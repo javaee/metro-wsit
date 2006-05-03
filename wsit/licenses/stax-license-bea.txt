@@ -1,0 +1,175 @@
+Streaming API for XML (JSR-173) Specification
+Reference Implementation
+License Agreement
+
+READ THE TERMS OF THIS (THE "AGREEMENT") CAREFULLY BEFORE VIEWING OR USING THE
+SOFTWARE LICENS
+ED HEREUNDER.  BY VIEWING OR USING THE SOFTWARE, YOU AGREE TO THE TERMS OF THIS
+AGREEMENT. IF
+YOU ARE ACCESSING THE SOFTWARE ELECTRONICALLY, INDICATE YOUR ACCEPTANCE OF THESE
+TERMS BY SELE
+CTING THE "ACCEPT" BUTTON AT THE END OF THIS AGREEMENT. IF YOU DO NOT AGREE TO
+ALL THESE TERMS
+, PROMPTLY RETURN THE UNUSED SOFTWARE TO ORIGINAL CONTRIBUTOR, DEFINED HEREIN.
+
+1.0  DEFINITIONS.
+
+1.1. "BEA" means BEA Systems, Inc., the licensor of the Original Code.
+
+1.2. "Contributor" means BEA and each entity that creates or contributes to the
+creation of Mo
+difications.
+
+1.3. "Covered Code" means the Original Code or Modifications or the combination
+of the Origina
+l Code and Modifications, in each case including portions thereof and
+corresponding documentat
+ion released with the source code.
+
+1.4. "Executable" means Covered Code in any form other than Source Code.
+
+1.5. "FCS" means first commercial shipment of a product.
+
+1.6. "Modifications" means any addition to or deletion from the substance or
+structure of eith
+er the Original Code or any previous Modifications. When Covered Code is
+released as a series
+of files, a Modification is:
+
+(a)  Any addition to or deletion from the contents of a file containing Original
+Code or previ
+ous Modifications.
+
+(b)  Any new file that contains any part of the Original Code or previous
+Modifications.
+
+1.7. "Original Code" means Source Code of computer software code Reference
+Implementation.
+
+1.8. "Patent Claims" means any patent claim(s), now owned or hereafter acquired,
+including wit
+hout limitation, method, process, and apparatus claims, in any patent for which
+the grantor ha
+s the right to grant a license.
+
+1.9.  "Reference Implementation" means the prototype or "proof of concept"
+implementa­tion of
+the Specification developed and made available for license by or on behalf of BEA.
+
+1.10. "Source Code" means the preferred form of the Covered Code for making
+modifications to i
+t, including all modules it contains, plus any associated documentation,
+interface definition
+files, scripts used to control compilation and installation of an Executable, or
+source code d
+ifferential comparisons against either the Original Code or another well known,
+available Cove
+red Code of the Contributor's choice.
+
+1.11.  "Specification" means the written specification for the Streaming API for
+XML , Java te
+chnology developed pursuant to the Java Community Process.
+1.12. "Technology Compatibility Kit" or "TCK" means the documentation, testing
+tools and test
+suites associated with the Specification as may be revised by BEA from time to
+time, that is p
+rovided so that an implementer of the Specifi­cation may determine if its
+implementation is co
+mpliant with the Specification.
+
+1.13. "You" (or "Your") means an individual or a legal entity exercising rights
+under, and com
+plying with all of the terms of, this Agreement or a future version of this
+Agreement issued u
+nder Section 6.1. For legal entities, "You" includes any entity which controls,
+is controlled
+by, or is under common control with You. For purposes of this definition,
+"control" means (a)
+the power, direct or indirect, to cause the direction or management of such
+entity, whether by
+ contract or otherwise, or (b) ownership of more than fifty percent (50%) of the
+outstanding s
+hares or beneficial ownership of such entity.
+
+2.0  SOURCE CODE LICENSE.
+
+2.1. Copyright Grant.  Subject to the terms of this Agreement, each Contributor
+hereby grants
+You a non-exclusive, worldwide, royalty-free copyright license to reproduce,
+prepare derivativ
+e works of, publicly display, publicly perform, distribute and sublicense the
+Covered Code of
+such Contributor, if any, and such derivative works, in Source Code and
+Executable form.
+
+2.2.  Patent Grant.  Subject to the terms of this Agreement, each Contributor
+hereby grants Yo
+u a non-exclusive, worldwide, royalty-free patent license under the Patent
+Claims to make, use
+, sell, offer to sell, import and otherwise transfer the Covered Code prepared
+and provided by
+ such Contributor, if any, in Source Code and Executable form. This patent
+license shall apply
+ to the Covered Code if, at the time a Modification is added by the Contributor,
+such addition
+ of the Modification causes such combination to be covered by the Patent Claims.
+The patent li
+cense shall not apply to any other combinations which include the Modification.
+
+2.3.  Conditions to Grants.  You understand that although each Contributor
+grants the licenses
+ to the Covered Code prepared by it, no assurances are provided by any
+Contributor that the Co
+vered Code does not infringe the patent or other intellectual property rights of
+any other ent
+ity. Each Contributor disclaims any liability to You for claims brought by any
+other entity ba
+sed on infringement of intellectual property rights or otherwise. As a condition
+to exercising
+ the rights and licenses granted hereunder, You hereby assume sole
+responsibility to secure an
+y other intellectual property rights needed, if any. For example, if a third
+party patent lice
+nse is required to allow You to distribute Covered Code, it is Your
+responsibility to acquire
+that license before distributing such code.
+
+2.4.  Contributors' Representation.  Each Contributor represents that to its
+knowledge it has
+sufficient copyright rights in the Covered Code it provides , if any, to grant
+the copyright l
+icense set forth in this Agreement.
+
+3.0  DISTRIBUION RESTRICTIONS.
+
+3.1. Application of Agreement.
+
+The Modifications which You create or to which You contribute are governed by
+the terms of thi
+s Agreement, including without limitation Section 2.0. The Source Code version
+of Covered Code
+ may be distributed only under the terms of this Agreement or a future version
+of this Agreeme
+nt released under Section 6.1, and You must include a copy of this Agreement
+with every copy o
+f the Source Code You distribute. You may not offer or impose any terms on any
+Source Code ver
+sion that alters or restricts the applicable version of this Agreement or the
+recipients' righ
+ts hereunder. However, You may include an additional document offering the
+additional rights d
+escribed in Section 3.3.
+
+3.2. Description of Modifications.
+
+You must cause all Covered Code to which You contribute to contain a file
+documenting the chan
+ges You made to create that Covered Code and the date of any change. You must
+include a promin
+ent statement that the Modification is derived, directly or indirectly, from
+Original Code pro
+vided by BEA and including the name of BEA in (a) the Source Code, and (b) in
+any notice in an
+ Executable version or related documentation in which You describe the origin or
+ownership of
+the Covered Code.

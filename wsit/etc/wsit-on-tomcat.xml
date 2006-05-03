@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+
+<!--
+ The contents of this file are subject to the terms
+ of the Common Development and Distribution License
+ (the "License").  You may not use this file except
+ in compliance with the License.
+ 
+ You can obtain a copy of the license at
+ https://jwsdp.dev.java.net/CDDLv1.0.html
+ See the License for the specific language governing
+ permissions and limitations under the License.
+ 
+ When distributing Covered Code, include this CDDL
+ HEADER in each file and include the License file at
+ https://jwsdp.dev.java.net/CDDLv1.0.html  If applicable,
+ add the following below this CDDL HEADER, with the
+ fields enclosed by brackets "[]" replaced with your
+ own identifying information: Portions Copyright [yyyy]
+ [name of copyright owner]
+-->
+
+<project name="WSIT 1.0 EA On Tomcat" default="help" basedir=".">
+    <property environment="env"/>
+    <property name="tomcat.home" value="${env.CATALINA_HOME}"/>
+    <property name="tomcat.lib.home" value="${tomcat.home}/shared/lib"/>
+
+    <target name="install">
+        <echo message="Installing WSIT 1.0 EA1 on ${tomcat.home} ..."/>
+
+        <!-- TODO: Identify placeholder for tools.jar -->
+        <copy toDir="${tomcat.lib.home}" overwrite="true">
+            <fileset dir="lib">
+                <include name="*.jar"/>
+            </fileset>
+        </copy>
+
+        <echo message="... installation complete."/>
+    </target>
+
+    <target name="uninstall">
+        <delete dir="${tomcat.lib.home}" includes="webservices.jar, webservices-tools.jar"/>
+    </target>
+
+    <target name="help">
+        <echo message="install  :"/>
+        <echo message="  Installs WSIT 1.0 EA on Tomcat"/>
+        <echo message="uninstall:"/>
+        <echo message="  Uninstalls WSIT 1.0 EA from Tomcat"/>
+        <echo/>
+        <echo message="  Make sure CATALINA_HOME is set to the installation directory of Tomcat."/>
+        <echo/>
+        <echo message="  Usage: ANT_HOME/bin/ant -f wsit-on-tomcat.xml install"/>
+    </target>
+</project>

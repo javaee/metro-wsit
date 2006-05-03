@@ -1,0 +1,129 @@
+<?xml version="1.0"?>
+
+<!--
+ The contents of this file are subject to the terms
+ of the Common Development and Distribution License
+ (the "License").  You may not use this file except
+ in compliance with the License.
+
+ You can obtain a copy of the license at
+ https://jwsdp.dev.java.net/CDDLv1.0.html
+ See the License for the specific language governing
+ permissions and limitations under the License.
+
+ When distributing Covered Code, include this CDDL
+ HEADER in each file and include the License file at
+ https://jwsdp.dev.java.net/CDDLv1.0.html  If applicable,
+ add the following below this CDDL HEADER, with the
+ fields enclosed by brackets "[]" replaced with your
+ own identifying information: Portions Copyright [yyyy]
+ [name of copyright owner]
+-->
+
+<project name="WSIT 1.0 EA On Sun Java System Application Server PE 9.0 (Glassfish)" default="help" basedir=".">
+    <property file="../build.properties"/>
+    <property environment="env"/>
+    <property name="as.home" value="${env.AS_HOME}"/>
+    <property name="as.lib.home" value="${as.home}/lib"/>
+    <property name="domain" value="domain1"/>
+    <property name="backup.dir" value="${as.home}/.wsit-1.0"/>
+
+    <condition property="notInstalled">
+        <not>
+            <available file="${backup.dir}"/>
+        </not>
+    </condition>
+
+    <condition property="ext" value="" else=".bat">
+        <os family="unix"/>
+    </condition>
+
+    <condition property="unix">
+        <os family="unix"/>
+    </condition>
+
+    <target name="init" if="notInstalled">
+        <mkdir dir="${backup.dir}"/>
+        <copy todir="${backup.dir}" failonerror="false">
+            <fileset dir="${as.home}/domains/${domain}/config" includes="domain.xml"/>
+            <fileset dir="${as.home}/bin" includes="wsimport${ext}, wsgen${ext}"/>
+            <fileset dir="${as.home}/lib" includes="webservices.jar, webservices-tools.jar"/>
+        </copy>
+    </target>
+    <target name="install" depends="init">
+        <echo message="Installing WSIT 1.0 EA1 on ${as.home} ..."/>
+
+        <copy todir="${as.lib.home}" overwrite="true">
+            <fileset dir="${basedir}/lib" includes="*.jar"/>
+        </copy>
+
+        <antcall target="update-classpath"/>
+
+        <echo message="... installation complete."/>
+    </target>
+
+    <target name="uninstall" depends="init" unless="notInstalled">
+        <echo message="Uninstalling WSIT 1.0 EA1 from ${as.home} ..."/>
+
+        <copy todir="${as.home}/domains/${domain}/config" file="${backup.dir}/domain.xml" overwrite="true"/>
+        <copy todir="${as.home}/bin" overwrite="true">
+            <fileset dir="${backup.dir}" includes="wsimport${ext}, wsgen${ext}"/>
+        </copy>
+        <delete dir="${backup.dir}" includeemptydirs="true"/>
+        <delete dir="${as.home}/lib" includes="webservices.jar, webservices-tools.jar"/>
+        <copy todir="${as.home}/lib" failonerror="false">
+            <fileset dir="${backup.dir}" includes="webservices.jar, webservices-tools.jar"/>
+        </copy>
+
+        <echo message="... uninstall complete."/>
+    </target>
+
+    <target name="update-classpath" if="notInstalled">
+        <echo message="Updating classpath"/>
+        <!-- Add the JAX-WS 2.0 and JAXB 2.0 jars to classpath-prefix -->
+        <copy toDir="${backup.dir}">
+            <fileset file="${as.home}/domains/${domain}/config/domain.xml"/>
+            <fileset dir="${as.home}/bin">
+                <include name="wsgen${ext}"/>
+                <include name="wsimport${ext}"/>
+            </fileset>
+        </copy>
+
+        <replace file="${as.home}/domains/${domain}/config/domain.xml">
+            <replacetoken><![CDATA[classpath-suffix="]]></replacetoken>
+            <replacevalue><![CDATA[classpath-prefix="${com.sun.aas.installRoot}/lib/webservices.jar${path.separator}${com.sun.aas.installRoot}/lib/webservices-tools.jar" classpath-suffix="]]></replacevalue>
+        </replace>
+        <antcall target="update-classpath-unix"/>
+        <antcall target="update-classpath-win"/>
+    </target>
+
+    <target name="update-classpath-unix" if="unix">
+        <replace dir="${as.home}/bin" includes="wsimport, wsgen, xjc">
+            <replacetoken>CLASSPATH=</replacetoken>
+            <replacevalue>WSIT_CLASSPATH="$AS_INSTALL"/lib/webservices-tools.jar:"$AS_INSTALL"/lib/webservices.jar
+
+CLASSPATH=${WSIT_CLASSPATH}:</replacevalue>
+        </replace>
+        <chmod perm="+x" dir="${as.home}/bin" includes="wsimport, wsgen, xjc"/>
+    </target>
+
+    <target name="update-classpath-win" unless="unix">
+        <replace dir="${as.home}/bin" includes="wsimport${ext}, wsgen${ext}, xjc${ext}">
+            <replacetoken>CLASSPATH=</replacetoken>
+            <replacevalue>WSIT_CLASSPATH=%AS_INSTALL%\lib\webservices-tools.jar;%AS_INSTALL%\lib\webservices.jar
+
+set CLASSPATH=%WSIT_CLASSPATH%;</replacevalue>
+        </replace>
+    </target>
+
+    <target name="help">
+        <echo message="install  : "/>
+        <echo message="  Installs WSIT 1.0 EA onto Sun Java System Application Server 9.0 PE (Glassfish)"/>
+        <echo message="uninstall: "/>
+        <echo message="  Uninstalls WSIT 1.0 EA from Sun Java System Application Server 9.0 PE (Glassfish)"/>
+        <echo/>
+        <echo message="  Make sure AS_HOME is set to the installation directory of Glassfish."/>
+        <echo/>
+        <echo message="  Usage: ANT_HOME/bin/ant -f wsit-on-glassfish.xml install"/>
+    </target>
+</project>

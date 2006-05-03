@@ -1,0 +1,2 @@
+com.sun.xml.ws.addressing.jaxws.WsaWSDLParserExtension
+com.sun.xml.ws.policy.jaxws.PolicyWSDLParserExtension

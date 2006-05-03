@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+
+<!--
+ $Id: build.xml,v 1.1 2006-05-03 22:58:18 arungupta Exp $
+
+ Copyright (c) 2005 Sun Microsystems, Inc.
+ All rights reserved.
+-->
+
+<project name="wsit.dev.java.net tools" default="main">
+    <property name="build.dir" value="${basedir}/build"/>
+    <property name="build.classes" value="${build.dir}/classes"/>
+
+    <target name="main" depends="compile"/>
+
+    <target name="prepare">
+        <mkdir dir="${build.classes}"/>
+    </target>
+
+    <target name="compile" depends="prepare">
+        <javac srcdir="src"
+               destdir="${basedir}/build/classes"
+               debug="${compile.debug}"
+               deprecation="${compile.deprecation}"
+               optimize="${compile.optimize}"
+               source="1.5">
+            <classpath refid="tooltime.compile.classpath"/>
+        </javac>
+    </target>
+
+    <target name="src-zip">
+        <mkdir dir="${build.dir}/temp"/>
+        <unzip dest="${build.dir}/temp">
+            <fileset dir="${lib.tooltime.dir}" includes="*src.zip"/>
+        </unzip>
+        <delete file="${build.dir}/temp/*.txt"/>
+        <delete dir="${build.dir}/temp/META-INF" includeemptydirs="true"/>
+        <zip destfile="${build.dir}/${name}-tools-src.zip">
+            <fileset dir="src"/>
+            <fileset dir="${build.dir}/temp"/>
+        </zip>
+        <delete dir="${build.dir}/temp" includeemptydirs="true"/>
+    </target>
+
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+    </target>
+</project>

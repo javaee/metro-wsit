@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+
+<!--
+ $Id: properties.xml,v 1.1 2006-05-03 22:56:05 arungupta Exp $
+
+ Copyright (c) 2005 Sun Microsystems, Inc.
+ All rights reserved.
+-->
+
+<project name="wsit.dev.java.net build properties">
+    <property name="name" value="webservices"/>
+    <property name="install.name" value="wsit"/>
+    <property name="lib.dir" value="${basedir}/lib"/>
+    <property name="lib.runtime.dir" value="${lib.dir}/runtime"/>
+    <property name="lib.tooltime.dir" value="${lib.dir}/tooltime"/>
+    <property name="dist.dir" value="${basedir}/dist"/>
+    <property name="dist.image.dir" value="${dist.dir}/image"/>
+    <property name="dist.image.wsit.dir" value="${dist.image.dir}/wsit"/>
+    <property name="dist.image.wsit.lib.dir" value="${dist.image.wsit.dir}/lib"/>
+    <property name="build.javadocs.dir" value="${basedir}/build/javadocs"/>
+
+    <property name="etc.dir" value="${basedir}/etc"/>
+    <property name="etc.lib.dir" value="${etc.dir}/lib"/>
+    <property name="etc.metainf.dir" value="${etc.dir}/META-INF"/>
+    <property name="etc.metainf.services.dir" value="${etc.dir}/META-INF/services"/>
+
+    <property name="rt.dir" value="${basedir}/rt"/>
+    <property name="tools.dir" value="${basedir}/tools"/>
+
+    <property name="compile.debug" value="true"/>
+    <property name="compile.deprecation" value="false"/>
+    <property name="compile.optimize" value="false"/>
+</project>
