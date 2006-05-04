@@ -78,14 +78,14 @@ import org.w3c.dom.Element;
 public abstract class IssueSamlTokenContract implements WSTrustContract {
 
     protected TrustSPMetadata config;
-    
+
     protected static final WSTrustElementFactory eleFac = WSTrustElementFactory.newInstance();
     protected static final SimpleDateFormat calendarFormatter
         = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'sss'Z'");
-    
+
     private static final int DEFAULT_KEY_SIZE = 256;
     private static final String SAML_VALUE_TYPE = "http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.0#SAMLAssertionID";
-    
+
     public void init(Configuration config) 
     {
         this.config = (TrustSPMetadata)config;
@@ -94,20 +94,52 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
    /** Issue a Token */
     public RequestSecurityTokenResponse issue(RequestSecurityToken rst, IssuedTokenContext context, SecureConversationToken policy)throws WSTrustException
     {   
-        
+
         //============================
         // Create required secret key
         //============================
         URI keyTypeURI = rst.getKeyType();
         if (keyTypeURI != null && WSTrustConstants.SYMMETRIC_KEY.equals(keyTypeURI.toString()))
             throw new WSTrustException("Unsupported proof key type: " + keyTypeURI.toString());
-        
-        byte[] key = createSecretKey(rst);
-       
+
+        Entropy serverEntropy = null;
+        RequestedProofToken proofToken = eleFac.createRequestedProofToken();
+
+        // Get client entropy
+        byte[] clientEntropyValue = null;
+        Entropy clientEntropy = rst.getEntropy();
+        if (clientEntropy != null){
+            BinarySecret clientBS = clientEntropy.getBinarySecret();
+            if (clientBS == null){
+                //ToDo
+            }else {
+                clientEntropyValue = clientBS.getRawValue(); 
+            }
+        }
+
+        int keySize = (int)rst.getKeySize();
+        if (keySize < 1){
+            keySize = DEFAULT_KEY_SIZE;
+        }
+
+
+        byte[] key = WSTrustUtil.generateRandomSecret(keySize/8);
+        BinarySecret serverBS = eleFac.createBinarySecret(key, BinarySecret.NONCE_KEY_TYPE);
+        serverEntropy = eleFac.createEntropy(serverBS);
+        proofToken.setProofTokenType(RequestedProofToken.COMPUTED_KEY_TYPE);
+
+        // compute the secret key
+        try {
+             proofToken.setComputedKey(URI.create(WSTrustConstants.CK_PSHA1));
+             key = SecurityUtil.P_SHA1(clientEntropyValue, key, keySize/8);
+        } catch (Exception ex){
+             throw new WSTrustException(ex.getMessage(), ex);
+        }
+
         //==================
         // Create the RSTR 
         //==================
-        
+
         // get Context
         URI ctx = null;
         try {
@@ -117,7 +149,7 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
         } catch (URISyntaxException ex) {
             throw new WSTrustException(ex.getMessage(), ex);
         }
-          
+
         // Create RequestedSecurityToken with SAML assertion
         String assertionId = "uuid-" + UUID.randomUUID().toString();
          AppliesTo ap = rst.getAppliesTo();
@@ -127,23 +159,26 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
          }
         Token samlToken = createSAMLAssertion(key, assertionId, appliesTo);
         RequestedSecurityToken st = eleFac.createRequestedSecurityToken(samlToken);
+
         // Create RequestedAttachedReference and RequestedUnattachedReference
         SecurityTokenReference samlReference = createSecurityTokenReference(assertionId);
         RequestedAttachedReference raRef =  eleFac.createRequestedAttachedReference(samlReference);
         RequestedUnattachedReference ruRef =  eleFac.createRequestedUnattachedReference(samlReference);
-        
+
         // Create RequestedProofToken
-        BinarySecret keyBs = eleFac.createBinarySecret(key, BinarySecret.SYMMETRIC_KEY_TYPE);
+     /*   BinarySecret keyBs = eleFac.createBinarySecret(key, BinarySecret.SYMMETRIC_KEY_TYPE);
         RequestedProofToken rpt = eleFac.createRequestedProofToken();
         rpt.setProofTokenType(RequestedProofToken.BINARY_SECRET_TYPE);
-        rpt.setBinarySecret(keyBs);
-        
+        rpt.setBinarySecret(keyBs);*/
+
         // Create Lifetime
         Lifetime lifetime = createLifetime();
-        
+
         RequestSecurityTokenResponse rstr = 
-                eleFac.createRSTRForIssue(rst.getTokenType(), ctx, st, ap, raRef, ruRef, rpt, null, lifetime);
-        
+                eleFac.createRSTRForIssue(rst.getTokenType(), ctx, st, ap, raRef, ruRef, proofToken, serverEntropy, lifetime);
+
+        rstr.setKeySize(keySize);
+
         // Populate IssuedTokenContext
         context.setSecurityToken(samlToken);
         context.setAttachedSecurityTokenReference(samlReference);
@@ -151,7 +186,7 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
         context.setProofKey(key);
         context.setCreationTime(new Date(currentTime));
         context.setExpirationTime(new Date(currentTime + config.getIssuedTokenTimeout()));
-        
+
         return rstr;   
     }
 
@@ -192,7 +227,7 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
            throws WSTrustException{
        throw new UnsupportedOperationException("Unsupported operation: handleUnsolicited");
    }
-   
+
    /**
     * Contains Challenge
     * @return true if the RSTR contains a SignChallenge/BinaryExchange or
@@ -201,7 +236,7 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
    public boolean containsChallenge(RequestSecurityTokenResponse rstr){
        throw new UnsupportedOperationException("Unsupported operation: containsChallenge");
    }
-   
+
    /**
     * Contains Challenge
     * @return true if the RST contains Initial Negotiation/Challenge information
@@ -210,14 +245,14 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
    public boolean containsChallenge(RequestSecurityToken rst){
         throw new UnsupportedOperationException("Unsupported operation: containsChallenge");
    }
-   
+
    protected abstract Token createSAMLAssertion(byte[] key, String assertionId, String appliesTo) throws WSTrustException;
-   
+
    protected abstract boolean isAuthorized(Subject subject, String appliesTo, String tokenType);
-   
+
    protected abstract List getClaimedAttributes(Subject subject, String appliesTo, String tokenType);
-   
-   protected byte[] createSecretKey(RequestSecurityToken rst)throws WSTrustException
+
+ /*  protected byte[] createSecretKey(RequestSecurityToken rst)throws WSTrustException
    {
        // get key information
         int keySize = (int)rst.getKeySize();
@@ -226,13 +261,13 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
         }
         URI keyType = rst.getKeyType();
         URI alg = rst.getComputedKeyAlgorithm();
-        
+
         Entropy entropy = rst.getEntropy();
         BinarySecret bs = entropy.getBinarySecret();
         byte[] nonce = bs.getRawValue();
-        
+
         byte[] key = null;
-        
+
         if (alg == null){
             key = nonce;
         } else if(alg.toString().equals(WSTrustConstants.CK_PSHA1)){
@@ -244,10 +279,10 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
         } else {
             throw new WSTrustException("Unsupported key computation algorithm: " + alg.toString());
         } 
-        
+
         return key;
-   }
-   
+   }*/
+
    private long currentTime;
    private Lifetime createLifetime()
    {
@@ -264,20 +299,20 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
            long beforeTime = c.getTimeInMillis();
            currentTime = beforeTime - offset;
            c.setTimeInMillis(currentTime);
-            
+
            AttributedDateTime created = new AttributedDateTime();
            created.setValue(calendarFormatter.format(c.getTime()));
 
            AttributedDateTime expires = new AttributedDateTime();
            c.setTimeInMillis(currentTime + config.getIssuedTokenTimeout());
            expires.setValue(calendarFormatter.format(c.getTime()));
-           
+
            Lifetime lifetime = eleFac.createLifetime(created, expires);
-           
+
            return lifetime;
         }
     }
-   
+
     private SecurityTokenReference createSecurityTokenReference(String id){
        KeyIdentifier ref = eleFac.createKeyIdentifier(SAML_VALUE_TYPE, null);
        ref.setValue(id);

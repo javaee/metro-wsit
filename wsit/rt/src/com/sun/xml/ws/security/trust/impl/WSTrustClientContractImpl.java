@@ -60,21 +60,21 @@ import java.util.Date;
  * @author WS-Trust-Implementation team
  */
 public class WSTrustClientContractImpl implements WSTrustClientContract {
-    
+
     private static final int DEFAULT_KEY_SIZE = 256;
-    
+
     private Configuration config;
-    
+
      private static final SimpleDateFormat calendarFormatter
         = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'sss'Z'");
-    
+
     /**
      * Creates a new instance of WSTrustClientContractImpl 
      */
     public WSTrustClientContractImpl(Configuration config) {
         this.config = config;
     }
-    
+
    /**
     * Handle an RSTR returned by the Issuer and update Token information into the
     * IssuedTokenContext.
@@ -82,29 +82,29 @@ public class WSTrustClientContractImpl implements WSTrustClientContract {
    public void handleRSTR(
            RequestSecurityToken rst, RequestSecurityTokenResponse rstr, IssuedTokenContext context) throws WSTrustException{
        if (rst.getRequestType().toString().equals(WSTrustConstants.ISSUE_REQUEST)){
-    
+
            AppliesTo requestAppliesTo = rst.getAppliesTo();
            AppliesTo responseAppliesTo = rstr.getAppliesTo();
-       
+
            RequestedSecurityToken securityToken = rstr.getRequestedSecurityToken();
-           
+
            // Requested References
            RequestedAttachedReference attachedRef = rstr.getRequestedAttachedReference();
            RequestedUnattachedReference unattachedRef = rstr.getRequestedUnattachedReference();
-          
+
            // RequestedProofToken
            RequestedProofToken proofToken = rstr.getRequestedProofToken();
-          
+
            // Obtain the secret key for the context
            byte[] key = getKey(rstr, proofToken, rst);
 
            if(key != null){
               context.setProofKey(key);
           }
-          
+
           //get the creation time and expires time and set it in the context
           setLifetime(rstr, context);
-          
+
           // if securityToken == null and proofToken == null
           // throw exception
           if(securityToken == null && proofToken == null){
@@ -112,21 +112,21 @@ public class WSTrustClientContractImpl implements WSTrustClientContract {
               throw new WSTrustException(
                       "Invalid Security Token or Proof Token");
           }
-          
+
           if (securityToken != null){
               context.setSecurityToken(securityToken.getToken());
           }
-         
+
           if(attachedRef != null){
               context.setAttachedSecurityTokenReference(attachedRef.getSTR());
           }
-          
+
           if (unattachedRef != null){
               context.setUnAttachedSecurityTokenReference(unattachedRef.getSTR());
           }
       }   
    }
-   
+
    /**
     * Handle an RSTR returned by the Issuer and Respond to the Challenge
     * 
@@ -135,7 +135,7 @@ public class WSTrustClientContractImpl implements WSTrustClientContract {
            RequestSecurityToken rst, RequestSecurityTokenResponse rstr, IssuedTokenContext context) throws WSTrustException{
        throw new UnsupportedOperationException("Unsupported operation: handleRSTRForNegotiatedExchange");
    }
-   
+
    /**
     * Create an RSTR for a client initiated IssuedTokenContext establishment, 
     * for example a Client Initiated WS-SecureConversation context.
@@ -144,7 +144,7 @@ public class WSTrustClientContractImpl implements WSTrustClientContract {
    public RequestSecurityTokenResponse createRSTRForClientInitiatedIssuedTokenContext(AppliesTo scopes,IssuedTokenContext context) throws WSTrustException {
        throw new UnsupportedOperationException("Unsupported operation: createRSTRForClientInitiatedIssuedTokenContext");
    }
-    
+
    /**
     * Contains Challenge
     * @return true if the RSTR contains a SignChallenge/BinaryExchange or
@@ -153,16 +153,16 @@ public class WSTrustClientContractImpl implements WSTrustClientContract {
    public boolean containsChallenge(RequestSecurityTokenResponse rstr){
        throw new UnsupportedOperationException("Unsupported operation: containsChallenge");
    }
-   
+
    /**
     * Return the &lt;wst:ComputedKey&gt; URI if any inside the RSTR, null otherwise
     */
    public URI getComputedKeyAlgorithmFromProofToken(RequestSecurityTokenResponse rstr){
       throw new UnsupportedOperationException("Unsupported operation: getComputedKeyAlgorithmFromProofToken");
    }
-   
+
    private void setLifetime(final RequestSecurityTokenResponse rstr, final IssuedTokenContext context) throws WSTrustException {
-        
+
         // Get Created and Expires from Lifetime
         try{
             Lifetime lifetime = rstr.getLifetime();
@@ -170,7 +170,7 @@ public class WSTrustClientContractImpl implements WSTrustClientContract {
             AttributedDateTime expires = lifetime.getExpires();
             Date dateCreated = calendarFormatter.parse(created.getValue());
             Date dateExpires = calendarFormatter.parse(expires.getValue());              
-            
+
             // populate the IssuedTokenContext
             context.setCreationTime(dateCreated);
             context.setExpirationTime(dateExpires);
@@ -178,7 +178,7 @@ public class WSTrustClientContractImpl implements WSTrustClientContract {
             throw new WSTrustException(ex.getMessage(), ex);
         }
     }
-   
+
        private byte[] getKey(final RequestSecurityTokenResponse rstr, final RequestedProofToken proofToken, final RequestSecurityToken rst)
         throws WSTrustException {
             byte[] key = null;
@@ -206,7 +206,7 @@ public class WSTrustClientContractImpl implements WSTrustClientContract {
             }
             return key;
         }
-       
+
        private byte[] computeKey(final RequestSecurityTokenResponse rstr, final RequestedProofToken proofToken, final RequestSecurityToken rst) throws WSTrustException, UnsupportedOperationException {
             // get ComputeKey algorithm URI, client entropy, server entropy and compute 
             // the SecretKey
@@ -223,10 +223,12 @@ public class WSTrustClientContractImpl implements WSTrustClientContract {
             if(serverBinarySecret!=null){
                 serverEntropyBytes = serverBinarySecret.getRawValue();
             }
+
+            int keySize = (int)rstr.getKeySize()/8;
             byte[] key = null;
             if(computedKey.toString().equals(WSTrustConstants.CK_PSHA1)){
                   try {
-                      key = SecurityUtil.P_SHA1(clientEntropyBytes,serverEntropyBytes);
+                      key = SecurityUtil.P_SHA1(clientEntropyBytes,serverEntropyBytes, keySize);
                   } catch (Exception ex) {
                       throw new WSTrustException(ex.getMessage(), ex);
                   }
