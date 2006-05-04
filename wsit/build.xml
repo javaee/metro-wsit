@@ -1,7 +1,29 @@
 <?xml version="1.0"?>
 
 <!--
- $Id: build.xml,v 1.4 2006-05-04 02:15:37 arungupta Exp $
+  The contents of this file are subject to the terms
+  of the Common Development and Distribution License
+  (the License).  You may not use this file except in
+  compliance with the License.
+ 
+  You can obtain a copy of the license at
+  https://glassfish.dev.java.net/public/CDDLv1.0.html.
+  See the License for the specific language governing
+  permissions and limitations under the License.
+ 
+  When distributing Covered Code, include this CDDL
+  Header Notice in each file and include the License file
+  at https://glassfish.dev.java.net/public/CDDLv1.0.html.
+  If applicable, add the following below the CDDL Header,
+  with the fields enclosed by brackets [] replaced by
+  you own identifying information:
+  "Portions Copyrighted [year] [name of copyright owner]"
+ 
+  Copyright %year% Sun Microsystems Inc. All Rights Reserved
+-->
+
+<!--
+ $Id: build.xml,v 1.5 2006-05-04 20:57:52 arungupta Exp $
 
  Copyright (c) 2005 Sun Microsystems, Inc.
  All rights reserved.
@@ -119,6 +141,30 @@
             dest="${lib.compiletime.dir}/servlet.jar"/>
         <!-- get src="https://jax-ws-sources.dev.java.net/source/browse/jax-ws-sources/jaxws-ri/servlet/lib/Attic/servlet.jar?rev=1.1.2.1&amp;only_with_tag=rearch-2005&amp;view=auto&amp;content-type=text/vnd.viewcvs-markup"
             dest="${lib.compiletime.dir}/servlet.jar"/ -->
+    </target>
+    
+    <target name="integrate-jaxwsa-hudson">
+        <mkdir dir="tmp/jaxwsa"/>
+        <get src="http://kohsuke.sfbay/hudson/job/jaxwsa-ri-rearch-2005/lastSuccessfulBuild/artifact/jax-wsa-sources/jaxwsa-ri/build/lib/jaxwsa-api.jar"
+             dest="${lib.runtime.dir}/jaxwsa-api.jar"/>
+        <get src="http://kohsuke.sfbay/hudson/job/jaxwsa-ri-rearch-2005/lastSuccessfulBuild/artifact/jax-wsa-sources/jaxwsa-ri/lib/jaxwsa-api-src.zip"
+             dest="${lib.runtime.dir}/jaxwsa-api-src.zip"/>
+        <get src="http://kohsuke.sfbay/hudson/job/jaxwsa-ri-rearch-2005/lastSuccessfulBuild/artifact/jax-wsa-sources/jaxwsa-ri/build/lib/jaxwsa-impl.jar"
+             dest="${lib.runtime.dir}/jaxwsa-impl.jar"/>
+        <get src="http://kohsuke.sfbay/hudson/job/jaxwsa-ri-rearch-2005/lastSuccessfulBuild/artifact/jax-wsa-sources/jaxwsa-ri/build/jaxwsa-impl-src.zip"
+             dest="${lib.runtime.dir}/jaxwsa-impl-src.zip"/>
+
+        <get src="http://kohsuke.sfbay/hudson/job/jaxwsa-ri-rearch-2005/lastSuccessfulBuild/artifact/jax-wsa-sources/jaxwsa-ri/build/jaxwsa-libs.zip"
+             dest="tmp/jaxwsa-libs.zip"/>
+
+        <unzip src="tmp/jaxwsa-libs.zip" dest="tmp/jaxwsa"/>
+        <copy todir="${lib.runtime.dir}" overwrite="true" verbose="${verbose}">
+            <fileset dir="tmp/jaxwsa" includes="*.zip, *.jar" excludes="jaxb-xjc.*, jaxws-tools.*"/>
+        </copy>
+        <copy todir="${lib.tooltime.dir}" overwrite="true" verbose="${verbose}">
+            <fileset dir="tmp/jaxwsa" includes="jaxb-xjc.*, jaxws-tools.*"/>
+        </copy>
+        <delete dir="tmp" includeemptydirs="true"/>
     </target>
 
     <target name="clean">
