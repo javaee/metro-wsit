@@ -24,9 +24,9 @@ package com.sun.xml.ws.policy.jaxws;
 
 import java.io.InputStream;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URL;
-import java.io.File;
-import javax.servlet.ServletContext;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
@@ -41,15 +41,16 @@ import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
 import com.sun.xml.ws.wsdl.parser.XMLEntityResolver;
 import com.sun.xml.ws.wsdl.parser.XMLEntityResolver.Parser;
 import com.sun.xml.ws.policy.PolicyException;
+import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 
 /**
  * Reads a policy configuration file and returns the WSDL model generated from it.
  */
 public final class PolicyConfigParser {
-    
-    private static final String FILE_PREFIX="wsit-";
-    private static final String FILE_POSTFIX=".xml";
+
+    private static final PolicyLogger logger = PolicyLogger.getLogger(PolicyConfigParser.class);
     private static final String CONFIG_FILE_NAME="wsit.xml";
+    private static final String SERVLET_CONTEXT_CLASSNAME = "javax.servlet.ServletContext";
 
     /**
      * Reads a WSDL file from META-INF or WEB-INF/wsit.xml, parses it
@@ -59,10 +60,18 @@ public final class PolicyConfigParser {
      * @return A WSDLModel populated from the WSDL file
      */
     public static WSDLModel parse(Container container) throws PolicyException {
+        logger.entering("parse");
         try {
             WSDLModel model = null;
             XMLStreamBuffer buffer = null;
-            ServletContext context = container.getSPI(ServletContext.class);
+            Object context = null;
+            try {
+                Class contextClass = Class.forName(SERVLET_CONTEXT_CLASSNAME);
+                context = container.getSPI(contextClass);
+            } catch (ClassNotFoundException e) {
+                logger.fine("parse", "Did not find class " + SERVLET_CONTEXT_CLASSNAME + ". We are apparently not running in a container.");
+            }
+            logger.finest("parse", "context = " + context);
             if (context != null) {
                 buffer = loadFromContext(context);
             }
@@ -78,6 +87,8 @@ public final class PolicyConfigParser {
             throw new PolicyException(ex);
         } catch (XMLStreamException ex) {
             throw new PolicyException(ex);
+        } finally {
+            logger.exiting("parse");
         }
     }
     
@@ -128,16 +139,25 @@ public final class PolicyConfigParser {
     }
 
     
-    private static XMLStreamBuffer loadFromContext(ServletContext context)
-        throws XMLStreamException, XMLStreamBufferException {
+    private static XMLStreamBuffer loadFromContext(Object context)
+        throws XMLStreamException, XMLStreamBufferException, PolicyException {
         
-        XMLStreamBuffer buffer = null;
-        InputStream input = context.getResourceAsStream("/WEB-INF/" + CONFIG_FILE_NAME);
-        if (input != null) {
-            XMLStreamReader reader = XMLInputFactory.newInstance().createXMLStreamReader(input);
-            buffer = XMLStreamBuffer.createNewBufferFromXMLStreamReader(reader);
+        try {
+            XMLStreamBuffer buffer = null;
+            Method getResourceAsStream = context.getClass().getMethod("getResourceAsStream", String.class);
+            InputStream input = (InputStream) getResourceAsStream.invoke(context, "/WEB-INF/" + CONFIG_FILE_NAME);
+            if (input != null) {
+                XMLStreamReader reader = XMLInputFactory.newInstance().createXMLStreamReader(input);
+                buffer = XMLStreamBuffer.createNewBufferFromXMLStreamReader(reader);
+            }
+            return buffer;
+        } catch (NoSuchMethodException e) {
+            throw new PolicyException("Failed to invoke getResourceAsStream(String) on ServletContext");
+        } catch (IllegalAccessException e) {
+            throw new PolicyException("Failed to invoke getResourceAsStream(String) on ServletContext");
+        } catch (InvocationTargetException e) {
+            throw new PolicyException("Failed to invoke getResourceAsStream(String) on ServletContext");
         }
-        return buffer;
     }
     
     
