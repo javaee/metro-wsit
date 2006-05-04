@@ -21,6 +21,23 @@
  */
 package com.sun.xml.ws.policy.jaxws;
 
+import java.io.StringReader;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLFault;
@@ -40,27 +57,13 @@ import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyConstants;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
+import com.sun.xml.ws.policy.PolicyMapExtender;
 import com.sun.xml.ws.policy.PolicyMapKey;
+import com.sun.xml.ws.policy.PolicyMapMutator;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelUnmarshaller;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModelContext;
-import java.net.URISyntaxException;
-import java.util.HashSet;
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamConstants;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
-import java.io.StringReader;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Level;
 
 /**
  *
@@ -160,7 +163,7 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
     HashMap<WSDLBoundOperation,Collection<PolicyHandler>> handlers4BindingOutputOpMap = null;
     HashMap<WSDLBoundOperation,Collection<PolicyHandler>> handlers4BindingFaultOpMap = null;
     
-    PolicyMapBuilder policyBuilder = null;
+    PolicyMapBuilder policyBuilder = new PolicyMapBuilder();
     
     HashMap<String,PolicySourceModel> getPolicyModels() {
         if (null==policyModels) {
@@ -281,11 +284,7 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
      */
     public PolicyWSDLParserExtension() {
     }
-    
-    private PolicyMap getPolicyMap(EffectivePolicyModifier modifier) throws PolicyException {
-        return getPolicyMapBuilder().getPolicyMap(modifier);
-    }
-    
+        
     PolicyHandler readSinglePolicy(PolicyRecord policyRec, boolean inner) {
         PolicyHandler handler = null;
         if (null!=policyRec.policyModel.getPolicyId()) {           // policy id defined, keep the policy
@@ -1053,8 +1052,11 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
                 } // end foreach port in service
             } // end foreach service in wsdl
             // finally register a wrapper for getting WSDL policy map
+            
             EffectivePolicyModifier modifier = EffectivePolicyModifier.createEffectivePolicyModifier();
-            WSDLPolicyMapWrapper wrapper = new WSDLPolicyMapWrapper(getPolicyMap(modifier),modifier);
+            PolicyMapExtender extender = PolicyMapExtender.createPolicyMapExtender();            
+            
+            WSDLPolicyMapWrapper wrapper = new WSDLPolicyMapWrapper(policyBuilder.getPolicyMap(Arrays.asList(new PolicyMapMutator[] {modifier, extender})), modifier, extender);
             model.addExtension(wrapper);
             // TODO: replace after J1
             processMtomPolicyAssertion(model);
