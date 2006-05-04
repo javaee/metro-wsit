@@ -216,14 +216,14 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
         if (ret == null) {
             return null;
         }
-        /* Why is this piece of code present
+        /* TODO:this piece of code present since payload should be read once*/
         try{
             SOAPMessage sm = ret.getMessage().readAsSOAPMessage();
             Message newMsg = Messages.create(sm);
             ret.setMessage(newMsg);
         }catch(SOAPException ex){
             throw new WebServiceException(ex);
-        }*/
+        }/**/
         //---------------INBOUND SECURITY VERIFICATION----------
         isSCMessage = isSCMessage(packet);
         if(isSCMessage){

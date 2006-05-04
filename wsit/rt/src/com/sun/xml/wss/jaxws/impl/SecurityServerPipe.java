@@ -287,7 +287,7 @@ public class SecurityServerPipe extends SecurityPipeBase
         try{
             msg = retPacket.getMessage();
             if(!optimized) {
-                if (thereWasAFault && (ctx.getSecurityPolicy() == null)) {
+                if (thereWasAFault || (ctx.getSecurityPolicy() == null)) {
                     //dont do anything here for now
                 } else {
                     SOAPMessage soapMessage = msg.readAsSOAPMessage();

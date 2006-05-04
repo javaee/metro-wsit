@@ -1138,9 +1138,10 @@ public abstract class SecurityPipeBase implements Pipe {
         sph.setBindingLevelAlgSuite(xwssPolicyGenerator.getBindingLevelAlgSuite());
         List<PolicyAssertion> tokenList = getTokens(effectivePolicy);
         addConfigAssertions(effectivePolicy,sph);
+        /*
         if(getWSITConfig() != null){
             addConfigAssertions(getWSITConfig(),sph);
-        }
+        }*/
         for(PolicyAssertion token:tokenList){
             if(PolicyUtil.isSecureConversationToken(token)){
                 NestedPolicy bootstrapPolicy = ((SecureConversationToken)token).getBootstrapPolicy();
