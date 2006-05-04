@@ -26,6 +26,7 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.io.File;
+import javax.servlet.ServletContext;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
@@ -33,6 +34,7 @@ import org.xml.sax.SAXException;
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
+import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.server.SDDocumentSource;
 import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
 import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
@@ -53,35 +55,21 @@ public final class PolicyConfigParser {
      * Reads a WSDL file from META-INF or WEB-INF/wsit.xml, parses it
      * and returns a WSDLModel.
      *
+     * @param container May hold the servlet context if run inside a web container
      * @return A WSDLModel populated from the WSDL file
      */
-    public static WSDLModel parse() throws PolicyException {
+    public static WSDLModel parse(Container container) throws PolicyException {
         try {
             WSDLModel model = null;
-            XMLStreamBuffer buffer = getResource(CONFIG_FILE_NAME);
-            if (buffer != null) {
-                model = parse(buffer);
+            XMLStreamBuffer buffer = null;
+            ServletContext context = container.getSPI(ServletContext.class);
+            if (context != null) {
+                buffer = loadFromContext(context);
             }
-            return model;
-        } catch (XMLStreamBufferException ex) {
-            throw new PolicyException(ex);
-        } catch (XMLStreamException ex) {
-            throw new PolicyException(ex);
-        }
-    }
-    
-    
-    /**
-     * Reads a WSDL file from META-INF or WEB-INF/wsit-serviceName.xml, parses it
-     * and returns a WSDLModel.
-     *
-     * @param serviceName The name of the service
-     * @return A WSDLModel populated from the WSDL file
-     */
-    public static WSDLModel parse(String serviceName) throws PolicyException {
-        try {
-            WSDLModel model = null;
-            XMLStreamBuffer buffer = getResource(getFilename(serviceName));
+            else {
+                // We are not running inside a web container, load file from META-INF
+                buffer = loadFromClasspath(CONFIG_FILE_NAME);
+            }
             if (buffer != null) {
                 model = parse(buffer);
             }
@@ -120,27 +108,16 @@ public final class PolicyConfigParser {
     }
     
 
-    private static XMLStreamBuffer getResource(String filename)
+    private static XMLStreamBuffer loadFromClasspath(String filename)
         throws XMLStreamException, XMLStreamBufferException {
         
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         InputStream input = null;
-        String metaInfFilename = "META-INF" + File.separatorChar + filename;
-        // TODO Classpath is searched under WEB-INF/classes, find a way to load
-        // resource from WEB-INF instead
-        // String webInfFilename = "WEB-INF" + File.separatorChar + filename;
-        String webInfFilename = filename;
         if (cl == null) {
-            input = ClassLoader.getSystemResourceAsStream(webInfFilename);
-            if (input == null) {
-                input = ClassLoader.getSystemResourceAsStream(metaInfFilename);
-            }
+            input = ClassLoader.getSystemResourceAsStream(filename);
         }
         else {
-            input = cl.getResourceAsStream(webInfFilename);
-            if (input == null) {
-                input = cl.getResourceAsStream(metaInfFilename);
-            }
+            input = cl.getResourceAsStream(filename);
         }
         XMLStreamBuffer buffer = null;
         if (input != null) {
@@ -149,10 +126,18 @@ public final class PolicyConfigParser {
         }
         return buffer;
     }
+
     
-    
-    private static String getFilename(String serviceName) {
-        return FILE_PREFIX + serviceName + FILE_POSTFIX;
+    private static XMLStreamBuffer loadFromContext(ServletContext context)
+        throws XMLStreamException, XMLStreamBufferException {
+        
+        XMLStreamBuffer buffer = null;
+        InputStream input = context.getResourceAsStream("/WEB-INF/" + CONFIG_FILE_NAME);
+        if (input != null) {
+            XMLStreamReader reader = XMLInputFactory.newInstance().createXMLStreamReader(input);
+            buffer = XMLStreamBuffer.createNewBufferFromXMLStreamReader(reader);
+        }
+        return buffer;
     }
     
     

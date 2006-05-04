@@ -23,11 +23,12 @@
 package com.sun.xml.ws.policy.jaxws;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import javax.xml.namespace.QName;
 import com.sun.xml.txw2.TypedXmlWriter;
-import com.sun.xml.ws.api.BindingID;
+import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.model.CheckedException;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
@@ -41,7 +42,7 @@ import com.sun.xml.ws.api.model.wsdl.WSDLOutput;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.model.wsdl.WSDLPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLService;
-import com.sun.xml.ws.policy.sourcemodel.PolicyModelGenerator;
+import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.wsdl.writer.WSDLGeneratorExtension;
 import com.sun.xml.ws.model.CheckedExceptionImpl;
 import com.sun.xml.ws.model.JavaMethodImpl;
@@ -55,10 +56,9 @@ import com.sun.xml.ws.policy.PolicyMerger;
 import com.sun.xml.ws.policy.PolicySubject;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
-import com.sun.xml.ws.policy.sourcemodel.ModelNode;
+import com.sun.xml.ws.policy.sourcemodel.PolicyModelGenerator;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
 import com.sun.xml.ws.policy.sourcemodel.XmlPolicyModelMarshaller;
-import java.util.ArrayList;
 
 /**
  * Marshals the contents of a policy map to WSDL.
@@ -84,14 +84,14 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
     private static final String mtomNamespace = "http://schemas.xmlsoap.org/ws/2004/09/policy/optimizedmimeserialization";
     private static final QName mtomName = new QName(mtomNamespace, "OptimizedMimeSerialization");
     
-    public void start(TypedXmlWriter root, SEIModel model, BindingID bindingID) {
+    public void start(TypedXmlWriter root, SEIModel model, WSBinding binding, Container container) {
         logger.entering("start");
         try {
             if (model != null) {
                 this.seiModel = model;
-                this.isMtomEnabled = bindingID.isMTOMEnabled();
-                QName serviceName = model.getServiceQName();
-                this.configModel = PolicyConfigParser.parse();
+                this.isMtomEnabled = binding.isMTOMEnabled();
+                // QName serviceName = model.getServiceQName();
+                this.configModel = PolicyConfigParser.parse(container);
                 if (this.configModel != null) {
                     WSDLPolicyMapWrapper mapWrapper = this.configModel.getExtension(WSDLPolicyMapWrapper.class);
                     if (mapWrapper != null) {
@@ -101,8 +101,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
                 }
             }
         } catch (PolicyException e) {
-            // TODO Throw WebServiceException
-            logger.warning("start", "Ignoring exception until implementation has stabilized", e);
+            logger.severe("start", "Failed to read wsit.xml", e);
         } finally {
             logger.exiting("start");
         }
@@ -384,17 +383,16 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
 
     /**
      * If isMtomEnabled is true, add an MTOM policy assertion to all policy alternatives.
-     * If isMtomEnabled is false, remove all MTOM policy assertions.
-     *
-     * TODO Replace with code that does not hard-wire MTOM assertion
      */
     private Policy overrideMtom(Policy policy) {
-        if (this.isMtomEnabled.booleanValue()) {
-            return addMtomAssertion(policy);
-        }
-        else {
-            return removeMtomAssertion(policy);
-        }
+        // TODO Replace with code that does not hard-wire MTOM assertion
+        return addMtomAssertion(policy);
+//        if (this.isMtomEnabled.booleanValue()) {
+//            return addMtomAssertion(policy);
+//        }
+//        else {
+//            return removeMtomAssertion(policy);
+//        }
     }
     
     private Policy addMtomAssertion(Policy policy) {
@@ -416,26 +414,26 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         return Policy.createPolicy(policy.getId(), policy.getName(), assertionSets);
     }
     
-    private Policy removeMtomAssertion(Policy policy) {
-        ArrayList<AssertionSet> assertionSets = new ArrayList<AssertionSet>();
-        for (AssertionSet assertionSet : policy) {
-            if (assertionSet.contains(mtomName)) {
-                ArrayList<PolicyAssertion> assertions = new ArrayList<PolicyAssertion>();
-                for (PolicyAssertion assertion : assertions) {
-                    if (assertion.getName().equals(mtomName)) {
-                        continue;
-                    }
-                    assertions.add(assertion);
-                }
-                AssertionSet reducedSet = AssertionSet.createAssertionSet(assertions);
-                assertionSets.add(reducedSet);
-            }
-            else {
-                assertionSets.add(assertionSet);
-            }
-        }
-        return Policy.createPolicy(policy.getId(), policy.getName(), assertionSets);
-    }
+//    private Policy removeMtomAssertion(Policy policy) {
+//        ArrayList<AssertionSet> assertionSets = new ArrayList<AssertionSet>();
+//        for (AssertionSet assertionSet : policy) {
+//            if (assertionSet.contains(mtomName)) {
+//                ArrayList<PolicyAssertion> assertions = new ArrayList<PolicyAssertion>();
+//                for (PolicyAssertion assertion : assertions) {
+//                    if (assertion.getName().equals(mtomName)) {
+//                        continue;
+//                    }
+//                    assertions.add(assertion);
+//                }
+//                AssertionSet reducedSet = AssertionSet.createAssertionSet(assertions);
+//                assertionSets.add(reducedSet);
+//            }
+//            else {
+//                assertionSets.add(assertionSet);
+//            }
+//        }
+//        return Policy.createPolicy(policy.getId(), policy.getName(), assertionSets);
+//    }
 
     /**
      * Creates an inline policy with an MTOM assertion if isMtomEnabled is set.
