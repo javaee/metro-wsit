@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <!--
- $Id: build.xml,v 1.1 2006-05-03 22:56:05 arungupta Exp $
+ $Id: build.xml,v 1.2 2006-05-04 01:44:52 arungupta Exp $
 
  Copyright (c) 2005 Sun Microsystems, Inc.
  All rights reserved.
@@ -26,6 +26,7 @@
     <path id="runtime.compile.classpath">
         <fileset dir="${lib.runtime.dir}" includes="*.jar"/>
         <fileset dir="${lib.tooltime.dir}" includes="*.jar"/>
+        <fileset dir="${lib.compiletime.dir}" includes="*.jar"/>
     </path>
 
     <path id="tools.compile.classpath" refid="runtime.compile.classpath"/>
@@ -86,7 +87,6 @@
         </copy>
     </target>
 
-
     <target name="combine-jars-runtime">
         <combine-jars-macro jarname="${name}" libdir="${lib.runtime.dir}" classesdir="${rt.dir}/build/classes">
             <metainf>
@@ -112,6 +112,11 @@
     <target name="src-zip">
         <ant dir="${rt.dir}" target="src-zip"/>
         <ant dir="${tools.dir}" target="src-zip"/>
+    </target>
+    
+    <target name="get-servlet-jar-local">
+        <get src="https://jax-ws-sources.dev.java.net/source/browse/jax-ws-sources/jaxws-ri/servlet/lib/Attic/servlet.jar?only_with_tag=rearch-2005"
+            dest="${lib.compiletime.dir}/servlet.jar"/>
     </target>
 
     <target name="clean">

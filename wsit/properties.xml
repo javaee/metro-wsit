@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <!--
- $Id: properties.xml,v 1.1 2006-05-03 22:56:05 arungupta Exp $
+ $Id: properties.xml,v 1.2 2006-05-04 01:44:52 arungupta Exp $
 
  Copyright (c) 2005 Sun Microsystems, Inc.
  All rights reserved.
@@ -13,6 +13,7 @@
     <property name="lib.dir" value="${basedir}/lib"/>
     <property name="lib.runtime.dir" value="${lib.dir}/runtime"/>
     <property name="lib.tooltime.dir" value="${lib.dir}/tooltime"/>
+    <property name="lib.compiletime.dir" value="${lib.dir}/compiletime"/>
     <property name="dist.dir" value="${basedir}/dist"/>
     <property name="dist.image.dir" value="${dist.dir}/image"/>
     <property name="dist.image.wsit.dir" value="${dist.image.dir}/wsit"/>
