@@ -403,7 +403,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
             }
             else {
                 ArrayList<PolicyAssertion> assertions = new ArrayList<PolicyAssertion>();
-                for (PolicyAssertion assertion : assertions) {
+                for (PolicyAssertion assertion : assertionSet) {
                     assertions.add(assertion);
                 }
                 assertions.add(new MtomAssertion());
@@ -411,7 +411,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
                 assertionSets.add(extendedSet);
             }
         }
-        return Policy.createPolicy(policy.getId(), policy.getName(), assertionSets);
+        return Policy.createPolicy(policy.getName(), policy.getId(), assertionSets);
     }
     
 //    private Policy removeMtomAssertion(Policy policy) {
