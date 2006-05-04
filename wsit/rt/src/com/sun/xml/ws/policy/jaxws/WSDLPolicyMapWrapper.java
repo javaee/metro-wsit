@@ -74,6 +74,12 @@ public class WSDLPolicyMapWrapper implements WSDLExtension {
     public void addClientConfigToMap(URL clientWsitConfig) throws PolicyException {
         logger.entering("addClientConfigToMap");
         
+        if (clientWsitConfig == null) {
+            // TODO: move this message into PipelineAssemblerFactoryImpl class
+            logger.warning("addClientConfigToMap", "Optional client configuration file URL is missing. No client configuration is processed.");
+            return;
+        }
+        
         logger.fine("addClientConfigToMap", "wsit-client.xml resource url: '" + clientWsitConfig + "'");
         
         try {
