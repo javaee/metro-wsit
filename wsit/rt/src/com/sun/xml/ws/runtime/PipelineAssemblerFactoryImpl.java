@@ -1,31 +1,34 @@
 /*
- The contents of this file are subject to the terms
- of the Common Development and Distribution License
- (the "License").  You may not use this file except
- in compliance with the License.
- 
- You can obtain a copy of the license at
- https://jwsdp.dev.java.net/CDDLv1.0.html
- See the License for the specific language governing
- permissions and limitations under the License.
- 
- When distributing Covered Code, include this CDDL
- HEADER in each file and include the License file at
- https://jwsdp.dev.java.net/CDDLv1.0.html  If applicable,
- add the following below this CDDL HEADER, with the
- fields enclosed by brackets "[]" replaced with your
- own identifying information: Portions Copyright [yyyy]
- [name of copyright owner]
-*/
-/*
- $Id: PipelineAssemblerFactoryImpl.java,v 1.1 2006-05-03 22:56:45 arungupta Exp $
-
- Copyright (c) 2006 Sun Microsystems, Inc.
- All rights reserved.
-*/
+ * The contents of this file are subject to the terms
+ * of the Common Development and Distribution License
+ * (the License).  You may not use this file except in
+ * compliance with the License.
+ *
+ * You can obtain a copy of the license at
+ * https://glassfish.dev.java.net/public/CDDLv1.0.html.
+ * See the License for the specific language governing
+ * permissions and limitations under the License.
+ *
+ * When distributing Covered Code, include this CDDL
+ * Header Notice in each file and include the License file
+ * at https://glassfish.dev.java.net/public/CDDLv1.0.html.
+ * If applicable, add the following below the CDDL Header,
+ * with the fields enclosed by brackets [] replaced by
+ * you own identifying information:
+ * "Portions Copyrighted [year] [name of copyright owner]"
+ *
+ * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
+ */
 
 package com.sun.xml.ws.runtime;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
+import javax.xml.ws.WebServiceException;
+import javax.xml.ws.addressing.AddressingConstants;
+import javax.xml.ws.addressing.AddressingBuilder;
+import javax.xml.namespace.QName;
 import com.sun.xml.ws.addressing.jaxws.WsaClientPipe;
 import com.sun.xml.ws.addressing.jaxws.WsaServerPipe;
 import com.sun.xml.ws.api.EndpointAddress;
@@ -54,13 +57,6 @@ import com.sun.xml.ws.util.pipe.DumpPipe;
 import com.sun.xml.wss.jaxws.impl.SecurityClientPipe;
 import com.sun.xml.wss.jaxws.impl.SecurityServerPipe;
 
-import javax.xml.ws.WebServiceException;
-import javax.xml.ws.addressing.AddressingConstants;
-import javax.xml.ws.addressing.AddressingBuilder;
-import javax.xml.namespace.QName;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-
 
 /**
  * Tango PipelineAssembler.
@@ -80,6 +76,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
     private static final String WSMEX_SUFFIX = ".wsmex";
     private static final String WSRM_SUFFIX = ".wsrm";
     private static final String WSTX_SUFFIX = ".wstx";
+    private static final String CLIENT_CONFIGURATION_FILENAME = "wsit-client.xml";
 
 
     private PolicyMap policyMap;
@@ -90,8 +87,11 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             public Pipe createClient(EndpointAddress address, WSDLPort wsdlPort, WSService service, WSBinding binding) {
                 Pipe p;
                 SecurityClientPipe securityClientPipe = null;
-
-                initPolicyMap(wsdlPort);
+                try {
+                    initPolicyMap(wsdlPort, true);
+                } catch (PolicyException ex) {
+                    throw new WebServiceException(ex);
+                }
 
                 // Transport pipe ALWAYS exist
                 p = createTransport(address, wsdlPort, service, binding);
@@ -154,8 +154,12 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             @Override
             public Pipe createServer(WSDLPort wsdlPort, WSEndpoint endpoint, Pipe terminal) {
                 Pipe p = terminal;
+                try {
 
-                initPolicyMap(wsdlPort);
+                    initPolicyMap(wsdlPort, false);
+                } catch (PolicyException ex) {
+                    throw new WebServiceException(ex);
+                }
 
                 p = dump(SERVER_PREFIX + WSTX_SUFFIX + AFTER_SUFFIX, p);
                 // check for WS-Atomic Transactions
@@ -372,12 +376,16 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
      *
      * @param wsdlPort wsdl:port.
      */
-    private void initPolicyMap(WSDLPort wsdlPort) {
+    private void initPolicyMap(WSDLPort wsdlPort, boolean isClient) throws PolicyException {
         if (wsdlPort != null) {
             WSDLBoundPortType binding = wsdlPort.getBinding();
             WSDLModel model = binding.getOwner();
-            WSDLPolicyMapWrapper mapWrapper = model.getExtension(WSDLPolicyMapWrapper.class);
+            WSDLPolicyMapWrapper mapWrapper = model.getExtension(WSDLPolicyMapWrapper.class);            
             if (mapWrapper != null) {
+                if (isClient) {
+                    URL clientConfigUrl = Thread.currentThread().getContextClassLoader().getResource(CLIENT_CONFIGURATION_FILENAME);
+                    mapWrapper.addClientConfigToMap(clientConfigUrl);
+                }
                 policyMap = mapWrapper.getPolicyMap();
             }
         }
