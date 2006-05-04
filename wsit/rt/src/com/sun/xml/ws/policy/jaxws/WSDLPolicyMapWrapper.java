@@ -50,16 +50,12 @@ import com.sun.xml.ws.policy.privateutil.PolicyLogger;
  * @author japod
  */
 public class WSDLPolicyMapWrapper implements WSDLExtension {
-    
     private static final PolicyLogger logger = PolicyLogger.getLogger(PolicyWSDLParserExtension.class);
-    
     private static final QName NAME = new QName(null, "WSDLPolicyMapWrapper");
     
     private PolicyMap policyMap;
     private EffectivePolicyModifier mapModifier;
     private PolicyMapExtender mapExtender;
-    
-    
     
     protected WSDLPolicyMapWrapper(PolicyMap policyMap) {
         this.policyMap = policyMap;
@@ -68,6 +64,7 @@ public class WSDLPolicyMapWrapper implements WSDLExtension {
     public WSDLPolicyMapWrapper(PolicyMap policyMap, EffectivePolicyModifier modifier, PolicyMapExtender extender) {
         this(policyMap);
         this.mapModifier = modifier;
+        this.mapExtender = extender;
     }
     
     public PolicyMap getPolicyMap() {
@@ -150,5 +147,4 @@ public class WSDLPolicyMapWrapper implements WSDLExtension {
     public QName getName() {
         return NAME;
     }
-    
 }
