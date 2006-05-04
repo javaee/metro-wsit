@@ -50,11 +50,13 @@
                     <ide-action name="rebuild"/>
                 </context-menu>
             </view>
+            <subprojects/>
         </general-data>
         <java-data xmlns="http://www.netbeans.org/ns/freeform-project-java/1">
             <compilation-unit>
                 <package-root>rt/src</package-root>
                 <package-root>tools/src</package-root>
+                <classpath mode="compile">lib/runtime/activation.jar;lib/runtime/jaxb-api.jar;lib/runtime/jaxws-api.jar;lib/runtime/jaxws-rt.jar;lib/runtime/saaj-api.jar;lib/runtime/jsr173_api.jar;lib/runtime/jaxwsa-api.jar;lib/runtime/jaxwsa-impl.jar;lib/runtime/FastInfoset.jar;lib/runtime/jaxb-impl.jar;lib/runtime/jsr181-api.jar;lib/runtime/jsr250-api.jar;lib/runtime/mail-1.4.jar;lib/runtime/resolver.jar;lib/runtime/saaj-impl.jar;lib/runtime/secconv-jaxbbindings.jar;lib/runtime/sjsxp.jar;lib/runtime/stax-ex.jar;lib/runtime/stax-utils.jar;lib/runtime/streambuffer.jar;lib/runtime/trust-jaxbbindings.jar;lib/runtime/xmldsig.jar;lib/runtime/xmlsec.jar</classpath>
                 <source-level>1.5</source-level>
             </compilation-unit>
         </java-data>
