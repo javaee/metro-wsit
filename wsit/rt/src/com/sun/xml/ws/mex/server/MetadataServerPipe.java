@@ -57,38 +57,39 @@ import static com.sun.xml.ws.mex.MetadataConstants.WXF_PREFIX;
  * @author WS Development Team
  */
 public class MetadataServerPipe extends AbstractFilterPipeImpl {
-    
-    private static WSDLRetriever wsdlRetriever;
-    private static String soapNamespace;
-    private static WsaRuntimeFactory wsaRtFac;
-    
+
+    private final WSDLRetriever wsdlRetriever;
+    private final String soapNamespace;
+    private final WsaRuntimeFactory wsaRtFac;
+
     public MetadataServerPipe(WSEndpoint endpoint, Pipe next) {
         super(next);
-        if (wsdlRetriever == null) {
-            wsaRtFac = WsaRuntimeFactory.newInstance(
-                endpoint.getPort(), endpoint.getBinding());
-            
-            wsdlRetriever = new WSDLRetriever(endpoint);
-            
-            // todo: get soap envelope namespace directly?
-            // soap version has binding id, not namespace
-            SOAPVersion version = endpoint.getBinding().getSOAPVersion();
-            if (version == SOAPVersion.SOAP_11) {
-                soapNamespace = SOAP_1_1;
-            } else {
-                soapNamespace = SOAP_1_2;
-            }
+        wsaRtFac = WsaRuntimeFactory.newInstance(
+            endpoint.getPort(), endpoint.getBinding());
+
+        wsdlRetriever = new WSDLRetriever(endpoint);
+
+        // todo: get soap envelope namespace directly?
+        // soap version has binding id, not namespace
+        SOAPVersion version = endpoint.getBinding().getSOAPVersion();
+        if (version == SOAPVersion.SOAP_11) {
+            soapNamespace = SOAP_1_1;
+        } else {
+            soapNamespace = SOAP_1_2;
         }
     }
-    
+
     protected MetadataServerPipe(MetadataServerPipe that, PipeCloner cloner) {
         super(that, cloner);
+        soapNamespace = that.soapNamespace;
+        wsaRtFac = that.wsaRtFac;
+        wsdlRetriever = that.wsdlRetriever;
     }
 
     public Pipe copy(PipeCloner cloner) {
         return new MetadataServerPipe(this, cloner);
     }
-    
+
     public Packet process(Packet request) {
         AddressingProperties ap = wsaRtFac.readHeaders(request);
         if (ap != null &&
@@ -97,20 +98,20 @@ public class MetadataServerPipe extends AbstractFilterPipeImpl {
         }
         return next.process(request);
     }
-    
+
     public void preDestroy() {}
-    
+
     private Packet processRequest(Packet request, AddressingProperties ap) {
         try {
             String address = ap.getTo().toString();
             MutableXMLStreamBuffer buffer = new MutableXMLStreamBuffer();
             XMLStreamWriter writer = buffer.createFromXMLStreamWriter();
-            
+
             writeStartEnvelope(writer);
             wsdlRetriever.addDocuments(writer, request, address);
             writer.writeEndDocument();
             writer.flush();
-            
+
             Message responseMessage = Messages.create(buffer);
             Packet response = request.createResponse(responseMessage);
             createResponseHeaders(request, response, ap);
@@ -126,21 +127,21 @@ public class MetadataServerPipe extends AbstractFilterPipeImpl {
 
     private void writeStartEnvelope(XMLStreamWriter writer) 
         throws XMLStreamException {
-        
+
         String soapPrefix = "soapenv";
-        
+
         writer.writeStartDocument();
         writer.writeStartElement(soapPrefix, "Envelope", soapNamespace);
-        
+
         // this line should go away after bug fix - 6418039
         writer.writeNamespace(soapPrefix, soapNamespace);
-        
+
         // todo: consistent namespace
         writer.writeNamespace("wsa",
             "http://schemas.xmlsoap.org/ws/2004/08/addressing");
         writer.writeNamespace(MEX_PREFIX, MEX_NAMESPACE);
         writer.writeNamespace(WXF_PREFIX, WXF_NAMESPACE);
-        
+
         writer.writeStartElement(soapPrefix, "Body", soapNamespace);
         writer.writeStartElement(MEX_PREFIX, "Metadata", MEX_NAMESPACE);
     }
@@ -154,5 +155,5 @@ public class MetadataServerPipe extends AbstractFilterPipeImpl {
 //        responseProps.setAction(GET_WXF_RESPONSE);
 //        wsaRtFac.writeHeaders(response, responseProps);
     }
-    
+
 }
