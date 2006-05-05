@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ The contents of this file are subject to the terms
+ of the Common Development and Distribution License
+ (the "License").  You may not use this file except
+ in compliance with the License.
+ 
+ You can obtain a copy of the license at
+ https://jwsdp.dev.java.net/CDDLv1.0.html
+ See the License for the specific language governing
+ permissions and limitations under the License.
+ 
+ When distributing Covered Code, include this CDDL
+ HEADER in each file and include the License file at
+ https://jwsdp.dev.java.net/CDDLv1.0.html  If applicable,
+ add the following below this CDDL HEADER, with the
+ fields enclosed by brackets "[]" replaced with your
+ own identifying information: Portions Copyright [yyyy]
+ [name of copyright owner]
+-->
+
+<project basedir="." default="help" name="wsit-enabled-fromwsdl">
+
+    <property environment="env"/>
+    <property file="etc/build.properties"/>
+    <property name="build.home" value="${basedir}/build"/>
+    <property name="build.classes.home" value="${build.home}/classes"/>
+    <property name="build.war.home" value="${build.home}/war"/>
+    <property name="war.file" value="${build.war.home}/${ant.project.name}.war"/>
+    <property name="domain" value="domain1"/>
+
+    <!-- <property name="as.home" value=""/> -->
+    <condition property="as.home" value="${env.AS_HOME}">
+        <not><isset property="as.home"/></not>
+    </condition>
+    
+    <!-- <property name="catalina.home" value=""/> -->
+    <condition property="catalina.home" value="${env.CATALINA_HOME}">
+        <not><isset property="catalina.home"/></not>
+    </condition>
+
+    <condition property="lib.home" value="${catalina.home}/shared/lib" else="${as.home}/lib">
+        <istrue value="${use.tomcat}"/>
+    </condition>
+
+    <condition property="deploy.dir" value="${catalina.home}/webapps" else="${as.home}/domains/${domain}/autodeploy">
+        <istrue value="${use.tomcat}"/>
+    </condition>
+    
+    <path id="wsit.classpath">
+        <pathelement location="${java.home}/../lib/tools.jar"/>
+        <fileset dir="${lib.home}">
+            <include name="*.jar"/>
+            <exclude name="jaxws-update.jar"/>
+            <exclude name="j2ee*.jar"/>
+            <exclude name="javaee.jar"/>
+            <exclude name="appserv-*.jar"/>
+        </fileset>
+    </path>
+
+    <taskdef name="wsimport" classname="com.sun.tools.ws.ant.WsImport">
+        <classpath refid="wsit.classpath"/>
+    </taskdef>
+
+    <target name="setup">
+        <mkdir dir="${build.home}"/>
+        <mkdir dir="${build.classes.home}"/>
+        <mkdir dir="${build.war.home}"/>
+    </target>
+
+    <target name="clean">
+        <delete dir="${build.home}" includeEmptyDirs="true" />
+    </target>
+
+    <target name="build-server-wsdl" depends="setup">
+        <wsimport
+            debug="${debug}"
+            verbose="${verbose}"
+            keep="${keep}"
+            extension="${extension}"
+            destdir="${build.classes.home}"
+            wsdl="${server.wsdl}">
+            <binding dir="${basedir}/etc" includes="${server.binding}"/>
+        </wsimport>
+        <javac
+            fork="true"
+            srcdir="${basedir}/src"
+            destdir="${build.classes.home}"
+            includes="**/server/**,**/common/**">
+            <classpath refid="wsit.classpath"/>
+        </javac>
+    </target>
+
+    <target name="create-war">
+        <war warfile="${war.file}" webxml="etc/web.xml">
+    	      <webinf dir="${basedir}/etc" includes="sun-jaxws.xml"/>
+    	      <zipfileset
+                dir="${basedir}/etc"
+                includes="*.wsdl, *.xsd"
+                prefix="WEB-INF/wsdl"/>
+    	      <classes dir="${build.classes.home}"/>
+        </war>
+    </target>
+
+    <target name="generate-client" depends="setup">
+        <wsimport
+            debug="${debug}"
+            verbose="${verbose}"
+            keep="${keep}"
+            extension="${extension}"
+            destdir="${build.classes.home}"
+            wsdl="${client.wsdl}">
+            <binding dir="${basedir}/etc" includes="${client.binding}"/>
+        </wsimport>
+    </target>
+
+    <target name="client" depends="generate-client">
+        <javac
+            fork="true"
+            srcdir="${basedir}/src"
+            destdir="${build.classes.home}"
+            includes="**/client/**,**/common/**">
+            <classpath refid="wsit.classpath"/>
+        </javac>
+    </target>
+
+    <target name="run">
+        <java fork="true" classname="${client}">
+            <classpath>
+                <path refid="wsit.classpath"/>
+                <pathelement location="${build.classes.home}"/>
+                <pathelement location="${basedir}/etc"/>
+            </classpath>
+        </java>
+    </target>
+
+    <target name="deploy">
+        <copy file="${war.file}" todir="${deploy.dir}"/>
+    </target>
+
+    <target name="help">
+        <echo message="server:       Builds and deploy the service endpoint WAR"/>
+        <echo message="client:       Builds the client"/>
+        <echo message="run:          Runs the client"/>
+    </target>
+
+    <target name="server" depends="setup">
+
+        <antcall target="clean" />
+
+        <antcall target="build-server-wsdl" />
+
+        <antcall target="create-war" />
+
+        <antcall target="deploy" />
+    </target>
+
+</project>

@@ -1,0 +1,453 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1"
+ http-equiv="content-type">
+  <title>Downloading, Building, and Installing WSIT</title>
+</head>
+<body>
+<pre>Draft:<br>v8 (5 May 2006) -- Concisified instructions and description of steps in install section.<br>	removed double-quotes around CVSROOT option value in example commands<br>	added links to cvs/firewall config help<br>v7 (4 May 2006) -- Updated with Harold's feedback &amp; changes for wsit switching to jax-ws-latest-wsit<br>v6 (4 May 2006) -- Adding version info and direct links to download pages for GF &amp; TC web containers.<br>v5 (4 May 2006) -- Removing "binary download" sections &amp; references per this morning's PTeam decision<br>	added nbproject back to source directory layout<br>	removing most of the sun-internal directions now that source is at java.net<br>v4 (2 May 2006) -- Incorporated more comments from Susan, Sreejith (jdk version 1.5.0_02), GailR.<br>v3 (26 Apr 2006) -- incorporating comments from Bobby, Tom, and Susan<br>	grammar &amp; spellin fixes<br>	change Glassfish --&gt; GlassFish throughout<br>	Java.Net --&gt; java.net (with diff font)<br>	removed nbproject from source dir table<br>v2 (24 Apr 2006) -- Alphabetized &amp; corrected directory contents table/listing<br>v1 (24 Apr 2006) -- Initial Revision<br><br></pre>
+<span style="font-weight: bold;"></span>
+<hr style="width: 100%; height: 2px;"><span style="font-weight: bold;">**
+SUN INTERNAL INSTRUCTIONS NECESSSARY PRIOR TO WSIT BEING POSTED TO
+JAVA.NET **</span><br>
+<span style="font-weight: bold;"></span><span style="font-weight: bold;">Building
+From Sources:<br>
+</span>Internal to swan, suggest using the java.net proxy machines,
+e.g. java-net-cvs.east.sun.com, java-net-cvs.sfbay.sun.com<br>
+<br>
+Problems, questions, and suggestions to ken.hofsass@sun.com<br>
+<span style="font-weight: bold;"></span>
+<hr style="width: 100%; height: 2px;"><span style="font-weight: bold;"></span><span
+ style="font-weight: bold;"></span>
+<h1>Getting Started with WSIT:<br>
+</h1>
+<h1>Downloading, Building, and Installing WSIT</h1>
+<h2>Overview</h2>
+This is the first in a series of articles intended to familiarize
+developers with Sun's Web Services Interoperability Technologies
+(<a href="http://wsit.dev.java.net">WSIT</a>). WSIT aims to ensure
+interoperability of enterprise features
+such as security, optimized communication, reliable messaging, and
+atomic transactions. WSIT is being developed as an open source
+project and
+is part of the <a href="http://glassfish.dev.java.net/">GlassFish
+Community</a>. The WSIT functionality plugs into Sun's <a
+ href="http://java.sun.com/webservices/jaxws/index.jsp">JAX-WS</a>
+implementation, and its implementation code is at <a
+ href="http://wsit.dev.java.net/">http://wsit.dev.java.net</a>.<br>
+<br>
+This article shows you how to retrieve the WSIT sources
+from the <span style="font-family: monospace;">java.net</span> CVS
+repository, how to build them, and then how to
+install the resulting artifacts into your web container.<br>
+<h2>Contents<br>
+</h2>
+<a href="#Prerequisites">Prerequisites</a><br>
+<a href="#Retrieving">Retrieving Sources</a><br>
+<a href="#Source">Source Code Directory Structure</a><br>
+<a href="#Building">Building the WSIT Source Code</a><br>
+<a href="#Installing">Installing Build Artifacts into a Web Container</a><br>
+<a href="#Verifying">Verifying Successful Build and Installation</a><br>
+<a href="#Summary">Summary and Resources</a><br>
+<h2><a name="Prerequisites"></a>Prerequisites<br>
+</h2>
+WSIT installation and usage have dependencies on several other software
+packages. The following software packages are needed whether you want
+to use pre-built WSIT binaries or intend to build WSIT from
+source. Links are provided to the respective web sites for more
+details on each package.<br>
+<ul>
+  <li>A Web Container supported by WSIT:</li>
+  <ul>
+    <li>The <a href="http://glassfish.dev.java.net/">GlassFish</a>
+Open
+Source JavaEE 5 Application Server: Requires <a
+ href="https://glassfish.dev.java.net/downloads/01May06.html">FCS b47
+promoted build</a>.</li>
+  </ul>
+  <ul>
+    <li><a href="http://tomcat.apache.org/download-55.cgi">Apache
+Tomcat 5.5</a> web container: Requires version 5.5.16 or later.<br>
+    </li>
+  </ul>
+  <li><a href="http://java.sun.com/j2se/1.5.0/download.jsp">Sun Java SE
+5.0 Developers Kit (JDK 5.0)</a>: Requires JDK 5.0 Update 2 or later.<br>
+  </li>
+  <li><a href="http://ant.apache.org/bindownload.cgi">Apache Ant</a>:
+Requires Ant
+version 1.6.5 or later.</li>
+  <li><a href="http://ftp.gnu.org/non-gnu/cvs/source/stable/">CVS:</a>
+Requires CVS version 1.11.17 or later.<br>
+  </li>
+</ul>
+<h2><a name="Retrieving"></a>Retrieving Sources</h2>
+To build WSIT from sources, you use CVS to
+manipulate your copy of the source repository. CVS requires some
+basic information about your user account and the repository location.
+Those details are consolidated into one setting referred to as the <span
+ style="font-family: monospace;">CVSROOT</span>. For these example
+commands, the <span style="font-family: monospace;">CVSROOT</span> is
+passed a command-line argument.&nbsp; Refer to the <a
+ href="http://www.nongnu.org/cvs/">CVS documentation</a> for more
+details on its commands and configuration.&nbsp; Please note that CVS
+may require extra configuration if you are attempting to retrieve the
+sources at <span style="font-family: monospace;">java.net</span> from
+behind a firewall.&nbsp; Both <a style="font-family: monospace;"
+ href="http://www.netbeans.org/community/sources/cvs.html"><span
+ style="text-decoration: underline;">netbeans.org</span></a> and <a
+ href="https://www.dev.java.net/scdocs/ddSSHGuide.html.en"><span
+ style="font-family: monospace;">java.net</span></a> have more details
+on configuring firewalled environments.<br>
+<br>
+The first step is to log into the <span style="font-family: monospace;">java.net</span>
+CVS repository. The
+following command asks you for a password. Please enter the
+password for your <span style="font-family: monospace;">java.net</span>
+user account.<br>
+<br>
+<div style="margin-left: 40px;"><span style="font-family: monospace;">cvs
+-d </span><span style="font-family: monospace;">:pserver:&lt;your
+java.net username&gt;@cvs.dev.java.net:/cvs </span><span
+ style="font-family: monospace;">login</span><br>
+</div>
+<br>
+The next step is to 'checkout' the sources. Note that in CVS terms,
+'checkout' simply means to retrieve a set of files. This differs from
+some version control systems that use the term 'checkout' to
+refer to locking a particular file for editing. The WSIT sources
+are part of the <span style="font-family: monospace;">wsit</span>
+module.<br>
+<br>
+<div style="margin-left: 40px;"><span style="font-family: monospace;">cvs
+-d </span><span style="font-family: monospace;">:pserver:&lt;your
+java.net username&gt;@cvs.dev.java.net:/cvs</span><span
+ style="font-family: monospace;"></span><span
+ style="font-family: monospace;"> checkout wsit/wsit</span><br>
+</div>
+<br>
+Executing the <span style="font-family: monospace;">cvs checkout</span>
+command retrieves a copy of the WSIT source repository to your
+local directory. The name of each file and directory is displayed as
+CVS
+retrieves each one.<br>
+<h2><a name="Source"></a>Source Code Directory Structure<br>
+</h2>
+This section gives a brief overview of the contents and layout for
+the directory structure of the WSIT sources. The top level directory is
+simply called <span style="font-family: monospace;">wsit.</span> All
+files and directories listed below reside within that top-level <span
+ style="font-family: monospace;">wsit</span> directory.<br>
+<br>
+<table style="width: 100%;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+    <tr>
+      <th style="vertical-align: middle;">Directory or File<br>
+      </th>
+      <th style="vertical-align: top;">Description<br>
+      </th>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">/wsit<br>
+      </td>
+      <td style="vertical-align: top;">Top-level directory of the WSIT
+repository.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="width: 20%; vertical-align: middle;">
+      <div style="margin-left: 40px;"><span
+ style="font-family: monospace;">/wsit</span><br>
+      </div>
+      </td>
+      <td style="vertical-align: top;">Top-level directory of the WSIT
+project sources.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="width: 20%; vertical-align: middle;">
+      <div style="margin-left: 80px;"><span
+ style="font-family: monospace;">/build.xml</span><br>
+      </div>
+      </td>
+      <td style="vertical-align: top;">The Apache Ant build file. Tells
+      <span style="font-family: monospace;">ant</span> how to build
+WSIT.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="width: 20%; vertical-align: middle;">
+      <div style="margin-left: 80px;"><span
+ style="font-family: monospace;">/CDDLv1.0.1.*</span><br>
+      </div>
+      </td>
+      <td style="vertical-align: top;">File specifying the licensing
+terms under that WSIT is distributed.<br>
+      </td>
+    </tr>
+    <tr>
+      <td
+ style="width: 20%; font-family: monospace; vertical-align: middle;">
+      <div style="margin-left: 80px;">/dist</div>
+      </td>
+      <td style="vertical-align: top;">Created during WSIT build
+process.&nbsp; Contains the primary build artifacts: <span
+ style="font-family: monospace;">jax-ws-latest-wsit-installer.jar</span>,
+      <span style="font-family: monospace;">jax-ws-latest-wsit.zip</span>,
+and under its <span style="font-family: monospace;">image</span>
+sub-directory, an
+unjarred
+WSIT
+directory image.</td>
+    </tr>
+    <tr>
+      <td style="width: 20%; vertical-align: middle;">
+      <div style="margin-left: 80px;"><span
+ style="font-family: monospace;">/etc</span><br>
+      </div>
+      </td>
+      <td style="vertical-align: top;">Contains miscellaneous
+supporting tools and jars for building WSIT.</td>
+    </tr>
+    <tr>
+      <td style="width: 20%; vertical-align: middle;">
+      <div style="margin-left: 80px;"><span
+ style="font-family: monospace;">/lib</span><br>
+      </div>
+      </td>
+      <td style="vertical-align: top;">Contains supporting binary jar
+files that are used to build the WSIT jars.</td>
+    </tr>
+    <tr>
+      <td style="width: 20%; vertical-align: middle;">
+      <div style="margin-left: 80px;"><span
+ style="font-family: monospace;">/licenses</span><br>
+      </div>
+      </td>
+      <td style="vertical-align: top;">Contains files that specify the
+licensing terms for the third-party packages incorporated in
+WSIT.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: middle;">
+      <div style="margin-left: 80px;"><span
+ style="font-family: monospace;">/nbproject</span><br>
+      </div>
+      </td>
+      <td style="vertical-align: top;">Contains NetBeans 5.5 project
+files. These files enable users to build WSIT from within NetBeans.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="width: 20%; vertical-align: middle;">
+      <div style="margin-left: 80px;"><span
+ style="font-family: monospace;">/properties.xml</span><br>
+      </div>
+      </td>
+      <td style="vertical-align: top;">Properties file that contains
+general settings needed during the WSIT build process.</td>
+    </tr>
+    <tr>
+      <td style="width: 20%; vertical-align: middle;">
+      <div style="margin-left: 80px;"><span
+ style="font-family: monospace;">/rt</span><br>
+      </div>
+      </td>
+      <td style="vertical-align: top;">Contains 'run-time' sources that
+provide the WSIT functionality needed by the web container to
+execute WSIT applications.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="width: 20%; vertical-align: middle;">
+      <div style="margin-left: 80px;"><span
+ style="font-family: monospace;">/samples</span><br>
+      </div>
+      </td>
+      <td style="vertical-align: top;">Contains sample code for each of
+the individual WSIT technologies.</td>
+    </tr>
+    <tr>
+      <td
+ style="width: 20%; font-family: monospace; vertical-align: middle;">
+      <div style="margin-left: 80px;">/test</div>
+      </td>
+      <td style="vertical-align: top;">Contains the unit tests for each
+individual WSIT technology.</td>
+    </tr>
+    <tr>
+      <td
+ style="width: 20%; font-family: monospace; vertical-align: middle;">
+      <div style="margin-left: 80px;">/tools</div>
+      </td>
+      <td style="vertical-align: top;">Contains sources that add
+functionality to various tools (such as <span
+ style="font-family: monospace;">wsimport</span><span
+ style="font-style: italic;"> </span>and <span
+ style="font-family: monospace;">apt</span>) needed to build WSIT
+applications.<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<h2><a name="Building"></a>Building the WSIT Source Code<span
+ style="font-family: monospace;"></span></h2>
+After retrieving the source code, run the following commands:<br>
+<br>
+<div style="margin-left: 40px;"><span style="font-family: monospace;">cd
+wsit/wsit<br>
+ant
+clean main<br>
+</span></div>
+<br>
+The <span style="font-family: monospace;">ant</span> command above
+builds all of the WSIT source code and bundles the
+resulting class files, along with some classes extracted from other
+supporting jars, into the WSIT run-time and tool-time jar files. As
+mentioned in the directory structure section above, the significant
+resulting
+files are found in the <span style="font-family: monospace;">dist</span>
+sub-directory.<br>
+<ul>
+  <li>The <span style="font-family: monospace;">image</span> directory
+contains a sub-directory named <span style="font-family: monospace;">jax-ws-latest-wsit</span>.
+The <span style="font-family: monospace;">image/jax-ws-latest-wsit</span>
+sub-directory contains
+the directory image users would see after executing the <span
+ style="font-family: monospace;">jax-ws-latest-wsit-installer.jar</span>
+mentioned in
+the table above.</li>
+  <li><span style="font-family: monospace;">jax-ws-latest-wsit.zip</span>
+holds the
+bundled contents of the <span style="font-family: monospace;">image</span>
+directory.</li>
+  <li><span style="font-family: monospace;">jax-ws-latest-wsit-installer.jar</span>
+is
+a self-extracting jar file. It wraps <span
+ style="font-family: monospace;">jax-ws-latest-wsit.zip</span> with a
+basic installer.<br>
+  </li>
+</ul>
+<h2><a name="Installing"></a>Installing Build Artifacts into a Web
+Container<br>
+</h2>
+At this point, WSIT has been built from its sources and the resulting
+binary artifacts need to be installed into the web container.&nbsp;
+There are two
+signficant WSIT jar files: <span style="font-family: monospace;">webservices.jar</span>
+and <span style="font-family: monospace;">webservices-tools.jar</span>.
+Both of these files live in <span style="font-family: monospace;">lib</span>
+under <span style="font-family: monospace;">dist/image/jax-ws-latest-wsit</span>.
+The <span style="font-family: monospace;">webservices.jar</span> file
+contains the classes required by the hosting web container at run-time
+to execute a WSIT application. The<span style="font-family: monospace;">
+webservices-tools.jar</span> file
+contains the classes needed by various
+build-time tools, including <span style="font-family: monospace;">apt</span>
+and <span style="font-family: monospace;">wsimport</span>, to create
+the web
+application archive (WAR) file.<br>
+<br>
+The <span style="font-family: monospace;">jax-ws-latest-wsit</span>
+directory also
+contains two <span style="font-family: monospace;">ant</span> files, <span
+ style="font-family: monospace;">wsit-on-glassfish.xml</span> and <span
+ style="font-family: monospace;">wsit-on-tomcat.xml</span>. These
+two files are used to install the WSIT binaries into the respective web
+containers. That procedure is explained next.<br>
+<br>
+<span style="font-weight: bold;">GlassFish<br>
+</span>To install WSIT into GlassFish, you must pass the name
+of the GlassFish top-level directory into <span
+ style="font-family: monospace;">ant</span>.
+There are two primary ways to accomplish this. One is to set the
+<span style="font-family: monospace;">AS_HOME</span> environment
+variable. The other is to pass that same information
+as an <span style="font-family: monospace;">ant</span> property value
+on the command line. Run the following sequence of commands shutdowns
+the instance of GlassFish
+into which you are installing WSIT, change directories, invoke the <span
+ style="font-family: monospace;">install</span> target, and then
+restart the GlassFish instance:<br>
+<br>
+<div style="margin-left: 40px;"><span
+ style="font-weight: bold; font-family: monospace;"></span><span
+ style="font-family: monospace;">asadmin stop-domain domain1<br>
+cd dist/image/jax-ws-latest-wsit<br>
+</span><span style="font-family: monospace;">ant [
+-Das.home=&lt;GlassFish install
+directory&gt; ] -f wsit-on-glassfish.xml install<br>
+</span><span style="font-weight: bold; font-family: monospace;"></span><span
+ style="font-family: monospace;">asadmin start-domain domain1</span><br>
+</div>
+<br>
+This process copies the two WSIT jar files into your GlassFish
+installation's <span style="font-family: monospace;">lib</span>
+directory and make the necessary classpath alterations in the
+domain configuration files and utility script files, <span
+ style="font-family: monospace;">wsimport</span> and
+<span style="font-family: monospace;">wsgen</span>.<br>
+<br>
+<span style="font-weight: bold;">Tomcat</span><br>
+The installation process for Tomcat is very similar to that of
+GlassFish. However, instead of setting the <span
+ style="font-family: monospace;">AS_HOME</span> environment
+variable, you would need to set <span style="font-family: monospace;">CATALINA_HOME</span>
+to point to the top-level
+of your Tomcat installation. Again, there is the option to pass
+this information as an argument to the <span
+ style="font-family: monospace;">ant</span> command.&nbsp; Shutdown
+Tomcat, change directories, invoke <span
+ style="font-family: monospace;">ant</span>, and restart Tomcat with
+these commands:<br>
+<br>
+<div style="margin-left: 40px;"><span style="font-family: monospace;">catalina.sh
+stop<br>
+cd dist/image/jax-ws-latest-wsit</span><br>
+</div>
+<div style="margin-left: 40px;"><span
+ style="font-weight: bold; font-family: monospace;"></span><span
+ style="font-family: monospace;">ant [ -Dtomcat.home=&lt;tomcat install
+directory&gt; ] -f wsit-on-tomcat.xml install<br>
+</span><span style="font-family: monospace;">catalina.sh start</span><br>
+</div>
+<br>
+For Tomcat, the installation process copies the two WSIT jar files
+into Tomcat's <span style="font-family: monospace;">shared/lib</span>
+directory. No Tomcat configuration files are modified.<br>
+<h2><a name="Verifying"></a>Verifying Successful Build and Installation</h2>
+At this point, you should have a WSIT-enabled web container. It
+is suggested that you verify WSIT installed correctly to your web
+container. The most direct method to accomplish that is to build,
+deploy, and execute a simple example program. These steps
+are explained in the next <span style="font-style: italic;">Getting
+Started with WSIT</span>
+article, <span style="font-weight: bold;">[FIXME] &lt;link to Build,
+Deploy JAX-WS app in WSIT&gt;</span>.<br>
+<h2><a name="Summary"></a>Summary and Resources<br>
+</h2>
+<span style="">This article explained the steps necessary to add WSIT
+functionality to your GlassFish or Tomcat web container. The next
+article <span style="font-weight: bold;">[FIXME: direct link to next
+article]</span> in this series
+explains how to build and deploy a JAX-WS application and use it to
+verify the successful installation of WSIT. For more details on
+the supporting technologies used by WSIT, refer to the links below.<br>
+</span><br>
+<a href="http://wsit.dev.java.net/">WSIT at java.net</a><br>
+<a href="http://glassfish.dev.java.net/">GlassFish at java.net</a><br>
+<a href="http://jax-ws.dev.java.net/">JAX-WS at java.net</a><br>
+<a href="http://java.sun.com/webservices/jaxws/index.jsp">JAX-WS at
+java.sun.com</a><br>
+<a href="http://www.jcp.org/en/jsr/detail?id=224">Java
+API for XML Web Services (JAX-WS) 2.0</a><a
+ href="https://jaxws.dev.java.net"><span style="font-family: monospace;"></span></a><br>
+<a href="http://java.sun.com/j2se/1.5.0/download.jsp">Sun Java SE 5.0
+Developers Kit (JDK 5.0)</a><br>
+<a href="http://ant.apache.org/">Apache Ant version 1.6.5</a><br>
+<a href="http://www.nongnu.org/cvs">CVS 1.11</a><br>
+<br>
+</body>
+</html>
