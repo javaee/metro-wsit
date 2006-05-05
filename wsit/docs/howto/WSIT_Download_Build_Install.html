@@ -48,9 +48,15 @@ details on each package.<br>
   <ul>
     <li>The <a href="http://glassfish.dev.java.net/">GlassFish</a>
 Open
-Source JavaEE 5 Application Server: Requires <a
- href="https://glassfish.dev.java.net/downloads/01May06.html">FCS b47
-promoted build</a>.</li>
+Source JavaEE 5 Application Server: Requires the Main branch
+01-May-2006 nightly build (<a
+ href="http://download.java.net/javaee5/installer-nightly/WINNT/glassfish-installer-b43-nightly-01_may_2006.jar">Windows</a>,
+      <a
+ href="http://download.java.net/javaee5/installer-nightly/SunOS/glassfish-installer-b43-nightly-01_may_2006.jar">Solaris
+Sparc</a>, <a
+ href="http://download.java.net/javaee5/installer-nightly/SunOS_X86/glassfish-installer-b43-nightly-01_may_2006.jar">Solaris
+x86</a>, <a
+ href="http://download.java.net/javaee5/installer-nightly/Linux/glassfish-installer-b43-nightly-01_may_2006.jar">Linux</a>).</li>
   </ul>
   <ul>
     <li><a href="http://tomcat.apache.org/download-55.cgi">Apache
@@ -347,24 +353,23 @@ containers. That procedure is explained next.<br>
 <span style="font-weight: bold;">GlassFish<br>
 </span>To install WSIT into GlassFish, you must pass the name
 of the GlassFish top-level directory into <span
- style="font-family: monospace;">ant</span>.
-There are two primary ways to accomplish this. One is to set the
-<span style="font-family: monospace;">AS_HOME</span> environment
-variable. The other is to pass that same information
-as an <span style="font-family: monospace;">ant</span> property value
-on the command line. Run the following sequence of commands shutdowns
+ style="font-family: monospace;">ant</span>. For this example that
+information is passed as an <span style="font-family: monospace;">ant</span>
+property value
+on the command line. To shutdown
 the instance of GlassFish
 into which you are installing WSIT, change directories, invoke the <span
  style="font-family: monospace;">install</span> target, and then
-restart the GlassFish instance:<br>
+restart the GlassFish instance, please run the following sequence of
+commands:<br>
 <br>
 <div style="margin-left: 40px;"><span
  style="font-weight: bold; font-family: monospace;"></span><span
  style="font-family: monospace;">asadmin stop-domain domain1<br>
 cd dist/image/jax-ws-latest-wsit<br>
-</span><span style="font-family: monospace;">ant [
+</span><span style="font-family: monospace;">ant
 -Das.home=&lt;GlassFish install
-directory&gt; ] -f wsit-on-glassfish.xml install<br>
+directory&gt; -f wsit-on-glassfish.xml install<br>
 </span><span style="font-weight: bold; font-family: monospace;"></span><span
  style="font-family: monospace;">asadmin start-domain domain1</span><br>
 </div>
@@ -378,15 +383,11 @@ domain configuration files and utility script files, <span
 <br>
 <span style="font-weight: bold;">Tomcat</span><br>
 The installation process for Tomcat is very similar to that of
-GlassFish. However, instead of setting the <span
- style="font-family: monospace;">AS_HOME</span> environment
-variable, you would need to set <span style="font-family: monospace;">CATALINA_HOME</span>
-to point to the top-level
-of your Tomcat installation. Again, there is the option to pass
-this information as an argument to the <span
- style="font-family: monospace;">ant</span> command.&nbsp; Shutdown
+GlassFish.&nbsp; Again, the top-level
+directory of the Tomcat installation is passed as an argument to the <span
+ style="font-family: monospace;">ant</span> command.&nbsp; To shutdown
 Tomcat, change directories, invoke <span
- style="font-family: monospace;">ant</span>, and restart Tomcat with
+ style="font-family: monospace;">ant</span>, and restart Tomcat execute
 these commands:<br>
 <br>
 <div style="margin-left: 40px;"><span style="font-family: monospace;">catalina.sh
@@ -395,8 +396,8 @@ cd dist/image/jax-ws-latest-wsit</span><br>
 </div>
 <div style="margin-left: 40px;"><span
  style="font-weight: bold; font-family: monospace;"></span><span
- style="font-family: monospace;">ant [ -Dtomcat.home=&lt;tomcat install
-directory&gt; ] -f wsit-on-tomcat.xml install<br>
+ style="font-family: monospace;">ant -Dtomcat.home=&lt;tomcat install
+directory&gt; -f wsit-on-tomcat.xml install<br>
 </span><span style="font-family: monospace;">catalina.sh start</span><br>
 </div>
 <br>
