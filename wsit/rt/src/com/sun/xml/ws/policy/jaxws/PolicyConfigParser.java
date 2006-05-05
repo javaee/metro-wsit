@@ -67,7 +67,9 @@ public final class PolicyConfigParser {
             Object context = null;
             try {
                 Class contextClass = Class.forName(SERVLET_CONTEXT_CLASSNAME);
-                context = container.getSPI(contextClass);
+                if (null!=container) {
+                    context = container.getSPI(contextClass);
+                }
             } catch (ClassNotFoundException e) {
                 logger.fine("parse", "Did not find class " + SERVLET_CONTEXT_CLASSNAME + ". We are apparently not running in a container.");
             }
