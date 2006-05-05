@@ -57,8 +57,8 @@ import com.sun.xml.ws.policy.PolicySubject;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelGenerator;
+import com.sun.xml.ws.policy.sourcemodel.PolicyModelMarshaller;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
-import com.sun.xml.ws.policy.sourcemodel.XmlPolicyModelMarshaller;
 
 /**
  * Marshals the contents of a policy map to WSDL.
@@ -112,7 +112,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
             logger.entering("addDefinitionsExtension");
             if (policyMap != null) {
                 Collection<PolicySubject> subjects = policyMap.getPolicySubjects();
-                XmlPolicyModelMarshaller marshaller = new XmlPolicyModelMarshaller();
+                PolicyModelMarshaller marshaller = PolicyModelMarshaller.getXmlMarshaller();
                 PolicyModelGenerator generator = PolicyModelGenerator.getGenerator();
                 PolicyMerger merger = PolicyMerger.getMerger();
                 boolean usingPolicy = false;
@@ -450,7 +450,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
                 assertionSets.add(assertionSet);
                 Policy policy = Policy.createPolicy(assertionSets);
                 binding._namespace("wsoma", "http://schemas.xmlsoap.org/ws/2004/09/policy/optimizedmimeserialization");
-                XmlPolicyModelMarshaller marshaller = new XmlPolicyModelMarshaller();
+                PolicyModelMarshaller marshaller = PolicyModelMarshaller.getXmlMarshaller();
                 PolicyModelGenerator generator = PolicyModelGenerator.getGenerator();
                 PolicySourceModel policyInfoset = generator.translate(policy);
                 marshaller.marshal(policyInfoset, binding);

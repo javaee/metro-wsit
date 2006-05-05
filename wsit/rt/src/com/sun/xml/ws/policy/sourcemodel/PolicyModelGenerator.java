@@ -101,7 +101,6 @@ public final class PolicyModelGenerator {
         ModelNode exactlyOneNode = nestedPolicyRoot.createChildExactlyOneNode();
         AssertionSet set = policy.getAssertionSet();
         ModelNode alternativeNode = exactlyOneNode.createChildAllNode();
-        exactlyOneNode.addChild(alternativeNode);
         for (PolicyAssertion assertion : set) {
             AssertionData data = new AssertionData(assertion.getName(), assertion.getValue(), assertion.getAttributes());
             ModelNode assertionNode = alternativeNode.createChildAssertionNode(data);
