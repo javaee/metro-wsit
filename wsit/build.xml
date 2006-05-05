@@ -23,7 +23,7 @@
 -->
 
 <!--
- $Id: build.xml,v 1.6 2006-05-04 21:04:22 arungupta Exp $
+ $Id: build.xml,v 1.7 2006-05-05 02:08:12 arungupta Exp $
 
  Copyright (c) 2005 Sun Microsystems, Inc.
  All rights reserved.
@@ -134,13 +134,6 @@
     <target name="src-zip">
         <ant dir="${rt.dir}" target="src-zip"/>
         <ant dir="${tools.dir}" target="src-zip"/>
-    </target>
-    
-    <target name="get-servlet-jar-local">
-        <get src="http://fisheye5.cenqua.com/viewrep/~raw,r=1.1.2.1/jax-ws-sources/jaxws-ri/servlet/lib/servlet.jar"
-            dest="${lib.compiletime.dir}/servlet.jar"/>
-        <!-- get src="https://jax-ws-sources.dev.java.net/source/browse/jax-ws-sources/jaxws-ri/servlet/lib/Attic/servlet.jar?rev=1.1.2.1&amp;only_with_tag=rearch-2005&amp;view=auto&amp;content-type=text/vnd.viewcvs-markup"
-            dest="${lib.compiletime.dir}/servlet.jar"/ -->
     </target>
     
     <target name="integrate-jaxwsa-hudson">

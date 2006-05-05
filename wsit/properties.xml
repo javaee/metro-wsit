@@ -23,7 +23,7 @@
 -->
 
 <!--
- $Id: properties.xml,v 1.6 2006-05-04 21:04:22 arungupta Exp $
+ $Id: properties.xml,v 1.7 2006-05-05 02:08:12 arungupta Exp $
 
  Copyright (c) 2005 Sun Microsystems, Inc.
  All rights reserved.
@@ -31,14 +31,14 @@
 
 <project name="wsit.dev.java.net build properties">
     <property name="name" value="webservices"/>
-    <property name="install.name" value="wsit"/>
+    <property name="install.name" value="jax-ws-latest-wsit"/>
     <property name="lib.dir" value="${basedir}/lib"/>
     <property name="lib.runtime.dir" value="${lib.dir}/runtime"/>
     <property name="lib.tooltime.dir" value="${lib.dir}/tooltime"/>
     <property name="lib.compiletime.dir" value="${lib.dir}/compiletime"/>
     <property name="dist.dir" value="${basedir}/dist"/>
     <property name="dist.image.dir" value="${dist.dir}/image"/>
-    <property name="dist.image.wsit.dir" value="${dist.image.dir}/wsit"/>
+    <property name="dist.image.wsit.dir" value="${dist.image.dir}/jax-ws-latest-wsit"/>
     <property name="dist.image.wsit.lib.dir" value="${dist.image.wsit.dir}/lib"/>
     <property name="build.javadocs.dir" value="${basedir}/build/javadocs"/>
 
