@@ -48,7 +48,7 @@
         <mkdir dir="${backup.dir}"/>
         <copy todir="${backup.dir}" failonerror="false">
             <fileset dir="${as.home}/domains/${domain}/config" includes="domain.xml"/>
-            <fileset dir="${as.home}/bin" includes="wsimport${ext}, wsgen${ext}"/>
+            <fileset dir="${as.home}/bin" includes="wsimport${ext}, wsgen${ext}, xjc${ext}, schemagen${ext}"/>
             <fileset dir="${as.home}/lib" includes="webservices.jar, webservices-tools.jar"/>
         </copy>
     </target>
@@ -69,7 +69,7 @@
 
         <copy todir="${as.home}/domains/${domain}/config" file="${backup.dir}/domain.xml" overwrite="true"/>
         <copy todir="${as.home}/bin" overwrite="true">
-            <fileset dir="${backup.dir}" includes="wsimport${ext}, wsgen${ext}"/>
+            <fileset dir="${backup.dir}" includes="wsimport${ext}, wsgen${ext}, xjc${ext}, schemagen${ext}"/>
         </copy>
         <delete dir="${backup.dir}" includeemptydirs="true"/>
         <delete dir="${as.home}/lib" includes="webservices.jar, webservices-tools.jar"/>
@@ -100,17 +100,17 @@
     </target>
 
     <target name="update-classpath-unix" if="unix">
-        <replace dir="${as.home}/bin" includes="wsimport, wsgen, xjc">
+        <replace dir="${as.home}/bin" includes="wsimport, wsgen, xjc, schemagen">
             <replacetoken>CLASSPATH=</replacetoken>
             <replacevalue>WSIT_CLASSPATH="$AS_INSTALL"/lib/webservices-tools.jar:"$AS_INSTALL"/lib/webservices.jar
 
 CLASSPATH=${WSIT_CLASSPATH}:</replacevalue>
         </replace>
-        <chmod perm="+x" dir="${as.home}/bin" includes="wsimport, wsgen, xjc"/>
+        <chmod perm="+x" dir="${as.home}/bin" includes="wsimport, wsgen, xjc, schemagen"/>
     </target>
 
     <target name="update-classpath-win" unless="unix">
-        <replace dir="${as.home}/bin" includes="wsimport${ext}, wsgen${ext}, xjc${ext}">
+        <replace dir="${as.home}/bin" includes="wsimport${ext}, wsgen${ext}, xjc${ext}, schemagen${ext}">
             <replacetoken>CLASSPATH=</replacetoken>
             <replacevalue>WSIT_CLASSPATH=%AS_INSTALL%\lib\webservices-tools.jar;%AS_INSTALL%\lib\webservices.jar
 
