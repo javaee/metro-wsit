@@ -35,6 +35,8 @@ install the resulting artifacts into your web container.<br>
 <a href="#Building">Building the WSIT Source Code</a><br>
 <a href="#Installing">Installing Build Artifacts into a Web Container</a><br>
 <a href="#Verifying">Verifying Successful Build and Installation</a><br>
+<a href="#Updating">Updating WSIT</a><br>
+<a href="#Uninstalling">Uninstalling WSIT</a><br>
 <a href="#Summary">Summary and Resources</a><br>
 <h2><a name="Prerequisites"></a>Prerequisites<br>
 </h2>
@@ -415,6 +417,46 @@ Started with WSIT</span>
 article, <span style="font-weight: bold;"></span><span style=""><a
  href="WSIT_Not_Enabled_Example.html">Building a JAX-WS Application in
 the WSIT Environment</a></span>.<br>
+<h2><a name="Updating"></a>Updating WSIT</h2>
+<span style="font-weight: bold;"></span>Once WSIT has been installed to
+a web container, it can be updated with new versions of the WSIT
+binaries.&nbsp; To update the jars, follow the same steps used for the
+initial install, <a href="#Installing">shown above</a>.&nbsp; For
+GlassFish, the second and subsequent installs will only update the WSIT
+binaries; no configuration files will be modified.<br>
+<h2><a name="Uninstalling"></a>Uninstalling WSIT</h2>
+To remove the WSIT binaries and configuration changes from your web
+container, the steps are almost identical to the install process.&nbsp;
+The following steps will restore your web container to the state it was
+in before WSIT installation.<br>
+<span style="font-family: monospace;"></span><br>
+<span style="font-weight: bold;">GlassFish</span><br>
+<br>
+<div style="margin-left: 40px;"><span style="font-family: monospace;">asadmin
+stop-domain domain1</span><br>
+<span style="font-family: monospace;">cd dist/image/jax-ws-latest-wsit</span><br>
+<span style="font-family: monospace;"></span><span
+ style="font-family: monospace;">ant
+-Das.home=&lt;GlassFish install
+directory&gt; -f wsit-on-glassfish.xml uninstall</span><br>
+<span style="font-family: monospace;"></span><span
+ style="font-weight: bold; font-family: monospace;"></span><span
+ style="font-family: monospace;">asadmin start-domain domain1</span><br>
+</div>
+<br>
+<span style="font-weight: bold;">Tomcat</span><br>
+<br>
+<div style="margin-left: 40px;"><span style="font-family: monospace;">catalina.sh
+stop<br>
+cd dist/image/jax-ws-latest-wsit</span><br>
+</div>
+<div style="margin-left: 40px;"><span
+ style="font-weight: bold; font-family: monospace;"></span><span
+ style="font-family: monospace;">ant -Dtomcat.home=&lt;tomcat install
+directory&gt; -f wsit-on-tomcat.xml uninstall<br>
+</span><span style="font-family: monospace;">catalina.sh start<br>
+</span></div>
+<span style="font-weight: bold;"></span>
 <h2><a name="Summary"></a>Summary and Resources<br>
 </h2>
 <span style="">This article explained the steps necessary to add WSIT
