@@ -36,9 +36,7 @@ can be found in
 the WSIT source tree here:<br>
 </p>
 <p style="margin-bottom: 0in; margin-left: 40px;"><span
- style="font-weight: bold;"></span><span style="font-family: monospace;">wsit/wsit/docs/howto/{<a
- href="wsit-jaxws-fromjava">wsit-jaxws-fromjava</a>,<a
- href="wsit-jaxws-fromwsdl">wsit-jaxws-fromwsdl</a>}</span></p>
+ style="font-weight: bold;"></span><span style="font-family: monospace;">wsit/wsit/docs/howto/{wsit-jaxws-fromjava,wsit-jaxws-fromwsdl}</span></p>
 <h2>Contents</h2>
 <a href="#Prerequisites">Prerequisites</a><br>
 <a href="#Environment">Environment Configuration Settings</a><br>
@@ -71,12 +69,12 @@ will need to edit the example source files to account for that. The
 following is a list of the files which contain references to the
 “listen” port.</p>
 <ol style="font-family: monospace;">
-  <li>fromjava/src/fromjava/server/AddWebservice.java</li>
-  <li>fromjava/etc/custom-schema.xml</li>
-  <li>fromjava/etc/custom-client.xml</li>
-  <li>fromjava/etc/build.properties</li>
-  <li>fromwsdl/etc/custom-client.xml</li>
-  <li>fromwsdl/etc/build.properties<br>
+  <li>wsit-jaxws-fromjava/src/fromjava/server/AddWebservice.java</li>
+  <li>wsit-jaxws-fromjava/etc/custom-schema.xml</li>
+  <li>wsit-jaxws-fromjava/etc/custom-client.xml</li>
+  <li>wsit-jaxws-fromjava/etc/build.properties</li>
+  <li>wsit-jaxws-fromwsdl/etc/custom-client.xml</li>
+  <li>wsit-jaxws-fromwsdl/etc/build.properties<br>
   </li>
 </ol>
 <p><b>Web Container Home Directory</b></p>
@@ -173,19 +171,28 @@ number2;<br>
 }</div>
 <p style="margin-bottom: 0in;">If you are using
 the GlassFish web container, the web service in the <span
- style="font-family: monospace;">fromjava</span>
-example can be compiled and bundled simply by invoking <span
+ style="font-family: monospace;">wsit-jaxws-fromjava</span>
+example can be compiled and bundled simply by invoking: <br>
+</p>
+<p style="margin-bottom: 0in; margin-left: 40px;"><span
  style="font-family: monospace;">ant
-server</span>. If using Tomcat, the command-line would be <span
+server</span><br>
+</p>
+<p style="margin-bottom: 0in;">If using Tomcat, the command-line would
+be:<br>
+</p>
+<p style="margin-bottom: 0in; margin-left: 40px;"><span
  style="font-family: monospace;">ant
--Duse.tomcat=true server</span>. The <span
+-Duse.tomcat=true server</span><br>
+</p>
+<p style="margin-bottom: 0in;">The <span
  style="font-family: monospace;">server</span> target in&nbsp;
 <span style="font-family: monospace;">build.xml</span> in turn invokes
 the tools necessary to process the
 annotations and compile the sources, and to bundle the Java class files
 and
 configuration files into a deployable web archive (WAR file). The WAR
-file will be <span style="font-family: monospace;">build/war/wsit-fromjava.war.</span>
+file will be <span style="font-family: monospace;">build/war/wsit-jaxws-fromjava.war.</span>
 The tools that were called by ant
 during this step are briefly described next.</p>
 <p style="margin-bottom: 0in;">The JAX-WS tool <span
@@ -215,18 +222,27 @@ retrieving it from a network address. An example of manually
 accessing a service’s WSDL using a web browser is shown below as
 part of the section on verifying deployment. </p>
 <p style="margin-bottom: 0in;">As in the previous
-example, to build the <span style="font-family: monospace;">fromwsdl</span>
-service, you can simply invoke <span style="font-family: monospace;">ant
-server</span> if using GlassFish or <span
+example, to build the <span style="font-family: monospace;">wsit-jaxws-fromwsdl</span>
+service for GlassFish, you can simply invoke:<br>
+</p>
+<p style="margin-bottom: 0in; margin-left: 40px;"><span
+ style="font-family: monospace;">ant
+server</span><br>
+</p>
+<p style="margin-bottom: 0in;">Otherwise for Tomcat use:<br>
+</p>
+<p style="margin-bottom: 0in; margin-left: 40px;"><span
  style="font-family: monospace;">ant -Duse.tomcat=true
-server</span> for Tomcat.</p>
+server</span><br>
+</p>
 <p style="margin-bottom: 0in;"><span style="font-family: monospace;">Wsimport</span>
 will take the WSDL description and generate a corresponding Java
 interface and other supporting classes. Then the Java compiler needs
 to be called to compile both the user’s code and the generated
 code. Finally, the class files are bundled together into the WAR
-file. The details can be seen in the <span
- style="font-family: monospace;">fromwsdl</span> build.xml file
+file. The details can be seen in the<span
+ style="font-family: monospace;"> wsit-jaxws-fromwsdl build.xml</span>
+file
 as the <span style="font-family: monospace;">build-server-wsdl</span>
 and <span style="font-family: monospace;">create-war</span> targets.<br>
 </p>
@@ -238,7 +254,8 @@ and <span style="font-family: monospace;">create-war</span> targets.<br>
 Container</h2>
 For both the “from Java” and “from WSDL” scenarios
 described above, the resulting application is deployed in the same
-manner. However, the details of the deployment process differ between
+manner. However, the details of the deployment process differ slightly
+between
 the GlassFish and Tomcat web containers.
 <p><b>Deploying to GlassFish</b></p>
 <p style="">For development purposes, it is
