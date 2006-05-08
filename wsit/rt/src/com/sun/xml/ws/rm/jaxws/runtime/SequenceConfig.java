@@ -112,6 +112,8 @@ public class SequenceConfig {
     }
     
     public SequenceConfig(WSDLPort port) {
+
+        inactivityTimeout = 600000;
                 
         if (port != null) {
             WSDLBoundPortType binding = port.getBinding();
