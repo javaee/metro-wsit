@@ -20,7 +20,7 @@
  [name of copyright owner]
 -->
 <!--
- $Id: run-ql-tests.xml,v 1.2 2006-05-09 13:40:38 tamiro Exp $
+ $Id: run-ql-tests.xml,v 1.3 2006-05-09 14:48:48 tamiro Exp $
 
  Copyright (c) 2005 Sun Microsystems, Inc.
  All rights reserved.
@@ -41,9 +41,6 @@
     <property name="CVSROOT" value=":pserver:tamiro@sunsw.sfbay.sun.com:/sw/wpts"/>
 -->
     <property name="gf.dir" value="/mnt/hdd2/hudson/server/jobs/wsit-javanet-ql"/>
-<!--
-    <property name="gf.dir" value="${basedir}"/>
--->
     <property name="gf.install.home" value="${gf.dir}/glassfish"/>
     <property name="wsit.name" value="jax-ws-latest-wsit"/>
     <property name="wsit.zip" value="${basedir}/dist/${wsit.name}.zip"/>
@@ -91,8 +88,8 @@
     </target>
 
     <target name="update.gf" description="Reverts GF to clean copy or install a new promoted build">
-      <mkdir dir="${basedir}/glassfish"/>
-      <mkdir dir="${basedir}/glassfish.orig"/>
+      <mkdir dir="${gf.dir}/glassfish"/>
+      <mkdir dir="${gf.dir}/glassfish.orig"/>
 <!--
       <setproxy proxyhost="webcache.sfbay.sun.com" proxyport="8080"/>
 -->
