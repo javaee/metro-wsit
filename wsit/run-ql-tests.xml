@@ -20,7 +20,7 @@
  [name of copyright owner]
 -->
 <!--
- $Id: run-ql-tests.xml,v 1.1 2006-05-09 12:32:49 tamiro Exp $
+ $Id: run-ql-tests.xml,v 1.2 2006-05-09 13:40:38 tamiro Exp $
 
  Copyright (c) 2005 Sun Microsystems, Inc.
  All rights reserved.
@@ -40,7 +40,7 @@
 <!--
     <property name="CVSROOT" value=":pserver:tamiro@sunsw.sfbay.sun.com:/sw/wpts"/>
 -->
-    <property name="gf.dir" value="/mnt/hdd2/hudson/server/jobs/wsit-javanet"/>
+    <property name="gf.dir" value="/mnt/hdd2/hudson/server/jobs/wsit-javanet-ql"/>
 <!--
     <property name="gf.dir" value="${basedir}"/>
 -->
