@@ -20,7 +20,7 @@
  [name of copyright owner]
 -->
 <!--
- $Id: run-ql-tests.xml,v 1.4 2006-05-09 20:39:52 tamiro Exp $
+ $Id: run-ql-tests.xml,v 1.5 2006-05-09 21:38:23 tamiro Exp $
 
  Copyright (c) 2005 Sun Microsystems, Inc.
  All rights reserved.
@@ -87,13 +87,13 @@
       </ant>
     </target>
 
-    <target name="update.gf" description="Reverts GF to clean copy or install a new promoted build">
+    <target name="update.gf" description="Reverts GF to clean copy or install a new build">
       <mkdir dir="${gf.dir}/glassfish"/>
       <mkdir dir="${gf.dir}/glassfish.orig"/>
 <!--
       <setproxy proxyhost="webcache.sfbay.sun.com" proxyport="8080"/>
 -->
-      <!-- only download and install a new GF promoted build -->
+      <!-- only download a new GF build -->
       <available file="${gf.dir}/${gf.sunos.jar}" property="file.present"/>
       <antcall target="create.file" />
       <checksum file="${gf.dir}/${gf.sunos.jar}" forceOverwrite="yes" />
@@ -109,7 +109,13 @@
       <available file="${gf.install.home}.orig/bin/asadmin" property="gf.backup.exists"/>
       <antcall target="revert.gf" />
       <condition property="do.gf.install">
-        <isfalse value="${nonew.build}"/>
+        <or>
+          <isfalse value="${nonew.build}"/>
+          <and>
+            <istrue value="${nonew.build}"/>
+            <isfalse value="${gf.exists}"/>
+          </and>
+        </or>
       </condition>
       <antcall target="install.gf" />
     </target>
