@@ -1,0 +1,203 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1"
+ http-equiv="content-type">
+  <title>Enabling WSIT Functionality in a Web Service Application</title>
+</head>
+<body>
+<h1><a href="index.html">Getting Started with WSIT:</a></h1>
+<h1>Enabling WSIT Functionality in a Web Service Application</h1>
+<h1>[under construction]<br>
+</h1>
+<h2><span style="font-weight: bold;">Overview</span></h2>
+This is the third article in the <span style="font-style: italic;">Getting
+Started with WSIT</span> series. It highlights the steps required to
+enable
+WSIT functionality in a web service and its corresponding client
+application. It shows how to configure, build, deploy, and install
+those applications. This article builds on the information presented in
+in the previous article, <a href="WSIT_Not_Enabled_Example.html">Building
+a JAX-WS
+Application in the WSIT Environment</a>.<br>
+<br>
+Supporting code samples are included to demonstrate building a web
+service using WSIT functionality. The examples show how to develop a
+web service both starting from Java source code and starting from an
+existing WSDL document. For both cases, it shows how to develop a
+corresponding client application from the web service's WSDL document.
+The examples can be found in
+the WSIT source tree here:<br>
+<br>
+<div style="margin-left: 40px;"><span style="font-family: monospace;">wsit/wsit/docs/howto/wsit-enabled-fromjava
+(<a href="wsit-enabled-fromjava.zip">zip</a>)</span><br>
+<span style="font-family: monospace;"></span></div>
+<p style="margin-bottom: 0in; margin-left: 40px;"><span
+ style="font-weight: bold;"></span><span style="font-family: monospace;">wsit/wsit/docs/howto/wsit-enabled-fromwsdl
+(<a href="wsit-enabled-fromwsdl.zip">zip</a>)<br>
+</span></p>
+<span style="font-family: monospace;"><br>
+</span>As you follow along with the sample code, please confirm that
+you are working in either <span style="font-family: monospace;">wsit-enabled-fromjava</span>
+or <span style="font-family: monospace;">wsit-enabled-fromwsdl</span>
+rather than one of the previous article's sample code directories, <span
+ style="font-family: monospace;">wsit-<span style="font-style: italic;">jaxws</span>-fromjava</span>
+or <span style="font-family: monospace;">wsit-<span
+ style="font-style: italic;">jaxws</span>-fromwsdl</span>.<br>
+<h2><span style="font-weight: bold;">Contents</span></h2>
+<h2><span style="font-weight: bold;"></span></h2>
+<a href="#Prerequisites">Prerequisites and Environment Configuration</a><br>
+<a href="#WSIT_Server">Configuring WSIT in the Web Service</a><br>
+<a href="#Building_Server">Building and Deploying the Web Service</a><br>
+<a href="#WSIT_Client">Configuring WSIT in the Web Service Client</a><br>
+<a href="#Building_Client">Building and Running a Web Service Client</a><br>
+<a href="#Summary">Summary and Resources</a><span
+ style="font-weight: bold;"><br>
+</span>
+<h2><a name="Prerequisites"></a>Prerequisites and Environment
+Configuration<br>
+</h2>
+As in the previous article, the steps in this document require that
+you have already installed the WSIT jars into your web container. It
+also requires the following software be <span style="">installed</span>:
+JDK 5.0 Update 2 or later, Apache Ant 1.6.2 or later, and a web
+container: either GlassFish or
+Tomcat 5.5. Please review the <a
+ href="WSIT_Download_Build_Install.html#Prerequisites">Prerequisites</a>
+section
+of the first article for details. Further, your
+WSIT build environment needs to be configured as described in the <a
+ href="WSIT_Not_Enabled_Example.html#Environment">Environment
+Configuration Settings</a>
+section of the previous article.<br>
+<h2></h2>
+<h2><a name="WSIT_Config"></a>Configuring WSIT in the Web Service</h2>
+<span style="font-weight: bold;">WS-Policy and Policy Assertions</span><br>
+<br>
+WSIT features are enabled and configured using a mechanism defined in
+WS-Policy called&nbsp; 'policy assertions'.<br>
+FIXME<br>
+The following is a WSDL snippet showing WS-Addressing and WS-Reliable
+Messaging&nbsp; assertions:<br>
+<br>
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;wsp:Policy wsu:Id="AddNumbers_policy"&gt;</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;wsp:ExactlyOne&gt;</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;wsp:All&gt;</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;wsaw:UsingAddressing/&gt;</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;wsrm:RMAssertion&gt;</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;wsrm:InactivityTimeout Milliseconds="600000"/&gt;</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;wsrm:AcknowledgementInterval Milliseconds="200"/&gt;</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;/wsrm:RMAssertion&gt;</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;/wsp:All&gt;</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;/wsp:ExactlyOne&gt;</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;/wsp:Policy&gt;</span><br style="font-family: monospace;">
+<br>
+<span style="font-weight: bold;">Starting from Java<br>
+<br>
+</span>FIXME wsit.xml - WSIT configuratino file stored in wsdl format<br>
+<br>
+<span style="font-weight: bold;"><span style="font-weight: bold;">Starting
+from WSDL<br>
+</span></span><br>
+When developing a web service starting from an existing WSDL, the
+situation is actually simpler.&nbsp; The policy assertions needed to
+enable various WSIT technologies will already be embedded in the WSDL
+document.&nbsp; Any given technology is enabled by the WSIT run-time
+when its corresponding assertion is found in the WSDL.&nbsp; The
+assertions may specify particular configuration settings or rely on
+default settings that are pre-determined by the specific technology.
+For instance, in the snippet shown above,&nbsp; <span
+ style="font-family: monospace;">wsrm:AcknowledgementInterval</span>
+and <span style="font-family: monospace;">wsrm:InactivityTimeout</span>
+are both optional and could be omitted.<br
+ style="font-family: monospace;">
+<br>
+<span style="font-family: monospace;"></span>Please note that the
+existing WSDL document essentially represents a contract
+between the web service and its clients.&nbsp; Adding new policy
+assertions
+or making any other semantic changes to the WSDL document creates a new
+contract. The new contract will not be compatible with the original
+version. In particular, if your goal is build a web service that works
+with the existing clients, this change will break compatibility.
+However, if the intention is to define a new WSDL contract and develop
+a new web service and clients for the new WSDL, then breaking
+compatibility with the original may not be an issue for you.<br>
+<h2><a name="Building_Server"></a>Building and Deploying the Web Service</h2>
+Once configured, a WSIT-enabled web service is built and deployed in
+the same manner as a standard JAX-WS web service. If you are not
+familiar with those steps, please review the following sections from <a
+ href="WSIT_Not_Enabled_Example.html">Building a JAX-WS Application in
+the WSIT
+Environment</a>: <a
+ href="WSIT_Not_Enabled_Example.html#Building_Server">Building
+a JAX-WS 2.0 Web Service</a> and <a
+ href="WSIT_Not_Enabled_Example.html#Deploying">Deploying
+the Web Service to a Web
+Container.</a>&nbsp; However, the URLs needed to verify the respective
+web services differ from the previous article's examples and are listed
+below:<br>
+<p style="margin-left: 40px;"><a
+ href="http://localhost:8080/wsit-enabled-fromwsdl/addnumbers?wsdl">http://localhost:8080/wsit-enabled-fromjava/addnumbers?wsdl</a></p>
+<p style="margin-left: 40px;"><a
+ href="http://localhost:8080/wsit-enabled-fromwsdl/addnumbers?wsdl">http://localhost:8080/wsit-enabled-fromwsdl/addnumbers?wsdl</a><br>
+</p>
+<h2><a name="WSIT_Client"></a>Configuring WSIT in the Web Service Client</h2>
+FIXME Clients always start from WSDL - contains policy assertions<br>
+Further configuration in wsit-client.xml... <br>
+<h2></h2>
+<h2><a name="Building_Client"></a>Building and Running a Web Service
+Client</h2>
+As with the web service itself, building and running a WSIT-enabled
+client application is identical to running a standard JAX-WS 2.0 client
+application. Those steps are described in the following sections of the
+previous article:&nbsp; <a
+ href="WSIT_Not_Enabled_Example.html#Building_Client">Building a JAX-WS
+2.0 Web Service
+Client</a> and <a href="WSIT_Not_Enabled_Example.html#Running">Running
+the Web Service Client</a>.
+<h2><a name="Summary"></a>Summary and Resources</h2>
+<span style="">This article highlighted the steps that will be common
+to building,
+deploying, and running almost any web service using WSIT. However there
+are many more details. </span>For further information on
+developing Java web services with JAX-WS 2.0, WSIT, Netbeans,
+GlassFish, and more, please visit the links below.
+<p style="margin-bottom: 0in;"><a href="http://wsit.dev.java.net/">WSIT
+at java.net<br>
+</a><a href="http://glassfish.dev.java.net/">GlassFish at java.net</a><br>
+<a href="http://jax-ws.dev.java.net/"><span
+ style="text-decoration: underline;">JAXWS at java.net</span></a><br>
+<a href="http://www.netbeans.org/">Netbeans</a>,
+<a href="http://www.jcp.org/en/jsr/detail?id=224">Developing Web
+Services with
+NetBeans IDE 5.5<br>
+Java
+API for XML Web Services (JAX-WS) 2.0</a> (JSR 224)<a
+ href="https://jaxws.dev.java.net/"><span
+ style="text-decoration: underline;"></span></a><br>
+<a href="http://www.jcp.org/en/jsr/detail?id=175">A
+Metadata Facility for the Java Programming Language</a> (JSR 175)<br>
+<a href="http://www.jcp.org/en/jsr/detail?id=181">Web
+Services Metadata for the Java Platform</a> (JSR 181)<br>
+<a href="http://java.sun.com/j2se/1.5.0/download.jsp">Sun Java
+SE 5.0 Developers Kit (JDK 5.0)</a><br>
+<br>
+</p>
+<h2><span style="font-weight: bold;"></span></h2>
+</body>
+</html>
