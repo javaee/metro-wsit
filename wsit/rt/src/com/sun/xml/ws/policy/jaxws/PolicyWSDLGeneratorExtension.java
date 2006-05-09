@@ -449,7 +449,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
                 ArrayList<AssertionSet> assertionSets = new ArrayList<AssertionSet>();
                 assertionSets.add(assertionSet);
                 Policy policy = Policy.createPolicy(assertionSets);
-                binding._namespace("wsoma", "http://schemas.xmlsoap.org/ws/2004/09/policy/optimizedmimeserialization");
+                binding._namespace("http://schemas.xmlsoap.org/ws/2004/09/policy/optimizedmimeserialization", "wsoma");
                 PolicyModelMarshaller marshaller = PolicyModelMarshaller.getXmlMarshaller();
                 PolicyModelGenerator generator = PolicyModelGenerator.getGenerator();
                 PolicySourceModel policyInfoset = generator.translate(policy);
