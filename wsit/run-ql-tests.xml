@@ -20,7 +20,7 @@
  [name of copyright owner]
 -->
 <!--
- $Id: run-ql-tests.xml,v 1.3 2006-05-09 14:48:48 tamiro Exp $
+ $Id: run-ql-tests.xml,v 1.4 2006-05-09 20:39:52 tamiro Exp $
 
  Copyright (c) 2005 Sun Microsystems, Inc.
  All rights reserved.
@@ -136,7 +136,7 @@
       <antcall target="stop.gf" />
       <antcall target="delete.gf" />
       <!-- unjar glassfish -->
-      <unzip src="${gf.sunos.jar}" dest="${gf.install.home}"/>
+      <unzip src="${gf.dir}/${gf.sunos.jar}" dest="${gf.install.home}"/>
       <ant antfile="${gf.install.home}/setup.xml">
          <property name="install.home" value="${gf.install.home}"/>
          <property name="instance.port" value="${myhttp.port}"/>
