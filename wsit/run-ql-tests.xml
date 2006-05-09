@@ -1,0 +1,206 @@
+<?xml version="1.0"?>
+
+<!--
+ The contents of this file are subject to the terms
+ of the Common Development and Distribution License
+ (the "License").  You may not use this file except
+ in compliance with the License.
+
+ You can obtain a copy of the license at
+ https://jwsdp.dev.java.net/CDDLv1.0.html
+ See the License for the specific language governing
+ permissions and limitations under the License.
+
+ When distributing Covered Code, include this CDDL
+ HEADER in each file and include the License file at
+ https://jwsdp.dev.java.net/CDDLv1.0.html  If applicable,
+ add the following below this CDDL HEADER, with the
+ fields enclosed by brackets "[]" replaced with your
+ own identifying information: Portions Copyright [yyyy]
+ [name of copyright owner]
+-->
+<!--
+ $Id: run-ql-tests.xml,v 1.1 2006-05-09 12:32:49 tamiro Exp $
+
+ Copyright (c) 2005 Sun Microsystems, Inc.
+ All rights reserved.
+-->
+
+<!--
+  =======================================================================
+    WSIT Quick Look Tests build file
+  =======================================================================
+-->
+<project name="QuickLookTests" default="runtests" basedir=".">
+
+    <!-- ***************** props for the Quick Look tests ********************** -->
+    <property environment="env"/>
+
+    <property name="CVSROOT" value=":pserver:kk122374@sunsw.sfbay.sun.com:/sw/wpts"/>
+<!--
+    <property name="CVSROOT" value=":pserver:tamiro@sunsw.sfbay.sun.com:/sw/wpts"/>
+-->
+    <property name="gf.dir" value="/mnt/hdd2/hudson/server/jobs/wsit-javanet"/>
+<!--
+    <property name="gf.dir" value="${basedir}"/>
+-->
+    <property name="gf.install.home" value="${gf.dir}/glassfish"/>
+    <property name="wsit.name" value="jax-ws-latest-wsit"/>
+    <property name="wsit.zip" value="${basedir}/dist/${wsit.name}.zip"/>
+    <property name="qltests.home" value="${basedir}/qltests"/>
+    <property name="wsit.install.home" value="${basedir}/wsit-install"/>
+    <property name="gf.unix.url" value="http://javaweb.sfbay/java/re/glassfish/9.0/nightly/images/solaris/latest/glassfish-image-SNAPSHOT.jar"/>
+    <property name="gf.sunos.jar" value="glassfish-image-SNAPSHOT.jar"/>
+    <property name="gf.statefile" value="${gf.dir}/gf-statefile"/>
+    <property name="myhttp.port" value="8090"/>
+    <property name="myhttps.port" value="8091"/>
+    <property name="myadmin.port" value="4849"/>
+
+    <!-- ************ end props for the Quick Look tests ********************** -->
+
+    <target name="runtests" description="Runs quick look tests after jax-ws-latest-wsit.zip has been generated">
+      <delete dir="${qltests.home}" includeemptydirs="true" failonerror="false"/>
+      <mkdir dir="${qltests.home}"/>
+      <mkdir dir="${wsit.install.home}"/>
+      <cvs cvsroot="${CVSROOT}" 
+          package="tango/qe-tests" 
+          reallyquiet="yes" dest="${qltests.home}"/>
+
+      <antcall target="update.gf"/>
+      <antcall target="install.wsit"/>
+      <antcall target="start.gf"/>
+      <antcall target="start.tests"/>
+      <antcall target="stop.gf"/>
+    </target>
+
+    <target name="start.tests">
+      <ant dir="${qltests.home}/tango/qe-tests">
+         <property name="wsit.jars.dir" value="${gf.install.home}/lib"/>
+         <property name="xtest.sjsas.home" value="${gf.install.home}"/>
+         <property name="xtest.http.port" value="${myhttp.port}"/>
+         <property name="xtest.https.port" value="${myhttps.port}"/>
+      </ant>
+    </target>
+
+    <target name="install.wsit">
+      <!-- expects the dist.zip target in main build.xml has been run -->
+      <unzip src="${wsit.zip}" dest="${wsit.install.home}"/>
+      <ant dir="${wsit.install.home}/${wsit.name}" antfile="${wsit.install.home}/${wsit.name}/wsit-on-glassfish.xml" target="install">
+         <property name="as.home" value="${gf.install.home}"/>
+      </ant>
+    </target>
+
+    <target name="update.gf" description="Reverts GF to clean copy or install a new promoted build">
+      <mkdir dir="${basedir}/glassfish"/>
+      <mkdir dir="${basedir}/glassfish.orig"/>
+<!--
+      <setproxy proxyhost="webcache.sfbay.sun.com" proxyport="8080"/>
+-->
+      <!-- only download and install a new GF promoted build -->
+      <available file="${gf.dir}/${gf.sunos.jar}" property="file.present"/>
+      <antcall target="create.file" />
+      <checksum file="${gf.dir}/${gf.sunos.jar}" forceOverwrite="yes" />
+      <!-- downloads the file from the GF Archive only if newer than previously downloaded file -->
+      <get src="${gf.unix.url}" 
+         dest="${gf.dir}/${gf.sunos.jar}"
+         usetimestamp="true"/>
+      <!-- checks whether checksum has changed and sets property but doesn't rewrite the checksum -->
+      <checksum file="${gf.dir}/${gf.sunos.jar}" verifyProperty="nonew.build" />
+      <!-- now recreate the checksum to match the current version of the installer binary -->
+      <checksum file="${gf.dir}/${gf.sunos.jar}" forceOverwrite="yes" />
+      <available file="${gf.install.home}/bin/asadmin" property="gf.exists"/>
+      <available file="${gf.install.home}.orig/bin/asadmin" property="gf.backup.exists"/>
+      <antcall target="revert.gf" />
+      <condition property="do.gf.install">
+        <isfalse value="${nonew.build}"/>
+      </condition>
+      <antcall target="install.gf" />
+    </target>
+
+    <target name="revert.gf" unless="do.gf.install" description="Revert GF to clean copy - no wsit - from backup copy">
+      <!-- stop it first -->
+      <antcall target="stop.gf" />
+      <antcall target="delete.gf" />
+      <antcall target="copyback.gf"/>
+    </target>
+
+    <target name="copyback.gf" if="gf.exists">
+      <!-- ant copy doesn't preserve permissions, so use platform cmd  -->
+      <exec os="SunOS,Linux" executable="cp" dir="${gf.install.home}.orig">
+        <arg value="-R"/>
+        <arg value="."/>
+        <arg value="${gf.install.home}"/>
+      </exec>
+    </target>
+
+    <target name="install.gf" if="do.gf.install" >
+      <!-- stop it first -->
+      <!-- delete previous install if it exists -->
+      <antcall target="stop.gf" />
+      <antcall target="delete.gf" />
+      <!-- unjar glassfish -->
+      <unzip src="${gf.sunos.jar}" dest="${gf.install.home}"/>
+      <ant antfile="${gf.install.home}/setup.xml">
+         <property name="install.home" value="${gf.install.home}"/>
+         <property name="instance.port" value="${myhttp.port}"/>
+         <property name="https.port" value="${myhttps.port}"/>
+         <property name="admin.port" value="${myadmin.port}"/>
+      </ant>
+
+     <!-- check to see if AppServer got installed before wiping up previous backup -->
+     <available file="${gf.install.home}/bin/asadmin" property="gf.new.exists"/>
+     <available file="${gf.install.home}.orig/bin/asadmin" property="gf.old.exists"/>
+     <antcall target="do.backup"/>
+    </target>
+
+    <target name="delete.gf" if="gf.exists">
+      <delete includeemptydirs="true" failonerror="true">
+        <fileset dir="${gf.install.home}" includes="**/*"/>
+      </delete>
+    </target>
+
+    <target name="do.backup" if="gf.new.exists">
+      <antcall target="delete.backup"/>
+      <!-- make a back up copy -->
+      <exec os="SunOS,Linux" executable="cp" dir="${gf.install.home}">
+        <arg value="-R"/>
+        <arg value="."/>
+        <arg value="${gf.install.home}.orig"/>
+      </exec>
+    </target>
+
+    <target name="delete.backup" if="gf.old.exists">
+      <!-- delete old backup copy -->
+      <delete includeemptydirs="true" failonerror="true">
+        <fileset dir="${gf.install.home}.orig" includes="**/*"/>
+      </delete>
+    </target>
+
+    <target name="stop.gf" >
+      <exec os="SunOS,Linux" executable="${gf.install.home}/bin/asadmin" failifexecutionfails="false" failonerror="false">
+        <arg value="stop-domain"/>
+        <arg value="domain1"/>
+      </exec>
+      <exec os="Windows XP,Windows 2000,Windows 2003" executable="${gf.install.home}/bin/asadmin.bat" vmlauncher="false" failonerror="false">
+        <arg value="stop-domain"/>
+        <arg value="domain1"/>
+      </exec>
+    </target>
+
+    <target name="start.gf" >
+      <exec executable="${gf.install.home}/bin/asadmin" os="SunOS,Linux">
+        <arg value="start-domain"/>
+        <arg value="domain1"/>
+      </exec>
+      <exec executable="${gf.install.home}/bin/asadmin.bat" os="Windows XP,Windows 2000,Windows 2003">
+        <arg value="start-domain"/>
+        <arg value="domain1"/>
+      </exec>
+    </target>
+
+    <!-- Hack to get around first time when there is no installer binary 
+     create an old file so the get check will pass -->
+    <target name="create.file" unless="file.present" >
+      <touch file="${gf.dir}/${gf.sunos.jar}" datetime="09/10/1974 4:30 pm" />
+    </target>
+</project>
