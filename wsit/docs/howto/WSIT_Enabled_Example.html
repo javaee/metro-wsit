@@ -205,7 +205,21 @@ previous article:&nbsp; <a
  href="WSIT_Not_Enabled_Example.html#Building_Client">Building a JAX-WS
 2.0 Web Service
 Client</a> and <a href="WSIT_Not_Enabled_Example.html#Running">Running
-the Web Service Client</a>.
+the Web Service Client</a>.<br>
+<br>
+When running the web service clients for this article's samples, you
+will see the following warning message:<br>
+<br>
+<div style="margin-left: 40px;"><span style="font-family: monospace;">WARNING:
+Optional client configuration file URL is missing. No client
+configuration is processed.</span><br>
+</div>
+<br>
+That message displays because there is no WSIT client configuration
+file included in these samples. No settings for WS-Reliable Messaging
+nor WS-Addressing need to be stored in a client configuration file. The
+WSDL document holds all of the settings required by the client for both
+WS-Reliable Messaging and WS-Addressing.<br>
 <h2><a name="Summary"></a>Summary and Resources</h2>
 <span style="">This article highlighted the steps that will be common
 to building,
