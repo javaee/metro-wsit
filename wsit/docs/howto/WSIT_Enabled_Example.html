@@ -86,10 +86,18 @@ Each individual WSIT technology, such as Reliable Messaging,
 Addressing, or Secure Conversations, provides a set of policy
 assertions
 it can process. Those assertions provide the necessary configuration
-details to the run-time to enable proper operation of the WSIT features
-used by a given web service. The following is an XML snippet showing
-WS-Policy assertions for WS-Addressing and WS-Reliable Messaging:<br>
-<a name="snippet"></a><br>
+details to the WSIT run-time to enable proper operation of the WSIT
+features
+used by a given web service. The assertions may specify particular
+configuration settings or rely on
+default settings that are pre-determined by the specific technology.
+For instance, in the snippet shown below,&nbsp; <span
+ style="font-family: monospace;">wsrm:AcknowledgementInterval</span>
+and <span style="font-family: monospace;">wsrm:InactivityTimeout</span>
+are both optional and could be omitted. The following is an XML snippet
+showing WS-Policy assertions for WS-Addressing and WS-Reliable
+Messaging:<br>
+<br>
 <span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 &lt;wsp:Policy wsu:Id="AddNumbers_policy"&gt;</span><br
  style="font-family: monospace;">
@@ -114,7 +122,10 @@ WS-Policy assertions for WS-Addressing and WS-Reliable Messaging:<br>
 <span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 &lt;/wsp:ExactlyOne&gt;</span><br style="font-family: monospace;">
 <span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&lt;/wsp:Policy&gt;</span><br style="font-family: monospace;">
+&lt;/wsp:Policy&gt;<br>
+<span style="font-family: monospace;"><br>
+</span></span>This snippet would be equally valid in either a WSIT
+configuration file or a web service's WSDL document. <br>
 <span style="font-weight: bold;"></span>
 <h2></h2>
 <h2><a name="Config_Server"></a>Configuring WSIT in the Web Service</h2>
@@ -125,19 +136,25 @@ from Java<br>
 existing Java class, WSIT features are enabled using a configuration
 file. That file, <span style="font-family: monospace;">wsit.xml</span>,
 is written in WSDL format.&nbsp; An example configuration file can be
-found in the accompanying samples, here:<br>
+found in the accompanying samples:<br>
 <br>
 <div style="margin-left: 40px;"><a
  href="wsit-enabled-fromjava/etc/wsit.xml"><span
  style="font-family: monospace;">wsit-enabled-fromjava/etc/wsit.xml</span></a><br>
 </div>
 <br>
+The&nbsp; configuration file settings will be incorporated dynamically
+by the WSIT run-time into the WSDL it generates for the web service. So
+when a client requests the service's WSDL, the run-time will embed into
+the WSDL any publically visible policy assertions contained in the
+configuration file.&nbsp; For the example link above, the Addressing
+and Reliable Messsaging assertions would be part of the WSDL as seen by
+the client.<br>
+<br>
 Please note that <span style="font-family: monospace;">wsit.xml</span>
 must be in the WEB-INF or META-INF sub-directories of the application's
 WAR file when it is deployed to the web container. Otherwise, the WSIT
 run-time environment will not find it.<br>
-<br>
-[ FIXME: pointer to more details on configuration file? ]<br>
 <br>
 <span style="font-weight: bold;"><span style="font-weight: bold;">Starting
 from WSDL<br>
@@ -145,27 +162,13 @@ from WSDL<br>
 When developing a web service starting from an existing WSDL, the
 situation is actually simpler.&nbsp; The policy assertions needed to
 enable various WSIT technologies will already be embedded in the WSDL
-document.&nbsp; Any given technology is enabled by the WSIT run-time
-when its corresponding assertion is found in the WSDL.&nbsp; The
-assertions may specify particular configuration settings or rely on
-default settings that are pre-determined by the specific technology.
-For instance, in the <a href="#snippet">snippet</a> shown above,&nbsp;
-<span style="font-family: monospace;">wsrm:AcknowledgementInterval</span>
-and <span style="font-family: monospace;">wsrm:InactivityTimeout</span>
-are both optional and could be omitted.<br
- style="font-family: monospace;">
+document.&nbsp; Here is an example WSDL document in the accompanying
+samples:<br>
 <br>
-<span style="font-family: monospace;"></span>Please note that the
-existing WSDL document represents a contract
-between the web service and its clients.&nbsp; Adding new policy
-assertions
-or making any other semantic changes to the WSDL document creates a new
-contract. The new contract will not be compatible with the original
-version. In particular, if your goal is build a web service that works
-with the existing clients, this change will break compatibility.
-However, if the intention is to define a new WSDL contract and develop
-a new web service and clients for the new WSDL, then breaking
-compatibility with the original may not be an issue for you.<br>
+<div style="margin-left: 40px;"><a
+ href="wsit-enabled-fromwsdl/etc/AddNumbers.wsdl"><span
+ style="font-family: monospace;">wsit-enabled-fromwsdl/etc/AddNumbers.wsdl</span></a><br>
+</div>
 <h2><a name="Building_Server"></a>Building and Deploying the Web Service</h2>
 Once configured, a WSIT-enabled web service is built and deployed in
 the same manner as a standard JAX-WS web service. If you are not
