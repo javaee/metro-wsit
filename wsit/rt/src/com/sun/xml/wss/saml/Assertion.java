@@ -38,6 +38,8 @@ import javax.xml.crypto.dsig.DigestMethod;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import java.security.cert.X509Certificate;
+
 
 /**
  *
@@ -85,6 +87,8 @@ public interface Assertion extends Token {
      */
     public Element sign(PublicKey pubKey, PrivateKey privKey) throws SAMLException;
     
+    public Element sign(X509Certificate cert, PrivateKey privKey) throws SAMLException;
+    
     
     /**
      * sign the saml assertion (Enveloped Signature)
@@ -98,6 +102,7 @@ public interface Assertion extends Token {
     
     public Element sign(DigestMethod digestMethod, String signatureMethod,PublicKey pubKey, PrivateKey privKey) throws SAMLException ;
     
+    public Element sign(DigestMethod digestMethod, String signatureMethod, X509Certificate cert, PrivateKey privKey) throws SAMLException ;
     /**
      * Set the saml major version
      * @param value A <code>java.math.BigInteger</code> representing

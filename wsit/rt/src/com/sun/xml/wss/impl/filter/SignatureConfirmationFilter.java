@@ -84,18 +84,20 @@ public class SignatureConfirmationFilter {
                 
                 if(!it.hasNext()){
                     // Insert a SignatureConfirmation element with no Value attribute
-                     SignatureConfirmationHeaderBlock signConfirm = new SignatureConfirmationHeaderBlock(
-                           secureMessage.generateId());
+                    String id = secureMessage.generateId();
+                     SignatureConfirmationHeaderBlock signConfirm = new SignatureConfirmationHeaderBlock(id);
                      secHeader.insertHeaderBlock(signConfirm);
+                     context.getSignatureConfirmationIds().add(id);
                 }
                 
                 while(it.hasNext()){
                     
-                    String signValue = (String)it.next();             
-                    SignatureConfirmationHeaderBlock signConfirm = new SignatureConfirmationHeaderBlock(
-                            secureMessage.generateId());
+                    String signValue = (String)it.next();     
+                    String id = secureMessage.generateId();
+                    SignatureConfirmationHeaderBlock signConfirm = new SignatureConfirmationHeaderBlock(id);
                     signConfirm.setSignatureValue(signValue);
                     secHeader.insertHeaderBlock(signConfirm);
+                    context.getSignatureConfirmationIds().add(id);
                 }
             
             }

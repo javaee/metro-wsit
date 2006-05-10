@@ -1,5 +1,5 @@
 /*
- * $Id: ProcessingContextImpl.java,v 1.1 2006-05-03 22:57:37 arungupta Exp $
+ * $Id: ProcessingContextImpl.java,v 1.2 2006-05-10 22:49:46 jdg6688 Exp $
  */
 
 /*
@@ -31,6 +31,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Hashtable;
 import java.util.HashMap;
+import java.util.List;
+import java.util.ArrayList;
 
 import javax.xml.soap.SOAPMessage;
 
@@ -66,6 +68,8 @@ public class ProcessingContextImpl extends ProcessingContext {
     protected IssuedTokenContext trustContext = null;
 
     protected MessagePolicy inferredSecurityPolicy = new MessagePolicy();
+    
+    protected List signConfirmIds = new ArrayList();
 
     private OperationResolver operationResolver = null;
     private boolean isTrustMsg = false;
@@ -229,5 +233,8 @@ public class ProcessingContextImpl extends ProcessingContext {
         return isTrustMsg;
     }
 
+    public List getSignatureConfirmationIds(){
+        return signConfirmIds;
+    }
 
 }

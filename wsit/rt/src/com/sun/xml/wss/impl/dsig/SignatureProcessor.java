@@ -1,5 +1,5 @@
 /*
- * $Id: SignatureProcessor.java,v 1.1 2006-05-03 22:57:47 arungupta Exp $
+ * $Id: SignatureProcessor.java,v 1.2 2006-05-10 22:49:47 jdg6688 Exp $
  */
 
 /*
@@ -799,7 +799,7 @@ public class SignatureProcessor{
             List referenceList = null;
             try{
                 if(requiredTarget){
-                    referenceList = dsigUtil.generateReferenceList(Collections.singletonList(signatureTarget),secureMessage,context,true);
+                    referenceList = dsigUtil.generateReferenceList(Collections.singletonList(signatureTarget),secureMessage,context,true, featureBinding.isEndorsingSignature());
                 }else{
                     //dont resolve it now.
                     optionalReqList.add(signatureTarget);
@@ -895,7 +895,7 @@ public class SignatureProcessor{
                 SignatureTarget signatureTarget = (SignatureTarget)optionalReqList.get(i);
                 try{
                     referenceList = null;
-                    referenceList = dsigUtil.generateReferenceList(Collections.singletonList(signatureTarget),secureMessage,context,true);
+                    referenceList = dsigUtil.generateReferenceList(Collections.singletonList(signatureTarget),secureMessage,context,true, featureBinding.isEndorsingSignature());
                 }catch(Exception ex){
                     if(logger.getLevel()==Level.FINE){
                         logger.log(Level.FINE,"Optional Target not found in the message ",ex);

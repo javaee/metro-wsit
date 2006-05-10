@@ -485,7 +485,7 @@ public class WSSPolicyConsumerImpl {
         SignatureMethod signatureMethod = signatureFactory.newSignatureMethod(keyAlgo, null);
         //Note : Signature algorithm parameters null for now , fix me.
         SignedInfo signedInfo = signatureFactory.newSignedInfo(canonicalMethod,signatureMethod,
-                generateReferenceList(targetList,signatureFactory,secureMessage,fpContext,false),null);
+                generateReferenceList(targetList,signatureFactory,secureMessage,fpContext,false, featureBinding.isEndorsingSignature()),null);
         //Note : Id is now null , check ?,
         return signedInfo;
     }
@@ -569,22 +569,69 @@ attribute.getNamespaceURI().equals(MessageConstants.NAMESPACES_NS)) {
         }
     }
     
-    public List generateReferenceList(List targetList,SecurableSoapMessage secureMessage,FilterProcessingContext fpContext,boolean verify)
+    public List generateReferenceList(List targetList,SecurableSoapMessage secureMessage,FilterProcessingContext fpContext,
+            boolean verify, boolean isEndorsing)
     throws PolicyGenerationException,NoSuchAlgorithmException,InvalidAlgorithmParameterException,XWSSecurityException {
         XMLSignatureFactory factory = getSignatureFactory();
-        return generateReferenceList(targetList,factory,secureMessage,fpContext,verify);
+        return generateReferenceList(targetList,factory,secureMessage,fpContext,verify, isEndorsing);
     }
     
     //Time to refactor this method
     //bloated toomuch.
     private List generateReferenceList(List targetList,XMLSignatureFactory signatureFactory,
-            SecurableSoapMessage secureMessage,FilterProcessingContext fpContext,boolean verify)
+            SecurableSoapMessage secureMessage,FilterProcessingContext fpContext,boolean verify, 
+            boolean isEndorsing)
             throws PolicyGenerationException,NoSuchAlgorithmException,InvalidAlgorithmParameterException,XWSSecurityException {
         
         ListIterator iterator = targetList.listIterator();
         ArrayList references = new ArrayList();
         if(MessageConstants.debug) {
             logger.log(Level.FINEST, "Number of Targets is"+targetList.size());
+        }
+        
+        if(!isEndorsing){
+            //Add SignatureConfirmation Targets
+            ListIterator scIter = fpContext.getSignatureConfirmationIds().listIterator();
+            while(scIter.hasNext()) {
+                String targetURI = (String)scIter.next();
+                String digestAlgo = MessageConstants.SHA1_DIGEST; 
+                DigestMethod digestMethod =null;
+                try{
+                    digestMethod = signatureFactory.newDigestMethod(digestAlgo, null);
+                }catch(Exception ex){
+                    logger.log(Level.SEVERE,"WSS1301.invalid.digest.algo",digestAlgo);
+                    throw new XWSSecurityException(ex.getMessage());
+                }
+                
+                ArrayList transformList = new ArrayList(2);
+                SOAPElement dataElement = null;
+                try {
+                    String _uri = targetURI;
+                    if(targetURI.length() > 0 && targetURI.charAt(0)=='#'){
+                        _uri = targetURI.substring(1);
+                    }
+                    dataElement =(SOAPElement) XMLUtil.getElementById(
+                            secureMessage.getSOAPPart(),_uri);
+                } catch (TransformerException te) {
+                    throw new XWSSecurityException(te.getMessage(), te);
+                }
+                String transformAlgo  = MessageConstants.TRANSFORM_C14N_EXCL_OMIT_COMMENTS;
+                ExcC14NParameterSpec spec = null;
+                if(dataElement != null){
+                    spec =   new ExcC14NParameterSpec(getReferenceNamespacePrefixes(dataElement));
+                }
+                Transform transform = signatureFactory.newTransform(transformAlgo,spec);
+                transformList.add(transform);
+                
+                byte [] digestValue = fpContext.getDigestValue();
+                Reference reference = null;
+                if(!verify && digestValue != null){
+                    reference = signatureFactory.newReference(targetURI,digestMethod,transformList,null,null,digestValue);
+                } else{
+                    reference = signatureFactory.newReference(targetURI,digestMethod,transformList,null,null);
+                }
+                references.add(reference);
+            }
         }
         
         while(iterator.hasNext()) {

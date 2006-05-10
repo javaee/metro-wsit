@@ -192,6 +192,7 @@ public class SecurityServerPipe extends SecurityPipeBase
             AttributedURI actionURI = ap.getAction();
             if (actionURI != null){
                 String action = actionURI.toString();
+                
                 if (action.equals(WSSCConstants.REQUEST_SECURITY_CONTEXT_TOKEN_ACTION)) {
                     isSCIssueMessage = true;
                 } else if (action.equals(WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_ACTION)) {
@@ -269,7 +270,14 @@ public class SecurityServerPipe extends SecurityPipeBase
                 retPacket = invokeSecureConversationContract(
                         packet, ctx, scSessionManager, isSCIssueMessage);
                 
-                retPacket = addAddressingHeaders(retPacket, msgId);
+                String action = null;
+                if (isSCIssueMessage){
+                    action = WSSCConstants.REQUEST_SECURITY_CONTEXT_TOKEN_RESPONSE_ACTION;
+                }else{
+                    action = WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_RESPONSE_ACTION;
+                }
+                
+                retPacket = addAddressingHeaders(retPacket, msgId, action);
             } else {
                 //--------INVOKE NEXT PIPE------------
                 
@@ -547,13 +555,13 @@ public class SecurityServerPipe extends SecurityPipeBase
         throw new UnsupportedOperationException("Will be supported for optimized path");
     }
     
-    private Packet addAddressingHeaders(Packet packet, String relatesTo){
+   private Packet addAddressingHeaders(Packet packet, String relatesTo, String action){
         AddressingBuilder builder = AddressingBuilder.newInstance();
         AddressingProperties ap = builder.newAddressingProperties();
         
         try{
             // Action
-            ap.setAction(builder.newURI(new URI(WSSCConstants.REQUEST_SECURITY_CONTEXT_TOKEN_RESPONSE_ACTION)));
+            ap.setAction(builder.newURI(new URI(action)));
             
             // RelatesTo
             Relationship[] rs = new Relationship[]{builder.newRelationship(new URI(relatesTo))};

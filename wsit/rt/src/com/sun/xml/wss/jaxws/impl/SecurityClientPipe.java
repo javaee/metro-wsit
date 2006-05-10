@@ -28,7 +28,9 @@ import com.sun.xml.ws.api.model.wsdl.WSDLFault;
 
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelTranslator;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
+import com.sun.xml.ws.security.impl.policy.Constants;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Hashtable;
@@ -38,6 +40,7 @@ import java.util.Collections;
 import java.net.URL;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Set;
 
 import javax.xml.namespace.QName;
@@ -144,6 +147,14 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
     // Plugin instances for Trust and SecureConversation invocation
     private static TrustPlugin trustPlugin = WSTrustFactory.newTrustPlugin(null);
     private static WSSCPlugin  scPlugin = WSSCFactory.newSCPlugin(null);
+    private Set trustConfig = null;
+    public static final String PRE_CONFIGURED_STS = "PreconfiguredSTS";
+    public static final String NAMESPACE = "namespace";
+    public static final String CONFIG_NAMESPACE = "";
+    public static final String ENDPOINT = "endpoint";
+    public static final String WSDL_LOCATION = "wsdlLocation";
+    public static final String SERVICE_NAME = "serviceName";
+    public static final String PORT_NAME = "portName";
     
     // Creates a new instance of SecurityClientPipe
     public SecurityClientPipe(ClientPipeConfiguration config,Pipe nextPipe) {
@@ -154,6 +165,7 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
             Iterator it = outMessagePolicyMap.values().iterator();
             SecurityPolicyHolder holder = (SecurityPolicyHolder)it.next();
             Set configAssertions = holder.getConfigAssertions(SUN_WSS_SECURITY_CLIENT_POLICY_NS);
+            trustConfig = holder.getConfigAssertions(Constants.SUN_TRUST_CLIENT_SECURITY_POLICY_NS);
             /*
             if (configAssertions == null || configAssertions.isEmpty()) {
                 throw new RuntimeException("Null or Empty Config WSDL encountered");
@@ -172,6 +184,7 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
     // copy constructor
     protected SecurityClientPipe(SecurityClientPipe that) {
         super(that);
+        trustConfig = that.trustConfig;
     }
     
     public Packet process(Packet packet) {
@@ -362,11 +375,32 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
             policies = getIssuedTokenPolicies(packet, OPERATION_SCOPE);
         }
         
-        URL stsEP = (URL)packet.invocationProperties.get(WSTrustConstants.PROPERTY_SERVICE_END_POINT);
-        URL wsdlLocation = (URL)packet.invocationProperties.get(WSTrustConstants.PROPERTY_URL);
-        QName serviceName = (QName)packet.invocationProperties.get(WSTrustConstants.PROPERTY_SERVICE_NAME);
-        QName portName = (QName)packet.invocationProperties.get(WSTrustConstants.PROPERTY_PORT_NAME);
-        
+        URL stsEP = null;
+        URL wsdlLocation = null;
+        QName serviceName = null;
+        QName portName = null;
+        if(trustConfig != null){
+            Iterator it = trustConfig.iterator();
+            while(it!=null && it.hasNext()) {
+                PolicyAssertion as = (PolicyAssertion)it.next();
+                if (PRE_CONFIGURED_STS.equals(as.getName().getLocalPart())) {
+                    Map<QName,String> attrs = as.getAttributes();
+                    String namespace = attrs.get(new QName(CONFIG_NAMESPACE,NAMESPACE));
+                    try {
+                        stsEP = new URL(attrs.get(new QName(CONFIG_NAMESPACE,ENDPOINT)));
+                    } catch (MalformedURLException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                    try {
+                        wsdlLocation = new URL(attrs.get(new QName(CONFIG_NAMESPACE,WSDL_LOCATION)));
+                    } catch (MalformedURLException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                    serviceName = new QName(namespace,attrs.get(new QName(CONFIG_NAMESPACE,SERVICE_NAME)));
+                    portName = new QName(namespace,attrs.get(new QName(CONFIG_NAMESPACE,PORT_NAME)));
+                }
+            }
+        }
         for (PolicyAssertion issuedTokenAssertion : policies) {
             IssuedTokenContext ctx = trustPlugin.process(issuedTokenAssertion, stsEP, wsdlLocation,serviceName,portName, packet.endpointAddress.toString());
             issuedTokenContextMap.put(

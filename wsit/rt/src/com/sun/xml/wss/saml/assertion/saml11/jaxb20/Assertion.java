@@ -1,5 +1,5 @@
 /*
- * $Id: Assertion.java,v 1.1 2006-05-03 22:58:13 arungupta Exp $
+ * $Id: Assertion.java,v 1.2 2006-05-10 22:49:50 jdg6688 Exp $
  */
 
 /*
@@ -50,6 +50,7 @@ import java.util.List;
 
 import com.sun.xml.wss.logging.LogDomainConstants;
 import com.sun.xml.wss.impl.XMLUtil;
+import com.sun.xml.wss.impl.misc.Base64;
 import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.XWSSecurityException;
 
@@ -83,6 +84,13 @@ import javax.xml.crypto.dom.*;
 import javax.xml.crypto.dsig.dom.DOMSignContext;
 import javax.xml.crypto.dsig.keyinfo.*;
 import javax.xml.crypto.dsig.spec.*;
+
+import java.math.BigInteger;
+
+import java.security.cert.X509Certificate;
+import com.sun.xml.wss.core.SecurityTokenReference;
+import com.sun.xml.wss.core.reference.X509SubjectKeyIdentifier;
+import javax.xml.soap.*;
 
 
 /**
@@ -148,6 +156,24 @@ public class Assertion  extends com.sun.xml.wss.saml.internal.saml11.jaxb20.Asse
         } catch (Exception ex) {
             // log here
             throw new SAMLException(ex);
+        }
+    }
+    
+     public Element sign(X509Certificate cert, PrivateKey privKey) throws SAMLException {
+        //Check if the signature is already calculated
+        if ( signedAssertion != null) {
+            return signedAssertion;
+        }
+        
+        //Calculate the enveloped signature
+        try {
+            
+            XMLSignatureFactory fac = WSSPolicyConsumerImpl.getInstance ().getSignatureFactory ();
+            return sign (fac.newDigestMethod (DigestMethod.SHA1,null),SignatureMethod.RSA_SHA1, cert,privKey);
+            
+        } catch (Exception ex) {
+            // log here
+            throw new SAMLException (ex);
         }
     }
     
@@ -243,6 +269,82 @@ public class Assertion  extends com.sun.xml.wss.saml.internal.saml11.jaxb20.Asse
             throw new SAMLException(ex);
         }
         //return signedAssertion;
+    }
+    
+     public Element sign(DigestMethod digestMethod, String signatureMethod, X509Certificate cert, PrivateKey privKey) throws SAMLException {
+         //Check if the signature is already calculated
+        if ( signedAssertion != null) {
+            return signedAssertion;
+            //return;
+        }
+        
+        //Calculate the enveloped signature
+        try {
+            XMLSignatureFactory fac = WSSPolicyConsumerImpl.getInstance ().getSignatureFactory ();
+            ArrayList transformList = new ArrayList ();
+            
+            Transform tr1 = fac.newTransform (Transform.ENVELOPED, (TransformParameterSpec) null);
+            Transform tr2 = fac.newTransform (CanonicalizationMethod.EXCLUSIVE, (TransformParameterSpec) null);
+            transformList.add (tr1);
+            transformList.add (tr2);
+            
+            String uri = "#" + this.getAssertionID ();
+            Reference ref = fac.newReference (uri,digestMethod,transformList, null, null);
+            
+            // Create the SignedInfo
+            SignedInfo si = fac.newSignedInfo
+                    (fac.newCanonicalizationMethod
+                    (CanonicalizationMethod.EXCLUSIVE,
+                    (C14NMethodParameterSpec) null),
+                    fac.newSignatureMethod (signatureMethod, null),
+                    Collections.singletonList (ref));
+            
+            // Instantiate the document to be signed
+            Document doc = MessageFactory.newInstance().createMessage().getSOAPPart();
+            X509SubjectKeyIdentifier keyIdentifier = new X509SubjectKeyIdentifier(doc);
+            keyIdentifier.setCertificate(cert);
+            keyIdentifier.setReferenceValue(Base64.encode(X509SubjectKeyIdentifier.getSubjectKeyIdentifier(cert)));
+            SecurityTokenReference str = new SecurityTokenReference();
+            str.setReference(keyIdentifier);
+           /* KeyIdentifier kid = new KeyIdentifierImpl(MessageConstants.X509SubjectKeyIdentifier_NS, MessageConstants.MessageConstants.BASE64_ENCODING_NS);
+            kid.setValue(Base64.encode(X509SubjectKeyIdentifier.getSubjectKeyIdentifier(cert)));
+            SecurityTokenReference str = new SecurityTokenReferenceImpl(kid);*/
+            DOMStructure domKeyInfo = new DOMStructure(str.getAsSoapElement());
+            
+            KeyInfoFactory kif = fac.getKeyInfoFactory ();
+            KeyInfo ki = kif.newKeyInfo(Collections.singletonList(domKeyInfo));
+                
+            Element assertionElement = this.toElement (doc);
+            //try {
+            //    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            //    DocumentBuilder builder = factory.newDocumentBuilder();
+            //    document = builder.newDocument();
+            //} catch (Exception ex) {
+            //    throw new XWSSecurityException("Unable to create Document : " + ex.getMessage());
+            //}
+            //document.appendChild(assertionElement);
+            //doc.appendChild(assertionElement);
+            
+            
+            
+            // Create a DOMSignContext and specify the DSA PrivateKey and
+            // location of the resulting XMLSignature's parent element
+            DOMSignContext dsc = new DOMSignContext (privKey, assertionElement);
+            HashMap map = new HashMap ();
+            map.put (this.getAssertionID (),assertionElement);
+            
+            dsc.setURIDereferencer (new DSigResolver (map,assertionElement));
+            XMLSignature signature = fac.newXMLSignature (si, ki);
+            dsc.putNamespacePrefix ("http://www.w3.org/2000/09/xmldsig#", "ds");
+            
+            // Marshal, generate (and sign) the enveloped signature
+            signature.sign (dsc);
+            
+            signedAssertion = assertionElement;
+            return assertionElement;
+        } catch (Exception ex) {
+            throw new SAMLException (ex);
+        }
     }
     
     public Element toElement(Node doc) throws XWSSecurityException {
@@ -369,8 +471,9 @@ public class Assertion  extends com.sun.xml.wss.saml.internal.saml11.jaxb20.Asse
         if ( statements != null)
             setStatement(statements);
         
+        setMajorVersion(BigInteger.ONE);
+        setMinorVersion(BigInteger.ONE); 
     }
-    
     
     private class DSigResolver implements URIDereferencer{
         //TODO : Convert DSigResolver to singleton class.

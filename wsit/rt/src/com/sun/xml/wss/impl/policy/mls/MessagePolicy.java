@@ -1,5 +1,5 @@
 /*
- * $Id: MessagePolicy.java,v 1.1 2006-05-03 22:57:55 arungupta Exp $
+ * $Id: MessagePolicy.java,v 1.2 2006-05-10 22:49:48 jdg6688 Exp $
  */
 
 /*
@@ -303,7 +303,14 @@ public class MessagePolicy implements SecurityPolicy {
     public void prepend(SecurityPolicy item)
     throws PolicyGenerationException {
         //BooleanComposer.checkType(item);
-        info.add(0, item);
+        int i = 0;
+        for(i = 0; i < info.size(); i++ ){
+            SecurityPolicy sp = (SecurityPolicy)info.get(i);
+            if(!sp.getType().equals(PolicyTypeUtil.SIGNATURE_CONFIRMATION_POLICY_TYPE)){
+                break;
+            }
+        }
+        info.add(i, item);
     }
     
     /**
@@ -437,7 +444,7 @@ public class MessagePolicy implements SecurityPolicy {
             SignatureConfirmationPolicy signConfirmPolicy = new SignatureConfirmationPolicy();
             String id = SecurityUtil.generateUUID();
             signConfirmPolicy.setUUID(id);
-            append(signConfirmPolicy);
+            prepend(signConfirmPolicy);
         }        
     }
 
