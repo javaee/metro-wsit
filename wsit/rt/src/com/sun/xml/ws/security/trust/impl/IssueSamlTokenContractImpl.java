@@ -81,15 +81,16 @@ import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponse;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponseCollection;
 import com.sun.xml.ws.security.trust.elements.RequestedSecurityToken;
-
 import com.sun.xml.ws.security.wsu.AttributedDateTime;
 
 import com.sun.xml.wss.core.reference.X509ThumbPrintIdentifier;
+import com.sun.xml.wss.core.reference.X509SubjectKeyIdentifier;
 import com.sun.xml.wss.impl.callback.EncryptionKeyCallback;
 import com.sun.xml.wss.impl.callback.SignatureKeyCallback;
 import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.saml.Advice;
 import com.sun.xml.wss.saml.Assertion;
+import com.sun.xml.wss.saml.Attribute;
 import com.sun.xml.wss.saml.AttributeStatement;
 import com.sun.xml.wss.saml.Conditions;
 import com.sun.xml.wss.saml.NameIdentifier;
@@ -167,8 +168,10 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
                 // Encrypt the secret key and create EncryptedKey 
                 EncryptedKey encKey = cipher.encryptKey(doc, new SecretKeySpec(key, "AES"));
                 KeyInfo keyinfo = new KeyInfo(doc);
-                KeyIdentifier keyIdentifier = new KeyIdentifierImpl(MessageConstants.ThumbPrintIdentifier_NS,null);
-                keyIdentifier.setValue(Base64.encode(X509ThumbPrintIdentifier.getThumbPrintIdentifier(serCert)));
+                //KeyIdentifier keyIdentifier = new KeyIdentifierImpl(MessageConstants.ThumbPrintIdentifier_NS,null);
+                //keyIdentifier.setValue(Base64.encode(X509ThumbPrintIdentifier.getThumbPrintIdentifier(serCert)));
+                KeyIdentifier keyIdentifier = new KeyIdentifierImpl(MessageConstants.X509SubjectKeyIdentifier_NS,null);
+                keyIdentifier.setValue(Base64.encode(X509SubjectKeyIdentifier.getSubjectKeyIdentifier(serCert)));
                 SecurityTokenReference str = new SecurityTokenReferenceImpl(keyIdentifier);
                 keyinfo.addUnknownElement(WSTrustElementFactory.newInstance().toElement(str,doc));
                 encKey.setKeyInfo(keyinfo);
@@ -189,7 +192,12 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
                 nameId = samlFac.createNameIdentifier(name, null, null);
             }
             com.sun.xml.wss.saml.Subject subj = samlFac.createSubject(nameId, subjectConfirmation);
-            AttributeStatement statement = samlFac.createAttributeStatement(subj, null);
+            List values = new ArrayList();
+            values.add("value");
+            Attribute attr = samlFac.createAttribute("name", "http://sun.com", values);
+            List attrs = new ArrayList();
+            attrs.add(attr);
+            AttributeStatement statement = samlFac.createAttributeStatement(subj, attrs);
             List statements = new ArrayList();
             statements.add(statement);
             Assertion assertion = 
@@ -200,11 +208,11 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
                 new SignatureKeyCallback.DefaultPrivKeyCertRequest();
             callbacks[0] = new SignatureKeyCallback(request);
             callbackHandler.handle(callbacks);                                                                                      
-            PublicKey stsPubKey = request.getX509Certificate().getPublicKey();
+            //PublicKey stsPubKey = request.getX509Certificate().getPublicKey();
             PrivateKey stsPrivKey = request.getPrivateKey();
             
             // Sign the assertion with STS's private key
-            Element signedAssertion = assertion.sign(stsPubKey, stsPrivKey);
+            Element signedAssertion = assertion.sign(request.getX509Certificate(), stsPrivKey);
             
             //javax.xml.bind.Unmarshaller u = eleFac.getContext().createUnmarshaller();
             //JAXBElement<AssertionType> aType = u.unmarshal(signedAssertion, AssertionType.class);

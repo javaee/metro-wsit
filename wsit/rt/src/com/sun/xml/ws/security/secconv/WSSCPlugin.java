@@ -296,7 +296,7 @@ public class WSSCPlugin {
         ap.setAction(builder.newURI(action));
         
         // MessageID
-        String msgId = "urn:uuid:" + UUID.randomUUID().toString();
+        String msgId = "uuid:" + UUID.randomUUID().toString();
         ap.setMessageID(builder.newURI(msgId));
         
         // To

@@ -24,6 +24,7 @@ package com.sun.xml.ws.security.impl.policyconv;
 
 import com.sun.xml.ws.security.policy.AlgorithmSuite;
 import com.sun.xml.wss.impl.MessageConstants;
+import com.sun.xml.wss.impl.policy.mls.Parameter;
 import com.sun.xml.wss.impl.policy.mls.SignatureTarget;
 import javax.xml.crypto.dsig.CanonicalizationMethod;
 import javax.xml.namespace.QName;
@@ -89,5 +90,6 @@ public class SignatureTargetCreator {
         SignatureTarget.Transform tr = target.newSignatureTransform();
         tr.setTransform(MessageConstants.STR_TRANSFORM_URI);
         target.addTransform(tr);
+        tr.setAlgorithmParameters(new Parameter("CanonicalizationMethod",CanonicalizationMethod.EXCLUSIVE));
     }
 }

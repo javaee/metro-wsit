@@ -24,6 +24,7 @@ package com.sun.xml.ws.security.trust.sts;
 
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.security.IssuedTokenContext;
+import com.sun.xml.ws.security.Token;
 import com.sun.xml.ws.security.impl.IssuedTokenContextImpl;
 import com.sun.xml.ws.security.impl.policy.Constants;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
@@ -40,6 +41,7 @@ import java.util.Iterator;
 import javax.xml.namespace.QName;
 
 import javax.security.auth.callback.CallbackHandler;
+import javax.xml.transform.dom.DOMSource;
 
 import javax.xml.ws.Provider;
 import javax.xml.ws.WebServiceException;
@@ -47,6 +49,7 @@ import javax.xml.transform.Source;
 import javax.xml.ws.handler.MessageContext;
 
 import com.sun.xml.ws.policy.impl.bindings.AppliesTo;
+import org.w3c.dom.*;
 
 /**
  * The Base class of an STS implementation. This could be used to implement 
@@ -139,7 +142,7 @@ public abstract class BaseSTSImpl implements Provider<Source> {
             if (appliesTo == null){
                 appliesTo = DEFAULT_APPLIESTO;
             }
-         
+            
             if(rst.getTokenType()!=null){
                 tokenType = rst.getTokenType().toString();
             }
@@ -240,17 +243,25 @@ public abstract class BaseSTSImpl implements Provider<Source> {
     private Source issue(final STSConfiguration config,final String appliesTo, 
             final WSTrustElementFactory eleFac, final RequestSecurityToken rst) 
             throws WSTrustException {
-        Source rstrEle;
-
+        
         // Create the RequestSecurityTokenResponse message
         WSTrustContract contract = WSTrustFactory.newWSTrustContract(config, 
                 appliesTo);
         IssuedTokenContext context = new IssuedTokenContextImpl();
         
         RequestSecurityTokenResponse rstr = contract.issue(rst, context, null);
-
-        rstrEle = eleFac.toSource(rstr);
-        return rstrEle;
+        
+        Token samlToken = rstr.getRequestedSecurityToken().getToken();
+        rstr.getRequestedSecurityToken().setToken(null);
+        Element samlEle = (Element)samlToken.getTokenValue();
+        Element rstrEle = eleFac.toElement(rstr);
+        Document doc = rstrEle.getOwnerDocument();
+        samlEle = (Element)doc.importNode(samlEle, true);
+        NodeList list = rstrEle.getElementsByTagNameNS("*", "RequestedSecurityToken");
+        Element rdstEle = (Element)list.item(0);
+        rdstEle.appendChild(samlEle);
+        
+        return new DOMSource(rstrEle);
     }
 
     private Source cancel(final STSConfiguration config,

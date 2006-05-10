@@ -74,6 +74,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 public abstract class IssueSamlTokenContract implements WSTrustContract {
 
@@ -157,8 +158,9 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
          if(ap != null){
                 appliesTo = WSTrustUtil.getAppliesToURI(ap);
          }
-        Token samlToken = createSAMLAssertion(key, assertionId, appliesTo);
-        RequestedSecurityToken st = eleFac.createRequestedSecurityToken(samlToken);
+        //Token samlToken = createSAMLAssertion(key, assertionId, appliesTo);
+       // RequestedSecurityToken st = eleFac.createRequestedSecurityToken(samlToken);
+         RequestedSecurityToken st = eleFac.createRequestedSecurityToken();
 
         // Create RequestedAttachedReference and RequestedUnattachedReference
         SecurityTokenReference samlReference = createSecurityTokenReference(assertionId);
@@ -178,7 +180,10 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
                 eleFac.createRSTRForIssue(rst.getTokenType(), ctx, st, ap, raRef, ruRef, proofToken, serverEntropy, lifetime);
 
         rstr.setKeySize(keySize);
-
+        
+        Token samlToken = createSAMLAssertion(key, assertionId, appliesTo);
+        rstr.getRequestedSecurityToken().setToken(samlToken);
+         
         // Populate IssuedTokenContext
         context.setSecurityToken(samlToken);
         context.setAttachedSecurityTokenReference(samlReference);

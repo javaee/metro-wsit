@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustElementFactoryImpl.java,v 1.1 2006-05-03 22:57:23 arungupta Exp $
+ * $Id: WSTrustElementFactoryImpl.java,v 1.2 2006-05-10 22:53:12 jdg6688 Exp $
  */
 
 /*
@@ -177,6 +177,13 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
      */
     public RequestedSecurityToken createRequestedSecurityToken(Token token) {
         return new RequestedSecurityTokenImpl(token);
+    }
+    
+     /**
+     * Create a RequestedSecurityToken.
+     */
+    public RequestedSecurityToken createRequestedSecurityToken() {
+        return new RequestedSecurityTokenImpl();
     }
     
     public DirectReference createDirectReference(String valueType, String uri){
@@ -529,6 +536,18 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
             DocumentBuilder db = dbf.newDocumentBuilder();
             Document doc = db.newDocument();
             
+            javax.xml.bind.Marshaller marshaller = getContext().createMarshaller();
+            JAXBElement<RequestSecurityTokenResponseType> rstrElement =  (new ObjectFactory()).createRequestSecurityTokenResponse((RequestSecurityTokenResponseType)rstr);
+            marshaller.marshal(rstrElement, doc);
+            return doc.getDocumentElement();
+            
+        } catch (Exception ex) {
+            throw new RuntimeException(ex.getMessage(), ex);
+        }
+    }
+    
+     public Element toElement(RequestSecurityTokenResponse rstr, Document doc) {
+        try { 
             javax.xml.bind.Marshaller marshaller = getContext().createMarshaller();
             JAXBElement<RequestSecurityTokenResponseType> rstrElement =  (new ObjectFactory()).createRequestSecurityTokenResponse((RequestSecurityTokenResponseType)rstr);
             marshaller.marshal(rstrElement, doc);

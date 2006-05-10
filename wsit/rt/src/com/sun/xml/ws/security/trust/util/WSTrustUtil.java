@@ -58,7 +58,7 @@ import org.w3c.dom.NodeList;
 
 import javax.xml.ws.addressing.AttributedURI;
 
-import com.sun.xml.ws.addressing.v200408.EndpointReferenceImpl;
+import com.sun.xml.ws.addressing.EndpointReferenceImpl;
 
 /**
  *
@@ -150,20 +150,19 @@ public class WSTrustUtil {
                 Object obj = list.get(i);
                 if (obj instanceof EndpointReference){
                     epr = (EndpointReference)obj;
-                    break;
+                } else if (obj instanceof JAXBElement){
+                    JAXBElement ele = (JAXBElement)obj;    
+                    String local = ele.getName().getLocalPart();
+                    if (local.equalsIgnoreCase("EndpointReference")) {
+                        epr = (EndpointReference)ele.getValue();
+                    }
                 }
                 
-                JAXBElement ele = (JAXBElement)obj;    
-                String local = ele.getName().getLocalPart();
-                if (local.equalsIgnoreCase("EndpointReference")) {
-                        epr = (EndpointReference)ele.getValue();
-                        break;
-                }
-            }
-            if (epr != null){
-                AttributedURI uri = epr.getAddress();
-                if (uri != null){
-                    return uri.getURI().toString();
+                if (epr != null){
+                    AttributedURI uri = epr.getAddress();
+                    if (uri != null){
+                        return uri.getURI().toString();
+                    }
                 }
             }
         }

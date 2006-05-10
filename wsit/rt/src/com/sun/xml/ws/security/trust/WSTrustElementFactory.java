@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustElementFactory.java,v 1.1 2006-05-03 22:57:14 arungupta Exp $
+ * $Id: WSTrustElementFactory.java,v 1.2 2006-05-10 22:53:12 jdg6688 Exp $
  */
 
 /*
@@ -173,6 +173,8 @@ public abstract class WSTrustElementFactory {
      * Create a RequestedSecurityToken.
      */
    public abstract RequestedSecurityToken createRequestedSecurityToken(Token token);
+   
+   public abstract RequestedSecurityToken createRequestedSecurityToken();
    
    public abstract DirectReference createDirectReference(String valueType, String uri);
    
@@ -367,6 +369,8 @@ public abstract class WSTrustElementFactory {
      * </p>
      */
     public abstract Element toElement(RequestSecurityTokenResponse rstr);
+    
+    public abstract Element toElement(RequestSecurityTokenResponse rstr, Document doc);
     
     /**
      * Marshal an RSTR Collection to a DOM Element
