@@ -1,5 +1,5 @@
 /*
- * $Id: OnBehalfOfImpl.java,v 1.1 2006-05-03 22:57:25 arungupta Exp $
+ * $Id: OnBehalfOfImpl.java,v 1.2 2006-05-10 23:11:53 jdg6688 Exp $
  */
 
 /*
@@ -26,7 +26,7 @@
 
 package com.sun.xml.ws.security.trust.impl.elements;
 
-import com.sun.xml.ws.addressing.v200408.EndpointReferenceImpl;
+import com.sun.xml.ws.addressing.EndpointReferenceImpl;
 import javax.xml.ws.addressing.EndpointReference;
 import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
 import com.sun.xml.ws.security.impl.bindings.SecurityTokenReferenceType;

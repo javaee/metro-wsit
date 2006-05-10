@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityTokenImpl.java,v 1.1 2006-05-03 22:57:26 arungupta Exp $
+ * $Id: RequestSecurityTokenImpl.java,v 1.2 2006-05-10 23:11:53 jdg6688 Exp $
  */
 
 /*
@@ -39,7 +39,7 @@ import javax.xml.bind.JAXBElement;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.ws.security.trust.WSTrustException;
 
-import com.sun.xml.ws.addressing.v200408.EndpointReferenceImpl;
+import com.sun.xml.ws.addressing.EndpointReferenceImpl;
 
 import com.sun.xml.ws.security.trust.elements.*;
 import com.sun.xml.ws.security.trust.elements.Claims;
