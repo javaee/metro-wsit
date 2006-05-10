@@ -227,7 +227,30 @@ bundled together along with the web service’s supporting
 configuration files into the application's WAR
 file. It is this file that will be deployed to the web container in
 the next step. The <span style="font-family: monospace;">create-war</span>
-target takes care of this.</p>
+target takes care of this.<br>
+</p>
+<p style="margin-bottom: 0in;">During execution of the <span
+ style="font-family: monospace;">wsit-jaxws-fromjava</span> sample's <span
+ style="font-family: monospace;">server</span> target, you will see a
+warning message from <span style="font-family: monospace;">apt.</span>
+The message refers to<span style="font-family: monospace;"></span>
+"Annotation types without processors". The warning is expected and does
+not indicate an abnormal situation. The text is included here for
+reference:<br>
+</p>
+<p
+ style="margin-bottom: 0in; font-family: monospace; margin-left: 40px;">build-server-java:
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp; [apt] warning: Annotation types without
+processors: [javax.xml.bind.annota
+<br>
+tion.XmlRootElement, javax.xml.bind.annotation.XmlAccessorType,
+javax.xml.bind.a
+<br>
+nnotation.XmlType, javax.xml.bind.annotation.XmlElement]
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp; [apt] 1 warning
+</p>
 <p style="margin-bottom: 0in;"><b>Starting from WSDL</b></p>
 <p style="margin-bottom: 0in;">Typically, you
 would start from WSDL to build your web service if you want to
