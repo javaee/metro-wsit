@@ -8,8 +8,6 @@
 <body>
 <h1><a href="index.html">Getting Started with WSIT:</a></h1>
 <h1>Enabling WSIT Functionality in a Web Service Application</h1>
-<h1>[under construction]<br>
-</h1>
 <h2><span style="font-weight: bold;">Overview</span></h2>
 This is the third article in the <span style="font-style: italic;">Getting
 Started with WSIT</span> series. It highlights the steps required to
@@ -190,9 +188,14 @@ below:<br>
 </p>
 <h2><a name="Config_Client"></a>Configuring WSIT in the Web Service
 Client</h2>
-FIXME Clients always start from WSDL - contains policy assertions<br>
-Further configuration in wsit-client.xml... <br>
-<h2></h2>
+Client-side configuration of WSIT functionality is largely automatic in
+the WSIT environment. The WSDL document seen by the client will already
+contain the WSIT policy assertions. Those assertions describe any
+requirements from the server as well as any optional features the
+client may use. The WSIT build tools and run-time environment will
+detect the WSDL's policy assertions and configure themselves
+appropriately, if possible.&nbsp; If an unsupported assertion is found,
+an error message describing the problem will be displayed.<br>
 <h2><a name="Building_Client"></a>Building and Running a Web Service
 Client</h2>
 As with the web service itself, building and running a WSIT-enabled
