@@ -400,6 +400,11 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
                     portName = new QName(namespace,attrs.get(new QName(CONFIG_NAMESPACE,PORT_NAME)));
                 }
             }
+        } else {
+            stsEP = (URL)packet.invocationProperties.get(WSTrustConstants.PROPERTY_SERVICE_END_POINT);
+            wsdlLocation = (URL)packet.invocationProperties.get(WSTrustConstants.PROPERTY_URL);
+            serviceName = (QName)packet.invocationProperties.get(WSTrustConstants.PROPERTY_SERVICE_NAME);
+            portName = (QName)packet.invocationProperties.get(WSTrustConstants.PROPERTY_PORT_NAME);
         }
         for (PolicyAssertion issuedTokenAssertion : policies) {
             IssuedTokenContext ctx = trustPlugin.process(issuedTokenAssertion, stsEP, wsdlLocation,serviceName,portName, packet.endpointAddress.toString());
