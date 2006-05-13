@@ -80,7 +80,7 @@
             keep="${keep}"
             extension="${extension}"
             destdir="${build.classes.home}"
-            wsdl="${server.wsdl}">
+            wsdl="${basedir}/${server.wsdl}">
             <binding dir="${basedir}/etc" includes="${server.binding}"/>
         </wsimport>
         <javac
