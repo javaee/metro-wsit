@@ -293,6 +293,13 @@ and <span style="font-family: monospace;">create-war</span> targets.<br>
  style="font-style: italic;"><span style="font-weight: bold;"></span></span></span><a
  name="Deploying"></a>Deploying the Web Service to a Web
 Container</h2>
+As a convenience, invoking each sample's <span
+ style="font-family: monospace;">server</span> target will build that
+web service's WAR file and immediately deploy it to the web
+container.&nbsp; However, in some situations, such as after undeploying
+a web service from its container, it may be useful to deploy the web
+service without rebuilding it.<br>
+<br>
 For both the “from Java” and “from WSDL” scenarios
 described above, the resulting application is deployed in the same
 manner. However, the details of the deployment process differ slightly
