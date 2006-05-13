@@ -1,5 +1,5 @@
 /*
- * $Id: HarnessUtil.java,v 1.1 2006-05-03 22:57:36 arungupta Exp $
+ * $Id: HarnessUtil.java,v 1.2 2006-05-13 08:17:28 kumarjayanti Exp $
  */
 
 /*
@@ -95,6 +95,8 @@ public abstract class HarnessUtil {
                 AuthenticationTokenFilter.processUserNameToken(fpContext);
             } else if (PolicyTypeUtil.samlTokenPolicy(authPolicy)) {
                 AuthenticationTokenFilter.processSamlToken(fpContext);
+            }else if (PolicyTypeUtil.x509CertificateBinding(authPolicy)) {
+                AuthenticationTokenFilter.processX509Token(fpContext);
             }
         }else {
             log.log(Level.SEVERE, "WSS0801.illegal.securitypolicy");

@@ -1,5 +1,5 @@
 /*
- * $Id: AuthenticationTokenFilter.java,v 1.1 2006-05-03 22:57:47 arungupta Exp $
+ * $Id: AuthenticationTokenFilter.java,v 1.2 2006-05-13 08:17:27 kumarjayanti Exp $
  */
 
 /*
@@ -25,6 +25,7 @@
  */
 package com.sun.xml.wss.impl.filter;
 
+import java.security.cert.X509Certificate;
 import com.sun.xml.wss.ProcessingContext;
 import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.impl.FilterProcessingContext;
@@ -460,6 +461,34 @@ public class AuthenticationTokenFilter {
             String applicationId, String nonce, String created, long maxNonceAge) {
         return NonceContainer.validateAndCacheNonce(
                 applicationId, nonce, created, maxNonceAge);
+    }
+    
+    public static void processX509Token(FilterProcessingContext context) throws XWSSecurityException {
+    
+        if (context.isInboundMessage()) {
+            return;
+        }
+
+        SecurableSoapMessage secureMessage = context.getSecurableSoapMessage();
+        AuthenticationTokenPolicy authPolicy = 
+            (AuthenticationTokenPolicy)context.getSecurityPolicy();
+        AuthenticationTokenPolicy.X509CertificateBinding policy =
+            (AuthenticationTokenPolicy.X509CertificateBinding)
+                authPolicy.getFeatureBinding();
+
+        X509Certificate cert = context.getSecurityEnvironment().
+            getDefaultCertificate(context.getExtraneousProperties());
+        if (cert == null) {
+            throw new XWSSecurityException("No default X509 certificate was provided");
+        }
+        SecurityHeader wsseSecurity = secureMessage.findOrCreateSecurityHeader();
+        String wsuId = policy.getUUID();
+        if (wsuId == null){
+            wsuId = secureMessage.generateId();
+        }
+        X509SecurityToken token = new X509SecurityToken(secureMessage.getSOAPPart(), cert, wsuId);
+        wsseSecurity.insertHeaderBlock(token);
+
     }
     
 }
