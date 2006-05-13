@@ -1,0 +1,2287 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<html><head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta name="GENERATOR" content="Adobe FrameMaker 6.0/HTML Export Filter">
+<link rel="STYLESHEET" href="tangoStatusNotes_files/tangoStatusNotes.htm" charset="ISO-8859-1" type="text/css"><title>1</title></head>
+<body bgcolor="#ffffff">
+<div>
+<h3 class="Chapter-Number">
+<a name="pgfId-78458"></a><a name="71778"></a>&nbsp;</h3>
+</div>
+<div>
+<h1 class="Chapter-Title">
+<a name="pgfId-78460"></a>WSIT Status Notes<a name="marker-78461"></a><a name="marker-78462"></a></h1>
+<div>
+<h5 class="UNL-Head">
+<a name="pgfId-80133"></a>Date: May 12, 2006</h5>
+</div>
+<div>
+<h2 class="A-Head">
+<a name="pgfId-80128"></a>Introduction</h2>
+<p class="Body">
+<a name="pgfId-85990"></a>This document provides the status of the
+interoperability testing performed by Sun Microsystems on each of the
+technologies supported in Web Services Interoperability Technology
+(WSIT) 1.0 Early Access 1 (EA1). It also lists and describes any known
+issues.</p>
+<p class="Body">
+<a name="pgfId-80129"></a>WSIT 1.0 EA1 is an early access release. In
+conjunction with Microsoft, Sun has done limited interoperability
+testing to ensure that the Web services created using WSIT technologies
+can access and consume Web services created using Microsoft's WCF
+product and vice versa.</p>
+<p class="Body">
+<a name="pgfId-93607"></a>This document covers the following topics:</p>
+<ul>
+<li class="Bullet">
+<a name="pgfId-93616"></a><a href="http://jse.east.sun.com/%7Efb199946/wsit/tangoStatusNotes.html#52974" class="XRef">See Glassfish Classpath Change Requirements</a></li>
+<li class="Bullet">
+<a name="pgfId-103678"></a><a href="http://jse.east.sun.com/%7Efb199946/wsit/tangoStatusNotes.html#67607" class="XRef">See Summary of Known Issues</a></li>
+<li class="Bullet">
+<a name="pgfId-103673"></a><a href="http://jse.east.sun.com/%7Efb199946/wsit/tangoStatusNotes.html#91780" class="XRef">See Metadata Exchange Status</a></li>
+<li class="Bullet">
+<a name="pgfId-93621"></a><a href="http://jse.east.sun.com/%7Efb199946/wsit/tangoStatusNotes.html#68668" class="XRef">See MTOM Status</a></li>
+<li class="Bullet">
+<a name="pgfId-93626"></a><a href="http://jse.east.sun.com/%7Efb199946/wsit/tangoStatusNotes.html#49498" class="XRef">See Data Binding Status</a></li>
+<li class="Bullet">
+<a name="pgfId-93631"></a><a href="http://jse.east.sun.com/%7Efb199946/wsit/tangoStatusNotes.html#60313" class="XRef">See Reliable Messaging Status</a></li>
+<li class="Bullet">
+<a name="pgfId-93636"></a><a href="http://jse.east.sun.com/%7Efb199946/wsit/tangoStatusNotes.html#35385" class="XRef">See Security Status</a></li>
+<li class="Bullet">
+<a name="pgfId-93641"></a><a href="http://jse.east.sun.com/%7Efb199946/wsit/tangoStatusNotes.html#44691" class="XRef">See Secure Conversation Status</a></li>
+<li class="Bullet">
+<a name="pgfId-93646"></a><a href="http://jse.east.sun.com/%7Efb199946/wsit/tangoStatusNotes.html#96126" class="XRef">See Trust Status</a></li>
+<li class="Bullet">
+<a name="pgfId-93651"></a><a href="http://jse.east.sun.com/%7Efb199946/wsit/tangoStatusNotes.html#98261" class="XRef">See Coordination/Atomic Transactions Status</a></li>
+<li class="Bullet">
+<a name="pgfId-93656"></a><a href="http://jse.east.sun.com/%7Efb199946/wsit/tangoStatusNotes.html#35087" class="XRef">See NetBeans WSIT Module Status</a></li>
+<li class="Bullet">
+<a name="pgfId-93661"></a><a href="http://jse.east.sun.com/%7Efb199946/wsit/tangoStatusNotes.html#70368" class="XRef">See Web Services Addressing Status</a></li>
+<li class="Bullet">
+<a name="pgfId-93666"></a><a href="http://jse.east.sun.com/%7Efb199946/wsit/tangoStatusNotes.html#13158" class="XRef">See Policy Status</a></li>
+<li class="Bullet">
+<a name="pgfId-93671"></a><a href="http://jse.east.sun.com/%7Efb199946/wsit/tangoStatusNotes.html#55934" class="XRef">See Security Policy Status</a></li>
+</ul>
+</div>
+<div>
+<h2 class="A-Head">
+<a name="pgfId-100267"></a><a name="52974"></a>Glassfish Classpath Change Requirements</h2>
+<p class="Body">
+<a name="pgfId-100268"></a>The b43-nightly-01_may_2006 build of
+GlassFish contains several Jar files which contain classes that can
+conflict with the newer versions of those classes provided by the WSIT
+environment. To avoid problems, the classpath for both the Glassfish
+application server and the client application must be modified. </p>
+<p class="Body">
+<a name="pgfId-100269"></a>The WSIT installer (wsit-on-glassfish.xml)
+will handle making the necessary classpath modifications in the
+Glassfish configuration file to prevent problems. However, the client
+applications need to have equivalent changes. The samples accompanying
+the Getting Started with WSIT How To documents already have the
+necessary work-around in place. The work-around is simply to exclude
+the conflicting Jar files from the application's classpath. Should you
+create a build.xml file of your own, you will need to do the same
+thing. The following code snippet excludes the conflicting Jar files
+from the classpath used to run the tools and the client application:</p>
+<p class="Body">
+<a name="pgfId-100270"></a>&lt;path id="wsit.classpath"&gt;<br>
+       &lt;pathelement location=<br>
+         "${java.home}/../lib/tools.jar"/&gt;<br>
+        &lt;fileset dir="${lib.home}"&gt;<br>
+           &lt;include name="*.jar"/&gt;<br>
+            &lt;exclude name="jaxws-update.jar"/&gt;<br>
+            &lt;exclude name="j2ee*.jar"/&gt;<br>
+            &lt;exclude name="javaee.jar"/&gt;<br>
+            &lt;exclude name="appserv-*.jar"/&gt;<br>
+        &lt;/fileset&gt;<br>
+    &lt;/path&gt;</p>
+</div>
+<div>
+<h2 class="A-Head">
+<a name="pgfId-86004"></a><a name="67607"></a>Summary of Known Issues</h2>
+<p class="Body">
+<a name="pgfId-81646"></a><a href="http://jse.east.sun.com/%7Efb199946/wsit/tangoStatusNotes.html#52873" class="XRef">See Summary of Known Issues</a> for the number of known issues with the WSIT features and their priority, or severity level.</p>
+<table border="1">
+<caption>
+<h6 class="TableTitle">
+<a name="pgfId-81650"></a><a name="52873"></a>Summary of Known Issues </h6>
+</caption>
+<tbody><tr>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-81656"></a>Features</p>
+</th>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-81658"></a>Priority 1</p>
+</th>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-81688"></a>Priority 2</p>
+</th>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-81690"></a>Priority 3</p>
+</th>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-81660"></a>Priority 4 and 5</p>
+</th>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-81715"></a>Totals</p>
+</th>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81662"></a>Installation</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81664"></a>0</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81692"></a>0</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81694"></a>1</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81666"></a>0</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81717"></a>1</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81668"></a>Integration</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81670"></a>0</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81696"></a>1</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81698"></a>0</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81672"></a>0</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81719"></a>1</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81674"></a>Metadata Exchange</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81676"></a>0</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81700"></a>1</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81702"></a>0</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81678"></a>0</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81721"></a>1</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81753"></a>Security</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81755"></a>0</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81757"></a>5</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81759"></a>4</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81761"></a>0</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81763"></a>0</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81741"></a>Security Policy</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81743"></a>0</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81745"></a>5</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81747"></a>3</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81749"></a>0</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81751"></a>0</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81729"></a>Trust</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81731"></a>0</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81733"></a>0</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81735"></a>4</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81737"></a>0</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81739"></a>0</p>
+</td>
+</tr>
+</tbody></table>
+</div>
+<div>
+<h2 class="A-Head">
+<a name="pgfId-98545"></a><a name="91780"></a>Metadata Exchange Status</h2>
+<div>
+<h4 class="B-Head-afterA-Head">
+<a name="pgfId-78519"></a>Microsoft Interoperability</h4>
+<p class="Body">
+<a name="pgfId-81060"></a><a href="http://jse.east.sun.com/%7Efb199946/wsit/tangoStatusNotes.html#76264" class="XRef">See Metadata Exchange Interoperability Scenarios Testing Status</a></p>
+<table border="1">
+<caption>
+<h6 class="TableTitle">
+<a name="pgfId-81031"></a><a name="76264"></a>Metadata Exchange Interoperability Scenarios Testing Status</h6>
+</caption>
+<tbody><tr>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-81037"></a>Testing Scenario</p>
+</th>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-81039"></a>Tests Available</p>
+</th>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-81041"></a>Status</p>
+</th>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81043"></a>Sun client to Microsoft server</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81045"></a>1</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81047"></a>Not tested.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81049"></a>Microsoft Client to Sun Server</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81051"></a>1</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81053"></a>Not tested.</p>
+</td>
+</tr>
+</tbody></table>
+</div>
+<div>
+<h4 class="B-Head">
+<a name="pgfId-80125"></a>What is Not Implemented</h4>
+<p class="Body">
+<a name="pgfId-82793"></a>All Metadata Exchange functionality has been
+implemented, including send and receive metadata and the client API for
+other components to use. However, the code that adds headers to the
+response message is commented out because of a known issue in xml
+stream buffer. For more information, see issue number 1 in <a href="http://jse.east.sun.com/%7Efb199946/wsit/tangoStatusNotes.html#29804" class="XRef">See Metadata Exchange Interoperability Known Issues</a>.</p>
+</div>
+<div>
+<h4 class="B-Head">
+<a name="pgfId-81074"></a>Known Issues</h4>
+<p class="Body">
+<a name="pgfId-81097"></a><a href="http://jse.east.sun.com/%7Efb199946/wsit/tangoStatusNotes.html#29804" class="XRef">See Metadata Exchange Interoperability Known Issues</a></p>
+<table border="1">
+<caption>
+<h6 class="TableTitle">
+<a name="pgfId-81080"></a><a name="29804"></a>Metadata Exchange Interoperability Known Issues </h6>
+</caption>
+<tbody><tr>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-81086"></a>Issue Number</p>
+</th>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-81088"></a>Interoperability Feature</p>
+</th>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-81090"></a>Status/Workaround</p>
+</th>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81092"></a>1</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81094"></a>Support for returning WS-Addressing response headers with response messages.</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81139"></a>This is an unbound prefix issue. This issue
+is preventing the Metadata Exchange feature from returning the
+WS-Addressing response headers that are required by the Metadata
+Exchange specification.</p>
+<p class="TAB-Table-Body">
+<a name="pgfId-81151"></a>WORKAROUND: The client</p>
+<p class="TAB-Table-Body">
+<a name="pgfId-81125"></a>code currently does not check for these headers so the response is still</p>
+<p class="TAB-Table-Body">
+<a name="pgfId-81115"></a>parsed.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81159"></a>2</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81161"></a>Support for multiple Web services on a single server</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81165"></a> If more than one Web service is deployed in
+the server, a client can only use Metadata Exchange to retrieve the
+first Web service deployed.</p>
+<p class="TAB-Table-Body">
+<a name="pgfId-81163"></a>WORKAROUND: Do not use Metadata Exchange. Instead, use the wsimport tool and specify the "?wsdl" address as the target.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81153"></a>3</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81210"></a>Support for ReplyTo in client request.</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81219"></a>This feature is currently not supported.</p>
+</td>
+</tr>
+</tbody></table>
+</div>
+</div>
+<div>
+<h2 class="A-Head">
+<a name="pgfId-80141"></a><a name="68668"></a>MTOM Status</h2>
+<div>
+<h4 class="B-Head-afterA-Head">
+<a name="pgfId-81250"></a>Microsoft Interoperability</h4>
+<p class="Body">
+<a name="pgfId-81276"></a><a href="http://jse.east.sun.com/%7Efb199946/wsit/tangoStatusNotes.html#76998" class="XRef">See MTOM Interoperability Scenarios Testing Status</a>.</p>
+<table border="1">
+<caption>
+<h6 class="TableTitle">
+<a name="pgfId-81460"></a><a name="76998"></a>MTOM Interoperability Scenarios Testing Status</h6>
+</caption>
+<tbody><tr>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-81466"></a>Testing Scenario</p>
+</th>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-81468"></a>Tests Available</p>
+</th>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-81470"></a>Status</p>
+</th>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81472"></a>Non-secure tests: Sun client to Microsoft server</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81474"></a>15</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81476"></a>All passed.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81490"></a>Non-secure tests: Sun client to Microsoft server</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81492"></a>15</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81494"></a>Not tested.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81478"></a>Non-secure tests: Sun client to Sun server</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81480"></a>15</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81482"></a>All passed.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-89370"></a>Secure tests: Sun client to Microsoft server</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-89372"></a>15</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-89374"></a>9 passed.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-89376"></a>Secure tests: Microsoft Client to Sun Server</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-89378"></a>15</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-89380"></a>Not tested.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81484"></a>Secure tests: Sun client to Sun server</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81486"></a>15</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81488"></a>9 passed.</p>
+</td>
+</tr>
+</tbody></table>
+</div>
+<div>
+<h4 class="B-Head">
+<a name="pgfId-80144"></a>What is Not Implemented</h4>
+<p class="Body">
+<a name="pgfId-80145"></a>All MTOM functionality has been implemented.</p>
+</div>
+<div>
+<h4 class="B-Head">
+<a name="pgfId-110273"></a>Known Issues</h4>
+<p class="Body">
+<a name="pgfId-110332"></a><a href="http://jse.east.sun.com/%7Efb199946/wsit/tangoStatusNotes.html#55167" class="XRef">See MTOM Interoperability Known Issues</a></p>
+<table border="1">
+<caption>
+<h6 class="TableTitle">
+<a name="pgfId-110296"></a><a name="55167"></a>MTOM Interoperability Known Issues </h6>
+</caption>
+<tbody><tr>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-110302"></a>Issue Number</p>
+</th>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-110304"></a>Interoperability Feature</p>
+</th>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-110306"></a>Status/Workaround</p>
+</th>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-110308"></a>1</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-110343"></a>Using MTOM with SOAP 1.2</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-110360"></a>MTOM with SOAP 1.2 will not work if the SOAP
+message to be sent has no soap action, that is, it will not work in
+either of the following cases:</p>
+<p class="TAB-Table-Body">
+<a name="pgfId-110361"></a>  - the WSDL has  no soap action</p>
+<p class="TAB-Table-Body">
+<a name="pgfId-110362"></a>  - WS-Addressing is disabled</p>
+<p class="TAB-Table-Body">
+<a name="pgfId-110353"></a>WORKAROUND: If the WSDL has a SOAP action or WS-Addressing is enabled, then MTOM will work.</p>
+</td>
+</tr>
+</tbody></table>
+</div>
+</div>
+<div>
+<h2 class="A-Head">
+<a name="pgfId-110276"></a><a name="49498"></a>Data Binding Status</h2>
+<div>
+<h4 class="B-Head-afterA-Head">
+<a name="pgfId-80157"></a>Microsoft Interoperability</h4>
+<p class="Body">
+<a name="pgfId-93396"></a><a href="http://jse.east.sun.com/%7Efb199946/wsit/tangoStatusNotes.html#26989" class="XRef">See Data Binding Interoperability Scenarios Testing Status</a></p>
+<table border="1">
+<caption>
+<h6 class="TableTitle">
+<a name="pgfId-93400"></a><a name="26989"></a>Data Binding Interoperability Scenarios Testing Status</h6>
+</caption>
+<tbody><tr>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-93406"></a>Testing Scenario</p>
+</th>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-93408"></a>Tests Available</p>
+</th>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-93410"></a>Status</p>
+</th>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-93412"></a> Non-secure tests: Sun client to Microsoft server</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-93414"></a>852</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-93416"></a> 834 passed.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-93518"></a>Non-secure tests: Microsoft client to Sun server (starting from WSDL)</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-93420"></a>855</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-93422"></a>808 passed.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-93553"></a>Non-secure tests: Microsoft client to Sun server (starting from Java)</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-93537"></a>0</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-110402"></a>Some testing has been done. More testing (driven by Sun) will be required</p>
+<p class="TAB-Table-Body">
+<a name="pgfId-93539"></a>for this scenario. </p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-93424"></a>Non-secure tests: Sun client to Sun server</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-93426"></a>0</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-93428"></a>Not tested.</p>
+</td>
+</tr>
+</tbody></table>
+</div>
+<div>
+<h4 class="B-Head">
+<a name="pgfId-80159"></a>What is Not Implemented</h4>
+<p class="Body">
+<a name="pgfId-80160"></a>TBD</p>
+</div>
+<div>
+<h4 class="B-Head">
+<a name="pgfId-80161"></a>Know Issues</h4>
+<p class="Body">
+<a name="pgfId-80154"></a>TBD</p>
+</div>
+</div>
+<div>
+<h2 class="A-Head">
+<a name="pgfId-80171"></a><a name="60313"></a>Reliable Messaging Status</h2>
+<div>
+<h4 class="B-Head-afterA-Head">
+<a name="pgfId-80172"></a>Microsoft Interoperability</h4>
+<p class="Body">
+<a name="pgfId-85971"></a><a href="http://jse.east.sun.com/%7Efb199946/wsit/tangoStatusNotes.html#53924" class="XRef">See Reliable Messaging Interoperability Testing Status</a></p>
+<table border="1">
+<caption>
+<h6 class="TableTitle">
+<a name="pgfId-85734"></a><a name="53924"></a>Reliable Messaging Interoperability Testing Status</h6>
+</caption>
+<tbody><tr>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-85740"></a>Testing Scenario</p>
+</th>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-85742"></a>Tests Available</p>
+</th>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-85744"></a>Status</p>
+</th>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-85746"></a>Non-secure: Sun client to Microsoft server</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-85748"></a>2</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-85750"></a>1 passed.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-85752"></a>Non-secure: Microsoft Client to Sun Server</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-85754"></a>2</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-85756"></a>None passed.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-85758"></a>Non-secure: Sun client to Sun server</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-85760"></a>2</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-85762"></a>All passed</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-85940"></a>Secure: Sun client to Microsoft server</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-85942"></a>2</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-85944"></a>1 passed.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-85934"></a>Secure: Microsoft Client to Sun Server</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-85936"></a>2</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-85938"></a>None passed.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-85928"></a>Secure: Sun client to Sun server</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-85930"></a>2</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-85932"></a> All passed.</p>
+</td>
+</tr>
+</tbody></table>
+<p class="Body">
+<a name="pgfId-120470"></a>NOTE: The interoperability tests do not include duplex binding tests. </p>
+</div>
+<div>
+<h4 class="B-Head">
+<a name="pgfId-120468"></a>What is Not Implemented</h4>
+<p class="Body">
+<a name="pgfId-85784"></a>The following feature is not working:</p>
+<ul>
+<li class="Bullet">
+<a name="pgfId-85786"></a>Flow control features not completely implemented.</li>
+</ul>
+</div>
+<div>
+<h4 class="B-Head">
+<a name="pgfId-80176"></a>Know Issues</h4>
+<p class="Body">
+<a name="pgfId-80165"></a>The reliable messaging destination reads the
+OrderedDelivery configuration setting incorrectly. Currently,
+OrderedDelivery cannot be configured.</p>
+</div>
+</div>
+<div>
+<h2 class="A-Head">
+<a name="pgfId-80182"></a><a name="35385"></a>Security Status</h2>
+<div>
+<h4 class="B-Head-afterA-Head">
+<a name="pgfId-80183"></a>Microsoft Interoperability</h4>
+<p class="Body">
+<a name="pgfId-80303"></a><a href="http://jse.east.sun.com/%7Efb199946/wsit/tangoStatusNotes.html#59653" class="XRef">See Security Interoperability Scenarios Testing Status</a></p>
+<table border="1">
+<caption>
+<h6 class="TableTitle">
+<a name="pgfId-80310"></a><a name="59653"></a>Security Interoperability Scenarios Testing Status</h6>
+</caption>
+<tbody><tr>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-80316"></a>Testing Scenario</p>
+</th>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-80318"></a>Tests Available</p>
+</th>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-80320"></a>Status</p>
+</th>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80322"></a>Sun client to Microsoft server (starting from WSDL)</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80324"></a>10</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80326"></a>All passed.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80328"></a>Microsoft Client to Sun Server (starting from WSDL)</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80330"></a>10</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80332"></a>Not tested.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80334"></a>Sun client to Sun server (starting from WSDL)</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80336"></a>10</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80338"></a>All passed</p>
+</td>
+</tr>
+</tbody></table>
+<p class="Body">
+<a name="pgfId-115492"></a>NOTE: No test scenarios were executed that started from Java.</p>
+</div>
+<div>
+<h4 class="B-Head">
+<a name="pgfId-115336"></a>What is Not Implemented</h4>
+<p class="Body">
+<a name="pgfId-85694"></a>The following features have been implemented but are not working correctly:</p>
+<ul>
+<li class="Bullet">
+<a name="pgfId-83024"></a>Multiple secure conversation tokens per message is not implemented. Only one secure conversation token per message is assumed.</li>
+<li class="Bullet">
+<a name="pgfId-83025"></a>Session timeout handling for secure conversation sessions and LifeTime handling for IssuedTokens.</li>
+<li class="Bullet">
+<a name="pgfId-83026"></a>MaxNonceAge information item specified in
+NetBeans IDE user interface and configuration files WSDL will not be
+honored, default values will be used instead.</li>
+<li class="Bullet">
+<a name="pgfId-83027"></a>&lt;sp:SAMLToken&gt; scenarios untested. SAML was only tested on the WS-Trust integration path.</li>
+<li class="Bullet">
+<a name="pgfId-83028"></a>If a binary secret arrives in a SAML assertion, then ensure SSL is used</li>
+<li class="Bullet">
+<a name="pgfId-83029"></a>Policy Verification is not done in the case of Encrypted Body scenarios. </li>
+<li class="Bullet">
+<a name="pgfId-86020"></a>Policy Verification for WS-Trust Protocol Messages.</li>
+<li class="Bullet">
+<a name="pgfId-83031"></a>Backward Compatibility with XWSS 2.0 FCS.</li>
+<li class="Bullet">
+<a name="pgfId-86025"></a>Implied DerivedKeys specified by a @wsc:nonce attribute on SecureTokenRequest</li>
+<li class="Bullet">
+<a name="pgfId-86029"></a>The @wsc:Instance attribute on wsse:Reference for referencing specific Secure Context Token instances.</li>
+<li class="Bullet">
+<a name="pgfId-83034"></a>Reference Type verification in Policy Verification.</li>
+<li class="Bullet">
+<a name="pgfId-86034"></a>Logging code added for WSIT is incomplete.</li>
+<li class="Bullet">
+<a name="pgfId-85693"></a>The sha256 signature algorithm is not
+supported and therefore all AlgorithmSuite identifiers that imply the
+sha256 signature algorithm are not supported.</li>
+<li class="Bullet">
+<a name="pgfId-115596"></a>Some of the JAX-WS with WSIT extensions that
+works without extensions is not enabled. For example, Handlers and
+MustUnderstand Processing are not enabled in the WSIT extensions bundle
+because a different PipelineAssembler is used. </li>
+</ul>
+</div>
+<div>
+<h4 class="B-Head">
+<a name="pgfId-80187"></a>Known Issues</h4>
+<p class="Body">
+<a name="pgfId-80366"></a><a href="http://jse.east.sun.com/%7Efb199946/wsit/tangoStatusNotes.html#12373" class="XRef">See Security Interoperability Known Issues</a></p>
+<table border="1">
+<caption>
+<h6 class="TableTitle">
+<a name="pgfId-80648"></a><a name="12373"></a>Security Interoperability Known Issues</h6>
+</caption>
+<tbody><tr>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-80652"></a>Issue Number</p>
+</th>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-80654"></a>Interoperability Feature</p>
+</th>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-80709"></a>Status</p>
+</th>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80656"></a>1</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80658"></a>Multiple secure conversation tokens per message.</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80738"></a>Only one secure conversation token per message is supported for the EA1 release.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80660"></a>2</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80662"></a>Session timeout handling for secure conversation sessions and LifeTime handling for IssuedTokens.</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80713"></a>?????</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80664"></a>3</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80666"></a>Specification of MaxNonceAge parameter in NetBeans GUI and configuration files. </p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80747"></a>This is not supported for the EA1 release. Default values will be used instead.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80668"></a>4</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80670"></a>&lt;sp:SAMLToken&gt; scenarios untested. </p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80822"></a>SAML only tested on the WS-Trust Integration Path.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80672"></a>5</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80674"></a> If a binary secret arrives in a SAML assertion, then ensure that SSL is used</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80719"></a>?????</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80676"></a>6</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80678"></a>SignedParts and EncryptedParts Policy Verification. </p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80757"></a>Currently disabled due to insufficient testing. </p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80681"></a>7</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80683"></a>Policy Verification for WS-Trust Protocol Messages. </p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80772"></a>This is specification issue.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80685"></a>8</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80687"></a>Backward Compatibility with XWSS 2.0 FCS </p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80782"></a>Not supported in the EA1 release. To be supported in the FCS release.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80689"></a>9</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80691"></a>Implied DerivedKeys </p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80793"></a>Specified by a @wsc:nonce attribute on the SecureTokenRequest (STR).</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80693"></a>10</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80695"></a>The @wsc:Instance attribute on wsse:Reference for referencing specific secure conversation token instances.</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80729"></a>?????</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91489"></a>11</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91491"></a>WSSecurityPolicy:TokenInclusion:</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91493"></a>WSSecurityPolicy:TokenInclusion: Only (Always) value for this property is used.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91483"></a>12</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91485"></a>LaxTimestampFirst and LaxTimestampLast assertions</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91487"></a> Not supported</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91477"></a>13</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91479"></a>SignedEndorsingSupportingTokens assertion</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91481"></a>SignedEndorsingSupportingTokens assertion causes: XWSSecurityException:java.lang.NullPointerException.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91471"></a>14</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91473"></a>java.lang.IllegalStateException</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91475"></a>java.lang.IllegalStateException: The current event is not START_ELEMENT but 2.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91465"></a>15</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91467"></a>ProtectTokens assertion with AsymmetricBinding </p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91469"></a>ProtectTokens assertion with AsymmetricBinding in service WSDL causes java.lang.NullPointerException.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80697"></a>16</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80699"></a>Reference Type verification in PolicyVerification.</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80845"></a>This feature is currently disabled due to
+problems with the interpretation of IncludeTokenPolicy in conjunction
+with Asymmetric Binding.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80701"></a>17</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80703"></a>Logging </p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80857"></a>Logging is incomplete in the newly added code for WSIT.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91517"></a>18</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91519"></a>EncryptedParts has sp:Body, sp: Header </p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91521"></a>EncryptedParts has sp:Body, sp: Header with @Namespace only; causes Encryption of SOAP Body not allowed.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91511"></a>19</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91513"></a> Returning of SOAP fault </p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91515"></a>Negative Test fail: No SOAP fault returned: Different Endpoint Policies and Body Encrypted.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91505"></a>20</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91507"></a> Returning of SOAP fault </p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91509"></a>SOAP Fault not returned: Different Algorithm suites used by Service Consumer/Provider.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91499"></a>21</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91501"></a>Using SCT security token as Signed Supporting Token,</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91503"></a>When using SCT security token as Signed Supporting Token, clients throw run-time exceptions.</p>
+</td>
+</tr>
+</tbody></table>
+</div>
+</div>
+<div>
+<h2 class="A-Head">
+<a name="pgfId-80204"></a><a name="44691"></a>Secure Conversation Status</h2>
+<div>
+<h4 class="B-Head-afterA-Head">
+<a name="pgfId-80205"></a>Microsoft Interoperability</h4>
+<p class="Body">
+<a name="pgfId-80896"></a><a href="http://jse.east.sun.com/%7Efb199946/wsit/tangoStatusNotes.html#75846" class="XRef">See Secure Conversation Interoperability Scenarios Testing Status</a></p>
+<table border="1">
+<caption>
+<h6 class="TableTitle">
+<a name="pgfId-80867"></a><a name="75846"></a>Secure Conversation Interoperability Scenarios Testing Status</h6>
+</caption>
+<tbody><tr>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-80873"></a>Testing Scenario</p>
+</th>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-80875"></a>Tests Available</p>
+</th>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-80877"></a>Status</p>
+</th>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80879"></a>Sun client to Microsoft server (starting from WSDL)</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80881"></a>3</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80883"></a>All passed.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80885"></a>Microsoft Client to Sun Server (starting from WSDL)</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80887"></a>3</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80889"></a>Not tested.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80891"></a>Sun client to Sun server (starting from WSDL)</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80893"></a>3</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80895"></a>All passed</p>
+</td>
+</tr>
+</tbody></table>
+<p class="Body">
+<a name="pgfId-115475"></a>NOTE: No test scenarios were executed that started from Java.</p>
+</div>
+<div>
+<h4 class="B-Head">
+<a name="pgfId-80207"></a>What is Not Implemented</h4>
+<p class="Body">
+<a name="pgfId-82800"></a>The following features have not been implemented:</p>
+<ul>
+<li class="Bullet">
+<a name="pgfId-82860"></a>Support for bindings other than token-issued and cancellation has not been implemented.</li>
+<li class="Bullet">
+<a name="pgfId-82861"></a>Support for security related clients is not available yet.</li>
+</ul>
+</div>
+<div>
+<h4 class="B-Head">
+<a name="pgfId-82862"></a>Known Issues</h4>
+<p class="Body">
+<a name="pgfId-80997"></a><a href="http://jse.east.sun.com/%7Efb199946/wsit/tangoStatusNotes.html#16524" class="XRef">See Secure Conversation Interoperability Known Issues</a></p>
+<table border="1">
+<caption>
+<h6 class="TableTitle">
+<a name="pgfId-80914"></a><a name="16524"></a>Secure Conversation Interoperability Known Issues </h6>
+</caption>
+<tbody><tr>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-80920"></a>Issue Number</p>
+</th>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-80922"></a>Interoperability Feature</p>
+</th>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-80924"></a>Status</p>
+</th>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-80926"></a>1</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81005"></a>Bindings supported.</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81017"></a>Token Issued and Cancellation bindings are supported in the EA1 release. However, no other bindings are currently supported.</p>
+</td>
+</tr>
+</tbody></table>
+</div>
+</div>
+<div>
+<h2 class="A-Head">
+<a name="pgfId-80218"></a><a name="96126"></a>Trust Status</h2>
+<div>
+<h4 class="B-Head-afterA-Head">
+<a name="pgfId-81383"></a>Microsoft Interoperability</h4>
+<p class="Body">
+<a name="pgfId-81415"></a><a href="http://jse.east.sun.com/%7Efb199946/wsit/tangoStatusNotes.html#36368" class="XRef">See Trust Interoperability Scenarios Testing Status</a></p>
+<table border="1">
+<caption>
+<h6 class="TableTitle">
+<a name="pgfId-81386"></a><a name="36368"></a>Trust Interoperability Scenarios Testing Status</h6>
+</caption>
+<tbody><tr>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-81392"></a>Testing Scenario</p>
+</th>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-81394"></a>Tests Available</p>
+</th>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-81396"></a>Status</p>
+</th>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81398"></a>Sun client to Microsoft server (starting from WSDL)</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81400"></a>4</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81402"></a>Not tested.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81404"></a>Microsoft Client to Sun Server (starting from WSDL)</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81406"></a>4</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81408"></a>Not tested.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81410"></a>Sun client to Sun server (starting from WSDL)</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81412"></a>4</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81414"></a>All passed.</p>
+</td>
+</tr>
+</tbody></table>
+<p class="Body">
+<a name="pgfId-115482"></a>NOTE: No test scenarios were executed that started from Java.</p>
+</div>
+<div>
+<h4 class="B-Head">
+<a name="pgfId-80221"></a>What is Not Implemented</h4>
+<p class="Body">
+<a name="pgfId-82830"></a>The following features have not been implemented:</p>
+<ul>
+<li class="Bullet">
+<a name="pgfId-82835"></a>Except for token-issued bindings, no other bindings are supported.</li>
+</ul>
+</div>
+<div>
+<h4 class="B-Head">
+<a name="pgfId-81425"></a>Known Issues</h4>
+<p class="Body">
+<a name="pgfId-81448"></a><a href="http://jse.east.sun.com/%7Efb199946/wsit/tangoStatusNotes.html#88084" class="XRef">See Trust Interoperability Known Issues</a></p>
+<table border="1">
+<caption>
+<h6 class="TableTitle">
+<a name="pgfId-81431"></a><a name="88084"></a> Trust Interoperability Known Issues </h6>
+</caption>
+<tbody><tr>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-81437"></a>Issue Number</p>
+</th>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-81439"></a>Interoperability Feature</p>
+</th>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-81441"></a>Status/Workaround</p>
+</th>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81443"></a>1</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81445"></a>Bindings supported.</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81447"></a>The Token Issued binding is supported in the EA1 release. No other bindings currently supported.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91523"></a>2</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91525"></a>com.sun.xml.wss.XWSSecurityException.</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91527"></a>com.sun.xml.wss.XWSSecurityException: No elements exist with Id/WsuId:.</p>
+</td>
+</tr>
+</tbody></table>
+</div>
+</div>
+<div>
+<h2 class="A-Head">
+<a name="pgfId-80232"></a><a name="98261"></a>Coordination/Atomic Transactions Status</h2>
+<p class="Body">
+<a name="pgfId-86040"></a>This technology is under development but it is not available in the WSIT 1.0 EA1 release. It is planned for a future release.</p>
+</div>
+<div>
+<h2 class="A-Head">
+<a name="pgfId-80246"></a><a name="35087"></a>NetBeans WSIT Module Status</h2>
+<div>
+<h4 class="B-Head">
+<a name="pgfId-80249"></a>What is Not Implemented</h4>
+<ul>
+<li class="Bullet">
+<a name="pgfId-103526"></a>WSIT support for Web Services and Web service clients is implemented in Web projects only.</li>
+<li class="Bullet">
+<a name="pgfId-80250"></a>Web Service Tester functionality for WSIT enabled Web services is not implemented. </li>
+</ul>
+</div>
+<div>
+<h4 class="B-Head">
+<a name="pgfId-80251"></a>Know Issues</h4>
+<p class="Body">
+<a name="pgfId-82281"></a><a href="http://jse.east.sun.com/%7Efb199946/wsit/tangoStatusNotes.html#31927" class="XRef">See NetBeans IDE Interoperability Known Issues</a></p>
+<table border="1">
+<caption>
+<h6 class="TableTitle">
+<a name="pgfId-82261"></a><a name="31927"></a>NetBeans IDE Interoperability Known Issues</h6>
+</caption>
+<tbody><tr>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-82267"></a>Issue Number</p>
+</th>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-82269"></a>Interoperability Feature</p>
+</th>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-82271"></a>Status/Workaround</p>
+</th>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-122126"></a>1</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-122128"></a>Client-side classpath must not use the jaxws-update.jar</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-122130"></a>For the client side classpath, make sure
+that jaxws-update.jar is NOT be in the classpath. You can do this by
+spelling out each jar name in the classpath (this is the best way to
+avoid confusion) or you can include all jars and exclude
+jaxws-update.jar from the client classpath.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-82273"></a>2</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-82275"></a>WSIT Security: Alpha input can be saved to numeric Timestamp Freshness Limit.</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-82355"></a>EXPECTED BEHAVIOR: Timestamp Freshness Limit in Security -&gt; Advanced Configuration should</p>
+<p class="TAB-Table-Body">
+<a name="pgfId-82356"></a>only accept numerics.</p>
+<p class="TAB-Table-Body">
+<a name="pgfId-82277"></a>ACTUAL BEHAVIOR: Accepts and saves alphas to the WSDL.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-82327"></a>3</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-82329"></a>WSIT Security: Alpha input can be saved to Maximum Clock.</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-82368"></a>EXPECTED BEHAVIOR: Maximum Clock Skew in Security -&gt; Advanced Configuration should only accept numerics.</p>
+<p class="TAB-Table-Body">
+<a name="pgfId-82331"></a>ACTUAL BEHAVIOR: Accepts and saves alphas to the WSDL.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-82321"></a>4</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-82323"></a>WSIT Security: A value that exceeds the maximum allowed can be saved to the Max Nonce Age.</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-82410"></a>EXPECTED BEHAVIOR: Max Nonce Age in Security -&gt; Advanced Configuration should not accept a value greater than 900000.</p>
+<p class="TAB-Table-Body">
+<a name="pgfId-82325"></a>ACTUAL BEHAVIOR: Accepts and saves invalid value to the WSDL.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-82315"></a>5</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-82317"></a>WSIT Security: A value that exceeds the maximum allowed can be saved to the Max Clock Skew.</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-82438"></a>EXPECTED BEHAVIOR: Max Nonce Age in Security -&gt; Advanced Configuration should not accept</p>
+<p class="TAB-Table-Body">
+<a name="pgfId-82439"></a>a value greater than 1200000.</p>
+<p class="TAB-Table-Body">
+<a name="pgfId-82319"></a>ACTUAL BEHAVIOR: Accepts and saves invalid value (1200001) to the WSDL.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-82309"></a>6</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-82311"></a>WSIT Security: Include Token in a message and X509 Version can be set incorrectly.</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-82471"></a>EXPECTED BEHAVIOR: Saved details show Security Binding and Encryption token with the same values.</p>
+<p class="TAB-Table-Body">
+<a name="pgfId-82474"></a>ACTUAL BEHAVIOR: Saved values are incorrect.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-82303"></a>7</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-82305"></a> WSIT Security Keystore Configuration: Behavior of child dialogs is incorrect.</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-82504"></a>EXPECTED BEHAVIOR: Do not expect values that specified on child dialogs to be saved to the WSDL.</p>
+<p class="TAB-Table-Body">
+<a name="pgfId-82506"></a>ACTUAL BEHAVIOR: Values that are specified in
+child dialogs are saved to the WSDL. Saving should not occur until the
+OK button is clicked on parent dialog.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-82297"></a>8</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-82299"></a> WSIT Accessibility: ALT + letter access for command buttons is not working correctly.</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-82608"></a>None of the command buttons in the Tooling plug-in provide for access using ALT</p>
+<p class="TAB-Table-Body">
+<a name="pgfId-82301"></a>+ letter.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-82291"></a>9</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-82293"></a>WSIT General: Attributes are saved to wsit.xml even when user cancels.</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-82638"></a>EXPECTED BEHAVIOR: If the user presses Cancel, then none of the currently changed values should be saved to wsit.xml.</p>
+<p class="TAB-Table-Body">
+<a name="pgfId-82626"></a>ACTUAL BEHAVIOR: When attributes are changed
+in Edit Web Service Attributes window, the wsit.xml shows the
+attributes as being updated before the OK button is clicked. If the
+user chooses to Cancel the changes, the changed attributes are still
+saved to the file.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-82285"></a>10</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-82287"></a>WSIT: Limit on size of MaxBufferSize and Inactivity Timeout for Reliable Messaging.</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-82677"></a>EXPECTED BEHAVIOR: User should not be allowed to enter more than eight (8) digits in either of the text boxes. </p>
+<p class="TAB-Table-Body">
+<a name="pgfId-82678"></a>ACTUAL BEHAVIOR: User is allowed to enter more than eight digits are entered, however, an error is received on the status line.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-103550"></a>11</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-103556"></a>WSIT features</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-103658"></a>When creating a Web Service project to use
+WSIT features, you must select J2EE 1.4 in the New Web Application
+window and set the Source Level to 1.5 in the Project Properties window.</p>
+<p class="TAB-Table-Body">
+<a name="pgfId-115333"></a>NOTE: With these configuration settings the NteBeans 5.5 does not support JSR 109.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-103544"></a>12</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-103574"></a>Support for multiple Web services and clients in a single project. </p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-103589"></a>In each project, only one service and one client is supported.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-103538"></a>13</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-103567"></a>Navigator functionality</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-103607"></a>The WSIT configuration file and the SWIT configuration GUI should never be opened at th same time.</p>
+</td>
+</tr>
+</tbody></table>
+</div>
+</div>
+<div>
+<h2 class="A-Head">
+<a name="pgfId-80260"></a><a name="70368"></a>Web Services Addressing Status</h2>
+<div>
+<h4 class="B-Head-afterA-Head">
+<a name="pgfId-81507"></a>Microsoft Interoperability</h4>
+<p class="Body">
+<a name="pgfId-81539"></a><a href="http://jse.east.sun.com/%7Efb199946/wsit/tangoStatusNotes.html#31324" class="XRef">See Web Services Addressing Interoperability Scenarios Testing Status</a></p>
+<table border="1">
+<caption>
+<h6 class="TableTitle">
+<a name="pgfId-81510"></a><a name="31324"></a>Web Services Addressing Interoperability Scenarios Testing Status</h6>
+</caption>
+<tbody><tr>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-81516"></a>Testing Scenario</p>
+</th>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-81518"></a>Tests Available</p>
+</th>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-81520"></a>Status</p>
+</th>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81522"></a>Non-secure tests: Sun client to Microsoft server</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81524"></a>42</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81526"></a>All passed.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81560"></a>Non-secure tests: Sun client to Microsoft server</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81562"></a>42</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81619"></a>All passed.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81609"></a>Non-secure tests: Microsoft Client to Sun Server</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81611"></a>42</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81625"></a>All passed.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81603"></a>Secure tests: Sun client to Sun server</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81605"></a>1</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81607"></a>Passed.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81528"></a>Secure tests: Microsoft Client to Sun Server</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81530"></a>1</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81532"></a>Passed.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81534"></a>Secure tests: Sun client to Sun server</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81536"></a>1</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-81538"></a>Passed.</p>
+</td>
+</tr>
+</tbody></table>
+</div>
+<div>
+<h4 class="B-Head">
+<a name="pgfId-80263"></a>What is Not Implemented</h4>
+<p class="Body">
+<a name="pgfId-80264"></a>All Web Services Addressing functionality has been implemented.</p>
+<p class="Body">
+<a name="pgfId-115616"></a>NOTE: Web Services Addressing is always enabled when starting from the Java-W3C version of WS-Addressing.</p>
+</div>
+<div>
+<h4 class="B-Head">
+<a name="pgfId-80265"></a>Known Issues</h4>
+<p class="Body">
+<a name="pgfId-80266"></a>There are no known issues with the Web Services Addressing feature. All functionality works.</p>
+</div>
+</div>
+<div>
+<h2 class="A-Head">
+<a name="pgfId-80271"></a><a name="13158"></a>Policy Status</h2>
+<div>
+<h4 class="B-Head-afterA-Head">
+<a name="pgfId-80272"></a>Microsoft Interoperability</h4>
+<p class="Body">
+<a name="pgfId-82041"></a><a href="http://jse.east.sun.com/%7Efb199946/wsit/tangoStatusNotes.html#40475" class="XRef">See Web Services-Policy Scenarios Testing Status</a></p>
+<table border="1">
+<caption>
+<h6 class="TableTitle">
+<a name="pgfId-81991"></a><a name="40475"></a>Web Services-Policy Scenarios Testing Status</h6>
+</caption>
+<tbody><tr>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-81997"></a>Testing Scenario</p>
+</th>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-81999"></a>Tests Available</p>
+</th>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-82001"></a>Status</p>
+</th>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-82003"></a>Non-secure tests: Sun client to Microsoft server</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-82005"></a>1</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-82007"></a>Passed.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-82069"></a>Non-secure tests: Microsoft Client to Sun Server</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-82011"></a>1</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-82013"></a>Passed.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-82015"></a>Non-secure tests: Sun Client to Sun Server</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-82017"></a>1</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-82019"></a>Passed.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-82021"></a>Secure tests: Sun client to Microsoft server</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-82023"></a>4</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-82025"></a>All passed.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-82027"></a>Secure tests: Microsoft Client to Sun Server</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-82029"></a>4</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-82031"></a>All passed.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-82033"></a>Secure tests: Sun client to Sun server</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-82035"></a>4</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-82037"></a>All passed.</p>
+</td>
+</tr>
+</tbody></table>
+</div>
+<div>
+<h4 class="B-Head">
+<a name="pgfId-80274"></a>What is Not Implemented</h4>
+<p class="Body">
+<a name="pgfId-80275"></a>The following functionality is not implemented in EA1 for Web Services-Policy.</p>
+<ul>
+<li class="Bullet">
+<a name="pgfId-82112"></a>Client selecting and validating policy alternative at startup.</li>
+<li class="Bullet">
+<a name="pgfId-82113"></a>Support for user-defined policy assertions.</li>
+<li class="Bullet">
+<a name="pgfId-82114"></a>Support for localization is incomplete</li>
+</ul>
+</div>
+<div>
+<h4 class="B-Head">
+<a name="pgfId-80276"></a>Known Issues</h4>
+<p class="Body">
+<a name="pgfId-82159"></a><a href="http://jse.east.sun.com/%7Efb199946/wsit/tangoStatusNotes.html#10655" class="XRef">See Web Services-Policy Interoperability Known Issues</a></p>
+<table border="1">
+<caption>
+<h6 class="TableTitle">
+<a name="pgfId-82139"></a><a name="10655"></a> Web Services-Policy Interoperability Known Issues </h6>
+</caption>
+<tbody><tr>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-82145"></a>Issue Number</p>
+</th>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-82147"></a>Interoperability Feature</p>
+</th>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-82149"></a>Status/Workaround</p>
+</th>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-82151"></a>1</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-82153"></a>Applying policy to endpoints that have multiple ports.</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-82173"></a>Policies cannot be applied to endpoints that have more than one port.</p>
+</td>
+</tr>
+</tbody></table>
+</div>
+</div>
+<div>
+<h2 class="A-Head">
+<a name="pgfId-80290"></a><a name="55934"></a>Security Policy Status</h2>
+<div>
+<h4 class="B-Head-afterA-Head">
+<a name="pgfId-80291"></a>Microsoft Interoperability</h4>
+<p class="Body">
+<a name="pgfId-80292"></a>TBD</p>
+<p class="Body">
+<a name="pgfId-115487"></a>NOTE: No test scenarios were executed that started from Java.</p>
+</div>
+<div>
+<h4 class="B-Head">
+<a name="pgfId-80293"></a>What is Not Implemented</h4>
+<p class="Body">
+<a name="pgfId-80294"></a>TBD</p>
+</div>
+<div>
+<h4 class="B-Head">
+<a name="pgfId-80295"></a>Know Issues</h4>
+<p class="Body">
+<a name="pgfId-91162"></a><a href="http://jse.east.sun.com/%7Efb199946/wsit/tangoStatusNotes.html#72795" class="XRef">See Web Services-Security Policy Interoperability Known Issues</a></p>
+<table border="1">
+<caption>
+<h6 class="TableTitle">
+<a name="pgfId-91142"></a><a name="72795"></a> Web Services-Security Policy Interoperability Known Issues </h6>
+</caption>
+<tbody><tr>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-91148"></a>Issue Number</p>
+</th>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-91150"></a>Interoperability Feature</p>
+</th>
+<th rowspan="1" colspan="1">
+<p class="TCH-Table-Column-Head">
+<a name="pgfId-91152"></a>Status/Workaround</p>
+</th>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91154"></a>1</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91173"></a>WSSecurityPolicy:wsu:Timestamp.</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91182"></a>WSSecurityPolicy:wsu:Timestamp present in Security header despite absence of sp:IncludeTimestamp</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91245"></a>2</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91247"></a>Security header</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91249"></a>WSSecurityPolicy:Signature block present in security header despite absence of Signature operation</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91239"></a>3</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91241"></a>sp:EncryptedElements/sp</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91243"></a>sp:EncryptedElements/sp:XPath fails to encrypt the element specified in the XPath element</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91233"></a>4</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91235"></a>ProtectTokens in SymmetricBinding</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91237"></a>Token used to generate Signature not covered by the Signature</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91227"></a>5</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91229"></a>SupportingTokens assertion</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91231"></a>EncryptedParts in SupportingTokens assertion in message policy does not work</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91191"></a>6</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91193"></a>Empty sp:SignedParts assertion</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91195"></a>Empty sp:SignedParts assertion: Gives exception-No elements exist with Id/WsuId: ALL_MESSAGE_HEADERS.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91313"></a>7</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91315"></a> AsymmetricBinding response message </p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91317"></a>Token missing in response message for AsymmetricBinding, in case where the default (ALWAYS) TokenInclusion is used.</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91307"></a>8</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91309"></a>WSSecurity Policy Exception</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-91311"></a>WSSecurity Policy Exception: Default implementation of IncludeToken takes "Never".</p>
+</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-108587"></a>9</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-108589"></a>WSSecurity Policy deploy</p>
+</td>
+<td rowspan="1" colspan="1">
+<p class="TAB-Table-Body">
+<a name="pgfId-108600"></a>The following security policy assertions cause a deploy failure:</p>
+<p class="TAB-Table-Body">
+<a name="pgfId-108609"></a>- SecurityPolicy:sp:AlgorithmSuite/wsp:Policy/sp:SoapNormalization10</p>
+<p class="TAB-Table-Body">
+<a name="pgfId-108613"></a>- SecurityPolicy: sp:AlgorithmSuite/wsp:Policy/sp:XPath10</p>
+<p class="TAB-Table-Body">
+<a name="pgfId-108623"></a>- SecurityPolicy: sp:AlgorithmSuite/wsp:Policy/sp:XPathFilter20</p>
+</td>
+</tr>
+</tbody></table>
+<p class="Body">
+<a name="pgfId-91134"></a>&nbsp;</p>
+</div>
+</div>
+</div>
+</body></html>
