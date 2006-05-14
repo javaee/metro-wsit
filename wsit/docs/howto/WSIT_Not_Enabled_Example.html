@@ -396,7 +396,8 @@ int result = port.addNumbers (number1, number2);</p>
 <p style="margin-bottom: 0in;">or<br>
 </p>
 <p style="margin-bottom: 0in; margin-left: 40px;"><span
- style="font-family: monospace;">ant -Duse.tomcat=true</span><br>
+ style="font-family: monospace;">ant -Duse.tomcat=true</span><span
+ style="font-family: monospace;"> client</span>
 </p>
 <p style="margin-bottom: 0in;">
 will run
@@ -404,11 +405,16 @@ will run
 service’s WSDL and compile the source.</p>
 <h2><a name="Running"></a>Running the Web Service Client<br>
 </h2>
-<p>For both examples, execute 
-the resulting command-line clients via<br>
+<p>For both examples, execute the resulting command-line clients via<br>
 </p>
 <p style="margin-bottom: 0in; margin-left: 40px;"><span
  style="font-family: monospace;">ant run</span><br>
+</p>
+<p style="margin-bottom: 0in;">or<br>
+</p>
+<p style="margin-bottom: 0in; margin-left: 40px;"><span
+ style="font-family: monospace;">ant -Duse.tomcat=true</span><span
+ style="font-family: monospace;"> run</span>
 </p>
 <p>
 That target simply runs Java with the
