@@ -50,6 +50,7 @@ or <span style="font-family: monospace;">wsit-<span
 <a href="#Building_Server">Building and Deploying the Web Service</a><br>
 <a href="#Config_Client">Configuring WSIT in the Web Service Client</a><br>
 <a href="#Building_Client">Building and Running a Web Service Client</a><br>
+<a href="#Undeploying">Undeploying a WSIT Web Service</a><br>
 <a href="#Summary">Summary and Resources</a><span
  style="font-weight: bold;"><br>
 </span>
@@ -220,6 +221,36 @@ file included in these samples. No settings for WS-Reliable Messaging
 nor WS-Addressing need to be stored in a client configuration file. The
 WSDL document holds all of the settings required by the client for both
 WS-Reliable Messaging and WS-Addressing.<br>
+<h2><a name="Undeploying"></a>Undeploying a WSIT Web Service</h2>
+As described in <a href="WSIT_Not_Enabled_Example.html#Undeploying">Undeploying
+a JAX-WS Web Service</a>, to undeploy a web service means to both
+disable and remove it from the web
+container. This section provides the necessary commands to undeploy
+this article's sample web services from both GlassFish
+and Tomcat.<br>
+<br>
+<b>Undeploying from GlassFish<br>
+</b><br>
+<div style="margin-left: 40px;"><span style="font-family: monospace;">asadmin
+undeploy --user admin wsit-enabled-fromjava<br>
+<br>
+</span></div>
+<div style="margin-left: 40px;"><span style="font-family: monospace;">asadmin
+undeploy --user admin wsit-enabled-fromwsdl</span><br>
+<span style="font-family: monospace;"></span></div>
+<span style="font-family: monospace;">
+</span><br>
+<b>Undeploying from Tomcat<br>
+</b><br>
+<div style="margin-left: 40px;"><span style="font-family: monospace;">rm
+$CATALINA_HOME/webapps/wsit-enabled-fromjava.war</span><br>
+<span style="font-family: monospace;"></span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;"></span><span
+ style="font-family: monospace;">rm
+$CATALINA_HOME/webapps/wsit-enabled-fromwsdl.war</span><br>
+</div>
+<div style="margin-left: 40px;"></div>
 <h2><a name="Summary"></a>Summary and Resources</h2>
 <span style="">This article highlighted the steps that will be common
 to building,

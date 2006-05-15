@@ -63,6 +63,7 @@ enable WSIT technologies.<br>
 Container</a><br>
 <a href="#Building_Client">Building a JAX-WS 2.0 Web Service Client</a><br>
 <a href="#Running">Running the Web Service Client</a><br>
+<a href="#Undeploying">Undeploying a JAX-WS Web Service</a><br>
 <a href="#Summary">Summary and Resources</a><br>
 <h2><a name="Prerequisites"></a>Prerequisites<br>
 </h2>
@@ -446,6 +447,44 @@ The <span style="font-family: monospace;">WARNING</span> line above is
 expected for both of these examples. Given that no WSIT technologies
 are enabled, a configuration file is unnecessary. More information will
 be provided on WSIT configuration files in the following article.<br>
+<h2><a name="Undeploying"></a>Undeploying a JAX-WS Web Service</h2>
+Undeploying a web service means to disable &amp; remove it from the web
+container.&nbsp; Clients will no longer be able to use the web service
+nor will the web service restart without explicit redeployment by the
+user. During the development process, it is often useful to undeploy a
+web service. This section explains the necessary steps for both
+GlassFish and Tomcat.<br>
+<br>
+<b>Undeploying from GlassFish<br>
+</b><br>
+The <span style="font-family: monospace;">asadmin</span> command
+provides the simplest method of undeploying a web service from
+GlassFish.<br>
+<br>
+<div style="margin-left: 40px;"><span style="font-family: monospace;">asadmin
+undeploy --user admin wsit-jaxws-fromjava<br>
+<br>
+</span></div>
+<div style="margin-left: 40px;"><span style="font-family: monospace;">asadmin
+undeploy --user admin wsit-jaxws-fromwsdl</span><br>
+<span style="font-family: monospace;"></span></div>
+<span style="font-family: monospace;"></span><br>
+<b>Undeploying from Tomcat<br>
+</b><br>
+Undeploying a given web service from Tomcat requires deleting its WAR
+file from the Tomcat <span style="font-family: monospace;">webapps</span>
+directory.&nbsp; For a typical <span style="font-family: monospace;">UNIX</span>
+scenario the commands below would delete the sample WAR files. Tomcat
+then automatically undeploys the web service within a few seconds.<br>
+<br>
+<div style="margin-left: 40px;"><span style="font-family: monospace;">rm
+$CATALINA_HOME/webapps/wsit-jaxws-fromjava.war</span><br>
+<span style="font-family: monospace;"></span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;"></span><span
+ style="font-family: monospace;">rm
+$CATALINA_HOME/webapps/wsit-jaxws-fromwsdl.war</span><br>
+</div>
 <h2><a name="Summary"></a>Summary and Resources<br>
 </h2>
 <span style="">This article highlighted the steps that will be common
