@@ -260,10 +260,14 @@ public class RMConstants {
         return new QName(version, "RMAssertion");
     }
 
+     public QName getOrderedQName() {
+        return new QName(sunVersion, "Ordered");
+    }
+     
     public QName getInactivityTimeoutQName() {
         return new QName(version, "InactivityTimeout");
     }
-
+       
     public QName getAcknowledgementIntervalQName() {
         return new QName(version, "AcknowledgementInterval");
     }
