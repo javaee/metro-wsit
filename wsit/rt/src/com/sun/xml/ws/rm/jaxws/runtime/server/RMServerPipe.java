@@ -416,6 +416,8 @@ public class RMServerPipe extends PipeBase<RMDestination,
         CreateSequenceElement csrElement = null;
         Identifier id = null;
         String offeredId = null;
+        AddressingConstants ac = addressingBuilder.newAddressingConstants();
+        
         Message message = packet.getMessage();
 
         AddressingProperties inboundAddressingProperties =
@@ -429,9 +431,16 @@ public class RMServerPipe extends PipeBase<RMDestination,
         }
 
         EndpointReference replyTo = inboundAddressingProperties.getReplyTo();
+        if (replyTo == null) {
+            replyTo = addressingBuilder.newEndpointReference( ac.getAnonymousURI());
+            inboundAddressingProperties.setReplyTo(replyTo);
+        }
+        
         EndpointReference acksTo = csrElement.getAcksTo();
         String ackstoUri = acksTo.getAddress().getURI().toString();
         String replytoUri = replyTo.getAddress().getURI().toString();
+                           
+        
         if (!ackstoUri.equals(replytoUri)){
             throw new CreateSequenceException("AcksTo is not equal to ReplyTo expected " + ackstoUri + "Got "
                     + replytoUri  );
@@ -498,7 +507,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
 
             dest = inboundAddressingProperties.getTo().getURI();
 
-            AddressingConstants ac = addressingBuilder.newAddressingConstants();
+            
             accept = new AcceptType();
             if (ac.getPackageName().equals("com.sun.xml.ws.addressing.v200408")) {
                 accept.setAcksTo(new MemberSubmissionAcksToImpl(dest));
@@ -634,7 +643,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
              AddressingProperties inboundAddressingProperties =
                 (AddressingProperties)(inbound.invocationProperties
                         .get(JAXWSAConstants.SERVER_ADDRESSING_PROPERTIES_INBOUND));
-            outboundAddressingProperties.initializeAsReply(inboundAddressingProperties);
+            //outboundAddressingProperties.initializeAsReply(inboundAddressingProperties);
             inbound.invocationProperties.put(JAXWSAConstants.SERVER_ADDRESSING_PROPERTIES_OUTBOUND,
                                     outboundAddressingProperties);
             //add message to ClientInboundSequence so that this message
