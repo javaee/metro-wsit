@@ -32,7 +32,6 @@ package com.sun.xml.ws.rm.jaxws.util;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.spi.PolicySelector;
 import static com.sun.xml.ws.rm.RMConstants.*;
-
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -45,6 +44,7 @@ public class RMPolicySelector extends PolicySelector {
         
     private static final QName rmQName = new QName(version, "RMAssertion");
     private static final QName flowQName = new QName(microsoftVersion, "RmFlowControl");
+    private static final QName orderedQName = new QName(sunVersion, "Ordered");
     static {
         supportedAssertions.add(new QName(version, "AcknowledgementInterval"));
         supportedAssertions.add(new QName(version, "InactivityTimeout"));
@@ -58,9 +58,12 @@ public class RMPolicySelector extends PolicySelector {
         
     public boolean test(PolicyAssertion assertion) {
         QName qname = assertion.getName();
-        if (qname.equals(flowQName) || qname.equals(rmQName)){
+        if (qname.equals(flowQName) || 
+            qname.equals(rmQName) ||
+            qname.equals(orderedQName)){
+            
             Iterator<PolicyAssertion> i = assertion.getNestedAssertionsIterator();
-            while (i.hasNext()) {
+            while (i != null && i.hasNext()) {
                 if (! supportedAssertions.contains(i.next().getName())) {
                     return false;
                 }
