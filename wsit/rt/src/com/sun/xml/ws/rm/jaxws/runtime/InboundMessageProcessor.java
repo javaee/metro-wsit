@@ -119,6 +119,25 @@ public class InboundMessageProcessor {
                 } 
 
 
+                header = message.getHeader("SequenceAcknowledgement");
+                if (header != null) {
+                    
+                    //determine OutboundSequence id from data in header and update
+                    //state of that sequence according to the acks and nacks in the element 
+                    SequenceAcknowledgementElement ackHeader =
+                            (SequenceAcknowledgementElement)(header.readAsJAXB(unmarshaller));
+                    
+                    message.setSequenceAcknowledgementElement(ackHeader);
+                    
+                    OutboundSequence seq =
+                            provider.getOutboundSequence(ackHeader.getId());
+
+                    if (seq != null) {
+                        seq.handleAckResponse(ackHeader);
+                    }
+                }
+                
+                
                 header = message.getHeader("AckRequested");
                 if (header != null) {
  
@@ -154,23 +173,6 @@ public class InboundMessageProcessor {
                     }
                 }
 
-                header = message.getHeader("SequenceAcknowledgement");
-                if (header != null) {
-                    
-                    //determine OutboundSequence id from data in header and update
-                    //state of that sequence according to the acks and nacks in the element 
-                    SequenceAcknowledgementElement ackHeader =
-                            (SequenceAcknowledgementElement)(header.readAsJAXB(unmarshaller));
-                    
-                    message.setSequenceAcknowledgementElement(ackHeader);
-                    
-                    OutboundSequence seq =
-                            provider.getOutboundSequence(ackHeader.getId());
-
-                    if (seq != null) {
-                        seq.handleAckResponse(ackHeader);
-                    }
-                }
                 
             } catch (JAXBException e) {
                 throw new RMException(e);
