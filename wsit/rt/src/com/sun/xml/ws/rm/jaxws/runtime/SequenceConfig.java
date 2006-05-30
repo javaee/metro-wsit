@@ -112,9 +112,8 @@ public class SequenceConfig {
     }
     
     public SequenceConfig(WSDLPort port) {
-
-        inactivityTimeout = 600000;
-                
+        
+        this();
         if (port != null) {
             WSDLBoundPortType binding = port.getBinding();
             WSDLModel model = binding.getOwner();
@@ -236,7 +235,7 @@ public class SequenceConfig {
     }
     
     public void init(WSDLPort port, PolicyMap policyMap) throws RMException {
-        System.out.println("init");
+       
         try {
             
             if (policyMap != null) {
@@ -263,12 +262,16 @@ public class SequenceConfig {
                         PolicyAssertion flowAssertion = null;
                         
                         for (PolicyAssertion assertion : policyAssertionSet) {
+                 
                             if (assertion.getName()
                                              .equals(constants.getRMAssertionQName())) {
                                 rmAssertion = assertion;
                             } else if (assertion.getName()
                                             .equals(constants.getRMFlowControlQName())) {
                                 flowAssertion = assertion;
+                            } else if (assertion.getName()
+                                            .equals(constants.getOrderedQName())) {
+                                ordered = true;
                             } else {
                                 //TODO handle error condition here
                             }
@@ -294,6 +297,7 @@ public class SequenceConfig {
     private void handleRMAssertion(PolicyAssertion rmAssertion) {
         
         Iterator<PolicyAssertion> it = rmAssertion.getNestedAssertionsIterator();
+        
         while (it != null && it.hasNext()) {
             PolicyAssertion assertion = it.next();
             if (assertion.getName().equals(constants.getInactivityTimeoutQName())) {
@@ -312,6 +316,8 @@ public class SequenceConfig {
     
     private void handleFlowAssertion(PolicyAssertion flowAssertion) {
        
+        flowControl = true;
+        
         Iterator<PolicyAssertion> it = flowAssertion.getNestedAssertionsIterator();
         while (it != null && it.hasNext()) { 
              PolicyAssertion assertion = it.next();
