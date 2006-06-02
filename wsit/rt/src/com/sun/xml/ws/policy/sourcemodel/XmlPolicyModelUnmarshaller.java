@@ -131,12 +131,11 @@ final class XmlPolicyModelUnmarshaller extends PolicyModelUnmarshaller {
                                         refData = new PolicyReferenceData(reference);
                                     } else {
                                         Attribute digestAlgorithm = getAttributeByName(childElement, PolicyReferenceData.ATTRIBUTE_DIGEST_ALGORITHM);
+                                        URI algorithmRef = null;
                                         if (digestAlgorithm != null) {
-                                            URI algorithmRef = new URI(digestAlgorithm.getValue());
-                                            refData = new PolicyReferenceData(reference, digest.getValue(), null);
-                                        } else {
-                                            refData = new PolicyReferenceData(reference, digest.getValue(), null);
+                                            algorithmRef = new URI(digestAlgorithm.getValue());
                                         }
+                                        refData = new PolicyReferenceData(reference, digest.getValue(), algorithmRef);
                                     }
                                     childNode = currentNode.createChildPolicyReferenceNode(refData);
                                 } catch (URISyntaxException e) {
