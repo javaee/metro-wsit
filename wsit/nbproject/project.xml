@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <!--
   The contents of this file are subject to the terms
   of the Common Development and Distribution License
@@ -21,7 +20,6 @@
  
   Copyright 2006 Sun Microsystems Inc. All Rights Reserved
 -->
-
 <project xmlns="http://www.netbeans.org/ns/project/1">
     <type>org.netbeans.modules.ant.freeform</type>
     <configuration>
@@ -53,6 +51,16 @@
                     <target>main</target>
                 </action>
             </ide-actions>
+            <export>
+                <type>jar</type>
+                <location>dist/image/jax-ws-latest-wsit/lib/webservices-tools.jar</location>
+                <build-target>main</build-target>
+            </export>
+            <export>
+                <type>jar</type>
+                <location>dist/image/jax-ws-latest-wsit/lib/webservices.jar</location>
+                <build-target>main</build-target>
+            </export>
             <view>
                 <items>
                     <source-folder style="packages">
@@ -80,6 +88,8 @@
                 <package-root>rt/src</package-root>
                 <package-root>tools/src</package-root>
                 <classpath mode="compile">lib/runtime/activation.jar;lib/runtime/jaxb-api.jar;lib/runtime/jaxws-api.jar;lib/runtime/jaxws-rt.jar;lib/runtime/saaj-api.jar;lib/runtime/jsr173_api.jar;lib/runtime/jaxwsa-api.jar;lib/runtime/jaxwsa-impl.jar;lib/runtime/FastInfoset.jar;lib/runtime/jaxb-impl.jar;lib/runtime/jsr181-api.jar;lib/runtime/jsr250-api.jar;lib/runtime/mail-1.4.jar;lib/runtime/resolver.jar;lib/runtime/saaj-impl.jar;lib/runtime/secconv-jaxbbindings.jar;lib/runtime/sjsxp.jar;lib/runtime/stax-ex.jar;lib/runtime/stax-utils.jar;lib/runtime/streambuffer.jar;lib/runtime/trust-jaxbbindings.jar;lib/runtime/xmldsig.jar;lib/runtime/xmlsec.jar</classpath>
+                <built-to>dist/image/jax-ws-latest-wsit/lib/webservices-tools.jar</built-to>
+                <built-to>dist/image/jax-ws-latest-wsit/lib/webservices.jar</built-to>
                 <source-level>1.5</source-level>
             </compilation-unit>
         </java-data>
