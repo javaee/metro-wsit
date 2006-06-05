@@ -100,11 +100,11 @@ public class MetadataClient {
             for (Protocol p : Protocol.values()) {
                 InputStream responseStream = null;
                 try {
-                    responseStream = wxfUtil.getMetadata(address, p);
+                    responseStream = wxfUtil.getMetadata(newAddress, p);
                 } catch (Exception e) {
                     logger.log(ERROR_LOG_LEVEL,
                         "Exception retrieving data with protocol" + p +
-                        ", address " + address,
+                        ", address " + newAddress,
                         e);
                     continue;
                 }
