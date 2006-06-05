@@ -71,6 +71,7 @@
         <copy todir="${as.home}/bin" overwrite="true">
             <fileset dir="${backup.dir}" includes="wsimport${ext}, wsgen${ext}, xjc${ext}, schemagen${ext}"/>
         </copy>
+        <chmod perm="+x" dir="${as.home}/bin" includes="wsimport${ext}, wsgen${ext}, xjc${ext}, schemagen${ext}"/>
         <delete dir="${backup.dir}" includeemptydirs="true"/>
         <delete dir="${as.home}/lib" includes="webservices.jar, webservices-tools.jar"/>
         <copy todir="${as.home}/lib" failonerror="false">
