@@ -66,7 +66,7 @@ public class SequenceAcknowledgementElement   {
     @XmlElement(name = "Nack", namespace = "http://schemas.xmlsoap.org/ws/2005/02/rm")
     protected List<BigInteger> nack;
 
-    @XmlElement(name="BufferRemaining", namespace="http://schemas.microsoft.com/net/2004/02/RM",nillable=true)
+    @XmlElement(name="BufferRemaining", namespace="http://schemas.microsoft.com/net/2004/02/RM")
     public Integer bufferRemaining;
 
     @XmlAnyElement(lax = true)
