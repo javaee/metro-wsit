@@ -38,8 +38,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap; 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
@@ -107,6 +109,7 @@ import com.sun.xml.wss.impl.misc.SecurityUtil;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.JAXBContext;
+import javax.xml.namespace.QName;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -117,6 +120,7 @@ import org.w3c.dom.Element;
 public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
 
     private static final String SAML_HOLDER_OF_KEY = "urn:oasis:names:tc:SAML:1.0:cm:holder-of-key";
+    protected static final String PRINCIPAL = "principal";
    
     protected Token createSAMLAssertion(byte[] key, String assertionId, String appliesTo) throws WSTrustException
     {       
@@ -185,18 +189,27 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
             SubjectConfirmation subjectConfirmation = samlFac.createSubjectConfirmation(
             confirmationMethods, null, keyInfo.getElement());
 
-            NameIdentifier nameId = null;
-            List claimedAttrs = getClaimedAttributes(subject, appliesTo, tokenType);
-            if (!claimedAttrs.isEmpty()){
-                String name = (String)claimedAttrs.get(0);
-                nameId = samlFac.createNameIdentifier(name, null, null);
+            Map claimedAttrs = getClaimedAttributes(subject, appliesTo, tokenType);
+            
+            com.sun.xml.wss.saml.Subject subj = null;
+            String principal = (String)claimedAttrs.get(PRINCIPAL);
+            if (principal != null){
+                NameIdentifier nameId = samlFac.createNameIdentifier(principal, null, null);
+                subj = samlFac.createSubject(nameId, subjectConfirmation);
+                claimedAttrs.remove(PRINCIPAL);
             }
-            com.sun.xml.wss.saml.Subject subj = samlFac.createSubject(nameId, subjectConfirmation);
-            List values = new ArrayList();
-            values.add("value");
-            Attribute attr = samlFac.createAttribute("name", "http://sun.com", values);
+            
             List attrs = new ArrayList();
-            attrs.add(attr);
+            Set keys = claimedAttrs.keySet();
+            Iterator iterator = keys.iterator();
+            while (iterator.hasNext()){
+                String attrKey = (String)iterator.next();
+                QName value = (QName)claimedAttrs.get(attrKey);
+                List values = new ArrayList();
+                values.add(value.getLocalPart());
+                Attribute attr = samlFac.createAttribute(attrKey, value.getNamespaceURI(), values);
+                attrs.add(attr);
+            }
             AttributeStatement statement = samlFac.createAttributeStatement(subj, attrs);
             List statements = new ArrayList();
             statements.add(statement);
@@ -257,19 +270,27 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
        return true;
    }
    
-   protected List getClaimedAttributes(Subject subject, String appliesTo, String tokenType){
+   protected Map getClaimedAttributes(Subject subject, String appliesTo, String tokenType){
        Set<Principal> principals = subject.getPrincipals();
-       List attrs = new ArrayList();
+       //List attrs = new ArrayList();
+       Map attrs = new HashMap();
        if (principals != null){
            Iterator iterator = principals.iterator();
            while (iterator.hasNext()){
                 String name = principals.iterator().next().getName();
                 if (name != null){
-                    attrs.add(name);
+                    //attrs.add(name);
+                    attrs.put(PRINCIPAL, name);
                     break;
                 }
            }       
        }
+       
+       // Set up a dumy attribute value
+       String key = "name";
+       QName value = new QName("http://sun.com", "value");
+       attrs.put(key, value);
+       
        return attrs;
    }
 }

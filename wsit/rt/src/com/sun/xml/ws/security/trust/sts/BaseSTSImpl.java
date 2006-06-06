@@ -252,7 +252,7 @@ public abstract class BaseSTSImpl implements Provider<Source> {
         RequestSecurityTokenResponse rstr = contract.issue(rst, context, null);
         
         Token samlToken = rstr.getRequestedSecurityToken().getToken();
-        rstr.getRequestedSecurityToken().setToken(null);
+        rstr.getRequestedSecurityToken().setAny(null);
         Element samlEle = (Element)samlToken.getTokenValue();
         Element rstrEle = eleFac.toElement(rstr);
         Document doc = rstrEle.getOwnerDocument();

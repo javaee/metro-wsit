@@ -255,7 +255,7 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
 
    protected abstract boolean isAuthorized(Subject subject, String appliesTo, String tokenType);
 
-   protected abstract List getClaimedAttributes(Subject subject, String appliesTo, String tokenType);
+   protected abstract Map getClaimedAttributes(Subject subject, String appliesTo, String tokenType);
 
  /*  protected byte[] createSecretKey(RequestSecurityToken rst)throws WSTrustException
    {

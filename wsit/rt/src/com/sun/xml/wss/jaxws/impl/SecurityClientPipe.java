@@ -304,7 +304,14 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
             return new ArrayList();
         }
         
-        SecurityPolicyHolder sph =(SecurityPolicyHolder) outMessagePolicyMap.get(getOperation(packet.getMessage()));
+        WSDLBoundOperation operation = null;
+        if(isTrustMessage(packet)){
+            operation = getWSDLOpFromAction(packet,false);
+        }else{
+            operation =getOperation(packet.getMessage());
+        }
+        
+        SecurityPolicyHolder sph =(SecurityPolicyHolder) outMessagePolicyMap.get(operation);
         if(sph == null){
             return EMPTY_LIST;
         }
@@ -406,6 +413,7 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
             serviceName = (QName)packet.invocationProperties.get(WSTrustConstants.PROPERTY_SERVICE_NAME);
             portName = (QName)packet.invocationProperties.get(WSTrustConstants.PROPERTY_PORT_NAME);
         }
+        
         for (PolicyAssertion issuedTokenAssertion : policies) {
             IssuedTokenContext ctx = trustPlugin.process(issuedTokenAssertion, stsEP, wsdlLocation,serviceName,portName, packet.endpointAddress.toString());
             issuedTokenContextMap.put(
