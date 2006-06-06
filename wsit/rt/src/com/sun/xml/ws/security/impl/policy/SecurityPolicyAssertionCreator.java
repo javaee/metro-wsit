@@ -58,6 +58,7 @@ public class SecurityPolicyAssertionCreator implements PolicyAssertionCreator{
         implementedAssertions.add(Constants.HEADER);
         implementedAssertions.add(Constants.HttpsToken);
         implementedAssertions.add(Constants.IssuedToken);
+        implementedAssertions.add(Constants.Issuer);
         implementedAssertions.add(Constants.InitiatorToken);
         
         implementedAssertions.add(Constants.KerberosToken);

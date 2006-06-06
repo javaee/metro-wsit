@@ -239,7 +239,7 @@ public class PolicyUtil {
         return false;
     }
     
-        public static boolean isSecurityContextToken(PolicyAssertion token) {
+    public static boolean isSecurityContextToken(PolicyAssertion token) {
         if ( !isSecurityPolicyNS(token )) {
             return false;
         }
@@ -285,7 +285,7 @@ public class PolicyUtil {
         return false;
     }
     
-        public static boolean isRelToken(PolicyAssertion token) {
+    public static boolean isRelToken(PolicyAssertion token) {
         if ( !isSecurityPolicyNS(token )) {
             return false;
         }
@@ -296,7 +296,7 @@ public class PolicyUtil {
         return false;
     }
     
-        public static boolean isRelTokenType(PolicyAssertion token) {
+    public static boolean isRelTokenType(PolicyAssertion token) {
         if ( !isSecurityPolicyNS(token )) {
             return false;
         }
@@ -705,7 +705,7 @@ public class PolicyUtil {
     }
     
     public static boolean isIssuer(PolicyAssertion assertion) {
-        if ( !isTrustNS(assertion)) {
+        if ( !isSecurityPolicyNS(assertion)) {
             return false;
         }
         
@@ -969,7 +969,7 @@ public class PolicyUtil {
         return false;
     }
     
-      public static boolean isRequireExternalReference(PolicyAssertion assertion) {
+    public static boolean isRequireExternalReference(PolicyAssertion assertion) {
         if ( !isSecurityPolicyNS(assertion)) {
             return false;
         }
@@ -980,7 +980,7 @@ public class PolicyUtil {
         
         return false;
     }
-      
+    
     public static boolean isRequireInternalReference(PolicyAssertion assertion) {
         if ( !isSecurityPolicyNS(assertion)) {
             return false;
@@ -1236,6 +1236,6 @@ public class PolicyUtil {
             return true;
         }
         return false;
-    }  
-   
+    }
+    
 }
