@@ -58,7 +58,7 @@ import javax.xml.namespace.QName;
 public class X509Token extends PolicyAssertion implements com.sun.xml.ws.security.policy.X509Token,Cloneable, SecurityAssertionValidator{
     
     private static QName itQname = new QName(Constants.SECURITY_POLICY_NS, Constants.IncludeToken);
-    private String includeToken = null;
+    private String includeToken = Token.INCLUDE_ALWAYS;
     
     private boolean populated = false;
     private String tokenType = null;
@@ -141,7 +141,9 @@ public class X509Token extends PolicyAssertion implements com.sun.xml.ws.securit
         }
         synchronized (this.getClass()){
             if(!populated){
+                if(this.getAttributeValue(itQname)!=null){
                 this.includeToken = this.getAttributeValue(itQname);
+                }
                 NestedPolicy policy = this.getNestedPolicy();
                 if(policy == null){
                     if(logger.getLevel() == Level.FINE){
