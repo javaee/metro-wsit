@@ -3,12 +3,12 @@
  * of the Common Development and Distribution License
  * (the License).  You may not use this file except in
  * compliance with the License.
- * 
+ *
  * You can obtain a copy of the license at
  * https://glassfish.dev.java.net/public/CDDLv1.0.html.
  * See the License for the specific language governing
  * permissions and limitations under the License.
- * 
+ *
  * When distributing Covered Code, include this CDDL
  * Header Notice in each file and include the License file
  * at https://glassfish.dev.java.net/public/CDDLv1.0.html.
@@ -16,7 +16,7 @@
  * with the fields enclosed by brackets [] replaced by
  * you own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * 
+ *
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
@@ -81,14 +81,15 @@ public class EndpointReference extends com.sun.xml.ws.policy.PolicyAssertion imp
         synchronized (this.getClass()){
             if(!populated){
                 if ( this.hasNestedAssertions() ) {
-                    NestedPolicy policy = this.getNestedPolicy();
-                    AssertionSet assertionSet = policy.getAssertionSet();
-                    for(PolicyAssertion assertion : assertionSet){
+                    Iterator <PolicyAssertion> it = this.getNestedAssertionsIterator();
+                    while ( it.hasNext() ) {
+                        PolicyAssertion assertion = it.next();                        
                         if ( PolicyUtil.isAddress(assertion)) {
                             this.address = (Address) assertion;
                         }
                     }
                 }
+                populated = true;
             }
         }
     }

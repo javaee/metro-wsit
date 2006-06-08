@@ -39,7 +39,8 @@ import java.net.URISyntaxException;
 import java.util.Collection;
 import javax.xml.namespace.QName;
 import javax.xml.ws.addressing.AttributedURI;
-
+import java.util.logging.Level;
+import static com.sun.xml.ws.security.impl.policy.Constants.logger;
 /**
  *
  * @author Abhijit Das
@@ -64,12 +65,15 @@ public class Address extends com.sun.xml.ws.policy.PolicyAssertion implements co
                 this.address = new URI(this.getValue());
                 populated = true;
             } catch (URISyntaxException ex) {
-                ex.printStackTrace();
+                if(logger.getLevel() == Level.SEVERE){
+                    logger.log(Level.SEVERE,"SP0100.invalid.epr-address",ex);
+                }
             }
         }
     }
     
     public URI getURI() {
+        populate();
         return address;
     }
     

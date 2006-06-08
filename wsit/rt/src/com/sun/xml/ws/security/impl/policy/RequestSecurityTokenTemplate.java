@@ -84,6 +84,7 @@ public class RequestSecurityTokenTemplate extends PolicyAssertion implements com
     }
     
     public String getTokenType() {
+        populate();
         return tokenType;
     }
     

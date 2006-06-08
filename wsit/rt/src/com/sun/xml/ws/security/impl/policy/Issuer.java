@@ -73,6 +73,7 @@ public class Issuer extends PolicyAssertion implements com.sun.xml.ws.security.p
 //        return Constants._Issuer;
 //    }
     public EndpointReference getEndpointReference() {
+        populate();
         return endpointRef;
     }
     
