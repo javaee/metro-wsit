@@ -46,7 +46,8 @@ public class EncryptionTargetCreator {
         target.setDataEncryptionAlgorithm(algorithmSuite.getEncryptionAlgorithm());
         target.setType(EncryptionTarget.TARGET_TYPE_VALUE_QNAME);
         target.setQName(targetValue);
-        target.setValue(EncryptionTarget.BODY);
+        //target.setValue(EncryptionTarget.BODY);
+        target.setValue("{"+targetValue.getNamespaceURI()+"}"+targetValue.getLocalPart());
         target.setContentOnly(false);
         return target;
     }
