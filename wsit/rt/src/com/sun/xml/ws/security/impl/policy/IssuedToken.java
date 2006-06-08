@@ -52,7 +52,7 @@ import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
 public class IssuedToken extends PolicyAssertion implements  com.sun.xml.ws.security.policy.IssuedToken, SecurityAssertionValidator{
     
     private boolean populated = false;
-    protected String includeToken;
+    protected String includeToken = Token.INCLUDE_ALWAYS;
     RequestSecurityTokenTemplate rstTemplate;
     EndpointReference er;
     private static QName itQname = new QName(Constants.SECURITY_POLICY_NS, Constants.IncludeToken);
@@ -163,8 +163,9 @@ public class IssuedToken extends PolicyAssertion implements  com.sun.xml.ws.secu
         }
         synchronized (this.getClass()){
             if(!populated){
-                
+                if(this.getAttributeValue(itQname)!=null){
                 this.includeToken = this.getAttributeValue(itQname);
+                }
                 if ( this.hasNestedAssertions() ) {
                     Iterator <PolicyAssertion> it = this.getNestedAssertionsIterator();
                     while ( it.hasNext() ) {
