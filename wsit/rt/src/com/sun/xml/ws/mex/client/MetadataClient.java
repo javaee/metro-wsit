@@ -143,7 +143,7 @@ public class MetadataClient {
         for (int i=0; i<nodes.getLength(); i++) {
             Node serviceNode = nodes.item(i);
             if (serviceNode.getLocalName() != null &&
-                serviceNode.getLocalName().equalsIgnoreCase("service")) {
+                serviceNode.getLocalName().equals("service")) {
                 
                 Node nameAtt = wsdlNode.getAttributes().getNamedItem("name");
                 QName serviceName = new QName(ns, nameAtt.getNodeValue());
@@ -151,7 +151,7 @@ public class MetadataClient {
                 for (int j=0; j<portNodes.getLength(); j++) {
                     Node portNode = portNodes.item(j);
                     if (portNode.getLocalName() != null &&
-                        portNode.getLocalName().equalsIgnoreCase("port")) {
+                        portNode.getLocalName().equals("port")) {
                         
                         QName portName = new QName(ns,
                             getAttributeValue(portNode, "name"));
@@ -177,11 +177,11 @@ public class MetadataClient {
         do {
             state = reader.next();
         } while (state != reader.START_ELEMENT ||
-            !reader.getLocalName().equalsIgnoreCase("metadata"));
+            !reader.getLocalName().equals("Metadata"));
         
         Unmarshaller uMarhaller = jaxbContext.createUnmarshaller();
         Metadata mData = (Metadata) uMarhaller.unmarshal(reader);
-        //cleanData(mData);
+        cleanData(mData);
         return mData;
     }
 
@@ -202,7 +202,7 @@ public class MetadataClient {
         for (int i=0; i<portDetails.getLength(); i++){
             Node addressNode = portDetails.item(i);
             if (addressNode.getLocalName() != null &&
-                addressNode.getLocalName().equalsIgnoreCase("address")) {
+                addressNode.getLocalName().equals("address")) {
                 
                 return getAttributeValue(addressNode, "location");
             }
@@ -213,8 +213,8 @@ public class MetadataClient {
     }
 
     /*
-     * This is a workaround for a bug in some indigo wsdls where
-     * there are being returned with schema imports containing
+     * This is a workaround for a bug in some indigo wsdls
+     * that are being returned with schema imports containing
      * an empty schemaLocation attribute.
      */
     private void cleanData(Metadata md) {
@@ -229,11 +229,39 @@ public class MetadataClient {
     private void cleanWSDLNode(final Node wsdlNode) {
         NodeList nodes = wsdlNode.getChildNodes();
         for (int i=0; i<nodes.getLength(); i++) {
-            Node child = nodes.item(i);
-            if (child.getLocalName() != null &&
-                child.getLocalName().equalsIgnoreCase("types")) {
+            Node typesNode = nodes.item(i);
+            if (typesNode.getLocalName() != null &&
+                typesNode.getLocalName().equals("types")) {
                 
-                // work in progress
+                NodeList schemaNodes = typesNode.getChildNodes();
+                for (int j=0; j<schemaNodes.getLength(); j++) {
+                    Node schemaNode = schemaNodes.item(j);
+                    if (schemaNode.getLocalName() != null &&
+                        schemaNode.getLocalName().equals("schema")) {
+                        
+                        cleanSchemaNode(schemaNode);
+                    }
+                }
+            }
+        }
+    }
+    
+    // remove this when cleanWSDLNode() is removed
+    private void cleanSchemaNode(Node schemaNode) {
+        NodeList children = schemaNode.getChildNodes();
+        for (int i=0; i<children.getLength(); i++) {
+            Node importNode = children.item(i);
+            if (importNode.getLocalName() != null &&
+                importNode.getLocalName().equals("import")) {
+
+                NamedNodeMap atts = importNode.getAttributes();
+                Node schemaLocation = atts.getNamedItem("schemaLocation");
+                if (schemaLocation != null &&
+                    schemaLocation.getNodeValue().equals("")) {
+                    
+                    atts.removeNamedItem("schemaLocation");
+                }
+                
             }
         }
     }
