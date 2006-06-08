@@ -172,18 +172,22 @@ public class SupportingTokens extends PolicyAssertion implements com.sun.xml.ws.
     }
     
     public Iterator<com.sun.xml.ws.security.policy.SignedParts> getSignedParts() {
+        populate();
         return spList.iterator();
     }
     
     public Iterator<com.sun.xml.ws.security.policy.SignedElements> getSignedElements() {
+        populate();
         return seList.iterator();
     }
     
     public Iterator<com.sun.xml.ws.security.policy.EncryptedParts> getEncryptedParts() {
+        populate();
         return epList.iterator();
     }
     
     public Iterator<com.sun.xml.ws.security.policy.EncryptedElements> getEncryptedElements() {
+        populate();
         return eeList.iterator();
     }
     
