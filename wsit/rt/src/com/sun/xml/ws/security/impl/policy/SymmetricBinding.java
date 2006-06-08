@@ -52,7 +52,7 @@ public class SymmetricBinding extends PolicyAssertion implements com.sun.xml.ws.
     Token encryptionToken ;
     MessageLayout layout = MessageLayout.Lax;
     AlgorithmSuite algSuite;
-    boolean includeTimestamp=true;
+    boolean includeTimestamp=false;
     boolean contentOnly = true;
     String protectionOrder = SIGN_ENCRYPT;
     boolean protectToken = false;

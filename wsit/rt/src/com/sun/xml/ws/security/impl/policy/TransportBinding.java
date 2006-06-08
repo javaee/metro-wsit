@@ -47,7 +47,7 @@ public class TransportBinding extends PolicyAssertion implements com.sun.xml.ws.
     
     HttpsToken transportToken;
     private AlgorithmSuite algSuite;
-    boolean includeTimeStamp=true;
+    boolean includeTimeStamp=false;
     MessageLayout layout = MessageLayout.Lax;
     boolean populated = false;
     /**

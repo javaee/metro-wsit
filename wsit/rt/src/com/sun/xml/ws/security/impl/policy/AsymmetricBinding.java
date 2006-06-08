@@ -52,7 +52,7 @@ public class AsymmetricBinding extends com.sun.xml.ws.policy.PolicyAssertion imp
     private Token initiatorToken;
     private Token recipientToken;
     private AlgorithmSuite algSuite;
-    private boolean includeTimestamp = true;
+    private boolean includeTimestamp = false;
     private boolean contentOnly = true;
     private  MessageLayout layout = MessageLayout.Lax;
     private String protectionOrder = SIGN_ENCRYPT;
