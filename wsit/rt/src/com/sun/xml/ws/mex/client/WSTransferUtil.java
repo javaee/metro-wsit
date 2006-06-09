@@ -80,9 +80,6 @@ public class WSTransferUtil {
             GET_WXF_REQUEST +
             "</wsa:Action>" +
             "<wsa:To>" + address + "</wsa:To>" +
-            "<wsa:ReplyTo><wsa:Address>" +
-            "http://www.w3.org/2005/08/addressing/none" +
-            "</wsa:Address></wsa:ReplyTo>" +
             "<wsa:MessageID>" +
             "uuid:778b135f-3fdf-44b2-b53e-ebaab7441e40" +
             "</wsa:MessageID>" +
