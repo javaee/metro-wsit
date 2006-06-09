@@ -289,6 +289,21 @@ public class SecurityServerPipe extends SecurityPipeBase
             }
         }
         
+        /* TODO:this piece of code present since payload should be read once*/
+        try{
+            SOAPMessage sm = retPacket.getMessage().readAsSOAPMessage();
+            Message newMsg = Messages.create(sm);
+            retPacket.setMessage(newMsg);
+            if (newMsg.isFault()) {
+                thereWasAFault = true;
+            }
+        }catch(SOAPException ex){
+            throw new WebServiceException(ex);
+        }/**/
+        
+        if (thereWasAFault) {
+            return retPacket;
+        }
         //---------------OUTBOUND SECURITY PROCESSING----------
         ctx = initializeOutgoingProcessingContext(retPacket, isSCIssueMessage, isTrustMessage, thereWasAFault);
         
