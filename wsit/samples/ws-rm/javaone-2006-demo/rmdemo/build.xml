@@ -24,7 +24,6 @@
 
 <project basedir="." default="help" name="rmdemo">
 
-    <import file="etc/deploy-targets.xml"/>
 
     <property environment="env"/>
 
