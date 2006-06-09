@@ -96,7 +96,7 @@ public class TrustPluginImpl implements TrustPlugin {
         IssuedToken issuedToken = (IssuedToken)token;
         RequestSecurityTokenTemplate rstTemplate = issuedToken.getRequestSecurityTokenTemplate();
         String stsURI = null;
-        if (stsURI == null){
+        if (stsEP == null){
             stsURI = getSTSURI(issuedToken);
         }else{
             stsURI = stsEP.toString();

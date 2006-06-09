@@ -73,6 +73,7 @@ import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.security.trust.WSTrustException;
 import com.sun.xml.ws.security.trust.WSTrustContract;
+import com.sun.xml.ws.security.trust.util.WSTrustUtil;
 import com.sun.xml.ws.security.trust.elements.BinarySecret;
 import com.sun.xml.ws.security.trust.elements.Entropy;
 import com.sun.xml.ws.security.trust.elements.Lifetime;
@@ -146,9 +147,9 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
             Callback[] callbacks = {ec};
             callbackHandler.handle(callbacks);
             X509Certificate serCert = req.getX509Certificate();
-            PublicKey serPubKey = serCert.getPublicKey();
-            XMLCipher cipher = XMLCipher.getInstance(XMLCipher.RSA_OAEP);
-            cipher.init(XMLCipher.WRAP_MODE, serPubKey);
+            //PublicKey serPubKey = serCert.getPublicKey();
+            //XMLCipher cipher = XMLCipher.getInstance(XMLCipher.RSA_OAEP);
+            //cipher.init(XMLCipher.WRAP_MODE, serPubKey);
  
             SAMLAssertionFactory samlFac = 
                    SAMLAssertionFactory.newInstance(SAMLAssertionFactory.SAML1_1);
@@ -167,18 +168,20 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
             // Create KeyInfo 
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             Document doc = docFactory.newDocumentBuilder().newDocument();
+            
             KeyInfo keyInfo = new KeyInfo(doc);
             if (!config.getEncryptIssuedToken() && config.getEncryptIssuedKey()){
                 // Encrypt the secret key and create EncryptedKey 
-                EncryptedKey encKey = cipher.encryptKey(doc, new SecretKeySpec(key, "AES"));
-                KeyInfo keyinfo = new KeyInfo(doc);
+               // EncryptedKey encKey = cipher.encryptKey(doc, new SecretKeySpec(key, "AES"));
+                //KeyInfo keyinfo = new KeyInfo(doc);
                 //KeyIdentifier keyIdentifier = new KeyIdentifierImpl(MessageConstants.ThumbPrintIdentifier_NS,null);
                 //keyIdentifier.setValue(Base64.encode(X509ThumbPrintIdentifier.getThumbPrintIdentifier(serCert)));
-                KeyIdentifier keyIdentifier = new KeyIdentifierImpl(MessageConstants.X509SubjectKeyIdentifier_NS,null);
-                keyIdentifier.setValue(Base64.encode(X509SubjectKeyIdentifier.getSubjectKeyIdentifier(serCert)));
-                SecurityTokenReference str = new SecurityTokenReferenceImpl(keyIdentifier);
-                keyinfo.addUnknownElement(WSTrustElementFactory.newInstance().toElement(str,doc));
-                encKey.setKeyInfo(keyinfo);
+               // KeyIdentifier keyIdentifier = new KeyIdentifierImpl(MessageConstants.X509SubjectKeyIdentifier_NS,null);
+               // keyIdentifier.setValue(Base64.encode(X509SubjectKeyIdentifier.getSubjectKeyIdentifier(serCert)));
+               // SecurityTokenReference str = new SecurityTokenReferenceImpl(keyIdentifier);
+               // keyinfo.addUnknownElement(WSTrustElementFactory.newInstance().toElement(str,doc));
+                //encKey.setKeyInfo(keyinfo);
+                EncryptedKey encKey = encryptKey(doc, key, serCert);
                 keyInfo.add(encKey);
             }
             else{
@@ -233,10 +236,22 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
             token = new GenericToken(signedAssertion);
             
             if (config.getEncryptIssuedToken()){
+                XMLCipher cipher = XMLCipher.getInstance(XMLCipher.AES_256);
+                int keysizeInBytes = 32;
+                byte[] skey = WSTrustUtil.generateRandomSecret(keysizeInBytes);
+                cipher.init(XMLCipher.ENCRYPT_MODE, new SecretKeySpec(skey, "AES"));
+                
                 // Encrypt the assertion and return the Encrypteddata
-                EncryptedData encData = cipher.encryptData(signedAssertion.getOwnerDocument(), signedAssertion);
+                Document owner = signedAssertion.getOwnerDocument();
+                EncryptedData encData = cipher.encryptData(owner, signedAssertion);
                 String id = "uuid-" + UUID.randomUUID().toString();
                 encData.setId(id);
+                
+                KeyInfo encKeyInfo = new KeyInfo(owner);
+                EncryptedKey encKey = encryptKey(owner, skey, serCert);
+                encKeyInfo.add(encKey);
+                encData.setKeyInfo(encKeyInfo);
+                
                 token = new GenericToken(cipher.martial(encData));
                 //JAXBElement<EncryptedDataType> eEle = u.unmarshal(cipher.martial(encData), EncryptedDataType.class);
                 //return eEle.getValue();
@@ -292,5 +307,23 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
        attrs.put(key, value);
        
        return attrs;
+   }
+   
+   private EncryptedKey encryptKey (Document doc, byte[] encryptedKey, X509Certificate cert) throws Exception{
+       PublicKey pubKey = cert.getPublicKey();
+       XMLCipher cipher = XMLCipher.getInstance(XMLCipher.RSA_OAEP);
+       cipher.init(XMLCipher.WRAP_MODE, pubKey);
+            
+       EncryptedKey encKey = cipher.encryptKey(doc, new SecretKeySpec(encryptedKey, "AES"));
+       KeyInfo keyinfo = new KeyInfo(doc);
+       //KeyIdentifier keyIdentifier = new KeyIdentifierImpl(MessageConstants.ThumbPrintIdentifier_NS,null);
+       //keyIdentifier.setValue(Base64.encode(X509ThumbPrintIdentifier.getThumbPrintIdentifier(serCert)));
+       KeyIdentifier keyIdentifier = new KeyIdentifierImpl(MessageConstants.X509SubjectKeyIdentifier_NS,null);
+       keyIdentifier.setValue(Base64.encode(X509SubjectKeyIdentifier.getSubjectKeyIdentifier(cert)));
+       SecurityTokenReference str = new SecurityTokenReferenceImpl(keyIdentifier);
+       keyinfo.addUnknownElement((Element)doc.importNode(WSTrustElementFactory.newInstance().toElement(str,null), true));
+       encKey.setKeyInfo(keyinfo);
+       
+       return encKey;
    }
 }
