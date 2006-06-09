@@ -1,5 +1,5 @@
 /*
- * $Id: SecurityRecipient.java,v 1.1 2006-05-03 22:57:38 arungupta Exp $
+ * $Id: SecurityRecipient.java,v 1.2 2006-06-09 14:13:11 kumarjayanti Exp $
  */
 
 /*
@@ -27,7 +27,6 @@
 package com.sun.xml.wss.impl;
 
 import com.sun.xml.wss.ProcessingContext;
-import com.sun.xml.wss.impl.dsig.AttachmentData;
 import com.sun.xml.wss.impl.policy.mls.EncryptionTarget;
 import java.util.Iterator;
 import java.util.ArrayList;
@@ -47,16 +46,12 @@ import javax.xml.soap.SOAPFactory;
 
 import com.sun.xml.wss.core.SecurityHeader;
 
-import javax.security.auth.callback.Callback;
-import javax.security.auth.callback.CallbackHandler;
-
 import com.sun.xml.wss.impl.policy.mls.WSSPolicy;
 import com.sun.xml.wss.impl.policy.mls.SignaturePolicy;
 import com.sun.xml.wss.impl.policy.mls.EncryptionPolicy;
 
 import com.sun.xml.wss.impl.policy.SecurityPolicy;
 import com.sun.xml.wss.impl.policy.StaticPolicyContext;
-import com.sun.xml.wss.impl.policy.DynamicSecurityPolicy;
 
 import com.sun.xml.wss.impl.filter.DumpFilter;
 import com.sun.xml.wss.impl.filter.TimestampFilter;
@@ -73,13 +68,10 @@ import com.sun.xml.wss.impl.config.ApplicationSecurityConfiguration;
 
 import com.sun.xml.wss.impl.callback.DynamicPolicyCallback;
 import com.sun.xml.wss.impl.policy.mls.AuthenticationTokenPolicy;
-import com.sun.xml.wss.impl.policy.mls.AuthenticationTokenPolicy.UsernameTokenBinding;
-import com.sun.xml.wss.impl.policy.mls.TimestampPolicy;
-
-import org.w3c.dom.Document;
 import com.sun.xml.wss.logging.LogDomainConstants;
 import com.sun.xml.wss.*;
 import com.sun.xml.wss.impl.policy.mls.Target;
+import javax.xml.namespace.QName;
 
 /**
  * This class exports a static Security Service for Verifying/Validating Security in an Inbound SOAPMessage.
@@ -1165,9 +1157,18 @@ public class SecurityRecipient {
         
         SOAPElement current = header.getCurrentHeaderBlockElement();
         SOAPElement first = current;
-        
+        SOAPElement prev = null;
         while (current != null) {
+            
             pProcessOnce(fpContext, current, false);
+            if (fpContext.getMode() == FilterProcessingContext.DEFAULT && 
+                    "EncryptedData".equals(current.getLocalName()) &&
+                     (prev != null)) {
+                header.setCurrentHeaderElement(prev);
+
+            } else {
+                prev = current;
+            }
             current = header.getCurrentHeaderBlockElement();
         }
         

@@ -1,5 +1,5 @@
 /*
- * $Id: KeyResolver.java,v 1.1 2006-05-03 22:57:51 arungupta Exp $
+ * $Id: KeyResolver.java,v 1.2 2006-06-09 14:13:10 kumarjayanti Exp $
  */
 
 /*
@@ -140,7 +140,7 @@ public class KeyResolver {
             SecurableSoapMessage secureMsg = context.getSecurableSoapMessage();
             if (keyInfo.containsSecurityTokenReference()) {
                 return processSecurityTokenReference(keyInfo,sig, context);
-            }else if (keyInfo.containsKeyName()) {
+            }else if (keyInfo.containsKeyName()) {                
                 EncryptionPolicy policy = (EncryptionPolicy)context.getInferredPolicy();
                 
                 String keynameString = keyInfo.getKeyNameString(0);
@@ -154,14 +154,14 @@ public class KeyResolver {
                         context.getSecurityEnvironment().getSecretKey(context.getExtraneousProperties(),
                         keynameString,
                         false);
-            } else if (keyInfo.containsKeyValue()) {
+            } else if (keyInfo.containsKeyValue()) {                
                 // resolve KeyValue
                 returnKey =
                         resolveKeyValue(secureMsg, keyInfo.getKeyValue(0), sig,context);
-            } else if (keyInfo.containsX509Data()) {
+            } else if (keyInfo.containsX509Data()) {                
                 // resolve X509Data
                 returnKey =  resolveX509Data(secureMsg, keyInfo.getX509Data(0), sig,context);
-            } else if(keyInfo.containsEncryptedKeyToken()){
+            } else if(keyInfo.containsEncryptedKeyToken()){                
                 EncryptedKeyToken token = keyInfo.getEncryptedKey(0);
                 KeyInfoHeaderBlock kiHB = token.getKeyInfo();
                 if(kiHB.containsSecurityTokenReference()){
@@ -175,7 +175,7 @@ public class KeyResolver {
                     dataEncAlgo = context.getAlgorithmSuite().getEncryptionAlgorithm();
                 }
                 returnKey = token.getSecretKey(getKey(kiHB, false, context), dataEncAlgo);
-            } else if (keyInfo.containsBinarySecret()) {
+            } else if (keyInfo.containsBinarySecret()) {                
                 BinarySecret bs = keyInfo.getBinarySecret(0);
                 // assuming the Binary Secret is of Type
                 if ((bs.getType() == null) || bs.getType().equals(BinarySecret.SYMMETRIC_KEY_TYPE)) {
@@ -232,6 +232,10 @@ public class KeyResolver {
              if (key != null)
                  return key;
             //TODO: expensive conversion happening
+            if (samlAssertion == null) {
+                 throw new XWSSecurityException("Cannot Locate SAML Assertion");
+            }
+             
             Element keyInfoElem =
                     AssertionUtil.getSubjectConfirmationKeyInfo(samlAssertion.toElement(null));
             KeyInfoHeaderBlock keyInfo = new KeyInfoHeaderBlock(
@@ -859,6 +863,11 @@ public class KeyResolver {
         
         //TODO: expensive conversion happening here
         try {
+            // if it is an Encrypted SAML Assertion we cannot decrypt it
+            // on the client side since we don't have the Private Key
+            if ("EncryptedData".equals(tokenElement.getLocalName())) {
+                return null;
+            }
             ret = AssertionUtil.fromElement(tokenElement);
         } catch (Exception e) {
             throw new XWSSecurityException(e);

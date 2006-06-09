@@ -807,6 +807,11 @@ public class KeySelectorImpl extends KeySelector{
             return key;
         
 
+        if (samlAssertion == null) {
+            throw new XWSSecurityException("Cannot Resolve SAML Assertion");
+        }
+        
+        
         if (purpose == Purpose.VERIFY) {
             NodeList nl = samlAssertion.getElementsByTagNameNS(MessageConstants.DSIG_NS, "Signature");
             //verify the signature inside the SAML assertion
@@ -1133,7 +1138,13 @@ public class KeySelectorImpl extends KeySelector{
         }
         //TODO: expensive conversion happening here 
         try {
-            ret = AssertionUtil.fromElement(tokenElement);
+            // if it is an Encrypted SAML Assertion we cannot decrypt it
+            // on the client side since we don't have the Private Key
+            if ("EncryptedData".equals(tokenElement.getLocalName())) {
+                // do nothing
+            } else {
+                ret = AssertionUtil.fromElement(tokenElement);
+            }
         } catch (Exception e) {
             if(logger.getLevel() == Level.FINEST){
                 logger.log(Level.FINEST,"Error occured while resolving" +
@@ -1141,7 +1152,9 @@ public class KeySelectorImpl extends KeySelector{
             }
             throw new XWSSecurityException(e);
         }
-        context.getTokenCache().put(assertionId, ret);
+        if (ret != null) {
+            context.getTokenCache().put(assertionId, ret);
+        }
         return tokenElement;
     }
     

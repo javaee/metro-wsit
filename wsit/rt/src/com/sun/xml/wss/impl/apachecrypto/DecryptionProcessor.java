@@ -440,6 +440,11 @@ public class DecryptionProcessor {
                     }
                 }
             }
+        } else if (context.getMode() == FilterProcessingContext.DEFAULT){
+            
+            EncryptedElement ed = (EncryptedElement)processEncryptedData(encDataElement,
+                    key,null,context,requiredTargets,optionalTargets,policy);
+            
         }
     }
     
@@ -583,7 +588,8 @@ public class DecryptionProcessor {
             }
             eFB.addTargetBinding(encTarget);
             return null;
-        }else if(context.getMode() == FilterProcessingContext.ADHOC){
+        }else if(context.getMode() == FilterProcessingContext.ADHOC || 
+                context.getMode() == FilterProcessingContext.DEFAULT){
             if(isAttachment){
                 return new AttachmentData(encryptedAttachment.getContentId(),contentOnly);
             }
