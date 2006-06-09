@@ -80,6 +80,13 @@ public class WSTransferUtil {
             GET_WXF_REQUEST +
             "</wsa:Action>" +
             "<wsa:To>" + address + "</wsa:To>" +
+            
+            // ReplyTo added for issue:
+            // https://jax-wsa-sources.dev.java.net/issues/show_bug.cgi?id=12
+            "<wsa:ReplyTo><wsa:Address>" +
+            "http://www.w3.org/2005/08/addressing/anonymous" +
+            "</wsa:Address></wsa:ReplyTo>" +
+            
             "<wsa:MessageID>" +
             "uuid:778b135f-3fdf-44b2-b53e-ebaab7441e40" +
             "</wsa:MessageID>" +
