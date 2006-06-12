@@ -6,7 +6,7 @@ To run with glassfish
 ======================
 1. Set AS_HOME to point to the location where Glassfish is installed
    e.g export AS_HOME="...."
-2. ant server
+2. ant server -Duseglassfish=true
 3. Start glassfish by invoking $AS_HOME/bin/asadmin start-domain domain1
 4. ant client
 5. ant run
