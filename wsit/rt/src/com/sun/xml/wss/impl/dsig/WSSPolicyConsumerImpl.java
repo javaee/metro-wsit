@@ -625,6 +625,8 @@ attribute.getNamespaceURI().equals(MessageConstants.NAMESPACES_NS)) {
                 
                 byte [] digestValue = fpContext.getDigestValue();
                 Reference reference = null;
+                if(targetURI.length() > 0 && targetURI.charAt(0) != '#')
+                    targetURI = "#" + targetURI;
                 if(!verify && digestValue != null){
                     reference = signatureFactory.newReference(targetURI,digestMethod,transformList,null,null,digestValue);
                 } else{

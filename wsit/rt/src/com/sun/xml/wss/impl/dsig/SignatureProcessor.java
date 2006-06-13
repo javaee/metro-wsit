@@ -1,5 +1,5 @@
 /*
- * $Id: SignatureProcessor.java,v 1.2 2006-05-10 22:49:47 jdg6688 Exp $
+ * $Id: SignatureProcessor.java,v 1.3 2006-06-13 06:18:05 ashutoshshahi Exp $
  */
 
 /*
@@ -546,6 +546,12 @@ public class SignatureProcessor{
             if(nodeList != null && nodeList.getLength() > 0){
                 nextSibling = nodeList.item(0).getNextSibling();
             }
+            // Put SignatureConfirmation above signature
+            nodeList = securityHeader.getElementsByTagNameNS(MessageConstants.WSSE11_NS, MessageConstants.SIGNATURE_CONFIRMATION_LNAME);
+            if(nodeList != null && nodeList.getLength() > 0){
+                nextSibling = nodeList.item(nodeList.getLength() - 1).getNextSibling();
+            }
+            
             if(featureBinding.isEndorsingSignature()){
                 nextSibling = securityHeader.getLastChild().getNextSibling();
             }
