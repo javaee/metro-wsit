@@ -3,12 +3,12 @@
  * of the Common Development and Distribution License
  * (the License).  You may not use this file except in
  * compliance with the License.
- * 
+ *
  * You can obtain a copy of the license at
  * https://glassfish.dev.java.net/public/CDDLv1.0.html.
  * See the License for the specific language governing
  * permissions and limitations under the License.
- * 
+ *
  * When distributing Covered Code, include this CDDL
  * Header Notice in each file and include the License file
  * at https://glassfish.dev.java.net/public/CDDLv1.0.html.
@@ -16,7 +16,7 @@
  * with the fields enclosed by brackets [] replaced by
  * you own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * 
+ *
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
@@ -37,6 +37,7 @@ import com.sun.xml.ws.security.policy.SupportingTokens;
 import com.sun.xml.ws.security.policy.Token;
 import com.sun.xml.ws.security.policy.X509Token;
 import com.sun.xml.wss.impl.MessageConstants;
+import com.sun.xml.wss.impl.PolicyTypeUtil;
 import com.sun.xml.wss.impl.policy.mls.AuthenticationTokenPolicy;
 import com.sun.xml.wss.impl.policy.mls.EncryptionPolicy;
 import com.sun.xml.wss.impl.policy.mls.EncryptionTarget;
@@ -111,6 +112,20 @@ public abstract class BindingProcessor {
     //TODO:WS-SX Spec:If we have a secondary signature should it protect the token too ?
     protected void protectToken(WSSPolicy token){
         String uid = token.getUUID();
+        if(PolicyTypeUtil.x509CertificateBinding(token)){
+            uid = ((AuthenticationTokenPolicy.X509CertificateBinding)token).getSTRID();
+            if(uid == null){
+                uid = pid.generateID();
+                ((AuthenticationTokenPolicy.X509CertificateBinding)token).setSTRID(uid);
+            }
+        }else if(PolicyTypeUtil.samlTokenPolicy(token)){
+            uid = ((AuthenticationTokenPolicy.SAMLAssertionBinding)token).getSTRID();
+            if(uid == null){
+                uid = pid.generateID();
+                ((AuthenticationTokenPolicy.SAMLAssertionBinding)token).setSTRID(uid);
+            }
+        }
+        //TODO:: Handle DTK and IssuedToken.
         if ( uid != null ) {
             SignatureTargetCreator stc = iAP.getTargetCreator();
             SignatureTarget st = stc.newURISignatureTarget(uid);
