@@ -1,5 +1,5 @@
 /*
- * $Id: DefaultCallbackHandler.java,v 1.1 2006-05-03 22:57:50 arungupta Exp $
+ * $Id: DefaultCallbackHandler.java,v 1.2 2006-06-14 11:45:42 kumarjayanti Exp $
  *
  */
 /*
@@ -1054,15 +1054,19 @@ public  class DefaultCallbackHandler implements CallbackHandler {
 
     //TODO: add RENEW/CANCEL etc out here
     protected boolean isTrustMessage(Map map){
-        AddressingProperties ap = (AddressingProperties)map.get("javax.xml.ws.addressing.context");
-        if (ap != null) {
-            AttributedURI uri = ap.getAction();
-            if (uri != null && ISSUE_REQUEST_URI.equals(ap.getAction().getURI())) {
-                return true;
+        String s = (String)map.get("isTrustMessage");
+        if (s != null) {
+            return s.equals("true");
+        } else {
+            AddressingProperties ap = (AddressingProperties)map.get("javax.xml.ws.addressing.context");
+            if (ap != null) {
+                AttributedURI uri = ap.getAction();
+                if (uri != null && ISSUE_REQUEST_URI.equals(ap.getAction().getURI())) {
+                    return true;
+                }
             }
         }
         return false;
-        
     }
 
     private Class loadClass(String classname) throws XWSSecurityException {
