@@ -798,9 +798,14 @@ attribute.getNamespaceURI().equals(MessageConstants.NAMESPACES_NS)) {
                                            if(name.getNamespaceURI().equals(MessageConstants.ADDRESSING_MEMBER_SUBMISSION_NAMESPACE) ||
                                                    name.getNamespaceURI().equals(MessageConstants.ADDRESSING_W3C_NAMESPACE)){
                                                if((child.getNamespaceURI().equals(MessageConstants.ADDRESSING_MEMBER_SUBMISSION_NAMESPACE) || 
-                                                       child.getNamespaceURI().equals(MessageConstants.ADDRESSING_W3C_NAMESPACE)) && 
-                                                       name.getLocalPart().equals(child.getLocalName()))
-                                               ((NodeListImpl)nodes).add(child);
+                                                       child.getNamespaceURI().equals(MessageConstants.ADDRESSING_W3C_NAMESPACE))) {
+                                                   if(!"".equals(name.getLocalPart())){
+                                                       if(name.getLocalPart().equals(child.getLocalName()))
+                                                           ((NodeListImpl)nodes).add(child);
+                                                   } else{
+                                                       ((NodeListImpl)nodes).add(child);
+                                                   }
+                                               }
                                            } else{
                                                if(!"".equals(name.getLocalPart())){
                                                    if(name.getNamespaceURI().equals(child.getNamespaceURI()) && 

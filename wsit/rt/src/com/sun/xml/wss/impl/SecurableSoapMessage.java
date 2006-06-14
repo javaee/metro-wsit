@@ -1,5 +1,5 @@
 /**
- * $Id: SecurableSoapMessage.java,v 1.1 2006-05-03 22:57:37 arungupta Exp $
+ * $Id: SecurableSoapMessage.java,v 1.2 2006-06-14 09:15:06 ashutoshshahi Exp $
  */
 
 /*
@@ -75,6 +75,7 @@ import com.sun.xml.wss.core.SecurityHeader;
 import com.sun.xml.wss.logging.LogDomainConstants;
 import org.w3c.dom.Node;
 import com.sun.xml.wss.*;
+import com.sun.xml.wss.util.NodeListImpl;
 
 public final class SecurableSoapMessage extends SOAPMessage {
     
@@ -737,6 +738,7 @@ public final class SecurableSoapMessage extends SOAPMessage {
         String type = target.getType();
         String value = target.getValue();
         boolean throwFault = false;
+        boolean headersOnly = target.isSOAPHeadersOnly();
         
         if (type.equals(Target.TARGET_TYPE_VALUE_QNAME)) {
             
@@ -765,10 +767,48 @@ public final class SecurableSoapMessage extends SOAPMessage {
                     };
                 }else{
                     QName name = QName.valueOf(value);
-                    if ("".equals(name.getNamespaceURI())) {
-                        retValue = this.getSOAPPart().getElementsByTagNameNS("*", name.getLocalPart());
-                    } else {
-                        retValue = this.getSOAPPart().getElementsByTagNameNS(name.getNamespaceURI(), name.getLocalPart());
+                    if(!headersOnly){
+                        if ("".equals(name.getNamespaceURI())) {
+                            retValue = this.getSOAPPart().getElementsByTagNameNS("*", name.getLocalPart());
+                        } else {
+                            retValue = this.getSOAPPart().getElementsByTagNameNS(name.getNamespaceURI(), name.getLocalPart());
+                        }
+                    } else{
+                        // process headers of a SOAPMessage
+                        retValue = new NodeListImpl();
+                        NodeList hdrChilds = this.getSOAPHeader().getChildNodes();
+                        for(int i = 0; i < hdrChilds.getLength(); i++){
+                            Node child = hdrChilds.item(i);
+                            if(child.getNodeType() ==  Node.ELEMENT_NODE){
+                                if("".equals(name.getNamespaceURI())){
+                                    if(name.getLocalPart().equals(child.getLocalName()))
+                                        ((NodeListImpl)retValue).add(child);
+                                } else{
+                                    // FIXME: Hack to get addressing members from both namespaces, as microsoft uses both of them in a soap message
+                                    if(name.getNamespaceURI().equals(MessageConstants.ADDRESSING_MEMBER_SUBMISSION_NAMESPACE) ||
+                                            name.getNamespaceURI().equals(MessageConstants.ADDRESSING_W3C_NAMESPACE)){
+                                        if((child.getNamespaceURI().equals(MessageConstants.ADDRESSING_MEMBER_SUBMISSION_NAMESPACE) || 
+                                                child.getNamespaceURI().equals(MessageConstants.ADDRESSING_W3C_NAMESPACE))) {
+                                            if(!"".equals(name.getLocalPart())){
+                                                if(name.getLocalPart().equals(child.getLocalName()))
+                                                    ((NodeListImpl)retValue).add(child);
+                                            } else{
+                                                ((NodeListImpl)retValue).add(child);
+                                            }
+                                        }
+                                    } else{
+                                        if(!"".equals(name.getLocalPart())){
+                                            if(name.getNamespaceURI().equals(child.getNamespaceURI()) && 
+                                                    name.getLocalPart().equals(child.getLocalName()))
+                                                ((NodeListImpl)retValue).add(child);
+                                        } else{
+                                             if(name.getNamespaceURI().equals(child.getNamespaceURI()))
+                                                ((NodeListImpl)retValue).add(child);
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             } catch (Exception e) {
@@ -814,8 +854,10 @@ public final class SecurableSoapMessage extends SOAPMessage {
             }
         
         if (throwFault) {
-            // log
-            throw new XWSSecurityException("No message part can be identified by the Target: " + value);
+            log.log(Level.FINE,"No message part can be identified by the Target:"+value);
+            //throw new XWSSecurityException("No message part can be identified by the Target: " + value);
+            //Do not throw an exception, acc. to WS-SecurityPolicy, it ok if a target is not found in message
+            return null;
         }
         
         return retValue;

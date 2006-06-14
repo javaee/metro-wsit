@@ -1030,7 +1030,9 @@ public class EncryptionProcessor {
             //Change this to context.
             //TODO :: Venu
             ArrayList transforms = target.getCipherReferenceTransforms();
-            if (mgpart instanceof AttachmentPart) {
+            if(mgpart == null){
+                continue;
+            } else if (mgpart instanceof AttachmentPart) {
                 Object[] s = new Object[2];
                 s[0] = mgpart;
                 s[1] = cOnly;
