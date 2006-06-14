@@ -52,6 +52,7 @@ import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyConstants;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
+import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.policy.PolicyMerger;
 import com.sun.xml.ws.policy.PolicySubject;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
@@ -72,7 +73,8 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
     private WSDLModel configModel;
     private HashMap<String, Policy> nameToPolicy = new HashMap<String, Policy>();
     private HashMap<String, Policy> portTypeOperationToPolicy = new HashMap<String, Policy>();
-    private HashMap<String, Policy> bindingOperationToPolicy = new HashMap<String, Policy>();
+    private HashMap<String, Policy> bindingOperationInToPolicy = new HashMap<String, Policy>();
+    private HashMap<String, Policy> bindingOperationOutToPolicy = new HashMap<String, Policy>();
     private HashMap<String, Policy> messageToPolicy = new HashMap<String, Policy>();
     private HashMap<String, Policy> portTypeMessageToPolicy = new HashMap<String, Policy>();
     private HashMap<String, Policy> bindingMessageToPolicy = new HashMap<String, Policy>();
@@ -161,7 +163,12 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
                         }
                         else if (wsdlSubject instanceof WSDLBoundOperation) {
                             WSDLBoundOperation operation = (WSDLBoundOperation) wsdlSubject;
-                            bindingOperationToPolicy.put(operation.getName().getLocalPart(), policy);
+                            QName serviceName = operation.getOperation().getName();
+                            if (policyMap.isOutputMessageSubject(subject)) {
+                                bindingOperationOutToPolicy.put(operation.getName().getLocalPart(), policy);
+                            } else {
+                                bindingOperationInToPolicy.put(operation.getName().getLocalPart(), policy);
+                            }
                         }
                         else if (wsdlSubject instanceof WSDLMessage) {
                             WSDLMessage message = (WSDLMessage) wsdlSubject;
@@ -341,7 +348,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
             // TODO Find a way not to down-cast
             JavaMethodImpl javaMethod = (JavaMethodImpl) this.seiModel.getJavaMethod(method);
             String messageName = javaMethod.getOperationName();
-            addPolicyReference(this.bindingMessageToPolicy, input, messageName);
+            addPolicyReference(this.bindingOperationInToPolicy, input, messageName);
         }
         logger.exiting("addBindingOperationInputExtension");
     }
@@ -352,8 +359,8 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
             // TODO Find a way not to down-cast
             JavaMethodImpl javaMethod = (JavaMethodImpl) this.seiModel.getJavaMethod(method);
             // TODO Do not rely on a naming algorithm that is private to WSDLGenerator
-            String messageName = javaMethod.getOperationName() + "Response";
-            addPolicyReference(this.bindingMessageToPolicy, output, messageName);
+            String messageName = javaMethod.getOperationName();
+            addPolicyReference(this.bindingOperationOutToPolicy, output, messageName);
         }
         logger.exiting("addBindingOperationOutputExtension");
     }

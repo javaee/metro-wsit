@@ -425,6 +425,31 @@ public final class PolicyMap {
         return subjects;
     }
     
+    /*
+     * TODO: reconsider this QUICK HACK FOR J1
+     */
+    public boolean isInputMessageSubject (PolicySubject subject) {
+        for (PolicyScope scope : inputMessageMap.getStoredScopes()) {
+            if (scope.getPolicySubjects().contains(subject)) {
+                return true;
+            } 
+        }
+        return false;
+    }
+    
+    /*
+     * TODO: reconsider this QUICK HACK FOR J1
+     */
+    public boolean isOutputMessageSubject (PolicySubject subject) {
+        for (PolicyScope scope : outputMessageMap.getStoredScopes()) {
+            if (scope.getPolicySubjects().contains(subject)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    
     /**
      * Add all subjects in the given map to the collection
      *
