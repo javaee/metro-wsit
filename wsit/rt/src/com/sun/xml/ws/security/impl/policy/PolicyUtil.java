@@ -1238,4 +1238,48 @@ public class PolicyUtil {
         return false;
     }
     
+    public static boolean isPortType(PolicyAssertion assertion) {
+        if ( !isAddressingNS(assertion)) {
+            return false;
+        }
+        
+        if ( assertion.getName().getLocalPart().equals(PortType)) {
+            return true;
+        }
+        return false;
+    }
+    
+    public  static boolean isReferenceParameters(PolicyAssertion assertion) {
+        if ( !isAddressingNS(assertion)) {
+            return false;
+        }
+        
+        if ( assertion.getName().getLocalPart().equals(ReferenceParameters)) {
+            return true;
+        }
+        return false;
+    }
+    
+    public static boolean isReferenceProperties(PolicyAssertion assertion) {
+        if ( !isAddressingNS(assertion)) {
+            return false;
+        }
+        
+        if ( assertion.getName().getLocalPart().equals(ReferenceProperties)) {
+            return true;
+        }
+        return false;
+    }
+    
+    public static boolean isServiceName(PolicyAssertion assertion) {
+        if ( !isAddressingNS(assertion)) {
+            return false;
+        }
+        
+        if ( assertion.getName().getLocalPart().equals(ServiceName)) {
+            return true;
+        }
+        return false;
+    }
+    
 }

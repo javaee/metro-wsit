@@ -34,10 +34,10 @@ import javax.xml.ws.addressing.EndpointReference;
 public interface IssuedToken extends Token{
     
     /**
-     * returns {@link javax.xml.ws.addressing.EndpointReference } which is the issuer for the issued token.
-     * @return {@link javax.xml.ws.addressing.EndpointReference} or null
+     * returns {@link com.sun.xml.ws.security.policy.Issuer } which is the issuer for the issued token.
+     * @return {@link com.sun.xml.ws.security.policy.Issuer} or null
      */
-    public EndpointReference getIssuer();
+    public Issuer getIssuer();
    
     /**
      * returns {@link RequestSecurityTokenTemplate }

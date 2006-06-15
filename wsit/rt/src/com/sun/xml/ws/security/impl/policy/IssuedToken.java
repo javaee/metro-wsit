@@ -29,6 +29,7 @@ import com.sun.xml.ws.policy.PolicyAssertion;
 
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
+import com.sun.xml.ws.security.policy.Issuer;
 
 import com.sun.xml.ws.security.policy.RequestSecurityTokenTemplate;
 import java.util.ArrayList;
@@ -53,13 +54,14 @@ public class IssuedToken extends PolicyAssertion implements  com.sun.xml.ws.secu
     
     private boolean populated = false;
     protected String includeToken = Token.INCLUDE_ALWAYS;
-    RequestSecurityTokenTemplate rstTemplate;
-    EndpointReference er;
+    private RequestSecurityTokenTemplate rstTemplate;
+    //EndpointReference er;
+    private Issuer issuer = null;
     private static QName itQname = new QName(Constants.SECURITY_POLICY_NS, Constants.IncludeToken);
 //    String tokenType;
-    List referenceType;
-    String id;
-    AssertionData ad = null;
+    private List referenceType;
+    private String id;
+    private AssertionData ad = null;
     
     private boolean reqDK=false;
     /**
@@ -77,36 +79,10 @@ public class IssuedToken extends PolicyAssertion implements  com.sun.xml.ws.secu
         id= uid.toString();
     }
     
-    
-    public EndpointReference getEndPointReference() {
-        populate();
-        return er;
-    }
-    
     public RequestSecurityTokenTemplate getRequestSecurityTokenTemplate() {
         populate();
         return rstTemplate;
-    }
-    
-    
-//    public QName getName() {
-//        return Constants._IssuedToken_QNAME;
-//    }
-    
-//    public void addTokenReferenceType(String tokenRefType) {
-//        if(referenceType == null){
-//            referenceType = new ArrayList();
-//        }
-//        referenceType.add(tokenRefType);
-//    }
-    
-//    public void setTokenType(String tokenType) {
-//        this.tokenType = tokenType;
-//    }
-    
-//    public String getTokenType() {
-//        return tokenType;
-//    }
+    }   
     
     public Iterator getTokenRefernceType() {
         populate();
@@ -121,28 +97,18 @@ public class IssuedToken extends PolicyAssertion implements  com.sun.xml.ws.secu
     public void setIncludeToken(String type) {
         //includeToken = type;
         throw new UnsupportedOperationException();
-    }
-    
+    }   
     
     public String getTokenId() {
         return id;
     }
     
-    public EndpointReference getIssuer() {
+    public Issuer getIssuer() {
         populate();
-        return er;
-    }
+        return issuer;
+    }    
     
-    public void setIssuer(EndpointReference reference) {
-        this.er = reference;
-    }
-    
-    public void setRequestSecurityTokenTemplate(RequestSecurityTokenTemplate template) {
-    }
-    
-    public void addTokenReferenceType(String tokenRefType) {
-    }
-    
+   
     public boolean isRequireDerivedKeys() {
         populate();
         return reqDK;
@@ -164,14 +130,14 @@ public class IssuedToken extends PolicyAssertion implements  com.sun.xml.ws.secu
         synchronized (this.getClass()){
             if(!populated){
                 if(this.getAttributeValue(itQname)!=null){
-                this.includeToken = this.getAttributeValue(itQname);
+                    this.includeToken = this.getAttributeValue(itQname);
                 }
                 if ( this.hasNestedAssertions() ) {
                     Iterator <PolicyAssertion> it = this.getNestedAssertionsIterator();
                     while ( it.hasNext() ) {
                         PolicyAssertion assertion = it.next();
                         if ( PolicyUtil.isIssuer(assertion) ) {
-                            this.er = ((Issuer) assertion).getEndpointReference();
+                            this.issuer = (Issuer) assertion;
                         } else if ( PolicyUtil.isRequestSecurityTokenTemplate(assertion)) {
                             this.rstTemplate = (RequestSecurityTokenTemplate) assertion;
                         }else{

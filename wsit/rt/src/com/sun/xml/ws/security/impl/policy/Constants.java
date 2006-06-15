@@ -353,6 +353,8 @@ public class Constants {
     public static final String CallbackHandlerConfiguration = "CallbackHandlerConfiguration";
     public static final String Validator = "Validator";
     public static final String ValidatorConfiguration = "ValidatorConfiguration";
-    
-    
+    public static final String ReferenceParameters = "ReferenceParameters";
+    public static final String ReferenceProperties = "ReferenceProperties";
+    public final static String PortType ="PortType";
+    public final static String ServiceName ="ServiceName";
 }

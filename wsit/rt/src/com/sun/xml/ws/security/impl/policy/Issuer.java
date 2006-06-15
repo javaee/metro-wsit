@@ -31,6 +31,7 @@
 
 package com.sun.xml.ws.security.impl.policy;
 
+import com.sun.xml.ws.addressing.policy.Address;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.NestedPolicy;
 import com.sun.xml.ws.policy.Policy;
@@ -57,8 +58,13 @@ import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
  */
 public class Issuer extends PolicyAssertion implements com.sun.xml.ws.security.policy.Issuer, SecurityAssertionValidator {
     
-    private EndpointReference endpointRef;
+    private AttributedURI address;
     private boolean populated = false;
+    private PolicyAssertion refProps = null;
+    private PolicyAssertion refParams = null;
+    private PolicyAssertion serviceName = null;
+    private String portType = null;
+    
     /**
      * Creates a new instance of Issuer
      */
@@ -67,22 +73,6 @@ public class Issuer extends PolicyAssertion implements com.sun.xml.ws.security.p
     
     public Issuer(AssertionData name,Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) {
         super(name,nestedAssertions,nestedAlternative);
-    }
-    
-//    public QName getName(){
-//        return Constants._Issuer;
-//    }
-    public EndpointReference getEndpointReference() {
-        populate();
-        return endpointRef;
-    }
-    
-    public void setEndpointReference(EndpointReference endpointReference) {
-        try {
-            this.endpointRef = (EndpointReference) endpointReference;
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
     }
     
     public boolean validate() {
@@ -104,35 +94,56 @@ public class Issuer extends PolicyAssertion implements com.sun.xml.ws.security.p
                     Iterator <PolicyAssertion> it = this.getNestedAssertionsIterator();
                     while ( it.hasNext() ) {
                         PolicyAssertion assertion = it.next();
-                        if ( PolicyUtil.isEndpointReference(assertion) ) {
-                            endpointRef = (EndpointReference) assertion;
-                        } else{
+                        if ( PolicyUtil.isAddress(assertion)) {
+                            this.address = (Address) assertion;
+                        } else if(PolicyUtil.isPortType(assertion)){
+                            this.portType = assertion.getValue();
+                        } else if(PolicyUtil.isReferenceParameters(assertion)){
+                            this.refParams = assertion;
+                        } else if(PolicyUtil.isReferenceProperties(assertion)){
+                            this.refProps = assertion;
+                        } else if(PolicyUtil.isServiceName(assertion)){
+                            this.serviceName = assertion;
+                        }                    
+                        /*else{
                             if(!assertion.isOptional()){
                                 if(logger.getLevel() == Level.SEVERE){
                                     logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"Issuer"});
                                 }
                                 throw new UnsupportedPolicyAssertion("Policy assertion "+
                                         assertion+" is not supported under Issuer assertion");
-                                
+                         
                             }
-                        }
+                        }*/
                     }
                 }
-//            Policy policy = this.getPolicy();
-//            Iterator<AssertionSet> itr = policy.iterator();
-//            while(itr.hasNext()){
-//                AssertionSet as = itr.next();
-//                Iterator<PolicyAssertion> ast = as.iterator();
-//                while(ast.hasNext()){
-//                    PolicyAssertion assertion = ast.next();
-//                    if ( assertion.getName() == Constants._EndpointReference_QNAME) {
-//
-//                        this.endpointRef = new EndpointReference(assertion.getValue());
-//                    }
-//                }
-//            }
                 populated = true;
             }
         }
+    }
+    
+    public Address getAddress() {
+        populate();
+        return (Address) address;
+    }
+    
+    public String getPortType(){
+        populate();
+        return portType;
+    }
+    
+    public PolicyAssertion getReferenceParameters(){
+        populate();
+        return refParams;
+    }
+    
+    public PolicyAssertion getReferenceProperties(){
+        populate();
+        return refProps;
+    }
+    
+    public PolicyAssertion getServiceName(){
+        populate();
+        return serviceName;
     }
 }

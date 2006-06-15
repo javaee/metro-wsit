@@ -29,6 +29,7 @@
 
 package com.sun.xml.ws.security.trust.util;
 
+import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.security.secconv.WSSCElementFactory;
 import com.sun.xml.ws.security.secconv.WSSecureConversationException;
 import com.sun.xml.ws.policy.impl.bindings.AppliesTo;
@@ -168,4 +169,54 @@ public class WSTrustUtil {
         }
         return null;
     }
+   
+    public static boolean isMetadata(PolicyAssertion assertion ) {
+        if ( !isMEXNS(assertion)) {
+            return false;
+        }
+        
+        if ( assertion.getName().getLocalPart().equals(Metadata)) {
+            return true;
+        }
+        
+        return false;
+    }
+    
+    public static final String MEX_NS = "http://schemas.xmlsoap.org/ws/2004/09/mex";
+    public static final String Metadata = "Metadata";
+    public static final String MetadataSection = "MetadataSection";
+    public static final String MetadataReference = "MetadataReference";
+    
+    public static boolean isMEXNS(PolicyAssertion pa) {
+        if ( MEX_NS.equals(pa.getName().getNamespaceURI()) ) {
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean isMetadataSection(PolicyAssertion assertion) {
+        if ( !isMEXNS(assertion)) {
+            return false;
+        }
+        
+        if ( assertion.getName().getLocalPart().equals(MetadataSection)) {
+            return true;
+        }
+        
+        return false;
+    }
+
+    public static boolean isMetadataReference(PolicyAssertion assertion) {
+        if ( !isMEXNS(assertion)) {
+            return false;
+        }
+        
+        if ( assertion.getName().getLocalPart().equals(MetadataReference)) {
+            return true;
+        }
+        
+        return false;
+    }
+    
+   
 }

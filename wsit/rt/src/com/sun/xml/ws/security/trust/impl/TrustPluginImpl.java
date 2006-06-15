@@ -3,12 +3,12 @@
  * of the Common Development and Distribution License
  * (the License).  You may not use this file except in
  * compliance with the License.
- * 
+ *
  * You can obtain a copy of the license at
  * https://glassfish.dev.java.net/public/CDDLv1.0.html.
  * See the License for the specific language governing
  * permissions and limitations under the License.
- * 
+ *
  * When distributing Covered Code, include this CDDL
  * Header Notice in each file and include the License file
  * at https://glassfish.dev.java.net/public/CDDLv1.0.html.
@@ -16,7 +16,7 @@
  * with the fields enclosed by brackets [] replaced by
  * you own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * 
+ *
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
@@ -38,7 +38,9 @@ import com.sun.xml.ws.policy.impl.bindings.AppliesTo;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.impl.IssuedTokenContextImpl;
+import com.sun.xml.ws.security.impl.policy.PolicyUtil;
 import com.sun.xml.ws.security.policy.IssuedToken;
+import com.sun.xml.ws.security.policy.Issuer;
 import com.sun.xml.ws.security.policy.RequestSecurityTokenTemplate;
 import com.sun.xml.ws.security.trust.*;
 import com.sun.xml.ws.security.trust.elements.BinarySecret;
@@ -53,12 +55,14 @@ import com.sun.xml.ws.security.trust.elements.RequestedSecurityToken;
 import com.sun.xml.ws.security.trust.elements.RequestedUnattachedReference;
 import com.sun.xml.ws.security.trust.impl.elements.BinarySecretImpl;
 import com.sun.xml.ws.security.trust.util.WSTrustUtil;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.rmi.RemoteException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.Iterator;
 import java.util.List;
 import javax.xml.bind.DatatypeConverter;
 import javax.xml.namespace.QName;
@@ -101,7 +105,16 @@ public class TrustPluginImpl implements TrustPlugin {
         }else{
             stsURI = stsEP.toString();
         }
-
+        URL metadataAddress = null;
+        try {
+            metadataAddress = getAddressFromMetadata(issuedToken);
+        } catch (MalformedURLException ex) {
+            //ex.printStackTrace();
+        }
+        if(metadataAddress != null){
+            wsdlLocation = metadataAddress;
+        }
+        
         RequestSecurityTokenResponse result = null;
         try {
             RequestSecurityToken request = createRequest(rstTemplate, appliesTo);
@@ -115,12 +128,12 @@ public class TrustPluginImpl implements TrustPlugin {
         } catch (URISyntaxException ex){
             throw new RuntimeException(ex.toString());
         } catch (WSTrustException ex){
-             throw new RuntimeException(ex.toString());
+            throw new RuntimeException(ex.toString());
         }
         //return createIssuedTokenContext(result);
         //return null;
     }
-
+    
     private IssuedTokenContext createIssuedTokenContext(final RequestSecurityTokenResponse rstr) {
         URI tokType = rstr.getTokenType();
         long keySize = rstr.getKeySize();
@@ -141,7 +154,7 @@ public class TrustPluginImpl implements TrustPlugin {
         }
         return itc;
     }
-
+    
     private RequestSecurityToken createRequest(final RequestSecurityTokenTemplate rstTemplate, String appliesTo) throws URISyntaxException, WSTrustException, NumberFormatException {
         URI requestType = URI.create(WSTrustConstants.ISSUE_REQUEST);
         AppliesTo at = null;
@@ -158,7 +171,7 @@ public class TrustPluginImpl implements TrustPlugin {
         Claims claims = null;
         Lifetime lifetime = null;
         RequestSecurityToken requestSecurityToken= fact.createRSTForIssue(tokenType,requestType,context,at,claims,entropy,lifetime);
-
+        
         long keySize = rstTemplate.getKeySize();
         if (keySize > 0){
             requestSecurityToken.setKeySize(keySize);
@@ -166,7 +179,7 @@ public class TrustPluginImpl implements TrustPlugin {
         
         String keyType = rstTemplate.getKeyType();
         if (keyType != null){
-           requestSecurityToken.setKeyType(new URI(rstTemplate.getKeyType())); 
+            requestSecurityToken.setKeyType(new URI(rstTemplate.getKeyType()));
         }
         requestSecurityToken.setComputedKeyAlgorithm(URI.create(WSTrustConstants.CK_PSHA1));
         
@@ -199,13 +212,13 @@ public class TrustPluginImpl implements TrustPlugin {
         Service service = Service.create(wsdlLocation, serviceName);
         Dispatch dispatch = service.createDispatch(portName, fact.getContext(), Service.Mode.PAYLOAD);
         dispatch = (Dispatch)addAddressingHeaders(dispatch);
-        dispatch.getRequestContext().put(javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY, stsURI); 
-        dispatch.getRequestContext().put("isTrustMessage", "true"); 
+        dispatch.getRequestContext().put(javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY, stsURI);
+        dispatch.getRequestContext().put("isTrustMessage", "true");
         return fact.createRSTRFrom((JAXBElement)dispatch.invoke(fact.toJAXBElement(request)));
     }
-
+    
     /**
-     * This method uses mex client api to issue a mex request and return the 
+     * This method uses mex client api to issue a mex request and return the
      * matching service name and port name
      * @param stsURI URI to the STS. Mex request will be issued to this address
      * @return List of 2 QName objects. The first one will be serviceName
@@ -251,20 +264,80 @@ public class TrustPluginImpl implements TrustPlugin {
             e.printStackTrace();
         }
         return DatatypeConverter.printBase64Binary(decodedNonce);
-    }    
-
+    }
+    
     /**
-     * method to examine the IssuedToken assertion and return the URI of the Issuer 
+     * method to examine the IssuedToken assertion and return the URI of the Issuer
      * endpoint reference.
      * @param issuedToken The issuedToken assertion
      * @return The URI of the Issuer in IssuedToken, which is nothing but the URI of STS.
      */
     private String getSTSURI(final IssuedToken issuedToken) {
-        EndpointReference endPointReference = issuedToken.getIssuer();
-        if(endPointReference != null){
-            AttributedURI address = endPointReference.getAddress();
+        Issuer issuer = issuedToken.getIssuer();
+        if(issuer != null){
+            AttributedURI address = issuer.getAddress();
             URI uri = address.getURI();
             return uri.toString();
+        }
+        return null;
+    }
+    
+    private URL getAddressFromMetadata(final IssuedToken issuedToken) throws MalformedURLException {
+        PolicyAssertion issuer = (PolicyAssertion)issuedToken.getIssuer();
+        PolicyAssertion metadata = null;
+        PolicyAssertion metadataSection = null;
+        PolicyAssertion metadataReference = null;
+        AttributedURI address = null;
+        if(issuer != null){
+            if ( issuer.hasNestedAssertions() ) {
+                Iterator <PolicyAssertion> it = issuer.getNestedAssertionsIterator();
+                while ( it.hasNext() ) {
+                    PolicyAssertion assertion = it.next();
+                    if ( WSTrustUtil.isMetadata(assertion)) {
+                        metadata = assertion;
+                        break;
+                    }
+                }
+            }
+        }
+        if(metadata != null){
+            if ( metadata.hasNestedAssertions() ) {
+                Iterator <PolicyAssertion> it = metadata.getNestedAssertionsIterator();
+                while ( it.hasNext() ) {
+                    PolicyAssertion assertion = it.next();
+                    if ( WSTrustUtil.isMetadataSection(assertion)) {
+                        metadataSection = assertion;
+                        break;
+                    }
+                }
+            }
+            
+        }
+        if(metadataSection != null){
+            if ( metadataSection.hasNestedAssertions() ) {
+                Iterator <PolicyAssertion> it = metadataSection.getNestedAssertionsIterator();
+                while ( it.hasNext() ) {
+                    PolicyAssertion assertion = it.next();
+                    if ( WSTrustUtil.isMetadataReference(assertion)) {
+                        metadataReference = assertion;
+                        break;
+                    }
+                }
+            }
+            
+        }
+        if(metadataReference != null){
+            if ( metadataReference.hasNestedAssertions() ) {
+                Iterator <PolicyAssertion> it = metadataReference.getNestedAssertionsIterator();
+                while ( it.hasNext() ) {
+                    PolicyAssertion assertion = it.next();
+                    if ( PolicyUtil.isAddress(assertion)) {
+                        address = (AttributedURI)assertion;
+                        return address.getURI().toURL();
+                    }
+                }
+            }
+            
         }
         return null;
     }
@@ -274,10 +347,10 @@ public class TrustPluginImpl implements TrustPlugin {
         AddressingProperties ap = builder.newAddressingProperties();
         
         // Action
-        ap.setAction(builder.newURI(WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION)); 
+        ap.setAction(builder.newURI(WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION));
         provider.getRequestContext().put(JAXWSAConstants.CLIENT_ADDRESSING_PROPERTIES, ap);
         
         return provider;
-    }   
+    }
     
 }

@@ -25,7 +25,6 @@ package com.sun.xml.ws.security.policy;
 
 import com.sun.xml.ws.policy.NestedPolicy;
 import java.util.Set;
-import javax.xml.ws.addressing.EndpointReference;
 import com.sun.xml.ws.policy.Policy;
 import java.util.Iterator;
 import java.util.List;
@@ -60,7 +59,7 @@ public interface SecureConversationToken extends Token {
      * returns the issuer for the SpnegoContext token.
      * @return returns the issuer
      */
-    public EndpointReference getIssuer();
+    public Issuer getIssuer();
   
     /**
      * returns {@link com.sun.xml.ws.policy.Policy } which represents Bootstrap Policy

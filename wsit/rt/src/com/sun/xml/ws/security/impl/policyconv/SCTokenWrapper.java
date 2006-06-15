@@ -29,6 +29,7 @@ import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.security.impl.policy.PolicyUtil;
 import com.sun.xml.ws.security.policy.AsymmetricBinding;
+import com.sun.xml.ws.security.policy.Issuer;
 import com.sun.xml.ws.security.policy.SecureConversationToken;
 import com.sun.xml.ws.security.policy.SupportingTokens;
 import com.sun.xml.ws.security.policy.SymmetricBinding;
@@ -98,7 +99,7 @@ public class SCTokenWrapper extends PolicyAssertion implements SecureConversatio
         return this.scToken.getTokenType();
     }
     
-    public javax.xml.ws.addressing.EndpointReference getIssuer() {
+    public Issuer getIssuer() {
         return this.scToken.getIssuer();
     }
     

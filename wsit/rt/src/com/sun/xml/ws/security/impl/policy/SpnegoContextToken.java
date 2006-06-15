@@ -50,7 +50,7 @@ public class SpnegoContextToken extends PolicyAssertion implements com.sun.xml.w
     Boolean requiredDerivedKeys = false;
     private String includeTokenType;
     private String id;
-    private EndpointReference er = null;
+    private Issuer issuer = null;
     private static QName itQname = new QName(Constants.SECURITY_POLICY_NS, Constants.IncludeToken);
     /**
      * Creates a new instance of SpnegoContextToken
@@ -67,9 +67,9 @@ public class SpnegoContextToken extends PolicyAssertion implements com.sun.xml.w
     }
     
     
-    public EndpointReference getIssuer() {
+    public Issuer getIssuer() {
         populate();
-        return this.er;
+        return this.issuer;
     }
     
     public boolean isRequireDerivedKeys() {
@@ -139,7 +139,7 @@ public class SpnegoContextToken extends PolicyAssertion implements com.sun.xml.w
                 while(it.hasNext()){
                     PolicyAssertion assertion = it.next();
                     if(PolicyUtil.isIssuer(assertion)){
-                        er = ((Issuer)assertion).getEndpointReference();
+                       issuer = (Issuer)assertion;
                     }
                 }
             }

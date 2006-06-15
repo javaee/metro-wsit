@@ -21,7 +21,6 @@
  */
 
 package com.sun.xml.ws.security.policy;
-import javax.xml.ws.addressing.EndpointReference;
 /**
  * 
  * @author K.Venugopal@sun.com
@@ -32,7 +31,7 @@ public interface SpnegoContextToken extends Token {
       * returns the issuer for the SpnegoContext token.
       * @return returns the issuer
       */
-     public EndpointReference getIssuer();
+     public Issuer getIssuer();
 
      
      /**

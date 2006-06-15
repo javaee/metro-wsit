@@ -58,7 +58,7 @@ public class SecureConversationToken extends PolicyAssertion implements com.sun.
     private boolean populated = false;
     private PolicyAssertion rdKey = null;
     private Set referenceType = null;
-    private EndpointReference er = null;
+    private Issuer issuer = null;
     private String tokenType = null;
     
     /**
@@ -75,15 +75,6 @@ public class SecureConversationToken extends PolicyAssertion implements com.sun.
         id= uid.toString();
     }
     
-//    public SecureConversationToken(Policy policy,Map<QName,String> attributes,String uid){
-//        this.nestedPolicy = (WSPolicy) policy;
-//        this.setAttributes(attributes);
-//        this.id = uid;
-//    }
-    
-    public void addTokenReferenceType(String tokenRefType) {
-        referenceType.add(tokenRefType);
-    }
     
     public Set getTokenRefernceTypes() {
         populate();
@@ -101,25 +92,16 @@ public class SecureConversationToken extends PolicyAssertion implements com.sun.
         return false;
     }
     
-    public void setRequireDerivedKeys(boolean require) {
-    }
-    
-    public void setTokenType(String tokenType) {
-    }
-    
     public String getTokenType() {
         populate();
         return this.tokenType;
     }
     
-    public EndpointReference getIssuer() {
+    public Issuer getIssuer() {
         populate();
-        return this.er;
+        return issuer;
     }
     
-    public void setIssuer(EndpointReference ref) {
-        
-    }
     
     public String getIncludeToken() {
         populate();
@@ -132,18 +114,11 @@ public class SecureConversationToken extends PolicyAssertion implements com.sun.
         attrs.put(itQname,type);
     }
     
-//    public QName getName() {
-//        return Constants._SecureConversationToken_QNAME;
-//    }
+    
     
     public NestedPolicy getBootstrapPolicy() {
         populate();
         return bootstrapPolicy;
-    }
-    
-    public void addBootstrapPolicy(NestedPolicy policy) {
-//        WSEnclosingAssertion pa = new BootstrapPolicy(policy);
-//        Policy asPolicy =  this.getPolicy();
     }
     
     public String getTokenId() {
@@ -160,16 +135,13 @@ public class SecureConversationToken extends PolicyAssertion implements com.sun.
     }
     
     
-    
     private void populate(){
         if(populated){
             return;
         }
         synchronized (this.getClass()){
             if(!populated){
-                
                 includeToken = getAttributeValue(itQname);
-                
                 NestedPolicy policy = this.getNestedPolicy();
                 if(policy == null){
                     if(logger.getLevel() == Level.FINE){
@@ -180,7 +152,6 @@ public class SecureConversationToken extends PolicyAssertion implements com.sun.
                 }
                 AssertionSet as = policy.getAssertionSet();
                 Iterator<PolicyAssertion> paItr = as.iterator();
-                
                 while(paItr.hasNext()){
                     PolicyAssertion assertion = paItr.next();
                     if(PolicyUtil.isBootstrapPolicy(assertion)){
@@ -199,7 +170,6 @@ public class SecureConversationToken extends PolicyAssertion implements com.sun.
                             if(logger.getLevel() == Level.SEVERE){
                                 logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"SecureConversationToken"});
                             }
-                            
                             throw new UnsupportedPolicyAssertion("Policy assertion "+
                                     assertion+" is not supported under SecureConversationToken assertion");
                         }
@@ -207,18 +177,16 @@ public class SecureConversationToken extends PolicyAssertion implements com.sun.
                 }
             }
             if ( this.hasNestedAssertions() ) {
-                
                 Iterator <PolicyAssertion> it = this.getNestedAssertionsIterator();
                 while(it.hasNext()){
                     PolicyAssertion assertion = it.next();
                     if(PolicyUtil.isIssuer(assertion)){
-                        er = ((Issuer)assertion).getEndpointReference();
+                        issuer = (Issuer)assertion;
                     }
                 }
             }
             populated = true;
         }
     }
-    
 }
 
