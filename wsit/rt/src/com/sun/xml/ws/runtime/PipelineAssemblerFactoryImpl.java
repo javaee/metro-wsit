@@ -29,6 +29,7 @@ import java.net.URL;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.addressing.AddressingConstants;
 import javax.xml.ws.addressing.AddressingBuilder;
+import javax.xml.ws.addressing.AddressingBuilderFactory;
 import javax.xml.namespace.QName;
 
 import com.sun.xml.ws.addressing.jaxws.WsaClientPipe;
@@ -153,7 +154,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
                 return p;
             }
 
-
+            @Override
             public Pipe createServer(SEIModel seiModel, WSDLPort wsdlPort, WSEndpoint endpoint, Pipe terminal) {
                 Pipe p = terminal;
                 try {
@@ -237,7 +238,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
      * Checks to see whether WS-Atomic Transactions are enabled or not.
      *
      * @param wsdlPort the WSDLPort object
-     * @param isServerSide true iff this method is being called from {@link PipelineAssembler#createServer(WSDLPort,WSEndpoint,Pipe)}
+     * @param isServerSide true iff this method is being called from {@link PipelineAssembler#createServer(SEIModel,WSDLPort,WSEndpoint,Pipe)}
      * @return true if Transactions is enabled, false otherwise
      */
     private boolean isTransactionsEnabled(WSDLPort wsdlPort, boolean isServerSide) {
@@ -322,10 +323,14 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             PolicyMapKey endpointKey = policyMap.createWsdlEndpointScopeKey(port.getOwner().getName(), port.getName());
             Policy policy = policyMap.getEndpointEffectivePolicy(endpointKey);
 
-            AddressingConstants ac = AddressingBuilder.newInstance().newAddressingConstants();
+            AddressingBuilderFactory abf = AddressingBuilderFactory.newInstance();
+            AddressingConstants ac = abf.newAddressingBuilder().newAddressingConstants();
+            AddressingConstants ac2 = abf.newAddressingBuilder("http://schemas.xmlsoap.org/ws/2004/08/addressing").newAddressingConstants();
 
-            return (policy != null) && (policy.contains(ADDRESSING_POLICY_NAMESPACE_URI) || policy.contains(
-                    ac.getNamespaceURI()));
+            return (policy != null) &&
+                    (policy.contains(ADDRESSING_POLICY_NAMESPACE_URI) ||
+                            policy.contains(ac.getNamespaceURI()) ||
+                            policy.contains(ac2.getNamespaceURI()));
         } catch (PolicyException e) {
             throw new WebServiceException(e);
         }

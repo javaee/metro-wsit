@@ -22,7 +22,7 @@
 
 package com.sun.xml.wss.jaxws.impl;
 
-import com.sun.xml.ws.addressing.jaxws.WsaWSDLExtension;
+import com.sun.xml.ws.addressing.jaxws.WsaWSDLOperationExtension;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.Packet;
@@ -670,7 +670,7 @@ public class SecurityServerPipe extends SecurityPipeBase
         sph.addFaultPolicy(fault,faultPH);
     }
     
-    protected String getAction(WsaWSDLExtension ext,boolean inComming){
+    protected String getAction(WsaWSDLOperationExtension ext,boolean inComming){
         if(inComming){
             return ext.getInputAction();
         }else{

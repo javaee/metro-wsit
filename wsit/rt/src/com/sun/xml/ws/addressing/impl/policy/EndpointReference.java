@@ -97,7 +97,15 @@ public class EndpointReference extends com.sun.xml.ws.policy.PolicyAssertion imp
     public ReferenceParameters getReferenceParameters() {
         throw new UnsupportedOperationException();
     }
-    
+
+    public void addReferenceParameter(QName name, String value) {
+        throw new UnsupportedOperationException();
+    }
+
+    public String getReferenceParameter(QName name) {
+        throw new UnsupportedOperationException();
+    }
+
     public Metadata getMetadata() {
         throw new UnsupportedOperationException();
     }

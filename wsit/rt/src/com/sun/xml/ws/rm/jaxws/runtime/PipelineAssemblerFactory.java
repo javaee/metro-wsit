@@ -35,6 +35,7 @@ import com.sun.xml.ws.addressing.jaxws.WsaServerPipe;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipelineAssembler;
 import com.sun.xml.ws.api.server.WSEndpoint;
@@ -66,7 +67,7 @@ public class PipelineAssemblerFactory extends
             }
 
             @Override
-            public Pipe createServer(WSDLPort wsdlModel, WSEndpoint endpoint, Pipe terminal) {
+            public Pipe createServer(SEIModel seiModel, WSDLPort wsdlModel, WSEndpoint endpoint, Pipe terminal) {
                 Pipe serverPipe = new RMServerPipe(wsdlModel,  endpoint, terminal);
                 return new WsaServerPipe(wsdlModel, endpoint.getBinding(), serverPipe);
             }
