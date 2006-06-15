@@ -41,6 +41,7 @@ import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipelineAssembler;
 import com.sun.xml.ws.api.pipe.PipelineAssemblerFactory;
@@ -152,11 +153,10 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
                 return p;
             }
 
-            @Override
-            public Pipe createServer(WSDLPort wsdlPort, WSEndpoint endpoint, Pipe terminal) {
+
+            public Pipe createServer(SEIModel seiModel, WSDLPort wsdlPort, WSEndpoint endpoint, Pipe terminal) {
                 Pipe p = terminal;
                 try {
-
                     initPolicyMap(wsdlPort, false);
                 } catch (PolicyException ex) {
                     throw new WebServiceException(ex);
@@ -217,6 +217,10 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
                 p = dump(SERVER_PREFIX, p);
 
                 return p;
+            }
+
+            public Pipe createServer(WSDLPort wsdlPort, WSEndpoint endpoint, Pipe terminal) {
+                return createServer(null, wsdlPort, endpoint, terminal);
             }
 
             private Pipe dump(String name, Pipe p) {
