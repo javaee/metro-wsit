@@ -293,11 +293,11 @@ public class ClientOutboundSequence extends OutboundSequence {
             throw new IllegalStateException("Not connected.");
         }
 
-        //this will block until all messages are complete
-        waitForAcks();
-        
         sendLast();
          
+        //this will block until all messages are complete
+        waitForAcks();
+                 
         TerminateSequenceElement ts = new TerminateSequenceElement();
         Identifier idTerminate = new Identifier();
         idTerminate.setValue(id);
