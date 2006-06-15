@@ -25,6 +25,7 @@ package com.sun.xml.ws.policy.jaxws;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import javax.naming.OperationNotSupportedException;
 import javax.xml.namespace.QName;
 import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLInputFactory;
@@ -147,6 +148,42 @@ public class WSDLPolicyMapWrapper implements WSDLExtension {
             EffectiveAlternativeSelector.doSelection(mapModifier);
         } catch (PolicyException e) {
             throw new WebServiceException("Failed to find a valid policy alternative", e);
+        }
+    }
+    
+    public void putEndpointSubject(PolicyMapKey key, PolicySubject subject) {
+        if (null != this.mapExtender) {
+            this.mapExtender.putEndpointSubject(key,subject);
+        } 
+    }
+    
+    public void putServiceSubject(PolicyMapKey key, PolicySubject subject) {
+        if (null != this.mapExtender) {
+            this.mapExtender.putServiceSubject(key,subject);
+        }
+    }
+    
+    public void putOperationSubject(PolicyMapKey key, PolicySubject subject) {
+        if (null != this.mapExtender) {
+            this.mapExtender.putOperationSubject(key,subject);
+        }
+    }
+    
+    public void putInputMessageSubject(PolicyMapKey key, PolicySubject subject) {
+        if (null != this.mapExtender) {
+            this.mapExtender.putInputMessageSubject(key,subject);
+        }
+    }
+    
+    public void putOutputMessageSubject(PolicyMapKey key, PolicySubject subject) {
+        if (null != this.mapExtender) {
+            this.mapExtender.putOutputMessageSubject(key,subject);
+        }
+    }
+    
+    public void putFaultMessageSubject(PolicyMapKey key, PolicySubject subject) {
+        if (null != this.mapExtender) {
+            this.mapExtender.putFaultMessageSubject(key,subject);
         }
     }
     
