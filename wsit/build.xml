@@ -23,7 +23,7 @@
 -->
 
 <!--
- $Id: build.xml,v 1.8 2006-05-08 18:37:44 tamiro Exp $
+ $Id: build.xml,v 1.9 2006-06-16 15:59:20 bbissett Exp $
 
  Copyright (c) 2005 Sun Microsystems, Inc.
  All rights reserved.
@@ -57,7 +57,8 @@
         <mkdir dir="${dist.image.wsit.lib.dir}"/>
     </target>
 
-    <target name="main" depends="dist"/>
+    <target name="main" depends="dist"
+        description="Create the wsit tool and runtime jars and installers."/>
 
     <target name="dist" depends="image">
         <mkdir dir="${dist.dir}"/>
@@ -65,7 +66,8 @@
         <installerBuilder classFile="${dist.dir}/${install.name}-installer.jar" licenseFile="CDDLv1.0.1.txt" zipFile="${dist.dir}/${install.name}.zip"/>
     </target>
 
-    <target name="image" depends="build, combine-jars">
+    <target name="image" depends="build, combine-jars"
+        description="Create the wsit tool and runtime jars.">
         <copy todir="${dist.image.wsit.dir}">
             <fileset dir="${basedir}" includes="CDDL*.*"/>
             <fileset dir="${etc.dir}" includes="wsit-on-*.*"/>
