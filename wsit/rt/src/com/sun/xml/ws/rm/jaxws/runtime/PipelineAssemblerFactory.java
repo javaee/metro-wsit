@@ -69,7 +69,7 @@ public class PipelineAssemblerFactory extends
             @Override
             public Pipe createServer(SEIModel seiModel, WSDLPort wsdlModel, WSEndpoint endpoint, Pipe terminal) {
                 Pipe serverPipe = new RMServerPipe(wsdlModel,  endpoint, terminal);
-                return new WsaServerPipe(wsdlModel, endpoint.getBinding(), serverPipe);
+                return new WsaServerPipe(seiModel, wsdlModel, endpoint.getBinding(), serverPipe);
             }
 
             @Override
