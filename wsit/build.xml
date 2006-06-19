@@ -23,7 +23,7 @@
 -->
 
 <!--
- $Id: build.xml,v 1.9 2006-06-16 15:59:20 bbissett Exp $
+ $Id: build.xml,v 1.10 2006-06-19 19:47:02 bbissett Exp $
 
  Copyright (c) 2005 Sun Microsystems, Inc.
  All rights reserved.
@@ -47,11 +47,16 @@
 
     <path id="runtime.compile.classpath">
         <fileset dir="${lib.runtime.dir}" includes="*.jar"/>
-        <fileset dir="${lib.tooltime.dir}" includes="*.jar"/>
         <fileset dir="${lib.compiletime.dir}" includes="*.jar"/>
+
+        <!-- this one should be moved to tools path -->
+        <fileset dir="${lib.tooltime.dir}" includes="*.jar"/>
     </path>
 
-    <path id="tools.compile.classpath" refid="runtime.compile.classpath"/>
+    <path id="tooltime.compile.classpath">
+        <path refid="runtime.compile.classpath"/>
+        <pathelement location="${rt.classes}"/>
+    </path>
 
     <target name="prepare">
         <mkdir dir="${dist.image.wsit.lib.dir}"/>
