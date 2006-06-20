@@ -33,6 +33,7 @@ import java.net.URL;
 import java.util.logging.Logger;
 
 import static com.sun.xml.ws.mex.MetadataConstants.ERROR_LOG_LEVEL;
+import static com.sun.xml.ws.mex.MetadataConstants.GET_WXF_REQUEST;
 
 /**
  * Class that handles making the HTTP POST request
@@ -61,7 +62,7 @@ public class HttpPoster {
         conn.setDoInput(true);
         conn.setRequestMethod("POST");
         conn.setRequestProperty("Content-Type", contentType);
-//        conn.setRequestProperty("SOAPAction", GET_WXF_REQUEST);
+        conn.setRequestProperty("SOAPAction", GET_WXF_REQUEST);
 
         Writer writer = new OutputStreamWriter(conn.getOutputStream());
         writer.write(request);
