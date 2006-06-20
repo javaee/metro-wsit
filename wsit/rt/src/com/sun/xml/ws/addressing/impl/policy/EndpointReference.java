@@ -109,7 +109,19 @@ public class EndpointReference extends com.sun.xml.ws.policy.PolicyAssertion imp
     public Metadata getMetadata() {
         throw new UnsupportedOperationException();
     }
-    
+
+    public QName getInterfaceName() {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public QName getServiceName() {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public QName getEndpointName() {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
     public String getNamespaceURI() {
         throw new UnsupportedOperationException();
     }
