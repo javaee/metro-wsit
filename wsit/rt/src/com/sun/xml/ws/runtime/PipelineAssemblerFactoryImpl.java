@@ -317,9 +317,11 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             return true;
         }
 
-        WsaWSDLPortExtension ww = port.getExtension(WsaWSDLPortExtension.class);
-        if (ww != null && ww.isEnabled())
-            return true;
+        if (port != null) {
+            WsaWSDLPortExtension ww = port.getExtension(WsaWSDLPortExtension.class);
+            if (ww != null && ww.isEnabled())
+                return true;
+        }
 
         if (null == policyMap)
             return false;
