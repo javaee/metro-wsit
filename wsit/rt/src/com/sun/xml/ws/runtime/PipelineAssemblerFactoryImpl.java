@@ -34,6 +34,7 @@ import javax.xml.namespace.QName;
 
 import com.sun.xml.ws.addressing.jaxws.WsaClientPipe;
 import com.sun.xml.ws.addressing.jaxws.WsaServerPipe;
+import com.sun.xml.ws.addressing.jaxws.WsaWSDLPortExtension;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.WSService;
@@ -315,6 +316,10 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
         if (null != param && (param.equals("1.0") || param.equals("submission"))) {
             return true;
         }
+
+        WsaWSDLPortExtension ww = port.getExtension(WsaWSDLPortExtension.class);
+        if (ww != null && ww.isEnabled())
+            return true;
 
         if (null == policyMap)
             return false;
