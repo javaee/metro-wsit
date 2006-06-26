@@ -28,7 +28,7 @@
     <property name="tomcat.lib.home" value="${tomcat.home}/shared/lib"/>
 
     <target name="install">
-        <echo message="Installing WSIT 1.0 EA1 on ${tomcat.home} ..."/>
+        <echo message="Installing WSIT 1.0 EA on ${tomcat.home} ..."/>
 
         <!-- TODO: Identify placeholder for tools.jar -->
         <copy toDir="${tomcat.lib.home}" overwrite="true">

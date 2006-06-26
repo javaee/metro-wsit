@@ -53,7 +53,7 @@
         </copy>
     </target>
     <target name="install" depends="init">
-        <echo message="Installing WSIT 1.0 EA1 on ${as.home} ..."/>
+        <echo message="Installing WSIT 1.0 EA on ${as.home} ..."/>
 
         <copy todir="${as.lib.home}" overwrite="true">
             <fileset dir="${basedir}/lib" includes="*.jar"/>
@@ -65,7 +65,7 @@
     </target>
 
     <target name="uninstall" depends="init" unless="notInstalled">
-        <echo message="Uninstalling WSIT 1.0 EA1 from ${as.home} ..."/>
+        <echo message="Uninstalling WSIT 1.0 EA from ${as.home} ..."/>
 
         <copy todir="${as.home}/domains/${domain}/config" file="${backup.dir}/domain.xml" overwrite="true"/>
         <copy todir="${as.home}/bin" overwrite="true">
