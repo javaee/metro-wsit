@@ -1,13 +1,10 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
-
-
-<html><head>
+<html>
+<head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <meta http-equiv="Content-Style-Type" content="text/css">
 <meta name="GENERATOR" content="Adobe FrameMaker 6.0/HTML Export Filter">
-
 <title>WSIT Status Notes</title>
-
 </head>
 
 <body bgcolor="#ffffff">
@@ -48,6 +45,7 @@ Microsoft's WCF product and vice versa.</p>
 </ul>
 
 <p>Legend:
+
 <ul>
 <li><pre>MS->S : N/M</pre> means testing a  Microsoft consumer using a
 Sun provider where N tests out of M total pass.</li>
@@ -65,7 +63,7 @@ without security turned on.
 <br/>
 <hr/>
 
-<h2><a name="52974"></a>Glassfish Classpath Change Requirements</h2>
+<h2></a>Glassfish Classpath Change Requirements</h2>
 
 <p> The b43-nightly-01_may_2006 build of GlassFish contains several
 Jar files which contain classes that can conflict with the newer
@@ -84,8 +82,7 @@ of your own, you will need to do the same thing. The following code
 snippet excludes the conflicting Jar files from the classpath used to
 run the tools and the client application:</p>
 
-<p>
-<a name="pgfId-100270"></a>&lt;path id="wsit.classpath"&gt;<br>
+<p>&lt;path id="wsit.classpath"&gt;<br>
        &lt;pathelement location=<br>
          "${java.home}/../lib/tools.jar"/&gt;<br>
         &lt;fileset dir="${lib.home}"&gt;<br>
@@ -102,8 +99,7 @@ run the tools and the client application:</p>
 <br/>
 <hr/>
 
-<h2>
-<a name="pgfId-86004"></a><a name="67607"></a>Summary of Known Issues</h2>
+<h2><a name="67607"></a>Summary of Known Issues</h2>
 
 <table border="1">
 <tbody align="center"><tr>
@@ -173,7 +169,7 @@ run the tools and the client application:</p>
 <h2><a name="91780"></a>Metadata Exchange Status</h2>
 
 
-<h4 class="B-Head-afterA-Head">WCF Interoperability</h4>
+<h4>WCF Interoperability</h4>
 
 <pre>
 non-secure:
@@ -187,17 +183,14 @@ secure:
   (no tests exist)
 </pre>
 
-<h4>
-<a name="pgfId-80125"></a>What is Not Implemented</h4>
-<p>
-<a name="pgfId-82793"></a>All Metadata Exchange functionality has been
-implemented, including send and receive metadata and the client API for
-other components to use. However, the code that adds headers to the
-response message is commented out because of a known issue in xml
-stream buffer.</p>
+<h4>What is Not Implemented</h4>
 
-<h4>
-<a name="pgfId-81074"></a>Known Issues</h4>
+<p>All Metadata Exchange functionality has been implemented, including
+send and receive metadata and the client API for other components to
+use. However, the code that adds headers to the response message is
+commented out because of a known issue in xml stream buffer.</p>
+
+<h4>Known Issues</h4>
 
 <table border="1">
 <tbody>
@@ -259,10 +252,9 @@ first Web service deployed.</p>
 <br/>
 <hr/>
 
-
 <h2><a name="68668"></a>MTOM Status</h2>
 
-<h4 class="B-Head-afterA-Head">WCF Interoperability</h4>
+<h4>WCF Interoperability</h4>
 
 <pre>
 non-secure:
@@ -280,8 +272,7 @@ secure:
 
 <h4>What is Not Implemented</h4>
 
-<p>
-All MTOM functionality has been implemented.</p>
+<p>All MTOM functionality has been implemented.</p>
 
 <h4>Known Issues</h4>
 
@@ -330,7 +321,7 @@ either of the following cases:</p>
 
 <h2><a name="49498"></a>Data Binding Status</h2>
 
-<h4 class="B-Head-afterA-Head">WCF Interoperability</h4>
+<h4>WCF Interoperability</h4>
 
 <pre>
 non-secure:
@@ -347,12 +338,11 @@ secure:
 
 <h4>What is Not Implemented</h4>
 
-<p>
-TBD</p>
+<p>TBD</p>
 
 <h4>Known Issues</h4>
-<p>
-TBD</p>
+
+<p>TBD</p>
 
 <!-- ================================================== -->
 <br/>
@@ -360,7 +350,7 @@ TBD</p>
 
 <h2><a name="60313"></a>Reliable Messaging Status</h2>
 
-<h4 class="B-Head-afterA-Head">WCF Interoperability</h4>
+<h4>WCF Interoperability</h4>
 
 <pre>
 non-secure:
@@ -376,13 +366,11 @@ secure:
   S ->S :  2/2
 </pre>
 
-<p>
-NOTE: The interoperability tests do not include duplex binding tests. </p>
+<p>NOTE: The interoperability tests do not include duplex binding tests. </p>
 
 <h4>What is Not Implemented</h4>
 
-<p>
-<a name="pgfId-85784"></a>The following feature is not working:</p>
+<p>The following feature is not working:</p>
 
 <ul>
 <li>Flow control features not completely implemented.</li>
@@ -398,11 +386,9 @@ be configured.</p>
 <br/>
 <hr/>
 
-<h2>
-<a name="pgfId-80182"></a><a name="35385"></a>Security Status</h2>
+<h2><a name="35385"></a>Security Status</h2>
 
-<h4 class="B-Head-afterA-Head">
-<a name="pgfId-80183"></a>WCF Interoperability</h4>
+<h4>WCF Interoperability</h4>
 
 <pre>
   MS->S :   0/10 : (starting from WSDL; not tested)
@@ -410,13 +396,13 @@ be configured.</p>
   S ->S :  10/10 : (starting from WSDL)
 </pre>
 
-<p>
-<a name="pgfId-115492"></a>NOTE: No test scenarios were executed that started from Java.</p>
+<p>NOTE: No test scenarios were executed that started from Java.</p>
 
 <h4>What is Not Implemented</h4>
 
-<p>
-<a name="pgfId-85694"></a>The following features have been implemented but are not working correctly:</p>
+<p>The following features have been implemented but are not working
+correctly:</p>
+
 <ul>
 <li>Multiple secure conversation tokens per message is not implemented. Only one secure conversation token per message is assumed.</li>
 <li>Session timeout handling for secure conversation sessions and LifeTime handling for IssuedTokens.</li>
@@ -668,7 +654,8 @@ with Asymmetric Binding.</p>
 <a name="pgfId-91503"></a>When using SCT security token as Signed Supporting Token, clients throw run-time exceptions.</p>
 </td>
 </tr>
-</tbody></table>
+</tbody>
+</table>
 
 <!-- ================================================== -->
 <br/>
