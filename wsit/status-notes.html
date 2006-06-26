@@ -103,60 +103,60 @@ run the tools and the client application:</p>
 
 <table border="1">
 <tbody align="center"><tr>
-<th rowspan="1" colspan="1">Features</th>
-<th rowspan="1" colspan="1">Priority 1</th>
-<th rowspan="1" colspan="1">Priority 2</th>
-<th rowspan="1" colspan="1">Priority 3</th>
-<th rowspan="1" colspan="1">Priority 4 and 5</p></th>
-<th rowspan="1" colspan="1">Totals</th>
+<th>Features</th>
+<th>Priority 1</th>
+<th>Priority 2</th>
+<th>Priority 3</th>
+<th>Priority 4 and 5</p></th>
+<th>Totals</th>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">Installation</td>
-<td rowspan="1" colspan="1">0</td>
-<td rowspan="1" colspan="1">0</td>
-<td rowspan="1" colspan="1">1</td>
-<td rowspan="1" colspan="1">0</td>
-<td rowspan="1" colspan="1">1</td>
+<td>Installation</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">Integration</td>
-<td rowspan="1" colspan="1">0</td>
-<td rowspan="1" colspan="1">1</td>
-<td rowspan="1" colspan="1">0</td>
-<td rowspan="1" colspan="1">0</td>
-<td rowspan="1" colspan="1">1</td>
+<td>Integration</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">Metadata Exchange</td>
-<td rowspan="1" colspan="1">0</td>
-<td rowspan="1" colspan="1">1</td>
-<td rowspan="1" colspan="1">0</td>
-<td rowspan="1" colspan="1">0</td>
-<td rowspan="1" colspan="1">1</td>
+<td>Metadata Exchange</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">Security</td>
-<td rowspan="1" colspan="1">0</td>
-<td rowspan="1" colspan="1">5</td>
-<td rowspan="1" colspan="1">4</td>
-<td rowspan="1" colspan="1">0</td>
-<td rowspan="1" colspan="1">0</td>
+<td>Security</td>
+<td>0</td>
+<td>5</td>
+<td>4</td>
+<td>0</td>
+<td>0</td>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">Security Policy</td>
-<td rowspan="1" colspan="1">0</td>
-<td rowspan="1" colspan="1">5</td>
-<td rowspan="1" colspan="1">3</td>
-<td rowspan="1" colspan="1">0</td>
-<td rowspan="1" colspan="1">0</td>
+<td>Security Policy</td>
+<td>0</td>
+<td>5</td>
+<td>3</td>
+<td>0</td>
+<td>0</td>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">Trust</td>
-<td rowspan="1" colspan="1">0</td>
-<td rowspan="1" colspan="1">0</td>
-<td rowspan="1" colspan="1">4</td>
-<td rowspan="1" colspan="1">0</td>
-<td rowspan="1" colspan="1">0</td>
+<td>Trust</td>
+<td>0</td>
+<td>0</td>
+<td>4</td>
+<td>0</td>
+<td>0</td>
 </tr>
 </tbody>
 </table>
@@ -195,55 +195,29 @@ commented out because of a known issue in xml stream buffer.</p>
 <table border="1">
 <tbody>
 <tr>
-<th rowspan="1" colspan="1">
-<p>
-<a name="pgfId-81088"></a>Interoperability Feature</p>
-</th>
-<th rowspan="1" colspan="1">
-<p>
-<a name="pgfId-81090"></a>Status/Workaround</p>
-</th>
+<th><p>Interoperability Feature</p></th>
+<th><p>Status/Workaround</p></th>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-81094"></a>Support for returning WS-Addressing response headers with response messages.</p>
-</td>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-81139"></a>This is an unbound prefix issue. This issue
+<td><p>Support for returning WS-Addressing response headers with response messages.</p></td>
+<td><p>This is an unbound prefix issue. This issue
 is preventing the Metadata Exchange feature from returning the
 WS-Addressing response headers that are required by the Metadata
 Exchange specification.</p>
-<p class="TAB-Table-Body">
-<a name="pgfId-81151"></a>WORKAROUND: The client
-code currently does not check for these headers so the response is still
-parsed.</p>
+<p>WORKAROUND: The client code currently does not check for these
+headers so the response is still parsed.</p>
 </td>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-81161"></a>Support for multiple Web services on a single server</p>
-</td>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-81165"></a> If more than one Web service is deployed in
-the server, a client can only use Metadata Exchange to retrieve the
-first Web service deployed.</p>
-<p class="TAB-Table-Body">
-<a name="pgfId-81163"></a>WORKAROUND: Do not use Metadata Exchange. Instead, use the wsimport tool and specify the "?wsdl" address as the target.</p>
-</td>
+<td><p>Support for multiple Web services on a single server</p></td>
+<td><p>If more than one Web service is deployed in the server, a
+client can only use Metadata Exchange to retrieve the first Web
+service deployed.</p> 
+<p>WORKAROUND: Do not use Metadata Exchange. Instead, use the wsimport tool and specify the "?wsdl" address as the target.</p></td>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-81210"></a>Support for ReplyTo in client request.</p>
-</td>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-81219"></a>This feature is currently not supported.</p>
-</td>
+<td><p>Support for ReplyTo in client request.</p></td>
+<td><p>This feature is currently not supported.</p></td>
 </tr>
 </tbody>
 </table>
@@ -278,34 +252,28 @@ secure:
 
 <table border="1">
 <tbody><tr>
-<th rowspan="1" colspan="1">
-<p>
-<a name="pgfId-110304"></a>Interoperability Feature</p>
+<th>
+<p>Interoperability Feature</p>
 </th>
-<th rowspan="1" colspan="1">
-<p>
-<a name="pgfId-110306"></a>Status/Workaround</p>
+<th>
+<p>Status/Workaround</p>
 </th>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-110343"></a>Using MTOM with SOAP 1.2</p>
+<td>
+<p>Using MTOM with SOAP 1.2</p>
 </td>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-110360"></a>MTOM with SOAP 1.2 will not work if the SOAP
+<td>
+<p>MTOM with SOAP 1.2 will not work if the SOAP
 message to be sent has no soap action, that is, it will not work in
 either of the following cases:</p>
-<p class="TAB-Table-Body">
-<a name="pgfId-110361"></a>  - the WSDL has  no soap action</p>
-<p class="TAB-Table-Body">
-<a name="pgfId-110362"></a>  - WS-Addressing is disabled</p>
-<p class="TAB-Table-Body">
-<a name="pgfId-110353"></a>WORKAROUND: If the WSDL has a SOAP action or WS-Addressing is enabled, then MTOM will work.</p>
+<p>- the WSDL has  no soap action</p>
+<p>- WS-Addressing is disabled</p>
+<p>WORKAROUND: If the WSDL has a SOAP action or WS-Addressing is enabled, then MTOM will work.</p>
 </td>
 </tr>
-</tbody></table>
+</tbody>
+</table>
 
 <!-- ================================================== -->
 <br/>
@@ -424,226 +392,182 @@ because a different PipelineAssembler is used. </li>
 <table border="1">
 <tbody>
 <tr>
-<th rowspan="1" colspan="1">
-<p>
-<a name="pgfId-80654"></a>Interoperability Feature</p>
+<th>
+<p>Interoperability Feature</p>
 </th>
-<th rowspan="1" colspan="1">
-<p>
-<a name="pgfId-80709"></a>Status</p>
+<th>
+<p>Status</p>
 </th>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-80658"></a>Multiple secure conversation tokens per message.</p>
+<td>
+<p>Multiple secure conversation tokens per message.</p>
 </td>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-80738"></a>Only one secure conversation token per
+<td>
+<p>Only one secure conversation token per
 message is supported at this time.</p>
 </td>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-80662"></a>Session timeout handling for secure conversation sessions and LifeTime handling for IssuedTokens.</p>
+<td>
+<p>Session timeout handling for secure conversation sessions and LifeTime handling for IssuedTokens.</p>
 </td>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-80713"></a>?????</p>
+<td>
+<p>?????</p>
 </td>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-80666"></a>Specification of MaxNonceAge parameter in NetBeans GUI and configuration files. </p>
+<td>
+<p>Specification of MaxNonceAge parameter in NetBeans GUI and configuration files. </p>
 </td>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-80747"></a>This is not supported at this time. Default values will be used instead.</p>
+<td>
+<p>This is not supported at this time. Default values will be used instead.</p>
 </td>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-80670"></a>&lt;sp:SAMLToken&gt; scenarios untested. </p>
+<td>
+<p>&lt;sp:SAMLToken&gt; scenarios untested. </p>
 </td>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-80822"></a>SAML only tested on the WS-Trust Integration Path.</p>
+<td>
+<p>SAML only tested on the WS-Trust Integration Path.</p>
 </td>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-80674"></a> If a binary secret arrives in a SAML assertion, then ensure that SSL is used</p>
+<td>
+<p>If a binary secret arrives in a SAML assertion, then ensure that SSL is used</p>
 </td>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-80719"></a>?????</p>
+<td>
+<p>?????</p>
 </td>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-80678"></a>SignedParts and EncryptedParts Policy Verification. </p>
+<td>
+<p>SignedParts and EncryptedParts Policy Verification. </p>
 </td>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-80757"></a>Currently disabled due to insufficient testing. </p>
+<td>
+<p>Currently disabled due to insufficient testing. </p>
 </td>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-80683"></a>Policy Verification for WS-Trust Protocol Messages. </p>
+<td>
+<p>Policy Verification for WS-Trust Protocol Messages. </p>
 </td>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-80772"></a>This is specification issue.</p>
+<td>
+<p>This is specification issue.</p>
 </td>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-80687"></a>Backward Compatibility with XWSS 2.0 FCS </p>
+<td>
+<p>Backward Compatibility with XWSS 2.0 FCS </p>
 </td>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-80782"></a>Not supported at this time. To be supported in the FCS release.</p>
+<td>
+<p>Not supported at this time. To be supported in the FCS release.</p>
 </td>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-80691"></a>Implied DerivedKeys </p>
+<td>
+<p>Implied DerivedKeys </p>
 </td>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-80793"></a>Specified by a @wsc:nonce attribute on the SecureTokenRequest (STR).</p>
+<td>
+<p>Specified by a @wsc:nonce attribute on the SecureTokenRequest (STR).</p>
 </td>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-80695"></a>The @wsc:Instance attribute on wsse:Reference for referencing specific secure conversation token instances.</p>
+<td>
+<p>The @wsc:Instance attribute on wsse:Reference for referencing specific secure conversation token instances.</p>
 </td>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-80729"></a>?????</p>
+<td>
+<p>?????</p>
 </td>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-91491"></a>WSSecurityPolicy:TokenInclusion:</p>
+<td>
+<p>WSSecurityPolicy:TokenInclusion:</p>
 </td>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-91493"></a>WSSecurityPolicy:TokenInclusion: Only (Always) value for this property is used.</p>
+<td>
+<p>WSSecurityPolicy:TokenInclusion: Only (Always) value for this property is used.</p>
 </td>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-91485"></a>LaxTimestampFirst and LaxTimestampLast assertions</p>
+<td>
+<p>LaxTimestampFirst and LaxTimestampLast assertions</p>
 </td>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-91487"></a> Not supported</p>
+<td>
+<p>Not supported</p>
 </td>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-91479"></a>SignedEndorsingSupportingTokens assertion</p>
+<td>
+<p>SignedEndorsingSupportingTokens assertion</p>
 </td>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-91481"></a>SignedEndorsingSupportingTokens assertion causes: XWSSecurityException:java.lang.NullPointerException.</p>
+<td>
+<p>SignedEndorsingSupportingTokens assertion causes: XWSSecurityException:java.lang.NullPointerException.</p>
 </td>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-91473"></a>java.lang.IllegalStateException</p>
+<td>
+<p>java.lang.IllegalStateException</p>
 </td>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-91475"></a>java.lang.IllegalStateException: The current event is not START_ELEMENT but 2.</p>
+<td>
+<p>java.lang.IllegalStateException: The current event is not START_ELEMENT but 2.</p>
 </td>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-91467"></a>ProtectTokens assertion with AsymmetricBinding </p>
+<td>
+<p>ProtectTokens assertion with AsymmetricBinding </p>
 </td>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-91469"></a>ProtectTokens assertion with AsymmetricBinding in service WSDL causes java.lang.NullPointerException.</p>
+<td>
+<p>ProtectTokens assertion with AsymmetricBinding in service WSDL causes java.lang.NullPointerException.</p>
 </td>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-80699"></a>Reference Type verification in PolicyVerification.</p>
+<td>
+<p>Reference Type verification in PolicyVerification.</p>
 </td>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-80845"></a>This feature is currently disabled due to
+<td>
+<p>This feature is currently disabled due to
 problems with the interpretation of IncludeTokenPolicy in conjunction
 with Asymmetric Binding.</p>
 </td>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-80703"></a>Logging </p>
+<td>
+<p>Logging </p>
 </td>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-80857"></a>Logging is incomplete in the newly added code for WSIT.</p>
+<td>
+<p>Logging is incomplete in the newly added code for WSIT.</p>
 </td>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-91519"></a>EncryptedParts has sp:Body, sp: Header </p>
+<td>
+<p>EncryptedParts has sp:Body, sp: Header </p>
 </td>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-91521"></a>EncryptedParts has sp:Body, sp: Header with @Namespace only; causes Encryption of SOAP Body not allowed.</p>
+<td>
+<p>EncryptedParts has sp:Body, sp: Header with @Namespace only; causes Encryption of SOAP Body not allowed.</p>
 </td>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-91513"></a> Returning of SOAP fault </p>
+<td>
+<p>Returning of SOAP fault </p>
 </td>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-91515"></a>Negative Test fail: No SOAP fault returned: Different Endpoint Policies and Body Encrypted.</p>
+<td>
+<p>Negative Test fail: No SOAP fault returned: Different Endpoint Policies and Body Encrypted.</p>
 </td>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-91507"></a> Returning of SOAP fault </p>
+<td>
+<p>Returning of SOAP fault </p>
 </td>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-91509"></a>SOAP Fault not returned: Different Algorithm suites used by Service Consumer/Provider.</p>
+<td>
+<p>SOAP Fault not returned: Different Algorithm suites used by Service Consumer/Provider.</p>
 </td>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-91501"></a>Using SCT security token as Signed Supporting Token,</p>
+<td>
+<p>Using SCT security token as Signed Supporting Token,</p>
 </td>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-91503"></a>When using SCT security token as Signed Supporting Token, clients throw run-time exceptions.</p>
+<td>
+<p>When using SCT security token as Signed Supporting Token, clients throw run-time exceptions.</p>
 </td>
 </tr>
 </tbody>
@@ -678,28 +602,23 @@ with Asymmetric Binding.</p>
 
 <table border="1">
 <tbody><tr>
-<th rowspan="1" colspan="1">
-<p>
-<a name="pgfId-80922"></a>Interoperability Feature</p>
+<th>
+<p>Interoperability Feature</p>
 </th>
-<th rowspan="1" colspan="1">
-<p>
-<a name="pgfId-80924"></a>Status</p>
+<th>
+<p>Status</p>
 </th>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-81005"></a>Bindings supported.</p>
+<td>
+<p>Bindings supported.</p>
 </td>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-81017"></a>Token Issued and Cancellation bindings are supported. However, no other bindings are currently supported.</p>
+<td>
+<p>Token Issued and Cancellation bindings are supported. However, no other bindings are currently supported.</p>
 </td>
 </tr>
 </tbody>
 </table>
-
 
 <!-- ================================================== -->
 <br/>
@@ -728,33 +647,27 @@ with Asymmetric Binding.</p>
 
 <table border="1">
 <tbody><tr>
-<th rowspan="1" colspan="1">
-<p>
-<a name="pgfId-81439"></a>Interoperability Feature</p>
+<th>
+<p>Interoperability Feature</p>
 </th>
-<th rowspan="1" colspan="1">
-<p>
-<a name="pgfId-81441"></a>Status/Workaround</p>
+<th>
+<p>Status/Workaround</p>
 </th>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-81445"></a>Bindings supported.</p>
+<td>
+<p>Bindings supported.</p>
 </td>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-81447"></a>The Token Issued binding is supported. No other bindings currently supported.</p>
+<td>
+<p>The Token Issued binding is supported. No other bindings currently supported.</p>
 </td>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-91525"></a>com.sun.xml.wss.XWSSecurityException.</p>
+<td>
+<p>com.sun.xml.wss.XWSSecurityException.</p>
 </td>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-91527"></a>com.sun.xml.wss.XWSSecurityException: No elements exist with Id/WsuId:.</p>
+<td>
+<p>com.sun.xml.wss.XWSSecurityException: No elements exist with Id/WsuId:.</p>
 </td>
 </tr>
 </tbody>
@@ -786,23 +699,19 @@ is not available at this time.</p>
 
 <table border="1">
 <tbody><tr>
-<th rowspan="1" colspan="1">
-<p>
-<a name="pgfId-82269"></a>Interoperability Feature</p>
+<th>
+<p>Interoperability Feature</p>
 </th>
-<th rowspan="1" colspan="1">
-<p>
-<a name="pgfId-82271"></a>Status/Workaround</p>
+<th>
+<p>Status/Workaround</p>
 </th>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-122128"></a>Client-side classpath must not use the jaxws-update.jar</p>
+<td>
+<p>Client-side classpath must not use the jaxws-update.jar</p>
 </td>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-122130"></a>For the client side classpath, make sure
+<td>
+<p>For the client side classpath, make sure
 that jaxws-update.jar is NOT be in the classpath. You can do this by
 spelling out each jar name in the classpath (this is the best way to
 avoid confusion) or you can include all jars and exclude
@@ -810,102 +719,79 @@ jaxws-update.jar from the client classpath.</p>
 </td>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-82275"></a>WSIT Security: Alpha input can be saved to numeric Timestamp Freshness Limit.</p>
+<td>
+<p>WSIT Security: Alpha input can be saved to numeric Timestamp Freshness Limit.</p>
 </td>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-82355"></a>EXPECTED BEHAVIOR: Timestamp Freshness Limit
+<td>
+<p>EXPECTED BEHAVIOR: Timestamp Freshness Limit
 in Security -&gt; Advanced Configuration should only accept numerics.</p>
-<p class="TAB-Table-Body">
-<a name="pgfId-82277"></a>ACTUAL BEHAVIOR: Accepts and saves alphas to the WSDL.</p>
+<p>ACTUAL BEHAVIOR: Accepts and saves alphas to the WSDL.</p>
 </td>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-82329"></a>WSIT Security: Alpha input can be saved to Maximum Clock.</p>
+<td>
+<p>WSIT Security: Alpha input can be saved to Maximum Clock.</p>
 </td>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-82368"></a>EXPECTED BEHAVIOR: Maximum Clock Skew in Security -&gt; Advanced Configuration should only accept numerics.</p>
-<p class="TAB-Table-Body">
-<a name="pgfId-82331"></a>ACTUAL BEHAVIOR: Accepts and saves alphas to the WSDL.</p>
+<td>
+<p>EXPECTED BEHAVIOR: Maximum Clock Skew in Security -&gt; Advanced Configuration should only accept numerics.</p>
+<p>ACTUAL BEHAVIOR: Accepts and saves alphas to the WSDL.</p>
 </td>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-82323"></a>WSIT Security: A value that exceeds the maximum allowed can be saved to the Max Nonce Age.</p>
+<td>
+<p>WSIT Security: A value that exceeds the maximum allowed can be saved to the Max Nonce Age.</p>
 </td>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-82410"></a>EXPECTED BEHAVIOR: Max Nonce Age in Security -&gt; Advanced Configuration should not accept a value greater than 900000.</p>
-<p class="TAB-Table-Body">
-<a name="pgfId-82325"></a>ACTUAL BEHAVIOR: Accepts and saves invalid value to the WSDL.</p>
+<td>
+<p>EXPECTED BEHAVIOR: Max Nonce Age in Security -&gt; Advanced Configuration should not accept a value greater than 900000.</p>
+<p>ACTUAL BEHAVIOR: Accepts and saves invalid value to the WSDL.</p>
 </td>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-82317"></a>WSIT Security: A value that exceeds the maximum allowed can be saved to the Max Clock Skew.</p>
+<td>
+<p>WSIT Security: A value that exceeds the maximum allowed can be saved to the Max Clock Skew.</p>
 </td>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-82438"></a>EXPECTED BEHAVIOR: Max Nonce Age in Security
+<td>
+<p>EXPECTED BEHAVIOR: Max Nonce Age in Security
 -&gt; Advanced Configuration should not accept a value greater than 1200000.</p>
-<p class="TAB-Table-Body">
-<a name="pgfId-82319"></a>ACTUAL BEHAVIOR: Accepts and saves invalid value (1200001) to the WSDL.</p>
+<p>ACTUAL BEHAVIOR: Accepts and saves invalid value (1200001) to the WSDL.</p>
 </td>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-82311"></a>WSIT Security: Include Token in a message and X509 Version can be set incorrectly.</p>
+<td>
+<p>WSIT Security: Include Token in a message and X509 Version can be set incorrectly.</p>
 </td>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-82471"></a>EXPECTED BEHAVIOR: Saved details show Security Binding and Encryption token with the same values.</p>
-<p class="TAB-Table-Body">
-<a name="pgfId-82474"></a>ACTUAL BEHAVIOR: Saved values are incorrect.</p>
+<td>
+<p>EXPECTED BEHAVIOR: Saved details show Security Binding and Encryption token with the same values.</p>
+<p>ACTUAL BEHAVIOR: Saved values are incorrect.</p>
 </td>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-82305"></a> WSIT Security Keystore Configuration: Behavior of child dialogs is incorrect.</p>
+<td>
+<p>WSIT Security Keystore Configuration: Behavior of child dialogs is incorrect.</p>
 </td>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-82504"></a>EXPECTED BEHAVIOR: Do not expect values that specified on child dialogs to be saved to the WSDL.</p>
-<p class="TAB-Table-Body">
-<a name="pgfId-82506"></a>ACTUAL BEHAVIOR: Values that are specified in
+<td>
+<p>EXPECTED BEHAVIOR: Do not expect values that specified on child dialogs to be saved to the WSDL.</p>
+<p>ACTUAL BEHAVIOR: Values that are specified in
 child dialogs are saved to the WSDL. Saving should not occur until the
 OK button is clicked on parent dialog.</p>
 </td>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-82299"></a> WSIT Accessibility: ALT + letter access for command buttons is not working correctly.</p>
+<td>
+<p>WSIT Accessibility: ALT + letter access for command buttons is not working correctly.</p>
 </td>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-82608"></a>None of the command buttons in the Tooling
+<td>
+<p>None of the command buttons in the Tooling
 plug-in provide for access using ALT + letter.</p>
 </td>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-82293"></a>WSIT General: Attributes are saved to wsit.xml even when user cancels.</p>
+<td>
+<p>WSIT General: Attributes are saved to wsit.xml even when user cancels.</p>
 </td>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-82638"></a>EXPECTED BEHAVIOR: If the user presses Cancel, then none of the currently changed values should be saved to wsit.xml.</p>
-<p class="TAB-Table-Body">
-<a name="pgfId-82626"></a>ACTUAL BEHAVIOR: When attributes are changed
+<td>
+<p>EXPECTED BEHAVIOR: If the user presses Cancel, then none of the currently changed values should be saved to wsit.xml.</p>
+<p>ACTUAL BEHAVIOR: When attributes are changed
 in Edit Web Service Attributes window, the wsit.xml shows the
 attributes as being updated before the OK button is clicked. If the
 user chooses to Cancel the changes, the changed attributes are still
@@ -913,49 +799,39 @@ saved to the file.</p>
 </td>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-82287"></a>WSIT: Limit on size of MaxBufferSize and Inactivity Timeout for Reliable Messaging.</p>
+<td>
+<p>WSIT: Limit on size of MaxBufferSize and Inactivity Timeout for Reliable Messaging.</p>
 </td>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-82677"></a>EXPECTED BEHAVIOR: User should not be allowed to enter more than eight (8) digits in either of the text boxes. </p>
-<p class="TAB-Table-Body">
-<a name="pgfId-82678"></a>ACTUAL BEHAVIOR: User is allowed to enter more than eight digits are entered, however, an error is received on the status line.</p>
+<td>
+<p>EXPECTED BEHAVIOR: User should not be allowed to enter more than eight (8) digits in either of the text boxes. </p>
+<p>ACTUAL BEHAVIOR: User is allowed to enter more than eight digits are entered, however, an error is received on the status line.</p>
 </td>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-103556"></a>WSIT features</p>
+<td>
+<p>WSIT features</p>
 </td>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-103658"></a>When creating a Web Service project to use
+<td>
+<p>When creating a Web Service project to use
 WSIT features, you must select J2EE 1.4 in the New Web Application
 window and set the Source Level to 1.5 in the Project Properties window.</p>
-<p class="TAB-Table-Body">
-<a name="pgfId-115333"></a>NOTE: With these configuration settings the NteBeans 5.5 does not support JSR 109.</p>
+<p>NOTE: With these configuration settings the NteBeans 5.5 does not support JSR 109.</p>
 </td>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-103574"></a>Support for multiple Web services and clients in a single project. </p>
+<td>
+<p>Support for multiple Web services and clients in a single project. </p>
 </td>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-103589"></a>In each project, only one service and one client is supported.</p>
+<td>
+<p>In each project, only one service and one client is supported.</p>
 </td>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-103567"></a>Navigator functionality</p>
+<td>
+<p>Navigator functionality</p>
 </td>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-103607"></a>The WSIT configuration file and the SWIT configuration GUI should never be opened at th same time.</p>
+<td>
+<p>The WSIT configuration file and the SWIT configuration GUI should never be opened at th same time.</p>
 </td>
 </tr>
 </tbody>
@@ -1030,23 +906,19 @@ secure:
 
 <table border="1">
 <tbody><tr>
-<th rowspan="1" colspan="1">
-<p>
-<a name="pgfId-82147"></a>Interoperability Feature</p>
+<th>
+<p>Interoperability Feature</p>
 </th>
-<th rowspan="1" colspan="1">
-<p>
-<a name="pgfId-82149"></a>Status/Workaround</p>
+<th>
+<p>Status/Workaround</p>
 </th>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-82153"></a>Applying policy to endpoints that have multiple ports.</p>
+<td>
+<p>Applying policy to endpoints that have multiple ports.</p>
 </td>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-82173"></a>Policies cannot be applied to endpoints that have more than one port.</p>
+<td>
+<p>Policies cannot be applied to endpoints that have more than one port.</p>
 </td>
 </tr>
 </tbody>
@@ -1073,109 +945,86 @@ secure:
 
 <table border="1">
 <tbody><tr>
-<th rowspan="1" colspan="1">
-<p>
-<a name="pgfId-91150"></a>Interoperability Feature</p>
+<th>
+<p>Interoperability Feature</p>
 </th>
-<th rowspan="1" colspan="1">
-<p>
-<a name="pgfId-91152"></a>Status/Workaround</p>
+<th>
+<p>Status/Workaround</p>
 </th>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-91173"></a>WSSecurityPolicy:wsu:Timestamp.</p>
+<td>
+<p>WSSecurityPolicy:wsu:Timestamp.</p>
 </td>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-91182"></a>WSSecurityPolicy:wsu:Timestamp present in Security header despite absence of sp:IncludeTimestamp</p>
+<td>
+<p>WSSecurityPolicy:wsu:Timestamp present in Security header despite absence of sp:IncludeTimestamp</p>
 </td>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-91247"></a>Security header</p>
+<td>
+<p>Security header</p>
 </td>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-91249"></a>WSSecurityPolicy:Signature block present in security header despite absence of Signature operation</p>
+<td>
+<p>WSSecurityPolicy:Signature block present in security header despite absence of Signature operation</p>
 </td>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-91241"></a>sp:EncryptedElements/sp</p>
+<td>
+<p>sp:EncryptedElements/sp</p>
 </td>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-91243"></a>sp:EncryptedElements/sp:XPath fails to encrypt the element specified in the XPath element</p>
+<td>
+<p>sp:EncryptedElements/sp:XPath fails to encrypt the element specified in the XPath element</p>
 </td>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-91235"></a>ProtectTokens in SymmetricBinding</p>
+<td>
+<p>ProtectTokens in SymmetricBinding</p>
 </td>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-91237"></a>Token used to generate Signature not covered by the Signature</p>
+<td>
+<p>Token used to generate Signature not covered by the Signature</p>
 </td>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-91229"></a>SupportingTokens assertion</p>
+<td>
+<p>SupportingTokens assertion</p>
 </td>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-91231"></a>EncryptedParts in SupportingTokens assertion in message policy does not work</p>
+<td>
+<p>EncryptedParts in SupportingTokens assertion in message policy does not work</p>
 </td>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-91193"></a>Empty sp:SignedParts assertion</p>
+<td>
+<p>Empty sp:SignedParts assertion</p>
 </td>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-91195"></a>Empty sp:SignedParts assertion: Gives exception-No elements exist with Id/WsuId: ALL_MESSAGE_HEADERS.</p>
+<td>
+<p>Empty sp:SignedParts assertion: Gives exception-No elements exist with Id/WsuId: ALL_MESSAGE_HEADERS.</p>
 </td>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-91315"></a> AsymmetricBinding response message </p>
+<td>
+<p>AsymmetricBinding response message </p>
 </td>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-91317"></a>Token missing in response message for AsymmetricBinding, in case where the default (ALWAYS) TokenInclusion is used.</p>
+<td>
+<p>Token missing in response message for AsymmetricBinding, in case where the default (ALWAYS) TokenInclusion is used.</p>
 </td>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-91309"></a>WSSecurity Policy Exception</p>
+<td>
+<p>WSSecurity Policy Exception</p>
 </td>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-91311"></a>WSSecurity Policy Exception: Default implementation of IncludeToken takes "Never".</p>
+<td>
+<p>WSSecurity Policy Exception: Default implementation of IncludeToken takes "Never".</p>
 </td>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-108589"></a>WSSecurity Policy deploy</p>
+<td>
+<p>WSSecurity Policy deploy</p>
 </td>
-<td rowspan="1" colspan="1">
-<p class="TAB-Table-Body">
-<a name="pgfId-108600"></a>The following security policy assertions cause a deploy failure:</p>
-<p class="TAB-Table-Body">
-<a name="pgfId-108609"></a>- SecurityPolicy:sp:AlgorithmSuite/wsp:Policy/sp:SoapNormalization10</p>
-<p class="TAB-Table-Body">
-<a name="pgfId-108613"></a>- SecurityPolicy: sp:AlgorithmSuite/wsp:Policy/sp:XPath10</p>
-<p class="TAB-Table-Body">
-<a name="pgfId-108623"></a>- SecurityPolicy: sp:AlgorithmSuite/wsp:Policy/sp:XPathFilter20</p>
+<td>
+<p>The following security policy assertions cause a deploy failure:</p>
+<p>- SecurityPolicy:sp:AlgorithmSuite/wsp:Policy/sp:SoapNormalization10</p>
+<p>- SecurityPolicy: sp:AlgorithmSuite/wsp:Policy/sp:XPath10</p>
+<p>- SecurityPolicy: sp:AlgorithmSuite/wsp:Policy/sp:XPathFilter20</p>
 </td>
 </tr>
 </tbody>
