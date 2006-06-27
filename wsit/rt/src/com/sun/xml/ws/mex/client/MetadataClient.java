@@ -129,7 +129,7 @@ public class MetadataClient {
     public List<PortInfo> getServiceInformation(@NotNull Metadata data) {
         for (MetadataSection section : data.getMetadataSection()) {
             if (section.getDialect().equals(WSDL_DIALECT)) {
-                return getServiceInformation(section.getAny().get(0));
+                return getServiceInformation(section.getAny());
             }
         }
         return null;
@@ -220,7 +220,7 @@ public class MetadataClient {
     private void cleanData(Metadata md) {
         for (MetadataSection section : md.getMetadataSection()) {
             if (section.getDialect().equals(WSDL_DIALECT)) {
-                cleanWSDLNode((Node) section.getAny().get(0));
+                cleanWSDLNode((Node) section.getAny());
             }
         }
     }

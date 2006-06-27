@@ -31,7 +31,9 @@ import com.sun.xml.ws.mex.client.MetadataClient.Protocol;
 import static com.sun.xml.ws.mex.MetadataConstants.GET_WXF_REQUEST;
 import static com.sun.xml.ws.mex.MetadataConstants.SOAP_1_1;
 import static com.sun.xml.ws.mex.MetadataConstants.SOAP_1_2;
-import static com.sun.xml.ws.mex.MetadataConstants.WXF_NAMESPACE;
+import static com.sun.xml.ws.mex.MetadataConstants.WSA_ANON;
+import static com.sun.xml.ws.mex.MetadataConstants.WSA_NAMESPACE;
+import static com.sun.xml.ws.mex.MetadataConstants.WSA_PREFIX;
 
 /**
  * Class for making ws-transfer requests.
@@ -73,19 +75,18 @@ public class WSTransferUtil {
         }
         return "<" + soapPrefix + ":Envelope " +
             "xmlns:" + soapPrefix + "='" + soapNamespace + "' " +
-            "xmlns:wsa='http://www.w3.org/2005/08/addressing' " +
-            "xmlns:wxf='" + WXF_NAMESPACE + "'>" +
+            "xmlns:" + WSA_PREFIX + "='" + WSA_NAMESPACE + "'>" +
             "<" + soapPrefix + ":Header>" +
-            "<wsa:Action>" +
+            "<" + WSA_PREFIX + ":Action>" +
             GET_WXF_REQUEST +
-            "</wsa:Action>" +
-            "<wsa:To>" + address + "</wsa:To>" +
-            "<wsa:ReplyTo><wsa:Address>" +
-            "http://www.w3.org/2005/08/addressing/anonymous" +
-            "</wsa:Address></wsa:ReplyTo>" +
-            "<wsa:MessageID>" +
+            "</" + WSA_PREFIX + ":Action>" +
+            "<" + WSA_PREFIX + ":To>" + address + "</" + WSA_PREFIX + ":To>" +
+            "<" + WSA_PREFIX + ":ReplyTo><" + WSA_PREFIX + ":Address>" +
+            WSA_ANON +
+            "</" + WSA_PREFIX + ":Address></" + WSA_PREFIX + ":ReplyTo>" +
+            "<" + WSA_PREFIX + ":MessageID>" +
             "uuid:778b135f-3fdf-44b2-b53e-ebaab7441e40" +
-            "</wsa:MessageID>" +
+            "</" + WSA_PREFIX + ":MessageID>" +
             "</" + soapPrefix + ":Header>" +
             "<" + soapPrefix + ":Body/>" +
             "</" + soapPrefix + ":Envelope>";

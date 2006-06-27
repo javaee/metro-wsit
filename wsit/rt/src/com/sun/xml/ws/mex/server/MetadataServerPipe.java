@@ -48,8 +48,8 @@ import static com.sun.xml.ws.mex.MetadataConstants.MEX_NAMESPACE;
 import static com.sun.xml.ws.mex.MetadataConstants.MEX_PREFIX;
 import static com.sun.xml.ws.mex.MetadataConstants.SOAP_1_2;
 import static com.sun.xml.ws.mex.MetadataConstants.SOAP_1_1;
-import static com.sun.xml.ws.mex.MetadataConstants.WXF_NAMESPACE;
-import static com.sun.xml.ws.mex.MetadataConstants.WXF_PREFIX;
+import static com.sun.xml.ws.mex.MetadataConstants.WSA_NAMESPACE;
+import static com.sun.xml.ws.mex.MetadataConstants.WSA_PREFIX;
 
 /**
  * todo: error handling, i18n
@@ -64,7 +64,7 @@ public class MetadataServerPipe extends AbstractFilterPipeImpl {
 
     public MetadataServerPipe(WSEndpoint endpoint, Pipe next) {
         super(next);
-        wsaRtFac = WsaRuntimeFactory.newInstance(
+        wsaRtFac = WsaRuntimeFactory.newInstance(WSA_NAMESPACE,
             endpoint.getPort(), endpoint.getBinding());
 
         wsdlRetriever = new WSDLRetriever(endpoint);
@@ -136,11 +136,8 @@ public class MetadataServerPipe extends AbstractFilterPipeImpl {
         // this line should go away after bug fix - 6418039
         writer.writeNamespace(soapPrefix, soapNamespace);
 
-        // todo: consistent namespace
-        writer.writeNamespace("wsa",
-            "http://schemas.xmlsoap.org/ws/2004/08/addressing");
+        writer.writeNamespace(WSA_PREFIX, WSA_NAMESPACE);
         writer.writeNamespace(MEX_PREFIX, MEX_NAMESPACE);
-        writer.writeNamespace(WXF_PREFIX, WXF_NAMESPACE);
 
         writer.writeStartElement(soapPrefix, "Body", soapNamespace);
         writer.writeStartElement(MEX_PREFIX, "Metadata", MEX_NAMESPACE);

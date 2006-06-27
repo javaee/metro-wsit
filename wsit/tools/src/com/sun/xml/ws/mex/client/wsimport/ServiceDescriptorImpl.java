@@ -64,7 +64,7 @@ public class ServiceDescriptorImpl extends ServiceDescriptor {
     }
     
     private Source createSource(MetadataSection section) {
-        Node n = (Node) section.getAny().get(0);
+        Node n = (Node) section.getAny();
         return new DOMSource(n);
     }
     

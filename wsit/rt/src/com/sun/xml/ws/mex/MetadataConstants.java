@@ -40,12 +40,12 @@ public class MetadataConstants {
     
     public static final String MEX_NAMESPACE =
         "http://schemas.xmlsoap.org/ws/2004/09/mex";
-    public static final String MEX_PREFIX = "wsx";
-    public static final String WXF_NAMESPACE =
-        "http://schemas.xmlsoap.org/ws/2004/09/transfer";
-    public static final String WXF_PREFIX = "wxf";
+    public static final String MEX_PREFIX = "mex";
+    public static final String WSA_ANON =
+        "http://www.w3.org/2005/08/addressing/anonymous";
     public static final String WSA_NAMESPACE =
-        "http://www.w3.org/2005/08/addressing";
+        "http://schemas.xmlsoap.org/ws/2004/08/addressing";
+    public static final String WSA_PREFIX = "wsa";
     
     public static final String SOAP_1_1 =
         "http://schemas.xmlsoap.org/soap/envelope/";
