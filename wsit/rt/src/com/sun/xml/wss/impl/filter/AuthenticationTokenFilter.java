@@ -1,5 +1,5 @@
 /*
- * $Id: AuthenticationTokenFilter.java,v 1.2 2006-05-13 08:17:27 kumarjayanti Exp $
+ * $Id: AuthenticationTokenFilter.java,v 1.3 2006-06-27 15:48:31 kumarjayanti Exp $
  */
 
 /*
@@ -77,6 +77,8 @@ import org.w3c.dom.NodeList;
 
 import com.sun.xml.wss.impl.policy.mls.MessagePolicy;
 import com.sun.xml.wss.impl.policy.SecurityPolicy;
+import com.sun.xml.wss.impl.misc.SecurityUtil;
+
 
 public class AuthenticationTokenFilter {
     
@@ -486,8 +488,11 @@ public class AuthenticationTokenFilter {
         if (wsuId == null){
             wsuId = secureMessage.generateId();
         }
-        X509SecurityToken token = new X509SecurityToken(secureMessage.getSOAPPart(), cert, wsuId);
-        wsseSecurity.insertHeaderBlock(token);
+        AuthenticationTokenPolicy.X509CertificateBinding policyClone = (AuthenticationTokenPolicy.X509CertificateBinding)policy.clone();
+        policyClone.setX509Certificate(cert);
+        SecurityUtil.checkIncludeTokenPolicy(context, policyClone, wsuId);
+        //X509SecurityToken token = new X509SecurityToken(secureMessage.getSOAPPart(), cert, wsuId);
+        //wsseSecurity.insertHeaderBlock(token);
 
     }
     

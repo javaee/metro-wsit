@@ -1,5 +1,5 @@
 /*
- * $Id: SubjectAccessor.java,v 1.1 2006-05-03 22:57:30 arungupta Exp $
+ * $Id: SubjectAccessor.java,v 1.2 2006-06-27 15:48:31 kumarjayanti Exp $
  */
 
 /*
@@ -77,11 +77,20 @@ public class SubjectAccessor {
         } else {
             try {
                 if ( context instanceof javax.xml.ws.WebServiceContext) {
+                    /*
                     java.security.Principal principal =
                             ((javax.xml.ws.WebServiceContext)context).getUserPrincipal();
                     if ( principal != null ) {
                         Subject subject = new Subject();
                         subject.getPrincipals().add(principal);
+                        return subject;
+                    } else {
+                        return null;
+                    }*/
+                    javax.xml.ws.WebServiceContext wsCtx = (javax.xml.ws.WebServiceContext) context;
+                    javax.xml.ws.handler.MessageContext msgContext = wsCtx.getMessageContext();
+                    if (msgContext != null) {
+                        Subject subject =(Subject)msgContext.get(MessageConstants.AUTH_SUBJECT);
                         return subject;
                     } else {
                         return null;

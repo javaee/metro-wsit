@@ -183,7 +183,7 @@ public class TokenProcessor {
             return key;
         }else if(PolicyUtil.isX509Token((PolicyAssertion) token)){
             AuthenticationTokenPolicy.X509CertificateBinding  xt =  new AuthenticationTokenPolicy.X509CertificateBinding();
-            xt.setUUID(pid.generateID());
+            xt.setUUID(token.getTokenId());
             xt.setPolicyToken(token);
             setTokenInclusion(xt,token);
             setX509TokenRefType(xt, (X509Token) token);
