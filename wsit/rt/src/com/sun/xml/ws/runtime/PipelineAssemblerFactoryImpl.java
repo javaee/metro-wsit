@@ -26,28 +26,24 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 
-import javax.xml.ws.WebServiceException;
-import javax.xml.ws.addressing.AddressingConstants;
-import javax.xml.ws.addressing.AddressingBuilder;
-import javax.xml.ws.addressing.AddressingBuilderFactory;
 import javax.xml.namespace.QName;
+import javax.xml.ws.WebServiceException;
+import javax.xml.ws.addressing.AddressingBuilderFactory;
+import javax.xml.ws.addressing.AddressingConstants;
 
 import com.sun.xml.ws.addressing.jaxws.WsaClientPipe;
 import com.sun.xml.ws.addressing.jaxws.WsaServerPipe;
 import com.sun.xml.ws.addressing.jaxws.WsaWSDLPortExtension;
-import com.sun.xml.ws.api.EndpointAddress;
-import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.api.model.SEIModel;
+import com.sun.xml.ws.api.pipe.ClientPipeAssemblerContext;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipelineAssembler;
 import com.sun.xml.ws.api.pipe.PipelineAssemblerFactory;
-import com.sun.xml.ws.api.server.WSEndpoint;
+import com.sun.xml.ws.api.pipe.ServerPipeAssemblerContext;
 import com.sun.xml.ws.client.dispatch.StandalonePipeAssembler;
 import com.sun.xml.ws.mex.server.MetadataServerPipe;
 import com.sun.xml.ws.policy.Policy;
@@ -87,17 +83,17 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
     public PipelineAssembler doCreate(final BindingID bindingId) {
         return new StandalonePipeAssembler() {
             @Override
-            public Pipe createClient(EndpointAddress address, WSDLPort wsdlPort, WSService service, WSBinding binding) {
+            public Pipe createClient(ClientPipeAssemblerContext context) {
                 Pipe p;
                 SecurityClientPipe securityClientPipe = null;
                 try {
-                    initPolicyMap(wsdlPort, true);
+                    initPolicyMap(context.getWsdlModel(), true);
                 } catch (PolicyException ex) {
                     throw new WebServiceException(ex);
                 }
 
                 // Transport pipe ALWAYS exist
-                p = createTransport(address, wsdlPort, service, binding);
+                p = context.createTransportPipe();
 
                 p = dump(CLIENT_PREFIX, p);
 
@@ -105,9 +101,9 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
 
                 p = dump(CLIENT_PREFIX + WSS_SUFFIX + AFTER_SUFFIX, p);
                 // check for Security
-                if (isSecurityEnabled(wsdlPort)) {
+                if (isSecurityEnabled(context.getWsdlModel())) {
                     ClientPipeConfiguration config = new ClientPipeConfiguration(
-                            policyMap, wsdlPort, service, binding);
+                            policyMap, context.getWsdlModel(), context.getService(), context.getBinding());
                     p = new SecurityClientPipe(config, p);
                     securityClientPipe = (SecurityClientPipe) p;
                 }
@@ -115,8 +111,8 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
 
                 p = dump(CLIENT_PREFIX + WSA_SUFFIX + AFTER_SUFFIX, p);
                 // check for WS-Addressing
-                if (isAddressingEnabled(wsdlPort, bindingId)) {
-                    p = new WsaClientPipe(wsdlPort, binding, p);
+                if (isAddressingEnabled(context.getWsdlModel(), bindingId)) {
+                    p = new WsaClientPipe(context.getWsdlModel(), context.getBinding(), p);
                 }
                 p = dump(CLIENT_PREFIX + WSA_SUFFIX + BEFORE_SUFFIX, p);
 
@@ -124,18 +120,18 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
 
                 p = dump(CLIENT_PREFIX + WSRM_SUFFIX + AFTER_SUFFIX, p);
                 // check for WS-Reliable Messaging
-                if (isReliableMessagingEnabled(wsdlPort)) {
-                    p = new RMClientPipe(wsdlPort, service, binding, securityClientPipe, p);
+                if (isReliableMessagingEnabled(context.getWsdlModel())) {
+                    p = new RMClientPipe(context.getWsdlModel(), context.getService(), context.getBinding(), securityClientPipe, p);
                 }
                 p = dump(CLIENT_PREFIX + WSRM_SUFFIX + BEFORE_SUFFIX, p);
 
                 p = dump(CLIENT_PREFIX + WSTX_SUFFIX + AFTER_SUFFIX, p);
                 // check for WS-Atomic Transactions
-                if (isTransactionsEnabled(wsdlPort, false)) {
+                if (isTransactionsEnabled(context.getWsdlModel(), false)) {
                     try {
                         Class c = Class.forName("com.sun.xml.ws.tx.client.TxClientPipe");
                         Constructor ctor = c.getConstructor(ClientPipeConfiguration.class, Pipe.class);
-                        p = (Pipe) ctor.newInstance(new ClientPipeConfiguration(policyMap, wsdlPort, service, binding),
+                        p = (Pipe) ctor.newInstance(new ClientPipeConfiguration(policyMap, context.getWsdlModel(), context.getService(), context.getBinding()),
                                                     p);
                     } catch (ClassNotFoundException e) {
                         throw new WebServiceException(e);
@@ -156,21 +152,21 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             }
 
             @Override
-            public Pipe createServer(SEIModel seiModel, WSDLPort wsdlPort, WSEndpoint endpoint, Pipe terminal) {
-                Pipe p = terminal;
+            public Pipe createServer(ServerPipeAssemblerContext context) {
+                Pipe p = context.getTerminalPipe();
                 try {
-                    initPolicyMap(wsdlPort, false);
+                    initPolicyMap(context.getWsdlModel(), false);
                 } catch (PolicyException ex) {
                     throw new WebServiceException(ex);
                 }
 
                 p = dump(SERVER_PREFIX + WSTX_SUFFIX + AFTER_SUFFIX, p);
                 // check for WS-Atomic Transactions
-                if (isTransactionsEnabled(wsdlPort, true)) {
+                if (isTransactionsEnabled(context.getWsdlModel(), true)) {
                     try {
                         Class c = Class.forName("com.sun.xml.ws.tx.client.TxServerPipe");
                         Constructor ctor = c.getConstructor(ClientPipeConfiguration.class, Pipe.class);
-                        p = (Pipe) ctor.newInstance(wsdlPort, policyMap, p);
+                        p = (Pipe) ctor.newInstance(context.getWsdlModel(), policyMap, p);
                     } catch (ClassNotFoundException e) {
                         throw new WebServiceException(e);
                     } catch (NoSuchMethodException e) {
@@ -188,28 +184,28 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
 
                 p = dump(SERVER_PREFIX + WSRM_SUFFIX + AFTER_SUFFIX, p);
                 // check for WS-Reliable Messaging
-                if (isReliableMessagingEnabled(wsdlPort)) {
-                    p = new RMServerPipe(wsdlPort, endpoint, p);
+                if (isReliableMessagingEnabled(context.getWsdlModel())) {
+                    p = new RMServerPipe(context.getWsdlModel(), context.getEndpoint(), p);
                 }
                 p = dump(SERVER_PREFIX + WSRM_SUFFIX + BEFORE_SUFFIX, p);
 
                 p = dump(SERVER_PREFIX + WSMEX_SUFFIX + AFTER_SUFFIX, p);
                 // MEX pipe here
-                p = new MetadataServerPipe(endpoint, p);
+                p = new MetadataServerPipe(context.getEndpoint(), p);
                 p = dump(SERVER_PREFIX + WSMEX_SUFFIX + BEFORE_SUFFIX, p);
 
                 p = dump(SERVER_PREFIX + WSA_SUFFIX + AFTER_SUFFIX, p);
                 // check for WS-Addressing
-                if (isAddressingEnabled(wsdlPort, bindingId)) {
-                    p = new WsaServerPipe(seiModel, wsdlPort, endpoint.getBinding(), p);
+                if (isAddressingEnabled(context.getWsdlModel(), bindingId)) {
+                    p = new WsaServerPipe(context.getSEIModel(), context.getWsdlModel(), context.getEndpoint().getBinding(), p);
                 }
                 p = dump(SERVER_PREFIX + WSA_SUFFIX + BEFORE_SUFFIX, p);
 
                 p = dump(SERVER_PREFIX + WSS_SUFFIX + AFTER_SUFFIX, p);
                 // check for Security
-                if (isSecurityEnabled(wsdlPort)) {
+                if (isSecurityEnabled(context.getWsdlModel())) {
                     ServerPipeConfiguration config = new ServerPipeConfiguration(
-                            policyMap, wsdlPort, endpoint);
+                            policyMap, context.getWsdlModel(), context.getEndpoint());
                     p = new SecurityServerPipe(config, p);
                 }
                 p = dump(SERVER_PREFIX + WSS_SUFFIX + BEFORE_SUFFIX, p);
@@ -219,10 +215,6 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
                 p = dump(SERVER_PREFIX, p);
 
                 return p;
-            }
-
-            public Pipe createServer(WSDLPort wsdlPort, WSEndpoint endpoint, Pipe terminal) {
-                return createServer(null, wsdlPort, endpoint, terminal);
             }
 
             private Pipe dump(String name, Pipe p) {
@@ -239,7 +231,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
      * Checks to see whether WS-Atomic Transactions are enabled or not.
      *
      * @param wsdlPort the WSDLPort object
-     * @param isServerSide true iff this method is being called from {@link PipelineAssembler#createServer(SEIModel,WSDLPort,WSEndpoint,Pipe)}
+     * @param isServerSide true iff this method is being called from {@link PipelineAssembler#createServer(ServerPipeAssemblerContext)}
      * @return true if Transactions is enabled, false otherwise
      */
     private boolean isTransactionsEnabled(WSDLPort wsdlPort, boolean isServerSide) {
