@@ -70,6 +70,7 @@ import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.impl.WssSoapFaultException;
 import com.sun.xml.wss.impl.SecurityAnnotator;
 import com.sun.xml.wss.impl.SecurityRecipient;
+import com.sun.xml.wss.impl.NewSecurityRecipient;
 
 
 import com.sun.xml.ws.security.IssuedTokenContext;
@@ -147,7 +148,7 @@ public class SecurityServerPipe extends SecurityPipeBase
         super(config,nextPipe);
         scSessionManager =
                 SCSessionManagerFactory.newInstance().getSessionManager();
-        
+
         try {
             Iterator it = inMessagePolicyMap.values().iterator();
             SecurityPolicyHolder holder = (SecurityPolicyHolder)it.next();
@@ -192,7 +193,6 @@ public class SecurityServerPipe extends SecurityPipeBase
             AttributedURI actionURI = ap.getAction();
             if (actionURI != null){
                 String action = actionURI.toString();
-                
                 if (action.equals(WSSCConstants.REQUEST_SECURITY_CONTEXT_TOKEN_ACTION)) {
                     isSCIssueMessage = true;
                 } else if (action.equals(WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_ACTION)) {
@@ -504,7 +504,7 @@ public class SecurityServerPipe extends SecurityPipeBase
     protected SOAPMessage verifyInboundMessage(SOAPMessage message, ProcessingContext ctx)
     throws WssSoapFaultException, XWSSecurityException {
         ctx.setSOAPMessage(message);
-        SecurityRecipient.validateMessage(ctx);
+        NewSecurityRecipient.validateMessage(ctx);
         return ctx.getSOAPMessage();
     }
     
@@ -570,7 +570,7 @@ public class SecurityServerPipe extends SecurityPipeBase
         throw new UnsupportedOperationException("Will be supported for optimized path");
     }
     
-   private Packet addAddressingHeaders(Packet packet, String relatesTo, String action){
+    private Packet addAddressingHeaders(Packet packet, String relatesTo, String action){
         AddressingBuilder builder = AddressingBuilder.newInstance();
         AddressingProperties ap = builder.newAddressingProperties();
         

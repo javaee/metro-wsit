@@ -30,6 +30,8 @@ import com.sun.xml.ws.model.wsdl.WSDLFaultImpl;
 import com.sun.xml.ws.security.impl.policyconv.XWSSPolicyGenerator;
 import com.sun.xml.ws.security.secconv.WSSCConstants;
 import com.sun.xml.ws.security.trust.WSTrustContract;
+import com.sun.xml.wss.impl.NewSecurityRecipient;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -48,6 +50,7 @@ import javax.xml.soap.SOAPBody;
 import javax.xml.ws.addressing.AttributedURI;
 import javax.xml.ws.WebServiceException;
 import java.util.Set;
+
 import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.message.Message;
@@ -340,7 +343,7 @@ public abstract class SecurityPipeBase implements Pipe {
     throws WssSoapFaultException, XWSSecurityException {
         try {
             ctx.setSOAPMessage(message);
-            SecurityRecipient.validateMessage(ctx);
+            NewSecurityRecipient.validateMessage(ctx);
             return ctx.getSOAPMessage();
         } catch (WssSoapFaultException soapFaultException) {
             soapFaultException.printStackTrace();
@@ -447,7 +450,7 @@ public abstract class SecurityPipeBase implements Pipe {
                 mp = new MessagePolicy();
                 return mp;
             }
-            if(isBodyEncrypted(message)){
+            if(operation == null && isBodyEncrypted(message)){
                 return new MessagePolicy();
                 //TODO:Remove when Security changes recipeint code.
             }
@@ -457,6 +460,12 @@ public abstract class SecurityPipeBase implements Pipe {
                 return new MessagePolicy();
             }
             SecurityPolicyHolder sph = (SecurityPolicyHolder) inMessagePolicyMap.get(operation);
+            //TODO: pass isTrustMessage Flag to this method later
+            if (sph == null && isTrustOrSCMessage(packet)) {
+                //could be due to trust message  
+                return new MessagePolicy();
+            }
+
             mp = sph.getMessagePolicy();
         }
         checkSecurityHeader(mp,packet);
@@ -531,8 +540,11 @@ public abstract class SecurityPipeBase implements Pipe {
         // set the policy, issued-token-map, and extraneous properties
         ctx.setIssuedTokenContextMap(issuedTokenContextMap);
         ctx.setAlgorithmSuite(getBindingAlgorithmSuite(packet));
+        ctx.setOperationResolver(new OperationResolverImpl(inMessagePolicyMap,
+                pipeConfig.getWSDLModel().getBinding()));
         try {
             MessagePolicy policy = null;
+            ctx.isTrustMessage(isTrustOrSCMessage(packet));
             if (isRMMessage(packet)) {
                 SecurityPolicyHolder holder = inProtocolPM.get("RM");
                 policy = holder.getMessagePolicy();
@@ -1038,6 +1050,32 @@ public abstract class SecurityPipeBase implements Pipe {
                 String uriValue = uri.toString();
                 if(WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION.equals(uriValue) ||
                         WSTrustConstants.REQUEST_SECURITY_TOKEN_RESPONSE_ISSUE_ACTION.equals(uriValue)){
+                    return true;
+                }
+            }
+        }
+        return false;
+        
+    }
+
+    protected boolean isTrustOrSCMessage(Packet packet){
+        AddressingProperties ap = null;
+        if (this instanceof SecurityClientPipe) {
+            ap = (AddressingProperties)packet.invocationProperties
+                .get(JAXWSAConstants.CLIENT_ADDRESSING_PROPERTIES);
+        } else {
+            ap = (AddressingProperties)packet.invocationProperties
+                .get(JAXWSAConstants.SERVER_ADDRESSING_PROPERTIES_INBOUND);
+        }
+
+        if (ap != null) {
+            AttributedURI uri = ap.getAction();
+            if (uri != null){
+                String uriValue = uri.toString();
+                if(WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION.equals(uriValue) ||
+                        WSTrustConstants.REQUEST_SECURITY_TOKEN_RESPONSE_ISSUE_ACTION.equals(uriValue) ||
+                        WSSCConstants.REQUEST_SECURITY_CONTEXT_TOKEN_ACTION.equals(uriValue) ||
+                        WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_ACTION.equals(uriValue)){
                     return true;
                 }
             }

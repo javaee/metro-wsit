@@ -344,8 +344,15 @@ public class KeySelectorImpl extends KeySelector{
                         x509Binding.setReferenceType(MessageConstants.KEY_INDETIFIER_TYPE);
                         if(inferredKB == null){                           
                             inferredSignaturePolicy.setKeyBinding(x509Binding);
+                        } else if(PolicyTypeUtil.symmetricKeyBinding(inferredKB)){
+                            ((SymmetricKeyBinding)inferredKB).setKeyBinding(x509Binding);
                         } else if(PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)){
-                            ((DerivedTokenKeyBinding)inferredKB).setOriginalKeyBinding(x509Binding);
+                            DerivedTokenKeyBinding dktBind = (DerivedTokenKeyBinding)inferredKB;
+                            if(dktBind.getOriginalKeyBinding() == null)
+                                ((DerivedTokenKeyBinding)inferredKB).setOriginalKeyBinding(x509Binding);
+                            else if(PolicyTypeUtil.symmetricKeyBinding(dktBind.getOriginalKeyBinding())){
+                                dktBind.getOriginalKeyBinding().setKeyBinding(x509Binding);
+                            }
                         }
                     }                   
                     if (purpose == Purpose.VERIFY) {
@@ -366,12 +373,19 @@ public class KeySelectorImpl extends KeySelector{
                         AuthenticationTokenPolicy.X509CertificateBinding x509Binding = new AuthenticationTokenPolicy.X509CertificateBinding();
                         x509Binding.setValueType(MessageConstants.ThumbPrintIdentifier_NS);
                         x509Binding.setReferenceType(MessageConstants.KEY_INDETIFIER_TYPE);
-                        if(inferredKB == null){
+                        if(inferredKB == null){                           
                             inferredSignaturePolicy.setKeyBinding(x509Binding);
+                        } else if(PolicyTypeUtil.symmetricKeyBinding(inferredKB)){
+                            ((SymmetricKeyBinding)inferredKB).setKeyBinding(x509Binding);
                         } else if(PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)){
-                            ((DerivedTokenKeyBinding)inferredKB).setOriginalKeyBinding(x509Binding);
+                            DerivedTokenKeyBinding dktBind = (DerivedTokenKeyBinding)inferredKB;
+                            if(dktBind.getOriginalKeyBinding() == null)
+                                ((DerivedTokenKeyBinding)inferredKB).setOriginalKeyBinding(x509Binding);
+                            else if(PolicyTypeUtil.symmetricKeyBinding(dktBind.getOriginalKeyBinding())){
+                                dktBind.getOriginalKeyBinding().setKeyBinding(x509Binding);
+                            }
                         }
-                    }                    
+                    }
                     if (purpose == Purpose.VERIFY) {
                         byte[] keyIdBytes = XMLUtil.getDecodedBase64EncodedData(keyId.getReferenceValue());
                         wssContext.setExtraneousProperty(MessageConstants.REQUESTER_KEYID, new String(keyIdBytes));
@@ -388,12 +402,13 @@ public class KeySelectorImpl extends KeySelector{
                         MLSPolicy inferredKB = inferredSignaturePolicy.getKeyBinding();
                         SymmetricKeyBinding skBinding = new SymmetricKeyBinding();
                         AuthenticationTokenPolicy.X509CertificateBinding x509Binding = new AuthenticationTokenPolicy.X509CertificateBinding();
+                        x509Binding.setReferenceType(MessageConstants.KEY_INDETIFIER_TYPE);
                         skBinding.setKeyBinding(x509Binding);
-                        //TODO: ReferenceType and ValueType not set on X509Binding
                         if(inferredKB == null){
                             inferredSignaturePolicy.setKeyBinding(skBinding);
                         } else if(PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)){
-                            ((DerivedTokenKeyBinding)inferredKB).setOriginalKeyBinding(skBinding);
+                            if(((DerivedTokenKeyBinding)inferredKB).getOriginalKeyBinding() == null)
+                                ((DerivedTokenKeyBinding)inferredKB).setOriginalKeyBinding(skBinding);
                         }
                     }
                     //Set return key here
@@ -439,7 +454,8 @@ public class KeySelectorImpl extends KeySelector{
                         if(inferredKB == null){   
                             inferredSignaturePolicy.setKeyBinding(itkBinding);
                         } else if(PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)){
-                            ((DerivedTokenKeyBinding)inferredKB).setOriginalKeyBinding(itkBinding);
+                            if(((DerivedTokenKeyBinding)inferredKB).getOriginalKeyBinding() == null)
+                                ((DerivedTokenKeyBinding)inferredKB).setOriginalKeyBinding(itkBinding);
                         }
                     }                    
                     returnKey = resolveSamlAssertion(context,tokenElement, purpose, assertionID);
@@ -466,7 +482,8 @@ public class KeySelectorImpl extends KeySelector{
                             if(inferredKB == null){   
                                 inferredSignaturePolicy.setKeyBinding(itkBinding);
                             } else if(PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)){
-                                ((DerivedTokenKeyBinding)inferredKB).setOriginalKeyBinding(itkBinding);
+                                if(((DerivedTokenKeyBinding)inferredKB).getOriginalKeyBinding() == null)
+                                    ((DerivedTokenKeyBinding)inferredKB).setOriginalKeyBinding(itkBinding);
                             }
                         }                        
                         returnKey = resolveSamlAssertion(context,samlAssertion, purpose, assertionID);
@@ -484,8 +501,15 @@ public class KeySelectorImpl extends KeySelector{
                             x509Binding.setReferenceType(MessageConstants.KEY_INDETIFIER_TYPE);
                             if(inferredKB == null){                           
                                 inferredSignaturePolicy.setKeyBinding(x509Binding);
+                            } else if(PolicyTypeUtil.symmetricKeyBinding(inferredKB)){
+                                ((SymmetricKeyBinding)inferredKB).setKeyBinding(x509Binding);
                             } else if(PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)){
-                                ((DerivedTokenKeyBinding)inferredKB).setOriginalKeyBinding(x509Binding);
+                                DerivedTokenKeyBinding dktBind = (DerivedTokenKeyBinding)inferredKB;
+                                if(dktBind.getOriginalKeyBinding() == null)
+                                    ((DerivedTokenKeyBinding)inferredKB).setOriginalKeyBinding(x509Binding);
+                                else if(PolicyTypeUtil.symmetricKeyBinding(dktBind.getOriginalKeyBinding())){
+                                    dktBind.getOriginalKeyBinding().setKeyBinding(x509Binding);
+                                }
                             }
                         }                        
                         if (purpose == Purpose.VERIFY) {
@@ -538,18 +562,25 @@ public class KeySelectorImpl extends KeySelector{
                             tokenCache.put(wsuId, token);
                         }
                     }
-                    
+
                     if(isPolicyRecipient){
                         MLSPolicy inferredKB = inferredSignaturePolicy.getKeyBinding();
                         AuthenticationTokenPolicy.X509CertificateBinding x509Binding = new AuthenticationTokenPolicy.X509CertificateBinding();
-                        x509Binding.setReferenceType(MessageConstants.DIRECT_REFERENCE_TYPE);
                         x509Binding.setValueType(MessageConstants.X509v3_NS);
-                        if(inferredKB == null){  
+                        x509Binding.setReferenceType(MessageConstants.DIRECT_REFERENCE_TYPE);
+                        if(inferredKB == null){                           
                             inferredSignaturePolicy.setKeyBinding(x509Binding);
-                        } else{
-                            ((DerivedTokenKeyBinding)inferredKB).setOriginalKeyBinding(x509Binding);
+                        } else if(PolicyTypeUtil.symmetricKeyBinding(inferredKB)){
+                            ((SymmetricKeyBinding)inferredKB).setKeyBinding(x509Binding);
+                        } else if(PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)){
+                            DerivedTokenKeyBinding dktBind = (DerivedTokenKeyBinding)inferredKB;
+                            if(dktBind.getOriginalKeyBinding() == null)
+                                dktBind.setOriginalKeyBinding(x509Binding);
+                            else if(PolicyTypeUtil.symmetricKeyBinding(dktBind.getOriginalKeyBinding())){
+                                dktBind.getOriginalKeyBinding().setKeyBinding(x509Binding);
+                            }
                         }
-                    }
+                    }                    
                     
                     returnKey = resolveX509Token(wssContext,  token, purpose);
                     
@@ -564,6 +595,21 @@ public class KeySelectorImpl extends KeySelector{
                             tokenCache.put(wsuId, token);
                         }
                     }
+                    
+                        if(isPolicyRecipient){
+                            MLSPolicy inferredKB = inferredSignaturePolicy.getKeyBinding();
+                            SymmetricKeyBinding skBinding = new SymmetricKeyBinding();
+                            AuthenticationTokenPolicy.X509CertificateBinding x509Binding = new AuthenticationTokenPolicy.X509CertificateBinding();
+                            skBinding.setKeyBinding(x509Binding);
+                            //TODO: ReferenceType and ValueType not set on X509Binding
+                            if(inferredKB == null){
+                                inferredSignaturePolicy.setKeyBinding(skBinding);
+                            } else if(PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)){
+                                if(((DerivedTokenKeyBinding)inferredKB).getOriginalKeyBinding() == null)
+                                    ((DerivedTokenKeyBinding)inferredKB).setOriginalKeyBinding(skBinding);
+                            }
+                        }
+                    
                         KeyInfoHeaderBlock kiHB = ((EncryptedKeyToken)token).getKeyInfo();
                         SecurityTokenReference sectr = kiHB.getSecurityTokenReference(0);
                         SOAPElement se = sectr.getAsSoapElement();
@@ -578,19 +624,6 @@ public class KeySelectorImpl extends KeySelector{
                         String encEkSha1 = Base64.encode(ekSha1);
                         wssContext.getSecurityEnvironment().updateOtherPartySubject(
                                               DefaultSecurityEnvironmentImpl.getSubject(wssContext), encEkSha1); 
-
-                        if(isPolicyRecipient){
-                            MLSPolicy inferredKB = inferredSignaturePolicy.getKeyBinding();
-                            SymmetricKeyBinding skBinding = new SymmetricKeyBinding();
-                            AuthenticationTokenPolicy.X509CertificateBinding x509Binding = new AuthenticationTokenPolicy.X509CertificateBinding();
-                            skBinding.setKeyBinding(x509Binding);
-                            //TODO: ReferenceType and ValueType not set on X509Binding
-                            if(inferredKB == null){
-                                inferredSignaturePolicy.setKeyBinding(skBinding);
-                            } else if(PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)){
-                                ((DerivedTokenKeyBinding)inferredKB).setOriginalKeyBinding(skBinding);
-                            }
-                        }
                         
                         returnKey = ((EncryptedKeyToken)token).getSecretKey(privKey, encAlgo);
                         wssContext.getSecurityEnvironment().updateOtherPartySubject(
@@ -656,16 +689,35 @@ public class KeySelectorImpl extends KeySelector{
                             MLSPolicy inferredKB = inferredSignaturePolicy.getKeyBinding();
                             AuthenticationTokenPolicy.X509CertificateBinding x509Binding = new AuthenticationTokenPolicy.X509CertificateBinding();
                             x509Binding.setReferenceType(MessageConstants.DIRECT_REFERENCE_TYPE);
-                            if(inferredKB == null){  
+                            if(inferredKB == null){                           
                                 inferredSignaturePolicy.setKeyBinding(x509Binding);
-                            } else{
-                                ((DerivedTokenKeyBinding)inferredKB).setOriginalKeyBinding(x509Binding);
+                            } else if(PolicyTypeUtil.symmetricKeyBinding(inferredKB)){
+                                ((SymmetricKeyBinding)inferredKB).setKeyBinding(x509Binding);
+                            } else if(PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)){
+                                DerivedTokenKeyBinding dktBind = (DerivedTokenKeyBinding)inferredKB;
+                                if(dktBind.getOriginalKeyBinding() == null)
+                                    dktBind.setOriginalKeyBinding(x509Binding);
+                                else if(PolicyTypeUtil.symmetricKeyBinding(dktBind.getOriginalKeyBinding())){
+                                    dktBind.getOriginalKeyBinding().setKeyBinding(x509Binding);
+                                }
                             }
                         }                        
                         returnKey =  resolveX509Token(wssContext,(X509SecurityToken)token, purpose);
                         
                     } else if (token instanceof EncryptedKeyToken) {
-
+                        if(isPolicyRecipient){
+                            MLSPolicy inferredKB = inferredSignaturePolicy.getKeyBinding();
+                            SymmetricKeyBinding skBinding = new SymmetricKeyBinding();
+                            AuthenticationTokenPolicy.X509CertificateBinding x509Binding = new AuthenticationTokenPolicy.X509CertificateBinding();
+                            skBinding.setKeyBinding(x509Binding);
+                            //TODO: ReferenceType and ValueType not set on X509Binding
+                            if(inferredKB == null){
+                                inferredSignaturePolicy.setKeyBinding(skBinding);
+                            } else if(PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)){
+                                if(((DerivedTokenKeyBinding)inferredKB).getOriginalKeyBinding() == null)
+                                    ((DerivedTokenKeyBinding)inferredKB).setOriginalKeyBinding(skBinding);
+                            }
+                        }
                         KeyInfoHeaderBlock kiHB = ((EncryptedKeyToken)token).getKeyInfo();
                         SecurityTokenReference sectr = kiHB.getSecurityTokenReference(0);
                         SOAPElement se = sectr.getAsSoapElement();
@@ -680,19 +732,6 @@ public class KeySelectorImpl extends KeySelector{
                         String encEkSha1 = Base64.encode(ekSha1);
                         wssContext.getSecurityEnvironment().updateOtherPartySubject(
                                               DefaultSecurityEnvironmentImpl.getSubject(wssContext), encEkSha1);
-                        
-                        if(isPolicyRecipient){
-                            MLSPolicy inferredKB = inferredSignaturePolicy.getKeyBinding();
-                            SymmetricKeyBinding skBinding = new SymmetricKeyBinding();
-                            AuthenticationTokenPolicy.X509CertificateBinding x509Binding = new AuthenticationTokenPolicy.X509CertificateBinding();
-                            skBinding.setKeyBinding(x509Binding);
-                            //TODO: ReferenceType and ValueType not set on X509Binding
-                            if(inferredKB == null){
-                                inferredSignaturePolicy.setKeyBinding(skBinding);
-                            } else if(PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)){
-                                ((DerivedTokenKeyBinding)inferredKB).setOriginalKeyBinding(skBinding);
-                            }
-                        }
                         
                         returnKey = ((EncryptedKeyToken)token).getSecretKey(privKey, encAlgo);
                         wssContext.getSecurityEnvironment().updateOtherPartySubject(
@@ -717,6 +756,8 @@ public class KeySelectorImpl extends KeySelector{
                             DerivedTokenKeyBinding dtkBinding = new DerivedTokenKeyBinding();
                             if(inferredKB == null){
                                 inferredSignaturePolicy.setKeyBinding(dtkBinding);
+                            } else if(PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)) {
+                                //already set - do nothing
                             } else{
                                 throw new XWSSecurityException("A derived Key Token should be a top level key binding");
                             }
@@ -752,8 +793,14 @@ public class KeySelectorImpl extends KeySelector{
                     x509Binding.setReferenceType(MessageConstants.X509_ISSUER_TYPE);
                     if(inferredKB == null){ 
                         inferredSignaturePolicy.setKeyBinding(x509Binding);
+                    } else if(PolicyTypeUtil.symmetricKeyBinding(inferredKB)){
+                        ((SymmetricKeyBinding)inferredKB).setKeyBinding(x509Binding);
                     } else if(PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)){
-                        ((DerivedTokenKeyBinding)inferredKB).setOriginalKeyBinding(x509Binding);
+                        DerivedTokenKeyBinding dktBind = (DerivedTokenKeyBinding)inferredKB;
+                        if(dktBind.getOriginalKeyBinding() == null)
+                            dktBind.setOriginalKeyBinding(x509Binding);
+                        else if(PolicyTypeUtil.symmetricKeyBinding(dktBind.getOriginalKeyBinding()))
+                            dktBind.getOriginalKeyBinding().setKeyBinding(x509Binding);
                     }
                 }
                 if (purpose ==  Purpose.VERIFY) {
@@ -807,11 +854,6 @@ public class KeySelectorImpl extends KeySelector{
             return key;
         
 
-        if (samlAssertion == null) {
-            throw new XWSSecurityException("Cannot Resolve SAML Assertion");
-        }
-        
-        
         if (purpose == Purpose.VERIFY) {
             NodeList nl = samlAssertion.getElementsByTagNameNS(MessageConstants.DSIG_NS, "Signature");
             //verify the signature inside the SAML assertion
@@ -1138,13 +1180,7 @@ public class KeySelectorImpl extends KeySelector{
         }
         //TODO: expensive conversion happening here 
         try {
-            // if it is an Encrypted SAML Assertion we cannot decrypt it
-            // on the client side since we don't have the Private Key
-            if ("EncryptedData".equals(tokenElement.getLocalName())) {
-                // do nothing
-            } else {
-                ret = AssertionUtil.fromElement(tokenElement);
-            }
+            ret = AssertionUtil.fromElement(tokenElement);
         } catch (Exception e) {
             if(logger.getLevel() == Level.FINEST){
                 logger.log(Level.FINEST,"Error occured while resolving" +
@@ -1152,9 +1188,7 @@ public class KeySelectorImpl extends KeySelector{
             }
             throw new XWSSecurityException(e);
         }
-        if (ret != null) {
-            context.getTokenCache().put(assertionId, ret);
-        }
+        context.getTokenCache().put(assertionId, ret);
         return tokenElement;
     }
     

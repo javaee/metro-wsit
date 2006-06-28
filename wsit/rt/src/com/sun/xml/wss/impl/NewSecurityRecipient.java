@@ -1,5 +1,5 @@
 /*
- * $Id: NewSecurityRecipient.java,v 1.1 2006-05-03 22:57:36 arungupta Exp $
+ * $Id: NewSecurityRecipient.java,v 1.1.2.1 2006-06-28 14:11:14 ashutoshshahi Exp $
  */
 
 /*
@@ -45,6 +45,7 @@ import java.util.logging.Logger;
 
 import javax.xml.soap.SOAPElement;
 import javax.xml.soap.SOAPFactory;
+import javax.xml.soap.SOAPException;
 
 import com.sun.xml.wss.core.SecurityHeader;
 
@@ -67,6 +68,8 @@ import com.sun.xml.wss.impl.policy.mls.SymmetricKeyBinding;
 import com.sun.xml.wss.impl.policy.mls.SecureConversationTokenKeyBinding;
 import com.sun.xml.wss.impl.policy.mls.IssuedTokenKeyBinding;
 import com.sun.xml.wss.impl.policy.mls.DerivedTokenKeyBinding;
+import com.sun.xml.ws.security.policy.WSSAssertion;
+import com.sun.xml.wss.impl.ProcessingContextImpl;
 
 import com.sun.xml.wss.impl.policy.mls.MessagePolicy;
 import com.sun.xml.wss.impl.configuration.StaticApplicationContext;
@@ -79,6 +82,7 @@ import com.sun.xml.wss.impl.policy.mls.AuthenticationTokenPolicy;
 import com.sun.xml.wss.impl.policy.mls.AuthenticationTokenPolicy.UsernameTokenBinding;
 import com.sun.xml.wss.impl.policy.mls.TimestampPolicy;
 import com.sun.xml.wss.impl.policy.MLSPolicy;
+import com.sun.xml.ws.security.policy.Token;
 
 import org.w3c.dom.Document;
 import com.sun.xml.wss.logging.LogDomainConstants;
@@ -135,34 +139,55 @@ public class NewSecurityRecipient {
         fpContext.isInboundMessage(true);
 
         MessagePolicy msgPolicy = (MessagePolicy) fpContext.getSecurityPolicy();
-  
-        if ((msgPolicy != null) && (msgPolicy.size() > 0)) {
-
-            if(msgPolicy.enableWSS11Policy()){
-                // set a property in context to determine if its WSS11
-                fpContext.setExtraneousProperty("EnableWSS11PolicyReceiver","true");
-            }
-
-            if (msgPolicy.enableSignatureConfirmation()) {
-                //For SignatureConfirmation
-                //Set a list in extraneous property which will store all the received SignatureValues
-                //If there was no Signature in incoming message this list will be empty
-                List scList = new ArrayList();
-                fpContext.setExtraneousProperty("receivedSignValues", scList);
-            }        
-
-            fpContext.setMode(FilterProcessingContext.ADHOC);
-            processMessagePolicy(fpContext);
-            checkForExtraSecurity(fpContext);
-        } else {
-            //unconditionally set these since the policy is unknown
-            fpContext.setExtraneousProperty("EnableWSS11PolicyReceiver","true");
-            List scList = new ArrayList();
-            fpContext.setExtraneousProperty("receivedSignValues", scList);
-            fpContext.setMode(FilterProcessingContext.WSDL_POLICY);
-            pProcess(fpContext);
+        if ((msgPolicy != null) && (msgPolicy.dumpMessages())) {
+            DumpFilter.process(fpContext);
         }
         
+        //unconditionally set these since the policy is unknown
+        fpContext.setExtraneousProperty("EnableWSS11PolicyReceiver","true");
+        List scList = new ArrayList();
+        fpContext.setExtraneousProperty("receivedSignValues", scList);
+        fpContext.setMode(FilterProcessingContext.WSDL_POLICY);
+
+        pProcess(fpContext);
+
+        boolean isTrust = fpContext.isTrustMessage();
+        
+        if(msgPolicy == null || msgPolicy.size() <= 0){
+            OperationResolver opResolver = fpContext.getOperationResolver();
+            if(opResolver != null && !isTrust)
+                msgPolicy = opResolver.resolveOperationPolicy(fpContext.getSOAPMessage());
+        }
+        //TODO: this is a workaround for PROTOCOL Messages
+        if (msgPolicy == null) {
+            return;
+        }
+        
+        /*
+        try{
+            System.out.println("Inferred Security Policy");
+            printInferredSecurityPolicy(fpContext.getInferredSecurityPolicy());
+        } catch(Exception e){
+            throw new XWSSecurityException(e);
+        }
+        System.out.println("==================================");
+       
+        
+        try{
+            System.out.println("Actual SecurityPolicy");
+            printInferredSecurityPolicy(msgPolicy);
+        } catch(Exception e){
+            throw new XWSSecurityException(e);
+        }
+        */
+
+        WSSAssertion wssAssertion = ((ProcessingContextImpl)context).getWSSAssertion();
+        if(!isTrust){
+            verifyPolicy(fpContext.getInferredSecurityPolicy(), msgPolicy, 
+                fpContext.getSecurableSoapMessage(), wssAssertion);
+        }
+        
+
         try {
             fpContext.getSecurableSoapMessage().deleteSecurityHeader();
             fpContext.getSOAPMessage().saveChanges();
@@ -171,227 +196,6 @@ public class NewSecurityRecipient {
         }
     }
     
-    /*
-     * @param fpContext com.sun.xml.wss.FilterProcessingContext
-     *
-     * @throws com.sun.xml.wss.XWSSecurityException
-     */
-    private static void processMessagePolicy(FilterProcessingContext fpContext)
-    throws XWSSecurityException {
-        
-        MessagePolicy policy = (MessagePolicy) fpContext.getSecurityPolicy();
-        
-        if (policy.dumpMessages()) {
-            DumpFilter.process(fpContext);
-        }
-        
-        /* We insert SignatureConfirmation into the MessagePolicy */
-        try {
-            if ((policy.size() == 1)  && 
-                (PolicyTypeUtil.signatureConfirmationPolicy(policy.get(0)))) {
-                fpContext.setMode(FilterProcessingContext.WSDL_POLICY);
-                pProcess(fpContext);
-                return;
-            }
-        }catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        
-        SecurityHeader header = fpContext.getSecurableSoapMessage().findSecurityHeader();
-        if (header == null) {
-            StringBuffer buf = new StringBuffer();
-            for(int it=0; it<policy.size(); it++) {
-                try {
-                    buf.append(policy.get(it).getType() );
-                    if ( PolicyTypeUtil.isPrimaryPolicy((WSSPolicy)policy.get(it))) {
-                        buf.append("(P) ");
-                    } else {
-                        buf.append("(S) ");
-                    }
-                } catch (Exception ex) {
-                    //ignore
-                }
-            }
-            throw new XWSSecurityException("Message does not conform to configured policy [ " + buf.toString()
-            + "]:  No Security Header found");
-        }
-        SOAPElement current = header.getFirstChildElement();
-        processMessagePolicy(fpContext,current);
-    }
-    
-    private static void processMessagePolicy(FilterProcessingContext fpContext,
-            SOAPElement current)throws XWSSecurityException {
-
-        int idx = 0;
-        MessagePolicy policy = (MessagePolicy) fpContext.getSecurityPolicy();
-        SecurableSoapMessage secureMsg = fpContext.getSecurableSoapMessage();
-        MessagePolicy secPolicy = null;
-        StringBuffer buf = null;
-        boolean foundPrimaryPolicy = false;
-
-        while (idx < policy.size()) {
-            
-            WSSPolicy wssPolicy = null;
-            try {
-                wssPolicy = (WSSPolicy) policy.get(idx);
-            } catch (Exception e) {
-                throw new XWSSecurityException(e);
-            }
-            
-            
-            if (PolicyTypeUtil.isPrimaryPolicy(wssPolicy)) {
-                foundPrimaryPolicy = true;
-                // roll the pointer down the header till a primary block is hit
-                // if end of header is hit (pointer is null) break out of the loop
-                while (current != null && HarnessUtil.isSecondaryHeaderElement(current))
-                    current = HarnessUtil.getNextElement(current);
-                
-                // if pointer is null (hit end of header), reset pointer to begining of header
-                if (current != null) {
-                    
-                    secureMsg.findSecurityHeader().
-                            setCurrentHeaderElement(current);
-                    
-                    fpContext.setSecurityPolicy(wssPolicy);
-                    HarnessUtil.processDeep(fpContext);
-                    
-                    if (fpContext.isPrimaryPolicyViolation()) {
-                        // log
-                        throw new XWSSecurityException(fpContext.getPVE());
-                    }
-                    
-                    if (fpContext.isOptionalPolicyViolation()) {
-                        // rollback current security header ptr.
-                        // if secondary security header element
-                        // is found, proceed to next header element
-                        secureMsg.findSecurityHeader().setCurrentHeaderElement(current);
-                    }
-                    
-                    current = HarnessUtil.getNextElement(current);
-                }else{
-                    //log
-                    if ( buf == null)
-                        buf = new StringBuffer();
-                    buf.append(wssPolicy.getType() + " ");
-                }
-            }else{
-                if(secPolicy == null){
-                    secPolicy = new MessagePolicy();
-                }
-                secPolicy.append(wssPolicy);
-            }
-            
-            idx++;
-        }
-        
-        if ( buf != null) {
-            throw new XWSSecurityException("More Receiver requirements [ " + buf + " ] specified"+
-                    " than present in the message");
-        }
-        
-        if ( !foundPrimaryPolicy) {
-            SecurityHeader header = secureMsg.findSecurityHeader();
-            if ( header != null && header.getCurrentHeaderElement() == null) {
-                header.setCurrentHeaderElement(header.getFirstChildElement());
-            }
-            checkForExtraSecurity(fpContext);
-        }
-        
-        // now process Secondary policies
-        idx = 0;
-        SOAPElement securityHeader = secureMsg.findSecurityHeader();
-        
-        NodeList uList = securityHeader.getElementsByTagNameNS(
-            MessageConstants.WSSE_NS, MessageConstants.USERNAME_TOKEN_LNAME);
-        if(uList.getLength() >1){
-            throw  new XWSSecurityException("More than one wsse:UsernameToken element present in security header");
-        }
-        
-        NodeList tList = securityHeader.getElementsByTagNameNS(MessageConstants.WSU_NS, MessageConstants.TIMESTAMP_LNAME);
-        if(tList.getLength() >1){
-            throw  new XWSSecurityException("More than one wsu:Timestamp element present in security header");
-        }
-        
-        int unpCount = 0;
-        int tspCount = 0;
-        if(secPolicy != null){
-            
-            while (idx < secPolicy.size()) {
-                WSSPolicy wssPolicy = null;
-                try {
-                    wssPolicy = (WSSPolicy) secPolicy.get(idx);
-                } catch (Exception e) {
-                    throw new XWSSecurityException(e);
-                }
-                if(PolicyTypeUtil.authenticationTokenPolicy(wssPolicy)){
-                    AuthenticationTokenPolicy atp =(AuthenticationTokenPolicy)wssPolicy;
-                    WSSPolicy fb = (WSSPolicy)atp.getFeatureBinding();
-                    if(PolicyTypeUtil.usernameTokenPolicy(fb)){
-                        if(uList.getLength() == 0){
-                            throw new XWSSecurityException(
-                                    "Message does not conform to configured policy: " +
-                                    "wsse:UsernameToken element not found in security header");
-                            
-                        }
-                        unpCount++;
-                    } else if (PolicyTypeUtil.samlTokenPolicy(fb)) {
-                        //TODO : there can be more than 1 SAML assertion in a message
-                    }
-                }else if(PolicyTypeUtil.timestampPolicy(wssPolicy)){
-                    if(tList.getLength() == 0){
-                        throw new XWSSecurityException(
-                                "Message does not conform to configured policy: " +
-                                "wsu:Timestamp element not found in security header");
-                    }
-                    tspCount++;
-                }
-                
-                fpContext.setSecurityPolicy(wssPolicy);
-                HarnessUtil.processDeep(fpContext);
-                
-                idx++;
-            }
-            
-        }
-        
-        if(uList.getLength() > unpCount){
-            throw  new XWSSecurityException("Message does not conform to configured policy: " +
-                    "Additional wsse:UsernameToken element found in security header");
-        }
-        
-        if(tList.getLength() > tspCount){
-            //TODO: localize the string
-            throw new XWSSecurityException(
-            "Message does not conform to configured policy: " +
-            "Additional wsu:Timestamp element found in security header");
-        }
-        
-        fpContext.setSecurityPolicy(policy);
-        return;
-    }
-    
-    private static void checkForExtraSecurity(FilterProcessingContext context)
-    throws XWSSecurityException {
-        
-        SecurityHeader header = context.getSecurableSoapMessage().findSecurityHeader();
-        
-        if (header == null || header.getCurrentHeaderElement() == null)
-            return;
-        
-        for (Node nextNode = header.getCurrentHeaderElement().getNextSibling();
-        nextNode != null;
-        nextNode = nextNode.getNextSibling()) {
-            if (nextNode instanceof SOAPElement) {
-                SOAPElement current = (SOAPElement) nextNode;
-                if (!HarnessUtil.isSecondaryHeaderElement(current)) {
-                    throw new XWSSecurityException(
-                            "Message does not conform to configured policy (found " + current.getLocalName() +") : " +
-                            "Additional security than required found");
-                }
-            }
-        }
-        
-    }
     
     /*
      * @param fpContext com.sun.xml.wss.FilterProcessingContext
@@ -516,23 +320,280 @@ public class NewSecurityRecipient {
             current = header.getCurrentHeaderBlockElement();
         }
         
+    }
+    
+    private static void verifyPolicy(MessagePolicy inferredSecurityPolicy, 
+            MessagePolicy actualPolicy, SecurableSoapMessage soapMsg, 
+            WSSAssertion wssAssertion) throws XWSSecurityException{
         try{
-            printInferredSecurityPolicy(fpContext);
+            Node firstChild = soapMsg.getSOAPBody().getFirstChild();
+            if(firstChild != null){
+                String uri = firstChild.getNamespaceURI();
+                String localName = firstChild.getLocalName();
+                if(localName.equals("Fault") && 
+                        (uri.equals(MessageConstants.SOAP_1_1_NS) || uri.equals(MessageConstants.SOAP_1_2_NS)))
+                    return;
+            } 
+        } catch(SOAPException se){
+            log.log(Level.WARNING, "WSS0807.no.body.element");
+        }
+        if(actualPolicy == null || actualPolicy.size() <= 0){
+            log.log(Level.SEVERE, "WSS0805.policy.null");
+            throw new XWSSecurityException("ERROR: Policy for the service could not be obtained");
+        } else if(inferredSecurityPolicy == null || inferredSecurityPolicy.size() <= 0){
+            throw new XWSSecurityException("ERROR: No security header found in the message");
+        } else{ // verify policy now
+            try{
+                for(int i = 0; i < actualPolicy.size(); i++) {
+                    WSSPolicy actualPol = (WSSPolicy)actualPolicy.get(i);
+                    if(PolicyTypeUtil.isSecondaryPolicy(actualPol)){
+                        processSecondaryPolicy(actualPol, inferredSecurityPolicy);
+                    } else if(PolicyTypeUtil.isPrimaryPolicy(actualPol)){
+                        processPrimaryPolicy(actualPol, inferredSecurityPolicy, soapMsg, wssAssertion);
+                    }
+                }
+                
+            } catch(Exception e){
+                throw new XWSSecurityException(e);
+            }
+        }
+    }
+    
+    private static void processSecondaryPolicy(WSSPolicy actualPol,
+            MessagePolicy inferredSecurityPolicy) throws XWSSecurityException{
+        try{
+            if(PolicyTypeUtil.timestampPolicy(actualPol)){
+                boolean found = false;
+                for(int j = 0; j < inferredSecurityPolicy.size(); j++) {
+                    WSSPolicy pol = (WSSPolicy)inferredSecurityPolicy.get(j);
+                    if(PolicyTypeUtil.timestampPolicy(pol)){
+                        inferredSecurityPolicy.remove(pol);
+                        found = true;
+                        break;
+                    }
+                }
+                if(!found){
+                    log.log(Level.WARNING, "Timestamp not found in configured policy but occurs in message");
+                    // commenting for now, uncomment once this is corrected in SecurityPolicy
+                    /*throw new XWSSecurityException("Policy Verification error:" 
+                            + "Timestamp not found in configured policy but occurs in message");*/
+                }
+            } else if(PolicyTypeUtil.usernameTokenPolicy(actualPol)){
+                boolean found = false;
+                for(int j = 0; j < inferredSecurityPolicy.size(); j++) {
+                    WSSPolicy pol = (WSSPolicy)inferredSecurityPolicy.get(j);
+                    if(PolicyTypeUtil.usernameTokenPolicy(pol)){
+                        inferredSecurityPolicy.remove(pol);
+                        found = true;
+                        break;
+                    }
+                }
+                if(!found){
+                    throw new XWSSecurityException("Policy Verification error:" 
+                            + "UsernameToken not found in configured policy but occurs in message");
+                }
+            }
         } catch(Exception e){
             throw new XWSSecurityException(e);
         }
     }
     
-    public static void printInferredSecurityPolicy(FilterProcessingContext fpContext) throws Exception{
-        MessagePolicy inferredSecurityPolicy = fpContext.getInferredSecurityPolicy();
+    private static void processPrimaryPolicy(WSSPolicy actualPol,
+            MessagePolicy inferredSecurityPolicy, 
+            SecurableSoapMessage soapMsg, WSSAssertion wssAssertion) throws XWSSecurityException{
+        try{
+            if(PolicyTypeUtil.signaturePolicy(actualPol)){
+                SignaturePolicy actualSignPolicy = (SignaturePolicy)actualPol;
+                boolean isEndorsing = ((SignaturePolicy.FeatureBinding)actualSignPolicy.getFeatureBinding()).isEndorsingSignature();
+                WSSPolicy pol = getFirstPrimaryPolicy(inferredSecurityPolicy, isEndorsing); 
+                if(pol == null && checkTargets(actualPol, soapMsg))
+                    throw new XWSSecurityException("Policy verification error:" +
+                            "Missing signature");
+                if(PolicyTypeUtil.signaturePolicy(pol)){
+                    SignaturePolicy inferredPol = (SignaturePolicy)pol;
+                    // verify key binding
+                    boolean isKBTrue = verifyKeyBinding(actualSignPolicy.getKeyBinding(), inferredPol.getKeyBinding(),
+                            wssAssertion);
+                    // verify target binding
+                    boolean isTBTrue = verifySignTargetBinding((SignaturePolicy.FeatureBinding)actualSignPolicy.getFeatureBinding(), 
+                            (SignaturePolicy.FeatureBinding)inferredPol.getFeatureBinding());
+
+                    inferredSecurityPolicy.remove(pol);
+                    if(!isKBTrue){
+                        log.log(Level.SEVERE, "WSS0206.policy.violation.exception");
+                        throw new XWSSecurityException("Policy verification error:" +
+                                "Incorrect Key types or references were used in signature");
+                    }
+                    if(!isTBTrue){
+                        log.log(Level.SEVERE, "WSS0206.policy.violation.exception");
+                        throw new XWSSecurityException("Policy verification error:" +
+                                "One or more signed parts could not be verified");
+                    }
+                } else{
+                    log.log(Level.SEVERE, "WSS0206.policy.violation.exception");
+                    throw new XWSSecurityException("Policy verification error: Incorrect policy encountered");
+                }
+            } else if(PolicyTypeUtil.encryptionPolicy(actualPol)){
+                EncryptionPolicy actualEncryptionPolicy = (EncryptionPolicy)actualPol;
+                WSSPolicy pol = getFirstPrimaryPolicy(inferredSecurityPolicy, false); 
+                if(pol == null && checkTargets(actualPol, soapMsg))
+                    throw new XWSSecurityException("Policy verification error:" +
+                            "Missing encryption element");
+                if(PolicyTypeUtil.encryptionPolicy(pol)){
+                   EncryptionPolicy inferredPol = (EncryptionPolicy)pol;
+                   //verify key binding
+                   boolean isKBTrue = verifyKeyBinding(actualEncryptionPolicy.getKeyBinding(), 
+                           inferredPol.getKeyBinding(), wssAssertion);
+                   // verify target binding
+                   boolean isTBTrue = verifyEncTargetBinding((EncryptionPolicy.FeatureBinding)actualEncryptionPolicy.getFeatureBinding(), 
+                           (EncryptionPolicy.FeatureBinding)inferredPol.getFeatureBinding());
+
+                   inferredSecurityPolicy.remove(pol);
+                   if(!isKBTrue){
+                       log.log(Level.SEVERE, "WSS0206.policy.violation.exception");
+                       throw new XWSSecurityException("Policy verification error" +
+                               "Incorrect Key types or references were used in encryption");
+                   }
+                   if(!isTBTrue){
+                       log.log(Level.SEVERE, "WSS0206.policy.violation.exception");
+                       throw new XWSSecurityException("Policy verification error" +
+                              "One or more encrypted parts could not be verified");
+                   }
+                } else{
+                    log.log(Level.SEVERE, "WSS0206.policy.violation.exception");
+                    throw new XWSSecurityException("Policy verification error: Incorrect policy encountered");
+                }
+            }
+        } catch(Exception e){
+            throw new XWSSecurityException(e);
+        }
+    }
+    
+    private static boolean checkTargets(WSSPolicy actualPol, SecurableSoapMessage message){
+        
+        return false;
+    }
+    
+    private static boolean verifyKeyBinding(MLSPolicy actualKeyBinding, 
+            MLSPolicy inferredKeyBinding, WSSAssertion wssAssertion) throws XWSSecurityException{
+        boolean verified = false;
+        try{
+            if(actualKeyBinding != null && inferredKeyBinding != null){
+                if(PolicyTypeUtil.x509CertificateBinding(actualKeyBinding) &&
+                        PolicyTypeUtil.x509CertificateBinding(inferredKeyBinding)){
+                    /* TODO: cannot change actual policy, there seems to be a bug in
+                     * security policy
+                    AuthenticationTokenPolicy.X509CertificateBinding actualX509Bind = 
+                            (AuthenticationTokenPolicy.X509CertificateBinding)actualKeyBinding;
+                    AuthenticationTokenPolicy.X509CertificateBinding inferredX509Bind = 
+                            (AuthenticationTokenPolicy.X509CertificateBinding)inferredKeyBinding;
+                    // workaround - policy sets reference type as Thumprint
+                    if(actualX509Bind.getReferenceType().equals(MessageConstants.THUMB_PRINT_TYPE))
+                        actualX509Bind.setReferenceType(MessageConstants.KEY_INDETIFIER_TYPE);
+                    correctIncludeTokenPolicy(actualX509Bind, wssAssertion);
+                    if(actualX509Bind.getReferenceType().equals(inferredX509Bind.getReferenceType()))*/
+                    verified =  true;
+                } else if(PolicyTypeUtil.symmetricKeyBinding(actualKeyBinding) &&
+                       PolicyTypeUtil.symmetricKeyBinding(inferredKeyBinding)){
+                    verified = verifyKeyBinding(actualKeyBinding.getKeyBinding(), inferredKeyBinding.getKeyBinding(), 
+                            wssAssertion);
+                } else if(PolicyTypeUtil.issuedTokenKeyBinding(actualKeyBinding) &&
+                        PolicyTypeUtil.issuedTokenKeyBinding(inferredKeyBinding)){
+                    
+                    verified = true;
+                } else if(PolicyTypeUtil.secureConversationTokenKeyBinding(actualKeyBinding) &&
+                        PolicyTypeUtil.secureConversationTokenKeyBinding(inferredKeyBinding)){
+                    
+                    verified = true;
+                } else if(PolicyTypeUtil.derivedTokenKeyBinding(actualKeyBinding) &&
+                       PolicyTypeUtil.derivedTokenKeyBinding(inferredKeyBinding)){
+                    
+                    verified = verifyKeyBinding(((DerivedTokenKeyBinding)actualKeyBinding).getOriginalKeyBinding(), 
+                            ((DerivedTokenKeyBinding)inferredKeyBinding).getOriginalKeyBinding(), wssAssertion);
+                }
+            }
+        } catch(Exception e){
+            throw new XWSSecurityException(e);
+        }
+        return verified;
+    }
+    
+    private static boolean verifySignTargetBinding(SignaturePolicy.FeatureBinding actualFeatureBinding,
+            SignaturePolicy.FeatureBinding inferredFeatureBinding){
+        
+        return true;
+    }
+    
+    private static boolean verifyEncTargetBinding(EncryptionPolicy.FeatureBinding actualFeatureBinding,
+            EncryptionPolicy.FeatureBinding inferredFeatureBinding){
+        
+        return true;
+    }
+    
+    private static WSSPolicy getFirstPrimaryPolicy(MessagePolicy securityPolicy, boolean isEndorsingSign) throws 
+            XWSSecurityException{
+        try{
+            if(!isEndorsingSign){
+                for(int i = 0; i < securityPolicy.size(); i++){
+                    WSSPolicy pol = (WSSPolicy)securityPolicy.get(i);
+                    if(PolicyTypeUtil.isPrimaryPolicy(pol)){
+                        // accounts for encrypted SAML tokens issued by STS 
+                        if(PolicyTypeUtil.encryptionPolicy(pol) && 
+                               ((EncryptionPolicy.FeatureBinding)pol.getFeatureBinding()).encryptsIssuedToken() ){
+                            continue;
+                        } else
+                            return pol;
+                    }
+                }
+            } else{
+                // endorsingSign policy is not placed correctly in actual policy
+                for(int i = 0; i < securityPolicy.size(); i++){
+                    WSSPolicy pol = (WSSPolicy)securityPolicy.get(i);
+                    if(PolicyTypeUtil.isPrimaryPolicy(pol) && PolicyTypeUtil.signaturePolicy(pol)){
+                        SignaturePolicy signPol = (SignaturePolicy)pol;
+                        SignaturePolicy.FeatureBinding fb = (SignaturePolicy.FeatureBinding)signPol.getFeatureBinding();
+                        if(fb.getTargetBindings().size() == 1){
+                            SignatureTarget target = (SignatureTarget)fb.getTargetBindings().get(0);
+                            if("{http://www.w3.org/2000/09/xmldsig#}Signature".equals(target.getValue()))
+                                return pol;
+                        }
+                    }
+                }
+            }
+        } catch(Exception e){
+            throw new XWSSecurityException(e);
+        }
+        return null;
+    }
+    
+    private static void correctIncludeTokenPolicy(AuthenticationTokenPolicy.X509CertificateBinding x509Bind, 
+            WSSAssertion wssAssertion){
+        if(Token.INCLUDE_NEVER.equals(x509Bind.getIncludeToken())){
+            if(MessageConstants.DIRECT_REFERENCE_TYPE.equals(x509Bind.getReferenceType())){
+                if(wssAssertion != null){
+                    if(wssAssertion.getRequiredProperties().contains(WSSAssertion.MUST_SUPPORT_REF_KEYIDENTIFIER))
+                        x509Bind.setReferenceType(MessageConstants.KEY_INDETIFIER_TYPE);
+                    else if(wssAssertion.getRequiredProperties().contains(WSSAssertion.MUSTSUPPORT_REF_THUMBPRINT))
+                        x509Bind.setReferenceType(MessageConstants.THUMB_PRINT_TYPE);                    
+                } else {
+                    // when wssAssertion is not set use KeyIdentifier
+                    x509Bind.setReferenceType(MessageConstants.KEY_INDETIFIER_TYPE);
+                }
+            }
+        } else if(Token.INCLUDE_ALWAYS_TO_RECIPIENT.equals(x509Bind.getIncludeToken()) || 
+                Token.INCLUDE_ALWAYS.equals(x509Bind.getIncludeToken())){
+            x509Bind.setReferenceType(MessageConstants.DIRECT_REFERENCE_TYPE);
+        }
+    }
+    
+    private static void printInferredSecurityPolicy(MessagePolicy inferredSecurityPolicy) throws Exception{
         StringBuffer buffer = new StringBuffer();
         if(inferredSecurityPolicy == null){
-            buffer.append("Inferred Security Policy not set\n");
+            buffer.append("Security Policy not set\n");
         } else{
-            buffer.append("Size of inferredSecurityPolicy:: " + inferredSecurityPolicy.size() + "\n");
+            buffer.append("Size of Policy:: " + inferredSecurityPolicy.size() + "\n");
             for(int i = 0; i < inferredSecurityPolicy.size(); i++){
                 WSSPolicy pol = (WSSPolicy)inferredSecurityPolicy.get(i);
-                buffer.append(pol + "\n");
                 if(PolicyTypeUtil.timestampPolicy(pol)){
                     buffer.append("Timestamp Policy\n");
                 } else if(PolicyTypeUtil.usernameTokenPolicy(pol)){
@@ -585,6 +646,8 @@ public class NewSecurityRecipient {
                     }                   
                 } else if(PolicyTypeUtil.signatureConfirmationPolicy(pol)){
                     buffer.append("SignatureConfirmation Policy\n");
+                } else{
+                    buffer.append(pol + "\n");
                 }
             }
         }
@@ -606,6 +669,8 @@ public class NewSecurityRecipient {
                         (AuthenticationTokenPolicy.X509CertificateBinding)skBinding.getKeyBinding();
                 if(x509Binding != null){
                     buffer.append("\t     X509CertificateBinding\n");
+                    buffer.append("\t       ValueType:" + x509Binding.getValueType() + "\n");
+                    buffer.append("\t       ReferenceType:" + x509Binding.getReferenceType() + "\n");
                 }
             } else if(keyBinding instanceof IssuedTokenKeyBinding){
                 buffer.append("\t  IssuedTokenKeyBinding\n");

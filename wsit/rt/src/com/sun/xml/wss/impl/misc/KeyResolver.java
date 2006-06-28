@@ -1,5 +1,5 @@
 /*
- * $Id: KeyResolver.java,v 1.2 2006-06-09 14:13:10 kumarjayanti Exp $
+ * $Id: KeyResolver.java,v 1.2.2.1 2006-06-28 14:11:14 ashutoshshahi Exp $
  */
 
 /*
@@ -140,7 +140,7 @@ public class KeyResolver {
             SecurableSoapMessage secureMsg = context.getSecurableSoapMessage();
             if (keyInfo.containsSecurityTokenReference()) {
                 return processSecurityTokenReference(keyInfo,sig, context);
-            }else if (keyInfo.containsKeyName()) {                
+            }else if (keyInfo.containsKeyName()) {
                 EncryptionPolicy policy = (EncryptionPolicy)context.getInferredPolicy();
                 
                 String keynameString = keyInfo.getKeyNameString(0);
@@ -154,14 +154,14 @@ public class KeyResolver {
                         context.getSecurityEnvironment().getSecretKey(context.getExtraneousProperties(),
                         keynameString,
                         false);
-            } else if (keyInfo.containsKeyValue()) {                
+            } else if (keyInfo.containsKeyValue()) {
                 // resolve KeyValue
                 returnKey =
                         resolveKeyValue(secureMsg, keyInfo.getKeyValue(0), sig,context);
-            } else if (keyInfo.containsX509Data()) {                
+            } else if (keyInfo.containsX509Data()) {
                 // resolve X509Data
                 returnKey =  resolveX509Data(secureMsg, keyInfo.getX509Data(0), sig,context);
-            } else if(keyInfo.containsEncryptedKeyToken()){                
+            } else if(keyInfo.containsEncryptedKeyToken()){
                 EncryptedKeyToken token = keyInfo.getEncryptedKey(0);
                 KeyInfoHeaderBlock kiHB = token.getKeyInfo();
                 if(kiHB.containsSecurityTokenReference()){
@@ -175,7 +175,7 @@ public class KeyResolver {
                     dataEncAlgo = context.getAlgorithmSuite().getEncryptionAlgorithm();
                 }
                 returnKey = token.getSecretKey(getKey(kiHB, false, context), dataEncAlgo);
-            } else if (keyInfo.containsBinarySecret()) {                
+            } else if (keyInfo.containsBinarySecret()) {
                 BinarySecret bs = keyInfo.getBinarySecret(0);
                 // assuming the Binary Secret is of Type
                 if ((bs.getType() == null) || bs.getType().equals(BinarySecret.SYMMETRIC_KEY_TYPE)) {
@@ -232,10 +232,6 @@ public class KeyResolver {
              if (key != null)
                  return key;
             //TODO: expensive conversion happening
-            if (samlAssertion == null) {
-                 throw new XWSSecurityException("Cannot Locate SAML Assertion");
-            }
-             
             Element keyInfoElem =
                     AssertionUtil.getSubjectConfirmationKeyInfo(samlAssertion.toElement(null));
             KeyInfoHeaderBlock keyInfo = new KeyInfoHeaderBlock(
@@ -285,11 +281,17 @@ public class KeyResolver {
                     AuthenticationTokenPolicy.X509CertificateBinding x509Binding = new AuthenticationTokenPolicy.X509CertificateBinding();
                     x509Binding.setValueType(MessageConstants.X509SubjectKeyIdentifier_NS);
                     x509Binding.setReferenceType(MessageConstants.KEY_INDETIFIER_TYPE);
-                    if(inferredKB == null){   
+                    if(inferredKB == null){                           
                         inferredEncryptionPolicy.setKeyBinding(x509Binding);
+                    } else if(PolicyTypeUtil.symmetricKeyBinding(inferredKB)){
+                        ((SymmetricKeyBinding)inferredKB).setKeyBinding(x509Binding);
                     } else if(PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)){
-                        if(((DerivedTokenKeyBinding)inferredKB).getOriginalKeyBinding() == null)
+                        DerivedTokenKeyBinding dktBind = (DerivedTokenKeyBinding)inferredKB;
+                        if(dktBind.getOriginalKeyBinding() == null)
                             ((DerivedTokenKeyBinding)inferredKB).setOriginalKeyBinding(x509Binding);
+                        else if(PolicyTypeUtil.symmetricKeyBinding(dktBind.getOriginalKeyBinding())){
+                            dktBind.getOriginalKeyBinding().setKeyBinding(x509Binding);
+                        }
                     }
                 }                
                 if (sig) {
@@ -313,11 +315,17 @@ public class KeyResolver {
                     AuthenticationTokenPolicy.X509CertificateBinding x509Binding = new AuthenticationTokenPolicy.X509CertificateBinding();
                     x509Binding.setValueType(MessageConstants.ThumbPrintIdentifier_NS);
                     x509Binding.setReferenceType(MessageConstants.KEY_INDETIFIER_TYPE);
-                    if(inferredKB == null){
+                    if(inferredKB == null){                           
                         inferredEncryptionPolicy.setKeyBinding(x509Binding);
+                    } else if(PolicyTypeUtil.symmetricKeyBinding(inferredKB)){
+                        ((SymmetricKeyBinding)inferredKB).setKeyBinding(x509Binding);
                     } else if(PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)){
-                        if(((DerivedTokenKeyBinding)inferredKB).getOriginalKeyBinding() == null)
+                        DerivedTokenKeyBinding dktBind = (DerivedTokenKeyBinding)inferredKB;
+                        if(dktBind.getOriginalKeyBinding() == null)
                             ((DerivedTokenKeyBinding)inferredKB).setOriginalKeyBinding(x509Binding);
+                        else if(PolicyTypeUtil.symmetricKeyBinding(dktBind.getOriginalKeyBinding())){
+                            dktBind.getOriginalKeyBinding().setKeyBinding(x509Binding);
+                        }
                     }
                 }                
                 if (sig) {
@@ -341,8 +349,8 @@ public class KeyResolver {
                     MLSPolicy inferredKB = inferredEncryptionPolicy.getKeyBinding();
                     SymmetricKeyBinding skBinding = new SymmetricKeyBinding();
                     AuthenticationTokenPolicy.X509CertificateBinding x509Binding = new AuthenticationTokenPolicy.X509CertificateBinding();
+                    x509Binding.setReferenceType(MessageConstants.KEY_INDETIFIER_TYPE);
                     skBinding.setKeyBinding(x509Binding);
-                    //TODO: ReferenceType and ValueType not set on X509Binding
                     if(inferredKB == null){
                         inferredEncryptionPolicy.setKeyBinding(skBinding);
                     } else if(PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)){
@@ -418,9 +426,15 @@ public class KeyResolver {
                         x509Binding.setReferenceType(MessageConstants.KEY_INDETIFIER_TYPE);
                         if(inferredKB == null){                           
                             inferredEncryptionPolicy.setKeyBinding(x509Binding);
+                        } else if(PolicyTypeUtil.symmetricKeyBinding(inferredKB)){
+                            ((SymmetricKeyBinding)inferredKB).setKeyBinding(x509Binding);
                         } else if(PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)){
-                            if(((DerivedTokenKeyBinding)inferredKB).getOriginalKeyBinding() == null)
+                            DerivedTokenKeyBinding dktBind = (DerivedTokenKeyBinding)inferredKB;
+                            if(dktBind.getOriginalKeyBinding() == null)
                                 ((DerivedTokenKeyBinding)inferredKB).setOriginalKeyBinding(x509Binding);
+                            else if(PolicyTypeUtil.symmetricKeyBinding(dktBind.getOriginalKeyBinding())){
+                                dktBind.getOriginalKeyBinding().setKeyBinding(x509Binding);
+                            }
                         }
                     }                    
                     if (sig) {
@@ -465,9 +479,14 @@ public class KeyResolver {
                     x509Binding.setValueType(MessageConstants.X509v3_NS);
                     if(inferredKB == null){  
                         inferredEncryptionPolicy.setKeyBinding(x509Binding);
+                    } else if(PolicyTypeUtil.symmetricKeyBinding(inferredKB)){
+                        ((SymmetricKeyBinding)inferredKB).setKeyBinding(x509Binding);
                     } else  if(PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)){
-                        if(((DerivedTokenKeyBinding)inferredKB).getOriginalKeyBinding() == null)
-                            ((DerivedTokenKeyBinding)inferredKB).setOriginalKeyBinding(x509Binding);
+                        DerivedTokenKeyBinding dktBind = (DerivedTokenKeyBinding)inferredKB;
+                        if(dktBind.getOriginalKeyBinding() == null)
+                            dktBind.setOriginalKeyBinding(x509Binding);
+                        else if(PolicyTypeUtil.symmetricKeyBinding(dktBind.getOriginalKeyBinding()))
+                            dktBind.getOriginalKeyBinding().setKeyBinding(x509Binding);
                     }
                 }                
                 returnKey = resolveX509Token(secureMsg, token, sig,context);
@@ -567,9 +586,14 @@ public class KeyResolver {
                         x509Binding.setReferenceType(MessageConstants.DIRECT_REFERENCE_TYPE);
                         if(inferredKB == null){  
                             inferredEncryptionPolicy.setKeyBinding(x509Binding);
+                        } else if(PolicyTypeUtil.symmetricKeyBinding(inferredKB)){
+                            ((SymmetricKeyBinding)inferredKB).setKeyBinding(x509Binding);
                         } else if(PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)){
-                            if(((DerivedTokenKeyBinding)inferredKB).getOriginalKeyBinding() == null)
-                                ((DerivedTokenKeyBinding)inferredKB).setOriginalKeyBinding(x509Binding);
+                            DerivedTokenKeyBinding dktBind = (DerivedTokenKeyBinding)inferredKB;
+                            if(dktBind.getOriginalKeyBinding() == null)
+                                dktBind.setOriginalKeyBinding(x509Binding);
+                            else if(PolicyTypeUtil.symmetricKeyBinding(dktBind.getOriginalKeyBinding()))
+                                dktBind.getOriginalKeyBinding().setKeyBinding(x509Binding);
                         }
                     }                    
                     returnKey = resolveX509Token(secureMsg, (X509SecurityToken)token, sig,context);
@@ -637,6 +661,8 @@ public class KeyResolver {
                           DerivedTokenKeyBinding dtkBinding = new DerivedTokenKeyBinding();
                           if(inferredKB == null){
                               inferredEncryptionPolicy.setKeyBinding(dtkBinding);
+                          } else if(PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)) {
+                              //already set - do nothing
                           } else{
                               throw new XWSSecurityException("A derived Key Token should be a top level key binding");
                           }
@@ -674,9 +700,14 @@ public class KeyResolver {
                 x509Binding.setReferenceType(MessageConstants.X509_ISSUER_TYPE);
                 if(inferredKB == null){ 
                     inferredEncryptionPolicy.setKeyBinding(x509Binding);
+                } else if(PolicyTypeUtil.symmetricKeyBinding(inferredKB)){
+                    ((SymmetricKeyBinding)inferredKB).setKeyBinding(x509Binding);
                 } else if(PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)){
-                    if(((DerivedTokenKeyBinding)inferredKB).getOriginalKeyBinding() == null)
-                        ((DerivedTokenKeyBinding)inferredKB).setOriginalKeyBinding(x509Binding);
+                    DerivedTokenKeyBinding dktBind = (DerivedTokenKeyBinding)inferredKB;
+                    if(dktBind.getOriginalKeyBinding() == null)
+                        dktBind.setOriginalKeyBinding(x509Binding);
+                    else if(PolicyTypeUtil.symmetricKeyBinding(dktBind.getOriginalKeyBinding()))
+                        dktBind.getOriginalKeyBinding().setKeyBinding(x509Binding);
                 }
             }            
             if (sig) {
@@ -863,11 +894,6 @@ public class KeyResolver {
         
         //TODO: expensive conversion happening here
         try {
-            // if it is an Encrypted SAML Assertion we cannot decrypt it
-            // on the client side since we don't have the Private Key
-            if ("EncryptedData".equals(tokenElement.getLocalName())) {
-                return null;
-            }
             ret = AssertionUtil.fromElement(tokenElement);
         } catch (Exception e) {
             throw new XWSSecurityException(e);
@@ -1030,8 +1056,8 @@ public class KeyResolver {
                         MLSPolicy inferredKB = inferredEncryptionPolicy.getKeyBinding();
                         SymmetricKeyBinding skBinding = new SymmetricKeyBinding();
                         AuthenticationTokenPolicy.X509CertificateBinding x509Binding = new AuthenticationTokenPolicy.X509CertificateBinding();
+                        x509Binding.setReferenceType(MessageConstants.KEY_INDETIFIER_TYPE);
                         skBinding.setKeyBinding(x509Binding);
-                        //TODO: ReferenceType and ValueType not set on X509Binding
                         if(PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)){
                             if(((DerivedTokenKeyBinding)inferredKB).getOriginalKeyBinding() == null)
                                 ((DerivedTokenKeyBinding)inferredKB).setOriginalKeyBinding(skBinding);
