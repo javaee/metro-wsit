@@ -29,13 +29,15 @@
 
 
     <property file="build.properties"/>
-    <property name="WSIT_HOME" value="${basedir}/../../../../"/>
+    <!--<property name="WSIT_HOME" value="${basedir}/../../../../"/>-->
+    <property name="WSIT_HOME" value="${env.WSIT_HOME}"/>
     <property name="lib.home" value="${WSIT_HOME}/lib"/>
-    <property name="dist.home" value="${WSIT_HOME}/dist/image"/>
+    <!--<property name="dist.home" value="${WSIT_HOME}/dist/image"/>-->
     <property name="build.home" value="${basedir}/build"/>
     <property name="build.classes.home" value="${build.home}/classes"/>
     <property name="build.war.home" value="${build.home}/war"/>
-    <property name="wsit.dir" value="${dist.home}/jax-ws-latest-wsit"/>
+    <!--<property name="wsit.dir" value="${WSIT_HOME}/jax-ws-latest-wsit"/>-->
+    <property name="wsit.dir" value="${WSIT_HOME}"/>
 
      <!-- Test Execution Defaults -->
     <condition property="usetomcat" value="true">
@@ -48,9 +50,9 @@
         <fileset dir="${lib.home}">
             <include name="*.jar"/>
         </fileset>
-         <fileset dir="${dist.home}/jax-ws-latest-wsit/lib">
+         <!--<fileset dir="${dist.home}/jax-ws-latest-wsit/lib">
             <include name="*.jar"/>
-        </fileset>
+        </fileset>-->
     </path>
 
     <taskdef name="wsimport" classname="com.sun.tools.ws.ant.WsImport">
@@ -68,15 +70,17 @@
         <delete dir="${build.home}" includeEmptyDirs="true"/>
     </target>
 
+                <!--wsdl="d:/new-wsit/wsit/wsit/samples/ws-rm/javaone-2006-demo/rmdemo/server/etc/RMDemo.wsdl">-->
     <target name="build-server-wsdl" depends="setup">
         <wsimport
-                debug="${debug}"
+                debug="true"
                 verbose="true"
                 keep="true"
                 extension="true"
                 destdir="${build.classes.home}"
+                fork="true"
                 sourcedestdir="${build.classes.home}/src"
-                wsdl="D:/delme/wsit/wsit/samples/ws-rm/javaone-2006-demo/rmdemo/server/etc/RMDemo.wsdl">
+                wsdl="${server.wsdl}">
             <binding dir="${server.dir}/etc" includes="${server.binding}"/>
         </wsimport>
         <javac
