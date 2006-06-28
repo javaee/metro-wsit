@@ -4,23 +4,27 @@ Project Tango and Microsoft Indigo" TS-1603 at  Javaone 2006.
 
 To run with glassfish
 ======================
-1. Set AS_HOME to point to the location where Glassfish is installed
+1. Set WSIT_HOME to the location of the WSIT jars ie
+   export WSIT_HOME=<somedir>/jax-ws-latest-wsit
+2. Set AS_HOME to point to the location where Glassfish is installed
    e.g export AS_HOME="...."
-2. ant server -Duseglassfish=true
-3. Start glassfish by invoking $AS_HOME/bin/asadmin start-domain domain1
-4. ant client
-5. ant run
+3. ant server -Duseglassfish=true
+4. Start glassfish by invoking $AS_HOME/bin/asadmin start-domain domain1
+5. ant client
+6. ant run
 
 
 
 To run with tomcat
 ==================
-1. Set CATALINA_HOME to point to the location where Tomcat is installed
+1. Set WSIT_HOME to the location of the WSIT jars ie
+   export WSIT_HOME=<somedir>/jax-ws-latest-wsit
+2. Set CATALINA_HOME to point to the location where Tomcat is installed
    e.g export CATALINA_HOME="...."
-2. ant server
-3. Start tomcat by invoking $CATALINA_HOME/bin/startup.sh
-4. ant client
-5. ant run
+3. ant server
+4. Start tomcat by invoking $CATALINA_HOME/bin/startup.sh
+5. ant client
+6. ant run
 
 
 Advanced feature
