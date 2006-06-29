@@ -1,0 +1,76 @@
+<?xml version="1.0"?>
+
+<!--
+  The contents of this file are subject to the terms
+  of the Common Development and Distribution License
+  (the License).  You may not use this file except in
+  compliance with the License.
+
+  You can obtain a copy of the license at
+  https://glassfish.dev.java.net/public/CDDLv1.0.html.
+  See the License for the specific language governing
+  permissions and limitations under the License.
+
+  When distributing Covered Code, include this CDDL
+  Header Notice in each file and include the License file
+  at https://glassfish.dev.java.net/public/CDDLv1.0.html.
+  If applicable, add the following below the CDDL Header,
+  with the fields enclosed by brackets [] replaced by
+  you own identifying information:
+  "Portions Copyrighted [year] [name of copyright owner]"
+
+  Copyright 2006 Sun Microsystems Inc. All Rights Reserved
+-->
+<!--
+ $Id: build.xml,v 1.1 2006-06-29 20:47:47 arungupta Exp $
+
+ Copyright (c) 2005 Sun Microsystems, Inc.
+ All rights reserved.
+-->
+
+<project name="wsit.dev.java.net etc" default="main">
+    <property name="build.dir" value="${basedir}/build"/>
+    <property name="build.classes" value="build/classes"/>
+
+    <property environment="env"/>
+
+    <path id="etc.compile.classpath">
+        <pathelement location="${env.ANT_HOME}/lib/ant.jar"/>
+    </path>
+
+    <target name="main" depends="compile"/>
+
+    <target name="prepare">
+        <mkdir dir="${build.classes}"/>
+    </target>
+
+    <target name="compile" depends="prepare">
+        <javac srcdir="src"
+               destdir="${build.classes}"
+               debug="true"
+               deprecation="${compile.deprecation}"
+               optimize="${compile.optimize}"
+               source="1.5">
+            <classpath refid="etc.compile.classpath"/>
+        </javac>
+        <jar basedir="${build.classes}" destfile="lib/wsit-taskdefs.jar"/>
+    </target>
+
+    <target name="src-zip">
+        <mkdir dir="${build.dir}/temp"/>
+        <unzip dest="${build.dir}/temp">
+            <fileset dir="${lib.runtime.dir}" includes="*src.zip"/>
+        </unzip>
+        <delete file="${build.dir}/temp/*.txt"/>
+        <delete dir="${build.dir}/temp/META-INF" includeemptydirs="true"/>
+        <zip destfile="${build.dir}/${name}-src.zip">
+            <fileset dir="src"/>
+            <fileset dir="${build.dir}/temp"/>
+        </zip>
+        <delete dir="${build.dir}/temp" includeemptydirs="true"/>
+    </target>
+
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+    </target>
+</project>
