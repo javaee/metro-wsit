@@ -23,7 +23,7 @@
 -->
 
 <!--
- $Id: build.xml,v 1.11 2006-06-27 21:58:12 ofung Exp $
+ $Id: build.xml,v 1.12 2006-06-29 20:58:46 arungupta Exp $
 
  Copyright (c) 2005 Sun Microsystems, Inc.
  All rights reserved.
@@ -37,6 +37,11 @@
      1. Aggregate manifest information of dependent jar files
      2. Add version/timestamp/build # as manifest to webservices*.jar
     -->
+    <taskdef name="concatmanifest" classname="taskdefs.ConcatManifest">
+        <classpath>
+            <fileset dir="${etc.lib.dir}" includes="wsit-taskdefs.jar"/>
+        </classpath>
+    </taskdef>
 
     <taskdef name="installerBuilder"
         classname="com.sun.tools.xjc.installer.builder.BuilderTask">
@@ -92,15 +97,14 @@
         <element name="metainf" optional="true"/>
         <sequential>
             <property name="tmpdir" value="${dist.image.dir}/tmp"/>
-            <unjar dest="${tmpdir}">
+            <copy file="${etc.metainf.dir}/MANIFEST.MF" todir="${tmpdir}"/>
+            <concatmanifest tempdir="${tmpdir}" manifest="${tmpdir}/MANIFEST.MF">
                 <fileset dir="@{libdir}" includes="*.jar"/>
-            </unjar>
+            </concatmanifest>
             <delete dir="${tmpdir}/META-INF" includeemptydirs="true" excludes="services/**"/>
 
-            <!-- TODO: Append to already existing service providers -->
-            <!-- TODO: Classify by tooltime/runtime -->
             <metainf/>
-            <jar destfile="${dist.image.wsit.lib.dir}/@{jarname}.jar">
+            <jar destfile="${dist.image.wsit.lib.dir}/@{jarname}.jar" manifest="${tmpdir}/MANIFEST.MF">
                 <fileset dir="${tmpdir}"/>
                 <fileset dir="@{classesdir}"/>
             </jar>
