@@ -45,12 +45,16 @@ public final class PolicySourceModelContext {
         return policyModels;
     }
     
-    public void addModel(URI uri, PolicySourceModel model) {
-        getModels().put(uri,model);
+    public void addModel(URI modelUri, PolicySourceModel model) {
+        getModels().put(modelUri,model);
     }
     
     public static PolicySourceModelContext createContext() {
         return new PolicySourceModelContext();
+    }
+    
+    public boolean containsModel(URI modelUri) {
+        return getModels().containsKey(modelUri);
     }
     
     PolicySourceModel retrieveModel(URI modelUri) throws PolicyModelAccessException {
