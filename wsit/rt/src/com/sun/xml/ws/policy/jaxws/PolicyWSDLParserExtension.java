@@ -3,12 +3,12 @@
  * of the Common Development and Distribution License
  * (the License).  You may not use this file except in
  * compliance with the License.
- * 
+ *
  * You can obtain a copy of the license at
  * https://glassfish.dev.java.net/public/CDDLv1.0.html.
  * See the License for the specific language governing
  * permissions and limitations under the License.
- * 
+ *
  * When distributing Covered Code, include this CDDL
  * Header Notice in each file and include the License file
  * at https://glassfish.dev.java.net/public/CDDLv1.0.html.
@@ -16,11 +16,12 @@
  * with the fields enclosed by brackets [] replaced by
  * you own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * 
+ *
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 package com.sun.xml.ws.policy.jaxws;
 
+import com.sun.xml.ws.api.model.wsdl.WSDLObject;
 import java.io.StringReader;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -64,6 +65,11 @@ import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelUnmarshaller;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModelContext;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.List;
+import javax.xml.stream.XMLInputFactory;
 
 /**
  *
@@ -75,11 +81,11 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
         PolicyUri, AnonymousPolicyId
     }
     
-    class PolicyHandler {
+    class PolicyRecordHandler {
         String handler;
         HandlerType type;
         
-        PolicyHandler(HandlerType type, String handler) {
+        PolicyRecordHandler(HandlerType type, String handler) {
             this.type = type;
             this.handler = handler;
         }
@@ -108,16 +114,28 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
                 return insertedRec;
             }
             PolicyRecord head = this;
+            PolicyRecord oneBeforeCurrent = null;
             PolicyRecord current;
-            for (current = head; null!=current.next; current=current.next) {
+            for (current = head; null!=current.next; ) {
+                if (current.unresolvedURIs.contains(insertedRec.uri)) {
+                    if (null == oneBeforeCurrent) {
+                        insertedRec.next = current;
+                        return insertedRec;
+                    } else { // oneBeforeCurrent != null
+                        oneBeforeCurrent.next = insertedRec;
+                        insertedRec.next = current;
+                        return head;
+                    } // end-if-else oneBeforeCurrent == null
+                }// end-if current record depends on inserted one
                 if (insertedRec.unresolvedURIs.remove(current.uri)) {
                     if (insertedRec.unresolvedURIs.isEmpty()) {
                         insertedRec.next = current.next;
                         current.next = insertedRec;
                         return head;
-                    }
-                }
-            }
+                    } // end-if unresolvedURIs empty
+                } // end-if one of unresolved URIs resolved by current record
+                current=current.next;
+            } // end for (current = head; null!=current.next; )
             insertedRec.next = null;
             current.next = insertedRec;
             return head;
@@ -135,146 +153,177 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
     private static final PolicyLogger logger = PolicyLogger.getLogger(PolicyWSDLParserExtension.class);
     
     //anonymous policy id prefix
-    static final StringBuffer AnonymnousPolicyIdPrefix = new StringBuffer("#__anonymousPolicy__ID");
+    private static final StringBuffer AnonymnousPolicyIdPrefix = new StringBuffer("#__anonymousPolicy__ID");
     
     // anonymous policies count
-    int anonymousPoliciesCount;
+    private int anonymousPoliciesCount;
     
     // policy queue -- needed for evaluating the right order policy of policy models expansion
-    PolicyRecord queueHead = null;
+    private PolicyRecord expandQueueHead = null;
     
-    // storage for policies with an id defined within given WSDL
-    HashMap<String,PolicySourceModel> policyModels = null;
+    // storage for policy models with an id passed by
+    private Map<String,PolicyRecord> policyRecordsPassedBy = null;
     // storage for anonymous policies defined within given WSDL
-    HashMap<String,PolicySourceModel> anonymousPolicyModels = null;
+    private Map<String,PolicySourceModel> anonymousPolicyModels = null;
+    
+    // container for URIs of policies referenced
+    private List<String> unresolvedUris = null;
+    
+    // structures for policies really needed to build a map
+    private LinkedList<String> urisNeeded = new LinkedList<String>();
+    private Map<String, PolicySourceModel> modelsNeeded = new HashMap<String, PolicySourceModel>();
     
     // lookup tables for Policy attachments found
-    HashMap<WSDLService,Collection<PolicyHandler>> handlers4ServiceMap = null;
-    HashMap<WSDLPort,Collection<PolicyHandler>> handlers4PortMap = null;
-    HashMap<WSDLPortType,Collection<PolicyHandler>> handlers4PortTypeMap = null;
-    HashMap<WSDLBoundPortType,Collection<PolicyHandler>> handlers4BindingMap = null;
-    HashMap<WSDLBoundOperation,Collection<PolicyHandler>> handlers4BoundOperationMap = null;
-    HashMap<WSDLOperation,Collection<PolicyHandler>> handlers4OperationMap = null;
-    HashMap<WSDLMessage,Collection<PolicyHandler>> handlers4MessageMap = null;
-    HashMap<WSDLInput,Collection<PolicyHandler>> handlers4InputMap = null;
-    HashMap<WSDLOutput,Collection<PolicyHandler>> handlers4OutputMap = null;
-    HashMap<WSDLFault,Collection<PolicyHandler>> handlers4FaultMap = null;
-    HashMap<WSDLBoundOperation,Collection<PolicyHandler>> handlers4BindingInputOpMap = null;
-    HashMap<WSDLBoundOperation,Collection<PolicyHandler>> handlers4BindingOutputOpMap = null;
-    HashMap<WSDLBoundOperation,Collection<PolicyHandler>> handlers4BindingFaultOpMap = null;
+    private Map<WSDLObject, Collection<PolicyRecordHandler>> handlers4ServiceMap = null;
+    private Map<WSDLObject, Collection<PolicyRecordHandler>> handlers4PortMap = null;
+    private Map<WSDLObject, Collection<PolicyRecordHandler>> handlers4PortTypeMap = null;
+    private Map<WSDLObject, Collection<PolicyRecordHandler>> handlers4BindingMap = null;
+    private Map<WSDLObject, Collection<PolicyRecordHandler>> handlers4BoundOperationMap = null;
+    private Map<WSDLObject, Collection<PolicyRecordHandler>> handlers4OperationMap = null;
+    private Map<WSDLObject, Collection<PolicyRecordHandler>> handlers4MessageMap = null;
+    private Map<WSDLObject, Collection<PolicyRecordHandler>> handlers4InputMap = null;
+    private Map<WSDLObject, Collection<PolicyRecordHandler>> handlers4OutputMap = null;
+    private Map<WSDLObject, Collection<PolicyRecordHandler>> handlers4FaultMap = null;
+    private Map<WSDLObject, Collection<PolicyRecordHandler>> handlers4BindingInputOpMap = null;
+    private Map<WSDLObject, Collection<PolicyRecordHandler>> handlers4BindingOutputOpMap = null;
+    private Map<WSDLObject, Collection<PolicyRecordHandler>> handlers4BindingFaultOpMap = null;
     
-    PolicyMapBuilder policyBuilder = new PolicyMapBuilder();
+    private PolicyMapBuilder policyBuilder = new PolicyMapBuilder();
     
-    HashMap<String,PolicySourceModel> getPolicyModels() {
-        if (null==policyModels) {
-            policyModels = new HashMap<String,PolicySourceModel>();
-        }
-        return policyModels;
+    private boolean isPolicyProcessed(String policyUri) {
+        return modelsNeeded.containsKey(policyUri);
     }
     
-    HashMap<String,PolicySourceModel> getAnonymousPolicyModels() {
+    private void addNewPolicyNeeded(String policyUri, PolicySourceModel policyModel) {
+        if (!modelsNeeded.containsKey(policyUri)) {
+            modelsNeeded.put(policyUri, policyModel);
+            urisNeeded.addFirst(policyUri);
+        }
+    }
+    
+    private Map<String, PolicySourceModel> getPolicyModels() {
+        return modelsNeeded;
+    }
+    
+    private Map<String,PolicyRecord> getPolicyRecordsPassedBy() {
+        if (null==policyRecordsPassedBy) {
+            policyRecordsPassedBy = new HashMap<String,PolicyRecord>();
+        }
+        return policyRecordsPassedBy;
+    }
+    
+    private Map<String,PolicySourceModel> getAnonymousPolicyModels() {
         if (null==anonymousPolicyModels) {
             anonymousPolicyModels = new HashMap<String,PolicySourceModel>();
         }
         return anonymousPolicyModels;
     }
     
-    HashMap<WSDLService,Collection<PolicyHandler>> getHandlers4ServiceMap() {
+    private Map<WSDLObject, Collection<PolicyRecordHandler>> getHandlers4ServiceMap() {
         if (null==handlers4ServiceMap) {
-            handlers4ServiceMap = new HashMap<WSDLService,Collection<PolicyHandler>>();
+            handlers4ServiceMap = new HashMap<WSDLObject,Collection<PolicyRecordHandler>>();
         }
         return handlers4ServiceMap;
     }
     
-    HashMap<WSDLPort,Collection<PolicyHandler>> getHandlers4PortMap() {
+    private Map<WSDLObject, Collection<PolicyRecordHandler>> getHandlers4PortMap() {
         if (null==handlers4PortMap) {
-            handlers4PortMap = new HashMap<WSDLPort,Collection<PolicyHandler>>();
+            handlers4PortMap = new HashMap<WSDLObject,Collection<PolicyRecordHandler>>();
         }
         return handlers4PortMap;
     }
     
-    HashMap<WSDLPortType,Collection<PolicyHandler>> getHandlers4PortTypeMap() {
+    private Map<WSDLObject, Collection<PolicyRecordHandler>> getHandlers4PortTypeMap() {
         if (null==handlers4PortTypeMap) {
-            handlers4PortTypeMap = new HashMap<WSDLPortType,Collection<PolicyHandler>>();
+            handlers4PortTypeMap = new HashMap<WSDLObject,Collection<PolicyRecordHandler>>();
         }
         return handlers4PortTypeMap;
     }
     
-    HashMap<WSDLBoundPortType,Collection<PolicyHandler>> getHandlers4BindingMap() {
+    private Map<WSDLObject, Collection<PolicyRecordHandler>> getHandlers4BindingMap() {
         if (null==handlers4BindingMap) {
-            handlers4BindingMap = new HashMap<WSDLBoundPortType,Collection<PolicyHandler>>();
+            handlers4BindingMap = new HashMap<WSDLObject,Collection<PolicyRecordHandler>>();
         }
         return handlers4BindingMap;
     }
     
-    HashMap<WSDLOperation,Collection<PolicyHandler>> getHandlers4OperationMap() {
+    private Map<WSDLObject, Collection<PolicyRecordHandler>> getHandlers4OperationMap() {
         if (null==handlers4OperationMap) {
-            handlers4OperationMap = new HashMap<WSDLOperation,Collection<PolicyHandler>>();
+            handlers4OperationMap = new HashMap<WSDLObject,Collection<PolicyRecordHandler>>();
         }
         return handlers4OperationMap;
     }
     
-    HashMap<WSDLBoundOperation,Collection<PolicyHandler>> getHandlers4BoundOperationMap() {
+    private Map<WSDLObject, Collection<PolicyRecordHandler>> getHandlers4BoundOperationMap() {
         if (null==handlers4BoundOperationMap) {
-            handlers4BoundOperationMap = new HashMap<WSDLBoundOperation,Collection<PolicyHandler>>();
+            handlers4BoundOperationMap = new HashMap<WSDLObject,Collection<PolicyRecordHandler>>();
         }
         return handlers4BoundOperationMap;
     }
     
-    HashMap<WSDLMessage,Collection<PolicyHandler>> getHandlers4MessageMap() {
+    private Map<WSDLObject, Collection<PolicyRecordHandler>> getHandlers4MessageMap() {
         if (null==handlers4MessageMap) {
-            handlers4MessageMap = new HashMap<WSDLMessage,Collection<PolicyHandler>>();
+            handlers4MessageMap = new HashMap<WSDLObject,Collection<PolicyRecordHandler>>();
         }
         return handlers4MessageMap;
     }
     
-    HashMap<WSDLInput,Collection<PolicyHandler>> getHandlers4InputMap() {
+    private Map<WSDLObject, Collection<PolicyRecordHandler>> getHandlers4InputMap() {
         if (null==handlers4InputMap) {
-            handlers4InputMap = new HashMap<WSDLInput,Collection<PolicyHandler>>();
+            handlers4InputMap = new HashMap<WSDLObject,Collection<PolicyRecordHandler>>();
         }
         return handlers4InputMap;
     }
     
-    HashMap<WSDLOutput,Collection<PolicyHandler>> getHandlers4OutputMap() {
+    private Map<WSDLObject, Collection<PolicyRecordHandler>> getHandlers4OutputMap() {
         if (null==handlers4OutputMap) {
-            handlers4OutputMap = new HashMap<WSDLOutput,Collection<PolicyHandler>>();
+            handlers4OutputMap = new HashMap<WSDLObject,Collection<PolicyRecordHandler>>();
         }
         return handlers4OutputMap;
     }
     
-    HashMap<WSDLFault,Collection<PolicyHandler>> getHandlers4FaultMap() {
+    private Map<WSDLObject, Collection<PolicyRecordHandler>> getHandlers4FaultMap() {
         if (null==handlers4FaultMap) {
-            handlers4FaultMap = new HashMap<WSDLFault,Collection<PolicyHandler>>();
+            handlers4FaultMap = new HashMap<WSDLObject,Collection<PolicyRecordHandler>>();
         }
         return handlers4FaultMap;
     }
     
-    HashMap<WSDLBoundOperation,Collection<PolicyHandler>> getHandlers4BindingInputOpMap() {
+    private Map<WSDLObject, Collection<PolicyRecordHandler>> getHandlers4BindingInputOpMap() {
         if (null==handlers4BindingInputOpMap) {
-            handlers4BindingInputOpMap = new HashMap<WSDLBoundOperation,Collection<PolicyHandler>>();
+            handlers4BindingInputOpMap = new HashMap<WSDLObject,Collection<PolicyRecordHandler>>();
         }
         return handlers4BindingInputOpMap;
     }
     
-    HashMap<WSDLBoundOperation,Collection<PolicyHandler>> getHandlers4BindingOutputOpMap() {
+    private Map<WSDLObject, Collection<PolicyRecordHandler>> getHandlers4BindingOutputOpMap() {
         if (null==handlers4BindingOutputOpMap) {
-            handlers4BindingOutputOpMap = new HashMap<WSDLBoundOperation,Collection<PolicyHandler>>();
+            handlers4BindingOutputOpMap = new HashMap<WSDLObject,Collection<PolicyRecordHandler>>();
         }
         return handlers4BindingOutputOpMap;
     }
     
-    HashMap<WSDLBoundOperation,Collection<PolicyHandler>> getHandlers4BindingFaultOpMap() {
+    private Map<WSDLObject, Collection<PolicyRecordHandler>> getHandlers4BindingFaultOpMap() {
         if (null==handlers4BindingFaultOpMap) {
-            handlers4BindingFaultOpMap = new HashMap<WSDLBoundOperation,Collection<PolicyHandler>>();
+            handlers4BindingFaultOpMap = new HashMap<WSDLObject,Collection<PolicyRecordHandler>>();
         }
         return handlers4BindingFaultOpMap;
     }
     
-    void queuePolicyRec(PolicyRecord policyRec) {
-        if (null==queueHead) {
-            queueHead = policyRec;
+    private List<String> getUnresolvedUris(boolean emptyListNeeded) {
+        if ((null == unresolvedUris) || emptyListNeeded) {
+            unresolvedUris = new LinkedList<String>();
+        }
+        return unresolvedUris;
+    }
+    
+    
+    
+    private void policyRecToExpandQueue(PolicyRecord policyRec) {
+        if (null==expandQueueHead) {
+            expandQueueHead = policyRec;
         } else {
-            queueHead = queueHead.insert(policyRec);
+            expandQueueHead = expandQueueHead.insert(policyRec);
         }
     }
     
@@ -284,516 +333,184 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
      */
     public PolicyWSDLParserExtension() {
     }
-        
-    PolicyHandler readSinglePolicy(PolicyRecord policyRec, boolean inner) {
-        PolicyHandler handler = null;
+    
+    private PolicyRecordHandler readSinglePolicy(PolicyRecord policyRec, boolean inner) {
+        PolicyRecordHandler handler = null;
         if (null!=policyRec.policyModel.getPolicyId()) {           // policy id defined, keep the policy
-            policyRec.uri = (new StringBuffer("#")).append(policyRec.policyModel.getPolicyId()).toString();
-            handler = new PolicyHandler(HandlerType.PolicyUri,policyRec.uri);
-            getPolicyModels().put(policyRec.uri, policyRec.policyModel);
-            queuePolicyRec(policyRec);
+            handler = new PolicyRecordHandler(HandlerType.PolicyUri,policyRec.uri);
+            getPolicyRecordsPassedBy().put(policyRec.uri, policyRec);
+            policyRecToExpandQueue(policyRec);
         } else if (inner) { // no id given to the policy --> keep as an annonymous policy model
             String anonymousId = AnonymnousPolicyIdPrefix.append(anonymousPoliciesCount++).toString();
-            handler = new PolicyHandler(HandlerType.AnonymousPolicyId,anonymousId);
+            handler = new PolicyRecordHandler(HandlerType.AnonymousPolicyId,anonymousId);
             getAnonymousPolicyModels().put(anonymousId,policyRec.policyModel);
         }
         return handler;
     }
     
-    private void addHandlerToServiceMap(WSDLService key, PolicyHandler handler) {
-        Map<WSDLService,Collection<PolicyHandler>> map = getHandlers4ServiceMap();
+    
+    private void addHandlerToMap(Map<WSDLObject, Collection<PolicyRecordHandler>> map, WSDLObject key, PolicyRecordHandler handler) {
         if (map.containsKey(key)) {
             map.get(key).add(handler);
         } else {
-            Collection<PolicyHandler> newSet = new LinkedList<PolicyHandler>();
+            Collection<PolicyRecordHandler> newSet = new LinkedList<PolicyRecordHandler>();
             newSet.add(handler);
             map.put(key,newSet);
         }
     }
     
-    private void addHandlerToPortMap(WSDLPort key, PolicyHandler handler) {
-        Map<WSDLPort,Collection<PolicyHandler>> map = getHandlers4PortMap();
-        if (map.containsKey(key)) {
-            map.get(key).add(handler);
-        } else {
-            Collection<PolicyHandler> newSet = new LinkedList<PolicyHandler>();
-            newSet.add(handler);
-            map.put(key,newSet);
-        }
+    private String getBaseUrl(String policyUri) {
+        return (null == policyUri) ? null : policyUri.substring(0,policyUri.indexOf('#'));
     }
     
-    private void addHandlerToBindingMap(WSDLBoundPortType key, PolicyHandler handler) {
-        Map<WSDLBoundPortType,Collection<PolicyHandler>> map = getHandlers4BindingMap();
-        if (map.containsKey(key)) {
-            map.get(key).add(handler);
-        } else {
-            Collection<PolicyHandler> newSet = new LinkedList<PolicyHandler>();
-            newSet.add(handler);
-            map.put(key,newSet);
-        }
-    }
-    
-    private void addHandlerToPortTypeMap(WSDLPortType key, PolicyHandler handler) {
-        Map<WSDLPortType,Collection<PolicyHandler>> map = getHandlers4PortTypeMap();
-        if (map.containsKey(key)) {
-            map.get(key).add(handler);
-        } else {
-            Collection<PolicyHandler> newSet = new LinkedList<PolicyHandler>();
-            newSet.add(handler);
-            map.put(key,newSet);
-        }
-    }
-    
-    private void addHandlerToOperationMap(WSDLOperation key, PolicyHandler handler) {
-        Map<WSDLOperation,Collection<PolicyHandler>> map = getHandlers4OperationMap();
-        if (map.containsKey(key)) {
-            map.get(key).add(handler);
-        } else {
-            Collection<PolicyHandler> newSet = new LinkedList<PolicyHandler>();
-            newSet.add(handler);
-            map.put(key,newSet);
-        }
-    }
-    
-    private void addHandlerToBoundOperationMap(WSDLBoundOperation key, PolicyHandler handler) {
-        Map<WSDLBoundOperation,Collection<PolicyHandler>> map = getHandlers4BoundOperationMap();
-        if (map.containsKey(key)) {
-            map.get(key).add(handler);
-        } else {
-            Collection<PolicyHandler> newSet = new LinkedList<PolicyHandler>();
-            newSet.add(handler);
-            map.put(key,newSet);
-        }
-    }
-    
-    private void addHandlerToMessageMap(WSDLMessage key, PolicyHandler handler) {
-        Map<WSDLMessage,Collection<PolicyHandler>> map = getHandlers4MessageMap();
-        if (map.containsKey(key)) {
-            map.get(key).add(handler);
-        } else {
-            Collection<PolicyHandler> newSet = new LinkedList<PolicyHandler>();
-            newSet.add(handler);
-            map.put(key,newSet);
-        }
-    }
-    
-    private void addHandlerToInputMap(WSDLInput key, PolicyHandler handler) {
-        Map<WSDLInput,Collection<PolicyHandler>> map = getHandlers4InputMap();
-        if (map.containsKey(key)) {
-            map.get(key).add(handler);
-        } else {
-            Collection<PolicyHandler> newSet = new LinkedList<PolicyHandler>();
-            newSet.add(handler);
-            map.put(key,newSet);
-        }
-    }
-    
-    private void addHandlerToOutputMap(WSDLOutput key, PolicyHandler handler) {
-        Map<WSDLOutput,Collection<PolicyHandler>> map = getHandlers4OutputMap();
-        if (map.containsKey(key)) {
-            map.get(key).add(handler);
-        } else {
-            Collection<PolicyHandler> newSet = new LinkedList<PolicyHandler>();
-            newSet.add(handler);
-            map.put(key,newSet);
-        }
-    }
-    
-    private void addHandlerToFaultMap(WSDLFault key, PolicyHandler handler) {
-        Map<WSDLFault,Collection<PolicyHandler>> map = getHandlers4FaultMap();
-        if (map.containsKey(key)) {
-            map.get(key).add(handler);
-        } else {
-            Collection<PolicyHandler> newSet = new LinkedList<PolicyHandler>();
-            newSet.add(handler);
-            map.put(key,newSet);
-        }
-    }
-    
-    private void addHandlerToBindingInputOpMap(WSDLBoundOperation key, PolicyHandler handler) {
-        Map<WSDLBoundOperation,Collection<PolicyHandler>> map = getHandlers4BindingInputOpMap();
-        if (map.containsKey(key)) {
-            map.get(key).add(handler);
-        } else {
-            Collection<PolicyHandler> newSet = new LinkedList<PolicyHandler>();
-            newSet.add(handler);
-            map.put(key,newSet);
-        }
-    }
-    
-    private void addHandlerToBindingOutputOpMap(WSDLBoundOperation key, PolicyHandler handler) {
-        Map<WSDLBoundOperation,Collection<PolicyHandler>> map = getHandlers4BindingOutputOpMap();
-        if (map.containsKey(key)) {
-            map.get(key).add(handler);
-        } else {
-            Collection<PolicyHandler> newSet = new LinkedList<PolicyHandler>();
-            newSet.add(handler);
-            map.put(key,newSet);
-        }
-    }
-    
-    private void addHandlerToBindingFaultOpMap(WSDLBoundOperation key, PolicyHandler handler) {
-        Map<WSDLBoundOperation,Collection<PolicyHandler>> map = getHandlers4BindingFaultOpMap();
-        if (map.containsKey(key)) {
-            map.get(key).add(handler);
-        } else {
-            Collection<PolicyHandler> newSet = new LinkedList<PolicyHandler>();
-            newSet.add(handler);
-            map.put(key,newSet);
-        }
-    }
-    
-    
-    public boolean portElements(WSDLPort port, XMLStreamReader reader) {
+    private boolean processSubelement(WSDLObject element, XMLStreamReader reader, Map<WSDLObject, Collection<PolicyRecordHandler>> map) {
         if (PolicyConstants.POLICY_REFERENCE.equals(reader.getName())) {     // "PolicyReference" element interests us
             String policyUri = readPolicyReferenceElement(reader);      // get the URI
-            if (null!=policyUri) {
-                addHandlerToPortMap(port,new PolicyHandler(HandlerType.PolicyUri,policyUri));
-            } //endif null!=policyUri
+            if (null != policyUri) {
+                addHandlerToMap(map, element, new PolicyRecordHandler(HandlerType.PolicyUri, policyUri));
+                if (!policyUri.startsWith("#")) {
+                    getUnresolvedUris(false).add(policyUri);
+                } // end-if external policy uri
+            } //endif null != policyUri
             return true;
         } else if (PolicyConstants.POLICY.equals(reader.getName())) {   // policy could be defined here
-            PolicyHandler handler = readSinglePolicy(skipPolicyElement(reader),true);
-            if (null!=handler) {           // only policies with an Id can work for us
-                addHandlerToPortMap(port,handler);
-            } // endif null!=handler
+            PolicyRecordHandler handler = readSinglePolicy(skipPolicyElement(reader, ""), true);
+            if (null != handler) {           // only policies with an Id can work for us
+                addHandlerToMap(map, element, handler);
+            } // endif null != handler
             return true; // element consumed
         }//end if Policy element found
         return false;
+        
+    }
+    
+    private void processAttributes(WSDLObject element, XMLStreamReader reader, Map<WSDLObject, Collection<PolicyRecordHandler>> map) {
+        String[] uriArray = getPolicyURIsFromAttr(reader);
+        if (null!=uriArray) {
+            for (String policyUri : uriArray) {
+                addHandlerToMap(map, element, new PolicyRecordHandler(HandlerType.PolicyUri, policyUri));
+                if (!policyUri.startsWith("#")) {
+                    getUnresolvedUris(false).add(policyUri);
+                } // end-if external policy uri
+            }
+        }
+    }
+    
+    public boolean portElements(WSDLPort port, XMLStreamReader reader) {
+        return processSubelement(port, reader, getHandlers4PortMap());
     }
     
     public void portAttributes(WSDLPort port, XMLStreamReader reader) {
-        String[] uriArray = getPolicyURIsFromAttr(reader);
-        if (null!=uriArray) {
-            for (String policyUri : uriArray) {
-                addHandlerToPortMap(port,new PolicyHandler(HandlerType.PolicyUri,policyUri));
-            }
-        }
+        processAttributes(port, reader, getHandlers4PortMap());
     }
     
     public boolean serviceElements(WSDLService service, XMLStreamReader reader) {
-        if (PolicyConstants.POLICY_REFERENCE.equals(reader.getName())) {     // "PolicyReference" element interests us
-            String policyUri = readPolicyReferenceElement(reader);      // get the URI
-            if (null!=policyUri) {
-                addHandlerToServiceMap(service,new PolicyHandler(HandlerType.PolicyUri,policyUri));
-            }
-            return true;
-        } else if (PolicyConstants.POLICY.equals(reader.getName())) {   // policy could be defined here
-            PolicyHandler handler = readSinglePolicy(skipPolicyElement(reader),true);
-            if (null!=handler) {           // only policies with an Id can work for us
-                addHandlerToServiceMap(service,handler);
-            } // endif null!=handler
-            return true; // element consumed
-        }//end if Policy element found
-        return false;
+        return processSubelement(service, reader, getHandlers4ServiceMap());
     }
     
     public void serviceAttributes(WSDLService service, XMLStreamReader reader) {
-        String[] uriArray = getPolicyURIsFromAttr(reader);
-        if (null!=uriArray) {
-            for (String policyUri : uriArray) {
-                addHandlerToServiceMap(service,new PolicyHandler(HandlerType.PolicyUri,policyUri));
-            }
-        }
+        processAttributes(service, reader, getHandlers4ServiceMap());
     }
     
     
     public boolean definitionsElements(XMLStreamReader reader){
         if (PolicyConstants.POLICY.equals(reader.getName())) {     // Only "Policy" element interests me
-            readSinglePolicy(skipPolicyElement(reader),false);
+            readSinglePolicy(skipPolicyElement(reader, ""), false);
             return true;
         }
         return false;
     }
     
     public boolean bindingElements(WSDLBoundPortType binding, XMLStreamReader reader) {
-        if (PolicyConstants.POLICY_REFERENCE.equals(reader.getName())) {     // Only "PolicyReference" element interests me
-            String policyUri = readPolicyReferenceElement(reader);      // get the URI
-            if (null!=policyUri) {
-                addHandlerToBindingMap(binding,new PolicyHandler(HandlerType.PolicyUri,policyUri));
-            }
-            return true;
-        } else if (PolicyConstants.POLICY.equals(reader.getName())) {   // policy could be defined here
-            PolicyHandler handler = readSinglePolicy(skipPolicyElement(reader),true);
-            if (null!=handler) {           // only policies with an Id can work for us
-                addHandlerToBindingMap(binding,handler);
-            } // endif null!=handler
-            return true; // element consumed
-        }//end if Policy element found
-        return false;
+        return processSubelement(binding, reader, getHandlers4BindingMap());
     }
     
     public void bindingAttributes(WSDLBoundPortType binding, XMLStreamReader reader) {
-        String[] uriArray = getPolicyURIsFromAttr(reader);
-        if (null!=uriArray) {
-            for (String policyUri : uriArray) {
-                addHandlerToBindingMap(binding,new PolicyHandler(HandlerType.PolicyUri,policyUri));
-            }
-        }
+        processAttributes(binding, reader, getHandlers4BindingMap());
     }
     
     public boolean portTypeElements(WSDLPortType portType, XMLStreamReader reader) {
-        if (PolicyConstants.POLICY_REFERENCE.equals(reader.getName())) {     // Only "PolicyReference" element interests me
-            String policyUri = readPolicyReferenceElement(reader);      // get the URI
-            if (null!=policyUri) {
-                addHandlerToPortTypeMap(portType,new PolicyHandler(HandlerType.PolicyUri,policyUri));
-            }
-            return true;
-        } else if (PolicyConstants.POLICY.equals(reader.getName())) {   // policy could be defined here
-            PolicyHandler handler = readSinglePolicy(skipPolicyElement(reader),true);
-            if (null!=handler) {           // only policies with an Id can work for us
-                addHandlerToPortTypeMap(portType,handler);
-            } // endif null!=handler
-            return true; // element consumed
-        }//end if Policy element found
-        return false;
+        return processSubelement(portType, reader, getHandlers4PortTypeMap());
     }
     
     public void portTypeAttributes(WSDLPortType portType, XMLStreamReader reader) {
-        String[] uriArray = getPolicyURIsFromAttr(reader);
-        if (null!=uriArray) {
-            for (String policyUri : uriArray) {
-                addHandlerToPortTypeMap(portType,new PolicyHandler(HandlerType.PolicyUri,policyUri));
-            }
-        }
+        processAttributes(portType, reader, getHandlers4PortTypeMap());
     }
     
     public boolean portTypeOperationElements(WSDLOperation operation, XMLStreamReader reader) {
-        if (PolicyConstants.POLICY_REFERENCE.equals(reader.getName())) {     // Only "PolicyReference" element interests me
-            String policyUri = readPolicyReferenceElement(reader);      // get the URI
-            if (null!=policyUri) {
-                addHandlerToOperationMap(operation,new PolicyHandler(HandlerType.PolicyUri,policyUri));
-            }
-            return true;
-        } else if (PolicyConstants.POLICY.equals(reader.getName())) {   // policy could be defined here
-            PolicyHandler handler = readSinglePolicy(skipPolicyElement(reader),true);
-            if (null!=handler) {           // only policies with an Id can work for us
-                addHandlerToOperationMap(operation,handler);
-            } // endif null!=handler
-            return true; // element consumed
-        }//end if Policy element found
-        return false;
+        return processSubelement(operation, reader, getHandlers4OperationMap());
     }
     
     public void portTypeOperationAttributes(WSDLOperation operation, XMLStreamReader reader) {
-        String[] uriArray = getPolicyURIsFromAttr(reader);
-        if (null!=uriArray) {
-            for (String policyUri : uriArray) {
-                addHandlerToOperationMap(operation,new PolicyHandler(HandlerType.PolicyUri,policyUri));
-            }
-        }
+        processAttributes(operation, reader, getHandlers4OperationMap());
     }
     
     public boolean bindingOperationElements(WSDLBoundOperation boundOperation, XMLStreamReader reader) {
-        if (PolicyConstants.POLICY_REFERENCE.equals(reader.getName())) {     // Only "PolicyReference" element interests me
-            String policyUri = readPolicyReferenceElement(reader);      // get the URI
-            if (null!=policyUri) {
-                addHandlerToBoundOperationMap(boundOperation,new PolicyHandler(HandlerType.PolicyUri,policyUri));
-            }
-            return true;
-        } else if (PolicyConstants.POLICY.equals(reader.getName())) {   // policy could be defined here
-            PolicyHandler handler = readSinglePolicy(skipPolicyElement(reader),true);
-            if (null!=handler) {           // only policies with an Id can work for us
-                addHandlerToBoundOperationMap(boundOperation,handler);
-            } // endif null!=handler
-            return true; // element consumed
-        }//end if Policy element found
-        return false;
+        return processSubelement(boundOperation, reader, getHandlers4BoundOperationMap());
     }
     
     public void bindingOperationAttributes(WSDLBoundOperation boundOperation, XMLStreamReader reader) {
-        String[] uriArray = getPolicyURIsFromAttr(reader);
-        if (null!=uriArray) {
-            for (String policyUri : uriArray) {
-                addHandlerToBoundOperationMap(boundOperation,new PolicyHandler(HandlerType.PolicyUri,policyUri));
-            }
-        }
+        processAttributes(boundOperation, reader, getHandlers4BoundOperationMap());
     }
     
     public boolean messageElements(WSDLMessage msg, XMLStreamReader reader) {
-        if (PolicyConstants.POLICY_REFERENCE.equals(reader.getName())) {     // Only "PolicyReference" element interests me
-            String policyUri = readPolicyReferenceElement(reader);      // get the URI
-            if (null!=policyUri) {
-                addHandlerToMessageMap(msg,new PolicyHandler(HandlerType.PolicyUri,policyUri));
-            }
-            return true;
-        } else if (PolicyConstants.POLICY.equals(reader.getName())) {   // policy could be defined here
-            PolicyHandler handler = readSinglePolicy(skipPolicyElement(reader),true);
-            if (null!=handler) {           // only policies with an Id can work for us
-                addHandlerToMessageMap(msg,handler);
-            } // endif null!=handler
-            return true; // element consumed
-        }//end if Policy element found
-        return false;
+        return processSubelement(msg, reader, getHandlers4MessageMap());
     }
     
     public void messageAttributes(WSDLMessage msg, XMLStreamReader reader) {
-        String[] uriArray = getPolicyURIsFromAttr(reader);
-        if (null!=uriArray) {
-            for (String policyUri : uriArray) {
-                addHandlerToMessageMap(msg,new PolicyHandler(HandlerType.PolicyUri,policyUri));
-            }
-        }
+        processAttributes(msg, reader, getHandlers4MessageMap());
     }
     
     
     public boolean portTypeOperationInputElements(WSDLInput input, XMLStreamReader reader) {
-        if (PolicyConstants.POLICY_REFERENCE.equals(reader.getName())) {     // Only "PolicyReference" element interests me
-            String policyUri = readPolicyReferenceElement(reader);      // get the URI
-            if (null!=policyUri) {
-                addHandlerToInputMap(input,new PolicyHandler(HandlerType.PolicyUri,policyUri));
-            }
-            return true;
-        } else if (PolicyConstants.POLICY.equals(reader.getName())) {   // policy could be defined here
-            PolicyHandler handler = readSinglePolicy(skipPolicyElement(reader),true);
-            if (null!=handler) {           // only policies with an Id can work for us
-                addHandlerToInputMap(input,handler);
-            } // endif null!=handler
-            return true; // element consumed
-        }//end if Policy element found
-        return false;
+        return processSubelement(input, reader, getHandlers4InputMap());
     }
     
     public void portTypeOperationInputAttributes(WSDLInput input, XMLStreamReader reader) {
-        String[] uriArray = getPolicyURIsFromAttr(reader);
-        if (null!=uriArray) {
-            for (String policyUri : uriArray) {
-                addHandlerToInputMap(input,new PolicyHandler(HandlerType.PolicyUri,policyUri));
-            }
-        }
+        processAttributes(input, reader, getHandlers4InputMap());
     }
     
     
     public boolean portTypeOperationOutputElements(WSDLOutput output, XMLStreamReader reader) {
-        if (PolicyConstants.POLICY_REFERENCE.equals(reader.getName())) {     // Only "PolicyReference" element interests me
-            String policyUri = readPolicyReferenceElement(reader);      // get the URI
-            if (null!=policyUri) {
-                addHandlerToOutputMap(output,new PolicyHandler(HandlerType.PolicyUri,policyUri));
-            }
-            return true;
-        } else if (PolicyConstants.POLICY.equals(reader.getName())) {   // policy could be defined here
-            PolicyHandler handler = readSinglePolicy(skipPolicyElement(reader),true);
-            if (null!=handler) {           // only policies with an Id can work for us
-                addHandlerToOutputMap(output,handler);
-            } // endif null!=handler
-            return true; // element consumed
-        }//end if Policy element found
-        return false;
+        return processSubelement(output, reader, getHandlers4OutputMap());
     }
     
     public void portTypeOperationOutputAttributes(WSDLOutput output, XMLStreamReader reader) {
-        String[] uriArray = getPolicyURIsFromAttr(reader);
-        if (null!=uriArray) {
-            for (String policyUri : uriArray) {
-                addHandlerToOutputMap(output,new PolicyHandler(HandlerType.PolicyUri,policyUri));
-            }
-        }
+        processAttributes(output, reader, getHandlers4OutputMap());
     }
     
     
     public boolean portTypeOperationFaultElements(WSDLFault fault, XMLStreamReader reader) {
-        if (PolicyConstants.POLICY_REFERENCE.equals(reader.getName())) {     // Only "PolicyReference" element interests me
-            String policyUri = readPolicyReferenceElement(reader);      // get the URI
-            if (null!=policyUri) {
-                addHandlerToFaultMap(fault,new PolicyHandler(HandlerType.PolicyUri,policyUri));
-            }
-            return true;
-        } else if (PolicyConstants.POLICY.equals(reader.getName())) {   // policy could be defined here
-            PolicyHandler handler = readSinglePolicy(skipPolicyElement(reader),true);
-            if (null!=handler) {           // only policies with an Id can work for us
-                addHandlerToFaultMap(fault,handler);
-            } // endif null!=handler
-            return true; // element consumed
-        }//end if Policy element found
-        return false;
+        return processSubelement(fault, reader, getHandlers4FaultMap());
     }
     
     public void portTypeOperationFaultAttributes(WSDLFault fault, XMLStreamReader reader) {
-        String[] uriArray = getPolicyURIsFromAttr(reader);
-        if (null!=uriArray) {
-            for (String policyUri : uriArray) {
-                addHandlerToFaultMap(fault,new PolicyHandler(HandlerType.PolicyUri,policyUri));
-            }
-        }
+        processAttributes(fault, reader, getHandlers4FaultMap());
     }
     
-    
     public boolean bindingOperationInputElements(WSDLBoundOperation operation, XMLStreamReader reader) {
-        if (PolicyConstants.POLICY_REFERENCE.equals(reader.getName())) {     // "PolicyReference" element interests me
-            String policyUri = readPolicyReferenceElement(reader);      // get the URI
-            if (null!=policyUri) {
-                addHandlerToBindingInputOpMap(operation,new PolicyHandler(HandlerType.PolicyUri,policyUri));
-            }
-            return true;
-        } else if (PolicyConstants.POLICY.equals(reader.getName())) {   // policy could be defined here
-            PolicyHandler handler = readSinglePolicy(skipPolicyElement(reader),true);
-            if (null!=handler) {           // only policies with an Id can work for us
-                addHandlerToBindingInputOpMap(operation,handler);
-            } // endif null!=policyId
-            return true; // element consumed
-        }//end if Policy element found
-        return false;
+        return processSubelement(operation, reader, getHandlers4BindingInputOpMap());
     }
     
     public void bindingOperationInputAttributes(WSDLBoundOperation operation, XMLStreamReader reader) {
-        String[] uriArray = getPolicyURIsFromAttr(reader);
-        if (null!=uriArray) {
-            for (String policyUri : uriArray) {
-                addHandlerToBindingInputOpMap(operation,new PolicyHandler(HandlerType.PolicyUri,policyUri));
-            }
-        }
+        processAttributes(operation, reader, getHandlers4BindingInputOpMap());
     }
     
     
     public boolean bindingOperationOutputElements(WSDLBoundOperation operation, XMLStreamReader reader) {
-        if (PolicyConstants.POLICY_REFERENCE.equals(reader.getName())) {     // Only "PolicyReference" element interests me
-            String policyUri = readPolicyReferenceElement(reader);      // get the URI
-            if (null!=policyUri) {
-                addHandlerToBindingOutputOpMap(operation,new PolicyHandler(HandlerType.PolicyUri,policyUri));
-            }
-            return true;
-        } else if (PolicyConstants.POLICY.equals(reader.getName())) {   // policy could be defined here
-            PolicyHandler handler = readSinglePolicy(skipPolicyElement(reader),true);
-            if (null!=handler) {           // only policies with an Id can work for us
-                addHandlerToBindingOutputOpMap(operation,handler);
-            } // endif null!=handler
-            return true; // element consumed
-        }//end if Policy element found
-        return false;
+        return processSubelement(operation, reader, getHandlers4BindingOutputOpMap());
     }
     
     public void bindingOperationOutputAttributes(WSDLBoundOperation operation, XMLStreamReader reader) {
-        String[] uriArray = getPolicyURIsFromAttr(reader);
-        if (null!=uriArray) {
-            for (String policyUri : uriArray) {
-                addHandlerToBindingOutputOpMap(operation,new PolicyHandler(HandlerType.PolicyUri,policyUri));
-            }
-        }
+        processAttributes(operation, reader, getHandlers4BindingOutputOpMap());
     }
     
     public boolean bindingOperationFaultElements(WSDLBoundOperation operation, XMLStreamReader reader) {
-        if (PolicyConstants.POLICY_REFERENCE.equals(reader.getName())) {     // Only "PolicyReference" element interests me
-            String policyUri = readPolicyReferenceElement(reader);      // get the URI
-            if (null!=policyUri) {
-                addHandlerToBindingFaultOpMap(operation,new PolicyHandler(HandlerType.PolicyUri,policyUri));
-            }
-            return true;
-        } else if (PolicyConstants.POLICY.equals(reader.getName())) {   // policy could be defined here
-            PolicyHandler handler = readSinglePolicy(skipPolicyElement(reader),true);
-            if (null!=handler) {           // only policies with an Id can work for us
-                addHandlerToBindingFaultOpMap(operation,handler);
-            } // endif null!=policyId
-            return true; // element consumed
-        }//end if Policy element found
-        return false;
+        return processSubelement(operation, reader, getHandlers4BindingFaultOpMap());
     }
     
     public void bindingOperationFaultAttributes(WSDLBoundOperation operation, XMLStreamReader reader) {
-        String[] uriArray = getPolicyURIsFromAttr(reader);
-        if (null!=uriArray) {
-            for (String policyUri : uriArray) {
-                addHandlerToBindingFaultOpMap(operation,new PolicyHandler(HandlerType.PolicyUri,policyUri));
-            }
-        }
+        processAttributes(operation, reader, getHandlers4BindingFaultOpMap());
     }
     
     
@@ -804,10 +521,10 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
         return policyBuilder;
     }
     
-    private Collection<String> getPolicyURIs(Collection<PolicyHandler> handlers, PolicySourceModelContext modelContext) throws PolicyException{
+    private Collection<String> getPolicyURIs(Collection<PolicyRecordHandler> handlers, PolicySourceModelContext modelContext) throws PolicyException{
         Collection<String> result = new ArrayList<String>(handlers.size());
         String policyUri;
-        for (PolicyHandler handler: handlers) {
+        for (PolicyRecordHandler handler: handlers) {
             policyUri = handler.handler;
             if (HandlerType.AnonymousPolicyId==handler.type) {
                 PolicySourceModel policyModel = getAnonymousPolicyModels().get(policyUri);
@@ -822,20 +539,70 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
         return result;
     }
     
-    public void finished(WSDLModel model) {
-        // expand all the models
+    private void readExternalFile(String fileUrl) {
         try {
-            PolicySourceModelContext modelContext = PolicySourceModelContext.createContext();
-            if(null!=queueHead) {
-                for (PolicyRecord currentRec = queueHead; null!=currentRec; currentRec=currentRec.next) {
-                    try {
-                        currentRec.policyModel.expand(modelContext);
-                        modelContext.addModel(new URI(currentRec.uri),currentRec.policyModel);
-                    } catch (URISyntaxException use) {
-                        logger.severe("finished",use.getMessage(),use);
+            URL xmlURL = new URL(fileUrl);
+            InputStream ios = xmlURL.openStream();
+            XMLStreamReader reader = XMLInputFactory.newInstance().createXMLStreamReader(ios);
+            while (reader.hasNext()) {
+                if (reader.isStartElement()) {
+                    if (PolicyConstants.POLICY.equals(reader.getName())) {
+                        readSinglePolicy(skipPolicyElement(reader, fileUrl), false);
                     }
                 }
-                queueHead = null; // cut the queue off
+                reader.next();
+            }
+        } catch (IOException ioe) {
+            // TODO: not necessary to solve it here, but ...
+        } catch (XMLStreamException xmlse) {
+            // TODO: not necessary to solve it here, but ...
+        }
+    }
+    
+    public void finished(WSDLModel model) {
+        try {
+            // need to make sure proper beginning order of internal policies within unresolvedUris list
+            if (null != expandQueueHead) { // any policies found
+                List<String> externalUris = getUnresolvedUris(false); // protect list of possible external policies
+                getUnresolvedUris(true); // cleaning up the list only
+                for (PolicyRecord currentRec = expandQueueHead; null!=currentRec; currentRec=currentRec.next) {
+                    getUnresolvedUris(false).add(currentRec.uri);
+                }
+                expandQueueHead = null; // cut the queue off
+                getUnresolvedUris(false).addAll(externalUris);
+            }
+            Set<String> urlsRead = new HashSet<String>();
+            urlsRead.add("");
+            while (!getUnresolvedUris(false).isEmpty()) {
+                List<String> urisToBeSolvedList = getUnresolvedUris(false);
+                getUnresolvedUris(true); // just cleaning up the list
+                for (String currentUri : urisToBeSolvedList) {
+                    if (!isPolicyProcessed(currentUri)) {
+                        PolicyRecord prefetchedRecord = getPolicyRecordsPassedBy().get(currentUri);
+                        if (null != prefetchedRecord) {
+                            if (null != prefetchedRecord.unresolvedURIs) {
+                                getUnresolvedUris(false).addAll(prefetchedRecord.unresolvedURIs);
+                            } // end-if null != prefetchedRecord.unresolvedURIs
+                            addNewPolicyNeeded(currentUri, prefetchedRecord.policyModel);
+                        } else { // policy has not been yet passed by
+                            if (urlsRead.contains(getBaseUrl(currentUri))) {
+                                // TODO: big problem --> unresolvable policy
+                            } else {
+                                readExternalFile(getBaseUrl(currentUri));
+                            }
+                        }
+                    } // end-if policy already processed
+                } // end-foreach unresolved uris
+            }
+            PolicySourceModelContext modelContext = PolicySourceModelContext.createContext();
+            for (String policyUri : urisNeeded) {
+                PolicySourceModel sourceModel = modelsNeeded.get(policyUri);
+                try {
+                    sourceModel.expand(modelContext);
+                    modelContext.addModel(new URI(policyUri), sourceModel);
+                } catch (URISyntaxException use) {
+                    logger.severe("finished", use.getMessage(), use);
+                }
             }
             // iterating over all services and binding all the policies read before
             for (WSDLService service : model.getServices().values()) {
@@ -1054,7 +821,7 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
             // finally register a wrapper for getting WSDL policy map
             
             EffectivePolicyModifier modifier = EffectivePolicyModifier.createEffectivePolicyModifier();
-            PolicyMapExtender extender = PolicyMapExtender.createPolicyMapExtender();            
+            PolicyMapExtender extender = PolicyMapExtender.createPolicyMapExtender();
             
             WSDLPolicyMapWrapper wrapper = new WSDLPolicyMapWrapper(policyBuilder.getPolicyMap(Arrays.asList(new PolicyMapMutator[] {modifier, extender})), modifier, extender);
             model.addExtension(wrapper);
@@ -1091,7 +858,7 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
      * Reads policy reference URIs from PolicyURIs attribute and returns them as a String array
      * returns null if there is no such attribute
      */
-    String[] getPolicyURIsFromAttr(XMLStreamReader reader) {
+    private String[] getPolicyURIsFromAttr(XMLStreamReader reader) {
         String policyURIs = reader.getAttributeValue(
                 PolicyConstants.POLICY_URIs.getNamespaceURI(),PolicyConstants.POLICY_URIs.getLocalPart());
         if (null!=policyURIs) {
@@ -1104,7 +871,7 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
     /**
      *  skips current element (should be in START_ELEMENT state) and returns its content as String
      */
-    private PolicyRecord skipPolicyElement(XMLStreamReader reader){
+    private PolicyRecord skipPolicyElement(XMLStreamReader reader, String baseUrl){
         if (null==reader) {
             return null;
         }
@@ -1127,8 +894,7 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
                         }
                         StringBuffer xmlnsCode = new StringBuffer();    // take care about namespaces as well
                         Set<String> tmpNsSet = new HashSet<String>();
-                        if (null==curName.getPrefix()
-                        ||"".equals(curName.getPrefix())) {           // no prefix
+                        if ((null == curName.getPrefix()) || ("".equals(curName.getPrefix()))) {           // no prefix
                             elementCode
                                     .append('<')                     // start tag
                                     .append(curName.getLocalPart());
@@ -1164,8 +930,7 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
                             if ("xmlns".equals(reader.getAttributePrefix(i)) && tmpNsSet.contains(reader.getAttributeLocalName(i))) {
                                 continue; // do not append already defined ns
                             }
-                            if (null==reader.getAttributePrefix(i)
-                            ||"".equals(reader.getAttributePrefix(i))) {  // no attribute prefix
+                            if ((null == reader.getAttributePrefix(i)) || ("".equals(reader.getAttributePrefix(i)))) {  // no attribute prefix
                                 attrCode
                                         .append(' ')
                                         .append(reader.getAttributeLocalName(i))
@@ -1232,6 +997,9 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
             } while (XMLStreamConstants.END_DOCUMENT!=reader.getEventType() && depth>0);
             policyRec.policyModel = PolicyModelUnmarshaller.getXmlUnmarshaller().unmarshalModel(
                     new StringReader(elementCode.toString()));
+            if (null != policyRec.policyModel.getPolicyId()) {
+                policyRec.uri = baseUrl + "#" + policyRec.policyModel.getPolicyId();
+            }
         }catch(Exception e){
             logger.log(Level.SEVERE,"definitionsElements","Exception while reading policy expression",e);
             logger.log(Level.SEVERE, "definitionsElements",elementCode.toString());
