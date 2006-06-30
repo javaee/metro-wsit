@@ -3,12 +3,12 @@
  * of the Common Development and Distribution License
  * (the License).  You may not use this file except in
  * compliance with the License.
- * 
+ *
  * You can obtain a copy of the license at
  * https://glassfish.dev.java.net/public/CDDLv1.0.html.
  * See the License for the specific language governing
  * permissions and limitations under the License.
- * 
+ *
  * When distributing Covered Code, include this CDDL
  * Header Notice in each file and include the License file
  * at https://glassfish.dev.java.net/public/CDDLv1.0.html.
@@ -16,7 +16,7 @@
  * with the fields enclosed by brackets [] replaced by
  * you own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * 
+ *
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
@@ -51,7 +51,7 @@ import com.sun.xml.ws.policy.privateutil.PolicyLogger;
  * @author japod
  */
 public class WSDLPolicyMapWrapper implements WSDLExtension {
-    private static final PolicyLogger logger = PolicyLogger.getLogger(PolicyWSDLParserExtension.class);
+    private static final PolicyLogger logger = PolicyLogger.getLogger(WSDLPolicyMapWrapper.class);
     private static final QName NAME = new QName(null, "WSDLPolicyMapWrapper");
     
     private PolicyMap policyMap;
