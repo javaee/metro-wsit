@@ -52,8 +52,8 @@
         interface="fromwsdl.server.AddNumbersPortType"
         implementation="fromwsdl.server.AddNumbersImpl"
         wsdl="WEB-INF/wsdl/AddNumbers.wsdl"
-        service="{http://duke.org}AddNumbersService"
-        port="{http://duke.org}AddNumbersPort"
+        service="{http://example.org}AddNumbersService"
+        port="{http://example.org}AddNumbersPort"
         url-pattern="/addnumbers" />
 
 </endpoints>
