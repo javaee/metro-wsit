@@ -1,0 +1,6 @@
+Mutual X509 Certificate Authentication, Sign Encrypt
+-----------------------------------------------------
+[WSS 1.1]SOAP 1.2 message, Client and server X509 certs are used for client and server auth 
+respectively. Request is signed using K, then encrypted using K, K is ephemeral key protected for 
+Server's Cert. Signature corresponding to K is signed using client cert. Response is signed using K, 
+encrypted using K, encrypted key K is not included in response.

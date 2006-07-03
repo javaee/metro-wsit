@@ -1,0 +1,8 @@
+Mutual X509 Certificate Authentication, Sign Encrypt, Use Derived Keys
+------------------------------------------------------------------------
+[WSS1.1] SOAP 1.2 message, Similar to previous scenario, but instead of using the same encrypted 
+key directly for the primary signature and encryption, use symmetric keys derived from K. That is, 
+Client and Server X509 certs are used for client and server auth respectively. Request is signed 
+using DKT1(K), then encrypted using a DKT2(K), K is ephemeral key protected for Server's Cert. 
+Signature corresponding to DKT1(K) is signed using client cert. Response is signed using DKT3(K), 
+(if needed) encrypted using DKT4(K)

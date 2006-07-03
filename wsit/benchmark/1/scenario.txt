@@ -1,0 +1,7 @@
+Mutual X509 Certificate Authentication, Sign Only
+--------------------------------------------------
+[WSS 1.1]SOAP 1.2 message, X509 certificate for signing, Client and server X509 certs are used for 
+client and server auth respectively. Request is signed using K, K is ephemeral key protected 
+for Server's Cert. Signature corresponding to K is signed using client cert. Response is 
+signed using K, encrypted key is not included in the the response but referenced using 
+EncryptedKeySHA1 reference type from WSS1.1

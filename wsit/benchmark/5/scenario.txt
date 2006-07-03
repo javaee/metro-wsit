@@ -1,0 +1,6 @@
+Username For Certificate, Sign
+------------------------------
+[WSS1.1] SOAP 1.2 message, Same as scenario 4.2, however Body is not encrypted, only UsernameToken. 
+Request is signed using DKT1(K) (symmetric key derived from K, represented using derived key token)
+, K is ephemeral key protected for Server's Cert. UsernameToken is included in the request signed 
+using DKT1(K) and encrypted using DKT2(K). Response is signed using DKT3(K).
