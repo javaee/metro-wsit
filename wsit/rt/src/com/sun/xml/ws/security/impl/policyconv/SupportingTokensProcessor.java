@@ -139,7 +139,7 @@ public class SupportingTokensProcessor {
     protected void createSupportingSignature(Token token) throws PolicyException{
         SignaturePolicy sp = new SignaturePolicy();
         sp.setUUID(pid.generateID());
-        tokenProcessor.addKeyBinding(sp, token);
+        tokenProcessor.addKeyBinding(sp, token,true);
         if(binding.getTokenProtection()){
             protectToken((WSSPolicy) sp.getKeyBinding(), sp);
         }
@@ -179,7 +179,7 @@ public class SupportingTokensProcessor {
         }
     }
     
-    
+        
     protected SignedParts getEmptySignedParts(Iterator itr){
         while(itr.hasNext()){
             Target target = (Target)itr.next();

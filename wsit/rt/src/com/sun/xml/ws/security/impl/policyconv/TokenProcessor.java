@@ -72,7 +72,7 @@ public class TokenProcessor {
         }
     }
     
-    public void addKeyBinding(WSSPolicy policy, Token token) throws PolicyException{
+    public void addKeyBinding(WSSPolicy policy, Token token,boolean ignoreDK) throws PolicyException{
         PolicyAssertion tokenAssertion = (PolicyAssertion)token;
         if(PolicyUtil.isX509Token(tokenAssertion)){
             AuthenticationTokenPolicy.X509CertificateBinding x509CB =new AuthenticationTokenPolicy.X509CertificateBinding();
@@ -81,7 +81,7 @@ public class TokenProcessor {
             setX509TokenRefType(x509CB, (X509Token) token);
             setTokenInclusion(x509CB,(Token) tokenAssertion);
             x509CB.setPolicyToken(token);
-            if(((X509Token)token).isRequireDerivedKeys()){
+            if(!ignoreDK && ((X509Token)token).isRequireDerivedKeys()){
                 DerivedTokenKeyBinding dtKB =  new DerivedTokenKeyBinding();
                 dtKB.setOriginalKeyBinding(x509CB);
                 policy.setKeyBinding(dtKB);

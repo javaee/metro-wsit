@@ -68,7 +68,7 @@ public class AsymmetricBindingProcessor extends BindingProcessor {
         if(st != null){
             primarySP = new SignaturePolicy();
             primarySP.setUUID(pid.generateID());
-            tokenProcessor.addKeyBinding(primarySP,st);
+            tokenProcessor.addKeyBinding(primarySP,st,true);
             SignaturePolicy.FeatureBinding spFB = (com.sun.xml.wss.impl.policy.mls.SignaturePolicy.FeatureBinding)
             primarySP.getFeatureBinding();
             spFB.setCanonicalizationAlgorithm(CanonicalizationMethod.EXCLUSIVE);
@@ -76,7 +76,7 @@ public class AsymmetricBindingProcessor extends BindingProcessor {
         if(et != null){
             primaryEP = new EncryptionPolicy();
             primaryEP.setUUID(pid.generateID());
-            tokenProcessor.addKeyBinding(primaryEP,et);
+            tokenProcessor.addKeyBinding(primaryEP,et,false);
         }
         if(protectionOrder == Binding.SIGN_ENCRYPT){
             container.insert(primarySP);
@@ -124,7 +124,7 @@ public class AsymmetricBindingProcessor extends BindingProcessor {
             sEncPolicy.setUUID(pid.generateID());
             Token token = null;
             token = getEncryptionToken();
-            tokenProcessor.addKeyBinding(sEncPolicy,token);
+            tokenProcessor.addKeyBinding(sEncPolicy,token,false);
             container.insert(sEncPolicy);
         }
         return sEncPolicy;

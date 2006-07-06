@@ -97,7 +97,7 @@ public class TransportBindingProcessor extends BindingProcessor {
             SignaturePolicy.FeatureBinding spFB = (com.sun.xml.wss.impl.policy.mls.SignaturePolicy.FeatureBinding)sp.getFeatureBinding();
             spFB.setCanonicalizationAlgorithm(CanonicalizationMethod.EXCLUSIVE);
             sp.setUUID(pid.generateID());
-            tokenProcessor.addKeyBinding(sp, token);
+            tokenProcessor.addKeyBinding(sp, token,false);
            // container.insert(sp.getKeyBinding());
             WSSPolicy key = (WSSPolicy) sp.getKeyBinding();
             if(tp != null ){
@@ -120,7 +120,7 @@ public class TransportBindingProcessor extends BindingProcessor {
             sp.setUUID(pid.generateID());
             SignaturePolicy.FeatureBinding spFB = (com.sun.xml.wss.impl.policy.mls.SignaturePolicy.FeatureBinding)sp.getFeatureBinding();
             spFB.setCanonicalizationAlgorithm(CanonicalizationMethod.EXCLUSIVE);
-            tokenProcessor.addKeyBinding(sp, token);
+            tokenProcessor.addKeyBinding(sp, token,false);
             WSSPolicy key = (WSSPolicy) sp.getKeyBinding();
             //protect primary signature
             
