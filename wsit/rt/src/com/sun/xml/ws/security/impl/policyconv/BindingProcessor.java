@@ -211,11 +211,11 @@ public abstract class BindingProcessor {
         }
     }
     
-    private EncryptionPolicy getEncryptionPolicy(){
+    private EncryptionPolicy getEncryptionPolicy() throws PolicyException{
         if(getBinding().getProtectionOrder() == Binding.SIGN_ENCRYPT){
             return primaryEP;
         }else{
-            return sEncPolicy;
+            return getSecondaryEncryptionPolicy();
         }
     }
     
