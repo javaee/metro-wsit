@@ -71,6 +71,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
     private static final String BEFORE_SUFFIX = ".before";
     private static final String AFTER_SUFFIX = ".after";
     private static final String TRANSPORT_SUFFIX = ".transport";
+    private static final String ACTION_SUFFIX = ".action";
     private static final String WSS_SUFFIX = ".wss";
     private static final String WSA_SUFFIX = ".wsa";
     private static final String WSMEX_SUFFIX = ".wsmex";
@@ -96,6 +97,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
                 p = context.createTransportPipe();
 
                 p = dump(CLIENT_PREFIX, p);
+                p = dumpAction(CLIENT_PREFIX + ACTION_SUFFIX, context.getWsdlModel(), p);
 
                 p = dump(CLIENT_PREFIX + TRANSPORT_SUFFIX, p);
 
@@ -211,6 +213,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
                 p = dump(SERVER_PREFIX + WSS_SUFFIX + BEFORE_SUFFIX, p);
 
                 p = dump(SERVER_PREFIX + TRANSPORT_SUFFIX, p);
+                p = dumpAction(SERVER_PREFIX + ACTION_SUFFIX, context.getWsdlModel(), p);
 
                 p = dump(SERVER_PREFIX, p);
 
@@ -378,6 +381,14 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
         }
 
         return false;
+    }
+
+    private Pipe dumpAction(String name, WSDLPort wsdlPort, Pipe p) {
+        if (Boolean.getBoolean(name)) {
+            return new ActionDumpPipe(name, wsdlPort, p);
+        }
+
+        return p;
     }
 
     /**
