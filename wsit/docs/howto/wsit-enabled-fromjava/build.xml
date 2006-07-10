@@ -104,6 +104,7 @@
         <apt
             fork="true"
             debug="${debug}"
+        target="1.5"
        	verbose="${verbose}"
        	destdir="${build.classes.home}"
       	sourcedestdir="${build.classes.home}"
