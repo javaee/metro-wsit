@@ -22,7 +22,7 @@
   Copyright 2006 Sun Microsystems Inc. All Rights Reserved
 -->
 <!--
- $Id: build.xml,v 1.1 2006-06-29 20:47:47 arungupta Exp $
+ $Id: build.xml,v 1.2 2006-07-10 17:06:34 arungupta Exp $
 
  Copyright (c) 2005 Sun Microsystems, Inc.
  All rights reserved.
@@ -50,6 +50,7 @@
                debug="true"
                deprecation="${compile.deprecation}"
                optimize="${compile.optimize}"
+               target="1.5"
                source="1.5">
             <classpath refid="etc.compile.classpath"/>
         </javac>
