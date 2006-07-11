@@ -312,6 +312,7 @@ public class SecurityUtil {
 
     public static void initInferredIssuedTokenContext(FilterProcessingContext wssContext, SecurityTokenReference str, Key returnKey) throws XWSSecurityException {
          // make sure this is called only when its is a secret key
+         /*
          IssuedTokenContextImpl ictx = (IssuedTokenContextImpl)wssContext.getTrustCredentialHolder();
          if (ictx == null) {
             if (!(returnKey instanceof javax.crypto.SecretKey)) {
@@ -326,6 +327,19 @@ public class SecurityUtil {
             if (ictx.getProofKey() == null) {
                 throw new RuntimeException("Internal Error when trying to construct IssuedToken context");            }
         }
+        */
+        // new code which fixes issues with Brokered Trust. Fix by Jiandong
+        // need to understand why the i coded the else part above.
+        IssuedTokenContextImpl ictx = (IssuedTokenContextImpl)wssContext.getTrustCredentialHolder();
+        if (ictx == null) {
+            ictx = new IssuedTokenContextImpl();
+        }
+        if (!(returnKey instanceof javax.crypto.SecretKey)) {
+               throw new XWSSecurityException("Internal Error while trying to initialize IssuedToken Context for Issued Token");
+        }
+        ictx.setProofKey(returnKey.getEncoded());
+        ictx.setUnAttachedSecurityTokenReference(str);
+        wssContext.setTrustCredentialHolder(ictx);
     }
 
     public static boolean isEncryptedKey(SOAPElement elem) {
