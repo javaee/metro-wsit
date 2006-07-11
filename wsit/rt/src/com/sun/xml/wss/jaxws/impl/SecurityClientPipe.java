@@ -85,6 +85,7 @@ import javax.xml.ws.WebServiceException;
 
 import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.impl.IssuedTokenContextImpl;
+import com.sun.xml.ws.security.SecurityContextToken;
 
 import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.impl.SecurableSoapMessage;
@@ -194,7 +195,7 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
         
         boolean isSCMessage = isSCMessage(packet);
         
-        if (!isSCMessage){
+        if (!isSCMessage && !isSCCancel(packet)){
             // this is an application message
             // initialize any secure-conversation sessions for this message
             invokeSCPlugin(packet);
@@ -350,9 +351,11 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
             IssuedTokenContext ctx =
                     (IssuedTokenContext)issuedTokenContextMap.get(id);
             
-            ctx = scPlugin.processCancellation(
+            if (ctx.getSecurityToken() instanceof SecurityContextToken){
+                ctx = scPlugin.processCancellation(
                     ctx, pipeConfig.getWSDLModel(), pipeConfig.getBinding(), this, jaxbContext, ctx.getEndpointAddress());
-            issuedTokenContextMap.remove(id);
+                issuedTokenContextMap.remove(id);
+            }
         }
     }
     

@@ -129,7 +129,7 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
         
         // get authenticaed client Subject
         Subject subject = SubjectAccessor.getRequesterSubject();
-        Set<Principal> principals = subject.getPrincipals();
+        //Set<Principal> principals = subject.getPrincipals();
         String tokenType = WSTrustConstants.SAML11_ASEERTION_TOKEN_TYPE;
         if (!isAuthorized(subject, appliesTo, tokenType)){
             throw new WSTrustException("The client is not authorized to be issued the token of type "+ tokenType + " apply to " + appliesTo);
@@ -299,6 +299,10 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
                     break;
                 }
            }       
+       }
+       
+       if (attrs.get(PRINCIPAL) == null){
+           attrs.put(PRINCIPAL, "principal");
        }
        
        // Set up a dumy attribute value
