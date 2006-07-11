@@ -82,18 +82,18 @@ of your own, you will need to do the same thing. The following code
 snippet excludes the conflicting Jar files from the classpath used to
 run the tools and the client application:</p>
 
-<p>&lt;path id="wsit.classpath"&gt;<br>
-       &lt;pathelement location=<br>
-         "${java.home}/../lib/tools.jar"/&gt;<br>
-        &lt;fileset dir="${lib.home}"&gt;<br>
-           &lt;include name="*.jar"/&gt;<br>
-            &lt;exclude name="jaxws-update.jar"/&gt;<br>
-            &lt;exclude name="j2ee*.jar"/&gt;<br>
-            &lt;exclude name="javaee.jar"/&gt;<br>
-            &lt;exclude name="appserv-*.jar"/&gt;<br>
-        &lt;/fileset&gt;<br>
-    &lt;/path&gt;</p>
-
+<pre>
+   &lt;path id="wsit.classpath">
+       &lt;pathelement location="${java.home}/../lib/tools.jar"/>
+       &lt;fileset dir="${lib.home}">
+           &lt;include name="*.jar"/>
+           &lt;exclude name="jaxws-update.jar"/>
+           &lt;exclude name="j2ee*.jar"/>
+           &lt;exclude name="javaee.jar"/>
+           &lt;exclude name="appserv-*.jar"/>
+        &lt;/fileset>
+   &lt;/path>
+</pre>
 
 <!-- ================================================== -->
 <br/>
