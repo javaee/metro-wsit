@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <meta http-equiv="Content-Style-Type" content="text/css">
-<meta name="GENERATOR" content="Adobe FrameMaker 6.0/HTML Export Filter">
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
 <title>WSIT Status Notes</title>
 </head>
 
@@ -47,16 +47,17 @@ Microsoft's WCF product and vice versa.</p>
 <p>Legend:
 
 <ul>
-<li><pre>MS->S : N/M</pre> means testing a  Microsoft consumer using a
+<li><pre>MS-&gt;S : N/M</pre> means testing a  Microsoft consumer using a
 Sun provider where N tests out of M total pass.</li>
-<li><pre>S->MS</pre> means testing a  Sun consumer using a Microsoft
+<li><pre>S-&gt;MS</pre> means testing a  Sun consumer using a Microsoft
 provider.</li> 
-<li><pre>S->S<pre> means testing a  Sun consumer using a Sun
-provider.</li>
+<li><pre>S-&gt;S</pre>
+  <pre> means testing a  Sun consumer using a Sun
+provider.</pre>
+</li>
 <li><pre>non-secure / secure</pre> means tests with or
 without security turned on.
 </ul>
-</p>
 
 
 <!-- ================================================== -->
@@ -83,16 +84,16 @@ snippet excludes the conflicting Jar files from the classpath used to
 run the tools and the client application:</p>
 
 <pre>
-   &lt;path id="wsit.classpath">
-       &lt;pathelement location="${java.home}/../lib/tools.jar"/>
-       &lt;fileset dir="${lib.home}">
-           &lt;include name="*.jar"/>
-           &lt;exclude name="jaxws-update.jar"/>
-           &lt;exclude name="j2ee*.jar"/>
-           &lt;exclude name="javaee.jar"/>
-           &lt;exclude name="appserv-*.jar"/>
-        &lt;/fileset>
-   &lt;/path>
+   &lt;path id=&quot;wsit.classpath&quot;&gt;
+       &lt;pathelement location=&quot;${java.home}/../lib/tools.jar&quot;/&gt;
+       &lt;fileset dir=&quot;${lib.home}&quot;&gt;
+           &lt;include name=&quot;*.jar&quot;/&gt;
+           &lt;exclude name=&quot;jaxws-update.jar&quot;/&gt;
+           &lt;exclude name=&quot;j2ee*.jar&quot;/&gt;
+           &lt;exclude name=&quot;javaee.jar&quot;/&gt;
+           &lt;exclude name=&quot;appserv-*.jar&quot;/&gt;
+        &lt;/fileset&gt;
+   &lt;/path&gt;
 </pre>
 
 <!-- ================================================== -->
@@ -174,9 +175,9 @@ run the tools and the client application:</p>
 <pre>
 non-secure:
 
-  MS->S : 0/1 : (not tested)
-  S->MS : 0/1 : (not tested)
-  S ->S : 0/1 : (not tested)
+  MS-&gt;S : 0/1 : (not tested)
+  S-&gt;MS : 0/1 : (not tested)
+  S -&gt;S : 0/1 : (not tested)
 
 secure:
 
@@ -233,15 +234,15 @@ service deployed.</p>
 <pre>
 non-secure:
 
-  MS->S :  0/15 : (not tested)
-  S->MS : 15/15 :
-  S ->S : 15/15 :
+  MS-&gt;S :  0/15 : (not tested)
+  S-&gt;MS : 15/15 :
+  S -&gt;S : 15/15 :
 
 secure:
 
-  MS->S :  0/15 : (not tested)
-  S->MS :  9/15 :
-  S ->S :  9/15 :
+  MS-&gt;S :  0/15 : (not tested)
+  S-&gt;MS :  9/15 :
+  S -&gt;S :  9/15 :
 </pre>
 
 <h4>What is Not Implemented</h4>
@@ -286,10 +287,10 @@ either of the following cases:</p>
 <pre>
 non-secure:
 
-  MS->S : 808/855 : (staring from WSDL)
-  MS->S : (not tested : staring from Java)
-  S->MS : 834/852
-  S ->S :   0/0   : (not tested)
+  MS-&gt;S : 808/855 : (staring from WSDL)
+  MS-&gt;S : (not tested : staring from Java)
+  S-&gt;MS : 834/852
+  S -&gt;S :   0/0   : (not tested)
 
 secure:
 
@@ -315,15 +316,15 @@ secure:
 <pre>
 non-secure:
 
-  MS->S :  0/2 : (not tested)
-  S->MS :  1/2
-  S ->S :  2/2
+  MS-&gt;S :  0/2 : (not tested)
+  S-&gt;MS :  1/2
+  S -&gt;S :  2/2
 
 secure:
 
-  MS->S :  0/2 : (not tested)
-  S->MS :  1/2
-  S ->S :  2/2
+  MS-&gt;S :  0/2 : (not tested)
+  S-&gt;MS :  1/2
+  S -&gt;S :  2/2
 </pre>
 
 <!-- week of June 26
@@ -367,9 +368,9 @@ be configured.</p>
 <h4>WCF Interoperability</h4>
 
 <pre>
-  MS->S :   0/10 : (starting from WSDL; not tested)
-  S->MS :  10/10 : (starting from WSDL)
-  S ->S :  10/10 : (starting from WSDL)
+  MS-&gt;S :   0/10 : (starting from WSDL; not tested)
+  S-&gt;MS :  10/10 : (starting from WSDL)
+  S -&gt;S :  10/10 : (starting from WSDL)
 </pre>
 
 <p>NOTE: No test scenarios were executed that started from Java.</p>
@@ -598,9 +599,9 @@ with Asymmetric Binding.</p>
 <h4>WCF Interoperability</h4>
 
 <pre>
-  MS->S :  0/3 : (starting from WSDL; not tested)
-  S->MS :  3/3 : (starting from WSDL)
-  S ->S :  3/3 : (starting from WSDL)
+  MS-&gt;S :  0/3 : (starting from WSDL; not tested)
+  S-&gt;MS :  3/3 : (starting from WSDL)
+  S -&gt;S :  3/3 : (starting from WSDL)
 </pre>
 
 <p>NOTE: No test scenarios were executed that started from Java.</p>
@@ -645,9 +646,9 @@ with Asymmetric Binding.</p>
 <h4>WCF Interoperability</h4>
 
 <pre>
-  MS->S :  0/4 : (starting from WSDL; not tested)
-  S->MS :  0/4 : (starting from WSDL; not tested)
-  S ->S :  4/4 : (starting from WSDL)
+  MS-&gt;S :  0/4 : (starting from WSDL; not tested)
+  S-&gt;MS :  0/4 : (starting from WSDL; not tested)
+  S -&gt;S :  4/4 : (starting from WSDL)
 </pre>
 
 <p>NOTE: No test scenarios were executed that started from Java.</p>
@@ -865,26 +866,26 @@ window and set the Source Level to 1.5 in the Project Properties window.</p>
 <pre>
 non-secure:
 
-  MS->S : 42/42
-  S->MS : 42/42
-  S ->S : 42/42
+  MS-&gt;S : No client code available
+  S-&gt;MS : 36/66
+  S -&gt;S : 47/66
 
 secure:
 
-  MS->S : 1/1
-  S->MS : 1/1
-  S ->S : 1/1
+  MS-&gt;S : No client code available
+  S-&gt;MS : Not tested
+  S -&gt;S : Not tested
 </pre>
 
 <h4>What is Not Implemented</h4>
 
-<p>All Web Services Addressing functionality has been implemented.</p>
+<p>Transparent support for WS-Addressing Member Submission Version.</p>
 
-<p>NOTE: Web Services Addressing is always enabled when starting from the Java-W3C version of WS-Addressing.</p>
+<p>Anonymous semantics in WSDL and faults in SOAP messages.</p>
 
 <h4>Known Issues</h4>
 
-<p>No known issues. All functionality works.</p>
+<p>Member Submission needs to be enabled explicitly using this (link TBD).</p>
 
 <!-- ================================================== -->
 <br/>
@@ -897,15 +898,15 @@ secure:
 <pre>
 non-secure:
 
-  MS->S : 1/1
-  S->MS : 1/1
-  S ->S : 1/1
+  MS-&gt;S : 1/1
+  S-&gt;MS : 1/1
+  S -&gt;S : 1/1
 
 secure:
 
-  MS->S : 4/4
-  S->MS : 4/4
-  S ->S : 4/4
+  MS-&gt;S : 4/4
+  S-&gt;MS : 4/4
+  S -&gt;S : 4/4
 </pre>
 
 <h4>What is Not Implemented</h4>
