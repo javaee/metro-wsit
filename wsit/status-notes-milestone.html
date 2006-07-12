@@ -251,8 +251,10 @@ enabled, then MTOM will work.</p>
 <hr>
 <h2><a name="60313"></a>Reliable Messaging Status</h2>
 <h4>WCF Interoperability</h4>
+<!--
 <pre>non-secure:<br><br>  MS-&gt;S :  0/2 : (not tested)<br>  S-&gt;MS :  1/2<br>  S -&gt;S :  2/2<br><br>secure:<br><br>  MS-&gt;S :  0/2 : (not tested)<br>  S-&gt;MS :  1/2<br>  S -&gt;S :  2/2<br></pre>
-<!-- week of June 26
+-->
+
 <pre>
 non-secure:
 
@@ -263,10 +265,10 @@ non-secure:
 secure:
 
   MS->S :  0/2 : (not tested)
-  S->MS :  0/2
+  S->MS :  2/2
   S ->S :  2/2
 </pre>
--->
+
 <p>NOTE: The interoperability tests do not include duplex binding
 tests. </p>
 <h4>What is Not Implemented</h4>
@@ -275,9 +277,11 @@ tests. </p>
   <li>Flow control features not completely implemented.</li>
 </ul>
 <h4>Known Issues</h4>
-<p> The reliable messaging destination reads the OrderedDelivery
-configuration setting incorrectly. Currently, OrderedDelivery cannot
-be configured.</p>
+<p>
+<ul>
+    <li>An RM-enabled endpoint will not work with Security unless Secure Conversations are enabled.</li>
+</ul>
+</p>
 <!-- ================================================== -->
 <br>
 <hr>
