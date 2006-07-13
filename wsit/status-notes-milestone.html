@@ -335,20 +335,36 @@ secure:
 
 <h4>WCF Interoperability</h4>
 <pre>non-secure:
-  MS-&gt;S : 808/855 : (staring from WSDL)
-  MS-&gt;S : (not tested : staring from Java)
-  S-&gt;MS : 834/852
-  S -&gt;S :   0/0   : (not tested)
+
+  S-&gt;MS (Schema and WSDL Interop scenario 1):  840/852 (starting from WSDL)
+  MS-&gt;S (Schema and WSDL Interop scenario 2):  745/855 
+  MS-&gt;S (Schema and WSDL Interop scenario 3):  20% tested (Starting from Java)
+  S-&gt;S  : 837/852 
+
 secure:
-  (not tested)</pre>
+ (not tested) </pre>
 
 <h4>What is Not Implemented</h4>
 
-<p>TBD</p>
+  <ul>
+    <li> Any fixes to resolve defects noted in the section
+    above. </li>
+    <li> JAXB and JAX-WS changes for issue 6419632 noted in the Known
+    Issues below. </li>
+  </ul>
 
 <h4>Known Issues</h4>
-
-<p>TBD</p>
+<ul>
+<li> <a href="http://monaco.sfbay/detail.jsf?cr=6419632">6419632</a>
+     Type substitution doesn't work with JAX-WS. <br>
+     Roundtripping of some XML Schema simple types used as xsi:type
+     may require use of the JAXB customization:
+     <pre>
+         &lt;jaxb:globalBindings mapSimpleTypeDef="true"/> </pre>
+     However, this defect prevents the mapSimpleTypeDef JAXB
+     customization from taking effect and thus some simple XML Schema
+     types when used as xsi:type may not be round tripped.  </li>
+</ul>
 
 <p style="margin-bottom: 0in"><!-- ================================================== -->
 <br>
