@@ -1221,6 +1221,8 @@ this time.</P>
 	<LI><P>Web Service Tester functionality for WSIT enabled Web
 	services is not implemented. 
 	</P>
+        <LI><P>Web Service Client wizard works when service WSDL URL is specified</P
+
 </UL>
 <H4>Known Issues</H4>
 <TABLE BORDER=1 CELLPADDING=2 CELLSPACING=2>
@@ -1231,39 +1233,6 @@ this time.</P>
 		<TH>
 			<P>Status/Workaround</P>
 		</TH>
-	</TR>
-	<TR>
-		<TD>
-			<P>Client-side classpath must not use the jaxws-update.jar</P>
-		</TD>
-		<TD>
-			<P>For the client side classpath, make sure that jaxws-update.jar
-			is NOT be in the classpath. You can do this by spelling out each
-			jar name in the classpath (this is the best way to avoid
-			confusion) or you can include all jars and exclude
-			jaxws-update.jar from the client classpath.</P>
-		</TD>
-	</TR>
-	<TR>
-		<TD>
-			<P>WSIT Security: Alpha input can be saved to numeric Timestamp
-			Freshness Limit.</P>
-		</TD>
-		<TD>
-			<P>EXPECTED BEHAVIOR: Timestamp Freshness Limit in Security -&gt;
-			Advanced Configuration should only accept numerics.</P>
-			<P>ACTUAL BEHAVIOR: Accepts and saves alphas to the WSDL.</P>
-		</TD>
-	</TR>
-	<TR>
-		<TD>
-			<P>WSIT Security: Alpha input can be saved to Maximum Clock.</P>
-		</TD>
-		<TD>
-			<P>EXPECTED BEHAVIOR: Maximum Clock Skew in Security -&gt;
-			Advanced Configuration should only accept numerics.</P>
-			<P>ACTUAL BEHAVIOR: Accepts and saves alphas to the WSDL.</P>
-		</TD>
 	</TR>
 	<TR>
 		<TD>
@@ -1314,41 +1283,10 @@ this time.</P>
 	</TR>
 	<TR>
 		<TD>
-			<P>WSIT Accessibility: ALT + letter access for command buttons is
-			not working correctly.</P>
+			<P>WSIT Security: Supporting Tokens are enabled even if there's No Security selected.</P>
 		</TD>
 		<TD>
-			<P>None of the command buttons in the Tooling plug-in provide for
-			access using ALT + letter.</P>
-		</TD>
-	</TR>
-	<TR>
-		<TD>
-			<P>WSIT General: Attributes are saved to wsit.xml even when user
-			cancels.</P>
-		</TD>
-		<TD>
-			<P>EXPECTED BEHAVIOR: If the user presses Cancel, then none of the
-			currently changed values should be saved to wsit.xml.</P>
-			<P>ACTUAL BEHAVIOR: When attributes are changed in Edit Web
-			Service Attributes window, the wsit.xml shows the attributes as
-			being updated before the OK button is clicked. If the user chooses
-			to Cancel the changes, the changed attributes are still saved to
-			the file.</P>
-		</TD>
-	</TR>
-	<TR>
-		<TD>
-			<P>WSIT: Limit on size of MaxBufferSize and Inactivity Timeout for
-			Reliable Messaging.</P>
-		</TD>
-		<TD>
-			<P>EXPECTED BEHAVIOR: User should not be allowed to enter more
-			than eight (8) digits in either of the text boxes. 
-			</P>
-			<P>ACTUAL BEHAVIOR: User is allowed to enter more than eight
-			digits are entered, however, an error is received on the status
-			line.</P>
+			<P>Do not specify Supporting Tokens before setting the security option.</P>
 		</TD>
 	</TR>
 	<TR>
@@ -1359,7 +1297,7 @@ this time.</P>
 			<P>When creating a Web Service project to use WSIT features, you
 			must select J2EE 1.4 in the New Web Application window and set the
 			Source Level to 1.5 in the Project Properties window.</P>
-			<P>NOTE: With these configuration settings the NteBeans 5.5 does
+			<P>NOTE: With these configuration settings the NetBeans 5.5 does
 			not support JSR 109.</P>
 		</TD>
 	</TR>
