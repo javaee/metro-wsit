@@ -23,59 +23,59 @@ using Microsoft's WCF product and vice versa.</P>
 <P>This document covers the following topics:</P>
 <UL>
 	<LI><P STYLE="margin-bottom: 0in"><A HREF="#52974">Glassfish
-	Classpath Change Requirements</A> 
+	Classpath Change Requirements</A>
 	</P>
 	<LI><P STYLE="margin-bottom: 0in"><A HREF="#67607">Summary of Known
-	Issues</A> 
+	Issues</A>
 	</P>
 	<LI><P STYLE="margin-bottom: 0in"><A HREF="#91780">Metadata Exchange
-	Status</A> 
+	Status</A>
 	</P>
-	<LI><P STYLE="margin-bottom: 0in"><A HREF="#68668">MTOM Status</A> 
+	<LI><P STYLE="margin-bottom: 0in"><A HREF="#68668">MTOM Status</A>
 	</P>
 	<LI><P STYLE="margin-bottom: 0in"><A HREF="#49498">Data Binding
-	Status</A> 
+	Status</A>
 	</P>
 	<LI><P STYLE="margin-bottom: 0in"><A HREF="#60313">Reliable
-	Messaging Status</A> 
+	Messaging Status</A>
 	</P>
 	<LI><P STYLE="margin-bottom: 0in"><A HREF="#35385">Security Status</A>
 		</P>
 	<LI><P STYLE="margin-bottom: 0in"><A HREF="#44691">Secure
-	Conversation Status</A> 
+	Conversation Status</A>
 	</P>
-	<LI><P STYLE="margin-bottom: 0in"><A HREF="#96126">Trust Status</A> 
+	<LI><P STYLE="margin-bottom: 0in"><A HREF="#96126">Trust Status</A>
 	</P>
 	<LI><P STYLE="margin-bottom: 0in"><A HREF="#98261">Coordination/Atomic
-	Transactions Status</A> 
+	Transactions Status</A>
 	</P>
 	<LI><P STYLE="margin-bottom: 0in"><A HREF="#35087">NetBeans WSIT
-	Module Status</A> 
+	Module Status</A>
 	</P>
 	<LI><P STYLE="margin-bottom: 0in"><A HREF="#70368">Web Services
-	Addressing Status</A> 
+	Addressing Status</A>
 	</P>
 	<LI><P STYLE="margin-bottom: 0in"><A HREF="#13158">Policy Status</A>
 		</P>
 	<LI><P STYLE="margin-bottom: 0in"><A HREF="#jax-ws">JAX-WS Status</A></P>
-	<LI><P><A HREF="#55934">Security Policy Status</A> 
+	<LI><P><A HREF="#55934">Security Policy Status</A>
 	</P>
 </UL>
-<P>Legend: 
+<P>Legend:
 </P>
 <UL>
 	<LI><PRE STYLE="margin-bottom: 0.2in">MS-&gt;S : N/M</PRE><P STYLE="margin-bottom: 0in">
 	means testing a Microsoft consumer using a Sun provider where N
-	tests out of M total pass. 
+	tests out of M total pass.
 	</P>
 	<LI><PRE STYLE="margin-bottom: 0.2in">S-&gt;MS</PRE><P STYLE="margin-bottom: 0in">
-	means testing a Sun consumer using a Microsoft provider. 
+	means testing a Sun consumer using a Microsoft provider.
 	</P>
 	<LI><PRE STYLE="margin-bottom: 0.2in">S-&gt;S
  means testing a  Sun consumer using a Sun
 provider.</PRE>
 	<LI><PRE STYLE="margin-bottom: 0.2in">non-secure / secure</PRE><P>
-	means tests with or without security turned on. 
+	means tests with or without security turned on.
 	</P>
 </UL>
 <P STYLE="margin-bottom: 0in"><!-- ================================================== --><BR>
@@ -86,7 +86,7 @@ provider.</PRE>
 Jar files which contain classes that can conflict with the newer
 versions of those classes provided by the WSIT environment. To avoid
 problems, the classpath for both the Glassfish application server and
-the client application must be modified. 
+the client application must be modified.
 </P>
 <P>The WSIT installer (wsit-on-glassfish.xml) will handle making the
 necessary classpath modifications in the Glassfish configuration file
@@ -329,7 +329,7 @@ stream buffer.</P>
 secure:
   MS-&gt;S :  0/15 : (not tested)
   S-&gt;MS :  9/15 :
-  S -&gt;S :  9/15 :</PRE><H4>
+  S -&gt;S : 15/15 :</PRE><H4>
 What is Not Implemented</H4>
 <P>All MTOM functionality has been implemented.</P>
 <H4>Known Issues</H4>
@@ -344,16 +344,12 @@ What is Not Implemented</H4>
 	</TR>
 	<TR>
 		<TD>
-			<P>Using MTOM with SOAP 1.2</P>
+			<P>Using MTOM with WS-Addressing for Sun <-> Microsoft Interoperability</P>
 		</TD>
 		<TD>
-			<P>MTOM with SOAP 1.2 will not work if the SOAP message to be sent
-			has no soap action, that is, it will not work in either of the
-			following cases:</P>
-			<P>- the WSDL has no soap action</P>
-			<P>- WS-Addressing is disabled</P>
-			<P>WORKAROUND: If the WSDL has a SOAP action or WS-Addressing is
-			enabled, then MTOM will work.</P>
+			<P>MTOM with WS-Addressing interoperablity with Microsoft would not work, if the CR version of addressing is used in Sun implementation. To workaround with this:</P>
+			<P>If Sun service is used with Microsoft client; put <a href="http://">ms.jar</a> in the Sun Service classpath.</P>
+			<P>If Microsoft service is used with Sun client; put <a href="http://">ms.jar</a> in the Sun Client classpath </P>
 		</TD>
 	</TR>
 </TABLE>
@@ -394,13 +390,13 @@ NOTE: The interoperability tests do not include duplex binding tests.
 <H4>What is Not Implemented</H4>
 <P>The following feature is not working:</P>
 <UL>
-	<LI><P>Flow control features not completely implemented. 
+	<LI><P>Flow control features not completely implemented.
 	</P>
 </UL>
 <H4>Known Issues</H4>
 <UL>
 	<LI><P>An RM-enabled endpoint will not work with Security unless
-	Secure Conversations are enabled. 
+	Secure Conversations are enabled.
 	</P>
 </UL>
 <P STYLE="margin-bottom: 0in"><!-- ================================================== --><BR>
@@ -417,20 +413,20 @@ NOTE: No test scenarios were executed that started from Java.</P>
 <UL>
 	<LI><P STYLE="margin-bottom: 0in">Multiple secure conversation
 	tokens per message is not implemented. Only one secure conversation
-	token per message is assumed. 
+	token per message is assumed.
 	</P>
 	<LI><P STYLE="margin-bottom: 0in">Session timeout handling for
-	secure conversation sessions and LifeTime handling for IssuedTokens 
+	secure conversation sessions and LifeTime handling for IssuedTokens
 	</P>
 	<LI><P STYLE="margin-bottom: 0in">MaxNonceAge information item
 	specified in NetBeans IDE user interface and configuration files
-	WSDL will not be honored, default values will be used instead. 
+	WSDL will not be honored, default values will be used instead.
 	</P>
 	<LI><P STYLE="margin-bottom: 0in"><FONT COLOR="#000000">Encryption
 	of SubjectConfirmation in cases where the received signature was
 	encrypted is not supported. The workaround is to disable
 	&lt;sp:RequireSignatureConfirmation&gt; from the server policy
-	(whenever there is an interop failure due to this).</FONT> 
+	(whenever there is an interop failure due to this).</FONT>
 	</P>
 	<LI><P STYLE="margin-bottom: 0in">If a binary secret arrives in a
 	SAML assertion, then implementation <FONT COLOR="#000000">does not&nbsp;
@@ -456,16 +452,16 @@ NOTE: No test scenarios were executed that started from Java.</P>
 	Reference Type verification in Policy Verification is not being done
 	in this release of WSIT</FONT></P>
 	<LI><P STYLE="margin-bottom: 0in"><FONT COLOR="#000000">Logging code
-	added for WSIT is incomplete.</FONT> 
+	added for WSIT is incomplete.</FONT>
 	</P>
 	<LI><P STYLE="margin-bottom: 0in"><FONT COLOR="#000000">The sha256
 	signature algorithm is not supported by the underlying JSR 105 RI&nbsp;
 	and therefore all AlgorithmSuite identifiers that imply the sha256
-	signature algorithm are not supported.</FONT> 
+	signature algorithm are not supported.</FONT>
 	</P>
 	<LI><P STYLE="margin-bottom: 0in"><FONT COLOR="#000000">&lt;sp:RequireDerivedKeys&gt;
 	under &lt;sp:AsymmetricBinding&gt;/&lt;sp:InitiatorToken&gt;/&lt;sp:X509Token&gt;
-	is not supported and will result in an Exception.</FONT> 
+	is not supported and will result in an Exception.</FONT>
 	</P>
 	<LI><P STYLE="margin-bottom: 0in"><FONT COLOR="#000000">&lt;sp:RequireDerivedKeys&gt;&nbsp;
 	under&nbsp; &lt;sp:X509Token&gt; appearing inside a Supporting Token
@@ -473,7 +469,7 @@ NOTE: No test scenarios were executed that started from Java.</P>
 	supported and will result in an exception.</FONT></P>
 	<LI><P><FONT COLOR="#000000">The Following WS-SecurityPolicy
 	Features from specification Draft : Jul 2005 Ver 1.1 are unsupported
-	in this release of WSIT</FONT> 
+	in this release of WSIT</FONT>
 	</P>
 </UL>
 <H4>WS Security Policy support by WS Security Implementation :</H4>
@@ -513,7 +509,7 @@ NOTE: No test scenarios were executed that started from Java.</P>
 		</TD>
 		<TD WIDTH=552>
 			<P>Not working even though the implementation is present (refer
-			Known Issues) 
+			Known Issues)
 			</P>
 		</TD>
 	</TR>
@@ -706,7 +702,7 @@ NOTE: No test scenarios were executed that started from Java.</P>
 			<P>&nbsp;The runtime will not be able to sign the supporting token
 			in cases where the Token is not in the Message (such as for
 			includeTokenPolicy=Never/Once). There is a need for some
-			clarification from the specification for this case. 
+			clarification from the specification for this case.
 			</P>
 		</TD>
 	</TR>
@@ -721,7 +717,7 @@ NOTE: No test scenarios were executed that started from Java.</P>
 			<P>The runtime will not be able to sign the supporting token in
 			cases where the Token is not in the Message (such as for
 			includeTokenPolicy=Never/Once).There is a need for some
-			clarification from the specification for this case. 
+			clarification from the specification for this case.
 			</P>
 		</TD>
 	</TR>
@@ -839,7 +835,7 @@ NOTE: No test scenarios were executed that started from Java.</P>
 	</TR>
 	<TR>
 		<TD WIDTH=210>
-			<P>ProtectTokens assertion with AsymmetricBinding 
+			<P>ProtectTokens assertion with AsymmetricBinding
 			</P>
 		</TD>
 		<TD WIDTH=397>
@@ -878,7 +874,7 @@ NOTE: No test scenarios were executed that started from Java.</P>
 			<P>Negative Test fail: No SOAP fault returned: Different Endpoint
 			Policies and Body Encrypted.</P>
                         <P> Issue#21 on IssueTracker </P>
-                        
+
 		</TD>
 		<TD WIDTH=251>
 			<P>Will be supported in a future release.</P>
@@ -887,7 +883,7 @@ NOTE: No test scenarios were executed that started from Java.</P>
 	<TR>
 		<TD WIDTH=210>
 			<P>Returning of SOAP fault : Negative tests with Mismatched client
-			and server policies 
+			and server policies
 			</P>
 		</TD>
 		<TD WIDTH=397>
@@ -906,7 +902,7 @@ NOTE: No test scenarios were executed that started from Java.</P>
 		<TD WIDTH=397>
 			<P>When using SCT security token as Signed Supporting Token,
 			clients throw run-time exceptions.&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp;
-			&nbsp;&nbsp; &nbsp;&nbsp; 
+			&nbsp;&nbsp; &nbsp;&nbsp;
 			</P>
                         <P> Issue#23 on IssueTracker </P>
 		</TD>
@@ -930,7 +926,7 @@ NOTE: No test scenarios were executed that started from Java.</P>
 	</TR>
 	<TR>
 		<TD WIDTH=210>
-			<P>ProtectTokens in SymmetricBinding 
+			<P>ProtectTokens in SymmetricBinding
 			</P>
 		</TD>
 		<TD WIDTH=397>
@@ -1014,7 +1010,7 @@ NOTE: No test scenarios were executed that started from Java.</P>
 	<TR>
 		<TD WIDTH=210>
 			<P>SecurityPolicy: sp:AlgorithmSuite/wsp:Policy/sp:XPathFilter20
-			assertion 
+			assertion
 			</P>
 		</TD>
 		<TD WIDTH=397>
@@ -1055,7 +1051,7 @@ NOTE: No test scenarios were executed that started from Java.</P>
 	</TR>
 	<TR>
 		<TD WIDTH=210>
-			<P>Encryption of SignatureConfirmation 
+			<P>Encryption of SignatureConfirmation
 			</P>
 		</TD>
 		<TD WIDTH=397>
@@ -1111,7 +1107,7 @@ NOTE: No test scenarios were executed that started from Java.</P>
 <P>The following features have not been implemented:</P>
 <UL>
 	<LI><P STYLE="margin-bottom: 0in">Renewing of Security Context</P>
-	<LI><P>Client initiated security context . 
+	<LI><P>Client initiated security context .
 	</P>
 </UL>
 <H4>Known Issues</H4>
@@ -1152,7 +1148,7 @@ NOTE: No test scenarios were executed that started from Java.</P>
 <HR>
 <H2><A NAME="96126"></A>Trust Status</H2>
 <H4>WCF Interoperability</H4>
-<PRE> Client-&gt; STS -&gt;Service   
+<PRE> Client-&gt; STS -&gt;Service
    MS -&gt; *  -&gt; *  :  0/4 : (not tested yet)
    S  -&gt; S  -&gt; S :   4/4 : (starting from WSDL)
    S  -&gt; S  -&gt; MS :  3/4 : (starting from WSDL)
@@ -1162,12 +1158,12 @@ NOTE: No test scenarios were executed that started from Java.</P>
 <H4>What is Not Implemented</H4>
 <P>The following features have not been implemented:</P>
 <UL>
-	<LI><P STYLE="margin-bottom: 0in">Token Validation protocol. 
+	<LI><P STYLE="margin-bottom: 0in">Token Validation protocol.
 	</P>
-	<LI><P STYLE="margin-bottom: 0in">Issusing SAML 2.0 assertion. 
+	<LI><P STYLE="margin-bottom: 0in">Issusing SAML 2.0 assertion.
 	</P>
 	<LI><P STYLE="margin-bottom: 0in">Support for issuring key types
-	other than symmetric key 
+	other than symmetric key
 	</P>
 	<LI><P>Support for claim types attributes</P>
 </UL>
@@ -1186,7 +1182,7 @@ NOTE: No test scenarios were executed that started from Java.</P>
 			<P>Issued token is in encrypted form with ws-security 1.0 used</P>
 		</TD>
 		<TD>
-			<P>An error is thrown on the client side for processing the token 
+			<P>An error is thrown on the client side for processing the token
 			</P>
 		</TD>
 	</TR>
@@ -1225,10 +1221,10 @@ this time.</P>
 <H4>What is Not Implemented</H4>
 <UL>
 	<LI><P STYLE="margin-bottom: 0in">WSIT support for Web Services and
-	Web service clients is implemented in Web projects only. 
+	Web service clients is implemented in Web projects only.
 	</P>
 	<LI><P>Web Service Tester functionality for WSIT enabled Web
-	services is not implemented. 
+	services is not implemented.
 	</P>
         <LI><P>Web Service Client wizard works when service WSDL URL is specified</P
 
@@ -1313,7 +1309,7 @@ this time.</P>
 	<TR>
 		<TD>
 			<P>Support for multiple Web services and clients in a single
-			project. 
+			project.
 			</P>
 		</TD>
 		<TD>
@@ -1366,12 +1362,12 @@ What is Not Implemented</H4>
 <P>The following functionality is not implemented:</P>
 <UL>
 	<LI><P STYLE="margin-bottom: 0in">Client selecting and validating
-	policy alternative at startup. 
+	policy alternative at startup.
 	</P>
 	<LI><P STYLE="margin-bottom: 0in">Support for user-defined policy
-	assertions. 
+	assertions.
 	</P>
-	<LI><P>Support for localization is incomplete 
+	<LI><P>Support for localization is incomplete
 	</P>
 </UL>
 <H4>Known Issues</H4>
@@ -1402,20 +1398,20 @@ What is Not Implemented</H4>
 <P>The following functionality is not implemented:</P>
 <UL>
 	<LI><P STYLE="margin-bottom: 0in">Handler, MustUnderstand processing
-	functionality is not integrated. 
+	functionality is not integrated.
 	</P>
 	<LI><P STYLE="margin-bottom: 0in">WSDL MIME binding and Async
-	response bean functionality is incomplete. 
+	response bean functionality is incomplete.
 	</P>
 	<LI><P>FastInfoset support is not there</P>
 </UL>
 <H4>Known Issues</H4>
 <UL>
 	<LI><P STYLE="margin-bottom: 0in">wsimport is not adding ?wsdl to
-	address when mex request fails. 
+	address when mex request fails.
 	</P>
 	<LI><P STYLE="margin-bottom: 0in">webservice client with unpublished
-	WSDL does not work anymore 
+	WSDL does not work anymore
 	</P>
 	<UL>
 		<LI><P STYLE="margin-bottom: 0in">Unpublished WSDL contains
@@ -1424,7 +1420,7 @@ What is Not Implemented</H4>
 		<LI><P STYLE="margin-bottom: 0in">WORKAROUND: replace
 		REPLACE_WITH_ACTUAL_URL with any http://... address</P>
 	</UL>
-	<LI><P>Unbound namespace prefix added to response message 
+	<LI><P>Unbound namespace prefix added to response message
 	</P>
 </UL>
 <P><BR><BR>
@@ -1438,7 +1434,7 @@ MTOM,WS-Addressing interop tests.</P>
 <H4>What is Not Implemented</H4>
 <P>Following assertions are not yet supported by Security Policy
 implementation.</P>
-<P>XPathFilter 
+<P>XPathFilter
 </P>
 <P>Xpath Targets</P>
 <P>RequiredElements</P>
@@ -1510,7 +1506,7 @@ is present.</P>
 	</TR>
 	<TR>
 		<TD>
-			<P>AsymmetricBinding response message 
+			<P>AsymmetricBinding response message
 			</P>
 		</TD>
 		<TD>
