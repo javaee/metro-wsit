@@ -360,7 +360,12 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
     }
     
     private String getBaseUrl(String policyUri) {
-        return (null == policyUri) ? null : policyUri.substring(0,policyUri.indexOf('#'));
+        if (null == policyUri) {
+            return null;
+        }
+        // TODO: encoded urls (escaped characters) might be a problem ?
+        int fragmentIdx = policyUri.indexOf('#');
+        return (fragmentIdx == -1) ? policyUri : policyUri.substring(0, fragmentIdx);
     }
     
     private boolean processSubelement(WSDLObject element, XMLStreamReader reader, Map<WSDLObject, Collection<PolicyRecordHandler>> map) {
@@ -553,9 +558,9 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
                 reader.next();
             }
         } catch (IOException ioe) {
-            // TODO: not necessary to solve it here, but ...
+            // not necessary to solve it here
         } catch (XMLStreamException xmlse) {
-            // TODO: not necessary to solve it here, but ...
+            // not necessary to solve it here
         }
     }
     
@@ -585,8 +590,8 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
                             } // end-if null != prefetchedRecord.unresolvedURIs
                             addNewPolicyNeeded(currentUri, prefetchedRecord.policyModel);
                         } else { // policy has not been yet passed by
-                            if (urlsRead.contains(getBaseUrl(currentUri))) {
-                                // TODO: big problem --> unresolvable policy
+                            if (urlsRead.contains(getBaseUrl(currentUri))) { // big problem --> unresolvable policy
+                                throw new PolicyException("Can not resolve policy: "+currentUri);
                             } else {
                                 readExternalFile(getBaseUrl(currentUri));
                             }
