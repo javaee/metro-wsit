@@ -56,8 +56,7 @@ provider.</li>
   <li>
     <pre>non-secure / secure</pre>
 means tests with or
-without security turned on.
-  </li>
+without security turned on. </li>
 </ul>
 <!-- ================================================== -->
 <br>
@@ -525,48 +524,15 @@ clients throw run-time exceptions.</p>
 <hr>
 <h2><a name="44691"></a>Secure Conversation Status</h2>
 <h4>WCF Interoperability</h4>
-<pre>  MS-&gt;S :  0/3 : (starting from WSDL; not tested)<br>  S-&gt;MS :  3/3 : (starting from WSDL)<br>  S -&gt;S :  3/3 : (starting from WSDL)<br></pre>
+<pre>  MS-&gt;S :  0/3 : (starting from WSDL; not tested yet)<br>  S-&gt;MS :  2/3 : (starting from WSDL)<br>  S -&gt;S :  3/3 : (starting from WSDL)<br></pre>
 <p>NOTE: No test scenarios were executed that started from Java.</p>
 <h4>What is Not Implemented</h4>
 <p>The following features have not been implemented:</p>
 <ul>
-  <li>Support for bindings other than token-issued and cancellation has
-not been implemented.</li>
-  <li>Support for security related clients is not available yet.</li>
-</ul>
-<h4>Known Issues</h4>
-<table border="1">
-  <tbody>
-    <tr>
-      <th>
-      <p>Interoperability Feature</p>
-      </th>
-      <th>
-      <p>Status</p>
-      </th>
-    </tr>
-    <tr>
-      <td>
-      <p>Bindings supported.</p>
-      </td>
-      <td>
-      <p>Token Issued and Cancellation bindings are supported. However,
-no other bindings are currently supported.</p>
-      </td>
-    </tr>
-  </tbody>
-</table>
-<!-- ================================================== -->
-<br>
-<hr>
-<h2><a name="96126"></a>Trust Status</h2>
-<h4>WCF Interoperability</h4>
-<pre>  MS-&gt;S :  0/4 : (starting from WSDL; not tested)<br>  S-&gt;MS :  0/4 : (starting from WSDL; not tested)<br>  S -&gt;S :  4/4 : (starting from WSDL)<br></pre>
-<p>NOTE: No test scenarios were executed that started from Java.</p>
-<h4>What is Not Implemented</h4>
-<p>The following features have not been implemented:</p>
-<ul>
-  <li>Except for token-issued bindings, no other bindings are supported.</li>
+  <li>Renewing of Security Context<br>
+  </li>
+  <li>Client initiated
+security context .</li>
 </ul>
 <h4>Known Issues</h4>
 <table border="1">
@@ -581,20 +547,87 @@ no other bindings are currently supported.</p>
     </tr>
     <tr>
       <td>
-      <p>Bindings supported.</p>
+      <p>Handling extensible elements in SecurityContextToken.</p>
+      </td>
+      <td>We don't take elements other than the standard ones defined
+for SecurityContextToken. This is being fixed to ensure
+interoperability.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">Client provided entropy for
+generating SecurityContextToken<br>
+      </td>
+      <td style="vertical-align: top;">We rely on security policy to
+determine if client entropy is needed. MS require it by default. This
+breaks interoperbility in certain casees. <br>
+      <br>
+WORKAROUND: We believe this is an issue with MS. To interop with MS for
+now, we have to modified their security policy to include assertion for
+requiring client entropy.<br>
+      <br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<!-- ================================================== --><br>
+<hr>
+<h2><a name="96126"></a>Trust Status</h2>
+<h4>WCF Interoperability</h4>
+<pre> Client-&gt; STS -&gt;Service   <br><br>   MS -&gt; *  -&gt; *  :  0/4 : (not tested yet)<br>   S  -&gt; S  -&gt; S :   4/4 : (starting from WSDL)<br>   S  -&gt; S  -&gt; MS :  3/4 : (starting from WSDL)<br>   S  -&gt; MS -&gt; MS :  2/4 : (starting from WSDL)<br>   S  -&gt; MS -&gt; S :   2/4 : (starting from WSDL)</pre>
+<p>NOTE: No test scenarios were executed that started from Java.</p>
+<h4>What is Not Implemented</h4>
+<p>The following features have not been implemented:</p>
+<ul>
+  <li>Token Validation protocol.</li>
+  <li>Issusing SAML 2.0 assertion.</li>
+  <li>Support for issuring key types other than symmetric key</li>
+  <li>Support for claim types attributes<br>
+  </li>
+</ul>
+<h4>Known Issues</h4>
+<table border="1">
+  <tbody>
+    <tr>
+      <th>
+      <p>Interoperability Feature</p>
+      </th>
+      <th>
+      <p>Status/Workaround</p>
+      </th>
+    </tr>
+    <tr>
+      <td>
+      <p>Issued token is in encrypted form with ws-security 1.0 used<br>
+      </p>
       </td>
       <td>
-      <p>The Token Issued binding is supported. No other bindings
-currently supported.</p>
+      <p>An error is thrown on the client side for processing the token
+      <br>
+      </p>
       </td>
     </tr>
     <tr>
       <td>
-      <p>com.sun.xml.wss.XWSSecurityException.</p>
+      <p>Issued token in encrypted formis used to establish a
+SecurityContextToken<br>
+      </p>
       </td>
       <td>
-      <p>com.sun.xml.wss.XWSSecurityException: No elements exist with
-Id/WsuId:.</p>
+      <p>An error is thrown on the service side for the RST/SCT request.<br>
+      </p>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">client configuration for the
+service and the STS (maybe mutiple)<br>
+      </td>
+      <td style="vertical-align: top;">Need support of client config
+files for mutiple services in Tango.<br>
+      <br>
+Workaround: We are using a mixing of wsit-client.xml and system
+properties to cinfigure security and STS information for different
+services and STS's.<br>
       </td>
     </tr>
   </tbody>
