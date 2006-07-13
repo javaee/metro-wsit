@@ -5,7 +5,7 @@
 	<TITLE>WSIT Status Notes</TITLE>
 	<META NAME="GENERATOR" CONTENT="StarOffice 8  (Solaris Sparc)">
 	<META NAME="CREATED" CONTENT="20060713;8550900">
-	<META NAME="CHANGED" CONTENT="20060713;9231400">
+	<META NAME="CHANGED" CONTENT="20060713;12054900">
 	<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
 </HEAD>
 <BODY LANG="en-US" BGCOLOR="#ffffff" DIR="LTR">
@@ -378,8 +378,7 @@ What is Not Implemented</H4>
 <HR>
 <H2><A NAME="60313"></A>Reliable Messaging Status</H2>
 <H4>WCF Interoperability</H4>
-<PRE><!-- <pre>non-secure:<br><br>  MS-&gt;S :  0/2 : (not tested)<br>  S-&gt;MS :  1/2<br>  S -&gt;S :  2/2<br><br>secure:<br><br>  MS-&gt;S :  0/2 : (not tested)<br>  S-&gt;MS :  1/2<br>  S -&gt;S :  2/2<br></pre>
--->non-secure:
+<PRE>non-secure:
 
   MS-&gt;S :  2/2
   S-&gt;MS :  2/2
@@ -414,266 +413,682 @@ NOTE: The interoperability tests do not include duplex binding tests.
   S -&gt;S :  10/10 : (starting from WSDL)</PRE><P>
 NOTE: No test scenarios were executed that started from Java.</P>
 <H4>What is Not Implemented</H4>
-<P>The following features have been implemented but are not working
-correctly:</P>
+<P>The following features have&nbsp; not been implemented:</P>
 <UL>
 	<LI><P STYLE="margin-bottom: 0in">Multiple secure conversation
 	tokens per message is not implemented. Only one secure conversation
 	token per message is assumed. 
 	</P>
 	<LI><P STYLE="margin-bottom: 0in">Session timeout handling for
-	secure conversation sessions and LifeTime handling for IssuedTokens.
-		</P>
+	secure conversation sessions and LifeTime handling for IssuedTokens 
+	</P>
 	<LI><P STYLE="margin-bottom: 0in">MaxNonceAge information item
 	specified in NetBeans IDE user interface and configuration files
 	WSDL will not be honored, default values will be used instead. 
 	</P>
-	<LI><P STYLE="margin-bottom: 0in">&lt;sp:SAMLToken&gt; scenarios
-	untested. SAML was only tested on the WS-Trust integration path. 
+	<LI><P STYLE="margin-bottom: 0in"><FONT COLOR="#000000">Encryption
+	of SubjectConfirmation in cases where the received signature was
+	encrypted is not supported. The workaround is to disable
+	&lt;sp:RequireSignatureConfirmation&gt; from the server policy
+	(whenever there is an interop failure due to this).</FONT> 
 	</P>
 	<LI><P STYLE="margin-bottom: 0in">If a binary secret arrives in a
-	SAML assertion, then ensure SSL is used 
+	SAML assertion, then implementation <FONT COLOR="#000000">does not&nbsp;
+	ensure that&nbsp; SSL was used for the Incoming Message.</FONT></P>
+	<LI><P STYLE="margin-bottom: 0in"><FONT COLOR="#000000">Policy
+	Verification is not done in the case of Encrypted Body scenarios. </FONT>
 	</P>
-	<LI><P STYLE="margin-bottom: 0in">Policy Verification is not done in
-	the case of Encrypted Body scenarios. 
+	<LI><P STYLE="margin-bottom: 0in"><FONT COLOR="#000000">Policy
+	Verification for WS-Trust Protocol Messages is not done. There is a
+	specification issue here since Issued Tokens can be Encrypted even
+	though there is no explicit policy in the Service WSDL indicating
+	the same.</FONT></P>
+	<LI><P STYLE="margin-bottom: 0in"><FONT COLOR="#000000">Backward
+	Compatibility with XWSS 2.0 FCS has not been ensured in this release
+	of WSIT</FONT></P>
+	<LI><P STYLE="margin-bottom: 0in"><FONT COLOR="#000000">Implied
+	DerivedKeys specified by a @wsc:nonce attribute on
+	SecureTokenRequest is not supported in this release</FONT></P>
+	<LI><P STYLE="margin-bottom: 0in"><FONT COLOR="#000000">The
+	@wsc:Instance attribute on wsse:Reference for referencing specific
+	Secure Context Token instances is not supported in this release</FONT></P>
+	<LI><P STYLE="margin-bottom: 0in"><FONT COLOR="#000000">WS-Security
+	Reference Type verification in Policy Verification is not being done
+	in this release of WSIT</FONT></P>
+	<LI><P STYLE="margin-bottom: 0in"><FONT COLOR="#000000">Logging code
+	added for WSIT is incomplete.</FONT> 
 	</P>
-	<LI><P STYLE="margin-bottom: 0in">Policy Verification for WS-Trust
-	Protocol Messages. 
+	<LI><P STYLE="margin-bottom: 0in"><FONT COLOR="#000000">The sha256
+	signature algorithm is not supported by the underlying JSR 105 RI&nbsp;
+	and therefore all AlgorithmSuite identifiers that imply the sha256
+	signature algorithm are not supported.</FONT> 
 	</P>
-	<LI><P STYLE="margin-bottom: 0in">Backward Compatibility with XWSS
-	2.0 FCS. 
+	<LI><P STYLE="margin-bottom: 0in"><FONT COLOR="#000000">&lt;sp:RequireDerivedKeys&gt;
+	under &lt;sp:AsymmetricBinding&gt;/&lt;sp:InitiatorToken&gt;/&lt;sp:X509Token&gt;
+	is not supported and will result in an Exception.</FONT> 
 	</P>
-	<LI><P STYLE="margin-bottom: 0in">Implied DerivedKeys specified by a
-	@wsc:nonce attribute on SecureTokenRequest 
-	</P>
-	<LI><P STYLE="margin-bottom: 0in">The @wsc:Instance attribute on
-	wsse:Reference for referencing specific Secure Context Token
-	instances. 
-	</P>
-	<LI><P STYLE="margin-bottom: 0in">Reference Type verification in
-	Policy Verification. 
-	</P>
-	<LI><P STYLE="margin-bottom: 0in">Logging code added for WSIT is
-	incomplete. 
-	</P>
-	<LI><P STYLE="margin-bottom: 0in">The sha256 signature algorithm is
-	not supported and therefore all AlgorithmSuite identifiers that
-	imply the sha256 signature algorithm are not supported. 
-	</P>
-	<LI><P>Some of the JAX-WS with WSIT extensions that works without
-	extensions is not enabled. For example, Handlers and MustUnderstand
-	Processing are not enabled in the WSIT extensions bundle because a
-	different PipelineAssembler is used. 
+	<LI><P STYLE="margin-bottom: 0in"><FONT COLOR="#000000">&lt;sp:RequireDerivedKeys&gt;&nbsp;
+	under&nbsp; &lt;sp:X509Token&gt; appearing inside a Supporting Token
+	Assertion (such as &lt;sp:EndorsingSupportingToken&gt;) is also not
+	supported and will result in an exception.</FONT></P>
+	<LI><P><FONT COLOR="#000000">The Following WS-SecurityPolicy
+	Features from specification Draft : Jul 2005 Ver 1.1 are unsupported
+	in this release of WSIT</FONT> 
 	</P>
 </UL>
-<H4>Known Issues</H4>
-<TABLE BORDER=1 CELLPADDING=2 CELLSPACING=2>
+<H4>WS Security Policy support by WS Security Implementation :</H4>
+<TABLE WIDTH=884 BORDER=1 CELLPADDING=2 CELLSPACING=3>
+	<COL WIDTH=92>
+	<COL WIDTH=214>
+	<COL WIDTH=552>
 	<TR>
-		<TH>
+		<TD WIDTH=92>
+			<P>WS-SecurityPolicy<BR>Specification<BR>Section</P>
+		</TD>
+		<TD WIDTH=214>
+			<P>Assertion</P>
+		</TD>
+		<TD WIDTH=552>
+			<P>Remark</P>
+		</TD>
+	</TR>
+	<TR>
+		<TD WIDTH=92>
+			<P>5.1.2</P>
+		</TD>
+		<TD WIDTH=214>
+			<P>SignedElements</P>
+		</TD>
+		<TD WIDTH=552>
+			<P>Not working even though the implementation is present (refer
+			Known Issues)</P>
+		</TD>
+	</TR>
+	<TR>
+		<TD WIDTH=92>
+			<P>5.2.2</P>
+		</TD>
+		<TD WIDTH=214>
+			<P>EncryptedElements</P>
+		</TD>
+		<TD WIDTH=552>
+			<P>Not working even though the implementation is present (refer
+			Known Issues) 
+			</P>
+		</TD>
+	</TR>
+	<TR>
+		<TD WIDTH=92>
+			<P>5.3.1</P>
+		</TD>
+		<TD WIDTH=214>
+			<P>RequiredElements</P>
+		</TD>
+		<TD WIDTH=552>
+			<P>Will be supported in a future release</P>
+		</TD>
+	</TR>
+	<TR>
+		<TD WIDTH=92>
+			<P>6.1.1</P>
+		</TD>
+		<TD WIDTH=214>
+			<P>TokenInclusion</P>
+		</TD>
+		<TD WIDTH=552>
+			<P>Only includeTokenPolicy=Once&nbsp; is not supported,&nbsp;
+			Always, AlwaysToRecipient and Never are supported</P>
+		</TD>
+	</TR>
+	<TR>
+		<TD WIDTH=92>
+			<P>6.3.1</P>
+		</TD>
+		<TD WIDTH=214>
+			<P>UsernameToken</P>
+		</TD>
+		<TD WIDTH=552>
+			<P>Only &lt;sp:UsernameToken10&gt;&nbsp; is supported in this
+			release, &lt;sp:UsernameToken11&gt;&nbsp; and Password Derived
+			Keys will be supported in a future release</P>
+		</TD>
+	</TR>
+	<TR>
+		<TD WIDTH=92>
+			<P>6.3.3</P>
+		</TD>
+		<TD WIDTH=214>
+			<P>X509Token</P>
+		</TD>
+		<TD WIDTH=552>
+			<P>Only &lt;sp:WssX509V3Token10&gt; is supported in this release.
+			<BR><BR>The rest&nbsp; (&lt;sp:WssX509V3Token11&gt;,
+			&lt;sp:WssX509Pkcs7Token10&gt;,
+			&lt;sp:WssX509Pkcs7Token11&gt;,&lt;sp:WssX509PkiPathV1Token10&gt;,
+			&lt;sp:WssX509PkiPathV1Token11&gt;, &lt;sp:WssX509V1Token10&gt;,
+			&lt;sp:WssX509V1Token11&gt;) will be supported in a future release
+			based on real-world usecases and customer preferences.</P>
+		</TD>
+	</TR>
+	<TR>
+		<TD WIDTH=92>
+			<P>6.3.4</P>
+		</TD>
+		<TD WIDTH=214>
+			<P>KerberosToken</P>
+		</TD>
+		<TD WIDTH=552>
+			<P>Will be supported in a future release</P>
+		</TD>
+	</TR>
+	<TR>
+		<TD WIDTH=92>
+			<P>6.3.8</P>
+		</TD>
+		<TD WIDTH=214>
+			<P>Samltoken</P>
+		</TD>
+		<TD WIDTH=552>
+			<P>Only&nbsp; &lt;sp:WssSamlV10Token10&gt;,&nbsp; and
+			&lt;sp:WssSamlV11Token10&gt; are supported in this release <BR><BR>&nbsp;The
+			rest (&lt;sp:WssSamlV10Token11&gt;, &lt;sp:WssSamlV11Token11&gt;,
+			&lt;sp:WssSamlV20Token11&gt; ) will be supported in a future
+			release.</P>
+		</TD>
+	</TR>
+	<TR>
+		<TD WIDTH=92>
+			<P>6.3.9</P>
+		</TD>
+		<TD WIDTH=214>
+			<P>RelToken</P>
+		</TD>
+		<TD WIDTH=552>
+			<P>No Plan for supporting this token.</P>
+		</TD>
+	</TR>
+	<TR>
+		<TD WIDTH=92>
+			<P>6.3.6</P>
+		</TD>
+		<TD WIDTH=214>
+			<P>SecurityContextToken</P>
+		</TD>
+		<TD WIDTH=552>
+			<P>No Plan for supporting this token</P>
+		</TD>
+	</TR>
+	<TR>
+		<TD WIDTH=92>
+			<P>6.3.5</P>
+		</TD>
+		<TD WIDTH=214>
+			<P>SpnegoContextToken</P>
+		</TD>
+		<TD WIDTH=552>
+			<P>Will be supported in a future release</P>
+		</TD>
+	</TR>
+	<TR>
+		<TD WIDTH=92>
+			<P>7.1/8.1</P>
+		</TD>
+		<TD WIDTH=214>
+			<P>AlgorithmSuite</P>
+		</TD>
+		<TD WIDTH=552>
+			<P>All algorithms are supported&nbsp; <FONT COLOR="#000000">with
+			the exception of&nbsp; algorithms under&nbsp; Asymmetric KeyWrap,
+			and Sha256.</FONT></P>
+		</TD>
+	</TR>
+	<TR>
+		<TD WIDTH=92>
+			<P>7.5</P>
+		</TD>
+		<TD WIDTH=214>
+			<P>Token Protection</P>
+		</TD>
+		<TD WIDTH=552>
+			<P>Token Protection in cases where includeTokenPolicy=&quot;Never&quot;
+			or in cases where the Token is not in the Message, is not handled
+			. There is a need for some clarification from the specification
+			for this case.&nbsp; In all other cases Token Protection is
+			supported.</P>
+		</TD>
+	</TR>
+	<TR>
+		<TD WIDTH=92>
+			<P>7.6</P>
+		</TD>
+		<TD WIDTH=214>
+			<P>Entire Header and Body Signature</P>
+		</TD>
+		<TD WIDTH=552>
+			<P>boolean value FALSE for this Assertion is not Supported in this
+			release.</P>
+		</TD>
+	</TR>
+	<TR>
+		<TD WIDTH=92>
+			<P>7.7 /8.2</P>
+		</TD>
+		<TD WIDTH=214>
+			<P>Security Header Layout</P>
+		</TD>
+		<TD WIDTH=552>
+			<P><FONT COLOR="#000000">LaxTimestampLast&nbsp; option is not
+			supported in this release and will be supported in a future
+			release. The rest are supported in this release.</FONT></P>
+		</TD>
+	</TR>
+	<TR>
+		<TD WIDTH=92>
+			<P>8.3</P>
+		</TD>
+		<TD WIDTH=214>
+			<P>TransportBinding</P>
+		</TD>
+		<TD WIDTH=552>
+			<P>Is Supported in principle, but no policy verification is
+			performed on the Server side to ensure that SSL was indeed used at
+			the Transport Layer. This check will be added in a future release.</P>
+		</TD>
+	</TR>
+	<TR>
+		<TD WIDTH=92>
+			<P>9.2</P>
+		</TD>
+		<TD WIDTH=214>
+			<P>SignedSupportingTokens</P>
+		</TD>
+		<TD WIDTH=552>
+			<P>&nbsp;The runtime will not be able to sign the supporting token
+			in cases where the Token is not in the Message (such as for
+			includeTokenPolicy=Never/Once). There is a need for some
+			clarification from the specification for this case. 
+			</P>
+		</TD>
+	</TR>
+	<TR>
+		<TD WIDTH=92>
+			<P>9.4</P>
+		</TD>
+		<TD WIDTH=214>
+			<P>SignedEndorsingSupportingTokens</P>
+		</TD>
+		<TD WIDTH=552>
+			<P>The runtime will not be able to sign the supporting token in
+			cases where the Token is not in the Message (such as for
+			includeTokenPolicy=Never/Once).There is a need for some
+			clarification from the specification for this case. 
+			</P>
+		</TD>
+	</TR>
+	<TR>
+		<TD WIDTH=92>
+			<P>10.1</P>
+		</TD>
+		<TD WIDTH=214>
+			<P>WSS10 Assertion</P>
+		</TD>
+		<TD WIDTH=552>
+			<P><FONT COLOR="#000000">Everything is supported with the
+			Exception of&nbsp; &lt;sp:MustSupportRefEmbeddedToken&gt;. </FONT>
+			</P>
+		</TD>
+	</TR>
+	<TR>
+		<TD WIDTH=92>
+			<P>10.2</P>
+		</TD>
+		<TD WIDTH=214>
+			<P>WSS11 Assertion</P>
+		</TD>
+		<TD WIDTH=552>
+			<P><FONT COLOR="#000000">Everything is supported with the
+			Exception of&nbsp; &lt;sp:MustSupportRefEmbeddedToken&gt;. </FONT>
+			</P>
+		</TD>
+	</TR>
+	<TR>
+		<TD WIDTH=92>
+			<P>11.1</P>
+		</TD>
+		<TD WIDTH=214>
+			<P>Trust10 Assertion</P>
+		</TD>
+		<TD WIDTH=552>
+			<P>MustSupportClientChallenge, MustSupportServerChallenge are not
+			supported in this release.</P>
+		</TD>
+	</TR>
+</TABLE>
+<P STYLE="margin-bottom: 0in"><BR>
+</P>
+<H4>Known Issues</H4>
+<TABLE WIDTH=884 BORDER=1 CELLPADDING=2 CELLSPACING=3>
+	<COL WIDTH=210>
+	<COL WIDTH=397>
+	<COL WIDTH=251>
+	<TR>
+		<TH WIDTH=210>
 			<P>Interoperability Feature</P>
 		</TH>
-		<TH>
+		<TH WIDTH=397>
 			<P>Status</P>
 		</TH>
-	</TR>
-	<TR>
-		<TD>
-			<P>Multiple secure conversation tokens per message.</P>
-		</TD>
-		<TD>
-			<P>Only one secure conversation token per message is supported at
-			this time.</P>
+		<TD WIDTH=251>
+			<P><B>Remark</B></P>
 		</TD>
 	</TR>
 	<TR>
-		<TD>
-			<P>Session timeout handling for secure conversation sessions and
-			LifeTime handling for IssuedTokens.</P>
-		</TD>
-		<TD>
-			<P>?????</P>
-		</TD>
-	</TR>
-	<TR>
-		<TD>
-			<P>Specification of MaxNonceAge parameter in NetBeans GUI and
-			configuration files. 
+		<TD WIDTH=210>
+			<P><FONT COLOR="#000000">SignedParts and EncryptedParts Policy
+			Verification. </FONT>
 			</P>
 		</TD>
-		<TD>
-			<P>This is not supported at this time. Default values will be used
-			instead.</P>
-		</TD>
-	</TR>
-	<TR>
-		<TD>
-			<P>&lt;sp:SAMLToken&gt; scenarios untested. 
+		<TD WIDTH=397>
+			<P><FONT COLOR="#000000">Currently disabled due to insufficient
+			testing. </FONT>
 			</P>
 		</TD>
-		<TD>
-			<P>SAML only tested on the WS-Trust Integration Path.</P>
-		</TD>
-	</TR>
-	<TR>
-		<TD>
-			<P>If a binary secret arrives in a SAML assertion, then ensure
-			that SSL is used</P>
-		</TD>
-		<TD>
-			<P>?????</P>
-		</TD>
-	</TR>
-	<TR>
-		<TD>
-			<P>SignedParts and EncryptedParts Policy Verification. 
-			</P>
-		</TD>
-		<TD>
-			<P>Currently disabled due to insufficient testing. 
+		<TD WIDTH=251>
+			<P><BR>
 			</P>
 		</TD>
 	</TR>
 	<TR>
-		<TD>
-			<P>Policy Verification for WS-Trust Protocol Messages. 
+		<TD WIDTH=210>
+			<P>LaxTimestampLast assertion</P>
+		</TD>
+		<TD WIDTH=397>
+			<P>LaxTimestampLast assertion not supported</P>
+		</TD>
+		<TD WIDTH=251>
+			<P><FONT COLOR="#000000">Will be supported in a future release</FONT></P>
+		</TD>
+	</TR>
+	<TR>
+		<TD WIDTH=210>
+			<P><FONT COLOR="#000000">LaxTimestampFirst assertion </FONT>
 			</P>
 		</TD>
-		<TD>
-			<P>This is specification issue.</P>
+		<TD WIDTH=397>
+			<P>LaxTimestampFirst assertion not supported</P>
+		</TD>
+		<TD WIDTH=251>
+			<P><FONT COLOR="#000000">Feature implemented, but Fails due to a
+			bug in the runtime</FONT></P>
 		</TD>
 	</TR>
 	<TR>
-		<TD>
-			<P>Backward Compatibility with XWSS 2.0 FCS 
-			</P>
+		<TD WIDTH=210>
+			<P><FONT COLOR="#000000">includeToken Policy ONCE</FONT></P>
 		</TD>
-		<TD>
-			<P>Not supported at this time. To be supported in the FCS release.</P>
+		<TD WIDTH=397>
+			<P><FONT COLOR="#000000">WSSecurityPolicy:TokenInclusion:
+			includeToken Policy ONCE is not Supported</FONT></P>
 		</TD>
-	</TR>
-	<TR>
-		<TD>
-			<P>Implied DerivedKeys 
-			</P>
-		</TD>
-		<TD>
-			<P>Specified by a @wsc:nonce attribute on the SecureTokenRequest
-			(STR).</P>
+		<TD WIDTH=251>
+			<P><FONT COLOR="#000000">Will be supported in a future release</FONT></P>
 		</TD>
 	</TR>
 	<TR>
-		<TD>
-			<P>The @wsc:Instance attribute on wsse:Reference for referencing
-			specific secure conversation token instances.</P>
-		</TD>
-		<TD>
-			<P>?????</P>
-		</TD>
-	</TR>
-	<TR>
-		<TD>
-			<P>WSSecurityPolicy:TokenInclusion:</P>
-		</TD>
-		<TD>
-			<P>WSSecurityPolicy:TokenInclusion: Only (Always) value for this
-			property is used.</P>
-		</TD>
-	</TR>
-	<TR>
-		<TD>
-			<P>LaxTimestampFirst and LaxTimestampLast assertions</P>
-		</TD>
-		<TD>
-			<P>Not supported</P>
-		</TD>
-	</TR>
-	<TR>
-		<TD>
-			<P>SignedEndorsingSupportingTokens assertion</P>
-		</TD>
-		<TD>
-			<P>SignedEndorsingSupportingTokens assertion causes:
-			XWSSecurityException:java.lang.NullPointerException.</P>
-		</TD>
-	</TR>
-	<TR>
-		<TD>
-			<P>java.lang.IllegalStateException</P>
-		</TD>
-		<TD>
-			<P>java.lang.IllegalStateException: The current event is not
-			START_ELEMENT but 2.</P>
-		</TD>
-	</TR>
-	<TR>
-		<TD>
+		<TD WIDTH=210>
 			<P>ProtectTokens assertion with AsymmetricBinding 
 			</P>
 		</TD>
-		<TD>
+		<TD WIDTH=397>
 			<P>ProtectTokens assertion with AsymmetricBinding in service WSDL
 			causes java.lang.NullPointerException.</P>
 		</TD>
+		<TD WIDTH=251>
+			<P><FONT COLOR="#009900"><FONT COLOR="#000000">Feature
+			implemented, but Fails due to a bug in the runtime. </FONT><BR><BR><FONT COLOR="#000000">Also
+			need clarification from WS-SecurityPolicy specification on how
+			protect different types of tokens which are not part of the
+			Message.</FONT></FONT></P>
+		</TD>
 	</TR>
 	<TR>
-		<TD>
+		<TD WIDTH=210>
 			<P>Reference Type verification in PolicyVerification.</P>
 		</TD>
-		<TD>
+		<TD WIDTH=397>
 			<P>This feature is currently disabled due to problems with the
 			interpretation of IncludeTokenPolicy in conjunction with
 			Asymmetric Binding.</P>
 		</TD>
-	</TR>
-	<TR>
-		<TD>
-			<P>Logging 
+		<TD WIDTH=251>
+			<P><BR>
 			</P>
-		</TD>
-		<TD>
-			<P>Logging is incomplete in the newly added code for WSIT.</P>
 		</TD>
 	</TR>
 	<TR>
-		<TD>
-			<P>EncryptedParts has sp:Body, sp: Header 
-			</P>
+		<TD WIDTH=210>
+			<P>Returning of SOAP fault : Negative tests with Mismatched client
+			and server policies</P>
 		</TD>
-		<TD>
-			<P>EncryptedParts has sp:Body, sp: Header with @Namespace only;
-			causes Encryption of SOAP Body not allowed.</P>
-		</TD>
-	</TR>
-	<TR>
-		<TD>
-			<P>Returning of SOAP fault 
-			</P>
-		</TD>
-		<TD>
+		<TD WIDTH=397>
 			<P>Negative Test fail: No SOAP fault returned: Different Endpoint
 			Policies and Body Encrypted.</P>
 		</TD>
+		<TD WIDTH=251>
+			<P>Will be supported in a future release.</P>
+		</TD>
 	</TR>
 	<TR>
-		<TD>
-			<P>Returning of SOAP fault 
+		<TD WIDTH=210>
+			<P>Returning of SOAP fault : Negative tests with Mismatched client
+			and server policies 
 			</P>
 		</TD>
-		<TD>
+		<TD WIDTH=397>
 			<P>SOAP Fault not returned: Different Algorithm suites used by
 			Service Consumer/Provider.</P>
 		</TD>
+		<TD WIDTH=251>
+			<P>Will be supported in a future release.</P>
+		</TD>
 	</TR>
 	<TR>
-		<TD>
+		<TD WIDTH=210>
 			<P>Using SCT security token as Signed Supporting Token,</P>
 		</TD>
-		<TD>
+		<TD WIDTH=397>
 			<P>When using SCT security token as Signed Supporting Token,
-			clients throw run-time exceptions.</P>
+			clients throw run-time exceptions.&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp;
+			&nbsp;&nbsp; &nbsp;&nbsp; 
+			</P>
+		</TD>
+		<TD WIDTH=251>
+			<P><FONT COLOR="#000000">Feature implemented, but Fails due to a
+			bug in the runtime.</FONT></P>
+		</TD>
+	</TR>
+	<TR>
+		<TD WIDTH=210>
+			<P>SignedElements and EncryptedElements</P>
+		</TD>
+		<TD WIDTH=397>
+			<P>sp:EncryptedElements/sp:XPath fails to encrypt the element
+			specified in the XPath element</P>
+		</TD>
+		<TD WIDTH=251>
+			<P><FONT COLOR="#000000">Feature implemented, but Fails due to a
+			bug in the runtime.</FONT></P>
+		</TD>
+	</TR>
+	<TR>
+		<TD WIDTH=210>
+			<P>ProtectTokens in SymmetricBinding 
+			</P>
+		</TD>
+		<TD WIDTH=397>
+			<P>ProtectTokens in SymmetricBinding : Token used to generate
+			Signature not covered by the Signature</P>
+		</TD>
+		<TD WIDTH=251>
+			<P>Fails due to a bug in runtime. A complete fix for the bug would
+			also require some clarification from the WS-SecurityPolicy
+			specification, since it is not clear how to protect different
+			token types in an interoperable manner when the token itself is
+			not present in the Message.</P>
+		</TD>
+	</TR>
+	<TR>
+		<TD WIDTH=210>
+			<P>EncryptedParts in SupportingTokens</P>
+		</TD>
+		<TD WIDTH=397>
+			<P>EncryptedParts in SupportingTokens assertion in message policy
+			does not work</P>
+		</TD>
+		<TD WIDTH=251>
+			<P>Need a clarification from the WS-SecurityPolicy Specification
+			as to whether Encrypted Parts inside SupportingTokens makes sense.</P>
+		</TD>
+	</TR>
+	<TR>
+		<TD WIDTH=210>
+			<P>&lt;sp:SAMLToken&gt; scenarios untested.</P>
+		</TD>
+		<TD WIDTH=397>
+			<P>SAML only tested on the WS-Trust Integration Path.</P>
+		</TD>
+		<TD WIDTH=251>
+			<P>Scenarios where an &lt;sp:SAMLToken&gt; is used directly under&nbsp;
+			SymmetricBinding or Supporting Token are not tested.</P>
+		</TD>
+	</TR>
+	<TR>
+		<TD WIDTH=210>
+			<P>IssuedToken Policy under EndorsingSupportingTokens</P>
+		</TD>
+		<TD WIDTH=397>
+			<P>com.sun.xml.wss.impl.WssSoapFaultException: SAML Assertion has
+			invalid Signature</P>
+		</TD>
+		<TD WIDTH=251>
+			<P><FONT COLOR="#000000">Feature implemented, but Fails due to a
+			bug in the runtime.&nbsp; Needs investigation because verification
+			of Signature Inside SAML Assertion works in general and in some of
+			the other scenarios.</FONT></P>
+		</TD>
+	</TR>
+	<TR>
+		<TD WIDTH=210>
+			<P>SecurityPolicy:sp:AlgorithmSuite/wsp:Policy/<BR>sp:SoapNormalization10&nbsp;
+			assertion</P>
+		</TD>
+		<TD WIDTH=397>
+			<P>SecurityPolicy:sp:AlgorithmSuite/wsp:Policy/sp:SoapNormalization10
+			assertion causes deploy failure</P>
+		</TD>
+		<TD WIDTH=251>
+			<P>Feature Not Implemented</P>
+		</TD>
+	</TR>
+	<TR>
+		<TD WIDTH=210>
+			<P>SecurityPolicy: sp:AlgorithmSuite/wsp:Policy/sp:XPath10
+			assertion</P>
+		</TD>
+		<TD WIDTH=397>
+			<P>SecurityPolicy: sp:AlgorithmSuite/wsp:Policy/sp:XPath10
+			assertion causes deploy failure</P>
+		</TD>
+		<TD WIDTH=251>
+			<P>Will be supported in a future release.</P>
+		</TD>
+	</TR>
+	<TR>
+		<TD WIDTH=210>
+			<P>SecurityPolicy: sp:AlgorithmSuite/wsp:Policy/sp:XPathFilter20
+			assertion 
+			</P>
+		</TD>
+		<TD WIDTH=397>
+			<P>SecurityPolicy: sp:AlgorithmSuite/wsp:Policy/sp:XPathFilter20
+			assertion causes deploy failure</P>
+		</TD>
+		<TD WIDTH=251>
+			<P>Will be supported in a future release.</P>
+		</TD>
+	</TR>
+	<TR>
+		<TD WIDTH=210>
+			<P>Protection Targets under Bootstrap Policy for
+			SecureConversation</P>
+		</TD>
+		<TD WIDTH=397>
+			<P>The WS-SecurityPolicy Spec has been updated to have&nbsp;
+			Protection targets&nbsp; under bootstrap policy</P>
+		</TD>
+		<TD WIDTH=251>
+			<P>Will be supported in a future release.</P>
+		</TD>
+	</TR>
+	<TR>
+		<TD WIDTH=210>
+			<P>SecureConversation Negative tests : Policy Verification with
+			Mismatched client and server policies</P>
+		</TD>
+		<TD WIDTH=397>
+			<P>SecureConversation:Service accepts messages signed,encrypted
+			with SCT directly instead of using
+			DerivedKeys<BR><BR>SecureConversation:Service accepts messages
+			that has wrong message protection order.</P>
+		</TD>
+		<TD WIDTH=251>
+			<P>Will be supported in a future release.</P>
+		</TD>
+	</TR>
+	<TR>
+		<TD WIDTH=210>
+			<P>Encryption of SubjectConfirmation 
+			</P>
+		</TD>
+		<TD WIDTH=397>
+			<P>Encryption of SubjectConfirmation&nbsp; in cases where the
+			received signature was encrypted is not supported. The workaround
+			is to disable &lt;sp:RequireSignatureConfirmation&gt; from the
+			server policy (whenever there is an interop failure due to this).</P>
+		</TD>
+		<TD WIDTH=251>
+			<P>Will be supported in a future release.</P>
+		</TD>
+	</TR>
+	<TR>
+		<TD WIDTH=210>
+			<P>RequireDerivedKeys assertion</P>
+		</TD>
+		<TD WIDTH=397>
+			<P>RequireDerivedKeys assertion under an X509Token is not
+			supported when the X509Token appears under&nbsp; Initiator token
+			of an AsymmetricBinding, or when the X509Token is appearing under
+			a SupportingToken Assertion.</P>
+		</TD>
+		<TD WIDTH=251>
+			<P>Need some clarification from the WS-SecurityPolicy
+			Specification.</P>
+		</TD>
+	</TR>
+	<TR>
+		<TD WIDTH=210>
+			<P>EncryptBeforeSigning</P>
+		</TD>
+		<TD WIDTH=397>
+			<P>Fails with Signature verification error on server side.</P>
+		</TD>
+		<TD WIDTH=251>
+			<P>Use SignBeforeEncrypting</P>
 		</TD>
 	</TR>
 </TABLE>
+<P STYLE="margin-bottom: 0in"><BR>
+</P>
 <P STYLE="margin-bottom: 0in"><!-- ================================================== --><BR>
 </P>
 <HR>
@@ -1072,7 +1487,7 @@ What is Not Implemented</H4>
 <H4>WCF Interoperability</H4>
 <P>Interoperability test is based on use of SecurityPolicy in
 WS-Security,WS-SecureConversation,WS-Trust,WS Reliable Messaging,
-MTOM,WS-Addressing  interop tests.</P>
+MTOM,WS-Addressing interop tests.</P>
 <H4>What is Not Implemented</H4>
 <P>Following assertions are not yet supported by Security Policy
 implementation.</P>
