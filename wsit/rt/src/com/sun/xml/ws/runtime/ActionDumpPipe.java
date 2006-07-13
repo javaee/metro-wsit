@@ -18,7 +18,7 @@
  [name of copyright owner]
 */
 /*
- $Id: ActionDumpPipe.java,v 1.1 2006-07-10 19:58:53 arungupta Exp $
+ $Id: ActionDumpPipe.java,v 1.2 2006-07-13 18:38:56 arungupta Exp $
 
  Copyright (c) 2006 Sun Microsystems, Inc.
  All rights reserved.
@@ -74,12 +74,12 @@ public class ActionDumpPipe extends AbstractFilterPipeImpl {
         return reply;
     }
 
-    private void dump(Packet packet) {
+    protected void dump(Packet packet) {
         if (packet.getMessage() != null)
             dumpAction(packet);
     }
 
-    private void dumpAction(Packet packet) {
+    protected void dumpAction(Packet packet) {
         try {
             Message m = packet.getMessage().copy();
 
@@ -92,7 +92,7 @@ public class ActionDumpPipe extends AbstractFilterPipeImpl {
         }
     }
 
-    private static String getHeaderValue(Message m, QName headerName) throws XMLStreamException {
+    protected static String getHeaderValue(Message m, QName headerName) throws XMLStreamException {
         Header h = m.getHeaders().get(headerName, false);
 
         if (h == null)
