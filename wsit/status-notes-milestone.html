@@ -1,1457 +1,2913 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
 <HTML>
+
 <HEAD>
+
 	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=windows-1252">
+
 	<TITLE>WSIT Status Notes</TITLE>
+
 	<META NAME="GENERATOR" CONTENT="StarOffice 8  (Win32)">
+
 	<META NAME="CREATED" CONTENT="20060713;8550900">
+
 	<META NAME="CHANGED" CONTENT="20060713;21281095">
+
 	<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
 </HEAD>
+
 <BODY LANG="en-US" BGCOLOR="#ffffff" DIR="LTR">
+
 <H1>WSIT Status Notes</H1>
+
 <H5>Date: May 13, 2006</H5>
+
 <H2>Introduction</H2>
+
 <P>This document provides the status of the interoperability testing
+
 performed by Sun Microsystems on each of the technologies supported
+
 in Web Services Interoperability Technology (WSIT). It also lists and
+
 describes any known issues.</P>
+
 <P>In conjunction with Microsoft, Sun has done limited
+
 interoperability testing to ensure that the Web services created
+
 using WSIT technologies can access and consume Web services created
+
 using Microsoft's WCF product and vice versa.</P>
+
 <P>This document covers the following topics:</P>
+
 <UL>
+
 	<LI><P STYLE="margin-bottom: 0in"><A HREF="#52974">Glassfish
+
 	Classpath Change Requirements</A></P>
+
 	<LI><P STYLE="margin-bottom: 0in"><A HREF="#67607">Summary of Known
+
 	Issues</A></P>
+
 	<LI><P STYLE="margin-bottom: 0in"><A HREF="#91780">Metadata Exchange
+
 	Status</A></P>
+
 	<LI><P STYLE="margin-bottom: 0in"><A HREF="#68668">MTOM Status</A></P>
+
 	<LI><P STYLE="margin-bottom: 0in"><A HREF="#49498">Data Binding
+
 	Status</A></P>
+
 	<LI><P STYLE="margin-bottom: 0in"><A HREF="#60313">Reliable
+
 	Messaging Status</A></P>
+
 	<LI><P STYLE="margin-bottom: 0in"><A HREF="#35385">Security Status</A></P>
+
 	<LI><P STYLE="margin-bottom: 0in"><A HREF="#44691">Secure
+
 	Conversation Status</A></P>
+
 	<LI><P STYLE="margin-bottom: 0in"><A HREF="#96126">Trust Status</A></P>
+
 	<LI><P STYLE="margin-bottom: 0in"><A HREF="#98261">Coordination/Atomic
+
 	Transactions Status</A></P>
+
 	<LI><P STYLE="margin-bottom: 0in"><A HREF="#35087">NetBeans WSIT
+
 	Module Status</A></P>
+
 	<LI><P STYLE="margin-bottom: 0in"><A HREF="#70368">Web Services
+
 	Addressing Status</A></P>
+
 	<LI><P STYLE="margin-bottom: 0in"><A HREF="#13158">Policy Status</A></P>
+
 	<LI><P STYLE="margin-bottom: 0in"><A HREF="#jax-ws">JAX-WS Status</A></P>
+
 	<LI><P><A HREF="#55934">Security Policy Status</A></P>
+
 </UL>
+
 <P>Legend:</P>
+
 <UL>
+
 	<LI><PRE STYLE="margin-bottom: 0.2in">MS-&gt;S : N/M</PRE><P STYLE="margin-bottom: 0in">
+
 	means testing a Microsoft consumer using a Sun provider where N
+
 	tests out of M total pass.</P>
+
 	<LI><PRE STYLE="margin-bottom: 0.2in">S-&gt;MS</PRE><P STYLE="margin-bottom: 0in">
+
 	means testing a Sun consumer using a Microsoft provider.</P>
+
 	<LI><PRE STYLE="margin-bottom: 0.2in">S-&gt;S
+
  means testing a  Sun consumer using a Sun
+
 provider.</PRE>
+
 	<LI><PRE STYLE="margin-bottom: 0.2in">non-secure / secure</PRE><P>
+
 	means tests with or without security turned on.</P>
+
 </UL>
+
 <P STYLE="margin-bottom: 0in"><!-- ================================================== --><BR>
+
 </P>
+
 <HR>
+
 <H2><A NAME="52974"></A>Glassfish Classpath Change Requirements</H2>
+
 <P>The b43-nightly-01_may_2006 build of GlassFish contains several
+
 Jar files which contain classes that can conflict with the newer
+
 versions of those classes provided by the WSIT environment. To avoid
+
 problems, the classpath for both the Glassfish application server and
+
 the client application must be modified.</P>
+
 <P>The WSIT installer (wsit-on-glassfish.xml) will handle making the
+
 necessary classpath modifications in the Glassfish configuration file
+
 to prevent problems. However, the client applications need to have
+
 equivalent changes. The samples accompanying the Getting Started with
+
 WSIT How To documents already have the necessary work-around in
+
 place. The work-around is simply to exclude the conflicting Jar files
+
 from the application's classpath. Should you create a build.xml file
+
 of your own, you will need to do the same thing. The following code
+
 snippet excludes the conflicting Jar files from the classpath used to
+
 run the tools and the client application:</P>
+
 <PRE>   &lt;path id=&quot;wsit.classpath&quot;&gt;
+
        &lt;pathelement location=&quot;${java.home}/../lib/tools.jar&quot;/&gt;
+
        &lt;fileset dir=&quot;${lib.home}&quot;&gt;
+
            &lt;include name=&quot;*.jar&quot;/&gt;
+
            &lt;exclude name=&quot;jaxws-update.jar&quot;/&gt;
+
            &lt;exclude name=&quot;j2ee*.jar&quot;/&gt;
+
            &lt;exclude name=&quot;javaee.jar&quot;/&gt;
+
            &lt;exclude name=&quot;appserv-*.jar&quot;/&gt;
+
         &lt;/fileset&gt;
+
    &lt;/path&gt;</PRE><P STYLE="margin-bottom: 0in">
+
 <!-- ================================================== --><BR>
+
 </P>
+
 <HR>
+
 <H2><A NAME="67607"></A>Summary of Known Issues</H2>
+
 <TABLE BORDER=1 CELLPADDING=2 CELLSPACING=2>
+
 	<TR>
+
 		<TH>
+
 			<P ALIGN=CENTER>Features</P>
+
 		</TH>
+
 		<TH>
+
 			<P ALIGN=CENTER>Priority 1</P>
+
 		</TH>
+
 		<TH>
+
 			<P ALIGN=CENTER>Priority 2</P>
+
 		</TH>
+
 		<TH>
+
 			<P ALIGN=CENTER>Priority 3</P>
+
 		</TH>
+
 		<TH>
+
 			<P ALIGN=CENTER>Priority 4 and 5</P>
+
 		</TH>
+
 		<TH>
+
 			<P ALIGN=CENTER>Totals</P>
+
 		</TH>
+
 	</TR>
+
 	<TR>
+
 		<TD>
+
 			<P ALIGN=CENTER>Installation</P>
+
 		</TD>
+
 		<TD>
+
 			<P ALIGN=CENTER>0</P>
+
 		</TD>
+
 		<TD>
+
 			<P ALIGN=CENTER>0</P>
+
 		</TD>
+
 		<TD>
+
 			<P ALIGN=CENTER>1</P>
+
 		</TD>
+
 		<TD>
+
 			<P ALIGN=CENTER>0</P>
+
 		</TD>
+
 		<TD>
+
 			<P ALIGN=CENTER>1</P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD>
+
 			<P ALIGN=CENTER>Integration</P>
+
 		</TD>
+
 		<TD>
+
 			<P ALIGN=CENTER>0</P>
+
 		</TD>
+
 		<TD>
+
 			<P ALIGN=CENTER>1</P>
+
 		</TD>
+
 		<TD>
+
 			<P ALIGN=CENTER>0</P>
+
 		</TD>
+
 		<TD>
+
 			<P ALIGN=CENTER>0</P>
+
 		</TD>
+
 		<TD>
+
 			<P ALIGN=CENTER>1</P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD>
+
 			<P ALIGN=CENTER>Metadata Exchange</P>
+
 		</TD>
+
 		<TD>
+
 			<P ALIGN=CENTER>0</P>
+
 		</TD>
+
 		<TD>
+
 			<P ALIGN=CENTER>1</P>
+
 		</TD>
+
 		<TD>
+
 			<P ALIGN=CENTER>0</P>
+
 		</TD>
+
 		<TD>
+
 			<P ALIGN=CENTER>0</P>
+
 		</TD>
+
 		<TD>
+
 			<P ALIGN=CENTER>1</P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD>
+
 			<P ALIGN=CENTER>Security</P>
+
 		</TD>
+
 		<TD>
+
 			<P ALIGN=CENTER>0</P>
+
 		</TD>
+
 		<TD>
+
 			<P ALIGN=CENTER>5</P>
+
 		</TD>
+
 		<TD>
+
 			<P ALIGN=CENTER>4</P>
+
 		</TD>
+
 		<TD>
+
 			<P ALIGN=CENTER>0</P>
+
 		</TD>
+
 		<TD>
+
 			<P ALIGN=CENTER>0</P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD>
+
 			<P ALIGN=CENTER>Security Policy</P>
+
 		</TD>
+
 		<TD>
+
 			<P ALIGN=CENTER>0</P>
+
 		</TD>
+
 		<TD>
+
 			<P ALIGN=CENTER>5</P>
+
 		</TD>
+
 		<TD>
+
 			<P ALIGN=CENTER>3</P>
+
 		</TD>
+
 		<TD>
+
 			<P ALIGN=CENTER>0</P>
+
 		</TD>
+
 		<TD>
+
 			<P ALIGN=CENTER>0</P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD>
+
 			<P ALIGN=CENTER>Trust</P>
+
 		</TD>
+
 		<TD>
+
 			<P ALIGN=CENTER>0</P>
+
 		</TD>
+
 		<TD>
+
 			<P ALIGN=CENTER>0</P>
+
 		</TD>
+
 		<TD>
+
 			<P ALIGN=CENTER>4</P>
+
 		</TD>
+
 		<TD>
+
 			<P ALIGN=CENTER>0</P>
+
 		</TD>
+
 		<TD>
+
 			<P ALIGN=CENTER>0</P>
+
 		</TD>
+
 	</TR>
+
 </TABLE>
+
 <P STYLE="margin-bottom: 0in"><!-- ================================================== --><BR>
+
 </P>
+
 <HR>
+
 <H2><A NAME="91780"></A>Metadata Exchange Status</H2>
+
 <H4>WCF Interoperability</H4>
+
 <PRE>non-secure:
+
   MS-&gt;S : 0/1 : (not tested)
+
   S-&gt;MS : 0/1 : (not tested)
+
   S -&gt;S : 0/1 : (not tested)
+
 secure:
+
   (no tests exist)</PRE><H4>
+
 What is Not Implemented</H4>
+
 <P>All basic Metadata Exchange functionality has been implemented,
+
 including send and receive metadata and the client API for other
+
 components to use. However, the code that adds headers to the
+
 response message is commented out because of a known issue in xml
+
 stream buffer.</P>
+
 <H4>Known Issues</H4>
+
 <TABLE BORDER=1 CELLPADDING=2 CELLSPACING=2>
+
 	<TR>
+
 		<TH>
+
 			<P>Interoperability Feature</P>
+
 		</TH>
+
 		<TH>
+
 			<P>Status/Workaround</P>
+
 		</TH>
+
 	</TR>
+
 	<TR>
+
 		<TD>
+
 			<P>Support for returning WS-Addressing response headers with
+
 			response messages.</P>
+
 		</TD>
+
 		<TD>
+
 			<P>This is an unbound prefix issue. This issue is preventing the
+
 			Metadata Exchange feature from returning the WS-Addressing
+
 			response headers that are required by the Metadata Exchange
+
 			specification.</P>
+
 			<P>WORKAROUND: The client code currently does not check for these
+
 			headers so the response is still parsed.</P>
+
 		</TD>
+
 	</TR>
+
 </TABLE>
+
 <P STYLE="margin-bottom: 0in"><!-- ================================================== --><BR>
+
 </P>
+
 <HR>
+
 <H2><A NAME="68668"></A>MTOM Status</H2>
+
 <H4>WCF Interoperability</H4>
+
 <PRE>non-secure:
+
   MS-&gt;S :  0/15 : (not tested)
+
   S-&gt;MS : 15/15 :
+
   S -&gt;S : 15/15 :
+
 secure:
+
   MS-&gt;S :  0/15 : (not tested)
+
   S-&gt;MS :  9/15 :
+
   S -&gt;S : 15/15 :</PRE><H4>
+
 What is Not Implemented</H4>
+
 <P>All MTOM functionality has been implemented.</P>
+
 <H4>Known Issues</H4>
+
 <TABLE BORDER=1 CELLPADDING=2 CELLSPACING=2>
+
 	<TR>
+
 		<TH>
+
 			<P>Interoperability Feature</P>
+
 		</TH>
+
 		<TH>
+
 			<P>Status/Workaround</P>
+
 		</TH>
+
 	</TR>
+
 	<TR>
+
 		<TD>
+
 			<P>Using MTOM with WS-Addressing for Sun &lt;-&gt;Microsoft
+
 			Interoperability</P>
+
 		</TD>
+
 		<TD>
+
 			<P>MTOM with WS-Addressing interoperablity with Microsoft would
+
 			not work, if the CR version of addressing is used in Sun
+
 			implementation. To workaround with this:</P>
+
 			<P>If Sun service is used with Microsoft client; put ms.jar in the
+
 			Sun Service classpath.</P>
+
 			<P>If Microsoft service is used with Sun client; put ms.jar in the
+
 			Sun Client classpath</P>
+
 		</TD>
+
 	</TR>
+
 </TABLE>
+
 <P STYLE="margin-bottom: 0in"><!-- ================================================== --><BR>
+
 </P>
+
 <HR>
+
 <H2><A NAME="49498"></A>Data Binding Status</H2>
+
 <H4>WCF Interoperability</H4>
+
 <PRE>non-secure:
+
+
 
   S-&gt;MS (Schema and WSDL Interop scenario 1):  840/852 (starting from WSDL)
+
   MS-&gt;S (Schema and WSDL Interop scenario 2):  745/855 
+
   MS-&gt;S (Schema and WSDL Interop scenario 3):  20% tested (Starting from Java)
+
   S-&gt;S  : 837/852 
 
+
+
 secure:
+
  (not tested) </PRE><H4>
+
 What is Not Implemented</H4>
+
 <UL>
+
 	<LI><P STYLE="margin-bottom: 0in">Any fixes to resolve defects noted
+
 	in the section above. 
+
 	</P>
+
 	<LI><P>JAXB and JAX-WS changes for issue 6419632 noted in the Known
+
 	Issues below. 
+
 	</P>
+
 </UL>
+
 <H4>Known Issues</H4>
+
 <UL>
+
 	<LI><P><A HREF="http://monaco.sfbay/detail.jsf?cr=6419632">6419632</A>
+
 	Type substitution doesn't work with JAX-WS. <BR>Roundtripping of
+
 	some XML Schema simple types used as xsi:type may require use of the
+
 	JAXB customization: 
+
 	</P>
+
 	<PRE STYLE="margin-bottom: 0.2in">         &lt;jaxb:globalBindings mapSimpleTypeDef=&quot;true&quot;/&gt; </PRE><P>
+
 	However, this defect prevents the mapSimpleTypeDef JAXB
+
 	customization from taking effect and thus some simple XML Schema
+
 	types when used as xsi:type may not be round tripped. 
+
 	</P>
+
 </UL>
+
 <P STYLE="margin-bottom: 0in"><!-- ================================================== --><BR>
+
 </P>
+
 <HR>
+
 <H2><A NAME="60313"></A>Reliable Messaging Status</H2>
+
 <H4>WCF Interoperability</H4>
+
 <PRE>non-secure:
+
+
 
   MS-&gt;S :  2/2
+
   S-&gt;MS :  2/2
+
   S -&gt;S :  2/2
 
+
+
 secure:
 
+
+
   MS-&gt;S :  0/2 : (not tested)
+
   S-&gt;MS :  2/2
+
   S -&gt;S :  2/2</PRE><P>
+
 NOTE: The interoperability tests do not include duplex binding tests.</P>
+
 <H4>What is Not Implemented</H4>
+
 <P>The following feature is not working:</P>
+
 <UL>
+
 	<LI><P>Flow control features not completely implemented.</P>
+
 </UL>
+
 <H4>Known Issues</H4>
+
 <UL>
+
 	<LI><P>An RM-enabled endpoint will not work with Security unless
+
 	Secure Conversations are enabled.</P>
+
 </UL>
+
 <P STYLE="margin-bottom: 0in"><!-- ================================================== --><BR>
+
 </P>
+
 <HR>
+
 <H2><A NAME="35385"></A>Security Status</H2>
+
 <H4>WCF Interoperability</H4>
+
 <PRE>  MS-&gt;S :   0/10 : (starting from WSDL; not tested)
+
   S-&gt;MS :  10/10 : (starting from WSDL)
+
   S -&gt;S :  10/10 : (starting from WSDL)</PRE><P>
+
 NOTE: No test scenarios were executed that started from Java.</P>
+
 <H4>What is Not Implemented</H4>
+
 <P>The following features have&nbsp; not been implemented:</P>
+
 <UL>
+
 	<LI><P STYLE="margin-bottom: 0in">Multiple secure conversation
+
 	tokens per message is not implemented. Only one secure conversation
+
 	token per message is assumed.</P>
+
 	<LI><P STYLE="margin-bottom: 0in">Session timeout handling for
+
 	secure conversation sessions and LifeTime handling for IssuedTokens</P>
+
 	<LI><P STYLE="margin-bottom: 0in">MaxNonceAge information item
+
 	specified in NetBeans IDE user interface and configuration files
+
 	WSDL will not be honored, default values will be used instead.</P>
+
 	<LI><P STYLE="margin-bottom: 0in"><FONT COLOR="#000000">Encryption
+
 	of SubjectConfirmation in cases where the received signature was
+
 	encrypted is not supported. The workaround is to disable
+
 	&lt;sp:RequireSignatureConfirmation&gt; from the server policy
+
 	(whenever there is an interop failure due to this).</FONT></P>
+
 	<LI><P STYLE="margin-bottom: 0in">If a binary secret arrives in a
+
 	SAML assertion, then implementation <FONT COLOR="#000000">does not&nbsp;
+
 	ensure that&nbsp; SSL was used for the Incoming Message.</FONT></P>
+
 	<LI><P STYLE="margin-bottom: 0in"><FONT COLOR="#000000">Policy
+
 	Verification is not done in the case of Encrypted Body scenarios. </FONT>
+
 	</P>
+
 	<LI><P STYLE="margin-bottom: 0in"><FONT COLOR="#000000">Policy
+
 	Verification for WS-Trust Protocol Messages is not done. There is a
+
 	specification issue here since Issued Tokens can be Encrypted even
+
 	though there is no explicit policy in the Service WSDL indicating
+
 	the same.</FONT></P>
+
 	<LI><P STYLE="margin-bottom: 0in"><FONT COLOR="#000000">Backward
+
 	Compatibility with XWSS 2.0 FCS has not been ensured in this release
+
 	of WSIT</FONT></P>
+
 	<LI><P STYLE="margin-bottom: 0in"><FONT COLOR="#000000">Implied
+
 	DerivedKeys specified by a @wsc:nonce attribute on
+
 	SecureTokenRequest is not supported in this release</FONT></P>
+
 	<LI><P STYLE="margin-bottom: 0in"><FONT COLOR="#000000">The
+
 	@wsc:Instance attribute on wsse:Reference for referencing specific
+
 	Secure Context Token instances is not supported in this release</FONT></P>
+
 	<LI><P STYLE="margin-bottom: 0in"><FONT COLOR="#000000">WS-Security
+
 	Reference Type verification in Policy Verification is not being done
+
 	in this release of WSIT</FONT></P>
+
 	<LI><P STYLE="margin-bottom: 0in"><FONT COLOR="#000000">Logging code
+
 	added for WSIT is incomplete.</FONT></P>
+
 	<LI><P STYLE="margin-bottom: 0in"><FONT COLOR="#000000">The sha256
+
 	signature algorithm is not supported by the underlying JSR 105 RI&nbsp;
+
 	and therefore all AlgorithmSuite identifiers that imply the sha256
+
 	signature algorithm are not supported.</FONT></P>
+
 	<LI><P STYLE="margin-bottom: 0in"><FONT COLOR="#000000">&lt;sp:RequireDerivedKeys&gt;
+
 	under &lt;sp:AsymmetricBinding&gt;/&lt;sp:InitiatorToken&gt;/&lt;sp:X509Token&gt;
+
 	is not supported and will result in an Exception.</FONT></P>
+
 	<LI><P STYLE="margin-bottom: 0in"><FONT COLOR="#000000">&lt;sp:RequireDerivedKeys&gt;&nbsp;
+
 	under&nbsp; &lt;sp:X509Token&gt; appearing inside a Supporting Token
+
 	Assertion (such as &lt;sp:EndorsingSupportingToken&gt;) is also not
+
 	supported and will result in an exception.</FONT></P>
+
 	<LI><P><FONT COLOR="#000000">The Following WS-SecurityPolicy
+
 	Features from specification Draft : Jul 2005 Ver 1.1 are unsupported
+
 	in this release of WSIT</FONT></P>
+
 </UL>
+
 <H4>WS Security Policy support by WS Security Implementation :</H4>
+
 <TABLE WIDTH=884 BORDER=1 CELLPADDING=2 CELLSPACING=3>
+
 	<COL WIDTH=92>
+
 	<COL WIDTH=214>
+
 	<COL WIDTH=552>
+
 	<TR>
+
 		<TD WIDTH=92>
+
 			<P>WS-SecurityPolicy<BR>Specification<BR>Section</P>
+
 		</TD>
+
 		<TD WIDTH=214>
+
 			<P>Assertion</P>
+
 		</TD>
+
 		<TD WIDTH=552>
+
 			<P>Remark</P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD WIDTH=92>
+
 			<P>5.1.2</P>
+
 		</TD>
+
 		<TD WIDTH=214>
+
 			<P>SignedElements</P>
+
 		</TD>
+
 		<TD WIDTH=552>
+
 			<P>Not working even though the implementation is present (refer
+
 			Known Issues)</P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD WIDTH=92>
+
 			<P>5.2.2</P>
+
 		</TD>
+
 		<TD WIDTH=214>
+
 			<P>EncryptedElements</P>
+
 		</TD>
+
 		<TD WIDTH=552>
+
 			<P>Not working even though the implementation is present (refer
+
 			Known Issues)</P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD WIDTH=92>
+
 			<P>5.3.1</P>
+
 		</TD>
+
 		<TD WIDTH=214>
+
 			<P>RequiredElements</P>
+
 		</TD>
+
 		<TD WIDTH=552>
+
 			<P>Will be supported in a future release</P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD WIDTH=92>
+
 			<P>6.1.1</P>
+
 		</TD>
+
 		<TD WIDTH=214>
+
 			<P>TokenInclusion</P>
+
 		</TD>
+
 		<TD WIDTH=552>
+
 			<P>Only includeTokenPolicy=Once&nbsp; is not supported,&nbsp;
+
 			Always, AlwaysToRecipient and Never are supported</P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD WIDTH=92>
+
 			<P>6.3.1</P>
+
 		</TD>
+
 		<TD WIDTH=214>
+
 			<P>UsernameToken</P>
+
 		</TD>
+
 		<TD WIDTH=552>
+
 			<P>Only &lt;sp:UsernameToken10&gt;&nbsp; is supported in this
+
 			release, &lt;sp:UsernameToken11&gt;&nbsp; and Password Derived
+
 			Keys will be supported in a future release</P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD WIDTH=92>
+
 			<P>6.3.3</P>
+
 		</TD>
+
 		<TD WIDTH=214>
+
 			<P>X509Token</P>
+
 		</TD>
+
 		<TD WIDTH=552>
+
 			<P>Only &lt;sp:WssX509V3Token10&gt; is supported in this release.
+
 			<BR><BR>The rest&nbsp; (&lt;sp:WssX509V3Token11&gt;,
+
 			&lt;sp:WssX509Pkcs7Token10&gt;,
+
 			&lt;sp:WssX509Pkcs7Token11&gt;,&lt;sp:WssX509PkiPathV1Token10&gt;,
+
 			&lt;sp:WssX509PkiPathV1Token11&gt;, &lt;sp:WssX509V1Token10&gt;,
+
 			&lt;sp:WssX509V1Token11&gt;) will be supported in a future release
+
 			based on real-world usecases and customer preferences.</P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD WIDTH=92>
+
 			<P>6.3.4</P>
+
 		</TD>
+
 		<TD WIDTH=214>
+
 			<P>KerberosToken</P>
+
 		</TD>
+
 		<TD WIDTH=552>
+
 			<P>Will be supported in a future release</P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD WIDTH=92>
+
 			<P>6.3.8</P>
+
 		</TD>
+
 		<TD WIDTH=214>
+
 			<P>Samltoken</P>
+
 		</TD>
+
 		<TD WIDTH=552>
+
 			<P>Only&nbsp; &lt;sp:WssSamlV10Token10&gt;,&nbsp; and
+
 			&lt;sp:WssSamlV11Token10&gt; are supported in this release <BR><BR>&nbsp;The
+
 			rest (&lt;sp:WssSamlV10Token11&gt;, &lt;sp:WssSamlV11Token11&gt;,
+
 			&lt;sp:WssSamlV20Token11&gt; ) will be supported in a future
+
 			release.</P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD WIDTH=92>
+
 			<P>6.3.9</P>
+
 		</TD>
+
 		<TD WIDTH=214>
+
 			<P>RelToken</P>
+
 		</TD>
+
 		<TD WIDTH=552>
+
 			<P>No Plan for supporting this token.</P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD WIDTH=92>
+
 			<P>6.3.6</P>
+
 		</TD>
+
 		<TD WIDTH=214>
+
 			<P>SecurityContextToken</P>
+
 		</TD>
+
 		<TD WIDTH=552>
+
 			<P>No Plan for supporting this token</P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD WIDTH=92>
+
 			<P>6.3.5</P>
+
 		</TD>
+
 		<TD WIDTH=214>
+
 			<P>SpnegoContextToken</P>
+
 		</TD>
+
 		<TD WIDTH=552>
+
 			<P>Will be supported in a future release</P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD WIDTH=92>
+
 			<P>7.1/8.1</P>
+
 		</TD>
+
 		<TD WIDTH=214>
+
 			<P>AlgorithmSuite</P>
+
 		</TD>
+
 		<TD WIDTH=552>
+
 			<P>All algorithms are supported&nbsp; <FONT COLOR="#000000">with
+
 			the exception of&nbsp; algorithms under&nbsp; Asymmetric KeyWrap,
+
 			and Sha256.</FONT></P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD WIDTH=92>
+
 			<P>7.5</P>
+
 		</TD>
+
 		<TD WIDTH=214>
+
 			<P>Token Protection</P>
+
 		</TD>
+
 		<TD WIDTH=552>
+
 			<P>Token Protection in cases where includeTokenPolicy=&quot;Never&quot;
+
 			or in cases where the Token is not in the Message, is not handled
+
 			. There is a need for some clarification from the specification
+
 			for this case.&nbsp; In all other cases Token Protection is
+
 			supported.</P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD WIDTH=92>
+
 			<P>7.6</P>
+
 		</TD>
+
 		<TD WIDTH=214>
+
 			<P>Entire Header and Body Signature</P>
+
 		</TD>
+
 		<TD WIDTH=552>
+
 			<P>boolean value FALSE for this Assertion is not Supported in this
+
 			release.</P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD WIDTH=92>
+
 			<P>7.7 /8.2</P>
+
 		</TD>
+
 		<TD WIDTH=214>
+
 			<P>Security Header Layout</P>
+
 		</TD>
+
 		<TD WIDTH=552>
+
 			<P><FONT COLOR="#000000">LaxTimestampLast&nbsp; option is not
+
 			supported in this release and will be supported in a future
+
 			release. The rest are supported in this release.</FONT></P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD WIDTH=92>
+
 			<P>8.3</P>
+
 		</TD>
+
 		<TD WIDTH=214>
+
 			<P>TransportBinding</P>
+
 		</TD>
+
 		<TD WIDTH=552>
+
 			<P>Is Supported in principle, but no policy verification is
+
 			performed on the Server side to ensure that SSL was indeed used at
+
 			the Transport Layer. This check will be added in a future release.</P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD WIDTH=92>
+
 			<P>9.2</P>
+
 		</TD>
+
 		<TD WIDTH=214>
+
 			<P>SignedSupportingTokens</P>
+
 		</TD>
+
 		<TD WIDTH=552>
+
 			<P>&nbsp;The runtime will not be able to sign the supporting token
+
 			in cases where the Token is not in the Message (such as for
+
 			includeTokenPolicy=Never/Once). There is a need for some
+
 			clarification from the specification for this case. 
+
 			</P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD WIDTH=92>
+
 			<P>9.4</P>
+
 		</TD>
+
 		<TD WIDTH=214>
+
 			<P>SignedEndorsingSupportingTokens</P>
+
 		</TD>
+
 		<TD WIDTH=552>
+
 			<P>The runtime will not be able to sign the supporting token in
+
 			cases where the Token is not in the Message (such as for
+
 			includeTokenPolicy=Never/Once).There is a need for some
+
 			clarification from the specification for this case.</P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD WIDTH=92>
+
 			<P>10.1</P>
+
 		</TD>
+
 		<TD WIDTH=214>
+
 			<P>WSS10 Assertion</P>
+
 		</TD>
+
 		<TD WIDTH=552>
+
 			<P><FONT COLOR="#000000">Everything is supported with the
+
 			Exception of&nbsp; &lt;sp:MustSupportRefEmbeddedToken&gt;. </FONT>
+
 			</P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD WIDTH=92>
+
 			<P>10.2</P>
+
 		</TD>
+
 		<TD WIDTH=214>
+
 			<P>WSS11 Assertion</P>
+
 		</TD>
+
 		<TD WIDTH=552>
+
 			<P><FONT COLOR="#000000">Everything is supported with the
+
 			Exception of&nbsp; &lt;sp:MustSupportRefEmbeddedToken&gt;. </FONT>
+
 			</P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD WIDTH=92>
+
 			<P>11.1</P>
+
 		</TD>
+
 		<TD WIDTH=214>
+
 			<P>Trust10 Assertion</P>
+
 		</TD>
+
 		<TD WIDTH=552>
+
 			<P>MustSupportClientChallenge, MustSupportServerChallenge are not
+
 			supported in this release.</P>
+
 		</TD>
+
 	</TR>
+
 </TABLE>
+
 <P STYLE="margin-bottom: 0in"><BR>
+
 </P>
+
 <H4>Known Issues</H4>
+
 <TABLE WIDTH=884 BORDER=1 CELLPADDING=2 CELLSPACING=3>
+
 	<COL WIDTH=210>
+
 	<COL WIDTH=397>
+
 	<COL WIDTH=251>
+
 	<TR>
+
 		<TH WIDTH=210>
+
 			<P>Interoperability Feature</P>
+
 		</TH>
+
 		<TH WIDTH=397>
+
 			<P>Status</P>
+
 		</TH>
+
 		<TD WIDTH=251>
+
 			<P><B>Remark</B></P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD WIDTH=210>
+
 			<P><FONT COLOR="#000000">SignedParts and EncryptedParts Policy
+
 			Verification. </FONT>
+
 			</P>
+
 		</TD>
+
 		<TD WIDTH=397>
+
 			<P><FONT COLOR="#000000">Currently disabled due to insufficient
+
 			testing. </FONT>
+
 			</P>
+
 		</TD>
+
 		<TD WIDTH=251>
+
 			<P><BR>
+
 			</P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD WIDTH=210>
+
 			<P>LaxTimestampLast assertion</P>
+
 		</TD>
+
 		<TD WIDTH=397>
+
 			<P>LaxTimestampLast assertion not supported</P>
+
 			<P>Issue#18 on IssueTracker</P>
+
 		</TD>
+
 		<TD WIDTH=251>
+
 			<P><FONT COLOR="#000000">Will be supported in a future release</FONT></P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD WIDTH=210>
+
 			<P><FONT COLOR="#000000">LaxTimestampFirst assertion </FONT>
+
 			</P>
+
 		</TD>
+
 		<TD WIDTH=397>
+
 			<P>LaxTimestampFirst assertion not supported</P>
+
 			<P>Issue#18 on IssueTracker</P>
+
 		</TD>
+
 		<TD WIDTH=251>
+
 			<P><FONT COLOR="#000000">Feature implemented, but Fails due to a
+
 			bug in the runtime</FONT></P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD WIDTH=210>
+
 			<P><FONT COLOR="#000000">includeToken Policy ONCE</FONT></P>
+
 		</TD>
+
 		<TD WIDTH=397>
+
 			<P><FONT COLOR="#000000">WSSecurityPolicy:TokenInclusion:
+
 			includeToken Policy ONCE is not Supported</FONT></P>
+
 			<P>Issue#19 on IssueTracker</P>
+
 		</TD>
+
 		<TD WIDTH=251>
+
 			<P><FONT COLOR="#000000">Will be supported in a future release</FONT></P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD WIDTH=210>
+
 			<P>ProtectTokens assertion with AsymmetricBinding</P>
+
 		</TD>
+
 		<TD WIDTH=397>
+
 			<P>ProtectTokens assertion with AsymmetricBinding in service WSDL
+
 			causes java.lang.NullPointerException.</P>
+
 			<P>Issue#20 on IssueTracker</P>
+
 		</TD>
+
 		<TD WIDTH=251>
+
 			<P><FONT COLOR="#009900"><FONT COLOR="#000000">Feature
+
 			implemented, but Fails due to a bug in the runtime. </FONT><BR><BR><FONT COLOR="#000000">Also
+
 			need clarification from WS-SecurityPolicy specification on how
+
 			protect different types of tokens which are not part of the
+
 			Message.</FONT></FONT></P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD WIDTH=210>
+
 			<P>Reference Type verification in PolicyVerification.</P>
+
 		</TD>
+
 		<TD WIDTH=397>
+
 			<P>This feature is currently disabled due to problems with the
+
 			interpretation of IncludeTokenPolicy in conjunction with
+
 			Asymmetric Binding.</P>
+
 		</TD>
+
 		<TD WIDTH=251>
+
 			<P><BR>
+
 			</P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD WIDTH=210>
+
 			<P>Returning of SOAP fault : Negative tests with Mismatched client
+
 			and server policies</P>
+
 		</TD>
+
 		<TD WIDTH=397>
+
 			<P>Negative Test fail: No SOAP fault returned: Different Endpoint
+
 			Policies and Body Encrypted.</P>
+
 			<P>Issue#21 on IssueTracker</P>
+
 		</TD>
+
 		<TD WIDTH=251>
+
 			<P>Will be supported in a future release.</P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD WIDTH=210>
+
 			<P>Returning of SOAP fault : Negative tests with Mismatched client
+
 			and server policies</P>
+
 		</TD>
+
 		<TD WIDTH=397>
+
 			<P>SOAP Fault not returned: Different Algorithm suites used by
+
 			Service Consumer/Provider.</P>
+
 			<P>Issue#22 on IssueTracker</P>
+
 		</TD>
+
 		<TD WIDTH=251>
+
 			<P>Will be supported in a future release.</P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD WIDTH=210>
+
 			<P>Using SCT security token as Signed Supporting Token,</P>
+
 		</TD>
+
 		<TD WIDTH=397>
+
 			<P>When using SCT security token as Signed Supporting Token,
+
 			clients throw run-time exceptions.&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp;
+
 			&nbsp;&nbsp; &nbsp;&nbsp; 
+
 			</P>
+
 			<P>Issue#23 on IssueTracker</P>
+
 		</TD>
+
 		<TD WIDTH=251>
+
 			<P><FONT COLOR="#000000">Feature implemented, but Fails due to a
+
 			bug in the runtime.</FONT></P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD WIDTH=210>
+
 			<P>SignedElements and EncryptedElements</P>
+
 		</TD>
+
 		<TD WIDTH=397>
+
 			<P>sp:EncryptedElements/sp:XPath fails to encrypt the element
+
 			specified in the XPath element</P>
+
 		</TD>
+
 		<TD WIDTH=251>
+
 			<P><FONT COLOR="#000000">Feature implemented, but Fails due to a
+
 			bug in the runtime.</FONT></P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD WIDTH=210>
+
 			<P>ProtectTokens in SymmetricBinding</P>
+
 		</TD>
+
 		<TD WIDTH=397>
+
 			<P>ProtectTokens in SymmetricBinding : Token used to generate
+
 			Signature not covered by the Signature</P>
+
 		</TD>
+
 		<TD WIDTH=251>
+
 			<P>Fails due to a bug in runtime. A complete fix for the bug would
+
 			also require some clarification from the WS-SecurityPolicy
+
 			specification, since it is not clear how to protect different
+
 			token types in an interoperable manner when the token itself is
+
 			not present in the Message.</P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD WIDTH=210>
+
 			<P>EncryptedParts in SupportingTokens</P>
+
 		</TD>
+
 		<TD WIDTH=397>
+
 			<P>EncryptedParts in SupportingTokens assertion in message policy
+
 			does not work</P>
+
 		</TD>
+
 		<TD WIDTH=251>
+
 			<P>Need a clarification from the WS-SecurityPolicy Specification
+
 			as to whether Encrypted Parts inside SupportingTokens makes sense.</P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD WIDTH=210>
+
 			<P>&lt;sp:SAMLToken&gt; scenarios untested.</P>
+
 		</TD>
+
 		<TD WIDTH=397>
+
 			<P>SAML only tested on the WS-Trust Integration Path.</P>
+
 		</TD>
+
 		<TD WIDTH=251>
+
 			<P>Scenarios where an &lt;sp:SAMLToken&gt; is used directly under&nbsp;
+
 			SymmetricBinding or Supporting Token are not tested.</P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD WIDTH=210>
+
 			<P>IssuedToken Policy under EndorsingSupportingTokens</P>
+
 		</TD>
+
 		<TD WIDTH=397>
+
 			<P>com.sun.xml.wss.impl.WssSoapFaultException: SAML Assertion has
+
 			invalid Signature</P>
+
 		</TD>
+
 		<TD WIDTH=251>
+
 			<P><FONT COLOR="#000000">Feature implemented, but Fails due to a
+
 			bug in the runtime.&nbsp; Needs investigation because verification
+
 			of Signature Inside SAML Assertion works in general and in some of
+
 			the other scenarios.</FONT></P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD WIDTH=210>
+
 			<P>SecurityPolicy:sp:AlgorithmSuite/wsp:Policy/<BR>sp:SoapNormalization10&nbsp;
+
 			assertion</P>
+
 		</TD>
+
 		<TD WIDTH=397>
+
 			<P>SecurityPolicy:sp:AlgorithmSuite/wsp:Policy/sp:SoapNormalization10
+
 			assertion causes deploy failure</P>
+
 		</TD>
+
 		<TD WIDTH=251>
+
 			<P>Feature Not Implemented</P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD WIDTH=210>
+
 			<P>SecurityPolicy: sp:AlgorithmSuite/wsp:Policy/sp:XPath10
+
 			assertion</P>
+
 		</TD>
+
 		<TD WIDTH=397>
+
 			<P>SecurityPolicy: sp:AlgorithmSuite/wsp:Policy/sp:XPath10
+
 			assertion causes deploy failure</P>
+
 		</TD>
+
 		<TD WIDTH=251>
+
 			<P>Will be supported in a future release.</P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD WIDTH=210>
+
 			<P>SecurityPolicy: sp:AlgorithmSuite/wsp:Policy/sp:XPathFilter20
+
 			assertion</P>
+
 		</TD>
+
 		<TD WIDTH=397>
+
 			<P>SecurityPolicy: sp:AlgorithmSuite/wsp:Policy/sp:XPathFilter20
+
 			assertion causes deploy failure</P>
+
 		</TD>
+
 		<TD WIDTH=251>
+
 			<P>Will be supported in a future release.</P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD WIDTH=210>
+
 			<P>Protection Targets under Bootstrap Policy for
+
 			SecureConversation</P>
+
 		</TD>
+
 		<TD WIDTH=397>
+
 			<P>The WS-SecurityPolicy Spec has been updated to have&nbsp;
+
 			Protection targets&nbsp; under bootstrap policy</P>
+
 		</TD>
+
 		<TD WIDTH=251>
+
 			<P>Will be supported in a future release.</P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD WIDTH=210>
+
 			<P>SecureConversation Negative tests : Policy Verification with
+
 			Mismatched client and server policies</P>
+
 		</TD>
+
 		<TD WIDTH=397>
+
 			<P>SecureConversation:Service accepts messages signed,encrypted
+
 			with SCT directly instead of using
+
 			DerivedKeys<BR><BR>SecureConversation:Service accepts messages
+
 			that has wrong message protection order.</P>
+
 		</TD>
+
 		<TD WIDTH=251>
+
 			<P>Will be supported in a future release.</P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD WIDTH=210>
+
 			<P>Encryption of SignatureConfirmation</P>
+
 		</TD>
+
 		<TD WIDTH=397>
+
 			<P>Encryption of SignatureConfirmation&nbsp; in cases where the
+
 			received signature was encrypted is not supported. The workaround
+
 			is to disable &lt;sp:RequireSignatureConfirmation&gt; from the
+
 			server policy (whenever there is an interop failure due to this).</P>
+
 		</TD>
+
 		<TD WIDTH=251>
+
 			<P>Will be supported in a future release.</P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD WIDTH=210>
+
 			<P>RequireDerivedKeys assertion</P>
+
 		</TD>
+
 		<TD WIDTH=397>
+
 			<P>RequireDerivedKeys assertion under an X509Token is not
+
 			supported when the X509Token appears under&nbsp; Initiator token
+
 			of an AsymmetricBinding, or when the X509Token is appearing under
+
 			a SupportingToken Assertion.</P>
+
 		</TD>
+
 		<TD WIDTH=251>
+
 			<P>Need some clarification from the WS-SecurityPolicy
+
 			Specification.</P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD WIDTH=210>
+
 			<P>EncryptBeforeSigning</P>
+
 		</TD>
+
 		<TD WIDTH=397>
+
 			<P>Fails with Signature verification error on server side.</P>
+
 			<P>Issue#17 on IssueTracker</P>
+
 		</TD>
+
 		<TD WIDTH=251>
+
 			<P>Use SignBeforeEncrypting</P>
+
 		</TD>
+
 	</TR>
+
 </TABLE>
+
 <P STYLE="margin-bottom: 0in"><BR>
+
 </P>
+
 <P STYLE="margin-bottom: 0in"><!-- ================================================== --><BR>
+
 </P>
+
 <HR>
+
 <H2><A NAME="44691"></A>Secure Conversation Status</H2>
+
 <H4>WCF Interoperability</H4>
+
 <PRE>  MS-&gt;S :  0/3 : (starting from WSDL; not tested yet)
+
   S-&gt;MS :  2/3 : (starting from WSDL)
+
   S -&gt;S :  3/3 : (starting from WSDL)</PRE><P>
+
 NOTE: No test scenarios were executed that started from Java.</P>
+
 <H4>What is Not Implemented</H4>
+
 <P>The following features have not been implemented:</P>
+
 <UL>
+
 	<LI><P STYLE="margin-bottom: 0in">Renewing of Security Context</P>
+
 	<LI><P>Client initiated security context .</P>
+
 </UL>
+
 <H4>Known Issues</H4>
+
 <TABLE BORDER=1 CELLPADDING=2 CELLSPACING=2>
+
 	<TR>
+
 		<TH>
+
 			<P>Interoperability Feature</P>
+
 		</TH>
+
 		<TH>
+
 			<P>Status/Workaround</P>
+
 		</TH>
+
 	</TR>
+
 	<TR>
+
 		<TD>
+
 			<P>Handling extensible elements in SecurityContextToken.</P>
+
 		</TD>
+
 		<TD>
+
 			<P>We don't take elements other than the standard ones defined for
+
 			SecurityContextToken. This is being fixed to ensure
+
 			interoperability.</P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD>
+
 			<P>Client provided entropy for generating SecurityContextToken</P>
+
 		</TD>
+
 		<TD>
+
 			<P>We rely on security policy to determine if client entropy is
+
 			needed. MS require it by default. This breaks interoperbility in
+
 			certain casees. <BR><BR>WORKAROUND: We believe this is an issue
+
 			with MS. To interop with MS for now, we have to modified their
+
 			security policy to include assertion for requiring client entropy.</P>
+
 		</TD>
+
 	</TR>
+
 </TABLE>
+
 <P STYLE="margin-bottom: 0in"><!-- ================================================== --><BR>
+
 </P>
+
 <HR>
+
 <H2><A NAME="96126"></A>Trust Status</H2>
+
 <H4>WCF Interoperability</H4>
+
 <PRE> Client-&gt; STS -&gt;Service
+
    MS -&gt; *  -&gt; *  :  0/4 : (not tested yet)
+
    S  -&gt; S  -&gt; S :   4/4 : (starting from WSDL)
+
    S  -&gt; S  -&gt; MS :  3/4 : (starting from WSDL)
+
    S  -&gt; MS -&gt; MS :  2/4 : (starting from WSDL)
+
    S  -&gt; MS -&gt; S :   2/4 : (starting from WSDL)</PRE><P>
+
 NOTE: No test scenarios were executed that started from Java.</P>
+
 <H4>What is Not Implemented</H4>
+
 <P>The following features have not been implemented:</P>
+
 <UL>
+
 	<LI><P STYLE="margin-bottom: 0in">Token Validation protocol.</P>
+
 	<LI><P STYLE="margin-bottom: 0in">Issusing SAML 2.0 assertion.</P>
+
 	<LI><P STYLE="margin-bottom: 0in">Support for issuring key types
+
 	other than symmetric key</P>
+
 	<LI><P>Support for claim types attributes</P>
+
 </UL>
+
 <H4>Known Issues</H4>
+
 <TABLE BORDER=1 CELLPADDING=2 CELLSPACING=2>
+
 	<TR>
+
 		<TH>
+
 			<P>Interoperability Feature</P>
+
 		</TH>
+
 		<TH>
+
 			<P>Status/Workaround</P>
+
 		</TH>
+
 	</TR>
+
 	<TR>
+
 		<TD>
+
 			<P>Issued token is in encrypted form with ws-security 1.0 used</P>
+
 		</TD>
+
 		<TD>
+
 			<P>An error is thrown on the client side for processing the token</P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD>
+
 			<P>Issued token in encrypted formis used to establish a
+
 			SecurityContextToken</P>
+
 		</TD>
+
 		<TD>
+
 			<P>An error is thrown on the service side for the RST/SCT request.</P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD>
+
 			<P>client configuration for the service and the STS (maybe
+
 			mutiple)</P>
+
 		</TD>
+
 		<TD>
+
 			<P>Need support of client config files for mutiple services in
+
 			Tango.<BR><BR>Workaround: We are using a mixing of wsit-client.xml
+
 			and system properties to cinfigure security and STS information
+
 			for different services and STS's.</P>
+
 		</TD>
+
 	</TR>
+
 </TABLE>
+
 <P STYLE="margin-bottom: 0in"><!-- ================================================== --><BR>
+
 </P>
+
 <HR>
+
 <H2><A NAME="98261"></A>Coordination/Atomic Transactions Status</H2>
+
 <P>This technology is under development but it is not available at
+
 this time.</P>
+
 <P STYLE="margin-bottom: 0in"><!-- ================================================== --><BR>
+
 </P>
+
 <HR>
+
 <H2><A NAME="35087"></A>NetBeans WSIT Module Status</H2>
+
 <H4>What is Not Implemented</H4>
+
 <UL>
+
 	<LI><P STYLE="margin-bottom: 0in">WSIT support for Web Services and
+
 	Web service clients is implemented in Web projects only.</P>
+
 	<LI><P>Web Service Tester functionality for WSIT enabled Web
+
 	services is not implemented.</P>
+
 	<LI><P>Web Service Client wizard works when service WSDL URL is
+
 	specified</P>
+
 </UL>
+
 <H4>Known Issues</H4>
+
 <TABLE BORDER=1 CELLPADDING=2 CELLSPACING=2>
+
 	<TR>
+
 		<TH>
+
 			<P>Interoperability Feature</P>
+
 		</TH>
+
 		<TH>
+
 			<P>Status/Workaround</P>
+
 		</TH>
+
 	</TR>
+
 	<TR>
+
 		<TD>
+
 			<P>WSIT Security: A value that exceeds the maximum allowed can be
+
 			saved to the Max Nonce Age.</P>
+
 		</TD>
+
 		<TD>
+
 			<P>EXPECTED BEHAVIOR: Max Nonce Age in Security -&gt; Advanced
+
 			Configuration should not accept a value greater than 900000.</P>
+
 			<P>ACTUAL BEHAVIOR: Accepts and saves invalid value to the WSDL.</P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD>
+
 			<P>WSIT Security: A value that exceeds the maximum allowed can be
+
 			saved to the Max Clock Skew.</P>
+
 		</TD>
+
 		<TD>
+
 			<P>EXPECTED BEHAVIOR: Max Nonce Age in Security -&gt; Advanced
+
 			Configuration should not accept a value greater than 1200000.</P>
+
 			<P>ACTUAL BEHAVIOR: Accepts and saves invalid value (1200001) to
+
 			the WSDL.</P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD>
+
 			<P>WSIT Security: Include Token in a message and X509 Version can
+
 			be set incorrectly.</P>
+
 		</TD>
+
 		<TD>
+
 			<P>EXPECTED BEHAVIOR: Saved details show Security Binding and
+
 			Encryption token with the same values.</P>
+
 			<P>ACTUAL BEHAVIOR: Saved values are incorrect.</P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD>
+
 			<P>WSIT Security Keystore Configuration: Behavior of child dialogs
+
 			is incorrect.</P>
+
 		</TD>
+
 		<TD>
+
 			<P>EXPECTED BEHAVIOR: Do not expect values that specified on child
+
 			dialogs to be saved to the WSDL.</P>
+
 			<P>ACTUAL BEHAVIOR: Values that are specified in child dialogs are
+
 			saved to the WSDL. Saving should not occur until the OK button is
+
 			clicked on parent dialog.</P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD>
+
 			<P>WSIT Security: Supporting Tokens are enabled even if there's No
+
 			Security selected.</P>
+
 		</TD>
+
 		<TD>
+
 			<P>Do not specify Supporting Tokens before setting the security
+
 			option.</P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD>
+
 			<P>WSIT features</P>
+
 		</TD>
+
 		<TD>
+
 			<P>When creating a Web Service project to use WSIT features, you
+
 			must select J2EE 1.4 in the New Web Application window and set the
+
 			Source Level to 1.5 in the Project Properties window.</P>
+
 			<P>NOTE: With these configuration settings the NetBeans 5.5 does
+
 			not support JSR 109.</P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD>
+
 			<P>Support for multiple Web services and clients in a single
+
 			project.</P>
+
 		</TD>
+
 		<TD>
+
 			<P>In each project, only one service and one client is supported.</P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD>
+
 			<P>Navigator functionality</P>
+
 		</TD>
+
 		<TD>
-			<P>The WSIT configuration file and the SWIT configuration GUI
-			should never be opened at th same time.</P>
+
+			<P>The WSIT configuration file and the WSIT configuration GUI
+
+			should never be opened at the same time.</P>
+
 		</TD>
+
 	</TR>
+
 </TABLE>
+
 <P STYLE="margin-bottom: 0in"><!-- ================================================== --><BR>
+
 </P>
+
 <HR>
+
 <H2><A NAME="70368"></A>Web Services Addressing Status</H2>
+
 <H4>WCF Interoperability</H4>
+
 <PRE>non-secure:
+
   MS-&gt;S : No client code available
+
   S-&gt;MS : 36/66
+
   S -&gt;S : 47/66
+
 secure:
+
   MS-&gt;S : No client code available
+
   S-&gt;MS : Not tested
+
   S -&gt;S : Not tested</PRE><H4>
+
 What is Not Implemented</H4>
+
 <P>Transparent support for WS-Addressing Member Submission Version.</P>
+
 <P>Anonymous semantics in WSDL and faults in SOAP messages.</P>
+
 <H4>Known Issues</H4>
+
 <P>Member Submission needs to be enabled explicitly using this (link
+
 TBD).</P>
+
 <P STYLE="margin-bottom: 0in"><!-- ================================================== --><BR>
+
 </P>
+
 <HR>
+
 <H2><A NAME="13158"></A>Policy Status</H2>
+
 <H4>WCF Interoperability</H4>
+
 <P>n/a</P>
+
 <H4>What is Not Implemented</H4>
+
 <P>The following functionality is not implemented:</P>
+
 <UL>
+
 	<LI><P STYLE="margin-bottom: 0in">Client selecting and validating
+
 	policy alternative at startup. 
+
 	</P>
+
 	<LI><P STYLE="margin-bottom: 0in">Configuring more than one WSDL
+
 	port per application. 
+
 	</P>
+
 	<LI><P STYLE="margin-bottom: 0in">The configuration language could
+
 	be simplified and/or amended with profiles. 
+
 	</P>
+
 	<LI><P STYLE="margin-bottom: 0in">Policy support at tool-time (may
+
 	be needed by WS-TX). 
+
 	</P>
+
 	<LI><P>Support for localization is incomplete 
+
 	</P>
+
 </UL>
+
 <H4>Known Issues</H4>
+
 <TABLE BORDER=1 CELLPADDING=2 CELLSPACING=2>
+
 	<TR>
+
 		<TH>
+
 			<P>Interoperability Feature</P>
+
 		</TH>
+
 		<TH>
+
 			<P>Status/Workaround</P>
+
 		</TH>
+
 	</TR>
+
 	<TR>
+
 		<TD>
+
 			<P><A HREF="https://wsit.dev.java.net/issues/show_bug.cgi?id=6">assertions
+
 			with visibility=&quot;private&quot; in wsit.xml are ignored</A></P>
+
 		</TD>
+
 		<TD>
+
 			<P>Will be fixed once final format of configuration files is
+
 			decided. All assertions must remain visible until then.</P>
+
 		</TD>
+
 	</TR>
+
 </TABLE>
+
 <P><!-- ================================================== --><BR><BR><BR>
+
 </P>
+
 <HR>
+
 <H2><A NAME="jax-ws"></A>JAX-WS Status</H2>
+
 <H4>What is Not Implemented</H4>
+
 <P>The following functionality is not implemented:</P>
+
 <UL>
+
 	<LI><P STYLE="margin-bottom: 0in">Handler, MustUnderstand processing
+
 	functionality is not integrated.</P>
+
 	<LI><P STYLE="margin-bottom: 0in">WSDL MIME binding and Async
+
 	response bean functionality is incomplete.</P>
+
 	<LI><P>FastInfoset support is not there</P>
+
 </UL>
+
 <H4>Known Issues</H4>
+
 <UL>
+
 	<LI><P STYLE="margin-bottom: 0in">wsimport is not adding ?wsdl to
+
 	address when mex request fails.</P>
+
 	<LI><P STYLE="margin-bottom: 0in">webservice client with unpublished
+
 	WSDL does not work anymore</P>
+
 	<UL>
+
 		<LI><P STYLE="margin-bottom: 0in">Unpublished WSDL contains
+
 		REPLACE_WITH_ACTUAL_URL as port address which causes problems while
+
 		creating tranport pipe</P>
+
 		<LI><P STYLE="margin-bottom: 0in">WORKAROUND: replace
+
 		REPLACE_WITH_ACTUAL_URL with any http://... address</P>
+
 	</UL>
+
 	<LI><P>Unbound namespace prefix added to response message</P>
+
 </UL>
+
 <P><BR><BR>
+
 </P>
+
 <HR>
+
 <H2><A NAME="55934"></A>Security Policy Status</H2>
+
 <H4>WCF Interoperability</H4>
+
 <P>Interoperability test is based on use of SecurityPolicy in
+
 WS-Security,WS-SecureConversation,WS-Trust,WS Reliable Messaging,
+
 MTOM,WS-Addressing interop tests.</P>
+
 <H4>What is Not Implemented</H4>
+
 <P>Following assertions are not yet supported by Security Policy
+
 implementation.</P>
+
 <P>XPathFilter</P>
+
 <P>Xpath Targets</P>
+
 <P>RequiredElements</P>
+
 <P>SoapNormalization10</P>
+
 <P>Use of https URL's for endpoints when TransportBinding assertion
+
 is present.</P>
+
 <H4>Known Issues</H4>
+
 <TABLE WIDTH=987 BORDER=1 CELLPADDING=2 CELLSPACING=3>
+
 	<COL WIDTH=231>
+
 	<COL WIDTH=737>
+
 	<TR>
+
 		<TH WIDTH=231>
+
 			<P>Interoperability Feature</P>
+
 		</TH>
+
 		<TH WIDTH=737>
+
 			<P>Status/Workaround</P>
+
 		</TH>
+
 	</TR>
+
 	<TR>
+
 		<TD WIDTH=231>
+
 			<P>sp:EncryptedElements/sp 
+
 			</P>
+
 			<P>Issue number <A HREF="https://wsit.dev.java.net/issues/show_bug.cgi?id=24">24</A></P>
+
 		</TD>
+
 		<TD WIDTH=737>
+
 			<P>sp:EncryptedElements/sp:XPath fails to encrypt the element
+
 			specified in the XPath element</P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD WIDTH=231>
+
 			<P>SupportingTokens assertion</P>
+
 			<P>Issue number <A HREF="https://wsit.dev.java.net/issues/show_bug.cgi?id=12">12</A></P>
+
 		</TD>
+
 		<TD WIDTH=737>
+
 			<P>EncryptedParts in SupportingTokens assertion in message policy
+
 			does not work</P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD WIDTH=231>
+
 			<P>WSSecurity Policy Exception</P>
+
 		</TD>
+
 		<TD WIDTH=737>
+
 			<P>WSSecurity Policy Exception: Default implementation of
+
 			IncludeToken takes &quot;Never&quot;.</P>
+
 		</TD>
+
 	</TR>
+
 	<TR>
+
 		<TD WIDTH=231>
+
 			<P>WSSecurity Policy deploy Issue number <A HREF="https://wsit.dev.java.net/issues/show_bug.cgi?id=14">14</A>,<A HREF="https://wsit.dev.java.net/issues/show_bug.cgi?id=15">15</A>,<A HREF="https://wsit.dev.java.net/issues/show_bug.cgi?id=16">16</A></P>
+
 		</TD>
+
 		<TD WIDTH=737>
+
 			<P>The following security policy assertions cause a deploy
+
 			failure:</P>
+
 			<P>-
+
 			SecurityPolicy:sp:AlgorithmSuite/wsp:Policy/sp:SoapNormalization10</P>
+
 			<P>- SecurityPolicy: sp:AlgorithmSuite/wsp:Policy/sp:XPath10</P>
+
 			<P>- SecurityPolicy: sp:AlgorithmSuite/wsp:Policy/sp:XPathFilter20</P>
+
 		</TD>
+
 	</TR>
+
 </TABLE>
+
 <P><BR><BR>
+
 </P>
+
 </BODY>
+
 </HTML>
