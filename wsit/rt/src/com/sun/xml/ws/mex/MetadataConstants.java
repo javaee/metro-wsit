@@ -33,13 +33,17 @@ public class MetadataConstants {
     public static final String XML_PREFIX =
         "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
     
-    public static final String GET_WXF_REQUEST =
-        "http://schemas.xmlsoap.org/ws/2004/09/transfer/Get";
-    public static final String GET_WXF_RESPONSE =
-        "http://schemas.xmlsoap.org/ws/2004/09/transfer/GetResponse";
+    private static final String XMLSOAP_2004_09 =
+        "http://schemas.xmlsoap.org/ws/2004/09/";
+    public static final String GET_REQUEST = XMLSOAP_2004_09 + "transfer/Get";
+    public static final String GET_RESPONSE =
+        XMLSOAP_2004_09 + "transfer/GetResponse";
+    public static final String GET_METADATA_REQUEST =
+        XMLSOAP_2004_09 + "mex/GetMetadata/Request";
+    public static final String GET_METADATA_RESPONSE =
+        XMLSOAP_2004_09 + "mex/GetMetadata/Response";
     
-    public static final String MEX_NAMESPACE =
-        "http://schemas.xmlsoap.org/ws/2004/09/mex";
+    public static final String MEX_NAMESPACE = XMLSOAP_2004_09 + "mex";
     public static final String MEX_PREFIX = "mex";
     public static final String WSA_ANON =
         "http://www.w3.org/2005/08/addressing/anonymous";
@@ -56,12 +60,10 @@ public class MetadataConstants {
         "http://www.w3.org/2001/XMLSchema";
     public static final String WSDL_DIALECT =
         "http://schemas.xmlsoap.org/wsdl/";
-    public static final String POLICY_DIALECT =
-        "http://schemas.xmlsoap.org/ws/2004/09/policy";
+    public static final String POLICY_DIALECT = XMLSOAP_2004_09 + "policy";
     public static final String POLICYATT_DIALECT =
-        "http://schemas.xmlsoap.org/ws/2004/09/policy/attachment";
-    public static final String MEX_DIALECT =
-        "http://schemas.xmlsoap.org/ws/2004/09/mex";
+        XMLSOAP_2004_09 + "policy/attachment";
+    public static final String MEX_DIALECT = XMLSOAP_2004_09 + "mex";
     
     /**
      * This is the logging level that is used for errors

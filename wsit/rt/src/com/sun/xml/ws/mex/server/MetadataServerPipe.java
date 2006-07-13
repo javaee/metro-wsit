@@ -42,8 +42,10 @@ import com.sun.xml.ws.api.pipe.helper.AbstractFilterPipeImpl;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.SOAPVersion;
 
-import static com.sun.xml.ws.mex.MetadataConstants.GET_WXF_REQUEST;
-import static com.sun.xml.ws.mex.MetadataConstants.GET_WXF_RESPONSE;
+import static com.sun.xml.ws.mex.MetadataConstants.GET_METADATA_REQUEST;
+import static com.sun.xml.ws.mex.MetadataConstants.GET_METADATA_RESPONSE;
+import static com.sun.xml.ws.mex.MetadataConstants.GET_REQUEST;
+import static com.sun.xml.ws.mex.MetadataConstants.GET_RESPONSE;
 import static com.sun.xml.ws.mex.MetadataConstants.MEX_NAMESPACE;
 import static com.sun.xml.ws.mex.MetadataConstants.MEX_PREFIX;
 import static com.sun.xml.ws.mex.MetadataConstants.SOAP_1_2;
@@ -92,16 +94,21 @@ public class MetadataServerPipe extends AbstractFilterPipeImpl {
 
     public Packet process(Packet request) {
         AddressingProperties ap = wsaRtFac.readHeaders(request);
-        if (ap != null &&
-            ap.getAction().toString().equals(GET_WXF_REQUEST)) {
-            return processRequest(request, ap);
+        if (ap != null) {
+            if (ap.getAction().toString().equals(GET_REQUEST)) {
+                return processGetRequest(request, ap, GET_RESPONSE);
+            } else if (ap.getAction().toString().equals(GET_METADATA_REQUEST)) {
+                return processGetMetdataRequest(request, ap);
+            }
         }
         return next.process(request);
     }
 
-    public void preDestroy() {}
+//    public void preDestroy() {}
 
-    private Packet processRequest(Packet request, AddressingProperties ap) {
+    private Packet processGetRequest(Packet request, AddressingProperties ap,
+        String responseAction) {
+        
         try {
             String address = ap.getTo().toString();
             MutableXMLStreamBuffer buffer = new MutableXMLStreamBuffer();
@@ -114,7 +121,7 @@ public class MetadataServerPipe extends AbstractFilterPipeImpl {
 
             Message responseMessage = Messages.create(buffer);
             Packet response = request.createResponse(responseMessage);
-            createResponseHeaders(request, response, ap);
+            createResponseHeaders(request, response, ap, responseAction);
             return response;
         } catch (XMLStreamBufferException bufferE) {
             throw new WebServiceException(bufferE);
@@ -125,6 +132,18 @@ public class MetadataServerPipe extends AbstractFilterPipeImpl {
         }
     }
 
+    /*
+     * This method should create an unsupported action
+     * fault for any cases that are not supported. Currently
+     * it ignores the dialect and returns all the metadata.
+     */
+    private Packet processGetMetdataRequest(Packet request,
+        AddressingProperties ap) {
+        
+        // todo: check for unsupported attributes in action
+        return processGetRequest(request, ap, GET_METADATA_RESPONSE);
+    }
+    
     private void writeStartEnvelope(XMLStreamWriter writer) 
         throws XMLStreamException {
 
@@ -144,12 +163,12 @@ public class MetadataServerPipe extends AbstractFilterPipeImpl {
     }
 
     private void createResponseHeaders(Packet request, Packet response,
-        AddressingProperties requestProps) {
+        AddressingProperties requestProps, String action) {
 
         // running into element prefix not bound problem again
 //        AddressingProperties responseProps =
 //            wsaRtFac.toOutbound(requestProps, request);
-//        responseProps.setAction(GET_WXF_RESPONSE);
+//        responseProps.setAction(action);
 //        wsaRtFac.writeHeaders(response, responseProps);
     }
 

@@ -28,7 +28,7 @@ import javax.xml.ws.WebServiceException;
 
 import com.sun.xml.ws.mex.client.MetadataClient.Protocol;
 
-import static com.sun.xml.ws.mex.MetadataConstants.GET_WXF_REQUEST;
+import static com.sun.xml.ws.mex.MetadataConstants.GET_REQUEST;
 import static com.sun.xml.ws.mex.MetadataConstants.SOAP_1_1;
 import static com.sun.xml.ws.mex.MetadataConstants.SOAP_1_2;
 import static com.sun.xml.ws.mex.MetadataConstants.WSA_ANON;
@@ -56,7 +56,7 @@ public class WSTransferUtil {
      * @return The full response from the server.
      */
     InputStream getMetadata(String address, Protocol p) throws Exception {
-        String request = getWxfWsdlRequest(address, p);
+        String request = getMexWsdlRequest(address, p);
         logger.fine("Request message:\n" + request + "\n");
         String contentType = "application/soap+xml"; // soap 1.2
         if (p == Protocol.SOAP_1_1) {
@@ -65,7 +65,7 @@ public class WSTransferUtil {
         return postClient.post(request, address, contentType);
     }
     
-    private String getWxfWsdlRequest(String address, Protocol p) {
+    private String getMexWsdlRequest(String address, Protocol p) {
         // start with soap 1.2
         String soapPrefix = "s12";
         String soapNamespace = SOAP_1_2;
@@ -78,7 +78,7 @@ public class WSTransferUtil {
             "xmlns:" + WSA_PREFIX + "='" + WSA_NAMESPACE + "'>" +
             "<" + soapPrefix + ":Header>" +
             "<" + WSA_PREFIX + ":Action>" +
-            GET_WXF_REQUEST +
+            GET_REQUEST +
             "</" + WSA_PREFIX + ":Action>" +
             "<" + WSA_PREFIX + ":To>" + address + "</" + WSA_PREFIX + ":To>" +
             "<" + WSA_PREFIX + ":ReplyTo><" + WSA_PREFIX + ":Address>" +
