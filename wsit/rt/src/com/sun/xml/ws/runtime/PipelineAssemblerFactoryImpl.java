@@ -55,6 +55,7 @@ import com.sun.xml.ws.rm.RMConstants;
 import com.sun.xml.ws.rm.jaxws.runtime.client.RMClientPipe;
 import com.sun.xml.ws.rm.jaxws.runtime.server.RMServerPipe;
 import com.sun.xml.ws.util.pipe.DumpPipe;
+import com.sun.xml.ws.util.ServiceFinder;
 import com.sun.xml.wss.jaxws.impl.SecurityClientPipe;
 import com.sun.xml.wss.jaxws.impl.SecurityServerPipe;
 
@@ -331,8 +332,8 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
 
             return (policy != null) &&
                     (policy.contains(ADDRESSING_POLICY_NAMESPACE_URI) ||
-                            policy.contains(ac.getNamespaceURI()) ||
-                            policy.contains(ac2.getNamespaceURI()));
+                            policy.contains(ac.getWSDLNamespaceURI()) ||
+                            policy.contains(ac2.getWSDLNamespaceURI()));
         } catch (PolicyException e) {
             throw new WebServiceException(e);
         }
@@ -385,6 +386,13 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
 
     private Pipe dumpAction(String name, WSDLPort wsdlPort, Pipe p) {
         if (Boolean.getBoolean(name)) {
+            ServiceFinder<ActionDumpPipe> pipes = ServiceFinder.find(com.sun.xml.ws.runtime.ActionDumpPipe.class);
+            if (pipes != null) {
+                if (pipes.toArray().length > 0) {
+                    return pipes.toArray()[0];
+                }
+            }
+
             return new ActionDumpPipe(name, wsdlPort, p);
         }
 
