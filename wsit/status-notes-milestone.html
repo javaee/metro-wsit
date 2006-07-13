@@ -247,10 +247,10 @@ secure:
 
 <h4>What is Not Implemented</h4>
 
-<p>All Metadata Exchange functionality has been implemented, including send
-and receive metadata and the client API for other components to use. However,
-the code that adds headers to the response message is commented out because
-of a known issue in xml stream buffer.</p>
+<p>All basic Metadata Exchange functionality has been implemented, including
+send and receive metadata and the client API for other components to use.
+However, the code that adds headers to the response message is commented out
+because of a known issue in xml stream buffer.</p>
 
 <h4>Known Issues</h4>
 
@@ -272,23 +272,6 @@ of a known issue in xml stream buffer.</p>
 
         <p>WORKAROUND: The client code currently does not check for these
         headers so the response is still parsed.</p>
-      </td>
-    </tr>
-    <tr>
-      <td><p>Support for multiple Web services on a single server</p>
-      </td>
-      <td><p>If more than one Web service is deployed in the server, a client
-        can only use Metadata Exchange to retrieve the first Web service
-        deployed.</p>
-
-        <p>WORKAROUND: Do not use Metadata Exchange. Instead, use the
-        wsimport tool and specify the "?wsdl" address as the target.</p>
-      </td>
-    </tr>
-    <tr>
-      <td><p>Support for ReplyTo in client request.</p>
-      </td>
-      <td><p>This feature is currently not supported.</p>
       </td>
     </tr>
   </tbody>
