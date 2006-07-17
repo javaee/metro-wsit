@@ -1,21 +1,13 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-
 <HTML>
-
 <HEAD>
-
 	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=windows-1252">
-
 	<TITLE>WSIT Status Notes</TITLE>
 
 	<META NAME="GENERATOR" CONTENT="Microsoft FrontPage 4.0">
-
 	<META NAME="CREATED" CONTENT="20060713;8550900">
-
 	<META NAME="CHANGED" CONTENT="20060713;21281095">
-
 	<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
-
 </HEAD>
 
 <BODY LANG="en-US" BGCOLOR="#ffffff" DIR="LTR">
@@ -48,7 +40,6 @@ Microsoft's WCF product and vice versa.</P>
 
 <UL>
 <LI><A HREF="#52974">Glassfish Classpath Change Requirements</A></li>
-<LI><A HREF="#67607">Summary of Known Issues</A></li>
 <LI><A HREF="#91780">Metadata Exchange Status</A></li>
 <LI><A HREF="#68668">MTOM Status</A></li>
 <LI><A HREF="#49498">Data Binding Status</A></li>
@@ -88,11 +79,10 @@ Microsoft's WCF product and vice versa.</P>
 
 <H2><A NAME="52974"></A>Glassfish Classpath Change Requirements</H2>
 
-<P>The b43-nightly-01_may_2006 build of GlassFish contains several Jar
-files which contain classes that can conflict with the newer versions
-of those classes provided by the WSIT environment. To avoid problems,
-the classpath for both the Glassfish application server and the client
-application must be modified.</P>
+<P>GlassFish contains several Jar files which contain classes that can
+conflict with the newer versions of those classes provided by the WSIT
+environment. To avoid problems, the classpath for both the Glassfish
+application server and the client application must be modified.</P>
 
 <P>The WSIT installer (wsit-on-glassfish.xml) will handle making the
 necessary classpath modifications in the Glassfish configuration file
@@ -116,155 +106,6 @@ run the tools and the client application:</P>
         &lt;/fileset>
    &lt;/path>
 </PRE>
-
-<!-- ================================================== -->
-<BR>
-<HR>
-
-<H2><A NAME="67607"></A>Summary of Known Issues</H2>
-
-<TABLE BORDER=1 CELLPADDING=2 CELLSPACING=2>
-	<TR>
-		<TH>
-			<P ALIGN=CENTER>Features</P>
-		</TH>
-		<TH>
-			<P ALIGN=CENTER>Priority 1</P>
-		</TH>
-		<TH>
-			<P ALIGN=CENTER>Priority 2</P>
-		</TH>
-		<TH>
-			<P ALIGN=CENTER>Priority 3</P>
-		</TH>
-		<TH>
-			<P ALIGN=CENTER>Priority 4 and 5</P>
-		</TH>
-		<TH>
-			<P ALIGN=CENTER>Totals</P>
-		</TH>
-	</TR>
-	<TR>
-		<TD>
-			<P ALIGN=CENTER>Installation</P>
-		</TD>
-		<TD>
-			<P ALIGN=CENTER>0</P>
-		</TD>
-		<TD>
-			<P ALIGN=CENTER>0</P>
-		</TD>
-		<TD>
-			<P ALIGN=CENTER>1</P>
-		</TD>
-		<TD>
-			<P ALIGN=CENTER>0</P>
-		</TD>
-		<TD>
-			<P ALIGN=CENTER>1</P>
-		</TD>
-	</TR>
-	<TR>
-		<TD>
-			<P ALIGN=CENTER>Integration</P>
-		</TD>
-		<TD>
-			<P ALIGN=CENTER>0</P>
-		</TD>
-		<TD>
-			<P ALIGN=CENTER>1</P>
-		</TD>
-		<TD>
-			<P ALIGN=CENTER>0</P>
-		</TD>
-		<TD>
-			<P ALIGN=CENTER>0</P>
-		</TD>
-		<TD>
-			<P ALIGN=CENTER>1</P>
-		</TD>
-	</TR>
-	<TR>
-		<TD>
-			<P ALIGN=CENTER>Metadata Exchange</P>
-		</TD>
-		<TD>
-			<P ALIGN=CENTER>0</P>
-		</TD>
-		<TD>
-			<P ALIGN=CENTER>1</P>
-		</TD>
-		<TD>
-			<P ALIGN=CENTER>0</P>
-		</TD>
-		<TD>
-			<P ALIGN=CENTER>0</P>
-		</TD>
-		<TD>
-			<P ALIGN=CENTER>1</P>
-		</TD>
-	</TR>
-	<TR>
-		<TD>
-			<P ALIGN=CENTER>Security</P>
-		</TD>
-		<TD>
-			<P ALIGN=CENTER>0</P>
-		</TD>
-		<TD>
-			<P ALIGN=CENTER>5</P>
-		</TD>
-		<TD>
-			<P ALIGN=CENTER>4</P>
-		</TD>
-		<TD>
-			<P ALIGN=CENTER>0</P>
-		</TD>
-		<TD>
-			<P ALIGN=CENTER>0</P>
-		</TD>
-	</TR>
-	<TR>
-		<TD>
-			<P ALIGN=CENTER>Security Policy</P>
-		</TD>
-		<TD>
-			<P ALIGN=CENTER>0</P>
-		</TD>
-		<TD>
-			<P ALIGN=CENTER>5</P>
-		</TD>
-		<TD>
-			<P ALIGN=CENTER>3</P>
-		</TD>
-		<TD>
-			<P ALIGN=CENTER>0</P>
-		</TD>
-		<TD>
-			<P ALIGN=CENTER>0</P>
-		</TD>
-	</TR>
-	<TR>
-		<TD>
-			<P ALIGN=CENTER>Trust</P>
-		</TD>
-		<TD>
-			<P ALIGN=CENTER>0</P>
-		</TD>
-		<TD>
-			<P ALIGN=CENTER>0</P>
-		</TD>
-		<TD>
-			<P ALIGN=CENTER>4</P>
-		</TD>
-		<TD>
-			<P ALIGN=CENTER>0</P>
-		</TD>
-		<TD>
-			<P ALIGN=CENTER>0</P>
-		</TD>
-	</TR>
-</TABLE>
 
 <!-- ================================================== -->
 <BR>
