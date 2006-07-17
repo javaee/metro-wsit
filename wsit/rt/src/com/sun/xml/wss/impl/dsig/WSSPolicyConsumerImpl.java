@@ -589,53 +589,6 @@ attribute.getNamespaceURI().equals(MessageConstants.NAMESPACES_NS)) {
             logger.log(Level.FINEST, "Number of Targets is"+targetList.size());
         }
         
-        if(!isEndorsing){
-            //Add SignatureConfirmation Targets
-            ListIterator scIter = fpContext.getSignatureConfirmationIds().listIterator();
-            while(scIter.hasNext()) {
-                String targetURI = (String)scIter.next();
-                String digestAlgo = MessageConstants.SHA1_DIGEST; 
-                DigestMethod digestMethod =null;
-                try{
-                    digestMethod = signatureFactory.newDigestMethod(digestAlgo, null);
-                }catch(Exception ex){
-                    logger.log(Level.SEVERE,"WSS1301.invalid.digest.algo",digestAlgo);
-                    throw new XWSSecurityException(ex.getMessage());
-                }
-                
-                ArrayList transformList = new ArrayList(2);
-                SOAPElement dataElement = null;
-                try {
-                    String _uri = targetURI;
-                    if(targetURI.length() > 0 && targetURI.charAt(0)=='#'){
-                        _uri = targetURI.substring(1);
-                    }
-                    dataElement =(SOAPElement) XMLUtil.getElementById(
-                            secureMessage.getSOAPPart(),_uri);
-                } catch (TransformerException te) {
-                    throw new XWSSecurityException(te.getMessage(), te);
-                }
-                String transformAlgo  = MessageConstants.TRANSFORM_C14N_EXCL_OMIT_COMMENTS;
-                ExcC14NParameterSpec spec = null;
-                if(dataElement != null){
-                    spec =   new ExcC14NParameterSpec(getReferenceNamespacePrefixes(dataElement));
-                }
-                Transform transform = signatureFactory.newTransform(transformAlgo,spec);
-                transformList.add(transform);
-                
-                byte [] digestValue = fpContext.getDigestValue();
-                Reference reference = null;
-                if(targetURI.length() > 0 && targetURI.charAt(0) != '#')
-                    targetURI = "#" + targetURI;
-                if(!verify && digestValue != null){
-                    reference = signatureFactory.newReference(targetURI,digestMethod,transformList,null,null,digestValue);
-                } else{
-                    reference = signatureFactory.newReference(targetURI,digestMethod,transformList,null,null);
-                }
-                references.add(reference);
-            }
-        }
-        
         while(iterator.hasNext()) {
             
             SignatureTarget signatureTarget = (SignatureTarget)iterator.next();
