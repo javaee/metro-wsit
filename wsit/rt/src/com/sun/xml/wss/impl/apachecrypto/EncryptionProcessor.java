@@ -255,16 +255,23 @@ public class EncryptionProcessor {
             keyEncAlgo = context.getAlgorithmSuite().getAsymmetricKeyAlgorithm(); 
         }
 
-       //FIXME: hack here to circument MS treatment of  DerivedKeys under X509
-       /*
-       if (PolicyTypeUtil.derivedTokenKeyBinding(keyBinding)) {
-            DerivedTokenKeyBinding dtk = (DerivedTokenKeyBinding)keyBinding;
-            WSSPolicy originalKeyBinding = dtk.getOriginalKeyBinding();
-            if (PolicyTypeUtil.x509CertificateBinding(originalKeyBinding)) {
-                keyBinding = (WSSPolicy)originalKeyBinding.clone();
-            }
-        }*/
-
+        // derivedTokenKeyBinding with x509 as originalkeyBinding is to be treated same as
+        // DerivedKey with Symmetric binding and X509 as key binding of Symmetric binding 
+        if(PolicyTypeUtil.derivedTokenKeyBinding(keyBinding)){
+             DerivedTokenKeyBinding dtk = (DerivedTokenKeyBinding)keyBinding.clone();
+             WSSPolicy originalKeyBinding = dtk.getOriginalKeyBinding();
+                    
+             if (PolicyTypeUtil.x509CertificateBinding(originalKeyBinding)){
+                 AuthenticationTokenPolicy.X509CertificateBinding ckBindingClone = 
+                        (AuthenticationTokenPolicy.X509CertificateBinding)originalKeyBinding.clone();
+                 //create a symmetric key binding and set it as original key binding of dkt
+                 SymmetricKeyBinding skb = new SymmetricKeyBinding();
+                 skb.setKeyBinding(ckBindingClone);
+                 // set the x509 binding as key binding of symmetric binding
+                 dtk.setOriginalKeyBinding(skb);
+                 keyBinding = dtk;
+             }
+        }        
         
         if (PolicyTypeUtil.usernameTokenPolicy(keyBinding)) {
                 throw new XWSSecurityException("UsernameToken as KeyBinding for EncryptionPolicy is Not Yet Supported");
@@ -662,7 +669,7 @@ public class EncryptionProcessor {
             long length = SecurityUtil.getLengthFromAlgorithm(algorithm);
 
             if (PolicyTypeUtil.x509CertificateBinding(originalKeyBinding)) {
-                throw new XWSSecurityException("Asymmetric Binding with DerivedKeys under X509Token Policy Not Yet Supported");
+                //throw new XWSSecurityException("Asymmetric Binding with DerivedKeys under X509Token Policy Not Yet Supported");
             } else if ( PolicyTypeUtil.symmetricKeyBinding(originalKeyBinding)) {
                 SymmetricKeyBinding skb = null;
                 if ( context.getSymmetricKeyBinding() != null) {

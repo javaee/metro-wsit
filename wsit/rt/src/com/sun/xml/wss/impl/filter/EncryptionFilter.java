@@ -1,5 +1,5 @@
 /**
- * $Id: EncryptionFilter.java,v 1.1 2006-05-03 22:57:48 arungupta Exp $
+ * $Id: EncryptionFilter.java,v 1.2 2006-07-17 08:52:38 ashutoshshahi Exp $
  */
 
 /*
@@ -120,6 +120,11 @@ public class EncryptionFilter {
 
             EncryptionPolicy policy = (EncryptionPolicy)context.getSecurityPolicy();
             EncryptionPolicy resolvedPolicy = (EncryptionPolicy)policy;
+            
+            boolean wss11Receiver = "true".equals(context.getExtraneousProperty("EnableWSS11PolicyReceiver"));
+            boolean wss11Sender = "true".equals(context.getExtraneousProperty("EnableWSS11PolicySender"));
+            boolean sendEKSHA1 =  wss11Receiver && wss11Sender;
+            boolean wss10 = !wss11Sender;
 
             if (!context.makeDynamicPolicyCallback()) {
                 WSSPolicy keyBinding = (WSSPolicy) policy.getKeyBinding();
@@ -138,7 +143,26 @@ public class EncryptionFilter {
 
                 if(tmp != null && !"".equals(tmp)){
                     dataEncAlgo = tmp;
-                }                
+                }
+                
+                // derivedTokenKeyBinding with x509 as originalkeyBinding is to be treated same as
+                // DerivedKey with Symmetric binding and X509 as key binding of Symmetric binding 
+                if(PolicyTypeUtil.derivedTokenKeyBinding(keyBinding)){
+                    DerivedTokenKeyBinding dtk = (DerivedTokenKeyBinding)keyBinding.clone();
+                    WSSPolicy originalKeyBinding = dtk.getOriginalKeyBinding();
+                    
+                    if (PolicyTypeUtil.x509CertificateBinding(originalKeyBinding)){
+                        AuthenticationTokenPolicy.X509CertificateBinding ckBindingClone = 
+                                (AuthenticationTokenPolicy.X509CertificateBinding)originalKeyBinding.clone();
+                        //create a symmetric key binding and set it as original key binding of dkt
+                        SymmetricKeyBinding skb = new SymmetricKeyBinding();
+                        skb.setKeyBinding(ckBindingClone);
+                        // set the x509 binding as key binding of symmetric binding
+                        dtk.setOriginalKeyBinding(skb);
+                        keyBinding = dtk;
+                    }
+                }
+                
                 if (PolicyTypeUtil.x509CertificateBinding(keyBinding)) {
                     try {
                         AuthenticationTokenPolicy.X509CertificateBinding binding = 
@@ -177,12 +201,7 @@ public class EncryptionFilter {
                                 log.log(Level.SEVERE, "WSS1413.error.extracting.certificate", e);
                                 throw new XWSSecurityException(e);
                             }
-                        }
-                        
-                        boolean wss11Receiver = "true".equals(context.getExtraneousProperty("EnableWSS11PolicyReceiver"));
-                        boolean wss11Sender = "true".equals(context.getExtraneousProperty("EnableWSS11PolicySender"));
-                        boolean sendEKSHA1 =  wss11Receiver && wss11Sender;
-                        boolean wss10 = !wss11Sender;                        
+                        }                    
                         
                         if(!keyIdentifier.equals(MessageConstants._EMPTY)){
                             sKey = context.getSecurityEnvironment().getSecretKey(
@@ -269,7 +288,7 @@ public class EncryptionFilter {
                             }
                         }
                         
-                        if("true".equals(context.getExtraneousProperty("EnableWSS11PolicyReceiver"))){
+                        if(sendEKSHA1){
                             Subject currentSubject = SubjectAccessor.getRequesterSubject();
                             Set privateCredentials = currentSubject.getPublicCredentials();
                             for(Iterator it = privateCredentials.iterator(); it.hasNext();){
@@ -278,7 +297,7 @@ public class EncryptionFilter {
                                     sKey = (javax.crypto.SecretKey)cred;
                                 }
                             }
-                        }else if("true".equals(context.getExtraneousProperty("EnableWSS11PolicySender"))){
+                        }else if(wss11Sender || wss10){
                             sKey =  SecurityUtil.generateSymmetricKey(dataEncAlgo);
                         }
                         symmBinding.setSecretKey(sKey);

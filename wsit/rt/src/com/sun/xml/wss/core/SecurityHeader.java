@@ -1,5 +1,5 @@
 /*
- * $Id: SecurityHeader.java,v 1.1 2006-05-03 22:57:33 arungupta Exp $
+ * $Id: SecurityHeader.java,v 1.2 2006-07-17 08:52:39 ashutoshshahi Exp $
  */
 
 /*
@@ -237,9 +237,19 @@ public class SecurityHeader extends SOAPElementExtension implements SOAPElement 
             while(temp.getNodeType() != Node.ELEMENT_NODE && temp.getNextSibling() != null){
                 temp = (javax.xml.soap.Node)temp.getNextSibling();
             }
-            if(null != temp)
+            if(null != temp){
+                while((temp != null) && (MessageConstants.SIGNATURE_CONFIRMATION_LNAME.equals(temp.getLocalName()))){
+                    temp = temp.getNextSibling();
+                    if(temp == null)
+                        return null;
+                    while(temp.getNodeType() != Node.ELEMENT_NODE && temp.getNextSibling() != null){
+                        temp = (javax.xml.soap.Node)temp.getNextSibling();
+                    }
+                }
+                if(temp == null)
+                    return null;
                 return (SOAPElement)temp;
-            else
+            } else
                 return null;
         } else{
             return firstElement;
