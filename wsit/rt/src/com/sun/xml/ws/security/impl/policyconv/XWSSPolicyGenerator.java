@@ -3,12 +3,12 @@
  * of the Common Development and Distribution License
  * (the License).  You may not use this file except in
  * compliance with the License.
- * 
+ *
  * You can obtain a copy of the license at
  * https://glassfish.dev.java.net/public/CDDLv1.0.html.
  * See the License for the specific language governing
  * permissions and limitations under the License.
- * 
+ *
  * When distributing Covered Code, include this CDDL
  * Header Notice in each file and include the License file
  * at https://glassfish.dev.java.net/public/CDDLv1.0.html.
@@ -16,7 +16,7 @@
  * with the fields enclosed by brackets [] replaced by
  * you own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * 
+ *
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
@@ -96,7 +96,6 @@ import com.sun.xml.ws.security.policy.WSSAssertion;
 
 public class XWSSPolicyGenerator {
     
-    
     String _protectionOrder = "";
     
     SignaturePolicy _primarySP  = null;
@@ -129,7 +128,7 @@ public class XWSSPolicyGenerator {
     
     private IntegrityAssertionProcessor iAP = null;
     private EncryptionAssertionProcessor eAP = null;
-    private Binding policyBinding = null; 
+    private Binding policyBinding = null;
     /** Creates a new instance of WSPolicyProcessorImpl */
     //public XWSSPolicyGenerator(AssertionSet assertionSet,boolean isServer,boolean isIncoming){
     public XWSSPolicyGenerator(Policy effectivePolicy,boolean isServer,boolean isIncoming){
@@ -142,10 +141,13 @@ public class XWSSPolicyGenerator {
     public AlgorithmSuite getBindingLevelAlgSuite(){
         return _binding.getAlgorithmSuite();
     }
+    
     public void process(boolean ignoreST) throws PolicyException {
         this.ignoreST = ignoreST;
         process();
     }
+    
+    
     public void process() throws PolicyException {
         collectPolicies();
         PolicyAssertion binding = (PolicyAssertion)getBinding();
@@ -156,9 +158,9 @@ public class XWSSPolicyGenerator {
         }
         if(PolicyUtil.isTransportBinding(binding)){
             TransportBindingProcessor tbp= new TransportBindingProcessor((TransportBinding)binding,isServer, isIncoming,_policyContainer);
-        //    _policyContainer.getMessagePolicy().setAlgorithmSuite(((TransportBinding)binding).getAlgorithmSuite());
+            //    _policyContainer.getMessagePolicy().setAlgorithmSuite(((TransportBinding)binding).getAlgorithmSuite());
             tbp.process();
-         //   _policyContainer.getMessagePolicy().setLayout(((TransportBinding)binding).getLayout());
+            //   _policyContainer.getMessagePolicy().setLayout(((TransportBinding)binding).getLayout());
             processNonBindingAssertions(tbp);
             //TODO
             //else if(PolicyUtil.isTransportBinding(binding.getName()) ){
@@ -172,13 +174,15 @@ public class XWSSPolicyGenerator {
             eAP = new EncryptionAssertionProcessor(_binding.getAlgorithmSuite(),false);
             
             _policyContainer.setPolicyContainerMode(_binding.getLayout());
-          //  _policyContainer.getMessagePolicy().setLayout(_binding.getLayout());
+            //  _policyContainer.getMessagePolicy().setLayout(_binding.getLayout());
             if(PolicyUtil.isSymmetricBinding(binding.getName())) {
-              //  _policyContainer.getMessagePolicy().setAlgorithmSuite(((SymmetricBinding) _binding).getAlgorithmSuite());
+                //  _policyContainer.getMessagePolicy().setAlgorithmSuite(((SymmetricBinding) _binding).getAlgorithmSuite());
                 SymmetricBindingProcessor sbp =  new SymmetricBindingProcessor((SymmetricBinding) _binding, _policyContainer,
                         isServer, isIncoming,signedParts,encryptedParts,
                         signedElements,encryptedElements);
-                
+                if(wssAssertion != null){
+                    sbp.setWSS11(true);
+                }
                 sbp.process();
                 processNonBindingAssertions(sbp);
                 sbp.close();
@@ -187,8 +191,11 @@ public class XWSSPolicyGenerator {
                 AsymmetricBindingProcessor abp = new AsymmetricBindingProcessor((AsymmetricBinding) _binding, _policyContainer,
                         isServer, isIncoming,signedParts,encryptedParts,
                         signedElements,encryptedElements);
+                if(wssAssertion != null){
+                    abp.setWSS11(true);
+                }
                 abp.process();
-              //  _policyContainer.getMessagePolicy().setAlgorithmSuite(((AsymmetricBinding) _binding).getAlgorithmSuite());
+                //  _policyContainer.getMessagePolicy().setAlgorithmSuite(((AsymmetricBinding) _binding).getAlgorithmSuite());
                 processNonBindingAssertions(abp);
                 abp.close();
             }
@@ -199,7 +206,7 @@ public class XWSSPolicyGenerator {
         MessagePolicy mp = _policyContainer.getMessagePolicy();
         try{
             if(wssAssertion != null){
-                mp.setWSSAssertion((WSSAssertion)wssAssertion);                
+                mp.setWSSAssertion((WSSAssertion)wssAssertion);
             }
             if(policyBinding.getAlgorithmSuite() != null){
                 mp.setAlgorithmSuite(policyBinding.getAlgorithmSuite());
@@ -275,5 +282,4 @@ public class XWSSPolicyGenerator {
         }
         return true;
     }
-    
 }

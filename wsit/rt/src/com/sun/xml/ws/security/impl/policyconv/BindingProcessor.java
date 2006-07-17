@@ -3,12 +3,12 @@
  * of the Common Development and Distribution License
  * (the License).  You may not use this file except in
  * compliance with the License.
- * 
+ *
  * You can obtain a copy of the license at
  * https://glassfish.dev.java.net/public/CDDLv1.0.html.
  * See the License for the specific language governing
  * permissions and limitations under the License.
- * 
+ *
  * When distributing Covered Code, include this CDDL
  * Header Notice in each file and include the License file
  * at https://glassfish.dev.java.net/public/CDDLv1.0.html.
@@ -16,7 +16,7 @@
  * with the fields enclosed by brackets [] replaced by
  * you own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * 
+ *
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
@@ -48,7 +48,7 @@ import com.sun.xml.wss.impl.policy.mls.WSSPolicy;
 import java.util.Set;
 import java.util.Vector;
 import javax.xml.crypto.dsig.CanonicalizationMethod;
-
+import static com.sun.xml.wss.impl.policy.mls.Target.SIGNATURE_CONFIRMATION;
 /**
  *
  * @author K.Venugopal@sun.com
@@ -76,7 +76,7 @@ public abstract class BindingProcessor {
     protected TokenProcessor tokenProcessor= null;
     protected IntegrityAssertionProcessor iAP = null;
     protected EncryptionAssertionProcessor eAP = null;
-    
+    private boolean WSS11  = false;
     /** Creates a new instance of BindingProcessor */
     public BindingProcessor() {
         this.pid = new PolicyID();
@@ -170,6 +170,12 @@ public abstract class BindingProcessor {
         for(EncryptedElements encEl : encryptedElements){
             eAP.process(encEl,epFB);
         }
+        if(isWSS11()){
+            iAP.process(SIGNATURE_CONFIRMATION,spFB);
+        }
+        if(isServer && !isIncoming && getBinding().getSignatureProtection()){
+            eAP.process(SIGNATURE_CONFIRMATION,epFB);
+        }
     }
     
     
@@ -220,4 +226,12 @@ public abstract class BindingProcessor {
     }
     
     protected abstract void close();
+    
+    public boolean isWSS11() {
+        return WSS11;
+    }
+    
+    public void setWSS11(boolean WSS11) {
+        this.WSS11 = WSS11;
+    }
 }

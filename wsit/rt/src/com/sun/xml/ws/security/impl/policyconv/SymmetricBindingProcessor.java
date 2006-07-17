@@ -119,6 +119,7 @@ public class SymmetricBindingProcessor extends BindingProcessor{
         }
         addPrimaryTargets();
         
+        
         if(binding.getSignatureProtection()){
             protectPrimarySignature();
         }

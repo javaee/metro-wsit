@@ -1,5 +1,5 @@
 /*
- * $Id: Target.java,v 1.1 2006-05-03 22:57:56 arungupta Exp $
+ * $Id: Target.java,v 1.2 2006-07-17 08:40:40 venu Exp $
  */
 
 /*
@@ -57,6 +57,7 @@ public class Target {
     public static final String BODY = "{" + MessageConstants.SOAP_1_1_NS + "}Body";
     public static final String BODY1_2 = "{"+MessageConstants.SOAP_1_2_NS+"}Body";    
     public static final QName BODY_QNAME = new QName(MessageConstants.SOAP_1_1_NS ,"Body");
+    public static final QName SIGNATURE_CONFIRMATION = new QName(MessageConstants.WSSE11_NS,MessageConstants.SIGNATURE_CONFIRMATION_LNAME);
             
     private String type = TARGET_TYPE_VALUE_QNAME;
     
