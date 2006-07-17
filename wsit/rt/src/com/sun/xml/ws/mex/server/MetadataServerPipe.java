@@ -165,11 +165,10 @@ public class MetadataServerPipe extends AbstractFilterPipeImpl {
     private void createResponseHeaders(Packet request, Packet response,
         AddressingProperties requestProps, String action) {
 
-        // running into element prefix not bound problem again
-//        AddressingProperties responseProps =
-//            wsaRtFac.toOutbound(requestProps, request);
-//        responseProps.setAction(action);
-//        wsaRtFac.writeHeaders(response, responseProps);
+        AddressingProperties responseProps =
+            wsaRtFac.toOutbound(requestProps, request);
+        responseProps.setAction(action);
+        wsaRtFac.writeHeaders(response, responseProps);
     }
 
 }
