@@ -95,9 +95,9 @@ public class MetadataServerPipe extends AbstractFilterPipeImpl {
     public Packet process(Packet request) {
         AddressingProperties ap = wsaRtFac.readHeaders(request);
         if (ap != null) {
-            if (ap.getAction().toString().equals(GET_REQUEST)) {
+            if (ap.getAction() != null && ap.getAction().toString().equals(GET_REQUEST)) {
                 return processGetRequest(request, ap, GET_RESPONSE);
-            } else if (ap.getAction().toString().equals(GET_METADATA_REQUEST)) {
+            } else if (ap.getAction() != null && ap.getAction().toString().equals(GET_METADATA_REQUEST)) {
                 return processGetMetdataRequest(request, ap);
             }
         }
