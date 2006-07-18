@@ -23,7 +23,7 @@
 -->
 
 <!--
- $Id: build.xml,v 1.14 2006-07-18 21:28:27 arungupta Exp $
+ $Id: build.xml,v 1.15 2006-07-18 23:01:29 arungupta Exp $
 
  Copyright (c) 2005 Sun Microsystems, Inc.
  All rights reserved.
@@ -95,48 +95,59 @@
         <attribute name="classesdir"/>
         <attribute name="jarname"/>
         <element name="metainf" optional="true"/>
+        <element name="services" optional="true"/>
         <sequential>
             <property name="tmpdir" value="${dist.image.dir}/tmp"/>
             <copy file="${etc.metainf.dir}/MANIFEST.MF" todir="${tmpdir}"/>
             <concatmanifest tempdir="${tmpdir}" manifest="${tmpdir}/MANIFEST.MF">
-                <fileset dir="@{libdir}" includes="*.jar"/>
+                <fileset dir="@{libdir}">
+                    <include name="*.jar"/>
+                    <exclude name="*javadocs*.jar"/>
+                </fileset>
             </concatmanifest>
             <delete dir="${tmpdir}/META-INF" includeemptydirs="true" excludes="services/**"/>
 
             <metainf/>
             <jar destfile="${dist.image.wsit.lib.dir}/@{jarname}.jar" manifest="${tmpdir}/MANIFEST.MF">
-                <fileset dir="${tmpdir}"/>
+                <services/>
                 <fileset dir="@{classesdir}"/>
             </jar>
             <delete dir="${tmpdir}" includeemptydirs="true"/>
         </sequential>
     </macrodef>
 
-    <target name="combine-jars" depends="combine-jars-tooltime, copy-services, combine-jars-runtime"/>
-
-    <target name="copy-services">
-        <copy todir="${tmpdir}/META-INF/services">
-            <fileset dir="etc/META-INF/services" includes="*.*"/>
-        </copy>
-    </target>
+    <target name="combine-jars" depends="combine-jars-tooltime, combine-jars-runtime"/>
 
     <target name="combine-jars-runtime">
         <combine-jars-macro jarname="${name}" libdir="${lib.runtime.dir}" classesdir="${rt.dir}/build/classes">
             <metainf>
                 <copy todir="${tmpdir}/META-INF/services">
-                    <fileset dir="etc/META-INF/services" includes="*.*" excludes="com.sun.tools.ws.api.TJavaGeneratorExtension, com.sun.tools.ws.api.wsdl.TWSDLExtensionHandler"/>
+                    <fileset dir="etc/META-INF/services">
+                        <include name="*.*"/>
+                    </fileset>
                 </copy>
             </metainf>
+            <services>
+                <fileset dir="${tmpdir}">
+                    <include name="**/*.*"/>
+                    <exclude name="**/*.TWSDL*"/>
+                    <exclude name="**/*.TJava*"/>
+                </fileset>
+            </services>
         </combine-jars-macro>
     </target>
 
     <target name="combine-jars-tooltime">
         <combine-jars-macro jarname="${name}-tools" libdir="${lib.tooltime.dir}" classesdir="${tools.dir}/build/classes">
-            <metainf>
-                <copy todir="${tmpdir}/META-INF/services">
-                    <fileset dir="etc/META-INF/services" includes="com.sun.tools.ws.api.TJavaGeneratorExtension, com.sun.tools.ws.api.wsdl.TWSDLExtensionHandler"/>
-                </copy>
-            </metainf>
+            <services>
+                <fileset dir="${etc.dir}">
+                    <include name="META-INF/services/*.TWSDL*"/>
+                    <include name="META-INF/services/*.TJava*"/>
+                </fileset>
+                <fileset dir="${tmpdir}">
+                    <include name="**/*.*"/>
+                </fileset>
+            </services>
         </combine-jars-macro>
     </target>
 
