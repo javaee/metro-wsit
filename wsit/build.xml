@@ -23,7 +23,7 @@
 -->
 
 <!--
- $Id: build.xml,v 1.13 2006-07-10 19:58:13 arungupta Exp $
+ $Id: build.xml,v 1.14 2006-07-18 21:28:27 arungupta Exp $
 
  Copyright (c) 2005 Sun Microsystems, Inc.
  All rights reserved.
@@ -124,14 +124,20 @@
         <combine-jars-macro jarname="${name}" libdir="${lib.runtime.dir}" classesdir="${rt.dir}/build/classes">
             <metainf>
                 <copy todir="${tmpdir}/META-INF/services">
-                    <fileset dir="etc/META-INF/services" includes="*.*"/>
+                    <fileset dir="etc/META-INF/services" includes="*.*" excludes="com.sun.tools.ws.api.TJavaGeneratorExtension, com.sun.tools.ws.api.wsdl.TWSDLExtensionHandler"/>
                 </copy>
             </metainf>
         </combine-jars-macro>
     </target>
 
     <target name="combine-jars-tooltime">
-        <combine-jars-macro jarname="${name}-tools" libdir="${lib.tooltime.dir}" classesdir="${tools.dir}/build/classes"/>
+        <combine-jars-macro jarname="${name}-tools" libdir="${lib.tooltime.dir}" classesdir="${tools.dir}/build/classes">
+            <metainf>
+                <copy todir="${tmpdir}/META-INF/services">
+                    <fileset dir="etc/META-INF/services" includes="com.sun.tools.ws.api.TJavaGeneratorExtension, com.sun.tools.ws.api.wsdl.TWSDLExtensionHandler"/>
+                </copy>
+            </metainf>
+        </combine-jars-macro>
     </target>
 
     <target name="runtime-build">
