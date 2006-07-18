@@ -347,6 +347,7 @@ public class SecurityServerPipe extends SecurityPipeBase
         }
         Pipe copied = new SecurityServerPipe(this);
         ((SecurityServerPipe)copied).setNextPipe(clonedNextPipe);
+        cloner.add(this, copied);
         return copied;
     }
     

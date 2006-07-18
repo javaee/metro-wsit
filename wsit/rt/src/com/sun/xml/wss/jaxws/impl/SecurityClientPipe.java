@@ -371,6 +371,7 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
         Pipe clonedNextPipe = cloner.copy(nextPipe);
         Pipe copied = new SecurityClientPipe(this);
         ((SecurityClientPipe)copied).setNextPipe(clonedNextPipe);
+        cloner.add(this, copied);
         return copied;
     }
     
