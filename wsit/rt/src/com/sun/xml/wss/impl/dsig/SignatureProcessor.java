@@ -1,5 +1,5 @@
 /*
- * $Id: SignatureProcessor.java,v 1.5 2006-07-17 08:52:38 ashutoshshahi Exp $
+ * $Id: SignatureProcessor.java,v 1.6 2006-07-19 12:40:23 kumarjayanti Exp $
  */
 
 /*
@@ -1372,6 +1372,12 @@ public class SignatureProcessor{
                         if (tok == null) {
                             //TODO: remove these expensive conversions DOM Imports
                             tokenElem = XMLUtil.convertToSoapElement(secureMessage.getSOAPPart(), elem);
+                            //FIX for Issue 26: We need an Id to cache and MS is not setting in some cases
+                            String tokId = tokenElem.getAttribute("Id");
+                            if ("".equals(tokId) &&
+                                   MessageConstants.ENCRYPTED_DATA_LNAME.equals(tokenElem.getLocalName())) {
+                               tokenElem.setAttribute("Id", secureMessage.generateId());
+                            }
                             tokCache.put(ikbPolicyId, tokenElem);
                         } else {
                            // it will be SOAPElement retrieve its wsuId attr
@@ -1499,6 +1505,12 @@ public class SignatureProcessor{
                     if (tok == null) {
                         //TODO: remove these expensive conversions DOM Imports
                         tokenElem = XMLUtil.convertToSoapElement(secureMessage.getSOAPPart(), elem);
+                        //FIX for Issue 26: We need an Id to cache and MS is not setting in some cases
+                        String tokId = tokenElem.getAttribute("Id");
+                        if ("".equals(tokId) &&
+                                MessageConstants.ENCRYPTED_DATA_LNAME.equals(tokenElem.getLocalName())) {
+                            tokenElem.setAttribute("Id", secureMessage.generateId());
+                        }
                         tokCache.put(ikbPolicyId, tokenElem);
                     } else {
                        // it will be SOAPElement retrieve its wsuId attr

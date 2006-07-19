@@ -572,6 +572,12 @@ public class EncryptionProcessor {
                     //TODO: remove these expensive conversions DOM Imports
                     if (tok == null) {
                         issuedTokenElement = XMLUtil.convertToSoapElement(secureMessage.getSOAPPart(), elem);
+                        //Temp FIX for Issue#26: We need an Id to cache and MS not sending Id in some cases
+                        String tokId = issuedTokenElement.getAttribute("Id");
+                        if ("".equals(tokId) &&
+                                   MessageConstants.ENCRYPTED_DATA_LNAME.equals(issuedTokenElement.getLocalName())) {
+                               issuedTokenElement.setAttribute("Id", secureMessage.generateId());
+                        }
                         tokCache.put(ikbPolicyId, issuedTokenElement);
                     } else {
                        issuedTokenInserted = true;
@@ -923,6 +929,12 @@ public class EncryptionProcessor {
                     //TODO: remove these expensive conversions DOM Imports
                     if (tok == null) {
                         issuedTokenElement = XMLUtil.convertToSoapElement(secureMessage.getSOAPPart(), elem);
+                        //Temp FIX for Issue#26: We need an Id to cache and MS not sending Id in some cases
+                        String tokId = issuedTokenElement.getAttribute("Id");
+                        if ("".equals(tokId) &&
+                                   MessageConstants.ENCRYPTED_DATA_LNAME.equals(issuedTokenElement.getLocalName())) {
+                               issuedTokenElement.setAttribute("Id", secureMessage.generateId());
+                        }
                         tokCache.put(ikbPolicyId, issuedTokenElement);
                     } else {
                        issuedTokenInserted = true;
