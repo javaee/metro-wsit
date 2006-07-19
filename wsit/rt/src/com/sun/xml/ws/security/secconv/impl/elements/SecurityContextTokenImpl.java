@@ -1,5 +1,5 @@
 /*
- * $Id: SecurityContextTokenImpl.java,v 1.1 2006-05-03 22:57:13 arungupta Exp $
+ * $Id: SecurityContextTokenImpl.java,v 1.2 2006-07-19 14:26:22 raharsha Exp $
  */
 
 /*
@@ -35,6 +35,7 @@ import com.sun.xml.ws.security.trust.impl.bindings.RequestSecurityTokenType;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.xml.bind.JAXBContext;
@@ -53,6 +54,7 @@ public class SecurityContextTokenImpl extends SecurityContextTokenType implement
     
     private String instance = null;
     private URI identifier = null;
+    private List extElements = null;
     
     public SecurityContextTokenImpl() {
         // empty c'tor
@@ -75,7 +77,9 @@ public class SecurityContextTokenImpl extends SecurityContextTokenType implement
     public SecurityContextTokenImpl(SecurityContextTokenType sTokenType){
         List<Object> list = sTokenType.getAny();
         for (int i = 0; i < list.size(); i++) {
-            JAXBElement obj = (JAXBElement)list.get(i);
+            Object object = list.get(i);
+            if(object instanceof JAXBElement){
+            JAXBElement obj = (JAXBElement)object;
             
             String local = obj.getName().getLocalPart();
             if (local.equalsIgnoreCase("Instance")) {
@@ -85,6 +89,13 @@ public class SecurityContextTokenImpl extends SecurityContextTokenType implement
                     setIdentifier(new URI((String)obj.getValue()));
                 }catch (URISyntaxException ex){
                     throw new RuntimeException(ex);
+                }
+            }
+            }else{
+                getAny().add(object);
+                if(extElements == null){
+                    extElements = new ArrayList();
+                    extElements.add(object);
                 }
             }
         }
@@ -142,5 +153,9 @@ public class SecurityContextTokenImpl extends SecurityContextTokenType implement
         } catch (Exception ex) {
             throw new RuntimeException(ex.getMessage(), ex);
         }
+    }
+
+    public List getExtElements() {
+        return extElements;
     }
 }

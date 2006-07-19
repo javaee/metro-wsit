@@ -380,7 +380,7 @@ public class SecurityUtil {
                     SecurityContextToken ret = (SecurityContextToken)securityToken;
                     if (sctId.equals(ret.getIdentifier().toString())) {
                         return new SecurityContextTokenImpl(
-                            context.getSOAPMessage().getSOAPPart(), ret.getIdentifier().toString(), ret.getInstance(), ret.getWsuId());
+                            context.getSOAPMessage().getSOAPPart(), ret.getIdentifier().toString(), ret.getInstance(), ret.getWsuId(), ret.getExtElements());
                     }
                 }
             }

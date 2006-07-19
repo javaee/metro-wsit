@@ -40,6 +40,7 @@ import com.sun.xml.wss.impl.misc.SecurityHeaderBlockImpl;
 import com.sun.xml.ws.security.Token;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.logging.Logger;
 import javax.xml.soap.SOAPElement;
 import javax.xml.soap.SOAPException;
@@ -62,6 +63,7 @@ public class SecurityContextTokenImpl extends SecurityHeaderBlockImpl
     
     private String securityContextId = null;
     private String instance = null;
+    private List extElements = null;
     
     private String wsuId = null;
     
@@ -81,10 +83,11 @@ public class SecurityContextTokenImpl extends SecurityHeaderBlockImpl
     
     
     public SecurityContextTokenImpl(
-        Document contextDocument, String contextId, String instance, String wsuId) throws XWSSecurityException {
+        Document contextDocument, String contextId, String instance, String wsuId, List extElements) throws XWSSecurityException {
         securityContextId = contextId;
         this.instance = instance;
         this.wsuId = wsuId;
+        this.extElements = extElements;
         this.contextDocument = contextDocument;
     }
     
@@ -105,7 +108,6 @@ public class SecurityContextTokenImpl extends SecurityHeaderBlockImpl
         if (!"".equals(wsuId))
             setId(wsuId);
         
-        boolean invalidToken = false;
         
         Iterator children = getChildElements();
         Node object = null;
@@ -123,16 +125,11 @@ public class SecurityContextTokenImpl extends SecurityHeaderBlockImpl
                         XMLUtil.inWsscNS(element)) {
                     this.instance = element.getFirstChild().getNodeValue();
                 } else {
-                    invalidToken = true;
-                    break;
+                    extElements.add(object);
                 }
             }
         }
         
-        if ( invalidToken) {
-            throw new XWSSecurityException("Invalid SecurityContextToken or Unsupported Extensions encountered");
-        }
-
         if (securityContextId == null) {
             throw new XWSSecurityException("Missing Identifier subelement in SecurityContextToken");
         }
@@ -165,6 +162,14 @@ public class SecurityContextTokenImpl extends SecurityHeaderBlockImpl
             
             if (wsuId != null) {
                 setWsuIdAttr(this, wsuId);
+            }
+            
+            if (extElements != null) {
+                for (int i=0; i<extElements.size(); i++) {
+                    Element element = (Element)extElements.get(i);
+                    Node newElement = delegateElement.getOwnerDocument().importNode(element,true);
+                    appendChild(newElement);
+                }
             }
             
         } catch (SOAPException se) {
@@ -211,6 +216,10 @@ public class SecurityContextTokenImpl extends SecurityHeaderBlockImpl
 
     public String getInstance() {
         return instance;
+    }
+
+    public List getExtElements() {
+        return extElements;
     }
     
 }

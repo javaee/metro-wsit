@@ -628,7 +628,7 @@ public class EncryptionProcessor {
                   }
                                                                                                                                     
                   sct = new SecurityContextTokenImpl(
-                      secureMessage.getSOAPPart(), sct1.getIdentifier().toString(), sct1.getInstance(), sct1.getWsuId());
+                      secureMessage.getSOAPPart(), sct1.getIdentifier().toString(), sct1.getInstance(), sct1.getWsuId(), sct1.getExtElements());
                   // put back in token cache
                   tokCache.put(sctPolicyId, sct);
               } else {
@@ -830,7 +830,7 @@ public class EncryptionProcessor {
                   }
                                                                                                                                      
                   sct = new SecurityContextTokenImpl(
-                      secureMessage.getSOAPPart(), sct1.getIdentifier().toString(), sct1.getInstance(), sct1.getWsuId());
+                      secureMessage.getSOAPPart(), sct1.getIdentifier().toString(), sct1.getInstance(), sct1.getWsuId(), sct1.getExtElements());
                   // put back in token cache
                    tokCache.put(sctPolicyId, sct);
                 } else {

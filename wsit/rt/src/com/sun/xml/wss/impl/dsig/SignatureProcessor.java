@@ -1,5 +1,5 @@
 /*
- * $Id: SignatureProcessor.java,v 1.6 2006-07-19 12:40:23 kumarjayanti Exp $
+ * $Id: SignatureProcessor.java,v 1.7 2006-07-19 14:26:24 raharsha Exp $
  */
 
 /*
@@ -1595,7 +1595,7 @@ public class SignatureProcessor{
             }
             
             sct = new SecurityContextTokenImpl(
-                    secureMessage.getSOAPPart(), sct1.getIdentifier().toString(), sct1.getInstance(), sct1.getWsuId());
+                    secureMessage.getSOAPPart(), sct1.getIdentifier().toString(), sct1.getInstance(), sct1.getWsuId(), sct1.getExtElements());
             // put back in token cache
             tokCache.put(sctPolicyId, sct);
         } else {

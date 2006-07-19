@@ -23,6 +23,7 @@
 package com.sun.xml.ws.security;
 
 import java.net.URI;
+import java.util.List;
 
 /**
  * SecurityContextToken Interface
@@ -34,4 +35,6 @@ public interface SecurityContextToken extends Token {
     String getInstance();
     
     String getWsuId();
+    
+    List getExtElements();
 }
