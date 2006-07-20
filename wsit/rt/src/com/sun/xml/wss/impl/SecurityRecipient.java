@@ -1,5 +1,5 @@
 /*
- * $Id: SecurityRecipient.java,v 1.2 2006-06-09 14:13:11 kumarjayanti Exp $
+ * $Id: SecurityRecipient.java,v 1.3 2006-07-20 08:35:16 raharsha Exp $
  */
 
 /*
@@ -826,6 +826,11 @@ public class SecurityRecipient {
                     fpContext.setSecurityPolicy(wssPolicy);
                     HarnessUtil.processDeep(fpContext);
                     
+                    boolean keepCurrent = false;
+                    if(MessageConstants.ENCRYPTED_DATA_LNAME.equals(current.getLocalName())){
+                        keepCurrent = true;
+                    }
+                    
                     if (fpContext.isPrimaryPolicyViolation()) {
                         // log
                         throw new XWSSecurityException(fpContext.getPVE());
@@ -838,7 +843,12 @@ public class SecurityRecipient {
                         secureMsg.findSecurityHeader().setCurrentHeaderElement(current);
                     }
                     
-                    current = HarnessUtil.getNextElement(current);
+                    if(!keepCurrent){
+                        current = secureMsg.findSecurityHeader().getCurrentHeaderBlockElement();
+                    }else{
+                        current = HarnessUtil.getNextElement(secureMsg.findSecurityHeader().getCurrentHeaderBlockElement());
+                    }
+                    //current = HarnessUtil.getNextElement(current);
                 }else{
                     //log
                     if ( buf == null)

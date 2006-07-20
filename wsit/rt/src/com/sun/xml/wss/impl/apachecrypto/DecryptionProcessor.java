@@ -343,7 +343,7 @@ public class DecryptionProcessor {
             try {
                 encDataElement =(SOAPElement) XMLUtil.getElementById(
                         secureMessage.getSOAPPart(), refURI.substring(1));
-                ed =processEncryptedData(encDataElement, key,dataCipher, context,requiredTargets,optionalTargets,policy);
+                ed =processEncryptedData(encDataElement, key,dataCipher, context,requiredTargets,optionalTargets,policy,false);
             } catch (TransformerException te) {
                 throw new XWSSecurityException(te.getMessage(), te);
             }
@@ -422,7 +422,7 @@ public class DecryptionProcessor {
             }
             String id = encDataElement.getAttribute("Id");
             EncryptedElement ed = (EncryptedElement)processEncryptedData(encDataElement,
-                    key,null,context,requiredTargets,optionalTargets,policy);
+                    key,null,context,requiredTargets,optionalTargets,policy,true);
             
             if(requiredTargets.size() > 1){
                 throw new XWSSecurityException("Receiver requirement has more targets specified");
@@ -443,7 +443,7 @@ public class DecryptionProcessor {
         } else if (context.getMode() == FilterProcessingContext.DEFAULT){
             
             EncryptedElement ed = (EncryptedElement)processEncryptedData(encDataElement,
-                    key,null,context,requiredTargets,optionalTargets,policy);
+                    key,null,context,requiredTargets,optionalTargets,policy,true);
             
         }
     }
@@ -451,7 +451,7 @@ public class DecryptionProcessor {
     
     public static EncryptedData processEncryptedData(SOAPElement encDataElement,SecretKey key,
             XMLCipher dataCipher,FilterProcessingContext context,ArrayList requiredTargets,
-            ArrayList optionalTargets,EncryptionPolicy encryptionPolicy) throws XWSSecurityException {
+            ArrayList optionalTargets,EncryptionPolicy encryptionPolicy,boolean updateSH) throws XWSSecurityException {
         
         EncryptedDataHeaderBlock xencEncryptedData = new EncryptedDataHeaderBlock(encDataElement);
         SecurableSoapMessage secureMessage = context.getSecurableSoapMessage();
@@ -542,6 +542,17 @@ public class DecryptionProcessor {
                 dataCipher = initXMLCipher(symmetricKey, algorithm);
             }
             decryptElementWithCipher(dataCipher, encDataElement, secureMessage);
+            SOAPElement currentNode = null;
+
+            if(updateSH && secureMessage.findSecurityHeader().getCurrentHeaderBlockElement() ==
+                    encDataElement){
+                if(prevSibling == null ){
+                    currentNode = (SOAPElement)parent.getFirstChild();
+                }else{
+                    currentNode = (SOAPElement)prevSibling.getNextSibling();
+                }
+                secureMessage.findSecurityHeader().setCurrentHeaderElement(currentNode);
+            }            
             
             if (xencEncryptedData.getType().equals(MessageConstants.XENC_NS+"Content")) {
                 actualEncrypted = (Element)resolveEncryptedNode(parent,prevSibling,true);

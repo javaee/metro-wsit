@@ -30,6 +30,10 @@ import com.sun.xml.ws.model.wsdl.WSDLFaultImpl;
 import com.sun.xml.ws.security.impl.policyconv.XWSSPolicyGenerator;
 import com.sun.xml.ws.security.secconv.WSSCConstants;
 import com.sun.xml.ws.security.trust.WSTrustContract;
+import com.sun.xml.wss.impl.policy.PolicyGenerationException;
+import com.sun.xml.wss.impl.policy.mls.EncryptionPolicy;
+import com.sun.xml.wss.impl.policy.mls.EncryptionPolicy.FeatureBinding;
+import com.sun.xml.wss.impl.policy.mls.EncryptionTarget;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -1149,6 +1153,22 @@ public abstract class SecurityPipeBase implements Pipe {
                 xwssPolicyGenerator = new XWSSPolicyGenerator(effectiveBP,isServer,isIncoming);
                 xwssPolicyGenerator.process(ignoreST);
                 MessagePolicy bmp = xwssPolicyGenerator.getXWSSPolicy();
+                if(isServer && isIncoming){
+                    EncryptionPolicy optionalPolicy =
+                            new EncryptionPolicy();
+                    EncryptionPolicy.FeatureBinding  fb = (EncryptionPolicy.FeatureBinding) optionalPolicy.getFeatureBinding();
+                    optionalPolicy.newX509CertificateKeyBinding();
+                    EncryptionTarget target = new EncryptionTarget();
+                    target.setQName(new QName(MessageConstants.SAML_v1_1_NS,MessageConstants.SAML_ASSERTION_LNAME));
+                    target.setEnforce(false);
+                    fb.addTargetBinding(target);
+                    try {
+                        bmp.prepend(optionalPolicy);
+                    } catch (PolicyGenerationException ex) {
+                        throw new PolicyException(ex);
+                    }
+                }
+                
                 PolicyAssertion sct = new SCTokenWrapper(token,bmp);
                 sph.addSecureConversationToken(sct);
             }else if(PolicyUtil.isIssuedToken(token)){
