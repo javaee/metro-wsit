@@ -1162,11 +1162,12 @@ public abstract class SecurityPipeBase implements Pipe {
                     target.setQName(new QName(MessageConstants.SAML_v1_1_NS,MessageConstants.SAML_ASSERTION_LNAME));
                     target.setEnforce(false);
                     fb.addTargetBinding(target);
+                    /*
                     try {
                         bmp.prepend(optionalPolicy);
                     } catch (PolicyGenerationException ex) {
                         throw new PolicyException(ex);
-                    }
+                    }*/
                 }
                 
                 PolicyAssertion sct = new SCTokenWrapper(token,bmp);
