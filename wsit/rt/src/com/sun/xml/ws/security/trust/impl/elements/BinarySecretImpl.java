@@ -1,5 +1,5 @@
 /*
- * $Id: BinarySecretImpl.java,v 1.1 2006-05-03 22:57:24 arungupta Exp $
+ * $Id: BinarySecretImpl.java,v 1.2 2006-07-21 19:10:16 jdg6688 Exp $
  */
 
 /*
@@ -55,11 +55,9 @@ import com.sun.org.apache.xml.internal.security.exceptions.Base64DecodingExcepti
  */
 public class BinarySecretImpl extends BinarySecretType implements BinarySecret {
     
-    private String type;
-    
     public BinarySecretImpl(byte[] rawValue, String type) {        
         setRawValue(rawValue);
-        this.type = type;
+        setType(type);
         
     }
     
@@ -113,18 +111,19 @@ public class BinarySecretImpl extends BinarySecretType implements BinarySecret {
          }
      }
      
-     public void setType(String type) {
+ /*    public void setType(String type) {
         if (!(this.ASYMMETRIC_KEY_TYPE.equalsIgnoreCase(type)  
               || this.NONCE_KEY_TYPE.equalsIgnoreCase(type) 
               || this.SYMMETRIC_KEY_TYPE.equalsIgnoreCase(type))) {
             throw new RuntimeException("Invalid BinarySecret Type: " + type);
         }
         
-        this.type = type;
+        setType(type);
+        
      }
      
      public String getType(){
          return this.type;
      }
-     
+     */
 }

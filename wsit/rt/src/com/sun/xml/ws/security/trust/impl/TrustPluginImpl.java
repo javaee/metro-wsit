@@ -53,7 +53,6 @@ import com.sun.xml.ws.security.trust.elements.RequestedAttachedReference;
 import com.sun.xml.ws.security.trust.elements.RequestedProofToken;
 import com.sun.xml.ws.security.trust.elements.RequestedSecurityToken;
 import com.sun.xml.ws.security.trust.elements.RequestedUnattachedReference;
-import com.sun.xml.ws.security.trust.impl.elements.BinarySecretImpl;
 import com.sun.xml.ws.security.trust.util.WSTrustUtil;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -161,7 +160,17 @@ public class TrustPluginImpl implements TrustPlugin {
         if (appliesTo != null){
             at = WSTrustUtil.createAppliesTo(appliesTo);
         }
-        BinarySecret binarySecret = new BinarySecretImpl(createNonce().getBytes(),BinarySecret.NONCE_KEY_TYPE);
+        
+       int len = 32;
+       long keySize = rstTemplate.getKeySize();
+       if (keySize > 0){
+           len = (int)keySize/8;
+       }
+        
+       SecureRandom sr = new SecureRandom();
+        byte[] nonce = new byte[len];
+        sr.nextBytes(nonce);
+        BinarySecret binarySecret = fact.createBinarySecret(nonce, BinarySecret.NONCE_KEY_TYPE);
         Entropy entropy = fact.createEntropy(binarySecret);
         URI tokenType = new URI(WSTrustConstants.SAML11_ASEERTION_TOKEN_TYPE);
         if (rstTemplate.getTokenType() != null){
@@ -172,7 +181,6 @@ public class TrustPluginImpl implements TrustPlugin {
         Lifetime lifetime = null;
         RequestSecurityToken requestSecurityToken= fact.createRSTForIssue(tokenType,requestType,context,at,claims,entropy,lifetime);
         
-        long keySize = rstTemplate.getKeySize();
         if (keySize > 0){
             requestSecurityToken.setKeySize(keySize);
         }
@@ -246,24 +254,6 @@ public class TrustPluginImpl implements TrustPlugin {
             }
         }
         return null;
-    }
-    
-    /*
-     * Create a unique nonce. Default encoded with base64.
-     * A nonce is a random value that the sender creates
-     * to include in the username token that it sends.
-     * Nonce is an effective counter measure against replay attacks.
-     */
-    protected String createNonce() {
-        
-        byte [] decodedNonce = new byte[18];
-        try {
-            SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
-            random.nextBytes(decodedNonce);
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-        return DatatypeConverter.printBase64Binary(decodedNonce);
     }
     
     /**
