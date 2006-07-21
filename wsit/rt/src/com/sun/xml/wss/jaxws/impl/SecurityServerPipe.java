@@ -590,7 +590,7 @@ public class SecurityServerPipe extends SecurityPipeBase
             throw new RuntimeException("Exception when adding Addressing Headers");
         }
         
-        WsaRuntimeFactory fac = WsaRuntimeFactory.newInstance(pipeConfig.getWSDLModel(), pipeConfig.getBinding());
+        WsaRuntimeFactory fac = WsaRuntimeFactory.newInstance(ap.getNamespaceURI(), pipeConfig.getWSDLModel(), pipeConfig.getBinding());
         fac.writeHeaders(packet, ap);
         
         return packet;

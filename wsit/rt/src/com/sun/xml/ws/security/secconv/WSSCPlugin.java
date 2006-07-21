@@ -306,7 +306,7 @@ public class WSSCPlugin {
         ap.setReplyTo(builder.newEndpointReference(builder.newAddressingConstants().getAnonymousURI().toString()));
         
         
-        WsaRuntimeFactory fac = WsaRuntimeFactory.newInstance(wsdlPort, binding);
+        WsaRuntimeFactory fac = WsaRuntimeFactory.newInstance(ap.getNamespaceURI(), wsdlPort, binding);
         fac.writeHeaders(packet, ap);
         packet.invocationProperties
                                 .put(JAXWSAConstants.CLIENT_ADDRESSING_PROPERTIES, ap);
