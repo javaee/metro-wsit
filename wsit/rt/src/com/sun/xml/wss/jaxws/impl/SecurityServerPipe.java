@@ -186,7 +186,6 @@ public class SecurityServerPipe extends SecurityPipeBase
         boolean isTrustMessage = false;
         String msgId = null;
         
-        System.out.println("addressingURI="+ addressingURI);
         WsaRuntimeFactory wsaFac = null;
         if (addressingURI != null){
             wsaFac = WsaRuntimeFactory.newInstance(addressingURI, pipeConfig.getWSDLModel(), pipeConfig.getBinding());
@@ -198,9 +197,7 @@ public class SecurityServerPipe extends SecurityPipeBase
             AttributedURI actionURI = ap.getAction();
             if (actionURI != null){
                 String action = actionURI.toString();
-                
-                System.out.println("******Action=" + action);
-                
+               
                 if (action.equals(WSSCConstants.REQUEST_SECURITY_CONTEXT_TOKEN_ACTION)) {
                     isSCIssueMessage = true;
                 } else if (action.equals(WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_ACTION)) {
