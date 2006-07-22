@@ -112,6 +112,8 @@ import com.sun.xml.ws.security.secconv.WSSCFactory;
 import com.sun.xml.ws.security.secconv.WSSCPlugin;
 import com.sun.xml.ws.policy.PolicyAssertion;
 
+import javax.xml.ws.addressing.AddressingBuilderFactory;
+import javax.xml.ws.addressing.AddressingConstants;
 import javax.xml.ws.addressing.AddressingProperties;
 import javax.xml.ws.addressing.AttributedURI;
 import javax.xml.ws.addressing.JAXWSAConstants;
@@ -186,8 +188,8 @@ public abstract class SecurityPipeBase implements Pipe {
     protected static final String SECURITY_POLICY_2005_07_NAMESPACE=
             "http://schemas.xmlsoap.org/ws/2005/07/securitypolicy".intern();
     protected static final String TRUST_2005_02_NAMESPACE ="http://schemas.xmlsoap.org/ws/2005/02/trust".intern();
-    protected static final String ADDRESSING_2004_08_NAMESPACE =
-            "http://schemas.xmlsoap.org/ws/2004/08/addressing".intern();
+    private static final String ADDRESSING_POLICY_NAMESPACE_URI = 
+            "http://schemas.xmlsoap.org/ws/2004/09/policy/addressing";
     protected static final String XENC_NS = "http://www.w3.org/2001/04/xmlenc#";
     protected static final String ENCRYPTED_DATA_LNAME = "EncryptedData";
     protected static ArrayList<String> securityPolicyNamespaces = null;
@@ -234,6 +236,8 @@ public abstract class SecurityPipeBase implements Pipe {
     protected static final String SUN_WSS_SECURITY_CLIENT_POLICY_NS="http://schemas.sun.com/2006/03/wss/client";
     
     protected Policy wsitConfig =null;
+    
+    protected String addressingURI;
     
     static {
         try {
@@ -289,6 +293,7 @@ public abstract class SecurityPipeBase implements Pipe {
         bindingLevelAlgSuite = that.bindingLevelAlgSuite;
         this.inProtocolPM = that.inProtocolPM;
         this.outProtocolPM = that.outProtocolPM;
+        this.addressingURI = that.addressingURI;
     }
     
     protected String getValue(Header hdr) {
@@ -698,6 +703,19 @@ public abstract class SecurityPipeBase implements Pipe {
             //createWsdlEndpointScopeKey(serviceName,portName);
             //Review:Will getEffectivePolicy return null or empty policy ?.
             Policy endpointPolicy = wsPolicyMap.getEndpointEffectivePolicy(endpointKey);
+            
+            if (endpointPolicy != null){
+                AddressingBuilderFactory abf = AddressingBuilderFactory.newInstance();
+                AddressingConstants ac = abf.newAddressingBuilder().newAddressingConstants();
+                AddressingConstants ac2 = abf.newAddressingBuilder("http://schemas.xmlsoap.org/ws/2004/08/addressing").newAddressingConstants();
+                if (endpointPolicy.contains(ac.getWSDLNamespaceURI()) ||
+                    endpointPolicy.contains(ADDRESSING_POLICY_NAMESPACE_URI)){
+                    addressingURI = ac.getNamespaceURI();
+                } else if (endpointPolicy.contains(ac2.getWSDLNamespaceURI())){
+                    addressingURI = ac2.getNamespaceURI();
+                }
+            }
+            
             buildProtocolPolicy(endpointPolicy);
             ArrayList policyList = new ArrayList();
             if(endpointPolicy != null){
