@@ -1,0 +1,8 @@
+<descriptor since="2.0">
+  <description>This is a roundtrip RM test </description>
+  <client href ="test.js" since="2.0"/>
+  <service basedir="./server">
+    <wsdl href="EchoService.wsdl"/>
+  </service>
+</descriptor>
+

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsap10="http://www.w3.org/2006/05/addressing/wsdl" xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing" xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy" xmlns:wsap="http://schemas.xmlsoap.org/ws/2004/09/policy/addressing" xmlns:xsd="http://www.w3.org/2001/XMLSchema"  xmlns:tns="http://tempuri.org/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:wsx="http://schemas.xmlsoap.org/ws/2004/09/mex" xmlns:wsa10="http://www.w3.org/2006/05/addressing/wsdl" targetNamespace="http://tempuri.org/" name="PingService">
+	<wsdl:types>
+		<xsd:schema targetNamespace="http://tempuri.org/Imports">
+			<xsd:import schemaLocation="ReliableRequestReplyxsd1.xsd" namespace="http://tempuri.org/"/>
+		</xsd:schema>
+	</wsdl:types>
+	<wsdl:message name="PingRequest">
+		<wsdl:part name="echoString" element="tns:echoString"/>
+	</wsdl:message>
+	<wsdl:message name="PingResponse">
+		<wsdl:part name="echoStringResponse" element="tns:echoStringResponse"/>
+	</wsdl:message>
+	<wsdl:portType name="IPing" >
+		<wsdl:operation name="EchoString" >
+			<wsdl:input name="PingRequest" message="tns:PingRequest" wsa10:Action="urn:wsrm:EchoString"/>
+			<wsdl:output name="PingResponse" message="tns:PingResponse" wsa10:Action="urn:wsrm:EchoStringResponse"/>
+		</wsdl:operation>
+	</wsdl:portType>
+	<wsdl:binding name="WSHttpBinding_IPing" type="tns:IPing">
+		<wsp:PolicyReference URI="#WSHttpBinding_IPing_policy"/>
+		<soap12:binding transport="http://schemas.xmlsoap.org/soap/http"/>
+		<wsdl:operation name="EchoString">
+			<wsdl:input>
+				<soap12:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap12:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+	</wsdl:binding>
+	<wsdl:service name="PingService">
+		<wsdl:port name="WSHttpBinding_IPing" binding="tns:WSHttpBinding_IPing">
+			<soap12:address location="http://131.107.72.15/ReliableMessaging_Service_Indigo/ReliableRequestReply.svc"/>
+			<wsa10:EndpointReference>
+				<wsa10:Address>http://129.145.133.132:8080/rmservice/echo?wsdl</wsa10:Address>
+			</wsa10:EndpointReference>
+		</wsdl:port>
+	</wsdl:service>
+	<wsp:Policy wsu:Id="WSHttpBinding_IPing_policy">
+		<wsp:ExactlyOne>
+			<wsp:All>
+				<wsrm:RMAssertion xmlns:wsrm="http://schemas.xmlsoap.org/ws/2005/02/rm/policy">
+					<wsrm:InactivityTimeout Milliseconds="600000"/>
+					<wsrm:AcknowledgementInterval Milliseconds="200"/>
+				</wsrm:RMAssertion>
+				<!--<net:RmFlowControl xmlns:net="http://schemas.microsoft.com/net/2005/02/rm/policy">
+					<net:MaxReceiveBufferSize>32</net:MaxReceiveBufferSize>
+				</net:RmFlowControl>-->
+				<wspe:Utf816FFFECharacterEncoding xmlns:wspe="http://schemas.xmlsoap.org/ws/2004/09/policy/encoding"/>
+				<wsap10:UsingAddressing/>
+			</wsp:All>
+		</wsp:ExactlyOne>
+	</wsp:Policy>
+</wsdl:definitions>
