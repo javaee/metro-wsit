@@ -23,7 +23,7 @@
 -->
 
 <!--
- $Id: build.xml,v 1.5 2006-07-24 22:37:18 hofsass Exp $
+ $Id: build.xml,v 1.6 2006-07-24 22:50:28 bhaktimehta Exp $
 
  Copyright (c) 2005 Sun Microsystems, Inc.
  All rights reserved.
@@ -37,7 +37,7 @@
     </path>
 
      <target name="prepare">
-        <mkdir dir="build/junit-reports" />
+        <mkdir dir="${logs.dir}/junit-reports" />
         <mkdir dir="${logs.dir}"/>
     </target>
 
@@ -89,10 +89,10 @@
             <arg line="${args}"/>
         </java>
 
-    <mkdir dir="build/junit-reports" />
-    <junitreport todir="build/junit-reports">
+    <mkdir dir="${logs.dir}/junit-reports" />
+    <junitreport todir="${logs.dir}/junit-reports">
         <fileset dir="${logs.dir}" />
-        <report format="frames" todir="build/junit-reports"/>
+        <report format="frames" todir="${logs.dir}/junit-reports"/>
     </junitreport>
     </target>
 
