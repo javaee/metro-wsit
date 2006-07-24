@@ -23,7 +23,7 @@
 -->
 
 <!--
- $Id: build.xml,v 1.2 2006-07-24 21:16:01 bhaktimehta Exp $
+ $Id: build.xml,v 1.3 2006-07-24 21:59:21 bhaktimehta Exp $
 
  Copyright (c) 2005 Sun Microsystems, Inc.
  All rights reserved.
@@ -52,15 +52,43 @@
 
     <target name="clean">
         <delete dir="build"/>
+        <delete dir="${logs.dir}"/>
     </target>
 
     <target name="main" >
-        <java className="com.sun.xml.ws.test.Main"
-            fork="yes">
-            <classpath refid="harness.classpath"/>
-            <arg line="${args}"/>
+        <mkdir dir="${logs.dir}"/>
+        <!--
+        These are the default args that are passed to the harness which mean that
+        the tests will be using the dist image of the wsit workspace , run the tests
+        using local transport and recursively scan for all the sub dirs under testcases
+
+        Please modify these options if you wish to test the harness in different
+        modes
+        For more information on the different command line options
+        refer to docs/index.html
+        -->
+        <java jar="${test.lib.dir}/harness.jar" fork="true">
             <sysproperty key="WSIT_HOME" value="${env.WSIT_HOME}"/>
+            <arg value="-cp:wsit-image" />
+            <arg path="${wsit.image}" />
+
+            <arg value="-report" />
+            <arg path="${logs.dir}" />
+
+            <arg value="-transport" />
+            <arg path="${wsit.lib}/runtime/jaxws-local-transport.jar" />
+
+            <!-- test data -->
+            <arg value="-r" />
+            <arg path="testcases/*" />
+
+            <arg line="${args}"/>
         </java>
     </target>
+    <mkdir dir="build/junit-reports" />
+    <junitreport todir="build/junit-reports">
+        <fileset dir="${logs.dir}" />
+        <report format="frames" todir="build/junit-reports"/>
+    </junitreport>
 
 </project>
