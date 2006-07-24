@@ -23,7 +23,7 @@
 -->
 
 <!--
- $Id: build.xml,v 1.4 2006-07-24 22:20:51 bhaktimehta Exp $
+ $Id: build.xml,v 1.5 2006-07-24 22:37:18 hofsass Exp $
 
  Copyright (c) 2005 Sun Microsystems, Inc.
  All rights reserved.
@@ -84,7 +84,7 @@
 
             <!-- test data -->
             <arg value="-r" />
-            <arg path="testcases/*" />
+            <arg path="testcases" />
 
             <arg line="${args}"/>
         </java>
