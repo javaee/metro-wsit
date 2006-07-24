@@ -32,9 +32,9 @@
 	<wsdl:service name="PingService">
 		<wsdl:port name="WSHttpBinding_IPing" binding="tns:WSHttpBinding_IPing">
 			<soap12:address location="http://131.107.72.15/ReliableMessaging_Service_Indigo/ReliableRequestReply.svc"/>
-			<wsa10:EndpointReference>
+			<!--<wsa10:EndpointReference>
 				<wsa10:Address>http://129.145.133.132:8080/rmservice/echo?wsdl</wsa10:Address>
-			</wsa10:EndpointReference>
+			</wsa10:EndpointReference>-->
 		</wsdl:port>
 	</wsdl:service>
 	<wsp:Policy wsu:Id="WSHttpBinding_IPing_policy">
