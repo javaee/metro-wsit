@@ -23,7 +23,7 @@
 -->
 
 <!--
- $Id: properties.xml,v 1.1 2006-07-24 20:28:15 hofsass Exp $
+ $Id: properties.xml,v 1.2 2006-07-24 21:16:01 bhaktimehta Exp $
 
  Copyright (c) 2005 Sun Microsystems, Inc.
  All rights reserved.
@@ -34,4 +34,20 @@
     <property name="test.docs.dir" value="${basedir}/docs"/>
     <property name="test.src.dir" value="${basedir}/src"/>
     <property name="test.etc.dir" value="${basedir}/etc"/>
+    <property name="wsit.dir" value="${basedir}/../../"/>
+    <property name="debug" value="false"/>
+    <property name="verbose" value="false"/>
+    <property environment="env" />
+
+    <!--
+        These are the default args that are passed to the harness which mean that
+        the tests will be using the dist image of the wsit workspace , run the tests
+        using local transport and recursively scan for all the sub dirs under testcases
+
+        Please modify these options if you wish to test the harness in different
+        modes
+        For more information on the different command line options
+        refer to docs/index.html
+        -->
+    <property name="args" value=" -debug -cp:wsit-image ${wsit.dir}/dist/image/jax-ws-latest-wsit -r testcases/*"/>
 </project>

@@ -23,7 +23,7 @@
 -->
 
 <!--
- $Id: build.xml,v 1.1 2006-07-24 20:28:15 hofsass Exp $
+ $Id: build.xml,v 1.2 2006-07-24 21:16:01 bhaktimehta Exp $
 
  Copyright (c) 2005 Sun Microsystems, Inc.
  All rights reserved.
@@ -31,6 +31,10 @@
 
 <project name="wsit.dev.java.net main" default="main" basedir=".">
     <import file="properties.xml"/>
+
+    <path id="harness.classpath">
+        <fileset dir="${test.lib.dir}" includes="*.jar"/>
+    </path>
 
     <target name="integrate-test-harness-hudson" description="integrates latest test harness into WSIT, meant for internal consumption only">
         <mkdir dir="tmp/test-harness"/>
@@ -48,6 +52,15 @@
 
     <target name="clean">
         <delete dir="build"/>
+    </target>
+
+    <target name="main" >
+        <java className="com.sun.xml.ws.test.Main"
+            fork="yes">
+            <classpath refid="harness.classpath"/>
+            <arg line="${args}"/>
+            <sysproperty key="WSIT_HOME" value="${env.WSIT_HOME}"/>
+        </java>
     </target>
 
 </project>
