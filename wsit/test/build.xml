@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+
+<!--
+ The contents of this file are subject to the terms
+ of the Common Development and Distribution License
+ (the License).  You may not use this file except in
+ compliance with the License.
+ 
+ You can obtain a copy of the license at
+ https://glassfish.dev.java.net/public/CDDLv1.0.html.
+ See the License for the specific language governing
+ permissions and limitations under the License.
+ 
+ When distributing Covered Code, include this CDDL
+ Header Notice in each file and include the License file
+ at https://glassfish.dev.java.net/public/CDDLv1.0.html.
+ If applicable, add the following below the CDDL Header,
+ with the fields enclosed by brackets [] replaced by
+ you own identifying information:
+ "Portions Copyrighted [year] [name of copyright owner]"
+ 
+ Copyright 2006 Sun Microsystems Inc. All Rights Reserved
+-->
+
+<!--
+ $Id: build.xml,v 1.1 2006-07-24 20:03:30 hofsass Exp $
+
+ Copyright (c) 2005 Sun Microsystems, Inc.
+ All rights reserved.
+-->
+
+<project name="wsit.dev.java.net main" default="main" basedir=".">
+    <import file="properties.xml"/>
+
+    <target name="integrate-test-harness-hudson" description="integrates latest test harness into WSIT, meant for internal consumption only">
+        <mkdir dir="tmp/test-harness"/>
+        <get src="http://kohsuke.sfbay/hudson/job/jaxws-test-harness/lastSuccessfulBuild/artifact/build/test-harness.zip"
+             dest="tmp/test-harness.zip"/>
+        <unzip src="tmp/test-harness.zip" dest="tmp"/>
+        <copy todir="${test.lib.dir}" overwrite="true" verbose="${verbose}">
+            <fileset dir="tmp/test-harness" includes="*.zip, *.jar"/>
+        </copy>
+        <copy todir="${test.docs.dir}" overwrite="true" verbose="${verbose}">
+            <fileset dir="tmp/test-harness" includes="*.html, *.png"/>
+        </copy>
+        <delete dir="tmp" includeemptydirs="true"/>
+    </target>
+
+    <target name="clean">
+        <delete dir="build"/>
+    </target>
+
+</project>

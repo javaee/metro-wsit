@@ -1,0 +1,540 @@
+
+<html xmlns:d="jelly:define" xmlns:jsl="jelly:jsl" xmlns:j="jelly:core" xmlns:l="layout" xmlns:x="jelly:xml">
+  <head>
+    <meta http-equiv="Content-type" content="text/html; charset=iso-8859-1"> 
+    <title>JAX-WS/Tango Test Harness User Guide</title> 
+    <style>
+		H1 {
+			text-align: center;
+		}
+		
+		PRE.cmd {
+			background-color: #eee;
+			border: solid 1px gray;
+			font-weight: bold;
+			padding: 0.2em;
+		}
+		
+		DIV.tip {
+			padding: 0.2em;
+			margin: 1em;
+			margin-left: 3em;
+			border: 1px dashed black;
+			background-color: #ddf;
+		}
+	</style> 
+  </head> 
+  <body>       
+    <h1>JAX-WS/Tango Test Harness User Guide</h1>      
+    <h2>Table of contents</h2> 
+    <ol>             
+      <li>
+        <a href="#Running_Tests">Running Tests</a>
+      </li> 
+      <ol>   
+        <li>
+          <a href="#Configuring_the_Harness_Classpath_for_Different_Delivery_Vehicles">Configuring the Harness Classpath for Different Delivery Vehicles</a>
+        </li> 
+        <ol>   
+          <li>
+            <a href="#JAX_WS_RI_Workspace">JAX-WS RI Workspace</a>
+          </li> 
+          <ol> </ol>    
+          <li>
+            <a href="#JAX_WS_RI_Binary_Image">JAX-WS RI Binary Image</a>
+          </li> 
+          <ol> </ol>    
+          <li>
+            <a href="#WSIT_Workspace">WSIT Workspace</a>
+          </li> 
+          <ol> </ol>    
+          <li>
+            <a href="#WSIT_Binary_Image">WSIT Binary Image</a>
+          </li> 
+          <ol> </ol>  
+        </ol>    
+        <li>
+          <a href="#Running_Tests_Manually">Running Tests Manually</a>
+        </li> 
+        <ol> </ol>    
+        <li>
+          <a href="#Debugging_Test_Failures">Debugging Test Failures</a>
+        </li> 
+        <ol> </ol>    
+        <li>
+          <a href="#Testing_Different_Transports_Containers">Testing Different Transports/Containers</a>
+        </li> 
+        <ol>   
+          <li>
+            <a href="#local">local</a>
+          </li> 
+          <ol> </ol>    
+          <li>
+            <a href="#Tomcat">Tomcat</a>
+          </li> 
+          <ol>   
+            <li>
+              <a href="#Embedded_Tomcat">Embedded Tomcat</a>
+            </li> 
+            <ol> </ol>    
+            <li>
+              <a href="#Remote_Tomcat">Remote Tomcat</a>
+            </li> 
+            <ol> </ol>    
+            <li>
+              <a href="#Local_Tomcat">Local Tomcat</a>
+            </li> 
+            <ol> </ol>  
+          </ol>    
+          <li>
+            <a href="#Glassfish">Glassfish</a>
+          </li> 
+          <ol> </ol>  
+        </ol>    
+        <li>
+          <a href="#Running_Batch_Tests">Running Batch Tests</a>
+        </li> 
+        <ol> </ol>  
+      </ol>                
+      <li>
+        <a href="#Writing_Tests">Writing Tests</a>
+      </li> 
+      <ol>   
+        <li>
+          <a href="#Conventions">Conventions</a>
+        </li> 
+        <ol>   
+          <li>
+            <a href="#Example_Directory_Layout">Example Directory Layout</a>
+          </li> 
+          <ol> </ol>    
+          <li>
+            <a href="#Test_Descriptor">Test Descriptor</a>
+          </li> 
+          <ol> </ol>    
+          <li>
+            <a href="#Client_Test_Scripts">Client Test Scripts</a>
+          </li> 
+          <ol> </ol>    
+          <li>
+            <a href="#Test_Service_Code">Test Service Code</a>
+          </li> 
+          <ol>   
+            <li>
+              <a href="#WSDL">WSDL</a>
+            </li> 
+            <ol> </ol>  
+          </ol>    
+          <li>
+            <a href="#Resources">Resources</a>
+          </li> 
+          <ol> </ol>    
+          <li>
+            <a href="#User_Defined_Customization_Files_and_Schemas">User-Defined Customization Files and Schemas</a>
+          </li> 
+          <ol> </ol>  
+        </ol>    
+        <li>
+          <a href="#Magic">Magic</a>
+        </li> 
+        <ol> </ol>    
+        <li>
+          <a href="#Tips__Gotchas___known_Limitations">Tips, Gotchas &amp; known Limitations</a>
+        </li> 
+        <ol> </ol>  
+      </ol>        
+    </ol>          
+    <a name="Running_Tests"></a>
+    <h2>
+      <a name="Running_Tests">
+        <a href="#Running_Tests">1.</a>  Running Tests
+      </a>
+    </h2>           
+    <a name="Configuring_the_Harness_Classpath_for_Different_Delivery_Vehicles"></a>
+    <h3>
+      <a name="Configuring_the_Harness_Classpath_for_Different_Delivery_Vehicles">
+        <a href="#Configuring_the_Harness_Classpath_for_Different_Delivery_Vehicles">1.1.</a>  Configuring the Harness Classpath for Different Delivery Vehicles
+      </a>
+    </h3>   
+    <p>The harness can be used to test different projects that use the JAX-WS RI.         
+    <a name="JAX_WS_RI_Workspace"></a>
+    <h4>
+      <a name="JAX_WS_RI_Workspace">
+        <a href="#JAX_WS_RI_Workspace">1.1.1.</a>  JAX-WS RI Workspace
+      </a>
+    </h4>   
+    <p>The following option tells the harness to pick up the JAX-WS RI classes from the JAX-WS workspace. Specifically, with this option, the harness will look into various
+      <tt>build/classes</tt> and library jars.
+      
+    <pre class="cmd">$ java -jar path/to/harness.jar -cp:jaxws path/to/jaxws-ri-workspace test-dir1 test-dir2 ...</pre>               
+    <a name="JAX_WS_RI_Binary_Image"></a>
+    <h4>
+      <a name="JAX_WS_RI_Binary_Image">
+        <a href="#JAX_WS_RI_Binary_Image">1.1.2.</a>  JAX-WS RI Binary Image
+      </a>
+    </h4>   
+    <p>The following option tells the harness to pick up the RI classes from a JAX-WS binary dist image. Using this option, the harness will only look at the RI library jars found under the
+      <TT>lib</TT> directory of the top-level dist image directory that you specify.
+      
+    <pre class="cmd">$ java -jar path/to/harness.jar -cp:jaxws-image path/to/jaxws-ri-image test-dir1 test-dir2 ...</pre>               
+    <a name="WSIT_Workspace"></a>
+    <h4>
+      <a name="WSIT_Workspace">
+        <a href="#WSIT_Workspace">1.1.3.</a>  WSIT Workspace
+      </a>
+    </h4>   
+    <p>The following option tells the harness to pick up the WSIT classes from a WSIT workspace. Specifically, with this option, the harness will look into various
+      <tt>build/classes</tt> and library jars.
+      
+    <pre class="cmd">$ java -jar path/to/harness.jar <span style="color:red; font-weight:bold">-cp:wsit path/to/wsit-workspace</span> test-dir1 test-dir2 ...</pre>               
+    <a name="WSIT_Binary_Image"></a>
+    <h4>
+      <a name="WSIT_Binary_Image">
+        <a href="#WSIT_Binary_Image">1.1.4.</a>  WSIT Binary Image
+      </a>
+    </h4>   
+    <p>The following option tells the harness to pick up the WSIT classes from a binary dist image. Using this option, the harness will only look at the WSIT library jars (webservices.jar &amp; webservices-tools.jar) found under the
+      <TT>lib</TT> directory of the dist image directory that you specify.
+      
+    <pre class="cmd">$ java -jar path/to/harness.jar -cp:wsit-image path/to/wsit-image test-dir1 test-dir2 ...</pre>                    
+    <a name="Running_Tests_Manually"></a>
+    <h3>
+      <a name="Running_Tests_Manually">
+        <a href="#Running_Tests_Manually">1.2.</a>  Running Tests Manually
+      </a>
+    </h3>   
+    <p>Each test is packaged in a directory. The following command runs a single test stored in
+      <tt>testdata/abc/def</tt>:
+      
+    <pre class="cmd">$ java -jar path/to/harness.jar testdata/abc/def</pre>  
+    <p>If you specify multiple directories, all the tests in the specified directories are run.  
+    <pre class="cmd">$ java -jar path/to/harness.jar testdata/abc/*</pre>  
+    <p>The
+      <tt>-r</tt> option tells the harness to recursively search for all tests inside the given directory:
+      
+    <pre class="cmd">$ java -jar path/to/harness.jar -r testdata/addressing</pre>   
+    <div class="tip">
+      <table>
+        <tr>
+          <td>
+            <img src="tip.png"> 
+          </td>
+          <td> Consider defining an alias to
+            <tt>java -jar path/to/harness.jar</tt> or a wrapper shell script so that you don't have to type the path name manually. 
+          </td> 
+        </tr>
+      </table> 
+    </div>               
+    <a name="Debugging_Test_Failures"></a>
+    <h3>
+      <a name="Debugging_Test_Failures">
+        <a href="#Debugging_Test_Failures">1.3.</a>  Debugging Test Failures
+      </a>
+    </h3>   
+    <p>The following command executes a test with debugger support enabled. Run this command from a console, then set up a remote debugging with your IDE to port 8000. This allows you to set breakpoints anywhere both on the client and the server.  
+    <pre class="cmd">$ java -Xdebug -Xrunjdwp:transport=dt_socket,server=y,address=8000 -jar path/to/harness.jar testdata/abc/def</pre>   
+    <div class="tip">
+      <table>
+        <tr>
+          <td>
+            <img src="tip.png"> 
+          </td>
+          <td> You'll use this command very often, so consider defining an alias to
+            <tt>java -Xdebug -Xrunjdwp:transport=dt_socket,server=y,address=8000 -jar path/to/harness.jar</tt>  
+          </td> 
+        </tr>
+      </table> 
+    </div>  
+    <p>If your test data resides in the Tango workspace or the JAX-WS workspace, the harness recognizes their directory layouts and pick up classes from respective
+      <tt>build/class</tt> directories and libraries. So if you make a change to the source code, all you need to do is to compile them to class files.
+      
+    <div class="tip">
+      <table>
+        <tr>
+          <td>
+            <img src="tip.png"> 
+          </td>
+          <td> Do not run any targets that generate jar files, as those unnecessary work will slow you down. </td> 
+        </tr>
+      </table> 
+    </div>  
+    <p>If your change to the code is to the runtime and does not affect the code generation, then use the
+      <tt>-skip</tt> option to skip the code generation. This allows you to quickly rerun the runtime portion of the tests without wasting time running all the tools just to produce the same results. 
+      <pre class="cmd">$ java -jar path/to/harness.jar -skip testdata/abc/def</pre>  
+                 
+    <a name="Testing_Different_Transports_Containers"></a>
+    <h3>
+      <a name="Testing_Different_Transports_Containers">
+        <a href="#Testing_Different_Transports_Containers">1.4.</a>  Testing Different Transports/Containers
+      </a>
+    </h3>   
+    <p>The harness can run tests by using a variety of transports and containers.         
+    <a name="local"></a>
+    <h4>
+      <a name="local">
+        <a href="#local">1.4.1.</a>  local
+      </a>
+    </h4>   
+    <p>By default, the test harness uses the local transport. There's no additional option required for this mode. This is the preferred mode of testing because of its quick turn-around time. This mode also allows you to use a single debug session to debug both the client and the server side.              
+    <a name="Tomcat"></a>
+    <h4>
+      <a name="Tomcat">
+        <a href="#Tomcat">1.4.2.</a>  Tomcat
+      </a>
+    </h4>   
+    <p>This test harness supports Tomcat 5.0.x or 5.5.x. There are a few different ways of using Tomcat.         
+    <a name="Embedded_Tomcat"></a>
+    <h5>
+      <a name="Embedded_Tomcat">
+        <a href="#Embedded_Tomcat">1.4.2.1.</a>  Embedded Tomcat
+      </a>
+    </h5>   
+    <p>The following command causes the harness to run Tomcat within the same VM. This mode is bit like the local transport, in the sense that both the server and the client runs inside the same VM, but this mode run tests by using HTTP and full servlet container.  
+    <pre class="cmd">$ java -jar path/to/harness.jar -tomcat-embedded path/to/tomcat test-dir1 test-dir2 ...</pre>  
+    <p>
+      <tt>path/to/tomcat</tt> should point to the directory where you have Tomcat installed. The harness will load Tomcat jar files from there.
+    
+    <p>This mode is preferrable mode of testing for Tomcat, as this provides the quickest turn-around time, and worry-free. This mode is the only mode in Tomcat where you can use a single debug session to debug both the client and the server.              
+    <a name="Remote_Tomcat"></a>
+    <h5>
+      <a name="Remote_Tomcat">
+        <a href="#Remote_Tomcat">1.4.2.2.</a>  Remote Tomcat
+      </a>
+    </h5>   
+    <p>The following command causes tests to run by using Tomcat launched externally. The parameter to the -tomcat-remote option is
+      <tt>
+        <i>adminUserName</i>:
+        <i>adminPassword</i>@
+        <i>hostname</i>:
+        <i>port</i>
+      </tt>.
+      
+    <pre class="cmd">$ java -jar path/to/harness.jar -tomcat-remote admin:admin@localhost:8080 test-dir1 test-dir2 ...</pre>  
+    <p>It is your responsibility to launch Tomcat. In this mode, the harness will only deploy and undeploy services from this running instance. The tomcat used for this purpose should
+      <b>NOT</b> have JAX-WS/Tango binaries installed in
+      <tt>common/lib</tt> or anywhere else. The harness will include everything necessary into a war file, and this is the only way to make sure that you are testing the bits that you are supposed to be testing.
+      
+    <div class="tip">
+      <table>
+        <tr>
+          <td>
+            <img src="tip.png"> 
+          </td>
+          <td> To find out the admin username and password, look at
+            <tt>$TOMCAT_HOME/conf/tomcat-users.xml</tt> and find the entry that has "manager" as one of the roles. If none is found, simply add the following two lines to the file:
+            <pre>
+&lt;role rolename="manager"/&gt;
+&lt;user username="admin" password="admin" roles="manager"/&gt;
+</pre>  
+          </td> 
+        </tr>
+      </table> 
+    </div>   
+    <div class="tip">
+      <table>
+        <tr>
+          <td>
+            <img src="tip.png"> 
+          </td>
+          <td> To debug the server side in this set up, you need to launch Tomcat with the debugger support enabled. Run
+            <tt>catalina.sh jpda run</tt> to do this, and you can attach your debugger to Tomcat remotely. 
+          </td> 
+        </tr>
+      </table> 
+    </div>   
+    <div class="tip">
+      <table>
+        <tr>
+          <td>
+            <img src="tip.png"> 
+          </td>
+          <td> (Tomcat 5.0.x only) By default, Tomcat is configured to output logs to multiple places, including files in the
+            <tt>logs</tt> directory and stdout/stderr. This is often inconvenient for debugging, as you are not sure which file you should monitor. You can modify
+            <tt>$TOMCAT_HOME/conf/server.xml</tt> to avoid this problem, by sending all the outputs to stdout. To do so, find all "&lt;Logger&gt;" elements in server.xml and replace them with
+            <tt>SystemOutLogger</tt>, like this:
+            <pre>&lt;Logger className="org.apache.catalina.logger.SystemOutLogger" /&gt;</pre>  
+          </td> 
+        </tr>
+      </table> 
+    </div>   
+    <div class="tip">
+      <table>
+        <tr>
+          <td>
+            <img src="tip.png"> 
+          </td>
+          <td> When tests are aborted via Ctrl+C, web applications may be left running on this remote machine. When the test is run next time, they will be removed (or you can remove them manually.) </td> 
+        </tr>
+      </table> 
+    </div>               
+    <a name="Local_Tomcat"></a>
+    <h5>
+      <a name="Local_Tomcat">
+        <a href="#Local_Tomcat">1.4.2.3.</a>  Local Tomcat
+      </a>
+    </h5>   
+    <p>Run the following command to use Tomcat in the local mode. In this mode, the haress launches Tomcat as a child process, run tests, and terminates Tomcat when everything is done.  
+    <pre class="cmd">$ java -jar path/to/harness.jar -tomcat-local path/to/tomcat test-dir1 test-dir2 ...</pre>  
+    <p>See the tips for the remote tomcat support for how to configure Tomcat to report logs to one place.  
+    <div class="tip">
+      <table>
+        <tr>
+          <td>
+            <img src="tip.png"> 
+          </td>
+          <td> On Windows systems, aborting the harness via Ctrl+C will leave the child Tomcat process running (does anyone know how to fix that?) Those orphan processes can be killed from task manager (be careful not to kill other Java processes), or better yet,
+            <a href="http://www.sysinternals.com/Utilities/ProcessExplorer.html">process explorer</a>. 
+          </td> 
+        </tr>
+      </table> 
+    </div>                    
+    <a name="Glassfish"></a>
+    <h4>
+      <a name="Glassfish">
+        <a href="#Glassfish">1.4.3.</a>  Glassfish
+      </a>
+    </h4>   
+    <p>To test with Glassfish, use the following option. This mode assumes that you have already started a domain, and the harness will simply deploy/undeploy applications to this running service:  
+    <pre class="cmd">$ java -jar path/to/harness.jar -glassfish-remote localhost test-dir1 test-dir2 ...</pre>  
+    <p>The "-glassfish-remote" takes the connection string as the parameter. The full syntax of the paramter is
+      <tt>[USER:PASS@]HOST[:PORT][-HTTPURL]</tt>. The first four parts up to '-' specifies the Glassfish admin port. USER and PASS is used for the administrator login, and PORT is the admin TCP port. The last HTTPURL specifies the URL with which client test programs talk to the service. All components but HOST are defaulted, so if your glassfish installation is out of the box, then all you need to specify is the host name where Glassfish runs.
+      
+    <div class="tip">
+      <table>
+        <tr>
+          <td>
+            <img src="tip.png"> 
+          </td>
+          <td> Glassfish has its copy of JAX-WS, so testing with Glassfish requires us to replace the runtime of Glassfish. At this point the harness is not capable of doing that. </td> 
+        </tr>
+      </table> 
+    </div>                    
+    <a name="Running_Batch_Tests"></a>
+    <h3>
+      <a name="Running_Batch_Tests">
+        <a href="#Running_Batch_Tests">1.5.</a>  Running Batch Tests
+      </a>
+    </h3>   
+    <p>There are a few command-line options that often go with automated batch test for a large number of tests. First, use
+      <tt>-p N</tt> to run tests by using N number of threads. This should be used on a multi-processor system to reduce the turn-around time of the test, and ideal for continuous testing.
+    
+    <p>The
+      <tt>-report DIR</tt> option causes the harness to generate JUnit test report files into the specified directory. These generated XML reports can be then formatted into HTML (via &lt;junitreport&gt; ant task) or picked up by Hudson.
+                       
+    <a name="Writing_Tests"></a>
+    <h2>
+      <a name="Writing_Tests">
+        <a href="#Writing_Tests">2.</a>  Writing Tests
+      </a>
+    </h2>           
+    <a name="Conventions"></a>
+    <h3>
+      <a name="Conventions">
+        <a href="#Conventions">2.1.</a>  Conventions
+      </a>
+    </h3>           
+    <a name="Example_Directory_Layout"></a>
+    <h4>
+      <a name="Example_Directory_Layout">
+        <a href="#Example_Directory_Layout">2.1.1.</a>  Example Directory Layout
+      </a>
+    </h4>   ./test-descriptor.xml
+    <br> ./test1.bsh
+    <br> ./test2.bsh
+    <br> ./resources/mascot.jpeg
+    <br> ./server/AddNumbers.wsdl
+    <br> ./server/AddNumbersImpl.java
+    <br> ./server/myschema.xsd
+    <br>              
+    <a name="Test_Descriptor"></a>
+    <h4>
+      <a name="Test_Descriptor">
+        <a href="#Test_Descriptor">2.1.2.</a>  Test Descriptor
+      </a>
+    </h4>   The file
+    <TT>test-descriptor.xml</TT> contains the required configuration information for each test directory.
+    <br> Sample test descriptor file:
+    <br> 
+    <br> &lt;descriptor since="1.0"&gt;
+    <br> &lt;description&gt;this is a very useful test that tests stuff&lt;/description&gt;
+    <br> &lt;client href="test1.bsh" since="2.0"/&gt;
+    <br> &lt;client href="test2.bsh" since="2.0"/&gt;
+    <br> &lt;client href="*.bsh"/&gt;
+    <br> &lt;service basedir="./server"&gt;
+    <br> &lt;wsdl href="AddNumbers.wsdl"/&gt;
+    <br> &lt;/service&gt;
+    <br> &lt;/despcriptor&gt;
+    <br>              
+    <a name="Client_Test_Scripts"></a>
+    <h4>
+      <a name="Client_Test_Scripts">
+        <a href="#Client_Test_Scripts">2.1.3.</a>  Client Test Scripts
+      </a>
+    </h4>   
+    <p>Test client scripts are written in the
+      <a href="http://www.beanshell.org">Beanshell</a> scripting language. Test scripts reside at the top-level directory of each test. In
+      <TT>test-descriptor.xml</TT>, the script names are either explicitly specified or matched with wildcard patterns. Scriptnames recommended to end with suffix:
+      <TT>.bsh</TT> 
+     
+    <p>Optionally, client beanshell code can be written inline in the &lt;client&gt; of the test descriptor.              
+    <a name="Test_Service_Code"></a>
+    <h4>
+      <a name="Test_Service_Code">
+        <a href="#Test_Service_Code">2.1.4.</a>  Test Service Code
+      </a>
+    </h4>   Service code assumed to be all
+    <TT>.java</TT> files in the directory specified by the service's
+    <TT>basedir</TT> value. The value for
+    <TT>basedir</TT> defaults to top-level directory.
+    <TT>basedir</TT> specified as an attribute of the &lt;service&gt; element. If you are converting existing test services to this harness, most likely the only thing that needs to change is the declared package name.        
+    <a name="WSDL"></a>
+    <h5>
+      <a name="WSDL">
+        <a href="#WSDL">2.1.4.1.</a>  WSDL
+      </a>
+    </h5>   For scenarios which requiring building the service from a WSDL, there is a sub-element of service named
+    <TT>wsdl</TT> with has an element named
+    <TT>href</TT>.
+    <TT>href</TT> should name the WSDL file, relative to the service's
+    <TT>basedir</TT>.                  
+    <a name="Resources"></a>
+    <h4>
+      <a name="Resources">
+        <a href="#Resources">2.1.5.</a>  Resources
+      </a>
+    </h4>   Resources should be put in
+    <TT>resources</TT> directory at test's top-level. The resources are automatically made available to the beanshell client.             
+    <a name="User_Defined_Customization_Files_and_Schemas"></a>
+    <h4>
+      <a name="User_Defined_Customization_Files_and_Schemas">
+        <a href="#User_Defined_Customization_Files_and_Schemas">2.1.6.</a>  User-Defined Customization Files and Schemas
+      </a>
+    </h4>   
+    <p>The basic package naming often handled by boiler-plate customization files is taken care of automatically by the test harness. Only customizations beyond package naming need to be specified by the user. 
+    <p>Optional user-defined customization files should have the following names: 'custom-server.xml', 'custom-client.xml', 'custom-schema-server.xml', 'custom-client-schema.xml' The client files must sit at the top-level of the test directory. The server files in basedir of service (default is top-level unless specified in test-descriptor.xml) 
+    <p>User-defined schemas should have the suffix
+      <TT>.xsd</TT>. The
+      <TT>.xsd</TT> files are automatically picked up from the service's
+      <TT>basedir</TT>.
+                       
+    <a name="Magic"></a>
+    <h3>
+      <a name="Magic">
+        <a href="#Magic">2.2.</a>  Magic
+      </a>
+    </h3>   
+    <p>- generates deployment descriptor (sun-jaxws.xml) 
+    <p>- generates basic customization files for client and service for wsdl (not needed for for java case) 
+    <p>- injects service, port, etc objects into script namespace automatically, don't need to be declared or instantiated 
+    <p>- also, script inherits from junit Assert, get assertEquals(), etc for free              
+    <a name="Tips__Gotchas___known_Limitations"></a>
+    <h3>
+      <a name="Tips__Gotchas___known_Limitations">
+        <a href="#Tips__Gotchas___known_Limitations">2.3.</a>  Tips, Gotchas &amp; known Limitations
+      </a>
+    </h3>   
+    <p>Test scripts should use the injected port &amp; service objects rather than explicitly creating them 
+    <p>Picks up binding info from impl class. Currently can not set it on the generated binding descriptor. 
+    <p>Beanshell can't handle Java generic's syntax with &lt; type &gt; syntax. Simply omit the...             
+  </body>
+</html>
