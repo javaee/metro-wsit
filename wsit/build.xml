@@ -23,7 +23,7 @@
 -->
 
 <!--
- $Id: build.xml,v 1.17 2006-07-25 19:56:37 arungupta Exp $
+ $Id: build.xml,v 1.18 2006-07-25 21:41:26 arungupta Exp $
 
  Copyright (c) 2005 Sun Microsystems, Inc.
  All rights reserved.
@@ -121,7 +121,7 @@
     <target name="combine-jars-runtime">
         <combine-jars-macro jarname="${name}" libdir="${lib.runtime.dir}" classesdir="${rt.dir}/build/classes">
             <metainf>
-                <copy todir="${tmpdir}/META-INF/services">
+                <copy todir="${tmpdir}/META-INF/services" overwrite="true">
                     <fileset dir="etc/META-INF/services">
                         <include name="*.*"/>
                     </fileset>
