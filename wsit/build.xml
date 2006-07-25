@@ -23,7 +23,7 @@
 -->
 
 <!--
- $Id: build.xml,v 1.15 2006-07-18 23:01:29 arungupta Exp $
+ $Id: build.xml,v 1.16 2006-07-25 19:04:57 arungupta Exp $
 
  Copyright (c) 2005 Sun Microsystems, Inc.
  All rights reserved.
@@ -146,6 +146,8 @@
                 </fileset>
                 <fileset dir="${tmpdir}">
                     <include name="**/*.*"/>
+                    <exclude name="**/*.TWSDL*"/>
+                    <exclude name="**/*.TJava*"/>
                 </fileset>
             </services>
         </combine-jars-macro>
@@ -170,10 +172,14 @@
              dest="${lib.runtime.dir}/jaxwsa-api.jar"/>
         <get src="http://kohsuke.sfbay/hudson/job/jaxwsa-ri-rearch-2005/lastSuccessfulBuild/artifact/jax-wsa-sources/jaxwsa-ri/lib/jaxwsa-api-src.zip"
              dest="${lib.runtime.dir}/jaxwsa-api-src.zip"/>
-        <get src="http://kohsuke.sfbay/hudson/job/jaxwsa-ri-rearch-2005/lastSuccessfulBuild/artifact/jax-wsa-sources/jaxwsa-ri/build/lib/jaxwsa-impl.jar"
-             dest="${lib.runtime.dir}/jaxwsa-impl.jar"/>
-        <get src="http://kohsuke.sfbay/hudson/job/jaxwsa-ri-rearch-2005/lastSuccessfulBuild/artifact/jax-wsa-sources/jaxwsa-ri/build/jaxwsa-impl-src.zip"
-             dest="${lib.runtime.dir}/jaxwsa-impl-src.zip"/>
+        <get src="http://kohsuke.sfbay/hudson/job/jaxwsa-ri/lastSuccessfulBuild/artifact/jax-wsa-sources/jaxwsa-ri/build/lib/jaxwsa-rt.jar"
+             dest="${lib.runtime.dir}/jaxwsa-rt.jar"/>
+        <get src="http://kohsuke.sfbay/hudson/job/jaxwsa-ri/lastSuccessfulBuild/artifact/jax-wsa-sources/jaxwsa-ri/build/jaxwsa-rt-src.zip"
+             dest="${lib.runtime.dir}/jaxwsa-rt-src.zip"/>
+        <get src="http://kohsuke.sfbay/hudson/job/jaxwsa-ri/lastSuccessfulBuild/artifact/jax-wsa-sources/jaxwsa-ri/build/lib/jaxwsa-tools.jar"
+             dest="${lib.tooltime.dir}/jaxwsa-tools.jar"/>
+        <get src="http://kohsuke.sfbay/hudson/job/jaxwsa-ri/lastSuccessfulBuild/artifact/jax-wsa-sources/jaxwsa-ri/build/jaxwsa-tools-src.zip"
+             dest="${lib.tooltime.dir}/jaxwsa-tools-src.zip"/>
 
         <get src="http://kohsuke.sfbay/hudson/job/jaxwsa-ri-rearch-2005/lastSuccessfulBuild/artifact/jax-wsa-sources/jaxwsa-ri/build/jaxwsa-libs.zip"
              dest="tmp/jaxwsa-libs.zip"/>

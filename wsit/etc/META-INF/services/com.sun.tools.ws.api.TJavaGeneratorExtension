@@ -1,1 +1,1 @@
-com.sun.xml.ws.addressing.jaxws.WsaJavaGeneratorExtension
+com.sun.tools.ws.addressing.jaxws.TWsaJavaGeneratorExtension

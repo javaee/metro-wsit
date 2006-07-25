@@ -1,2 +1,2 @@
-com.sun.xml.ws.addressing.jaxws.WsaWSDLExtensionHandler
-com.sun.xml.ws.addressing.jaxws.Wsa200408WSDLExtensionHandler
+com.sun.tools.ws.addressing.jaxws.TWsaWSDLExtensionHandler
+com.sun.tools.ws.addressing.jaxws.TWsa200408WSDLExtensionHandler
