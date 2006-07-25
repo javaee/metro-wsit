@@ -23,7 +23,7 @@
 -->
 
 <!--
- $Id: build.xml,v 1.6 2006-07-24 22:50:28 bhaktimehta Exp $
+ $Id: build.xml,v 1.7 2006-07-25 22:32:44 bhaktimehta Exp $
 
  Copyright (c) 2005 Sun Microsystems, Inc.
  All rights reserved.
@@ -73,6 +73,9 @@
         -->
         <java jar="${test.lib.dir}/harness.jar" fork="true">
             <sysproperty key="WSIT_HOME" value="${env.WSIT_HOME}"/>
+            <sysproperty key="com.sun.xml.ws.transport.http.client.HttpTransportPipe.dump" value="true"/> 
+            <sysproperty key="com.sun.xml.ws.transport.local.LocalTransportPipe.dump" value="true"/>
+            <sysproperty key="com.sun.xml.ws.runtime.client" value="true"/> 
             <arg value="-cp:wsit-image" />
             <arg path="${wsit.image}" />
 
@@ -87,6 +90,10 @@
             <arg path="testcases" />
 
             <arg line="${args}"/>
+
+            <!--<jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,address=7000"
+/>
+            <jvmarg value="-Xdebug"/>-->
         </java>
 
     <mkdir dir="${logs.dir}/junit-reports" />
