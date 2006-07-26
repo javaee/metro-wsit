@@ -23,7 +23,7 @@
 -->
 
 <!--
- $Id: build.xml,v 1.7 2006-07-25 22:32:44 bhaktimehta Exp $
+ $Id: build.xml,v 1.8 2006-07-26 18:55:28 bhaktimehta Exp $
 
  Copyright (c) 2005 Sun Microsystems, Inc.
  All rights reserved.
@@ -72,7 +72,7 @@
         refer to docs/index.html
         -->
         <java jar="${test.lib.dir}/harness.jar" fork="true">
-            <sysproperty key="WSIT_HOME" value="${env.WSIT_HOME}"/>
+            <sysproperty key="WSIT_HOME" value="${basedir}/misc"/>
             <sysproperty key="com.sun.xml.ws.transport.http.client.HttpTransportPipe.dump" value="true"/> 
             <sysproperty key="com.sun.xml.ws.transport.local.LocalTransportPipe.dump" value="true"/>
             <sysproperty key="com.sun.xml.ws.runtime.client" value="true"/> 
