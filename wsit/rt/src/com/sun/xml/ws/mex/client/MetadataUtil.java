@@ -38,14 +38,14 @@ import static com.sun.xml.ws.mex.MetadataConstants.WSA_PREFIX;
 /**
  * Class for making ws-transfer requests.
  */
-public class WSTransferUtil {
+public class MetadataUtil {
     
     private HttpPoster postClient;
     
     private static final Logger logger =
-        Logger.getLogger(WSTransferUtil.class.getName());
+        Logger.getLogger(MetadataUtil.class.getName());
     
-    public WSTransferUtil() {
+    public MetadataUtil() {
         postClient = new HttpPoster();
     }
 

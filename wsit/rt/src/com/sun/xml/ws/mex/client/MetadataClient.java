@@ -64,7 +64,7 @@ public class MetadataClient {
     enum Protocol { SOAP_1_2, SOAP_1_1 };
     
     private String [] suffixes = { "" , "/mex" };
-    private WSTransferUtil wxfUtil;
+    private MetadataUtil mexUtil;
     private static final JAXBContext jaxbContext;
     
     private static final Logger logger =
@@ -83,7 +83,7 @@ public class MetadataClient {
      * Default constructor.
      */
     public MetadataClient() {
-        wxfUtil = new WSTransferUtil();
+        mexUtil = new MetadataUtil();
     }
     
     /**
@@ -100,7 +100,7 @@ public class MetadataClient {
             for (Protocol p : Protocol.values()) {
                 InputStream responseStream = null;
                 try {
-                    responseStream = wxfUtil.getMetadata(newAddress, p);
+                    responseStream = mexUtil.getMetadata(newAddress, p);
                 } catch (Exception e) {
                     logger.log(ERROR_LOG_LEVEL,
                         "Exception retrieving data with protocol" + p +
@@ -167,7 +167,9 @@ public class MetadataClient {
     
     /*
      * Create Metadata object from output stream. Need to remove
-     * the metadata from soap wrapper.
+     * the metadata from soap wrapper. If the metadata contains
+     * metadata refernces or HTTP GET location elements, these
+     * are dereferenced later.
      */
     private Metadata createMetadata(InputStream stream) throws Exception {
         XMLInputFactory factory = XMLInputFactory.newInstance();
@@ -216,16 +218,19 @@ public class MetadataClient {
      * This is a workaround for a bug in some indigo wsdls
      * that are being returned with schema imports containing
      * an empty schemaLocation attribute.
+     *
+     * If getAny() returns null, the metadata section contains
+     * a metadata reference or location rather than the wsdl.
      */
     private void cleanData(Metadata md) {
         for (MetadataSection section : md.getMetadataSection()) {
-            if (section.getDialect().equals(WSDL_DIALECT)) {
+            if (section.getDialect().equals(WSDL_DIALECT) &&
+                section.getAny() != null) {
                 cleanWSDLNode((Node) section.getAny());
             }
         }
     }
 
-    // remove this when cleanData() goes away
     private void cleanWSDLNode(final Node wsdlNode) {
         NodeList nodes = wsdlNode.getChildNodes();
         for (int i=0; i<nodes.getLength(); i++) {

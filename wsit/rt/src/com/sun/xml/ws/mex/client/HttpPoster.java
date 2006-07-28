@@ -99,4 +99,18 @@ public class HttpPoster {
         }
     }
 
+    public InputStream makeGetCall(String address) throws Exception {
+        URL url = new URL(address);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("GET");
+        conn.setRequestProperty("Content-Type",
+            "application/x-www-form-urlencoded"); // taken from wsimport
+        try {
+            return conn.getInputStream();
+        } catch (IOException ioe) {
+            outputErrorStream(conn);
+            throw ioe;
+        }
+    }
+    
 }
