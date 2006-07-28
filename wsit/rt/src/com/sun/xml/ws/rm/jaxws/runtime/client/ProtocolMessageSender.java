@@ -44,7 +44,6 @@ import com.sun.xml.ws.rm.protocol.*;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.ws.BindingProvider;
 import javax.xml.ws.addressing.*;
 import java.util.Map;
 import java.util.UUID;
@@ -84,14 +83,16 @@ public class ProtocolMessageSender {
      */
     private  Unmarshaller unmarshaller;
 
-    /**
-     * Associate the binding provider for request
-     * and response context
-     */
-    private BindingProvider proxy;
 
     private RMConstants constants;
 
+    /**
+     * Properties like the BindingProvider to associate with the
+     * request and response context
+     * contentNegotiation etc can be obtained from
+     * the packet
+     */
+    private Packet packet;
 
     /**
      * Public ctor.  Initialize the fields
@@ -100,14 +101,14 @@ public class ProtocolMessageSender {
                                  Marshaller marshaller,
                                  Unmarshaller unmarshaller,
                                  Pipe nextPipe,
-                                 BindingProvider proxy) {
+                                 Packet packet) {
 
         this.processor = processor;
         this.nextPipe = nextPipe;
         this.marshaller = marshaller;
         this.unmarshaller = unmarshaller;
-        this.proxy = proxy;
         this.constants = new RMConstants();
+        this.packet = packet;
 
     }
 
@@ -130,7 +131,8 @@ public class ProtocolMessageSender {
             //on the packet
 
             Packet requestPacket = new Packet(request);
-            requestPacket.proxy = proxy;
+            requestPacket.proxy = packet.proxy;
+            requestPacket.contentNegotiation = packet.contentNegotiation;
             addAddressingHeaders (requestPacket,constants.getCreateSequenceAction(),
                     destination,acksTo,false);
             
@@ -181,7 +183,8 @@ public class ProtocolMessageSender {
         seq.processAcknowledgement(new com.sun.xml.ws.rm.Message(request), marshaller);
         
         Packet requestPacket = new Packet(request);
-        requestPacket.proxy = proxy;
+        requestPacket.proxy = packet.proxy;
+        requestPacket.contentNegotiation = packet.contentNegotiation;
         addAddressingHeaders (requestPacket,constants.getTerminateSequenceAction(),seq.getDestination(),seq.getAcksTo(),true);
         requestPacket.setEndPointAddressString(seq.getDestination().getAddress().getURI().toString());
         Packet responsePacket = nextPipe.process(requestPacket);
@@ -213,7 +216,8 @@ public class ProtocolMessageSender {
         request.getHeaders().add(Headers.create(version,marshaller,el));
 
         Packet requestPacket = new Packet(request);
-        requestPacket.proxy = proxy;
+        requestPacket.proxy = packet.proxy;
+        requestPacket.contentNegotiation = packet.contentNegotiation;
         addAddressingHeaders(requestPacket, constants.getLastAction(),seq.getDestination(),
                 seq.getAcksTo(),true);
         
@@ -248,7 +252,8 @@ public class ProtocolMessageSender {
 
 
         Packet requestPacket = new Packet(request);
-        requestPacket.proxy = proxy;
+        requestPacket.proxy = packet.proxy;
+        requestPacket.contentNegotiation = packet.contentNegotiation;
         
         addAddressingHeaders (requestPacket, constants.getAckRequestedAction(),
                 seq.getDestination(),seq.getAcksTo(),true);

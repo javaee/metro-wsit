@@ -31,41 +31,35 @@
 
 package com.sun.xml.ws.rm.jaxws.runtime.client;
 
-import com.sun.xml.ws.rm.jaxws.runtime.PipeBase;
-import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.api.model.wsdl.WSDLModel;
-import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
-import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
-import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
-import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.pipe.Pipe;
-import com.sun.xml.ws.api.EndpointAddress;
-import com.sun.xml.ws.api.pipe.PipeCloner;
+import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.message.Messages;
-import javax.xml.ws.WebServiceException;
-import java.io.IOException;
-import java.net.SocketTimeoutException;
+import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
+import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
+import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.rm.RMException;
-import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
 import com.sun.xml.ws.rm.jaxws.runtime.InboundMessageProcessor;
-import javax.xml.ws.addressing.AddressingBuilder;
-import javax.xml.ws.addressing.EndpointReference;
-import java.net.URI;
-import java.net.URISyntaxException;
-import com.sun.xml.ws.rm.RMConstants;
-import com.sun.xml.ws.rm.RMException;
-import com.sun.xml.ws.security.secconv.WSSecureConversationException;
+import com.sun.xml.ws.rm.jaxws.runtime.PipeBase;
+import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
 import com.sun.xml.ws.security.impl.bindings.SecurityTokenReferenceType;
-import javax.xml.ws.BindingProvider;
+import com.sun.xml.ws.security.secconv.WSSecureConversationException;
+import com.sun.xml.wss.jaxws.impl.SecurityClientPipe;
+
 import javax.xml.bind.JAXBElement;
 import javax.xml.soap.SOAPException;
-
-import com.sun.xml.wss.jaxws.impl.SecurityClientPipe;
-//import com.sun.xml.ws.runtime.ClientPipeConfiguration;
-import com.sun.xml.ws.policy.PolicyMap;
+import javax.xml.ws.BindingProvider;
+import javax.xml.ws.WebServiceException;
+import javax.xml.ws.addressing.AddressingBuilder;
+import javax.xml.ws.addressing.EndpointReference;
+import java.io.IOException;
+import java.net.SocketTimeoutException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 
 /**
@@ -276,7 +270,7 @@ public class RMClientPipe
             outboundSequence.setSecureReliableMessaging(secureReliableMessaging);
 
             outboundSequence.registerProtocolMessageSender(
-                    new ProtocolMessageSender(messageProcessor,marshaller,unmarshaller,nextPipe, proxy));
+                    new ProtocolMessageSender(messageProcessor,marshaller,unmarshaller,nextPipe, packet));
 
 
             outboundSequence.connect(destEpr,  acksToEpr, twoWay);
