@@ -117,7 +117,7 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
             PolicyRecord oneBeforeCurrent = null;
             PolicyRecord current;
             for (current = head; null!=current.next; ) {
-                if (current.unresolvedURIs.contains(insertedRec.uri)) {
+                if ((null != current.unresolvedURIs) && current.unresolvedURIs.contains(insertedRec.uri)) {
                     if (null == oneBeforeCurrent) {
                         insertedRec.next = current;
                         return insertedRec;
@@ -570,9 +570,11 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
             if (null != expandQueueHead) { // any policies found
                 List<String> externalUris = getUnresolvedUris(false); // protect list of possible external policies
                 getUnresolvedUris(true); // cleaning up the list only
+                LinkedList<String> baseUnresolvedUris = new LinkedList<String>();
                 for (PolicyRecord currentRec = expandQueueHead; null!=currentRec; currentRec=currentRec.next) {
-                    getUnresolvedUris(false).add(currentRec.uri);
+                    baseUnresolvedUris.addFirst(currentRec.uri);
                 }
+                getUnresolvedUris(false).addAll(baseUnresolvedUris);
                 expandQueueHead = null; // cut the queue off
                 getUnresolvedUris(false).addAll(externalUris);
             }
