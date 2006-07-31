@@ -34,7 +34,9 @@ import com.sun.xml.ws.security.policy.SignedEndorsingSupportingTokens;
 import com.sun.xml.ws.security.policy.SignedParts;
 import com.sun.xml.ws.security.policy.SignedSupportingTokens;
 import com.sun.xml.ws.security.policy.SupportingTokens;
+import com.sun.xml.ws.security.policy.Target;
 import com.sun.xml.ws.security.policy.Token;
+import com.sun.xml.ws.security.policy.WSSAssertion;
 import com.sun.xml.ws.security.policy.X509Token;
 import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.impl.PolicyTypeUtil;
@@ -76,7 +78,7 @@ public abstract class BindingProcessor {
     protected TokenProcessor tokenProcessor= null;
     protected IntegrityAssertionProcessor iAP = null;
     protected EncryptionAssertionProcessor eAP = null;
-    private boolean WSS11  = false;
+    private WSSAssertion wss11  = null;
     /** Creates a new instance of BindingProcessor */
     public BindingProcessor() {
         this.pid = new PolicyID();
@@ -170,14 +172,22 @@ public abstract class BindingProcessor {
         for(EncryptedElements encEl : encryptedElements){
             eAP.process(encEl,epFB);
         }
-        if(isWSS11()){
+        if(isWSS11() && requireSC()){
             iAP.process(SIGNATURE_CONFIRMATION,spFB);
         }
-        if(isServer && !isIncoming && getBinding().getSignatureProtection()){
+        if((isWSS11() && requireSC() ) && isServer && !isIncoming && getBinding().getSignatureProtection()){
             eAP.process(SIGNATURE_CONFIRMATION,epFB);
         }
     }
     
+    protected boolean requireSC(){
+        if(wss11 != null){
+            if(wss11.getRequiredProperties().contains(WSSAssertion.REQUIRE_SIGNATURE_CONFIRMATION)){
+                return true;
+            }
+        }
+        return false;
+    }
     
     protected abstract Binding getBinding();
     
@@ -228,10 +238,13 @@ public abstract class BindingProcessor {
     protected abstract void close();
     
     public boolean isWSS11() {
-        return WSS11;
+        if(wss11 != null){
+            return true;
+        }
+        return false;
     }
     
-    public void setWSS11(boolean WSS11) {
-        this.WSS11 = WSS11;
+    public void setWSS11(WSSAssertion wss11) {
+        this.wss11 = wss11;
     }
 }

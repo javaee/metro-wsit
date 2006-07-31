@@ -180,8 +180,8 @@ public class XWSSPolicyGenerator {
                 SymmetricBindingProcessor sbp =  new SymmetricBindingProcessor((SymmetricBinding) _binding, _policyContainer,
                         isServer, isIncoming,signedParts,encryptedParts,
                         signedElements,encryptedElements);
-                if(wssAssertion != null){
-                    sbp.setWSS11(true);
+                if(PolicyUtil.isWSS11(wssAssertion)){
+                    sbp.setWSS11((WSSAssertion)wssAssertion);
                 }
                 sbp.process();
                 processNonBindingAssertions(sbp);
@@ -191,8 +191,8 @@ public class XWSSPolicyGenerator {
                 AsymmetricBindingProcessor abp = new AsymmetricBindingProcessor((AsymmetricBinding) _binding, _policyContainer,
                         isServer, isIncoming,signedParts,encryptedParts,
                         signedElements,encryptedElements);
-                if(wssAssertion != null){
-                    abp.setWSS11(true);
+                if(PolicyUtil.isWSS11(wssAssertion)){
+                    abp.setWSS11((WSSAssertion)wssAssertion);
                 }
                 abp.process();
                 //  _policyContainer.getMessagePolicy().setAlgorithmSuite(((AsymmetricBinding) _binding).getAlgorithmSuite());

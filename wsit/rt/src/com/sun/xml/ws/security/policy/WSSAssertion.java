@@ -33,7 +33,7 @@ import java.util.Set;
 public interface WSSAssertion {
     public final static String MUSTSUPPORT_REF_THUMBPRINT = "MustSupportRefThumbprint";
     public final static String MUSTSUPPORT_REF_ENCRYPTED_KEY = "MustSupportRefEncryptedKey";
-    public final static String REQUIRED_SIGNATURE_CONFIRMATION = "RequireSignatureConfirmation";    
+    public final static String REQUIRE_SIGNATURE_CONFIRMATION = "RequireSignatureConfirmation";    
     public static final String MUST_SUPPORT_CLIENT_CHALLENGE = "MustSupportClientChallenge";
     public static final String MUST_SUPPORT_SERVER_CHALLENGE = "MustSupportServerChallenge";
     public static final String REQUIRE_CLIENT_ENTROPY = "RequireClientEntropy";
