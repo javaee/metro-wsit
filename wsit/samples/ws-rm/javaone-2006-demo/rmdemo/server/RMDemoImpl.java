@@ -20,59 +20,62 @@
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 package rmdemo.server;
-import javax.xml.bind.JAXBElement;
-import javax.jws.WebService;
-import javax.jws.WebMethod;
-import java.util.HashMap;
-import javax.xml.bind.*;
-import javax.xml.namespace.*;
-import javax.jws.WebService;
-import javax.jws.WebParam;
-import javax.xml.bind.JAXBElement;
+
 import javax.annotation.Resource;
-import javax.xml.ws.handler.MessageContext;
+import javax.jws.WebMethod;
+import javax.jws.WebService;
 import javax.xml.ws.WebServiceContext;
+import java.util.HashMap;
+
+
 
 @WebService(endpointInterface="rmdemo.server.RMDemo")
 public class RMDemoImpl {
 
     /* Store a String for each session */
-       private final HashMap<String, String> sessionMap = 
-               new HashMap<String, String>();
+    private final HashMap<String, String> sessionTable =
+            new HashMap<String, String>();
 
-       /* JAX-WS initializes context for each request */
-       @Resource
-       private WebServiceContext context;
-       
-       
-       /* Get SesssionId using well-known key in MessageContext */
-       private String getSessionId() {
-           return (String)context.getMessageContext()
-                   .get("com.sun.xml.ws.sessionid");
-       }
-       
-       /* Get String associated with SessionID for current request */
-       private String getSessionData() {         
-           String id = getSessionId();
-           String ret = sessionMap.get(id);
-           return ret != null ? ret : "";
-       }
-       
-       /* Store String associated with SessionID for current request */
-       private void setSessionData(String data) {
-           sessionMap.put(getSessionId(), data);
-       }
-       
-       /* RMDemo Methods */
-       @WebMethod
-       public void addString(String s ) {
-           /* append string to session data */
-           setSessionData(getSessionData() + " " + s);
-       } 
+    /* JAX-WS initializes context for each request */
+    @Resource
+    private WebServiceContext context;
 
-       @WebMethod
-       public String getResult() {
-           /* return session data */
-	   return getSessionData();  
-       }
+    /* Get SesssionId using well-known key in MessageContext */
+    private String getSessionId() {
+        return (String)context.getMessageContext()
+                .get("com.sun.xml.ws.sessionid");
+
+    }
+
+    /* Get String associated with SessionID for current request */
+
+    private String getSessionData() {
+        String id = getSessionId();
+        String ret = sessionTable.get(id);
+        return ret != null ? ret : "";
+
+    }
+
+    /* Store String associated with SessionID for current request */
+    private void setSessionData(String data) {
+        sessionTable.put(getSessionId(), data);
+    }
+
+    /* RMDemo Methods */
+
+    @WebMethod
+    public void addString(String s ) {
+        /* append string to session data */
+        setSessionData(getSessionData() + " " + s);
+    }
+
+
+
+    @WebMethod
+    public String getResult() {
+        /* return session data */
+        return getSessionData();
+    }
+
 }
+
