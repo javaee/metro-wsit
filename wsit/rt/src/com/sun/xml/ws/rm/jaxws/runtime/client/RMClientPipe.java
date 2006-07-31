@@ -103,7 +103,7 @@ public class RMClientPipe
      * then we need to create CreateSequenceRequest with
      * STR
      */
-    private final boolean secureReliableMessaging ;
+    private  boolean secureReliableMessaging ;
 
     /**
      * The BindingProvider instance using the OutboundSequence
@@ -259,8 +259,9 @@ public class RMClientPipe
                 try {
                     JAXBElement<SecurityTokenReferenceType> str = securityPipe.startSecureConversation(packet);
                     outboundSequence.setSecurityTokenReference(str);
-                } catch (WSSecureConversationException e) {
-                    throw new RMException ("Cannot start the Secure Conversation" + e);
+                } catch (Exception e) {
+                    secureReliableMessaging = false;
+                    outboundSequence.setSecurityTokenReference(null);
                 }
             }
 
