@@ -29,8 +29,7 @@
 
 
     <property file="build.properties"/>
-    <!--<property name="WSIT_HOME" value="${basedir}/../../../../"/>-->
-    <property name="WSIT_HOME" value="${env.WSIT_HOME}"/>
+    <property name="WSIT_HOME" value="${basedir}/../../../../dist/image/jax-ws-latest-wsit"/>
     <property name="lib.home" value="${WSIT_HOME}/lib"/>
     <!--<property name="dist.home" value="${WSIT_HOME}/dist/image"/>-->
     <property name="build.home" value="${basedir}/build"/>
@@ -70,7 +69,6 @@
         <delete dir="${build.home}" includeEmptyDirs="true"/>
     </target>
 
-                <!--wsdl="d:/new-wsit/wsit/wsit/samples/ws-rm/javaone-2006-demo/rmdemo/server/etc/RMDemo.wsdl">-->
     <target name="build-server-wsdl" depends="setup">
         <wsimport
                 debug="true"
