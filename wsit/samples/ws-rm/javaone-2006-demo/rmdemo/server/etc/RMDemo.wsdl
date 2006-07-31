@@ -1,6 +1,8 @@
 <?xml version="1.0" ?>
+
 <definitions
-    xmlns:wsaw = "http://www.w3.org/2005/08/addressing"
+
+    xmlns:wsaw = "http://www.w3.org/2006/05/addressing/wsdl"
     xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing"
     xmlns:soap = "http://schemas.xmlsoap.org/wsdl/soap12/"
     xmlns:tns = "http://rm.demo/"
@@ -11,34 +13,42 @@
     xmlns:wsrm="http://schemas.xmlsoap.org/ws/2005/02/rm/policy"
     targetNamespace = "http://rm.demo/"
     name = "RMDemoService">
+
     
+
      <wsp:Policy wsu:Id="RM_policy">
         <wsp:ExactlyOne>
             <wsp:All>
                 <wsrm:RMAssertion>
-                </wsrm:RMAssertion> 
+                </wsrm:RMAssertion>
                 <wsaw:UsingAddressing/>
             </wsp:All>
         </wsp:ExactlyOne>
     </wsp:Policy>
-    
+
+
     <types>
         <xsd:schema>
             <xsd:import namespace = "http://rm.demo/" schemaLocation = "RMDemo.xsd"></xsd:import>
         </xsd:schema>
     </types>
+
     <message name = "getResult">
         <part name = "parameters" element = "tns:getResult"></part>
     </message>
+
     <message name = "getResultResponse">
         <part name = "parameters" element = "tns:getResultResponse"></part>
     </message>
+
     <message name = "addString">
         <part name = "parameters" element = "tns:addString"></part>
     </message>
+
     <message name = "addStringResponse">
         <part name = "parameters" element = "tns:addStringResponse"></part>
     </message>
+
     <portType name = "RMDemo">
         <operation name = "getResult">
             <input message = "tns:getResult" wsaw:Action="urn:wsrm:getResult"></input>
@@ -49,6 +59,7 @@
             <output message = "tns:addStringResponse" wsaw:Action="urn:wsrm:addStringResponse"></output>
         </operation>
     </portType>
+
     <binding name = "RMDemoPortBinding" type = "tns:RMDemo">
         <wsp:PolicyReference URI="#RM_policy"/>
         <wsaw:UsingAddressing></wsaw:UsingAddressing>
@@ -72,9 +83,12 @@
             </output>
         </operation>
     </binding>
+
     <service name = "RMDemoService">
         <port name = "RMDemoPort" binding = "tns:RMDemoPortBinding">
             <soap:address location = "http://localhost:8080/rmdemo"></soap:address>
         </port>
     </service>
+
 </definitions>
+
