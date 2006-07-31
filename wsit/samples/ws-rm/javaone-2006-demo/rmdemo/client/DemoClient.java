@@ -20,11 +20,17 @@
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
+
 /*
+
  * DemoClient.java
+
  */
 
+
+
 package rmdemo.client;
+import com.sun.xml.ws.Closeable;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -34,29 +40,39 @@ import java.io.InputStreamReader;
  * with WS RM implementation.
  * @author Mike Grogan
  */
+
 public class DemoClient {
 
     public static void main(String[] args) throws Exception {
         RMDemoService service = new RMDemoService();
         RMDemo port = service.getRMDemoPort();
-        
-        
+
         BufferedReader reader = new BufferedReader(
                                     new InputStreamReader(
-                                        System.in));
+                                       System.in));
+
         System.out.println("Running the RMDemo....\n"+
                 "Enter as many strings as you like... \n" +
                 "then press <Enter> to see the result and terminate this client\n");
+
         while (true) {
+
             String str = reader.readLine();
             if (!str.equals("")) {
                 port.addString(str);
+
             } else {
                 System.out.println(port.getResult());
-
+                ((Closeable)port).close();
                 System.exit(0);
+
             }
+
         }
 
+
+
     }
+
 }
+
