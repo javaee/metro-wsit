@@ -59,16 +59,6 @@ public class ClientOutboundSequence extends OutboundSequence {
      */
     protected int receiveBufferSize;
 
-    /**
-     *temporary algorithm for determining whether to send ack request
-     *request ack every ackFrequency + 1 requests
-     */
-    protected int ackFrequency;
-
-    /**
-     *number of messages that have been sent since last ack request.
-     */
-    protected int ackCount;
 
     /**
      * The helper class used to send protocol messages
@@ -108,14 +98,30 @@ public class ClientOutboundSequence extends OutboundSequence {
      */
     private long lastActivityTime = System.currentTimeMillis();
     
+    /*
+     * Flag which indicates whether sequence is active (disconnect() has not
+     * been called.
+     */
+    private boolean isActive = true;
+    
+    /**
+     * Time after which resend of messages in sequences is attempted at
+     * next opportunity.
+     */
+    private long resendDeadline;
+    
+    /**
+     * Time after which Ack is requested at next opportunity.
+     */
+    private long ackRequestDeadline;
+    
+    
     private static boolean sendHeartbeats = true;
     
     public ClientOutboundSequence(SequenceConfig config) {
         this.config = config;
-        this.ackCount = 0;
 
         //for now
-        this.ackFrequency = 0;
         this.version = config.getSoapVersion();
         this.ackHandler = new AcknowledgementHandler(config);
 
@@ -154,6 +160,17 @@ public class ClientOutboundSequence extends OutboundSequence {
 
     public boolean isSecureReliableMessaging() {
         return secureReliableMessaging;
+    }
+    
+    /**
+     * Return the hoped-for limit to number of stored messages.  Currently
+     * the limit is not enforced, but as the number of stored messages approaches
+     * the limit, resends and ackRequests occurr more frequently.
+     */
+    private int getTransferWindowSize() {
+       //Use server size receive buffer size for now.  Might
+       //want to make this configurable.
+       return config.getBufferSize(); 
     }
 
     public void setSecureReliableMessaging(boolean secureReliableMessaging) {
@@ -292,6 +309,8 @@ public class ClientOutboundSequence extends OutboundSequence {
         if (inboundSequence == null) {
             throw new IllegalStateException("Not connected.");
         }
+        
+        isActive = false;
 
         sendLast();
          
@@ -325,35 +344,73 @@ public class ClientOutboundSequence extends OutboundSequence {
      * Forces an ack request on next message
      */
     public synchronized void requestAck() {
-        ackCount = ackFrequency;
+        ackRequestDeadline = System.currentTimeMillis();
     }
 
-    /**
-     * Sets the value of the <code>ackFrequency</code> field, which regulates how
-     * many requests to the endpoint are sent between ack requests.
-     *
-     * @param ackFrequency The new value of the field.
-     */
-    public synchronized void setAckFrequency(int ackFrequency) {
-        this.ackFrequency = ackFrequency;
-        //get ack next request
-        this.ackCount = ackFrequency;
-    }
-
+    
     /**
      * Checks whether an ack should be requested.  Currently checks whether the
-     * number of requests since the last ackRequest matches the value specified
-     * in the <code>ackFrequency</code> field.  If the return is <code>true</code>
-     * the counter is reset.
+     * The algorithm checks whether the ackRequest deadline has elapsed.  
+     * The ackRequestDeadline is determined by the ackRequestInterval in the 
+     * SequenceConfig member for this sequence.
+     *
      */
     protected synchronized boolean isAckRequested(){
-        if (ackCount >= ackFrequency) {
-            ackCount = 0;
+      
+        long time = System.currentTimeMillis();
+        if (time > ackRequestDeadline) {
+            //reset the clock
+            ackRequestDeadline = time + getAckRequestInterval();
             return true;
         } else {
-            ackCount++;
             return false;
         }
+    }
+    
+    /**
+     * Checks whether a resend should happen.  The algorithm checks whether 
+     * the resendDeadline has elapsed.  
+     * The resendDeadline is determined by the resendInterval in the 
+     * SequenceConfig member for this sequence.
+     *
+     */
+    public synchronized boolean isResendDue() {
+        long time = System.currentTimeMillis();
+        if (time > resendDeadline) {
+            //reset the clock
+            resendDeadline = time + getResendInterval();
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+    private long getResendInterval() {
+        //do a resend at every opportunity under these conditions
+        //1. Sequence has been terminated
+        //2. Number of stored messages exceeds 1/2 available space.
+        //3. Number of stored messages at endpoint exceeds 1/2
+        //   available space.
+        if (!isActive || 
+            storedMessages > (getTransferWindowSize() / 2) ||
+            getReceiveBufferSize() > (config.getBufferSize() / 2)) {
+            return 0;
+        }
+        return config.getResendInterval();
+    }
+    
+    private long getAckRequestInterval() {
+        //send an ackRequest at every opportunity under these conditions
+        //1. Sequence has been terminated
+        //2. Number of stored messages exceeds 1/2 available space.
+        //3. Number of stored messages at endpoint exceeds 1/2
+        //   available space.
+        if (!isActive || 
+            storedMessages > (getTransferWindowSize() / 2) ||
+            getReceiveBufferSize() > (config.getBufferSize() / 2)) {
+            return 0;
+        }
+        return config.getAckRequestInterval();
     }
     
     /**
@@ -432,7 +489,7 @@ public class ClientOutboundSequence extends OutboundSequence {
      */
     public synchronized void doMaintenanceTasks() throws RMException {
          
-        if (storedMessages > 0) {
+        if (storedMessages > 0 && isResendDue()) {
             int top = getNextIndex();
             for (int i = 1; i < top; i++) {
                 Message mess = get(i);

@@ -45,11 +45,15 @@ public class RMPolicySelector extends PolicySelector {
     private static final QName rmQName = new QName(version, "RMAssertion");
     private static final QName flowQName = new QName(microsoftVersion, "RmFlowControl");
     private static final QName orderedQName = new QName(sunVersion, "Ordered");
+    private static final QName resendIntervalQName = new QName(sunVersion, "ResendInterval");
+    private static final QName ackRequestIntervalQName = new QName(sunVersion, "AckRequestInterval");
     static {
         supportedAssertions.add(new QName(version, "AcknowledgementInterval"));
         supportedAssertions.add(new QName(version, "InactivityTimeout"));
         supportedAssertions.add(new QName(microsoftVersion, "MaxReceiveBufferSize"));
         supportedAssertions.add(new QName(sunVersion, "Ordered"));
+        supportedAssertions.add(new QName(sunVersion, "ResendInterval"));
+        supportedAssertions.add(new QName(sunVersion, "AckRequestInterval"));
     }
     
     public RMPolicySelector() {
@@ -60,7 +64,9 @@ public class RMPolicySelector extends PolicySelector {
         QName qname = assertion.getName();
         if (qname.equals(flowQName) || 
             qname.equals(rmQName) ||
-            qname.equals(orderedQName)){
+            qname.equals(orderedQName) ||
+            qname.equals(resendIntervalQName) ||
+            qname.equals(ackRequestIntervalQName)){
             
             Iterator<PolicyAssertion> i = assertion.getNestedAssertionsIterator();
             while (i != null && i.hasNext()) {

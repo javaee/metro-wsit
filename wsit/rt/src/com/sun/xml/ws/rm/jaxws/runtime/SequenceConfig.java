@@ -88,6 +88,17 @@ public class SequenceConfig {
     public SOAPVersion soapVersion;
     
     
+    /**
+     * Length of time between resends
+     */
+    public long resendInterval;
+    
+    /**
+     * Length of time between ackRequests.
+     */
+    public long ackRequestInterval;
+    
+    
     private static RMConstants constants = 
             new RMConstants();
 
@@ -109,6 +120,14 @@ public class SequenceConfig {
         flowControl = true;
         bufferSize = 32;
         soapVersion = SOAPVersion.SOAP_12;
+        
+        /*
+        ackRequestInterval = 200;
+        resendInterval = 200;
+         */
+        
+        ackRequestInterval = 0;
+        resendInterval = 0;
     }
     
     public SequenceConfig(WSDLPort port) {
@@ -234,6 +253,42 @@ public class SequenceConfig {
         flowControl = use;
     }
     
+     /**
+     * Accessor for resendIterval field
+     *
+     * @return The value of the field.
+     */
+    public long getResendInterval() {
+        return resendInterval;
+    }
+    
+    /**
+     * Mutator for the flow control field
+     *
+     * @param The new value
+     */
+    public void setResendInterval(long interval) {
+        resendInterval = interval;
+    }
+    
+     /**
+     * Accessor for ackRequestIterval field
+     *
+     * @return The value of the field.
+     */
+    public long getAckRequestInterval() {
+        return ackRequestInterval;
+    }
+    
+    /**
+     * Mutator for the ackRequestInterval field
+     *
+     * @param The new value
+     */
+    public void setAckRequestInterval(long interval) {
+        ackRequestInterval = interval;
+    }
+    
     public void init(WSDLPort port, PolicyMap policyMap) throws RMException {
        
         try {
@@ -262,16 +317,24 @@ public class SequenceConfig {
                         PolicyAssertion flowAssertion = null;
                         
                         for (PolicyAssertion assertion : policyAssertionSet) {
-                 
-                            if (assertion.getName()
-                                             .equals(constants.getRMAssertionQName())) {
+                            QName qname = assertion.getName();
+                          
+                            if (qname.equals(constants.getRMAssertionQName())) {
                                 rmAssertion = assertion;
-                            } else if (assertion.getName()
-                                            .equals(constants.getRMFlowControlQName())) {
+                            } else if (qname.equals(constants.getRMFlowControlQName())) {
                                 flowAssertion = assertion;
-                            } else if (assertion.getName()
-                                            .equals(constants.getOrderedQName())) {
+                            } else if (qname.equals(constants.getOrderedQName())) {
                                 ordered = true;
+                            } else if (qname.equals(constants.getAckRequestIntervalQName())) {
+                                String num = assertion.getAttributeValue(new QName("", "Milliseconds"));
+                                if (num != null) {
+                                    ackRequestInterval = Long.parseLong(num);
+                                }
+                            } else if (qname.equals(constants.getResendIntervalQName())) {
+                                String num = assertion.getAttributeValue(new QName("", "Milliseconds"));
+                                if (num != null) {
+                                    resendInterval = Long.parseLong(num);
+                                }
                             } else {
                                 //TODO handle error condition here
                             }

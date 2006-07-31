@@ -264,6 +264,14 @@ public class RMConstants {
         return new QName(sunVersion, "Ordered");
     }
      
+    public QName getResendIntervalQName() {
+        return new QName(sunVersion, "ResendInterval");
+    }
+    
+    public QName getAckRequestIntervalQName() {
+        return new QName(sunVersion, "AckRequestInterval");
+    }
+    
     public QName getInactivityTimeoutQName() {
         return new QName(version, "InactivityTimeout");
     }

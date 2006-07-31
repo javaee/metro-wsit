@@ -154,6 +154,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
                 //message or protocol message is piggybacked on an application message.
                 return ret;
             }
+            
             //If we got here, this is an application message
 
             //do inbound bookkeeping
@@ -173,7 +174,6 @@ public class RMServerPipe extends PipeBase<RMDestination,
                     Header header = Headers.create(binding.getSOAPVersion(),marshaller, new SequenceFaultElement());
                     m.getHeaders().add(header);
                 }
-
 
                 packet.setMessage(m);
                 return packet;

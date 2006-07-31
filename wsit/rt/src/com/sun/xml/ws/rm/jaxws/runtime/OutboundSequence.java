@@ -206,9 +206,7 @@ public abstract class OutboundSequence extends Sequence {
             mess.addHeader(Headers.create(getVersion(), 
                            marshaller,
                            mess.getSequenceAcknowledgementElement()));
-        }
-        
-        
+        }   
     }
     
     /**
@@ -291,7 +289,11 @@ public abstract class OutboundSequence extends Sequence {
 
     
      protected boolean isAckRequested(){
-         return false;
+         return true;
+     }
+     
+     protected boolean isResendDue() {
+         return true;
      }
 
     private SOAPVersion getVersion(){
