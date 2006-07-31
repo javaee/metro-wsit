@@ -23,7 +23,7 @@
 -->
 
 <!--
- $Id: build.xml,v 1.9 2006-07-26 22:43:21 bhaktimehta Exp $
+ $Id: build.xml,v 1.10 2006-07-31 18:18:23 hofsass Exp $
 
  Copyright (c) 2005 Sun Microsystems, Inc.
  All rights reserved.
@@ -39,6 +39,19 @@
      <target name="prepare">
         <mkdir dir="${logs.dir}/junit-reports" />
         <mkdir dir="${logs.dir}"/>
+    </target>
+
+    <target name="get-wsit-hudson" description="internal: retrieve last successful build of WSIT from hudson">
+        <mkdir dir="wsit-image"/>
+
+        <get src="http://kohsuke.sfbay/hudson/job/wsit-javanet/lastSuccessfulBuild/artifact/dist/jax-ws-latest-wsit.zip"
+            dest="wsit-image/jax-ws-latest-wsit.zip"/>
+        <unzip src="wsit-image/jax-ws-latest-wsit.zip" dest="wsit-image"/>
+
+        <get src="http://kohsuke.sfbay/hudson/job/wsit-javanet/lastSuccessfulBuild/artifact/rt/build/webservices-src.zip"
+            dest="wsit-image/webservices-src.zip"/>
+        <get src="http://kohsuke.sfbay/hudson/job/wsit-javanet/lastSuccessfulBuild/artifact/tools/build/webservices-tools-src.zip"
+            dest="wsit-image/webservices-tools-src.zip"/>
     </target>
 
     <target name="integrate-test-harness-hudson" description="integrates latest test harness into WSIT, meant for internal consumption only">
