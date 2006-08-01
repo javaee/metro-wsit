@@ -77,7 +77,7 @@ public class WSDLPolicyMapWrapper implements WSDLExtension {
         
         if (clientWsitConfig == null) {
             // TODO: move this message into PipelineAssemblerFactoryImpl class
-            logger.warning("addClientConfigToMap", "Optional client configuration file URL is missing. No client configuration is processed.");
+            logger.config("addClientConfigToMap", "Optional client configuration file URL is missing. No client configuration is processed.");
             return;
         }
         
