@@ -32,13 +32,14 @@ package com.sun.xml.ws.rm.jaxws.runtime;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Headers;
 import com.sun.xml.ws.rm.*;
+import com.sun.xml.ws.rm.jaxws.util.ProcessingFilter;
 import com.sun.xml.ws.rm.protocol.AckRequestedElement;
 import com.sun.xml.ws.rm.protocol.AcknowledgementHandler;
 import com.sun.xml.ws.rm.protocol.SequenceAcknowledgementElement;
 import com.sun.xml.ws.rm.protocol.SequenceElement;
+
 import javax.xml.bind.Marshaller;
 import javax.xml.ws.addressing.EndpointReference;
-import com.sun.xml.ws.rm.jaxws.util.ProcessingFilter;
 
 /**
  *
@@ -289,7 +290,12 @@ public abstract class OutboundSequence extends Sequence {
 
     
      protected boolean isAckRequested(){
-         return true;
+         //For oneway messages it does not make sense to send
+         // AckRequestedElement on the ServerOutbound messages
+         //saveMessages will be true in case of two way messages
+         // for AckRequestedElement will be generated then
+         //otherwise it will return false
+         return saveMessages;
      }
      
      protected boolean isResendDue() {
