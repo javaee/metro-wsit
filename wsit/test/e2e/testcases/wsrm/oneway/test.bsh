@@ -1,5 +1,4 @@
-System.out.println("Uncomment me later");
-/*try{
+try{
     WSHttpBinding_IPing.ping("hello");
     System.out.println("first message sent");
     WSHttpBinding_IPing.ping("there");
@@ -13,5 +12,5 @@ System.out.println("Uncomment me later");
 } catch (Exception e ){
   e.printStackTrace();
   fail("The ReliableOneway.testSendPing failed with the above execption");
- }*/
+ }
 

@@ -32,8 +32,8 @@
             for (int i = 0; i < 4; i++) {
                 System.out.println("sending " + i + " on Thread " +
                         Thread.currentThread().getId());
-                 System.out.println("Uncomment me later");
-                //WSHttpBinding_IPing.ping("bar " + i);
+                 
+                WSHttpBinding_IPing.ping("bar " + i);
             }
 
             //wait here for awhile and see if the Maintenance thread sends
@@ -44,7 +44,7 @@
 
             }*/
 
-            WSHttpBinding_IPing.close();
+           WSHttpBinding_IPing.close();
             assertTrue(true);
         } catch (Exception e ){
             e.printStackTrace();
