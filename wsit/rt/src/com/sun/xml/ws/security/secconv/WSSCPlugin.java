@@ -228,7 +228,9 @@ public class WSSCPlugin {
         // Ideally this property for enabling FI or not should be available to the pipeline. 
         // As a workaround for now, we 
         // copy the property for the client packet to the reqPacket mananually here.
-         reqPacket.contentNegotiation = packet.contentNegotiation;
+        if (packet != null){
+            reqPacket.contentNegotiation = packet.contentNegotiation;
+        }
         
         // Send the message 
         Packet respPacket = securityPipe.process(reqPacket);
