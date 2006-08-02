@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustConstants.java,v 1.1 2006-05-03 22:57:14 arungupta Exp $
+ * $Id: WSTrustConstants.java,v 1.2 2006-08-02 18:03:54 jdg6688 Exp $
  */
 
 /*
@@ -52,8 +52,8 @@ public interface WSTrustConstants {
     /**
      * URI for KeyType
      */
-    public static final String PUBLIC_KEY = WST_NAMESPACE+ "PublicKey";
-    public static final String SYMMETRIC_KEY = WST_NAMESPACE + "SymmetricKey";
+    public static final String PUBLIC_KEY = WST_NAMESPACE+ "/PublicKey";
+    public static final String SYMMETRIC_KEY = WST_NAMESPACE + "/SymmetricKey";
     
    /**
      * Constants denoting type of Elements

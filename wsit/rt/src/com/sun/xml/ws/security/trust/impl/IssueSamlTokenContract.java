@@ -100,7 +100,7 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
         // Create required secret key
         //============================
         URI keyTypeURI = rst.getKeyType();
-        if (keyTypeURI != null && WSTrustConstants.SYMMETRIC_KEY.equals(keyTypeURI.toString()))
+        if (keyTypeURI != null && !WSTrustConstants.SYMMETRIC_KEY.equals(keyTypeURI.toString()))
             throw new WSTrustException("Unsupported proof key type: " + keyTypeURI.toString());
 
         Entropy serverEntropy = null;
