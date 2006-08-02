@@ -23,7 +23,7 @@
 -->
 
 <!--
- $Id: build.xml,v 1.13 2006-08-02 00:42:39 kohsuke Exp $
+ $Id: build.xml,v 1.14 2006-08-02 00:54:06 kohsuke Exp $
 
  Copyright (c) 2005 Sun Microsystems, Inc.
  All rights reserved.
@@ -53,7 +53,7 @@
             dest="wsit-image/webservices-src.zip"/>
         <get src="http://kohsuke.sfbay/hudson/job/wsit-javanet/lastSuccessfulBuild/artifact/tools/build/webservices-tools-src.zip"
             dest="wsit-image/webservices-tools-src.zip"/>
-        <get src="http://kohsuke.sfbay/hudson/job/wsit-javanet/ws/lib/runtime/jaxws-local-transport.jar"
+        <get src="http://kohsuke.sfbay/hudson/job/wsit-javanet/lastSuccessfulBuild/artifact/lib/runtime/jaxws-local-transport.jar"
             dest="wsit-image/runtime/jaxws-local-transport.jar"/>
     </target>
 
