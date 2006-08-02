@@ -23,7 +23,7 @@
 -->
 
 <!--
- $Id: build.xml,v 1.12 2006-07-31 20:06:17 kohsuke Exp $
+ $Id: build.xml,v 1.13 2006-08-02 00:42:39 kohsuke Exp $
 
  Copyright (c) 2005 Sun Microsystems, Inc.
  All rights reserved.
@@ -75,48 +75,75 @@
         <delete dir="build"/>
         <delete dir="${logs.dir}"/>
     </target>
+    
+    <!-- invokes Unit test-->
+    <macrodef name="run-tests">
+        <element name="arguments" />
+        <sequential>
+		        <!--
+		        These are the default args that are passed to the harness which mean that
+		        the tests will be using the dist image of the wsit workspace , run the tests
+		        using local transport and recursively scan for all the sub dirs under testcases
 
-    <target name="main" depends="prepare">
-        <!--
-        These are the default args that are passed to the harness which mean that
-        the tests will be using the dist image of the wsit workspace , run the tests
-        using local transport and recursively scan for all the sub dirs under testcases
+		        Please modify these options if you wish to test the harness in different
+		        modes
+		        For more information on the different command line options
+		        refer to docs/index.html
+		        -->
+		        <java jar="${test.lib.dir}/harness.jar" fork="true">
+		            <sysproperty key="WSIT_HOME" value="${basedir}/misc"/>
+		            <sysproperty key="com.sun.xml.ws.transport.http.client.HttpTransportPipe.dump" value="true"/>
+		            <sysproperty key="com.sun.xml.ws.transport.local.LocalTransportPipe.dump" value="true"/>
+		            <!--<sysproperty key="com.sun.xml.ws.runtime.client" value="true"/>-->
 
-        Please modify these options if you wish to test the harness in different
-        modes
-        For more information on the different command line options
-        refer to docs/index.html
-        -->
-        <java jar="${test.lib.dir}/harness.jar" fork="true">
-            <sysproperty key="WSIT_HOME" value="${basedir}/misc"/>
-            <sysproperty key="com.sun.xml.ws.transport.http.client.HttpTransportPipe.dump" value="true"/>
-            <sysproperty key="com.sun.xml.ws.transport.local.LocalTransportPipe.dump" value="true"/>
-            <!--<sysproperty key="com.sun.xml.ws.runtime.client" value="true"/>-->
+		            <arg value="-report" />
+		            <arg path="${logs.dir}" />
+		            
+		            <arguments />
+
+		            <!-- test data -->
+		            <arg value="-r" />
+		            <arg path="testcases" />
+
+		            <arg line="${args}"/>
+
+		            <!--<jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,address=7000" />
+		            <jvmarg value="-Xdebug"/>-->
+		        </java>
+		        
+				    <mkdir dir="${logs.dir}/junit-reports" />
+				    <junitreport todir="${logs.dir}/junit-reports">
+				        <fileset dir="${logs.dir}" includes="*.xml" />
+				        <report format="frames" todir="${logs.dir}/junit-reports"/>
+				    </junitreport>
+		    </sequential>
+		</macrodef>
+
+    <target name="main-hudson"
+        description="Invoke unit test from Hudson. This downloads WSIT from Hudson, as opposed to test the local one"
+        depends="get-wsit-hudson">
+        
+        <run-tests>
+          <arguments>
             <arg value="-cp:wsit-image" />
-            <arg path="${wsit.image}" />
-
-            <arg value="-report" />
-            <arg path="${logs.dir}" />
-
+            <arg path="wsit-image/jax-ws-latest-wsit" />
             <arg value="-transport" />
-            <arg path="${wsit.lib}/runtime/jaxws-local-transport.jar" />
-
-            <!-- test data -->
-            <arg value="-r" />
-            <arg path="testcases" />
-
-            <arg line="${args}"/>
-
-            <!--<jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,address=7000"
-/>
-            <jvmarg value="-Xdebug"/>-->
-        </java>
-
-    <mkdir dir="${logs.dir}/junit-reports" />
-    <junitreport todir="${logs.dir}/junit-reports">
-        <fileset dir="${logs.dir}" includes="*.xml" />
-        <report format="frames" todir="${logs.dir}/junit-reports"/>
-    </junitreport>
+            <arg path="wsit-image/runtime/jaxws-local-transport.jar" />
+          </arguments>
+        </run-tests>
+    </target>
+    
+    <target name="main"
+        description="Runs unit test on the entire workspace">
+        
+        <run-tests>
+          <arguments>
+            <arg value="-cp:wsit" />
+            <arg path="../.." />
+            <arg value="-transport" />
+            <arg path="../../lib/runtime/jaxws-local-transport.jar" />
+          </arguments>
+        </run-tests>
     </target>
 
 </project>
