@@ -48,7 +48,7 @@ import com.sun.xml.ws.policy.privateutil.PolicyLogger;
  */
 public final class PolicyConfigParser {
 
-    private static final PolicyLogger logger = PolicyLogger.getLogger(PolicyConfigParser.class);
+    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyConfigParser.class);
     private static final String CONFIG_FILE_NAME="wsit.xml";
     private static final String SERVLET_CONTEXT_CLASSNAME = "javax.servlet.ServletContext";
 
@@ -60,37 +60,39 @@ public final class PolicyConfigParser {
      * @return A WSDLModel populated from the WSDL file
      */
     public static WSDLModel parse(Container container) throws PolicyException {
-        logger.entering("parse");
+        LOGGER.entering("parse");
         try {
             WSDLModel model = null;
             XMLStreamBuffer buffer = null;
             Object context = null;
             try {
-                Class contextClass = Class.forName(SERVLET_CONTEXT_CLASSNAME);
+                Class<?> contextClass = Class.forName(SERVLET_CONTEXT_CLASSNAME);
                 if (null!=container) {
                     context = container.getSPI(contextClass);
                 }
             } catch (ClassNotFoundException e) {
-                logger.fine("parse", "Did not find class " + SERVLET_CONTEXT_CLASSNAME + ". We are apparently not running in a container.");
+                LOGGER.fine("parse", "Did not find class " + SERVLET_CONTEXT_CLASSNAME + ". We are apparently not running in a container.");
             }
-            logger.finest("parse", "context = " + context);
+            
+            LOGGER.finest("parse", "context = " + context);
             if (context != null) {
                 buffer = loadFromContext(context);
-            }
-            else {
+            } else {
                 // We are not running inside a web container, load file from META-INF
                 buffer = loadFromClasspath(CONFIG_FILE_NAME);
             }
+            
             if (buffer != null) {
                 model = parse(buffer);
             }
+            
             return model;
         } catch (XMLStreamBufferException ex) {
             throw new PolicyException(ex);
         } catch (XMLStreamException ex) {
             throw new PolicyException(ex);
         } finally {
-            logger.exiting("parse");
+            LOGGER.exiting("parse");
         }
     }
     
