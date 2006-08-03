@@ -1,71 +1,72 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- You may freely edit this file. See commented blocks below for -->
+<!-- some examples of how to customize the build. -->
+<!-- (If you delete it and reopen the project it will be recreated.) -->
+<project name="WSIT-Tools" default="default" basedir=".">
+    <description>Builds, tests, and runs the project WSIT-Tools.</description>
+    <import file="nbproject/build-impl.xml"/>
+    <import file="../properties.xml"/>
 
-<!--
- The contents of this file are subject to the terms
- of the Common Development and Distribution License
- (the License).  You may not use this file except in
- compliance with the License.
- 
- You can obtain a copy of the license at
- https://glassfish.dev.java.net/public/CDDLv1.0.html.
- See the License for the specific language governing
- permissions and limitations under the License.
- 
- When distributing Covered Code, include this CDDL
- Header Notice in each file and include the License file
- at https://glassfish.dev.java.net/public/CDDLv1.0.html.
- If applicable, add the following below the CDDL Header,
- with the fields enclosed by brackets [] replaced by
- you own identifying information:
- "Portions Copyrighted [year] [name of copyright owner]"
- 
- Copyright 2006 Sun Microsystems Inc. All Rights Reserved
--->
+    <taskdef name="concatmanifest" classname="taskdefs.ConcatManifest">
+        <classpath>
+            <fileset dir="../${etc.lib.dir}" includes="wsit-taskdefs.jar"/>
+        </classpath>
+    </taskdef>
 
-<!--
- $Id: build.xml,v 1.5 2006-07-10 17:06:35 arungupta Exp $
-
- Copyright (c) 2005 Sun Microsystems, Inc.
- All rights reserved.
--->
-
-<project name="wsit.dev.java.net tools" default="main">
-    <property name="build.dir" value="${basedir}/build"/>
-    <property name="build.classes" value="${build.dir}/classes"/>
-
-    <target name="main" depends="compile"/>
-
-    <target name="prepare">
-        <mkdir dir="${build.classes}"/>
+    <macrodef name="expand-jars-macro">
+        <attribute name="libdir"/>
+        <element name="metainf" optional="true"/>
+        <sequential>
+            <property name="tmpdir" value="${dist.image.dir}/tmp"/>
+            <copy file="../${etc.metainf.dir}/MANIFEST.MF" todir="${tmpdir}"/>
+            <concatmanifest tempdir="${tmpdir}" manifest="${tmpdir}/MANIFEST.MF">
+                <fileset dir="@{libdir}">
+                    <include name="*.jar"/>
+                    <exclude name="*javadocs*.jar"/>
+                </fileset>
+            </concatmanifest>
+            <delete dir="${tmpdir}/META-INF" includeemptydirs="true" excludes="services/**"/>
+            <metainf/>
+        </sequential>
+    </macrodef>
+    
+    <macrodef name="combine-jars-macro">
+        <attribute name="classesdir"/>
+        <attribute name="jarname"/>
+        <element name="services" optional="true"/>
+        <sequential>
+            <property name="tmpdir" value="${dist.image.dir}/tmp"/>
+            <jar destfile="../${dist.image.wsit.lib.dir}/@{jarname}.jar" manifest="${tmpdir}/MANIFEST.MF">
+                <services/>
+                <fileset dir="@{classesdir}"/>
+            </jar>
+        </sequential>
+    </macrodef>
+    
+    <target name="-do-jar-without-manifest">
+        <available file="${dist.image.dir}/tmp" type="dir" property="tooltime.jars.expanded"/>
+        <antcall target="expand-jars-tooltime"/>
+        <antcall target="combine-jars-tooltime"/>
     </target>
 
-    <target name="compile" depends="prepare">
-        <javac srcdir="src"
-               destdir="${basedir}/build/classes"
-               debug="${compile.debug}"
-               deprecation="${compile.deprecation}"
-               optimize="${compile.optimize}"
-               target="1.5"
-               source="1.5">
-            <classpath refid="tooltime.compile.classpath"/>
-        </javac>
+    <target name="expand-jars-tooltime" unless="tooltime.jars.expanded">
+        <expand-jars-macro libdir="../${lib.tooltime.dir}"/>
     </target>
 
-    <target name="src-zip">
-        <mkdir dir="${build.dir}/temp"/>
-        <unzip dest="${build.dir}/temp">
-            <fileset dir="${lib.tooltime.dir}" includes="*src.zip"/>
-        </unzip>
-        <delete file="${build.dir}/temp/*.txt"/>
-        <delete dir="${build.dir}/temp/META-INF" includeemptydirs="true"/>
-        <zip destfile="${build.dir}/${name}-tools-src.zip">
-            <fileset dir="src"/>
-            <fileset dir="${build.dir}/temp"/>
-        </zip>
-        <delete dir="${build.dir}/temp" includeemptydirs="true"/>
+    <target name="combine-jars-tooltime">
+        <combine-jars-macro jarname="${name}-tools" classesdir="build/classes">
+            <services>
+                <fileset dir="../etc">
+                    <include name="META-INF/services/*.TWSDL*"/>
+                    <include name="META-INF/services/*.TJava*"/>
+                </fileset>
+                <fileset dir="${tmpdir}">
+                    <include name="**/*.*"/>
+                    <exclude name="**/*.TWSDL*"/>
+                    <exclude name="**/*.TJava*"/>
+                </fileset>
+            </services>
+        </combine-jars-macro>
     </target>
-
-    <target name="clean">
-        <delete dir="${build.dir}"/>
-    </target>
+    
 </project>

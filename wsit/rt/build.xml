@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 
 <!--
  The contents of this file are subject to the terms
@@ -21,56 +21,100 @@
  
  Copyright 2006 Sun Microsystems Inc. All Rights Reserved
 -->
-<!--
- $Id: build.xml,v 1.5 2006-07-10 17:06:35 arungupta Exp $
 
- Copyright (c) 2005 Sun Microsystems, Inc.
- All rights reserved.
--->
 
-<project name="wsit.dev.java.net runtime" default="main">
-    <property name="build.dir" value="${basedir}/build"/>
-    <property name="build.classes" value="build/classes"/>
+<!-- You may freely edit this file. See commented blocks below for -->
+<!-- some examples of how to customize the build. -->
+<!-- (If you delete it and reopen the project it will be recreated.) -->
+<project name="WSIT-Runtime" default="default" basedir=".">
+    <description>Builds, tests, and runs the project WSIT-Runtime.</description>
+    <import file="nbproject/build-impl.xml"/>
+    <import file="../properties.xml"/>
 
-    <target name="main" depends="compile"/>
+    <taskdef name="concatmanifest" classname="taskdefs.ConcatManifest">
+        <classpath>
+            <fileset dir="../${etc.lib.dir}" includes="wsit-taskdefs.jar"/>
+        </classpath>
+    </taskdef>
+    
+    <macrodef name="expand-jars-macro">
+        <attribute name="libdir"/>
+        <element name="metainf" optional="true"/>
+        <sequential>
+            <property name="tmpdir" value="${dist.image.dir}/tmp"/>
+            <copy file="../${etc.metainf.dir}/MANIFEST.MF" todir="${tmpdir}"/>
+            <concatmanifest tempdir="${tmpdir}" manifest="${tmpdir}/MANIFEST.MF">
+                <fileset dir="@{libdir}">
+                    <include name="*.jar"/>
+                    <exclude name="*javadocs*.jar"/>
+                </fileset>
+            </concatmanifest>
+            <delete dir="${tmpdir}/META-INF" includeemptydirs="true" excludes="services/**"/>
+            <metainf/>
+        </sequential>
+    </macrodef>
+    
+    <macrodef name="combine-jars-macro">
+        <attribute name="classesdir"/>
+        <attribute name="jarname"/>
+        <element name="services" optional="true"/>
+        <sequential>
+            <property name="tmpdir" value="${dist.image.dir}/tmp"/>
+            <jar destfile="../${dist.image.wsit.lib.dir}/@{jarname}.jar" manifest="${tmpdir}/MANIFEST.MF">
+                <services/>
+                <fileset dir="@{classesdir}"/>
+            </jar>
+        </sequential>
+    </macrodef>
 
-    <target name="prepare">
-        <mkdir dir="${build.classes}"/>
+    <target name="-do-jar-without-manifest">
+        <available file="${dist.image.dir}/tmp" type="dir" property="runtime.jars.expanded"/>
+        <antcall target="expand-jars-runtime"/>
+        <antcall target="combine-jars-runtime"/>
+    </target>
+    
+    <target name="expand-jars-runtime" unless="runtime.jars.expanded">
+        <expand-jars-macro libdir="../${lib.runtime.dir}">
+            <metainf>
+                <copy todir="${tmpdir}/META-INF/services" overwrite="true">
+                    <fileset dir="../etc/META-INF/services">
+                        <include name="*.*"/>
+                    </fileset>
+                </copy>
+            </metainf>
+        </expand-jars-macro>
     </target>
 
-    <target name="compile" depends="prepare">
-        <javac srcdir="src"
-               destdir="${build.classes}"
-               debug="${compile.debug}"
-               deprecation="${compile.deprecation}"
-               optimize="${compile.optimize}"
-               target="1.5"
-               source="1.5">
-            <classpath refid="runtime.compile.classpath"/>
-        </javac>
-        <copy todir="${build.classes}">
-            <fileset dir="src">
-                <include name="**/*.properties"/>
-                <include name="**/*.xml"/>
-            </fileset>
+    <target name="combine-jars-runtime">
+        <combine-jars-macro jarname="${name}" classesdir="build/classes">
+            <services>
+                <fileset dir="${tmpdir}">
+                    <include name="**/*.*"/>
+                    <exclude name="**/*.TWSDL*"/>
+                    <exclude name="**/*.TJava*"/>
+                </fileset>
+            </services>
+        </combine-jars-macro>
+    </target>
+
+
+      <target name="test.resources.copy"
+            description="Copy test resources before running tests">
+
+        <copy todir="build/test/unit/data">
+            <fileset dir="test/unit/data" includes="*.wsdl"/>
+            <fileset dir="test/unit/data" includes="*.xml"/>
         </copy>
+
     </target>
 
-    <target name="src-zip">
-        <mkdir dir="${build.dir}/temp"/>
-        <unzip dest="${build.dir}/temp">
-            <fileset dir="${lib.runtime.dir}" includes="*src.zip"/>
-        </unzip>
-        <delete file="${build.dir}/temp/*.txt"/>
-        <delete dir="${build.dir}/temp/META-INF" includeemptydirs="true"/>
-        <zip destfile="${build.dir}/${name}-src.zip">
-            <fileset dir="src"/>
-            <fileset dir="${build.dir}/temp"/>
-        </zip>
-        <delete dir="${build.dir}/temp" includeemptydirs="true"/>
+    
+    <target name="-post-compile-test" depends="init,test.resources.copy">
     </target>
 
-    <target name="clean">
-        <delete dir="${build.dir}"/>
+    
+    <target name="-post-compile-test-single" depends="init,test.resources.copy">
     </target>
+
+   
 </project>

@@ -1,97 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
- The contents of this file are subject to the terms
- of the Common Development and Distribution License
- (the License).  You may not use this file except in
- compliance with the License.
- 
- You can obtain a copy of the license at
- https://glassfish.dev.java.net/public/CDDLv1.0.html.
- See the License for the specific language governing
- permissions and limitations under the License.
- 
- When distributing Covered Code, include this CDDL
- Header Notice in each file and include the License file
- at https://glassfish.dev.java.net/public/CDDLv1.0.html.
- If applicable, add the following below the CDDL Header,
- with the fields enclosed by brackets [] replaced by
- you own identifying information:
- "Portions Copyrighted [year] [name of copyright owner]"
- 
- Copyright 2006 Sun Microsystems Inc. All Rights Reserved
--->
 <project xmlns="http://www.netbeans.org/ns/project/1">
-    <type>org.netbeans.modules.ant.freeform</type>
+    <type>org.netbeans.modules.java.j2seproject</type>
     <configuration>
-        <general-data xmlns="http://www.netbeans.org/ns/freeform-project/1">
-            <!-- Do not use Project Properties customizer when editing this file manually. -->
-            <name>wsit.dev.java.net main</name>
-            <properties/>
-            <folders>
-                <source-folder>
-                    <label>rt\src</label>
-                    <type>java</type>
-                    <location>rt/src</location>
-                </source-folder>
-                <source-folder>
-                    <label>tools\src</label>
-                    <type>java</type>
-                    <location>tools/src</location>
-                </source-folder>
-            </folders>
-            <ide-actions>
-                <action name="build">
-                    <target>main</target>
-                </action>
-                <action name="clean">
-                    <target>clean</target>
-                </action>
-                <action name="rebuild">
-                    <target>clean</target>
-                    <target>main</target>
-                </action>
-            </ide-actions>
-            <export>
-                <type>jar</type>
-                <location>dist/image/jax-ws-latest-wsit/lib/webservices-tools.jar</location>
-                <build-target>main</build-target>
-            </export>
-            <export>
-                <type>jar</type>
-                <location>dist/image/jax-ws-latest-wsit/lib/webservices.jar</location>
-                <build-target>main</build-target>
-            </export>
-            <view>
-                <items>
-                    <source-folder style="packages">
-                        <label>rt\src</label>
-                        <location>rt/src</location>
-                    </source-folder>
-                    <source-folder style="packages">
-                        <label>tools\src</label>
-                        <location>tools/src</location>
-                    </source-folder>
-                    <source-file>
-                        <location>build.xml</location>
-                    </source-file>
-                </items>
-                <context-menu>
-                    <ide-action name="build"/>
-                    <ide-action name="clean"/>
-                    <ide-action name="rebuild"/>
-                </context-menu>
-            </view>
-            <subprojects/>
-        </general-data>
-        <java-data xmlns="http://www.netbeans.org/ns/freeform-project-java/1">
-            <compilation-unit>
-                <package-root>rt/src</package-root>
-                <package-root>tools/src</package-root>
-                <classpath mode="compile">lib/runtime/activation.jar;lib/runtime/jaxb-api.jar;lib/runtime/jaxws-api.jar;lib/runtime/jaxws-rt.jar;lib/runtime/saaj-api.jar;lib/runtime/jsr173_api.jar;lib/runtime/jaxwsa-api.jar;lib/runtime/jaxwsa-impl.jar;lib/runtime/FastInfoset.jar;lib/runtime/jaxb-impl.jar;lib/runtime/jsr181-api.jar;lib/runtime/jsr250-api.jar;lib/runtime/mail-1.4.jar;lib/runtime/resolver.jar;lib/runtime/saaj-impl.jar;lib/runtime/secconv-jaxbbindings.jar;lib/runtime/sjsxp.jar;lib/runtime/stax-ex.jar;lib/runtime/stax-utils.jar;lib/runtime/streambuffer.jar;lib/runtime/trust-jaxbbindings.jar;lib/runtime/xmldsig.jar;lib/runtime/xmlsec.jar</classpath>
-                <built-to>dist/image/jax-ws-latest-wsit/lib/webservices-tools.jar</built-to>
-                <built-to>dist/image/jax-ws-latest-wsit/lib/webservices.jar</built-to>
-                <source-level>1.5</source-level>
-            </compilation-unit>
-        </java-data>
+        <data xmlns="http://www.netbeans.org/ns/j2se-project/3">
+            <name>WSIT-Installer</name>
+            <minimum-ant-version>1.6.5</minimum-ant-version>
+            <source-roots/>
+            <test-roots/>
+        </data>
+        <references xmlns="http://www.netbeans.org/ns/ant-project-references/1">
+            <reference>
+                <foreign-project>WSIT-Tools</foreign-project>
+                <artifact-type>jar</artifact-type>
+                <script>build.xml</script>
+                <target>jar</target>
+                <clean-target>clean</clean-target>
+                <id>jar</id>
+            </reference>
+        </references>
     </configuration>
 </project>

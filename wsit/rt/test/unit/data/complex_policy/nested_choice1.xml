@@ -1,0 +1,15 @@
+<wsp:Policy 
+  xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy"
+	xmlns:foo="http://schemas.foo.com/">
+
+  <foo:TopLevelAssertion_1 />
+  <foo:TopLevelAssertion_2 />
+  <foo:TopLevelAssertion_3 />
+	<wsp:ExactlyOne>
+  	<wsp:ExactlyOne>
+      <foo:TopLevelAssertion_choice1_choice1 />
+      <foo:TopLevelAssertion_choice1_choice2 />
+  	</wsp:ExactlyOne>
+    <foo:TopLevelAssertion_choice2 />
+  </wsp:ExactlyOne>
+</wsp:Policy>

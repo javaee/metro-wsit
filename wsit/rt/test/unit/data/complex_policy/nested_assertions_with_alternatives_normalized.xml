@@ -1,0 +1,136 @@
+<wsp:Policy 
+  xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy"
+	xmlns:foo="http://schemas.foo.com/">
+  
+  <wsp:ExactlyOne>
+    <wsp:All>
+    	<foo:TopLevelAssertion>
+    		<wsp:Policy>
+    			<foo:NestedPolicyAssertion_1>
+    				<wsp:Policy>
+    					<foo:NestedPolicyAssertion_11 foo:attribute_A='Value A'>
+    						<wsp:Policy>
+    							<foo:NestedPolicyAssertion_111 />
+    						</wsp:Policy>
+    					</foo:NestedPolicyAssertion_11>
+    				</wsp:Policy>
+    			</foo:NestedPolicyAssertion_1>
+    
+    			<foo:NestedPolicyAssertion_2>
+    				<wsp:Policy>
+    					<foo:NestedPolicyAssertion_21 foo:attribute_A='Value A'>
+    						<wsp:Policy>
+    							<foo:NestedPolicyAssertion_211 />
+    						</wsp:Policy>
+    					</foo:NestedPolicyAssertion_21>
+    				</wsp:Policy>
+    			</foo:NestedPolicyAssertion_2>
+    
+    			<foo:NestedPolicyAssertion_3>
+    				<wsp:Policy>
+    					<foo:NestedPolicyAssertion_31 />
+    				</wsp:Policy>
+    			</foo:NestedPolicyAssertion_3>
+    
+    			<foo:NestedPolicyAssertion_4 />
+    
+    			<foo:NestedPolicyAssertion_5 />
+    
+ 					<foo:NestedPolicyChoice2Assertion_1>
+ 						<wsp:Policy>
+ 							<foo:NestedPolicyChoice2Assertion_11 />
+ 						</wsp:Policy>
+ 					</foo:NestedPolicyChoice2Assertion_1>
+
+    		</wsp:Policy>
+    	</foo:TopLevelAssertion>
+    </wsp:All>
+    <wsp:All>
+    	<foo:TopLevelAssertion>
+    		<wsp:Policy>
+    			<foo:NestedPolicyAssertion_1>
+    				<wsp:Policy>
+    					<foo:NestedPolicyAssertion_11 foo:attribute_A='Value A'>
+    						<wsp:Policy>
+    							<foo:NestedPolicyAssertion_111 />
+    						</wsp:Policy>
+    					</foo:NestedPolicyAssertion_11>
+    				</wsp:Policy>
+    			</foo:NestedPolicyAssertion_1>
+    
+    			<foo:NestedPolicyAssertion_2>
+    				<wsp:Policy>
+    					<foo:NestedPolicyAssertion_21 foo:attribute_A='Value A'>
+    						<wsp:Policy>
+    							<foo:NestedPolicyAssertion_211 />
+    						</wsp:Policy>
+    					</foo:NestedPolicyAssertion_21>
+    				</wsp:Policy>
+    			</foo:NestedPolicyAssertion_2>
+    
+    			<foo:NestedPolicyAssertion_3>
+    				<wsp:Policy>
+    					<foo:NestedPolicyAssertion_31 />
+    				</wsp:Policy>
+    			</foo:NestedPolicyAssertion_3>
+    
+    			<foo:NestedPolicyAssertion_4 />
+    
+    			<foo:NestedPolicyAssertion_5 />
+    
+					<foo:NestedPolicyChoice1Assertion_1>
+						<wsp:Policy>
+  						<foo:NestedPolicyChoice1_1Assertion_1 />
+						</wsp:Policy>
+					</foo:NestedPolicyChoice1Assertion_1>
+					<foo:NestedPolicyChoice1Assertion_2 />
+    		
+        </wsp:Policy>
+    	</foo:TopLevelAssertion>
+    </wsp:All>
+    <wsp:All>
+    	<foo:TopLevelAssertion>
+    		<wsp:Policy>
+    			<foo:NestedPolicyAssertion_1>
+    				<wsp:Policy>
+    					<foo:NestedPolicyAssertion_11 foo:attribute_A='Value A'>
+    						<wsp:Policy>
+    							<foo:NestedPolicyAssertion_111 />
+    						</wsp:Policy>
+    					</foo:NestedPolicyAssertion_11>
+    				</wsp:Policy>
+    			</foo:NestedPolicyAssertion_1>
+    
+    			<foo:NestedPolicyAssertion_2>
+    				<wsp:Policy>
+    					<foo:NestedPolicyAssertion_21 foo:attribute_A='Value A'>
+    						<wsp:Policy>
+    							<foo:NestedPolicyAssertion_211 />
+    						</wsp:Policy>
+    					</foo:NestedPolicyAssertion_21>
+    				</wsp:Policy>
+    			</foo:NestedPolicyAssertion_2>
+    
+    			<foo:NestedPolicyAssertion_3>
+    				<wsp:Policy>
+    					<foo:NestedPolicyAssertion_31 />
+    				</wsp:Policy>
+    			</foo:NestedPolicyAssertion_3>
+    
+    			<foo:NestedPolicyAssertion_4 />
+    
+    			<foo:NestedPolicyAssertion_5 />
+    
+					<foo:NestedPolicyChoice1Assertion_1>
+						<wsp:Policy>
+							<foo:NestedPolicyChoice1_1Assertion_2 />
+						</wsp:Policy>
+					</foo:NestedPolicyChoice1Assertion_1>
+					<foo:NestedPolicyChoice1Assertion_2 />
+    
+        </wsp:Policy>
+    	</foo:TopLevelAssertion>
+    </wsp:All>
+  </wsp:ExactlyOne>
+</wsp:Policy>
+
