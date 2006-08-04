@@ -20,7 +20,7 @@
  [name of copyright owner]
 -->
 <!--
- $Id: build.xml,v 1.1 2006-08-04 19:29:57 arungupta Exp $
+ $Id: build.xml,v 1.2 2006-08-04 21:51:27 arungupta Exp $
 
  Copyright (c) 2005 Sun Microsystems, Inc.
  All rights reserved.
@@ -76,8 +76,6 @@
 
     <path id="classpath">
         <fileset dir="${lib.dir}" includes="*.jar"/>
-        <!--<fileset dir="${lib.dir}" includes="servlet.jar"/>-->
-        <!--<fileset dir="d:/testbed/apache-tomcat-5.5.16/shared/lib" includes="*.jar"/>-->
         <pathelement location="${java.home}/lib/tools.jar"/>
         <pathelement location="etc"/>
         <pathelement location="etc/sts"/>
@@ -85,13 +83,6 @@
 
     <taskdef name="wsimport" classname="com.sun.tools.ws.ant.WsImport">
         <classpath refid="classpath"/>
-    </taskdef>
-
-    <taskdef name="installerBuilder"
-        classname="com.sun.tools.xjc.installer.builder.BuilderTask">
-        <classpath>
-            <fileset dir="${lib.dir}" includes="installer-builder.jar, sfx4j-1.0.jar"/>
-        </classpath>
     </taskdef>
 
     <target name="prepare" description="prepare the build">
@@ -167,7 +158,7 @@
             <lib dir="${build.dir}" includes="${name}-client.jar"/>
             <lib dir="lib" includes="standard.jar, jstl.jar"/>
 
-            <classes dir="${build.classes}" excludes="**/MS*.class"/>
+            <classes dir="${build.classes}" excludes="**/WCF*.class"/>
             <classes dir="etc/sts" includes="wsit-client.xml"/>
             <classes dir="etc/sts" includes="client-security-env.properties"/>
         </war>
@@ -203,11 +194,6 @@
         <antcall target="deploy-tomcat"/>
     </target>
 
-    <target name="deploy-ui">
-        <antcall target="deploy-glassfish-ui"/>
-        <antcall target="deploy-tomcat-ui"/>
-    </target>
-
     <target name="deploy-glassfish" unless="tomcat">
         <copy file="${build.war}/${war.name}.war" todir="${env.AS_HOME}/domains/domain1/autodeploy"/>
         <copy file="${build.war}/${war.name}-wcf.war" todir="${env.AS_HOME}/domains/domain1/autodeploy"/>
@@ -216,14 +202,6 @@
     <target name="deploy-tomcat" if="tomcat">
         <copy file="${build.war}/${war.name}.war" todir="${env.CATALINA_HOME}/webapps"/>
         <copy file="${build.war}/${war.name}-wcf.war" todir="${env.CATALINA_HOME}/webapps"/>
-    </target>
-
-    <target name="deploy-glassfish-ui" unless="tomcat">
-        <copy file="${build.war}/${uiwar.name}.war" todir="${env.AS_HOME}/domains/domain1/autodeploy"/>
-    </target>
-
-    <target name="deploy-tomcat-ui" if="tomcat">
-        <copy file="${build.war}/${uiwar.name}.war" todir="${env.CATALINA_HOME}/webapps"/>
     </target>
 
     <target name="retailer-server">
@@ -261,12 +239,6 @@
 
     <target name="client" depends="prepare, retailer-client, wholesaler-client, make-client-jar"/>
 
-    <target name="src-zip" description="create source zip bundles" depends="prepare">
-        <zip file="${build.dir}/${ant.project.name}-src.zip">
-            <fileset dir="${basedir}/src"/>
-        </zip>
-    </target>
-
     <target name="util" depends="prepare">
         <compile-macro dir="util"/>
     </target>
@@ -287,11 +259,6 @@
                 <jvmarg value="-Dpid=${pid}"/>
                 <jvmarg value="-Dverbose=${verbose}"/>
                 <jvmarg value="-DWSIT_HOME=${env.WSIT_HOME}"/>
-                <!--<jvmarg value="-Dhttp.proxyHost=${http.proxyHost}"/>-->
-                <!--<jvmarg value="-Dhttp.proxyPort=${http.proxyPort}"/>-->
-                <!--<jvmarg value="-Dhttp.nonProxyHosts=${http.nonProxyHosts}"/>-->
-                <!--<jvmarg value="-Dhttp.proxyHost=127.0.0.1"/>-->
-                <!--<jvmarg value="-Dhttp.proxyPort=8085"/>-->
                 <options/>
                 <classpath>
                     <path refid="classpath"/>
@@ -301,17 +268,6 @@
         </sequential>
     </macrodef>
 
-    <target name="dumper" depends="create-dumper, install-dumper"/>
-
-    <target name="create-dumper" depends="util">
-        <jar destfile="${build.dir}/action-dumper.jar">
-            <fileset dir="${build.classes}" includes="**/util/*.class"/>
-            <fileset dir="${etc.dir}">
-                <include name="META-INF/**"/>
-            </fileset>
-        </jar>
-    </target>
-
     <target name="run">
         <run-macro classname="pricequote.retailer.client.RetailerClient">
             <options>
@@ -319,7 +275,6 @@
                 <jvmarg value="-Dsts.namespace=http://tempuri.org/"/>
                 <jvmarg value="-Dsts.serviceName=SecurityTokenService"/>
                 <jvmarg value="-Dsts.portName=CustomBinding_ISecurityTokenService"/>
-                <jvmarg value="-DWSIT_HOME=${env.WSIT_HOME}"/>
             </options>
         </run-macro>
     </target>
@@ -340,33 +295,8 @@
                 <jvmarg value="-Dwqs=${wqs}"/>
                 <jvmarg value="-Dwqs.endpoint=http://129.145.133.244/WcfInterop/WholesaleService.wsdl"/>
                 <jvmarg value="-Dwqs.serviceName=WholesaleService"/>
-                <!--<jvmarg value="-Xdebug"/>-->
-                <!--<jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,address=8000"/>-->
             </options>
         </run-macro>
-        <!--<delete file="${build.classes}/wsit-client.xml"/>-->
-    </target>
-
-    <target name="integrate-hudson" depends="prepare">
-        <get src="http://kohsuke.sfbay/hudson/job/wsit-javanet/lastSuccessfulBuild/artifact/dist/image/jax-ws-latest-wsit/lib/webservices.jar"
-             dest="${lib.dir}/webservices.jar"/>
-        <get src="http://kohsuke.sfbay/hudson/job/wsit-javanet/lastSuccessfulBuild/artifact/dist/image/jax-ws-latest-wsit/lib/webservices-tools.jar"
-             dest="${lib.dir}/webservices-tools.jar"/>
-        <get src="http://kohsuke.sfbay/hudson/job/wsit-javanet/lastSuccessfulBuild/artifact/rt/build/webservices-src.zip"
-             dest="${lib.dir}/webservices-src.zip"/>
-        <get src="http://kohsuke.sfbay/hudson/job/wsit-javanet/lastSuccessfulBuild/artifact/tools/build/webservices-tools-src.zip"
-             dest="${lib.dir}/webservices-tools-src.zip"/>
-    </target>
-
-    <target name="integrate-local" depends="prepare">
-        <get src="file:///D:/workspaces/wsit/wsit/dist/image/jax-ws-latest-wsit/lib/webservices.jar"
-             dest="${lib.dir}/webservices.jar"/>
-        <get src="file:///D:/workspaces/wsit/wsit/dist/image/jax-ws-latest-wsit/lib/webservices-tools.jar"
-             dest="${lib.dir}/webservices-tools.jar"/>
-        <get src="file:///D:/workspaces/wsit/wsit/rt/build/webservices-src.zip"
-             dest="${lib.dir}/webservices-src.zip"/>
-        <get src="file:///D:/workspaces/wsit/wsit/tools/build/webservices-tools-src.zip"
-             dest="${lib.dir}/webservices-tools-src.zip"/>
     </target>
 
     <target name="install-wsit">
@@ -383,23 +313,6 @@
     <target name="install-glassfish" unless="tomcat">
         <copy todir="${env.AS_HOME}/lib" overwrite="true" verbose="${verbose}">
             <fileset dir="${lib.dir}" includes="webservices*.jar" excludes="*javadocs*.jar"/>
-        </copy>
-    </target>
-
-    <target name="install-dumper">
-        <antcall target="install-dumper-glassfish"/>
-        <antcall target="install-dumper-tomcat"/>
-    </target>
-
-    <target name="install-dumper-tomcat" if="tomcat">
-        <copy todir="${env.CATALINA_HOME}/shared/lib" overwrite="true" verbose="${verbose}">
-            <fileset dir="${build.dir}" includes="action-dumper.jar"/>
-        </copy>
-    </target>
-
-    <target name="install-dumper-glassfish" unless="tomcat">
-        <copy todir="${env.AS_HOME}/lib" overwrite="true" verbose="${verbose}">
-            <fileset dir="${build.dir}" includes="action-dumper.jar"/>
         </copy>
     </target>
 
