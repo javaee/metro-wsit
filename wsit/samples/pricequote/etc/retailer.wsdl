@@ -1,4 +1,35 @@
-<?xml version="1.0" ?><definitions xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsaw="http://www.w3.org/2005/08/addressing" xmlns:wsap10="http://www.w3.org/2005/08/addressing" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy" xmlns:tns="http://example.org/retailer" xmlns:wsx="http://schemas.xmlsoap.org/ws/2004/09/mex" targetNamespace="http://example.org/retailer">
+<?xml version="1.0" ?>
+<!--
+ The contents of this file are subject to the terms
+ of the Common Development and Distribution License
+ (the "License").  You may not use this file except
+ in compliance with the License.
+
+ You can obtain a copy of the license at
+ https://jwsdp.dev.java.net/CDDLv1.0.html
+ See the License for the specific language governing
+ permissions and limitations under the License.
+
+ When distributing Covered Code, include this CDDL
+ HEADER in each file and include the License file at
+ https://jwsdp.dev.java.net/CDDLv1.0.html  If applicable,
+ add the following below this CDDL HEADER, with the
+ fields enclosed by brackets "[]" replaced with your
+ own identifying information: Portions Copyright [yyyy]
+ [name of copyright owner]
+-->
+<!--
+ $Id: retailer.wsdl,v 1.2 2006-08-04 21:33:36 arungupta Exp $
+
+ Copyright (c) 2005 Sun Microsystems, Inc.
+ All rights reserved.
+-->
+
+<definitions xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+             xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:wsap10="http://www.w3.org/2005/08/addressing"
+             xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
+             xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy" xmlns:tns="http://example.org/retailer"
+             xmlns:wsx="http://schemas.xmlsoap.org/ws/2004/09/mex" targetNamespace="http://example.org/retailer">
 
     <wsp:Policy wsu:Id="OnlyAddressing_policy">
         <wsp:ExactlyOne>
@@ -11,7 +42,8 @@
     <wsp:Policy wsu:Id="OnlyMTOM_policy">
         <wsp:ExactlyOne>
             <wsp:All>
-                <wsoma:OptimizedMimeSerialization xmlns:wsoma="http://schemas.xmlsoap.org/ws/2004/09/policy/optimizedmimeserialization"></wsoma:OptimizedMimeSerialization>
+                <wsoma:OptimizedMimeSerialization
+                        xmlns:wsoma="http://schemas.xmlsoap.org/ws/2004/09/policy/optimizedmimeserialization"></wsoma:OptimizedMimeSerialization>
             </wsp:All>
         </wsp:ExactlyOne>
     </wsp:Policy>
@@ -23,7 +55,8 @@
                     <wsp:Policy>
                         <sp:InitiatorToken>
                             <wsp:Policy>
-                                <sp:X509Token sp:IncludeToken="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/AlwaysToRecipient">
+                                <sp:X509Token
+                                        sp:IncludeToken="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/AlwaysToRecipient">
                                     <wsp:Policy>
                                         <sp:WssX509V3Token10></sp:WssX509V3Token10>
                                     </wsp:Policy>
@@ -32,7 +65,8 @@
                         </sp:InitiatorToken>
                         <sp:RecipientToken>
                             <wsp:Policy>
-                                <sp:X509Token sp:IncludeToken="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/Never">
+                                <sp:X509Token
+                                        sp:IncludeToken="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/Never">
                                     <wsp:Policy>
                                         <sp:WssX509V3Token10></sp:WssX509V3Token10>
                                     </wsp:Policy>
@@ -66,214 +100,239 @@
                         <sp:RequireServerEntropy></sp:RequireServerEntropy>
                     </wsp:Policy>
                 </sp:Trust10>
-                <wsoma:OptimizedMimeSerialization xmlns:wsoma="http://schemas.xmlsoap.org/ws/2004/09/policy/optimizedmimeserialization"></wsoma:OptimizedMimeSerialization>
-                <sc:KeyStore xmlns:sc="http://schemas.sun.com/2006/03/wss/server" location="$WSIT_HOME/xws-security/etc/server-keystore.jks" storepass="changeit" alias="bob"></sc:KeyStore>
-                <sc:TrustStore xmlns:sc="http://schemas.sun.com/2006/03/wss/server" location="$WSIT_HOME/xws-security/etc/server-truststore.jks" storepass="changeit"></sc:TrustStore>
+                <wsoma:OptimizedMimeSerialization
+                        xmlns:wsoma="http://schemas.xmlsoap.org/ws/2004/09/policy/optimizedmimeserialization"></wsoma:OptimizedMimeSerialization>
+                <sc:KeyStore xmlns:sc="http://schemas.sun.com/2006/03/wss/server"
+                             location="$WSIT_HOME/xws-security/etc/server-keystore.jks" storepass="changeit"
+                             alias="bob"></sc:KeyStore>
+                <sc:TrustStore xmlns:sc="http://schemas.sun.com/2006/03/wss/server"
+                               location="$WSIT_HOME/xws-security/etc/server-truststore.jks"
+                               storepass="changeit"></sc:TrustStore>
                 <wsap10:UsingAddressing></wsap10:UsingAddressing>
             </wsp:All>
         </wsp:ExactlyOne>
     </wsp:Policy>
 
     <wsp:Policy wsu:Id="Retailer_Infocardpolicy">
-       <wsp:ExactlyOne>
-          <wsp:All>
-             <sp:SymmetricBinding xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
-                <wsp:Policy>
-                   <sp:ProtectionToken>
-                      <wsp:Policy>
-                         <sp:X509Token sp:IncludeToken="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/Never">
+        <wsp:ExactlyOne>
+            <wsp:All>
+                <sp:SymmetricBinding xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+                    <wsp:Policy>
+                        <sp:ProtectionToken>
                             <wsp:Policy>
-                               <sp:RequireDerivedKeys></sp:RequireDerivedKeys>
+                                <sp:X509Token
+                                        sp:IncludeToken="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/Never">
+                                    <wsp:Policy>
+                                        <sp:RequireDerivedKeys></sp:RequireDerivedKeys>
 
-                               <sp:RequireThumbprintReference></sp:RequireThumbprintReference>
+                                        <sp:RequireThumbprintReference></sp:RequireThumbprintReference>
 
-                               <sp:WssX509V3Token10></sp:WssX509V3Token10>
+                                        <sp:WssX509V3Token10></sp:WssX509V3Token10>
+                                    </wsp:Policy>
+                                </sp:X509Token>
                             </wsp:Policy>
-                         </sp:X509Token>
-                      </wsp:Policy>
-                   </sp:ProtectionToken>
+                        </sp:ProtectionToken>
 
-                   <sp:AlgorithmSuite>
-                      <wsp:Policy>
-                         <sp:Basic256></sp:Basic256>
-                      </wsp:Policy>
-                   </sp:AlgorithmSuite>
+                        <sp:AlgorithmSuite>
+                            <wsp:Policy>
+                                <sp:Basic256></sp:Basic256>
+                            </wsp:Policy>
+                        </sp:AlgorithmSuite>
 
-                   <sp:Layout>
-                      <wsp:Policy>
-                         <sp:Strict></sp:Strict>
-                      </wsp:Policy>
-                   </sp:Layout>
+                        <sp:Layout>
+                            <wsp:Policy>
+                                <sp:Strict></sp:Strict>
+                            </wsp:Policy>
+                        </sp:Layout>
 
-                   <sp:IncludeTimestamp></sp:IncludeTimestamp>
+                        <sp:IncludeTimestamp></sp:IncludeTimestamp>
 
-                   <sp:EncryptSignature></sp:EncryptSignature>
+                        <sp:EncryptSignature></sp:EncryptSignature>
 
-                   <sp:OnlySignEntireHeadersAndBody></sp:OnlySignEntireHeadersAndBody>
-                </wsp:Policy>
-             </sp:SymmetricBinding>
+                        <sp:OnlySignEntireHeadersAndBody></sp:OnlySignEntireHeadersAndBody>
+                    </wsp:Policy>
+                </sp:SymmetricBinding>
 
-             <sp:EndorsingSupportingTokens xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
-                <wsp:Policy>
-                  <sp:IssuedToken sp:IncludeToken="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/AlwaysToRecipient">
-                      <!--Issuer xmlns="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">-->
-                        <!--Address xmlns="http://www.w3.org/2005/08/addressing">http://129.145.133.244/wcfinterop/sts.svc</Address>-->
+                <sp:EndorsingSupportingTokens xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+                    <wsp:Policy>
+                        <sp:IssuedToken
+                                sp:IncludeToken="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/AlwaysToRecipient">
+                            <!--Issuer xmlns="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">-->
+                            <!--Address xmlns="http://www.w3.org/2005/08/addressing">http://129.145.133.244/wcfinterop/sts.svc</Address>-->
 
-                         <!--Metadata xmlns="http://schemas.xmlsoap.org/ws/2004/09/mex" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">-->
+                            <!--Metadata xmlns="http://schemas.xmlsoap.org/ws/2004/09/mex" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">-->
                             <!--<wsx:MetadataSection xmlns="">-->
-                               <!--<wsx:MetadataReference>-->
-                                  <!--<Address xmlns="http://schemas.xmlsoap.org/ws/2004/08/addressing">http://129.145.133.244/wcfinterop/sts.svc/mex</Address>-->
-                               <!--</wsx:MetadataReference>-->
+                            <!--<wsx:MetadataReference>-->
+                            <!--<Address xmlns="http://schemas.xmlsoap.org/ws/2004/08/addressing">http://129.145.133.244/wcfinterop/sts.svc/mex</Address>-->
+                            <!--</wsx:MetadataReference>-->
                             <!--</wsx:MetadataSection>-->
-                         <!--</Metadata>-->
-                      <!--</Issuer>-->
+                            <!--</Metadata>-->
+                            <!--</Issuer>-->
 
-                      <sp:RequestSecurityTokenTemplate>
-                         <t:TokenType xmlns:t="http://schemas.xmlsoap.org/ws/2005/02/trust">http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV1.1</t:TokenType>
+                            <sp:RequestSecurityTokenTemplate>
+                                <t:TokenType xmlns:t="http://schemas.xmlsoap.org/ws/2005/02/trust">
+                                    http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV1.1</t:TokenType>
 
-                         <t:KeyType xmlns:t="http://schemas.xmlsoap.org/ws/2005/02/trust">http://schemas.xmlsoap.org/ws/2005/02/trust/SymmetricKey</t:KeyType>
+                                <t:KeyType xmlns:t="http://schemas.xmlsoap.org/ws/2005/02/trust">
+                                    http://schemas.xmlsoap.org/ws/2005/02/trust/SymmetricKey</t:KeyType>
 
-                         <t:KeySize xmlns:t="http://schemas.xmlsoap.org/ws/2005/02/trust">256</t:KeySize>
-                      </sp:RequestSecurityTokenTemplate>
+                                <t:KeySize xmlns:t="http://schemas.xmlsoap.org/ws/2005/02/trust">256</t:KeySize>
+                            </sp:RequestSecurityTokenTemplate>
 
-                      <wsp:Policy>
-                         <sp:RequireDerivedKeys></sp:RequireDerivedKeys>
+                            <wsp:Policy>
+                                <sp:RequireDerivedKeys></sp:RequireDerivedKeys>
 
-                         <sp:RequireInternalReference></sp:RequireInternalReference>
-                      </wsp:Policy>
-                   </sp:IssuedToken>
-                </wsp:Policy>
-             </sp:EndorsingSupportingTokens>
+                                <sp:RequireInternalReference></sp:RequireInternalReference>
+                            </wsp:Policy>
+                        </sp:IssuedToken>
+                    </wsp:Policy>
+                </sp:EndorsingSupportingTokens>
 
-             <sp:Wss11 xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
-                <wsp:Policy>
-                   <sp:MustSupportRefKeyIdentifier></sp:MustSupportRefKeyIdentifier>
+                <sp:Wss11 xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+                    <wsp:Policy>
+                        <sp:MustSupportRefKeyIdentifier></sp:MustSupportRefKeyIdentifier>
 
-                   <sp:MustSupportRefIssuerSerial></sp:MustSupportRefIssuerSerial>
+                        <sp:MustSupportRefIssuerSerial></sp:MustSupportRefIssuerSerial>
 
-                   <sp:MustSupportRefThumbprint></sp:MustSupportRefThumbprint>
+                        <sp:MustSupportRefThumbprint></sp:MustSupportRefThumbprint>
 
-                   <sp:MustSupportRefEncryptedKey></sp:MustSupportRefEncryptedKey>
-                </wsp:Policy>
-            </sp:Wss11>
+                        <sp:MustSupportRefEncryptedKey></sp:MustSupportRefEncryptedKey>
+                    </wsp:Policy>
+                </sp:Wss11>
 
-             <sp:Trust10 xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
-                <wsp:Policy>
-                   <sp:MustSupportIssuedTokens></sp:MustSupportIssuedTokens>
+                <sp:Trust10 xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+                    <wsp:Policy>
+                        <sp:MustSupportIssuedTokens></sp:MustSupportIssuedTokens>
 
-                   <sp:RequireClientEntropy></sp:RequireClientEntropy>
+                        <sp:RequireClientEntropy></sp:RequireClientEntropy>
 
-                   <sp:RequireServerEntropy></sp:RequireServerEntropy>
-                </wsp:Policy>
-             </sp:Trust10>
+                        <sp:RequireServerEntropy></sp:RequireServerEntropy>
+                    </wsp:Policy>
+                </sp:Trust10>
 
-             <wsoma:OptimizedMimeSerialization xmlns:wsoma="http://schemas.xmlsoap.org/ws/2004/09/policy/optimizedmimeserialization"></wsoma:OptimizedMimeSerialization>
-              <sc:KeyStore xmlns:sc="http://schemas.sun.com/2006/03/wss/server" location="$WSIT_HOME/xws-security/etc/server-keystore.jks" storepass="changeit" alias="bob"></sc:KeyStore>
-              <sc:TrustStore xmlns:sc="http://schemas.sun.com/2006/03/wss/server" location="$WSIT_HOME/xws-security/etc/server-truststore.jks" storepass="changeit"></sc:TrustStore>
-            <wsap10:UsingAddressing></wsap10:UsingAddressing>
-          </wsp:All>
-       </wsp:ExactlyOne>
+                <wsoma:OptimizedMimeSerialization
+                        xmlns:wsoma="http://schemas.xmlsoap.org/ws/2004/09/policy/optimizedmimeserialization"></wsoma:OptimizedMimeSerialization>
+                <sc:KeyStore xmlns:sc="http://schemas.sun.com/2006/03/wss/server"
+                             location="$WSIT_HOME/xws-security/etc/server-keystore.jks" storepass="changeit"
+                             alias="bob"></sc:KeyStore>
+                <sc:TrustStore xmlns:sc="http://schemas.sun.com/2006/03/wss/server"
+                               location="$WSIT_HOME/xws-security/etc/server-truststore.jks"
+                               storepass="changeit"></sc:TrustStore>
+                <wsap10:UsingAddressing></wsap10:UsingAddressing>
+            </wsp:All>
+        </wsp:ExactlyOne>
     </wsp:Policy>
 
     <wsp:Policy wsu:Id="Retailer_WithSTS_policy">
-       <wsp:ExactlyOne>
-          <wsp:All>
-             <sp:SymmetricBinding xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
-                <wsp:Policy>
-                   <sp:ProtectionToken>
-                      <wsp:Policy>
-                         <sp:X509Token sp:IncludeToken="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/Never">
+        <wsp:ExactlyOne>
+            <wsp:All>
+                <sp:SymmetricBinding xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+                    <wsp:Policy>
+                        <sp:ProtectionToken>
                             <wsp:Policy>
-                               <sp:RequireDerivedKeys />
+                                <sp:X509Token
+                                        sp:IncludeToken="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/Never">
+                                    <wsp:Policy>
+                                        <sp:RequireDerivedKeys/>
 
-                               <sp:RequireThumbprintReference />
+                                        <sp:RequireThumbprintReference/>
 
-                               <sp:WssX509V3Token10 />
+                                        <sp:WssX509V3Token10/>
+                                    </wsp:Policy>
+                                </sp:X509Token>
                             </wsp:Policy>
-                         </sp:X509Token>
-                      </wsp:Policy>
-                   </sp:ProtectionToken>
+                        </sp:ProtectionToken>
 
-                   <sp:AlgorithmSuite>
-                      <wsp:Policy>
-                         <sp:Basic256 />
-                      </wsp:Policy>
-                   </sp:AlgorithmSuite>
+                        <sp:AlgorithmSuite>
+                            <wsp:Policy>
+                                <sp:Basic256/>
+                            </wsp:Policy>
+                        </sp:AlgorithmSuite>
 
-                   <sp:Layout>
-                      <wsp:Policy>
-                         <sp:Strict />
-                      </wsp:Policy>
-                   </sp:Layout>
+                        <sp:Layout>
+                            <wsp:Policy>
+                                <sp:Strict/>
+                            </wsp:Policy>
+                        </sp:Layout>
 
-                   <sp:IncludeTimestamp />
+                        <sp:IncludeTimestamp/>
 
-                   <sp:EncryptSignature />
+                        <sp:EncryptSignature/>
 
-                   <sp:OnlySignEntireHeadersAndBody />
-                </wsp:Policy>
-             </sp:SymmetricBinding>
+                        <sp:OnlySignEntireHeadersAndBody/>
+                    </wsp:Policy>
+                </sp:SymmetricBinding>
 
-             <sp:EndorsingSupportingTokens xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
-                <wsp:Policy>
-                   <sp:IssuedToken sp:IncludeToken="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/AlwaysToRecipient">
-                      <Issuer xmlns="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
-                         <Address xmlns="http://www.w3.org/2005/08/addressing">http://129.145.133.244/wcfinterop/sts.svc</Address>
+                <sp:EndorsingSupportingTokens xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+                    <wsp:Policy>
+                        <sp:IssuedToken
+                                sp:IncludeToken="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/AlwaysToRecipient">
+                            <Issuer xmlns="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+                                <Address xmlns="http://www.w3.org/2005/08/addressing">
+                                    http://129.145.133.244/wcfinterop/sts.svc</Address>
 
-                         <Metadata xmlns="http://schemas.xmlsoap.org/ws/2004/09/mex" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-                            <wsx:MetadataSection xmlns="">
-                               <wsx:MetadataReference>
-                                  <Address xmlns="http://schemas.xmlsoap.org/ws/2004/08/addressing">http://129.145.133.244/wcfinterop/sts.svc/mex</Address>
-                               </wsx:MetadataReference>
-                            </wsx:MetadataSection>
-                         </Metadata>
-                      </Issuer>
+                                <Metadata xmlns="http://schemas.xmlsoap.org/ws/2004/09/mex"
+                                          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                                    <wsx:MetadataSection xmlns="">
+                                        <wsx:MetadataReference>
+                                            <Address xmlns="http://schemas.xmlsoap.org/ws/2004/08/addressing">
+                                                http://129.145.133.244/wcfinterop/sts.svc/mex</Address>
+                                        </wsx:MetadataReference>
+                                    </wsx:MetadataSection>
+                                </Metadata>
+                            </Issuer>
 
-                      <sp:RequestSecurityTokenTemplate>
-                         <t:TokenType xmlns:t="http://schemas.xmlsoap.org/ws/2005/02/trust">http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV1.1</t:TokenType>
+                            <sp:RequestSecurityTokenTemplate>
+                                <t:TokenType xmlns:t="http://schemas.xmlsoap.org/ws/2005/02/trust">
+                                    http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV1.1</t:TokenType>
 
-                         <t:KeyType xmlns:t="http://schemas.xmlsoap.org/ws/2005/02/trust">http://schemas.xmlsoap.org/ws/2005/02/trust/SymmetricKey</t:KeyType>
+                                <t:KeyType xmlns:t="http://schemas.xmlsoap.org/ws/2005/02/trust">
+                                    http://schemas.xmlsoap.org/ws/2005/02/trust/SymmetricKey</t:KeyType>
 
-                         <t:KeySize xmlns:t="http://schemas.xmlsoap.org/ws/2005/02/trust">256</t:KeySize>
-                      </sp:RequestSecurityTokenTemplate>
+                                <t:KeySize xmlns:t="http://schemas.xmlsoap.org/ws/2005/02/trust">256</t:KeySize>
+                            </sp:RequestSecurityTokenTemplate>
 
-                      <wsp:Policy>
-                         <sp:RequireDerivedKeys />
+                            <wsp:Policy>
+                                <sp:RequireDerivedKeys/>
 
-                         <sp:RequireInternalReference />
-                      </wsp:Policy>
-                   </sp:IssuedToken>
-                </wsp:Policy>
-             </sp:EndorsingSupportingTokens>
+                                <sp:RequireInternalReference/>
+                            </wsp:Policy>
+                        </sp:IssuedToken>
+                    </wsp:Policy>
+                </sp:EndorsingSupportingTokens>
 
-             <sp:Wss11 xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
-                <wsp:Policy>
-                   <sp:MustSupportRefKeyIdentifier />
+                <sp:Wss11 xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+                    <wsp:Policy>
+                        <sp:MustSupportRefKeyIdentifier/>
 
-                   <sp:MustSupportRefIssuerSerial />
+                        <sp:MustSupportRefIssuerSerial/>
 
-                   <sp:MustSupportRefThumbprint />
+                        <sp:MustSupportRefThumbprint/>
 
-                   <sp:MustSupportRefEncryptedKey />
-                </wsp:Policy>
-             </sp:Wss11>
+                        <sp:MustSupportRefEncryptedKey/>
+                    </wsp:Policy>
+                </sp:Wss11>
 
-             <sp:Trust10 xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
-                <wsp:Policy>
-                   <sp:MustSupportIssuedTokens />
+                <sp:Trust10 xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+                    <wsp:Policy>
+                        <sp:MustSupportIssuedTokens/>
 
-                   <sp:RequireClientEntropy />
+                        <sp:RequireClientEntropy/>
 
-                   <sp:RequireServerEntropy />
-                </wsp:Policy>
-             </sp:Trust10>
+                        <sp:RequireServerEntropy/>
+                    </wsp:Policy>
+                </sp:Trust10>
 
-             <wsoma:OptimizedMimeSerialization xmlns:wsoma="http://schemas.xmlsoap.org/ws/2004/09/policy/optimizedmimeserialization" />
-              <sc:KeyStore xmlns:sc="http://schemas.sun.com/2006/03/wss/server" location="$WSIT_HOME/xws-security/etc/server-keystore.jks" storepass="changeit" alias="bob"/>
-              <sc:TrustStore xmlns:sc="http://schemas.sun.com/2006/03/wss/server" location="$WSIT_HOME/xws-security/etc/server-truststore.jks" storepass="changeit"/>
-             <wsap10:UsingAddressing />
-          </wsp:All>
-       </wsp:ExactlyOne>
+                <wsoma:OptimizedMimeSerialization
+                        xmlns:wsoma="http://schemas.xmlsoap.org/ws/2004/09/policy/optimizedmimeserialization"/>
+                <sc:KeyStore xmlns:sc="http://schemas.sun.com/2006/03/wss/server"
+                             location="$WSIT_HOME/xws-security/etc/server-keystore.jks" storepass="changeit"
+                             alias="bob"/>
+                <sc:TrustStore xmlns:sc="http://schemas.sun.com/2006/03/wss/server"
+                               location="$WSIT_HOME/xws-security/etc/server-truststore.jks" storepass="changeit"/>
+                <wsap10:UsingAddressing/>
+            </wsp:All>
+        </wsp:ExactlyOne>
     </wsp:Policy>
 
     <wsp:Policy wsu:Id="Retailer_getPrice_Input_policy">
@@ -316,7 +375,9 @@
     </wsp:Policy>
 
     <types>
-        <schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xmime="http://www.w3.org/2005/05/xmlmime" targetNamespace="http://example.org/retailer" elementFormDefault="qualified" attributeFormDefault="unqualified">
+        <schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                xmlns:xmime="http://www.w3.org/2005/05/xmlmime" targetNamespace="http://example.org/retailer"
+                elementFormDefault="qualified" attributeFormDefault="unqualified">
             <complexType name="QuoteType">
 
             </complexType>

@@ -1,4 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+ The contents of this file are subject to the terms
+ of the Common Development and Distribution License
+ (the "License").  You may not use this file except
+ in compliance with the License.
+
+ You can obtain a copy of the license at
+ https://jwsdp.dev.java.net/CDDLv1.0.html
+ See the License for the specific language governing
+ permissions and limitations under the License.
+
+ When distributing Covered Code, include this CDDL
+ HEADER in each file and include the License file at
+ https://jwsdp.dev.java.net/CDDLv1.0.html  If applicable,
+ add the following below this CDDL HEADER, with the
+ fields enclosed by brackets "[]" replaced with your
+ own identifying information: Portions Copyright [yyyy]
+ [name of copyright owner]
+-->
+<!--
+ $Id: wholesaler.wsdl,v 1.2 2006-08-04 21:33:36 arungupta Exp $
+
+ Copyright (c) 2005 Sun Microsystems, Inc.
+ All rights reserved.
+-->
+
 <wsdl:definitions
         name="WholesaleService"
         targetNamespace="http://example.org/wholesaler"
@@ -6,7 +32,7 @@
         xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
         xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
         xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/"
-        xmlns:wsap10="http://www.w3.org/2005/08/addressing"
+        xmlns:wsap10="http://www.w3.org/2006/05/addressing/wsdl"
         xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing"
         xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy"
         xmlns:wsap="http://schemas.xmlsoap.org/ws/2004/09/policy/addressing"
@@ -15,7 +41,7 @@
         xmlns:tns="http://example.org/wholesaler"
         xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/"
         xmlns:wsx="http://schemas.xmlsoap.org/ws/2004/09/mex"
-        xmlns:wsa10="http://www.w3.org/2005/08/addressing">
+        xmlns:wsa10="http://www.w3.org/2006/05/addressing/wsdl">
     <wsp:Policy
             wsu:Id="WholesalerPort_policy">
         <wsp:ExactlyOne>
@@ -401,21 +427,6 @@
             <soap:address
                     location="http://129.145.133.244/wholesaler/wholesalerservice.svc/SecureConversation"
                     />
-
-            <wsa10:EndpointReference>
-                <wsa10:Address>http://localhost/wholesaler/wholesalerservice.svc/SecureConversation</wsa10:Address>
-
-                <Identity
-                        xmlns="http://schemas.microsoft.com/ws/2004/04/addressingidentityextension">
-                    <KeyInfo
-                            xmlns="http://www.w3.org/2000/09/xmldsig#">
-                        <X509Data>
-                            <X509Certificate>
-                                MIIDCjCCAfKgAwIBAgIQYDju2/6sm77InYfTq65x+DANBgkqhkiG9w0BAQUFADAwMQ4wDAYDVQQKDAVPQVNJUzEeMBwGA1UEAwwVT0FTSVMgSW50ZXJvcCBUZXN0IENBMB4XDTA1MDMxOTAwMDAwMFoXDTE4MDMxOTIzNTk1OVowQDEOMAwGA1UECgwFT0FTSVMxIDAeBgNVBAsMF09BU0lTIEludGVyb3AgVGVzdCBDZXJ0MQwwCgYDVQQDDANCb2IwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBAMCquMva4lFDrv3fXQnKK8CkSU7HvVZ0USyJtlL/yhmHH/FQXHyYY+fTcSyWYItWJYiTZ99PAbD+6EKBGbdfuJNUJCGaTWc5ZDUISqM/SGtacYe/PD/4+g3swNPzTUQAIBLRY1pkr2cm3s5Ch/f+mYVNBR41HnBeIxybw25kkoM7AgMBAAGjgZMwgZAwCQYDVR0TBAIwADAzBgNVHR8ELDAqMCiiJoYkaHR0cDovL2ludGVyb3AuYmJ0ZXN0Lm5ldC9jcmwvY2EuY3JsMA4GA1UdDwEB/wQEAwIEsDAdBgNVHQ4EFgQUXeg55vRyK3ZhAEhEf+YT0z986L0wHwYDVR0jBBgwFoAUwJ0o/MHrNaEd1qqqoBwaTcJJDw8wDQYJKoZIhvcNAQEFBQADggEBAIiVGv2lGLhRvmMAHSlY7rKLVkv+zEUtSyg08FBT8z/RepUbtUQShcIqwWsemDU8JVtsucQLc+g6GCQXgkCkMiC8qhcLAt3BXzFmLxuCEAQeeFe8IATr4wACmEQE37TEqAuWEIanPYIplbxYgwP0OBWBSjcRpKRAxjEzuwObYjbll6vKdFHYIweWhhWPrefquFp7TefTkF4D3rcctTfWJ76I5NrEVld+7PBnnJNpdDEuGsoaiJrwTW3Ixm40RXvG3fYS4hIAPeTCUk3RkYfUkqlaaLQnUrF2hZSgiBNLPe8gGkYORccRIlZCGQDEpcWl1Uf9OHw6fC+3hkqolFd5CVI=</X509Certificate>
-                        </X509Data>
-                    </KeyInfo>
-                </Identity>
-            </wsa10:EndpointReference>
         </wsdl:port>
     </wsdl:service>
 </wsdl:definitions>
