@@ -20,7 +20,7 @@
  [name of copyright owner]
 -->
 <!--
- $Id: build.xml,v 1.2 2006-08-04 21:51:27 arungupta Exp $
+ $Id: build.xml,v 1.3 2006-08-04 23:50:12 arungupta Exp $
 
  Copyright (c) 2005 Sun Microsystems, Inc.
  All rights reserved.
@@ -33,29 +33,23 @@
 -->
 <project name="pricequote" default="main" basedir=".">
 
-    <property name="name" value="pricequote"/>
+    <property name="name" value="${ant.project.name}"/>
 
     <property name="version" value="1.0"/>
 
-    <!-- ********************* Where are we building into? ********************* -->
-
     <property name="src.dir" value="src"/>
     <property name="etc.dir" value="etc"/>
-    <property name="lib.dir" value="lib"/>
+    <property name="lib.dir" value="../../dist/image/jax-ws-latest-wsit/lib"/>
 
     <property name="certs.dir" value="${etc.dir}/certs"/>
     <property name="build.dir" value="build"/>
     <property name="build.classes" value="${build.dir}/classes"/>
     <property name="build.war" value="${build.dir}/war"/>
-    <property name="build.docs" value="${build.dir}/docs"/>
 
-    <property name="dist.dir" value="${basedir}/dist"/>
-    <property name="dist.home" value="${dist.dir}/${name}"/>
     <property name="endpoint" value="http://localhost:8080/${name}/retailer"/>
     <property name="pid" value="10"/>
-    <property name="wqs" value="sun"/>
 
-    <property name="war.name" value="${ant.project.name}"/>
+    <property name="war.name" value="${name}"/>
 
     <tstamp>
         <format property="now" pattern="MM/dd/yyyy hh:mm aa" unit="hour" locale="en_US"/>
@@ -69,10 +63,6 @@
     <property name="verbose" value="false"/>
     <property name="fork" value="false"/>
     <property name="log" value="false"/>
-
-    <property name="http.proxyHost" value="webcache.sfbay.sun.com"/>
-    <property name="http.proxyPort" value="8080"/>
-    <property name="http.nonProxyHosts" value="129.145.133.244"/>
 
     <path id="classpath">
         <fileset dir="${lib.dir}" includes="*.jar"/>
@@ -93,7 +83,6 @@
 
     <target name="clean" description="clean the build directory">
         <delete dir="${build.dir}" includeEmptyDirs="true"/>
-        <delete dir="${dist.dir}" includeEmptyDirs="true"/>
     </target>
 
     <macrodef name="wsimport-macro">
@@ -112,7 +101,6 @@
                     wsdl="@{wsdl}">
                 <binding dir="${basedir}/etc" includes="@{binding}"/>
                 <depends dir="${basedir}/etc" includes="@{wsdl}"/>
-                <!--<produces dir="${build.classes}" includes="**/@{dir}/**/*.java"/>-->
             </wsimport>
         </sequential>
     </macrodef>
@@ -253,8 +241,6 @@
                     fork="true"
                     classname="@{classname}">
                 <jvmarg value="-Dcom.sun.xml.ws.transport.http.client.HttpTransportPipe.dump=${log}"/>
-                <!--<jvmarg value="-Dcom.sun.xml.ws.runtime.client=${log}"/>-->
-                <!--<jvmarg value="-Dcom.sun.xml.ws.runtime.client.wsa.after=${log}"/>-->
                 <jvmarg value="-Dendpoint=${endpoint}"/>
                 <jvmarg value="-Dpid=${pid}"/>
                 <jvmarg value="-Dverbose=${verbose}"/>
@@ -288,17 +274,6 @@
         </run-macro>
     </target>
 
-    <target name="runw">
-        <copy file="etc/wsit-client-wcfwqs.xml" tofile="${build.classes}/wsit-client.xml"/>
-        <run-macro classname="pricequote.wholesaler.client.WholesalerClient">
-            <options>
-                <jvmarg value="-Dwqs=${wqs}"/>
-                <jvmarg value="-Dwqs.endpoint=http://129.145.133.244/WcfInterop/WholesaleService.wsdl"/>
-                <jvmarg value="-Dwqs.serviceName=WholesaleService"/>
-            </options>
-        </run-macro>
-    </target>
-
     <target name="install-wsit">
         <antcall target="install-glassfish"/>
         <antcall target="install-tomcat"/>
@@ -306,7 +281,7 @@
 
     <target name="install-tomcat" if="tomcat">
         <copy todir="${env.CATALINA_HOME}/shared/lib" overwrite="true" verbose="${verbose}">
-            <fileset dir="lib" includes="webservices*.jar" excludes="*javadocs*.jar"/>
+            <fileset dir="${lib.dir}" includes="webservices*.jar" excludes="*javadocs*.jar"/>
         </copy>
     </target>
 
@@ -316,6 +291,11 @@
         </copy>
     </target>
 
+    <target name="setup-demo">
+        <antcall target="update-encryption-jars"/>
+        <antcall target="copy-certs"/>
+    </target>
+
     <target name="update-encryption-jars">
         <copy todir="${env.JAVA_HOME}/jre/lib/security">
             <fileset dir="${certs.dir}" includes="US_export_policy.jar, local_policy.jar"/>
@@ -323,6 +303,7 @@
     </target>
 
     <target name="copy-certs">
+        <mkdir dir="${env.WSIT_HOME}/xws-security/etc"/>
         <copy todir="${env.WSIT_HOME}/xws-security/etc">
             <fileset dir="${certs.dir}" includes="*.jks, *.properties"/>
         </copy>
