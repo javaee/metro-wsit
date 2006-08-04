@@ -1,0 +1,426 @@
+<?xml version="1.0"?>
+
+<!--
+ The contents of this file are subject to the terms
+ of the Common Development and Distribution License
+ (the "License").  You may not use this file except
+ in compliance with the License.
+ 
+ You can obtain a copy of the license at
+ https://jwsdp.dev.java.net/CDDLv1.0.html
+ See the License for the specific language governing
+ permissions and limitations under the License.
+ 
+ When distributing Covered Code, include this CDDL
+ HEADER in each file and include the License file at
+ https://jwsdp.dev.java.net/CDDLv1.0.html  If applicable,
+ add the following below this CDDL HEADER, with the
+ fields enclosed by brackets "[]" replaced with your
+ own identifying information: Portions Copyright [yyyy]
+ [name of copyright owner]
+-->
+<!--
+ $Id: build.xml,v 1.1 2006-08-04 19:29:57 arungupta Exp $
+
+ Copyright (c) 2005 Sun Microsystems, Inc.
+ All rights reserved.
+-->
+
+<!--
+  =======================================================================
+    JavaOne 2006 Demo build file
+  =======================================================================
+-->
+<project name="pricequote" default="main" basedir=".">
+
+    <property name="name" value="pricequote"/>
+
+    <property name="version" value="1.0"/>
+
+    <!-- ********************* Where are we building into? ********************* -->
+
+    <property name="src.dir" value="src"/>
+    <property name="etc.dir" value="etc"/>
+    <property name="lib.dir" value="lib"/>
+
+    <property name="certs.dir" value="${etc.dir}/certs"/>
+    <property name="build.dir" value="build"/>
+    <property name="build.classes" value="${build.dir}/classes"/>
+    <property name="build.war" value="${build.dir}/war"/>
+    <property name="build.docs" value="${build.dir}/docs"/>
+
+    <property name="dist.dir" value="${basedir}/dist"/>
+    <property name="dist.home" value="${dist.dir}/${name}"/>
+    <property name="endpoint" value="http://localhost:8080/${name}/retailer"/>
+    <property name="pid" value="10"/>
+    <property name="wqs" value="sun"/>
+
+    <property name="war.name" value="${ant.project.name}"/>
+
+    <tstamp>
+        <format property="now" pattern="MM/dd/yyyy hh:mm aa" unit="hour" locale="en_US"/>
+    </tstamp>
+    <property name="build.id" value="${now}(${user.name})"/>
+
+    <property environment="env"/>
+    <property name="debug" value="true"/>
+    <property name="keep" value="true"/>
+    <property name="optimize" value="false"/>
+    <property name="verbose" value="false"/>
+    <property name="fork" value="false"/>
+    <property name="log" value="false"/>
+
+    <property name="http.proxyHost" value="webcache.sfbay.sun.com"/>
+    <property name="http.proxyPort" value="8080"/>
+    <property name="http.nonProxyHosts" value="129.145.133.244"/>
+
+    <path id="classpath">
+        <fileset dir="${lib.dir}" includes="*.jar"/>
+        <!--<fileset dir="${lib.dir}" includes="servlet.jar"/>-->
+        <!--<fileset dir="d:/testbed/apache-tomcat-5.5.16/shared/lib" includes="*.jar"/>-->
+        <pathelement location="${java.home}/lib/tools.jar"/>
+        <pathelement location="etc"/>
+        <pathelement location="etc/sts"/>
+    </path>
+
+    <taskdef name="wsimport" classname="com.sun.tools.ws.ant.WsImport">
+        <classpath refid="classpath"/>
+    </taskdef>
+
+    <taskdef name="installerBuilder"
+        classname="com.sun.tools.xjc.installer.builder.BuilderTask">
+        <classpath>
+            <fileset dir="${lib.dir}" includes="installer-builder.jar, sfx4j-1.0.jar"/>
+        </classpath>
+    </taskdef>
+
+    <target name="prepare" description="prepare the build">
+        <mkdir dir="${build.dir}"/>
+        <mkdir dir="${build.classes}"/>
+        <mkdir dir="${build.war}"/>
+    </target>
+
+    <target name="clean" description="clean the build directory">
+        <delete dir="${build.dir}" includeEmptyDirs="true"/>
+        <delete dir="${dist.dir}" includeEmptyDirs="true"/>
+    </target>
+
+    <macrodef name="wsimport-macro">
+        <attribute name="binding"/>
+        <attribute name="wsdl"/>
+        <attribute name="dir"/>
+        <sequential>
+            <echo message="@{wsdl}"/>
+            <wsimport
+                    fork="${fork}"
+                    debug="${debug}"
+                    verbose="${verbose}"
+                    extension="${extension}"
+                    keep="${keep}"
+                    destdir="${build.classes}"
+                    wsdl="@{wsdl}">
+                <binding dir="${basedir}/etc" includes="@{binding}"/>
+                <depends dir="${basedir}/etc" includes="@{wsdl}"/>
+                <!--<produces dir="${build.classes}" includes="**/@{dir}/**/*.java"/>-->
+            </wsimport>
+        </sequential>
+    </macrodef>
+
+    <macrodef name="compile-macro">
+        <attribute name="dir"/>
+        <sequential>
+            <javac
+                    fork="${fork}"
+                    srcdir="src/pricequote/@{dir}"
+                    source="1.5"
+                    destdir="${build.classes}"
+                    debug="${debug}"
+                    includes="**/*.java">
+                <classpath>
+                    <path refid="classpath"/>
+                </classpath>
+            </javac>
+        </sequential>
+    </macrodef>
+
+    <target name="create-war">
+        <copy file="etc/manifest" todir="${build.dir}"/>
+        <updateManifestWithVersion file="${build.dir}/manifest"/>
+        <war warfile="${build.war}/${war.name}.war" webxml="etc/web.xml" manifest="${build.dir}/manifest">
+            <webinf dir="etc" includes="sun-jaxws.xml"/>
+
+            <zipfileset
+                    dir="etc"
+                    includes="wholesaler.wsdl, retailer.wsdl"
+                    prefix="WEB-INF/wsdl"/>
+
+            <zipfileset
+                    dir="etc/sts"
+                    includes="sts.wsdl, custom-sts.xml, sts_schema.xsd"
+                    prefix="WEB-INF/wsdl"/>
+
+            <zipfileset
+                    dir="etc/images"
+                    includes="*.jpg"
+                    prefix="images"/>
+
+            <lib dir="${build.dir}" includes="${name}-client.jar"/>
+            <lib dir="lib" includes="standard.jar, jstl.jar"/>
+
+            <classes dir="${build.classes}" excludes="**/MS*.class"/>
+            <classes dir="etc/sts" includes="wsit-client.xml"/>
+            <classes dir="etc/sts" includes="client-security-env.properties"/>
+        </war>
+    </target>
+
+    <target name="create-wcf-war">
+        <copy file="etc/manifest" todir="${build.dir}"/>
+        <updateManifestWithVersion file="${build.dir}/manifest"/>
+        <war warfile="${build.war}/${war.name}-wcf.war" webxml="etc/wcf/web.xml" manifest="${build.dir}/manifest">
+            <webinf dir="etc/wcf" includes="sun-jaxws.xml"/>
+
+            <zipfileset
+                    dir="etc/wcf"
+                    includes="wholesaler.wsdl"
+                    prefix="WEB-INF/wsdl"/>
+
+            <zipfileset
+                    dir="etc/sts/wcf"
+                    includes="sts.wsdl, sts_schema.xsd"
+                    prefix="WEB-INF/wsdl"/>
+
+            <zipfileset
+                    dir="etc/images"
+                    includes="*.jpg"
+                    prefix="images"/>
+
+            <classes dir="${build.classes}" includes="**/wcf/**, **/WCF*/**"/>
+        </war>
+    </target>
+
+    <target name="deploy">
+        <antcall target="deploy-glassfish"/>
+        <antcall target="deploy-tomcat"/>
+    </target>
+
+    <target name="deploy-ui">
+        <antcall target="deploy-glassfish-ui"/>
+        <antcall target="deploy-tomcat-ui"/>
+    </target>
+
+    <target name="deploy-glassfish" unless="tomcat">
+        <copy file="${build.war}/${war.name}.war" todir="${env.AS_HOME}/domains/domain1/autodeploy"/>
+        <copy file="${build.war}/${war.name}-wcf.war" todir="${env.AS_HOME}/domains/domain1/autodeploy"/>
+    </target>
+
+    <target name="deploy-tomcat" if="tomcat">
+        <copy file="${build.war}/${war.name}.war" todir="${env.CATALINA_HOME}/webapps"/>
+        <copy file="${build.war}/${war.name}-wcf.war" todir="${env.CATALINA_HOME}/webapps"/>
+    </target>
+
+    <target name="deploy-glassfish-ui" unless="tomcat">
+        <copy file="${build.war}/${uiwar.name}.war" todir="${env.AS_HOME}/domains/domain1/autodeploy"/>
+    </target>
+
+    <target name="deploy-tomcat-ui" if="tomcat">
+        <copy file="${build.war}/${uiwar.name}.war" todir="${env.CATALINA_HOME}/webapps"/>
+    </target>
+
+    <target name="retailer-server">
+        <wsimport-macro binding="retailer-server-binding.xml" wsdl="etc/retailer.wsdl" dir="server"/>
+        <compile-macro dir="retailer/server"/>
+    </target>
+
+    <target name="wholesaler-server">
+        <wsimport-macro binding="wholesaler-server-binding.xml" wsdl="etc/wholesaler.wsdl" dir="server"/>
+        <compile-macro dir="wholesaler/server"/>
+    </target>
+
+    <target name="wholesaler-wcf-server">
+        <wsimport-macro binding="wcf/wholesaler-server-binding.xml" wsdl="etc/wcf/wholesaler.wsdl" dir="wcf"/>
+        <compile-macro dir="wholesaler/wcf"/>
+    </target>
+
+    <target name="server" depends="prepare, retailer-server, wholesaler-server, wholesaler-wcf-server, create-war, create-wcf-war, deploy"/>
+
+    <target name="retailer-client">
+        <wsimport-macro binding="retailer-client-binding.xml" wsdl="etc/retailer.wsdl" dir="client"/>
+        <compile-macro dir="retailer/client"/>
+    </target>
+
+    <target name="wholesaler-client">
+        <wsimport-macro binding="wholesaler-client-binding.xml" wsdl="etc/wholesaler.wsdl" dir="client"/>
+        <compile-macro dir="wholesaler/client"/>
+    </target>
+
+    <target name="make-client-jar">
+        <jar file="${build.dir}/${name}-client.jar">
+            <fileset dir="${build.classes}" includes="**/client/*.class, *.java"/>
+        </jar>
+    </target>
+
+    <target name="client" depends="prepare, retailer-client, wholesaler-client, make-client-jar"/>
+
+    <target name="src-zip" description="create source zip bundles" depends="prepare">
+        <zip file="${build.dir}/${ant.project.name}-src.zip">
+            <fileset dir="${basedir}/src"/>
+        </zip>
+    </target>
+
+    <target name="util" depends="prepare">
+        <compile-macro dir="util"/>
+    </target>
+
+    <target name="main" depends="client, util, server"/>
+
+    <macrodef name="run-macro">
+        <attribute name="classname"/>
+        <element name="options" optional="yes"/>
+        <sequential>
+            <java
+                    fork="true"
+                    classname="@{classname}">
+                <jvmarg value="-Dcom.sun.xml.ws.transport.http.client.HttpTransportPipe.dump=${log}"/>
+                <!--<jvmarg value="-Dcom.sun.xml.ws.runtime.client=${log}"/>-->
+                <!--<jvmarg value="-Dcom.sun.xml.ws.runtime.client.wsa.after=${log}"/>-->
+                <jvmarg value="-Dendpoint=${endpoint}"/>
+                <jvmarg value="-Dpid=${pid}"/>
+                <jvmarg value="-Dverbose=${verbose}"/>
+                <jvmarg value="-DWSIT_HOME=${env.WSIT_HOME}"/>
+                <!--<jvmarg value="-Dhttp.proxyHost=${http.proxyHost}"/>-->
+                <!--<jvmarg value="-Dhttp.proxyPort=${http.proxyPort}"/>-->
+                <!--<jvmarg value="-Dhttp.nonProxyHosts=${http.nonProxyHosts}"/>-->
+                <!--<jvmarg value="-Dhttp.proxyHost=127.0.0.1"/>-->
+                <!--<jvmarg value="-Dhttp.proxyPort=8085"/>-->
+                <options/>
+                <classpath>
+                    <path refid="classpath"/>
+                    <pathelement location="${build.classes}"/>
+                </classpath>
+            </java>
+        </sequential>
+    </macrodef>
+
+    <target name="dumper" depends="create-dumper, install-dumper"/>
+
+    <target name="create-dumper" depends="util">
+        <jar destfile="${build.dir}/action-dumper.jar">
+            <fileset dir="${build.classes}" includes="**/util/*.class"/>
+            <fileset dir="${etc.dir}">
+                <include name="META-INF/**"/>
+            </fileset>
+        </jar>
+    </target>
+
+    <target name="run">
+        <run-macro classname="pricequote.retailer.client.RetailerClient">
+            <options>
+                <jvmarg value="-Dsts.wsdlLocation=http://localhost:8080/${name}/sts"/>
+                <jvmarg value="-Dsts.namespace=http://tempuri.org/"/>
+                <jvmarg value="-Dsts.serviceName=SecurityTokenService"/>
+                <jvmarg value="-Dsts.portName=CustomBinding_ISecurityTokenService"/>
+                <jvmarg value="-DWSIT_HOME=${env.WSIT_HOME}"/>
+            </options>
+        </run-macro>
+    </target>
+
+    <target name="rund">
+        <run-macro classname="pricequote.retailer.client.RetailerClient">
+            <options>
+                <jvmarg value="-Xdebug"/>
+                <jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,address=8000"/>
+            </options>
+        </run-macro>
+    </target>
+
+    <target name="runw">
+        <copy file="etc/wsit-client-wcfwqs.xml" tofile="${build.classes}/wsit-client.xml"/>
+        <run-macro classname="pricequote.wholesaler.client.WholesalerClient">
+            <options>
+                <jvmarg value="-Dwqs=${wqs}"/>
+                <jvmarg value="-Dwqs.endpoint=http://129.145.133.244/WcfInterop/WholesaleService.wsdl"/>
+                <jvmarg value="-Dwqs.serviceName=WholesaleService"/>
+                <!--<jvmarg value="-Xdebug"/>-->
+                <!--<jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,address=8000"/>-->
+            </options>
+        </run-macro>
+        <!--<delete file="${build.classes}/wsit-client.xml"/>-->
+    </target>
+
+    <target name="integrate-hudson" depends="prepare">
+        <get src="http://kohsuke.sfbay/hudson/job/wsit-javanet/lastSuccessfulBuild/artifact/dist/image/jax-ws-latest-wsit/lib/webservices.jar"
+             dest="${lib.dir}/webservices.jar"/>
+        <get src="http://kohsuke.sfbay/hudson/job/wsit-javanet/lastSuccessfulBuild/artifact/dist/image/jax-ws-latest-wsit/lib/webservices-tools.jar"
+             dest="${lib.dir}/webservices-tools.jar"/>
+        <get src="http://kohsuke.sfbay/hudson/job/wsit-javanet/lastSuccessfulBuild/artifact/rt/build/webservices-src.zip"
+             dest="${lib.dir}/webservices-src.zip"/>
+        <get src="http://kohsuke.sfbay/hudson/job/wsit-javanet/lastSuccessfulBuild/artifact/tools/build/webservices-tools-src.zip"
+             dest="${lib.dir}/webservices-tools-src.zip"/>
+    </target>
+
+    <target name="integrate-local" depends="prepare">
+        <get src="file:///D:/workspaces/wsit/wsit/dist/image/jax-ws-latest-wsit/lib/webservices.jar"
+             dest="${lib.dir}/webservices.jar"/>
+        <get src="file:///D:/workspaces/wsit/wsit/dist/image/jax-ws-latest-wsit/lib/webservices-tools.jar"
+             dest="${lib.dir}/webservices-tools.jar"/>
+        <get src="file:///D:/workspaces/wsit/wsit/rt/build/webservices-src.zip"
+             dest="${lib.dir}/webservices-src.zip"/>
+        <get src="file:///D:/workspaces/wsit/wsit/tools/build/webservices-tools-src.zip"
+             dest="${lib.dir}/webservices-tools-src.zip"/>
+    </target>
+
+    <target name="install-wsit">
+        <antcall target="install-glassfish"/>
+        <antcall target="install-tomcat"/>
+    </target>
+
+    <target name="install-tomcat" if="tomcat">
+        <copy todir="${env.CATALINA_HOME}/shared/lib" overwrite="true" verbose="${verbose}">
+            <fileset dir="lib" includes="webservices*.jar" excludes="*javadocs*.jar"/>
+        </copy>
+    </target>
+
+    <target name="install-glassfish" unless="tomcat">
+        <copy todir="${env.AS_HOME}/lib" overwrite="true" verbose="${verbose}">
+            <fileset dir="${lib.dir}" includes="webservices*.jar" excludes="*javadocs*.jar"/>
+        </copy>
+    </target>
+
+    <target name="install-dumper">
+        <antcall target="install-dumper-glassfish"/>
+        <antcall target="install-dumper-tomcat"/>
+    </target>
+
+    <target name="install-dumper-tomcat" if="tomcat">
+        <copy todir="${env.CATALINA_HOME}/shared/lib" overwrite="true" verbose="${verbose}">
+            <fileset dir="${build.dir}" includes="action-dumper.jar"/>
+        </copy>
+    </target>
+
+    <target name="install-dumper-glassfish" unless="tomcat">
+        <copy todir="${env.AS_HOME}/lib" overwrite="true" verbose="${verbose}">
+            <fileset dir="${build.dir}" includes="action-dumper.jar"/>
+        </copy>
+    </target>
+
+    <target name="update-encryption-jars">
+        <copy todir="${env.JAVA_HOME}/jre/lib/security">
+            <fileset dir="${certs.dir}" includes="US_export_policy.jar, local_policy.jar"/>
+        </copy>
+    </target>
+
+    <target name="copy-certs">
+        <copy todir="${env.WSIT_HOME}/xws-security/etc">
+            <fileset dir="${certs.dir}" includes="*.jks, *.properties"/>
+        </copy>
+    </target>
+
+    <macrodef name="updateManifestWithVersion">
+        <attribute name="file"/>
+        <sequential>
+            <manifest mode="update" file="@{file}">
+                <attribute name="Build-Id" value="${build.id}"/>
+            </manifest>
+        </sequential>
+    </macrodef>
+</project>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ The contents of this file are subject to the terms
+ of the Common Development and Distribution License
+ (the "License").  You may not use this file except
+ in compliance with the License.
+
+ You can obtain a copy of the license at
+ https://jwsdp.dev.java.net/CDDLv1.0.html
+ See the License for the specific language governing
+ permissions and limitations under the License.
+
+ When distributing Covered Code, include this CDDL
+ HEADER in each file and include the License file at
+ https://jwsdp.dev.java.net/CDDLv1.0.html  If applicable,
+ add the following below this CDDL HEADER, with the
+ fields enclosed by brackets "[]" replaced with your
+ own identifying information: Portions Copyright [yyyy]
+ [name of copyright owner]
+-->
+<!--
+ $Id: sun-jaxws.xml,v 1.1 2006-08-04 19:29:52 arungupta Exp $
+
+ Copyright (c) 2005 Sun Microsystems, Inc.
+ All rights reserved.
+-->
+
+<endpoints xmlns='http://java.sun.com/xml/ns/jax-ws/ri/runtime' version='2.0'>
+    <endpoint
+        name="wholesaler_ms"
+        implementation="pricequote.wholesaler.wcf.Wholesaler"
+        wsdl="WEB-INF/wsdl/wholesaler.wsdl"
+        service='{http://example.org/wholesaler}WholesaleService'
+        port='{http://example.org/wholesaler}WholesalerPort'
+        url-pattern="/wholesaler"
+        enable-mtom="true"/>
+    <endpoint
+        name="sts_ms"
+        implementation="pricequote.util.WCFSTSImpl"
+        wsdl="WEB-INF/wsdl/sts.wsdl"
+        service='{http://tempuri.org/}SecurityTokenService'
+        port='{http://tempuri.org/}WSHttpBinding_ISecurityTokenService'
+        url-pattern="/sts"/>
+</endpoints>
+
