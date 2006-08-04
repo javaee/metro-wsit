@@ -18,7 +18,7 @@
  [name of copyright owner]
 */
 /*
- $Id: RetailerClient.java,v 1.1 2006-08-04 19:29:55 arungupta Exp $
+ $Id: RetailerClient.java,v 1.2 2006-08-04 21:33:12 arungupta Exp $
 
  Copyright (c) 2006 Sun Microsystems, Inc.
  All rights reserved.
@@ -35,8 +35,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-
-import pricequote.retailer.client.ImageServingServlet;
 
 /**
  * @author Arun Gupta
@@ -97,15 +95,6 @@ public class RetailerClient {
             System.out.println("No photo received.");
         }
         System.out.println("Quoted price: " + quote.getPrice());
-    }
-
-    /**
-     * Persists an image to a file and returns the URL.
-     */
-    public static String getPhoto(BufferedImage img) throws IOException {
-        File file = new File(ImageServingServlet.TEMP_DIR,(iota++)+".jpg");
-        ImageIO.write(img, "jpeg", file);
-        return file.getName();
     }
 
     private static int iota = 1;
