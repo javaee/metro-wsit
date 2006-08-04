@@ -1,0 +1,66 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1"
+ http-equiv="content-type">
+  <title>Running the Javaone demo</title>
+</head>
+<body>
+<h1><span style="font-weight: bold">Instructions for PriceQuote sample Setup and
+Running&nbsp;</span></h1>
+<ol>
+  <li>Download and install <a href="https://glassfish.dev.java.net/public/downloadsindex.html#GlassFish_v2_Main_branch">GlassFish
+    v2</a> (<code>AS_HOME</code>)</li>
+  <li>Set the following environment variables:
+    <ul>
+      <li><code>ANT_HOME</code>=<code>$AS_HOME/lib/ant</code></li>
+      <li><code>JAVA_HOME</code>=<code>$AS_HOME/jdk</code></li>
+      <li><code>WSIT_HOME</code>=<code>$AS_HOME</code></li>
+    </ul>
+  </li>
+  <li>Edit <code>AS_HOME/domains/domain1/config/domains.xml</code>, and add <code>-DWSIT_HOME=&quot;Value
+    of WSIT_HOME&quot;</code> as <code>&lt;jvm-options&gt;</code> under <code>&lt;java-config&gt;</code>.</li>
+  <li>Copy the strong encryption jars to <code>$JAVA_HOME/jre/lib/security</code>
+    directory and required certificates using the following command:<br>
+    <br>
+    <code>ant setup-demo</code>
+  </li>
+  <li><a href="https://wsit.dev.java.net/source/browse/*checkout*/wsit/wsit/docs/howto/WSIT_Download_Build_Install.html">Build
+    and Install
+    WSIT</a> on GlassFish. If you are reading this file, you might have already
+    downloaded WSIT source code. In that case, skip to <a href="https://wsit.dev.java.net/source/browse/*checkout*/wsit/wsit/docs/howto/WSIT_Download_Build_Install.html#Building">build</a>
+    and <a href="https://wsit.dev.java.net/source/browse/*checkout*/wsit/wsit/docs/howto/WSIT_Download_Build_Install.html#Installing_On_GlassFish">install</a>
+    steps.</li>
+  <li>Start Glassfish default domain using the following command:<br>
+    <br>
+    <code>$AS_HOME/bin/asadmin start-domain domain1</code></li>
+  <li>Build and deploy the demo using the following command:<br>
+    <br>
+    <code>$DEMO_HOME/ant clean main</code></li>
+  <li>Run the demo using the following command:<br>
+    <br>
+    <code>
+    ant run</code></li>
+  <li>The console shows the quoted price and the name and location of the
+    product image.
+    If no exceptions are returned, then success!</li>
+</ol>
+<p>&nbsp;</p>
+<h2>Troubleshooting</h2>
+<ol>
+  <li>Enable WS-Addressing Action header dump on the server side to understand
+    the message flow. This can be done by adding <code>&lt;jvm-options&gt;</code> in <code>domains.xml</code> to
+        set the following properties:
+        <ul>
+          <li><code>-Dcom.sun.xml.ws.runtime.client.action=true</code></li>
+          <li><code>-Dcom.sun.xml.ws.runtime.server.action=true</code></li>
+        </ul>
+  </li>
+</ol>
+<p>&nbsp;</p>
+<p>Last Updated: <i><!--webbot bot="Timestamp" startspan S-Type="EDITED"
+S-Format="%B %d, %Y %I:%M:%S %p" -->August 04, 2006 03:31:12 PM<!--webbot
+bot="Timestamp" i-CheckSum="39381" endspan -->
+</i></p>
+</body>
+</html>
