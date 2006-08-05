@@ -3,7 +3,7 @@
 <head>
   <meta content="text/html; charset=ISO-8859-1"
  http-equiv="content-type">
-  <title>Running the Javaone demo</title>
+  <title>Instructions for PriceQuote sample Setup and Running </title>
 </head>
 <body>
 <h1><span style="font-weight: bold">Instructions for PriceQuote sample Setup and
@@ -12,7 +12,7 @@ Running&nbsp;</span></h1>
   <li>Download and install <a href="http://java.sun.com/javase/downloads/index.jsp">JDK
     5.0 Update 2 or later</a> (<code>JAVA_HOME</code>).</li>
   <li>Download and install <a href="https://glassfish.dev.java.net/public/downloadsindex.html#GlassFish_v2_Main_branch">GlassFish
-    v2</a> (<code>AS_HOME</code>)</li>
+    v2</a> (<code>AS_HOME</code>).</li>
   <li>Set the following environment variables:
     <ul>
       <li><code>ANT_HOME</code>=<code>$AS_HOME/lib/ant</code></li>
@@ -21,17 +21,18 @@ Running&nbsp;</span></h1>
   </li>
   <li>Edit <code>AS_HOME/domains/domain1/config/domains.xml</code>, and add <code>-DWSIT_HOME=&quot;Value
     of WSIT_HOME&quot;</code> as <code>&lt;jvm-options&gt;</code> under <code>&lt;java-config&gt;</code>.</li>
+  <li><a href="https://wsit.dev.java.net/source/browse/*checkout*/wsit/wsit/docs/howto/WSIT_Download_Build_Install.html">Download,
+    Build and Install</a>
+    WSIT on GlassFish. If you are reading this file, you might have already
+    downloaded WSIT source code. In that case, skip to <a href="https://wsit.dev.java.net/source/browse/*checkout*/wsit/wsit/docs/howto/WSIT_Download_Build_Install.html#Building">build</a>
+    and <a href="https://wsit.dev.java.net/source/browse/*checkout*/wsit/wsit/docs/howto/WSIT_Download_Build_Install.html#Installing_On_GlassFish">install</a>
+    steps.
+  </li>
   <li>Copy the strong encryption jars to <code>$JAVA_HOME/jre/lib/security</code>
     directory and required certificates using the following command:<br>
     <br>
-    <code>ant setup-demo</code>
+    <code>$ANT_HOME/bin/ant setup-demo</code>
   </li>
-  <li><a href="https://wsit.dev.java.net/source/browse/*checkout*/wsit/wsit/docs/howto/WSIT_Download_Build_Install.html">Build
-    and Install
-    WSIT</a> on GlassFish. If you are reading this file, you might have already
-    downloaded WSIT source code. In that case, skip to <a href="https://wsit.dev.java.net/source/browse/*checkout*/wsit/wsit/docs/howto/WSIT_Download_Build_Install.html#Building">build</a>
-    and <a href="https://wsit.dev.java.net/source/browse/*checkout*/wsit/wsit/docs/howto/WSIT_Download_Build_Install.html#Installing_On_GlassFish">install</a>
-    steps.</li>
   <li>Start Glassfish default domain using the following command:<br>
     <br>
     <code>$AS_HOME/bin/asadmin start-domain domain1</code></li>
@@ -40,8 +41,7 @@ Running&nbsp;</span></h1>
     <code>$DEMO_HOME/ant clean main</code></li>
   <li>Run the demo using the following command:<br>
     <br>
-    <code>
-    ant run</code></li>
+    <code>$ANT_HOME/bin/ant run</code></li>
   <li>The console shows the quoted price and the name and location of the
     product image.
     If no exceptions are returned, then success!</li>
