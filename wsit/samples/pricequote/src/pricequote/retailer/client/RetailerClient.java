@@ -18,7 +18,7 @@
  [name of copyright owner]
 */
 /*
- $Id: RetailerClient.java,v 1.2 2006-08-04 21:33:12 arungupta Exp $
+ $Id: RetailerClient.java,v 1.3 2006-08-05 00:21:02 arungupta Exp $
 
  Copyright (c) 2006 Sun Microsystems, Inc.
  All rights reserved.
@@ -26,15 +26,16 @@
 
 package pricequote.retailer.client;
 
-import javax.imageio.ImageIO;
-import javax.xml.namespace.QName;
-import javax.xml.ws.BindingProvider;
-import javax.xml.ws.WebServiceException;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+
+import javax.imageio.ImageIO;
+import javax.xml.namespace.QName;
+import javax.xml.ws.BindingProvider;
+import javax.xml.ws.WebServiceException;
 
 /**
  * @author Arun Gupta
@@ -44,7 +45,6 @@ public class RetailerClient {
     private static final String WSDL_LOCATION = ENDPOINT + "?wsdl";
     private static final QName SERVICE = new QName("http://example.org/retailer", "RetailerQuoteService");
     private static int pid = 10;
-    private static String imageLocation;
 
     public static void main(String[] args) {
         String endpoint = System.getProperty("endpoint");
@@ -57,8 +57,6 @@ public class RetailerClient {
      * Invokes the web service.
      */
     public static Quote getQuote(String endpoint, String spid) {
-        System.out.println("Got endpoint address: " + endpoint);
-        System.out.println("Got product id: " + spid);
         RetailerQuoteService service;
         try {
             service = new RetailerQuoteService(new URL(WSDL_LOCATION), SERVICE);
@@ -73,7 +71,7 @@ public class RetailerClient {
             pid = Integer.valueOf(spid);
 
         RetailerPortType port = service.getRetailerPort();
-        System.out.printf("Using endpoint address: %s\n", endpoint);
+        System.out.printf("Invoking endpoint address \"%s\" for product id \"%s\".", endpoint, spid);
         ((BindingProvider)port).getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, endpoint);
 
         Quote quote = port.getPrice(pid);
@@ -83,11 +81,11 @@ public class RetailerClient {
     private static final void displayPhotoAndPrice(Quote quote) {
         if (quote.getPhoto() != null) {
             try {
-                String carName = "car" + (pid%2==0 ? "0":"1") + ".jpg";
+                String carName = carname(pid);
                 File file = new File(carName);
                 ImageIO.write((BufferedImage)quote.getPhoto(), "jpeg", file);
-                System.out.println("Photo copied to " + carName);
-                imageLocation = file.getAbsolutePath();
+                String imageLocation = file.getAbsolutePath();
+                System.out.printf("Photo is copied to \"%s\" file.", imageLocation);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -95,7 +93,20 @@ public class RetailerClient {
             System.out.println("No photo received.");
         }
         System.out.println("Quoted price: " + quote.getPrice());
+        System.out.println("Success!");
     }
 
-    private static int iota = 1;
+    private static final String carname(int pid) {
+        switch (pid % 4) {
+            case 1:
+                return "AM-Vantage-2k6";
+            case 2:
+                return "BMW-M3-2k6";
+            case 3:
+                return "MB-SLR-2k6";
+            case 0:
+            default:
+                return "Porsche-911-2k6";
+        }
+    }
 }
