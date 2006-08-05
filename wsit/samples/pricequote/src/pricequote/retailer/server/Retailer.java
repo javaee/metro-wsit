@@ -18,7 +18,7 @@
  [name of copyright owner]
 */
 /*
- $Id: Retailer.java,v 1.1 2006-08-04 19:29:55 arungupta Exp $
+ $Id: Retailer.java,v 1.2 2006-08-05 00:18:31 arungupta Exp $
 
  Copyright (c) 2006 Sun Microsystems, Inc.
  All rights reserved.
@@ -26,18 +26,19 @@
 
 package pricequote.retailer.server;
 
-import pricequote.wholesaler.client.WholesalerClient;
-import com.sun.xml.ws.rm.jaxws.runtime.client.ClientSession;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import javax.annotation.Resource;
 import javax.jws.WebService;
+import javax.servlet.ServletContext;
+import javax.xml.namespace.QName;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.handler.MessageContext;
-import javax.xml.namespace.QName;
-import javax.annotation.Resource;
-import javax.servlet.ServletContext;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import com.sun.xml.ws.rm.jaxws.runtime.client.ClientSession;
+import pricequote.wholesaler.client.WholesalerClient;
 
 /**
  * @author Arun Gupta
@@ -56,9 +57,9 @@ public class Retailer implements RetailerPortType {
 
         ServletContext sc = (ServletContext)wsc.getMessageContext().get(MessageContext.SERVLET_CONTEXT);
 
-        logger.log(level, "Configuring Sun client ...");
+        logger.log(level, "Configuring WSIT client ...");
         WholesalerClient sunClient = new WholesalerClient(getSunEndpointAddress(sc), new QName(WQS_NAMESPACE_URI, getSunServiceName(sc)));
-        logger.log(level, "Invoking Sun's Wholesaler ...");
+        logger.log(level, "Invoking WSIT's Wholesaler ...");
         pricequote.wholesaler.client.Quote sunQuote = sunClient.getQuote(pid);
         float sunPrice = sunQuote.getPrice();
         ClientSession session = ClientSession.getSession((BindingProvider)sunClient.getBindingProvider());
@@ -66,21 +67,19 @@ public class Retailer implements RetailerPortType {
             session.close();
         logger.log(level, "Sun's wholesaler response received.");
 
-        logger.log(level, "Configuring Microsoft client ...");
+        logger.log(level, "Configuring WSIT#2 client ...");
         WholesalerClient msClient = new WholesalerClient(getMSEndpointAddress(sc), new QName(WQS_NAMESPACE_URI, getMSServiceName(sc)));
-        logger.log(level, "Invoking Microsoft's Wholesaler ...");
+        logger.log(level, "Invoking WSIT#2's Wholesaler ...");
         pricequote.wholesaler.client.Quote msQuote = msClient.getQuote(pid);
         session = ClientSession.getSession((BindingProvider)msClient.getBindingProvider());
         if (session != null)
             session.close();
         float msPrice = msQuote.getPrice();
-        logger.log(level, "Microsoft's wholesaler response received.");
+        logger.log(level, "WSIT#2's wholesaler response received.");
 
         pricequote.wholesaler.client.Quote quote = sunPrice <= msPrice ? sunQuote : msQuote;
-//        pricequote.wholesaler.client.Quote quote = sunQuote;
-
         logger.log(level, "Got a better price from \"{0}\" Wholesaler ...",
-                   (sunPrice <= msPrice ? "Sun" : "Microsoft"));
+                   (sunPrice <= msPrice ? "WSIT" : "WSIT#2"));
 
         // TODO: Calculate the price to be returned back
         // TODO: based upon user's identity and gross margin
@@ -129,5 +128,4 @@ public class Retailer implements RetailerPortType {
 
         return serviceName;
     }
-
 }
