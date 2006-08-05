@@ -18,7 +18,7 @@
  [name of copyright owner]
 */
 /*
- $Id: WholesalerClient.java,v 1.1 2006-08-04 19:29:56 arungupta Exp $
+ $Id: WholesalerClient.java,v 1.2 2006-08-05 00:20:35 arungupta Exp $
 
  Copyright (c) 2006 Sun Microsystems, Inc.
  All rights reserved.
@@ -26,18 +26,18 @@
 
 package pricequote.wholesaler.client;
 
-import com.sun.xml.ws.security.trust.WSTrustConstants;
-import com.sun.xml.ws.client.BindingProviderProperties;
-
-import javax.xml.namespace.QName;
-import javax.xml.ws.WebServiceException;
-import javax.xml.ws.WebServiceContext;
-import javax.xml.ws.BindingProvider;
-import javax.annotation.Resource;
-import java.net.URL;
 import java.net.MalformedURLException;
-import java.util.Map;
+import java.net.URL;
 import java.util.HashMap;
+import java.util.Map;
+
+import javax.annotation.Resource;
+import javax.xml.namespace.QName;
+import javax.xml.ws.BindingProvider;
+import javax.xml.ws.WebServiceContext;
+import javax.xml.ws.WebServiceException;
+
+import com.sun.xml.ws.security.trust.WSTrustConstants;
 
 /**
  * @author Arun Gupta
