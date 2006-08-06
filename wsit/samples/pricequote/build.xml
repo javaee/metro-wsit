@@ -22,7 +22,7 @@
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
 -->
 <!--
- $Id: build.xml,v 1.5 2006-08-05 05:15:02 arungupta Exp $
+ $Id: build.xml,v 1.6 2006-08-06 19:26:34 arungupta Exp $
 -->
 
 <!--
@@ -65,6 +65,7 @@
 
     <path id="classpath">
         <fileset dir="${lib.dir}" includes="*.jar"/>
+        <fileset dir="lib" includes="*.jar"/>
         <pathelement location="${java.home}/lib/tools.jar"/>
         <pathelement location="etc"/>
         <pathelement location="etc/sts"/>
