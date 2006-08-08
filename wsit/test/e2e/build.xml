@@ -23,7 +23,7 @@
 -->
 
 <!--
- $Id: build.xml,v 1.14 2006-08-02 00:54:06 kohsuke Exp $
+ $Id: build.xml,v 1.15 2006-08-08 22:22:28 bhaktimehta Exp $
 
  Copyright (c) 2005 Sun Microsystems, Inc.
  All rights reserved.
@@ -75,7 +75,7 @@
         <delete dir="build"/>
         <delete dir="${logs.dir}"/>
     </target>
-    
+
     <!-- invokes Unit test-->
     <macrodef name="run-tests">
         <element name="arguments" />
@@ -96,9 +96,10 @@
 		            <sysproperty key="com.sun.xml.ws.transport.local.LocalTransportPipe.dump" value="true"/>
 		            <!--<sysproperty key="com.sun.xml.ws.runtime.client" value="true"/>-->
 
-		            <arg value="-report" />
+
+                    <arg value="-report" />
 		            <arg path="${logs.dir}" />
-		            
+
 		            <arguments />
 
 		            <!-- test data -->
@@ -107,10 +108,10 @@
 
 		            <arg line="${args}"/>
 
-		            <!--<jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,address=7000" />
+		         <!--<jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,address=7000" />
 		            <jvmarg value="-Xdebug"/>-->
 		        </java>
-		        
+
 				    <mkdir dir="${logs.dir}/junit-reports" />
 				    <junitreport todir="${logs.dir}/junit-reports">
 				        <fileset dir="${logs.dir}" includes="*.xml" />
@@ -122,7 +123,7 @@
     <target name="main-hudson"
         description="Invoke unit test from Hudson. This downloads WSIT from Hudson, as opposed to test the local one"
         depends="get-wsit-hudson">
-        
+
         <run-tests>
           <arguments>
             <arg value="-cp:wsit-image" />
@@ -132,14 +133,14 @@
           </arguments>
         </run-tests>
     </target>
-    
+
     <target name="main"
         description="Runs unit test on the entire workspace">
-        
+
         <run-tests>
           <arguments>
-            <arg value="-cp:wsit" />
-            <arg path="../.." />
+            <arg value="-cp:wsit-image" />
+            <arg path="${wsit.image}" />
             <arg value="-transport" />
             <arg path="../../lib/runtime/jaxws-local-transport.jar" />
           </arguments>
