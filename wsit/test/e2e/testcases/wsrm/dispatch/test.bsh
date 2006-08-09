@@ -98,4 +98,4 @@ import junit.framework.TestCase;
     }
 
 
-}
+testSendEcho();
