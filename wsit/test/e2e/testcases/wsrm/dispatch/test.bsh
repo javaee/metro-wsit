@@ -33,9 +33,9 @@ import junit.framework.TestCase;
             "  </S:Body>" +
             "</S:Envelope>";
 
-    @WebServiceRef(
-          wsdlLocation="http://localhost:8080/rm-dispatch/echo?wsdl"
-        )
+//    @WebServiceRef(
+//         wsdlLocation="http://localhost:8080/rm-dispatch/echo?wsdl"
+//        )
         static PingService service = new PingService();
 
         private static final String URL =
@@ -51,7 +51,7 @@ import junit.framework.TestCase;
 
      public void testSendEcho()  {
         System.out.println("doInvoke");
-        Dispatch<SOAPMessage> dispatchMsg = null;
+        // Dispatch<SOAPMessage> dispatchMsg = null;
         try {
             dispatchMsg = service.createDispatch(PORT_QNAME, SOAPMessage.class, javax.xml.ws.Service.Mode.MESSAGE);
             SOAPMessage reqMsg = makeSOAPMessage(helloRequest);
