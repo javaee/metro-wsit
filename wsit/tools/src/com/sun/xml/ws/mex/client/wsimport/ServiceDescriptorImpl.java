@@ -88,26 +88,9 @@ public class ServiceDescriptorImpl extends ServiceDescriptor {
         }
     }
 
-    /*
-     * Currently only supports Get requests (not Get Metadata),
-     * so we only need the reference's address. Any metadata
-     * about the request is ignored.<br>
-     *
-     * Todo: handle inline metadata if we support starting
-     * from EPR.
-     */
     private void handleReference(MetadataSection section) {
         MetadataReference ref = section.getMetadataReference();
-        List nodes = ref.getAny();
-        for (Object o : nodes) {
-            Node node = (Node) o;
-            if (node.getLocalName().equals("Address")) {
-                String address = node.getFirstChild().getNodeValue();
-                Metadata removeMe =
-                    new MetadataClient().retrieveMetadata(address);
-                populateLists(removeMe);
-            }
-        }
+        populateLists(new MetadataClient().retrieveMetadata(ref));
     }
     
     private void handleLocation(MetadataSection section) {
