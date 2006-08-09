@@ -1,0 +1,3 @@
+com.sun.xml.ws.policy.jaxws.addressing.AddressingPolicySelector
+com.sun.xml.ws.policy.jaxws.encoding.EncodingPolicySelector
+com.sun.xml.ws.security.impl.policy.SecurityPolicySelector
