@@ -47,19 +47,16 @@ import com.sun.xml.ws.rm.jaxws.runtime.PipeBase;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
 import com.sun.xml.ws.rm.jaxws.runtime.client.ProtocolMessageReceiver;
 import com.sun.xml.ws.rm.protocol.*;
-import com.sun.xml.ws.security.secconv.WSSCConstants;
-import com.sun.xml.ws.security.trust.WSTrustElementFactory;
-import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
-import com.sun.xml.ws.security.trust.elements.str.DirectReference;
 import com.sun.xml.ws.security.SecurityContextToken;
+import com.sun.xml.ws.security.trust.WSTrustElementFactory;
+import com.sun.xml.ws.security.trust.elements.str.DirectReference;
+import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
 import com.sun.xml.wss.impl.MessageConstants;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
-import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPFactory;
-import javax.xml.soap.SOAPFault;
+import javax.xml.soap.*;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.addressing.*;
 import javax.xml.ws.soap.SOAPBinding;
@@ -154,7 +151,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
                 //message or protocol message is piggybacked on an application message.
                 return ret;
             }
-            
+
             //If we got here, this is an application message
 
             //do inbound bookkeeping
@@ -194,11 +191,11 @@ public class RMServerPipe extends PipeBase<RMDestination,
                     (ServerInboundSequence)message.getSequence();
 
             if (inboundSequence == null ) {
-                throw new RMException("This exception is thrown when Addressing is not set properly. \n" +
+                throw new RMException("This exception is thrown when Addressing or RM headers are not set properly. \n" +
                         " Please check \n" +
-                        "1. If there is a jaxwsa.properties file in JAVA_HOME/jre/lib which contains a different" +
-                        "version of addressing \n" +
-                        "2. If the policy in the wsdl is missing an explicit usingAddressing assertion\n");
+                        "1. If the policy in the wsdl is missing an explicit usingAddressing assertion\n" +
+                        "2. The namespace uri for the UsingAddressing element in the wsdl  \n");
+
             }
             //reset inactivity timer
             inboundSequence.resetLastActivityTime();
@@ -393,6 +390,14 @@ public class RMServerPipe extends PipeBase<RMDestination,
             if (uri != null) {
                 actionValue = ap.getAction().getURI().toString();
             }
+        } else {
+            //Whenever addressing headers are missing the CreateSequenceRefusedFault should be sent
+            //back to the client
+            //This can be achieved by throwing the CreateSequenceException
+            throw new CreateSequenceException("Addressing headers are not set up correctly in the inbound message \n" +
+                    " Please check \n" +
+                    "1. If the policy in the wsdl is missing an explicit usingAddressing assertion\n" +
+                    "2. The namespace uri for the UsingAddressing element in the wsdl  \n");
         }
 
         if (actionValue != null) {
@@ -980,7 +985,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
 
      private SOAPFault newCreateSequenceRefusedFault(CreateSequenceException e) throws RMException {
         QName subcode = Constants.CREATE_SEQUENCE_REFUSED_QNAME;
-        String faultstring = String.format(Constants.CREATE_SEQUENCE_REFUSED_TEXT,e.getCause());
+        String faultstring = String.format(Constants.CREATE_SEQUENCE_REFUSED_TEXT,e.getMessage());
 
         try {
             SOAPFactory factory;

@@ -45,6 +45,10 @@ public class CreateSequenceException extends RMException {
         this.sequenceId = id;
     }
 
+    public CreateSequenceException (String s, com.sun.xml.ws.api.message.Message message) {
+        super (s,message);
+    }
+
      public CreateSequenceException(Throwable e) {
          super(e);
     }

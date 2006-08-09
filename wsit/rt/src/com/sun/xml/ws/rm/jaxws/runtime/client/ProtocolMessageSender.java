@@ -37,6 +37,7 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.rm.RMConstants;
 import com.sun.xml.ws.rm.RMException;
+import com.sun.xml.ws.rm.CreateSequenceException;
 import com.sun.xml.ws.rm.jaxws.runtime.InboundMessageProcessor;
 import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
 import com.sun.xml.ws.rm.protocol.*;
@@ -152,7 +153,7 @@ public class ProtocolMessageSender {
                 Message response = responsePacket.getMessage();
 
                if (response.isFault()){
-                    throw new RMException(response);
+                    throw new CreateSequenceException("CreateSequence was refused by the RMDestination \n ",response);
                 }
 
                 //unmarshall CreateSequenceResponse object from body of response.
