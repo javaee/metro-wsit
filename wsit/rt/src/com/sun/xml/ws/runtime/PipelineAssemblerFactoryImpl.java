@@ -151,6 +151,10 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
                 }
                 p = dump(CLIENT_PREFIX + WSTX_SUFFIX + BEFORE_SUFFIX, p);
 
+                p = context.createClientMUPipe(p);
+
+                p = context.createHandlerPipe(p);
+
                 return p;
             }
 
@@ -162,6 +166,10 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
                 } catch (PolicyException ex) {
                     throw new WebServiceException(ex);
                 }
+
+                p = context.createHandlerPipe(p);
+
+                p = context.createServerMUPipe(p);
 
                 p = dump(SERVER_PREFIX + WSTX_SUFFIX + AFTER_SUFFIX, p);
                 // check for WS-Atomic Transactions

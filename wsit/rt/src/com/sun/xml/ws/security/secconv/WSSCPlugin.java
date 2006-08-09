@@ -99,7 +99,7 @@ public class WSSCPlugin {
     
     private static WSTrustElementFactory eleFac = WSTrustElementFactory.newInstance();
     
-    private static final int DEFAULT_KEY_SIZE = 128;
+    private static final int DEFAULT_KEY_SIZE = 256;
     private static final String SC_ASSERTION = "SecureConversationAssertion";
     
     /** Creates a new instance of WSSCPlugin */
@@ -145,6 +145,8 @@ public class WSSCPlugin {
         try{
             rst = createRequestSecurityToken(requireClientEntropy,skl);
         } catch (WSSecureConversationException ex){
+            throw new RuntimeException(ex);
+        } catch (WSTrustException ex){
             throw new RuntimeException(ex);
         }
         
@@ -257,7 +259,7 @@ public class WSSCPlugin {
         return rstr;
     }
     
-    private RequestSecurityToken createRequestSecurityToken(boolean requireClientEntropy,int skl) throws WSSecureConversationException{
+    private RequestSecurityToken createRequestSecurityToken(boolean requireClientEntropy,int skl) throws WSSecureConversationException, WSTrustException{
  
         URI tokenType = URI.create(WSSCConstants.SECURITY_CONTEXT_TOKEN_TYPE);
         URI requestType = URI.create(WSTrustConstants.ISSUE_REQUEST);
@@ -274,6 +276,8 @@ public class WSSCPlugin {
             throw new WSSecureConversationException(ex);
         }
         rst.setKeySize(skl);
+        rst.setKeyType(URI.create(WSTrustConstants.SYMMETRIC_KEY));
+        rst.setComputedKeyAlgorithm(URI.create(WSTrustConstants.CK_PSHA1));
         
         return rst;
     }
