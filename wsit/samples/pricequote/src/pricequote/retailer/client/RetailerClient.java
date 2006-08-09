@@ -20,7 +20,7 @@
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 /*
- $Id: RetailerClient.java,v 1.4 2006-08-05 00:29:35 arungupta Exp $
+ $Id: RetailerClient.java,v 1.5 2006-08-09 01:45:05 arungupta Exp $
 */
 
 package pricequote.retailer.client;
@@ -70,7 +70,7 @@ public class RetailerClient {
             pid = Integer.valueOf(spid);
 
         RetailerPortType port = service.getRetailerPort();
-        System.out.printf("Invoking endpoint address \"%s\" for product id \"%s\".", endpoint, spid);
+        System.out.printf("Invoking endpoint address \"%s\" for product id \"%s\".\n", endpoint, spid);
         ((BindingProvider)port).getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, endpoint);
 
         Quote quote = port.getPrice(pid);
@@ -84,7 +84,7 @@ public class RetailerClient {
                 File file = new File(carName);
                 ImageIO.write((BufferedImage)quote.getPhoto(), "jpeg", file);
                 String imageLocation = file.getAbsolutePath();
-                System.out.printf("Photo is copied to \"%s\" file.", imageLocation);
+                System.out.printf("Photo is copied to \"%s\" file.\n", imageLocation);
             } catch (IOException e) {
                 e.printStackTrace();
             }
