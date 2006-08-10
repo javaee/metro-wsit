@@ -38,6 +38,7 @@ import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.rm.RMConstants;
 import com.sun.xml.ws.rm.RMException;
 import com.sun.xml.ws.rm.CreateSequenceException;
+import com.sun.xml.ws.rm.TerminateSequenceException;
 import com.sun.xml.ws.rm.jaxws.runtime.InboundMessageProcessor;
 import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
 import com.sun.xml.ws.rm.protocol.*;
@@ -191,7 +192,7 @@ public class ProtocolMessageSender {
         Packet responsePacket = nextPipe.process(requestPacket);
         Message response = responsePacket.getMessage();
         if (response != null && response.isFault()){
-                throw new RMException(response);
+                throw new TerminateSequenceException("There was an error trying to terminate the sequence " ,response);
         }
 
 
