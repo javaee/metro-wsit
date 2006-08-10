@@ -33,14 +33,9 @@ import junit.framework.TestCase;
             "  </S:Body>" +
             "</S:Envelope>";
 
-//    @WebServiceRef(
-//         wsdlLocation="http://localhost:8080/rm-dispatch/echo?wsdl"
-//        )
-        static PingService service = new PingService();
+       static PingService service = new PingService();
 
-        private static final String URL =
-            "http://localhost:8080/rm-dispatch/echo?wsdl";
-
+        
         private final String NAMESPACEURI = "http://tempuri.org/";
         private static final String SERVICE_NAME = "PingService";
         private static final String PORT_NAME = "WSHttpBinding_IPing";
