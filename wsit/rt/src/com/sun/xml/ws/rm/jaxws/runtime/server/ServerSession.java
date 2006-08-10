@@ -30,44 +30,36 @@
 
 package com.sun.xml.ws.rm.jaxws.runtime.server;
 import com.sun.xml.ws.rm.jaxws.runtime.Session;
-import java.util.HashMap;
 /**
  *
  */
 public class ServerSession extends Session {
-    
-    /**
-     *  Holds the Session for the current request for access by
-     *  the endpoint implementation.  Must be set by ServerPipe during
-     *  inbound message processing
-     */
-    private static ThreadLocal<ServerSession> sessions = 
-            new ThreadLocal<ServerSession>();
-    
+
     /**
      * Property bag exposed to user of session.
      */
-    private HashMap<String, Object> data;
+    private Object sessionData;
     
     /**
      */
-    public ServerSession(String id) {
+    public ServerSession(String id,Object d) {
         super(id);
-        data = new HashMap<String, Object>();
+        this.sessionData = d;
+    }
+
+    public ServerSession (String id) {
+        super(id);
+        this.sessionData = null;
     }
     
-    
-    public HashMap<String, Object> getData() {
-        return data;
+    public  Object getSessionData() {
+        return this.sessionData;
     }
-    
-    public static ServerSession getSession() {
-        return sessions.get();
+
+    public void setSessionData(Object data) {
+        this.sessionData = data;
     }
-    
-    public static void setSession(ServerSession session) {
-        sessions.set(session);
-    }
+
     
     
 }

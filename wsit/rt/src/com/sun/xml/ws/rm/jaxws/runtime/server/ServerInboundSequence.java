@@ -93,6 +93,13 @@ public class ServerInboundSequence extends InboundSequence {
     public ServerSession getSession() {
         return session;
     }
+
+    /**
+     * Mutator for the <code>session</code> field.
+     */
+    public void  setSession(ServerSession s) {
+        session = s;
+    }
     
     /**
      * If ordered delivery is required, resume processing the next Message
