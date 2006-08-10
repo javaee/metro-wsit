@@ -1,5 +1,6 @@
-System.out.println("Ping" + pingPort);
- pingPort.ping("Hello");
-pingPort.close()
-assertTrue(true);
+pingPort.ping("Hello");
+pingPort.close();
+
+
+
 
