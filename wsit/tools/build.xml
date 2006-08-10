@@ -7,6 +7,8 @@
     <import file="nbproject/build-impl.xml"/>
     <import file="../properties.xml"/>
 
+    <property name="build.dir" value="${basedir}/build"/>
+
     <taskdef name="concatmanifest" classname="taskdefs.ConcatManifest">
         <classpath>
             <fileset dir="../${etc.lib.dir}" includes="wsit-taskdefs.jar"/>
@@ -67,6 +69,20 @@
                 </fileset>
             </services>
         </combine-jars-macro>
+    </target>
+    
+    <target name="src-zip">
+        <mkdir dir="${build.dir}/temp"/>
+        <unzip dest="${build.dir}/temp">
+            <fileset dir="../${lib.tooltime.dir}" includes="*src.zip"/>
+        </unzip>
+        <delete file="${build.dir}/temp/*.txt"/>
+        <delete dir="${build.dir}/temp/META-INF" includeemptydirs="true"/>
+        <zip destfile="${build.dir}/${name}-tools-src.zip">
+            <fileset dir="src"/>
+            <fileset dir="${build.dir}/temp"/>
+        </zip>
+        <delete dir="${build.dir}/temp" includeemptydirs="true"/>
     </target>
     
 </project>

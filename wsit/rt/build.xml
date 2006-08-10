@@ -31,6 +31,8 @@
     <import file="nbproject/build-impl.xml"/>
     <import file="../properties.xml"/>
 
+    <property name="build.dir" value="${basedir}/build"/>
+
     <taskdef name="concatmanifest" classname="taskdefs.ConcatManifest">
         <classpath>
             <fileset dir="../${etc.lib.dir}" includes="wsit-taskdefs.jar"/>
@@ -97,24 +99,32 @@
         </combine-jars-macro>
     </target>
 
-
-      <target name="test.resources.copy"
+    <target name="test.resources.copy"
             description="Copy test resources before running tests">
-
         <copy todir="build/test/unit/data">
             <fileset dir="test/unit/data" includes="*.wsdl"/>
             <fileset dir="test/unit/data" includes="*.xml"/>
         </copy>
-
     </target>
 
+    <target name="src-zip">
+        <mkdir dir="${build.dir}/temp"/>
+        <unzip dest="${build.dir}/temp">
+            <fileset dir="../${lib.runtime.dir}" includes="*src.zip"/>
+        </unzip>
+        <delete file="${build.dir}/temp/*.txt"/>
+        <delete dir="${build.dir}/temp/META-INF" includeemptydirs="true"/>
+        <zip destfile="${build.dir}/${name}-src.zip">
+            <fileset dir="src"/>
+            <fileset dir="${build.dir}/temp"/>
+        </zip>
+        <delete dir="${build.dir}/temp" includeemptydirs="true"/>
+    </target>
     
     <target name="-post-compile-test" depends="init,test.resources.copy">
     </target>
-
     
     <target name="-post-compile-test-single" depends="init,test.resources.copy">
     </target>
-
    
 </project>
