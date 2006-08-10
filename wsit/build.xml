@@ -2,7 +2,7 @@
 <!-- You may freely edit this file. See commented blocks below for -->
 <!-- some examples of how to customize the build. -->
 <!-- (If you delete it and reopen the project it will be recreated.) -->
-<project name="WSIT-Binary" default="default" basedir=".">
+<project name="WSIT-Binary" default="main" basedir=".">
     <description>Builds, tests, and runs the project WSIT-Binary.</description>
     <import file="nbproject/build-impl.xml"/>
     <import file="properties.xml"/>
@@ -20,6 +20,11 @@
         <installerBuilder classFile="${dist.dir}/${install.name}-installer.jar" licenseFile="CDDLv1.0.1.txt" zipFile="${dist.dir}/${install.name}.zip"/>
     </target>
 
+    <target name="dist" depends="jar"/>
+
+    <target name="main" depends="dist"
+        description="Create the wsit tool and runtime jars and installers."/>
+    
     <target name="image" description="Create the wsit tool and runtime jars.">
         <copy todir="${dist.image.wsit.dir}">
             <fileset dir="${basedir}" includes="CDDL*.*"/>
@@ -61,13 +66,6 @@
         </copy>
         <delete dir="tmp" includeemptydirs="true"/>
     </target>
-
-<!--    <target name="clean">
-        <delete dir="build"/>
-        <delete dir="${dist.dir}"/>
-        <ant dir="${basedir}/tools" target="clean"/>
-        <ant dir="${basedir}/rt" target="clean"/>
-    </target>-->
 
     <target name="runtests">
       <ant antfile="run-ql-tests.xml"/>
