@@ -148,6 +148,19 @@
 			</wsdl:output>
 		</wsdl:operation>
 	</wsdl:binding>
+    <wsdl:binding name="XSDC_IPingService" type="tns:IPingService">
+	<wsp:PolicyReference URI="#ClientKeystorePolicy"></wsp:PolicyReference>
+        <soap12:binding transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="Ping">
+            <soap12:operation soapAction="http://xmlsoap.org/Ping" style="document"/>
+            <wsdl:input name="PingRequest">
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output name="PingResponse">
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
     <!-- **** NOTE : SOAP:BINDING HAS POLICYREFERENCE TO CLIENTKEYSTOREPOLICY DEFINED ABOVE **** -->
     
     <wsdl:service name="PingService"> 
@@ -163,6 +176,9 @@
         	<wsdl:port binding="tns:XC_IPingService" name="XC_IPingService">
             		<soap12:address location="http://131.107.72.15/Security_WsSecurity_Service_Indigo/WSSecureConversation.svc/XC"/>
 		</wsdl:port>
+        <wsdl:port binding="tns:XSDC_IPingService" name="XSDC_IPingService">
+            <soap12:address location="http://131.107.72.15/Security_WsSecurity_Service_Indigo/WSSecureConversationSign.svc//Security_WsSecurity_Service_Indigo/WSSecureConversationSign.svc/SecureConversation_MutualCertificate11Sign"/> 
+        </wsdl:port>
     </wsdl:service>
     
     <wsdl:service name="SecurityTokenService">
