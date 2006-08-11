@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://xmlsoap.org/Ping" targetNamespace="http://xmlsoap.org/Ping" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:element name="Ping" type="xs:string"/>
+	
+</xs:schema>

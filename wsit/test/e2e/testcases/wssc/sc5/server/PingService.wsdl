@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions targetNamespace="http://xmlsoap.org/Ping" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="http://xmlsoap.org/Ping" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy" xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing" xmlns:ci="http://schemas.microsoft.com/ws/2005/01/WSDL/Extensions/ContractInheritance" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:wsx="http://schemas.xmlsoap.org/ws/2004/09/mex" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/">
+    <wsdl:types>
+        <xsd:schema targetNamespace="http://xmlsoap.org/Ping/Imports" elementFormDefault="qualified">
+            <xsd:import schemaLocation="xsd0.xsd" namespace="http://xmlsoap.org/Ping"/>
+        </xsd:schema>
+    </wsdl:types>
+
+	
+	<wsp:Policy wsu:Id="SecureConversation_UserNameOverTransport_IPingService_policy" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy">
+		<wsp:ExactlyOne>
+			<wsp:All>
+				<wspe:Utf816FFFECharacterEncoding xmlns:wspe="http://schemas.xmlsoap.org/ws/2004/09/policy/encoding"/>
+				<sp:TransportBinding xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+					<wsp:Policy>
+						<sp:TransportToken>
+							<wsp:Policy>
+								<sp:HttpsToken RequireClientCertificate="false"/>
+							</wsp:Policy>
+						</sp:TransportToken>
+						<sp:AlgorithmSuite>
+							<wsp:Policy>
+								<sp:Basic256/>
+							</wsp:Policy>
+						</sp:AlgorithmSuite>
+						<sp:Layout>
+							<wsp:Policy>
+								<sp:Lax/>
+							</wsp:Policy>
+						</sp:Layout>
+						<sp:IncludeTimestamp/>
+					</wsp:Policy>
+				</sp:TransportBinding>
+				<sp:EndorsingSupportingTokens xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+					<wsp:Policy>
+						<sp:SecureConversationToken sp:IncludeToken="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/AlwaysToRecipient">
+							<wsp:Policy>
+								<mssp:RequireCancel wsp:Optional="true" xmlns:mssp="http://schemas.microsoft.com/ws/2005/07/securitypolicy"/>
+								<sp:BootstrapPolicy>
+									<wsp:Policy>
+										<sp:TransportBinding>
+											<wsp:Policy>
+												<sp:TransportToken>
+													<wsp:Policy>
+														<sp:HttpsToken RequireClientCertificate="false"/>
+													</wsp:Policy>
+												</sp:TransportToken>
+												<sp:AlgorithmSuite>
+													<wsp:Policy>
+														<sp:Basic256/>
+													</wsp:Policy>
+												</sp:AlgorithmSuite>
+												<sp:Layout>
+													<wsp:Policy>
+														<sp:Strict/>
+													</wsp:Policy>
+												</sp:Layout>
+												<sp:IncludeTimestamp/>
+											</wsp:Policy>
+										</sp:TransportBinding>
+										<sp:SignedSupportingTokens>
+											<wsp:Policy>
+												<sp:UsernameToken sp:IncludeToken="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/AlwaysToRecipient">
+													<wsp:Policy>
+														<sp:WssUsernameToken10/>
+													</wsp:Policy>
+												</sp:UsernameToken>
+											</wsp:Policy>
+										</sp:SignedSupportingTokens>
+												<sp:Trust10>
+													<wsp:Policy>
+														<sp:MustSupportIssuedTokens/>
+														<sp:RequireClientEntropy/>
+														<sp:RequireServerEntropy/>
+													</wsp:Policy>
+												</sp:Trust10>
+									</wsp:Policy>
+								</sp:BootstrapPolicy>
+							</wsp:Policy>
+						</sp:SecureConversationToken>
+					</wsp:Policy>
+				</sp:EndorsingSupportingTokens>
+				<sp:Trust10 xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+					<wsp:Policy>
+						<sp:MustSupportIssuedTokens/>
+						<sp:RequireClientEntropy/>
+						<sp:RequireServerEntropy/>
+					</wsp:Policy>
+				</sp:Trust10>
+				<wsap:UsingAddressing  xmlns:wsap="http://schemas.xmlsoap.org/ws/2004/09/policy/addressing"/>
+<sc:KeyStore xmlns:sc="http://schemas.sun.com/2006/03/wss/server" location="$WSIT_HOME/xws-security/etc/server-keystore.jks" storepass="changeit" alias="bob"/>
+<sc:TrustStore xmlns:sc="http://schemas.sun.com/2006/03/wss/server" location="$WSIT_HOME/xws-security/etc/server-truststore.jks" storepass="changeit"/>
+<sc:ValidatorConfiguration xmlns:sc="http://schemas.sun.com/2006/03/wss/server">
+    <sc:Validator name="usernameValidator"  classname="wssc.sc5.server.PingImpl$PlainTextPasswordValidator"/>
+</sc:ValidatorConfiguration>
+
+			</wsp:All>
+		</wsp:ExactlyOne>
+	</wsp:Policy>
+
+  
+    <wsdl:message name="PingRequest">
+        <wsdl:part name="Ping" element="tns:Ping"/>
+    </wsdl:message>
+    
+    <wsdl:message name="PingResponse">
+        <wsdl:part name="PingResponse" element="tns:PingResponse"/>
+    </wsdl:message>
+    
+    <wsdl:portType name="IPingService">
+        <wsdl:operation name="Ping">
+            <wsdl:input wsa:Action="http://xmlsoap.org/Ping" name="PingRequest" message="tns:PingRequest"/>
+            <wsdl:output wsa:Action="http://xmlsoap.org/PingResponse" name="PingResponse" message="tns:PingResponse"/>
+        </wsdl:operation>
+    </wsdl:portType>
+    
+    <wsdl:binding name="PingBinding" type="tns:IPingService"> 
+	<wsp:PolicyReference URI="#SecureConversation_UserNameOverTransport_IPingService_policy"/>
+        <soap12:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/> 
+        <wsdl:operation name="Ping"> 
+            <soap12:operation soapAction="http://xmlsoap.org/Ping" style="document"/> 
+            <wsdl:input> 		
+                <soap12:body use="literal"/> 
+            </wsdl:input> 
+            <wsdl:output> 	
+                <soap12:body use="literal"/> 
+            </wsdl:output> 
+        </wsdl:operation>         
+    </wsdl:binding> 
+    
+    <wsdl:service name="PingService"> 
+        <wsdl:port name="PingPort" binding="tns:PingBinding"> 
+            <soap12:address location="https://131.107.72.15/Security_WsSecurity_Service_Indigo/WSSecureConversation.svc/SecureConversation_UserNameOverTransport"/> 
+        </wsdl:port>
+    </wsdl:service> 
+</wsdl:definitions>
