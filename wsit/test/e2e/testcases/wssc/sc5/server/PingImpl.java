@@ -4,6 +4,7 @@
  */
 package wssc.sc5.server;
 import javax.xml.ws.Holder;
+import com.sun.xml.wss.impl.callback.PasswordValidationCallback;
 
 
 @javax.jws.WebService (endpointInterface="wssc.sc5.server.IPingService")
@@ -16,4 +17,23 @@ public class PingImpl implements IPingService {
         System.out.println("The message is here : " + scenario.value + " " +origin.value + " " + text.value);
 
     }                    
+public static class PlainTextPasswordValidator implements PasswordValidationCallback.PasswordValidator {
+
+
+        public boolean validate(PasswordValidationCallback.Request request)
+            throws PasswordValidationCallback.PasswordValidationException {
+            System.out.println("Using configured PlainTextPasswordValidator................");
+
+            PasswordValidationCallback.PlainTextPasswordRequest plainTextRequest =
+                (PasswordValidationCallback.PlainTextPasswordRequest) request;
+            if ("Alice".equals(plainTextRequest.getUsername()) &&
+                "ecilA".equals(plainTextRequest.getPassword())) {
+                return true;
+            }
+            return false;
+        }
 }
+}
+
+
+

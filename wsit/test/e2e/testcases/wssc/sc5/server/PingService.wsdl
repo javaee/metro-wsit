@@ -11,12 +11,6 @@
 		<wsp:ExactlyOne>
 			<wsp:All>
 				<wspe:Utf816FFFECharacterEncoding xmlns:wspe="http://schemas.xmlsoap.org/ws/2004/09/policy/encoding"/>
-<sc:KeyStore xmlns:sc="http://schemas.sun.com/2006/03/wss/server" location="$WSIT_HOME/xws-security/etc/server-keystore.jks" storepass="changeit" alias="bob"/>
-<sc:TrustStore xmlns:sc="http://schemas.sun.com/2006/03/wss/server" location="$WSIT_HOME/xws-security/etc/server-truststore.jks" storepass="changeit"/>
-
-<sc:ValidatorConfiguration xmlns:sc="http://schemas.sun.com/2006/03/wss/server">
-    <sc:Validator name="usernameValidator"  classname="common.PlainTextPasswordValidator"/>  
-</sc:ValidatorConfiguration>
 				<sp:TransportBinding xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
 					<wsp:Policy>
 						<sp:TransportToken>
@@ -94,6 +88,12 @@
 					</wsp:Policy>
 				</sp:Trust10>
 				<wsap:UsingAddressing  xmlns:wsap="http://schemas.xmlsoap.org/ws/2004/09/policy/addressing"/>
+<sc:KeyStore xmlns:sc="http://schemas.sun.com/2006/03/wss/server" location="$WSIT_HOME/xws-security/etc/server-keystore.jks" storepass="changeit" alias="bob"/>
+<sc:TrustStore xmlns:sc="http://schemas.sun.com/2006/03/wss/server" location="$WSIT_HOME/xws-security/etc/server-truststore.jks" storepass="changeit"/>
+<sc:ValidatorConfiguration xmlns:sc="http://schemas.sun.com/2006/03/wss/server">
+    <sc:Validator name="usernameValidator"  classname="wssc.sc5.server.PingImpl$PlainTextPasswordValidator"/>
+</sc:ValidatorConfiguration>
+
 			</wsp:All>
 		</wsp:ExactlyOne>
 	</wsp:Policy>
