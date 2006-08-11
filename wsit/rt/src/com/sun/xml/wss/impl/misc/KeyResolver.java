@@ -1,5 +1,5 @@
 /*
- * $Id: KeyResolver.java,v 1.2 2006-06-09 14:13:10 kumarjayanti Exp $
+ * $Id: KeyResolver.java,v 1.3 2006-08-11 08:31:01 ashutoshshahi Exp $
  */
 
 /*
@@ -960,7 +960,12 @@ public class KeyResolver {
                 SecurityToken secToken = SecurityUtil.locateBySCTId(context, wsuId);
                 if (secToken == null) {
                     secToken =resolveToken(wsuId,context,secureMsg);
-                }
+                    //workaround for case where Reference does not have ValueType
+                    if ((valueType == null) && (secToken instanceof EncryptedKeyToken)){
+                        valueType = MessageConstants.EncryptedKey_NS;
+                    }
+                } 
+                
                 if(MessageConstants.EncryptedKey_NS.equals(valueType)){
                     try{
                         Element cipherData = (Element)((EncryptedKeyToken)secToken).getAsSoapElement().getChildElements(new QName(MessageConstants.XENC_NS, "CipherData", MessageConstants.XENC_PREFIX)).next();
@@ -1004,7 +1009,8 @@ public class KeyResolver {
                         //handling for SecurityContext Token
                         secret = resolveSCT(context, (SecurityContextTokenImpl)secToken, false);
                     } else {
-                        throw new XWSSecurityException("Incorrect ValueType: " + MessageConstants.SCT_VALUETYPE + ", specified for a Non SCT Token");                    }
+                        throw new XWSSecurityException("Incorrect ValueType: " + MessageConstants.SCT_VALUETYPE + ", specified for a Non SCT Token");                    
+                    }
 
                 } else if (null == valueType) {
                     if (secToken instanceof SecurityContextToken) {
@@ -1018,10 +1024,10 @@ public class KeyResolver {
                         //handling for SecurityContext Token
                         secret = resolveSCT(context, (SecurityContextTokenImpl)secToken, false);
                     } else {
-                        throw new XWSSecurityException("Unsupported TokenType " + token + " under DerivedKeyToken");
+                        throw new XWSSecurityException("Unsupported TokenType " + secToken + " under DerivedKeyToken");
                     }
                 } else{
-                    throw new XWSSecurityException("Unsupported TokenType " + token + " under DerivedKeyToken");
+                    throw new XWSSecurityException("Unsupported TokenType " + secToken + " under DerivedKeyToken");
                 }
            } else if (refElement instanceof KeyIdentifier) {
                 KeyIdentifier keyId = (KeyIdentifier)refElement;
