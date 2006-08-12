@@ -1,47 +1,11 @@
-<?xml version="1.0"?>
-
-<!--
- The contents of this file are subject to the terms
- of the Common Development and Distribution License
- (the License).  You may not use this file except in
- compliance with the License.
- 
- You can obtain a copy of the license at
- https://glassfish.dev.java.net/public/CDDLv1.0.html.
- See the License for the specific language governing
- permissions and limitations under the License.
- 
- When distributing Covered Code, include this CDDL
- Header Notice in each file and include the License file
- at https://glassfish.dev.java.net/public/CDDLv1.0.html.
- If applicable, add the following below the CDDL Header,
- with the fields enclosed by brackets [] replaced by
- you own identifying information:
- "Portions Copyrighted [year] [name of copyright owner]"
- 
- Copyright 2006 Sun Microsystems Inc. All Rights Reserved
--->
-
-<!--
- $Id: build.xml,v 1.18 2006-07-25 21:41:26 arungupta Exp $
-
- Copyright (c) 2005 Sun Microsystems, Inc.
- All rights reserved.
--->
-
-<project name="wsit.dev.java.net main" default="main" basedir=".">
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- You may freely edit this file. See commented blocks below for -->
+<!-- some examples of how to customize the build. -->
+<!-- (If you delete it and reopen the project it will be recreated.) -->
+<project name="WSIT-Binary" default="main" basedir=".">
+    <description>Builds, tests, and runs the project WSIT-Binary.</description>
+    <import file="nbproject/build-impl.xml"/>
     <import file="properties.xml"/>
-
-    <!--
-    TODO:
-     1. Aggregate manifest information of dependent jar files
-     2. Add version/timestamp/build # as manifest to webservices*.jar
-    -->
-    <taskdef name="concatmanifest" classname="taskdefs.ConcatManifest">
-        <classpath>
-            <fileset dir="${etc.lib.dir}" includes="wsit-taskdefs.jar"/>
-        </classpath>
-    </taskdef>
 
     <taskdef name="installerBuilder"
         classname="com.sun.tools.xjc.installer.builder.BuilderTask">
@@ -50,122 +14,31 @@
         </classpath>
     </taskdef>
 
-    <path id="runtime.compile.classpath">
-        <fileset dir="${lib.runtime.dir}" includes="*.jar"/>
-        <fileset dir="${lib.compiletime.dir}" includes="*.jar"/>
-
-        <!-- this one should be moved to tools path -->
-        <fileset dir="${lib.tooltime.dir}" includes="*.jar"/>
-    </path>
-
-    <path id="tooltime.compile.classpath">
-        <path refid="runtime.compile.classpath"/>
-        <pathelement location="${rt.classes}"/>
-    </path>
-
-    <target name="prepare">
-        <mkdir dir="${dist.image.wsit.lib.dir}"/>
-    </target>
-
-    <target name="main" depends="dist"
-        description="Create the wsit tool and runtime jars and installers."/>
-
-    <target name="dist" depends="image">
+    <target name="-do-jar-without-manifest" depends="image">
         <mkdir dir="${dist.dir}"/>
         <zip basedir="${dist.image.dir}" destfile="${dist.dir}/${install.name}.zip"/>
         <installerBuilder classFile="${dist.dir}/${install.name}-installer.jar" licenseFile="CDDLv1.0.1.txt" zipFile="${dist.dir}/${install.name}.zip"/>
     </target>
 
-    <target name="image" depends="build, combine-jars"
-        description="Create the wsit tool and runtime jars.">
+    <target name="dist" depends="jar"/>
+
+    <target name="main" depends="dist"
+        description="Create the wsit tool and runtime jars and installers."/>
+    
+    <target name="image" description="Create the wsit tool and runtime jars.">
         <copy todir="${dist.image.wsit.dir}">
             <fileset dir="${basedir}" includes="CDDL*.*"/>
             <fileset dir="${etc.dir}" includes="wsit-on-*.*"/>
         </copy>
-        <copy todir="${dist.image.wsit.lib.dir}">
-            <fileset dir="${tools.dir}/build" includes="*.jar"/>
-            <fileset dir="${rt.dir}/build" includes="*.jar"/>
-        </copy>
     </target>
 
-    <target name="build" depends="prepare, runtime-build, tools-build"/>
-
-    <macrodef name="combine-jars-macro">
-        <attribute name="libdir"/>
-        <attribute name="classesdir"/>
-        <attribute name="jarname"/>
-        <element name="metainf" optional="true"/>
-        <element name="services" optional="true"/>
-        <sequential>
-            <property name="tmpdir" value="${dist.image.dir}/tmp"/>
-            <copy file="${etc.metainf.dir}/MANIFEST.MF" todir="${tmpdir}"/>
-            <concatmanifest tempdir="${tmpdir}" manifest="${tmpdir}/MANIFEST.MF">
-                <fileset dir="@{libdir}">
-                    <include name="*.jar"/>
-                    <exclude name="*javadocs*.jar"/>
-                </fileset>
-            </concatmanifest>
-            <delete dir="${tmpdir}/META-INF" includeemptydirs="true" excludes="services/**"/>
-
-            <metainf/>
-            <jar destfile="${dist.image.wsit.lib.dir}/@{jarname}.jar" manifest="${tmpdir}/MANIFEST.MF">
-                <services/>
-                <fileset dir="@{classesdir}"/>
-            </jar>
-            <delete dir="${tmpdir}" includeemptydirs="true"/>
-        </sequential>
-    </macrodef>
-
-    <target name="combine-jars" depends="combine-jars-tooltime, combine-jars-runtime"/>
-
-    <target name="combine-jars-runtime">
-        <combine-jars-macro jarname="${name}" libdir="${lib.runtime.dir}" classesdir="${rt.dir}/build/classes">
-            <metainf>
-                <copy todir="${tmpdir}/META-INF/services" overwrite="true">
-                    <fileset dir="etc/META-INF/services">
-                        <include name="*.*"/>
-                    </fileset>
-                </copy>
-            </metainf>
-            <services>
-                <fileset dir="${tmpdir}">
-                    <include name="**/*.*"/>
-                    <exclude name="**/*.TWSDL*"/>
-                    <exclude name="**/*.TJava*"/>
-                </fileset>
-            </services>
-        </combine-jars-macro>
-    </target>
-
-    <target name="combine-jars-tooltime">
-        <combine-jars-macro jarname="${name}-tools" libdir="${lib.tooltime.dir}" classesdir="${tools.dir}/build/classes">
-            <services>
-                <fileset dir="${etc.dir}">
-                    <include name="META-INF/services/*.TWSDL*"/>
-                    <include name="META-INF/services/*.TJava*"/>
-                </fileset>
-                <fileset dir="${tmpdir}">
-                    <include name="**/*.*"/>
-                    <exclude name="**/*.TWSDL*"/>
-                    <exclude name="**/*.TJava*"/>
-                </fileset>
-            </services>
-        </combine-jars-macro>
-    </target>
-
-    <target name="runtime-build">
-        <ant dir="${rt.dir}" target="compile" inheritrefs="true"/>
-    </target>
-
-    <target name="tools-build">
-        <ant dir="${tools.dir}" target="compile" inheritrefs="true"/>
-    </target>
-
+    <target name="-javadoc-build" depends="init"/>
+    
     <target name="src-zip">
         <ant dir="${rt.dir}" target="src-zip"/>
         <ant dir="${tools.dir}" target="src-zip"/>
     </target>
-    
+
     <target name="integrate-jaxwsa-hudson" description="integrates latest JAX-WSA bits in WSIT, meant for internal consumption only">
         <mkdir dir="tmp/jaxwsa"/>
         <get src="http://kohsuke.sfbay/hudson/job/jaxwsa-ri-rearch-2005/lastSuccessfulBuild/artifact/jax-wsa-sources/jaxwsa-ri/build/lib/jaxwsa-api.jar"
@@ -194,15 +67,8 @@
         <delete dir="tmp" includeemptydirs="true"/>
     </target>
 
-    <target name="clean">
-        <delete dir="build"/>
-        <delete dir="${dist.dir}"/>
-        <ant dir="${basedir}/tools" target="clean"/>
-        <ant dir="${basedir}/rt" target="clean"/>
-    </target>
-
     <target name="runtests">
       <ant antfile="run-ql-tests.xml"/>
     </target>
-
+    
 </project>

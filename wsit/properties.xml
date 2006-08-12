@@ -23,7 +23,7 @@
 -->
 
 <!--
- $Id: properties.xml,v 1.9 2006-06-27 21:58:12 ofung Exp $
+ $Id: properties.xml,v 1.10 2006-08-12 18:39:20 snajper Exp $
 
  Copyright (c) 2005 Sun Microsystems, Inc.
  All rights reserved.
@@ -32,17 +32,17 @@
 <project name="wsit.dev.java.net build properties">
     <property name="name" value="webservices"/>
     <property name="install.name" value="jax-ws-latest-wsit"/>
-    <property name="lib.dir" value="${basedir}/lib"/>
+    <property name="lib.dir" value="lib"/>
     <property name="lib.runtime.dir" value="${lib.dir}/runtime"/>
     <property name="lib.tooltime.dir" value="${lib.dir}/tooltime"/>
     <property name="lib.compiletime.dir" value="${lib.dir}/compiletime"/>
-    <property name="dist.dir" value="${basedir}/dist"/>
+    <property name="dist.dir" value="dist"/>
     <property name="dist.image.dir" value="${dist.dir}/image"/>
     <property name="dist.image.wsit.dir" value="${dist.image.dir}/jax-ws-latest-wsit"/>
     <property name="dist.image.wsit.lib.dir" value="${dist.image.wsit.dir}/lib"/>
     <property name="build.javadocs.dir" value="${basedir}/build/javadocs"/>
 
-    <property name="etc.dir" value="${basedir}/etc"/>
+    <property name="etc.dir" value="etc"/>
     <property name="etc.lib.dir" value="${etc.dir}/lib"/>
     <property name="etc.metainf.dir" value="${etc.dir}/META-INF"/>
     <property name="etc.metainf.services.dir" value="${etc.dir}/META-INF/services"/>
