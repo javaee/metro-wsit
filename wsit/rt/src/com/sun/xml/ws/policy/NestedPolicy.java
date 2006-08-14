@@ -35,23 +35,23 @@ public final class NestedPolicy extends Policy {
     private static final String NESTED_POLICY_TOSTRING_NAME = "nested policy";
     
     private Policy standardPolicyImpl;
-    
-    NestedPolicy() {
-        super(NESTED_POLICY_TOSTRING_NAME);
-    }
-    
-    NestedPolicy(String name, String id) {
-        super(NESTED_POLICY_TOSTRING_NAME, name, id);
-    }
-    
-    NestedPolicy(AssertionSet set) {
+        
+    private NestedPolicy(AssertionSet set) {
         super(NESTED_POLICY_TOSTRING_NAME, Arrays.asList(new AssertionSet[] { set }));
     }
     
-    NestedPolicy(String name, String id, AssertionSet set) {
+    private NestedPolicy(String name, String id, AssertionSet set) {
         super(NESTED_POLICY_TOSTRING_NAME, name, id, Arrays.asList(new AssertionSet[] { set }));
     }
 
+    static NestedPolicy createNestedPolicy(AssertionSet set) {
+        return new NestedPolicy(set);
+    }
+
+    static NestedPolicy createNestedPolicy(String name, String id, AssertionSet set) {
+        return new NestedPolicy(name, id, set);
+    }
+    
     /**
      * Returns the AssertionSet instance representing a single policy alterantive held wihtin this nested policy object.
      * If the nested policy represents a policy with no alternatives (i.e. nothing is allowed) the method returns {@code null}.

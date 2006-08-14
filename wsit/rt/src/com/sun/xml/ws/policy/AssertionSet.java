@@ -115,7 +115,7 @@ public final class AssertionSet implements Iterable<PolicyAssertion>, Comparable
         }
     }
     
-    private boolean addAll(Collection<PolicyAssertion> assertions) {
+    private boolean addAll(Collection<? extends PolicyAssertion> assertions) {
         boolean result = true;
         
         if (assertions != null) {
@@ -184,7 +184,7 @@ public final class AssertionSet implements Iterable<PolicyAssertion>, Comparable
      * @param assertions collection of provided policy assertions to be stored in the assertion set. May be {@code null}.
      * @return new instance of assertion set holding the provided policy assertions
      */
-    public static AssertionSet createAssertionSet(Collection<PolicyAssertion> assertions) {
+    public static AssertionSet createAssertionSet(Collection<? extends PolicyAssertion> assertions) {
         if (assertions == null || assertions.isEmpty()) {
             return EMPTY_ASSERTION_SET;
         }

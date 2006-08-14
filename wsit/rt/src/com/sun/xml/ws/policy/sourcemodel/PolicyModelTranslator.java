@@ -3,12 +3,12 @@
  * of the Common Development and Distribution License
  * (the License).  You may not use this file except in
  * compliance with the License.
- * 
+ *
  * You can obtain a copy of the license at
  * https://glassfish.dev.java.net/public/CDDLv1.0.html.
  * See the License for the specific language governing
  * permissions and limitations under the License.
- * 
+ *
  * When distributing Covered Code, include this CDDL
  * Header Notice in each file and include the License file
  * at https://glassfish.dev.java.net/public/CDDLv1.0.html.
@@ -16,7 +16,7 @@
  * with the fields enclosed by brackets [] replaced by
  * you own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * 
+ *
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
@@ -62,10 +62,10 @@ public final class PolicyModelTranslator {
     private static final class RawAssertion {
         ModelNode originalNode; // used to initialize nestedPolicy and nestedAssertions in the constructor of RawAlternative
         Collection<RawAlternative> nestedAlternatives = null;
-        final Collection<RawAssertion> nestedAssertions;
+        final Collection<ModelNode> parameters;
         
-        RawAssertion(ModelNode originalNode, Collection<RawAssertion> nestedAssertions) {
-            this.nestedAssertions = nestedAssertions;
+        RawAssertion(ModelNode originalNode, Collection<ModelNode> parameters) {
+            this.parameters = parameters;
             this.originalNode = originalNode;
         }
     }
@@ -76,32 +76,24 @@ public final class PolicyModelTranslator {
         
         RawAlternative(Collection<ModelNode> assertionNodes) throws PolicyException {
             this.nestedAssertions = new LinkedList<RawAssertion>();
-            for (ModelNode a : assertionNodes) {
-                nestedAssertions.add(new RawAssertion(a, new LinkedList<RawAssertion>()));
-            }
-            
-            Queue<RawAssertion> assertionQueue = new LinkedList<RawAssertion>(nestedAssertions);
-            
-            // creating RawAssertions and checking for any nested policies to be normalized...
-            RawAssertion assertion;
-            while ((assertion = assertionQueue.poll()) != null) {
-                for (ModelNode child : assertion.originalNode.getContent()) {
-                    switch (child.getType()) {
-                        case ASSERTION:
-                            RawAssertion nestedAssertion = new RawAssertion(child, new LinkedList<RawAssertion>());
-                            assertion.nestedAssertions.add(nestedAssertion);
-                            if (child.hasChildren())
-                                assertionQueue.add(nestedAssertion);
+            for (ModelNode node : assertionNodes) {
+                RawAssertion assertion = new RawAssertion(node, new LinkedList<ModelNode>());
+                nestedAssertions.add(assertion);
+                
+                for (ModelNode assertionNodeChild : assertion.originalNode.getContent()) {
+                    switch (assertionNodeChild.getType()) {
+                        case ASSERTION_PARAMETER_NODE:
+                            assertion.parameters.add(assertionNodeChild);
                             break;
                         case POLICY:
                         case POLICY_REFERENCE:
                             if (assertion.nestedAlternatives == null) {
                                 assertion.nestedAlternatives = new LinkedList<RawAlternative>();
                                 RawPolicy nestedPolicy;
-                                if (child.getType() == ModelNode.Type.POLICY) {
-                                    nestedPolicy = new RawPolicy(child, assertion.nestedAlternatives);
+                                if (assertionNodeChild.getType() == ModelNode.Type.POLICY) {
+                                    nestedPolicy = new RawPolicy(assertionNodeChild, assertion.nestedAlternatives);
                                 } else {
-                                    nestedPolicy = new RawPolicy(getReferencedModelRootNode(child), assertion.nestedAlternatives);
+                                    nestedPolicy = new RawPolicy(getReferencedModelRootNode(assertionNodeChild), assertion.nestedAlternatives);
                                 }
                                 this.allNestedPolicies.add(nestedPolicy);
                             } else {
@@ -109,11 +101,12 @@ public final class PolicyModelTranslator {
                             }
                             break;
                         default:
-                            throw new PolicyException("Unexpected nested 'ASSERTION' model node child type: '" + child.getType() + "'");
+                            throw new PolicyException("Unexpected type of child model node nested in an 'ASSERTION' node: '" + assertionNodeChild.getType() + "'");
                     }
                 }
             }
         }
+        
     }
     
     private static final class RawPolicy {
@@ -152,8 +145,8 @@ public final class PolicyModelTranslator {
     private static Map<String, PolicyAssertionCreator> initPolicyAssertionCreatorsMap() throws PolicyException {
         logger.entering("initPolicyAssertionCreatorsMap");
         Map<String, PolicyAssertionCreator> pacMap = new HashMap<String, PolicyAssertionCreator>();
-
-        ServiceFinder<PolicyAssertionCreator> serviceFinder = ServiceFinder.find(PolicyAssertionCreator.class, Thread.currentThread().getContextClassLoader());        
+        
+        ServiceFinder<PolicyAssertionCreator> serviceFinder = ServiceFinder.find(PolicyAssertionCreator.class, Thread.currentThread().getContextClassLoader());
         for (PolicyAssertionCreator creator : serviceFinder) {
             String[] supportedURIs = creator.getSupportedDomainNamespaceURIs();
             String creatorClassName = creator.getClass().getName();
@@ -201,12 +194,6 @@ public final class PolicyModelTranslator {
     }
     
     /**
-     * Creates a new instance of PolicyModelTranslator
-     */
-    private PolicyModelTranslator() {
-    }
-    
-    /**
      * The method translates {@link PolicySourceModel} structure into normalized {@link Policy} expression. The resulting Policy
      * is disconnected from its model, thus any additional changes in model will have no effect on the Policy expression.
      *
@@ -221,18 +208,18 @@ public final class PolicyModelTranslator {
             throw new PolicyException("Policy model translation error:  Input policy source model parameter is 'null'");
         }
         
-        PolicySourceModel localModelCopy;
+        PolicySourceModel localPolicyModelCopy;
         try {
-            localModelCopy = model.clone();
+            localPolicyModelCopy = model.clone();
         } catch (CloneNotSupportedException e) {
             logger.severe("translate", "Unable to clone input policy source model. Throwing policy exception.", e);
             throw new PolicyException("Unable to clone input policy source model", e);
         }
         
-        String policyId = localModelCopy.getPolicyId();
-        String policyName = localModelCopy.getPolicyName();
+        String policyId = localPolicyModelCopy.getPolicyId();
+        String policyName = localPolicyModelCopy.getPolicyName();
         
-        Collection<AssertionSet> alternatives = createPolicyAssertionSets(localModelCopy);
+        Collection<AssertionSet> alternatives = createPolicyAlternatives(localPolicyModelCopy);
         logger.finest("translate", "Number of policy alternative combinations created: '" + alternatives.size() + "'");
         
         Policy policy = null;
@@ -256,7 +243,7 @@ public final class PolicyModelTranslator {
      *
      * @return created policy alternatives resulting from policy source model.
      */
-    private Collection<AssertionSet> createPolicyAssertionSets(PolicySourceModel model) throws PolicyException {
+    private Collection<AssertionSet> createPolicyAlternatives(PolicySourceModel model) throws PolicyException {
         // creating global method variables
         boolean emptyAlternativeFound = false;
         final ContentDecomposition decomposition = new ContentDecomposition();
@@ -327,7 +314,7 @@ public final class PolicyModelTranslator {
                     decomposition.assertions.add(node);
                     break;
                 default :
-                    throw new PolicyException("Unsupported model node type: '" + node.getType() + "'");
+                    throw new PolicyException("Unexpected model node type found during policy expression content decomposition: '" + node.getType() + "'");
             }
         }
     }
@@ -409,20 +396,13 @@ public final class PolicyModelTranslator {
     }
     
     private List<PolicyAssertion> normalizeRawAssertion(RawAssertion assertion) throws PolicyException {
-        List<PolicyAssertion> contentBase = new LinkedList<PolicyAssertion>();
-        Collection<List<PolicyAssertion>> contentOptions = new LinkedList<List<PolicyAssertion>>();
-        if (!assertion.nestedAssertions.isEmpty()) {
-            Queue<RawAssertion> nestedAssertionsQueue = new LinkedList<RawAssertion>(assertion.nestedAssertions);
-            RawAssertion a;
-            while((a = nestedAssertionsQueue.poll()) != null) {
-                List<PolicyAssertion> normalized = normalizeRawAssertion(a);
-                // if there is only a single result, we can add it direclty to the content base collection
-                // more elements in the result indicate that we will have to create combinations
-                if (normalized.size() == 1) {
-                    contentBase.addAll(normalized);
-                } else {
-                    contentOptions.add(normalized);
-                }
+        List<PolicyAssertion> parameters;
+        if (assertion.parameters.isEmpty()) {
+            parameters = null;
+        } else {
+            parameters = new ArrayList<PolicyAssertion>(assertion.parameters.size());
+            for (ModelNode parameterNode : assertion.parameters) {
+                parameters.add(createPolicyAssertionParameter(parameterNode));
             }
         }
         
@@ -435,39 +415,46 @@ public final class PolicyModelTranslator {
             }
             // if there is only a single result, we can add it direclty to the content base collection
             // more elements in the result indicate that we will have to create combinations
-        }
+        }        
         
-        Collection<Collection<PolicyAssertion>> contentCombinations;
-        if (contentOptions.isEmpty()) {
-            // we do not have any options to combine => returning this assertion
-            contentCombinations = new ArrayList<Collection<PolicyAssertion>>(1);
-            contentCombinations.add(contentBase);
-        } else {
-            // we have some options to combine => creating assertion options based on content combinations
-            contentCombinations = PolicyUtils.Collections.combine(contentBase, contentOptions, true);
-        }
-        
-        List<PolicyAssertion> options = new LinkedList<PolicyAssertion>();
+        List<PolicyAssertion> assertionOptions = new LinkedList<PolicyAssertion>();
         boolean nestedAlternativesAvailable = !nestedAlternatives.isEmpty();
-        for (Collection<PolicyAssertion> contentCombination : contentCombinations) {
-            if (nestedAlternativesAvailable) {
-                for (AssertionSet nestedAlternative : nestedAlternatives) {
-                    options.add(createPolicyAssertion(assertion.originalNode.getAssertionData(), contentCombination, nestedAlternative));
-                }
-            } else {
-                options.add(createPolicyAssertion(assertion.originalNode.getAssertionData(), contentCombination, null));
+        if (nestedAlternativesAvailable) {
+            for (AssertionSet nestedAlternative : nestedAlternatives) {
+                assertionOptions.add(createPolicyAssertion(assertion.originalNode.getNodeData(), parameters, nestedAlternative));
             }
+        } else {
+            assertionOptions.add(createPolicyAssertion(assertion.originalNode.getNodeData(), parameters, null));
         }
-        return options;
+        return assertionOptions;
     }
     
-    private static PolicyAssertion createPolicyAssertion(AssertionData data, Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) throws AssertionCreationException {
+    private static PolicyAssertion createPolicyAssertionParameter(ModelNode parameterNode) throws PolicyException {
+        if (parameterNode.getType() != ModelNode.Type.ASSERTION_PARAMETER_NODE) {
+            throw new PolicyException("Inconsistency in policy source model detected: Cannot create policy assertion parameter " +
+                    "from a model node of this type: '" + parameterNode.getType() + "'");
+        }
+        
+        List<PolicyAssertion> childParameters = null;
+        if (parameterNode.hasChildren()) {
+            childParameters = new ArrayList<PolicyAssertion>(parameterNode.childrenSize());
+            for (ModelNode childParameterNode : parameterNode) {
+                childParameters.add(createPolicyAssertionParameter(childParameterNode));
+            }
+        }
+        
+        return createPolicyAssertion(parameterNode.getNodeData(), childParameters, null /* parameters do not have any nested alternatives */);
+    }
+    
+    private static PolicyAssertion createPolicyAssertion(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative) throws AssertionCreationException {
         String assertionNamespace = data.getName().getNamespaceURI();
         PolicyAssertionCreator domainSpecificPAC = assertionCreators.get(assertionNamespace);
+        
+        
         if (domainSpecificPAC != null) {
-            return domainSpecificPAC.createAssertion(data, nestedAssertions, nestedAlternative, defaultCreator);
+            return domainSpecificPAC.createAssertion(data, assertionParameters, nestedAlternative, defaultCreator);
         } else {
-            return defaultCreator.createAssertion(data, nestedAssertions, nestedAlternative, null);
+            return defaultCreator.createAssertion(data, assertionParameters, nestedAlternative, null);
         }
     }
 }

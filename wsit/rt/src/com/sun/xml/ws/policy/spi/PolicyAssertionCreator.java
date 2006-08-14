@@ -70,7 +70,7 @@ public interface PolicyAssertionCreator {
      * implemetors to use class composition instad of class inheritance.
      *
      * @param data assertion creation data specifying the details of newly created assertion
-     * @param nestedAssertions collection of nested assertions of this policy alternative. May be {@code null}.
+     * @param assertionParameters collection of assertions parameters of this policy assertion. May be {@code null}.
      * @param nestedAlternative assertion set specifying nested policy alternative. May be {@code null}.
      * @param defaultCreator default policy assertion creator implementation that shall be used to handle creation of assertions
      * which are not explicitly supported by this policy assertion creator implementation
@@ -78,5 +78,5 @@ public interface PolicyAssertionCreator {
      * 
      * @throw AssertionCreationException in case of assertion creation failure
      */
-    PolicyAssertion createAssertion(AssertionData data, Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative, PolicyAssertionCreator defaultCreator) throws AssertionCreationException;
+    PolicyAssertion createAssertion(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative, PolicyAssertionCreator defaultCreator) throws AssertionCreationException;
 }

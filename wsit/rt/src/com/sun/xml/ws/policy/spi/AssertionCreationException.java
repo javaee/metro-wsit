@@ -24,6 +24,7 @@ package com.sun.xml.ws.policy.spi;
 
 import com.sun.xml.ws.policy.*;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
+import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 
 /**
  * Exception thrown in case of assertion creation failure.

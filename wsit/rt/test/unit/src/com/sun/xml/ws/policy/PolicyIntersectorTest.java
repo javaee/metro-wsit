@@ -7,15 +7,14 @@
 
 package com.sun.xml.ws.policy;
 
+import com.sun.xml.ws.policy.sourcemodel.AssertionData;
+import com.sun.xml.ws.policy.sourcemodel.ModelNode;
 import com.sun.xml.ws.policy.testutils.PolicyResourceLoader;
 import junit.framework.*;
-import java.net.PasswordAuthentication;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
+import javax.xml.namespace.QName;
 
 /**
  *
@@ -60,7 +59,7 @@ public class PolicyIntersectorTest extends TestCase {
     
     public void testIntersectSinglePolicyInCollectionReturnsTheSameSinglePolicyInstance() throws Exception {
         Collection<Policy> policies = new LinkedList<Policy>();
-        Policy expected = Policy.createPolicy("fake", null);
+        Policy expected = Policy.createEmptyPolicy("fake", null);
         policies.add(expected);
         Policy result = intersector.intersect(policies);
         
@@ -68,7 +67,7 @@ public class PolicyIntersectorTest extends TestCase {
     }
     
     public void testIntersectNullPolicyInCollectionReturnsNullPolicy() throws Exception {
-        Collection<AssertionSet> alternatives = Arrays.asList(new AssertionSet[] {AssertionSet.createAssertionSet(Arrays.asList(new PolicyAssertion[] {new PolicyAssertion(){}}))});
+        Collection<AssertionSet> alternatives = Arrays.asList(new AssertionSet[] {AssertionSet.createAssertionSet(Arrays.asList(new PolicyAssertion[] {new PolicyAssertion(new AssertionData(new QName("A"), null, null, ModelNode.Type.ASSERTION), null, null){}}))});
         Collection<Policy> policies = new LinkedList<Policy>();
         for (int i = 0; i < 10; i++) {
             policies.add(Policy.createPolicy("fake", null, alternatives));
@@ -81,7 +80,7 @@ public class PolicyIntersectorTest extends TestCase {
     }
     
     public void testIntersectEmptyPolicyInCollectionReturnsNullPolicy() throws Exception {
-        Collection<AssertionSet> alternatives = Arrays.asList(new AssertionSet[] {AssertionSet.createAssertionSet(Arrays.asList(new PolicyAssertion[] {new PolicyAssertion(){}}))});
+        Collection<AssertionSet> alternatives = Arrays.asList(new AssertionSet[] {AssertionSet.createAssertionSet(Arrays.asList(new PolicyAssertion[] {new PolicyAssertion(new AssertionData(new QName("A"), null, null, ModelNode.Type.ASSERTION), null, null){}}))});
         Collection<Policy> policies = new LinkedList<Policy>();
         for (int i = 0; i < 10; i++) {
             policies.add(Policy.createPolicy("fake", null, alternatives));

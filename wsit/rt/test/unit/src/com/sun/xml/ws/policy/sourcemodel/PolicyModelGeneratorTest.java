@@ -59,7 +59,7 @@ public class PolicyModelGeneratorTest extends TestCase {
         PolicySourceModel result = instance.translate(policy);
         assertNull(result);
         
-        AssertionData data1 = new AssertionData(new QName("testns", "assertion1"));
+        AssertionData data1 = new AssertionData(new QName("testns", "assertion1"), ModelNode.Type.ASSERTION);
         PolicyAssertion assertion1 = new WSPolicyAssertion(data1);
         ArrayList<PolicyAssertion> assertions = new ArrayList<PolicyAssertion>();
         assertions.add(assertion1);
@@ -77,11 +77,7 @@ public class PolicyModelGeneratorTest extends TestCase {
     
     
     class WSPolicyAssertion extends PolicyAssertion {
-        
-        public WSPolicyAssertion() {
-            super();
-        }
-        
+                
         public WSPolicyAssertion(AssertionData assertionData) {
             super(assertionData, null, null);
         }

@@ -73,7 +73,7 @@ public final class PolicyModelGenerator {
                 ModelNode alternativeNode = exactlyOneNode.createChildAllNode();
                 for (PolicyAssertion assertion : set) {
                     // TODO Add getAssertionData method to PolicyAssertion?
-                    AssertionData data = new AssertionData(assertion.getName(), assertion.getValue(), assertion.getAttributes());
+                    AssertionData data = new AssertionData(assertion.getName(), assertion.getValue(), assertion.getAttributes(), ModelNode.Type.ASSERTION); // TODO: revise constructor - node type
                     ModelNode assertionNode = alternativeNode.createChildAssertionNode(data);
                     if (assertion.hasNestedPolicy()) {
                         NestedPolicy nestedPolicy = assertion.getNestedPolicy();
@@ -102,7 +102,7 @@ public final class PolicyModelGenerator {
         AssertionSet set = policy.getAssertionSet();
         ModelNode alternativeNode = exactlyOneNode.createChildAllNode();
         for (PolicyAssertion assertion : set) {
-            AssertionData data = new AssertionData(assertion.getName(), assertion.getValue(), assertion.getAttributes());
+            AssertionData data = new AssertionData(assertion.getName(), assertion.getValue(), assertion.getAttributes(), ModelNode.Type.ASSERTION); // TODO: revise constructor - node type
             ModelNode assertionNode = alternativeNode.createChildAssertionNode(data);
             if (assertion.hasNestedPolicy()) {
                 NestedPolicy nestedPolicy = assertion.getNestedPolicy();
@@ -124,7 +124,7 @@ public final class PolicyModelGenerator {
     private void translate(Iterator<PolicyAssertion> nestedAssertionsIterator, ModelNode assertionNode) {
         while (nestedAssertionsIterator.hasNext()) {
             PolicyAssertion nestedAssertion = nestedAssertionsIterator.next();
-            AssertionData data = new AssertionData(nestedAssertion.getName(), nestedAssertion.getValue(), nestedAssertion.getAttributes());
+            AssertionData data = new AssertionData(nestedAssertion.getName(), nestedAssertion.getValue(), nestedAssertion.getAttributes(), ModelNode.Type.ASSERTION); // TODO: revise constructor - node type
             ModelNode nestedAssertionNode = assertionNode.createChildAssertionNode(data);
             if (nestedAssertion.hasNestedPolicy()) {
                 NestedPolicy nestedPolicy = nestedAssertion.getNestedPolicy();

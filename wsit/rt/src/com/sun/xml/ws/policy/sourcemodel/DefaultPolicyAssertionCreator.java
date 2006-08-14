@@ -42,8 +42,8 @@ class DefaultPolicyAssertionCreator implements PolicyAssertionCreator {
     static final String[] ANY_NAMESPACE = null;
     
     private static final class DefaultPolicyAssertion extends PolicyAssertion {
-        DefaultPolicyAssertion(AssertionData data, Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) {
-            super (data, nestedAssertions, nestedAlternative);
+        DefaultPolicyAssertion(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative) {
+            super (data, assertionParameters, nestedAlternative);
         }
     }
     
@@ -55,7 +55,7 @@ class DefaultPolicyAssertionCreator implements PolicyAssertionCreator {
         return ANY_NAMESPACE;
     }
 
-    public PolicyAssertion createAssertion(AssertionData data, Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative, PolicyAssertionCreator defaultCreator) throws AssertionCreationException {
-        return new DefaultPolicyAssertion(data, nestedAssertions, nestedAlternative);
+    public PolicyAssertion createAssertion(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative, PolicyAssertionCreator defaultCreator) throws AssertionCreationException {
+        return new DefaultPolicyAssertion(data, assertionParameters, nestedAlternative);
     }    
 }

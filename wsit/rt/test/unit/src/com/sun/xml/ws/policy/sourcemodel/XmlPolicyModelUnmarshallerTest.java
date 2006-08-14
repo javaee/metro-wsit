@@ -57,6 +57,12 @@ public class XmlPolicyModelUnmarshallerTest extends TestCase {
         System.out.println("\n===============================================================================\n");
     }
     
+    public void testUnmarshallComplexPolicyModelWithAssertionParameters() throws Exception {
+        PolicySourceModel model = unmarshallModel("complex_policy/assertion_parameters1.xml");
+        System.out.println("model = " + model.toString());
+        System.out.println("\n===============================================================================\n");
+    }
+    
     private PolicySourceModel unmarshallModel(String resource) throws Exception {
         Reader reader = PolicyResourceLoader.getResourceReader(resource);
         PolicySourceModel model = xmlUnmarshaller.unmarshalModel(reader);

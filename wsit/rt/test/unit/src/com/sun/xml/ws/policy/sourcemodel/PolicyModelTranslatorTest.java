@@ -45,6 +45,7 @@ public class PolicyModelTranslatorTest extends TestCase {
         tempMap.put("complex_policy/single_choice2", 5);
         tempMap.put("complex_policy/nested_choice1", 3);
         tempMap.put("complex_policy/nested_choice2", 3);
+        tempMap.put("complex_policy/assertion_parameters1", 1);
         COMPLEX_POLICIES = Collections.unmodifiableMap(tempMap);
     }
     
@@ -92,9 +93,9 @@ public class PolicyModelTranslatorTest extends TestCase {
             Policy compactModelPolicy = translator.translate(compactModel);
             Policy normalizedModelPolicy = translator.translate(normalizedModel);
             
-            assertEquals("Normalized and compact policy expression should form equal Policy instances", normalizedModelPolicy, compactModelPolicy);
             assertEquals("Normalized and compact model policy instances should contain equal number of alternatives", normalizedModelPolicy.getNumberOfAssertionSets(), compactModelPolicy.getNumberOfAssertionSets());
             assertEquals("This policy should contain '" + expectedNumberOfAlternatives + "' alternatives", expectedNumberOfAlternatives, compactModelPolicy.getNumberOfAssertionSets());
+            assertEquals("Normalized and compact policy expression should form equal Policy instances", normalizedModelPolicy, compactModelPolicy);
             
 //            System.out.println(index + ". compact model policy: " + compactModelPolicy);
 //            System.out.println("===========================================================");
