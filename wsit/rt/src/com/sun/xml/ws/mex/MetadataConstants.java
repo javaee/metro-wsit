@@ -35,6 +35,7 @@ public class MetadataConstants {
     
     private static final String XMLSOAP_2004_09 =
         "http://schemas.xmlsoap.org/ws/2004/09/";
+    
     public static final String GET_REQUEST = XMLSOAP_2004_09 + "transfer/Get";
     public static final String GET_RESPONSE =
         XMLSOAP_2004_09 + "transfer/GetResponse";
@@ -45,11 +46,15 @@ public class MetadataConstants {
     
     public static final String MEX_NAMESPACE = XMLSOAP_2004_09 + "mex";
     public static final String MEX_PREFIX = "mex";
+    
+    // todo: get these from wsa api
+    public static final String WSA_MS_NAMESPACE =
+        "http://schemas.xmlsoap.org/ws/2004/08/addressing";
+    public static final String WSA_W3C_NAMESPACE =
+        "http://www.w3.org/2005/08/addressing";
+    public static final String WSA_PREFIX = "wsa";
     public static final String WSA_ANON =
         "http://www.w3.org/2005/08/addressing/anonymous";
-    public static final String WSA_NAMESPACE =
-        "http://schemas.xmlsoap.org/ws/2004/08/addressing";
-    public static final String WSA_PREFIX = "wsa";
     
     public static final String SOAP_1_1 =
         "http://schemas.xmlsoap.org/soap/envelope/";

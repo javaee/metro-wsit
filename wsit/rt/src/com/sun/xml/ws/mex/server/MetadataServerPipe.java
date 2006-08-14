@@ -50,7 +50,8 @@ import static com.sun.xml.ws.mex.MetadataConstants.MEX_NAMESPACE;
 import static com.sun.xml.ws.mex.MetadataConstants.MEX_PREFIX;
 import static com.sun.xml.ws.mex.MetadataConstants.SOAP_1_2;
 import static com.sun.xml.ws.mex.MetadataConstants.SOAP_1_1;
-import static com.sun.xml.ws.mex.MetadataConstants.WSA_NAMESPACE;
+import static com.sun.xml.ws.mex.MetadataConstants.WSA_MS_NAMESPACE;
+import static com.sun.xml.ws.mex.MetadataConstants.WSA_W3C_NAMESPACE;
 import static com.sun.xml.ws.mex.MetadataConstants.WSA_PREFIX;
 
 /**
@@ -62,11 +63,14 @@ public class MetadataServerPipe extends AbstractFilterPipeImpl {
 
     private final WSDLRetriever wsdlRetriever;
     private final String soapNamespace;
-    private final WsaRuntimeFactory wsaRtFac;
+    private final WsaRuntimeFactory wsaMSFactory;
+    private final WsaRuntimeFactory wsaW3Factory;
 
     public MetadataServerPipe(WSEndpoint endpoint, Pipe next) {
         super(next);
-        wsaRtFac = WsaRuntimeFactory.newInstance(WSA_NAMESPACE,
+        wsaMSFactory = WsaRuntimeFactory.newInstance(WSA_MS_NAMESPACE,
+            endpoint.getPort(), endpoint.getBinding());
+        wsaW3Factory = WsaRuntimeFactory.newInstance(WSA_W3C_NAMESPACE,
             endpoint.getPort(), endpoint.getBinding());
 
         wsdlRetriever = new WSDLRetriever(endpoint);
@@ -84,7 +88,8 @@ public class MetadataServerPipe extends AbstractFilterPipeImpl {
     protected MetadataServerPipe(MetadataServerPipe that, PipeCloner cloner) {
         super(that, cloner);
         soapNamespace = that.soapNamespace;
-        wsaRtFac = that.wsaRtFac;
+        wsaMSFactory = that.wsaMSFactory;
+        wsaW3Factory = that.wsaW3Factory;
         wsdlRetriever = that.wsdlRetriever;
     }
 
@@ -101,35 +106,39 @@ public class MetadataServerPipe extends AbstractFilterPipeImpl {
             return next.process(request);
         }
         
-        AddressingProperties ap = wsaRtFac.readHeaders(request);
+        AddressingProperties ap = wsaW3Factory.readHeaders(request);
+        boolean useW3C = true;
+        if (ap == null) {
+            ap = wsaMSFactory.readHeaders(request);
+            useW3C = false;
+        }
         if (ap != null && ap.getAction() != null) {
             if (ap.getAction().toString().equals(GET_REQUEST)) {
-                return processGetRequest(request, ap, GET_RESPONSE);
+                return processGetRequest(request, ap, GET_RESPONSE, useW3C);
             } else if (ap.getAction().toString().equals(GET_METADATA_REQUEST)) {
-                return processGetMetdataRequest(request, ap);
+                return processGetMetdataRequest(request, ap, useW3C);
             }
         }
         return next.process(request);
     }
 
-//    public void preDestroy() {}
-
     private Packet processGetRequest(Packet request, AddressingProperties ap,
-        String responseAction) {
+        String responseAction, boolean useW3C) {
         
         try {
             String address = ap.getTo().toString();
             MutableXMLStreamBuffer buffer = new MutableXMLStreamBuffer();
             XMLStreamWriter writer = buffer.createFromXMLStreamWriter();
 
-            writeStartEnvelope(writer);
+            writeStartEnvelope(writer, useW3C);
             wsdlRetriever.addDocuments(writer, request, address);
             writer.writeEndDocument();
             writer.flush();
 
             Message responseMessage = Messages.create(buffer);
             Packet response = request.createResponse(responseMessage);
-            createResponseHeaders(request, response, ap, responseAction);
+            createResponseHeaders(request, response,
+                ap, responseAction, useW3C);
             return response;
         } catch (XMLStreamBufferException bufferE) {
             throw new WebServiceException(bufferE);
@@ -146,14 +155,14 @@ public class MetadataServerPipe extends AbstractFilterPipeImpl {
      * it ignores the dialect and returns all the metadata.
      */
     private Packet processGetMetdataRequest(Packet request,
-        AddressingProperties ap) {
+        AddressingProperties ap, boolean useW3C) {
         
         // todo: check for unsupported attributes in action
         // and throw exception
-        return processGetRequest(request, ap, GET_METADATA_RESPONSE);
+        return processGetRequest(request, ap, GET_METADATA_RESPONSE, useW3C);
     }
     
-    private void writeStartEnvelope(XMLStreamWriter writer) 
+    private void writeStartEnvelope(XMLStreamWriter writer, boolean useW3C) 
         throws XMLStreamException {
 
         String soapPrefix = "soapenv";
@@ -164,7 +173,11 @@ public class MetadataServerPipe extends AbstractFilterPipeImpl {
         // this line should go away after bug fix - 6418039
         writer.writeNamespace(soapPrefix, soapNamespace);
 
-        writer.writeNamespace(WSA_PREFIX, WSA_NAMESPACE);
+        if (useW3C) {
+            writer.writeNamespace(WSA_PREFIX, WSA_W3C_NAMESPACE);
+        } else {
+            writer.writeNamespace(WSA_PREFIX, WSA_MS_NAMESPACE);
+        }
         writer.writeNamespace(MEX_PREFIX, MEX_NAMESPACE);
 
         writer.writeStartElement(soapPrefix, "Body", soapNamespace);
@@ -172,12 +185,16 @@ public class MetadataServerPipe extends AbstractFilterPipeImpl {
     }
 
     private void createResponseHeaders(Packet request, Packet response,
-        AddressingProperties requestProps, String action) {
+        AddressingProperties requestProps, String action, boolean useW3C) {
 
+        WsaRuntimeFactory wrf = wsaW3Factory;
+        if (!useW3C) {
+            wrf = wsaMSFactory;
+        }
         AddressingProperties responseProps =
-            wsaRtFac.toOutbound(requestProps, request);
+            wrf.toOutbound(requestProps, request);
         responseProps.setAction(action);
-        wsaRtFac.writeHeaders(response, responseProps);
+        wrf.writeHeaders(response, responseProps);
     }
 
 }
