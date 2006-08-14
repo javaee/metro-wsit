@@ -3,12 +3,12 @@
  * of the Common Development and Distribution License
  * (the License).  You may not use this file except in
  * compliance with the License.
- * 
+ *
  * You can obtain a copy of the license at
  * https://glassfish.dev.java.net/public/CDDLv1.0.html.
  * See the License for the specific language governing
  * permissions and limitations under the License.
- * 
+ *
  * When distributing Covered Code, include this CDDL
  * Header Notice in each file and include the License file
  * at https://glassfish.dev.java.net/public/CDDLv1.0.html.
@@ -16,7 +16,7 @@
  * with the fields enclosed by brackets [] replaced by
  * you own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * 
+ *
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
@@ -30,6 +30,9 @@ import javax.xml.namespace.QName;
 
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
+import com.sun.xml.ws.policy.sourcemodel.ModelNode;
+import java.util.Collections;
+import java.util.LinkedList;
 
 /**
  * Base class for any policy assertion implementations. It defines the common interface and provides some default
@@ -37,11 +40,11 @@ import com.sun.xml.ws.policy.sourcemodel.AssertionData;
  */
 public abstract class PolicyAssertion {
     private AssertionData data;
-    private AssertionSet nestedAssertionSet;
-    private NestedPolicy nestedPolicy;
+    private AssertionSet parameters;
+    private NestedPolicy nestedPolicy;         
     
     protected PolicyAssertion() {
-        this.data = new AssertionData(null);
+        this.data = new AssertionData(null, ModelNode.Type.ASSERTION);
     }
     
     /**
@@ -51,15 +54,15 @@ public abstract class PolicyAssertion {
      * @param nestedAssertions collection of nested assertions of this policy alternative. May be {@code null}.
      * @param nestedAlternative assertion set specifying nested policy alternative. May be {@code null}.
      */
-    protected PolicyAssertion(AssertionData assertionData, Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) {
+    protected PolicyAssertion(AssertionData assertionData, Collection<? extends PolicyAssertion> assertionParameters, AssertionSet nestedAlternative) {
         this.data = assertionData;
         if (nestedAlternative != null) {
-            this.nestedPolicy = new NestedPolicy(nestedAlternative);
+            this.nestedPolicy = NestedPolicy.createNestedPolicy(nestedAlternative);
         }
         
-        this.nestedAssertionSet = AssertionSet.createAssertionSet(nestedAssertions);
+        this.parameters = AssertionSet.createAssertionSet(assertionParameters);
     }
-    
+        
     /**
      * Returns the fully qualified name of the assertion.
      *
@@ -93,7 +96,7 @@ public abstract class PolicyAssertion {
             result = Boolean.parseBoolean(attributeValue);
         }
         
-        return result;        
+        return result;
     }
     
     /**
@@ -102,9 +105,9 @@ public abstract class PolicyAssertion {
      * @return {@code 'true'} if the assertion is marked as private (i.e. should not be marshalled int generated WSDL documents). Returns {@code false} otherwise.
      */
     public final boolean isPrivate() {
-       return data.isPrivateAttributeSet();
+        return data.isPrivateAttributeSet();
     }
-        
+    
     /**
      * Returns the disconnected set of attributes attached to the assertion. Each attribute is represented as a single
      * {@code Map.Entry<attributeName, attributeValue>} element.
@@ -143,25 +146,25 @@ public abstract class PolicyAssertion {
     }
     
     /**
-     * Returns the boolean information whether this assertion contains nested assertions.
+     * Returns the boolean information whether this assertion contains any parameters.
      *
-     * @return {@code true} if the assertion contains child (nested) assertions. Returns {@code false} otherwise.
+     * @return {@code true} if the assertion contains parameters. Returns {@code false} otherwise.
      */
     public final boolean hasNestedAssertions() {
-        return !nestedAssertionSet.isEmpty();
+        return !parameters.isEmpty();
     }
     
     /**
-     * Returns the set of nested assertions if any.
+     * Returns the assertion's parameter collection iterator.
      *
-     * @return the set of nested assertion if the assertion contains any child (nested) assertions. Returns {@code null} otherwise.
+     * @return the assertion's parameter collection iterator.
      */
     public final Iterator<PolicyAssertion> getNestedAssertionsIterator() {
-        if (hasNestedAssertions()) {
-            return nestedAssertionSet.iterator();
-        } else {
-            return null;
-        }
+        return parameters.iterator();
+    }
+    
+    boolean isParameter() {
+        return data.getNodeType() == ModelNode.Type.ASSERTION_PARAMETER_NODE;
     }
     
     /**
@@ -205,13 +208,13 @@ public abstract class PolicyAssertion {
         buffer.append(PolicyUtils.Text.NEW_LINE);
         
         if (hasNestedAssertions()) {
-            buffer.append(innerIndent).append("nested assertions {").append(PolicyUtils.Text.NEW_LINE);
-            for (PolicyAssertion assertion : nestedAssertionSet) {
-                assertion.toString(indentLevel + 2, buffer);
+            buffer.append(innerIndent).append("parameters {").append(PolicyUtils.Text.NEW_LINE);
+            for (PolicyAssertion parameter : parameters) {
+                parameter.toString(indentLevel + 2, buffer);
             }
             buffer.append(innerIndent).append('}').append(PolicyUtils.Text.NEW_LINE);
         } else {
-            buffer.append(innerIndent).append("no nested assertions").append(PolicyUtils.Text.NEW_LINE);
+            buffer.append(innerIndent).append("no parameters").append(PolicyUtils.Text.NEW_LINE);
         }
         
         if (hasNestedPolicy()) {
@@ -241,7 +244,7 @@ public abstract class PolicyAssertion {
         boolean result = true;
         
         result = result && this.data.equals(that.data);
-        result = result && this.nestedAssertionSet.equals(that.nestedAssertionSet);
+        result = result && this.parameters.equals(that.parameters);
         result = result && ((this.nestedPolicy != null) ? this.nestedPolicy.equals(that.nestedPolicy) : ((that.nestedPolicy == null) ? true : false));
         
         return result;

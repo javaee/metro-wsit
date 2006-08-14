@@ -3,12 +3,12 @@
  * of the Common Development and Distribution License
  * (the License).  You may not use this file except in
  * compliance with the License.
- * 
+ *
  * You can obtain a copy of the license at
  * https://glassfish.dev.java.net/public/CDDLv1.0.html.
  * See the License for the specific language governing
  * permissions and limitations under the License.
- * 
+ *
  * When distributing Covered Code, include this CDDL
  * Header Notice in each file and include the License file
  * at https://glassfish.dev.java.net/public/CDDLv1.0.html.
@@ -16,7 +16,7 @@
  * with the fields enclosed by brackets [] replaced by
  * you own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * 
+ *
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
@@ -88,62 +88,70 @@ final class XmlPolicyModelUnmarshaller extends PolicyModelUnmarshaller {
         return model;
     }
     
-    private void unmarshalNodeContent(ModelNode currentNode, StartElement currentElement, XMLEventReader reader) throws PolicyException {
-        QName currentElementName = currentElement.getName();
+    private void unmarshalNodeContent(ModelNode lastNode, StartElement lastStartElement, XMLEventReader reader) throws PolicyException {
+        QName lastElementName = lastStartElement.getName();
         StringBuffer valueBuffer = null;
         
         loop : while (reader.hasNext()) {
             try {
-                XMLEvent event = reader.nextEvent();
-                switch (event.getEventType()) {
+                XMLEvent xmlParserEvent = reader.nextEvent();
+                switch (xmlParserEvent.getEventType()) {
                     case XMLStreamConstants.COMMENT:
                         break; // skipping the comments
                         
                     case XMLStreamConstants.CHARACTERS:
-                        valueBuffer = processCharacters(currentNode.getType(), event.asCharacters(), valueBuffer);
+                        valueBuffer = processCharacters(lastNode.getType(), xmlParserEvent.asCharacters(), valueBuffer);
                         break;
                         
                     case XMLStreamConstants.END_ELEMENT:
-                        checkEndTagName(currentElementName, event.asEndElement());
+                        checkEndTagName(lastElementName, xmlParserEvent.asEndElement());
                         break loop; // data exctraction for currently processed policy node is done
                         
                     case XMLStreamConstants.START_ELEMENT:
-                        StartElement childElement = event.asStartElement();
-                        QName elementName = childElement.getName();
+                        StartElement childElement = xmlParserEvent.asStartElement();
+                        QName childElementName = childElement.getName();
                         
                         ModelNode childNode;
-                        if (ModelNode.Type.POLICY.asQName().equals(elementName)) {
-                            childNode = currentNode.createChildPolicyNode();
-                        } else if (ModelNode.Type.ALL.asQName().equals(elementName)) {
-                            childNode = currentNode.createChildAllNode();
-                        } else if (ModelNode.Type.EXACTLY_ONE.asQName().equals(elementName)) {
-                            childNode = currentNode.createChildExactlyOneNode();
-                        } else if (ModelNode.Type.POLICY_REFERENCE.asQName().equals(elementName)) {
-                            Attribute uri = getAttributeByName(childElement, PolicyReferenceData.ATTRIBUTE_URI);
-                            if (uri == null) {
-                                throw new PolicyException("Policy reference 'URI' attribute not found");
-                            } else {
-                                try {
-                                    URI reference = new URI(uri.getValue());
-                                    Attribute digest = getAttributeByName(childElement, PolicyReferenceData.ATTRIBUTE_DIGEST);
-                                    PolicyReferenceData refData;
-                                    if (digest == null) {
-                                        refData = new PolicyReferenceData(reference);
-                                    } else {
-                                        Attribute digestAlgorithm = getAttributeByName(childElement, PolicyReferenceData.ATTRIBUTE_DIGEST_ALGORITHM);
-                                        URI algorithmRef = null;
-                                        if (digestAlgorithm != null) {
-                                            algorithmRef = new URI(digestAlgorithm.getValue());
+                        if (lastNode.getType() != ModelNode.Type.ASSERTION_PARAMETER_NODE){
+                            if (ModelNode.Type.POLICY.asQName().equals(childElementName)) {
+                                childNode = lastNode.createChildPolicyNode();
+                            } else if (ModelNode.Type.ALL.asQName().equals(childElementName)) {
+                                childNode = lastNode.createChildAllNode();
+                            } else if (ModelNode.Type.EXACTLY_ONE.asQName().equals(childElementName)) {
+                                childNode = lastNode.createChildExactlyOneNode();
+                            } else if (ModelNode.Type.POLICY_REFERENCE.asQName().equals(childElementName)) {
+                                Attribute uri = getAttributeByName(childElement, PolicyReferenceData.ATTRIBUTE_URI);
+                                if (uri == null) {
+                                    throw new PolicyException("Policy reference 'URI' attribute not found");
+                                } else {
+                                    try {
+                                        URI reference = new URI(uri.getValue());
+                                        Attribute digest = getAttributeByName(childElement, PolicyReferenceData.ATTRIBUTE_DIGEST);
+                                        PolicyReferenceData refData;
+                                        if (digest == null) {
+                                            refData = new PolicyReferenceData(reference);
+                                        } else {
+                                            Attribute digestAlgorithm = getAttributeByName(childElement, PolicyReferenceData.ATTRIBUTE_DIGEST_ALGORITHM);
+                                            URI algorithmRef = null;
+                                            if (digestAlgorithm != null) {
+                                                algorithmRef = new URI(digestAlgorithm.getValue());
+                                            }
+                                            refData = new PolicyReferenceData(reference, digest.getValue(), algorithmRef);
                                         }
-                                        refData = new PolicyReferenceData(reference, digest.getValue(), algorithmRef);
+                                        childNode = lastNode.createChildPolicyReferenceNode(refData);
+                                    } catch (URISyntaxException e) {
+                                        throw new PolicyException("Unable to unmarshall policy referenced due to malformed URI value in attribute", e);
                                     }
-                                    childNode = currentNode.createChildPolicyReferenceNode(refData);
-                                } catch (URISyntaxException e) {
-                                    throw new PolicyException("Unable to unmarshall policy referenced due to malformed URI value in attribute", e);
+                                }
+                            } else {
+                                if (!lastNode.isAssertionRelatedNode()) {
+                                    childNode = lastNode.createChildAssertionNode();
+                                } else {
+                                    childNode = lastNode.createChildAssertionParameterNode();                                    
                                 }
                             }
                         } else {
-                            childNode = currentNode.createChildAssertionNode();
+                            childNode = lastNode.createChildAssertionParameterNode();
                         }
                         
                         unmarshalNodeContent(childNode, childElement, reader);
@@ -156,30 +164,30 @@ final class XmlPolicyModelUnmarshaller extends PolicyModelUnmarshaller {
             }
         }
         
-        if (isAssertion(currentNode)) {
+        if (lastNode.isAssertionRelatedNode()) {
             // finish assertion node processing: create and set assertion data...
             Map<QName, String> attributeMap = new HashMap<QName, String>();
-            Iterator iterator = currentElement.getAttributes();
+            Iterator iterator = lastStartElement.getAttributes();
             while (iterator.hasNext()) {
                 Attribute a = (Attribute) iterator.next();
                 QName name = a.getName();
                 if (attributeMap.containsKey(name)) {
-                    throw new PolicyException("Multiple attributes with the same name '" + a.getName() + "' detected for assertion '" + currentElementName + "'");
+                    throw new PolicyException("Multiple attributes with the same name '" + a.getName() + "' detected for assertion '" + lastElementName + "'");
                 } else {
                     attributeMap.put(name , a.getValue());
                 }
             }
-            AssertionData assertionData = new AssertionData(currentElementName, (valueBuffer != null) ? valueBuffer.toString() : null, attributeMap);
+            AssertionData nodeData = new AssertionData(lastElementName, (valueBuffer != null) ? valueBuffer.toString() : null, attributeMap, lastNode.getType());
             
             // check visibility value syntax if present...
-            if (assertionData.containsAttribute(PolicyConstants.VISIBILITY_ATTRIBUTE)) {
-                String visibilityValue = assertionData.getAttributeValue(PolicyConstants.VISIBILITY_ATTRIBUTE);
+            if (nodeData.containsAttribute(PolicyConstants.VISIBILITY_ATTRIBUTE)) {
+                String visibilityValue = nodeData.getAttributeValue(PolicyConstants.VISIBILITY_ATTRIBUTE);
                 if (!PolicyConstants.VISIBILITY_VALUE_PRIVATE.equals(visibilityValue)) {
                     throw new PolicyException("Unexpected visibility attribute value: '" + visibilityValue + "'");
                 }
             }
             
-            currentNode.setOrReplaceAssertionData(assertionData);
+            lastNode.setOrReplaceNodeData(nodeData);
         }
     }
     
@@ -222,10 +230,6 @@ final class XmlPolicyModelUnmarshaller extends PolicyModelUnmarshaller {
                 throw new PolicyException("Unexpected character data on current policy source model node '" + currentNodeType + "' : data = '" + data + "'");
             }
         }
-    }
-    
-    private boolean isAssertion(ModelNode node) {
-        return node.getType() == ModelNode.Type.ASSERTION;
     }
     
     private Attribute getAttributeByName(StartElement element, QName attributeName) {

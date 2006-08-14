@@ -3,12 +3,12 @@
  * of the Common Development and Distribution License
  * (the License).  You may not use this file except in
  * compliance with the License.
- * 
+ *
  * You can obtain a copy of the license at
  * https://glassfish.dev.java.net/public/CDDLv1.0.html.
  * See the License for the specific language governing
  * permissions and limitations under the License.
- * 
+ *
  * When distributing Covered Code, include this CDDL
  * Header Notice in each file and include the License file
  * at https://glassfish.dev.java.net/public/CDDLv1.0.html.
@@ -16,7 +16,7 @@
  * with the fields enclosed by brackets [] replaced by
  * you own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * 
+ *
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
@@ -25,6 +25,7 @@ package com.sun.xml.ws.policy.sourcemodel;
 import com.sun.xml.ws.policy.PolicyConstants;
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import javax.xml.namespace.QName;
@@ -45,7 +46,8 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
         ALL(new QName(PolicyConstants.POLICY_NAMESPACE_URI, "All")),
         EXACTLY_ONE(new QName(PolicyConstants.POLICY_NAMESPACE_URI, "ExactlyOne")),
         POLICY_REFERENCE(new QName(PolicyConstants.POLICY_NAMESPACE_URI, "PolicyReference")),
-        ASSERTION(null);
+        ASSERTION(null),
+        ASSERTION_PARAMETER_NODE(null);
         
         private QName qName;
         
@@ -60,7 +62,8 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
     
     // comon model node attributes
     private LinkedList<ModelNode> content;
-    private ModelNode.Type type;
+    private Collection<ModelNode> unmodifiableViewOnContent;
+    private final ModelNode.Type type;
     private ModelNode parentNode;
     private PolicySourceModel parentModel;
     
@@ -68,17 +71,42 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
     private PolicyReferenceData referenceData;
     private PolicySourceModel referencedModel;
     
-    // attibutes used only in 'ASSERTION' model node
-    private AssertionData assertionData;
+    // attibutes used only in 'ASSERTION' or 'ASSERTION_PARAMETER_NODE' model node
+    private AssertionData nodeData;
     
     /**
-     * TODO: proper java doc
+     * The factory method creates and initializes the POLICY model node and sets it's parent model reference to point to
+     * the model supplied as an input parameter. This method is intended to be used ONLY from {@link PolicySourceModel} during
+     * the initialization of its own internal structures.
+     *
+     * @param model policy source model to be used as a parent model of the newly created {@link ModelNode}. Must not be {@code null}
+     * @return POLICY model node with the parent model reference initialized to the model supplied as an input parameter
+     * @throws NullPointerException if the {@code model} input parameter is {@code null}
      */
-    static ModelNode createRootPolicyNode(PolicySourceModel model) {
+    static ModelNode createRootPolicyNode(PolicySourceModel model) throws NullPointerException {
         if (model == null) {
             throw new NullPointerException("Policy source model input argument must not be 'null'.");
         }
         return new ModelNode(ModelNode.Type.POLICY, model);
+    }
+    
+    private ModelNode(Type type, PolicySourceModel parentModel) {
+        this.type = type;
+        this.parentModel = parentModel;
+        this.content = new LinkedList<ModelNode>();
+        this.unmodifiableViewOnContent = Collections.unmodifiableCollection(this.content);
+    }
+    
+    private ModelNode(Type type, PolicySourceModel parentModel, AssertionData data) {
+        this(type, parentModel);
+        
+        this.nodeData = data;
+    }
+    
+    private ModelNode(PolicySourceModel parentModel, PolicyReferenceData data) {
+        this(Type.POLICY_REFERENCE, parentModel);
+        
+        this.referenceData = data;
     }
     
     /**
@@ -88,6 +116,10 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
      * Each node is created with respect to its enclosing policy source model.
      */
     public ModelNode createChildPolicyNode() {
+        if (type == Type.ASSERTION_PARAMETER_NODE) {
+            throw new UnsupportedOperationException("This operation is supported only for 'POLICY', 'EXACTLY_ONE', 'ALL' and 'ASSERTION' node types. It is not supported for the 'ASSERTION_PARAMETER_NODE' node type");
+        }
+        
         ModelNode node = new ModelNode(ModelNode.Type.POLICY, parentModel);
         this.addChild(node);
         
@@ -100,20 +132,11 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
      * Factory method that creates new policy source model node as specified by a factory method name and input parameters.
      * Each node is created with respect to its enclosing policy source model.
      */
-    public ModelNode createChildPolicyNode(Collection<ModelNode> children) {
-        ModelNode node = new ModelNode(ModelNode.Type.POLICY, parentModel, children);
-        this.addChild(node);
-        
-        return node;
-    }
-    
-    /**
-     * TODO: proper java doc
-     *
-     * Factory method that creates new policy source model node as specified by a factory method name and input parameters.
-     * Each node is created with respect to its enclosing policy source model.
-     */
     public ModelNode createChildAllNode() {
+        if (isAssertionRelatedNode()) {
+            throw new UnsupportedOperationException("This operation is supported only for 'POLICY', 'EXACTLY_ONE' and 'ALL' node types. It is not supported for the node type of this instance: '" +  type + "'");
+        }
+        
         ModelNode node = new ModelNode(ModelNode.Type.ALL, parentModel);
         this.addChild(node);
         
@@ -126,20 +149,11 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
      * Factory method that creates new policy source model node as specified by a factory method name and input parameters.
      * Each node is created with respect to its enclosing policy source model.
      */
-    public ModelNode createChildAllNode(Collection<ModelNode> children) {
-        ModelNode node = new ModelNode(ModelNode.Type.ALL, parentModel, children);
-        this.addChild(node);
-        
-        return node;
-    }
-    
-    /**
-     * TODO: proper java doc
-     *
-     * Factory method that creates new policy source model node as specified by a factory method name and input parameters.
-     * Each node is created with respect to its enclosing policy source model.
-     */
     public ModelNode createChildExactlyOneNode() {
+        if (isAssertionRelatedNode()) {
+            throw new UnsupportedOperationException("This operation is supported only for 'POLICY', 'EXACTLY_ONE' and 'ALL' node types. It is not supported for the node type of this instance: '" +  type + "'");
+        }
+        
         ModelNode node = new ModelNode(ModelNode.Type.EXACTLY_ONE, parentModel);
         this.addChild(node);
         
@@ -152,20 +166,11 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
      * Factory method that creates new policy source model node as specified by a factory method name and input parameters.
      * Each node is created with respect to its enclosing policy source model.
      */
-    public ModelNode createChildExactlyOneNode(Collection<ModelNode> children) {
-        ModelNode node = new ModelNode(ModelNode.Type.EXACTLY_ONE, parentModel, children);
-        this.addChild(node);
-        
-        return node;
-    }
-    
-    /**
-     * TODO: proper java doc
-     *
-     * Factory method that creates new policy source model node as specified by a factory method name and input parameters.
-     * Each node is created with respect to its enclosing policy source model.
-     */
     public ModelNode createChildAssertionNode() {
+        if (isAssertionRelatedNode()) {
+            throw new UnsupportedOperationException("This operation is supported only for 'POLICY', 'EXACTLY_ONE' and 'ALL' node types. It is not supported for the node type of this instance: '" +  type + "'");
+        }
+        
         ModelNode node = new ModelNode(ModelNode.Type.ASSERTION, parentModel);
         this.addChild(node);
         
@@ -178,8 +183,46 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
      * Factory method that creates new policy source model node as specified by a factory method name and input parameters.
      * Each node is created with respect to its enclosing policy source model.
      */
-    public ModelNode createChildAssertionNode(AssertionData assertionData) {
-        ModelNode node = new ModelNode(parentModel, assertionData);
+    public ModelNode createChildAssertionNode(AssertionData nodeData) {
+        if (isAssertionRelatedNode()) {
+            throw new UnsupportedOperationException("This operation is supported only for 'POLICY', 'EXACTLY_ONE' and 'ALL' node types. It is not supported for the node type of this instance: '" +  type + "'");
+        }
+        
+        ModelNode node = new ModelNode(Type.ASSERTION, parentModel, nodeData);
+        this.addChild(node);
+        
+        return node;
+    }
+    
+    /**
+     * TODO: proper java doc
+     *
+     * Factory method that creates new policy source model node as specified by a factory method name and input parameters.
+     * Each node is created with respect to its enclosing policy source model.
+     */
+    public ModelNode createChildAssertionParameterNode() {
+        if (!isAssertionRelatedNode()) {
+            throw new UnsupportedOperationException("This operation is supported only for 'POLICY', 'EXACTLY_ONE' and 'ALL' node types. It is not supported for the node type of this instance: '" +  type + "'");
+        }
+        
+        ModelNode node = new ModelNode(ModelNode.Type.ASSERTION_PARAMETER_NODE, parentModel);
+        this.addChild(node);
+        
+        return node;
+    }
+    
+    /**
+     * TODO: proper java doc
+     *
+     * Factory method that creates new policy source model node as specified by a factory method name and input parameters.
+     * Each node is created with respect to its enclosing policy source model.
+     */
+    public ModelNode createChildAssertionParameterNode(AssertionData nodeData) {
+        if (!isAssertionRelatedNode()) {
+            throw new UnsupportedOperationException("This operation is supported only for 'ASSERTION' and 'ASSERTION_PARAMETER_NODE' node types. It is not supported for the node type of this instance: '" +  type + "'");
+        }
+        
+        ModelNode node = new ModelNode(Type.ASSERTION_PARAMETER_NODE, parentModel, nodeData);
         this.addChild(node);
         
         return node;
@@ -192,55 +235,36 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
      * Each node is created with respect to its enclosing policy source model.
      */
     public ModelNode createChildPolicyReferenceNode(PolicyReferenceData referenceData) {
+        if (!isAssertionRelatedNode()) {
+            throw new UnsupportedOperationException("This operation is supported only for 'ASSERTION' and 'ASSERTION_PARAMETER_NODE' node types. It is not supported for the node type of this instance: '" +  type + "'");
+        }
+        
         ModelNode node = new ModelNode(parentModel, referenceData);
         this.parentModel.addNewPolicyReference(node);
         this.addChild(node);
         
         return node;
     }
-    
-    /**
-     * TODO: proper java doc
-     *
-     * Factory method that creates new policy source model node as specified by a factory method name and input parameters.
-     * Each node is created with respect to its enclosing policy source model.
-     */
-    public ModelNode createChildAssertionNode(Collection<ModelNode> children, AssertionData assertionData) {
-        return new ModelNode(parentModel, children, assertionData);
-    }
-    
-    private ModelNode(Type type, PolicySourceModel parentModel) {
-        this.type = type;
-        this.parentModel = parentModel;
-        this.content = new LinkedList<ModelNode>();
-    }
-    
-    private ModelNode(Type type, PolicySourceModel parentModel, Collection<ModelNode> children) {
-        this.type = type;
-        this.parentModel = parentModel;
-        this.content = new LinkedList<ModelNode>(children);
-    }
-    
-    private ModelNode(PolicySourceModel parentModel, AssertionData data) {
-        this(Type.ASSERTION, parentModel);
         
-        this.assertionData = data;
-    }
-    
-    private ModelNode(PolicySourceModel parentModel, PolicyReferenceData data) {
-        this(Type.POLICY_REFERENCE, parentModel);
-        
-        this.referenceData = data;
-    }
-    
-    private ModelNode(PolicySourceModel parentModel, Collection<ModelNode> children, AssertionData data) {
-        this(Type.ASSERTION, parentModel, children);
-        
-        this.assertionData = data;
-    }
-    
     Collection<ModelNode> getContent() {
-        return content;
+        return unmodifiableViewOnContent;
+    }
+    
+    Collection<ModelNode> getAssertionParameterNodeChildren() {
+        Collection<ModelNode> result = null;
+        
+        if (isAssertionRelatedNode()) {
+            
+            result = new LinkedList<ModelNode>();
+            
+            for (ModelNode child : content) {
+                if (child.type == Type.ASSERTION_PARAMETER_NODE) {
+                    result.add(child);
+                }
+            }
+        }
+        
+        return result;
     }
     
     /**
@@ -298,16 +322,16 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
     public ModelNode getParentNode() {
         return parentNode;
     }
-    
+        
     /**
-     * Returns the assertion data for this policy source model node. The assertion data are expected to be not {@code null} only in
-     * case the type of this node is ASSERTION.
+     * Returns the data for this policy source model node (if any). The model node data are expected to be not {@code null} only in
+     * case the type of this node is ASSERTION or ASSERTION_PARAMETER_NODE.
      *
-     * @return the assertion data for this policy source model node or {@code null} if the node does not have any assertion data
+     * @return the data of this policy source model node or {@code null} if the node does not have any data associated to it
      * attached.
      */
-    public AssertionData getAssertionData() {
-        return assertionData;
+    public AssertionData getNodeData() {
+        return nodeData;
     }
     
     /**
@@ -322,73 +346,38 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
     }
     
     /**
-     * The method may be used to set or replace assertion data set for this node. If there are assertion data set already, those are
-     * replaced by a new reference and eventualy returned from the method.
+     * The method may be used to set or replace assertion data set for this node. If there are assertion data set already,
+     * those are replaced by a new reference and eventualy returned from the method.
      * <p/>
-     * This method is supported only in case this model node instance's type is {@code ASSERTION}. If used from other node types,
-     * an exception is thrown.
+     * This method is supported only in case this model node instance's type is {@code ASSERTION} or {@code ASSERTION_PARAMETER_NODE}.
+     * If used from other node types, an exception is thrown.
      *
      * @param newData new assertion data to be set.
      * @return old and replaced assertion data if any or {@code null} otherwise.
      *
      * @throws UnsupportedOperationException in case this method is called on nodes of type other than {@code ASSERTION}
+     * or {@code ASSERTION_PARAMETER_NODE}
      */
-    public AssertionData setOrReplaceAssertionData(AssertionData newData) {
-        if (type != Type.ASSERTION) {
-            throw new UnsupportedOperationException("This operation is supported only for 'ASSERTION' policy source model node type");
+    public AssertionData setOrReplaceNodeData(AssertionData newData) {
+        if (!isAssertionRelatedNode()) {
+            throw new UnsupportedOperationException("This operation is supported only for 'ASSERTION' and 'ASSERTION_PARAMETER_NODE' node types. It is not supported for the node type of this instance: '" +  type + "'");
         }
         
-        AssertionData oldData = this.assertionData;
-        this.assertionData = newData;
+        AssertionData oldData = this.nodeData;
+        this.nodeData = newData;
         
         return oldData;
     }
     
     /**
-     * Returns the child node at the specified position in the list of children.
+     * The method specifies whether the model node instance represents assertion related node, it means whether its type
+     * is 'ASSERTION' or 'ASSERTION_PARAMETER_NODE'. This is, for example, the way to determine whether the node supports
+     * setting a {@link AssertionData} object via {@link #setOrReplaceNodeData(AssertionData)} method or not.
      *
-     * @param index index of child node to return.
-     * @return the child node at the specified position in the children list.
-     *
-     * @throws IndexOutOfBoundsException if the specified index is out of range ({@code index < 0 || index >= childrenSize()}).
+     * @return {@code true} or {@code false} according to whether the node instance represents assertion related node or not.
      */
-    public ModelNode getChild(int index) {
-        return content.get(index);
-    }
-    
-    /**
-     * Removes the child at the specified position in this children list and dettaches it's parent reference from this node.
-     * Shifts any subsequent child nodes to the left (subtracts one from their indices). Returns the child node that was
-     * removed from the list.
-     *
-     * @param index the index of the child node to be removed.
-     * @return the removed child node (previously at the specified position).
-     *
-     * @throws IndexOutOfBoundsException if the specified index is out of range ({@code index < 0 || index >= childrenSize()}).
-     */
-    public ModelNode removeChild(int index) {
-        ModelNode removed = content.remove(index);
-        removed.parentNode = null;
-        
-        return removed;
-    }
-    
-    /**
-     * Removes the first child occurrence in the list of children and dettaches it's parent reference from this node.
-     * If there is no such child node found, the list of children remains unchanged. More formally, removes the child
-     * node with the lowest index {@code i} such that {@code (o==null ? get(i)==null : o.equals(get(i)))} (if such child
-     * node exists).
-     *
-     * @param child child node to be removed from the list of children, if present.
-     * @return {@code true} if this node contained the child node specified.
-     */
-    public boolean removeChild(ModelNode child) {
-        if (content.remove(child)) {
-            child.parentNode = null;
-            return true;
-        } else {
-            return false;
-        }
+    boolean isAssertionRelatedNode() {
+        return type == Type.ASSERTION || type == Type.ASSERTION_PARAMETER_NODE;
     }
     
     /**
@@ -401,16 +390,19 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
      * @throws NullPointerException if the specified node is {@code null}.
      * @throws IllegalArgumentException if child has a parent node set already to point to some node
      */
-    public boolean addChild(ModelNode child) {
+    private boolean addChild(ModelNode child) {
         content.add(child);
         child.parentNode = this;
         
         return true;
     }
     
+    /**
+     *
+     */
     void setReferencedModel(PolicySourceModel model) {
         if (this.type != Type.POLICY_REFERENCE) {
-            throw new IllegalStateException("This method may be invoked only on 'POLICY_REFERENCE' model nodes. Current node type: '" +  type + "'");
+            throw new UnsupportedOperationException("This operation is supported only for 'POLICY_REFERENCE' node types. It is not supported for the node type of this instance: '" +  type + "'");
         }
         
         referencedModel = model;
@@ -419,40 +411,6 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
     PolicySourceModel getReferencedModel() {
         return referencedModel;
     }
-    
-    /**
-     * Appends all of the new child nodes in the specified list to the end of the children list of this policy source
-     * model node, in the order that they are returned by the specified collection's iterator and sets it's parent to
-     * reference this node. The behavior of this operation is undefined if the specified list is modified while the
-     * operation is in progress.
-     *
-     * @param newChildren the new child nodes to be added as new children of this node.
-     * @return {@code true} if the children list of this node was changed as a result of the call.
-     *
-     * @throws NullPointerException if the specified collection is {@code null} or if any of the child nodes in the collection is {@code null}.
-     * @throws IllegalArgumentException if any of the child nodes in the collection has a parent node set already to point to some node.
-     */
-    public boolean addChildren(Collection<ModelNode> newChildren) {
-        int index = 0;
-        for (ModelNode child : newChildren) {
-            if (child == null) {
-                throw new NullPointerException("Attempt to set 'null' as " + index + ". new child policy source model node failed. Child policy source model node must not be null!");
-            }
-            
-            if (child.parentNode != null) {
-                throw new IllegalArgumentException("The " + index + ". new child node is already bound to another parent. Remove the child from its old parent's children first.");
-            }
-            
-            index++;
-        }
-        
-        for (ModelNode child : newChildren) {
-            child.parentNode = this;
-        }
-        
-        return content.addAll(newChildren);
-    }
-    
     
     /**
      * Returns the number of child policy source model nodes. If this model node contains
@@ -502,7 +460,7 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
         
         result = result && this.type.equals(that.type);
         // result = result && ((this.parentNode == null) ? that.parentNode == null : this.parentNode.equals(that.parentNode));
-        result = result && ((this.assertionData == null) ? that.assertionData == null : this.assertionData.equals(that.assertionData));
+        result = result && ((this.nodeData == null) ? that.nodeData == null : this.nodeData.equals(that.nodeData));
         result = result && ((this.content == null) ? that.content == null : this.content.equals(that.content));
         
         return result;
@@ -516,7 +474,7 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
         
         result = 37 * result + this.type.hashCode();
         result = 37 * result + ((this.parentNode != null) ? this.parentNode.hashCode() : 0);
-        result = 37 * result + ((this.assertionData != null) ? this.assertionData.hashCode() : 0);
+        result = 37 * result + ((this.nodeData != null) ? this.nodeData.hashCode() : 0);
         result = 37 * result + this.content.hashCode();
         
         return result;
@@ -539,14 +497,14 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
      * @param buffer buffer to be used for appending string representation of this instance
      * @return modified buffer containing new string representation of the instance
      */
-    StringBuffer toString(int indentLevel, StringBuffer buffer) {
+    public StringBuffer toString(int indentLevel, StringBuffer buffer) {
         String indent = PolicyUtils.Text.createIndent(indentLevel);
         String innerIndent = PolicyUtils.Text.createIndent(indentLevel + 1);
         
         buffer.append(indent).append(type).append(" {").append(PolicyUtils.Text.NEW_LINE);
         if (type == Type.ASSERTION) {
-            if (assertionData != null) {
-                assertionData.toString(indentLevel + 1, buffer);
+            if (nodeData != null) {
+                nodeData.toString(indentLevel + 1, buffer);
             } else {
                 buffer.append(innerIndent).append("no assertion data set");
             }
@@ -557,7 +515,7 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
             } else {
                 buffer.append(innerIndent).append("no policy reference data set");
             }
-            buffer.append(PolicyUtils.Text.NEW_LINE);            
+            buffer.append(PolicyUtils.Text.NEW_LINE);
         }
         
         if (content.size() > 0) {
@@ -575,8 +533,8 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
     protected ModelNode clone() throws CloneNotSupportedException {
         ModelNode clone = (ModelNode) super.clone();
         
-        if (this.assertionData != null) {
-            clone.assertionData = this.assertionData.clone();
+        if (this.nodeData != null) {
+            clone.nodeData = this.nodeData.clone();
         }
         
         // no need to clone PolicyReferenceData, since those are immutable
@@ -586,10 +544,11 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
         }
         
         
-        clone.content = new LinkedList<ModelNode>(this.content);
-        clone.content.clear();
+        clone.content = new LinkedList<ModelNode>();
+        clone.unmodifiableViewOnContent = Collections.unmodifiableCollection(clone.content);
+        
         for (ModelNode thisChild : this.content) {
-            clone.content.add(thisChild.clone());
+            clone.addChild(thisChild.clone());
         }
         
         return clone;

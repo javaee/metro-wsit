@@ -27,6 +27,7 @@ import com.sun.xml.ws.policy.NestedPolicy;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
+import com.sun.xml.ws.policy.sourcemodel.ModelNode;
 import com.sun.xml.ws.security.impl.policy.PolicyUtil;
 import com.sun.xml.ws.security.policy.AsymmetricBinding;
 import com.sun.xml.ws.security.policy.Issuer;
@@ -56,7 +57,7 @@ public class SCTokenWrapper extends PolicyAssertion implements SecureConversatio
     private boolean cached = false;
     /** Creates a new instance of SCTokenWrapper */
     public SCTokenWrapper(PolicyAssertion scToken,MessagePolicy mp) {
-        super(new AssertionData(scToken.getName(),scToken.getValue(),scToken.getAttributes()),getNestedAssertions(scToken),
+        super(new AssertionData(scToken.getName(),scToken.getValue(),scToken.getAttributes(), ModelNode.Type.ASSERTION),getNestedAssertions(scToken),
                 (scToken.getNestedPolicy()== null ? null : scToken.getNestedPolicy().getAssertionSet()));
         this.scToken = (SecureConversationToken)scToken;
         this.messagePolicy = mp;
