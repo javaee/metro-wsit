@@ -1,5 +1,5 @@
 /*
- * $Id: RMException.java,v 1.1 2006-05-03 22:56:35 arungupta Exp $
+ * $Id: RMException.java,v 1.1.6.1 2006-08-14 12:33:57 m_potociar Exp $
  */
 
 /*
@@ -59,6 +59,11 @@ public class RMException extends Exception {
     public com.sun.xml.ws.api.message.Message getFaultMessage() {
         return faultMessage;
 
+    }
+
+    public RMException (String s , com.sun.xml.ws.api.message.Message message) {
+        super(s);
+        this.faultMessage = message;
     }
 
 

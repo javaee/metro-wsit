@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustElementFactory.java,v 1.2 2006-05-10 22:53:12 jdg6688 Exp $
+ * $Id: WSTrustElementFactory.java,v 1.2.6.1 2006-08-14 12:33:59 m_potociar Exp $
  */
 
 /*
@@ -95,26 +95,24 @@ import javax.xml.bind.JAXBException;
  */
 public abstract class WSTrustElementFactory {
        
-    private static WSTrustElementFactory trustElemFactory = null;
+    private static WSTrustElementFactory trustElemFactory 
+            = new WSTrustElementFactoryImpl();
     
     private static JAXBContext jaxbContext = null;
+    
+    static {
+        try {
+            jaxbContext = JAXBContext.newInstance("com.sun.xml.ws.security.trust.impl.bindings:com.sun.xml.ws.security.secconv.impl.bindings:com.sun.xml.ws.security.impl.bindings:com.sun.xml.ws.policy.impl.bindings");
+        } catch (JAXBException jbe) {
+            throw new RuntimeException(jbe.getMessage());
+        }        
+    }
 
     public static JAXBContext getContext() {
-        
-        if (jaxbContext == null) {
-            try {
-                jaxbContext = JAXBContext.newInstance("com.sun.xml.ws.security.trust.impl.bindings:com.sun.xml.ws.security.secconv.impl.bindings:com.sun.xml.ws.security.impl.bindings:com.sun.xml.ws.policy.impl.bindings");
-            } catch (JAXBException jbe) {
-                throw new RuntimeException(jbe.getMessage());
-            }
-        }
         return jaxbContext;
-    };
+    }
     
     public static WSTrustElementFactory newInstance() {
-        if (trustElemFactory == null) {
-            trustElemFactory = new WSTrustElementFactoryImpl();
-        }
         return trustElemFactory;
     }
     

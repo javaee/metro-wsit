@@ -35,14 +35,16 @@ import javax.xml.stream.XMLStreamReader;
 import javax.xml.ws.WebServiceException;
 
 import com.sun.istack.NotNull;
-import static com.sun.xml.ws.mex.MetadataConstants.ERROR_LOG_LEVEL;
-import static com.sun.xml.ws.mex.MetadataConstants.WSDL_DIALECT;
 import com.sun.xml.ws.mex.client.schema.Metadata;
+import com.sun.xml.ws.mex.client.schema.MetadataReference;
 import com.sun.xml.ws.mex.client.schema.MetadataSection;
 
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import static com.sun.xml.ws.mex.MetadataConstants.ERROR_LOG_LEVEL;
+import static com.sun.xml.ws.mex.MetadataConstants.WSDL_DIALECT;
 
 /**
  * Class used for retrieving metadata at runtime. The intended usage is:
@@ -118,6 +120,26 @@ public class MetadataClient {
         return null;
     }
     
+    /*
+     * Currently only supports Get requests (not Get Metadata),
+     * so we only need the reference's address. Any metadata
+     * about the request is ignored.<br>
+     *
+     * Todo: handle inline metadata if we support starting
+     * from EPR.
+     */
+    public Metadata retrieveMetadata(@NotNull MetadataReference reference) {
+        List nodes = reference.getAny();
+        for (Object o : nodes) {
+            Node node = (Node) o;
+            if (node.getLocalName().equals("Address")) {
+                String address = node.getFirstChild().getNodeValue();
+                return retrieveMetadata(address);
+            }
+        }
+        return null;
+    }
+    
     /**
      * Used to retrieve the service and port names and port addresses
      * from metadata. If there is more than one wsdl section in the metadata,
@@ -129,13 +151,28 @@ public class MetadataClient {
     public List<PortInfo> getServiceInformation(@NotNull Metadata data) {
         for (MetadataSection section : data.getMetadataSection()) {
             if (section.getDialect().equals(WSDL_DIALECT)) {
-                return getServiceInformation(section.getAny());
+                if (section.getAny() != null) {
+                    return getServiceInformation(section.getAny());
+                }
+                if (section.getMetadataReference() != null) {
+                    Metadata newMetadata =
+                        retrieveMetadata(section.getMetadataReference());
+                    return getServiceInformation(newMetadata);
+                }
+                if (section.getLocation() != null) {
+                    Metadata newMetadata =
+                        retrieveMetadata(section.getLocation());
+                    return getServiceInformation(newMetadata);
+                }
             }
         }
         return null;
     }
 
     private List<PortInfo> getServiceInformation(Object o) {
+        if (o == null) {
+            return null;
+        }
         List<PortInfo> portInfos = new ArrayList<PortInfo>();
         Node wsdlNode = (Node) o;
         String ns = getAttributeValue(wsdlNode, "targetNamespace");

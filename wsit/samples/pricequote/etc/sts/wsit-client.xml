@@ -20,7 +20,7 @@
  *
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
 --><!--
- $Id: wsit-client.xml,v 1.3 2006-08-05 05:15:00 arungupta Exp $
+ $Id: wsit-client.xml,v 1.3.2.1 2006-08-14 12:34:10 m_potociar Exp $
 -->
 
 <wsdl:definitions targetNamespace="http://tempuri.org/" xmlns:tns="http://tempuri.org/"

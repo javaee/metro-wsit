@@ -1,5 +1,5 @@
 /*
-* $Id: ClaimsImpl.java,v 1.1 2006-05-03 22:57:24 arungupta Exp $
+* $Id: ClaimsImpl.java,v 1.1.6.1 2006-08-14 12:34:00 m_potociar Exp $
  */
 
 /*
@@ -35,6 +35,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 
 import com.sun.xml.ws.security.trust.WSTrustException;
+import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 
 import com.sun.xml.ws.security.trust.elements.Claims;
 import com.sun.xml.ws.security.trust.impl.bindings.ClaimsType;
@@ -61,9 +62,7 @@ public class ClaimsImpl extends ClaimsType implements Claims {
     public static ClaimsType fromElement(org.w3c.dom.Element element)
         throws WSTrustException {
         try {
-            JAXBContext jc =
-                JAXBContext.newInstance("com.sun.xml.ws.security.trust.impl.elements");
-            javax.xml.bind.Unmarshaller u = jc.createUnmarshaller();
+            javax.xml.bind.Unmarshaller u = WSTrustElementFactory.getContext().createUnmarshaller();
             return (ClaimsType)u.unmarshal(element);
         } catch ( Exception ex) {
             throw new WSTrustException(ex.getMessage(), ex);

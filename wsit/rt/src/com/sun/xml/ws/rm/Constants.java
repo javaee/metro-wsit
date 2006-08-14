@@ -50,7 +50,11 @@ public class Constants {
 
     public static final QName CREATE_SEQUENCE_REFUSED_QNAME = new QName(WS_RM_NAMESPACE,"CreateSequenceRefused");
 
+    public static final QName SEQUENCE_TERMINATED_QNAME = new QName(WS_RM_NAMESPACE,"SequenceTerminated");
+
     public static final String CREATE_SEQUENCE_REFUSED_TEXT = "The create sequence request has been refused by RM Destination %s ";
+
+    public static final String SEQUENCE_TERMINATED_TEXT = "The sequence has been terminated because of an unrecoverable error";
 
 
 }
