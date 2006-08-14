@@ -1,5 +1,5 @@
 /*
- * $Id: BinarySecretImpl.java,v 1.2 2006-07-21 19:10:16 jdg6688 Exp $
+ * $Id: BinarySecretImpl.java,v 1.3 2006-08-14 10:10:55 raharsha Exp $
  */
 
 /*
@@ -26,6 +26,7 @@
 
 package com.sun.xml.ws.security.trust.impl.elements;
 
+import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import org.w3c.dom.Element;
 
 import javax.xml.bind.JAXBContext;
@@ -54,7 +55,7 @@ import com.sun.org.apache.xml.internal.security.exceptions.Base64DecodingExcepti
  * @author WS-Trust Implementation Team
  */
 public class BinarySecretImpl extends BinarySecretType implements BinarySecret {
-    
+   
     public BinarySecretImpl(byte[] rawValue, String type) {        
         setRawValue(rawValue);
         setType(type);
@@ -80,9 +81,7 @@ public class BinarySecretImpl extends BinarySecretType implements BinarySecret {
     public static BinarySecretType fromElement(org.w3c.dom.Element element)
         throws WSTrustException {
         try {
-            JAXBContext jc =
-                JAXBContext.newInstance("com.sun.xml.ws.security.trust.impl.bindings");
-            javax.xml.bind.Unmarshaller u = jc.createUnmarshaller();
+            javax.xml.bind.Unmarshaller u = WSTrustElementFactory.getContext().createUnmarshaller();
             return (BinarySecretType)((JAXBElement)u.unmarshal(element)).getValue();
         } catch (Exception ex) {
             throw new WSTrustException(ex.getMessage(), ex);

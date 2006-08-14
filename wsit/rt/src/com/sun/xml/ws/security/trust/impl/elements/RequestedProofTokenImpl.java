@@ -1,5 +1,5 @@
 /*
- * $Id: RequestedProofTokenImpl.java,v 1.1 2006-05-03 22:57:27 arungupta Exp $
+ * $Id: RequestedProofTokenImpl.java,v 1.2 2006-08-14 10:10:55 raharsha Exp $
  */
 
 /*
@@ -33,6 +33,7 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
 import com.sun.xml.ws.security.trust.WSTrustException;
+import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 
 import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
 
@@ -149,9 +150,7 @@ public class RequestedProofTokenImpl extends RequestedProofTokenType implements 
     public static RequestedProofTokenType fromElement(org.w3c.dom.Element element)
         throws WSTrustException {
         try {
-            JAXBContext jc =
-                JAXBContext.newInstance("com.sun.xml.ws.security.trust.impl.elements");
-            javax.xml.bind.Unmarshaller u = jc.createUnmarshaller();
+            javax.xml.bind.Unmarshaller u = WSTrustElementFactory.getContext().createUnmarshaller();
             return (RequestedProofTokenType)u.unmarshal(element);
         } catch ( Exception ex) {
             throw new WSTrustException(ex.getMessage(), ex);

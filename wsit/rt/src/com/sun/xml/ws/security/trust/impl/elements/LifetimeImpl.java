@@ -1,5 +1,5 @@
 /*
- * $Id: LifetimeImpl.java,v 1.1 2006-05-03 22:57:25 arungupta Exp $
+ * $Id: LifetimeImpl.java,v 1.2 2006-08-14 10:10:55 raharsha Exp $
  */
 
 /*
@@ -35,6 +35,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import com.sun.xml.ws.security.wsu.AttributedDateTime;
 import com.sun.xml.ws.security.trust.WSTrustException;
+import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.security.trust.impl.bindings.LifetimeType;
 
 import com.sun.xml.ws.security.trust.elements.Lifetime;
@@ -76,9 +77,7 @@ public class LifetimeImpl extends LifetimeType implements Lifetime {
     public static LifetimeType fromElement(org.w3c.dom.Element element)
         throws WSTrustException {
         try {
-            JAXBContext jc =
-                JAXBContext.newInstance("com.sun.xml.ws.security.trust.impl.elements");
-            javax.xml.bind.Unmarshaller u = jc.createUnmarshaller();
+            javax.xml.bind.Unmarshaller u = WSTrustElementFactory.getContext().createUnmarshaller();
             return (LifetimeType)u.unmarshal(element);
         } catch ( Exception ex) {
             throw new WSTrustException(ex.getMessage(), ex);

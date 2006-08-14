@@ -1,5 +1,5 @@
 /*
- * $Id: EntropyImpl.java,v 1.2 2006-07-21 19:10:17 jdg6688 Exp $
+ * $Id: EntropyImpl.java,v 1.3 2006-08-14 10:10:55 raharsha Exp $
  */
 
 /*
@@ -33,6 +33,7 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 
 import com.sun.xml.ws.security.trust.WSTrustException;
+import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.security.trust.elements.BinarySecret;
 import com.sun.xml.ws.security.EncryptedKey;
 
@@ -96,9 +97,7 @@ public class EntropyImpl extends EntropyType implements Entropy {
     public static EntropyType fromElement(org.w3c.dom.Element element)
     throws WSTrustException {
         try {
-            JAXBContext jc =
-                    JAXBContext.newInstance("com.sun.xml.ws.security.trust.impl.elements");
-            javax.xml.bind.Unmarshaller u = jc.createUnmarshaller();
+            javax.xml.bind.Unmarshaller u = WSTrustElementFactory.getContext().createUnmarshaller();
             return (EntropyType)u.unmarshal(element);
         } catch ( Exception ex) {
             throw new WSTrustException(ex.getMessage(), ex);
