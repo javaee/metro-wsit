@@ -64,7 +64,13 @@ public class XmlPolicyModelUnmarshallerTest extends TestCase {
     }
     
     public void testUnmarshallComplexPolicyModelWithAssertionParametersWithValues() throws Exception {
-        PolicySourceModel model = unmarshallModel("complex_policy/assertion_parameters2.xml");
+        PolicySourceModel model = unmarshallModel("bug_reproduction/assertion_parameter_value_unmarshalling.xml");
+        System.out.println("model = " + model.toString());
+        System.out.println("\n===============================================================================\n");
+    }
+    
+    public void testUnmarshallPolicyModelWithPolicyReference() throws Exception {
+        PolicySourceModel model = unmarshallModel("bug_reproduction/policy_reference1.xml");
         System.out.println("model = " + model.toString());
         System.out.println("\n===============================================================================\n");
     }
