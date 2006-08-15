@@ -48,7 +48,8 @@ import com.sun.xml.ws.policy.PolicyException;
  */
 final class XmlPolicyModelUnmarshaller extends PolicyModelUnmarshaller {
     /** Creates a new instance of WsdlPolicyModelUnmarshaller */
-    XmlPolicyModelUnmarshaller() {
+    XmlPolicyModelUnmarshaller() {        
+        
     }
     
     public PolicySourceModel unmarshalModel(Object storage) throws PolicyException {
@@ -224,7 +225,7 @@ final class XmlPolicyModelUnmarshaller extends PolicyModelUnmarshaller {
         } else {
             StringBuffer buffer = (currentValueBuffer == null) ? new StringBuffer() : currentValueBuffer;
             String data = characters.getData();
-            if (currentNodeType == ModelNode.Type.ASSERTION ) {
+            if (currentNodeType == ModelNode.Type.ASSERTION || currentNodeType == ModelNode.Type.ASSERTION_PARAMETER_NODE) {
                 return buffer.append(data);
             } else {
                 throw new PolicyException("Unexpected character data on current policy source model node '" + currentNodeType + "' : data = '" + data + "'");
