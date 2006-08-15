@@ -102,7 +102,7 @@ public final class PolicyModelGenerator {
         AssertionSet set = policy.getAssertionSet();
         ModelNode alternativeNode = exactlyOneNode.createChildAllNode();
         for (PolicyAssertion assertion : set) {
-            AssertionData data = new AssertionData(assertion.getName(), assertion.getValue(), assertion.getAttributes(), ModelNode.Type.ASSERTION); // TODO: revise constructor - node type
+            AssertionData data = new AssertionData(assertion.getName(), assertion.getValue(), assertion.getAttributes(), ModelNode.Type.ASSERTION); 
             ModelNode assertionNode = alternativeNode.createChildAssertionNode(data);
             if (assertion.hasNestedPolicy()) {
                 NestedPolicy nestedPolicy = assertion.getNestedPolicy();
@@ -121,17 +121,16 @@ public final class PolicyModelGenerator {
      * @param assertions The set of contained assertions
      * @param assertionNode The node to which the assertions are added as child nodes
      */
-    private void translate(Iterator<PolicyAssertion> nestedAssertionsIterator, ModelNode assertionNode) {
-        while (nestedAssertionsIterator.hasNext()) {
-            PolicyAssertion nestedAssertion = nestedAssertionsIterator.next();
-            AssertionData data = new AssertionData(nestedAssertion.getName(), nestedAssertion.getValue(), nestedAssertion.getAttributes(), ModelNode.Type.ASSERTION); // TODO: revise constructor - node type
-            ModelNode nestedAssertionNode = assertionNode.createChildAssertionNode(data);
-            if (nestedAssertion.hasNestedPolicy()) {
-                NestedPolicy nestedPolicy = nestedAssertion.getNestedPolicy();
-                ModelNode nestedPolicyNode = translate(nestedAssertionNode, nestedPolicy);
+    private void translate(Iterator<PolicyAssertion> assertionParametersIterator, ModelNode assertionNode) {
+        while (assertionParametersIterator.hasNext()) {
+            PolicyAssertion assertionParameter = assertionParametersIterator.next();
+            AssertionData data = new AssertionData(assertionParameter.getName(), assertionParameter.getValue(), assertionParameter.getAttributes(), ModelNode.Type.ASSERTION_PARAMETER_NODE);
+            ModelNode assertionParameterNode = assertionNode.createChildAssertionParameterNode(data);
+            if (assertionParameter.hasNestedPolicy()) {
+                throw new IllegalStateException("Unexpected nested policy element found in assertion parameter: " + assertionParameter);
             }
-            if (nestedAssertion.hasNestedAssertions()) {
-                translate(nestedAssertion.getNestedAssertionsIterator(), nestedAssertionNode);
+            if (assertionParameter.hasNestedAssertions()) {
+                translate(assertionParameter.getNestedAssertionsIterator(), assertionParameterNode);
             }
         }
     }    
