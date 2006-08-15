@@ -34,7 +34,6 @@ package com.sun.xml.ws.rm.jaxws.runtime.client;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
@@ -47,7 +46,6 @@ import com.sun.xml.ws.rm.jaxws.runtime.InboundMessageProcessor;
 import com.sun.xml.ws.rm.jaxws.runtime.PipeBase;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
 import com.sun.xml.ws.security.impl.bindings.SecurityTokenReferenceType;
-import com.sun.xml.ws.security.secconv.WSSecureConversationException;
 import com.sun.xml.wss.jaxws.impl.SecurityClientPipe;
 
 import javax.xml.bind.JAXBElement;
@@ -214,8 +212,7 @@ public class RMClientPipe
             if (dest != null && !dest.equals("") && 
                 outboundSequence.getDestination()
                     .getAddress().getURI().toString() != dest) {
-                        throw new RMException("The Endpoint Address cannot be changed "
-                                            + " by a client of an RM-enabled endpoint");
+                        throw new RMException(Messages.UNCHANGEABLE_ENDPOINT_ADDRESS.format());
             }
             
         } else {
@@ -240,14 +237,14 @@ public class RMClientPipe
                 destURI = new URI(dest);
                 destEpr = addressingBuilder.newEndpointReference(destURI);
             } catch (URISyntaxException e) {
-                throw new RMException("Invalid destination URI - " + dest);
+                throw new RMException(Messages.INVALID_DEST_URI.format( dest));
             }
 
             try {
                 acksToURI = new URI(acksTo);
                 acksToEpr = addressingBuilder.newEndpointReference(acksToURI);
             } catch (URISyntaxException e) {
-                throw new RMException("Invalid acksTo URI - " + acksTo);
+                throw new RMException(Messages.INVALID_ACKS_TO_URI.format( acksTo));
             }
 
             //BUGBUG?? - We may need to pass a new marshaller and unmarshaller and a clone of nextPipe
@@ -266,7 +263,7 @@ public class RMClientPipe
             }
 
             //store this in field
-            proxy = packet.proxy;
+            this.proxy = packet.proxy;
 
             outboundSequence.setSecureReliableMessaging(secureReliableMessaging);
 
@@ -277,11 +274,11 @@ public class RMClientPipe
             outboundSequence.connect(destEpr,  acksToEpr, twoWay);
 
             inboundSequence = (ClientInboundSequence)outboundSequence.getInboundSequence();
-            String inboundId = inboundSequence.getId();
+
 
             //set a Session object in BindingProvider property allowing user to close
             //the sequence
-            ClientSession.setSession(proxy, new ClientSession(outboundSequence.getId(), this));
+            ClientSession.setSession(this.proxy, new ClientSession(outboundSequence.getId(), this));
 
             provider.addOutboundSequence(outboundSequence);
             provider.addInboundSequence(inboundSequence);
@@ -319,10 +316,10 @@ public class RMClientPipe
      * @return packet
      *      A packet containing the "output" message.  If a failure occurs that might
      *      succeed in a retry, <code>null</code> is returne.
-     * @throws RMException for errors caused by non-retriable failures.
+     *
      */
     private Packet trySend(Packet packet, com.sun.xml.ws.rm.Message message)
-            throws RMException {
+            {
        
         try {
             
@@ -389,7 +386,7 @@ public class RMClientPipe
                     //be uninteresting.  Also, make sure that the returned packet
                     //actually contains a message.  It may be a one-way response.
                     Message mess = ret.getMessage();                
-                    com.sun.xml.ws.rm.Message rmMessage = null;
+                    com.sun.xml.ws.rm.Message rmMessage ;
                     if (mess == null || mess.isFault()) {
                        return ret;
                     } else {
@@ -521,7 +518,7 @@ public class RMClientPipe
 
                 t.start();
                 //client is not expecting a response here.
-                Packet ret = new Packet(Messages.createEmpty(binding.getSOAPVersion()));
+                Packet ret = new Packet(com.sun.xml.ws.api.message.Messages.createEmpty(binding.getSOAPVersion()));
                 ret.invocationProperties.putAll(packet.invocationProperties);
                 return ret;
 
@@ -530,7 +527,7 @@ public class RMClientPipe
             Message faultMessage = e.getFaultMessage();
             if (faultMessage != null){
                 try {
-                    Packet ret = new Packet(Messages.create(faultMessage.readAsSOAPMessage()));
+                    Packet ret = new Packet(com.sun.xml.ws.api.message.Messages.create(faultMessage.readAsSOAPMessage()));
                     ret.invocationProperties.putAll(packet.invocationProperties);
                     return ret;
                 } catch (SOAPException e1) {
