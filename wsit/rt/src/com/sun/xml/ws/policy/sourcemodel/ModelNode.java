@@ -58,6 +58,44 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
         public QName asQName() {
             return qName;
         }
+        
+        /**
+         * Method checks the PSM state machine if the creation of new child of given type is plausible for a node element
+         * with type set to this type instance. 
+         */
+        boolean isChildTypeSupported(Type childType) {
+            switch (this) {
+                case POLICY:
+                case ALL:
+                case EXACTLY_ONE:
+                    switch (childType) {
+                        case ASSERTION_PARAMETER_NODE:
+                            return false;
+                        default:
+                            return true;
+                    }
+                case POLICY_REFERENCE:
+                    return false;
+                case ASSERTION:
+                    switch (childType) {
+                        case POLICY:
+                        case POLICY_REFERENCE:
+                        case ASSERTION_PARAMETER_NODE:
+                            return true;
+                        default:
+                            return false;
+                    }
+                case ASSERTION_PARAMETER_NODE:
+                    switch (childType) {
+                        case ASSERTION_PARAMETER_NODE:
+                            return true;
+                        default:
+                            return false;
+                    }
+                default:
+                    throw new IllegalStateException("Unknown model node type: " + this);
+            }
+        }
     }
     
     // comon model node attributes
@@ -116,8 +154,8 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
      * Each node is created with respect to its enclosing policy source model.
      */
     public ModelNode createChildPolicyNode() {
-        if (type == Type.ASSERTION_PARAMETER_NODE) {
-            throw new UnsupportedOperationException("This operation is supported only for 'POLICY', 'EXACTLY_ONE', 'ALL' and 'ASSERTION' node types. It is not supported for the 'ASSERTION_PARAMETER_NODE' node type");
+        if (!this.type.isChildTypeSupported(Type.POLICY)) {
+            throw new UnsupportedOperationException("This operation is not supported for the '" + type + "' node type");
         }
         
         ModelNode node = new ModelNode(ModelNode.Type.POLICY, parentModel);
@@ -133,8 +171,8 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
      * Each node is created with respect to its enclosing policy source model.
      */
     public ModelNode createChildAllNode() {
-        if (isAssertionRelatedNode()) {
-            throw new UnsupportedOperationException("This operation is supported only for 'POLICY', 'EXACTLY_ONE' and 'ALL' node types. It is not supported for the node type of this instance: '" +  type + "'");
+        if (!this.type.isChildTypeSupported(Type.ALL)) {
+            throw new UnsupportedOperationException("This operation is not supported for the '" + type + "' node type");
         }
         
         ModelNode node = new ModelNode(ModelNode.Type.ALL, parentModel);
@@ -150,8 +188,8 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
      * Each node is created with respect to its enclosing policy source model.
      */
     public ModelNode createChildExactlyOneNode() {
-        if (isAssertionRelatedNode()) {
-            throw new UnsupportedOperationException("This operation is supported only for 'POLICY', 'EXACTLY_ONE' and 'ALL' node types. It is not supported for the node type of this instance: '" +  type + "'");
+        if (!this.type.isChildTypeSupported(Type.EXACTLY_ONE)) {
+            throw new UnsupportedOperationException("This operation is not supported for the '" + type + "' node type");
         }
         
         ModelNode node = new ModelNode(ModelNode.Type.EXACTLY_ONE, parentModel);
@@ -167,9 +205,9 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
      * Each node is created with respect to its enclosing policy source model.
      */
     public ModelNode createChildAssertionNode() {
-        if (isAssertionRelatedNode()) {
-            throw new UnsupportedOperationException("This operation is supported only for 'POLICY', 'EXACTLY_ONE' and 'ALL' node types. It is not supported for the node type of this instance: '" +  type + "'");
-        }
+        if (!this.type.isChildTypeSupported(Type.ASSERTION)) {
+            throw new UnsupportedOperationException("This operation is not supported for the '" + type + "' node type");
+        }        
         
         ModelNode node = new ModelNode(ModelNode.Type.ASSERTION, parentModel);
         this.addChild(node);
@@ -184,9 +222,9 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
      * Each node is created with respect to its enclosing policy source model.
      */
     public ModelNode createChildAssertionNode(AssertionData nodeData) {
-        if (isAssertionRelatedNode()) {
-            throw new UnsupportedOperationException("This operation is supported only for 'POLICY', 'EXACTLY_ONE' and 'ALL' node types. It is not supported for the node type of this instance: '" +  type + "'");
-        }
+        if (!this.type.isChildTypeSupported(Type.ASSERTION)) {
+            throw new UnsupportedOperationException("This operation is not supported for the '" + type + "' node type");
+        }        
         
         ModelNode node = new ModelNode(Type.ASSERTION, parentModel, nodeData);
         this.addChild(node);
@@ -201,9 +239,9 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
      * Each node is created with respect to its enclosing policy source model.
      */
     public ModelNode createChildAssertionParameterNode() {
-        if (!isAssertionRelatedNode()) {
-            throw new UnsupportedOperationException("This operation is supported only for 'POLICY', 'EXACTLY_ONE' and 'ALL' node types. It is not supported for the node type of this instance: '" +  type + "'");
-        }
+        if (!this.type.isChildTypeSupported(Type.ASSERTION_PARAMETER_NODE)) {
+            throw new UnsupportedOperationException("This operation is not supported for the '" + type + "' node type");
+        }        
         
         ModelNode node = new ModelNode(ModelNode.Type.ASSERTION_PARAMETER_NODE, parentModel);
         this.addChild(node);
@@ -218,9 +256,9 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
      * Each node is created with respect to its enclosing policy source model.
      */
     public ModelNode createChildAssertionParameterNode(AssertionData nodeData) {
-        if (!isAssertionRelatedNode()) {
-            throw new UnsupportedOperationException("This operation is supported only for 'ASSERTION' and 'ASSERTION_PARAMETER_NODE' node types. It is not supported for the node type of this instance: '" +  type + "'");
-        }
+        if (!this.type.isChildTypeSupported(Type.ASSERTION_PARAMETER_NODE)) {
+            throw new UnsupportedOperationException("This operation is not supported for the '" + type + "' node type");
+        }        
         
         ModelNode node = new ModelNode(Type.ASSERTION_PARAMETER_NODE, parentModel, nodeData);
         this.addChild(node);
@@ -235,9 +273,9 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
      * Each node is created with respect to its enclosing policy source model.
      */
     public ModelNode createChildPolicyReferenceNode(PolicyReferenceData referenceData) {
-        if (!isAssertionRelatedNode()) {
-            throw new UnsupportedOperationException("This operation is supported only for 'ASSERTION' and 'ASSERTION_PARAMETER_NODE' node types. It is not supported for the node type of this instance: '" +  type + "'");
-        }
+        if (!this.type.isChildTypeSupported(Type.POLICY_REFERENCE)) {
+            throw new UnsupportedOperationException("This operation is not supported for the '" + type + "' node type");
+        }        
         
         ModelNode node = new ModelNode(parentModel, referenceData);
         this.parentModel.addNewPolicyReference(node);
@@ -245,7 +283,7 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
         
         return node;
     }
-        
+    
     Collection<ModelNode> getContent() {
         return unmodifiableViewOnContent;
     }
@@ -322,7 +360,7 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
     public ModelNode getParentNode() {
         return parentNode;
     }
-        
+    
     /**
      * Returns the data for this policy source model node (if any). The model node data are expected to be not {@code null} only in
      * case the type of this node is ASSERTION or ASSERTION_PARAMETER_NODE.
@@ -552,6 +590,10 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
         }
         
         return clone;
+    }
+    
+    public PolicyReferenceData getReferenceData() {
+        return referenceData;
     }
     
 }
