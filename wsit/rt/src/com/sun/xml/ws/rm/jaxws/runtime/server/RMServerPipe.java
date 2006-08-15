@@ -166,7 +166,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
             }
 
             if (soapFault != null){
-                Message m = Messages.create(soapFault);
+                Message m = com.sun.xml.ws.api.message.Messages.create(soapFault);
 
                 //SequenceFault is to be added for only SOAP 1.1
                 if (binding.getSOAPVersion() == SOAPVersion.SOAP_11) {
@@ -193,10 +193,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
                     (ServerInboundSequence)message.getSequence();
 
             if (inboundSequence == null ) {
-                throw new RMException("This exception is thrown when Addressing or RM headers are not set properly. \n" +
-                        " Please check \n" +
-                        "1. If the policy in the wsdl is missing an explicit usingAddressing assertion\n" +
-                        "2. The namespace uri for the UsingAddressing element in the wsdl  \n");
+                throw new RMException(Messages.INCORRECT_ADDRESSING_HEADERS.format());
 
             }
             //reset inactivity timer
@@ -228,13 +225,13 @@ public class RMServerPipe extends PipeBase<RMDestination,
 
 
             Message responseMessage = ret.getMessage();
-            Message emptyMessage = null;
+            Message emptyMessage ;
 
             if (responseMessage == null) {
                 //This a one-way response. handleOutboundMessage
                 //might need a message to write sequenceAcknowledgent headers to.
                 //Give it one.
-                emptyMessage = Messages.createEmpty(config.getSoapVersion());
+                emptyMessage = com.sun.xml.ws.api.message.Messages.createEmpty(config.getSoapVersion());
                 ret.setMessage(emptyMessage);
             }
 
@@ -293,7 +290,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
             try {
                 return generateAckMessage(packet, inboundSequence);
             } catch (RMException ee) {
-                throw new WebServiceException(e);
+                throw new WebServiceException(Messages.ACKNOWLEDGEMENT_MESSAGE_EXCEPTION.format() +e);
             }
 
         } catch (DuplicateMessageException e) {
@@ -313,7 +310,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
 
             } else {
                 //check whether original response is available.
-                com.sun.xml.ws.api.message.Message  response = null;
+                com.sun.xml.ws.api.message.Message  response ;
                 com.sun.xml.ws.rm.Message original = e.getRMMessage();
                 com.sun.xml.ws.rm.Message origresp = original.getRelatedMessage();
 
@@ -380,7 +377,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
     public Packet handleProtocolMessage(Packet packet) throws RMException {
 
         String actionValue = null;
-        ActionHandler handler = null;
+        ActionHandler handler ;
 
         AddressingProperties ap = (AddressingProperties)packet.invocationProperties
                 .get(JAXWSAConstants.CLIENT_ADDRESSING_PROPERTIES_INBOUND);
@@ -393,10 +390,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
             //Whenever addressing headers are missing the CreateSequenceRefusedFault should be sent
             //back to the client
             //This can be achieved by throwing the CreateSequenceException
-            throw new CreateSequenceException("Addressing headers are not set up correctly in the inbound message \n" +
-                    " Please check \n" +
-                    "1. If the policy in the wsdl is missing an explicit usingAddressing assertion\n" +
-                    "2. The namespace uri for the UsingAddressing element in the wsdl  \n");
+            throw new CreateSequenceException(Messages.INCORRECT_ADDRESSING_HEADERS.format());
         }
 
         if (actionValue != null) {
@@ -417,8 +411,8 @@ public class RMServerPipe extends PipeBase<RMDestination,
 
     public Packet handleCreateSequenceAction(Packet packet) throws RMException{
 
-        CreateSequenceElement csrElement = null;
-        Identifier id = null;
+        CreateSequenceElement csrElement;
+        Identifier id ;
         String offeredId = null;
         AddressingConstants ac = addressingBuilder.newAddressingConstants();
         
@@ -431,7 +425,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
         try {
             csrElement = message.readPayloadAsJAXB(unmarshaller);
         } catch (JAXBException e) {
-            throw new RMException (e);
+            throw new RMException (Messages.CREATESEQUENCE_HEADER_PROBLEM.format() + e);
         }
 
         EndpointReference replyTo = inboundAddressingProperties.getReplyTo();
@@ -446,8 +440,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
                            
         
         if (!ackstoUri.equals(replytoUri)){
-            throw new CreateSequenceException("AcksTo is not equal to ReplyTo expected " + ackstoUri + "Got "
-                    + replytoUri  );
+            throw new CreateSequenceException(Messages.ACKSTO_NOT_EQUAL_REPLYTO.format(ackstoUri,replytoUri)  );
         }
         OfferType offer = csrElement.getOffer();
         if (offer != null) {
@@ -485,12 +478,11 @@ public class RMServerPipe extends PipeBase<RMDestination,
                     if (gotId.equals(strId)){
                         inboundSequence.setStrId(strId);
                     } else {
-                        throw new RMSecurityException("SecurityToken Authorization error " + "Got "+
-                                gotId + "Expected "+ strId );
+                        throw new RMSecurityException(Messages.SECURITY_TOKEN_AUTHORIZATION_ERROR.format(gotId ,strId ));
                     }
-                } else throw new RMSecurityException("Cannot handle the Reference from the SecurityToken reference"+ ref.getClass());
+                } else throw new RMSecurityException(Messages.SECURITY_REFERENCE_ERROR.format( ref.getClass().getName()));
 
-            } else throw new RMSecurityException("SecurityToken null in the packet");
+            } else throw new RMSecurityException(Messages.NULL_SECURITY_TOKEN.format());
         }
 
 
@@ -501,12 +493,12 @@ public class RMServerPipe extends PipeBase<RMDestination,
         //initialize CreateSequenceResponseElement
         CreateSequenceResponseElement crsElement = new CreateSequenceResponseElement();
 
-        AcceptType accept = null;
+        AcceptType accept ;
 
         Identifier id2 = new Identifier();
         id2.setValue(inboundSequence.getId());
         crsElement.setIdentifier(id2);
-        URI dest = null;
+        URI dest ;
         if (offeredId != null) {
 
             dest = inboundAddressingProperties.getTo().getURI();
@@ -522,7 +514,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
             crsElement.setAccept(accept);
         }
 
-        Message response = Messages.create(marshaller,
+        Message response = com.sun.xml.ws.api.message.Messages.create(marshaller,
                 crsElement,
                 config.getSoapVersion());
 
@@ -556,7 +548,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
     public Packet handleTerminateSequenceAction(Packet packet)
             throws RMException {
 
-        TerminateSequenceElement tsElement = null;
+        TerminateSequenceElement tsElement ;
         Message message = packet.getMessage();
         AddressingProperties inboundAddressingProperties =
                 (AddressingProperties)(packet.invocationProperties
@@ -565,7 +557,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
         try {
             tsElement = message.readPayloadAsJAXB(unmarshaller);
         } catch (JAXBException e) {
-            throw new TerminateSequenceException (e);
+            throw new TerminateSequenceException (Messages.TERMINATE_SEQUENCE_EXCEPTION.format() + e);
         }
 
         String id = tsElement.getIdentifier().getValue();
@@ -590,7 +582,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
 
 
         //formulate response if required
-        Packet ret = null;
+        Packet ret ;
         OutboundSequence outboundSequence = seq.getOutboundSequence();
 
         //If there is an "real" outbound sequence, client expects us to terminate it.
@@ -600,7 +592,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
             id2.setValue(outboundSequence.getId());
 
             terminateSeqResponse.setIdentifier(id2);
-            Message response = Messages.create(marshaller,
+            Message response = com.sun.xml.ws.api.message.Messages.create(marshaller,
                     terminateSeqResponse,
                     config.getSoapVersion());
 
@@ -630,7 +622,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
             Message message = inbound.getMessage();
             Header header = message.getHeaders().get(constants.getSequenceQName(), true);
             if (header == null) {
-                throw new RMException("Invalid Last Message header.");
+                throw new RMException(Messages.INVALID_LAST_MESSAGE.format());
             }
 
             SequenceElement el = (SequenceElement)header.readAsJAXB(unmarshaller);
@@ -647,9 +639,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
             outboundAddressingProperties.setAction(addressingBuilder.newURI(
                     constants.getLastAction()));
 
-             AddressingProperties inboundAddressingProperties =
-                (AddressingProperties)(inbound.invocationProperties
-                        .get(JAXWSAConstants.SERVER_ADDRESSING_PROPERTIES_INBOUND));
+
             //outboundAddressingProperties.initializeAsReply(inboundAddressingProperties);
             inbound.invocationProperties.put(JAXWSAConstants.SERVER_ADDRESSING_PROPERTIES_OUTBOUND,
                                     outboundAddressingProperties);
@@ -661,7 +651,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
             return generateAckMessage(inbound, seq);
 
         } catch (JAXBException e) {
-            throw new RMException(e);
+            throw new RMException(Messages.LAST_MESSAGE_EXCEPTION.format() +e);
         }
     }
 
@@ -672,7 +662,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
             Message message = inbound.getMessage();
             Header header = message.getHeaders().get(constants.getAckRequestedQName(), true);
             if (header == null) {
-                throw new RMException("Invalid AckRequested message");
+                throw new RMException(Messages.INVALID_ACK_REQUESTED.format());
             }
 
             AckRequestedElement el = (AckRequestedElement)header
@@ -689,7 +679,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
             return generateAckMessage(inbound, seq);
 
         } catch (JAXBException e) {
-            throw new RMException(e);
+            throw new RMException(Messages.ACK_REQUESTED_EXCEPTION.format() +e);
         }
 
     }
@@ -703,7 +693,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
             Message message = inbound.getMessage();
             Header header = message.getHeaders().get(constants.getSequenceAcknowledgementQName());
             if (header == null) {
-                throw new RMException("Invalid SequenceAcknowledgement message");
+                throw new RMException(Messages.INVALID_SEQ_ACKNOWLEDGEMENT.format());
             }
 
             SequenceAcknowledgementElement el = (SequenceAcknowledgementElement)header
@@ -733,7 +723,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
 
 
         } catch (JAXBException e) {
-            throw new RMException(e);
+            throw new RMException(Messages.SEQ_ACKNOWLEDGEMENT_EXCEPTION.format() +e);
         }
     }
 
@@ -747,7 +737,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
      */
     public Packet handleCreateSequenceResponseAction(Packet inbound) throws RMException {
 
-        CreateSequenceResponseElement csrElement = null;
+        CreateSequenceResponseElement csrElement ;
 
         Message message = inbound.getMessage();
 
@@ -758,13 +748,13 @@ public class RMServerPipe extends PipeBase<RMDestination,
         try {
             csrElement = message.readPayloadAsJAXB(unmarshaller);
         } catch (JAXBException e) {
-            throw new RMException (e);
+            throw new RMException (Messages.INVALID_CREATE_SEQUENCE_RESPONSE.format() +e);
         }
 
         Relationship[] relatesTo = inboundAddressingProperties.getRelatesTo();
-        Relationship relationship = null;
+        Relationship relationship ;
         if (relatesTo == null || null == (relationship = relatesTo[0])){
-            throw new RMException("Cannot correlate CreateSequenceResponse.");
+            throw new RMException(Messages.CREATE_SEQUENCE_CORRELATION_ERROR.format());
         }
         String messageId = relationship.getID().toString();
         ProtocolMessageReceiver.setCreateSequenceResponse(messageId, csrElement);
@@ -897,7 +887,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
         SecurityContextToken sct = (SecurityContextToken)packet.invocationProperties.get(MessageConstants.INCOMING_SCT);
         URI uri = sct.getIdentifier();
         if(!uri.toString().equals(seq.getStrId())){
-            throw new RMSecurityException("Mismatch in the SecurityTokenReference");
+            throw new RMSecurityException(Messages.SECURITY_TOKEN_MISMATCH.format());
         }
     }
 
@@ -917,7 +907,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
 
         //construct empty non-application message to be used as a conduit for
         //this SequenceAcknowledgement header.
-        Message message = Messages.createEmpty(config.getSoapVersion());
+        Message message = com.sun.xml.ws.api.message.Messages.createEmpty(config.getSoapVersion());
         Packet outbound = new Packet(message);
         outbound.invocationProperties.putAll(inbound.invocationProperties);
 
