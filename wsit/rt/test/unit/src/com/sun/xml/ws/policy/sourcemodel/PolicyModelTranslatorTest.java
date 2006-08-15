@@ -74,8 +74,6 @@ public class PolicyModelTranslatorTest extends TestCase {
      * Test of translate method, of class com.sun.xml.ws.policy.PolicyModelTranslator.
      */
     public void testTranslateComplexPoliciesWithMultipleNestedPolicyAlternatives() throws Exception {
-        PolicyModelTranslator translator = PolicyModelTranslator.getTranslator();
-        
         int index = 0;
         for (Map.Entry<String, Integer> entry : COMPLEX_POLICIES.entrySet()) {
             String compactResourceName = entry.getKey() + COMPACT_MODEL_SUFFIX;
