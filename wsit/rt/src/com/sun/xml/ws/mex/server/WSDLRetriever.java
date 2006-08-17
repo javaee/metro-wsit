@@ -26,6 +26,7 @@ import java.util.Iterator;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
+import javax.xml.ws.WebServiceException;
 
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.server.DocumentAddressResolver;
@@ -60,7 +61,7 @@ public class WSDLRetriever {
     }
     
     void addDocuments(XMLStreamWriter writer, Packet request, String address)
-        throws XMLStreamException, IOException {
+        throws XMLStreamException {
         
         ServiceDefinition sDef = endpoint.getServiceDefinition();
         Iterator<SDDocument> docs = sDef.iterator();
@@ -70,16 +71,23 @@ public class WSDLRetriever {
     }
     
     private void writeDoc(XMLStreamWriter writer, SDDocument doc, String add)
-        throws XMLStreamException, IOException {
-        writer.writeStartElement(MEX_PREFIX, "MetadataSection", MEX_NAMESPACE);
-        if (doc.isWSDL()) {
-            writer.writeAttribute("Dialect", WSDL_DIALECT);
+        throws XMLStreamException {
+        
+        try {
+            writer.writeStartElement(MEX_PREFIX,
+                "MetadataSection", MEX_NAMESPACE);
+            if (doc.isWSDL()) {
+                writer.writeAttribute("Dialect", WSDL_DIALECT);
+            }
+            else if(doc.isSchema()) {
+                writer.writeAttribute("Dialect", SCHEMA_DIALECT);
+            }
+            doc.writeTo(new PortAddressResolverImpl(add), dar, writer);
+            writer.writeEndElement();
+        } catch (IOException ioe) {
+            throw new WebServiceException(
+                "Exception while writing document to mex response", ioe);
         }
-        else if(doc.isSchema()) {
-            writer.writeAttribute("Dialect", SCHEMA_DIALECT);
-        }
-        doc.writeTo(new PortAddressResolverImpl(add), dar, writer);
-        writer.writeEndElement();
     }
     
     // not sure how to deal with this

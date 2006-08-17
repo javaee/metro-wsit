@@ -21,12 +21,16 @@
  */
 package com.sun.xml.ws.mex.server;
 
-import java.io.IOException;
-
+import javax.xml.namespace.QName;
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPFactory;
+import javax.xml.soap.SOAPFault;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
+import javax.xml.ws.addressing.ActionNotSupportedException;
 import javax.xml.ws.addressing.AddressingProperties;
+import javax.xml.ws.addressing.JAXWSAConstants;
 import javax.xml.ws.WebServiceException;
 
 import com.sun.xml.stream.buffer.MutableXMLStreamBuffer;
@@ -116,7 +120,7 @@ public class MetadataServerPipe extends AbstractFilterPipeImpl {
             if (ap.getAction().toString().equals(GET_REQUEST)) {
                 return processGetRequest(request, ap, GET_RESPONSE, useW3C);
             } else if (ap.getAction().toString().equals(GET_METADATA_REQUEST)) {
-                return processGetMetdataRequest(request, ap, useW3C);
+                return createANSFault(request, useW3C);
             }
         }
         return next.process(request);
@@ -144,24 +148,9 @@ public class MetadataServerPipe extends AbstractFilterPipeImpl {
             throw new WebServiceException(bufferE);
         } catch (XMLStreamException streamE) {
             throw new WebServiceException(streamE);
-        } catch (IOException ioe) {
-            throw new WebServiceException(ioe);
         }
     }
 
-    /*
-     * This method should create an unsupported action
-     * fault for any cases that are not supported. Currently
-     * it ignores the dialect and returns all the metadata.
-     */
-    private Packet processGetMetdataRequest(Packet request,
-        AddressingProperties ap, boolean useW3C) {
-        
-        // todo: check for unsupported attributes in action
-        // and throw exception
-        return processGetRequest(request, ap, GET_METADATA_RESPONSE, useW3C);
-    }
-    
     private void writeStartEnvelope(XMLStreamWriter writer, boolean useW3C) 
         throws XMLStreamException {
 
@@ -197,4 +186,38 @@ public class MetadataServerPipe extends AbstractFilterPipeImpl {
         wrf.writeHeaders(response, responseProps);
     }
 
+    /*
+     * Note: this method will be removed later and this pipe
+     * will instead be able to throw a ws-a exception.
+     */
+    private Packet createANSFault(Packet request, boolean useW3C) {
+        try {
+            SOAPFactory factory;
+            SOAPFault fault;
+            String wsaNamespace = WSA_W3C_NAMESPACE;
+            if (!useW3C) {
+                wsaNamespace = WSA_MS_NAMESPACE;
+            }
+            QName wsaFaultCode = new QName(wsaNamespace, "ActionNotSupported");
+            if (soapNamespace.equals(SOAP_1_1)) {
+                factory = SOAPVersion.SOAP_11.saajSoapFactory;
+                fault = factory.createFault();
+                fault.setFaultCode(wsaFaultCode);
+            } else {
+                factory = SOAPVersion.SOAP_12.saajSoapFactory;
+                fault = factory.createFault();
+                fault.setFaultCode(JAXWSAConstants.SOAP12_SENDER_QNAME);
+                fault.appendFaultSubcode(wsaFaultCode);
+                fault.setFaultString("The " +
+                    GET_METADATA_REQUEST +
+                    " cannot be processed at the receiver");
+            }
+            Message faultMessage = Messages.create(fault);
+            return request.createResponse(faultMessage);
+        } catch (SOAPException se) {
+            throw new WebServiceException(
+                "Exception while trying to create fault message", se);
+        }
+    }
+    
 }
