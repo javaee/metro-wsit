@@ -50,6 +50,7 @@
             <fileset dir="${as.home}/domains/${domain}/config" includes="domain.xml"/>
             <fileset dir="${as.home}/bin" includes="wsimport${ext}, wsgen${ext}, xjc${ext}, schemagen${ext}"/>
             <fileset dir="${as.home}/lib" includes="webservices.jar, webservices-tools.jar"/>
+            <fileset dir="${as.home}/lib" includes="jaxws-update.jar"/>
         </copy>
     </target>
     <target name="install" depends="init">
@@ -70,6 +71,9 @@
         <copy todir="${as.home}/domains/${domain}/config" file="${backup.dir}/domain.xml" overwrite="true"/>
         <copy todir="${as.home}/bin" overwrite="true">
             <fileset dir="${backup.dir}" includes="wsimport${ext}, wsgen${ext}, xjc${ext}, schemagen${ext}"/>
+        </copy>
+        <copy todir="${as.home}/lib" overwrite="true">
+            <fileset dir="${backup.dir}" includes="jaxws-update.jar"/>
         </copy>
         <chmod perm="+x" dir="${as.home}/bin" includes="wsimport${ext}, wsgen${ext}, xjc${ext}, schemagen${ext}"/>
         <delete dir="${backup.dir}" includeemptydirs="true"/>
@@ -92,8 +96,8 @@
         </copy>
 
         <replace file="${as.home}/domains/${domain}/config/domain.xml">
-            <replacetoken><![CDATA[classpath-suffix="]]></replacetoken>
-            <replacevalue><![CDATA[classpath-prefix="${com.sun.aas.installRoot}/lib/webservices.jar${path.separator}${com.sun.aas.installRoot}/lib/webservices-tools.jar" classpath-suffix="]]></replacevalue>
+            <replacetoken><![CDATA[classpath-prefix="${com.sun.aas.installRoot}/lib/jaxws-update.jar"]]></replacetoken>
+            <replacevalue><![CDATA[classpath-prefix="${com.sun.aas.installRoot}/lib/webservices.jar${path.separator}${com.sun.aas.installRoot}/lib/webservices-tools.jar"]]></replacevalue>
         </replace>
         <antcall target="update-classpath-unix"/>
         <antcall target="update-classpath-win"/>
