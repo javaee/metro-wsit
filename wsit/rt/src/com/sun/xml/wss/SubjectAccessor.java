@@ -1,5 +1,5 @@
 /*
- * $Id: SubjectAccessor.java,v 1.2 2006-06-27 15:48:31 kumarjayanti Exp $
+ * $Id: SubjectAccessor.java,v 1.3 2006-08-18 22:20:05 kohsuke Exp $
  */
 
 /*
@@ -26,17 +26,14 @@
 
 package com.sun.xml.wss;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.sun.xml.wss.impl.MessageConstants;
+import com.sun.xml.wss.logging.LogDomainConstants;
 
 import javax.security.auth.Subject;
 import javax.xml.rpc.handler.MessageContext;
-import javax.xml.rpc.handler.soap.SOAPMessageContext;
 import javax.xml.rpc.server.ServletEndpointContext;
-
-import com.sun.xml.wss.ProcessingContext;
-import com.sun.xml.wss.logging.LogDomainConstants;
-import com.sun.xml.wss.impl.MessageConstants;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 
@@ -52,7 +49,7 @@ public class SubjectAccessor {
             LogDomainConstants.WSS_API_DOMAIN_BUNDLE);
     
     
-    private static ThreadLocal wssThreadCtx = new ThreadLocal();
+    private static ThreadLocal<Subject> wssThreadCtx = new ThreadLocal<Subject>();
     
     /**
      *@return the Requester's Subject if one is available, null otherwise.
@@ -118,7 +115,7 @@ public class SubjectAccessor {
      * Exchange Patterns.
      */
     public static Subject getRequesterSubject(){
-        return (Subject)wssThreadCtx.get();
+        return wssThreadCtx.get();
         
     }
     
