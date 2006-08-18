@@ -110,10 +110,14 @@ public class ServerInboundSequence extends InboundSequence {
      * @param message The message to be processed
      */
     public  void releaseNextMessage(Message message) throws RMException {
-   
-        if (!config.ordered) {
+
+        /**
+         * Flow Control can be enabled without ordered delivery in which case
+         * we want the storedmessages to be decremented 
+         */
+       /* if (!config.ordered) {
            return;
-       }
+       }*/
         
        message.complete();
        --storedMessages;
