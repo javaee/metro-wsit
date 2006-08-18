@@ -41,7 +41,7 @@ import java.util.Map;
 public class AcceptType {
 
     @XmlAnyElement(lax = true)
-    protected List<Object> any = new ArrayList();
+    protected List<Object> any = new ArrayList<Object>();
     @XmlAnyAttribute
     private Map<QName, String> otherAttributes = new HashMap<QName, String>();
 

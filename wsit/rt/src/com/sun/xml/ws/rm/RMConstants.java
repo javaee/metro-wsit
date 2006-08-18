@@ -331,7 +331,7 @@ public class RMConstants {
                     Class.forName(getPackageName()+ ".OfferType"),
                     Class.forName(getPackageName()+ ".Expires")
             };
-            classList = new ArrayList(Arrays.asList(classes));
+            classList = new ArrayList<Class>(Arrays.asList(classes));
              if (ab.newAddressingConstants().getPackageName().
                     equals("com.sun.xml.ws.addressing")){
 

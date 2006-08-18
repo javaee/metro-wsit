@@ -28,19 +28,16 @@
 //
 package com.sun.xml.ws.rm.jaxws.runtime.client;
 import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.rm.RMBuilder;
-import com.sun.xml.ws.rm.RMConstants;
-import com.sun.xml.ws.rm.RMException;
-import com.sun.xml.ws.rm.Message;
+import com.sun.xml.ws.rm.*;
 import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
 import com.sun.xml.ws.rm.protocol.*;
-import com.sun.xml.ws.rm.InvalidMessageNumberException;
 import com.sun.xml.ws.security.impl.bindings.SecurityTokenReferenceType;
+
+import javax.xml.bind.JAXBElement;
 import javax.xml.ws.addressing.AddressingBuilder;
 import javax.xml.ws.addressing.AddressingConstants;
 import javax.xml.ws.addressing.EndpointReference;
-import javax.xml.bind.JAXBElement;
 import java.net.URI;
 import java.util.UUID;
 
@@ -83,7 +80,7 @@ public class ClientOutboundSequence extends OutboundSequence {
     /**
      * The SecurityTokenReference to pass to CreateSequence
      */
-    private JAXBElement str = null;
+    private JAXBElement<SecurityTokenReferenceType> str = null;
 
 
     /**
@@ -215,7 +212,7 @@ public class ClientOutboundSequence extends OutboundSequence {
 
             
             CreateSequenceElement cs = new CreateSequenceElement();
-            EndpointReference epr = RMBuilder.getConstants().getAddressingBuilder().newEndpointReference(new URI(acksToString));
+
             AddressingConstants ac = RMBuilder.getConstants().getAddressingBuilder().newAddressingConstants();
             if (ac.getPackageName().equals("com.sun.xml.ws.addressing")){
                 cs.setAcksTo(new W3CAcksToImpl(new URI(acksToString)));
@@ -255,7 +252,7 @@ public class ClientOutboundSequence extends OutboundSequence {
                 if (accept != null) {
 
                     EndpointReference eprAccept = accept.getAcksTo();
-                    javax.xml.ws.addressing.AttributedURI uriAccept = epr.getAddress();
+
                     EndpointReference eprNew = null;
                     if (eprAccept.getAddress()!=null) {
 

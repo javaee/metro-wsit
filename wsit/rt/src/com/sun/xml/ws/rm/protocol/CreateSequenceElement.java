@@ -70,7 +70,7 @@ import java.util.Map;
 public class CreateSequenceElement {
 
     @XmlAnyElement(lax = true)
-    protected List<Object> any = new ArrayList();
+    protected List<Object> any = new ArrayList<Object>();
     @XmlElement(name = "Expires", namespace = "http://schemas.xmlsoap.org/ws/2005/02/rm")
     protected Expires expires;
     @XmlElement(name = "Offer", namespace = "http://schemas.xmlsoap.org/ws/2005/02/rm")
