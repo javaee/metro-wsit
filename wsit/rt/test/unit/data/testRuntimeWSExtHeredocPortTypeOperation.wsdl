@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ The contents of this file are subject to the terms
+ of the Common Development and Distribution License
+ (the License).  You may not use this file except in
+ compliance with the License.
+  
+ You can obtain a copy of the license at
+ https://glassfish.dev.java.net/public/CDDLv1.0.html.
+ See the License for the specific language governing
+ permissions and limitations under the License.
+  
+ When distributing Covered Code, include this CDDL
+ Header Notice in each file and include the License file
+ at https://glassfish.dev.java.net/public/CDDLv1.0.html.
+ If applicable, add the following below the CDDL Header,
+ with the fields enclosed by brackets [] replaced by
+ you own identifying information:
+ "Portions Copyrighted [year] [name of copyright owner]"
+  
+ Copyright 2006 Sun Microsystems Inc. All Rights Reserved
+-->
+
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:myns="http://any.net" name="DictService" targetNamespace="http://any.net">
+  <wsdl:types>
+    <schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://any.net">
+      <element name="Word" type="xsd:string"/>
+      <element name="FaultResponse">
+        <complexType>
+          <sequence>
+            <element name="ResponsePart" nillable="true" type="xsd:string"/>
+          </sequence>
+        </complexType>
+      </element>
+    </schema>
+  </wsdl:types>
+  <wsdl:message name="DictRequest">
+    <wsdl:part name="TranslateIt" element="myns:Word"/>
+  </wsdl:message>
+  <wsdl:message name="DictResponse">
+    <wsdl:part name="Translated" element="myns:Word"/>
+  </wsdl:message>
+  <wsdl:message name="DictFault">
+    <wsdl:part name="Message" element="myns:FaultResponse"/>
+  </wsdl:message>
+  <wsdl:portType name="DictPortType">
+    <wsdl:operation name="TranslateOperation">
+      <wsp:Policy>
+        <myns:dummyAssertion id="itsMeDummyPolicy"/>
+      </wsp:Policy>
+      <wsdl:input name="Input" message="myns:DictRequest"/>
+      <wsdl:output name="Output" message="myns:DictResponse"/>
+      <wsdl:fault name="Fault" message="myns:DictFault"/>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="MyBinding" type="myns:DictPortType">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="TranslateOperation">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="Input">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="Output">
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="Fault">
+        <soap:body use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="DictionaryService">
+    <wsdl:port name="CzechToEnglish" binding="myns:MyBinding">
+      <soap:address location="http://any.net/dict"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

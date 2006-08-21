@@ -1,0 +1,60 @@
+<!--
+ The contents of this file are subject to the terms
+ of the Common Development and Distribution License
+ (the License).  You may not use this file except in
+ compliance with the License.
+ 
+ You can obtain a copy of the license at
+ https://glassfish.dev.java.net/public/CDDLv1.0.html.
+ See the License for the specific language governing
+ permissions and limitations under the License.
+ 
+ When distributing Covered Code, include this CDDL
+ Header Notice in each file and include the License file
+ at https://glassfish.dev.java.net/public/CDDLv1.0.html.
+ If applicable, add the following below the CDDL Header,
+ with the fields enclosed by brackets [] replaced by
+ you own identifying information:
+ "Portions Copyrighted [year] [name of copyright owner]"
+ 
+ Copyright 2006 Sun Microsystems Inc. All Rights Reserved
+-->
+
+<wsp:Policy xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy" xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+  <sp:AsymmetricBinding>
+    <wsp:Policy>
+      <sp:RecipientToken>
+        <wsp:Policy>
+          <sp:X509Token sp:IncludeToken="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/Never">  
+            <wsp:Policy>
+              <sp:WssX509V3Token10 />
+            </wsp:Policy>
+          </sp:X509Token>
+        </wsp:Policy>
+      </sp:RecipientToken>
+      <sp:InitiatorToken>
+        <wsp:Policy>
+          <sp:X509Token sp:IncludeToken="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/AlwaysToRecipient">
+            <wsp:Policy>
+              <sp:WssX509V3Token10 />
+            </wsp:Policy>
+          </sp:X509Token>
+        </wsp:Policy>
+      </sp:InitiatorToken>
+      <sp:Layout>
+        <wsp:Policy>
+          <sp:Lax />
+        </wsp:Policy>
+      </sp:Layout>
+      <sp:ProtectTokens />
+      <sp:OnlySignEntireHeadersAndBody />
+      <sp:IncludeTimestamp />
+      <sp:AlgorithmSuite>
+        <wsp:Policy>
+          <sp:Basic256Rsa15 />
+        </wsp:Policy>
+      </sp:AlgorithmSuite>
+    </wsp:Policy>
+  </sp:AsymmetricBinding>
+</wsp:Policy>
+
