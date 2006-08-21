@@ -50,6 +50,11 @@ public final class PolicyConstants {
     public static final String WSU_NAMESPACE_URI = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd";
 
     /**
+     * Standard XML namespace URI
+     */       
+    public static final String XML_NAMESPACE_URI = "http://www.w3.org/XML/1998/namespace";
+
+    /**
      * Fully qualified name of the SUN's proprietary policy assertion visibility attribute
      */       
     public static final QName VISIBILITY_ATTRIBUTE = new QName(SUN_POLICY_NAMESPACE_URI, "visibility");
@@ -65,9 +70,14 @@ public final class PolicyConstants {
     public static final QName POLICY = new QName(POLICY_NAMESPACE_URI, "Policy");
 
     /**
-     * Fully qualified name of the WS-Policy Policy Id XML attribute
+     * Fully qualified name of the Policy wsu:Id XML attribute
      */       
-    public static final QName POLICY_ID = new QName(WSU_NAMESPACE_URI, "Id");
+    public static final QName WSU_ID = new QName(WSU_NAMESPACE_URI, "Id");
+
+    /**
+     * Fully qualified name of the xml:id policy attribute
+     */       
+    public static final QName XML_ID = new QName(XML_NAMESPACE_URI, "id");
 
     /**
      * Fully qualified name of the WS-Policy Policy Id XML attribute

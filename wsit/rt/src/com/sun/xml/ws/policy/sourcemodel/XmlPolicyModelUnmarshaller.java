@@ -70,7 +70,17 @@ final class XmlPolicyModelUnmarshaller extends PolicyModelUnmarshaller {
                     case XMLStreamConstants.START_ELEMENT :
                         if (ModelNode.Type.POLICY.asQName().equals(event.asStartElement().getName())) {
                             StartElement element = reader.nextEvent().asStartElement();
-                            Attribute policyId = getAttributeByName(element, PolicyConstants.POLICY_ID);
+                            
+                            Attribute policyId = getAttributeByName(element, PolicyConstants.WSU_ID);
+                            Attribute xmlId = getAttributeByName(element, PolicyConstants.XML_ID);
+                            
+                            if (policyId == null) {
+                                policyId = xmlId;
+                            } else if (xmlId != null) {
+                                throw new PolicyException("Multiple identifiers of policy expression detected. Single " +
+                                        "policy expression must not contain both wsu:Id and xml:id identifiers at once.");
+                            }
+                            
                             Attribute policyName = getAttributeByName(element, PolicyConstants.POLICY_NAME);
                             
                             model = PolicySourceModel.createPolicySourceModel((policyId == null) ? null : policyId.getValue(), (policyName == null) ? null : policyName.getValue());

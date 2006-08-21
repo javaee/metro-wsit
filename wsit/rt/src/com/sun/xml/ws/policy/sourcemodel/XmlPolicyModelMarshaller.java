@@ -87,7 +87,7 @@ public class XmlPolicyModelMarshaller extends PolicyModelMarshaller {
     private static void marshalPolicyAttributes(PolicySourceModel model, TypedXmlWriter writer) {
         String policyId = model.getPolicyId();
         if (policyId != null) {
-            writer._attribute(PolicyConstants.POLICY_ID, policyId);
+            writer._attribute(PolicyConstants.WSU_ID, policyId);
         }
         
         String policyName = model.getPolicyName();
