@@ -20,7 +20,7 @@
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 /*
- $Id: RetailerClient.java,v 1.5 2006-08-09 01:45:05 arungupta Exp $
+ $Id: RetailerClient.java,v 1.6 2006-08-22 01:33:56 arungupta Exp $
 */
 
 package pricequote.retailer.client;
@@ -81,7 +81,7 @@ public class RetailerClient {
         if (quote.getPhoto() != null) {
             try {
                 String carName = carname(pid);
-                File file = new File(carName);
+                File file = new File(carName + ".jpeg");
                 ImageIO.write((BufferedImage)quote.getPhoto(), "jpeg", file);
                 String imageLocation = file.getAbsolutePath();
                 System.out.printf("Photo is copied to \"%s\" file.\n", imageLocation);
