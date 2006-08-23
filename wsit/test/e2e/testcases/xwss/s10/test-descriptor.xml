@@ -1,0 +1,8 @@
+<descriptor since="2.0">
+  <description>S10 e2e test </description>
+  <client href ="test.bsh" since="2.0"/>
+  <service basedir="./server">
+    <wsdl href="PingServices10.wsdl"/>
+  </service>
+</descriptor>
+
