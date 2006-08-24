@@ -1,5 +1,5 @@
 /*
- * $Id: DefaultCallbackHandler.java,v 1.3 2006-06-27 21:58:33 ofung Exp $
+ * $Id: DefaultCallbackHandler.java,v 1.4 2006-08-24 10:10:37 kumarjayanti Exp $
  *
  */
 /*
@@ -1148,7 +1148,7 @@ public  class DefaultCallbackHandler implements CallbackHandler {
                String ret= url.replace("$WSIT_HOME", wsitHome);
                return ret;
            } else {
-               throw new RuntimeException("System Property WSIT_HOME not set");
+               throw new RuntimeException("The following config URL: " + url + " in the WSDL could not be resolved because System Property WSIT_HOME was not set");
            }
        } else {
            return url;
