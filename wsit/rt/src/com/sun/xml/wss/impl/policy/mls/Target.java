@@ -1,5 +1,5 @@
 /*
- * $Id: Target.java,v 1.2 2006-07-17 08:40:40 venu Exp $
+ * $Id: Target.java,v 1.3 2006-08-24 03:35:32 venu Exp $
  */
 
 /*
@@ -69,6 +69,7 @@ public class Target {
     private boolean attachment = false;
     boolean bsp = false;
     boolean headersOnly = false;
+    private String xpathVersion;
     
     /**
      * Default constructor
@@ -288,5 +289,21 @@ public class Target {
      */
     public boolean isAttachment(){
         return attachment;
+    }
+    
+    /**
+     * returns xpath version to be used if the Target Type is XPATH.
+     */
+    public String getXPathVersion(){
+        return xpathVersion;
+    }
+    
+    
+    /**
+     * sets  xpath version to be used if the Target Type is XPATH.
+     */
+    
+    public void setXPathVersion(String version){
+        xpathVersion = version;
     }
 }

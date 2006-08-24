@@ -1,5 +1,5 @@
 /*
- * $Id: HarnessUtil.java,v 1.2 2006-05-13 08:17:28 kumarjayanti Exp $
+ * $Id: HarnessUtil.java,v 1.3 2006-08-24 03:35:20 venu Exp $
  */
 
 /*
@@ -7,12 +7,12 @@
  * of the Common Development and Distribution License
  * (the License).  You may not use this file except in
  * compliance with the License.
- * 
+ *
  * You can obtain a copy of the license at
  * https://glassfish.dev.java.net/public/CDDLv1.0.html.
  * See the License for the specific language governing
  * permissions and limitations under the License.
- * 
+ *
  * When distributing Covered Code, include this CDDL
  * Header Notice in each file and include the License file
  * at https://glassfish.dev.java.net/public/CDDLv1.0.html.
@@ -20,7 +20,7 @@
  * with the fields enclosed by brackets [] replaced by
  * you own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * 
+ *
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
@@ -68,8 +68,8 @@ import org.w3c.dom.NodeList;
 public abstract class HarnessUtil {
     
     private static Logger log = Logger.getLogger(
-            LogDomainConstants.WSS_API_DOMAIN,
-            LogDomainConstants.WSS_API_DOMAIN_BUNDLE);
+              LogDomainConstants.WSS_API_DOMAIN,
+              LogDomainConstants.WSS_API_DOMAIN_BUNDLE);
     
     /**
      * @param fpContext com.sun.xml.wss.FilterProcessingContext
@@ -88,8 +88,7 @@ public abstract class HarnessUtil {
             TimestampFilter.process(fpContext);
         } else if(PolicyTypeUtil.signatureConfirmationPolicy(policy)) {
             SignatureConfirmationFilter.process(fpContext);
-        }
-        else if (PolicyTypeUtil.authenticationTokenPolicy(policy)) {
+        } else if (PolicyTypeUtil.authenticationTokenPolicy(policy)) {
             WSSPolicy authPolicy = (WSSPolicy)policy.getFeatureBinding();
             if(PolicyTypeUtil.usernameTokenPolicy(authPolicy)) {
                 AuthenticationTokenFilter.processUserNameToken(fpContext);
@@ -98,6 +97,8 @@ public abstract class HarnessUtil {
             }else if (PolicyTypeUtil.x509CertificateBinding(authPolicy)) {
                 AuthenticationTokenFilter.processX509Token(fpContext);
             }
+        }else if(PolicyTypeUtil.isMandatoryTargetPolicy(policy)) {
+            return;
         }else {
             log.log(Level.SEVERE, "WSS0801.illegal.securitypolicy");
             throw new XWSSecurityException("Invalid WSSPolicy Type");
@@ -266,13 +267,13 @@ public abstract class HarnessUtil {
         if (message == null) {
             log.log(Level.SEVERE, "WSS0803.soapmessage.notset");
             throw new XWSSecurityException(
-                    "javax.xml.soap.SOAPMessage parameter not set in the ProcessingContext");
+                      "javax.xml.soap.SOAPMessage parameter not set in the ProcessingContext");
         }
         
         if (handler == null) {
             log.log(Level.SEVERE, "WSS0804.callback.handler.notset");
             throw new XWSSecurityException(
-                    "SecurityEnvironment/javax.security.auth.callback.CallbackHandler implementation not set in the ProcessingContext");
+                      "SecurityEnvironment/javax.security.auth.callback.CallbackHandler implementation not set in the ProcessingContext");
         }
         
         if (policy == null && !isInboundMessage) {
@@ -306,13 +307,13 @@ public abstract class HarnessUtil {
         } else {
             log.log(Level.SEVERE, "WSS0808.no.body.element.operation");
             throw new XWSSecurityException(
-                    "No body element identifying an operation is found");
+                      "No body element identifying an operation is found");
         }
         
         String id =
-                firstChild != null ?
-                    "{"+firstChild.getNamespaceURI()+"}"+firstChild.getLocalName() :
-                    null;
+                  firstChild != null ?
+                      "{"+firstChild.getNamespaceURI()+"}"+firstChild.getLocalName() :
+                      null;
         
         return id;
     }
@@ -330,13 +331,13 @@ public abstract class HarnessUtil {
             }
         }
         return (element.getLocalName().equals(MessageConstants.WSSE_BINARY_SECURITY_TOKEN_LNAME) ||
-                element.getLocalName().equals(MessageConstants.USERNAME_TOKEN_LNAME) ||
-                element.getLocalName().equals(MessageConstants.SAML_ASSERTION_LNAME) ||
-                element.getLocalName().equals(MessageConstants.TIMESTAMP_LNAME) ||
-                element.getLocalName().equals(MessageConstants.SIGNATURE_CONFIRMATION_LNAME) ||
-                element.getLocalName().equals(MessageConstants.WSSE_SECURITY_TOKEN_REFERENCE_LNAME) ||
-                element.getLocalName().equals(MessageConstants.DERIVEDKEY_TOKEN_LNAME) ||
-                element.getLocalName().equals(MessageConstants.SECURITY_CONTEXT_TOKEN_LNAME));
+                  element.getLocalName().equals(MessageConstants.USERNAME_TOKEN_LNAME) ||
+                  element.getLocalName().equals(MessageConstants.SAML_ASSERTION_LNAME) ||
+                  element.getLocalName().equals(MessageConstants.TIMESTAMP_LNAME) ||
+                  element.getLocalName().equals(MessageConstants.SIGNATURE_CONFIRMATION_LNAME) ||
+                  element.getLocalName().equals(MessageConstants.WSSE_SECURITY_TOKEN_REFERENCE_LNAME) ||
+                  element.getLocalName().equals(MessageConstants.DERIVEDKEY_TOKEN_LNAME) ||
+                  element.getLocalName().equals(MessageConstants.SECURITY_CONTEXT_TOKEN_LNAME));
     }
     
     /*
@@ -370,9 +371,9 @@ public abstract class HarnessUtil {
     static void throwWssSoapFault(String message) throws WssSoapFaultException {
         XWSSecurityException xwsse = new XWSSecurityException(message);
         throw SecurableSoapMessage.newSOAPFaultException(
-                MessageConstants.WSSE_INVALID_SECURITY,
-                message,
-                xwsse);
+                  MessageConstants.WSSE_INVALID_SECURITY,
+                  message,
+                  xwsse);
     }
     
    /*
@@ -380,8 +381,8 @@ public abstract class HarnessUtil {
     * @param callback the DynamicPolicyCallback object
     */
     public static void makeDynamicPolicyCallback(DynamicPolicyCallback callback,
-            CallbackHandler callbackHandler)
-            throws XWSSecurityException {
+              CallbackHandler callbackHandler)
+              throws XWSSecurityException {
         
         if (callbackHandler == null)
             return;
