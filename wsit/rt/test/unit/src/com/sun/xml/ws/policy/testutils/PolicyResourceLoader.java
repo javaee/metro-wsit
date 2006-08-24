@@ -3,12 +3,12 @@
  * of the Common Development and Distribution License
  * (the License).  You may not use this file except in
  * compliance with the License.
- * 
+ *
  * You can obtain a copy of the license at
  * https://glassfish.dev.java.net/public/CDDLv1.0.html.
  * See the License for the specific language governing
  * permissions and limitations under the License.
- * 
+ *
  * When distributing Covered Code, include this CDDL
  * Header Notice in each file and include the License file
  * at https://glassfish.dev.java.net/public/CDDLv1.0.html.
@@ -16,7 +16,7 @@
  * with the fields enclosed by brackets [] replaced by
  * you own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * 
+ *
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
@@ -24,13 +24,13 @@ package com.sun.xml.ws.policy.testutils;
 
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
-import com.sun.xml.ws.policy.sourcemodel.PolicySourceModelContext;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelTranslator;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelUnmarshaller;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.net.URL;
 
 /**
  * This class provides utility methods to load resources and unmarshall policy source model.
@@ -38,6 +38,8 @@ import java.io.Reader;
  * @author Marek Potociar
  */
 public final class PolicyResourceLoader {
+    private static final String POLICY_RESOURCE_ROOT_PREFIX = "policy/";
+    
     public static final String[] SINGLE_ALTERNATIVE_POLICY = new String[] {
         "single_alternative_policy/policy1.xml",
         "single_alternative_policy/policy2.xml",
@@ -57,7 +59,11 @@ public final class PolicyResourceLoader {
     }
     
     public static Reader getResourceReader(String resourceName) {
-        return new InputStreamReader(Thread.currentThread().getContextClassLoader().getResourceAsStream(resourceName));
+        return new InputStreamReader(Thread.currentThread().getContextClassLoader().getResourceAsStream(POLICY_RESOURCE_ROOT_PREFIX + resourceName));
+    }
+    
+    public static URL getResourceUrl(String resourceName) {
+        return Thread.currentThread().getContextClassLoader().getResource(POLICY_RESOURCE_ROOT_PREFIX + resourceName);
     }
     
     public static Policy translateModel(PolicySourceModel model) throws PolicyException {
