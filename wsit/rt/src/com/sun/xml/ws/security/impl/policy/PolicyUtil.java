@@ -21,6 +21,7 @@
  */
 
 package com.sun.xml.ws.security.impl.policy;
+import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.security.policy.AlgorithmSuiteValue;
 import com.sun.xml.ws.security.policy.Target;
@@ -1281,5 +1282,15 @@ public class PolicyUtil {
         }
         return false;
     }
-    
+ 
+    public static boolean isRequiredElements(PolicyAssertion assertion){
+        if(isSecurityPolicyNS(assertion)){
+            return false;
+        }
+        
+        if(assertion.getName().getLocalPart().equals(RequiredElements)){
+            return true;
+        }
+        return false;
+    }
 }

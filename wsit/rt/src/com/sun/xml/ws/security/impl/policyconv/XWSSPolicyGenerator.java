@@ -63,6 +63,7 @@ import com.sun.xml.wss.impl.policy.mls.EncryptionPolicy.FeatureBinding;
 import com.sun.xml.wss.impl.policy.mls.EncryptionTarget;
 import com.sun.xml.wss.impl.policy.mls.IssuedTokenKeyBinding;
 import com.sun.xml.wss.impl.policy.mls.KeyBindingBase;
+import com.sun.xml.wss.impl.policy.mls.MandatoryTargetPolicy;
 import com.sun.xml.wss.impl.policy.mls.MessagePolicy;
 import com.sun.xml.wss.impl.policy.mls.SecureConversationTokenKeyBinding;
 import com.sun.xml.wss.impl.policy.mls.SignaturePolicy;
@@ -76,6 +77,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
@@ -129,6 +131,7 @@ public class XWSSPolicyGenerator {
     private IntegrityAssertionProcessor iAP = null;
     private EncryptionAssertionProcessor eAP = null;
     private Binding policyBinding = null;
+    private List reqElements = new ArrayList();
     /** Creates a new instance of WSPolicyProcessorImpl */
     //public XWSSPolicyGenerator(AssertionSet assertionSet,boolean isServer,boolean isIncoming){
     public XWSSPolicyGenerator(Policy effectivePolicy,boolean isServer,boolean isIncoming){
@@ -178,8 +181,8 @@ public class XWSSPolicyGenerator {
             if(PolicyUtil.isSymmetricBinding(binding.getName())) {
                 //  _policyContainer.getMessagePolicy().setAlgorithmSuite(((SymmetricBinding) _binding).getAlgorithmSuite());
                 SymmetricBindingProcessor sbp =  new SymmetricBindingProcessor((SymmetricBinding) _binding, _policyContainer,
-                        isServer, isIncoming,signedParts,encryptedParts,
-                        signedElements,encryptedElements);
+                          isServer, isIncoming,signedParts,encryptedParts,
+                          signedElements,encryptedElements);
                 if(wssAssertion != null && PolicyUtil.isWSS11(wssAssertion)){
                     sbp.setWSS11((WSSAssertion)wssAssertion);
                 }
@@ -189,8 +192,8 @@ public class XWSSPolicyGenerator {
                 
             }else if(PolicyUtil.isAsymmetricBinding(binding.getName()) ){
                 AsymmetricBindingProcessor abp = new AsymmetricBindingProcessor((AsymmetricBinding) _binding, _policyContainer,
-                        isServer, isIncoming,signedParts,encryptedParts,
-                        signedElements,encryptedElements);
+                          isServer, isIncoming,signedParts,encryptedParts,
+                          signedElements,encryptedElements);
                 if( wssAssertion != null && PolicyUtil.isWSS11(wssAssertion)){
                     abp.setWSS11((WSSAssertion)wssAssertion);
                 }
@@ -214,7 +217,10 @@ public class XWSSPolicyGenerator {
             if(policyBinding.getLayout()!= null){
                 mp.setLayout(policyBinding.getLayout());
             }
-            
+            if(isIncoming && reqElements.size() > 0){
+               RequiredElementsProcessor rep =  new RequiredElementsProcessor(reqElements,mp);
+               rep.process();
+            }
         }catch(PolicyGenerationException pe){
             pe.printStackTrace();
         }
@@ -268,6 +274,8 @@ public class XWSSPolicyGenerator {
                     trust10 = (Trust10)assertion;
                 }else if(PolicyUtil.isBinding(assertion)){
                     _binding =(Binding) assertion;
+                }else if(PolicyUtil.isRequiredElements(assertion)){
+                    reqElements.add(assertion);
                 }
             }
         }
@@ -282,4 +290,5 @@ public class XWSSPolicyGenerator {
         }
         return true;
     }
+    
 }
