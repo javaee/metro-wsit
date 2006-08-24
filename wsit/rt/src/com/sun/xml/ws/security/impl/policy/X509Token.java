@@ -3,12 +3,12 @@
  * of the Common Development and Distribution License
  * (the License).  You may not use this file except in
  * compliance with the License.
- * 
+ *
  * You can obtain a copy of the license at
  * https://glassfish.dev.java.net/public/CDDLv1.0.html.
  * See the License for the specific language governing
  * permissions and limitations under the License.
- * 
+ *
  * When distributing Covered Code, include this CDDL
  * Header Notice in each file and include the License file
  * at https://glassfish.dev.java.net/public/CDDLv1.0.html.
@@ -16,7 +16,7 @@
  * with the fields enclosed by brackets [] replaced by
  * you own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * 
+ *
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
@@ -69,6 +69,8 @@ public class X509Token extends PolicyAssertion implements com.sun.xml.ws.securit
      */
     private String id = null;
     private boolean reqDK=false;
+
+    private boolean isServer = false;
     
     public X509Token() {
         UUID uid = UUID.randomUUID();
@@ -142,7 +144,7 @@ public class X509Token extends PolicyAssertion implements com.sun.xml.ws.securit
         synchronized (this.getClass()){
             if(!populated){
                 if(this.getAttributeValue(itQname)!=null){
-                this.includeToken = this.getAttributeValue(itQname);
+                    this.includeToken = this.getAttributeValue(itQname);
                 }
                 NestedPolicy policy = this.getNestedPolicy();
                 if(policy == null){
@@ -165,9 +167,10 @@ public class X509Token extends PolicyAssertion implements com.sun.xml.ws.securit
                             if(logger.getLevel() == Level.SEVERE){
                                 logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"X509Token"});
                             }
-                            throw new UnsupportedPolicyAssertion("Policy assertion "+
-                                    assertion+" is not supported under X509Token assertion");
-                            
+                            if(isServer){
+                                throw new UnsupportedPolicyAssertion("Policy assertion "+
+                                          assertion+" is not supported under X509Token assertion");
+                            }
                         }
                     }
                 }

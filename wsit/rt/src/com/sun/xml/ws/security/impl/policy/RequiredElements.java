@@ -54,7 +54,7 @@ public class RequiredElements extends PolicyAssertion implements com.sun.xml.ws.
     private List targetList;
     private boolean populated = false;
     private static QName XPathVersion = new QName("XPathVersion");
-    
+    private boolean isServer = false;
     /** Creates a new instance of RequiredElements */
     public RequiredElements() {
     }
@@ -120,9 +120,10 @@ public class RequiredElements extends PolicyAssertion implements com.sun.xml.ws.
                                 if(logger.getLevel() == Level.SEVERE){
                                     logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"RequiredElements"});
                                 }
-                                throw new UnsupportedPolicyAssertion("Policy assertion "+
-                                          assertion+" is not supported under RequiredElements assertion");
-                                
+                                if(isServer){
+                                    throw new UnsupportedPolicyAssertion("Policy assertion "+
+                                              assertion+" is not supported under RequiredElements assertion");
+                                }
                             }
                         }
                     }

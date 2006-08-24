@@ -3,12 +3,12 @@
  * of the Common Development and Distribution License
  * (the License).  You may not use this file except in
  * compliance with the License.
- * 
+ *
  * You can obtain a copy of the license at
  * https://glassfish.dev.java.net/public/CDDLv1.0.html.
  * See the License for the specific language governing
  * permissions and limitations under the License.
- * 
+ *
  * When distributing Covered Code, include this CDDL
  * Header Notice in each file and include the License file
  * at https://glassfish.dev.java.net/public/CDDLv1.0.html.
@@ -16,7 +16,7 @@
  * with the fields enclosed by brackets [] replaced by
  * you own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * 
+ *
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
@@ -57,7 +57,7 @@ public class SecurityContextToken extends PolicyAssertion implements com.sun.xml
     private PolicyAssertion rdKey = null;
     private Set referenceType = null;
     private static QName itQname = new QName(Constants.SECURITY_POLICY_NS, Constants.IncludeToken);
-    
+    private boolean isServer = false;
     /** Creates a new instance of SecurityContextToken */
     public SecurityContextToken(AssertionData name,Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) {
         super(name,nestedAssertions,nestedAlternative);
@@ -137,13 +137,14 @@ public class SecurityContextToken extends PolicyAssertion implements com.sun.xml
                         referenceType.add(assertion.getName().getLocalPart().intern());
                     } else{
                         if(!assertion.isOptional()){
-                        if(logger.getLevel() == Level.SEVERE){
-                            logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"SecurityContextToken"});
+                            if(logger.getLevel() == Level.SEVERE){
+                                logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"SecurityContextToken"});
+                            }
+                            if(isServer){
+                                throw new UnsupportedPolicyAssertion("Policy assertion "+
+                                          assertion+" is not supported under SecurityContextToken assertion");
+                            }
                         }
-                        throw new UnsupportedPolicyAssertion("Policy assertion "+
-                                assertion+" is not supported under SecurityContextToken assertion");
-                        
-                    }
                     }
                 }
             }
