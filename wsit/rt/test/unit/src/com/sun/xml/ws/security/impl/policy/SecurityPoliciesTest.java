@@ -78,20 +78,20 @@ public class SecurityPoliciesTest extends TestCase {
     public SecurityPoliciesTest(String testName) {
         super(testName);
     }
-
+    
     protected void setUp() throws Exception {
     }
-
+    
     protected void tearDown() throws Exception {
     }
-
+    
     public static Test suite() {
         TestSuite suite = new TestSuite(SecurityPoliciesTest.class);
         
         return suite;
     }
     
-        public void testInteropScenario3_1() throws Exception {
+    public void testInteropScenario3_1() throws Exception {
         String filaname = "security/interop-1.wsdl";
         execute(filaname, false, false,1);
         execute(filaname, false, true,1);
@@ -156,7 +156,7 @@ public class SecurityPoliciesTest extends TestCase {
     }
     
     
-        public void testUMPolicy()throws Exception{
+    public void testUMPolicy()throws Exception{
         String xmlFile = "security/interop-1.xml";
         unmarshalPolicy(xmlFile);
     }
@@ -224,6 +224,14 @@ public class SecurityPoliciesTest extends TestCase {
         SignaturePolicy.FeatureBinding spFB = (SignaturePolicy.FeatureBinding) sp.getFeatureBinding();
         SignatureTarget st = new SignatureTarget();
         st.setType(SignatureTarget.TARGET_TYPE_VALUE_URI);
+        st.setValue(policy.getType());
+        spFB.addTargetBinding(st);
+    }
+    
+    public void addQTToSPTList(WSSPolicy policy, SignaturePolicy sp){
+        SignaturePolicy.FeatureBinding spFB = (SignaturePolicy.FeatureBinding) sp.getFeatureBinding();
+        SignatureTarget st = new SignatureTarget();
+        st.setType(SignatureTarget.TARGET_TYPE_VALUE_QNAME);
         st.setValue(policy.getType());
         spFB.addTargetBinding(st);
     }
@@ -375,7 +383,7 @@ public class SecurityPoliciesTest extends TestCase {
         }
     }
     
-        public List<SignatureTarget> createSignatureTargetEndorsingSignature(boolean contentonlyflag) {
+    public List<SignatureTarget> createSignatureTargetEndorsingSignature(boolean contentonlyflag) {
         List<String> targetType = new ArrayList<String>();
         targetType.add("uri");
         
@@ -769,7 +777,7 @@ public class SecurityPoliciesTest extends TestCase {
         return true;
     }
     
-        public MessagePolicy executeTest(String fileName, boolean isServer, boolean isIncoming) throws Exception {
+    public MessagePolicy executeTest(String fileName, boolean isServer, boolean isIncoming) throws Exception {
 //        QName serviceName = new QName("PingService");
 //        QName portName = new QName("Port");
 //        QName operationName = new QName("Ping");
@@ -993,7 +1001,7 @@ public class SecurityPoliciesTest extends TestCase {
         return msgPolicy;
     }
     
-        public MessagePolicy createClientIncomingPolicy(int scenario) throws Exception {
+    public MessagePolicy createClientIncomingPolicy(int scenario) throws Exception {
         switch (scenario) {
             case 1:
                 return createScenario1ClientIncoming();
@@ -1078,7 +1086,7 @@ public class SecurityPoliciesTest extends TestCase {
         }
         if(scenario == 6) {
             return createScenario6ServerIncoming();
-        }        
+        }
         if(scenario == 7) {
             return createScenario7ServerIncoming();
         }
@@ -1385,8 +1393,8 @@ public class SecurityPoliciesTest extends TestCase {
     //AnonymousForCertificateSignEncrypt_IPingService_policy
     public MessagePolicy createScenario6ClientOutgoing() throws Exception {
         MessagePolicy msgPolicy = new MessagePolicy();
-
-                SignatureConfirmationPolicy sigConf = new SignatureConfirmationPolicy();
+        
+        SignatureConfirmationPolicy sigConf = new SignatureConfirmationPolicy();
         msgPolicy.append(sigConf);
         
         TimestampPolicy tp = new TimestampPolicy();
@@ -1402,6 +1410,7 @@ public class SecurityPoliciesTest extends TestCase {
                 createSignaturePolicy(sigTargetList);
         addSignKeyBinding(sigPolicy, "derivedkey", "Thumbprint");
         msgPolicy.append(sigPolicy);
+        addQTToSPTList(sigConf,sigPolicy);
         addToSPTList(tp,sigPolicy);
         List<EncryptionTarget> encTargetList =
                 createEncryptionTargetBody(true);
@@ -1411,7 +1420,7 @@ public class SecurityPoliciesTest extends TestCase {
         addEncryptKeyBinding(encPolicy, "derivedkey", "Thumbprint");
         msgPolicy.append(encPolicy);
         
-
+        
         
         return msgPolicy;
     }
@@ -1419,7 +1428,7 @@ public class SecurityPoliciesTest extends TestCase {
     public MessagePolicy createScenario6ClientIncoming() throws Exception {
         MessagePolicy msgPolicy = new MessagePolicy();
         
-                SignatureConfirmationPolicy sigConf = new SignatureConfirmationPolicy();
+        SignatureConfirmationPolicy sigConf = new SignatureConfirmationPolicy();
         msgPolicy.append(sigConf);
         
         List<EncryptionTarget> encTargetList =
@@ -1444,13 +1453,14 @@ public class SecurityPoliciesTest extends TestCase {
                 createSignaturePolicy(sigTargetList);
         addSignKeyBinding(sigPolicy, "derivedkey", "Thumbprint");
         msgPolicy.append(sigPolicy);
+        addQTToSPTList(sigConf,sigPolicy);
         addToSPTList(tp,sigPolicy);
-              
+        
         return msgPolicy;
     }
     
     
-        public MessagePolicy createScenario6ServerOutgoing() throws Exception {
+    public MessagePolicy createScenario6ServerOutgoing() throws Exception {
         MessagePolicy msgPolicy = new MessagePolicy();
         
         SignatureConfirmationPolicy sigConf = new SignatureConfirmationPolicy();
@@ -1458,11 +1468,11 @@ public class SecurityPoliciesTest extends TestCase {
         
         List<EncryptionTarget> encTargetList =
                 createEncryptionTargetBody(true);
-       
+        
         TimestampPolicy tp = new TimestampPolicy();
         msgPolicy.append(tp);
-            
-
+        
+        
         
         List<SignatureTarget> sigTargetList =
                 createSignatureTargetBodyAllHeader(true);
@@ -1474,18 +1484,19 @@ public class SecurityPoliciesTest extends TestCase {
                 createSignaturePolicy(sigTargetList);
         addSignKeyBinding(sigPolicy, "derivedkey", "Thumbprint");
         msgPolicy.append(sigPolicy);
+        addQTToSPTList(sigConf,sigPolicy);
         addToSPTList(tp,sigPolicy);
         
         EncryptionPolicy encPolicy =
                 createEncryptionPolicy(encTargetList);
         addEncryptKeyBinding(encPolicy, "derivedkey", "Thumbprint");
         msgPolicy.append(encPolicy);
-
+        
         
         return msgPolicy;
     }
-        
-                public MessagePolicy createScenario6ServerIncoming() throws Exception {
+    
+    public MessagePolicy createScenario6ServerIncoming() throws Exception {
         MessagePolicy msgPolicy = new MessagePolicy();
         
         SignatureConfirmationPolicy sigConf = new SignatureConfirmationPolicy();
@@ -1493,11 +1504,11 @@ public class SecurityPoliciesTest extends TestCase {
         
         List<EncryptionTarget> encTargetList =
                 createEncryptionTargetBody(true);
-       
+        
         TimestampPolicy tp = new TimestampPolicy();
         msgPolicy.append(tp);
-            
-
+        
+        
         
         List<SignatureTarget> sigTargetList =
                 createSignatureTargetBodyAllHeader(true);
@@ -1505,7 +1516,7 @@ public class SecurityPoliciesTest extends TestCase {
 //        AlgorithmSuite suite = new com.sun.xml.ws.security.impl.policy.AlgorithmSuite();
 //        suite.setType(AlgorithmSuiteValue.TripleDesRsa15);
         
-                EncryptionPolicy encPolicy =
+        EncryptionPolicy encPolicy =
                 createEncryptionPolicy(encTargetList);
         addEncryptKeyBinding(encPolicy, "derivedkey", "Thumbprint");
         msgPolicy.append(encPolicy);
@@ -1514,10 +1525,11 @@ public class SecurityPoliciesTest extends TestCase {
                 createSignaturePolicy(sigTargetList);
         addSignKeyBinding(sigPolicy, "derivedkey", "Thumbprint");
         msgPolicy.append(sigPolicy);
+        addQTToSPTList(sigConf,sigPolicy);
         addToSPTList(tp,sigPolicy);
         
-
-
+        
+        
         
         return msgPolicy;
     }
@@ -1526,8 +1538,8 @@ public class SecurityPoliciesTest extends TestCase {
     //MutualCertificate11SignEncrypt_IPingService_policy
     public MessagePolicy createScenario7ClientOutgoing() throws Exception {
         MessagePolicy msgPolicy = new MessagePolicy();
-
-                SignatureConfirmationPolicy sigConf = new SignatureConfirmationPolicy();
+        
+        SignatureConfirmationPolicy sigConf = new SignatureConfirmationPolicy();
         msgPolicy.append(sigConf);
         
         AuthenticationTokenPolicy at =
@@ -1548,6 +1560,7 @@ public class SecurityPoliciesTest extends TestCase {
                 createSignaturePolicy(sigTargetList);
         addSignKeyBinding(sigPolicy, "symmetric", "");
         msgPolicy.append(sigPolicy);
+        addQTToSPTList(sigConf,sigPolicy);
         addToSPTList(tp,sigPolicy);
         
         List<SignatureTarget> sigTargetList1 =
@@ -1567,7 +1580,7 @@ public class SecurityPoliciesTest extends TestCase {
         
         
         
-
+        
         
         return msgPolicy;
     }
@@ -1579,7 +1592,7 @@ public class SecurityPoliciesTest extends TestCase {
 //                createUTPolicy("testuser", null, null, false);
 //        at.setUUID("UsernameTokenBinding");
 //        msgPolicy.append(at);
-           SignatureConfirmationPolicy sigConf = new SignatureConfirmationPolicy();
+        SignatureConfirmationPolicy sigConf = new SignatureConfirmationPolicy();
         msgPolicy.append(sigConf);
         
         List<EncryptionTarget> encTargetList =
@@ -1607,11 +1620,12 @@ public class SecurityPoliciesTest extends TestCase {
                 createSignaturePolicy(sigTargetList);
         addSignKeyBinding(sigPolicy, "symmetric", "");
         msgPolicy.append(sigPolicy);
+        addQTToSPTList(sigConf,sigPolicy);
         addToSPTList(tp,sigPolicy);
         
         
         
-
+        
         
         return msgPolicy;
     }
@@ -1619,8 +1633,8 @@ public class SecurityPoliciesTest extends TestCase {
     //MutualCertificate11SignEncrypt_IPingService_policy
     public MessagePolicy createScenario7ServerIncoming() throws Exception {
         MessagePolicy msgPolicy = new MessagePolicy();
-
-                SignatureConfirmationPolicy sigConf = new SignatureConfirmationPolicy();
+        
+        SignatureConfirmationPolicy sigConf = new SignatureConfirmationPolicy();
         msgPolicy.append(sigConf);
         
         AuthenticationTokenPolicy at =
@@ -1655,15 +1669,16 @@ public class SecurityPoliciesTest extends TestCase {
                 createSignaturePolicy(sigTargetList);
         addSignKeyBinding(sigPolicy, "symmetric", "");
         msgPolicy.append(sigPolicy);
+        addQTToSPTList(sigConf,sigPolicy);
         addToSPTList(tp,sigPolicy);
-             
+        
         return msgPolicy;
     }
     
-        //MutualCertificate11SignEncrypt_IPingService_policy
+    //MutualCertificate11SignEncrypt_IPingService_policy
     public MessagePolicy createScenario7ServerOutgoing() throws Exception {
         MessagePolicy msgPolicy = new MessagePolicy();
-
+        
         SignatureConfirmationPolicy sigConf = new SignatureConfirmationPolicy();
         msgPolicy.append(sigConf);
         
@@ -1671,19 +1686,19 @@ public class SecurityPoliciesTest extends TestCase {
                 createUTPolicy("testuser", null, null, false);
         at.setUUID("UsernameTokenBinding");
         msgPolicy.append(at);
-      */  
+     */
         TimestampPolicy tp = new TimestampPolicy();
         msgPolicy.append(tp);
         
         List<EncryptionTarget> encTargetList =
                 createEncryptionTargetBody(true);
-
+        
     /*    List<SignatureTarget> sigTargetList1 =
                 createSignatureTargetEndorsingSignature(true);
         SignaturePolicy sigPolicy1 = createSignaturePolicy(sigTargetList1);
         addSignKeyBinding(sigPolicy1, "x509", "Identifier");
         msgPolicy.append(sigPolicy1);
-      */  
+     */
         List<SignatureTarget> sigTargetList =
                 createSignatureTargetBodyAllHeader(true);
         
@@ -1694,9 +1709,10 @@ public class SecurityPoliciesTest extends TestCase {
                 createSignaturePolicy(sigTargetList);
         addSignKeyBinding(sigPolicy, "symmetric", "");
         msgPolicy.append(sigPolicy);
+        addQTToSPTList(sigConf,sigPolicy);
         addToSPTList(tp,sigPolicy);
-
-                
+        
+        
         EncryptionPolicy encPolicy =
                 createEncryptionPolicy(encTargetList);
         addEncryptKeyBinding(encPolicy, "symmetric", "");
@@ -1748,10 +1764,10 @@ public class SecurityPoliciesTest extends TestCase {
         return(reverse(createScenario7ClientOutgoing()));
     }
     
-        public MessagePolicy createScenario10ClientOutgoing() throws Exception {
+    public MessagePolicy createScenario10ClientOutgoing() throws Exception {
         MessagePolicy msgPolicy = new MessagePolicy();
-           //     TimestampPolicy tp = new TimestampPolicy();
-       // msgPolicy.append(tp);
+        //     TimestampPolicy tp = new TimestampPolicy();
+        // msgPolicy.append(tp);
         
         List<SignatureTarget> sigTargetList =
                 createSignatureTargetBody(true);
@@ -1763,7 +1779,7 @@ public class SecurityPoliciesTest extends TestCase {
                 createSignaturePolicy(sigTargetList);
         addSignKeyBinding(sigPolicy, "x509", "Direct");
         msgPolicy.append(sigPolicy);
-    //    addToSPTList(tp,sigPolicy);
+        //    addToSPTList(tp,sigPolicy);
         List<EncryptionTarget> encTargetList =
                 createEncryptionTargetBody(true);
         
@@ -1777,7 +1793,7 @@ public class SecurityPoliciesTest extends TestCase {
     
     public MessagePolicy createScenario10ClientIncoming() throws Exception {
         MessagePolicy msgPolicy = new MessagePolicy();
-                List<EncryptionTarget> encTargetList =
+        List<EncryptionTarget> encTargetList =
                 createEncryptionTargetBody(true);
         
         EncryptionPolicy encPolicy =
@@ -1785,8 +1801,8 @@ public class SecurityPoliciesTest extends TestCase {
         addEncryptKeyBinding(encPolicy, "x509", "Identifier");
         msgPolicy.append(encPolicy);
         
-       // TimestampPolicy tp = new TimestampPolicy();
-       // msgPolicy.append(tp);
+        // TimestampPolicy tp = new TimestampPolicy();
+        // msgPolicy.append(tp);
         
         
 //        AlgorithmSuite suite = new com.sun.xml.ws.security.impl.policy.AlgorithmSuite();
@@ -1799,30 +1815,30 @@ public class SecurityPoliciesTest extends TestCase {
                 createSignaturePolicy(sigTargetList);
         addSignKeyBinding(sigPolicy, "x509", "Direct");
         msgPolicy.append(sigPolicy);
-     //   addToSPTList(tp,sigPolicy);
+        //   addToSPTList(tp,sigPolicy);
         return msgPolicy;
     }
     
-
-        public MessagePolicy createScenario11ClientOutgoing() throws Exception {
+    
+    public MessagePolicy createScenario11ClientOutgoing() throws Exception {
         MessagePolicy msgPolicy = new MessagePolicy();
         
         TimestampPolicy tp = new TimestampPolicy();
-         msgPolicy.append(tp);
+        msgPolicy.append(tp);
         
         List<String> targetSignType =  new ArrayList<String>();
         targetSignType.add("uri");
         List<String> targetSignValue =  new ArrayList<String>();
-        targetSignValue.add("TimestampPolicy");        
+        targetSignValue.add("TimestampPolicy");
         List<Boolean> targetSignContent =  new ArrayList<Boolean>();
-        targetSignContent.add(true);        
+        targetSignContent.add(true);
         List<SignatureTarget.Transform> transform = new ArrayList<SignatureTarget.Transform>();
         List<List<SignatureTarget.Transform>> tl = new ArrayList<List<SignatureTarget.Transform>>();
         tl.add(transform);
         
         
-        List<SignatureTarget> sigTargetList = 
-              createSignatureTargetList(targetSignType, targetSignValue, targetSignContent, tl);
+        List<SignatureTarget> sigTargetList =
+                createSignatureTargetList(targetSignType, targetSignValue, targetSignContent, tl);
         
 //       AlgorithmSuite suite = new com.sun.xml.ws.security.impl.policy.AlgorithmSuite();
 //      suite.setType(AlgorithmSuiteValue.Basic256);
@@ -1831,7 +1847,7 @@ public class SecurityPoliciesTest extends TestCase {
                 createSignaturePolicy(sigTargetList);
         addSignKeyBinding(sigPolicy, "symmetric", "");
         msgPolicy.append(sigPolicy);
-       // addToSPTList(tp,sigPolicy);
+        // addToSPTList(tp,sigPolicy);
         List<String> listHeaders = createAddressingHeaderQNameList();
         
         List<String> targetType = new ArrayList<String>();
@@ -1858,21 +1874,21 @@ public class SecurityPoliciesTest extends TestCase {
         MessagePolicy msgPolicy = new MessagePolicy();
         
         TimestampPolicy tp = new TimestampPolicy();
-         msgPolicy.append(tp);
+        msgPolicy.append(tp);
         
         List<String> targetSignType =  new ArrayList<String>();
         targetSignType.add("uri");
         List<String> targetSignValue =  new ArrayList<String>();
-        targetSignValue.add("TimestampPolicy");        
+        targetSignValue.add("TimestampPolicy");
         List<Boolean> targetSignContent =  new ArrayList<Boolean>();
-        targetSignContent.add(true);        
+        targetSignContent.add(true);
         List<SignatureTarget.Transform> transform = new ArrayList<SignatureTarget.Transform>();
         List<List<SignatureTarget.Transform>> tl = new ArrayList<List<SignatureTarget.Transform>>();
         tl.add(transform);
         
         
-        List<SignatureTarget> sigTargetList = 
-              createSignatureTargetList(targetSignType, targetSignValue, targetSignContent, tl);
+        List<SignatureTarget> sigTargetList =
+                createSignatureTargetList(targetSignType, targetSignValue, targetSignContent, tl);
         
 //       AlgorithmSuite suite = new com.sun.xml.ws.security.impl.policy.AlgorithmSuite();
 //      suite.setType(AlgorithmSuiteValue.Basic256);
@@ -1881,7 +1897,7 @@ public class SecurityPoliciesTest extends TestCase {
                 createSignaturePolicy(sigTargetList);
         addSignKeyBinding(sigPolicy, "symmetric", "");
         msgPolicy.append(sigPolicy);
-       // addToSPTList(tp,sigPolicy);
+        // addToSPTList(tp,sigPolicy);
         List<String> listHeaders = createAddressingHeaderQNameList();
         
         List<String> targetType = new ArrayList<String>();
