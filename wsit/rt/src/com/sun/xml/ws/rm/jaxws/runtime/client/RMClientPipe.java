@@ -47,6 +47,7 @@ import com.sun.xml.ws.rm.jaxws.runtime.PipeBase;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
 import com.sun.xml.ws.security.impl.bindings.SecurityTokenReferenceType;
 import com.sun.xml.wss.jaxws.impl.SecurityClientPipe;
+import com.sun.xml.ws.client.ClientTransportException;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.soap.SOAPException;
@@ -342,7 +343,9 @@ public class RMClientPipe
             //tail of the Pipeline is non-reentrant.  We are using a pool
             //of copies of nextPipe here.
             return nextPipe.process(packet);
-
+        } catch (ClientTransportException ee) {
+            //resend in this case
+            return null;
         } catch (WebServiceException e) {
             //Unwrap exception and see if it makes sense to retry this
             //request.
@@ -550,7 +553,7 @@ public class RMClientPipe
     /**
      * Send a Last message and a TerminateSequence message down the pipeline.
      */
-    public void preDestroy() {
+    public synchronized void preDestroy() {
         try {  
             provider.terminateSequence(outboundSequence);       
             nextPipe.preDestroy();
