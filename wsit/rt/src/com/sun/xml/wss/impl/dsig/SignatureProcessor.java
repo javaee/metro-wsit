@@ -1,5 +1,5 @@
 /*
- * $Id: SignatureProcessor.java,v 1.7 2006-07-19 14:26:24 raharsha Exp $
+ * $Id: SignatureProcessor.java,v 1.8 2006-08-25 07:06:00 kumarjayanti Exp $
  */
 
 /*
@@ -546,11 +546,18 @@ public class SignatureProcessor{
             if(nodeList != null && nodeList.getLength() > 0){
                 nextSibling = nodeList.item(0).getNextSibling();
             }
+            // if currentReflist is non-null it means we are doing E before S
+            Node refList = context.getCurrentRefList();
+            if (refList != null) {
+                nextSibling = refList;
+                //reset it after using once to null.
+                context.setCurrentReferenceList(null);
+            }
             
             if(featureBinding.isEndorsingSignature()){
                 nextSibling = securityHeader.getLastChild().getNextSibling();
             }
-
+            
             SignedInfo signedInfo = WSSPolicyConsumerImpl.getInstance().constructSignedInfo(context);
             DOMSignContext signContext = null;
             if(nextSibling == null){

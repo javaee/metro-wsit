@@ -1,5 +1,5 @@
 /*
- * $Id: FilterProcessingContext.java,v 1.1 2006-05-03 22:57:36 arungupta Exp $
+ * $Id: FilterProcessingContext.java,v 1.2 2006-08-25 07:06:00 kumarjayanti Exp $
  */
 
 /*
@@ -27,10 +27,7 @@
 package com.sun.xml.wss.impl;
 
 import com.sun.xml.wss.ProcessingContext;
-import com.sun.xml.wss.impl.config.ApplicationSecurityConfiguration;
-import com.sun.xml.wss.impl.policy.mls.MessagePolicy;
 import java.util.HashMap;
-import java.util.ArrayList;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -45,12 +42,9 @@ import com.sun.xml.wss.impl.policy.SecurityPolicy;
 import com.sun.xml.wss.impl.policy.mls.AuthenticationTokenPolicy;
 import com.sun.xml.wss.impl.policy.mls.SymmetricKeyBinding;
 import com.sun.xml.wss.*;
-import com.sun.xml.wss.impl.misc.*;
-import com.sun.xml.ws.security.policy.WSSAssertion;
 
 import javax.crypto.SecretKey;
 import java.security.Key;
-
 import org.w3c.dom.Node;
 
 public class FilterProcessingContext extends ProcessingContextImpl {
@@ -165,6 +159,9 @@ public class FilterProcessingContext extends ProcessingContextImpl {
     private String dataEncAlgo = null;
     
     private SecretKey currentSecret = null;
+    
+    //added to handle Encrypt Before Signing
+    private Node currentRefList = null;
     
     private static Logger log = Logger.getLogger (
             LogDomainConstants.WSS_API_DOMAIN,
@@ -402,4 +399,10 @@ public class FilterProcessingContext extends ProcessingContextImpl {
         return this.currentSecret;
     }
 
+    public Node getCurrentRefList() {
+        return currentRefList;
+    }
+    public void setCurrentReferenceList(Node blk){
+        currentRefList = blk;
+    }
 }

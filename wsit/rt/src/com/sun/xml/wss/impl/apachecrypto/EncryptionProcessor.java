@@ -196,7 +196,9 @@ public class EncryptionProcessor {
         SecurityTokenReference ekTokenRef = null;
         SecurityTokenReference dktSctTokenRef = null;
         SecurityTokenReference issuedTokenRef = null;
-
+        //adding EncryptedKey Direct Reference to handle EncryptBeforeSigning
+        SecurityTokenReference ekDirectRef = null;
+        
         DerivedKeyTokenHeaderBlock dktHeadrBlock = null;
 
         SecurityContextTokenImpl sct = null;
@@ -276,6 +278,8 @@ public class EncryptionProcessor {
         if (PolicyTypeUtil.usernameTokenPolicy(keyBinding)) {
                 throw new XWSSecurityException("UsernameToken as KeyBinding for EncryptionPolicy is Not Yet Supported");
         } else if(PolicyTypeUtil.x509CertificateBinding(keyBinding)) {
+            //we need to use standalone reflist to support EncryptBeforeSigning 
+            useStandaloneRefList=true;
             if ( context.getX509CertificateBinding() != null) {
                 certificateBinding  = context.getX509CertificateBinding();
                 context.setX509CertificateBinding(null);
@@ -1230,8 +1234,20 @@ public class EncryptionProcessor {
                     cloned = new SecurityTokenReference((SOAPElement)issuedTokenRef.cloneNode(true));
                     keyInfoBlock.addSecurityTokenReference(cloned);
                 } else {
-                    // this is the default KeyName case
-                    keyInfoStrategy.insertKey(keyInfoBlock, secureMsg, null);
+                    
+                    if (PolicyTypeUtil.x509CertificateBinding(keyBinding)){
+                        //to handle EncryptBeforeSigning we split EK and RefList even in this case
+                        DirectReference dRef = new DirectReference();
+                        dRef.setURI("#"+ekId);
+                        ekDirectRef = new SecurityTokenReference(secureMessage.getSOAPPart());
+                        ekDirectRef.setReference(dRef);
+                        keyInfoBlock.addSecurityTokenReference(ekDirectRef);
+                        
+                    }else {
+                        // this is the default KeyName case
+                        keyInfoStrategy.insertKey(keyInfoBlock, secureMsg, null);
+                    }
+                    
                 }
                 xencEncryptedData.setKeyInfo(keyInfoBlock);
             }
@@ -1269,9 +1285,10 @@ public class EncryptionProcessor {
                 }else{
                     _secHeader.insertBefore(se,x509Sibling);
                 }
-                //For SymmetricBinding with X509 case
+                //For SymmetricBinding  with X509 case and for Asym with E before S
                 if (_standaloneReferenceList != null){
                      _secHeader.insertBefore(_standaloneReferenceList, se.getNextSibling());
+                     context.setCurrentReferenceList(se.getNextSibling());
                 } 
             }else{
                 if (_standaloneReferenceList != null){
