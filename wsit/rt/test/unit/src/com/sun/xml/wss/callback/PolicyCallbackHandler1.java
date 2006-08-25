@@ -20,7 +20,7 @@
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 /*
- * $Id: PolicyCallbackHandler1.java,v 1.2 2006-08-25 19:27:07 mayankmishra Exp $
+ * $Id: PolicyCallbackHandler1.java,v 1.3 2006-08-25 19:29:09 mayankmishra Exp $
  *
  * Copyright 2005 Sun Microsystems, Inc. All rights reserved.
  * SUN PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
@@ -102,9 +102,6 @@ public  class PolicyCallbackHandler1 implements CallbackHandler {
 
         Properties properties = new Properties();
 
-       // String home = "keystore";
-        System.out.println("**************");
-System.out.println(System.getProperty("user.dir"));
         if (side.equals("server")) {
         String serverPropsFile ="./test/unit/data/security/keystore/server-security-env.properties";
         properties.load(new FileInputStream(serverPropsFile));
