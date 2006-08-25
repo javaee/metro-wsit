@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ The contents of this file are subject to the terms
+ of the Common Development and Distribution License
+ (the License).  You may not use this file except in
+ compliance with the License.
+  
+ You can obtain a copy of the license at
+ https://glassfish.dev.java.net/public/CDDLv1.0.html.
+ See the License for the specific language governing
+ permissions and limitations under the License.
+  
+ When distributing Covered Code, include this CDDL
+ Header Notice in each file and include the License file
+ at https://glassfish.dev.java.net/public/CDDLv1.0.html.
+ If applicable, add the following below the CDDL Header,
+ with the fields enclosed by brackets [] replaced by
+ you own identifying information:
+ "Portions Copyrighted [year] [name of copyright owner]"
+  
+ Copyright 2006 Sun Microsystems Inc. All Rights Reserved
+-->
+<!--
+    Document   : X509TokenAssertions4.xml
+    Created on : March 28, 2006, 6:41 PM
+    Author     : Mayank.Mishra@sun.com
+    Description: X509 Token Assertion of type PKI path V1 Token 10        
+-->
+
+
+<wsp:Policy wsu:Id="X509Token_assertion_WssX509PKIPathV1Token10_Always" xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsap10="http://www.w3.org/2005/08/addressing" xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing" xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy" xmlns:i0="http://xmlsoap.org/Ping" xmlns:wsap="http://schemas.xmlsoap.org/ws/2004/09/policy/addressing" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msc="http://schemas.microsoft.com/ws/2005/12/wsdl/contract" xmlns:tns="http://tempuri.org/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:wsx="http://schemas.xmlsoap.org/ws/2004/09/mex" xmlns:wsa10="http://www.w3.org/2005/08/addressing">
+    <wsp:ExactlyOne>
+        <wsp:All>         
+            <sp:X509Token sp:IncludeToken="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/Always" xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+                <wsp:Policy>
+                   <sp:WssX509PkiPathV1Token10/>                       
+                </wsp:Policy>
+            </sp:X509Token>
+        </wsp:All>
+    </wsp:ExactlyOne>
+</wsp:Policy>
