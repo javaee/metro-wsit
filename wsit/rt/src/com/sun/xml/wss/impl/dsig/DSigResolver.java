@@ -399,13 +399,10 @@ public class DSigResolver implements URIDereferencer{
                 if(tokenElement == null){
                     throw new URIReferenceException ("Could not locate token with following ID"+tokenId);
                 }
-                /*secToken = KeySelectorImpl.resolveToken(uri,context);
-                if(secToken == null){
-                    throw new URIReferenceException("Could not locate token with following ID"+tokenId);
-                }
-                tokenCache.put(tokenId,secToken);*/
+             
+            } else {
+                tokenElement = secToken.getAsSoapElement();
             }
-            //tokenElement = secToken.getAsSoapElement();
             newElement = (Element)element.getOwnerDocument ().importNode (tokenElement, true);
             
         } else if (refElement instanceof KeyIdentifier) {
