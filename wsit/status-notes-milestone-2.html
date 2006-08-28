@@ -114,50 +114,22 @@ run the tools and the client application:</P>
 <PRE>
 non-secure:
 
-  MS->S : 0/1 : (not tested)
-  S->MS : 0/1 : (not tested)
-  S->S  : 0/1 : (not tested)
+  MS->S : 1/1
+  S->MS : 0/1 (wsimport will still work using ?wsdl when mex fails)
+  S->S  : 1/1
 
 secure:
 
-  (no tests exist)
+  MS->S : 0/1
+  S->MS : 0/1
+  S->S  : 0/1
 
 </PRE>
 
 <H4>What is Not Implemented</H4>
 
-<P>All basic Metadata Exchange functionality has been implemented,
-including send and receive metadata and the client API for other
-components to use. However, the code that adds headers to the response
-message is commented out because of a known issue in xml stream
-buffer.</P>
+<P>Secure metadata exchange.</P>
 
-<H4>Known Issues</H4>
-
-<TABLE BORDER=1 CELLPADDING=2 CELLSPACING=2>
-	<TR>
-		<TH>
-			<P>Interoperability Feature</P>
-		</TH>
-		<TH>
-			<P>Status/Workaround</P>
-		</TH>
-	</TR>
-	<TR>
-		<TD>
-			<P>Support for returning WS-Addressing response headers with
-			response messages.</P>
-		</TD>
-		<TD>
-			<P>This is an unbound prefix issue. This issue is preventing the
-			Metadata Exchange feature from returning the WS-Addressing
-			response headers that are required by the Metadata Exchange
-			specification.</P>
-			<P>WORKAROUND: The client code currently does not check for these
-			headers so the response is still parsed.</P>
-		</TD>
-	</TR>
-</TABLE>
 
 <!-- ================================================== -->
 <BR>
