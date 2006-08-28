@@ -99,6 +99,16 @@ public class HttpPoster {
         }
     }
 
+    /**
+     * This method is called by ServiceDescriptorImpl when a
+     * metadata response contains a mex location element. The
+     * location element contains an address of a metadata document
+     * that can be retrieved with an HTTP GET call.
+     *
+     * @param address The address of the document.
+     * @return The java.io.InputStream returned by the http
+     *     url connection.
+     */
     public InputStream makeGetCall(String address) throws Exception {
         URL url = new URL(address);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
