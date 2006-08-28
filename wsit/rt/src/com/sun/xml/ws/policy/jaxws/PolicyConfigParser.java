@@ -66,7 +66,7 @@ public final class PolicyConfigParser {
             XMLStreamBuffer buffer = null;
             Object context = null;
             try {
-                Class contextClass = Class.forName(SERVLET_CONTEXT_CLASSNAME);
+                Class<?> contextClass = Class.forName(SERVLET_CONTEXT_CLASSNAME);
                 if (null!=container) {
                     context = container.getSPI(contextClass);
                 }
