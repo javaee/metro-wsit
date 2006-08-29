@@ -1799,64 +1799,7 @@ secure:
 
 <H4>What is Not Implemented</H4>
 
-<P>The following functionality is not implemented:</P>
-
-<UL>
-
-<LI>Client selecting and validating policy alternative at startup. 
-
-<LI>Configuring more than one WSDL port per application. 
-
-<LI>The configuration language could be simplified and/or amended with profiles. 
-
-<LI>Policy support at tool-time (may be needed by WS-TX). 
-
-<LI><P>Support for localization is incomplete 
-
-</UL>
-
-<H4>Known Issues</H4>
-
-<TABLE BORDER=1 CELLPADDING=2 CELLSPACING=2>
-
-	<TR>
-
-		<TH>
-
-			<P>Interoperability Feature</P>
-
-		</TH>
-
-		<TH>
-
-			<P>Status/Workaround</P>
-
-		</TH>
-
-	</TR>
-
-	<TR>
-
-		<TD>
-
-			<P><A HREF="https://wsit.dev.java.net/issues/show_bug.cgi?id=6">assertions
-
-			with visibility=&quot;private&quot; in wsit.xml are ignored</A></P>
-
-		</TD>
-
-		<TD>
-
-			<P>Will be fixed once final format of configuration files is
-
-			decided. All assertions must remain visible until then.</P>
-
-		</TD>
-
-	</TR>
-
-</TABLE>
-
+<p>The following functionality is not implemented:</p><ul>  <li>Client selecting and validating policy alternative at startup is    currently disabled.</li>  <li>Configuring more than one WSDL port per application.</li>  <li>Filter private policy assertions from WSDL.</li>  <li>Policy support at tool-time (may be needed by WS-TX).</li>  <li>Support for localization is incomplete.</li></ul><h4>Known Issues</h4><table border="1" cellpadding="2" cellspacing="2">  <tbody>    <tr>      <th><p>Interoperability Feature</p>      </th>      <th><p>Status/Workaround</p>      </th>    </tr>    <tr>      <td><p><a        href="https://wsit.dev.java.net/issues/show_bug.cgi?id=6">assertions        with visibility="private" in wsit.xml are ignored</a></p>      </td>      <td><p>Assertions must not be set to invisible.</p>      </td>    </tr>  </tbody></table>
 <!-- ================================================== -->
 <BR>
 <HR>
