@@ -159,10 +159,10 @@
 		</xsd:schema>
 	</wsdl:types>
 	<wsdl:message name="ISecurityTokenService_IssueToken_InputMessage">
-		<wsdl:part name="rstMessage" element="q1:MessageBody" xmlns:q1="http://schemas.message.com/Message"/>
+		<wsdl:part name="rstMessage" type="q1:MessageBody" xmlns:q1="http://schemas.message.com/Message"/>
 	</wsdl:message>
 	<wsdl:message name="ISecurityTokenService_IssueToken_OutputMessage">
-		<wsdl:part name="IssueTokenResult" element="q2:MessageBody" xmlns:q2="http://schemas.message.com/Message"/>
+		<wsdl:part name="IssueTokenResult" type="q2:MessageBody" xmlns:q2="http://schemas.message.com/Message"/>
 	</wsdl:message>
 	<wsdl:portType name="ISecurityTokenService">
 		<wsdl:operation name="IssueToken">
