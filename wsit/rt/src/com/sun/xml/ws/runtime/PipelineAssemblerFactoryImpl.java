@@ -423,6 +423,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
                             CLIENT_CONFIGURATION_FILENAME);
                     mapWrapper.addClientConfigToMap(clientConfigUrl);
                 }
+                mapWrapper.configureModel(model);
                 policyMap = mapWrapper.getPolicyMap();
             }
         }

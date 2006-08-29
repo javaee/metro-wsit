@@ -25,7 +25,6 @@ package com.sun.xml.ws.policy.jaxws;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import javax.naming.OperationNotSupportedException;
 import javax.xml.namespace.QName;
 import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLInputFactory;
@@ -45,7 +44,8 @@ import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
-
+import com.sun.xml.ws.policy.privateutil.ServiceFinder;
+import com.sun.xml.ws.policy.jaxws.spi.ModelConfiguratorProvider;
 /**
  *
  * @author japod
@@ -54,9 +54,18 @@ public class WSDLPolicyMapWrapper implements WSDLExtension {
     private static final PolicyLogger logger = PolicyLogger.getLogger(WSDLPolicyMapWrapper.class);
     private static final QName NAME = new QName(null, "WSDLPolicyMapWrapper");
     
+    private static ModelConfiguratorProvider[] configurators = null;
+    
     private PolicyMap policyMap;
     private EffectivePolicyModifier mapModifier;
     private PolicyMapExtender mapExtender;
+    
+    private static ModelConfiguratorProvider[] getConfigurators() {
+        if (configurators == null) {
+            configurators = ServiceFinder.find(ModelConfiguratorProvider.class).toArray();
+        }
+        return configurators;
+    }
     
     protected WSDLPolicyMapWrapper(PolicyMap policyMap) {
         this.policyMap = policyMap;
@@ -151,10 +160,20 @@ public class WSDLPolicyMapWrapper implements WSDLExtension {
         }
     }
     
+    public void configureModel(WSDLModel model) {
+        try {
+            for (ModelConfiguratorProvider configurator : getConfigurators()) {
+                configurator.configure(model);
+            }
+        } catch (PolicyException e) {
+            throw new WebServiceException("Failed to configure wsdl model", e);
+        }
+    }
+    
     public void putEndpointSubject(PolicyMapKey key, PolicySubject subject) {
         if (null != this.mapExtender) {
             this.mapExtender.putEndpointSubject(key,subject);
-        } 
+        }
     }
     
     public void putServiceSubject(PolicyMapKey key, PolicySubject subject) {

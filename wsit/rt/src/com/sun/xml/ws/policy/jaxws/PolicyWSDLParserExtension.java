@@ -832,8 +832,6 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
             
             WSDLPolicyMapWrapper wrapper = new WSDLPolicyMapWrapper(policyBuilder.getPolicyMap(Arrays.asList(new PolicyMapMutator[] {modifier, extender})), modifier, extender);
             model.addExtension(wrapper);
-            // TODO: replace after J1
-            processMtomPolicyAssertion(model);
         } catch(PolicyException pe) {
             logger.severe("finished",pe.getMessage(),pe);
         }
@@ -1011,53 +1009,8 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
             logger.log(Level.SEVERE,"definitionsElements","Exception while reading policy expression",e);
             logger.log(Level.SEVERE, "definitionsElements",elementCode.toString());
             return null;
-        };
+        }
         
         return policyRec;
-    }
-    
-    private static final QName mtomAssertion =
-            new QName("http://schemas.xmlsoap.org/ws/2004/09/policy/optimizedmimeserialization", "OptimizedMimeSerialization");
-    /**
-     * process Mtom policy assertions and if found and is not optional then mtom is enabled on the
-     * {@link WSDLBoundPortType}
-     *
-     * @param boundPortType must be non-null
-     */
-    private void processMtomPolicyAssertion(WSDLModel model){
-        if (null==model) {
-            return;
-        }
-        WSDLPolicyMapWrapper wrapper = model.getExtension(WSDLPolicyMapWrapper.class);
-        if (null==wrapper) {
-            return;
-        }
-        PolicyMap policyMap = wrapper.getPolicyMap();
-        if(null==policyMap) {
-            return;
-        }
-        for (WSDLService service:model.getServices().values()) {
-            for (WSDLPort port : service.getPorts()) {
-                PolicyMapKey key = PolicyMap.createWsdlEndpointScopeKey(service.getName(),port.getName());
-                try {
-                    Policy policy = policyMap.getEndpointEffectivePolicy(key);
-                    if (null!=policy && policy.contains(mtomAssertion)) {
-                        Iterator <AssertionSet> assertions = policy.iterator();
-                        while(assertions.hasNext()){
-                            AssertionSet assertionSet = assertions.next();
-                            Iterator<PolicyAssertion> policyAssertion = assertionSet.iterator();
-                            while(policyAssertion.hasNext()){
-                                PolicyAssertion assertion = policyAssertion.next();
-                                if(assertion.getName().equals(mtomAssertion) && !assertion.isOptional()){
-                                    port.getBinding().enableMTOM();
-                                } // end-if non optional mtom assertion found
-                            } // next assertion
-                        } // next alternative
-                    } // end-if policy contains mtom assertion
-                } catch (PolicyException pe) {
-                    // TODO: decide how to handle pe
-                }
-            } // end foreach port
-        } // end foreach service
     }
 }
