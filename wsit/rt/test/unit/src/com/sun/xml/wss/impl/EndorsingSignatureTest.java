@@ -91,7 +91,7 @@ public class EndorsingSignatureTest extends TestCase{
     }
     
     public static void testEndorsingSignatureTest() throws Exception {
-        try{
+     
             alg.setType(AlgorithmSuiteValue.Basic256);
             SignaturePolicy signaturePolicy = new SignaturePolicy();
             signaturePolicy.setUUID("22222");
@@ -191,10 +191,6 @@ public class EndorsingSignatureTest extends TestCase{
             // verify
             ProcessingContextImpl context1 = verify(recMsg, null, null);
             
-        } catch(Exception e){
-            e.printStackTrace();
-            assertTrue(false);
-        }
     }
     
    public static ProcessingContextImpl verify(SOAPMessage msg, byte[] proofKey, Map map) throws Exception {

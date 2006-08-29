@@ -87,7 +87,6 @@ public class SignSOAPHeadersOnlyTest extends TestCase{
     }
     
     public static void testSignSOAPHeadersOnlyTest() throws Exception {
-        try{ 
             alg.setType(AlgorithmSuiteValue.Basic256);
             SignaturePolicy signaturePolicy = new SignaturePolicy();
             SignatureTarget st = new SignatureTarget();
@@ -169,10 +168,6 @@ public class SignSOAPHeadersOnlyTest extends TestCase{
             // verify
             verify(recMsg, null, null);
             
-        } catch(Exception e){
-            e.printStackTrace();
-            assertTrue(false);
-        }
     }
 
    public static ProcessingContextImpl verify(SOAPMessage msg, byte[] proofKey, Map map) throws Exception {

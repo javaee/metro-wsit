@@ -135,8 +135,7 @@ public class TrustDKTTest extends TestCase{
     }
 
     public static void testTrustIntegrationTest() throws Exception {
-    
-		try{     
+        
                 //System.setProperty("com.sun.xml.wss.saml.binding.jaxb", "true");
 	        alg.setType(AlgorithmSuiteValue.Basic128);
     	        SignaturePolicy signaturePolicy = new SignaturePolicy();
@@ -245,14 +244,7 @@ public class TrustDKTTest extends TestCase{
                 SOAPMessage newMsg = testResponse(ctxImpl);
                 newMsg.saveChanges();
                 context.setSOAPMessage(newMsg);
-                /*
-                SecurityRecipient.validateMessage(context);
-                */
 
-		}catch(Exception e){
-			throw e;
-			//assertTrue(false);
-		}
     }
 
 

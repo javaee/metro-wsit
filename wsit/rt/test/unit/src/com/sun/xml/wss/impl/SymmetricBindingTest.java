@@ -78,8 +78,7 @@ public class SymmetricBindingTest extends TestCase{
     }
 
     public static void testSymmetricBindingTest() throws Exception {
-    
-        try{     
+       
 	    alg.setType(AlgorithmSuiteValue.Basic256);
     	    SignaturePolicy signaturePolicy = new SignaturePolicy();
             SignatureTarget st = new SignatureTarget();
@@ -190,10 +189,6 @@ public class SymmetricBindingTest extends TestCase{
 	        // now create the message
     	    SOAPMessage clientRecMsg = TestUtil.constructMessage("recvd.mh", "recvd.msg");
         	verify(clientRecMsg, null, client);
-		}catch(Exception e){
-			e.printStackTrace();
-			assertTrue(false);
-		}
     }
 
    public static ProcessingContextImpl verify(SOAPMessage msg, byte[] proofKey, Map map) throws Exception {

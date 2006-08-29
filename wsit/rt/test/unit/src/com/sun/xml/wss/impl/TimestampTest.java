@@ -89,7 +89,6 @@ public class TimestampTest extends TestCase {
     }
     
     public static void testTimestampOnTop() throws Exception {
-        try{ 
             alg.setType(AlgorithmSuiteValue.Basic256);
             SignaturePolicy signaturePolicy = new SignaturePolicy();
             SignatureTarget st = new SignatureTarget();
@@ -160,10 +159,6 @@ public class TimestampTest extends TestCase {
             org.w3c.dom.Node timestamp = securityHeader.getFirstChild();
             assertEquals("Timestamp", timestamp.getLocalName());
             
-        } catch(Exception e){
-            e.printStackTrace();
-            assertTrue(false);
-        }
         
     }
     

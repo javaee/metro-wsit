@@ -65,7 +65,6 @@ public class SymmetricKeyGenerationTest extends TestCase{
     }
     
     public static void testSymmetricKeyGenerationTest() throws Exception {
-        try{
             String algorithm = MessageConstants.AES_BLOCK_ENCRYPTION_256;
             byte[] secret = "randombytes".getBytes();
             long offset = 0;
@@ -73,10 +72,6 @@ public class SymmetricKeyGenerationTest extends TestCase{
             DerivedKeyToken dkt = new DerivedKeyTokenImpl(offset, length, secret);
             SecretKey sKey = dkt.generateSymmetricKey(algorithm);
             assertEquals(sKey.getEncoded().length, length); 
-        } catch(Exception e){
-            e.printStackTrace();
-            assertTrue(false);
-        }
     }
     
    public static void main(String[] args) throws Exception{

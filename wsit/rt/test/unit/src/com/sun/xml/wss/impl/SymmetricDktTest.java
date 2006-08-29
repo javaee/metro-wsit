@@ -81,7 +81,6 @@ public class SymmetricDktTest extends TestCase{
 
     public static void testSymmetricDktTest() throws Exception {
     
-		try{     
 	        alg.setType(AlgorithmSuiteValue.Basic128);
     	    SignaturePolicy signaturePolicy = new SignaturePolicy();
         	SignatureTarget st = new SignatureTarget();
@@ -197,10 +196,6 @@ public class SymmetricDktTest extends TestCase{
         	// now create the message
 	        SOAPMessage clientRecMsg = TestUtil.constructMessage("recvd.mh", "recvd.msg");
     	    verify(clientRecMsg, null, client);
-		}catch(Exception e){
-			e.printStackTrace();
-			assertTrue(false);
-		}
     }
 
    public static ProcessingContextImpl verify(SOAPMessage msg, byte[] proofKey, Map map) throws Exception {
