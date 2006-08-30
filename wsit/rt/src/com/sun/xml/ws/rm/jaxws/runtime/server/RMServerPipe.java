@@ -262,10 +262,22 @@ public class RMServerPipe extends PipeBase<RMDestination,
                     !ret.getMessage().hasHeaders()) {
                 ret.setMessage(null);
             } else {
+
                 //Fill in relatedMessage field in request message for use in case request is resent.
                 //the com.sun.xml.ws.api.message.Message referenced will be a copy of the one
                 //contained in the returned packet.  See implementation of message.setRelatedMessage.
                 message.setRelatedMessage(om);
+                // MS client expects SequenceAcknowledgement action incase of oneway messages
+                if (responseMessage == null) {
+                    AddressingProperties outboundAddressingProperties =
+                            addressingBuilder.newAddressingProperties();
+
+                    outboundAddressingProperties.setAction(addressingBuilder.newURI(
+                            constants.getSequenceAcknowledgementAction()));
+                    ret.invocationProperties.put(JAXWSAConstants.SERVER_ADDRESSING_PROPERTIES_OUTBOUND,
+                            outboundAddressingProperties);
+
+                }
             }
 
 
@@ -602,15 +614,19 @@ public class RMServerPipe extends PipeBase<RMDestination,
             SequenceAcknowledgementElement element = seq.generateSequenceAcknowledgement(null, marshaller);
             Header header = Headers.create(config.getSoapVersion(),marshaller,element);
             response.getHeaders().add(header);
+            ret.invocationProperties.putAll(packet.invocationProperties);
+            //Commented this out as in case MS does not send MessageID we dont want
+            // to fail
+            //outboundAddressingProperties.initializeAsReply(inboundAddressingProperties);
+            ret.invocationProperties.put(JAXWSAConstants.SERVER_ADDRESSING_PROPERTIES_OUTBOUND,
+                    outboundAddressingProperties);
+
 
         } else {
             packet.transportBackChannel.close();
             ret = new Packet(null);
         }
-        ret.invocationProperties.putAll(packet.invocationProperties);
-        outboundAddressingProperties.initializeAsReply(inboundAddressingProperties);
-        ret.invocationProperties.put(JAXWSAConstants.SERVER_ADDRESSING_PROPERTIES_OUTBOUND,
-                                    outboundAddressingProperties);
+
 
         return ret;
 
