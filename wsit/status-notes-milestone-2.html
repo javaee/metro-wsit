@@ -263,14 +263,14 @@ secure:
 <PRE>
 non-secure:
 
-  MS->S :  2/2
-  S->MS :  2/2
+  MS->S :  0/2 : (not tested)
+  S->MS :  3/3
   S ->S :  2/2
 
 secure:
 
   MS->S :  0/2 : (not tested)
-  S->MS :  2/2
+  S->MS :  0/2
   S ->S :  2/2
 </PRE>
 
@@ -1799,7 +1799,34 @@ secure:
 
 <H4>What is Not Implemented</H4>
 
-<p>The following functionality is not implemented:</p><ul>  <li>Client selecting and validating policy alternative at startup is    currently disabled.</li>  <li>Configuring more than one WSDL port per application.</li>  <li>Filter private policy assertions from WSDL.</li>  <li>Policy support at tool-time (may be needed by WS-TX).</li>  <li>Support for localization is incomplete.</li></ul><h4>Known Issues</h4><table border="1" cellpadding="2" cellspacing="2">  <tbody>    <tr>      <th><p>Interoperability Feature</p>      </th>      <th><p>Status/Workaround</p>      </th>    </tr>    <tr>      <td><p><a        href="https://wsit.dev.java.net/issues/show_bug.cgi?id=6">assertions        with visibility="private" in wsit.xml are ignored</a></p>      </td>      <td><p>Assertions must not be set to invisible.</p>      </td>    </tr>  </tbody></table>
+<p>The following functionality is not implemented:</p>
+<ul>
+  <li>Client selecting and validating policy alternative at startup is
+    currently disabled.</li>
+  <li>Configuring more than one WSDL port per application.</li>
+  <li>Filter private policy assertions from WSDL.</li>
+  <li>Policy support at tool-time (may be needed by WS-TX).</li>
+  <li>Support for localization is incomplete.</li>
+</ul>
+<h4>Known Issues</h4>
+<table border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+    <tr>
+      <th><p>Interoperability Feature</p>
+      </th>
+      <th><p>Status/Workaround</p>
+      </th>
+    </tr>
+    <tr>
+      <td><p><a
+        href="https://wsit.dev.java.net/issues/show_bug.cgi?id=6">assertions
+        with visibility="private" in wsit.xml are ignored</a></p>
+      </td>
+      <td><p>Assertions must not be set to invisible.</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
 <!-- ================================================== -->
 <BR>
 <HR>
