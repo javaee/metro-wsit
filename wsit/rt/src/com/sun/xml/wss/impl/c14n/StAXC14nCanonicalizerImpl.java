@@ -259,8 +259,9 @@ public class StAXC14nCanonicalizerImpl extends BaseCanonicalizer implements XMLS
         try {
             _stream .write(_END_TAG);
             //writeStringToUtf8 (qname,_stream);
-            _stream.write(elementNames[--_depth].getUtf8Data().getBytes(), 0, elementNames[--_depth].getUtf8Data().getLength());
-            elementNames[--_depth].getUtf8Data().reset();
+            ElementName en =elementNames[--_depth]; 
+            _stream.write(en.getUtf8Data().getBytes(), 0,en.getUtf8Data().getLength());
+            en.getUtf8Data().reset();
             _stream .write('>');
         } catch (IOException ex) {
             throw new RuntimeException(ex);
