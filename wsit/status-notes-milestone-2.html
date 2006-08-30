@@ -1338,7 +1338,7 @@ tests.</P>
 <H4>WCF Interoperability</H4>
 
 <PRE>
-  MS->S :  3/5 : (starting from WSDL)
+  MS->S :  4/5 : (starting from WSDL)
   S->MS :  2/3 : (starting from WSDL)
   S ->S :  3/3 : (starting from WSDL)
 
@@ -1420,6 +1420,15 @@ tests.</P>
 	</TR>
 
 </TABLE>
+<P>Notes:</P>
+<P>For MS to SUN TransportBinding scenario, import the issuer of SSL certificate as Trusted Root 
+CA and provide the username and password in the client program as shown below
+client.ClientCredentials.UserName.UserName = "username";
+client.ClientCredentials.UserName.Password = "password";
+
+The other point to note is that app.config file should not have identity element for the endpoint
+for TransportBinding scenario.
+</P>
 
 <!-- ================================================== -->
 <BR>
