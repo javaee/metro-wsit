@@ -163,7 +163,7 @@ public class WSDLPolicyMapWrapper implements WSDLExtension {
     public void configureModel(WSDLModel model) {
         try {
             for (ModelConfiguratorProvider configurator : getConfigurators()) {
-                configurator.configure(model);
+                configurator.configure(model, policyMap);
             }
         } catch (PolicyException e) {
             throw new WebServiceException("Failed to configure wsdl model", e);

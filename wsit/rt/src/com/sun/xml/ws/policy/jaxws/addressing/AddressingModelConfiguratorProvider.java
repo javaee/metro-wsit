@@ -57,17 +57,10 @@ public class AddressingModelConfiguratorProvider implements ModelConfiguratorPro
      * {@link WSDLBoundPortType}
      *
      * @param model must be non-null
+     * @param policyMap must be non-null
      */
-    public void configure(WSDLModel model) throws PolicyException {
-        if (null==model) {
-            return;
-        }
-        WSDLPolicyMapWrapper wrapper = model.getExtension(WSDLPolicyMapWrapper.class);
-        if (null==wrapper) {
-            return;
-        }
-        PolicyMap policyMap = wrapper.getPolicyMap();
-        if(null==policyMap) {
+    public void configure(WSDLModel model, PolicyMap policyMap) throws PolicyException {
+        if ((null==model) || (null==policyMap)) {
             return;
         }
         for (WSDLService service:model.getServices().values()) {
@@ -84,10 +77,10 @@ public class AddressingModelConfiguratorProvider implements ModelConfiguratorPro
                                 PolicyAssertion assertion = policyAssertion.next();
                                 if(assertion.getName().equals(addressingAssertionQName) && !assertion.isOptional()){
                                     // TODO: add port.getBinding().enableAddressing(addressingAssertionQName.getNamespaceURI())
-                                } // end-if non optional mtom assertion found
+                                } // end-if non optional wsa assertion found
                             } // next assertion
                         } // next alternative
-                    } // end-if policy contains mtom assertion
+                    } // end-if policy contains wsa assertion
                 } // end foreach port
             } //end foreach addr assertion
         } // end foreach service

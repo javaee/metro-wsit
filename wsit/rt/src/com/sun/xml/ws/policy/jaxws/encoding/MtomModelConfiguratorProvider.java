@@ -56,17 +56,10 @@ public class MtomModelConfiguratorProvider implements ModelConfiguratorProvider{
      * {@link WSDLBoundPortType}
      *
      * @param model must be non-null
+     * @param policyMap must be non-null
      */
-    public void configure(WSDLModel model) throws PolicyException {
-        if (null==model) {
-            return;
-        }
-        WSDLPolicyMapWrapper wrapper = model.getExtension(WSDLPolicyMapWrapper.class);
-        if (null==wrapper) {
-            return;
-        }
-        PolicyMap policyMap = wrapper.getPolicyMap();
-        if(null==policyMap) {
+    public void configure(WSDLModel model, PolicyMap policyMap) throws PolicyException {
+        if ((null==model) ||(null==policyMap)) {
             return;
         }
         for (WSDLService service:model.getServices().values()) {

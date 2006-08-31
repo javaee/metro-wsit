@@ -3,12 +3,12 @@
  * of the Common Development and Distribution License
  * (the License).  You may not use this file except in
  * compliance with the License.
- * 
+ *
  * You can obtain a copy of the license at
  * https://glassfish.dev.java.net/public/CDDLv1.0.html.
  * See the License for the specific language governing
  * permissions and limitations under the License.
- * 
+ *
  * When distributing Covered Code, include this CDDL
  * Header Notice in each file and include the License file
  * at https://glassfish.dev.java.net/public/CDDLv1.0.html.
@@ -16,7 +16,7 @@
  * with the fields enclosed by brackets [] replaced by
  * you own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * 
+ *
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
@@ -24,7 +24,7 @@ package com.sun.xml.ws.policy.jaxws.spi;
 
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.policy.PolicyException;
-import com.sun.xml.ws.policy.PolicyMapExtender;
+import com.sun.xml.ws.policy.PolicyMap;
 
 /**
  * The service provider implementing this interface will be discovered and called to configure
@@ -33,12 +33,12 @@ import com.sun.xml.ws.policy.PolicyMapExtender;
  * @author japod
  */
 public interface ModelConfiguratorProvider {
-
-  /**
-   * A callback method that allows to retrieve policy related information from provided WSDLModel 
-   * and to configure the model accordingly.
-   *
-   * @param model
-   */
-  void configure(WSDLModel model) throws PolicyException;
+    
+    /**
+     * A callback method that allows to retrieve policy related information from provided WSDLModel
+     * and to configure the model accordingly.
+     *
+     * @param model
+     */
+    void configure(WSDLModel model, PolicyMap map) throws PolicyException;
 }
