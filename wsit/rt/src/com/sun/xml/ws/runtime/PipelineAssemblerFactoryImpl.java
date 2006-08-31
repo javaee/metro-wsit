@@ -175,8 +175,8 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
                 // check for WS-Atomic Transactions
                 if (isTransactionsEnabled(context.getWsdlModel(), true)) {
                     try {
-                        Class c = Class.forName("com.sun.xml.ws.tx.client.TxServerPipe");
-                        Constructor ctor = c.getConstructor(ClientPipeConfiguration.class, Pipe.class);
+                        Class c = Class.forName("com.sun.xml.ws.tx.service.TxServerPipe");
+                        Constructor ctor = c.getConstructor(WSDLPort.class, PolicyMap.class, Pipe.class);
                         p = (Pipe) ctor.newInstance(context.getWsdlModel(), policyMap, p);
                     } catch (ClassNotFoundException e) {
                         throw new WebServiceException(e);
@@ -247,17 +247,9 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
      * @return true if Transactions is enabled, false otherwise
      */
     private boolean isTransactionsEnabled(WSDLPort wsdlPort, boolean isServerSide) {
-
-        // TODO: this is a temporary hack so that ws-tx can explicitly enable their
-        // TODO: pipes for development purposes, while insulating it from the rest of the stack
-        if (System.getProperty("enableTx") == null) {
-            return false;
-        }
-
         if (policyMap == null) {
             return false;
         }
-
         try {
             PolicyMapKey endpointKey = PolicyMap.createWsdlEndpointScopeKey(wsdlPort.getOwner().getName(),
                                                                             wsdlPort.getName());
@@ -276,7 +268,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
 
                     // look for ATAssertion in both client and server
                     if (policy.contains(AT_ASSERTION)) {
-                        return true;
+                          return true;
                     }
                 }
             }
