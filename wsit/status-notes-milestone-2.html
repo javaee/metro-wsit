@@ -844,7 +844,7 @@ on IssueTracker</p>
 <hr>
 <h2><a name="44691"></a>Secure Conversation Status</h2>
 <h4>WCF Interoperability</h4>
-<pre>  MS-&gt;S :  4/5 : (starting from WSDL)<br>  S-&gt;MS :  2/3 : (starting from WSDL)<br>  S -&gt;S :  3/3 : (starting from WSDL)<br><br></pre>
+<pre>  MS-&gt;S :  5/5 : (starting from WSDL)<br>  S-&gt;MS :  2/3 : (starting from WSDL)<br>  S -&gt;S :  3/3 : (starting from WSDL)<br><br></pre>
 <p>NOTE: No test scenarios were executed that started from Java.</p>
 <h4>What is Not Implemented</h4>
 <p>The following features have not been implemented:</p>
@@ -893,8 +893,10 @@ requiring client entropy.</p>
 <p>For MS to SUN TransportBinding scenario, import the issuer of SSL
 certificate as Trusted Root CA and provide the username and password in
 the client program as shown below
+<pre>
 client.ClientCredentials.UserName.UserName = "username";
 client.ClientCredentials.UserName.Password = "password";
+</pre>
 The other point to note is that app.config file should not have
 identity element for the endpoint
 for TransportBinding scenario.
