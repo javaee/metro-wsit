@@ -159,14 +159,12 @@ tests.</p>
 <h4>What is Not Implemented</h4>
 <p>The following feature is not working:</p>
 <ul>
-  <li>Flow control features not completely implemented.
-  </li>
+  <li>Flow control features not completely implemented. </li>
 </ul>
 <h4>Known Issues</h4>
 <ul>
   <li>An RM-enabled endpoint will not work with Security unless Secure
-Conversations are enabled.
-  </li>
+Conversations are enabled. </li>
 </ul>
 <!-- ================================================== -->
 <br>
@@ -182,60 +180,45 @@ Conversations are enabled.
 implemented. Only one secure conversation token per message is assumed.
   </li>
   <li>Session timeout handling for secure conversation sessions and
-LifeTime handling for IssuedTokens
-  </li>
+LifeTime handling for IssuedTokens </li>
   <li>MaxNonceAge information item specified in NetBeans IDE user
 interface and configuration files WSDL will not be honored, default
-values will be used instead.
-  </li>
+values will be used instead. </li>
   <li>Encryption of SubjectConfirmation in cases where the received
 signature was encrypted is not supported. The workaround is to disable
 &lt;sp:RequireSignatureConfirmation&gt; from the server policy
-(whenever there is an interop failure due to this).
-  </li>
+(whenever there is an interop failure due to this). </li>
   <li>If a binary secret arrives in a SAML assertion, then
 implementation does not&nbsp; ensure that&nbsp; SSL was used for the
-Incoming Message.
-  </li>
+Incoming Message. </li>
   <li>Policy Verification is not done in the case of Encrypted Body
-scenarios.
-  </li>
+scenarios. </li>
   <li>Policy Verification for WS-Trust Protocol Messages is not done.
 There is a specification issue here since Issued Tokens can be
 Encrypted even though there is no explicit policy in the Service WSDL
-indicating the same.
-  </li>
+indicating the same. </li>
   <li>Backward Compatibility with XWSS 2.0 FCS has not been ensured in
-this release of WSIT
-  </li>
+this release of WSIT </li>
   <li>Implied DerivedKeys specified by a @wsc:nonce attribute on
-SecureTokenRequest is not supported in this release
-  </li>
+SecureTokenRequest is not supported in this release </li>
   <li>The @wsc:Instance attribute on wsse:Reference for referencing
 specific Secure Context Token instances is not supported in this
-release
-  </li>
+release </li>
   <li>WS-Security Reference Type verification in Policy Verification is
-not being done in this release of WSIT
-  </li>
-  <li>Logging code added for WSIT is incomplete.
-  </li>
+not being done in this release of WSIT </li>
+  <li>Logging code added for WSIT is incomplete. </li>
   <li>The sha256 signature algorithm is not supported by the underlying
 JSR 105 RI&nbsp; and therefore all AlgorithmSuite identifiers that
-imply the sha256 signature algorithm are not supported.
-  </li>
+imply the sha256 signature algorithm are not supported. </li>
   <li>&lt;sp:RequireDerivedKeys&gt; under
 &lt;sp:AsymmetricBinding&gt;/&lt;sp:InitiatorToken&gt;/&lt;sp:X509Token&gt;
-is not supported and will result in an Exception.
-  </li>
+is not supported and will result in an Exception. </li>
   <li>&lt;sp:RequireDerivedKeys&gt;&nbsp; under&nbsp;
 &lt;sp:X509Token&gt; appearing inside a Supporting Token Assertion
 (such as &lt;sp:EndorsingSupportingToken&gt;) is also not supported and
-will result in an exception.
-  </li>
+will result in an exception. </li>
   <li>The Following WS-SecurityPolicy Features from specification Draft
-: Jul 2005 Ver 1.1 are unsupported in this release of WSIT
-  </li>
+: Jul 2005 Ver 1.1 are unsupported in this release of WSIT </li>
 </ul>
 <h4>WS Security Policy support by WS Security Implementation :</h4>
 <table border="1" cellpadding="2" cellspacing="3" width="884">
@@ -866,10 +849,8 @@ on IssueTracker</p>
 <h4>What is Not Implemented</h4>
 <p>The following features have not been implemented:</p>
 <ul>
-  <li>Renewing of Security Context
-  </li>
-  <li>Client initiated security context
-  </li>
+  <li>Renewing of Security Context </li>
+  <li>Client initiated security context </li>
 </ul>
 <h4>Known Issues</h4>
 <table border="1" cellpadding="2" cellspacing="2">
@@ -923,19 +904,15 @@ for TransportBinding scenario.
 <hr>
 <h2><a name="96126"></a>Trust Status</h2>
 <h4>WCF Interoperability</h4>
-<pre>   Client -&gt; STS -&gt; Service<br>       MS -&gt; *   -&gt; *       :  0/4 : (not tested yet)<br>        S -&gt; S   -&gt; S       :  4/4 : (starting from WSDL)<br>        S -&gt; S   -&gt; MS      :  3/4 : (starting from WSDL)<br>        S -&gt; MS  -&gt; MS      :  2/4 : (starting from WSDL)<br>        S -&gt; MS  -&gt; S       :  3/4 : (starting from WSDL)<br></pre>
+<pre>   Client -&gt; STS -&gt; Service<br>       MS -&gt; *   -&gt; *       :  0/4 : (not tested yet)<br>        S -&gt; S   -&gt; S       :  4/4 : (starting from WSDL)<br>        S -&gt; S   -&gt; MS      :  3/4 : (starting from WSDL)<br>        S -&gt; MS  -&gt; MS      :  3/4 : (starting from WSDL)<br>        S -&gt; MS  -&gt; S       :  3/4 : (starting from WSDL)<br></pre>
 <p>NOTE: No test scenarios were executed that started from Java.</p>
 <h4>What is Not Implemented</h4>
 <p>The following features have not been implemented:</p>
 <ul>
-  <li>Token Validation protocol.
-  </li>
-  <li>Issusing SAML 2.0 assertion.
-  </li>
-  <li>Support for issuring key types other than symmetric key
-  </li>
-  <li>Support for claim types attributes
-  </li>
+  <li>Token Validation protocol. </li>
+  <li>Issusing SAML 2.0 assertion. </li>
+  <li>Support for issuring key types other than symmetric key </li>
+  <li>Support for claim types attributes </li>
 </ul>
 <h4>Known Issues</h4>
 <table border="1" cellpadding="2" cellspacing="2">
@@ -994,14 +971,11 @@ this time.</p>
 <h4>What is Not Implemented</h4>
 <ul>
   <li>WSIT support for Web Services and Web service clients is
-implemented in Web projects only.
-  </li>
+implemented in Web projects only. </li>
   <li>Web Service Tester functionality for WSIT enabled Web services is
-not implemented.
-  </li>
+not implemented. </li>
   <li>Web Service Client wizard works when service WSDL URL is
-specified
-  </li>
+specified </li>
 </ul>
 <h4>Known Issues</h4>
 <table border="1" cellpadding="2" cellspacing="2">
@@ -1162,18 +1136,14 @@ with visibility="private" in wsit.xml are ignored</a></p>
 <p>The following functionality is not implemented:</p>
 <ul>
   <li>Handler, MustUnderstand processing functionality is not
-integrated.
-  </li>
+integrated. </li>
   <li>WSDL MIME binding and Async response bean functionality is
-incomplete.
-  </li>
-  <li>FastInfoset support is not there
-  </li>
+incomplete. </li>
+  <li>FastInfoset support is not there </li>
 </ul>
 <h4>Known Issues</h4>
 <ul>
-  <li>wsimport is not adding ?wsdl to address when mex request fails.
-  </li>
+  <li>wsimport is not adding ?wsdl to address when mex request fails. </li>
   <li>webservice client with unpublished WSDL does not work anymore
     <ul>
       <li>Unpublished WSDL contains REPLACE_WITH_ACTUAL_URL as port
@@ -1182,8 +1152,7 @@ address which causes problems while creating tranport pipe </li>
 http://... address </li>
     </ul>
   </li>
-  <li>Unbound namespace prefix added to response message
-  </li>
+  <li>Unbound namespace prefix added to response message </li>
 </ul>
 <!-- ================================================== -->
 <br>
@@ -1197,17 +1166,12 @@ MTOM,WS-Addressing interop tests.</p>
 <p>The Following assertions are not yet supported by Security Policy
 implementation.</p>
 <ul>
-  <li>XPathFilter
-  </li>
-  <li>Xpath Targets
-  </li>
-  <li>RequiredElements
-  </li>
-  <li>SoapNormalization10
-  </li>
+  <li>XPathFilter </li>
+  <li>Xpath Targets </li>
+  <li>RequiredElements </li>
+  <li>SoapNormalization10 </li>
   <li>Use of https URL's for endpoints when TransportBinding assertion
-is present.
-  </li>
+is present. </li>
 </ul>
 <h4>Known Issues</h4>
 <table border="1" cellpadding="2" cellspacing="3" width="987">
