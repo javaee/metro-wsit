@@ -22,12 +22,12 @@
  Copyright 2006 Sun Microsystems Inc. All Rights Reserved
 -->
 
-<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:myns="http://any.net" name="DictService" targetNamespace="http://any.net">
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:myns="http://example.org" name="DictService" targetNamespace="http://example.org">
   <wsp:Policy wsu:Id="DummyPolicy">
     <myns:dummyAssertion id="itsMeDummyPolicy"/>
   </wsp:Policy>
   <wsdl:types>
-    <schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://any.net">
+    <schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://example.org">
       <element name="Word" type="xsd:string"/>
       <element name="FaultResponse">
         <complexType>
@@ -72,7 +72,7 @@
   <wsdl:service name="DictionaryService">
     <wsdl:port name="CzechToEnglish" binding="myns:MyBinding">
       <wsp:PolicyReference URI="#DummyPolicy"/>
-      <soap:address location="http://any.net/dict"/>
+      <soap:address location="http://example.org/dict"/>
     </wsdl:port>
   </wsdl:service>
 </wsdl:definitions>

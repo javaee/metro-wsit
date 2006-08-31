@@ -77,14 +77,14 @@ public class PolicyWSDLParserExtensionTest extends TestCase{
     public void testServiceElementAttachment() throws Exception {
         PolicyMap policyMap = getPolicyMap("testRuntimeWSExtElemService.wsdl");
         assertNotNull(policyMap.getServiceEffectivePolicy(PolicyMap.createWsdlServiceScopeKey(
-                new QName("http://any.net","DictionaryService"))));
+                new QName("http://example.org","DictionaryService"))));
     }
     
     public void testPortElementAttachment() throws Exception {
         PolicyMap policyMap = getPolicyMap("testRuntimeWSExtElemPort.wsdl");
         assertNotNull(policyMap.getEndpointEffectivePolicy(PolicyMap.createWsdlEndpointScopeKey(
-                new QName("http://any.net","DictionaryService")
-                ,new QName("http://any.net","CzechToEnglish"))));
+                new QName("http://example.org","DictionaryService")
+                ,new QName("http://example.org","CzechToEnglish"))));
     }
     
     /**
@@ -93,56 +93,56 @@ public class PolicyWSDLParserExtensionTest extends TestCase{
     public void testPortTypeElementAttachment() throws Exception {
         PolicyMap policyMap = getPolicyMap("testRuntimeWSExtElemPortType-invalid.wsdl");
         assertNotNull(policyMap.getEndpointEffectivePolicy(policyMap.createWsdlEndpointScopeKey(
-                new QName("http://any.net","DictionaryService")
-                ,new QName("http://any.net","CzechToEnglish"))));
+                new QName("http://example.org","DictionaryService")
+                ,new QName("http://example.org","CzechToEnglish"))));
     }
     
     public void testBindingElementAttachment() throws Exception {
         PolicyMap policyMap = getPolicyMap("testRuntimeWSExtElemBinding.wsdl");
         assertNotNull(policyMap.getEndpointEffectivePolicy(policyMap.createWsdlEndpointScopeKey(
-                new QName("http://any.net","DictionaryService")
-                ,new QName("http://any.net","CzechToEnglish"))));
+                new QName("http://example.org","DictionaryService")
+                ,new QName("http://example.org","CzechToEnglish"))));
     }
     
     public void testPortTypeOperationElementAttachment() throws Exception {
         PolicyMap policyMap = getPolicyMap("testRuntimeWSExtElemPortTypeOperation.wsdl");
         assertNotNull(policyMap.getOperationEffectivePolicy(policyMap.createWsdlOperationScopeKey(
-                new QName("http://any.net","DictionaryService")
-                ,new QName("http://any.net","CzechToEnglish")
-                ,new QName("http://any.net","TranslateOperation"))));
+                new QName("http://example.org","DictionaryService")
+                ,new QName("http://example.org","CzechToEnglish")
+                ,new QName("http://example.org","TranslateOperation"))));
     }
     
     public void testBindingOperationElementAttachment() throws Exception {
         PolicyMap policyMap = getPolicyMap("testRuntimeWSExtElemBindingOperation.wsdl");
         assertNotNull(policyMap.getOperationEffectivePolicy(policyMap.createWsdlOperationScopeKey(
-                new QName("http://any.net","DictionaryService")
-                ,new QName("http://any.net","CzechToEnglish")
-                ,new QName("http://any.net","TranslateOperation"))));
+                new QName("http://example.org","DictionaryService")
+                ,new QName("http://example.org","CzechToEnglish")
+                ,new QName("http://example.org","TranslateOperation"))));
     }
     
     public void testMessageInElementAttachment() throws Exception {
         PolicyMap policyMap = getPolicyMap("testRuntimeWSExtElemMessageIn.wsdl");
         assertNotNull(policyMap.getInputMessageEffectivePolicy(policyMap.createWsdlMessageScopeKey(
-                new QName("http://any.net","DictionaryService")
-                ,new QName("http://any.net","CzechToEnglish")
-                ,new QName("http://any.net","TranslateOperation"))));
+                new QName("http://example.org","DictionaryService")
+                ,new QName("http://example.org","CzechToEnglish")
+                ,new QName("http://example.org","TranslateOperation"))));
     }
     
     public void testMessageOutElementAttachment() throws Exception {
         PolicyMap policyMap = getPolicyMap("testRuntimeWSExtElemMessageOut.wsdl");
         assertNotNull(policyMap.getOutputMessageEffectivePolicy(policyMap.createWsdlMessageScopeKey(
-                new QName("http://any.net","DictionaryService")
-                ,new QName("http://any.net","CzechToEnglish")
-                ,new QName("http://any.net","TranslateOperation"))));
+                new QName("http://example.org","DictionaryService")
+                ,new QName("http://example.org","CzechToEnglish")
+                ,new QName("http://example.org","TranslateOperation"))));
     }
     
     public void testMessageFaultElementAttachment() throws Exception {
         PolicyMap policyMap = getPolicyMap("testRuntimeWSExtElemMessageFault.wsdl");
         assertNotNull(policyMap.getFaultMessageEffectivePolicy(policyMap.createWsdlFaultMessageScopeKey(
-                new QName("http://any.net","DictionaryService")
-                ,new QName("http://any.net","CzechToEnglish")
-                ,new QName("http://any.net","TranslateOperation")
-                ,new QName("http://any.net","DictFault"))));
+                new QName("http://example.org","DictionaryService")
+                ,new QName("http://example.org","CzechToEnglish")
+                ,new QName("http://example.org","TranslateOperation")
+                ,new QName("http://example.org","DictFault"))));
     }
     
     /**
@@ -151,9 +151,9 @@ public class PolicyWSDLParserExtensionTest extends TestCase{
     public void testPortTypeOpInElementAttachment() throws Exception {
         PolicyMap policyMap = getPolicyMap("testRuntimeWSExtElemPortTypeOpIn-invalid.wsdl");
         assertNotNull(policyMap.getInputMessageEffectivePolicy(policyMap.createWsdlMessageScopeKey(
-                new QName("http://any.net","DictionaryService")
-                ,new QName("http://any.net","CzechToEnglish")
-                ,new QName("http://any.net","TranslateOperation"))));
+                new QName("http://example.org","DictionaryService")
+                ,new QName("http://example.org","CzechToEnglish")
+                ,new QName("http://example.org","TranslateOperation"))));
     }
     
     /**
@@ -162,9 +162,9 @@ public class PolicyWSDLParserExtensionTest extends TestCase{
     public void testPortTypeOpOutElementAttachment() throws Exception {
         PolicyMap policyMap = getPolicyMap("testRuntimeWSExtElemPortTypeOpOut-invalid.wsdl");
         assertNotNull(policyMap.getOutputMessageEffectivePolicy(policyMap.createWsdlMessageScopeKey(
-                new QName("http://any.net","DictionaryService")
-                ,new QName("http://any.net","CzechToEnglish")
-                ,new QName("http://any.net","TranslateOperation"))));
+                new QName("http://example.org","DictionaryService")
+                ,new QName("http://example.org","CzechToEnglish")
+                ,new QName("http://example.org","TranslateOperation"))));
     }
     
     /**
@@ -173,35 +173,35 @@ public class PolicyWSDLParserExtensionTest extends TestCase{
     public void testPortTypeOpFaultElementAttachment() throws Exception {
         PolicyMap policyMap = getPolicyMap("testRuntimeWSExtElemPortTypeOpFault-invalid.wsdl");
         assertNotNull(policyMap.getFaultMessageEffectivePolicy(policyMap.createWsdlFaultMessageScopeKey(
-                new QName("http://any.net","DictionaryService")
-                ,new QName("http://any.net","CzechToEnglish")
-                ,new QName("http://any.net","TranslateOperation")
-                ,new QName("http://any.net","DictFault"))));
+                new QName("http://example.org","DictionaryService")
+                ,new QName("http://example.org","CzechToEnglish")
+                ,new QName("http://example.org","TranslateOperation")
+                ,new QName("http://example.org","DictFault"))));
     }
     
     public void testBindingOpInElementAttachment() throws Exception {
         PolicyMap policyMap = getPolicyMap("testRuntimeWSExtElemBindingOpIn.wsdl");
         assertNotNull(policyMap.getInputMessageEffectivePolicy(policyMap.createWsdlMessageScopeKey(
-                new QName("http://any.net","DictionaryService")
-                ,new QName("http://any.net","CzechToEnglish")
-                ,new QName("http://any.net","TranslateOperation"))));
+                new QName("http://example.org","DictionaryService")
+                ,new QName("http://example.org","CzechToEnglish")
+                ,new QName("http://example.org","TranslateOperation"))));
     }
     
     public void testBindingOpOutElementAttachment() throws Exception {
         PolicyMap policyMap = getPolicyMap("testRuntimeWSExtElemBindingOpOut.wsdl");
         assertNotNull(policyMap.getOutputMessageEffectivePolicy(policyMap.createWsdlMessageScopeKey(
-                new QName("http://any.net","DictionaryService")
-                ,new QName("http://any.net","CzechToEnglish")
-                ,new QName("http://any.net","TranslateOperation"))));
+                new QName("http://example.org","DictionaryService")
+                ,new QName("http://example.org","CzechToEnglish")
+                ,new QName("http://example.org","TranslateOperation"))));
     }
     
     public void testBindingOpFaultElementAttachment() throws Exception {
         PolicyMap policyMap = getPolicyMap("testRuntimeWSExtElemBindingOpFault.wsdl");
         assertNotNull(policyMap.getFaultMessageEffectivePolicy(policyMap.createWsdlFaultMessageScopeKey(
-                new QName("http://any.net","DictionaryService")
-                ,new QName("http://any.net","CzechToEnglish")
-                ,new QName("http://any.net","TranslateOperation")
-                ,new QName("http://any.net","DictFault"))));
+                new QName("http://example.org","DictionaryService")
+                ,new QName("http://example.org","CzechToEnglish")
+                ,new QName("http://example.org","TranslateOperation")
+                ,new QName("http://example.org","DictFault"))));
     }
     
     /**
@@ -210,7 +210,7 @@ public class PolicyWSDLParserExtensionTest extends TestCase{
     public void testServiceAttrAttachment() throws Exception {
         PolicyMap policyMap = getPolicyMap("testRuntimeWSExtAttrService-invalid.wsdl");
         assertNotNull(policyMap.getServiceEffectivePolicy(policyMap.createWsdlServiceScopeKey(
-                new QName("http://any.net","DictionaryService"))));
+                new QName("http://example.org","DictionaryService"))));
     }
     
     /**
@@ -219,15 +219,15 @@ public class PolicyWSDLParserExtensionTest extends TestCase{
     public void testPortAttrAttachment() throws Exception {
         PolicyMap policyMap = getPolicyMap("testRuntimeWSExtAttrPort-invalid.wsdl");
         assertNotNull(policyMap.getEndpointEffectivePolicy(policyMap.createWsdlEndpointScopeKey(
-                new QName("http://any.net","DictionaryService")
-                ,new QName("http://any.net","CzechToEnglish"))));
+                new QName("http://example.org","DictionaryService")
+                ,new QName("http://example.org","CzechToEnglish"))));
     }
     
     public void testPortTypeAttrAttachment() throws Exception {
         PolicyMap policyMap = getPolicyMap("testRuntimeWSExtAttrPortType.wsdl");
         assertNotNull(policyMap.getEndpointEffectivePolicy(policyMap.createWsdlEndpointScopeKey(
-                new QName("http://any.net","DictionaryService")
-                ,new QName("http://any.net","CzechToEnglish"))));
+                new QName("http://example.org","DictionaryService")
+                ,new QName("http://example.org","CzechToEnglish"))));
     }
     
     /**
@@ -236,8 +236,8 @@ public class PolicyWSDLParserExtensionTest extends TestCase{
     public void testBindingAttrAttachment() throws Exception {
         PolicyMap policyMap = getPolicyMap("testRuntimeWSExtAttrBinding-invalid.wsdl");
         assertNotNull(policyMap.getEndpointEffectivePolicy(policyMap.createWsdlEndpointScopeKey(
-                new QName("http://any.net","DictionaryService")
-                ,new QName("http://any.net","CzechToEnglish"))));
+                new QName("http://example.org","DictionaryService")
+                ,new QName("http://example.org","CzechToEnglish"))));
     }
     
     /**
@@ -246,9 +246,9 @@ public class PolicyWSDLParserExtensionTest extends TestCase{
     public void testPortTypeOperationAttrAttachment() throws Exception {
         PolicyMap policyMap = getPolicyMap("testRuntimeWSExtAttrPortTypeOperation-invalid.wsdl");
         assertNotNull(policyMap.getOperationEffectivePolicy(policyMap.createWsdlOperationScopeKey(
-                new QName("http://any.net","DictionaryService")
-                ,new QName("http://any.net","CzechToEnglish")
-                ,new QName("http://any.net","TranslateOperation"))));
+                new QName("http://example.org","DictionaryService")
+                ,new QName("http://example.org","CzechToEnglish")
+                ,new QName("http://example.org","TranslateOperation"))));
     }
     
     /**
@@ -257,9 +257,9 @@ public class PolicyWSDLParserExtensionTest extends TestCase{
     public void testBindingOperationAttrAttachment() throws Exception {
         PolicyMap policyMap = getPolicyMap("testRuntimeWSExtAttrBindingOperation-invalid.wsdl");
         assertNotNull(policyMap.getOperationEffectivePolicy(policyMap.createWsdlOperationScopeKey(
-                new QName("http://any.net","DictionaryService")
-                ,new QName("http://any.net","CzechToEnglish")
-                ,new QName("http://any.net","TranslateOperation"))));
+                new QName("http://example.org","DictionaryService")
+                ,new QName("http://example.org","CzechToEnglish")
+                ,new QName("http://example.org","TranslateOperation"))));
     }
     
     /**
@@ -268,9 +268,9 @@ public class PolicyWSDLParserExtensionTest extends TestCase{
     public void testMessageInAttrAttachment() throws Exception {
         PolicyMap policyMap = getPolicyMap("testRuntimeWSExtAttrMessageIn-invalid.wsdl");
         assertNotNull(policyMap.getInputMessageEffectivePolicy(policyMap.createWsdlMessageScopeKey(
-                new QName("http://any.net","DictionaryService")
-                ,new QName("http://any.net","CzechToEnglish")
-                ,new QName("http://any.net","TranslateOperation"))));
+                new QName("http://example.org","DictionaryService")
+                ,new QName("http://example.org","CzechToEnglish")
+                ,new QName("http://example.org","TranslateOperation"))));
     }
     
     /**
@@ -279,9 +279,9 @@ public class PolicyWSDLParserExtensionTest extends TestCase{
     public void testMessageOutAttrAttachment() throws Exception {
         PolicyMap policyMap = getPolicyMap("testRuntimeWSExtAttrMessageOut-invalid.wsdl");
         assertNotNull(policyMap.getOutputMessageEffectivePolicy(policyMap.createWsdlMessageScopeKey(
-                new QName("http://any.net","DictionaryService")
-                ,new QName("http://any.net","CzechToEnglish")
-                ,new QName("http://any.net","TranslateOperation"))));
+                new QName("http://example.org","DictionaryService")
+                ,new QName("http://example.org","CzechToEnglish")
+                ,new QName("http://example.org","TranslateOperation"))));
     }
     
     /**
@@ -290,35 +290,35 @@ public class PolicyWSDLParserExtensionTest extends TestCase{
     public void testMessageFaultAttrAttachment() throws Exception {
         PolicyMap policyMap = getPolicyMap("testRuntimeWSExtAttrMessageFault-invalid.wsdl");
         assertNotNull(policyMap.getFaultMessageEffectivePolicy(policyMap.createWsdlFaultMessageScopeKey(
-                new QName("http://any.net","DictionaryService")
-                ,new QName("http://any.net","CzechToEnglish")
-                ,new QName("http://any.net","TranslateOperation")
-                ,new QName("http://any.net","DictFault"))));
+                new QName("http://example.org","DictionaryService")
+                ,new QName("http://example.org","CzechToEnglish")
+                ,new QName("http://example.org","TranslateOperation")
+                ,new QName("http://example.org","DictFault"))));
     }
     
     public void testPortTypeOpInAttrAttachment() throws Exception {
         PolicyMap policyMap = getPolicyMap("testRuntimeWSExtAttrPortTypeOpIn.wsdl");
         assertNotNull(policyMap.getInputMessageEffectivePolicy(policyMap.createWsdlMessageScopeKey(
-                new QName("http://any.net","DictionaryService")
-                ,new QName("http://any.net","CzechToEnglish")
-                ,new QName("http://any.net","TranslateOperation"))));
+                new QName("http://example.org","DictionaryService")
+                ,new QName("http://example.org","CzechToEnglish")
+                ,new QName("http://example.org","TranslateOperation"))));
     }
     
     public void testPortTypeOpOutAttrAttachment() throws Exception {
         PolicyMap policyMap = getPolicyMap("testRuntimeWSExtAttrPortTypeOpOut.wsdl");
         assertNotNull(policyMap.getOutputMessageEffectivePolicy(policyMap.createWsdlMessageScopeKey(
-                new QName("http://any.net","DictionaryService")
-                ,new QName("http://any.net","CzechToEnglish")
-                ,new QName("http://any.net","TranslateOperation"))));
+                new QName("http://example.org","DictionaryService")
+                ,new QName("http://example.org","CzechToEnglish")
+                ,new QName("http://example.org","TranslateOperation"))));
     }
     
     public void testPortTypeOpFaultAttrAttachment() throws Exception {
         PolicyMap policyMap = getPolicyMap("testRuntimeWSExtAttrPortTypeOpFault.wsdl");
         assertNotNull(policyMap.getFaultMessageEffectivePolicy(policyMap.createWsdlFaultMessageScopeKey(
-                new QName("http://any.net","DictionaryService")
-                ,new QName("http://any.net","CzechToEnglish")
-                ,new QName("http://any.net","TranslateOperation")
-                ,new QName("http://any.net","DictFault"))));
+                new QName("http://example.org","DictionaryService")
+                ,new QName("http://example.org","CzechToEnglish")
+                ,new QName("http://example.org","TranslateOperation")
+                ,new QName("http://example.org","DictFault"))));
     }
     
     /**
@@ -327,9 +327,9 @@ public class PolicyWSDLParserExtensionTest extends TestCase{
     public void testBindingOpInAttrAttachment() throws Exception {
         PolicyMap policyMap = getPolicyMap("testRuntimeWSExtAttrBindingOpIn-invalid.wsdl");
         assertNotNull(policyMap.getInputMessageEffectivePolicy(policyMap.createWsdlMessageScopeKey(
-                new QName("http://any.net","DictionaryService")
-                ,new QName("http://any.net","CzechToEnglish")
-                ,new QName("http://any.net","TranslateOperation"))));
+                new QName("http://example.org","DictionaryService")
+                ,new QName("http://example.org","CzechToEnglish")
+                ,new QName("http://example.org","TranslateOperation"))));
     }
     
     /**
@@ -338,9 +338,9 @@ public class PolicyWSDLParserExtensionTest extends TestCase{
     public void testBindingOpOutAttrAttachment() throws Exception {
         PolicyMap policyMap = getPolicyMap("testRuntimeWSExtAttrBindingOpOut-invalid.wsdl");
         assertNotNull(policyMap.getOutputMessageEffectivePolicy(policyMap.createWsdlMessageScopeKey(
-                new QName("http://any.net","DictionaryService")
-                ,new QName("http://any.net","CzechToEnglish")
-                ,new QName("http://any.net","TranslateOperation"))));
+                new QName("http://example.org","DictionaryService")
+                ,new QName("http://example.org","CzechToEnglish")
+                ,new QName("http://example.org","TranslateOperation"))));
     }
     
     /**
@@ -349,23 +349,23 @@ public class PolicyWSDLParserExtensionTest extends TestCase{
     public void testBindingOpFaultAttrAttachment() throws Exception {
         PolicyMap policyMap = getPolicyMap("testRuntimeWSExtAttrBindingOpFault-invalid.wsdl");
         assertNotNull(policyMap.getFaultMessageEffectivePolicy(policyMap.createWsdlFaultMessageScopeKey(
-                new QName("http://any.net","DictionaryService")
-                ,new QName("http://any.net","CzechToEnglish")
-                ,new QName("http://any.net","TranslateOperation")
-                ,new QName("http://any.net","DictFault"))));
+                new QName("http://example.org","DictionaryService")
+                ,new QName("http://example.org","CzechToEnglish")
+                ,new QName("http://example.org","TranslateOperation")
+                ,new QName("http://example.org","DictFault"))));
     }
     
     public void testServiceHeredocAttachment() throws Exception {
         PolicyMap policyMap = getPolicyMap("testRuntimeWSExtHeredocService.wsdl");
         assertNotNull(policyMap.getServiceEffectivePolicy(policyMap.createWsdlServiceScopeKey(
-                new QName("http://any.net","DictionaryService"))));
+                new QName("http://example.org","DictionaryService"))));
     }
     
     public void testPortHeredocAttachment() throws Exception {
         PolicyMap policyMap = getPolicyMap("testRuntimeWSExtHeredocPort.wsdl");
         assertNotNull(policyMap.getEndpointEffectivePolicy(policyMap.createWsdlEndpointScopeKey(
-                new QName("http://any.net","DictionaryService")
-                ,new QName("http://any.net","CzechToEnglish"))));
+                new QName("http://example.org","DictionaryService")
+                ,new QName("http://example.org","CzechToEnglish"))));
     }
     
     /**
@@ -374,56 +374,56 @@ public class PolicyWSDLParserExtensionTest extends TestCase{
     public void testPortTypeHeredocAttachment() throws Exception {
         PolicyMap policyMap = getPolicyMap("testRuntimeWSExtHeredocPortType-invalid.wsdl");
         assertNotNull(policyMap.getEndpointEffectivePolicy(policyMap.createWsdlEndpointScopeKey(
-                new QName("http://any.net","DictionaryService")
-                ,new QName("http://any.net","CzechToEnglish"))));
+                new QName("http://example.org","DictionaryService")
+                ,new QName("http://example.org","CzechToEnglish"))));
     }
     
     public void testBindingHeredocAttachment() throws Exception {
         PolicyMap policyMap = getPolicyMap("testRuntimeWSExtHeredocBinding.wsdl");
         assertNotNull(policyMap.getEndpointEffectivePolicy(policyMap.createWsdlEndpointScopeKey(
-                new QName("http://any.net","DictionaryService")
-                ,new QName("http://any.net","CzechToEnglish"))));
+                new QName("http://example.org","DictionaryService")
+                ,new QName("http://example.org","CzechToEnglish"))));
     }
     
     public void testPortTypeOperationHeredocAttachment() throws Exception {
         PolicyMap policyMap = getPolicyMap("testRuntimeWSExtHeredocPortTypeOperation.wsdl");
         assertNotNull(policyMap.getOperationEffectivePolicy(policyMap.createWsdlOperationScopeKey(
-                new QName("http://any.net","DictionaryService")
-                ,new QName("http://any.net","CzechToEnglish")
-                ,new QName("http://any.net","TranslateOperation"))));
+                new QName("http://example.org","DictionaryService")
+                ,new QName("http://example.org","CzechToEnglish")
+                ,new QName("http://example.org","TranslateOperation"))));
     }
     
     public void testBindingOperationHeredocAttachment() throws Exception {
         PolicyMap policyMap = getPolicyMap("testRuntimeWSExtHeredocBindingOperation.wsdl");
         assertNotNull(policyMap.getOperationEffectivePolicy(policyMap.createWsdlOperationScopeKey(
-                new QName("http://any.net","DictionaryService")
-                ,new QName("http://any.net","CzechToEnglish")
-                ,new QName("http://any.net","TranslateOperation"))));
+                new QName("http://example.org","DictionaryService")
+                ,new QName("http://example.org","CzechToEnglish")
+                ,new QName("http://example.org","TranslateOperation"))));
     }
     
     public void testMessageInHeredocAttachment() throws Exception {
         PolicyMap policyMap = getPolicyMap("testRuntimeWSExtHeredocMessageIn.wsdl");
         assertNotNull(policyMap.getInputMessageEffectivePolicy(policyMap.createWsdlMessageScopeKey(
-                new QName("http://any.net","DictionaryService")
-                ,new QName("http://any.net","CzechToEnglish")
-                ,new QName("http://any.net","TranslateOperation"))));
+                new QName("http://example.org","DictionaryService")
+                ,new QName("http://example.org","CzechToEnglish")
+                ,new QName("http://example.org","TranslateOperation"))));
     }
     
     public void testMessageOutHeredocAttachment() throws Exception {
         PolicyMap policyMap = getPolicyMap("testRuntimeWSExtHeredocMessageOut.wsdl");
         assertNotNull(policyMap.getOutputMessageEffectivePolicy(policyMap.createWsdlMessageScopeKey(
-                new QName("http://any.net","DictionaryService")
-                ,new QName("http://any.net","CzechToEnglish")
-                ,new QName("http://any.net","TranslateOperation"))));
+                new QName("http://example.org","DictionaryService")
+                ,new QName("http://example.org","CzechToEnglish")
+                ,new QName("http://example.org","TranslateOperation"))));
     }
     
     public void testMessageFaultHeredocAttachment() throws Exception {
         PolicyMap policyMap = getPolicyMap("testRuntimeWSExtHeredocMessageFault.wsdl");
         assertNotNull(policyMap.getFaultMessageEffectivePolicy(policyMap.createWsdlFaultMessageScopeKey(
-                new QName("http://any.net","DictionaryService")
-                ,new QName("http://any.net","CzechToEnglish")
-                ,new QName("http://any.net","TranslateOperation")
-                ,new QName("http://any.net","DictFault"))));
+                new QName("http://example.org","DictionaryService")
+                ,new QName("http://example.org","CzechToEnglish")
+                ,new QName("http://example.org","TranslateOperation")
+                ,new QName("http://example.org","DictFault"))));
     }
     
     /**
@@ -432,9 +432,9 @@ public class PolicyWSDLParserExtensionTest extends TestCase{
     public void testPortTypeOpInHeredocAttachment() throws Exception {
         PolicyMap policyMap = getPolicyMap("testRuntimeWSExtHeredocPortTypeOpIn-invalid.wsdl");
         assertNotNull(policyMap.getInputMessageEffectivePolicy(policyMap.createWsdlMessageScopeKey(
-                new QName("http://any.net","DictionaryService")
-                ,new QName("http://any.net","CzechToEnglish")
-                ,new QName("http://any.net","TranslateOperation"))));
+                new QName("http://example.org","DictionaryService")
+                ,new QName("http://example.org","CzechToEnglish")
+                ,new QName("http://example.org","TranslateOperation"))));
     }
     
     /**
@@ -443,9 +443,9 @@ public class PolicyWSDLParserExtensionTest extends TestCase{
     public void testPortTypeOpOutHeredocAttachment() throws Exception {
         PolicyMap policyMap = getPolicyMap("testRuntimeWSExtHeredocPortTypeOpOut-invalid.wsdl");
         assertNotNull(policyMap.getOutputMessageEffectivePolicy(policyMap.createWsdlMessageScopeKey(
-                new QName("http://any.net","DictionaryService")
-                ,new QName("http://any.net","CzechToEnglish")
-                ,new QName("http://any.net","TranslateOperation"))));
+                new QName("http://example.org","DictionaryService")
+                ,new QName("http://example.org","CzechToEnglish")
+                ,new QName("http://example.org","TranslateOperation"))));
     }
     
     /**
@@ -454,35 +454,35 @@ public class PolicyWSDLParserExtensionTest extends TestCase{
     public void testPortTypeOpFaultHeredocAttachment() throws Exception {
         PolicyMap policyMap = getPolicyMap("testRuntimeWSExtHeredocPortTypeOpFault-invalid.wsdl");
         assertNotNull(policyMap.getFaultMessageEffectivePolicy(policyMap.createWsdlFaultMessageScopeKey(
-                new QName("http://any.net","DictionaryService")
-                ,new QName("http://any.net","CzechToEnglish")
-                ,new QName("http://any.net","TranslateOperation")
-                ,new QName("http://any.net","DictFault"))));
+                new QName("http://example.org","DictionaryService")
+                ,new QName("http://example.org","CzechToEnglish")
+                ,new QName("http://example.org","TranslateOperation")
+                ,new QName("http://example.org","DictFault"))));
     }
     
     public void testBindingOpInHeredocAttachment() throws Exception {
         PolicyMap policyMap = getPolicyMap("testRuntimeWSExtHeredocBindingOpIn.wsdl");
         assertNotNull(policyMap.getInputMessageEffectivePolicy(policyMap.createWsdlMessageScopeKey(
-                new QName("http://any.net","DictionaryService")
-                ,new QName("http://any.net","CzechToEnglish")
-                ,new QName("http://any.net","TranslateOperation"))));
+                new QName("http://example.org","DictionaryService")
+                ,new QName("http://example.org","CzechToEnglish")
+                ,new QName("http://example.org","TranslateOperation"))));
     }
     
     public void testBindingOpOutHeredocAttachment() throws Exception {
         PolicyMap policyMap = getPolicyMap("testRuntimeWSExtHeredocBindingOpOut.wsdl");
         assertNotNull(policyMap.getOutputMessageEffectivePolicy(policyMap.createWsdlMessageScopeKey(
-                new QName("http://any.net","DictionaryService")
-                ,new QName("http://any.net","CzechToEnglish")
-                ,new QName("http://any.net","TranslateOperation"))));
+                new QName("http://example.org","DictionaryService")
+                ,new QName("http://example.org","CzechToEnglish")
+                ,new QName("http://example.org","TranslateOperation"))));
     }
     
     public void testBindingOpFaultHeredocAttachment() throws Exception {
         PolicyMap policyMap = getPolicyMap("testRuntimeWSExtHeredocBindingOpFault.wsdl");
         assertNotNull(policyMap.getFaultMessageEffectivePolicy(policyMap.createWsdlFaultMessageScopeKey(
-                new QName("http://any.net","DictionaryService")
-                ,new QName("http://any.net","CzechToEnglish")
-                ,new QName("http://any.net","TranslateOperation")
-                ,new QName("http://any.net","DictFault"))));
+                new QName("http://example.org","DictionaryService")
+                ,new QName("http://example.org","CzechToEnglish")
+                ,new QName("http://example.org","TranslateOperation")
+                ,new QName("http://example.org","DictFault"))));
     }
     
 }
