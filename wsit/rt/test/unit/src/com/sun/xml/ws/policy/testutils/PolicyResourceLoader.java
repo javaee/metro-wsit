@@ -28,9 +28,13 @@ import com.sun.xml.ws.policy.sourcemodel.PolicyModelTranslator;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelUnmarshaller;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 
 /**
  * This class provides utility methods to load resources and unmarshall policy source model.
@@ -39,7 +43,8 @@ import java.net.URL;
  */
 public final class PolicyResourceLoader {
     private static final String POLICY_RESOURCE_ROOT_PREFIX = "policy/";
-    
+    private static final XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+
     public static final String[] SINGLE_ALTERNATIVE_POLICY = new String[] {
         "single_alternative_policy/policy1.xml",
         "single_alternative_policy/policy2.xml",
@@ -58,8 +63,17 @@ public final class PolicyResourceLoader {
         return model;
     }
     
+    public static InputStream getInputStream(String resourceName) {
+        return Thread.currentThread().getContextClassLoader().getResourceAsStream(POLICY_RESOURCE_ROOT_PREFIX + resourceName);
+    }
+    
     public static Reader getResourceReader(String resourceName) {
-        return new InputStreamReader(Thread.currentThread().getContextClassLoader().getResourceAsStream(POLICY_RESOURCE_ROOT_PREFIX + resourceName));
+        return new InputStreamReader(getInputStream(resourceName));
+    }
+    
+    public static XMLStreamReader getResourceXmlReader(String resourceName)
+        throws XMLStreamException {
+        return inputFactory.createXMLStreamReader(getInputStream(resourceName));
     }
     
     public static URL getResourceUrl(String resourceName) {
