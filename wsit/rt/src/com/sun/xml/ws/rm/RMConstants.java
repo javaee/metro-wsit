@@ -325,6 +325,7 @@ public class RMConstants {
                     Class.forName(getPackageName()+ ".CreateSequenceResponseElement"),
                     Class.forName(getPackageName()+ ".SequenceAcknowledgementElement"),
                     Class.forName(getPackageName()+ ".SequenceElement"),
+                    Class.forName(getPackageName()+ ".SequenceFaultElement"),
                     Class.forName(getPackageName()+ ".TerminateSequenceElement"),
                     Class.forName(getPackageName()+ ".AcceptType"),
                     Class.forName(getPackageName()+ ".Identifier"),
