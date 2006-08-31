@@ -120,7 +120,7 @@ public class SymmetricBindingProcessor extends BindingProcessor{
         addPrimaryTargets();
         
         
-        if(binding.getSignatureProtection()){
+        if(foundEncryptTargets && binding.getSignatureProtection()){
             protectPrimarySignature();
         }
         if(binding.isIncludeTimeStamp()){

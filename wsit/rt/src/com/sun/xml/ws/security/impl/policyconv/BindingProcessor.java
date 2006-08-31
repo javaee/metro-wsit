@@ -79,6 +79,8 @@ public abstract class BindingProcessor {
     protected IntegrityAssertionProcessor iAP = null;
     protected EncryptionAssertionProcessor eAP = null;
     private WSSAssertion wss11  = null;
+    
+    protected boolean foundEncryptTargets = false;
     /** Creates a new instance of BindingProcessor */
     public BindingProcessor() {
         this.pid = new PolicyID();
@@ -166,16 +168,18 @@ public abstract class BindingProcessor {
             iAP.process(sp,spFB);
         }
         for(EncryptedParts ep :encryptedParts){
+            foundEncryptTargets = true;
             eAP.process(ep,epFB);
         }
         
         for(EncryptedElements encEl : encryptedElements){
+            foundEncryptTargets = true;
             eAP.process(encEl,epFB);
         }
         if(isWSS11() && requireSC()){
             iAP.process(SIGNATURE_CONFIRMATION,spFB);
         }
-        if((isWSS11() && requireSC() ) && isServer && !isIncoming && getBinding().getSignatureProtection()){
+        if(foundEncryptTargets && (isWSS11() && requireSC() ) && isServer && !isIncoming && getBinding().getSignatureProtection()){
             eAP.process(SIGNATURE_CONFIRMATION,epFB);
         }
     }
