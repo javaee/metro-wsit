@@ -86,7 +86,7 @@ public class AsymmetricBindingProcessor extends BindingProcessor {
             
         }
         addPrimaryTargets();
-        if(binding.getSignatureProtection()){
+        if(foundEncryptTargets && binding.getSignatureProtection()){
             protectPrimarySignature();
         }
         if(binding.isIncludeTimeStamp()){

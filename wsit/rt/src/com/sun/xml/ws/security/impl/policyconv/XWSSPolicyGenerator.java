@@ -285,6 +285,7 @@ public class XWSSPolicyGenerator {
         if(isServer && !isIncoming){
             return false;
         }
+        
         if(!isServer && isIncoming){
             return false;
         }
