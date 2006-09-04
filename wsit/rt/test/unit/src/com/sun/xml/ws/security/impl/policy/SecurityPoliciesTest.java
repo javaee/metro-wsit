@@ -801,14 +801,8 @@ public class SecurityPoliciesTest extends TestCase {
         XMLStreamReader reader = XMLInputFactory.newInstance().createXMLStreamReader(inStream);
         XMLStreamBuffer buffer = XMLStreamBuffer.createNewBufferFromXMLStreamReader(reader);
         //WSDLModel model = PolicyConfigParser.parse(buffer);
-        WSDLExtensible model = (WSDLExtensible)PolicyConfigParser.parse(inUrl, buffer);
+        map = PolicyConfigParser.parse(inUrl, buffer);
         reader.close();
-        if (model != null) {
-            WSDLPolicyMapWrapper mapWrapper = model.getExtension(WSDLPolicyMapWrapper.class);
-            if (mapWrapper != null) {
-                map = mapWrapper.getPolicyMap();
-            }
-        }
         
         
 //        QName serviceName = new QName(UUID.randomUUID().toString());

@@ -70,7 +70,6 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
     
     private PolicyMap policyMap;
     private SEIModel seiModel;
-    private WSDLModel configModel;
     private HashMap<String, Policy> nameToPolicy = new HashMap<String, Policy>();
     private HashMap<String, Policy> portTypeOperationToPolicy = new HashMap<String, Policy>();
     private HashMap<String, Policy> bindingOperationInToPolicy = new HashMap<String, Policy>();
@@ -93,13 +92,9 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
                 this.seiModel = model;
                 this.isMtomEnabled = binding.isMTOMEnabled();
                 // QName serviceName = model.getServiceQName();
-                this.configModel = PolicyConfigParser.parse(container);
-                if (this.configModel != null) {
-                    WSDLPolicyMapWrapper mapWrapper = this.configModel.getExtension(WSDLPolicyMapWrapper.class);
-                    if (mapWrapper != null) {
-                        this.policyMap = mapWrapper.getPolicyMap();
-                        root._namespace(PolicyConstants.POLICY_NAMESPACE_URI, PolicyConstants.POLICY_NAMESPACE_PREFIX);
-                    }
+                this.policyMap = PolicyConfigParser.parse(container);
+                if (this.policyMap != null) {
+                    root._namespace(PolicyConstants.POLICY_NAMESPACE_URI, PolicyConstants.POLICY_NAMESPACE_PREFIX);
                 }
             }
         } catch (PolicyException e) {

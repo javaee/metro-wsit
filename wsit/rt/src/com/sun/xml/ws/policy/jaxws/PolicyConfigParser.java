@@ -3,12 +3,12 @@
  * of the Common Development and Distribution License
  * (the License).  You may not use this file except in
  * compliance with the License.
- * 
+ *
  * You can obtain a copy of the license at
  * https://glassfish.dev.java.net/public/CDDLv1.0.html.
  * See the License for the specific language governing
  * permissions and limitations under the License.
- * 
+ *
  * When distributing Covered Code, include this CDDL
  * Header Notice in each file and include the License file
  * at https://glassfish.dev.java.net/public/CDDLv1.0.html.
@@ -16,7 +16,7 @@
  * with the fields enclosed by brackets [] replaced by
  * you own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * 
+ *
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
@@ -40,18 +40,19 @@ import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
 import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
 import com.sun.xml.ws.wsdl.parser.XMLEntityResolver.Parser;
 import com.sun.xml.ws.policy.PolicyException;
+import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 
 /**
  * Reads a policy configuration file and returns the WSDL model generated from it.
  */
 public final class PolicyConfigParser {
-
+    
     private static final PolicyLogger logger = PolicyLogger.getLogger(PolicyConfigParser.class);
     private static final String CONFIG_FILE_NAME="wsit.xml";
     private static final String SERVLET_CONTEXT_CLASSNAME = "javax.servlet.ServletContext";
     private static final XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
-
+    
     /**
      * Reads a WSDL file from META-INF or WEB-INF/wsit.xml, parses it
      * and returns a WSDLModel.
@@ -59,12 +60,13 @@ public final class PolicyConfigParser {
      * @param container May hold the servlet context if run inside a web container
      * @return A WSDLModel populated from the WSDL file
      */
-    public static WSDLModel parse(Container container) throws PolicyException {
+    public static PolicyMap parse(Container container) throws PolicyException {
         logger.entering("parse", container);
-        WSDLModel model = null;
+        PolicyMap map = null;
         try {
             UrlBufferStruct urlBuffer = null;
             Object context = null;
+            
             try {
                 Class<?> contextClass = Class.forName(SERVLET_CONTEXT_CLASSNAME);
                 if (null!=container) {
@@ -73,20 +75,23 @@ public final class PolicyConfigParser {
             } catch (ClassNotFoundException e) {
                 logger.fine("parse", "Did not find class " + SERVLET_CONTEXT_CLASSNAME + ". We are apparently not running in a container.");
             }
+            
             logger.finest("parse", "context = " + context);
+            
             if (context != null) {
                 urlBuffer = loadFromContext(context);
-            }
-            else {
+            } else {
                 // We are not running inside a web container, load file from META-INF
                 urlBuffer = loadFromClasspath(CONFIG_FILE_NAME);
             }
+            
             if (urlBuffer != null) {
-                model = parse(urlBuffer.getUrl(), urlBuffer.getBuffer());
+                map = parse(urlBuffer.getUrl(), urlBuffer.getBuffer());
             }
-            return model;
+            
+            return map;
         } finally {
-            logger.exiting("parse", model);
+            logger.exiting("parse", map);
         }
     }
     
@@ -99,41 +104,49 @@ public final class PolicyConfigParser {
      * @param buffer The XMLStreamBuffer from which WSDL is parsed. May not be null.
      * @return A WSDLModel populated from the WSDL input
      */
-    public static WSDLModel parse(URL systemId, XMLStreamBuffer buffer) throws PolicyException {
+    public static PolicyMap parse(URL systemId, XMLStreamBuffer buffer) throws PolicyException {
+        logger.entering("parse", new Object[] {systemId, buffer});
+        PolicyMap map = null;
         try {
             if (buffer == null) {
                 throw new PolicyException(Messages.BUFFER_NOT_EXIST.format(systemId));
             }
-            WSDLModel model = null;
+            
             SDDocumentSource doc = SDDocumentSource.create(systemId, buffer);
             Parser parser =  new Parser(doc);
-            model = RuntimeWSDLParser.parse(parser, new PolicyConfigResolver(),
-                new WSDLParserExtension[] { new PolicyWSDLParserExtension() } );
-            return model;
+            WSDLModel model = RuntimeWSDLParser.parse(parser, new PolicyConfigResolver(), new WSDLParserExtension[] { new PolicyWSDLParserExtension() } );
+            WSDLPolicyMapWrapper wrapper = model.getExtension(WSDLPolicyMapWrapper.class);
+           
+            if (wrapper != null) {
+                map = wrapper.getPolicyMap();
+            }
+            
+            return map;
         } catch (XMLStreamException ex) {
             throw new PolicyException(Messages.WSDL_IMPORT_FAILED.format(), ex);
         } catch (IOException ex) {
             throw new PolicyException(Messages.WSDL_IMPORT_FAILED.format(), ex);
         } catch (SAXException ex) {
             throw new PolicyException(Messages.WSDL_IMPORT_FAILED.format(), ex);
+        } finally {
+             logger.exiting("parse", map);           
         }
     }
     
-
+    
     private static UrlBufferStruct loadFromClasspath(String filename)
-        throws PolicyException {
+    throws PolicyException {
         
         URL inputUrl = null;
         XMLStreamReader reader = null;
         InputStream input = null;
         
         try {
-
+            
             ClassLoader cl = Thread.currentThread().getContextClassLoader();
             if (cl == null) {
                 inputUrl = ClassLoader.getSystemResource(filename);
-            }
-            else {
+            } else {
                 inputUrl = cl.getResource(filename);
             }
             XMLStreamBuffer buffer = null;
@@ -144,8 +157,7 @@ public final class PolicyConfigParser {
             }
             if (buffer == null) {
                 return null;
-            }
-            else {
+            } else {
                 return new UrlBufferStruct(inputUrl, buffer);
             }
         } catch (XMLStreamException e) {
@@ -156,10 +168,10 @@ public final class PolicyConfigParser {
             throw new PolicyException(Messages.URL_OPEN_FAILED.format(inputUrl), e);
         }
     }
-
+    
     
     private static UrlBufferStruct loadFromContext(Object context)
-        throws PolicyException {
+    throws PolicyException {
         
         URL inputUrl = null;
         InputStream input = null;
@@ -192,7 +204,7 @@ public final class PolicyConfigParser {
             throw new PolicyException(Messages.BUFFER_CREATE_FAILED.format(inputUrl, reader), e);
         }
     }
-
+    
     /**
      * Used to return an XMLStreamBuffer and the URL from which the buffer was built.
      */
