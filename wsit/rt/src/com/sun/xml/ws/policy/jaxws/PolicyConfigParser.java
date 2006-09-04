@@ -38,7 +38,6 @@ import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.server.SDDocumentSource;
 import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
 import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
-import com.sun.xml.ws.wsdl.parser.XMLEntityResolver;
 import com.sun.xml.ws.wsdl.parser.XMLEntityResolver.Parser;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
@@ -51,6 +50,7 @@ public final class PolicyConfigParser {
     private static final PolicyLogger logger = PolicyLogger.getLogger(PolicyConfigParser.class);
     private static final String CONFIG_FILE_NAME="wsit.xml";
     private static final String SERVLET_CONTEXT_CLASSNAME = "javax.servlet.ServletContext";
+    private static final XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
 
     /**
      * Reads a WSDL file from META-INF or WEB-INF/wsit.xml, parses it
@@ -60,10 +60,10 @@ public final class PolicyConfigParser {
      * @return A WSDLModel populated from the WSDL file
      */
     public static WSDLModel parse(Container container) throws PolicyException {
-        logger.entering("parse");
+        logger.entering("parse", container);
+        WSDLModel model = null;
         try {
-            WSDLModel model = null;
-            XMLStreamBuffer buffer = null;
+            UrlBufferStruct urlBuffer = null;
             Object context = null;
             try {
                 Class<?> contextClass = Class.forName(SERVLET_CONTEXT_CLASSNAME);
@@ -75,22 +75,18 @@ public final class PolicyConfigParser {
             }
             logger.finest("parse", "context = " + context);
             if (context != null) {
-                buffer = loadFromContext(context);
+                urlBuffer = loadFromContext(context);
             }
             else {
                 // We are not running inside a web container, load file from META-INF
-                buffer = loadFromClasspath(CONFIG_FILE_NAME);
+                urlBuffer = loadFromClasspath(CONFIG_FILE_NAME);
             }
-            if (buffer != null) {
-                model = parse(buffer);
+            if (urlBuffer != null) {
+                model = parse(urlBuffer.getUrl(), urlBuffer.getBuffer());
             }
             return model;
-        } catch (XMLStreamBufferException ex) {
-            throw new PolicyException(ex);
-        } catch (XMLStreamException ex) {
-            throw new PolicyException(ex);
         } finally {
-            logger.exiting("parse");
+            logger.exiting("parse", model);
         }
     }
     
@@ -99,74 +95,122 @@ public final class PolicyConfigParser {
      * Reads WSDL from an XMLStreamBuffer, parses it
      * and returns a WSDLModel.
      *
-     * @param buffer The XMLStreamBuffer from which WSDL is parsed
+     * @param systemId The URL to the file that is being parsed. May not be null.
+     * @param buffer The XMLStreamBuffer from which WSDL is parsed. May not be null.
      * @return A WSDLModel populated from the WSDL input
      */
-    public static WSDLModel parse(XMLStreamBuffer buffer) throws PolicyException {
+    public static WSDLModel parse(URL systemId, XMLStreamBuffer buffer) throws PolicyException {
         try {
+            if (buffer == null) {
+                throw new PolicyException(Messages.BUFFER_NOT_EXIST.format(systemId));
+            }
             WSDLModel model = null;
-            URL systemId = new URL("http://example.org/wsit");
             SDDocumentSource doc = SDDocumentSource.create(systemId, buffer);
             Parser parser =  new Parser(doc);
-            model = RuntimeWSDLParser.parse(parser, new Resolver(),
+            model = RuntimeWSDLParser.parse(parser, new PolicyConfigResolver(),
                 new WSDLParserExtension[] { new PolicyWSDLParserExtension() } );
             return model;
         } catch (XMLStreamException ex) {
-            throw new PolicyException(ex);
+            throw new PolicyException(Messages.WSDL_IMPORT_FAILED.format(), ex);
         } catch (IOException ex) {
-            throw new PolicyException(ex);
+            throw new PolicyException(Messages.WSDL_IMPORT_FAILED.format(), ex);
         } catch (SAXException ex) {
-            throw new PolicyException(ex);
+            throw new PolicyException(Messages.WSDL_IMPORT_FAILED.format(), ex);
         }
     }
     
 
-    private static XMLStreamBuffer loadFromClasspath(String filename)
-        throws XMLStreamException, XMLStreamBufferException {
+    private static UrlBufferStruct loadFromClasspath(String filename)
+        throws PolicyException {
         
-        ClassLoader cl = Thread.currentThread().getContextClassLoader();
+        URL inputUrl = null;
+        XMLStreamReader reader = null;
         InputStream input = null;
-        if (cl == null) {
-            input = ClassLoader.getSystemResourceAsStream(filename);
+        
+        try {
+
+            ClassLoader cl = Thread.currentThread().getContextClassLoader();
+            if (cl == null) {
+                inputUrl = ClassLoader.getSystemResource(filename);
+            }
+            else {
+                inputUrl = cl.getResource(filename);
+            }
+            XMLStreamBuffer buffer = null;
+            if (inputUrl != null) {
+                input = inputUrl.openStream();
+                reader = xmlInputFactory.createXMLStreamReader(input);
+                buffer = XMLStreamBuffer.createNewBufferFromXMLStreamReader(reader);
+            }
+            if (buffer == null) {
+                return null;
+            }
+            else {
+                return new UrlBufferStruct(inputUrl, buffer);
+            }
+        } catch (XMLStreamException e) {
+            throw new PolicyException(Messages.READER_CREATE_FAILED.format(inputUrl), e);
+        } catch (XMLStreamBufferException e) {
+            throw new PolicyException(Messages.BUFFER_CREATE_FAILED.format(inputUrl, reader), e);
+        } catch (IOException e) {
+            throw new PolicyException(Messages.URL_OPEN_FAILED.format(inputUrl), e);
         }
-        else {
-            input = cl.getResourceAsStream(filename);
-        }
-        XMLStreamBuffer buffer = null;
-        if (input != null) {
-            XMLStreamReader reader = XMLInputFactory.newInstance().createXMLStreamReader(input);
-            buffer = XMLStreamBuffer.createNewBufferFromXMLStreamReader(reader);
-        }
-        return buffer;
     }
 
     
-    private static XMLStreamBuffer loadFromContext(Object context)
-        throws XMLStreamException, XMLStreamBufferException, PolicyException {
+    private static UrlBufferStruct loadFromContext(Object context)
+        throws PolicyException {
+        
+        URL inputUrl = null;
+        InputStream input = null;
+        XMLStreamReader reader = null;
         
         try {
             XMLStreamBuffer buffer = null;
-            Method getResourceAsStream = context.getClass().getMethod("getResourceAsStream", String.class);
-            InputStream input = (InputStream) getResourceAsStream.invoke(context, "/WEB-INF/" + CONFIG_FILE_NAME);
-            if (input != null) {
-                XMLStreamReader reader = XMLInputFactory.newInstance().createXMLStreamReader(input);
+            Method getResource = context.getClass().getMethod("getResource", String.class);
+            inputUrl = (URL) getResource.invoke(context, "/WEB-INF/" + CONFIG_FILE_NAME);
+            if (inputUrl != null) {
+                input = inputUrl.openStream();
+                reader = xmlInputFactory.createXMLStreamReader(input);
                 buffer = XMLStreamBuffer.createNewBufferFromXMLStreamReader(reader);
             }
-            return buffer;
+            if (buffer == null) {
+                throw new PolicyException(Messages.FAILED_LOAD_CONTEXT.format(inputUrl, context));
+            }
+            return new UrlBufferStruct(inputUrl, buffer);
         } catch (NoSuchMethodException e) {
-            throw new PolicyException("Failed to invoke getResourceAsStream(String) on ServletContext");
+            throw new PolicyException(Messages.GET_RESOURCE_INVOCATION_FAILED.format(), e);
         } catch (IllegalAccessException e) {
-            throw new PolicyException("Failed to invoke getResourceAsStream(String) on ServletContext");
+            throw new PolicyException(Messages.GET_RESOURCE_INVOCATION_FAILED.format(), e);
         } catch (InvocationTargetException e) {
-            throw new PolicyException("Failed to invoke getResourceAsStream(String) on ServletContext");
+            throw new PolicyException(Messages.GET_RESOURCE_INVOCATION_FAILED.format(), e);
+        } catch (IOException e) {
+            throw new PolicyException(Messages.GET_RESOURCE_INVOCATION_FAILED.format(), e);
+        } catch (XMLStreamException e) {
+            throw new PolicyException(Messages.READER_CREATE_FAILED.format(inputUrl), e);
+        } catch (XMLStreamBufferException e) {
+            throw new PolicyException(Messages.BUFFER_CREATE_FAILED.format(inputUrl, reader), e);
         }
     }
-    
-    
-    private static final class Resolver implements XMLEntityResolver {
+
+    /**
+     * Used to return an XMLStreamBuffer and the URL from which the buffer was built.
+     */
+    private static class UrlBufferStruct {
+        private XMLStreamBuffer buffer;
+        private URL url;
         
-        public Parser resolveEntity(String string, String string0) {
-            throw new UnsupportedOperationException("Can not resolve XML entities");
+        UrlBufferStruct(URL url, XMLStreamBuffer buffer) {
+            this.buffer = buffer;
+            this.url = url;
+        }
+        
+        public XMLStreamBuffer getBuffer() {
+            return this.buffer;
+        }
+        
+        public URL getUrl() {
+            return this.url;
         }
     }
 }
