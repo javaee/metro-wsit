@@ -22,6 +22,8 @@
 
 package com.sun.xml.ws.policy.testutils;
 
+import com.sun.xml.stream.buffer.XMLStreamBuffer;
+import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelTranslator;
@@ -34,7 +36,6 @@ import java.io.Reader;
 import java.net.URL;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
 
 /**
  * This class provides utility methods to load resources and unmarshall policy source model.
@@ -63,17 +64,17 @@ public final class PolicyResourceLoader {
         return model;
     }
     
-    public static InputStream getInputStream(String resourceName) {
+    public static InputStream getResourceStream(String resourceName) {
         return Thread.currentThread().getContextClassLoader().getResourceAsStream(POLICY_RESOURCE_ROOT_PREFIX + resourceName);
     }
     
     public static Reader getResourceReader(String resourceName) {
-        return new InputStreamReader(getInputStream(resourceName));
+        return new InputStreamReader(getResourceStream(resourceName));
     }
     
-    public static XMLStreamReader getResourceXmlReader(String resourceName)
-        throws XMLStreamException {
-        return inputFactory.createXMLStreamReader(getInputStream(resourceName));
+    public static XMLStreamBuffer getResourceXmlBuffer(String resourceName)
+        throws XMLStreamException, XMLStreamBufferException {
+        return XMLStreamBuffer.createNewBufferFromXMLStreamReader(inputFactory.createXMLStreamReader(getResourceStream(resourceName)));
     }
     
     public static URL getResourceUrl(String resourceName) {
