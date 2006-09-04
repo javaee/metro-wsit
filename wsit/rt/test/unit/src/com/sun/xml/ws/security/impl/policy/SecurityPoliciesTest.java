@@ -789,18 +789,19 @@ public class SecurityPoliciesTest extends TestCase {
         
         PolicyMap map = null;
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        InputStream inStream = null;
         String wsdlFile = fileName;
+        URL inUrl = null;
         if(cl==null) {
-            inStream = ClassLoader.getSystemResourceAsStream(wsdlFile);
+            inUrl = ClassLoader.getSystemResource(wsdlFile);
         } else {
-            inStream = cl.getResourceAsStream(wsdlFile);
+            inUrl = cl.getResource(wsdlFile);
         }
+        InputStream inStream = inUrl.openStream();
         
         XMLStreamReader reader = XMLInputFactory.newInstance().createXMLStreamReader(inStream);
         XMLStreamBuffer buffer = XMLStreamBuffer.createNewBufferFromXMLStreamReader(reader);
         //WSDLModel model = PolicyConfigParser.parse(buffer);
-        WSDLExtensible model = (WSDLExtensible)PolicyConfigParser.parse(new URL("http://example.org/wsit"), buffer);
+        WSDLExtensible model = (WSDLExtensible)PolicyConfigParser.parse(inUrl, buffer);
         reader.close();
         if (model != null) {
             WSDLPolicyMapWrapper mapWrapper = model.getExtension(WSDLPolicyMapWrapper.class);
