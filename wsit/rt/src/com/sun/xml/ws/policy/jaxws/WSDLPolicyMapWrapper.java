@@ -98,7 +98,7 @@ public class WSDLPolicyMapWrapper implements WSDLExtension {
             XMLStreamBuffer buffer = XMLStreamBuffer.createNewBufferFromXMLStreamReader(reader);
             logger.fine("addClientConfigToMap", "Client configuration resource opened.");
             
-            WSDLModel wsdlModel = PolicyConfigParser.parse(buffer);
+            WSDLModel wsdlModel = PolicyConfigParser.parse(clientWsitConfig, buffer);
             WSDLPolicyMapWrapper mapWrapper = wsdlModel.getExtension(WSDLPolicyMapWrapper.class);
             PolicyMap clientPolicyMap = mapWrapper.getPolicyMap();
             logger.fine("addClientConfigToMap", "Client configuration resource parsed into a policy map: " + clientPolicyMap);
@@ -146,7 +146,7 @@ public class WSDLPolicyMapWrapper implements WSDLExtension {
         } catch (IOException ex) {
             throw new PolicyException(ex);
         } catch (XMLStreamException ex) {
-            throw new PolicyException(ex);
+            throw new PolicyException(Messages.READER_CREATE_FAILED.format(clientWsitConfig), ex);
         }
         
         logger.exiting("addClientConfigToMap");
