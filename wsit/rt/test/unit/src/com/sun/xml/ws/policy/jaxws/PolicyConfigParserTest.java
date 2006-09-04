@@ -60,11 +60,8 @@ public class PolicyConfigParserTest extends TestCase {
         WSDLModel expResult = null;
         WSDLModel result = null;
         
-        try {
-            PolicyConfigParser.parse(container);
-            fail("Expected PolicyException");
-        } catch (PolicyException e) {
-        }
+        result = PolicyConfigParser.parse(container);
+        assertNull(result);
     }
     
     public void testParseContainerNullWithConfig() throws Exception {
@@ -94,11 +91,8 @@ public class PolicyConfigParserTest extends TestCase {
         WSDLModel expResult = null;
         WSDLModel result = null;
         
-        try {
-            PolicyConfigParser.parse(container);
-            fail("Expected PolicyException");
-        } catch (PolicyException e) {
-        }
+        result = PolicyConfigParser.parse(container);
+        assertNull(result);
     }
     
     public void testParseContainerWithoutContext() throws Exception {
@@ -229,6 +223,20 @@ public class PolicyConfigParserTest extends TestCase {
         assertEquals("MutualCertificate10Sign_IPingService_policy", policy.getId());
     }
     
+    public void testParseBufferExternalReference() throws Exception {
+        XMLStreamBuffer buffer = null;
+        WSDLModel result = null;
+        
+        buffer = PolicyResourceLoader.getResourceXmlBuffer("config/service.wsdl");
+        result = PolicyConfigParser.parse(new URL("file:test/unit/data/policy/config/"), buffer);
+        WSDLPolicyMapWrapper wrapper = result.getExtension(WSDLPolicyMapWrapper.class);
+        PolicyMap map = wrapper.getPolicyMap();
+        PolicyMapKey key = map.createWsdlEndpointScopeKey(new QName("http://example.org/AddNumbers/service", "AddNumbersService"), new QName("http://example.org/AddNumbers/service", "AddNumbersPort"));
+        Policy policy = map.getEndpointEffectivePolicy(key);
+        assertNotNull(policy);
+        assertEquals("AddNumbersServicePolicy", policy.getId());
+    }
+    
     /**
      * Copy a file
      */
@@ -267,7 +275,12 @@ public class PolicyConfigParserTest extends TestCase {
         }
         
         public <T> T getSPI(Class<T> spiType) {
-            return (T) spi;
+            if (spiType.isInstance(this.spi)) {
+                return (T) this.spi;
+            }
+            else {
+                return null;
+            }
         }
         
     }
