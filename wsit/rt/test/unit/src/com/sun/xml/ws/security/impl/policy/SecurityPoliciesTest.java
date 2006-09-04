@@ -57,6 +57,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -799,7 +800,7 @@ public class SecurityPoliciesTest extends TestCase {
         XMLStreamReader reader = XMLInputFactory.newInstance().createXMLStreamReader(inStream);
         XMLStreamBuffer buffer = XMLStreamBuffer.createNewBufferFromXMLStreamReader(reader);
         //WSDLModel model = PolicyConfigParser.parse(buffer);
-        WSDLExtensible model = (WSDLExtensible)PolicyConfigParser.parse(buffer);
+        WSDLExtensible model = (WSDLExtensible)PolicyConfigParser.parse(new URL("http://example.org/wsit"), buffer);
         reader.close();
         if (model != null) {
             WSDLPolicyMapWrapper mapWrapper = model.getExtension(WSDLPolicyMapWrapper.class);
