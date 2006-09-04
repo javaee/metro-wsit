@@ -63,7 +63,13 @@ abstract class BuilderHandler{
         Collection<Policy> result = new ArrayList<Policy>(policyURIs.size());
         
         for (String policyURI:policyURIs) {
-            result.add(PolicyModelTranslator.getTranslator().translate(policyStore.get(policyURI)));
+            PolicySourceModel sourceModel = policyStore.get(policyURI);
+            if (sourceModel != null) {
+                result.add(PolicyModelTranslator.getTranslator().translate(sourceModel));
+            }
+            else {
+                throw new PolicyException(Messages.POLICY_REFERENCE_NOT_EXIST.format(policyURI));
+            }
         }
         
         return result;
