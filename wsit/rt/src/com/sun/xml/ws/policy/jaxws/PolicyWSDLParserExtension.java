@@ -544,7 +544,7 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
         return result;
     }
     
-    private void readExternalFile(String fileUrl) {
+    private boolean readExternalFile(String fileUrl) {
         try {
             URL xmlURL = new URL(fileUrl);
             InputStream ios = xmlURL.openStream();
@@ -558,10 +558,11 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
                 reader.next();
             }
         } catch (IOException ioe) {
-            // not necessary to solve it here
+            return false;
         } catch (XMLStreamException xmlse) {
-            // not necessary to solve it here
+            return false;
         }
+        return true;
     }
     
     public void finished(WSDLModel model) {
@@ -595,7 +596,9 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
                             if (urlsRead.contains(getBaseUrl(currentUri))) { // big problem --> unresolvable policy
                                 throw new PolicyException("Can not resolve policy: "+currentUri);
                             } else {
-                                readExternalFile(getBaseUrl(currentUri));
+                                if (readExternalFile(getBaseUrl(currentUri))) {
+                                    getUnresolvedUris(false).add(currentUri);
+                                }
                             }
                         }
                     } // end-if policy already processed
