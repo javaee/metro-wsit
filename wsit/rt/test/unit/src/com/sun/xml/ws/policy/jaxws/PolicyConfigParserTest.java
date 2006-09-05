@@ -214,6 +214,18 @@ public class PolicyConfigParserTest extends TestCase {
         assertEquals("AddNumbersServicePolicy", policy.getId());
     }
     
+    public void testParseBufferExternalReferenceName() throws Exception {
+        XMLStreamBuffer buffer = null;
+        PolicyMap result = null;
+        
+        buffer = PolicyResourceLoader.getResourceXmlBuffer("config/service-name.wsdl");
+        result = PolicyConfigParser.parse(new URL("file:test/unit/data/policy/config/"), buffer);
+        PolicyMapKey key = result.createWsdlEndpointScopeKey(new QName("http://example.org/AddNumbers/service", "AddNumbersService"), new QName("http://example.org/AddNumbers/service", "AddNumbersPort"));
+        Policy policy = result.getEndpointEffectivePolicy(key);
+        assertNotNull(policy);
+        assertEquals("http://example.org/AddNumbers/porttype#AddNumbersServicePolicy", policy.getName());
+    }
+    
     /**
      * Copy a file
      */
