@@ -336,7 +336,11 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
     
     private PolicyRecordHandler readSinglePolicy(PolicyRecord policyRec, boolean inner) {
         PolicyRecordHandler handler = null;
-        if (null!=policyRec.policyModel.getPolicyId()) {           // policy id defined, keep the policy
+        String policyId = policyRec.policyModel.getPolicyId();
+        if (policyId == null) {
+            policyId = policyRec.policyModel.getPolicyName();
+        }
+        if (policyId != null) {           // policy id defined, keep the policy
             handler = new PolicyRecordHandler(HandlerType.PolicyUri,policyRec.uri);
             getPolicyRecordsPassedBy().put(policyRec.uri, policyRec);
             policyRecToExpandQueue(policyRec);
@@ -1007,6 +1011,9 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
                     new StringReader(elementCode.toString()));
             if (null != policyRec.policyModel.getPolicyId()) {
                 policyRec.uri = baseUrl + "#" + policyRec.policyModel.getPolicyId();
+            }
+            else if (policyRec.policyModel.getPolicyName() != null) {
+                policyRec.uri = policyRec.policyModel.getPolicyName();
             }
         }catch(Exception e){
             logger.log(Level.SEVERE,"definitionsElements","Exception while reading policy expression",e);
