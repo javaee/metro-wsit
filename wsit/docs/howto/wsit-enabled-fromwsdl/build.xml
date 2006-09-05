@@ -53,22 +53,63 @@
     <property name="war.file" value="${build.war.home}/${ant.project.name}.war"/>
     <property name="domain" value="domain1"/>
 
-    <!-- <property name="as.home" value=""/> -->
     <condition property="as.home" value="${env.AS_HOME}">
-        <not><isset property="as.home"/></not>
-    </condition>
-    
-    <!-- <property name="catalina.home" value=""/> -->
-    <condition property="catalina.home" value="${env.CATALINA_HOME}">
-        <not><isset property="catalina.home"/></not>
+        <isset property="env.AS_HOME"/>
     </condition>
 
+    <condition property="catalina.home" value="${env.CATALINA_HOME}">
+        <isset property="env.CATALINA_HOME"/>
+    </condition>
+
+    <!--
+        There are 2 ways to designate a tomcat build.
+    -->
+    <condition property="bld.for.tomcat" value="true">
+          <or>
+             <and>
+                 <not><isset property="as.home"/></not>
+                 <isset property="catalina.home"/>
+             </and>
+
+             <and>
+                 <isset property="as.home"/>
+                 <isset property="catalina.home"/>
+                 <isset property="use.tomcat"/>
+             </and>
+          </or>
+    </condition>
+
+    <!-- 
+        Verify that one of the two supported containers is identified
+        for use.  If these are not set correctly lib.home and deploy.dir
+        will not be correct and all elements that use them will not be correct.
+    -->
+    <fail message="Web container not identified. Require AS_HOME or CATALINA_HOME be s
+et" >
+          <condition >
+              <and>
+                  <not><isset property="as.home"/></not>
+                  <not><isset property="catalina.home"/></not>
+              </and>
+          </condition>
+      </fail>
+   <fail message="Two Web containers identified. Only one allowed AS_HOME or CATALINA_
+HOME" >
+      <condition>
+          <and>
+              <isset property="as.home"/>
+              <isset property="catalina.home"/>
+              <not><isset property="use.tomcat"/></not>
+          </and>
+      </condition>
+   </fail>
+
     <condition property="lib.home" value="${catalina.home}/shared/lib" else="${as.home}/lib">
-        <istrue value="${use.tomcat}"/>
+	<isset property="bld.for.tomcat"/>
     </condition>
 
     <condition property="deploy.dir" value="${catalina.home}/webapps" else="${as.home}/domains/${domain}/autodeploy">
-        <istrue value="${use.tomcat}"/>
+	<isset property="bld.for.tomcat"/>
     </condition>
     
     <path id="wsit.classpath">
