@@ -1,5 +1,5 @@
 /**
- * $Id: EncryptionFilter.java,v 1.2 2006-07-17 08:52:38 ashutoshshahi Exp $
+ * $Id: EncryptionFilter.java,v 1.3 2006-09-05 11:09:08 ashutoshshahi Exp $
  */
 
 /*
@@ -123,7 +123,7 @@ public class EncryptionFilter {
             
             boolean wss11Receiver = "true".equals(context.getExtraneousProperty("EnableWSS11PolicyReceiver"));
             boolean wss11Sender = "true".equals(context.getExtraneousProperty("EnableWSS11PolicySender"));
-            boolean sendEKSHA1 =  wss11Receiver && wss11Sender;
+            boolean sendEKSHA1 =  wss11Receiver && wss11Sender && (SubjectAccessor.getRequesterSubject() != null);
             boolean wss10 = !wss11Sender;
 
             if (!context.makeDynamicPolicyCallback()) {

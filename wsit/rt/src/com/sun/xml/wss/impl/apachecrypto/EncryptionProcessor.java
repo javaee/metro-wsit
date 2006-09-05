@@ -237,7 +237,7 @@ public class EncryptionProcessor {
         
         boolean wss11Receiver = "true".equals(context.getExtraneousProperty("EnableWSS11PolicyReceiver"));
         boolean wss11Sender = "true".equals(context.getExtraneousProperty("EnableWSS11PolicySender"));
-        boolean sendEKSHA1 =  wss11Receiver && wss11Sender;
+        boolean sendEKSHA1 =  wss11Receiver && wss11Sender && (SubjectAccessor.getRequesterSubject() != null);
         boolean wss10 = !wss11Sender;
         
         String tmp = featureBinding.getDataEncryptionAlgorithm();
