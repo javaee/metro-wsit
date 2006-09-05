@@ -46,25 +46,34 @@ import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import com.sun.xml.ws.policy.privateutil.ServiceFinder;
 import com.sun.xml.ws.policy.jaxws.spi.ModelConfiguratorProvider;
+import com.sun.xml.ws.policy.jaxws.spi.PolicyMapUpdateProvider;
+
 /**
- *
- * @author japod
+ * TODO: write doc
  */
 public class WSDLPolicyMapWrapper implements WSDLExtension {
     private static final PolicyLogger logger = PolicyLogger.getLogger(WSDLPolicyMapWrapper.class);
     private static final QName NAME = new QName(null, "WSDLPolicyMapWrapper");
     
     private static ModelConfiguratorProvider[] configurators = null;
+    private static PolicyMapUpdateProvider[] policyMapUpdateProviders = null;
     
     private PolicyMap policyMap;
     private EffectivePolicyModifier mapModifier;
     private PolicyMapExtender mapExtender;
     
-    private static ModelConfiguratorProvider[] getConfigurators() {
+    private static ModelConfiguratorProvider[] getModelConfiguratorProviders() {
         if (configurators == null) {
             configurators = ServiceFinder.find(ModelConfiguratorProvider.class).toArray();
         }
         return configurators;
+    }
+    
+    private static PolicyMapUpdateProvider[] getPolicyMapUpdateProviders() {
+        if (policyMapUpdateProviders == null) {
+            policyMapUpdateProviders = ServiceFinder.find(PolicyMapUpdateProvider.class).toArray();
+        }
+        return policyMapUpdateProviders;
     }
     
     protected WSDLPolicyMapWrapper(PolicyMap policyMap) {
@@ -160,11 +169,21 @@ public class WSDLPolicyMapWrapper implements WSDLExtension {
     
     public void configureModel(WSDLModel model) {
         try {
-            for (ModelConfiguratorProvider configurator : getConfigurators()) {
+            for (ModelConfiguratorProvider configurator : getModelConfiguratorProviders()) {
                 configurator.configure(model, policyMap);
             }
         } catch (PolicyException e) {
-            throw new WebServiceException("Failed to configure wsdl model", e);
+            throw new WebServiceException(Messages.FAILED_CONFIGURE_WSDL_MODEL.format(), e);
+        }
+    }
+    
+    public void updatePolicyMap(WSDLModel model) {
+        try {
+            for (PolicyMapUpdateProvider updateProvider : getPolicyMapUpdateProviders()) {
+                updateProvider.update(mapExtender, model);
+            }
+        } catch (PolicyException e) {
+            throw new WebServiceException(Messages.FAILED_UPDATE_POLICY_MAP.format(), e);
         }
     }
     

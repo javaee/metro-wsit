@@ -38,6 +38,8 @@ enum Messages {
     BUFFER_NOT_EXIST,
     FAILED_LOAD_CLASSPATH,
     FAILED_LOAD_CONTEXT,
+    FAILED_CONFIGURE_WSDL_MODEL,
+    FAILED_UPDATE_POLICY_MAP,
     POLICY_REFERENCE_NOT_EXIST;
 
     private static final ResourceBundle rb = ResourceBundle.getBundle(Messages.class.getName());
