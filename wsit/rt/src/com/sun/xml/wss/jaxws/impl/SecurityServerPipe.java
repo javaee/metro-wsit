@@ -285,6 +285,8 @@ public class SecurityServerPipe extends SecurityPipeBase
                 retPacket = addAddressingHeaders(retPacket, msgId, action);
             } else {
                 //--------INVOKE NEXT PIPE------------
+                // Put the addressing headers as unread
+                packet.invocationProperties.put(JAXWSAConstants.SERVER_ADDRESSING_PROPERTIES_INBOUND, null);
                 
                 if (nextPipe != null) {
                     retPacket = nextPipe.process(packet);
