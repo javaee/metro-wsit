@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ The contents of this file are subject to the terms
+ of the Common Development and Distribution License
+ (the License).  You may not use this file except in
+ compliance with the License.
+
+ You can obtain a copy of the license at
+ https://glassfish.dev.java.net/public/CDDLv1.0.html.
+ See the License for the specific language governing
+ permissions and limitations under the License.
+
+ When distributing Covered Code, include this CDDL
+ Header Notice in each file and include the License file
+ at https://glassfish.dev.java.net/public/CDDLv1.0.html.
+ If applicable, add the following below the CDDL Header,
+ with the fields enclosed by brackets [] replaced by
+ you own identifying information:
+ "Portions Copyrighted [year] [name of copyright owner]"
+
+ Copyright 2006 Sun Microsystems Inc. All Rights Reserved
+-->
+
+
+<!--
+ The contents of this file are subject to the terms
+ of the Common Development and Distribution License
+ (the "License").  You may not use this file except
+ in compliance with the License.
+
+ You can obtain a copy of the license at
+ https://jwsdp.dev.java.net/CDDLv1.0.html
+ See the License for the specific language governing
+ permissions and limitations under the License.
+
+ When distributing Covered Code, include this CDDL
+ HEADER in each file and include the License file at
+ https://jwsdp.dev.java.net/CDDLv1.0.html  If applicable,
+ add the following below this CDDL HEADER, with the
+ fields enclosed by brackets "[]" replaced with your
+ own identifying information: Portions Copyright [yyyy]
+ [name of copyright owner]
+-->
+
+<project basedir="." default="all" name="docs howto zip files">
+  <target name="csclient-enabled-fromjava">
+	<zip destfile="csclient-enabled-fromjava.zip" 
+		basedir="." includes="csclient/*"
+		excludes="*/CVS"/>
+  </target>
+  <target name="wsit-enabled-fromjava">
+	<zip destfile="wsit-enabled-fromjava.zip" 
+		basedir="." includes="wsit-enabled-fromjava/**"
+		excludes="**/CVS"/>
+  </target>
+  <target name="wsit-enabled-fromwsdl">
+	<zip destfile="wsit-enabled-fromwsdl.zip" 
+		basedir="." includes="wsit-enabled-fromwsdl/**"
+		excludes="**/CVS"/>
+  </target>
+  <target name="wsit-jaxws-fromjava">
+	<zip destfile="wsit-jaxws-fromjava.zip" 
+		basedir="." includes="wsit-jaxws-fromjava/**"
+		excludes="**/CVS"/>
+  </target>
+  <target name="wsit-jaxws-fromwsdl">
+	<zip destfile="wsit-jaxws-fromwsdl.zip" 
+		basedir="." includes="wsit-jaxws-fromwsdl/**"
+		excludes="**/CVS"/>
+  </target>
+
+  <target name="all">
+	<antcall target="csclient-enabled-fromjava" />
+	<antcall target="wsit-enabled-fromjava" />
+	<antcall target="wsit-enabled-fromwsdl" />
+	<antcall target="wsit-jaxws-fromjava" />
+	<antcall target="wsit-jaxws-fromwsdl" />
+  </target>
+</project>
+
