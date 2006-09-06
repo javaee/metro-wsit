@@ -174,7 +174,7 @@ public class TrustPluginImpl implements TrustPlugin {
         Entropy entropy = fact.createEntropy(binarySecret);
         URI tokenType = new URI(WSTrustConstants.SAML11_ASEERTION_TOKEN_TYPE);
         if (rstTemplate.getTokenType() != null){
-            tokenType = new URI(rstTemplate.getTokenType());
+            tokenType = new URI(rstTemplate.getTokenType().trim());
         }
         URI context = null;
         Claims claims = null;
@@ -187,7 +187,7 @@ public class TrustPluginImpl implements TrustPlugin {
         
         String keyType = rstTemplate.getKeyType();
         if (keyType != null){
-            requestSecurityToken.setKeyType(new URI(rstTemplate.getKeyType()));
+            requestSecurityToken.setKeyType(new URI(keyType.trim()));
         }
         requestSecurityToken.setComputedKeyAlgorithm(URI.create(WSTrustConstants.CK_PSHA1));
         
@@ -220,7 +220,9 @@ public class TrustPluginImpl implements TrustPlugin {
         Service service = Service.create(wsdlLocation, serviceName);
         Dispatch dispatch = service.createDispatch(portName, fact.getContext(), Service.Mode.PAYLOAD);
         dispatch = (Dispatch)addAddressingHeaders(dispatch);
-        dispatch.getRequestContext().put(javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY, stsURI);
+        if (stsURI != null){
+            dispatch.getRequestContext().put(javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY, stsURI);
+        }
         dispatch.getRequestContext().put("isTrustMessage", "true");
         return fact.createRSTRFrom((JAXBElement)dispatch.invoke(fact.toJAXBElement(request)));
     }
@@ -266,8 +268,10 @@ public class TrustPluginImpl implements TrustPlugin {
         Issuer issuer = issuedToken.getIssuer();
         if(issuer != null){
             AttributedURI address = issuer.getAddress();
-            URI uri = address.getURI();
-            return uri.toString();
+            if (address != null){
+                URI uri = address.getURI();
+                return uri.toString();
+            }
         }
         return null;
     }
