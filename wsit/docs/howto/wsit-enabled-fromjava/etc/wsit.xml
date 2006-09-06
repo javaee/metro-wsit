@@ -63,7 +63,7 @@
         <wsp:PolicyReference URI="#AddNumbers_policy"/>
         <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
         <operation name="addNumbers">
-            <soap:operation soapAction=""/>
+            <soap:operation soapAction="addNumbers"/>
             <input>
                 <soap:body use="literal"/>
             </input>

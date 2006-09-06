@@ -54,7 +54,7 @@ public class AddNumbersImpl {
      * @throws AddNumbersException
      *             if any of the numbers to be added is negative.
      */
-    @WebMethod
+    @WebMethod(action="addNumbers")
     public int addNumbers(int number1, int number2) throws AddNumbersException {
         if (number1 < 0 || number2 < 0) {
             throw new AddNumbersException("Negative number cant be added!",
