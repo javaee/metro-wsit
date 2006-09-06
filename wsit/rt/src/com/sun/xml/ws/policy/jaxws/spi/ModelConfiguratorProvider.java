@@ -35,10 +35,11 @@ import com.sun.xml.ws.policy.PolicyMap;
 public interface ModelConfiguratorProvider {
     
     /**
-     * A callback method that allows to retrieve policy related information from provided WSDLModel
-     * and to configure the model accordingly.
+     * A callback method that allows to retrieve policy related information from provided PolicyMap
+     * and to configure the WSDLModel accordingly.
      *
-     * @param model
+     * @param model which is to be configured
+     * @param map provides policies as a source of information on proper configuration
      */
     void configure(WSDLModel model, PolicyMap map) throws PolicyException;
 }
