@@ -1,5 +1,5 @@
 /**
- * $Id: EncryptionFilter.java,v 1.2 2006-07-17 08:52:38 ashutoshshahi Exp $
+ * $Id: EncryptionFilter.java,v 1.2.4.1 2006-09-07 16:37:35 kumarjayanti Exp $
  */
 
 /*
@@ -123,7 +123,7 @@ public class EncryptionFilter {
             
             boolean wss11Receiver = "true".equals(context.getExtraneousProperty("EnableWSS11PolicyReceiver"));
             boolean wss11Sender = "true".equals(context.getExtraneousProperty("EnableWSS11PolicySender"));
-            boolean sendEKSHA1 =  wss11Receiver && wss11Sender;
+            boolean sendEKSHA1 =  wss11Receiver && wss11Sender && (getReceivedSecret(context) != null);
             boolean wss10 = !wss11Sender;
 
             if (!context.makeDynamicPolicyCallback()) {
@@ -207,15 +207,8 @@ public class EncryptionFilter {
                             sKey = context.getSecurityEnvironment().getSecretKey(
                                 context.getExtraneousProperties(),
                                 keyIdentifier, true);
-                        } else if(wss11Receiver){
-                           Subject currentSubject = SubjectAccessor.getRequesterSubject();
-                           Set privateCredentials = currentSubject.getPublicCredentials();
-                           for(Iterator it = privateCredentials.iterator(); it.hasNext();){
-                               Object cred = it.next();
-                                if(cred instanceof java.security.Key){
-                                   sKey = (javax.crypto.SecretKey)cred;
-                                }
-                           }
+                        } else if(sendEKSHA1){
+                           sKey = getReceivedSecret(context);
                         }else if(wss11Sender || wss10){
                             sKey =  SecurityUtil.generateSymmetricKey(dataEncAlgo);
                         }
@@ -289,14 +282,7 @@ public class EncryptionFilter {
                         }
                         
                         if(sendEKSHA1){
-                            Subject currentSubject = SubjectAccessor.getRequesterSubject();
-                            Set privateCredentials = currentSubject.getPublicCredentials();
-                            for(Iterator it = privateCredentials.iterator(); it.hasNext();){
-                                Object cred = it.next();
-                                if(cred instanceof java.security.Key){
-                                    sKey = (javax.crypto.SecretKey)cred;
-                                }
-                            }
+                            sKey = getReceivedSecret(context);
                         }else if(wss11Sender || wss10){
                             sKey =  SecurityUtil.generateSymmetricKey(dataEncAlgo);
                         }
@@ -375,6 +361,12 @@ public class EncryptionFilter {
 
             DecryptionProcessor.decrypt(context);
         }
+    }
+    
+    private static SecretKey getReceivedSecret(FilterProcessingContext context){
+        SecretKey sKey = null;
+        sKey = (javax.crypto.SecretKey)context.getExtraneousProperty(MessageConstants.SECRET_KEY_VALUE);
+        return sKey;
     }
 
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: KeyResolver.java,v 1.3 2006-08-11 08:31:01 ashutoshshahi Exp $
+ * $Id: KeyResolver.java,v 1.3.2.1 2006-09-07 16:37:37 kumarjayanti Exp $
  */
 
 /*
@@ -490,9 +490,9 @@ public class KeyResolver {
                     String cipherValue = cipherData.getElementsByTagNameNS(MessageConstants.XENC_NS, "CipherValue").item(0).getTextContent();
                     byte[] decodedCipher = Base64.decode(cipherValue);
                     byte[] ekSha1 = MessageDigest.getInstance("SHA-1").digest(decodedCipher);
-                    String encEkSha1 = Base64.encode(ekSha1);
-                    context.getSecurityEnvironment().updateOtherPartySubject(
-                            DefaultSecurityEnvironmentImpl.getSubject(context), encEkSha1); 
+                    String encEkSha1 = Base64.encode(ekSha1); 
+                    context.setExtraneousProperty(MessageConstants.EK_SHA1_VALUE, encEkSha1);
+                    
                 } catch(Exception e){
                     throw new XWSSecurityException(e);
                 }
@@ -510,8 +510,7 @@ public class KeyResolver {
                     }
                 }                
                 returnKey = ((EncryptedKeyToken)token).getSecretKey(getKey(kiHB, sig, context), dataEncAlgo);                
-                context.getSecurityEnvironment().updateOtherPartySubject(
-                        DefaultSecurityEnvironmentImpl.getSubject(context), returnKey);
+                context.setExtraneousProperty(MessageConstants.SECRET_KEY_VALUE, returnKey);
                 
             } else if (MessageConstants.SCT_VALUETYPE.equals(valueType)) {
                     // could be wsuId or SCT Session Id
@@ -589,9 +588,8 @@ public class KeyResolver {
                         String cipherValue = cipherData.getElementsByTagNameNS(MessageConstants.XENC_NS, "CipherValue").item(0).getTextContent();
                         byte[] decodedCipher = Base64.decode(cipherValue);
                         byte[] ekSha1 = MessageDigest.getInstance("SHA-1").digest(decodedCipher);
-                        String encEkSha1 = Base64.encode(ekSha1);
-                        context.getSecurityEnvironment().updateOtherPartySubject(
-                                DefaultSecurityEnvironmentImpl.getSubject(context), encEkSha1); 
+                        String encEkSha1 = Base64.encode(ekSha1); 
+                        context.setExtraneousProperty(MessageConstants.EK_SHA1_VALUE, encEkSha1);
                     } catch(Exception e){
                         throw new XWSSecurityException(e);
                     }
@@ -608,9 +606,8 @@ public class KeyResolver {
                                 ((DerivedTokenKeyBinding)inferredKB).setOriginalKeyBinding(skBinding);
                         }
                     }                    
-                    returnKey = ((EncryptedKeyToken)token).getSecretKey(getKey(kiHB, sig, context), dataEncAlgo);                
-                    context.getSecurityEnvironment().updateOtherPartySubject(
-                            DefaultSecurityEnvironmentImpl.getSubject(context), returnKey);  
+                    returnKey = ((EncryptedKeyToken)token).getSecretKey(getKey(kiHB, sig, context), dataEncAlgo);                  
+                    context.setExtraneousProperty(MessageConstants.SECRET_KEY_VALUE, returnKey);
 
                 } else if (token instanceof SecurityContextToken) {
                         //handling for SecurityContext Token
@@ -972,9 +969,8 @@ public class KeyResolver {
                         String cipherValue = cipherData.getElementsByTagNameNS(MessageConstants.XENC_NS, "CipherValue").item(0).getTextContent();
                         byte[] decodedCipher = Base64.decode(cipherValue);
                         byte[] ekSha1 = MessageDigest.getInstance("SHA-1").digest(decodedCipher);
-                        String encEkSha1 = Base64.encode(ekSha1);
-                        context.getSecurityEnvironment().updateOtherPartySubject(
-                                DefaultSecurityEnvironmentImpl.getSubject(context), encEkSha1); 
+                        String encEkSha1 = Base64.encode(ekSha1); 
+                        context.setExtraneousProperty(MessageConstants.EK_SHA1_VALUE, encEkSha1);
                     } catch(Exception e){
                         throw new XWSSecurityException(e);
                     }
@@ -994,8 +990,7 @@ public class KeyResolver {
                     KeyInfoHeaderBlock kiHB = ((EncryptedKeyToken)secToken).getKeyInfo(); 
                     encKey = ((EncryptedKeyToken)secToken).getSecretKey(getKey(kiHB, false, context), dataEncAlgo); 
                     secret = encKey.getEncoded();
-                    context.getSecurityEnvironment().updateOtherPartySubject(
-                            DefaultSecurityEnvironmentImpl.getSubject(context), encKey);
+                    context.setExtraneousProperty(MessageConstants.SECRET_KEY_VALUE, encKey);
                 } else if (MessageConstants.SCT_VALUETYPE.equals(valueType)) {
                     if (secToken instanceof SecurityContextToken) {
                         if(isWSITRecipient){
@@ -1335,8 +1330,7 @@ public class KeyResolver {
                     byte[] decodedCipher = Base64.decode(cipherValue);
                     byte[] ekSha1 = MessageDigest.getInstance("SHA-1").digest(decodedCipher);
                     String encEkSha1 = Base64.encode(ekSha1);
-                    context.getSecurityEnvironment().updateOtherPartySubject(
-                            DefaultSecurityEnvironmentImpl.getSubject(context), encEkSha1); 
+                    context.setExtraneousProperty(MessageConstants.EK_SHA1_VALUE, encEkSha1);
                 } catch(Exception e){
                     throw new XWSSecurityException(e);
                 }
@@ -1354,8 +1348,7 @@ public class KeyResolver {
                     }
                 }                
                 returnKey = ((EncryptedKeyToken)token).getSecretKey(getKey(kiHB, sig, context), dataEncAlgo);                
-                context.getSecurityEnvironment().updateOtherPartySubject(
-                        DefaultSecurityEnvironmentImpl.getSubject(context), returnKey);
+                context.setExtraneousProperty(MessageConstants.SECRET_KEY_VALUE, returnKey);
                 
             } else if (MessageConstants.SCT_VALUETYPE.equals(valueType)) {
                     // could be wsuId or SCT Session Id
@@ -1433,9 +1426,8 @@ public class KeyResolver {
                         String cipherValue = cipherData.getElementsByTagNameNS(MessageConstants.XENC_NS, "CipherValue").item(0).getTextContent();
                         byte[] decodedCipher = Base64.decode(cipherValue);
                         byte[] ekSha1 = MessageDigest.getInstance("SHA-1").digest(decodedCipher);
-                        String encEkSha1 = Base64.encode(ekSha1);
-                        context.getSecurityEnvironment().updateOtherPartySubject(
-                                DefaultSecurityEnvironmentImpl.getSubject(context), encEkSha1); 
+                        String encEkSha1 = Base64.encode(ekSha1); 
+                        context.setExtraneousProperty(MessageConstants.EK_SHA1_VALUE, encEkSha1);
                     } catch(Exception e){
                         throw new XWSSecurityException(e);
                     }
@@ -1452,9 +1444,8 @@ public class KeyResolver {
                                 ((DerivedTokenKeyBinding)inferredKB).setOriginalKeyBinding(skBinding);
                         }
                     }                    
-                    returnKey = ((EncryptedKeyToken)token).getSecretKey(getKey(kiHB, sig, context), dataEncAlgo);                
-                    context.getSecurityEnvironment().updateOtherPartySubject(
-                            DefaultSecurityEnvironmentImpl.getSubject(context), returnKey);  
+                    returnKey = ((EncryptedKeyToken)token).getSecretKey(getKey(kiHB, sig, context), dataEncAlgo);                  
+                    context.setExtraneousProperty(MessageConstants.SECRET_KEY_VALUE, returnKey);
 
                 } else if (token instanceof SecurityContextToken) {
                         //handling for SecurityContext Token

@@ -575,9 +575,8 @@ public class KeySelectorImpl extends KeySelector{
                         byte[] decodedCipher = Base64.decode(cipherValue);
                         byte[] ekSha1 = MessageDigest.getInstance("SHA-1").digest(decodedCipher);
                             
-                        String encEkSha1 = Base64.encode(ekSha1);
-                        wssContext.getSecurityEnvironment().updateOtherPartySubject(
-                                              DefaultSecurityEnvironmentImpl.getSubject(wssContext), encEkSha1); 
+                        String encEkSha1 = Base64.encode(ekSha1); 
+                        wssContext.setExtraneousProperty(MessageConstants.EK_SHA1_VALUE, encEkSha1);
 
                         if(isPolicyRecipient){
                             MLSPolicy inferredKB = inferredSignaturePolicy.getKeyBinding();
@@ -592,9 +591,8 @@ public class KeySelectorImpl extends KeySelector{
                             }
                         }
                         
-                        returnKey = ((EncryptedKeyToken)token).getSecretKey(privKey, encAlgo);
-                        wssContext.getSecurityEnvironment().updateOtherPartySubject(
-                                                  DefaultSecurityEnvironmentImpl.getSubject(wssContext), returnKey);                
+                        returnKey = ((EncryptedKeyToken)token).getSecretKey(privKey, encAlgo);     
+                        wssContext.setExtraneousProperty(MessageConstants.SECRET_KEY_VALUE, returnKey);
                 } else if (MessageConstants.SCT_VALUETYPE.equals(valueType)) {
                     // could be wsuId or SCT Session Id
                     String sctId = secureMsg.getIdFromFragmentRef(uri);
@@ -678,8 +676,7 @@ public class KeySelectorImpl extends KeySelector{
                         byte[] ekSha1 = MessageDigest.getInstance("SHA-1").digest(decodedCipher);
                             
                         String encEkSha1 = Base64.encode(ekSha1);
-                        wssContext.getSecurityEnvironment().updateOtherPartySubject(
-                                              DefaultSecurityEnvironmentImpl.getSubject(wssContext), encEkSha1);
+                        wssContext.setExtraneousProperty(MessageConstants.EK_SHA1_VALUE, encEkSha1);
                         
                         if(isPolicyRecipient){
                             MLSPolicy inferredKB = inferredSignaturePolicy.getKeyBinding();
@@ -695,8 +692,7 @@ public class KeySelectorImpl extends KeySelector{
                         }
                         
                         returnKey = ((EncryptedKeyToken)token).getSecretKey(privKey, encAlgo);
-                        wssContext.getSecurityEnvironment().updateOtherPartySubject(
-                                                  DefaultSecurityEnvironmentImpl.getSubject(wssContext), returnKey);
+                        wssContext.setExtraneousProperty(MessageConstants.SECRET_KEY_VALUE, returnKey);
                     
                     } else if (token instanceof SecurityContextToken) {
                         //handling for SecurityContext Token

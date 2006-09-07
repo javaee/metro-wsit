@@ -179,8 +179,7 @@ public class DecryptionProcessor {
             byte[] decodedCipher = Base64.decode(cipherValue);
             byte[] ekSha1 = MessageDigest.getInstance("SHA-1").digest(decodedCipher);
             String encEkSha1 = Base64.encode(ekSha1);
-            context.getSecurityEnvironment().updateOtherPartySubject(
-                    DefaultSecurityEnvironmentImpl.getSubject(context), encEkSha1);
+            context.setExtraneousProperty(MessageConstants.EK_SHA1_VALUE, encEkSha1);
             
             EncryptedKeyHeaderBlock encKeyHB = new EncryptedKeyHeaderBlock(xencEncryptedKey);
             String encryptionAlgorithm = encKeyHB.getEncryptionMethodURI();
@@ -262,9 +261,8 @@ public class DecryptionProcessor {
                         "Decryption of key encryption key failed",
                         xmlee);
             }
-            //Store the SecretKey in Subject, for EKSHA1 support
-            context.getSecurityEnvironment().updateOtherPartySubject(
-                DefaultSecurityEnvironmentImpl.getSubject(context), symmetricKey);            
+            //Store the SecretKey in context, for EKSHA1 support  
+            context.setExtraneousProperty(MessageConstants.SECRET_KEY_VALUE, symmetricKey);
             if(refListSoapElement != null)
                 decryptReferenceList(refListSoapElement,symmetricKey,dataCipher,context);
             

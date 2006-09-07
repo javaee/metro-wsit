@@ -237,7 +237,7 @@ public class EncryptionProcessor {
         
         boolean wss11Receiver = "true".equals(context.getExtraneousProperty("EnableWSS11PolicyReceiver"));
         boolean wss11Sender = "true".equals(context.getExtraneousProperty("EnableWSS11PolicySender"));
-        boolean sendEKSHA1 =  wss11Receiver && wss11Sender;
+        boolean sendEKSHA1 =  wss11Receiver && wss11Sender && (getEKSHA1Ref(context) != null);
         boolean wss10 = !wss11Sender;
         
         String tmp = featureBinding.getDataEncryptionAlgorithm();
@@ -360,15 +360,7 @@ public class EncryptionProcessor {
                 }
             } else if (sendEKSHA1) {
                 //get the signing key and EKSHA1 reference from the Subject, it was stored from the incoming message
-                Subject currentSubject = SubjectAccessor.getRequesterSubject();
-                Set privateCredentials = currentSubject.getPublicCredentials();
-                String ekSha1Ref = null;
-                for(Iterator it = privateCredentials.iterator(); it.hasNext();){
-                    Object cred = it.next();
-                    if(cred instanceof String && ((String)cred).startsWith("EK")){
-                        ekSha1Ref = ((String)cred).substring(2);
-                    }
-                }
+                String ekSha1Ref = getEKSHA1Ref(context);
                 _symmetricKey = skb.getSecretKey();
                 
                 keyInfoBlock = new KeyInfoHeaderBlock(secureMessage.getSOAPPart());
@@ -690,15 +682,7 @@ public class EncryptionProcessor {
                 }
                 
                 if(sendEKSHA1){
-                    Subject currentSubject = SubjectAccessor.getRequesterSubject();
-                    Set privateCredentials = currentSubject.getPublicCredentials();
-                    String ekSha1Ref = null;
-                    for(Iterator it = privateCredentials.iterator(); it.hasNext();){
-                        Object cred = it.next();
-                        if(cred instanceof String && ((String)cred).startsWith("EK")){
-                            ekSha1Ref = ((String)cred).substring(2);
-                        }
-                    }
+                    String ekSha1Ref = getEKSHA1Ref(context);
                     //Construct a derivedKeyToken to be used
                     originalKey = skb.getSecretKey();
                     byte[] secret = originalKey.getEncoded(); 
@@ -1539,7 +1523,11 @@ public class EncryptionProcessor {
         }
     }
     
-    
+    private static String getEKSHA1Ref(FilterProcessingContext context){
+        String ekSha1Ref = null;
+        ekSha1Ref = (String) context.getExtraneousProperty(MessageConstants.EK_SHA1_VALUE);
+        return ekSha1Ref;
+    }
     
     private static byte[] serializeHeaders(java.util.Vector mimeHeaders) throws XWSSecurityException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();

@@ -1,5 +1,5 @@
 /*
- * $Id: MessageConstants.java,v 1.1 2006-05-03 22:57:36 arungupta Exp $
+ * $Id: MessageConstants.java,v 1.1.8.1 2006-09-07 16:37:36 kumarjayanti Exp $
  */
 
 /*
@@ -371,5 +371,17 @@ public class MessageConstants {
     public static final String ADDRESSING_MEMBER_SUBMISSION_NAMESPACE = "http://schemas.xmlsoap.org/ws/2004/08/addressing";
     
     public static final String ADDRESSING_W3C_NAMESPACE = "http://www.w3.org/2005/08/addressing";
+    
+    public static final String ENCRYPT_ELEMENT_CONTENT = "http://www.w3.org/2001/04/xmlenc#Content";
+    
+    public static final String ENCRYPT_ELEMENT = "http://www.w3.org/2001/04/xmlenc#Element";
+    
+    public static final String MUST_UNDERSTAND = "mustunderstand";
+    
+    public static final String SIGNATURE_LNAME = "Signature";
+    
+    public static final String EK_SHA1_VALUE = "EKSHA1Value";
+    
+    public static final String SECRET_KEY_VALUE = "SecretKeyValue";
 
 }
