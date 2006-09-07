@@ -21,28 +21,41 @@ Running&nbsp;</span></h1>
   </li>
   <li>Edit <code>AS_HOME/domains/domain1/config/domains.xml</code>, and add <code>-DWSIT_HOME=&quot;Value
     of WSIT_HOME&quot;</code> as <code>&lt;jvm-options&gt;</code> under <code>&lt;java-config&gt;</code>.</li>
-  <li><a href="https://wsit.dev.java.net/source/browse/*checkout*/wsit/wsit/docs/howto/WSIT_Download_Build_Install.html">Download,
+  <li>If you want to build WSIT from source, please <a href="https://wsit.dev.java.net/source/browse/*checkout*/wsit/wsit/docs/howto/WSIT_Download_Build_Install.html">Download,
     Build and Install</a>
-    WSIT on GlassFish. If you are reading this file, you might have already
-    downloaded WSIT source code. In that case, skip to <a href="https://wsit.dev.java.net/source/browse/*checkout*/wsit/wsit/docs/howto/WSIT_Download_Build_Install.html#Building">build</a>
+    WSIT into GlassFish. However, if you are reading this file, you 
+    might have already downloaded WSIT source code. In that case, skip to <a href="https://wsit.dev.java.net/source/browse/*checkout*/wsit/wsit/docs/howto/WSIT_Download_Build_Install.html#Building">build</a>
     and <a href="https://wsit.dev.java.net/source/browse/*checkout*/wsit/wsit/docs/howto/WSIT_Download_Build_Install.html#Installing_On_GlassFish">install</a>
-    steps.
+    steps.<br>
+    <b>Note:</b> If you are using a pre-built binary version of WSIT, 
+    you should install it into GlassFish following these
+    <a href="http://java.sun.com/webservices/interop/reference/docs/install.html">instructions</a>.
   </li>
   <li>Copy the strong encryption jars to <code>$JAVA_HOME/jre/lib/security</code>
     directory and required certificates using the following command:<br>
     <br>
-    <code>$ANT_HOME/bin/ant setup-demo</code>
+    WSIT Source Users:<br> <code>$ANT_HOME/bin/ant setup-demo</code> <br>
+    <br>
+    WSIT Binary Users:<br> <code>$ANT_HOME/bin/ant -Dlib.dir=/path/to/jax-ws-latest-wsit/lib setup-demo</code> <br><br>
   </li>
   <li>Start Glassfish default domain using the following command:<br>
     <br>
-    <code>$AS_HOME/bin/asadmin start-domain domain1</code></li>
+    <code>$AS_HOME/bin/asadmin start-domain domain1</code><br><br></li>
   <li>Build and deploy the sample, in the sample directory (<code>wsit/wsit/samples/pricequote</code>),
     using the following command:<br>
     <br>
-    <code>$ANT_HOME/ant clean main</code></li>
+    WSIT Source Users:<br>
+    <code>$ANT_HOME/ant clean main</code><br><br>
+    WSIT Binary Users:<br>
+    <code>$ANT_HOME/ant -Dlib.dir=/path/to/jax-ws-latest-wsit/lib clean main</code><br><br>
+  </li>
   <li>Run the sample using the following command:<br>
     <br>
-    <code>$ANT_HOME/bin/ant run</code></li>
+    WSIT Source Users:<br>
+    <code>$ANT_HOME/bin/ant run</code><br><br>
+    WSIT Binary Users:<br>
+    <code>$ANT_HOME/bin/ant -Dlib.dir=/path/to/jax-ws-latest-wsit/lib run</code><br><br>
+  </li>
   <li>The console shows the quoted price and the name and location of the
     product image.
     If no exceptions are returned, then success!</li>
