@@ -1,5 +1,5 @@
 /**
- * $Id: EncryptionFilter.java,v 1.4 2006-09-05 12:55:21 ashutoshshahi Exp $
+ * $Id: EncryptionFilter.java,v 1.5 2006-09-07 07:03:41 ashutoshshahi Exp $
  */
 
 /*
@@ -123,7 +123,7 @@ public class EncryptionFilter {
             
             boolean wss11Receiver = "true".equals(context.getExtraneousProperty("EnableWSS11PolicyReceiver"));
             boolean wss11Sender = "true".equals(context.getExtraneousProperty("EnableWSS11PolicySender"));
-            boolean sendEKSHA1 =  wss11Receiver && wss11Sender && (getReceivedSecret() != null);
+            boolean sendEKSHA1 =  wss11Receiver && wss11Sender && (getReceivedSecret(context) != null);
             boolean wss10 = !wss11Sender;
 
             if (!context.makeDynamicPolicyCallback()) {
@@ -208,7 +208,7 @@ public class EncryptionFilter {
                                 context.getExtraneousProperties(),
                                 keyIdentifier, true);
                         } else if(sendEKSHA1){
-                           sKey = getReceivedSecret();
+                           sKey = getReceivedSecret(context);
                         }else if(wss11Sender || wss10){
                             sKey =  SecurityUtil.generateSymmetricKey(dataEncAlgo);
                         }
@@ -282,7 +282,7 @@ public class EncryptionFilter {
                         }
                         
                         if(sendEKSHA1){
-                            sKey = getReceivedSecret();
+                            sKey = getReceivedSecret(context);
                         }else if(wss11Sender || wss10){
                             sKey =  SecurityUtil.generateSymmetricKey(dataEncAlgo);
                         }
@@ -363,18 +363,9 @@ public class EncryptionFilter {
         }
     }
     
-    private static SecretKey getReceivedSecret(){
+    private static SecretKey getReceivedSecret(FilterProcessingContext context){
         SecretKey sKey = null;
-        Subject currentSubject = SubjectAccessor.getRequesterSubject();
-        if(currentSubject != null){
-            Set privateCredentials = currentSubject.getPublicCredentials();
-            for(Iterator it = privateCredentials.iterator(); it.hasNext();){
-                Object cred = it.next();
-                if(cred instanceof java.security.Key){
-                    sKey = (javax.crypto.SecretKey)cred;
-                }
-            }
-        }
+        sKey = (javax.crypto.SecretKey)context.getExtraneousProperty(MessageConstants.SECRET_KEY_VALUE);
         return sKey;
     }
 

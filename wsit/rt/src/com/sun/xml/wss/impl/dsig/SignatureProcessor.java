@@ -1,5 +1,5 @@
 /*
- * $Id: SignatureProcessor.java,v 1.8 2006-08-25 07:06:00 kumarjayanti Exp $
+ * $Id: SignatureProcessor.java,v 1.9 2006-09-07 07:03:40 ashutoshshahi Exp $
  */
 
 /*
@@ -174,7 +174,7 @@ public class SignatureProcessor{
             boolean wss11Receiver = "true".equals(context.getExtraneousProperty("EnableWSS11PolicyReceiver"));
             boolean wss11Sender = "true".equals(context.getExtraneousProperty("EnableWSS11PolicySender"));
             boolean wss10 = !wss11Sender;
-            boolean sendEKSHA1 =  wss11Receiver && wss11Sender;
+            boolean sendEKSHA1 =  wss11Receiver && wss11Sender && (getEKSHA1Ref(context) != null);
 
             //FIXME: hack here to circument MS treatment of  DerivedKeys under X509
             /*
@@ -382,15 +382,7 @@ public class SignatureProcessor{
                     nextSibling = securityHeader.getNextSiblingOfTimestamp();
                 } else if(sendEKSHA1){
                     //get the signing key and EKSHA1 reference from the Subject, it was stored from the incoming message
-                    Subject currentSubject = SubjectAccessor.getRequesterSubject();
-                    Set privateCredentials = currentSubject.getPublicCredentials();
-                    String ekSha1Ref = null;
-                    for(Iterator it = privateCredentials.iterator(); it.hasNext();){
-                        Object cred = it.next();
-                        if(cred instanceof String && ((String)cred).startsWith("EK")){
-                            ekSha1Ref = ((String)cred).substring(2);
-                        }
-                    }
+                    String ekSha1Ref = getEKSHA1Ref(context);
                     signingKey = skb.getSecretKey();
                     
                     SecurityTokenReference secTokenRef = new SecurityTokenReference(secureMessage.getSOAPPart());
@@ -1173,7 +1165,7 @@ public class SignatureProcessor{
 
         boolean wss11Receiver = "true".equals(context.getExtraneousProperty("EnableWSS11PolicyReceiver"));
         boolean wss11Sender = "true".equals(context.getExtraneousProperty("EnableWSS11PolicySender"));
-        boolean sendEKSHA1 =  wss11Receiver && wss11Sender;
+        boolean sendEKSHA1 =  wss11Receiver && wss11Sender&& (getEKSHA1Ref(context) != null);
         boolean wss10 = !wss11Sender;
         
         try {
@@ -1187,15 +1179,7 @@ public class SignatureProcessor{
                 } else  if ( PolicyTypeUtil.symmetricKeyBinding(originalKeyBinding)) {
                    
                     if(sendEKSHA1){
-                        Subject currentSubject = SubjectAccessor.getRequesterSubject();
-                        Set privateCredentials = currentSubject.getPublicCredentials();
-                        String ekSha1Ref = null;
-                        for(Iterator it = privateCredentials.iterator(); it.hasNext();){
-                            Object cred = it.next();
-                            if(cred instanceof String && ((String)cred).startsWith("EK")){
-                                ekSha1Ref = ((String)cred).substring(2);
-                            }
-                        }  
+                        String ekSha1Ref = getEKSHA1Ref(context);  
                         
                         //STR for DerivedKeyToken
                         SecurityTokenReference tokenRef = new SecurityTokenReference(secureMessage.getSOAPPart());
@@ -1743,6 +1727,12 @@ public class SignatureProcessor{
         } catch(Exception e){
             throw new XWSSecurityException(e);
         }
+    }
+
+    private static String getEKSHA1Ref(FilterProcessingContext context) {
+        String ekSha1Ref = null;
+        ekSha1Ref = (String) context.getExtraneousProperty(MessageConstants.EK_SHA1_VALUE);
+        return ekSha1Ref;
     }
     
 }

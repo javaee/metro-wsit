@@ -1,5 +1,5 @@
 /*
- * $Id: MessageConstants.java,v 1.2 2006-08-30 10:05:04 venu Exp $
+ * $Id: MessageConstants.java,v 1.3 2006-09-07 07:03:41 ashutoshshahi Exp $
  */
 
 /*
@@ -380,5 +380,8 @@ public class MessageConstants {
     
     public static final String SIGNATURE_LNAME = "Signature";
     
+    public static final String EK_SHA1_VALUE = "EKSHA1Value";
+    
+    public static final String SECRET_KEY_VALUE = "SecretKeyValue";
 
 }

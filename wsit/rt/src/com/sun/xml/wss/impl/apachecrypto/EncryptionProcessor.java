@@ -237,7 +237,7 @@ public class EncryptionProcessor {
         
         boolean wss11Receiver = "true".equals(context.getExtraneousProperty("EnableWSS11PolicyReceiver"));
         boolean wss11Sender = "true".equals(context.getExtraneousProperty("EnableWSS11PolicySender"));
-        boolean sendEKSHA1 =  wss11Receiver && wss11Sender && (getEKSHA1Ref() != null);
+        boolean sendEKSHA1 =  wss11Receiver && wss11Sender && (getEKSHA1Ref(context) != null);
         boolean wss10 = !wss11Sender;
         
         String tmp = featureBinding.getDataEncryptionAlgorithm();
@@ -360,7 +360,7 @@ public class EncryptionProcessor {
                 }
             } else if (sendEKSHA1) {
                 //get the signing key and EKSHA1 reference from the Subject, it was stored from the incoming message
-                String ekSha1Ref = getEKSHA1Ref();
+                String ekSha1Ref = getEKSHA1Ref(context);
                 _symmetricKey = skb.getSecretKey();
                 
                 keyInfoBlock = new KeyInfoHeaderBlock(secureMessage.getSOAPPart());
@@ -682,7 +682,7 @@ public class EncryptionProcessor {
                 }
                 
                 if(sendEKSHA1){
-                    String ekSha1Ref = getEKSHA1Ref();
+                    String ekSha1Ref = getEKSHA1Ref(context);
                     //Construct a derivedKeyToken to be used
                     originalKey = skb.getSecretKey();
                     byte[] secret = originalKey.getEncoded(); 
@@ -1523,18 +1523,9 @@ public class EncryptionProcessor {
         }
     }
     
-    private static String getEKSHA1Ref(){
+    private static String getEKSHA1Ref(FilterProcessingContext context){
         String ekSha1Ref = null;
-        Subject currentSubject = SubjectAccessor.getRequesterSubject();
-        if(currentSubject != null){
-            Set privateCredentials = currentSubject.getPublicCredentials();
-            for(Iterator it = privateCredentials.iterator(); it.hasNext();){
-                Object cred = it.next();
-                if(cred instanceof String && ((String)cred).startsWith("EK")){
-                    ekSha1Ref = ((String)cred).substring(2);
-                }
-            }
-        }
+        ekSha1Ref = (String) context.getExtraneousProperty(MessageConstants.EK_SHA1_VALUE);
         return ekSha1Ref;
     }
     

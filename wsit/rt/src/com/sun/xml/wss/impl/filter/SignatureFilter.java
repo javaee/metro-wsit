@@ -1,5 +1,5 @@
 /**
- * $Id: SignatureFilter.java,v 1.1 2006-05-03 22:57:48 arungupta Exp $
+ * $Id: SignatureFilter.java,v 1.2 2006-09-07 07:03:40 ashutoshshahi Exp $
  */
 
 /*
@@ -314,20 +314,13 @@ public class SignatureFilter {
                         boolean wss11Receiver = "true".equals(context.getExtraneousProperty("EnableWSS11PolicyReceiver"));
                         boolean wss11Sender = "true".equals(context.getExtraneousProperty("EnableWSS11PolicySender"));
                         boolean wss10 = !wss11Sender;
-                        boolean sendEKSHA1 =  wss11Receiver && wss11Sender;
+                        boolean sendEKSHA1 =  wss11Receiver && wss11Sender && (getReceivedSecret(context) != null);
                         if(!binding.getKeyIdentifier().equals(MessageConstants._EMPTY)){
                             sKey = context.getSecurityEnvironment().getSecretKey(
                             context.getExtraneousProperties(),
                             keyIdentifier, true);
-                        } else if(wss11Receiver){
-                           Subject currentSubject = SubjectAccessor.getRequesterSubject();
-                           Set privateCredentials = currentSubject.getPublicCredentials();
-                           for(Iterator it = privateCredentials.iterator(); it.hasNext();){
-                               Object cred = it.next();
-                                if(cred instanceof java.security.Key){
-                                   sKey = (javax.crypto.SecretKey)cred;
-                                }
-                           }
+                        } else if(sendEKSHA1){
+                           sKey = getReceivedSecret(context);
                         }else if(wss11Sender || wss10){
 
                             sKey =  SecurityUtil.generateSymmetricKey(dataEncAlgo);
@@ -382,16 +375,9 @@ public class SignatureFilter {
                         boolean wss11Receiver = "true".equals(context.getExtraneousProperty("EnableWSS11PolicyReceiver"));
                         boolean wss11Sender = "true".equals(context.getExtraneousProperty("EnableWSS11PolicySender"));
                         boolean wss10 = !wss11Sender;
-                        boolean sendEKSHA1 =  wss11Receiver && wss11Sender; 
-                        if(wss11Receiver){
-                           Subject currentSubject = SubjectAccessor.getRequesterSubject();
-                           Set privateCredentials = currentSubject.getPublicCredentials();
-                           for(Iterator it = privateCredentials.iterator(); it.hasNext();){
-                               Object cred = it.next();
-                                if(cred instanceof java.security.Key){
-                                   sKey = (javax.crypto.SecretKey)cred;
-                                }
-                           }
+                        boolean sendEKSHA1 =  wss11Receiver && wss11Sender && (getReceivedSecret(context) != null);
+                        if(sendEKSHA1){
+                           sKey = getReceivedSecret(context);
                         }else if(wss11Sender || wss10){
                             sKey =  SecurityUtil.generateSymmetricKey(dataEncAlgo);
                         }
@@ -474,6 +460,12 @@ public class SignatureFilter {
 
             SignatureProcessor.verify(context);
         }
+    }
+    
+    private static SecretKey getReceivedSecret(FilterProcessingContext context){
+        SecretKey sKey = null;
+        sKey = (javax.crypto.SecretKey)context.getExtraneousProperty(MessageConstants.SECRET_KEY_VALUE);
+        return sKey;
     }
     
  }
