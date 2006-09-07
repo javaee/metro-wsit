@@ -1,5 +1,5 @@
 /*
- * $Id: DefaultCallbackHandler.java,v 1.4 2006-08-24 10:10:37 kumarjayanti Exp $
+ * $Id: DefaultCallbackHandler.java,v 1.5 2006-09-07 11:56:22 kumarjayanti Exp $
  *
  */
 /*
@@ -1008,15 +1008,15 @@ public  class DefaultCallbackHandler implements CallbackHandler {
     }
 
      public static byte[] getThumbprintIdentifier(X509Certificate cert)
-       throws Exception {
+       throws XWSSecurityException {
         byte[] thumbPrintIdentifier = null;
                                                                                                                       
         try {
             thumbPrintIdentifier = MessageDigest.getInstance("SHA-1").digest(cert.getEncoded());
         } catch ( NoSuchAlgorithmException ex ) {
-            throw new Exception("Digest algorithm SHA-1 not found");
+            throw new XWSSecurityException("Digest algorithm SHA-1 not found");
         } catch ( CertificateEncodingException ex) {
-            throw new Exception("Error while getting certificate's raw content");
+            throw new XWSSecurityException("Error while getting certificate's raw content");
         }
         return thumbPrintIdentifier;
     }

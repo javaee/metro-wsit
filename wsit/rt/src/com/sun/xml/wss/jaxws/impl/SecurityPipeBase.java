@@ -237,6 +237,8 @@ public abstract class SecurityPipeBase implements Pipe {
     protected static final String SUN_WSS_SECURITY_CLIENT_POLICY_NS="http://schemas.sun.com/2006/03/wss/client";
     
     protected Policy wsitConfig =null;
+    // store as instance variable
+    protected Unmarshaller unmarshaller =null;
     
     protected String addressingURI;
     
@@ -273,6 +275,7 @@ public abstract class SecurityPipeBase implements Pipe {
             if(wsPolicyMap != null){
                 collectPolicies();
             }
+            unmarshaller = jaxbContext.createUnmarshaller();
         }catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -299,7 +302,8 @@ public abstract class SecurityPipeBase implements Pipe {
     
     protected String getValue(Header hdr) {
         try {
-            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+            // avoid recreating
+            //unmarshaller = jaxbContext.createUnmarshaller();
             return (String)((JAXBElement)hdr.readAsJAXB(unmarshaller)).getValue();
         } catch (JAXBException ex) {
             throw new RuntimeException(ex);
