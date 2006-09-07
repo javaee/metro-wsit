@@ -54,11 +54,11 @@ public final class PolicyConfigParser {
     private static final XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
     
     /**
-     * Reads a WSDL file from META-INF or WEB-INF/wsit.xml, parses it
-     * and returns a WSDLModel.
+     * Reads a WSIT config file stored in META-INF or WEB-INF, parses it
+     * and returns a PolicyMap.
      *
      * @param container May hold the servlet context if run inside a web container
-     * @return A WSDLModel populated from the WSDL file
+     * @return A PolicyMap populated from the WSIT config file
      */
     public static PolicyMap parse(Container container) throws PolicyException {
         logger.entering("parse", container);
@@ -97,12 +97,12 @@ public final class PolicyConfigParser {
     
     
     /**
-     * Reads WSDL from an XMLStreamBuffer, parses it
-     * and returns a WSDLModel.
+     * Reads a WSIT config from an XMLStreamBuffer, parses it
+     * and returns a PolicyMap.
      *
-     * @param systemId The URL to the file that is being parsed. May not be null.
-     * @param buffer The XMLStreamBuffer from which WSDL is parsed. May not be null.
-     * @return A WSDLModel populated from the WSDL input
+     * @param systemId the URL to the file that is being parsed. Must not be {@code null}.
+     * @param buffer the XMLStreamBuffer from which WSIT config is parsed. May not be {@code null}.
+     * @return A PolicyMap populated from the WSIT config file
      */
     public static PolicyMap parse(URL systemId, XMLStreamBuffer buffer) throws PolicyException {
         logger.entering("parse", new Object[] {systemId, buffer});
