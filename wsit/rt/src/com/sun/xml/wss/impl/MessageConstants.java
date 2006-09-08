@@ -1,5 +1,5 @@
 /*
- * $Id: MessageConstants.java,v 1.4 2006-09-08 08:50:04 venu Exp $
+ * $Id: MessageConstants.java,v 1.5 2006-09-08 13:30:30 ashutoshshahi Exp $
  */
 
 /*
@@ -385,7 +385,5 @@ public class MessageConstants {
     public static final String SECRET_KEY_VALUE = "SecretKeyValue"; 
    
     public static final String SUBJECT_KEY_IDENTIFIER_OID = "2.5.29.14"; 
-  
-    public static final String EK_SHA1_VALUE = "EKSHA1Value";
 	        
 }
