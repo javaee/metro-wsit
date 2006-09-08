@@ -1,5 +1,5 @@
 /*
- * $Id: SignatureProcessor.java,v 1.9 2006-09-07 07:03:40 ashutoshshahi Exp $
+ * $Id: SignatureProcessor.java,v 1.10 2006-09-08 07:03:08 kumarjayanti Exp $
  */
 
 /*
@@ -453,6 +453,12 @@ public class SignatureProcessor{
                     }
                     
                     token = (X509SecurityToken)tokenCache.get(x509TokenId);
+                    
+                    //reference type adjustment in checkIncludePolicy might 
+                    // have inserted x509 
+                    X509SecurityToken insertedx509 = 
+                                (X509SecurityToken)context.getInsertedX509Cache().get(x509TokenId);
+                    
                     if (token == null) {
                         token = new X509SecurityToken(secureMessage.getSOAPPart(), cert, x509TokenId);
                         tokenCache.put(x509TokenId, token);
@@ -489,7 +495,11 @@ public class SignatureProcessor{
                     
                         // insert the EK into the SOAPMessage
                         SOAPElement se = (SOAPElement)keyEncryptor.martial(encryptedKey);
-                        secureMessage.findOrCreateSecurityHeader().insertHeaderBlockElement(se);
+                        if (insertedx509 == null) {
+                            secureMessage.findOrCreateSecurityHeader().insertHeaderBlockElement(se);
+                        } else {
+                            secureMessage.findOrCreateSecurityHeader().insertBefore(se,insertedx509.getNextSibling());
+                        }
                     
                         //store EKSHA1 of KeyValue contents in context
                         Element cipherData = (Element)se.getChildElements(new QName(MessageConstants.XENC_NS, "CipherData", MessageConstants.XENC_PREFIX)).next();
@@ -507,7 +517,7 @@ public class SignatureProcessor{
                     }
                     //insert the token as the first child in SecurityHeader -- if same token was not already
                     // inserted by Encryption
-                    if (MessageConstants.DIRECT_REFERENCE_TYPE.equals(referenceType) && insertedX509Cache.get(x509TokenId) == null){
+                    if (MessageConstants.DIRECT_REFERENCE_TYPE.equals(referenceType) && insertedx509 == null){
                         secureMessage.findOrCreateSecurityHeader().insertHeaderBlock(token);
                         insertedX509Cache.put(x509TokenId, token);
                     }
@@ -538,6 +548,7 @@ public class SignatureProcessor{
             if(nodeList != null && nodeList.getLength() > 0){
                 nextSibling = nodeList.item(0).getNextSibling();
             }
+            
             // if currentReflist is non-null it means we are doing E before S
             Node refList = context.getCurrentRefList();
             if (refList != null) {
@@ -1237,16 +1248,27 @@ public class SignatureProcessor{
                         if(x509TokenId == null || x509TokenId.equals("")){
                             x509TokenId = secureMessage.generateId();
                         }
+                        // ReferenceType adjustment in checkIncludeTokenPolicy is also currently
+                        // causing an insertion of the X509 into the Message
+                        X509SecurityToken insertedx509 = 
+                                (X509SecurityToken)context.getInsertedX509Cache().get(x509TokenId);
+                        
+                        // this one is used to determine if the whole BST + EK + DKT(opt)
+                        // has been inserted by another filter such as Encryption running before
                         token = (X509SecurityToken)tokenCache.get(x509TokenId);
                         if (token == null) {
-                            token = new X509SecurityToken(secureMessage.getSOAPPart(), cert, x509TokenId);
-                            tokenCache.put(x509TokenId, token);
+                            if (insertedx509 != null) {
+                                token = insertedx509;
+                                tokenCache.put(x509TokenId, insertedx509);
+                            } else {
+                               token = new X509SecurityToken(secureMessage.getSOAPPart(), cert, x509TokenId);
+                               tokenCache.put(x509TokenId, token);
+                            }
                             context.setCurrentSecret(originalKey);
-                        } else{
+                        } else{                        
                             tokenInserted = true;
-                            
                         }
-
+                        
                         String dktId = secureMessage.generateId();
                         String nonce = Base64.encode(dkt.getNonce());
                         HashMap ekCache = context.getEncryptedKeyCache();
@@ -1291,12 +1313,30 @@ public class SignatureProcessor{
                         tokenRef.setReference(reference);
                         DerivedKeyTokenHeaderBlock dktHeadrBlock = 
                                 new DerivedKeyTokenHeaderBlock(securityHeader.getOwnerDocument(), tokenRef, nonce, dkt.getOffset(), dkt.getLength() ,dktId);
+                        
                         if(!tokenInserted){
-                            // insert the derivedKey into SecurityHeader
-                            secureMessage.findOrCreateSecurityHeader().insertHeaderBlock(dktHeadrBlock);
+                            Node nsX509 = null;
+                            if (insertedx509 != null) {
+                                nsX509 = insertedx509.getNextSibling();
+                            }
+                            // move DKT below X509 if present
+                            if (nsX509 == null) {
+                                secureMessage.findOrCreateSecurityHeader().insertHeaderBlock(dktHeadrBlock);
+                            } else {
+                                secureMessage.findOrCreateSecurityHeader().insertBefore(dktHeadrBlock, nsX509);
+                            }
+                            // move EK above DKT but below X509
+                            if (insertedx509 != null) {
+                                nsX509 = insertedx509.getNextSibling();
+                            }
+                     
                             // insert the EK into the SOAPMessage -  this goes on top of DKT Header block
                             SOAPElement se = (SOAPElement)keyEncryptor.martial(encryptedKey);
-                            secureMessage.findOrCreateSecurityHeader().insertHeaderBlockElement(se);
+                            if (nsX509 == null) {
+                                secureMessage.findOrCreateSecurityHeader().insertHeaderBlockElement(se);
+                            }else {
+                                secureMessage.findOrCreateSecurityHeader().insertBefore(se, nsX509);
+                            }
                             //insert the token as the first child in SecurityHeader
                             if (MessageConstants.DIRECT_REFERENCE_TYPE.equals(referenceType) && insertedX509Cache.get(x509TokenId) == null){
                                 secureMessage.findOrCreateSecurityHeader().insertHeaderBlock(token);

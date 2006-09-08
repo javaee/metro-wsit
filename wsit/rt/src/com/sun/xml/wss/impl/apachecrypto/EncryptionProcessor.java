@@ -743,10 +743,22 @@ public class EncryptionProcessor {
                     
                     SecurityUtil.checkIncludeTokenPolicy(context, certificateBinding, x509TokenId);          
                     
+                    // ReferenceType adjustment in checkIncludeTokenPolicy is also currently
+                    // causing an insertion of the X509 into the Message
+                    X509SecurityToken insertedx509 =
+                            (X509SecurityToken)context.getInsertedX509Cache().get(x509TokenId);
+                    
+                    // this one is used to determine if the whole BST + EK + DKT(opt)
+                    // has been inserted by another filter such as Encryption running before
                     X509SecurityToken token = (X509SecurityToken)tokenCache.get(x509TokenId);
                     if(token == null){
-                        token = new X509SecurityToken(secureMsg.getSOAPPart(),_x509Cert,x509TokenId);
-                        tokenCache.put(x509TokenId, token);
+                        if (insertedx509 != null) {
+                            token = insertedx509;
+                            tokenCache.put(x509TokenId, insertedx509);
+                        } else {
+                            token = new X509SecurityToken(secureMsg.getSOAPPart(),_x509Cert,x509TokenId);
+                            tokenCache.put(x509TokenId, token);
+                        }
                         context.setCurrentSecret(originalKey);
                         //Store SymmetricKey generated in ProcessingContext
                         context.setExtraneousProperty("SecretKey", originalKey);
@@ -754,16 +766,18 @@ public class EncryptionProcessor {
                         skbX509TokenInserted = true;
                         originalKey = context.getCurrentSecret();
                     }
-                    if(MessageConstants.DIRECT_REFERENCE_TYPE.equals(referenceType)){   
-                        if(insertedX509Cache.get(x509TokenId) == null){
+                    //   
+                      if(insertedx509 == null){
+                        if(MessageConstants.DIRECT_REFERENCE_TYPE.equals(referenceType)){
                             secureMsg.findOrCreateSecurityHeader().insertHeaderBlock(token);
                             insertedX509Cache.put(x509TokenId, token);
-                            //x509TokenElement = secureMsg.findOrCreateSecurityHeader().getFirstChildElement();
                             x509TokenElement = secureMsg.findOrCreateSecurityHeader().getNextSiblingOfTimestamp();
-                        } else{
-                            x509TokenElement = secureMsg.getElementByWsuId(x509TokenId);
                         }
-                    }
+                       } else{
+                        //x509TokenElement = secureMsg.getElementByWsuId(x509TokenId);
+                        x509TokenElement = insertedx509;
+                      }
+                    //}
                     
                     //Construct a derivedKeyToken to be used                    
                     byte[] secret = originalKey.getEncoded(); 
