@@ -831,13 +831,13 @@ attribute.getNamespaceURI().equals(MessageConstants.NAMESPACES_NS)) {
                         throw new XWSSecurityException(
                                 "XPath does not correspond to a DOM Element");
                     }
-                    
+                    ArrayList clonedTransformList = (ArrayList) transformList.clone();
                     if (exclTransformToBeAdded) {
                         // exc-14-n must be one of the last transforms under ReferenceList by default.
                         String transformAlgo  = MessageConstants.TRANSFORM_C14N_EXCL_OMIT_COMMENTS;
                         ExcC14NParameterSpec spec = new ExcC14NParameterSpec(getReferenceNamespacePrefixes(nodeRef));
                         Transform transform = signatureFactory.newTransform(transformAlgo,spec);
-                        transformList.add(transform);
+                        clonedTransformList.add(transform);
                     }
                     boolean w3cElem = false;
                     // Assume only elements with wsu:Id are signed
@@ -873,9 +873,9 @@ attribute.getNamespaceURI().equals(MessageConstants.NAMESPACES_NS)) {
                     byte [] digestValue = fpContext.getDigestValue();
                     Reference reference = null;
                     if(!verify && digestValue != null){
-                        reference = signatureFactory.newReference(targetURI,digestMethod,transformList,null,null,digestValue);
+                        reference = signatureFactory.newReference(targetURI,digestMethod,clonedTransformList,null,null,digestValue);
                     }else{
-                        reference = signatureFactory.newReference(targetURI,digestMethod,transformList,null,null);
+                        reference = signatureFactory.newReference(targetURI,digestMethod,clonedTransformList,null,null);
                     }
                     references.add(reference);
                 }
