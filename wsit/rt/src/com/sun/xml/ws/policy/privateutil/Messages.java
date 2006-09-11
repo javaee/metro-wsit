@@ -36,6 +36,7 @@ enum Messages {
     ILLEGAL_ENTRY,
     BROKEN_CONTEXTPATH,
     ERROR_LOADING_CLASS,
+    METHOD_INVOCATION_FAILED
     ;
 
     private static final ResourceBundle rb = ResourceBundle.getBundle(Messages.class.getName());

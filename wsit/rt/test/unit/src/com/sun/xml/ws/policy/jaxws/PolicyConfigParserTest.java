@@ -22,13 +22,13 @@
 
 package com.sun.xml.ws.policy.jaxws;
 
-import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
+import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import com.sun.xml.ws.policy.testutils.PolicyResourceLoader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -115,12 +115,11 @@ public class PolicyConfigParserTest extends TestCase {
     /**
      * Test of parse method, of class com.sun.xml.ws.policy.jaxws.PolicyConfigParser.
      */
-    public void testParseBufferNull() throws Exception {
-        XMLStreamBuffer buffer = null;
+    public void testParseURLNull() throws Exception {
         PolicyMap result = null;
         
         try {
-            result = PolicyConfigParser.parse(new URL("http://example.org/wsit"), buffer);
+            result = PolicyConfigParser.parse((URL) null);
             fail("Expected PolicyException");
         } catch (PolicyException e) {
         }
@@ -128,10 +127,7 @@ public class PolicyConfigParserTest extends TestCase {
     }
     
     public void testParseBufferSimple() throws Exception {
-        XMLStreamBuffer buffer = null;
-        
-        buffer = PolicyResourceLoader.getResourceXmlBuffer("config/simple.wsdl");
-        PolicyMap map = PolicyConfigParser.parse(new URL("http://example.org/wsit"), buffer);
+        PolicyMap map = parseConfigFile("config/simple.wsdl");
         PolicyMapKey key = map.createWsdlEndpointScopeKey(new QName("http://example.org/", "AddNumbersService"), new QName("http://example.org/", "AddNumbersPort"));
         Policy policy = map.getEndpointEffectivePolicy(key);
         assertNotNull(policy);
@@ -139,11 +135,9 @@ public class PolicyConfigParserTest extends TestCase {
     }
     
     public void testParseBufferSingleImport() throws Exception {
-        XMLStreamBuffer buffer = null;
         WSDLModel result = null;
         
-        buffer = PolicyResourceLoader.getResourceXmlBuffer("config/single-import.wsdl");
-        PolicyMap map = PolicyConfigParser.parse(new URL("file:test/unit/data/policy/"), buffer);
+        PolicyMap map = parseConfigFile("config/single-import.wsdl");
         assertNotNull(map);
         
         PolicyMapKey key1 = map.createWsdlEndpointScopeKey(new QName("http://example.org/", "AddNumbersService"),
@@ -160,11 +154,8 @@ public class PolicyConfigParserTest extends TestCase {
     }
     
     public void testParseBufferMultiImport() throws Exception {
-        XMLStreamBuffer buffer = null;
+        PolicyMap map = parseConfigFile("config/import.wsdl");
         
-        buffer = PolicyResourceLoader.getResourceXmlBuffer("config/import.wsdl");
-        
-        PolicyMap map = PolicyConfigParser.parse(new URL("file:test/unit/data/policy/"), buffer);
         assertNotNull(map);
         
         PolicyMapKey key1 = map.createWsdlEndpointScopeKey(new QName("http://example.org/", "AddNumbersService"),
@@ -193,10 +184,7 @@ public class PolicyConfigParserTest extends TestCase {
     }
     
     public void testParseBufferCyclicImport() throws Exception {
-        XMLStreamBuffer buffer = null;
-        
-        buffer = PolicyResourceLoader.getResourceXmlBuffer("config/cyclic.wsdl");
-        PolicyMap map = PolicyConfigParser.parse(new URL("file:test/unit/data/policy/config/"), buffer);
+        PolicyMap map = parseConfigFile("config/cyclic.wsdl");
         PolicyMapKey key = map.createWsdlEndpointScopeKey(new QName("http://example.org/", "AddNumbersService"), new QName("http://example.org/", "AddNumbersPort"));
         Policy policy = map.getEndpointEffectivePolicy(key);
         assertNotNull(policy);
@@ -204,10 +192,7 @@ public class PolicyConfigParserTest extends TestCase {
     }
     
     public void testParseBufferExternalReference() throws Exception {
-        XMLStreamBuffer buffer = null;
-        
-        buffer = PolicyResourceLoader.getResourceXmlBuffer("config/service.wsdl");
-        PolicyMap map = PolicyConfigParser.parse(new URL("file:test/unit/data/policy/config/"), buffer);
+        PolicyMap map = parseConfigFile("config/service.wsdl");
         PolicyMapKey key = map.createWsdlEndpointScopeKey(new QName("http://example.org/AddNumbers/service", "AddNumbersService"), new QName("http://example.org/AddNumbers/service", "AddNumbersPort"));
         Policy policy = map.getEndpointEffectivePolicy(key);
         assertNotNull(policy);
@@ -215,17 +200,18 @@ public class PolicyConfigParserTest extends TestCase {
     }
     
     public void testParseBufferExternalReferenceName() throws Exception {
-        XMLStreamBuffer buffer = null;
-        PolicyMap result = null;
-        
-        buffer = PolicyResourceLoader.getResourceXmlBuffer("config/service-name.wsdl");
-        result = PolicyConfigParser.parse(new URL("file:test/unit/data/policy/config/"), buffer);
-        PolicyMapKey key = result.createWsdlEndpointScopeKey(new QName("http://example.org/AddNumbers/service", "AddNumbersService"), new QName("http://example.org/AddNumbers/service", "AddNumbersPort"));
-        Policy policy = result.getEndpointEffectivePolicy(key);
+        PolicyMap map = parseConfigFile("config/service-name.wsdl");
+        PolicyMapKey key = map.createWsdlEndpointScopeKey(new QName("http://example.org/AddNumbers/service", "AddNumbersService"), new QName("http://example.org/AddNumbers/service", "AddNumbersPort"));
+        Policy policy = map.getEndpointEffectivePolicy(key);
         assertNotNull(policy);
         assertEquals("http://example.org/AddNumbers/porttype#AddNumbersServicePolicy", policy.getName());
     }
-    
+        
+    private PolicyMap parseConfigFile(String configFile) throws Exception {
+        URL url = PolicyUtils.ConfigFile.loadResource(PolicyResourceLoader.POLICY_UNIT_TEST_RESOURCE_ROOT + configFile, null);
+        return PolicyConfigParser.parse(url);
+    }
+
     /**
      * Copy a file
      */
@@ -266,8 +252,7 @@ public class PolicyConfigParserTest extends TestCase {
         public <T> T getSPI(Class<T> spiType) {
             if (spiType.isInstance(this.spi)) {
                 return (T) this.spi;
-            }
-            else {
+            } else {
                 return null;
             }
         }

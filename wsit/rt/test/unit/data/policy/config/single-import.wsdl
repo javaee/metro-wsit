@@ -33,7 +33,7 @@
     xmlns:wsx="http://schemas.xmlsoap.org/ws/2004/09/mex" 
     xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">
         
-    <import namespace="http://example.net/" location="config/single-import1.wsdl"/>
+    <import namespace="http://example.net/" location="single-import1.wsdl"/>
     
     <wsp:Policy wsu:Id="MutualCertificate10Sign_IPingService_policy">
         <wsp:ExactlyOne>

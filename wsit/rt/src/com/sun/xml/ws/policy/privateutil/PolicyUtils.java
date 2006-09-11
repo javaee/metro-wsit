@@ -3,12 +3,12 @@
  * of the Common Development and Distribution License
  * (the License).  You may not use this file except in
  * compliance with the License.
- * 
+ *
  * You can obtain a copy of the license at
  * https://glassfish.dev.java.net/public/CDDLv1.0.html.
  * See the License for the specific language governing
  * permissions and limitations under the License.
- * 
+ *
  * When distributing Covered Code, include this CDDL
  * Header Notice in each file and include the License file
  * at https://glassfish.dev.java.net/public/CDDLv1.0.html.
@@ -16,12 +16,16 @@
  * with the fields enclosed by brackets [] replaced by
  * you own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * 
+ *
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
 package com.sun.xml.ws.policy.privateutil;
 
+import com.sun.xml.ws.policy.PolicyException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -111,7 +115,7 @@ public final class PolicyUtils {
         }
     }
     
-    public static class Collections {        
+    public static class Collections {
         /**
          * TODO javadocs
          *
@@ -190,6 +194,89 @@ public final class PolicyUtils {
                 }
             }
             return combinations;
-        }        
+        }
+    }
+    
+    /**
+     * Reflection utilities wrapper
+     */
+    public static class Reflection {
+        
+        /**
+         * Reflectively invokes specified method on the specified target
+         */
+        public static <T> T invoke(Object target, String methodName, Class<T> resultClass, Object... parameters) throws PolicyException {
+            Class[] parameterTypes;
+            if (parameters != null && parameters.length > 0) {
+                parameterTypes = new Class[parameters.length];
+                int i = 0;
+                for (Object parameter : parameters) {
+                    parameterTypes[i++] = parameter.getClass();
+                }
+            } else {
+                parameterTypes = null;
+            }
+            
+            return invoke(target, methodName, resultClass, parameters, parameterTypes);
+        }
+        
+        /**
+         * Reflectively invokes specified method on the specified target
+         */
+        public static <T> T invoke(Object target, String methodName, Class<T> resultClass, Object[] parameters, Class[] parameterTypes) throws PolicyException {
+            try {
+                Method method = target.getClass().getMethod(methodName, parameterTypes);
+                Object result = method.invoke(target, parameters);
+                
+                return resultClass.cast(result);
+            } catch (IllegalArgumentException e) {
+                throw new PolicyException(Messages.METHOD_INVOCATION_FAILED.format(methodName, target.getClass().getName(), Arrays.asList(parameters).toString()), e);
+            } catch (InvocationTargetException e) {
+                throw new PolicyException(Messages.METHOD_INVOCATION_FAILED.format(methodName, target.getClass().getName(), Arrays.asList(parameters).toString()), e);
+            } catch (IllegalAccessException e) {
+                throw new PolicyException(Messages.METHOD_INVOCATION_FAILED.format(methodName, target.getClass().getName(), Arrays.asList(parameters).toString()), e);
+            } catch (SecurityException e) {
+                throw new PolicyException(Messages.METHOD_INVOCATION_FAILED.format(methodName, target.getClass().getName(), Arrays.asList(parameters).toString()), e);
+            } catch (NoSuchMethodException e) {
+                throw new PolicyException(Messages.METHOD_INVOCATION_FAILED.format(methodName, target.getClass().getName(), Arrays.asList(parameters).toString()), e);
+            }
+        }
+    }
+    
+    public static class ConfigFile {
+        /**
+         * Generates a config file resource name from provided config file identifier. The generated file name can be
+         * transformed into a URL instance using {@link #loadResource(String, Object)} method.
+         *
+         * @param configFileIdentifier the string used to generate the config file URL that will be parsed. Each WSIT config
+         *        file is in form of <code>wsit-<i>{configFileIdentifier}</i>.xml</code>. Must not be {@code null}.
+         * @return generated config file resource name
+         */
+        public static String generateFullName(String configFileIdentifier) {
+            //TODO: replace with some algorithm that retrieves the actual file name.
+            if (configFileIdentifier != null) {
+                StringBuffer buffer = new StringBuffer("wsit-");
+                buffer.append(configFileIdentifier).append(".xml");
+                return buffer.toString();
+            } else {
+                return "wsit.xml"; //TODO: throw exception instead
+            }
+        }
+        
+        /**
+         * Loads the config file as an URL resource.
+         */
+        public static URL loadResource(String configFileName, Object context) throws PolicyException {
+            if (context == null) {
+                ClassLoader cl = Thread.currentThread().getContextClassLoader();
+                if (cl == null) {
+                    return ClassLoader.getSystemResource(configFileName);
+                } else {
+                    return cl.getResource(configFileName);
+                }
+            } else {
+                return Reflection.invoke(context, "getResource", URL.class, "/WEB-INF/" + configFileName);
+            }
+        }
     }
 }

@@ -43,7 +43,7 @@ import javax.xml.stream.XMLStreamException;
  * @author Marek Potociar
  */
 public final class PolicyResourceLoader {
-    private static final String POLICY_RESOURCE_ROOT_PREFIX = "policy/";
+    public static final String POLICY_UNIT_TEST_RESOURCE_ROOT = "policy/";
     private static final XMLInputFactory inputFactory = XMLInputFactory.newInstance();
 
     public static final String[] SINGLE_ALTERNATIVE_POLICY = new String[] {
@@ -65,7 +65,7 @@ public final class PolicyResourceLoader {
     }
     
     public static InputStream getResourceStream(String resourceName) {
-        return Thread.currentThread().getContextClassLoader().getResourceAsStream(POLICY_RESOURCE_ROOT_PREFIX + resourceName);
+        return Thread.currentThread().getContextClassLoader().getResourceAsStream(POLICY_UNIT_TEST_RESOURCE_ROOT + resourceName);
     }
     
     public static Reader getResourceReader(String resourceName) {
@@ -78,7 +78,7 @@ public final class PolicyResourceLoader {
     }
     
     public static URL getResourceUrl(String resourceName) {
-        return Thread.currentThread().getContextClassLoader().getResource(POLICY_RESOURCE_ROOT_PREFIX + resourceName);
+        return Thread.currentThread().getContextClassLoader().getResource(POLICY_UNIT_TEST_RESOURCE_ROOT + resourceName);
     }
     
     public static Policy translateModel(PolicySourceModel model) throws PolicyException {

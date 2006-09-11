@@ -796,13 +796,8 @@ public class SecurityPoliciesTest extends TestCase {
         } else {
             inUrl = cl.getResource(wsdlFile);
         }
-        InputStream inStream = inUrl.openStream();
-        
-        XMLStreamReader reader = XMLInputFactory.newInstance().createXMLStreamReader(inStream);
-        XMLStreamBuffer buffer = XMLStreamBuffer.createNewBufferFromXMLStreamReader(reader);
         //WSDLModel model = PolicyConfigParser.parse(buffer);
-        map = PolicyConfigParser.parse(inUrl, buffer);
-        reader.close();
+        map = PolicyConfigParser.parse(inUrl);
         
         
 //        QName serviceName = new QName(UUID.randomUUID().toString());

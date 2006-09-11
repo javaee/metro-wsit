@@ -102,12 +102,7 @@ public class WSDLPolicyMapWrapper implements WSDLExtension {
         logger.fine("addClientConfigToMap", "wsit-client.xml resource url: '" + clientWsitConfig + "'");
         
         try {
-            InputStream is = clientWsitConfig.openStream();
-            XMLStreamReader reader = XMLInputFactory.newInstance().createXMLStreamReader(is);
-            XMLStreamBuffer buffer = XMLStreamBuffer.createNewBufferFromXMLStreamReader(reader);
-            logger.fine("addClientConfigToMap", "Client configuration resource opened.");
-            
-            PolicyMap clientPolicyMap = PolicyConfigParser.parse(clientWsitConfig, buffer);
+            PolicyMap clientPolicyMap = PolicyConfigParser.parse(clientWsitConfig);
             logger.fine("addClientConfigToMap", "Client configuration resource parsed into a policy map: " + clientPolicyMap);
             
             for (PolicyMapKey key : clientPolicyMap.getAllServiceScopeKeys()) {
@@ -148,12 +143,6 @@ public class WSDLPolicyMapWrapper implements WSDLExtension {
             logger.fine("addClientConfigToMap", "Client configuration policies transfered into final policy map: " + policyMap);
         } catch (FactoryConfigurationError ex) {
             throw new PolicyException(ex);
-        } catch (XMLStreamBufferException ex) {
-            throw new PolicyException(ex);
-        } catch (IOException ex) {
-            throw new PolicyException(ex);
-        } catch (XMLStreamException ex) {
-            throw new PolicyException(Messages.READER_CREATE_FAILED.format(clientWsitConfig), ex);
         }
         
         logger.exiting("addClientConfigToMap");

@@ -31,7 +31,6 @@ import java.util.ResourceBundle;
 enum Messages {
 
     WSDL_IMPORT_FAILED,
-    GET_RESOURCE_INVOCATION_FAILED,
     URL_OPEN_FAILED,
     BUFFER_CREATE_FAILED,
     READER_CREATE_FAILED,
