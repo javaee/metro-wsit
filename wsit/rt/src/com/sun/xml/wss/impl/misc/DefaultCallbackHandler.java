@@ -1,5 +1,5 @@
 /*
- * $Id: DefaultCallbackHandler.java,v 1.5 2006-09-07 11:56:22 kumarjayanti Exp $
+ * $Id: DefaultCallbackHandler.java,v 1.6 2006-09-12 11:10:45 kumarjayanti Exp $
  *
  */
 /*
@@ -418,7 +418,9 @@ public  class DefaultCallbackHandler implements CallbackHandler {
                     Map runtimeProperties = cb.getRuntimeProperties();
                     if(isTrustMessage(runtimeProperties)){
                         getSTSCertificateFromTrustStore(request);
-                        return;
+                        if (request.getX509Certificate() != null){
+                            return;
+                        }
                     }
 
                     String alias = request.getAlias();
@@ -714,12 +716,19 @@ public  class DefaultCallbackHandler implements CallbackHandler {
                     req.setX509Certificate(thisCertificate);
                     return;
                 } else {
-                    throw new RuntimeException("Cannot locate Security Token Service certificate from TrustStore");
+                    //throw new RuntimeException("Cannot locate Security Token Service certificate from TrustStore");
+                    // We just maintian this method for old configs to continue working and 
+                    // not throw exception here
+                    req.setX509Certificate(null);
                 }
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                //throw new RuntimeException(e);
+                // We just maintian this method for old configs to continue working and 
+                // not throw exception here
+                req.setX509Certificate(null);
             }
     }
+
 
 
     private void getDefaultPrivKeyCert(
