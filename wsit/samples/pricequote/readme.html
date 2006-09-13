@@ -36,18 +36,18 @@ Running&nbsp;</span></h1>
     <br>
     WSIT Source Users:<br> <code>$ANT_HOME/bin/ant setup-demo</code> <br>
     <br>
-    WSIT Binary Users:<br> <code>$ANT_HOME/bin/ant -Dlib.dir=/path/to/jax-ws-latest-wsit/lib setup-demo</code> <br><br>
+    WSIT Binary Users:<br> <code>$ANT_HOME/bin/ant -Dlib.dir=/path/to/jax-ws-latest-wsit/lib setup-demo</code> <br>
   </li>
   <li>Start Glassfish default domain using the following command:<br>
     <br>
-    <code>$AS_HOME/bin/asadmin start-domain domain1</code><br><br></li>
+    <code>$AS_HOME/bin/asadmin start-domain domain1</code><br></li>
   <li>Build and deploy the sample, in the sample directory (<code>wsit/wsit/samples/pricequote</code>),
     using the following command:<br>
     <br>
     WSIT Source Users:<br>
     <code>$ANT_HOME/ant clean main</code><br><br>
     WSIT Binary Users:<br>
-    <code>$ANT_HOME/ant -Dlib.dir=/path/to/jax-ws-latest-wsit/lib clean main</code><br><br>
+    <code>$ANT_HOME/ant -Dlib.dir=/path/to/jax-ws-latest-wsit/lib clean main</code><br>
   </li>
   <li>Run the sample using the following command:<br>
     <br>
@@ -55,6 +55,8 @@ Running&nbsp;</span></h1>
     <code>$ANT_HOME/bin/ant run</code><br><br>
     WSIT Binary Users:<br>
     <code>$ANT_HOME/bin/ant -Dlib.dir=/path/to/jax-ws-latest-wsit/lib run</code><br><br>
+    If the sample is correctly deployed on the default host and port
+    (localhost:8080) then all the endpoints can be viewed <a href="http://localhost:8080/pricequote/retailer">here</a>.
   </li>
   <li>The console shows the quoted price and the name and location of the
     product image.
@@ -75,8 +77,8 @@ Running&nbsp;</span></h1>
 <p>&nbsp;</p>
 <p>&nbsp;</p>
 <p>Last Updated: <i><!--webbot bot="Timestamp" startspan S-Type="EDITED"
-S-Format="%B %d, %Y %I:%M:%S %p" -->August 07, 2006 09:20:08 AM<!--webbot
-bot="Timestamp" i-CheckSum="40046" endspan -->
+S-Format="%B %d, %Y %I:%M:%S %p" -->September 12, 2006 06:21:37 PM<!--webbot
+bot="Timestamp" i-CheckSum="55051" endspan -->
 </i></p>
 </body>
 </html>
