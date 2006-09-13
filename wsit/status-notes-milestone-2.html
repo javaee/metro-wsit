@@ -844,7 +844,7 @@ on IssueTracker</p>
 <hr>
 <h2><a name="44691"></a>Secure Conversation Status</h2>
 <h4>WCF Interoperability</h4>
-<pre>  MS-&gt;S :  5/5 : (starting from WSDL)<br>  S-&gt;MS :  2/3 : (starting from WSDL)<br>  S -&gt;S :  3/3 : (starting from WSDL)<br><br></pre>
+<pre>  MS-&gt;S :  5/5 : (starting from WSDL)<br>  S-&gt;MS :  5/5 : (starting from WSDL)<br>  S -&gt;S :  5/5 : (starting from WSDL)<br><br></pre>
 <p>NOTE: No test scenarios were executed that started from Java.</p>
 <h4>What is Not Implemented</h4>
 <p>The following features have not been implemented:</p>
@@ -862,16 +862,6 @@ on IssueTracker</p>
       <th>
       <p>Status/Workaround</p>
       </th>
-    </tr>
-    <tr>
-      <td>
-      <p>Handling extensible elements in SecurityContextToken.</p>
-      </td>
-      <td>
-      <p>We don't take elements other than the standard ones defined
-for SecurityContextToken. This is being fixed to ensure
-interoperability.</p>
-      </td>
     </tr>
     <tr>
       <td>
@@ -893,20 +883,18 @@ requiring client entropy.</p>
 <p>For MS to SUN TransportBinding scenario, import the issuer of SSL
 certificate as Trusted Root CA and provide the username and password in
 the client program as shown below
-<pre>
-client.ClientCredentials.UserName.UserName = "username";
-client.ClientCredentials.UserName.Password = "password";
-</pre>
+</p>
+<pre>client.ClientCredentials.UserName.UserName = "username";<br>client.ClientCredentials.UserName.Password = "password";<br></pre>
 The other point to note is that app.config file should not have
 identity element for the endpoint
 for TransportBinding scenario.
-</p>
+<p></p>
 <!-- ================================================== -->
 <br>
 <hr>
 <h2><a name="96126"></a>Trust Status</h2>
 <h4>WCF Interoperability</h4>
-<pre>   Client -&gt; STS -&gt; Service<br>       MS -&gt; *   -&gt; *       :  0/4 : (not tested yet)<br>        S -&gt; S   -&gt; S       :  4/4 : (starting from WSDL)<br>        S -&gt; S   -&gt; MS      :  3/4 : (starting from WSDL)<br>        S -&gt; MS  -&gt; MS      :  3/4 : (starting from WSDL)<br>        S -&gt; MS  -&gt; S       :  3/4 : (starting from WSDL)<br></pre>
+<pre>   Client -&gt; STS -&gt; Service<br>    MS    -&gt;  S  -&gt; MS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp; 0/4 : (not tested yet)<br><br>&nbsp;&nbsp;&nbsp; MS    -&gt; MS&nbsp; -&gt; S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp; 0/4 : (not tested yet)<br><br>&nbsp;&nbsp;&nbsp; MS    -&gt; S&nbsp;&nbsp; -&gt; S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp; 3/4 : (starting from WSDL)&nbsp;&nbsp;&nbsp; <br>&nbsp;  <br>    S     -&gt; S&nbsp;&nbsp; -&gt; S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp; 4/4 : (starting from WSDL)<br><br>&nbsp;&nbsp;&nbsp; S     -&gt; S&nbsp;&nbsp; -&gt; MS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp; 4/4 : (starting from WSDL)<br><br>&nbsp;&nbsp;&nbsp; S     -&gt; MS&nbsp; -&gt; MS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp; 3/4 : (starting from WSDL)<br><br>&nbsp;&nbsp;&nbsp; S     -&gt; MS&nbsp; -&gt; S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp; 4/4 : (starting from WSDL)<br></pre>
 <p>NOTE: No test scenarios were executed that started from Java.</p>
 <h4>What is Not Implemented</h4>
 <p>The following features have not been implemented:</p>
@@ -929,33 +917,11 @@ for TransportBinding scenario.
     </tr>
     <tr>
       <td>
-      <p>Issued token is in encrypted form with ws-security 1.0 used</p>
-      </td>
-      <td>
-      <p>An error is thrown on the client side for processing the token</p>
-      </td>
-    </tr>
-    <tr>
-      <td>
       <p>Issued token in encrypted formis used to establish a
 SecurityContextToken</p>
       </td>
       <td>
       <p>An error is thrown on the service side for the RST/SCT request.</p>
-      </td>
-    </tr>
-    <tr>
-      <td>
-      <p>client configuration for the service and the STS (maybe
-mutiple)</p>
-      </td>
-      <td>
-      <p>Need support of client config files for mutiple services in
-Tango.<br>
-      <br>
-Workaround: We are using a mixing of wsit-client.xml and system
-properties to cinfigure security and STS information for different
-services and STS's.</p>
       </td>
     </tr>
   </tbody>
@@ -1087,12 +1053,17 @@ should never be opened at the same time.</p>
 <pre>non-secure:<br><br>  MS-&gt;S : No client code available<br>  S-&gt;MS : Incorrect public endpoints, no service code<br>  S -&gt;S : 66/66<br><br>secure:<br><br>  MS-&gt;S : No client code available<br>  S-&gt;MS : Not tested<br>  S -&gt;S : Not tested<br></pre>
 <h4>What is Not Implemented</h4>
 <ul>
-<li>Transparent support for WS-Addressing Member Submission Version.
+  <li>Transparent support for WS-Addressing Member Submission Version.
+  </li>
 </ul>
 <h4>Known Issues</h4>
 <ul>
-<li>Member Submission needs to be enabled explicitly using <a href="docs/enabling-addressing-submission.htm">this link</a>.
-<li>A WCF endpoint responds back with "HTTP 400 Bad Request" if an empty Metadata element is sent from the WSIT client.
+  <li>Member Submission needs to be enabled explicitly using <a
+ href="docs/enabling-addressing-submission.htm">this link</a>.
+  </li>
+  <li>A WCF endpoint responds back with "HTTP 400 Bad Request" if an
+empty Metadata element is sent from the WSIT client.
+  </li>
 </ul>
 <!-- ================================================== -->
 <br>
