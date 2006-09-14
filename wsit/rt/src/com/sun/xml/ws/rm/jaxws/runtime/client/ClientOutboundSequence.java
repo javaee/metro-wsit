@@ -522,7 +522,8 @@ public class ClientOutboundSequence extends OutboundSequence {
             try {
                
                 if (sendHeartbeats) {
-                    System.out.println("Sending heartbeat message for sequence " + sequence.getId());
+                    System.out.println("Sending heartbeat message for sequence " + sequence.getId() + 
+                                            " current time = " + System.currentTimeMillis());
                     //BUGBUG - Need to fix ProtocolMessageSender to allow sendAckRequested
                     //to be called from this Thread or somehow prevent application messages
                     //from being processed at the same time.  
@@ -534,7 +535,7 @@ public class ClientOutboundSequence extends OutboundSequence {
                 //probably unrecoverable.  This is probably caused by the same condition
                 //forcing the heartbeat message to be resent.
                 //TODO Log something here
-                e.printStackTrace();
+                //e.printStackTrace();
             }
         }
     }

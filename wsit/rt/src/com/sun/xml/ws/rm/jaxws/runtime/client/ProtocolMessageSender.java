@@ -265,6 +265,8 @@ public class ProtocolMessageSender {
         Packet responsePacket = nextPipe.process(requestPacket);
         Message response = responsePacket.getMessage();
         if (response != null && response.isFault()){
+                //reset alarm
+                ((ClientOutboundSequence)seq).resetLastActivityTime();
                 throw new RMException(response);
         }
 
