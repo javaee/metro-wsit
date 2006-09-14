@@ -1,5 +1,5 @@
 /*
- * $Id: SubjectAccessor.java,v 1.3 2006-08-18 22:20:05 kohsuke Exp $
+ * $Id: SubjectAccessor.java,v 1.4 2006-09-14 09:16:25 kumarjayanti Exp $
  */
 
 /*
@@ -70,6 +70,18 @@ public class SubjectAccessor {
                 
             } else {
                 return null;
+            }
+            
+        } else if (context instanceof javax.xml.ws.handler.MessageContext) {
+            
+            javax.xml.ws.handler.MessageContext msgContext = (javax.xml.ws.handler.MessageContext)context;
+            if (msgContext != null) {
+                Subject subject =(Subject)msgContext.get(MessageConstants.AUTH_SUBJECT);
+                return subject;
+                
+            } else {
+                return null;
+                
             }
         } else {
             try {

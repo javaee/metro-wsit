@@ -233,6 +233,9 @@ public class KeySelectorImpl extends KeySelector{
                         X509Certificate cert = wssContext.getSecurityEnvironment().getCertificate(
                                 wssContext.getExtraneousProperties(),keyName.getName(), false);
                         if (cert != null && algEquals(sm.getAlgorithm(),cert.getPublicKey().getAlgorithm())) {
+                            //update other party subject here
+                            wssContext.getSecurityEnvironment().updateOtherPartySubject(
+                                    DefaultSecurityEnvironmentImpl.getSubject(wssContext), cert);
                             return new SimpleKeySelectorResult(cert.getPublicKey());
                         }
                     }else{
@@ -351,8 +354,12 @@ public class KeySelectorImpl extends KeySelector{
                     if (purpose == Purpose.VERIFY) {
                         byte[] keyIdBytes = XMLUtil.getDecodedBase64EncodedData(keyId.getReferenceValue());
                         wssContext.setExtraneousProperty(MessageConstants.REQUESTER_KEYID, new String(keyIdBytes));
-                        returnKey = wssContext.getSecurityEnvironment().getPublicKey(
+                        // add missing update to other party certificate
+                        X509Certificate cert = wssContext.getSecurityEnvironment().getCertificate(
                                 wssContext.getExtraneousProperties(),keyIdBytes);
+                        wssContext.getSecurityEnvironment().updateOtherPartySubject(
+                                DefaultSecurityEnvironmentImpl.getSubject(wssContext), cert);
+                        returnKey = cert.getPublicKey();
                     } else if(purpose == Purpose.SIGN){
                         returnKey =wssContext.getSecurityEnvironment().getPrivateKey(
                                 wssContext.getExtraneousProperties(),
@@ -375,8 +382,12 @@ public class KeySelectorImpl extends KeySelector{
                     if (purpose == Purpose.VERIFY) {
                         byte[] keyIdBytes = XMLUtil.getDecodedBase64EncodedData(keyId.getReferenceValue());
                         wssContext.setExtraneousProperty(MessageConstants.REQUESTER_KEYID, new String(keyIdBytes));
-                        returnKey = wssContext.getSecurityEnvironment().getPublicKey(
+                        //update other party subject
+                        X509Certificate cert = wssContext.getSecurityEnvironment().getCertificate(
                                 wssContext.getExtraneousProperties(),keyIdBytes, MessageConstants.THUMB_PRINT_TYPE);
+                        wssContext.getSecurityEnvironment().updateOtherPartySubject(
+                                DefaultSecurityEnvironmentImpl.getSubject(wssContext), cert);
+                        returnKey = cert.getPublicKey();
                     } else if(purpose == Purpose.SIGN){
                         returnKey =wssContext.getSecurityEnvironment().getPrivateKey(
                                 wssContext.getExtraneousProperties(),
@@ -491,9 +502,14 @@ public class KeySelectorImpl extends KeySelector{
                         if (purpose == Purpose.VERIFY) {
                             byte[] keyIdBytes = XMLUtil.getDecodedBase64EncodedData(keyId.getReferenceValue());
                             wssContext.setExtraneousProperty(MessageConstants.REQUESTER_KEYID, new String(keyIdBytes));
-                            returnKey = wssContext.getSecurityEnvironment().getPublicKey(
+                            //update other party certificate
+                            X509Certificate cert = wssContext.getSecurityEnvironment().getCertificate(
                                     wssContext.getExtraneousProperties(),
                                     XMLUtil.getDecodedBase64EncodedData(keyId.getReferenceValue()));
+                            wssContext.getSecurityEnvironment().updateOtherPartySubject(
+                                DefaultSecurityEnvironmentImpl.getSubject(wssContext), cert);
+                            returnKey = cert.getPublicKey();
+                            
                         } else if(purpose == Purpose.SIGN){
                             returnKey =wssContext.getSecurityEnvironment().getPrivateKey(
                                     wssContext.getExtraneousProperties(),
@@ -755,8 +771,13 @@ public class KeySelectorImpl extends KeySelector{
                 if (purpose ==  Purpose.VERIFY) {
                     wssContext.setExtraneousProperty(MessageConstants.REQUESTER_SERIAL, serialNumber);
                     wssContext.setExtraneousProperty(MessageConstants.REQUESTER_ISSUERNAME, issuerName);
-                    returnKey = wssContext.getSecurityEnvironment().getPublicKey(
+                    //update other party certificate
+                    X509Certificate cert = wssContext.getSecurityEnvironment().getCertificate(
                             wssContext.getExtraneousProperties(),serialNumber, issuerName);
+                    wssContext.getSecurityEnvironment().updateOtherPartySubject(
+                            DefaultSecurityEnvironmentImpl.getSubject(wssContext), cert);
+                    returnKey = cert.getPublicKey();
+                           
                 } else if(purpose== Purpose.SIGN){
                     returnKey = wssContext.getSecurityEnvironment().getPrivateKey(
                             wssContext.getExtraneousProperties(),serialNumber, issuerName);
@@ -962,8 +983,12 @@ public class KeySelectorImpl extends KeySelector{
                 } else if(content instanceof byte[]) {
                     byte[] ski = (byte[]) content;
                     if (purpose == Purpose.VERIFY) {
-                        return context.getSecurityEnvironment().getPublicKey(
-                                context.getExtraneousProperties(),ski);
+                        //update other party subject
+                        cert =
+                                context.getSecurityEnvironment().getCertificate(context.getExtraneousProperties(), ski);
+                        context.getSecurityEnvironment().updateOtherPartySubject(
+                                DefaultSecurityEnvironmentImpl.getSubject(context),cert);
+                        return cert.getPublicKey();
                     } else if(purpose == Purpose.SIGN){
                         return context.getSecurityEnvironment().getPrivateKey(
                                 context.getExtraneousProperties(), ski);
@@ -975,8 +1000,12 @@ public class KeySelectorImpl extends KeySelector{
                 } else if (content instanceof X509IssuerSerial) {
                     X509IssuerSerial xis = (X509IssuerSerial) content;
                     if (purpose == Purpose.VERIFY) {
-                        return context.getSecurityEnvironment().getPublicKey(
+                        //update other party certificate
+                        cert = context.getSecurityEnvironment().getCertificate(
                                 context.getExtraneousProperties(), xis.getSerialNumber(), xis.getIssuerName());
+                        context.getSecurityEnvironment().updateOtherPartySubject(
+                                DefaultSecurityEnvironmentImpl.getSubject(context),cert);
+                        return cert.getPublicKey();
                     } else if(purpose == Purpose.SIGN){
                         return context.getSecurityEnvironment().getPrivateKey(
                                 context.getExtraneousProperties(), xis.getSerialNumber(), xis.getIssuerName());
@@ -989,6 +1018,9 @@ public class KeySelectorImpl extends KeySelector{
                 }
                 
                 if (purpose == Purpose.VERIFY) {
+                    //update other part subject
+                    context.getSecurityEnvironment().updateOtherPartySubject(
+                                DefaultSecurityEnvironmentImpl.getSubject(context),cert);
                     return cert.getPublicKey();
                 } else if(purpose == Purpose.SIGN){
                     return context.getSecurityEnvironment().getPrivateKey(
