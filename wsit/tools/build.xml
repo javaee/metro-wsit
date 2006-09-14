@@ -84,5 +84,37 @@
         </zip>
         <delete dir="${build.dir}/temp" includeemptydirs="true"/>
     </target>
-    
+
+
+   <!-- <target name="wsit-jars-tools" depends="compile" >-->
+    <target name="wsit-jars-tools"  >
+             <property name="tmpdir" value="${tools.dir}/tmp"/>
+              <mkdir dir="${tmpdir}/META-INF/services"/>
+             <property name="wsit.tools.dir" value = "${tools.dir}/build"/>
+             <property name="wsit.tools.jarname" value = "wsit-tools"/>
+             <mkdir dir="${wsit.tools.dir}"/>
+
+
+             <copy todir="${tmpdir}/META-INF/services" overwrite="true">
+                 <fileset dir="../etc/META-INF/services">
+                     <include name="*.*"/>
+
+                 </fileset>
+             </copy>
+
+             <jar destfile="${wsit.tools.dir}/${wsit.tools.jarname}.jar" manifest="../${etc.metainf.dir}/MANIFEST.MF">
+
+                     <fileset dir="${tmpdir}">
+                        <include name="**/*.TWSDL*"/>
+                        <include name="**/*.TJava*"/>
+                        <include name="**/*Meta*"/>
+                    </fileset>
+
+                    <fileset dir="${tools.dir}/build/classes"/>
+                </jar>
+
+
+            </target>
+
+    <target name="create-wsit-tools-jar" depends="wsit-jars-tools"/>
 </project>

@@ -70,5 +70,15 @@
     <target name="runtests">
       <ant antfile="run-ql-tests.xml"/>
     </target>
-    
+
+    <target name="create-wsit-runtime-jar">
+        <ant dir="${rt.dir}" target="create-wsit-runtime-jar"/>
+    </target>
+     <target name="create-wsit-tools-jar">
+        <ant dir="${tools.dir}" target="create-wsit-tools-jar"/>
+    </target>
+    <target name="create-wsit-jars" depends="jar" >
+        <antcall target="create-wsit-runtime-jar"/>
+        <antcall target="create-wsit-tools-jar"/>
+    </target>
 </project>
