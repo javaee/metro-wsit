@@ -59,7 +59,7 @@ import com.sun.xml.wss.jaxws.impl.SecurityClientPipe;
 import com.sun.xml.wss.jaxws.impl.SecurityServerPipe;
 
 /**
- * Tango PipelineAssembler.
+ * WSIT PipelineAssembler.
  *
  * @author Arun Gupta
  */
@@ -406,7 +406,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
 
         private Pipe dumpAction(String name, WSDLPort wsdlPort, Pipe p) {
             if (Boolean.getBoolean(name)) {
-                ServiceFinder<ActionDumpPipe> pipes = ServiceFinder.find(com.sun.xml.ws.runtime.ActionDumpPipe.class);
+                ServiceFinder<ActionDumpPipe> pipes = ServiceFinder.find(ActionDumpPipe.class);
                 if (pipes != null) {
                     if (pipes.toArray().length > 0) {
                         return pipes.toArray()[0];
