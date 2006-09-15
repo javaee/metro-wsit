@@ -99,6 +99,7 @@
                                 <tc:STSConfiguration xmlns:tc="http://schemas.sun.com/ws/2006/05/trust/server" encryptIssuedKey="true" encryptIssuedToken="false">
                                      <tc:LifeTime>36000</tc:LifeTime>
                                      <tc:Contract>com.sun.xml.ws.security.trust.impl.IssueSamlTokenContractImpl</tc:Contract>
+                                     <tc:Issuer>SunSTS</tc:Issuer>
                                      <tc:ServiceProviders>
                                             <tc:ServiceProvider endPoint="http://localhost:8080/jaxws-fs/simple" >
                                                   <tc:CertAlias>bob</tc:CertAlias>
