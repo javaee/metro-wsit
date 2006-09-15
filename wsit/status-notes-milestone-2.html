@@ -165,15 +165,20 @@ tests.</p>
 <ul>
   <li>An RM-enabled endpoint will not work with Security unless Secure
 Conversations are enabled. </li>
-<LI>For Secure Reliable Messaging  oneway scenario there is a known bug  when close is called on the proxy which causes an NPE <a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=73">issue 73</a> which has been waived for this milestone and will be fixed for the next release
-
+  <li>For Secure Reliable Messaging oneway scenario there is a known
+bug when close is called on the proxy which causes an NPE <a
+ href="https://wsit.dev.java.net/issues/show_bug.cgi?id=73">issue 73</a>
+which has been waived for this milestone and will be fixed for the next
+release
+  </li>
 </ul>
 <!-- ================================================== -->
 <br>
 <hr>
 <h2><a name="35385"></a>Security Status</h2>
+<br>
 <h4>WCF Interoperability</h4>
-<pre>  MS-&gt;S :   0/10 : (starting from WSDL; not tested)<br>  S-&gt;MS :  10/10 : (starting from WSDL)<br>  S -&gt;S :  10/10 : (starting from WSDL)<br></pre>
+<pre>  MS-&gt;S :   9/10 : (starting from WSDL; Scenario 1 requires SSL, not tested)<br>  S-&gt;MS :  10/10 : (starting from WSDL)<br>  S -&gt;S :  10/10 : (starting from WSDL)<br></pre>
 <p>NOTE: No test scenarios were executed that started from Java.</p>
 <h4>What is Not Implemented</h4>
 <p>The following features have&nbsp; not been implemented:</p>
@@ -184,12 +189,8 @@ implemented. Only one secure conversation token per message is assumed.
   <li>Session timeout handling for secure conversation sessions and
 LifeTime handling for IssuedTokens </li>
   <li>MaxNonceAge information item specified in NetBeans IDE user
-interface and configuration files WSDL will not be honored, default
+interface and configuration&nbsp; WSDL will not be honored, default
 values will be used instead. </li>
-  <li>Encryption of SubjectConfirmation in cases where the received
-signature was encrypted is not supported. The workaround is to disable
-&lt;sp:RequireSignatureConfirmation&gt; from the server policy
-(whenever there is an interop failure due to this). </li>
   <li>If a binary secret arrives in a SAML assertion, then
 implementation does not&nbsp; ensure that&nbsp; SSL was used for the
 Incoming Message. </li>
@@ -211,14 +212,10 @@ not being done in this release of WSIT </li>
   <li>Logging code added for WSIT is incomplete. </li>
   <li>The sha256 signature algorithm is not supported by the underlying
 JSR 105 RI&nbsp; and therefore all AlgorithmSuite identifiers that
-imply the sha256 signature algorithm are not supported. </li>
-  <li>&lt;sp:RequireDerivedKeys&gt; under
-&lt;sp:AsymmetricBinding&gt;/&lt;sp:InitiatorToken&gt;/&lt;sp:X509Token&gt;
-is not supported and will result in an Exception. </li>
-  <li>&lt;sp:RequireDerivedKeys&gt;&nbsp; under&nbsp;
-&lt;sp:X509Token&gt; appearing inside a Supporting Token Assertion
-(such as &lt;sp:EndorsingSupportingToken&gt;) is also not supported and
-will result in an exception. </li>
+imply the sha256 signature algorithm are not supported.</li>
+  <li>WSS 1.1 EncryptedHeader feature&nbsp; is not supported and is
+planned for a future release.<br>
+  </li>
   <li>The Following WS-SecurityPolicy Features from specification Draft
 : Jul 2005 Ver 1.1 are unsupported in this release of WSIT </li>
 </ul>
@@ -525,16 +522,33 @@ supported in this release.</p>
       </td>
     </tr>
     <tr>
+      <td style="vertical-align: top;">Specifying KeyPassword for
+extracting a Key from KeyStore not supported<br>
+      </td>
+      <td style="vertical-align: top;">&nbsp;The WSIT implementation
+assumes that the KeyStore password and KeyPassword are the same<br>
+      <a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=5">Issue
+#5</a> on IssueTracker<br>
+      </td>
+      <td style="vertical-align: top;">Will be fixed in a future
+release.<br>
+      </td>
+    </tr>
+    <tr>
       <td width="210">
       <p><font color="#000000">SignedParts and EncryptedParts Policy
-Verification. </font> </p>
+Verification does not happen. </font> </p>
       </td>
       <td width="397">
       <p><font color="#000000">Currently disabled due to insufficient
-testing. </font> </p>
+testing.<br>
+      </font><a
+ href="https://wsit.dev.java.net/issues/show_bug.cgi?id=21">Issue#21</a>
+on IssueTracker<br>
+      </p>
       </td>
       <td width="251">
-      <p><br>
+      <p>Will be fixed in a future release<br>
       </p>
       </td>
     </tr>
@@ -581,25 +595,6 @@ on IssueTracker</p>
     </tr>
     <tr>
       <td width="210">
-      <p>ProtectTokens assertion with AsymmetricBinding</p>
-      </td>
-      <td width="397">
-      <p>ProtectTokens assertion with AsymmetricBinding in service WSDL
-causes java.lang.NullPointerException.</p>
-      <p><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=20">Issue#20</a>
-on IssueTracker</p>
-      </td>
-      <td width="251">
-      <p><font color="#009900"><font color="#000000">Feature
-implemented, but Fails due to a bug in the runtime. </font><br>
-      <br>
-      <font color="#000000">Also need clarification from
-WS-SecurityPolicy specification on how protect different types of
-tokens which are not part of the Message.</font></font></p>
-      </td>
-    </tr>
-    <tr>
-      <td width="210">
       <p>Reference Type verification in PolicyVerification.</p>
       </td>
       <td width="397">
@@ -608,7 +603,7 @@ interpretation of IncludeTokenPolicy in conjunction with Asymmetric
 Binding.</p>
       </td>
       <td width="251">
-      <p><br>
+      <p>Will be supported in a future release<br>
       </p>
       </td>
     </tr>
@@ -644,27 +639,16 @@ on IssueTracker</p>
     </tr>
     <tr>
       <td width="210">
-      <p>Using SCT security token as Signed Supporting Token,</p>
-      </td>
-      <td width="397">
-      <p>When using SCT security token as Signed Supporting Token,
-clients throw run-time exceptions.&nbsp;&nbsp; &nbsp;&nbsp;
-&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; </p>
-      <p><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=23">Issue#23</a>
-on IssueTracker</p>
-      </td>
-      <td width="251">
-      <p><font color="#000000">Feature implemented, but Fails due to a
-bug in the runtime.</font></p>
-      </td>
-    </tr>
-    <tr>
-      <td width="210">
       <p>SignedElements and EncryptedElements</p>
       </td>
       <td width="397">
       <p>sp:EncryptedElements/sp:XPath fails to encrypt the element
-specified in the XPath element</p>
+specified in the XPath element<br>
+      </p>
+      <p><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=24">Issue
+#24 </a>on IssueTracker<br>
+      <br>
+      </p>
       </td>
       <td width="251">
       <p><font color="#000000">Feature implemented, but Fails due to a
@@ -677,14 +661,23 @@ bug in the runtime.</font></p>
       </td>
       <td width="397">
       <p>ProtectTokens in SymmetricBinding : Token used to generate
-Signature not covered by the Signature</p>
+Signature not covered by the Signature<br>
+      </p>
+      <p><br>
+      <a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=32">Issue
+# 32</a> on IssueTracker<br>
+      </p>
       </td>
       <td width="251">
-      <p>Fails due to a bug in runtime. A complete fix for the bug
-would also require some clarification from the WS-SecurityPolicy
-specification, since it is not clear how to protect different token
-types in an interoperable manner when the token itself is not present
-in the Message.</p>
+      <p>Works when the token to be protected is in the message. <br>
+But<br>
+Fails when the Token to be Protected is not in the Message. <br>
+      </p>
+      <p><br>
+A complete fix for the bug would also require some clarification from
+the WS-SecurityPolicy specification, since it is not clear how to
+protect different token types in an interoperable manner when the token
+itself is not present in the Message.</p>
       </td>
     </tr>
     <tr>
@@ -693,7 +686,12 @@ in the Message.</p>
       </td>
       <td width="397">
       <p>EncryptedParts in SupportingTokens assertion in message policy
-does not work</p>
+does not work<br>
+      </p>
+      <p><br>
+      <a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=12">Issue
+#12</a> on IssueTracker<br>
+      </p>
       </td>
       <td width="251">
       <p>Need a clarification from the WS-SecurityPolicy Specification
@@ -709,22 +707,9 @@ as to whether Encrypted Parts inside SupportingTokens makes sense.</p>
       </td>
       <td width="251">
       <p>Scenarios where an &lt;sp:SAMLToken&gt; is used directly
-under&nbsp; SymmetricBinding or Supporting Token are not tested.</p>
-      </td>
-    </tr>
-    <tr>
-      <td width="210">
-      <p>IssuedToken Policy under EndorsingSupportingTokens</p>
-      </td>
-      <td width="397">
-      <p>com.sun.xml.wss.impl.WssSoapFaultException: SAML Assertion has
-invalid Signature</p>
-      </td>
-      <td width="251">
-      <p><font color="#000000">Feature implemented, but Fails due to a
-bug in the runtime.&nbsp; Needs investigation because verification of
-Signature Inside SAML Assertion works in general and in some of the
-other scenarios.</font></p>
+under&nbsp; SymmetricBinding or Supporting Token fail. This will be
+fixed in a future release.<br>
+      </p>
       </td>
     </tr>
     <tr>
@@ -768,19 +753,6 @@ assertion causes deploy failure</p>
     </tr>
     <tr>
       <td width="210">
-      <p>Protection Targets under Bootstrap Policy for
-SecureConversation</p>
-      </td>
-      <td width="397">
-      <p>The WS-SecurityPolicy Spec has been updated to have&nbsp;
-Protection targets&nbsp; under bootstrap policy</p>
-      </td>
-      <td width="251">
-      <p>Will be supported in a future release.</p>
-      </td>
-    </tr>
-    <tr>
-      <td width="210">
       <p>SecureConversation Negative tests : Policy Verification with
 Mismatched client and server policies</p>
       </td>
@@ -792,57 +764,101 @@ SecureConversation:Service accepts messages that has wrong message
 protection order.</p>
       </td>
       <td width="251">
-      <p>Will be supported in a future release.</p>
+      <p>Will be supported in a future release.&nbsp;&nbsp; <br>
+      </p>
       </td>
     </tr>
     <tr>
-      <td width="210">
-      <p>Encryption of SignatureConfirmation</p>
+      <td style="vertical-align: top;">MTOM secure interop testscases
+against MS July CTP fail throwing security verification excpetion<br>
       </td>
-      <td width="397">
-      <p>Encryption of SignatureConfirmation&nbsp; in cases where the
-received signature was encrypted is not supported. The workaround is to
-disable &lt;sp:RequireSignatureConfirmation&gt; from the server policy
-(whenever there is an interop failure due to this).</p>
+      <td style="vertical-align: top;">&nbsp;The issue requires a fix
+at both the Sun and Microsoft Ends <br>
+      <a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=59">&nbsp;Issue
+#59</a> on IssueTracker<br>
       </td>
-      <td width="251">
-      <p>Will be supported in a future release.</p>
-      </td>
-    </tr>
-    <tr>
-      <td width="210">
-      <p>RequireDerivedKeys assertion</p>
-      </td>
-      <td width="397">
-      <p>RequireDerivedKeys assertion under an X509Token is not
-supported when the X509Token appears under&nbsp; Initiator token of an
-AsymmetricBinding, or when the X509Token is appearing under a
-SupportingToken Assertion.</p>
-      </td>
-      <td width="251">
-      <p>Need some clarification from the WS-SecurityPolicy
-Specification.</p>
+      <td style="vertical-align: top;">Will be supported in a future
+release<br>
+      <br>
+If you hit upon this scenario, please send email to
+dev@wsit.dev.java.net and we shall suggest workarounds.<br>
       </td>
     </tr>
     <tr>
-      <td width="210">
-      <p>EncryptBeforeSigning</p>
+      <td style="vertical-align: top;">When WSIT is installed on&nbsp;
+GlassFish, the Glassfish SecurityProvider is Broken<br>
       </td>
-      <td width="397">
-      <p>Fails with Signature verification error on server side.</p>
-      <p><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=17">Issue#17</a>
-on IssueTracker</p>
+      <td style="vertical-align: top;">When WSIT is installed on&nbsp;
+GlassFish, the Glassfish SecurityProvider is Broken because WSIT
+overrides certain classes required for running the GlassFish Security
+Provider.<br>
+      <br>
       </td>
-      <td width="251">
-      <p>Use SignBeforeEncrypting</p>
+      <td style="vertical-align: top;">Will be fixed with the next
+milestone release of GlassFish.<br>
+      <br>
+If you hit upon this scenario, please send email to
+dev@wsit.dev.java.net and we shall suggest workarounds.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">When WSIT is installed on
+GlassFish, an existing XWSS 2.0 application on GlassFish breaks and
+does not work<br>
+      </td>
+      <td style="vertical-align: top;">WSIT makes use of&nbsp; JAXWS
+2.0.1M1 which has a different internal architecture to support WSIT.
+This breaks the integration of XWSS 2.0 with JAXWS 2.0.1M1<br>
+      </td>
+      <td style="vertical-align: top;">Will be fixed in a future
+release of WSIT.<br>
+      <br>
+If you hit upon this scenario, please send email to
+dev@wsit.dev.java.net and we shall suggest workarounds.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">Absence of SignedParts assertion
+causes runtime securtity exception:java.lang.IllegalArgumentException:
+list of references must contain at least one entry ; Putting
+SignedParts assertion makes the test pass<br>
+      </td>
+      <td style="vertical-align: top;"><a
+ href="https://wsit.dev.java.net/issues/show_bug.cgi?id=36">Issue #36</a>
+on IssueTracker<br>
+      </td>
+      <td style="vertical-align: top;">Will be fixed in a future release<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">SignedParts in
+EndorsingSupportingToken in TransportBinding ignored.<br>
+      </td>
+      <td style="vertical-align: top;"><a
+ href="https://wsit.dev.java.net/issues/show_bug.cgi?id=38">Issue #38</a>
+on IssueTracker<br>
+      </td>
+      <td style="vertical-align: top;">Will be fixed in a future release<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">SignedEndorsingSupportingTokens
+not supported with TransportBinding<br>
+      </td>
+      <td style="vertical-align: top;"><a
+ href="https://wsit.dev.java.net/issues/show_bug.cgi?id=39">Issue #39</a>
+on IssueTracker<br>
+      </td>
+      <td style="vertical-align: top;">Will be fixed in a future release<br>
       </td>
     </tr>
   </tbody>
 </table>
 <p style="margin-bottom: 0in;"><br>
 </p>
-<!-- ================================================== -->
-<br>
+<!-- ================================================== -->&nbsp;
+<p><br>
+</p>
 <hr>
 <h2><a name="44691"></a>Secure Conversation Status</h2>
 <h4>WCF Interoperability</h4>
@@ -1055,17 +1071,14 @@ should never be opened at the same time.</p>
 <pre>non-secure:<br><br>  MS-&gt;S : No client code available<br>  S-&gt;MS : 53/66<br>  S -&gt;S : 62/66<br><br>secure:<br><br>  MS-&gt;S : No client code available<br>  S-&gt;MS : Not tested<br>  S -&gt;S : Not tested<br></pre>
 <h4>What is Not Implemented</h4>
 <ul>
-  <li>Transparent support for WS-Addressing Member Submission Version.
-  </li>
+  <li>Transparent support for WS-Addressing Member Submission Version. </li>
 </ul>
 <h4>Known Issues</h4>
 <ul>
   <li>Member Submission needs to be enabled explicitly using <a
- href="docs/enabling-addressing-submission.htm">this link</a>.
-  </li>
+ href="docs/enabling-addressing-submission.htm">this link</a>. </li>
   <li>A WCF endpoint responds back with "HTTP 400 Bad Request" if an
-empty Metadata element is sent from the WSIT client.
-  </li>
+empty Metadata element is sent from the WSIT client. </li>
 </ul>
 <!-- ================================================== -->
 <br>
