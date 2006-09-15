@@ -44,6 +44,8 @@ import com.sun.org.apache.xml.internal.security.encryption.XMLCipher;
 
 import java.util.Date;
 
+import javax.security.auth.Subject;
+
 /**
  *
  * @author Abhijit Das
@@ -65,6 +67,7 @@ public class IssuedTokenContextImpl implements IssuedTokenContext {
     Date expiryTime = null;    
     String username = null;
     String endPointAddress = null;
+    Subject subject;
     
     public X509Certificate getRequestorCertificate() {
         return x509Certificate;
@@ -76,6 +79,13 @@ public class IssuedTokenContextImpl implements IssuedTokenContext {
         this.x509Certificate = cert;
     }
     
+     public Subject getRequestorSubject(){
+        return subject;
+    }
+
+    public void setRequestorSubject(Subject subject){
+        this.subject = subject;
+    }
 
     public String getRequestorUsername() {
         return username;

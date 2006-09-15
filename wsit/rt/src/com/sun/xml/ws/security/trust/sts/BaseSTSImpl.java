@@ -37,6 +37,9 @@ import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponse;
 import com.sun.xml.ws.security.trust.impl.STSConfiguration;
 import com.sun.xml.ws.security.trust.impl.TrustSPMetadata;
 import com.sun.xml.ws.security.trust.util.WSTrustUtil;
+import com.sun.xml.wss.SubjectAccessor;
+import com.sun.xml.wss.XWSSecurityException;
+
 import java.util.Iterator;
 import javax.xml.namespace.QName;
 
@@ -61,6 +64,8 @@ public abstract class BaseSTSImpl implements Provider<Source> {
      * The default value of the timeout for the tokens issued by this STS
      */
     public static final int DEFAULT_TIMEOUT = 36000;
+    
+     public static final String DEFAULT_ISSUER = "SampleSunSTS";
     /**
      * The xml element tag for STS Configuration
      */
@@ -101,6 +106,8 @@ public abstract class BaseSTSImpl implements Provider<Source> {
      * The String Contract.
      */
     public static final String CONTRACT = "Contract";
+    
+    public static final String ISSUER = "Issuer";
     /**
      * The String TokenType.
      */
@@ -175,7 +182,11 @@ public abstract class BaseSTSImpl implements Provider<Source> {
         Iterator it = (Iterator)msgCtx.get(
                 Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS);
         CallbackHandler handler = (CallbackHandler)msgCtx.get(WSTrustConstants.STS_CALL_BACK_HANDLER);
+        if (it == null){
+            throw new WebServiceException("STS configuration information is not available");
+        }
         String impl = DEFAULT_IMPL;
+        String issuer = DEFAULT_ISSUER;
         String alias = null;
         boolean encKey=true;
         boolean encToken = false;
@@ -201,6 +212,11 @@ public abstract class BaseSTSImpl implements Provider<Source> {
                     impl = serviceSTSPolicy.getValue();
                     continue;
                 }
+                if(ISSUER.equals(serviceSTSPolicy.getName().getLocalPart())){
+                    issuer = serviceSTSPolicy.getValue();
+                    continue;
+                }
+                
                 if(SERVICE_PROVIDERS.equals(serviceSTSPolicy.getName().getLocalPart())){
                     Iterator<PolicyAssertion> serviceProviders =
                     serviceSTSPolicy.getNestedAssertionsIterator();
@@ -221,6 +237,7 @@ public abstract class BaseSTSImpl implements Provider<Source> {
                         data.setEncryptIssuedToken(encToken);
                         data.setEncryptIssuedKey(encKey);
                         data.setCertAlias(alias);
+                        data.setIssuer(issuer);
                         data.setIssuedTokenTimeout(timeout);
                         //data.setCallbackHandlerName("common.STSCallbackHandler");
                         data.setCallbackHandler(handler);
@@ -248,7 +265,12 @@ public abstract class BaseSTSImpl implements Provider<Source> {
         WSTrustContract contract = WSTrustFactory.newWSTrustContract(config, 
                 appliesTo);
         IssuedTokenContext context = new IssuedTokenContextImpl();
-        
+        try {
+            context.setRequestorSubject(SubjectAccessor.getRequesterSubject(getMessageContext()));
+        } catch (XWSSecurityException ex) {
+            throw new WSTrustException("error getting subject",ex);
+        }
+
         RequestSecurityTokenResponse rstr = contract.issue(rst, context, null);
         
         Token samlToken = rstr.getRequestedSecurityToken().getToken();

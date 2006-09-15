@@ -40,6 +40,8 @@ import com.sun.xml.wss.XWSSecurityException;
 import java.net.URI;
 import java.util.Date;
 
+import javax.security.auth.Subject;
+
 
 /**
  * This interface is the SPI defined by WS-Security to enable WS-Trust/SecureConversation 
@@ -65,6 +67,10 @@ public interface IssuedTokenContext {
      * incoming message.
      */
     void setRequestorCertificate(X509Certificate cert);
+    
+    Subject getRequestorSubject();
+    
+    void setRequestorSubject(Subject subject);
 
     /**
      * Requestor username if any

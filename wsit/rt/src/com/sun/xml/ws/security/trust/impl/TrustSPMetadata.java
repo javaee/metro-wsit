@@ -45,6 +45,7 @@ public class TrustSPMetadata implements Configuration{
     private String endpoint;
     private String tokenType;
     private String type;
+    private String issuer;
     private boolean encryptIssuedToken;
     private boolean encryptIssuedKey;
     private String certAlias;
@@ -65,6 +66,14 @@ public class TrustSPMetadata implements Configuration{
         
     public String getType(){
         return this.type;
+    }
+    
+    public void setIssuer(String issuer){
+        this.issuer = issuer;
+    }
+        
+    public String getIssuer(){
+        return this.issuer;
     }
         
     public void setEncryptIssuedToken(boolean encryptIssuedToken){

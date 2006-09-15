@@ -181,7 +181,9 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
 
         rstr.setKeySize(keySize);
         
-        Token samlToken = createSAMLAssertion(key, assertionId, appliesTo);
+        String issuer = config.getIssuer();
+        
+        Token samlToken = createSAMLAssertion(key, assertionId, appliesTo, issuer, context);
         rstr.getRequestedSecurityToken().setToken(samlToken);
          
         // Populate IssuedTokenContext
@@ -251,7 +253,7 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
         throw new UnsupportedOperationException("Unsupported operation: containsChallenge");
    }
 
-   protected abstract Token createSAMLAssertion(byte[] key, String assertionId, String appliesTo) throws WSTrustException;
+   protected abstract Token createSAMLAssertion(byte[] key, String assertionId, String appliesTo, String issuer, IssuedTokenContext context) throws WSTrustException;
 
    protected abstract boolean isAuthorized(Subject subject, String appliesTo, String tokenType);
 

@@ -398,17 +398,31 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
                     Map<QName,String> attrs = as.getAttributes();
                     String namespace = attrs.get(new QName(CONFIG_NAMESPACE,NAMESPACE));
                     try {
-                        stsEP = new URL(attrs.get(new QName(CONFIG_NAMESPACE,ENDPOINT)));
+                        String stsEPStr = attrs.get(new QName(CONFIG_NAMESPACE,ENDPOINT));
+                        if (stsEPStr != null){
+                            stsEP = new URL(stsEPStr);
+                        }
                     } catch (MalformedURLException ex) {
                         throw new RuntimeException(ex);
                     }
                     try {
-                        wsdlLocation = new URL(attrs.get(new QName(CONFIG_NAMESPACE,WSDL_LOCATION)));
+                        String wsdlLocationStr = attrs.get(new QName(CONFIG_NAMESPACE,WSDL_LOCATION));
+                        if (wsdlLocationStr != null){
+                            wsdlLocation = new URL(attrs.get(new QName(CONFIG_NAMESPACE,WSDL_LOCATION)));
+                        }
                     } catch (MalformedURLException ex) {
                         throw new RuntimeException(ex);
                     }
-                    serviceName = new QName(namespace,attrs.get(new QName(CONFIG_NAMESPACE,SERVICE_NAME)));
-                    portName = new QName(namespace,attrs.get(new QName(CONFIG_NAMESPACE,PORT_NAME)));
+                    
+                    String serviceNameStr = attrs.get(new QName(CONFIG_NAMESPACE,SERVICE_NAME));
+                    if (serviceNameStr != null && namespace != null){
+                        serviceName = new QName(namespace,serviceNameStr);
+                    }
+                    
+                    String portNameStr = attrs.get(new QName(CONFIG_NAMESPACE,PORT_NAME));
+                    if (portNameStr != null && namespace != null){
+                        portName = new QName(namespace, portNameStr);
+                    }
                 }
             }
         } else {

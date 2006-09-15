@@ -123,13 +123,20 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
     private static final String SAML_HOLDER_OF_KEY = "urn:oasis:names:tc:SAML:1.0:cm:holder-of-key";
     protected static final String PRINCIPAL = "principal";
    
-    protected Token createSAMLAssertion(byte[] key, String assertionId, String appliesTo) throws WSTrustException
+    protected Token createSAMLAssertion(byte[] key, String assertionId, String appliesTo, String issuer, IssuedTokenContext context) throws WSTrustException
     {       
         Token token = null;
         
         // get authenticaed client Subject
-        Subject subject = SubjectAccessor.getRequesterSubject();
-        //Set<Principal> principals = subject.getPrincipals();
+         //Subject subject = SubjectAccessor.getRequesterSubject();
+        Subject subject = context.getRequestorSubject();
+        if(subject == null){
+           throw new WSTrustException("Requester subject was null");
+        }
+        
+        //Set<Principal> 
+        //principals = subject.getPrincipals();
+        
         String tokenType = WSTrustConstants.SAML11_ASEERTION_TOKEN_TYPE;
         if (!isAuthorized(subject, appliesTo, tokenType)){
             throw new WSTrustException("The client is not authorized to be issued the token of type "+ tokenType + " apply to " + appliesTo);
@@ -153,7 +160,6 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
  
             SAMLAssertionFactory samlFac = 
                    SAMLAssertionFactory.newInstance(SAMLAssertionFactory.SAML1_1);
-            String issuer = "TestSTS";
             GregorianCalendar issuerInst = new GregorianCalendar(); 
             GregorianCalendar notOnOrAfter = new GregorianCalendar();
             notOnOrAfter.add(Calendar.MILLISECOND, (int)config.getIssuedTokenTimeout());
