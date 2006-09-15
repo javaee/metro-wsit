@@ -228,8 +228,9 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
         Packet ret = nextPipe.process(packet);
         // Could be OneWay
         if (ret == null || ret.getMessage() == null) {
-            return null;
+            return ret;
         }
+        
         /* TODO:this piece of code present since payload should be read once*/
         try{
             SOAPMessage sm = ret.getMessage().readAsSOAPMessage();
