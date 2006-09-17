@@ -153,7 +153,7 @@ xsi:type may not be round tripped. </li>
 <hr>
 <h2><a name="60313"></a>Reliable Messaging Status</h2>
 <h4>WCF Interoperability</h4>
-<pre>non-secure:<br><br>  MS-&gt;S :  2/2 <br>  S-&gt;MS :  3/3<br>  S -&gt;S :  0/0<br><br>secure:<br><br>  MS-&gt;S :  0/2 : (not tested)<br>  S-&gt;MS :  1/2<br>  S -&gt;S :  0/0<br></pre>
+<pre>non-secure:<br><br>  MS-&gt;S :  2/2 <br>  S-&gt;MS :  3/3<br> <br>secure:<br><br>  MS-&gt;S :  0/2 : (not tested)<br>  S-&gt;MS :  1/2<br></pre>
 <p> NOTE: The interoperability tests do not include duplex binding
 tests.</p>
 <h4>What is Not Implemented</h4>
@@ -163,13 +163,17 @@ tests.</p>
 </ul>
 <h4>Known Issues</h4>
 <ul>
-  <li>An RM-enabled endpoint will not work with Security unless Secure
-Conversations are enabled. </li>
   <li>For Secure Reliable Messaging oneway scenario there is a known
 bug when close is called on the proxy which causes an NPE <a
  href="https://wsit.dev.java.net/issues/show_bug.cgi?id=73">issue 73</a>
 which has been waived for this milestone and will be fixed for the next
 release
+  </li>
+<li>
+<a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=62">issue 62</a> - Occasional errors calling proxy.close() on a client talking to an MS Endpoint
+  </li>
+  <li>
+<a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=75">issue 75</a> - A WebApp hosting a RM client won't undeploy cleanly without restarting the container. 
   </li>
 </ul>
 <!-- ================================================== -->
