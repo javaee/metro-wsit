@@ -201,7 +201,7 @@ public class EndorsingSignatureTest extends TestCase{
         
        WSSAssertion wssAssertion = null;
        AssertionSet as = null;
-       Policy wssPolicy = new PolicyResourceLoader().loadPolicy("./etc/policy-binding2.xml");
+       Policy wssPolicy = new PolicyResourceLoader().loadPolicy("security/policy-binding2.xml");
        Iterator<AssertionSet> i = wssPolicy.iterator();
        if(i.hasNext())
            as = i.next();
