@@ -1,7 +1,6 @@
-           PingService service = new PingService();
-           IPingService stub = service.getCustomBindingIPingService();
 
-            ((BindingProvider)stub).getRequestContext().
+
+          /*  ((BindingProvider)stub).getRequestContext().
                 put(WSTrustConstants.PROPERTY_URL, new URL(stsWsdlLocation));
             ((BindingProvider)stub).getRequestContext().
                 put(WSTrustConstants.PROPERTY_SERVICE_NAME,new QName(namespace,
@@ -9,8 +8,9 @@
             ((BindingProvider)stub).getRequestContext().
                 put(WSTrustConstants.PROPERTY_PORT_NAME, new QName(namespace,
                 stsPortName));
+                */
 
-//            stub.ping(new Ping(new Holder("1"), new Holder("sun"), new Holder(
-"Passed!")));
-            stub.ping(new Ping());
+            customBinding_IPingService.ping(new Holder("1"), new Holder("sun"), new Holder(
+"Passed!"));
+         //   stub.ping(new Ping());
             assertTrue(true);
