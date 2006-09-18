@@ -156,6 +156,10 @@
                 <fileset dir="${rt.dir}/build/classes"/>
             </jar>
 
+         <zip destfile="${wsit.rt.dir}/${wsit.rt.jarname}-src.zip">
+            <fileset dir="src"/>
+
+        </zip>
 
         </target>
 

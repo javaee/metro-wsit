@@ -77,8 +77,34 @@
      <target name="create-wsit-tools-jar">
         <ant dir="${tools.dir}" target="create-wsit-tools-jar"/>
     </target>
+
     <target name="create-wsit-jars" depends="jar" >
         <antcall target="create-wsit-runtime-jar"/>
         <antcall target="create-wsit-tools-jar"/>
     </target>
+
+    <target name="create-wsit-integration-zip">
+       <antcall target="create-wsit-jars"/>
+        <property name="wsit.integration.dir" value="${dist.dir}/wsit-integration"/>
+        <mkdir dir="${dist.dir}/wsit-integration"/>
+
+        <copy todir="${wsit.integration.dir}" >
+            <fileset dir="${rt.dir}/build">
+                <include name="wsit-*.*"/>
+            </fileset>
+        </copy>
+        <copy todir="${wsit.integration.dir}" >
+            <fileset dir="${tools.dir}/build/">
+                <include name="wsit-*.*"/>
+            </fileset>
+        </copy>
+        <zip destfile="${wsit.integration.dir}/wsit-integration.zip">
+                   <fileset dir="${wsit.integration.dir}">
+                       <include name="wsit-rt*.*"/>
+                       <include name="wsit-tools*.*"/>
+                   </fileset>
+
+         </zip>
+    </target>
+
 </project>
