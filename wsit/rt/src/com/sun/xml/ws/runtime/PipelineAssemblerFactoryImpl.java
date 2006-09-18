@@ -228,15 +228,15 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
 
             p = dump(SERVER_PREFIX + WSS_SUFFIX + AFTER_SUFFIX, p);
             // check for Security
-            if (isSecurityEnabled(context.getWsdlModel())) {
-                ServerPipeConfiguration config = new ServerPipeConfiguration(
-                        policyMap, context.getWsdlModel(), context.getEndpoint());
-
-                ServerPipelineHook hook = context.getEndpoint().getContainer().getSPI(ServerPipelineHook.class);
-                if (hook != null)
-                    p = hook.createSecurityPipe(policyMap, context.getSEIModel(), context.getWsdlModel(), context.getEndpoint(), p);
-                else
-                    p = new SecurityServerPipe(config, p);
+            ServerPipelineHook hook = context.getEndpoint().getContainer().getSPI(ServerPipelineHook.class);
+            if (hook != null)
+                p = hook.createSecurityPipe(policyMap, context.getSEIModel(), context.getWsdlModel(), context.getEndpoint(), p);
+            else {
+                if (isSecurityEnabled(context.getWsdlModel())) {
+                    ServerPipeConfiguration config = new ServerPipeConfiguration(
+                            policyMap, context.getWsdlModel(), context.getEndpoint());
+                        p = new SecurityServerPipe(config, p);
+                }
             }
             p = dump(SERVER_PREFIX + WSS_SUFFIX + BEFORE_SUFFIX, p);
 
