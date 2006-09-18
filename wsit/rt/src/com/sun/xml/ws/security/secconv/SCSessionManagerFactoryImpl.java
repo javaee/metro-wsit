@@ -33,8 +33,7 @@
 package com.sun.xml.ws.security.secconv;
 
 /**
- *
- * @author localuser
+ * @author Jiandong Guo
  */
 class SCSessionManagerFactoryImpl extends SCSessionManagerFactory{
     
