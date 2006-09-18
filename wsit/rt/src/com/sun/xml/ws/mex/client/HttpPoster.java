@@ -32,6 +32,10 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.logging.Logger;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLSession;
+
 import static com.sun.xml.ws.mex.MetadataConstants.ERROR_LOG_LEVEL;
 import static com.sun.xml.ws.mex.MetadataConstants.GET_REQUEST;
 
@@ -57,7 +61,7 @@ public class HttpPoster {
         throws Exception {
         
         URL url = new URL(address);
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        HttpURLConnection conn = createConnection(url);
         conn.setDoOutput(true);
         conn.setDoInput(true);
         conn.setRequestMethod("POST");
@@ -111,7 +115,7 @@ public class HttpPoster {
      */
     public InputStream makeGetCall(String address) throws Exception {
         URL url = new URL(address);
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        HttpURLConnection conn = createConnection(url);
         conn.setRequestMethod("GET");
         conn.setRequestProperty("Content-Type",
             "application/x-www-form-urlencoded"); // taken from wsimport
@@ -121,6 +125,23 @@ public class HttpPoster {
             outputErrorStream(conn);
             throw ioe;
         }
+    }
+    
+    /*
+     * This method creates an http url connection and sets the
+     * hostname verifier on it if it's an ssl connection.
+     */
+    private HttpURLConnection createConnection(URL url) throws IOException {
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        if (conn instanceof HttpsURLConnection) {
+            ((HttpsURLConnection) conn).setHostnameVerifier(
+                new HostnameVerifier() {
+                public boolean verify(String string, SSLSession sSLSession) {
+                    return true;
+                }
+            });
+        }
+        return conn;
     }
     
 }
