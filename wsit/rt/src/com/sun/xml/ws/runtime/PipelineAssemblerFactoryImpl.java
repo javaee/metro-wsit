@@ -234,7 +234,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
 
                 ServerPipelineHook hook = context.getEndpoint().getContainer().getSPI(ServerPipelineHook.class);
                 if (hook != null)
-                    p = hook.createSecurityPipe(config, p);
+                    p = hook.createSecurityPipe(policyMap, context.getSEIModel(), context.getWsdlModel(), context.getEndpoint(), p);
                 else
                     p = new SecurityServerPipe(config, p);
             }

@@ -23,7 +23,12 @@
 package com.sun.xml.ws.runtime;
 
 import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
+import com.sun.xml.ws.api.model.SEIModel;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.api.server.WSEndpoint;
+import com.sun.xml.ws.policy.PolicyMap;
 
 /**
  * @author Arun Gupta
@@ -47,7 +52,7 @@ public class ServerPipelineHook extends com.sun.xml.ws.api.server.ServerPipeline
      *      no additional pipe is inserted. If the implementation adds
      *      new pipes, return the new head pipe.
      */
-    public @NotNull Pipe createSecurityPipe(@NotNull ServerPipeConfiguration config, @NotNull Pipe tail) {
+    public @NotNull Pipe createSecurityPipe(@Nullable PolicyMap policyMap, @Nullable SEIModel seiModel, @Nullable WSDLPort wsdlModel, @NotNull WSEndpoint owner, @NotNull Pipe tail) {
         return tail;
     }
 }
