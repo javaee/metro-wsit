@@ -1,5 +1,5 @@
 /*
- * $Id: SecurityContextTokenImpl.java,v 1.2 2006-07-19 14:26:22 raharsha Exp $
+ * $Id: SecurityContextTokenImpl.java,v 1.3 2006-09-18 23:03:01 manveen Exp $
  */
 
 /*
@@ -7,12 +7,12 @@
  * of the Common Development and Distribution License
  * (the License).  You may not use this file except in
  * compliance with the License.
- * 
+ *
  * You can obtain a copy of the license at
  * https://glassfish.dev.java.net/public/CDDLv1.0.html.
  * See the License for the specific language governing
  * permissions and limitations under the License.
- * 
+ *
  * When distributing Covered Code, include this CDDL
  * Header Notice in each file and include the License file
  * at https://glassfish.dev.java.net/public/CDDLv1.0.html.
@@ -20,7 +20,7 @@
  * with the fields enclosed by brackets [] replaced by
  * you own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * 
+ *
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
@@ -46,8 +46,13 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Document;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import com.sun.xml.ws.security.secconv.logging.LogDomainConstants;
+
 /**
  * SecurityContextToken Implementation
+ *
  * @author Manveen Kaur manveen.kaur@sun.com
  */
 public class SecurityContextTokenImpl extends SecurityContextTokenType implements SecurityContextToken {
@@ -55,6 +60,11 @@ public class SecurityContextTokenImpl extends SecurityContextTokenType implement
     private String instance = null;
     private URI identifier = null;
     private List extElements = null;
+    
+    private static Logger log =
+            Logger.getLogger(
+            LogDomainConstants.WSSC_IMPL_DOMAIN,
+            LogDomainConstants.WSSC_IMPL_DOMAIN_BUNDLE);
     
     public SecurityContextTokenImpl() {
         // empty c'tor
@@ -70,7 +80,7 @@ public class SecurityContextTokenImpl extends SecurityContextTokenType implement
         
         if (wsuId != null){
             setWsuId(wsuId);
-        }
+        }                
     }
     
     // useful for converting from JAXB to our owm impl class
@@ -79,18 +89,18 @@ public class SecurityContextTokenImpl extends SecurityContextTokenType implement
         for (int i = 0; i < list.size(); i++) {
             Object object = list.get(i);
             if(object instanceof JAXBElement){
-            JAXBElement obj = (JAXBElement)object;
-            
-            String local = obj.getName().getLocalPart();
-            if (local.equalsIgnoreCase("Instance")) {
-                setInstance((String)obj.getValue());
-            } else if (local.equalsIgnoreCase("Identifier")){
-                try {
-                    setIdentifier(new URI((String)obj.getValue()));
-                }catch (URISyntaxException ex){
-                    throw new RuntimeException(ex);
+                JAXBElement obj = (JAXBElement)object;
+                
+                String local = obj.getName().getLocalPart();
+                if (local.equalsIgnoreCase("Instance")) {
+                    setInstance((String)obj.getValue());
+                } else if (local.equalsIgnoreCase("Identifier")){
+                    try {
+                        setIdentifier(new URI((String)obj.getValue()));
+                    }catch (URISyntaxException ex){
+                        throw new RuntimeException(ex);
+                    }
                 }
-            }
             }else{
                 getAny().add(object);
                 if(extElements == null){
@@ -112,6 +122,10 @@ public class SecurityContextTokenImpl extends SecurityContextTokenType implement
         JAXBElement<String> iElement =
                 (new ObjectFactory()).createIdentifier(identifier.toString());
         getAny().add(iElement);
+        log.log(Level.FINE,
+                "WSSC1004.secctx.token.id.value",
+                new Object[] {identifier.toString()});
+
     }
     
     public String getInstance() {
@@ -126,8 +140,10 @@ public class SecurityContextTokenImpl extends SecurityContextTokenType implement
     }
     
     public void setWsuId(String wsuId){
-        setId(wsuId);
-        
+        log.log(Level.FINE,
+                "WSSC1005.secctx.token.wsuid.value",
+                new Object[] {wsuId});
+        setId(wsuId);        
     }
     
     public String getWsuId(){
@@ -154,7 +170,7 @@ public class SecurityContextTokenImpl extends SecurityContextTokenType implement
             throw new RuntimeException(ex.getMessage(), ex);
         }
     }
-
+    
     public List getExtElements() {
         return extElements;
     }
