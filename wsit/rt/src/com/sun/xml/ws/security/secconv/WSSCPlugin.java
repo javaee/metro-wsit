@@ -162,6 +162,7 @@ public class WSSCPlugin {
         } catch (WSSecureConversationException ex){
             throw new RuntimeException(ex);
         }
+        context.setEndpointAddress(endPointAddress);
         
         return context;
     }
