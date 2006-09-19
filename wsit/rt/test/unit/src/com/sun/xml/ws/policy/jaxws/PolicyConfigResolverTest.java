@@ -72,7 +72,7 @@ public class PolicyConfigResolverTest extends TestCase {
         }
 
         publicId = null;
-        systemId = "http://example.org/";
+        systemId = "http://test.invalid/";
         
         try {
             result = resolver.resolveEntity(publicId, systemId);
@@ -81,7 +81,7 @@ public class PolicyConfigResolverTest extends TestCase {
         }
         
         publicId = "http://example.org/";
-        systemId = "http://example.org/";
+        systemId = "http://test.invalid/";
         
         try {
             result = resolver.resolveEntity(publicId, systemId);
