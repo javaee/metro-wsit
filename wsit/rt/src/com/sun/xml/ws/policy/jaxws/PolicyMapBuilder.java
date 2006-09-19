@@ -25,6 +25,7 @@ import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapExtender;
 import com.sun.xml.ws.policy.PolicyMapMutator;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -61,35 +62,13 @@ class PolicyMapBuilder {
         }
     }
     
+   
     /**
      * Iterates all the registered PolicyBuilders and lets them populate
-     * their changes into PolicyMap
-     */
-    PolicyMap getPolicyMap() throws PolicyException{
-        return getNewPolicyMap(null);
-    }
-    
-    /**
-     * Iterates all the registered PolicyBuilders and lets them populate
-     * their changes into PolicyMap. Registers mutator given as a parameter
+     * their changes into PolicyMap. Registers mutators given as a parameter
      * with the newly created map.
      */
-    PolicyMap getPolicyMap(PolicyMapMutator mutator) throws PolicyException{
-        if (null == mutator) {
-            return getNewPolicyMap(null);
-        } else {
-            LinkedList<PolicyMapMutator> list = new LinkedList<PolicyMapMutator>();
-            list.add(mutator);
-            return getNewPolicyMap(list);
-        }
-    }
-    
-    /**
-     * Iterates all the registered PolicyBuilders and lets them populate
-     * their changes into PolicyMap. Registers mutators from collection given as a parameter
-     * with the newly created map.
-     */
-    PolicyMap getPolicyMap(Collection<PolicyMapMutator> externalMutators) throws PolicyException{
+    PolicyMap getPolicyMap(PolicyMapMutator... externalMutators) throws PolicyException{
         return getNewPolicyMap(externalMutators);
     }
     
@@ -99,12 +78,12 @@ class PolicyMapBuilder {
      * their changes into PolicyMap. Registers mutators from collection given as a parameter
      * with the newly created map.
      */
-    private PolicyMap getNewPolicyMap(Collection<PolicyMapMutator> externalMutators) throws PolicyException{
+    private PolicyMap getNewPolicyMap(PolicyMapMutator... externalMutators) throws PolicyException{
         HashSet<PolicyMapMutator> mutators = new HashSet<PolicyMapMutator>();
         PolicyMapExtender myExtender = PolicyMapExtender.createPolicyMapExtender();
         mutators.add(myExtender);
         if (null != externalMutators) {
-            mutators.addAll(externalMutators);
+            mutators.addAll(Arrays.asList(externalMutators));
         }
         PolicyMap policyMap = PolicyMap.createPolicyMap(mutators);
         for(BuilderHandler builder : policyBuilders){

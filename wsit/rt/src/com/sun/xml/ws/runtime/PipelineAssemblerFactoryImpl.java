@@ -429,7 +429,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
                 WSDLPolicyMapWrapper mapWrapper = model.getExtension(WSDLPolicyMapWrapper.class);
                 if (mapWrapper != null) {
                     String clientCfgFileName = PolicyUtils.ConfigFile.generateFullName(CLIENT_CONFIGURATION_IDENTIFIER);
-                    URL clientCfgFileUrl = PolicyUtils.ConfigFile.loadResource(clientCfgFileName, null);
+                    URL clientCfgFileUrl = PolicyUtils.ConfigFile.loadAsResource(clientCfgFileName, null);
                     mapWrapper.addClientConfigToMap(clientCfgFileUrl);
                     mapWrapper.configureModel(model);
                     policyMap = mapWrapper.getPolicyMap();

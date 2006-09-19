@@ -42,12 +42,14 @@ import javax.xml.namespace.QName;
  * @author Marek Potociar
  */
 public final class PolicyUtils {
-    private PolicyUtils() { }
+    private PolicyUtils() { } // aviods constructing instances of this class
     
     /**
      * Text utilities wrapper.
      */
-    public static class Text {
+    public static final class Text {
+        private Text() {}
+        
         /**
          * System-specific line separator character retrieved from the Java system property
          * <code>line.separator</code>
@@ -68,7 +70,9 @@ public final class PolicyUtils {
         }
     }
     
-    public static class Comparison {
+    public static final class Comparison {
+        private Comparison() {}
+        
         /**
          * The comparator comapres QName objects according to their publicly accessible attributes, in the following
          * order of attributes:
@@ -115,7 +119,9 @@ public final class PolicyUtils {
         }
     }
     
-    public static class Collections {
+    public static final class Collections {
+        private Collections() {}
+        
         /**
          * TODO javadocs
          *
@@ -200,7 +206,8 @@ public final class PolicyUtils {
     /**
      * Reflection utilities wrapper
      */
-    public static class Reflection {
+    public static final class Reflection {
+        private Reflection() {}
         
         /**
          * Reflectively invokes specified method on the specified target
@@ -243,7 +250,9 @@ public final class PolicyUtils {
         }
     }
     
-    public static class ConfigFile {
+    public static final class ConfigFile {
+        private ConfigFile() {}
+        
         /**
          * Generates a config file resource name from provided config file identifier. The generated file name can be
          * transformed into a URL instance using {@link #loadResource(String, Object)} method.
@@ -253,11 +262,11 @@ public final class PolicyUtils {
          * @return generated config file resource name
          */
         public static String generateFullName(String configFileIdentifier) {
-            //TODO: replace with some algorithm that retrieves the actual file name.
             if (configFileIdentifier != null) {
-                StringBuffer buffer = new StringBuffer("wsit-");
-                buffer.append(configFileIdentifier).append(".xml");
-                return buffer.toString();
+//                StringBuffer buffer = new StringBuffer("wsit-");
+//                buffer.append(configFileIdentifier).append(".xml");
+//                return buffer.toString(); 
+                return "wsit.xml"; //TODO: uncomment above, remove this line
             } else {
                 return "wsit.xml"; //TODO: throw exception instead
             }
@@ -266,7 +275,7 @@ public final class PolicyUtils {
         /**
          * Loads the config file as an URL resource.
          */
-        public static URL loadResource(String configFileName, Object context) throws PolicyException {
+        public static URL loadAsResource(String configFileName, Object context) throws PolicyException {
             if (context == null) {
                 ClassLoader cl = Thread.currentThread().getContextClassLoader();
                 if (cl == null) {

@@ -25,8 +25,6 @@ package com.sun.xml.ws.policy.jaxws;
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import java.io.InputStream;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.URL;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -42,7 +40,9 @@ import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
 import com.sun.xml.ws.wsdl.parser.XMLEntityResolver.Parser;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
+import com.sun.xml.ws.policy.PolicyMapMutator;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
+import java.util.Collection;
 
 /**
  * Reads a policy configuration file and returns the WSDL model generated from it.
@@ -53,14 +53,19 @@ public final class PolicyConfigParser {
     private static final String SERVLET_CONTEXT_CLASSNAME = "javax.servlet.ServletContext";
     private static final XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
     
+    
+    
     /**
      * Reads a WSIT config file stored in META-INF or WEB-INF, parses it
-     * and returns a PolicyMap.
+     * and returns a PolicyMap. It gives you a chance to register policy map mutators
+     * to be able to modify the policy map later.
      *
+     * @param configFileIdentifier base for config file name
      * @param container May hold the servlet context if run inside a web container
+     * @param mutators to be registered with the new policy map
      * @return A PolicyMap populated from the WSIT config file
      */
-    public static PolicyMap parse(Container container) throws PolicyException {
+    public static <T extends PolicyMapMutator> PolicyMap parse(String configFileIdentifier, Container container, T...  mutators) throws PolicyException {
         logger.entering("parse", container);
         PolicyMap map = null;
         try {
@@ -75,13 +80,13 @@ public final class PolicyConfigParser {
             }
             logger.finest("parse", "context = '" + context + "'");
             
-            String cfgFile = PolicyUtils.ConfigFile.generateFullName(null); //TODO: get the real server side identifier
+            String cfgFile = PolicyUtils.ConfigFile.generateFullName(configFileIdentifier);
             logger.finest("parse", "config file = '" + cfgFile + "'");
             
-            URL configFileUrl = PolicyUtils.ConfigFile.loadResource(cfgFile, context);
+            URL configFileUrl = PolicyUtils.ConfigFile.loadAsResource(cfgFile, context);
             
             if (configFileUrl != null) {
-                map = parse(configFileUrl);
+                map = parse(configFileUrl, mutators);
             }
             
             return map;
@@ -90,16 +95,17 @@ public final class PolicyConfigParser {
         }
     }
     
-    
     /**
-     * Reads a WSIT config from an XMLStreamBuffer, parses it and returns a PolicyMap.
+     * Reads a WSIT config from an XMLStreamBuffer, parses it and returns a PolicyMap. It gives you a chance
+     * to register policy map mutators to the newly created map.
      *
      * @param configFileUrl URL of the config file resource that should be parsed. Must not be {@code null}.
+     * @param mutators to be registered with the policy map
      *
      * @return A PolicyMap populated from the WSIT config file
      */
-    public static PolicyMap parse(URL configFileUrl) throws PolicyException {
-        logger.entering("parse", new Object[] {configFileUrl});
+    public static <T extends PolicyMapMutator> PolicyMap parse(URL configFileUrl, T... mutators) throws PolicyException {
+        logger.entering("parse", new Object[] {configFileUrl, mutators});
         PolicyMap map = null;
         try {
             XMLStreamBuffer configFileSource = initConfigFileSource(configFileUrl);
@@ -128,6 +134,31 @@ public final class PolicyConfigParser {
             logger.exiting("parse", map);
         }
     }
+    
+    
+    /**
+     * Reads a WSIT config file stored in META-INF or WEB-INF, parses it
+     * and returns a PolicyMap.
+     *
+     * @param configFileIdentifier base for config file name
+     * @param container May hold the servlet context if run inside a web container
+     * @return A PolicyMap populated from the WSIT config file
+     */
+    /*public static PolicyMap parse(String configFileIdentifier, Container container) throws PolicyException {
+        return parse(configFileIdentifier, container, null);
+    }*/
+    
+    
+    /**
+     * Reads a WSIT config from an XMLStreamBuffer, parses it and returns a PolicyMap.
+     *
+     * @param configFileUrl URL of the config file resource that should be parsed. Must not be {@code null}.
+     *
+     * @return A PolicyMap populated from the WSIT config file
+     */
+    /*public static PolicyMap parse(URL configFileUrl) throws PolicyException {
+        return parse(configFileUrl, null);
+    }*/
     
     private static XMLStreamBuffer initConfigFileSource(URL configFileUrl) throws PolicyException {
         XMLStreamReader reader = null;

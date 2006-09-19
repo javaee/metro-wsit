@@ -22,8 +22,11 @@
 
 package com.sun.xml.ws.policy.jaxws.spi;
 
+import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.policy.PolicyException;
+import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapExtender;
 
 /**
@@ -41,5 +44,10 @@ public interface PolicyMapUpdateProvider {
    * @param policyMapMutator policy map mutator that may be used to modify/extend policy map instance by adding new policy bindings
    * @param model the service provider can retrieve its WSDLExtensions from the parsed WSDLModel
    */
-  void update(PolicyMapExtender policyMapMutator, WSDLModel model) throws PolicyException;        
+  void update(PolicyMapExtender policyMapMutator, WSDLModel model) throws PolicyException;
+ 
+  /**
+   * TODO: clarify with jax-ws guys, what information is to be provided by jax-ws on generated wsdl doc
+   */
+  void update(PolicyMapExtender policyMapMutator, PolicyMap policyMap, SEIModel model, WSBinding wsBinding) throws PolicyException;
 }

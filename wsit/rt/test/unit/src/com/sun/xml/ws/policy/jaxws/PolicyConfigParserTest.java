@@ -59,7 +59,7 @@ public class PolicyConfigParserTest extends TestCase {
         
         PolicyMap result = null;
         
-        result = PolicyConfigParser.parse(container);
+        result = PolicyConfigParser.parse(null, container);
         assertNull(result);
     }
     
@@ -70,7 +70,7 @@ public class PolicyConfigParserTest extends TestCase {
         
         try {
             copyFile("test/unit/data/policy/config/wsit.xml", "test/unit/data/wsit.xml");
-            map = PolicyConfigParser.parse(container);
+            map = PolicyConfigParser.parse(null, container);
         } finally {
             File wsitxml = new File("test/unit/data/wsit.xml");
             wsitxml.delete();
@@ -86,7 +86,7 @@ public class PolicyConfigParserTest extends TestCase {
         
         PolicyMap result = null;
         
-        result = PolicyConfigParser.parse(container);
+        result = PolicyConfigParser.parse(null, container);
         assertNull(result);
     }
     
@@ -97,7 +97,7 @@ public class PolicyConfigParserTest extends TestCase {
         
         try {
             copyFile("test/unit/data/policy/config/wsit.xml", "test/unit/data/wsit.xml");
-            map = PolicyConfigParser.parse(container);
+            map = PolicyConfigParser.parse(null, container);
         } finally {
             File wsitxml = new File("test/unit/data/wsit.xml");
             wsitxml.delete();
@@ -208,7 +208,7 @@ public class PolicyConfigParserTest extends TestCase {
     }
         
     private PolicyMap parseConfigFile(String configFile) throws Exception {
-        URL url = PolicyUtils.ConfigFile.loadResource(PolicyResourceLoader.POLICY_UNIT_TEST_RESOURCE_ROOT + configFile, null);
+        URL url = PolicyUtils.ConfigFile.loadAsResource(PolicyResourceLoader.POLICY_UNIT_TEST_RESOURCE_ROOT + configFile, null);
         return PolicyConfigParser.parse(url);
     }
 
