@@ -1,5 +1,5 @@
 /*
- * $Id: UseKeyImpl.java,v 1.1 2006-05-03 22:57:28 arungupta Exp $
+ * $Id: UseKeyImpl.java,v 1.2 2006-09-20 23:58:48 manveen Exp $
  */
 
 /*
@@ -38,11 +38,20 @@ import com.sun.xml.ws.security.trust.impl.bindings.UseKeyType;
 import java.net.URISyntaxException;
 import javax.xml.bind.JAXBElement;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
+
 /**
  * @author Manveen Kaur
  */
 public class UseKeyImpl extends UseKeyType implements UseKey {
     
+    private static Logger log =
+            Logger.getLogger(
+            LogDomainConstants.TRUST_IMPL_DOMAIN,
+            LogDomainConstants.TRUST_IMPL_DOMAIN_BUNDLE);
+
     private String targetType = null;
     
     private SecurityTokenReference str = null;
@@ -110,6 +119,7 @@ public class UseKeyImpl extends UseKeyType implements UseKey {
         try {
             return new URI(getSig());
         } catch (URISyntaxException ue) {
+            log.log(Level.SEVERE, "WST0023.invalid.uri.syntax", getSig());            
             throw new RuntimeException("URI syntax invalid ", ue);
         }
     }

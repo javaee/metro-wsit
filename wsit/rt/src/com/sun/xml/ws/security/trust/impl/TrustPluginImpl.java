@@ -3,12 +3,12 @@
  * of the Common Development and Distribution License
  * (the License).  You may not use this file except in
  * compliance with the License.
- * 
+ *
  * You can obtain a copy of the license at
  * https://glassfish.dev.java.net/public/CDDLv1.0.html.
  * See the License for the specific language governing
  * permissions and limitations under the License.
- * 
+ *
  * When distributing Covered Code, include this CDDL
  * Header Notice in each file and include the License file
  * at https://glassfish.dev.java.net/public/CDDLv1.0.html.
@@ -16,7 +16,7 @@
  * with the fields enclosed by brackets [] replaced by
  * you own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * 
+ *
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
@@ -53,34 +53,42 @@ import com.sun.xml.ws.security.trust.elements.RequestedAttachedReference;
 import com.sun.xml.ws.security.trust.elements.RequestedProofToken;
 import com.sun.xml.ws.security.trust.elements.RequestedSecurityToken;
 import com.sun.xml.ws.security.trust.elements.RequestedUnattachedReference;
+import com.sun.xml.ws.security.trust.impl.bindings.ObjectFactory;
+import com.sun.xml.ws.security.trust.impl.bindings.RequestSecurityTokenResponseType;
+import com.sun.xml.ws.security.trust.impl.bindings.RequestSecurityTokenType;
 import com.sun.xml.ws.security.trust.util.WSTrustUtil;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.rmi.RemoteException;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Iterator;
 import java.util.List;
-import javax.xml.bind.DatatypeConverter;
 import javax.xml.namespace.QName;
-import javax.xml.transform.Source;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Dispatch;
 import javax.xml.ws.Service;
 import javax.xml.ws.addressing.AddressingBuilder;
 import javax.xml.ws.addressing.AddressingProperties;
 import javax.xml.ws.addressing.AttributedURI;
-import javax.xml.ws.addressing.EndpointReference;
 import javax.xml.ws.addressing.JAXWSAConstants;
 import javax.xml.bind.JAXBElement;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
 
 /**
  *
  * @author hr124446
  */
 public class TrustPluginImpl implements TrustPlugin {
+    
+    private static Logger log =
+            Logger.getLogger(
+            LogDomainConstants.TRUST_IMPL_DOMAIN,
+            LogDomainConstants.TRUST_IMPL_DOMAIN_BUNDLE);
     
     private Configuration config;
     private static WSTrustElementFactory fact = WSTrustElementFactory.newInstance();
@@ -108,7 +116,7 @@ public class TrustPluginImpl implements TrustPlugin {
         try {
             metadataAddress = getAddressFromMetadata(issuedToken);
         } catch (MalformedURLException ex) {
-            //ex.printStackTrace();
+            log.log(Level.WARNING, "WST1011.problem.metadata", ex);
         }
         if(metadataAddress != null){
             wsdlLocation = metadataAddress;
@@ -123,14 +131,15 @@ public class TrustPluginImpl implements TrustPlugin {
             contract.handleRSTR(request, result, itc);
             return itc;
         } catch (RemoteException ex) {
+            log.log(Level.SEVERE, "WST0016.problem.itCtx", ex);
             throw new RuntimeException(ex.toString());
         } catch (URISyntaxException ex){
+            log.log(Level.SEVERE, "WST0016.problem.itCtx", ex);
             throw new RuntimeException(ex.toString());
         } catch (WSTrustException ex){
+            log.log(Level.SEVERE, "WST0016.problem.itCtx", ex);
             throw new RuntimeException(ex.toString());
         }
-        //return createIssuedTokenContext(result);
-        //return null;
     }
     
     private IssuedTokenContext createIssuedTokenContext(final RequestSecurityTokenResponse rstr) {
@@ -161,13 +170,13 @@ public class TrustPluginImpl implements TrustPlugin {
             at = WSTrustUtil.createAppliesTo(appliesTo);
         }
         
-       int len = 32;
-       long keySize = rstTemplate.getKeySize();
-       if (keySize > 0){
-           len = (int)keySize/8;
-       }
+        int len = 32;
+        long keySize = rstTemplate.getKeySize();
+        if (keySize > 0){
+            len = (int)keySize/8;
+        }
         
-       SecureRandom sr = new SecureRandom();
+        SecureRandom sr = new SecureRandom();
         byte[] nonce = new byte[len];
         sr.nextBytes(nonce);
         BinarySecret binarySecret = fact.createBinarySecret(nonce, BinarySecret.NONCE_KEY_TYPE);
@@ -191,21 +200,30 @@ public class TrustPluginImpl implements TrustPlugin {
         }
         requestSecurityToken.setComputedKeyAlgorithm(URI.create(WSTrustConstants.CK_PSHA1));
         
+        if (log.isLoggable(Level.FINE)) {
+            log.log(Level.FINE,"WST1006.created.rst.issue", new Object[]{elemToString(requestSecurityToken)});
+        }
+        
         return requestSecurityToken;
     }
     
     private RequestSecurityTokenResponse invokeRST(RequestSecurityToken request, URL wsdlLocation, QName serviceName, QName portName, String stsURI) throws RemoteException, WSTrustException {
         if(serviceName == null || portName==null){
             //we have to get the serviceName and portName through MEX
+            log.log(Level.FINE, "WST1012.service.portname.mex",
+                    new Object[] {serviceName, portName});
             if(stsURI == null){
                 //could not get the STS location from the IssuedToken
                 //try to get it from client configuration
                 if(wsdlLocation != null){
                     stsURI = wsdlLocation.toString();
+                    log.log(Level.FINE, "WST1013.sts.uri.client", new Object[] {stsURI});
                 }else{
                     //sts location could not be obtained from either IssuedToken or
                     //from client configuration
-                    throw new IllegalArgumentException("sts information not passed");
+                    log.log(Level.SEVERE,
+                            "WST0029.could.not.get.sts.location",
+                            new IllegalArgumentException("STS information not passed"));
                 }
             }
             //do the actual mex request to the stsURI
@@ -214,7 +232,9 @@ public class TrustPluginImpl implements TrustPlugin {
                 serviceName = names[0];
                 portName = names[1];
             }else{
-                throw new WSTrustException("Could not obtain sts service and port names through MEX");
+                log.log(Level.SEVERE, "WST0017.service.portname.error",
+                        new Object[] {serviceName, portName});
+                throw new WSTrustException("Could not obtain STS service and port names through MEX");
             }
         }
         Service service = Service.create(wsdlLocation, serviceName);
@@ -224,7 +244,11 @@ public class TrustPluginImpl implements TrustPlugin {
             dispatch.getRequestContext().put(javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY, stsURI);
         }
         dispatch.getRequestContext().put("isTrustMessage", "true");
-        return fact.createRSTRFrom((JAXBElement)dispatch.invoke(fact.toJAXBElement(request)));
+        RequestSecurityTokenResponse rstr =  fact.createRSTRFrom((JAXBElement)dispatch.invoke(fact.toJAXBElement(request)));
+        if (log.isLoggable(Level.FINE)) {
+            log.log(Level.FINE,"WST1014.response.invoking.rst", new Object[]{elemToString(rstr)});
+        }
+        return rstr;
     }
     
     /**
@@ -345,6 +369,38 @@ public class TrustPluginImpl implements TrustPlugin {
         provider.getRequestContext().put(JAXWSAConstants.CLIENT_ADDRESSING_PROPERTIES, ap);
         
         return provider;
+    }
+    
+    /**
+     * Prints out the RST created as string.
+     * This method is primarily used for logging purposes.
+     */
+    private String elemToString(RequestSecurityToken rst) {
+        try {
+            javax.xml.bind.Marshaller marshaller = fact.getContext().createMarshaller();
+            JAXBElement<RequestSecurityTokenType> rstElement =  (new ObjectFactory()).createRequestSecurityToken((RequestSecurityTokenType)rst);
+            marshaller.setProperty(javax.xml.bind.Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+            java.io.StringWriter sw = new java.io.StringWriter();
+            marshaller.marshal(rstElement, sw);
+            return sw.toString();
+        } catch (Exception e) {
+            log.log(Level.FINE, "WST1004.error.marshal.toString", e);
+            throw new RuntimeException("Error in Marshalling RST to string for logging ", e);
+        }
+    }
+    
+    private String elemToString(RequestSecurityTokenResponse rstr){
+        try {
+            javax.xml.bind.Marshaller marshaller = fact.getContext().createMarshaller();
+            JAXBElement<RequestSecurityTokenResponseType> rstrElement =  (new ObjectFactory()).createRequestSecurityTokenResponse((RequestSecurityTokenResponseType)rstr);
+            marshaller.setProperty(javax.xml.bind.Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+            java.io.StringWriter sw = new java.io.StringWriter();
+            marshaller.marshal(rstrElement, sw);
+            return sw.toString();
+        } catch (Exception e) {
+            log.log(Level.FINE, "WST1004.error.marshal.toString", e);
+            throw new RuntimeException("Error in Marshalling RSTR to string for logging ", e);
+        }
     }
     
 }

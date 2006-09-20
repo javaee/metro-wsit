@@ -118,7 +118,16 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
+
 public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
+
+    private static Logger log =
+            Logger.getLogger(
+            LogDomainConstants.TRUST_IMPL_DOMAIN,
+            LogDomainConstants.TRUST_IMPL_DOMAIN_BUNDLE);
 
     private static final String SAML_HOLDER_OF_KEY = "urn:oasis:names:tc:SAML:1.0:cm:holder-of-key";
     protected static final String PRINCIPAL = "principal";
@@ -139,14 +148,13 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
         
         String tokenType = WSTrustConstants.SAML11_ASEERTION_TOKEN_TYPE;
         if (!isAuthorized(subject, appliesTo, tokenType)){
+            log.log(Level.SEVERE, "WST0015.client.not.authorized", 
+                    new Object[]{subject.toString(), tokenType, appliesTo});        
             throw new WSTrustException("The client is not authorized to be issued the token of type "+ tokenType + " apply to " + appliesTo);
         }
         
         try{
             CallbackHandler callbackHandler = config.getCallbackHandler();
-            //CallbackHandler callbackHandler = (CallbackHandler)Class.forName(config.getCallbackHandlerName(),
-                                 // true, Thread.currentThread().getContextClassLoader()).newInstance();
-
             
             // Get the service certificate and the corresponding public key
             EncryptionKeyCallback.AliasX509CertificateRequest req = new EncryptionKeyCallback.AliasX509CertificateRequest(config.getCertAlias());

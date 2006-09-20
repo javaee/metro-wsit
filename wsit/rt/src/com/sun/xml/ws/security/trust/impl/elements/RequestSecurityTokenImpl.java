@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityTokenImpl.java,v 1.3 2006-06-06 20:00:22 jdg6688 Exp $
+ * $Id: RequestSecurityTokenImpl.java,v 1.4 2006-09-20 23:58:48 manveen Exp $
  */
 
 /*
@@ -7,12 +7,12 @@
  * of the Common Development and Distribution License
  * (the License).  You may not use this file except in
  * compliance with the License.
- * 
+ *
  * You can obtain a copy of the license at
  * https://glassfish.dev.java.net/public/CDDLv1.0.html.
  * See the License for the specific language governing
  * permissions and limitations under the License.
- * 
+ *
  * When distributing Covered Code, include this CDDL
  * Header Notice in each file and include the License file
  * at https://glassfish.dev.java.net/public/CDDLv1.0.html.
@@ -20,7 +20,7 @@
  * with the fields enclosed by brackets [] replaced by
  * you own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * 
+ *
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
@@ -29,7 +29,6 @@ package com.sun.xml.ws.security.trust.impl.elements;
 import java.util.List;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 
 import com.sun.xml.ws.policy.impl.bindings.AppliesTo;
 import com.sun.xml.ws.policy.Policy;
@@ -66,6 +65,10 @@ import com.sun.xml.ws.security.trust.impl.bindings.RenewingType;
 import com.sun.xml.ws.security.trust.impl.bindings.SignChallengeType;
 import com.sun.xml.ws.security.trust.impl.bindings.UseKeyType;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
+
 /**
  * Implementation of the RequestSecurityToken interface.
  *
@@ -73,6 +76,11 @@ import com.sun.xml.ws.security.trust.impl.bindings.UseKeyType;
  */
 public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
         implements RequestSecurityToken {
+    
+    private static Logger log =
+            Logger.getLogger(
+            LogDomainConstants.TRUST_IMPL_DOMAIN,
+            LogDomainConstants.TRUST_IMPL_DOMAIN_BUNDLE);
     
     private Claims claims = null;
     private Participants participants = null;
@@ -240,6 +248,7 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
     
     public void setRequestType(URI requestType) {
         if (requestType == null) {
+            log.log(Level.SEVERE,"WST0024.invalid.request.type", "null");
             throw new RuntimeException("RequestType cannot be null");
         }
         String rtString = requestType.toString();
@@ -248,6 +257,7 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
         && !rtString.equalsIgnoreCase(WSTrustConstants.KEY_EXCHANGE_REQUEST)
         && !rtString.equalsIgnoreCase(WSTrustConstants.RENEW_REQUEST)
         && !rtString.equalsIgnoreCase(WSTrustConstants.VALIDATE_REQUEST)) {
+            log.log(Level.SEVERE,"WST0024.invalid.request.type", rtString);
             throw new RuntimeException("Invalid Request Type specified");
         }
         this.requestType = requestType;
@@ -352,11 +362,16 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
     
     public void setKeyType(URI keytype) throws WSTrustException {
         
-        if (keytype == null || ! (keytype.toString().equalsIgnoreCase(RequestSecurityToken.PUBLIC_KEY_TYPE)
-        || keytype.toString().equalsIgnoreCase(RequestSecurityToken.SYMMETRIC_KEY_TYPE) )){
-            throw new WSTrustException("Invalid KeyType");
+        if (keytype == null) {
+            log.log(Level.SEVERE,"WST0025.invalid.key.type", "null");
+            throw new WSTrustException("Invalid KeyType: null");
         }
-        else {
+        
+        if (! (keytype.toString().equalsIgnoreCase(RequestSecurityToken.PUBLIC_KEY_TYPE)
+        || keytype.toString().equalsIgnoreCase(RequestSecurityToken.SYMMETRIC_KEY_TYPE) )){
+            log.log(Level.SEVERE,"WST0025.invalid.key.type", keytype.toString());
+            throw new WSTrustException("Invalid KeyType " + keytype.toString());
+        } else {
             this.keyType = keytype;
             JAXBElement<String> ktElement =
                     (new ObjectFactory()).createKeyType(keyType.toString());
@@ -434,11 +449,17 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
     }
     
     public void setComputedKeyAlgorithm(URI algorithm) {
+        if (algorithm == null) {
+            log.log(Level.SEVERE,"WST0026.invalid.ck.algorithm", "null");
+            throw new RuntimeException("Null Computed Key Algorithm specified");
+        }
+        
         if (algorithm != null) {
             String ckaString = algorithm.toString();
             if (!ckaString.equalsIgnoreCase(WSTrustConstants.CK_HASH)
             && !ckaString.equalsIgnoreCase(WSTrustConstants.CK_PSHA1)) {
-                throw new RuntimeException("Invalid Computed Key Algorithm specified");
+                log.log(Level.SEVERE,"WST0026.invalid.ck.algorithm", ckaString);
+                throw new RuntimeException("Invalid Computed Key Algorithm specified :" + ckaString);
             }
             computedKeyAlgorithm = algorithm;
             JAXBElement<String> ckaElement =
@@ -555,7 +576,7 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
             }
             if (list.get(i) instanceof JAXBElement){
                 JAXBElement obj = (JAXBElement)list.get(i);
-
+                
                 String local = obj.getName().getLocalPart();
                 if (local.equalsIgnoreCase("RequestType")) {
                     setRequestType(new URI((String)obj.getValue()));

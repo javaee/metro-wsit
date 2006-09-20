@@ -1,5 +1,5 @@
 /*
-* $Id: ClaimsImpl.java,v 1.2 2006-08-14 10:10:55 raharsha Exp $
+* $Id: ClaimsImpl.java,v 1.3 2006-09-20 23:58:47 manveen Exp $
  */
 
 /*
@@ -64,7 +64,7 @@ public class ClaimsImpl extends ClaimsType implements Claims {
         try {
             javax.xml.bind.Unmarshaller u = WSTrustElementFactory.getContext().createUnmarshaller();
             return (ClaimsType)u.unmarshal(element);
-        } catch ( Exception ex) {
+        } catch ( Exception ex) {            
             throw new WSTrustException(ex.getMessage(), ex);
         }
     }

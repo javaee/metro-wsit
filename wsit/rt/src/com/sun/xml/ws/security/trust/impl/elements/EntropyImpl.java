@@ -1,5 +1,5 @@
 /*
- * $Id: EntropyImpl.java,v 1.3 2006-08-14 10:10:55 raharsha Exp $
+ * $Id: EntropyImpl.java,v 1.4 2006-09-20 23:58:47 manveen Exp $
  */
 
 /*
@@ -7,12 +7,12 @@
  * of the Common Development and Distribution License
  * (the License).  You may not use this file except in
  * compliance with the License.
- * 
+ *
  * You can obtain a copy of the license at
  * https://glassfish.dev.java.net/public/CDDLv1.0.html.
  * See the License for the specific language governing
  * permissions and limitations under the License.
- * 
+ *
  * When distributing Covered Code, include this CDDL
  * Header Notice in each file and include the License file
  * at https://glassfish.dev.java.net/public/CDDLv1.0.html.
@@ -20,7 +20,7 @@
  * with the fields enclosed by brackets [] replaced by
  * you own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * 
+ *
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
@@ -43,6 +43,10 @@ import com.sun.xml.ws.security.trust.impl.bindings.BinarySecretType;
 import com.sun.xml.ws.security.trust.impl.bindings.ObjectFactory;
 import java.util.List;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
+
 /**
  * Implementation of Entropy Interface.
  *
@@ -50,6 +54,11 @@ import java.util.List;
  */
 public class EntropyImpl extends EntropyType implements Entropy {
     
+    private static Logger log =
+            Logger.getLogger(
+            LogDomainConstants.TRUST_IMPL_DOMAIN,
+            LogDomainConstants.TRUST_IMPL_DOMAIN_BUNDLE);
+        
     private String entropyType;
     private final static QName _EntropyType_QNAME = new QName("http://schemas.xmlsoap.org/ws/2005/02/trust", "Type");
     
@@ -61,7 +70,6 @@ public class EntropyImpl extends EntropyType implements Entropy {
     }
     
     public EntropyImpl(BinarySecret binarySecret) {
-        //setEntropyType(this.BINARY_SECRET_TYPE);
         setBinarySecret(binarySecret);
     }
     
@@ -100,6 +108,7 @@ public class EntropyImpl extends EntropyType implements Entropy {
             javax.xml.bind.Unmarshaller u = WSTrustElementFactory.getContext().createUnmarshaller();
             return (EntropyType)u.unmarshal(element);
         } catch ( Exception ex) {
+            log.log(Level.SEVERE,"WST0021.error.unmarshal.domElement", ex);            
             throw new WSTrustException(ex.getMessage(), ex);
         }
     }
@@ -118,7 +127,9 @@ public class EntropyImpl extends EntropyType implements Entropy {
         if (!(type.equalsIgnoreCase(this.BINARY_SECRET_TYPE)  ||
                 type.equalsIgnoreCase(this.CUSTOM_TYPE)
                 || type.equalsIgnoreCase(this.ENCRYPTED_KEY_TYPE))) {
-            throw new RuntimeException("Invalid Entropy Type");
+            log.log(Level.SEVERE,
+                    "WST0022.invalid.entropy", type);               
+            throw new RuntimeException("Invalid Entropy Type: " + type);
         }
         entropyType = type;
         getOtherAttributes().put(_EntropyType_QNAME,type);

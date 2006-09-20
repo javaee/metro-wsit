@@ -1,5 +1,5 @@
 /*
- * $Id: IssuerImpl.java,v 1.1 2006-05-03 22:57:25 arungupta Exp $
+ * $Id: IssuerImpl.java,v 1.2 2006-09-20 23:58:48 manveen Exp $
  */
 
 /*
@@ -32,8 +32,7 @@ import com.sun.xml.ws.addressing.v200408.EndpointReferenceImpl;
 import com.sun.xml.ws.security.trust.elements.Issuer;
 
 /**
- * Implementation of wst:Issuer. EndpointReference etc. is all part
- * of Addressing. Need to see how this will fit together.
+ * Implementation of wst:Issuer. 
  *
  * @author Manveen Kaur
  */

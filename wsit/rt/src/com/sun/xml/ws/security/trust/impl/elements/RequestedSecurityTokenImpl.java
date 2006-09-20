@@ -1,5 +1,5 @@
 /*
- * $Id: RequestedSecurityTokenImpl.java,v 1.1 2006-05-03 22:57:27 arungupta Exp $
+ * $Id: RequestedSecurityTokenImpl.java,v 1.2 2006-09-20 23:58:48 manveen Exp $
  */
 
 /*
@@ -33,8 +33,6 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
-//import com.sun.xml.security.core.xenc.EncryptedDataType;
-
 import com.sun.xml.ws.security.Token;
 import com.sun.xml.ws.security.trust.WSTrustException;
 import com.sun.xml.ws.security.trust.GenericToken;
@@ -48,12 +46,21 @@ import com.sun.xml.ws.security.secconv.impl.bindings.SecurityContextTokenType;
 import com.sun.xml.wss.saml.assertion.saml11.jaxb20.Assertion;
 import com.sun.xml.wss.saml.internal.saml11.jaxb20.AssertionType;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
+
 /**
  * Implementation for the RequestedSecurityToken.
  * 
  * @author Manveen Kaur
  */
 public class RequestedSecurityTokenImpl extends RequestedSecurityTokenType implements RequestedSecurityToken {
+
+    private static Logger log =
+            Logger.getLogger(
+            LogDomainConstants.TRUST_IMPL_DOMAIN,
+            LogDomainConstants.TRUST_IMPL_DOMAIN_BUNDLE);
 
     Token containedToken = null;
     
@@ -119,6 +126,7 @@ public class RequestedSecurityTokenImpl extends RequestedSecurityTokenType imple
             javax.xml.bind.Unmarshaller u = jc.createUnmarshaller();
             return (RequestedSecurityTokenType)(((JAXBElement<RequestedSecurityTokenType>)u.unmarshal(element)).getValue());
         } catch ( Exception ex) {
+            log.log(Level.SEVERE,"WST0021.error.unmarshal.domElement", ex);                        
             throw new WSTrustException(ex.getMessage(), ex);
         }
     }

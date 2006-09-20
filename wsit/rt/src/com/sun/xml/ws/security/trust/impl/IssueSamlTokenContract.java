@@ -72,11 +72,20 @@ import com.sun.xml.wss.impl.misc.SecurityUtil;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 public abstract class IssueSamlTokenContract implements WSTrustContract {
+
+    private static Logger log =
+            Logger.getLogger(
+            LogDomainConstants.TRUST_IMPL_DOMAIN,
+            LogDomainConstants.TRUST_IMPL_DOMAIN_BUNDLE);
 
     protected TrustSPMetadata config;
 
@@ -100,9 +109,11 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
         // Create required secret key
         //============================
         URI keyTypeURI = rst.getKeyType();
-        if (keyTypeURI != null && !WSTrustConstants.SYMMETRIC_KEY.equals(keyTypeURI.toString()))
+        if (keyTypeURI != null && !WSTrustConstants.SYMMETRIC_KEY.equals(keyTypeURI.toString())) {
+            log.log(Level.SEVERE, "WST0001.unsupported.proofkey", new Object[]{keyTypeURI.toString(), WSTrustConstants.SYMMETRIC_KEY});        
             throw new WSTrustException("Unsupported proof key type: " + keyTypeURI.toString());
-
+        }
+        
         Entropy serverEntropy = null;
         RequestedProofToken proofToken = eleFac.createRequestedProofToken();
 
@@ -112,7 +123,7 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
         if (clientEntropy != null){
             BinarySecret clientBS = clientEntropy.getBinarySecret();
             if (clientBS == null){
-                //ToDo
+                log.log(Level.FINE, "WST1009.null.binary.secret");        
             }else {
                 clientEntropyValue = clientBS.getRawValue(); 
             }
@@ -123,6 +134,7 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
             keySize = DEFAULT_KEY_SIZE;
         }
 
+        log.log(Level.FINE, "WST1010.key.size", new Object[] {keySize});        
 
         byte[] key = WSTrustUtil.generateRandomSecret(keySize/8);
         BinarySecret serverBS = eleFac.createBinarySecret(key, BinarySecret.NONCE_KEY_TYPE);
@@ -134,6 +146,7 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
              proofToken.setComputedKey(URI.create(WSTrustConstants.CK_PSHA1));
              key = SecurityUtil.P_SHA1(clientEntropyValue, key, keySize/8);
         } catch (Exception ex){
+            log.log(Level.SEVERE, "WST0013.error.secret.key", ex);                
              throw new WSTrustException(ex.getMessage(), ex);
         }
 
@@ -148,6 +161,7 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
             if (rstCtx != null)
                 ctx = new URI(rst.getContext());
         } catch (URISyntaxException ex) {
+            log.log(Level.SEVERE, "WST0014.uri.syntax", new Object[] {rst.getContext()});                
             throw new WSTrustException(ex.getMessage(), ex);
         }
 

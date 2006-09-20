@@ -1,5 +1,5 @@
 /*
- * $Id: BinaryExchangeImpl.java,v 1.1 2006-05-03 22:57:23 arungupta Exp $
+ * $Id: BinaryExchangeImpl.java,v 1.2 2006-09-20 23:58:47 manveen Exp $
  */
 
 /*
@@ -7,12 +7,12 @@
  * of the Common Development and Distribution License
  * (the License).  You may not use this file except in
  * compliance with the License.
- * 
+ *
  * You can obtain a copy of the license at
  * https://glassfish.dev.java.net/public/CDDLv1.0.html.
  * See the License for the specific language governing
  * permissions and limitations under the License.
- * 
+ *
  * When distributing Covered Code, include this CDDL
  * Header Notice in each file and include the License file
  * at https://glassfish.dev.java.net/public/CDDLv1.0.html.
@@ -20,7 +20,7 @@
  * with the fields enclosed by brackets [] replaced by
  * you own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * 
+ *
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
@@ -31,12 +31,21 @@ import com.sun.org.apache.xml.internal.security.utils.Base64;
 import com.sun.xml.ws.security.trust.elements.BinaryExchange;
 import com.sun.xml.ws.security.trust.impl.bindings.BinaryExchangeType;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
+
 /**
  *
  * @author Manveen Kaur (manveen.kaur@sun.com).
  */
 
 public class BinaryExchangeImpl extends BinaryExchangeType implements BinaryExchange {
+    
+    private static Logger log =
+            Logger.getLogger(
+            LogDomainConstants.TRUST_IMPL_DOMAIN,
+            LogDomainConstants.TRUST_IMPL_DOMAIN_BUNDLE);
     
     public BinaryExchangeImpl(String encodingType, String valueType, byte[] rawText) {
         setEncodingType(encodingType);
@@ -54,6 +63,7 @@ public class BinaryExchangeImpl extends BinaryExchangeType implements BinaryExch
         try {
             return Base64.decode(getTextValue());
         } catch (Base64DecodingException de) {
+            log.log(Level.SEVERE,"WST0020.error.decoding", new Object[] {getTextValue()});
             throw new RuntimeException("Error while decoding " +
                     de.getMessage());
         }

@@ -1,5 +1,5 @@
 /*
- * $Id: BinarySecretImpl.java,v 1.3 2006-08-14 10:10:55 raharsha Exp $
+ * $Id: BinarySecretImpl.java,v 1.4 2006-09-20 23:58:47 manveen Exp $
  */
 
 /*
@@ -50,12 +50,21 @@ import com.sun.xml.ws.security.trust.elements.BinarySecret;
 import com.sun.org.apache.xml.internal.security.utils.Base64;
 import com.sun.org.apache.xml.internal.security.exceptions.Base64DecodingException;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
+
 /**
  *
  * @author WS-Trust Implementation Team
  */
 public class BinarySecretImpl extends BinarySecretType implements BinarySecret {
    
+    private static Logger log =
+            Logger.getLogger(
+            LogDomainConstants.TRUST_IMPL_DOMAIN,
+            LogDomainConstants.TRUST_IMPL_DOMAIN_BUNDLE);
+
     public BinarySecretImpl(byte[] rawValue, String type) {        
         setRawValue(rawValue);
         setType(type);
@@ -84,6 +93,7 @@ public class BinarySecretImpl extends BinarySecretType implements BinarySecret {
             javax.xml.bind.Unmarshaller u = WSTrustElementFactory.getContext().createUnmarshaller();
             return (BinarySecretType)((JAXBElement)u.unmarshal(element)).getValue();
         } catch (Exception ex) {
+            log.log(Level.SEVERE,"WST0021.error.unmarshal.domElement", ex);            
             throw new WSTrustException(ex.getMessage(), ex);
         }
     }
@@ -105,24 +115,9 @@ public class BinarySecretImpl extends BinarySecretType implements BinarySecret {
          try {
              setValue(Base64.decode(encodedText));
          } catch (Base64DecodingException de) {
+            log.log(Level.SEVERE,"WST0020.error.decoding", new Object[] {encodedText});             
              throw new RuntimeException("Error while decoding " + 
                                         de.getMessage()); 
          }
-     }
-     
- /*    public void setType(String type) {
-        if (!(this.ASYMMETRIC_KEY_TYPE.equalsIgnoreCase(type)  
-              || this.NONCE_KEY_TYPE.equalsIgnoreCase(type) 
-              || this.SYMMETRIC_KEY_TYPE.equalsIgnoreCase(type))) {
-            throw new RuntimeException("Invalid BinarySecret Type: " + type);
-        }
-        
-        setType(type);
-        
-     }
-     
-     public String getType(){
-         return this.type;
-     }
-     */
+     }     
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityTokenResponseImpl.java,v 1.2 2006-05-10 23:11:53 jdg6688 Exp $
+ * $Id: RequestSecurityTokenResponseImpl.java,v 1.3 2006-09-20 23:58:48 manveen Exp $
  */
 
 /*
@@ -67,6 +67,10 @@ import com.sun.xml.ws.security.trust.impl.bindings.SignChallengeType;
 import com.sun.xml.ws.security.trust.impl.bindings.StatusType;
 import com.sun.xml.ws.security.trust.impl.bindings.UseKeyType;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
+
 /**
  * Implementation of a RequestSecurityTokenResponse.
  *
@@ -74,6 +78,11 @@ import com.sun.xml.ws.security.trust.impl.bindings.UseKeyType;
  */
 public class RequestSecurityTokenResponseImpl extends RequestSecurityTokenResponseType implements RequestSecurityTokenResponse {
     
+    private static Logger log =
+            Logger.getLogger(
+            LogDomainConstants.TRUST_IMPL_DOMAIN,
+            LogDomainConstants.TRUST_IMPL_DOMAIN_BUNDLE);
+
     private URI tokenType = null;
     
     private long keySize = 0;
@@ -290,10 +299,17 @@ public class RequestSecurityTokenResponseImpl extends RequestSecurityTokenRespon
     }
     
     public void setKeyType(URI keytype) throws WSTrustException {
-        if (keytype == null || ! (keytype.toString().equalsIgnoreCase(RequestSecurityToken.PUBLIC_KEY_TYPE)
-        || keytype.toString().equalsIgnoreCase(RequestSecurityToken.SYMMETRIC_KEY_TYPE) ))
-            throw new WSTrustException("Invalid KeyType");
-        else {
+        
+        if (keytype == null) {
+            log.log(Level.SEVERE,"WST0025.invalid.key.type", "null");
+            throw new WSTrustException("Invalid KeyType: null");
+        }
+        
+        if (! (keytype.toString().equalsIgnoreCase(RequestSecurityToken.PUBLIC_KEY_TYPE)
+        || keytype.toString().equalsIgnoreCase(RequestSecurityToken.SYMMETRIC_KEY_TYPE) )){
+            log.log(Level.SEVERE,"WST0025.invalid.key.type", keytype.toString());
+            throw new WSTrustException("Invalid KeyType " + keytype.toString());
+        } else {
             this.keyType = keytype;
             JAXBElement<String> ktElement =
                     (new ObjectFactory()).createKeyType(keyType.toString());
