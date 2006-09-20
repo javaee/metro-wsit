@@ -204,8 +204,8 @@ public class SignAllHeadersTest extends TestCase{
         return context;
    }
     
-    public static void main(String[] args) throws Exception{
-        testSignAllHeadersTest();
-    }
+//    public static void main(String[] args) throws Exception{
+//        testSignAllHeadersTest();
+//    }
     
 }

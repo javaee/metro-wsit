@@ -162,8 +162,8 @@ public class TimestampTest extends TestCase {
         
     }
     
-   public static void main(String[] args) throws Exception{
-       testTimestampOnTop();
-   }
+//   public static void main(String[] args) throws Exception{
+//       testTimestampOnTop();
+//   }
     
 }

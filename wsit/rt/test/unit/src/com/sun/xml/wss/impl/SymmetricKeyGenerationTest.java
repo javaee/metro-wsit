@@ -74,7 +74,7 @@ public class SymmetricKeyGenerationTest extends TestCase{
             assertEquals(sKey.getEncoded().length, length); 
     }
     
-   public static void main(String[] args) throws Exception{
-       testSymmetricKeyGenerationTest();
-   }
+//   public static void main(String[] args) throws Exception{
+//       testSymmetricKeyGenerationTest();
+//   }
 }

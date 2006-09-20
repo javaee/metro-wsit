@@ -59,9 +59,7 @@ import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.AssertionSet;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import junit.framework.*;
 
 /**
  *
@@ -90,7 +88,8 @@ public class EndorsingSignatureTest extends TestCase{
         return suite;
     }
     
-    public static void testEndorsingSignatureTest() throws Exception {
+    
+    public void testEndorsingSignatureTest() throws Exception {
      
             alg.setType(AlgorithmSuiteValue.Basic256);
             SignaturePolicy signaturePolicy = new SignaturePolicy();
@@ -193,7 +192,7 @@ public class EndorsingSignatureTest extends TestCase{
             
     }
     
-   public static ProcessingContextImpl verify(SOAPMessage msg, byte[] proofKey, Map map) throws Exception {
+   public ProcessingContextImpl verify(SOAPMessage msg, byte[] proofKey, Map map) throws Exception {
        //Create processing context and set the soap
        //message to be processed.
        ProcessingContextImpl context = new ProcessingContextImpl(map);
@@ -229,7 +228,7 @@ public class EndorsingSignatureTest extends TestCase{
         return context;
    }
 
-   public static void main(String[] args) throws Exception{
-       testEndorsingSignatureTest();
-   }
+//   public static void main(String[] args) throws Exception{
+//       testEndorsingSignatureTest();
+//   }
 }

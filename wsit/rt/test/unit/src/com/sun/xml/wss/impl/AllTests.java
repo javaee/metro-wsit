@@ -21,37 +21,39 @@
  */
 package com.sun.xml.wss.impl;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import junit.framework.*;
                                                                                                                         
 public class AllTests extends TestCase {
     public AllTests(String name) {
         super(name);
     }
+    
+    protected void setUp() throws Exception {
+    }
+
+    protected void tearDown() throws Exception {
+    }
                                                                                                                         
     public static Test suite() {
-        TestSuite suite = new TestSuite();
-        suite.addTestSuite(EndorsingSignatureTest.class);
-        suite.addTestSuite(AsymmetricBindingTest.class);
+       TestSuite suite = new TestSuite("Security unit tests suite");
+       suite.addTest(com.sun.xml.wss.impl.EndorsingSignatureTest.suite());
+       suite.addTest(com.sun.xml.wss.impl.AsymmetricBindingTest.suite());
 
       //  suite.addTestSuite(SCTDKTTest.class);
       //  suite.addTestSuite(SecurityContextTokenTest.class);
-        suite.addTestSuite(SignAllHeadersTest.class);
-        suite.addTestSuite(SignatureConfirmationTest.class);
-        suite.addTestSuite(SignSOAPHeadersOnlyTest.class);
-        suite.addTestSuite(SymmetricBindingTest.class);
-        suite.addTestSuite(SymmetricDktTest.class);
-        suite.addTestSuite(SymmetricKeyGenerationTest.class);
-        suite.addTestSuite(TimestampTest.class);
-        suite.addTestSuite(TrustTest.class);
-        suite.addTestSuite(TrustDKTTest.class);
+        
+        suite.addTest(com.sun.xml.wss.impl.SignAllHeadersTest.suite());
+        suite.addTest(com.sun.xml.wss.impl.SignatureConfirmationTest.suite());
+        suite.addTest(com.sun.xml.wss.impl.SignSOAPHeadersOnlyTest.suite());
+        suite.addTest(com.sun.xml.wss.impl.SymmetricBindingTest.suite());
+        suite.addTest(com.sun.xml.wss.impl.SymmetricDktTest.suite());
+        suite.addTest(com.sun.xml.wss.impl.SymmetricKeyGenerationTest.suite());
+        suite.addTest(com.sun.xml.wss.impl.TimestampTest.suite());
+        suite.addTest(com.sun.xml.wss.impl.TrustTest.suite());
+        suite.addTest(com.sun.xml.wss.impl.TrustDKTTest.suite());
 
         return suite;
     }
                                                                                                                         
-    public static void main(String[] args) throws Exception {
-        junit.textui.TestRunner.run(AllTests.class);
-    }
 }
 

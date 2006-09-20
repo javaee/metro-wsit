@@ -207,8 +207,8 @@ public class SignSOAPHeadersOnlyTest extends TestCase{
         return context;
    }
     
-    public static void main(String[] args) throws Exception{
-        testSignSOAPHeadersOnlyTest();
-    }
-    
+//    public static void main(String[] args) throws Exception{
+//        testSignSOAPHeadersOnlyTest();
+//    }
+//    
 }

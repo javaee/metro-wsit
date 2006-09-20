@@ -235,7 +235,7 @@ public class SymmetricDktTest extends TestCase{
         return context;
    }
    
-   public static void main(String[] args) throws Exception{
-       testSymmetricDktTest();
-   }
+//   public static void main(String[] args) throws Exception{
+//       testSymmetricDktTest();
+//   }
 }

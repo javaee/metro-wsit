@@ -218,7 +218,7 @@ public class AsymmetricBindingTest extends TestCase{
 
    }
    
-   public static void main(String[] args) throws Exception{
-       testSymmetricBindingTest();
-   }
+//   public static void main(String[] args) throws Exception{
+//       testSymmetricBindingTest();
+//   }
 }

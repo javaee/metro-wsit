@@ -220,8 +220,8 @@ public class SignatureConfirmationTest extends TestCase {
         return context;
    }
    
-   public static void main(String[] args) throws Exception{
-       testSignatureConfirmationTest();
-   }
+//   public static void main(String[] args) throws Exception{
+//       testSignatureConfirmationTest();
+//   }
     
 }
