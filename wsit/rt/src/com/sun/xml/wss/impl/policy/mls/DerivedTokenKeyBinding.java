@@ -51,6 +51,7 @@ public class DerivedTokenKeyBinding extends KeyBindingBase {
     public Object clone() {
         DerivedTokenKeyBinding dkt = new DerivedTokenKeyBinding();
         dkt.setOriginalKeyBinding((WSSPolicy)getOriginalKeyBinding().clone());
+        dkt.setUUID(this.getUUID());
         return dkt;
     }
     
