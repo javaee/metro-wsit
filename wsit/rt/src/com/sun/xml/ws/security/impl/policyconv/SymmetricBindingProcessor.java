@@ -151,6 +151,7 @@ public class SymmetricBindingProcessor extends BindingProcessor{
                 skb.setKeyBinding(x509CB);
                 policy.setKeyBinding(dtKB);
                 dtKB.setOriginalKeyBinding(skb);
+                dtKB.setUUID(pid.generateID());
             }else{
                 skb.setKeyBinding(x509CB);
                 policy.setKeyBinding(skb);
@@ -165,6 +166,7 @@ public class SymmetricBindingProcessor extends BindingProcessor{
                 DerivedTokenKeyBinding dtKB =  new DerivedTokenKeyBinding();
                 dtKB.setOriginalKeyBinding(sab);
                 policy.setKeyBinding(dtKB);
+                dtKB.setUUID(pid.generateID());
             }else{
                 policy.setKeyBinding(sab);
             }
@@ -178,6 +180,7 @@ public class SymmetricBindingProcessor extends BindingProcessor{
                 DerivedTokenKeyBinding dtKB =  new DerivedTokenKeyBinding();
                 dtKB.setOriginalKeyBinding(itkb);
                 policy.setKeyBinding(dtKB);
+                dtKB.setUUID(pid.generateID());
             }else{
                 policy.setKeyBinding(itkb);
             }
@@ -188,6 +191,7 @@ public class SymmetricBindingProcessor extends BindingProcessor{
                 DerivedTokenKeyBinding dtKB =  new DerivedTokenKeyBinding();
                 dtKB.setOriginalKeyBinding(sct);
                 policy.setKeyBinding(dtKB);
+                dtKB.setUUID(pid.generateID());
             }else{
                 policy.setKeyBinding(sct);
             }
