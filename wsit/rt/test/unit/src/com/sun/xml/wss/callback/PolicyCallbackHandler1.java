@@ -20,7 +20,7 @@
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 /*
- * $Id: PolicyCallbackHandler1.java,v 1.3 2006-08-25 19:29:09 mayankmishra Exp $
+ * $Id: PolicyCallbackHandler1.java,v 1.4 2006-09-20 11:20:35 mayankmishra Exp $
  *
  * Copyright 2005 Sun Microsystems, Inc. All rights reserved.
  * SUN PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
@@ -103,20 +103,20 @@ public  class PolicyCallbackHandler1 implements CallbackHandler {
         Properties properties = new Properties();
 
         if (side.equals("server")) {
-        String serverPropsFile ="./test/unit/data/security/keystore/server-security-env.properties";
+       String serverPropsFile ="./test/unit/data/security/keystore/server-security-env.properties";                
         properties.load(new FileInputStream(serverPropsFile));
 
         } else {
             // we are on the client side
-            String clientPropsFile = "./test/unit/data/security/keystore/client-security-env.properties";
+        String clientPropsFile = "./test/unit/data/security/keystore/client-security-env.properties";
             properties.load(new FileInputStream(clientPropsFile));
        }
 
-        this.keyStoreURL =  "./test/unit/data/security/keystore/client-keystore.jks";
+        this.keyStoreURL =  properties.getProperty("keystore.url");
         this.keyStoreType = properties.getProperty("keystore.type");
         this.keyStorePassword = properties.getProperty("keystore.password");
 
-        this.trustStoreURL = "./test/unit/data/security/keystore/client-truststore.jks";
+        this.trustStoreURL = properties.getProperty("truststore.url");
         this.trustStoreType = properties.getProperty("truststore.type");
         this.trustStorePassword = properties.getProperty("truststore.password");
 
