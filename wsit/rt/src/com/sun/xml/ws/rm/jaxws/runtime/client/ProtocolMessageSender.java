@@ -42,12 +42,15 @@ import com.sun.xml.ws.rm.TerminateSequenceException;
 import com.sun.xml.ws.rm.jaxws.runtime.InboundMessageProcessor;
 import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
 import com.sun.xml.ws.rm.protocol.*;
+import javax.xml.ws.Binding;
+import javax.xml.ws.BindingProvider;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.ws.addressing.*;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.UUID;
 
 /**
@@ -216,9 +219,13 @@ public class ProtocolMessageSender {
         Message request = createEmptyMessage(version);
         SequenceElement el = createLastHeader(seq);
         request.getHeaders().add(Headers.create(version,marshaller,el));
-
+        
+        seq.setLast();
+        
         Packet requestPacket = new Packet(request);
-        requestPacket.proxy = packet.proxy;
+        //requestPacket.proxy = packet.proxy;
+        requestPacket.proxy = new ProxyWrapper(packet.proxy);
+        
         requestPacket.contentNegotiation = packet.contentNegotiation;
         addAddressingHeaders(requestPacket, constants.getLastAction(),seq.getDestination(),
                 seq.getAcksTo(),true);
@@ -233,7 +240,6 @@ public class ProtocolMessageSender {
                 throw new RMException(response);
         }
         
-        seq.setLast();
         processor.processMessage(msg, marshaller, unmarshaller);
 
     }
@@ -248,32 +254,35 @@ public class ProtocolMessageSender {
      */
     public void sendAckRequested(OutboundSequence seq, SOAPVersion version) throws RMException {
         
-        Message request = createEmptyMessage(version);
-        AckRequestedElement el = createAckRequestedElement(seq);
-        request.getHeaders().add(Headers.create(version,marshaller,el));
+        try {
+            Message request = createEmptyMessage(version);
+            AckRequestedElement el = createAckRequestedElement(seq);
+            request.getHeaders().add(Headers.create(version,marshaller,el));
 
 
-        Packet requestPacket = new Packet(request);
-        requestPacket.proxy = packet.proxy;
-        requestPacket.contentNegotiation = packet.contentNegotiation;
-        
-        addAddressingHeaders (requestPacket, constants.getAckRequestedAction(),
-                seq.getDestination(),seq.getAcksTo(),true);
-        
-        requestPacket.setEndPointAddressString(seq.getDestination().getAddress().getURI().toString());
-        
-        Packet responsePacket = nextPipe.process(requestPacket);
-        Message response = responsePacket.getMessage();
-        if (response != null && response.isFault()){
-                throw new RMException(response);
+            Packet requestPacket = new Packet(request);
+            requestPacket.proxy = packet.proxy;
+            requestPacket.contentNegotiation = packet.contentNegotiation;
+
+            addAddressingHeaders (requestPacket, constants.getAckRequestedAction(),
+                    seq.getDestination(),seq.getAcksTo(),true);
+
+            requestPacket.setEndPointAddressString(seq.getDestination().getAddress().getURI().toString());
+
+            Packet responsePacket = nextPipe.process(requestPacket);
+            Message response = responsePacket.getMessage();
+            if (response != null && response.isFault()){
+                    //reset alarm
+                    ((ClientOutboundSequence)seq).resetLastActivityTime();
+                    throw new RMException(response);
+            }
+
+            com.sun.xml.ws.rm.Message msg = new com.sun.xml.ws.rm.Message(response);
+            processor.processMessage(msg, marshaller, unmarshaller);
+        } finally {
+            //Make sure that alarm is reset.
+            ((ClientOutboundSequence)seq).resetLastActivityTime();
         }
-
-        com.sun.xml.ws.rm.Message msg = new com.sun.xml.ws.rm.Message(response);
-        
-        //reset alarm
-        ((ClientOutboundSequence)seq).resetLastActivityTime();
-        
-        processor.processMessage(msg, marshaller, unmarshaller);
 
     }
 
@@ -294,8 +303,9 @@ public class ProtocolMessageSender {
             appImpl.setReplyTo(acksTo);
 
 
-            AttributedURI uri = AddressingBuilder.newInstance()
+            AttributedURI uri = constants.getAddressingBuilder()
                     .newURI("uuid:" + UUID.randomUUID());
+            
             appImpl.setMessageID(uri);
 
             Map<String,Object> reqContext = requestPacket.proxy.getRequestContext();
@@ -357,6 +367,30 @@ public class ProtocolMessageSender {
         return ackRequestedElement;
     }
 
-
+    public RMConstants getConstants() {
+        return constants;
+    }
+    
+    private static class ProxyWrapper implements BindingProvider {
+        private BindingProvider proxy;
+        private Map<String, Object> requestContext = new HashMap<String, Object>();
+        
+        public ProxyWrapper(BindingProvider proxy) {
+            this.proxy = proxy;
+            requestContext.putAll(proxy.getRequestContext());
+        }
+        
+        public Map<String, Object> getRequestContext() {
+            return requestContext;
+        }
+        
+        public Map<String, Object> getResponseContext() {
+            return proxy.getResponseContext();
+        }
+        
+        public Binding getBinding() {
+            return proxy.getBinding();
+        }
+    }
 
 }
