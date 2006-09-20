@@ -39,7 +39,7 @@ import java.util.HashSet;
 public class SecurityPolicyAssertionCreator implements PolicyAssertionCreator{
     
     
-    private static HashSet implementedAssertions = new HashSet();
+    private static HashSet<String> implementedAssertions = new HashSet<String>();
     private static final String [] nsSupportedList = new String[]{Constants.SECURITY_POLICY_NS};
 //    Constants.SUN_WSS_SECURITY_CLIENT_POLICY_NS,    
 //    Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS,

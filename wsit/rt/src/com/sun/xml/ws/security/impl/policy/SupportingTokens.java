@@ -48,10 +48,10 @@ import static com.sun.xml.ws.security.impl.policy.Constants.*;
 public class SupportingTokens extends PolicyAssertion implements com.sun.xml.ws.security.policy.SupportingTokens{
     
     private AlgorithmSuite algSuite;
-    private List<com.sun.xml.ws.security.policy.SignedParts> spList = new ArrayList(1);
-    private List<com.sun.xml.ws.security.policy.EncryptedParts> epList = new ArrayList(1);
-    private List<com.sun.xml.ws.security.policy.SignedElements> seList = new ArrayList(1);
-    private List<com.sun.xml.ws.security.policy.EncryptedElements> eeList = new ArrayList(1);;
+    private List<com.sun.xml.ws.security.policy.SignedParts> spList = new ArrayList<com.sun.xml.ws.security.policy.SignedParts>(1);
+    private List<com.sun.xml.ws.security.policy.EncryptedParts> epList = new ArrayList<com.sun.xml.ws.security.policy.EncryptedParts>(1);
+    private List<com.sun.xml.ws.security.policy.SignedElements> seList = new ArrayList<com.sun.xml.ws.security.policy.SignedElements>(1);
+    private List<com.sun.xml.ws.security.policy.EncryptedElements> eeList = new ArrayList<com.sun.xml.ws.security.policy.EncryptedElements>(1);;
     private boolean isServer = false;
     private List<Token> _tokenList;
     private boolean populated;
