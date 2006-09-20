@@ -1296,8 +1296,10 @@ public class EncryptionProcessor {
                             //insert the standalone reflist under EK
                             Element ekElem = secureMessage.getElementById(insertedEkId);
                             _secHeader.insertBefore(_standaloneReferenceList, ekElem.getNextSibling());
+                            
                         } else {
                             _secHeader.insertHeaderBlock(_standaloneReferenceList);
+                            context.setCurrentReferenceList(_standaloneReferenceList.getAsSoapElement());
                         }
                     } else {
                         // insert standalone reflist under the  SCT/Issued Token
@@ -1307,6 +1309,7 @@ public class EncryptionProcessor {
                             _secHeader.insertBefore(_standaloneReferenceList, issuedTokenElementFromMsg.getNextSibling());
                         } else {
                             _secHeader.insertHeaderBlock(_standaloneReferenceList);
+                            context.setCurrentReferenceList(_standaloneReferenceList.getAsSoapElement());
                         }
                     }
                 }

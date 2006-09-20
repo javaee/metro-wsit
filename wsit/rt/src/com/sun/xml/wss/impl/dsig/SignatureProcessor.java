@@ -1,5 +1,5 @@
 /*
- * $Id: SignatureProcessor.java,v 1.10 2006-09-08 07:03:08 kumarjayanti Exp $
+ * $Id: SignatureProcessor.java,v 1.11 2006-09-20 05:33:30 kumarjayanti Exp $
  */
 
 /*
@@ -1445,11 +1445,18 @@ public class SignatureProcessor{
                             dkt.getLength(),
                             dktId);
 
+                    
                     if (issuedTokenElementFromMsg != null) {
                          SecurityHeader _secHeader = secureMessage.findOrCreateSecurityHeader();
                          _secHeader.insertBefore(derivedKeyTokenHeaderBlock, issuedTokenElementFromMsg.getNextSibling());
                     } else {
+                       Node reflist = context.getCurrentRefList();
+                       if (reflist != null) {
+                           secureMessage.findOrCreateSecurityHeader().insertBefore(derivedKeyTokenHeaderBlock, reflist);
+                           context.setCurrentReferenceList(null);
+                       } else {
                         secureMessage.findOrCreateSecurityHeader().insertHeaderBlock(derivedKeyTokenHeaderBlock);
+                       }
                     }
 
                     // insert the Issued Token after the DKT
@@ -1487,9 +1494,17 @@ public class SignatureProcessor{
                     DerivedKeyTokenHeaderBlock dktHeaderBlock = 
                            new DerivedKeyTokenHeaderBlock(
                                securityHeader.getOwnerDocument(), tokenRef, nonce, dkt.getOffset(), dkt.getLength() ,dktId);
-                    // insert DKT
+                    
                     Node next = (sctElement != null) ? sctElement.getNextSibling() : null;
-
+                    
+                    if (next == null) {
+                       Node reflist = context.getCurrentRefList();
+                       if (reflist != null) {
+                           next = reflist;
+                           context.setCurrentReferenceList(null);
+                       }
+                    }
+                    
                     SOAPElement dktElem = (SOAPElement)securityHeader.insertBefore(
                                dktHeaderBlock.getAsSoapElement(), next);
                     //Construct the STR for signature
@@ -1573,7 +1588,7 @@ public class SignatureProcessor{
                         secureMessage.findOrCreateSecurityHeader().insertHeaderBlockElement(tokenElem);
                         nxtSiblingContainer[0] = tokenElem.getNextSibling();
                      } else {
-                        nxtSiblingContainer[0] = null;
+                        nxtSiblingContainer[0] =  null;
                      }
                      // also store the token in Packet.invocationProperties to be used by
                      // client side response processing
@@ -1593,7 +1608,7 @@ public class SignatureProcessor{
 
                // signature should be below SCT
                 nextSibling = (sctElement != null) ? sctElement.getNextSibling() : null;  
-                nxtSiblingContainer[0] = nextSibling;            
+                nxtSiblingContainer[0] =  nextSibling;            
                         
                 keyInfo = dsigHelper.constructKeyInfo(signaturePolicy,secTokenRef);
                 return keyInfo;
