@@ -42,7 +42,6 @@ import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.wsdl.writer.WSDLGeneratorExtension;
 import com.sun.xml.ws.model.CheckedExceptionImpl;
 import com.sun.xml.ws.model.JavaMethodImpl;
-import com.sun.xml.ws.policy.EffectivePolicyModifier;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyConstants;
 import com.sun.xml.ws.policy.PolicyException;
@@ -56,6 +55,7 @@ import com.sun.xml.ws.policy.privateutil.ServiceFinder;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelGenerator;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelMarshaller;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
+import java.util.Collections;
 
 /**
  * Marshals the contents of a policy map to WSDL.
@@ -91,12 +91,16 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
                         policyMapUpdateProviders[i].update(extenders[i], policyMap, model, binding);
                         extenders[i].disconnect();
                     }
+                    subjects = policyMap.getPolicySubjects();
                 }
             }
         } catch (PolicyException e) {
             logger.severe("start", "Failed to read wsit.xml", e);
         } finally {
             logger.exiting("start");
+            if (subjects == null) {
+                subjects = Collections.emptyList();
+            }
         }
     }
     
@@ -104,7 +108,6 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         try {
             logger.entering("addDefinitionsExtension");
             if (policyMap != null) {
-                subjects = policyMap.getPolicySubjects();
                 boolean usingPolicy = false;
                 PolicyModelGenerator generator = PolicyModelGenerator.getGenerator();
                 for (PolicySubject subject : subjects) {
