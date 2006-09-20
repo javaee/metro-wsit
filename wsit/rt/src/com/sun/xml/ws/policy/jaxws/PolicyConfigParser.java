@@ -57,6 +57,19 @@ public final class PolicyConfigParser {
     
     /**
      * Reads a WSIT config file stored in META-INF or WEB-INF, parses it
+     * and returns a PolicyMap.
+     *
+     * @param configFileIdentifier base for config file name
+     * @param container May hold the servlet context if run inside a web container
+     * @return A PolicyMap populated from the WSIT config file
+     */
+    public static PolicyMap parse(String configFileIdentifier, Container container) throws PolicyException {
+        return parse(configFileIdentifier, container, (PolicyMapMutator[])null);
+    }
+    
+    
+    /**
+     * Reads a WSIT config file stored in META-INF or WEB-INF, parses it
      * and returns a PolicyMap. It gives you a chance to register policy map mutators
      * to be able to modify the policy map later.
      *
@@ -94,6 +107,19 @@ public final class PolicyConfigParser {
             logger.exiting("parse", map);
         }
     }
+    
+    /**
+     * Reads a WSIT config from an XMLStreamBuffer, parses it and returns a PolicyMap. 
+     *
+     * @param configFileUrl URL of the config file resource that should be parsed. Must not be {@code null}.
+     *
+     * @return A PolicyMap populated from the WSIT config file
+     */
+    public static PolicyMap parse(URL configFileUrl) throws PolicyException {
+        return parse(configFileUrl, (PolicyMapMutator[])null);
+    }
+
+
     
     /**
      * Reads a WSIT config from an XMLStreamBuffer, parses it and returns a PolicyMap. It gives you a chance
@@ -134,19 +160,6 @@ public final class PolicyConfigParser {
             logger.exiting("parse", map);
         }
     }
-    
-    
-    /**
-     * Reads a WSIT config file stored in META-INF or WEB-INF, parses it
-     * and returns a PolicyMap.
-     *
-     * @param configFileIdentifier base for config file name
-     * @param container May hold the servlet context if run inside a web container
-     * @return A PolicyMap populated from the WSIT config file
-     */
-    /*public static PolicyMap parse(String configFileIdentifier, Container container) throws PolicyException {
-        return parse(configFileIdentifier, container, null);
-    }*/
     
     
     /**
