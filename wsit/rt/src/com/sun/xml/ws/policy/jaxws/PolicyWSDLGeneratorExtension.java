@@ -23,7 +23,10 @@
 package com.sun.xml.ws.policy.jaxws;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import javax.xml.namespace.QName;
 import com.sun.xml.txw2.TypedXmlWriter;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.model.CheckedException;
@@ -33,6 +36,7 @@ import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLFault;
 import com.sun.xml.ws.api.model.wsdl.WSDLInput;
 import com.sun.xml.ws.api.model.wsdl.WSDLMessage;
+import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLOutput;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
@@ -42,20 +46,20 @@ import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.wsdl.writer.WSDLGeneratorExtension;
 import com.sun.xml.ws.model.CheckedExceptionImpl;
 import com.sun.xml.ws.model.JavaMethodImpl;
+import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.Policy;
+import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyConstants;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
-import com.sun.xml.ws.policy.PolicyMapExtender;
 import com.sun.xml.ws.policy.PolicyMerger;
 import com.sun.xml.ws.policy.PolicySubject;
-import com.sun.xml.ws.policy.jaxws.spi.PolicyMapUpdateProvider;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
-import com.sun.xml.ws.policy.privateutil.ServiceFinder;
+import com.sun.xml.ws.policy.sourcemodel.AssertionData;
+import com.sun.xml.ws.policy.sourcemodel.ModelNode;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelGenerator;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelMarshaller;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
-import java.util.Collections;
 
 /**
  * Marshals the contents of a policy map to WSDL.
@@ -66,41 +70,37 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
     
     private PolicyMap policyMap;
     private SEIModel seiModel;
+    private HashMap<String, Policy> nameToPolicy = new HashMap<String, Policy>();
+    private HashMap<String, Policy> portTypeOperationToPolicy = new HashMap<String, Policy>();
+    private HashMap<String, Policy> bindingOperationInToPolicy = new HashMap<String, Policy>();
+    private HashMap<String, Policy> bindingOperationOutToPolicy = new HashMap<String, Policy>();
+    private HashMap<String, Policy> messageToPolicy = new HashMap<String, Policy>();
+    private HashMap<String, Policy> portTypeMessageToPolicy = new HashMap<String, Policy>();
+    private HashMap<String, Policy> bindingMessageToPolicy = new HashMap<String, Policy>();
     // TODO Determine if service or port were renamed so that we can just map them like the other elements
     private Policy servicePolicy = null;
     private Policy portPolicy = null;
-    private Collection<PolicySubject> subjects;
-    
-    private PolicyModelMarshaller marshaller = PolicyModelMarshaller.getXmlMarshaller();
-    private PolicyMerger merger = PolicyMerger.getMerger();
+    // TODO Work-around to determine if MTOM was set by DD
+    private Boolean isMtomEnabled = null;
+    private static final String mtomNamespace = "http://schemas.xmlsoap.org/ws/2004/09/policy/optimizedmimeserialization";
+    private static final QName mtomName = new QName(mtomNamespace, "OptimizedMimeSerialization");
     
     public void start(TypedXmlWriter root, SEIModel model, WSBinding binding, Container container) {
         logger.entering("start");
         try {
             if (model != null) {
                 this.seiModel = model;
+                this.isMtomEnabled = binding.isMTOMEnabled();
                 // QName serviceName = model.getServiceQName();
-                PolicyMapUpdateProvider[] policyMapUpdateProviders = ServiceFinder.find(PolicyMapUpdateProvider.class).toArray();
-                PolicyMapExtender[] extenders = new PolicyMapExtender[policyMapUpdateProviders.length];
-                for (int i=0; i<extenders.length; extenders[i++] = PolicyMapExtender.createPolicyMapExtender());
-                policyMap = PolicyConfigParser.parse(null, container, extenders);
-                if (policyMap!= null) {
+                this.policyMap = PolicyConfigParser.parse(null, container);
+                if (this.policyMap != null) {
                     root._namespace(PolicyConstants.POLICY_NAMESPACE_URI, PolicyConstants.POLICY_NAMESPACE_PREFIX);
-                    // TODO: review after jax-ws interface to it's runtime wsdl generator gets changed
-                    for (int i=0; i<policyMapUpdateProviders.length; i++) {
-                        policyMapUpdateProviders[i].update(extenders[i], policyMap, model, binding);
-                        extenders[i].disconnect();
-                    }
-                    subjects = policyMap.getPolicySubjects();
                 }
             }
         } catch (PolicyException e) {
             logger.severe("start", "Failed to read wsit.xml", e);
         } finally {
             logger.exiting("start");
-            if (subjects == null) {
-                subjects = Collections.emptyList();
-            }
         }
     }
     
@@ -108,8 +108,11 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         try {
             logger.entering("addDefinitionsExtension");
             if (policyMap != null) {
-                boolean usingPolicy = false;
+                Collection<PolicySubject> subjects = policyMap.getPolicySubjects();
+                PolicyModelMarshaller marshaller = PolicyModelMarshaller.getXmlMarshaller();
                 PolicyModelGenerator generator = PolicyModelGenerator.getGenerator();
+                PolicyMerger merger = PolicyMerger.getMerger();
+                boolean usingPolicy = false;
                 for (PolicySubject subject : subjects) {
                     Object wsdlSubject = subject.getSubject();
                     if (wsdlSubject != null) {
@@ -118,10 +121,59 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
                             usingPolicy = true;
                         }
                         Policy policy = subject.getEffectivePolicy(merger);
-                        if (null != policy.getIdOrName()) {
-                            PolicySourceModel policyInfoset = generator.translate(policy);
-                            marshaller.marshal(policyInfoset, definitions);
+                        if (wsdlSubject instanceof WSDLService) {
+                            // TODO For now we always extract the service policy irrespective of the
+                            // service name so that we do not have to deal with name changes by the app server
+                            if (this.servicePolicy != null) {
+                                logger.warning("addDefinitionsExtension", "WSIT configuration file seems to contain more than one service definition. Reading policy from one of them randomly.");
+                            }
+                            this.servicePolicy = policy;
+//                            WSDLService service = (WSDLService) wsdlSubject;
+//                            nameToPolicy.put(service.getName().getLocalPart(), policy);
+                        } else if (wsdlSubject instanceof WSDLPort) {
+                            // TODO For now we always extract the port policy irrespective of the
+                            // port name so that we do not have to deal with name changes by the app server
+                            if (this.portPolicy != null) {
+                                logger.warning("addDefinitionsExtension", "WSIT configuration file seems to contain more than one port definition. Reading policy from one of them randomly.");
+                            }
+                            this.portPolicy = policy;
+//                            WSDLPort port = (WSDLPort) wsdlSubject;
+//                            nameToPolicy.put(port.getName().getLocalPart(), policy);
+                        } else if (wsdlSubject instanceof WSDLPortType) {
+                            WSDLPortType portType = (WSDLPortType) wsdlSubject;
+                            nameToPolicy.put(portType.getName().getLocalPart(), policy);
+                        } else if (wsdlSubject instanceof WSDLBoundPortType) {
+                            WSDLBoundPortType binding = (WSDLBoundPortType) wsdlSubject;
+                            if (this.isMtomEnabled != null) {
+                                policy = overrideMtom(policy);
+                            }
+                            nameToPolicy.put(binding.getName().getLocalPart(), policy);
+                        } else if (wsdlSubject instanceof WSDLOperation) {
+                            WSDLOperation operation = (WSDLOperation) wsdlSubject;
+                            portTypeOperationToPolicy.put(operation.getName().getLocalPart(), policy);
+                        } else if (wsdlSubject instanceof WSDLBoundOperation) {
+                            WSDLBoundOperation operation = (WSDLBoundOperation) wsdlSubject;
+                            QName serviceName = operation.getOperation().getName();
+                            if (policyMap.isOutputMessageSubject(subject)) {
+                                bindingOperationOutToPolicy.put(operation.getName().getLocalPart(), policy);
+                            } else {
+                                bindingOperationInToPolicy.put(operation.getName().getLocalPart(), policy);
+                            }
+                        } else if (wsdlSubject instanceof WSDLMessage) {
+                            WSDLMessage message = (WSDLMessage) wsdlSubject;
+                            messageToPolicy.put(message.getName().getLocalPart(), policy);
+                        } else if (wsdlSubject instanceof WSDLInput) {
+                            WSDLInput input = (WSDLInput) wsdlSubject;
+                            portTypeMessageToPolicy.put(input.getName(), policy);
+                        } else if (wsdlSubject instanceof WSDLOutput) {
+                            WSDLOutput output = (WSDLOutput) wsdlSubject;
+                            portTypeMessageToPolicy.put(output.getName(), policy);
+                        } else if (wsdlSubject instanceof WSDLFault) {
+                            WSDLFault fault = (WSDLFault) wsdlSubject;
+                            portTypeMessageToPolicy.put(fault.getName(), policy);
                         }
+                        PolicySourceModel policyInfoset = generator.translate(policy);
+                        marshaller.marshal(policyInfoset, definitions);
                     } else {
                         logger.fine("addDefinitionsExtension", "Subject was null, not marshalling attached policy: " + subject);
                     }
@@ -140,11 +192,11 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
     public void addServiceExtension(TypedXmlWriter service) {
         logger.entering("addServiceExtension");
         if (this.seiModel != null) {
-            for (PolicySubject subject : subjects) {
-                Object wsdlSubject = subject.getSubject();
-                if (wsdlSubject != null && wsdlSubject instanceof WSDLService) {
-                    processPolicy(subject, service);
-                }
+//            QName serviceName = this.seiModel.getServiceQName();
+//            addPolicyReference(this.nameToPolicy, service, serviceName.getLocalPart());
+            if (this.servicePolicy != null) {
+                TypedXmlWriter policyReference = service._element(PolicyConstants.POLICY_REFERENCE, TypedXmlWriter.class);
+                policyReference._attribute(PolicyConstants.POLICY_URI.getLocalPart(), '#' + this.servicePolicy.getIdOrName());
             }
         }
         logger.exiting("addServiceExtension");
@@ -153,11 +205,11 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
     public void addPortExtension(TypedXmlWriter port) {
         logger.entering("addPortExtension");
         if (this.seiModel != null) {
-            for (PolicySubject subject : subjects) {
-                Object wsdlSubject = subject.getSubject();
-                if (wsdlSubject != null && wsdlSubject instanceof WSDLPort) {
-                    processPolicy(subject, port);
-                }
+//            QName portName = this.seiModel.getPortName();
+//            addPolicyReference(this.nameToPolicy, port, portName.getLocalPart());
+            if (this.portPolicy != null) {
+                TypedXmlWriter policyReference = port._element(PolicyConstants.POLICY_REFERENCE, TypedXmlWriter.class);
+                policyReference._attribute(PolicyConstants.POLICY_URI.getLocalPart(), '#' + this.portPolicy.getIdOrName());
             }
         }
         logger.exiting("addPortExtension");
@@ -166,12 +218,8 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
     public void addPortTypeExtension(TypedXmlWriter portType) {
         logger.entering("addPortTypeExtension");
         if (this.seiModel != null) {
-            for (PolicySubject subject : subjects) {
-                Object wsdlSubject = subject.getSubject();
-                if (wsdlSubject != null && wsdlSubject instanceof WSDLPortType) {
-                    processPolicy(subject, portType);
-                }
-            }
+            QName portTypeName = this.seiModel.getPortTypeName();
+            addPolicyReference(this.nameToPolicy, portType, portTypeName.getLocalPart());
         }
         logger.exiting("addPortTypeExtension");
     }
@@ -180,12 +228,14 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         logger.entering("addBindingExtension");
         if (this.seiModel != null) {
             // TODO Do not rely on a naming algorithm that is private to WSDLGenerator
-            //String bindingName = this.seiModel.getPortName().getLocalPart() + "Binding";
-            for (PolicySubject subject : subjects) {
-                Object wsdlSubject = subject.getSubject();
-                if (wsdlSubject != null && wsdlSubject instanceof WSDLBoundPortType) {
-                    processPolicy(subject, binding);
-                }
+            String bindingName = this.seiModel.getPortName().getLocalPart() + "Binding";
+            addPolicyReference(this.nameToPolicy, binding, bindingName);
+            
+            // Marshal an inline policy with MTOM setting if there wasn't one already.
+            // TODO Replace with a non-hardcoded mechanism.
+            Policy policy = nameToPolicy.get(bindingName);
+            if (policy == null) {
+                marshalMtomPolicy(binding);
             }
         }
         logger.exiting("addBindingExtension");
@@ -197,24 +247,19 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
             // TODO Find a way not to down-cast
             JavaMethodImpl javaMethod = (JavaMethodImpl) this.seiModel.getJavaMethod(method);
             String operationName = javaMethod.getOperationName();
-            for (PolicySubject subject : subjects) {
-                Object wsdlSubject = subject.getSubject();
-                if (wsdlSubject != null && wsdlSubject instanceof WSDLOperation && operationName.equals(((WSDLBoundPortType)wsdlSubject).getName().getLocalPart())) {
-                    processPolicy(subject, operation);
-                }
-            }
+            addPolicyReference(this.portTypeOperationToPolicy, operation, operationName);
         }
         logger.exiting("addOperationExtension");
     }
     
     public void addBindingOperationExtension(TypedXmlWriter operation, Method method) {
         logger.entering("addBindingOperationExtension");
-        // TODO: Have to clarify where to find appropriate policy
-/*        if (this.seiModel != null) {
+        if (this.seiModel != null) {
             // TODO Find a way not to down-cast
             JavaMethodImpl javaMethod = (JavaMethodImpl) this.seiModel.getJavaMethod(method);
             String operationName = javaMethod.getOperationName();
-        }*/
+            addPolicyReference(this.nameToPolicy, operation, operationName);
+        }
         logger.exiting("addBindingOperationExtension");
     }
     
@@ -224,12 +269,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
             // TODO Find a way not to down-cast
             JavaMethodImpl javaMethod = (JavaMethodImpl) this.seiModel.getJavaMethod(method);
             String messageName = javaMethod.getOperationName();
-            for (PolicySubject subject : subjects) {
-                Object wsdlSubject = subject.getSubject();
-                if (wsdlSubject != null && wsdlSubject instanceof WSDLMessage && messageName.equals(((WSDLMessage)wsdlSubject).getName().getLocalPart())) {
-                    processPolicy(subject, message);
-                }
-            }
+            addPolicyReference(this.messageToPolicy, message, messageName);
         }
         logger.exiting("addInputMessageExtension");
     }
@@ -241,12 +281,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
             JavaMethodImpl javaMethod = (JavaMethodImpl) this.seiModel.getJavaMethod(method);
             // TODO Do not rely on a naming algorithm that is private to WSDLGenerator
             String messageName = javaMethod.getOperationName() + "Response";
-            for (PolicySubject subject : subjects) {
-                Object wsdlSubject = subject.getSubject();
-                if (wsdlSubject != null && wsdlSubject instanceof WSDLMessage && messageName.equals(((WSDLMessage)wsdlSubject).getName().getLocalPart())) {
-                    processPolicy(subject, message);
-                }
-            }
+            addPolicyReference(this.messageToPolicy, message, messageName);
         }
         logger.exiting("addOutputMessageExtension");
     }
@@ -263,12 +298,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
             // TODO Find a way not to down-cast
             JavaMethodImpl javaMethod = (JavaMethodImpl) this.seiModel.getJavaMethod(method);
             String messageName = javaMethod.getOperationName();
-            for (PolicySubject subject : subjects) {
-                Object wsdlSubject = subject.getSubject();
-                if (wsdlSubject != null && wsdlSubject instanceof WSDLInput && messageName.equals(((WSDLInput)wsdlSubject).getName())) {
-                    processPolicy(subject, input);
-                }
-            }
+            addPolicyReference(this.portTypeMessageToPolicy, input, messageName);
         }
         logger.exiting("addOperationInputExtension");
     }
@@ -280,12 +310,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
             JavaMethodImpl javaMethod = (JavaMethodImpl) this.seiModel.getJavaMethod(method);
             // TODO Do not rely on a naming algorithm that is private to WSDLGenerator
             String messageName = javaMethod.getOperationName() + "Response";
-            for (PolicySubject subject : subjects) {
-                Object wsdlSubject = subject.getSubject();
-                if (wsdlSubject != null && wsdlSubject instanceof WSDLOutput && messageName.equals(((WSDLOutput)wsdlSubject).getName())) {
-                    processPolicy(subject, output);
-                }
-            }
+            addPolicyReference(this.portTypeMessageToPolicy, output, messageName);
         }
         logger.exiting("addOperationOutputExtension");
     }
@@ -296,12 +321,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
             // TODO Find a way not to down-cast
             CheckedExceptionImpl exception = (CheckedExceptionImpl) ce;
             String messageName = exception.getMessageName();
-            for (PolicySubject subject : subjects) {
-                Object wsdlSubject = subject.getSubject();
-                if (wsdlSubject != null && wsdlSubject instanceof WSDLFault && messageName.equals(((WSDLFault)wsdlSubject).getName())) {
-                    processPolicy(subject, fault);
-                }
-            }
+            addPolicyReference(this.portTypeMessageToPolicy, fault, messageName);
         }
         logger.exiting("addOperationFaultExtension");
     }
@@ -312,14 +332,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
             // TODO Find a way not to down-cast
             JavaMethodImpl javaMethod = (JavaMethodImpl) this.seiModel.getJavaMethod(method);
             String messageName = javaMethod.getOperationName();
-            for (PolicySubject subject : subjects) {
-                if (policyMap.isInputMessageSubject(subject)) {
-                    Object wsdlSubject = subject.getSubject();
-                    if (wsdlSubject != null && wsdlSubject instanceof WSDLBoundOperation && messageName.equals(((WSDLBoundOperation)wsdlSubject).getName().getLocalPart())) {
-                        processPolicy(subject, input);
-                    }
-                }
-            }
+            addPolicyReference(this.bindingOperationInToPolicy, input, messageName);
         }
         logger.exiting("addBindingOperationInputExtension");
     }
@@ -331,14 +344,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
             JavaMethodImpl javaMethod = (JavaMethodImpl) this.seiModel.getJavaMethod(method);
             // TODO Do not rely on a naming algorithm that is private to WSDLGenerator
             String messageName = javaMethod.getOperationName();
-            for (PolicySubject subject : subjects) {
-                if (policyMap.isOutputMessageSubject(subject)) {
-                    Object wsdlSubject = subject.getSubject();
-                    if (wsdlSubject != null && wsdlSubject instanceof WSDLBoundOperation && messageName.equals(((WSDLBoundOperation)wsdlSubject).getName().getLocalPart())) {
-                        processPolicy(subject, output);
-                    }
-                }
-            }
+            addPolicyReference(this.bindingOperationOutToPolicy, output, messageName);
         }
         logger.exiting("addBindingOperationOutputExtension");
     }
@@ -350,29 +356,106 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
     }
     
     /**
-     * Adds a PolicyReference element that points to the policy of the element,
-     * if the policy does not have any id or name. Writes policy inside the element otherwise.
+     * Search for an element identified by its qualified name in nameToPolicy
+     * and add a PolicyReference element that points to the policy of the
+     * element.
      *
-     * @param policy to be referenced or marshalled
+     * @param nameToPolicy A map from qualified names to referenced policies
      * @param element A TXW element to which we shall add the PolicyReference
+     * @param name The fully qualified name of the above element
      */
-    private void processPolicy(PolicySubject policySubject, TypedXmlWriter xmlWriter) {
-        try {
-            Policy policy = policySubject.getEffectivePolicy(merger);
-            if (policy != null) {
-                if (null != policy.getIdOrName()) {
-                    TypedXmlWriter policyReference = xmlWriter._element(PolicyConstants.POLICY_REFERENCE, TypedXmlWriter.class);
-                    policyReference._attribute(PolicyConstants.POLICY_URI.getLocalPart(), '#' + policy.getIdOrName());
-                } else {
-                    PolicyModelGenerator generator = PolicyModelGenerator.getGenerator();
-                    PolicySourceModel policyInfoset = generator.translate(policy);
-                    marshaller.marshal(policyInfoset, xmlWriter);
-                }
-            }
-        } catch (PolicyException pe) {
-            //TODO: handle pe
-            logger.severe("processPolicy", "Unable to marshall policy or it's reference.");
+    private void addPolicyReference(HashMap<String, Policy> nameToPolicy, TypedXmlWriter element, String name) {
+        Policy policy = nameToPolicy.get(name);
+        if (policy != null) {
+            TypedXmlWriter policyReference = element._element(PolicyConstants.POLICY_REFERENCE, TypedXmlWriter.class);
+            policyReference._attribute(PolicyConstants.POLICY_URI.getLocalPart(), '#' + policy.getIdOrName());
         }
     }
     
+    /**
+     * If isMtomEnabled is true, add an MTOM policy assertion to all policy alternatives.
+     */
+    private Policy overrideMtom(Policy policy) {
+        // TODO Replace with code that does not hard-wire MTOM assertion
+        return addMtomAssertion(policy);
+//        if (this.isMtomEnabled.booleanValue()) {
+//            return addMtomAssertion(policy);
+//        }
+//        else {
+//            return removeMtomAssertion(policy);
+//        }
+    }
+    
+    private Policy addMtomAssertion(Policy policy) {
+        ArrayList<AssertionSet> assertionSets = new ArrayList<AssertionSet>();
+        for (AssertionSet assertionSet : policy) {
+            if (assertionSet.contains(mtomName)) {
+                assertionSets.add(assertionSet);
+            } else {
+                ArrayList<PolicyAssertion> assertions = new ArrayList<PolicyAssertion>();
+                for (PolicyAssertion assertion : assertionSet) {
+                    assertions.add(assertion);
+                }
+                assertions.add(new MtomAssertion());
+                AssertionSet extendedSet = AssertionSet.createAssertionSet(assertions);
+                assertionSets.add(extendedSet);
+            }
+        }
+        return Policy.createPolicy(policy.getName(), policy.getId(), assertionSets);
+    }
+    
+//    private Policy removeMtomAssertion(Policy policy) {
+//        ArrayList<AssertionSet> assertionSets = new ArrayList<AssertionSet>();
+//        for (AssertionSet assertionSet : policy) {
+//            if (assertionSet.contains(mtomName)) {
+//                ArrayList<PolicyAssertion> assertions = new ArrayList<PolicyAssertion>();
+//                for (PolicyAssertion assertion : assertions) {
+//                    if (assertion.getName().equals(mtomName)) {
+//                        continue;
+//                    }
+//                    assertions.add(assertion);
+//                }
+//                AssertionSet reducedSet = AssertionSet.createAssertionSet(assertions);
+//                assertionSets.add(reducedSet);
+//            }
+//            else {
+//                assertionSets.add(assertionSet);
+//            }
+//        }
+//        return Policy.createPolicy(policy.getId(), policy.getName(), assertionSets);
+//    }
+    
+    /**
+     * Creates an inline policy with an MTOM assertion if isMtomEnabled is set.
+     *
+     * TODO Replace with code that does not hard-wire MTOM assertion
+     */
+    private void marshalMtomPolicy(TypedXmlWriter binding) {
+        if ((this.isMtomEnabled != null) && this.isMtomEnabled.booleanValue()) {
+            try {
+                ArrayList<PolicyAssertion> assertions = new ArrayList<PolicyAssertion>();
+                assertions.add(new MtomAssertion());
+                AssertionSet assertionSet = AssertionSet.createAssertionSet(assertions);
+                ArrayList<AssertionSet> assertionSets = new ArrayList<AssertionSet>();
+                assertionSets.add(assertionSet);
+                Policy policy = Policy.createPolicy(assertionSets);
+                binding._namespace("http://schemas.xmlsoap.org/ws/2004/09/policy/optimizedmimeserialization", "wsoma");
+                PolicyModelMarshaller marshaller = PolicyModelMarshaller.getXmlMarshaller();
+                PolicyModelGenerator generator = PolicyModelGenerator.getGenerator();
+                PolicySourceModel policyInfoset = generator.translate(policy);
+                marshaller.marshal(policyInfoset, binding);
+            } catch (PolicyException e) {
+                logger.warning("addBindingExtension", "Failed to marshal MTOM policy onto WSDL", e);
+            }
+        }
+    }
+    
+    static class MtomAssertion extends PolicyAssertion {
+        
+        private static final AssertionData mtomData = new AssertionData(mtomName, ModelNode.Type.ASSERTION);
+        
+        MtomAssertion() {
+            super(mtomData, null, null);
+        }
+    }
 }
