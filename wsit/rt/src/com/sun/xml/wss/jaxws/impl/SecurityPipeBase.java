@@ -1061,9 +1061,12 @@ public abstract class SecurityPipeBase implements Pipe {
                   .get(JAXWSAConstants.CLIENT_ADDRESSING_PROPERTIES);
         if (ap != null) {
             AttributedURI uri = ap.getAction();
-            if (uri != null &&
-                      WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_ACTION .equals(uri.toString())) {
-                return true;
+            if (uri != null){
+                String uriValue = uri.toString();
+                if(WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_RESPONSE_ACTION.equals(uriValue) || 
+                      WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_ACTION .equals(uriValue)) {
+                    return true;
+                }
             }
         }
         return false;

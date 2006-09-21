@@ -332,6 +332,10 @@ public class SecurityServerPipe extends SecurityPipeBase
         } catch(SOAPException se) {
             // internal error
             throw new WebServiceException(se);
+        } finally{
+            if (isSCCancel(retPacket)){
+                removeContext(packet);
+            }
         }
         resetCachedOperation();
         
@@ -340,6 +344,16 @@ public class SecurityServerPipe extends SecurityPipeBase
         
     }
     
+    private void removeContext(final Packet packet) {
+        SecurityContextToken sct = (SecurityContextToken)packet.invocationProperties.get(MessageConstants.INCOMING_SCT);
+        if (sct != null){
+            String strId = sct.getIdentifier().toString();
+            if(strId!=null){
+                issuedTokenContextMap.remove(strId);
+            }
+        }
+    }
+        
     public void preDestroy() {
         if (nextPipe != null) {
             nextPipe.preDestroy();
@@ -599,6 +613,8 @@ public class SecurityServerPipe extends SecurityPipeBase
         
         WsaRuntimeFactory fac = WsaRuntimeFactory.newInstance(ap.getNamespaceURI(), pipeConfig.getWSDLModel(), pipeConfig.getBinding());
         fac.writeHeaders(packet, ap);
+        packet.invocationProperties
+                .put(JAXWSAConstants.SERVER_ADDRESSING_PROPERTIES_OUTBOUND, ap);
         
         return packet;
     }
@@ -706,6 +722,22 @@ public class SecurityServerPipe extends SecurityPipeBase
         return false;
     }
     
+    protected boolean isSCCancel(Packet packet){
+        AddressingProperties ap = (AddressingProperties)packet.invocationProperties
+                  .get(JAXWSAConstants.SERVER_ADDRESSING_PROPERTIES_OUTBOUND);
+        if (ap != null) {
+            AttributedURI uri = ap.getAction();
+            if (uri != null){
+                String uriValue = uri.toString();
+                if(WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_RESPONSE_ACTION.equals(uriValue) || 
+                      WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_ACTION .equals(uriValue)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }    
+        
     protected boolean isTrustMessage(Packet packet){
         AddressingProperties ap = (AddressingProperties)packet.invocationProperties
                 .get(JAXWSAConstants.SERVER_ADDRESSING_PROPERTIES_OUTBOUND);
