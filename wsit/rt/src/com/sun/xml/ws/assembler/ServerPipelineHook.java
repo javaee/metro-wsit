@@ -20,7 +20,7 @@
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
-package com.sun.xml.ws.runtime;
+package com.sun.xml.ws.assembler;
 
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;

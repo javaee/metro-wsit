@@ -18,13 +18,13 @@
  [name of copyright owner]
 */
 /*
- $Id: ActionDumpPipe.java,v 1.2 2006-07-13 18:38:56 arungupta Exp $
+ $Id: ActionDumpPipe.java,v 1.1 2006-09-22 00:51:16 arungupta Exp $
 
  Copyright (c) 2006 Sun Microsystems, Inc.
  All rights reserved.
 */
 
-package com.sun.xml.ws.runtime;
+package com.sun.xml.ws.assembler;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
