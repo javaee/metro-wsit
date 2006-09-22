@@ -1,1 +1,1 @@
-com.sun.xml.ws.runtime.PipelineAssemblerFactoryImpl
+com.sun.xml.ws.assembler.PipelineAssemblerFactoryImpl
