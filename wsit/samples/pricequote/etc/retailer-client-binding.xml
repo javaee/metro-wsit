@@ -22,7 +22,7 @@
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
 -->
 <!--
- $Id: retailer-client-binding.xml,v 1.3 2006-08-05 05:15:00 arungupta Exp $
+ $Id: retailer-client-binding.xml,v 1.3.6.1 2006-09-26 13:16:54 m_potociar Exp $
 -->
 
 <bindings wsdlLocation="retailer.wsdl" xmlns="http://java.sun.com/xml/ns/jaxws" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jaxb="http://java.sun.com/xml/ns/jaxb">

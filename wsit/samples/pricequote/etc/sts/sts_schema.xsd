@@ -21,7 +21,7 @@
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
 -->
 <!--
- $Id: sts_schema.xsd,v 1.2 2006-08-05 05:15:00 arungupta Exp $
+ $Id: sts_schema.xsd,v 1.2.6.1 2006-09-26 13:16:58 m_potociar Exp $
 -->
 <xs:schema elementFormDefault="qualified" targetNamespace="http://schemas.microsoft.com/Message"
 xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://schemas.microsoft.com/Message">

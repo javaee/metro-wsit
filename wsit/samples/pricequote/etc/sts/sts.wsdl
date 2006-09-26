@@ -21,7 +21,7 @@
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
 -->
 <!--
- $Id: sts.wsdl,v 1.3 2006-08-05 05:14:59 arungupta Exp $
+ $Id: sts.wsdl,v 1.3.6.1 2006-09-26 13:16:58 m_potociar Exp $
 -->
         
 <wsdl:definitions name="SecurityTokenService" targetNamespace="http://tempuri.org/"

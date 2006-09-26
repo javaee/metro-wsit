@@ -21,7 +21,7 @@
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
 -->
 <!--
- $Id: retailer.wsdl,v 1.5 2006-08-05 05:15:01 arungupta Exp $
+ $Id: retailer.wsdl,v 1.5.6.1 2006-09-26 13:16:55 m_potociar Exp $
 -->
 
 <definitions xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"

@@ -20,7 +20,7 @@
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 /*
- $Id: Retailer.java,v 1.3 2006-08-05 00:29:36 arungupta Exp $
+ $Id: Retailer.java,v 1.3.6.1 2006-09-26 13:17:01 m_potociar Exp $
 */
 
 package pricequote.retailer.server;

@@ -21,7 +21,7 @@
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
 -->
 <!--
- $Id: wholesaler.wsdl,v 1.4 2006-08-05 05:15:00 arungupta Exp $
+ $Id: wholesaler.wsdl,v 1.4.6.1 2006-09-26 13:17:00 m_potociar Exp $
 -->
 
 <wsdl:definitions

@@ -20,7 +20,7 @@
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 /*
- $Id: WCFSTSImpl.java,v 1.2 2006-08-05 00:29:36 arungupta Exp $
+ $Id: WCFSTSImpl.java,v 1.2.6.1 2006-09-26 13:17:02 m_potociar Exp $
 */
 
 package pricequote.util;
