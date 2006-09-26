@@ -64,7 +64,7 @@ public final class PolicyConfigParser {
      * @return A PolicyMap populated from the WSIT config file
      */
     public static PolicyMap parse(String configFileIdentifier, Container container) throws PolicyException {
-        return parse(configFileIdentifier, container, (PolicyMapMutator[])null);
+        return parse(configFileIdentifier, container, (PolicyMapMutator[]) null);
     }
     
     
@@ -78,7 +78,7 @@ public final class PolicyConfigParser {
      * @param mutators to be registered with the new policy map
      * @return A PolicyMap populated from the WSIT config file
      */
-    public static <T extends PolicyMapMutator> PolicyMap parse(String configFileIdentifier, Container container, T...  mutators) throws PolicyException {
+    public static PolicyMap parse(String configFileIdentifier, Container container, PolicyMapMutator...  mutators) throws PolicyException {
         logger.entering("parse", container);
         PolicyMap map = null;
         try {
@@ -116,7 +116,7 @@ public final class PolicyConfigParser {
      * @return A PolicyMap populated from the WSIT config file
      */
     public static PolicyMap parse(URL configFileUrl) throws PolicyException {
-        return parse(configFileUrl, (PolicyMapMutator[])null);
+        return parse(configFileUrl, (PolicyMapMutator[]) null);
     }
 
 
@@ -130,7 +130,7 @@ public final class PolicyConfigParser {
      *
      * @return A PolicyMap populated from the WSIT config file
      */
-    public static <T extends PolicyMapMutator> PolicyMap parse(URL configFileUrl, T... mutators) throws PolicyException {
+    public static PolicyMap parse(URL configFileUrl, PolicyMapMutator... mutators) throws PolicyException {
         logger.entering("parse", new Object[] {configFileUrl, mutators});
         PolicyMap map = null;
         try {

@@ -124,8 +124,6 @@ public class ClientOutboundSequence extends OutboundSequence {
 
     }
 
-
-
     /**
      * Accessor for the sequenceConfig field
      *
@@ -134,8 +132,6 @@ public class ClientOutboundSequence extends OutboundSequence {
     public SequenceConfig getSequenceConfig() {
         return config;
     }
-
-
 
     /**
      * Mutator for the <code>receiveBufferSize</code> field.
@@ -162,7 +158,7 @@ public class ClientOutboundSequence extends OutboundSequence {
     /**
      * Return the hoped-for limit to number of stored messages.  Currently
      * the limit is not enforced, but as the number of stored messages approaches
-     * the limit, resends and ackRequests occurr more frequently.
+     * the limit, resends and ackRequests occur more frequently.
      */
     private int getTransferWindowSize() {
        //Use server size receive buffer size for now.  Might
@@ -269,9 +265,6 @@ public class ClientOutboundSequence extends OutboundSequence {
                             incomingID, null);
                 }
                 
-                //Todo
-                decryptAndValidate();
-                
                 //start the inactivity clock
                 resetLastActivityTime();
 
@@ -285,13 +278,7 @@ public class ClientOutboundSequence extends OutboundSequence {
         }
     }
 
-    public void decryptAndValidate(){
-        //We don't need to do anything:)  The SecurityPipe
-        //will do it.  They gave us the STR they will use and
-        //we sent it to the server-side in the CS message.  Thats
-        //all we need to do on the client side.
-
-    }
+   
 
     /**
      * Disconnect from the RMDestination by invoking <code>TerminateSequence</code> on
@@ -308,7 +295,14 @@ public class ClientOutboundSequence extends OutboundSequence {
         }
         
         isActive = false;
-
+ 
+        //TODO 
+        //Move this after waitForAcks to obviate  problems caused by
+        //the LastMessage Protocol message being processed concurrently with
+        //application messages.  At the moment, this may cause problems in
+        //Glassfish container with ordered delivery configured.  This will
+        //probably no longer be the case when the Tube/Fibre architecture
+        //is used.
         sendLast();
          
         //this will block until all messages are complete
@@ -320,7 +314,6 @@ public class ClientOutboundSequence extends OutboundSequence {
         ts.setIdentifier(idTerminate);
         protocolMessageSender.sendTerminateSequence(ts,this,version);
 
-        
     }
 
     private void sendLast() throws RMException{
@@ -531,11 +524,24 @@ public class ClientOutboundSequence extends OutboundSequence {
                                                        version);
                 }
                 
-            } catch (RMException e) {
-                //probably unrecoverable.  This is probably caused by the same condition
-                //forcing the heartbeat message to be resent.
-                //TODO Log something here
+            } catch (Exception e) {
+                //We get here in at least two cases.
+                //1. Client running in Webapp that is undeployed, 
+                //2. SequenceFault from AckRequested message.
+                //
+                //In both cases the sequence is of no further use.  We
+                //will assume for now that this is already the case.
+                
+                System.out.println("Exception from sending heartbeat message for sequence " +
+                        sequence.getId());
+         
+                try {
+                    RMSource.getRMSource().terminateSequence(sequence);
+                } catch (Exception ex){
+                    //we did our best.
+                }
                 //e.printStackTrace();
+            
             }
         }
     }
