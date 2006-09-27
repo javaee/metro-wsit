@@ -22,17 +22,10 @@
 
 package com.sun.xml.ws.policy.jaxws;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import javax.xml.namespace.QName;
 import javax.xml.stream.FactoryConfigurationError;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
 import javax.xml.ws.WebServiceException;
-import com.sun.xml.stream.buffer.XMLStreamBuffer;
-import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.ws.api.model.wsdl.WSDLExtension;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.policy.PolicyMapExtender;
@@ -44,9 +37,9 @@ import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
-import com.sun.xml.ws.policy.privateutil.ServiceFinder;
 import com.sun.xml.ws.policy.jaxws.spi.ModelConfiguratorProvider;
 import com.sun.xml.ws.policy.jaxws.spi.PolicyMapUpdateProvider;
+import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 
 /**
  * TODO: write doc
@@ -64,14 +57,14 @@ public class WSDLPolicyMapWrapper implements WSDLExtension {
     
     private static ModelConfiguratorProvider[] getModelConfiguratorProviders() {
         if (configurators == null) {
-            configurators = ServiceFinder.find(ModelConfiguratorProvider.class).toArray();
+            configurators = PolicyUtils.ServiceProvider.load(ModelConfiguratorProvider.class);
         }
         return configurators;
     }
     
     private static PolicyMapUpdateProvider[] getPolicyMapUpdateProviders() {
         if (policyMapUpdateProviders == null) {
-            policyMapUpdateProviders = ServiceFinder.find(PolicyMapUpdateProvider.class).toArray();
+            policyMapUpdateProviders = PolicyUtils.ServiceProvider.load(PolicyMapUpdateProvider.class);
         }
         return policyMapUpdateProviders;
     }

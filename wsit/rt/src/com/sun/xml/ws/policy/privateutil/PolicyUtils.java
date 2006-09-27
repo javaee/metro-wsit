@@ -279,4 +279,59 @@ public final class PolicyUtils {
             }
         }
     }
+
+    /**
+     * Wrapper for ServiceFinder class which is not part of the Java SE yet.
+     */
+    public static class ServiceProvider {
+        /**
+         * Locates and incrementally instantiates the available providers of a
+         * given service using the given class loader.
+         * <p/>
+         * <p> This method transforms the name of the given service class into a
+         * provider-configuration filename as described above and then uses the
+         * <tt>getResources</tt> method of the given class loader to find all
+         * available files with that name.  These files are then read and parsed to
+         * produce a list of provider-class names. Eventually each provider class is
+         * instantiated and array of those instances is returned.
+         * <p/>
+         * <p> Because it is possible for extensions to be installed into a running
+         * Java virtual machine, this method may return different results each time
+         * it is invoked. <p>
+         *
+         * @param service The service's abstract service class. Must not be {@code null}.
+         * @param loader  The class loader to be used to load provider-configuration files
+         *                and instantiate provider classes, or <tt>null</tt> if the system
+         *                class loader (or, failing that the bootstrap class loader) is to
+         *                be used
+         * @throws NullPointerException in case {@code service} input parameter is {@code null}.
+         * @throws ServiceConfigurationError If a provider-configuration file violates the specified format
+         *                                   or names a provider class that cannot be found and instantiated
+         * @see #load(Class)
+         */
+        public static <T> T[] load(Class<T> serviceClass, ClassLoader loader) {
+            return ServiceFinder.find(serviceClass, loader).toArray();
+        }
+        
+        /**
+         * Locates and incrementally instantiates the available providers of a
+         * given service using the context class loader.  This convenience method
+         * is equivalent to
+         * <p/>
+         * <pre>
+         *   ClassLoader cl = Thread.currentThread().getContextClassLoader();
+         *   return PolicyUtils.ServiceProvider.load(service, cl);
+         * </pre>
+         *
+         * @param service The service's abstract service class. Must not be {@code null}.
+         *
+         * @throws NullPointerException in case {@code service} input parameter is {@code null}.
+         * @throws ServiceConfigurationError If a provider-configuration file violates the specified format
+         *                                   or names a provider class that cannot be found and instantiated
+         * @see #load(Class, ClassLoader)
+         */
+        public static <T> T[] load(Class<T> serviceClass) {
+            return ServiceFinder.find(serviceClass).toArray();
+        }
+    }    
 }

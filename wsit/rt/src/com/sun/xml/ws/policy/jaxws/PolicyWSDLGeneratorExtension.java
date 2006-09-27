@@ -42,7 +42,6 @@ import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.wsdl.writer.WSDLGeneratorExtension;
 import com.sun.xml.ws.model.CheckedExceptionImpl;
 import com.sun.xml.ws.model.JavaMethodImpl;
-import com.sun.xml.ws.policy.EffectivePolicyModifier;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyConstants;
 import com.sun.xml.ws.policy.PolicyException;
@@ -52,7 +51,7 @@ import com.sun.xml.ws.policy.PolicyMerger;
 import com.sun.xml.ws.policy.PolicySubject;
 import com.sun.xml.ws.policy.jaxws.spi.PolicyMapUpdateProvider;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
-import com.sun.xml.ws.policy.privateutil.ServiceFinder;
+import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelGenerator;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelMarshaller;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
@@ -71,7 +70,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
     private Policy portPolicy = null;
     private Collection<PolicySubject> subjects;
     
-    private PolicyModelMarshaller marshaller = PolicyModelMarshaller.getXmlMarshaller();
+    private PolicyModelMarshaller marshaller = PolicyModelMarshaller.getXmlMarshaller(true);
     private PolicyMerger merger = PolicyMerger.getMerger();
     
     public void start(TypedXmlWriter root, SEIModel model, WSBinding binding, Container container) {
@@ -80,7 +79,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
             if (model != null) {
                 this.seiModel = model;
                 // QName serviceName = model.getServiceQName();
-                PolicyMapUpdateProvider[] policyMapUpdateProviders = ServiceFinder.find(PolicyMapUpdateProvider.class).toArray();
+                PolicyMapUpdateProvider[] policyMapUpdateProviders = PolicyUtils.ServiceProvider.load(PolicyMapUpdateProvider.class);
                 PolicyMapExtender[] extenders = new PolicyMapExtender[policyMapUpdateProviders.length];
                 for (int i=0; i<extenders.length; extenders[i++] = PolicyMapExtender.createPolicyMapExtender());
                 policyMap = PolicyConfigParser.parse(null, container, extenders);

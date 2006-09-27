@@ -22,7 +22,7 @@
 
 package com.sun.xml.ws.policy;
 
-import com.sun.xml.ws.policy.privateutil.ServiceFinder;
+import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import com.sun.xml.ws.policy.spi.PolicySelector;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -37,7 +37,7 @@ public class EffectiveAlternativeSelector {
     
     private static PolicySelector[] getSelectors() {
         if (selectors==null) {
-            selectors = ServiceFinder.find(PolicySelector.class).toArray();
+            selectors = PolicyUtils.ServiceProvider.load(PolicySelector.class);
         }
         return selectors;
     }

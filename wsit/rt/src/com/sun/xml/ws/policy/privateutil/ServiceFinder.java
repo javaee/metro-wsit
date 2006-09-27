@@ -154,7 +154,7 @@ public final class ServiceFinder<T> implements Iterable<T> {
      *                                   or names a provider class that cannot be found and instantiated
      * @see #find(Class)
      */
-    public static <T> ServiceFinder<T> find(Class<T> service, ClassLoader loader) {
+    static <T> ServiceFinder<T> find(Class<T> service, ClassLoader loader) {
         if (null==service) {
             throw new NullPointerException("service can not be null.");
         }

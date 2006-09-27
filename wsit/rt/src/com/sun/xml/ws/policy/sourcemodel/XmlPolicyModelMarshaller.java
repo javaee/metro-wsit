@@ -32,7 +32,13 @@ import com.sun.xml.txw2.output.StaxSerializer;
 import com.sun.xml.ws.policy.PolicyConstants;
 import com.sun.xml.ws.policy.PolicyException;
 
-public class XmlPolicyModelMarshaller extends PolicyModelMarshaller {
+public final class XmlPolicyModelMarshaller extends PolicyModelMarshaller {
+    
+    private boolean marshallInvisible;
+    
+    XmlPolicyModelMarshaller(boolean marshallInvisible) {
+        this.marshallInvisible = marshallInvisible;
+    }
     
     public void marshal(PolicySourceModel model, Object storage) throws PolicyException {
         if (storage instanceof TypedXmlWriter) {
@@ -56,7 +62,7 @@ public class XmlPolicyModelMarshaller extends PolicyModelMarshaller {
      * @param model A policy source model.
      * @param writer A typed XML writer.
      */
-    private static void marshal(PolicySourceModel model, TypedXmlWriter writer) throws PolicyException {
+    private void marshal(PolicySourceModel model, TypedXmlWriter writer) throws PolicyException {
         TypedXmlWriter policy = writer._element(PolicyConstants.POLICY, TypedXmlWriter.class);
         marshalPolicyAttributes(model, policy);
         marshal(model.getRootNode(), policy);
@@ -68,7 +74,7 @@ public class XmlPolicyModelMarshaller extends PolicyModelMarshaller {
      * @param model A policy source model.
      * @param writer An XML stream writer.
      */
-    private static void marshal(PolicySourceModel model, XMLStreamWriter writer) throws PolicyException {
+    private void marshal(PolicySourceModel model, XMLStreamWriter writer) throws PolicyException {
         StaxSerializer serializer = new StaxSerializer(writer);
         TypedXmlWriter policy = TXW.create(PolicyConstants.POLICY, TypedXmlWriter.class, serializer);
         policy._namespace(PolicyConstants.POLICY_NAMESPACE_URI, PolicyConstants.POLICY_NAMESPACE_PREFIX);
@@ -100,12 +106,12 @@ public class XmlPolicyModelMarshaller extends PolicyModelMarshaller {
      * Marshal given ModelNode and child elements on given TypedXmlWriter.
      *
      * @param rootNode The ModelNode that is marshalled.
-     * @param writer The TypedXmlWriter onto which the ModelNode is marshalled.
+     * @param writer The TypedXmlWriter onto which the content of the rootNode is marshalled.
      */
-    private static void marshal(ModelNode rootNode, TypedXmlWriter writer) {
+    private void marshal(ModelNode rootNode, TypedXmlWriter writer) {
         for (ModelNode node : rootNode) {
             AssertionData data = node.getNodeData();
-            if (data == null || !data.isPrivateAttributeSet()) {
+            if (marshallInvisible || data == null || !data.isPrivateAttributeSet()) {
                 TypedXmlWriter child = null;
                 if (data == null) {
                     child = writer._element(node.getType().asQName(), TypedXmlWriter.class);
