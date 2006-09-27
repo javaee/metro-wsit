@@ -53,17 +53,22 @@
                 
                 <sc:CallbackHandlerConfiguration xmlns:sc="http://schemas.sun.com/2006/03/wss/client">
                     <sc:CallbackHandler  name="usernameHandler"  default="Alice"/> 
-                    <sc:CallbackHandler  name="passwordHandler"  default="abcd!1234"/>
+                    <!--<sc:CallbackHandler  name="passwordHandler"  default="abcd!1234"/>-->
                 </sc:CallbackHandlerConfiguration>
                 
-                <tc:PreconfiguredSTS xmlns:tc="http://schemas.sun.com/ws/2006/05/trust/client" 
-                    endpoint="http://localhost:8080/jaxws-s5-sts/sts"
-                    wsdlLocation="WEB-INF/wsdl/sts.wsdl"
+                <tc:PreconfiguredSTS xmlns:tc="http://schemas.sun.com/ws/2006/05/trust/client"
+                   endpoint="local://D:/wsit-fresh/wsit/wsit/test/e2e/testcases/wstrust/scenario5/work/services/sts/war?CustomBinding_ISecurityTokenService"
+
+                    wsdlLocation="file:/D:/wsit-fresh/wsit/wsit/test/e2e/testcases/wstrust/scenario5/sts/sts.wsdl"
                     serviceName="SecurityTokenService"
                     portName="CustomBinding_ISecurityTokenService"
                     namespace="http://tempuri.org/">
                 </tc:PreconfiguredSTS>
-                
+
+                <!--endpoint="http://localhost:8080/jaxws-s5-sts/sts?wsdl"-->
+                <!--endpoint="local://D:/wsit-fresh/wsit/wsit/test/e2e/testcases/wstrust/scenario5/work/services/sts/war?CustomBinding_ISecurityTokenService"-->
+                 <!--endpoint="file:/D:/wsit-fresh/wsit/wsit/test/e2e/testcases/wstrust/scenario5/work/services/sts/war/WEB-INF/wsdl/sts.wsdl"-->
+
                 <!--tc:PreconfiguredSTS xmlns:tc="http://schemas.sun.com/ws/2006/05/trust/client" 
                     endpoint="http://131.107.72.15/Security_Federation_SecurityTokenService_Indigo/Symmetric.svc/Scenario_6_IssuedTokenForCertificateSecureConversation_MutualCertificate11"
                     wsdlLocation="file:etc/sts/sts.wsdl"
