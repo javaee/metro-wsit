@@ -151,7 +151,7 @@
 
     <wsdl:service name="SecurityTokenService">
         <wsdl:port name="CustomBinding_ISecurityTokenService" binding="tns:WSHttpBinding_ISecurityTokenService">
-            <soap12:address location="http://131.107.72.15/Security_Federation_SecurityTokenService_Indigo/Symmetric.svc/Scenario_6_IssuedTokenForCertificateSecureConversation_MutualCertificate11" /> 
+            <soap12:address location="REPLACE_WITH_ACTUAL_URL" /> 
             <wsa10:EndpointReference>
                 <wsa10:Address>http://131.107.72.15/Security_Federation_SecurityTokenService_Indigo/Symmetric.svc/Scenario_6_IssuedTokenForCertificateSecureConversation_MutualCertificate11</wsa10:Address> 
                 <Identity xmlns="http://schemas.microsoft.com/ws/2004/04/addressingidentityextension">
