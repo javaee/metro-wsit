@@ -45,6 +45,7 @@ import javax.xml.ws.handler.MessageContext;
 
 @ServiceMode(value=Service.Mode.PAYLOAD)
 @WebServiceProvider(wsdlLocation="WEB-INF/wsdl/sts.wsdl")
+@javax.xml.ws.BindingType(javax.xml.ws.soap.SOAPBinding.SOAP12HTTP_BINDING)
 public class STSImpl extends BaseSTSImpl implements Provider<Source>{
     @Resource
     protected WebServiceContext context;
