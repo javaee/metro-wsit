@@ -49,7 +49,7 @@
                         </wsp:Policy>
                     </sp:Layout>
                     <sp:AlgorithmSuite>
-                        <wsp:Policy><sp:Basic256/></wsp:Policy>
+                        <wsp:Policy><sp:Basic128/></wsp:Policy>
                     </sp:AlgorithmSuite>
                     <sp:IncludeTimestamp />
                     <sp:OnlySignEntireHeadersAndBody />

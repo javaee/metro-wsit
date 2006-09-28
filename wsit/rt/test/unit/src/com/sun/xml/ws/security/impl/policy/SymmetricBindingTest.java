@@ -120,7 +120,7 @@ public class SymmetricBindingTest extends TestCase {
                 assertTrue(sb.getTokenProtection());
                 
                 AlgorithmSuite aSuite = sb.getAlgorithmSuite();
-                assertEquals("Unmatched Algorithm",aSuite.getEncryptionAlgorithm(), AlgorithmSuiteValue.Basic256.getEncAlgorithm());
+                assertEquals("Unmatched Algorithm",aSuite.getEncryptionAlgorithm(), AlgorithmSuiteValue.Basic128.getEncAlgorithm());
                 
                 assertTrue(sb.isIncludeTimeStamp());
                 

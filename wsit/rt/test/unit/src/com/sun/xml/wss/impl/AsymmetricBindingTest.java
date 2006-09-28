@@ -92,7 +92,7 @@ public class AsymmetricBindingTest extends TestCase{
     
     public static void testSymmetricBindingTest() throws Exception {
        
-	    alg.setType(AlgorithmSuiteValue.Basic256);
+	    alg.setType(AlgorithmSuiteValue.Basic128);
     	    SignaturePolicy signaturePolicy = new SignaturePolicy();
             SignatureTarget st = new SignatureTarget();
 	    st.setType("qname");

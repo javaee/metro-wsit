@@ -91,7 +91,7 @@ public class EndorsingSignatureTest extends TestCase{
     
     public void testEndorsingSignatureTest() throws Exception {
      
-            alg.setType(AlgorithmSuiteValue.Basic256);
+            alg.setType(AlgorithmSuiteValue.Basic128);
             SignaturePolicy signaturePolicy = new SignaturePolicy();
             signaturePolicy.setUUID("22222");
             SignatureTarget st = new SignatureTarget();

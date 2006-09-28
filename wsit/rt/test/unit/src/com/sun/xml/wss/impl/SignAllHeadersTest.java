@@ -85,7 +85,7 @@ public class SignAllHeadersTest extends TestCase{
     }
     
     public static void testSignAllHeadersTest() throws Exception {
-            alg.setType(AlgorithmSuiteValue.Basic256);
+            alg.setType(AlgorithmSuiteValue.Basic128);
             SignaturePolicy signaturePolicy = new SignaturePolicy();
             SignatureTarget st = new SignatureTarget();
             st.setType("uri");

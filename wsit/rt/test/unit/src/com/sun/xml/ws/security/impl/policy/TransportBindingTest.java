@@ -111,7 +111,7 @@ public class TransportBindingTest extends TestCase {
                 TransportBinding tb = (TransportBinding)assertion;
                 
                 AlgorithmSuite aSuite = tb.getAlgorithmSuite();
-                assertEquals("Unmatched Algorithm",aSuite.getEncryptionAlgorithm(), AlgorithmSuiteValue.Basic256.getEncAlgorithm());
+                assertEquals("Unmatched Algorithm",aSuite.getEncryptionAlgorithm(), AlgorithmSuiteValue.Basic128.getEncAlgorithm());
                 
                 assertTrue(tb.isIncludeTimeStamp());
                 
