@@ -106,5 +106,12 @@
 
          </zip>
     </target>
+    
+    <target name="-post-compile-test"
+            description="Run unit tests of dependent projects">
+        <ant dir="${rt.dir}"
+             target="test"
+             inheritAll="false"/>
+    </target>
 
 </project>
