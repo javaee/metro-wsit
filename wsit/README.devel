@@ -1,0 +1,50 @@
+README for developers of WSIT
+-----------------------------
+
+1. HOW TO CHECK OUT AND BUILD WSIT
+
+Please see the project home page for details: https://wsit.dev.java.net/
+
+You need a working installation of Ant 1.6.5 to build the project.
+
+2. HOW TO RUN UNIT AND END-TO-END TESTS
+
+Unit tests test single classes only. End-to-end (e2e) tests test entire client-service invocations.
+
+2a. Run unit tests
+
+Option 1:
+Open the project in NetBeans, right-click the project and select "Test Project"
+
+Option 2:
+Make sure that you are having Ant's optional support for JUnit installed.
+Make sure that you are having JUnit 3.8.1 installed in $ANT_HOME/lib or in
+$HOME/.ant/lib or pass a "-lib etc/lib/junit-3.8.1.jar" parameter to Ant when
+you invoke it.
+cd to the WSIT main directory and invoke "ant test".
+
+2b. Run e2e tests
+
+cd to the WSIT test subdirectory and invoke "ant e2e".
+
+
+
+# The contents of this file are subject to the terms
+# of the Common Development and Distribution License
+# (the License).  You may not use this file except in
+# compliance with the License.
+# 
+# You can obtain a copy of the license at
+# https://glassfish.dev.java.net/public/CDDLv1.0.html.
+# See the License for the specific language governing
+# permissions and limitations under the License.
+# 
+# When distributing Covered Code, include this CDDL
+# Header Notice in each file and include the License file
+# at https://glassfish.dev.java.net/public/CDDLv1.0.html.
+# If applicable, add the following below the CDDL Header,
+# with the fields enclosed by brackets [] replaced by
+# you own identifying information:
+# "Portions Copyrighted [year] [name of copyright owner]"
+# 
+# Copyright 2006 Sun Microsystems Inc. All Rights Reserved
