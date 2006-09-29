@@ -36,10 +36,13 @@ import static com.sun.xml.ws.mex.MetadataConstants.WSA_W3C_NAMESPACE;
 import static com.sun.xml.ws.mex.MetadataConstants.WSA_PREFIX;
 
 /**
- * Class for making ws-transfer requests.
+ * Class for making mex Get requests (which are the same
+ * as ws-transfer Get requests). Currently only http requests
+ * are supported.
  */
 public class MetadataUtil {
     
+    // the transport-specific code is (mostly) here
     private HttpPoster postClient;
     
     private static final Logger logger =

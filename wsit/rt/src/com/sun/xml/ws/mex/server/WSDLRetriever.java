@@ -41,7 +41,8 @@ import static com.sun.xml.ws.mex.MetadataConstants.SCHEMA_DIALECT;
 import static com.sun.xml.ws.mex.MetadataConstants.WSDL_DIALECT;
 
 /**
- * Big TODO: error handling. Need to add localized exceptions.
+ * This class is used to add the endpoint's metadata to
+ * the mex MetadataResponse element.
  *
  * @author WS Development Team
  */
@@ -49,6 +50,13 @@ public class WSDLRetriever {
 
     private WSEndpoint endpoint;
     
+    /*
+     * This class is used by the SDDocument object in the
+     * jax-ws runtime. The agreement we have is to return
+     * null to the jax-ws runtime for mex responses. This
+     * tells the jax-ws runtime not to add schemaLocation
+     * attributes for schema import statements.
+     */
     private static final DocumentAddressResolver dar =
         new DocumentAddressResolver() {
         public String getRelativeAddressFor(SDDocument d1, SDDocument d2) {
@@ -60,6 +68,10 @@ public class WSDLRetriever {
         this.endpoint = endpoint;
     }
     
+    /*
+     * This method is called by the server pipe to write out
+     * the wsdl and schema documents to the mex response.
+     */
     void addDocuments(XMLStreamWriter writer, Packet request, String address)
         throws XMLStreamException {
         
@@ -70,6 +82,13 @@ public class WSDLRetriever {
         }
     }
     
+    /*
+     * This method writes out each individual document, which
+     * must be wrapped in a MetadataSection element within
+     * the mex response. It also sets the Dialect attribure
+     * of the section so that sections can be classified as
+     * wsdl, schema, etc. when parsed.
+     */
     private void writeDoc(XMLStreamWriter writer, SDDocument doc, String add)
         throws XMLStreamException {
         
@@ -78,19 +97,21 @@ public class WSDLRetriever {
                 "MetadataSection", MEX_NAMESPACE);
             if (doc.isWSDL()) {
                 writer.writeAttribute("Dialect", WSDL_DIALECT);
-            }
-            else if(doc.isSchema()) {
+            } else if(doc.isSchema()) {
                 writer.writeAttribute("Dialect", SCHEMA_DIALECT);
             }
             doc.writeTo(new PortAddressResolverImpl(add), dar, writer);
             writer.writeEndElement();
         } catch (IOException ioe) {
-            throw new WebServiceException(
-                "Exception while writing document to mex response", ioe);
+            // this should be very rare
+            throw new WebServiceException(ioe);
         }
     }
-    
-    // not sure how to deal with this
+
+    /*
+     * This object is passed to the jax-ws runtime to give
+     * the address to be included in the wsdl.
+     */
     static class PortAddressResolverImpl implements PortAddressResolver {
 
         private String address;

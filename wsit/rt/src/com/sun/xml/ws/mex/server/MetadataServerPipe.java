@@ -59,7 +59,15 @@ import static com.sun.xml.ws.mex.MetadataConstants.WSA_W3C_NAMESPACE;
 import static com.sun.xml.ws.mex.MetadataConstants.WSA_PREFIX;
 
 /**
- * todo: error handling, i18n
+ * This pipe handles any mex requests that come through. If a
+ * message comes through that has no headers or does not have
+ * a mex action in the header, then the pipe ignores the message
+ * and passes it on to the next pipe. Otherwise, it responds
+ * to a mex Get request and returns a fault for a GetMetadata
+ * request (these optional requests are not supported).
+ *
+ * TODO: Remove the createANSFault() method after the next
+ * jax-ws integration. See the method for more details.
  *
  * @author WS Development Team
  */
@@ -67,6 +75,8 @@ public class MetadataServerPipe extends AbstractFilterPipeImpl {
 
     private final WSDLRetriever wsdlRetriever;
     private final String soapNamespace;
+    
+    // Pipe accepts both versions of WS-A
     private final WsaRuntimeFactory wsaMSFactory;
     private final WsaRuntimeFactory wsaW3Factory;
 
@@ -79,7 +89,6 @@ public class MetadataServerPipe extends AbstractFilterPipeImpl {
 
         wsdlRetriever = new WSDLRetriever(endpoint);
 
-        // todo: get soap envelope namespace directly?
         // soap version has binding id, not namespace
         SOAPVersion version = endpoint.getBinding().getSOAPVersion();
         if (version == SOAPVersion.SOAP_11) {
@@ -110,15 +119,17 @@ public class MetadataServerPipe extends AbstractFilterPipeImpl {
             return next.process(request);
         }
         
+        // try w3c version of ws-a first, then member submission version
         AddressingProperties ap = wsaW3Factory.readHeaders(request);
         boolean useW3C = true;
         if (ap == null) {
             ap = wsaMSFactory.readHeaders(request);
             useW3C = false;
         }
+        
         if (ap != null && ap.getAction() != null) {
             if (ap.getAction().toString().equals(GET_REQUEST)) {
-                return processGetRequest(request, ap, GET_RESPONSE, useW3C);
+                return processGetRequest(request, ap, useW3C);
             } else if (ap.getAction().toString().equals(GET_METADATA_REQUEST)) {
                 return createANSFault(request, useW3C);
             }
@@ -126,8 +137,12 @@ public class MetadataServerPipe extends AbstractFilterPipeImpl {
         return next.process(request);
     }
 
+    /*
+     * This method creates an xml stream buffer, writes the response to
+     * it, and uses it to create a response message.
+     */
     private Packet processGetRequest(Packet request, AddressingProperties ap,
-        String responseAction, boolean useW3C) {
+        boolean useW3C) {
         
         try {
             String address = ap.getTo().toString();
@@ -142,7 +157,7 @@ public class MetadataServerPipe extends AbstractFilterPipeImpl {
             Message responseMessage = Messages.create(buffer);
             Packet response = request.createResponse(responseMessage);
             createResponseHeaders(request, response,
-                ap, responseAction, useW3C);
+                ap, useW3C);
             return response;
         } catch (XMLStreamBufferException bufferE) {
             throw new WebServiceException(bufferE);
@@ -173,8 +188,13 @@ public class MetadataServerPipe extends AbstractFilterPipeImpl {
         writer.writeStartElement(MEX_PREFIX, "Metadata", MEX_NAMESPACE);
     }
 
+    /*
+     * This method delegates WS-A header duties to the WS-A code
+     * for creating response headers based on the request headers.
+     * It also adds the mex-specific response action header.
+     */
     private void createResponseHeaders(Packet request, Packet response,
-        AddressingProperties requestProps, String action, boolean useW3C) {
+        AddressingProperties requestProps, boolean useW3C) {
 
         WsaRuntimeFactory wrf = wsaW3Factory;
         if (!useW3C) {
@@ -182,13 +202,15 @@ public class MetadataServerPipe extends AbstractFilterPipeImpl {
         }
         AddressingProperties responseProps =
             wrf.toOutbound(requestProps, request);
-        responseProps.setAction(action);
+        responseProps.setAction(GET_RESPONSE);
         wrf.writeHeaders(response, responseProps);
     }
 
     /*
      * Note: this method will be removed later and this pipe
-     * will instead be able to throw a ws-a exception.
+     * will instead be able to throw a ws-a exception. The exception
+     * will be caught by the ws-a pipe to create the necessary
+     * fault.
      */
     private Packet createANSFault(Packet request, boolean useW3C) {
         try {

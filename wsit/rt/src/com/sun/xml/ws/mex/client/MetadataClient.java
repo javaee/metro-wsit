@@ -38,6 +38,7 @@ import com.sun.istack.NotNull;
 import com.sun.xml.ws.mex.client.schema.Metadata;
 import com.sun.xml.ws.mex.client.schema.MetadataReference;
 import com.sun.xml.ws.mex.client.schema.MetadataSection;
+import org.w3c.dom.DOMException;
 
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -57,9 +58,6 @@ import static com.sun.xml.ws.mex.MetadataConstants.WSDL_DIALECT;
  * retrieved from the metadata with:
  * <p>
  * <code>Map&lt;QName, List&lt;PortInfo&gt;&gt; names = mClient.getServiceAndPortNames(mData);</code>
- * <p>
- * TODO: once we finalize any of this, need to
- * enhance the error handling.
  */
 public class MetadataClient {
     
@@ -94,7 +92,8 @@ public class MetadataClient {
      * clienr will try again adding "/mex" to the address.
      *
      * @param address The address used to query for Metadata
-     * @return The metadata object
+     * @return The metadata object, or null if no metadata could
+     *     be obtained from the service
      */
     public Metadata retrieveMetadata(@NotNull String address) {
         for (String suffix : suffixes) {
@@ -253,8 +252,8 @@ public class MetadataClient {
 
     /*
      * This is a workaround for a bug in some indigo wsdls
-     * that are being returned with schema imports containing
-     * an empty schemaLocation attribute.
+     * that are being returned with schema or wsdl imports
+     * containing empty location attributes.
      *
      * If getAny() returns null, the metadata section contains
      * a metadata reference or location rather than the wsdl.
@@ -268,43 +267,59 @@ public class MetadataClient {
         }
     }
 
+    /*
+     * This should be passed the top level wsdl:definitions node.
+     */
     private void cleanWSDLNode(final Node wsdlNode) {
         NodeList nodes = wsdlNode.getChildNodes();
         for (int i=0; i<nodes.getLength(); i++) {
-            Node typesNode = nodes.item(i);
-            if (typesNode.getLocalName() != null &&
-                typesNode.getLocalName().equals("types")) {
-                
-                NodeList schemaNodes = typesNode.getChildNodes();
-                for (int j=0; j<schemaNodes.getLength(); j++) {
-                    Node schemaNode = schemaNodes.item(j);
-                    if (schemaNode.getLocalName() != null &&
-                        schemaNode.getLocalName().equals("schema")) {
-                        
-                        cleanSchemaNode(schemaNode);
+            Node node = nodes.item(i);
+            if (node.getLocalName() != null) {
+                if (node.getLocalName().equals("types")) {
+                    NodeList schemaNodes = node.getChildNodes();
+                    for (int j=0; j<schemaNodes.getLength(); j++) {
+                        Node schemaNode = schemaNodes.item(j);
+                        if (schemaNode.getLocalName() != null &&
+                            schemaNode.getLocalName().equals("schema")) {
+                            
+                            cleanSchemaNode(schemaNode);
+                        }
                     }
+                } else if (node.getLocalName().equals("import")) {
+                    cleanImport(node);
                 }
             }
         }
     }
     
-    // remove this when cleanWSDLNode() is removed
     private void cleanSchemaNode(Node schemaNode) {
         NodeList children = schemaNode.getChildNodes();
         for (int i=0; i<children.getLength(); i++) {
             Node importNode = children.item(i);
             if (importNode.getLocalName() != null &&
                 importNode.getLocalName().equals("import")) {
+                cleanImport(importNode);            }
+        }
+    }
 
-                NamedNodeMap atts = importNode.getAttributes();
-                Node schemaLocation = atts.getNamedItem("schemaLocation");
-                if (schemaLocation != null &&
-                    schemaLocation.getNodeValue().equals("")) {
-                    
-                    atts.removeNamedItem("schemaLocation");
-                }
-                
-            }
+    /*
+     * Takes the import node itself and removes any empty
+     * schemaLocation or location attributes. There will
+     * only be one or the other, so the method returns if
+     * it finds a schema location.
+     */
+    private void cleanImport(Node importNode) {
+        NamedNodeMap atts = importNode.getAttributes();
+        Node location = atts.getNamedItem("schemaLocation");
+        if (location != null &&
+            location.getNodeValue().equals("")) {
+            atts.removeNamedItem("schemaLocation");
+            return;
+        }
+        location = atts.getNamedItem("location");
+        if (location != null &&
+            location.getNodeValue().equals("")) {
+            atts.removeNamedItem("location");
         }
     }
     
