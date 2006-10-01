@@ -199,7 +199,6 @@ public class RMClientPipe
     private synchronized void initialize(Packet packet) throws RMException {
         
         String dest = packet.endpointAddress.toString();
-        
         if (outboundSequence != null) {
             
             //sequence has already been initialized.  We need to
@@ -384,18 +383,13 @@ public class RMClientPipe
                 if (ret != null) {
                     //Perform operations in the RMSource according to the contents of
                     //the RM Headers on the incoming message.
-
-                    //Do not try to process fault message.  The headers will
-                    //be uninteresting.  Also, make sure that the returned packet
-                    //actually contains a message.  It may be a one-way response.
                     Message mess = ret.getMessage();                
-                    com.sun.xml.ws.rm.Message rmMessage ;
-                    if (mess == null || mess.isFault()) {
-                       return ret;
-                    } else {
+                    com.sun.xml.ws.rm.Message rmMessage = null;
+                    
+                    if (mess != null) {
                         rmMessage = handleInboundMessage(ret);
                     }
-                    
+                          
                     //if a diagnostic / debugging filter has been set, allow it to inspect
                     //the response message.
                      if (filter != null) {
@@ -434,8 +428,12 @@ public class RMClientPipe
            //
            //for a one-way message, we need to wait for an ack, indicated by (message.isComplete).
            //This will be the case when an ack has been received.
+            
            if (ret == null || !message.isComplete()) {
                 message.block();
+                if (message.isComplete()) {
+                    return ret;
+                }
            } else {
                 return ret;
            }
