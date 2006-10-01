@@ -1,5 +1,5 @@
 /*
- * $Id: Message.java,v 1.1 2006-05-03 22:56:35 arungupta Exp $
+ * $Id: Message.java,v 1.2 2006-10-01 22:17:19 mikeg Exp $
  */
 
 /*
@@ -222,7 +222,7 @@ public class Message {
      
         isWaiting = true;
         try {
-            while (isWaiting) {
+            while (!isComplete && isWaiting) {
                 wait();
             }
         } catch (InterruptedException e) {}
@@ -232,8 +232,8 @@ public class Message {
      * Wake up the current thread which is waiting on this Message's monitor.
      */
     public synchronized  void resume() {
-        isWaiting = false;
-        notify();
+            isWaiting = false;
+            notify();
     }
     
     public synchronized boolean isWaiting() {
