@@ -43,6 +43,12 @@ import javax.xml.ws.WebServiceException;
 
 import org.w3c.dom.Node;
 
+/**
+ * This class is used by the JAX-WS code when it needs to retrieve
+ * metadata from an endpoint using mex. An address is passed into
+ * the MetadataResolverImpl class, which creates a service
+ * descriptor and returns it.
+ */
 public class ServiceDescriptorImpl extends ServiceDescriptor {
     
     private final List<Source> wsdls;
@@ -52,6 +58,10 @@ public class ServiceDescriptorImpl extends ServiceDescriptor {
     private static final Logger logger =
         Logger.getLogger(ServiceDescriptorImpl.class.getName());
     
+    /**
+     * The ServiceDescriptorImpl constructor does the work of
+     * parsing the data in the Metadata object.
+     */
     public ServiceDescriptorImpl(Metadata mData) {
         wsdls = new ArrayList<Source>();
         schemas = new ArrayList<Source>();
@@ -61,7 +71,10 @@ public class ServiceDescriptorImpl extends ServiceDescriptor {
     
     /*
      * This will be called recursively for metadata sections
-     * that contain metadata references.
+     * that contain metadata references. A metadata section can
+     * contain the xml of metadata itself (the default case), a
+     * metadata reference that needs to be retrieved, or a
+     * mex location which can be retrieved with http GET call.
      */
     private void populateLists(Metadata mData) {
         for (MetadataSection section : mData.getMetadataSection()) {
@@ -75,6 +88,10 @@ public class ServiceDescriptorImpl extends ServiceDescriptor {
         }
     }
 
+    /*
+     * This is the normal case where a metadata section contains
+     * xml representing a wsdl, schema, etc.
+     */
     private void handleXml(MetadataSection section) {
         String dialect = section.getDialect();
         if (dialect.equals(WSDL_DIALECT)) {
@@ -88,11 +105,20 @@ public class ServiceDescriptorImpl extends ServiceDescriptor {
         }
     }
 
+    /*
+     * If the metadata section contains a metadata reference,
+     * retrieve the new metadata and add it to the lists. This
+     * method recursively calls the the populateLists method.
+     */
     private void handleReference(MetadataSection section) {
         MetadataReference ref = section.getMetadataReference();
         populateLists(new MetadataClient().retrieveMetadata(ref));
     }
     
+    /*
+     * A mex location is simply the url of a document that can
+     * be retrieved with an http GET call.
+     */
     private void handleLocation(MetadataSection section) {
         String location = section.getLocation();
         String dialect = section.getDialect();
@@ -119,11 +145,18 @@ public class ServiceDescriptorImpl extends ServiceDescriptor {
         return policies;
     }
     
+    /*
+     * Helper method used by handleXml() to turn the xml DOM nodes
+     * into Sources objects.
+     */
     private Source createSource(MetadataSection section) {
         Node n = (Node) section.getAny();
         return new DOMSource(n);
     }
     
+    /*
+     * Turn the address of a document into a source.
+     */
     private Source getSourceFromLocation(String address) {
         try {
             HttpPoster poster = new HttpPoster();

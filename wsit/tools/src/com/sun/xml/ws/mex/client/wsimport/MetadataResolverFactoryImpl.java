@@ -27,7 +27,10 @@ import com.sun.tools.ws.api.MetadataResolverFactory;
 import org.xml.sax.EntityResolver;
 
 /**
- * Factory class for metadata resolver.
+ * Factory class for metadata resolver. The JAX-WS code uses this
+ * class to instantiate a MetadataResolver object, and then uses
+ * that object to get a ServiceDescriptor by passing in the URL
+ * of a service.
  */
 public class MetadataResolverFactoryImpl extends MetadataResolverFactory {
     

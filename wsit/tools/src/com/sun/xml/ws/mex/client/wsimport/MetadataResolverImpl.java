@@ -45,7 +45,11 @@ public class MetadataResolverImpl extends MetaDataResolver {
     }
     
     /**
-     * This method is called by wsimport to retrieve metadata.
+     * This method is called by JAX-WS code to retrieve metadata.
+     * The contract is that, if there are problems trying to get the
+     * metadata with mex, this method returns null and the JAX-WS
+     * code can try retrieving it another way (for instance, with
+     * a ?wsdl http GET call).
      */
     public ServiceDescriptor resolve(URI location) {
         Metadata mData = mClient.retrieveMetadata(location.toString());
