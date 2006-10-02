@@ -60,6 +60,7 @@ import com.sun.xml.ws.security.trust.util.WSTrustUtil;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.rmi.RemoteException;
 import java.security.SecureRandom;
@@ -103,7 +104,7 @@ public class TrustPluginImpl implements TrustPlugin {
      * @param issuedToken, an instance of <sp:IssuedToken> or <sp:SecureConversation> assertion
      * @return issuedTokenContext, a context containing the issued Token and related information
      */
-    public IssuedTokenContext process(PolicyAssertion token, URL stsEP, URL wsdlLocation, QName serviceName, QName portName, String appliesTo){
+    public IssuedTokenContext process(PolicyAssertion token, URI stsEP, URI wsdlLocation, QName serviceName, QName portName, String appliesTo){
         IssuedToken issuedToken = (IssuedToken)token;
         RequestSecurityTokenTemplate rstTemplate = issuedToken.getRequestSecurityTokenTemplate();
         String stsURI = null;
@@ -112,7 +113,7 @@ public class TrustPluginImpl implements TrustPlugin {
         }else{
             stsURI = stsEP.toString();
         }
-        URL metadataAddress = null;
+        URI metadataAddress = null;
         try {
             metadataAddress = getAddressFromMetadata(issuedToken);
         } catch (MalformedURLException ex) {
@@ -125,7 +126,7 @@ public class TrustPluginImpl implements TrustPlugin {
         RequestSecurityTokenResponse result = null;
         try {
             RequestSecurityToken request = createRequest(rstTemplate, appliesTo);
-            result = invokeRST(request, wsdlLocation, serviceName, portName, stsURI);
+            result = invokeRST(request, wsdlLocation.toURL(), serviceName, portName, stsURI);
             IssuedTokenContext itc = new IssuedTokenContextImpl();
             WSTrustClientContract contract = WSTrustFactory.createWSTrustClientContract(config);
             contract.handleRSTR(request, result, itc);
@@ -134,6 +135,9 @@ public class TrustPluginImpl implements TrustPlugin {
             log.log(Level.SEVERE, "WST0016.problem.itCtx", ex);
             throw new RuntimeException(ex.toString());
         } catch (URISyntaxException ex){
+            log.log(Level.SEVERE, "WST0016.problem.itCtx", ex);
+            throw new RuntimeException(ex.toString());
+        } catch (MalformedURLException ex){
             log.log(Level.SEVERE, "WST0016.problem.itCtx", ex);
             throw new RuntimeException(ex.toString());
         } catch (WSTrustException ex){
@@ -300,7 +304,7 @@ public class TrustPluginImpl implements TrustPlugin {
         return null;
     }
     
-    private URL getAddressFromMetadata(final IssuedToken issuedToken) throws MalformedURLException {
+    private URI getAddressFromMetadata(final IssuedToken issuedToken) throws MalformedURLException {
         PolicyAssertion issuer = (PolicyAssertion)issuedToken.getIssuer();
         PolicyAssertion metadata = null;
         PolicyAssertion metadataSection = null;
@@ -351,7 +355,7 @@ public class TrustPluginImpl implements TrustPlugin {
                     PolicyAssertion assertion = it.next();
                     if ( PolicyUtil.isAddress(assertion)) {
                         address = (AttributedURI)assertion;
-                        return address.getURI().toURL();
+                        return address.getURI();
                     }
                 }
             }

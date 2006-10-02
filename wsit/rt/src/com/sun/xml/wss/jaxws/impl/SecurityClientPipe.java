@@ -30,7 +30,7 @@ import com.sun.xml.ws.policy.sourcemodel.PolicyModelTranslator;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
 import com.sun.xml.ws.security.impl.policy.Constants;
 import java.io.IOException;
-import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Hashtable;
@@ -38,6 +38,7 @@ import java.util.Enumeration;
 import java.util.Collection;
 import java.util.Collections;
 import java.net.URL;
+import java.net.URI;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
@@ -387,8 +388,8 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
             policies = getIssuedTokenPolicies(packet, OPERATION_SCOPE);
         }
         
-        URL stsEP = null;
-        URL wsdlLocation = null;
+        URI stsEP = null;
+        URI wsdlLocation = null;
         QName serviceName = null;
         QName portName = null;
         if(trustConfig != null){
@@ -401,17 +402,17 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
                     try {
                         String stsEPStr = attrs.get(new QName(CONFIG_NAMESPACE,ENDPOINT));
                         if (stsEPStr != null){
-                            stsEP = new URL(stsEPStr);
+                            stsEP = new URI(stsEPStr);
                         }
-                    } catch (MalformedURLException ex) {
+                    } catch (URISyntaxException ex) {
                         throw new RuntimeException(ex);
                     }
                     try {
                         String wsdlLocationStr = attrs.get(new QName(CONFIG_NAMESPACE,WSDL_LOCATION));
                         if (wsdlLocationStr != null){
-                            wsdlLocation = new URL(attrs.get(new QName(CONFIG_NAMESPACE,WSDL_LOCATION)));
+                            wsdlLocation = new URI(attrs.get(new QName(CONFIG_NAMESPACE,WSDL_LOCATION)));
                         }
-                    } catch (MalformedURLException ex) {
+                    } catch (URISyntaxException ex) {
                         throw new RuntimeException(ex);
                     }
                     
@@ -427,8 +428,23 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
                 }
             }
         } else {
-            stsEP = (URL)packet.invocationProperties.get(WSTrustConstants.PROPERTY_SERVICE_END_POINT);
-            wsdlLocation = (URL)packet.invocationProperties.get(WSTrustConstants.PROPERTY_URL);
+            try{
+                Object stsEPOb = packet.invocationProperties.get(WSTrustConstants.PROPERTY_SERVICE_END_POINT);
+                if (stsEPOb instanceof URL){
+                    stsEP = ((URL)stsEPOb).toURI();
+                }else{
+                    stsEP = (URI)stsEPOb;
+                }
+
+                Object wsdlLocationOb = packet.invocationProperties.get(WSTrustConstants.PROPERTY_URL);
+                if (wsdlLocationOb instanceof URL){
+                    wsdlLocation = ((URL)wsdlLocationOb).toURI();
+                }else{
+                    wsdlLocation = (URI)wsdlLocationOb;
+                }
+            }catch(URISyntaxException ex) {
+                throw new RuntimeException(ex);
+            }
             serviceName = (QName)packet.invocationProperties.get(WSTrustConstants.PROPERTY_SERVICE_NAME);
             portName = (QName)packet.invocationProperties.get(WSTrustConstants.PROPERTY_PORT_NAME);
         }

@@ -1,5 +1,5 @@
 /*
- * $Id: TrustPlugin.java,v 1.1 2006-05-03 22:57:14 arungupta Exp $
+ * $Id: TrustPlugin.java,v 1.2 2006-10-02 19:36:49 jdg6688 Exp $
  */
 
 /*
@@ -28,7 +28,7 @@ package com.sun.xml.ws.security.trust;
 
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.security.IssuedTokenContext;
-import java.net.URL;
+import java.net.URI;
 
 import java.util.Map;
 import javax.xml.namespace.QName;
@@ -40,6 +40,6 @@ public interface TrustPlugin {
      * @param issuedToken, an instance of <sp:IssuedToken> or <sp:SecureConversation> assertion
      * @return issuedTokenContext, a context containing the issued Token and related information
      */
-    public IssuedTokenContext process(PolicyAssertion issuedToken, URL stsEP, URL wsdlLocation, QName serviceName, QName portName, String appliesTo);
+    public IssuedTokenContext process(PolicyAssertion issuedToken, URI stsEP, URI wsdlLocation, QName serviceName, QName portName, String appliesTo);
 
 }
