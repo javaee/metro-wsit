@@ -22,13 +22,12 @@
 package wsrm.session.server;
 
 import com.sun.xml.ws.rm.jaxws.runtime.Session;
-import com.sun.xml.ws.rm.jaxws.runtime.server.ServerSession;
 
 import javax.annotation.Resource;
 import javax.jws.WebMethod;
 import javax.jws.WebService;
 import javax.xml.ws.WebServiceContext;
-
+import java.util.Hashtable;
 
 
 @WebService(endpointInterface="wsrm.session.server.RMDemo")
@@ -41,24 +40,24 @@ public class RMDemoImpl {
     private WebServiceContext context;
 
     /* Get Sesssion using well-known key in MessageContext */
-    private Session getSession() {
-        return (Session)context.getMessageContext()
+    private Hashtable getSession() {
+        return (Hashtable)context.getMessageContext()
                 .get("com.sun.xml.ws.session");
     }
 
     /* Get String associated with SessionID for current request */
 
     private String getSessionData() {
-        ServerSession session = (ServerSession)getSession();
-        String ret = (String)session.getSessionData();
+	Hashtable sess = getSession();
+        String ret = (String)sess.get("request_record");
         return ret != null ? ret : "";
 
     }
 
     /* Store String associated with SessionID for current request */
     private void setSessionData(String data) {
-        ServerSession session = (ServerSession)getSession();
-        session.setSessionData(data);
+        Hashtable session = getSession();
+        session.put("request_record", data);
     }
 
     /* RMDemo Methods */
