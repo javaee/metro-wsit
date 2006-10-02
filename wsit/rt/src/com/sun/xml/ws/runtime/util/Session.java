@@ -11,6 +11,12 @@ import com.sun.xml.ws.rm.Sequence;
  * @author Mike Grogan
  */
 public  class Session {
+    
+    /**
+     * Well-known invocationProperty names
+     */
+    public static final String SESSION_ID_KEY = "com.sun.xml.ws.sessionid";
+    public static final String SESSION_KEY = "com.sun.xml.ws.session";
 
     /**
      * Session manager that can handle Sessions of this exact type.
