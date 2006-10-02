@@ -62,6 +62,8 @@ import javax.xml.ws.addressing.*;
 import javax.xml.ws.soap.SOAPBinding;
 import java.net.URI;
 import java.util.HashMap;
+import com.sun.xml.ws.runtime.util.Session;
+import com.sun.xml.ws.runtime.util.SessionManager;
 
 /**
  * Server-side RM Pipe implementation
@@ -86,6 +88,9 @@ public class RMServerPipe extends PipeBase<RMDestination,
     protected WSBinding binding;
 
     private AddressingBuilder addressingBuilder = AddressingBuilder.newInstance();
+
+    private SessionManager sessionManager = 
+            SessionManager.getSessionManager();
 
     //populate map if wsa:Action values for protocol messages to handlers used to process
     //messages with those headers
@@ -207,9 +212,11 @@ public class RMServerPipe extends PipeBase<RMDestination,
             if (secureReliableMessaging)
                 checkSTR(packet,  inboundSequence);
 
-                       
-            packet.invocationProperties.put("com.sun.xml.ws.session", inboundSequence.getSession());
-            packet.invocationProperties.put("com.sun.xml.ws.sessionid", inboundSequence.getId());
+            //set com.sun.xml.ws.session and com.sun.xml.ws.sessionid
+            //invocationProperties if they have not already been set
+            //by SC pipe.
+            setSessionData(packet, inboundSequence);    
+           
            
 
             //If ordered deliver is configured,
@@ -497,7 +504,8 @@ public class RMServerPipe extends PipeBase<RMDestination,
             } else throw new RMSecurityException(Messages.NULL_SECURITY_TOKEN.format());
         }
 
-
+        startSession(inboundSequence);
+        
         if (offeredId == null) {
             inboundSequence.getOutboundSequence().saveMessages = false;
         }
@@ -579,9 +587,11 @@ public class RMServerPipe extends PipeBase<RMDestination,
         }
 
 
-        //close the session before we terminate the sequence
-        seq.setSession(null);
-        provider.terminateSequence(id);
+       //end the session if we own its lifetime..i.e. SC is not
+       //present
+       endSession(seq);
+       
+       provider.terminateSequence(id);
 
         AddressingProperties outboundAddressingProperties =
                 addressingBuilder.newAddressingProperties();
@@ -1045,5 +1055,66 @@ public class RMServerPipe extends PipeBase<RMDestination,
         } catch (SOAPException se) {
             throw new RMException(se);
         }
+          
     }
+    
+    /**
+     * Either creates a new <code>Session</code> for the 
+     * <code>InboundSequence</code> or returns one that has
+     * already been created by the SC Pipe.
+     *
+     * @param sequence The InboundSequence
+     * @return The Session
+     */
+    public Session startSession(InboundSequence sequence) {
+        String id = sequence.getSessionId();
+        Session sess = sessionManager.getSession(id);
+        if (sess == null) {
+            sess = sessionManager.createSession(id);
+        }
+        
+        sess.setSequence(sequence);
+        return sess;
+    }
+    
+    /**
+     * Terminates the session associated with the sequence if
+     * RM owns the lifetime of the session.. i.e. If SC is not present.
+     * 
+     * @param sequence The InboundSequence
+     */
+    public void endSession(InboundSequence sequence) {
+        String sessionId = sequence.getSessionId();
+        if (sessionId.equals(sequence.getId())) {
+            //we own the session
+            sessionManager.terminateSession(sessionId);
+        }
+    }
+    
+    /**
+     * Sets the session and session id properties in a request packet
+     * if necessary.  This will be the case if SC has not already done
+     * so.
+     *
+     * @param packet The packet.
+     * @param seq The sequence to which the request message belongs.
+     */
+    public void setSessionData(Packet packet, 
+                                InboundSequence seq) {
+        if (null == packet.invocationProperties
+                           .get(Session.SESSION_ID_KEY)) {
+            packet.invocationProperties
+                    .put(Session.SESSION_ID_KEY, seq.getSessionId());
+        }
+        
+        if (null == packet.invocationProperties
+                           .get(Session.SESSION_KEY)) {
+            Session sess = sessionManager.getSession(seq.getSessionId());
+            packet.invocationProperties
+                    .put(Session.SESSION_KEY, sess.getUserData());
+            
+        }
+    }
+     
+    
 }

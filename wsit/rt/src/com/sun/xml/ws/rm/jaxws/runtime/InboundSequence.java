@@ -189,6 +189,10 @@ public abstract class InboundSequence extends Sequence {
     public SequenceConfig getSequenceConfig() {
         return config;
     }
+    
+    public String getSessionId() {
+        return strId != null ? strId : getId();
+    }
 }
 
 

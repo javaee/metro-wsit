@@ -40,6 +40,7 @@ import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
 
 import javax.xml.ws.addressing.EndpointReference;
 import java.util.UUID;
+import com.sun.xml.ws.runtime.util.Session;
 
 /**
  * An <code>ServerInboundSequence</code> represents a sequence of incoming messages.  For an 
@@ -51,7 +52,7 @@ public class ServerInboundSequence extends InboundSequence {
     /**
      * Session associated with this sequence.
      */
-    private ServerSession session;
+    private Session session;
     
     public ServerInboundSequence( EndpointReference acksTo, 
                             String outboundId,
@@ -62,7 +63,6 @@ public class ServerInboundSequence extends InboundSequence {
         
         String id = "uuid:" + UUID.randomUUID();
         setId(id);
-        session = new ServerSession(id);
         
          //if flow control is enabled, set buffer size
         if (config.flowControl) {
@@ -90,14 +90,14 @@ public class ServerInboundSequence extends InboundSequence {
      *
      * @return The value of the session field.
      */
-    public ServerSession getSession() {
+    public Session getSession() {
         return session;
     }
 
     /**
      * Mutator for the <code>session</code> field.
      */
-    public void  setSession(ServerSession s) {
+    public void  setSession(Session s) {
         session = s;
     }
     
