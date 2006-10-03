@@ -23,11 +23,11 @@
 
 package com.sun.xml.ws.rm.protocol;
 
+import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import org.w3c.dom.Element;
 
 import javax.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
-import javax.xml.ws.addressing.EndpointReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -50,14 +50,14 @@ public class AcceptType {
      *
      * @return
      *     possible object is
-     *     {@link javax.xml.ws.addressing.EndpointReference }
+     *     {@link com.sun.xml.ws.api.addressing.WSEndpointReference }
      *
      */
-    public EndpointReference getAcksTo() {
+    public WSEndpointReference getAcksTo() {
           for (int i = 0 ; i < any.size(); i++) {
 
-            if (any.get(i) instanceof EndpointReference) {
-                return (EndpointReference)any.get(i);
+            if (any.get(i) instanceof WSEndpointReference) {
+                return (WSEndpointReference)any.get(i);
             }
         }
         return null;
@@ -68,10 +68,10 @@ public class AcceptType {
      *
      * @param value
      *     allowed object is
-     *     {@link EndpointReference }
+     *     {@link WSEndpointReference }
      *
      */
-    public void setAcksTo(EndpointReference value) {
+    public void setAcksTo(WSEndpointReference value) {
         this.any.add(value);
     }
 

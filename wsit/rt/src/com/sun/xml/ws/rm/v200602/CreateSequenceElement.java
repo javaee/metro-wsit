@@ -23,11 +23,11 @@
 
 package com.sun.xml.ws.rm.v200602;
 
+import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import org.w3c.dom.Element;
 
 import javax.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
-import javax.xml.ws.addressing.EndpointReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -67,7 +67,7 @@ import java.util.Map;
 public class CreateSequenceElement {
 
     @XmlElement(name = "AcksTo", namespace = "http://docs.oasis-open.org/ws-rx/wsrm/200602", required = true)
-    protected EndpointReference acksTo;
+    protected WSEndpointReference acksTo;
     @XmlElement(name = "Expires", namespace = "http://docs.oasis-open.org/ws-rx/wsrm/200602")
     protected Expires expires;
     @XmlElement(name = "Offer", namespace = "http://docs.oasis-open.org/ws-rx/wsrm/200602")
@@ -82,10 +82,10 @@ public class CreateSequenceElement {
      * 
      * @return
      *     possible object is
-     *     {@link EndpointReference }
+     *     {@link WSEndpointReference }
      *     
      */
-    public EndpointReference getAcksTo() {
+    public WSEndpointReference getAcksTo() {
         return acksTo;
     }
 
@@ -94,10 +94,10 @@ public class CreateSequenceElement {
      * 
      * @param value
      *     allowed object is
-     *     {@link EndpointReference }
+     *     {@link WSEndpointReference }
      *     
      */
-    public void setAcksTo(EndpointReference value) {
+    public void setAcksTo(WSEndpointReference value) {
         this.acksTo = value;
     }
 

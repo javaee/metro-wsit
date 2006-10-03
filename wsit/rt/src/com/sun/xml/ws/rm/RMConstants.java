@@ -29,13 +29,13 @@
  */
 
 package com.sun.xml.ws.rm;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
+
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
-import javax.xml.ws.addressing.AddressingBuilder;
-import javax.xml.ws.addressing.AddressingConstants;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
@@ -56,7 +56,7 @@ public class RMConstants {
     
     public static final String sunVersion = "http://sun.com/2006/03/rm";
         
-    private static AddressingBuilder ab;
+    private static AddressingVersion addressingVersion;
 
     private static final JAXBContext jc;
 
@@ -64,7 +64,7 @@ public class RMConstants {
     static {
         try {
             //jc = JAXBContext.newInstance(getPackageName()+":com.sun.xml.ws.security.impl.bindings");
-            ab = AddressingBuilder.newInstance();
+
             List<Class> classes = getClassesToBeBound();
 
             jc = JAXBContext.newInstance(classes.toArray(new Class[0]));
@@ -96,19 +96,7 @@ public class RMConstants {
         return Constants.WS_RM_NAMESPACE;
     }
 
-    /**
-     * Returns the <code>AddressingBuilder</code> for the version of WS-Addressing
-     * being used.
-     *
-     * @return The AddressingBuilder
-     */
-    public  static AddressingBuilder getAddressingBuilder() {
-        return ab;
-    }
 
-    public static AddressingConstants getAddressingConstants(){
-        return ab.newAddressingConstants();
-    }
 
     /**
      * Returns the value of the WS-Addressing Action property for CreateSeqence
@@ -333,8 +321,7 @@ public class RMConstants {
                     Class.forName(getPackageName()+ ".Expires")
             };
             classList = new ArrayList<Class>(Arrays.asList(classes));
-             if (ab.newAddressingConstants().getPackageName().
-                    equals("com.sun.xml.ws.addressing")){
+             if (getAddressingVersion().equals(AddressingVersion.W3C)){
 
                 classList.add(Class.forName(getPackageName()+ ".W3CAcksToImpl"));
             }    else {
@@ -345,6 +332,14 @@ public class RMConstants {
             throw new RMException("Cannot bind the following class with JAXBContext" + e);
         }
         return classList;
+    }
+
+    public static void setAddressingVersion(AddressingVersion version) {
+        addressingVersion = version;
+    }
+
+    public static com.sun.xml.ws.api.addressing.AddressingVersion getAddressingVersion() {
+        return addressingVersion;
     }
 
 }
