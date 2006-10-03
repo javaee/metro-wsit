@@ -39,32 +39,43 @@
         <ant dir="${tools.dir}" target="src-zip"/>
     </target>
 
-    <target name="integrate-jaxwsa-hudson" description="integrates latest JAX-WSA bits in WSIT, meant for internal consumption only">
-        <mkdir dir="tmp/jaxwsa"/>
-        <get src="http://kohsuke.sfbay/hudson/job/jaxwsa-ri-rearch-2005/lastSuccessfulBuild/artifact/jax-wsa-sources/jaxwsa-ri/build/lib/jaxwsa-api.jar"
-             dest="${lib.runtime.dir}/jaxwsa-api.jar"/>
-        <get src="http://kohsuke.sfbay/hudson/job/jaxwsa-ri-rearch-2005/lastSuccessfulBuild/artifact/jax-wsa-sources/jaxwsa-ri/lib/jaxwsa-api-src.zip"
-             dest="${lib.runtime.dir}/jaxwsa-api-src.zip"/>
-        <get src="http://kohsuke.sfbay/hudson/job/jaxwsa-ri/lastSuccessfulBuild/artifact/jax-wsa-sources/jaxwsa-ri/build/lib/jaxwsa-rt.jar"
-             dest="${lib.runtime.dir}/jaxwsa-rt.jar"/>
-        <get src="http://kohsuke.sfbay/hudson/job/jaxwsa-ri/lastSuccessfulBuild/artifact/jax-wsa-sources/jaxwsa-ri/build/jaxwsa-rt-src.zip"
-             dest="${lib.runtime.dir}/jaxwsa-rt-src.zip"/>
-        <get src="http://kohsuke.sfbay/hudson/job/jaxwsa-ri/lastSuccessfulBuild/artifact/jax-wsa-sources/jaxwsa-ri/build/lib/jaxwsa-tools.jar"
-             dest="${lib.tooltime.dir}/jaxwsa-tools.jar"/>
-        <get src="http://kohsuke.sfbay/hudson/job/jaxwsa-ri/lastSuccessfulBuild/artifact/jax-wsa-sources/jaxwsa-ri/build/jaxwsa-tools-src.zip"
-             dest="${lib.tooltime.dir}/jaxwsa-tools-src.zip"/>
+    <target name="integrate-jaxws-hudson" description="integrates latest JAX-WS 2.1 bits in WSIT, meant for internal consumption only">
+        <!-- JAX-WS 2.1 JARs -->
 
-        <get src="http://kohsuke.sfbay/hudson/job/jaxwsa-ri/lastSuccessfulBuild/artifact/jax-wsa-sources/jaxwsa-ri/build/jaxwsa-libs.zip"
-             dest="tmp/jaxwsa-libs.zip"/>
+        <!-- Unzip the JARs -->
+        <mkdir dir="${tmpdir}"/>
+        <get src="http://kohsuke.sfbay/hudson/job/jaxws-ri-21/lastSuccessfulBuild/artifact/jax-ws-sources/jaxws-ri/build/jaxws-ri.zip"
+                dest="${tmpdir}/jaxws-ri.zip"/>
+        <unzip src="${tmpdir}/jaxws-ri.zip" dest="${tmpdir}"/>
 
-        <unzip src="tmp/jaxwsa-libs.zip" dest="tmp/jaxwsa"/>
+        <!-- unzip the JAR source zips -->
+        <get src="http://kohsuke.sfbay/hudson/job/jaxws-ri-21/lastSuccessfulBuild/artifact/jax-ws-sources/jaxws-ri/build/jaxws-libs.src.zip"
+                dest="${tmpdir}/jaxws-libs.src.zip"/>
+        <unzip src="${tmpdir}/jaxws-libs.src.zip" dest="${tmpdir}"/>
+
+        <!-- copy to relevant directories -->
         <copy todir="${lib.runtime.dir}" overwrite="true" verbose="${verbose}">
-            <fileset dir="tmp/jaxwsa" includes="*.zip, *.jar" excludes="jaxb-xjc.*, *-tools.*"/>
+            <fileset dir="tmp/jaxws-ri/lib" includes="*.jar" excludes="jaxb-xjc.*, *-tools.*"/>
+            <fileset dir="tmp" includes="*.zip" excludes="jaxb-xjc.*, *-tools.*"/>
         </copy>
         <copy todir="${lib.tooltime.dir}" overwrite="true" verbose="${verbose}">
-            <fileset dir="tmp/jaxwsa" includes="jaxb-xjc.*, *-tools.*"/>
+            <fileset dir="tmp/jaxws-ri/lib" includes="jaxb-xjc.*, *-tools.*"/>
+            <fileset dir="tmp" includes="jaxb-xjc.*, *-tools.*"/>
         </copy>
-        <delete dir="tmp" includeemptydirs="true"/>
+
+        <!-- unzip the JAX-WS source zips -->
+        <get src="http://kohsuke.sfbay/hudson/job/jaxws-ri-21/lastSuccessfulBuild/artifact/jax-ws-sources/jaxws-ri/build/jaxws-rt.src.zip"
+                dest="${lib.runtime.dir}/jaxws-rt.src.zip"/>
+        <get src="http://kohsuke.sfbay/hudson/job/jaxws-ri-21/lastSuccessfulBuild/artifact/jax-ws-sources/jaxws-ri/build/jaxws-tools.src.zip"
+                dest="${lib.tooltime.dir}/jaxws-tools.src.zip"/>
+
+        <!-- Local transport JAR and Source -->
+        <!--<get src="http://kohsuke.sfbay/hudson/job/jaxws-ri-rearch-2005/lastSuccessfulBuild/artifact/jax-ws-sources/jaxws-ri/transports/local/build/jaxws-local-transport.jar"-->
+                <!--dest="${lib.dir}/jaxws-local-transport.jar"/>-->
+        <!--<get src="http://kohsuke.sfbay/hudson/job/jaxws-ri-rearch-2005/lastSuccessfulBuild/artifact/jax-ws-sources/jaxws-ri/transports/local/build/jaxws-local-transport-src.zip"-->
+                <!--dest="${lib.dir}/jaxws-local-transport-src.zip"/>-->
+
+        <!--<delete dir="${tmpdir}" includeemptydirs="true"/>-->
     </target>
 
     <target name="runtests">
