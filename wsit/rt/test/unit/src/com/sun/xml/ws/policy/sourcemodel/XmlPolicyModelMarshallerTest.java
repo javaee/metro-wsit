@@ -31,7 +31,7 @@ import junit.framework.*;
 import javax.xml.stream.XMLStreamWriter;
 
 public class XmlPolicyModelMarshallerTest extends TestCase {
-    private PolicyModelMarshaller marshaller = PolicyModelMarshaller.getXmlMarshaller();
+    private PolicyModelMarshaller marshaller = PolicyModelMarshaller.getXmlMarshaller(false);
     private PolicyModelUnmarshaller unmarshaller = PolicyModelUnmarshaller.getXmlUnmarshaller();
     
     public XmlPolicyModelMarshallerTest(String testName) {

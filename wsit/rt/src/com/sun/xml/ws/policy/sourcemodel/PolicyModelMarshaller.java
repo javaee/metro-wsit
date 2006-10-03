@@ -32,7 +32,8 @@ import com.sun.xml.ws.policy.PolicyException;
  * @author Marek Potociar
  */
 public abstract class PolicyModelMarshaller {
-    private static final PolicyModelMarshaller xmlMarshaller = new XmlPolicyModelMarshaller();
+    private static final PolicyModelMarshaller defaultXmlMarshaller = new XmlPolicyModelMarshaller(false);
+    private static final PolicyModelMarshaller invisibleAssertionXmlMarshaller = new XmlPolicyModelMarshaller(true);
     
     /**
      * Default constructor to ensure we have a common model marshaller base, but only our API classes implemented in this 
@@ -60,7 +61,7 @@ public abstract class PolicyModelMarshaller {
      */
     public abstract void marshal(Collection<PolicySourceModel> models, Object storage) throws PolicyException;
 
-    public static PolicyModelMarshaller getXmlMarshaller() {
-        return xmlMarshaller;
+    public static PolicyModelMarshaller getXmlMarshaller(boolean marshallInvisible) {
+        return (marshallInvisible) ? invisibleAssertionXmlMarshaller : defaultXmlMarshaller;
     }
 }

@@ -37,7 +37,6 @@ import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
-import com.sun.xml.ws.policy.privateutil.ServiceFinder;
 import com.sun.xml.ws.policy.spi.AssertionCreationException;
 import com.sun.xml.ws.policy.spi.PolicyAssertionCreator;
 
@@ -146,8 +145,8 @@ public final class PolicyModelTranslator {
         logger.entering("initPolicyAssertionCreatorsMap");
         Map<String, PolicyAssertionCreator> pacMap = new HashMap<String, PolicyAssertionCreator>();
         
-        ServiceFinder<PolicyAssertionCreator> serviceFinder = ServiceFinder.find(PolicyAssertionCreator.class, Thread.currentThread().getContextClassLoader());
-        for (PolicyAssertionCreator creator : serviceFinder) {
+        PolicyAssertionCreator[] creators = PolicyUtils.ServiceProvider.load(PolicyAssertionCreator.class);
+        for (PolicyAssertionCreator creator : creators) {
             String[] supportedURIs = creator.getSupportedDomainNamespaceURIs();
             String creatorClassName = creator.getClass().getName();
             
