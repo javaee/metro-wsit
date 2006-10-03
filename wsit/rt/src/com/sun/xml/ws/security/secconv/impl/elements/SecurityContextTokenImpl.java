@@ -1,5 +1,5 @@
 /*
- * $Id: SecurityContextTokenImpl.java,v 1.3 2006-09-18 23:03:01 manveen Exp $
+ * $Id: SecurityContextTokenImpl.java,v 1.4 2006-10-03 22:46:31 jdg6688 Exp $
  */
 
 /*
@@ -59,7 +59,7 @@ public class SecurityContextTokenImpl extends SecurityContextTokenType implement
     
     private String instance = null;
     private URI identifier = null;
-    private List extElements = null;
+    private List<Object> extElements = null;
     
     private static Logger log =
             Logger.getLogger(
@@ -104,7 +104,7 @@ public class SecurityContextTokenImpl extends SecurityContextTokenType implement
             }else{
                 getAny().add(object);
                 if(extElements == null){
-                    extElements = new ArrayList();
+                    extElements = new ArrayList<Object>();
                     extElements.add(object);
                 }
             }

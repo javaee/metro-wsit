@@ -176,7 +176,7 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
                  samlFac.createConditions(issuerInst, notOnOrAfter, null, null, null);
             Advice advice = samlFac.createAdvice(null, null, null);
 
-            List confirmationMethods = new ArrayList();
+            List<String> confirmationMethods = new ArrayList<String>();
             confirmationMethods.add(SAML_HOLDER_OF_KEY);
            
             // Create KeyInfo 
@@ -216,19 +216,19 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
                 claimedAttrs.remove(PRINCIPAL);
             }
             
-            List attrs = new ArrayList();
+            List<Attribute> attrs = new ArrayList<Attribute>();
             Set keys = claimedAttrs.keySet();
             Iterator iterator = keys.iterator();
             while (iterator.hasNext()){
                 String attrKey = (String)iterator.next();
                 QName value = (QName)claimedAttrs.get(attrKey);
-                List values = new ArrayList();
+                List<String> values = new ArrayList<String>();
                 values.add(value.getLocalPart());
                 Attribute attr = samlFac.createAttribute(attrKey, value.getNamespaceURI(), values);
                 attrs.add(attr);
             }
             AttributeStatement statement = samlFac.createAttributeStatement(subj, attrs);
-            List statements = new ArrayList();
+            List<AttributeStatement> statements = new ArrayList<AttributeStatement>();
             statements.add(statement);
             Assertion assertion = 
                    samlFac.createAssertion(assertionId, issuer, issuerInst, conditions, advice, statements);
@@ -302,7 +302,7 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
    protected Map getClaimedAttributes(Subject subject, String appliesTo, String tokenType){
        Set<Principal> principals = subject.getPrincipals();
        //List attrs = new ArrayList();
-       Map attrs = new HashMap();
+       Map<String, String> attrs = new HashMap<String, String>();
        if (principals != null){
            Iterator iterator = principals.iterator();
            while (iterator.hasNext()){

@@ -40,11 +40,11 @@ import java.util.Map;
  * @author Jiandong Guo
  */
 public class STSConfiguration implements Configuration{
-    Map spMap;
+    Map<String, TrustSPMetadata> spMap;
     String defaultType = BaseSTSImpl.DEFAULT_IMPL;
     
     public STSConfiguration(){
-        spMap = new HashMap();
+        spMap = new HashMap<String, TrustSPMetadata>();
     }
     
     public void addTrustSPMetadata(TrustSPMetadata data, String spEndpoint){

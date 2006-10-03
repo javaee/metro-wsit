@@ -45,7 +45,7 @@ import com.sun.xml.ws.security.secconv.logging.LogDomainConstants;
  */
 class SCSessionManagerImpl implements SCSessionManager{
     
-    Map sessions;
+    Map<String, IssuedTokenContext> sessions;
     
     private static Logger log =
             Logger.getLogger(
@@ -53,7 +53,7 @@ class SCSessionManagerImpl implements SCSessionManager{
             LogDomainConstants.WSSC_IMPL_DOMAIN_BUNDLE);
     
     protected SCSessionManagerImpl() {
-        sessions = new HashMap();
+        sessions = new HashMap<String, IssuedTokenContext>();
     }
     
     public Iterator getSecurityContextIds(){

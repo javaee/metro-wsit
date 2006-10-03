@@ -242,8 +242,8 @@ public class TrustPluginImpl implements TrustPlugin {
             }
         }
         Service service = Service.create(wsdlLocation, serviceName);
-        Dispatch dispatch = service.createDispatch(portName, fact.getContext(), Service.Mode.PAYLOAD);
-        dispatch = (Dispatch)addAddressingHeaders(dispatch);
+        Dispatch<Object> dispatch = service.createDispatch(portName, fact.getContext(), Service.Mode.PAYLOAD);
+        dispatch = addAddressingHeaders(dispatch);
         if (stsURI != null){
             dispatch.getRequestContext().put(javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY, stsURI);
         }
@@ -364,7 +364,7 @@ public class TrustPluginImpl implements TrustPlugin {
         return null;
     }
     
-    private BindingProvider addAddressingHeaders(BindingProvider provider) {
+    private Dispatch<Object> addAddressingHeaders(Dispatch<Object> provider) {
         AddressingBuilder builder = AddressingBuilder.newInstance();
         AddressingProperties ap = builder.newAddressingProperties();
         

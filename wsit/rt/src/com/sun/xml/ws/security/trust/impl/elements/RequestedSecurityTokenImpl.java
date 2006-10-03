@@ -1,5 +1,5 @@
 /*
- * $Id: RequestedSecurityTokenImpl.java,v 1.2 2006-09-20 23:58:48 manveen Exp $
+ * $Id: RequestedSecurityTokenImpl.java,v 1.3 2006-10-03 22:46:03 jdg6688 Exp $
  */
 
 /*
@@ -81,7 +81,7 @@ public class RequestedSecurityTokenImpl extends RequestedSecurityTokenType imple
     public RequestedSecurityTokenImpl(RequestedSecurityTokenType rdstType){
         Object rdst = rdstType.getAny();
         if (rdst instanceof JAXBElement){
-            JAXBElement<Object> rdstEle = (JAXBElement)rdst; 
+            JAXBElement rdstEle = (JAXBElement)rdst; 
            QName name = rdstEle.getName();
             if(SecurityContextToken_QNAME.equals(name)){
                 SecurityContextTokenType sctType = (SecurityContextTokenType)rdstEle.getValue();
@@ -124,7 +124,9 @@ public class RequestedSecurityTokenImpl extends RequestedSecurityTokenType imple
             JAXBContext jc =
                 WSTrustElementFactory.getContext();
             javax.xml.bind.Unmarshaller u = jc.createUnmarshaller();
-            return (RequestedSecurityTokenType)(((JAXBElement<RequestedSecurityTokenType>)u.unmarshal(element)).getValue());
+            
+            JAXBElement<RequestedSecurityTokenType> rstType = u.unmarshal(element, RequestedSecurityTokenType.class);
+            return rstType.getValue();
         } catch ( Exception ex) {
             log.log(Level.SEVERE,"WST0021.error.unmarshal.domElement", ex);                        
             throw new WSTrustException(ex.getMessage(), ex);
