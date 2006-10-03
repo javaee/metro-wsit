@@ -440,6 +440,8 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
                     String clientCfgFileName = PolicyUtils.ConfigFile.generateFullName(CLIENT_CONFIGURATION_IDENTIFIER);
                     URL clientCfgFileUrl = PolicyUtils.ConfigFile.loadAsResource(clientCfgFileName, null);
                     mapWrapper.addClientConfigToMap(clientCfgFileUrl);
+                    // TODO: uncomment to turn on client alternative selection
+                    // mapWrapper.doAlternativeSelection();
                     mapWrapper.configureModel(model);
                     map = mapWrapper.getPolicyMap();
                 }

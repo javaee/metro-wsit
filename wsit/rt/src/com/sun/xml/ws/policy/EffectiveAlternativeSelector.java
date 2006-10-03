@@ -3,12 +3,12 @@
  * of the Common Development and Distribution License
  * (the License).  You may not use this file except in
  * compliance with the License.
- * 
+ *
  * You can obtain a copy of the license at
  * https://glassfish.dev.java.net/public/CDDLv1.0.html.
  * See the License for the specific language governing
  * permissions and limitations under the License.
- * 
+ *
  * When distributing Covered Code, include this CDDL
  * Header Notice in each file and include the License file
  * at https://glassfish.dev.java.net/public/CDDLv1.0.html.
@@ -16,13 +16,15 @@
  * with the fields enclosed by brackets [] replaced by
  * you own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * 
+ *
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
 package com.sun.xml.ws.policy;
 
+import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
+import com.sun.xml.ws.policy.Messages;
 import com.sun.xml.ws.policy.spi.PolicySelector;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -33,7 +35,8 @@ import java.util.LinkedList;
  */
 public class EffectiveAlternativeSelector {
     
-    static PolicySelector[] selectors = null;
+    private static PolicySelector[] selectors = null;
+    private static final PolicyLogger logger = PolicyLogger.getLogger(EffectiveAlternativeSelector.class);
     
     private static PolicySelector[] getSelectors() {
         if (selectors==null) {
@@ -83,7 +86,7 @@ public class EffectiveAlternativeSelector {
             Policy oldPolicy, PolicySelector[] selectors) throws PolicyException {
         
         if(null==selectors || selectors.length==0) {
-            throw new PolicyException("No alternative selectors found.");
+            throw new PolicyException(Messages.NO_POLICY_SELECTORS_FOUND.format());
         }
         for (AssertionSet alternative : oldPolicy) {
             boolean alternativeIsOk = true;
@@ -93,7 +96,10 @@ public class EffectiveAlternativeSelector {
                     for ( PolicySelector selector : selectors ) {   // foreach selector
                         if (selector.isSupported(assertion.getName().getNamespaceURI())) { // namespace supported?
                             if (!selector.test(assertion)) {                    // assertion as well?
-                                alternativeIsOk = false;                        // not -> drop the alternative 
+                                alternativeIsOk = false;                        // not -> drop the alternative
+                                logger.warning("getNewEffectivePolicy", 
+                                        Messages.ASSERTION_REJECTED_BY_POLICY_SELECTOR.format(assertion.getName(),
+                                                                                              selector.getClass().toString()));
                                 break testing;                                  //     do not need further testing
                             } else { // single selector test ok
                                 assertionIsOk = true;                           // at least one module supports it
@@ -101,7 +107,9 @@ public class EffectiveAlternativeSelector {
                         }
                     } // end foreach selector
                     if (!assertionIsOk) {       // no supportive selector found
-                        alternativeIsOk = false;    // drop the whole alternative 
+                        alternativeIsOk = false;    // drop the whole alternative
+                        logger.warning("getNewEffectivePolicy", 
+                                Messages.NO_POLICY_SELECTOR_FOUND_FOR_ASSERTION.format(assertion.getName()));
                         break testing;
                     } // end if !assertionIsOk
                 } // end foreach assertion, end of testing:
@@ -111,6 +119,6 @@ public class EffectiveAlternativeSelector {
                     return new Policy(null,alternativeSet);
                 } // endif this alternative is ok
         }
-        throw new PolicyException("No supported alternative found.");
+        throw new PolicyException(Messages.NO_SUPPORTED_ALTERNATIVE_FOUND.format());
     }
 }

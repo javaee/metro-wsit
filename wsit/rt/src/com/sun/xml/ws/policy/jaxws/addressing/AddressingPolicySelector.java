@@ -36,15 +36,15 @@ public class AddressingPolicySelector extends PolicySelector{
     
     static {
         String wsapNamespaceUri = "http://schemas.xmlsoap.org/ws/2004/09/policy/addressing";
-        String wsaw1NamespaceUri = "http://www.w3.org/2005/08/addressing";
-        String wsaw2NamespaceUri = "http://www.w3.org/2005/08/addressing/wsdl";
+        String wsaw1NamespaceUri = "http://www.w3.org/2006/05/addressing/wsdl";
+        //String wsaw2NamespaceUri = "http://www.w3.org/2005/08/addressing/wsdl";
         String anUsingAddressing = "UsingAddressing";
-        String anAnonymous = "Anonymous";
+        //String anAnonymous = "Anonymous";
         supportedAssertions.add(new QName(wsapNamespaceUri, anUsingAddressing));
         supportedAssertions.add(new QName(wsaw1NamespaceUri, anUsingAddressing));
-        supportedAssertions.add(new QName(wsaw2NamespaceUri, anUsingAddressing));
-        supportedAssertions.add(new QName(wsaw1NamespaceUri, anAnonymous));
-        supportedAssertions.add(new QName(wsaw2NamespaceUri, anAnonymous));
+        //supportedAssertions.add(new QName(wsaw2NamespaceUri, anUsingAddressing));
+        //supportedAssertions.add(new QName(wsaw1NamespaceUri, anAnonymous));
+        //supportedAssertions.add(new QName(wsaw2NamespaceUri, anAnonymous));
     }
     
     /**
