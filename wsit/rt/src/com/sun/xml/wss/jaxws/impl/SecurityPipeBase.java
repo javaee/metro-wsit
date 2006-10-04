@@ -24,21 +24,15 @@
 package com.sun.xml.wss.jaxws.impl;
 
 import com.sun.xml.ws.addressing.jaxws.WsaWSDLOperationExtension;
-import com.sun.xml.ws.api.model.wsdl.WSDLExtension;
 import com.sun.xml.ws.api.model.wsdl.WSDLFault;
-import com.sun.xml.ws.model.wsdl.WSDLFaultImpl;
 import com.sun.xml.ws.security.impl.policyconv.XWSSPolicyGenerator;
 import com.sun.xml.ws.security.policy.Target;
 import com.sun.xml.ws.security.secconv.WSSCConstants;
-import com.sun.xml.ws.security.trust.WSTrustContract;
-import com.sun.xml.wss.impl.policy.PolicyGenerationException;
 import com.sun.xml.wss.impl.policy.mls.EncryptionPolicy;
-import com.sun.xml.wss.impl.policy.mls.EncryptionPolicy.FeatureBinding;
 import com.sun.xml.wss.impl.policy.mls.EncryptionTarget;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
-import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -50,7 +44,6 @@ import java.util.Hashtable;
 import javax.xml.namespace.QName;
 import java.net.URI;
 import javax.xml.soap.SOAPBody;
-import javax.xml.ws.addressing.AttributedURI;
 import javax.xml.ws.WebServiceException;
 import java.util.Set;
 import com.sun.xml.ws.api.message.Messages;
@@ -66,7 +59,6 @@ import com.sun.xml.ws.policy.NestedPolicy;
 import com.sun.xml.ws.security.impl.policyconv.SCTokenWrapper;
 import com.sun.xml.ws.security.impl.policyconv.SecurityPolicyHolder;
 import com.sun.xml.ws.api.pipe.Pipe;
-import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
@@ -76,7 +68,6 @@ import com.sun.xml.ws.policy.PolicyMerger;
 import com.sun.xml.ws.assembler.PipeConfiguration;
 import com.sun.xml.ws.security.policy.AsymmetricBinding;
 import com.sun.xml.ws.security.policy.AlgorithmSuite;
-import com.sun.xml.ws.security.policy.Binding;
 import com.sun.xml.ws.security.policy.SecureConversationToken;
 import com.sun.xml.ws.security.policy.SupportingTokens;
 import com.sun.xml.ws.security.policy.SymmetricBinding;
@@ -84,7 +75,6 @@ import com.sun.xml.ws.security.impl.policy.PolicyUtil;
 
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelTranslator;
-import javax.security.auth.callback.CallbackHandler;
 
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
@@ -95,22 +85,13 @@ import javax.xml.soap.SOAPConstants;
 
 import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.SecurityEnvironment;
-import com.sun.xml.wss.ProcessingContext;
-import com.sun.xml.wss.impl.SecurableSoapMessage;
 import com.sun.xml.wss.impl.policy.mls.MessagePolicy;
 import com.sun.xml.wss.impl.ProcessingContextImpl;
 import com.sun.xml.wss.impl.SecurityAnnotator;
 import com.sun.xml.wss.impl.SecurityRecipient;
 import com.sun.xml.wss.impl.PolicyViolationException;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelUnmarshaller;
-
-import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
-import com.sun.xml.ws.security.secconv.WSSecureConversationException;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
-import com.sun.xml.ws.security.trust.WSTrustFactory;
-import com.sun.xml.ws.security.trust.TrustPlugin;
-import com.sun.xml.ws.security.secconv.WSSCFactory;
-import com.sun.xml.ws.security.secconv.WSSCPlugin;
 import com.sun.xml.ws.policy.PolicyAssertion;
 
 import javax.xml.ws.addressing.AddressingBuilderFactory;
@@ -130,17 +111,16 @@ import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.ProcessingContext;
 import com.sun.xml.wss.impl.SecurableSoapMessage;
 import com.sun.xml.wss.impl.WssSoapFaultException;
-import com.sun.xml.wss.impl.misc.DefaultSecurityEnvironmentImpl;
 import com.sun.xml.wss.impl.misc.DefaultCallbackHandler;
 
 import com.sun.xml.ws.security.trust.WSTrustConstants;
-import com.sun.xml.ws.util.ServiceFinder;
 
 import com.sun.xml.ws.security.policy.KeyStore;
 import com.sun.xml.ws.security.policy.TrustStore;
 import com.sun.xml.ws.security.policy.CallbackHandlerConfiguration;
 import com.sun.xml.ws.security.policy.Validator;
 import com.sun.xml.ws.security.policy.ValidatorConfiguration;
+import com.sun.xml.ws.security.policy.WSSAssertion;
 
 import java.util.Properties;
 import org.w3c.dom.Element;
@@ -240,7 +220,12 @@ public abstract class SecurityPipeBase implements Pipe {
     // store as instance variable
     protected Unmarshaller unmarshaller =null;
     
-    protected String addressingURI;
+    protected String addressingURI; 
+    
+    //store instance variable: Binding has IssuedToken Policy
+    //TODO: temporary setting it true till venu provides a method
+    // for querying issuedTokens in Binding.
+    boolean hasIssuedTokens = true;
     
     static {
         try {
@@ -271,6 +256,14 @@ public abstract class SecurityPipeBase implements Pipe {
         soapFactory = pipeConfig.getBinding().getSOAPVersion().saajSoapFactory;
         this.inProtocolPM = new HashMap<String,SecurityPolicyHolder>();
         this.outProtocolPM = new HashMap<String,SecurityPolicyHolder>();
+        
+        //unmarshaller as instance variable of the pipe
+        try {
+            this.unmarshaller = jaxbContext.createUnmarshaller();
+        }catch (javax.xml.bind.JAXBException ex) {
+            throw new RuntimeException(ex);
+        }
+        
         try {
             if(wsPolicyMap != null){
                 collectPolicies();
@@ -279,7 +272,7 @@ public abstract class SecurityPipeBase implements Pipe {
         }catch (Exception e) {
             throw new RuntimeException(e);
         }
-        
+        //TODO: set the hasIssuedTokens flag here        
     }
     
     protected SecurityPipeBase(SecurityPipeBase that) {
@@ -298,6 +291,11 @@ public abstract class SecurityPipeBase implements Pipe {
         this.inProtocolPM = that.inProtocolPM;
         this.outProtocolPM = that.outProtocolPM;
         this.addressingURI = that.addressingURI;
+        try {
+            this.unmarshaller = jaxbContext.createUnmarshaller();
+        }catch (javax.xml.bind.JAXBException ex) {
+            throw new RuntimeException(ex);
+        }
     }
     
     protected String getValue(Header hdr) {
@@ -544,7 +542,7 @@ public abstract class SecurityPipeBase implements Pipe {
                   packet.invocationProperties);
         // set the policy, issued-token-map, and extraneous properties
         ctx.setIssuedTokenContextMap(issuedTokenContextMap);
-        ctx.setAlgorithmSuite(getBindingAlgorithmSuite(packet));
+        ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
         try {
             MessagePolicy policy = null;
             if (isRMMessage(packet)) {
@@ -564,6 +562,8 @@ public abstract class SecurityPipeBase implements Pipe {
                 if (debug) {
                     policy.dumpMessages(true);
                 }
+                // setting a flag if issued tokens present
+                ctx.hasIssuedToken(bindingHasIssuedTokenPolicy());
             }
             ctx.setSecurityEnvironment(secEnv);
             ctx.isInboundMessage(true);
@@ -572,6 +572,10 @@ public abstract class SecurityPipeBase implements Pipe {
         }
         
         return ctx;
+    }
+    
+    protected boolean bindingHasIssuedTokenPolicy() {
+        return hasIssuedTokens;
     }
     
     protected void checkSecurityHeader(MessagePolicy policy,Packet packet){
@@ -603,7 +607,7 @@ public abstract class SecurityPipeBase implements Pipe {
                   packet.invocationProperties);
         // set the policy, issued-token-map, and extraneous properties
         ctx.setIssuedTokenContextMap(issuedTokenContextMap);
-        ctx.setAlgorithmSuite(getBindingAlgorithmSuite(packet));
+        ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
         try {
             MessagePolicy policy = null;
             if (isRMMessage(packet)) {
@@ -753,6 +757,7 @@ public abstract class SecurityPipeBase implements Pipe {
                     policyList.add(operationPolicy);
                 }else{
                     //log fine message
+
                     //System.out.println("Operation Level Security policy is null");
                 }
                 
@@ -1061,12 +1066,9 @@ public abstract class SecurityPipeBase implements Pipe {
                   .get(JAXWSAConstants.CLIENT_ADDRESSING_PROPERTIES);
         if (ap != null) {
             AttributedURI uri = ap.getAction();
-            if (uri != null){
-                String uriValue = uri.toString();
-                if(WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_RESPONSE_ACTION.equals(uriValue) || 
-                      WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_ACTION .equals(uriValue)) {
-                    return true;
-                }
+            if (uri != null &&
+                      WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_ACTION .equals(uri.toString())) {
+                return true;
             }
         }
         return false;
@@ -1418,7 +1420,22 @@ public abstract class SecurityPipeBase implements Pipe {
     }
     
     
+    protected com.sun.xml.wss.impl.AlgorithmSuite getAlgoSuite(AlgorithmSuite suite) {
+        com.sun.xml.wss.impl.AlgorithmSuite als = new com.sun.xml.wss.impl.AlgorithmSuite(
+                suite.getDigestAlgorithm(),
+                suite.getEncryptionAlgorithm(),
+                suite.getSymmetricKeyAlgorithm(), 
+                suite.getAsymmetricKeyAlgorithm());
+                
+        return als;
+    }
     
+    protected com.sun.xml.wss.impl.WSSAssertion getWssAssertion(WSSAssertion asser) {
+        com.sun.xml.wss.impl.WSSAssertion assertion = new com.sun.xml.wss.impl.WSSAssertion(
+                asser.getRequiredProperties(),
+                asser.getType());
+        return assertion;
+    }
     
     protected abstract Policy getWSITConfig();
     

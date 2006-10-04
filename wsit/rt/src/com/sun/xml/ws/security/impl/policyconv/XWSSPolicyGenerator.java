@@ -209,13 +209,13 @@ public class XWSSPolicyGenerator {
         MessagePolicy mp = _policyContainer.getMessagePolicy();
         try{
             if(wssAssertion != null){
-                mp.setWSSAssertion((WSSAssertion)wssAssertion);
+                mp.setWSSAssertion(getWssAssertion((WSSAssertion)wssAssertion));
             }
             if(policyBinding.getAlgorithmSuite() != null){
-                mp.setAlgorithmSuite(policyBinding.getAlgorithmSuite());
+                mp.setAlgorithmSuite(getAlgoSuite(policyBinding.getAlgorithmSuite()));
             }
             if(policyBinding.getLayout()!= null){
-                mp.setLayout(policyBinding.getLayout());
+                mp.setLayout(getLayout(policyBinding.getLayout()));
             }
             if(isIncoming && reqElements.size() > 0){
                RequiredElementsProcessor rep =  new RequiredElementsProcessor(reqElements,mp);
@@ -292,4 +292,40 @@ public class XWSSPolicyGenerator {
         return true;
     }
     
+    protected com.sun.xml.wss.impl.AlgorithmSuite getAlgoSuite(AlgorithmSuite suite) {
+        com.sun.xml.wss.impl.AlgorithmSuite als = new com.sun.xml.wss.impl.AlgorithmSuite(
+                suite.getDigestAlgorithm(),
+                suite.getEncryptionAlgorithm(),
+                suite.getSymmetricKeyAlgorithm(), 
+                suite.getAsymmetricKeyAlgorithm());
+                
+        return als;
+    }
+    
+    protected com.sun.xml.wss.impl.WSSAssertion getWssAssertion(WSSAssertion asser) {
+        com.sun.xml.wss.impl.WSSAssertion assertion = new com.sun.xml.wss.impl.WSSAssertion(
+                asser.getRequiredProperties(),
+                asser.getType());
+        return assertion;
+    }
+    
+    protected com.sun.xml.wss.impl.MessageLayout getLayout(
+            com.sun.xml.ws.security.policy.MessageLayout layout) {
+        
+       switch(layout) {
+           case Strict :
+               return com.sun.xml.wss.impl.MessageLayout.Strict;
+           case Lax : 
+               return com.sun.xml.wss.impl.MessageLayout.Lax;
+           case LaxTsFirst : 
+               return com.sun.xml.wss.impl.MessageLayout.LaxTsFirst;
+           case LaxTsLast :
+               return com.sun.xml.wss.impl.MessageLayout.LaxTsLast;
+           default :
+               throw new RuntimeException("Unkown MessageLayout Enum Value Encountered");
+               
+       }
+        
+    }
+
 }

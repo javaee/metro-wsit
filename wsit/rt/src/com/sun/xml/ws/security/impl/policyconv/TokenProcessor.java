@@ -80,7 +80,7 @@ public class TokenProcessor {
             x509CB.setUUID(token.getTokenId());
             setX509TokenRefType(x509CB, (X509Token) token);
             setTokenInclusion(x509CB,(Token) tokenAssertion);
-            x509CB.setPolicyToken(token);
+            //x509CB.setPolicyToken(token);
             if(!ignoreDK && ((X509Token)token).isRequireDerivedKeys()){
                 DerivedTokenKeyBinding dtKB =  new DerivedTokenKeyBinding();
                 dtKB.setOriginalKeyBinding(x509CB);
@@ -95,7 +95,7 @@ public class TokenProcessor {
             sab.setUUID(token.getTokenId());
             sab.setReferenceType(MessageConstants.DIRECT_REFERENCE_TYPE);
             setTokenInclusion(sab,(Token) tokenAssertion);
-            sab.setPolicyToken((Token) tokenAssertion);
+            //sab.setPolicyToken((Token) tokenAssertion);
             if(((SamlToken)token).isRequireDerivedKeys()){
                 DerivedTokenKeyBinding dtKB =  new DerivedTokenKeyBinding();
                 dtKB.setOriginalKeyBinding(sab);
@@ -107,7 +107,7 @@ public class TokenProcessor {
         }else if(PolicyUtil.isIssuedToken(tokenAssertion)){
             IssuedTokenKeyBinding itkb = new IssuedTokenKeyBinding();
             setTokenInclusion(itkb,(Token) tokenAssertion);
-            itkb.setPolicyToken((Token) tokenAssertion);
+            //itkb.setPolicyToken((Token) tokenAssertion);
             itkb.setUUID(((Token)tokenAssertion).getTokenId());
             IssuedToken it = (IssuedToken)tokenAssertion;
             if(it.isRequireDerivedKeys()){
@@ -130,7 +130,7 @@ public class TokenProcessor {
                 policy.setKeyBinding(sct);
             }
             setTokenInclusion(sct,(Token) tokenAssertion);
-            sct.setPolicyToken((Token)tokenAssertion);
+            //sct.setPolicyToken((Token)tokenAssertion);
             sct.setUUID(((Token)tokenAssertion).getTokenId());
         }else{
             throw new UnsupportedOperationException("addKeyBinding for "+ token + "is not supported");
@@ -164,31 +164,31 @@ public class TokenProcessor {
             key  =  new AuthenticationTokenPolicy.UsernameTokenBinding();
             key.setUUID(token.getTokenId());
             setTokenInclusion(key,token);
-            key.setPolicyToken(token);
+            //key.setPolicyToken(token);
             return key;
         }else if(PolicyUtil.isSamlToken((PolicyAssertion) token)){
             AuthenticationTokenPolicy.SAMLAssertionBinding  key = null;
             key  = new AuthenticationTokenPolicy.SAMLAssertionBinding();
             setTokenInclusion(key,token);
-            key.setPolicyToken(token);
+            //key.setPolicyToken(token);
             key.setUUID(token.getTokenId());
             return key;
         }else if(PolicyUtil.isIssuedToken((PolicyAssertion) token)){
             IssuedTokenKeyBinding key = new IssuedTokenKeyBinding();
             setTokenInclusion(key,token);
-            key.setPolicyToken(token);
+            //key.setPolicyToken(token);
             key.setUUID(token.getTokenId());
             return key;
         }else if(PolicyUtil.isSecureConversationToken((PolicyAssertion) token)){
             SecureConversationTokenKeyBinding key =  new SecureConversationTokenKeyBinding();
             setTokenInclusion(key,token);
-            key.setPolicyToken(token);
+            //key.setPolicyToken(token);
             key.setUUID(token.getTokenId());
             return key;
         }else if(PolicyUtil.isX509Token((PolicyAssertion) token)){
             AuthenticationTokenPolicy.X509CertificateBinding  xt =  new AuthenticationTokenPolicy.X509CertificateBinding();
             xt.setUUID(token.getTokenId());
-            xt.setPolicyToken(token);
+            //xt.setPolicyToken(token);
             setTokenInclusion(xt,token);
             setX509TokenRefType(xt, (X509Token) token);
             return xt;

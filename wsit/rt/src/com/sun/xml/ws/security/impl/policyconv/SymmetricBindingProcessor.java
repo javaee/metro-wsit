@@ -143,7 +143,7 @@ public class SymmetricBindingProcessor extends BindingProcessor{
             //        (AuthenticationTokenPolicy.X509CertificateBinding)policy.newX509CertificateKeyBinding();
             x509CB.setUUID(token.getTokenId());
             tokenProcessor.setTokenInclusion(x509CB,(Token) tokenAssertion);
-            x509CB.setPolicyToken((Token) tokenAssertion);
+            //x509CB.setPolicyToken((Token) tokenAssertion);
             tokenProcessor.setX509TokenRefType(x509CB, (X509Token) token);
             
             if(((X509Token)token).isRequireDerivedKeys()){
@@ -161,7 +161,7 @@ public class SymmetricBindingProcessor extends BindingProcessor{
             sab.setUUID(token.getTokenId());
             sab.setReferenceType(MessageConstants.DIRECT_REFERENCE_TYPE);
             tokenProcessor.setTokenInclusion(sab,(Token) tokenAssertion);
-            sab.setPolicyToken((Token) tokenAssertion);
+            //sab.setPolicyToken((Token) tokenAssertion);
             if(((SamlToken)token).isRequireDerivedKeys()){
                 DerivedTokenKeyBinding dtKB =  new DerivedTokenKeyBinding();
                 dtKB.setOriginalKeyBinding(sab);
@@ -173,7 +173,7 @@ public class SymmetricBindingProcessor extends BindingProcessor{
         }else if(PolicyUtil.isIssuedToken(tokenAssertion)){
             IssuedTokenKeyBinding itkb = new IssuedTokenKeyBinding();
             tokenProcessor.setTokenInclusion(itkb,(Token) tokenAssertion);
-            itkb.setPolicyToken((Token) tokenAssertion);
+            //itkb.setPolicyToken((Token) tokenAssertion);
             itkb.setUUID(((Token)tokenAssertion).getTokenId());
             IssuedToken it = (IssuedToken)tokenAssertion;
             if(it.isRequireDerivedKeys()){
@@ -196,7 +196,7 @@ public class SymmetricBindingProcessor extends BindingProcessor{
                 policy.setKeyBinding(sct);
             }
             tokenProcessor.setTokenInclusion(sct,(Token) tokenAssertion);
-            sct.setPolicyToken((Token) tokenAssertion);
+            //sct.setPolicyToken((Token) tokenAssertion);
             sct.setUUID(((Token)tokenAssertion).getTokenId());
         }else{
             throw new UnsupportedOperationException("addKeyBinding for "+ token + "is not supported");
