@@ -28,7 +28,10 @@
 //
 package com.sun.xml.ws.rm.jaxws.runtime.client;
 import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.rm.*;
+import com.sun.xml.ws.rm.InvalidMessageNumberException;
+import com.sun.xml.ws.rm.Message;
+import com.sun.xml.ws.rm.RMConstants;
+import com.sun.xml.ws.rm.RMException;
 import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
 import com.sun.xml.ws.rm.protocol.*;
@@ -37,7 +40,6 @@ import com.sun.xml.ws.security.impl.bindings.SecurityTokenReferenceType;
 import javax.xml.bind.JAXBElement;
 import java.net.URI;
 import java.util.UUID;
-import com.sun.xml.ws.api.addressing.AddressingVersion;
 
 
 /**
@@ -241,8 +243,12 @@ public class ClientOutboundSequence extends OutboundSequence {
                 //TODO ... copy rest of eprAccept some day.
                 
                 if (accept != null) {
-
-                    URI uriAccept = accept.getAcksTo();
+                    /**
+                     * ADDRESSING_FIXME Needs to be fixes once
+                     * AcksTO issue is resolved
+                     */
+                   /* URI uriAccept = accept.getAcksTo();*/
+                   URI uriAccept = null;
 
                     inboundSequence = new ClientInboundSequence(this,
                             incomingID,

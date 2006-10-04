@@ -23,13 +23,11 @@
 package com.sun.xml.ws.rm.protocol;
 
 
-import com.sun.xml.ws.addressing.EndpointReferenceImpl;
 
-import javax.xml.bind.annotation.XmlAccessorType;
+
 import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.ws.wsaddressing.W3CEndpointReference;
-import java.net.URI;
 
 /**
  * <p>Java class for Acks To that refers to W3c  version
@@ -45,8 +43,8 @@ public class W3CAcksToImpl {//extends W3CEndpointReference {
 
      }
 
-    public W3CAcksToImpl(URI uri) {
+    /*public W3CAcksToImpl(URI uri) {
          super(uri);
-    }
+    }*/
 
 }
