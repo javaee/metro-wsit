@@ -64,8 +64,8 @@ public class ClientOutboundSequence extends OutboundSequence {
      *
      */
     protected ProtocolMessageSender protocolMessageSender ;
-    
-    
+
+
     private SOAPVersion version ;
 
     /**
@@ -85,34 +85,34 @@ public class ClientOutboundSequence extends OutboundSequence {
      * Indicates whether the sequence uses anonymous acksTo
      */
     private boolean isAnonymous = false;
-    
+
 
     /**
      * Last time that application or protocol message belonging to the sequence was received
      * at RMD.
      */
     private long lastActivityTime = System.currentTimeMillis();
-    
+
     /*
      * Flag which indicates whether sequence is active (disconnect() has not
      * been called.
      */
     private boolean isActive = true;
-    
+
     /**
      * Time after which resend of messages in sequences is attempted at
      * next opportunity.
      */
     private long resendDeadline;
-    
+
     /**
      * Time after which Ack is requested at next opportunity.
      */
     private long ackRequestDeadline;
-    
-    
+
+
     private static boolean sendHeartbeats = true;
-    
+
     public ClientOutboundSequence(SequenceConfig config) {
         this.config = config;
 
@@ -152,7 +152,7 @@ public class ClientOutboundSequence extends OutboundSequence {
     public boolean isSecureReliableMessaging() {
         return secureReliableMessaging;
     }
-    
+
     /**
      * Return the hoped-for limit to number of stored messages.  Currently
      * the limit is not enforced, but as the number of stored messages approaches
@@ -161,7 +161,7 @@ public class ClientOutboundSequence extends OutboundSequence {
     private int getTransferWindowSize() {
        //Use server size receive buffer size for now.  Might
        //want to make this configurable.
-       return config.getBufferSize(); 
+       return config.getBufferSize();
     }
 
     public void setSecureReliableMessaging(boolean secureReliableMessaging) {
@@ -187,25 +187,30 @@ public class ClientOutboundSequence extends OutboundSequence {
 
             String anonymous = RMConstants.getAnonymousURI().toString();
             String acksToString;
-                        
+
             if (acksTo == null) {
                 acksToString = anonymous;
             } else {
                 acksToString = acksTo.toString();
-                
+
             }
-            
+
             this.isAnonymous = acksToString.equals(anonymous);
 
-            
+
             CreateSequenceElement cs = new CreateSequenceElement();
 
-            if (RMConstants.getAddressingVersion() == AddressingVersion.W3C){
+            /**
+             * ADDRESSING_FIXME
+             * This needs to be fixed commenting temporarily to get the compilation
+             * problems fixed
+             */
+            /*if (RMConstants.getAddressingVersion() == AddressingVersion.W3C){
                 cs.setAcksTo(new W3CAcksToImpl(new URI(acksToString)));
             }    else {
                 cs.setAcksTo(new MemberSubmissionAcksToImpl(new URI(acksToString)));
                 
-            }
+            }*/
             String incomingID = "uuid:" + UUID.randomUUID();
 
             if (twoWay) {

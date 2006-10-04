@@ -22,12 +22,10 @@
 
 package com.sun.xml.ws.rm.protocol;
 
-import com.sun.xml.ws.addressing.v200408.EndpointReferenceImpl;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.net.URI;
 
 /**
  * <p>Java class for Acks To that refers to Member submission version
@@ -37,14 +35,14 @@ import java.net.URI;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "AcksTo", namespace="http://schemas.xmlsoap.org/ws/2005/02/rm" )
 
-public class MemberSubmissionAcksToImpl extends EndpointReferenceImpl {
+public class MemberSubmissionAcksToImpl {//extends MemberSubmissionEndpointReference {
 
      public MemberSubmissionAcksToImpl(){
 
      }
 
-    public MemberSubmissionAcksToImpl(URI uri){
+    /*public MemberSubmissionAcksToImpl(URI uri){
          super(uri);
-     }
+     }*/
 
 }
