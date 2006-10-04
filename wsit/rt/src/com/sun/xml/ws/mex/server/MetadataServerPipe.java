@@ -26,7 +26,6 @@ import javax.xml.stream.XMLStreamWriter;
 import javax.xml.ws.WebServiceException;
 
 import com.sun.xml.stream.buffer.MutableXMLStreamBuffer;
-
 import com.sun.xml.ws.addressing.model.ActionNotSupportedException;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.message.HeaderList;
@@ -41,10 +40,9 @@ import com.sun.xml.ws.api.SOAPVersion;
 
 import static com.sun.xml.ws.mex.MetadataConstants.GET_METADATA_REQUEST;
 import static com.sun.xml.ws.mex.MetadataConstants.GET_REQUEST;
+import static com.sun.xml.ws.mex.MetadataConstants.GET_RESPONSE;
 import static com.sun.xml.ws.mex.MetadataConstants.MEX_NAMESPACE;
 import static com.sun.xml.ws.mex.MetadataConstants.MEX_PREFIX;
-import static com.sun.xml.ws.mex.MetadataConstants.WSA_MS_NAMESPACE;
-import static com.sun.xml.ws.mex.MetadataConstants.WSA_W3C_NAMESPACE;
 import static com.sun.xml.ws.mex.MetadataConstants.WSA_PREFIX;
 
 /**
@@ -94,16 +92,16 @@ public class MetadataServerPipe extends AbstractFilterPipeImpl {
         HeaderList headers = request.getMessage().getHeaders();
         String action = headers.getAction(AddressingVersion.W3C, soapVersion);
         String toAddress = headers.getTo(AddressingVersion.W3C, soapVersion);
-        boolean useW3C = true;
+        AddressingVersion av = AddressingVersion.W3C;
         if (action == null) {
             action = headers.getAction(AddressingVersion.MEMBER, soapVersion);
             toAddress = headers.getTo(AddressingVersion.MEMBER, soapVersion);
-            useW3C = false;
+            av = AddressingVersion.MEMBER;
         }
         
         if (action != null) {
             if (action.equals(GET_REQUEST)) {
-                return processGetRequest(request, toAddress, useW3C);
+                return processGetRequest(request, toAddress, av);
             } else if (action.equals(GET_METADATA_REQUEST)) {
                 throw new ActionNotSupportedException(GET_METADATA_REQUEST);
             }
@@ -115,27 +113,29 @@ public class MetadataServerPipe extends AbstractFilterPipeImpl {
      * This method creates an xml stream buffer, writes the response to
      * it, and uses it to create a response message.
      */
-    private Packet processGetRequest(Packet req, String add, boolean useW3C) {
+    private Packet processGetRequest(Packet request,
+        String address, AddressingVersion av) {
+        
         try {
             MutableXMLStreamBuffer buffer = new MutableXMLStreamBuffer();
             XMLStreamWriter writer = buffer.createFromXMLStreamWriter();
 
-            writeStartEnvelope(writer, useW3C);
-            wsdlRetriever.addDocuments(writer, req, add);
+            writeStartEnvelope(writer, av);
+            wsdlRetriever.addDocuments(writer, request, address);
             writer.writeEndDocument();
             writer.flush();
 
             Message responseMessage = Messages.create(buffer);
-            Packet response = req.createResponse(responseMessage);
-            createResponseHeaders(req, response, useW3C);
+            Packet response = request.createServerResponse(responseMessage,
+                av, soapVersion, GET_RESPONSE);
             return response;
         } catch (XMLStreamException streamE) {
             throw new WebServiceException(streamE);
         }
     }
 
-    private void writeStartEnvelope(XMLStreamWriter writer, boolean useW3C) 
-        throws XMLStreamException {
+    private void writeStartEnvelope(XMLStreamWriter writer,
+        AddressingVersion av) throws XMLStreamException {
 
         String soapPrefix = "soapenv";
 
@@ -145,69 +145,11 @@ public class MetadataServerPipe extends AbstractFilterPipeImpl {
         // todo: this line should go away after bug fix - 6418039
         writer.writeNamespace(soapPrefix, soapVersion.nsUri);
 
-        if (useW3C) {
-            writer.writeNamespace(WSA_PREFIX, WSA_W3C_NAMESPACE);
-        } else {
-            writer.writeNamespace(WSA_PREFIX, WSA_MS_NAMESPACE);
-        }
+        writer.writeNamespace(WSA_PREFIX, av.nsUri);
         writer.writeNamespace(MEX_PREFIX, MEX_NAMESPACE);
 
         writer.writeStartElement(soapPrefix, "Body", soapVersion.nsUri);
         writer.writeStartElement(MEX_PREFIX, "Metadata", MEX_NAMESPACE);
     }
-
-    /*
-     * This method delegates WS-A header duties to the WS-A code
-     * for creating response headers based on the request headers.
-     * It also adds the mex-specific response action header.
-     */
-    private void createResponseHeaders(Packet request, Packet response,
-        boolean useW3C) {
-
-//        WsaRuntimeFactory wrf = wsaW3Factory;
-//        if (!useW3C) {
-//            wrf = wsaMSFactory;
-//        }
-//        AddressingProperties responseProps =
-//            wrf.toOutbound(requestProps, request);
-//        responseProps.setAction(GET_RESPONSE);
-//        wrf.writeHeaders(response, responseProps);
-    }
-
-    /*
-     * Note: this method will be removed later and this pipe
-     * will instead be able to throw a ws-a exception. The exception
-     * will be caught by the ws-a pipe to create the necessary
-     * fault.
-     */
-//    private Packet createANSFault(Packet request, boolean useW3C) {
-//        try {
-//            SOAPFactory factory;
-//            SOAPFault fault;
-//            String wsaNamespace = WSA_W3C_NAMESPACE;
-//            if (!useW3C) {
-//                wsaNamespace = WSA_MS_NAMESPACE;
-//            }
-//            QName wsaFaultCode = new QName(wsaNamespace, "ActionNotSupported");
-//            if (soapNamespace.equals(SOAP_1_1)) {
-//                factory = SOAPVersion.SOAP_11.saajSoapFactory;
-//                fault = factory.createFault();
-//                fault.setFaultCode(wsaFaultCode);
-//            } else {
-//                factory = SOAPVersion.SOAP_12.saajSoapFactory;
-//                fault = factory.createFault();
-//                fault.setFaultCode(JAXWSAConstants.SOAP12_SENDER_QNAME);
-//                fault.appendFaultSubcode(wsaFaultCode);
-//                fault.setFaultString("The " +
-//                    GET_METADATA_REQUEST +
-//                    " cannot be processed at the receiver");
-//            }
-//            Message faultMessage = Messages.create(fault);
-//            return request.createResponse(faultMessage);
-//        } catch (SOAPException se) {
-//            throw new WebServiceException(
-//                "Exception while trying to create fault message", se);
-//        }
-//    }
     
 }
