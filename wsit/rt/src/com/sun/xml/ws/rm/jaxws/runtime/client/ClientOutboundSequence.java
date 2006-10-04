@@ -237,19 +237,11 @@ public class ClientOutboundSequence extends OutboundSequence {
                 
                 if (accept != null) {
 
-                    EndpointReference eprAccept = accept.getAcksTo();
+                    URI uriAccept = accept.getAcksTo();
 
-                    EndpointReference eprNew = null;
-                    if (eprAccept.getAddress()!=null) {
-
-                        eprNew = AddressingBuilder
-                                .newInstance()
-                                .newEndpointReference(
-                                        eprAccept.getAddress().getURI());
-                    }
                     inboundSequence = new ClientInboundSequence(this,
                             incomingID,
-                            eprNew);
+                            uriAccept);
                 } else {
                     inboundSequence = new ClientInboundSequence(this,
                             incomingID, null);
