@@ -42,7 +42,7 @@ import java.util.UUID;
 import java.util.logging.Level;
 import javax.xml.namespace.QName;
 import static com.sun.xml.ws.security.impl.policy.Constants.*;
-import javax.xml.ws.addressing.EndpointReference;
+
 import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
 /**
  *

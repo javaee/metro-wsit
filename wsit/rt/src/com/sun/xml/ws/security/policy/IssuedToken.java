@@ -23,7 +23,7 @@
 
 package com.sun.xml.ws.security.policy;
 import java.util.Iterator;
-import javax.xml.ws.addressing.EndpointReference;
+
 
 /**
  * This element represents a requirement for an issued token, that is one issued by some token

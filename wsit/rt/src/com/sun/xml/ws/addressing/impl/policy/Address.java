@@ -38,7 +38,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
 import javax.xml.namespace.QName;
-import javax.xml.ws.addressing.AttributedURI;
 import java.util.logging.Level;
 import static com.sun.xml.ws.security.impl.policy.Constants.logger;
 /**
@@ -77,13 +76,7 @@ public class Address extends com.sun.xml.ws.policy.PolicyAssertion implements co
         return address;
     }
     
-    public void setURI(URI address) {
-        this.address = address;
-    }
-    
-    public void addAttribute(QName qName, String string) {
-    }
-    
+       
     public String getNamespaceURI() {
         throw new UnsupportedOperationException();
     }

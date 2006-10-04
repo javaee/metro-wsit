@@ -44,18 +44,14 @@ import java.util.Iterator;
 import static com.sun.xml.ws.security.impl.policy.Constants.logger;
 import java.util.List;
 import javax.xml.namespace.QName;
-import javax.xml.ws.addressing.AddressingException;
-import javax.xml.ws.addressing.AttributedURI;
-import javax.xml.ws.addressing.Metadata;
-import javax.xml.ws.addressing.ReferenceParameters;
 
 /**
  *
  * @author Abhijit Das
  */
-public class EndpointReference extends com.sun.xml.ws.policy.PolicyAssertion implements javax.xml.ws.addressing.EndpointReference {
+public class EndpointReference extends com.sun.xml.ws.policy.PolicyAssertion  {
     
-    private AttributedURI address;
+    private Address address;
     private boolean populated = false;
     
     /**
@@ -65,15 +61,12 @@ public class EndpointReference extends com.sun.xml.ws.policy.PolicyAssertion imp
         super(name,nestedAssertions,nestedAlternative);
     }
     
-    public AttributedURI getAddress() {
+    public Address getAddress() {
         populate();
         return address;
     }
     
-    public void setAddress(AttributedURI address) {
-        this.address = address;
-    }
-    
+       
     private void populate() {
         if(populated){
             return;
@@ -94,51 +87,5 @@ public class EndpointReference extends com.sun.xml.ws.policy.PolicyAssertion imp
         }
     }
     
-    public ReferenceParameters getReferenceParameters() {
-        throw new UnsupportedOperationException();
-    }
 
-    public void addReferenceParameter(QName name, String value) {
-        throw new UnsupportedOperationException();
-    }
-
-    public String getReferenceParameter(QName name) {
-        throw new UnsupportedOperationException();
-    }
-
-    public Metadata getMetadata() {
-        throw new UnsupportedOperationException();
-    }
-
-    public QName getInterfaceName() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    public QName getServiceName() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    public QName getEndpointName() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    public String getNamespaceURI() {
-        throw new UnsupportedOperationException();
-    }
-    
-    public void addAttribute(QName qName, String string) throws AddressingException {
-        throw new UnsupportedOperationException();
-    }
-    
-    public List<Object> getElements() {
-        throw new UnsupportedOperationException();
-    }
-    
-    public void addElement(Object object) {
-        throw new UnsupportedOperationException();
-    }
-    
-    public boolean removeElement(Object object) {
-        throw new UnsupportedOperationException();
-    }
 }

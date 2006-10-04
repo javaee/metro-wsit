@@ -1,5 +1,5 @@
 /*
- * $Id: Issuer.java,v 1.3 2006-06-27 21:58:31 ofung Exp $
+ * $Id: Issuer.java,v 1.4 2006-10-04 12:53:59 venu Exp $
  */
 
 /*
@@ -28,7 +28,7 @@ package com.sun.xml.ws.security.policy;
 
 import com.sun.xml.ws.addressing.policy.Address;
 import com.sun.xml.ws.policy.PolicyAssertion;
-import javax.xml.ws.addressing.EndpointReference;
+
 
 /**
  * Specifies the issuer of the security token that is presented

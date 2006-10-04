@@ -31,12 +31,15 @@
 
 package com.sun.xml.ws.addressing.policy;
 
-import javax.xml.ws.addressing.AttributedURI;
+import java.net.URI;
+
+
 
 /**
  *
  * @author Abhijit Das
  */
-public interface Address extends AttributedURI {
-   
+public interface Address {
+    //extends AttributedURI {
+   URI getURI();
 }

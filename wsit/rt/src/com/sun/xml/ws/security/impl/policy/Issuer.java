@@ -45,11 +45,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import javax.xml.namespace.QName;
-import javax.xml.ws.addressing.AddressingException;
-import javax.xml.ws.addressing.AttributedURI;
-import javax.xml.ws.addressing.EndpointReference;
-import javax.xml.ws.addressing.Metadata;
-import javax.xml.ws.addressing.ReferenceParameters;
 import static com.sun.xml.ws.security.impl.policy.Constants.logger;
 import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
 /**
@@ -58,7 +53,7 @@ import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
  */
 public class Issuer extends PolicyAssertion implements com.sun.xml.ws.security.policy.Issuer, SecurityAssertionValidator {
     
-    private AttributedURI address;
+    private Address address;
     private boolean populated = false;
     private PolicyAssertion refProps = null;
     private PolicyAssertion refParams = null;

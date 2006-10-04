@@ -28,7 +28,7 @@ import java.util.Set;
 import com.sun.xml.ws.policy.Policy;
 import java.util.Iterator;
 import java.util.List;
-import javax.xml.ws.addressing.*;
+
 
 /**
  * This interface represents requirement for Security Context Token defined in WS-SecureConversation 1.0
