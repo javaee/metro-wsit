@@ -36,7 +36,7 @@ import com.sun.xml.ws.rm.protocol.AckRequestedElement;
 import com.sun.xml.ws.rm.protocol.Identifier;
 import com.sun.xml.ws.rm.protocol.SequenceAcknowledgementElement;
 import javax.xml.bind.Marshaller;
-import javax.xml.ws.addressing.EndpointReference;
+import java.net.URI;
 
 /**
  * An <code>InboundSequence</code> represents a sequence of incoming messages.  For an 
@@ -56,7 +56,7 @@ public abstract class InboundSequence extends Sequence {
     /**
      * AcksTo URI.  Assigned by ctor.
      */
-    protected EndpointReference acksTo;
+    protected URI acksTo;
     
     /**
      * Companion OutboundSequence
@@ -72,7 +72,7 @@ public abstract class InboundSequence extends Sequence {
 
     public InboundSequence() {}
     
-    public InboundSequence(EndpointReference acksTo, 
+    public InboundSequence(URI acksTo, 
             SequenceConfig config) {
         
         this.acksTo = acksTo;

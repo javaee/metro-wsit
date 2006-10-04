@@ -29,11 +29,11 @@
  */
 
 package com.sun.xml.ws.rm.jaxws.runtime.client;
-import javax.xml.ws.addressing.EndpointReference;
 import com.sun.xml.ws.rm.Sequence;
 import com.sun.xml.ws.rm.Header;
 import com.sun.xml.ws.rm.protocol.*;
 import java.util.List;
+import java.net.URI;
 import com.sun.xml.ws.rm.jaxws.runtime.InboundSequence;
 
 
@@ -47,7 +47,7 @@ public class ClientInboundSequence extends InboundSequence {
           
     public ClientInboundSequence(ClientOutboundSequence outboundSequence , 
                             String identifier, 
-                            EndpointReference acksTo) {
+                            URI acksTo) {
         
         this.acksTo = acksTo;
         this.outboundSequence = outboundSequence;

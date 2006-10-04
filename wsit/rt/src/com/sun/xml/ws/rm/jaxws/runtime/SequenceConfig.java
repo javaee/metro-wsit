@@ -35,8 +35,6 @@ import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.rm.RMConstants;
 import com.sun.xml.ws.rm.RMBuilder;
 import com.sun.xml.ws.rm.RMException;
-
-import javax.xml.ws.addressing.AddressingConstants;
 import javax.xml.ws.WebServiceException;
 
 import com.sun.xml.ws.policy.*;
@@ -110,10 +108,8 @@ public class SequenceConfig {
         
         //Use anonymous URI for acksTo.  Its value depends on 
         //WS-Addressing version being used
-        RMConstants constants = RMBuilder.getConstants();
-        AddressingConstants addressingConstants = 
-                      constants.getAddressingBuilder().newAddressingConstants();
-        acksTo = addressingConstants.getAnonymousURI();
+        
+        acksTo = RMConstants.getAnonymousURI().toString();
         
         ordered = false;
         inactivityTimeout = 600000;

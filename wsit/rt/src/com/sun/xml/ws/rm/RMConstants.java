@@ -39,6 +39,8 @@ import javax.xml.namespace.QName;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
+import java.net.URI;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
 
 
 /**
@@ -56,14 +58,23 @@ public class RMConstants {
     
     public static final String sunVersion = "http://sun.com/2006/03/rm";
         
-    private static AddressingVersion addressingVersion;
+    private static AddressingVersion addressingVersion = AddressingVersion.W3C;
 
     private static final JAXBContext jc;
 
-
+    public static AddressingVersion getAddressingVersion() {
+       return addressingVersion;
+    }
+    
+    public static URI getAnonymousURI() {
+        try {
+            return new URI(getAddressingVersion().getAnonymousUri());
+        } catch (Exception e) {
+        }
+    }
+    
     static {
         try {
-            //jc = JAXBContext.newInstance(getPackageName()+":com.sun.xml.ws.security.impl.bindings");
 
             List<Class> classes = getClassesToBeBound();
 
@@ -95,7 +106,6 @@ public class RMConstants {
     public static String getNamespaceURI() {
         return Constants.WS_RM_NAMESPACE;
     }
-
 
 
     /**
@@ -321,8 +331,9 @@ public class RMConstants {
                     Class.forName(getPackageName()+ ".Expires")
             };
             classList = new ArrayList<Class>(Arrays.asList(classes));
-             if (getAddressingVersion().equals(AddressingVersion.W3C)){
 
+             if (getAddressingVersion().equals(AddressingVersion.W3C)){
+                
                 classList.add(Class.forName(getPackageName()+ ".W3CAcksToImpl"));
             }    else {
                 classList.add(Class.forName(getPackageName()+".MemberSubmissionAcksToImpl"));
@@ -338,8 +349,6 @@ public class RMConstants {
         addressingVersion = version;
     }
 
-    public static com.sun.xml.ws.api.addressing.AddressingVersion getAddressingVersion() {
-        return addressingVersion;
-    }
+   
 
 }

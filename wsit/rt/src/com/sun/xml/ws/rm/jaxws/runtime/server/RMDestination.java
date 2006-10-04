@@ -33,8 +33,7 @@ import com.sun.xml.ws.rm.RMException;
 import com.sun.xml.ws.rm.Constants;
 import com.sun.xml.ws.rm.jaxws.runtime.RMProvider;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
-
-import javax.xml.ws.addressing.EndpointReference;
+import java.net.URI;
 import java.util.*;
 
 /**
@@ -82,7 +81,7 @@ public class RMDestination extends RMProvider<ServerInboundSequence,
     
     //TODO add endpoint address argument to this method and corresponding
     //member in ServerInboundSequence
-    public ServerInboundSequence createSequence(EndpointReference acksTo, 
+    public ServerInboundSequence createSequence(URI acksTo, 
                                           String outboundId,
                                           SequenceConfig config) throws RMException {
         

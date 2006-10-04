@@ -38,7 +38,7 @@ import com.sun.xml.ws.rm.RMException;
 import com.sun.xml.ws.rm.jaxws.runtime.InboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
 
-import javax.xml.ws.addressing.EndpointReference;
+import java.net.URI;
 import java.util.UUID;
 import com.sun.xml.ws.runtime.util.Session;
 
@@ -54,7 +54,7 @@ public class ServerInboundSequence extends InboundSequence {
      */
     private Session session;
     
-    public ServerInboundSequence( EndpointReference acksTo, 
+    public ServerInboundSequence(URI acksTo, 
                             String outboundId,
                             SequenceConfig config) {
         

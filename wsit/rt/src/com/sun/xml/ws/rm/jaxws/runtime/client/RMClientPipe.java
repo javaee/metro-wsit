@@ -54,8 +54,6 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.soap.SOAPException;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.WebServiceException;
-import javax.xml.ws.addressing.AddressingBuilder;
-import javax.xml.ws.addressing.EndpointReference;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.net.URI;
@@ -213,8 +211,7 @@ public class RMClientPipe
             //single client instances and endpoints.
             
             if (dest != null && !dest.equals("") && 
-                outboundSequence.getDestination()
-                    .getAddress().getURI().toString() != dest) {
+                outboundSequence.getDestination().toString() != dest) {
                         throw new RMException(Messages.UNCHANGEABLE_ENDPOINT_ADDRESS.format());
             }
             
@@ -232,20 +229,15 @@ public class RMClientPipe
 
             URI destURI;
             URI acksToURI;
-            EndpointReference destEpr;
-            EndpointReference acksToEpr;
-            AddressingBuilder addressingBuilder = AddressingBuilder.newInstance();
-
+           
             try {
                 destURI = new URI(dest);
-                destEpr = addressingBuilder.newEndpointReference(destURI);
             } catch (URISyntaxException e) {
                 throw new RMException(Messages.INVALID_DEST_URI.format( dest));
             }
 
             try {
                 acksToURI = new URI(acksTo);
-                acksToEpr = addressingBuilder.newEndpointReference(acksToURI);
             } catch (URISyntaxException e) {
                 throw new RMException(Messages.INVALID_ACKS_TO_URI.format( acksTo));
             }
@@ -271,10 +263,14 @@ public class RMClientPipe
             outboundSequence.setSecureReliableMessaging(secureReliableMessaging);
 
             outboundSequence.registerProtocolMessageSender(
-                    new ProtocolMessageSender(messageProcessor,marshaller,unmarshaller,nextPipe, packet));
+                    new ProtocolMessageSender(messageProcessor,
+                                                marshaller,
+                                                unmarshaller, 
+                                                port, binding, 
+                                                nextPipe, packet));
 
 
-            outboundSequence.connect(destEpr,  acksToEpr, twoWay);
+            outboundSequence.connect(destURI,  acksToURI, twoWay);
 
             inboundSequence = (ClientInboundSequence)outboundSequence.getInboundSequence();
 

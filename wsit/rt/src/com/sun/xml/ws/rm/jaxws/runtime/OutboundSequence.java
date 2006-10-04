@@ -39,7 +39,7 @@ import com.sun.xml.ws.rm.protocol.SequenceAcknowledgementElement;
 import com.sun.xml.ws.rm.protocol.SequenceElement;
 
 import javax.xml.bind.Marshaller;
-import javax.xml.ws.addressing.EndpointReference;
+import java.net.URI;
 
 /**
  *
@@ -49,7 +49,7 @@ public abstract class OutboundSequence extends Sequence {
     /**
      * Common destination for all application messages in the sequence.
      */
-    protected EndpointReference destination;
+    protected URI destination;
     
    
     /**
@@ -57,7 +57,7 @@ public abstract class OutboundSequence extends Sequence {
      * There are several variations depending on whether this EPR is the same as 
      * the one used by application messages in the companion <code>InboundSequence</code>
      */
-    protected EndpointReference acksTo;
+    protected URI acksTo;
     
     /**
      *  Companion <code>InboundSequence</code>
@@ -94,22 +94,22 @@ public abstract class OutboundSequence extends Sequence {
     private ProcessingFilter filter = null;
     
      /**
-     * Accessor for the String value of the Destination EPR.
+     * Accessor for the value of the Destination URI.
      *
-     * @return The destination String.
+     * @return The destination URI.
      */
-    public EndpointReference getDestination() {
-        //return destination.getAddress().getURI().toString();
+    public URI getDestination() {
+     
         return destination;
     }
     
     /**
-     * Accessor for the String value of the Destination EPR.
+     * Accessor for the value of the Destination URI.
      *
      * @return The destination String.
      */
-    public EndpointReference getAcksTo() {
-        //return destination.getAddress().getURI().toString();
+    public URI getAcksTo() {
+       
         return acksTo;
     }
     

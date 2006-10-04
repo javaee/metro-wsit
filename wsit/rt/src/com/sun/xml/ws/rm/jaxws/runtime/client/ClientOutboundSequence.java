@@ -35,11 +35,9 @@ import com.sun.xml.ws.rm.protocol.*;
 import com.sun.xml.ws.security.impl.bindings.SecurityTokenReferenceType;
 
 import javax.xml.bind.JAXBElement;
-import javax.xml.ws.addressing.AddressingBuilder;
-import javax.xml.ws.addressing.AddressingConstants;
-import javax.xml.ws.addressing.EndpointReference;
 import java.net.URI;
 import java.util.UUID;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
 
 
 /**
@@ -174,33 +172,26 @@ public class ClientOutboundSequence extends OutboundSequence {
      * Connects to remote RM Destination by sending request through the proxy
      * stored in the <code>port</code> field.
      *
-     * @param destination Destination EPR for RM Destination
+     * @param destination Destination URI for RM Destination
      * @param acksTo reply to EPR for protocol responses.  The null value indicates
      *          use of the WS-Addressing anonymous EPR
      * @throws RMException wrapper for all exceptions thrown during execution of method.
      */
-    public void connect(EndpointReference destination,
-                        EndpointReference acksTo,
+    public void connect(URI destination,
+                        URI acksTo,
                         boolean twoWay) throws RMException {
         try {
 
             this.destination = destination;
             this.acksTo = acksTo;
 
-            RMConstants constants = RMBuilder.getConstants();
-
-            AddressingConstants addressingConstants =
-                    constants.getAddressingBuilder().newAddressingConstants();
-
-            String anonymous = addressingConstants.getAnonymousURI();
-
+            String anonymous = RMConstants.getAnonymousURI().toString();
             String acksToString;
-            //AckListener listener = null; 
                         
             if (acksTo == null) {
                 acksToString = anonymous;
             } else {
-                acksToString = acksTo.getAddress().getURI().toString();
+                acksToString = acksTo.toString();
                 
             }
             
@@ -209,8 +200,7 @@ public class ClientOutboundSequence extends OutboundSequence {
             
             CreateSequenceElement cs = new CreateSequenceElement();
 
-            AddressingConstants ac = RMBuilder.getConstants().getAddressingBuilder().newAddressingConstants();
-            if (ac.getPackageName().equals("com.sun.xml.ws.addressing")){
+            if (RMConstants.getAddressingVersion() == AddressingVersion.W3C){
                 cs.setAcksTo(new W3CAcksToImpl(new URI(acksToString)));
             }    else {
                 cs.setAcksTo(new MemberSubmissionAcksToImpl(new URI(acksToString)));

@@ -35,8 +35,6 @@ import com.sun.xml.ws.rm.jaxws.runtime.RMProvider;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
 
 
-import javax.xml.ws.addressing.EndpointReference;
-
 
 /**
  * An RMSource represents a Collection of RMSequences with a
