@@ -24,14 +24,9 @@ package com.sun.xml.ws.mex;
 import java.util.logging.Level;
 
 /**
- * TODO: get jaxws and wsa namespaces from them
- *
  * @author WS Development Team
  */
 public class MetadataConstants {
-    
-    public static final String XML_PREFIX =
-        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
     
     private static final String XMLSOAP_2004_09 =
         "http://schemas.xmlsoap.org/ws/2004/09/";
@@ -41,20 +36,14 @@ public class MetadataConstants {
         XMLSOAP_2004_09 + "transfer/GetResponse";
     public static final String GET_METADATA_REQUEST =
         XMLSOAP_2004_09 + "mex/GetMetadata/Request";
-    public static final String GET_METADATA_RESPONSE =
-        XMLSOAP_2004_09 + "mex/GetMetadata/Response";
     
     public static final String MEX_NAMESPACE = XMLSOAP_2004_09 + "mex";
     public static final String MEX_PREFIX = "mex";
     
-    // todo: get these from wsa api
-    public static final String WSA_MS_NAMESPACE =
-        "http://schemas.xmlsoap.org/ws/2004/08/addressing";
-    public static final String WSA_W3C_NAMESPACE =
-        "http://www.w3.org/2005/08/addressing";
-    public static final String WSA_PREFIX = "wsa";
+    // todo: get this from wsa api
     public static final String WSA_ANON =
         "http://www.w3.org/2005/08/addressing/anonymous";
+    public static final String WSA_PREFIX = "wsa";
     
     public static final String SOAP_1_1 =
         "http://schemas.xmlsoap.org/soap/envelope/";
@@ -66,9 +55,6 @@ public class MetadataConstants {
     public static final String WSDL_DIALECT =
         "http://schemas.xmlsoap.org/wsdl/";
     public static final String POLICY_DIALECT = XMLSOAP_2004_09 + "policy";
-    public static final String POLICYATT_DIALECT =
-        XMLSOAP_2004_09 + "policy/attachment";
-    public static final String MEX_DIALECT = XMLSOAP_2004_09 + "mex";
     
     /**
      * This is the logging level that is used for errors
