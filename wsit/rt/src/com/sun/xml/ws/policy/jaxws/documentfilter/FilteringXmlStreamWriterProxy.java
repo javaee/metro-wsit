@@ -22,6 +22,7 @@
 
 package com.sun.xml.ws.policy.jaxws.documentfilter;
 
+import com.sun.xml.ws.policy.PolicyConstants;
 import java.io.ByteArrayOutputStream;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
@@ -29,6 +30,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.LinkedList;
 import java.util.Queue;
+import javax.xml.XMLConstants;
+import javax.xml.namespace.QName;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
@@ -43,12 +46,14 @@ final class FilteringXmlStreamWriterProxy implements InvocationHandler {
         WRITE_START_ELEMENT("writeStartElement"),
         WRITE_END_ELEMENT("writeEndElement"),
         WRITE_ATTRIBUTE("writeAttribute"),
+        CLOSE("close"),
         OTHER(null);
         
         private static final MethodType[] types = new MethodType[] {
             WRITE_START_ELEMENT,
             WRITE_END_ELEMENT,
-            WRITE_ATTRIBUTE
+            WRITE_ATTRIBUTE,
+            CLOSE
         };
         public static MethodType getMethodType(String methodName) {
             for (MethodType type : types) {
@@ -132,8 +137,13 @@ final class FilteringXmlStreamWriterProxy implements InvocationHandler {
                 case WRITE_ATTRIBUTE:
                     if (!filteringOn && startFiltering(args)) {
                         filteringOn = true;
-                        commandQueue.clear();
+                        commandQueue.clear(); // remowing buffered commands that should not be executed
                     }
+                    break;
+                case CLOSE:
+                    cmdBufferingOn = false;
+                    filteringOn = false;
+                    executeCommands();
                     break;
                 case OTHER:
                     break;
@@ -172,6 +182,41 @@ final class FilteringXmlStreamWriterProxy implements InvocationHandler {
     }
     
     private boolean startFiltering(Object[] writeAttributeMethodArguments) {
-        return false; // TODO
+        /*
+         * void writeAttribute(String localName, String value)
+         * void writeAttribute(String namespaceURI, String localName, String value)
+         * void writeAttribute(String prefix, String namespaceURI, String localName, String value)
+         */
+        int argumentsCount = writeAttributeMethodArguments.length;
+        String namespaceURI, localName, value;
+        
+        switch (argumentsCount) {
+            case 2:
+                namespaceURI = mirrorWriter.getNamespaceContext().getNamespaceURI(XMLConstants.DEFAULT_NS_PREFIX);
+                localName = writeAttributeMethodArguments[0].toString();
+                value = writeAttributeMethodArguments[1].toString();
+                break;
+            case 3:
+                namespaceURI = writeAttributeMethodArguments[0].toString();
+                localName = writeAttributeMethodArguments[1].toString();
+                value = writeAttributeMethodArguments[2].toString();
+                break;
+            case 4:
+                namespaceURI = writeAttributeMethodArguments[1].toString();
+                localName = writeAttributeMethodArguments[2].toString();
+                value = writeAttributeMethodArguments[3].toString();
+                break;
+            default:
+                throw new IllegalArgumentException(
+                        Messages.UNEXPECTED_ARGUMENTS_COUNT.format(MethodType.WRITE_ATTRIBUTE + "(...)", argumentsCount)
+                        );
+        }        
+        
+        QName attributeName = new QName(namespaceURI, localName);
+        if (PolicyConstants.VISIBILITY_ATTRIBUTE.equals(attributeName) && PolicyConstants.VISIBILITY_VALUE_PRIVATE.equals(value)) {
+            return true;
+        } else {
+            return false;            
+        }        
     }
 }

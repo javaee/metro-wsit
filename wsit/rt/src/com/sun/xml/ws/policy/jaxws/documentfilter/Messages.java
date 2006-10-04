@@ -29,7 +29,8 @@ import java.util.ResourceBundle;
  * Formats error messages.
  */
 enum Messages {
-    INVOCATION_ERROR;
+    INVOCATION_ERROR,
+    UNEXPECTED_ARGUMENTS_COUNT;
 
     private static final ResourceBundle rb = ResourceBundle.getBundle(Messages.class.getName());
 

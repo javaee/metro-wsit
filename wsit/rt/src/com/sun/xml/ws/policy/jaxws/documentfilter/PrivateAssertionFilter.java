@@ -36,12 +36,8 @@ import javax.xml.ws.WebServiceException;
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class PrivateAssertionFilter implements SDDocumentFilter{
-    public XMLStreamWriter filter(SDDocument sdDocument, XMLStreamWriter xmlStreamWriter) {
-        try {
-            return FilteringXmlStreamWriterProxy.createProxy(xmlStreamWriter);
-        } catch (XMLStreamException ex) {
-            throw new WebServiceException(ex); // TODO
-        }
+public class PrivateAssertionFilter implements SDDocumentFilter {
+    public XMLStreamWriter filter(SDDocument sdDocument, XMLStreamWriter xmlStreamWriter) throws XMLStreamException {
+        return FilteringXmlStreamWriterProxy.createProxy(xmlStreamWriter);
     }
 }
