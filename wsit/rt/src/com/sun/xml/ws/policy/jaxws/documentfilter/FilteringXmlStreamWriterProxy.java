@@ -23,7 +23,7 @@
 package com.sun.xml.ws.policy.jaxws.documentfilter;
 
 import com.sun.xml.ws.policy.PolicyConstants;
-import java.io.ByteArrayOutputStream;
+import java.io.StringWriter;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -106,7 +106,7 @@ final class FilteringXmlStreamWriterProxy implements InvocationHandler {
     private FilteringXmlStreamWriterProxy(XMLStreamWriter writer) throws XMLStreamException {
         this.writer = writer;
         
-        this.mirrorWriter = XML_OUTPUT_FACTORY.createXMLStreamWriter(new ByteArrayOutputStream());
+        this.mirrorWriter = XML_OUTPUT_FACTORY.createXMLStreamWriter(new StringWriter());
         this.commandQueue = new LinkedList<CommandQueueItem>();
     }
     
