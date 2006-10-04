@@ -22,22 +22,19 @@
 
 package com.sun.xml.ws.assembler;
 
-import com.sun.xml.ws.api.server.Container;
-import com.sun.xml.ws.api.server.WSEndpoint;
-import com.sun.xml.ws.policy.jaxws.PolicyConfigParser;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceException;
-import javax.xml.ws.addressing.AddressingBuilderFactory;
-import javax.xml.ws.addressing.AddressingConstants;
+import javax.xml.ws.soap.AddressingFeature;
 
-import com.sun.xml.ws.addressing.jaxws.WsaClientPipe;
-import com.sun.xml.ws.addressing.jaxws.WsaServerPipe;
-import com.sun.xml.ws.addressing.jaxws.WsaWSDLPortExtension;
+import com.sun.xml.ws.addressing.WsaServerPipe;
 import com.sun.xml.ws.api.BindingID;
+import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
+import com.sun.xml.ws.api.addressing.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
@@ -46,11 +43,14 @@ import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipelineAssembler;
 import com.sun.xml.ws.api.pipe.PipelineAssemblerFactory;
 import com.sun.xml.ws.api.pipe.ServerPipeAssemblerContext;
+import com.sun.xml.ws.api.server.Container;
+import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.mex.server.MetadataServerPipe;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
+import com.sun.xml.ws.policy.jaxws.PolicyConfigParser;
 import com.sun.xml.ws.policy.jaxws.WSDLPolicyMapWrapper;
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import com.sun.xml.ws.rm.RMConstants;
@@ -58,8 +58,6 @@ import com.sun.xml.ws.rm.jaxws.runtime.client.RMClientPipe;
 import com.sun.xml.ws.rm.jaxws.runtime.server.RMServerPipe;
 import com.sun.xml.ws.util.ServiceFinder;
 import com.sun.xml.ws.util.pipe.DumpPipe;
-import com.sun.xml.ws.assembler.ActionDumpPipe;
-import com.sun.xml.ws.assembler.ClientPipeConfiguration;
 import com.sun.xml.wss.jaxws.impl.SecurityClientPipe;
 import com.sun.xml.wss.jaxws.impl.SecurityServerPipe;
 
@@ -85,7 +83,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
     private static final String CLIENT_CONFIGURATION_IDENTIFIER = "client";
 
     private static final String SECURITY_POLICY_NAMESPACE_URI = "http://schemas.xmlsoap.org/ws/2005/07/securitypolicy";
-    private static final String ADDRESSING_POLICY_NAMESPACE_URI = "http://schemas.xmlsoap.org/ws/2004/09/policy/addressing";
+    private static final String ADDRESSING_POLICY_NAMESPACE_URI = "http://schemas.xmlsoap.org/ws/2004/08/addressing/policy";
     private static final String WSAT_SOAP_NSURI = "http://schemas.xmlsoap.org/ws/2004/10/wsat";
     private static final QName AT_ALWAYS_CAPABILITY = new QName(WSAT_SOAP_NSURI, "ATAlwaysCapability");
     private static final QName AT_ASSERTION = new QName(WSAT_SOAP_NSURI, "ATAssertion");
@@ -123,13 +121,6 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
                 securityClientPipe = (SecurityClientPipe) p;
             }
             p = dump(CLIENT_PREFIX + WSS_SUFFIX + BEFORE_SUFFIX, p);
-
-            p = dump(CLIENT_PREFIX + WSA_SUFFIX + AFTER_SUFFIX, p);
-            // check for WS-Addressing
-            if (isAddressingEnabled(policyMap, context.getWsdlModel(), bindingId)) {
-                p = new WsaClientPipe(context.getWsdlModel(), context.getBinding(), p);
-            }
-            p = dump(CLIENT_PREFIX + WSA_SUFFIX + BEFORE_SUFFIX, p);
 
             // MEX pipe here
 
@@ -225,9 +216,8 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
 
             p = dump(SERVER_PREFIX + WSA_SUFFIX + AFTER_SUFFIX, p);
             // check for WS-Addressing
-            if (isAddressingEnabled(policyMap, context.getWsdlModel(), bindingId)) {
-                p = new WsaServerPipe(context.getSEIModel(),
-                        context.getWsdlModel(),
+            if (isAddressingEnabled(policyMap, context.getWsdlModel(), context.getEndpoint().getBinding())) {
+                p = new WsaServerPipe(context.getWsdlModel(),
                         context.getEndpoint().getBinding(),
                         p);
             }
@@ -327,22 +317,15 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
         /**
          * Checks to see whether WS-Addressing is enabled or not.
          *
+         * @param policyMap policy map for {@link this} assembler
          * @param port wsdl:port
-         * @param bindingId Binding identifier as specified in the deployment descriptor
+         * @param binding Binding
          * @return true if Addressing is enabled, false otherwise
          */
-        private boolean isAddressingEnabled(PolicyMap policyMap, WSDLPort port, BindingID bindingId) {
-            String param = bindingId.getParameter("addressing", "");
-
-            if (null != param && (param.equals("1.0") || param.equals("submission"))) {
+        private boolean isAddressingEnabled(PolicyMap policyMap, WSDLPort port, WSBinding binding) {
+            if (binding.isFeatureEnabled(AddressingFeature.ID) ||
+                    binding.isFeatureEnabled(MemberSubmissionAddressingFeature.ID))
                 return true;
-            }
-
-            if (port != null) {
-                WsaWSDLPortExtension ww = port.getExtension(WsaWSDLPortExtension.class);
-                if (ww != null && ww.isEnabled())
-                    return true;
-            }
 
             if (null == policyMap)
                 return false;
@@ -352,14 +335,10 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
                         port.getName());
                 Policy policy = policyMap.getEndpointEffectivePolicy(endpointKey);
 
-                AddressingBuilderFactory abf = AddressingBuilderFactory.newInstance();
-                AddressingConstants ac = abf.newAddressingBuilder().newAddressingConstants();
-                AddressingConstants ac2 = abf.newAddressingBuilder("http://schemas.xmlsoap.org/ws/2004/08/addressing").newAddressingConstants();
-
                 return (policy != null) &&
                         (policy.contains(ADDRESSING_POLICY_NAMESPACE_URI) ||
-                        policy.contains(ac.getWSDLNamespaceURI()) ||
-                        policy.contains(ac2.getWSDLNamespaceURI()));
+                        policy.contains(AddressingVersion.W3C.nsUri) ||
+                        policy.contains(AddressingVersion.MEMBER.nsUri));
             } catch (PolicyException e) {
                 throw new WebServiceException(e);
             }
