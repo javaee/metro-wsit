@@ -33,6 +33,8 @@ import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.security.secconv.WSSCElementFactory;
 import com.sun.xml.ws.security.secconv.WSSecureConversationException;
 import com.sun.xml.ws.policy.impl.bindings.AppliesTo;
+import com.sun.xml.ws.security.trust.impl.bindings.EndpointReference;
+import com.sun.xml.ws.security.trust.impl.bindings.AttributedURI;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -41,7 +43,6 @@ import java.util.List;
 import java.util.UUID;
 import javax.xml.soap.SOAPFault;
 import javax.xml.bind.JAXBElement;
-import javax.xml.ws.EndpointReference;
 
 import javax.xml.soap.SOAPElement;
 import javax.xml.soap.SOAPHeader;
@@ -127,9 +128,12 @@ public class WSTrustUtil {
    }
    
    public static AppliesTo createAppliesTo(String appliesTo){
-       EndpointReferenceImpl epr = null;
+       EndpointReference epr = null;
        try{
-           epr = new EndpointReferenceImpl(new URI(appliesTo));
+           AttributedURI uri = new AttributedURI();
+           uri.setValue(appliesTo);
+           epr = new EndpointReference();
+           epr.setAddress(uri);
        } catch (Exception ex){
            throw new RuntimeException(ex);
        }
@@ -158,7 +162,7 @@ public class WSTrustUtil {
                 if (epr != null){
                     AttributedURI uri = epr.getAddress();
                     if (uri != null){
-                        return uri.getURI().toString();
+                        return uri.getValue().toString();
                     }
                 }
             }
