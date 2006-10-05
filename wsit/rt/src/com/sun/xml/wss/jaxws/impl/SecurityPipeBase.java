@@ -23,7 +23,7 @@
 
 package com.sun.xml.wss.jaxws.impl;
 
-import com.sun.xml.ws.addressing.jaxws.WsaWSDLOperationExtension;
+
 import com.sun.xml.ws.api.model.wsdl.WSDLFault;
 import com.sun.xml.ws.security.impl.policyconv.XWSSPolicyGenerator;
 import com.sun.xml.ws.security.policy.Target;
@@ -1081,8 +1081,8 @@ public abstract class SecurityPipeBase implements Pipe {
         Set <WSDLBoundOperation>keys = outMessagePolicyMap.keySet();
         for(WSDLBoundOperation wbo : keys){
             WSDLOperation wo = wbo.getOperation();
-            WsaWSDLOperationExtension extensions = wo.getExtension(WsaWSDLOperationExtension.class);
-            String action = getAction((WsaWSDLOperationExtension) extensions, isIncomming);
+           // WsaWSDLOperationExtension extensions = wo.getExtension(WsaWSDLOperationExtension.class);
+            String action = getAction(wo, isIncomming);
             if(action != null && action.equals(uriValue)){
                 return wbo;
             }
@@ -1399,6 +1399,6 @@ public abstract class SecurityPipeBase implements Pipe {
     
     protected abstract void addOutgoingProtocolPolicy(Policy effectivePolicy,String protocol)throws PolicyException;
     
-    protected abstract String getAction(WsaWSDLOperationExtension ext, boolean isIncomming) ;
+    protected abstract String getAction(WSDLOperation operation, boolean isIncomming) ;
     
 }

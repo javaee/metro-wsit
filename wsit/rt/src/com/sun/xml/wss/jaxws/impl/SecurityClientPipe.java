@@ -23,7 +23,7 @@
 
 package com.sun.xml.wss.jaxws.impl;
 
-import com.sun.xml.ws.addressing.jaxws.WsaWSDLOperationExtension;
+
 import com.sun.xml.ws.api.model.wsdl.WSDLFault;
 
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelTranslator;
@@ -74,7 +74,7 @@ import com.sun.xml.ws.security.impl.policyconv.XWSSPolicyGenerator;
 import com.sun.xml.ws.security.policy.SecureConversationToken;
 import com.sun.xml.ws.security.impl.policy.PolicyUtil;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
-import com.sun.xml.wss.impl.policy.PolicyGenerationException;
+
 
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPFault;
@@ -190,7 +190,7 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
         // Add Action header to trust message
         if (packet.invocationProperties.get(WSTrustConstants.IS_TRUST_MESSAGE).equals(Boolean.TRUE)){
             HeaderList headers = packet.getMessage().getHeaders();
-            headers.fillRequestAddressingHeaders(pipeConfig.getWSDLModel(), pipeConfig.getBinding(), packet, WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION);
+            headers.fillRequestAddressingHeaders(packet, pipeConfig.getBinding().getAddressingVersion(), pipeConfig.getBinding().getSOAPVersion(),false,WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION);
         }
         
         // keep the message
@@ -460,60 +460,14 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
     
     protected SecurityPolicyHolder addOutgoingMP(WSDLBoundOperation operation,Policy policy)throws PolicyException{
         
-//        SecurityPolicyHolder sph = new SecurityPolicyHolder();
-//
-//        XWSSPolicyGenerator xwssPolicyGenerator = new XWSSPolicyGenerator(policy,false,false);
-//        xwssPolicyGenerator.process();
-//        MessagePolicy messagePolicy = xwssPolicyGenerator.getXWSSPolicy();
-//        sph.setMessagePolicy(messagePolicy);
-//        sph.setBindingLevelAlgSuite(xwssPolicyGenerator.getBindingLevelAlgSuite());
-//        this.bindingLevelAlgSuite = xwssPolicyGenerator.getBindingLevelAlgSuite();
-//        List<PolicyAssertion> tokenList = getTokens(policy);
-//        for(PolicyAssertion token:tokenList){
-//            ArrayList asList= null;
-//            if(PolicyUtil.isSecureConversationToken(token)){
-//                NestedPolicy bootstrapPolicy = ((SecureConversationToken)token).getBootstrapPolicy();
-//
-//                Policy effectiveBP = getEffectiveBootstrapPolicy(bootstrapPolicy);
-//                xwssPolicyGenerator = new XWSSPolicyGenerator(effectiveBP,false,false);
-//
-//                xwssPolicyGenerator.process();
-//                MessagePolicy bmp = xwssPolicyGenerator.getXWSSPolicy();
-//                PolicyAssertion sct = new SCTokenWrapper(token,bmp);
-//                sph.addSecureConversationToken(sct);
-//            }else if(PolicyUtil.isIssuedToken(token)){
-//                sph.addIssuedToken(token);
-//            }
-//        }
-//
+
         SecurityPolicyHolder sph = constructPolicyHolder(policy,false,false);
         outMessagePolicyMap.put(operation,sph);
         return sph;
     }
     
     protected SecurityPolicyHolder addIncomingMP(WSDLBoundOperation operation,Policy policy)throws PolicyException{
-//        XWSSPolicyGenerator xwssPolicyGenerator = new XWSSPolicyGenerator(policy,false,true);
-//        xwssPolicyGenerator.process();
-//        this.bindingLevelAlgSuite = xwssPolicyGenerator.getBindingLevelAlgSuite();
-//        MessagePolicy messagePolicy = xwssPolicyGenerator.getXWSSPolicy();
-//
-//        SecurityPolicyHolder sph = new SecurityPolicyHolder();
-//        sph.setMessagePolicy(messagePolicy);
-//        sph.setBindingLevelAlgSuite(xwssPolicyGenerator.getBindingLevelAlgSuite());
-//        List<PolicyAssertion> tokenList = getTokens(policy);
-//        for(PolicyAssertion token:tokenList){
-//            if(PolicyUtil.isSecureConversationToken(token)){
-//                NestedPolicy bootstrapPolicy = ((SecureConversationToken)token).getBootstrapPolicy();
-//                Policy effectiveBP = getEffectiveBootstrapPolicy(bootstrapPolicy);
-//                xwssPolicyGenerator = new XWSSPolicyGenerator(effectiveBP,false,true);
-//                xwssPolicyGenerator.process();
-//                MessagePolicy bmp = xwssPolicyGenerator.getXWSSPolicy();
-//                PolicyAssertion sct = new SCTokenWrapper(token,bmp);
-//                sph.addSecureConversationToken(sct);
-//            }else if(PolicyUtil.isIssuedToken(token)){
-//                sph.addIssuedToken(token);
-//            }
-//        }
+
         SecurityPolicyHolder sph = constructPolicyHolder(policy,false,true);
         inMessagePolicyMap.put(operation,sph);
         return sph;
@@ -537,11 +491,11 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
         sph.addFaultPolicy(fault,faultPH);
     }
     
-    protected String getAction(WsaWSDLOperationExtension ext,boolean inComming){
+    protected String getAction(WSDLOperation operation,boolean inComming){
         if(!inComming){
-            return ext.getInputAction();
+            return operation.getInput().getAction();
         }else{
-            return ext.getOutputAction();
+            return operation.getOutput().getAction();
         }
     }
     

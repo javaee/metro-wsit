@@ -318,8 +318,8 @@ public class WSSCPlugin {
     
     private Packet addAddressingHeaders(Packet packet, WSDLPort wsdlPort, WSBinding binding, String action)throws WSSecureConversationException {
         HeaderList hl = packet.getMessage().getHeaders();
-        hl.fillRequestAddressingHeaders(wsdlPort, binding, packet, action);
-        
+        hl.fillRequestAddressingHeaders(packet, binding.getAddressingVersion(),binding.getSOAPVersion(),false,action);
+        //hl.fillRequestAddressingHeaders(wsdlPort, binding, packet, action);
         return packet;
     }
 }
