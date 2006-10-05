@@ -99,24 +99,24 @@ public final class PolicyConfigParser {
             URL configFileUrl = PolicyUtils.ConfigFile.loadAsResource(cfgFile, context);
             
 //TODO: remove after NB plugin starts generating differnet names
-// BEGIN REMOVE            
+// BEGIN REMOVE
             if (configFileUrl == null) {
                 configFileUrl = PolicyUtils.ConfigFile.loadAsResource("wsit.xml", context);
-            }            
-// END REMOVE            
-            
+            }
+// END REMOVE
+
             if (configFileUrl != null) {
                 map = parse(configFileUrl, mutators);
             }
-            
+
             return map;
         } finally {
             logger.exiting("parse", map);
         }
     }
-    
+
     /**
-     * Reads a WSIT config from an XMLStreamBuffer, parses it and returns a PolicyMap. 
+     * Reads a WSIT config from an XMLStreamBuffer, parses it and returns a PolicyMap.
      *
      * @param configFileUrl URL of the config file resource that should be parsed. Must not be {@code null}.
      *
@@ -127,7 +127,7 @@ public final class PolicyConfigParser {
     }
 
 
-    
+
     /**
      * Reads a WSIT config from an XMLStreamBuffer, parses it and returns a PolicyMap. It gives you a chance
      * to register policy map mutators to the newly created map.
@@ -142,11 +142,11 @@ public final class PolicyConfigParser {
         PolicyMap map = null;
         try {
             XMLStreamBuffer configFileSource = initConfigFileSource(configFileUrl);
-            
+
             if (configFileSource == null) {
                 throw new PolicyException(Messages.BUFFER_NOT_EXIST.format(configFileUrl));
             }
-            
+
             SDDocumentSource doc = SDDocumentSource.create(configFileUrl, configFileSource);
             Parser parser =  new Parser(doc);
             WSDLModel model = RuntimeWSDLParser.parse(parser, new PolicyConfigResolver(), new WSDLParserExtension[] { new PolicyWSDLParserExtension(mutators) } );
@@ -192,8 +192,6 @@ public final class PolicyConfigParser {
             return null;
         } catch (XMLStreamException e) {
             throw new PolicyException(Messages.READER_CREATE_FAILED.format(configFileUrl), e);
-        } catch (XMLStreamBufferException e) {
-            throw new PolicyException(Messages.BUFFER_CREATE_FAILED.format(configFileUrl, reader), e);
         } catch (IOException e) {
             throw new PolicyException(Messages.URL_OPEN_FAILED.format(configFileUrl), e);
         }
