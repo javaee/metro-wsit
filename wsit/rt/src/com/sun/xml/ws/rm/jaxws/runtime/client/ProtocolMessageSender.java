@@ -334,7 +334,9 @@ public class ProtocolMessageSender {
             } else {
                 message.assertOneWay(false);
             }
-            list.fillRequestAddressingHeaders(port, binding, requestPacket, action);
+            //list.fillRequestAddressingHeaders(port, binding, requestPacket, action);
+            list.fillRequestAddressingHeaders(requestPacket,RMConstants.getAddressingVersion(),binding.getSOAPVersion(),oneWay,action);
+
             return requestPacket;
         /*
          } else {
