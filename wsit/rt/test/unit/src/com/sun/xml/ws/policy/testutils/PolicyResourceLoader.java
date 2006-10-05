@@ -58,9 +58,15 @@ public final class PolicyResourceLoader {
     }
     
     public static PolicySourceModel unmarshallModel(String resource) throws PolicyException, IOException {
-        Reader reader = getResourceReader(resource);
-        PolicySourceModel model = PolicyModelUnmarshaller.getXmlUnmarshaller().unmarshalModel(reader);
-        reader.close();
+        Reader resourceReader = getResourceReader(resource);
+        PolicySourceModel model = PolicyModelUnmarshaller.getXmlUnmarshaller().unmarshalModel(resourceReader);
+        resourceReader.close();
+        return model;
+    }
+    
+    public static PolicySourceModel unmarshallModel(Reader resourceReader) throws PolicyException, IOException {
+        PolicySourceModel model = PolicyModelUnmarshaller.getXmlUnmarshaller().unmarshalModel(resourceReader);
+        resourceReader.close();
         return model;
     }
     
