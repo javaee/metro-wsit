@@ -26,13 +26,13 @@ import java.util.logging.Logger;
 
 import javax.xml.ws.WebServiceException;
 
+import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.mex.client.MetadataClient.Protocol;
 
 import static com.sun.xml.ws.mex.MetadataConstants.GET_REQUEST;
 import static com.sun.xml.ws.mex.MetadataConstants.SOAP_1_1;
 import static com.sun.xml.ws.mex.MetadataConstants.SOAP_1_2;
 import static com.sun.xml.ws.mex.MetadataConstants.WSA_ANON;
-import static com.sun.xml.ws.mex.MetadataConstants.WSA_W3C_NAMESPACE;
 import static com.sun.xml.ws.mex.MetadataConstants.WSA_PREFIX;
 
 /**
@@ -78,7 +78,7 @@ public class MetadataUtil {
         }
         return "<" + soapPrefix + ":Envelope " +
             "xmlns:" + soapPrefix + "='" + soapNamespace + "' " +
-            "xmlns:" + WSA_PREFIX + "='" + WSA_W3C_NAMESPACE + "'>" +
+            "xmlns:" + WSA_PREFIX + "='" + AddressingVersion.W3C.nsUri + "'>" +
             "<" + soapPrefix + ":Header>" +
             "<" + WSA_PREFIX + ":Action>" +
             GET_REQUEST +
