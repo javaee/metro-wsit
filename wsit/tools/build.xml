@@ -58,10 +58,7 @@
     <target name="combine-jars-tooltime">
         <combine-jars-macro jarname="${name}-tools" classesdir="build/classes">
             <services>
-                <fileset dir="../etc">
-                    <include name="META-INF/services/*.TWSDL*"/>
-                    <include name="META-INF/services/*.TJava*"/>
-                </fileset>
+                
                 <fileset dir="${tmpdir}">
                     <include name="**/*.*"/>
                     <exclude name="**/*.TWSDL*"/>
