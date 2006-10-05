@@ -244,7 +244,7 @@ public class TrustPluginImpl implements TrustPlugin {
         if (stsURI != null){
             dispatch.getRequestContext().put(javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY, stsURI);
         }
-        dispatch.getRequestContext().put(WSTrustConstants.IS_TRUST_MESSAGE, true);
+        dispatch.getRequestContext().put(WSTrustConstants.IS_TRUST_MESSAGE, "true");
         RequestSecurityTokenResponse rstr =  fact.createRSTRFrom((JAXBElement)dispatch.invoke(fact.toJAXBElement(request)));
         if (log.isLoggable(Level.FINE)) {
             log.log(Level.FINE,"WST1014.response.invoking.rst", new Object[]{elemToString(rstr)});
