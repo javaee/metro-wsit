@@ -919,10 +919,10 @@ public abstract class SecurityPipeBase implements Pipe {
             }
         }
     }
-    private void addToken(Token token,ArrayList<Token> list){
+    private void addToken(Token token,ArrayList<PolicyAssertion> list){
         if(PolicyUtil.isSecureConversationToken((PolicyAssertion)token) ||
                   PolicyUtil.isIssuedToken((PolicyAssertion)token)){
-            list.add(token);
+            list.add((PolicyAssertion)token);
         }
     }
     
