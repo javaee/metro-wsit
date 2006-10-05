@@ -109,7 +109,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             // Transport pipe ALWAYS exist
             p = context.createTransportPipe();
             p = dump(CLIENT_PREFIX, p);
-            p = dumpAction(CLIENT_PREFIX + ACTION_SUFFIX, context.getWsdlModel(), p);
+            p = dumpAction(CLIENT_PREFIX + ACTION_SUFFIX, context.getBinding(), p);
             p = dump(CLIENT_PREFIX + TRANSPORT_SUFFIX, p);
 
             p = dump(CLIENT_PREFIX + WSS_SUFFIX + AFTER_SUFFIX, p);
@@ -238,7 +238,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             p = dump(SERVER_PREFIX + WSS_SUFFIX + BEFORE_SUFFIX, p);
 
             p = dump(SERVER_PREFIX + TRANSPORT_SUFFIX, p);
-            p = dumpAction(SERVER_PREFIX + ACTION_SUFFIX, context.getWsdlModel(), p);
+            p = dumpAction(SERVER_PREFIX + ACTION_SUFFIX, context.getEndpoint().getBinding(), p);
             p = dump(SERVER_PREFIX, p);
 
             return p;
@@ -390,7 +390,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             return false;
         }
 
-        private Pipe dumpAction(String name, WSDLPort wsdlPort, Pipe p) {
+        private Pipe dumpAction(String name, WSBinding binding, Pipe p) {
             if (Boolean.getBoolean(name)) {
                 ServiceFinder<ActionDumpPipe> pipes = ServiceFinder.find(ActionDumpPipe.class);
                 if (pipes != null) {
@@ -399,7 +399,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
                     }
                 }
 
-                return new ActionDumpPipe(name, wsdlPort, p);
+                return new ActionDumpPipe(name, binding, p);
             }
 
             return p;
