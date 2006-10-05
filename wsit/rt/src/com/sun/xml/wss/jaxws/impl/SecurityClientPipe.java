@@ -189,7 +189,7 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
     public Packet process(Packet packet) {
         
         // Add Action header to trust message
-        if (packet.invocationProperties.get(WSTrustConstants.IS_TRUST_MESSAGE)){
+        if (packet.invocationProperties.get(WSTrustConstants.IS_TRUST_MESSAGE).equals(Boolean.TRUE)){
             HeaderList headers = packet.getMessage().getHeaders();
             headers.fillRequestAddressingHeaders(pipeConfig.getWSDLModel(), pipeConfig.getBinding(), packet, WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION);
         }
