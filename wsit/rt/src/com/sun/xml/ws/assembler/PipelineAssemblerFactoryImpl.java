@@ -22,18 +22,6 @@
 
 package com.sun.xml.ws.assembler;
 
-import com.sun.xml.ws.policy.PolicyConstants;
-import com.sun.xml.ws.policy.jaxws.documentfilter.PrivateAssertionFilter;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.net.URL;
-import javax.naming.Context;
-
-import javax.xml.namespace.QName;
-import javax.xml.ws.WebServiceException;
-import javax.xml.ws.soap.AddressingFeature;
-
-import com.sun.xml.ws.addressing.WsaServerPipe;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
@@ -41,16 +29,9 @@ import com.sun.xml.ws.api.addressing.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.api.pipe.ClientPipeAssemblerContext;
-import com.sun.xml.ws.api.pipe.Pipe;
-import com.sun.xml.ws.api.pipe.PipelineAssembler;
-import com.sun.xml.ws.api.pipe.PipelineAssemblerFactory;
-import com.sun.xml.ws.api.pipe.ServerPipeAssemblerContext;
+import com.sun.xml.ws.api.pipe.*;
 import com.sun.xml.ws.mex.server.MetadataServerPipe;
-import com.sun.xml.ws.policy.Policy;
-import com.sun.xml.ws.policy.PolicyException;
-import com.sun.xml.ws.policy.PolicyMap;
-import com.sun.xml.ws.policy.PolicyMapKey;
+import com.sun.xml.ws.policy.*;
 import com.sun.xml.ws.policy.jaxws.WSDLPolicyMapWrapper;
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import com.sun.xml.ws.rm.RMConstants;
@@ -60,6 +41,13 @@ import com.sun.xml.ws.util.ServiceFinder;
 import com.sun.xml.ws.util.pipe.DumpPipe;
 import com.sun.xml.wss.jaxws.impl.SecurityClientPipe;
 import com.sun.xml.wss.jaxws.impl.SecurityServerPipe;
+
+import javax.xml.namespace.QName;
+import javax.xml.ws.WebServiceException;
+import javax.xml.ws.soap.AddressingFeature;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
 
 /**
  * WSIT PipelineAssembler.
@@ -406,8 +394,12 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             WSDLPolicyMapWrapper mapWrapper = model.getExtension(WSDLPolicyMapWrapper.class);
             if (mapWrapper != null) {
                 String clientCfgFileName = PolicyUtils.ConfigFile.generateFullName(PolicyConstants.CLIENT_CONFIGURATION_IDENTIFIER);
-                URL clientCfgFileUrl = PolicyUtils.ConfigFile.loadAsResource(clientCfgFileName, null);
-                mapWrapper.addClientConfigToMap(clientCfgFileUrl);
+                try {
+                    URL clientCfgFileUrl = PolicyUtils.ConfigFile.loadAsResource(clientCfgFileName, null);
+                    mapWrapper.addClientConfigToMap(clientCfgFileUrl);
+                } catch (PolicyException e) {
+                    throw new WebServiceException(e);
+                }
                 mapWrapper.configureModel(model);
                 map = mapWrapper.getPolicyMap();
             }
