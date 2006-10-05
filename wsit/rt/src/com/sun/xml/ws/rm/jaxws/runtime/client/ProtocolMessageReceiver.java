@@ -49,7 +49,7 @@ import java.util.HashMap;
 public class ProtocolMessageReceiver {
 
      public static final String anonymous = new RMConstants()
-            .getAddressingBuilder().newAddressingConstants().getAnonymousURI();
+            .getAnonymousURI().toString();
     /**
      * AcksTo URI used for non-anonymous responses... Currently one per process.
      * Set using the <code>start</code> method.  Defaults to anonymous.  When
