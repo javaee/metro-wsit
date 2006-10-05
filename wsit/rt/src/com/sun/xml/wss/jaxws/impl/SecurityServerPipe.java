@@ -43,7 +43,6 @@ import com.sun.xml.ws.api.model.wsdl.WSDLFault;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
-import com.sun.xml.ws.api.pipe.ServerEdgePipe;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.NestedPolicy;
 import com.sun.xml.ws.policy.Policy;
@@ -123,8 +122,7 @@ import org.w3c.dom.NodeList;
  *
  * @author K.Venugopal@sun.com,Vbkumar.Jayanti@Sun.COM,
  */
-public class SecurityServerPipe extends SecurityPipeBase
-        implements ServerEdgePipe {
+public class SecurityServerPipe extends SecurityPipeBase {
     
     
     private SCSessionManager scSessionManager;
@@ -364,10 +362,10 @@ public class SecurityServerPipe extends SecurityPipeBase
         throw new UnsupportedOperationException();
     }
     
-    public ServerEdgePipe.RequestResponseTypes getRequestResponseType() {
+    /*public ServerEdgePipe.RequestResponseTypes getRequestResponseType() {
         //TODO:Optimized security
         throw new UnsupportedOperationException();
-    }
+    }*/
     
     
     private ProcessingContext initializeInboundProcessingContext(

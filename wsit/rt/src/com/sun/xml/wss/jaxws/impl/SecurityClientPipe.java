@@ -174,9 +174,9 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
             throw new RuntimeException(e);
         }
         
-        if(nextPipe != null && nextPipe instanceof ClientEdgePipe){
+        /*if(nextPipe != null && nextPipe instanceof ClientEdgePipe){
             transportOptimization = true;
-        }
+        }*/
     }
     
     // copy constructor
