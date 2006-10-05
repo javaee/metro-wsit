@@ -75,7 +75,7 @@
              <sc:KeyStore xmlns:sc="http://schemas.sun.com/2006/03/wss/server" location="$WSIT_HOME/xws-security/etc/server-keystore.jks" storepass="changeit" alias="bob"/>
              <sc:TrustStore xmlns:sc="http://schemas.sun.com/2006/03/wss/server" location="$WSIT_HOME/xws-security/etc/server-truststore.jks" storepass="changeit"/>
              <sc:ValidatorConfiguration xmlns:sc="http://schemas.sun.com/2006/03/wss/server">
-                 <sc:Validator name="usernameValidator"  classname="plugfest.PlainTextPasswordValidator"/>
+                 <sc:Validator name="usernameValidator"  classname="xwss.s4.server.PlainTextPasswordValidator"/>
              </sc:ValidatorConfiguration>
          </wsp:All>
       </wsp:ExactlyOne>
