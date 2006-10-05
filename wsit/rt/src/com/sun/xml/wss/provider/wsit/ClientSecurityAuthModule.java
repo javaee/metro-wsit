@@ -18,7 +18,7 @@
  * [name of copyright owner]
  */
 /*
- * $Id: ClientSecurityAuthModule.java,v 1.1 2006-10-04 16:49:05 kumarjayanti Exp $
+ * $Id: ClientSecurityAuthModule.java,v 1.2 2006-10-05 16:29:45 m_potociar Exp $
  *
  * Copyright 2006 Sun Microsystems, Inc. All rights reserved.
  * SUN PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
@@ -60,6 +60,7 @@ public class ClientSecurityAuthModule extends WssProviderAuthModule
     public ClientSecurityAuthModule() {
     }
     
+    @SuppressWarnings("unchecked")
     public void initialize(AuthPolicy requestPolicy,
             AuthPolicy responsePolicy,
             CallbackHandler handler,
@@ -68,6 +69,7 @@ public class ClientSecurityAuthModule extends WssProviderAuthModule
         //todo add Tango code
     }
     
+    @SuppressWarnings("unchecked")
     public void secureRequest(AuthParam param,
             Subject subject,
             Map sharedState)
@@ -83,13 +85,14 @@ public class ClientSecurityAuthModule extends WssProviderAuthModule
             Message msg = packet.getMessage();
             msg = secureOutboundMessage(msg, ctx, optimized);
             packet.setMessage(msg);
-          
+            
         }catch (XWSSecurityException ex){
             throw getSOAPFaultException(ex);
         }
         
     }
     
+    @SuppressWarnings("unchecked")
     public void validateResponse(AuthParam param,
             Subject subject,
             Map sharedState)

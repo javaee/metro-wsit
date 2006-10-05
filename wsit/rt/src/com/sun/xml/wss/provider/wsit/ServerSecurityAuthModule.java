@@ -18,7 +18,7 @@
  * [name of copyright owner]
  */
 /*
- * $Id: ServerSecurityAuthModule.java,v 1.2 2006-10-05 11:42:43 mayankmishra Exp $
+ * $Id: ServerSecurityAuthModule.java,v 1.3 2006-10-05 16:29:45 m_potociar Exp $
  *
  * Copyright 2006 Sun Microsystems, Inc. All rights reserved.
  * SUN PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
@@ -52,6 +52,7 @@ public class ServerSecurityAuthModule extends WssProviderAuthModule
        public ServerSecurityAuthModule() {
        }
 
+       @SuppressWarnings("unchecked")
        public void initialize (AuthPolicy requestPolicy,
                                AuthPolicy responsePolicy,
                                CallbackHandler handler,
@@ -60,6 +61,7 @@ public class ServerSecurityAuthModule extends WssProviderAuthModule
             //todo add tango init code
        }
 
+       @SuppressWarnings("unchecked")
        public void validateRequest (AuthParam param,
                                     Subject subject,
                                     Map sharedState)
@@ -80,6 +82,7 @@ public class ServerSecurityAuthModule extends WssProviderAuthModule
                  
        }
 
+       @SuppressWarnings("unchecked")
        public void secureResponse (AuthParam param,
                                    Subject subject,
                                    Map sharedState)

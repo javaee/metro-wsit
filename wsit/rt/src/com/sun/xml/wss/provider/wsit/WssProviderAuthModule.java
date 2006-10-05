@@ -18,7 +18,7 @@
  * [name of copyright owner]
  */
 /**
- * $Id: WssProviderAuthModule.java,v 1.1 2006-10-04 16:49:06 kumarjayanti Exp $
+ * $Id: WssProviderAuthModule.java,v 1.2 2006-10-05 16:29:45 m_potociar Exp $
  *
  * Copyright 2006 Sun Microsystems, Inc. All rights reserved.
  * SUN PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
@@ -53,7 +53,9 @@ import com.sun.xml.wss.impl.SecurityAnnotator;
 import com.sun.xml.wss.impl.SecurityRecipient;
 import com.sun.xml.wss.impl.policy.mls.MessagePolicy;
 
-public abstract class WssProviderAuthModule implements ModuleOptions {
+import static com.sun.xml.wss.provider.wsit.ModuleOptions.*;
+
+public abstract class WssProviderAuthModule {
     
     // Security Environment reference initialized with a JAAS CallbackHandler
     protected WssProviderSecurityEnvironment secEnv = null;
@@ -104,7 +106,7 @@ public abstract class WssProviderAuthModule implements ModuleOptions {
     public void initialize(AuthPolicy requestPolicy,
             AuthPolicy responsePolicy,
             CallbackHandler handler,
-            Map options,
+            Map<String, Object> options,
             boolean isClientAuthModule) {
         
         
@@ -155,7 +157,7 @@ public abstract class WssProviderAuthModule implements ModuleOptions {
     }
     
   protected ProcessingContext initializeProcessingContext(
-            AuthParam param, Map sharedState, Packet packet, boolean optimized, boolean inbound)
+            AuthParam param, Map<String, Object> sharedState, Packet packet, boolean optimized, boolean inbound)
             throws XWSSecurityException {
         
         if (optimized) {
