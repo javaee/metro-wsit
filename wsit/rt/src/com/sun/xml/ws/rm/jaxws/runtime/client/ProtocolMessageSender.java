@@ -30,34 +30,26 @@
 
 package com.sun.xml.ws.rm.jaxws.runtime.client;
 import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.api.message.Headers;
-import com.sun.xml.ws.api.message.HeaderList;
-import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.message.*;
 import com.sun.xml.ws.api.message.Messages;
-import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.rm.CreateSequenceException;
 import com.sun.xml.ws.rm.RMConstants;
 import com.sun.xml.ws.rm.RMException;
-import com.sun.xml.ws.rm.CreateSequenceException;
 import com.sun.xml.ws.rm.TerminateSequenceException;
 import com.sun.xml.ws.rm.jaxws.runtime.InboundMessageProcessor;
 import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
 import com.sun.xml.ws.rm.protocol.*;
-import javax.xml.ws.Binding;
-import javax.xml.ws.BindingProvider;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.UUID;
 import java.net.URI;
-import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.api.WSBinding;
 
 /**
- * Helper class used to send protocol message addressed to the endpoint. 
+ * Helper class used to send protocol message addressed to the endpoint.
  * The messages belong to the following types:
  * <ul>
  * <li>CreateSequence. A message with a CreateSequence element in its body is sent.  The
@@ -101,12 +93,12 @@ public class ProtocolMessageSender {
      * the packet
      */
     private Packet packet;
-    
+
     /*
      * WSDLPort for use by addressing module when assigning headers.
      */
     private WSDLPort port;
-    
+
     /*
      * WSBinding for use by addressing module when assigning headers.
      */
@@ -155,16 +147,16 @@ public class ProtocolMessageSender {
             Packet requestPacket = new Packet(request);
             requestPacket.proxy = packet.proxy;
             requestPacket.contentNegotiation = packet.contentNegotiation;
-            
+
             addAddressingHeaders (requestPacket,constants.getCreateSequenceAction(),
                     destination , acksTo, false);
-            
-            String messageId ;/*= ADDRESSING_FIXME - initialize with mesageID
+
+            String messageId = null ;/*= ADDRESSING_FIXME - initialize with mesageID
                                    assigned by addAddressingHeaders for use in
                                    correlating non-anonymous acksTo response*/
-            
+
             requestPacket.setEndPointAddressString(destination.toString());
-            
+
             Packet responsePacket = nextPipe.process(requestPacket);
 
             if (acksTo.equals(RMConstants.getAnonymousURI())) {
@@ -181,7 +173,7 @@ public class ProtocolMessageSender {
                     csrElem = unmarshallCreateSequenceResponse(response);
                 }
             } else {
-               
+
                 csrElem = ProtocolMessageReceiver.getCreateSequenceResponse(messageId);
             }
         }
@@ -200,7 +192,7 @@ public class ProtocolMessageSender {
 
         //piggyback an acknowledgement if one is pending
         seq.processAcknowledgement(new com.sun.xml.ws.rm.Message(request), marshaller);
-        
+
         Packet requestPacket = new Packet(request);
         requestPacket.proxy = packet.proxy;
         requestPacket.contentNegotiation = packet.contentNegotiation;
@@ -233,17 +225,17 @@ public class ProtocolMessageSender {
         Message request = createEmptyMessage(version);
         SequenceElement el = createLastHeader(seq);
         request.getHeaders().add(Headers.create(version,marshaller,el));
-        
+
         seq.setLast();
-        
+
         Packet requestPacket = new Packet(request);
         requestPacket.proxy = packet.proxy;
         //requestPacket.proxy = new ProxyWrapper(packet.proxy);
-        
+
         requestPacket.contentNegotiation = packet.contentNegotiation;
         addAddressingHeaders(requestPacket, constants.getLastAction(),seq.getDestination(),
                 seq.getAcksTo(),true);
-        
+
         requestPacket.setEndPointAddressString(seq.getDestination().toString());
 
         Packet responsePacket = nextPipe.process(requestPacket);
@@ -253,7 +245,7 @@ public class ProtocolMessageSender {
         if (response != null && response.isFault()){
                 throw new RMException(response);
         }
-        
+
         processor.processMessage(msg, marshaller, unmarshaller);
 
     }
@@ -267,7 +259,7 @@ public class ProtocolMessageSender {
      *
      */
     public void sendAckRequested(OutboundSequence seq, SOAPVersion version) throws RMException {
-        
+
         try {
             Message request = createEmptyMessage(version);
             AckRequestedElement el = createAckRequestedElement(seq);
@@ -310,8 +302,8 @@ public class ProtocolMessageSender {
                                         URI acksTo,
                                         boolean oneWay) throws RMException {
         //if (requestPacket.proxy != null) {
-            
-            
+
+
             /*
              AddressingProperties appImpl = constants.getAddressingBuilder().newAddressingProperties();
 
@@ -322,14 +314,14 @@ public class ProtocolMessageSender {
 
             AttributedURI uri = constants.getAddressingBuilder()
                     .newURI("uuid:" + UUID.randomUUID());
-            
+
             appImpl.setMessageID(uri);
 
             Map<String,Object> reqContext = requestPacket.proxy.getRequestContext();
             reqContext.put(JAXWSAConstants.CLIENT_ADDRESSING_PROPERTIES,appImpl);
             requestPacket.invocationProperties.put(JAXWSAConstants.CLIENT_ADDRESSING_PROPERTIES,appImpl);
             */
-        
+
             /*ADDRESSING FIX_ME
             1. No longer need destination
             2. Current API does not allow assignment of non-anon reply to, if we
@@ -402,25 +394,25 @@ public class ProtocolMessageSender {
     public RMConstants getConstants() {
         return constants;
     }
-    
+
     /*
     private static class ProxyWrapper implements BindingProvider {
         private BindingProvider proxy;
         private Map<String, Object> requestContext = new HashMap<String, Object>();
-        
+
         public ProxyWrapper(BindingProvider proxy) {
             this.proxy = proxy;
             requestContext.putAll(proxy.getRequestContext());
         }
-        
+
         public Map<String, Object> getRequestContext() {
             return requestContext;
         }
-        
+
         public Map<String, Object> getResponseContext() {
             return proxy.getResponseContext();
         }
-        
+
         public Binding getBinding() {
             return proxy.getBinding();
         }

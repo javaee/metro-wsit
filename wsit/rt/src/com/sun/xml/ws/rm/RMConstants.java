@@ -36,11 +36,10 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
+import java.net.URI;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.ArrayList;
-import java.net.URI;
-import com.sun.xml.ws.api.addressing.AddressingVersion;
 
 
 /**
@@ -70,7 +69,9 @@ public class RMConstants {
         try {
             return new URI(getAddressingVersion().getAnonymousUri());
         } catch (Exception e) {
+            throw new Error(e);
         }
+        
     }
     
     static {
