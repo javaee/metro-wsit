@@ -399,7 +399,7 @@ public class SecurityServerPipe extends SecurityPipeBase
                 packet.invocationProperties);
         // set the policy, issued-token-map, and extraneous properties
         ctx.setIssuedTokenContextMap(issuedTokenContextMap);
-        ctx.setAlgorithmSuite(getBindingAlgorithmSuite(packet));
+        ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
         try {
             MessagePolicy policy = null;
             if (packet.getMessage().isFault()) {
