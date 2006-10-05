@@ -115,7 +115,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
         this.owner = owner;
         this.config = getSequenceConfig();
         this.binding = this.owner.getBinding();
-        RMConstants.setAddressingVersion(binding.getAddressingVersion());
+       // RMConstants.setAddressingVersion(binding.getAddressingVersion());
 
     }
 

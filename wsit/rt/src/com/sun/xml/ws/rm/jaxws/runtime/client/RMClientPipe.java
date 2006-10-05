@@ -41,14 +41,13 @@ import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
+import com.sun.xml.ws.client.ClientTransportException;
 import com.sun.xml.ws.rm.RMException;
-import com.sun.xml.ws.rm.RMConstants;
 import com.sun.xml.ws.rm.jaxws.runtime.InboundMessageProcessor;
 import com.sun.xml.ws.rm.jaxws.runtime.PipeBase;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
 import com.sun.xml.ws.security.impl.bindings.SecurityTokenReferenceType;
 import com.sun.xml.wss.jaxws.impl.SecurityClientPipe;
-import com.sun.xml.ws.client.ClientTransportException;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.soap.SOAPException;
@@ -145,7 +144,7 @@ public class RMClientPipe
         }else {
             this.secureReliableMessaging = false;
         }
-        RMConstants.setAddressingVersion(binding.getAddressingVersion());
+        //RMConstants.setAddressingVersion(binding.getAddressingVersion());
     }
 
     /**
@@ -181,7 +180,7 @@ public class RMClientPipe
          //these are be threadsafe
         this.outboundSequence = toCopy.outboundSequence;
         this.inboundSequence = toCopy.inboundSequence;
-        RMConstants.setAddressingVersion(binding.getAddressingVersion());
+       // RMConstants.setAddressingVersion(binding.getAddressingVersion());
 
     }
 
