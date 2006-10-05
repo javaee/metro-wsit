@@ -209,9 +209,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             p = dump(SERVER_PREFIX + WSA_SUFFIX + AFTER_SUFFIX, p);
             // check for WS-Addressing
             if (isAddressingEnabled(policyMap, context.getWsdlModel(), context.getEndpoint().getBinding())) {
-                p = new WsaServerPipe(context.getWsdlModel(),
-                        context.getEndpoint().getBinding(),
-                        p);
+                p = context.createWsaPipe(p);
             }
             p = dump(SERVER_PREFIX + WSA_SUFFIX + BEFORE_SUFFIX, p);
             
