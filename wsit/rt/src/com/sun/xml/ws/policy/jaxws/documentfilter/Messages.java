@@ -26,7 +26,8 @@ import java.text.MessageFormat;
 import java.util.ResourceBundle;
 
 /**
- * Formats error messages.
+ *
+ * @author Marek Potociar (marek.potociar at sun.com)
  */
 enum Messages {
     INVOCATION_ERROR,
