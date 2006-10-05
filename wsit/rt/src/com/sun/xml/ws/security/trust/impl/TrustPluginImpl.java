@@ -240,11 +240,11 @@ public class TrustPluginImpl implements TrustPlugin {
         }
         Service service = Service.create(wsdlLocation, serviceName);
         Dispatch<Object> dispatch = service.createDispatch(portName, fact.getContext(), Service.Mode.PAYLOAD);
-        dispatch = addAddressingHeaders(dispatch);
+        //dispatch = addAddressingHeaders(dispatch);
         if (stsURI != null){
             dispatch.getRequestContext().put(javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY, stsURI);
         }
-        dispatch.getRequestContext().put("isTrustMessage", "true");
+        dispatch.getRequestContext().put(WSTrustConstants.IS_TRUST_MESSAGE, true);
         RequestSecurityTokenResponse rstr =  fact.createRSTRFrom((JAXBElement)dispatch.invoke(fact.toJAXBElement(request)));
         if (log.isLoggable(Level.FINE)) {
             log.log(Level.FINE,"WST1014.response.invoking.rst", new Object[]{elemToString(rstr)});
@@ -351,7 +351,7 @@ public class TrustPluginImpl implements TrustPlugin {
                 while ( it.hasNext() ) {
                     PolicyAssertion assertion = it.next();
                     if ( PolicyUtil.isAddress(assertion)) {
-                        address = (AttributedURI)assertion;
+                        address = (Address)assertion;
                         return address.getURI();
                     }
                 }
@@ -361,7 +361,7 @@ public class TrustPluginImpl implements TrustPlugin {
         return null;
     }
     
-    private Dispatch<Object> addAddressingHeaders(Dispatch<Object> provider) {
+ /*   private Dispatch<Object> addAddressingHeaders(Dispatch<Object> provider) {
         AddressingBuilder builder = AddressingBuilder.newInstance();
         AddressingProperties ap = builder.newAddressingProperties();
         
@@ -370,7 +370,7 @@ public class TrustPluginImpl implements TrustPlugin {
         provider.getRequestContext().put(JAXWSAConstants.CLIENT_ADDRESSING_PROPERTIES, ap);
         
         return provider;
-    }
+    }*/
     
     /**
      * Prints out the RST created as string.

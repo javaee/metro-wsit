@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustConstants.java,v 1.2 2006-08-02 18:03:54 jdg6688 Exp $
+ * $Id: WSTrustConstants.java,v 1.3 2006-10-05 03:37:54 jdg6688 Exp $
  */
 
 /*
@@ -99,4 +99,6 @@ public interface WSTrustConstants {
      * List of STS Properties
      */
     public static final String [] STS_PROPERTIES = { PROPERTY_URL, PROPERTY_PORT_NAME, PROPERTY_SERVICE_NAME, PROPERTY_SERVICE_END_POINT };
+    
+    public static final String IS_TRUST_MESSAGE = "isTrustMessage";
 }
