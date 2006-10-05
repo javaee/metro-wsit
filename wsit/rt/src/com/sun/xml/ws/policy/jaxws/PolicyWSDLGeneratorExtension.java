@@ -22,6 +22,7 @@
 
 package com.sun.xml.ws.policy.jaxws;
 
+import com.sun.xml.ws.api.wsdl.writer.WSDLGenExtnContext;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import com.sun.xml.txw2.TypedXmlWriter;
@@ -73,23 +74,27 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
     private PolicyModelMarshaller marshaller = PolicyModelMarshaller.getXmlMarshaller(true);
     private PolicyMerger merger = PolicyMerger.getMerger();
     
-    public void start(TypedXmlWriter root, SEIModel model, WSBinding binding, Container container) {
+    public void start(WSDLGenExtnContext context) {
         logger.entering("start");
         try {
-            if (model != null) {
-                this.seiModel = model;
-                // QName serviceName = model.getServiceQName();
-                PolicyMapUpdateProvider[] policyMapUpdateProviders = PolicyUtils.ServiceProvider.load(PolicyMapUpdateProvider.class);
-                PolicyMapExtender[] extenders = new PolicyMapExtender[policyMapUpdateProviders.length];
-                for (int i=0; i<extenders.length; extenders[i++] = PolicyMapExtender.createPolicyMapExtender());
-                policyMap = PolicyConfigParser.parse(null, container, extenders);
-                if (policyMap!= null) {
-                    root._namespace(PolicyConstants.POLICY_NAMESPACE_URI, PolicyConstants.POLICY_NAMESPACE_PREFIX);
-                    // TODO: review after jax-ws interface to it's runtime wsdl generator gets changed
-                    for (int i=0; i<policyMapUpdateProviders.length; i++) {
-                        policyMapUpdateProviders[i].update(extenders[i], policyMap, model, binding);
-                        extenders[i].disconnect();
-                    }
+            this.seiModel = context.getModel();
+            // QName serviceName = model.getServiceQName();
+            PolicyMapUpdateProvider[] policyMapUpdateProviders = PolicyUtils.ServiceProvider.load(PolicyMapUpdateProvider.class);
+            PolicyMapExtender[] extenders = new PolicyMapExtender[policyMapUpdateProviders.length];
+            for (int i=0; i<extenders.length; i++) {
+                extenders[i] = PolicyMapExtender.createPolicyMapExtender();
+            }
+            
+            String configId = context.getEndpointClass().getName();
+            policyMap = PolicyConfigParser.parse(configId, context.getContainer(), extenders);
+            
+            if (policyMap!= null) {
+                context.getRoot()._namespace(PolicyConstants.POLICY_NAMESPACE_URI, PolicyConstants.POLICY_NAMESPACE_PREFIX);
+                WSBinding binding = context.getBinding();                
+                // TODO: review after jax-ws interface to it's runtime wsdl generator gets changed
+                for (int i=0; i<policyMapUpdateProviders.length; i++) {
+                    policyMapUpdateProviders[i].update(extenders[i], policyMap, seiModel, binding);
+                    extenders[i].disconnect();
                 }
             }
         } catch (PolicyException e) {

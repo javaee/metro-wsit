@@ -98,6 +98,13 @@ public final class PolicyConfigParser {
             
             URL configFileUrl = PolicyUtils.ConfigFile.loadAsResource(cfgFile, context);
             
+//TODO: remove after NB plugin starts generating differnet names
+// BEGIN REMOVE            
+            if (configFileUrl == null) {
+                configFileUrl = PolicyUtils.ConfigFile.loadAsResource("wsit.xml", context);
+            }            
+// END REMOVE            
+            
             if (configFileUrl != null) {
                 map = parse(configFileUrl, mutators);
             }
