@@ -36,7 +36,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 import javax.xml.namespace.QName;
-import javax.xml.ws.addressing.EndpointReference;
+import javax.xml.ws.EndpointReference;
 import static com.sun.xml.ws.security.impl.policy.Constants.*;
 
 /**

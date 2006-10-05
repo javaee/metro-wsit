@@ -35,7 +35,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
 
-import javax.xml.ws.addressing.EndpointReference;
+import javax.xml.ws.EndpointReference;
 import com.sun.xml.ws.policy.Policy;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -43,7 +43,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import javax.xml.namespace.QName;
-import javax.xml.ws.addressing.EndpointReference;
+import javax.xml.ws.EndpointReference;
 import static com.sun.xml.ws.security.impl.policy.Constants.*;
 /**
  *

@@ -89,15 +89,6 @@ import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.WebServiceException;
 
-import javax.xml.ws.addressing.AddressingBuilder;
-import javax.xml.ws.addressing.AddressingConstants;
-import javax.xml.ws.addressing.AddressingProperties;
-import javax.xml.ws.addressing.AttributedURI;
-import javax.xml.ws.addressing.JAXWSAConstants;
-import javax.xml.ws.addressing.Relationship;
-
-import com.sun.xml.ws.addressing.spi.WsaRuntimeFactory;
-
 import javax.security.auth.callback.CallbackHandler;
 
 import java.util.Properties;
@@ -108,8 +99,6 @@ import java.util.Set;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-
-import com.sun.xml.ws.addressing.spi.WsaRuntimeFactory;
 
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
@@ -186,48 +175,28 @@ public class SecurityServerPipe extends SecurityPipeBase
         boolean isTrustMessage = false;
         String msgId = null;
         
-        WsaRuntimeFactory wsaFac = null;
-        if (addressingURI != null){
-            wsaFac = WsaRuntimeFactory.newInstance(addressingURI, pipeConfig.getWSDLModel(), pipeConfig.getBinding());
-        } else {
-            wsaFac = WsaRuntimeFactory.newInstance(pipeConfig.getWSDLModel(), pipeConfig.getBinding());
-        }
-        AddressingProperties ap = wsaFac.readHeaders(packet);
-        if (ap != null) {
-            AttributedURI actionURI = ap.getAction();
-            if (actionURI != null){
-                String action = actionURI.toString();
-               
-                if (action.equals(WSSCConstants.REQUEST_SECURITY_CONTEXT_TOKEN_ACTION)) {
-                    isSCIssueMessage = true;
-                } else if (action.equals(WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_ACTION)) {
-                    isSCCancelMessage = true;
-                } else if (WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION.equals(action) /*||
-                           WSTrustConstants.REQUEST_SECURITY_TOKEN_RESPONSE_ISSUE_ACTION.equals(action)*/) {
-                    isTrustMessage = true;
+        String action = getAction(packet);
+        if (WSSCConstants.REQUEST_SECURITY_CONTEXT_TOKEN_ACTION.equals(action)) {
+            isSCIssueMessage = true;
+        } else if (WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_ACTION.equals(action)) {
+            isSCCancelMessage = true;
+        } else if (WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION.equals(action)) {
+            isTrustMessage = true;
+            
+            if(trustConfig != null){
+                packet.invocationProperties.put(Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS,trustConfig.iterator());
+                packet.getApplicationScopePropertyNames(false).add(Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS);
+            }
                     
-                    // set outbound addressing property for RSTR action header
-                    AddressingProperties outAp = wsaFac.toOutbound(ap, packet);
-                    outAp.setAction(AddressingBuilder.newInstance().newURI(WSTrustConstants.REQUEST_SECURITY_TOKEN_RESPONSE_ISSUE_ACTION));
-                    packet.invocationProperties.put(JAXWSAConstants.SERVER_ADDRESSING_PROPERTIES_OUTBOUND, outAp);
-                    if(trustConfig != null){
-                        packet.invocationProperties.put(Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS,trustConfig.iterator());
-                        packet.getApplicationScopePropertyNames(false).add(Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS);
-                    }
-                    //set the callbackhandler
-                    packet.invocationProperties.put(WSTrustConstants.STS_CALL_BACK_HANDLER, handler);
-                    packet.getApplicationScopePropertyNames(false).add(WSTrustConstants.STS_CALL_BACK_HANDLER);
-                }
-            }
-            AttributedURI msgURI = ap.getMessageID();
-            if (msgURI != null){
-                msgId = msgURI.toString();
-            }
+            //set the callbackhandler
+            packet.invocationProperties.put(WSTrustConstants.STS_CALL_BACK_HANDLER, handler);
+            packet.getApplicationScopePropertyNames(false).add(WSTrustConstants.STS_CALL_BACK_HANDLER);
         }
+         
         if (isSCIssueMessage){
             List<PolicyAssertion> policies = getInBoundSCP(packet.getMessage());
             if(!policies.isEmpty()) {
-                packet.otherProperties.put(SC_ASSERTION, (PolicyAssertion)policies.get(0));
+                packet.invocationProperties.put(SC_ASSERTION, (PolicyAssertion)policies.get(0));
             }
         }
         
@@ -272,29 +241,37 @@ public class SecurityServerPipe extends SecurityPipeBase
             
             if (isSCIssueMessage || isSCCancelMessage) {
                 //-------put application message on hold and invoke SC contract--------
+               // String action = null;
+               // if (isSCIssueMessage){
+                   // action = WSSCConstants.REQUEST_SECURITY_CONTEXT_TOKEN_RESPONSE_ACTION;
+               // }else{
+                //    action = WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_RESPONSE_ACTION;
+               // }
+                
                 retPacket = invokeSecureConversationContract(
-                        packet, ctx, scSessionManager, isSCIssueMessage);
-                
-                String action = null;
-                if (isSCIssueMessage){
-                    action = WSSCConstants.REQUEST_SECURITY_CONTEXT_TOKEN_RESPONSE_ACTION;
-                }else{
-                    action = WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_RESPONSE_ACTION;
-                }
-                
-                retPacket = addAddressingHeaders(retPacket, msgId, action);
+                        packet, ctx, scSessionManager, isSCIssueMessage, action);
             } else {
                 //--------INVOKE NEXT PIPE------------
                 // Put the addressing headers as unread
-                packet.invocationProperties.put(JAXWSAConstants.SERVER_ADDRESSING_PROPERTIES_INBOUND, null);
+               // packet.invocationProperties.put(JAXWSAConstants.SERVER_ADDRESSING_PROPERTIES_INBOUND, null);
                 
                 if (nextPipe != null) {
                     retPacket = nextPipe.process(packet);
                 }else {
                     retPacket = packet;
                 }
+                
+                // Add addrsssing headers to trust message
+                if (isTrustMessage){
+                    Packet newRetPacket = packet.createServerResponse(retPacket.getMessage(), pipeConfig.getBinding().getAddressingVersion(), pipeConfig.getBinding().getSOAPVersion(), WSTrustConstants.REQUEST_SECURITY_TOKEN_RESPONSE_ISSUE_ACTION); 
+                    newRetPacket.proxy = retPacket.proxy;
+                    newRetPacket.invocationProperties.putAll(retPacket.invocationProperties);
+                    
+                    retPacket = newRetPacket;
+                }
             }
         }
+        
         
         /* TODO:this piece of code present since payload should be read once*/
         try{
@@ -451,7 +428,7 @@ public class SecurityServerPipe extends SecurityPipeBase
     protected MessagePolicy getOutgoingXWSSecurityPolicy(
             Packet packet, boolean isSCMessage) {
         if (isSCMessage) {
-            Token scToken = (Token)packet.otherProperties.get(SC_ASSERTION);
+            Token scToken = (Token)packet.invocationProperties.get(SC_ASSERTION);
             return getOutgoingXWSBootstrapPolicy(scToken);
         }
         Message message = packet.getMessage();
@@ -533,7 +510,7 @@ public class SecurityServerPipe extends SecurityPipeBase
     // The packet has the Message with RST/SCT inside it
     // TODO: Need to inspect if it is really a Issue or a Cancel
     private Packet invokeSecureConversationContract(
-            Packet packet, ProcessingContext ctx, SCSessionManager scSessionManager, boolean isSCTIssue) {
+            Packet packet, ProcessingContext ctx, SCSessionManager scSessionManager, boolean isSCTIssue, String action) {
         //IssuedTokenContext ictx = ((ProcessingContextImpl)ctx).getTrustCredentialHolder();
         IssuedTokenContext ictx = new IssuedTokenContextImpl();
         Message msg = packet.getMessage();
@@ -573,14 +550,15 @@ public class SecurityServerPipe extends SecurityPipeBase
         //String sctId = sct.getIdentifier().toString();
         //((ProcessingContextImpl)ctx).getIssuedTokenContextMap().put(sctId, ictx);
         
-        Packet retPacket = new Packet(retMsg);
+        Packet retPacket = packet.createServerResponse(retMsg, pipeConfig.getBinding().getAddressingVersion(), pipeConfig.getBinding().getSOAPVersion(), action); 
+
         retPacket.proxy = packet.proxy;
         retPacket.invocationProperties.putAll(packet.invocationProperties);
         if (isSCTIssue){
             List<PolicyAssertion> policies = getOutBoundSCP(packet.getMessage());
             
             if(!policies.isEmpty()) {
-                retPacket.otherProperties.put(SC_ASSERTION, (PolicyAssertion)policies.get(0));
+                retPacket.invocationProperties.put(SC_ASSERTION, (PolicyAssertion)policies.get(0));
             }
         }
         
@@ -592,7 +570,7 @@ public class SecurityServerPipe extends SecurityPipeBase
         throw new UnsupportedOperationException("Will be supported for optimized path");
     }
     
-   private Packet addAddressingHeaders(Packet packet, String relatesTo, String action){
+  /** private Packet addAddressingHeaders(Packet packet, String relatesTo, String action){
         AddressingBuilder builder = AddressingBuilder.newInstance();
         AddressingProperties ap = builder.newAddressingProperties();
         
@@ -617,7 +595,7 @@ public class SecurityServerPipe extends SecurityPipeBase
                 .put(JAXWSAConstants.SERVER_ADDRESSING_PROPERTIES_OUTBOUND, ap);
         
         return packet;
-    }
+    }*/
     
     protected SecurityPolicyHolder addOutgoingMP(WSDLBoundOperation operation,Policy policy)throws PolicyException{
         
@@ -702,7 +680,7 @@ public class SecurityServerPipe extends SecurityPipeBase
         }
     }
     
-    protected boolean isRMMessage(Packet packet){
+   /* protected boolean isRMMessage(Packet packet){
         //TODO: For incoming messages we need to look at the
         //Action header
         AddressingProperties ap = (AddressingProperties)packet.invocationProperties
@@ -753,9 +731,9 @@ public class SecurityServerPipe extends SecurityPipeBase
         }
         return false;
         
-    }
+    }*/
     
-    protected AttributedURI getAction(Packet packet ){
+  /**  protected AttributedURI getAction(Packet packet ){
         AddressingProperties ap = (AddressingProperties)packet.invocationProperties
                 .get(JAXWSAConstants.SERVER_ADDRESSING_PROPERTIES_OUTBOUND);
         if (ap != null) {
@@ -764,7 +742,7 @@ public class SecurityServerPipe extends SecurityPipeBase
             return uri;
         }
         return null;
-    }
+    }*/
     
     private CallbackHandler configureServerHandler(Set configAssertions) {
         Properties props = new Properties();

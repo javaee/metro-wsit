@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityTokenImpl.java,v 1.4 2006-09-20 23:58:48 manveen Exp $
+ * $Id: RequestSecurityTokenImpl.java,v 1.5 2006-10-05 00:19:10 jdg6688 Exp $
  */
 
 /*
@@ -37,8 +37,6 @@ import javax.xml.bind.JAXBElement;
 
 import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.ws.security.trust.WSTrustException;
-
-import com.sun.xml.ws.addressing.EndpointReferenceImpl;
 
 import com.sun.xml.ws.security.trust.elements.*;
 import com.sun.xml.ws.security.trust.elements.Claims;
@@ -307,9 +305,9 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
     
     public void setIssuer(Issuer issuer) {
         this.issuer = issuer;
-        JAXBElement<EndpointReferenceImpl> eprType =
+        /*JAXBElement<EndpointReferenceImpl> eprType =
                 (new com.sun.xml.ws.security.trust.impl.bindings.ObjectFactory()).createIssuer((EndpointReferenceImpl)issuer);
-        getAny().add(eprType);
+        getAny().add(eprType);*/
     }
     
     public Issuer getIssuer() {
@@ -618,8 +616,8 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
                     BinaryExchangeType bcType = (BinaryExchangeType)obj.getValue();
                     setBinaryExchange(new BinaryExchangeImpl(bcType));
                 } else if (local.equalsIgnoreCase("Issuer")){
-                    EndpointReferenceImpl isType = (EndpointReferenceImpl)obj.getValue();
-                    setIssuer(new IssuerImpl(isType));
+                   // EndpointReferenceImpl isType = (EndpointReferenceImpl)obj.getValue();
+                   // setIssuer(new IssuerImpl(isType));
                 } else if (local.equalsIgnoreCase("Claims")){
                     ClaimsType cType = (ClaimsType)obj.getValue();
                     setClaims(new ClaimsImpl(cType));

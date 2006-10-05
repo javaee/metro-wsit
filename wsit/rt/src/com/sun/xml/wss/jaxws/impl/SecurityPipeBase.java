@@ -50,6 +50,7 @@ import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Header;
+import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLInput;
@@ -73,6 +74,8 @@ import com.sun.xml.ws.security.policy.SupportingTokens;
 import com.sun.xml.ws.security.policy.SymmetricBinding;
 import com.sun.xml.ws.security.impl.policy.PolicyUtil;
 
+import com.sun.xml.ws.security.IssuedTokenContext;
+
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelTranslator;
 
@@ -94,11 +97,6 @@ import com.sun.xml.ws.policy.sourcemodel.PolicyModelUnmarshaller;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.policy.PolicyAssertion;
 
-import javax.xml.ws.addressing.AddressingBuilderFactory;
-import javax.xml.ws.addressing.AddressingConstants;
-import javax.xml.ws.addressing.AddressingProperties;
-import javax.xml.ws.addressing.AttributedURI;
-import javax.xml.ws.addressing.JAXWSAConstants;
 import com.sun.xml.ws.security.policy.Token;
 
 
@@ -143,7 +141,7 @@ public abstract class SecurityPipeBase implements Pipe {
     // Per-Proxy State for SecureConversation sessions
     // as well as IssuedTokenContext returned by invoking a Trust-Plugin
     // This map stores IssuedTokenContext against the Policy-Id
-    protected Hashtable issuedTokenContextMap = new Hashtable();
+    protected Hashtable<String, IssuedTokenContext> issuedTokenContextMap = new Hashtable<String, IssuedTokenContext>();
     
     protected PipeConfiguration pipeConfig = null;
     
@@ -220,8 +218,6 @@ public abstract class SecurityPipeBase implements Pipe {
     // store as instance variable
     protected Unmarshaller unmarshaller =null;
     
-    protected String addressingURI; 
-    
     //store instance variable: Binding has IssuedToken Policy
     //TODO: temporary setting it true till venu provides a method
     // for querying issuedTokens in Binding.
@@ -234,7 +230,7 @@ public abstract class SecurityPipeBase implements Pipe {
             ISSUE_REQUEST_URI = new URI(WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION);
             CANCEL_REQUEST_URI = new URI(WSTrustConstants.CANCEL_REQUEST);
             jaxbContext = WSTrustElementFactory.getContext();           ;
-            securityPolicyNamespaces = new ArrayList();
+            securityPolicyNamespaces = new ArrayList<String>();
             securityPolicyNamespaces.add(SECURITY_POLICY_2005_07_NAMESPACE);
             
         } catch (Exception e) {
@@ -290,7 +286,6 @@ public abstract class SecurityPipeBase implements Pipe {
         bindingLevelAlgSuite = that.bindingLevelAlgSuite;
         this.inProtocolPM = that.inProtocolPM;
         this.outProtocolPM = that.outProtocolPM;
-        this.addressingURI = that.addressingURI;
         try {
             this.unmarshaller = jaxbContext.createUnmarshaller();
         }catch (javax.xml.bind.JAXBException ex) {
@@ -389,7 +384,7 @@ public abstract class SecurityPipeBase implements Pipe {
         
         
         if (isSCMessage) {
-            Token scToken = (Token)packet.otherProperties.get(SC_ASSERTION);
+            Token scToken = (Token)packet.invocationProperties.get(SC_ASSERTION);
             return getOutgoingXWSBootstrapPolicy(scToken);
         }
         Message message = packet.getMessage();
@@ -433,7 +428,7 @@ public abstract class SecurityPipeBase implements Pipe {
               Packet packet, boolean isSCMessage) {
         MessagePolicy mp = null;
         if (isSCMessage) {
-            Token scToken = (Token)packet.otherProperties.get(SC_ASSERTION);
+            Token scToken = (Token)packet.invocationProperties.get(SC_ASSERTION);
             //mp = getInboundXWSBootstrapPolicy(scToken);
             if(mp == null){
                 return new MessagePolicy();
@@ -713,20 +708,8 @@ public abstract class SecurityPipeBase implements Pipe {
             //Review:Will getEffectivePolicy return null or empty policy ?.
             Policy endpointPolicy = wsPolicyMap.getEndpointEffectivePolicy(endpointKey);
             
-            if (endpointPolicy != null){
-                AddressingBuilderFactory abf = AddressingBuilderFactory.newInstance();
-                AddressingConstants ac = abf.newAddressingBuilder().newAddressingConstants();
-                AddressingConstants ac2 = abf.newAddressingBuilder("http://schemas.xmlsoap.org/ws/2004/08/addressing").newAddressingConstants();
-                if (endpointPolicy.contains(ac.getWSDLNamespaceURI()) ||
-                          endpointPolicy.contains(ADDRESSING_POLICY_NAMESPACE_URI)){
-                    addressingURI = ac.getNamespaceURI();
-                } else if (endpointPolicy.contains(ac2.getWSDLNamespaceURI())){
-                    addressingURI = ac2.getNamespaceURI();
-                }
-            }
-            
             buildProtocolPolicy(endpointPolicy);
-            ArrayList policyList = new ArrayList();
+            ArrayList<Policy> policyList = new ArrayList<Policy>();
             if(endpointPolicy != null){
                 policyList.add(endpointPolicy);
             }
@@ -792,7 +775,7 @@ public abstract class SecurityPipeBase implements Pipe {
                 inPH = addIncomingMP(operation,omEP);
                 /*}*/
                 Iterator faults = operation.getOperation().getFaults().iterator();
-                ArrayList faultPL = new ArrayList();
+                ArrayList<Policy> faultPL = new ArrayList<Policy>();
                 faultPL.add(endpointPolicy);
                 if(operationPolicy != null){
                     faultPL.add(operationPolicy);
@@ -936,7 +919,7 @@ public abstract class SecurityPipeBase implements Pipe {
             }
         }
     }
-    private void addToken(Token token,ArrayList list){
+    private void addToken(Token token,ArrayList<Token> list){
         if(PolicyUtil.isSecureConversationToken((PolicyAssertion)token) ||
                   PolicyUtil.isIssuedToken((PolicyAssertion)token)){
             list.add(token);
@@ -997,7 +980,7 @@ public abstract class SecurityPipeBase implements Pipe {
     
     protected Policy getEffectiveBootstrapPolicy(NestedPolicy bp)throws PolicyException{
         try {
-            ArrayList pl = new ArrayList();
+            ArrayList<Policy> pl = new ArrayList<Policy>();
             pl.add(bp);
             Policy mbp = getMessageBootstrapPolicy();
             if ( mbp != null ) {
@@ -1050,82 +1033,51 @@ public abstract class SecurityPipeBase implements Pipe {
     }
     
     protected boolean isSCMessage(Packet packet){
-        AddressingProperties ap = (AddressingProperties)packet.invocationProperties
-                  .get(JAXWSAConstants.CLIENT_ADDRESSING_PROPERTIES);
-        if (ap != null) {
-            AttributedURI uri = ap.getAction();
-            if (uri != null && rstSCTURI.equals(uri.toString())) {
+        String action = getAction(packet);
+        if (rstSCTURI.equals(action)){
                 return true;
-            }
         }
         return false;
     }
     
     protected boolean isSCCancel(Packet packet){
-        AddressingProperties ap = (AddressingProperties)packet.invocationProperties
-                  .get(JAXWSAConstants.CLIENT_ADDRESSING_PROPERTIES);
-        if (ap != null) {
-            AttributedURI uri = ap.getAction();
-            if (uri != null &&
-                      WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_ACTION .equals(uri.toString())) {
-                return true;
-            }
+        String action = getAction(packet);
+        if(WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_RESPONSE_ACTION.equals(action) || 
+           WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_ACTION .equals(action)) {
+            return true;
         }
         return false;
     }
     
     protected boolean isTrustMessage(Packet packet){
-        AddressingProperties ap = (AddressingProperties)packet.invocationProperties
-                  .get(JAXWSAConstants.CLIENT_ADDRESSING_PROPERTIES);
-        if (ap != null) {
-            AttributedURI uri = ap.getAction();
-            if (uri != null){
-                String uriValue = uri.toString();
-                if(WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION.equals(uriValue) ||
-                          WSTrustConstants.REQUEST_SECURITY_TOKEN_RESPONSE_ISSUE_ACTION.equals(uriValue)){
-                    return true;
-                }
-            }
+        String action = getAction(packet);
+        if(WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION.equals(action) ||
+           WSTrustConstants.REQUEST_SECURITY_TOKEN_RESPONSE_ISSUE_ACTION.equals(action)){
+            return true;
         }
         return false;
         
     }
     
     protected boolean isRMMessage(Packet packet){
-        AddressingProperties ap = (AddressingProperties)packet.invocationProperties
-                  .get(JAXWSAConstants.CLIENT_ADDRESSING_PROPERTIES);
-        
-        
-        if (ap != null) {
-            AttributedURI uri = ap.getAction();
-            
-            if (uri != null) {
-                String action = uri.toString();
-                if (RM_CREATE_SEQ.equals(action) || RM_CREATE_SEQ_RESP.equals(action)
+       String action = getAction(packet);
+       if (RM_CREATE_SEQ.equals(action) || RM_CREATE_SEQ_RESP.equals(action)
                 || RM_SEQ_ACK.equals(action) || RM_TERMINATE_SEQ.equals(action)
                 || RM_LAST_MESSAGE.equals(action)) {
                     return true;
-                }
+       }
                 
-            }
-        }
-        return false;
+       return false;
     }
     
-    protected AttributedURI getAction(Packet packet ){
-        AddressingProperties ap = (AddressingProperties)packet.invocationProperties
-                  .get(JAXWSAConstants.CLIENT_ADDRESSING_PROPERTIES);
-        if (ap != null) {
-            AttributedURI uri = ap.getAction();
-            
-            return uri;
-        }
-        return null;
+    protected String getAction(Packet packet ){
+        HeaderList hl = packet.getMessage().getHeaders();
+        String action =  hl.getAction(pipeConfig.getBinding().getAddressingVersion(), pipeConfig.getBinding().getSOAPVersion());
+        return action;
     }
     
     protected WSDLBoundOperation getWSDLOpFromAction(Packet packet ,boolean isIncomming){
-        AttributedURI uri = getAction(packet);
-        String uriValue = uri.toString();
+        String uriValue = getAction(packet);
         Set <WSDLBoundOperation>keys = outMessagePolicyMap.keySet();
         for(WSDLBoundOperation wbo : keys){
             WSDLOperation wo = wbo.getOperation();
@@ -1146,7 +1098,7 @@ public abstract class SecurityPipeBase implements Pipe {
             RMPolicyResolver rr = new RMPolicyResolver();
             Policy msgLevelPolicy = rr.getOperationLevelPolicy();
             PolicyMerger merger = PolicyMerger.getMerger();
-            ArrayList pList = new ArrayList(2);
+            ArrayList<Policy> pList = new ArrayList<Policy>(2);
             pList.add(endpointPolicy);
             pList.add(msgLevelPolicy);
             Policy effectivePolicy = merger.merge(pList);

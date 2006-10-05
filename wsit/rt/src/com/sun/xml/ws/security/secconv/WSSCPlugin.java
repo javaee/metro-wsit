@@ -28,11 +28,10 @@
 
 package com.sun.xml.ws.security.secconv;
 
-import com.sun.xml.ws.addressing.spi.WsaRuntimeFactory;
-
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
@@ -71,10 +70,6 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-
-import javax.xml.ws.addressing.AddressingBuilder;
-import javax.xml.ws.addressing.AddressingProperties;
-import javax.xml.ws.addressing.JAXWSAConstants;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -215,7 +210,7 @@ public class WSSCPlugin {
         log.log(Level.FINE,"WSSC1009.send.req.message", new Object[] {printMessageAsString(request)});        
         Packet reqPacket = new Packet(request);
         if (issuedToken != null){
-            reqPacket.otherProperties.put(SC_ASSERTION, issuedToken);
+            reqPacket.invocationProperties.put(SC_ASSERTION, issuedToken);
         }
         if (packet != null){
             for(String stsProperty : WSTrustConstants.STS_PROPERTIES) {
@@ -322,28 +317,8 @@ public class WSSCPlugin {
     }
     
     private Packet addAddressingHeaders(Packet packet, WSDLPort wsdlPort, WSBinding binding, String action)throws WSSecureConversationException {
-        AddressingBuilder builder = AddressingBuilder.newInstance();
-        AddressingProperties ap = builder.newAddressingProperties();
-        
-        
-        // Action
-        ap.setAction(builder.newURI(action));
-        
-        // MessageID
-        String msgId = "uuid:" + UUID.randomUUID().toString();
-        ap.setMessageID(builder.newURI(msgId));
-        
-        // To
-        ap.setTo(builder.newURI(wsdlPort.getAddress().toString()));
-        
-        // ReplyTo
-        ap.setReplyTo(builder.newEndpointReference(builder.newAddressingConstants().getAnonymousURI().toString()));
-        
-        
-        WsaRuntimeFactory fac = WsaRuntimeFactory.newInstance(ap.getNamespaceURI(), wsdlPort, binding);
-        fac.writeHeaders(packet, ap);
-        packet.invocationProperties
-                .put(JAXWSAConstants.CLIENT_ADDRESSING_PROPERTIES, ap);
+        HeaderList hl = packet.getMessage().getHeaders();
+        hl.fillRequestAddressingHeaders(wsdlPort, binding, packet, action);
         
         return packet;
     }

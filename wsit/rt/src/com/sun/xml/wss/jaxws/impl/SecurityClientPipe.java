@@ -129,10 +129,6 @@ import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
 import javax.xml.soap.SOAPFactory;
 import javax.xml.ws.soap.SOAPFaultException;
 
-import javax.xml.ws.addressing.AddressingProperties;
-import javax.xml.ws.addressing.AttributedURI;
-import javax.xml.ws.addressing.JAXWSAConstants;
-
 import com.sun.xml.wss.impl.filter.DumpFilter;
 import com.sun.xml.wss.impl.misc.DefaultCallbackHandler;
 
@@ -246,7 +242,7 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
             
             List<PolicyAssertion> policies = getInBoundSCP(packet.getMessage());
             if (!policies.isEmpty()) {
-                ret.otherProperties.put(SC_ASSERTION, (PolicyAssertion)policies.get(0));
+                ret.invocationProperties.put(SC_ASSERTION, (PolicyAssertion)policies.get(0));
             }
         }
         
@@ -304,7 +300,7 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
     // service policy
     protected List<PolicyAssertion> getIssuedTokenPolicies(Packet packet, String scope) {
         if (outMessagePolicyMap == null) {
-            return new ArrayList();
+            return new ArrayList<PolicyAssertion>();
         }
         
         WSDLBoundOperation operation = null;
@@ -382,7 +378,7 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
         List<PolicyAssertion> policies = null;
         
         if (isSCMessage) {
-            Token scToken = (Token)packet.otherProperties.get(SC_ASSERTION);
+            Token scToken = (Token)packet.invocationProperties.get(SC_ASSERTION);
             policies =  getIssuedTokenPoliciesFromBootstrapPolicy(scToken);
         } else {
             policies = getIssuedTokenPolicies(packet, OPERATION_SCOPE);

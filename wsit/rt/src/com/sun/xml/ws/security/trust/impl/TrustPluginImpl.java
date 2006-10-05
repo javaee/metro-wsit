@@ -31,6 +31,7 @@
 
 package com.sun.xml.ws.security.trust.impl;
 
+import com.sun.xml.ws.addressing.policy.Address;
 import com.sun.xml.ws.mex.client.MetadataClient;
 import com.sun.xml.ws.mex.client.PortInfo;
 import com.sun.xml.ws.mex.client.schema.Metadata;
@@ -70,10 +71,6 @@ import javax.xml.namespace.QName;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Dispatch;
 import javax.xml.ws.Service;
-import javax.xml.ws.addressing.AddressingBuilder;
-import javax.xml.ws.addressing.AddressingProperties;
-import javax.xml.ws.addressing.AttributedURI;
-import javax.xml.ws.addressing.JAXWSAConstants;
 import javax.xml.bind.JAXBElement;
 
 import java.util.logging.Level;
@@ -295,7 +292,7 @@ public class TrustPluginImpl implements TrustPlugin {
     private String getSTSURI(final IssuedToken issuedToken) {
         Issuer issuer = issuedToken.getIssuer();
         if(issuer != null){
-            AttributedURI address = issuer.getAddress();
+            Address address = issuer.getAddress();
             if (address != null){
                 URI uri = address.getURI();
                 return uri.toString();
@@ -309,7 +306,7 @@ public class TrustPluginImpl implements TrustPlugin {
         PolicyAssertion metadata = null;
         PolicyAssertion metadataSection = null;
         PolicyAssertion metadataReference = null;
-        AttributedURI address = null;
+        Address address = null;
         if(issuer != null){
             if ( issuer.hasNestedAssertions() ) {
                 Iterator <PolicyAssertion> it = issuer.getNestedAssertionsIterator();

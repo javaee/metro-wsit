@@ -1,5 +1,5 @@
 /*
- * $Id: OnBehalfOf.java,v 1.1 2006-05-03 22:57:18 arungupta Exp $
+ * $Id: OnBehalfOf.java,v 1.2 2006-10-05 00:19:12 jdg6688 Exp $
  */
 
 /*
@@ -26,7 +26,7 @@
 
 package com.sun.xml.ws.security.trust.elements;
 
-import javax.xml.ws.addressing.EndpointReference;
+import javax.xml.ws.EndpointReference;
 import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
 
 /**

@@ -1,5 +1,5 @@
 /*
- * $Id: IssuerImpl.java,v 1.2 2006-09-20 23:58:48 manveen Exp $
+ * $Id: IssuerImpl.java,v 1.3 2006-10-05 00:19:10 jdg6688 Exp $
  */
 
 /*
@@ -26,8 +26,8 @@
 
 package com.sun.xml.ws.security.trust.impl.elements;
 
-import javax.xml.ws.addressing.EndpointReference;
-import com.sun.xml.ws.addressing.v200408.EndpointReferenceImpl;
+import javax.xml.ws.EndpointReference;
+//import com.sun.xml.ws.addressing.v200408.EndpointReferenceImpl;
 
 import com.sun.xml.ws.security.trust.elements.Issuer;
 
@@ -36,7 +36,7 @@ import com.sun.xml.ws.security.trust.elements.Issuer;
  *
  * @author Manveen Kaur
  */
-public class IssuerImpl extends EndpointReferenceImpl implements Issuer {
+public class IssuerImpl implements Issuer {
 
     EndpointReference epr = null;
 
@@ -47,9 +47,9 @@ public class IssuerImpl extends EndpointReferenceImpl implements Issuer {
          setEndpointReference(epr);
     }
     
-    public IssuerImpl(EndpointReferenceImpl isType) throws Exception{
+   // public IssuerImpl(EndpointReferenceImpl isType) throws Exception{
         // ToDo
-    }
+   // }
     
     public EndpointReference getEndpointReference() {
         return epr;

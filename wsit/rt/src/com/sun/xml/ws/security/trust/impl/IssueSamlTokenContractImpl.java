@@ -302,21 +302,21 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
    protected Map getClaimedAttributes(Subject subject, String appliesTo, String tokenType){
        Set<Principal> principals = subject.getPrincipals();
        //List attrs = new ArrayList();
-       Map<String, String> attrs = new HashMap<String, String>();
+       Map<String, QName> attrs = new HashMap<String, QName>();
        if (principals != null){
            Iterator iterator = principals.iterator();
            while (iterator.hasNext()){
                 String name = principals.iterator().next().getName();
                 if (name != null){
                     //attrs.add(name);
-                    attrs.put(PRINCIPAL, name);
+                    attrs.put(PRINCIPAL, new QName("http://sun.com", name));
                     break;
                 }
            }       
        }
        
        if (attrs.get(PRINCIPAL) == null){
-           attrs.put(PRINCIPAL, "principal");
+           attrs.put(PRINCIPAL, new QName("http://sun.com", "principal"));
        }
        
        // Set up a dumy attribute value

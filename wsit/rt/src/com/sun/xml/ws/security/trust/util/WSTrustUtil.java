@@ -41,7 +41,7 @@ import java.util.List;
 import java.util.UUID;
 import javax.xml.soap.SOAPFault;
 import javax.xml.bind.JAXBElement;
-import javax.xml.ws.addressing.EndpointReference;
+import javax.xml.ws.EndpointReference;
 
 import javax.xml.soap.SOAPElement;
 import javax.xml.soap.SOAPHeader;
@@ -56,10 +56,6 @@ import com.sun.xml.ws.security.secconv.WSSCConstants;
 import com.sun.xml.wss.core.SecurityContextTokenImpl;
 
 import org.w3c.dom.NodeList;
-
-import javax.xml.ws.addressing.AttributedURI;
-
-import com.sun.xml.ws.addressing.EndpointReferenceImpl;
 
 /**
  *

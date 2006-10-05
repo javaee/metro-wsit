@@ -1,5 +1,5 @@
 /*
- * $Id: OnBehalfOfImpl.java,v 1.2 2006-05-10 23:11:53 jdg6688 Exp $
+ * $Id: OnBehalfOfImpl.java,v 1.3 2006-10-05 00:19:11 jdg6688 Exp $
  */
 
 /*
@@ -26,8 +26,8 @@
 
 package com.sun.xml.ws.security.trust.impl.elements;
 
-import com.sun.xml.ws.addressing.EndpointReferenceImpl;
-import javax.xml.ws.addressing.EndpointReference;
+//import com.sun.xml.ws.addressing.EndpointReferenceImpl;
+import javax.xml.ws.EndpointReference;
 import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
 import com.sun.xml.ws.security.impl.bindings.SecurityTokenReferenceType;
 import com.sun.xml.ws.security.trust.elements.OnBehalfOf;
@@ -52,12 +52,12 @@ public class OnBehalfOfImpl extends OnBehalfOfType implements OnBehalfOf {
     
     public void setEndpointReference(EndpointReference endpointReference) {
         epr = endpointReference;
-        if (endpointReference != null) {
+       /* if (endpointReference != null) {
             JAXBElement<EndpointReferenceImpl> eprElement=
                     (new com.sun.xml.ws.security.trust.impl.bindings.ObjectFactory()).
                     createEndpointReference((EndpointReferenceImpl)endpointReference);
             setAny(eprElement);
-        }
+        }*/
         str = null;
     }
     
