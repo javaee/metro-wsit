@@ -66,6 +66,7 @@ import com.sun.xml.wss.jaxws.impl.SecurityServerPipe;
  *
  * @author Arun Gupta
  */
+@SuppressWarnings("deprecation")
 public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory {
 
     private static final String PREFIX = "com.sun.xml.ws.assembler.runtime";
