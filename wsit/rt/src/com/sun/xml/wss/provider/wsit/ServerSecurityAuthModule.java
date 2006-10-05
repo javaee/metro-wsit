@@ -18,7 +18,7 @@
  * [name of copyright owner]
  */
 /*
- * $Id: ServerSecurityAuthModule.java,v 1.1 2006-10-04 16:49:06 kumarjayanti Exp $
+ * $Id: ServerSecurityAuthModule.java,v 1.2 2006-10-05 11:42:43 mayankmishra Exp $
  *
  * Copyright 2006 Sun Microsystems, Inc. All rights reserved.
  * SUN PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
@@ -164,7 +164,7 @@ public class ServerSecurityAuthModule extends WssProviderAuthModule
                MessageConstants.REQUESTER_SERIAL, sharedState.get(REQUESTER_SERIAL));
        }
 
-       private void populateSharedStateFromContext(Map sharedState, ProcessingContextImpl context) {
+   private void populateSharedStateFromContext(Map<String, Object> sharedState, ProcessingContextImpl context) {
            sharedState.put(
                REQUESTER_SUBJECT, context.getExtraneousProperty(MessageConstants.AUTH_SUBJECT));
            sharedState.put(

@@ -49,5 +49,5 @@ public interface EncryptedElements extends Target {
      * protected if present in the message.
      * @return {@link java.util.Iterator }
      */
-    public Iterator getTargets();
+    public Iterator<String> getTargets();
 }

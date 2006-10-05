@@ -40,6 +40,7 @@ import com.sun.xml.ws.security.policy.EncryptedElements;
 import com.sun.xml.ws.security.policy.EncryptedParts;
 import com.sun.xml.ws.security.policy.EndorsingSupportingTokens;
 import com.sun.xml.ws.security.policy.Header;
+import com.sun.xml.ws.security.policy.RequiredElements;
 import com.sun.xml.ws.security.policy.SamlToken;
 import com.sun.xml.ws.security.policy.SecureConversationToken;
 import com.sun.xml.ws.security.policy.SignedElements;
@@ -131,7 +132,7 @@ public class XWSSPolicyGenerator {
     private IntegrityAssertionProcessor iAP = null;
     private EncryptionAssertionProcessor eAP = null;
     private Binding policyBinding = null;
-    private List reqElements = new ArrayList();
+    private List<RequiredElements> reqElements = new ArrayList<RequiredElements>();
     /** Creates a new instance of WSPolicyProcessorImpl */
     //public XWSSPolicyGenerator(AssertionSet assertionSet,boolean isServer,boolean isIncoming){
     public XWSSPolicyGenerator(Policy effectivePolicy,boolean isServer,boolean isIncoming){
@@ -275,7 +276,7 @@ public class XWSSPolicyGenerator {
                 }else if(PolicyUtil.isBinding(assertion)){
                     _binding =(Binding) assertion;
                 }else if(PolicyUtil.isRequiredElements(assertion)){
-                    reqElements.add(assertion);
+                    reqElements.add((RequiredElements)assertion);
                 }
             }
         }

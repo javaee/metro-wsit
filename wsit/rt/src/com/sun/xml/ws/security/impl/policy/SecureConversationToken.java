@@ -109,7 +109,7 @@ public class SecureConversationToken extends PolicyAssertion implements com.sun.
     }
     
     public void setIncludeToken(String type) {
-        Map attrs = this.getAttributes();
+        Map<QName, String> attrs = this.getAttributes();
         QName itQname = new QName(Constants.SECURITY_POLICY_NS, Constants.IncludeToken);
         attrs.put(itQname,type);
     }

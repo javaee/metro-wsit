@@ -22,6 +22,7 @@
 
 package com.sun.xml.ws.security.impl.policyconv;
 
+import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.security.policy.RequiredElements;
 import com.sun.xml.wss.impl.policy.PolicyGenerationException;
 import com.sun.xml.wss.impl.policy.mls.MandatoryTargetPolicy;
@@ -46,7 +47,7 @@ public class RequiredElementsProcessor {
     
     
     public void process() throws PolicyGenerationException{
-        Vector targetValues = new Vector();
+        Vector<String> targetValues = new Vector<String>();
         MandatoryTargetPolicy mt = new MandatoryTargetPolicy();
         MandatoryTargetPolicy.FeatureBinding mfb = new MandatoryTargetPolicy.FeatureBinding();
         mt.setFeatureBinding(mfb);

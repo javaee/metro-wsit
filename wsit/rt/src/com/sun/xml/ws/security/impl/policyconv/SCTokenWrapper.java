@@ -164,9 +164,9 @@ public class SCTokenWrapper extends PolicyAssertion implements SecureConversatio
         return tokenList;
     }
     
-    private void addToken(Token token,ArrayList list){
+    private void addToken(Token token,ArrayList<PolicyAssertion> list){
         if(PolicyUtil.isIssuedToken((PolicyAssertion)token)){
-            list.add(token);
+            list.add((PolicyAssertion)token);
         }
     }
     

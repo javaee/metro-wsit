@@ -52,7 +52,7 @@ import static com.sun.xml.ws.security.impl.policy.Constants.*;
 public class SignedElements extends PolicyAssertion implements com.sun.xml.ws.security.policy.SignedElements, SecurityAssertionValidator{
     
     private String xpathVersion;
-    private List targetList;
+    private List<String> targetList;
     private boolean populated = false;
     private static QName XPathVersion = new QName("XPathVersion");
     private static List<String> emptyList = Collections.emptyList();
@@ -76,7 +76,7 @@ public class SignedElements extends PolicyAssertion implements com.sun.xml.ws.se
     
     public void addTarget(String target) {
         if ( targetList == null ) {
-            targetList = new ArrayList();
+            targetList = new ArrayList<String>();
         }
         targetList.add(target);
     }

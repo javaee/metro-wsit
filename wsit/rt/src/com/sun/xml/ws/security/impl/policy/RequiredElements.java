@@ -51,7 +51,7 @@ import static com.sun.xml.ws.security.impl.policy.Constants.*;
 public class RequiredElements extends PolicyAssertion implements com.sun.xml.ws.security.policy.RequiredElements, SecurityAssertionValidator {
     
     private String xpathVersion;
-    private List targetList;
+    private List<String> targetList;
     private boolean populated = false;
     private static QName XPathVersion = new QName("XPathVersion");
     private boolean isServer = false;
@@ -74,7 +74,7 @@ public class RequiredElements extends PolicyAssertion implements com.sun.xml.ws.
     
     public void addTarget(String target) {
         if ( targetList == null ) {
-            targetList = new ArrayList();
+            targetList = new ArrayList<String>();
         }
         targetList.add(target);
     }
