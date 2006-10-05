@@ -130,6 +130,11 @@ public final class PolicyConstants {
     public static final String DEFAULT_POLICY_FACTORY_IMPLEMENTATION = "com.sun.xml.ws.policy.wspol.WSPolicyFactory";
     
     /**
+     * Identifier of the client-side configuration file 
+     */
+    public static final String CLIENT_CONFIGURATION_IDENTIFIER = "client";
+    
+    /**
      * Prevent instantiation of this class.
      */
     private PolicyConstants() {
