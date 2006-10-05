@@ -21,10 +21,9 @@
  */
 package com.sun.xml.ws.mex.client.wsimport;
 
-import com.sun.tools.ws.api.MetaDataResolver;
-import com.sun.tools.ws.api.MetadataResolverFactory;
-
 import org.xml.sax.EntityResolver;
+import com.sun.xml.ws.api.wsdl.parser.MetadataResolverFactory;
+import com.sun.xml.ws.api.wsdl.parser.MetaDataResolver;
 
 /**
  * Factory class for metadata resolver. The JAX-WS code uses this
@@ -33,7 +32,7 @@ import org.xml.sax.EntityResolver;
  * of a service.
  */
 public class MetadataResolverFactoryImpl extends MetadataResolverFactory {
-    
+
     public MetaDataResolver metadataResolver(EntityResolver resolver) {
         return new MetadataResolverImpl(resolver);
     }

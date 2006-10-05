@@ -21,26 +21,25 @@
  */
 package com.sun.xml.ws.mex.client.wsimport;
 
-import javax.xml.transform.Source;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamSource;
-
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import com.sun.tools.ws.api.ServiceDescriptor;
+import javax.xml.transform.Source;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.ws.WebServiceException;
+
+import com.sun.xml.ws.api.wsdl.parser.ServiceDescriptor;
+import static com.sun.xml.ws.mex.MetadataConstants.POLICY_DIALECT;
+import static com.sun.xml.ws.mex.MetadataConstants.SCHEMA_DIALECT;
+import static com.sun.xml.ws.mex.MetadataConstants.WSDL_DIALECT;
 import com.sun.xml.ws.mex.client.HttpPoster;
 import com.sun.xml.ws.mex.client.MetadataClient;
 import com.sun.xml.ws.mex.client.schema.Metadata;
 import com.sun.xml.ws.mex.client.schema.MetadataReference;
 import com.sun.xml.ws.mex.client.schema.MetadataSection;
-import static com.sun.xml.ws.mex.MetadataConstants.POLICY_DIALECT;
-import static com.sun.xml.ws.mex.MetadataConstants.SCHEMA_DIALECT;
-import static com.sun.xml.ws.mex.MetadataConstants.WSDL_DIALECT;
-import javax.xml.ws.WebServiceException;
-
 import org.w3c.dom.Node;
 
 /**

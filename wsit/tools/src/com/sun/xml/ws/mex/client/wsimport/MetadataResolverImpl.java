@@ -23,11 +23,10 @@ package com.sun.xml.ws.mex.client.wsimport;
 
 import java.net.URI;
 
-import com.sun.tools.ws.api.MetaDataResolver;
-import com.sun.tools.ws.api.ServiceDescriptor;
-
 import com.sun.xml.ws.mex.client.MetadataClient;
 import com.sun.xml.ws.mex.client.schema.Metadata;
+import com.sun.xml.ws.api.wsdl.parser.MetaDataResolver;
+import com.sun.xml.ws.api.wsdl.parser.ServiceDescriptor;
 
 import org.xml.sax.EntityResolver;
 
