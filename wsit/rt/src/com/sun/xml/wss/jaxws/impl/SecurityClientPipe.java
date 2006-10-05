@@ -96,6 +96,7 @@ import com.sun.xml.wss.ProcessingContext;
 import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
 
 import com.sun.xml.ws.security.secconv.WSSecureConversationException;
+import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.ws.security.trust.WSTrustFactory;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.security.trust.TrustPlugin;
@@ -186,6 +187,12 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
     }
     
     public Packet process(Packet packet) {
+        
+        // Add Action header to trust message
+        if (packet.invocationProperties.get(WSTrustConstants.IS_TRUST_MESSAGE)){
+            HeaderList headers = packet.getMessage().getHeaders();
+            headers.fillRequestAddressingHeaders(pipeConfig.getWSDLModel(), pipeConfig.getBinding(), packet, WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION);
+        }
         
         // keep the message
         Message msg = packet.getMessage();
