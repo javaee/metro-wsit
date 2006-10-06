@@ -66,9 +66,8 @@ public class FilteringXmlStreamWriterProxyTest extends TestCase {
      * Test of createProxy method, of class com.sun.xml.ws.policy.jaxws.documentfilter.FilteringXmlStreamWriterProxy.
      */
     public void testCreateProxy() throws Exception {
-        XMLStreamWriter writer = openFilteredWriter(new StringWriter());
-        
-        XMLStreamWriter result = FilteringXmlStreamWriterProxy.createProxy(writer);
+        XMLStreamWriter result = openFilteredWriter(new StringWriter());
+
         assertNotNull(result);
     }
     
@@ -91,6 +90,7 @@ public class FilteringXmlStreamWriterProxyTest extends TestCase {
     }
     
     private XMLStreamWriter openFilteredWriter(Writer outputStream) throws XMLStreamException {
-        return XMLOutputFactory.newInstance().createXMLStreamWriter(outputStream);
+        XMLStreamWriter writer = XMLOutputFactory.newInstance().createXMLStreamWriter(outputStream);
+        return FilteringXmlStreamWriterProxy.createProxy(writer);
     }
 }

@@ -28,6 +28,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
 import javax.xml.XMLConstants;
@@ -81,6 +82,8 @@ final class FilteringXmlStreamWriterProxy implements InvocationHandler {
         }
         
         public Object execute(Object target) throws IllegalAccessException, InvocationTargetException {
+            __log("Execute normally", method, arguments);
+            
             return method.invoke(target, arguments);
         }
     }
@@ -88,7 +91,7 @@ final class FilteringXmlStreamWriterProxy implements InvocationHandler {
     private static final Class<?>[] PROXIED_INTERFACES = new Class<?>[] {XMLStreamWriter.class};
     private static final XMLOutputFactory XML_OUTPUT_FACTORY = XMLOutputFactory.newInstance();
     
-    private XMLStreamWriter writer; // underlying XML stream writer which we use to eventually serve the requests
+    private XMLStreamWriter originalWriter; // underlying XML stream writer which we use to eventually serve the requests
     private XMLStreamWriter mirrorWriter;
     
     private Queue<CommandQueueItem> commandQueue; // command queue that stores requests to be still executed on the underlying XML output stream
@@ -104,7 +107,7 @@ final class FilteringXmlStreamWriterProxy implements InvocationHandler {
     }
     
     private FilteringXmlStreamWriterProxy(XMLStreamWriter writer) throws XMLStreamException {
-        this.writer = writer;
+        this.originalWriter = writer;
         
         this.mirrorWriter = XML_OUTPUT_FACTORY.createXMLStreamWriter(new StringWriter());
         this.commandQueue = new LinkedList<CommandQueueItem>();
@@ -118,7 +121,7 @@ final class FilteringXmlStreamWriterProxy implements InvocationHandler {
                     if (filteringOn) {
                         depth++;
                     } else {
-                        executeCommands();
+                        executeCommands(this.originalWriter);
                         cmdBufferingOn = true;
                     }
                     break;
@@ -126,24 +129,26 @@ final class FilteringXmlStreamWriterProxy implements InvocationHandler {
                     if (filteringOn) {
                         if (depth == 0) {
                             filteringOn = false;
+                            return method.invoke(mirrorWriter, args);
                         } else {
                             depth--;
                         }
                     } else {
-                        executeCommands();
+                        executeCommands(this.originalWriter);
                         cmdBufferingOn = false;
                     }
                     break;
                 case WRITE_ATTRIBUTE:
                     if (!filteringOn && startFiltering(args)) {
                         filteringOn = true;
+                        cmdBufferingOn = false;
                         commandQueue.clear(); // remowing buffered commands that should not be executed
                     }
                     break;
                 case CLOSE:
                     cmdBufferingOn = false;
                     filteringOn = false;
-                    executeCommands();
+                    executeCommands(this.originalWriter);
                     break;
                 case OTHER:
                     break;
@@ -160,7 +165,9 @@ final class FilteringXmlStreamWriterProxy implements InvocationHandler {
                     invocationTarget = mirrorWriter;
                 } else {
                     method.invoke(mirrorWriter, args);
-                    invocationTarget = writer;
+                    invocationTarget = originalWriter;
+                    
+                    __log("Execute normally", method, args);
                 }
             }
             
@@ -174,7 +181,7 @@ final class FilteringXmlStreamWriterProxy implements InvocationHandler {
         }
     }
     
-    private void executeCommands() throws IllegalAccessException, InvocationTargetException {
+    private void executeCommands(XMLStreamWriter writer) throws IllegalAccessException, InvocationTargetException {
         while (!commandQueue.isEmpty()) {
             CommandQueueItem command = commandQueue.poll();
             command.execute(writer);
@@ -210,13 +217,18 @@ final class FilteringXmlStreamWriterProxy implements InvocationHandler {
                 throw new IllegalArgumentException(
                         Messages.UNEXPECTED_ARGUMENTS_COUNT.format(MethodType.WRITE_ATTRIBUTE + "(...)", argumentsCount)
                         );
-        }        
+        }
         
         QName attributeName = new QName(namespaceURI, localName);
         if (PolicyConstants.VISIBILITY_ATTRIBUTE.equals(attributeName) && PolicyConstants.VISIBILITY_VALUE_PRIVATE.equals(value)) {
             return true;
         } else {
-            return false;            
-        }        
+            return false;
+        }
+    }
+    
+    private void __log(String message, Method method, Object... arguments) {
+        String argsString = (arguments != null) ? Arrays.asList(arguments).toString() : "null";
+        System.out.println(message + ": method='" + method.getName() + "', args= {" + argsString + "}");
     }
 }
