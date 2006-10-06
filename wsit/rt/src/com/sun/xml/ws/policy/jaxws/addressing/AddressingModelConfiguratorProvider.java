@@ -47,11 +47,8 @@ public class AddressingModelConfiguratorProvider implements ModelConfiguratorPro
     private static final PolicyLogger logger = PolicyLogger.getLogger(AddressingModelConfiguratorProvider.class);
 
     private static final QName[] AddressingAssertions = {
-//        new QName("http://www.w3.org/2006/05/addressing/wsdl","UsingAddressing"),
-//        new QName("http://schemas.xmlsoap.org/ws/2004/09/policy/addressing","UsingAddressing")};
-    // TODO: replace hardcoded uris with the constants bellow
-     new QName(AddressingVersion.MEMBER.wsdlNsUri,"UsingAddressing"),
-     new QName(AddressingVersion.W3C.wsdlNsUri,"UsingAddressing")};
+     new QName(AddressingVersion.MEMBER.policyNsUri,"UsingAddressing"),
+     new QName(AddressingVersion.W3C.policyNsUri,"UsingAddressing")};
 
     /**
      * Creates a new instance of AddressingModelConfiguratorProvider
