@@ -134,7 +134,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
         owner = toCopy.owner;
         config = toCopy.config;
         binding = owner.getBinding();
-        RMConstants.setAddressingVersion(binding.getAddressingVersion());
+        //RMConstants.setAddressingVersion(binding.getAddressingVersion());
 
     }
 
