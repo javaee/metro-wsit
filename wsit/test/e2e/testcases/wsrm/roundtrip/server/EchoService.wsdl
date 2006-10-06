@@ -18,7 +18,8 @@
 		</wsdl:operation>
 	</wsdl:portType>
 	<wsdl:binding name="WSHttpBinding_IPing" type="tns:IPing">
-		<wsp:PolicyReference URI="#WSHttpBinding_IPing_policy"/>
+        <wsap10:UsingAddressing wsdl:required="true"/>
+        <wsp:PolicyReference URI="#WSHttpBinding_IPing_policy"/>
 		<soap12:binding transport="http://schemas.xmlsoap.org/soap/http"/>
 		<wsdl:operation name="EchoString">
 			<wsdl:input>
@@ -31,7 +32,7 @@
 	</wsdl:binding>
 	<wsdl:service name="PingService">
 		<wsdl:port name="WSHttpBinding_IPing" binding="tns:WSHttpBinding_IPing">
-			<soap12:address location="http://131.107.72.15/ReliableMessaging_Service_Indigo/ReliableRequestReply.svc"/>
+			<soap:address location="http://131.107.72.15/ReliableMessaging_Service_Indigo/ReliableRequestReply.svc"/>
 			<!--<wsa10:EndpointReference>
 				<wsa10:Address>http://129.145.133.132:8080/rmservice/echo?wsdl</wsa10:Address>
 			</wsa10:EndpointReference>-->
@@ -44,11 +45,11 @@
 					<wsrm:InactivityTimeout Milliseconds="600000"/>
 					<wsrm:AcknowledgementInterval Milliseconds="200"/>
 				</wsrm:RMAssertion>
-				<!--<net:RmFlowControl xmlns:net="http://schemas.microsoft.com/net/2005/02/rm/policy">
-					<net:MaxReceiveBufferSize>32</net:MaxReceiveBufferSize>
-				</net:RmFlowControl>-->
+				<net:RmFlowControl xmlns:net="http://schemas.microsoft.com/net/2005/02/rm/policy">
+					<net:MaxReceiveBufferSize>2</net:MaxReceiveBufferSize>
+				</net:RmFlowControl>
 				<wspe:Utf816FFFECharacterEncoding xmlns:wspe="http://schemas.xmlsoap.org/ws/2004/09/policy/encoding"/>
-				<wsap10:UsingAddressing/>
+				<wsap10:UsingAddressing wsdl:required="true"/>
 			</wsp:All>
 		</wsp:ExactlyOne>
 	</wsp:Policy>
