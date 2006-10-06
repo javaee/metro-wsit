@@ -55,8 +55,8 @@ import com.sun.xml.ws.security.impl.policyconv.XWSSPolicyGenerator;
 import com.sun.xml.ws.security.policy.SecureConversationToken;
 import com.sun.xml.ws.security.policy.AlgorithmSuite;
 import com.sun.xml.ws.security.impl.policy.PolicyUtil;
-import com.sun.xml.ws.security.secconv.SCSessionManager;
-import com.sun.xml.ws.security.secconv.SCSessionManagerFactory;
+//import com.sun.xml.ws.security.secconv.SCSessionManager;
+//import com.sun.xml.ws.security.secconv.SCSessionManagerFactory;
 import com.sun.xml.ws.security.secconv.WSSCConstants;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
 
@@ -122,18 +122,17 @@ import org.w3c.dom.NodeList;
  *
  * @author K.Venugopal@sun.com,Vbkumar.Jayanti@Sun.COM,
  */
-public class SecurityServerPipe extends SecurityPipeBase {
+public class SecurityServerPipe extends SecurityPipeBase {    
     
-    
-    private SCSessionManager scSessionManager;
+//    private SCSessionManager scSessionManager;
     private WSDLBoundOperation cachedOperation = null;
     private Set trustConfig = null;
     private CallbackHandler handler = null;
     // Creates a new instance of SecurityServerPipe
     public SecurityServerPipe(ServerPipeConfiguration config,Pipe nextPipe) {
         super(config,nextPipe);
-        scSessionManager =
-                SCSessionManagerFactory.newInstance().getSessionManager();
+//        scSessionManager =
+//                SCSessionManagerFactory.newInstance().getSessionManager();
         
         try {
             Iterator it = inMessagePolicyMap.values().iterator();
@@ -155,7 +154,6 @@ public class SecurityServerPipe extends SecurityPipeBase {
     // copy constructor
     protected SecurityServerPipe(SecurityServerPipe that) {
         super(that);
-        scSessionManager = that.scSessionManager;
         trustConfig = that.trustConfig;
         handler = that.handler;
     }
@@ -245,9 +243,10 @@ public class SecurityServerPipe extends SecurityPipeBase {
                // }else{
                 //    action = WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_RESPONSE_ACTION;
                // }
-                
+
                 retPacket = invokeSecureConversationContract(
-                        packet, ctx, scSessionManager, isSCIssueMessage, action);
+                        packet, ctx, isSCIssueMessage, action);
+
             } else {
                 //--------INVOKE NEXT PIPE------------
                 // Put the addressing headers as unread
@@ -508,7 +507,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
     // The packet has the Message with RST/SCT inside it
     // TODO: Need to inspect if it is really a Issue or a Cancel
     private Packet invokeSecureConversationContract(
-            Packet packet, ProcessingContext ctx, SCSessionManager scSessionManager, boolean isSCTIssue, String action) {
+            Packet packet, ProcessingContext ctx, boolean isSCTIssue, String action) {
         //IssuedTokenContext ictx = ((ProcessingContextImpl)ctx).getTrustCredentialHolder();
         IssuedTokenContext ictx = new IssuedTokenContextImpl();
         Message msg = packet.getMessage();
