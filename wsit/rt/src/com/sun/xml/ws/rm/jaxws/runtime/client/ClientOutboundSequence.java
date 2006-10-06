@@ -28,6 +28,8 @@
 //
 package com.sun.xml.ws.rm.jaxws.runtime.client;
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
+import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.rm.InvalidMessageNumberException;
 import com.sun.xml.ws.rm.Message;
 import com.sun.xml.ws.rm.RMConstants;
@@ -38,6 +40,8 @@ import com.sun.xml.ws.rm.protocol.*;
 import com.sun.xml.ws.security.impl.bindings.SecurityTokenReferenceType;
 
 import javax.xml.bind.JAXBElement;
+import javax.xml.transform.Source;
+import javax.xml.ws.wsaddressing.W3CEndpointReference;
 import java.net.URI;
 import java.util.UUID;
 
@@ -213,6 +217,20 @@ public class ClientOutboundSequence extends OutboundSequence {
                 cs.setAcksTo(new MemberSubmissionAcksToImpl(new URI(acksToString)));
                 
             }*/
+            W3CEndpointReference endpointReference = null;
+            AddressingVersion addressingVersion = RMConstants.getAddressingVersion();
+            if ( addressingVersion == AddressingVersion.W3C){
+                  //WSEndpointReference wsepr = new WSEndpointReference(getClass().getResourceAsStream("w3c-anonymous-acksTo.xml"), addressingVersion);
+                  WSEndpointReference epr = AddressingVersion.W3C.anonymousEpr;
+                  Source s = epr.asSource("AcksTo");
+                  endpointReference = new W3CEndpointReference(s);
+            }/*else {
+                  WSEndpointReference wsepr = new WSEndpointReference(getClass().getResourceAsStream("member-anonymous-acksTo.xml"), addressingVersion);
+                  Source s = wsepr.asSource("AcksTo");
+                  endpointReference = new MemberSubmissionEndpointReference(s);
+            }*/
+            cs.setAcksTo(endpointReference);
+
             String incomingID = "uuid:" + UUID.randomUUID();
 
             if (twoWay) {

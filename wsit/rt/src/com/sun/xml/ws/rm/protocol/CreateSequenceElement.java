@@ -25,12 +25,11 @@ package com.sun.xml.ws.rm.protocol;
 
 
 import com.sun.xml.ws.security.impl.bindings.SecurityTokenReferenceType;
-import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import org.w3c.dom.Element;
 
 import javax.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
-
+import javax.xml.ws.wsaddressing.W3CEndpointReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -61,6 +60,7 @@ import java.util.Map;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "CreateSequenceType", propOrder = {
+        "acksTo",
         "any",
         "expires",
         "offer",
@@ -70,6 +70,8 @@ import java.util.Map;
 @XmlRootElement(name="CreateSequence",namespace="http://schemas.xmlsoap.org/ws/2005/02/rm")
 public class CreateSequenceElement {
 
+    @XmlElement(name="AcksTo", namespace="http://schemas.xmlsoap.org/ws/2005/02/rm")
+    protected W3CEndpointReference acksTo;
     @XmlAnyElement(lax = true)
     protected List<Object> any = new ArrayList<Object>();
     @XmlElement(name = "Expires", namespace = "http://schemas.xmlsoap.org/ws/2005/02/rm")
@@ -89,13 +91,16 @@ public class CreateSequenceElement {
      *     {@link com.sun.xml.ws.api.addressing.WSEndpointReference }
      *
      */
-    public WSEndpointReference getAcksTo() {
-        for (int i = 0 ; i < any.size(); i++) {
+    //Temporary hack till https://jaxb.dev.java.net/issues/show_bug.cgi?id=257
+    //is fixed
+    public W3CEndpointReference getAcksTo() {
+        /*for (int i = 0 ; i < any.size(); i++) {
             if (any.get(i) instanceof WSEndpointReference) {
-                return (WSEndpointReference)any.get(i);
+                return (W3CEndpointReference)any.get(i);
             }
         }
-        return null;
+        return null;*/
+        return acksTo;
     }
 
     /**
@@ -103,11 +108,14 @@ public class CreateSequenceElement {
      *
      * @param value
      *     allowed object is
-     *     {@link WSEndpointReference }
+     *     {@link javax.xml.ws.EndpointReference }
      *
      */
-    public void setAcksTo(WSEndpointReference value) {
-        this.any.add(value);
+    //Temporary hack till https://jaxb.dev.java.net/issues/show_bug.cgi?id=257
+    //is fixed
+    public void setAcksTo(W3CEndpointReference value) {
+        //this.any.add(value);
+        this.acksTo = value;
     }
 
     /**
