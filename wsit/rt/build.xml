@@ -131,27 +131,26 @@
 
     <!-- <target name="wsit-jars-runtime"  depends="compile">-->
      <target name="wsit-jars-runtime" >
-         <property name="tmpdir" value="${rt.dir}/tmp"/>
-          <mkdir dir="${tmpdir}/META-INF/services"/>
+
+         <mkdir dir="${rt.dir}/tmp/META-INF/services"/>
          <property name="wsit.rt.dir" value = "${rt.dir}/build"/>
          <property name="wsit.rt.jarname" value = "wsit-rt"/>
          <mkdir dir="${wsit.rt.dir}"/>
 
 
-         <copy todir="${tmpdir}/META-INF/services" overwrite="true">
+         <!--<copy todir="${rt.dir}/tmp/META-INF/services" overwrite="true">
              <fileset dir="../etc/META-INF/services">
                  <include name="*.*"/>
 
              </fileset>
-         </copy>
+         </copy>-->
 
          <jar destfile="${wsit.rt.dir}/${wsit.rt.jarname}.jar" manifest="../${etc.metainf.dir}/MANIFEST.MF">
 
-                 <fileset dir="${tmpdir}">
-                    <exclude name="**/*.TWSDL*"/>
-                    <exclude name="**/*.TJava*"/>
-                   <!-- <exclude name="**/*Meta*"/>-->
-                </fileset>
+                 <metainf dir="../etc">
+                     <include name="META-INF/services/*.*"/>
+                 </metainf>
+
 
                 <fileset dir="${rt.dir}/build/classes"/>
             </jar>
@@ -160,6 +159,8 @@
             <fileset dir="src"/>
 
         </zip>
+
+          <delete dir="${rt.dir}/tmp"/>
 
         </target>
 

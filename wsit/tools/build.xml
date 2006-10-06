@@ -85,27 +85,25 @@
 
    <!-- <target name="wsit-jars-tools" depends="compile" >-->
     <target name="wsit-jars-tools"  >
-             <property name="tmpdir" value="${tools.dir}/tmp"/>
-              <mkdir dir="${tmpdir}/META-INF/services"/>
+
+
+             <mkdir dir="${tools.dir}/tmp/META-INF"/>
              <property name="wsit.tools.dir" value = "${tools.dir}/build"/>
              <property name="wsit.tools.jarname" value = "wsit-tools"/>
              <mkdir dir="${wsit.tools.dir}"/>
 
 
-             <copy todir="${tmpdir}/META-INF/services" overwrite="true">
+
+             <!--<copy todir="${tools.dir}/tmp/META-INF/services" overwrite="true">
                  <fileset dir="../etc/META-INF/services">
                      <include name="*.*"/>
 
                  </fileset>
-             </copy>
+             </copy>-->
 
              <jar destfile="${wsit.tools.dir}/${wsit.tools.jarname}.jar" manifest="../${etc.metainf.dir}/MANIFEST.MF">
 
-                     <fileset dir="${tmpdir}">
-                        <include name="**/*.TWSDL*"/>
-                        <include name="**/*.TJava*"/>
-                        <include name="**/*Meta*"/>
-                    </fileset>
+                    <!--<metainf dir="${tools.dir}/tmp"/>-->
 
                     <fileset dir="${tools.dir}/build/classes"/>
                 </jar>
@@ -113,6 +111,7 @@
                    <fileset dir="src"/>
 
                 </zip>
+               <delete dir="${tools.dir}/tmp"/>
 
             </target>
 
