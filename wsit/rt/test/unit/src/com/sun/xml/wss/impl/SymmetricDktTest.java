@@ -42,10 +42,11 @@ import javax.security.auth.callback.CallbackHandler;
 import com.sun.xml.wss.impl.*;
 import javax.xml.crypto.dsig.DigestMethod;
 import com.sun.xml.ws.security.policy.AlgorithmSuiteValue;
-import com.sun.xml.ws.security.policy.WSSAssertion;
+import com.sun.xml.wss.impl.WSSAssertion;
 import com.sun.xml.wss.impl.util.PolicyResourceLoader;
 import com.sun.xml.wss.impl.util.TestUtil;
 
+import com.sun.xml.wss.impl.AlgorithmSuite;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.AssertionSet;
@@ -60,7 +61,7 @@ public class SymmetricDktTest extends TestCase{
 
     private static Hashtable client = new Hashtable();
     private static Hashtable server = new Hashtable();
-    private static AlgorithmSuite alg = new AlgorithmSuite();
+    private static AlgorithmSuite alg = null;
     
     public SymmetricDktTest(String testName) throws Exception {
         super(testName);
@@ -81,7 +82,8 @@ public class SymmetricDktTest extends TestCase{
 
     public static void testSymmetricDktTest() throws Exception {
     
-	        alg.setType(AlgorithmSuiteValue.Basic128);
+	       // alg.setType(AlgorithmSuiteValue.Basic128);
+        alg = new AlgorithmSuite(AlgorithmSuiteValue.Basic128.getDigAlgorithm(), AlgorithmSuiteValue.Basic128.getEncAlgorithm(), AlgorithmSuiteValue.Basic128.getSymKWAlgorithm(), AlgorithmSuiteValue.Basic128.getAsymKWAlgorithm());
     	    SignaturePolicy signaturePolicy = new SignaturePolicy();
         	SignatureTarget st = new SignatureTarget();
 	        st.setType("qname");
@@ -99,8 +101,8 @@ public class SymmetricDktTest extends TestCase{
         	AuthenticationTokenPolicy.X509CertificateBinding x509bind = 
 	        (AuthenticationTokenPolicy.X509CertificateBinding)sigKb.newX509CertificateKeyBinding();
     	    x509bind.setReferenceType(MessageConstants.THUMB_PRINT_TYPE);
-        	x509bind.setPolicyToken(tok);
-	        x509bind.setUUID(tok.getTokenId());
+        	//x509bind.setPolicyToken(tok);
+	        x509bind.setUUID(new String("1017"));
 
     	    DerivedTokenKeyBinding dktSigKB = (DerivedTokenKeyBinding)signaturePolicy.newDerivedTokenKeyBinding();
         	dktSigKB.setOriginalKeyBinding(sigKb);
@@ -116,8 +118,8 @@ public class SymmetricDktTest extends TestCase{
 	        encKb.newX509CertificateKeyBinding();
     	    x509bind = (AuthenticationTokenPolicy.X509CertificateBinding)encKb.newX509CertificateKeyBinding();
 	        x509bind.setReferenceType(MessageConstants.THUMB_PRINT_TYPE);
-    	    x509bind.setPolicyToken(tok);
-        	x509bind.setUUID(tok.getTokenId());
+    	    //x509bind.setPolicyToken(tok);
+        	x509bind.setUUID(new String("1017"));
 
 	        DerivedTokenKeyBinding dktEncKB = (DerivedTokenKeyBinding)encryptPolicy.newDerivedTokenKeyBinding();
     	    dktEncKB.setOriginalKeyBinding(encKb);
@@ -136,6 +138,7 @@ public class SymmetricDktTest extends TestCase{
     	    ProcessingContextImpl context = new ProcessingContextImpl(client);
         	context.setSOAPMessage(msg);
 
+            com.sun.xml.ws.security.policy.WSSAssertion wssAssertionws = null;
             WSSAssertion wssAssertion = null;
             AssertionSet as = null;
             Policy wssPolicy = new PolicyResourceLoader().loadPolicy("security/policy-binding2.xml");
@@ -144,12 +147,12 @@ public class SymmetricDktTest extends TestCase{
                 as = i.next();
             
             for(PolicyAssertion assertion:as){
-                if(assertion instanceof WSSAssertion){
-                    wssAssertion = (WSSAssertion)assertion;
+                if(assertion instanceof com.sun.xml.ws.security.policy.WSSAssertion){
+                    wssAssertionws = (com.sun.xml.ws.security.policy.WSSAssertion)assertion;
                 }                      
             }
 	    //wssAssertion.addRequiredProperty("RequireSignatureConfirmation");
-        
+                wssAssertion = new WSSAssertion(wssAssertionws.getRequiredProperties(), "1.0");
         	MessagePolicy pol = new MessagePolicy();
 	        pol.append(signaturePolicy);
     	    pol.append(encryptPolicy);
@@ -204,6 +207,7 @@ public class SymmetricDktTest extends TestCase{
        ProcessingContextImpl context = new ProcessingContextImpl(map);
        context.setSOAPMessage(msg);
         
+       com.sun.xml.ws.security.policy.WSSAssertion wssAssertionws = null;
        WSSAssertion wssAssertion = null;
        AssertionSet as = null;
        Policy wssPolicy = new PolicyResourceLoader().loadPolicy("security/policy-binding2.xml");
@@ -212,12 +216,12 @@ public class SymmetricDktTest extends TestCase{
            as = i.next();
             
        for(PolicyAssertion assertion:as){
-           if(assertion instanceof WSSAssertion){
-               wssAssertion = (WSSAssertion)assertion;
+           if(assertion instanceof com.sun.xml.ws.security.policy.WSSAssertion){
+               wssAssertionws = (com.sun.xml.ws.security.policy.WSSAssertion)assertion;
            }                      
        }
        //wssAssertion.addRequiredProperty("RequireSignatureConfirmation");
-       
+        wssAssertion = new WSSAssertion(wssAssertionws.getRequiredProperties(), "1.0");
         MessagePolicy pol = new MessagePolicy();
         context.setAlgorithmSuite(alg);
         pol.setWSSAssertion(wssAssertion);

@@ -115,7 +115,7 @@ public class TrustTest extends TestCase{
 
 
     private static Hashtable map = new Hashtable();
-    private static  AlgorithmSuite alg = new AlgorithmSuite();
+    private static  AlgorithmSuite alg = null;
     
     public TrustTest(String testName) throws Exception {
         super(testName);
@@ -137,7 +137,8 @@ public class TrustTest extends TestCase{
     public static void testTrustIntegrationTest() throws Exception {
     
                 //System.setProperty("com.sun.xml.wss.saml.binding.jaxb", "true");
-	        alg.setType(AlgorithmSuiteValue.Basic128);
+	        //alg.setType(AlgorithmSuiteValue.Basic128);
+                alg = new AlgorithmSuite(AlgorithmSuiteValue.Basic128.getDigAlgorithm(), AlgorithmSuiteValue.Basic128.getEncAlgorithm(), AlgorithmSuiteValue.Basic128.getSymKWAlgorithm(), AlgorithmSuiteValue.Basic128.getAsymKWAlgorithm());
     	        SignaturePolicy signaturePolicy = new SignaturePolicy();
         	SignatureTarget st = new SignatureTarget();
 	        st.setType("qname");
@@ -165,8 +166,10 @@ public class TrustTest extends TestCase{
 
         	QName name = new QName("IssuedToken");
 	        Token tok = new Token(name);
-    	        isKB.setPolicyToken(tok);
-        	ieKB.setPolicyToken(tok);
+    	        //isKB.setPolicyToken(tok);
+        	//ieKB.setPolicyToken(tok);
+                isKB.setUUID(new String("1011"));
+                ieKB.setUUID(new String("1011"));
     	        MessagePolicy pol = new MessagePolicy();
                 pol.dumpMessages(true);
         	signaturePolicy.setUUID("22222");
@@ -207,7 +210,7 @@ public class TrustTest extends TestCase{
                 impl.setAttachedSecurityTokenReference(str);
                 impl.setUnAttachedSecurityTokenReference(str);
 
-	        map.put(tok.getTokenId(), impl);
+	        map.put(new String("1011"), impl);
     	        context.setIssuedTokenContextMap(map);
         	context.setAlgorithmSuite(alg);
 	        context.setSecurityPolicy(pol);
@@ -430,8 +433,10 @@ public class TrustTest extends TestCase{
 
         	QName name = new QName("IssuedToken");
 	        Token tok = new Token(name);
-    	        isKB.setPolicyToken(tok);
-        	ieKB.setPolicyToken(tok);
+    	        //isKB.setPolicyToken(tok);
+                isKB.setUUID(new String("20029"));
+                ieKB.setUUID(new String("20029"));
+        	//ieKB.setPolicyToken(tok);
     	        MessagePolicy pol = new MessagePolicy();
                 //pol.dumpMessages(true);
         	signaturePolicy.setUUID("22222");

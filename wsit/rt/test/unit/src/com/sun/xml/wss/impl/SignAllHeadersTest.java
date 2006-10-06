@@ -42,10 +42,10 @@ import com.sun.xml.wss.impl.*;
 import com.sun.xml.wss.*;
 import com.sun.xml.wss.impl.misc.DefaultSecurityEnvironmentImpl;
 import com.sun.xml.wss.impl.filter.*;
-import com.sun.xml.ws.security.policy.WSSAssertion;
+import com.sun.xml.wss.impl.WSSAssertion;
 import com.sun.xml.wss.impl.util.PolicyResourceLoader;
 import com.sun.xml.wss.impl.util.TestUtil;
-
+import com.sun.xml.wss.impl.AlgorithmSuite;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.AssertionSet;
@@ -66,7 +66,7 @@ public class SignAllHeadersTest extends TestCase{
     
     private static HashMap client = new HashMap();
     private static HashMap server = new HashMap();
-    private static  AlgorithmSuite alg = new AlgorithmSuite();
+    private static  AlgorithmSuite alg = null;
     
     /** Creates a new instance of SignAllHeadersTest */
     public SignAllHeadersTest(String testName) {
@@ -85,7 +85,8 @@ public class SignAllHeadersTest extends TestCase{
     }
     
     public static void testSignAllHeadersTest() throws Exception {
-            alg.setType(AlgorithmSuiteValue.Basic128);
+           // alg.setType(AlgorithmSuiteValue.Basic128);
+            alg = new AlgorithmSuite(AlgorithmSuiteValue.Basic128.getDigAlgorithm(), AlgorithmSuiteValue.Basic128.getEncAlgorithm(), AlgorithmSuiteValue.Basic128.getSymKWAlgorithm(), AlgorithmSuiteValue.Basic128.getAsymKWAlgorithm());
             SignaturePolicy signaturePolicy = new SignaturePolicy();
             SignatureTarget st = new SignatureTarget();
             st.setType("uri");
@@ -104,8 +105,8 @@ public class SignAllHeadersTest extends TestCase{
             AuthenticationTokenPolicy.X509CertificateBinding x509bind = 
                     (AuthenticationTokenPolicy.X509CertificateBinding)sigKb.newX509CertificateKeyBinding();
             x509bind.setReferenceType(MessageConstants.DIRECT_REFERENCE_TYPE);
-            x509bind.setPolicyToken(tok);
-            x509bind.setUUID(tok.getTokenId());
+            //x509bind.setPolicyToken(tok);
+            x509bind.setUUID(new String("1004"));
             
             // create SOAPMessage
             SOAPMessage msg = MessageFactory.newInstance().createMessage();
@@ -126,6 +127,7 @@ public class SignAllHeadersTest extends TestCase{
             ProcessingContextImpl context = new ProcessingContextImpl(client);
             context.setSOAPMessage(msg);
             
+            com.sun.xml.ws.security.policy.WSSAssertion wssAssertionws = null;
             WSSAssertion wssAssertion = null;
             AssertionSet as = null;
             Policy wssPolicy = new PolicyResourceLoader().loadPolicy("security/policy-binding2.xml");
@@ -134,11 +136,11 @@ public class SignAllHeadersTest extends TestCase{
                 as = i.next();
             
             for(PolicyAssertion assertion:as){
-                if(assertion instanceof WSSAssertion){
-                    wssAssertion = (WSSAssertion)assertion;
+                if(assertion instanceof com.sun.xml.ws.security.policy.WSSAssertion){
+                    wssAssertionws = (com.sun.xml.ws.security.policy.WSSAssertion)assertion;
                 }                      
             }
-            
+            wssAssertion = new WSSAssertion(wssAssertionws.getRequiredProperties(), "1.0");
             MessagePolicy pol = new MessagePolicy();
             pol.append(signaturePolicy);
             pol.setWSSAssertion(wssAssertion);
@@ -173,6 +175,7 @@ public class SignAllHeadersTest extends TestCase{
        ProcessingContextImpl context = new ProcessingContextImpl(map);
        context.setSOAPMessage(msg);
         
+       com.sun.xml.ws.security.policy.WSSAssertion wssAssertionws = null;
        WSSAssertion wssAssertion = null;
        AssertionSet as = null;
        Policy wssPolicy = new PolicyResourceLoader().loadPolicy("security/policy-binding2.xml");
@@ -181,12 +184,12 @@ public class SignAllHeadersTest extends TestCase{
            as = i.next();
             
        for(PolicyAssertion assertion:as){
-           if(assertion instanceof WSSAssertion){
-               wssAssertion = (WSSAssertion)assertion;
+           if(assertion instanceof com.sun.xml.ws.security.policy.WSSAssertion){
+               wssAssertionws = (com.sun.xml.ws.security.policy.WSSAssertion)assertion;
            }                      
        }
        //wssAssertion.addRequiredProperty("RequireSignatureConfirmation");
-       
+        wssAssertion = new WSSAssertion(wssAssertionws.getRequiredProperties(), "1.0");
         MessagePolicy pol = new MessagePolicy();
         context.setAlgorithmSuite(alg);
         pol.setWSSAssertion(wssAssertion);

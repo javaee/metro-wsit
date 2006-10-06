@@ -41,7 +41,7 @@ import javax.security.auth.callback.CallbackHandler;
 import com.sun.xml.wss.impl.*;
 import javax.xml.crypto.dsig.DigestMethod;
 import com.sun.xml.ws.security.policy.AlgorithmSuiteValue;
-
+import com.sun.xml.wss.impl.AlgorithmSuite;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -114,8 +114,8 @@ public class TrustDKTTest extends TestCase{
     "urn:oasis:names:tc:SAML:1.0:cm:sender-vouches";
 
 
-    private static Hashtable map = new Hashtable();
-    private static  AlgorithmSuite alg = new AlgorithmSuite();
+    private static Hashtable<String, IssuedTokenContextImpl> map = new Hashtable<String, IssuedTokenContextImpl>();
+    private static  AlgorithmSuite alg = null;
     
     public TrustDKTTest(String testName) throws Exception {
         super(testName);
@@ -137,7 +137,8 @@ public class TrustDKTTest extends TestCase{
     public static void testTrustIntegrationTest() throws Exception {
         
                 //System.setProperty("com.sun.xml.wss.saml.binding.jaxb", "true");
-	        alg.setType(AlgorithmSuiteValue.Basic128);
+	       // alg.setType(AlgorithmSuiteValue.Basic128);
+                alg = new AlgorithmSuite(AlgorithmSuiteValue.Basic128.getDigAlgorithm(), AlgorithmSuiteValue.Basic128.getEncAlgorithm(), AlgorithmSuiteValue.Basic128.getSymKWAlgorithm(), AlgorithmSuiteValue.Basic128.getAsymKWAlgorithm());
     	        SignaturePolicy signaturePolicy = new SignaturePolicy();
         	SignatureTarget st = new SignatureTarget();
 	        st.setType("qname");
@@ -171,8 +172,10 @@ public class TrustDKTTest extends TestCase{
 
         	QName name = new QName("IssuedToken");
 	        Token tok = new Token(name);
-    	        isKB.setPolicyToken(tok);
-        	ieKB.setPolicyToken(tok);
+    	        //isKB.setPolicyToken(tok);
+        	//ieKB.setPolicyToken(tok);
+                isKB.setUUID(new String("12015"));
+                ieKB.setUUID(new String("12015"));
     	        MessagePolicy pol = new MessagePolicy();
                 pol.dumpMessages(true);
         	signaturePolicy.setUUID("22222");
@@ -212,8 +215,9 @@ public class TrustDKTTest extends TestCase{
                 str.setReference(samlRef);           
                 impl.setAttachedSecurityTokenReference(str);
                 impl.setUnAttachedSecurityTokenReference(str);
-
-	        map.put(tok.getTokenId(), impl);
+                
+                map.put(new String("12015"), impl);
+	        //map.put(tok.getTokenId(), impl);
     	        context.setIssuedTokenContextMap(map);
         	context.setAlgorithmSuite(alg);
 	        context.setSecurityPolicy(pol);
@@ -254,7 +258,7 @@ public class TrustDKTTest extends TestCase{
         FileOutputStream fos = new FileOutputStream(fileName);
         ObjectOutputStream oos = new ObjectOutputStream(fos);
                                                                                                                                                  
-        Hashtable hashTable = new Hashtable();
+        Hashtable<String, Object> hashTable = new Hashtable<String, Object>();
         MimeHeaders mimeHeaders = msg.getMimeHeaders();
         Iterator iterator = mimeHeaders.getAllHeaders();
                                                                                                                                                  
@@ -442,8 +446,10 @@ public class TrustDKTTest extends TestCase{
 
         	QName name = new QName("IssuedToken");
 	        Token tok = new Token(name);
-    	        isKB.setPolicyToken(tok);
-        	ieKB.setPolicyToken(tok);
+    	        //isKB.setPolicyToken(tok);
+        	//ieKB.setPolicyToken(tok);
+                isKB.setUUID(new String("11016"));
+                ieKB.setUUID(new String("11016"));
     	        MessagePolicy pol = new MessagePolicy();
                 pol.dumpMessages(true);
         	signaturePolicy.setUUID("22222");

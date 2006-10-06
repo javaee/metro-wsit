@@ -862,7 +862,7 @@ public class SecurityPoliciesTest extends TestCase {
         ipEP = (Policy) map.getInputMessageEffectivePolicy(inputKey);
         opEP = (Policy)map.getOutputMessageEffectivePolicy(outputKey);
         
-        ArrayList pl = new ArrayList();
+        ArrayList<Policy> pl = new ArrayList<Policy>();
         
         if(endpointEP !=null)
             pl.add(endpointEP);
