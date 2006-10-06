@@ -56,7 +56,7 @@ import java.net.URL;
  */
 @SuppressWarnings("deprecation")
 public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory {
-    
+
     private static final String PREFIX = "com.sun.xml.ws.assembler.runtime";
     private static final String CLIENT_PREFIX = PREFIX + ".client";
     private static final String SERVER_PREFIX = PREFIX + ".server";
@@ -69,32 +69,32 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
     private static final String WSMEX_SUFFIX = ".wsmex";
     private static final String WSRM_SUFFIX = ".wsrm";
     private static final String WSTX_SUFFIX = ".wstx";
-    
+
     private static final String SECURITY_POLICY_NAMESPACE_URI = "http://schemas.xmlsoap.org/ws/2005/07/securitypolicy";
     private static final String ADDRESSING_POLICY_NAMESPACE_URI = "http://schemas.xmlsoap.org/ws/2004/08/addressing/policy";
     private static final String WSAT_SOAP_NSURI = "http://schemas.xmlsoap.org/ws/2004/10/wsat";
     private static final QName AT_ALWAYS_CAPABILITY = new QName(WSAT_SOAP_NSURI, "ATAlwaysCapability");
     private static final QName AT_ASSERTION = new QName(WSAT_SOAP_NSURI, "ATAssertion");
-    
+
     private static class WsitPipelineAssembler implements PipelineAssembler {
         private BindingID bindingId;
 //        private PolicyMap policyMap;
-        
+
         WsitPipelineAssembler(final BindingID bindingId) {
             this.bindingId = bindingId;
         }
-        
+
         public Pipe createClient(ClientPipeAssemblerContext context) {
             PolicyMap policyMap = initPolicyMap(context);
-            
+
             // Transport pipe ALWAYS exist
             Pipe p = context.createTransportPipe();
             p = dump(CLIENT_PREFIX, p);
             p = dumpAction(CLIENT_PREFIX + ACTION_SUFFIX, context.getBinding(), p);
             p = dump(CLIENT_PREFIX + TRANSPORT_SUFFIX, p);
-            
+
             p = dump(CLIENT_PREFIX + WSS_SUFFIX + AFTER_SUFFIX, p);
-            
+
             // check for Security
             SecurityClientPipe securityClientPipe = null;
             if (isSecurityEnabled(policyMap, context.getWsdlModel())) {
@@ -104,9 +104,9 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
                 securityClientPipe = (SecurityClientPipe) p;
             }
             p = dump(CLIENT_PREFIX + WSS_SUFFIX + BEFORE_SUFFIX, p);
-            
+
             // MEX pipe here
-            
+
             p = dump(CLIENT_PREFIX + WSRM_SUFFIX + AFTER_SUFFIX, p);
             // check for WS-Reliable Messaging
             if (isReliableMessagingEnabled(policyMap, context.getWsdlModel())) {
@@ -117,7 +117,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
                         p);
             }
             p = dump(CLIENT_PREFIX + WSRM_SUFFIX + BEFORE_SUFFIX, p);
-            
+
             p = dump(CLIENT_PREFIX + WSTX_SUFFIX + AFTER_SUFFIX, p);
             // check for WS-Atomic Transactions
             if (isTransactionsEnabled(policyMap, context.getWsdlModel(), false)) {
@@ -143,23 +143,23 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
 //                    p = new TxClientPipe(new ClientPipeConfiguration(policyMap, wsdlPort, service, binding), p);
             }
             p = dump(CLIENT_PREFIX + WSTX_SUFFIX + BEFORE_SUFFIX, p);
-            
+
             p = context.createClientMUPipe(p);
             p = context.createHandlerPipe(p);
-            
+
             return p;
         }
-        
+
         public Pipe createServer(ServerPipeAssemblerContext context) {
-// TODO: uncomment            
+// TODO: uncomment
 //            context.getEndpoint().getServiceDefinition().addFilter(new PrivateAssertionFilter());
             PolicyMap policyMap = initPolicyMap(context);
-            
+
             Pipe p = context.getTerminalPipe();
             p = context.createHandlerPipe(p);
             p = context.createServerMUPipe(p);
             p = context.createMonitoringPipe(p);
-            
+
             p = dump(SERVER_PREFIX + WSTX_SUFFIX + AFTER_SUFFIX, p);
             // check for WS-Atomic Transactions
             if (isTransactionsEnabled(policyMap, context.getWsdlModel(), true)) {
@@ -181,26 +181,26 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
 //                    p = new TxServerPipe(wsdlPort, policyMap, p);
             }
             p = dump(SERVER_PREFIX + WSTX_SUFFIX + BEFORE_SUFFIX, p);
-            
+
             p = dump(SERVER_PREFIX + WSRM_SUFFIX + AFTER_SUFFIX, p);
             // check for WS-Reliable Messaging
             if (isReliableMessagingEnabled(policyMap, context.getWsdlModel())) {
                 p = new RMServerPipe(context.getWsdlModel(), context.getEndpoint(), p);
             }
             p = dump(SERVER_PREFIX + WSRM_SUFFIX + BEFORE_SUFFIX, p);
-            
+
             p = dump(SERVER_PREFIX + WSMEX_SUFFIX + AFTER_SUFFIX, p);
             // MEX pipe here
             p = new MetadataServerPipe(context.getEndpoint(), p);
             p = dump(SERVER_PREFIX + WSMEX_SUFFIX + BEFORE_SUFFIX, p);
-            
+
             p = dump(SERVER_PREFIX + WSA_SUFFIX + AFTER_SUFFIX, p);
             // check for WS-Addressing
             if (isAddressingEnabled(policyMap, context.getWsdlModel(), context.getEndpoint().getBinding())) {
                 p = context.createWsaPipe(p);
             }
             p = dump(SERVER_PREFIX + WSA_SUFFIX + BEFORE_SUFFIX, p);
-            
+
             p = dump(SERVER_PREFIX + WSS_SUFFIX + AFTER_SUFFIX, p);
             // check for Security
             ServerPipelineHook hook = context.getEndpoint().getContainer().getSPI(ServerPipelineHook.class);
@@ -214,14 +214,14 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
                 }
             }
             p = dump(SERVER_PREFIX + WSS_SUFFIX + BEFORE_SUFFIX, p);
-            
+
             p = dump(SERVER_PREFIX + TRANSPORT_SUFFIX, p);
             p = dumpAction(SERVER_PREFIX + ACTION_SUFFIX, context.getEndpoint().getBinding(), p);
             p = dump(SERVER_PREFIX, p);
-            
+
             return p;
         }
-        
+
         private Pipe dump(String name, Pipe p) {
             if (Boolean.getBoolean(name)) {
 //                p = new DumpPipe(name, System.out, p);
@@ -315,8 +315,8 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
                 
                 return (policy != null) &&
                         (policy.contains(ADDRESSING_POLICY_NAMESPACE_URI) ||
-                        policy.contains(AddressingVersion.W3C.nsUri) ||
-                        policy.contains(AddressingVersion.MEMBER.nsUri));
+                        policy.contains(AddressingVersion.W3C.wsdlNsUri) ||
+                        policy.contains(AddressingVersion.MEMBER.wsdlNsUri));
             } catch (PolicyException e) {
                 throw new WebServiceException(e);
             }
