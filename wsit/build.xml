@@ -71,9 +71,9 @@
 
         <!-- Local transport JAR and Source -->
         <get src="http://kohsuke.sfbay/hudson/job/jaxws-ri-21/lastSuccessfulBuild/artifact/jax-ws-sources/jaxws-ri/transports/local/build/jaxws-local-transport.jar"
-                dest="${lib.dir}/jaxws-local-transport.jar"/>
+                dest="${lib.runtime.dir}/jaxws-local-transport.jar"/>
         <get src="http://kohsuke.sfbay/hudson/job/jaxws-ri-21/lastSuccessfulBuild/artifact/jax-ws-sources/jaxws-ri/transports/local/build/jaxws-local-transport-src.zip"
-                dest="${lib.dir}/jaxws-local-transport-src.zip"/>
+                dest="${lib.runtime.dir}/jaxws-local-transport-src.zip"/>
 
         <delete dir="${tmpdir}" includeemptydirs="true"/>
     </target>
