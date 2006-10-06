@@ -43,22 +43,22 @@ import javax.xml.ws.WebServiceFeature;
  * @author japod
  */
 public class AddressingModelConfiguratorProvider implements ModelConfiguratorProvider{
-    
+
     private static final PolicyLogger logger = PolicyLogger.getLogger(AddressingModelConfiguratorProvider.class);
-    
+
     private static final QName[] AddressingAssertions = {
-        new QName("http://www.w3.org/2006/05/addressing/wsdl","UsingAddressing"),
-        new QName("http://schemas.xmlsoap.org/ws/2004/09/policy/addressing","UsingAddressing")};
+//        new QName("http://www.w3.org/2006/05/addressing/wsdl","UsingAddressing"),
+//        new QName("http://schemas.xmlsoap.org/ws/2004/09/policy/addressing","UsingAddressing")};
     // TODO: replace hardcoded uris with the constants bellow
-    // new QName(AddressingVersion.MEMBER.nsUri,"UsingAddressing"),
-    // new QName(AddressingVersion.W3C.nsUri,"UsingAddressing")};
-    
+     new QName(AddressingVersion.MEMBER.wsdlNsUri,"UsingAddressing"),
+     new QName(AddressingVersion.W3C.wsdlNsUri,"UsingAddressing")};
+
     /**
      * Creates a new instance of AddressingModelConfiguratorProvider
      */
     public AddressingModelConfiguratorProvider() {
     }
-    
+
     /**
      * process addressing policy assertions and if found and are not optional then addressing is enabled on the
      * {@link com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType}
