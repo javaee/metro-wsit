@@ -44,8 +44,8 @@ import javax.xml.namespace.QName;
 public class AddressingModelConfiguratorProvider implements ModelConfiguratorProvider{
     
     private static final QName[] AddressingAssertions = {
-        new QName("http://schemas.xmlsoap.org/ws/2004/09/policy/addressing","UsingAddressing"),
-        new QName("http://www.w3.org/2006/05/addressing/wsdl","UsingAddressing")};
+        new QName(AddressingVersion.MEMBER.nsUri,"UsingAddressing"),
+        new QName(AddressingVersion.W3C.nsUri,"UsingAddressing")};
     
     /**
      * Creates a new instance of AddressingModelConfiguratorProvider
