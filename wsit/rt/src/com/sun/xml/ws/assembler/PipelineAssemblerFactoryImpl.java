@@ -38,7 +38,7 @@ import com.sun.xml.ws.rm.RMConstants;
 import com.sun.xml.ws.rm.jaxws.runtime.client.RMClientPipe;
 import com.sun.xml.ws.rm.jaxws.runtime.server.RMServerPipe;
 import com.sun.xml.ws.util.ServiceFinder;
-import com.sun.xml.ws.util.pipe.DumpPipe;
+//import com.sun.xml.ws.util.pipe.DumpPipe;
 import com.sun.xml.wss.jaxws.impl.SecurityClientPipe;
 import com.sun.xml.wss.jaxws.impl.SecurityServerPipe;
 
@@ -224,7 +224,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
         
         private Pipe dump(String name, Pipe p) {
             if (Boolean.getBoolean(name)) {
-                p = new DumpPipe(name, System.out, p);
+//                p = new DumpPipe(name, System.out, p);
             }
             
             return p;
