@@ -147,6 +147,7 @@ public class ProtocolMessageSender {
             Packet requestPacket = new Packet(request);
             requestPacket.proxy = packet.proxy;
             requestPacket.contentNegotiation = packet.contentNegotiation;
+            requestPacket.setEndPointAddressString(destination.toString());
 
             addAddressingHeaders (requestPacket,constants.getCreateSequenceAction(),
                     destination , acksTo, false);
@@ -155,7 +156,7 @@ public class ProtocolMessageSender {
                                    assigned by addAddressingHeaders for use in
                                    correlating non-anonymous acksTo response*/
 
-            requestPacket.setEndPointAddressString(destination.toString());
+
 
             Packet responsePacket = nextPipe.process(requestPacket);
 
