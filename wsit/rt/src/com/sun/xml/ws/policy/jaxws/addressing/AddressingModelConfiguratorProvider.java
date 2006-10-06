@@ -25,6 +25,7 @@ package com.sun.xml.ws.policy.jaxws.addressing;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.model.wsdl.WSDLService;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
@@ -54,7 +55,7 @@ public class AddressingModelConfiguratorProvider implements ModelConfiguratorPro
     
     /**
      * process addressing policy assertions and if found and are not optional then addressing is enabled on the
-     * {@link WSDLBoundPortType}
+     * {@link com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType}
      *
      * @param model must be non-null
      * @param policyMap must be non-null
@@ -76,7 +77,7 @@ public class AddressingModelConfiguratorProvider implements ModelConfiguratorPro
                             while(policyAssertion.hasNext()){
                                 PolicyAssertion assertion = policyAssertion.next();
                                 if(assertion.getName().equals(addressingAssertionQName) && !assertion.isOptional()){
-                                    // TODO: add port.getBinding().enableAddressing(addressingAssertionQName.getNamespaceURI())
+                                    port.addFeature(AddressingVersion.getFeature(addressingAssertionQName.getNamespaceURI(), true, true));
                                 } // end-if non optional wsa assertion found
                             } // next assertion
                         } // next alternative
