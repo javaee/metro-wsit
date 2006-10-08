@@ -232,12 +232,12 @@ public class ProtocolMessageSender {
         Packet requestPacket = new Packet(request);
         requestPacket.proxy = packet.proxy;
         //requestPacket.proxy = new ProxyWrapper(packet.proxy);
-
+        requestPacket.setEndPointAddressString(seq.getDestination().toString());
         requestPacket.contentNegotiation = packet.contentNegotiation;
         addAddressingHeaders(requestPacket, constants.getLastAction(),seq.getDestination(),
                 seq.getAcksTo(),true);
 
-        requestPacket.setEndPointAddressString(seq.getDestination().toString());
+       
 
         Packet responsePacket = nextPipe.process(requestPacket);
         Message response = responsePacket.getMessage();
@@ -336,6 +336,7 @@ public class ProtocolMessageSender {
                 message.assertOneWay(false);
             }
             //list.fillRequestAddressingHeaders(port, binding, requestPacket, action);
+            requestPacket.setEndPointAddressString(destination.toString());
             list.fillRequestAddressingHeaders(requestPacket,RMConstants.getAddressingVersion(),binding.getSOAPVersion(),oneWay,action);
 
             return requestPacket;
