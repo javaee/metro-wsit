@@ -163,7 +163,6 @@ public class RMServerPipe extends PipeBase<RMDestination,
             }
 
             //If we got here, this is an application message
-
             //do inbound bookkeeping
             try {
                 message = handleInboundMessage(packet);
@@ -172,7 +171,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
             } catch (InvalidSequenceException e){
                 soapFault = newUnknownSequenceFault(e);
             }
-
+            
             if (soapFault != null){
                 Message m = com.sun.xml.ws.api.message.Messages.create(soapFault);
 
@@ -414,11 +413,8 @@ public class RMServerPipe extends PipeBase<RMDestination,
                     .getHeaders().getAction(RMConstants.getAddressingVersion(),
                                             config.getSoapVersion());
         if (actionValue == null || actionValue.equals("")) {
-            //Whenever addressing headers are missing the CreateSequenceRefusedFault
-            //should be sent back to the client
-            //This can be achieved by throwing the CreateSequenceException
-            //BUGBUG   There is probably some other way this can happen.
-            throw new CreateSequenceException(Messages.INCORRECT_ADDRESSING_HEADERS.format());
+          throw new RMException("Non RM Request or Missing wsa:Action header" +
+                                        " on CreateSequence message.");
         }
 
 
