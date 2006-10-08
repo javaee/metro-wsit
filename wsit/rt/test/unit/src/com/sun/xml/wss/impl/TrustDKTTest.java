@@ -195,7 +195,7 @@ public class TrustDKTTest extends TestCase{
     	        //message to be processed.
         	ProcessingContextImpl context = new ProcessingContextImpl();
 	        context.setSOAPMessage(msg);
-
+                context.hasIssuedToken(true);
     	        // create a new IssuedTokenContext
         	IssuedTokenContextImpl impl = new IssuedTokenContextImpl();
         
@@ -314,7 +314,7 @@ public class TrustDKTTest extends TestCase{
        //message to be processed.
        ProcessingContextImpl context = new ProcessingContextImpl();
        context.setSOAPMessage(msg);
-                                                                                                           
+       context.hasIssuedToken(true);                                                                                                        
         MessagePolicy pol = new MessagePolicy();
         pol.dumpMessages(true);
         //pol.append(signaturePolicy);
