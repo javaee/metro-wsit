@@ -171,9 +171,7 @@ public abstract class OutboundSequence extends Sequence {
         //if it is time to request an ack for this sequence, add AckRequestedHeader
         if (isAckRequested()) {
             AckRequestedElement ack = new AckRequestedElement();
-            ack.setId(this.getId());
-            //mess.addHeader(Headers.create(getVersion(), marshaller,ack));
-            
+            ack.setId(this.getId());      
             mess.setAckRequestedElement(ack);
         }
         
@@ -309,5 +307,26 @@ public abstract class OutboundSequence extends Sequence {
     public void setProcessingFilter(ProcessingFilter filter) {
         this.filter = filter;
     }
-		
+    
+    /**
+     * Add AckRequested element to an existing message if one is not already 
+     * present.  This is used to ensure that an AckRequested header is included
+     * on every resend.
+     *
+     * @param mess The message
+     * @param marshaller
+     */
+    public void ensureAckRequested(Message mess, Marshaller marshaller) {
+        if (mess.getAckRequestedElement() == null) {
+            
+            AckRequestedElement ack = new AckRequestedElement();
+            ack.setId(this.getId());      
+            mess.setAckRequestedElement(ack);
+            mess.addHeader(Headers.create(getVersion(), 
+                               marshaller,
+                               mess.getAckRequestedElement()));
+        }
+    }
+    
+  	
 }
