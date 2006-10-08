@@ -392,7 +392,14 @@ public class RMClientPipe
                     //the response message.
                      if (filter != null) {
                         filter.handleClientResponseMessage(rmMessage);
-                    }                    
+                    }
+                    
+                    if (mess != null && mess.isFault()) {
+                        //don't want to resend
+                        //TODO decrement savedMessages so
+                        // waitForAcks will return
+                        message.complete();
+                    }
 
                     //check for empty body response to two-way message.  Indigo will return
                     //one when it drops the request message.  In this case we also need to retry.
@@ -431,6 +438,11 @@ public class RMClientPipe
                 message.block();
                 if (message.isComplete()) {
                     return ret;
+                } else {
+                    //make sure message now has an AckRequested header
+                    //so there will be an AckRequested on every resend
+                    outboundSequence.ensureAckRequested(message, 
+                                                        marshaller);       
                 }
            } else {
                 return ret;
@@ -461,7 +473,7 @@ public class RMClientPipe
             //TODO Figure out how to initialize at the time the Pipe is initialized.  Doing it
             //lazily means that the ClientSession will not  be available to the client
             //before the first request is processed.
-	        initialize(packet);
+	    initialize(packet);
             
             //Copy of this pipe used for processing this request.  Will initialize
             //it with processorPool.checkOut() when it is needed.  Will check it back
@@ -517,7 +529,7 @@ public class RMClientPipe
 
                 t.start();
                 //client is not expecting a response here.
-                Packet ret = new Packet(com.sun.xml.ws.api.message.Messages.createEmpty(binding.getSOAPVersion()));
+                Packet ret = new Packet(/*com.sun.xml.ws.api.message.Messages.createEmpty(binding.getSOAPVersion())*/);
                 ret.invocationProperties.putAll(packet.invocationProperties);
                 return ret;
 
