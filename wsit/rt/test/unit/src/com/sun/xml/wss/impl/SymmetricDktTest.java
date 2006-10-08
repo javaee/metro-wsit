@@ -198,7 +198,7 @@ public class SymmetricDktTest extends TestCase{
 
         	// now create the message
 	        SOAPMessage clientRecMsg = TestUtil.constructMessage("recvd.mh", "recvd.msg");
-    	    verify(clientRecMsg, null, client);
+    	    verifyClientRecMsg(clientRecMsg, null, client);
     }
 
    public static ProcessingContextImpl verify(SOAPMessage msg, byte[] proofKey, Map map) throws Exception {
@@ -238,7 +238,45 @@ public class SymmetricDktTest extends TestCase{
 
         return context;
    }
-   
+  
+    public static ProcessingContextImpl verifyClientRecMsg(SOAPMessage msg, byte[] proofKey, Map map) throws Exception {
+       //Create processing context and set the soap
+       //message to be processed.
+       ProcessingContextImpl context = new ProcessingContextImpl(map);
+       context.setSOAPMessage(msg);
+        
+       com.sun.xml.ws.security.policy.WSSAssertion wssAssertionws = null;
+       WSSAssertion wssAssertion = null;
+       AssertionSet as = null;
+       Policy wssPolicy = new PolicyResourceLoader().loadPolicy("security/policy-binding2.xml");
+       Iterator<AssertionSet> i = wssPolicy.iterator();
+       if(i.hasNext())
+           as = i.next();
+            
+       for(PolicyAssertion assertion:as){
+           if(assertion instanceof com.sun.xml.ws.security.policy.WSSAssertion){
+               wssAssertionws = (com.sun.xml.ws.security.policy.WSSAssertion)assertion;
+           }                      
+       }
+       //wssAssertion.addRequiredProperty("RequireSignatureConfirmation");
+        wssAssertion = new WSSAssertion(wssAssertionws.getRequiredProperties(), "1.0");
+        MessagePolicy pol = new MessagePolicy();
+        context.setAlgorithmSuite(alg);
+        pol.setWSSAssertion(wssAssertion);
+                                                                                                           
+        context.setSecurityPolicy(pol);
+        CallbackHandler handler = new PolicyCallbackHandler1("client");
+        SecurityEnvironment env = new DefaultSecurityEnvironmentImpl(handler);
+        context.setSecurityEnvironment(env);
+
+        SecurityRecipient.validateMessage(context);
+
+        System.out.println("Verfied Message");
+        DumpFilter.process(context);
+
+        return context;
+   }
+  
 //   public static void main(String[] args) throws Exception{
 //       testSymmetricDktTest();
 //   }
