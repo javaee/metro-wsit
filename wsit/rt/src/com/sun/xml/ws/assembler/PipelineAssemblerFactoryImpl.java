@@ -33,6 +33,7 @@ import com.sun.xml.ws.api.pipe.*;
 import com.sun.xml.ws.mex.server.MetadataServerPipe;
 import com.sun.xml.ws.policy.*;
 import com.sun.xml.ws.policy.jaxws.WSDLPolicyMapWrapper;
+import com.sun.xml.ws.policy.jaxws.documentfilter.PrivateAssertionFilter;
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import com.sun.xml.ws.rm.RMConstants;
 import com.sun.xml.ws.rm.jaxws.runtime.client.RMClientPipe;
@@ -78,7 +79,6 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
 
     private static class WsitPipelineAssembler implements PipelineAssembler {
         private BindingID bindingId;
-//        private PolicyMap policyMap;
 
         WsitPipelineAssembler(final BindingID bindingId) {
             this.bindingId = bindingId;
@@ -151,8 +151,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
         }
 
         public Pipe createServer(ServerPipeAssemblerContext context) {
-// TODO: uncomment
-//            context.getEndpoint().getServiceDefinition().addFilter(new PrivateAssertionFilter());
+            context.getEndpoint().getServiceDefinition().addFilter(new PrivateAssertionFilter());
             PolicyMap policyMap = initPolicyMap(context);
 
             Pipe p = context.getTerminalPipe();
