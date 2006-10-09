@@ -26,11 +26,8 @@ import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.NestedPolicy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.impl.bindings.AppliesTo;
-import com.sun.xml.ws.runtime.util.Session;
-import com.sun.xml.ws.runtime.util.SessionManager;
 import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.SecurityContextToken;
-import com.sun.xml.ws.security.SecurityContextTokenInfo;
 import com.sun.xml.ws.security.Token;
 import com.sun.xml.ws.security.impl.policy.PolicyUtil;
 import com.sun.xml.ws.security.impl.policy.Trust10;
@@ -60,7 +57,6 @@ import com.sun.xml.ws.security.trust.impl.bindings.RequestSecurityTokenResponseT
 import com.sun.xml.ws.security.trust.util.WSTrustUtil;
 import com.sun.xml.ws.security.wsu.AttributedDateTime;
 import com.sun.xml.ws.security.policy.SecureConversationToken;
-import com.sun.xml.ws.security.secconv.impl.SecurityContextTokenInfoImpl;
 import com.sun.xml.wss.impl.misc.SecurityUtil;
 
 import java.net.URI;
