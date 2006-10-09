@@ -136,7 +136,7 @@ public class SignatureConfirmationTest extends TestCase {
                 }                      
             }
 	    //wssAssertion.addRequiredProperty("RequireSignatureConfirmation");
-            wssAssertion = (WSSAssertion)wssAssertionws;
+            wssAssertion = getWssAssertion(wssAssertionws);
      	    MessagePolicy pol = new MessagePolicy();
 	    pol.append(signaturePolicy);
             pol.setWSSAssertion(wssAssertion);
@@ -184,6 +184,13 @@ public class SignatureConfirmationTest extends TestCase {
             verify(clientRecMsg, null, client);
             
     }
+    
+   protected static WSSAssertion getWssAssertion(com.sun.xml.ws.security.policy.WSSAssertion asser) {
+        com.sun.xml.wss.impl.WSSAssertion assertion = new com.sun.xml.wss.impl.WSSAssertion(
+                asser.getRequiredProperties(),
+                asser.getType());
+        return assertion;
+    }
 
    public static ProcessingContextImpl verify(SOAPMessage msg, byte[] proofKey, Map map) throws Exception {
        //Create processing context and set the soap
@@ -205,7 +212,7 @@ public class SignatureConfirmationTest extends TestCase {
            }                      
        }
        //wssAssertion.addRequiredProperty("RequireSignatureConfirmation");
-        wssAssertion = (WSSAssertion)wssAssertionws;
+        wssAssertion = getWssAssertion(wssAssertionws);
         MessagePolicy pol = new MessagePolicy();
         context.setAlgorithmSuite(alg);
         pol.setWSSAssertion(wssAssertion);
