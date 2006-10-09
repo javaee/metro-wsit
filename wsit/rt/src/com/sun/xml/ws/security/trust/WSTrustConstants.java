@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustConstants.java,v 1.3 2006-10-05 03:37:54 jdg6688 Exp $
+ * $Id: WSTrustConstants.java,v 1.4 2006-10-09 05:25:22 jdg6688 Exp $
  */
 
 /*
@@ -34,7 +34,11 @@ public interface WSTrustConstants {
     
     public static final String STS_CALL_BACK_HANDLER = "stsCallbackHandler";
     
-    public static final String SAML11_ASEERTION_TOKEN_TYPE ="urn:oasis:names:tc:SAML:1.0:assertion";
+    public static final String SAML10_ASSERTION_TOKEN_TYPE = "urn:oasis:names:tc:SAML:1.0:assertion";
+    
+    public static final String SAML11_ASSERTION_TOKEN_TYPE = "http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV1.1";
+    
+    public static final String SAML20_ASSERTION_TOKEN_TYPE = "urn:oasis:names:tc:SAML:2.0:assertion";
     
     /** the Trust namespace URI */
     public static final String WST_NAMESPACE = "http://schemas.xmlsoap.org/ws/2005/02/trust";

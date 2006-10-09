@@ -112,6 +112,12 @@ public abstract class BaseSTSImpl implements Provider<Source> {
      * The String TokenType.
      */
     public static final String TOKEN_TYPE = "TokenType";
+    
+    /**
+     * The String KeyType.
+     */
+    public static final String KEY_TYPE = "KeyType";
+    
     /**
      * The String ServiceProviders.
      */
@@ -193,6 +199,7 @@ public abstract class BaseSTSImpl implements Provider<Source> {
         int timeout = DEFAULT_TIMEOUT;
         String endpointUri = null;
         String tokenType = null;
+        String keyType = null;
         while(it.hasNext()) {
             PolicyAssertion as = (PolicyAssertion)it.next();
             if (!STS_CONFIGURATION.equals(as.getName().getLocalPart())) {
@@ -223,7 +230,7 @@ public abstract class BaseSTSImpl implements Provider<Source> {
                     while(serviceProviders.hasNext()){
                         PolicyAssertion serviceProvider = serviceProviders.next();
                         endpointUri = serviceProvider.getAttributeValue(new QName("",END_POINT));
-                        TrustSPMetadata data = new TrustSPMetadata(endpointUri, null);
+                        TrustSPMetadata data = new TrustSPMetadata(endpointUri);
                         Iterator<PolicyAssertion> spConfig = serviceProvider.getNestedAssertionsIterator();
                         while(spConfig.hasNext()){
                             PolicyAssertion pa = spConfig.next();
@@ -231,6 +238,8 @@ public abstract class BaseSTSImpl implements Provider<Source> {
                                 alias = pa.getValue();
                             }else if (TOKEN_TYPE.equals(pa.getName().getLocalPart())){
                                 tokenType = pa.getValue();
+                            }else if (KEY_TYPE.equals(pa.getName().getLocalPart())){
+                                keyType = pa.getValue();
                             }
                         }
                         data.setType(impl);
@@ -239,8 +248,9 @@ public abstract class BaseSTSImpl implements Provider<Source> {
                         data.setCertAlias(alias);
                         data.setIssuer(issuer);
                         data.setIssuedTokenTimeout(timeout);
-                        //data.setCallbackHandlerName("common.STSCallbackHandler");
                         data.setCallbackHandler(handler);
+                        data.setKeyType(keyType);
+                        data.setTokenType(tokenType);
                         config.addTrustSPMetadata(data, endpointUri);
                     }
                 }

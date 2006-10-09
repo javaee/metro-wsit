@@ -27,6 +27,7 @@ import com.sun.xml.ws.security.policy.SecureConversationToken;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -104,50 +105,101 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
    /** Issue a Token */
     public RequestSecurityTokenResponse issue(RequestSecurityToken rst, IssuedTokenContext context, SecureConversationToken policy)throws WSTrustException
     {   
-
-        //============================
-        // Create required secret key
-        //============================
-        URI keyTypeURI = rst.getKeyType();
-        if (keyTypeURI != null && !WSTrustConstants.SYMMETRIC_KEY.equals(keyTypeURI.toString())) {
-            log.log(Level.SEVERE, "WST0001.unsupported.proofkey", new Object[]{keyTypeURI.toString(), WSTrustConstants.SYMMETRIC_KEY});        
-            throw new WSTrustException("Unsupported proof key type: " + keyTypeURI.toString());
+        // Get TokenType
+        String tokenType = null;
+        URI tokenTypeURI = rst.getTokenType();
+        if (tokenTypeURI != null){
+            tokenType = tokenTypeURI.toString();
+        }else{
+            tokenType = config.getTokenType();
+        }
+        if (tokenType == null){
+            tokenType = WSTrustConstants.SAML11_ASSERTION_TOKEN_TYPE;
         }
         
+        // Get KeyType
+        String keyType = null;
+        URI keyTypeURI = rst.getKeyType();
+        if (keyTypeURI != null){
+            keyType = keyTypeURI.toString();
+        }else{
+            keyType = config.getKeyType();
+        }
+        if (keyType == null){
+            keyType = WSTrustConstants.SYMMETRIC_KEY;
+        }
+        
+        // Get AppliesTo 
+         AppliesTo ap = rst.getAppliesTo();
+         String appliesTo = null;
+         if(ap != null){
+            appliesTo = WSTrustUtil.getAppliesToURI(ap);
+         }
+         
+        // Get authenticaed client Subject
+        Subject subject = context.getRequestorSubject();
+        if(subject == null){
+           throw new WSTrustException("Requester subject is null");
+        }
+        
+        // Check if the client is authorized to be issued the token
+        if (!isAuthorized(subject, appliesTo, tokenType, keyType)){
+            log.log(Level.SEVERE, "WST0015.client.not.authorized", 
+                    new Object[]{subject.toString(), tokenType, appliesTo});        
+            throw new WSTrustException("The client is not authorized to be issued the token of type "+ tokenType + " apply to " + appliesTo);
+        }
+        
+        // Get claimed attributes
+        Map claimedAttrs = getClaimedAttributes(subject, appliesTo, tokenType);
+        
+        RequestedProofToken proofToken = null;
         Entropy serverEntropy = null;
-        RequestedProofToken proofToken = eleFac.createRequestedProofToken();
+        int keySize = 0;
+        if (WSTrustConstants.SYMMETRIC_KEY.equals(keyType)){
+            //============================
+            // Create required secret key
+            //============================
+        
+            proofToken = eleFac.createRequestedProofToken();
 
-        // Get client entropy
-        byte[] clientEntropyValue = null;
-        Entropy clientEntropy = rst.getEntropy();
-        if (clientEntropy != null){
-            BinarySecret clientBS = clientEntropy.getBinarySecret();
-            if (clientBS == null){
-                log.log(Level.FINE, "WST1009.null.binary.secret");        
-            }else {
-                clientEntropyValue = clientBS.getRawValue(); 
+            // Get client entropy
+            byte[] clientEntropyValue = null;
+            Entropy clientEntropy = rst.getEntropy();
+            if (clientEntropy != null){
+                BinarySecret clientBS = clientEntropy.getBinarySecret();
+                if (clientBS == null){
+                    log.log(Level.FINE, "WST1009.null.binary.secret");        
+                }else {
+                    clientEntropyValue = clientBS.getRawValue(); 
+                }
             }
-        }
 
-        int keySize = (int)rst.getKeySize();
-        if (keySize < 1){
-            keySize = DEFAULT_KEY_SIZE;
-        }
+            keySize = (int)rst.getKeySize();
+            if (keySize < 1){
+                keySize = DEFAULT_KEY_SIZE;
+            }
 
-        log.log(Level.FINE, "WST1010.key.size", new Object[] {keySize});        
+            log.log(Level.FINE, "WST1010.key.size", new Object[] {keySize});        
 
-        byte[] key = WSTrustUtil.generateRandomSecret(keySize/8);
-        BinarySecret serverBS = eleFac.createBinarySecret(key, BinarySecret.NONCE_KEY_TYPE);
-        serverEntropy = eleFac.createEntropy(serverBS);
-        proofToken.setProofTokenType(RequestedProofToken.COMPUTED_KEY_TYPE);
+            byte[] key = WSTrustUtil.generateRandomSecret(keySize/8);
+            BinarySecret serverBS = eleFac.createBinarySecret(key, BinarySecret.NONCE_KEY_TYPE);
+            serverEntropy = eleFac.createEntropy(serverBS);
+            proofToken.setProofTokenType(RequestedProofToken.COMPUTED_KEY_TYPE);
 
-        // compute the secret key
-        try {
-             proofToken.setComputedKey(URI.create(WSTrustConstants.CK_PSHA1));
-             key = SecurityUtil.P_SHA1(clientEntropyValue, key, keySize/8);
-        } catch (Exception ex){
-            log.log(Level.SEVERE, "WST0013.error.secret.key", ex);                
-             throw new WSTrustException(ex.getMessage(), ex);
+            // compute the secret key
+            try {
+                proofToken.setComputedKey(URI.create(WSTrustConstants.CK_PSHA1));
+                key = SecurityUtil.P_SHA1(clientEntropyValue, key, keySize/8);
+            } catch (Exception ex){
+                log.log(Level.SEVERE, "WST0013.error.secret.key", ex);                
+                throw new WSTrustException(ex.getMessage(), ex);
+            }
+        
+            context.setProofKey(key);
+        }else if(WSTrustConstants.PUBLIC_KEY.equals(keyType)){ 
+            // Get client certificate and put it in the IssuedTokenContext
+        }else{
+            throw new WSTrustException("Unsupport key type: " + keyType);
         }
 
         //==================
@@ -167,25 +219,12 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
 
         // Create RequestedSecurityToken with SAML assertion
         String assertionId = "uuid-" + UUID.randomUUID().toString();
-         AppliesTo ap = rst.getAppliesTo();
-         String appliesTo = null;
-         if(ap != null){
-                appliesTo = WSTrustUtil.getAppliesToURI(ap);
-         }
-        //Token samlToken = createSAMLAssertion(key, assertionId, appliesTo);
-       // RequestedSecurityToken st = eleFac.createRequestedSecurityToken(samlToken);
-         RequestedSecurityToken st = eleFac.createRequestedSecurityToken();
+        RequestedSecurityToken st = eleFac.createRequestedSecurityToken();
 
         // Create RequestedAttachedReference and RequestedUnattachedReference
         SecurityTokenReference samlReference = createSecurityTokenReference(assertionId);
         RequestedAttachedReference raRef =  eleFac.createRequestedAttachedReference(samlReference);
         RequestedUnattachedReference ruRef =  eleFac.createRequestedUnattachedReference(samlReference);
-
-        // Create RequestedProofToken
-     /*   BinarySecret keyBs = eleFac.createBinarySecret(key, BinarySecret.SYMMETRIC_KEY_TYPE);
-        RequestedProofToken rpt = eleFac.createRequestedProofToken();
-        rpt.setProofTokenType(RequestedProofToken.BINARY_SECRET_TYPE);
-        rpt.setBinarySecret(keyBs);*/
 
         // Create Lifetime
         Lifetime lifetime = createLifetime();
@@ -193,18 +232,19 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
         RequestSecurityTokenResponse rstr = 
                 eleFac.createRSTRForIssue(rst.getTokenType(), ctx, st, ap, raRef, ruRef, proofToken, serverEntropy, lifetime);
 
-        rstr.setKeySize(keySize);
+        if (keySize > 0){
+            rstr.setKeySize(keySize);
+        }
         
         String issuer = config.getIssuer();
         
-        Token samlToken = createSAMLAssertion(key, assertionId, appliesTo, issuer, context);
+        Token samlToken = createSAMLAssertion(tokenType, keyType, assertionId, issuer, claimedAttrs, context);
         rstr.getRequestedSecurityToken().setToken(samlToken);
          
         // Populate IssuedTokenContext
         context.setSecurityToken(samlToken);
         context.setAttachedSecurityTokenReference(samlReference);
         context.setUnAttachedSecurityTokenReference(samlReference);
-        context.setProofKey(key);
         context.setCreationTime(new Date(currentTime));
         context.setExpirationTime(new Date(currentTime + config.getIssuedTokenTimeout()));
 
@@ -267,9 +307,9 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
         throw new UnsupportedOperationException("Unsupported operation: containsChallenge");
    }
 
-   protected abstract Token createSAMLAssertion(byte[] key, String assertionId, String appliesTo, String issuer, IssuedTokenContext context) throws WSTrustException;
+   protected abstract Token createSAMLAssertion(String tokenType, String keyType, String assertionId, String issuer, Map claimedAttrs, IssuedTokenContext context) throws WSTrustException;
 
-   protected abstract boolean isAuthorized(Subject subject, String appliesTo, String tokenType);
+   protected abstract boolean isAuthorized(Subject subject, String appliesTo, String tokenType, String keyType);
 
    protected abstract Map getClaimedAttributes(Subject subject, String appliesTo, String tokenType);
 

@@ -44,20 +44,19 @@ public class TrustSPMetadata implements Configuration{
     
     private String endpoint;
     private String tokenType;
+    private String keyType;
     private String type;
     private String issuer;
     private boolean encryptIssuedToken;
     private boolean encryptIssuedKey;
     private String certAlias;
     private long issuedTokenTimeout;
-    //private String callbackHandlerName;
     private CallbackHandler handler;
 
         
     /** Creates a new instance of TrustSPMetedata */
-    public TrustSPMetadata(String endpoint, String tokenType) {
+    public TrustSPMetadata(String endpoint) {
         this.endpoint = endpoint;
-        this.tokenType = tokenType;
     }
         
     public void setType(String type){
@@ -116,12 +115,19 @@ public class TrustSPMetadata implements Configuration{
         return this.handler;
     }
     
-  /*  public void setCallbackHandlerName(String callbackHandlerName){
-        this.callbackHandlerName = callbackHandlerName;
+    public void setTokenType(String tokenType){
+        this.tokenType = tokenType;
     }
     
-    public String getCallbackHandlerName(){
-        return this.callbackHandlerName;
+     public String getTokenType(){
+        return this.tokenType;
     }
-  */
+     
+    public void setKeyType(String keyType){
+        this.keyType = keyType;
+    }
+    
+    public String getKeyType(){
+        return this.keyType;
+    }
 }

@@ -182,7 +182,7 @@ public class TrustPluginImpl implements TrustPlugin {
         sr.nextBytes(nonce);
         BinarySecret binarySecret = fact.createBinarySecret(nonce, BinarySecret.NONCE_KEY_TYPE);
         Entropy entropy = fact.createEntropy(binarySecret);
-        URI tokenType = new URI(WSTrustConstants.SAML11_ASEERTION_TOKEN_TYPE);
+        URI tokenType = new URI(WSTrustConstants.SAML11_ASSERTION_TOKEN_TYPE);
         if (rstTemplate.getTokenType() != null){
             tokenType = new URI(rstTemplate.getTokenType().trim());
         }
