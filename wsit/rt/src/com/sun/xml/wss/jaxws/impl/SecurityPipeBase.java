@@ -26,7 +26,6 @@ package com.sun.xml.wss.jaxws.impl;
 
 import com.sun.xml.ws.api.model.wsdl.WSDLFault;
 import com.sun.xml.ws.security.impl.policyconv.XWSSPolicyGenerator;
-import com.sun.xml.ws.security.policy.Target;
 import com.sun.xml.ws.security.secconv.WSSCConstants;
 import com.sun.xml.wss.impl.policy.mls.EncryptionPolicy;
 import com.sun.xml.wss.impl.policy.mls.EncryptionTarget;
@@ -56,6 +55,7 @@ import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLInput;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLOutput;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.policy.NestedPolicy;
 import com.sun.xml.ws.security.impl.policyconv.SCTokenWrapper;
 import com.sun.xml.ws.security.impl.policyconv.SecurityPolicyHolder;
@@ -96,6 +96,7 @@ import com.sun.xml.wss.impl.PolicyViolationException;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelUnmarshaller;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.policy.PolicyAssertion;
+import com.sun.xml.ws.rm.RMConstants;
 
 import com.sun.xml.ws.security.policy.Token;
 
@@ -218,11 +219,10 @@ public abstract class SecurityPipeBase implements Pipe {
     // store as instance variable
     protected Unmarshaller unmarshaller =null;
     
-    //store instance variable: Binding has IssuedToken Policy
-    //TODO: temporary setting it true till venu provides a method
-    // for querying issuedTokens in Binding.
+    //store instance variable(s): Binding has IssuedToken/RM/SC Policy
     boolean hasIssuedTokens = false;
     boolean hasSecureConversation = false;
+    boolean hasReliableMessaging = false;
     
     static {
         try {
@@ -240,7 +240,6 @@ public abstract class SecurityPipeBase implements Pipe {
     }
     
     public SecurityPipeBase(PipeConfiguration config, Pipe nextPipe) {
-        
         System.setProperty("com.sun.xml.ws.policy.PolicyFactory",
                   "com.sun.xml.ws.security.impl.policy.WSSecurityPolicyFactory");
         this.nextPipe= nextPipe;
@@ -266,6 +265,8 @@ public abstract class SecurityPipeBase implements Pipe {
                 collectPolicies();
             }
             unmarshaller = jaxbContext.createUnmarshaller();
+            // check whether Service Port has RM
+            hasReliableMessaging = isReliableMessagingEnabled(wsPolicyMap, pipeConfig.getWSDLModel());
         }catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -576,6 +577,10 @@ public abstract class SecurityPipeBase implements Pipe {
     
     protected boolean bindingHasSecureConversationPolicy() {
         return hasSecureConversation;
+    }
+    
+    protected boolean bindingHasRMPolicy() {
+        return hasReliableMessaging;
     }
     
     protected void checkSecurityHeader(MessagePolicy policy,Packet packet){
@@ -1073,6 +1078,9 @@ public abstract class SecurityPipeBase implements Pipe {
     }
     
     protected boolean isRMMessage(Packet packet){
+       if (!bindingHasRMPolicy()) {
+           return false;
+       } 
        String action = getAction(packet);
        if (RM_CREATE_SEQ.equals(action) || RM_CREATE_SEQ_RESP.equals(action)
                 || RM_SEQ_ACK.equals(action) || RM_TERMINATE_SEQ.equals(action)
@@ -1408,6 +1416,23 @@ public abstract class SecurityPipeBase implements Pipe {
                 asser.getType());
         return assertion;
     }
+    
+    //TODO: Duplicate information copied from Pipeline Assembler
+    private boolean isReliableMessagingEnabled(PolicyMap policyMap, WSDLPort port) {
+        if (policyMap == null)
+            return false;
+        
+        try {
+            PolicyMapKey endpointKey = policyMap.createWsdlEndpointScopeKey(port.getOwner().getName(),
+                    port.getName());
+            Policy policy = policyMap.getEndpointEffectivePolicy(endpointKey);
+            
+            return (policy != null) && policy.contains(RMConstants.version);
+        } catch (PolicyException e) {
+            throw new WebServiceException(e);
+        }
+    }
+     
     
     protected abstract Policy getWSITConfig();
     
