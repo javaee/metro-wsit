@@ -81,7 +81,11 @@ public class MetadataServerPipe extends AbstractFilterPipeImpl {
 
     /**
      * Method returns immediately if there are no headers
-     * in the message to check.
+     * in the message to check. If there are, the pipe checks
+     * W3C and then MEMBER addressing for an action header.
+     * If there is an action header, and if it is a mex Get
+     * request, then ask addressing again for the address and
+     * process the request.
      */
     public Packet process(Packet request) {
         if (request.getMessage()==null || !request.getMessage().hasHeaders()) {
@@ -91,16 +95,15 @@ public class MetadataServerPipe extends AbstractFilterPipeImpl {
         // try w3c version of ws-a first, then member submission version
         HeaderList headers = request.getMessage().getHeaders();
         String action = headers.getAction(AddressingVersion.W3C, soapVersion);
-        String toAddress = headers.getTo(AddressingVersion.W3C, soapVersion);
         AddressingVersion av = AddressingVersion.W3C;
         if (action == null) {
             action = headers.getAction(AddressingVersion.MEMBER, soapVersion);
-            toAddress = headers.getTo(AddressingVersion.MEMBER, soapVersion);
             av = AddressingVersion.MEMBER;
         }
         
         if (action != null) {
             if (action.equals(GET_REQUEST)) {
+                String toAddress = headers.getTo(av, soapVersion);
                 return processGetRequest(request, toAddress, av);
             } else if (action.equals(GET_METADATA_REQUEST)) {
                 throw new ActionNotSupportedException(GET_METADATA_REQUEST);
