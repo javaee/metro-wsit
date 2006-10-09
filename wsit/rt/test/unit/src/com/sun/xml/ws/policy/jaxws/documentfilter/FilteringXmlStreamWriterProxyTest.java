@@ -49,7 +49,8 @@ public class FilteringXmlStreamWriterProxyTest extends TestCase {
     private String[] testResources = new String[] {
         "policy_0_visible",
         "policy_1_visible",
-        "policy_2_visible"
+        "policy_2_visible",
+        "policy_3_visible"
     };
     
     public FilteringXmlStreamWriterProxyTest(String testName) {
