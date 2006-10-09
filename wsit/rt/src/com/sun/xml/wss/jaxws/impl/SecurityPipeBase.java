@@ -221,7 +221,8 @@ public abstract class SecurityPipeBase implements Pipe {
     //store instance variable: Binding has IssuedToken Policy
     //TODO: temporary setting it true till venu provides a method
     // for querying issuedTokens in Binding.
-    boolean hasIssuedTokens = true;
+    boolean hasIssuedTokens = false;
+    boolean hasSecureConversation = false;
     
     static {
         try {
@@ -268,7 +269,7 @@ public abstract class SecurityPipeBase implements Pipe {
         }catch (Exception e) {
             throw new RuntimeException(e);
         }
-        //TODO: set the hasIssuedTokens flag here        
+               
     }
     
     protected SecurityPipeBase(SecurityPipeBase that) {
@@ -571,6 +572,10 @@ public abstract class SecurityPipeBase implements Pipe {
     
     protected boolean bindingHasIssuedTokenPolicy() {
         return hasIssuedTokens;
+    }
+    
+    protected boolean bindingHasSecureConversationPolicy() {
+        return hasSecureConversation;
     }
     
     protected void checkSecurityHeader(MessagePolicy policy,Packet packet){
@@ -1033,6 +1038,9 @@ public abstract class SecurityPipeBase implements Pipe {
     }
     
     protected boolean isSCMessage(Packet packet){
+        if (!bindingHasSecureConversationPolicy())
+            return false;
+        
         String action = getAction(packet);
         if (rstSCTURI.equals(action)){
                 return true;
@@ -1041,6 +1049,9 @@ public abstract class SecurityPipeBase implements Pipe {
     }
     
     protected boolean isSCCancel(Packet packet){
+        if (!bindingHasSecureConversationPolicy())
+            return false;
+        
         String action = getAction(packet);
         if(WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_RESPONSE_ACTION.equals(action) || 
            WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_ACTION .equals(action)) {
@@ -1050,6 +1061,8 @@ public abstract class SecurityPipeBase implements Pipe {
     }
     
     protected boolean isTrustMessage(Packet packet){
+        if (!bindingHasIssuedTokenPolicy())
+            return false;
         String action = getAction(packet);
         if(WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION.equals(action) ||
            WSTrustConstants.REQUEST_SECURITY_TOKEN_RESPONSE_ISSUE_ACTION.equals(action)){
@@ -1172,8 +1185,10 @@ public abstract class SecurityPipeBase implements Pipe {
                 
                 PolicyAssertion sct = new SCTokenWrapper(token,bmp);
                 sph.addSecureConversationToken(sct);
+                hasSecureConversation = true;
             }else if(PolicyUtil.isIssuedToken(token)){
                 sph.addIssuedToken(token);
+                hasIssuedTokens = true;
             }
         }
         return sph;
@@ -1302,6 +1317,11 @@ public abstract class SecurityPipeBase implements Pipe {
                         throw new RuntimeException("Null or Empty Value specified for passwordHandler classname");
                     }
                 }
+            } else if ("samlHandler".equals(name)) {
+                if (ret == null || "".equals(ret)) {
+                     throw new RuntimeException("Null or Empty Value specified for samlHandler classname");
+                }
+                props.put(DefaultCallbackHandler.SAML_CBH, ret);
             } else {
                 throw new RuntimeException("Unsupported CallbackHandler Type " + name + " encountered");
             }

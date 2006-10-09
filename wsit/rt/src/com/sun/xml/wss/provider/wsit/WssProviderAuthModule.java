@@ -18,7 +18,7 @@
  * [name of copyright owner]
  */
 /**
- * $Id: WssProviderAuthModule.java,v 1.2 2006-10-05 16:29:45 m_potociar Exp $
+ * $Id: WssProviderAuthModule.java,v 1.3 2006-10-09 09:18:33 kumarjayanti Exp $
  *
  * Copyright 2006 Sun Microsystems, Inc. All rights reserved.
  * SUN PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
@@ -66,15 +66,17 @@ public abstract class WssProviderAuthModule {
     public static final String REQUESTER_SERIAL = "REQUESTER_SERIAL";
     public static final String SELF_SUBJECT = "SELF_SUBJECT";
     
+    public static final String SOAP12="soap12";
+    public static final String SOAP11="soap11";
+    
+    public static final String SOAP_FACTORY="SoapFactory";
     public static final String PACKET = "packet";
     public static final String ISSUED_TOKEN_CONTEXT_MAP = "issued_token_context_map";
     public static final String ALGORITHM_SUITE = "algorithm_suite";
     public static final String MESSAGE_POLICY="message_policy";
     public static final String OPTIMIZED="optimized";
     public static final String SOAP_VERSION="soap_version";
-    public static final String SOAP12="soap12";
-    public static final String SOAP11="soap11";
-    public static final String SOAP_FACTORY="SoapFactory";
+    public static final String BINDING_HAS_ISSUED_TOKENS="BindingHasIssuedTokens";
     
     
     protected boolean debug = false;
@@ -171,7 +173,11 @@ public abstract class WssProviderAuthModule {
         Hashtable issuedTokenContextMap = (Hashtable)sharedState.get(ISSUED_TOKEN_CONTEXT_MAP);
         AlgorithmSuite suite = (AlgorithmSuite)sharedState.get(ALGORITHM_SUITE);
         MessagePolicy policy = (MessagePolicy) sharedState.get(MESSAGE_POLICY);
-        
+        String issuedTokensPresent = (String)sharedState.get(BINDING_HAS_ISSUED_TOKENS);
+        boolean hasIssuedTokens = false;
+        if ("true".equals(issuedTokensPresent)) {
+            hasIssuedTokens = true;
+        }
         // set the policy, issued-token-map, and extraneous properties
         ctx.setIssuedTokenContextMap(issuedTokenContextMap);
         ctx.setAlgorithmSuite(suite);
@@ -187,6 +193,9 @@ public abstract class WssProviderAuthModule {
         ctx.setWSSAssertion(policy.getWSSAssertion());
         ctx.setSecurityPolicy(policy);
         ctx.setSecurityEnvironment(secEnv);
+        // setting a flag if issued tokens present
+        ctx.hasIssuedToken(hasIssuedTokens);
+        
         if (!inbound) {
           ctx.isInboundMessage(false);    
         }else {
