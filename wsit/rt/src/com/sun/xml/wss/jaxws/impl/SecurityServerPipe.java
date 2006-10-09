@@ -22,19 +22,10 @@
 
 package com.sun.xml.wss.jaxws.impl;
 
-
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.message.HeaderList;
-import com.sun.xml.ws.api.message.Header;
-import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.policy.sourcemodel.PolicyModelTranslator;
-import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
 import com.sun.xml.ws.security.impl.policy.Constants;
-import java.io.IOException;
-
 
 import com.sun.xml.ws.api.message.stream.InputStreamMessage;
 import com.sun.xml.ws.api.message.stream.XMLStreamReaderMessage;
@@ -43,33 +34,22 @@ import com.sun.xml.ws.api.model.wsdl.WSDLFault;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
-import com.sun.xml.ws.policy.AssertionSet;
-import com.sun.xml.ws.policy.NestedPolicy;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.assembler.ServerPipeConfiguration;
-import com.sun.xml.ws.security.impl.policyconv.SCTokenWrapper;
+import com.sun.xml.ws.runtime.util.SessionManager;
 import com.sun.xml.ws.security.impl.policyconv.SecurityPolicyHolder;
-import com.sun.xml.ws.security.impl.policyconv.XWSSPolicyGenerator;
 import com.sun.xml.ws.security.policy.SecureConversationToken;
-import com.sun.xml.ws.security.policy.AlgorithmSuite;
-import com.sun.xml.ws.security.impl.policy.PolicyUtil;
-//import com.sun.xml.ws.security.secconv.SCSessionManager;
-//import com.sun.xml.ws.security.secconv.SCSessionManagerFactory;
-import com.sun.xml.ws.security.secconv.WSSCConstants;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
 
 import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.impl.ProcessingContextImpl;
 import com.sun.xml.wss.impl.policy.mls.MessagePolicy;
 import com.sun.xml.wss.ProcessingContext;
-import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
 import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.impl.WssSoapFaultException;
-import com.sun.xml.wss.impl.SecurityAnnotator;
 import com.sun.xml.wss.impl.SecurityRecipient;
-
 
 import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.SecurityContextToken;
@@ -91,16 +71,10 @@ import javax.xml.ws.WebServiceException;
 import javax.security.auth.callback.CallbackHandler;
 
 import java.util.Properties;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Hashtable;
 import java.util.Set;
 
 import java.net.URI;
-import java.net.URISyntaxException;
-
-import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.security.policy.Token;
 
 import com.sun.xml.ws.security.secconv.WSSCContract;
@@ -109,30 +83,29 @@ import com.sun.xml.ws.security.secconv.WSSCElementFactory;
 import com.sun.xml.ws.security.secconv.WSSCFactory;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponse;
-import com.sun.xml.ws.util.ServiceFinder;
 
 import com.sun.xml.wss.impl.misc.DefaultCallbackHandler;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
-
+        
 //TODO: add logging before 4/13
 
 /**
- *
- * @author K.Venugopal@sun.com,Vbkumar.Jayanti@Sun.COM,
+ * @author K.Venugopal@sun.com
+ * @author Vbkumar.Jayanti@Sun.COM
  */
 public class SecurityServerPipe extends SecurityPipeBase {    
     
-//    private SCSessionManager scSessionManager;
+    private static SessionManager sessionManager;
     private WSDLBoundOperation cachedOperation = null;
     private Set trustConfig = null;
     private CallbackHandler handler = null;
+    
     // Creates a new instance of SecurityServerPipe
     public SecurityServerPipe(ServerPipeConfiguration config,Pipe nextPipe) {
         super(config,nextPipe);
-//        scSessionManager =
-//                SCSessionManagerFactory.newInstance().getSessionManager();
+            sessionManager =
+                SessionManager.getSessionManager();
         
         try {
             Iterator it = inMessagePolicyMap.values().iterator();
@@ -154,6 +127,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
     // copy constructor
     protected SecurityServerPipe(SecurityServerPipe that) {
         super(that);
+        sessionManager = that.sessionManager;
         trustConfig = that.trustConfig;
         handler = that.handler;
     }
@@ -240,12 +214,6 @@ public class SecurityServerPipe extends SecurityPipeBase {
             
             if (isSCIssueMessage || isSCCancelMessage) {
                 //-------put application message on hold and invoke SC contract--------
-               // String action = null;
-               // if (isSCIssueMessage){
-                   // action = WSSCConstants.REQUEST_SECURITY_CONTEXT_TOKEN_RESPONSE_ACTION;
-               // }else{
-                //    action = WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_RESPONSE_ACTION;
-               // }
 
                 retPacket = invokeSecureConversationContract(
                         packet, ctx, isSCIssueMessage, action);
@@ -327,6 +295,9 @@ public class SecurityServerPipe extends SecurityPipeBase {
             String strId = sct.getIdentifier().toString();
             if(strId!=null){
                 issuedTokenContextMap.remove(strId);
+                /* MK: Terminate the session.
+                   sessionManager.terminateSession(strId);
+                 */
             }
         }
     }
@@ -375,6 +346,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
         
         ProcessingContextImpl ctx =
                 (ProcessingContextImpl)initializeInboundProcessingContext(packet, isSCMessage);
+
         
         if (isTrustMessage /*|| isSCMessage*/) {
             // this is an RST to the STS
@@ -511,8 +483,12 @@ public class SecurityServerPipe extends SecurityPipeBase {
     // TODO: Need to inspect if it is really a Issue or a Cancel
     private Packet invokeSecureConversationContract(
             Packet packet, ProcessingContext ctx, boolean isSCTIssue, String action) {
-        //IssuedTokenContext ictx = ((ProcessingContextImpl)ctx).getTrustCredentialHolder();
+        
         IssuedTokenContext ictx = new IssuedTokenContextImpl();
+        /* MK: 
+         SecurityContextTokenInfo sctx = 
+                                    new SecurityTokenContextInfoImpl();
+         */
         Message msg = packet.getMessage();
         Message retMsg = null;
         try {
@@ -525,9 +501,28 @@ public class SecurityServerPipe extends SecurityPipeBase {
             if (requestType.toString().equals(WSTrustConstants.ISSUE_REQUEST)) {
                 List<PolicyAssertion> policies = getOutBoundSCP(packet.getMessage());
                 rstr =  scContract.issue(rst, ictx, (SecureConversationToken)policies.get(0));
-                
                 SecurityContextToken sct = (SecurityContextToken)ictx.getSecurityToken();
                 String sctId = sct.getIdentifier().toString();
+ 
+/* MK: 
+                rstr =  scContract.issue(rst, sctx, (SecureConversationToken)policies.get(0));
+                String sctId = sctx.getIdentifier();                                
+                                
+                Session session = null;
+                if (sessionManager.getSession(sctId) == null) {
+                            session = sessionManager.createSession(sctId); 
+                }
+            
+                session.setSecurityInfo(sctx);
+                // Put it here for RM to pick up
+                packet.invocationProperties.put(
+                          "com.sun.xml.ws.sessionid", sctId);
+
+                packet.invocationProperties.put(
+                          "com.sun.xml.ws.sessiondata", session.getUserData());
+ 
+                IssuedTokenContext ictx = sctInfo.getIssuedTokenContext();
+*/                                
                 ((ProcessingContextImpl)ctx).getIssuedTokenContextMap().put(sctId, ictx);
             } else if (requestType.toString().equals(WSTrustConstants.CANCEL_REQUEST)) {
                 rstr =  scContract.cancel(rst, ictx, issuedTokenContextMap);
