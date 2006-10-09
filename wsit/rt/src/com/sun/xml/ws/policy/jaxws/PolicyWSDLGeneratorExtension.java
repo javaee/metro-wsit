@@ -39,7 +39,6 @@ import com.sun.xml.ws.api.model.wsdl.WSDLOutput;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.model.wsdl.WSDLPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLService;
-import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.wsdl.writer.WSDLGeneratorExtension;
 import com.sun.xml.ws.model.CheckedExceptionImpl;
 import com.sun.xml.ws.model.JavaMethodImpl;
@@ -56,6 +55,7 @@ import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelGenerator;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelMarshaller;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
+import java.util.LinkedList;
 
 /**
  * Marshals the contents of a policy map to WSDL.
@@ -69,7 +69,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
     // TODO Determine if service or port were renamed so that we can just map them like the other elements
     private Policy servicePolicy = null;
     private Policy portPolicy = null;
-    private Collection<PolicySubject> subjects;
+    private Collection<PolicySubject> subjects = new LinkedList<PolicySubject>();
     
     private PolicyModelMarshaller marshaller = PolicyModelMarshaller.getXmlMarshaller(true);
     private PolicyMerger merger = PolicyMerger.getMerger();
