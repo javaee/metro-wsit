@@ -19,11 +19,9 @@
  * 
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
-package com.sun.xml.ws.mex.client.wsimport;
+package com.sun.xml.ws.mex.client;
 
 import java.net.URI;
-
-import com.sun.xml.ws.mex.client.MetadataClient;
 import com.sun.xml.ws.mex.client.schema.Metadata;
 import com.sun.xml.ws.api.wsdl.parser.MetaDataResolver;
 import com.sun.xml.ws.api.wsdl.parser.ServiceDescriptor;

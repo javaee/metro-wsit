@@ -19,7 +19,7 @@
  * 
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
-package com.sun.xml.ws.mex.client.wsimport;
+package com.sun.xml.ws.mex.client;
 
 import org.xml.sax.EntityResolver;
 import com.sun.xml.ws.api.wsdl.parser.MetadataResolverFactory;
