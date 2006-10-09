@@ -26,8 +26,11 @@ import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.NestedPolicy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.impl.bindings.AppliesTo;
+import com.sun.xml.ws.runtime.util.Session;
+import com.sun.xml.ws.runtime.util.SessionManager;
 import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.SecurityContextToken;
+import com.sun.xml.ws.security.SecurityContextTokenInfo;
 import com.sun.xml.ws.security.Token;
 import com.sun.xml.ws.security.impl.policy.PolicyUtil;
 import com.sun.xml.ws.security.impl.policy.Trust10;
@@ -57,6 +60,7 @@ import com.sun.xml.ws.security.trust.impl.bindings.RequestSecurityTokenResponseT
 import com.sun.xml.ws.security.trust.util.WSTrustUtil;
 import com.sun.xml.ws.security.wsu.AttributedDateTime;
 import com.sun.xml.ws.security.policy.SecureConversationToken;
+import com.sun.xml.ws.security.secconv.impl.SecurityContextTokenInfoImpl;
 import com.sun.xml.wss.impl.misc.SecurityUtil;
 
 import java.net.URI;
@@ -236,6 +240,23 @@ public class WSSCContract implements WSTrustContract   {
                     "WSSC0013.cannot.create.rstr.response", new Object[] {ex.getMessage()});
             throw new WSSecureConversationException(ex);
         }
+        
+        /* MK: create session and populate the SCTInfo and add it
+           MK: to the session.
+         
+        Session session =
+                SessionManager.getSessionManager().createSession(token.getIdentifier().toString());
+        
+        SecurityContextTokenInfo sctinfo = 
+                new SecurityContextTokenInfoImpl();
+        sctinfo.setIdentifier(token.getIdentifier().toString());
+        sctinfo.addInstance(token.getInstance(), secret);
+        sctinfo.setCreationTime(new Date(currentTime));
+        sctinfo.setExpirationTime(new Date(currentTime + TIMEOUT));
+        
+        session.setSecurityInfo(sctinfo);
+
+        */
         
         // Populate the IssuedTokenContext
         context.setSecurityToken(token);
