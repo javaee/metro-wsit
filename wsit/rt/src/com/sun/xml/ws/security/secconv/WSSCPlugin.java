@@ -218,6 +218,10 @@ public class WSSCPlugin {
             }
         }
         
+        reqPacket.setEndPointAddressString(endPointAddress);
+         log.log(Level.FINE,"WSSC1008.set.ep.address",
+                new Object[]{endPointAddress});
+        
         // Add addressing headers to the message
         try{
             reqPacket = addAddressingHeaders(reqPacket, wsdlPort, binding, action);
@@ -225,10 +229,6 @@ public class WSSCPlugin {
             log.log(Level.SEVERE,"WSSC0017.problem.add.address.headers", ex);
             throw new RuntimeException(ex);
         }
-        
-        reqPacket.setEndPointAddressString(endPointAddress);
-        log.log(Level.FINE,"WSSC1008.set.ep.address",
-                new Object[]{endPointAddress});
         
         // Ideally this property for enabling FI or not should be available to the pipeline.
         // As a workaround for now, we
@@ -319,7 +319,7 @@ public class WSSCPlugin {
     private Packet addAddressingHeaders(Packet packet, WSDLPort wsdlPort, WSBinding binding, String action)throws WSSecureConversationException {
         HeaderList hl = packet.getMessage().getHeaders();
         hl.fillRequestAddressingHeaders(packet, binding.getAddressingVersion(),binding.getSOAPVersion(),false,action);
-        //hl.fillRequestAddressingHeaders(wsdlPort, binding, packet, action);
+    
         return packet;
     }
 }
