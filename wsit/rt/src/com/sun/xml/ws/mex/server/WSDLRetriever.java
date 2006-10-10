@@ -97,8 +97,12 @@ public class WSDLRetriever {
                 "MetadataSection", MEX_NAMESPACE);
             if (doc.isWSDL()) {
                 writer.writeAttribute("Dialect", WSDL_DIALECT);
+                writer.writeAttribute("Identifier",
+                    ((SDDocument.WSDL) doc).getTargetNamespace());
             } else if(doc.isSchema()) {
                 writer.writeAttribute("Dialect", SCHEMA_DIALECT);
+                writer.writeAttribute("Identifier",
+                    ((SDDocument.Schema) doc).getTargetNamespace());
             }
             doc.writeTo(new PortAddressResolverImpl(add), dar, writer);
             writer.writeEndElement();
