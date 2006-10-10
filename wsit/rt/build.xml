@@ -32,7 +32,28 @@
     <import file="../properties.xml"/>
 
     <property name="build.dir" value="${basedir}/build"/>
+    <property name="build.gen-src.dir" value="${build.dir}/gen-src"/>
 
+    
+    <target name="resgen" depends="init"
+            description="Generate class wrappers for all property files that contain localizable messages">
+        
+        <taskdef name="resgen" classname="com.sun.tools.resourcegen.ResourceGenTask">
+            <classpath>
+                <path path="${javac.classpath}"/>
+                <pathelement path="${lib.dir}/tooltime/jaxws-tools.jar" />
+            </classpath>
+        </taskdef>
+
+        <mkdir dir="${build.gen-src.dir}"/>
+        
+        <resgen destdir="${build.gen-src.dir}">
+            <resource dir="${src.dir}" includes="com/sun/xml/ws/**/*.properties" />
+        </resgen>
+        
+    </target>
+    
+    
     <taskdef name="concatmanifest" classname="taskdefs.ConcatManifest">
         <classpath>
             <fileset dir="../${etc.lib.dir}" includes="wsit-taskdefs.jar"/>
@@ -160,8 +181,8 @@
 
         </zip>
 
-          <delete dir="${rt.dir}/tmp"/>
+        <delete dir="${rt.dir}/tmp"/>
 
-        </target>
+     </target>
 
 </project>
