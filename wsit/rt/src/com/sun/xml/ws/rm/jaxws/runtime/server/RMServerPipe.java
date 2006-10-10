@@ -40,6 +40,7 @@ import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.api.server.WSEndpoint;
+import com.sun.xml.ws.message.StringHeader;
 import com.sun.xml.ws.rm.*;
 import com.sun.xml.ws.rm.jaxws.runtime.InboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
@@ -47,23 +48,24 @@ import com.sun.xml.ws.rm.jaxws.runtime.PipeBase;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
 import com.sun.xml.ws.rm.jaxws.runtime.client.ProtocolMessageReceiver;
 import com.sun.xml.ws.rm.protocol.*;
+import com.sun.xml.ws.runtime.util.Session;
+import com.sun.xml.ws.runtime.util.SessionManager;
 import com.sun.xml.ws.security.SecurityContextToken;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.security.trust.elements.str.DirectReference;
 import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
 import com.sun.xml.wss.impl.MessageConstants;
-import com.sun.xml.ws.message.StringHeader;
+
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
-import javax.xml.soap.*;
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPFactory;
+import javax.xml.soap.SOAPFault;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.soap.SOAPBinding;
 import java.net.URI;
 import java.util.HashMap;
-import com.sun.xml.ws.runtime.util.Session;
-import com.sun.xml.ws.runtime.util.SessionManager;
-import com.sun.xml.ws.api.addressing.AddressingVersion;
 
 /**
  * Server-side RM Pipe implementation
@@ -413,8 +415,8 @@ public class RMServerPipe extends PipeBase<RMDestination,
                     .getHeaders().getAction(RMConstants.getAddressingVersion(),
                                             config.getSoapVersion());
         if (actionValue == null || actionValue.equals("")) {
-          throw new RMException("Non RM Request or Missing wsa:Action header" +
-                                        " on CreateSequence message.");
+          throw new RMException("Non RM Request or Missing wsa:Action header" )
+                                        ;
         }
 
 
