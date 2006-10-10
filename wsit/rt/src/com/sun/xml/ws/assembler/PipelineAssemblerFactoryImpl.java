@@ -392,14 +392,6 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             WSDLModel model = wsdlPort.getBinding().getOwner();
             WSDLPolicyMapWrapper mapWrapper = model.getExtension(WSDLPolicyMapWrapper.class);
             if (mapWrapper != null) {
-                String clientCfgFileName = PolicyUtils.ConfigFile.generateFullName(PolicyConstants.CLIENT_CONFIGURATION_IDENTIFIER);
-                try {
-                    URL clientCfgFileUrl = PolicyUtils.ConfigFile.loadAsResource(clientCfgFileName, null);
-                    mapWrapper.addClientConfigToMap(clientCfgFileUrl);
-                } catch (PolicyException e) {
-                    throw new WebServiceException(e);
-                }
-                mapWrapper.configureModel(model);
                 map = mapWrapper.getPolicyMap();
             }
             
@@ -416,7 +408,6 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             WSDLModel model = wsdlPort.getBinding().getOwner();
             WSDLPolicyMapWrapper mapWrapper = model.getExtension(WSDLPolicyMapWrapper.class);
             if (mapWrapper != null) {
-                mapWrapper.configureModel(model);
                 map = mapWrapper.getPolicyMap();
             }
             
