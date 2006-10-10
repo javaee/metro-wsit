@@ -91,12 +91,13 @@ public class ServiceDescriptorImpl extends ServiceDescriptor {
      */
     private void handleXml(MetadataSection section) {
         String dialect = section.getDialect();
+        String id = section.getIdentifier();
         if (dialect.equals(WSDL_DIALECT)) {
-            wsdls.add(createSource(section));
+            wsdls.add(createSource(section, id));
         } else if (dialect.equals(SCHEMA_DIALECT)) {
-            schemas.add(createSource(section));
+            schemas.add(createSource(section, id));
         } else if (dialect.equals(POLICY_DIALECT)) {
-            policies.add(createSource(section));
+            policies.add(createSource(section, id));
         } else {
             // todo: log unknown dialect
         }
@@ -146,9 +147,14 @@ public class ServiceDescriptorImpl extends ServiceDescriptor {
      * Helper method used by handleXml() to turn the xml DOM nodes
      * into Sources objects.
      */
-    private Source createSource(MetadataSection section) {
+    private Source createSource(MetadataSection section, String id) {
         Node n = (Node) section.getAny();
-        return new DOMSource(n);
+        Source source = new DOMSource(n);
+        if (id == null) {
+            id = "todo"; // will get this from namespace in wsdl/schema
+        }
+        source.setSystemId(id);
+        return source;
     }
     
     /*
