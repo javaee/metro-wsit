@@ -43,7 +43,7 @@ public class MtomModelConfiguratorProviderTest extends TestCase {
     
     private WSDLModel getWSDLModel(String resourceName) throws Exception {
         URL wsdlUrl = PolicyResourceLoader.getResourceUrl(resourceName);
-        WSDLModel model = RuntimeWSDLParser.parse(wsdlUrl, XmlUtil.createDefaultCatalogResolver(), WSDLParserExtensionContextImpl.clientWSDLParserExtnCtx, new WSDLParserExtension[] { new PolicyWSDLParserExtension() });
+        WSDLModel model = RuntimeWSDLParser.parse(wsdlUrl, XmlUtil.createDefaultCatalogResolver(), true, new WSDLParserExtension[] { new PolicyWSDLParserExtension() });
         return model;
     }
     

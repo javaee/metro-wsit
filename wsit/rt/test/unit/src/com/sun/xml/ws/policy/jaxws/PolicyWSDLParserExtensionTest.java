@@ -72,7 +72,7 @@ public class PolicyWSDLParserExtensionTest extends TestCase{
     
     private PolicyMap getPolicyMap(String resourceName) throws Exception {
         URL wsdlUrl = PolicyResourceLoader.getResourceUrl(resourceName);
-        WSDLModel model = RuntimeWSDLParser.parse(wsdlUrl, XmlUtil.createDefaultCatalogResolver(), WSDLParserExtensionContextImpl.clientWSDLParserExtnCtx, new WSDLParserExtension[] { new PolicyWSDLParserExtension() });
+        WSDLModel model = RuntimeWSDLParser.parse(wsdlUrl, XmlUtil.createDefaultCatalogResolver(), true, new WSDLParserExtension[] { new PolicyWSDLParserExtension() });
         WSDLPolicyMapWrapper wrapper = model.getExtension(WSDLPolicyMapWrapper.class);
         assertNotNull("PolicyMap not attached to populated WSDLModel", wrapper);
         return wrapper.getPolicyMap();

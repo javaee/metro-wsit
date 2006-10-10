@@ -157,9 +157,6 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
     // are we parsing config file?
     private boolean isForConfigFile = false;
     
-    // wsdl parser context
-    private WSDLParserExtensionContext parserContext;
-    
     // policy queue -- needed for evaluating the right order policy of policy models expansion
     private PolicyRecord expandQueueHead = null;
     
@@ -355,14 +352,6 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
         this.isForConfigFile = isForConfigFile;
         this.externalMutators = externalMutators;
     }
-    
-    //TODO: add comments
-    public void start(WSDLParserExtensionContext context){
-        logger.entering("start", context);
-        this.parserContext = context;
-        logger.exiting("start");
-    }
-    
     
     private PolicyRecordHandler readSinglePolicy(PolicyRecord policyRec, boolean inner) {
         PolicyRecordHandler handler = null;
@@ -667,7 +656,7 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
         return true;
     }
     
-    public void finished(WSDLModel model) {
+    public void finished(WSDLParserExtensionContext context) {
         logger.entering("finished");
         try {
             // need to make sure proper beginning order of internal policies within unresolvedUris list
@@ -718,7 +707,7 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
                 }
             }
             // iterating over all services and binding all the policies read before
-            for (WSDLService service : model.getServices().values()) {
+            for (WSDLService service : context.getWSDLModel().getServices().values()) {
                 if (getHandlers4ServiceMap().containsKey(service)) {
                     getPolicyMapBuilder().registerHandler(new BuilderHandlerServiceScope(
                             getPolicyURIs(getHandlers4ServiceMap().get(service),modelContext)
@@ -941,9 +930,9 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
                 mutators[0] = modifier;
                 mutators[1] = extender;
                 System.arraycopy(externalMutators, 0, mutators, 2, externalMutators.length);
-                model.addExtension(new WSDLPolicyMapWrapper(policyBuilder.getPolicyMap(mutators), modifier, extender));
+                context.getWSDLModel().addExtension(new WSDLPolicyMapWrapper(policyBuilder.getPolicyMap(mutators), modifier, extender));
             } else {
-                model.addExtension(new WSDLPolicyMapWrapper(policyBuilder.getPolicyMap(modifier, extender), modifier, extender));
+                context.getWSDLModel().addExtension(new WSDLPolicyMapWrapper(policyBuilder.getPolicyMap(modifier, extender), modifier, extender));
             }
             
         } catch(PolicyException pe) {
@@ -1132,11 +1121,11 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
     }
     
     // TODO: add comments
-    public void postFinished(WSDLModel model) {
+    public void postFinished(WSDLParserExtensionContext context) {
         logger.entering("postFinished");
-        WSDLPolicyMapWrapper mapWrapper = model.getExtension(WSDLPolicyMapWrapper.class);
+        WSDLPolicyMapWrapper mapWrapper = context.getWSDLModel().getExtension(WSDLPolicyMapWrapper.class);
         if (mapWrapper != null) {
-            if (parserContext.isClientSide() && (!isForConfigFile)) {
+            if (context.isClientSide() && (!isForConfigFile)) {
                 String clientCfgFileName = PolicyUtils.ConfigFile.generateFullName(PolicyConstants.CLIENT_CONFIGURATION_IDENTIFIER);
                 try {
                     URL clientCfgFileUrl = PolicyUtils.ConfigFile.loadAsResource(clientCfgFileName, null);
@@ -1146,7 +1135,7 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
                     throw new WebServiceException(e);
                 }
             }
-            mapWrapper.configureModel(model);
+            mapWrapper.configureModel(context.getWSDLModel());
         }
         logger.exiting("postFinished");
     }

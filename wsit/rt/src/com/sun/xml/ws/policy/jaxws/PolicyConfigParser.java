@@ -150,8 +150,9 @@ public final class PolicyConfigParser {
 
             SDDocumentSource doc = SDDocumentSource.create(configFileUrl, configFileSource);
             Parser parser =  new Parser(doc);
-            WSDLModel model = RuntimeWSDLParser.parse(parser, new PolicyConfigResolver(), WSDLParserExtensionContextImpl.clientWSDLParserExtnCtx, 
-                                                                                new WSDLParserExtension[] { new PolicyWSDLParserExtension(true, mutators) } );
+            WSDLModel model = RuntimeWSDLParser.parse(parser, 
+                                                        new PolicyConfigResolver(), true, 
+                                                        new WSDLParserExtension[] { new PolicyWSDLParserExtension(true, mutators) } );
             WSDLPolicyMapWrapper wrapper = model.getExtension(WSDLPolicyMapWrapper.class);
             
             if (wrapper != null) {
