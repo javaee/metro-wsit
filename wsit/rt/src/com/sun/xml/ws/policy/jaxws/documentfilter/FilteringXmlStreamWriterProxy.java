@@ -82,7 +82,7 @@ final class FilteringXmlStreamWriterProxy implements InvocationHandler {
         }
         
         public Object execute(Object target) throws IllegalAccessException, InvocationTargetException {
-            __log("Execute normally", method, arguments);
+//            __log("Execute normally", method, arguments);
             
             return method.invoke(target, arguments);
         }
@@ -167,7 +167,7 @@ final class FilteringXmlStreamWriterProxy implements InvocationHandler {
                     method.invoke(mirrorWriter, args);
                     invocationTarget = originalWriter;
                     
-                    __log("Execute normally", method, args);
+//                    __log("Execute normally", method, args);
                 }
             }
             
@@ -227,8 +227,8 @@ final class FilteringXmlStreamWriterProxy implements InvocationHandler {
         }
     }
     
-    private void __log(String message, Method method, Object... arguments) {
-        String argsString = (arguments != null) ? Arrays.asList(arguments).toString() : "null";
-        System.out.println(message + ": method='" + method.getName() + "', args= {" + argsString + "}");
-    }
+//    private void __log(String message, Method method, Object... arguments) {
+//        String argsString = (arguments != null) ? Arrays.asList(arguments).toString() : "null";
+//        System.out.println(message + ": method='" + method.getName() + "', args= {" + argsString + "}");
+//    }
 }
