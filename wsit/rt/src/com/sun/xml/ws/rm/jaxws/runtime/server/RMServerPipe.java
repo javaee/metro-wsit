@@ -202,7 +202,8 @@ public class RMServerPipe extends PipeBase<RMDestination,
                     (ServerInboundSequence)message.getSequence();
 
             if (inboundSequence == null ) {
-                throw new RMException(Messages.INCORRECT_ADDRESSING_HEADERS.format());
+                throw new RMException("Message does not belong to a Reliable Messaging Sequence " +
+                                      "and is not a Reliable Messaging protocol message.");
 
             }
             //reset inactivity timer
