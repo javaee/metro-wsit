@@ -33,6 +33,7 @@ import com.sun.xml.ws.util.xml.XmlUtil;
 import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
 import java.net.URL;
 import javax.xml.namespace.QName;
+import javax.xml.ws.soap.MTOMFeature;
 
 /**
  *
@@ -48,14 +49,26 @@ public class MtomModelConfiguratorProviderTest extends TestCase {
     
     /**
      * Test of configure method, of class com.sun.xml.ws.policy.jaxws.encoding.MtomModelConfiguratorProvider.
+     * policy assertion present
      */
-    public void testConfigure() throws Exception {
+    public void testConfigureMtomAssertionPresent() throws Exception {
         WSDLModel model = getWSDLModel("jaxws-spi/testModelConfigProviderMtom.wsdl");
         PolicyMap policyMap = model.getExtension(WSDLPolicyMapWrapper.class).getPolicyMap();
         
-        assertFalse(model.getBinding(new QName("http://example.org","MyBinding")).isMTOMEnabled());
-        (new MtomModelConfiguratorProvider()).configure(model, policyMap);
-        assertTrue(model.getBinding(new QName("http://example.org","MyBinding")).isMTOMEnabled());
+        assertTrue(model.getService(new QName("http://example.org","DictionaryService")).
+                getFirstPort().getFeature((new MTOMFeature()).getID()).isEnabled());
+    }
+    
+    /**
+     * Test of configure method, of class com.sun.xml.ws.policy.jaxws.encoding.MtomModelConfiguratorProvider.
+     * policy assertion not present
+     */
+    public void testConfigureMtomAssertionNotPresent() throws Exception {
+        WSDLModel model = getWSDLModel("jaxws-spi/testModelConfigProviderMtomPolicyNotPresent.wsdl");
+        PolicyMap policyMap = model.getExtension(WSDLPolicyMapWrapper.class).getPolicyMap();
+        
+        assertNull(model.getService(new QName("http://example.org","DictionaryService")).
+                getFirstPort().getFeature((new MTOMFeature()).getID()));
     }
     
 }

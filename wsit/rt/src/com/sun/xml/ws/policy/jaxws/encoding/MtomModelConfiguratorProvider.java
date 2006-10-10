@@ -31,10 +31,10 @@ import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
-import com.sun.xml.ws.policy.jaxws.WSDLPolicyMapWrapper;
 import com.sun.xml.ws.policy.jaxws.spi.ModelConfiguratorProvider;
 import java.util.Iterator;
 import javax.xml.namespace.QName;
+import javax.xml.ws.soap.MTOMFeature;
 
 /**
  *
@@ -74,7 +74,7 @@ public class MtomModelConfiguratorProvider implements ModelConfiguratorProvider{
                         while(policyAssertion.hasNext()){
                             PolicyAssertion assertion = policyAssertion.next();
                             if(assertion.getName().equals(mtomAssertion) && !assertion.isOptional()){
-                                port.getBinding().enableMTOM();
+                                port.getBinding().addFeature(new MTOMFeature(true));
                             } // end-if non optional mtom assertion found
                         } // next assertion
                     } // next alternative
