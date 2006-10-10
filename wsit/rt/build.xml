@@ -170,6 +170,8 @@
 
                  <metainf dir="../etc">
                      <include name="META-INF/services/*.*"/>
+                     <exclude name="META-INF/services/TJavaGeneratorExtension"/>
+                     <exclude name="META-INF/services/TWSDLExtensionHandler"/>
                  </metainf>
 
 
