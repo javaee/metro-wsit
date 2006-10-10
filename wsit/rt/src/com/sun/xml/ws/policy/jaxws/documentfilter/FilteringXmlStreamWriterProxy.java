@@ -47,6 +47,7 @@ final class FilteringXmlStreamWriterProxy implements InvocationHandler {
         WRITE_START_ELEMENT("writeStartElement"),
         WRITE_END_ELEMENT("writeEndElement"),
         WRITE_ATTRIBUTE("writeAttribute"),
+        WRITE_CHARACTERS("writeCharacters"),
         CLOSE("close"),
         OTHER(null);
         
@@ -54,6 +55,7 @@ final class FilteringXmlStreamWriterProxy implements InvocationHandler {
             WRITE_START_ELEMENT,
             WRITE_END_ELEMENT,
             WRITE_ATTRIBUTE,
+            WRITE_CHARACTERS,
             CLOSE
         };
         public static MethodType getMethodType(String methodName) {
@@ -72,13 +74,33 @@ final class FilteringXmlStreamWriterProxy implements InvocationHandler {
         }
     }
     
-    private class CommandQueueItem {
+    private static class CommandQueueItem {
         private Method method;
         private Object[] arguments;
         
-        public CommandQueueItem(Method method, Object[] arguments) {
+        public CommandQueueItem(Method method, Object[] args) {
             this.method = method;
-            this.arguments = arguments;
+            this.arguments = args;
+        }
+        
+        public static CommandQueueItem createWriteCharactersCQI(Method method, Object[] args) {
+            CommandQueueItem item = new CommandQueueItem(method, null);
+            
+            if (args.length == 3) {
+                Integer start = (Integer) args[1];
+                Integer length = (Integer) args[2];
+                char[] text = new char[length.intValue()];
+                System.arraycopy(args[0], start, text, 0, length);
+                
+                item.arguments = new Object[3];
+                item.arguments[0] = text;
+                item.arguments[1] = Integer.valueOf(0);
+                item.arguments[2] = length;
+            } else {
+                item.arguments = args;
+            }
+            
+            return item;
         }
         
         public Object execute(Object target) throws IllegalAccessException, InvocationTargetException {
@@ -150,6 +172,7 @@ final class FilteringXmlStreamWriterProxy implements InvocationHandler {
                     filteringOn = false;
                     executeCommands(this.originalWriter);
                     break;
+                case WRITE_CHARACTERS:
                 case OTHER:
                     break;
                 default:
@@ -161,7 +184,13 @@ final class FilteringXmlStreamWriterProxy implements InvocationHandler {
                 invocationTarget = mirrorWriter;
             } else {
                 if (cmdBufferingOn) {
-                    this.commandQueue.offer(new CommandQueueItem(method, args));
+                    CommandQueueItem item;
+                    if (methodType.equals(MethodType.WRITE_CHARACTERS)) {
+                        item = CommandQueueItem.createWriteCharactersCQI(method, args);
+                    } else {
+                        item = new CommandQueueItem(method, args);
+                    }
+                    this.commandQueue.offer(item);
                     invocationTarget = mirrorWriter;
                 } else {
                     method.invoke(mirrorWriter, args);
