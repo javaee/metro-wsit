@@ -22,28 +22,27 @@
 
 package com.sun.xml.ws.policy.jaxws;
 
-import com.sun.xml.ws.policy.privateutil.PolicyUtils;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
+
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-import org.xml.sax.SAXException;
+
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
-import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.server.SDDocumentSource;
 import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
-import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
-import com.sun.xml.ws.wsdl.parser.WSDLParserExtensionContextImpl;
-import com.sun.xml.ws.wsdl.parser.XMLEntityResolver.Parser;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapMutator;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
-import java.util.Collection;
+import com.sun.xml.ws.policy.privateutil.PolicyUtils;
+import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
+import com.sun.xml.ws.wsdl.parser.XMLEntityResolver.Parser;
+import org.xml.sax.SAXException;
 
 /**
  * Reads a policy configuration file and returns the WSDL model generated from it.
@@ -150,8 +149,8 @@ public final class PolicyConfigParser {
 
             SDDocumentSource doc = SDDocumentSource.create(configFileUrl, configFileSource);
             Parser parser =  new Parser(doc);
-            WSDLModel model = RuntimeWSDLParser.parse(parser, 
-                                                        new PolicyConfigResolver(), true, 
+            WSDLModel model = RuntimeWSDLParser.parse(parser,
+                                                        new PolicyConfigResolver(), true,
                                                         new WSDLParserExtension[] { new PolicyWSDLParserExtension(true, mutators) } );
             WSDLPolicyMapWrapper wrapper = model.getExtension(WSDLPolicyMapWrapper.class);
             
