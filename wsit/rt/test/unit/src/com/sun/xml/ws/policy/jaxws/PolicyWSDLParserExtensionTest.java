@@ -31,13 +31,20 @@
 
 package com.sun.xml.ws.policy.jaxws;
 
+import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
+import com.sun.xml.ws.api.server.SDDocumentSource;
+import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.testutils.PolicyResourceLoader;
 import com.sun.xml.ws.util.xml.XmlUtil;
-import com.sun.xml.ws.wsdl.WSDLContext;
+import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
+import com.sun.xml.ws.wsdl.parser.WSDLParserExtensionContextImpl;
+import com.sun.xml.ws.wsdl.parser.XMLEntityResolver.Parser;
+import java.io.InputStream;
 import java.net.URL;
 import javax.xml.namespace.QName;
+import javax.xml.stream.XMLInputFactory;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -65,8 +72,10 @@ public class PolicyWSDLParserExtensionTest extends TestCase{
     
     private PolicyMap getPolicyMap(String resourceName) throws Exception {
         URL wsdlUrl = PolicyResourceLoader.getResourceUrl(resourceName);
-        WSDLContext wsdlContext = new WSDLContext(wsdlUrl,XmlUtil.createDefaultCatalogResolver());
-        return wsdlContext.getWSDLModel().getExtension(WSDLPolicyMapWrapper.class).getPolicyMap();
+        WSDLModel model = RuntimeWSDLParser.parse(wsdlUrl, XmlUtil.createDefaultCatalogResolver(), WSDLParserExtensionContextImpl.clientWSDLParserExtnCtx, new WSDLParserExtension[] { new PolicyWSDLParserExtension() });
+        WSDLPolicyMapWrapper wrapper = model.getExtension(WSDLPolicyMapWrapper.class);
+        assertNotNull("PolicyMap not attached to populated WSDLModel", wrapper);
+        return wrapper.getPolicyMap();
     }
     
     
@@ -484,7 +493,7 @@ public class PolicyWSDLParserExtensionTest extends TestCase{
                 ,new QName("http://example.org","TranslateOperation")
                 ,new QName("http://example.org","DictFault"))));
     }
-
+    
     public void testBindingOpFaultExternalPolicyAttachment() throws Exception {
         PolicyMap policyMap = getPolicyMap("parser/testRuntimeWSExtExternalBindingOpFault.wsdl");
         assertNotNull(policyMap.getFaultMessageEffectivePolicy(policyMap.createWsdlFaultMessageScopeKey(
