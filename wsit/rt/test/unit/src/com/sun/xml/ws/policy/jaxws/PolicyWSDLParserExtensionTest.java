@@ -39,7 +39,6 @@ import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.testutils.PolicyResourceLoader;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
-import com.sun.xml.ws.wsdl.parser.WSDLParserExtensionContextImpl;
 import com.sun.xml.ws.wsdl.parser.XMLEntityResolver.Parser;
 import java.io.InputStream;
 import java.net.URL;
