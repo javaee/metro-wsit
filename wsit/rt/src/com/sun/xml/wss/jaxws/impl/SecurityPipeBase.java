@@ -45,6 +45,7 @@ import java.net.URI;
 import javax.xml.soap.SOAPBody;
 import javax.xml.ws.WebServiceException;
 import java.util.Set;
+
 import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.message.Message;
@@ -127,6 +128,7 @@ import java.util.Properties;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
 
 //TODO: add logging before 4/13
 /**
@@ -290,6 +292,9 @@ public abstract class SecurityPipeBase implements Pipe {
         bindingLevelAlgSuite = that.bindingLevelAlgSuite;
         this.inProtocolPM = that.inProtocolPM;
         this.outProtocolPM = that.outProtocolPM;
+        this.hasIssuedTokens = that.hasIssuedTokens;
+        this.hasSecureConversation = that.hasSecureConversation;
+        this.hasReliableMessaging = that.hasReliableMessaging;
         try {
             this.unmarshaller = jaxbContext.createUnmarshaller();
         }catch (javax.xml.bind.JAXBException ex) {
@@ -1116,9 +1121,10 @@ public abstract class SecurityPipeBase implements Pipe {
        return false;
     }
     
-    protected String getAction(Packet packet ){
+    protected String getAction(Packet packet){
         HeaderList hl = packet.getMessage().getHeaders();
         String action =  hl.getAction(pipeConfig.getBinding().getAddressingVersion(), pipeConfig.getBinding().getSOAPVersion());
+    
         return action;
     }
     
@@ -1470,5 +1476,4 @@ public abstract class SecurityPipeBase implements Pipe {
     protected abstract void addOutgoingProtocolPolicy(Policy effectivePolicy,String protocol)throws PolicyException;
     
     protected abstract String getAction(WSDLOperation operation, boolean isIncomming) ;
-    
 }
