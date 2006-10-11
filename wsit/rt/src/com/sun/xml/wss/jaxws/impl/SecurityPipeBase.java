@@ -1096,8 +1096,6 @@ public abstract class SecurityPipeBase implements Pipe {
     }
     
     protected boolean isTrustMessage(Packet packet){
-        if (!bindingHasIssuedTokenPolicy())
-            return false;
         String action = getAction(packet);
         if(WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION.equals(action) ||
            WSTrustConstants.REQUEST_SECURITY_TOKEN_RESPONSE_ISSUE_ACTION.equals(action)){
