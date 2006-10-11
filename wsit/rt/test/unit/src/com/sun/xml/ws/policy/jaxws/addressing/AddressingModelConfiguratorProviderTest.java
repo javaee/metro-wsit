@@ -20,7 +20,7 @@
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
-package com.sun.xml.ws.policy.jaxws.encoding;
+package com.sun.xml.ws.policy.jaxws.addressing;
 
 import junit.framework.*;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
@@ -33,13 +33,14 @@ import com.sun.xml.ws.util.xml.XmlUtil;
 import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
 import java.net.URL;
 import javax.xml.namespace.QName;
-import javax.xml.ws.soap.MTOMFeature;
+import javax.xml.ws.WebServiceFeature;
+import javax.xml.ws.soap.AddressingFeature;
 
 /**
  *
  * @author japod
  */
-public class MtomModelConfiguratorProviderTest extends TestCase {
+public class AddressingModelConfiguratorProviderTest extends TestCase {
     
     private WSDLModel getWSDLModel(String resourceName) throws Exception {
         URL wsdlUrl = PolicyResourceLoader.getResourceUrl(resourceName);
@@ -48,27 +49,27 @@ public class MtomModelConfiguratorProviderTest extends TestCase {
     }
     
     /**
-     * Test of configure method, of class com.sun.xml.ws.policy.jaxws.encoding.MtomModelConfiguratorProvider.
+     * Test of configure method, of class com.sun.xml.ws.policy.jaxws.addressing.AddressingModelConfiguratorProvider.
      * policy assertion present
      */
-    public void testConfigureMtomAssertionPresent() throws Exception {
-        WSDLModel model = getWSDLModel("jaxws-spi/testModelConfigProviderMtom.wsdl");
+    public void testConfigureAddressingAssertionPresent() throws Exception {
+        WSDLModel model = getWSDLModel("jaxws-spi/testModelConfigProviderAddr.wsdl");
         PolicyMap policyMap = model.getExtension(WSDLPolicyMapWrapper.class).getPolicyMap();
         
         assertTrue(model.getService(new QName("http://example.org","DictionaryService")).
-                getFirstPort().getFeature(MTOMFeature.ID).isEnabled());
+                getFirstPort().getFeature(AddressingFeature.ID).isEnabled());
     }
     
     /**
-     * Test of configure method, of class com.sun.xml.ws.policy.jaxws.encoding.MtomModelConfiguratorProvider.
+     * Test of configure method, of class com.sun.xml.ws.policy.jaxws.addressing.AddressingModelConfiguratorProvider.
      * policy assertion not present
      */
-    public void testConfigureMtomAssertionNotPresent() throws Exception {
-        WSDLModel model = getWSDLModel("jaxws-spi/testModelConfigProviderMtomPolicyNotPresent.wsdl");
+    public void testConfigureAddressingAssertionNotPresent() throws Exception {
+        WSDLModel model = getWSDLModel("jaxws-spi/testModelConfigProviderAddrPolicyNotPresent.wsdl");
         PolicyMap policyMap = model.getExtension(WSDLPolicyMapWrapper.class).getPolicyMap();
         
         assertNull(model.getService(new QName("http://example.org","DictionaryService")).
-                getFirstPort().getFeature(MTOMFeature.ID));
+                getFirstPort().getFeature(AddressingFeature.ID));
     }
     
 }

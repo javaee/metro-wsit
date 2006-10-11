@@ -69,40 +69,25 @@ public class AddressingModelConfiguratorProvider implements ModelConfiguratorPro
             return;
         }
         for (WSDLService service:model.getServices().values()) {
-            // TODO: clean up logging
-            logger.fine("configure", "processing service " + service.getName().toString());
             for (WSDLPort port : service.getPorts()) {
                 PolicyMapKey key = PolicyMap.createWsdlEndpointScopeKey(service.getName(),port.getName());
                 Policy policy = policyMap.getEndpointEffectivePolicy(key);
-                // TODO: clean up logging
-                logger.fine("configure", "processing port " + port.getName().toString());
                 for (QName addressingAssertionQName : AddressingAssertions) {
-                    // TODO: clean up logging
-                    logger.fine("configure", "processing assertion " + addressingAssertionQName.toString());
                     if (null!=policy && policy.contains(addressingAssertionQName)) {
-                        // TODO: clean up logging
-                        logger.fine("configure", "assertion contained in the policy");
                         Iterator <AssertionSet> assertions = policy.iterator();
                         while(assertions.hasNext()){
                             AssertionSet assertionSet = assertions.next();
                             Iterator<PolicyAssertion> policyAssertion = assertionSet.iterator();
                             while(policyAssertion.hasNext()){
                                 PolicyAssertion assertion = policyAssertion.next();
-                                // TODO: clean up logging
-                                logger.fine("configure", "assertion = " + assertion.getName());
                                 if(assertion.getName().equals(addressingAssertionQName) && !assertion.isOptional()){
                                     WebServiceFeature feature = AddressingVersion.getFeature(addressingAssertionQName.getNamespaceURI(), true, true);
                                     // TODO: clean up logging
-                                    logger.fine("configure", "calling port.addFeature " + feature);
+                                    //logger.fine("configure", "calling port.addFeature " + feature);
                                     port.addFeature(feature);
-                                    // TODO: clean up logging
-                                    logger.fine("configure", "feature added");
                                 } // end-if non optional wsa assertion found
                             } // next assertion
                         } // next alternative
-                    }else {
-                        // TODO: clean up logging
-                        logger.fine("configure", "assertion " + addressingAssertionQName.toString() + " not contained in the policy");
                     } // end-if policy contains wsa assertion
                 } // end foreach port
             } //end foreach addr assertion
