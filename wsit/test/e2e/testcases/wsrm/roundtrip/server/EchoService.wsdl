@@ -18,7 +18,7 @@
 		</wsdl:operation>
 	</wsdl:portType>
 	<wsdl:binding name="WSHttpBinding_IPing" type="tns:IPing">
-        <wsap10:UsingAddressing wsdl:required="true"/>
+        <!--<wsap10:UsingAddressing wsdl:required="true"/>-->
         <wsp:PolicyReference URI="#WSHttpBinding_IPing_policy"/>
 		<soap12:binding transport="http://schemas.xmlsoap.org/soap/http"/>
 		<wsdl:operation name="EchoString">
