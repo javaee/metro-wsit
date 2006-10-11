@@ -68,7 +68,7 @@
                 </sp:Trust10>
                 <wspe:Utf816FFFECharacterEncoding
                     xmlns:wspe="http://schemas.xmlsoap.org/ws/2004/09/policy/encoding"/>
-                <wsap:UsingAddressing xmlns:wsap="http://schemas.xmlsoap.org/ws/2004/09/policy/addressing"/>
+                <wsap:UsingAddressing xmlns:wsap="http://schemas.xmlsoap.org/ws/2004/08/addressing/policy"/>
             <sc:KeyStore xmlns:sc="http://schemas.sun.com/2006/03/wss/server" location="$WSIT_HOME/xws-security/etc/server-keystore.jks" storepass="changeit" alias="bob"/>
             <sc:TrustStore xmlns:sc="http://schemas.sun.com/2006/03/wss/server" location="$WSIT_HOME/xws-security/etc/server-truststore.jks" storepass="changeit"/>
             <!--sc:ValidatorConfiguration xmlns:sc="http://schemas.sun.com/2006/03/wss/server">
