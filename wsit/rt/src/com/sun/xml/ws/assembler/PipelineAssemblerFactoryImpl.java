@@ -63,7 +63,7 @@ import com.sun.xml.wss.jaxws.impl.SecurityServerPipe;
 @SuppressWarnings("deprecation")
 public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory {
 
-    private static final String PREFIX = "com.sun.xml.ws.assembler.runtime";
+    private static final String PREFIX = "com.sun.xml.ws.assembler";
     private static final String CLIENT_PREFIX = PREFIX + ".client";
     private static final String SERVER_PREFIX = PREFIX + ".server";
     private static final String BEFORE_SUFFIX = ".before";
