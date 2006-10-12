@@ -47,7 +47,7 @@ public class SecurityPolicyHolder {
     private static final List<PolicyAssertion> EMPTY_LIST = Collections.emptyList();
     private AlgorithmSuite suite  = null;
     private HashMap<WSDLFault,SecurityPolicyHolder> faultFPMap = null;
-    private HashMap<String,Set> configAssertions;
+    private HashMap<String,Set<PolicyAssertion>> configAssertions;
     
     /**
      * Creates a new instance of SecurityPolicyHolder
@@ -117,11 +117,11 @@ public class SecurityPolicyHolder {
     
     public void addConfigAssertions(PolicyAssertion assertion){
         if(configAssertions == null){
-            configAssertions = new HashMap<String,Set>();
+            configAssertions = new HashMap<String,Set<PolicyAssertion>>();
         }
-        Set assertions = configAssertions.get(assertion.getName().getNamespaceURI());
+        Set<PolicyAssertion> assertions = configAssertions.get(assertion.getName().getNamespaceURI());
         if(assertions == null){
-            assertions = new HashSet();
+            assertions = new HashSet<com.sun.xml.ws.policy.PolicyAssertion>();
             configAssertions.put(assertion.getName().getNamespaceURI(),assertions);
         }
         assertions.add(assertion);

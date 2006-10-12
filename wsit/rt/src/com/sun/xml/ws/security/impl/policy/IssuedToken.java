@@ -59,7 +59,7 @@ public class IssuedToken extends PolicyAssertion implements  com.sun.xml.ws.secu
     private Issuer issuer = null;
     private static QName itQname = new QName(Constants.SECURITY_POLICY_NS, Constants.IncludeToken);
 //    String tokenType;
-    private List referenceType;
+    private ArrayList<String> referenceType;
     private String id;
     private AssertionData ad = null;
     private boolean isServer = false;
@@ -173,7 +173,7 @@ public class IssuedToken extends PolicyAssertion implements  com.sun.xml.ws.secu
                 while(ast.hasNext()){
                     PolicyAssertion assertion = ast.next();
                     if(referenceType == null){
-                        referenceType = new ArrayList();
+                        referenceType = new ArrayList<String>();
                     }
                     if ( PolicyUtil.isRequireDerivedKeys(assertion)) {
                         reqDK = true;

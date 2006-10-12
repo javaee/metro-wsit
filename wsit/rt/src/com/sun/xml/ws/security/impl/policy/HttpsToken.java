@@ -59,9 +59,9 @@ public class HttpsToken extends PolicyAssertion implements com.sun.xml.ws.securi
     }
     
     public void setRequireClientCertificate(boolean value) {
-        Map attrs = this.getAttributes();
+        Map<QName, String> attrs = this.getAttributes();
         QName rccQname = new QName(Constants.SECURITY_POLICY_NS, Constants.RequireClientCertificate);
-        attrs.put(rccQname,value);
+        attrs.put(rccQname,Boolean.toString(value));
         requireCC = value;
     }
     

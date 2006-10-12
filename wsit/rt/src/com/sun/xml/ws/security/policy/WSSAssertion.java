@@ -48,7 +48,7 @@ public interface WSSAssertion {
      * List of WSS properties
      * @return {@link java.util.Set}
      */
-    public Set getRequiredProperties();
+    public Set<String> getRequiredProperties();
     /**
      * WSS version
      * @return 1.0

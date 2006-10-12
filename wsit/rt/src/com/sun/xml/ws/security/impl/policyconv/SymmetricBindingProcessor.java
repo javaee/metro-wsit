@@ -142,6 +142,7 @@ public class SymmetricBindingProcessor extends BindingProcessor{
             AuthenticationTokenPolicy.X509CertificateBinding x509CB =new AuthenticationTokenPolicy.X509CertificateBinding();
             //        (AuthenticationTokenPolicy.X509CertificateBinding)policy.newX509CertificateKeyBinding();
             x509CB.setUUID(token.getTokenId());
+            tokenProcessor.setTokenValueType(x509CB, tokenAssertion);
             tokenProcessor.setTokenInclusion(x509CB,(Token) tokenAssertion);
             //x509CB.setPolicyToken((Token) tokenAssertion);
             tokenProcessor.setX509TokenRefType(x509CB, (X509Token) token);

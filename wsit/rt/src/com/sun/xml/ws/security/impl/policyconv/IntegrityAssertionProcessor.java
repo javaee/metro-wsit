@@ -64,7 +64,7 @@ public class IntegrityAssertionProcessor {
     }
     
     public void process(SignedParts signedParts,SignaturePolicy.FeatureBinding binding){
-        Iterator<PolicyAssertion> tv = signedParts.getHeaders();
+        Iterator tv = signedParts.getHeaders();
         if(SecurityPolicyUtil.isSignedPartsEmpty(signedParts)){
             if(!allHeaders){
                 SignatureTarget target = targetCreator.newURISignatureTarget("");

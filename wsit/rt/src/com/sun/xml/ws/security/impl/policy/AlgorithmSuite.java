@@ -52,7 +52,7 @@ public class AlgorithmSuite extends com.sun.xml.ws.policy.PolicyAssertion implem
     
     
     private AlgorithmSuiteValue value;
-    private Set props = new HashSet();
+    private HashSet<String> props = new HashSet<String>();
     private boolean populated = false;
     private boolean isServer = false;
     /**

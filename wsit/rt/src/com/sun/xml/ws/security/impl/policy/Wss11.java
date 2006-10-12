@@ -65,7 +65,7 @@ public class Wss11 extends PolicyAssertion implements com.sun.xml.ws.security.po
         requiredPropSet.add(requirement);
     }
     
-    public Set getRequiredProperties() {
+    public Set<String> getRequiredProperties() {
         populate();
         return requiredPropSet;
     }

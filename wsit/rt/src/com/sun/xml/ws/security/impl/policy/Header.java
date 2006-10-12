@@ -45,7 +45,7 @@ public class Header extends PolicyAssertion implements com.sun.xml.ws.security.p
      * Creates a new instance of Header
      */
     @Deprecated public Header(String localName , String uri) {
-        Map attrs = this.getAttributes();
+        Map<QName,String> attrs = this.getAttributes();
         attrs.put(NAME,localName);
         attrs.put(URI,uri);
     }

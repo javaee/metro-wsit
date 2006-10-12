@@ -57,7 +57,7 @@ public class SecureConversationToken extends PolicyAssertion implements com.sun.
     protected String includeToken = null;
     private boolean populated = false;
     private PolicyAssertion rdKey = null;
-    private Set referenceType = null;
+    private Set<String> referenceType = null;
     private Issuer issuer = null;
     private String tokenType = null;
     private boolean isServer = false;
@@ -160,7 +160,7 @@ public class SecureConversationToken extends PolicyAssertion implements com.sun.
                         rdKey =  assertion;
                     }else if(PolicyUtil.isRequireExternalUriReference(assertion)){
                         if(referenceType == null){
-                            referenceType =new HashSet();
+                            referenceType =new HashSet<String>();
                         }
                         referenceType.add(assertion.getName().getLocalPart().intern());
                     }else if(PolicyUtil.isSC10SecurityContextToken(assertion)){

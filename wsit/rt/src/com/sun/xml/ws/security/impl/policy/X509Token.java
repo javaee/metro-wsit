@@ -62,7 +62,7 @@ public class X509Token extends PolicyAssertion implements com.sun.xml.ws.securit
     
     private boolean populated = false;
     private String tokenType = null;
-    private Set referenceType = null;
+    private HashSet<String> referenceType = null;
     
     /**
      * Creates a new instance of X509Token
@@ -75,7 +75,7 @@ public class X509Token extends PolicyAssertion implements com.sun.xml.ws.securit
     public X509Token() {
         UUID uid = UUID.randomUUID();
         id= uid.toString();
-        referenceType = new HashSet();
+        referenceType = new HashSet<String>();
     }
     
     public X509Token(AssertionData name,Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) {
@@ -83,7 +83,7 @@ public class X509Token extends PolicyAssertion implements com.sun.xml.ws.securit
         
         UUID uid = UUID.randomUUID();
         id= uid.toString();
-        referenceType = new HashSet();
+        referenceType = new HashSet<String>();
     }
     
     

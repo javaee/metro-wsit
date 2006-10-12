@@ -52,7 +52,8 @@ import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
 public class EncryptedElements extends PolicyAssertion implements  com.sun.xml.ws.security.policy.EncryptedElements, SecurityAssertionValidator {
     
     private String xpathVersion;
-    private List targetList;
+    private ArrayList<String> targetList;
+    private static List<String> emptyList = Collections.emptyList();
     private boolean populated = false;
     private static QName XPathVersion = new QName("XPathVersion");
     private boolean isServer = false;
@@ -76,7 +77,7 @@ public class EncryptedElements extends PolicyAssertion implements  com.sun.xml.w
     
     public void addTarget(String target) {
         if ( targetList == null ) {
-            targetList = new ArrayList();
+            targetList = new ArrayList<String>();
         }
         targetList.add(target);
     }
@@ -87,11 +88,11 @@ public class EncryptedElements extends PolicyAssertion implements  com.sun.xml.w
         }
     }
     
-    public Iterator getTargets() {
+    public Iterator<String> getTargets() {
         if ( targetList != null ) {
             return targetList.iterator();
         }
-        return Collections.emptyList().iterator();
+        return emptyList.iterator();
     }
     
     public boolean validate() {

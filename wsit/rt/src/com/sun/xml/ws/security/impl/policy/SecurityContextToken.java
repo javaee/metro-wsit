@@ -55,7 +55,7 @@ public class SecurityContextToken extends PolicyAssertion implements com.sun.xml
     private String tokenType;
     private String includeTokenType;
     private PolicyAssertion rdKey = null;
-    private Set referenceType = null;
+    private Set<String> referenceType = null;
     private static QName itQname = new QName(Constants.SECURITY_POLICY_NS, Constants.IncludeToken);
     private boolean isServer = false;
     /** Creates a new instance of SecurityContextToken */
@@ -132,7 +132,7 @@ public class SecurityContextToken extends PolicyAssertion implements com.sun.xml
                         rdKey = assertion;
                     }else if(PolicyUtil.isRequireExternalUriReference(assertion)){
                         if(referenceType == null){
-                            referenceType =new HashSet();
+                            referenceType =new HashSet<String>();
                         }
                         referenceType.add(assertion.getName().getLocalPart().intern());
                     } else{

@@ -22,8 +22,11 @@
 
 package com.sun.xml.ws.security.impl.policyconv;
 
+import com.sun.xml.ws.policy.AssertionSet;
+import com.sun.xml.ws.policy.NestedPolicy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyException;
+import com.sun.xml.ws.security.impl.policy.Constants;
 import com.sun.xml.ws.security.impl.policy.PolicyUtil;
 import com.sun.xml.ws.security.policy.IssuedToken;
 import com.sun.xml.ws.security.policy.SamlToken;
@@ -37,6 +40,7 @@ import com.sun.xml.wss.impl.policy.mls.IssuedTokenKeyBinding;
 import com.sun.xml.wss.impl.policy.mls.KeyBindingBase;
 import com.sun.xml.wss.impl.policy.mls.SecureConversationTokenKeyBinding;
 import com.sun.xml.wss.impl.policy.mls.WSSPolicy;
+import java.util.Iterator;
 import java.util.Set;
 
 /**
@@ -80,6 +84,7 @@ public class TokenProcessor {
             x509CB.setUUID(token.getTokenId());
             setX509TokenRefType(x509CB, (X509Token) token);
             setTokenInclusion(x509CB,(Token) tokenAssertion);
+            setTokenValueType(x509CB, tokenAssertion);
             //x509CB.setPolicyToken(token);
             if(!ignoreDK && ((X509Token)token).isRequireDerivedKeys()){
                 DerivedTokenKeyBinding dtKB =  new DerivedTokenKeyBinding();
@@ -195,5 +200,18 @@ public class TokenProcessor {
         }
         throw new UnsupportedOperationException("Unsupported  "+ token + "format");
     }
+    
+       public void setTokenValueType(AuthenticationTokenPolicy.X509CertificateBinding x509CB, PolicyAssertion tokenAssertion){
+           
+         NestedPolicy policy = tokenAssertion.getNestedPolicy();
+         AssertionSet as = policy.getAssertionSet();
+         Iterator<PolicyAssertion> itr = as.iterator();
+         while(itr.hasNext()){
+             PolicyAssertion policyAssertion = (PolicyAssertion)itr.next();
+             if(policyAssertion.getName().getLocalPart().equals(Constants.WssX509V1Token11)||policyAssertion.getName().getLocalPart().equals(Constants.WssX509V1Token10)){
+                 x509CB.setValueType(MessageConstants.X509v1_NS);
+             }
+         }       
+     }
     
 }
