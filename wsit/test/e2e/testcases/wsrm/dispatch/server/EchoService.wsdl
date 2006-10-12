@@ -18,7 +18,8 @@
 		</wsdl:operation>
 	</wsdl:portType>
 	<wsdl:binding name="WSHttpBinding_IPing" type="tns:IPing">
-		<wsp:PolicyReference URI="#WSHttpBinding_IPing_policy"/>
+        <wsap10:UsingAddressing wsdl:required="true"/>
+        <wsp:PolicyReference URI="#WSHttpBinding_IPing_policy"/>
 		<soap12:binding transport="http://schemas.xmlsoap.org/soap/http"/>
 		<wsdl:operation name="EchoString">
 			<wsdl:input>
@@ -31,7 +32,7 @@
 	</wsdl:binding>
 	<wsdl:service name="PingService">
 		<wsdl:port name="WSHttpBinding_IPing" binding="tns:WSHttpBinding_IPing">
-			<soap12:address location="http://131.107.72.15/ReliableMessaging_Service_Indigo/ReliableRequestReply.svc"/>
+			<soap12:address location="REPLACE_WITH_ACTUAL_URL"/>
 		<!--	<wsa10:EndpointReference>
 				<wsa10:Address>http://129.145.133.132:8080/rmservice/echo?wsdl</wsa10:Address>
 			</wsa10:EndpointReference>-->
