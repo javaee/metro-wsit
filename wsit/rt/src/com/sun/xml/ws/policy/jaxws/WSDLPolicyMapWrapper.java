@@ -159,16 +159,6 @@ public class WSDLPolicyMapWrapper implements WSDLExtension {
         }
     }
     
-    public void updatePolicyMap(WSDLModel model) {
-        try {
-            for (PolicyMapUpdateProvider updateProvider : getPolicyMapUpdateProviders()) {
-                updateProvider.update(mapExtender, model);
-            }
-        } catch (PolicyException e) {
-            throw new WebServiceException(Messages.FAILED_UPDATE_POLICY_MAP.format(), e);
-        }
-    }
-    
     public void putEndpointSubject(PolicyMapKey key, PolicySubject subject) {
         if (null != this.mapExtender) {
             this.mapExtender.putEndpointSubject(key,subject);
