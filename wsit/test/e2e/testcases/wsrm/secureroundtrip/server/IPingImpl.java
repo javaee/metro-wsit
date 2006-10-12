@@ -36,7 +36,7 @@ public class IPingImpl {
     /**
      * @param String
      */
-    public String ping(String message) {
+    public String echo(String message) {
         System.out.println("The message is here : " + message);
         return message;
     }
