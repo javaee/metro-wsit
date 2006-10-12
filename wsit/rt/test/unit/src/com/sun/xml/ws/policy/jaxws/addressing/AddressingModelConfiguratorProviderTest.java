@@ -22,6 +22,7 @@
 
 package com.sun.xml.ws.policy.jaxws.addressing;
 
+import com.sun.xml.ws.api.addressing.MemberSubmissionAddressingFeature;
 import junit.framework.*;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
@@ -33,7 +34,6 @@ import com.sun.xml.ws.util.xml.XmlUtil;
 import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
 import java.net.URL;
 import javax.xml.namespace.QName;
-import javax.xml.ws.WebServiceFeature;
 import javax.xml.ws.soap.AddressingFeature;
 
 /**
@@ -52,14 +52,26 @@ public class AddressingModelConfiguratorProviderTest extends TestCase {
      * Test of configure method, of class com.sun.xml.ws.policy.jaxws.addressing.AddressingModelConfiguratorProvider.
      * policy assertion present
      */
-    public void testConfigureAddressingAssertionPresent() throws Exception {
-        WSDLModel model = getWSDLModel("jaxws-spi/testModelConfigProviderAddr.wsdl");
+    public void testConfigureW3CAddressingAssertionPresent() throws Exception {
+        WSDLModel model = getWSDLModel("jaxws-spi/testModelConfigProviderAddrW3C.wsdl");
         PolicyMap policyMap = model.getExtension(WSDLPolicyMapWrapper.class).getPolicyMap();
         
         assertTrue(model.getService(new QName("http://example.org","DictionaryService")).
                 getFirstPort().getFeature(AddressingFeature.ID).isEnabled());
     }
     
+    /**
+     * Test of configure method, of class com.sun.xml.ws.policy.jaxws.addressing.AddressingModelConfiguratorProvider.
+     * policy assertion present
+     */
+    public void testConfigureMEMBERAddressingAssertionPresent() throws Exception {
+        WSDLModel model = getWSDLModel("jaxws-spi/testModelConfigProviderAddrMEMBER.wsdl");
+        PolicyMap policyMap = model.getExtension(WSDLPolicyMapWrapper.class).getPolicyMap();
+        
+        assertTrue(model.getService(new QName("http://example.org","DictionaryService")).
+                getFirstPort().getFeature(MemberSubmissionAddressingFeature.ID).isEnabled());
+    }
+
     /**
      * Test of configure method, of class com.sun.xml.ws.policy.jaxws.addressing.AddressingModelConfiguratorProvider.
      * policy assertion not present
