@@ -168,10 +168,10 @@
 
          <jar destfile="${wsit.rt.dir}/${wsit.rt.jarname}.jar" manifest="../${etc.metainf.dir}/MANIFEST.MF">
 
-                 <metainf dir="../etc">
-                     <include name="META-INF/services/*.*"/>
-                     <exclude name="META-INF/services/*.TJavaGeneratorExtension"/>
-                     <exclude name="META-INF/services/*.TWSDLExtensionHandler"/>
+                 <metainf dir="../etc/META-INF">
+                     <include name="services/*.*"/>
+                     <exclude name="services/*.TJavaGeneratorExtension"/>
+                     <exclude name="services/*.TWSDLExtensionHandler"/>
                  </metainf>
 
 
