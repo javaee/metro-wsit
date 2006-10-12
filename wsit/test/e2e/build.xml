@@ -23,7 +23,7 @@
 -->
 
 <!--
- $Id: build.xml,v 1.16 2006-10-10 19:16:28 bhaktimehta Exp $
+ $Id: build.xml,v 1.17 2006-10-12 04:38:09 hofsass Exp $
 
  Copyright (c) 2005 Sun Microsystems, Inc.
  All rights reserved.
@@ -103,6 +103,7 @@
 		            <arguments />
 
 		            <!-- test data -->
+                            <arg value="-legacy-local" />
 		            <arg value="-r" />
 		            <arg path="testcases" />
 
