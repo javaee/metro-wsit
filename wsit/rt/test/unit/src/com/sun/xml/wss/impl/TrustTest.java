@@ -171,7 +171,7 @@ public class TrustTest extends TestCase{
                 isKB.setUUID(new String("1011"));
                 ieKB.setUUID(new String("1011"));
     	        MessagePolicy pol = new MessagePolicy();
-                pol.dumpMessages(true);
+                //pol.dumpMessages(true);
         	signaturePolicy.setUUID("22222");
 	        pol.append(encryptPolicy);
     	        pol.append(signaturePolicy);
@@ -282,9 +282,9 @@ public class TrustTest extends TestCase{
         Hashtable hashTable = (Hashtable) ois.readObject();
         ois.close();
                                                                                                                                                  
-        if(hashTable.isEmpty())
-            System.out.println("MimeHeaders Hashtable is empty");
-        else {
+        if(hashTable.isEmpty()) {
+            //System.out.println("MimeHeaders Hashtable is empty");
+        } else {
             for(int i=0; i < hashTable.size(); i++) {
                 Enumeration keys = hashTable.keys();
                 Enumeration values = hashTable.elements();

@@ -156,7 +156,7 @@ public class TimestampTest extends TestCase {
             SecurityAnnotator.secureMessage(context);
 
 	    SecurableSoapMessage secMsg = context.getSecurableSoapMessage();
-            DumpFilter.process(context);
+            //DumpFilter.process(context);
             
             SecurityHeader securityHeader = secMsg.findSecurityHeader();
             org.w3c.dom.Node timestamp = securityHeader.getFirstChild();

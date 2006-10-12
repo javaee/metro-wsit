@@ -159,7 +159,7 @@ public class SymmetricBindingTest extends TestCase{
             SecurityAnnotator.secureMessage(context);
 
 	    SOAPMessage secMsg = context.getSOAPMessage();
-    	    DumpFilter.process(context);
+    	    //DumpFilter.process(context);
 
         	// now persist the message and read-back
 	        FileOutputStream sentFile = new FileOutputStream("golden.msg");
@@ -179,7 +179,7 @@ public class SymmetricBindingTest extends TestCase{
         	context1.setSecurityPolicy(pol);
 	        SecurityAnnotator.secureMessage(context1);
     	    secMsg = context1.getSOAPMessage();
-        	DumpFilter.process(context1);
+            //DumpFilter.process(context1);
         
 	        // now persist the message and read-back
     	    FileOutputStream recvdFile = new FileOutputStream("recvd.msg");
@@ -223,8 +223,8 @@ public class SymmetricBindingTest extends TestCase{
         context.setSecurityEnvironment(env);
 
         SecurityRecipient.validateMessage(context);
-        System.out.println("Verfied Message");
-        DumpFilter.process(context);
+        //System.out.println("Verfied Message");
+        //DumpFilter.process(context);
       
         return context;
 
@@ -260,8 +260,8 @@ public class SymmetricBindingTest extends TestCase{
         context.setSecurityEnvironment(env);
 
         SecurityRecipient.validateMessage(context);
-        System.out.println("Verfied Message");
-        DumpFilter.process(context);
+        //System.out.println("Verfied Message");
+        //DumpFilter.process(context);
       
         return context;
 

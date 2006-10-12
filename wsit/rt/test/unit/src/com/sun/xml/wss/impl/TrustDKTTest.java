@@ -177,7 +177,7 @@ public class TrustDKTTest extends TestCase{
                 isKB.setUUID(new String("12015"));
                 ieKB.setUUID(new String("12015"));
     	        MessagePolicy pol = new MessagePolicy();
-                pol.dumpMessages(true);
+                //pol.dumpMessages(true);
         	signaturePolicy.setUUID("22222");
 	        pol.append(encryptPolicy);
     	        pol.append(signaturePolicy);
@@ -287,9 +287,9 @@ public class TrustDKTTest extends TestCase{
         Hashtable hashTable = (Hashtable) ois.readObject();
         ois.close();
                                                                                                                                                  
-        if(hashTable.isEmpty())
-            System.out.println("MimeHeaders Hashtable is empty");
-        else {
+        if(hashTable.isEmpty()) {
+          //  System.out.println("MimeHeaders Hashtable is empty");
+        } else {
             for(int i=0; i < hashTable.size(); i++) {
                 Enumeration keys = hashTable.keys();
                 Enumeration values = hashTable.elements();
@@ -316,7 +316,7 @@ public class TrustDKTTest extends TestCase{
        context.setSOAPMessage(msg);
        context.hasIssuedToken(true);                                                                                                        
         MessagePolicy pol = new MessagePolicy();
-        pol.dumpMessages(true);
+        //pol.dumpMessages(true);
         //pol.append(signaturePolicy);
         context.setAlgorithmSuite(alg);
                                                                                                            
@@ -451,7 +451,7 @@ public class TrustDKTTest extends TestCase{
                 isKB.setUUID(new String("11016"));
                 ieKB.setUUID(new String("11016"));
     	        MessagePolicy pol = new MessagePolicy();
-                pol.dumpMessages(true);
+                //pol.dumpMessages(true);
         	signaturePolicy.setUUID("22222");
 	        pol.append(encryptPolicy);
     	        pol.append(signaturePolicy);

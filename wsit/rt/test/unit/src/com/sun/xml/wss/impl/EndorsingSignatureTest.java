@@ -176,7 +176,7 @@ public class EndorsingSignatureTest extends TestCase{
             SecurityAnnotator.secureMessage(context);
 
 	    SOAPMessage secMsg = context.getSOAPMessage();
-    	    DumpFilter.process(context);
+    	    //DumpFilter.process(context);
             
             // now persist the message and read-back
             FileOutputStream sentFile = new FileOutputStream("golden.msg");
@@ -224,8 +224,8 @@ public class EndorsingSignatureTest extends TestCase{
 
         SecurityRecipient.validateMessage(context);
 
-        System.out.println("Verfied Message");
-        DumpFilter.process(context);
+        //System.out.println("Verfied Message");
+        //DumpFilter.process(context);
 
         return context;
    }
