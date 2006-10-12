@@ -48,13 +48,13 @@ import junit.framework.TestCase;
         System.out.println("doInvoke");
         // Dispatch<SOAPMessage> dispatchMsg = null;
         try {
-            dispatchMsg = service.createDispatch(PORT_QNAME, SOAPMessage.class, javax.xml.ws.Service.Mode.MESSAGE);
+            dispatchMsg = service.createDispatch(PORT_QNAME, SOAPMessage.class, javax.xml.ws.Service.Mode.MESSAGE,new WebServiceFeature[] {new javax.xml.ws.RespectBindingFeature()});
             SOAPMessage reqMsg = makeSOAPMessage(helloRequest);
             System.out.println("SOAPMessage request: " + getSOAPMessageAsString(reqMsg));
             SOAPMessage resMsg = dispatchMsg.invoke(reqMsg);
             System.out.println("SOAPPMessage response: " + getSOAPMessageAsString(resMsg));
             String responseMessage = getSOAPMessageAsString(resMsg);
-            if (!responseMessage.contains(new String("SequenceAcknowledgement"))){
+            if (!responseMessage.contains(new String("Action"))){
                fail("The response Message is not as expected");
             }
 
