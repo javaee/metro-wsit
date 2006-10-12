@@ -47,8 +47,8 @@ public class AddressingModelConfiguratorProvider implements ModelConfiguratorPro
     private static final PolicyLogger logger = PolicyLogger.getLogger(AddressingModelConfiguratorProvider.class);
 
     private static final QName[] AddressingAssertions = {
-     new QName(AddressingVersion.MEMBER.wsdlNsUri,"UsingAddressing"),
-     new QName(AddressingVersion.W3C.wsdlNsUri,"UsingAddressing")};
+     new QName(AddressingVersion.MEMBER.policyNsUri,"UsingAddressing"),
+     new QName(AddressingVersion.W3C.policyNsUri,"UsingAddressing")};
 
     /**
      * Creates a new instance of AddressingModelConfiguratorProvider
