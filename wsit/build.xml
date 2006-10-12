@@ -64,9 +64,9 @@
         </copy>
 
         <!-- unzip the JAX-WS source zips -->
-        <get src="http://kohsuke.sfbay/hudson/job/jaxws-ri-21/lastSuccessfulBuild/artifact/jax-ws-sources/jaxws-ri/build/jaxws-rt.src.zip"
+        <get src="http://kohsuke.sfbay/hudson/job/jaxws-ri-21/lastSuccessfulBuild/artifact/jax-ws-sources/jaxws-ri/dist/jaxws-ri/lib/jaxws-rt.src.zip"
                 dest="${lib.runtime.dir}/jaxws-rt.src.zip"/>
-        <get src="http://kohsuke.sfbay/hudson/job/jaxws-ri-21/lastSuccessfulBuild/artifact/jax-ws-sources/jaxws-ri/build/jaxws-tools.src.zip"
+        <get src="http://kohsuke.sfbay/hudson/job/jaxws-ri-21/lastSuccessfulBuild/artifact/jax-ws-sources/jaxws-ri/dist/jaxws-ri/lib/jaxws-tools.src.zip"
                 dest="${lib.tooltime.dir}/jaxws-tools.src.zip"/>
 
         <!-- Local transport JAR and Source -->
