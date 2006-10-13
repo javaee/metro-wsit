@@ -51,18 +51,18 @@ import javax.xml.ws.WebServiceException;
 import javax.xml.transform.Source;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.BindingType;
-import javax.xml.ws.RespectBindingFeature;
-import javax.xml.ws.Feature;
+import javax.xml.ws.RespectBinding;
 
 import com.sun.xml.ws.policy.impl.bindings.AppliesTo;
 import org.w3c.dom.*;
 
 /**
- * The Base class of an STS implementation. This could be used to implement 
- * the actual STS. The sub class could override the methods of this class to 
+ * The Base class of an STS implementation. This could be used to implement
+ * the actual STS. The sub class could override the methods of this class to
  * customize the implementation.
  */
-@BindingType(features=@Feature(RespectBindingFeature.ID))
+@RespectBinding
+@BindingType
 public abstract class BaseSTSImpl implements Provider<Source> {
     /**
      * The default value of the timeout for the tokens issued by this STS
