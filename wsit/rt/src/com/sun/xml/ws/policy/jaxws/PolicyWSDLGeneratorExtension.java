@@ -23,17 +23,17 @@
 package com.sun.xml.ws.policy.jaxws;
 
 import com.sun.xml.ws.api.wsdl.writer.WSDLGenExtnContext;
-import java.lang.reflect.Method;
-import java.util.Collection;
 import com.sun.xml.txw2.TypedXmlWriter;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.model.CheckedException;
+import com.sun.xml.ws.api.model.JavaMethod;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLFault;
 import com.sun.xml.ws.api.model.wsdl.WSDLInput;
 import com.sun.xml.ws.api.model.wsdl.WSDLMessage;
+import com.sun.xml.ws.api.model.wsdl.WSDLObject;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLOutput;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
@@ -55,6 +55,8 @@ import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelGenerator;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelMarshaller;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
+import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.LinkedList;
 
 /**
@@ -192,15 +194,13 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         logger.exiting("addBindingExtension");
     }
     
-    public void addOperationExtension(TypedXmlWriter operation, Method method) {
+    public void addOperationExtension(TypedXmlWriter operation, JavaMethod method) {
         logger.entering("addOperationExtension");
         if (this.seiModel != null) {
-            // TODO Find a way not to down-cast
-            JavaMethodImpl javaMethod = (JavaMethodImpl) this.seiModel.getJavaMethod(method);
-            String operationName = javaMethod.getOperationName();
+            String operationName = method.getOperationName();
             for (PolicySubject subject : subjects) {
                 Object wsdlSubject = subject.getSubject();
-                if (wsdlSubject != null && wsdlSubject instanceof WSDLOperation && operationName.equals(((WSDLBoundPortType)wsdlSubject).getName().getLocalPart())) {
+                if (wsdlSubject != null && wsdlSubject instanceof WSDLOperation && operationName.equals(((WSDLOperation)wsdlSubject).getName().getLocalPart())) {
                     processPolicy(subject, operation);
                 }
             }
@@ -208,23 +208,24 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         logger.exiting("addOperationExtension");
     }
     
-    public void addBindingOperationExtension(TypedXmlWriter operation, Method method) {
+    public void addBindingOperationExtension(TypedXmlWriter operation, JavaMethod method) {
         logger.entering("addBindingOperationExtension");
-        // TODO: Have to clarify where to find appropriate policy
-/*        if (this.seiModel != null) {
-            // TODO Find a way not to down-cast
-            JavaMethodImpl javaMethod = (JavaMethodImpl) this.seiModel.getJavaMethod(method);
-            String operationName = javaMethod.getOperationName();
-        }*/
+        if (this.seiModel != null) {
+            String operationName = method.getOperationName();
+            for (PolicySubject subject : subjects) {
+                Object wsdlSubject = subject.getSubject();
+                if (wsdlSubject != null && wsdlSubject instanceof WSDLBoundOperation && operationName.equals(((WSDLBoundOperation)wsdlSubject).getName().getLocalPart())) {
+                    processPolicy(subject, operation);
+                }
+            }
+        }
         logger.exiting("addBindingOperationExtension");
     }
     
-    public void addInputMessageExtension(TypedXmlWriter message, Method method) {
+    public void addInputMessageExtension(TypedXmlWriter message, JavaMethod method) {
         logger.entering("addInputMessageExtension");
         if (this.seiModel != null) {
-            // TODO Find a way not to down-cast
-            JavaMethodImpl javaMethod = (JavaMethodImpl) this.seiModel.getJavaMethod(method);
-            String messageName = javaMethod.getOperationName();
+            String messageName = method.getRequestMessageName();
             for (PolicySubject subject : subjects) {
                 Object wsdlSubject = subject.getSubject();
                 if (wsdlSubject != null && wsdlSubject instanceof WSDLMessage && messageName.equals(((WSDLMessage)wsdlSubject).getName().getLocalPart())) {
@@ -235,13 +236,10 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         logger.exiting("addInputMessageExtension");
     }
     
-    public void addOutputMessageExtension(TypedXmlWriter message, Method method) {
+    public void addOutputMessageExtension(TypedXmlWriter message, JavaMethod method) {
         logger.entering("addOutputMessageExtension");
         if (this.seiModel != null) {
-            // TODO Find a way not to down-cast
-            JavaMethodImpl javaMethod = (JavaMethodImpl) this.seiModel.getJavaMethod(method);
-            // TODO Do not rely on a naming algorithm that is private to WSDLGenerator
-            String messageName = javaMethod.getOperationName() + "Response";
+            String messageName = method.getResponseMessageName();
             for (PolicySubject subject : subjects) {
                 Object wsdlSubject = subject.getSubject();
                 if (wsdlSubject != null && wsdlSubject instanceof WSDLMessage && messageName.equals(((WSDLMessage)wsdlSubject).getName().getLocalPart())) {
@@ -252,18 +250,24 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         logger.exiting("addOutputMessageExtension");
     }
     
-    public void addFaultMessageExtension(TypedXmlWriter message, Method method) {
+    public void addFaultMessageExtension(TypedXmlWriter message, JavaMethod method, CheckedException ce) {
         logger.entering("addFaultMessageExtension");
-        // TODO Need access to fault message name
+        if (this.seiModel != null) {
+            String messageName = ce.getMessageName();
+            for (PolicySubject subject : subjects) {
+                Object wsdlSubject = subject.getSubject();
+                if (wsdlSubject != null && wsdlSubject instanceof WSDLMessage && messageName.equals(((WSDLMessage)wsdlSubject).getName().getLocalPart())) {
+                    processPolicy(subject, message);
+                }
+            }
+        }
         logger.exiting("addFaultMessageExtension");
     }
     
-    public void addOperationInputExtension(TypedXmlWriter input, Method method) {
+    public void addOperationInputExtension(TypedXmlWriter input, JavaMethod method) {
         logger.entering("addOperationInputExtension");
         if (this.seiModel != null) {
-            // TODO Find a way not to down-cast
-            JavaMethodImpl javaMethod = (JavaMethodImpl) this.seiModel.getJavaMethod(method);
-            String messageName = javaMethod.getOperationName();
+            String messageName = method.getRequestMessageName();
             for (PolicySubject subject : subjects) {
                 Object wsdlSubject = subject.getSubject();
                 if (wsdlSubject != null && wsdlSubject instanceof WSDLInput && messageName.equals(((WSDLInput)wsdlSubject).getName())) {
@@ -274,13 +278,10 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         logger.exiting("addOperationInputExtension");
     }
     
-    public void addOperationOutputExtension(TypedXmlWriter output, Method method) {
+    public void addOperationOutputExtension(TypedXmlWriter output, JavaMethod method) {
         logger.entering("addOperationOutputExtension");
         if (this.seiModel != null) {
-            // TODO Find a way not to down-cast
-            JavaMethodImpl javaMethod = (JavaMethodImpl) this.seiModel.getJavaMethod(method);
-            // TODO Do not rely on a naming algorithm that is private to WSDLGenerator
-            String messageName = javaMethod.getOperationName() + "Response";
+            String messageName = method.getResponseMessageName();
             for (PolicySubject subject : subjects) {
                 Object wsdlSubject = subject.getSubject();
                 if (wsdlSubject != null && wsdlSubject instanceof WSDLOutput && messageName.equals(((WSDLOutput)wsdlSubject).getName())) {
@@ -291,12 +292,10 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         logger.exiting("addOperationOutputExtension");
     }
     
-    public void addOperationFaultExtension(TypedXmlWriter fault, Method method, CheckedException ce) {
+    public void addOperationFaultExtension(TypedXmlWriter fault, JavaMethod method, CheckedException ce) {
         logger.entering("addOperationFaultExtension");
         if (this.seiModel != null) {
-            // TODO Find a way not to down-cast
-            CheckedExceptionImpl exception = (CheckedExceptionImpl) ce;
-            String messageName = exception.getMessageName();
+            String messageName = ce.getMessageName();
             for (PolicySubject subject : subjects) {
                 Object wsdlSubject = subject.getSubject();
                 if (wsdlSubject != null && wsdlSubject instanceof WSDLFault && messageName.equals(((WSDLFault)wsdlSubject).getName())) {
@@ -307,12 +306,10 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         logger.exiting("addOperationFaultExtension");
     }
     
-    public void addBindingOperationInputExtension(TypedXmlWriter input, Method method) {
+    public void addBindingOperationInputExtension(TypedXmlWriter input, JavaMethod method) {
         logger.entering("addBindingOperationInputExtension");
         if (this.seiModel != null) {
-            // TODO Find a way not to down-cast
-            JavaMethodImpl javaMethod = (JavaMethodImpl) this.seiModel.getJavaMethod(method);
-            String messageName = javaMethod.getOperationName();
+            String messageName = method.getOperationName();
             for (PolicySubject subject : subjects) {
                 if (policyMap.isInputMessageSubject(subject)) {
                     Object wsdlSubject = subject.getSubject();
@@ -325,13 +322,10 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         logger.exiting("addBindingOperationInputExtension");
     }
     
-    public void addBindingOperationOutputExtension(TypedXmlWriter output, Method method) {
+    public void addBindingOperationOutputExtension(TypedXmlWriter output, JavaMethod method) {
         logger.entering("addBindingOperationOutputExtension");
         if (this.seiModel != null) {
-            // TODO Find a way not to down-cast
-            JavaMethodImpl javaMethod = (JavaMethodImpl) this.seiModel.getJavaMethod(method);
-            // TODO Do not rely on a naming algorithm that is private to WSDLGenerator
-            String messageName = javaMethod.getOperationName();
+            String messageName = method.getOperationName();
             for (PolicySubject subject : subjects) {
                 if (policyMap.isOutputMessageSubject(subject)) {
                     Object wsdlSubject = subject.getSubject();
@@ -344,12 +338,20 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         logger.exiting("addBindingOperationOutputExtension");
     }
     
-    public void addBindingOperationFaultExtension(TypedXmlWriter fault, Method method) {
+    public void addBindingOperationFaultExtension(TypedXmlWriter fault, JavaMethod method, CheckedException ce) {
         logger.entering("addBindingOperationFaultExtension");
-        // TODO Not invoked by WSDLGenerator
+        if (this.seiModel != null) {
+            String messageName = ce.getMessageName();
+            for (PolicySubject subject : subjects) {
+                Object wsdlSubject = subject.getSubject();
+                if (wsdlSubject != null && wsdlSubject instanceof WSDLFault && messageName.equals(((WSDLFault)wsdlSubject).getName())) {
+                    processPolicy(subject, fault);
+                }
+            }
+        }
         logger.exiting("addBindingOperationFaultExtension");
     }
-    
+        
     /**
      * Adds a PolicyReference element that points to the policy of the element,
      * if the policy does not have any id or name. Writes policy inside the element otherwise.
