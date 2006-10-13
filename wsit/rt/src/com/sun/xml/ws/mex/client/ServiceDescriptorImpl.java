@@ -27,18 +27,23 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.ws.WebServiceException;
 
+import org.w3c.dom.Node;
+
 import com.sun.xml.ws.api.wsdl.parser.ServiceDescriptor;
-import static com.sun.xml.ws.mex.MetadataConstants.POLICY_DIALECT;
-import static com.sun.xml.ws.mex.MetadataConstants.SCHEMA_DIALECT;
-import static com.sun.xml.ws.mex.MetadataConstants.WSDL_DIALECT;
 import com.sun.xml.ws.mex.client.schema.Metadata;
 import com.sun.xml.ws.mex.client.schema.MetadataReference;
 import com.sun.xml.ws.mex.client.schema.MetadataSection;
-import org.w3c.dom.Node;
+
+import static com.sun.xml.ws.mex.MetadataConstants.SCHEMA_DIALECT;
+import static com.sun.xml.ws.mex.MetadataConstants.WSDL_DIALECT;
 
 /**
  * This class is used by the JAX-WS code when it needs to retrieve
@@ -50,7 +55,6 @@ public class ServiceDescriptorImpl extends ServiceDescriptor {
     
     private final List<Source> wsdls;
     private final List<Source> schemas;
-    private final List<Source> policies;
     
     private static final Logger logger =
         Logger.getLogger(ServiceDescriptorImpl.class.getName());
@@ -62,7 +66,6 @@ public class ServiceDescriptorImpl extends ServiceDescriptor {
     public ServiceDescriptorImpl(Metadata mData) {
         wsdls = new ArrayList<Source>();
         schemas = new ArrayList<Source>();
-        policies = new ArrayList<Source>();
         populateLists(mData);
     }
     
@@ -96,10 +99,10 @@ public class ServiceDescriptorImpl extends ServiceDescriptor {
             wsdls.add(createSource(section, id));
         } else if (dialect.equals(SCHEMA_DIALECT)) {
             schemas.add(createSource(section, id));
-        } else if (dialect.equals(POLICY_DIALECT)) {
-            policies.add(createSource(section, id));
         } else {
-            // todo: log unknown dialect
+            logger.warning("Ignoring unknown dialect \"" +
+                dialect + "\" in metadata response with identifier \"" +
+                id + "\"");
         }
     }
 
@@ -120,14 +123,15 @@ public class ServiceDescriptorImpl extends ServiceDescriptor {
     private void handleLocation(MetadataSection section) {
         String location = section.getLocation();
         String dialect = section.getDialect();
+        String id = section.getIdentifier();
         if (dialect.equals(WSDL_DIALECT)) {
-            wsdls.add(getSourceFromLocation(location));
+            wsdls.add(getSourceFromLocation(location, id));
         } else if (dialect.equals(SCHEMA_DIALECT)) {
-            schemas.add(getSourceFromLocation(location));
-        } else if (dialect.equals(POLICY_DIALECT)) {
-            policies.add(getSourceFromLocation(location));
+            schemas.add(getSourceFromLocation(location, id));
         } else {
-            // todo: log unknown dialect
+            logger.warning("Ignoring unknown dialect \"" +
+                dialect + "\" in metadata response with identifier \"" +
+                id + "\"");
         }
     }
     
@@ -139,10 +143,6 @@ public class ServiceDescriptorImpl extends ServiceDescriptor {
         return schemas;
     }
     
-    public List<Source> getPolicies() {
-        return policies;
-    }
-    
     /*
      * Helper method used by handleXml() to turn the xml DOM nodes
      * into Sources objects.
@@ -151,22 +151,72 @@ public class ServiceDescriptorImpl extends ServiceDescriptor {
         Node n = (Node) section.getAny();
         Source source = new DOMSource(n);
         if (id == null) {
-            id = "todo"; // will get this from namespace in wsdl/schema
+            id = getIdFromNode(n);
         }
         source.setSystemId(id);
         return source;
     }
     
     /*
-     * Turn the address of a document into a source.
+     * Turn the address of a document into a source. The document
+     * referred to in a mex location element must be retrievable
+     * with an HTTP GET call.
      */
-    private Source getSourceFromLocation(String address) {
+    private Source getSourceFromLocation(String address, String id) {
         try {
             HttpPoster poster = new HttpPoster();
             InputStream response = poster.makeGetCall(address);
-            return new StreamSource(response);
+            if (id != null) {
+                StreamSource source = new StreamSource(response);
+                source.setSystemId(id);
+                return source;
+            }
+            return parseAndConvertStream(address, response);
         } catch (Exception e) {
             throw new WebServiceException(e);
+        }
+    }
+    
+    /*
+     * This method used when metadata section did not include
+     * an identifier. The node passed in must be a wsdl:definitions
+     * or an xsd:schema node.
+     */
+    private String getIdFromNode(Node node) {
+        Node namespace = node.getAttributes().getNamedItem("targetNamespace");
+        if (namespace == null) {
+            logger.warning("No targetNamespace was found for element " +
+                node.getNamespaceURI() + ":" + node.getLocalName() +
+                " in metadata response.");
+            return null;
+        }
+        return namespace.getNodeValue();
+    }
+
+    /*
+     * This method used when metadata section did not include
+     * an identifier. Since we need to read some of this information
+     * to get the namespace and then return it to be read again by
+     * jax-ws, we cannot use the InputStream itself (cannot call
+     * mark/reset on InputStream).
+     *
+     * TODO: This isn't a common use case, but can this be sped up?
+     */
+    private Source parseAndConvertStream(String address, InputStream stream) {
+        try {
+            Transformer xFormer =
+                TransformerFactory.newInstance().newTransformer();
+            Source source = new StreamSource(stream);
+            DOMResult result = new DOMResult();
+            xFormer.transform(source, result);
+            Node node = result.getNode();
+            source = new DOMSource(node);
+            source.setSystemId(getIdFromNode(node.getFirstChild()));
+            return source;
+        } catch (TransformerException te) {
+            throw new WebServiceException("Exception while " +
+                "trying to convert and read targetNamespace from " +
+                "location " + address, te);
         }
     }
     
