@@ -205,13 +205,19 @@ public class TokenProcessor {
            
          NestedPolicy policy = tokenAssertion.getNestedPolicy();
          AssertionSet as = policy.getAssertionSet();
+         if(policy==null){
+             return;
+         }
          Iterator<PolicyAssertion> itr = as.iterator();
          while(itr.hasNext()){
              PolicyAssertion policyAssertion = (PolicyAssertion)itr.next();
              if(policyAssertion.getName().getLocalPart().equals(Constants.WssX509V1Token11)||policyAssertion.getName().getLocalPart().equals(Constants.WssX509V1Token10)){
                  x509CB.setValueType(MessageConstants.X509v1_NS);
+             }else if(policyAssertion.getName().getLocalPart().equals(Constants.WssX509V3Token10)||policyAssertion.getName().getLocalPart().equals(Constants.WssX509V3Token11)){
+                 x509CB.setValueType(MessageConstants.X509v3_NS);          
              }
-         }       
+         }
+       
      }
     
 }
