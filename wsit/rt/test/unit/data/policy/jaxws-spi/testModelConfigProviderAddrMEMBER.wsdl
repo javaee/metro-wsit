@@ -53,7 +53,7 @@
     </wsdl:portType>
     <wsdl:binding name="MyBinding" type="myns:DictPortType">
         <wsp:Policy>
-            <wsa:UsingAddressing xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/09/policy/addressing"/>
+            <wsa:UsingAddressing xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing/policy"/>
         </wsp:Policy>
         <soap:binding transport="http://schemas.xmlsoap.org/soap/http"/>
         <wsdl:operation name="TranslateOperation">
