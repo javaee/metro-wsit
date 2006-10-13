@@ -79,9 +79,9 @@ public class TestUtil {
         Hashtable hashTable = (Hashtable) ois.readObject();
         ois.close();
                                                                                                                                                  
-        if(hashTable.isEmpty())
-            System.out.println("MimeHeaders Hashtable is empty");
-        else {
+        if(hashTable.isEmpty()) {
+          //  System.out.println("MimeHeaders Hashtable is empty");
+        } else {
             for(int i=0; i < hashTable.size(); i++) {
                 Enumeration keys = hashTable.keys();
                 Enumeration values = hashTable.elements();

@@ -20,7 +20,7 @@
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 /*
- * $Id: PolicyCallbackHandler1.java,v 1.4 2006-09-20 11:20:35 mayankmishra Exp $
+ * $Id: PolicyCallbackHandler1.java,v 1.5 2006-10-13 09:34:05 kumarjayanti Exp $
  *
  * Copyright 2005 Sun Microsystems, Inc. All rights reserved.
  * SUN PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
@@ -815,7 +815,7 @@ public  class PolicyCallbackHandler1 implements CallbackHandler {
                     // Cert does not contain a key identifier
                     continue;
                 }
-                System.out.println("Alias = " + alias + " ti=" + Base64.encode(keyId));
+                //System.out.println("Alias = " + alias + " ti=" + Base64.encode(keyId));
                 if (Arrays.equals(ski, keyId)) {
                     return x509Cert;
                 }
