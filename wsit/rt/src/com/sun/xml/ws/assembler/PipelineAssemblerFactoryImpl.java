@@ -32,7 +32,7 @@ import javax.xml.ws.soap.AddressingFeature;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
-import com.sun.xml.ws.api.addressing.MemberSubmissionAddressingFeature;
+import com.sun.xml.ws.developer.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
