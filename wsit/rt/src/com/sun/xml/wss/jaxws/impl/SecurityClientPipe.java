@@ -46,6 +46,7 @@ import java.util.Set;
 
 import javax.xml.namespace.QName;
 
+import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
@@ -186,11 +187,12 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
     }
     
     public Packet process(Packet packet) {
-        
+         
         // Add Action header to trust message
         if ("true".equals(packet.invocationProperties.get(WSTrustConstants.IS_TRUST_MESSAGE))){
+            String action = (String)packet.invocationProperties.get(WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION);
             HeaderList headers = packet.getMessage().getHeaders();
-            headers.fillRequestAddressingHeaders(packet, pipeConfig.getBinding().getAddressingVersion(), pipeConfig.getBinding().getSOAPVersion(),false,WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION);
+            headers.fillRequestAddressingHeaders(packet, addVer, soapVersion,false, action);
         }
         
         // keep the message

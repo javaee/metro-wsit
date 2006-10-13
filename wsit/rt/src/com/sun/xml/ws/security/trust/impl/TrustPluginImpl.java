@@ -76,14 +76,10 @@ import javax.xml.bind.JAXBElement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
-import org.w3c.dom.*;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
 
 import javax.xml.ws.soap.AddressingFeature;
-import com.sun.xml.ws.api.addressing.*;
-import java.util.*;
-import javax.xml.soap.*;
 
 /**
  *

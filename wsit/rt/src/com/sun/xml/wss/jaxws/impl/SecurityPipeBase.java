@@ -129,6 +129,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.sun.xml.ws.api.addressing.*;
+
 
 //TODO: add logging before 4/13
 /**
@@ -228,6 +230,8 @@ public abstract class SecurityPipeBase implements Pipe {
     boolean hasSecureConversation = false;
     boolean hasReliableMessaging = false;
     
+    AddressingVersion addVer = null;
+    
     static {
         try {
             //TODO: system property maynot be appropriate for server side.
@@ -286,6 +290,7 @@ public abstract class SecurityPipeBase implements Pipe {
         secEnv = that.secEnv;
         isSOAP12 = that.isSOAP12;
         soapVersion = that.soapVersion;
+        this.addVer = that.addVer;
         wsPolicyMap = that.wsPolicyMap;
         outMessagePolicyMap = that.outMessagePolicyMap;
         inMessagePolicyMap = that.inMessagePolicyMap;
@@ -748,6 +753,14 @@ public abstract class SecurityPipeBase implements Pipe {
             //Review:Will getEffectivePolicy return null or empty policy ?.
             Policy endpointPolicy = wsPolicyMap.getEndpointEffectivePolicy(endpointKey);
             
+            if (endpointPolicy != null){
+                if (endpointPolicy.contains(AddressingVersion.W3C.policyNsUri)){
+                    addVer = AddressingVersion.W3C;
+                } else if (endpointPolicy.contains(AddressingVersion.MEMBER.policyNsUri)){
+                    addVer = AddressingVersion.MEMBER;
+                }
+            }
+            
             buildProtocolPolicy(endpointPolicy);
             ArrayList<Policy> policyList = new ArrayList<Policy>();
             if(endpointPolicy != null){
@@ -1096,6 +1109,9 @@ public abstract class SecurityPipeBase implements Pipe {
     }
     
     protected boolean isTrustMessage(Packet packet){
+      //  if (!bindingHasIssuedTokenPolicy())
+        //    return false;
+        
         String action = getAction(packet);
         if(WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION.equals(action) ||
            WSTrustConstants.REQUEST_SECURITY_TOKEN_RESPONSE_ISSUE_ACTION.equals(action)){
@@ -1120,9 +1136,13 @@ public abstract class SecurityPipeBase implements Pipe {
     }
     
     protected String getAction(Packet packet){
+      // if ("true".equals(packet.invocationProperties.get(WSTrustConstants.IS_TRUST_MESSAGE))){
+        //    return (String)packet.invocationProperties.get(WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION);
+       //}
+             
         HeaderList hl = packet.getMessage().getHeaders();
-        String action =  hl.getAction(pipeConfig.getBinding().getAddressingVersion(), pipeConfig.getBinding().getSOAPVersion());
-    
+        //String action =  hl.getAction(pipeConfig.getBinding().getAddressingVersion(), pipeConfig.getBinding().getSOAPVersion());
+        String action =  hl.getAction(addVer, pipeConfig.getBinding().getSOAPVersion());
         return action;
     }
     
