@@ -109,10 +109,19 @@
                 <include name="wsit-*.*"/>
             </fileset>
         </copy>
+        <copy todir="${wsit.integration.dir}">
+            <fileset dir="${lib.runtime.dir}">
+                <include name="xws-security.jar"/>
+                <include name="trust-jaxbbindings.jar"/>
+                <include name="secconv-jaxbbindings.jar"/>
+            </fileset>
+        </copy>
         <zip destfile="${wsit.integration.dir}/wsit-integration.zip">
                    <fileset dir="${wsit.integration.dir}">
                        <include name="wsit-rt*.*"/>
                        <include name="wsit-tools*.*"/>
+                       <include name="xws-security.jar"/>
+                       <include name="trust-jaxbbindings.jar"/>
                    </fileset>
 
          </zip>
