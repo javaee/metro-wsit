@@ -333,9 +333,9 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
                   confirmationMethods, null, keyInfo.getElement());
 
             com.sun.xml.wss.saml.Subject subj = null;
-            String principal = (String)claimedAttrs.get(PRINCIPAL);
+            QName principal = (QName)claimedAttrs.get(PRINCIPAL);
             if (principal != null){
-                NameIdentifier nameId = samlFac.createNameIdentifier(principal, null, null);
+                NameIdentifier nameId = samlFac.createNameIdentifier(principal.getLocalPart(), null, null);
                 subj = samlFac.createSubject(nameId, subjectConfirmation);
                 claimedAttrs.remove(PRINCIPAL);
             }
@@ -386,9 +386,9 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
                 confirmationMethods, null, keyInfo.getElement());
 
             com.sun.xml.wss.saml.Subject subj = null;
-            String principal = (String)claimedAttrs.get(PRINCIPAL);
+            QName principal = (QName)claimedAttrs.get(PRINCIPAL);
             if (principal != null){
-                NameIdentifier nameId = samlFac.createNameIdentifier(principal, null, null);
+                NameIdentifier nameId = samlFac.createNameIdentifier(principal.getLocalPart(), null, null);
                 subj = samlFac.createSubject(nameId, subjectConfirmation);
                 claimedAttrs.remove(PRINCIPAL);
             }

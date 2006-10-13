@@ -58,7 +58,6 @@ import com.sun.xml.ws.security.trust.impl.bindings.ObjectFactory;
 import com.sun.xml.ws.security.trust.impl.bindings.RequestSecurityTokenResponseType;
 import com.sun.xml.ws.security.trust.impl.bindings.RequestSecurityTokenType;
 import com.sun.xml.ws.security.trust.util.WSTrustUtil;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.MalformedURLException;
@@ -68,14 +67,23 @@ import java.security.SecureRandom;
 import java.util.Iterator;
 import java.util.List;
 import javax.xml.namespace.QName;
-import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Dispatch;
+import javax.xml.ws.RespectBindingFeature;
 import javax.xml.ws.Service;
+import javax.xml.ws.WebServiceFeature;
 import javax.xml.bind.JAXBElement;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
+import org.w3c.dom.*;
+import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.WSBinding;
+
+import javax.xml.ws.soap.AddressingFeature;
+import com.sun.xml.ws.api.addressing.*;
+import java.util.*;
+import javax.xml.soap.*;
 
 /**
  *
@@ -239,12 +247,42 @@ public class TrustPluginImpl implements TrustPlugin {
             }
         }
         Service service = Service.create(wsdlLocation, serviceName);
-        Dispatch<Object> dispatch = service.createDispatch(portName, fact.getContext(), Service.Mode.PAYLOAD);
+        Dispatch<Object> dispatch = service.createDispatch(portName, fact.getContext(), Service.Mode.PAYLOAD, new WebServiceFeature[]{new RespectBindingFeature(), new AddressingFeature(false)});
+        //Dispatch<SOAPMessage> dispatch = service.createDispatch(portName, SOAPMessage.class, Service.Mode.MESSAGE, new WebServiceFeature[]{new AddressingFeature(false)});
+        //WSBinding wsbinding = (WSBinding) dispatch.getBinding();
+        //AddressingVersion addVer = wsbinding.getAddressingVersion();
+        //SOAPVersion sv = wsbinding.getSOAPVersion(); 
+        
         //dispatch = addAddressingHeaders(dispatch);
         if (stsURI != null){
             dispatch.getRequestContext().put(javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY, stsURI);
         }
         dispatch.getRequestContext().put(WSTrustConstants.IS_TRUST_MESSAGE, "true");
+        dispatch.getRequestContext().put(WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION, WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION);
+        
+        //RequestSecurityTokenResponse rstr = null;
+       // try{
+          //  MessageFactory factory = sv.saajMessageFactory;
+          //  SOAPMessage message = factory.createMessage(); 
+         //   message.getSOAPBody().addDocument(fact.toElement(request).getOwnerDocument());
+         //   SOAPHeader header = message.getSOAPHeader();
+           // SOAPHeaderElement action = header.addHeaderElement(addVer.actionTag);
+           // action.addTextNode(WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION);
+           // SOAPHeaderElement to = header.addHeaderElement(addVer.toTag);
+           // to.addTextNode(stsURI.toString());
+           // SOAPHeaderElement msgID = header.addHeaderElement(addVer.messageIDTag);
+           // msgID.addTextNode("uuid:" + UUID.randomUUID().toString());
+           // SOAPHeaderElement replyTo = header.addHeaderElement(addVer.replyToTag);
+           // SOAPElement add = replyTo.addChildElement(new QName(addVer.nsUri, "Address"));
+           // add.addTextNode(AddressingVersion.W3C.getAnonymousUri());
+            //SOAPMessage response = (SOAPMessage)dispatch.invoke(message);
+           // SOAPBody rsp = response.getSOAPBody();
+           // Element rspEle = rsp.extractContentAsDocument().getDocumentElement();
+           // rstr = fact.createRSTRFrom(rspEle);
+       // } catch(Exception ex){
+           // ex.printStackTrace();
+       // }
+        
         RequestSecurityTokenResponse rstr =  fact.createRSTRFrom((JAXBElement)dispatch.invoke(fact.toJAXBElement(request)));
         if (log.isLoggable(Level.FINE)) {
             log.log(Level.FINE,"WST1014.response.invoking.rst", new Object[]{elemToString(rstr)});
