@@ -22,7 +22,7 @@
 
 package com.sun.xml.ws.policy.jaxws.addressing;
 
-import com.sun.xml.ws.api.addressing.MemberSubmissionAddressingFeature;
+import com.sun.xml.ws.developer.MemberSubmissionAddressingFeature;
 import junit.framework.*;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
