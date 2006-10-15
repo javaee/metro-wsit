@@ -144,28 +144,32 @@ public class SecurityServerPipe extends SecurityPipeBase {
         boolean isSCCancelMessage = false;
         boolean isTrustMessage = false;
         String msgId = null;
-        String action = getAction(packet);
-        if (WSSCConstants.REQUEST_SECURITY_CONTEXT_TOKEN_ACTION.equals(action)) {
-            isSCIssueMessage = true;
-        } else if (WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_ACTION.equals(action)) {
-            isSCCancelMessage = true;
-        } else if (WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION.equals(action)) {
-            isTrustMessage = true;
-            
-            if(trustConfig != null){
-                packet.invocationProperties.put(Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS,trustConfig.iterator());
-                packet.getApplicationScopePropertyNames(false).add(Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS);
+        String action = null;
+        
+        if (isAddressingEnabled()) {
+            action = getAction(packet);
+            if (WSSCConstants.REQUEST_SECURITY_CONTEXT_TOKEN_ACTION.equals(action)) {
+                isSCIssueMessage = true;
+            } else if (WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_ACTION.equals(action)) {
+                isSCCancelMessage = true;
+            } else if (WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION.equals(action)) {
+                isTrustMessage = true;
+                
+                if(trustConfig != null){
+                    packet.invocationProperties.put(Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS,trustConfig.iterator());
+                    packet.getApplicationScopePropertyNames(false).add(Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS);
+                }
+                
+                //set the callbackhandler
+                packet.invocationProperties.put(WSTrustConstants.STS_CALL_BACK_HANDLER, handler);
+                packet.getApplicationScopePropertyNames(false).add(WSTrustConstants.STS_CALL_BACK_HANDLER);
             }
             
-            //set the callbackhandler
-            packet.invocationProperties.put(WSTrustConstants.STS_CALL_BACK_HANDLER, handler);
-            packet.getApplicationScopePropertyNames(false).add(WSTrustConstants.STS_CALL_BACK_HANDLER);
-        }
-        
-        if (isSCIssueMessage){
-            List<PolicyAssertion> policies = getInBoundSCP(packet.getMessage());
-            if(!policies.isEmpty()) {
-                packet.invocationProperties.put(SC_ASSERTION, (PolicyAssertion)policies.get(0));
+            if (isSCIssueMessage){
+                List<PolicyAssertion> policies = getInBoundSCP(packet.getMessage());
+                if(!policies.isEmpty()) {
+                    packet.invocationProperties.put(SC_ASSERTION, (PolicyAssertion)policies.get(0));
+                }
             }
         }
       

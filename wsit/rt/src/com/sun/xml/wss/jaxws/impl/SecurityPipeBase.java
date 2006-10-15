@@ -229,6 +229,7 @@ public abstract class SecurityPipeBase implements Pipe {
     boolean hasIssuedTokens = false;
     boolean hasSecureConversation = false;
     boolean hasReliableMessaging = false;
+    boolean addressingEnabled = false;
     
     AddressingVersion addVer = null;
     
@@ -255,9 +256,10 @@ public abstract class SecurityPipeBase implements Pipe {
         this.inMessagePolicyMap = new HashMap<WSDLBoundOperation,SecurityPolicyHolder>();
         this.outMessagePolicyMap = new HashMap<WSDLBoundOperation,SecurityPolicyHolder>();
         soapVersion = pipeConfig.getBinding().getSOAPVersion();
+        addressingEnabled = (pipeConfig.getBinding().getAddressingVersion() == null) ?  false : true;
         isSOAP12 = (soapVersion == SOAPVersion.SOAP_12) ? true : false;
         wsPolicyMap = pipeConfig.getPolicyMap();
-        soapFactory = pipeConfig.getBinding().getSOAPVersion().saajSoapFactory;
+        soapFactory = pipeConfig.getBinding().getSOAPVersion().saajSoapFactory; 
         this.inProtocolPM = new HashMap<String,SecurityPolicyHolder>();
         this.outProtocolPM = new HashMap<String,SecurityPolicyHolder>();
         
@@ -300,6 +302,7 @@ public abstract class SecurityPipeBase implements Pipe {
         this.hasIssuedTokens = that.hasIssuedTokens;
         this.hasSecureConversation = that.hasSecureConversation;
         this.hasReliableMessaging = that.hasReliableMessaging;
+        this.addressingEnabled = that.addressingEnabled;
         try {
             this.unmarshaller = jaxbContext.createUnmarshaller();
         }catch (javax.xml.bind.JAXBException ex) {
@@ -1086,8 +1089,14 @@ public abstract class SecurityPipeBase implements Pipe {
     }
     
     protected boolean isSCMessage(Packet packet){
-        if (!bindingHasSecureConversationPolicy())
+        
+        if (!bindingHasSecureConversationPolicy()) {
             return false;
+        }
+        
+        if (!isAddressingEnabled()) {
+            return false;
+        }
         
         String action = getAction(packet);
         if (rstSCTURI.equals(action)){
@@ -1097,8 +1106,14 @@ public abstract class SecurityPipeBase implements Pipe {
     }
     
     protected boolean isSCCancel(Packet packet){
-        if (!bindingHasSecureConversationPolicy())
+        
+        if (!bindingHasSecureConversationPolicy()) {
             return false;
+        }
+        
+        if (!isAddressingEnabled()) {
+            return false;
+        }
         
         String action = getAction(packet);
         if(WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_RESPONSE_ACTION.equals(action) || 
@@ -1108,10 +1123,14 @@ public abstract class SecurityPipeBase implements Pipe {
         return false;
     }
     
+    protected boolean isAddressingEnabled() {
+        return addressingEnabled;
+    }
+    
     protected boolean isTrustMessage(Packet packet){
-      //  if (!bindingHasIssuedTokenPolicy())
-        //    return false;
-        
+        if (!isAddressingEnabled()) {
+            return false;
+        }
         String action = getAction(packet);
         if(WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION.equals(action) ||
            WSTrustConstants.REQUEST_SECURITY_TOKEN_RESPONSE_ISSUE_ACTION.equals(action)){
@@ -1122,6 +1141,9 @@ public abstract class SecurityPipeBase implements Pipe {
     }
     
     protected boolean isRMMessage(Packet packet){
+       if (!isAddressingEnabled()) {
+            return false;
+       }
        if (!bindingHasRMPolicy()) {
            return false;
        } 
