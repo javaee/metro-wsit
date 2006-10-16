@@ -47,8 +47,12 @@ import junit.framework.TestCase;
      public void testSendEcho()  {
         System.out.println("doInvoke");
         // Dispatch<SOAPMessage> dispatchMsg = null;
+        List features = new ArrayList();
+        features.add(new javax.xml.ws.RespectBindingFeature());
+        WebServiceFeature[] wsarray = features.toArray(new WebServiceFeature[0]);
         try {
-            dispatchMsg = service.createDispatch(PORT_QNAME, SOAPMessage.class, javax.xml.ws.Service.Mode.MESSAGE,new WebServiceFeature[] {new javax.xml.ws.RespectBindingFeature()});
+            //dispatchMsg = service.createDispatch(PORT_QNAME, SOAPMessage.class, javax.xml.ws.Service.Mode.MESSAGE,new WebServiceFeature[] {new javax.xml.ws.RespectBindingFeature()});
+            dispatchMsg = service.createDispatch(PORT_QNAME, SOAPMessage.class, javax.xml.ws.Service.Mode.MESSAGE,wsarray);
             SOAPMessage reqMsg = makeSOAPMessage(helloRequest);
             System.out.println("SOAPMessage request: " + getSOAPMessageAsString(reqMsg));
             SOAPMessage resMsg = dispatchMsg.invoke(reqMsg);

@@ -14,8 +14,8 @@ import java.io.StringReader;
     targetNamespace="http://tempuri.org/",
     wsdlLocation="WEB-INF/wsdl/EchoService.wsdl"
 )
-@BindingType(value="http://schemas.xmlsoap.org/wsdl/soap/http",
-           features={@Feature( RespectBindingFeature.ID)})
+@BindingType(value="http://schemas.xmlsoap.org/wsdl/soap/http")
+@javax.xml.ws.RespectBinding
 @ServiceMode(value=javax.xml.ws.Service.Mode.MESSAGE)
 public class PingProvider implements Provider<SOAPMessage> {
 
