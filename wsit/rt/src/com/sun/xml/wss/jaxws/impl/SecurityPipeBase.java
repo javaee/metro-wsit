@@ -229,7 +229,7 @@ public abstract class SecurityPipeBase implements Pipe {
     boolean hasIssuedTokens = false;
     boolean hasSecureConversation = false;
     boolean hasReliableMessaging = false;
-    boolean addressingEnabled = false;
+    //boolean addressingEnabled = false;
     
     AddressingVersion addVer = null;
     
@@ -256,7 +256,7 @@ public abstract class SecurityPipeBase implements Pipe {
         this.inMessagePolicyMap = new HashMap<WSDLBoundOperation,SecurityPolicyHolder>();
         this.outMessagePolicyMap = new HashMap<WSDLBoundOperation,SecurityPolicyHolder>();
         soapVersion = pipeConfig.getBinding().getSOAPVersion();
-        addressingEnabled = (pipeConfig.getBinding().getAddressingVersion() == null) ?  false : true;
+        //addressingEnabled = (pipeConfig.getBinding().getAddressingVersion() == null) ?  false : true;
         isSOAP12 = (soapVersion == SOAPVersion.SOAP_12) ? true : false;
         wsPolicyMap = pipeConfig.getPolicyMap();
         soapFactory = pipeConfig.getBinding().getSOAPVersion().saajSoapFactory; 
@@ -302,7 +302,7 @@ public abstract class SecurityPipeBase implements Pipe {
         this.hasIssuedTokens = that.hasIssuedTokens;
         this.hasSecureConversation = that.hasSecureConversation;
         this.hasReliableMessaging = that.hasReliableMessaging;
-        this.addressingEnabled = that.addressingEnabled;
+        //this.addressingEnabled = that.addressingEnabled;
         try {
             this.unmarshaller = jaxbContext.createUnmarshaller();
         }catch (javax.xml.bind.JAXBException ex) {
@@ -1124,7 +1124,7 @@ public abstract class SecurityPipeBase implements Pipe {
     }
     
     protected boolean isAddressingEnabled() {
-        return addressingEnabled;
+        return (addVer != null);
     }
     
     protected boolean isTrustMessage(Packet packet){
