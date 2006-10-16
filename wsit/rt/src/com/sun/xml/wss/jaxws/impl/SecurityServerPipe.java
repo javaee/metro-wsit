@@ -497,6 +497,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
          */
         Message msg = packet.getMessage();
         Message retMsg = null;
+        String retAction = null;
         try {
             WSSCElementFactory eleFac = WSSCElementFactory.newInstance();
             JAXBElement rstEle = msg.readPayloadAsJAXB(jaxbContext.createUnmarshaller());
@@ -507,6 +508,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
             if (requestType.toString().equals(WSTrustConstants.ISSUE_REQUEST)) {
                 List<PolicyAssertion> policies = getOutBoundSCP(packet.getMessage());
                 rstr =  scContract.issue(rst, ictx, (SecureConversationToken)policies.get(0));
+                retAction = WSSCConstants.REQUEST_SECURITY_CONTEXT_TOKEN_RESPONSE_ACTION;
                 SecurityContextToken sct = (SecurityContextToken)ictx.getSecurityToken();
                 String sctId = sct.getIdentifier().toString();
  
@@ -531,6 +533,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
 */                                
                 ((ProcessingContextImpl)ctx).getIssuedTokenContextMap().put(sctId, ictx);
             } else if (requestType.toString().equals(WSTrustConstants.CANCEL_REQUEST)) {
+                retAction = WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_RESPONSE_ACTION;
                 rstr =  scContract.cancel(rst, ictx, issuedTokenContextMap);
             } else {
                 throw new UnsupportedOperationException(
@@ -551,7 +554,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
         //String sctId = sct.getIdentifier().toString();
         //((ProcessingContextImpl)ctx).getIssuedTokenContextMap().put(sctId, ictx);
         
-        Packet retPacket = addAddressingHeaders(packet, retMsg, action);
+        Packet retPacket = addAddressingHeaders(packet, retMsg, retAction);
         if (isSCTIssue){
             List<PolicyAssertion> policies = getOutBoundSCP(packet.getMessage());
             
