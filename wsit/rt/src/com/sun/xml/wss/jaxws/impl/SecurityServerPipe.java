@@ -225,18 +225,24 @@ public class SecurityServerPipe extends SecurityPipeBase {
                 
                 if (nextPipe != null) {
                     retPacket = nextPipe.process(packet);
+                    
+                    // Add addrsssing headers to trust message
+                    if (isTrustMessage){
+                       retPacket = addAddressingHeaders(packet, retPacket.getMessage(), WSTrustConstants.REQUEST_SECURITY_TOKEN_RESPONSE_ISSUE_ACTION);
+                    }
                 }else {
                     retPacket = packet;
                 }
                 
-                // Add addrsssing headers to trust message
+               /* // Add addrsssing headers to trust message
                 if (isTrustMessage){
-                    Packet newRetPacket = packet.createServerResponse(retPacket.getMessage(), pipeConfig.getBinding().getAddressingVersion(), pipeConfig.getBinding().getSOAPVersion(), WSTrustConstants.REQUEST_SECURITY_TOKEN_RESPONSE_ISSUE_ACTION); 
+                    System.out.println("****It is a trust message. Adding addressing herder to it");
+                    Packet newRetPacket = packet.createServerResponse(retPacket.getMessage(), addVer, pipeConfig.getBinding().getSOAPVersion(), WSTrustConstants.REQUEST_SECURITY_TOKEN_RESPONSE_ISSUE_ACTION); 
                     newRetPacket.proxy = retPacket.proxy;
                     newRetPacket.invocationProperties.putAll(retPacket.invocationProperties);
                     
                     retPacket = newRetPacket;
-                }
+                }*/
             }
         }
         
@@ -545,10 +551,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
         //String sctId = sct.getIdentifier().toString();
         //((ProcessingContextImpl)ctx).getIssuedTokenContextMap().put(sctId, ictx);
         
-        Packet retPacket = packet.createServerResponse(retMsg, pipeConfig.getBinding().getAddressingVersion(), pipeConfig.getBinding().getSOAPVersion(), action); 
-
-        retPacket.proxy = packet.proxy;
-        retPacket.invocationProperties.putAll(packet.invocationProperties);
+        Packet retPacket = addAddressingHeaders(packet, retMsg, action);
         if (isSCTIssue){
             List<PolicyAssertion> policies = getOutBoundSCP(packet.getMessage());
             
@@ -673,6 +676,15 @@ public class SecurityServerPipe extends SecurityPipeBase {
         }else{
             return operation.getOutput().getAction();
         }
+    }
+    
+    private Packet addAddressingHeaders(Packet packet, Message retMsg, String action){
+        Packet retPacket = packet.createServerResponse(retMsg, addVer, soapVersion, action); 
+
+        retPacket.proxy = packet.proxy;
+        retPacket.invocationProperties.putAll(packet.invocationProperties);
+        
+        return retPacket;
     }
     
    /* protected boolean isRMMessage(Packet packet){
