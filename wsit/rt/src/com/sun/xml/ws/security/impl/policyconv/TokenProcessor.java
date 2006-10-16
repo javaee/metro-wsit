@@ -204,10 +204,10 @@ public class TokenProcessor {
        public void setTokenValueType(AuthenticationTokenPolicy.X509CertificateBinding x509CB, PolicyAssertion tokenAssertion){
            
          NestedPolicy policy = tokenAssertion.getNestedPolicy();
-         AssertionSet as = policy.getAssertionSet();
          if(policy==null){
              return;
          }
+         AssertionSet as = policy.getAssertionSet();
          Iterator<PolicyAssertion> itr = as.iterator();
          while(itr.hasNext()){
              PolicyAssertion policyAssertion = (PolicyAssertion)itr.next();
