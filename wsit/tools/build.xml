@@ -28,7 +28,7 @@
         </resgen>
         
     </target>
-    
+
     <taskdef name="concatmanifest" classname="taskdefs.ConcatManifest">
         <classpath>
             <fileset dir="../${etc.lib.dir}" includes="wsit-taskdefs.jar"/>
@@ -40,8 +40,8 @@
         <element name="metainf" optional="true"/>
         <sequential>
             <property name="tmpdir" value="${dist.image.dir}/tmp"/>
-            <updateManifestWithVersion file="${tmpdir}/MANIFEST.MF"/>
             <copy file="../${etc.metainf.dir}/MANIFEST.MF" todir="${tmpdir}"/>
+            <updateManifestWithVersion file="${tmpdir}/MANIFEST.MF"/>
             <concatmanifest tempdir="${tmpdir}" manifest="${tmpdir}/MANIFEST.MF">
                 <fileset dir="@{libdir}">
                     <include name="*.jar"/>
