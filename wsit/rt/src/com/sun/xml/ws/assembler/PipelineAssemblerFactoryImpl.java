@@ -108,13 +108,6 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             }
             p = dump(context, CLIENT_PREFIX + WSS_SUFFIX + BEFORE_SUFFIX, p);
 
-            p = dump(context, CLIENT_PREFIX + WSA_SUFFIX + AFTER_SUFFIX, p);
-            // check for WS-Addressing
-            if (isAddressingEnabled(policyMap, context.getWsdlModel(), context.getBinding())) {
-                p = context.createWsaPipe(p);
-            }
-            p = dump(context, CLIENT_PREFIX + WSA_SUFFIX + BEFORE_SUFFIX, p);
-
             // MEX pipe here
 
             p = dump(context, CLIENT_PREFIX + WSRM_SUFFIX + AFTER_SUFFIX, p);
@@ -156,6 +149,13 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
 
             p = context.createClientMUPipe(p);
             p = context.createHandlerPipe(p);
+
+            p = dump(context, CLIENT_PREFIX + WSA_SUFFIX + AFTER_SUFFIX, p);
+            // check for WS-Addressing
+            if (isAddressingEnabled(policyMap, context.getWsdlModel(), context.getBinding())) {
+                p = context.createWsaPipe(p);
+            }
+            p = dump(context, CLIENT_PREFIX + WSA_SUFFIX + BEFORE_SUFFIX, p);
 
             return p;
         }
