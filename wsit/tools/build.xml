@@ -9,7 +9,6 @@
 
     <property name="build.dir" value="${basedir}/build"/>
     <property name="build.gen-src.dir" value="${build.dir}/gen-src"/>
-
     
     <target name="resgen" depends="init"
             description="Generate class wrappers for all property files that contain localizable messages">
@@ -79,7 +78,7 @@
     <target name="combine-jars-tooltime">
         <combine-jars-macro jarname="${name}-tools" classesdir="build/classes">
             <services>
-                
+
                 <fileset dir="${tmpdir}">
                     <include name="**/*.*"/>
                     <exclude name="**/*.TWSDL*"/>
@@ -88,7 +87,7 @@
             </services>
         </combine-jars-macro>
     </target>
-    
+
     <target name="src-zip">
         <mkdir dir="${build.dir}/temp"/>
         <unzip dest="${build.dir}/temp">
@@ -103,39 +102,18 @@
         <delete dir="${build.dir}/temp" includeemptydirs="true"/>
     </target>
 
+    <target name="wsit-jars-tools">
+        <mkdir dir="${tools.dir}/tmp/META-INF"/>
+        <property name="wsit.tools.dir" value="${tools.dir}/build"/>
+        <property name="wsit.tools.jarname" value="wsit-tools"/>
+        <mkdir dir="${wsit.tools.dir}"/>
 
-   <!-- <target name="wsit-jars-tools" depends="compile" >-->
-    <target name="wsit-jars-tools"  >
-
-
-             <mkdir dir="${tools.dir}/tmp/META-INF"/>
-             <property name="wsit.tools.dir" value = "${tools.dir}/build"/>
-             <property name="wsit.tools.jarname" value = "wsit-tools"/>
-             <mkdir dir="${wsit.tools.dir}"/>
-
-
-
-             <!--<copy todir="${tools.dir}/tmp/META-INF/services" overwrite="true">
-                 <fileset dir="../etc/META-INF/services">
-                     <include name="*.*"/>
-
-                 </fileset>
-             </copy>-->
-
-             <updateManifestWithVersion file="${tools.dir}/tmp/MANIFEST.MF"/>
-             <jar destfile="${wsit.tools.dir}/${wsit.tools.jarname}.jar" manifest="${tools.dir}/tmp/MANIFEST.MF">
-
-                    <!--<metainf dir="${tools.dir}/tmp"/>-->
-
-                    <fileset dir="${tools.dir}/build/classes"/>
-                </jar>
-              <!--  <zip destfile="${wsit.tools.dir}/${wsit.tools.jarname}-src.zip">
-                   <fileset dir="src"/>
-
-                </zip>-->
-               <delete dir="${tools.dir}/tmp"/>
-
-            </target>
+        <updateManifestWithVersion file="${tools.dir}/tmp/MANIFEST.MF"/>
+        <jar destfile="${wsit.tools.dir}/${wsit.tools.jarname}.jar" manifest="${tools.dir}/tmp/MANIFEST.MF">
+            <fileset dir="${tools.dir}/build/classes"/>
+        </jar>
+        <delete dir="${tools.dir}/tmp"/>
+    </target>
 
     <target name="create-wsit-tools-jar" depends="wsit-jars-tools"/>
 </project>

@@ -34,7 +34,6 @@
     <property name="build.dir" value="${basedir}/build"/>
     <property name="build.gen-src.dir" value="${build.dir}/gen-src"/>
 
-
     <target name="resgen" depends="init"
             description="Generate class wrappers for all property files that contain localizable messages">
 
@@ -151,42 +150,22 @@
 
      <target name="create-wsit-runtime-jar" depends="wsit-jars-runtime"/>
 
-    <!-- <target name="wsit-jars-runtime"  depends="compile">-->
-     <target name="wsit-jars-runtime" >
+    <target name="wsit-jars-runtime">
+        <mkdir dir="${rt.dir}/tmp/META-INF/services"/>
+        <property name="wsit.rt.dir" value="${rt.dir}/build"/>
+        <property name="wsit.rt.jarname" value="wsit-rt"/>
+        <mkdir dir="${wsit.rt.dir}"/>
+        <updateManifestWithVersion file="${rt.dir}/tmp/MANIFEST.MF"/>
 
-         <mkdir dir="${rt.dir}/tmp/META-INF/services"/>
-         <property name="wsit.rt.dir" value = "${rt.dir}/build"/>
-         <property name="wsit.rt.jarname" value = "wsit-rt"/>
-         <mkdir dir="${wsit.rt.dir}"/>
-
-
-         <!--<copy todir="${rt.dir}/tmp/META-INF/services" overwrite="true">
-             <fileset dir="../etc/META-INF/services">
-                 <include name="*.*"/>
-
-             </fileset>
-         </copy>-->
-         <updateManifestWithVersion file="${rt.dir}/tmp/MANIFEST.MF"/>
-
-         <jar destfile="${wsit.rt.dir}/${wsit.rt.jarname}.jar" manifest="${rt.dir}/tmp/MANIFEST.MF">
-
-                 <metainf dir="../etc/META-INF">
-                     <include name="services/*.*"/>
-                     <exclude name="services/*.TJavaGeneratorExtension"/>
-                     <exclude name="services/*.TWSDLExtensionHandler"/>
-                 </metainf>
-
-
-                <fileset dir="${rt.dir}/build/classes"/>
-            </jar>
-
-         <!--<zip destfile="${wsit.rt.dir}/${wsit.rt.jarname}-src.zip">
-            <fileset dir="src"/>
-
-        </zip>-->
-
+        <jar destfile="${wsit.rt.dir}/${wsit.rt.jarname}.jar" manifest="${rt.dir}/tmp/MANIFEST.MF">
+            <metainf dir="../etc/META-INF">
+                <include name="services/*.*"/>
+                <exclude name="services/*.TJavaGeneratorExtension"/>
+                <exclude name="services/*.TWSDLExtensionHandler"/>
+            </metainf>
+            <fileset dir="${rt.dir}/build/classes"/>
+        </jar>
         <delete dir="${rt.dir}/tmp"/>
-
-     </target>
+    </target>
 
 </project>
