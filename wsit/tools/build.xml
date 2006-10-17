@@ -129,10 +129,10 @@
 
                     <fileset dir="${tools.dir}/build/classes"/>
                 </jar>
-                <zip destfile="${wsit.tools.dir}/${wsit.tools.jarname}-src.zip">
+              <!--  <zip destfile="${wsit.tools.dir}/${wsit.tools.jarname}-src.zip">
                    <fileset dir="src"/>
 
-                </zip>
+                </zip>-->
                <delete dir="${tools.dir}/tmp"/>
 
             </target>

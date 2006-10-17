@@ -89,7 +89,7 @@
         <ant dir="${tools.dir}" target="create-wsit-tools-jar"/>
     </target>
 
-    <target name="create-wsit-jars" depends="jar" >
+    <target name="create-wsit-jars" depends="jar,src-zip" >
         <antcall target="create-wsit-runtime-jar"/>
         <antcall target="create-wsit-tools-jar"/>
     </target>
@@ -102,11 +102,13 @@
         <copy todir="${wsit.integration.dir}" >
             <fileset dir="${rt.dir}/build">
                 <include name="wsit-*.*"/>
+                <include name="*src.zip"/>
             </fileset>
         </copy>
         <copy todir="${wsit.integration.dir}" >
             <fileset dir="${tools.dir}/build/">
                 <include name="wsit-*.*"/>
+                <include name="*src.zip"/>
             </fileset>
         </copy>
         <copy todir="${wsit.integration.dir}">
@@ -121,6 +123,7 @@
                        <include name="wsit-rt*.*"/>
                        <include name="wsit-tools*.*"/>
                        <include name="xws-security.jar"/>
+                       <include name="*src*"/>
                        <include name="trust-jaxbbindings.jar"/>
                    </fileset>
 
