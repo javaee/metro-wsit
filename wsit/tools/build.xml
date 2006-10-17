@@ -122,7 +122,8 @@
                  </fileset>
              </copy>-->
 
-             <jar destfile="${wsit.tools.dir}/${wsit.tools.jarname}.jar" manifest="../${etc.metainf.dir}/MANIFEST.MF">
+             <updateManifestWithVersion file="${tools.dir}/tmp/MANIFEST.MF"/>
+             <jar destfile="${wsit.tools.dir}/${wsit.tools.jarname}.jar" manifest="${tools.dir}/tmp/MANIFEST.MF">
 
                     <!--<metainf dir="${tools.dir}/tmp"/>-->
 

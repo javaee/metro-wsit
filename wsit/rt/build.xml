@@ -165,8 +165,9 @@
 
              </fileset>
          </copy>-->
+         <updateManifestWithVersion file="${rt.dir}/tmp/MANIFEST.MF"/>
 
-         <jar destfile="${wsit.rt.dir}/${wsit.rt.jarname}.jar" manifest="../${etc.metainf.dir}/MANIFEST.MF">
+         <jar destfile="${wsit.rt.dir}/${wsit.rt.jarname}.jar" manifest="${rt.dir}/tmp/MANIFEST.MF">
 
                  <metainf dir="../etc/META-INF">
                      <include name="services/*.*"/>
