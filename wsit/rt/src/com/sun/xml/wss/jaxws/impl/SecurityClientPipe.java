@@ -189,7 +189,9 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
     public Packet process(Packet packet) {
          
         // Add Action header to trust message
+        boolean isTrustMsg = false;
         if ("true".equals(packet.invocationProperties.get(WSTrustConstants.IS_TRUST_MESSAGE))){
+            isTrustMsg = true;
             String action = (String)packet.invocationProperties.get(WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION);
             HeaderList headers = packet.getMessage().getHeaders();
             headers.fillRequestAddressingHeaders(packet, addVer, soapVersion,false, action);
@@ -245,6 +247,7 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
             throw new WebServiceException(ex);
         }/**/
         //---------------INBOUND SECURITY VERIFICATION----------
+        
         isSCMessage = isSCMessage(packet);
         if(isSCMessage){
             
@@ -284,6 +287,10 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
         }
         resetCachedOperation();
         ret.setMessage(msg);
+        
+        if (isTrustMsg){
+            String action = getAction(ret);
+        }
         
         return ret;
     }
