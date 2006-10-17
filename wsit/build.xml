@@ -2,8 +2,8 @@
 <!-- You may freely edit this file. See commented blocks below for -->
 <!-- some examples of how to customize the build. -->
 <!-- (If you delete it and reopen the project it will be recreated.) -->
-<project name="WSIT-Binary" default="main" basedir=".">
-    <description>Builds, tests, and runs the project WSIT-Binary.</description>
+<project name="WSIT" default="main" basedir=".">
+    <description>Builds, tests, and runs the project WSIT.</description>
     <import file="nbproject/build-impl.xml"/>
     <import file="properties.xml"/>
 
@@ -127,6 +127,18 @@
          </zip>
     </target>
     
+    <macrodef name="updateManifestWithVersion"
+            description="updates a jar manifest file with the version information">
+      <attribute name="file" />
+      <sequential>
+        <manifest mode="update" file="@{file}">
+          <attribute name="Build-Id" value="${build.id}" />
+          <attribute name="Build-Version" value="${build.version}" />
+          <attribute name="Major-Version" value="${release.impl.version}" />
+        </manifest>
+      </sequential>
+    </macrodef>
+
     <target name="-post-compile-test"
             description="Run unit tests of dependent projects">
         <ant dir="${rt.dir}"

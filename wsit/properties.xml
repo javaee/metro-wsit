@@ -23,7 +23,7 @@
 -->
 
 <!--
- $Id: properties.xml,v 1.11 2006-10-06 00:18:03 arungupta Exp $
+ $Id: properties.xml,v 1.12 2006-10-17 18:49:11 arungupta Exp $
 
  Copyright (c) 2005 Sun Microsystems, Inc.
  All rights reserved.
@@ -54,6 +54,14 @@
     <property name="compile.debug" value="true"/>
     <property name="compile.deprecation" value="false"/>
     <property name="compile.optimize" value="false"/>
+
+    <property name="release.impl.version" value="1.0"/>
+    <property name="release.impl.version.suffix" value="EA"/>
+    <tstamp>
+        <format property="now" pattern="MM/dd/yyyy hh:mm aa" unit="hour" locale="en_US"/>
+    </tstamp>
+    <property name="build.id" value="${now}(${user.name})" />
+    <property name="build.version" value="${ant.project.name} ${release.impl.version}-${build.id}-${release.impl.version.suffix}" />
 
     <property name="tmpdir" value="${basedir}/tmp"/>
 </project>
