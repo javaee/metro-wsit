@@ -1,5 +1,5 @@
 /*
- * $Id: DirectReferenceImpl.java,v 1.1 2006-05-03 22:57:28 arungupta Exp $
+ * $Id: DirectReferenceImpl.java,v 1.2 2006-10-17 05:45:47 raharsha Exp $
  */
 
 /*
@@ -26,7 +26,7 @@
 
 package com.sun.xml.ws.security.trust.impl.elements.str;
 
-import com.sun.xml.ws.security.impl.bindings.ReferenceType;
+import com.sun.xml.ws.security.secext10.ReferenceType;
 import com.sun.xml.ws.security.trust.elements.str.DirectReference;
 
 import java.net.URI;

@@ -1,5 +1,5 @@
 /*
- * $Id: Lifetime.java,v 1.1 2006-05-03 22:57:17 arungupta Exp $
+ * $Id: Lifetime.java,v 1.2 2006-10-17 05:45:45 raharsha Exp $
  */
 
 /*
@@ -25,7 +25,7 @@
  */
 
 package com.sun.xml.ws.security.trust.elements;
-import com.sun.xml.ws.security.wsu.AttributedDateTime;
+import com.sun.xml.ws.security.wsu10.AttributedDateTime;
 
 /**
  *

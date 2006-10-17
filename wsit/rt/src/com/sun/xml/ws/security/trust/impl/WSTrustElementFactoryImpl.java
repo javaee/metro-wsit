@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustElementFactoryImpl.java,v 1.3 2006-09-20 23:58:47 manveen Exp $
+ * $Id: WSTrustElementFactoryImpl.java,v 1.4 2006-10-17 05:45:45 raharsha Exp $
  */
 
 /*
@@ -26,7 +26,7 @@
 
 package com.sun.xml.ws.security.trust.impl;
 
-import com.sun.xml.ws.security.impl.bindings.SecurityTokenReferenceType;
+import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
 
 import com.sun.xml.ws.security.trust.elements.AllowPostdating;
 import com.sun.xml.ws.security.trust.elements.BinarySecret;
@@ -81,7 +81,7 @@ import com.sun.xml.ws.security.EncryptedKey;
 import com.sun.xml.ws.security.trust.elements.str.Reference;
 import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
 import com.sun.xml.ws.security.Token;
-import com.sun.xml.ws.security.wsu.AttributedDateTime;
+import com.sun.xml.ws.security.wsu10.AttributedDateTime;
 
 import java.net.URI;
 
@@ -456,7 +456,7 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
      */
     public JAXBElement toJAXBElement(SecurityTokenReference str){
         JAXBElement<SecurityTokenReferenceType> strElement =
-                (new com.sun.xml.ws.security.impl.bindings.ObjectFactory()).createSecurityTokenReference((SecurityTokenReferenceType)str);
+                (new com.sun.xml.ws.security.secext10.ObjectFactory()).createSecurityTokenReference((SecurityTokenReferenceType)str);
         return strElement;
     }
     
@@ -654,7 +654,7 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
             }
             
             javax.xml.bind.Marshaller marshaller = getContext().createMarshaller();
-            JAXBElement<SecurityTokenReferenceType> strElement =  (new com.sun.xml.ws.security.impl.bindings.ObjectFactory()).createSecurityTokenReference((SecurityTokenReferenceType)str);
+            JAXBElement<SecurityTokenReferenceType> strElement =  (new com.sun.xml.ws.security.secext10.ObjectFactory()).createSecurityTokenReference((SecurityTokenReferenceType)str);
             marshaller.marshal(strElement, doc);
             return doc.getDocumentElement();
         } catch (javax.xml.parsers.ParserConfigurationException pe) {

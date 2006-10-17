@@ -1,5 +1,5 @@
 /*
- * $Id: KeyIdentifierImpl.java,v 1.1 2006-05-03 22:57:28 arungupta Exp $
+ * $Id: KeyIdentifierImpl.java,v 1.2 2006-10-17 05:45:47 raharsha Exp $
  */
 
 /*
@@ -26,7 +26,7 @@
 
 package com.sun.xml.ws.security.trust.impl.elements.str;
 
-import com.sun.xml.ws.security.impl.bindings.KeyIdentifierType;
+import com.sun.xml.ws.security.secext10.KeyIdentifierType;
 import com.sun.xml.ws.security.trust.elements.str.KeyIdentifier;
 
 import java.net.URI;

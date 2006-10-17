@@ -87,7 +87,7 @@ import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponse;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponseCollection;
 import com.sun.xml.ws.security.trust.elements.RequestedSecurityToken;
-import com.sun.xml.ws.security.wsu.AttributedDateTime;
+import com.sun.xml.ws.security.wsu10.AttributedDateTime;
 
 import com.sun.xml.wss.core.reference.X509ThumbPrintIdentifier;
 import com.sun.xml.wss.core.reference.X509SubjectKeyIdentifier;

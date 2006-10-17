@@ -24,7 +24,7 @@
 package com.sun.xml.ws.rm.protocol;
 
 
-import com.sun.xml.ws.security.impl.bindings.SecurityTokenReferenceType;
+import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
 import org.w3c.dom.Element;
 
 import javax.xml.bind.annotation.*;

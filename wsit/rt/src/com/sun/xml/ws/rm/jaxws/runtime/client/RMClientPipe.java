@@ -46,7 +46,7 @@ import com.sun.xml.ws.rm.RMException;
 import com.sun.xml.ws.rm.jaxws.runtime.InboundMessageProcessor;
 import com.sun.xml.ws.rm.jaxws.runtime.PipeBase;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
-import com.sun.xml.ws.security.impl.bindings.SecurityTokenReferenceType;
+import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
 import com.sun.xml.wss.jaxws.impl.SecurityClientPipe;
 
 import javax.xml.bind.JAXBElement;

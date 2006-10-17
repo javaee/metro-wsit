@@ -1,5 +1,5 @@
 /*
- * $Id: RequestedAttachedReferenceImpl.java,v 1.1 2006-05-03 22:57:27 arungupta Exp $
+ * $Id: RequestedAttachedReferenceImpl.java,v 1.2 2006-10-17 05:45:46 raharsha Exp $
  */
 
 /*
@@ -28,7 +28,7 @@ package com.sun.xml.ws.security.trust.impl.elements;
 
 import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
 import com.sun.xml.ws.security.trust.impl.elements.str.SecurityTokenReferenceImpl;
-import com.sun.xml.ws.security.impl.bindings.SecurityTokenReferenceType;
+import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
 
 import com.sun.xml.ws.security.trust.elements.RequestedAttachedReference;
 import com.sun.xml.ws.security.trust.impl.bindings.RequestedReferenceType;

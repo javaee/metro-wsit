@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustElementFactory.java,v 1.3 2006-08-14 10:10:54 raharsha Exp $
+ * $Id: WSTrustElementFactory.java,v 1.4 2006-10-17 05:45:44 raharsha Exp $
  */
 
 /*
@@ -55,7 +55,7 @@ import com.sun.xml.ws.security.EncryptedKey;
 import com.sun.xml.ws.security.trust.elements.str.Reference;
 import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
 import com.sun.xml.ws.security.Token;
-import com.sun.xml.ws.security.wsu.AttributedDateTime;
+import com.sun.xml.ws.security.wsu10.AttributedDateTime;
 
 import javax.xml.transform.Source;
 import org.w3c.dom.Document;
@@ -102,7 +102,7 @@ public abstract class WSTrustElementFactory {
     
     static {
         try {
-            jaxbContext = JAXBContext.newInstance("com.sun.xml.ws.security.trust.impl.bindings:com.sun.xml.ws.security.secconv.impl.bindings:com.sun.xml.ws.security.impl.bindings:com.sun.xml.ws.policy.impl.bindings");
+            jaxbContext = JAXBContext.newInstance("com.sun.xml.ws.security.trust.impl.bindings:com.sun.xml.ws.security.secconv.impl.bindings:com.sun.xml.ws.security.secext10:com.sun.xml.ws.policy.impl.bindings");
         } catch (JAXBException jbe) {
             throw new RuntimeException(jbe.getMessage());
         }        

@@ -33,8 +33,9 @@ import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.security.secconv.WSSCElementFactory;
 import com.sun.xml.ws.security.secconv.WSSecureConversationException;
 import com.sun.xml.ws.policy.impl.bindings.AppliesTo;
-import com.sun.xml.ws.security.trust.impl.bindings.EndpointReference;
 import com.sun.xml.ws.security.trust.impl.bindings.AttributedURI;
+import com.sun.xml.ws.security.trust.impl.bindings.EndpointReference;
+
 
 import java.net.URI;
 import java.net.URISyntaxException;

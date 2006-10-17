@@ -1,5 +1,5 @@
 /*
- * $Id: ProofEncryptionImpl.java,v 1.1 2006-05-03 22:57:26 arungupta Exp $
+ * $Id: ProofEncryptionImpl.java,v 1.2 2006-10-17 05:45:46 raharsha Exp $
  */
 
 /*
@@ -28,7 +28,7 @@ package com.sun.xml.ws.security.trust.impl.elements;
 
 import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
 import com.sun.xml.ws.security.trust.impl.elements.str.SecurityTokenReferenceImpl;
-import com.sun.xml.ws.security.impl.bindings.SecurityTokenReferenceType;
+import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
 import com.sun.xml.ws.security.Token;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.ws.security.trust.elements.ProofEncryption;
@@ -80,7 +80,7 @@ public class ProofEncryptionImpl extends ProofEncryptionType implements ProofEnc
         if (ref != null) {
             str = ref;
             JAXBElement<SecurityTokenReferenceType> strElement=
-                    (new com.sun.xml.ws.security.impl.bindings.ObjectFactory()).createSecurityTokenReference((SecurityTokenReferenceType)ref);
+                    (new com.sun.xml.ws.security.secext10.ObjectFactory()).createSecurityTokenReference((SecurityTokenReferenceType)ref);
             setAny(strElement);
         }
         setTargetType(WSTrustConstants.STR_TYPE);

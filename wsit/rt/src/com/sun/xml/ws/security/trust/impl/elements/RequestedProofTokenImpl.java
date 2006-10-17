@@ -1,5 +1,5 @@
 /*
- * $Id: RequestedProofTokenImpl.java,v 1.3 2006-09-20 23:58:48 manveen Exp $
+ * $Id: RequestedProofTokenImpl.java,v 1.4 2006-10-17 05:45:46 raharsha Exp $
  */
 
 /*
@@ -48,7 +48,7 @@ import com.sun.xml.ws.security.trust.elements.RequestedProofToken;
 import com.sun.xml.ws.security.trust.impl.bindings.RequestedProofTokenType;
 import com.sun.xml.ws.security.trust.impl.bindings.BinarySecretType;
 
-import com.sun.xml.ws.security.impl.bindings.SecurityTokenReferenceType;
+import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -115,7 +115,7 @@ public class RequestedProofTokenImpl extends RequestedProofTokenType implements 
         if (reference != null) {
             str = reference;
             JAXBElement<SecurityTokenReferenceType> strElement=
-                    (new com.sun.xml.ws.security.impl.bindings.ObjectFactory()).createSecurityTokenReference((SecurityTokenReferenceType)reference);
+                    (new com.sun.xml.ws.security.secext10.ObjectFactory()).createSecurityTokenReference((SecurityTokenReferenceType)reference);
             setAny(strElement);
         }
         setProofTokenType(RequestedProofToken.TOKEN_REF_TYPE);

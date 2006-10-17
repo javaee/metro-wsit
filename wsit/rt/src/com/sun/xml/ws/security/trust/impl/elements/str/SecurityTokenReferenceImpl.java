@@ -1,5 +1,5 @@
 /*
- * $Id: SecurityTokenReferenceImpl.java,v 1.1 2006-05-03 22:57:28 arungupta Exp $
+ * $Id: SecurityTokenReferenceImpl.java,v 1.2 2006-10-17 05:45:47 raharsha Exp $
  */
 
 /*
@@ -26,11 +26,11 @@
 
 package com.sun.xml.ws.security.trust.impl.elements.str;
 
-import com.sun.xml.ws.security.impl.bindings.KeyIdentifierType;
+import com.sun.xml.ws.security.secext10.KeyIdentifierType;
 import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
-import com.sun.xml.ws.security.impl.bindings.SecurityTokenReferenceType;
-import com.sun.xml.ws.security.impl.bindings.ObjectFactory;
-import com.sun.xml.ws.security.impl.bindings.ReferenceType;
+import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
+import com.sun.xml.ws.security.secext10.ObjectFactory;
+import com.sun.xml.ws.security.secext10.ReferenceType;
 import com.sun.xml.ws.security.trust.elements.str.KeyIdentifier;
 import com.sun.xml.ws.security.trust.elements.str.Reference;
 import com.sun.xml.ws.security.trust.WSTrustConstants;

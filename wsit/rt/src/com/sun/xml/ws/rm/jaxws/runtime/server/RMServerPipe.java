@@ -492,12 +492,12 @@ public class RMServerPipe extends PipeBase<RMDestination,
         //TODO.. Read STR element in csrElement if any
         this.secureReliableMessaging = csrElement.getSecurityTokenReference()!=null?true:false;
         if (this.secureReliableMessaging) {
-            com.sun.xml.ws.security.impl.bindings.SecurityTokenReferenceType strType= csrElement.getSecurityTokenReference();
+            com.sun.xml.ws.security.secext10.SecurityTokenReferenceType strType= csrElement.getSecurityTokenReference();
             SecurityContextToken sct = (SecurityContextToken)packet.invocationProperties.get(MessageConstants.INCOMING_SCT);
             if (sct != null){
                 String strId = sct.getIdentifier().toString();
                 WSTrustElementFactory wsTrustElemFactory = WSTrustElementFactory.newInstance();
-                JAXBElement jaxbElem = new com.sun.xml.ws.security.impl.bindings.ObjectFactory().createSecurityTokenReference(strType);
+                JAXBElement jaxbElem = new com.sun.xml.ws.security.secext10.ObjectFactory().createSecurityTokenReference(strType);
                 SecurityTokenReference str = wsTrustElemFactory.createSecurityTokenReference(jaxbElem);
 
                 com.sun.xml.ws.security.trust.elements.str.Reference ref = str.getReference();
