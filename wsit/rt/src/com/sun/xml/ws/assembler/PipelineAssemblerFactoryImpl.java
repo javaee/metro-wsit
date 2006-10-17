@@ -47,6 +47,7 @@ import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.policy.jaxws.WSDLPolicyMapWrapper;
 import com.sun.xml.ws.policy.jaxws.documentfilter.PrivateAssertionFilter;
 import com.sun.xml.ws.rm.RMConstants;
+import com.sun.xml.ws.rm.Constants;
 import com.sun.xml.ws.rm.jaxws.runtime.client.RMClientPipe;
 import com.sun.xml.ws.rm.jaxws.runtime.server.RMServerPipe;
 import com.sun.xml.ws.util.ServiceFinder;
@@ -303,7 +304,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
                         port.getName());
                 Policy policy = policyMap.getEndpointEffectivePolicy(endpointKey);
 
-                return (policy != null) && policy.contains(RMConstants.version);
+                return (policy != null) && policy.contains(Constants.version);
             } catch (PolicyException e) {
                 throw new WebServiceException(e);
             }

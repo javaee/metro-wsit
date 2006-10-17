@@ -97,7 +97,7 @@ import com.sun.xml.wss.impl.PolicyViolationException;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelUnmarshaller;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.policy.PolicyAssertion;
-import com.sun.xml.ws.rm.RMConstants;
+import com.sun.xml.ws.rm.Constants;
 import com.sun.xml.ws.runtime.util.SessionManager;
 import com.sun.xml.ws.security.impl.IssuedTokenContextImpl;
 
@@ -1498,7 +1498,7 @@ public abstract class SecurityPipeBase implements Pipe {
                     port.getName());
             Policy policy = policyMap.getEndpointEffectivePolicy(endpointKey);
             
-            return (policy != null) && policy.contains(RMConstants.version);
+            return (policy != null) && policy.contains(Constants.version);
         } catch (PolicyException e) {
             throw new WebServiceException(e);
         }
