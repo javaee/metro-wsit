@@ -27,12 +27,10 @@ import java.lang.reflect.InvocationTargetException;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceException;
-import javax.xml.ws.soap.AddressingFeature;
 
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
-import com.sun.xml.ws.developer.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
@@ -109,6 +107,13 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
                 securityClientPipe = (SecurityClientPipe) p;
             }
             p = dump(context, CLIENT_PREFIX + WSS_SUFFIX + BEFORE_SUFFIX, p);
+
+            p = dump(context, CLIENT_PREFIX + WSA_SUFFIX + AFTER_SUFFIX, p);
+            // check for WS-Addressing
+            if (isAddressingEnabled(policyMap, context.getWsdlModel(), context.getBinding())) {
+                p = context.createWsaPipe(p);
+            }
+            p = dump(context, CLIENT_PREFIX + WSA_SUFFIX + BEFORE_SUFFIX, p);
 
             // MEX pipe here
 
@@ -257,19 +262,19 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
                 PolicyMapKey endpointKey = PolicyMap.createWsdlEndpointScopeKey(wsdlPort.getOwner().getName(),
                         wsdlPort.getName());
                 Policy policy = policyMap.getEndpointEffectivePolicy(endpointKey);
-                
+
                 for (WSDLBoundOperation wbo : wsdlPort.getBinding().getBindingOperations()) {
                     PolicyMapKey operationKey = PolicyMap.createWsdlOperationScopeKey(wsdlPort.getOwner().getName(),
                             wsdlPort.getName(),
                             wbo.getName());
                     policy = policyMap.getOperationEffectivePolicy(operationKey);
-                    
+
                     if (policy != null) {
                         // look for ATAlwaysCapable on the server side
                         if ((isServerSide) && (policy.contains(AT_ALWAYS_CAPABILITY))) {
                             return true;
                         }
-                        
+
                         // look for ATAssertion in both client and server
                         if (policy.contains(AT_ASSERTION)) {
                             return true;
@@ -279,10 +284,10 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             } catch (PolicyException e) {
                 throw new WebServiceException(e);
             }
-            
+
             return false;
         }
-        
+
         /**
          * Checks to see whether WS-ReliableMessaging is enabled or not.
          *
@@ -292,18 +297,18 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
         private boolean isReliableMessagingEnabled(PolicyMap policyMap, WSDLPort port) {
             if (policyMap == null)
                 return false;
-            
+
             try {
                 PolicyMapKey endpointKey = policyMap.createWsdlEndpointScopeKey(port.getOwner().getName(),
                         port.getName());
                 Policy policy = policyMap.getEndpointEffectivePolicy(endpointKey);
-                
+
                 return (policy != null) && policy.contains(RMConstants.version);
             } catch (PolicyException e) {
                 throw new WebServiceException(e);
             }
         }
-        
+
         /**
          * Checks to see whether WS-Addressing is enabled or not.
          *
@@ -313,27 +318,25 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
          * @return true if Addressing is enabled, false otherwise
          */
         private boolean isAddressingEnabled(PolicyMap policyMap, WSDLPort port, WSBinding binding) {
-            if (binding.isFeatureEnabled(AddressingFeature.ID) ||
-                    binding.isFeatureEnabled(MemberSubmissionAddressingFeature.ID))
+            if (AddressingVersion.isEnabled(binding))
                 return true;
-            
+
             if (null == policyMap)
                 return false;
-            
+
             try {
                 PolicyMapKey endpointKey = policyMap.createWsdlEndpointScopeKey(port.getOwner().getName(),
                         port.getName());
                 Policy policy = policyMap.getEndpointEffectivePolicy(endpointKey);
-                
+
                 return (policy != null) &&
-                        (policy.contains(ADDRESSING_POLICY_NAMESPACE_URI) ||
-                        policy.contains(AddressingVersion.W3C.wsdlNsUri) ||
-                        policy.contains(AddressingVersion.MEMBER.wsdlNsUri));
+                        (policy.contains(AddressingVersion.W3C.policyNsUri) ||
+                        policy.contains(AddressingVersion.MEMBER.policyNsUri));
             } catch (PolicyException e) {
                 throw new WebServiceException(e);
             }
         }
-        
+
         /**
          * Checks to see whether WS-Security is enabled or not.
          *
@@ -343,16 +346,16 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
         private boolean isSecurityEnabled(PolicyMap policyMap, WSDLPort wsdlPort) {
             if (policyMap == null)
                 return false;
-            
+
             try {
                 PolicyMapKey endpointKey = policyMap.createWsdlEndpointScopeKey(wsdlPort.getOwner().getName(),
                         wsdlPort.getName());
                 Policy policy = policyMap.getEndpointEffectivePolicy(endpointKey);
-                
+
                 if ((policy != null) && policy.contains(SECURITY_POLICY_NAMESPACE_URI)) {
                     return true;
                 }
-                
+
                 for (WSDLBoundOperation wbo : wsdlPort.getBinding().getBindingOperations()) {
                     PolicyMapKey operationKey = policyMap.createWsdlOperationScopeKey(wsdlPort.getOwner().getName(),
                             wsdlPort.getName(),
@@ -360,15 +363,15 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
                     policy = policyMap.getOperationEffectivePolicy(operationKey);
                     if ((policy != null) && policy.contains(SECURITY_POLICY_NAMESPACE_URI))
                         return true;
-                    
+
                     policy = policyMap.getInputMessageEffectivePolicy(operationKey);
                     if ((policy != null) && policy.contains(SECURITY_POLICY_NAMESPACE_URI))
                         return true;
-                    
+
                     policy = policyMap.getOutputMessageEffectivePolicy(operationKey);
                     if ((policy != null) && policy.contains(SECURITY_POLICY_NAMESPACE_URI))
                         return true;
-                    
+
                     policy = policyMap.getFaultMessageEffectivePolicy(operationKey);
                     if ((policy != null) && policy.contains(SECURITY_POLICY_NAMESPACE_URI))
                         return true;
@@ -376,10 +379,10 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             } catch (PolicyException e) {
                 throw new WebServiceException(e);
             }
-            
+
             return false;
         }
-        
+
         private Pipe dumpAction(String name, WSBinding binding, Pipe p) {
             if (Boolean.getBoolean(name)) {
                 ServiceFinder<ActionDumpPipe> pipes = ServiceFinder.find(ActionDumpPipe.class);
@@ -388,19 +391,19 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
                         return pipes.toArray()[0];
                     }
                 }
-                
+
                 return new ActionDumpPipe(name, binding, p);
             }
-            
+
             return p;
         }
-        
+
         /**
          * Initializes the PolicyMap on the client side.
          */
         private PolicyMap initPolicyMap(ClientPipeAssemblerContext context) {
             PolicyMap map = null;
-            
+
             WSDLPort wsdlPort = context.getWsdlModel();
             WSDLModel model = wsdlPort.getBinding().getOwner();
             WSDLPolicyMapWrapper mapWrapper = model.getExtension(WSDLPolicyMapWrapper.class);
@@ -423,11 +426,11 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             if (mapWrapper != null) {
                 map = mapWrapper.getPolicyMap();
             }
-            
+
             return map;
         }
     }
-    
+
     public PipelineAssembler doCreate(final BindingID bindingId) {
         return new WsitPipelineAssembler(bindingId);
     }
