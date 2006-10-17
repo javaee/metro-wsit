@@ -43,6 +43,7 @@ public class EncodingPolicySelector extends PolicySelector{
         
         supportedAssertions.add(new QName(wsomaNamespaceUri,anOptimizedMimeSerialization));
         supportedAssertions.add(new QName(wspeNamespaceUri,anUtf816FFFECharacterEncoding));
+        supportedAssertions.add(FastInfosetModelConfiguratorProvider.fastInfosetAssertion);
     }
     
     /**
