@@ -29,14 +29,12 @@
  */
 package com.sun.xml.ws.rm.jaxws.runtime;
 
-import com.sun.xml.ws.rm.jaxws.util.ProcessingFilter;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
-import com.sun.xml.ws.rm.RMConstants;
 import com.sun.xml.ws.rm.RMException;
-import com.sun.xml.ws.rm.jaxws.runtime.client.ClientInboundSequence;
+import com.sun.xml.ws.rm.jaxws.util.ProcessingFilter;
 
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
@@ -73,8 +71,8 @@ public abstract class PipeBase<PROVIDER extends RMProvider,
         this.nextPipe = nextPipe;
         this.filter = provider.getProcessingFilter();
 
-        marshaller = RMConstants.createMarshaller();
-        unmarshaller = RMConstants.createUnmarshaller();
+       /* marshaller = RMConstants.createMarshaller();
+        unmarshaller = RMConstants.createUnmarshaller();*/
     }
 
 

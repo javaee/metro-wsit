@@ -31,7 +31,8 @@ package com.sun.xml.ws.rm.jaxws.util;
 
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.spi.PolicySelector;
-import static com.sun.xml.ws.rm.RMConstants.*;
+import static com.sun.xml.ws.rm.Constants.*;
+
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.Iterator;

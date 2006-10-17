@@ -30,12 +30,14 @@
 
 package com.sun.xml.ws.rm;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
+import com.sun.xml.ws.developer.MemberSubmissionEndpointReference;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
+import javax.xml.ws.wsaddressing.W3CEndpointReference;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,35 +48,48 @@ import java.util.List;
  * Class contains accessors for constants defined by the 02/2005 version of the 
  * WS-RM specification.
  */
-public class RMConstants {
+public enum RMConstants {
 
-    /*
-     * Policy namespaces.
-     */
-    public static final String version = "http://schemas.xmlsoap.org/ws/2005/02/rm/policy";
 
-    public static final String microsoftVersion = "http://schemas.microsoft.com/net/2005/02/rm/policy";
-    
-    public static final String sunVersion = "http://sun.com/2006/03/rm";
-        
-    private static AddressingVersion addressingVersion = AddressingVersion.W3C;
-
-    private static final JAXBContext jc;
-
-    public static AddressingVersion getAddressingVersion() {
-       return addressingVersion;
-    }
-    
-    public static URI getAnonymousURI() {
-        try {
-            return new URI(getAddressingVersion().getAnonymousUri());
-        } catch (Exception e) {
-            throw new Error(e);
+    W3C(AddressingVersion.W3C) {
+        @Override
+        public Class getAcksToClass (){
+            return W3CEndpointReference.class;
         }
-        
+    },
+    MEMBER(AddressingVersion.MEMBER)  {
+        @Override
+        public Class getAcksToClass (){
+            return MemberSubmissionEndpointReference.class;
+        }
+    };
+
+
+
+
+    private final AddressingVersion addressingVersion ;
+    // TODO FIX ME ADDRESSING_FIXME
+    // private static final JAXBContext jc;
+    private JAXBContext jc;
+
+
+
+    private RMConstants(AddressingVersion addVersion) {
+        this.addressingVersion = addVersion;
+
+        init();
+
     }
-    
-    static {
+
+    public static RMConstants getRMConstants(AddressingVersion version) {
+        if(version == AddressingVersion.W3C) {
+            return RMConstants.W3C;
+        } else {
+            return RMConstants.MEMBER;
+        }
+    }
+
+    private void init(){
         try {
 
             List<Class> classes = getClassesToBeBound();
@@ -94,7 +109,7 @@ public class RMConstants {
      *
      * @return the package name (com.sun.xml.ws.rm.protocol)
      */
-    private static String getPackageName() {
+    private  String getPackageName() {
         return Constants.PROTOCOL_PACKAGE_NAME;
     }
 
@@ -104,30 +119,12 @@ public class RMConstants {
      *
      * @return The URI (http://schemas.xmlsoap.org/ws/2005/02/rm)
      */
-    public static String getNamespaceURI() {
+    public String getNamespaceURI() {
         return Constants.WS_RM_NAMESPACE;
     }
 
 
-    /**
-     * Returns the value of the WS-Addressing Action property for CreateSeqence
-     * messages to an RMDestination.
-     *
-     * @return The Action value (http://schemas.xmlsoap.org/ws/2005/02/rm/CreateSequence)
-     */
-    public String getCreateSequenceAction() {
-        return "http://schemas.xmlsoap.org/ws/2005/02/rm/CreateSequence";
-    }
 
-    /**
-     * Returns the value of the WS-Addressing Action property for 
-     * CreateSeqenceResponse messages
-     *
-     * @return The Action value (http://schemas.xmlsoap.org/ws/2005/02/rm/CreateSequenceResponse)
-     */
-    public String getCreateSequenceResponseAction() {
-         return "http://schemas.xmlsoap.org/ws/2005/02/rm/CreateSequenceResponse";
-    }
     /**
      * Returns the QName of the CreateSequence element defined by the WS-RM schema.
      *
@@ -137,15 +134,6 @@ public class RMConstants {
         return new QName(getNamespaceURI(), "CreateSequence");
     }
 
-    /**
-     * Returns the value of the WS-Addressing Action property for TerminateSeqence
-     * messages to an RMDestination.
-     *
-     * @return The Action value (http://schemas.xmlsoap.org/ws/2005/02/rm/TerminateSequence)
-     */
-    public String getTerminateSequenceAction() {
-        return "http://schemas.xmlsoap.org/ws/2005/02/rm/TerminateSequence";
-    }
 
 
 
@@ -158,15 +146,7 @@ public class RMConstants {
         return new QName(getNamespaceURI(), "TerminateSequence");
     }
 
-    /**
-     * Returns the value of the WS-Addressing Action property stand alone AckRequested
-     * messages to an RMDestination.
-     *
-     * @return The Action value (http://schemas.xmlsoap.org/ws/2005/02/rm/AckRequested)
-     */
-    public String getAckRequestedAction() {
-        return "http://schemas.xmlsoap.org/ws/2005/02/rm/AckRequested";
-    }
+
 
     /**
      * Returns the QName of the AcksTo element defined by the WS-RM spec.
@@ -188,15 +168,7 @@ public class RMConstants {
         return "http://schemas.xmlsoap.org/ws/2005/02/rm/LastMessage";
     }
 
-    /**
-     * Returns the value of the WS-Addressing Action property for stand alone
-     * SequenceAcknowledgement messages.
-     *
-     * @return The Action value (http://schemas.xmlsoap.org/ws/2005/02/rm/SequenceAcknowledgement)
-     */
-     public String getSequenceAcknowledgementAction() {
-        return "http://schemas.xmlsoap.org/ws/2005/02/rm/SequenceAcknowledgement";
-    }
+    
 
     /**
      * Returns the QName of the Address element defined by the WS-RM spec.
@@ -256,46 +228,46 @@ public class RMConstants {
 
     //Policy Assertiion QNames
     public QName getRMAssertionQName() {
-        return new QName(version, "RMAssertion");
+        return new QName(Constants.version, "RMAssertion");
     }
 
-     public QName getOrderedQName() {
-        return new QName(sunVersion, "Ordered");
+    public QName getOrderedQName() {
+        return new QName(Constants.sunVersion, "Ordered");
     }
-     
+
     public QName getResendIntervalQName() {
-        return new QName(sunVersion, "ResendInterval");
+        return new QName(Constants.sunVersion, "ResendInterval");
     }
-    
+
     public QName getAckRequestIntervalQName() {
-        return new QName(sunVersion, "AckRequestInterval");
+        return new QName(Constants.sunVersion, "AckRequestInterval");
     }
-    
+
     public QName getInactivityTimeoutQName() {
-        return new QName(version, "InactivityTimeout");
+        return new QName(Constants.version, "InactivityTimeout");
     }
-       
+
     public QName getAcknowledgementIntervalQName() {
-        return new QName(version, "AcknowledgementInterval");
+        return new QName(Constants.version, "AcknowledgementInterval");
     }
 
     public QName getMillisecondsQName() {
-        return new QName(version, "Milliseconds");
+        return new QName(Constants.version, "Milliseconds");
     }
 
     public QName getRMFlowControlQName() {
-        return new QName(microsoftVersion, "RmFlowControl");
+        return new QName(Constants.microsoftVersion, "RmFlowControl");
     }
 
     public QName getMaxReceiveBufferSizeQName() {
-        return new QName(microsoftVersion, "MaxReceiveBufferSize");
+        return new QName(Constants.microsoftVersion, "MaxReceiveBufferSize");
     }
 
-    public static JAXBContext getJAXBContext() {
+    public  JAXBContext getJAXBContext() {
         return jc;
     }
 
-    public static Marshaller createMarshaller() {
+    public  Marshaller createMarshaller() {
         try {
             Marshaller marshaller = jc.createMarshaller();
             marshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.TRUE);
@@ -305,7 +277,7 @@ public class RMConstants {
         }
     }
 
-    public static Unmarshaller createUnmarshaller()  {
+    public Unmarshaller createUnmarshaller()  {
         try {
             return jc.createUnmarshaller();
         } catch (JAXBException e) {
@@ -314,7 +286,7 @@ public class RMConstants {
     }
 
 
-    private static List<Class> getClassesToBeBound() throws RMException{
+    private  List<Class> getClassesToBeBound() throws RMException{
         final Class[] classes;
         final ArrayList<Class> classList;
         try {
@@ -332,24 +304,32 @@ public class RMConstants {
                     Class.forName(getPackageName()+ ".Expires")
             };
             classList = new ArrayList<Class>(Arrays.asList(classes));
-
-             if (getAddressingVersion().equals(AddressingVersion.W3C)){
-                
-                classList.add(Class.forName(getPackageName()+ ".W3CAcksToImpl"));
-            }    else {
-                classList.add(Class.forName(getPackageName()+".MemberSubmissionAcksToImpl"));
-
-            }
+            classList.add(getAcksToClass());
+            return classList;
         } catch (ClassNotFoundException e) {
             throw new RMException("Cannot bind the following class with JAXBContext" + e);
         }
-        return classList;
     }
 
-    public static void setAddressingVersion(AddressingVersion version) {
-        addressingVersion = version;
+    public abstract Class getAcksToClass();
+
+    public  AddressingVersion getAddressingVersion() {
+        return addressingVersion;
     }
 
+
+
+    public URI getAnonymousURI() {
+        try {
+
+            return new URI(getAddressingVersion().getAnonymousUri());
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new Error(e);
+        }
+
+    }
+}
    
 
-}
+

@@ -29,10 +29,8 @@
  */
 
 package com.sun.xml.ws.rm.jaxws.runtime.server;
-import com.sun.xml.ws.rm.Sequence;
 import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
-import com.sun.xml.ws.rm.protocol.SequenceAcknowledgementElement;
 import com.sun.xml.ws.rm.protocol.AcknowledgementHandler;
 
 /**

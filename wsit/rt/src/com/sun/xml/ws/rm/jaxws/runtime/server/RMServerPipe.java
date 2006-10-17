@@ -77,7 +77,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
     private static HashMap<String, ActionHandler> actionMap =
             new HashMap<String, ActionHandler>();
 
-    private static RMConstants constants = new RMConstants();
+    private RMConstants constants;
 
     protected WSDLPort wsdlModel;
 
@@ -115,9 +115,12 @@ public class RMServerPipe extends PipeBase<RMDestination,
         super(RMDestination.getRMDestination(), nextPipe);
         this.wsdlModel = wsdlModel;
         this.owner = owner;
-        this.config = getSequenceConfig();
+
         this.binding = this.owner.getBinding();
-       // RMConstants.setAddressingVersion(binding.getAddressingVersion());
+        this.config = getSequenceConfig();
+        this.constants = config.getRMConstants();
+        this.unmarshaller = constants.createUnmarshaller();
+        this.marshaller = constants.createMarshaller();
 
     }
 
@@ -136,6 +139,10 @@ public class RMServerPipe extends PipeBase<RMDestination,
         owner = toCopy.owner;
         config = toCopy.config;
         binding = owner.getBinding();
+        this.constants = RMConstants.getRMConstants(binding.getAddressingVersion());
+        this.unmarshaller = constants.createUnmarshaller();
+        this.marshaller = constants.createMarshaller();
+
         //RMConstants.setAddressingVersion(binding.getAddressingVersion());
 
     }
@@ -296,8 +303,8 @@ public class RMServerPipe extends PipeBase<RMDestination,
                      */
 
                     HeaderList headerList = ret.getMessage().getHeaders();
-                    headerList.add(new StringHeader(RMConstants.getAddressingVersion().actionTag,
-                                                    constants.getSequenceAcknowledgementAction()));
+                    headerList.add(new StringHeader(constants.getAddressingVersion().actionTag,
+                                                    Constants.SEQUENCE_ACKNOWLEDGEMENT_ACTION));
 
                 }
             }
@@ -413,7 +420,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
         ActionHandler handler ;
         String actionValue = null;
         actionValue = packet.getMessage()
-                    .getHeaders().getAction(RMConstants.getAddressingVersion(),
+                    .getHeaders().getAction(constants.getAddressingVersion(),
                                             config.getSoapVersion());
         if (actionValue == null || actionValue.equals("")) {
           throw new RMException("Non RM Request or Missing wsa:Action header" )
@@ -451,7 +458,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
         /**ADDRESSING_FIXME
          *  Assume for now that AcksTo is anonymous.
          */
-        URI acksTo = RMConstants.getAnonymousURI();
+        URI acksTo = constants.getAnonymousURI();
         String acksToString = acksTo.toString();
         String replyToString = acksToString;
         /*
@@ -533,7 +540,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
 
 
             String destString = message.getHeaders()
-                                        .getTo(RMConstants.getAddressingVersion(),
+                                        .getTo(constants.getAddressingVersion(),
                                                config.getSoapVersion());
             try {
                 dest = new URI(destString);
@@ -567,9 +574,9 @@ public class RMServerPipe extends PipeBase<RMDestination,
          * This will probably be broken with MS client if they still send CS with
          * missing reply-to.
          */
-        Packet ret = packet.createServerResponse(response, RMConstants.getAddressingVersion(),
+        Packet ret = packet.createServerResponse(response, constants.getAddressingVersion(),
                                                 config.getSoapVersion(),
-                                                constants.getCreateSequenceResponseAction());
+                                                Constants.CREATE_SEQUENCE_RESPONSE_ACTION);
         /*
         ret.setEndPointAddressString(acksToString);
         ret.proxy = packet.proxy;
@@ -641,8 +648,8 @@ public class RMServerPipe extends PipeBase<RMDestination,
 
             SequenceAcknowledgementElement element = seq.generateSequenceAcknowledgement(null, marshaller);
             Header header = Headers.create(config.getSoapVersion(),marshaller,element);
-            Header actionHeader = new StringHeader(RMConstants.getAddressingVersion().actionTag,
-                                                   constants.getTerminateSequenceAction());
+            Header actionHeader = new StringHeader(constants.getAddressingVersion().actionTag,
+                                                   Constants.TERMINATE_SEQUENCE_ACTION);
             response.getHeaders().add(header);
             response.getHeaders().add(actionHeader);
 
@@ -814,7 +821,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
     }
 
     private static void initActionMap(){
-        actionMap.put(constants.getCreateSequenceAction(),
+        actionMap.put(Constants.CREATE_SEQUENCE_ACTION,
                 new ActionHandler() {
             public Packet process(RMServerPipe pipe, Packet packet)
             throws RMException   {
@@ -822,7 +829,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
             }
         });
 
-        actionMap.put(constants.getTerminateSequenceAction(),
+        actionMap.put(Constants.TERMINATE_SEQUENCE_ACTION,
                 new ActionHandler() {
             public Packet process(RMServerPipe pipe, Packet packet)
             throws RMException  {
@@ -830,7 +837,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
             }
         });
 
-        actionMap.put(constants.getAckRequestedAction(),
+        actionMap.put(Constants.ACK_REQUESTED_ACTION,
                 new ActionHandler() {
             public Packet process(RMServerPipe pipe, Packet packet)
             throws RMException  {
@@ -838,7 +845,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
             }
         });
 
-        actionMap.put(constants.getLastAction(),
+        actionMap.put(Constants.LAST_MESSAGE_ACTION,
                 new ActionHandler() {
             public Packet process(RMServerPipe pipe, Packet packet)
             throws RMException {
@@ -846,7 +853,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
             }
         });
 
-        actionMap.put(constants.getCreateSequenceResponseAction(),
+        actionMap.put(Constants.CREATE_SEQUENCE_RESPONSE_ACTION,
                 new ActionHandler() {
             public Packet process(RMServerPipe pipe, Packet packet)
             throws RMException {
@@ -854,7 +861,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
             }
         });
 
-        actionMap.put(constants.getSequenceAcknowledgementAction(),
+        actionMap.put(Constants.SEQUENCE_ACKNOWLEDGEMENT_ACTION,
                 new ActionHandler() {
             public Packet process(RMServerPipe pipe, Packet packet)
             throws RMException {
@@ -892,9 +899,9 @@ public class RMServerPipe extends PipeBase<RMDestination,
              If there is a WSDL, use the SequenceConfig ctor taking a WSDLPort and
              initialize SOAPVersion according to the value obtained from the binding.
              */
-            ret =  new SequenceConfig(wsdlModel);
-            BindingID binding = wsdlModel.getBinding().getBindingId();
-            if (binding.equals(BindingID.parse(SOAPBinding.SOAP11HTTP_BINDING))) {
+            ret =  new SequenceConfig(wsdlModel,this.binding);
+            BindingID bindingid = wsdlModel.getBinding().getBindingId();
+            if (bindingid.equals(BindingID.parse(SOAPBinding.SOAP11HTTP_BINDING))) {
                 ret.setSoapVersion(SOAPVersion.SOAP_11);
             } else {
                 ret.setSoapVersion(SOAPVersion.SOAP_12);
@@ -966,7 +973,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
         Header header = Headers.create(config.getSoapVersion(),marshaller,element);
         message.getHeaders().add(header);
         if (action != null) {
-            Header h = new StringHeader(RMConstants.getAddressingVersion().actionTag,
+            Header h = new StringHeader(constants.getAddressingVersion().actionTag,
                                         action);
             message.getHeaders().add(h);
         }

@@ -33,12 +33,10 @@ import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.*;
 import com.sun.xml.ws.api.message.Messages;
+import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
-import com.sun.xml.ws.rm.CreateSequenceException;
-import com.sun.xml.ws.rm.RMConstants;
-import com.sun.xml.ws.rm.RMException;
-import com.sun.xml.ws.rm.TerminateSequenceException;
+import com.sun.xml.ws.rm.*;
 import com.sun.xml.ws.rm.jaxws.runtime.InboundMessageProcessor;
 import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
 import com.sun.xml.ws.rm.protocol.*;
@@ -121,7 +119,7 @@ public class ProtocolMessageSender {
         this.binding = binding;
         this.marshaller = marshaller;
         this.unmarshaller = unmarshaller;
-        this.constants = new RMConstants();
+        this.constants =  RMConstants.getRMConstants(binding.getAddressingVersion());
         this.packet = packet;
 
     }
@@ -149,7 +147,7 @@ public class ProtocolMessageSender {
             requestPacket.contentNegotiation = packet.contentNegotiation;
             requestPacket.setEndPointAddressString(destination.toString());
 
-            addAddressingHeaders (requestPacket,constants.getCreateSequenceAction(),
+            addAddressingHeaders (requestPacket, Constants.CREATE_SEQUENCE_ACTION,
                     destination , acksTo, false);
 
             String messageId = null ;/*= ADDRESSING_FIXME - initialize with mesageID
@@ -160,7 +158,7 @@ public class ProtocolMessageSender {
 
             Packet responsePacket = nextPipe.process(requestPacket);
 
-            if (acksTo.equals(RMConstants.getAnonymousURI())) {
+            if (acksTo.equals(constants.getAnonymousURI())) {
 
                 Message response = responsePacket.getMessage();
                if (response.isFault()){
@@ -197,7 +195,7 @@ public class ProtocolMessageSender {
         Packet requestPacket = new Packet(request);
         requestPacket.proxy = packet.proxy;
         requestPacket.contentNegotiation = packet.contentNegotiation;
-        addAddressingHeaders (requestPacket,constants.getTerminateSequenceAction(),seq.getDestination(),seq.getAcksTo(),true);
+        addAddressingHeaders (requestPacket,Constants.TERMINATE_SEQUENCE_ACTION,seq.getDestination(),seq.getAcksTo(),true);
         requestPacket.setEndPointAddressString(seq.getDestination().toString());
         Packet responsePacket = nextPipe.process(requestPacket);
         Message response = responsePacket.getMessage();
@@ -271,7 +269,7 @@ public class ProtocolMessageSender {
             requestPacket.proxy = packet.proxy;
             requestPacket.contentNegotiation = packet.contentNegotiation;
 
-            addAddressingHeaders (requestPacket, constants.getAckRequestedAction(),
+            addAddressingHeaders (requestPacket, Constants.ACK_REQUESTED_ACTION,
                     seq.getDestination(),seq.getAcksTo(),true);
 
             requestPacket.setEndPointAddressString(seq.getDestination().toString());
@@ -337,7 +335,7 @@ public class ProtocolMessageSender {
             }
             //list.fillRequestAddressingHeaders(port, binding, requestPacket, action);
             requestPacket.setEndPointAddressString(destination.toString());
-            list.fillRequestAddressingHeaders(requestPacket,RMConstants.getAddressingVersion(),binding.getSOAPVersion(),oneWay,action);
+            list.fillRequestAddressingHeaders(requestPacket,constants.getAddressingVersion(),binding.getSOAPVersion(),oneWay,action);
 
             return requestPacket;
         /*

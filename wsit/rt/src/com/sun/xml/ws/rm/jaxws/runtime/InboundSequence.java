@@ -77,6 +77,7 @@ public abstract class InboundSequence extends Sequence {
         
         this.acksTo = acksTo;
         this.config = config;
+        this.rmConstants = config.getRMConstants();
     }
     
     /** Construct a <code>SequenceAcknowlegementElement</code> based on the contents of this sequence.

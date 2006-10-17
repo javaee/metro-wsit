@@ -48,7 +48,8 @@ import java.util.HashMap;
  */
 public class ProtocolMessageReceiver {
 
-     public static final String anonymous = new RMConstants()
+    //Hardcoding the W3C version for now
+     public static final String anonymous =  RMConstants.W3C
             .getAnonymousURI().toString();
     /**
      * AcksTo URI used for non-anonymous responses... Currently one per process.

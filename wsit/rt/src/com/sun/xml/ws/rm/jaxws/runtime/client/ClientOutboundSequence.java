@@ -32,7 +32,6 @@ import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.rm.InvalidMessageNumberException;
 import com.sun.xml.ws.rm.Message;
-import com.sun.xml.ws.rm.RMConstants;
 import com.sun.xml.ws.rm.RMException;
 import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
@@ -125,6 +124,7 @@ public class ClientOutboundSequence extends OutboundSequence {
         //for now
         this.version = config.getSoapVersion();
         this.ackHandler = new AcknowledgementHandler(config);
+        this.rmConstants = config.getRMConstants();
 
     }
 
@@ -191,7 +191,7 @@ public class ClientOutboundSequence extends OutboundSequence {
             this.destination = destination;
             this.acksTo = acksTo;
 
-            String anonymous = RMConstants.getAnonymousURI().toString();
+            String anonymous = rmConstants.getAnonymousURI().toString();
             String acksToString;
 
             if (acksTo == null) {
@@ -218,7 +218,7 @@ public class ClientOutboundSequence extends OutboundSequence {
                 
             }*/
             W3CEndpointReference endpointReference = null;
-            AddressingVersion addressingVersion = RMConstants.getAddressingVersion();
+            AddressingVersion addressingVersion = rmConstants.getAddressingVersion();
             if ( addressingVersion == AddressingVersion.W3C){
                   //WSEndpointReference wsepr = new WSEndpointReference(getClass().getResourceAsStream("w3c-anonymous-acksTo.xml"), addressingVersion);
                   WSEndpointReference epr = AddressingVersion.W3C.anonymousEpr;

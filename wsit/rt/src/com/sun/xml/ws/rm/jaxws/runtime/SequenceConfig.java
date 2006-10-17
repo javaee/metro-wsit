@@ -31,10 +31,11 @@
 package com.sun.xml.ws.rm.jaxws.runtime;
 
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.rm.RMConstants;
-import com.sun.xml.ws.rm.RMBuilder;
-import com.sun.xml.ws.rm.RMException;
+import com.sun.xml.ws.rm.*;
+
 import javax.xml.ws.WebServiceException;
 
 import com.sun.xml.ws.policy.*;
@@ -95,10 +96,11 @@ public class SequenceConfig {
      * Length of time between ackRequests.
      */
     public long ackRequestInterval;
-    
-    
-    private static RMConstants constants = 
-            new RMConstants();
+
+
+
+    public RMConstants constants ;
+
 
 
     /**
@@ -108,8 +110,12 @@ public class SequenceConfig {
         
         //Use anonymous URI for acksTo.  Its value depends on 
         //WS-Addressing version being used
-        
-        acksTo = RMConstants.getAnonymousURI().toString();
+
+        if (constants == null) {
+            //hardcoding W3C as default
+            constants = RMConstants.getRMConstants(AddressingVersion.W3C);
+        }
+        acksTo = constants.getAnonymousURI().toString();
         
         ordered = false;
         inactivityTimeout = 600000;
@@ -126,7 +132,7 @@ public class SequenceConfig {
         resendInterval = 0;
     }
     
-    public SequenceConfig(WSDLPort port) {
+    public SequenceConfig(WSDLPort port, WSBinding wsbinding) {
         
         this();
         if (port != null) {
@@ -134,6 +140,7 @@ public class SequenceConfig {
             WSDLModel model = binding.getOwner();
             PolicyMap policyMap = model.getExtension(WSDLPolicyMapWrapper.class)
                                             .getPolicyMap();
+            this.constants = RMConstants.getRMConstants(wsbinding.getAddressingVersion());
             try {
                 init(port, policyMap);
             } catch (RMException e) {
@@ -385,6 +392,14 @@ public class SequenceConfig {
                 break;
             }
        }
+    }
+
+    /**
+     *  Returns the RMConstants based on the AddressingVersion
+     * @return RMConstants
+     */
+    public RMConstants getRMConstants() {
+        return constants;
     }
         
 }

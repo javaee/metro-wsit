@@ -1,5 +1,5 @@
 /*
- * $Id: Sequence.java,v 1.1 2006-05-03 22:56:36 arungupta Exp $
+ * $Id: Sequence.java,v 1.2 2006-10-17 19:11:04 bhaktimehta Exp $
  */
 
 /*
@@ -77,6 +77,13 @@ public class Sequence {
      * Last accesse time.
      */
     protected long lastActivityTime;
+
+    /**
+     * RMConstants associated with each Sequence which
+     * will give information regarding addressing version, JAXBContext etc
+     *
+     */
+    protected  RMConstants rmConstants;
     
    
     
@@ -103,6 +110,7 @@ public class Sequence {
         //messageNumbers are 1-based and we will be keeping
         //messageNumbers in-sync with indices.
         list.add(null);
+       // this.rmConstants = new RMConstants();
     }
     
     /**

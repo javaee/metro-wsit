@@ -133,7 +133,7 @@ public class RMClientPipe
         this.binding = binding;
         this.securityPipe = securityPipe;
         
-        this.config = new SequenceConfig(port);
+        this.config = new SequenceConfig(port,binding);
         config.setSoapVersion(binding.getSOAPVersion());
         
         this.messageProcessor = this.provider.getInboundMessageProcessor();
@@ -144,6 +144,8 @@ public class RMClientPipe
         }else {
             this.secureReliableMessaging = false;
         }
+        this.unmarshaller = config.getRMConstants().createUnmarshaller();
+        this.marshaller = config.getRMConstants().createMarshaller();
         //RMConstants.setAddressingVersion(binding.getAddressingVersion());
     }
 
@@ -180,6 +182,8 @@ public class RMClientPipe
          //these are be threadsafe
         this.outboundSequence = toCopy.outboundSequence;
         this.inboundSequence = toCopy.inboundSequence;
+        this.unmarshaller = config.getRMConstants().createUnmarshaller();
+        this.marshaller = config.getRMConstants().createMarshaller();
        // RMConstants.setAddressingVersion(binding.getAddressingVersion());
 
     }

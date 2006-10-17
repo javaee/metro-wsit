@@ -29,10 +29,10 @@
  */
 
 package com.sun.xml.ws.rm.jaxws.runtime.client;
-import java.util.Stack;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
-import com.sun.xml.ws.api.message.Packet;
+
+import java.util.Stack;
 /**
  * Pool of Pipelines used by RMClientPipe to insure that
  * no two invocations of nextPipe.process() are done concurrently.

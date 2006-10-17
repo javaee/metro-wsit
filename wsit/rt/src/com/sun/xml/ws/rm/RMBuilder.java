@@ -1,5 +1,5 @@
 /*
- * $Id: RMBuilder.java,v 1.1 2006-05-03 22:56:35 arungupta Exp $
+ * $Id: RMBuilder.java,v 1.2 2006-10-17 19:11:04 bhaktimehta Exp $
  */
 
 /*
@@ -42,6 +42,6 @@ public class RMBuilder {
      */
     public static RMConstants getConstants() {
         
-        return new RMConstants();
+        return  RMConstants.W3C;
     }
 }
