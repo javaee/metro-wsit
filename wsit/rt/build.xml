@@ -108,7 +108,7 @@
     </target>
 
     <target name="combine-jars-runtime">
-        <combine-jars-macro jarname="${name}" classesdir="build/classes">
+        <combine-jars-macro jarname="${name}-rt" classesdir="build/classes">
             <services>
                 <fileset dir="${tmpdir}">
                     <include name="**/*.*"/>

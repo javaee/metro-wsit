@@ -41,7 +41,7 @@
     </target>
 
     <target name="uninstall">
-        <delete dir="${tomcat.lib.home}" includes="webservices.jar, webservices-tools.jar"/>
+        <delete dir="${tomcat.lib.home}" includes="webservices-rt.jar, webservices-tools.jar"/>
     </target>
 
     <target name="help">

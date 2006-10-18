@@ -114,9 +114,9 @@ HOME" >
     </condition>
     
     <path id="wsit.classpath">
-        <pathelement location="${java.home}/../lib/tools.jar"/>
+        <pathelement location="${java.home}/../lib/tools.webservices-rt.jar"/>
         <fileset dir="${lib.home}">
-            <include name="webservices.jar"/>
+            <include name="webservices-rt.jar"/>
             <include name="webservices-tools.jar"/>
             <exclude name="jaxws-update.jar"/>
             <exclude name="j2ee*.jar"/>

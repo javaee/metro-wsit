@@ -49,7 +49,7 @@
         <copy todir="${backup.dir}" failonerror="false">
             <fileset dir="${as.home}/domains/${domain}/config" includes="domain.xml"/>
             <fileset dir="${as.home}/bin" includes="wsimport${ext}, wsgen${ext}, xjc${ext}, schemagen${ext}"/>
-            <fileset dir="${as.home}/lib" includes="webservices.jar, webservices-tools.jar"/>
+            <fileset dir="${as.home}/lib" includes="webservices-rt.jar, webservices-tools.jar"/>
             <fileset dir="${as.home}/lib" includes="jaxws-update.jar"/>
         </copy>
     </target>
@@ -78,7 +78,7 @@
         <chmod perm="+x" dir="${as.home}/bin" includes="wsimport${ext}, wsgen${ext}, xjc${ext}, schemagen${ext}"/>
         <delete dir="${backup.dir}" includeemptydirs="true"/>
         <delete>
-            <fileset dir="${as.home}/lib" includes="webservices.jar, webservices-tools.jar"/>
+            <fileset dir="${as.home}/lib" includes="webservices-rt.jar, webservices-tools.jar"/>
         </delete>
 
         <echo message="... uninstall complete."/>
@@ -97,7 +97,7 @@
 
         <replace file="${as.home}/domains/${domain}/config/domain.xml">
             <replacetoken><![CDATA[classpath-prefix="${com.sun.aas.installRoot}/lib/jaxws-update.jar"]]></replacetoken>
-            <replacevalue><![CDATA[classpath-prefix="${com.sun.aas.installRoot}/lib/webservices.jar${path.separator}${com.sun.aas.installRoot}/lib/webservices-tools.jar"]]></replacevalue>
+            <replacevalue><![CDATA[classpath-prefix="${com.sun.aas.installRoot}/lib/webservices-rt.jar${path.separator}${com.sun.aas.installRoot}/lib/webservices-tools.jar"]]></replacevalue>
         </replace>
         <antcall target="update-classpath-unix"/>
         <antcall target="update-classpath-win"/>
@@ -106,7 +106,7 @@
     <target name="update-classpath-unix" if="unix">
         <replace dir="${as.home}/bin" includes="wsimport, wsgen, xjc, schemagen">
             <replacetoken>CLASSPATH=</replacetoken>
-            <replacevalue>WSIT_CLASSPATH="$AS_INSTALL"/lib/webservices-tools.jar:"$AS_INSTALL"/lib/webservices.jar
+            <replacevalue>WSIT_CLASSPATH="$AS_INSTALL"/lib/webservices-tools.jar:"$AS_INSTALL"/lib/webservices-rt.jar
 
 CLASSPATH=${WSIT_CLASSPATH}:</replacevalue>
         </replace>
@@ -116,7 +116,7 @@ CLASSPATH=${WSIT_CLASSPATH}:</replacevalue>
     <target name="update-classpath-win" unless="unix">
         <replace dir="${as.home}/bin" includes="wsimport${ext}, wsgen${ext}, xjc${ext}, schemagen${ext}">
             <replacetoken>CLASSPATH=</replacetoken>
-            <replacevalue>WSIT_CLASSPATH=%AS_INSTALL%\lib\webservices-tools.jar;%AS_INSTALL%\lib\webservices.jar
+            <replacevalue>WSIT_CLASSPATH=%AS_INSTALL%\lib\webservices-tools.jar;%AS_INSTALL%\lib\webservices-rt.jar
 
 set CLASSPATH=%WSIT_CLASSPATH%;</replacevalue>
         </replace>
