@@ -23,7 +23,7 @@
 -->
 
 <!--
- $Id: build.xml,v 1.17 2006-10-12 04:38:09 hofsass Exp $
+ $Id: build.xml,v 1.18 2006-10-18 18:41:42 hofsass Exp $
 
  Copyright (c) 2005 Sun Microsystems, Inc.
  All rights reserved.
@@ -41,7 +41,7 @@
         <mkdir dir="${logs.dir}"/>
     </target>
 
-    <target name="get-wsit-hudson" description="internal: retrieve last successful build of WSIT from hudson">
+    <target name="get-wsit-hudson" description="internal: retrieve last successful build of WSIT from hudson" unless="noget">
         <mkdir dir="wsit-image"/>
         <mkdir dir="wsit-image/runtime"/>
 
@@ -121,6 +121,10 @@
 		    </sequential>
 		</macrodef>
 
+    <target name="main-hudson-no-get">
+        <property name="noget" value="true"/>
+        <antcall target="main-hudson"/>
+    </target>
     <target name="main-hudson"
         description="Invoke unit test from Hudson. This downloads WSIT from Hudson, as opposed to test the local one"
         depends="get-wsit-hudson">
