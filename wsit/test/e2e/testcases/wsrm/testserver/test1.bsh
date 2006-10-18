@@ -1,0 +1,113 @@
+
+
+import com.sun.xml.ws.rm.Message;
+import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
+  
+    //use this one for conducting the test, clearing state
+    //on client before starting test and reporting results
+    private IPing portControl=WSHttpBinding_IPing;
+        
+        //use this one to collect messages belonging to this
+        //sequence and make sure they all arrive
+    private IPing portSequence= WSHttpBinding_IPing;
+    
+    private OutboundSequence controlSequence;
+
+
+    public String sendTwoWay(IPing port, String method, String arg) {
+        EchoRequestBodyType p = new ObjectFactory().createEchoRequestBodyType();
+        p.setText(new JAXBElement(new QName("http://tempuri.org/","Text"),String.class, method));
+        p.setSequence(new JAXBElement(new QName("http://tempuri.org/","Sequence"),String.class, arg));
+
+        EchoResponseBodyType pres = port.echoString(p);
+        return pres.getEchoStringReturn().getValue();
+    }
+
+    public void sendOneWay(IPing port, String method, String arg) {
+        PingRequestBodyType p = new ObjectFactory().createPingRequestBodyType();
+        p.setText(new JAXBElement(new QName("http://tempuri.org/","Text"),String.class, method));
+        p.setSequence(new JAXBElement(new QName("http://tempuri.org/","Sequence"),String.class, arg));
+
+        port.ping(p);
+    }
+
+    public void close(IPing port) {
+        ClientSession session = ClientSession.getSession((BindingProvider)port);
+        session.close();
+    }
+    
+    testCount() {
+              
+        /* expected result (modulo order) when report operation is called */
+        String ret = "";
+     
+        sendOneWay(portControl, "clear", null);
+        
+        try {
+            Thread.sleep(new Long("1000").longValue());
+        } catch (Exception e) {}
+        
+        for (int i = 0; i < 5; i++) {
+            sendOneWay(portSequence, "process" , "message " + (i + 1));
+            
+            //use i+1 because message numbers are one-based and   
+            ret += Integer.toString(i + 1);
+            ret += ",";
+        }
+    
+        //wait for everything to arrive
+        try {
+            Thread.sleep(new Long("2000").longValue());
+        } catch (Exception e) {}
+        
+        String retCount = sendTwoWay(portControl, "reportCount" , null);  
+        String retStr = sendTwoWay(portControl, "reportSequence", null);
+        String duplicates = sendTwoWay(portControl, "reportDuplicates", null);
+       
+ 
+        
+        
+        System.out.println("");
+        if (duplicates.equals("true")) {
+            System.out.println("Duplicates were received at the endpoint.");            
+        } else {
+            System.out.println("No duplicates were received at the endpoint.");
+        }
+        
+        assertEquals(duplicates,"false");
+    }
+
+myfilter = new com.sun.xml.ws.rm.jaxws.util.ProcessingFilter(){
+    
+    public boolean handleClientRequestMessage(Message mess) {
+        
+        OutboundSequence seq = (OutboundSequence)mess.getSequence();
+        seq.setProcessingFilter(myfilter);
+        
+        //first message is from portControl
+        if (controlSequence == null) {
+            controlSequence = seq;
+        }
+        
+       
+        return true;
+    }
+    public boolean handleClientResponseMessage(Message mess) {return true;}
+    
+    public void handleOutboundHeaders(Message mess) {
+         //change message numbers on all messages from test sequence to 1.
+         //This will not affect resends
+        if (!mess.getSequence().getId().equals(controlSequence.getId())) {
+            SequenceElement el = mess.getSequenceElement();
+            if (el != null) {
+                mess.setMessageNumber(1);
+                el.setMessageNumber(1);
+            }
+        }
+    }
+};
+
+com.sun.xml.ws.rm.jaxws.runtime.client.RMSource.getRMSource().setProcessingFilter(myfilter);
+
+testCount();
+
