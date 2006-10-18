@@ -406,10 +406,13 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             PolicyMap map = null;
 
             WSDLPort wsdlPort = context.getWsdlModel();
-            WSDLModel model = wsdlPort.getBinding().getOwner();
-            WSDLPolicyMapWrapper mapWrapper = model.getExtension(WSDLPolicyMapWrapper.class);
-            if (mapWrapper != null) {
-                map = mapWrapper.getPolicyMap();
+            // In dispatch mode, wsdlPort is null
+            if (wsdlPort != null) {
+                WSDLModel model = wsdlPort.getBinding().getOwner();
+                WSDLPolicyMapWrapper mapWrapper = model.getExtension(WSDLPolicyMapWrapper.class);
+                if (mapWrapper != null) {
+                    map = mapWrapper.getPolicyMap();
+                }
             }
 
             return map;
