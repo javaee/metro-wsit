@@ -6,7 +6,7 @@
         </xsd:schema>
     </wsdl:types>
 
-    <wsp:Policy wsu:Id="SecureConversation_MutualCertificate10SignEncrypt_IPingService_policy">
+    <wsp:Policy wsu:Id="XDC-ES_IPingService_policy">
         <wsp:ExactlyOne>
             <wsp:All>
                 <sp:SymmetricBinding xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
@@ -122,7 +122,7 @@
         </wsp:ExactlyOne>
     </wsp:Policy>
 
-    <wsp:Policy wsu:Id="SecureConversation_MutualCertificate10SignEncrypt_IPingService_Ping_Input_policy">
+    <wsp:Policy wsu:Id="XDC-ES_IPingService_Ping_Input_policy">
         <wsp:ExactlyOne>
             <wsp:All>
                 <sp:SignedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
@@ -142,7 +142,7 @@
         </wsp:ExactlyOne>
     </wsp:Policy>
 
-    <wsp:Policy wsu:Id="SecureConversation_MutualCertificate10SignEncrypt_IPingService_Ping_output_policy">
+    <wsp:Policy wsu:Id="XDC-ES_IPingService_Ping_output_policy">
         <wsp:ExactlyOne>
             <wsp:All>
                 <sp:SignedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
@@ -178,7 +178,7 @@
     </wsdl:portType>
     
     <wsdl:binding name="PingBinding" type="tns:IPingService"> 
-        <wsp:PolicyReference URI="#SecureConversation_MutualCertificate10SignEncrypt_IPingService_policy"/>
+        <wsp:PolicyReference URI="#XDC-ES_IPingService_policy"/>
         <soap12:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/> 
         <wsdl:operation name="Ping"> 
             <soap12:operation soapAction="http://xmlsoap.org/Ping" style="document"/> 
