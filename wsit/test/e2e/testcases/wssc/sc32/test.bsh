@@ -1,0 +1,1 @@
+pingPort.ping(new Holder("32"), new Holder("sun"), new Holder("Passed!"));
