@@ -1,0 +1,125 @@
+
+
+
+import com.sun.xml.ws.rm.Message;
+import com.sun.xml.ws.rm.Sequence;
+import com.sun.xml.ws.rm.jaxws.runtime.client.RMSource;
+
+     IPing port =WSHttpBinding_IPing;
+     IPing portControl =WSHttpBinding_IPing;
+
+
+     public String sendTwoWay(IPing port, String method, String arg) {
+        EchoRequestBodyType p = new ObjectFactory().createEchoRequestBodyType();
+        p.setText(new JAXBElement(new QName("http://tempuri.org/","Text"),String.class, method));
+        p.setSequence(new JAXBElement(new QName("http://tempuri.org/","Sequence"),String.class, arg));
+
+        EchoResponseBodyType pres = port.echoString(p);
+        return pres.getEchoStringReturn().getValue();
+    }
+
+    public void sendOneWay(IPing port, String method, String arg) {
+        PingRequestBodyType p = new ObjectFactory().createPingRequestBodyType();
+        p.setText(new JAXBElement(new QName("http://tempuri.org/","Text"),String.class, method));
+        p.setSequence(new JAXBElement(new QName("http://tempuri.org/","Sequence"),String.class, arg));
+
+        port.ping(p);
+    }
+
+    public void close(IPing port) {
+        ClientSession session = ClientSession.getSession((BindingProvider)port);
+        session.close();
+    }
+
+    myfilter = new com.sun.xml.ws.rm.jaxws.util.ProcessingFilter(){
+
+
+        public boolean handleClientResponseMessage(Message mess) {
+           return true;
+        }
+
+
+
+
+         public boolean handleClientRequestMessage(Message mess) {
+
+             if (sequence == null) {
+                 sequence = mess.getSequence();
+             }
+
+             return true;
+        }
+
+    };
+    com.sun.xml.ws.rm.jaxws.runtime.client.RMSource.getRMSource().setProcessingFilter(myfilter);
+
+    public void testTimeout() throws InterruptedException {
+
+            try {
+                /*RMSource.getRMSource().setProcessingFilter(myfilter);*/
+                 //start a sequence by sending a message.  Do not close
+                //it.  The test case will use Process.exec to run this
+                //and see if sequence has disappeared after timeout period
+                //elapses.
+                sendOneWay(port, "clear", null);
+
+                 try {
+                    Thread.currentThread().sleep(new Long("1000").longValue());
+                } catch (Exception e) {}
+
+                String s = sendTwoWay(port, "getSequenceId" , null);
+                String it = sendTwoWay(port, "getInactivityTimeout" , null);
+                long timeout = Long.valueOf(it);
+                System.out.println("timeout = " + it);
+                //wait longer than timeout period + t seconds
+                /****WARNINGWARNING...Currently, the SequenceReaper wakes up every 5 seconds.
+                 ***** if the constant "5" changes, this test should be changed accordingly.*****/
+                System.out.println("waiting to see if sequence times out before " +
+                        5 + (2 * timeout)/1000 + " seconds.");
+                Thread.currentThread().sleep( new Long(10000 + 2 * timeout).longValue());
+                //see if sequence is alive .. it should be, but will not be
+                //if no heartbeats are sent
+                String alive = sendTwoWay(port, "isSequenceAlive", sequence.getId());
+                System.out.println("alive = " + alive);
+                assertEquals(alive,"true");
+
+                System.out.println("blocking heartbeats and waiting another " +
+                        5 + (2 * timeout)/1000 + " seconds.");
+
+
+                //use cheesy reflection technique to suppress all heartbeat messages
+                toggleHeartbeats(false);
+                Thread.currentThread().sleep( 2 * timeout + 10000);
+
+                //use non-timed-out sequence here.
+                portControl = newPort();
+                alive = sendTwoWay(portControl, "isSequenceAlive", sequence.getId());
+                System.out.println("alive = " + alive);
+                assertEquals(alive , "false");
+
+            } finally {
+               ((Closeable)port).close();
+                if (portControl != null) {
+                    ((Closeable)portControl).close();
+                }
+                toggleHeartbeats(true);
+            }
+
+        }
+
+
+ public static void toggleHeartbeats(boolean b) {
+         try {
+            ClassLoader loader = Thread.currentThread().getContextClassLoader();
+            Class clasz = loader.loadClass(
+                    "com.sun.xml.ws.rm.jaxws.runtime.client.ClientOutboundSequence");
+            java.lang.reflect.Field field = clasz.getDeclaredField("sendHeartbeats");
+            field.setAccessible(true);
+            field.setBoolean(new Object(), new Boolean(b).booleanValue());
+         } catch (Exception e) {
+             e.printStackTrace();
+         }
+    }
+
+   testTimeout();
+
