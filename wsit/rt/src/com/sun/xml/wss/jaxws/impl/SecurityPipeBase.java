@@ -1265,6 +1265,14 @@ public abstract class SecurityPipeBase implements Pipe {
                 PolicyAssertion sct = new SCTokenWrapper(token,bmp);
                 sph.addSecureConversationToken(sct);
                 hasSecureConversation = true;
+                
+                // if the bootstrap has issued tokens then set hasIssuedTokens=true
+                List<PolicyAssertion> iList = 
+                        this.getIssuedTokenPoliciesFromBootstrapPolicy((Token)sct);
+                if (!iList.isEmpty()) {
+                    hasIssuedTokens = true;
+                }
+                
             }else if(PolicyUtil.isIssuedToken(token)){
                 sph.addIssuedToken(token);
                 hasIssuedTokens = true;
