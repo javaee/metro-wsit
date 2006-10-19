@@ -64,7 +64,7 @@ public class AddressingModelConfiguratorProvider implements ModelConfiguratorPro
      * @param policyMap must be non-null
      */
     public void configure(WSDLModel model, PolicyMap policyMap) throws PolicyException {
-        logger.entering("configure", new Object[]{model, policyMap});
+        logger.entering("configure");
         if ((null==model) || (null==policyMap)) {
             return;
         }
