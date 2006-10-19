@@ -35,12 +35,16 @@ import com.sun.xml.ws.policy.PolicyMap;
  */
 public class ServerPipelineHook extends com.sun.xml.ws.api.server.ServerPipelineHook {
     /**
-     * Called during the pipeline construction process once to allow a container
-     * to register a pipe for security on the service endpoint.
+     * Called during the server-side pipeline construction process once to allow a
+     * container to register a pipe for security on the service endpoint.
      *
      * This pipe will be injected to a point very close to the transport, allowing
      * it to do some security operations.
      *
+     * @param policyMap {@link PolicyMap} holding policies for a scope
+     * @param seiModel abstraction of server-side SEI
+     * @param wsdlModel abstraction of wsdl:port
+     * @param owner instance of deployed service
      * @param tail
      *      Head of the partially constructed pipeline. If the implementation
      *      wishes to add new pipes, it should do so by extending
