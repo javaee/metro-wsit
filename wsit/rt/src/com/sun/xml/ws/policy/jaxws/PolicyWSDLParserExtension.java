@@ -1134,6 +1134,11 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
                     logger.fine("postFinished", e.getMessage());
                     throw new WebServiceException(e);
                 }
+                // TODO: switch on, after 
+                //   1) SecurityPolicySelector will be cleaned up
+                //   2) private assertions will get properly filtered out
+                //logger.fine("postFinished", "invoking alternative selection");
+                //mapWrapper.doAlternativeSelection();
             }
             mapWrapper.configureModel(context.getWSDLModel());
         }
