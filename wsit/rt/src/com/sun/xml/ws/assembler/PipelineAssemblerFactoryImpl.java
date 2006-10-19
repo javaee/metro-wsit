@@ -46,7 +46,6 @@ import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.policy.jaxws.WSDLPolicyMapWrapper;
 import com.sun.xml.ws.policy.jaxws.documentfilter.PrivateAssertionFilter;
-import com.sun.xml.ws.rm.RMConstants;
 import com.sun.xml.ws.rm.Constants;
 import com.sun.xml.ws.rm.jaxws.runtime.client.RMClientPipe;
 import com.sun.xml.ws.rm.jaxws.runtime.server.RMServerPipe;
@@ -76,7 +75,6 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
     private static final String WSTX_SUFFIX = ".wstx";
 
     private static final String SECURITY_POLICY_NAMESPACE_URI = "http://schemas.xmlsoap.org/ws/2005/07/securitypolicy";
-    private static final String ADDRESSING_POLICY_NAMESPACE_URI = "http://schemas.xmlsoap.org/ws/2004/08/addressing/policy";
     private static final String WSAT_SOAP_NSURI = "http://schemas.xmlsoap.org/ws/2004/10/wsat";
     private static final QName AT_ALWAYS_CAPABILITY = new QName(WSAT_SOAP_NSURI, "ATAlwaysCapability");
     private static final QName AT_ASSERTION = new QName(WSAT_SOAP_NSURI, "ATAssertion");
@@ -101,11 +99,19 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
 
             // check for Security
             SecurityClientPipe securityClientPipe = null;
-            if (isSecurityEnabled(policyMap, context.getWsdlModel())) {
-                ClientPipeConfiguration config = new ClientPipeConfiguration(
-                        policyMap, context.getWsdlModel(), context.getService(), context.getBinding());
-                p = new SecurityClientPipe(config, p);
-                securityClientPipe = (SecurityClientPipe) p;
+            ClientPipelineHook hook = context.getContainer().getSPI(ClientPipelineHook.class);
+            if (hook != null) {
+                // TODO: how SecurityClientPipe will be passed to RMClientPipe. Currently SC+RM
+                // TODO: will not work for JSR 109-based DD.
+                // TODO: Vijay will follow with Ron if 196 & Policy-based pipe can be separate
+                p = hook.createSecurityPipe(policyMap, context, p);
+            } else {
+                if (isSecurityEnabled(policyMap, context.getWsdlModel())) {
+                    ClientPipeConfiguration config = new ClientPipeConfiguration(
+                            policyMap, context.getWsdlModel(), context.getService(), context.getBinding());
+                    p = new SecurityClientPipe(config, p);
+                    securityClientPipe = (SecurityClientPipe) p;
+                }
             }
             p = dump(context, CLIENT_PREFIX + WSS_SUFFIX + BEFORE_SUFFIX, p);
 
