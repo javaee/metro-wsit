@@ -31,22 +31,14 @@
 
 package com.sun.xml.ws.policy.jaxws;
 
-import com.sun.xml.stream.buffer.XMLStreamBuffer;
-import com.sun.xml.ws.api.model.wsdl.WSDLModel;
-import com.sun.xml.ws.api.server.SDDocumentSource;
-import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.testutils.PolicyResourceLoader;
-import com.sun.xml.ws.util.xml.XmlUtil;
-import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
-import com.sun.xml.ws.wsdl.parser.XMLEntityResolver.Parser;
-import java.io.InputStream;
-import java.net.URL;
 import javax.xml.namespace.QName;
-import javax.xml.stream.XMLInputFactory;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+
+import static com.sun.xml.ws.policy.testutils.PolicyResourceLoader.getPolicyMap;
 
 /**
  *
@@ -65,21 +57,9 @@ public class PolicyWSDLParserExtensionTest extends TestCase{
         return suite;
     }
     
-    private PolicyMap getPolicyMap(WSDLModel model) {
-        return model.getExtension(WSDLPolicyMapWrapper.class).getPolicyMap();
-    }
-    
-    private PolicyMap getPolicyMap(String resourceName) throws Exception {
-        URL wsdlUrl = PolicyResourceLoader.getResourceUrl(resourceName);
-        WSDLModel model = RuntimeWSDLParser.parse(wsdlUrl, XmlUtil.createDefaultCatalogResolver(), true, new WSDLParserExtension[] { new PolicyWSDLParserExtension() });
-        WSDLPolicyMapWrapper wrapper = model.getExtension(WSDLPolicyMapWrapper.class);
-        assertNotNull("PolicyMap not attached to populated WSDLModel", wrapper);
-        return wrapper.getPolicyMap();
-    }
-    
     
     public void testWsdlParserBasics() throws Exception {
-        assertNotNull("PolicyMap can not be null",getPolicyMap("parser/testWsdlParserBasics.wsdl"));
+        assertNotNull("PolicyMap can not be null", getPolicyMap("parser/testWsdlParserBasics.wsdl"));
     }
     
     public void testServiceElementAttachment() throws Exception {

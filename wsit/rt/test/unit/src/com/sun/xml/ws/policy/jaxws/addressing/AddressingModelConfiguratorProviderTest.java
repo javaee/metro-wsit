@@ -25,16 +25,13 @@ package com.sun.xml.ws.policy.jaxws.addressing;
 import com.sun.xml.ws.developer.MemberSubmissionAddressingFeature;
 import junit.framework.*;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
-import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
 import com.sun.xml.ws.policy.PolicyMap;
-import com.sun.xml.ws.policy.jaxws.PolicyWSDLParserExtension;
 import com.sun.xml.ws.policy.jaxws.WSDLPolicyMapWrapper;
-import com.sun.xml.ws.policy.testutils.PolicyResourceLoader;
-import com.sun.xml.ws.util.xml.XmlUtil;
-import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
-import java.net.URL;
 import javax.xml.namespace.QName;
 import javax.xml.ws.soap.AddressingFeature;
+
+import static com.sun.xml.ws.policy.testutils.PolicyResourceLoader.getWSDLModel;
+
 
 /**
  *
@@ -42,11 +39,6 @@ import javax.xml.ws.soap.AddressingFeature;
  */
 public class AddressingModelConfiguratorProviderTest extends TestCase {
     
-    private WSDLModel getWSDLModel(String resourceName) throws Exception {
-        URL wsdlUrl = PolicyResourceLoader.getResourceUrl(resourceName);
-        WSDLModel model = RuntimeWSDLParser.parse(wsdlUrl, XmlUtil.createDefaultCatalogResolver(), true, new WSDLParserExtension[] { new PolicyWSDLParserExtension() });
-        return model;
-    }
     
     /**
      * Test of configure method, of class com.sun.xml.ws.policy.jaxws.addressing.AddressingModelConfiguratorProvider.
