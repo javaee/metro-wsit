@@ -4,7 +4,7 @@
   <meta http-equiv="CONTENT-TYPE"
  content="text/html; charset=windows-1252">
   <title>WSIT Status Notes - Milestone 2</title>
-  <meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+  <meta name="GENERATOR" content="Microsoft FrontPage 6.0">
   <meta name="CREATED" content="20060713;8550900">
   <meta name="CHANGED" content="20060713;21281095">
   <meta http-equiv="Content-Style-Type" content="text/css">
@@ -86,7 +86,19 @@ run the tools and the client application:</p>
 <hr>
 <h2><a name="68668"></a>MTOM Status</h2>
 <h4>WCF Interoperability</h4>
-<pre>non-secure:<br><br>  MS-&gt;S :  0/15 : (not tested)<br>  S-&gt;MS : 15/15 :<br>  S -&gt;S : 15/15 :<br><br>secure:<br><br>  MS-&gt;S :  0/15 : (not tested)<br>  S-&gt;MS :  9/15 :<br>  S -&gt;S : 15/15 :<br></pre>
+<pre wrap>Internal endpoint running July CTP
+
+Non-Secure Scenarios
+
+S -&gt; S : 15/15
+S -&gt; MS : 15/15
+MS -&gt; S :  15/15
+
+Secure Scenarios</pre>
+<pre wrap>S -&gt; S : 15/15
+S -&gt; MS : 0/15
+MS -&gt; S :  0/15</pre>
+<pre><br></pre>
 <h4>What is Not Implemented</h4>
 <p>All MTOM functionality has been implemented.</p>
 <h4>Known Issues</h4>
@@ -114,6 +126,14 @@ the Sun Service classpath.</p>
       <p>If Microsoft service is used with Sun client; put ms.jar in
 the Sun Client classpath</p>
       </td>
+    </tr>
+    <tr>
+      <td>
+      Secure MTOM Scenario</td>
+      <td>All secure scenarios fail owing to WSIT
+		<a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=59">issue #59</a> (Fix is 
+      available on public MS endpoint though). Please see <a href="#35385">WSS status</a> 
+      notes for workaround/more details.</td>
     </tr>
   </tbody>
 </table>
