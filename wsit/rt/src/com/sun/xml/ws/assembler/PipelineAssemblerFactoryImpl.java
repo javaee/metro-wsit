@@ -28,6 +28,7 @@ import java.lang.reflect.InvocationTargetException;
 import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceException;
 
+import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
@@ -86,7 +87,8 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             this.bindingId = bindingId;
         }
 
-        public Pipe createClient(ClientPipeAssemblerContext context) {
+        @NotNull
+        public Pipe createClient(@NotNull ClientPipeAssemblerContext context) {
             PolicyMap policyMap = initPolicyMap(context);
 
             // Transport pipe ALWAYS exist
@@ -167,6 +169,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             return p;
         }
 
+        @NotNull
         public Pipe createServer(ServerPipeAssemblerContext context) {
             context.getEndpoint().getServiceDefinition().addFilter(new PrivateAssertionFilter());
             PolicyMap policyMap = initPolicyMap(context);
@@ -257,6 +260,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
         /**
          * Checks to see whether WS-Atomic Transactions are enabled or not.
          *
+         * @param policyMap policy map for {@link this} assembler
          * @param wsdlPort the WSDLPort object
          * @param isServerSide true iff this method is being called from {@link PipelineAssembler#createServer(ServerPipeAssemblerContext)}
          * @return true if Transactions is enabled, false otherwise
@@ -298,7 +302,8 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
         /**
          * Checks to see whether WS-ReliableMessaging is enabled or not.
          *
-         * @param port
+         * @param policyMap policy map for {@link this} assembler
+         * @param port wsdl:port
          * @return true if ReliableMessaging is enabled, false otherwise
          */
         private boolean isReliableMessagingEnabled(PolicyMap policyMap, WSDLPort port) {
@@ -347,7 +352,8 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
         /**
          * Checks to see whether WS-Security is enabled or not.
          *
-         * @param wsdlPort
+         * @param policyMap policy map for {@link this} assembler
+         * @param wsdlPort wsdl:port
          * @return true if Security is enabled, false otherwise
          */
         private boolean isSecurityEnabled(PolicyMap policyMap, WSDLPort wsdlPort) {
@@ -406,7 +412,10 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
         }
 
         /**
-         * Initializes the PolicyMap on the client side.
+         * Initializes the {@link PolicyMap} on the client side.
+         *
+         * @param context client assembler context
+         * @return policy map
          */
         private PolicyMap initPolicyMap(ClientPipeAssemblerContext context) {
             PolicyMap map = null;
@@ -425,7 +434,10 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
         }
 
         /**
-         * Initializes the PolicyMap on the server side.
+         * Initializes the {@link PolicyMap} on the server side.
+         *
+         * @param context server assembler context
+         * @return initialized policy map
          */
         private PolicyMap initPolicyMap(ServerPipeAssemblerContext context) {
             PolicyMap map = null;
