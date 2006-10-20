@@ -16,7 +16,7 @@
         <taskdef name="resgen" classname="com.sun.tools.resourcegen.ResourceGenTask">
             <classpath>
                 <path path="${javac.classpath}"/>
-                <pathelement path="${lib.dir}/tooltime/jaxws-tools.jar" />
+                <pathelement path="${basedir}/${lib.tooltime.dir}/jaxws-tools.jar" />
             </classpath>
         </taskdef>
 
