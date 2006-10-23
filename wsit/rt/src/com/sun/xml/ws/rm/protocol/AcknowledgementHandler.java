@@ -70,6 +70,9 @@ public class AcknowledgementHandler {
                      throws InvalidMessageNumberException {
         
         synchronized (sequence) {
+            
+            sequence.setBufferRemaining(element.getBufferRemaining());
+            
             List<SequenceAcknowledgementElement.AcknowledgementRange> ranges =
                     element.getAcknowledgementRange();
 
