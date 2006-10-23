@@ -161,6 +161,9 @@ public class SequenceAcknowledgementElement   {
     }
 
     public int getBufferRemaining() {
+        if (bufferRemaining == null) {
+            return -1;
+        }
         return bufferRemaining;
     }
 
