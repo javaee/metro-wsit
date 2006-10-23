@@ -93,6 +93,12 @@ public abstract class OutboundSequence extends Sequence {
      */
     private ProcessingFilter filter = null;
     
+    /**
+     * Space available in receiving buffer at destination, if
+     * this can be determined.
+     */
+    protected int bufferRemaining;
+    
      /**
      * Accessor for the value of the Destination URI.
      *
@@ -129,6 +135,21 @@ public abstract class OutboundSequence extends Sequence {
     public InboundSequence getInboundSequence() {
         return inboundSequence;
     }
+    
+    /**
+     * Accessor for bufferRemaining field.
+     */
+    public int getBufferRemaining() {
+        return bufferRemaining;
+    }
+    
+    /**
+     * Mutator for bufferRemaining field.
+     */
+    public void setBufferRemaining(int value) {
+        bufferRemaining = value;
+    }
+    
     
     /**
      *  Handles an <code>OutboundMessage</code>.
