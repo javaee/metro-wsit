@@ -277,11 +277,12 @@ public class RMServerPipe extends PipeBase<RMDestination,
             //If we populated
             //ret with an empty message to be used by RM protocol, and it
             //was not used, get rid of the empty message.
-            if (responseMessage == null &&
-                !ret.getMessage().hasHeaders()) {
-
-                ret.setMessage(null);
-
+            if (responseMessage == null ) {
+                if (ret.getMessage() != null) {
+                    if (!ret.getMessage().hasHeaders()) {
+                        ret.setMessage(null);
+                    }
+                }
             } else {
 
                 //Fill in relatedMessage field in request message for use in case request is resent.
