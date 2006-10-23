@@ -92,12 +92,6 @@ public class ClientOutboundSequence extends OutboundSequence {
     private boolean isAnonymous = false;
 
 
-    /**
-     * Last time that application or protocol message belonging to the sequence was received
-     * at RMD.
-     */
-    private long lastActivityTime = System.currentTimeMillis();
-
     /*
      * Flag which indicates whether sequence is active (disconnect() has not
      * been called.
@@ -125,6 +119,7 @@ public class ClientOutboundSequence extends OutboundSequence {
         this.version = config.getSoapVersion();
         this.ackHandler = new AcknowledgementHandler(config);
         this.rmConstants = config.getRMConstants();
+        this.bufferRemaining = config.getBufferSize();
 
     }
 
@@ -246,7 +241,9 @@ public class ClientOutboundSequence extends OutboundSequence {
                 JAXBElement<SecurityTokenReferenceType> str = getSecurityTokenReference();
                 if (str != null) {
                     cs.setSecurityTokenReference(str.getValue());
-                }   else throw new RMException("SecurityTokenReference is null");
+                }   else {
+                    throw new RMException("SecurityTokenReference is null");
+                }
             }
 
             CreateSequenceResponseElement csr = protocolMessageSender.sendCreateSequence(cs,destination,
@@ -390,14 +387,20 @@ public class ClientOutboundSequence extends OutboundSequence {
         //do a resend at every opportunity under these conditions
         //1. Sequence has been terminated
         //2. Number of stored messages exceeds 1/2 available space.
-        //3. Number of stored messages at endpoint exceeds 1/2
-        //   available space.
+        
         if (!isActive || 
-            storedMessages > (getTransferWindowSize() / 2) ||
-            getReceiveBufferSize() > (config.getBufferSize() / 2)) {
+            storedMessages > (getTransferWindowSize() / 2) ) {
             return 0;
         }
         return config.getResendInterval();
+    }
+    
+    /**
+     * Returns true if TransferWindow is full.  In this case, we 
+     * hold off on sending messages.
+     */
+    public boolean isTransferWindowFull() {
+        return getTransferWindowSize() == storedMessages;
     }
     
     private long getAckRequestInterval() {
