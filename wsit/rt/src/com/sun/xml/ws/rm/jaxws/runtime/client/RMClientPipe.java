@@ -359,8 +359,14 @@ public class RMClientPipe
                 return null;
 
             } else {
+                System.out.println("Unexpected exception wrapped in WS exception");
+                System.out.println(e.getClass().getName());
                 throw e;
             }
+        } catch (Exception e) {
+            System.out.println("Unexpected exception in trySend");
+            System.out.println(e.getClass().getName());
+            throw new WebServiceException(e);
         }
 
     }
@@ -371,6 +377,15 @@ public class RMClientPipe
 
         while (!message.isComplete()) {
 
+            /*
+            boolean flow = outboundSequence.getSequenceConfig().flowControl;
+            int bufferRemaining = outboundSequence.getBufferRemaining();
+            System.out.println("bufferRemaining =" + bufferRemaining);
+            if (flow && bufferRemaining == 0) {
+                continue;
+            }
+            */
+            
             Packet ret = null;
 
             //give debug/diagnostic filter access to the message and allow it

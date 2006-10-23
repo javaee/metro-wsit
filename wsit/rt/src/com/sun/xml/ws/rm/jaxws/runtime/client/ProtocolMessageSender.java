@@ -300,50 +300,25 @@ public class ProtocolMessageSender {
                                         URI destination,
                                         URI acksTo,
                                         boolean oneWay) throws RMException {
-        //if (requestPacket.proxy != null) {
+       
+        /*ADDRESSING FIX_ME
 
-
-            /*
-             AddressingProperties appImpl = constants.getAddressingBuilder().newAddressingProperties();
-
-            appImpl.setAction(constants.getAddressingBuilder().newURI(action));
-            appImpl.setTo(destination.getAddress());
-            appImpl.setReplyTo(acksTo);
-
-
-            AttributedURI uri = constants.getAddressingBuilder()
-                    .newURI("uuid:" + UUID.randomUUID());
-
-            appImpl.setMessageID(uri);
-
-            Map<String,Object> reqContext = requestPacket.proxy.getRequestContext();
-            reqContext.put(JAXWSAConstants.CLIENT_ADDRESSING_PROPERTIES,appImpl);
-            requestPacket.invocationProperties.put(JAXWSAConstants.CLIENT_ADDRESSING_PROPERTIES,appImpl);
-            */
-
-            /*ADDRESSING FIX_ME
-            1. No longer need destination
-            2. Current API does not allow assignment of non-anon reply to, if we
-               need to support non-anon acksTo.
-             */
-            Message message = requestPacket.getMessage();
-            HeaderList list = message.getHeaders();
-            if (oneWay) {
-                message.assertOneWay(true);
-            } else {
-                message.assertOneWay(false);
-            }
-            //list.fillRequestAddressingHeaders(port, binding, requestPacket, action);
-            requestPacket.setEndPointAddressString(destination.toString());
-            list.fillRequestAddressingHeaders(requestPacket,constants.getAddressingVersion(),binding.getSOAPVersion(),oneWay,action);
-
-            return requestPacket;
-        /*
-         } else {
-            throw new RMException("Binding Provider null in packet");
-        }
+        Current API does not allow assignment of non-anon reply to, if we
+           need to support non-anon acksTo.
          */
+        Message message = requestPacket.getMessage();
+        HeaderList list = message.getHeaders();
+        if (oneWay) {
+            message.assertOneWay(true);
+        } else {
+            message.assertOneWay(false);
+        }
+        //list.fillRequestAddressingHeaders(port, binding, requestPacket, action);
+        requestPacket.setEndPointAddressString(destination.toString());
+        list.fillRequestAddressingHeaders(requestPacket,constants.getAddressingVersion(),binding.getSOAPVersion(),oneWay,action);
 
+        return requestPacket;
+       
    }
 
     /**
@@ -397,27 +372,5 @@ public class ProtocolMessageSender {
         return constants;
     }
 
-    /*
-    private static class ProxyWrapper implements BindingProvider {
-        private BindingProvider proxy;
-        private Map<String, Object> requestContext = new HashMap<String, Object>();
-
-        public ProxyWrapper(BindingProvider proxy) {
-            this.proxy = proxy;
-            requestContext.putAll(proxy.getRequestContext());
-        }
-
-        public Map<String, Object> getRequestContext() {
-            return requestContext;
-        }
-
-        public Map<String, Object> getResponseContext() {
-            return proxy.getResponseContext();
-        }
-
-        public Binding getBinding() {
-            return proxy.getBinding();
-        }
-    }
-    */
+    
 }
