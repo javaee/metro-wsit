@@ -38,7 +38,6 @@ import com.sun.istack.NotNull;
 import com.sun.xml.ws.mex.client.schema.Metadata;
 import com.sun.xml.ws.mex.client.schema.MetadataReference;
 import com.sun.xml.ws.mex.client.schema.MetadataSection;
-import org.w3c.dom.DOMException;
 
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -89,8 +88,15 @@ public class MetadataClient {
     /**
      * Method used to load the metadata from the endpoint. First
      * soap 1.2 is used, then 1.1. If both attempts fail, the
-     * clienr will try again adding "/mex" to the address.
+     * client will try again adding "/mex" to the address.
+     * <P>
+     * If any wsdl or schema import elements are found with
+     * empty location attributes, these attributes are removed.
+     * In the case of data returned to JAX-WS through
+     * ServiceDescriptorImpl, these attributes are added back
+     * in with appropriate location information.
      *
+     * @see com.sun.xml.ws.mex.client.ServiceDescriptorImpl
      * @param address The address used to query for Metadata
      * @return The metadata object, or null if no metadata could
      *     be obtained from the service
@@ -119,13 +125,12 @@ public class MetadataClient {
         return null;
     }
     
-    /*
+    /**
      * Currently only supports Get requests (not Get Metadata),
      * so we only need the reference's address. Any metadata
-     * about the request is ignored.<br>
+     * about the request is ignored.
      *
-     * Todo: handle inline metadata if we support starting
-     * from EPR.
+     * @see #retrieveMetadata(String)
      */
     public Metadata retrieveMetadata(@NotNull MetadataReference reference) {
         List nodes = reference.getAny();

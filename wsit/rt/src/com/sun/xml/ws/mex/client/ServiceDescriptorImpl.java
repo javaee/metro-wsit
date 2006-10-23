@@ -23,7 +23,9 @@ package com.sun.xml.ws.mex.client;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import javax.xml.transform.Source;
@@ -34,8 +36,12 @@ import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.ws.WebServiceException;
+import org.w3c.dom.Attr;
+import org.w3c.dom.DOMException;
+import org.w3c.dom.NamedNodeMap;
 
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import com.sun.xml.ws.api.wsdl.parser.ServiceDescriptor;
 import com.sun.xml.ws.mex.client.schema.Metadata;
@@ -50,11 +56,27 @@ import static com.sun.xml.ws.mex.MetadataConstants.WSDL_DIALECT;
  * metadata from an endpoint using mex. An address is passed into
  * the MetadataResolverImpl class, which creates a service
  * descriptor and returns it.
+ * <P>
+ * Because wsdl and schema import@location attributes are removed
+ * from the data when empty, this class will add them back in
+ * for wsdl imports. The value that is used for the attribute
+ * matches the systemId of the Source that contains the imported
+ * wsdl (which may be different from the target namespace of the
+ * wsdl).
  */
 public class ServiceDescriptorImpl extends ServiceDescriptor {
     
     private final List<Source> wsdls;
     private final List<Source> schemas;
+    
+    // holds nodes that are missing location attributes
+    private final List<Node> importNodesToPatch;
+    
+    // holds sysId for wsdls, key is wsdl targetNamespace
+    private final Map<String, String> nsToSysIdMap;
+
+    private static final String LOCATION = "location";
+    private static final String NAMESPACE = "namespace";
     
     private static final Logger logger =
         Logger.getLogger(ServiceDescriptorImpl.class.getName());
@@ -66,9 +88,14 @@ public class ServiceDescriptorImpl extends ServiceDescriptor {
     public ServiceDescriptorImpl(Metadata mData) {
         wsdls = new ArrayList<Source>();
         schemas = new ArrayList<Source>();
+        importNodesToPatch = new ArrayList<Node>();
+        nsToSysIdMap = new HashMap<String, String>();
         populateLists(mData);
+        if (!importNodesToPatch.isEmpty()) {
+            patchImports();
+        }
     }
-    
+
     /*
      * This will be called recursively for metadata sections
      * that contain metadata references. A metadata section can
@@ -145,14 +172,25 @@ public class ServiceDescriptorImpl extends ServiceDescriptor {
     
     /*
      * Helper method used by handleXml() to turn the xml DOM nodes
-     * into Sources objects.
+     * into Sources objects. This method is also responsible for
+     * adding data to the nsToSysIdMap map for wsdl sections in
+     * case there are wsdl:import elements that need to be patched.
      */
     private Source createSource(MetadataSection section, String id) {
         Node n = (Node) section.getAny();
-        Source source = new DOMSource(n);
-        if (id == null) {
-            id = getIdFromNode(n);
+        if (section.getDialect().equals(WSDL_DIALECT)) {
+            String targetNamespace = getNamespaceFromNode(n);
+            if (id == null) {
+                id = targetNamespace;
+            }
+            nsToSysIdMap.put(targetNamespace, id);
+            checkWsdlImports(n);
+        } else {
+            if (id == null) {
+                id = getNamespaceFromNode(n);
+            }
         }
+        Source source = new DOMSource(n);
         source.setSystemId(id);
         return source;
     }
@@ -182,9 +220,10 @@ public class ServiceDescriptorImpl extends ServiceDescriptor {
      * an identifier. The node passed in must be a wsdl:definitions
      * or an xsd:schema node.
      */
-    private String getIdFromNode(Node node) {
+    private String getNamespaceFromNode(Node node) {
         Node namespace = node.getAttributes().getNamedItem("targetNamespace");
         if (namespace == null) {
+            // bug in the server? want to avoid NPE if so
             logger.warning("No targetNamespace was found for element " +
                 node.getNamespaceURI() + ":" + node.getLocalName() +
                 " in metadata response.");
@@ -194,13 +233,36 @@ public class ServiceDescriptorImpl extends ServiceDescriptor {
     }
 
     /*
-     * This method used when metadata section did not include
+     * This method will check the wsdl for import nodes
+     * that have no location attribute and add them to
+     * the list to be patched.
+     */
+    private void checkWsdlImports(Node wsdl) {
+        NodeList kids = wsdl.getChildNodes();
+        for (int i=0; i<kids.getLength(); i++) {
+            Node importNode = kids.item(i);
+            if (importNode.getLocalName() != null &&
+                importNode.getLocalName().equals("import")) {
+                
+                Node location =
+                    importNode.getAttributes().getNamedItem(LOCATION);
+                if (location == null) {
+                    importNodesToPatch.add(importNode);
+                }
+            }
+        }
+    }
+    
+    /*
+     * This method used when metadata location section did not include
      * an identifier. Since we need to read some of this information
      * to get the namespace and then return it to be read again by
      * jax-ws, we cannot use the InputStream itself (cannot call
      * mark/reset on InputStream).
      *
-     * TODO: This isn't a common use case, but can this be sped up?
+     * It is not expected that a wsdl retrieved with mex location
+     * will import another wsdl in the mex response, so this
+     * wsdl is not checked for empty wsdl import locations.
      */
     private Source parseAndConvertStream(String address, InputStream stream) {
         try {
@@ -209,14 +271,37 @@ public class ServiceDescriptorImpl extends ServiceDescriptor {
             Source source = new StreamSource(stream);
             DOMResult result = new DOMResult();
             xFormer.transform(source, result);
-            Node node = result.getNode();
-            source = new DOMSource(node);
-            source.setSystemId(getIdFromNode(node.getFirstChild()));
+            Node wsdlDoc = result.getNode();
+            source = new DOMSource(wsdlDoc);
+            source.setSystemId(getNamespaceFromNode(wsdlDoc.getFirstChild()));
             return source;
         } catch (TransformerException te) {
             throw new WebServiceException("Exception while " +
                 "trying to convert and read targetNamespace from " +
                 "location " + address, te);
+        }
+    }
+
+    /*
+     * For wsdl:import statements that have no location attribute,
+     * add a location with the value of the sysId of the imported
+     * wsdl.
+     */
+    private void patchImports() throws DOMException {
+        for (Node importNode : importNodesToPatch) {
+            NamedNodeMap atts = importNode.getAttributes();
+            String targetNamespace =
+                atts.getNamedItem(NAMESPACE).getNodeValue();
+            String sysId = nsToSysIdMap.get(targetNamespace);
+            if (sysId == null) {
+                logger.warning("No wsdl with target namespace \"" +
+                    targetNamespace + "\" found to match import statement.");
+                return;
+            }
+            Attr locationAtt =
+                importNode.getOwnerDocument().createAttribute(LOCATION);
+            locationAtt.setValue(sysId);
+            atts.setNamedItem(locationAtt);
         }
     }
     
