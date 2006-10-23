@@ -1,4 +1,4 @@
-<descriptor since="2.0">
+<descriptor since="2.0" skip="true">
   <description>This is a roundtrip RM test </description>
   <client href ="test.bsh" since="2.0"/>
   <service basedir="./server">
