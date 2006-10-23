@@ -31,7 +31,7 @@
 package com.sun.xml.ws.rm.jaxws.runtime.client;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
-
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.Stack;
 /**
  * Pool of Pipelines used by RMClientPipe to insure that
@@ -40,23 +40,42 @@ import java.util.Stack;
 public class ProcessorPool<T extends Pipe> extends Stack<T> {
     
     private T pipe;
+    private int capacity;
+    private int length = 0;
+    
+    public ProcessorPool(T pipe) {
+        this(pipe, 5);
+    }
     
     /** Creates a new instance of ProcessorPool */
-    public ProcessorPool(T pipe){
+    public ProcessorPool(T pipe, int capacity){
+        this.capacity = capacity;
         this.pipe =pipe;
+        
+        
     }
     
     public synchronized T checkOut() {
-        
-        if (!isEmpty()) {
-            return pop();
-        } else {
-            return (T)PipeCloner.clone(pipe);
+        try {
+            if (!empty()) {
+                return pop();
+            } else if (length < capacity) {
+                length++;
+                return (T)PipeCloner.clone(pipe);
+            } else {
+                while (empty()) {
+                    wait();
+                }
+                return pop();
+            }
+        } catch (InterruptedException e) {
         }
+        return null;
     } 
     
     public synchronized void checkIn(T in) {
         push(in);
+        notifyAll();
     }
     
    
