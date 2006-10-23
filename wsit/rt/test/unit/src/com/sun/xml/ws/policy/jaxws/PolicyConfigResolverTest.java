@@ -23,7 +23,7 @@
 package com.sun.xml.ws.policy.jaxws;
 
 import junit.framework.TestCase;
-import com.sun.xml.ws.wsdl.parser.XMLEntityResolver;
+import com.sun.xml.ws.api.wsdl.parser.XMLEntityResolver;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
