@@ -75,7 +75,23 @@ public class Constants {
     public static final String microsoftVersion = "http://schemas.microsoft.com/net/2005/02/rm/policy";
 
     public  static final String sunVersion = "http://sun.com/2006/03/rm";
-
-
+    
+    public  static final String sunClientVersion = "http://sun.com/2006/03/rm/client";
+    
+     /*
+     * RequestContext / MessageContext property names
+     */
+    public static final String sequenceProperty = "com.sun.xml.ws.sequence";
+    
+    public static final String messageNumberProperty = "com.sun.xml.ws.messagenumber";
+    
+    /**
+     * Constants used by RMSource.createSequence
+     */
+    public static final String createSequencePayload = 
+            "<sun:createSequence xmlns:sun=\"http://com.sun/createSequence\"/>";
+    
+    public static final String createSequenceNamespace = 
+            "http://com.sun/createSequence";
 
 }
