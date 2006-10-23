@@ -41,7 +41,7 @@ import com.sun.xml.ws.policy.PolicyMapMutator;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
-import com.sun.xml.ws.wsdl.parser.XMLEntityResolver.Parser;
+import com.sun.xml.ws.api.wsdl.parser.XMLEntityResolver.Parser;
 import org.xml.sax.SAXException;
 
 /**

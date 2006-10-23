@@ -23,7 +23,7 @@
 package com.sun.xml.ws.policy.jaxws;
 
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
-import com.sun.xml.ws.wsdl.parser.XMLEntityResolver;
+import com.sun.xml.ws.api.wsdl.parser.XMLEntityResolver;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -53,7 +53,7 @@ class PolicyConfigResolver implements XMLEntityResolver {
      * @throws IOException If the URL was invalid or a connection to the URL
      * failed
      * @see javax.xml.stream.XMLStreamReader
-     * @see com.sun.xml.ws.wsdl.parser.XMLEntityResolver.Parser
+     * @see com.sun.xml.ws.api.wsdl.parser.XMLEntityResolver.Parser
      */
     public Parser resolveEntity(String publicId, String systemId)
         throws XMLStreamException, IOException {
