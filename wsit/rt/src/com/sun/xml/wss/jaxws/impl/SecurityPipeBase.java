@@ -92,14 +92,13 @@ import com.sun.xml.wss.SecurityEnvironment;
 import com.sun.xml.wss.impl.policy.mls.MessagePolicy;
 import com.sun.xml.wss.impl.ProcessingContextImpl;
 import com.sun.xml.wss.impl.SecurityAnnotator;
-import com.sun.xml.wss.impl.SecurityRecipient;
+//import com.sun.xml.wss.impl.SecurityRecipient;
+import com.sun.xml.wss.impl.NewSecurityRecipient;
 import com.sun.xml.wss.impl.PolicyViolationException;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelUnmarshaller;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.policy.PolicyAssertion;
-import com.sun.xml.ws.rm.Constants;
-import com.sun.xml.ws.runtime.util.SessionManager;
-import com.sun.xml.ws.security.impl.IssuedTokenContextImpl;
+
 
 import com.sun.xml.ws.security.policy.Token;
 
@@ -123,6 +122,7 @@ import com.sun.xml.ws.security.policy.CallbackHandlerConfiguration;
 import com.sun.xml.ws.security.policy.Validator;
 import com.sun.xml.ws.security.policy.ValidatorConfiguration;
 import com.sun.xml.ws.security.policy.WSSAssertion;
+import com.sun.xml.wss.impl.OperationResolver;
 
 import java.util.Properties;
 import org.w3c.dom.Element;
@@ -130,6 +130,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import com.sun.xml.ws.api.addressing.*;
+import com.sun.xml.ws.rm.Constants;
 
 
 //TODO: add logging before 4/13
@@ -224,6 +225,8 @@ public abstract class SecurityPipeBase implements Pipe {
     protected Policy wsitConfig =null;
     // store as instance variable
     protected Unmarshaller unmarshaller =null;
+    // store operation resolver
+    protected OperationResolver opResolver = null;
     
     //store instance variable(s): Binding has IssuedToken/RM/SC Policy
     boolean hasIssuedTokens = false;
@@ -232,6 +235,9 @@ public abstract class SecurityPipeBase implements Pipe {
     //boolean addressingEnabled = false;
     
     AddressingVersion addVer = null;
+    
+    //flag used as temporary variable for each run
+    boolean isTrustOrSCMessage = false;
     
     static {
         try {
@@ -262,7 +268,6 @@ public abstract class SecurityPipeBase implements Pipe {
         soapFactory = pipeConfig.getBinding().getSOAPVersion().saajSoapFactory; 
         this.inProtocolPM = new HashMap<String,SecurityPolicyHolder>();
         this.outProtocolPM = new HashMap<String,SecurityPolicyHolder>();
-        
         //unmarshaller as instance variable of the pipe
         try {
             this.unmarshaller = jaxbContext.createUnmarshaller();
@@ -277,6 +282,7 @@ public abstract class SecurityPipeBase implements Pipe {
             unmarshaller = jaxbContext.createUnmarshaller();
             // check whether Service Port has RM
             hasReliableMessaging = isReliableMessagingEnabled(wsPolicyMap, pipeConfig.getWSDLModel());
+            opResolver = new OperationResolverImpl(inMessagePolicyMap,pipeConfig.getWSDLModel().getBinding());
         }catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -302,7 +308,8 @@ public abstract class SecurityPipeBase implements Pipe {
         this.hasIssuedTokens = that.hasIssuedTokens;
         this.hasSecureConversation = that.hasSecureConversation;
         this.hasReliableMessaging = that.hasReliableMessaging;
-        //this.addressingEnabled = that.addressingEnabled;
+        this.opResolver = that.opResolver;
+        
         try {
             this.unmarshaller = jaxbContext.createUnmarshaller();
         }catch (javax.xml.bind.JAXBException ex) {
@@ -364,7 +371,7 @@ public abstract class SecurityPipeBase implements Pipe {
     throws WssSoapFaultException, XWSSecurityException {
         try {
             ctx.setSOAPMessage(message);
-            SecurityRecipient.validateMessage(ctx);
+            NewSecurityRecipient.validateMessage(ctx);
             return ctx.getSOAPMessage();
         } catch (WssSoapFaultException soapFaultException) {
             soapFaultException.printStackTrace();
@@ -471,6 +478,7 @@ public abstract class SecurityPipeBase implements Pipe {
                 mp = new MessagePolicy();
                 return mp;
             }
+            /*
             if(isBodyEncrypted(message)){
                 return new MessagePolicy();
                 //TODO:Remove when Security changes recipeint code.
@@ -479,8 +487,16 @@ public abstract class SecurityPipeBase implements Pipe {
             if (inMessagePolicyMap == null) {
                 //remove once new security recipient is ready.
                 return new MessagePolicy();
-            }
+            }*/
+            
             SecurityPolicyHolder sph = (SecurityPolicyHolder) inMessagePolicyMap.get(operation);
+            //TODO: pass isTrustMessage Flag to this method later
+            if (sph == null && (isTrustMessage(packet) || isSCMessage(packet))) {
+                //could be due to trust message  
+                isTrustOrSCMessage = true;
+                return new MessagePolicy();
+            }
+
             mp = sph.getMessagePolicy();
         }
         checkSecurityHeader(mp,packet);
@@ -578,6 +594,8 @@ public abstract class SecurityPipeBase implements Pipe {
 */
         ctx.setIssuedTokenContextMap(issuedTokenContextMap);
         ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
+        ctx.setOperationResolver(opResolver);
+
         try {
             MessagePolicy policy = null;
             if (isRMMessage(packet)) {
@@ -585,6 +603,7 @@ public abstract class SecurityPipeBase implements Pipe {
                 policy = holder.getMessagePolicy();
             } else {
                 policy = getInboundXWSSecurityPolicy(packet, isSCMessage);
+                ctx.isTrustMessage(isTrustOrSCMessage);
             }
             
             if(policy != null){

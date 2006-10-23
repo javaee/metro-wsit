@@ -102,8 +102,8 @@ public class TransportBindingProcessor extends BindingProcessor {
             WSSPolicy key = (WSSPolicy) sp.getKeyBinding();
             if(tp != null ){
                 SignatureTarget target = iAP.getTargetCreator().newURISignatureTarget(tp.getUUID());
-               
-                spFB.isEndorsingSignature(true);
+                // there is no primary signature in Transport Binding
+                //spFB.isEndorsingSignature(true);
                 spFB.addTargetBinding(target);
                 
                 container.insert(sp);

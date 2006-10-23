@@ -49,7 +49,6 @@ import com.sun.xml.wss.impl.policy.mls.MessagePolicy;
 import com.sun.xml.wss.ProcessingContext;
 import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.impl.WssSoapFaultException;
-import com.sun.xml.wss.impl.SecurityRecipient;
 
 import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.SecurityContextToken;
@@ -83,6 +82,7 @@ import com.sun.xml.ws.security.secconv.WSSCElementFactory;
 import com.sun.xml.ws.security.secconv.WSSCFactory;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponse;
+import com.sun.xml.wss.impl.NewSecurityRecipient;
 
 import com.sun.xml.wss.impl.misc.DefaultCallbackHandler;
 import org.w3c.dom.Node;
@@ -481,7 +481,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
     protected SOAPMessage verifyInboundMessage(SOAPMessage message, ProcessingContext ctx)
     throws WssSoapFaultException, XWSSecurityException {
         ctx.setSOAPMessage(message);
-        SecurityRecipient.validateMessage(ctx);
+        NewSecurityRecipient.validateMessage(ctx);
         return ctx.getSOAPMessage();
     }
     
