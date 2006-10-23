@@ -31,9 +31,9 @@ import com.sun.xml.ws.policy.PolicyMapExtender;
 
 /**
  * The service provider implementing this interface will be discovered and called to extend created PolicyMap instance with additional policy
- * bindings. The call is performed directly after WSDL document is parsed.
+ * bindings. The call is performed directly after WSIT config file is parsed.
  *
- * @author Marek Potociar (marek.potociar@sun.com)
+ * @author Marek Potociar (marek.potociar at sun.com)
  */
 public interface PolicyMapUpdateProvider {
 
