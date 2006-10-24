@@ -86,39 +86,91 @@ public class EffectiveAlternativeSelector {
             Policy oldPolicy, PolicySelector[] selectors) throws PolicyException {
         
         if(null==selectors || selectors.length==0) {
-            throw new PolicyException(Messages.NO_POLICY_SELECTORS_FOUND.format());
+            logger.warning("getNewEffectivePolicy", Messages.NO_POLICY_SELECTORS_FOUND.format());
         }
-        for (AssertionSet alternative : oldPolicy) {
-            boolean alternativeIsOk = true;
-            testing:
-                for ( PolicyAssertion assertion : alternative ) {  // foreach assertion in alternative
-                    boolean assertionIsOk = false;                  // consider it is not supported
-                    for ( PolicySelector selector : selectors ) {   // foreach selector
-                        if (selector.isSupported(assertion.getName().getNamespaceURI())) { // namespace supported?
-                            if (!selector.test(assertion)) {                    // assertion as well?
-                                alternativeIsOk = false;                        // not -> drop the alternative
-                                logger.warning("getNewEffectivePolicy", 
-                                        Messages.ASSERTION_REJECTED_BY_POLICY_SELECTOR.format(assertion.getName(),
-                                                                                              selector.getClass().toString()));
-                                break testing;                                  //     do not need further testing
-                            } else { // single selector test ok
-                                assertionIsOk = true;                           // at least one module supports it
-                            }  // end if single assertion test ok
-                        }
-                    } // end foreach selector
-                    if (!assertionIsOk) {       // no supportive selector found
-                        alternativeIsOk = false;    // drop the whole alternative
-                        logger.warning("getNewEffectivePolicy", 
-                                Messages.NO_POLICY_SELECTOR_FOUND_FOR_ASSERTION.format(assertion.getName()));
-                        break testing;
-                    } // end if !assertionIsOk
-                } // end foreach assertion, end of testing:
-                if (alternativeIsOk) { // supported alternative has been found
-                    Collection<AssertionSet> alternativeSet = new LinkedList<AssertionSet>();
-                    alternativeSet.add(alternative);
-                    return new Policy(null,alternativeSet);
-                } // endif this alternative is ok
+        
+        AssertionSet alternativePickedSoFar = null;
+        int fitnessBestSoFar = 0;
+        
+        for (AssertionSet alternative : oldPolicy) { 
+            int supportedAssertions = 0;
+            int weirdAssertions = 0;
+            int unsupportedAssertions = 0;
+            int unknownAssertions = 0;
+            int numberOfAssertions = 0;
+            for ( PolicyAssertion assertion : alternative ) {  // foreach assertion in alternative
+                boolean supportedOne = false;
+                boolean unsupportedOne = false;
+                numberOfAssertions++;
+                for ( PolicySelector selector : selectors ) {   // foreach selector
+                    if (selector.isSupported(assertion.getName().getNamespaceURI())) { // namespace supported?
+                        if (!selector.test(assertion)) {                    // assertion as well?
+                            unsupportedOne = true;
+                            logger.warning("getNewEffectivePolicy",
+                                    Messages.ASSERTION_REJECTED_BY_POLICY_SELECTOR.format(assertion.getName(),
+                                    selector.getClass().toString()));
+                        } else { // single selector test ok
+                            supportedOne = true;
+                        }  // end if single assertion test ok
+                    }
+                } // end foreach selector
+                if (supportedOne) {
+                    if (unsupportedOne) {
+                        weirdAssertions++;
+                    } else {
+                        supportedAssertions++;
+                    }
+                } else { // !supportedOne
+                    if (unsupportedOne) {
+                        unsupportedAssertions++;
+                    } else {
+                        unknownAssertions++;
+                    }
+                }
+            } // end foreach assertion in current alternative
+            
+            if (supportedAssertions == numberOfAssertions) { // all assertions supported by at least one selector
+                // will take this
+                Collection<AssertionSet> alternativeSet = new LinkedList<AssertionSet>();
+                alternativeSet.add(alternative);
+                return new Policy(null,alternativeSet);
+            } // end-if all assertions supported
+            
+            if (null == alternativePickedSoFar) { // first alternative, nothing to compare
+                alternativePickedSoFar = alternative;
+                fitnessBestSoFar = getFitness(supportedAssertions, unsupportedAssertions, 
+                                            weirdAssertions, unknownAssertions, numberOfAssertions);
+            } else {  // not the first alternative
+                // if this one is better than that picked so far, pick this...
+                if (fitnessBestSoFar < getFitness(supportedAssertions, unsupportedAssertions, 
+                                            weirdAssertions, unknownAssertions, numberOfAssertions)) {
+                alternativePickedSoFar = alternative;
+                fitnessBestSoFar = getFitness(supportedAssertions, unsupportedAssertions, 
+                                            weirdAssertions, unknownAssertions, numberOfAssertions);
+                    
+                }
+            } // endif not the first alternative
         }
-        throw new PolicyException(Messages.NO_SUPPORTED_ALTERNATIVE_FOUND.format());
+        // return a policy containing just the picked alternative
+        Collection<AssertionSet> alternativeSet = new LinkedList<AssertionSet>();
+        alternativeSet.add(alternativePickedSoFar);
+        return new Policy(null,alternativeSet);
     }
+    
+    private static final int getFitness (int supp, int unsupp, int weird, int unkn, int total) {
+        return (to3(supp, total) * 27) + (to3(unkn, total) * 9) + (to3(weird, total) * 3) + to3(unsupp,total);
+    }
+    
+    private static final int to3(int op, int base) {
+        if (op == 0) {
+            return 0;
+        } else {
+            if (op == base) {
+                return 2;
+            } else {
+                return 1;
+            }
+        }
+    }
+    
 }

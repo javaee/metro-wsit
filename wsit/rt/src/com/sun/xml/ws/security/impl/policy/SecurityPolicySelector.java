@@ -156,6 +156,12 @@ public class SecurityPolicySelector extends PolicySelector{
         
         supportedAssertions.add(new QName(TRUST_NS,EncryptWith));
         
+        supportedAssertions.add(new QName(SUN_WSS_SECURITY_CLIENT_POLICY_NS,CallbackHandler));
+        supportedAssertions.add(new QName(SUN_WSS_SECURITY_CLIENT_POLICY_NS,KeyStore));
+        supportedAssertions.add(new QName(SUN_WSS_SECURITY_CLIENT_POLICY_NS,TrustStore));
+        
+        supportedAssertions.add(new QName(SUN_SECURE_CLIENT_CONVERSATION_POLICY_NS,"SCClientConfiguration"));
+        
     }
     /** Creates a new instance of SecurityPolicySelector */
     public SecurityPolicySelector() {
@@ -173,10 +179,9 @@ public class SecurityPolicySelector extends PolicySelector{
     
     
     public boolean isSupported(String uri) {
-        if(SECURITY_POLICY_NS.equals(uri)|| TRUST_NS.equals(uri) || UTILITY_NS.equals(uri)
-        || XPATH_NS.equals(uri) || ADDRESSING_NS.equals(uri)){
+        /*if(SECURITY_POLICY_NS.equals(uri)|| TRUST_NS.equals(uri) || SUN_WSS_SECURITY_CLIENT_POLICY_NS.equals(uri)) {
             return true;
-        }
+        }*/
         return super.isSupported(uri);
         
     }

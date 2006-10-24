@@ -44,13 +44,13 @@ public class EffectiveAlternativeSelectorTest extends TestCase {
     public EffectiveAlternativeSelectorTest(String testName) {
         super(testName);
     }
-
+    
     public static Test suite() {
         TestSuite suite = new TestSuite(EffectiveAlternativeSelectorTest.class);
         
         return suite;
     }
-
+    
     /**
      * Test of doSelection method, of class com.sun.xml.ws.policy.EffectiveAlternativeSelector.
      */
@@ -66,7 +66,7 @@ public class EffectiveAlternativeSelectorTest extends TestCase {
         //Policy pol1 = PolicyModelTranslator.getTranslator()
         //                .translate(unmarshalModel("single_alternative_policy/policy3.xml"));
         Policy pol2 = PolicyModelTranslator.getTranslator()
-                        .translate(unmarshalModel("complex_policy/nested_assertions_with_alternatives.xml"));
+        .translate(unmarshalModel("complex_policy/nested_assertions_with_alternatives.xml"));
         
         PolicyMapKey aKey = PolicyMap.createWsdlEndpointScopeKey(new QName("service"),new QName("port"));
         
@@ -98,7 +98,7 @@ public class EffectiveAlternativeSelectorTest extends TestCase {
         //Policy pol1 = PolicyModelTranslator.getTranslator()
         //                .translate(unmarshalModel("single_alternative_policy/policy3.xml"));
         Policy pol2 = PolicyModelTranslator.getTranslator()
-                        .translate(unmarshalModel("complex_policy/nested_assertions_with_alternatives.xml"));
+        .translate(unmarshalModel("complex_policy/nested_assertions_with_alternatives.xml"));
         
         PolicyMapKey aKey = PolicyMap.createWsdlEndpointScopeKey(new QName("service"),new QName("port"));
         
@@ -107,25 +107,29 @@ public class EffectiveAlternativeSelectorTest extends TestCase {
         
         //System.out.println(myExtender.getMap());
         
-        if(1>myExtender.getMap().getEndpointEffectivePolicy(aKey).getNumberOfAssertionSets()) {
-            fail("Insufficient number of alternatives found. At least 1 needed.");
+        if(2>myExtender.getMap().getEndpointEffectivePolicy(aKey).getNumberOfAssertionSets()) {
+            fail("Insufficient number of alternatives found. At least 2 of them needed.");
         };
         
-        try {
-            EffectiveAlternativeSelector.doSelection(myModifier);
-        } catch (PolicyException e) {
-            return;
+        EffectiveAlternativeSelector.doSelection(myModifier);
+        
+        if(1!=myExtender.getMap().getEndpointEffectivePolicy(aKey).getNumberOfAssertionSets()) {
+            fail("Too many alternatives has left.");
         }
         
-        fail("PolicyException: no supported alternative found expected.");
-    }
+        EffectiveAlternativeSelector.doSelection(myModifier);
 
+        if(1!=myExtender.getMap().getEndpointEffectivePolicy(aKey).getNumberOfAssertionSets()) {
+            fail("Too many alternatives has left.");
+        }
+    }
+    
     
     private PolicySourceModel unmarshalModel(String resource) throws Exception {
         Reader reader = PolicyResourceLoader.getResourceReader(resource);
         PolicySourceModel model = xmlUnmarshaller.unmarshalModel(reader);
         reader.close();
         return model;
-    }    
+    }
     
 }
