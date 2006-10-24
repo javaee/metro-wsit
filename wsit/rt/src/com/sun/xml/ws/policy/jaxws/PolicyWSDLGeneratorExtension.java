@@ -22,7 +22,6 @@
 
 package com.sun.xml.ws.policy.jaxws;
 
-import com.sun.xml.ws.api.wsdl.writer.WSDLGenExtnContext;
 import com.sun.xml.txw2.TypedXmlWriter;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.model.CheckedException;
@@ -33,15 +32,13 @@ import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLFault;
 import com.sun.xml.ws.api.model.wsdl.WSDLInput;
 import com.sun.xml.ws.api.model.wsdl.WSDLMessage;
-import com.sun.xml.ws.api.model.wsdl.WSDLObject;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLOutput;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.model.wsdl.WSDLPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLService;
 import com.sun.xml.ws.api.wsdl.writer.WSDLGeneratorExtension;
-import com.sun.xml.ws.model.CheckedExceptionImpl;
-import com.sun.xml.ws.model.JavaMethodImpl;
+import com.sun.xml.ws.api.wsdl.writer.WSDLGenExtnContext;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyConstants;
 import com.sun.xml.ws.policy.PolicyException;
@@ -55,7 +52,6 @@ import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelGenerator;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelMarshaller;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
-import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.LinkedList;
 
