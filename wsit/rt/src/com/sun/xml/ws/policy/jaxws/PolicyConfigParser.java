@@ -35,13 +35,12 @@ import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.server.SDDocumentSource;
 import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
+import com.sun.xml.ws.api.wsdl.parser.XMLEntityResolver.Parser;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapMutator;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
-import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
-import com.sun.xml.ws.api.wsdl.parser.XMLEntityResolver.Parser;
 import org.xml.sax.SAXException;
 
 /**
@@ -149,9 +148,9 @@ public final class PolicyConfigParser {
 
             SDDocumentSource doc = SDDocumentSource.create(configFileUrl, configFileSource);
             Parser parser =  new Parser(doc);
-            WSDLModel model = RuntimeWSDLParser.parse(parser,
-                                                        new PolicyConfigResolver(), true,
-                                                        new WSDLParserExtension[] { new PolicyWSDLParserExtension(true, mutators) } );
+            WSDLModel model = WSDLModel.WSDLParser.parse(parser,
+                                                         new PolicyConfigResolver(), true,
+                                                         new WSDLParserExtension[] { new PolicyWSDLParserExtension(true, mutators) } );
             WSDLPolicyMapWrapper wrapper = model.getExtension(WSDLPolicyMapWrapper.class);
             
             if (wrapper != null) {
