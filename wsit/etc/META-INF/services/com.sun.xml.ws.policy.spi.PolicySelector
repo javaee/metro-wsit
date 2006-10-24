@@ -1,3 +1,7 @@
 com.sun.xml.ws.security.impl.policy.SecurityPolicySelector
 com.sun.xml.ws.rm.jaxws.util.RMPolicySelector
-com.sun.xml.ws.tx.common.TxPolicySelector
+com.sun.xml.ws.policy.jaxws.addressing.AddressingPolicySelector
+com.sun.xml.ws.policy.jaxws.encoding.EncodingPolicySelector
+com.sun.xml.ws.policy.jaxws.impl.MicrosoftProprietaryPolicySelector
+com.sun.xml.ws.policy.jaxws.impl.SunProprietaryPolicySelector
+#com.sun.xml.ws.tx.common.TxPolicySelector
