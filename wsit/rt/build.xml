@@ -51,6 +51,9 @@
         </resgen>
 
     </target>
+    
+    <target name="-pre-compile" depends="resgen"
+            description="Hook resgen target into compilation process"/>
 
     <taskdef name="concatmanifest" classname="taskdefs.ConcatManifest">
         <classpath>
