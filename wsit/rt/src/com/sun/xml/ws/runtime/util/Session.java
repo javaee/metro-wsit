@@ -1,5 +1,7 @@
 package com.sun.xml.ws.runtime.util;
 import com.sun.xml.ws.rm.Sequence;
+import com.sun.xml.ws.security.SecurityContextTokenInfo;
+
 /**
  * The <code> Session </Session> object is used to manage state between multiple requests
  * from the same client. It contains a session key field to uniquely identify the Session, 
