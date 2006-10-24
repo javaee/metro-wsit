@@ -22,12 +22,11 @@
  Copyright 2006 Sun Microsystems Inc. All Rights Reserved
 -->
 
-<project name="WSIT 1.0 EA On Sun Java System Application Server PE 9.0 (Glassfish)" default="help" basedir=".">
+<project name="WSIT 1.0 EA On GlassFish v2" default="help" basedir=".">
     <property file="../build.properties"/>
     <property environment="env"/>
     <property name="as.home" value="${env.AS_HOME}"/>
     <property name="as.lib.home" value="${as.home}/lib"/>
-    <property name="domain" value="domain1"/>
     <property name="backup.dir" value="${as.home}/.wsit-1.0"/>
 
     <condition property="notInstalled">
@@ -44,16 +43,15 @@
         <os family="unix"/>
     </condition>
 
-    <target name="init" if="notInstalled">
+    <target name="init" if="notInstalled" description="backup existing WSIT jars and JAX-WS/JAXB scripts">
         <mkdir dir="${backup.dir}"/>
         <copy todir="${backup.dir}" failonerror="false">
-            <fileset dir="${as.home}/domains/${domain}/config" includes="domain.xml"/>
             <fileset dir="${as.home}/bin" includes="wsimport${ext}, wsgen${ext}, xjc${ext}, schemagen${ext}"/>
             <fileset dir="${as.home}/lib" includes="webservices-rt.jar, webservices-tools.jar"/>
-            <fileset dir="${as.home}/lib" includes="jaxws-update.jar"/>
         </copy>
     </target>
-    <target name="install" depends="init">
+
+    <target name="install" depends="init" description="install latest WSIT jars">
         <echo message="Installing WSIT 1.0 EA on ${as.home} ..."/>
 
         <copy todir="${as.lib.home}" overwrite="true">
@@ -65,10 +63,10 @@
         <echo message="... installation complete."/>
     </target>
 
-    <target name="uninstall" depends="init" unless="notInstalled">
+    <target name="uninstall" depends="init" unless="notInstalled"
+            description="restore original WSIT jars and JAX-WS/JAXB scripts">
         <echo message="Uninstalling WSIT 1.0 EA from ${as.home} ..."/>
 
-        <copy todir="${as.home}/domains/${domain}/config" file="${backup.dir}/domain.xml" overwrite="true"/>
         <copy todir="${as.home}/bin" overwrite="true">
             <fileset dir="${backup.dir}" includes="wsimport${ext}, wsgen${ext}, xjc${ext}, schemagen${ext}"/>
         </copy>
@@ -86,19 +84,14 @@
 
     <target name="update-classpath" if="notInstalled">
         <echo message="Updating classpath"/>
-        <!-- Add the JAX-WS 2.0 and JAXB 2.0 jars to classpath-prefix -->
+        <!-- Add the JAX-WS 2.1 and JAXB 2.1 jars to classpath-prefix -->
         <copy toDir="${backup.dir}">
-            <fileset file="${as.home}/domains/${domain}/config/domain.xml"/>
             <fileset dir="${as.home}/bin">
                 <include name="wsgen${ext}"/>
                 <include name="wsimport${ext}"/>
             </fileset>
         </copy>
 
-        <replace file="${as.home}/domains/${domain}/config/domain.xml">
-            <replacetoken><![CDATA[classpath-prefix="${com.sun.aas.installRoot}/lib/jaxws-update.jar"]]></replacetoken>
-            <replacevalue><![CDATA[classpath-prefix="${com.sun.aas.installRoot}/lib/webservices-rt.jar${path.separator}${com.sun.aas.installRoot}/lib/webservices-tools.jar"]]></replacevalue>
-        </replace>
         <antcall target="update-classpath-unix"/>
         <antcall target="update-classpath-win"/>
     </target>
@@ -124,11 +117,11 @@ set CLASSPATH=%WSIT_CLASSPATH%;</replacevalue>
 
     <target name="help">
         <echo message="install  : "/>
-        <echo message="  Installs WSIT 1.0 EA onto Sun Java System Application Server 9.0 PE (Glassfish)"/>
+        <echo message="  Installs WSIT 1.0 EA on GlassFishv2"/>
         <echo message="uninstall: "/>
-        <echo message="  Uninstalls WSIT 1.0 EA from Sun Java System Application Server 9.0 PE (Glassfish)"/>
+        <echo message="  Uninstalls WSIT 1.0 EA from GlassFishv2"/>
         <echo/>
-        <echo message="  Make sure AS_HOME is set to the installation directory of Glassfish."/>
+        <echo message="  Make sure AS_HOME is set to the installation directory of GlassFishv2."/>
         <echo/>
         <echo message="  Usage: ANT_HOME/bin/ant -f wsit-on-glassfish.xml install"/>
     </target>
