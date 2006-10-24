@@ -1,8 +1,8 @@
-<descriptor since="2.0" skip="true">
+<descriptor skip="true">
   <description>This is a test for checking the Delivery assurances of RM </description>
-  <client href ="test.bsh" since="2.0"/>
-  <client href ="test1.bsh" since="2.0"/>
-  <client href ="test2.bsh" since="2.0"/>
+  <client href ="test.bsh"/>
+  <client href ="test1.bsh"/>
+  <client href ="test2.bsh"/>
   <service basedir="./server">
     <wsdl href="EchoService.wsdl"/>
   </service>
