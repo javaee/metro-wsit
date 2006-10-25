@@ -104,6 +104,7 @@ import com.sun.xml.wss.saml.NameIdentifier;
 import com.sun.xml.wss.saml.SAMLAssertionFactory;
 import com.sun.xml.wss.saml.SAMLException;
 import com.sun.xml.wss.saml.SubjectConfirmation;
+import com.sun.xml.wss.saml.SubjectConfirmationData;
 import com.sun.xml.wss.saml.internal.saml11.jaxb20.AssertionType;
 
 import javax.security.auth.Subject;
@@ -138,7 +139,7 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
     private static final String SAML_HOLDER_OF_KEY = "urn:oasis:names:tc:SAML:1.0:cm:holder-of-key";
     protected static final String PRINCIPAL = "principal";
    
-    protected Token createSAMLAssertion(String tokenType, String keyType, String assertionId, String issuer, Map claimedAttrs, IssuedTokenContext context) throws WSTrustException
+    protected Token createSAMLAssertion(String appliesTo, String tokenType, String keyType, String assertionId, String issuer, Map claimedAttrs, IssuedTokenContext context) throws WSTrustException
     {       
         Token token = null;
         
@@ -155,9 +156,9 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
             Assertion assertion = null;
             if (WSTrustConstants.SAML10_ASSERTION_TOKEN_TYPE.equals(tokenType)||
                 WSTrustConstants.SAML11_ASSERTION_TOKEN_TYPE.equals(tokenType)){
-                assertion = createSAML11Assertion(assertionId, issuer, keyInfo, claimedAttrs);
+                assertion = createSAML11Assertion(assertionId, issuer, appliesTo, keyInfo, claimedAttrs);
             } else if (WSTrustConstants.SAML20_ASSERTION_TOKEN_TYPE.equals(tokenType)){
-                assertion = createSAML20Assertion(assertionId, issuer, keyInfo, claimedAttrs); 
+                assertion = createSAML20Assertion(assertionId, issuer, appliesTo, keyInfo, claimedAttrs); 
             } else{
                 throw new WSTrustException("Unsupported token type: " + tokenType);
             }
@@ -334,7 +335,7 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
        return keyInfo;
    }
    
-   private Assertion createSAML11Assertion(String assertionId, String issuer, KeyInfo keyInfo, Map claimedAttrs) throws WSTrustException{
+   private Assertion createSAML11Assertion(String assertionId, String issuer, String appliesTo, KeyInfo keyInfo, Map claimedAttrs) throws WSTrustException{
         Assertion assertion = null;
         try{
             SAMLAssertionFactory samlFac = SAMLAssertionFactory.newInstance(SAMLAssertionFactory.SAML1_1);
@@ -386,30 +387,31 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
         return assertion;
    }
    
-   private Assertion createSAML20Assertion(String assertionId, String issuer, KeyInfo keyInfo, Map claimedAttrs) throws WSTrustException{
+   private Assertion createSAML20Assertion(String assertionId, String issuer, String appliesTo, KeyInfo keyInfo, Map claimedAttrs) throws WSTrustException{
        Assertion assertion = null;
        try{ 
             SAMLAssertionFactory samlFac = SAMLAssertionFactory.newInstance(SAMLAssertionFactory.SAML2_0);
        
             // Create Conditions
-            GregorianCalendar issuerInst = new GregorianCalendar(); 
+            GregorianCalendar issueInst = new GregorianCalendar(); 
             GregorianCalendar notOnOrAfter = new GregorianCalendar();
             notOnOrAfter.add(Calendar.MILLISECOND, (int)config.getIssuedTokenTimeout());
 
-            Conditions conditions = 
-                     samlFac.createConditions(issuerInst, notOnOrAfter, null, null, null);
+            Conditions conditions = samlFac.createConditions(issueInst, notOnOrAfter, null, null, null, null);
 
             // Create Subject
-            List<String> confirmationMethods = new ArrayList<String>();
-            confirmationMethods.add(SAML_HOLDER_OF_KEY);
+            
+            SubjectConfirmationData subjComfData = samlFac.createSubjectConfirmationData(
+                    null, null, issueInst, notOnOrAfter, appliesTo, keyInfo.getElement());
 
             SubjectConfirmation subjectConfirmation = samlFac.createSubjectConfirmation(
-                confirmationMethods, null, keyInfo.getElement());
+                null, subjComfData, SAML_HOLDER_OF_KEY);
 
             com.sun.xml.wss.saml.Subject subj = null;
             QName principal = (QName)claimedAttrs.get(PRINCIPAL);
+            
             if (principal != null){
-                NameIdentifier nameId = samlFac.createNameIdentifier(principal.getLocalPart(), null, null);
+                NameID nameId = samlFac.createNameID(principal.getLocalPart(), principal.getNamespaceURI(), null);
                 subj = samlFac.createSubject(nameId, subjectConfirmation);
                 claimedAttrs.remove(PRINCIPAL);
             }
@@ -434,7 +436,7 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
 
             // Create Assertion
             assertion = 
-                       samlFac.createAssertion(assertionId, issuerID, issuerInst, conditions, null, subj, statements);
+                       samlFac.createAssertion(assertionId, issuerID, issueInst, conditions, null, subj, statements);
         }catch(SAMLException ex){
             throw new WSTrustException("Unable to create SAML assertion", ex);
         }catch(XWSSecurityException ex){
