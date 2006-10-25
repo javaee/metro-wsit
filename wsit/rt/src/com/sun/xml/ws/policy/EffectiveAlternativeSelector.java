@@ -24,33 +24,187 @@ package com.sun.xml.ws.policy;
 
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
-import com.sun.xml.ws.policy.Messages;
+import com.sun.xml.ws.policy.privateutil.LocalizationMessages;
 import com.sun.xml.ws.policy.spi.PolicySelector;
 import java.util.Collection;
 import java.util.LinkedList;
 
 /**
+ * Contains static methods for policy alternative selection. Given policy map is changed so that 
+ * each effective policy contains at most one policy alternative. Uses domain 
+ * specific @see com.sun.xml.ws.policy.spi.PolicySelector
+ * to find out whether particular policy assertion is actually supported.
  *
  * @author japod
  */
 public class EffectiveAlternativeSelector {
     
+    private enum AssertionFitness {
+        UNKNOWN {
+            AssertionFitness considerFitness(PolicySelector.Fitness f) {
+                switch (f) {
+                    case UNKNOWN:
+                        return AssertionFitness.UNKNOWN;
+                    case SUPPORTED:
+                        return AssertionFitness.SUPPORTED;
+                    case UNSUPPORTED:
+                    default:
+                        return AssertionFitness.UNSUPPORTED;
+                }
+            }
+        },
+        SUPPORTED {
+            AssertionFitness considerFitness(PolicySelector.Fitness f) {
+                switch (f) {
+                    case UNKNOWN:
+                        return AssertionFitness.SUPPORTED;
+                    case SUPPORTED:
+                        return AssertionFitness.SUPPORTED;
+                    case UNSUPPORTED:
+                    default:
+                        return AssertionFitness.AMBIVALENT;
+                }
+            }
+        },
+        UNSUPPORTED {
+            AssertionFitness considerFitness(PolicySelector.Fitness f) {
+                switch (f) {
+                    case UNKNOWN:
+                        return AssertionFitness.UNSUPPORTED;
+                    case SUPPORTED:
+                        return AssertionFitness.AMBIVALENT;
+                    case UNSUPPORTED:
+                    default:
+                        return AssertionFitness.UNSUPPORTED;
+                }
+            }
+        },
+        AMBIVALENT {
+            AssertionFitness considerFitness(PolicySelector.Fitness f) {
+                return AssertionFitness.AMBIVALENT;
+            }
+        };
+        
+        abstract AssertionFitness considerFitness(PolicySelector.Fitness f);
+    }
+    
+    
+    private enum AlternativeFitness {
+        SUPPORTED {
+            AlternativeFitness considerFitness(AssertionFitness f) {
+                switch (f) {
+                    case UNKNOWN:
+                        return PARTIALLY_SUPPORTED;
+                    case UNSUPPORTED:
+                        return AMBIVALENT;
+                    case SUPPORTED:
+                        return SUPPORTED;
+                    case AMBIVALENT:
+                        return AMBIVALENT;
+                    default:
+                        return UNEVALUATED;
+                }
+            }
+        },
+        PARTIALLY_SUPPORTED {
+            AlternativeFitness considerFitness(AssertionFitness f) {
+                switch (f) {
+                    case UNKNOWN:
+                        return PARTIALLY_SUPPORTED;
+                    case UNSUPPORTED:
+                        return AMBIVALENT;
+                    case SUPPORTED:
+                        return PARTIALLY_SUPPORTED;
+                    case AMBIVALENT:
+                        return AMBIVALENT;
+                    default:
+                        return UNEVALUATED;
+                }
+            }
+        },
+        UNKNOWN {
+            AlternativeFitness considerFitness(AssertionFitness f) {
+                switch (f) {
+                    case UNKNOWN:
+                        return UNKNOWN;
+                    case UNSUPPORTED:
+                        return UNSUPPORTED;
+                    case SUPPORTED:
+                        return PARTIALLY_SUPPORTED;
+                    case AMBIVALENT:
+                        return AMBIVALENT;
+                    default:
+                        return UNEVALUATED;
+                }
+            }
+        },
+        AMBIVALENT {
+            AlternativeFitness considerFitness(AssertionFitness f) {
+                        return AMBIVALENT;
+            }
+        },
+        UNSUPPORTED {
+            AlternativeFitness considerFitness(AssertionFitness f) {
+                switch (f) {
+                    case UNKNOWN:
+                        return UNSUPPORTED;
+                    case UNSUPPORTED:
+                        return UNSUPPORTED;
+                    case SUPPORTED:
+                        return AMBIVALENT;
+                    case AMBIVALENT:
+                        return AMBIVALENT;
+                    default:
+                        return UNEVALUATED;
+                }
+            }
+        },
+        UNEVALUATED {
+            AlternativeFitness considerFitness(AssertionFitness f) {
+                switch (f) {
+                    case UNKNOWN:
+                        return UNKNOWN;
+                    case UNSUPPORTED:
+                        return UNSUPPORTED;
+                    case SUPPORTED:
+                        return SUPPORTED;
+                    case AMBIVALENT:
+                        return AMBIVALENT;
+                    default:
+                        return UNEVALUATED;
+                }
+            }
+        };
+        
+        abstract AlternativeFitness considerFitness(AssertionFitness f);
+    }
+    
     private static PolicySelector[] selectors = null;
     private static final PolicyLogger logger = PolicyLogger.getLogger(EffectiveAlternativeSelector.class);
     
     private static PolicySelector[] getSelectors() {
-        if (selectors==null) {
+        if (selectors == null) {
             selectors = PolicyUtils.ServiceProvider.load(PolicySelector.class);
         }
         return selectors;
     }
     
-    public static void doSelection(EffectivePolicyModifier modifier) throws PolicyException {
-        doSelection(modifier,getSelectors());
+    /**
+     * Does the selection using implicit policy selectors 
+     *
+     * @param modifier @see EffectivePolicyModifier which the map is bound to
+     */
+    public static final void doSelection(EffectivePolicyModifier modifier) throws PolicyException {
+        doSelection(modifier, getSelectors());
     }
     
-    /** Creates a new instance of EffectiveAlternativeSelector */
-    public static void doSelection(EffectivePolicyModifier modifier
+    /** 
+     * Does the selection for policy map bound to given modifier using only the given selectors 
+     *
+     * @param modifier @see EffectivePolicyModifier which the map is bound to
+     * @param selectors to be used
+     */
+    public static final void doSelection(EffectivePolicyModifier modifier
             , PolicySelector[] selectors) throws PolicyException {
         
         PolicyMap map = modifier.getMap();
@@ -86,91 +240,47 @@ public class EffectiveAlternativeSelector {
             Policy oldPolicy, PolicySelector[] selectors) throws PolicyException {
         
         if(null==selectors || selectors.length==0) {
-            logger.warning("getNewEffectivePolicy", Messages.NO_POLICY_SELECTORS_FOUND.format());
+            logger.warning("getNewEffectivePolicy", LocalizationMessages.NO_POLICY_SELECTORS_FOUND());
         }
         
         AssertionSet alternativePickedSoFar = null;
-        int fitnessBestSoFar = 0;
+        AlternativeFitness bestFitnessSoFar = AlternativeFitness.UNEVALUATED;
         
-        for (AssertionSet alternative : oldPolicy) { 
-            int supportedAssertions = 0;
-            int weirdAssertions = 0;
-            int unsupportedAssertions = 0;
-            int unknownAssertions = 0;
-            int numberOfAssertions = 0;
+        for (AssertionSet alternative : oldPolicy) {
+            AlternativeFitness alternativeFitness = AlternativeFitness.UNEVALUATED;
             for ( PolicyAssertion assertion : alternative ) {  // foreach assertion in alternative
-                boolean supportedOne = false;
-                boolean unsupportedOne = false;
-                numberOfAssertions++;
+                AssertionFitness assertionFitness = AssertionFitness.UNKNOWN;
                 for ( PolicySelector selector : selectors ) {   // foreach selector
-                    if (selector.isSupported(assertion.getName().getNamespaceURI())) { // namespace supported?
-                        if (!selector.test(assertion)) {                    // assertion as well?
-                            unsupportedOne = true;
-                            logger.warning("getNewEffectivePolicy",
-                                    Messages.ASSERTION_REJECTED_BY_POLICY_SELECTOR.format(assertion.getName(),
-                                    selector.getClass().toString()));
-                        } else { // single selector test ok
-                            supportedOne = true;
-                        }  // end if single assertion test ok
-                    }
+                    assertionFitness = assertionFitness.considerFitness(selector.getFitness(assertion));
                 } // end foreach selector
-                if (supportedOne) {
-                    if (unsupportedOne) {
-                        weirdAssertions++;
-                    } else {
-                        supportedAssertions++;
-                    }
-                } else { // !supportedOne
-                    if (unsupportedOne) {
-                        unsupportedAssertions++;
-                    } else {
-                        unknownAssertions++;
-                    }
+                alternativeFitness = alternativeFitness.considerFitness(assertionFitness);
+                if (assertionFitness == assertionFitness.UNKNOWN) {
+                    logger.warning("getNewEffectivePolicy", 
+                            LocalizationMessages.ASSERTION_UNKNOWN(assertion.getName()));
+                } else if (assertionFitness == assertionFitness.UNSUPPORTED) {
+                    logger.warning("getNewEffectivePolicy", 
+                            LocalizationMessages.ASSERTION_UNSUPPORTED(assertion.getName()));
                 }
             } // end foreach assertion in current alternative
             
-            if (supportedAssertions == numberOfAssertions) { // all assertions supported by at least one selector
+            if (alternativeFitness == AlternativeFitness.SUPPORTED) { // all assertions supported by at least one selector
                 // will take this
                 Collection<AssertionSet> alternativeSet = new LinkedList<AssertionSet>();
                 alternativeSet.add(alternative);
                 return new Policy(null,alternativeSet);
             } // end-if all assertions supported
             
-            if (null == alternativePickedSoFar) { // first alternative, nothing to compare
+            if (bestFitnessSoFar.compareTo(alternativeFitness) > 0) { // better alternative found
                 alternativePickedSoFar = alternative;
-                fitnessBestSoFar = getFitness(supportedAssertions, unsupportedAssertions, 
-                                            weirdAssertions, unknownAssertions, numberOfAssertions);
-            } else {  // not the first alternative
-                // if this one is better than that picked so far, pick this...
-                if (fitnessBestSoFar < getFitness(supportedAssertions, unsupportedAssertions, 
-                                            weirdAssertions, unknownAssertions, numberOfAssertions)) {
-                alternativePickedSoFar = alternative;
-                fitnessBestSoFar = getFitness(supportedAssertions, unsupportedAssertions, 
-                                            weirdAssertions, unknownAssertions, numberOfAssertions);
-                    
-                }
-            } // endif not the first alternative
+                bestFitnessSoFar = alternativeFitness;
+            }
         }
         // return a policy containing just the picked alternative
         Collection<AssertionSet> alternativeSet = new LinkedList<AssertionSet>();
         alternativeSet.add(alternativePickedSoFar);
+        logger.warning("getNewEffectivePolicy", 
+                LocalizationMessages.SUBOPTIMAL_ALTERNATIVE_PICKED_WITH_FITNESS(bestFitnessSoFar));
         return new Policy(null,alternativeSet);
-    }
-    
-    private static final int getFitness (int supp, int unsupp, int weird, int unkn, int total) {
-        return (to3(supp, total) * 27) + (to3(unkn, total) * 9) + (to3(weird, total) * 3) + to3(unsupp,total);
-    }
-    
-    private static final int to3(int op, int base) {
-        if (op == 0) {
-            return 0;
-        } else {
-            if (op == base) {
-                return 2;
-            } else {
-                return 1;
-            }
-        }
     }
     
 }

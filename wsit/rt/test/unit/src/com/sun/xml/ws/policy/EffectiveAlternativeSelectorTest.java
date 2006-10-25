@@ -55,7 +55,6 @@ public class EffectiveAlternativeSelectorTest extends TestCase {
      * Test of doSelection method, of class com.sun.xml.ws.policy.EffectiveAlternativeSelector.
      */
     public void testDoPositiveSelection() throws Exception {
-        DummyPolicySelector.supported = true;
         HashSet<PolicyMapMutator> mutators = new HashSet<PolicyMapMutator>();
         EffectivePolicyModifier myModifier = EffectivePolicyModifier.createEffectivePolicyModifier();
         mutators.add(myModifier);
@@ -87,7 +86,6 @@ public class EffectiveAlternativeSelectorTest extends TestCase {
     }
     
     public void testDoNegativeSelection() throws Exception {
-        DummyPolicySelector.supported = false;
         HashSet<PolicyMapMutator> mutators = new HashSet<PolicyMapMutator>();
         EffectivePolicyModifier myModifier = EffectivePolicyModifier.createEffectivePolicyModifier();
         mutators.add(myModifier);

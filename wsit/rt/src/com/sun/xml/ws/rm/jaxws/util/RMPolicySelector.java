@@ -39,7 +39,7 @@ import java.util.Iterator;
 /**
  *
  */
-public class RMPolicySelector extends PolicySelector {
+public class RMPolicySelector implements PolicySelector {
 
     private static final ArrayList<QName> supportedAssertions = new ArrayList<QName>();
         
@@ -58,10 +58,9 @@ public class RMPolicySelector extends PolicySelector {
     }
     
     public RMPolicySelector() {
-        super(supportedAssertions);
     }
         
-    public boolean test(PolicyAssertion assertion) {
+    public Fitness getFitness(PolicyAssertion assertion) {
         QName qname = assertion.getName();
         if (qname.equals(flowQName) || 
             qname.equals(rmQName) ||
@@ -72,13 +71,12 @@ public class RMPolicySelector extends PolicySelector {
             Iterator<PolicyAssertion> i = assertion.getNestedAssertionsIterator();
             while (i != null && i.hasNext()) {
                 if (! supportedAssertions.contains(i.next().getName())) {
-                    return false;
+                    return Fitness.UNSUPPORTED;
                 }
             }
-            return true;
-        }
-        else {
-            return false;
+            return Fitness.SUPPORTED;
+        } else {
+            return Fitness.UNKNOWN;
         }
     }
 

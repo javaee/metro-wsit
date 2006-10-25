@@ -22,36 +22,33 @@
 
 package com.sun.xml.ws.policy.jaxws.addressing;
 
+import com.sun.xml.ws.api.addressing.AddressingVersion;
+import com.sun.xml.ws.policy.PolicyAssertion;
 import java.util.ArrayList;
 import javax.xml.namespace.QName;
 import com.sun.xml.ws.policy.spi.PolicySelector;
+import com.sun.xml.ws.policy.spi.PolicySelector.Fitness;
 
 /**
  *
  * @author japod
  */
-public class AddressingPolicySelector extends PolicySelector{
+public class AddressingPolicySelector implements PolicySelector{
     
     private static final ArrayList<QName> supportedAssertions = new ArrayList<QName>();
     
     static {
-        String wsapNamespaceUri = "http://schemas.xmlsoap.org/ws/2004/09/policy/addressing";
-        String wsaw1NamespaceUri = "http://www.w3.org/2006/05/addressing/wsdl";
-        //String wsaw2NamespaceUri = "http://www.w3.org/2005/08/addressing/wsdl";
-        String anUsingAddressing = "UsingAddressing";
-        //String anAnonymous = "Anonymous";
-        supportedAssertions.add(new QName(wsapNamespaceUri, anUsingAddressing));
-        supportedAssertions.add(new QName(wsaw1NamespaceUri, anUsingAddressing));
-        //supportedAssertions.add(new QName(wsaw2NamespaceUri, anUsingAddressing));
-        //supportedAssertions.add(new QName(wsaw1NamespaceUri, anAnonymous));
-        //supportedAssertions.add(new QName(wsaw2NamespaceUri, anAnonymous));
+        supportedAssertions.add(new QName(AddressingVersion.MEMBER.policyNsUri,"UsingAddressing"));
+        supportedAssertions.add(new QName(AddressingVersion.W3C.policyNsUri,"UsingAddressing"));
     }
     
     /**
      * Creates a new instance of AddressingPolicySelector
      */
     public AddressingPolicySelector() {
-        super(supportedAssertions);
     }
-    
+
+    public PolicySelector.Fitness getFitness(PolicyAssertion assertion) {
+        return supportedAssertions.contains(assertion.getName()) ? Fitness.SUPPORTED : Fitness.UNKNOWN;
+    }
 }

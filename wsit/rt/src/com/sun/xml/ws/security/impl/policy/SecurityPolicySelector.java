@@ -31,8 +31,8 @@ import javax.xml.namespace.QName;
  *
  * @author K.Venugopal@sun.com
  */
-public class SecurityPolicySelector extends PolicySelector{
-    private static ArrayList<QName> supportedAssertions = new ArrayList<QName>();
+public class SecurityPolicySelector implements PolicySelector{
+    private static final ArrayList<QName> supportedAssertions = new ArrayList<QName>();
     static{
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,CanonicalizationAlgorithm));
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,Basic256));
@@ -115,6 +115,9 @@ public class SecurityPolicySelector extends PolicySelector{
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,WssRelV10Token11));
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,WssRelV20Token11));
         //     supportedAssertions.add(new QName(SECURITY_POLICY_NS,X509V3Token));
+
+        supportedAssertions.add(new QName(SECURITY_POLICY_NS,SignedSupportingTokens));
+        supportedAssertions.add(new QName(SECURITY_POLICY_NS,EndorsingSupportingTokens));
         
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,MustSupportRefKeyIdentifier));
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,MustSupportRefIssuerSerial));
@@ -156,33 +159,25 @@ public class SecurityPolicySelector extends PolicySelector{
         
         supportedAssertions.add(new QName(TRUST_NS,EncryptWith));
         
-        supportedAssertions.add(new QName(SUN_WSS_SECURITY_CLIENT_POLICY_NS,CallbackHandler));
-        supportedAssertions.add(new QName(SUN_WSS_SECURITY_CLIENT_POLICY_NS,KeyStore));
-        supportedAssertions.add(new QName(SUN_WSS_SECURITY_CLIENT_POLICY_NS,TrustStore));
+        //supportedAssertions.add(new QName(SUN_WSS_SECURITY_CLIENT_POLICY_NS,CallbackHandler));
+        //supportedAssertions.add(new QName(SUN_WSS_SECURITY_CLIENT_POLICY_NS,KeyStore));
+        //supportedAssertions.add(new QName(SUN_WSS_SECURITY_CLIENT_POLICY_NS,TrustStore));
         
-        supportedAssertions.add(new QName(SUN_SECURE_CLIENT_CONVERSATION_POLICY_NS,"SCClientConfiguration"));
+        //supportedAssertions.add(new QName(SUN_SECURE_CLIENT_CONVERSATION_POLICY_NS,"SCClientConfiguration"));
         
     }
-    /** Creates a new instance of SecurityPolicySelector */
+    
+    /** Creates a new instance of SecurityPolicySelector. To be used by appropriate service finder */
     public SecurityPolicySelector() {
-        super(supportedAssertions);
     }
     
-    public boolean test(PolicyAssertion policyAssertion) {
-        if(policyAssertion instanceof SecurityAssertionValidator){
-            return ((SecurityAssertionValidator)policyAssertion).validate();
-        }else if(supportedAssertions.contains(policyAssertion) || policyAssertion.isOptional()){
-            return true;
+    public PolicySelector.Fitness getFitness(PolicyAssertion policyAssertion) {
+        if (policyAssertion instanceof SecurityAssertionValidator) {
+            return ((SecurityAssertionValidator)policyAssertion).validate() ? Fitness.SUPPORTED : Fitness.UNSUPPORTED;
+        } else if (supportedAssertions.contains(policyAssertion.getName())) {
+            return Fitness.SUPPORTED;
+        } else {
+            return Fitness.UNKNOWN;
         }
-        return super.test(policyAssertion);
-    }
-    
-    
-    public boolean isSupported(String uri) {
-        /*if(SECURITY_POLICY_NS.equals(uri)|| TRUST_NS.equals(uri) || SUN_WSS_SECURITY_CLIENT_POLICY_NS.equals(uri)) {
-            return true;
-        }*/
-        return super.isSupported(uri);
-        
     }
 }

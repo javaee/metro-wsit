@@ -31,70 +31,22 @@ import com.sun.xml.ws.policy.PolicyAssertion;
 /**
  * A call-back interface to test if a policy assertion is valid and supported.
  */
-public abstract class PolicySelector {
+public interface PolicySelector {
     
-    private final ArrayList<String> domainNamespaces = new ArrayList<String>();
-    private final HashSet<QName> supportedAssertions = new HashSet<QName>();
-    
-    /**
-     * Initialize the list of supported namespaces and assertions.
-     *
-     * @param assertionNames A list of the QNames of all supported assertions
-     */
-    protected PolicySelector(List<QName> assertionNames) {
-        for (QName assertionName : assertionNames) {
-            domainNamespaces.add(assertionName.getNamespaceURI());
-            supportedAssertions.add(assertionName);
-        }
+    public enum Fitness {
+        UNKNOWN,
+        SUPPORTED,
+        UNSUPPORTED
     }
     
+    
     /**
-     * An implementation of this method must return true if the given policy
-     * assertion is supported. Otherwise it must return false.
+     * An implementation of this method must return Fitness.UNKNOWN if the given policy
+     * assertion is not known, Fitness.SUPPORTED if it is supported and Fitness.UNSUPPORTED otherwise.
      *
      * @param assertion A policy asssertion. May contain nested policies and
      * assertions.
-     * @return True if the assertion is supported. False otherwise.
+     * @return must not be null
      */
-    public boolean test(PolicyAssertion assertion) {
-        // 1. Check if assertion belongs to known namespace
-        String namespace = assertion.getName().getNamespaceURI();
-        if (!domainNamespaces.contains(namespace)) {
-            return false;
-        }
-        // 2. Check if assertion is known and supported
-        return isAssertionSupported(assertion);
-    };
-    
-    private boolean isAssertionSupported(PolicyAssertion assertion) {
-        if (!supportedAssertions.contains(assertion.getName())) {
-            return false;
-        };
-        /*if (assertion.hasNestedAssertions()) { // check nested assertions -- if any
-            for (Iterator<PolicyAssertion> asIter = assertion.getNestedAssertionsIterator(); asIter.hasNext() ; ) {
-                if (!isAssertionSupported(asIter.next())) {
-                    return false;
-                }
-            }
-        } // end if nested assertions exist
-        if (assertion.hasNestedPolicy()) { // check nested policies -- if any
-            for (PolicyAssertion nestedAssertion : assertion.getNestedPolicy().getAssertionSet()) {
-                if (!isAssertionSupported(nestedAssertion)) {
-                    return false;
-                }
-            }
-        }  // end if has nested policy exists */
-        return true;
-    }
-    
-    /**
-     * An implementation of this method must return true if the given namespace
-     * is supported within its domain. Otherwise it must return false.
-     *
-     * @param namespaceUri A namespace URI
-     * @return True if the namespace is supported. False otherwise.
-     */
-    public boolean isSupported(String namespaceUri) {
-        return domainNamespaces.contains(namespaceUri);
-    };
+    public Fitness getFitness(PolicyAssertion assertion);
 }

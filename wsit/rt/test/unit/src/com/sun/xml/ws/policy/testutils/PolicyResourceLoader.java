@@ -26,7 +26,6 @@ import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
-import com.sun.xml.ws.policy.DummyPolicySelector;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
@@ -103,28 +102,16 @@ public final class PolicyResourceLoader {
         return translateModel(unmarshallModel(resourceName));
     }
 
-    // reads policy map from the given wsdl document
-    public static PolicyMap getPolicyMap(String resourceName) throws Exception {
-        return getPolicyMap(resourceName, true);
-    }
-
-    
+   
     // reads policy map from given wsdl document
-    public static PolicyMap getPolicyMap(String resourceName, boolean policySelectorResponse) throws Exception {
-        WSDLModel model = getWSDLModel(resourceName, policySelectorResponse);
+    public static PolicyMap getPolicyMap(String resourceName) throws Exception {
+        WSDLModel model = getWSDLModel(resourceName);
         WSDLPolicyMapWrapper wrapper = model.getExtension(WSDLPolicyMapWrapper.class);
         return wrapper.getPolicyMap();
     }
     
     // reads wsdl model from given wsdl document
     public static WSDLModel getWSDLModel(String resourceName) throws Exception {
-        return getWSDLModel(resourceName, true);
-    }
-
-    
-    // reads wsdl model from given wsdl document
-    public static WSDLModel getWSDLModel(String resourceName, boolean policySelectorResponse) throws Exception {
-        DummyPolicySelector.supported = policySelectorResponse;
         URL wsdlUrl = PolicyResourceLoader.getResourceUrl(resourceName);
         WSDLModel model = RuntimeWSDLParser.parse(wsdlUrl, XmlUtil.createDefaultCatalogResolver(), true, new WSDLParserExtension[] { new PolicyWSDLParserExtension() });
         return model;

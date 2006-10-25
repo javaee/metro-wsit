@@ -22,8 +22,9 @@
 
 package com.sun.xml.ws.policy.jaxws.impl;
 
-import com.sun.xml.ws.policy.jaxws.encoding.FastInfosetModelConfiguratorProvider;
+import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.spi.PolicySelector;
+import com.sun.xml.ws.policy.spi.PolicySelector.Fitness;
 import java.util.ArrayList;
 import javax.xml.namespace.QName;
 
@@ -32,7 +33,7 @@ import javax.xml.namespace.QName;
  *
  * @author japod
  */
-public class SunProprietaryPolicySelector extends PolicySelector{
+public class SunProprietaryPolicySelector implements PolicySelector{
     
     private static final ArrayList<QName> supportedAssertions = new ArrayList<QName>();
     
@@ -156,7 +157,10 @@ public class SunProprietaryPolicySelector extends PolicySelector{
     
     /** Creates a new instance of SunProprietaryPolicySelector */
     public SunProprietaryPolicySelector() {
-        super(supportedAssertions);
+    }
+    
+    public PolicySelector.Fitness getFitness(PolicyAssertion assertion) {
+        return supportedAssertions.contains(assertion.getName()) ? Fitness.SUPPORTED : Fitness.UNKNOWN;
     }
     
 }
