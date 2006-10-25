@@ -36,7 +36,7 @@ import com.sun.xml.ws.rm.RMConstants;
 import com.sun.xml.ws.rm.RMException;
 import com.sun.xml.ws.rm.protocol.CreateSequenceResponseElement;
 import com.sun.xml.ws.rm.protocol.SequenceAcknowledgementElement;
-import com.sun.xml.ws.transport.http.server.EndpointImpl;
+//import com.sun.xml.ws.transport.http.server.EndpointImpl;
 
 import javax.xml.ws.soap.SOAPBinding;
 import java.util.HashMap;
@@ -62,7 +62,7 @@ public class ProtocolMessageReceiver {
     /**
      * Endpoint listening for protocol messages.
      */
-    private static EndpointImpl endpoint;
+//    private static EndpointImpl endpoint;
     
     /**
      * Map of  messageId String / CreateSequenceElement pairs that have beeen
@@ -91,7 +91,7 @@ public class ProtocolMessageReceiver {
      * Http listener listening at that URI.
      */
     public static void start(String newAcksTo) {
-        
+ /*       
         if (!acksTo.equals(anonymous) && !newAcksTo.equals(acksTo)) {
             throw new UnsupportedOperationException("Cannot change non-anonymous acksTo");
         }
@@ -104,12 +104,15 @@ public class ProtocolMessageReceiver {
             endpoint.publish(acksTo);
 
         }
+*/
     }
     
     public static void stop() {
+/*
         if (endpoint != null) {
             endpoint.stop();
         }
+*/
     }
     
        
