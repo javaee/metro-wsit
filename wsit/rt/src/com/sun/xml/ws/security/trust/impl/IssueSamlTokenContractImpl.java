@@ -22,6 +22,7 @@
 
 package com.sun.xml.ws.security.trust.impl;
 
+import com.sun.org.apache.xml.internal.security.keys.content.X509Data;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.security.trust.impl.elements.str.KeyIdentifierImpl;
 import com.sun.xml.ws.security.trust.impl.elements.str.SecurityTokenReferenceImpl;
@@ -307,7 +308,27 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
                 keyInfo.addUnknownElement(eleFac.toElement(bs,doc));
             }
        }else if(WSTrustConstants.PUBLIC_KEY.equals(keyType)){
-           
+            X509Data x509data = new X509Data(doc);
+            Set certs = ctx.getRequestorSubject().getPublicCredentials();
+            if(certs == null){
+                throw new WSTrustException("Unable to obtain client certificate");
+            }
+            boolean addedClientCert = false;
+            for(Object o : certs){
+                if(o instanceof X509Certificate){
+                    X509Certificate clientCert = (X509Certificate)o;
+                    try{
+                        x509data.addCertificate(clientCert);
+                        addedClientCert = true;
+                    }catch(com.sun.org.apache.xml.internal.security.exceptions.XMLSecurityException ex){
+                        throw new WSTrustException(ex.getMessage(), ex);
+                    }
+                }
+            }
+            if(!addedClientCert){
+                throw new WSTrustException("Unable to obtain client certificate");
+            }
+            keyInfo.add(x509data);
        }
        
        return keyInfo;
