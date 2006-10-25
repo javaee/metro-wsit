@@ -40,7 +40,7 @@ import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.api.server.WSEndpoint;
-import com.sun.xml.ws.message.StringHeader;
+import com.sun.xml.ws.api.message.Headers;
 import com.sun.xml.ws.rm.*;
 import com.sun.xml.ws.rm.jaxws.runtime.InboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
@@ -304,7 +304,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
                      */
 
                     HeaderList headerList = ret.getMessage().getHeaders();
-                    headerList.add(new StringHeader(constants.getAddressingVersion().actionTag,
+                    headerList.add(Headers.create(constants.getAddressingVersion().actionTag,
                                                     Constants.SEQUENCE_ACKNOWLEDGEMENT_ACTION));
 
                 }
@@ -649,7 +649,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
 
             SequenceAcknowledgementElement element = seq.generateSequenceAcknowledgement(null, marshaller);
             Header header = Headers.create(config.getSoapVersion(),marshaller,element);
-            Header actionHeader = new StringHeader(constants.getAddressingVersion().actionTag,
+            Header actionHeader = Headers.create(constants.getAddressingVersion().actionTag,
                                                    Constants.TERMINATE_SEQUENCE_ACTION);
             response.getHeaders().add(header);
             response.getHeaders().add(actionHeader);
@@ -974,7 +974,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
         Header header = Headers.create(config.getSoapVersion(),marshaller,element);
         message.getHeaders().add(header);
         if (action != null) {
-            Header h = new StringHeader(constants.getAddressingVersion().actionTag,
+            Header h = Headers.create(constants.getAddressingVersion().actionTag,
                                         action);
             message.getHeaders().add(h);
         }
