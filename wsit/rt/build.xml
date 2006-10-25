@@ -55,6 +55,9 @@
     <target name="-pre-compile" depends="resgen"
             description="Hook resgen target into compilation process"/>
 
+    <target name="-pre-compile-single" depends="resgen"
+            description="Hook resgen target into single file compilation process"/>
+
     <taskdef name="concatmanifest" classname="taskdefs.ConcatManifest">
         <classpath>
             <fileset dir="../${etc.lib.dir}" includes="wsit-taskdefs.jar"/>
