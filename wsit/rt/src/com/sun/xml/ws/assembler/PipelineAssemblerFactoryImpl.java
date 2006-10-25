@@ -50,6 +50,7 @@ import com.sun.xml.ws.policy.jaxws.documentfilter.PrivateAssertionFilter;
 import com.sun.xml.ws.rm.Constants;
 import com.sun.xml.ws.rm.jaxws.runtime.client.RMClientPipe;
 import com.sun.xml.ws.rm.jaxws.runtime.server.RMServerPipe;
+import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
 import com.sun.xml.ws.util.ServiceFinder;
 import com.sun.xml.wss.jaxws.impl.SecurityClientPipe;
 import com.sun.xml.wss.jaxws.impl.SecurityServerPipe;
@@ -100,19 +101,17 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             p = dump(context, CLIENT_PREFIX + WSS_SUFFIX + AFTER_SUFFIX, p);
 
             // check for Security
-            SecurityClientPipe securityClientPipe = null;
+            SecureConversationInitiator secureConversationInitiator = null;
             ClientPipelineHook hook = context.getContainer().getSPI(ClientPipelineHook.class);
             if (hook != null) {
-                // TODO: how SecurityClientPipe will be passed to RMClientPipe. Currently SC+RM
-                // TODO: will not work for JSR 109-based DD.
-                // TODO: Vijay will follow with Ron if 196 & Policy-based pipe can be separate
                 p = hook.createSecurityPipe(policyMap, context, p);
+                secureConversationInitiator = (SecureConversationInitiator) p;
             } else {
                 if (isSecurityEnabled(policyMap, context.getWsdlModel())) {
                     ClientPipeConfiguration config = new ClientPipeConfiguration(
                             policyMap, context.getWsdlModel(), context.getService(), context.getBinding());
                     p = new SecurityClientPipe(config, p);
-                    securityClientPipe = (SecurityClientPipe) p;
+                    secureConversationInitiator = (SecureConversationInitiator) p;
                 }
             }
             p = dump(context, CLIENT_PREFIX + WSS_SUFFIX + BEFORE_SUFFIX, p);
@@ -125,7 +124,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
                 p = new RMClientPipe(context.getWsdlModel(),
                         context.getService(),
                         context.getBinding(),
-                        securityClientPipe,
+                        secureConversationInitiator,
                         p);
             }
             p = dump(context, CLIENT_PREFIX + WSRM_SUFFIX + BEFORE_SUFFIX, p);
