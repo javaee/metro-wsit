@@ -21,6 +21,7 @@
  */
 
 package com.sun.xml.ws.security.impl.policy;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.security.policy.AlgorithmSuiteValue;
@@ -46,7 +47,10 @@ public class PolicyUtil {
     }
     
     public static boolean isAddressingNS(PolicyAssertion pa) {
-        if ( Constants.ADDRESSING_NS.equals(pa.getName().getNamespaceURI()) ) {
+        if ( AddressingVersion.MEMBER.getNsUri().equals(pa.getName().getNamespaceURI()) ) {
+            return true;
+        }
+        if ( AddressingVersion.W3C.getNsUri().equals(pa.getName().getNamespaceURI()) ) {
             return true;
         }
         return false;

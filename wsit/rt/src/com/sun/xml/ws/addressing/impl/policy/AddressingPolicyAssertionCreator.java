@@ -22,6 +22,7 @@
 
 package com.sun.xml.ws.addressing.impl.policy;
 
+import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
@@ -36,7 +37,7 @@ import java.util.Collection;
  * @author K.Venugopal@sun.com
  */
 public class AddressingPolicyAssertionCreator extends SecurityPolicyAssertionCreator {
-    private String [] nsSupportedList= new String[] { Constants.ADDRESSING_NS};
+    private String [] nsSupportedList= new String[] { AddressingVersion.MEMBER.getNsUri(),AddressingVersion.W3C.getNsUri()};
     /** Creates a new instance of AddressingPolicyAssertionCreator */
     public AddressingPolicyAssertionCreator() {
     }
