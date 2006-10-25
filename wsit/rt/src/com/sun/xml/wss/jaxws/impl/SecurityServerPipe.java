@@ -157,12 +157,12 @@ public class SecurityServerPipe extends SecurityPipeBase {
                 
                 if(trustConfig != null){
                     packet.invocationProperties.put(Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS,trustConfig.iterator());
-                    packet.getApplicationScopePropertyNames(false).add(Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS);
+                    //packet.getHandlerScopePropertyNames(false).add(Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS);
                 }
                 
                 //set the callbackhandler
                 packet.invocationProperties.put(WSTrustConstants.STS_CALL_BACK_HANDLER, handler);
-                packet.getApplicationScopePropertyNames(false).add(WSTrustConstants.STS_CALL_BACK_HANDLER);
+               // packet.getHandlerScopePropertyNames(false).add(WSTrustConstants.STS_CALL_BACK_HANDLER);
             }
             
             if (isSCIssueMessage){
