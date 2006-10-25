@@ -239,15 +239,18 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
         }
         
         /* TODO:this piece of code present since payload should be read once*/
-        try{
-            SOAPMessage sm = ret.getMessage().readAsSOAPMessage();
-            Message newMsg = Messages.create(sm);
-            ret.setMessage(newMsg);
-        }catch(SOAPException ex){
-            throw new WebServiceException(ex);
-        }/**/
+        if (!optimized) {
+            try{
+                SOAPMessage sm = ret.getMessage().readAsSOAPMessage();
+                Message newMsg = Messages.create(sm);
+                ret.setMessage(newMsg);
+            }catch(SOAPException ex){
+                throw new WebServiceException(ex);
+            }
+        }
         //---------------INBOUND SECURITY VERIFICATION----------
         
+        /* unused code after migration to new policyverification
         isSCMessage = isSCMessage(packet);
         if(isSCMessage){
             
@@ -255,9 +258,9 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
             if (!policies.isEmpty()) {
                 ret.invocationProperties.put(SC_ASSERTION, (PolicyAssertion)policies.get(0));
             }
-        }
+        }*/
         
-        ctx = initializeInboundProcessingContext(ret, isSCMessage);
+        ctx = initializeInboundProcessingContext(ret);
         try{
             msg = ret.getMessage();
             // Could be OneWay
@@ -269,7 +272,6 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
                 SOAPMessage soapMessage = msg.readAsSOAPMessage();
                 soapMessage = verifyInboundMessage(soapMessage, ctx);
                 if (msg.isFault()) {                                  
-
                     if (debug) {
                         DumpFilter.process(ctx);
                     }

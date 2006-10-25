@@ -565,7 +565,7 @@ public abstract class SecurityPipeBase implements Pipe {
     }
     
     protected ProcessingContext initializeInboundProcessingContext(
-              Packet packet, boolean isSCMessage)  {
+              Packet packet /*, boolean isSCMessage*/)  {
         ProcessingContextImpl ctx = new ProcessingContextImpl(
                   packet.invocationProperties);
         // set the policy, issued-token-map, and extraneous properties
@@ -594,10 +594,10 @@ public abstract class SecurityPipeBase implements Pipe {
 */
         ctx.setIssuedTokenContextMap(issuedTokenContextMap);
         ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
-        ctx.setOperationResolver(opResolver);
+        ctx.setExtraneousProperty(ctx.OPERATION_RESOLVER, opResolver);
 
-        try {
-            MessagePolicy policy = null;
+//        try { policy need not be set apriori after moving to new policverification code
+           /* MessagePolicy policy = null;
             if (isRMMessage(packet)) {
                 SecurityPolicyHolder holder = inProtocolPM.get("RM");
                 policy = holder.getMessagePolicy();
@@ -616,14 +616,16 @@ public abstract class SecurityPipeBase implements Pipe {
                 if (debug) {
                     policy.dumpMessages(true);
                 }
-                // setting a flag if issued tokens present
-                ctx.hasIssuedToken(bindingHasIssuedTokenPolicy());
-            }
+        
+               
+            }*/
+            // setting a flag if issued tokens present
+            ctx.hasIssuedToken(bindingHasIssuedTokenPolicy());
             ctx.setSecurityEnvironment(secEnv);
             ctx.isInboundMessage(true);
-        } catch (XWSSecurityException e) {
-            throw new RuntimeException(e);
-        }
+//        } catch (XWSSecurityException e) {
+//            throw new RuntimeException(e);
+//        }
         
         return ctx;
     }

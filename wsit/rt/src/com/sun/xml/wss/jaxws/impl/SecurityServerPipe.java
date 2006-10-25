@@ -137,7 +137,10 @@ public class SecurityServerPipe extends SecurityPipeBase {
     // WS-Trust and the STS and WebService are the same entity for SecureConversation
     public Packet process(Packet packet) {
         
-        cacheMessage(packet);
+        if (!optimized) {
+            cacheMessage(packet);
+        }
+
         Message msg = packet.getMessage();
         
         boolean isSCIssueMessage = false;
@@ -146,38 +149,11 @@ public class SecurityServerPipe extends SecurityPipeBase {
         String msgId = null;
         String action = null;
         
-        if (isAddressingEnabled()) {
-            action = getAction(packet);
-            if (WSSCConstants.REQUEST_SECURITY_CONTEXT_TOKEN_ACTION.equals(action)) {
-                isSCIssueMessage = true;
-            } else if (WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_ACTION.equals(action)) {
-                isSCCancelMessage = true;
-            } else if (WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION.equals(action)) {
-                isTrustMessage = true;
-                
-                if(trustConfig != null){
-                    packet.invocationProperties.put(Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS,trustConfig.iterator());
-                    //packet.getHandlerScopePropertyNames(false).add(Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS);
-                }
-                
-                //set the callbackhandler
-                packet.invocationProperties.put(WSTrustConstants.STS_CALL_BACK_HANDLER, handler);
-               // packet.getHandlerScopePropertyNames(false).add(WSTrustConstants.STS_CALL_BACK_HANDLER);
-            }
-            
-            if (isSCIssueMessage){
-                List<PolicyAssertion> policies = getInBoundSCP(packet.getMessage());
-                if(!policies.isEmpty()) {
-                    packet.invocationProperties.put(SC_ASSERTION, (PolicyAssertion)policies.get(0));
-                }
-            }
-        }
-      
         boolean thereWasAFault = false;
         
         //Do Security Processing for Incoming Message
         //---------------INBOUND SECURITY VERIFICATION----------
-        ProcessingContext ctx = initializeInboundProcessingContext(packet, isSCIssueMessage, isTrustMessage);
+        ProcessingContext ctx = initializeInboundProcessingContext(packet/*, isSCIssueMessage, isTrustMessage*/);
         
         try{
             if(!optimized) {
@@ -200,12 +176,39 @@ public class SecurityServerPipe extends SecurityPipeBase {
             // internal error
             throw new WebServiceException(se);
         }
+        packet.setMessage(msg);
+         
+        if (isAddressingEnabled()) {
+            action = getAction(packet);
+            if (WSSCConstants.REQUEST_SECURITY_CONTEXT_TOKEN_ACTION.equals(action)) {
+                isSCIssueMessage = true;
+            } else if (WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_ACTION.equals(action)) {
+                isSCCancelMessage = true;
+            } else if (WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION.equals(action)) {
+                isTrustMessage = true;
+                
+                if(trustConfig != null){
+                    packet.invocationProperties.put(Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS,trustConfig.iterator());
+                    //packet.getHandlerScopePropertyNames(false).add(Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS);
+                }
+                
+                //set the callbackhandler
+                packet.invocationProperties.put(WSTrustConstants.STS_CALL_BACK_HANDLER, handler);
+                // packet.getHandlerScopePropertyNames(false).add(WSTrustConstants.STS_CALL_BACK_HANDLER);
+            }
+            
+            if (isSCIssueMessage){
+                List<PolicyAssertion> policies = getInBoundSCP(packet.getMessage());
+                if(!policies.isEmpty()) {
+                    packet.invocationProperties.put(SC_ASSERTION, (PolicyAssertion)policies.get(0));
+                }
+            }
+        }
         
         if(!isSCIssueMessage ){
             cachedOperation = msg.getOperation(pipeConfig.getWSDLModel());
         }
         
-        packet.setMessage(msg);
         Packet retPacket = null;
         
         if (thereWasAFault) {
@@ -248,35 +251,29 @@ public class SecurityServerPipe extends SecurityPipeBase {
         
         
         /* TODO:this piece of code present since payload should be read once*/
-        try{
-            SOAPMessage sm = retPacket.getMessage().readAsSOAPMessage();
-            Message newMsg = Messages.create(sm);
-            retPacket.setMessage(newMsg);
-            if (newMsg.isFault()) {
-                thereWasAFault = true;
+        if (!optimized) {
+            try{
+                SOAPMessage sm = retPacket.getMessage().readAsSOAPMessage();
+                Message newMsg = Messages.create(sm);
+                retPacket.setMessage(newMsg);
+            }catch(SOAPException ex){
+                throw new WebServiceException(ex);
             }
-        }catch(SOAPException ex){
-            throw new WebServiceException(ex);
-        }/**/
-        
-        if (thereWasAFault) {
-            return retPacket;
         }
+        
         //---------------OUTBOUND SECURITY PROCESSING----------
-        ctx = initializeOutgoingProcessingContext(retPacket, isSCIssueMessage, isTrustMessage, thereWasAFault);
+        ctx = initializeOutgoingProcessingContext(retPacket, isSCIssueMessage, isTrustMessage /*, thereWasAFault*/);
         
         try{
             msg = retPacket.getMessage();
-            if(!optimized) {
-                if (thereWasAFault || (ctx.getSecurityPolicy() == null)) {
-                    //dont do anything here for now
-                } else {
+            if (ctx.getSecurityPolicy() != null) {
+                if(!optimized) {
                     SOAPMessage soapMessage = msg.readAsSOAPMessage();
                     soapMessage = secureOutboundMessage(soapMessage, ctx);
-                    msg = Messages.create(soapMessage);
+                    msg = Messages.create(soapMessage); 
+                }else{
+                    msg = secureOutboundMessage(msg, ctx);
                 }
-            }else{
-                msg = secureOutboundMessage(msg, ctx);
             }
         } catch (WssSoapFaultException ex) {
             msg = Messages.create(getSOAPFault(ex));
@@ -289,7 +286,6 @@ public class SecurityServerPipe extends SecurityPipeBase {
             }
         }
         resetCachedOperation();
-        
         retPacket.setMessage(msg);
         return retPacket;
         
@@ -347,31 +343,31 @@ public class SecurityServerPipe extends SecurityPipeBase {
     }*/
     
     
-    private ProcessingContext initializeInboundProcessingContext(
-            Packet packet, boolean isSCMessage, boolean isTrustMessage) {
-        
-        ProcessingContextImpl ctx =
-                (ProcessingContextImpl)initializeInboundProcessingContext(packet, isSCMessage);
-
-        
-        if (isTrustMessage /*|| isSCMessage*/) {
-            // this is an RST to the STS
-            // Security runtime would populate received client creds into it
-            // for use by the STS (for TRUST/SC)
-            IssuedTokenContext trustCredHolder = new IssuedTokenContextImpl();
-            ctx.setTrustCredentialHolder(trustCredHolder);
-        }
+//    protected ProcessingContext initializeInboundProcessingContext(
+//            Packet packet /*, boolean isSCMessage, boolean isTrustMessage*/) {
+//        
+//        ProcessingContextImpl ctx =
+//                (ProcessingContextImpl)initializeInboundProcessingContext(packet /*, isSCMessage*/);
+//
+//        
+////        if (isTrustMessage /*|| isSCMessage*/) {
+////            // this is an RST to the STS
+////            // Security runtime would populate received client creds into it
+////            // for use by the STS (for TRUST/SC)
+////            IssuedTokenContext trustCredHolder = new IssuedTokenContextImpl();
+////            ctx.setTrustCredentialHolder(trustCredHolder);
+////        }
+//        return ctx;
+//    }
+    
+    protected ProcessingContext initializeOutgoingProcessingContext(
+            Packet packet, boolean isSCMessage, boolean isTrustMessage /*, boolean thereWasAFault*/) {
+        ProcessingContext ctx = initializeOutgoingProcessingContext(packet, isSCMessage/*, thereWasAFault*/);
         return ctx;
     }
     
     protected ProcessingContext initializeOutgoingProcessingContext(
-            Packet packet, boolean isSCMessage, boolean isTrustMessage, boolean thereWasAFault) {
-        ProcessingContext ctx = initializeOutgoingProcessingContext(packet, isSCMessage, thereWasAFault);
-        return ctx;
-    }
-    
-    protected ProcessingContext initializeOutgoingProcessingContext(
-            Packet packet, boolean isSCMessage, boolean thereWasAFault) {
+            Packet packet, boolean isSCMessage /*, boolean thereWasAFault*/) {
         
         ProcessingContextImpl ctx = new ProcessingContextImpl(
                 packet.invocationProperties);
@@ -391,10 +387,15 @@ public class SecurityServerPipe extends SecurityPipeBase {
             }else {
                 policy = getOutgoingXWSSecurityPolicy(packet, isSCMessage);
             }
-            if (debug) {
+            
+            if (debug && policy != null) {
                 policy.dumpMessages(true);
             }
-            ctx.setSecurityPolicy(policy);
+            //this might mislead if there is a bug in code above
+            //but we are doing this check for cases such as no-fault-security-policy
+            if (policy != null) {
+                ctx.setSecurityPolicy(policy);
+            }
             ctx.setSecurityEnvironment(secEnv);
             ctx.isInboundMessage(false);
         } catch (XWSSecurityException e) {
