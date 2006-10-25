@@ -57,6 +57,8 @@ import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
+
 
 
 /**
@@ -73,7 +75,7 @@ public class RMClientPipe
     private WSDLPort port;
     private WSService service;
     private WSBinding binding;
-    private SecurityClientPipe securityPipe;
+    private SecureConversationInitiator securityPipe;
 
     /*
      * SequenceConfig from policy
@@ -123,7 +125,7 @@ public class RMClientPipe
     public RMClientPipe(WSDLPort port,
                       WSService service,
                       WSBinding binding,
-                      SecurityClientPipe securityPipe,
+                      SecureConversationInitiator securityPipe,
                       Pipe nextPipe) {
 
         super(RMSource.getRMSource(), nextPipe);
@@ -163,7 +165,8 @@ public class RMClientPipe
         nextPipe = cloner.copy(toCopy.nextPipe);
         
         if (securityPipe != null) {
-            securityPipe = cloner.copy(toCopy.securityPipe);
+            //securityPipe = cloner.copy(toCopy.securityPipe);
+            securityPipe = toCopy.securityPipe;
             this.secureReliableMessaging = true;
         } else {
             securityPipe = null;
