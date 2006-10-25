@@ -37,7 +37,7 @@ import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.NestedPolicy;
-import com.sun.xml.ws.fault.SOAPFaultBuilder;
+//import com.sun.xml.ws.fault.SOAPFaultBuilder;
 
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.security.IssuedTokenContext;
@@ -63,6 +63,7 @@ import java.net.URI;
 import java.security.SecureRandom;
 import java.util.Set;
 import java.util.UUID;
+import javax.xml.soap.SOAPException;
 import javax.xml.ws.soap.SOAPFaultException;
 
 import javax.xml.bind.JAXBContext;
@@ -254,9 +255,10 @@ public class WSSCPlugin {
             rstr = eleFac.createRSTRFrom(rstrEle);
         } else {
             try{
-                SOAPFaultBuilder builder = SOAPFaultBuilder.create(response);
-                throw (SOAPFaultException)builder.createException(null, response);
-            } catch (JAXBException ex){
+               // SOAPFaultBuilder builder = SOAPFaultBuilder.create(response);
+                //throw (SOAPFaultException)builder.createException(null, response);
+                throw new SOAPFaultException(response.readAsSOAPMessage().getSOAPBody().getFault());
+            } catch (SOAPException ex){
                 throw new RuntimeException(ex);
             }
         }
