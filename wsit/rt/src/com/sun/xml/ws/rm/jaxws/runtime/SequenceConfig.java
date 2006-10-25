@@ -98,7 +98,11 @@ public class SequenceConfig {
     public long ackRequestInterval;
 
 
-
+    /**
+     * Do we suppress duplicates at the endpoint?
+     */
+    public boolean allowDuplicates;
+    
     public RMConstants constants ;
 
 
@@ -118,6 +122,7 @@ public class SequenceConfig {
         acksTo = constants.getAnonymousURI().toString();
         
         ordered = false;
+        allowDuplicates = false;
         inactivityTimeout = 600000;
         flowControl = true;
         bufferSize = 32;
@@ -328,6 +333,8 @@ public class SequenceConfig {
                                 flowAssertion = assertion;
                             } else if (qname.equals(constants.getOrderedQName())) {
                                 ordered = true;
+                            } else if (qname.equals (constants.getAllowDuplicatesQName())) {
+                                allowDuplicates = true;
                             } else if (qname.equals(constants.getAckRequestIntervalQName())) {
                                 String num = assertion.getAttributeValue(new QName("", "Milliseconds"));
                                 if (num != null) {
