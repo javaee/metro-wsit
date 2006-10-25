@@ -156,7 +156,7 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
             if (WSTrustConstants.SAML10_ASSERTION_TOKEN_TYPE.equals(tokenType)||
                 WSTrustConstants.SAML11_ASSERTION_TOKEN_TYPE.equals(tokenType)){
                 assertion = createSAML11Assertion(assertionId, issuer, keyInfo, claimedAttrs);
-            } else if (WSTrustConstants.SAML11_ASSERTION_TOKEN_TYPE.equals(tokenType)){
+            } else if (WSTrustConstants.SAML20_ASSERTION_TOKEN_TYPE.equals(tokenType)){
                 assertion = createSAML20Assertion(assertionId, issuer, keyInfo, claimedAttrs); 
             } else{
                 throw new WSTrustException("Unsupported token type: " + tokenType);
