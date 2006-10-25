@@ -36,6 +36,8 @@ import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSession;
 
+import com.sun.xml.ws.mex.MessagesMessages;
+
 import static com.sun.xml.ws.mex.MetadataConstants.ERROR_LOG_LEVEL;
 import static com.sun.xml.ws.mex.MetadataConstants.GET_REQUEST;
 
@@ -87,7 +89,8 @@ public class HttpPoster {
                 new InputStreamReader(error));
             try {
                 if (logger.isLoggable(ERROR_LOG_LEVEL)) {
-                    logger.log(ERROR_LOG_LEVEL, "Error returned from server:");
+                    logger.log(ERROR_LOG_LEVEL,
+                        MessagesMessages.ERROR_FROM_SERVER());
                     String line = reader.readLine();
                     while (line != null) {
                         logger.log(ERROR_LOG_LEVEL, line);
@@ -97,8 +100,7 @@ public class HttpPoster {
             } catch (IOException ioe) {
                 // This exception has no more impact.
                 logger.log(ERROR_LOG_LEVEL,
-                    "Exception ignored while reading error stream:",
-                    ioe);
+                    MessagesMessages.READING_ERROR_STREAM_FAILURE(), ioe);
             }
         }
     }

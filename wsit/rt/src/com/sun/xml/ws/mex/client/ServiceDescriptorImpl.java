@@ -44,6 +44,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import com.sun.xml.ws.api.wsdl.parser.ServiceDescriptor;
+import com.sun.xml.ws.mex.MessagesMessages;
 import com.sun.xml.ws.mex.client.schema.Metadata;
 import com.sun.xml.ws.mex.client.schema.MetadataReference;
 import com.sun.xml.ws.mex.client.schema.MetadataSection;
@@ -127,9 +128,8 @@ public class ServiceDescriptorImpl extends ServiceDescriptor {
         } else if (dialect.equals(SCHEMA_DIALECT)) {
             schemas.add(createSource(section, id));
         } else {
-            logger.warning("Ignoring unknown dialect \"" +
-                dialect + "\" in metadata response with identifier \"" +
-                id + "\"");
+            logger.warning(
+                MessagesMessages.UNKNOWN_DIALECT_WITH_ID(dialect, id));
         }
     }
 
@@ -156,9 +156,8 @@ public class ServiceDescriptorImpl extends ServiceDescriptor {
         } else if (dialect.equals(SCHEMA_DIALECT)) {
             schemas.add(getSourceFromLocation(location, id));
         } else {
-            logger.warning("Ignoring unknown dialect \"" +
-                dialect + "\" in metadata response with identifier \"" +
-                id + "\"");
+            logger.warning(
+                MessagesMessages.UNKNOWN_DIALECT_WITH_ID(dialect, id));
         }
     }
     
@@ -224,9 +223,8 @@ public class ServiceDescriptorImpl extends ServiceDescriptor {
         Node namespace = node.getAttributes().getNamedItem("targetNamespace");
         if (namespace == null) {
             // bug in the server? want to avoid NPE if so
-            logger.warning("No targetNamespace was found for element " +
-                node.getNamespaceURI() + ":" + node.getLocalName() +
-                " in metadata response.");
+            logger.warning(
+                MessagesMessages.UNKNOWN_WSDL_NAMESPACE(node.toString()));
             return null;
         }
         return namespace.getNodeValue();
@@ -276,9 +274,8 @@ public class ServiceDescriptorImpl extends ServiceDescriptor {
             source.setSystemId(getNamespaceFromNode(wsdlDoc.getFirstChild()));
             return source;
         } catch (TransformerException te) {
-            throw new WebServiceException("Exception while " +
-                "trying to convert and read targetNamespace from " +
-                "location " + address, te);
+            throw new WebServiceException(
+                MessagesMessages.TRANSFORMING_FAILURE(address), te);
         }
     }
 
@@ -294,8 +291,8 @@ public class ServiceDescriptorImpl extends ServiceDescriptor {
                 atts.getNamedItem(NAMESPACE).getNodeValue();
             String sysId = nsToSysIdMap.get(targetNamespace);
             if (sysId == null) {
-                logger.warning("No wsdl with target namespace \"" +
-                    targetNamespace + "\" found to match import statement.");
+                logger.warning(MessagesMessages.WSDL_NOT_FOUND_WITH_NAMESPACE(
+                    targetNamespace));
                 return;
             }
             Attr locationAtt =

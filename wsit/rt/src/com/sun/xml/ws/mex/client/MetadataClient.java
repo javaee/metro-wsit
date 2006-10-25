@@ -35,6 +35,7 @@ import javax.xml.stream.XMLStreamReader;
 import javax.xml.ws.WebServiceException;
 
 import com.sun.istack.NotNull;
+import com.sun.xml.ws.mex.MessagesMessages;
 import com.sun.xml.ws.mex.client.schema.Metadata;
 import com.sun.xml.ws.mex.client.schema.MetadataReference;
 import com.sun.xml.ws.mex.client.schema.MetadataSection;
@@ -74,7 +75,8 @@ public class MetadataClient {
             jaxbContext = JAXBContext.newInstance(
                 "com.sun.xml.ws.mex.client.schema");
         } catch (JAXBException jaxbE) {
-            throw new WebServiceException(jaxbE);
+            throw new WebServiceException(
+                MessagesMessages.JAXB_CONTEXT_CREATION_FAILURE(), jaxbE);
         }
     }
    
@@ -110,9 +112,8 @@ public class MetadataClient {
                     responseStream = mexUtil.getMetadata(newAddress, p);
                 } catch (Exception e) {
                     logger.log(ERROR_LOG_LEVEL,
-                        "Exception retrieving data with protocol" + p +
-                        ", address " + newAddress,
-                        e);
+                        MessagesMessages.RETRIEVING_MDATA_FAILURE(
+                        p, newAddress));
                     continue;
                 }
                 try {
@@ -250,8 +251,7 @@ public class MetadataClient {
                 return getAttributeValue(addressNode, "location");
             }
         }
-        logger.warning("No address node was found for the port " +
-            portNode);
+        logger.warning(MessagesMessages.ADDRESS_NOT_FOUND_FOR_PORT(portNode));
         return null;
     }
 

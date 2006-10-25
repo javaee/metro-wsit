@@ -37,6 +37,7 @@ import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterPipeImpl;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.mex.MessagesMessages;
 
 import static com.sun.xml.ws.mex.MetadataConstants.GET_METADATA_REQUEST;
 import static com.sun.xml.ws.mex.MetadataConstants.GET_REQUEST;
@@ -133,7 +134,8 @@ public class MetadataServerPipe extends AbstractFilterPipeImpl {
                 av, soapVersion, GET_RESPONSE);
             return response;
         } catch (XMLStreamException streamE) {
-            throw new WebServiceException(streamE);
+            throw new WebServiceException(
+                MessagesMessages.RESPONSE_WRITING_FAILURE(), streamE);
         }
     }
 
