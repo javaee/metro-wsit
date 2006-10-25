@@ -114,12 +114,14 @@ public class TrustPluginImpl implements TrustPlugin {
         }else{
             stsURI = stsEP.toString();
         }
+        
         URI metadataAddress = null;
         try {
             metadataAddress = getAddressFromMetadata(issuedToken);
         } catch (MalformedURLException ex) {
             log.log(Level.WARNING, "WST1011.problem.metadata", ex);
         }
+        
         if(metadataAddress != null){
             wsdlLocation = metadataAddress;
         }
@@ -342,6 +344,8 @@ public class TrustPluginImpl implements TrustPlugin {
         PolicyAssertion metadataReference = null;
         Address address = null;
         if(issuer != null){
+            address = ((Issuer)issuer).getAddress();
+            
             if ( issuer.hasNestedAssertions() ) {
                 Iterator <PolicyAssertion> it = issuer.getNestedAssertionsIterator();
                 while ( it.hasNext() ) {
@@ -366,6 +370,7 @@ public class TrustPluginImpl implements TrustPlugin {
             }
             
         }
+        
         if(metadataSection != null){
             if ( metadataSection.hasNestedAssertions() ) {
                 Iterator <PolicyAssertion> it = metadataSection.getNestedAssertionsIterator();
@@ -386,12 +391,17 @@ public class TrustPluginImpl implements TrustPlugin {
                     PolicyAssertion assertion = it.next();
                     if ( PolicyUtil.isAddress(assertion)) {
                         address = (Address)assertion;
-                        return address.getURI();
+                       // return address.getURI();
                     }
                 }
             }
             
         }
+        
+        if (address != null){
+            return address.getURI();
+        }
+        
         return null;
     }
     
