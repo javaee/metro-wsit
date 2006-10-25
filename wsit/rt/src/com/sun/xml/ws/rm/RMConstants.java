@@ -234,13 +234,17 @@ public enum RMConstants {
     public QName getOrderedQName() {
         return new QName(Constants.sunVersion, "Ordered");
     }
+    
+    public QName getAllowDuplicatesQName() {
+        return new QName(Constants.sunVersion, "AllowDuplicates");
+    }
 
     public QName getResendIntervalQName() {
-        return new QName(Constants.sunVersion, "ResendInterval");
+        return new QName(Constants.sunClientVersion, "ResendInterval");
     }
 
     public QName getAckRequestIntervalQName() {
-        return new QName(Constants.sunVersion, "AckRequestInterval");
+        return new QName(Constants.sunClientVersion, "AckRequestInterval");
     }
 
     public QName getInactivityTimeoutQName() {
