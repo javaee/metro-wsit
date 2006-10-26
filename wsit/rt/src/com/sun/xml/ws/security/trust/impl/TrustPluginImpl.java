@@ -126,10 +126,16 @@ public class TrustPluginImpl implements TrustPlugin {
             wsdlLocation = metadataAddress;
         }
         
+        if(wsdlLocation == null){
+              log.log(Level.SEVERE,
+                            "WST0029.could.not.get.sts.location",
+              new IllegalArgumentException("STS information not passed"));
+         }
+        
         RequestSecurityTokenResponse result = null;
         try {
             RequestSecurityToken request = createRequest(rstTemplate, appliesTo);
-            result = invokeRST(request, wsdlLocation.toURL(), serviceName, portName, stsURI);
+            result = invokeRST(request, wsdlLocation, serviceName, portName, stsURI);
             IssuedTokenContext itc = new IssuedTokenContextImpl();
             WSTrustClientContract contract = WSTrustFactory.createWSTrustClientContract(config);
             contract.handleRSTR(request, result, itc);
@@ -138,9 +144,6 @@ public class TrustPluginImpl implements TrustPlugin {
             log.log(Level.SEVERE, "WST0016.problem.itCtx", ex);
             throw new RuntimeException(ex.toString());
         } catch (URISyntaxException ex){
-            log.log(Level.SEVERE, "WST0016.problem.itCtx", ex);
-            throw new RuntimeException(ex.toString());
-        } catch (MalformedURLException ex){
             log.log(Level.SEVERE, "WST0016.problem.itCtx", ex);
             throw new RuntimeException(ex.toString());
         } catch (WSTrustException ex){
@@ -214,24 +217,18 @@ public class TrustPluginImpl implements TrustPlugin {
         return requestSecurityToken;
     }
     
-    private RequestSecurityTokenResponse invokeRST(RequestSecurityToken request, URL wsdlLocation, QName serviceName, QName portName, String stsURI) throws RemoteException, WSTrustException {
-        if(serviceName == null || portName==null){
+    private RequestSecurityTokenResponse invokeRST(RequestSecurityToken request, URI wsdlLocation, QName serviceName, QName portName, String stsURI) throws RemoteException, WSTrustException {
+        
+         if(serviceName == null || portName==null){
             //we have to get the serviceName and portName through MEX
             log.log(Level.FINE, "WST1012.service.portname.mex",
                     new Object[] {serviceName, portName});
             if(stsURI == null){
                 //could not get the STS location from the IssuedToken
                 //try to get it from client configuration
-                if(wsdlLocation != null){
-                    stsURI = wsdlLocation.toString();
-                    log.log(Level.FINE, "WST1013.sts.uri.client", new Object[] {stsURI});
-                }else{
-                    //sts location could not be obtained from either IssuedToken or
-                    //from client configuration
-                    log.log(Level.SEVERE,
-                            "WST0029.could.not.get.sts.location",
-                            new IllegalArgumentException("STS information not passed"));
-                }
+  
+                stsURI = wsdlLocation.toString();
+                log.log(Level.FINE, "WST1013.sts.uri.client", new Object[] {stsURI});
             }
             //do the actual mex request to the stsURI
             QName[] names = doMexRequest(stsURI);
@@ -244,7 +241,14 @@ public class TrustPluginImpl implements TrustPlugin {
                 throw new WSTrustException("Could not obtain STS service and port names through MEX");
             }
         }
-        Service service = Service.create(wsdlLocation, serviceName);
+        
+        Service service = null;
+        try{
+            service = Service.create(wsdlLocation.toURL(), serviceName);
+        }catch (MalformedURLException ex){
+            log.log(Level.SEVERE, "WST0016.problem.itCtx", ex);
+            throw new RuntimeException(ex.toString());
+        } 
         Dispatch<Object> dispatch = service.createDispatch(portName, fact.getContext(), Service.Mode.PAYLOAD, new WebServiceFeature[]{new RespectBindingFeature(), new AddressingFeature(false)});
         //Dispatch<SOAPMessage> dispatch = service.createDispatch(portName, SOAPMessage.class, Service.Mode.MESSAGE, new WebServiceFeature[]{new AddressingFeature(false)});
         //WSBinding wsbinding = (WSBinding) dispatch.getBinding();
