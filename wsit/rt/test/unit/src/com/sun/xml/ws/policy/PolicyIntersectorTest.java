@@ -23,7 +23,6 @@
 package com.sun.xml.ws.policy;
 
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
-import com.sun.xml.ws.policy.sourcemodel.ModelNode;
 import com.sun.xml.ws.policy.testutils.PolicyResourceLoader;
 import junit.framework.*;
 import java.util.Arrays;
@@ -82,7 +81,7 @@ public class PolicyIntersectorTest extends TestCase {
     }
     
     public void testIntersectNullPolicyInCollectionReturnsNullPolicy() throws Exception {
-        Collection<AssertionSet> alternatives = Arrays.asList(new AssertionSet[] {AssertionSet.createAssertionSet(Arrays.asList(new PolicyAssertion[] {new PolicyAssertion(new AssertionData(new QName("A"), null, null, ModelNode.Type.ASSERTION), null, null){}}))});
+        Collection<AssertionSet> alternatives = Arrays.asList(new AssertionSet[] {AssertionSet.createAssertionSet(Arrays.asList(new PolicyAssertion[] {new PolicyAssertion(AssertionData.createAssertionData(new QName("A")), null, null){}}))});
         Collection<Policy> policies = new LinkedList<Policy>();
         for (int i = 0; i < 10; i++) {
             policies.add(Policy.createPolicy("fake", null, alternatives));
@@ -95,7 +94,7 @@ public class PolicyIntersectorTest extends TestCase {
     }
     
     public void testIntersectEmptyPolicyInCollectionReturnsNullPolicy() throws Exception {
-        Collection<AssertionSet> alternatives = Arrays.asList(new AssertionSet[] {AssertionSet.createAssertionSet(Arrays.asList(new PolicyAssertion[] {new PolicyAssertion(new AssertionData(new QName("A"), null, null, ModelNode.Type.ASSERTION), null, null){}}))});
+        Collection<AssertionSet> alternatives = Arrays.asList(new AssertionSet[] {AssertionSet.createAssertionSet(Arrays.asList(new PolicyAssertion[] {new PolicyAssertion(AssertionData.createAssertionData(new QName("A")), null, null){}}))});
         Collection<Policy> policies = new LinkedList<Policy>();
         for (int i = 0; i < 10; i++) {
             policies.add(Policy.createPolicy("fake", null, alternatives));

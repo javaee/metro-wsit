@@ -44,7 +44,7 @@ public abstract class PolicyAssertion {
     private NestedPolicy nestedPolicy;         
     
     protected PolicyAssertion() {
-        this.data = new AssertionData(null, ModelNode.Type.ASSERTION);
+        this.data = AssertionData.createAssertionData(null);
     }
     
     /**

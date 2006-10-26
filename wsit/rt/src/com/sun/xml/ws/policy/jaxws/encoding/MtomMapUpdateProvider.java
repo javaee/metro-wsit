@@ -37,7 +37,6 @@ import com.sun.xml.ws.policy.PolicySubject;
 import com.sun.xml.ws.policy.jaxws.spi.PolicyMapUpdateProvider;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
-import com.sun.xml.ws.policy.sourcemodel.ModelNode;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelGenerator;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelMarshaller;
 import java.util.ArrayList;
@@ -57,7 +56,7 @@ public class MtomMapUpdateProvider implements PolicyMapUpdateProvider{
     
     static class MtomAssertion extends PolicyAssertion {
         
-        private static final AssertionData mtomData = new AssertionData(mtomName, ModelNode.Type.ASSERTION);
+        private static final AssertionData mtomData = AssertionData.createAssertionData(mtomName);
         
         MtomAssertion() {
             super(mtomData, null, null);

@@ -30,7 +30,6 @@ import java.util.Set;
 import javax.xml.namespace.QName;
 
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
-import java.util.Map.Entry;
 
 /**
  * Wrapper class for possible data that each 'assertion' and 'assertion parameter content' policy source model node may
@@ -49,27 +48,56 @@ public final class AssertionData implements Cloneable {
     private ModelNode.Type type;
     
     /**
-     * Constructs assertion data wrapper instance for an assertion or assertion parameter that does not contain any value nor 
-     * any attributes. Whether the data wrapper is constructed for assertion or assertion parameter node is distinguished by 
-     * the supplied {@code type} parameter.
+     * Constructs assertion data wrapper instance for an assertion that does not contain any value nor any attributes.
      *
      * @param name the FQN of the assertion or assertion parameter
-     * @param type specifies whether the data will belong to the assertion or assertion parameter node. This is
-     *             a workaround solution that allows us to transfer this information about the owner node to
-     *             a policy assertion instance factory without actualy having to touch the {@link PolicyAssertionCreator}
-     *             interface and protected {@link PolicyAssertion} constructors.
      *
      * @throws IllegalArgumentException in case the {@code type} parameter is not {@link ModelNode.Type.ASSERTION} or {@link ModelNode.Type.ASSERTION_PARAMETER_NODE}
      */
-    public AssertionData(QName name, ModelNode.Type type) throws IllegalArgumentException {
-        this.name = name;
-        
-        setModelNodeType(type);
+    public static AssertionData createAssertionData(QName name) throws IllegalArgumentException {
+        return new AssertionData(name, null, null, ModelNode.Type.ASSERTION);
     }
     
     /**
-     * Constructs assertion data wrapper instance for an assertion or assertion parameter that contains a value or 
-     * some attributes. Whether the data wrapper is constructed for assertion or assertion parameter node is distinguished by 
+     * Constructs assertion data wrapper instance for an assertion or assertion parameter that contains a value or
+     *
+     * @param name the FQN of the assertion or assertion parameter
+     * @param value a {@link String} representation of model node value
+     * @param attributes map of model node's &lt;attribute name, attribute value&gt; pairs
+     *
+     * @throws IllegalArgumentException in case the {@code type} parameter is not 'ModelNode.Type.ASSERTION' or 'ModelNode.Type.ASSERTION_PARAMETER_NODE'
+     */
+    public static AssertionData createAssertionParameterData(QName name) throws IllegalArgumentException {
+        return new AssertionData(name, null, null, ModelNode.Type.ASSERTION_PARAMETER_NODE);
+    }
+    
+    /**
+     * Constructs assertion data wrapper instance for an assertion that does not contain any value nor any attributes.
+     *
+     * @param name the FQN of the assertion or assertion parameter
+     *
+     * @throws IllegalArgumentException in case the {@code type} parameter is not {@link ModelNode.Type.ASSERTION} or {@link ModelNode.Type.ASSERTION_PARAMETER_NODE}
+     */
+    public static AssertionData createAssertionData(QName name, String value, Map<QName, String> attributes) throws IllegalArgumentException {
+        return new AssertionData(name, value, attributes, ModelNode.Type.ASSERTION);
+    }
+    
+    /**
+     * Constructs assertion data wrapper instance for an assertion or assertion parameter that contains a value or
+     *
+     * @param name the FQN of the assertion or assertion parameter
+     * @param value a {@link String} representation of model node value
+     * @param attributes map of model node's &lt;attribute name, attribute value&gt; pairs
+     *
+     * @throws IllegalArgumentException in case the {@code type} parameter is not 'ModelNode.Type.ASSERTION' or 'ModelNode.Type.ASSERTION_PARAMETER_NODE'
+     */
+    public static AssertionData createAssertionParameterData(QName name, String value, Map<QName, String> attributes) throws IllegalArgumentException {
+        return new AssertionData(name, value, attributes, ModelNode.Type.ASSERTION_PARAMETER_NODE);
+    }
+    
+    /**
+     * Constructs assertion data wrapper instance for an assertion or assertion parameter that contains a value or
+     * some attributes. Whether the data wrapper is constructed for assertion or assertion parameter node is distinguished by
      * the supplied {@code type} parameter.
      *
      * @param name the FQN of the assertion or assertion parameter
@@ -82,7 +110,7 @@ public final class AssertionData implements Cloneable {
      *
      * @throws IllegalArgumentException in case the {@code type} parameter is not 'ModelNode.Type.ASSERTION' or 'ModelNode.Type.ASSERTION_PARAMETER_NODE'
      */
-    public AssertionData(QName name, String value, Map<QName, String> attributes, ModelNode.Type type) throws IllegalArgumentException {
+    AssertionData(QName name, String value, Map<QName, String> attributes, ModelNode.Type type) throws IllegalArgumentException {
         this.name = name;
         this.value = value;
         if (attributes != null) {
@@ -91,7 +119,7 @@ public final class AssertionData implements Cloneable {
         setModelNodeType(type);
     }
     
-    private void setModelNodeType(final ModelNode.Type type) throws IllegalArgumentException {        
+    private void setModelNodeType(final ModelNode.Type type) throws IllegalArgumentException {
         if (type == ModelNode.Type.ASSERTION || type == ModelNode.Type.ASSERTION_PARAMETER_NODE) {
             this.type = type;
         } else {
@@ -241,7 +269,6 @@ public final class AssertionData implements Cloneable {
         return PolicyConstants.VISIBILITY_VALUE_PRIVATE.equals(getAttributeValue(PolicyConstants.VISIBILITY_ATTRIBUTE));
     }
     
-    
     /**
      * TODO: javadoc
      */
@@ -250,7 +277,6 @@ public final class AssertionData implements Cloneable {
             return attributes.remove(name);
         }
     }
-    
     
     /**
      * TODO: javadoc
@@ -261,6 +287,12 @@ public final class AssertionData implements Cloneable {
         }
     }
     
+    /**
+     * TODO: javadoc
+     */
+    public void setOptionalAttribute(boolean value) {
+        setAttribute(PolicyConstants.OPTIONAL, Boolean.toString(value));
+    }
     
     /**
      * An {@code Object.toString()} method override.
@@ -268,7 +300,6 @@ public final class AssertionData implements Cloneable {
     public String toString() {
         return toString(0, new StringBuffer()).toString();
     }
-    
     
     /**
      * A helper method that appends indented string representation of this instance to the input string buffer.
@@ -313,7 +344,7 @@ public final class AssertionData implements Cloneable {
         
         return buffer;
     }
-
+    
     public ModelNode.Type getNodeType() {
         return type;
     }

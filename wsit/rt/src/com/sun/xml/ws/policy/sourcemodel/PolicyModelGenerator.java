@@ -28,7 +28,6 @@ import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
-import java.util.Collection;
 import java.util.Iterator;
 
 /**
@@ -72,8 +71,7 @@ public final class PolicyModelGenerator {
             for (AssertionSet set : policy) {
                 ModelNode alternativeNode = exactlyOneNode.createChildAllNode();
                 for (PolicyAssertion assertion : set) {
-                    // TODO Add getAssertionData method to PolicyAssertion?
-                    AssertionData data = new AssertionData(assertion.getName(), assertion.getValue(), assertion.getAttributes(), ModelNode.Type.ASSERTION); // TODO: revise constructor - node type
+                    AssertionData data = AssertionData.createAssertionData(assertion.getName(), assertion.getValue(), assertion.getAttributes());
                     ModelNode assertionNode = alternativeNode.createChildAssertionNode(data);
                     if (assertion.hasNestedPolicy()) {
                         NestedPolicy nestedPolicy = assertion.getNestedPolicy();
@@ -102,7 +100,7 @@ public final class PolicyModelGenerator {
         AssertionSet set = policy.getAssertionSet();
         ModelNode alternativeNode = exactlyOneNode.createChildAllNode();
         for (PolicyAssertion assertion : set) {
-            AssertionData data = new AssertionData(assertion.getName(), assertion.getValue(), assertion.getAttributes(), ModelNode.Type.ASSERTION); 
+            AssertionData data = AssertionData.createAssertionData(assertion.getName(), assertion.getValue(), assertion.getAttributes()); 
             ModelNode assertionNode = alternativeNode.createChildAssertionNode(data);
             if (assertion.hasNestedPolicy()) {
                 NestedPolicy nestedPolicy = assertion.getNestedPolicy();
@@ -124,7 +122,7 @@ public final class PolicyModelGenerator {
     private void translate(Iterator<PolicyAssertion> assertionParametersIterator, ModelNode assertionNode) {
         while (assertionParametersIterator.hasNext()) {
             PolicyAssertion assertionParameter = assertionParametersIterator.next();
-            AssertionData data = new AssertionData(assertionParameter.getName(), assertionParameter.getValue(), assertionParameter.getAttributes(), ModelNode.Type.ASSERTION_PARAMETER_NODE);
+            AssertionData data = AssertionData.createAssertionParameterData(assertionParameter.getName(), assertionParameter.getValue(), assertionParameter.getAttributes());
             ModelNode assertionParameterNode = assertionNode.createChildAssertionParameterNode(data);
             if (assertionParameter.hasNestedPolicy()) {
                 throw new IllegalStateException("Unexpected nested policy element found in assertion parameter: " + assertionParameter);
