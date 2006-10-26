@@ -343,6 +343,7 @@ public class TrustPluginImpl implements TrustPlugin {
     
     private URI getAddressFromMetadata(final IssuedToken issuedToken) throws MalformedURLException {
         PolicyAssertion issuer = (PolicyAssertion)issuedToken.getIssuer();
+        PolicyAssertion addressingMetadata = null;
         PolicyAssertion metadata = null;
         PolicyAssertion metadataSection = null;
         PolicyAssertion metadataReference = null;
@@ -354,6 +355,19 @@ public class TrustPluginImpl implements TrustPlugin {
                 Iterator <PolicyAssertion> it = issuer.getNestedAssertionsIterator();
                 while ( it.hasNext() ) {
                     PolicyAssertion assertion = it.next();
+                    if ( WSTrustUtil.isAddressingMetadata(assertion)) {
+                        addressingMetadata = assertion;
+                        break;
+                    }
+                }
+            }
+        }
+        
+        if(addressingMetadata != null){            
+            if ( addressingMetadata.hasNestedAssertions() ) {
+                Iterator <PolicyAssertion> it = addressingMetadata.getNestedAssertionsIterator();
+                while ( it.hasNext() ) {
+                    PolicyAssertion assertion = it.next();
                     if ( WSTrustUtil.isMetadata(assertion)) {
                         metadata = assertion;
                         break;
@@ -361,6 +375,7 @@ public class TrustPluginImpl implements TrustPlugin {
                 }
             }
         }
+        
         if(metadata != null){
             if ( metadata.hasNestedAssertions() ) {
                 Iterator <PolicyAssertion> it = metadata.getNestedAssertionsIterator();

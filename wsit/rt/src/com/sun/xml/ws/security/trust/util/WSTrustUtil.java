@@ -30,6 +30,7 @@
 package com.sun.xml.ws.security.trust.util;
 
 import com.sun.xml.ws.policy.PolicyAssertion;
+import com.sun.xml.ws.security.impl.policy.PolicyUtil;
 import com.sun.xml.ws.security.secconv.WSSCElementFactory;
 import com.sun.xml.ws.security.secconv.WSSecureConversationException;
 import com.sun.xml.ws.policy.impl.bindings.AppliesTo;
@@ -216,6 +217,17 @@ public class WSTrustUtil {
             return true;
         }
         
+        return false;
+    }
+
+    public static boolean isAddressingMetadata(PolicyAssertion assertion) {
+        if ( !PolicyUtil.isAddressingNS(assertion)) {
+            return false;
+        }
+        
+        if ( assertion.getName().getLocalPart().equals(Metadata)) {
+            return true;
+        }        
         return false;
     }
     
