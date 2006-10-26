@@ -34,6 +34,7 @@ import javax.xml.ws.WebServiceException;
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
@@ -43,6 +44,7 @@ import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipelineAssembler;
 import com.sun.xml.ws.api.pipe.PipelineAssemblerFactory;
 import com.sun.xml.ws.api.pipe.ServerPipeAssemblerContext;
+import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.mex.server.MetadataServerPipe;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
@@ -56,6 +58,10 @@ import com.sun.xml.ws.rm.jaxws.runtime.server.RMServerPipe;
 import com.sun.xml.ws.util.ServiceFinder;
 import com.sun.xml.wss.jaxws.impl.SecurityClientPipe;
 import com.sun.xml.wss.jaxws.impl.SecurityServerPipe;
+
+import java.io.InputStream;
+
+import javax.servlet.ServletContext;
 
 /**
  * WSIT PipelineAssembler.
@@ -82,6 +88,10 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
     private static final String WSAT_SOAP_NSURI = "http://schemas.xmlsoap.org/ws/2004/10/wsat";
     private static final QName AT_ALWAYS_CAPABILITY = new QName(WSAT_SOAP_NSURI, "ATAlwaysCapability");
     private static final QName AT_ASSERTION = new QName(WSAT_SOAP_NSURI, "ATAssertion");
+    
+    //default security pipe classes for XWSS 2.0 Style Security Configuration Support
+    private static final String xwss20ClientPipe = "com.sun.xml.xwss.XWSSClientPipe";
+    private static final String xwss20ServerPipe = "com.sun.xml.xwss.XWSSServerPipe";
     
     private static class WsitPipelineAssembler implements PipelineAssembler {
         private BindingID bindingId;
@@ -120,6 +130,13 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
                             policyMap, context.getWsdlModel(), context.getService(), context.getBinding());
                     p = new SecurityClientPipe(config, p);
                     securityClientPipe = (SecurityClientPipe) p;
+                } else {
+                    //look for XWSS 2.0 Style Security
+                    if (policyMap == null && isSecurityConfigPresent(context)) {
+                        p = initializeXWSSClientPipe(context.getWsdlModel(), context.getService(), context.getBinding(), p);
+                        //donot set securityClientPipe since this is a 
+                        // non WSIT scenario
+                    }
                 }
             }
             p = dump(context, CLIENT_PREFIX + WSS_SUFFIX + BEFORE_SUFFIX, p);
@@ -239,6 +256,11 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
                     ServerPipeConfiguration config = new ServerPipeConfiguration(
                             policyMap, context.getWsdlModel(), context.getEndpoint());
                     p = new SecurityServerPipe(config, p);
+                } else {
+                    //look for XWSS 2.0 Style Security
+                    if (policyMap == null && isSecurityConfigPresent(context)) {
+                        p = initializeXWSSServerPipe(context.getEndpoint(), context.getWsdlModel(), p);
+                    }
                 }
             }
             p = dump(context, SERVER_PREFIX + WSS_SUFFIX + BEFORE_SUFFIX, p);
@@ -480,4 +502,118 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
     public PipelineAssembler doCreate(final BindingID bindingId) {
         return new WsitPipelineAssembler(bindingId);
     }
+    
+    private static boolean isSecurityConfigPresent(ClientPipeAssemblerContext context) {
+        //returning true by default for now, because the Client Side Security Config is 
+        //only accessible as a Runtime Property on BindingProvider.RequestContext
+        return true;    
+    }
+    
+    private static boolean isSecurityConfigPresent(ServerPipeAssemblerContext context) {
+        
+        QName serviceQName = context.getEndpoint().getServiceName();
+        QName portQName = context.getEndpoint().getPortName();
+        //TODO: not sure which of the two above will give the service name as specified in DD
+        String serviceLocalName = serviceQName.getLocalPart();
+        
+        ServletContext ctxt = 
+                context.getEndpoint().getContainer().getSPI(ServletContext.class);
+       
+        String serverName = "server";
+        String serverConfig = "/WEB-INF/" + serverName + "_" + "security_config.xml";
+        InputStream in = ctxt.getResourceAsStream(serverConfig);
+        
+        if (in == null) {
+            serverConfig = "/WEB-INF/" + serviceLocalName + "_" + "security_config.xml";
+            in = ctxt.getResourceAsStream(serverConfig);
+        }
+        
+        if (in != null) {
+            return true;
+        }
+        
+        return false;
+    }
+    
+    private static Class loadClass(String classname) throws ClassNotFoundException {
+        if (classname == null) {
+            return null;
+        }
+        Class ret = null;
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        
+        if (loader != null) {
+            ret = loader.loadClass(classname);
+        }
+        //try this if the earlier one did not work
+        if (ret == null) {
+            ret = Class.forName(classname);
+        }
+        return ret;
+    }
+    
+    private static Pipe initializeXWSSClientPipe(WSDLPort prt, WSService svc, WSBinding bnd, Pipe nextP) {
+    
+        Pipe ret = null;
+        Class cPipeClass = null;
+        
+        try {
+            cPipeClass = loadClass(xwss20ClientPipe);
+            if (cPipeClass == null) {
+                return nextP;
+            }
+            
+            Constructor ctor = null;
+            ctor = cPipeClass.getConstructor(WSDLPort.class, WSService.class, WSBinding.class, Pipe.class);
+            
+            ret = (Pipe)ctor.newInstance(prt, svc, bnd, nextP);
+            return ret;
+
+        }catch (ClassNotFoundException ex) {
+            //TODO: Log a Compulsary Warning stating that XWSSClientPipe class was not found
+            //ignore because we do not know at assembly time whether security is required.
+            //this will avoid unnecessary creation of an extra Security pipe.
+            //NOTE: In XWSS 2.0, Security Configuration was provided as a property on BindingProvider.RquestContext
+            return nextP;
+        }catch (NoSuchMethodException e) {
+            throw new WebServiceException(e);
+        }catch (InstantiationException ie) {
+            throw new WebServiceException(ie);
+        }catch(IllegalAccessException ae) {
+            throw new WebServiceException(ae);
+        }catch(InvocationTargetException te) {
+            throw new WebServiceException(te);   
+        }
+    }
+    
+    private static Pipe initializeXWSSServerPipe(WSEndpoint epoint, WSDLPort prt, Pipe nextP) {
+        
+        Pipe ret = null;
+        Class sPipeClass = null;
+        
+        try {
+            sPipeClass = loadClass(xwss20ServerPipe);
+            if (sPipeClass == null) {
+                return nextP;
+            }
+            
+            Constructor ctor = sPipeClass.getConstructor(WSEndpoint.class, WSDLPort.class, Pipe.class);
+           
+            ret = (Pipe)ctor.newInstance(epoint, prt, nextP);
+            return ret;
+            
+        }catch (ClassNotFoundException ex) {
+            throw new WebServiceException(ex);
+        }catch (NoSuchMethodException e) {
+            throw new WebServiceException(e);
+        }catch (InstantiationException ie) {
+            throw new WebServiceException(ie);
+        }catch(IllegalAccessException ae) {
+            throw new WebServiceException(ae);
+        }catch(InvocationTargetException te) {
+            throw new WebServiceException(te);   
+        }
+    }
+                        
+    
 }
