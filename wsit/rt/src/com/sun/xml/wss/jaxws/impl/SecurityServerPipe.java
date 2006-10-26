@@ -3,12 +3,12 @@
  * of the Common Development and Distribution License
  * (the License).  You may not use this file except in
  * compliance with the License.
- * 
+ *
  * You can obtain a copy of the license at
  * https://glassfish.dev.java.net/public/CDDLv1.0.html.
  * See the License for the specific language governing
  * permissions and limitations under the License.
- * 
+ *
  * When distributing Covered Code, include this CDDL
  * Header Notice in each file and include the License file
  * at https://glassfish.dev.java.net/public/CDDLv1.0.html.
@@ -16,7 +16,7 @@
  * with the fields enclosed by brackets [] replaced by
  * you own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * 
+ *
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
@@ -40,6 +40,7 @@ import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.assembler.ServerPipeConfiguration;
 import com.sun.xml.ws.runtime.util.SessionManager;
 import com.sun.xml.ws.security.impl.policyconv.SecurityPolicyHolder;
+import com.sun.xml.ws.security.opt.impl.JAXBFilterProcessingContext;
 import com.sun.xml.ws.security.policy.SecureConversationToken;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
 
@@ -87,14 +88,14 @@ import com.sun.xml.wss.impl.NewSecurityRecipient;
 import com.sun.xml.wss.impl.misc.DefaultCallbackHandler;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-        
+
 //TODO: add logging before 4/13
 
 /**
  * @author K.Venugopal@sun.com
  * @author Vbkumar.Jayanti@Sun.COM
  */
-public class SecurityServerPipe extends SecurityPipeBase {    
+public class SecurityServerPipe extends SecurityPipeBase {
     
     private static SessionManager sessionManager;
     private WSDLBoundOperation cachedOperation = null;
@@ -104,7 +105,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
     // Creates a new instance of SecurityServerPipe
     public SecurityServerPipe(ServerPipeConfiguration config,Pipe nextPipe) {
         super(config,nextPipe);
-            sessionManager =
+        sessionManager =
                 SessionManager.getSessionManager();
         
         try {
@@ -140,7 +141,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
         if (!optimized) {
             cacheMessage(packet);
         }
-
+        
         Message msg = packet.getMessage();
         
         boolean isSCIssueMessage = false;
@@ -177,7 +178,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
             throw new WebServiceException(se);
         }
         packet.setMessage(msg);
-         
+        
         if (isAddressingEnabled()) {
             action = getAction(packet);
             if (WSSCConstants.REQUEST_SECURITY_CONTEXT_TOKEN_ACTION.equals(action)) {
@@ -217,21 +218,21 @@ public class SecurityServerPipe extends SecurityPipeBase {
             
             if (isSCIssueMessage || isSCCancelMessage) {
                 //-------put application message on hold and invoke SC contract--------
-
+                
                 retPacket = invokeSecureConversationContract(
                         packet, ctx, isSCIssueMessage, action);
-
+                
             } else {
                 //--------INVOKE NEXT PIPE------------
                 // Put the addressing headers as unread
-               // packet.invocationProperties.put(JAXWSAConstants.SERVER_ADDRESSING_PROPERTIES_INBOUND, null);
+                // packet.invocationProperties.put(JAXWSAConstants.SERVER_ADDRESSING_PROPERTIES_INBOUND, null);
                 
                 if (nextPipe != null) {
                     retPacket = nextPipe.process(packet);
                     
                     // Add addrsssing headers to trust message
                     if (isTrustMessage){
-                       retPacket = addAddressingHeaders(packet, retPacket.getMessage(), WSTrustConstants.REQUEST_SECURITY_TOKEN_RESPONSE_ISSUE_ACTION);
+                        retPacket = addAddressingHeaders(packet, retPacket.getMessage(), WSTrustConstants.REQUEST_SECURITY_TOKEN_RESPONSE_ISSUE_ACTION);
                     }
                 }else {
                     retPacket = packet;
@@ -240,16 +241,18 @@ public class SecurityServerPipe extends SecurityPipeBase {
                /* // Add addrsssing headers to trust message
                 if (isTrustMessage){
                     System.out.println("****It is a trust message. Adding addressing herder to it");
-                    Packet newRetPacket = packet.createServerResponse(retPacket.getMessage(), addVer, pipeConfig.getBinding().getSOAPVersion(), WSTrustConstants.REQUEST_SECURITY_TOKEN_RESPONSE_ISSUE_ACTION); 
+                    Packet newRetPacket = packet.createServerResponse(retPacket.getMessage(), addVer, pipeConfig.getBinding().getSOAPVersion(), WSTrustConstants.REQUEST_SECURITY_TOKEN_RESPONSE_ISSUE_ACTION);
                     newRetPacket.proxy = retPacket.proxy;
                     newRetPacket.invocationProperties.putAll(retPacket.invocationProperties);
-                    
+                
                     retPacket = newRetPacket;
                 }*/
             }
         }
         
-        
+       if(retPacket.getMessage() == null){
+          return retPacket; 
+       } 
         /* TODO:this piece of code present since payload should be read once*/
         if (!optimized) {
             try{
@@ -270,7 +273,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
                 if(!optimized) {
                     SOAPMessage soapMessage = msg.readAsSOAPMessage();
                     soapMessage = secureOutboundMessage(soapMessage, ctx);
-                    msg = Messages.create(soapMessage); 
+                    msg = Messages.create(soapMessage);
                 }else{
                     msg = secureOutboundMessage(msg, ctx);
                 }
@@ -303,7 +306,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
             }
         }
     }
-        
+    
     public void preDestroy() {
         if (nextPipe != null) {
             nextPipe.preDestroy();
@@ -345,11 +348,11 @@ public class SecurityServerPipe extends SecurityPipeBase {
     
 //    protected ProcessingContext initializeInboundProcessingContext(
 //            Packet packet /*, boolean isSCMessage, boolean isTrustMessage*/) {
-//        
+//
 //        ProcessingContextImpl ctx =
 //                (ProcessingContextImpl)initializeInboundProcessingContext(packet /*, isSCMessage*/);
 //
-//        
+//
 ////        if (isTrustMessage /*|| isSCMessage*/) {
 ////            // this is an RST to the STS
 ////            // Security runtime would populate received client creds into it
@@ -369,8 +372,12 @@ public class SecurityServerPipe extends SecurityPipeBase {
     protected ProcessingContext initializeOutgoingProcessingContext(
             Packet packet, boolean isSCMessage /*, boolean thereWasAFault*/) {
         
-        ProcessingContextImpl ctx = new ProcessingContextImpl(
-                packet.invocationProperties);
+        ProcessingContextImpl ctx = null;
+        if(optimized){
+            ctx = new JAXBFilterProcessingContext(packet.invocationProperties);
+        }else{
+            ctx = new ProcessingContextImpl( packet.invocationProperties);
+        }
         // set the policy, issued-token-map, and extraneous properties
         ctx.setIssuedTokenContextMap(issuedTokenContextMap);
         ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
@@ -445,7 +452,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
                     if(nodes.getLength() == 0){
                         nodes = body.getElementsByTagNameNS(SOAPConstants.URI_NS_SOAP_1_2_ENVELOPE,"Detail");
                     }
-                    if(nodes.getLength() >0){                        
+                    if(nodes.getLength() >0){
                         Node node = nodes.item(0);
                         Node faultNode = node.getFirstChild();
                         if(faultNode == null){
@@ -467,7 +474,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
                     }
                 }catch(SOAPException sx){
                     sx.printStackTrace();
-                    //log error                    
+                    //log error
                 }
             }
             return null;
@@ -492,8 +499,8 @@ public class SecurityServerPipe extends SecurityPipeBase {
             Packet packet, ProcessingContext ctx, boolean isSCTIssue, String action) {
         
         IssuedTokenContext ictx = new IssuedTokenContextImpl();
-        /* MK: 
-         SecurityContextTokenInfo sctx = 
+        /* MK:
+         SecurityContextTokenInfo sctx =
                                     new SecurityTokenContextInfoImpl();
          */
         Message msg = packet.getMessage();
@@ -512,26 +519,26 @@ public class SecurityServerPipe extends SecurityPipeBase {
                 retAction = WSSCConstants.REQUEST_SECURITY_CONTEXT_TOKEN_RESPONSE_ACTION;
                 SecurityContextToken sct = (SecurityContextToken)ictx.getSecurityToken();
                 String sctId = sct.getIdentifier().toString();
- 
-/* MK: 
+                
+/* MK:
                 rstr =  scContract.issue(rst, sctx, (SecureConversationToken)policies.get(0));
-                String sctId = sctx.getIdentifier();                                
-                                
+                String sctId = sctx.getIdentifier();
+ 
                 Session session = null;
                 if (sessionManager.getSession(sctId) == null) {
-                            session = sessionManager.createSession(sctId); 
+                            session = sessionManager.createSession(sctId);
                 }
-            
+ 
                 session.setSecurityInfo(sctx);
                 // Put it here for RM to pick up
                 packet.invocationProperties.put(
                           "com.sun.xml.ws.sessionid", sctId);
-
+ 
                 packet.invocationProperties.put(
                           "com.sun.xml.ws.sessiondata", session.getUserData());
  
                 IssuedTokenContext ictx = sctInfo.getIssuedTokenContext();
-*/                                
+ */
                 ((ProcessingContextImpl)ctx).getIssuedTokenContextMap().put(sctId, ictx);
             } else if (requestType.toString().equals(WSTrustConstants.CANCEL_REQUEST)) {
                 retAction = WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_RESPONSE_ACTION;
@@ -572,30 +579,30 @@ public class SecurityServerPipe extends SecurityPipeBase {
         throw new UnsupportedOperationException("Will be supported for optimized path");
     }
     
-  /** private Packet addAddressingHeaders(Packet packet, String relatesTo, String action){
+    /** private Packet addAddressingHeaders(Packet packet, String relatesTo, String action){
         AddressingBuilder builder = AddressingBuilder.newInstance();
         AddressingProperties ap = builder.newAddressingProperties();
-        
+   
         try{
             // Action
             ap.setAction(builder.newURI(new URI(action)));
-            
+   
             // RelatesTo
             Relationship[] rs = new Relationship[]{builder.newRelationship(new URI(relatesTo))};
             ap.setRelatesTo(rs);
-            
+   
             // To
             ap.setTo(builder.newURI(new URI(builder.newAddressingConstants().getAnonymousURI())));
-            
+   
         } catch (URISyntaxException e) {
             throw new RuntimeException("Exception when adding Addressing Headers");
         }
-        
+   
         WsaRuntimeFactory fac = WsaRuntimeFactory.newInstance(ap.getNamespaceURI(), pipeConfig.getWSDLModel(), pipeConfig.getBinding());
         fac.writeHeaders(packet, ap);
         packet.invocationProperties
                 .put(JAXWSAConstants.SERVER_ADDRESSING_PROPERTIES_OUTBOUND, ap);
-        
+   
         return packet;
     }*/
     
@@ -676,15 +683,15 @@ public class SecurityServerPipe extends SecurityPipeBase {
     
     protected String getAction(WSDLOperation operation,boolean inComming){
         if(inComming){
-               return operation.getInput().getAction();
+            return operation.getInput().getAction();
         }else{
             return operation.getOutput().getAction();
         }
     }
     
     private Packet addAddressingHeaders(Packet packet, Message retMsg, String action){
-        Packet retPacket = packet.createServerResponse(retMsg, addVer, soapVersion, action); 
-
+        Packet retPacket = packet.createServerResponse(retMsg, addVer, soapVersion, action);
+        
         retPacket.proxy = packet.proxy;
         retPacket.invocationProperties.putAll(packet.invocationProperties);
         
@@ -696,7 +703,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
         //Action header
         AddressingProperties ap = (AddressingProperties)packet.invocationProperties
                 .get(JAXWSAConstants.SERVER_ADDRESSING_PROPERTIES_OUTBOUND);
-        
+    
         if (ap != null) {
             AttributedURI uri = ap.getAction();
             if (uri != null) {
@@ -718,15 +725,15 @@ public class SecurityServerPipe extends SecurityPipeBase {
             AttributedURI uri = ap.getAction();
             if (uri != null){
                 String uriValue = uri.toString();
-                if(WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_RESPONSE_ACTION.equals(uriValue) || 
+                if(WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_RESPONSE_ACTION.equals(uriValue) ||
                       WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_ACTION .equals(uriValue)) {
                     return true;
                 }
             }
         }
         return false;
-    }    
-        
+    }
+    
     protected boolean isTrustMessage(Packet packet){
         AddressingProperties ap = (AddressingProperties)packet.invocationProperties
                 .get(JAXWSAConstants.SERVER_ADDRESSING_PROPERTIES_OUTBOUND);
@@ -741,15 +748,15 @@ public class SecurityServerPipe extends SecurityPipeBase {
             }
         }
         return false;
-        
+    
     }*/
     
-  /**  protected AttributedURI getAction(Packet packet ){
+    /**  protected AttributedURI getAction(Packet packet ){
         AddressingProperties ap = (AddressingProperties)packet.invocationProperties
                 .get(JAXWSAConstants.SERVER_ADDRESSING_PROPERTIES_OUTBOUND);
         if (ap != null) {
             AttributedURI uri = ap.getAction();
-            
+   
             return uri;
         }
         return null;
@@ -763,8 +770,8 @@ public class SecurityServerPipe extends SecurityPipeBase {
                 Class handler = loadClass(ret);
                 Object obj = handler.newInstance();
                 if (!(obj instanceof CallbackHandler)) {
-                    throw new RuntimeException("The specified CallbackHandler class, " + 
-                        ret + ", Is not a valid CallbackHandler");
+                    throw new RuntimeException("The specified CallbackHandler class, " +
+                            ret + ", Is not a valid CallbackHandler");
                 }
                 return (CallbackHandler)obj;
             }
