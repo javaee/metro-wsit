@@ -23,7 +23,7 @@
 -->
 
 <!--
- $Id: build.xml,v 1.19 2006-10-26 18:32:53 hofsass Exp $
+ $Id: build.xml,v 1.20 2006-10-26 18:39:27 hofsass Exp $
 
  Copyright (c) 2005 Sun Microsystems, Inc.
  All rights reserved.
@@ -126,7 +126,7 @@
         <run-tests>
             <arguments>
                 <arg value="-r" />
-                <arg path="testcases" />
+                <arg path="${testcases}" />
                 <arg value="-cp:wsit-image" />
                 <arg path="wsit-image/jax-ws-latest-wsit" />
                 <arg value="-transport" />
@@ -141,7 +141,7 @@
         <run-tests>
             <arguments>
                 <arg value="-r" />
-                <arg path="testcases" />
+                <arg path="${testcases}" />
                 <arg value="-cp:wsit-image" />
                 <arg path="${wsit.image}" />
                 <arg value="-transport" />
