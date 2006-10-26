@@ -30,4 +30,101 @@
     
     <xs:element name="PingRequest.BodyType" nillable="true" type="tns:PingRequest.BodyType"/>
     <xs:element name="ping" nillable="true" type="tns:PingRequest.BodyType"/>
+    
+     <xs:element name="clear" type="tns:clear"/>
+
+      <xs:element name="clearResponse" type="tns:clearResponse"/>
+      
+      <xs:element name="process" type="tns:process"/>
+
+      <xs:element name="processResponse" type="tns:processResponse"/>
+
+
+      <xs:element name="getAlive" type="tns:getAlive"/>
+
+      <xs:element name="getAliveResponse" type="tns:getAliveResponse"/>
+
+      <xs:element name="getCount" type="tns:getCount"/>
+
+      <xs:element name="getCountResponse" type="tns:getCountResponse"/>
+
+      <xs:element name="getDuplicates" type="tns:getDuplicates"/>
+
+      <xs:element name="getDuplicatesResponse" type="tns:getDuplicatesResponse"/>
+
+      <xs:element name="getSequence" type="tns:getSequence"/>
+
+      <xs:element name="getSequenceResponse" type="tns:getSequenceResponse"/>
+
+      <xs:complexType name="getCount">
+        <xs:sequence>
+          <xs:element name="getCount_param" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+      </xs:complexType>
+
+      <xs:complexType name="getCountResponse">
+        <xs:sequence>
+          <xs:element name="return" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+      </xs:complexType>
+
+      <xs:complexType name="getAlive">
+        <xs:sequence>
+          <xs:element name="getAlive_param" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+      </xs:complexType>
+
+      <xs:complexType name="getAliveResponse">
+        <xs:sequence>
+          <xs:element name="return" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+      </xs:complexType>
+
+      <xs:complexType name="getDuplicates">
+        <xs:sequence>
+          <xs:element name="getDuplicates_param" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+      </xs:complexType>
+
+      <xs:complexType name="getDuplicatesResponse">
+        <xs:sequence>
+          <xs:element name="return" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+      </xs:complexType>
+
+      <xs:complexType name="clear">
+        <xs:sequence>
+          <xs:element name="clear_param" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+      </xs:complexType>
+
+      <xs:complexType name="clearResponse">
+        <xs:sequence>
+          <xs:element name="return" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+      </xs:complexType>
+      
+      <xs:complexType name="process">
+        <xs:sequence>
+          <xs:element name="process_param" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+      </xs:complexType>
+
+      <xs:complexType name="processResponse">
+        <xs:sequence>
+          <xs:element name="return" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+      </xs:complexType>
+
+      <xs:complexType name="getSequence">
+        <xs:sequence>
+          <xs:element name="getSequence_param" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+      </xs:complexType>
+
+      <xs:complexType name="getSequenceResponse">
+        <xs:sequence>
+          <xs:element name="return" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+      </xs:complexType>
 </xs:schema>

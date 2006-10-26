@@ -1,47 +1,28 @@
 
 
 import com.sun.xml.ws.rm.Message;
- /* Mask determines whether messages should be dropped.  Message whose index has
+import com.sun.xml.ws.rm.jaxws.runtime.client.RMSource;
+
+/* Mask determines whether messages should be dropped.  Message whose index has
      * value 0 is dropped first time.
-     */
- int[] dropList = {1,1,0,1,0,1,1,0,1};
+*/
+int[] dropList = {1,1,0,1,0,1,1,0,1};
 
-     public String sendTwoWay(IPing port, String method, String arg) {
-        EchoRequestBodyType p = new ObjectFactory().createEchoRequestBodyType();
-        p.setText(new JAXBElement(new QName("http://tempuri.org/","Text"),String.class, method));
-        p.setSequence(new JAXBElement(new QName("http://tempuri.org/","Sequence"),String.class, arg));
+ 
 
-        EchoResponseBodyType pres = port.echoString(p);
-        return pres.getEchoStringReturn().getValue();
-    }
+public void close(IPing port) {
+    ClientSession session = ClientSession.getSession((BindingProvider)port);
+    session.close();
+}
 
-    public void sendOneWay(IPing port, String method, String arg) {
-        PingRequestBodyType p = new ObjectFactory().createPingRequestBodyType();
-        p.setText(new JAXBElement(new QName("http://tempuri.org/","Text"),String.class, method));
-        p.setSequence(new JAXBElement(new QName("http://tempuri.org/","Sequence"),String.class, arg));
-
-        port.ping(p);
-    }
-
-    public void close(IPing port) {
-        ClientSession session = ClientSession.getSession((BindingProvider)port);
-        session.close();
-    }
-
-    myfilter = new com.sun.xml.ws.rm.jaxws.util.ProcessingFilter(){
-
-
-        public boolean handleClientResponseMessage(Message mess) {
+myfilter = new com.sun.xml.ws.rm.jaxws.util.ProcessingFilter(){
+    public boolean handleClientResponseMessage(Message mess) {
            return true;
-        }
-
-         public void handleEndpointRequestMessage(Message mess){}
-
-
-         public boolean handleEndpointResponseMessage(Message mess){return true;}
-
-         public void handleOutboundHeaders(Message mess){}
-         public boolean handleClientRequestMessage(Message mess) {
+    }
+    public void handleEndpointRequestMessage(Message mess){}
+    public boolean handleEndpointResponseMessage(Message mess){return true;}
+    public void handleOutboundHeaders(Message mess){}
+    public boolean handleClientRequestMessage(Message mess) {
 
             int index = mess.getMessageNumber() - 1;
             if (dropList[index] == 0) {
@@ -50,63 +31,53 @@ import com.sun.xml.ws.rm.Message;
             }
             System.out.println("sending " + mess.getMessageNumber());
             return true;
-        }
+    }
+};
 
-    };
+RMSource.getRMSource().setProcessingFilter(myfilter);
+
+
+testAtLeastOnce(){
+
+    service = new wsrm.testserver.client.PingService();
+    IPing portSequence = service.getWSHttpBindingIPing();
+    IPing portControl = service.getWSHttpBindingIPing();
+ 
     com.sun.xml.ws.rm.jaxws.runtime.client.RMSource.getRMSource().setProcessingFilter(myfilter);
+    int num = dropList.length;
 
-    testAtLeastOnce(){
+    /* expected result (modulo order) when report operation is called */
+    String ret = "";
 
+    portControl.clear(null);
 
+    try {
+        Thread.sleep(new Long("1000").longValue());
+    } catch (Exception e) {}
 
-    //use this one for conducting the test, clearing state
-    //on client before starting test and reporting results
-    IPing portControl = WSHttpBinding_IPing;
+    for (int i = 0; i < num; i++) {
+        portSequence.process("message " + (i + 1));
 
-        //use this one to collect messages belonging to this
-        //sequence and make sure they all arrive
-    IPing portSequence = WSHttpBinding_IPing;
-
-
-
-        com.sun.xml.ws.rm.jaxws.runtime.client.RMSource.getRMSource().setProcessingFilter(myfilter);
-        int num = dropList.length;
-
-        /* expected result (modulo order) when report operation is called */
-        String ret = "";
-
-        sendOneWay(portControl, "clear", null);
-
-        try {
-            Thread.sleep(new Long("1000").longValue());
-        } catch (Exception e) {}
-
-        for (int i = 0; i < num; i++) {
-            sendOneWay(portSequence, "process" , "message " + (i + 1));
-
-            //use i+1 because message numbers are one-based and
-            ret += Integer.toString(i + 1);
-            ret += ",";
-        }
-
-        //wait for everything to arrive
-        try {
-            Thread.sleep(new Long("2000").longValue());
-        } catch (Exception e) {}
-
-        String retCount = sendTwoWay(portControl, "reportCount" , null);
-        String retStr = sendTwoWay(portControl, "reportSequence", null);
-
-
-
-        System.out.println("");
-        System.out.println("sent messages  = " + ret);
-        System.out.println("received messages from endpoint = " + retStr);
-        System.out.println("received count from endpoint = " + retCount);
-
-        assertEquals(retCount, Integer.toString(num + 1));
+        //use i+1 because message numbers are one-based and
+        ret += Integer.toString(i + 1);
+        ret += ",";
     }
 
+    //wait for everything to arrive
+    try {
+         Thread.sleep(new Long("2000").longValue());
+    } catch (Exception e) {}
 
-   testAtLeastOnce();
+    String retCount = portControl.getCount(null);
+    String retStr = portControl.getSequence(null);
+
+    System.out.println("");
+    System.out.println("sent messages  = " + ret);
+    System.out.println("received messages from endpoint = " + retStr);
+    System.out.println("received count from endpoint = " + retCount);
+
+    assertEquals(retCount, Integer.toString(num ));
+}
+
+testAtLeastOnce();
 

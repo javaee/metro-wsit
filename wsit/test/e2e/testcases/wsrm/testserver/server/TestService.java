@@ -6,15 +6,16 @@ import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
 import com.sun.xml.ws.rm.jaxws.runtime.server.RMDestination;
 import com.sun.xml.ws.rm.jaxws.runtime.InboundSequence;
 import javax.xml.ws.WebServiceContext;
+import com.sun.xml.ws.rm.jaxws.util.ProcessingFilter;
 
-public class TestService {
+public class TestService implements ProcessingFilter {
     
     private boolean duplicatesReceived = false;
     private boolean timedOutOnce = false;
-    private String sequenceId = null;
+    public static String sequenceId = "";
     private InboundSequence sequence = null;
-    private int count = 0;
-    public HashMap<Integer, Integer> messages = 
+    public static int count = 0;
+    public static HashMap<Integer, Integer> messages = 
             new HashMap<Integer, Integer>();
     
     
@@ -24,6 +25,14 @@ public class TestService {
         this.context = context;
     }
     
+    public boolean handleClientResponseMessage(Message mess) {
+       return true;
+    }
+    
+    public boolean handleClientRequestMessage(Message mess) {
+        return true;
+    } 
+    
     public void handleEndpointRequestMessage(Message mess) {
      
         //first message will be call to clear() which sets sequenceId to null.
@@ -32,6 +41,7 @@ public class TestService {
             sequence = (InboundSequence)mess.getSequence();
             sequenceId = mess.getSequence().getId();
         }
+        
         synchronized (this) {
             if (mess.getSequence().getId().equals(sequenceId)) {
                 
@@ -40,19 +50,29 @@ public class TestService {
                     duplicatesReceived = true;
                 }
                 messages.put(count++, mess.getMessageNumber());
+       
             }
         }
     }
     
-    public void handleEndpointResponseMessage(Message mess) {
+    public boolean handleEndpointResponseMessage(Message mess) {
+        return true;
     }
     
-    public void process(String s) {
+    public void handleOutboundHeaders(Message mess) {}
+    
+    public void processImpl(String s) {
+        if (s.equals("block")) {
+            try {
+                Thread.sleep(3000);
+            } catch (Exception e) {}
+        }
         System.out.println("received message " + s.toString());
     }
     
     public String reportCount(String s) {
-        return Integer.toString(count + 1);
+        System.out.println("reportCount.. count = " + count);
+        return Integer.toString(count);
     }
     
     public String reportSequence(String s) {
@@ -67,9 +87,12 @@ public class TestService {
         return result;
     }
     
-    public void clear(String s) {
-     
+    public void clearImpl(String s) {
+     System.out.println("clear called");
         sequenceId = null;
+        System.out.println("sequenceId = \"" + sequenceId + "\"");
+        
+        
         messages = 
             new HashMap<Integer, Integer>();
         count = 0;

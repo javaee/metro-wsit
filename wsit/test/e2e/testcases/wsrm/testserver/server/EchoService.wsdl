@@ -14,31 +14,149 @@
         <wsdl:message name="PingRequest">
 		<wsdl:part name="parameters" element="tns:ping"/>
 	</wsdl:message>
+        <wsdl:message name="process">
+            <wsdl:part name="parameters" element="tns:process"/>
+        </wsdl:message>
+        <!--
+        <wsdl:message name="processResponse">
+            <wsdl:part name="parameters" element="tns:processResponse"/>
+        </wsdl:message>
+        -->
+        <wsdl:message name="clear">
+            <wsdl:part name="parameters" element="tns:clear"/>
+        </wsdl:message>
+        <wsdl:message name="clearResponse">
+            <wsdl:part name="parameters" element="tns:clearResponse"/>
+        </wsdl:message>
+        <wsdl:message name="getCount">
+            <wsdl:part name="parameters" element="tns:getCount"/>
+        </wsdl:message>
+        <wsdl:message name="getCountResponse">
+            <wsdl:part name="parameters" element="tns:getCountResponse"/>
+        </wsdl:message>
+        <wsdl:message name="getSequence">
+            <wsdl:part name="parameters" element="tns:getSequence"/>
+        </wsdl:message>
+        <wsdl:message name="getSequenceResponse">
+            <wsdl:part name="parameters" element="tns:getSequenceResponse"/>
+        </wsdl:message>
+        <wsdl:message name="getDuplicates">
+            <wsdl:part name="parameters" element="tns:getDuplicates"/>
+        </wsdl:message>
+        <wsdl:message name="getDuplicatesResponse">
+            <wsdl:part name="parameters" element="tns:getDuplicatesResponse"/>
+        </wsdl:message>
+        <wsdl:message name="getAlive">
+            <wsdl:part name="parameters" element="tns:getAlive"/>
+        </wsdl:message>
+        <wsdl:message name="getAliveResponse">
+            <wsdl:part name="parameters" element="tns:getAliveResponse"/>
+        </wsdl:message>
 	<wsdl:portType name="IPing" >
-		<wsdl:operation name="EchoString" >
-			<wsdl:input name="EchoRequest" message="tns:EchoRequest" />
-			<wsdl:output name="EchoResponse" message="tns:EchoResponse" />
-		</wsdl:operation>
-                <wsdl:operation name="Ping" >
-			<wsdl:input name="PingRequest" message="tns:PingRequest" />
-		</wsdl:operation>
-	</wsdl:portType>
-	<wsdl:binding name="WSHttpBinding_IPing" type="tns:IPing">
-		<wsp:PolicyReference URI="#WSHttpBinding_IPing_policy"/>
-		<soap12:binding transport="http://schemas.xmlsoap.org/soap/http"/>
-		<wsdl:operation name="EchoString">
-			<wsdl:input>
-				<soap12:body use="literal"/>
-			</wsdl:input>
-			<wsdl:output>
-				<soap12:body use="literal"/>
-			</wsdl:output>
-		</wsdl:operation>
-                <wsdl:operation name="Ping">
-			<wsdl:input>
-				<soap12:body use="literal"/>
-			</wsdl:input>
-		</wsdl:operation>
+            <wsdl:operation name="EchoString" >
+                    <wsdl:input name="EchoRequest" message="tns:EchoRequest" />
+                    <wsdl:output name="EchoResponse" message="tns:EchoResponse" />
+            </wsdl:operation>
+            <wsdl:operation name="Ping" >
+                    <wsdl:input name="PingRequest" message="tns:PingRequest" />
+            </wsdl:operation>
+            <wsdl:operation name="clear">
+                  <wsdl:input message="tns:clear"/>
+                  <wsdl:output message="tns:clearResponse"/>
+            </wsdl:operation>
+            <wsdl:operation name="process">
+                  <wsdl:input message="tns:process"/>
+           <!--       <wsdl:output message="tns:processResponse"/> -->
+            </wsdl:operation>
+            <wsdl:operation name="getCount">
+                  <wsdl:input message="tns:getCount"/>
+                  <wsdl:output message="tns:getCountResponse"/>
+            </wsdl:operation>
+            <wsdl:operation name="getSequence">
+                  <wsdl:input message="tns:getSequence"/>
+                  <wsdl:output message="tns:getSequenceResponse"/>
+            </wsdl:operation>
+            <wsdl:operation name="getDuplicates">
+                  <wsdl:input message="tns:getDuplicates"/>
+                  <wsdl:output message="tns:getDuplicatesResponse"/>
+            </wsdl:operation>
+            <wsdl:operation name="getAlive">
+                  <wsdl:input message="tns:getAlive"/>
+                  <wsdl:output message="tns:getAliveResponse"/>
+            </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:binding name="WSHttpBinding_IPing" type="tns:IPing">
+            <wsp:PolicyReference URI="#WSHttpBinding_IPing_policy"/>
+            <soap12:binding transport="http://schemas.xmlsoap.org/soap/http"/>
+            <wsdl:operation name="EchoString">
+                    <wsdl:input>
+                            <soap12:body use="literal"/>
+                    </wsdl:input>
+                    <wsdl:output>
+                            <soap12:body use="literal"/>
+                    </wsdl:output>
+            </wsdl:operation>
+            <wsdl:operation name="Ping">
+                    <wsdl:input>
+                            <soap12:body use="literal"/>
+                    </wsdl:input>
+            </wsdl:operation>
+             <wsdl:operation name="process">
+              <soap:operation soapAction=""/>
+              <wsdl:input>
+                <soap:body use="literal"/>
+              </wsdl:input>
+              <!--
+              <wsdl:output>
+                <soap:body use="literal"/>
+              </wsdl:output>
+              -->
+            </wsdl:operation>
+            <wsdl:operation name="clear">
+              <soap:operation soapAction=""/>
+              <wsdl:input>
+                <soap:body use="literal"/>
+              </wsdl:input>
+              <wsdl:output>
+                <soap:body use="literal"/>
+              </wsdl:output>
+            </wsdl:operation>
+            <wsdl:operation name="getCount">
+              <soap:operation soapAction=""/>
+              <wsdl:input>
+                <soap:body use="literal"/>
+              </wsdl:input>
+              <wsdl:output>
+                <soap:body use="literal"/>
+              </wsdl:output>
+            </wsdl:operation>
+            <wsdl:operation name="getSequence">
+              <soap:operation soapAction=""/>
+              <wsdl:input>
+                <soap:body use="literal"/>
+              </wsdl:input>
+              <wsdl:output>
+                <soap:body use="literal"/>
+              </wsdl:output>
+            </wsdl:operation>
+            <wsdl:operation name="getDuplicates">
+              <soap:operation soapAction=""/>
+              <wsdl:input>
+                <soap:body use="literal"/>
+              </wsdl:input>
+              <wsdl:output>
+                <soap:body use="literal"/>
+              </wsdl:output>
+            </wsdl:operation>
+            <wsdl:operation name="getAlive">
+              <soap:operation soapAction=""/>
+              <wsdl:input>
+                <soap:body use="literal"/>
+              </wsdl:input>
+              <wsdl:output>
+                <soap:body use="literal"/>
+              </wsdl:output>
+            </wsdl:operation>
 	</wsdl:binding>
 	<wsdl:service name="PingService">
 		<wsdl:port name="WSHttpBinding_IPing" binding="tns:WSHttpBinding_IPing">
@@ -60,6 +178,7 @@
 				</net:RmFlowControl>
 				<wspe:Utf816FFFECharacterEncoding xmlns:wspe="http://schemas.xmlsoap.org/ws/2004/09/policy/encoding"/>
 				<wsap10:UsingAddressing/>
+                                <sun:Ordered xmlns:sun="http://sun.com/2006/03/rm"/>
 			</wsp:All>
 		</wsp:ExactlyOne>
 	</wsp:Policy>
