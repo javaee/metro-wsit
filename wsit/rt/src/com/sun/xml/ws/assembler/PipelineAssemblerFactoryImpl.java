@@ -94,7 +94,8 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
         public Pipe createClient(@NotNull ClientPipeAssemblerContext context) {
             PolicyMap policyMap = initPolicyMap(context);
             
-            if (isSecurityEnabled(policyMap, context.getWsdlModel())) {
+            boolean isSecurityEnabled = isSecurityEnabled(policyMap, context.getWsdlModel());
+            if (isSecurityEnabled) {
                 setSecurityCodec(context);
             }
             // Transport pipe ALWAYS exist
@@ -114,7 +115,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
                 // TODO: Vijay will follow with Ron if 196 & Policy-based pipe can be separate
                 p = hook.createSecurityPipe(policyMap, context, p);
             } else {
-                if (isSecurityEnabled(policyMap, context.getWsdlModel())) {
+                if (isSecurityEnabled) {
                     ClientPipeConfiguration config = new ClientPipeConfiguration(
                             policyMap, context.getWsdlModel(), context.getService(), context.getBinding());
                     p = new SecurityClientPipe(config, p);
