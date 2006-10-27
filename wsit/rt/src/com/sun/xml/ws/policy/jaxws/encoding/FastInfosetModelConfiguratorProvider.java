@@ -73,8 +73,8 @@ public class FastInfosetModelConfiguratorProvider implements ModelConfiguratorPr
                             PolicyAssertion assertion = policyAssertion.next();
                             if(assertion.getName().equals(fastInfosetAssertion)){
                                 String value = assertion.getAttributeValue(enabled);
-                                boolean isOptimizedTransportEnabled = Boolean.valueOf(value.trim());
-                                port.getBinding().addFeature(new FastInfosetFeature(isOptimizedTransportEnabled));
+                                boolean isFastInfosetEnabled = Boolean.valueOf(value.trim());
+                                port.getBinding().addFeature(new FastInfosetFeature(isFastInfosetEnabled));
                             } // end-if non optional mtom assertion found
                         } // next assertion
                     } // next alternative
