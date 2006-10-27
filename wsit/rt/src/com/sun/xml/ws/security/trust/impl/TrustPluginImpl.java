@@ -231,7 +231,7 @@ public class TrustPluginImpl implements TrustPlugin {
                 log.log(Level.FINE, "WST1013.sts.uri.client", new Object[] {stsURI});
             }
             //do the actual mex request to the stsURI
-            QName[] names = doMexRequest(stsURI);
+            QName[] names = doMexRequest(wsdlLocation.toString(), stsURI);
             if(names!=null){
                 serviceName = names[0];
                 portName = names[1];
@@ -299,10 +299,10 @@ public class TrustPluginImpl implements TrustPlugin {
      * @return List of 2 QName objects. The first one will be serviceName
      * and the second one will be portName.
      */
-    protected static QName[]  doMexRequest(final String stsURI) {
+    protected static QName[]  doMexRequest(final String wsdlLocation, final String stsURI) {
         MetadataClient mexClient = new MetadataClient();
-        String stsAddress = stsURI;
-        Metadata metadata = mexClient.retrieveMetadata(stsAddress);
+        
+        Metadata metadata = mexClient.retrieveMetadata(wsdlLocation);
         
         //this method gives the names of services and the corresponding port details
         List<PortInfo> ports = mexClient.getServiceInformation(metadata);
@@ -313,7 +313,7 @@ public class TrustPluginImpl implements TrustPlugin {
             
             //if the stsAddress what we have matches the address of this port, return
             //this port information
-            if(uri.equals(stsAddress)){
+            if(uri.equals(stsURI)){
                 QName[] serviceInfo = new QName[2];
                 serviceInfo[0]= port.getServiceName();
                 serviceInfo[1]= port.getPortName();
