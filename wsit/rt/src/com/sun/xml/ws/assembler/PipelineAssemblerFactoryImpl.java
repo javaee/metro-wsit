@@ -533,86 +533,15 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
         
         return false;
     }
-    
-    private static Class loadClass(String classname) throws ClassNotFoundException {
-        if (classname == null) {
-            return null;
-        }
-        Class ret = null;
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        
-        if (loader != null) {
-            ret = loader.loadClass(classname);
-        }
-        //try this if the earlier one did not work
-        if (ret == null) {
-            ret = Class.forName(classname);
-        }
+      
+    private static Pipe initializeXWSSClientPipe(WSDLPort prt, WSService svc, WSBinding bnd, Pipe nextP) {
+        Pipe ret = new com.sun.xml.xwss.XWSSClientPipe(prt,svc, bnd, nextP);
         return ret;
     }
     
-    private static Pipe initializeXWSSClientPipe(WSDLPort prt, WSService svc, WSBinding bnd, Pipe nextP) {
-    
-        Pipe ret = null;
-        Class cPipeClass = null;
-        
-        try {
-            cPipeClass = loadClass(xwss20ClientPipe);
-            if (cPipeClass == null) {
-                return nextP;
-            }
-            
-            Constructor ctor = null;
-            ctor = cPipeClass.getConstructor(WSDLPort.class, WSService.class, WSBinding.class, Pipe.class);
-            
-            ret = (Pipe)ctor.newInstance(prt, svc, bnd, nextP);
-            return ret;
-
-        }catch (ClassNotFoundException ex) {
-            //TODO: Log a Compulsary Warning stating that XWSSClientPipe class was not found
-            //ignore because we do not know at assembly time whether security is required.
-            //this will avoid unnecessary creation of an extra Security pipe.
-            //NOTE: In XWSS 2.0, Security Configuration was provided as a property on BindingProvider.RquestContext
-            return nextP;
-        }catch (NoSuchMethodException e) {
-            throw new WebServiceException(e);
-        }catch (InstantiationException ie) {
-            throw new WebServiceException(ie);
-        }catch(IllegalAccessException ae) {
-            throw new WebServiceException(ae);
-        }catch(InvocationTargetException te) {
-            throw new WebServiceException(te);   
-        }
-    }
-    
     private static Pipe initializeXWSSServerPipe(WSEndpoint epoint, WSDLPort prt, Pipe nextP) {
-        
-        Pipe ret = null;
-        Class sPipeClass = null;
-        
-        try {
-            sPipeClass = loadClass(xwss20ServerPipe);
-            if (sPipeClass == null) {
-                return nextP;
-            }
-            
-            Constructor ctor = sPipeClass.getConstructor(WSEndpoint.class, WSDLPort.class, Pipe.class);
-           
-            ret = (Pipe)ctor.newInstance(epoint, prt, nextP);
-            return ret;
-            
-        }catch (ClassNotFoundException ex) {
-            throw new WebServiceException(ex);
-        }catch (NoSuchMethodException e) {
-            throw new WebServiceException(e);
-        }catch (InstantiationException ie) {
-            throw new WebServiceException(ie);
-        }catch(IllegalAccessException ae) {
-            throw new WebServiceException(ae);
-        }catch(InvocationTargetException te) {
-            throw new WebServiceException(te);   
-        }
+        Pipe ret = new com.sun.xml.xwss.XWSSServerPipe(epoint, prt, nextP);
+        return ret;
     }
-                        
     
 }
