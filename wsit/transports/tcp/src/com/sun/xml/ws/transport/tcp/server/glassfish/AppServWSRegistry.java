@@ -52,7 +52,7 @@ public class AppServWSRegistry {
     }
     
     private AppServWSRegistry() {
-        registry = new HashMap();
+        registry = new HashMap<String, Map<String, WSEndpointDescriptor>>();
         WSEndpointLifeCycleListener lifecycleListener = new WSEndpointLifeCycleListener();
         
         WebServiceEngine engine = WebServiceEngineFactory.getInstance().getEngine();
@@ -152,7 +152,7 @@ public class AppServWSRegistry {
         
         Map<String, WSEndpointDescriptor> endpointMap = registry.get(contextRoot);
         if (endpointMap == null) {
-            endpointMap = new HashMap();
+            endpointMap = new HashMap<String, WSEndpointDescriptor>();
             registry.put(contextRoot, endpointMap);
         }
         

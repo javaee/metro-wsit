@@ -77,7 +77,7 @@ public class FramedMessageInputStream extends InputStream implements LifeCycle {
     private int channelId;
     private int contentId;
     private int messageId;
-    private Map<Integer, String> contentParameters = new HashMap();
+    private Map<Integer, String> contentParameters = new HashMap<Integer, String>();
     
     private boolean isReadingHeader;
     

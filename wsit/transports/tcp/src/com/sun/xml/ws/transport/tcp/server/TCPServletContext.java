@@ -37,7 +37,7 @@ import javax.servlet.ServletContext;
 public class TCPServletContext implements TCPContext {
     
     private ServletContext servletContext;
-    private Map<String, Object> attributes = new HashMap();
+    private Map<String, Object> attributes = new HashMap<String, Object>();
     
     public TCPServletContext(ServletContext servletContext) {
         this.servletContext = servletContext;
@@ -48,7 +48,7 @@ public class TCPServletContext implements TCPContext {
     }
     
     public Set<String> getResourcePaths(String path) {
-        return servletContext.getResourcePaths(path);
+        return (Set<String>) servletContext.getResourcePaths(path);
     }
     
     public URL getResource(String resource) throws MalformedURLException {

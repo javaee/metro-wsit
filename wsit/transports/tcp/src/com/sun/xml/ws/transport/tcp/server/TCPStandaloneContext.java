@@ -43,7 +43,7 @@ import java.util.zip.ZipFile;
 public class TCPStandaloneContext implements TCPContext {
     
     private ClassLoader classloader;
-    private Map<String, Object> attributes = new HashMap();
+    private Map<String, Object> attributes = new HashMap<String, Object>();
     
     public TCPStandaloneContext(ClassLoader classloader) {
         this.classloader = classloader;
@@ -105,7 +105,7 @@ public class TCPStandaloneContext implements TCPContext {
         String zipFile = resourceURIAsString.substring("jar:file:/".length(), (pathDelim != -1) ? pathDelim : resourceURIAsString.length());
         ZipFile file = null;
         
-        Set<String> resources = new HashSet();
+        Set<String> resources = new HashSet<String>();
         try {
             file = new ZipFile(zipFile);
             

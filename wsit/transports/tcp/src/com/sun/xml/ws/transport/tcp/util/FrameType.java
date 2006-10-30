@@ -40,7 +40,7 @@ public class FrameType {
     private static final Set<Integer> typesContainParameters;
     
     static {
-        typesContainParameters = new HashSet();
+        typesContainParameters = new HashSet<Integer>();
         typesContainParameters.add(MESSAGE);
         typesContainParameters.add(MESSAGE_START_CHUNK);
         typesContainParameters.add(ERROR);

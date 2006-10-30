@@ -45,7 +45,7 @@ public class WSTCPAdapterRegistryImpl implements WSTCPAdapterRegistry {
     /**
      * Registry holds correspondents between service name and adapter
      */
-    Map<String, TCPAdapter> registry = new ConcurrentHashMap();
+    Map<String, TCPAdapter> registry = new ConcurrentHashMap<String, TCPAdapter>();
     private static final WSTCPAdapterRegistryImpl instance = new WSTCPAdapterRegistryImpl();
     
     private WSTCPAdapterRegistryImpl() {}

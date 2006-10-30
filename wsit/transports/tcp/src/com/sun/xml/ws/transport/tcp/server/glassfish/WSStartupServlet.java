@@ -149,7 +149,7 @@ public class WSStartupServlet extends HttpServlet
         
         public <T> T getSPI(Class<T> spiType) {
             if (spiType == ServletContext.class) {
-                return (T)servletContext;
+                return (T) servletContext;
             }
             return null;
         }

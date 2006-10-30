@@ -31,7 +31,7 @@ import java.util.Map;
  */
 public class ContentType {
     private MimeType mimeType;
-    private Map<String, String> parameters = new HashMap();
+    private Map<String, String> parameters = new HashMap<String, String>();
     
     public MimeType getMimeType() {
         return mimeType;

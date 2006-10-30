@@ -56,8 +56,8 @@ public class ConnectionSession {
     public ConnectionSession(int dstAddressHashKey, Connection connection) {
         this.dstAddressHashKey = dstAddressHashKey;
         this.connection = connection;
-        channelId2context = new HashMap();
-        attributes = new HashMap(1);
+        channelId2context = new HashMap<Integer, ChannelContext>();
+        attributes = new HashMap<String, Object>(1);
         channelCounter = 1;
         initServiceChannel();
     }

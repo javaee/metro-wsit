@@ -53,16 +53,16 @@ public class BindingUtils {
         MTOM_SOAP_PARAMS = Arrays.asList(new String[] {"boundary"});
         
         SOAP11_BINDING_CONTENT =
-                new NegotiatedBindingContent(new ArrayList(1), Collections.<String>emptyList());
+                new NegotiatedBindingContent(new ArrayList<MimeType>(1), Collections.<String>emptyList());
         
         SOAP12_BINDING_CONTENT =
-                new NegotiatedBindingContent(new ArrayList(1), Collections.<String>emptyList());
+                new NegotiatedBindingContent(new ArrayList<MimeType>(1), Collections.<String>emptyList());
         
         MTOM11_BINDING_CONTENT =
-                new NegotiatedBindingContent(new ArrayList(2), MTOM_SOAP_PARAMS);
+                new NegotiatedBindingContent(new ArrayList<MimeType>(2), MTOM_SOAP_PARAMS);
         
         MTOM12_BINDING_CONTENT =
-                new NegotiatedBindingContent(new ArrayList(2), MTOM_SOAP_PARAMS);
+                new NegotiatedBindingContent(new ArrayList<MimeType>(2), MTOM_SOAP_PARAMS);
         
         MTOM11_BINDING_CONTENT.negotiatedMimeTypes.add(MimeType.MTOM11);
         MTOM12_BINDING_CONTENT.negotiatedMimeTypes.add(MimeType.MTOM12);

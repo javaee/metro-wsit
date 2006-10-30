@@ -45,8 +45,10 @@ public class Connection {
     private static final Logger logger = Logger.getLogger(
             com.sun.xml.ws.transport.tcp.util.TCPConstants.LoggingDomain);
     
-    private static ByteBufferStreamPool<FramedMessageInputStream> byteBufferInputStreamPool = new ByteBufferStreamPool(FramedMessageInputStream.class);
-    private static ByteBufferStreamPool<FramedMessageOutputStream> byteBufferOutputStreamPool = new ByteBufferStreamPool(FramedMessageOutputStream.class);
+    private static ByteBufferStreamPool<FramedMessageInputStream> byteBufferInputStreamPool = 
+            new ByteBufferStreamPool<FramedMessageInputStream>(FramedMessageInputStream.class);
+    private static ByteBufferStreamPool<FramedMessageOutputStream> byteBufferOutputStreamPool = 
+            new ByteBufferStreamPool<FramedMessageOutputStream>(FramedMessageOutputStream.class);
     
     private SocketChannel socketChannel;
     
@@ -114,8 +116,8 @@ public class Connection {
      * prepareForReading() should be called before!
      */
     public InputStream openInputStream() throws IOException {
-        InputStream is = new BufferedMessageInputStream(inputStream);
-        inputStreamRef = new WeakReference(is);
+        BufferedMessageInputStream is = new BufferedMessageInputStream(inputStream);
+        inputStreamRef = new WeakReference<BufferedMessageInputStream>(is);
         return is;
     }
     

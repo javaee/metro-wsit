@@ -30,14 +30,15 @@ import com.sun.xml.ws.api.server.DocumentAddressResolver;
 import com.sun.xml.ws.api.server.InstanceResolver;
 import com.sun.xml.ws.api.server.PortAddressResolver;
 import com.sun.xml.ws.api.server.SDDocument;
+import com.sun.xml.ws.api.server.SDDocumentSource;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.net.URL;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
-import java.util.Map;
 import javax.xml.namespace.QName;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Source;
@@ -55,13 +56,13 @@ public class ServiceChannelWSDLGenerator {
         QName portName = WSEndpoint.getDefaultPortName(serviceName, ServiceChannelWSImpl.class);
         BindingID bindingId = BindingID.parse(ServiceChannelWSImpl.class);
         WSBinding binding = bindingId.createBinding();
-        Map docs = new HashMap();
+        Collection<SDDocumentSource> docs = new ArrayList<SDDocumentSource>(0);
         
         WSEndpoint<?> endpoint = WSEndpoint.create(
                 ServiceChannelWSImpl.class, true,
                 InstanceResolver.createSingleton(ServiceChannelWSImpl.class.newInstance()).createInvoker(),
                 serviceName, portName, null, binding,
-                null, docs.values(), (URL) null
+                null, docs, (URL) null
                 );
         
         DocumentAddressResolver resolver = new DocumentAddressResolver() {

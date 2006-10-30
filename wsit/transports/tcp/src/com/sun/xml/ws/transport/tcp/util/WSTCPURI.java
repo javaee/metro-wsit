@@ -76,7 +76,7 @@ public class WSTCPURI {
         
         if (query != null && query.length() > 0) {
             String[] paramsStr = query.split(";");
-            params = new HashMap(paramsStr.length);
+            params = new HashMap<String, String>(paramsStr.length);
             for(String paramStr : paramsStr) {
                 if (paramStr.length() > 0) {
                     String[] paramAsgn = paramStr.split("=");

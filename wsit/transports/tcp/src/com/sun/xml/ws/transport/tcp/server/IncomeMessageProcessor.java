@@ -50,7 +50,8 @@ public class IncomeMessageProcessor {
     
     private TCPMessageListener listener;
     
-    private static Map<Integer, IncomeMessageProcessor> portMessageProcessors = new HashMap(1);
+    private static Map<Integer, IncomeMessageProcessor> portMessageProcessors = 
+            new HashMap<Integer, IncomeMessageProcessor>(1);
     
     public static void registerListener(int port, @NotNull TCPMessageListener listener) {
         portMessageProcessors.put(port, new IncomeMessageProcessor(listener));
@@ -109,7 +110,8 @@ public class IncomeMessageProcessor {
      *  in future probably should be replaced, as could be handled by
      *  nio framework
      */
-    private Map<SocketChannel, ConnectionSession> connectionSessionMap = new WeakHashMap();
+    private Map<SocketChannel, ConnectionSession> connectionSessionMap = 
+            new WeakHashMap<SocketChannel, ConnectionSession>();
     private @Nullable ConnectionSession getConnectionSession(
             @NotNull SocketChannel socketChannel) throws IOException {
         

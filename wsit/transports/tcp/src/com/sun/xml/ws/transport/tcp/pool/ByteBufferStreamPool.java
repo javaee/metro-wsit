@@ -31,7 +31,7 @@ public class ByteBufferStreamPool<T extends LifeCycle> {
     
     private Pool<T> pool;
     public ByteBufferStreamPool(final Class<T> memberClass) {
-        pool = new Pool() {
+        pool = new Pool<T>() {
             protected T create() {
                 T member = null;
                 try {

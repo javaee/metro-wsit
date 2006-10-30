@@ -41,11 +41,11 @@ public final class ChannelContext {
     private static final Logger logger = Logger.getLogger(
             com.sun.xml.ws.transport.tcp.util.TCPConstants.LoggingDomain);
     
-    private static Map<String, Integer> staticParamsEncodingMap = new HashMap();
-    private static Map<Integer, String> staticParamsDecodingMap = new HashMap();
+    private static Map<String, Integer> staticParamsEncodingMap = new HashMap<String, Integer>();
+    private static Map<Integer, String> staticParamsDecodingMap = new HashMap<Integer, String> ();
     
-    private static Map<MimeType, Integer> staticMimeTypeEncodingMap = new HashMap();
-    private static Map<Integer, MimeType> staticMimeTypeDecodingMap = new HashMap();
+    private static Map<MimeType, Integer> staticMimeTypeEncodingMap = new HashMap<MimeType, Integer>();
+    private static Map<Integer, MimeType> staticMimeTypeDecodingMap = new HashMap<Integer, MimeType>();
     static {
         staticParamsEncodingMap.put(TCPConstants.CHARSET_PROPERTY, 0);
         staticParamsEncodingMap.put(TCPConstants.SOAP_ACTION_PROPERTY, 1);
@@ -152,7 +152,7 @@ public final class ChannelContext {
         
         assert mt != null && mt != -1;
         
-        Map<Integer, String> encodedParameterMap = new HashMap();
+        Map<Integer, String> encodedParameterMap = new HashMap<Integer, String>();
         for(Map.Entry<String, String> parameter : contentType.getParameters().entrySet()) {
             int paramId = encodeParam(parameter.getKey());
             encodedParameterMap.put(paramId, parameter.getValue());

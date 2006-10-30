@@ -53,9 +53,9 @@ public class WSConnectionCache {
     private Map<ConnectionSession, Thread> lockedConnections;
     
     public WSConnectionCache() {
-        allDstAddress2connectionSession = new HashMap();
-        availableDstAddress2connectionSession = new HashMap();
-        lockedConnections = new HashMap();
+        allDstAddress2connectionSession = new HashMap<Integer, Set<ConnectionSession>>();
+        availableDstAddress2connectionSession = new HashMap<Integer, ConcurrentLinkedQueue<ConnectionSession>>();
+        lockedConnections = new HashMap<ConnectionSession, Thread>();
     }
     
     public synchronized void registerConnectionSession(@NotNull ConnectionSession connectionSession, int dstAddrHashKey) {
@@ -63,9 +63,9 @@ public class WSConnectionCache {
         Set<ConnectionSession> allConnectionSessions = allDstAddress2connectionSession.get(dstAddrHashKey);
         //check if there is a record for such destination address
         if (allConnectionSessions == null) {
-            allConnectionSessions = new HashSet();
+            allConnectionSessions = new HashSet<ConnectionSession>();
             allDstAddress2connectionSession.put(dstAddrHashKey, allConnectionSessions);
-            availableConnectionSessions = new ConcurrentLinkedQueue();
+            availableConnectionSessions = new ConcurrentLinkedQueue<ConnectionSession>();
             availableDstAddress2connectionSession.put(dstAddrHashKey, availableConnectionSessions);
         }
         
@@ -78,7 +78,7 @@ public class WSConnectionCache {
      */
     public @NotNull Set<ConnectionSession> getAllConnectionsByAddr(int dstAddrHashKey) {
         Set<ConnectionSession> allConnectionSessions = allDstAddress2connectionSession.get(dstAddrHashKey);
-        return allConnectionSessions != null ? allConnectionSessions : Collections.EMPTY_SET;
+        return allConnectionSessions != null ? allConnectionSessions : Collections.<ConnectionSession>emptySet();
     }
     
     /**
