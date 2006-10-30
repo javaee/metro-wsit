@@ -23,7 +23,7 @@
 -->
 
 <!--
- $Id: build.xml,v 1.22 2006-10-30 06:43:49 ritzmann Exp $
+ $Id: build.xml,v 1.23 2006-10-30 11:27:34 ritzmann Exp $
 
  Copyright (c) 2005 Sun Microsystems, Inc.
  All rights reserved.
@@ -104,8 +104,10 @@
                 <arguments />
                 <arg line="${args}"/>
                 
-                <!--  <jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,address=7000" />
-		            <jvmarg value="-Xdebug"/>-->
+                <!--
+                <jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,address=8000" />
+		<jvmarg value="-Xdebug"/>
+                -->
             </java>
             
             <mkdir dir="${logs.dir}/junit-reports" />
