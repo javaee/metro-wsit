@@ -85,6 +85,7 @@ public class Constants {
     
     public static final String messageNumberProperty = "com.sun.xml.ws.messagenumber";
     
+    public static final String createSequenceProperty = "com.sun.xml.ws.createsequence";
     /**
      * Constants used by RMSource.createSequence
      */
