@@ -1,0 +1,212 @@
+/*
+ * The contents of this file are subject to the terms
+ * of the Common Development and Distribution License
+ * (the License).  You may not use this file except in
+ * compliance with the License.
+ *
+ * You can obtain a copy of the license at
+ * https://glassfish.dev.java.net/public/CDDLv1.0.html.
+ * See the License for the specific language governing
+ * permissions and limitations under the License.
+ *
+ * When distributing Covered Code, include this CDDL
+ * Header Notice in each file and include the License file
+ * at https://glassfish.dev.java.net/public/CDDLv1.0.html.
+ * If applicable, add the following below the CDDL Header,
+ * with the fields enclosed by brackets [] replaced by
+ * you own identifying information:
+ * "Portions Copyrighted [year] [name of copyright owner]"
+ *
+ * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
+ */
+
+package com.sun.xml.ws.transport.tcp.server;
+
+import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
+import com.sun.xml.ws.api.BindingID;
+import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.server.InstanceResolver;
+import com.sun.xml.ws.api.server.WSEndpoint;
+import com.sun.xml.ws.transport.tcp.util.ChannelContext;
+import com.sun.xml.ws.transport.tcp.util.TCPConstants;
+import com.sun.xml.ws.transport.tcp.util.WSTCPURI;
+import com.sun.xml.ws.transport.tcp.servicechannel.ServiceChannelWSImpl;
+import com.sun.xml.ws.util.exception.JAXWSExceptionBase;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.xml.namespace.QName;
+import org.xml.sax.EntityResolver;
+
+/**
+ * @author Alexey Stashok
+ */
+public class WSTCPDelegate implements WSTCPAdapterRegistry, TCPMessageListener {
+    private static final Logger logger = Logger.getLogger(
+            com.sun.xml.ws.transport.tcp.util.TCPConstants.LoggingDomain + ".server");
+    
+    private final Map<String, TCPAdapter> fixedUrlPatternEndpoints = new HashMap<String, TCPAdapter>();
+    private final List<TCPAdapter> pathUrlPatternEndpoints = new ArrayList<TCPAdapter>();
+    
+    private TCPAdapter serviceChannelWSAdapter;
+    
+    /**
+     * Custom registry, where its possible to delegate Adapter search
+     */
+    private WSTCPAdapterRegistry customWSRegistry;
+    
+    public WSTCPDelegate() {
+    }
+    
+    public void setCustomWSRegistry(@NotNull WSTCPAdapterRegistry customWSRegistry) {
+        this.customWSRegistry = customWSRegistry;
+    }
+    
+    public void registerAdapters(@NotNull String contextPath,
+            @NotNull List<TCPAdapter> adapters) {
+        
+        for(TCPAdapter adapter : adapters)
+            registerEndpointUrlPattern(contextPath, adapter);
+    }
+    
+    public void freeAdapters(@NotNull String contextPath,
+            @NotNull List<TCPAdapter> adapters) {
+        
+        for(TCPAdapter adapter : adapters) {
+            String urlPattern = contextPath + adapter.urlPattern;
+            logger.log(Level.INFO, "Deregister adapter: {0}", urlPattern);
+            
+            if (fixedUrlPatternEndpoints.remove(urlPattern) == null) {
+                pathUrlPatternEndpoints.remove(adapter);
+            }
+        }
+    }
+    
+    private void registerEndpointUrlPattern(@NotNull String contextPath,
+            @NotNull TCPAdapter adapter) {
+        
+        String urlPattern = contextPath + adapter.urlPattern;
+        logger.log(Level.INFO, "Register adapter: {0}", urlPattern);
+        
+        if (urlPattern.endsWith("/*")) {
+            pathUrlPatternEndpoints.add(adapter);
+        } else {
+            if (fixedUrlPatternEndpoints.containsKey(urlPattern)) {
+                // Warning because of duplication
+            } else {
+                fixedUrlPatternEndpoints.put(urlPattern, adapter);
+            }
+        }
+    }
+    
+    /**
+     * Determines which {@link TCPAdapter} serves the given request.
+     */
+    public @Nullable TCPAdapter getTarget(@NotNull WSTCPURI tcpURI) {
+        TCPAdapter result = null;
+        String path = tcpURI.path;
+        if (path != null) {
+            result = fixedUrlPatternEndpoints.get(path);
+            if (result == null) {
+                for (TCPAdapter candidate : pathUrlPatternEndpoints) {
+                    if (path.startsWith(candidate.getValidPath())) {
+                        result = candidate;
+                        break;
+                    }
+                }
+            }
+        }
+        
+        if (result ==  null && customWSRegistry != null) {
+            logger.log(Level.FINE, "Going to custom registry");
+            return customWSRegistry.getTarget(tcpURI);
+        }
+        
+        return result;
+    }
+    
+    /**
+     * Implementation of TCPMessageListener.onMessage
+     * method is called once request message come
+     */
+    public void onMessage(@NotNull ChannelContext channelContext) {
+        logger.log(Level.FINE, "WSTCPDelegate.onMessage entering");
+        try {
+            TCPAdapter target = null;
+            if (channelContext.getChannelId() > 0) {
+                WSTCPURI tcpURI = channelContext.getTargetWSURI();
+                target = getTarget(tcpURI);
+            } else {
+                target = getServiceChannelWSAdapter();
+            }
+            
+            if (target != null) {
+                target.handle(channelContext);
+            } else {
+                TCPAdapter.sendErrorResponse(channelContext, TCPConstants.RS_NOT_FOUND, "Target WS not found");
+            }
+            
+        } catch (JAXWSExceptionBase e) {
+            logger.log(Level.SEVERE, e.getMessage(), e);
+            try {
+                TCPAdapter.sendErrorResponse(channelContext, TCPConstants.RS_INTERNAL_SERVER_ERROR, "For details check server's log");
+            } catch (Throwable ex) {
+                logger.log(Level.SEVERE, "Failed to send error message to client.", ex);
+            }
+        } catch (Throwable e) {
+            logger.log(Level.SEVERE, e.getMessage(), e);
+            try {
+                TCPAdapter.sendErrorResponse(channelContext, TCPConstants.RS_INTERNAL_SERVER_ERROR, "For details check server's log");
+            } catch (Throwable ex) {
+                logger.log(Level.SEVERE, "Failed to send error message to client.", ex);
+            }
+        } finally {
+            logger.log(Level.FINE, "WSTCPDelegate.onMessage exiting");
+        }
+    }
+    
+    public void destroy() {
+        logger.log(Level.FINE, "WSTCPDelegate.destroy");
+    }
+    
+    /**
+     * Returns TCPAdapter for service channel
+     * cannot do that once in constructor because of GF startup performance
+     * initialize it lazy
+     */
+    private synchronized @NotNull TCPAdapter getServiceChannelWSAdapter() throws Exception {
+        if (serviceChannelWSAdapter == null) {
+            registerServiceChannelWSAdapter();
+        }
+        
+        return serviceChannelWSAdapter;
+    }
+    
+    private void registerServiceChannelWSAdapter() throws Exception {
+        QName serviceName = WSEndpoint.getDefaultServiceName(ServiceChannelWSImpl.class);
+        QName portName = WSEndpoint.getDefaultPortName(serviceName, ServiceChannelWSImpl.class);
+        BindingID bindingId = BindingID.parse(ServiceChannelWSImpl.class);
+        WSBinding binding = bindingId.createBinding();
+        
+        WSEndpoint<ServiceChannelWSImpl> endpoint = WSEndpoint.create(
+                ServiceChannelWSImpl.class, true,
+                InstanceResolver.createSingleton(ServiceChannelWSImpl.class.newInstance()).createInvoker(),
+                serviceName, portName, null, binding,
+                null, null, (EntityResolver) null, true
+                );
+        
+        String serviceNameLocal = serviceName.getLocalPart();
+        String portTypeLocal = endpoint.getPort().getBinding().getPortTypeName().getLocalPart();
+        
+        serviceChannelWSAdapter = new TCPServiceChannelWSAdapter(serviceNameLocal,
+                TCPConstants.SERVICE_CHANNEL_URL_PATTERN,
+                endpoint,
+                this);
+        registerEndpointUrlPattern(TCPConstants.SERVICE_CHANNEL_CONTEXT_PATH,
+                serviceChannelWSAdapter);
+    }
+}
