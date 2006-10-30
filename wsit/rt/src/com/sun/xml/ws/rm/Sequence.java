@@ -1,5 +1,5 @@
 /*
- * $Id: Sequence.java,v 1.2 2006-10-17 19:11:04 bhaktimehta Exp $
+ * $Id: Sequence.java,v 1.3 2006-10-30 22:26:29 mikeg Exp $
  */
 
 /*
@@ -99,7 +99,7 @@ public class Sequence {
      * Sets the sequence identifier.
      * @param id The sequence identifier.
      */
-    protected void setId(String id) {
+    public void setId(String id) {
         this.id = id;
     }
     
