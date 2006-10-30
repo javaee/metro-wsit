@@ -133,6 +133,7 @@ import org.w3c.dom.NodeList;
 
 import com.sun.xml.ws.api.addressing.*;
 import com.sun.xml.ws.rm.Constants;
+import com.sun.xml.wss.impl.filter.DumpFilter;
 
 
 //TODO: add logging before 4/13
@@ -387,6 +388,9 @@ public abstract class SecurityPipeBase implements Pipe {
     throws WssSoapFaultException, XWSSecurityException {
         try {
             ctx.setSOAPMessage(message);
+            if (debug) {
+                DumpFilter.process(ctx);
+            }
             NewSecurityRecipient.validateMessage(ctx);
             return ctx.getSOAPMessage();
         } catch (WssSoapFaultException soapFaultException) {
