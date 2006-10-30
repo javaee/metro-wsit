@@ -117,6 +117,10 @@ public final class PolicyMap {
             return localKeyCopy;
         }
         
+        public boolean isEmpty() {
+            return internalMap.isEmpty();
+        }
+        
         public String toString() {
             return internalMap.toString();
         }
@@ -447,6 +451,20 @@ public final class PolicyMap {
             }
         }
         return false;
+    }
+    
+
+    /**
+     * Returns true if this map contains no key - policy pairs
+     *
+     * A null object key or policy constitutes a non-empty map.
+     *
+     * @return true if this map contains no key - policy pairs
+     */
+    public boolean isEmpty() {
+        return serviceMap.isEmpty() && endpointMap.isEmpty() &&
+               operationMap.isEmpty() && inputMessageMap.isEmpty() &&
+               outputMessageMap.isEmpty() && faultMessageMap.isEmpty();
     }
 
     
