@@ -34,6 +34,7 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.rm.RMException;
+import com.sun.xml.ws.rm.Constants;
 import com.sun.xml.ws.rm.jaxws.util.ProcessingFilter;
 
 import javax.xml.bind.Marshaller;
@@ -90,6 +91,11 @@ public abstract class PipeBase<PROVIDER extends RMProvider,
         Message message = packet.getMessage();
         com.sun.xml.ws.rm.Message msg = 
                 new com.sun.xml.ws.rm.Message(message);
+        
+        Object mn = packet.invocationProperties.get(Constants.messageNumberProperty);
+        if (mn instanceof Integer) {
+            msg.setMessageNumber((Integer)mn);
+        }
         
         outboundSequence.processOutboundMessage(msg, marshaller);
       

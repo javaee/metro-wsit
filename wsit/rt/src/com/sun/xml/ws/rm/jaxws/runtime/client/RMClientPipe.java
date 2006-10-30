@@ -57,7 +57,9 @@ import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import com.sun.xml.ws.rm.Constants;
 import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
+import java.util.logging.Logger;
 
 
 
@@ -68,6 +70,9 @@ public class RMClientPipe
         extends PipeBase<RMSource,
                          ClientOutboundSequence,
                          ClientInboundSequence>{
+    
+    public static final Logger logger = 
+            Logger.getLogger(RMClientPipe.class.getName());
 
     /*
      * Metadata from ctor.
@@ -206,6 +211,7 @@ public class RMClientPipe
     private synchronized void initialize(Packet packet) throws RMException {
         
         String dest = packet.endpointAddress.toString();
+                     
         if (outboundSequence != null) {
             
             //sequence has already been initialized.  We need to
@@ -222,6 +228,9 @@ public class RMClientPipe
             }
             
         } else {
+            //store this in field
+            this.proxy = packet.proxy;
+            
             //make sure we have a destination
             if (dest == null) {
                 dest = port.getAddress().toString();
@@ -248,45 +257,60 @@ public class RMClientPipe
                 throw new RMException(Messages.INVALID_ACKS_TO_URI.format( acksTo));
             }
 
-            //BUGBUG?? - We may need to pass a new marshaller and unmarshaller and a clone of nextPipe
-            //here if it turns out that it is possible that protocol messages are being sent at the
-            //same time as application messages.
-            outboundSequence = new ClientOutboundSequence(config);
+            ClientOutboundSequence specifiedOutboundSequence =
+                    (ClientOutboundSequence)packet.proxy.getRequestContext()
+                                                  .get(Constants.sequenceProperty);
+            if (specifiedOutboundSequence != null) {
+                outboundSequence = specifiedOutboundSequence;
+            } else {
+                //we need to connect to the back end.
+                outboundSequence = new ClientOutboundSequence(config);
 
-            if (secureReliableMessaging) {
-                try {
-                    JAXBElement<SecurityTokenReferenceType> str = securityPipe.startSecureConversation(packet);
-                    outboundSequence.setSecurityTokenReference(str);
-                } catch (Exception e) {
-                    secureReliableMessaging = false;
-                    outboundSequence.setSecurityTokenReference(null);
+                if (secureReliableMessaging) {
+                    try {
+                        JAXBElement<SecurityTokenReferenceType> str = securityPipe.startSecureConversation(packet);
+                        outboundSequence.setSecurityTokenReference(str);
+                    } catch (Exception e) {
+                        secureReliableMessaging = false;
+                        outboundSequence.setSecurityTokenReference(null);
+                    }
                 }
+
+                outboundSequence.setSecureReliableMessaging(secureReliableMessaging);
+
+                outboundSequence.registerProtocolMessageSender(
+                        new ProtocolMessageSender(messageProcessor,
+                                                    marshaller,
+                                                    unmarshaller, 
+                                                    port, binding, 
+                                                    nextPipe, packet));
+
+
+                outboundSequence.connect(destURI,  acksToURI, twoWay);
+
+                inboundSequence = (ClientInboundSequence)outboundSequence.getInboundSequence();
+
+
+                //set a Session object in BindingProvider property allowing user to close
+                //the sequence
+                ClientSession.setSession(this.proxy, new ClientSession(outboundSequence.getId(), this));
+
+                provider.addOutboundSequence(outboundSequence);
+
+                //if the message in the packet was sent by RMSource.createSequence,
+                //put the sequence in a packet property.  The process method, that
+                //called us will find it there and return it to the caller.
+                String reqUri = packet.getMessage().getPayloadNamespaceURI();
+                if (reqUri.equals(Constants.createSequenceNamespace)) {
+                    packet.invocationProperties.put(Constants.createSequenceProperty,
+                                                          outboundSequence);
+                }
+                
+                //make this available to the client
+                //FIXME - Can this work?
+                packet.proxy.getRequestContext().put(Constants.sequenceProperty, 
+                                                        outboundSequence);
             }
-
-            //store this in field
-            this.proxy = packet.proxy;
-
-            outboundSequence.setSecureReliableMessaging(secureReliableMessaging);
-
-            outboundSequence.registerProtocolMessageSender(
-                    new ProtocolMessageSender(messageProcessor,
-                                                marshaller,
-                                                unmarshaller, 
-                                                port, binding, 
-                                                nextPipe, packet));
-
-
-            outboundSequence.connect(destURI,  acksToURI, twoWay);
-
-            inboundSequence = (ClientInboundSequence)outboundSequence.getInboundSequence();
-
-
-            //set a Session object in BindingProvider property allowing user to close
-            //the sequence
-            ClientSession.setSession(this.proxy, new ClientSession(outboundSequence.getId(), this));
-
-            provider.addOutboundSequence(outboundSequence);
-            provider.addInboundSequence(inboundSequence);
         }    
     }
     
@@ -362,13 +386,11 @@ public class RMClientPipe
                 return null;
 
             } else {
-                System.out.println("Unexpected exception wrapped in WS exception");
-                System.out.println(e.getClass().getName());
+                logger.severe("Unexpected exception wrapped in WS exception " + e);
                 throw e;
             }
         } catch (Exception e) {
-            System.out.println("Unexpected exception in trySend");
-            System.out.println(e.getClass().getName());
+            logger.severe("Unexpected exception in trySend " + e);
             throw new WebServiceException(e);
         }
 
@@ -418,9 +440,15 @@ public class RMClientPipe
                     
                     if (mess != null && mess.isFault()) {
                         //don't want to resend
-                        //TODO decrement savedMessages so
+                        //FIXME decrement savedMessages so
                         // waitForAcks will return
                         message.complete();
+                        AcknowledgementListener listener = 
+                                outboundSequence.getAckListener();
+                        if (listener != null) {
+                            listener.notify(outboundSequence,
+                                            message.getMessageNumber());
+                        }
                     }
 
                     //check for empty body response to two-way message.  Indigo will return
@@ -497,6 +525,29 @@ public class RMClientPipe
             //before the first request is processed.
 	    initialize(packet);
             
+             //If the request is being sent by RMSource.createSequence, we are done.
+            Object seq = packet.invocationProperties.get(Constants.createSequenceProperty);
+            if (seq != null) {
+                packet.invocationProperties.put(Constants.createSequenceProperty, null);
+                packet.proxy.getRequestContext().put(Constants.sequenceProperty, seq);
+                //TODO..return something reasonable that will not cause disp.invoke
+                //to throw an exception here.  Other than that, we don't care about the
+                //response message.  We are only interested in the sequence that has been
+                //stored in the requestcontext.
+                com.sun.xml.ws.api.message.Message mess = 
+                        com.sun.xml.ws.api.message.Messages
+                            .createEmpty(binding.getSOAPVersion());
+                packet.setMessage(mess);
+                return packet;
+            }
+            
+            //FIXME - Need a better way for client to pass a message number.
+            Object mn = packet.proxy.getRequestContext().get(Constants.messageNumberProperty);
+            if (mn != null) {
+                packet.invocationProperties.put(Constants.messageNumberProperty, mn);
+            }
+            
+            
             //Copy of this pipe used for processing this request.  Will initialize
             //it with processorPool.checkOut() when it is needed.  Will check it back
             //in to the pool in the finally handler.
@@ -564,11 +615,9 @@ public class RMClientPipe
                     ret.invocationProperties.putAll(packet.invocationProperties);
                     return ret;
                 } catch (SOAPException e1) {
-                    e1.printStackTrace();
                     throw new WebServiceException(e);
                 }
             } else {
-                e.printStackTrace();
                 throw new WebServiceException(e);
             }
         } finally {
@@ -587,9 +636,8 @@ public class RMClientPipe
         try {  
             provider.terminateSequence(outboundSequence);       
             nextPipe.preDestroy();
-        } catch (RMException e) {
-            //Is this right?
-            throw new WebServiceException(e);
+        } catch (Exception e) {
+            logger.warning("RMClientPipe threw Exception " + e);
         }
     }
 

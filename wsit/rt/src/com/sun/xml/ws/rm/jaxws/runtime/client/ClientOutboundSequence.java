@@ -43,7 +43,7 @@ import javax.xml.transform.Source;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
 import java.net.URI;
 import java.util.UUID;
-
+import java.util.logging.Logger;
 
 /**
  * ClientOutboundSequence represents the set of all messages from a single BindingProvider instance.
@@ -52,6 +52,9 @@ import java.util.UUID;
  */
 
 public class ClientOutboundSequence extends OutboundSequence {
+
+    private static final Logger logger =
+        Logger.getLogger(ClientOutboundSequence.class.getName());
 
     /**
      * Current value of receive buffer read from incoming SequenceAcknowledgement
@@ -108,6 +111,11 @@ public class ClientOutboundSequence extends OutboundSequence {
      * Time after which Ack is requested at next opportunity.
      */
     private long ackRequestDeadline;
+    
+    /**
+     * Can be registered to listen for sequence acknowledgements.
+     */
+    private AcknowledgementListener ackListener;
 
 
     private static boolean sendHeartbeats = true;
@@ -163,6 +171,25 @@ public class ClientOutboundSequence extends OutboundSequence {
        //Use server size receive buffer size for now.  Might
        //want to make this configurable.
        return config.getBufferSize();
+    }
+    
+    /**
+     * Registers a <code>AcknowledgementListener</code> for this
+     * sequence
+     *
+     * @param listener The <code>AcknowledgementListener</code>
+     */
+    public void setAckListener(AcknowledgementListener listener) {
+        this.ackListener = ackListener;
+    }
+    
+    /**
+     * Accessor for the AcknowledgementListener field.
+     *
+     * @return The AcknowledgementListener.
+     */
+    public AcknowledgementListener getAckListener() {
+        return ackListener;
     }
 
     public void setSecureReliableMessaging(boolean secureReliableMessaging) {
@@ -255,7 +282,6 @@ public class ClientOutboundSequence extends OutboundSequence {
                 this.id = idOutbound.getValue();
                 
                 AcceptType accept = csr.getAccept();
-                //TODO ... copy rest of eprAccept some day.
                 
                 if (accept != null) {
                     /**
@@ -281,20 +307,33 @@ public class ClientOutboundSequence extends OutboundSequence {
                 //Handle CreateSequenceRefused fault
             }
         } catch (Exception e) {
- 
             throw new RMException(e);
         }
     }
 
    
+    /**
+     * Disconnect from the RMDestination by invoking <code>TerminateSequence</code> on
+     * the proxy stored in the <code>port</code> field. State of 
+     * sequence is set to inactive.
+     *
+     * @throws RMException wrapper for all exceptions thrown during execution of method.
+     */
+    public void disconnect() throws RMException {
+        disconnect(false);
+    }
+
 
     /**
      * Disconnect from the RMDestination by invoking <code>TerminateSequence</code> on
      * the proxy stored in the <code>port</code> field.
      *
+     * @param keepAlive If true, state of sequence is kept in
+     * active atate allowing the reuse of the sequence.
+     *
      * @throws RMException wrapper for all exceptions thrown during execution of method.
      */
-    public void disconnect() throws RMException {
+    public void disconnect(boolean keepAlive) throws RMException {
 
         //FIXME - find another check for connectiveness.. want to get rid of
         //unnecessary InboundSequences.
@@ -302,7 +341,7 @@ public class ClientOutboundSequence extends OutboundSequence {
             throw new IllegalStateException("Not connected.");
         }
         
-        isActive = false;
+        isActive = keepAlive;
  
         //TODO 
         //Move this after waitForAcks to obviate  problems caused by
@@ -498,7 +537,7 @@ public class ClientOutboundSequence extends OutboundSequence {
             for (int i = 1; i < top; i++) {
                 Message mess = get(i);
                 if (mess != null && !mess.isComplete()) {
-                    System.out.println("resending "  + getId() + ":" + i);
+                    logger.warning("resending "  + getId() + ":" + i);
                     resend(i);
                 }
             }
@@ -529,11 +568,9 @@ public class ClientOutboundSequence extends OutboundSequence {
             try {
                
                 if (sendHeartbeats) {
-                    System.out.println("Sending heartbeat message for sequence " + sequence.getId() + 
-                            " time = " + System.currentTimeMillis());
-                    //BUGBUG - Need to fix ProtocolMessageSender to allow sendAckRequested
-                    //to be called from this Thread or somehow prevent application messages
-                    //from being processed at the same time.  
+                    
+                    logger.warning("Sending heartbeat message for sequence " + sequence.getId() + 
+                            " time = " + System.currentTimeMillis()); 
                     protocolMessageSender.sendAckRequested(sequence, 
                                                        version);
                 }
@@ -546,16 +583,14 @@ public class ClientOutboundSequence extends OutboundSequence {
                 //In both cases the sequence is of no further use.  We
                 //will assume for now that this is already the case.
                 
-                System.out.println("Exception from sending heartbeat message for sequence " +
+                logger.warning("Exception from sending heartbeat message for sequence " +
                         sequence.getId());
+                //e.printStackTrace();
          
                 try {
-                    RMSource.getRMSource().terminateSequence(sequence);
+                    RMSource.getRMSource().removeOutboundSequence(sequence);
                 } catch (Exception ex){
-                    //we did our best.
-                }
-                //e.printStackTrace();
-            
+                }         
             }
         }
     }
