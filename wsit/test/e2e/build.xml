@@ -23,13 +23,14 @@
 -->
 
 <!--
- $Id: build.xml,v 1.21 2006-10-30 06:41:00 ritzmann Exp $
+ $Id: build.xml,v 1.22 2006-10-30 06:43:49 ritzmann Exp $
 
  Copyright (c) 2005 Sun Microsystems, Inc.
  All rights reserved.
 -->
 
 <project name="wsit.dev.java.net main" default="main" basedir=".">
+    <property file="${basedir}/build.properties"/>
     <import file="properties.xml"/>
     
     <path id="harness.classpath">
