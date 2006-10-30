@@ -52,6 +52,7 @@ import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.policy.jaxws.WSDLPolicyMapWrapper;
 import com.sun.xml.ws.policy.jaxws.documentfilter.PrivateAssertionFilter;
+import com.sun.xml.ws.policy.util.PolicyMapUtil;
 import com.sun.xml.ws.rm.Constants;
 import com.sun.xml.ws.rm.jaxws.runtime.client.RMClientPipe;
 import com.sun.xml.ws.rm.jaxws.runtime.server.RMServerPipe;
@@ -469,7 +470,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
          * @param context server assembler context
          * @return initialized policy map
          */
-        private PolicyMap initPolicyMap(ServerPipeAssemblerContext context) {
+        private PolicyMap initPolicyMap(ServerPipeAssemblerContext context) throws WebServiceException {
             PolicyMap map = null;
             
             WSDLPort wsdlPort = context.getWsdlModel();
@@ -477,6 +478,14 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             WSDLPolicyMapWrapper mapWrapper = model.getExtension(WSDLPolicyMapWrapper.class);
             if (mapWrapper != null) {
                 map = mapWrapper.getPolicyMap();
+            }
+            
+            if (map != null) {
+                try {
+                    PolicyMapUtil.rejectAlternatives(map);
+                } catch (PolicyException e) {
+                    throw new WebServiceException(e);
+                }
             }
             
             return map;
