@@ -23,7 +23,8 @@ package com.sun.xml.ws.policy;
 
 import java.util.Arrays;
 import java.util.LinkedList;
-import junit.framework.*;
+import javax.xml.namespace.QName;
+import junit.framework.TestCase;
 
 /**
  *
@@ -51,5 +52,53 @@ public class PolicyMapTest extends TestCase {
 
     public void testCreatePolicyMapWithNonemptyMutatorCollection() throws Exception {
         assertNotNull("Policy map instance should not be null", PolicyMap.createPolicyMap(Arrays.asList(new PolicyMapMutator[] {PolicyMapExtender.createPolicyMapExtender()})));                
+    }
+    
+    public void testIsEmpty() {
+        PolicyMap map = PolicyMap.createPolicyMap(null);
+        assertTrue(map.isEmpty());
+        
+        map = PolicyMap.createPolicyMap(new LinkedList<PolicyMapMutator>());
+        assertTrue(map.isEmpty());
+        
+        map = PolicyMap.createPolicyMap(Arrays.asList(new PolicyMapMutator[] {PolicyMapExtender.createPolicyMapExtender()}));
+        assertTrue(map.isEmpty());
+        
+        PolicyMapExtender extender = PolicyMapExtender.createPolicyMapExtender();
+        PolicyMapMutator[] mutators = new PolicyMapMutator[] {extender};
+        PolicyMapKey key = map.createWsdlServiceScopeKey(new QName("service"));
+        map = PolicyMap.createPolicyMap(Arrays.asList(mutators));
+        extender.putServiceSubject(key, null);
+        assertFalse(map.isEmpty());
+
+        mutators[0].disconnect();
+        key = map.createWsdlEndpointScopeKey(new QName("service"), new QName("port"));
+        map = PolicyMap.createPolicyMap(Arrays.asList(new PolicyMapMutator[] {extender}));
+        extender.putEndpointSubject(key, null);
+        assertFalse(map.isEmpty());
+
+        mutators[0].disconnect();
+        key = map.createWsdlOperationScopeKey(new QName("service"), new QName("port"), new QName("operation"));
+        map = PolicyMap.createPolicyMap(Arrays.asList(new PolicyMapMutator[] {extender}));
+        extender.putOperationSubject(key, null);
+        assertFalse(map.isEmpty());
+
+        mutators[0].disconnect();
+        key = map.createWsdlMessageScopeKey(new QName("service"), new QName("port"), new QName("operation"));
+        map = PolicyMap.createPolicyMap(Arrays.asList(new PolicyMapMutator[] {extender}));
+        extender.putInputMessageSubject(key, null);
+        assertFalse(map.isEmpty());
+
+        mutators[0].disconnect();
+        key = map.createWsdlMessageScopeKey(new QName("service"), new QName("port"), new QName("operation"));
+        map = PolicyMap.createPolicyMap(Arrays.asList(new PolicyMapMutator[] {extender}));
+        extender.putOutputMessageSubject(key, null);
+        assertFalse(map.isEmpty());
+
+        mutators[0].disconnect();
+        key = map.createWsdlMessageScopeKey(new QName("service"), new QName("port"), new QName("operation"));
+        map = PolicyMap.createPolicyMap(Arrays.asList(new PolicyMapMutator[] {extender}));
+        extender.putFaultMessageSubject(key, null);
+        assertFalse(map.isEmpty());
     }
 }
