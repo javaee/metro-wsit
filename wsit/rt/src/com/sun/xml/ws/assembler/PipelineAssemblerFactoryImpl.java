@@ -103,7 +103,6 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
         @NotNull
         public Pipe createClient(@NotNull ClientPipeAssemblerContext context) {
             PolicyMap policyMap = initPolicyMap(context);
-            
             boolean isSecurityEnabled = isSecurityEnabled(policyMap, context.getWsdlModel());
             if (isSecurityEnabled) {
                 setSecurityCodec(context);
@@ -132,7 +131,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
                     securityClientPipe = (SecurityClientPipe) p;
                 } else {
                     //look for XWSS 2.0 Style Security
-                    if (policyMap == null && isSecurityConfigPresent(context)) {
+                    if (policyMap.isEmpty() && isSecurityConfigPresent(context)) {
                         p = initializeXWSSClientPipe(context.getWsdlModel(), context.getService(), context.getBinding(), p);
                         //donot set securityClientPipe since this is a 
                         // non WSIT scenario
@@ -258,7 +257,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
                     p = new SecurityServerPipe(config, p);
                 } else {
                     //look for XWSS 2.0 Style Security
-                    if (policyMap == null && isSecurityConfigPresent(context)) {
+                    if (policyMap.isEmpty() && isSecurityConfigPresent(context)) {
                         p = initializeXWSSServerPipe(context.getEndpoint(), context.getWsdlModel(), p);
                     }
                 }

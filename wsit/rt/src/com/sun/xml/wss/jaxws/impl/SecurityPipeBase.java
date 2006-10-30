@@ -199,7 +199,7 @@ public abstract class SecurityPipeBase implements Pipe {
     protected SOAPVersion soapVersion = null;
     
     // SOAP Factory
-    protected static SOAPFactory soapFactory = null;
+    protected  SOAPFactory soapFactory = null;
     
     protected PolicyMap wsPolicyMap = null;
     
@@ -301,6 +301,7 @@ public abstract class SecurityPipeBase implements Pipe {
         secEnv = that.secEnv;
         isSOAP12 = that.isSOAP12;
         soapVersion = that.soapVersion;
+        this.soapFactory = that.soapFactory;
         this.addVer = that.addVer;
         wsPolicyMap = that.wsPolicyMap;
         outMessagePolicyMap = that.outMessagePolicyMap;
