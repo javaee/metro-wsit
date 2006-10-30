@@ -277,12 +277,11 @@ public class RMServerPipe extends PipeBase<RMDestination,
             //If we populated
             //ret with an empty message to be used by RM protocol, and it
             //was not used, get rid of the empty message.
-            if (responseMessage == null ) {
-                if (ret.getMessage() != null) {
-                    if (!ret.getMessage().hasHeaders()) {
+            if (responseMessage == null &&
+                    ret.getMessage() != null &&
+                    !ret.getMessage().hasHeaders()) {
                         ret.setMessage(null);
-                    }
-                }
+                    
             } else {
 
                 //Fill in relatedMessage field in request message for use in case request is resent.
@@ -645,14 +644,17 @@ public class RMServerPipe extends PipeBase<RMDestination,
                     terminateSeqResponse,
                     config.getSoapVersion());
 
-            ret = packet.createServerResponse(response, wsdlModel, binding);
-
+            //ret = packet.createServerResponse(response, wsdlModel, binding);
+             ret = packet.createServerResponse(response,
+                    constants.getAddressingVersion(),
+                    config.getSoapVersion(), Constants.TERMINATE_SEQUENCE_ACTION);
+             
             SequenceAcknowledgementElement element = seq.generateSequenceAcknowledgement(null, marshaller);
             Header header = Headers.create(config.getSoapVersion(),marshaller,element);
-            Header actionHeader = Headers.create(constants.getAddressingVersion().actionTag,
-                                                   Constants.TERMINATE_SEQUENCE_ACTION);
+            //Header actionHeader = Headers.create(constants.getAddressingVersion().actionTag,
+            //                                       Constants.TERMINATE_SEQUENCE_ACTION);
             response.getHeaders().add(header);
-            response.getHeaders().add(actionHeader);
+            //response.getHeaders().add(actionHeader);
 
         } else {
             packet.transportBackChannel.close();
