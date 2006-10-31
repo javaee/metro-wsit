@@ -95,7 +95,7 @@ public class WSDLPolicyMapWrapper implements WSDLExtension {
         logger.fine("addClientConfigToMap", "wsit-client.xml resource url: '" + clientWsitConfig + "'");
         
         try {
-            PolicyMap clientPolicyMap = PolicyConfigParser.parse(clientWsitConfig);
+            PolicyMap clientPolicyMap = PolicyConfigParser.parse(clientWsitConfig, true);
             logger.fine("addClientConfigToMap", "Client configuration resource parsed into a policy map: " + clientPolicyMap);
             
             for (PolicyMapKey key : clientPolicyMap.getAllServiceScopeKeys()) {

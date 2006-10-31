@@ -119,12 +119,23 @@ public class PolicyConfigParserTest extends TestCase {
         PolicyMap result = null;
         
         try {
-            result = PolicyConfigParser.parse((URL) null);
+            result = PolicyConfigParser.parse((URL) null, false);
             fail("Expected PolicyException");
         } catch (PolicyException e) {
         }
         assertNull(result);
     }
+    
+    public void testParseBufferMex() throws Exception {
+        URL url = PolicyUtils.ConfigFile.loadAsResource("policy/mex/mex.xml", null);
+        PolicyMap map = PolicyConfigParser.parse(url, false);
+        System.out.println(map.toString());
+//        PolicyMapKey key = map.createWsdlEndpointScopeKey(new QName("http://example.org/", "AddNumbersService"), new QName("http://example.org/", "AddNumbersPort"));
+//        Policy policy = map.getEndpointEffectivePolicy(key);
+//        assertNotNull(policy);
+//        assertEquals("MutualCertificate10Sign_IPingService_policy", policy.getId());
+    }
+
     
     public void testParseBufferSimple() throws Exception {
         PolicyMap map = parseConfigFile("config/simple.wsdl");
@@ -209,7 +220,7 @@ public class PolicyConfigParserTest extends TestCase {
         
     private PolicyMap parseConfigFile(String configFile) throws Exception {
         URL url = PolicyUtils.ConfigFile.loadAsResource(PolicyResourceLoader.POLICY_UNIT_TEST_RESOURCE_ROOT + configFile, null);
-        return PolicyConfigParser.parse(url);
+        return PolicyConfigParser.parse(url, false);
     }
 
     /**

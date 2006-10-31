@@ -53,20 +53,6 @@ public final class PolicyConfigParser {
     private static final XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
     
     
-    
-    /**
-     * Reads a WSIT config file stored in META-INF or WEB-INF, parses it
-     * and returns a PolicyMap.
-     *
-     * @param configFileIdentifier base for config file name
-     * @param container May hold the servlet context if run inside a web container
-     * @return A PolicyMap populated from the WSIT config file
-     */
-    public static PolicyMap parse(String configFileIdentifier, Container container) throws PolicyException {
-        return parse(configFileIdentifier, container, (PolicyMapMutator[]) null);
-    }
-    
-    
     /**
      * Reads a WSIT config file stored in META-INF or WEB-INF, parses it
      * and returns a PolicyMap. It gives you a chance to register policy map mutators
@@ -105,7 +91,7 @@ public final class PolicyConfigParser {
 // END REMOVE
 
             if (configFileUrl != null) {
-                map = parse(configFileUrl, mutators);
+                map = parse(configFileUrl, false, mutators);
             }
 
             return map;
@@ -114,29 +100,18 @@ public final class PolicyConfigParser {
         }
     }
 
-    /**
-     * Reads a WSIT config from an XMLStreamBuffer, parses it and returns a PolicyMap.
-     *
-     * @param configFileUrl URL of the config file resource that should be parsed. Must not be {@code null}.
-     *
-     * @return A PolicyMap populated from the WSIT config file
-     */
-    public static PolicyMap parse(URL configFileUrl) throws PolicyException {
-        return parse(configFileUrl, (PolicyMapMutator[]) null);
-    }
-
-
 
     /**
      * Reads a WSIT config from an XMLStreamBuffer, parses it and returns a PolicyMap. It gives you a chance
      * to register policy map mutators to the newly created map.
      *
      * @param configFileUrl URL of the config file resource that should be parsed. Must not be {@code null}.
+     * @param isClient must be true if this method is invoked to parse client configuration, false otherwise
      * @param mutators to be registered with the policy map
      *
      * @return A PolicyMap populated from the WSIT config file
      */
-    public static PolicyMap parse(URL configFileUrl, PolicyMapMutator... mutators) throws PolicyException {
+    public static PolicyMap parse(URL configFileUrl, boolean isClient, PolicyMapMutator... mutators) throws PolicyException {
         logger.entering("parse", new Object[] {configFileUrl, mutators});
         PolicyMap map = null;
         try {
@@ -149,7 +124,7 @@ public final class PolicyConfigParser {
             SDDocumentSource doc = SDDocumentSource.create(configFileUrl, configFileSource);
             Parser parser =  new Parser(doc);
             WSDLModel model = WSDLModel.WSDLParser.parse(parser,
-                                                         new PolicyConfigResolver(), true,
+                                                         new PolicyConfigResolver(), isClient,
                                                          new WSDLParserExtension[] { new PolicyWSDLParserExtension(true, mutators) } );
             WSDLPolicyMapWrapper wrapper = model.getExtension(WSDLPolicyMapWrapper.class);
             

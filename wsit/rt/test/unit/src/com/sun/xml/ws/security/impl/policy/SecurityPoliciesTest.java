@@ -797,7 +797,7 @@ public class SecurityPoliciesTest extends TestCase {
             inUrl = cl.getResource(wsdlFile);
         }
         //WSDLModel model = PolicyConfigParser.parse(buffer);
-        map = PolicyConfigParser.parse(inUrl);
+        map = PolicyConfigParser.parse(inUrl, false);
         
         
 //        QName serviceName = new QName(UUID.randomUUID().toString());
