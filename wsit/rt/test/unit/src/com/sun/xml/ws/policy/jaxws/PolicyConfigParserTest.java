@@ -129,11 +129,10 @@ public class PolicyConfigParserTest extends TestCase {
     public void testParseBufferMex() throws Exception {
         URL url = PolicyUtils.ConfigFile.loadAsResource("policy/mex/mex.xml", null);
         PolicyMap map = PolicyConfigParser.parse(url, false);
-        System.out.println(map.toString());
-//        PolicyMapKey key = map.createWsdlEndpointScopeKey(new QName("http://example.org/", "AddNumbersService"), new QName("http://example.org/", "AddNumbersPort"));
-//        Policy policy = map.getEndpointEffectivePolicy(key);
-//        assertNotNull(policy);
-//        assertEquals("MutualCertificate10Sign_IPingService_policy", policy.getId());
+        PolicyMapKey key = map.createWsdlEndpointScopeKey(new QName("http://schemas.xmlsoap.org/ws/2004/09/mex", "MetadataExchangeService"), new QName("http://schemas.xmlsoap.org/ws/2004/09/mex", "MetadataExchangePort"));
+        Policy policy = map.getEndpointEffectivePolicy(key);
+        assertNotNull(policy);
+        assertEquals("MEXPolicy", policy.getId());
     }
 
     
