@@ -24,6 +24,10 @@ package com.sun.xml.ws.assembler;
 
 import com.sun.xml.ws.api.pipe.StreamSOAPCodec;
 import com.sun.xml.ws.encoding.LazyStreamCodec;
+import com.sun.xml.ws.policy.AssertionSet;
+import com.sun.xml.ws.policy.PolicyAssertion;
+import com.sun.xml.ws.transport.tcp.client.TCPTransportPipeFactory;
+import com.sun.xml.ws.transport.tcp.wsit.TCPConstants;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import com.sun.xml.ws.api.pipe.Codec;
@@ -89,6 +93,8 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
     private static final String WSAT_SOAP_NSURI = "http://schemas.xmlsoap.org/ws/2004/10/wsat";
     private static final QName AT_ALWAYS_CAPABILITY = new QName(WSAT_SOAP_NSURI, "ATAlwaysCapability");
     private static final QName AT_ASSERTION = new QName(WSAT_SOAP_NSURI, "ATAssertion");
+    private static final String AUTO_OPTIMIZED_TRANSPORT_POLICY_NAMESPACE_URI = "http://java.sun.com/xml/ns/wsit/2006/09/policy/transport/client";
+    private static final QName AUTO_OPTIMIZED_TRANSPORT_POLICY_ASSERTION = new QName(AUTO_OPTIMIZED_TRANSPORT_POLICY_NAMESPACE_URI, "AutomaticallySelectOptimalTransport");
     
     //default security pipe classes for XWSS 2.0 Style Security Configuration Support
     private static final String xwss20ClientPipe = "com.sun.xml.xwss.XWSSClientPipe";
@@ -109,7 +115,12 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
                 setSecurityCodec(context);
             }
             // Transport pipe ALWAYS exist
-            Pipe p = context.createTransportPipe();
+            Pipe p;
+            if (isOptimizedTransportEnabled(policyMap, context.getWsdlModel())) {
+                p = TCPTransportPipeFactory.doCreate(context, false);
+            } else {
+                p = context.createTransportPipe();
+            }
             p = dump(context, CLIENT_PREFIX, p);
             p = dumpAction(CLIENT_PREFIX + ACTION_SUFFIX, context.getBinding(), p);
             p = dump(context, CLIENT_PREFIX + TRANSPORT_SUFFIX, p);
@@ -134,7 +145,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
                     //look for XWSS 2.0 Style Security
                     if (policyMap.isEmpty() && isSecurityConfigPresent(context)) {
                         p = initializeXWSSClientPipe(context.getWsdlModel(), context.getService(), context.getBinding(), p);
-                        //donot set securityClientPipe since this is a 
+                        //donot set securityClientPipe since this is a
                         // non WSIT scenario
                     }
                 }
@@ -286,6 +297,50 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             }
             
             return p;
+        }
+        
+        /**
+         * Checks to see whether OptimizedTransport is enabled or not.
+         *
+         * @param policyMap policy map for {@link this} assembler
+         * @param wsdlPort the WSDLPort object
+         * @return true if OptimizedTransport is enabled, false otherwise
+         */
+        private boolean isOptimizedTransportEnabled(PolicyMap policyMap, WSDLPort port) {
+            String schema = port.getAddress().getURI().getScheme();
+            // if target endpoint URI starts with TCP schema - dont check policies, just return true
+            if (com.sun.xml.ws.transport.tcp.util.TCPConstants.PROTOCOL_SCHEMA.equals(schema))
+                return true;
+            
+            if (policyMap == null)
+                return false;
+            
+            try {
+                PolicyMapKey endpointKey = policyMap.createWsdlEndpointScopeKey(port.getOwner().getName(),
+                        port.getName());
+                Policy policy = policyMap.getEndpointEffectivePolicy(endpointKey);
+                
+                if (policy != null && policy.contains(TCPConstants.TCPTRANSPORT_POLICY_ASSERTION) &&
+                        policy.contains(AUTO_OPTIMIZED_TRANSPORT_POLICY_ASSERTION)) {
+                    /* if client set to choose optimal transport and server has TCP transport policy
+                       then need to check server side policy "enabled" attribute*/
+                    for(AssertionSet assertionSet : policy) {
+                        for(PolicyAssertion assertion : assertionSet) {
+                            if(assertion.getName().equals(TCPConstants.TCPTRANSPORT_POLICY_ASSERTION)){
+                                String value = assertion.getAttributeValue(new QName("enabled"));
+                                if (value == null) return false;
+                                value = value.trim();
+                                
+                                return (Boolean.valueOf(value) || value.equalsIgnoreCase("yes"));
+                            }
+                        }
+                    }
+                }
+                
+                return false;
+            } catch (PolicyException e) {
+                throw new WebServiceException(e);
+            }
         }
         
         /**
@@ -512,9 +567,9 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
     }
     
     private static boolean isSecurityConfigPresent(ClientPipeAssemblerContext context) {
-        //returning true by default for now, because the Client Side Security Config is 
+        //returning true by default for now, because the Client Side Security Config is
         //only accessible as a Runtime Property on BindingProvider.RequestContext
-        return true;    
+        return true;
     }
     
     private static boolean isSecurityConfigPresent(ServerPipeAssemblerContext context) {
@@ -524,9 +579,9 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
         //TODO: not sure which of the two above will give the service name as specified in DD
         String serviceLocalName = serviceQName.getLocalPart();
         
-        ServletContext ctxt = 
+        ServletContext ctxt =
                 context.getEndpoint().getContainer().getSPI(ServletContext.class);
-       
+        
         String serverName = "server";
         String serverConfig = "/WEB-INF/" + serverName + "_" + "security_config.xml";
         InputStream in = ctxt.getResourceAsStream(serverConfig);
@@ -542,7 +597,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
         
         return false;
     }
-      
+    
     private static Pipe initializeXWSSClientPipe(WSDLPort prt, WSService svc, WSBinding bnd, Pipe nextP) {
         Pipe ret = new com.sun.xml.xwss.XWSSClientPipe(prt,svc, bnd, nextP);
         return ret;
