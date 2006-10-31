@@ -580,11 +580,8 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
         //TODO: not sure which of the two above will give the service name as specified in DD
         String serviceLocalName = serviceQName.getLocalPart();
         
-        ServletContext ctxt = null;
-        Container container = context.getEndpoint().getContainer(); 
-        if (container != null) {
-            ctxt = container.getSPI(ServletContext.class);
-        } else {
+        ServletContext ctxt = context.getEndpoint().getContainer().getSPI(ServletContext.class);
+        if (ctxt == null) {
             return false;
         }
        
