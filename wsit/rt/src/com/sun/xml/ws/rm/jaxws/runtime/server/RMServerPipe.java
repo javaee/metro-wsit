@@ -290,25 +290,13 @@ public class RMServerPipe extends PipeBase<RMDestination,
                 message.setRelatedMessage(om);
 
                 // MS client expects SequenceAcknowledgement action incase of oneway messages
-                if (responseMessage == null) {
-
-                    /*
-                    AddressingProperties outboundAddressingProperties =
-                            addressingBuilder.newAddressingProperties();
-
-                    outboundAddressingProperties.setAction(addressingBuilder.newURI(
-                            constants.getSequenceAcknowledgementAction()));
-                    ret.invocationProperties.put(JAXWSAConstants.SERVER_ADDRESSING_PROPERTIES_OUTBOUND,
-                            outboundAddressingProperties);
-                     */
-
-                    HeaderList headerList = ret.getMessage().getHeaders();
-                    headerList.add(Headers.create(constants.getAddressingVersion().actionTag,
-                                                    Constants.SEQUENCE_ACKNOWLEDGEMENT_ACTION));
-
+                if (responseMessage == null && ret.getMessage() != null) {
+                        HeaderList headerList = ret.getMessage().getHeaders();
+                        headerList.add(Headers.create(constants.getAddressingVersion().actionTag,
+                                                        Constants.SEQUENCE_ACKNOWLEDGEMENT_ACTION));
+                        
                 }
             }
-
 
             return ret;
 

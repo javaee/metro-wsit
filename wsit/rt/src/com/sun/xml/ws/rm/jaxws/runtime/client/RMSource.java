@@ -40,7 +40,7 @@ import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import java.io.ByteArrayInputStream;
 import com.sun.xml.ws.rm.Constants;
-
+import java.util.logging.Logger;
 
 /**
  * An RMSource represents a Collection of RMSequences with a
@@ -48,6 +48,9 @@ import com.sun.xml.ws.rm.Constants;
  */
 public class RMSource  extends RMProvider<ClientInboundSequence,
         ClientOutboundSequence> {
+    
+    private  static final Logger logger = 
+            Logger.getLogger(RMSource.class.getName());
     
     private static RMSource rmSource = new RMSource();
     
@@ -87,6 +90,7 @@ public class RMSource  extends RMProvider<ClientInboundSequence,
     }
     
     public synchronized void addOutboundSequence(ClientOutboundSequence seq) {
+        logger.warning("adding sequence " + seq.getId());    
         
         boolean firstSequence = outboundMap.isEmpty();
         outboundMap.put(seq.getId(), seq);
@@ -105,7 +109,8 @@ public class RMSource  extends RMProvider<ClientInboundSequence,
     }
     
     public synchronized void removeOutboundSequence(ClientOutboundSequence seq) {
-        
+         logger.warning("removing sequence " + seq.getId());
+         
          String id = seq.getId();
          
         ClientInboundSequence iseq = 

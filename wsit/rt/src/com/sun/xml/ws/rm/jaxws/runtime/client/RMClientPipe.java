@@ -440,15 +440,7 @@ public class RMClientPipe
                     
                     if (mess != null && mess.isFault()) {
                         //don't want to resend
-                        //FIXME decrement savedMessages so
-                        // waitForAcks will return
-                        message.complete();
-                        AcknowledgementListener listener = 
-                                outboundSequence.getAckListener();
-                        if (listener != null) {
-                            listener.notify(outboundSequence,
-                                            message.getMessageNumber());
-                        }
+                        outboundSequence.acknowledge(message.getMessageNumber());
                     }
 
                     //check for empty body response to two-way message.  Indigo will return

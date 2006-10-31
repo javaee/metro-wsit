@@ -37,6 +37,7 @@ import com.sun.xml.ws.rm.protocol.AckRequestedElement;
 import com.sun.xml.ws.rm.protocol.AcknowledgementHandler;
 import com.sun.xml.ws.rm.protocol.SequenceAcknowledgementElement;
 import com.sun.xml.ws.rm.protocol.SequenceElement;
+import java.util.logging.Logger;
 
 import javax.xml.bind.Marshaller;
 import java.net.URI;
@@ -45,6 +46,9 @@ import java.net.URI;
  *
  */
 public abstract class OutboundSequence extends Sequence {
+    
+    private static final Logger logger = 
+            Logger.getLogger(OutboundSequence.class.getName());
     
     /**
      * Common destination for all application messages in the sequence.
@@ -302,7 +306,16 @@ public abstract class OutboundSequence extends Sequence {
     
         while (storedMessages != 0) {
             try {
-                wait();
+                //FIXME - Temporarily, we will let this
+                //timeout to allow debugging of ack failures.
+                //Doing this, we lose the ability to recover
+                //from spurious wakeups.
+                wait(5000);
+                if (storedMessages > 0) {
+                    logger.severe("Timeout in waitForAcks with " +
+                            storedMessages + " unacked messages.");
+                    break;
+                }
             } catch (InterruptedException e) {}
         }
     }

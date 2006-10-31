@@ -474,6 +474,10 @@ public class ClientOutboundSequence extends OutboundSequence {
             return;
         } else {
             super.acknowledge(i);
+                    
+            if (ackListener != null) {
+                ackListener.notify(this, i);
+            }
             //if this acknowledgement is not on the protocol
             //response for the one-way message (endpoint behaved
             //unkindly, or possibly dropped the request), the sending
@@ -493,6 +497,9 @@ public class ClientOutboundSequence extends OutboundSequence {
             throws InvalidMessageNumberException {
             
         super.acknowledge(i);
+        if (ackListener != null) {
+                ackListener.notify(this, i);
+        }
     }
     
     /**
