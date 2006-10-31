@@ -78,6 +78,14 @@
         <delete dir="${tmpdir}" includeemptydirs="true"/>
     </target>
 
+  <target name="integrate-xwss30-hudson" 
+          description="integrate the last successful XWSS 3.0 Hudson build">
+    <!-- get src="http://kohsuke.sfbay/hudson/job/xwss3.0/lastSuccessfulBuild/artifact/xwss/xwss-ri/dist/wsit/lib/xws-security.src.zip"
+         dest="lib/xws-security.src.zip" / -->
+    <get src="http://kohsuke.sfbay/hudson/job/xwss3.0/lastSuccessfulBuild/artifact/xwss/xwss-ri/dist/wsit/lib/xws-security.jar"
+         dest="lib/runtime/xws-security.jar" />
+  </target>
+
     <target name="runtests">
       <ant antfile="run-ql-tests.xml"/>
     </target>
