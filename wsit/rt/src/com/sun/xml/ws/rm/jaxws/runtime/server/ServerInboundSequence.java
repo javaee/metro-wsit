@@ -54,15 +54,20 @@ public class ServerInboundSequence extends InboundSequence {
      */
     private Session session;
     
-    public ServerInboundSequence(URI acksTo, 
+    public ServerInboundSequence(URI acksTo,
+                            String inboundId,
                             String outboundId,
                             SequenceConfig config) {
         
         super(acksTo, config);
         this.outboundSequence = new ServerOutboundSequence(this, outboundId, config);
         
-        String id = "uuid:" + UUID.randomUUID();
-        setId(id);
+        if (inboundId == null) {
+            String newid = "uuid:" + UUID.randomUUID();
+            setId(newid);
+        } else {
+            setId(inboundId);
+        }
         
          //if flow control is enabled, set buffer size
         if (config.flowControl) {
@@ -70,6 +75,8 @@ public class ServerInboundSequence extends InboundSequence {
         } else {
             maxMessages = -1;
         }
+        
+        allowDuplicates = config.allowDuplicates;
     }
     
     /**

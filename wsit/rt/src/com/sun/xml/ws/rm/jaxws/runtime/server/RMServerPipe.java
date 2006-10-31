@@ -477,6 +477,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
         //create server-side data structures.
         ServerInboundSequence inboundSequence =
                 provider.createSequence(acksTo,
+                                        null, //assign random id
                                         offeredId,
                                         config);
 

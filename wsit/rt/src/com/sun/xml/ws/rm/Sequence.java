@@ -1,5 +1,5 @@
 /*
- * $Id: Sequence.java,v 1.3 2006-10-30 22:26:29 mikeg Exp $
+ * $Id: Sequence.java,v 1.4 2006-10-31 22:14:08 mikeg Exp $
  */
 
 /*
@@ -77,6 +77,8 @@ public class Sequence {
      * Last accesse time.
      */
     protected long lastActivityTime;
+    
+    protected boolean allowDuplicates;
 
     /**
      * RMConstants associated with each Sequence which
@@ -110,7 +112,7 @@ public class Sequence {
         //messageNumbers are 1-based and we will be keeping
         //messageNumbers in-sync with indices.
         list.add(null);
-       // this.rmConstants = new RMConstants();
+        allowDuplicates = false;
     }
     
     /**
@@ -164,7 +166,7 @@ public class Sequence {
         
         if (i < nextIndex) {
             Message mess = null;
-            if (null != (mess = list.get(i))) {
+            if (null != (mess = list.get(i))  && !allowDuplicates) {
                 //Store the original message in the exception so
                 //that exception handling can use it.
                 throw new DuplicateMessageException(mess);
@@ -209,8 +211,7 @@ public class Sequence {
     public synchronized boolean isLast() {
         return last;
     }
-   
-    
+     
     /////////////////////////////////////////////////////////////////////////////
     /*
      *             InactivityTimeout management helpers
