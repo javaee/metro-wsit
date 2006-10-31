@@ -48,6 +48,7 @@ import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipelineAssembler;
 import com.sun.xml.ws.api.pipe.PipelineAssemblerFactory;
 import com.sun.xml.ws.api.pipe.ServerPipeAssemblerContext;
+import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.mex.server.MetadataServerPipe;
 import com.sun.xml.ws.policy.Policy;
@@ -579,9 +580,14 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
         //TODO: not sure which of the two above will give the service name as specified in DD
         String serviceLocalName = serviceQName.getLocalPart();
         
-        ServletContext ctxt =
-                context.getEndpoint().getContainer().getSPI(ServletContext.class);
-        
+        ServletContext ctxt = null;
+        Container container = context.getEndpoint().getContainer(); 
+        if (container != null) {
+            ctxt = container.getSPI(ServletContext.class);
+        } else {
+            return false;
+        }
+       
         String serverName = "server";
         String serverConfig = "/WEB-INF/" + serverName + "_" + "security_config.xml";
         InputStream in = ctxt.getResourceAsStream(serverConfig);
