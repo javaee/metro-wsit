@@ -32,6 +32,7 @@ import com.sun.xml.ws.api.server.PortAddressResolver;
 import com.sun.xml.ws.api.server.SDDocument;
 import com.sun.xml.ws.api.server.SDDocumentSource;
 import com.sun.xml.ws.api.server.WSEndpoint;
+import com.sun.xml.ws.transport.tcp.util.TCPConstants;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
@@ -49,7 +50,7 @@ import javax.xml.transform.stream.StreamSource;
 
 public class ServiceChannelWSDLGenerator {
 
-    private static final String TCP_ENDPOINT_ADDRESS_STUB = "tcp://CHANGED_BY_RUNTIME";
+    private static final String TCP_ENDPOINT_ADDRESS_STUB = TCPConstants.PROTOCOL_SCHEMA + "://CHANGED_BY_RUNTIME";
     
     public static void main(String[] args) throws Exception {
         QName serviceName = WSEndpoint.getDefaultServiceName(ServiceChannelWSImpl.class);

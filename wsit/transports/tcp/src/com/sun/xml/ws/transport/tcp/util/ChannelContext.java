@@ -29,6 +29,7 @@ import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.encoding.fastinfoset.FastInfosetStreamSOAPCodec;
 import com.sun.xml.ws.transport.tcp.io.Connection;
+import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -203,7 +204,7 @@ public final class ChannelContext {
             return paramId;
         }
         
-        throw new AssertionError("unknown param");
+        throw new AssertionError(MessagesMessages.UNKNOWN_PARAMETER(paramStr));
     }
     
     private @NotNull String decodeParam(int paramId) {
@@ -217,7 +218,7 @@ public final class ChannelContext {
             return paramStr;
         }
         
-        throw new AssertionError("unknown param");
+        throw new AssertionError(MessagesMessages.UNKNOWN_PARAMETER(paramId));
     }
     
     /**

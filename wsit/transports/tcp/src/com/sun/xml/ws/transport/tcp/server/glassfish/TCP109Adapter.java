@@ -45,11 +45,11 @@ public class TCP109Adapter extends TCPAdapter {
     
     public TCP109Adapter(
             @NotNull String name,
-            @NotNull String contextRoot,
-            @NotNull String urlPattern,
-            @NotNull WSEndpoint endpoint,
-            @NotNull ServletFakeArtifactSet servletFakeArtifactSet,
-            boolean isEJB) {
+    @NotNull String contextRoot,
+    @NotNull String urlPattern,
+    @NotNull WSEndpoint endpoint,
+    @NotNull ServletFakeArtifactSet servletFakeArtifactSet,
+    boolean isEJB) {
         super(name, urlPattern, endpoint);
         this.contextRoot = contextRoot;
         this.servletFakeArtifactSet = servletFakeArtifactSet;
@@ -65,25 +65,25 @@ public class TCP109Adapter extends TCPAdapter {
     
     @Override
     public void handle(@NotNull ChannelContext channelContext) throws IOException {
-        try {
-            NewEjbRuntimeEndpointInfo ejbRuntimeEndpointInfo = null;
-            
-            if (isEJB) {
-                ejbRuntimeEndpointInfo = AppServWSRegistry.getInstance().
-                        getEjbRuntimeEndpointInfo(contextRoot, getValidPath());
+        NewEjbRuntimeEndpointInfo ejbRuntimeEndpointInfo = null;
+        
+        if (isEJB) {
+            ejbRuntimeEndpointInfo = AppServWSRegistry.getInstance().
+                    getEjbRuntimeEndpointInfo(contextRoot, getValidPath());
+            try {
                 ejbRuntimeEndpointInfo.prepareInvocation(true);
+            } catch (Exception e) {
+                throw new IOException(e.getClass().getName());
             }
-            
+        }
+        
+        try {
             super.handle(channelContext);
-            
+        } finally {
             if (isEJB) {
                 if(ejbRuntimeEndpointInfo != null)
                     ejbRuntimeEndpointInfo.releaseImplementor();
             }
-        } catch (IOException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new IOException("Unexpected exception. " + e.getMessage());
         }
     }
 }

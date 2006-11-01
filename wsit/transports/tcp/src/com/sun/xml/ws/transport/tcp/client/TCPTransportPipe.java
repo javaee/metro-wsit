@@ -39,6 +39,7 @@ import com.sun.xml.ws.api.pipe.ContentType;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.transport.tcp.util.TCPConstants;
+import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
 import java.io.InputStream;
 import javax.xml.ws.WebServiceException;
 
@@ -136,7 +137,7 @@ public class TCPTransportPipe implements Pipe {
         } while (failure != null && ++retryNum <= TCPConstants.CLIENT_MAX_FAIL_TRIES);
         
         assert failure != null;
-        logger.log(Level.SEVERE, "Sending message failed!", failure);
+        logger.log(Level.SEVERE, MessagesMessages.ERROR_MESSAGE_SENDING_FAILED(), failure);
         throw failure;
     }
     
@@ -154,7 +155,7 @@ public class TCPTransportPipe implements Pipe {
         logger.log(Level.FINE, "TCPTransportPipe.createClientTransport");
         
         WSTCPURI tcpURI = WSTCPURI.parse(uri);
-        if (tcpURI == null) throw new WebServiceException("Invalid endpoint URL");
+        if (tcpURI == null) throw new WebServiceException(MessagesMessages.INVALID_EP_URL());
         ChannelContext channelContext = wsConnectionManager.openChannel(tcpURI, pipeAssemblerContext);
         return new TCPClientTransport(channelContext);
     }

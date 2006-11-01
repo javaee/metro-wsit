@@ -28,6 +28,7 @@ import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.pipe.ClientPipeAssemblerContext;
 import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.client.ClientTransportException;
+import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
 import com.sun.xml.ws.transport.tcp.util.ChannelSettings;
 import com.sun.xml.ws.transport.tcp.io.Connection;
 import com.sun.xml.ws.transport.tcp.util.ChannelContext;
@@ -233,7 +234,7 @@ public class WSConnectionManager {
         Version serverConnectionManagementVersion = new Version(versionInfo[3], versionInfo[4]);
         
         if (success != VersionController.VersionSupport.FULLY_SUPPORTED.ordinal()) {
-            throw new VersionMismatchException("Version mismatch!", serverFramingVersion,
+            throw new VersionMismatchException(MessagesMessages.VERSION_MISMATCH(), serverFramingVersion,
                     serverConnectionManagementVersion);
         }
         

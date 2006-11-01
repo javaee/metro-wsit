@@ -24,6 +24,7 @@ package com.sun.xml.ws.transport.tcp.server.glassfish;
 
 import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.transport.http.DeploymentDescriptorParser;
+import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
 import com.sun.xml.ws.transport.tcp.server.TCPAdapter;
 import com.sun.xml.ws.transport.tcp.server.TCPContext;
 import com.sun.xml.ws.transport.tcp.server.TCPResourceLoader;
@@ -46,6 +47,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.ws.WebServiceException;
 
 /**
  * @author JAX-WS team
@@ -96,12 +98,14 @@ public class WSStartupServlet extends HttpServlet
             
             transportModule = (WSTCPLifeCycleModule) initialContext.lookup("TCPLifeCycle");
             if (transportModule == null) {
-                throw new WSTCPException("Transport module not registered.");
+                throw new WSTCPException(MessagesMessages.TRANSPORT_MODULE_NOT_REGISTERED());
             }
             
             DeploymentDescriptorParser<TCPAdapter> parser = new DeploymentDescriptorParser<TCPAdapter>(
                     classLoader, new TCPResourceLoader(context), container, TCPAdapter.FACTORY);
             URL sunJaxWsXml = context.getResource(JAXWS_RI_RUNTIME);
+            if(sunJaxWsXml==null)
+                throw new WebServiceException("No JAX-WS descriptor file found");
             adapters = parser.parse(sunJaxWsXml.toExternalForm(), sunJaxWsXml.openStream());
             
             transportModule.register(servletContext.getContextPath(), adapters);

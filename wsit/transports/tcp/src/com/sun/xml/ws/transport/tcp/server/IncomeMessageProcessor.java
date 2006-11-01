@@ -25,6 +25,7 @@ package com.sun.xml.ws.transport.tcp.server;
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.transport.tcp.io.Connection;
+import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
 import com.sun.xml.ws.transport.tcp.util.ChannelContext;
 import com.sun.xml.ws.transport.tcp.util.ConnectionSession;
 import com.sun.xml.ws.transport.tcp.util.Version;
@@ -82,7 +83,7 @@ public class IncomeMessageProcessor {
                 returnConnectionSession(connectionSession);
             } else {
                 // Client's version is not supported
-                logger.log(Level.WARNING, "IncomeMessageProcessor.process: Version mismatch");
+                logger.log(Level.WARNING, "IncomeMessageProcessor.process: {0}", MessagesMessages.VERSION_MISMATCH());
             }
             return;
         }

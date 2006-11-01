@@ -22,6 +22,7 @@
 
 package com.sun.xml.ws.transport.tcp.util;
 
+import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -83,7 +84,7 @@ public class ContentType {
             dct.parameters.clear();
         }
         
-        throw new AssertionError("Unknown content-type");
+        throw new AssertionError(MessagesMessages.UNKNOWN_CONTENT_TYPE(contentType));
     }
     
     public static class EncodedContentType {

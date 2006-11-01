@@ -28,6 +28,7 @@ import com.sun.appserv.server.ServerLifecycleException;
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.transport.tcp.grizzly.GrizzlyTCPConnector;
 import com.sun.xml.ws.transport.tcp.server.*;
+import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -86,7 +87,7 @@ public class WSTCPLifeCycleModule implements LifecycleListener {
             try {
                 lifecycleEvent.getLifecycleEventContext().getInitialContext().unbind("TCPLifeCycle");
             } catch (NamingException ex) {
-                logger.log(Level.WARNING, "WSTCPLifeCycleModule.SHUTDOWN_EVENT: name wasnt registered in JNDI");
+                logger.log(Level.WARNING, MessagesMessages.TRANSPORT_MODULE_NOT_REGISTERED());
             }
             
             if (delegate != null) {

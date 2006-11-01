@@ -22,6 +22,7 @@
 
 package com.sun.xml.ws.transport.tcp.util;
 
+import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
 import com.sun.xml.ws.transport.tcp.util.MimeType;
 import com.sun.xml.ws.transport.tcp.util.TCPSettings.EncodingMode;
 import com.sun.xml.ws.api.SOAPVersion;
@@ -95,7 +96,7 @@ public class BindingUtils {
             }
         }
         
-        throw new AssertionError("Unknown WSBinding");
+        throw new AssertionError(MessagesMessages.UNKNOWN_BINDING(binding));
     }
     
     public static class NegotiatedBindingContent {

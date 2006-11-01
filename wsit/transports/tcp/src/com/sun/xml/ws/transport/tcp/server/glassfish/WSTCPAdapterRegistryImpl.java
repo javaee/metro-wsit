@@ -27,6 +27,7 @@ import com.sun.enterprise.webservice.NewEjbRuntimeEndpointInfo;
 import com.sun.enterprise.webservice.WebServiceEjbEndpointRegistry;
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.server.Adapter;
+import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
 import com.sun.xml.ws.transport.tcp.util.WSTCPURI;
 import com.sun.xml.ws.transport.tcp.server.TCPAdapter;
 import com.sun.xml.ws.transport.tcp.server.WSTCPAdapterRegistry;
@@ -71,9 +72,9 @@ public class WSTCPAdapterRegistryImpl implements WSTCPAdapterRegistry {
                         logger.log(Level.FINE, "WSTCPAdapterRegistryImpl. Register adapter. Path: {0}", requestURI.path);
                     } catch (Exception e) {
                         // This common exception is thrown from ejbEndPtInfo.prepareInvocation(true)
-                        logger.log(Level.SEVERE, 
-                                "WSTCPAdapterRegistryImpl. Error creating TCP adapter for " + 
-                                wsEndpointDescriptor.getWSServiceName(), e);
+                        logger.log(Level.SEVERE, "WSTCPAdapterRegistryImpl. " + 
+                                MessagesMessages.ERROR_TCP_ADAPTER_CREATE(
+                                wsEndpointDescriptor.getWSServiceName()), e);
                     }
                 }
                 return adapter;

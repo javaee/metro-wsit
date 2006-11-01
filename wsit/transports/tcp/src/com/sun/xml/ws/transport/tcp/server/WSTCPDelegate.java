@@ -28,6 +28,7 @@ import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.server.InstanceResolver;
 import com.sun.xml.ws.api.server.WSEndpoint;
+import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
 import com.sun.xml.ws.transport.tcp.util.ChannelContext;
 import com.sun.xml.ws.transport.tcp.util.TCPConstants;
 import com.sun.xml.ws.transport.tcp.util.WSTCPURI;
@@ -147,22 +148,22 @@ public class WSTCPDelegate implements WSTCPAdapterRegistry, TCPMessageListener {
             if (target != null) {
                 target.handle(channelContext);
             } else {
-                TCPAdapter.sendErrorResponse(channelContext, TCPConstants.RS_NOT_FOUND, "Target WS not found");
+                TCPAdapter.sendErrorResponse(channelContext, TCPConstants.RS_NOT_FOUND, MessagesMessages.TARGET_WS_NOT_FOUND());
             }
             
         } catch (JAXWSExceptionBase e) {
             logger.log(Level.SEVERE, e.getMessage(), e);
             try {
-                TCPAdapter.sendErrorResponse(channelContext, TCPConstants.RS_INTERNAL_SERVER_ERROR, "For details check server's log");
+                TCPAdapter.sendErrorResponse(channelContext, TCPConstants.RS_INTERNAL_SERVER_ERROR, MessagesMessages.CHECK_SERVER_LOG());
             } catch (Throwable ex) {
-                logger.log(Level.SEVERE, "Failed to send error message to client.", ex);
+                logger.log(Level.SEVERE, MessagesMessages.ERROR_MESSAGE_SENDING_FAILED(), ex);
             }
         } catch (Throwable e) {
             logger.log(Level.SEVERE, e.getMessage(), e);
             try {
-                TCPAdapter.sendErrorResponse(channelContext, TCPConstants.RS_INTERNAL_SERVER_ERROR, "For details check server's log");
+                TCPAdapter.sendErrorResponse(channelContext, TCPConstants.RS_INTERNAL_SERVER_ERROR, MessagesMessages.CHECK_SERVER_LOG());
             } catch (Throwable ex) {
-                logger.log(Level.SEVERE, "Failed to send error message to client.", ex);
+                logger.log(Level.SEVERE, MessagesMessages.ERROR_MESSAGE_SENDING_FAILED(), ex);
             }
         } finally {
             logger.log(Level.FINE, "WSTCPDelegate.onMessage exiting");

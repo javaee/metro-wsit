@@ -24,6 +24,7 @@ package com.sun.xml.ws.transport.tcp.server;
 
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.transport.http.DeploymentDescriptorParser;
+import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
 import com.sun.xml.ws.transport.tcp.util.WSTCPURI;
 import com.sun.xml.ws.transport.tcp.grizzly.GrizzlyTCPConnector;
 import java.io.IOException;
@@ -99,7 +100,7 @@ public class WSTCP {
     
     public static void main(String[] args) {
         if (args.length != 1) {
-            System.out.println("Run WSTCP <WS_CONTEXT_ROOT>");
+            System.out.println(MessagesMessages.STANDALONE_RUN());
             System.exit(0);
         }
         
@@ -114,7 +115,7 @@ public class WSTCP {
         wsTCP.process();
         
         try {
-            System.out.println("Press enter key to quit");
+            System.out.println(MessagesMessages.STANDALONE_EXIT());
             System.in.read();
         } catch (Exception e) {
         } finally {

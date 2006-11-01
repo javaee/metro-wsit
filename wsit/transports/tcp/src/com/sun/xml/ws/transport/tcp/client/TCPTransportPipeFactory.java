@@ -27,8 +27,6 @@ import com.sun.xml.ws.api.pipe.ClientPipeAssemblerContext;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.TransportPipeFactory;
 import com.sun.xml.ws.transport.tcp.util.TCPConstants;
-import com.sun.xml.ws.transport.tcp.client.ServiceChannelTransportPipe;
-import com.sun.xml.ws.transport.tcp.client.TCPTransportPipe;
 import com.sun.xml.ws.transport.tcp.servicechannel.stubs.ServiceChannelWSImplService;
 import javax.xml.namespace.QName;
 
