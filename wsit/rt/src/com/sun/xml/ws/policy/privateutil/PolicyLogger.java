@@ -37,6 +37,7 @@ public final class PolicyLogger {
      * Otherwise we default to "wspolicy".
      */
     private static final String LOGGING_SUBSYSTEM_NAME;
+    private static final Level METHOD_CALL_LEVEL_VALUE = Level.FINER;
     
     static {
         String loggingSubsystemName = "wspolicy";
@@ -143,6 +144,50 @@ public final class PolicyLogger {
         logger.logp(Level.SEVERE, componentClassName, methodName, message, thrown);
     }
     
+    public void entering() {
+        if (!this.logger.isLoggable(METHOD_CALL_LEVEL_VALUE)) {
+            return;
+        }
+        
+        logger.entering(componentClassName, getStackMethodName(4));
+    }
+
+    public void entering(Object[] parameters) {
+        if (!this.logger.isLoggable(METHOD_CALL_LEVEL_VALUE)) {
+            return;
+        }
+                
+        logger.entering(componentClassName, getStackMethodName(4), parameters);
+    }
+    
+    public void exiting() {
+        if (!this.logger.isLoggable(METHOD_CALL_LEVEL_VALUE)) {
+            return;
+        }
+        logger.exiting(componentClassName, getStackMethodName(4));
+    }
+    
+    public void exiting(Object result) {
+        if (!this.logger.isLoggable(METHOD_CALL_LEVEL_VALUE)) {
+            return;
+        }
+        logger.exiting(componentClassName, getStackMethodName(4), result);
+    }
+
+    private String getStackMethodName(int index) {
+        String methodName;
+
+        StackTraceElement[] stack = Thread.currentThread().getStackTrace();
+        if (stack.length > index + 1) {
+            methodName = stack[index].getMethodName();
+        } else {
+            methodName = "UNKNOWN METHOD";
+        }       
+        
+        return methodName;
+    }
+    
+    // TODO: refactor and remove usage of the following methods (replace with the version above): 
     public void entering(String methodName) {
         logger.entering(componentClassName, methodName);
     }
@@ -162,4 +207,5 @@ public final class PolicyLogger {
     public void exiting(String methodName, Object result) {
         logger.exiting(componentClassName, methodName, result);
     }
+    
 }

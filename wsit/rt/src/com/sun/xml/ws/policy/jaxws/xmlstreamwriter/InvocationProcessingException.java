@@ -20,26 +20,18 @@
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
-package com.sun.xml.ws.policy.jaxws.documentfilter;
+package com.sun.xml.ws.policy.jaxws.xmlstreamwriter;
 
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class PrivateAssertionFilterException extends RuntimeException {
-    public PrivateAssertionFilterException() {
-	super();
-    }
-
-    public PrivateAssertionFilterException(String message) {
+public class InvocationProcessingException extends RuntimeException {
+    public InvocationProcessingException(String message) {
 	super(message);
     }
 
-    public PrivateAssertionFilterException(String message, Throwable cause) {
+    public InvocationProcessingException(String message, Throwable cause) {
         super(message, cause);
-    }
-
-    public PrivateAssertionFilterException(Throwable cause) {
-        super(cause);
-    }        
+    }      
 }

@@ -48,7 +48,6 @@ import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipelineAssembler;
 import com.sun.xml.ws.api.pipe.PipelineAssemblerFactory;
 import com.sun.xml.ws.api.pipe.ServerPipeAssemblerContext;
-import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.mex.server.MetadataServerPipe;
 import com.sun.xml.ws.policy.Policy;
@@ -56,7 +55,7 @@ import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.policy.jaxws.WSDLPolicyMapWrapper;
-import com.sun.xml.ws.policy.jaxws.documentfilter.PrivateAssertionFilter;
+import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter.WsdlDocumentFilter;
 import com.sun.xml.ws.policy.util.PolicyMapUtil;
 import com.sun.xml.ws.rm.Constants;
 import com.sun.xml.ws.rm.jaxws.runtime.client.RMClientPipe;
@@ -207,7 +206,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
         
         @NotNull
         public Pipe createServer(ServerPipeAssemblerContext context) {
-            context.getEndpoint().getServiceDefinition().addFilter(new PrivateAssertionFilter());
+            context.getEndpoint().getServiceDefinition().addFilter(new WsdlDocumentFilter());
             PolicyMap policyMap = initPolicyMap(context);
             
             Pipe p = context.getTerminalPipe();

@@ -20,24 +20,23 @@
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
-package com.sun.xml.ws.policy.jaxws.documentfilter;
+package com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter;
 
 import com.sun.xml.ws.api.server.SDDocument;
 import com.sun.xml.ws.api.server.SDDocumentFilter;
+import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.EnhancedXmlStreamWriterProxy;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
-import javax.xml.ws.WebServiceException;
 
 /**
  * The class provides an implementaion of JAX-WS {@code SDDocumentFilter} interface.
- * The filter may be used to instantiate {@code XMLStreamWriter} that do filter
- * private policy assertion elements and their contents out of the stream during
- * the serialization of a document.
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class PrivateAssertionFilter implements SDDocumentFilter {
+public class WsdlDocumentFilter implements SDDocumentFilter {
+    FilteringInvocationProcessorFactory ipFactory = new FilteringInvocationProcessorFactory(FilteringInvocationProcessorFactory.FilterType.PRIVATE_ASSERTION_FILTER);
+    
     public XMLStreamWriter filter(SDDocument sdDocument, XMLStreamWriter xmlStreamWriter) throws XMLStreamException {
-        return FilteringXmlStreamWriterProxy.createProxy(xmlStreamWriter);
+        return EnhancedXmlStreamWriterProxy.createProxy(xmlStreamWriter, ipFactory);
     }
 }

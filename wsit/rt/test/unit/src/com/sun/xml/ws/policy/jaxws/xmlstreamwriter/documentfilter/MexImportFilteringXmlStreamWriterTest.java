@@ -27,8 +27,9 @@
  * Created on October 4, 2006, 6:02 PM
  */
 
-package com.sun.xml.ws.policy.jaxws.documentfilter;
+package com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter;
 
+import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.*;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelMarshaller;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
 import com.sun.xml.ws.policy.testutils.PolicyResourceLoader;
@@ -44,16 +45,13 @@ import javax.xml.stream.XMLStreamWriter;
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class FilteringXmlStreamWriterProxyTest extends TestCase {
+public class MexImportFilteringXmlStreamWriterTest extends TestCase {
     private PolicyModelMarshaller marshaller = PolicyModelMarshaller.getXmlMarshaller(true);
     private String[] testResources = new String[] {
-        "policy_0_visible",
-        "policy_1_visible",
-        "policy_2_visible",
-        "policy_3_visible"
+        "import_element_01"
     };
     
-    public FilteringXmlStreamWriterProxyTest(String testName) {
+    public MexImportFilteringXmlStreamWriterTest(String testName) {
         super(testName);
     }
     
@@ -74,8 +72,8 @@ public class FilteringXmlStreamWriterProxyTest extends TestCase {
     
     public void testFilterPrivateAssertionsFromPolicyExpression() throws Exception {
         for (String testResourceName : testResources) {
-            PolicySourceModel model = PolicyResourceLoader.unmarshallModel("visibility/" + testResourceName + ".xml");
-            PolicySourceModel expected = PolicyResourceLoader.unmarshallModel("visibility/" + testResourceName + "_expected.xml");
+            PolicySourceModel model = PolicyResourceLoader.unmarshallModel("mex_filtering/" + testResourceName + ".xml");
+            PolicySourceModel expected = PolicyResourceLoader.unmarshallModel("mex_filtering/" + testResourceName + "_expected.xml");
             
             StringWriter buffer = new StringWriter();
             XMLStreamWriter writer = openFilteredWriter(buffer);
@@ -92,6 +90,7 @@ public class FilteringXmlStreamWriterProxyTest extends TestCase {
     
     private XMLStreamWriter openFilteredWriter(Writer outputStream) throws XMLStreamException {
         XMLStreamWriter writer = XMLOutputFactory.newInstance().createXMLStreamWriter(outputStream);
-        return FilteringXmlStreamWriterProxy.createProxy(writer);
+        return EnhancedXmlStreamWriterProxy.createProxy(writer, new FilteringInvocationProcessorFactory(FilteringInvocationProcessorFactory.FilterType.MEX_FILTER));
+        
     }
 }

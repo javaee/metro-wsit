@@ -20,7 +20,7 @@
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
-package com.sun.xml.ws.policy.jaxws.documentfilter;
+package com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter;
 
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
@@ -31,7 +31,8 @@ import java.util.ResourceBundle;
  */
 enum Messages {
     INVOCATION_ERROR,
-    UNEXPECTED_ARGUMENTS_COUNT;
+    UNEXPECTED_ARGUMENTS_COUNT,
+    UNEXPECTED_FILTER_TYPE;
 
     private static final ResourceBundle rb = ResourceBundle.getBundle(Messages.class.getName());
 
