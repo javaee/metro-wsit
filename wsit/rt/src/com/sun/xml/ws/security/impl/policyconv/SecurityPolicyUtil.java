@@ -49,10 +49,10 @@ public class SecurityPolicyUtil {
     public static boolean isEncryptedPartsEmpty(EncryptedParts ep){
         if(!ep.hasBody()){
             if(!ep.getTargets().hasNext()){
-                return false;
+                return true;
             }
         }
-        return true;
+        return false;
     }
     
     public static String convertToXWSSConstants(String type){

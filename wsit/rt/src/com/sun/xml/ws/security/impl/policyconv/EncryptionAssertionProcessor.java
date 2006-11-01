@@ -58,7 +58,10 @@ public class EncryptionAssertionProcessor {
     public void process(EncryptedParts encryptParts,EncryptionPolicy.FeatureBinding binding){
         if(SecurityPolicyUtil.isEncryptedPartsEmpty(encryptParts)){
             if(!bodyEncrypted){
-                
+                EncryptionTarget target = etCreator.newQNameEncryptionTarget(EncryptionTarget.BODY_QNAME);
+                target.setContentOnly(true);
+                binding.addTargetBinding(target);
+                bodyEncrypted = true;
             }
         }
         Iterator tv = encryptParts.getTargets();

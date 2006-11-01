@@ -28,6 +28,7 @@
 
 package com.sun.xml.ws.security.trust;
 
+import com.sun.xml.ws.security.opt.api.SecurityHeaderElement;
 import javax.xml.bind.JAXBElement;
 
 import com.sun.xml.ws.security.Token;
@@ -54,6 +55,7 @@ public class GenericToken implements Token{
     private JAXBElement tokenEle;
     
     private String tokenType;
+    private SecurityHeaderElement she = null;
     
     public static final String OPAQUE_TYPE = "opaque";
     public static final String SAML11_TYPE =
@@ -70,6 +72,10 @@ public class GenericToken implements Token{
         this.tokenType = tokenType;
     }
     
+    public GenericToken(SecurityHeaderElement se){
+        this.she = se;        
+    }
+    
     public String getType(){
         if (tokenType != null) {
             log.log(Level.FINE,
@@ -82,5 +88,9 @@ public class GenericToken implements Token{
     
     public Object getTokenValue(){
         return this.token;
+    }
+    
+    public SecurityHeaderElement getElement(){
+        return this.she;
     }
 }
