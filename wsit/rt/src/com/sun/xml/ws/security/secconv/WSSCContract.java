@@ -142,14 +142,18 @@ public class WSSCContract implements WSTrustContract   {
             BinarySecret clientBS = clientEntropy.getBinarySecret();
             if (clientBS == null){
                 //ToDo
-                log.log(Level.FINE,
-                        "WSSC0009.clientEntropy.value",
-                        new Object[] {"null"});
+                if (log.isLoggable(Level.FINE)) {
+                    log.log(Level.FINE,
+                            "WSSC0009.clientEntropy.value",
+                            new Object[] {"null"});
+                }
             }else {
                 clientEntropyValue = clientBS.getRawValue();
-                log.log(Level.FINE,
-                        "WSSC0009.clientEntropy.value",
-                        new Object[] {clientEntropy.toString()});
+                if (log.isLoggable(Level.FINE)) {
+                    log.log(Level.FINE,
+                            "WSSC0009.clientEntropy.value",
+                            new Object[] {clientEntropy.toString()});
+                }
             }
         }
         
@@ -241,7 +245,7 @@ public class WSSCContract implements WSTrustContract   {
             throw new WSSecureConversationException(ex);
         }
         
-        Session session = 
+        Session session =
                 SessionManager.getSessionManager().createSession(token.getIdentifier().toString());
         log.info("Creating session for : "  + token.getIdentifier());
         
@@ -252,20 +256,22 @@ public class WSSCContract implements WSTrustContract   {
         context.setProofKey(secret);
         context.setCreationTime(new Date(currentTime));
         context.setExpirationTime(new Date(currentTime + TIMEOUT));
-
-        SecurityContextTokenInfo sctinfo = 
+        
+        SecurityContextTokenInfo sctinfo =
                 new SecurityContextTokenInfoImpl();
         sctinfo.setIdentifier(token.getIdentifier().toString());
-        sctinfo.setExternalId(token.getWsuId());         
+        sctinfo.setExternalId(token.getWsuId());
         sctinfo.addInstance(null, secret);
-   
+        
         sctinfo.setCreationTime(new Date(currentTime));
         sctinfo.setExpirationTime(new Date(currentTime + TIMEOUT));
         
         session.setSecurityInfo(sctinfo);
-
-        log.log(Level.FINE,
-                "WSSC0014.rstr.response", new Object[] {elemToString(response)});
+        
+        if (log.isLoggable(Level.FINE)) {
+            log.log(Level.FINE,
+                    "WSSC0014.rstr.response", new Object[] {elemToString(response)});
+        }
         return response;
     }
     
@@ -303,8 +309,10 @@ public class WSSCContract implements WSTrustContract   {
         }
         
         RequestSecurityTokenResponse rstr = eleFac.createRSTRForCancel();
-        log.log(Level.FINE,
-                "WSSC0014.rstr.response", new Object[] {elemToString(rstr)});
+        if (log.isLoggable(Level.FINE)) {
+            log.log(Level.FINE,
+                    "WSSC0014.rstr.response", new Object[] {elemToString(rstr)});
+        }
         return rstr;
     }
     
@@ -343,9 +351,11 @@ public class WSSCContract implements WSTrustContract   {
         Date expirationTime = new Date(curTime + TIMEOUT);
         context.setCreationTime(creationTime);
         context.setExpirationTime(expirationTime);
-        log.log(Level.FINER,
-                "WSSC1003.setting.times",
-                new Object[] {creationTime.toString(), expirationTime.toString()});
+        if (log.isLoggable(Level.FINER)) {
+            log.log(Level.FINER,
+                    "WSSC1003.setting.times",
+                    new Object[] {creationTime.toString(), expirationTime.toString()});
+        }
     }
     
     /**
@@ -409,7 +419,9 @@ public class WSSCContract implements WSTrustContract   {
             marshaller.marshal(rstrElement, sw);
             return sw.toString();
         } catch (Exception e) {
-            log.log(Level.FINE, "WST1004.error.marshal.toString", e);
+            if (log.isLoggable(Level.FINE)) {
+                log.log(Level.FINE, "WST1004.error.marshal.toString", e);
+            }
             throw new RuntimeException("Error in Marshalling RSTR to string for logging ", e);
         }
     }

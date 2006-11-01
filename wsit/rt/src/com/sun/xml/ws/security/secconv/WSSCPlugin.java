@@ -130,7 +130,9 @@ public class WSSCPlugin {
             if(skl<1){
                 skl = DEFAULT_KEY_SIZE;
             }
-            log.log(Level.FINE,"WSSC1006.sym.bin.keysize", new Object[] {skl});
+            if (log.isLoggable(Level.FINE)) {
+                log.log(Level.FINE,"WSSC1006.sym.bin.keysize", new Object[] {skl});
+            }
         }
         if(trust10 != null){
             Set trustReqdProps = trust10.getRequiredProperties();
@@ -206,9 +208,11 @@ public class WSSCPlugin {
         }
         
         Message request = Messages.create(marshaller, eleFac.toJAXBElement(rst), binding.getSOAPVersion());
-
+        
         // Log Request created
-        log.log(Level.FINE,"WSSC1009.send.req.message", new Object[] {printMessageAsString(request)});        
+        if (log.isLoggable(Level.FINE)) {
+            log.log(Level.FINE,"WSSC1009.send.req.message", new Object[] {printMessageAsString(request)});
+        }
         Packet reqPacket = new Packet(request);
         if (issuedToken != null){
             reqPacket.invocationProperties.put(SC_ASSERTION, issuedToken);
@@ -220,8 +224,10 @@ public class WSSCPlugin {
         }
         
         reqPacket.setEndPointAddressString(endPointAddress);
-         log.log(Level.FINE,"WSSC1008.set.ep.address",
-                new Object[]{endPointAddress});
+        if (log.isLoggable(Level.FINE)) {
+            log.log(Level.FINE,"WSSC1008.set.ep.address",
+                    new Object[]{endPointAddress});
+        }
         
         // Add addressing headers to the message
         try{
@@ -255,7 +261,7 @@ public class WSSCPlugin {
             rstr = eleFac.createRSTRFrom(rstrEle);
         } else {
             try{
-               // SOAPFaultBuilder builder = SOAPFaultBuilder.create(response);
+                // SOAPFaultBuilder builder = SOAPFaultBuilder.create(response);
                 //throw (SOAPFaultException)builder.createException(null, response);
                 throw new SOAPFaultException(response.readAsSOAPMessage().getSOAPBody().getFault());
             } catch (SOAPException ex){
@@ -321,7 +327,7 @@ public class WSSCPlugin {
     private Packet addAddressingHeaders(Packet packet, WSDLPort wsdlPort, WSBinding binding, String action)throws WSSecureConversationException {
         HeaderList hl = packet.getMessage().getHeaders();
         hl.fillRequestAddressingHeaders(packet, binding.getAddressingVersion(),binding.getSOAPVersion(),false,action);
-    
+        
         return packet;
     }
 }

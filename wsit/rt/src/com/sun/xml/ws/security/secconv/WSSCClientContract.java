@@ -200,8 +200,10 @@ public class WSSCClientContract implements WSTrustClientContract{
         if(keySize == 0){
             keySize = DEFAULT_KEY_SIZE;//key size is in bits
         }
-        log.log(Level.FINE,
-                "WSSC0005.computed.keysize", new Object[] {keySize});
+        if (log.isLoggable(Level.FINE)) {
+            log.log(Level.FINE,
+                    "WSSC0005.computed.keysize", new Object[] {keySize});
+        }
         if(computedKey.toString().equals(WSTrustConstants.CK_PSHA1)){
             try {
                 key = SecurityUtil.P_SHA1(clientEntropyBytes,serverEntropyBytes, keySize/8);
@@ -251,9 +253,10 @@ public class WSSCClientContract implements WSTrustClientContract{
         
         context.setSecurityToken(token);
         context.setProofKey(secret);
-
-        log.log(Level.FINE,
-                "WSSC0007.created.rstr", new Object[] {rstr});
+        if (log.isLoggable(Level.FINE)) {
+            log.log(Level.FINE,
+                    "WSSC0007.created.rstr", new Object[] {rstr});
+        }
         return rstr;
     }
     
