@@ -40,7 +40,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Set;
+import java.util.List;
 
 /**
  * The </code>SecurityContextTokenInfo</code> class represents security parameters
@@ -117,8 +117,10 @@ public class SecurityContextTokenInfoImpl implements SecurityContextTokenInfo {
         this.expirationTime = expirationTime;
     }
     
-    public Set getInstanceKeys() {
-        return secretMap.keySet();
+    public List getInstanceKeys() {
+      return null;
+// TBD   
+      //return secretMap.keySet();
     }
     
     public IssuedTokenContext getIssuedTokenContext() {
