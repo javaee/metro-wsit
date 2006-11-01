@@ -60,6 +60,7 @@ import java.net.URISyntaxException;
 import com.sun.xml.ws.rm.Constants;
 import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 
 
@@ -386,11 +387,11 @@ public class RMClientPipe
                 return null;
 
             } else {
-                logger.severe("Unexpected exception wrapped in WS exception " + e);
+                logger.log(Level.SEVERE, "Unexpected exception wrapped in WS exception ", e);
                 throw e;
             }
         } catch (Exception e) {
-            logger.severe("Unexpected exception in trySend " + e);
+            logger.log(Level.SEVERE, "Unexpected exception in trySend " , e);
             throw new WebServiceException(e);
         }
 
@@ -629,7 +630,7 @@ public class RMClientPipe
             provider.terminateSequence(outboundSequence);       
             nextPipe.preDestroy();
         } catch (Exception e) {
-            logger.warning("RMClientPipe threw Exception " + e);
+            logger.log(Level.FINE, "RMClientPipe threw Exception in preDestroy", e);
         }
     }
 

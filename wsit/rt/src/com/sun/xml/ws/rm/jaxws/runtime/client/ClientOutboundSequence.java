@@ -44,6 +44,7 @@ import javax.xml.ws.wsaddressing.W3CEndpointReference;
 import java.net.URI;
 import java.util.UUID;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 /**
  * ClientOutboundSequence represents the set of all messages from a single BindingProvider instance.
@@ -544,7 +545,7 @@ public class ClientOutboundSequence extends OutboundSequence {
             for (int i = 1; i < top; i++) {
                 Message mess = get(i);
                 if (mess != null && !mess.isComplete()) {
-                    logger.warning("resending "  + getId() + ":" + i);
+                    logger.fine("resending "  + getId() + ":" + i);
                     resend(i);
                 }
             }
@@ -576,7 +577,7 @@ public class ClientOutboundSequence extends OutboundSequence {
                
                 if (sendHeartbeats) {
                     
-                    logger.warning("Sending heartbeat message for sequence " + sequence.getId() + 
+                    logger.fine("Sending heartbeat message for sequence " + sequence.getId() + 
                             " time = " + System.currentTimeMillis()); 
                     protocolMessageSender.sendAckRequested(sequence, 
                                                        version);
@@ -590,8 +591,8 @@ public class ClientOutboundSequence extends OutboundSequence {
                 //In both cases the sequence is of no further use.  We
                 //will assume for now that this is already the case.
                 
-                logger.warning("Exception from sending heartbeat message for sequence " +
-                        sequence.getId());
+                logger.log(Level.FINE, "Exception from sending heartbeat message for sequence " +
+                        sequence.getId(), e);
                 //e.printStackTrace();
          
                 try {

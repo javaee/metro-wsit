@@ -90,7 +90,7 @@ public class RMSource  extends RMProvider<ClientInboundSequence,
     }
     
     public synchronized void addOutboundSequence(ClientOutboundSequence seq) {
-        logger.warning("adding sequence " + seq.getId());    
+        logger.fine("adding sequence " + seq.getId());    
         
         boolean firstSequence = outboundMap.isEmpty();
         outboundMap.put(seq.getId(), seq);
@@ -109,7 +109,7 @@ public class RMSource  extends RMProvider<ClientInboundSequence,
     }
     
     public synchronized void removeOutboundSequence(ClientOutboundSequence seq) {
-         logger.warning("removing sequence " + seq.getId());
+         logger.fine("removing sequence " + seq.getId());
          
          String id = seq.getId();
          

@@ -227,7 +227,8 @@ public class RMServerPipe extends PipeBase<RMDestination,
             //set com.sun.xml.ws.session and com.sun.xml.ws.sessionid
             //invocationProperties if they have not already been set
             //by SC pipe.
-            setSessionData(packet, inboundSequence);
+            setSessionData(packet, 
+                            inboundSequence);
 
 
 
@@ -240,7 +241,21 @@ public class RMServerPipe extends PipeBase<RMDestination,
             //bodies for RM SequenceAcknowledgemnts.
             packet.transportBackChannel = null;
 
+            //make these available in an injected WebServiceContext
+            packet.invocationProperties.put(Constants.sequenceProperty,
+                                        inboundSequence);
+            packet.invocationProperties.put(Constants.messageNumberProperty,
+                                        message.getMessageNumber());
             ret = nextPipe.process(packet);
+            
+            // FIXME
+            // This shouldn't be necessary, but havint messageNumberProperty
+            // set has side-effects here due to the fact that RMClientPipe
+            // and RMServerPipe share an implementation of handleOutboundMessage
+            packet.invocationProperties.put(Constants.sequenceProperty,
+                                        null);
+            packet.invocationProperties.put(Constants.messageNumberProperty,
+                                        null);
 
 
             Message responseMessage = ret.getMessage();
@@ -1128,7 +1143,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
      * @param seq The sequence to which the request message belongs.
      */
     public void setSessionData(Packet packet,
-            InboundSequence seq) {
+                                InboundSequence seq) {
         if (null == packet.invocationProperties
                 .get(Session.SESSION_ID_KEY)) {
             packet.invocationProperties
@@ -1142,6 +1157,8 @@ public class RMServerPipe extends PipeBase<RMDestination,
                     .put(Session.SESSION_KEY, sess.getUserData());
 
         }
+        
+       
     }
 
 
