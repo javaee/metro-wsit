@@ -73,14 +73,16 @@ public class GenericToken implements Token{
     }
     
     public GenericToken(SecurityHeaderElement se){
-        this.she = se;        
+        this.she = se;
     }
     
     public String getType(){
         if (tokenType != null) {
-            log.log(Level.FINE,
-                    "WST1001.token.type",
-                    new Object[] {tokenType});
+            if(log.isLoggable(Level.FINE)) {
+                log.log(Level.FINE,
+                        "WST1001.token.type",
+                        new Object[] {tokenType});
+            }
             return tokenType;
         }
         return OPAQUE_TYPE;

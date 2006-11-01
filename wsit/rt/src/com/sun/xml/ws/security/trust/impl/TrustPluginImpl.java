@@ -450,7 +450,9 @@ public class TrustPluginImpl implements TrustPlugin {
             marshaller.marshal(rstElement, sw);
             return sw.toString();
         } catch (Exception e) {
-            log.log(Level.FINE, "WST1004.error.marshal.toString", e);
+            if(log.isLoggable(Level.FINE)) {
+                log.log(Level.FINE, "WST1004.error.marshal.toString", e);
+            }
             throw new RuntimeException("Error in Marshalling RST to string for logging ", e);
         }
     }

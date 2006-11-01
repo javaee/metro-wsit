@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustFactory.java,v 1.2 2006-09-20 23:58:46 manveen Exp $
+ * $Id: WSTrustFactory.java,v 1.3 2006-11-01 19:41:39 manveen Exp $
  */
 
 /*
@@ -76,11 +76,11 @@ public class WSTrustFactory {
         String type = spMetadata.getType();
         if (type == null)
             type = stsConfig.getDefaultType();
-        
-        log.log(Level.FINE,
-                "WST1002.provider.type",
-                new Object[] {type});
-                
+        if(log.isLoggable(Level.FINE)) {
+            log.log(Level.FINE,
+                    "WST1002.provider.type",
+                    new Object[] {type});
+        }
         WSTrustContract contract = null;
         try {
             Class clazz = null;
@@ -99,8 +99,8 @@ public class WSTrustFactory {
         } catch (ClassNotFoundException ex) {
             contract = null;
             log.log(Level.SEVERE,
-                "WST0005.classnotfound.null.contract",
-                new Object[] {type});
+                    "WST0005.classnotfound.null.contract",
+                    new Object[] {type});
             ex.printStackTrace();
         } catch (Exception ex) {
             throw new WSTrustException(ex.toString(), ex);

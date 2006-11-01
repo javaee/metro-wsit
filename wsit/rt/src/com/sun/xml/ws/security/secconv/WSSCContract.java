@@ -189,8 +189,10 @@ public class WSSCContract implements WSTrustContract   {
         if (keySize < 1){
             keySize = DEFAULT_KEY_SIZE;
         }
+        if (log.isLoggable(Level.FINE)) {
         log.log(Level.FINE,
                 "WSSC0011.keySize.value", new Object[] {keySize});
+        }
         
         byte[] secret = WSTrustUtil.generateRandomSecret(keySize/8);
         String proofTokenType = (clientEntropyValue == null ||clientEntropyValue.length ==0)

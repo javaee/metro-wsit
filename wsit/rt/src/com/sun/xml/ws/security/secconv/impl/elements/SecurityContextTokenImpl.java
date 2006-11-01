@@ -1,5 +1,5 @@
 /*
- * $Id: SecurityContextTokenImpl.java,v 1.4 2006-10-03 22:46:31 jdg6688 Exp $
+ * $Id: SecurityContextTokenImpl.java,v 1.5 2006-11-01 19:41:03 manveen Exp $
  */
 
 /*
@@ -122,10 +122,11 @@ public class SecurityContextTokenImpl extends SecurityContextTokenType implement
         JAXBElement<String> iElement =
                 (new ObjectFactory()).createIdentifier(identifier.toString());
         getAny().add(iElement);
+        if (log.isLoggable(Level.FINE)) {
         log.log(Level.FINE,
                 "WSSC1004.secctx.token.id.value",
                 new Object[] {identifier.toString()});
-
+        }
     }
     
     public String getInstance() {
@@ -140,10 +141,12 @@ public class SecurityContextTokenImpl extends SecurityContextTokenType implement
     }
     
     public void setWsuId(String wsuId){
+                setId(wsuId);        
+                if (log.isLoggable(Level.FINE)) {
         log.log(Level.FINE,
                 "WSSC1005.secctx.token.wsuid.value",
                 new Object[] {wsuId});
-        setId(wsuId);        
+                }
     }
     
     public String getWsuId(){
