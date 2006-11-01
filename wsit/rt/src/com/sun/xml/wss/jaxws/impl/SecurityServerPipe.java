@@ -38,6 +38,7 @@ import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.assembler.ServerPipeConfiguration;
+import com.sun.xml.ws.runtime.util.Session;
 import com.sun.xml.ws.runtime.util.SessionManager;
 import com.sun.xml.ws.security.impl.policyconv.SecurityPolicyHolder;
 import com.sun.xml.ws.security.opt.impl.JAXBFilterProcessingContext;
@@ -250,9 +251,9 @@ public class SecurityServerPipe extends SecurityPipeBase {
             }
         }
         
-       if(retPacket.getMessage() == null){
-          return retPacket; 
-       } 
+        if(retPacket.getMessage() == null){
+            return retPacket;
+        }
         /* TODO:this piece of code present since payload should be read once*/
         if (!optimized) {
             try{
@@ -300,9 +301,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
             String strId = sct.getIdentifier().toString();
             if(strId!=null){
                 issuedTokenContextMap.remove(strId);
-                /* MK: Terminate the session.
-                   sessionManager.terminateSession(strId);
-                 */
+                sessionManager.terminateSession(strId);
             }
         }
     }
@@ -499,13 +498,10 @@ public class SecurityServerPipe extends SecurityPipeBase {
             Packet packet, ProcessingContext ctx, boolean isSCTIssue, String action) {
         
         IssuedTokenContext ictx = new IssuedTokenContextImpl();
-        /* MK:
-         SecurityContextTokenInfo sctx =
-                                    new SecurityTokenContextInfoImpl();
-         */
         Message msg = packet.getMessage();
         Message retMsg = null;
         String retAction = null;
+        
         try {
             WSSCElementFactory eleFac = WSSCElementFactory.newInstance();
             JAXBElement rstEle = msg.readPayloadAsJAXB(jaxbContext.createUnmarshaller());
@@ -520,26 +516,22 @@ public class SecurityServerPipe extends SecurityPipeBase {
                 SecurityContextToken sct = (SecurityContextToken)ictx.getSecurityToken();
                 String sctId = sct.getIdentifier().toString();
                 
-/* MK:
-                rstr =  scContract.issue(rst, sctx, (SecureConversationToken)policies.get(0));
-                String sctId = sctx.getIdentifier();
- 
-                Session session = null;
-                if (sessionManager.getSession(sctId) == null) {
-                            session = sessionManager.createSession(sctId);
+                Session session = sessionManager.getSession(sctId);
+                if (session == null) {
+                    throw new WSSecureConversationException("Session could not be " + "" +
+                            "created successfully while issuing");
                 }
- 
-                session.setSecurityInfo(sctx);
+                
                 // Put it here for RM to pick up
                 packet.invocationProperties.put(
-                          "com.sun.xml.ws.sessionid", sctId);
- 
+                        "com.sun.xml.ws.sessionid", sctId);
+                
                 packet.invocationProperties.put(
-                          "com.sun.xml.ws.sessiondata", session.getUserData());
- 
-                IssuedTokenContext ictx = sctInfo.getIssuedTokenContext();
- */
-                ((ProcessingContextImpl)ctx).getIssuedTokenContextMap().put(sctId, ictx);
+                        "com.sun.xml.ws.sessiondata", session.getUserData());
+                
+                IssuedTokenContext itctx = session.getSecurityInfo().getIssuedTokenContext();
+                ((ProcessingContextImpl)ctx).getIssuedTokenContextMap().put(sctId, itctx);
+                
             } else if (requestType.toString().equals(WSTrustConstants.CANCEL_REQUEST)) {
                 retAction = WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_RESPONSE_ACTION;
                 rstr =  scContract.cancel(rst, ictx, issuedTokenContextMap);
@@ -580,31 +572,31 @@ public class SecurityServerPipe extends SecurityPipeBase {
     }
     
     /** private Packet addAddressingHeaders(Packet packet, String relatesTo, String action){
-        AddressingBuilder builder = AddressingBuilder.newInstance();
-        AddressingProperties ap = builder.newAddressingProperties();
-   
-        try{
-            // Action
-            ap.setAction(builder.newURI(new URI(action)));
-   
-            // RelatesTo
-            Relationship[] rs = new Relationship[]{builder.newRelationship(new URI(relatesTo))};
-            ap.setRelatesTo(rs);
-   
-            // To
-            ap.setTo(builder.newURI(new URI(builder.newAddressingConstants().getAnonymousURI())));
-   
-        } catch (URISyntaxException e) {
-            throw new RuntimeException("Exception when adding Addressing Headers");
-        }
-   
-        WsaRuntimeFactory fac = WsaRuntimeFactory.newInstance(ap.getNamespaceURI(), pipeConfig.getWSDLModel(), pipeConfig.getBinding());
-        fac.writeHeaders(packet, ap);
-        packet.invocationProperties
-                .put(JAXWSAConstants.SERVER_ADDRESSING_PROPERTIES_OUTBOUND, ap);
-   
-        return packet;
-    }*/
+     * AddressingBuilder builder = AddressingBuilder.newInstance();
+     * AddressingProperties ap = builder.newAddressingProperties();
+     *
+     * try{
+     * // Action
+     * ap.setAction(builder.newURI(new URI(action)));
+     *
+     * // RelatesTo
+     * Relationship[] rs = new Relationship[]{builder.newRelationship(new URI(relatesTo))};
+     * ap.setRelatesTo(rs);
+     *
+     * // To
+     * ap.setTo(builder.newURI(new URI(builder.newAddressingConstants().getAnonymousURI())));
+     *
+     * } catch (URISyntaxException e) {
+     * throw new RuntimeException("Exception when adding Addressing Headers");
+     * }
+     *
+     * WsaRuntimeFactory fac = WsaRuntimeFactory.newInstance(ap.getNamespaceURI(), pipeConfig.getWSDLModel(), pipeConfig.getBinding());
+     * fac.writeHeaders(packet, ap);
+     * packet.invocationProperties
+     * .put(JAXWSAConstants.SERVER_ADDRESSING_PROPERTIES_OUTBOUND, ap);
+     *
+     * return packet;
+     * }*/
     
     protected SecurityPolicyHolder addOutgoingMP(WSDLBoundOperation operation,Policy policy)throws PolicyException{
         
@@ -752,15 +744,15 @@ public class SecurityServerPipe extends SecurityPipeBase {
     }*/
     
     /**  protected AttributedURI getAction(Packet packet ){
-        AddressingProperties ap = (AddressingProperties)packet.invocationProperties
-                .get(JAXWSAConstants.SERVER_ADDRESSING_PROPERTIES_OUTBOUND);
-        if (ap != null) {
-            AttributedURI uri = ap.getAction();
-   
-            return uri;
-        }
-        return null;
-    }*/
+     * AddressingProperties ap = (AddressingProperties)packet.invocationProperties
+     * .get(JAXWSAConstants.SERVER_ADDRESSING_PROPERTIES_OUTBOUND);
+     * if (ap != null) {
+     * AttributedURI uri = ap.getAction();
+     *
+     * return uri;
+     * }
+     * return null;
+     * }*/
     
     private CallbackHandler configureServerHandler(Set configAssertions) {
         Properties props = new Properties();
