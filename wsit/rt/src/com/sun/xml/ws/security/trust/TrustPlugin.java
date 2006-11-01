@@ -1,5 +1,5 @@
 /*
- * $Id: TrustPlugin.java,v 1.2 2006-10-02 19:36:49 jdg6688 Exp $
+ * $Id: TrustPlugin.java,v 1.3 2006-11-01 20:20:30 jdg6688 Exp $
  */
 
 /*
@@ -40,6 +40,6 @@ public interface TrustPlugin {
      * @param issuedToken, an instance of <sp:IssuedToken> or <sp:SecureConversation> assertion
      * @return issuedTokenContext, a context containing the issued Token and related information
      */
-    public IssuedTokenContext process(PolicyAssertion issuedToken, URI stsEP, URI wsdlLocation, QName serviceName, QName portName, String appliesTo);
+    public IssuedTokenContext process(PolicyAssertion issuedToken, PolicyAssertion preSetSTS, String appliesTo);
 
 }

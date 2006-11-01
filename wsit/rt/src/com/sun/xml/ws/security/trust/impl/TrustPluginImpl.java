@@ -66,6 +66,7 @@ import java.rmi.RemoteException;
 import java.security.SecureRandom;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import javax.xml.namespace.QName;
 import javax.xml.ws.Dispatch;
 import javax.xml.ws.RespectBindingFeature;
@@ -95,6 +96,15 @@ public class TrustPluginImpl implements TrustPlugin {
     private Configuration config;
     private static WSTrustElementFactory fact = WSTrustElementFactory.newInstance();
     
+    private static final String PRE_CONFIGURED_STS = "PreconfiguredSTS";
+    private static final String NAMESPACE = "namespace";
+    private static final String CONFIG_NAMESPACE = "";
+    private static final String ENDPOINT = "endpoint";
+    private static final String METADATA = "metadata";
+    private static final String WSDL_LOCATION = "wsdlLocation";
+    private static final String SERVICE_NAME = "serviceName";
+    private static final String PORT_NAME = "portName";
+    
     /** Creates a new instance of TrustPluginImpl */
     public TrustPluginImpl(Configuration config) {
         this.config = config;
@@ -105,37 +115,78 @@ public class TrustPluginImpl implements TrustPlugin {
      * @param issuedToken, an instance of <sp:IssuedToken> or <sp:SecureConversation> assertion
      * @return issuedTokenContext, a context containing the issued Token and related information
      */
-    public IssuedTokenContext process(PolicyAssertion token, URI stsEP, URI wsdlLocation, QName serviceName, QName portName, String appliesTo){
+    public IssuedTokenContext process(PolicyAssertion token, PolicyAssertion localToken, String appliesTo){
         IssuedToken issuedToken = (IssuedToken)token;
         RequestSecurityTokenTemplate rstTemplate = issuedToken.getRequestSecurityTokenTemplate();
-        String stsURI = null;
-        if (stsEP == null){
-            stsURI = getSTSURI(issuedToken);
-        }else{
-            stsURI = stsEP.toString();
+        URI stsURI =  getSTSURI(issuedToken);
+        URI wsdlLocation = null;
+        QName serviceName = null;
+        QName portName = null;
+        
+        // Get STS information from IssuedToken
+        if (stsURI != null){
+            URI metadataAddress = null;
+            try {
+                metadataAddress = getAddressFromMetadata(issuedToken);
+            } catch (MalformedURLException ex) {
+                log.log(Level.WARNING, "WST1011.problem.metadata", ex);
+            }
+        
+            if(metadataAddress != null){
+                wsdlLocation = metadataAddress;
+            }else{
+                wsdlLocation = stsURI;
+            }
+        }else if (localToken != null){
+            // Get STS information from local configuration
+            if (PRE_CONFIGURED_STS.equals(localToken.getName().getLocalPart())) {
+                Map<QName,String> attrs = localToken.getAttributes();
+                String namespace = attrs.get(new QName(CONFIG_NAMESPACE,NAMESPACE));
+                try {
+                    String stsEPStr = attrs.get(new QName(CONFIG_NAMESPACE,ENDPOINT));
+                    if (stsEPStr != null){
+                        stsURI = new URI(stsEPStr);
+                    }
+                    
+                    String metadataStr = attrs.get(new QName(CONFIG_NAMESPACE, METADATA));
+                    if (metadataStr != null){
+                        wsdlLocation = new URI(metadataStr);
+                    }
+                    
+                    String wsdlLocationStr = attrs.get(new QName(CONFIG_NAMESPACE,WSDL_LOCATION));
+                    if (wsdlLocationStr != null){
+                        wsdlLocation = new URI(wsdlLocationStr);
+                    }
+                } catch (URISyntaxException ex) {
+                    throw new RuntimeException(ex);
+                }
+                    
+                String serviceNameStr = attrs.get(new QName(CONFIG_NAMESPACE,SERVICE_NAME));
+                if (serviceNameStr != null && namespace != null){
+                    serviceName = new QName(namespace,serviceNameStr);
+                }
+                
+                if (wsdlLocation == null){
+                    wsdlLocation = stsURI;
+                }
+                    
+                String portNameStr = attrs.get(new QName(CONFIG_NAMESPACE,PORT_NAME));
+                if (portNameStr != null && namespace != null){
+                    portName = new QName(namespace, portNameStr);
+                }
+            }   
         }
         
-        URI metadataAddress = null;
-        try {
-            metadataAddress = getAddressFromMetadata(issuedToken);
-        } catch (MalformedURLException ex) {
-            log.log(Level.WARNING, "WST1011.problem.metadata", ex);
-        }
-        
-        if(metadataAddress != null){
-            wsdlLocation = metadataAddress;
-        }
-        
-        if(wsdlLocation == null){
-            log.log(Level.SEVERE,
-                    "WST0029.could.not.get.sts.location",
-                    new IllegalArgumentException("STS information not passed"));
-        }
+        if(stsURI == null){
+              log.log(Level.SEVERE,
+                            "WST0029.could.not.get.sts.location",
+              new IllegalArgumentException("STS information not passed"));
+         }
         
         RequestSecurityTokenResponse result = null;
         try {
             RequestSecurityToken request = createRequest(rstTemplate, appliesTo);
-            result = invokeRST(request, wsdlLocation, serviceName, portName, stsURI);
+            result = invokeRST(request, wsdlLocation, serviceName, portName, stsURI.toString());
             IssuedTokenContext itc = new IssuedTokenContextImpl();
             WSTrustClientContract contract = WSTrustFactory.createWSTrustClientContract(config);
             contract.handleRSTR(request, result, itc);
@@ -232,7 +283,7 @@ public class TrustPluginImpl implements TrustPlugin {
                 stsURI = wsdlLocation.toString();
                 log.log(Level.FINE, "WST1013.sts.uri.client", new Object[] {stsURI});
             }
-            //do the actual mex request to the stsURI
+            //do the actual mex request
             QName[] names = doMexRequest(wsdlLocation.toString(), stsURI);
             if(names!=null){
                 serviceName = names[0];
@@ -331,13 +382,12 @@ public class TrustPluginImpl implements TrustPlugin {
      * @param issuedToken The issuedToken assertion
      * @return The URI of the Issuer in IssuedToken, which is nothing but the URI of STS.
      */
-    private String getSTSURI(final IssuedToken issuedToken) {
+    private URI getSTSURI(final IssuedToken issuedToken) {
         Issuer issuer = issuedToken.getIssuer();
         if(issuer != null){
             Address address = issuer.getAddress();
             if (address != null){
-                URI uri = address.getURI();
-                return uri.toString();
+                return address.getURI();
             }
         }
         return null;

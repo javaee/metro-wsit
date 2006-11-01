@@ -147,13 +147,6 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
     private static TrustPlugin trustPlugin = WSTrustFactory.newTrustPlugin(null);
     private static WSSCPlugin  scPlugin = WSSCFactory.newSCPlugin(null);
     private Set trustConfig = null;
-    public static final String PRE_CONFIGURED_STS = "PreconfiguredSTS";
-    public static final String NAMESPACE = "namespace";
-    public static final String CONFIG_NAMESPACE = "";
-    public static final String ENDPOINT = "endpoint";
-    public static final String WSDL_LOCATION = "wsdlLocation";
-    public static final String SERVICE_NAME = "serviceName";
-    public static final String PORT_NAME = "portName";
     
     // Creates a new instance of SecurityClientPipe
     public SecurityClientPipe(ClientPipeConfiguration config,Pipe nextPipe) {
@@ -401,6 +394,7 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
             policies = getIssuedTokenPolicies(packet, OPERATION_SCOPE);
         }
         
+        PolicyAssertion preSetSTSAssertion = null;
         URI stsEP = null;
         URI wsdlLocation = null;
         QName serviceName = null;
@@ -408,62 +402,14 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
         if(trustConfig != null){
             Iterator it = trustConfig.iterator();
             while(it!=null && it.hasNext()) {
-                PolicyAssertion as = (PolicyAssertion)it.next();
-                if (PRE_CONFIGURED_STS.equals(as.getName().getLocalPart())) {
-                    Map<QName,String> attrs = as.getAttributes();
-                    String namespace = attrs.get(new QName(CONFIG_NAMESPACE,NAMESPACE));
-                    try {
-                        String stsEPStr = attrs.get(new QName(CONFIG_NAMESPACE,ENDPOINT));
-                        if (stsEPStr != null){
-                            stsEP = new URI(stsEPStr);
-                        }
-                    } catch (URISyntaxException ex) {
-                        throw new RuntimeException(ex);
-                    }
-                    try {
-                        String wsdlLocationStr = attrs.get(new QName(CONFIG_NAMESPACE,WSDL_LOCATION));
-                        if (wsdlLocationStr != null){
-                            wsdlLocation = new URI(attrs.get(new QName(CONFIG_NAMESPACE,WSDL_LOCATION)));
-                        }
-                    } catch (URISyntaxException ex) {
-                        throw new RuntimeException(ex);
-                    }
-                    
-                    String serviceNameStr = attrs.get(new QName(CONFIG_NAMESPACE,SERVICE_NAME));
-                    if (serviceNameStr != null && namespace != null){
-                        serviceName = new QName(namespace,serviceNameStr);
-                    }
-                    
-                    String portNameStr = attrs.get(new QName(CONFIG_NAMESPACE,PORT_NAME));
-                    if (portNameStr != null && namespace != null){
-                        portName = new QName(namespace, portNameStr);
-                    }
-                }
-            }
-        } else {
-            try{
-                Object stsEPOb = packet.invocationProperties.get(WSTrustConstants.PROPERTY_SERVICE_END_POINT);
-                if (stsEPOb instanceof URL){
-                    stsEP = ((URL)stsEPOb).toURI();
-                }else{
-                    stsEP = (URI)stsEPOb;
-                }
-
-                Object wsdlLocationOb = packet.invocationProperties.get(WSTrustConstants.PROPERTY_URL);
-                if (wsdlLocationOb instanceof URL){
-                    wsdlLocation = ((URL)wsdlLocationOb).toURI();
-                }else{
-                    wsdlLocation = (URI)wsdlLocationOb;
-                }
-            }catch(URISyntaxException ex) {
-                throw new RuntimeException(ex);
+                preSetSTSAssertion = (PolicyAssertion)it.next();
             }
             serviceName = (QName)packet.invocationProperties.get(WSTrustConstants.PROPERTY_SERVICE_NAME);
             portName = (QName)packet.invocationProperties.get(WSTrustConstants.PROPERTY_PORT_NAME);
         }
         
         for (PolicyAssertion issuedTokenAssertion : policies) {
-            IssuedTokenContext ctx = trustPlugin.process(issuedTokenAssertion, stsEP, wsdlLocation,serviceName,portName, packet.endpointAddress.toString());
+            IssuedTokenContext ctx = trustPlugin.process(issuedTokenAssertion, preSetSTSAssertion, packet.endpointAddress.toString());
             issuedTokenContextMap.put(
                     ((Token)issuedTokenAssertion).getTokenId(), ctx);
         }
