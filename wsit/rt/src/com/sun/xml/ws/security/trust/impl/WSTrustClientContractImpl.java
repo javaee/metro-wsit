@@ -205,7 +205,9 @@ public class WSTrustClientContractImpl implements WSTrustClientContract {
                 BinarySecret binarySecret = proofToken.getBinarySecret();
                 key = binarySecret.getRawValue();
             } else{
-                log.log(Level.FINE,"WST0019.invalid.proofToken.type", new Object[]{proofTokenType});
+                if (log.isLoggable(Level.FINE)) {
+                    log.log(Level.FINE,"WST0019.invalid.proofToken.type", new Object[]{proofTokenType});
+                }
                 throw new WSTrustException("Invalid Proof Token Type: " + proofTokenType);
             }
         }

@@ -127,10 +127,10 @@ public class TrustPluginImpl implements TrustPlugin {
         }
         
         if(wsdlLocation == null){
-              log.log(Level.SEVERE,
-                            "WST0029.could.not.get.sts.location",
-              new IllegalArgumentException("STS information not passed"));
-         }
+            log.log(Level.SEVERE,
+                    "WST0029.could.not.get.sts.location",
+                    new IllegalArgumentException("STS information not passed"));
+        }
         
         RequestSecurityTokenResponse result = null;
         try {
@@ -219,14 +219,16 @@ public class TrustPluginImpl implements TrustPlugin {
     
     private RequestSecurityTokenResponse invokeRST(RequestSecurityToken request, URI wsdlLocation, QName serviceName, QName portName, String stsURI) throws RemoteException, WSTrustException {
         
-         if(serviceName == null || portName==null){
+        if(serviceName == null || portName==null){
             //we have to get the serviceName and portName through MEX
-            log.log(Level.FINE, "WST1012.service.portname.mex",
-                    new Object[] {serviceName, portName});
+            if (log.isLoggable(Level.FINE)) {
+                log.log(Level.FINE, "WST1012.service.portname.mex",
+                        new Object[] {serviceName, portName});
+            }
             if(stsURI == null){
                 //could not get the STS location from the IssuedToken
                 //try to get it from client configuration
-  
+                
                 stsURI = wsdlLocation.toString();
                 log.log(Level.FINE, "WST1013.sts.uri.client", new Object[] {stsURI});
             }
@@ -248,12 +250,12 @@ public class TrustPluginImpl implements TrustPlugin {
         }catch (MalformedURLException ex){
             log.log(Level.SEVERE, "WST0016.problem.itCtx", ex);
             throw new RuntimeException(ex.toString());
-        } 
+        }
         Dispatch<Object> dispatch = service.createDispatch(portName, fact.getContext(), Service.Mode.PAYLOAD, new WebServiceFeature[]{new RespectBindingFeature(), new AddressingFeature(false)});
         //Dispatch<SOAPMessage> dispatch = service.createDispatch(portName, SOAPMessage.class, Service.Mode.MESSAGE, new WebServiceFeature[]{new AddressingFeature(false)});
         //WSBinding wsbinding = (WSBinding) dispatch.getBinding();
         //AddressingVersion addVer = wsbinding.getAddressingVersion();
-        //SOAPVersion sv = wsbinding.getSOAPVersion(); 
+        //SOAPVersion sv = wsbinding.getSOAPVersion();
         
         //dispatch = addAddressingHeaders(dispatch);
         if (stsURI != null){
@@ -263,27 +265,27 @@ public class TrustPluginImpl implements TrustPlugin {
         dispatch.getRequestContext().put(WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION, WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION);
         
         //RequestSecurityTokenResponse rstr = null;
-       // try{
-          //  MessageFactory factory = sv.saajMessageFactory;
-          //  SOAPMessage message = factory.createMessage(); 
-         //   message.getSOAPBody().addDocument(fact.toElement(request).getOwnerDocument());
-         //   SOAPHeader header = message.getSOAPHeader();
-           // SOAPHeaderElement action = header.addHeaderElement(addVer.actionTag);
-           // action.addTextNode(WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION);
-           // SOAPHeaderElement to = header.addHeaderElement(addVer.toTag);
-           // to.addTextNode(stsURI.toString());
-           // SOAPHeaderElement msgID = header.addHeaderElement(addVer.messageIDTag);
-           // msgID.addTextNode("uuid:" + UUID.randomUUID().toString());
-           // SOAPHeaderElement replyTo = header.addHeaderElement(addVer.replyToTag);
-           // SOAPElement add = replyTo.addChildElement(new QName(addVer.nsUri, "Address"));
-           // add.addTextNode(AddressingVersion.W3C.getAnonymousUri());
-            //SOAPMessage response = (SOAPMessage)dispatch.invoke(message);
-           // SOAPBody rsp = response.getSOAPBody();
-           // Element rspEle = rsp.extractContentAsDocument().getDocumentElement();
-           // rstr = fact.createRSTRFrom(rspEle);
-       // } catch(Exception ex){
-           // ex.printStackTrace();
-       // }
+        // try{
+        //  MessageFactory factory = sv.saajMessageFactory;
+        //  SOAPMessage message = factory.createMessage();
+        //   message.getSOAPBody().addDocument(fact.toElement(request).getOwnerDocument());
+        //   SOAPHeader header = message.getSOAPHeader();
+        // SOAPHeaderElement action = header.addHeaderElement(addVer.actionTag);
+        // action.addTextNode(WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION);
+        // SOAPHeaderElement to = header.addHeaderElement(addVer.toTag);
+        // to.addTextNode(stsURI.toString());
+        // SOAPHeaderElement msgID = header.addHeaderElement(addVer.messageIDTag);
+        // msgID.addTextNode("uuid:" + UUID.randomUUID().toString());
+        // SOAPHeaderElement replyTo = header.addHeaderElement(addVer.replyToTag);
+        // SOAPElement add = replyTo.addChildElement(new QName(addVer.nsUri, "Address"));
+        // add.addTextNode(AddressingVersion.W3C.getAnonymousUri());
+        //SOAPMessage response = (SOAPMessage)dispatch.invoke(message);
+        // SOAPBody rsp = response.getSOAPBody();
+        // Element rspEle = rsp.extractContentAsDocument().getDocumentElement();
+        // rstr = fact.createRSTRFrom(rspEle);
+        // } catch(Exception ex){
+        // ex.printStackTrace();
+        // }
         
         RequestSecurityTokenResponse rstr =  fact.createRSTRFrom((JAXBElement)dispatch.invoke(fact.toJAXBElement(request)));
         if (log.isLoggable(Level.FINE)) {
@@ -363,7 +365,7 @@ public class TrustPluginImpl implements TrustPlugin {
             }
         }
         
-        if(addressingMetadata != null){            
+        if(addressingMetadata != null){
             if ( addressingMetadata.hasNestedAssertions() ) {
                 Iterator <PolicyAssertion> it = addressingMetadata.getNestedAssertionsIterator();
                 while ( it.hasNext() ) {
@@ -410,7 +412,7 @@ public class TrustPluginImpl implements TrustPlugin {
                     PolicyAssertion assertion = it.next();
                     if ( PolicyUtil.isAddress(assertion)) {
                         address = (Address)assertion;
-                       // return address.getURI();
+                        // return address.getURI();
                     }
                 }
             }
@@ -427,11 +429,11 @@ public class TrustPluginImpl implements TrustPlugin {
  /*   private Dispatch<Object> addAddressingHeaders(Dispatch<Object> provider) {
         AddressingBuilder builder = AddressingBuilder.newInstance();
         AddressingProperties ap = builder.newAddressingProperties();
-        
+  
         // Action
         ap.setAction(builder.newURI(WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION));
         provider.getRequestContext().put(JAXWSAConstants.CLIENT_ADDRESSING_PROPERTIES, ap);
-        
+  
         return provider;
     }*/
     
