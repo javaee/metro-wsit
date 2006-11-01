@@ -49,9 +49,11 @@
         <resgen destdir="${build.gen-src.dir}">
             <resource dir="${src.dir}" includes="com/sun/xml/ws/**/*.properties" />
         </resgen>
-
+        <resgen destdir="${build.gen-src.dir}">
+            <resource dir="${src.transport.tcp}" includes="com/sun/xml/ws/**/*.properties" />
+        </resgen>
     </target>
-    
+
     <target name="-pre-compile" depends="resgen"
             description="Hook resgen target into compilation process"/>
 
