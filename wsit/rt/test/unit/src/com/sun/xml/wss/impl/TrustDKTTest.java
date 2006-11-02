@@ -206,9 +206,22 @@ public class TrustDKTTest extends TestCase{
 
 	        // create a SAML Token and set it here
                 Assertion assertion = createHOKAssertion(keyBytes, msg.getSOAPPart());
-                Element samlElem = SAMLUtil.toElement(null, assertion);
-
-	        impl.setSecurityToken(new GenericToken(samlElem));
+                
+                // Get the client's public and private key to sign SAML Assertion
+                                                                                                                                                             
+                SignatureKeyCallback.DefaultPrivKeyCertRequest request =
+                    new SignatureKeyCallback.DefaultPrivKeyCertRequest();
+                Callback skc = new SignatureKeyCallback(request);
+                Callback[] callbacks = {skc};
+                CallbackHandler handler = new PolicyCallbackHandler1("client");
+                handler.handle(callbacks);
+                PrivateKey stsPrivKey = request.getPrivateKey();
+                                                                                                                                                             
+                // Sign the assertion with Client's private key
+                Element signedSamlElem = assertion.sign(request.getX509Certificate(), stsPrivKey);
+                                                                                                                                                             
+                impl.setSecurityToken(new GenericToken(signedSamlElem));
+	        
                 SecurityTokenReference str = new SecurityTokenReference(msg.getSOAPPart());
                 KeyIdentifier samlRef = new SamlKeyIdentifier(msg.getSOAPPart());
                 samlRef.setReferenceValue(assertion.getAssertionID());
@@ -221,7 +234,7 @@ public class TrustDKTTest extends TestCase{
     	        context.setIssuedTokenContextMap(map);
         	context.setAlgorithmSuite(alg);
 	        context.setSecurityPolicy(pol);
-    	        CallbackHandler handler = new PolicyCallbackHandler1("client");
+    	        //CallbackHandler handler = new PolicyCallbackHandler1("client");
         	SecurityEnvironment env = new DefaultSecurityEnvironmentImpl(handler);
 	        context.setSecurityEnvironment(env);
 
