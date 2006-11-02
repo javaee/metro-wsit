@@ -37,7 +37,7 @@ import javax.xml.stream.XMLStreamReader;
  * XMLEntityResolver.Parser for that URL. An XMLEntityResolver.Parser is
  * essentially a wrapper around an XMLStreamReader.
  */
-class PolicyConfigResolver implements XMLEntityResolver {
+public class PolicyConfigResolver implements XMLEntityResolver {
 
     private static final PolicyLogger logger = PolicyLogger.getLogger(PolicyConfigResolver.class);
     private static final XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
