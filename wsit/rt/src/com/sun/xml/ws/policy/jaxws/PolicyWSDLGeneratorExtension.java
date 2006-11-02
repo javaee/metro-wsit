@@ -32,7 +32,6 @@ import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLFault;
 import com.sun.xml.ws.api.model.wsdl.WSDLInput;
 import com.sun.xml.ws.api.model.wsdl.WSDLMessage;
-import com.sun.xml.ws.api.model.wsdl.WSDLObject;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLOutput;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
@@ -49,6 +48,7 @@ import com.sun.xml.ws.policy.PolicyMapExtender;
 import com.sun.xml.ws.policy.PolicyMerger;
 import com.sun.xml.ws.policy.PolicySubject;
 import com.sun.xml.ws.policy.jaxws.spi.PolicyMapUpdateProvider;
+import com.sun.xml.ws.policy.jaxws.privateutil.LocalizationMessages;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelGenerator;
@@ -61,6 +61,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
 import javax.xml.namespace.QName;
+import javax.xml.ws.WebServiceException;
 
 /**
  * Marshals the contents of a policy map to WSDL.
@@ -100,7 +101,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
                 }
             }
         } catch (PolicyException e) {
-            logger.severe("start", "Failed to read wsit.xml", e);
+            logger.fine("start", LocalizationMessages.FAILED_TO_READ_WSIT_CFG(), e);
         } finally {
             logger.exiting("start");
         }
@@ -130,15 +131,15 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
                             policiesWritten.add(policy);
                         }
                     } else {
-                        logger.fine("addDefinitionsExtension", "Subject was null, not marshalling attached policy: " + subject);
+                        logger.fine("addDefinitionsExtension", LocalizationMessages.NOT_MARSHALLING_WSDL_SUBJ_NULL(subject));
                     }
                 }
             } else {
-                logger.fine("addDefinitionsExtension", "Policy map was null, not marshalling any policies");
+                logger.fine("addDefinitionsExtension", LocalizationMessages.NOT_MARSHALLING_ANY_POLICIES_POLICY_MAP_IS_NULL());
             }
         } catch (PolicyException e) {
-            // TODO Throw WebServiceException
-            logger.severe("addDefinitionsExtension", "Failed to marshal policies", e);
+            logger.severe("addDefinitionsExtension", LocalizationMessages.FAILED_TO_MARSHALL_POLICIES(), e);
+            throw new WebServiceException(e);
         } finally {
             logger.exiting("addDefinitionsExtension");
         }
@@ -259,23 +260,22 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         logger.entering("selectAndProcessSubject");
         if (subjects != null) {
             for (PolicySubject subject : subjects) { // iterate over all subjects in policy map
-                WSDLObject wsdlSubject = (WSDLObject)subject.getSubject(); // it must be WSDLObject
+                Object wsdlSubject = subject.getSubject();
                 if (wsdlSubject != null && clazz.isInstance(wsdlSubject)) { // is it our class?
                     if (null == wsdlName) { // no name provided to check
                         writePolicyOrReferenceIt(subject, xmlWriter);
                     } else {
                         try {
                             Method getNameMethod = clazz.getDeclaredMethod("getName");
-                            QName wsdlSubjectQName = (QName)getNameMethod.invoke(wsdlSubject);
-                            if (wsdlName.equals(wsdlSubjectQName.getLocalPart())) {
+                            if (stringEqualsToStringOrQName(wsdlName, getNameMethod.invoke(wsdlSubject))) {
                                 writePolicyOrReferenceIt(subject, xmlWriter);
                             }
                         } catch (NoSuchMethodException nsme) {
-                            logger.severe("selectAndProcessSubject", "Unable to check element name.", nsme);
+                            handleCheckingElementQNameWithReflectionException(nsme);
                         } catch (IllegalAccessException iae) {
-                            logger.severe("selectAndProcessSubject", "Unable to check element name.", iae);
+                            handleCheckingElementQNameWithReflectionException(iae);
                         } catch (InvocationTargetException ite) {
-                            logger.severe("selectAndProcessSubject", "Unable to check element name.", ite);
+                            handleCheckingElementQNameWithReflectionException(ite);
                         }
                     }
                 }
@@ -283,6 +283,17 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         }
         logger.exiting("selectAndProcessSubject");
     }
+
+    private boolean stringEqualsToStringOrQName(String first, Object second) {
+        return (second instanceof QName) ? first.equals(((QName)second).getLocalPart()) : first.equals(second) ;
+    }
+    
+    private void handleCheckingElementQNameWithReflectionException(Exception e) {
+        logger.severe("handleCheckingElementQNameWithReflectionException",
+                LocalizationMessages.UNABLE_TO_CHECK_ELEMENT_NAME(), e);
+        throw new WebServiceException(e);
+    }
+    
     
     /**
      * Adds a PolicyReference element that points to the policy of the element,
@@ -305,7 +316,8 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
                 }
             }
         } catch (PolicyException pe) {
-            logger.severe("processPolicy", "Unable to marshall policy or it's reference.", pe);
+            logger.severe("processPolicy", LocalizationMessages.UNABLE_TO_MARSHALL_POLICY_OR_POLICY_REFERENCE(), pe);
+            throw new WebServiceException(pe);
         }
     }
     
