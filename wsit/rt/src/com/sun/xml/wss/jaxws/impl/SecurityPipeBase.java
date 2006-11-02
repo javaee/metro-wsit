@@ -124,7 +124,7 @@ import com.sun.xml.ws.security.policy.CallbackHandlerConfiguration;
 import com.sun.xml.ws.security.policy.Validator;
 import com.sun.xml.ws.security.policy.ValidatorConfiguration;
 import com.sun.xml.ws.security.policy.WSSAssertion;
-import com.sun.xml.wss.impl.OperationResolver;
+//import com.sun.xml.wss.impl.OperationResolver;
 
 import java.util.Properties;
 import org.w3c.dom.Element;
@@ -134,6 +134,30 @@ import org.w3c.dom.NodeList;
 import com.sun.xml.ws.api.addressing.*;
 import com.sun.xml.ws.rm.Constants;
 import com.sun.xml.wss.impl.filter.DumpFilter;
+import static com.sun.xml.wss.jaxws.impl.Constants.ACTION_HEADER;
+import static com.sun.xml.wss.jaxws.impl.Constants.OPERATION_SCOPE;
+import static com.sun.xml.wss.jaxws.impl.Constants.BINDING_SCOPE;
+import static com.sun.xml.wss.jaxws.impl.Constants.rstSCTURI;
+import static com.sun.xml.wss.jaxws.impl.Constants.rstrSCTURI;
+import static com.sun.xml.wss.jaxws.impl.Constants.rstTrustURI;
+import static com.sun.xml.wss.jaxws.impl.Constants.rstrTrustURI;
+import static com.sun.xml.wss.jaxws.impl.Constants.wsaURI;
+import static com.sun.xml.wss.jaxws.impl.Constants.SC_ASSERTION;
+import static com.sun.xml.wss.jaxws.impl.Constants.bsOperationName;
+import static com.sun.xml.wss.jaxws.impl.Constants._SecureConversationToken_QNAME;
+import static com.sun.xml.wss.jaxws.impl.Constants.SECURITY_POLICY_2005_07_NAMESPACE;
+import static com.sun.xml.wss.jaxws.impl.Constants.XENC_NS;
+import static com.sun.xml.wss.jaxws.impl.Constants.ENCRYPTED_DATA_LNAME;
+import static com.sun.xml.wss.jaxws.impl.Constants.MESSAGE_ID_HEADER;
+import static com.sun.xml.wss.jaxws.impl.Constants.EMPTY_LIST;
+
+import static com.sun.xml.wss.jaxws.impl.Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS;
+import static com.sun.xml.wss.jaxws.impl.Constants.SUN_WSS_SECURITY_CLIENT_POLICY_NS;
+import static com.sun.xml.wss.jaxws.impl.Constants.RM_CREATE_SEQ;
+import static com.sun.xml.wss.jaxws.impl.Constants.RM_CREATE_SEQ_RESP;
+import static com.sun.xml.wss.jaxws.impl.Constants.RM_SEQ_ACK;
+import static com.sun.xml.wss.jaxws.impl.Constants.RM_TERMINATE_SEQ;
+import static com.sun.xml.wss.jaxws.impl.Constants.RM_LAST_MESSAGE;
 
 
 //TODO: add logging before 4/13
@@ -164,27 +188,27 @@ public abstract class SecurityPipeBase implements Pipe {
             new QName("http://schemas.xmlsoap.org/ws/2005/02/trust","RequestSecurityToken");
     
     // CONSTANTs
-    protected static final String OPERATION_SCOPE = "operation-policy-scope".intern();
-    protected static final String BINDING_SCOPE = "binding-policy-scope".intern();
-    protected static final String rstSCTURI = "http://schemas.xmlsoap.org/ws/2005/02/trust/RST/SCT".intern();
-    protected static final String rstrSCTURI = "http://schemas.xmlsoap.org/ws/2005/02/trust/RSTR/SCT".intern();
-    protected static final String rstTrustURI = "http://schemas.xmlsoap.org/ws/2005/02/trust/RST/Issue".intern();
-    protected static final String rstrTrustURI = "http://schemas.xmlsoap.org/ws/2005/02/trust/RSTR/Issue".intern();
-    protected static final String wsaURI = "http://schemas.xmlsoap.org/ws/2004/08/addressing".intern();
-    protected static final String SC_ASSERTION = "SecureConversationAssertion".intern();
-    protected static final QName ACTION_HEADER = new QName(wsaURI,"Action");
-    protected final static QName _SecureConversationToken_QNAME =
-            new QName("http://schemas.xmlsoap.org/ws/2005/07/securitypolicy", "SecureConversationToken");
-    protected static final String SECURITY_POLICY_2005_07_NAMESPACE=
-            "http://schemas.xmlsoap.org/ws/2005/07/securitypolicy".intern();
-    protected static final String TRUST_2005_02_NAMESPACE ="http://schemas.xmlsoap.org/ws/2005/02/trust".intern();
-    private static final String ADDRESSING_POLICY_NAMESPACE_URI =
-            "http://schemas.xmlsoap.org/ws/2004/09/policy/addressing";
-    protected static final String XENC_NS = "http://www.w3.org/2001/04/xmlenc#";
-    protected static final String ENCRYPTED_DATA_LNAME = "EncryptedData";
+//    protected static final String OPERATION_SCOPE = "operation-policy-scope".intern();
+//    protected static final String BINDING_SCOPE = "binding-policy-scope".intern();
+//    protected static final String rstSCTURI = "http://schemas.xmlsoap.org/ws/2005/02/trust/RST/SCT".intern();
+//    protected static final String rstrSCTURI = "http://schemas.xmlsoap.org/ws/2005/02/trust/RSTR/SCT".intern();
+//    protected static final String rstTrustURI = "http://schemas.xmlsoap.org/ws/2005/02/trust/RST/Issue".intern();
+//    protected static final String rstrTrustURI = "http://schemas.xmlsoap.org/ws/2005/02/trust/RSTR/Issue".intern();
+//    protected static final String wsaURI = "http://schemas.xmlsoap.org/ws/2004/08/addressing".intern();
+//    protected static final String SC_ASSERTION = "SecureConversationAssertion".intern();
+//    protected static final QName ACTION_HEADER = new QName(wsaURI,"Action");
+//    protected final static QName _SecureConversationToken_QNAME =
+//            new QName("http://schemas.xmlsoap.org/ws/2005/07/securitypolicy", "SecureConversationToken");
+//    protected static final String SECURITY_POLICY_2005_07_NAMESPACE=
+//            "http://schemas.xmlsoap.org/ws/2005/07/securitypolicy".intern();
+//    protected static final String TRUST_2005_02_NAMESPACE ="http://schemas.xmlsoap.org/ws/2005/02/trust".intern();
+//    private static final String ADDRESSING_POLICY_NAMESPACE_URI =
+//            "http://schemas.xmlsoap.org/ws/2004/09/policy/addressing";
+//    protected static final String XENC_NS = "http://www.w3.org/2001/04/xmlenc#";
+//    protected static final String ENCRYPTED_DATA_LNAME = "EncryptedData";
     protected static ArrayList<String> securityPolicyNamespaces = null;
     protected static MessagePolicy emptyMessagePolicy;
-    protected static final QName MESSAGE_ID_HEADER = new QName(wsaURI,"MessageID");
+//    protected static final QName MESSAGE_ID_HEADER = new QName(wsaURI,"MessageID");
     protected static final List<PolicyAssertion> EMPTY_LIST = Collections.emptyList();
     
     // Security Environment reference initialized with a JAAS CallbackHandler
@@ -214,22 +238,22 @@ public abstract class SecurityPipeBase implements Pipe {
      * Constants for RM Security Processing
      */
     
-    protected static final String RM_CREATE_SEQ= "http://schemas.xmlsoap.org/ws/2005/02/rm/CreateSequence";
-    protected static final String RM_CREATE_SEQ_RESP= "http://schemas.xmlsoap.org/ws/2005/02/rm/CreateSequenceResponse";
-    protected static final String RM_SEQ_ACK = "http://schemas.xmlsoap.org/ws/2005/02/rm/SequenceAcknowledgement";
-    protected static final String RM_TERMINATE_SEQ = "http://schemas.xmlsoap.org/ws/2005/02/rm/TerminateSequence";
-    protected static final String RM_LAST_MESSAGE= "http://schemas.xmlsoap.org/ws/2005/02/rm/LastMessage";
-    
-    
+//    protected static final String RM_CREATE_SEQ= "http://schemas.xmlsoap.org/ws/2005/02/rm/CreateSequence";
+//    protected static final String RM_CREATE_SEQ_RESP= "http://schemas.xmlsoap.org/ws/2005/02/rm/CreateSequenceResponse";
+//    protected static final String RM_SEQ_ACK = "http://schemas.xmlsoap.org/ws/2005/02/rm/SequenceAcknowledgement";
+//    protected static final String RM_TERMINATE_SEQ = "http://schemas.xmlsoap.org/ws/2005/02/rm/TerminateSequence";
+//    protected static final String RM_LAST_MESSAGE= "http://schemas.xmlsoap.org/ws/2005/02/rm/LastMessage";
+//    
+//    
     protected WSDLBoundOperation cachedOperation = null;
-    protected static final String SUN_WSS_SECURITY_SERVER_POLICY_NS="http://schemas.sun.com/2006/03/wss/server";
-    protected static final String SUN_WSS_SECURITY_CLIENT_POLICY_NS="http://schemas.sun.com/2006/03/wss/client";
+//    protected static final String SUN_WSS_SECURITY_SERVER_POLICY_NS="http://schemas.sun.com/2006/03/wss/server";
+//    protected static final String SUN_WSS_SECURITY_CLIENT_POLICY_NS="http://schemas.sun.com/2006/03/wss/client";
     
     protected Policy wsitConfig =null;
     // store as instance variable
     protected Unmarshaller unmarshaller =null;
     // store operation resolver
-    protected OperationResolver opResolver = null;
+   // protected OperationResolver opResolver = null;
     
     //store instance variable(s): Binding has IssuedToken/RM/SC Policy
     boolean hasIssuedTokens = false;
@@ -285,7 +309,7 @@ public abstract class SecurityPipeBase implements Pipe {
             unmarshaller = jaxbContext.createUnmarshaller();
             // check whether Service Port has RM
             hasReliableMessaging = isReliableMessagingEnabled(wsPolicyMap, pipeConfig.getWSDLModel());
-            opResolver = new OperationResolverImpl(inMessagePolicyMap,pipeConfig.getWSDLModel().getBinding());
+         //   opResolver = new OperationResolverImpl(inMessagePolicyMap,pipeConfig.getWSDLModel().getBinding());
         }catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -312,7 +336,7 @@ public abstract class SecurityPipeBase implements Pipe {
         this.hasIssuedTokens = that.hasIssuedTokens;
         this.hasSecureConversation = that.hasSecureConversation;
         this.hasReliableMessaging = that.hasReliableMessaging;
-        this.opResolver = that.opResolver;
+        //this.opResolver = that.opResolver;
         
         try {
             this.unmarshaller = jaxbContext.createUnmarshaller();
@@ -625,7 +649,7 @@ public abstract class SecurityPipeBase implements Pipe {
          */
         ctx.setIssuedTokenContextMap(issuedTokenContextMap);
         ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
-        ctx.setExtraneousProperty(ctx.OPERATION_RESOLVER, opResolver);
+//        ctx.setExtraneousProperty(ctx.OPERATION_RESOLVER, opResolver);
         
 //        try { policy need not be set apriori after moving to new policverification code
            /* MessagePolicy policy = null;

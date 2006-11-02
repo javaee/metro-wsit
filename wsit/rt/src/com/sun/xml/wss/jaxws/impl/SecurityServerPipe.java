@@ -90,6 +90,13 @@ import com.sun.xml.wss.impl.misc.DefaultCallbackHandler;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import static com.sun.xml.wss.jaxws.impl.Constants.SC_ASSERTION;
+import static com.sun.xml.wss.jaxws.impl.Constants.OPERATION_SCOPE;
+import static com.sun.xml.wss.jaxws.impl.Constants.EMPTY_LIST;
+import static com.sun.xml.wss.jaxws.impl.Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS;
+import static com.sun.xml.wss.jaxws.impl.Constants.SUN_WSS_SECURITY_CLIENT_POLICY_NS;
+
+
 //TODO: add logging before 4/13
 
 /**
@@ -156,7 +163,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
         //Do Security Processing for Incoming Message
         //---------------INBOUND SECURITY VERIFICATION----------
         ProcessingContext ctx = initializeInboundProcessingContext(packet/*, isSCIssueMessage, isTrustMessage*/);
-        
+        ctx.setExtraneousProperty(ctx.OPERATION_RESOLVER, new PolicyResolverImpl(inMessagePolicyMap,inProtocolPM,cachedOperation,pipeConfig,addVer,false));
         try{
             if(!optimized) {
                 SOAPMessage soapMessage = msg.readAsSOAPMessage();

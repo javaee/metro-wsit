@@ -3,12 +3,12 @@
  * of the Common Development and Distribution License
  * (the License).  You may not use this file except in
  * compliance with the License.
- * 
+ *
  * You can obtain a copy of the license at
  * https://glassfish.dev.java.net/public/CDDLv1.0.html.
  * See the License for the specific language governing
  * permissions and limitations under the License.
- * 
+ *
  * When distributing Covered Code, include this CDDL
  * Header Notice in each file and include the License file
  * at https://glassfish.dev.java.net/public/CDDLv1.0.html.
@@ -16,7 +16,7 @@
  * with the fields enclosed by brackets [] replaced by
  * you own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * 
+ *
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
@@ -134,6 +134,11 @@ import com.sun.xml.wss.impl.filter.DumpFilter;
 import com.sun.xml.wss.impl.misc.DefaultCallbackHandler;
 
 import java.util.Properties;
+import static com.sun.xml.wss.jaxws.impl.Constants.SC_ASSERTION;
+import static com.sun.xml.wss.jaxws.impl.Constants.OPERATION_SCOPE;
+import static com.sun.xml.wss.jaxws.impl.Constants.EMPTY_LIST;
+import static com.sun.xml.wss.jaxws.impl.Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS;
+import static com.sun.xml.wss.jaxws.impl.Constants.SUN_WSS_SECURITY_CLIENT_POLICY_NS;
 
 
 //TODO: add logging before 4/13
@@ -180,7 +185,7 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
     }
     
     public Packet process(Packet packet) {
-         
+        
         // Add Action header to trust message
         boolean isTrustMsg = false;
         if ("true".equals(packet.invocationProperties.get(WSTrustConstants.IS_TRUST_MESSAGE))){
@@ -246,7 +251,7 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
         /* unused code after migration to new policyverification
         isSCMessage = isSCMessage(packet);
         if(isSCMessage){
-            
+         
             List<PolicyAssertion> policies = getInBoundSCP(packet.getMessage());
             if (!policies.isEmpty()) {
                 ret.invocationProperties.put(SC_ASSERTION, (PolicyAssertion)policies.get(0));
@@ -254,17 +259,19 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
         }*/
         
         ctx = initializeInboundProcessingContext(ret);
+        ctx.setExtraneousProperty(ctx.OPERATION_RESOLVER, new PolicyResolverImpl(inMessagePolicyMap,inProtocolPM,cachedOperation,pipeConfig,addVer,true));
+        
         try{
             msg = ret.getMessage();
             // Could be OneWay
             if (msg == null) {
                 return ret;
             }
-
+            
             if(!optimized) {
                 SOAPMessage soapMessage = msg.readAsSOAPMessage();
                 soapMessage = verifyInboundMessage(soapMessage, ctx);
-                if (msg.isFault()) {                                  
+                if (msg.isFault()) {
                     if (debug) {
                         DumpFilter.process(ctx);
                     }
@@ -361,7 +368,7 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
             
             if (ctx.getSecurityToken() instanceof SecurityContextToken){
                 ctx = scPlugin.processCancellation(
-                    ctx, pipeConfig.getWSDLModel(), pipeConfig.getBinding(), this, jaxbContext, ctx.getEndpointAddress());
+                        ctx, pipeConfig.getWSDLModel(), pipeConfig.getBinding(), this, jaxbContext, ctx.getEndpointAddress());
                 issuedTokenContextMap.remove(id);
             }
         }
@@ -417,14 +424,14 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
     
     protected SecurityPolicyHolder addOutgoingMP(WSDLBoundOperation operation,Policy policy)throws PolicyException{
         
-
+        
         SecurityPolicyHolder sph = constructPolicyHolder(policy,false,false);
         outMessagePolicyMap.put(operation,sph);
         return sph;
     }
     
     protected SecurityPolicyHolder addIncomingMP(WSDLBoundOperation operation,Policy policy)throws PolicyException{
-
+        
         SecurityPolicyHolder sph = constructPolicyHolder(policy,false,true);
         inMessagePolicyMap.put(operation,sph);
         return sph;
@@ -466,7 +473,7 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
                 Object obj = handler.newInstance();
                 if (!(obj instanceof CallbackHandler)) {
                     throw new RuntimeException("The specified CallbackHandler class, " +
-                        ret + ", Is not a valid CallbackHandler");
+                            ret + ", Is not a valid CallbackHandler");
                 }
                 return (CallbackHandler)obj;
             }
