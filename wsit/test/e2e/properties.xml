@@ -23,7 +23,7 @@
 -->
 
 <!--
- $Id: properties.xml,v 1.4 2006-10-26 18:39:27 hofsass Exp $
+ $Id: properties.xml,v 1.5 2006-11-02 23:42:50 hofsass Exp $
 
  Copyright (c) 2005 Sun Microsystems, Inc.
  All rights reserved.
@@ -49,5 +49,5 @@
         For more information on the different command line options
         refer to docs/index.html
         -->
-     <property name="args" value=" -debug   "/>
+     <property name="args" value=""/>
 </project>
