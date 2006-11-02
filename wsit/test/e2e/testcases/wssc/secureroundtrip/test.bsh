@@ -1,0 +1,28 @@
+// Testing session support for Secure RM case
+
+PingService service = new PingService();
+
+IPingService port = service.getPingPort();
+IPingService anotherPort = service.getPingPort();
+
+String response1 = ""; 
+for (i = 0 ; i <2; i++) {
+     response1 = port.echo("String " + i);
+}
+
+String response2 = ""; 
+for (i = 0 ; i <2; i++) {
+    response2 = anotherPort.echo("AnotherString " + i);
+}
+
+assertNotNull(response1);
+assertNotNull(response2);
+
+//assertEquals(response1,"String 1");
+//assertEquals(response2,"AnotherString 1");
+
+((Closeable)port).close();
+((Closeable)anotherPort).close();
+
+
+

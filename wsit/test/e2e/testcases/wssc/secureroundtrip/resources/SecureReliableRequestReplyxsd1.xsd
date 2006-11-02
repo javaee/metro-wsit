@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+ <xs:schema elementFormDefault="qualified" targetNamespace="http://InteropBaseAddress/interop" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://InteropBaseAddress/interop">
+  <xs:element name="echo">
+    <xs:complexType>
+        <xs:sequence>
+            <xs:element minOccurs="0" name="request" nillable="true" type="xs:string" />
+        </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="echoResponse">
+    <xs:complexType>
+        <xs:sequence>
+         <xs:element minOccurs="0" name="echoResult" nillable="true" type="xs:string" />
+        </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

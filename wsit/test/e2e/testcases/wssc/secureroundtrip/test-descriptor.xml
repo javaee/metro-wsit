@@ -1,0 +1,8 @@
+<descriptor>
+  <description>Testing session support for secure RM case </description>
+  <client href ="test.bsh"/>
+  <service basedir="./server">
+    <wsdl href="EchoService.wsdl"/>
+  </service>
+</descriptor>
+
