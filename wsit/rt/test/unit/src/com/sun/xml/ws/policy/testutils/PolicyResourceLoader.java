@@ -25,17 +25,18 @@ package com.sun.xml.ws.policy.testutils;
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
+import com.sun.xml.ws.api.server.SDDocumentSource;
 import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
+import com.sun.xml.ws.api.wsdl.parser.XMLEntityResolver.Parser;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
+import com.sun.xml.ws.policy.jaxws.PolicyConfigResolver;
 import com.sun.xml.ws.policy.jaxws.PolicyWSDLParserExtension;
 import com.sun.xml.ws.policy.jaxws.WSDLPolicyMapWrapper;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelTranslator;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelUnmarshaller;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
-import com.sun.xml.ws.util.xml.XmlUtil;
-import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -112,8 +113,11 @@ public final class PolicyResourceLoader {
     
     // reads wsdl model from given wsdl document
     public static WSDLModel getWSDLModel(String resourceName) throws Exception {
-        URL wsdlUrl = PolicyResourceLoader.getResourceUrl(resourceName);
-        WSDLModel model = RuntimeWSDLParser.parse(wsdlUrl, XmlUtil.createDefaultCatalogResolver(), true, new WSDLParserExtension[] { new PolicyWSDLParserExtension() });
+        URL resourceUrl = getResourceUrl(resourceName);
+        XMLStreamBuffer resourceBuffer = getResourceXmlBuffer(resourceName);
+        SDDocumentSource doc = SDDocumentSource.create(resourceUrl, resourceBuffer);
+        Parser parser = new Parser(doc);
+        WSDLModel model = WSDLModel.WSDLParser.parse(parser, new PolicyConfigResolver(), true, new WSDLParserExtension[] { new PolicyWSDLParserExtension() });
         return model;
     }
     
