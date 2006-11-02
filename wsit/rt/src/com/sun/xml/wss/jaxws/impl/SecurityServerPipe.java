@@ -531,10 +531,10 @@ public class SecurityServerPipe extends SecurityPipeBase {
                 
                 // Put it here for RM to pick up
                 packet.invocationProperties.put(
-                        "com.sun.xml.ws.sessionid", sctId);
+                        Session.SESSION_ID_KEY, sctId);
                 
                 packet.invocationProperties.put(
-                        "com.sun.xml.ws.sessiondata", session.getUserData());
+                        Session.SESSION_KEY, session.getUserData());
                 
                 IssuedTokenContext itctx = session.getSecurityInfo().getIssuedTokenContext();
                 ((ProcessingContextImpl)ctx).getIssuedTokenContextMap().put(sctId, itctx);
