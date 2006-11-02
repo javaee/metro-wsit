@@ -49,7 +49,7 @@ public class FastInfosetModelConfiguratorProviderTest extends TestCase {
         PolicyMap policyMap = model.getExtension(WSDLPolicyMapWrapper.class).getPolicyMap();
         
         assertTrue(model.getService(new QName("http://example.org","DictionaryService")).
-                getFirstPort().getFeature(FastInfosetFeature.ID).isEnabled());
+                getFirstPort().getFeature(FastInfosetFeature.class).isEnabled());
     }
     
     /**
@@ -61,7 +61,7 @@ public class FastInfosetModelConfiguratorProviderTest extends TestCase {
         PolicyMap policyMap = model.getExtension(WSDLPolicyMapWrapper.class).getPolicyMap();
         
         assertFalse(model.getService(new QName("http://example.org","DictionaryService")).
-                getFirstPort().getFeature(FastInfosetFeature.ID).isEnabled());
+                getFirstPort().getFeature(FastInfosetFeature.class).isEnabled());
     }
     
     /**
@@ -73,7 +73,7 @@ public class FastInfosetModelConfiguratorProviderTest extends TestCase {
         PolicyMap policyMap = model.getExtension(WSDLPolicyMapWrapper.class).getPolicyMap();
         
         assertNull(model.getService(new QName("http://example.org","DictionaryService")).
-                getFirstPort().getFeature(FastInfosetFeature.ID));
+                getFirstPort().getFeature(FastInfosetFeature.class));
     }
     
 }

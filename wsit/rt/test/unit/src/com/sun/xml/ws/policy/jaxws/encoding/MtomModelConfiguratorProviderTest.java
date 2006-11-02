@@ -48,7 +48,7 @@ public class MtomModelConfiguratorProviderTest extends TestCase {
         PolicyMap policyMap = model.getExtension(WSDLPolicyMapWrapper.class).getPolicyMap();
         
         assertTrue(model.getService(new QName("http://example.org","DictionaryService")).
-                getFirstPort().getFeature(MTOMFeature.ID).isEnabled());
+                getFirstPort().getFeature(MTOMFeature.class).isEnabled());
     }
     
     /**
@@ -60,7 +60,7 @@ public class MtomModelConfiguratorProviderTest extends TestCase {
         PolicyMap policyMap = model.getExtension(WSDLPolicyMapWrapper.class).getPolicyMap();
         
         assertNull(model.getService(new QName("http://example.org","DictionaryService")).
-                getFirstPort().getFeature(MTOMFeature.ID));
+                getFirstPort().getFeature(MTOMFeature.class));
     }
     
 }
