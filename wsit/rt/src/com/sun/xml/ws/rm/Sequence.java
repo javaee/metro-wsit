@@ -1,5 +1,5 @@
 /*
- * $Id: Sequence.java,v 1.4 2006-10-31 22:14:08 mikeg Exp $
+ * $Id: Sequence.java,v 1.5 2006-11-03 18:11:50 mikeg Exp $
  */
 
 /*
@@ -88,7 +88,7 @@ public class Sequence {
     protected  RMConstants rmConstants;
     
    
-    
+    protected int firstKnownGap;
     /**
      * Gets the sequence identifier
      * @return The sequence identifier.
@@ -113,6 +113,7 @@ public class Sequence {
         //messageNumbers in-sync with indices.
         list.add(null);
         allowDuplicates = false;
+        firstKnownGap = 1;
     }
     
     /**
