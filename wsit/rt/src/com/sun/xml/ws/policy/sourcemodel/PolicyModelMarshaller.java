@@ -61,6 +61,15 @@ public abstract class PolicyModelMarshaller {
      */
     public abstract void marshal(Collection<PolicySourceModel> models, Object storage) throws PolicyException;
 
+    /**
+     * Factory methods that returns a marshaller instance based on input parameter.
+     *
+     * @param marshallInvisible boolean parameter indicating whether the marshaller 
+     *        returned by this method does marshall private assertions or not.
+     * 
+     * @return policy model marshaller that either marshalls private assertions or not
+     *         based on the input argument.
+     */
     public static PolicyModelMarshaller getXmlMarshaller(boolean marshallInvisible) {
         return (marshallInvisible) ? invisibleAssertionXmlMarshaller : defaultXmlMarshaller;
     }

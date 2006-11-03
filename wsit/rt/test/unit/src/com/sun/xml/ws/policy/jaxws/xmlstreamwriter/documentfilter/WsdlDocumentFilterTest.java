@@ -21,38 +21,31 @@
  */
 
 /*
- * FilteringXmlStreamWriterProxyTest.java
+ * WsdlDocumentFilterTest.java
  * JUnit based test
  *
- * @author Marek Potociar (marek.potociar at sun.com)
+ * @author Marek Potociar (marek.potociar at sun.com) 
  */
 
 package com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter;
 
-import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.*;
-import com.sun.xml.ws.policy.sourcemodel.PolicyModelMarshaller;
-import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
-import com.sun.xml.ws.policy.testutils.PolicyResourceLoader;
-import java.io.StringReader;
 import java.io.StringWriter;
-import java.io.Writer;
-import junit.framework.*;
-import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamException;
+import com.sun.xml.ws.api.server.SDDocumentFilter;
 import javax.xml.stream.XMLStreamWriter;
 
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public final class MexImportFilteringXmlStreamWriterTest extends AbstractFilteringTest {
-    private String[] testResources = new String[] {
-        "import_element_01"
+public class WsdlDocumentFilterTest extends AbstractFilteringTest {
+    private static final String[] testResources = new String[] {
+        "policy_0",
+        "policy_1",
+        "policy_2"
     };
+    private static final SDDocumentFilter filter = new WsdlDocumentFilter();
     
-    private static final InvocationProcessorFactory factory = FilteringInvocationProcessorFactory.getFactory(FilteringInvocationProcessorFactory.FilterType.MEX_FILTER);
-    
-    public MexImportFilteringXmlStreamWriterTest(String testName) {
+    public WsdlDocumentFilterTest(String testName) {
         super(testName);
     }
     
@@ -60,12 +53,11 @@ public final class MexImportFilteringXmlStreamWriterTest extends AbstractFilteri
      * Test of createProxy method, of class com.sun.xml.ws.policy.jaxws.documentfilter.FilteringXmlStreamWriterProxy.
      */
     public void testCreateProxy() throws Exception {
-        XMLStreamWriter result = openFilteredWriter(new StringWriter(), factory);
+        XMLStreamWriter result = openFilteredWriter(new StringWriter(), filter);
         
         assertNotNull(result);
     }
     
     public void testFilterPrivateAssertionsFromPolicyExpression() throws Exception {
-        performResourceBasedTest(testResources, "mex_filtering/", ".xml", factory);
-    }
-}
+        performResourceBasedTest(testResources, "wsdl_filter/", ".xml", filter);
+    }}

@@ -32,27 +32,36 @@ import javax.xml.stream.XMLStreamWriter;
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public final class FilteringInvocationProcessorFactory implements InvocationProcessorFactory {
+public abstract class FilteringInvocationProcessorFactory implements InvocationProcessorFactory {
     public enum FilterType {
         PRIVATE_ASSERTION_FILTER,
         MEX_FILTER
     }
     
-    private FilterType filterType;
-    
-    public FilteringInvocationProcessorFactory(FilterType type) {
-        this.filterType = type;
-    }
-    
-    public InvocationProcessor createInvocationProcessor(XMLStreamWriter writer) throws XMLStreamException {
-        switch (filterType) {
-            case PRIVATE_ASSERTION_FILTER :
-                return new PrivateAssertionFilteringInvocationProcessor(writer);
-            case MEX_FILTER:
-                return new MexImportFilteringInvocationProcessor(writer);
-            default:
-                throw new XMLStreamException(Messages.UNEXPECTED_FILTER_TYPE.format(filterType));
+    private static final FilteringInvocationProcessorFactory PRIVATE_ASSERTION_FILTER_FACTORY = new FilteringInvocationProcessorFactory() {
+        public InvocationProcessor createInvocationProcessor(XMLStreamWriter writer) throws XMLStreamException {
+            return new PrivateAssertionFilteringInvocationProcessor(writer);
         }
+    };
+    
+    private static final FilteringInvocationProcessorFactory MEX_IMPORT_FILTER_FACTORY = new FilteringInvocationProcessorFactory() {
+        public InvocationProcessor createInvocationProcessor(XMLStreamWriter writer) throws XMLStreamException {
+            return new MexImportFilteringInvocationProcessor(writer);
+        }
+    };
+    
+    public static FilteringInvocationProcessorFactory getFactory(FilterType type) {
+        switch (type) {
+            case PRIVATE_ASSERTION_FILTER :
+                return PRIVATE_ASSERTION_FILTER_FACTORY;
+            case MEX_FILTER:
+                return MEX_IMPORT_FILTER_FACTORY;
+            default:
+                return null;
+        }
+        
     }
     
+    private FilteringInvocationProcessorFactory() {
+    }
 }

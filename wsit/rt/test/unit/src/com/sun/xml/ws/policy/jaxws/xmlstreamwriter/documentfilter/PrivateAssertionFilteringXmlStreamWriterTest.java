@@ -24,75 +24,42 @@
  * FilteringXmlStreamWriterProxyTest.java
  * JUnit based test
  *
- * Created on October 4, 2006, 6:02 PM
+ * @author Marek Potociar (marek.potociar at sun.com)
  */
 
 package com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter;
 
-import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.*;
-import com.sun.xml.ws.policy.sourcemodel.PolicyModelMarshaller;
-import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
-import com.sun.xml.ws.policy.testutils.PolicyResourceLoader;
-import java.io.StringReader;
+import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.InvocationProcessorFactory;
 import java.io.StringWriter;
-import java.io.Writer;
-import junit.framework.*;
-import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class PrivateAssertionFilteringXmlStreamWriterTest extends TestCase {
-    private PolicyModelMarshaller marshaller = PolicyModelMarshaller.getXmlMarshaller(true);
-    private String[] testResources = new String[] {
+public final class PrivateAssertionFilteringXmlStreamWriterTest extends AbstractFilteringTest {
+    private static final String[] testResources = new String[] {
         "policy_0_visible",
         "policy_1_visible",
         "policy_2_visible",
         "policy_3_visible"
     };
+    private static final InvocationProcessorFactory factory = FilteringInvocationProcessorFactory.getFactory(FilteringInvocationProcessorFactory.FilterType.PRIVATE_ASSERTION_FILTER);
     
     public PrivateAssertionFilteringXmlStreamWriterTest(String testName) {
         super(testName);
-    }
-    
-    protected void setUp() throws Exception {
-    }
-    
-    protected void tearDown() throws Exception {
     }
     
     /**
      * Test of createProxy method, of class com.sun.xml.ws.policy.jaxws.documentfilter.FilteringXmlStreamWriterProxy.
      */
     public void testCreateProxy() throws Exception {
-        XMLStreamWriter result = openFilteredWriter(new StringWriter());
-
+        XMLStreamWriter result = openFilteredWriter(new StringWriter(), factory);
+        
         assertNotNull(result);
     }
     
     public void testFilterPrivateAssertionsFromPolicyExpression() throws Exception {
-        for (String testResourceName : testResources) {
-            PolicySourceModel model = PolicyResourceLoader.unmarshallModel("visibility/" + testResourceName + ".xml");
-            PolicySourceModel expected = PolicyResourceLoader.unmarshallModel("visibility/" + testResourceName + "_expected.xml");
-            
-            StringWriter buffer = new StringWriter();
-            XMLStreamWriter writer = openFilteredWriter(buffer);
-            marshaller.marshal(model, writer);
-            writer.close();
-            
-            String marshalledData = buffer.toString();
-            System.out.println("Filtered output: \n" + marshalledData);
-            
-            PolicySourceModel result = PolicyResourceLoader.unmarshallModel(new StringReader(marshalledData));
-            assertEquals("Result is not as expected for '" + testResourceName + "' test resource.", expected, result);            
-        }
-    }
-    
-    private XMLStreamWriter openFilteredWriter(Writer outputStream) throws XMLStreamException {
-        XMLStreamWriter writer = XMLOutputFactory.newInstance().createXMLStreamWriter(outputStream);
-        return EnhancedXmlStreamWriterProxy.createProxy(writer, new FilteringInvocationProcessorFactory(FilteringInvocationProcessorFactory.FilterType.PRIVATE_ASSERTION_FILTER));        
+        performResourceBasedTest(testResources, "visibility/", ".xml", factory);
     }
 }

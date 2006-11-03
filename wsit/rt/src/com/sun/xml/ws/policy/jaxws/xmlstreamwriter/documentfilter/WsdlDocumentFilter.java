@@ -33,10 +33,11 @@ import javax.xml.stream.XMLStreamWriter;
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class WsdlDocumentFilter implements SDDocumentFilter {
-    FilteringInvocationProcessorFactory ipFactory = new FilteringInvocationProcessorFactory(FilteringInvocationProcessorFactory.FilterType.PRIVATE_ASSERTION_FILTER);
-    
+public class WsdlDocumentFilter implements SDDocumentFilter {    
     public XMLStreamWriter filter(SDDocument sdDocument, XMLStreamWriter xmlStreamWriter) throws XMLStreamException {
-        return EnhancedXmlStreamWriterProxy.createProxy(xmlStreamWriter, ipFactory);
+        XMLStreamWriter result = EnhancedXmlStreamWriterProxy.createProxy(xmlStreamWriter, FilteringInvocationProcessorFactory.getFactory(FilteringInvocationProcessorFactory.FilterType.PRIVATE_ASSERTION_FILTER));
+        result = EnhancedXmlStreamWriterProxy.createProxy(result, FilteringInvocationProcessorFactory.getFactory(FilteringInvocationProcessorFactory.FilterType.MEX_FILTER));
+                
+        return result;
     }
 }
