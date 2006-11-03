@@ -20,10 +20,8 @@
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
-package com.sun.xml.ws.policy.jaxws.encoding;
+package com.sun.xml.ws.encoding.policy;
 
-import com.sun.istack.NotNull;
-import com.sun.xml.ws.api.fastinfoset.FastInfosetFeature;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.model.wsdl.WSDLService;
@@ -36,45 +34,47 @@ import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.policy.jaxws.spi.ModelConfiguratorProvider;
 import java.util.Iterator;
 import javax.xml.namespace.QName;
+import javax.xml.ws.soap.MTOMFeature;
 
 /**
- * A configurator provider for FastInfoset policy assertions.
  *
- * @author Paul.Sandoz@Sun.Com
+ * @author japod
  */
-public class FastInfosetModelConfiguratorProvider implements ModelConfiguratorProvider{
+public class MtomModelConfiguratorProvider implements ModelConfiguratorProvider{
     
-    public static final QName fastInfosetAssertion = new QName(
-            "http://java.sun.com/xml/ns/wsit/2006/09/policy/fastinfoset/service",
-            "OptimizedFastInfosetSerialization");
-        
-    public static final QName enabled = new QName("enabled");
+    private static final QName mtomAssertion =
+            new QName("http://schemas.xmlsoap.org/ws/2004/09/policy/optimizedmimeserialization", "OptimizedMimeSerialization");
     
     /**
-     * Process FastInfoset policy assertions.
-     *
-     * @param model the WSDL model.
-     * @param policyMap the policy map.
+     * Creates a new instance of MtomModelConfiguratorProvider
      */
-    public void configure(@NotNull WSDLModel model, @NotNull PolicyMap policyMap) throws PolicyException {
-        assert model != null;
-        assert policyMap != null;
-        
+    public MtomModelConfiguratorProvider() {
+    }
+    
+    /**
+     * process Mtom policy assertions and if found and is not optional then mtom is enabled on the
+     * {@link WSDLBoundPortType}
+     *
+     * @param model must be non-null
+     * @param policyMap must be non-null
+     */
+    public void configure(WSDLModel model, PolicyMap policyMap) throws PolicyException {
+        if ((null==model) ||(null==policyMap)) {
+            return;
+        }
         for (WSDLService service:model.getServices().values()) {
             for (WSDLPort port : service.getPorts()) {
                 PolicyMapKey key = PolicyMap.createWsdlEndpointScopeKey(service.getName(),port.getName());
                 Policy policy = policyMap.getEndpointEffectivePolicy(key);
-                if (null!=policy && policy.contains(fastInfosetAssertion)) {
+                if (null!=policy && policy.contains(mtomAssertion)) {
                     Iterator <AssertionSet> assertions = policy.iterator();
                     while(assertions.hasNext()){
                         AssertionSet assertionSet = assertions.next();
                         Iterator<PolicyAssertion> policyAssertion = assertionSet.iterator();
                         while(policyAssertion.hasNext()){
                             PolicyAssertion assertion = policyAssertion.next();
-                            if(assertion.getName().equals(fastInfosetAssertion)){
-                                String value = assertion.getAttributeValue(enabled);
-                                boolean isFastInfosetEnabled = Boolean.valueOf(value.trim());
-                                port.getBinding().addFeature(new FastInfosetFeature(isFastInfosetEnabled));
+                            if(assertion.getName().equals(mtomAssertion) && !assertion.isOptional()){
+                                port.getBinding().addFeature(new MTOMFeature(true));
                             } // end-if non optional mtom assertion found
                         } // next assertion
                     } // next alternative

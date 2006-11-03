@@ -1,1 +1,1 @@
-com.sun.xml.ws.policy.jaxws.encoding.MtomMapUpdateProvider
+com.sun.xml.ws.encoding.policy.MtomMapUpdateProvider

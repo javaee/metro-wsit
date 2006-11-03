@@ -20,7 +20,7 @@
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
-package com.sun.xml.ws.policy.jaxws.addressing;
+package com.sun.xml.ws.addressing.policy;
 
 import com.sun.xml.ws.developer.MemberSubmissionAddressingFeature;
 import junit.framework.*;

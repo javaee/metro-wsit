@@ -20,7 +20,7 @@
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
-package com.sun.xml.ws.policy.jaxws.encoding;
+package com.sun.xml.ws.encoding.policy;
 
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import junit.framework.*;
