@@ -1,6 +1,7 @@
 
 
 import com.sun.xml.ws.rm.Message;
+import com.sun.xml.ws.Closeable;
 import com.sun.xml.ws.rm.jaxws.runtime.client.RMSource;
 
 /* Mask determines whether messages should be dropped.  Message whose index has
@@ -8,11 +9,8 @@ import com.sun.xml.ws.rm.jaxws.runtime.client.RMSource;
 */
 int[] dropList = {1,1,0,1,0,1,1,0,1};
 
- 
-
 public void close(IPing port) {
-    ClientSession session = ClientSession.getSession((BindingProvider)port);
-    session.close();
+	(Closeable)port.close();
 }
 
 myfilter = new com.sun.xml.ws.rm.jaxws.util.ProcessingFilter(){
@@ -35,49 +33,61 @@ myfilter = new com.sun.xml.ws.rm.jaxws.util.ProcessingFilter(){
 };
 
 RMSource.getRMSource().setProcessingFilter(myfilter);
-
+service = new wsrm.testserver.client.PingService();
+portSequence = service.getWSHttpBindingIPing();
+portControl = service.getWSHttpBindingIPing();
 
 testAtLeastOnce(){
-
-    service = new wsrm.testserver.client.PingService();
-    IPing portSequence = service.getWSHttpBindingIPing();
-    IPing portControl = service.getWSHttpBindingIPing();
- 
-    com.sun.xml.ws.rm.jaxws.runtime.client.RMSource.getRMSource().setProcessingFilter(myfilter);
-    int num = dropList.length;
-
-    /* expected result (modulo order) when report operation is called */
-    String ret = "";
-
-    portControl.clear(null);
-
     try {
-        Thread.sleep(new Long("1000").longValue());
-    } catch (Exception e) {}
+        
 
-    for (int i = 0; i < num; i++) {
-        portSequence.process("message " + (i + 1));
+        com.sun.xml.ws.rm.jaxws.runtime.client
+            .RMSource.getRMSource().setProcessingFilter(myfilter);
+        int num = dropList.length;
 
-        //use i+1 because message numbers are one-based and
-        ret += Integer.toString(i + 1);
-        ret += ",";
-    }
+        /* expected result (modulo order) when report operation is called */
+        String ret = "";
 
-    //wait for everything to arrive
-    try {
-         Thread.sleep(new Long("2000").longValue());
-    } catch (Exception e) {}
+        portControl.clear(null);
 
-    String retCount = portControl.getCount(null);
-    String retStr = portControl.getSequence(null);
+        try {
+            Thread.sleep(new Long("1000").longValue());
+        } catch (Exception e) {}
 
-    System.out.println("");
-    System.out.println("sent messages  = " + ret);
-    System.out.println("received messages from endpoint = " + retStr);
-    System.out.println("received count from endpoint = " + retCount);
+        for (int i = 0; i < num; i++) {
+            portSequence.process("message " + (i + 1));
 
-    assertEquals(retCount, Integer.toString(num ));
+            //use i+1 because message numbers are one-based and
+            ret += Integer.toString(i + 1);
+            ret += ",";
+        }
+
+        //wait for everything to arrive
+	portSequence.close();
+	portSequence = null;
+//        try {
+//            Thread.sleep(new Long("2000").longValue());
+//      } catch (Exception e) {}
+
+        String retCount = portControl.getCount(null);
+        String retStr = portControl.getSequence(null);
+
+        System.out.println("");
+        System.out.println("sent messages  = " + ret);
+        System.out.println("received messages from endpoint = " + retStr);
+        System.out.println("received count from endpoint = " + retCount);
+
+        assertEquals(retCount, Integer.toString(num ));
+
+    } finally {
+         if (portSequence != null) portSequence.close();
+         portControl.close();
+      
+    } 
+   
 }
 
+
 testAtLeastOnce();
+	
 

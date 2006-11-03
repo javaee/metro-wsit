@@ -7,6 +7,8 @@ import com.sun.xml.ws.rm.jaxws.runtime.server.RMDestination;
 import com.sun.xml.ws.rm.jaxws.runtime.InboundSequence;
 import javax.xml.ws.WebServiceContext;
 import com.sun.xml.ws.rm.jaxws.util.ProcessingFilter;
+import javax.annotation.Resource;
+import javax.xml.ws.*;
 
 public class TestService implements ProcessingFilter {
     
@@ -18,12 +20,13 @@ public class TestService implements ProcessingFilter {
     public static HashMap<Integer, Integer> messages = 
             new HashMap<Integer, Integer>();
     
-    
-    public WebServiceContext context;
+    public WebServiceContext wscontext;
    
     public void setContext(WebServiceContext context) {
-        this.context = context;
+        this.wscontext = context;
     }
+
+   
     
     public boolean handleClientResponseMessage(Message mess) {
        return true;
@@ -68,6 +71,8 @@ public class TestService implements ProcessingFilter {
             } catch (Exception e) {}
         }
         System.out.println("received message " + s.toString());
+         System.out.println("sequenceId = \"" + sequenceId + "\"");
+         System.out.println("sequence = \"" + sequence + "\"");
     }
     
     public String reportCount(String s) {
@@ -88,7 +93,7 @@ public class TestService implements ProcessingFilter {
     }
     
     public void clearImpl(String s) {
-     System.out.println("clear called");
+        System.out.println("clear called");
         sequenceId = null;
         System.out.println("sequenceId = \"" + sequenceId + "\"");
         
@@ -102,13 +107,13 @@ public class TestService implements ProcessingFilter {
     }
     
     public String getInactivityTimeout(String s) {
+        InboundSequence iseq = RMDestination
+                .getRMDestination().getInboundSequence(sequenceId);
+        SequenceConfig config = iseq.getSequenceConfig();
         
-        SequenceConfig config = sequence.getSequenceConfig();
-        System.out.println("config = " + config);
-        System.out.println("sequence = " + sequence);
         System.out.println("timeout = " + config.getInactivityTimeout());
         String ret = Long.toString(
-                sequence.getSequenceConfig().getInactivityTimeout());
+                config.getInactivityTimeout());
         return ret;
     }
     
@@ -155,8 +160,8 @@ public class TestService implements ProcessingFilter {
     
         
         String id = null;
-        if (context != null ) { 
-            id = (String)context.getMessageContext().
+        if (wscontext != null ) { 
+            id = (String)wscontext.getMessageContext().
                             get("com.sun.xml.ws.sessionid");
         } 
         

@@ -34,6 +34,14 @@
         <wsdl:message name="getCountResponse">
             <wsdl:part name="parameters" element="tns:getCountResponse"/>
         </wsdl:message>
+        
+        <wsdl:message name="getOrdered">
+            <wsdl:part name="parameters" element="tns:getOrdered"/>
+        </wsdl:message>
+        <wsdl:message name="getOrderedResponse">
+            <wsdl:part name="parameters" element="tns:getOrderedResponse"/>
+        </wsdl:message>
+        
         <wsdl:message name="getSequence">
             <wsdl:part name="parameters" element="tns:getSequence"/>
         </wsdl:message>
@@ -51,6 +59,12 @@
         </wsdl:message>
         <wsdl:message name="getAliveResponse">
             <wsdl:part name="parameters" element="tns:getAliveResponse"/>
+        </wsdl:message>
+        <wsdl:message name="getInactivityTimeout">
+            <wsdl:part name="parameters" element="tns:getInactivityTimeout"/>
+        </wsdl:message>
+        <wsdl:message name="getInactivityTimeoutResponse">
+            <wsdl:part name="parameters" element="tns:getInactivityTimeoutResponse"/>
         </wsdl:message>
 	<wsdl:portType name="IPing" >
             <wsdl:operation name="EchoString" >
@@ -72,6 +86,10 @@
                   <wsdl:input message="tns:getCount"/>
                   <wsdl:output message="tns:getCountResponse"/>
             </wsdl:operation>
+            <wsdl:operation name="getOrdered">
+                  <wsdl:input message="tns:getOrdered"/>
+                  <wsdl:output message="tns:getOrderedResponse"/>
+            </wsdl:operation>
             <wsdl:operation name="getSequence">
                   <wsdl:input message="tns:getSequence"/>
                   <wsdl:output message="tns:getSequenceResponse"/>
@@ -83,6 +101,10 @@
             <wsdl:operation name="getAlive">
                   <wsdl:input message="tns:getAlive"/>
                   <wsdl:output message="tns:getAliveResponse"/>
+            </wsdl:operation>
+             <wsdl:operation name="getInactivityTimeout">
+                  <wsdl:input message="tns:getInactivityTimeout"/>
+                  <wsdl:output message="tns:getInactivityTimeoutResponse"/>
             </wsdl:operation>
     </wsdl:portType>
     <wsdl:binding name="WSHttpBinding_IPing" type="tns:IPing">
@@ -130,6 +152,16 @@
                 <soap:body use="literal"/>
               </wsdl:output>
             </wsdl:operation>
+            
+            <wsdl:operation name="getOrdered">
+              <soap:operation soapAction=""/>
+              <wsdl:input>
+                <soap:body use="literal"/>
+              </wsdl:input>
+              <wsdl:output>
+                <soap:body use="literal"/>
+              </wsdl:output>
+            </wsdl:operation>
             <wsdl:operation name="getSequence">
               <soap:operation soapAction=""/>
               <wsdl:input>
@@ -149,6 +181,15 @@
               </wsdl:output>
             </wsdl:operation>
             <wsdl:operation name="getAlive">
+              <soap:operation soapAction=""/>
+              <wsdl:input>
+                <soap:body use="literal"/>
+              </wsdl:input>
+              <wsdl:output>
+                <soap:body use="literal"/>
+              </wsdl:output>
+            </wsdl:operation>
+            <wsdl:operation name="getInactivityTimeout">
               <soap:operation soapAction=""/>
               <wsdl:input>
                 <soap:body use="literal"/>

@@ -21,6 +21,11 @@ import javax.xml.ws.handler.MessageContext;
 @javax.xml.ws.BindingType(javax.xml.ws.soap.SOAPBinding.SOAP12HTTP_BINDING)
 public class IPingImpl extends TestService {
     
+    static int lastMessageNumber = 0;
+    static boolean ordered = true;
+    
+    @Resource
+    WebServiceContext context;
     
     public IPingImpl() {
         RMDestination.getRMDestination().setProcessingFilter(this);
@@ -66,6 +71,14 @@ public class IPingImpl extends TestService {
     }
     
     public void process(String param) {
+        if (param.equals("test_order")) {
+            int messageNumber = (Integer)(context.getMessageContext().get("com.sun.xml.ws.messagenumber"));
+            if (messageNumber != lastMessageNumber + 1) {
+                ordered  = false;
+            }
+            lastMessageNumber = messageNumber;
+            
+        }
         processImpl(param);
     }
     public String clear(String param) {
@@ -87,4 +100,19 @@ public class IPingImpl extends TestService {
     public String getAlive(String param) {
         return isSequenceAlive(param);
     }
+    
+    public String getInactivityTimeout(String s) {
+        return super.getInactivityTimeout(s);
+    }
+    
+    public String getOrdered(String s) {
+        if (ordered) {
+            return "true";
+        } else {
+            return "false";
+        }
+    }
+    
+   
+    
 }

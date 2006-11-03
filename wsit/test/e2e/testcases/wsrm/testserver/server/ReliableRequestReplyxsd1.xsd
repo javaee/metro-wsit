@@ -47,6 +47,10 @@
       <xs:element name="getCount" type="tns:getCount"/>
 
       <xs:element name="getCountResponse" type="tns:getCountResponse"/>
+      
+       <xs:element name="getOrdered" type="tns:getOrdered"/>
+
+      <xs:element name="getOrderedResponse" type="tns:getOrderedResponse"/>
 
       <xs:element name="getDuplicates" type="tns:getDuplicates"/>
 
@@ -55,6 +59,10 @@
       <xs:element name="getSequence" type="tns:getSequence"/>
 
       <xs:element name="getSequenceResponse" type="tns:getSequenceResponse"/>
+      
+       <xs:element name="getInactivityTimeout" type="tns:getInactivityTimeout"/>
+
+      <xs:element name="getInactivityTimeoutResponse" type="tns:getInactivityTimeoutResponse"/>
 
       <xs:complexType name="getCount">
         <xs:sequence>
@@ -63,6 +71,18 @@
       </xs:complexType>
 
       <xs:complexType name="getCountResponse">
+        <xs:sequence>
+          <xs:element name="return" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+      </xs:complexType>
+      
+      <xs:complexType name="getOrdered">
+        <xs:sequence>
+          <xs:element name="getOrdered_param" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+      </xs:complexType>
+
+      <xs:complexType name="getOrderedResponse">
         <xs:sequence>
           <xs:element name="return" type="xs:string" minOccurs="0"/>
         </xs:sequence>
@@ -123,6 +143,18 @@
       </xs:complexType>
 
       <xs:complexType name="getSequenceResponse">
+        <xs:sequence>
+          <xs:element name="return" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+      </xs:complexType>
+      
+       <xs:complexType name="getInactivityTimeout">
+        <xs:sequence>
+          <xs:element name="getInactivityTimeout_param" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+      </xs:complexType>
+
+      <xs:complexType name="getInactivityTimeoutResponse">
         <xs:sequence>
           <xs:element name="return" type="xs:string" minOccurs="0"/>
         </xs:sequence>
