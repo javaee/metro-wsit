@@ -623,30 +623,6 @@ public abstract class SecurityPipeBase implements Pipe {
         }
         
         
-        // set the policy, issued-token-map, and extraneous properties
-        
-        /* MK: Check if issuedTokenContextMap is empty
-           MK:  that means crash may have occured, recreate it.
-         
-           MK: Get all sessions from SessionManger
-           MK: Add <sessionId, new IssuedTokenContextImpl(SCTInfo)> to map
-         
-         if (issuedTokenContextMap.isEmpty()) {
-               SessionManager sessionManager =
-                        SessionManager.getSessionManager();
-               Set<String> allKeys =
-                       sessionManager.getKeys();
-               Iterator iKeys = allKeys.iterator();
-               while (iKeys.hasNext()) {
-                   String sctId = (String) iKeys.next();
-                   IssuedTokenContext itc =
-                           new IssuedTokenContextImpl();
-                   itc.setSecurityContextTokenInfo(
-                           sessionManager.getSession(sctId).getSecurityInfo());
-                   issuedTokenContextMap.put(sctId, itc );
-               }
-         }
-         */
         ctx.setIssuedTokenContextMap(issuedTokenContextMap);
         ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
 //        ctx.setExtraneousProperty(ctx.OPERATION_RESOLVER, opResolver);
