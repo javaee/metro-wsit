@@ -533,19 +533,21 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             PolicyMap map = null;
             
             WSDLPort wsdlPort = context.getWsdlModel();
-            WSDLModel model = wsdlPort.getBinding().getOwner();
-            WSDLPolicyMapWrapper mapWrapper = model.getExtension(WSDLPolicyMapWrapper.class);
-            if (mapWrapper != null) {
-                map = mapWrapper.getPolicyMap();
-            }
-            
-            if (map != null) {
-                try {
-                    PolicyMapUtil.rejectAlternatives(map);
-                } catch (PolicyException e) {
-                    throw new WebServiceException(e);
-                }
-            }
+			if (wsdlPort != null) {
+				WSDLModel model = wsdlPort.getBinding().getOwner();
+				WSDLPolicyMapWrapper mapWrapper = model.getExtension(WSDLPolicyMapWrapper.class);
+				if (mapWrapper != null) {
+					map = mapWrapper.getPolicyMap();
+				}
+				
+				if (map != null) {
+					try {
+						PolicyMapUtil.rejectAlternatives(map);
+					} catch (PolicyException e) {
+						throw new WebServiceException(e);
+					}
+				}
+			}
             
             return map;
         }
