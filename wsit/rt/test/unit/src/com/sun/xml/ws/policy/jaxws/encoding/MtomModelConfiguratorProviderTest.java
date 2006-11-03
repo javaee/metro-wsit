@@ -22,6 +22,7 @@
 
 package com.sun.xml.ws.policy.jaxws.encoding;
 
+import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import junit.framework.*;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
@@ -56,7 +57,10 @@ public class MtomModelConfiguratorProviderTest extends TestCase {
         WSDLPort port = service.getFirstPort();
         assertNotNull(port);
         
-        WebServiceFeature feature = port.getFeature(MTOMFeature.class);
+        WSDLBoundPortType binding = port.getBinding();
+        assertNotNull(binding);
+        
+        WebServiceFeature feature = binding.getFeature(MTOMFeature.class);
         assertNotNull(feature);
         
         assertTrue(feature.isEnabled());
@@ -76,7 +80,10 @@ public class MtomModelConfiguratorProviderTest extends TestCase {
         WSDLPort port = service.getFirstPort();
         assertNotNull(port);
         
-        WebServiceFeature feature = port.getFeature(MTOMFeature.class);
+        WSDLBoundPortType binding = port.getBinding();
+        assertNotNull(binding);
+        
+        WebServiceFeature feature = binding.getFeature(MTOMFeature.class);
         assertNull(feature);
     }
     

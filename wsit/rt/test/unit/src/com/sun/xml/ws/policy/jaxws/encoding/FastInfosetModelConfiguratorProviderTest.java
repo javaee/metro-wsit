@@ -23,6 +23,7 @@
 package com.sun.xml.ws.policy.jaxws.encoding;
 
 import com.sun.xml.ws.api.fastinfoset.FastInfosetFeature;
+import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.model.wsdl.WSDLService;
@@ -57,7 +58,10 @@ public class FastInfosetModelConfiguratorProviderTest extends TestCase {
         WSDLPort port = service.getFirstPort();
         assertNotNull(port);
         
-        WebServiceFeature feature = port.getFeature(FastInfosetFeature.class);
+        WSDLBoundPortType binding = port.getBinding();
+        assertNotNull(binding);
+        
+        WebServiceFeature feature = binding.getFeature(FastInfosetFeature.class);
         assertNotNull(feature);
         
         assertTrue(feature.isEnabled());
@@ -77,7 +81,10 @@ public class FastInfosetModelConfiguratorProviderTest extends TestCase {
         WSDLPort port = service.getFirstPort();
         assertNotNull(port);
         
-        WebServiceFeature feature = port.getFeature(FastInfosetFeature.class);
+        WSDLBoundPortType binding = port.getBinding();
+        assertNotNull(binding);
+        
+        WebServiceFeature feature = binding.getFeature(FastInfosetFeature.class);
         assertNotNull(feature);
         
         assertFalse(feature.isEnabled());
@@ -97,7 +104,10 @@ public class FastInfosetModelConfiguratorProviderTest extends TestCase {
         WSDLPort port = service.getFirstPort();
         assertNotNull(port);
         
-        WebServiceFeature feature = port.getFeature(FastInfosetFeature.class);
+        WSDLBoundPortType binding = port.getBinding();
+        assertNotNull(binding);
+        
+        WebServiceFeature feature = binding.getFeature(FastInfosetFeature.class);
         assertNull(feature);
     }
     
