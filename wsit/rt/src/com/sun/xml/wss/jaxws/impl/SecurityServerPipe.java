@@ -195,6 +195,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
                 isSCCancelMessage = true;
             } else if (WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION.equals(action)) {
                 isTrustMessage = true;
+                packet.getMessage().getHeaders().getTo(addVer, pipeConfig.getBinding().getSOAPVersion());
                 
                 if(trustConfig != null){
                     packet.invocationProperties.put(Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS,trustConfig.iterator());
