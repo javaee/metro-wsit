@@ -58,10 +58,10 @@ public class FastInfosetModelConfiguratorProviderTest extends TestCase {
         WSDLPort port = service.getFirstPort();
         assertNotNull(port);
         
-        WSDLBoundPortType binding = port.getBinding();
-        assertNotNull(binding);
+        // WSDLBoundPortType binding = port.getBinding();
+        // assertNotNull(binding);
         
-        WebServiceFeature feature = binding.getFeature(FastInfosetFeature.class);
+        WebServiceFeature feature = port.getFeature(FastInfosetFeature.class);
         assertNotNull(feature);
         
         assertTrue(feature.isEnabled());
@@ -81,10 +81,10 @@ public class FastInfosetModelConfiguratorProviderTest extends TestCase {
         WSDLPort port = service.getFirstPort();
         assertNotNull(port);
         
-        WSDLBoundPortType binding = port.getBinding();
-        assertNotNull(binding);
+        // WSDLBoundPortType binding = port.getBinding();
+        // assertNotNull(binding);
         
-        WebServiceFeature feature = binding.getFeature(FastInfosetFeature.class);
+        WebServiceFeature feature = port.getFeature(FastInfosetFeature.class);
         assertNotNull(feature);
         
         assertFalse(feature.isEnabled());
@@ -104,10 +104,10 @@ public class FastInfosetModelConfiguratorProviderTest extends TestCase {
         WSDLPort port = service.getFirstPort();
         assertNotNull(port);
         
-        WSDLBoundPortType binding = port.getBinding();
-        assertNotNull(binding);
+        // WSDLBoundPortType binding = port.getBinding();
+        // assertNotNull(binding);
         
-        WebServiceFeature feature = binding.getFeature(FastInfosetFeature.class);
+        WebServiceFeature feature = port.getFeature(FastInfosetFeature.class);
         assertNull(feature);
     }
     
