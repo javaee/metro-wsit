@@ -23,11 +23,14 @@
 package com.sun.xml.ws.policy.jaxws.encoding;
 
 import com.sun.xml.ws.api.fastinfoset.FastInfosetFeature;
-import junit.framework.*;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.api.model.wsdl.WSDLService;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.jaxws.WSDLPolicyMapWrapper;
 import javax.xml.namespace.QName;
+import javax.xml.ws.WebServiceFeature;
+import junit.framework.TestCase;
 
 import static com.sun.xml.ws.policy.testutils.PolicyResourceLoader.getWSDLModel;
 
@@ -48,8 +51,16 @@ public class FastInfosetModelConfiguratorProviderTest extends TestCase {
         WSDLModel model = getWSDLModel("jaxws-spi/testModelConfigProviderFastInfosetEnabled.wsdl");
         PolicyMap policyMap = model.getExtension(WSDLPolicyMapWrapper.class).getPolicyMap();
         
-        assertTrue(model.getService(new QName("http://example.org","DictionaryService")).
-                getFirstPort().getFeature(FastInfosetFeature.class).isEnabled());
+        WSDLService service = model.getService(new QName("http://example.org","DictionaryService"));
+        assertNotNull(service);
+        
+        WSDLPort port = service.getFirstPort();
+        assertNotNull(port);
+        
+        WebServiceFeature feature = port.getFeature(FastInfosetFeature.class);
+        assertNotNull(feature);
+        
+        assertTrue(feature.isEnabled());
     }
     
     /**
@@ -60,8 +71,16 @@ public class FastInfosetModelConfiguratorProviderTest extends TestCase {
         WSDLModel model = getWSDLModel("jaxws-spi/testModelConfigProviderFastInfosetDisabled.wsdl");
         PolicyMap policyMap = model.getExtension(WSDLPolicyMapWrapper.class).getPolicyMap();
         
-        assertFalse(model.getService(new QName("http://example.org","DictionaryService")).
-                getFirstPort().getFeature(FastInfosetFeature.class).isEnabled());
+        WSDLService service = model.getService(new QName("http://example.org","DictionaryService"));
+        assertNotNull(service);
+        
+        WSDLPort port = service.getFirstPort();
+        assertNotNull(port);
+        
+        WebServiceFeature feature = port.getFeature(FastInfosetFeature.class);
+        assertNotNull(feature);
+        
+        assertFalse(feature.isEnabled());
     }
     
     /**
@@ -72,8 +91,14 @@ public class FastInfosetModelConfiguratorProviderTest extends TestCase {
         WSDLModel model = getWSDLModel("jaxws-spi/testModelConfigProviderFastInfosetPolicyNotPresent.wsdl");
         PolicyMap policyMap = model.getExtension(WSDLPolicyMapWrapper.class).getPolicyMap();
         
-        assertNull(model.getService(new QName("http://example.org","DictionaryService")).
-                getFirstPort().getFeature(FastInfosetFeature.class));
+        WSDLService service = model.getService(new QName("http://example.org","DictionaryService"));
+        assertNotNull(service);
+        
+        WSDLPort port = service.getFirstPort();
+        assertNotNull(port);
+        
+        WebServiceFeature feature = port.getFeature(FastInfosetFeature.class);
+        assertNull(feature);
     }
     
 }
