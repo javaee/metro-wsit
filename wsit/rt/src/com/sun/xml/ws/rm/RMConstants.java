@@ -36,6 +36,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
+import com.sun.xml.bind.api.JAXBRIContext; 
 import javax.xml.namespace.QName;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
 import java.net.URI;
@@ -71,12 +72,12 @@ public enum RMConstants {
     // TODO FIX ME ADDRESSING_FIXME
     // private static final JAXBContext jc;
     private JAXBContext jc;
-
+    
+    public JAXBRIContext jaxbricontext;
 
 
     private RMConstants(AddressingVersion addVersion) {
         this.addressingVersion = addVersion;
-
         init();
 
     }
@@ -93,8 +94,13 @@ public enum RMConstants {
         try {
 
             List<Class> classes = getClassesToBeBound();
-
             jc = JAXBContext.newInstance(classes.toArray(new Class[0]));
+            
+            Class[] clazzes = getHeaderClassesToBeBound().toArray(new Class[0]);
+            jaxbricontext = JAXBRIContext.newInstance(clazzes, 
+                                                        null, 
+                                                        null, false);
+            
         } catch (JAXBException e) {
             throw new Error(e);
         } catch(RMException e ) {
@@ -270,6 +276,10 @@ public enum RMConstants {
     public  JAXBContext getJAXBContext() {
         return jc;
     }
+    
+    public JAXBRIContext getJAXBRIContext() {
+        return jaxbricontext;
+    }
 
     public  Marshaller createMarshaller() {
         try {
@@ -296,16 +306,35 @@ public enum RMConstants {
         try {
             classes = new Class[]{
                     Class.forName(getPackageName()+ ".AckRequestedElement"),
-                    Class.forName(getPackageName()+ ".CreateSequenceElement"),
-                    Class.forName(getPackageName()+ ".CreateSequenceResponseElement"),
-                    Class.forName(getPackageName()+ ".SequenceAcknowledgementElement"),
                     Class.forName(getPackageName()+ ".SequenceElement"),
+                     Class.forName(getPackageName()+ ".SequenceAcknowledgementElement"),
+                    Class.forName(getPackageName()+ ".Identifier"),
+                    Class.forName(getPackageName()+ ".CreateSequenceElement"),
+                    Class.forName(getPackageName()+ ".CreateSequenceResponseElement"),                  
                     Class.forName(getPackageName()+ ".SequenceFaultElement"),
                     Class.forName(getPackageName()+ ".TerminateSequenceElement"),
-                    Class.forName(getPackageName()+ ".AcceptType"),
-                    Class.forName(getPackageName()+ ".Identifier"),
+                    Class.forName(getPackageName()+ ".AcceptType"),                    
                     Class.forName(getPackageName()+ ".OfferType"),
                     Class.forName(getPackageName()+ ".Expires")
+            };
+            classList = new ArrayList<Class>(Arrays.asList(classes));
+            classList.add(getAcksToClass());
+            return classList;
+        } catch (ClassNotFoundException e) {
+            throw new RMException("Cannot bind the following class with JAXBContext" + e);
+        }
+    }
+    
+     private  List<Class> getHeaderClassesToBeBound() throws RMException{
+        final Class[] classes;
+        final ArrayList<Class> classList;
+        try {
+            classes = new Class[]{
+                    Class.forName(getPackageName()+ ".AckRequestedElement"),
+                    Class.forName(getPackageName()+ ".SequenceElement"),
+                     Class.forName(getPackageName()+ ".SequenceAcknowledgementElement"),
+                    Class.forName(getPackageName()+ ".Identifier"),
+                    
             };
             classList = new ArrayList<Class>(Arrays.asList(classes));
             classList.add(getAcksToClass());
