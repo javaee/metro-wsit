@@ -18,8 +18,8 @@ for (i = 0 ; i <2; i++) {
 assertNotNull(response1);
 assertNotNull(response2);
 
-//assertEquals(response1,"String 1");
-//assertEquals(response2,"AnotherString 1");
+assertEquals(response1.trim(),"String 0 String 1");
+assertEquals(response2.trim(),"AnotherString 0 AnotherString 1");
 
 ((Closeable)port).close();
 ((Closeable)anotherPort).close();

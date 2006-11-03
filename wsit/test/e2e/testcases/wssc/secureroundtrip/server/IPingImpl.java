@@ -20,24 +20,52 @@
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 package wssc.secureroundtrip.server;
+import java.util.Hashtable;
 import javax.xml.bind.JAXBElement;
-import javax.jws.WebService;
 
 import javax.xml.bind.*;
-import javax.xml.namespace.*;
 
+import javax.annotation.Resource;
+import javax.jws.WebMethod;
 import javax.jws.WebService;
-import javax.jws.WebParam;
-import javax.xml.bind.JAXBElement;
+import javax.xml.ws.WebServiceContext;
+import java.util.Hashtable;
 
 @WebService(endpointInterface="wssc.secureroundtrip.server.IPingService")
 public class IPingImpl {
+
+    /* JAX-WS initializes context for each request */
+    @Resource
+    private WebServiceContext context;
+
+    /* Get Sesssion using well-known key in MessageContext */
+    private Hashtable getSession() {
+        return (Hashtable)context.getMessageContext()
+                .get("com.sun.xml.ws.session");
+    }
+
+    /* Get String associated with SessionID for current request */
+
+    private String getSessionData() {
+	Hashtable sess = getSession();
+        String ret = (String)sess.get("request_record");
+        return ret != null ? ret : "";
+
+    }
+
+    /* Store String associated with SessionID for current request */
+    private void setSessionData(String data) {
+        Hashtable session = getSession();
+        session.put("request_record", data);
+    }
 
     /**
      * @param String
      */
     public String echo(String message) {
+        /* append string to session data */
+        setSessionData(getSessionData() + " " + message);
         System.out.println("The message is here : " + message);
-        return message;
+        return getSessionData();
     }
 }
