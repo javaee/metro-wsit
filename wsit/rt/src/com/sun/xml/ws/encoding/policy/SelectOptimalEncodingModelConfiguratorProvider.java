@@ -23,7 +23,7 @@
 package com.sun.xml.ws.encoding.policy;
 
 import com.sun.istack.NotNull;
-import com.sun.xml.ws.api.fastinfoset.FastInfosetFeature;
+import com.sun.xml.ws.api.client.SelectOptimalEncodingFeature;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.model.wsdl.WSDLService;
@@ -42,16 +42,16 @@ import javax.xml.namespace.QName;
  *
  * @author Paul.Sandoz@Sun.Com
  */
-public class FastInfosetModelConfiguratorProvider implements ModelConfiguratorProvider{
+public class SelectOptimalEncodingModelConfiguratorProvider implements ModelConfiguratorProvider{
     
-    public static final QName fastInfosetAssertion = new QName(
-            "http://java.sun.com/xml/ns/wsit/2006/09/policy/fastinfoset/service",
-            "OptimizedFastInfosetSerialization");
+    public static final QName selectOptimalEncodingAssertion = new QName(
+            "http://java.sun.com/xml/ns/wsit/2006/09/policy/encoding/client",
+            "AutomaticallySelectOptimalEncoding");
         
     public static final QName enabled = new QName("enabled");
     
     /**
-     * Process FastInfoset policy assertions.
+     * Process SelectOptimalEncoding policy assertions.
      *
      * @param model the WSDL model.
      * @param policyMap the policy map.
@@ -62,24 +62,32 @@ public class FastInfosetModelConfiguratorProvider implements ModelConfiguratorPr
         
         for (WSDLService service:model.getServices().values()) {
             for (WSDLPort port : service.getPorts()) {
-                PolicyMapKey key = PolicyMap.createWsdlEndpointScopeKey(service.getName(),port.getName());
-                Policy policy = policyMap.getEndpointEffectivePolicy(key);
-                if (null!=policy && policy.contains(fastInfosetAssertion)) {
-                    Iterator <AssertionSet> assertions = policy.iterator();
-                    while(assertions.hasNext()){
-                        AssertionSet assertionSet = assertions.next();
-                        Iterator<PolicyAssertion> policyAssertion = assertionSet.iterator();
-                        while(policyAssertion.hasNext()){
-                            PolicyAssertion assertion = policyAssertion.next();
-                            if(assertion.getName().equals(fastInfosetAssertion)){
-                                String value = assertion.getAttributeValue(enabled);
-                                boolean isFastInfosetEnabled = Boolean.valueOf(value.trim());
-                                port.addFeature(new FastInfosetFeature(isFastInfosetEnabled));
-                            } // end-if non optional fast infoset assertion found
-                        } // next assertion
-                    } // next alternative
-                } // end-if policy contains fast infoset assertion
+                configure(port, policyMap);
             } // end foreach port
         } // end foreach service
+    }
+    
+    public void configure(@NotNull WSDLPort port, @NotNull PolicyMap policyMap) throws PolicyException {
+        assert port != null;
+        assert policyMap != null;
+        
+        PolicyMapKey key = PolicyMap.createWsdlEndpointScopeKey(port.getOwner().getName(),port.getName());
+        Policy policy = policyMap.getEndpointEffectivePolicy(key);
+        if (null!=policy && policy.contains(selectOptimalEncodingAssertion)) {
+            Iterator <AssertionSet> assertions = policy.iterator();
+            while(assertions.hasNext()){
+                AssertionSet assertionSet = assertions.next();
+                Iterator<PolicyAssertion> policyAssertion = assertionSet.iterator();
+                while(policyAssertion.hasNext()){
+                    PolicyAssertion assertion = policyAssertion.next();
+                    if(assertion.getName().equals(selectOptimalEncodingAssertion)){
+                        String value = assertion.getAttributeValue(enabled);
+                        boolean isSelectOptimalEncodingEnabled = Boolean.valueOf(value.trim());
+                        port.addFeature(
+                                new SelectOptimalEncodingFeature(isSelectOptimalEncodingEnabled));
+                    } 
+                } 
+            } 
+        }
     }
 }
