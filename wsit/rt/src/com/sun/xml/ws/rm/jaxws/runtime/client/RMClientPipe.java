@@ -120,7 +120,7 @@ public class RMClientPipe
      * Pool of pipes to be used for invoking the tail of the
      * Pipeline.
      */
-    private final ProcessorPool<RMClientPipe> processorPool;
+    private  ProcessorPool<RMClientPipe> processorPool;
     
    
     /**
@@ -517,6 +517,10 @@ public class RMClientPipe
             //lazily means that the ClientSession will not  be available to the client
             //before the first request is processed.
 	    initialize(packet);
+            
+            processorPool = 
+                    new ProcessorPool<RMClientPipe>(this,
+                        outboundSequence.getTransferWindowSize());
             
              //If the request is being sent by RMSource.createSequence, we are done.
             Object seq = packet.invocationProperties.get(Constants.createSequenceProperty);

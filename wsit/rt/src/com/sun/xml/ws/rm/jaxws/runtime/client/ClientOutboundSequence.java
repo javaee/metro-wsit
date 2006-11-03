@@ -168,7 +168,7 @@ public class ClientOutboundSequence extends OutboundSequence {
      * the limit is not enforced, but as the number of stored messages approaches
      * the limit, resends and ackRequests occur more frequently.
      */
-    private int getTransferWindowSize() {
+    public int getTransferWindowSize() {
        //Use server size receive buffer size for now.  Might
        //want to make this configurable.
        return config.getBufferSize();
