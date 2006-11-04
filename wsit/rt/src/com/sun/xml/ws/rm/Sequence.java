@@ -1,5 +1,5 @@
 /*
- * $Id: Sequence.java,v 1.5 2006-11-03 18:11:50 mikeg Exp $
+ * $Id: Sequence.java,v 1.6 2006-11-04 22:50:42 mikeg Exp $
  */
 
 /*
@@ -157,6 +157,10 @@ public class Sequence {
                     BufferFullException,
                     DuplicateMessageException {
        
+        //record the index and sequence in the message
+        m.setMessageNumber(i);
+        m.setSequence(this);
+        
         if (i <= 0) {
             throw new InvalidMessageNumberException();
         }
@@ -186,10 +190,6 @@ public class Sequence {
             nextIndex = i + 1;
         }
        
-        //record the index in the message
-        m.setMessageNumber(i);
-        m.setSequence(this);
-        
         storedMessages++;
         
         return i;
