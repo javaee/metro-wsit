@@ -108,7 +108,8 @@ public class InboundMessageProcessor {
                     if (messageNumber > Integer.MAX_VALUE){
                         throw new MessageNumberRolloverException(String.format(Constants.MESSAGE_NUMBER_ROLLOVER_TEXT,messageNumber),messageNumber);
                     }
-                     inseq =   provider.getInboundSequence(seqid);
+                    
+                    inseq =   provider.getInboundSequence(seqid);
                     
                     if (inseq != null) {
                         inseq.set(messageNumber, message);
@@ -158,12 +159,16 @@ public class InboundMessageProcessor {
                     }
 
                 } else {
+                    //FIXME - We need to be checking whether this is a ServerInboundSequence
+                    //in a port with a two-way operation.  This is the case where MS
+                    //puts a SequenceAcknowledgement on every message.
+                    
                     //Need to check this with the latest CTP
                     //Currently with Dec CTP the client message
                     //does not have AckRequested element
                     // but they are expecting a SequenceAcknowledgement
                     //Hack for now
-
+                    
                     if (inseq != null) {
                         
                         inseq.handleAckRequested(null, marshaller);
@@ -171,6 +176,7 @@ public class InboundMessageProcessor {
                         //we can get here if there is no sequence header.  Perhaps this
                         //is a ClientInboundSequence where the OutboundSequence has no two-ways
                     }
+                    
                 }
 
                 
