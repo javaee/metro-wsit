@@ -124,7 +124,7 @@ public class SequenceConfig {
         ordered = false;
         allowDuplicates = false;
         inactivityTimeout = 600000;
-        flowControl = true;
+        flowControl = false;
         bufferSize = 32;
         soapVersion = SOAPVersion.SOAP_12;
         
