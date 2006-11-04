@@ -590,11 +590,8 @@ public class ClientOutboundSequence extends OutboundSequence {
                 //
                 //In both cases the sequence is of no further use.  We
                 //will assume for now that this is already the case.
-                
                 logger.log(Level.FINE, "Exception from sending heartbeat message for sequence " +
                         sequence.getId(), e);
-                //e.printStackTrace();
-         
                 try {
                     RMSource.getRMSource().removeOutboundSequence(sequence);
                 } catch (Exception ex){
