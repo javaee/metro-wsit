@@ -1,5 +1,5 @@
 /*
- * $Id: Message.java,v 1.2 2006-10-01 22:17:19 mikeg Exp $
+ * $Id: Message.java,v 1.3 2006-11-04 22:49:57 mikeg Exp $
  */
 
 /*
@@ -97,6 +97,12 @@ public class Message {
      * AcksTo has to handle Acknowledgements differently in this case.
      */
     public boolean isTwoWayRequest = false;
+    
+    /**
+     * Set in empty message used to piggyback response 
+     * headers on a one-way response.
+     */
+    public boolean isOneWayResponse = false;
     
     
     /**
