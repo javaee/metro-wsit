@@ -93,6 +93,13 @@ public abstract class PipeBase<PROVIDER extends RMProvider,
                 new com.sun.xml.ws.rm.Message(message);
         
         Object mn = packet.invocationProperties.get(Constants.messageNumberProperty);
+        Object oneWayResponse = packet.invocationProperties.get("onewayresponse");
+        
+        if (oneWayResponse != null) {
+            //don't want to add this message to a sequence.
+            msg.isOneWayResponse = true;
+        }
+        
         if (mn instanceof Integer) {
             msg.setMessageNumber((Integer)mn);
         }
@@ -126,6 +133,5 @@ public abstract class PipeBase<PROVIDER extends RMProvider,
     public abstract Packet process(Packet packet);
     public abstract void preDestroy();
     public abstract Pipe copy(PipeCloner cloner);
-
 
 }
