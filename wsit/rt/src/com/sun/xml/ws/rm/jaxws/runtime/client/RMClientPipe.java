@@ -365,7 +365,7 @@ public class RMClientPipe
             //HACK - Do this now.  Any marshallings of the message need to be
             //done on this Thread.  Tbis will at least keep JAXBMessage.sniff
             //from doing marshallings.
-            copy.isOneWay(port);
+            //copy.isOneWay(port);
 
             
             //We are sending one-way requests in the background.  The
@@ -387,11 +387,16 @@ public class RMClientPipe
                 return null;
 
             } else {
-                logger.log(Level.SEVERE, "Unexpected exception wrapped in WS exception ", e);
+                logger.log(Level.SEVERE, 
+                           "Unexpected exception wrapped in WS exception ", e);
+                //fill the gap in the sequence
+                message.complete();
                 throw e;
             }
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Unexpected exception in trySend " , e);
+            //fill the gap in the sequence
+            message.complete();
             throw new WebServiceException(e);
         }
 
