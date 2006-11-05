@@ -138,18 +138,6 @@
          </zip>
     </target>
     
-    <macrodef name="updateManifestWithVersion"
-            description="updates a jar manifest file with the version information">
-      <attribute name="file" />
-      <sequential>
-        <manifest mode="update" file="@{file}">
-          <attribute name="Build-Id" value="${build.id}" />
-          <attribute name="Build-Version" value="${build.version}" />
-          <attribute name="Major-Version" value="${release.impl.version}" />
-        </manifest>
-      </sequential>
-    </macrodef>
-
     <target name="-post-compile-test"
             description="Run unit tests of dependent projects">
         <ant dir="${rt.dir}"
