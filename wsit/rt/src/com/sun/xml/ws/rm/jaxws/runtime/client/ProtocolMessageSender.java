@@ -223,7 +223,8 @@ public class ProtocolMessageSender {
 
         Message request = createEmptyMessage(version);
         SequenceElement el = createLastHeader(seq);
-        request.getHeaders().add(Headers.create(version,marshaller,el));
+        //request.getHeaders().add(Headers.create(version,marshaller,el));
+        request.getHeaders().add(createHeader(el));
 
         seq.setLast();
 
@@ -262,7 +263,8 @@ public class ProtocolMessageSender {
         try {
             Message request = createEmptyMessage(version);
             AckRequestedElement el = createAckRequestedElement(seq);
-            request.getHeaders().add(Headers.create(version,marshaller,el));
+            //request.getHeaders().add(Headers.create(version,marshaller,el));
+            request.getHeaders().add(createHeader(el));
 
 
             Packet requestPacket = new Packet(request);
@@ -370,6 +372,10 @@ public class ProtocolMessageSender {
 
     public RMConstants getConstants() {
         return constants;
+    }
+    
+    private com.sun.xml.ws.api.message.Header createHeader(Object obj) {
+        return com.sun.xml.ws.api.message.Headers.create(constants.getJAXBRIContext(), obj);
     }
 
     

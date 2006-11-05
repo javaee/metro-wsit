@@ -164,7 +164,10 @@ public class RMServerPipe extends PipeBase<RMDestination,
                 soapFault = newCreateSequenceRefusedFault(e);
             } catch (TerminateSequenceException e ) {
                 soapFault = newSequenceTerminatedFault(e);
+            }  catch (InvalidSequenceException e){
+                soapFault = newUnknownSequenceFault(e);
             }
+            
             if (ret != null) {
                 //the contract of handleProtocolMessage is to return null if messager is non-protocol
                 //message or protocol message is piggybacked on an application message.
@@ -186,6 +189,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
 
                 //SequenceFault is to be added for only SOAP 1.1
                 if (binding.getSOAPVersion() == SOAPVersion.SOAP_11) {
+                    //FIXME - need JAXBRIContext that can marshall SequenceFaultElement
                     Header header = Headers.create(binding.getSOAPVersion(),marshaller, new SequenceFaultElement());
                     m.getHeaders().add(header);
                 }
@@ -267,6 +271,10 @@ public class RMServerPipe extends PipeBase<RMDestination,
                 //Give it one.
                 emptyMessage = com.sun.xml.ws.api.message.Messages.createEmpty(config.getSoapVersion());
                 ret.setMessage(emptyMessage);
+                
+                //propogate this information so handleOutboundMessage will not
+                //add this to the outbound sequence, if any.
+                ret.invocationProperties.put("onewayresponse",true);
             }
 
             //If ordered delivery is configured, unblock the next message in the sequence
@@ -307,9 +315,10 @@ public class RMServerPipe extends PipeBase<RMDestination,
                 // MS client expects SequenceAcknowledgement action incase of oneway messages
                 if (responseMessage == null && ret.getMessage() != null) {
                         HeaderList headerList = ret.getMessage().getHeaders();
+                        
                         headerList.add(Headers.create(constants.getAddressingVersion().actionTag,
                                                         Constants.SEQUENCE_ACKNOWLEDGEMENT_ACTION));
-                        
+                         
                 }
             }
 
@@ -329,10 +338,15 @@ public class RMServerPipe extends PipeBase<RMDestination,
                 return ret;
             }
 
-            //DISCUSS - How to set status code
             //handleInboundMessage shouldn't let inboundSequence be null.
             try {
-                return generateAckMessage(packet, inboundSequence);
+                ServerInboundSequence seq = (ServerInboundSequence)e.getSequence();
+                if (seq != null) {
+                    return generateAckMessage(packet, seq);
+                } else {
+                    //unreachable
+                    return null;
+                }
             } catch (RMException ee) {
                 throw new WebServiceException(Messages.ACKNOWLEDGEMENT_MESSAGE_EXCEPTION.format() +e);
             }
@@ -654,9 +668,10 @@ public class RMServerPipe extends PipeBase<RMDestination,
                     config.getSoapVersion(), Constants.TERMINATE_SEQUENCE_ACTION);
              
             SequenceAcknowledgementElement element = seq.generateSequenceAcknowledgement(null, marshaller);
-            Header header = Headers.create(config.getSoapVersion(),marshaller,element);
+            //Header header = Headers.create(config.getSoapVersion(),marshaller,element);
             //Header actionHeader = Headers.create(constants.getAddressingVersion().actionTag,
             //                                       Constants.TERMINATE_SEQUENCE_ACTION);
+            Header header = createHeader(element);
             response.getHeaders().add(header);
             //response.getHeaders().add(actionHeader);
 
@@ -977,7 +992,8 @@ public class RMServerPipe extends PipeBase<RMDestination,
 
         //construct the SequenceAcknowledgement header and  add it to thge message.
         SequenceAcknowledgementElement element = seq.generateSequenceAcknowledgement(null, marshaller);
-        Header header = Headers.create(config.getSoapVersion(),marshaller,element);
+        //Header header = Headers.create(config.getSoapVersion(),marshaller,element);
+        Header header = createHeader(element);
         message.getHeaders().add(header);
         if (action != null) {
             Header h = Headers.create(constants.getAddressingVersion().actionTag,
@@ -1099,6 +1115,10 @@ public class RMServerPipe extends PipeBase<RMDestination,
             throw new RMException(se);
         }
 
+    }
+    
+    private Header createHeader(Object obj) {
+        return Headers.create(constants.getJAXBRIContext(), obj);
     }
 
     /**
