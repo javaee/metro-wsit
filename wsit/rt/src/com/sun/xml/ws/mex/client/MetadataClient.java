@@ -46,6 +46,7 @@ import org.w3c.dom.NodeList;
 
 import static com.sun.xml.ws.mex.MetadataConstants.ERROR_LOG_LEVEL;
 import static com.sun.xml.ws.mex.MetadataConstants.WSDL_DIALECT;
+import static com.sun.xml.ws.mex.MetadataConstants.SCHEMA_DIALECT;
 
 /**
  * Class used for retrieving metadata at runtime. The intended usage is:
@@ -268,6 +269,10 @@ public class MetadataClient {
             if (section.getDialect().equals(WSDL_DIALECT) &&
                 section.getAny() != null) {
                 cleanWSDLNode((Node) section.getAny());
+            }
+            else if(section.getDialect().equals(SCHEMA_DIALECT) &&
+                section.getAny() != null){
+                cleanSchemaNode((Node) section.getAny());
             }
         }
     }
