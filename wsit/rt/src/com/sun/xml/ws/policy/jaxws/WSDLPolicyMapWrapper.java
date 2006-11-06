@@ -22,7 +22,6 @@
 
 package com.sun.xml.ws.policy.jaxws;
 
-import java.net.URL;
 import javax.xml.namespace.QName;
 import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.ws.WebServiceException;
@@ -40,6 +39,7 @@ import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import com.sun.xml.ws.policy.jaxws.spi.ModelConfiguratorProvider;
 import com.sun.xml.ws.policy.jaxws.spi.PolicyMapUpdateProvider;
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
+import java.net.URL;
 
 /**
  * TODO: write doc
@@ -82,22 +82,11 @@ public class WSDLPolicyMapWrapper implements WSDLExtension {
     public PolicyMap getPolicyMap() {
         return policyMap;
     }
-    
-    public void addClientConfigToMap(URL clientWsitConfig) throws PolicyException {
+        
+    public void addClientConfigToMap(URL clientWsitConfig, PolicyMap clientPolicyMap) throws PolicyException {
         logger.entering("addClientConfigToMap");
         
-        if (clientWsitConfig == null) {
-            // TODO: move this message into PipelineAssemblerFactoryImpl class
-            logger.config("addClientConfigToMap", "Optional client configuration file URL is missing. No client configuration is processed.");
-            return;
-        }
-        
-        logger.fine("addClientConfigToMap", "wsit-client.xml resource url: '" + clientWsitConfig + "'");
-        
         try {
-            PolicyMap clientPolicyMap = PolicyConfigParser.parse(clientWsitConfig, true);
-            logger.fine("addClientConfigToMap", "Client configuration resource parsed into a policy map: " + clientPolicyMap);
-            
             for (PolicyMapKey key : clientPolicyMap.getAllServiceScopeKeys()) {
                 Policy policy = clientPolicyMap.getServiceEffectivePolicy(key);
                 // setting subject to provided URL of client WSIT config
@@ -133,12 +122,12 @@ public class WSDLPolicyMapWrapper implements WSDLExtension {
                 // setting subject to provided URL of client WSIT config
                 mapExtender.putFaultMessageSubject(key, new PolicySubject(clientWsitConfig, policy));
             }
-            logger.fine("addClientConfigToMap", "Client configuration policies transfered into final policy map: " + policyMap);
+            logger.fine("addClientToServerMap", "Client configuration policies transfered into final policy map: " + policyMap);
         } catch (FactoryConfigurationError ex) {
             throw new PolicyException(ex);
         }
         
-        logger.exiting("addClientConfigToMap");
+        logger.exiting("addClientToServerMap");
     }
     
     public void doAlternativeSelection() {

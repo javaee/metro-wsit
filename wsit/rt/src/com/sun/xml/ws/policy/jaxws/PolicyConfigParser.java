@@ -36,6 +36,7 @@ import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.server.SDDocumentSource;
 import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
 import com.sun.xml.ws.api.wsdl.parser.XMLEntityResolver.Parser;
+import com.sun.xml.ws.policy.PolicyConstants;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapMutator;
@@ -113,7 +114,32 @@ public final class PolicyConfigParser {
      */
     public static PolicyMap parse(URL configFileUrl, boolean isClient, PolicyMapMutator... mutators) throws PolicyException {
         logger.entering("parse", new Object[] {configFileUrl, mutators});
+        WSDLModel model = parseModel(configFileUrl, isClient, mutators);
+        WSDLPolicyMapWrapper wrapper = model.getExtension(WSDLPolicyMapWrapper.class);
+
         PolicyMap map = null;
+        if (wrapper != null) {
+            map = wrapper.getPolicyMap();
+        }
+        logger.exiting("parse", map);
+        return map;
+    }
+    
+    
+    /**
+     * Reads a WSIT config from an XMLStreamBuffer, parses it and returns a WSDLModel
+     * with a PolicyMap attached. It gives you a chance to register policy map mutators
+     * to the newly created map.
+     *
+     * @param configFileUrl URL of the config file resource that should be parsed. Must not be {@code null}.
+     * @param isClient must be true if this method is invoked to parse client configuration, false otherwise
+     * @param mutators to be registered with the policy map
+     *
+     * @return A WSDLModel populated from the WSIT config file
+     */
+    public static WSDLModel parseModel(URL configFileUrl, boolean isClient, PolicyMapMutator... mutators) throws PolicyException {
+        logger.entering("parseModel", new Object[] {configFileUrl, mutators});
+        WSDLModel model = null;
         try {
             XMLStreamBuffer configFileSource = initConfigFileSource(configFileUrl);
 
@@ -123,16 +149,9 @@ public final class PolicyConfigParser {
 
             SDDocumentSource doc = SDDocumentSource.create(configFileUrl, configFileSource);
             Parser parser =  new Parser(doc);
-            WSDLModel model = WSDLModel.WSDLParser.parse(parser,
-                                                         new PolicyConfigResolver(), isClient,
-                                                         new WSDLParserExtension[] { new PolicyWSDLParserExtension(true, mutators) } );
-            WSDLPolicyMapWrapper wrapper = model.getExtension(WSDLPolicyMapWrapper.class);
-            
-            if (wrapper != null) {
-                map = wrapper.getPolicyMap();
-            }
-            
-            return map;
+            model = WSDLModel.WSDLParser.parse(parser, new PolicyConfigResolver(), isClient,
+                                               new WSDLParserExtension[] { new PolicyWSDLParserExtension(true, mutators) } );
+            return model;
         } catch (XMLStreamException ex) {
             throw new PolicyException(Messages.WSDL_IMPORT_FAILED.format(), ex);
         } catch (IOException ex) {
@@ -140,10 +159,10 @@ public final class PolicyConfigParser {
         } catch (SAXException ex) {
             throw new PolicyException(Messages.WSDL_IMPORT_FAILED.format(), ex);
         } finally {
-            logger.exiting("parse", map);
+            logger.exiting("parseModel", model);
         }
     }
-    
+
     
     /**
      * Reads a WSIT config from an XMLStreamBuffer, parses it and returns a PolicyMap.

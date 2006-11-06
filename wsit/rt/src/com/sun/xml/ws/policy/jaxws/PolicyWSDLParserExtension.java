@@ -21,10 +21,37 @@
  */
 package com.sun.xml.ws.policy.jaxws;
 
+import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
+import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
+import com.sun.xml.ws.api.model.wsdl.WSDLFault;
+import com.sun.xml.ws.api.model.wsdl.WSDLInput;
+import com.sun.xml.ws.api.model.wsdl.WSDLMessage;
 import com.sun.xml.ws.api.model.wsdl.WSDLObject;
+import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
+import com.sun.xml.ws.api.model.wsdl.WSDLOutput;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.api.model.wsdl.WSDLPortType;
+import com.sun.xml.ws.api.model.wsdl.WSDLService;
+import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
+import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtensionContext;
+import com.sun.xml.ws.policy.EffectivePolicyModifier;
+import com.sun.xml.ws.policy.PolicyConstants;
+import com.sun.xml.ws.policy.PolicyException;
+import com.sun.xml.ws.policy.PolicyMap;
+import com.sun.xml.ws.policy.PolicyMapExtender;
+import com.sun.xml.ws.policy.PolicyMapMutator;
+import com.sun.xml.ws.policy.privateutil.PolicyLogger;
+import com.sun.xml.ws.policy.privateutil.PolicyUtils;
+import com.sun.xml.ws.policy.sourcemodel.PolicyModelUnmarshaller;
+import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
+import com.sun.xml.ws.policy.sourcemodel.PolicySourceModelContext;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringReader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.List;
 import java.util.HashSet;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -37,33 +64,6 @@ import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
-import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
-import com.sun.xml.ws.api.model.wsdl.WSDLFault;
-import com.sun.xml.ws.api.model.wsdl.WSDLInput;
-import com.sun.xml.ws.api.model.wsdl.WSDLMessage;
-import com.sun.xml.ws.api.model.wsdl.WSDLModel;
-import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
-import com.sun.xml.ws.api.model.wsdl.WSDLOutput;
-import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.api.model.wsdl.WSDLPortType;
-import com.sun.xml.ws.api.model.wsdl.WSDLService;
-import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
-import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtensionContext;
-import com.sun.xml.ws.policy.EffectivePolicyModifier;
-import com.sun.xml.ws.policy.PolicyConstants;
-import com.sun.xml.ws.policy.PolicyException;
-import com.sun.xml.ws.policy.PolicyMapExtender;
-import com.sun.xml.ws.policy.PolicyMapMutator;
-import com.sun.xml.ws.policy.privateutil.PolicyLogger;
-import com.sun.xml.ws.policy.privateutil.PolicyUtils;
-import com.sun.xml.ws.policy.sourcemodel.PolicyModelUnmarshaller;
-import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
-import com.sun.xml.ws.policy.sourcemodel.PolicySourceModelContext;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.List;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.ws.WebServiceException;
 
@@ -704,6 +704,7 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
                     modelContext.addModel(new URI(policyUri), sourceModel);
                 } catch (URISyntaxException use) {
                     logger.severe("finished", use.getMessage(), use);
+                    throw new WebServiceException(use);
                 }
             }
             // iterating over all services and binding all the policies read before
@@ -937,6 +938,7 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
             
         } catch(PolicyException pe) {
             logger.severe("finished",pe.getMessage(),pe);
+            throw new WebServiceException(pe);
         }
         logger.exiting("finished");
     }
@@ -958,7 +960,7 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
             reader.next();
             return null;
         } catch(XMLStreamException e) {
-            return null;
+            throw new WebServiceException(e);
         }
     }
     
@@ -1111,10 +1113,10 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
             } else if (policyRec.policyModel.getPolicyName() != null) {
                 policyRec.uri = policyRec.policyModel.getPolicyName();
             }
-        }catch(Exception e){
-            logger.log(Level.SEVERE,"definitionsElements","Exception while reading policy expression",e);
-            logger.log(Level.SEVERE, "definitionsElements",elementCode.toString());
-            return null;
+        } catch(Exception e) {
+            logger.log(Level.SEVERE, "definitionsElements", "Exception while reading policy expression", e);
+            logger.log(Level.SEVERE, "definitionsElements", elementCode.toString());
+            throw new WebServiceException(e);
         }
         
         return policyRec;
@@ -1129,7 +1131,15 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
                 String clientCfgFileName = PolicyUtils.ConfigFile.generateFullName(PolicyConstants.CLIENT_CONFIGURATION_IDENTIFIER);
                 try {
                     URL clientCfgFileUrl = PolicyUtils.ConfigFile.loadAsResource(clientCfgFileName, null);
-                    mapWrapper.addClientConfigToMap(clientCfgFileUrl);
+                    if (clientCfgFileUrl == null) {
+                        logger.config("postFinished", "Optional client configuration file URL is missing. No client configuration is processed.");
+                    }
+                    else {
+                        logger.config("postFinished", "wsit-client.xml resource url: '" + clientCfgFileUrl + "'");
+                        PolicyMap clientPolicyMap = PolicyConfigParser.parse(clientCfgFileUrl, true);
+                        logger.fine("postFinished", "Client configuration resource parsed into a policy map: " + clientPolicyMap);
+                        mapWrapper.addClientConfigToMap(clientCfgFileUrl, clientPolicyMap);
+                    }
                 } catch (PolicyException e) {
                     logger.fine("postFinished", e.getMessage());
                     throw new WebServiceException(e);
@@ -1140,9 +1150,10 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
                 logger.fine("postFinished", "invoking alternative selection");
                 mapWrapper.doAlternativeSelection();
             }
+
             mapWrapper.configureModel(context.getWSDLModel());
         }
         logger.exiting("postFinished");
     }
-    
+
 }
