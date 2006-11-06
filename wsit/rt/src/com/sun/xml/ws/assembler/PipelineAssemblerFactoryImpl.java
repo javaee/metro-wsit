@@ -299,7 +299,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
                     p = new SecurityServerPipe(config, p);
                 } else {
                     //look for XWSS 2.0 Style Security
-                    if (policyMap.isEmpty() && isSecurityConfigPresent(context)) {
+                    if (((null == policyMap) || policyMap.isEmpty()) && isSecurityConfigPresent(context)) {
                         p = initializeXWSSServerPipe(context.getEndpoint(), context.getWsdlModel(), p);
                     }
                 }
