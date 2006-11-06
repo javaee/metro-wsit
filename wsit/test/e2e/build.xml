@@ -23,7 +23,7 @@
 -->
 
 <!--
- $Id: build.xml,v 1.23 2006-10-30 11:27:34 ritzmann Exp $
+ $Id: build.xml,v 1.24 2006-11-06 19:06:16 hofsass Exp $
 
  Copyright (c) 2005 Sun Microsystems, Inc.
  All rights reserved.
@@ -55,6 +55,22 @@
         <get src="http://kohsuke.sfbay/hudson/job/wsit-javanet/lastSuccessfulBuild/artifact/tools/build/webservices-tools-src.zip"
              dest="wsit-image/webservices-tools-src.zip"/>
         <get src="http://kohsuke.sfbay/hudson/job/wsit-javanet/lastSuccessfulBuild/artifact/lib/runtime/jaxws-local-transport.jar"
+             dest="wsit-image/runtime/jaxws-local-transport.jar"/>
+    </target>
+
+    <target name="get-wsit-bleedingedge-hudson" description="internal: retrieve last successful build of WSIT from hudson" unless="noget">
+        <mkdir dir="wsit-image"/>
+        <mkdir dir="wsit-image/runtime"/>
+        
+        <get src="http://kohsuke.sfbay/hudson/job/wsit-javanet-bleedingedge/lastSuccessfulBuild/artifact/dist/jax-ws-latest-wsit.zip"
+             dest="wsit-image/jax-ws-latest-wsit.zip"/>
+        <unzip src="wsit-image/jax-ws-latest-wsit.zip" dest="wsit-image"/>
+        
+        <get src="http://kohsuke.sfbay/hudson/job/wsit-javanet-bleedingedge/lastSuccessfulBuild/artifact/rt/build/webservices-src.zip"
+             dest="wsit-image/webservices-src.zip"/>
+        <get src="http://kohsuke.sfbay/hudson/job/wsit-javanet-bleedingedge/lastSuccessfulBuild/artifact/tools/build/webservices-tools-src.zip"
+             dest="wsit-image/webservices-tools-src.zip"/>
+        <get src="http://kohsuke.sfbay/hudson/job/wsit-javanet-bleedingedge/lastSuccessfulBuild/artifact/lib/runtime/jaxws-local-transport.jar"
              dest="wsit-image/runtime/jaxws-local-transport.jar"/>
     </target>
     
@@ -126,6 +142,22 @@
     <target name="main-hudson"
             description="Invoke unit test from Hudson. This downloads WSIT from Hudson, as opposed to test the local one"
             depends="get-wsit-hudson">
+        
+        <run-tests>
+            <arguments>
+                <arg value="-r" />
+                <arg path="${testcases}" />
+                <arg value="-cp:wsit-image" />
+                <arg path="wsit-image/jax-ws-latest-wsit" />
+                <arg value="-transport" />
+                <arg path="wsit-image/runtime/jaxws-local-transport.jar" />
+            </arguments>
+        </run-tests>
+    </target>
+    
+    <target name="main-bleedingedge-hudson"
+            description="Invoke unit test from Hudson. This downloads WSIT (wsit-javanet-bleedingedge) from Hudson, as opposed to test the local one"
+            depends="get-wsit-bleedingedge-hudson">
         
         <run-tests>
             <arguments>
