@@ -68,6 +68,7 @@ import com.sun.xml.ws.security.trust.util.WSTrustUtil;
 import com.sun.xml.ws.security.wsu10.AttributedDateTime;
 
 import com.sun.xml.wss.SubjectAccessor;
+import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.impl.misc.SecurityUtil;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -95,7 +96,7 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
             = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'sss'Z'");
     
     private static final int DEFAULT_KEY_SIZE = 256;
-    private static final String SAML_VALUE_TYPE = "http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.0#SAMLAssertionID";
+
     
     public void init(Configuration config) {
         this.config = (TrustSPMetadata)config;
@@ -221,9 +222,11 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
         // Create RequestedSecurityToken with SAML assertion
         String assertionId = "uuid-" + UUID.randomUUID().toString();
         RequestedSecurityToken st = eleFac.createRequestedSecurityToken();
+        //Token samlToken = createSAMLAssertion(appliesTo, tokenType, keyType, assertionId, config.getIssuer(), claimedAttrs, context);
+        //st.setToken(samlToken);
         
         // Create RequestedAttachedReference and RequestedUnattachedReference
-        SecurityTokenReference samlReference = createSecurityTokenReference(assertionId);
+        SecurityTokenReference samlReference = createSecurityTokenReference(assertionId, tokenType);
         RequestedAttachedReference raRef =  eleFac.createRequestedAttachedReference(samlReference);
         RequestedUnattachedReference ruRef =  eleFac.createRequestedUnattachedReference(samlReference);
         
@@ -237,10 +240,10 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
             rstr.setKeySize(keySize);
         }
         
-        String issuer = config.getIssuer();
+       String issuer = config.getIssuer();
         
-        Token samlToken = createSAMLAssertion(appliesTo, tokenType, keyType, assertionId, issuer, claimedAttrs, context);
-        rstr.getRequestedSecurityToken().setToken(samlToken);
+       Token samlToken = createSAMLAssertion(appliesTo, tokenType, keyType, assertionId, issuer, claimedAttrs, context);
+       rstr.getRequestedSecurityToken().setToken(samlToken);
         
         // Populate IssuedTokenContext
         context.setSecurityToken(samlToken);
@@ -373,8 +376,15 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
         }
     }
     
-    private SecurityTokenReference createSecurityTokenReference(String id){
-        KeyIdentifier ref = eleFac.createKeyIdentifier(SAML_VALUE_TYPE, null);
+    private SecurityTokenReference createSecurityTokenReference(String id, String tokenType){
+        String valueType = null;
+         if (WSTrustConstants.SAML10_ASSERTION_TOKEN_TYPE.equals(tokenType)||
+                WSTrustConstants.SAML11_ASSERTION_TOKEN_TYPE.equals(tokenType)){
+                valueType = MessageConstants.WSSE_SAML_KEY_IDENTIFIER_VALUE_TYPE;
+            } else if (WSTrustConstants.SAML20_ASSERTION_TOKEN_TYPE.equals(tokenType)){
+                valueType = MessageConstants.WSSE_SAML_v2_0_KEY_IDENTIFIER_VALUE_TYPE;
+            }
+        KeyIdentifier ref = eleFac.createKeyIdentifier(valueType, null);
         ref.setValue(id);
         return eleFac.createSecurityTokenReference(ref);
     }
