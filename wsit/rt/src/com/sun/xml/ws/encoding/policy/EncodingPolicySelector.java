@@ -46,6 +46,7 @@ public class EncodingPolicySelector implements PolicySelector{
                 "http://schemas.xmlsoap.org/ws/2004/09/policy/encoding",
                 "Utf816FFFECharacterEncoding"));
         supportedAssertions.add(FastInfosetModelConfiguratorProvider.fastInfosetAssertion);
+        supportedAssertions.add(SelectOptimalEncodingModelConfiguratorProvider.selectOptimalEncodingAssertion);
     }
     
     /**
