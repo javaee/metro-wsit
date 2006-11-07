@@ -105,7 +105,8 @@ import static com.sun.xml.wss.jaxws.impl.Constants.SUN_WSS_SECURITY_CLIENT_POLIC
  */
 public class SecurityServerPipe extends SecurityPipeBase {
     
-    private static SessionManager sessionManager;
+    private SessionManager sessionManager =
+                            SessionManager.getSessionManager();
     private WSDLBoundOperation cachedOperation = null;
     private Set trustConfig = null;
     private CallbackHandler handler = null;
@@ -113,8 +114,6 @@ public class SecurityServerPipe extends SecurityPipeBase {
     // Creates a new instance of SecurityServerPipe
     public SecurityServerPipe(ServerPipeConfiguration config,Pipe nextPipe) {
         super(config,nextPipe);
-        sessionManager =
-                SessionManager.getSessionManager();
         
         try {
             Iterator it = inMessagePolicyMap.values().iterator();
