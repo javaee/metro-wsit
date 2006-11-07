@@ -117,12 +117,7 @@ public class TCPConnectionImpl extends DistributedPropertySet implements WebServ
     }
 
     public String getWSDLAddress(@NotNull Packet request, @NotNull WSEndpoint endpoint) {
-        throw new UnsupportedOperationException();
-//        String eprAddress = getEPRAddress(request,endpoint);
-//        if(adapter.getEndpoint().getPort() != null)
-//            return eprAddress+"?wsdl";
-//        else
-//            return null;
+        return null;
     }
     
     private void setMessageHeaders() throws IOException {
