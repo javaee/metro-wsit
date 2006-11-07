@@ -40,6 +40,7 @@ import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapExtender;
 import com.sun.xml.ws.policy.PolicyMapMutator;
+import com.sun.xml.ws.policy.jaxws.privateutil.LocalizationMessages;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelUnmarshaller;
@@ -409,12 +410,11 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
             return true; // element consumed
         }//end if Policy element found
         return false;
-        
     }
     
     private void processAttributes(WSDLObject element, XMLStreamReader reader, Map<WSDLObject, Collection<PolicyRecordHandler>> map) {
         String[] uriArray = getPolicyURIsFromAttr(reader);
-        if (null!=uriArray) {
+        if (null != uriArray) {
             for (String policyUri : uriArray) {
                 addHandlerToMap(map, element, new PolicyRecordHandler(HandlerType.PolicyUri, policyUri));
                 if (!policyUri.startsWith("#")) {
@@ -611,18 +611,19 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
     
     
     private PolicyMapBuilder getPolicyMapBuilder() {
-        if (null==policyBuilder) {
+        if (null == policyBuilder) {
             policyBuilder = new PolicyMapBuilder();
         }
         return policyBuilder;
     }
     
-    private Collection<String> getPolicyURIs(Collection<PolicyRecordHandler> handlers, PolicySourceModelContext modelContext) throws PolicyException{
+    private Collection<String> getPolicyURIs(Collection<PolicyRecordHandler> handlers, PolicySourceModelContext modelContext)
+    throws PolicyException{
         Collection<String> result = new ArrayList<String>(handlers.size());
         String policyUri;
-        for (PolicyRecordHandler handler: handlers) {
+        for (PolicyRecordHandler handler : handlers) {
             policyUri = handler.handler;
-            if (HandlerType.AnonymousPolicyId==handler.type) {
+            if (HandlerType.AnonymousPolicyId == handler.type) {
                 PolicySourceModel policyModel = getAnonymousPolicyModels().get(policyUri);
                 policyModel.expand(modelContext);
                 while (getPolicyModels().containsKey(policyUri)) {
@@ -664,7 +665,7 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
                 List<String> externalUris = getUnresolvedUris(false); // protect list of possible external policies
                 getUnresolvedUris(true); // cleaning up the list only
                 LinkedList<String> baseUnresolvedUris = new LinkedList<String>();
-                for (PolicyRecord currentRec = expandQueueHead; null!=currentRec; currentRec=currentRec.next) {
+                for (PolicyRecord currentRec = expandQueueHead ; null != currentRec ; currentRec = currentRec.next) {
                     baseUnresolvedUris.addFirst(currentRec.uri);
                 }
                 getUnresolvedUris(false).addAll(baseUnresolvedUris);
@@ -686,7 +687,7 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
                             addNewPolicyNeeded(currentUri, prefetchedRecord.policyModel);
                         } else { // policy has not been yet passed by
                             if (urlsRead.contains(getBaseUrl(currentUri))) { // big problem --> unresolvable policy
-                                throw new PolicyException("Can not resolve policy: "+currentUri);
+                                throw new PolicyException(LocalizationMessages.CAN_NOT_RESOLVE_POLICY(currentUri));
                             } else {
                                 if (readExternalFile(getBaseUrl(currentUri))) {
                                     getUnresolvedUris(false).add(currentUri);
@@ -703,7 +704,7 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
                     sourceModel.expand(modelContext);
                     modelContext.addModel(new URI(policyUri), sourceModel);
                 } catch (URISyntaxException use) {
-                    logger.severe("finished", use.getMessage(), use);
+                    logger.severe("finished", LocalizationMessages.URI_SYNTAX_EXCEPTION_THROWN_WHEN_PROCESSING_URI(policyUri), use);
                     throw new WebServiceException(use);
                 }
             }
@@ -937,7 +938,7 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
             }
             
         } catch(PolicyException pe) {
-            logger.severe("finished",pe.getMessage(),pe);
+            logger.severe("finished", LocalizationMessages.POLICY_EXCEPTION_WHILE_FINISHING_PARSING_WSDL(),pe);
             throw new WebServiceException(pe);
         }
         logger.exiting("finished");
@@ -949,7 +950,7 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
     private String readPolicyReferenceElement(XMLStreamReader reader) {
         try {
             if (PolicyConstants.POLICY_REFERENCE.equals(reader.getName())) {     // "PolicyReference" element interests me
-                for (int i=0; i<reader.getAttributeCount(); i++) {
+                for (int i = 0; i < reader.getAttributeCount(); i++) {
                     if (PolicyConstants.POLICY_URI.getLocalPart().equals(reader.getAttributeName(i).getLocalPart())) {
                         String uriValue = reader.getAttributeValue(i);
                         reader.next();
@@ -960,6 +961,7 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
             reader.next();
             return null;
         } catch(XMLStreamException e) {
+            logger.severe("readPolicyReferenceElement", LocalizationMessages.XML_EXCEPTION_WHEN_PROCESSING_POLICY_REFERENCE());
             throw new WebServiceException(e);
         }
     }
@@ -971,11 +973,9 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
      */
     private String[] getPolicyURIsFromAttr(XMLStreamReader reader) {
         String policyURIs = reader.getAttributeValue(
-                PolicyConstants.POLICY_URIs.getNamespaceURI(),PolicyConstants.POLICY_URIs.getLocalPart());
-        if (null!=policyURIs) {
-            return policyURIs.split("[\\n ]+");
-        }
-        return null;
+                PolicyConstants.POLICY_URIs.getNamespaceURI(),
+                PolicyConstants.POLICY_URIs.getLocalPart());
+        return (null != policyURIs) ? policyURIs.split("[\\n ]+") : null;
     }
     
     
@@ -983,10 +983,7 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
      *  skips current element (should be in START_ELEMENT state) and returns its content as String
      */
     private PolicyRecord skipPolicyElement(XMLStreamReader reader, String baseUrl){
-        if (null==reader) {
-            return null;
-        }
-        if (!reader.isStartElement()) {
+        if ((null == reader) || (!reader.isStartElement())) {
             return null;
         }
         StringBuffer elementCode = new StringBuffer();
@@ -1114,15 +1111,17 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
                 policyRec.uri = policyRec.policyModel.getPolicyName();
             }
         } catch(Exception e) {
-            logger.log(Level.SEVERE, "definitionsElements", "Exception while reading policy expression", e);
-            logger.log(Level.SEVERE, "definitionsElements", elementCode.toString());
+            logger.log(Level.SEVERE,
+                    "definitionsElements",
+                    LocalizationMessages.EXCEPTION_WHEN_READING_POLICY_ELEMENT(elementCode.toString()),
+                    e);
             throw new WebServiceException(e);
         }
         
         return policyRec;
     }
     
-    // TODO: add comments
+    // time to read possible config file and do alternative selection (on client side)
     public void postFinished(WSDLParserExtensionContext context) {
         logger.entering("postFinished");
         WSDLPolicyMapWrapper mapWrapper = context.getWSDLModel().getExtension(WSDLPolicyMapWrapper.class);
@@ -1132,28 +1131,22 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
                 try {
                     URL clientCfgFileUrl = PolicyUtils.ConfigFile.loadAsResource(clientCfgFileName, null);
                     if (clientCfgFileUrl == null) {
-                        logger.config("postFinished", "Optional client configuration file URL is missing. No client configuration is processed.");
-                    }
-                    else {
-                        logger.config("postFinished", "wsit-client.xml resource url: '" + clientCfgFileUrl + "'");
+                        logger.config("postFinished", LocalizationMessages.CLIENT_CONFIG_FILE_MISSING());
+                    } else {
+                        logger.config("postFinished", LocalizationMessages.CLIENT_CONFIG_FILE_URL_IS(clientCfgFileUrl));
                         PolicyMap clientPolicyMap = PolicyConfigParser.parse(clientCfgFileUrl, true);
-                        logger.fine("postFinished", "Client configuration resource parsed into a policy map: " + clientPolicyMap);
+                        logger.fine("postFinished", LocalizationMessages.CLIENT_CONFIG_FILE_POLICY_MAP_IS(clientPolicyMap));
                         mapWrapper.addClientConfigToMap(clientCfgFileUrl, clientPolicyMap);
                     }
-                } catch (PolicyException e) {
-                    logger.fine("postFinished", e.getMessage());
-                    throw new WebServiceException(e);
+                } catch (PolicyException pe) {
+                    logger.log(Level.SEVERE ,"postFinished", LocalizationMessages.POLICY_EXCEPTION_WHILE_READING_CLIENT_CONFIG(), pe);
+                    throw new WebServiceException(pe);
                 }
-                // TODO: switch on, after 
-                //   1) SecurityPolicySelector will be cleaned up
-                //   2) private assertions will get properly filtered out
-                logger.fine("postFinished", "invoking alternative selection");
+                logger.fine("postFinished", LocalizationMessages.INVOKING_CLIENT_POLICY_ALTERNATIVE_SELECTION());
                 mapWrapper.doAlternativeSelection();
             }
-
             mapWrapper.configureModel(context.getWSDLModel());
         }
         logger.exiting("postFinished");
     }
-
 }
