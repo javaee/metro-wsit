@@ -114,21 +114,21 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
                 subjects.addAll(policyMap.getPolicySubjects());
                 boolean usingPolicy = false;
                 PolicyModelGenerator generator = null;
-                Set<Policy> policiesWritten = null;
+                Set<String> policyIDsOrNamesWritten = null;
                 for (PolicySubject subject : subjects) {
                     Object wsdlSubject = subject.getSubject();
                     if (wsdlSubject != null) {
                         if (!usingPolicy) {
                             definitions._element(PolicyConstants.USING_POLICY, TypedXmlWriter.class);
                             usingPolicy = true;
-                            policiesWritten = new HashSet<Policy>();
+                            policyIDsOrNamesWritten = new HashSet<String>();
                             generator = PolicyModelGenerator.getGenerator();
                         }
                         Policy policy = subject.getEffectivePolicy(merger);
-                        if ((null != policy.getIdOrName()) && (!policiesWritten.contains(policy))) {
+                        if ((null != policy.getIdOrName()) && (!policyIDsOrNamesWritten.contains(policy.getIdOrName()))) {
                             PolicySourceModel policyInfoset = generator.translate(policy);
                             marshaller.marshal(policyInfoset, definitions);
-                            policiesWritten.add(policy);
+                            policyIDsOrNamesWritten.add(policy.getIdOrName());
                         }
                     } else {
                         logger.fine("addDefinitionsExtension", LocalizationMessages.NOT_MARSHALLING_WSDL_SUBJ_NULL(subject));
