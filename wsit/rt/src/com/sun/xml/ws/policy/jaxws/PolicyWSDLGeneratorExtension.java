@@ -159,7 +159,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         String portName = ((null != seiModel) && (null != endpointClass)) ?
             WSEndpoint.getDefaultPortName(seiModel.getServiceQName(), endpointClass).getLocalPart() :
             null;
-        selectAndProcessSubject(port, WSDLPort.class, null);
+        selectAndProcessSubject(port, WSDLPort.class, portName);
         logger.exiting("addPortExtension");
     }
     
