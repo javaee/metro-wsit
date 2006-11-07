@@ -105,7 +105,7 @@ public class WSSCPlugin {
         this.config = config;
     }
     
-    public IssuedTokenContext process(PolicyAssertion token, WSDLPort wsdlPort, WSBinding binding, Pipe securityPipe, JAXBContext jbCxt, String endPointAddress, Packet packet){
+    public IssuedTokenContext process(PolicyAssertion token, WSDLPort wsdlPort, WSBinding binding, Pipe securityPipe, Marshaller marshaller, Unmarshaller unmarshaller, String endPointAddress, Packet packet){
         
         //==============================
         // Get Required policy assertions
@@ -123,7 +123,7 @@ public class WSSCPlugin {
         }
         
         int skl = DEFAULT_KEY_SIZE;
-        boolean requireClientEntropy = false;
+        boolean requireClientEntropy = true;
         if(symBinding!=null){
             AlgorithmSuite algoSuite = symBinding.getAlgorithmSuite();
             skl = algoSuite.getMinSKLAlgorithm();
@@ -151,7 +151,7 @@ public class WSSCPlugin {
             throw new RuntimeException("There is a problem in the Trust layer creating an RST", ex);
         }
         
-        RequestSecurityTokenResponse rstr = sendRequest(token, wsdlPort, binding, securityPipe, jbCxt, rst, WSSCConstants.REQUEST_SECURITY_CONTEXT_TOKEN_ACTION, endPointAddress, packet);
+        RequestSecurityTokenResponse rstr = sendRequest(token, wsdlPort, binding, securityPipe, marshaller, unmarshaller, rst, WSSCConstants.REQUEST_SECURITY_CONTEXT_TOKEN_ACTION, endPointAddress, packet);
         
         // Handle the RequestSecurityTokenResponse
         IssuedTokenContext context = new IssuedTokenContextImpl();
@@ -171,7 +171,7 @@ public class WSSCPlugin {
         return assertions;
     }
     
-    public IssuedTokenContext processCancellation(IssuedTokenContext ctx, WSDLPort wsdlPort, WSBinding binding, Pipe securityPipe, JAXBContext jbCxt, String endPointAddress){
+    public IssuedTokenContext processCancellation(IssuedTokenContext ctx, WSDLPort wsdlPort, WSBinding binding, Pipe securityPipe, Marshaller marshaller, Unmarshaller unmarshaller, String endPointAddress){
         
         //==============================
         // Create RequestSecurityToken
@@ -183,7 +183,7 @@ public class WSSCPlugin {
             throw new RuntimeException("There was a problem creating RST For Cancel", ex);
         }
         
-        RequestSecurityTokenResponse rstr = sendRequest(null, wsdlPort, binding, securityPipe, jbCxt, rst, WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_ACTION, endPointAddress, null);
+        RequestSecurityTokenResponse rstr = sendRequest(null, wsdlPort, binding, securityPipe, marshaller, unmarshaller, rst, WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_ACTION, endPointAddress, null);
         
         // Handle the RequestSecurityTokenResponse
         try {
@@ -195,17 +195,17 @@ public class WSSCPlugin {
         return ctx;
     }
     
-    private RequestSecurityTokenResponse sendRequest(PolicyAssertion issuedToken, WSDLPort wsdlPort, WSBinding binding, Pipe securityPipe, JAXBContext jbCxt, RequestSecurityToken rst, String action, String endPointAddress, Packet packet) {
-        Marshaller marshaller;
-        Unmarshaller unmarshaller;
+    private RequestSecurityTokenResponse sendRequest(PolicyAssertion issuedToken, WSDLPort wsdlPort, WSBinding binding, Pipe securityPipe, Marshaller marshaller, Unmarshaller unmarshaller, RequestSecurityToken rst, String action, String endPointAddress, Packet packet) {
+       // Marshaller marshaller;
+        //Unmarshaller unmarshaller;
         
-        try {
-            marshaller = jbCxt.createMarshaller();
-            unmarshaller = jbCxt.createUnmarshaller();
-        } catch (JAXBException ex){
-            log.log(Level.SEVERE,"WSSC0016.problem.mar.unmar", ex);
-            throw new RuntimeException("Problem creating JAXB Marshaller/Unmarshaller", ex);
-        }
+       // try {
+         //   marshaller = jbCxt.createMarshaller();
+           // unmarshaller = jbCxt.createUnmarshaller();
+        //} catch (JAXBException ex){
+         //   log.log(Level.SEVERE,"WSSC0016.problem.mar.unmar", ex);
+          //  throw new RuntimeException("Problem creating JAXB Marshaller/Unmarshaller", ex);
+        //}
         
         Message request = Messages.create(marshaller, eleFac.toJAXBElement(rst), binding.getSOAPVersion());
         

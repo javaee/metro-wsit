@@ -307,7 +307,7 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
             if (issuedTokenContextMap.get(scToken.getTokenId()) == null) {
                 
                 IssuedTokenContext ctx = scPlugin.process(
-                        scAssertion, pipeConfig.getWSDLModel(), pipeConfig.getBinding(), this, jaxbContext, packet.endpointAddress.toString(), packet);
+                        scAssertion, pipeConfig.getWSDLModel(), pipeConfig.getBinding(), this, marshaller, unmarshaller, packet.endpointAddress.toString(), packet);
                 issuedTokenContextMap.put(((Token)scAssertion).getTokenId(), ctx);
             }
         }
@@ -349,7 +349,7 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
         if (ctx == null) {
             ctx = scPlugin.process(
                     (PolicyAssertion)tok, pipeConfig.getWSDLModel(), pipeConfig.getBinding(),
-                    this, jaxbContext, packet.endpointAddress.toString(), packet);
+                    this, marshaller, unmarshaller, packet.endpointAddress.toString(), packet);
             ctx.setEndpointAddress(packet.endpointAddress.toString());
             issuedTokenContextMap.put(((Token)tok).getTokenId(), ctx);
         }
@@ -368,7 +368,7 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
             
             if (ctx.getSecurityToken() instanceof SecurityContextToken){
                 ctx = scPlugin.processCancellation(
-                        ctx, pipeConfig.getWSDLModel(), pipeConfig.getBinding(), this, jaxbContext, ctx.getEndpointAddress());
+                        ctx, pipeConfig.getWSDLModel(), pipeConfig.getBinding(), this, marshaller, unmarshaller, ctx.getEndpointAddress());
                 issuedTokenContextMap.remove(id);
             }
         }

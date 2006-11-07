@@ -107,6 +107,7 @@ import com.sun.xml.ws.security.policy.Token;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
+import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.JAXBException;
 
@@ -251,6 +252,7 @@ public abstract class SecurityPipeBase implements Pipe {
     
     protected Policy wsitConfig =null;
     // store as instance variable
+    protected Marshaller marshaller =null;
     protected Unmarshaller unmarshaller =null;
     // store operation resolver
    // protected OperationResolver opResolver = null;
@@ -297,6 +299,7 @@ public abstract class SecurityPipeBase implements Pipe {
         this.outProtocolPM = new HashMap<String,SecurityPolicyHolder>();
         //unmarshaller as instance variable of the pipe
         try {
+            this.marshaller = jaxbContext.createMarshaller();
             this.unmarshaller = jaxbContext.createUnmarshaller();
         }catch (javax.xml.bind.JAXBException ex) {
             throw new RuntimeException(ex);
@@ -306,7 +309,7 @@ public abstract class SecurityPipeBase implements Pipe {
             if(wsPolicyMap != null){
                 collectPolicies();
             }
-            unmarshaller = jaxbContext.createUnmarshaller();
+            //unmarshaller = jaxbContext.createUnmarshaller();
             // check whether Service Port has RM
             hasReliableMessaging = isReliableMessagingEnabled(wsPolicyMap, pipeConfig.getWSDLModel());
          //   opResolver = new OperationResolverImpl(inMessagePolicyMap,pipeConfig.getWSDLModel().getBinding());
@@ -339,6 +342,7 @@ public abstract class SecurityPipeBase implements Pipe {
         //this.opResolver = that.opResolver;
         
         try {
+            this.marshaller = jaxbContext.createMarshaller();
             this.unmarshaller = jaxbContext.createUnmarshaller();
         }catch (javax.xml.bind.JAXBException ex) {
             throw new RuntimeException(ex);
@@ -621,8 +625,6 @@ public abstract class SecurityPipeBase implements Pipe {
         }else{
             ctx = new ProcessingContextImpl( packet.invocationProperties);
         }
-        
-        
         ctx.setIssuedTokenContextMap(issuedTokenContextMap);
         ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
 //        ctx.setExtraneousProperty(ctx.OPERATION_RESOLVER, opResolver);
