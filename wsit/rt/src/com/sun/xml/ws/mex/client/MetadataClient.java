@@ -120,7 +120,8 @@ public class MetadataClient {
                 try {
                     return createMetadata(responseStream);
                 } catch (Exception e) {
-                    throw new WebServiceException(e);
+                    continue;
+                    //throw new WebServiceException(e);
                 }
             }
         }
