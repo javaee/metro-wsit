@@ -246,7 +246,7 @@
 		<wsdl:port name="WSHttpBinding_IPing" binding="tns:WSHttpBinding_IPing">
 			<soap12:address location="http://131.107.72.15/ReliableMessaging_Service_Indigo/ReliableRequestReply.svc"/>
 			<!--<wsa10:EndpointReference>
-				<wsa10:Address>http://localhost:8080/testserver/echo?wsdl</wsa10:Address>
+				<wsa10:Address>http://localhost:8080/timeout/echo?wsdl</wsa10:Address>
 			</wsa10:EndpointReference>-->
 		</wsdl:port>
 	</wsdl:service>
@@ -254,7 +254,7 @@
 		<wsp:ExactlyOne>
 			<wsp:All>
 				<wsrm:RMAssertion xmlns:wsrm="http://schemas.xmlsoap.org/ws/2005/02/rm/policy">
-					<wsrm:InactivityTimeout Milliseconds="60000"/>
+					<wsrm:InactivityTimeout Milliseconds="4000"/>
 					<wsrm:AcknowledgementInterval Milliseconds="199"/>
 				</wsrm:RMAssertion>
                             <!--

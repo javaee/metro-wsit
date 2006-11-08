@@ -117,7 +117,7 @@
 
       <xs:complexType name="getMessageNumberResponse">
         <xs:sequence>
-          <xs:element name="return" type="xs:string" minOccurs="0"/>
+          <xs:element name="return" type="xs:integer" minOccurs="0"/>
         </xs:sequence>
       </xs:complexType>
 

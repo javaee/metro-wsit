@@ -246,7 +246,7 @@
 		<wsdl:port name="WSHttpBinding_IPing" binding="tns:WSHttpBinding_IPing">
 			<soap12:address location="http://131.107.72.15/ReliableMessaging_Service_Indigo/ReliableRequestReply.svc"/>
 			<!--<wsa10:EndpointReference>
-				<wsa10:Address>http://localhost:8080/testserver/echo?wsdl</wsa10:Address>
+				<wsa10:Address>http://localhost:8080/createsequence/echo?wsdl</wsa10:Address>
 			</wsa10:EndpointReference>-->
 		</wsdl:port>
 	</wsdl:service>
@@ -264,7 +264,6 @@
                             -->
 				<wspe:Utf816FFFECharacterEncoding xmlns:wspe="http://schemas.xmlsoap.org/ws/2004/09/policy/encoding"/>
 				<wsap10:UsingAddressing/>
-                                <sun:Ordered xmlns:sun="http://sun.com/2006/03/rm"/>
 			</wsp:All>
 		</wsp:ExactlyOne>
 	</wsp:Policy>

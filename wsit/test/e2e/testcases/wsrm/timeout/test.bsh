@@ -1,0 +1,110 @@
+
+
+
+import com.sun.xml.ws.rm.Message;
+import com.sun.xml.ws.rm.Sequence;
+import com.sun.xml.ws.rm.jaxws.runtime.client.RMSource;
+
+service = new wsrm.timeout.client.PingService();
+IPing port = service.getWSHttpBindingIPing();
+IPing portControl = null;
+
+Sequence sequence = null;
+ 
+myfilter = new com.sun.xml.ws.rm.jaxws.util.ProcessingFilter(){
+
+        public boolean handleClientResponseMessage(Message mess) {
+           return true;
+        }
+        public boolean handleClientRequestMessage(Message mess) {
+             if (sequence == null) {
+                 sequence = mess.getSequence();
+             }
+             return true;
+        }
+        public void handleEndpointRequestMessage(Message mess){}
+        public boolean handleEndpointResponseMessage(Message mess){return true;}
+        public void handleOutboundHeaders(Message mess){}
+
+     
+};
+com.sun.xml.ws.rm.jaxws.runtime.client.RMSource.getRMSource().setProcessingFilter(myfilter);
+
+public void testTimeout() throws InterruptedException {
+
+    try {
+          
+          port.clear(null);
+          port.process("hello");
+
+          try {
+                Thread.currentThread().sleep(new Long("1000").longValue());
+          } catch (Exception e) {}
+
+          
+          sequenceId = sequence.getId();
+	  print("sequence id = " + sequenceId);
+
+          String it = port.getInactivityTimeout(null);
+          long timeout = Long.valueOf(it);
+          print("timeout = " + it);
+          
+          assertEquals(timeout, sequence.getSequenceConfig().getInactivityTimeout());
+
+          //wait longer than timeout period + t seconds
+          /****WARNINGWARNING...Currently, the SequenceReaper wakes up every 5 seconds.
+           ***** if the constant "5" changes, this test should be changed accordingly.*****/
+          long interval = (2*timeout)/1000;
+          long seconds = 5 + interval;
+
+          print("waiting to see if sequence times out before " +
+                    seconds + " seconds.");
+          Thread.currentThread().sleep( seconds * 1000);
+          
+          //see if sequence is alive .. it should be, but will not be
+          //if no heartbeats are sent
+          alive = port.getAlive(sequenceId);
+          print("alive = " + alive);
+
+          assertEquals(alive,"true");
+          port = null;
+
+         
+          print("blocking heartbeats and waiting another " +
+                    seconds  + " seconds.");
+
+
+          //use cheesy reflection technique to suppress all heartbeat messages
+          toggleHeartbeats(false);
+          Thread.currentThread().sleep( seconds * 1000 );
+
+          //use non-timed-out sequence here.
+          portControl = service.getWSHttpBindingIPing();
+          alive = portControl.getAlive(sequenceId);
+          print("alive = " + alive);
+          assertEquals(alive , "false");
+
+        } finally {
+           if (port != null) port.close();
+           if (portControl != null) portControl.close();
+           toggleHeartbeats(true);
+        }
+
+ }
+
+
+ public static void toggleHeartbeats(boolean b) {
+         try {
+            ClassLoader loader = Thread.currentThread().getContextClassLoader();
+            Class clasz = loader.loadClass(
+                    "com.sun.xml.ws.rm.jaxws.runtime.client.ClientOutboundSequence");
+            java.lang.reflect.Field field = clasz.getDeclaredField("sendHeartbeats");
+            field.setAccessible(true);
+            field.setBoolean(new Object(), new Boolean(b).booleanValue());
+         } catch (Exception e) {
+             e.printStackTrace();
+         }
+}
+
+testTimeout();
+

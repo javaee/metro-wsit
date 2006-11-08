@@ -1,4 +1,5 @@
-package wsrm.testserver.server;
+
+package wsrm.timeout.server;
 
 import javax.xml.bind.JAXBElement;
 import javax.jws.WebService;
@@ -15,9 +16,8 @@ import java.lang.reflect.*;
 import javax.annotation.Resource;
 import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.handler.MessageContext;
-import com.sun.xml.ws.rm.Sequence;
 
-@WebService(endpointInterface="wsrm.testserver.server.IPing")
+@WebService(endpointInterface="wsrm.timeout.server.IPing")
 @javax.xml.ws.BindingType(javax.xml.ws.soap.SOAPBinding.SOAP12HTTP_BINDING)
 public class IPingImpl extends TestService {
     
@@ -114,20 +114,13 @@ public class IPingImpl extends TestService {
     }
     
     public String getSequenceID(String s) {
-        Sequence seq = (Sequence)context.getMessageContext()
-            .get("com.sun.xml.ws.sequence");
-        if (seq != null) {
-            return seq.getId();
-        } else {
-            return null;
-        }
+        return (String)context.getMessageContext().get("com.sun.xml.ws.sequenceid");
     }
     
-    public String getMessageNumber(String s) {
-        Integer i = 
-            (Integer)context.getMessageContext()
-                    .get("com.sun.xml.ws.messagenumber");
-      
-        return String.valueOf(i);
+    public int getMessageNumber(String s) {
+        return (Integer)context.getMessageContext().get("com.sun.xml.ws.messageid");
     }
+    
+   
+    
 }
