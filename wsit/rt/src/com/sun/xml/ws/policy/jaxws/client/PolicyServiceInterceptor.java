@@ -44,14 +44,14 @@ import javax.xml.ws.WebServiceException;
 import javax.xml.ws.WebServiceFeature;
 
 public class PolicyServiceInterceptor extends ServiceInterceptor {
-
+    
     private static final PolicyLogger logger = PolicyLogger.getLogger(PolicyServiceInterceptor.class);
     
     public List<WebServiceFeature> preCreateBinding(WSPortInfo port,
-                                                    java.lang.Class<?> serviceEndpointInterface,
-                                                    WSFeatureList defaultFeatures) {
+            java.lang.Class<?> serviceEndpointInterface,
+            WSFeatureList defaultFeatures) {
         logger.entering("preCreateBinding",
-                        new Object[] {port, serviceEndpointInterface, defaultFeatures});
+                new Object[] {port, serviceEndpointInterface, defaultFeatures});
         LinkedList<WebServiceFeature> features = new LinkedList<WebServiceFeature>();
         try {
             WSDLPort wsdlPort = port.getPort();
@@ -59,40 +59,38 @@ public class PolicyServiceInterceptor extends ServiceInterceptor {
             if (wsdlPort == null) {
                 String clientCfgFileName = PolicyUtils.ConfigFile.generateFullName(PolicyConstants.CLIENT_CONFIGURATION_IDENTIFIER);
                 URL clientCfgFileUrl = PolicyUtils.ConfigFile.loadAsResource(clientCfgFileName, null);
-                WSDLModel clientModel = null;
                 if (clientCfgFileUrl != null) {
                     logger.config("preCreateBinding", "Loading client config file: " + clientCfgFileUrl);
-                    clientModel = PolicyConfigParser.parseModel(clientCfgFileUrl, true);
-                }
-                else {
-                    logger.config("preCreateBinding",
-                                  "Could not find client configuration file \"" + 
-                                  clientCfgFileName + "\" on classpath");
-                }
-                WSDLPolicyMapWrapper clientWrapper = clientModel.getExtension(WSDLPolicyMapWrapper.class);
-                if (clientWrapper != null) {
-                    PolicyMap map = clientWrapper.getPolicyMap();
-                    if (map != null) {
-                        logger.config("preCreateBinding", "invoking alternative selection on client policy map");
-                        clientWrapper.doAlternativeSelection();
-                        for (ModelConfiguratorProvider configurator : PolicyUtils.ServiceProvider.load(ModelConfiguratorProvider.class)) {
-                            configurator.configure(clientModel, map);
+                    WSDLModel clientModel = PolicyConfigParser.parseModel(clientCfgFileUrl, true);
+                    WSDLPolicyMapWrapper clientWrapper = clientModel.getExtension(WSDLPolicyMapWrapper.class);
+                    if (clientWrapper != null) {
+                        PolicyMap map = clientWrapper.getPolicyMap();
+                        if (map != null) {
+                            logger.config("preCreateBinding", "invoking alternative selection on client policy map");
+                            clientWrapper.doAlternativeSelection();
+                            for (ModelConfiguratorProvider configurator : PolicyUtils.ServiceProvider.load(ModelConfiguratorProvider.class)) {
+                                configurator.configure(clientModel, map);
+                            }
+                            // We can not read the features directly from port.getPort() because in the
+                            // case of dispatch that object may be null.
+                            addFeatures(features, clientModel, port.getPortName());
+                            features.add(new PolicyFeature(map, clientModel, port));
                         }
-                        // We can not read the features directly from port.getPort() because in the
-                        // case of dispatch that object may be null.
-                        addFeatures(features, clientModel, port.getPortName());
-                        features.add(new PolicyFeature(map, clientModel, port));
                     }
+                } else {
+                    logger.config("preCreateBinding",
+                            "Could not find client configuration file \"" +
+                            clientCfgFileName + "\" on classpath");
                 }
             }
         } catch (PolicyException e) {
             throw new WebServiceException(e);
         }
-
+        
         logger.exiting("preCreateBinding", features);
         return features;
     }
-
+    
     /**
      * Add the features in the WSDL model for the given port to the list
      */
