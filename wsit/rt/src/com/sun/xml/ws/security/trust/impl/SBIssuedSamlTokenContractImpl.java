@@ -37,7 +37,9 @@ import com.sun.xml.ws.security.opt.api.keyinfo.SecurityTokenReference;
 import com.sun.xml.security.core.dsig.ObjectFactory;
 import com.sun.xml.ws.security.opt.crypto.JAXBData;
 import com.sun.xml.ws.security.opt.crypto.dsig.Signature;
+import com.sun.xml.ws.security.opt.crypto.dsig.keyinfo.DSAKeyValue;
 import com.sun.xml.ws.security.opt.crypto.dsig.keyinfo.KeyInfo;
+import com.sun.xml.ws.security.opt.crypto.dsig.keyinfo.RSAKeyValue;
 import com.sun.xml.ws.security.opt.crypto.dsig.keyinfo.X509Data;
 import com.sun.xml.ws.security.opt.crypto.jaxb.JAXBSignContext;
 import com.sun.xml.ws.security.opt.crypto.jaxb.JAXBSignatureFactory;
@@ -71,6 +73,8 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
+import java.security.interfaces.DSAPublicKey;
+import java.security.interfaces.RSAPublicKey;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -188,6 +192,8 @@ public class SBIssuedSamlTokenContractImpl extends IssueSamlTokenContract{
     protected static final String PRINCIPAL = "principal";
     private SOAPVersion soapVersion = SOAPVersion.SOAP_11;
     WSSElementFactory wef = new WSSElementFactory(SOAPVersion.SOAP_11);//TODO:: Pick up proper SOAPVersion.
+    
+    
     /** Creates a new instance of SBIssuedSamlTokenContractImpl */
     public SBIssuedSamlTokenContractImpl(SOAPVersion soapVersion) {
         this.soapVersion = soapVersion;
@@ -225,7 +231,7 @@ public class SBIssuedSamlTokenContractImpl extends IssueSamlTokenContract{
             if (WSTrustConstants.SAML10_ASSERTION_TOKEN_TYPE.equals(tokenType)||
                     WSTrustConstants.SAML11_ASSERTION_TOKEN_TYPE.equals(tokenType)){
                 assertion = createSAML11Assertion(assertionId, issuer, appliesTo, keyInfo, claimedAttrs);
-                 st = new SAMLToken(assertion,SAMLJAXBUtil.getJAXBContext(),soapVersion);
+                st = new SAMLToken(assertion,SAMLJAXBUtil.getJAXBContext(),soapVersion);
                 
             } else if (WSTrustConstants.SAML20_ASSERTION_TOKEN_TYPE.equals(tokenType)){
                 assertion = createSAML20Assertion(assertionId, issuer, appliesTo, keyInfo, claimedAttrs);
@@ -528,7 +534,7 @@ public class SBIssuedSamlTokenContractImpl extends IssueSamlTokenContract{
     
     private SecurityHeaderElement createSignature(PublicKey pubKey,Key signingKey,SAMLToken samlToken,NamespaceContextEx nsContext)throws WSTrustException{
         try{
-            XMLSignatureFactory signatureFactory = JAXBSignatureFactory.newInstance();
+            JAXBSignatureFactory signatureFactory = JAXBSignatureFactory.newInstance();
             C14NMethodParameterSpec spec = null;
             CanonicalizationMethod canonicalMethod =
                     signatureFactory.newCanonicalizationMethod(CanonicalizationMethod.EXCLUSIVE,spec);
@@ -556,14 +562,32 @@ public class SBIssuedSamlTokenContractImpl extends IssueSamlTokenContract{
             
             // Create the SignedInfo
             SignedInfo si = signatureFactory.newSignedInfo(canonicalMethod,signatureMethod,Collections.singletonList(ref));
-            KeyInfoFactory kif = signatureFactory.getKeyInfoFactory();
+            
             KeyValue kv;
             
-            kv = kif.newKeyValue(pubKey);
-            
+            //kv = kif.newKeyValue(pubKey);
+            if (pubKey instanceof java.security.interfaces.DSAPublicKey) {
+                DSAKeyValue dsa = null;
+                DSAPublicKey key = (DSAPublicKey)pubKey;
+                
+                byte[] p = key.getParams().getP().toByteArray();
+                byte[] q = key.getParams().getQ().toByteArray();
+                byte[] g = key.getParams().getG().toByteArray();
+                byte[] y = key.getY().toByteArray();
+                dsa = signatureFactory.newDSAKeyValue(p,q,g,y,null,null,null);
+                kv = signatureFactory.newKeyValue(Collections.singletonList(dsa));
+                
+            } else if (pubKey instanceof java.security.interfaces.RSAPublicKey) {                
+                RSAKeyValue rsa = null;                
+                RSAPublicKey key = (RSAPublicKey)pubKey;
+                rsa = signatureFactory.newRSAKeyValue(key.getModulus().toByteArray(),key.getPublicExponent().toByteArray());
+                kv = signatureFactory.newKeyValue(Collections.singletonList(rsa));
+            }else{
+                throw new WSTrustException("Unsupported PublicKey");
+            }
             
             // Create a KeyInfo and add the KeyValue to it
-            javax.xml.crypto.dsig.keyinfo.KeyInfo ki = kif.newKeyInfo(Collections.singletonList(kv));
+            javax.xml.crypto.dsig.keyinfo.KeyInfo ki = signatureFactory.newKeyInfo(Collections.singletonList(kv));
             JAXBSignContext signContext = new JAXBSignContext(signingKey);
             
             SSEData data = null;
@@ -571,9 +595,10 @@ public class SBIssuedSamlTokenContractImpl extends IssueSamlTokenContract{
             com.sun.xml.ws.security.opt.crypto.dsig.Signature signature = (Signature) signatureFactory.newXMLSignature(si,ki);
             JAXBSignatureHeaderElement jhe =  new JAXBSignatureHeaderElement(signature,soapVersion,(XMLSignContext)signContext);
             return new EnvelopedSignedMessageHeader(samlToken,(com.sun.xml.ws.security.opt.crypto.dsig.Reference) ref, jhe,nsContext);
-        } catch (KeyException ex) {
-            ex.printStackTrace();
-            throw new WSTrustException("Unable to create sign SAML Assertion",ex);
+//        } catch (KeyException ex) {
+//            ex.printStackTrace();
+//            throw new WSTrustException("Unable to create sign SAML Assertion",ex);
+//        } 
         } catch (NoSuchAlgorithmException ex) {
             ex.printStackTrace();
             throw new WSTrustException("Unable to create sign SAML Assertion",ex);
