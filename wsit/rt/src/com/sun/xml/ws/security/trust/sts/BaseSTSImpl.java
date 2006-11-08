@@ -287,7 +287,7 @@ public abstract class BaseSTSImpl implements Provider<Source> {
 
         RequestSecurityTokenResponse rstr = contract.issue(rst, context, null);
         
-        Token samlToken = rstr.getRequestedSecurityToken().getToken();
+    /*    Token samlToken = rstr.getRequestedSecurityToken().getToken();
         rstr.getRequestedSecurityToken().setAny(null);
         Element samlEle = (Element)samlToken.getTokenValue();
         Element rstrEle = eleFac.toElement(rstr);
@@ -297,7 +297,8 @@ public abstract class BaseSTSImpl implements Provider<Source> {
         Element rdstEle = (Element)list.item(0);
         rdstEle.appendChild(samlEle);
         
-        return new DOMSource(rstrEle);
+        return new DOMSource(rstrEle);*/
+        return eleFac.toSource(rstr);
     }
 
     private Source cancel(final STSConfiguration config,

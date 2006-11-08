@@ -222,8 +222,8 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
         // Create RequestedSecurityToken with SAML assertion
         String assertionId = "uuid-" + UUID.randomUUID().toString();
         RequestedSecurityToken st = eleFac.createRequestedSecurityToken();
-        //Token samlToken = createSAMLAssertion(appliesTo, tokenType, keyType, assertionId, config.getIssuer(), claimedAttrs, context);
-        //st.setToken(samlToken);
+        Token samlToken = createSAMLAssertion(appliesTo, tokenType, keyType, assertionId, config.getIssuer(), claimedAttrs, context);
+        st.setToken(samlToken);
         
         // Create RequestedAttachedReference and RequestedUnattachedReference
         SecurityTokenReference samlReference = createSecurityTokenReference(assertionId, tokenType);
@@ -242,8 +242,8 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
         
        String issuer = config.getIssuer();
         
-       Token samlToken = createSAMLAssertion(appliesTo, tokenType, keyType, assertionId, issuer, claimedAttrs, context);
-       rstr.getRequestedSecurityToken().setToken(samlToken);
+      // Token samlToken = createSAMLAssertion(appliesTo, tokenType, keyType, assertionId, issuer, claimedAttrs, context);
+       //rstr.getRequestedSecurityToken().setToken(samlToken);
         
         // Populate IssuedTokenContext
         context.setSecurityToken(samlToken);

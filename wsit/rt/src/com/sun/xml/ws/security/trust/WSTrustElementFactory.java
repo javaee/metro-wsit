@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustElementFactory.java,v 1.4 2006-10-17 05:45:44 raharsha Exp $
+ * $Id: WSTrustElementFactory.java,v 1.5 2006-11-08 21:06:04 jdg6688 Exp $
  */
 
 /*
@@ -95,8 +95,8 @@ import javax.xml.bind.JAXBException;
  */
 public abstract class WSTrustElementFactory {
        
-    private static WSTrustElementFactory trustElemFactory 
-            = new WSTrustElementFactoryImpl();
+   // private static WSTrustElementFactory trustElemFactory 
+     //       = new WSTrustElementFactoryImpl();
     
     private static JAXBContext jaxbContext = null;
     
@@ -107,6 +107,9 @@ public abstract class WSTrustElementFactory {
             throw new RuntimeException(jbe.getMessage());
         }        
     }
+    
+    private static WSTrustElementFactory trustElemFactory 
+            = new WSTrustElementFactoryImpl();
 
     public static JAXBContext getContext() {
         return jaxbContext;
