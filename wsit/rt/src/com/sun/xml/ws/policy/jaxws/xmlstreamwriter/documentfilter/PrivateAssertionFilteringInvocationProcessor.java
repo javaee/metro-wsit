@@ -23,6 +23,7 @@
 package com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter;
 
 import com.sun.xml.ws.policy.PolicyConstants;
+import com.sun.xml.ws.policy.jaxws.privateutil.LocalizationMessages;
 import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.*;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import java.io.StringWriter;
@@ -121,11 +122,11 @@ final class PrivateAssertionFilteringInvocationProcessor implements InvocationPr
             
             return invocation.execute(invocationTarget);
         } catch (IllegalArgumentException ex) {
-            throw new InvocationProcessingException(Messages.INVOCATION_ERROR.format(), ex);
+            throw new InvocationProcessingException(LocalizationMessages.INVOCATION_ERROR(), ex);
         } catch (InvocationTargetException ex) {
-            throw new InvocationProcessingException(Messages.INVOCATION_ERROR.format(), ex.getCause());
+            throw new InvocationProcessingException(LocalizationMessages.INVOCATION_ERROR(), ex.getCause());
         } catch (IllegalAccessException ex) {
-            throw new InvocationProcessingException(Messages.INVOCATION_ERROR.format(), ex);
+            throw new InvocationProcessingException(LocalizationMessages.INVOCATION_ERROR(), ex);
         } finally {
             LOGGER.exiting();
         }
@@ -165,7 +166,7 @@ final class PrivateAssertionFilteringInvocationProcessor implements InvocationPr
                 break;
             default:
                 throw new IllegalArgumentException(
-                        Messages.UNEXPECTED_ARGUMENTS_COUNT.format(XmlStreamWriterMethodType.WRITE_ATTRIBUTE + "(...)", argumentsCount)
+                        LocalizationMessages.UNEXPECTED_ARGUMENTS_COUNT(XmlStreamWriterMethodType.WRITE_ATTRIBUTE + "(...)", argumentsCount)
                         );
         }
         

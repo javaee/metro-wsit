@@ -22,19 +22,11 @@
 
 package com.sun.xml.ws.policy.jaxws.xmlstreamwriter;
 
-import com.sun.xml.ws.policy.PolicyConstants;
+import com.sun.xml.ws.policy.jaxws.privateutil.LocalizationMessages;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
-import java.io.StringWriter;
 import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.Queue;
-import javax.xml.XMLConstants;
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
@@ -126,7 +118,7 @@ public final class EnhancedXmlStreamWriterProxy implements InvocationHandler {
         } else if (method.equals(toStringMethod)) {
             return proxy.getClass().getName() + '@' + Integer.toHexString(proxy.hashCode());
         } else {
-            throw new InternalError(Messages.UNEXPECTED_OBJECT_METHOD.format(method));
+            throw new InternalError(LocalizationMessages.UNEXPECTED_OBJECT_METHOD(method));
         }
     }
 }

@@ -25,6 +25,7 @@ import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMapExtender;
 import com.sun.xml.ws.policy.PolicySubject;
+import com.sun.xml.ws.policy.jaxws.privateutil.LocalizationMessages;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelTranslator;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
 import java.util.ArrayList;
@@ -68,7 +69,7 @@ abstract class BuilderHandler{
                 result.add(PolicyModelTranslator.getTranslator().translate(sourceModel));
             }
             else {
-                throw new PolicyException(Messages.POLICY_REFERENCE_NOT_EXIST.format(policyURI));
+                throw new PolicyException(LocalizationMessages.POLICY_REFERENCE_NOT_EXIST(policyURI));
             }
         }
         

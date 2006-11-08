@@ -36,10 +36,10 @@ import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.server.SDDocumentSource;
 import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
 import com.sun.xml.ws.api.wsdl.parser.XMLEntityResolver.Parser;
-import com.sun.xml.ws.policy.PolicyConstants;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapMutator;
+import com.sun.xml.ws.policy.jaxws.privateutil.LocalizationMessages;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import org.xml.sax.SAXException;
@@ -144,7 +144,7 @@ public final class PolicyConfigParser {
             XMLStreamBuffer configFileSource = initConfigFileSource(configFileUrl);
 
             if (configFileSource == null) {
-                throw new PolicyException(Messages.BUFFER_NOT_EXIST.format(configFileUrl));
+                throw new PolicyException(LocalizationMessages.BUFFER_NOT_EXIST(configFileUrl));
             }
 
             SDDocumentSource doc = SDDocumentSource.create(configFileUrl, configFileSource);
@@ -153,11 +153,11 @@ public final class PolicyConfigParser {
                                                new WSDLParserExtension[] { new PolicyWSDLParserExtension(true, mutators) } );
             return model;
         } catch (XMLStreamException ex) {
-            throw new PolicyException(Messages.WSDL_IMPORT_FAILED.format(), ex);
+            throw new PolicyException(LocalizationMessages.WSDL_IMPORT_FAILED(), ex);
         } catch (IOException ex) {
-            throw new PolicyException(Messages.WSDL_IMPORT_FAILED.format(), ex);
+            throw new PolicyException(LocalizationMessages.WSDL_IMPORT_FAILED(), ex);
         } catch (SAXException ex) {
-            throw new PolicyException(Messages.WSDL_IMPORT_FAILED.format(), ex);
+            throw new PolicyException(LocalizationMessages.WSDL_IMPORT_FAILED(), ex);
         } finally {
             logger.exiting("parseModel", model);
         }
@@ -186,9 +186,9 @@ public final class PolicyConfigParser {
             
             return null;
         } catch (XMLStreamException e) {
-            throw new PolicyException(Messages.READER_CREATE_FAILED.format(configFileUrl), e);
+            throw new PolicyException(LocalizationMessages.READER_CREATE_FAILED(configFileUrl), e);
         } catch (IOException e) {
-            throw new PolicyException(Messages.URL_OPEN_FAILED.format(configFileUrl), e);
+            throw new PolicyException(LocalizationMessages.URL_OPEN_FAILED(configFileUrl), e);
         }
     }
 }

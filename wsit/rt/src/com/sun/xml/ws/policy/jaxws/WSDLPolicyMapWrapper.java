@@ -35,6 +35,7 @@ import com.sun.xml.ws.policy.EffectivePolicyModifier;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
+import com.sun.xml.ws.policy.jaxws.privateutil.LocalizationMessages;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import com.sun.xml.ws.policy.jaxws.spi.ModelConfiguratorProvider;
 import com.sun.xml.ws.policy.jaxws.spi.PolicyMapUpdateProvider;
@@ -144,7 +145,7 @@ public class WSDLPolicyMapWrapper implements WSDLExtension {
                 configurator.configure(model, policyMap);
             }
         } catch (PolicyException e) {
-            throw new WebServiceException(Messages.FAILED_CONFIGURE_WSDL_MODEL.format(), e);
+            throw new WebServiceException(LocalizationMessages.FAILED_CONFIGURE_WSDL_MODEL(), e);
         }
     }
     

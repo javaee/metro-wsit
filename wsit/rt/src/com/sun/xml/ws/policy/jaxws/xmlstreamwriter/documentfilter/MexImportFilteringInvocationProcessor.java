@@ -22,7 +22,7 @@
 
 package com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter;
 
-import com.sun.xml.ws.policy.PolicyConstants;
+import com.sun.xml.ws.policy.jaxws.privateutil.LocalizationMessages;
 import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.Invocation;
 import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.InvocationProcessingException;
 import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.InvocationProcessor;
@@ -127,11 +127,11 @@ public final class MexImportFilteringInvocationProcessor implements InvocationPr
             
             return invocation.execute(invocationTarget);
         } catch (IllegalArgumentException ex) {
-            throw new InvocationProcessingException(Messages.INVOCATION_ERROR.format(), ex);
+            throw new InvocationProcessingException(LocalizationMessages.INVOCATION_ERROR(), ex);
         } catch (InvocationTargetException ex) {
-            throw new InvocationProcessingException(Messages.INVOCATION_ERROR.format(), ex.getCause());
+            throw new InvocationProcessingException(LocalizationMessages.INVOCATION_ERROR(), ex.getCause());
         } catch (IllegalAccessException ex) {
-            throw new InvocationProcessingException(Messages.INVOCATION_ERROR.format(), ex);
+            throw new InvocationProcessingException(LocalizationMessages.INVOCATION_ERROR(), ex);
         } finally {
             LOGGER.exiting();
         }
@@ -171,7 +171,7 @@ public final class MexImportFilteringInvocationProcessor implements InvocationPr
                 break;
             default:
                 throw new IllegalArgumentException(
-                        Messages.UNEXPECTED_ARGUMENTS_COUNT.format(XmlStreamWriterMethodType.WRITE_ATTRIBUTE + "(...)", argumentsCount)
+                        LocalizationMessages.UNEXPECTED_ARGUMENTS_COUNT(XmlStreamWriterMethodType.WRITE_ATTRIBUTE + "(...)", argumentsCount)
                         );
         }
         
@@ -203,7 +203,7 @@ public final class MexImportFilteringInvocationProcessor implements InvocationPr
                 break;
             default:
                 throw new IllegalArgumentException(
-                        Messages.UNEXPECTED_ARGUMENTS_COUNT.format(XmlStreamWriterMethodType.WRITE_START_ELEMENT + "(...)", argumentsCount)
+                        LocalizationMessages.UNEXPECTED_ARGUMENTS_COUNT(XmlStreamWriterMethodType.WRITE_START_ELEMENT + "(...)", argumentsCount)
                         );
         }
         
