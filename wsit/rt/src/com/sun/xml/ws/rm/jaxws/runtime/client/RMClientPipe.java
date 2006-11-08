@@ -508,7 +508,6 @@ public class RMClientPipe
      * PIPE INTERFACE METHODS.
      */
     public Packet process(Packet packet) {
- 
         com.sun.xml.ws.rm.Message message = null;
         RMClientPipe poolPipe = null;
         

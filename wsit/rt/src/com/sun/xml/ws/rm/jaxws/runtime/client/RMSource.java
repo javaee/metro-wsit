@@ -83,7 +83,7 @@ public class RMSource  extends RMProvider<ClientInboundSequence,
             throws RMException {
         
         String id = seq.getId();
-        if (seq != null) {
+        if (seq != null && outboundMap.keySet().contains(id)) {
             seq.disconnect();
             removeOutboundSequence(id);
         }   
@@ -138,9 +138,6 @@ public class RMSource  extends RMProvider<ClientInboundSequence,
                                                  id + " exists.");
          }
     }
-    
-    
-    
     
     /**
      * Allow a clean shutdown
@@ -213,7 +210,6 @@ public class RMSource  extends RMProvider<ClientInboundSequence,
         try {
             disp.invoke(source);
         } catch (Exception e) {
-            //e.printStackTrace();
             //dont care what happened processing the response message.  We are only
             //interested in the sequence that has been stored in the request context
         }

@@ -182,6 +182,8 @@ public abstract class OutboundSequence extends Sequence {
 
             if (messageNumber == 0) {
                 messageNumber = set(getNextIndex(), mess);
+            } else {
+                set(messageNumber, mess);
             }
 
             SequenceElement element = new SequenceElement();

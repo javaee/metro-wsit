@@ -36,6 +36,7 @@ import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 import com.sun.xml.ws.rm.InvalidMessageNumberException;
 
 
@@ -48,6 +49,9 @@ import com.sun.xml.ws.rm.InvalidMessageNumberException;
  */
 public class AcknowledgementHandler {
 
+    private static final Logger logger = 
+            Logger.getLogger(AcknowledgementHandler.class.getName());
+    
     /**
      * Configuration for this sequence.
      */
@@ -96,8 +100,7 @@ public class AcknowledgementHandler {
                 for (int i = 1; i < sequence.getNextIndex();i++) {
                     Message mess = sequence.get(i);
                     if (list.get(i)) {
-
-                        sequence.acknowledge(i);
+                        acknowledgeIfValid(sequence, i);
                     }
                 }     
             } else {
@@ -114,12 +117,31 @@ public class AcknowledgementHandler {
                     }
 
                     for (int i = lower; i <= upper; i++) {
-                        Message mess = sequence.get(i);
-    
-                        sequence.acknowledge(i);
+                        acknowledgeIfValid(sequence, i);
                     }
                 }
             } 
+        }
+    }
+    
+    /**
+     * We may receive an ack for an unknown message if we are restarting
+     * after a crash or if the RMD is broken. Allow processing to continue
+     * after logging.
+     * 
+     */
+    private void acknowledgeIfValid(OutboundSequence seq, int i) {
+        try {
+            Message mess = seq.get(i);
+            if (mess != null) {
+                seq.acknowledge(i);
+            }
+        } catch (InvalidMessageNumberException e) {
+            //this can happen if the sequence has been resurrected
+            //after a restart.
+            logger.fine("Received acknowledgement of unknown message.  " +
+                        "Sequence = " + seq.getId() +
+                        "MessageNumber = " + i);
         }
     }
     
