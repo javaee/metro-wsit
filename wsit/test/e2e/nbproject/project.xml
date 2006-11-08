@@ -4,7 +4,7 @@
     <configuration>
         <general-data xmlns="http://www.netbeans.org/ns/freeform-project/1">
             <!-- Do not use Project Properties customizer when editing this file manually. -->
-            <name>test harness</name>
+            <name>WSIT e2e Test Suite</name>
             <properties/>
             <folders>
                 <source-folder>
@@ -16,6 +16,9 @@
             <ide-actions>
                 <action name="clean">
                     <target>clean</target>
+                </action>
+                <action name="test">
+                    <target>main</target>
                 </action>
             </ide-actions>
             <view>
@@ -30,8 +33,10 @@
                 </items>
                 <context-menu>
                     <ide-action name="clean"/>
+                    <ide-action name="test"/>
                 </context-menu>
             </view>
+            <subprojects/>
         </general-data>
         <java-data xmlns="http://www.netbeans.org/ns/freeform-project-java/1">
             <compilation-unit>
