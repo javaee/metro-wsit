@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://java.sun.com/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.5"
+         xmlns:j2ee="http://java.sun.com/xml/ns/javaee"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+
+    <session-config>
+        <session-timeout>30</session-timeout>
+    </session-config>
+
+    <!-- Coordinator coordinator bindings -->
+    <servlet>
+        <description>WS-Coordination createCoordinationContext service endpoint</description>
+        <display-name>WSCoord CreateCoordinationContext</display-name>
+        <servlet-name>ActivationCoordinatorPortTypeImpl</servlet-name>
+        <servlet-class>com.sun.xml.ws.tx.webservice.member.coord.ActivationCoordinatorPortTypeImpl</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ActivationCoordinatorPortTypeImpl</servlet-name>
+        <url-pattern>/wscoor/coordinator/createCoordinationContext</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <description>WS-Coordination createCoordinationContextResponse service endpoint</description>
+        <display-name>WSCoord CreateCoordinationContextResponse</display-name>
+        <servlet-name>ActivationRequesterPortTypeImpl</servlet-name>
+        <servlet-class>com.sun.xml.ws.tx.webservice.member.coord.ActivationRequesterPortTypeImpl</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ActivationRequesterPortTypeImpl</servlet-name>
+        <url-pattern>/wscoor/coordinator/createCoordinationContextResponse</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <description>WS-Coordination register service endpoint</description>
+        <display-name>WSCoord Register</display-name>
+        <servlet-name>RegistrationCoordinatorPortTypeImpl</servlet-name>
+        <servlet-class>com.sun.xml.ws.tx.webservice.member.coord.RegistrationCoordinatorPortTypeImpl</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>RegistrationCoordinatorPortTypeImpl</servlet-name>
+        <url-pattern>/wscoor/coordinator/register</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <description>WS-Coordination registerResponse service endpoint</description>
+        <display-name>WSCoord RegisterResponse</display-name>
+        <servlet-name>RegistrationRequesterPortTypeImpl</servlet-name>
+        <servlet-class>com.sun.xml.ws.tx.webservice.member.coord.RegistrationRequesterPortTypeImpl</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>RegistrationRequesterPortTypeImpl</servlet-name>
+        <url-pattern>/wscoor/coordinator/registerResponse</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <description>WS-Coordination register RPC service endpoint</description>
+        <display-name>WSCoord Register RPC</display-name>
+        <servlet-name>RegistrationPortTypeImpl</servlet-name>
+        <servlet-class>com.sun.xml.ws.tx.webservice.member.coord.RegistrationPortTypeImpl</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>RegistrationPortTypeImpl</servlet-name>
+        <url-pattern>/wscoor/coordinator/synchRegister</url-pattern>
+    </servlet-mapping>
+
+
+    <!-- WSATCoordinator coordinator bindings -->
+    <servlet>
+        <description>WS-AtomicTransaction Coordinator service endpoint</description>
+        <display-name>WSAT Coordinator</display-name>
+        <servlet-name>CoordinatorPortTypeImpl</servlet-name>
+        <servlet-class>com.sun.xml.ws.tx.webservice.member.at.CoordinatorPortTypeImpl</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>CoordinatorPortTypeImpl</servlet-name>
+        <url-pattern>/wsat/coordinator</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <description>WS-AtomicTransaction participant service endpoint</description>
+        <display-name>WSAT Participant</display-name>
+        <servlet-name>ParticipantPortTypeImpl</servlet-name>
+        <servlet-class>com.sun.xml.ws.tx.webservice.member.at.ParticipantPortTypeImpl</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ParticipantPortTypeImpl</servlet-name>
+        <url-pattern>/wsat/2pc</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <description>WS-AtomicTransaction completionCoordinator service endpoint</description>
+        <display-name>WSAT CompletionCoordinator</display-name>
+        <servlet-name>CompletionCoordinatorPortTypeImpl</servlet-name>
+        <servlet-class>com.sun.xml.ws.tx.webservice.member.at.CompletionCoordinatorPortTypeImpl</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>CompletionCoordinatorPortTypeImpl</servlet-name>
+        <url-pattern>/wsat/completion/coordinator</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <description>WS-AtomicTransaction txInitiator service endpoint</description>
+        <display-name>WSAT Completion Initiator</display-name>
+        <servlet-name>CompletionInitiatorPortTypeImpl</servlet-name>
+        <servlet-class>com.sun.xml.ws.tx.webservice.member.at.CompletionInitiatorPortTypeImpl</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>CompletionInitiatorPortTypeImpl</servlet-name>
+        <url-pattern>/wsat/completion/initiator</url-pattern>
+    </servlet-mapping>
+</web-app>
