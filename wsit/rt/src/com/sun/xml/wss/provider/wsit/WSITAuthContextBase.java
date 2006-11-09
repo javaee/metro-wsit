@@ -1,0 +1,1369 @@
+/*
+ * WSITAuthContextBase.java
+ *
+ * Created on November 1, 2006, 4:39 PM
+ *
+ * To change this template, choose Tools | Template Manager
+ * and open the template in the editor.
+ */
+
+package com.sun.xml.wss.provider.wsit;
+
+import com.sun.xml.ws.api.model.wsdl.WSDLFault;
+import com.sun.xml.ws.security.impl.policyconv.XWSSPolicyGenerator;
+import com.sun.xml.ws.security.secconv.WSSCConstants;
+import com.sun.xml.wss.impl.policy.mls.EncryptionPolicy;
+import com.sun.xml.wss.impl.policy.mls.EncryptionTarget;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Hashtable;
+import javax.xml.bind.Marshaller;
+import javax.xml.namespace.QName;
+import java.net.URI;
+import javax.xml.ws.WebServiceException;
+import java.util.Set;
+
+import com.sun.xml.ws.api.message.Messages;
+import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.HeaderList;
+import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.WSService;
+import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
+import com.sun.xml.ws.api.model.wsdl.WSDLInput;
+import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
+import com.sun.xml.ws.api.model.wsdl.WSDLOutput;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.policy.NestedPolicy;
+import com.sun.xml.ws.security.impl.policyconv.SCTokenWrapper;
+import com.sun.xml.ws.security.impl.policyconv.SecurityPolicyHolder;
+import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.policy.AssertionSet;
+import com.sun.xml.ws.policy.Policy;
+import com.sun.xml.ws.policy.PolicyException;
+import com.sun.xml.ws.policy.PolicyMap;
+import com.sun.xml.ws.policy.PolicyMapKey;
+import com.sun.xml.ws.policy.PolicyMerger;
+import com.sun.xml.ws.assembler.PipeConfiguration;
+import com.sun.xml.ws.security.policy.AsymmetricBinding;
+import com.sun.xml.ws.security.policy.AlgorithmSuite;
+import com.sun.xml.ws.security.policy.SecureConversationToken;
+import com.sun.xml.ws.security.policy.SupportingTokens;
+import com.sun.xml.ws.security.policy.SymmetricBinding;
+import com.sun.xml.ws.security.impl.policy.PolicyUtil;
+
+import com.sun.xml.ws.security.IssuedTokenContext;
+
+import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
+import com.sun.xml.ws.policy.sourcemodel.PolicyModelTranslator;
+
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPFault;
+import javax.xml.soap.SOAPFactory;
+import javax.xml.ws.soap.SOAPFaultException;
+import javax.xml.soap.SOAPConstants;
+
+import com.sun.xml.wss.XWSSecurityException;
+import com.sun.xml.wss.SecurityEnvironment;
+import com.sun.xml.wss.impl.policy.mls.MessagePolicy;
+import com.sun.xml.ws.policy.sourcemodel.PolicyModelUnmarshaller;
+import com.sun.xml.ws.security.trust.WSTrustElementFactory;
+import com.sun.xml.ws.policy.PolicyAssertion;
+
+
+import com.sun.xml.ws.security.policy.Token;
+
+
+import javax.xml.bind.JAXBContext;
+//import javax.xml.bind.Unmarshaller;
+
+import com.sun.xml.wss.impl.MessageConstants;
+import com.sun.xml.wss.impl.misc.DefaultCallbackHandler;
+
+import com.sun.xml.ws.security.trust.WSTrustConstants;
+
+import com.sun.xml.ws.security.policy.KeyStore;
+import com.sun.xml.ws.security.policy.TrustStore;
+import com.sun.xml.ws.security.policy.CallbackHandlerConfiguration;
+import com.sun.xml.ws.security.policy.Validator;
+import com.sun.xml.ws.security.policy.ValidatorConfiguration;
+import com.sun.xml.ws.security.policy.WSSAssertion;
+//import com.sun.xml.wss.impl.OperationResolver;
+
+import java.util.Properties;
+
+import com.sun.xml.ws.api.addressing.*;
+import com.sun.xml.ws.api.server.WSEndpoint;
+import com.sun.xml.ws.assembler.ClientPipeConfiguration;
+import com.sun.xml.ws.assembler.ServerPipeConfiguration;
+import com.sun.xml.ws.rm.Constants;
+import com.sun.xml.ws.security.opt.impl.JAXBFilterProcessingContext;
+import com.sun.xml.wss.ProcessingContext;
+import com.sun.xml.wss.impl.PolicyViolationException;
+import com.sun.xml.wss.impl.ProcessingContextImpl;
+import com.sun.xml.wss.impl.SecurableSoapMessage;
+import com.sun.xml.wss.impl.SecurityAnnotator;
+import com.sun.xml.wss.impl.WssSoapFaultException;
+
+import static com.sun.xml.wss.jaxws.impl.Constants.ACTION_HEADER;
+import static com.sun.xml.wss.jaxws.impl.Constants.OPERATION_SCOPE;
+import static com.sun.xml.wss.jaxws.impl.Constants.BINDING_SCOPE;
+import static com.sun.xml.wss.jaxws.impl.Constants.rstSCTURI;
+import static com.sun.xml.wss.jaxws.impl.Constants.rstrSCTURI;
+import static com.sun.xml.wss.jaxws.impl.Constants.rstTrustURI;
+import static com.sun.xml.wss.jaxws.impl.Constants.rstrTrustURI;
+import static com.sun.xml.wss.jaxws.impl.Constants.wsaURI;
+import static com.sun.xml.wss.jaxws.impl.Constants.SC_ASSERTION;
+import static com.sun.xml.wss.jaxws.impl.Constants.bsOperationName;
+import static com.sun.xml.wss.jaxws.impl.Constants._SecureConversationToken_QNAME;
+import static com.sun.xml.wss.jaxws.impl.Constants.SECURITY_POLICY_2005_07_NAMESPACE;
+import static com.sun.xml.wss.jaxws.impl.Constants.XENC_NS;
+import static com.sun.xml.wss.jaxws.impl.Constants.ENCRYPTED_DATA_LNAME;
+import static com.sun.xml.wss.jaxws.impl.Constants.MESSAGE_ID_HEADER;
+import static com.sun.xml.wss.jaxws.impl.Constants.EMPTY_LIST;
+
+import static com.sun.xml.wss.jaxws.impl.Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS;
+import static com.sun.xml.wss.jaxws.impl.Constants.SUN_WSS_SECURITY_CLIENT_POLICY_NS;
+import static com.sun.xml.wss.jaxws.impl.Constants.RM_CREATE_SEQ;
+import static com.sun.xml.wss.jaxws.impl.Constants.RM_CREATE_SEQ_RESP;
+import static com.sun.xml.wss.jaxws.impl.Constants.RM_SEQ_ACK;
+import static com.sun.xml.wss.jaxws.impl.Constants.RM_TERMINATE_SEQ;
+import static com.sun.xml.wss.jaxws.impl.Constants.RM_LAST_MESSAGE;
+import com.sun.xml.wss.jaxws.impl.RMPolicyResolver;
+import java.util.Map;
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.message.MessageInfo;
+import javax.xml.soap.SOAPMessage;
+
+/**
+ *
+ * @author kumar jayanti
+ */
+public abstract class WSITAuthContextBase  {
+    
+    //*************Synchronized And Modified at Runtime***********
+    // Per-Proxy State for SecureConversation sessions
+    // as well as IssuedTokenContext returned by invoking a Trust-Plugin
+    // This map stores IssuedTokenContext against the Policy-Id
+    protected Hashtable<String, IssuedTokenContext> issuedTokenContextMap = new Hashtable<String, IssuedTokenContext>();
+    
+    //*************STATIC(s)**************************************
+    protected static QName bsOperationName =
+            new QName("http://schemas.xmlsoap.org/ws/2005/02/trust","RequestSecurityToken");
+    //static JAXBContext used across the Pipe
+    protected static JAXBContext jaxbContext = null;
+    protected static ArrayList<String> securityPolicyNamespaces = null;
+    //TODO: not initialized anywhere and is being used at one place in server auth-ctx
+    protected static MessagePolicy emptyMessagePolicy;
+    protected static final List<PolicyAssertion> EMPTY_LIST = Collections.emptyList();
+    // debug the Secure SOAP Messages (enable dumping)
+    protected static boolean debug = true;
+    public static  URI ISSUE_REQUEST_URI = null;
+    public static  URI CANCEL_REQUEST_URI = null;
+    
+    
+    //***********CTOR initialized Instance Variables**************
+    protected Pipe nextPipe;
+    
+    // TODO: Optimized flag to be set based on some conditions (no SignedElements/EncryptedElements)
+    protected boolean optimized = false;
+    protected PipeConfiguration pipeConfig = null;
+    protected AlgorithmSuite bindingLevelAlgSuite = null;
+    
+    // Security Environment reference initialized with a JAAS CallbackHandler
+    //TODO: not initialized yet
+    protected SecurityEnvironment secEnv = null;
+    
+    // SOAP version
+    protected boolean isSOAP12 = false;
+    protected SOAPVersion soapVersion = null;
+    // SOAP Factory
+    protected  SOAPFactory soapFactory = null;
+    protected PolicyMap wsPolicyMap = null;
+   
+    protected HashMap<WSDLBoundOperation,SecurityPolicyHolder> outMessagePolicyMap = null;
+    protected HashMap<WSDLBoundOperation,SecurityPolicyHolder> inMessagePolicyMap = null;
+    protected HashMap<String,SecurityPolicyHolder> outProtocolPM = null;
+    protected HashMap<String,SecurityPolicyHolder> inProtocolPM = null;
+    
+    protected Policy bpMSP = null; 
+    //protected WSDLBoundOperation cachedOperation = null;
+    // store as instance variable
+    //protected Marshaller marshaller =null;
+    //protected Unmarshaller unmarshaller =null;
+    //store instance variable(s): Binding has IssuedToken/RM/SC Policy
+    boolean hasIssuedTokens = false;
+    boolean hasSecureConversation = false;
+    boolean hasReliableMessaging = false;
+    //boolean addressingEnabled = false;
+    AddressingVersion addVer = null;
+    WSDLPort port = null;
+    
+    
+    static {
+        try {
+            //TODO: system property maynot be appropriate for server side.
+            debug = Boolean.valueOf(System.getProperty("DebugSecurity"));
+            ISSUE_REQUEST_URI = new URI(WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION);
+            CANCEL_REQUEST_URI = new URI(WSTrustConstants.CANCEL_REQUEST);
+            jaxbContext = WSTrustElementFactory.getContext();           ;
+            securityPolicyNamespaces = new ArrayList<String>();
+            securityPolicyNamespaces.add(SECURITY_POLICY_2005_07_NAMESPACE);
+            
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    /** Creates a new instance of WSITAuthContextBase */
+    @SuppressWarnings("unchecked")
+    public WSITAuthContextBase(Map map) {
+        
+        this.nextPipe= (Pipe)map.get("NEXT_PIPE");
+        wsPolicyMap = (PolicyMap)map.get("POLICY");
+        port =(WSDLPort)map.get("WSDL_MODEL");
+        
+        if (this instanceof WSITClientAuthContext) {        
+            WSService service = (WSService)map.get("SERVICE");
+            WSBinding binding = (WSBinding)map.get("BINDING");
+            pipeConfig = new ClientPipeConfiguration(
+                            wsPolicyMap, port, service, binding);
+        } else {
+            WSEndpoint endPoint = (WSEndpoint)map.get("ENDPOINT");
+            pipeConfig = new ServerPipeConfiguration(
+                            wsPolicyMap, port, endPoint);
+        }
+        
+        this.inMessagePolicyMap = new HashMap<WSDLBoundOperation,SecurityPolicyHolder>();
+        this.outMessagePolicyMap = new HashMap<WSDLBoundOperation,SecurityPolicyHolder>();
+        soapVersion = pipeConfig.getBinding().getSOAPVersion();
+        isSOAP12 = (soapVersion == SOAPVersion.SOAP_12) ? true : false;
+        wsPolicyMap = pipeConfig.getPolicyMap();
+        soapFactory = pipeConfig.getBinding().getSOAPVersion().saajSoapFactory;
+        this.inProtocolPM = new HashMap<String,SecurityPolicyHolder>();
+        this.outProtocolPM = new HashMap<String,SecurityPolicyHolder>();
+        //unmarshaller as instance variable of the pipe
+//        try {
+//           // this.marshaller = jaxbContext.createMarshaller();
+//           // this.unmarshaller = jaxbContext.createUnmarshaller();
+//        }catch (javax.xml.bind.JAXBException ex) {
+//            throw new RuntimeException(ex);
+//        }
+        
+        try {
+            if(wsPolicyMap != null){
+                collectPolicies();
+            }
+            // check whether Service Port has RM
+            hasReliableMessaging = isReliableMessagingEnabled(wsPolicyMap, pipeConfig.getWSDLModel());
+            //opResolver = new OperationResolverImpl(inMessagePolicyMap,pipeConfig.getWSDLModel().getBinding());
+        }catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        
+        //put properties for use by AuthModule init
+        map.put("SOAP_VERSION", soapVersion);          
+    }
+    
+    /**
+     * Summary from Section 4.2, WS-Security Policy spec( version 1.1 July 2005 ).
+     * MessagePolicySubject : policy can be attached to
+     *   1) wsdl:binding/wsdl:operation/wsdl:input, ./wsdl:output, or ./wsdl:fault
+     *
+     * OperationPolicySubject : policy can be attached to
+     *   1)wsdl:binding/wsdl:operation
+     *
+     * EndpointPolicySubject : policy can be attached to
+     *   1)wsdl:port
+     *   2)wsdl:Binding
+     */
+    
+    protected void collectPolicies(){
+        try{
+            if (wsPolicyMap == null) {
+                return;
+            }
+            //To check: Is this sufficient, any edge cases I need to take care
+            QName serviceName = pipeConfig.getWSDLModel().getOwner().getName();
+            QName portName = pipeConfig.getWSDLModel().getName();
+            //Review: will this take care of EndpointPolicySubject
+            PolicyMerger policyMerge = PolicyMerger.getMerger();
+            PolicyMapKey endpointKey =wsPolicyMap.createWsdlEndpointScopeKey(serviceName,portName);
+            //createWsdlEndpointScopeKey(serviceName,portName);
+            //Review:Will getEffectivePolicy return null or empty policy ?.
+            Policy endpointPolicy = wsPolicyMap.getEndpointEffectivePolicy(endpointKey);
+            
+            if (endpointPolicy != null){
+                if (endpointPolicy.contains(AddressingVersion.W3C.policyNsUri)){
+                    addVer = AddressingVersion.W3C;
+                } else if (endpointPolicy.contains(AddressingVersion.MEMBER.policyNsUri)){
+                    addVer = AddressingVersion.MEMBER;
+                }
+            }
+            
+            buildProtocolPolicy(endpointPolicy);
+            ArrayList<Policy> policyList = new ArrayList<Policy>();
+            if(endpointPolicy != null){
+                policyList.add(endpointPolicy);
+            }
+            for( WSDLBoundOperation operation: pipeConfig.getWSDLModel().getBinding().getBindingOperations()){
+                QName operationName = operation.getName();
+                WSDLOperation wsdlOperation = operation.getOperation();
+                WSDLInput input = wsdlOperation.getInput();
+                WSDLOutput output = wsdlOperation.getOutput();
+                
+                QName inputMessageName = input.getMessage().getName();
+                QName outputMessageName = null;
+                if(output != null){
+                    outputMessageName = output.getMessage().getName();
+                }
+                
+                PolicyMapKey messageKey =  wsPolicyMap.createWsdlMessageScopeKey(
+                        serviceName,portName,operationName);
+                
+                
+                PolicyMapKey operationKey = wsPolicyMap.createWsdlOperationScopeKey(serviceName,portName,operationName);
+                
+                //Review:Not sure if this is need and what is the
+                //difference between operation and message level key.
+                //securityPolicyNamespaces
+                
+                Policy operationPolicy = wsPolicyMap.getOperationEffectivePolicy(operationKey);
+                if(operationPolicy != null ){
+                    policyList.add(operationPolicy);
+                }else{
+                    //log fine message
+                    
+                    //System.out.println("Operation Level Security policy is null");
+                }
+                
+                
+                Policy imPolicy = null;
+                
+                imPolicy = wsPolicyMap.getInputMessageEffectivePolicy(messageKey);
+                if(imPolicy != null ){
+                    policyList.add(imPolicy);
+                }
+                //input message effective policy to be used. Policy elements at various
+                //scopes merged.
+                
+                Policy imEP = policyMerge.merge(policyList);
+                SecurityPolicyHolder outPH = addOutgoingMP(operation,imEP);
+                if(imPolicy != null){
+                    policyList.remove(imPolicy);
+                }
+                //one way
+                SecurityPolicyHolder inPH = null;
+                //TODO: Venu to verify this fix later
+                /*if(output != null){*/
+                Policy omPolicy = null;
+                omPolicy = wsPolicyMap.getOutputMessageEffectivePolicy(messageKey);
+                if(omPolicy != null){
+                    policyList.add(omPolicy);
+                }
+                //ouput message effective policy to be used. Policy elements at various
+                //scopes merged.
+                
+                Policy omEP =  policyMerge.merge(policyList);
+                inPH = addIncomingMP(operation,omEP);
+            /*}*/
+                Iterator faults = operation.getOperation().getFaults().iterator();
+                ArrayList<Policy> faultPL = new ArrayList<Policy>();
+                faultPL.add(endpointPolicy);
+                if(operationPolicy != null){
+                    faultPL.add(operationPolicy);
+                }
+                while(faults.hasNext()){
+                    WSDLFault fault = (WSDLFault) faults.next();
+                    
+                    PolicyMapKey fKey = null;
+                    fKey = wsPolicyMap.createWsdlFaultMessageScopeKey(
+                            serviceName,portName,operationName,fault.getMessage().getName());
+                    Policy fPolicy = wsPolicyMap.getFaultMessageEffectivePolicy(fKey);
+                    
+                    if(fPolicy != null){
+                        faultPL.add(fPolicy);
+                    }else{
+                        continue;
+                    }
+                    Policy ep = policyMerge.merge(faultPL);
+                    if(inPH != null){
+                        addIncomingFaultPolicy(ep,inPH,fault);
+                    }
+                    if(outPH != null){
+                        addOutgoingFaultPolicy(ep,outPH,fault);
+                    }
+                    faultPL.remove(fPolicy);
+                }
+            }
+        }catch(PolicyException pe){
+            throw generateInternalError(pe);
+        }
+    }
+
+      protected RuntimeException generateInternalError(PolicyException ex){
+        SOAPFault fault = null;
+        try {
+            if (isSOAP12) {
+                fault = soapFactory.createFault(ex.getMessage(),SOAPConstants.SOAP_SENDER_FAULT);
+                fault.appendFaultSubcode(MessageConstants.WSSE_INTERNAL_SERVER_ERROR);
+            } else {
+                fault = soapFactory.createFault(ex.getMessage(), MessageConstants.WSSE_INTERNAL_SERVER_ERROR);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Security Pipe: Internal Error while trying to create a SOAPFault");
+        }
+        return new SOAPFaultException(fault);
+    }
+  
+    protected List<PolicyAssertion> getInBoundSCP(Message message){
+        if (inMessagePolicyMap == null) {
+            return Collections.emptyList();
+        }
+        SecurityPolicyHolder sph = null;
+        Collection coll = inMessagePolicyMap.values();
+        Iterator itr = coll.iterator();
+        
+        while(itr.hasNext()){
+            SecurityPolicyHolder ph = (SecurityPolicyHolder) itr.next();
+            if(ph != null){
+                sph = ph;
+                break;
+            }
+        }
+        if(sph == null){
+            return EMPTY_LIST;
+        }
+        return sph.getSecureConversationTokens();
+    }
+    
+    
+    protected List<PolicyAssertion> getOutBoundSCP(
+            Message message) {
+        
+        if (outMessagePolicyMap == null) {
+            return Collections.emptyList();
+        }
+        SecurityPolicyHolder sph = null;
+        Collection coll = outMessagePolicyMap.values();
+        Iterator itr = coll.iterator();
+        
+        while(itr.hasNext()){
+            SecurityPolicyHolder ph = (SecurityPolicyHolder) itr.next();
+            if(ph != null){
+                sph = ph;
+                break;
+            }
+        }
+        if(sph == null){
+            return EMPTY_LIST;
+        }
+        return sph.getSecureConversationTokens();
+        
+    }
+    
+    
+    protected List<PolicyAssertion> getSecureConversationPolicies(
+            Message message, String scope) {
+        
+        if (outMessagePolicyMap == null) {
+            return Collections.emptyList();
+        }
+        SecurityPolicyHolder sph = null;
+        Collection coll = outMessagePolicyMap.values();
+        Iterator itr = coll.iterator();
+        
+        while(itr.hasNext()){
+            SecurityPolicyHolder ph = (SecurityPolicyHolder) itr.next();
+            if(ph != null){
+                sph = ph;
+                break;
+            }
+        }
+        if(sph == null){
+            return EMPTY_LIST;
+        }
+        return sph.getSecureConversationTokens();
+        
+    }
+    
+//TODO :: Refactor
+    protected ArrayList<PolicyAssertion> getTokens(Policy policy){
+        ArrayList<PolicyAssertion> tokenList = new ArrayList<PolicyAssertion>();
+        for(AssertionSet assertionSet : policy){
+            for(PolicyAssertion assertion:assertionSet){
+                if(PolicyUtil.isAsymmetricBinding(assertion)){
+                    AsymmetricBinding sb =  (AsymmetricBinding)assertion;
+                    addToken(sb.getInitiatorToken(),tokenList);
+                    addToken(sb.getRecipientToken(),tokenList);
+                }else if(PolicyUtil.isSymmetricBinding(assertion)){
+                    SymmetricBinding sb = (SymmetricBinding)assertion;
+                    Token token = sb.getProtectionToken();
+                    if(token != null){
+                        addToken(token,tokenList);
+                    }else{
+                        addToken(sb.getEncryptionToken(),tokenList);
+                        addToken(sb.getSignatureToken(),tokenList);
+                    }
+                }else if(PolicyUtil.isSupportingTokens(assertion)){
+                    SupportingTokens st = (SupportingTokens)assertion;
+                    Iterator itr = st.getTokens();
+                    while(itr.hasNext()){
+                        addToken((Token)itr.next(),tokenList);
+                    }
+                }
+            }
+        }
+        return tokenList;
+    }
+    
+    private void addConfigAssertions(Policy policy,SecurityPolicyHolder sph){
+        ArrayList<PolicyAssertion> tokenList = new ArrayList<PolicyAssertion>();
+        for(AssertionSet assertionSet : policy){
+            for(PolicyAssertion assertion:assertionSet){
+                if(PolicyUtil.isConfigPolicyAssertion(assertion)){
+                    sph.addConfigAssertions(assertion);
+                }
+            }
+        }
+    }
+    private void addToken(Token token,ArrayList<PolicyAssertion> list){
+        if(PolicyUtil.isSecureConversationToken((PolicyAssertion)token) ||
+                PolicyUtil.isIssuedToken((PolicyAssertion)token)){
+            list.add((PolicyAssertion)token);
+        }
+    }
+    
+    
+    protected PolicyMapKey getOperationKey(Message message){
+        WSDLBoundOperation operation = message.getOperation(pipeConfig.getWSDLModel());
+        WSDLOperation wsdlOperation = operation.getOperation();
+        QName serviceName = pipeConfig.getWSDLModel().getOwner().getName();
+        QName portName = pipeConfig.getWSDLModel().getName();
+        WSDLInput input = wsdlOperation.getInput();
+        WSDLOutput output = wsdlOperation.getOutput();
+        QName inputMessageName = input.getMessage().getName();
+        QName outputMessageName = output.getMessage().getName();
+        PolicyMapKey messageKey =  wsPolicyMap.createWsdlMessageScopeKey(
+                serviceName,portName,wsdlOperation.getName());
+        return messageKey;
+        
+    }
+    
+    protected abstract SecurityPolicyHolder addOutgoingMP(WSDLBoundOperation operation,Policy policy)throws PolicyException;
+    
+    protected abstract SecurityPolicyHolder addIncomingMP(WSDLBoundOperation operation,Policy policy)throws PolicyException;
+    
+    protected AlgorithmSuite getBindingAlgorithmSuite(Packet packet) {
+        return bindingLevelAlgSuite;
+    }
+    
+    protected void cacheMessage(Packet packet){
+        Message message = null;
+        if(!optimized){
+            try{
+                message = packet.getMessage();
+                message= Messages.create(message.readAsSOAPMessage());
+                packet.setMessage(message);
+            }catch(SOAPException se){
+                // internal error
+                throw new WebServiceException(se);
+            }
+        }
+    }
+    
+    private boolean hasTargets(NestedPolicy policy){
+        AssertionSet as = policy.getAssertionSet();
+        Iterator<PolicyAssertion> paItr = as.iterator();
+        boolean foundTargets = false;
+        for(PolicyAssertion assertion : as){
+            if(PolicyUtil.isSignedParts(assertion) || PolicyUtil.isEncryptParts(assertion)){
+                foundTargets = true;
+                break;
+            }
+        }
+        return foundTargets;
+    }
+    
+    
+    protected Policy getEffectiveBootstrapPolicy(NestedPolicy bp)throws PolicyException{
+        try {
+            ArrayList<Policy> pl = new ArrayList<Policy>();
+            pl.add(bp);
+            Policy mbp = getMessageBootstrapPolicy();
+            if ( mbp != null ) {
+                pl.add(mbp);
+            }
+            
+            PolicyMerger pm = PolicyMerger.getMerger();
+            Policy ep = pm.merge(pl);
+            return ep;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new PolicyException(e);
+        }
+        
+    }
+    
+    private Policy getMessageBootstrapPolicy()throws PolicyException ,IOException{
+        if(bpMSP == null){
+            PolicySourceModel model =  unmarshalPolicy(
+                    "com/sun/xml/ws/security/impl/policyconv/"+"boot-msglevel-policy.xml");
+            bpMSP = PolicyModelTranslator.getTranslator().translate(model);
+        }
+        return bpMSP;
+    }
+    
+    private Policy getMessageLevelBSP() throws PolicyException {
+        QName serviceName = pipeConfig.getWSDLModel().getOwner().getName();
+        QName portName = pipeConfig.getWSDLModel().getName();
+        PolicyMapKey operationKey = wsPolicyMap.createWsdlOperationScopeKey(serviceName, portName, bsOperationName);
+        
+        Policy operationLevelEP =  wsPolicyMap.getOperationEffectivePolicy(operationKey);
+        return operationLevelEP;
+    }
+    
+    protected PolicySourceModel unmarshalPolicy(String resource) throws PolicyException, IOException {
+        InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(resource);
+        if (is == null) return null;
+        Reader reader =  new InputStreamReader(is);
+        PolicySourceModel model = PolicyModelUnmarshaller.getXmlUnmarshaller().unmarshalModel(reader);
+        reader.close();
+        return model;
+    }
+    
+    protected final WSDLBoundOperation cacheOperation(Message msg, Packet packet){
+        WSDLBoundOperation cachedOperation = msg.getOperation(pipeConfig.getWSDLModel());
+        packet.invocationProperties.put("WSDL_BOUND_OPERATION", cachedOperation);
+        return cachedOperation;
+    }
+    
+    protected final void resetCachedOperation(Packet packet){
+        packet.invocationProperties.put("WSDL_BOUND_OPERATION", null);
+    }
+    
+    protected final void cacheOperation(WSDLBoundOperation op, Packet packet) {
+        packet.invocationProperties.put("WSDL_BOUND_OPERATION", op);
+    }
+    
+    protected final WSDLBoundOperation cachedOperation(Packet packet) {
+        WSDLBoundOperation op = (WSDLBoundOperation)packet.invocationProperties.get("WSDL_BOUND_OPERATION");
+        return op;
+    }
+    
+    protected boolean isSCMessage(Packet packet){
+        
+        if (!bindingHasSecureConversationPolicy()) {
+            return false;
+        }
+        
+        if (!isAddressingEnabled()) {
+            return false;
+        }
+        
+        String action = getAction(packet);
+        if (rstSCTURI.equals(action)){
+            return true;
+        }
+        return false;
+    }
+    
+    protected boolean isSCCancel(Packet packet){
+        
+        if (!bindingHasSecureConversationPolicy()) {
+            return false;
+        }
+        
+        if (!isAddressingEnabled()) {
+            return false;
+        }
+        
+        String action = getAction(packet);
+        if(WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_RESPONSE_ACTION.equals(action) ||
+                WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_ACTION .equals(action)) {
+            return true;
+        }
+        return false;
+    }
+    
+    protected boolean isAddressingEnabled() {
+        return (addVer != null);
+    }
+    
+    protected boolean isTrustMessage(Packet packet){
+        if (!isAddressingEnabled()) {
+            return false;
+        }
+        String action = getAction(packet);
+        if(WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION.equals(action) ||
+                WSTrustConstants.REQUEST_SECURITY_TOKEN_RESPONSE_ISSUE_ACTION.equals(action)){
+            return true;
+        }
+        return false;
+        
+    }
+    
+    protected boolean isRMMessage(Packet packet){
+        if (!isAddressingEnabled()) {
+            return false;
+        }
+        if (!bindingHasRMPolicy()) {
+            return false;
+        }
+        String action = getAction(packet);
+        if (RM_CREATE_SEQ.equals(action) || RM_CREATE_SEQ_RESP.equals(action)
+        || RM_SEQ_ACK.equals(action) || RM_TERMINATE_SEQ.equals(action)
+        || RM_LAST_MESSAGE.equals(action)) {
+            return true;
+        }
+        
+        return false;
+    }
+    
+    protected String getAction(Packet packet){
+        // if ("true".equals(packet.invocationProperties.get(WSTrustConstants.IS_TRUST_MESSAGE))){
+        //    return (String)packet.invocationProperties.get(WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION);
+        //}
+        
+        HeaderList hl = packet.getMessage().getHeaders();
+        //String action =  hl.getAction(pipeConfig.getBinding().getAddressingVersion(), pipeConfig.getBinding().getSOAPVersion());
+        String action =  hl.getAction(addVer, pipeConfig.getBinding().getSOAPVersion());
+        return action;
+    }
+    
+    protected WSDLBoundOperation getWSDLOpFromAction(Packet packet ,boolean isIncomming){
+        String uriValue = getAction(packet);
+        Set <WSDLBoundOperation>keys = outMessagePolicyMap.keySet();
+        for(WSDLBoundOperation wbo : keys){
+            WSDLOperation wo = wbo.getOperation();
+            // WsaWSDLOperationExtension extensions = wo.getExtension(WsaWSDLOperationExtension.class);
+            String action = getAction(wo, isIncomming);
+            if(action != null && action.equals(uriValue)){
+                return wbo;
+            }
+        }
+        return null;
+    }
+    
+    protected void buildProtocolPolicy(Policy endpointPolicy)throws PolicyException{
+        if(endpointPolicy == null ){
+            return;
+        }
+        try{
+            RMPolicyResolver rr = new RMPolicyResolver();
+            Policy msgLevelPolicy = rr.getOperationLevelPolicy();
+            PolicyMerger merger = PolicyMerger.getMerger();
+            ArrayList<Policy> pList = new ArrayList<Policy>(2);
+            pList.add(endpointPolicy);
+            pList.add(msgLevelPolicy);
+            Policy effectivePolicy = merger.merge(pList);
+            addIncomingProtocolPolicy(effectivePolicy,"RM");
+            addOutgoingProtocolPolicy(effectivePolicy,"RM");
+            
+            pList.remove(msgLevelPolicy);
+            pList.add(getMessageBootstrapPolicy());
+            PolicyMerger pm = PolicyMerger.getMerger();
+            //add secure conversation policy.
+            Policy ep = pm.merge(pList);
+            addIncomingProtocolPolicy(ep,"SC");
+            addOutgoingProtocolPolicy(ep,"SC");
+        }catch(IOException ie){
+            throw new PolicyException(ie);
+        }
+    }
+    
+    protected SecurityPolicyHolder constructPolicyHolder(Policy effectivePolicy,
+            boolean isServer,boolean isIncoming)throws PolicyException{
+        return  constructPolicyHolder(effectivePolicy,isServer,isIncoming,false);
+    }
+    
+    protected SecurityPolicyHolder constructPolicyHolder(Policy effectivePolicy,
+            boolean isServer,boolean isIncoming,boolean ignoreST)throws PolicyException{
+        
+        XWSSPolicyGenerator xwssPolicyGenerator = new XWSSPolicyGenerator(effectivePolicy,isServer,isIncoming);
+        xwssPolicyGenerator.process(ignoreST);
+        this.bindingLevelAlgSuite = xwssPolicyGenerator.getBindingLevelAlgSuite();
+        MessagePolicy messagePolicy = xwssPolicyGenerator.getXWSSPolicy();
+        
+        SecurityPolicyHolder sph = new SecurityPolicyHolder();
+        sph.setMessagePolicy(messagePolicy);
+        sph.setBindingLevelAlgSuite(xwssPolicyGenerator.getBindingLevelAlgSuite());
+        List<PolicyAssertion> tokenList = getTokens(effectivePolicy);
+        addConfigAssertions(effectivePolicy,sph);
+        
+        for(PolicyAssertion token:tokenList){
+            if(PolicyUtil.isSecureConversationToken(token)){
+                NestedPolicy bootstrapPolicy = ((SecureConversationToken)token).getBootstrapPolicy();
+                Policy effectiveBP = null;
+                if(hasTargets(bootstrapPolicy)){
+                    effectiveBP = bootstrapPolicy;
+                }else{
+                    effectiveBP = getEffectiveBootstrapPolicy(bootstrapPolicy);
+                }
+                xwssPolicyGenerator = new XWSSPolicyGenerator(effectiveBP,isServer,isIncoming);
+                xwssPolicyGenerator.process(ignoreST);
+                MessagePolicy bmp = xwssPolicyGenerator.getXWSSPolicy();
+                
+                
+                if(isServer && isIncoming){
+                    EncryptionPolicy optionalPolicy =
+                            new EncryptionPolicy();
+                    EncryptionPolicy.FeatureBinding  fb = (EncryptionPolicy.FeatureBinding) optionalPolicy.getFeatureBinding();
+                    optionalPolicy.newX509CertificateKeyBinding();
+                    EncryptionTarget target = new EncryptionTarget();
+                    target.setQName(new QName(MessageConstants.SAML_v1_1_NS,MessageConstants.SAML_ASSERTION_LNAME));
+                    target.setEnforce(false);
+                    fb.addTargetBinding(target);
+                    /*
+                    try {
+                        bmp.prepend(optionalPolicy);
+                    } catch (PolicyGenerationException ex) {
+                        throw new PolicyException(ex);
+                    }*/
+                }
+                
+                PolicyAssertion sct = new SCTokenWrapper(token,bmp);
+                sph.addSecureConversationToken(sct);
+                hasSecureConversation = true;
+                
+                // if the bootstrap has issued tokens then set hasIssuedTokens=true
+                List<PolicyAssertion> iList =
+                        this.getIssuedTokenPoliciesFromBootstrapPolicy((Token)sct);
+                if (!iList.isEmpty()) {
+                    hasIssuedTokens = true;
+                }
+                
+            }else if(PolicyUtil.isIssuedToken(token)){
+                sph.addIssuedToken(token);
+                hasIssuedTokens = true;
+            }
+        }
+        return sph;
+    }
+    
+    protected List<PolicyAssertion> getIssuedTokenPoliciesFromBootstrapPolicy(
+            Token scAssertion) {
+        SCTokenWrapper token = (SCTokenWrapper)scAssertion;
+        return token.getIssuedTokens();
+    }
+    
+// return the callbackhandler if the xwssCallbackHandler was set
+// otherwise populate the props and return null.
+    protected String populateConfigProperties(Set configAssertions, Properties props) {
+        if (configAssertions == null) {
+            return null;
+        }
+        Iterator it = configAssertions.iterator();
+        for (; it.hasNext();) {
+            PolicyAssertion as = (PolicyAssertion)it.next();
+            if ("KeyStore".equals(as.getName().getLocalPart())) {
+                populateKeystoreProps(props, (KeyStore)as);
+            } else if ("TrustStore".equals(as.getName().getLocalPart())) {
+                populateTruststoreProps(props, (TrustStore)as);
+            } else if ("CallbackHandlerConfiguration".equals(as.getName().getLocalPart())) {
+                String ret = populateCallbackHandlerProps(props, (CallbackHandlerConfiguration)as);
+                if (ret != null) {
+                    return ret;
+                }
+            } else if ("ValidatorConfiguration".equals(as.getName().getLocalPart())) {
+                populateValidatorProps(props, (ValidatorConfiguration)as);
+            }
+        }
+        return null;
+    }
+    
+    private void populateKeystoreProps(Properties props, KeyStore store) {
+        if (store.getLocation() != null) {
+            props.put(DefaultCallbackHandler.KEYSTORE_URL, store.getLocation());
+        } else {
+            //throw RuntimeException for now
+            throw new RuntimeException("KeyStore URL was obtained as NULL from ConfigAssertion");
+        }
+        
+        if (store.getType() != null) {
+            props.put(DefaultCallbackHandler.KEYSTORE_TYPE, store.getType());
+        } else {
+            props.put(DefaultCallbackHandler.KEYSTORE_TYPE, "JKS");
+        }
+        
+        if (store.getPassword() != null) {
+            props.put(DefaultCallbackHandler.KEYSTORE_PASSWORD, new String(store.getPassword()));
+        } else {
+            throw new RuntimeException("KeyStore Password was obtained as NULL from ConfigAssertion");
+        }
+        
+        if (store.getAlias() != null) {
+            props.put(DefaultCallbackHandler.MY_ALIAS, store.getAlias());
+        } else {
+            // use default alias
+            //throw new RuntimeException("KeyStore Alias was obtained as NULL from ConfigAssertion");
+        }
+    }
+    
+    protected ProcessingContext initializeInboundProcessingContext(Packet packet)  {
+        ProcessingContextImpl ctx = null;
+        if(optimized){
+            ctx = new JAXBFilterProcessingContext(packet.invocationProperties);
+        }else{
+            ctx = new ProcessingContextImpl( packet.invocationProperties);
+        }
+        
+        // set the policy, issued-token-map, and extraneous properties
+        // try { policy need not be set apriori after moving to new policverification code
+        // setting a flag if issued tokens present
+        ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
+        ctx.setIssuedTokenContextMap(issuedTokenContextMap);
+
+        ctx.hasIssuedToken(bindingHasIssuedTokenPolicy());
+        ctx.setSecurityEnvironment(secEnv);
+        ctx.isInboundMessage(true);
+        
+        return ctx;
+    }
+    
+    private void populateTruststoreProps(Properties props, TrustStore store) {
+        if (store.getLocation() != null) {
+            props.put(DefaultCallbackHandler.TRUSTSTORE_URL, store.getLocation());
+        } else {
+            //throw RuntimeException for now
+            throw new RuntimeException("TrustStore URL was obtained as NULL from ConfigAssertion");
+        }
+        
+        if (store.getType() != null) {
+            props.put(DefaultCallbackHandler.TRUSTSTORE_TYPE, store.getType());
+        } else {
+            props.put(DefaultCallbackHandler.TRUSTSTORE_TYPE, "JKS");
+        }
+        
+        if (store.getPassword() != null) {
+            props.put(DefaultCallbackHandler.TRUSTSTORE_PASSWORD, new String(store.getPassword()));
+        } else {
+            throw new RuntimeException("TrustStore Password was obtained as NULL from ConfigAssertion");
+        }
+        
+        if (store.getPeerAlias() != null) {
+            props.put(DefaultCallbackHandler.PEER_ENTITY_ALIAS, store.getPeerAlias());
+        }
+        
+        if (store.getSTSAlias() != null) {
+            props.put(DefaultCallbackHandler.STS_ALIAS, store.getSTSAlias());
+        }
+        
+        if (store.getServiceAlias() != null) {
+            props.put(DefaultCallbackHandler.SERVICE_ALIAS, store.getServiceAlias());
+        }
+    }
+    
+    private String  populateCallbackHandlerProps(Properties props, CallbackHandlerConfiguration conf) {
+        Iterator it = conf.getCallbackHandlers();
+        for (; it.hasNext();) {
+            PolicyAssertion p = (PolicyAssertion)it.next();
+            com.sun.xml.ws.security.impl.policy.CallbackHandler hd = (com.sun.xml.ws.security.impl.policy.CallbackHandler)p;
+            String name = hd.getHandlerName();
+            String ret = hd.getHandler();
+            if ("xwssCallbackHandler".equals(name)) {
+                if (ret != null && !"".equals(ret)) {
+                    return ret;
+                } else {
+                    throw new RuntimeException("Null or Empty Value specified for xwssCallbackHandler classname");
+                }
+            } else if ("usernameHandler".equals(name)) {
+                if (ret != null && !"".equals(ret)) {
+                    props.put(DefaultCallbackHandler.USERNAME_CBH, ret);
+                } else {
+                    QName qname = new QName("default");
+                    String def = hd.getAttributeValue(qname);
+                    if (def != null && !"".equals(def)) {
+                        props.put(DefaultCallbackHandler.MY_USERNAME, def);
+                    } else {
+                        throw new RuntimeException("Null or Empty Value specified for usernameHandler classname");
+                    }
+                }
+            } else if ("passwordHandler".equals(name)) {
+                if (ret != null && !"".equals(ret)) {
+                    props.put(DefaultCallbackHandler.PASSWORD_CBH, ret);
+                } else {
+                    QName qname = new QName("default");
+                    String def = hd.getAttributeValue(qname);
+                    if (def != null && !"".equals(def)) {
+                        props.put(DefaultCallbackHandler.MY_PASSWORD, def);
+                    } else {
+                        throw new RuntimeException("Null or Empty Value specified for passwordHandler classname");
+                    }
+                }
+            } else if ("samlHandler".equals(name)) {
+                if (ret == null || "".equals(ret)) {
+                    throw new RuntimeException("Null or Empty Value specified for samlHandler classname");
+                }
+                props.put(DefaultCallbackHandler.SAML_CBH, ret);
+            } else {
+                throw new RuntimeException("Unsupported CallbackHandler Type " + name + " encountered");
+            }
+        }
+        return null;
+    }
+    
+    private void populateValidatorProps(Properties props, ValidatorConfiguration conf) {
+        if (conf.getMaxClockSkew() != null) {
+            props.put(DefaultCallbackHandler.MAX_CLOCK_SKEW_PROPERTY, conf.getMaxClockSkew());
+        }
+        
+        if (conf.getTimestampFreshnessLimit() != null) {
+            props.put(DefaultCallbackHandler.TIMESTAMP_FRESHNESS_LIMIT_PROPERTY, conf.getTimestampFreshnessLimit());
+        }
+        
+        if (conf.getMaxNonceAge() != null) {
+            props.put(DefaultCallbackHandler.MAX_NONCE_AGE_PROPERTY, conf.getMaxNonceAge());
+        }
+        
+        Iterator it = conf.getValidators();
+        for (; it.hasNext();) {
+            PolicyAssertion p = (PolicyAssertion)it.next();
+            Validator v = (Validator)p;
+            String name = v.getValidatorName();
+            String validator = v.getValidator();
+            if (validator == null || "".equals(validator)) {
+                throw new RuntimeException("Null or Empty Validator classname set for " + name);
+            }
+            
+            if ("usernameValidator".equals(name)) {
+                props.put(DefaultCallbackHandler.USERNAME_VALIDATOR, validator);
+            } else if ("timestampValidator".equals(name)) {
+                props.put(DefaultCallbackHandler.TIMESTAMP_VALIDATOR, validator);
+            } else if ("certificateValidator".equals(name)) {
+                props.put(DefaultCallbackHandler.CERTIFICATE_VALIDATOR, validator);
+            } else if ("samlAssertionValidator".equals(name)) {
+                props.put(DefaultCallbackHandler.SAML_VALIDATOR, validator);
+            } else {
+                throw new RuntimeException("Unknown Validator type " + name + " in config Assertion");
+            }
+        }
+    }
+    
+    
+    protected com.sun.xml.wss.impl.AlgorithmSuite getAlgoSuite(AlgorithmSuite suite) {
+        com.sun.xml.wss.impl.AlgorithmSuite als = new com.sun.xml.wss.impl.AlgorithmSuite(
+                suite.getDigestAlgorithm(),
+                suite.getEncryptionAlgorithm(),
+                suite.getSymmetricKeyAlgorithm(),
+                suite.getAsymmetricKeyAlgorithm());
+        
+        return als;
+    }
+    
+    protected com.sun.xml.wss.impl.WSSAssertion getWssAssertion(WSSAssertion asser) {
+        com.sun.xml.wss.impl.WSSAssertion assertion = new com.sun.xml.wss.impl.WSSAssertion(
+                asser.getRequiredProperties(),
+                asser.getType());
+        return assertion;
+    }
+    
+    //TODO: Duplicate information copied from Pipeline Assembler
+    private boolean isReliableMessagingEnabled(PolicyMap policyMap, WSDLPort port) {
+        if (policyMap == null)
+            return false;
+        
+        try {
+            PolicyMapKey endpointKey = policyMap.createWsdlEndpointScopeKey(port.getOwner().getName(),
+                    port.getName());
+            Policy policy = policyMap.getEndpointEffectivePolicy(endpointKey);
+            
+            return (policy != null) && policy.contains(Constants.version);
+        } catch (PolicyException e) {
+            throw new WebServiceException(e);
+        }
+    }
+    
+    protected boolean bindingHasIssuedTokenPolicy() {
+        return hasIssuedTokens;
+    }
+    
+    protected boolean bindingHasSecureConversationPolicy() {
+        return hasSecureConversation;
+    }
+    
+    protected boolean bindingHasRMPolicy() {
+        return hasReliableMessaging;
+    }
+    
+    protected Class loadClass(String classname) throws Exception {
+        if (classname == null) {
+            return null;
+        }
+        Class ret = null;
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        if (loader != null) {
+            try {
+                ret = loader.loadClass(classname);
+                return ret;
+            } catch (ClassNotFoundException e) {
+                // ignore
+            }
+        }
+        // if context classloader didnt work, try this
+        loader = this.getClass().getClassLoader();
+        try {
+            ret = loader.loadClass(classname);
+            return ret;
+        } catch (ClassNotFoundException e) {
+            // ignore
+        }
+        throw new XWSSecurityException("Could not find User Class " + classname);
+    }
+
+     protected WSDLBoundOperation getOperation(Message message, Packet packet){
+         WSDLBoundOperation op = cachedOperation(packet);
+        if(op == null){
+            op = cacheOperation(message, packet);
+        }
+        return op;
+    }
+    
+    protected ProcessingContext initializeOutgoingProcessingContext(
+            Packet packet, boolean isSCMessage) {
+        ProcessingContextImpl ctx = null;
+        if(optimized){
+            ctx = new JAXBFilterProcessingContext(packet.invocationProperties);
+        }else{
+            ctx = new ProcessingContextImpl( packet.invocationProperties);
+        }
+        // set the policy, issued-token-map, and extraneous properties
+        ctx.setIssuedTokenContextMap(issuedTokenContextMap);
+        ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
+        try {
+            MessagePolicy policy = null;
+            if (isRMMessage(packet)) {
+                SecurityPolicyHolder holder = outProtocolPM.get("RM");
+                policy = holder.getMessagePolicy();
+            }else if(isSCCancel(packet)){
+                SecurityPolicyHolder holder = outProtocolPM.get("SC");
+                policy = holder.getMessagePolicy();
+            }else {
+                policy = getOutgoingXWSSecurityPolicy(packet, isSCMessage);
+            }
+            if (debug) {
+                policy.dumpMessages(true);
+            }
+            if (policy.getAlgorithmSuite() != null) {
+                //override the binding level suite
+                ctx.setAlgorithmSuite(policy.getAlgorithmSuite());
+            }
+            ctx.setWSSAssertion(policy.getWSSAssertion());
+            ctx.setSecurityPolicy(policy);
+            ctx.setSecurityEnvironment(secEnv);
+            ctx.isInboundMessage(false);
+        } catch (XWSSecurityException e) {
+            throw new RuntimeException(e);
+        }
+        return ctx;
+    }
+    
+    protected MessagePolicy getOutgoingXWSSecurityPolicy(
+            Packet packet, boolean isSCMessage) {
+        
+        
+        if (isSCMessage) {
+            Token scToken = (Token)packet.invocationProperties.get(SC_ASSERTION);
+            return getOutgoingXWSBootstrapPolicy(scToken);
+        }
+        Message message = packet.getMessage();
+        WSDLBoundOperation operation = null;
+        if(isTrustMessage(packet)){
+            operation = getWSDLOpFromAction(packet,false);
+        }else{
+            operation =message.getOperation(pipeConfig.getWSDLModel());
+        }
+        
+        //Review : Will this return operation name in all cases , doclit,rpclit, wrap / non wrap ?
+        
+        MessagePolicy mp = null;
+        if(operation == null){
+            //Body could be encrypted. Security will have to infer the
+            //policy from the message till the Body is decrypted.
+            mp =  new MessagePolicy();
+        }
+        if (outMessagePolicyMap == null) {
+            //empty message policy
+            return new MessagePolicy();
+        }
+        SecurityPolicyHolder sph = (SecurityPolicyHolder) outMessagePolicyMap.get(operation);
+        if(sph == null){
+            return new MessagePolicy();
+        }
+        mp = sph.getMessagePolicy();
+        return mp;
+    }
+    
+    protected MessagePolicy getOutgoingXWSBootstrapPolicy(Token scAssertion) {
+        return ((SCTokenWrapper)scAssertion).getMessagePolicy();
+    }
+    
+    protected SOAPFaultException getSOAPFaultException(WssSoapFaultException sfe) {
+        
+        SOAPFault fault = null;
+        try {
+            if (isSOAP12) {
+                fault = soapFactory.createFault(sfe.getFaultString(),SOAPConstants.SOAP_SENDER_FAULT);
+                fault.appendFaultSubcode(sfe.getFaultCode());
+            } else {
+                fault = soapFactory.createFault(sfe.getFaultString(), sfe.getFaultCode());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Security Pipe: Internal Error while trying to create a SOAPFault");
+        }
+        return new SOAPFaultException(fault);
+        
+    }
+    
+    protected SOAPFaultException getSOAPFaultException(XWSSecurityException xwse) {
+        QName qname = null;
+        if (xwse.getCause() instanceof PolicyViolationException)
+            qname = MessageConstants.WSSE_RECEIVER_POLICY_VIOLATION;
+        else
+            qname = MessageConstants.WSSE_FAILED_AUTHENTICATION;
+        
+        com.sun.xml.wss.impl.WssSoapFaultException wsfe =
+                SecurableSoapMessage.newSOAPFaultException(
+                qname, xwse.getMessage(), xwse);
+        
+        return getSOAPFaultException(wsfe);
+    }
+    
+    protected SOAPMessage secureOutboundMessage(SOAPMessage message, ProcessingContext ctx){
+        try {
+            ctx.setSOAPMessage(message);
+            SecurityAnnotator.secureMessage(ctx);
+            return ctx.getSOAPMessage();
+        } catch (WssSoapFaultException soapFaultException) {
+            soapFaultException.printStackTrace();
+            throw getSOAPFaultException(soapFaultException);
+        } catch (XWSSecurityException xwse) {
+            xwse.printStackTrace();
+            WssSoapFaultException wsfe =
+                    SecurableSoapMessage.newSOAPFaultException(
+                    MessageConstants.WSSE_INTERNAL_SERVER_ERROR,
+                    xwse.getMessage(), xwse);
+            throw getSOAPFaultException(wsfe);
+        }
+    }
+    
+    protected Message secureOutboundMessage(Message message, ProcessingContext ctx){
+        try{
+            JAXBFilterProcessingContext  context = (JAXBFilterProcessingContext)ctx;
+            context.setSOAPVersion(soapVersion);
+            context.setJAXWSMessage(message, soapVersion);
+            SecurityAnnotator.secureMessage(context);
+            return context.getJAXWSMessage();
+        } catch(XWSSecurityException xwse){
+            xwse.printStackTrace();
+            WssSoapFaultException wsfe =
+                    SecurableSoapMessage.newSOAPFaultException(
+                    MessageConstants.WSSE_INTERNAL_SERVER_ERROR,
+                    xwse.getMessage(), xwse);
+            throw getSOAPFaultException(wsfe);
+        }
+    }
+    
+    protected SOAPFault getSOAPFault(WssSoapFaultException sfe) {
+        
+        SOAPFault fault = null;
+        try {
+            if (isSOAP12) {
+                fault = soapFactory.createFault(sfe.getFaultString(),SOAPConstants.SOAP_SENDER_FAULT);
+                fault.appendFaultSubcode(sfe.getFaultCode());
+            } else {
+                fault = soapFactory.createFault(sfe.getFaultString(), sfe.getFaultCode());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Security Pipe: Internal Error while trying to create a SOAPFault");
+        }
+        return fault;
+    }
+
+    
+    
+    protected CallbackHandler loadGFHandler(boolean isClientAuthModule) {
+        String classname = "com.sun.enterprise.security.jmac.callback.ContainerCallbackHandler";
+        
+        Class ret = null;
+        try {
+            
+            ClassLoader loader = Thread.currentThread().getContextClassLoader();
+            try {
+                if (loader != null) {
+                    ret = loader.loadClass(classname);
+                }
+            }catch(ClassNotFoundException e) {
+                
+            }
+            
+            if (ret == null) {
+                // if context classloader didnt work, try this
+                loader = this.getClass().getClassLoader();
+                ret = loader.loadClass(classname);
+            }
+            
+            if (ret != null) {
+                CallbackHandler handler = (CallbackHandler)ret.newInstance();
+                return handler;
+            }
+        } catch (ClassNotFoundException e) {
+            // ignore
+            
+        } catch(InstantiationException e) {
+            
+        } catch(IllegalAccessException ex) {
+            
+        }
+        throw new RuntimeException("Internal Error: Could Not Load CallbackHandler Class: " + classname);
+    }
+    
+    protected boolean isGFAppClient() {
+        //TODO
+        String isGF = System.getProperty("com.sun.aas.installRoot");
+        if (isGF != null) {
+            //this will work for servlet clients
+            return true;
+        }
+        //TODO: for ACC we need a different check
+        return false;
+    }
+    
+    protected Packet getRequestPacket(MessageInfo messageInfo) {
+        return (Packet)messageInfo.getMap().get("REQ_PACKET");
+    }
+    
+    protected Packet getResponsePacket(MessageInfo messageInfo) {
+        return (Packet)messageInfo.getMap().get("RES_PACKET");
+    }
+    
+    @SuppressWarnings("unchecked")
+    protected void setRequestPacket(MessageInfo messageInfo, Packet ret) {
+        messageInfo.getMap().put("REQ_PACKET", ret);    
+    }
+    
+    @SuppressWarnings("unchecked")
+    protected void setResponsePacket(MessageInfo messageInfo, Packet ret) {
+        messageInfo.getMap().put("RES_PACKET", ret);    
+    }
+    
+    protected abstract void addIncomingFaultPolicy(Policy effectivePolicy,SecurityPolicyHolder sph,WSDLFault fault)throws PolicyException;
+    
+    protected abstract void addOutgoingFaultPolicy(Policy effectivePolicy,SecurityPolicyHolder sph,WSDLFault fault)throws PolicyException;
+    
+    protected abstract void addIncomingProtocolPolicy(Policy effectivePolicy,String protocol)throws PolicyException;
+    
+    protected abstract void addOutgoingProtocolPolicy(Policy effectivePolicy,String protocol)throws PolicyException;
+    
+    protected abstract String getAction(WSDLOperation operation, boolean isIncomming) ;
+    
+}

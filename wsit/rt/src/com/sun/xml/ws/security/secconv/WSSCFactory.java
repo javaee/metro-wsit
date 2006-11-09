@@ -47,6 +47,11 @@ public class WSSCFactory {
         return new WSSCPlugin(config);
     }
 
+     public static NewWSSCPlugin newNewSCPlugin(Configuration config) {
+        return new NewWSSCPlugin(config);
+    }
+
+
     public static WSSCContract newWSSCContract(Configuration config) {
         WSSCContract contract = new WSSCContract();
         contract.init(config); 
