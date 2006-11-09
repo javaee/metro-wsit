@@ -33,6 +33,7 @@ import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.assembler.PipeConfiguration;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.security.impl.policyconv.SCTokenWrapper;
+import com.sun.xml.ws.security.opt.impl.JAXBFilterProcessingContext;
 import com.sun.xml.ws.security.secconv.WSSCConstants;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.wss.impl.PolicyResolver;
@@ -107,8 +108,12 @@ public class PolicyResolverImpl implements PolicyResolver{
         MessagePolicy mp = null;
         SOAPMessage soapMsg = null;
         if(msg == null){
-            soapMsg = ctx.getSOAPMessage();
-            msg = Messages.create(soapMsg);
+            if(ctx instanceof JAXBFilterProcessingContext){
+                msg = ((JAXBFilterProcessingContext)ctx).getJAXWSMessage();
+            } else{
+                soapMsg = ctx.getSOAPMessage();
+                msg = Messages.create(soapMsg);
+            }
             ctx.setExtraneousProperty(JAXWS_21_MESSAGE,msg);
         }
         action = getAction(msg);
