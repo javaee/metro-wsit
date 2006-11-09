@@ -78,6 +78,45 @@
         <delete dir="${tmpdir}" includeemptydirs="true"/>
     </target>
 
+    <target name="integrate-jaxws-bleedingedge-hudson" description="integrates latest JAX-WS 2.1 bleedingedge bits in WSIT, meant for internal consumption only">
+        <!-- JAX-WS 2.1 JARs -->
+
+        <!-- Unzip the JARs -->
+        <mkdir dir="${tmpdir}"/>
+        <get src="http://kohsuke.sfbay/hudson/job/jaxws-ri-21-bleedingedge/lastSuccessfulBuild/artifact/jax-ws-sources/jaxws-ri/build/jaxws-ri.zip"
+                dest="${tmpdir}/jaxws-ri.zip"/>
+        <unzip src="${tmpdir}/jaxws-ri.zip" dest="${tmpdir}"/>
+
+        <!-- unzip the JAR source zips -->
+        <get src="http://kohsuke.sfbay/hudson/job/jaxws-ri-21-bleedingedge/lastSuccessfulBuild/artifact/jax-ws-sources/jaxws-ri/build/jaxws-libs.src.zip"
+                dest="${tmpdir}/jaxws-libs.src.zip"/>
+        <unzip src="${tmpdir}/jaxws-libs.src.zip" dest="${tmpdir}"/>
+
+        <!-- copy to relevant directories -->
+        <copy todir="${lib.runtime.dir}" overwrite="true" verbose="${verbose}">
+            <fileset dir="tmp/jaxws-ri/lib" includes="*.jar" excludes="jaxb-xjc.*, *-tools.*"/>
+            <fileset dir="tmp" includes="*.zip" excludes="jaxb-xjc.*, *-tools.*"/>
+        </copy>
+        <copy todir="${lib.tooltime.dir}" overwrite="true" verbose="${verbose}">
+            <fileset dir="tmp/jaxws-ri/lib" includes="jaxb-xjc.*, *-tools.*"/>
+            <fileset dir="tmp" includes="jaxb-xjc.*, *-tools.*"/>
+        </copy>
+
+        <!-- unzip the JAX-WS source zips -->
+        <get src="http://kohsuke.sfbay/hudson/job/jaxws-ri-21-bleedingedge/lastSuccessfulBuild/artifact/jax-ws-sources/jaxws-ri/dist/jaxws-ri/lib/jaxws-rt.src.zip"
+                dest="${lib.runtime.dir}/jaxws-rt.src.zip"/>
+        <get src="http://kohsuke.sfbay/hudson/job/jaxws-ri-21-bleedingedge/lastSuccessfulBuild/artifact/jax-ws-sources/jaxws-ri/dist/jaxws-ri/lib/jaxws-tools.src.zip"
+                dest="${lib.tooltime.dir}/jaxws-tools.src.zip"/>
+
+        <!-- Local transport JAR and Source -->
+        <get src="http://kohsuke.sfbay/hudson/job/jaxws-ri-21-bleedingedge/lastSuccessfulBuild/artifact/jax-ws-sources/jaxws-ri/transports/local/build/jaxws-local-transport.jar"
+                dest="${lib.runtime.dir}/jaxws-local-transport.jar"/>
+        <get src="http://kohsuke.sfbay/hudson/job/jaxws-ri-21-bleedingedge/lastSuccessfulBuild/artifact/jax-ws-sources/jaxws-ri/transports/local/build/jaxws-local-transport-src.zip"
+                dest="${lib.runtime.dir}/jaxws-local-transport-src.zip"/>
+
+        <delete dir="${tmpdir}" includeemptydirs="true"/>
+    </target>
+
   <target name="integrate-xwss30-hudson" 
           description="integrate the last successful XWSS 3.0 Hudson build">
     <!-- get src="http://kohsuke.sfbay/hudson/job/xwss3.0/lastSuccessfulBuild/artifact/xwss/xwss-ri/dist/wsit/lib/xws-security.src.zip"
