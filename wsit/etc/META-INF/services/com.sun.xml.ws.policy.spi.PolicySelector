@@ -4,4 +4,4 @@ com.sun.xml.ws.addressing.policy.AddressingPolicySelector
 com.sun.xml.ws.encoding.policy.EncodingPolicySelector
 com.sun.xml.ws.policy.jaxws.impl.MicrosoftProprietaryPolicySelector
 com.sun.xml.ws.policy.jaxws.impl.SunProprietaryPolicySelector
-#com.sun.xml.ws.tx.common.TxPolicySelector
+com.sun.xml.ws.tx.common.TxPolicySelector
