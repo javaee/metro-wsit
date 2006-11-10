@@ -18,7 +18,7 @@
  * [name of copyright owner]
  */
 /*
- * $Id: SamlCallbackHandler.java,v 1.1 2006-11-10 13:28:12 shyam_rao Exp $
+ * $Id: SamlCallbackHandler.java,v 1.2 2006-11-10 17:15:30 shyam_rao Exp $
  *
  * Copyright 2005 Sun Microsystems, Inc. All rights reserved.
  * SUN PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
@@ -126,7 +126,6 @@ public  class SamlCallbackHandler implements CallbackHandler {
             Properties properties = new Properties();
 
 			setContainerHome();
-			System.out.print(" CLIENT HOME ================== : "+home);
             String clientPropsFile = home + fileSeparator + "xws-security" + fileSeparator + "etc" + fileSeparator + "client-security-env.properties";
    	        properties.load(new FileInputStream(clientPropsFile));
                                                                                                                                                              
@@ -148,7 +147,6 @@ public  class SamlCallbackHandler implements CallbackHandler {
         
     }
     public void setContainerHome() {
-        System.out.println("SJSAS HOME location ========================= : "+System.getProperty("xtest.sjsas.home"));
         this.home = System.getProperty("WSIT_HOME");
         if (this.home == null) {
             this.home = System.getProperty("xtest.sjsas.home");
@@ -160,7 +158,6 @@ public  class SamlCallbackHandler implements CallbackHandler {
             System.out.println("WARNING: Could not locate container.home in PlugFestServerCallbackHandler");
         }
                                                                                                                                                              
-        System.out.println("home="+ home);
     }
 
     public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
@@ -500,14 +497,12 @@ public  class SamlCallbackHandler implements CallbackHandler {
             Enumeration aliases = keyStore.aliases();
             while (aliases.hasMoreElements()) {
                 String currentAlias = (String) aliases.nextElement();
-				System.out.println("ALIAS ALL************************************* "+currentAlias);
                 if (keyStore.isKeyEntry(currentAlias)) {
                     Certificate thisCertificate = keyStore.getCertificate(currentAlias);
                     if (thisCertificate != null) {
                         if (thisCertificate instanceof X509Certificate) {
                             if (uniqueAlias == null) {
                                 uniqueAlias = currentAlias;
-								System.out.println("ALIAS INSIDE************************************* "+currentAlias);
                             } else {
                                 // Not unique!
                                 uniqueAlias = null;
