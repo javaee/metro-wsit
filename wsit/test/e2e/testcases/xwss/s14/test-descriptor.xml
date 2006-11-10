@@ -1,0 +1,8 @@
+<descriptor>
+  <description>S14 e2e test : saml20 used in samlToken policy assertion as EndorsingSupportingToken </description>
+  <client href ="test.bsh"/>
+  <service basedir="./server">
+    <wsdl href="PingServices14.wsdl"/>
+  </service>
+</descriptor>
+
