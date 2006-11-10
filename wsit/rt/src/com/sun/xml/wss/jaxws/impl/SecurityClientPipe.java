@@ -270,6 +270,7 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
             
             if(!optimized) {
                 SOAPMessage soapMessage = msg.readAsSOAPMessage();
+                soapMessage = verifyInboundMessage(soapMessage, ctx);
                 if (msg.isFault()) {
                     if (debug) {
                         DumpFilter.process(ctx);
@@ -277,7 +278,6 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
                     SOAPFault fault = soapMessage.getSOAPBody().getFault();
                     throw new SOAPFaultException(fault);
                 }
-                soapMessage = verifyInboundMessage(soapMessage, ctx);
                 msg = Messages.create(soapMessage);
             }else{
                 msg = verifyInboundMessage(msg, ctx);
