@@ -29,8 +29,10 @@
 
 package com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter;
 
+import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.InvocationProcessor;
 import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.InvocationProcessorFactory;
 import java.io.StringWriter;
+import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 /**
@@ -40,11 +42,12 @@ import javax.xml.stream.XMLStreamWriter;
 public final class PrivateAssertionFilteringXmlStreamWriterTest extends AbstractFilteringTest {
     private static final String[] testResources = new String[] {
         "policy_0_visible",
-        "policy_1_visible",
-        "policy_2_visible",
-        "policy_3_visible"
     };
-    private static final InvocationProcessorFactory factory = FilteringInvocationProcessorFactory.getFactory(FilteringInvocationProcessorFactory.FilterType.PRIVATE_ASSERTION_FILTER);
+    private static final InvocationProcessorFactory factory = new InvocationProcessorFactory() {
+        public InvocationProcessor createInvocationProcessor(XMLStreamWriter writer) throws XMLStreamException {
+            return new PrivateAssertionFilteringInvocationProcessor(writer);
+        }
+    };
     
     public PrivateAssertionFilteringXmlStreamWriterTest(String testName) {
         super(testName);

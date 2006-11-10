@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ The contents of this file are subject to the terms
+ of the Common Development and Distribution License
+ (the License).  You may not use this file except in
+ compliance with the License.
+  
+ You can obtain a copy of the license at
+ https://glassfish.dev.java.net/public/CDDLv1.0.html.
+ See the License for the specific language governing
+ permissions and limitations under the License.
+  
+ When distributing Covered Code, include this CDDL
+ Header Notice in each file and include the License file
+ at https://glassfish.dev.java.net/public/CDDLv1.0.html.
+ If applicable, add the following below the CDDL Header,
+ with the fields enclosed by brackets [] replaced by
+ you own identifying information:
+ "Portions Copyrighted [year] [name of copyright owner]"
+  
+ Copyright 2006 Sun Microsystems Inc. All Rights Reserved
+-->
+
+<wsp:Policy 
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+    xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy"
+    xmlns:policy="http://java.sun.com/xml/ns/wsit/policy" 
+    xmlns:foo="http://schemas.foo.com/"
+    xmlns:wsss="http://schemas.sun.com/2006/03/wss/server"    
+    xmlns:wssc="http://schemas.sun.com/2006/03/wss/client"    
+    xmlns:scs="http://schemas.sun.com/ws/2006/05/sc/server"    
+    xmlns:scc="http://schemas.sun.com/ws/2006/05/sc/client"    
+    xmlns:trusts="http://schemas.sun.com/ws/2006/05/trust/server"  
+    xmlns:trustc="http://schemas.sun.com/ws/2006/05/trust/client">
+    
+    <wsss:KeyStore></wsss:KeyStore>
+    <wsss:TrustStore></wsss:TrustStore>
+    <wsss:CallbackHandlerConfiguration></wsss:CallbackHandlerConfiguration>
+    <wsss:ValidatorConfiguration></wsss:ValidatorConfiguration>           
+    
+    <foo:TopLevelAssertion_1 policy:visibility="private">
+        <wsp:Policy>
+            <foo:NestedPolicyAssertion_1>
+                <wsp:Policy>
+                    <foo:NestedPolicyAssertion_11 foo:attribute_A='Value A'>
+                        <wsp:Policy>
+                            <foo:NestedPolicyAssertion_111 />
+                            <wssc:KeyStore></wssc:KeyStore>
+                            <wssc:TrustStore></wssc:TrustStore>                            
+                        </wsp:Policy>
+                        <wssc:CallbackHandlerConfiguration></wssc:CallbackHandlerConfiguration>
+                        <wssc:ValidatorConfiguration></wssc:ValidatorConfiguration>
+                    </foo:NestedPolicyAssertion_11>
+                </wsp:Policy>
+            </foo:NestedPolicyAssertion_1>
+            
+            <foo:NestedPolicyAssertion_2>
+                <wsp:Policy>
+                    <scs:SCConfiguration>        
+                        <foo:NestedPolicyAssertion_21 foo:attribute_A='Value A'>
+                            <wsp:Policy>
+                                <foo:NestedPolicyAssertion_211 />
+                            </wsp:Policy>
+                        </foo:NestedPolicyAssertion_21>
+                    </scs:SCConfiguration>
+                </wsp:Policy>
+            </foo:NestedPolicyAssertion_2>
+            
+            <foo:NestedPolicyAssertion_3>
+                <wsp:Policy>
+                    <foo:NestedPolicyAssertion_31 />
+                </wsp:Policy>
+            </foo:NestedPolicyAssertion_3>
+            
+            <foo:NestedPolicyAssertion_4 />
+            
+            <foo:NestedPolicyAssertion_5 />
+            
+            <wsp:ExactlyOne>
+                <wsp:All>
+                    <foo:NestedPolicyChoice1Assertion_1>
+                        <wsp:Policy>
+                            <wsp:ExactlyOne>
+                                <foo:NestedPolicyChoice1_1Assertion_1 />
+                                <foo:NestedPolicyChoice1_1Assertion_2 />
+                            </wsp:ExactlyOne>
+                        </wsp:Policy>
+                    </foo:NestedPolicyChoice1Assertion_1>
+                    <foo:NestedPolicyChoice1Assertion_2 />
+                </wsp:All>
+                
+                <wsp:All>
+                    <foo:NestedPolicyChoice2Assertion_1>
+                        <wsp:Policy>
+                            <foo:NestedPolicyChoice2Assertion_11 />
+                        </wsp:Policy>
+                    </foo:NestedPolicyChoice2Assertion_1>
+                </wsp:All>
+            </wsp:ExactlyOne>
+        </wsp:Policy>
+    </foo:TopLevelAssertion_1>
+    
+    <foo:TopLevelAssertion_2>
+        <wsp:Policy>
+            <wsp:ExactlyOne>
+                <wsp:All>
+                    <scc:SCClientConfiguration>
+                        <wsp:Policy>
+                            <wsp:ExactlyOne>
+                                <foo:NestedPolicyChoice1_1Assertion_1 />
+                                <foo:NestedPolicyChoice1_1Assertion_2 />
+                            </wsp:ExactlyOne>
+                        </wsp:Policy>
+                    </scc:SCClientConfiguration>
+                    <foo:NestedPolicyChoice1Assertion_2 />
+                </wsp:All>
+                
+                <wsp:All>
+                    <foo:NestedPolicyChoice2Assertion_1>
+                        <wsp:Policy>
+                            <foo:NestedPolicyChoice2Assertion_11 />
+                        </wsp:Policy>
+                    </foo:NestedPolicyChoice2Assertion_1>
+                    <trusts:STSConfiguration>
+                        <wsdl:import wsdl:namespace="http://schemas.xmlsoap.org/ws/2004/09/mex"/>            
+                    </trusts:STSConfiguration>                    
+                    <trustc:PreconfiguredSTS></trustc:PreconfiguredSTS>
+                    <wsdl:import wsdl:namespace="http://schemas.xmlsoap.org/ws/2004/09/mex"/>
+                    <wsdl:import wsdl:namespace="1234"/>
+                </wsp:All>
+            </wsp:ExactlyOne>
+        </wsp:Policy>
+        
+    </foo:TopLevelAssertion_2>        
+</wsp:Policy>

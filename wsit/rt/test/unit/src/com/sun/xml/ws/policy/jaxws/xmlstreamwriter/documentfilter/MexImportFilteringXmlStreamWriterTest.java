@@ -30,14 +30,7 @@
 package com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter;
 
 import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.*;
-import com.sun.xml.ws.policy.sourcemodel.PolicyModelMarshaller;
-import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
-import com.sun.xml.ws.policy.testutils.PolicyResourceLoader;
-import java.io.StringReader;
 import java.io.StringWriter;
-import java.io.Writer;
-import junit.framework.*;
-import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
@@ -50,7 +43,11 @@ public final class MexImportFilteringXmlStreamWriterTest extends AbstractFilteri
         "import_element_01"
     };
     
-    private static final InvocationProcessorFactory factory = FilteringInvocationProcessorFactory.getFactory(FilteringInvocationProcessorFactory.FilterType.MEX_FILTER);
+    private static final InvocationProcessorFactory factory = new InvocationProcessorFactory() {
+        public InvocationProcessor createInvocationProcessor(XMLStreamWriter writer) throws XMLStreamException {
+            return new MexImportFilteringInvocationProcessor(writer);
+        }
+    };
     
     public MexImportFilteringXmlStreamWriterTest(String testName) {
         super(testName);

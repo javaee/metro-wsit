@@ -1,0 +1,61 @@
+<!--
+ The contents of this file are subject to the terms
+ of the Common Development and Distribution License
+ (the License).  You may not use this file except in
+ compliance with the License.
+ 
+ You can obtain a copy of the license at
+ https://glassfish.dev.java.net/public/CDDLv1.0.html.
+ See the License for the specific language governing
+ permissions and limitations under the License.
+ 
+ When distributing Covered Code, include this CDDL
+ Header Notice in each file and include the License file
+ at https://glassfish.dev.java.net/public/CDDLv1.0.html.
+ If applicable, add the following below the CDDL Header,
+ with the fields enclosed by brackets [] replaced by
+ you own identifying information:
+ "Portions Copyrighted [year] [name of copyright owner]"
+ 
+ Copyright 2006 Sun Microsystems Inc. All Rights Reserved
+-->
+
+<wsp:Policy 
+    xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy"
+    xmlns:policy="http://java.sun.com/xml/ns/wsit/policy" 
+    xmlns:wsss="http://schemas.sun.com/2006/03/wss/server"    
+    xmlns:wssc="http://schemas.sun.com/2006/03/wss/client"    
+    xmlns:scs="http://schemas.sun.com/ws/2006/05/sc/server"    
+    xmlns:scc="http://schemas.sun.com/ws/2006/05/sc/client"    
+    xmlns:trusts="http://schemas.sun.com/ws/2006/05/trust/server"  
+    xmlns:trustc="http://schemas.sun.com/ws/2006/05/trust/client"    
+    xmlns:ns0="http://com.foo/goo"
+>
+    <ns0:Assertion0/>
+    
+    <wsss:KeyStore></wsss:KeyStore>
+    <wsss:TrustStore></wsss:TrustStore>
+    <wsss:CallbackHandlerConfiguration></wsss:CallbackHandlerConfiguration>
+    <wsss:ValidatorConfiguration></wsss:ValidatorConfiguration>
+    
+    <wssc:KeyStore></wssc:KeyStore>
+    <wssc:TrustStore></wssc:TrustStore>
+    <wssc:CallbackHandlerConfiguration></wssc:CallbackHandlerConfiguration>
+    <wssc:ValidatorConfiguration></wssc:ValidatorConfiguration>
+    
+    <scs:SCConfiguration></scs:SCConfiguration>
+    
+    <scc:SCClientConfiguration></scc:SCClientConfiguration>
+    
+    <trusts:STSConfiguration></trusts:STSConfiguration>
+    
+    <trustc:PreconfiguredSTS></trustc:PreconfiguredSTS>
+    
+    <ns0:Assertion1 policy:visibility="private" a="value"/>
+    <ns0:Assertion2 a1="value1" a2="value2">content</ns0:Assertion2>
+    <ns0:Assertion3 policy:visibility="private">
+        100
+    </ns0:Assertion3>
+    
+</wsp:Policy>
+

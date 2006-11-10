@@ -105,11 +105,8 @@ public final class MexImportFilteringInvocationProcessor implements InvocationPr
                     filteringOn = false;
                     executeCommands(this.originalWriter);
                     break;
-                case WRITE_CHARACTERS:
-                case OTHER:
-                    break;
                 default:
-                    throw new IllegalStateException("Unexpected method type: '" + methodType + "'");
+                    break;
             }
             
             Object invocationTarget;

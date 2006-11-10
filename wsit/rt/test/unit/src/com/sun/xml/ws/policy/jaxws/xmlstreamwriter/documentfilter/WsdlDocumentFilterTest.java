@@ -41,7 +41,8 @@ public class WsdlDocumentFilterTest extends AbstractFilteringTest {
     private static final String[] testResources = new String[] {
         "policy_0",
         "policy_1",
-        "policy_2"
+        "policy_2",
+        "policy_3"
     };
     private static final SDDocumentFilter filter = new WsdlDocumentFilter();
     

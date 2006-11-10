@@ -20,36 +20,38 @@
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
+/*
+ * PrivateElementFilteringInvocationProcessorTest.java
+ * JUnit based test
+ *
+ * Created on November 10, 2006, 2:51 PM
+ */
+
 package com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter;
 
-import com.sun.xml.ws.api.server.SDDocument;
-import com.sun.xml.ws.api.server.SDDocumentFilter;
-import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.EnhancedXmlStreamWriterProxy;
-import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.InvocationProcessor;
-import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.InvocationProcessorFactory;
+import junit.framework.*;
+import com.sun.xml.ws.policy.jaxws.privateutil.LocalizationMessages;
+import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.*;
+import com.sun.xml.ws.policy.privateutil.PolicyLogger;
+import java.io.StringWriter;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Queue;
+import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
+import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 /**
- * The class provides an implementaion of JAX-WS {@code SDDocumentFilter} interface.
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class WsdlDocumentFilter implements SDDocumentFilter {
-    private static final InvocationProcessorFactory PRIVATE_ASSERTION_FILTER_FACTORY = new InvocationProcessorFactory() {
-        public InvocationProcessor createInvocationProcessor(XMLStreamWriter writer) throws XMLStreamException {
-            return new PrivateAssertionFilteringInvocationProcessor(writer);
-        }
+public class PrivateElementFilteringInvocationProcessorTest  extends AbstractFilteringTest {
+    private static final String[] testResources = new String[] {
+        "element_01",
+        "element_02"
     };
-    
-    private static final InvocationProcessorFactory MEX_IMPORT_FILTER_FACTORY = new InvocationProcessorFactory() {
-        public InvocationProcessor createInvocationProcessor(XMLStreamWriter writer) throws XMLStreamException {
-            return new MexImportFilteringInvocationProcessor(writer);
-        }
-    };
-    
-    private static final InvocationProcessorFactory PRIVATE_ELEMENTS_FILTER_FACTORY = new InvocationProcessorFactory() {
+    private static final InvocationProcessorFactory factory = new InvocationProcessorFactory() {
         public InvocationProcessor createInvocationProcessor(XMLStreamWriter writer) throws XMLStreamException {
             return new PrivateElementFilteringInvocationProcessor(
                     writer,
@@ -74,11 +76,20 @@ public class WsdlDocumentFilter implements SDDocumentFilter {
         }
     };
     
-    public XMLStreamWriter filter(SDDocument sdDocument, XMLStreamWriter xmlStreamWriter) throws XMLStreamException {
-        XMLStreamWriter result = EnhancedXmlStreamWriterProxy.createProxy(xmlStreamWriter, PRIVATE_ASSERTION_FILTER_FACTORY);
-        result = EnhancedXmlStreamWriterProxy.createProxy(result, MEX_IMPORT_FILTER_FACTORY);
-        result = EnhancedXmlStreamWriterProxy.createProxy(result, PRIVATE_ELEMENTS_FILTER_FACTORY);
+    public PrivateElementFilteringInvocationProcessorTest(String testName) {
+        super(testName);
+    }
+    
+    /**
+     * Test of createProxy method, of class com.sun.xml.ws.policy.jaxws.documentfilter.FilteringXmlStreamWriterProxy.
+     */
+    public void testCreateProxy() throws Exception {
+        XMLStreamWriter result = openFilteredWriter(new StringWriter(), factory);
         
-        return result;
+        assertNotNull(result);
+    }
+    
+    public void testFilterPrivateAssertionsFromPolicyExpression() throws Exception {
+        performResourceBasedTest(testResources, "element_filtering/", ".xml", factory);
     }
 }

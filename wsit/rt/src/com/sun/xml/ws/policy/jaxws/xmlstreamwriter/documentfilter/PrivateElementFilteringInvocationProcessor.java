@@ -22,13 +22,11 @@
 
 package com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter;
 
-import com.sun.xml.ws.policy.PolicyConstants;
 import com.sun.xml.ws.policy.jaxws.privateutil.LocalizationMessages;
 import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.*;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
-import java.util.LinkedList;
 import java.util.Queue;
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
@@ -41,39 +39,14 @@ import javax.xml.stream.XMLStreamWriter;
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-
-/*
-TODO: Filter these (even if there is not visibility attribute set)
- 
-http://schemas.sun.com/2006/03/wss/server
-KeyStore
-TrustStore
-CallbackHandlerConfiguration
-ValidatorConfiguration
-
-http://schemas.sun.com/2006/03/wss/client
-KeyStore
-TrustStore
-Timestamp
-CallbackHandlerConfiguration
-ValidatorConfiguration
-
-http://schemas.sun.com/ws/2006/05/sc/server
-SCConfiguration
-
-http://schemas.sun.com/ws/2006/05/sc/client
-SCClientConfiguration
-
-http://schemas.sun.com/ws/2006/05/trust/server
-STSConfiguration
-
-http://schemas.sun.com/ws/2006/05/trust/client
-PreconfiguredSTS 
- */
-final class PrivateAssertionFilteringInvocationProcessor implements InvocationProcessor {
-    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PrivateAssertionFilteringInvocationProcessor.class);
+final class PrivateElementFilteringInvocationProcessor implements InvocationProcessor {
+    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PrivateElementFilteringInvocationProcessor.class);
     
     private static final XMLOutputFactory XML_OUTPUT_FACTORY = XMLOutputFactory.newInstance();
+    private static final String MEX_NAMESPACE = "http://schemas.xmlsoap.org/ws/2004/09/mex";
+    private static final String WSDL_NAMESPACE = "http://schemas.xmlsoap.org/wsdl/";
+    private static final QName WSDL_IMPORT_ELEMENT = new QName(WSDL_NAMESPACE, "import");
+    private static final QName IMPORT_NAMESPACE_ATTIBUTE = new QName(WSDL_NAMESPACE, "namespace");
     
     private XMLStreamWriter originalWriter; // underlying XML stream writer which we use to eventually serve the requests
     private XMLStreamWriter mirrorWriter;
@@ -83,13 +56,19 @@ final class PrivateAssertionFilteringInvocationProcessor implements InvocationPr
     private boolean filteringOn; // indicates that currently processed elements will be filtered out.
     private boolean cmdBufferingOn; // indicates whether the commands should be buffered or whether they can be directly executed on the underlying XML output stream
     
+    private QName[] filteredElements;
+    
     
     /** Creates a new instance of InvocationProcessor */
-    public PrivateAssertionFilteringInvocationProcessor(XMLStreamWriter writer) throws XMLStreamException {
+    public PrivateElementFilteringInvocationProcessor(XMLStreamWriter writer, QName... filteredElements) throws XMLStreamException {
         this.originalWriter = writer;
+        if (filteredElements == null) {
+            this.filteredElements = new QName[]{};
+        } else {
+            this.filteredElements = filteredElements;
+        }
         
         this.mirrorWriter = XML_OUTPUT_FACTORY.createXMLStreamWriter(new StringWriter());
-        this.invocationQueue = new LinkedList<Invocation>();
     }
     
     public Object process(Invocation invocation) throws InvocationProcessingException {
@@ -100,8 +79,7 @@ final class PrivateAssertionFilteringInvocationProcessor implements InvocationPr
                     if (filteringOn) {
                         depth++;
                     } else {
-                        executeCommands(this.originalWriter);
-                        cmdBufferingOn = true;
+                        filteringOn = startFiltering(invocation);
                     }
                     break;
                 case WRITE_END_ELEMENT:
@@ -112,22 +90,7 @@ final class PrivateAssertionFilteringInvocationProcessor implements InvocationPr
                         } else {
                             depth--;
                         }
-                    } else {
-                        executeCommands(this.originalWriter);
-                        cmdBufferingOn = false;
                     }
-                    break;
-                case WRITE_ATTRIBUTE:
-                    if (!filteringOn && startFiltering(invocation)) {
-                        filteringOn = true;
-                        cmdBufferingOn = false;
-                        invocationQueue.clear(); // removing buffered commands that should not be executed
-                    }
-                    break;
-                case CLOSE:
-                    cmdBufferingOn = false;
-                    filteringOn = false;
-                    executeCommands(this.originalWriter);
                     break;
                 default:
                     break;
@@ -137,13 +100,8 @@ final class PrivateAssertionFilteringInvocationProcessor implements InvocationPr
             if (filteringOn) {
                 invocationTarget = mirrorWriter;
             } else {
-                if (cmdBufferingOn) {
-                    this.invocationQueue.offer(invocation);
-                    invocationTarget = mirrorWriter;
-                } else {
-                    invocation.execute(mirrorWriter);
-                    invocationTarget = originalWriter;
-                }
+                invocation.execute(mirrorWriter);
+                invocationTarget = originalWriter;
             }
             
             return invocation.execute(invocationTarget);
@@ -166,38 +124,42 @@ final class PrivateAssertionFilteringInvocationProcessor implements InvocationPr
     }
     
     private boolean startFiltering(Invocation invocation) {
-        /*
-         * void writeAttribute(String localName, String value)
-         * void writeAttribute(String namespaceURI, String localName, String value)
-         * void writeAttribute(String prefix, String namespaceURI, String localName, String value)
+        /**
+         * void writeStartElement(String localName)
+         * void writeStartElement(String namespaceURI, String localName)
+         * void writeStartElement(String prefix, String localName, String namespaceURI)
          */
         int argumentsCount = invocation.getArgumentsLength();
-        String namespaceURI, localName, value;
+        String namespaceURI, localName;
         
         switch (argumentsCount) {
-            case 2:
+            case 1:
                 namespaceURI = mirrorWriter.getNamespaceContext().getNamespaceURI(XMLConstants.DEFAULT_NS_PREFIX);
                 localName = invocation.getArgument(0).toString();
-                value = invocation.getArgument(1).toString();
                 break;
-            case 3:
+            case 2:
                 namespaceURI = invocation.getArgument(0).toString();
                 localName = invocation.getArgument(1).toString();
-                value = invocation.getArgument(2).toString();
                 break;
-            case 4:
-                namespaceURI = invocation.getArgument(1).toString();
-                localName = invocation.getArgument(2).toString();
-                value = invocation.getArgument(3).toString();
+            case 3:
+                localName = invocation.getArgument(1).toString();
+                namespaceURI = invocation.getArgument(2).toString();
                 break;
             default:
                 throw new IllegalArgumentException(
-                        LocalizationMessages.UNEXPECTED_ARGUMENTS_COUNT(XmlStreamWriterMethodType.WRITE_ATTRIBUTE + "(...)", argumentsCount)
+                        LocalizationMessages.UNEXPECTED_ARGUMENTS_COUNT(XmlStreamWriterMethodType.WRITE_START_ELEMENT + "(...)", argumentsCount)
                         );
         }
         
-        QName attributeName = new QName(namespaceURI, localName);
-        return PolicyConstants.VISIBILITY_ATTRIBUTE.equals(attributeName) && PolicyConstants.VISIBILITY_VALUE_PRIVATE.equals(value);
+        QName elementName = new QName(namespaceURI, localName);
+        
+        for (QName filteredElement : filteredElements) {
+            if (filteredElement.equals(elementName)) {
+                return true;
+            }
+        }
+        
+        return false;
     }
-    
 }
+
