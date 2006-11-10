@@ -270,7 +270,6 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
             
             if(!optimized) {
                 SOAPMessage soapMessage = msg.readAsSOAPMessage();
-                soapMessage = verifyInboundMessage(soapMessage, ctx);
                 if (msg.isFault()) {
                     if (debug) {
                         DumpFilter.process(ctx);
@@ -278,6 +277,7 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
                     SOAPFault fault = soapMessage.getSOAPBody().getFault();
                     throw new SOAPFaultException(fault);
                 }
+                soapMessage = verifyInboundMessage(soapMessage, ctx);
                 msg = Messages.create(soapMessage);
             }else{
                 msg = verifyInboundMessage(msg, ctx);
@@ -483,20 +483,20 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
         }
     }
     
-    protected Policy getWSITConfig(){
-        if(wsitConfig == null){
-            try{
-                PolicySourceModel model =  unmarshalPolicy("wsit-client.xml");
-                if(model != null){
-                    wsitConfig =  PolicyModelTranslator.getTranslator().translate(model);
-                }
-            }catch(PolicyException ex){
-                ex.printStackTrace();
-            }catch(IOException ex){
-                ex.printStackTrace();
-            }
-        }
-        return wsitConfig;
-    }
+//    protected Policy getWSITConfig(){
+//        if(wsitConfig == null){
+//            try{
+//                PolicySourceModel model =  unmarshalPolicy("wsit-client.xml");
+//                if(model != null){
+//                    wsitConfig =  PolicyModelTranslator.getTranslator().translate(model);
+//                }
+//            }catch(PolicyException ex){
+//                ex.printStackTrace();
+//            }catch(IOException ex){
+//                ex.printStackTrace();
+//            }
+//        }
+//        return wsitConfig;
+//    }
     
 }

@@ -780,20 +780,20 @@ public class SecurityServerPipe extends SecurityPipeBase {
         }
     }
     
-    protected Policy getWSITConfig(){
-//        if(wsitConfig == null){
-//            try{
-//                PolicySourceModel model =  unmarshalPolicy("wsit-server.xml");
-//                if(model != null){
-//                    wsitConfig =  PolicyModelTranslator.getTranslator().translate(model);
-//                }
-//            }catch(PolicyException ex){
-//                ex.printStackTrace();
-//            }catch(IOException ex){
-//                ex.printStackTrace();
-//            }
-//        }
-        return wsitConfig;
-    }
+//    protected Policy getWSITConfig(){
+////        if(wsitConfig == null){
+////            try{
+////                PolicySourceModel model =  unmarshalPolicy("wsit-server.xml");
+////                if(model != null){
+////                    wsitConfig =  PolicyModelTranslator.getTranslator().translate(model);
+////                }
+////            }catch(PolicyException ex){
+////                ex.printStackTrace();
+////            }catch(IOException ex){
+////                ex.printStackTrace();
+////            }
+////        }
+//        return wsitConfig;
+//    }
     
 }

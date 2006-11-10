@@ -284,8 +284,8 @@ public abstract class SecurityPipeBase implements Pipe {
     }
     
     public SecurityPipeBase(PipeConfiguration config, Pipe nextPipe) {
-        System.setProperty("com.sun.xml.ws.policy.PolicyFactory",
-                "com.sun.xml.ws.security.impl.policy.WSSecurityPolicyFactory");
+//        System.setProperty("com.sun.xml.ws.policy.PolicyFactory",
+//                "com.sun.xml.ws.security.impl.policy.WSSecurityPolicyFactory");
         this.nextPipe= nextPipe;
         this.pipeConfig = config;
         this.inMessagePolicyMap = new HashMap<WSDLBoundOperation,SecurityPolicyHolder>();
@@ -349,15 +349,15 @@ public abstract class SecurityPipeBase implements Pipe {
         }
     }
     
-    protected String getValue(Header hdr) {
-        try {
-            // avoid recreating
-            //unmarshaller = jaxbContext.createUnmarshaller();
-            return (String)((JAXBElement)hdr.readAsJAXB(unmarshaller)).getValue();
-        } catch (JAXBException ex) {
-            throw new RuntimeException(ex);
-        }
-    }
+//    protected String getValue(Header hdr) {
+//        try {
+//            // avoid recreating
+//            //unmarshaller = jaxbContext.createUnmarshaller();
+//            return (String)((JAXBElement)hdr.readAsJAXB(unmarshaller)).getValue();
+//        } catch (JAXBException ex) {
+//            throw new RuntimeException(ex);
+//        }
+//    }
     
     protected SOAPMessage secureOutboundMessage(SOAPMessage message, ProcessingContext ctx){
         try {
@@ -1571,7 +1571,7 @@ public abstract class SecurityPipeBase implements Pipe {
     }
     
     
-    protected abstract Policy getWSITConfig();
+//    protected abstract Policy getWSITConfig();
     
     protected abstract void addIncomingFaultPolicy(Policy effectivePolicy,SecurityPolicyHolder sph,WSDLFault fault)throws PolicyException;
     
