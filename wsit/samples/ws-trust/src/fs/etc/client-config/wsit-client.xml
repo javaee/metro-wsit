@@ -40,7 +40,7 @@
         <wsp:ExactlyOne>
             <wsp:All>
                 <sc:KeyStore wspp:visibility="private" location="$WSIT_HOME/xws-security/etc/client-keystore.jks" type="JKS" alias="alice" storepass="changeit"></sc:KeyStore>
-                <sc:TrustStore wspp:visibility="private" location="$WSIT_HOME/xws-security/etc/client-truststore.jks" type="JKS" storepass="changeit" peeralias="bob" stsalias="wssip"></sc:TrustStore>
+                <sc:TrustStore wspp:visibility="private" location="$WSIT_HOME/xws-security/etc/client-truststore.jks" type="JKS" storepass="changeit" peeralias="bob"></sc:TrustStore>
                 
                 <!--sc:ValidatorConfiguration wspp:visibility="private" sc:maxClockSkew="1200000" sc:timestampFreshnessLimit="1200000"/-->
                 <scc:SCClientConfiguration wspp:visibility="private">
@@ -59,6 +59,18 @@
                     portName="ISecurityTokenService_Port"
                     namespace="http://tempuri.org/">
                 </tc:PreconfiguredSTS>
+            </wsp:All>
+        </wsp:ExactlyOne>
+    </wsp:Policy>
+    
+    <wsp:Policy wsu:Id="STSClientKeystorePolicy" 
+      xmlns:sc="http://schemas.sun.com/2006/03/wss/client" 
+      xmlns:wspp="http://java.sun.com/xml/ns/wsit/policy" 
+      xmlns:scc="http://schemas.sun.com/ws/2006/05/sc/client" >
+        <wsp:ExactlyOne>
+            <wsp:All>
+                <sc:KeyStore wspp:visibility="private" location="$WSIT_HOME/xws-security/etc/client-keystore.jks" type="JKS" alias="alice" storepass="changeit"></sc:KeyStore>
+                <sc:TrustStore wspp:visibility="private" location="$WSIT_HOME/xws-security/etc/client-truststore.jks" type="JKS" storepass="changeit" peeralias="wssip"></sc:TrustStore>
             </wsp:All>
         </wsp:ExactlyOne>
     </wsp:Policy>
