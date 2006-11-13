@@ -147,7 +147,7 @@ public class WSConnectionManager {
         try {
             logger.log(Level.FINE, "WSConnectionManager.createConnectionSession");
             Connection connection = Connection.create(tcpURI.host, tcpURI.port);
-            doCheckVersions(connection);
+            doSendMagicAndCheckVersions(connection);
             ConnectionSession connectionSession = new ConnectionSession(tcpURI.hashCode(), connection);
             
             ServiceChannelWSImplService serviceChannelWS = new ServiceChannelWSImplService();
@@ -208,10 +208,13 @@ public class WSConnectionManager {
         return (ServiceChannelWSImpl) connectionSession.getAttribute(TCPConstants.SERVICE_PIPELINE_ATTR_NAME);
     }
     
-    private void doCheckVersions(Connection connection) throws IOException, VersionMismatchException {
+    private void doSendMagicAndCheckVersions(Connection connection) throws IOException, VersionMismatchException {
         logger.log(Level.FINE, "doCheckVersions entering");
         connection.setDirectMode(true);
+        
         OutputStream outputStream = connection.openOutputStream();
+        outputStream.write(TCPConstants.PROTOCOL_SCHEMA.getBytes("US-ASCII"));
+        
         VersionController versionController = VersionController.getInstance();
         Version framingVersion = versionController.getFramingVersion();
         Version connectionManagementVersion = versionController.getConnectionManagementVersion();
@@ -233,12 +236,12 @@ public class WSConnectionManager {
         Version serverFramingVersion = new Version(versionInfo[1], versionInfo[2]);
         Version serverConnectionManagementVersion = new Version(versionInfo[3], versionInfo[4]);
         
+        connection.setDirectMode(false);
+
         if (success != VersionController.VersionSupport.FULLY_SUPPORTED.ordinal()) {
             throw new VersionMismatchException(MessagesMessages.VERSION_MISMATCH(), serverFramingVersion,
                     serverConnectionManagementVersion);
         }
-        
-        connection.setDirectMode(false);
     }
     
 }

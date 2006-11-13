@@ -28,6 +28,15 @@ import java.nio.ByteBuffer;
  * @author Alexey Stashok
  */
 public class DumpUtils {
+    public static String dump(ByteBuffer[] bb) {
+        StringBuffer stringBuffer = new StringBuffer();
+        for(int i=0; i<bb.length; i++) {
+            stringBuffer.append(dump(bb[i]));
+        }
+        
+        return stringBuffer.toString();
+    }
+
     public static String dump(ByteBuffer buffer) {
         return dump(buffer, buffer.position(), buffer.limit() - buffer.position());
     }
@@ -52,9 +61,13 @@ public class DumpUtils {
             String strValue = Integer.toHexString(value).toUpperCase();
             String str = "00".substring(strValue.length()) + strValue;
             stringBuffer.append(str);
+            stringBuffer.append('(');
+            stringBuffer.append((char) value);
+            stringBuffer.append(')');
             stringBuffer.append(' ');
         }
         
         return stringBuffer.toString();
     }
+
 }

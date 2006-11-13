@@ -24,9 +24,6 @@ package com.sun.xml.ws.transport.tcp.io;
 
 import com.sun.xml.ws.transport.tcp.pool.LifeCycle;
 import com.sun.xml.ws.transport.tcp.util.ByteBufferFactory;
-import com.sun.xml.ws.transport.tcp.io.ByteBufferOutputStream;
-import com.sun.xml.ws.transport.tcp.io.DataInOutUtils;
-import com.sun.xml.ws.transport.tcp.io.OutputWriter;
 import com.sun.xml.ws.transport.tcp.util.FrameType;
 import com.sun.xml.ws.transport.tcp.util.TCPConstants;
 import java.io.DataOutputStream;

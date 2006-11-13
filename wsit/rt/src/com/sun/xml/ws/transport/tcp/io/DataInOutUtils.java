@@ -337,4 +337,20 @@ public class DataInOutUtils {
         
         return value;
     }
+    
+    public static void readFully(InputStream inputStream, byte[] magicBuf) throws IOException {
+        readFully(inputStream, magicBuf, 0, magicBuf.length);
+    }
+    
+    public static void readFully(InputStream inputStream, byte[] magicBuf, int offset, int length) throws IOException {
+        int bytesRead = 0;
+        while(bytesRead < length) {
+            int count = inputStream.read(magicBuf, offset + bytesRead, length - bytesRead);
+            if (count < 0) {
+                throw new EOFException();
+            }
+            bytesRead += count;
+        }
+    }
+    
 }

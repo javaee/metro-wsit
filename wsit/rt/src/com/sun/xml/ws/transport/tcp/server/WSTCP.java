@@ -74,7 +74,7 @@ public class WSTCP {
             
             TCPAdapter adapter = adapters.get(0);
             URI uri = adapter.getEndpoint().getPort().getAddress().getURI();
-            
+
             WSTCPURI tcpURI = WSTCPURI.parse(uri);
             
             WSTCPConnector connector = new GrizzlyTCPConnector(tcpURI.host,

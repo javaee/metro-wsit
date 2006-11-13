@@ -28,6 +28,7 @@ import com.sun.xml.ws.transport.tcp.io.Connection;
 import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
 import com.sun.xml.ws.transport.tcp.util.ChannelContext;
 import com.sun.xml.ws.transport.tcp.util.ConnectionSession;
+import com.sun.xml.ws.transport.tcp.util.TCPConstants;
 import com.sun.xml.ws.transport.tcp.util.Version;
 import com.sun.xml.ws.transport.tcp.util.VersionController;
 import com.sun.xml.ws.transport.tcp.io.DataInOutUtils;
@@ -36,6 +37,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -51,7 +53,7 @@ public class IncomeMessageProcessor {
     
     private TCPMessageListener listener;
     
-    private static Map<Integer, IncomeMessageProcessor> portMessageProcessors = 
+    private static Map<Integer, IncomeMessageProcessor> portMessageProcessors =
             new HashMap<Integer, IncomeMessageProcessor>(1);
     
     public static void registerListener(int port, @NotNull TCPMessageListener listener) {
@@ -66,7 +68,7 @@ public class IncomeMessageProcessor {
         return portMessageProcessors.get(port);
     }
     
-    private IncomeMessageProcessor(TCPMessageListener listener) {
+    public IncomeMessageProcessor(TCPMessageListener listener) {
         this.listener = listener;
     }
     
@@ -111,7 +113,7 @@ public class IncomeMessageProcessor {
      *  in future probably should be replaced, as could be handled by
      *  nio framework
      */
-    private Map<SocketChannel, ConnectionSession> connectionSessionMap = 
+    private Map<SocketChannel, ConnectionSession> connectionSessionMap =
             new WeakHashMap<SocketChannel, ConnectionSession>();
     private @Nullable ConnectionSession getConnectionSession(
             @NotNull SocketChannel socketChannel) throws IOException {
@@ -137,7 +139,7 @@ public class IncomeMessageProcessor {
         
         Connection connection = new Connection(socketChannel);
         connection.setInputStreamByteBuffer(messageBuffer);
-        if (!checkVersionCompatibility(connection)) {
+        if (!checkMagicAndVersionCompatibility(connection)) {
             connection.close();
             return null;
         }
@@ -153,11 +155,20 @@ public class IncomeMessageProcessor {
         connectionSession.getConnection().setSocketChannel(null);
     }
     
-    private boolean checkVersionCompatibility(@NotNull Connection connection) throws IOException {
-        logger.log(Level.FINE, "IncomeMessageProcessor.checkVersionCompatibility entering");
-        connection.setDirectMode(true);
+    private boolean checkMagicAndVersionCompatibility(@NotNull Connection connection) throws IOException {
+        logger.log(Level.FINE, "IncomeMessageProcessor.checkMagicAndVersionCompatibility entering");
         
+        connection.setDirectMode(true);
         InputStream inputStream = connection.openInputStream();
+        
+        byte[] magicBuf = new byte[TCPConstants.PROTOCOL_SCHEMA.length()];
+        DataInOutUtils.readFully(inputStream, magicBuf);
+        String magic = new String(magicBuf, "US-ASCII");
+        if (!TCPConstants.PROTOCOL_SCHEMA.equals(magic)) {
+            logger.log(Level.WARNING, "IncomeMessageProcessor.checkMagicAndVersionCompatibility wrong magic: {0}", magic);
+            return false;
+        }
+        
         int[] versionInfo = new int[4];
         
         DataInOutUtils.readInts4(inputStream, versionInfo, 4);
@@ -184,7 +195,7 @@ public class IncomeMessageProcessor {
         
         connection.setDirectMode(false);
         
-        logger.log(Level.FINE, "IncomeMessageProcessor.checkVersionCompatibility successCode: {0}", successCode);
+        logger.log(Level.FINE, "IncomeMessageProcessor.checkMagicAndVersionCompatibility successCode: {0}", successCode);
         return successCode == VersionController.VersionSupport.FULLY_SUPPORTED;
     }
     

@@ -22,6 +22,7 @@
 
 package com.sun.xml.ws.transport.tcp.io;
 
+import com.sun.xml.ws.transport.tcp.util.DumpUtils;
 import com.sun.xml.ws.transport.tcp.util.SelectorFactory;
 import java.io.EOFException;
 import java.io.IOException;
@@ -29,6 +30,8 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * NIO utility to flush <code>ByteBuffer</code>
@@ -37,6 +40,8 @@ import java.nio.channels.SocketChannel;
  * @author Alexey Stashok
  */
 public final class OutputWriter {
+    private static final Logger logger = Logger.getLogger(
+            com.sun.xml.ws.transport.tcp.util.TCPConstants.LoggingDomain + ".dump");
     
     /**
      * Flush the buffer by looping until the <code>ByteBuffer</code> is empty
@@ -44,6 +49,11 @@ public final class OutputWriter {
      */   
     public static void flushChannel(SocketChannel socketChannel, ByteBuffer bb)
             throws IOException{
+        if (logger.isLoggable(Level.FINEST)) {
+            logger.log(Level.FINEST, "Output dump:");
+            logger.log(Level.FINEST, DumpUtils.dump(bb));
+        }
+        
         SelectionKey key = null;
         Selector writeSelector = null;
         int attempts = 0;
@@ -96,6 +106,10 @@ public final class OutputWriter {
      */   
     public static void flushChannel(SocketChannel socketChannel, ByteBuffer[] bb)
             throws IOException{
+        if (logger.isLoggable(Level.FINEST)) {
+            logger.log(Level.FINEST, "Output dump:");
+            logger.log(Level.FINEST, DumpUtils.dump(bb));
+        }
         SelectionKey key = null;
         Selector writeSelector = null;
         int attempts = 0;

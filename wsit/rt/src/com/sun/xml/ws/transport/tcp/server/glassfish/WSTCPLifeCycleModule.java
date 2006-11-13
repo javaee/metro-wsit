@@ -45,13 +45,13 @@ public class WSTCPLifeCycleModule implements LifecycleListener {
     
     private WSTCPConnector connector;
     private WSTCPDelegate delegate;
-    private Properties props;
+//    private Properties props;
     
     public void handleEvent(@NotNull LifecycleEvent lifecycleEvent) throws ServerLifecycleException {
         int eventType = lifecycleEvent.getEventType();
         if (eventType == LifecycleEvent.INIT_EVENT) {
             logger.log(Level.FINE, "WSTCPLifeCycleModule.INIT_EVENT");
-            props = (Properties) lifecycleEvent.getData();
+//            props = (Properties) lifecycleEvent.getData();
         } else if (eventType == LifecycleEvent.STARTUP_EVENT) {
             logger.log(Level.FINE, "WSTCPLifeCycleModule.STARTUP_EVENT");
             try {
@@ -66,16 +66,17 @@ public class WSTCPLifeCycleModule implements LifecycleListener {
             try {
                 AppServWSRegistry.getInstance();
                 delegate.setCustomWSRegistry(WSTCPAdapterRegistryImpl.getInstance());
-                String host = props.getProperty("host", "localhost");
-                String portS = props.getProperty("port");
-                int port;
-                if (portS != null) {
-                    port = Integer.parseInt(portS);
-                } else {
-                    throw new WSTCPException("Property 'port' is not set!");
-                }
+//                String host = props.getProperty("host", "localhost");
+//                String portS = props.getProperty("port");
+//                int port;
+//                if (portS != null) {
+//                    port = Integer.parseInt(portS);
+//                } else {
+//                    throw new WSTCPException("Property 'port' is not set!");
+//                }
                 
-                connector = new GrizzlyTCPConnector(host, port, delegate);
+//                connector = new GrizzlyTCPConnector(host, port, delegate);
+                connector = new GrizzlyTCPConnector(delegate);
                 connector.listen();
                 
                 
