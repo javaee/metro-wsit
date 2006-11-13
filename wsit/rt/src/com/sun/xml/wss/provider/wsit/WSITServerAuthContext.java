@@ -15,6 +15,7 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLFault;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
+import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.message.stream.LazyStreamBasedMessage;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
@@ -37,15 +38,16 @@ import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponse;
 import com.sun.xml.wss.ProcessingContext;
+import com.sun.xml.wss.RealmAuthenticationAdapter;
 import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.impl.NewSecurityRecipient;
 import com.sun.xml.wss.impl.ProcessingContextImpl;
-import com.sun.xml.wss.impl.WssProviderSecurityEnvironment;
 import com.sun.xml.wss.impl.WssSoapFaultException;
 import com.sun.xml.wss.impl.filter.DumpFilter;
 import com.sun.xml.wss.impl.misc.DefaultCallbackHandler;
 import com.sun.xml.wss.impl.misc.DefaultSecurityEnvironmentImpl;
+import com.sun.xml.wss.impl.misc.WSITProviderSecurityEnvironment;
 import com.sun.xml.wss.impl.policy.mls.MessagePolicy;
 import com.sun.xml.wss.jaxws.impl.Constants;
 import com.sun.xml.wss.jaxws.impl.PolicyResolverImpl;
@@ -60,6 +62,7 @@ import javax.security.auth.message.AuthException;
 import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.config.ServerAuthContext;
+//import javax.servlet.ServletContext;
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPBody;
 import javax.xml.soap.SOAPConstants;
@@ -97,10 +100,11 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
     String operation = null;
     Subject subject = null; 
     Map map = null;
+    WSEndpoint endPoint =  null;
     
     //***************AuthModule Instance**********
     WSITServerAuthModule  authModule = null;
-    
+   
     
     /** Creates a new instance of WSITServerAuthContext */
     public WSITServerAuthContext(String operation, Subject subject, Map map) {
@@ -108,6 +112,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         this.operation = operation;
         this.subject = subject;
         this.map = map;
+        endPoint = (WSEndpoint)map.get("ENDPOINT");
         
         sessionManager = SessionManager.getSessionManager();
         
@@ -120,15 +125,18 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         if (configAssertions == null || configAssertions.isEmpty()) {
             String isGF = System.getProperty("com.sun.aas.installRoot");
             if (isGF != null) {
-                handler = loadGFHandler(true);
+                handler = loadGFHandler(false);
                 try {
-                    secEnv = new WssProviderSecurityEnvironment(handler, map);
+                    secEnv = new WSITProviderSecurityEnvironment(handler, map);
                 }catch (XWSSecurityException ex) {
                     throw new WebServiceException(ex);
                 }
             } else {
-                throw new RuntimeException(
-                        "Error: Could Initialize CallbackHandler: No configuration assertions found in wsit-client.xml");
+                //This will handle Non-GF containers where no config assertions
+                // are required in the WSDL. Ex. UsernamePassword validatio
+                // with Default Realm Authentication
+                handler = configureServerHandler(configAssertions);
+                secEnv = new DefaultSecurityEnvironmentImpl(handler);
             }
         } else {
             handler = configureServerHandler(configAssertions);
@@ -342,7 +350,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         try{
             
             if (ctx.getSecurityPolicy() != null) {
-                if(!optimized) {
+                if(!optimized || msg.isFault()) {
                     SOAPMessage soapMessage = msg.readAsSOAPMessage();
                     soapMessage = secureOutboundMessage(soapMessage, ctx);
                     msg = Messages.create(soapMessage);
@@ -402,6 +410,9 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
             MessagePolicy policy = null;
             if (packet.getMessage().isFault()) {
                 policy =  getOutgoingFaultPolicy(packet);
+                if(optimized){
+                    ctx = new ProcessingContextImpl( packet.invocationProperties);
+                }
             } else if (isRMMessage(packet)) {
                 SecurityPolicyHolder holder = outProtocolPM.get("RM");
                 policy = holder.getMessagePolicy();
@@ -473,9 +484,9 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         return mp;
     }
     
-    protected MessagePolicy getOutgoingFaultPolicy(Packet packet) {
-        WSDLBoundOperation cachedOp = cachedOperation(packet);
-        if(!optimized){
+        protected MessagePolicy getOutgoingFaultPolicy(Packet packet) {
+            WSDLBoundOperation cachedOp = cachedOperation(packet);
+            
             if(operation != null){
                 WSDLOperation operation = cachedOp.getOperation();
                 try{
@@ -510,10 +521,8 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
                 }
             }
             return null;
-        }else{
-            throw new UnsupportedOperationException("Optimized path not supported");
+            
         }
-    }
 
     
     private CallbackHandler configureServerHandler(Set configAssertions) {
@@ -528,9 +537,12 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
                             ret + ", Is not a valid CallbackHandler");
                 }
                 return (CallbackHandler)obj;
+            } else {
+                //ServletContext context = endPoint.getContainer().getSPI(ServletContext.class);
+                RealmAuthenticationAdapter adapter = this.getRealmAuthenticationAdapter(endPoint);
+                return new DefaultCallbackHandler("server", props, adapter);
             }
-            return new DefaultCallbackHandler("server", props);
-        } catch (Exception e) {
+        }catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -668,6 +680,36 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         }else{
             return operation.getOutput().getAction();
         }
+    }
+    
+    @SuppressWarnings("unchecked")
+    private RealmAuthenticationAdapter getRealmAuthenticationAdapter(WSEndpoint wSEndpoint) {
+        String className = "javax.servlet.ServletContext";
+        Class ret = null;
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        if (loader != null) {
+            try {
+                ret = loader.loadClass(className);
+            } catch (ClassNotFoundException e) {
+                return null;
+            }
+        }
+        if (ret == null) {
+            // if context classloader didnt work, try this
+            loader = this.getClass().getClassLoader();
+            try {
+                ret = loader.loadClass(className);
+            } catch (ClassNotFoundException e) {
+                return null;
+            }
+        }
+        if (ret != null) {
+            Object obj = wSEndpoint.getContainer().getSPI(ret);
+            if (obj != null) {
+                return RealmAuthenticationAdapter.newInstance(obj);
+            }
+        }
+        return null;
     }
     
 }

@@ -25,7 +25,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Hashtable;
-import javax.xml.bind.Marshaller;
 import javax.xml.namespace.QName;
 import java.net.URI;
 import javax.xml.ws.WebServiceException;
@@ -159,6 +158,9 @@ public abstract class WSITAuthContextBase  {
     //*************STATIC(s)**************************************
     protected static QName bsOperationName =
             new QName("http://schemas.xmlsoap.org/ws/2005/02/trust","RequestSecurityToken");
+    private final QName optServerSecurity = new QName("http://schemas.sun.com/2006/03/wss/server","DisableStreamingSecurity");
+    private final QName optClientSecurity = new QName("http://schemas.sun.com/2006/03/wss/client","DisableStreamingSecurity");
+    
     //static JAXBContext used across the Pipe
     protected static JAXBContext jaxbContext = null;
     protected static ArrayList<String> securityPolicyNamespaces = null;
@@ -309,7 +311,9 @@ public abstract class WSITAuthContextBase  {
                     addVer = AddressingVersion.MEMBER;
                 }
             }
-            
+            if(endpointPolicy.contains(optServerSecurity) || endpointPolicy.contains(optClientSecurity)){
+                optimized = false;
+            }
             buildProtocolPolicy(endpointPolicy);
             ArrayList<Policy> policyList = new ArrayList<Policy>();
             if(endpointPolicy != null){
@@ -911,6 +915,7 @@ public abstract class WSITAuthContextBase  {
     
     protected ProcessingContext initializeInboundProcessingContext(Packet packet)  {
         ProcessingContextImpl ctx = null;
+        
         if(optimized){
             ctx = new JAXBFilterProcessingContext(packet.invocationProperties);
         }else{
@@ -1261,6 +1266,7 @@ public abstract class WSITAuthContextBase  {
             JAXBFilterProcessingContext  context = (JAXBFilterProcessingContext)ctx;
             context.setSOAPVersion(soapVersion);
             context.setJAXWSMessage(message, soapVersion);
+            context.isOneWayMessage(message.isOneWay(this.pipeConfig.getWSDLModel()));
             SecurityAnnotator.secureMessage(context);
             return context.getJAXWSMessage();
         } catch(XWSSecurityException xwse){

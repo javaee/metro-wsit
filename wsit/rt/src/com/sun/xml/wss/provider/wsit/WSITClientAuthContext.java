@@ -43,11 +43,11 @@ import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.impl.NewSecurityRecipient;
 import com.sun.xml.wss.impl.SecurableSoapMessage;
 import com.sun.xml.wss.impl.SecurityAnnotator;
-import com.sun.xml.wss.impl.WssProviderSecurityEnvironment;
 import com.sun.xml.wss.impl.WssSoapFaultException;
 import com.sun.xml.wss.impl.filter.DumpFilter;
 import com.sun.xml.wss.impl.misc.DefaultCallbackHandler;
 import com.sun.xml.wss.impl.misc.DefaultSecurityEnvironmentImpl;
+import com.sun.xml.wss.impl.misc.WSITProviderSecurityEnvironment;
 import com.sun.xml.wss.jaxws.impl.Constants;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -121,11 +121,13 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
             if (isACC) {
                 handler = loadGFHandler(true);
                 try {
-                    secEnv = new WssProviderSecurityEnvironment(handler, map);
+                    secEnv = new WSITProviderSecurityEnvironment(handler, map);
                 }catch (XWSSecurityException ex) {
                     throw new WebServiceException(ex);
                 }
             } else {
+                //handler = configureClientHandler(configAssertions);
+                //secEnv = new DefaultSecurityEnvironmentImpl(handler);
                 throw new RuntimeException(
                         "Error: Could Initialize CallbackHandler: No configuration assertions found in wsit-client.xml");
             }

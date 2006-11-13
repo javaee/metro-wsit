@@ -25,6 +25,7 @@ package com.sun.xml.wss.jaxws.impl;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.security.impl.policy.Constants;
 
 import com.sun.xml.ws.api.message.stream.InputStreamMessage;
@@ -84,6 +85,7 @@ import com.sun.xml.ws.security.secconv.WSSCElementFactory;
 import com.sun.xml.ws.security.secconv.WSSCFactory;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponse;
+import com.sun.xml.wss.RealmAuthenticationAdapter;
 import com.sun.xml.wss.impl.NewSecurityRecipient;
 
 import com.sun.xml.wss.impl.misc.DefaultCallbackHandler;
@@ -95,6 +97,7 @@ import static com.sun.xml.wss.jaxws.impl.Constants.OPERATION_SCOPE;
 import static com.sun.xml.wss.jaxws.impl.Constants.EMPTY_LIST;
 import static com.sun.xml.wss.jaxws.impl.Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS;
 import static com.sun.xml.wss.jaxws.impl.Constants.SUN_WSS_SECURITY_CLIENT_POLICY_NS;
+//import javax.servlet.ServletContext;
 
 
 //TODO: add logging before 4/13
@@ -775,7 +778,11 @@ public class SecurityServerPipe extends SecurityPipeBase {
                 }
                 return (CallbackHandler)obj;
             }
-            return new DefaultCallbackHandler("server", props);
+           // ServletContext context = 
+           //         ((ServerPipeConfiguration)pipeConfig).getEndpoint().getContainer().getSPI(ServletContext.class);
+           RealmAuthenticationAdapter adapter = getRealmAuthenticationAdapter(((ServerPipeConfiguration)pipeConfig).getEndpoint());
+           return new DefaultCallbackHandler("server", props, adapter);
+           //return new DefaultCallbackHandler("server", props);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -796,5 +803,35 @@ public class SecurityServerPipe extends SecurityPipeBase {
 ////        }
 //        return wsitConfig;
 //    }
+
+    @SuppressWarnings("unchecked")
+    private RealmAuthenticationAdapter getRealmAuthenticationAdapter(WSEndpoint wSEndpoint) {
+        String className = "javax.servlet.ServletContext";
+        Class ret = null;
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        if (loader != null) {
+            try {
+                ret = loader.loadClass(className);
+            } catch (ClassNotFoundException e) {
+                return null;
+            }
+        }
+        if (ret == null) {
+            // if context classloader didnt work, try this
+            loader = this.getClass().getClassLoader();
+            try {
+                ret = loader.loadClass(className);
+            } catch (ClassNotFoundException e) {
+                return null;
+            }
+        }
+        if (ret != null) {
+            Object obj = wSEndpoint.getContainer().getSPI(ret);
+            if (obj != null) {
+                return RealmAuthenticationAdapter.newInstance(obj);
+            } 
+        }
+        return null;
+    }
     
 }
