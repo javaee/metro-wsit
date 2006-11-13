@@ -249,7 +249,7 @@ public class WSSCContract implements WSTrustContract   {
         
         Session session =
                 SessionManager.getSessionManager().createSession(token.getIdentifier().toString());
-        log.info("Creating session for : "  + token.getIdentifier());
+        log.fine("Creating session for : "  + token.getIdentifier());
         
         // Populate the IssuedTokenContext
         context.setSecurityToken(token);
