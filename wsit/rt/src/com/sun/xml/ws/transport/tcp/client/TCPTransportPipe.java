@@ -142,7 +142,7 @@ public class TCPTransportPipe implements Pipe {
     }
     
     private void prepareRetry(ChannelContext channelContext, int retryNum, Exception e) {
-        logger.log(Level.WARNING, "Sending failed. Retry#" + retryNum, e);
+        logger.log(Level.WARNING, MessagesMessages.SEND_RETRY(retryNum), e);
         clientTransport = null;
         if (channelContext != null) {
             WSConnectionManager.getInstance().abortConnection(channelContext);
