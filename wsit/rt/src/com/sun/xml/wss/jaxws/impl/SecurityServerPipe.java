@@ -106,7 +106,7 @@ import static com.sun.xml.wss.jaxws.impl.Constants.SUN_WSS_SECURITY_CLIENT_POLIC
 public class SecurityServerPipe extends SecurityPipeBase {
     
     private SessionManager sessionManager =
-                            SessionManager.getSessionManager();
+            SessionManager.getSessionManager();
     private WSDLBoundOperation cachedOperation = null;
     private Set trustConfig = null;
     private CallbackHandler handler = null;
@@ -278,7 +278,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
         try{
             msg = retPacket.getMessage();
             if (ctx.getSecurityPolicy() != null) {
-                if(!optimized) {
+                if(!optimized || msg.isFault()) {
                     SOAPMessage soapMessage = msg.readAsSOAPMessage();
                     soapMessage = secureOutboundMessage(soapMessage, ctx);
                     msg = Messages.create(soapMessage);
@@ -391,6 +391,9 @@ public class SecurityServerPipe extends SecurityPipeBase {
             MessagePolicy policy = null;
             if (packet.getMessage().isFault()) {
                 policy =  getOutgoingFaultPolicy(packet);
+                if(optimized){
+                    ctx = new ProcessingContextImpl( packet.invocationProperties);
+                }
             } else if (isRMMessage(packet)) {
                 SecurityPolicyHolder holder = outProtocolPM.get("RM");
                 policy = holder.getMessagePolicy();
@@ -449,44 +452,42 @@ public class SecurityServerPipe extends SecurityPipeBase {
     }
     
     protected MessagePolicy getOutgoingFaultPolicy(Packet packet) {
-        if(!optimized){
-            if(cachedOperation != null){
-                WSDLOperation operation = cachedOperation.getOperation();
-                try{
-                    SOAPBody body = packet.getMessage().readAsSOAPMessage().getSOAPBody();
-                    NodeList nodes = body.getElementsByTagName("detail");
-                    if(nodes.getLength() == 0){
-                        nodes = body.getElementsByTagNameNS(SOAPConstants.URI_NS_SOAP_1_2_ENVELOPE,"Detail");
-                    }
-                    if(nodes.getLength() >0){
-                        Node node = nodes.item(0);
-                        Node faultNode = node.getFirstChild();
-                        if(faultNode == null){
-                            return null;
-                        }
-                        String uri = faultNode.getNamespaceURI();
-                        QName faultDetail = null;
-                        if(uri != null && uri.length() >0){
-                            faultDetail = new QName(faultNode.getNamespaceURI(),faultNode.getLocalName());
-                        }else{
-                            faultDetail = new QName(faultNode.getNodeName());
-                        }
-                        WSDLFault fault = operation.getFault(faultDetail);
-                        SecurityPolicyHolder sph = outMessagePolicyMap.get(cachedOperation);
-                        SecurityPolicyHolder faultPolicyHolder = sph.getFaultPolicy(fault);
-                        MessagePolicy faultPolicy = (faultPolicyHolder == null) ? new MessagePolicy() : faultPolicyHolder.getMessagePolicy();
-                        return faultPolicy;
-                        
-                    }
-                }catch(SOAPException sx){
-                    sx.printStackTrace();
-                    //log error
+        
+        if(cachedOperation != null){
+            WSDLOperation operation = cachedOperation.getOperation();
+            try{
+                SOAPBody body = packet.getMessage().readAsSOAPMessage().getSOAPBody();
+                NodeList nodes = body.getElementsByTagName("detail");
+                if(nodes.getLength() == 0){
+                    nodes = body.getElementsByTagNameNS(SOAPConstants.URI_NS_SOAP_1_2_ENVELOPE,"Detail");
                 }
+                if(nodes.getLength() >0){
+                    Node node = nodes.item(0);
+                    Node faultNode = node.getFirstChild();
+                    if(faultNode == null){
+                        return null;
+                    }
+                    String uri = faultNode.getNamespaceURI();
+                    QName faultDetail = null;
+                    if(uri != null && uri.length() >0){
+                        faultDetail = new QName(faultNode.getNamespaceURI(),faultNode.getLocalName());
+                    }else{
+                        faultDetail = new QName(faultNode.getNodeName());
+                    }
+                    WSDLFault fault = operation.getFault(faultDetail);
+                    SecurityPolicyHolder sph = outMessagePolicyMap.get(cachedOperation);
+                    SecurityPolicyHolder faultPolicyHolder = sph.getFaultPolicy(fault);
+                    MessagePolicy faultPolicy = (faultPolicyHolder == null) ? new MessagePolicy() : faultPolicyHolder.getMessagePolicy();
+                    return faultPolicy;
+                    
+                }
+            }catch(SOAPException sx){
+                sx.printStackTrace();
+                //log error
             }
-            return null;
-        }else{
-            throw new UnsupportedOperationException("Optimized path not supported");
         }
+        return null;
+        
     }
     
     

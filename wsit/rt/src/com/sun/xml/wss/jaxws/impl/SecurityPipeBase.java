@@ -171,7 +171,7 @@ public abstract class SecurityPipeBase implements Pipe {
     protected Pipe nextPipe;
     
     // TODO: Optimized flag to be set based on some conditions (no SignedElements/EncryptedElements)
-    protected boolean optimized = false;
+    protected boolean optimized = true;
     protected boolean transportOptimization = false;
     
     // Per-Proxy State for SecureConversation sessions
@@ -187,6 +187,8 @@ public abstract class SecurityPipeBase implements Pipe {
     protected AlgorithmSuite bindingLevelAlgSuite = null;
     protected static QName bsOperationName =
             new QName("http://schemas.xmlsoap.org/ws/2005/02/trust","RequestSecurityToken");
+    private final QName optServerSecurity = new QName("http://schemas.sun.com/2006/03/wss/server","DisableStreamingSecurity");
+    private final QName optClientSecurity = new QName("http://schemas.sun.com/2006/03/wss/client","DisableStreamingSecurity");
     
     // CONSTANTs
 //    protected static final String OPERATION_SCOPE = "operation-policy-scope".intern();
@@ -244,8 +246,8 @@ public abstract class SecurityPipeBase implements Pipe {
 //    protected static final String RM_SEQ_ACK = "http://schemas.xmlsoap.org/ws/2005/02/rm/SequenceAcknowledgement";
 //    protected static final String RM_TERMINATE_SEQ = "http://schemas.xmlsoap.org/ws/2005/02/rm/TerminateSequence";
 //    protected static final String RM_LAST_MESSAGE= "http://schemas.xmlsoap.org/ws/2005/02/rm/LastMessage";
-//    
-//    
+//
+//
     protected WSDLBoundOperation cachedOperation = null;
 //    protected static final String SUN_WSS_SECURITY_SERVER_POLICY_NS="http://schemas.sun.com/2006/03/wss/server";
 //    protected static final String SUN_WSS_SECURITY_CLIENT_POLICY_NS="http://schemas.sun.com/2006/03/wss/client";
@@ -255,7 +257,7 @@ public abstract class SecurityPipeBase implements Pipe {
     protected Marshaller marshaller =null;
     protected Unmarshaller unmarshaller =null;
     // store operation resolver
-   // protected OperationResolver opResolver = null;
+    // protected OperationResolver opResolver = null;
     
     //store instance variable(s): Binding has IssuedToken/RM/SC Policy
     boolean hasIssuedTokens = false;
@@ -312,7 +314,7 @@ public abstract class SecurityPipeBase implements Pipe {
             //unmarshaller = jaxbContext.createUnmarshaller();
             // check whether Service Port has RM
             hasReliableMessaging = isReliableMessagingEnabled(wsPolicyMap, pipeConfig.getWSDLModel());
-         //   opResolver = new OperationResolverImpl(inMessagePolicyMap,pipeConfig.getWSDLModel().getBinding());
+            //   opResolver = new OperationResolverImpl(inMessagePolicyMap,pipeConfig.getWSDLModel().getBinding());
         }catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -399,6 +401,7 @@ public abstract class SecurityPipeBase implements Pipe {
             JAXBFilterProcessingContext  context = (JAXBFilterProcessingContext)ctx;
             context.setSOAPVersion(soapVersion);
             context.setJAXWSMessage(message, soapVersion);
+            context.isOneWayMessage(message.isOneWay(this.pipeConfig.getWSDLModel()));
             SecurityAnnotator.secureMessage(context);
             return context.getJAXWSMessage();
         } catch(XWSSecurityException xwse){
@@ -821,7 +824,9 @@ public abstract class SecurityPipeBase implements Pipe {
                     addVer = AddressingVersion.MEMBER;
                 }
             }
-            
+            if(endpointPolicy.contains(optServerSecurity) || endpointPolicy.contains(optClientSecurity)){
+                optimized = false;
+            }
             buildProtocolPolicy(endpointPolicy);
             ArrayList<Policy> policyList = new ArrayList<Policy>();
             if(endpointPolicy != null){
