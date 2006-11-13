@@ -68,7 +68,7 @@ import java.util.logging.Level;
  * <p/>
  * Supports following WS-Coordination protocols: 2004 WS-Atomic Transaction protocol
  *
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 1.0
  */
 // suppress known deprecation warnings about using pipes.
@@ -78,7 +78,7 @@ public class TxServerPipe implements Pipe {
     static private TxLogger logger = TxLogger.getLogger(TxServerPipe.class);
     static private TransactionManagerImpl tm = TransactionManagerImpl.getInstance();
 
-    // In future there can be multiple WS-AT namespaces: xmlsoap.org 2004, OASIS WS-TX
+    // In future there can be multiple WS-AT namespaces: 2004 member submission, OASIS WS-TX
     final static private List<String> WSAT_NS_LST = Arrays.asList(WSAT_SOAP_NSURI);
 
     // Might need CoordinationContext for OASIS and 2004 input submission.
@@ -175,9 +175,9 @@ public class TxServerPipe implements Pipe {
         }
 
         /*
-         * Absence of a ws-at atassertion does not forbid coordinationcontext from flowing.
+         * Absence of a ws-at atassertion does not forbid WS-AT CoordinationContext from flowing.
          * OASIS WS-TX refers to this case as no claims made.
-         * TODO: consider adding a log warning for this case when it occurs.
+         * Comment out this warning for now.
 
         if (CC != null && opat.atAssertion == ATAssertion.NOT_ALLOWED) {
             txLogger.warning("atomic transaction flowed with operation request that was not annotated with wsat:ATAssertion : " +
@@ -187,6 +187,7 @@ public class TxServerPipe implements Pipe {
         boolean importedTxn = false;
         Packet responsePkt = null;
         Transaction txn = null;
+        Exception rethrow = null;
 
         if (CC != null) {
             ATCoordinator coord = (ATCoordinator) CoordinationManager.getInstance().lookupOrCreateCoordinator(CC);
@@ -194,22 +195,25 @@ public class TxServerPipe implements Pipe {
 
             txn = coord.getTransaction();
             if (txn != null) {
+                boolean performSuspend = true;
                 try {
                     tm.resume(txn);
-                } catch (InvalidTransactionException ex) {
-                    ex.printStackTrace();
-                } catch (IllegalStateException ex) {
-                    ex.printStackTrace();
-                } catch (SystemException ex) {
-                    ex.printStackTrace();
+                } catch (IllegalStateException e) {
+                    // ignore.  transaction context already setup
+                    performSuspend = false;
+                } catch (Exception ex)
+                    throw new WebServiceException(ex.getMessage(), ex);
                 }
                 try {
                     responsePkt = next.process(pkt);
-                } finally {
+                } catch (Exception e) {
+                    rethrow = e;
+                }
+                if (performSuspend) {
                     try {
                         tm.suspend();
                     } catch (SystemException ex) {
-                        ex.printStackTrace();
+                        throw new WebServiceException(ex.getMessage(), ex);
                     }
                 }
             } else if (coord.isSubordinateCoordinator()) {
@@ -217,15 +221,13 @@ public class TxServerPipe implements Pipe {
                 beginImportTransaction(CC, coord);
                 try {
                     responsePkt = next.process(pkt);
-                } finally {
-                    endImportTransaction(CC);
+                } catch (Exception e) {
+                    rethrow = e;
                 }
+                endImportTransaction(CC);
             } else {
-                // no transaction on coordinator AND not a subordinate coordinator
-                // sun to sun across application servers.  should this import transaction or create a transaction?
-                if (logger.isLogging(Level.SEVERE)) {
-                    logger.severe("TxServerPipe", "functionality not implemented yet: transaction flow across application servers");
-                }
+                // just in case first two cases are not met
+                responsePkt = next.process(pkt);
             }
         } else if (opat.ATAlwaysCapability == true) {
             // no Transaction context flowed with message but WS-AT policy assertion requests auto creation of txn 
@@ -234,14 +236,17 @@ public class TxServerPipe implements Pipe {
             try {
                 responsePkt = next.process(pkt);
             } catch (Exception e) {
-                // TODO: consider whether ALL unhandled exceptions should cause rollback
+                rethrow = e;
                 tm.setRollbackOnly();
-            } finally {
-                commitTransaction();
             }
+            commitTransaction();
         } else {  // just in case first two cases are not met
             responsePkt = next.process(pkt);
         }
+        if (rethrow != null) {
+            throw new WebServiceException(rethrow.getMessage(), rethrow);
+        }
+        
         return responsePkt;
     }
 
@@ -258,13 +263,10 @@ public class TxServerPipe implements Pipe {
 
         // TODO:
         // JTS recovery must process WS-AT SubordinateCoordinator.
-        // So  WS-AT SubordinateCoordinator must to be registered as coordinator resource with JTS.
+        // So  WS-AT SubordinateCoordinator mustbe registered as coordinator resource with JTS.
 
         Transaction currentTxn;
         try {
-            // TODO support case where coordination context contains a JTA txn id
-            //      that can be recreated.  For now, just assume importing foreign
-            //      transaction context and just create a new Java EE transaction.
             activeImportedXid = CoordinationXid.lookupOrCreate(CC.getIdentifier());
             ((TransactionImport) tm).recreate(activeImportedXid, CC.getExpires());
             currentTxn = tm.getTransaction();
@@ -272,9 +274,9 @@ public class TxServerPipe implements Pipe {
             coordinator.setTransaction(currentTxn);
             tm.setCoordinationContext(CC);
         } catch (IllegalStateException ex) {
-            ex.printStackTrace();
+            throw new WebServiceException(ex.getMessage(), ex);
         } catch (SystemException ex) {
-            ex.printStackTrace();
+            throw new WebServiceException(ex.getMessage(), ex);
         }
     }
 
@@ -294,11 +296,6 @@ public class TxServerPipe implements Pipe {
         activeImportedXid = null;
         ATCoordinator coord = (ATCoordinator) CoordinationManager.getInstance().getCoordinator(CC.getIdentifier());
         coord.setTransaction(null);
-    }
-
-    static private long getManagedEnvironmentDefaultTxnTimeout() {
-        // TODO  hook this up with AS default transaction timeout with call to tm.getDefaultTxnTimeout();
-        return 60000;
     }
 
     enum ATAssertion {
@@ -383,9 +380,9 @@ public class TxServerPipe implements Pipe {
         try {
             tm.begin();
         } catch (NotSupportedException ex) {
-            ex.printStackTrace();
+            throw new WebServiceException(ex.getMessage(), ex);
         } catch (SystemException ex) {
-            ex.printStackTrace();
+            throw new WebServiceException(ex.getMessage(), ex);
         }
     }
 
@@ -395,19 +392,10 @@ public class TxServerPipe implements Pipe {
     private void commitTransaction() {
         try {
             tm.commit();
-        } catch (SecurityException ex) {
+        } catch (Exception ex) {
+            logger.warning("commitTransaction", "commit failed with exception " + ex.getLocalizedMessage());
             ex.printStackTrace();
-        } catch (IllegalStateException ex) {
-            ex.printStackTrace();
-        } catch (RollbackException ex) {
-            ex.printStackTrace();
-        } catch (HeuristicRollbackException ex) {
-            ex.printStackTrace();
-        } catch (HeuristicMixedException ex) {
-            ex.printStackTrace();
-        } catch (SystemException ex) {
-            ex.printStackTrace();
-        }
+        } 
     }
 }
 
