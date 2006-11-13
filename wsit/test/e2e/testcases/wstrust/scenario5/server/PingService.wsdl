@@ -18,6 +18,7 @@
     <wsp:Policy wsu:Id="Scenario_5_IssuedTokenForCertificate_MutualCertificate11_policy">
         <wsp:ExactlyOne>
             <wsp:All>
+		 <sunsp:DisableStreamingSecurity xmlns:sunsp="http://schemas.sun.com/2006/03/wss/server"/>
                 <sp:SymmetricBinding xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
                     <wsp:Policy>
                         <sp:ProtectionToken>
