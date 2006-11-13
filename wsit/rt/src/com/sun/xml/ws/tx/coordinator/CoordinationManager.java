@@ -42,7 +42,7 @@ import java.util.logging.Level;
  * <p/>
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 1.0
  */
 public final class CoordinationManager {
@@ -136,8 +136,8 @@ public final class CoordinationManager {
     public Coordinator lookupOrCreateCoordinator(CoordinationContextInterface context) {
         Coordinator c = getCoordinator(context.getIdentifier());
         if (c == null) {
-            // If registration service EPR is not created by us, make this a subordinate coordinator
-            if (isForeignService(context.getRegistrationService())) {
+            // If registration service EPR is not created locally, make this a subordinate coordinator
+            if (RegistrationManager.getRegistrationCoordinatorStatefulWebServiceManager().resolve(context.getRegistrationService()) == null) {
                 c = createSubordinateCoordinator(context, null);
             } else {
                 c = createCoordinator(context, null);
@@ -239,17 +239,4 @@ public final class CoordinationManager {
         }
     }
 
-    /**
-     * Returns true if coordination/at service epr is not our implementation.
-     * <p/>
-     * Note that this solution results in sun to sun on multiptRefle app servers NOT using subordinate delegation.
-     */
-    static public boolean isForeignService(EndpointReference coordOrATServiceEPR) {
-        // TODO: must fix this. Assume always importing transaction from foreign service.
-        //       will add sun proprietary meta data to CoordinationContext in future that flows
-        //       iiop transactional service.
-        //return (coordOrATServiceEPR.getReferenceParameter(ActivityIdentifier.QNAME) == null);
-        return true;
-
-    }
 }

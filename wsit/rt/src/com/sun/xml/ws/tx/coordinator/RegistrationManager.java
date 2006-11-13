@@ -29,6 +29,7 @@ import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.tx.Protocol;
 import com.sun.xml.ws.developer.JAXWSProperties;
 import com.sun.xml.ws.developer.MemberSubmissionEndpointReference;
+import com.sun.xml.ws.developer.StatefulWebServiceManager;
 import com.sun.xml.ws.tx.at.ATParticipant;
 import com.sun.xml.ws.tx.common.ActivityIdentifier;
 import static com.sun.xml.ws.tx.common.Constants.WSTX_WS_PORT;
@@ -56,7 +57,7 @@ import java.util.logging.Level;
  * for register and registerResponse delegate to the methods in this class.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 1.0
  */
 public final class RegistrationManager {
@@ -96,6 +97,11 @@ public final class RegistrationManager {
         return swf.createService("Coordinator", "RegistrationCoordinator",
                 localAsynchronousRegistrationURI, AddressingVersion.MEMBER,
                 activityId.getValue(), null);
+    }
+    
+    public static StatefulWebServiceManager getRegistrationCoordinatorStatefulWebServiceManager() {
+        StatefulWebserviceFactory swf = StatefulWebserviceFactoryFactory.getInstance();
+        return swf.getManager("Coordinator", "RegistrationCoordinator");
     }
 
     static private TxLogger logger = TxLogger.getCoordLogger(RegistrationManager.class);
