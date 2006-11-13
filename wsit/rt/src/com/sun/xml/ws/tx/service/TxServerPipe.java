@@ -68,7 +68,7 @@ import java.util.logging.Level;
  * <p/>
  * Supports following WS-Coordination protocols: 2004 WS-Atomic Transaction protocol
  *
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 1.0
  */
 // suppress known deprecation warnings about using pipes.
@@ -201,7 +201,7 @@ public class TxServerPipe implements Pipe {
                 } catch (IllegalStateException e) {
                     // ignore.  transaction context already setup
                     performSuspend = false;
-                } catch (Exception ex)
+                } catch (Exception ex) {
                     throw new WebServiceException(ex.getMessage(), ex);
                 }
                 try {
