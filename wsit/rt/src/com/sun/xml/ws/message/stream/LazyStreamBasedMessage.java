@@ -22,6 +22,7 @@
 
 package com.sun.xml.ws.message.stream;
 
+import com.sun.xml.stream.buffer.MutableXMLStreamBuffer;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.model.JavaMethod;
 import com.sun.xml.ws.api.model.SEIModel;
@@ -33,6 +34,7 @@ import com.sun.xml.ws.api.pipe.StreamSOAPCodec;
 import com.sun.xml.ws.message.AbstractMessageImpl;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
+import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamReader;
 
 import com.sun.istack.NotNull;
@@ -77,16 +79,20 @@ public class LazyStreamBasedMessage extends Message{
     private boolean readMessage = false;
     private XMLStreamReader reader = null;
     private Message message = null;
+    private MutableXMLStreamBuffer buffer = null;
     /** Creates a new instance of StreamMessage */
     public LazyStreamBasedMessage(XMLStreamReader message,StreamSOAPCodec codec) {
         this.reader = message;
         this.codec = codec;
     }
     
+    public StreamSOAPCodec getCodec(){
+        return codec;
+    }
     
     private synchronized void cacheMessage(){
         if(!readMessage){
-            message = codec.decode(reader);          
+            message = codec.decode(reader);
             readMessage = true;
         }
     }
@@ -465,5 +471,16 @@ public class LazyStreamBasedMessage extends Message{
         }
         return null; //message read;
     }
+    
+    public void print() throws XMLStreamException{
+        if(buffer == null){
+            buffer = new MutableXMLStreamBuffer();
+            buffer.createFromXMLStreamReader(reader); 
+            reader =  buffer.readAsXMLStreamReader();
+        }
+        XMLOutputFactory xof = XMLOutputFactory.newInstance();        
+        buffer.writeToXMLStreamWriter(xof.createXMLStreamWriter(System.out));            
+    }
+    
 }
 

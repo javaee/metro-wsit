@@ -45,6 +45,7 @@ import java.util.Hashtable;
 import javax.xml.namespace.QName;
 import java.net.URI;
 import javax.xml.soap.SOAPBody;
+import javax.xml.stream.XMLStreamException;
 import javax.xml.ws.WebServiceException;
 import java.util.Set;
 
@@ -441,6 +442,13 @@ public abstract class SecurityPipeBase implements Pipe {
     protected Message verifyInboundMessage(Message message, ProcessingContext ctx) throws XWSSecurityException{
         JAXBFilterProcessingContext  context = (JAXBFilterProcessingContext)ctx;
         //  context.setJAXWSMessage(message, soapVersion);
+        if(debug){
+            try {
+                ((LazyStreamBasedMessage)message).print();
+            } catch (XMLStreamException ex) {
+                throw new XWSSecurityException("Error occurred when printing message",ex);
+            }
+        }
         com.sun.xml.ws.security.opt.impl.incoming.SecurityRecipient recipient =
                 new com.sun.xml.ws.security.opt.impl.incoming.SecurityRecipient(((LazyStreamBasedMessage)message).readMessage(),soapVersion);
         
@@ -1575,6 +1583,7 @@ public abstract class SecurityPipeBase implements Pipe {
         }
     }
     
+   
     
 //    protected abstract Policy getWSITConfig();
     
