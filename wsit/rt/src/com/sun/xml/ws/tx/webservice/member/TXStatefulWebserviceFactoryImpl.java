@@ -38,7 +38,7 @@ import java.net.URI;
  * This class ...
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 1.0
  */
 // suppress known deprecation warnings about using short term workaround StatefulWebService.export(Class, String webServiceEndpoint, PortType)
@@ -109,27 +109,30 @@ final public class TXStatefulWebserviceFactoryImpl implements StatefulWebservice
         }
     }
 
+    static private boolean registeredFallback = false;
     /**
      * Instances that handle request for unknown StatefulWebService instance.
      * This can happen when a request for a StatefulWebService is received after the instance has
      * timed out or was explicitly unexported.
      */
     private void registerFallback() {
-        ParticipantPortTypeImpl participant =
-                new ParticipantPortTypeImpl(UNKNOWN_ID, UNKNOWN_ID);
-        ParticipantPortTypeImpl.manager.setFallbackInstance(participant);
-
-        CoordinatorPortTypeImpl coordinator =
-                new CoordinatorPortTypeImpl(UNKNOWN_ID, UNKNOWN_ID);
-        CoordinatorPortTypeImpl.manager.setFallbackInstance(coordinator);
-
-        RegistrationRequesterPortTypeImpl registrationRequester =
-                new RegistrationRequesterPortTypeImpl(UNKNOWN_ID, UNKNOWN_ID);
-        RegistrationRequesterPortTypeImpl.manager.setFallbackInstance(registrationRequester);
-
-        RegistrationCoordinatorPortTypeImpl registrationCoordinator =
-                new RegistrationCoordinatorPortTypeImpl(UNKNOWN_ID);
-        RegistrationCoordinatorPortTypeImpl.manager.setFallbackInstance(registrationCoordinator);
-
+        if (!registeredFallback ) {
+            registeredFallback = true;
+            ParticipantPortTypeImpl participant =
+                    new ParticipantPortTypeImpl(UNKNOWN_ID, UNKNOWN_ID);
+            ParticipantPortTypeImpl.manager.setFallbackInstance(participant);
+            
+            CoordinatorPortTypeImpl coordinator =
+                    new CoordinatorPortTypeImpl(UNKNOWN_ID, UNKNOWN_ID);
+            CoordinatorPortTypeImpl.manager.setFallbackInstance(coordinator);
+            
+            RegistrationRequesterPortTypeImpl registrationRequester =
+                    new RegistrationRequesterPortTypeImpl(UNKNOWN_ID, UNKNOWN_ID);
+            RegistrationRequesterPortTypeImpl.manager.setFallbackInstance(registrationRequester);
+            
+            RegistrationCoordinatorPortTypeImpl registrationCoordinator =
+                    new RegistrationCoordinatorPortTypeImpl(UNKNOWN_ID);
+            RegistrationCoordinatorPortTypeImpl.manager.setFallbackInstance(registrationCoordinator);
+        }
     }
 }
