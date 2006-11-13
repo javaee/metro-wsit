@@ -37,7 +37,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -94,13 +93,14 @@ public class IncomeMessageProcessor {
         connection.setInputStreamByteBuffer(messageBuffer);
         
         try {
-            while(messageBuffer.hasRemaining()) {
+            do {
                 connection.prepareForReading();  // Reading headers
+                
                 int channelId = connection.getChannelId();
                 ChannelContext channelContext = connectionSession.findWSServiceContextByChannelId(channelId);
                 
                 listener.onMessage(channelContext);
-            }
+            } while(messageBuffer.hasRemaining());
         } finally {
             returnConnectionSession(connectionSession);
         }

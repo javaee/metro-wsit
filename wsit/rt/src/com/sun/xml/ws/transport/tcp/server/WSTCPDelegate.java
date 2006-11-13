@@ -156,14 +156,14 @@ public class WSTCPDelegate implements WSTCPAdapterRegistry, TCPMessageListener {
             try {
                 TCPAdapter.sendErrorResponse(channelContext, TCPConstants.RS_INTERNAL_SERVER_ERROR, MessagesMessages.CHECK_SERVER_LOG());
             } catch (Throwable ex) {
-                logger.log(Level.SEVERE, MessagesMessages.ERROR_MESSAGE_SENDING_FAILED(), ex);
+                logger.log(Level.SEVERE, MessagesMessages.SERVER_ERROR_MESSAGE_SENDING_FAILED(), ex);
             }
         } catch (Throwable e) {
             logger.log(Level.SEVERE, e.getMessage(), e);
             try {
                 TCPAdapter.sendErrorResponse(channelContext, TCPConstants.RS_INTERNAL_SERVER_ERROR, MessagesMessages.CHECK_SERVER_LOG());
             } catch (Throwable ex) {
-                logger.log(Level.SEVERE, MessagesMessages.ERROR_MESSAGE_SENDING_FAILED(), ex);
+                logger.log(Level.SEVERE, MessagesMessages.SERVER_ERROR_MESSAGE_SENDING_FAILED(), ex);
             }
         } finally {
             logger.log(Level.FINE, "WSTCPDelegate.onMessage exiting");

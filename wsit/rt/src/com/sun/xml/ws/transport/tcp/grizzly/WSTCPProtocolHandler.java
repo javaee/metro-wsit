@@ -29,6 +29,7 @@ import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
 import com.sun.xml.ws.transport.tcp.server.IncomeMessageProcessor;
 import com.sun.xml.ws.transport.tcp.util.TCPConstants;
 import java.io.IOException;
+import java.nio.channels.SocketChannel;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -52,7 +53,7 @@ public class WSTCPProtocolHandler implements ProtocolHandler {
     public void handle(ProtocolInfo tupple) throws IOException {
         if (processor != null) {
             tupple.byteBuffer.flip();
-            processor.process(tupple.byteBuffer, tupple.socketChannel);
+            processor.process(tupple.byteBuffer, (SocketChannel) tupple.key.channel());
         } else {
             logger.log(Level.WARNING, MessagesMessages.TCP_PROCESSOR_NOT_REGISTERED());
         }

@@ -30,54 +30,75 @@ import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.transport.tcp.util.ChannelContext;
 import com.sun.xml.ws.transport.tcp.util.TCPConstants;
+import java.io.IOException;
 
 /**
  * @author Alexey Stashok
  */
 public class TCPServiceChannelWSAdapter extends TCPAdapter {
     private WSTCPAdapterRegistry adapterRegistry;
-    private ServiceChannelWSSatellite serviceChannelWSSatellite;
     
     public TCPServiceChannelWSAdapter(@NotNull String name,
             @NotNull String urlPattern,
-            @NotNull WSEndpoint endpoint,
-            @NotNull WSTCPAdapterRegistry adapterRegistry) {
+    @NotNull WSEndpoint endpoint,
+    @NotNull WSTCPAdapterRegistry adapterRegistry) {
         super(name, urlPattern, endpoint);
         this.adapterRegistry = adapterRegistry;
-        serviceChannelWSSatellite = new ServiceChannelWSSatellite(this);
     }
     
-    @Override
-    public void addCustomPacketSattellites(@NotNull Packet packet) {
-        super.addCustomPacketSattellites(packet);
-        packet.addSatellite(serviceChannelWSSatellite);
-    }
-
     @Override
     protected TCPAdapter.TCPToolkit createToolkit() {
         return new ServiceChannelTCPToolkit();
     }
     
-
+    
     class ServiceChannelTCPToolkit extends TCPAdapter.TCPToolkit {
+        private ServiceChannelWSSatellite serviceChannelWSSatellite;
+        
+        public ServiceChannelTCPToolkit() {
+            serviceChannelWSSatellite = new ServiceChannelWSSatellite(TCPServiceChannelWSAdapter.this);
+        }
+        
         // Taking Codec from virtual connection's ChannelContext
         @Override
         protected @NotNull Codec getCodec(@NotNull ChannelContext context) {
             return codec;
         }
+        
+        @Override
+        protected void handle(@NotNull TCPConnectionImpl con) throws IOException {
+            serviceChannelWSSatellite.setConnectionContext(con.getChannelContext());
+            super.handle(con);
+        }
+        
+        @Override
+        public void addCustomPacketSattellites(@NotNull Packet packet) {
+            super.addCustomPacketSattellites(packet);
+            packet.addSatellite(serviceChannelWSSatellite);
+        }
     };
-
+    
     
     public static class ServiceChannelWSSatellite extends DistributedPropertySet {
         private TCPServiceChannelWSAdapter serviceChannelWSAdapter;
+        private ChannelContext channelContext;
         
         ServiceChannelWSSatellite(@NotNull TCPServiceChannelWSAdapter serviceChannelWSAdapter) {
             this.serviceChannelWSAdapter = serviceChannelWSAdapter;
         }
         
+        protected void setConnectionContext(ChannelContext channelContext) {
+            this.channelContext = channelContext;
+        }
+        
         @Property(TCPConstants.ADAPTER_REGISTRY)
         public @NotNull WSTCPAdapterRegistry getAdapterRegistry() {
             return serviceChannelWSAdapter.adapterRegistry;
+        }
+        
+        @Property(TCPConstants.CHANNEL_CONTEXT)
+        public ChannelContext getChannelContext() {
+            return channelContext;
         }
         
         private static PropertyMap model;

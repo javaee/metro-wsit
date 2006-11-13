@@ -105,7 +105,7 @@ public class WSStartupServlet extends HttpServlet
                     classLoader, new TCPResourceLoader(context), container, TCPAdapter.FACTORY);
             URL sunJaxWsXml = context.getResource(JAXWS_RI_RUNTIME);
             if(sunJaxWsXml==null)
-                throw new WebServiceException("No JAX-WS descriptor file found");
+                throw new WebServiceException(MessagesMessages.NO_JAXWS_DESCRIPTOR());
             adapters = parser.parse(sunJaxWsXml.toExternalForm(), sunJaxWsXml.openStream());
             
             transportModule.register(servletContext.getContextPath(), adapters);

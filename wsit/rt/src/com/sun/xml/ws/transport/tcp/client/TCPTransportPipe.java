@@ -137,7 +137,7 @@ public class TCPTransportPipe implements Pipe {
         } while (failure != null && ++retryNum <= TCPConstants.CLIENT_MAX_FAIL_TRIES);
         
         assert failure != null;
-        logger.log(Level.SEVERE, MessagesMessages.ERROR_MESSAGE_SENDING_FAILED(), failure);
+        logger.log(Level.SEVERE, MessagesMessages.MESSAGE_PROCESS_FAILED(), failure);
         throw failure;
     }
     

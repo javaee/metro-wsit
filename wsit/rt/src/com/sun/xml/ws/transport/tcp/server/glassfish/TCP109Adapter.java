@@ -56,12 +56,6 @@ public class TCP109Adapter extends TCPAdapter {
         this.isEJB = isEJB;
     }
     
-    // if its Adapter from 109 deployed WS - add fake Servlet artifacts
-    @Override
-    public void addCustomPacketSattellites(@NotNull Packet packet) {
-        super.addCustomPacketSattellites(packet);
-        packet.addSatellite(servletFakeArtifactSet);
-    }
     
     @Override
     public void handle(@NotNull ChannelContext channelContext) throws IOException {
@@ -84,6 +78,15 @@ public class TCP109Adapter extends TCPAdapter {
                 if(ejbRuntimeEndpointInfo != null)
                     ejbRuntimeEndpointInfo.releaseImplementor();
             }
+        }
+    }
+    
+    class TCP109Toolkit extends TCPAdapter.TCPToolkit {
+        // if its Adapter from 109 deployed WS - add fake Servlet artifacts
+        @Override
+        public void addCustomPacketSattellites(@NotNull Packet packet) {
+            super.addCustomPacketSattellites(packet);
+            packet.addSatellite(servletFakeArtifactSet);
         }
     }
 }

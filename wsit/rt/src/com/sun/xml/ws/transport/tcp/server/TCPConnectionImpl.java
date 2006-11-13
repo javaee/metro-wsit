@@ -22,7 +22,6 @@
 
 package com.sun.xml.ws.transport.tcp.server;
 
-import com.sun.xml.ws.api.DistributedPropertySet;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.transport.tcp.io.Connection;
 import com.sun.xml.ws.transport.tcp.util.ChannelContext;
@@ -40,8 +39,8 @@ import com.sun.istack.NotNull;
 /**
  * @author Alexey Stashok
  */
-public class TCPConnectionImpl extends DistributedPropertySet implements WebServiceContextDelegate {
-    private ChannelContext connectionContext;
+public class TCPConnectionImpl implements WebServiceContextDelegate {
+    private ChannelContext channelContext;
     private Connection connection;
     
     private String contentType;
@@ -52,14 +51,14 @@ public class TCPConnectionImpl extends DistributedPropertySet implements WebServ
     
     private boolean isHeaderSerialized;
     
-    public TCPConnectionImpl(ChannelContext connectionContext) {
-        this.connectionContext = connectionContext;
-        this.connection = connectionContext.getConnection();
+    public TCPConnectionImpl(ChannelContext channelContext) {
+        this.channelContext = channelContext;
+        this.connection = channelContext.getConnection();
     }
     
     public InputStream openInput() throws IOException {
         inputStream = connection.openInputStream();
-        contentType = connectionContext.decodeContentType(connection.getContentId(),
+        contentType = channelContext.decodeContentType(connection.getContentId(),
                 connection.getContentProps());
         return inputStream;
     }
@@ -113,7 +112,7 @@ public class TCPConnectionImpl extends DistributedPropertySet implements WebServ
     }
     
     public @NotNull String getEPRAddress(@NotNull Packet request, @NotNull WSEndpoint endpoint) {
-        return connectionContext.getTargetWSURI().toString();
+        return channelContext.getTargetWSURI().toString();
     }
 
     public String getWSDLAddress(@NotNull Packet request, @NotNull WSEndpoint endpoint) {
@@ -127,7 +126,7 @@ public class TCPConnectionImpl extends DistributedPropertySet implements WebServ
             int messageId = getMessageId();
             connection.setMessageId(messageId);
             if (FrameType.isFrameContainsParams(messageId)) {
-                ContentType.EncodedContentType ect = connectionContext.encodeContentType(contentType);
+                ContentType.EncodedContentType ect = channelContext.encodeContentType(contentType);
                 connection.setContentId(ect.mimeId);
                 connection.setContentProps(ect.params);
             }
@@ -144,18 +143,7 @@ public class TCPConnectionImpl extends DistributedPropertySet implements WebServ
         return FrameType.MESSAGE;
     }
     
-    @Property(TCPConstants.CHANNEL_CONTEXT)
-    public ChannelContext getConnectionContext() {
-        return connectionContext;
+    public ChannelContext getChannelContext() {
+        return channelContext;
     }
-    
-    private static PropertyMap model;
-    static {
-        model = parse(TCPConnectionImpl.class);
-    }
-    
-    public DistributedPropertySet.PropertyMap getPropertyMap() {
-        return model;
-    }
-
 }

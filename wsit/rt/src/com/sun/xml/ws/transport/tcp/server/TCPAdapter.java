@@ -82,12 +82,6 @@ public class TCPAdapter<TCPTK extends TCPAdapter.TCPToolkit> extends Adapter<TCP
         }
     }
     
-    /**
-     * Method could be overwritten by children to add some extra Satellites to Packet
-     */
-    public void addCustomPacketSattellites(@NotNull Packet packet) {
-    }
-    
     public static void sendErrorResponse(@NotNull ChannelContext channelContext,
             int errorCode,
             @NotNull String errorDescription) throws IOException {
@@ -111,16 +105,16 @@ public class TCPAdapter<TCPTK extends TCPAdapter.TCPToolkit> extends Adapter<TCP
         }
     }
     
-    class TCPToolkit extends Adapter.Toolkit implements TransportBackChannel {
+    protected class TCPToolkit extends Adapter.Toolkit implements TransportBackChannel {
         protected TCPConnectionImpl connection;
         private boolean isClosed;
         
-        private void handle(@NotNull TCPConnectionImpl con) throws IOException {
+        protected void handle(@NotNull TCPConnectionImpl con) throws IOException {
             connection = con;
             isClosed = false;
             
             InputStream in = connection.openInput();
-            Codec codec = getCodec(connection.getConnectionContext());
+            Codec codec = getCodec(connection.getChannelContext());
             
             String ct = connection.getContentType();
             logger.log(Level.FINE, "TCPAdapter.TCPToolkit.handle; received content-type: {0}", ct);
@@ -128,7 +122,6 @@ public class TCPAdapter<TCPTK extends TCPAdapter.TCPToolkit> extends Adapter<TCP
             Packet packet = new Packet();
             codec.decode(in, ct, packet);
             logger.log(Level.FINE, "TCPAdapter.TCPToolkit.handle decoded");
-            packet.addSatellite(connection);
             addCustomPacketSattellites(packet);
             try {
                 logger.log(Level.FINE, "TCPAdapter.TCPToolkit.handle head.process");
@@ -162,6 +155,12 @@ public class TCPAdapter<TCPTK extends TCPAdapter.TCPToolkit> extends Adapter<TCP
         // Taking Codec from virtual connection's ChannelContext
         protected @NotNull Codec getCodec(@NotNull ChannelContext context) {
             return context.getCodec();
+        }
+        
+        /**
+         * Method could be overwritten by children to add some extra Satellites to Packet
+         */
+        public void addCustomPacketSattellites(@NotNull Packet packet) {
         }
         
         public void close() {
