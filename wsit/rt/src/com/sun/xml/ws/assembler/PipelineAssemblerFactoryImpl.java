@@ -72,10 +72,6 @@ import com.sun.xml.ws.transport.tcp.client.TCPTransportPipeFactory;
 import com.sun.xml.ws.util.ServiceFinder;
 import com.sun.xml.wss.jaxws.impl.SecurityClientPipe;
 import com.sun.xml.wss.jaxws.impl.SecurityServerPipe;
-import com.sun.xml.wss.provider.wsit.WSITClientAuthConfig;
-import javax.security.auth.message.AuthException;
-import javax.security.auth.message.config.AuthConfigFactory;
-import javax.security.auth.message.config.AuthConfigProvider;
 
 /**
  * WSIT PipelineAssembler.
@@ -167,8 +163,11 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
                 // TODO: how SecurityClientPipe will be passed to RMClientPipe. Currently SC+RM
                 // TODO: will not work for JSR 109-based DD.
                 // TODO: Vijay will follow with Ron if 196 & Policy-based pipe can be separate
+
                 p = hook.createSecurityPipe(policyMap, context, p);
                 if (isSecurityEnabled) {
+                    scInit = (SecureConversationInitiator) p;
+                    /*
                     AuthConfigFactory factory = AuthConfigFactory.getFactory();
                     if (factory != null) {
                         AuthConfigProvider provider = factory.getConfigProvider("SOAP", null,null);
@@ -179,7 +178,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
                         }catch (AuthException e) {
                             throw new RuntimeException(e);
                         }
-                    }
+                    }*/
                 }
                 
             } else {
