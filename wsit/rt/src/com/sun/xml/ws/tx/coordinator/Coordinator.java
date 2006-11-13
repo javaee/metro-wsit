@@ -36,7 +36,7 @@ import java.util.TimerTask;
  * is constructed and managed by this class.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 1.0
  */
 public abstract class Coordinator {
@@ -128,6 +128,12 @@ public abstract class Coordinator {
      */
     public long getExpires() {
         return context.getExpires();
+    }
+    
+    public void setExpires(long i) {
+        if (context != null) {
+            context.setExpires(i);
+        }
     }
 
     /**
