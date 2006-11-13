@@ -83,7 +83,7 @@ import javax.xml.ws.soap.SOAPFaultException;
  * @author kumar jayanti
  */
 public class WSITClientAuthContext  extends WSITAuthContextBase 
-        implements ClientAuthContext, SecureConversationInitiator {
+        implements ClientAuthContext {
     
     //*****************STATIC****************
     // Plugin instances for Trust and SecureConversation invocation

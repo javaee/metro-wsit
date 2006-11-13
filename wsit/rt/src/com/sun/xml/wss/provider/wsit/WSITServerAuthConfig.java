@@ -63,5 +63,13 @@ public class WSITServerAuthConfig implements ServerAuthConfig {
 
     public void refresh() {
     }
+
+    public String getAuthContextID(MessageInfo messageInfo) {
+        return null;
+    }
+
+    public boolean isProtected() {
+        return true;
+    }
     
 }

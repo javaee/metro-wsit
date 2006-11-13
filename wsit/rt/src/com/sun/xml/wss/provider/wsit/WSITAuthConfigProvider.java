@@ -52,12 +52,16 @@ public class WSITAuthConfigProvider implements AuthConfigProvider {
     public void refresh() {
     }
 
-    public AuthConfigProvider newInstance(AuthConfigFactory authConfigFactory, Map map) {
-       WSITAuthConfigProvider provider = new WSITAuthConfigProvider(map);
-       /*if (id == null) {
-          id = authConfigFactory.registerConfigProvider(provider,null, null, description);
-       }*/
-       return provider;
+
+    public AuthConfigProvider newInstance(Map map) {
+        throw new UnsupportedOperationException(
+                "newInstance(Map) method not supported by WSIT Provider");
+    }
+
+    public AuthConfigProvider registerNewInstance(AuthConfigFactory authConfigFactory, Map map) {
+        WSITAuthConfigProvider provider = new WSITAuthConfigProvider(map); 
+        authConfigFactory.registerConfigProvider(provider, "SOAP", null,description);
+        return provider;
     }
     
 }

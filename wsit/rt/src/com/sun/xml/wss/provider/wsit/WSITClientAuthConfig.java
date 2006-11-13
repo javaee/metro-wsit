@@ -9,8 +9,10 @@
 
 package com.sun.xml.wss.provider.wsit;
 
+import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
+import com.sun.xml.ws.security.secconv.WSSecureConversationException;
 import java.util.Map;
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
@@ -18,12 +20,13 @@ import javax.security.auth.message.AuthException;
 import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.config.ClientAuthConfig;
 import javax.security.auth.message.config.ClientAuthContext;
+import javax.xml.bind.JAXBElement;
 
 /**
  *
  * @author kumar jayanti
  */
-public class WSITClientAuthConfig implements ClientAuthConfig {
+public class WSITClientAuthConfig implements ClientAuthConfig, SecureConversationInitiator {
     
     String layer = null;
     String appContext = null;
@@ -62,6 +65,23 @@ public class WSITClientAuthConfig implements ClientAuthConfig {
     }
 
     public void refresh() {
+    }
+
+    public String getAuthContextID(MessageInfo messageInfo) {
+        return null;
+    }
+
+    public boolean isProtected() {
+        return true;
+    }
+    
+    public JAXBElement startSecureConversation(Packet packet)
+    throws WSSecureConversationException {
+        if (clientAuthContext != null) {
+            return ((WSITClientAuthContext)clientAuthContext).startSecureConversation(packet);    
+        } else {
+            throw new WSSecureConversationException("Error: Client Authentication Context was not Initialized");
+        }
     }
     
 }

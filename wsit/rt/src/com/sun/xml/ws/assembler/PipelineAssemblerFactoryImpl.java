@@ -67,10 +67,15 @@ import com.sun.xml.ws.policy.util.PolicyMapUtil;
 import com.sun.xml.ws.rm.Constants;
 import com.sun.xml.ws.rm.jaxws.runtime.client.RMClientPipe;
 import com.sun.xml.ws.rm.jaxws.runtime.server.RMServerPipe;
+import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
 import com.sun.xml.ws.transport.tcp.client.TCPTransportPipeFactory;
 import com.sun.xml.ws.util.ServiceFinder;
 import com.sun.xml.wss.jaxws.impl.SecurityClientPipe;
 import com.sun.xml.wss.jaxws.impl.SecurityServerPipe;
+import com.sun.xml.wss.provider.wsit.WSITClientAuthConfig;
+import javax.security.auth.message.AuthException;
+import javax.security.auth.message.config.AuthConfigFactory;
+import javax.security.auth.message.config.AuthConfigProvider;
 
 /**
  * WSIT PipelineAssembler.
@@ -114,6 +119,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
         }
         
         @NotNull
+        @SuppressWarnings("unchecked")
         public Pipe createClient(@NotNull ClientPipeAssemblerContext context) {
             // For dispatch client, this variable may be null
             WSDLPort wsdlPort = context.getWsdlModel();
@@ -154,26 +160,50 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             p = dump(context, CLIENT_PREFIX + WSS_SUFFIX + AFTER_SUFFIX, p);
             
             // check for Security
-            SecurityClientPipe securityClientPipe = null;
+            //SecurityClientPipe securityClientPipe = null;
+            SecureConversationInitiator scInit = null;
             ClientPipelineHook hook = context.getContainer().getSPI(ClientPipelineHook.class);
             if (hook != null) {
                 // TODO: how SecurityClientPipe will be passed to RMClientPipe. Currently SC+RM
                 // TODO: will not work for JSR 109-based DD.
                 // TODO: Vijay will follow with Ron if 196 & Policy-based pipe can be separate
                 p = hook.createSecurityPipe(policyMap, context, p);
+                if (isSecurityEnabled) {
+                    AuthConfigFactory factory = AuthConfigFactory.getFactory();
+                    if (factory != null) {
+                        AuthConfigProvider provider = factory.getConfigProvider("SOAP", null,null);
+                        try {
+                            WSITClientAuthConfig authConfig =
+                                    (WSITClientAuthConfig)provider.getClientAuthConfig("SOAP", null, null);
+                            scInit = (SecureConversationInitiator)authConfig;
+                        }catch (AuthException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                }
+                
             } else {
                 if (isSecurityEnabled) {
-                    ClientPipeConfiguration config = new ClientPipeConfiguration(
+                   ClientPipeConfiguration config = new ClientPipeConfiguration(
                             policyMap, wsdlPort, context.getService(), context.getBinding());
                     p = new SecurityClientPipe(config, p);
-                    securityClientPipe = (SecurityClientPipe) p;
+                    scInit = (SecureConversationInitiator) p;
+                    
+                    /*
+                   HashMap propBag = new HashMap();
+                    propBag.put("POLICY", policyMap);
+                    propBag.put("WSDL_MODEL", wsdlPort);
+                    propBag.put("SERVICE",context.getService());
+                    propBag.put("BINDING", context.getBinding());
+                    System.out.println("<<<<<<<<<Creating WSITClientSecurityPipe>>>>>>>>>");
+                    p = new WSITClientSecurityPipe(propBag, p);
+                    scInit = (SecureConversationInitiator)propBag.get("SC_INITIATOR");*/
+                    
                 } else {
                     //look for XWSS 2.0 Style Security
                     // policyMap may be null in case of client dispatch without a client config file
                     if ((policyMap == null || policyMap.isEmpty()) && isSecurityConfigPresent(context)) {
                         p = initializeXWSSClientPipe(wsdlPort, context.getService(), context.getBinding(), p);
-                        //donot set securityClientPipe since this is a
-                        // non WSIT scenario
                     }
                 }
             }
@@ -187,7 +217,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
                 p = new RMClientPipe(wsdlPort,
                         context.getService(),
                         context.getBinding(),
-                        securityClientPipe,
+                        scInit,
                         p);
             }
             p = dump(context, CLIENT_PREFIX + WSRM_SUFFIX + BEFORE_SUFFIX, p);
@@ -232,6 +262,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
         }
         
         @NotNull
+        @SuppressWarnings("unchecked")
         public Pipe createServer(ServerPipeAssemblerContext context) {
             ServiceDefinition sd = context.getEndpoint().getServiceDefinition();
             if (sd != null) {
@@ -286,17 +317,30 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             p = dump(context, SERVER_PREFIX + WSA_SUFFIX + BEFORE_SUFFIX, p);
             
             p = dump(context, SERVER_PREFIX + WSS_SUFFIX + AFTER_SUFFIX, p);
+            
             // check for Security
+            boolean securityIsEnabled = isSecurityEnabled(policyMap, context.getWsdlModel());
             ServerPipelineHook hook = context.getEndpoint().getContainer().getSPI(ServerPipelineHook.class);
             if (hook != null){
-                setSecurityCodec(context);
+                if (securityIsEnabled) {
+                    setSecurityCodec(context);
+                }
                 p = hook.createSecurityPipe(policyMap, context.getSEIModel(), context.getWsdlModel(), context.getEndpoint(), p);
             }else {
-                if (isSecurityEnabled(policyMap, context.getWsdlModel())) {
+                if (securityIsEnabled) {
                     setSecurityCodec(context);
                     ServerPipeConfiguration config = new ServerPipeConfiguration(
                             policyMap, context.getWsdlModel(), context.getEndpoint());
                     p = new SecurityServerPipe(config, p);
+                    /*
+                    HashMap propBag = new HashMap();
+                    propBag.put("POLICY", policyMap);
+                    propBag.put("WSDL_MODEL", context.getWsdlModel());
+                    propBag.put("SEI_MODEL", context.getSEIModel());
+                    propBag.put("ENDPOINT", context.getEndpoint());
+                    System.out.println("<<<<<<<<<Creating WSITServerSecurityPipe>>>>>>>>>");
+                    p = new WSITServerSecurityPipe(propBag, p);*/
+                    
                 } else {
                     //look for XWSS 2.0 Style Security
                     if (((null == policyMap) || policyMap.isEmpty()) && isSecurityConfigPresent(context)) {

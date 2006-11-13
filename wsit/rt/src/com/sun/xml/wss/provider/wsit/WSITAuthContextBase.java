@@ -177,7 +177,7 @@ public abstract class WSITAuthContextBase  {
     protected Pipe nextPipe;
     
     // TODO: Optimized flag to be set based on some conditions (no SignedElements/EncryptedElements)
-    protected boolean optimized = false;
+    protected boolean optimized = true;
     protected PipeConfiguration pipeConfig = null;
     protected AlgorithmSuite bindingLevelAlgSuite = null;
     
