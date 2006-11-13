@@ -144,7 +144,6 @@ public class ATSubCoordinator extends ATCoordinator {
 
         public void commit() {
             initiateVolatileCommit();
-            // TODO: is waitForVolatileCommitResponse() needed.
             rootVolatileParticipant.committed();
         }
 
