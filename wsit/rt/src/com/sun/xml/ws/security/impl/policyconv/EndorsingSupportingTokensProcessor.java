@@ -69,6 +69,7 @@ public class EndorsingSupportingTokensProcessor extends SupportingTokensProcesso
     protected void endorseSignature(SignaturePolicy sp){
         SignaturePolicy.FeatureBinding spFB = (SignaturePolicy.FeatureBinding)sp.getFeatureBinding();
         SignatureTarget sigTarget = stc.newURISignatureTarget(signaturePolicy.getUUID());
+        SecurityPolicyUtil.setName(sigTarget, signaturePolicy);
         spFB.addTargetBinding(sigTarget);
         spFB.isEndorsingSignature(true);
     }

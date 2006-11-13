@@ -102,6 +102,7 @@ public class TransportBindingProcessor extends BindingProcessor {
             WSSPolicy key = (WSSPolicy) sp.getKeyBinding();
             if(tp != null ){
                 SignatureTarget target = iAP.getTargetCreator().newURISignatureTarget(tp.getUUID());
+                SecurityPolicyUtil.setName(target, tp);
                 // there is no primary signature in Transport Binding
                 //spFB.isEndorsingSignature(true);
                 spFB.addTargetBinding(target);
@@ -126,6 +127,7 @@ public class TransportBindingProcessor extends BindingProcessor {
             
             if(tp != null){
                 SignatureTarget target = iAP.getTargetCreator().newURISignatureTarget(tp.getUUID());
+                SecurityPolicyUtil.setName(target, tp);
                 //SignaturePolicy.FeatureBinding spFB = (SignaturePolicy.FeatureBinding)sp.getFeatureBinding();
                 //spFB.isEndorsingSignature(true);
                 spFB.addTargetBinding(target);
@@ -134,6 +136,7 @@ public class TransportBindingProcessor extends BindingProcessor {
             
             if(binding.getSignatureProtection()){
                 SignatureTarget target = iAP.getTargetCreator().newURISignatureTarget(key.getUUID());
+                SecurityPolicyUtil.setName(target, key);
               //  SignaturePolicy.FeatureBinding spFB = (SignaturePolicy.FeatureBinding)sp.getFeatureBinding();
                 
                 spFB.isEndorsingSignature(true);

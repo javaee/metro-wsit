@@ -58,6 +58,7 @@ public class SignedSupportingTokensProcessor extends SupportingTokensProcessor {
     
     protected void addToPrimarySignature(WSSPolicy policy,Token token) throws PolicyException{
         SignatureTarget target = stc.newURISignatureTarget(policy.getUUID());
+        SecurityPolicyUtil.setName(target, policy);
         if(!PolicyUtil.isUsernameToken((PolicyAssertion) token)){
             stc.addSTRTransform(target);
         }

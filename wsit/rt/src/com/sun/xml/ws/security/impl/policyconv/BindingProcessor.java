@@ -96,10 +96,12 @@ public abstract class BindingProcessor {
             EncryptionPolicy ep = getSecondaryEncryptionPolicy();
             EncryptionPolicy.FeatureBinding epFB  = (EncryptionPolicy.FeatureBinding) ep.getFeatureBinding();
             EncryptionTarget et = eAP.getTargetCreator().newURIEncryptionTarget(primarySP.getUUID());
+            SecurityPolicyUtil.setName(et, primarySP);
             epFB.addTargetBinding(et);
         }else{
             EncryptionPolicy.FeatureBinding epFB  = (EncryptionPolicy.FeatureBinding) primaryEP.getFeatureBinding();
             EncryptionTarget et = eAP.getTargetCreator().newURIEncryptionTarget(primarySP.getUUID());
+            SecurityPolicyUtil.setName(et, primarySP);
             epFB.addTargetBinding(et);
         }
     }
@@ -108,6 +110,7 @@ public abstract class BindingProcessor {
         TimestampPolicy tp = new TimestampPolicy();
         tp.setUUID(pid.generateID());
         SignatureTarget target = iAP.getTargetCreator().newURISignatureTarget(tp.getUUID());
+        SecurityPolicyUtil.setName(target, tp);
         container.insert(tp);
         SignaturePolicy.FeatureBinding spFB = (SignaturePolicy.FeatureBinding)primarySP.getFeatureBinding();
         spFB.addTargetBinding(target);
