@@ -23,7 +23,7 @@
 -->
 
 <!--
- $Id: properties.xml,v 1.5 2006-11-02 23:42:50 hofsass Exp $
+ $Id: properties.xml,v 1.6 2006-11-13 03:50:00 hofsass Exp $
 
  Copyright (c) 2005 Sun Microsystems, Inc.
  All rights reserved.
@@ -49,5 +49,5 @@
         For more information on the different command line options
         refer to docs/index.html
         -->
-     <property name="args" value=""/>
+     <property name="args" value="-legacy-local"/>
 </project>

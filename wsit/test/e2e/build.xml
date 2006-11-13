@@ -23,7 +23,7 @@
 -->
 
 <!--
- $Id: build.xml,v 1.24 2006-11-06 19:06:16 hofsass Exp $
+ $Id: build.xml,v 1.25 2006-11-13 03:50:00 hofsass Exp $
 
  Copyright (c) 2005 Sun Microsystems, Inc.
  All rights reserved.
@@ -116,7 +116,6 @@
                 
                 <arg value="-report" />
                 <arg path="${logs.dir}" />
-                <arg value="-legacy-local" />
                 <arguments />
                 <arg line="${args}"/>
                 
