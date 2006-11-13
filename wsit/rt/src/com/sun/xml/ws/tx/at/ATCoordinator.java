@@ -86,16 +86,16 @@ import java.util.logging.Level;
  *
  * @author Ryan.Shoemaker@Sun.COM
  * @author Joe.Fialli@Sun.COM
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 1.0
  */
 public class ATCoordinator extends Coordinator implements Synchronization, XAResource {
-    // TODO: don't hardcode this in future, look it up
+    // TODO: workaround until jaxws-ri stateful webservice can compute this URI 
     public static final URI localCoordinationProtocolServiceURI =
             Util.createURI(WSTX_WS_URL_PREFIX, null, WSTX_WS_PORT, "/wstx-services/wsat/coordinator");
 
 
-    // TODO: HACKS so waitFor* do not hang.  Remove when implement transaction timeout.
+    // TODO: short term solution so waitFor* do not hang.  Remove when implement transaction timeout.
     static private final int MAX_WAIT_ITERATION = 30;
     static private final long WAIT_SLEEP = 2000;
 
@@ -198,7 +198,6 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
      * The returned list is unmodifiable (read-only).  Add new Registrants
      * with the {@link #addRegistrant(com.sun.xml.ws.tx.coordinator.Registrant)} api instead.
      * <p/>
-     * TODO: is this even a useful method?
      *
      * @return the list of Registrant objects
      */
@@ -239,6 +238,7 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
         // TODO: check for duplicate registration and send fault S4.6 ws:coor Already Registered
         switch (registrant.getProtocol()) {
             case COMPLETION:
+                // Unimplemented OPTIONAL functionality.
                 // TODO: do we need to see if this field is already set?
                 // TODO: disallow if subordinate coordinator
                 completionRegistrant = (ATCompletion) registrant;
@@ -254,7 +254,6 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
                 break;
 
             default:
-                // TODO: Throw AT fault
                 throw new UnsupportedOperationException(
                         LocalizationMessages.UNKNOWN_PROTOCOL((registrant.getProtocol().getUri())));
         }
@@ -292,7 +291,10 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
     }
 
     public Collection<ATParticipant> getVolatileParticipantsSnapshot() {
-        HashMap<String, ATParticipant> vp = (HashMap<String, ATParticipant>) volatileParticipants.clone();
+        // Try an alternative to clone to get rid unchecked cast warning
+        // (HashMap<String, ATParticipant>) volatileParticipants.clone();
+        HashMap<String, ATParticipant> vp = 
+                new HashMap<String, ATParticipant>(volatileParticipants);
         return vp.values();
     }
 
@@ -308,27 +310,18 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
     }
 
     public Collection<ATParticipant> getDurableParticipantsSnapshot() {
-        return ((HashMap<String, ATParticipant>) durableParticipants.clone()).values();
+       //return ((HashMap<String, ATParticipant>) durableParticipants.clone()).values();
+       return new HashMap<String, ATParticipant>(durableParticipants).values();
     }
 
 
     /**
      * Get the completion registrant.
-     * <p/>
-     * TODO: can this be null?
      *
      * @return The completion registrant
      */
     public ATCompletion getCompletionRegistrant() {
         return completionRegistrant;
-    }
-
-    /**
-     * Only for root coordinator, invoke when transaction initiator calls commit/abort.
-     * Called when receive completion commit or abort  OR when initiated by local call to txn commit/abort.
-     */
-    public void initiate2PC(boolean commit) {
-        // TODO
     }
 
     /**
@@ -394,7 +387,7 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
                     break;
 
                 case COMMITTING:
-                    // TODO
+                    // TODO: Send Invalid State fault
                     logger.warning("initiateVolatileParticipant", "state committing " +
                             getCoordIdPartId(volatileP.getIdValue()));
                     break;
@@ -449,13 +442,6 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
                         }
                         break;
 
-                    case NONE:
-                        allPrepared = false;
-                        setAborting();
-
-                        // TODO: throw illegal state exception
-                        assert false;
-
                     case ABORTING:
                         setAborting();
                         return;
@@ -466,6 +452,7 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
                     case COMMITTING:
                         break;
 
+                    case NONE:
                     case COMMITTED:
                     case ABORTED:
                     case READONLY:
@@ -670,7 +657,7 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
     }
 
     public void initiateDurableCommit() {
-        // TODO: assert all participants must be in PREPARED, PREPARED_SUCCESS, COMMITTING, READONLY
+        // assert all participants must be in PREPARED, PREPARED_SUCCESS, COMMITTING, READONLY
 
         // PRE-CONDITION: durableParticipantState is PREPARED
         if (isAborting()) {
@@ -696,7 +683,7 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
     }
 
     public void initiateVolatileCommit() {
-        // TODO: assert all participants must be in PREPARED, PREPARED_SUCCESS, COMMITTING, READONLY
+        // assert all participants must be in PREPARED, PREPARED_SUCCESS, COMMITTING, READONLY
 
         // PRE-CONDITION: durableParticipantState is PREPARED
         if (isAborting()) {
@@ -757,7 +744,7 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
     }
 
     protected void waitForCommitOrRollbackResponse(Protocol protocol) {
-        // TODO  all participants have been committed or rolled back.
+        // all participants have been committed or rolled back.
         // wait for all outstanding participants to send final notification of wsat COMMITTED or ABORTED.
         boolean communicationTimeout = false;  // TODO: resend prepare due to communication timeout. Assume msg lost.
         boolean allProcessed;
@@ -911,12 +898,11 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
 
 
     public boolean setTransactionTimeout(int i) throws XAException {
-        throw new UnsupportedOperationException("Not yet implemented");
+        setExpires(i * 1000L);
+        return true;
     }
 
     public void start(Xid xid, int flags) throws XAException {
-        // TODO  consider if anything needed here
-        // called when transaction starts
     }
 
     /**
@@ -943,12 +929,12 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
      */
     public void forget(Xid xid) throws XAException {
         // TODO release resources held for xid.
-        throw new UnsupportedOperationException("Not yet implemented");
+        // Comment out exception, no need to fail when forget is called.
+        // throw new UnsupportedOperationException("Not yet implemented");
     }
 
     public int getTransactionTimeout() throws XAException {
-        // TODO: implement this method
-        throw new UnsupportedOperationException("Not yet implemented");
+        return (int)(getExpires() / 1000L); 
     }
 
     public boolean isSameRM(XAResource xAResource) throws XAException {
@@ -1045,7 +1031,6 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
      * Implement inbound event <i>replay</i> for Atomic Transaction 2PC Protocol(Coordinator View).
      */
     public void replay(String participantId) {
-        // TODO: review this method
         if (logger.isLogging(Level.FINER)) {
             logger.entering("replay", getCoordIdPartId(participantId));
         }
@@ -1152,15 +1137,13 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
             return;
         }
         /*
-         * TODO: implement when completion supported.
+         * TODO: implement if optional completion is ever supported.
         if ((completionRegistrant != null) && (completionRegistrant.getId().equals(id))) {
             r = completionRegistrant;
         }
         */
     }
 
-
-    // TODO:  don't think this coordinator protocol serviceusage  needs to export state? 
     static EndpointReference localCoordinatorProtocolService = null;
 
     public EndpointReference getCoordinatorProtocolServiceForRegistrant(Registrant r) {
