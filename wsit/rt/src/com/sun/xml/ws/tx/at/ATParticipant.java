@@ -68,7 +68,7 @@ import java.util.logging.Level;
  * already decided to prepare.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 1.0
  */
 public class ATParticipant extends Registrant {
@@ -78,7 +78,7 @@ public class ATParticipant extends Registrant {
     }
 
     /* PPS */
-    // TODO: fix hardcoding this endpoint
+    // TODO: workaround until jaxws-ri stateful webservice can compute this URI 
     private static final URI LOCAL_PPS_URI =
             Util.createURI(WSTX_WS_URL_PREFIX, null, WSTX_WS_PORT, "/wstx-services/wsat/2pc");
 
