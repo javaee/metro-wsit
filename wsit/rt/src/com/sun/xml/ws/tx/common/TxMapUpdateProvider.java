@@ -57,6 +57,8 @@ import java.util.logging.Level;
 public class TxMapUpdateProvider implements PolicyMapUpdateProvider {
 
     final static private TxLogger logger = TxLogger.getATLogger(TxMapUpdateProvider.class);
+    
+    static private boolean nonJavaEEContainer = false;
 
     /**
      * Update policy map with operation scope of correct ws-at policy assertions.
@@ -69,7 +71,10 @@ public class TxMapUpdateProvider implements PolicyMapUpdateProvider {
      * @param wsBinding
      */
     public void update(PolicyMapExtender policyMapMutator, PolicyMap policyMap, SEIModel model, WSBinding wsBinding) throws PolicyException {
-
+        if (nonJavaEEContainer) {
+            return;
+        }
+        
         // For each method of a CMT EJB, map its effective javax.ejb.TransactionAttribute to semantically equivalent 
         // ws-at policy assertion.
         if (model != null) {
@@ -80,8 +85,22 @@ public class TxMapUpdateProvider implements PolicyMapUpdateProvider {
             for (JavaMethod method : methods) {
 
                 if (CMTEJB == null) {
+                    boolean isCMTEJB = false;
                     Class theClass = method.getSEIMethod().getDeclaringClass();
-                    if (TransactionAnnotationProcessor.isContainerManagedEJB(theClass)) {
+                    try {
+                        isCMTEJB = TransactionAnnotationProcessor.isContainerManagedEJB(theClass);
+                    } catch (Exception e) {
+                      // running in a container that does not support EJBs; terminate processing of EJB annotations
+                      nonJavaEEContainer = true;
+                      if (logger.isLogging(Level.FINEST)) { 
+                        logger.finest("update", "handled exception " + e.getLocalizedMessage());
+                      }
+                      if (logger.isLogging(Level.INFO)) {
+                        logger.info("update", "running in a non Java EE container; disable mapping of Container Managed Transaction EJB to WS-AT Policy assertions");
+                      }
+                       return;  
+                    }
+                    if (isCMTEJB) {
                         // perform class level caching of info
                         CMTEJB = theClass;
                         classDefaultTxnAttr = TransactionAnnotationProcessor.getTransactionAttributeDefault(theClass);
