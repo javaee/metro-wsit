@@ -148,7 +148,7 @@
 
         <copy todir="${wsit.integration.dir}" >
             <fileset dir="${dist.dir}/image/jax-ws-latest-wsit/lib">
-                <include name="wstx-services.jar"/>
+                <!-- include name="wstx-services.jar"/ -->
                 <include name="wstx-services.war"/>
             </fileset>
         </copy>
