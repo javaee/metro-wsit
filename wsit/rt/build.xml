@@ -99,7 +99,7 @@
         <antcall target="expand-jars-runtime"/>
         <antcall target="combine-jars-runtime"/>
         <!-- TODO: is this the right place to build wstx-services.war and wstx-services.jar ??? -->
-        <antcall target="create-wstx-jar"/>
+        <!--antcall target="create-wstx-jar"/-->
         <antcall target="create-wstx-war"/>
     </target>
 
@@ -184,8 +184,8 @@
         <delete dir="${rt.dir}/tmp"/>
     </target>
 
-    <target name="-post-compile" depends="move-wstx-service-classes"
-            description="Hook for handling wstx web service classes"/>
+    <!--target name="-post-compile" depends="move-wstx-service-classes"
+            description="Hook for handling wstx web service classes"/-->
 
     <property name="wstx-svc-classes" value="${basedir}/build/wstx-svc-classes"/>
     <target name="move-wstx-service-classes">
@@ -216,7 +216,8 @@
         </jar>
     </target>
 
-    <target name="create-wstx-war" depends="create-wstx-jar" description="create wstx webservices war file">
+    <!--target name="create-wstx-war" depends="create-wstx-jar" description="create wstx webservices war file"-->
+    <target name="create-wstx-war" description="create wstx webservices war file">
         <property name="wstx.tmp" value="${basedir}/wstx-tmp"/>
         <mkdir dir="${wstx.tmp}"/>
         <mkdir dir="${wstx.tmp}/lib"/>
