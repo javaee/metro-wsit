@@ -53,7 +53,12 @@ public class WSTCPProtocolHandler implements ProtocolHandler {
     public void handle(ProtocolInfo tupple) throws IOException {
         if (processor != null) {
             tupple.byteBuffer.flip();
-            processor.process(tupple.byteBuffer, (SocketChannel) tupple.key.channel());
+            try {
+                processor.process(tupple.byteBuffer, (SocketChannel) tupple.key.channel());
+            } catch(IOException e) {
+                tupple.mappedProtocols.remove(tupple.key);
+                throw e;
+            }
         } else {
             logger.log(Level.WARNING, MessagesMessages.TCP_PROCESSOR_NOT_REGISTERED());
         }
