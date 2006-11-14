@@ -147,6 +147,12 @@
         <mkdir dir="${dist.dir}/wsit-integration"/>
 
         <copy todir="${wsit.integration.dir}" >
+            <fileset dir="${dist.dir}/image/jax-ws-latest-wsit/lib">
+                <include name="wstx-services.jar"/>
+                <include name="wstx-services.war"/>
+            </fileset>
+        </copy>
+        <copy todir="${wsit.integration.dir}" >
             <fileset dir="${rt.dir}/build">
                 <include name="wsit-*.*"/>
                 <include name="*src.zip"/>
@@ -172,6 +178,7 @@
                        <include name="xws-security.jar"/>
                        <include name="*src*"/>
                        <include name="trust-jaxbbindings.jar"/>
+                       <include name="wstx-*.*"/>
                    </fileset>
 
          </zip>
