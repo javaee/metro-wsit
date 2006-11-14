@@ -48,7 +48,7 @@ public class WSITServerSecurityPipe implements Pipe {
         
         //TODO: Load the Class by reflection.
         //Hack for now
-        AuthConfigProvider provider = new WSITAuthConfigProvider(properties);
+        AuthConfigProvider provider = new WSITAuthConfigProvider(properties, null);
         try {
             serverAuthConfig = provider.getServerAuthConfig("SOAP", null, null);
             //initialize the serverAuthContext

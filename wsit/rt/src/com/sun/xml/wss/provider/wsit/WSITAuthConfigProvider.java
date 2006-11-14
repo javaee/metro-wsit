@@ -29,10 +29,15 @@ public class WSITAuthConfigProvider implements AuthConfigProvider {
     
     ClientAuthConfig clientConfig = null;
     ServerAuthConfig serverConfig = null;
+    AuthConfigFactory factory = null;
     
     /** Creates a new instance of WSITAuthConfigProvider */
-    public WSITAuthConfigProvider(Map props) {
+    public WSITAuthConfigProvider(Map props, AuthConfigFactory factory) {
         properties = props;
+        this.factory = factory;
+        if (factory != null) {
+            factory.registerConfigProvider(this, "SOAP", null,description);
+        }
     }
 
     public synchronized ClientAuthConfig getClientAuthConfig(String layer, String appContext, CallbackHandler callbackHandler) throws AuthException {
@@ -50,18 +55,6 @@ public class WSITAuthConfigProvider implements AuthConfigProvider {
     }
 
     public void refresh() {
-    }
-
-
-    public AuthConfigProvider newInstance(Map map) {
-        throw new UnsupportedOperationException(
-                "newInstance(Map) method not supported by WSIT Provider");
-    }
-
-    public AuthConfigProvider registerNewInstance(AuthConfigFactory authConfigFactory, Map map) {
-        WSITAuthConfigProvider provider = new WSITAuthConfigProvider(map); 
-        authConfigFactory.registerConfigProvider(provider, "SOAP", null,description);
-        return provider;
     }
     
 }

@@ -48,7 +48,7 @@ public class WSITClientSecurityPipe implements Pipe {
         properties.put("NEXT_PIPE", nextPipe);
         //TODO: Load the Class by reflection.
         //Hack for now
-        AuthConfigProvider provider = new WSITAuthConfigProvider(properties);
+        AuthConfigProvider provider = new WSITAuthConfigProvider(properties, null);
         try {
             clientConfig = provider.getClientAuthConfig("SOAP", null, null);
             //initialize the clientAuthContext
