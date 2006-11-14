@@ -89,7 +89,7 @@ public class TxMapUpdateProvider implements PolicyMapUpdateProvider {
                     Class theClass = method.getSEIMethod().getDeclaringClass();
                     try {
                         isCMTEJB = TransactionAnnotationProcessor.isContainerManagedEJB(theClass);
-                    } catch (Exception e) {
+                    } catch (NoClassDefFoundError e) {
                       // running in a container that does not support EJBs; terminate processing of EJB annotations
                       nonJavaEEContainer = true;
                       if (logger.isLogging(Level.FINEST)) { 
