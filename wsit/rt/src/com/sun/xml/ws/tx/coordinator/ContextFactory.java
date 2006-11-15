@@ -21,6 +21,7 @@
  */
 package com.sun.xml.ws.tx.coordinator;
 
+import com.sun.xml.ws.developer.MemberSubmissionEndpointReference;
 import com.sun.xml.ws.tx.common.ActivityIdentifier;
 import static com.sun.xml.ws.tx.common.Constants.WSAT_2004_PROTOCOL;
 import static com.sun.xml.ws.tx.common.Constants.WSAT_OASIS_NSURI;
@@ -28,13 +29,15 @@ import com.sun.xml.ws.tx.common.TxLogger;
 import com.sun.xml.ws.tx.webservice.member.coord.CreateCoordinationContextType;
 
 import java.util.logging.Level;
+import javax.xml.transform.Result;
+import javax.xml.ws.EndpointReference;
 
 /**
  * This class is an abstraction of the two kinds of CoordinationContexts defined
  * in WS-Coordination 2004/10 member submission and 2006/03 OASIS.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 1.0
  */
 public class ContextFactory {
@@ -94,5 +97,39 @@ public class ContextFactory {
         return createContext(contextRequest.getCoordinationType(), contextRequest.getExpires().getValue());
     }
 
+    /**
+     * FOR UNIT TESTING ONLY 
+     */
+    static CoordinationContextInterface createTestContext(String coordType, long expires) {
 
+        CoordinationContextInterface context;
+
+        if (WSAT_2004_PROTOCOL.equals(coordType)) {
+            context = new CoordinationContext200410();
+            context.setCoordinationType(coordType);
+
+            context.setExpires(expires);
+
+            ACTIVITY_ID += 1;
+            context.setIdentifier("uuid:WSCOOR-SUN-" + ACTIVITY_ID);
+
+            ActivityIdentifier activityId = new ActivityIdentifier(context.getIdentifier());
+            
+            // we can't unit test the normal creation of an EPR this way because
+            // it requires the use of injected stateful webservice managers on
+            // the port type impls.  So set a dummy EPR instead.
+            // context.setRegistrationService(RegistrationManager.newRegistrationEPR(activityId));
+            context.setRegistrationService(new MemberSubmissionEndpointReference());
+        } else if (WSAT_OASIS_NSURI.equals(coordType)) {
+            throw new UnsupportedOperationException(
+                    LocalizationMessages.OASIS_UNSUPPORTED()
+            );
+        } else {
+            throw new UnsupportedOperationException(
+                    LocalizationMessages.UNRECOGNIZED_COORDINATION_TYPE(coordType)
+            );
+        }
+
+        return context;
+    }
 }
