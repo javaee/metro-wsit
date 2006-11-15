@@ -14,7 +14,7 @@
         <display-name>WSCoord CreateCoordinationContext</display-name>
         <servlet-name>ActivationCoordinatorPortTypeImpl</servlet-name>
         <servlet-class>com.sun.xml.ws.tx.webservice.member.coord.ActivationCoordinatorPortTypeImpl</servlet-class>
-        <load-on-startup>1</load-on-startup>
+        <load-on-startup>0</load-on-startup>
     </servlet>
     <servlet-mapping>
         <servlet-name>ActivationCoordinatorPortTypeImpl</servlet-name>
@@ -26,7 +26,7 @@
         <display-name>WSCoord CreateCoordinationContextResponse</display-name>
         <servlet-name>ActivationRequesterPortTypeImpl</servlet-name>
         <servlet-class>com.sun.xml.ws.tx.webservice.member.coord.ActivationRequesterPortTypeImpl</servlet-class>
-        <load-on-startup>1</load-on-startup>
+        <load-on-startup>0</load-on-startup>
     </servlet>
     <servlet-mapping>
         <servlet-name>ActivationRequesterPortTypeImpl</servlet-name>
@@ -38,7 +38,7 @@
         <display-name>WSCoord Register</display-name>
         <servlet-name>RegistrationCoordinatorPortTypeImpl</servlet-name>
         <servlet-class>com.sun.xml.ws.tx.webservice.member.coord.RegistrationCoordinatorPortTypeImpl</servlet-class>
-        <load-on-startup>1</load-on-startup>
+        <load-on-startup>0</load-on-startup>
     </servlet>
     <servlet-mapping>
         <servlet-name>RegistrationCoordinatorPortTypeImpl</servlet-name>
@@ -50,7 +50,7 @@
         <display-name>WSCoord RegisterResponse</display-name>
         <servlet-name>RegistrationRequesterPortTypeImpl</servlet-name>
         <servlet-class>com.sun.xml.ws.tx.webservice.member.coord.RegistrationRequesterPortTypeImpl</servlet-class>
-        <load-on-startup>1</load-on-startup>
+        <load-on-startup>0</load-on-startup>
     </servlet>
     <servlet-mapping>
         <servlet-name>RegistrationRequesterPortTypeImpl</servlet-name>
@@ -62,7 +62,7 @@
         <display-name>WSCoord Register RPC</display-name>
         <servlet-name>RegistrationPortTypeImpl</servlet-name>
         <servlet-class>com.sun.xml.ws.tx.webservice.member.coord.RegistrationPortTypeImpl</servlet-class>
-        <load-on-startup>1</load-on-startup>
+        <load-on-startup>0</load-on-startup>
     </servlet>
     <servlet-mapping>
         <servlet-name>RegistrationPortTypeImpl</servlet-name>
@@ -76,7 +76,7 @@
         <display-name>WSAT Coordinator</display-name>
         <servlet-name>CoordinatorPortTypeImpl</servlet-name>
         <servlet-class>com.sun.xml.ws.tx.webservice.member.at.CoordinatorPortTypeImpl</servlet-class>
-        <load-on-startup>1</load-on-startup>
+        <load-on-startup>0</load-on-startup>
     </servlet>
     <servlet-mapping>
         <servlet-name>CoordinatorPortTypeImpl</servlet-name>
@@ -88,7 +88,7 @@
         <display-name>WSAT Participant</display-name>
         <servlet-name>ParticipantPortTypeImpl</servlet-name>
         <servlet-class>com.sun.xml.ws.tx.webservice.member.at.ParticipantPortTypeImpl</servlet-class>
-        <load-on-startup>1</load-on-startup>
+        <load-on-startup>0</load-on-startup>
     </servlet>
     <servlet-mapping>
         <servlet-name>ParticipantPortTypeImpl</servlet-name>
@@ -100,7 +100,7 @@
         <display-name>WSAT CompletionCoordinator</display-name>
         <servlet-name>CompletionCoordinatorPortTypeImpl</servlet-name>
         <servlet-class>com.sun.xml.ws.tx.webservice.member.at.CompletionCoordinatorPortTypeImpl</servlet-class>
-        <load-on-startup>1</load-on-startup>
+        <load-on-startup>0</load-on-startup>
     </servlet>
     <servlet-mapping>
         <servlet-name>CompletionCoordinatorPortTypeImpl</servlet-name>
@@ -112,7 +112,7 @@
         <display-name>WSAT Completion Initiator</display-name>
         <servlet-name>CompletionInitiatorPortTypeImpl</servlet-name>
         <servlet-class>com.sun.xml.ws.tx.webservice.member.at.CompletionInitiatorPortTypeImpl</servlet-class>
-        <load-on-startup>1</load-on-startup>
+        <load-on-startup>0</load-on-startup>
     </servlet>
     <servlet-mapping>
         <servlet-name>CompletionInitiatorPortTypeImpl</servlet-name>
