@@ -122,20 +122,28 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             // This variable may be null if there was no client configuration file
             PolicyFeature feature = initPolicyMap(context);
             // For dispatch client, this variable may be null
-            WSDLModel wsdlModel = feature.getWsdlModel();
+            WSDLModel wsdlModel = null;
             // For dispatch client, this variable may be null
-            PolicyMap policyMap = feature.getPolicyMap();
+            PolicyMap policyMap = null;
             // This variable is only set if WSDL port is null and there is a
             // client configuration file
-            WSPortInfo portInfo = feature.getPortInfo();
+            WSPortInfo portInfo = null;
+            
+            if (feature != null) {
+                wsdlModel = feature.getWsdlModel();
+                policyMap = feature.getPolicyMap();
+                portInfo = feature.getPortInfo();
+            }
 
             // No WSDL port -> we must have a dispatch client. Extract WSDLPort
             // from client config instead (if we have one).
-            if (wsdlPort == null && portInfo != null) {
+            if (wsdlPort == null && portInfo != null && wsdlModel != null) {
                 QName serviceName = portInfo.getServiceName();
                 QName portName = portInfo.getPortName();
                 WSDLService service = wsdlModel.getService(serviceName);
-                wsdlPort = service.get(portName);
+                if (service != null) {
+                    wsdlPort = service.get(portName);
+                }
             }
 
             boolean isSecurityEnabled = isSecurityEnabled(policyMap, wsdlPort);
