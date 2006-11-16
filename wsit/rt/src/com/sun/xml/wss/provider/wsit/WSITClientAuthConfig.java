@@ -21,34 +21,65 @@ import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.config.ClientAuthConfig;
 import javax.security.auth.message.config.ClientAuthContext;
 import javax.xml.bind.JAXBElement;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
 
 /**
  *
  * @author kumar jayanti
  */
-public class WSITClientAuthConfig implements ClientAuthConfig, SecureConversationInitiator {
+public class WSITClientAuthConfig implements ClientAuthConfig {
     
     String layer = null;
     String appContext = null;
     //ignore the CBH here
     CallbackHandler cbh = null;
     WSITClientAuthContext clientAuthContext = null;
+
+    private ReentrantReadWriteLock rwLock;
+    private ReentrantReadWriteLock.ReadLock rLock;
+    private ReentrantReadWriteLock.WriteLock wLock;
     
     /** Creates a new instance of WSITClientAuthConfig */
     public WSITClientAuthConfig(String layer, String appContext, CallbackHandler callbackHandler) {
         this.layer = layer;
         this.appContext = appContext;
         this.cbh = callbackHandler;
+        this.rwLock = new ReentrantReadWriteLock(true);
+        this.rLock = rwLock.readLock();
+        this.wLock = rwLock.writeLock(); 
     }
 
-    public synchronized ClientAuthContext getAuthContext(String operation, Subject subject, Map map) throws AuthException {
+    public ClientAuthContext getAuthContext(String operation, Subject subject, Map map) throws AuthException {
         PolicyMap  pMap = (PolicyMap)map.get("POLICY");
         if (pMap.isEmpty()) {
             return null;
         }
-        if (clientAuthContext == null) {
-            clientAuthContext = new WSITClientAuthContext(operation, subject, map);
+        
+        boolean authContextInitialized = false;
+        
+        try {
+            this.rLock.lock();
+            if (clientAuthContext != null) {
+                authContextInitialized = true;
+            }
+        } finally {
+            this.rLock.unlock();
         }
+        
+        if (!authContextInitialized) {
+            try {
+                this.wLock.lock();
+                // recheck the precondition, since the rlock was released.
+                if (clientAuthContext == null) {
+                    clientAuthContext = new WSITClientAuthContext(operation, subject, map);
+                }
+            } finally {
+                this.wLock.unlock();
+            }
+        }
+       
+        this.startSecureConversation(map);
         return clientAuthContext;
     }
 
@@ -75,13 +106,29 @@ public class WSITClientAuthConfig implements ClientAuthConfig, SecureConversatio
         return true;
     }
     
-    public JAXBElement startSecureConversation(Packet packet)
-    throws WSSecureConversationException {
-        if (clientAuthContext != null) {
-            return ((WSITClientAuthContext)clientAuthContext).startSecureConversation(packet);    
-        } else {
-            throw new WSSecureConversationException("Error: Client Authentication Context was not Initialized");
+    public JAXBElement startSecureConversation(Map map) {
+        //check if we need to start secure conversation
+        JAXBElement ret = null;
+        try {
+            MessageInfo info = (MessageInfo)map.get("SECURITY_TOKEN");
+            if (info != null) {
+                Packet packet = (Packet)info.getMap().get("REQ_PACKET");
+                if (packet != null) {
+                    if (clientAuthContext != null) {
+                        ret =  ((WSITClientAuthContext)clientAuthContext).startSecureConversation(packet);
+                        map.put("SECURITY_TOKEN", ret);
+                    } else {
+                        throw new WSSecureConversationException("Error: Client Authentication Context was not Initialized");
+                    }
+                } else {
+                    throw new RuntimeException(
+                            "A Packet required for starting a secure session was not supplied to getAuthContext()");
+                }
+            }
+        } catch (WSSecureConversationException ex) {
+            throw new RuntimeException(ex);
         }
+        return ret;
     }
     
 }

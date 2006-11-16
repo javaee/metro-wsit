@@ -17,6 +17,7 @@ import javax.security.auth.message.AuthException;
 import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.config.ServerAuthConfig;
 import javax.security.auth.message.config.ServerAuthContext;
+import java.util.concurrent.locks.ReentrantReadWriteLock; 
 
 /**
  *
@@ -29,24 +30,48 @@ public class WSITServerAuthConfig implements ServerAuthConfig {
     CallbackHandler cbh = null;
     
     WSITServerAuthContext serverAuthContext = null;
+
+    private ReentrantReadWriteLock rwLock;
+    private ReentrantReadWriteLock.ReadLock rLock;
+    private ReentrantReadWriteLock.WriteLock wLock;
     
     /** Creates a new instance of WSITServerAuthConfig */
     public WSITServerAuthConfig(String layer, String appContext, CallbackHandler callbackHandler) {
         this.layer = layer;
         this.appContext = appContext;
         this.cbh = callbackHandler;
+        this.rwLock = new ReentrantReadWriteLock(true);
+        this.rLock = rwLock.readLock();
+        this.wLock = rwLock.writeLock();
     }
 
-    public synchronized ServerAuthContext getAuthContext(String operation, Subject subject, Map map) throws AuthException {
+    public ServerAuthContext getAuthContext(String operation, Subject subject, Map map) throws AuthException {
          PolicyMap  pMap = (PolicyMap)map.get("POLICY");
          if (pMap.isEmpty()) {
             return null;
          }
-         //TODO: Not thread safe, make it thread safe
-         if (serverAuthContext == null) {
-             serverAuthContext = new WSITServerAuthContext(operation, subject, map);
+         
+         try {
+             this.rLock.lock();
+             if (serverAuthContext != null) {
+                 return serverAuthContext;
+             }
+         } finally {
+             this.rLock.unlock();
          }
-         return serverAuthContext;
+        // make sure you don't hold the rlock when you request the wlock
+        // or you will encounter dealock
+         
+         try {
+             this.wLock.lock();
+             // recheck the precondition, since the rlock was released.
+             if (serverAuthContext == null) {
+                 serverAuthContext = new WSITServerAuthContext(operation, subject, map);
+             }
+             return serverAuthContext;
+         } finally {
+             this.wLock.unlock();
+         }
     }
 
     public String getMessageLayer() {
