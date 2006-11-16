@@ -67,8 +67,14 @@ public class RMDestination extends RMProvider<ServerInboundSequence,
         ServerOutboundSequence out = 
                 (ServerOutboundSequence)seq.getOutboundSequence();
         
-        if (seq != null) {
-            inboundMap.remove(id);
+        synchronized(this) {
+            if (seq != null) {
+                inboundMap.remove(id);
+            }
+
+            if (inboundMap.isEmpty()) {
+                reaper.stop();
+            }
         }
         
         if (out != null) {
@@ -87,7 +93,14 @@ public class RMDestination extends RMProvider<ServerInboundSequence,
                                           SequenceConfig config) throws RMException {
         
         ServerInboundSequence seq = new ServerInboundSequence(acksTo, inboundId, outboundId, config);
-        inboundMap.put(seq.getId(), seq);
+        
+        synchronized (this) {
+            inboundMap.put(seq.getId(), seq);
+
+            if (inboundMap.size() == 1) {
+                reaper.start();
+            }
+        }
         
         ServerOutboundSequence outbound = 
                 (ServerOutboundSequence)seq.getOutboundSequence();
@@ -96,6 +109,8 @@ public class RMDestination extends RMProvider<ServerInboundSequence,
         if (id != null) {
             outboundMap.put(id ,  outbound);
         }
+        
+        
         
         return seq;
     }
@@ -110,8 +125,11 @@ public class RMDestination extends RMProvider<ServerInboundSequence,
         private Map<String, 
                 ServerInboundSequence> map;
         
-        private TimerTask timerTask = new TimerTask() {
-            public void run() {
+        private TimerTask timerTask;
+        
+        public void start() {
+            timerTask = new TimerTask() {
+                public void run() {
                 //go though all the sequences and shut down any that
                 //are expired.
                 HashSet<String> keysToRemove = new HashSet<String>();
@@ -135,8 +153,17 @@ public class RMDestination extends RMProvider<ServerInboundSequence,
                     }
                  }
                    
-            }
-        };
+                }
+            };
+        
+            schedule(timerTask, 
+                     new Date(System.currentTimeMillis()),
+                     frequency);
+        }
+        
+        public void stop() {
+            timerTask.cancel();
+        }
         
         public SequenceReaper(long frequency, Map<String, 
                 ServerInboundSequence> map) {
@@ -144,9 +171,7 @@ public class RMDestination extends RMProvider<ServerInboundSequence,
             super(true);
             this.map = map;
             this.frequency = frequency;
-            schedule(timerTask, 
-                     new Date(System.currentTimeMillis()),
-                     frequency);
+            
         }
     }
 }
