@@ -280,7 +280,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
         
         try{
             msg = retPacket.getMessage();
-            if (ctx.getSecurityPolicy() != null) {
+            if (ctx.getSecurityPolicy() != null && ((MessagePolicy)ctx.getSecurityPolicy()).size() >0) {
                 if(!optimized || msg.isFault()) {
                     SOAPMessage soapMessage = msg.readAsSOAPMessage();
                     soapMessage = secureOutboundMessage(soapMessage, ctx);
@@ -384,6 +384,8 @@ public class SecurityServerPipe extends SecurityPipeBase {
         ProcessingContextImpl ctx = null;
         if(optimized){
             ctx = new JAXBFilterProcessingContext(packet.invocationProperties);
+            ((JAXBFilterProcessingContext)ctx).setAddressingVersion(addVer);
+            ((JAXBFilterProcessingContext)ctx).setSOAPVersion(soapVersion);
         }else{
             ctx = new ProcessingContextImpl( packet.invocationProperties);
         }

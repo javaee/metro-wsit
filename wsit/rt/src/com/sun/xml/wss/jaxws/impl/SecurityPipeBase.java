@@ -633,6 +633,8 @@ public abstract class SecurityPipeBase implements Pipe {
         ProcessingContextImpl ctx = null;
         if(optimized){
             ctx = new JAXBFilterProcessingContext(packet.invocationProperties);
+            ((JAXBFilterProcessingContext)ctx).setAddressingVersion(addVer);
+            ((JAXBFilterProcessingContext)ctx).setSOAPVersion(soapVersion);
         }else{
             ctx = new ProcessingContextImpl( packet.invocationProperties);
         }
@@ -714,6 +716,8 @@ public abstract class SecurityPipeBase implements Pipe {
         ProcessingContextImpl ctx = null;
         if(optimized){
             ctx = new JAXBFilterProcessingContext(packet.invocationProperties);
+            ((JAXBFilterProcessingContext)ctx).setAddressingVersion(addVer);
+            ((JAXBFilterProcessingContext)ctx).setSOAPVersion(soapVersion);
         }else{
             ctx = new ProcessingContextImpl( packet.invocationProperties);
         }
