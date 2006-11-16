@@ -23,7 +23,7 @@
 <param-name>listings</param-name>
 <param-value>true</param-value>
 </init-param>
-<load-on-startup>1</load-on-startup>
+<load-on-startup>0</load-on-startup>
 </servlet>
 <servlet>
 <servlet-name>jsp</servlet-name>
