@@ -195,7 +195,7 @@ public class ProtocolMessageSender {
         Packet requestPacket = new Packet(request);
         requestPacket.proxy = packet.proxy;
         requestPacket.contentNegotiation = packet.contentNegotiation;
-        addAddressingHeaders (requestPacket,Constants.TERMINATE_SEQUENCE_ACTION,seq.getDestination(),seq.getAcksTo(),true);
+        addAddressingHeaders (requestPacket,Constants.TERMINATE_SEQUENCE_ACTION,seq.getDestination(),seq.getAcksTo(),/*true*/ false);
         requestPacket.setEndPointAddressString(seq.getDestination().toString());
         Packet responsePacket = nextPipe.process(requestPacket);
         Message response = responsePacket.getMessage();
@@ -234,7 +234,7 @@ public class ProtocolMessageSender {
         requestPacket.setEndPointAddressString(seq.getDestination().toString());
         requestPacket.contentNegotiation = packet.contentNegotiation;
         addAddressingHeaders(requestPacket, constants.getLastAction(),seq.getDestination(),
-                seq.getAcksTo(),true);
+                seq.getAcksTo(), /*true*/ false);
 
        
 
@@ -272,7 +272,7 @@ public class ProtocolMessageSender {
             requestPacket.contentNegotiation = packet.contentNegotiation;
 
             addAddressingHeaders (requestPacket, Constants.ACK_REQUESTED_ACTION,
-                    seq.getDestination(),seq.getAcksTo(),true);
+                    seq.getDestination(),seq.getAcksTo(), /*true*/ false);
 
             requestPacket.setEndPointAddressString(seq.getDestination().toString());
 
