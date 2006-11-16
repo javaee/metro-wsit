@@ -58,21 +58,21 @@ To set up and run the sample with AccessManager:
 7. Repeat step 6 to create another test user with ID = Bob.
 
 8. Create a policy:
-   7.1 Click 'Policies'
-   7.2 Click 'New Policy'
-   7.3 Name: Access Simple Service
-   7.4 Under 'Rules', click 'New'
-   7.5 Leave the default URL Policy Agent selected, click 'Next'
-   7.6 Name: Simple Service
+   8.1 Click 'Policies'
+   8.2 Click 'New Policy'
+   8.3 Name: Access Simple Service
+   8.4 Under 'Rules', click 'New'
+   8.5 Leave the default URL Policy Agent selected, click 'Next'
+   8.6 Name: Simple Service
        Resource Name: http://localhost:8080/jaxws-fs/simple (this MUST match
        exactly what the client asks for. You can use wildcards if you like, though, so
        it could be http://*:*/jaxws-fs/simple)
-   7.7 Select 'POST', click 'Finish'
-   7.8 Under 'Subjects', click 'New'
-   7.9 Select 'Access Manager Identity Subject' and click Next.
-   7.10 Filter: User, click 'Search'
-   7.11 Select alice, click 'Add', put Name: alice, click 'Finish'
-   7.12 Click 'OK'.
+   8.7 Select 'POST', click 'Finish'
+   8.8 Under 'Subjects', click 'New'
+   8.9 Select 'Access Manager Identity Subject' and click Next.
+   8.10 Filter: User, click 'Search'
+   8.11 Select alice, click 'Add', put Name: alice, click 'Finish'
+   8.12 Click 'OK'.
 
 9. Stop the container and Install WSIT to it according to the above steps 1 to 4
    for "To Install WSIT and Run the Sample".
@@ -96,7 +96,7 @@ To set up and run the sample with AccessManager:
 
 From this point on, all paths arerelative to the /wsit/wsit/samples/ws-trust directory.
 
-14. Edit etc/targets.xml. Add the following lines after the initial list of
+12. Edit etc/targets.xml. Add the following lines after the initial list of
     properties:
 
     <property name="build.lib.home" value="${build.home}/lib"/>
@@ -137,7 +137,7 @@ From this point on, all paths arerelative to the /wsit/wsit/samples/ws-trust dir
     This new target element places the additional jars and configuration files into
     the jaxws-sts war.
 
-15.  Edit /wsit/wsit/samples/ws-trust/src/fs/etc/sts/sts.wsdl:
+13.  Edit /wsit/wsit/samples/ws-trust/src/fs/etc/sts/sts.wsdl:
      replace 
        <sc:Validator name="usernameValidator"  classname="common.SampleUsernamePasswordValidator"/>  
      with
@@ -147,9 +147,9 @@ From this point on, all paths arerelative to the /wsit/wsit/samples/ws-trust dir
      with
        <tc:Contract>common.SampleContract</tc:Contract>
 
-16. Start the container.
+14. Start the container.
 
-16. Now build and run the sample with "ant run-sample" in src/fs directory. You will be prompted to enter 
+15. Now build and run the sample with "ant run-sample" in src/fs directory. You will be prompted to enter 
     the username/password. 
     Enter Alice/Alice, you should get the balance back from the service.
     Enter Bob/Bob, you should be authenticated in the STS and denied to be issued a SAML token. 
