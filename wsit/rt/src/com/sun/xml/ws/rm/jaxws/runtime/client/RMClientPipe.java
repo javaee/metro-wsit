@@ -3,12 +3,12 @@
  * of the Common Development and Distribution License
  * (the License).  You may not use this file except in
  * compliance with the License.
- * 
+ *
  * You can obtain a copy of the license at
  * https://glassfish.dev.java.net/public/CDDLv1.0.html.
  * See the License for the specific language governing
  * permissions and limitations under the License.
- * 
+ *
  * When distributing Covered Code, include this CDDL
  * Header Notice in each file and include the License file
  * at https://glassfish.dev.java.net/public/CDDLv1.0.html.
@@ -16,7 +16,7 @@
  * with the fields enclosed by brackets [] replaced by
  * you own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * 
+ *
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
@@ -69,12 +69,12 @@ import java.util.logging.Level;
  */
 public class RMClientPipe
         extends PipeBase<RMSource,
-                         ClientOutboundSequence,
-                         ClientInboundSequence>{
+        ClientOutboundSequence,
+        ClientInboundSequence>{
     
-    public static final Logger logger = 
+    public static final Logger logger =
             Logger.getLogger(RMClientPipe.class.getName());
-
+    
     /*
      * Metadata from ctor.
      */
@@ -82,60 +82,60 @@ public class RMClientPipe
     private WSService service;
     private WSBinding binding;
     private SecureConversationInitiator securityPipe;
-
+    
     /*
      * SequenceConfig from policy
      */
     private SequenceConfig config;
-
-      /**
+    
+    /**
      * RM OutboundSequence handled by this Pipe.
      */
     private ClientOutboundSequence outboundSequence;
-
+    
     /**
      * RM InboundSequence handled by this Pipe.
      */
     private ClientInboundSequence inboundSequence;
-
+    
     /**
      * Message processor to handle inbound messages
      */
     private InboundMessageProcessor messageProcessor;
-
+    
     /**
      * Flag to indicate if security pipe is our next pipe
      * then we need to create CreateSequenceRequest with
      * STR
      */
     private  boolean secureReliableMessaging ;
-
+    
     /**
      * The BindingProvider instance using the OutboundSequence
      * serviced by this pipe.
      */
     private BindingProvider proxy;
-
+    
     /**
      * Pool of pipes to be used for invoking the tail of the
      * Pipeline.
      */
     private  ProcessorPool<RMClientPipe> processorPool;
     
-   
+    
     /**
      * Constructor accepts all possible arguments available in
      * <code>PipelineAssembler.createClient</code>.  It may not need all of them.
      * TODO It also needs a way to access the Security Pipe.
      */
     public RMClientPipe(WSDLPort port,
-                      WSService service,
-                      WSBinding binding,
-                      SecureConversationInitiator securityPipe,
-                      Pipe nextPipe) {
-
+            WSService service,
+            WSBinding binding,
+            SecureConversationInitiator securityPipe,
+            Pipe nextPipe) {
+        
         super(RMSource.getRMSource(), nextPipe);
-
+        
         this.port = port;
         this.service = service;
         this.binding = binding;
@@ -144,9 +144,8 @@ public class RMClientPipe
         this.config = new SequenceConfig(port,binding);
         config.setSoapVersion(binding.getSOAPVersion());
         
-        this.messageProcessor = this.provider.getInboundMessageProcessor();
-        this.processorPool = new ProcessorPool<RMClientPipe>(this);
-
+        this.messageProcessor = this.provider.getInboundMessageProcessor();        
+        
         if (securityPipe != null) {
             this.secureReliableMessaging = true;
         }else {
@@ -155,8 +154,12 @@ public class RMClientPipe
         this.unmarshaller = config.getRMConstants().createUnmarshaller();
         this.marshaller = config.getRMConstants().createMarshaller();
         //RMConstants.setAddressingVersion(binding.getAddressingVersion());
+        
+        //need to initialize a ProcessorPool here for use by createSequence.
+        //need to adjust capacity later.
+        processorPool = new ProcessorPool<RMClientPipe>(this);
     }
-
+    
     /**
      * Copy constructor used by <code>copy</code> method.
      *
@@ -164,10 +167,10 @@ public class RMClientPipe
      * @param cloner passed as an argument to copy.
      */
     private RMClientPipe( RMClientPipe toCopy, PipeCloner cloner) {
-
+        
         super(RMSource.getRMSource(), null);
         cloner.add(toCopy, this);
-
+        
         nextPipe = cloner.copy(toCopy.nextPipe);
         
         if (securityPipe != null) {
@@ -178,26 +181,26 @@ public class RMClientPipe
             securityPipe = null;
             this.secureReliableMessaging = false;
         }
-
+        
         port = toCopy.port;
         service = toCopy.service;
         binding = toCopy.binding;
         processorPool = toCopy.processorPool;
-
-
+        
+        
         config = toCopy.config;
         messageProcessor = this.provider.getInboundMessageProcessor();
-
-         //these are be threadsafe
+        
+        //these are be threadsafe
         this.outboundSequence = toCopy.outboundSequence;
         this.inboundSequence = toCopy.inboundSequence;
         this.unmarshaller = config.getRMConstants().createUnmarshaller();
         this.marshaller = config.getRMConstants().createMarshaller();
-       // RMConstants.setAddressingVersion(binding.getAddressingVersion());
-
+        // RMConstants.setAddressingVersion(binding.getAddressingVersion());
+        
     }
-
-   
+    
+    
     /**
      * Perform lazy initialization when the first message is processed. Need to:
      * <ul>
@@ -212,7 +215,7 @@ public class RMClientPipe
     private synchronized void initialize(Packet packet) throws RMException {
         
         String dest = packet.endpointAddress.toString();
-                     
+        
         if (outboundSequence != null) {
             
             //sequence has already been initialized.  We need to
@@ -220,12 +223,12 @@ public class RMClientPipe
             //the destination for requests by changing the value of
             //the BindingProvider ENDPOINT_ADDRESS_PROPERTY.  This is
             //allowable from the JAX-WS POV, but breaks the RM assumption
-            //that sequences exactly correspond to connections between 
+            //that sequences exactly correspond to connections between
             //single client instances and endpoints.
             
-            if (dest != null && !dest.equals("") && 
-                outboundSequence.getDestination().toString() != dest) {
-                        throw new RMException(Messages.UNCHANGEABLE_ENDPOINT_ADDRESS.format());
+            if (dest != null && !dest.equals("") &&
+                    outboundSequence.getDestination().toString() != dest) {
+                throw new RMException(Messages.UNCHANGEABLE_ENDPOINT_ADDRESS.format());
             }
             
         } else {
@@ -238,35 +241,35 @@ public class RMClientPipe
             }
             
             String acksTo = ProtocolMessageReceiver.getAcksTo();
-
+            
             //use helper function to speilunk the metadata and find out if the port
             //has a two-way operation.
             boolean twoWay = checkForTwoWayOperation();
-
+            
             URI destURI;
             URI acksToURI;
-           
+            
             try {
                 destURI = new URI(dest);
             } catch (URISyntaxException e) {
                 throw new RMException(Messages.INVALID_DEST_URI.format( dest));
             }
-
+            
             try {
                 acksToURI = new URI(acksTo);
             } catch (URISyntaxException e) {
                 throw new RMException(Messages.INVALID_ACKS_TO_URI.format( acksTo));
             }
-
+            
             ClientOutboundSequence specifiedOutboundSequence =
                     (ClientOutboundSequence)packet.proxy.getRequestContext()
-                                                  .get(Constants.sequenceProperty);
+                    .get(Constants.sequenceProperty);
             if (specifiedOutboundSequence != null) {
                 outboundSequence = specifiedOutboundSequence;
             } else {
                 //we need to connect to the back end.
                 outboundSequence = new ClientOutboundSequence(config);
-
+                
                 if (secureReliableMessaging) {
                     try {
                         JAXBElement<SecurityTokenReferenceType> str = securityPipe.startSecureConversation(packet);
@@ -276,43 +279,52 @@ public class RMClientPipe
                         outboundSequence.setSecurityTokenReference(null);
                     }
                 }
-
+                
                 outboundSequence.setSecureReliableMessaging(secureReliableMessaging);
-
+                
                 outboundSequence.registerProtocolMessageSender(
                         new ProtocolMessageSender(messageProcessor,
-                                                    marshaller,
-                                                    unmarshaller, 
-                                                    port, binding, 
-                                                    nextPipe, packet));
-
-
+                        marshaller,
+                        unmarshaller,
+                        port, binding,
+                        nextPipe, packet));
+                
+                
                 outboundSequence.connect(destURI,  acksToURI, twoWay);
-
+                
                 inboundSequence = (ClientInboundSequence)outboundSequence.getInboundSequence();
-
-
+                
+                
                 //set a Session object in BindingProvider property allowing user to close
                 //the sequence
                 ClientSession.setSession(this.proxy, new ClientSession(outboundSequence.getId(), this));
-
+                
                 provider.addOutboundSequence(outboundSequence);
-
+                
                 //if the message in the packet was sent by RMSource.createSequence,
                 //put the sequence in a packet property.  The process method, that
                 //called us will find it there and return it to the caller.
                 String reqUri = packet.getMessage().getPayloadNamespaceURI();
                 if (reqUri.equals(Constants.createSequenceNamespace)) {
                     packet.invocationProperties.put(Constants.createSequenceProperty,
-                                                          outboundSequence);
+                            outboundSequence);
                 }
                 
                 //make this available to the client
                 //FIXME - Can this work?
-                packet.proxy.getRequestContext().put(Constants.sequenceProperty, 
-                                                        outboundSequence);
+                packet.proxy.getRequestContext().put(Constants.sequenceProperty,
+                        outboundSequence);
+                
+                //FIXME
+                //need to adjust size here rather than create a new one
+                processorPool =
+                    new ProcessorPool<RMClientPipe>(this,
+                    /*outboundSequence.getTransferWindowSize()*/ 8);
             }
-        }    
+            
+        }
+        
+        
     }
     
     /**
@@ -348,9 +360,8 @@ public class RMClientPipe
      *      succeed in a retry, <code>null</code> is returne.
      *
      */
-    private Packet trySend(Packet packet, com.sun.xml.ws.rm.Message message)
-            {
-       
+    private Packet trySend(Packet packet, com.sun.xml.ws.rm.Message message) {
+        
         try {
             
             //RM would always want expectReply to the true.  We need to look at
@@ -366,144 +377,156 @@ public class RMClientPipe
             //done on this Thread.  Tbis will at least keep JAXBMessage.sniff
             //from doing marshallings.
             //copy.isOneWay(port);
-
+            
             
             //We are sending one-way requests in the background.  The
             //tail of the Pipeline is non-reentrant.  We are using a pool
             //of copies of nextPipe here.
             return nextPipe.process(packet);
+            
         } catch (ClientTransportException ee) {
             //resend in this case
             return null;
+            
         } catch (WebServiceException e) {
             //Unwrap exception and see if it makes sense to retry this
             //request.
             Throwable cause = e.getCause();
             if (cause != null &&
                     (cause instanceof IOException ||
-                     cause instanceof SocketTimeoutException)) {
-
+                    cause instanceof SocketTimeoutException)) {
+                
                 //cause the retry loop in the process method to resend
                 return null;
-
+                
             } else {
-                logger.log(Level.SEVERE, 
-                           "Unexpected exception wrapped in WS exception ", e);
-                //fill the gap in the sequence
-                message.complete();
+                logger.log(Level.SEVERE,
+                        "Unexpected exception wrapped in WS exception ", e);
+                
                 throw e;
             }
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Unexpected exception in trySend " , e);
             //fill the gap in the sequence
-            message.complete();
+            
             throw new WebServiceException(e);
         }
-
+        
     }
-   
+    
     
     public Packet doRetryLoop(Packet packet, com.sun.xml.ws.rm.Message message)
-                        throws RMException  {
+        throws RMException  {
+        
+        try {
+            while (!message.isComplete()) {
 
-        while (!message.isComplete()) {
+                Packet ret = null;
 
-            /*
-            boolean flow = outboundSequence.getSequenceConfig().flowControl;
-            int bufferRemaining = outboundSequence.getBufferRemaining();
-            System.out.println("bufferRemaining =" + bufferRemaining);
-            if (flow && bufferRemaining == 0) {
-                continue;
-            }
-            */
-            
-            Packet ret = null;
-
-            //give debug/diagnostic filter access to the message and allow it
-            //to simulate dropped message
-            if (filter == null || filter.handleClientRequestMessage(message)) {
-                //send down the pipe
-                ret = trySend(packet, message);
-
-                //reset last activity timer in sequence.
-                outboundSequence.resetLastActivityTime();
-
-                if (ret != null) {
-                    //Perform operations in the RMSource according to the contents of
-                    //the RM Headers on the incoming message.
-                    Message mess = ret.getMessage();                
-                    com.sun.xml.ws.rm.Message rmMessage = null;
+                //give debug/diagnostic filter access to the message and allow it
+                //to simulate dropped message
+                if (filter == null || filter.handleClientRequestMessage(message)) {
                     
-                    if (mess != null) {
-                        rmMessage = handleInboundMessage(ret);
-                    }
-                          
-                    //if a diagnostic / debugging filter has been set, allow it to inspect
-                    //the response message.
-                     if (filter != null) {
-                        filter.handleClientResponseMessage(rmMessage);
-                    }
-                    
-                    if (mess != null && mess.isFault()) {
-                        //don't want to resend
-                        outboundSequence.acknowledge(message.getMessageNumber());
-                    }
+                    //reset last activity timer in sequence.
+                    outboundSequence.resetLastActivityTime();
 
-                    //check for empty body response to two-way message.  Indigo will return
-                    //one when it drops the request message.  In this case we also need to retry.
-                    //
-                    // Alternative things to check:
-                    //
-                    //Perhaps check for wsa:Action == AckRequested instead?
-                    //Perhaps check whether message has an SequenceAcknowledgement
-                    //     not containing the id for the request?
+                    //send down the pipe
+                    ret = trySend(packet, message);
+                   
+                    if (ret != null) {
+                        //Perform operations in the RMSource according to the contents of
+                        //the RM Headers on the incoming message.
+                        Message mess = ret.getMessage();
+                        com.sun.xml.ws.rm.Message rmMessage = null;
 
-                    if (mess != null && !packet.getMessage().isOneWay(port) &&
-                        mess.getPayloadNamespaceURI() == null) {
-                        //resend
-                        ret = null;
-                    }
+                        if (mess != null) {
+                            rmMessage = handleInboundMessage(ret);
+                        }
 
-                    //If a response to a two-way operation has been received, it is
-                    //time to release the request being retained on the OutboundSequence.
-                    //This will also result in the state of the message being set to
-                    //"complete" so the retry loop will exit.
-                    if (message.isTwoWayRequest) {
-                        outboundSequence.acknowledgeResponse(message.getMessageNumber());
+                        //if a diagnostic / debugging filter has been set, allow it to inspect
+                        //the response message.
+                        if (filter != null) {
+                            filter.handleClientResponseMessage(rmMessage);
+                        }
+
+                        if (mess != null && mess.isFault()) {
+                            //don't want to resend
+                            outboundSequence.acknowledge(message.getMessageNumber());
+                        }
+
+                        //check for empty body response to two-way message.  Indigo will return
+                        //one when it drops the request message.  In this case we also need to retry.
+                        //
+                        // Alternative things to check:
+                        //
+                        //Perhaps check for wsa:Action == AckRequested instead?
+                        //Perhaps check whether message has an SequenceAcknowledgement
+                        //     not containing the id for the request?
+
+                        if (mess != null && !packet.getMessage().isOneWay(port) &&
+                                mess.getPayloadNamespaceURI() == null) {
+                            //resend
+                            ret = null;
+                        }
+
+                        //If a response to a two-way operation has been received, it is
+                        //time to release the request being retained on the OutboundSequence.
+                        //This will also result in the state of the message being set to
+                        //"complete" so the retry loop will exit.
+                        if (message.isTwoWayRequest) {
+                            outboundSequence.acknowledgeResponse(
+                                    message.getMessageNumber());
+                        }
                     }
                 }
-           }
 
-           //if the original call to trySend for a two-way message resulted in a retriable
-           //failure, wait here until awakakened by the RMSource's maintenance Thread that
-           //will eventually notice that the request has not been acked.  The condition
-           //(ret == null) determines that retriable failure has happende.
-           //
-           //for a one-way message, we need to wait for an ack, indicated by (message.isComplete).
-           //This will be the case when an ack has been received.
-            
-           if (ret == null || !message.isComplete()) {
-                message.block();
-                if (message.isComplete()) {
-                    return ret;
+                //if the original call to trySend for a two-way message resulted in a retriable
+                //failure, wait here until awakakened by the RMSource's maintenance Thread that
+                //will eventually notice that the request has not been acked.  The condition
+                //(ret == null) determines that retriable failure has happende.
+                //
+                //for a one-way message, we need to wait for an ack, indicated by (message.isComplete).
+                //This will be the case when an ack has been received.
+
+                if (ret == null || !message.isComplete()) {
+                    message.block();
+                    if (message.isComplete()) {
+                        return ret;
+                    } else {
+                        //make sure message now has an AckRequested header
+                        //so there will be an AckRequested on every resend
+                        outboundSequence.ensureAckRequested(message,
+                                marshaller);
+                    }
                 } else {
-                    //make sure message now has an AckRequested header
-                    //so there will be an AckRequested on every resend
-                    outboundSequence.ensureAckRequested(message, 
-                                                        marshaller);       
+                    return ret;
                 }
-           } else {
-                return ret;
-           }
 
-        }  //while
+            }  //while
 
-        //Only a one-way message can reach here.  That will happen if it has to wait at least
-        //once for an ack.  The return value is irrelevant here since the sending of the one-way message
-        //is being done in the background.
-        return null;
+            //Only a one-way message can reach here.  That will happen if it has to wait at least
+            //once for an ack.  The return value is irrelevant here since the sending of the one-way message
+            //is being done in the background.
+            return null;
+            
+        } catch (RuntimeException e) {
+            //There will not be any more opportunities to resend the message, so we may as
+            //well fill the gap in the sequence so the maintenance thread can ignore it.
+            //If this happens due to an Exception, it will be logged in process()
+            
+            //FIXME - Refactor.. This is being called twice in most cases
+            if (message != null) {
+                 outboundSequence.acknowledge(message.getMessageNumber());
+                 if (message.isTwoWayRequest) {
+                            outboundSequence.acknowledgeResponse(
+                                    message.getMessageNumber());
+                 }
+            }
+            
+            throw e;
+        }
     }
-
+    
     /*
      * PIPE INTERFACE METHODS.
      */
@@ -520,13 +543,10 @@ public class RMClientPipe
             //TODO Figure out how to initialize at the time the Pipe is initialized.  Doing it
             //lazily means that the ClientSession will not  be available to the client
             //before the first request is processed.
-	    initialize(packet);
+            initialize(packet);
             
-            processorPool = 
-                    new ProcessorPool<RMClientPipe>(this,
-                        outboundSequence.getTransferWindowSize());
             
-             //If the request is being sent by RMSource.createSequence, we are done.
+            //If the request is being sent by RMSource.createSequence, we are done.
             Object seq = packet.invocationProperties.get(Constants.createSequenceProperty);
             if (seq != null) {
                 packet.invocationProperties.put(Constants.createSequenceProperty, null);
@@ -535,9 +555,9 @@ public class RMClientPipe
                 //to throw an exception here.  Other than that, we don't care about the
                 //response message.  We are only interested in the sequence that has been
                 //stored in the requestcontext.
-                com.sun.xml.ws.api.message.Message mess = 
+                com.sun.xml.ws.api.message.Message mess =
                         com.sun.xml.ws.api.message.Messages
-                            .createEmpty(binding.getSOAPVersion());
+                        .createEmpty(binding.getSOAPVersion());
                 packet.setMessage(mess);
                 return packet;
             }
@@ -553,11 +573,11 @@ public class RMClientPipe
             //it with processorPool.checkOut() when it is needed.  Will check it back
             //in to the pool in the finally handler.
             poolPipe = processorPool.checkOut();
-
+            
             //Add to OutboundSequence and include RM headers according to the
             //state of the RMSource
             message = poolPipe.handleOutboundMessage(outboundSequence,
-                                                     packet);  
+                    packet);
             
             if (!packet.getMessage().isOneWay(port)) {
                 //ClientOutboundSequence needs to know this.  If this flag is true,
@@ -571,25 +591,25 @@ public class RMClientPipe
                 //can exit if an application response has been received.
                 message.isTwoWayRequest = true;
             }
- 
+            
             if (message.isTwoWayRequest) {
                 return poolPipe.doRetryLoop(packet, message);
             } else {
                 //For a one-way message, the application thread does not need to wait.  It may
-                //be some time if messages are lost, or if the RMD has to withhold the request 
+                //be some time if messages are lost, or if the RMD has to withhold the request
                 //waiting for earlier ones to arrive. The spec requires the runtime to wait for
                 //the protocol response, and it will -- just not this thread.
                 
                 final Packet p = packet;
-                final com.sun.xml.ws.rm.Message m = message; 
+                final com.sun.xml.ws.rm.Message m = message;
                 final RMClientPipe pp = poolPipe;
                 
                 Thread t = new Thread() {
                     public void run() {
                         try {
-                           pp.doRetryLoop(p,m);
+                            pp.doRetryLoop(p,m);
                         } catch (RMException e) {
-                           throw new WebServiceException(e);
+                            throw new WebServiceException(e);
                         } finally {
                             //this needs to wait for poolPipe.doRetryLoop to return.
                             //otherwise, poolPipe might end up being used concurrently
@@ -600,15 +620,15 @@ public class RMClientPipe
                         }
                     }
                 };
-
+                
                 t.start();
                 //client is not expecting a response here.
                 Packet ret = new Packet(/*com.sun.xml.ws.api.message.Messages.createEmpty(binding.getSOAPVersion())*/);
                 ret.invocationProperties.putAll(packet.invocationProperties);
                 return ret;
-
+                
             }
-         } catch (RMException e) {
+        } catch (RMException e) {
             Message faultMessage = e.getFaultMessage();
             if (faultMessage != null){
                 try {
@@ -621,27 +641,33 @@ public class RMClientPipe
             } else {
                 throw new WebServiceException(e);
             }
+        } catch (Throwable ee) {
+            logger.log(Level.SEVERE,
+                    "Unexpected  Exception in RMClientPipe.process",
+                    ee);
+            throw new WebServiceException(ee);
+            
         } finally {
-             if (message != null && 
-                 message.isTwoWayRequest &&
-                 poolPipe != null ){
-                 processorPool.checkIn(poolPipe);
-             }
-         }
+            if (message != null &&
+                    message.isTwoWayRequest &&
+                    poolPipe != null ){
+                processorPool.checkIn(poolPipe);
+            }
+        }
     }
-
+    
     /**
      * Send a Last message and a TerminateSequence message down the pipeline.
      */
     public synchronized void preDestroy() {
-        try {  
-            provider.terminateSequence(outboundSequence);       
+        try {
+            provider.terminateSequence(outboundSequence);
             nextPipe.preDestroy();
         } catch (Exception e) {
             logger.log(Level.FINE, "RMClientPipe threw Exception in preDestroy", e);
         }
     }
-
+    
     /**
      * Create a copy, reusing thread-safe fields and cloning or recreating non-threadsafe ones.
      */
@@ -651,21 +677,20 @@ public class RMClientPipe
         //takes place in the <code>initialize</code> method, which needs to be
         //synchronized anyway.  Therefore it works to use the synchronized block here.
         synchronized(this) {
-
+            
             return new RMClientPipe(this, cloner);
         }
     }
-
-    /*
-    * PRIVATE HELPERS
-    */
     
+    /*
+     * PRIVATE HELPERS
+     */
     
     /**
      * Look in the WSDLPort and determine whether it contains any two-way operations.
      */
     private boolean checkForTwoWayOperation() {
-
+        
         WSDLBoundPortType portType;
         if (port == null || null == (portType = port.getBinding())) {
             
@@ -673,7 +698,7 @@ public class RMClientPipe
             //reverse sequence.  That is the correct behavior.
             return false;
         }
-
+        
         for (WSDLBoundOperation op : portType.getBindingOperations()) {
             WSDLOperation operation = op.getOperation();
             if (!operation.isOneWay()) {
@@ -684,5 +709,4 @@ public class RMClientPipe
         //all operations are one-way
         return false;
     }
-
 }
