@@ -39,6 +39,7 @@
 <path id="jaxws.classpath">
     <pathelement location="${tomcat.home}/shared/lib/webservices-rt.jar"/>
     <pathelement location="${tomcat.home}/shared/lib/webservices-tools.jar"/>
+    <pathelement location="${basedir}/../../am/amclientsdk.jar"/>
     <pathelement location="${basedir}/../../etc"/>
     <pathelement location="etc/client-config"/>
 </path>
