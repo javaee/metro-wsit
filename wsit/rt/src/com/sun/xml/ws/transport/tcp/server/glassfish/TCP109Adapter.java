@@ -22,7 +22,7 @@
 
 package com.sun.xml.ws.transport.tcp.server.glassfish;
 
-import com.sun.enterprise.webservice.NewEjbRuntimeEndpointInfo;
+import com.sun.enterprise.webservice.EjbRuntimeEndpointInfo;
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.server.WSEndpoint;
@@ -59,7 +59,7 @@ public class TCP109Adapter extends TCPAdapter {
     
     @Override
     public void handle(@NotNull ChannelContext channelContext) throws IOException {
-        NewEjbRuntimeEndpointInfo ejbRuntimeEndpointInfo = null;
+        EjbRuntimeEndpointInfo ejbRuntimeEndpointInfo = null;
         
         if (isEJB) {
             ejbRuntimeEndpointInfo = AppServWSRegistry.getInstance().

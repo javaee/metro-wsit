@@ -22,7 +22,7 @@
 
 package com.sun.xml.ws.transport.tcp.server.glassfish;
 
-import com.sun.enterprise.webservice.NewEjbRuntimeEndpointInfo;
+import com.sun.enterprise.webservice.EjbRuntimeEndpointInfo;
 import com.sun.enterprise.webservice.WebServiceEjbEndpointRegistry;
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
@@ -86,14 +86,14 @@ public class AppServWSRegistry {
     /**
      * Method is used by WS invoker to clear some EJB invoker state ???
      */
-    public @NotNull NewEjbRuntimeEndpointInfo getEjbRuntimeEndpointInfo(@NotNull String service,
+    public @NotNull EjbRuntimeEndpointInfo getEjbRuntimeEndpointInfo(@NotNull String service,
             @NotNull String endpointName) {
         
         WSEndpointDescriptor wsEndpointDescriptor = get(service, endpointName);
-        NewEjbRuntimeEndpointInfo endpointInfo = null;
+        EjbRuntimeEndpointInfo endpointInfo = null;
         
         if (wsEndpointDescriptor.isEJB()) {
-            endpointInfo = (NewEjbRuntimeEndpointInfo) WebServiceEjbEndpointRegistry.
+            endpointInfo = (EjbRuntimeEndpointInfo) WebServiceEjbEndpointRegistry.
                     getRegistry().getEjbWebServiceEndpoint(wsEndpointDescriptor.getURI(), "POST", null);
         }
         

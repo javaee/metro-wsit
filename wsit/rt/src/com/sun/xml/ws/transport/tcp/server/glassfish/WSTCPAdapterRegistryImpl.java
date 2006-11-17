@@ -23,7 +23,7 @@
 package com.sun.xml.ws.transport.tcp.server.glassfish;
 
 import com.sun.enterprise.webservice.JAXWSAdapterRegistry;
-import com.sun.enterprise.webservice.NewEjbRuntimeEndpointInfo;
+import com.sun.enterprise.webservice.EjbRuntimeEndpointInfo;
 import com.sun.enterprise.webservice.WebServiceEjbEndpointRegistry;
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.server.Adapter;
@@ -93,7 +93,7 @@ public class WSTCPAdapterRegistryImpl implements WSTCPAdapterRegistry {
     private TCPAdapter createWSAdapter(@NotNull WSEndpointDescriptor wsEndpointDescriptor) throws Exception {
         Adapter adapter;
         if (wsEndpointDescriptor.isEJB()) {
-            NewEjbRuntimeEndpointInfo ejbEndPtInfo = (NewEjbRuntimeEndpointInfo) WebServiceEjbEndpointRegistry.getRegistry().
+            EjbRuntimeEndpointInfo ejbEndPtInfo = (EjbRuntimeEndpointInfo) WebServiceEjbEndpointRegistry.getRegistry().
                     getEjbWebServiceEndpoint(wsEndpointDescriptor.getURI(), "POST", null);
             adapter = (Adapter) ejbEndPtInfo.prepareInvocation(true);
         } else {
