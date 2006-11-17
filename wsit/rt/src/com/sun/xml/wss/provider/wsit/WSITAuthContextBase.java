@@ -918,6 +918,8 @@ public abstract class WSITAuthContextBase  {
         
         if(optimized){
             ctx = new JAXBFilterProcessingContext(packet.invocationProperties);
+            ((JAXBFilterProcessingContext)ctx).setAddressingVersion(addVer);
+            ((JAXBFilterProcessingContext)ctx).setSOAPVersion(soapVersion);
         }else{
             ctx = new ProcessingContextImpl( packet.invocationProperties);
         }
@@ -1138,6 +1140,8 @@ public abstract class WSITAuthContextBase  {
         ProcessingContextImpl ctx = null;
         if(optimized){
             ctx = new JAXBFilterProcessingContext(packet.invocationProperties);
+            ((JAXBFilterProcessingContext)ctx).setAddressingVersion(addVer);
+            ((JAXBFilterProcessingContext)ctx).setSOAPVersion(soapVersion);
         }else{
             ctx = new ProcessingContextImpl( packet.invocationProperties);
         }

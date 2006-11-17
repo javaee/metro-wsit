@@ -349,7 +349,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         
         try{
             
-            if (ctx.getSecurityPolicy() != null) {
+            if (ctx.getSecurityPolicy() != null && ((MessagePolicy)ctx.getSecurityPolicy()).size() >0) {
                 if(!optimized || msg.isFault()) {
                     SOAPMessage soapMessage = msg.readAsSOAPMessage();
                     soapMessage = secureOutboundMessage(soapMessage, ctx);
@@ -400,6 +400,8 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         ProcessingContextImpl ctx = null;
         if(optimized){
             ctx = new JAXBFilterProcessingContext(packet.invocationProperties);
+            ((JAXBFilterProcessingContext)ctx).setAddressingVersion(addVer);
+            ((JAXBFilterProcessingContext)ctx).setSOAPVersion(soapVersion);
         }else{
             ctx = new ProcessingContextImpl( packet.invocationProperties);
         }
