@@ -60,7 +60,7 @@ public class HttpPoster {
      *     url connection.
      */
     InputStream post(String request, String address, String contentType)
-        throws Exception {
+        throws IOException {
         
         URL url = new URL(address);
         HttpURLConnection conn = createConnection(url);

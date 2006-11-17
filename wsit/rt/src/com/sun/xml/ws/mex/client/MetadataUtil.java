@@ -21,6 +21,7 @@
  */
 package com.sun.xml.ws.mex.client;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.logging.Logger;
 
@@ -58,7 +59,7 @@ public class MetadataUtil {
      * @param address The address to query for metadata.
      * @return The full response from the server.
      */
-    InputStream getMetadata(String address, Protocol p) throws Exception {
+    InputStream getMetadata(String address, Protocol p) throws IOException {
         String request = getMexWsdlRequest(address, p);
         logger.fine("Request message:\n" + request + "\n");
         String contentType = "application/soap+xml"; // soap 1.2

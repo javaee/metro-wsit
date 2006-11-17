@@ -21,9 +21,11 @@
  */
 package com.sun.xml.ws.mex.client;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.xml.bind.JAXBContext;
@@ -111,17 +113,16 @@ public class MetadataClient {
                 InputStream responseStream = null;
                 try {
                     responseStream = mexUtil.getMetadata(newAddress, p);
-                } catch (Exception e) {
+                    return createMetadata(responseStream);
+                } catch (IOException e) {
                     logger.log(ERROR_LOG_LEVEL,
                         MessagesMessages.RETRIEVING_MDATA_FAILURE(
                         p, newAddress));
                     continue;
-                }
-                try {
-                    return createMetadata(responseStream);
                 } catch (Exception e) {
+                    logger.log(Level.WARNING,
+                        MessagesMessages.PARSING_MDATA_FAILURE());
                     continue;
-                    //throw new WebServiceException(e);
                 }
             }
         }
