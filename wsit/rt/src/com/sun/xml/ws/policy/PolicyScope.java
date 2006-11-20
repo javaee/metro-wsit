@@ -35,7 +35,7 @@ final class PolicyScope {
     private List<PolicySubject> subjects = new LinkedList<PolicySubject>();
     
     PolicyScope(List<PolicySubject> initialSubjects) {
-        if (initialSubjects != null || !initialSubjects.isEmpty()) {
+        if (initialSubjects != null && !initialSubjects.isEmpty()) {
             this.subjects.addAll(initialSubjects);
         }
     }
