@@ -79,17 +79,26 @@ public final class PolicyResourceLoader {
         return model;
     }
     
-    public static InputStream getResourceStream(String resourceName) {
-        return Thread.currentThread().getContextClassLoader().getResourceAsStream(POLICY_UNIT_TEST_RESOURCE_ROOT + resourceName);
+    public static InputStream getResourceStream(String resourceName) throws PolicyException {
+        String fullName = POLICY_UNIT_TEST_RESOURCE_ROOT + resourceName;
+        InputStream input = Thread.currentThread().getContextClassLoader().getResourceAsStream(fullName);
+        if (input == null) {
+            throw new PolicyException("Failed to find resource \"" + fullName + "\"");
+        }
+        return input;
     }
     
-    public static Reader getResourceReader(String resourceName) {
+    public static Reader getResourceReader(String resourceName) throws PolicyException {
         return new InputStreamReader(getResourceStream(resourceName));
     }
     
     public static XMLStreamBuffer getResourceXmlBuffer(String resourceName)
-        throws XMLStreamException, XMLStreamBufferException {
-        return XMLStreamBuffer.createNewBufferFromXMLStreamReader(inputFactory.createXMLStreamReader(getResourceStream(resourceName)));
+        throws PolicyException {
+        try {
+            return XMLStreamBuffer.createNewBufferFromXMLStreamReader(inputFactory.createXMLStreamReader(getResourceStream(resourceName)));
+        } catch (XMLStreamException ex) {
+            throw new PolicyException("Failed to create XMLStreamBuffer", ex);
+        }
     }
     
     public static URL getResourceUrl(String resourceName) {
@@ -107,7 +116,7 @@ public final class PolicyResourceLoader {
    
     // reads policy map from given wsdl document
     public static PolicyMap getPolicyMap(String resourceName)
-        throws XMLStreamException, XMLStreamBufferException, IOException, SAXException {
+        throws PolicyException {
         
         WSDLModel model = getWSDLModel(resourceName);
         WSDLPolicyMapWrapper wrapper = model.getExtension(WSDLPolicyMapWrapper.class);
@@ -116,14 +125,22 @@ public final class PolicyResourceLoader {
     
     // reads wsdl model from given wsdl document
     public static WSDLModel getWSDLModel(String resourceName)
-        throws XMLStreamException, XMLStreamBufferException, IOException, SAXException {
+        throws PolicyException {
         
         URL resourceUrl = getResourceUrl(resourceName);
         XMLStreamBuffer resourceBuffer = getResourceXmlBuffer(resourceName);
         SDDocumentSource doc = SDDocumentSource.create(resourceUrl, resourceBuffer);
-        Parser parser = new Parser(doc);
-        WSDLModel model = WSDLModel.WSDLParser.parse(parser, new PolicyConfigResolver(), true, new WSDLParserExtension[] { new PolicyWSDLParserExtension() });
-        return model;
+        try {
+            Parser parser = new Parser(doc);
+            WSDLModel model = WSDLModel.WSDLParser.parse(parser, new PolicyConfigResolver(), true, new WSDLParserExtension[] {new PolicyWSDLParserExtension()});
+            return model;
+        } catch (XMLStreamException ex) {
+            throw new PolicyException("Failed to parse document", ex);
+        } catch (IOException ex) {
+            throw new PolicyException("Failed to parse document", ex);
+        } catch (SAXException ex) {
+            throw new PolicyException("Failed to parse document", ex);
+        }
     }
     
     

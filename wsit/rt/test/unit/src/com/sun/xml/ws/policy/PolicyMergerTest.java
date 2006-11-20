@@ -68,4 +68,15 @@ public class PolicyMergerTest extends TestCase {
         assertEquals(expected, result);
     }
     
+    public void testMergeNoAltPolicies() throws Exception {
+        Collection<Policy> policies = new LinkedList<Policy>();
+        policies.add(PolicyResourceLoader.loadPolicy("merge/policy1.xml"));
+        policies.add(PolicyResourceLoader.loadPolicy("merge/policy-no-alt.xml"));
+        
+        Policy result = merger.merge(policies);
+        Policy expected = PolicyResourceLoader.loadPolicy("merge/policy-no-alt.xml");
+        
+        assertEquals(expected, result);
+    }
+    
 }
