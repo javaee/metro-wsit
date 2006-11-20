@@ -267,7 +267,7 @@ public class EffectiveAlternativeSelector {
                 // will take this
                 Collection<AssertionSet> alternativeSet = new LinkedList<AssertionSet>();
                 alternativeSet.add(alternative);
-                return new Policy(null,alternativeSet);
+                return Policy.createPolicy(oldPolicy.getName(), oldPolicy.getId(), alternativeSet);
             } // end-if all assertions supported
             
             if (bestFitnessSoFar.compareTo(alternativeFitness) > 0) { // better alternative found
@@ -280,7 +280,7 @@ public class EffectiveAlternativeSelector {
         alternativeSet.add(alternativePickedSoFar);
         logger.warning("getNewEffectivePolicy", 
                 LocalizationMessages.SUBOPTIMAL_ALTERNATIVE_PICKED_WITH_FITNESS(bestFitnessSoFar));
-        return new Policy(null,alternativeSet);
+        return Policy.createPolicy(oldPolicy.getName(), oldPolicy.getId(), alternativeSet);
     }
     
 }

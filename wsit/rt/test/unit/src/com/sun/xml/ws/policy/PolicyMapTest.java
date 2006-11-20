@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import javax.xml.namespace.QName;
 import junit.framework.TestCase;
+import static com.sun.xml.ws.policy.testutils.PolicyResourceLoader.getPolicyMap;
 
 /**
  *
@@ -100,5 +101,11 @@ public class PolicyMapTest extends TestCase {
         map = PolicyMap.createPolicyMap(Arrays.asList(new PolicyMapMutator[] {extender}));
         extender.putFaultMessageSubject(key, null);
         assertFalse(map.isEmpty());
+    }
+    
+    public void testToString() throws Exception {
+        PolicyMap policyMap = getPolicyMap("bug_reproduction/simple.wsdl");
+        String result = policyMap.toString();
+        assertNotNull(result);
     }
 }

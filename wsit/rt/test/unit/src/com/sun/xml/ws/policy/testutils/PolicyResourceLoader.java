@@ -44,6 +44,7 @@ import java.io.Reader;
 import java.net.URL;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
+import org.xml.sax.SAXException;
 
 /**
  * This class provides utility methods to load resources and unmarshall policy source model.
@@ -105,14 +106,18 @@ public final class PolicyResourceLoader {
 
    
     // reads policy map from given wsdl document
-    public static PolicyMap getPolicyMap(String resourceName) throws Exception {
+    public static PolicyMap getPolicyMap(String resourceName)
+        throws XMLStreamException, XMLStreamBufferException, IOException, SAXException {
+        
         WSDLModel model = getWSDLModel(resourceName);
         WSDLPolicyMapWrapper wrapper = model.getExtension(WSDLPolicyMapWrapper.class);
         return wrapper.getPolicyMap();
     }
     
     // reads wsdl model from given wsdl document
-    public static WSDLModel getWSDLModel(String resourceName) throws Exception {
+    public static WSDLModel getWSDLModel(String resourceName)
+        throws XMLStreamException, XMLStreamBufferException, IOException, SAXException {
+        
         URL resourceUrl = getResourceUrl(resourceName);
         XMLStreamBuffer resourceBuffer = getResourceXmlBuffer(resourceName);
         SDDocumentSource doc = SDDocumentSource.create(resourceUrl, resourceBuffer);

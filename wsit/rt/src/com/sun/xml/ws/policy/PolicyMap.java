@@ -84,7 +84,7 @@ public final class PolicyMap {
         void setNewEffectivePolicy(PolicyMapKey key, Policy newEffectivePolicy) {
             // we add this policy map as a subject, because there is nothing reasonable we could add there, since
             // this is an artificial policy subject
-            PolicySubject subject = new PolicySubject(this, newEffectivePolicy);
+            PolicySubject subject = new PolicySubject(key, newEffectivePolicy);
             
             PolicyMapKey localKey = createLocalCopy(key);
             PolicyScope scope = internalMap.get(localKey);            
