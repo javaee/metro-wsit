@@ -54,8 +54,18 @@ public class PolicyMergerTest extends TestCase {
         Policy result = merger.merge(policies);
         Policy expected = PolicyResourceLoader.loadPolicy("merge/merge_1-2-3.xml");
         
-        System.out.println(result.toString());
+        assertEquals(expected, result);
+    }
+    
+    public void testMergeEmtpyNonEmptyPolicies() throws Exception {
+        Collection<Policy> policies = new LinkedList<Policy>();
+        policies.add(PolicyResourceLoader.loadPolicy("merge/policy1.xml"));
+        policies.add(PolicyResourceLoader.loadPolicy("merge/policy-empty-alt.xml"));
+        
+        Policy result = merger.merge(policies);
+        Policy expected = PolicyResourceLoader.loadPolicy("merge/policy1.xml");
         
         assertEquals(expected, result);
     }
+    
 }
