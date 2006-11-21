@@ -103,6 +103,24 @@
         <antcall target="create-wstx-war"/>
     </target>
 
+    <!-- include wsdl files for wstx resource lookups -->
+    <property name="tx.tmp" value="${tmpdir}/tx"/>
+    <property name="tx.tmp.webinf" value="${tx.tmp}/WEB-INF"/>
+    <macrodef name="include-wstx-resources">
+        <sequential>
+            <delete dir="${tx.tmp}"/>
+            <mkdir dir="${tx.tmp.webinf}"/>
+            <copy todir="${tx.tmp.webinf}" overwrite="true">
+                <fileset dir="etc/tx/WEB-INF">
+                    <!-- we only want the wsdl & xsd files -->
+                    <exclude name="**/web.xml"/>
+                    <exclude name="**/webservices.xml"/>
+                    <exclude name="**/sun-web.xml"/>
+                </fileset>
+            </copy>
+        </sequential>
+    </macrodef>
+
     <target name="expand-jars-runtime" unless="runtime.jars.expanded">
         <expand-jars-macro libdir="../${lib.runtime.dir}">
             <metainf>
@@ -113,13 +131,12 @@
                 </copy>
             </metainf>
         </expand-jars-macro>
+
         <!-- include wsdl files for wstx resource lookups -->
+        <include-wstx-resources/>
         <mkdir dir="${tmpdir}/WEB-INF"/>
         <copy todir="${tmpdir}/WEB-INF" overwrite="true">
-            <fileset dir="etc/tx/WEB-INF">
-                <exclude name="**/web.xml"/>
-                <!-- we don't want web.xml -->
-            </fileset>
+            <fileset dir="${tx.tmp.webinf}"/>
         </copy>
     </target>
 
@@ -173,6 +190,9 @@
         <mkdir dir="${wsit.rt.dir}"/>
         <updateManifestWithVersion file="${rt.dir}/tmp/MANIFEST.MF"/>
 
+        <!-- include wsdl files for wstx resource lookups -->        
+        <include-wstx-resources/>
+
         <jar destfile="${wsit.rt.dir}/${wsit.rt.jarname}.jar" manifest="${rt.dir}/tmp/MANIFEST.MF">
             <metainf dir="../etc/META-INF">
                 <include name="services/*.*"/>
@@ -180,6 +200,7 @@
                 <exclude name="services/*.TWSDLExtensionHandler"/>
             </metainf>
             <fileset dir="${rt.dir}/build/classes"/>
+            <fileset dir="${tx.tmp}"/>
         </jar>
         <delete dir="${rt.dir}/tmp"/>
     </target>
