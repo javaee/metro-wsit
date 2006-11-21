@@ -1,5 +1,5 @@
 /*
- * $Id: Sequence.java,v 1.6 2006-11-04 22:50:42 mikeg Exp $
+ * $Id: Sequence.java,v 1.7 2006-11-21 19:45:39 mikeg Exp $
  */
 
 /*
@@ -114,6 +114,8 @@ public class Sequence {
         list.add(null);
         allowDuplicates = false;
         firstKnownGap = 1;
+	resetLastActivityTime();
+	
     }
     
     /**

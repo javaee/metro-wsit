@@ -157,7 +157,7 @@ public class RMDestination extends RMProvider<ServerInboundSequence,
             };
         
             schedule(timerTask, 
-                     new Date(System.currentTimeMillis()),
+                     new Date(System.currentTimeMillis() + frequency),
                      frequency);
         }
         
