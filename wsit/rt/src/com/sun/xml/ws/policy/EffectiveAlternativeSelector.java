@@ -274,6 +274,10 @@ public class EffectiveAlternativeSelector {
                 alternativePickedSoFar = alternative;
                 bestFitnessSoFar = alternativeFitness;
             }
+            // Make sure that if we have an empty alternative, at least one gets picked
+            else if (alternativePickedSoFar == null) {
+                alternativePickedSoFar = alternative;
+            }
         }
         // return a policy containing just the picked alternative
         Collection<AssertionSet> alternativeSet = new LinkedList<AssertionSet>();

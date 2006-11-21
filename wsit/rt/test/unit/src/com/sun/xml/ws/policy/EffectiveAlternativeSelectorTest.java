@@ -22,16 +22,14 @@
 
 package com.sun.xml.ws.policy;
 
-import com.sun.xml.ws.policy.sourcemodel.PolicyModelTranslator;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelUnmarshaller;
-import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
-import com.sun.xml.ws.policy.spi.PolicySelector;
-import com.sun.xml.ws.policy.testutils.PolicyResourceLoader;
-import java.io.Reader;
-import java.net.URI;
 import java.util.HashSet;
 import javax.xml.namespace.QName;
-import junit.framework.*;
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+
+import static com.sun.xml.ws.policy.testutils.PolicyResourceLoader.loadPolicy;
 
 /**
  *
@@ -64,8 +62,7 @@ public class EffectiveAlternativeSelectorTest extends TestCase {
         
         //Policy pol1 = PolicyModelTranslator.getTranslator()
         //                .translate(unmarshalModel("single_alternative_policy/policy3.xml"));
-        Policy pol2 = PolicyModelTranslator.getTranslator()
-        .translate(unmarshalModel("complex_policy/nested_assertions_with_alternatives.xml"));
+        Policy pol2 = loadPolicy("complex_policy/nested_assertions_with_alternatives.xml");
         
         PolicyMapKey aKey = PolicyMap.createWsdlEndpointScopeKey(new QName("service"),new QName("port"));
         
@@ -95,8 +92,7 @@ public class EffectiveAlternativeSelectorTest extends TestCase {
         
         //Policy pol1 = PolicyModelTranslator.getTranslator()
         //                .translate(unmarshalModel("single_alternative_policy/policy3.xml"));
-        Policy pol2 = PolicyModelTranslator.getTranslator()
-        .translate(unmarshalModel("complex_policy/nested_assertions_with_alternatives.xml"));
+        Policy pol2 = loadPolicy("complex_policy/nested_assertions_with_alternatives.xml");
         
         PolicyMapKey aKey = PolicyMap.createWsdlEndpointScopeKey(new QName("service"),new QName("port"));
         
@@ -122,12 +118,38 @@ public class EffectiveAlternativeSelectorTest extends TestCase {
         }
     }
     
+    public void testDoEmptySelection() throws Exception {
+        HashSet<PolicyMapMutator> mutators = new HashSet<PolicyMapMutator>();
+        EffectivePolicyModifier modifier = EffectivePolicyModifier.createEffectivePolicyModifier();
+        mutators.add(modifier);
+        PolicyMapExtender extender = PolicyMapExtender.createPolicyMapExtender();
+        mutators.add(extender);
+        PolicyMap policyMap = PolicyMap.createPolicyMap(mutators);
+        
+        Policy emptyPolicy = Policy.createEmptyPolicy();
+        PolicyMapKey key = PolicyMap.createWsdlEndpointScopeKey(new QName("service"), new QName("port"));
+        extender.putEndpointSubject(key, new PolicySubject("two", emptyPolicy));
+        
+        EffectiveAlternativeSelector.doSelection(modifier);
+        
+        assertTrue(extender.getMap().getEndpointEffectivePolicy(key).isEmpty());
+    }
     
-    private PolicySourceModel unmarshalModel(String resource) throws Exception {
-        Reader reader = PolicyResourceLoader.getResourceReader(resource);
-        PolicySourceModel model = xmlUnmarshaller.unmarshalModel(reader);
-        reader.close();
-        return model;
+    public void testDoNullSelection() throws Exception {
+        HashSet<PolicyMapMutator> mutators = new HashSet<PolicyMapMutator>();
+        EffectivePolicyModifier modifier = EffectivePolicyModifier.createEffectivePolicyModifier();
+        mutators.add(modifier);
+        PolicyMapExtender extender = PolicyMapExtender.createPolicyMapExtender();
+        mutators.add(extender);
+        PolicyMap policyMap = PolicyMap.createPolicyMap(mutators);
+        
+        Policy nullPolicy = Policy.createNullPolicy();
+        PolicyMapKey key = PolicyMap.createWsdlEndpointScopeKey(new QName("service"), new QName("port"));
+        extender.putEndpointSubject(key, new PolicySubject("two", nullPolicy));
+        
+        EffectiveAlternativeSelector.doSelection(modifier);
+        
+        assertTrue(extender.getMap().getEndpointEffectivePolicy(key).isNull());
     }
     
 }
