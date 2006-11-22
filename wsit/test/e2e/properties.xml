@@ -23,7 +23,7 @@
 -->
 
 <!--
- $Id: properties.xml,v 1.6 2006-11-13 03:50:00 hofsass Exp $
+ $Id: properties.xml,v 1.7 2006-11-22 17:49:19 m_potociar Exp $
 
  Copyright (c) 2005 Sun Microsystems, Inc.
  All rights reserved.
@@ -42,12 +42,20 @@
     <property name="verbose" value="false"/>
     <property name="logs.dir" value="${basedir}/logs"/>
     <property environment="env" />
-
+    
     <!--
         These are the additional options which are passed to the harness incase you
         wish to test the harness in different testing modes
         For more information on the different command line options
         refer to docs/index.html
         -->
-     <property name="args" value="-legacy-local"/>
+    <property name="args" value="-legacy-local"/>
+    
+    <!-- BEGIN: Emma code coverage specific stuff -->    
+        
+    <property name="emma.dir" value="D:/_java/emma-2.0.5312/lib" /> <!-- emma installation directory -->    
+    <property name="coverage.dir" value="${basedir}/coverage" /> <!-- output directory used for EMMA work files and coverage reports -->
+    <property name="out.instr.dir" value="${basedir}/outinstr" /><!-- output directory used for EMMA to store instrumented classes -->
+    
+    <!-- END: Emma code coverage specific stuff -->        
 </project>
