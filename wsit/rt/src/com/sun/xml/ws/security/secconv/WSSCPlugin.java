@@ -100,12 +100,16 @@ public class WSSCPlugin {
     private static final int DEFAULT_KEY_SIZE = 256;
     private static final String SC_ASSERTION = "SecureConversationAssertion";
     
+    private Packet packet = null;
+    
     /** Creates a new instance of WSSCPlugin */
     public WSSCPlugin(Configuration config) {
         this.config = config;
     }
     
     public IssuedTokenContext process(PolicyAssertion token, WSDLPort wsdlPort, WSBinding binding, Pipe securityPipe, Marshaller marshaller, Unmarshaller unmarshaller, String endPointAddress, Packet packet){
+        
+        this.packet = packet;
         
         //==============================
         // Get Required policy assertions
@@ -151,7 +155,7 @@ public class WSSCPlugin {
             throw new RuntimeException("There is a problem in the Trust layer creating an RST", ex);
         }
         
-        RequestSecurityTokenResponse rstr = sendRequest(token, wsdlPort, binding, securityPipe, marshaller, unmarshaller, rst, WSSCConstants.REQUEST_SECURITY_CONTEXT_TOKEN_ACTION, endPointAddress, packet);
+        RequestSecurityTokenResponse rstr = sendRequest(token, wsdlPort, binding, securityPipe, marshaller, unmarshaller, rst, WSSCConstants.REQUEST_SECURITY_CONTEXT_TOKEN_ACTION, endPointAddress);
         
         // Handle the RequestSecurityTokenResponse
         IssuedTokenContext context = new IssuedTokenContextImpl();
@@ -183,7 +187,7 @@ public class WSSCPlugin {
             throw new RuntimeException("There was a problem creating RST For Cancel", ex);
         }
         
-        RequestSecurityTokenResponse rstr = sendRequest(null, wsdlPort, binding, securityPipe, marshaller, unmarshaller, rst, WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_ACTION, endPointAddress, null);
+        RequestSecurityTokenResponse rstr = sendRequest(null, wsdlPort, binding, securityPipe, marshaller, unmarshaller, rst, WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_ACTION, endPointAddress);
         
         // Handle the RequestSecurityTokenResponse
         try {
@@ -195,7 +199,7 @@ public class WSSCPlugin {
         return ctx;
     }
     
-    private RequestSecurityTokenResponse sendRequest(PolicyAssertion issuedToken, WSDLPort wsdlPort, WSBinding binding, Pipe securityPipe, Marshaller marshaller, Unmarshaller unmarshaller, RequestSecurityToken rst, String action, String endPointAddress, Packet packet) {
+    private RequestSecurityTokenResponse sendRequest(PolicyAssertion issuedToken, WSDLPort wsdlPort, WSBinding binding, Pipe securityPipe, Marshaller marshaller, Unmarshaller unmarshaller, RequestSecurityToken rst, String action, String endPointAddress) {
        // Marshaller marshaller;
         //Unmarshaller unmarshaller;
         
