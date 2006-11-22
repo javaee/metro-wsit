@@ -23,7 +23,7 @@
 -->
 
 <!--
- $Id: properties.xml,v 1.7 2006-11-22 17:49:19 m_potociar Exp $
+ $Id: properties.xml,v 1.8 2006-11-22 18:10:07 m_potociar Exp $
 
  Copyright (c) 2005 Sun Microsystems, Inc.
  All rights reserved.
@@ -53,7 +53,7 @@
     
     <!-- BEGIN: Emma code coverage specific stuff -->    
         
-    <property name="emma.dir" value="D:/_java/emma-2.0.5312/lib" /> <!-- emma installation directory -->    
+    <property name="emma.dir" value="${test.lib.dir}" /> <!-- emma libraries directory -->    
     <property name="coverage.dir" value="${basedir}/coverage" /> <!-- output directory used for EMMA work files and coverage reports -->
     <property name="out.instr.dir" value="${basedir}/outinstr" /><!-- output directory used for EMMA to store instrumented classes -->
     
