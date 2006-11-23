@@ -349,9 +349,13 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
                     p = new WSITServerSecurityPipe(propBag, p);*/
                     
                 } else {
-                    //look for XWSS 2.0 Style Security
-                    if (((null == policyMap) || policyMap.isEmpty()) && isSecurityConfigPresent(context)) {
-                        p = initializeXWSSServerPipe(context.getEndpoint(), context.getWsdlModel(), p);
+                    try {
+                        //look for XWSS 2.0 Style Security
+                        if (((null == policyMap) || policyMap.isEmpty()) && isSecurityConfigPresent(context)) {
+                            p = initializeXWSSServerPipe(context.getEndpoint(), context.getWsdlModel(), p);
+                        }
+                    } catch (NoClassDefFoundError err) {
+                        // do nothing
                     }
                 }
             }
