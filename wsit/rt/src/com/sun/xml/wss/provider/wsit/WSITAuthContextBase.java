@@ -911,6 +911,9 @@ public abstract class WSITAuthContextBase  {
             // use default alias
             //throw new RuntimeException("KeyStore Alias was obtained as NULL from ConfigAssertion");
         }
+        if (store.getKeyPassword() != null) {
+            props.put(DefaultCallbackHandler.KEY_PASSWORD, store.getKeyPassword());
+        }
     }
     
     protected ProcessingContext initializeInboundProcessingContext(Packet packet)  {

@@ -35,4 +35,6 @@ public interface KeyStore {
     
     public String getAlias();
     
+    public String getKeyPassword();
+    
 }

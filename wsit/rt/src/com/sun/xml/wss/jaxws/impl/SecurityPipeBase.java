@@ -1407,6 +1407,10 @@ public abstract class SecurityPipeBase implements Pipe {
             // use default alias
             //throw new RuntimeException("KeyStore Alias was obtained as NULL from ConfigAssertion");
         }
+        
+        if (store.getKeyPassword() != null) {
+            props.put(DefaultCallbackHandler.KEY_PASSWORD, store.getKeyPassword());
+        }
     }
     
     private void populateTruststoreProps(Properties props, TrustStore store) {
