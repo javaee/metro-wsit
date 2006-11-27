@@ -29,6 +29,7 @@
 package com.sun.xml.ws.security.trust;
 
 import com.sun.xml.ws.security.opt.api.SecurityHeaderElement;
+import java.util.UUID;
 import javax.xml.bind.JAXBElement;
 
 import com.sun.xml.ws.security.Token;
@@ -56,6 +57,7 @@ public class GenericToken implements Token{
     
     private String tokenType;
     private SecurityHeaderElement she = null;
+    private String id;
     
     public static final String OPAQUE_TYPE = "opaque";
     public static final String SAML11_TYPE =
@@ -64,6 +66,16 @@ public class GenericToken implements Token{
     /** Creates a new instance of GenericToken */
     public GenericToken(Element token) {
         this.token = token;
+        id = token.getAttributeNS(null,"AssertionID");
+        if(id == null || id.length() ==0){
+            id = token.getAttributeNS(null,"ID");
+        }
+        if(id == null || id.length() ==0){
+            id = token.getAttributeNS(null,"Id");
+        }
+        if(id == null || id.length() == 0){
+            id = UUID.randomUUID().toString();
+        }
     }
     
     public GenericToken(Element token, String tokenType){
@@ -94,5 +106,13 @@ public class GenericToken implements Token{
     
     public SecurityHeaderElement getElement(){
         return this.she;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }
