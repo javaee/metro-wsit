@@ -86,7 +86,7 @@ import java.util.logging.Level;
  *
  * @author Ryan.Shoemaker@Sun.COM
  * @author Joe.Fialli@Sun.COM
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 1.0
  */
 public class ATCoordinator extends Coordinator implements Synchronization, XAResource {
@@ -1129,7 +1129,7 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
             }
             return;
         }
-        removed = volatileParticipants.remove(partId);
+        removed = durableParticipants.remove(partId);
         if (removed != null) {
             if (logger.isLogging(Level.FINE)) {
                 logger.fine("forget", "forgot durable participant " + getCoordIdPartId(partId));
