@@ -137,7 +137,7 @@ public class AppServWSRegistry {
         String path = contextRoot + urlPattern;
         
         if (logger.isLoggable(Level.FINE)) {
-            logger.log(Level.INFO, "AppServWSRegistry.deregisterEndpoint: ServiceName: {0}" +
+            logger.log(Level.FINE, "AppServWSRegistry.deregisterEndpoint: ServiceName: {0}" +
                     " path: {1} isEJB: {2}",
                     new Object[] {wsServiceDescriptor.getWebService().getName(),
                     path, wsServiceDescriptor.implementedByEjbComponent()});
@@ -180,7 +180,9 @@ public class AppServWSRegistry {
             contextRoot = "/" +
                     wsServiceDescriptor.getWebComponentImpl().
                     getWebBundleDescriptor().getContextRoot();
+            logger.log(Level.FINE, "AppServWSRegistry.getEndpointContextRoot nonEJB WS. ContextRoot: {0}", contextRoot);
         } else {
+            logger.log(Level.FINE, "AppServWSRegistry.getEndpointContextRoot EJB WS. ContextRoot: {0}", wsServiceDescriptor.getEndpointAddressUri());
             String[] path = wsServiceDescriptor.getEndpointAddressUri().split("/");
             contextRoot = "/" + path[1];
         }
@@ -192,8 +194,14 @@ public class AppServWSRegistry {
         String urlPattern;
         if(!wsServiceDescriptor.implementedByEjbComponent()) {
             urlPattern = wsServiceDescriptor.getEndpointAddressUri();
+            logger.log(Level.FINE, "AppServWSRegistry.getEndpointUrlPattern nonEJB WS. URLPattern: {0}", urlPattern);
         } else {
+            logger.log(Level.FINE, "AppServWSRegistry.getEndpointUrlPattern EJB WS. URLPattern: {0}", wsServiceDescriptor.getEndpointAddressUri());
             String[] path = wsServiceDescriptor.getEndpointAddressUri().split("/");
+            if (path.length < 3) {
+                return "";
+            }
+            
             urlPattern = "/" + path[2];
         }
         
