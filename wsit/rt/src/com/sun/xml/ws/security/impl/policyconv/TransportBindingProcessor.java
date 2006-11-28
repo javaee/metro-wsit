@@ -132,18 +132,7 @@ public class TransportBindingProcessor extends BindingProcessor {
                 //spFB.isEndorsingSignature(true);
                 spFB.addTargetBinding(target);
                 container.insert(sp);
-            }
-            
-            if(binding.getSignatureProtection()){
-                SignatureTarget target = iAP.getTargetCreator().newURISignatureTarget(key.getUUID());
-                SecurityPolicyUtil.setName(target, key);
-              //  SignaturePolicy.FeatureBinding spFB = (SignaturePolicy.FeatureBinding)sp.getFeatureBinding();
-                
-                spFB.isEndorsingSignature(true);
-                spFB.addTargetBinding(target);
-                container.insert(sp);
-            }
-           // container.insert(key);
+            }           
         }
     }
     
