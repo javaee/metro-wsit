@@ -38,6 +38,7 @@ import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
 import com.sun.xml.ws.rm.protocol.*;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
 
+import javax.xml.ws.Service;
 import javax.xml.bind.JAXBElement;
 import javax.xml.transform.Source;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
@@ -117,6 +118,11 @@ public class ClientOutboundSequence extends OutboundSequence {
      * Can be registered to listen for sequence acknowledgements.
      */
     private AcknowledgementListener ackListener;
+    
+    /**
+     * Service using this sequence (if known)
+     */
+    private Service service;
 
 
     private static boolean sendHeartbeats = true;
@@ -195,6 +201,24 @@ public class ClientOutboundSequence extends OutboundSequence {
 
     public void setSecureReliableMessaging(boolean secureReliableMessaging) {
         this.secureReliableMessaging = secureReliableMessaging;
+    }
+    
+    /**
+     * Accessor for the service field.
+     *
+     * @returns The value of the service field.  May be null if not known.
+     */
+    public Service getService() {
+        return service;
+    }
+    
+    /**
+     * Sets the value of the service field.
+     *
+     * @param service The service using the sequence.
+     */
+    public void setService(Service service) {
+        this.service = service;
     }
 
     /**
@@ -424,6 +448,7 @@ public class ClientOutboundSequence extends OutboundSequence {
     }
     
     private long getResendInterval() {
+        
         //do a resend at every opportunity under these conditions
         //1. Sequence has been terminated
         //2. Number of stored messages exceeds 1/2 available space.

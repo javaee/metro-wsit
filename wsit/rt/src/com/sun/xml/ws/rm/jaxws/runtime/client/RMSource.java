@@ -210,12 +210,18 @@ public class RMSource  extends RMProvider<ClientInboundSequence,
         try {
             disp.invoke(source);
         } catch (Exception e) {
+            
             //dont care what happened processing the response message.  We are only
             //interested in the sequence that has been stored in the request context
+            //
+            //TODO - At the same time, it would be prettier to get something other than
+            //a fault
         }
         
-        return (ClientOutboundSequence)disp.getRequestContext()
+        ClientOutboundSequence seq =  (ClientOutboundSequence)disp.getRequestContext()
                     .get(Constants.sequenceProperty);
+        seq.setService(service);
+        return seq;
        
     }
 
