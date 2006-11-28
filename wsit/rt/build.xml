@@ -98,9 +98,9 @@
         <available file="${tmpdir}" type="dir" property="runtime.jars.expanded"/>
         <antcall target="expand-jars-runtime"/>
         <antcall target="combine-jars-runtime"/>
-        <!-- TODO: is this the right place to build wstx-services.war ??? -->
-        <antcall target="create-wstx-war"/>
     </target>
+
+    <target name="-post-jar" depends="create-wstx-war"/>
 
     <!-- include wsdl files for wstx resource lookups -->
     <property name="tx.tmp" value="${tmpdir}/tx"/>
