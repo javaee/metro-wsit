@@ -35,6 +35,7 @@ import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
@@ -232,6 +233,11 @@ public class RMClientPipe
             }
             
         } else {
+            
+            if (binding.getAddressingVersion() == AddressingVersion.MEMBER) {
+                throw new RMException("The Reliable Messaging Client does not "+ 
+                        "support the Member submission addressing version.");
+            }
             //store this in field
             this.proxy = packet.proxy;
             
