@@ -162,17 +162,17 @@
     </target>
 
     <target name="src-zip">
-        <mkdir dir="${build.dir}/temp"/>
-        <unzip dest="${build.dir}/temp">
+        <delete dir="${tmpdir}"/>
+        <mkdir dir="${tmpdir}"/>
+        <unzip dest="${tmpdir}">
             <fileset dir="../${lib.runtime.dir}" includes="*src.zip"/>
         </unzip>
-        <delete file="${build.dir}/temp/*.txt"/>
-        <delete dir="${build.dir}/temp/META-INF" includeemptydirs="true"/>
+        <delete file="${tmpdir}/*.txt"/>
+        <delete dir="${tmpdir}/META-INF" includeemptydirs="true"/>
         <zip destfile="${build.dir}/${name}-src.zip">
             <fileset dir="src"/>
-            <fileset dir="${build.dir}/temp"/>
+            <fileset dir="${tmpdir}"/>
         </zip>
-        <delete dir="${build.dir}/temp" includeemptydirs="true"/>
     </target>
 
     <target name="-post-compile-test" depends="init,test.resources.copy">
