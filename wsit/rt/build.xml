@@ -67,7 +67,8 @@
         <attribute name="libdir"/>
         <element name="metainf" optional="true"/>
         <sequential>
-            <property name="tmpdir" value="${dist.image.dir}/tmp"/>
+            <delete dir="${tmpdir}"/>
+            <mkdir dir="${tmpdir}"/>
             <copy file="../${etc.metainf.dir}/MANIFEST.MF" todir="${tmpdir}"/>
             <updateManifestWithVersion file="${tmpdir}/MANIFEST.MF"/>
             <concatmanifest tempdir="${tmpdir}" manifest="${tmpdir}/MANIFEST.MF">
@@ -86,7 +87,6 @@
         <attribute name="jarname"/>
         <element name="services" optional="true"/>
         <sequential>
-            <property name="tmpdir" value="${dist.image.dir}/tmp"/>
             <jar destfile="../${dist.image.wsit.lib.dir}/@{jarname}.jar" manifest="${tmpdir}/MANIFEST.MF">
                 <services/>
                 <fileset dir="@{classesdir}"/>
@@ -95,7 +95,7 @@
     </macrodef>
 
     <target name="-do-jar-without-manifest">
-        <available file="${dist.image.dir}/tmp" type="dir" property="runtime.jars.expanded"/>
+        <available file="${tmpdir}" type="dir" property="runtime.jars.expanded"/>
         <antcall target="expand-jars-runtime"/>
         <antcall target="combine-jars-runtime"/>
         <!-- TODO: is this the right place to build wstx-services.war and wstx-services.jar ??? -->
@@ -184,16 +184,17 @@
     <target name="create-wsit-runtime-jar" depends="wsit-jars-runtime, create-wstx-war"/>
 
     <target name="wsit-jars-runtime">
-        <mkdir dir="${rt.dir}/tmp/META-INF/services"/>
+        <delete dir="${tmpdir}"/>
+        <mkdir dir="${tmpdir}/META-INF/services"/>
         <property name="wsit.rt.dir" value="${rt.dir}/build"/>
         <property name="wsit.rt.jarname" value="wsit-rt"/>
         <mkdir dir="${wsit.rt.dir}"/>
-        <updateManifestWithVersion file="${rt.dir}/tmp/MANIFEST.MF"/>
+        <updateManifestWithVersion file="${tmpdir}/MANIFEST.MF"/>
 
         <!-- include wsdl files for wstx resource lookups -->        
         <include-wstx-resources/>
 
-        <jar destfile="${wsit.rt.dir}/${wsit.rt.jarname}.jar" manifest="${rt.dir}/tmp/MANIFEST.MF">
+        <jar destfile="${wsit.rt.dir}/${wsit.rt.jarname}.jar" manifest="${tmpdir}/MANIFEST.MF">
             <metainf dir="../etc/META-INF">
                 <include name="services/*.*"/>
                 <exclude name="services/*.TJavaGeneratorExtension"/>
@@ -202,7 +203,6 @@
             <fileset dir="${rt.dir}/build/classes"/>
             <fileset dir="${tx.tmp}"/>
         </jar>
-        <delete dir="${rt.dir}/tmp"/>
     </target>
 
     <!--target name="-post-compile" depends="move-wstx-service-classes"
@@ -238,8 +238,9 @@
     </target>
 
     <!--target name="create-wstx-war" depends="create-wstx-jar" description="create wstx webservices war file"-->
-    <target name="create-wstx-war" description="create wstx webservices war file">
-        <property name="wstx.tmp" value="${basedir}/wstx-tmp"/>
+    <target name="create-wstx-war" depends="init" description="create wstx webservices war file">
+        <property name="wstx.tmp" value="${build.dir}/wstx-tmp"/>
+        <delete dir="${wstx.tmp}"/>
         <mkdir dir="${wstx.tmp}"/>
         <mkdir dir="${wstx.tmp}/lib"/>
         <copy todir="${wstx.tmp}">
@@ -254,7 +255,6 @@
             <!--lib dir="${wstx.tmp}/lib" includes="*.jar"/-->
             <webinf dir="${wstx.tmp}/WEB-INF" includes="**/*" excludes="web.xml"/>
         </war>
-        <delete dir="${wstx.tmp}"/>
     </target>
 
 </project>
