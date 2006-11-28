@@ -98,8 +98,7 @@
         <available file="${tmpdir}" type="dir" property="runtime.jars.expanded"/>
         <antcall target="expand-jars-runtime"/>
         <antcall target="combine-jars-runtime"/>
-        <!-- TODO: is this the right place to build wstx-services.war and wstx-services.jar ??? -->
-        <!--antcall target="create-wstx-jar"/-->
+        <!-- TODO: is this the right place to build wstx-services.war ??? -->
         <antcall target="create-wstx-war"/>
     </target>
 
@@ -205,39 +204,6 @@
         </jar>
     </target>
 
-    <!--target name="-post-compile" depends="move-wstx-service-classes"
-            description="Hook for handling wstx web service classes"/-->
-
-    <property name="wstx-svc-classes" value="${basedir}/build/wstx-svc-classes"/>
-    <target name="move-wstx-service-classes">
-        <mkdir dir="${wstx-svc-classes}"/>
-        <move todir="${wstx-svc-classes}">
-            <fileset dir="${basedir}/build/classes">
-                <include name="**/tx/webservice/member/TXStatefulWebserviceFactoryImpl.class"/>
-                <include name="**/tx/webservice/member/**/*PortTypeImpl.class"/>
-                <include name="**/tx/webservice/member/**/*RPC.class"/>
-                <include name="**/tx/webservice/member/**/LocalizationMessages.class"/>
-                <include name="**/tx/webservice/member/**/*.properties"/>
-            </fileset>
-        </move>
-    </target>
-
-    <target name="create-wstx-jar" depends="" description="create wstx webservices jar file">
-        <jar jarfile="../${dist.image.wsit.lib.dir}/wstx-services.jar"
-             basedir="${wstx-svc-classes}">
-            <manifest>
-                <attribute name="Build-Id" value="${build.id}"/>
-                <attribute name="Build-Version" value="${build.version}"/>
-                <attribute name="Implementation-Title"
-                           value="Web Services Interoperability Technology (WS-Coordination / WS-AtomicTransaction Implementation)"/>
-                <attribute name="Implementation-Version" value="EA"/>
-                <attribute name="Implementation-Vendor" value="Sun Microsystems, Inc."/>
-                <attribute name="Implementation-Vendor-ID" value="com.sun"/>
-            </manifest>
-        </jar>
-    </target>
-
-    <!--target name="create-wstx-war" depends="create-wstx-jar" description="create wstx webservices war file"-->
     <target name="create-wstx-war" depends="init" description="create wstx webservices war file">
         <property name="wstx.tmp" value="${build.dir}/wstx-tmp"/>
         <delete dir="${wstx.tmp}"/>
@@ -246,13 +212,7 @@
         <copy todir="${wstx.tmp}">
             <fileset dir="${basedir}/etc/tx"/>
         </copy>
-        <!-- TODO: figure out if we need *any* libs in the war or if it can get them all from AS_HOME/lib -->
-        <!--copy todir="${wstx.tmp}/lib" flatten="true">
-            <fileset dir="${wstx.dist}" includes="wstx-api.jar"/>
-            <fileset dir="${rt.dir}/build" includes="wstx-services.jar"/>
-        </copy-->
         <war destfile="../${dist.image.wsit.lib.dir}/wstx-services.war" webxml="${wstx.tmp}/WEB-INF/web.xml">
-            <!--lib dir="${wstx.tmp}/lib" includes="*.jar"/-->
             <webinf dir="${wstx.tmp}/WEB-INF" includes="**/*" excludes="web.xml"/>
         </war>
     </target>
