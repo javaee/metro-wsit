@@ -41,7 +41,8 @@
         <attribute name="libdir"/>
         <element name="metainf" optional="true"/>
         <sequential>
-            <property name="tmpdir" value="${dist.image.dir}/tmp"/>
+            <delete dir="${tmpdir}"/>
+            <mkdir dir="${tmpdir}"/>
             <copy file="../${etc.metainf.dir}/MANIFEST.MF" todir="${tmpdir}"/>
             <updateManifestWithVersion file="${tmpdir}/MANIFEST.MF"/>
             <concatmanifest tempdir="${tmpdir}" manifest="${tmpdir}/MANIFEST.MF">
@@ -69,7 +70,7 @@
     </macrodef>
     
     <target name="-do-jar-without-manifest">
-        <available file="${dist.image.dir}/tmp" type="dir" property="tooltime.jars.expanded"/>
+        <available file="${tmpdir}" type="dir" property="tooltime.jars.expanded"/>
         <antcall target="expand-jars-tooltime"/>
         <antcall target="combine-jars-tooltime"/>
     </target>
@@ -92,30 +93,30 @@
     </target>
 
     <target name="src-zip">
-        <mkdir dir="${build.dir}/temp"/>
-        <unzip dest="${build.dir}/temp">
+        <delete dir="${tmpdir}"/>
+        <mkdir dir="${tmpdir}"/>
+        <unzip dest="${tmpdir}">
             <fileset dir="../${lib.tooltime.dir}" includes="*src.zip"/>
         </unzip>
-        <delete file="${build.dir}/temp/*.txt"/>
-        <delete dir="${build.dir}/temp/META-INF" includeemptydirs="true"/>
+        <delete file="${tmpdir}/*.txt"/>
+        <delete dir="${tmpdir}/META-INF" includeemptydirs="true"/>
         <zip destfile="${build.dir}/${name}-tools-src.zip">
             <fileset dir="src"/>
-            <fileset dir="${build.dir}/temp"/>
+            <fileset dir="${tmpdir}"/>
         </zip>
-        <delete dir="${build.dir}/temp" includeemptydirs="true"/>
     </target>
 
     <target name="wsit-jars-tools">
-        <mkdir dir="${tools.dir}/tmp/META-INF"/>
+        <delete dir="${tmpdir}"/>
+        <mkdir dir="${tmpdir}/META-INF"/>
         <property name="wsit.tools.dir" value="${tools.dir}/build"/>
         <property name="wsit.tools.jarname" value="wsit-tools"/>
         <mkdir dir="${wsit.tools.dir}"/>
 
-        <updateManifestWithVersion file="${tools.dir}/tmp/MANIFEST.MF"/>
-        <jar destfile="${wsit.tools.dir}/${wsit.tools.jarname}.jar" manifest="${tools.dir}/tmp/MANIFEST.MF">
+        <updateManifestWithVersion file="${tmpdir}/MANIFEST.MF"/>
+        <jar destfile="${wsit.tools.dir}/${wsit.tools.jarname}.jar" manifest="${tmpdir}/MANIFEST.MF">
             <fileset dir="${tools.dir}/build/classes"/>
         </jar>
-        <delete dir="${tools.dir}/tmp"/>
     </target>
 
     <target name="create-wsit-tools-jar" depends="wsit-jars-tools"/>
