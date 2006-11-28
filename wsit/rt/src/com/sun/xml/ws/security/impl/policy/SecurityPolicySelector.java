@@ -115,7 +115,7 @@ public class SecurityPolicySelector implements PolicySelector{
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,WssRelV10Token11));
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,WssRelV20Token11));
         //     supportedAssertions.add(new QName(SECURITY_POLICY_NS,X509V3Token));
-        
+        supportedAssertions.add(new QName(SECURITY_POLICY_NS,SupportingTokens));
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,SignedSupportingTokens));
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,EndorsingSupportingTokens));
         
