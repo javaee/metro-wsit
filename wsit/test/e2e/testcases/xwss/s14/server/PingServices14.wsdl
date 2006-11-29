@@ -70,7 +70,7 @@
                      <sc:Validator name="usernameValidator"  classname="xwss.s14.server.PlainTextPasswordValidator"/>
                  </sc:ValidatorConfiguration>
 
-                <wsap:UsingAddressing  xmlns:wsap="http://schemas.xmlsoap.org/ws/2004/09/policy/addressing"/>
+                <wsap:UsingAddressing xmlns:wsap="http://schemas.xmlsoap.org/ws/2004/08/addressing/policy" />
             </wsp:All>
         </wsp:ExactlyOne>
     </wsp:Policy>
