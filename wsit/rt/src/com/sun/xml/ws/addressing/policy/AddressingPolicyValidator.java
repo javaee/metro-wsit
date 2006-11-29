@@ -26,14 +26,14 @@ import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import java.util.ArrayList;
 import javax.xml.namespace.QName;
-import com.sun.xml.ws.policy.spi.PolicySelector;
-import com.sun.xml.ws.policy.spi.PolicySelector.Fitness;
+import com.sun.xml.ws.policy.spi.PolicyAssertionValidator;
+import com.sun.xml.ws.policy.spi.PolicyAssertionValidator.Fitness;
 
 /**
  *
  * @author japod
  */
-public class AddressingPolicySelector implements PolicySelector{
+public class AddressingPolicyValidator implements PolicyAssertionValidator{
     
     private static final ArrayList<QName> supportedAssertions = new ArrayList<QName>();
     
@@ -43,12 +43,20 @@ public class AddressingPolicySelector implements PolicySelector{
     }
     
     /**
-     * Creates a new instance of AddressingPolicySelector
+     * Creates a new instance of AddressingPolicyValidator
      */
-    public AddressingPolicySelector() {
+    public AddressingPolicyValidator() {
     }
 
-    public PolicySelector.Fitness getFitness(PolicyAssertion assertion) {
+    public Fitness validateClientSide(PolicyAssertion assertion) {
         return supportedAssertions.contains(assertion.getName()) ? Fitness.SUPPORTED : Fitness.UNKNOWN;
+    }
+
+    public Fitness validateServerSide(PolicyAssertion assertion) {
+        return supportedAssertions.contains(assertion.getName()) ? Fitness.SUPPORTED : Fitness.UNKNOWN;
+    }
+
+    public String[] declareSupportedDomains() {
+        return new String[] {AddressingVersion.MEMBER.policyNsUri, AddressingVersion.W3C.policyNsUri};
     }
 }

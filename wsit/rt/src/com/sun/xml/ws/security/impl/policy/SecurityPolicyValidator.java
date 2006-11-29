@@ -22,7 +22,7 @@
 package com.sun.xml.ws.security.impl.policy;
 
 import com.sun.xml.ws.policy.PolicyAssertion;
-import com.sun.xml.ws.policy.spi.PolicyAssertionValidator.Fitness;
+import com.sun.xml.ws.policy.spi.PolicyAssertionValidator;
 import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
 import static com.sun.xml.ws.security.impl.policy.Constants.*;
 import java.util.ArrayList;
@@ -31,7 +31,7 @@ import javax.xml.namespace.QName;
  *
  * @author K.Venugopal@sun.com
  */
-public class SecurityPolicySelector {
+public class SecurityPolicyValidator implements PolicyAssertionValidator{
     private static final ArrayList<QName> supportedAssertions = new ArrayList<QName>();
     static{
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,CanonicalizationAlgorithm));
@@ -158,23 +158,29 @@ public class SecurityPolicySelector {
         supportedAssertions.add(new QName(TRUST_NS,SignWith));
         
         supportedAssertions.add(new QName(TRUST_NS,EncryptWith));
-        supportedAssertions.add(new QName("http://schemas.sun.com/2006/03/wss/server","DisableStreamingSecurity"));
-        supportedAssertions.add(new QName("http://schemas.sun.com/2006/03/wss/client","DisableStreamingSecurity"));
         
+        supportedAssertions.add(new QName(SUN_WSS_SECURITY_SERVER_POLICY_NS,"DisableStreamingSecurity"));
+        supportedAssertions.add(new QName(SUN_WSS_SECURITY_CLIENT_POLICY_NS,"DisableStreamingSecurity"));
+
+        // newly added by M.P.
+        supportedAssertions.add(new QName(SUN_WSS_SECURITY_SERVER_POLICY_NS,"KeyStore"));
+        supportedAssertions.add(new QName(SUN_WSS_SECURITY_SERVER_POLICY_NS,"TrustStore"));
         
-        //supportedAssertions.add(new QName(SUN_WSS_SECURITY_CLIENT_POLICY_NS,CallbackHandler));
-        //supportedAssertions.add(new QName(SUN_WSS_SECURITY_CLIENT_POLICY_NS,KeyStore));
-        //supportedAssertions.add(new QName(SUN_WSS_SECURITY_CLIENT_POLICY_NS,TrustStore));
+        supportedAssertions.add(new QName(SUN_WSS_SECURITY_CLIENT_POLICY_NS,"KeyStore"));
+        supportedAssertions.add(new QName(SUN_WSS_SECURITY_CLIENT_POLICY_NS,"TrustStore"));
         
-        //supportedAssertions.add(new QName(SUN_SECURE_CLIENT_CONVERSATION_POLICY_NS,"SCClientConfiguration"));
+        supportedAssertions.add(new QName(SUN_SECURE_CLIENT_CONVERSATION_POLICY_NS,"SCClientConfiguration"));
+        
+        supportedAssertions.add(new QName(SUN_TRUST_CLIENT_SECURITY_POLICY_NS,"PreconfiguredSTS"));
+        supportedAssertions.add(new QName(SUN_TRUST_SERVER_SECURITY_POLICY_NS,"STSConfiguration"));
         
     }
     
-    /** Creates a new instance of SecurityPolicySelector. To be used by appropriate service finder */
-    public SecurityPolicySelector() {
+    /** Creates a new instance of SecurityPolicyValidator. To be used by appropriate service finder */
+    public SecurityPolicyValidator() {
     }
     
-    public Fitness getFitness(PolicyAssertion policyAssertion) {
+    public Fitness validateClientSide(PolicyAssertion policyAssertion) {
         if (policyAssertion instanceof SecurityAssertionValidator) {
             return ((SecurityAssertionValidator)policyAssertion).validate() ? Fitness.SUPPORTED : Fitness.UNSUPPORTED;
         } else if (supportedAssertions.contains(policyAssertion.getName())) {
@@ -182,5 +188,20 @@ public class SecurityPolicySelector {
         } else {
             return Fitness.UNKNOWN;
         }
+    }
+
+    public Fitness validateServerSide(PolicyAssertion assertion) {
+        return Fitness.UNKNOWN; // TODO: implement
+    }
+
+    public String[] declareSupportedDomains() {
+        return new String[] {
+            SECURITY_POLICY_NS, 
+            TRUST_NS, 
+            SUN_WSS_SECURITY_CLIENT_POLICY_NS, 
+            SUN_WSS_SECURITY_SERVER_POLICY_NS,
+            SUN_SECURE_CLIENT_CONVERSATION_POLICY_NS,
+            
+        };
     }
 }

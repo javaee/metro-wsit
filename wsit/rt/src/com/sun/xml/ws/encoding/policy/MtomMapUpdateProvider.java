@@ -41,8 +41,9 @@ import com.sun.xml.ws.policy.sourcemodel.PolicyModelGenerator;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelMarshaller;
 import java.util.ArrayList;
 import java.util.Collection;
-import javax.xml.namespace.QName;
 import javax.xml.ws.soap.MTOMFeature;
+
+import static com.sun.xml.ws.encoding.policy.EncodingConstants.OPTIMIZED_MIME_SERIALIZATION_ASSERTION;
 
 /**
  *
@@ -52,11 +53,9 @@ public class MtomMapUpdateProvider implements PolicyMapUpdateProvider{
     
     private static final PolicyLogger logger = PolicyLogger.getLogger(MtomMapUpdateProvider.class);
     
-    private static final QName mtomName = new QName("http://schemas.xmlsoap.org/ws/2004/09/policy/optimizedmimeserialization", "OptimizedMimeSerialization");
-    
     static class MtomAssertion extends PolicyAssertion {
         
-        private static final AssertionData mtomData = AssertionData.createAssertionData(mtomName);
+        private static final AssertionData mtomData = AssertionData.createAssertionData(OPTIMIZED_MIME_SERIALIZATION_ASSERTION);
         
         MtomAssertion() {
             super(mtomData, null, null);
@@ -69,7 +68,7 @@ public class MtomMapUpdateProvider implements PolicyMapUpdateProvider{
     
     public void update(PolicyMapExtender policyMapMutator, PolicyMap policyMap, SEIModel model, WSBinding wsBinding) throws PolicyException {
         logger.entering("update");
-        MTOMFeature mtomFeature =  (MTOMFeature)wsBinding.getFeature(MTOMFeature.ID);
+        MTOMFeature mtomFeature = (MTOMFeature) wsBinding.getFeature(MTOMFeature.ID);
         if (policyMap != null) {
             Collection<PolicySubject> subjects = policyMap.getPolicySubjects();
             PolicyModelMarshaller marshaller = PolicyModelMarshaller.getXmlMarshaller(true);
@@ -85,12 +84,12 @@ public class MtomMapUpdateProvider implements PolicyMapUpdateProvider{
                         // TODO: ? should we make sure binding.getName().equals(model.getPort().getBinding().getName()) ???
                         if (mtomFeature != null) {
                             if (mtomFeature.isEnabled()) {
-                                if (policy.contains(mtomName)) {
+                                if (policy.contains(OPTIMIZED_MIME_SERIALIZATION_ASSERTION)) {
                                     // TODO: make sure the attached policy is in sync with mtomEnabled setting
                                 } else { // policy does not contain mtom assertion yet
                                     PolicySubject mtomPolicySubject = new PolicySubject(wsdlSubject, createMtomPolicy());
                                     PolicyMapKey aKey = PolicyMap.createWsdlEndpointScopeKey(
-                                                                    model.getPort().getOwner().getName(), model.getPortName());
+                                            model.getPort().getOwner().getName(), model.getPortName());
                                     policyMapMutator.putEndpointSubject(aKey, mtomPolicySubject);
                                     logger.fine("update","a new mtom endpoint subject just added to policy map");
                                 } // endif policy already contains an mtom assertion

@@ -1144,6 +1144,8 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
                 }
                 logger.fine("postFinished", LocalizationMessages.INVOKING_CLIENT_POLICY_ALTERNATIVE_SELECTION());
                 mapWrapper.doAlternativeSelection();
+            } else { //server side
+                                
             }
             mapWrapper.configureModel(context.getWSDLModel());
         }

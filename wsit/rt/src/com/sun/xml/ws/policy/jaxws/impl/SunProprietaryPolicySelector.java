@@ -23,8 +23,8 @@
 package com.sun.xml.ws.policy.jaxws.impl;
 
 import com.sun.xml.ws.policy.PolicyAssertion;
-import com.sun.xml.ws.policy.spi.PolicySelector;
-import com.sun.xml.ws.policy.spi.PolicySelector.Fitness;
+import com.sun.xml.ws.policy.spi.PolicyAssertionValidator;
+import com.sun.xml.ws.policy.spi.PolicyAssertionValidator.Fitness;
 import java.util.ArrayList;
 import javax.xml.namespace.QName;
 
@@ -33,44 +33,15 @@ import javax.xml.namespace.QName;
  *
  * @author japod
  */
-public class SunProprietaryPolicySelector implements PolicySelector{
+public class SunProprietaryPolicySelector implements PolicyAssertionValidator{
     
     private static final ArrayList<QName> supportedAssertions = new ArrayList<QName>();
     
     static {
-        supportedAssertions.add(new QName(
-                "http://java.sun.com/xml/ns/wsit/2006/09/policy/optimizedfastinfosetserialization",
-                "OptimizedFastInfosetSerialization"));
-        supportedAssertions.add(new QName(
-                "http://java.sun.com/xml/ns/wsit/2006/09/policy/automaticallyselectfastinfoset",
-                "AutomaticallySelectFastInfoset"));
-        supportedAssertions.add(new QName(
-                "http://java.sun.com/xml/ns/wsit/2006/09/policy/soaptcp/service",
-                "OptimizedTCPTransport"));
-        supportedAssertions.add(new QName(
-                "http://java.sun.com/xml/ns/wsit/2006/09/policy/transport/client",
-                "AutomaticallySelectOptimalTransport"));
-        supportedAssertions.add(new QName(
-                "http://sun.com/2006/03/rm",
-                "Ordered"));
-        supportedAssertions.add(new QName(
-                "http://sun.com/2006/03/rm",
-                "AllowDuplicates"));
-        supportedAssertions.add(new QName(
-                "http://sun.com/2006/03/rm/client",
-                "AckRequestInterval"));
-        supportedAssertions.add(new QName(
-                "http://sun.com/2006/03/rm/client",
-                "ResendInterval"));
+        
         supportedAssertions.add(new QName(
                 "http://schemas.sun.com/2006/03/wss/server",
                 "CertStore"));
-        supportedAssertions.add(new QName(
-                "http://schemas.sun.com/2006/03/wss/server",
-                "KeyStore"));
-        supportedAssertions.add(new QName(
-                "http://schemas.sun.com/2006/03/wss/server",
-                "TrustStore"));
         supportedAssertions.add(new QName(
                 "http://schemas.sun.com/2006/03/wss/server",
                 "CallbackHandlerConfiguration"));
@@ -89,12 +60,6 @@ public class SunProprietaryPolicySelector implements PolicySelector{
         supportedAssertions.add(new QName(
                 "http://schemas.sun.com/2006/03/wss/client",
                 "CertStore"));
-        supportedAssertions.add(new QName(
-                "http://schemas.sun.com/2006/03/wss/client",
-                "KeyStore"));
-        supportedAssertions.add(new QName(
-                "http://schemas.sun.com/2006/03/wss/client",
-                "TrustStore"));
         supportedAssertions.add(new QName(
                 "http://schemas.sun.com/2006/03/wss/client",
                 "CallbackHandlerConfiguration"));
@@ -118,13 +83,7 @@ public class SunProprietaryPolicySelector implements PolicySelector{
                 "Lifetime"));
         supportedAssertions.add(new QName(
                 "http://schemas.sun.com/ws/2006/05/sc/client",
-                "SCClientConfiguration"));
-        supportedAssertions.add(new QName(
-                "http://schemas.sun.com/ws/2006/05/sc/client",
                 "LifeTime"));
-        supportedAssertions.add(new QName(
-                "http://schemas.sun.com/ws/2006/05/trust/server",
-                "STSConfiguration"));
         supportedAssertions.add(new QName(
                 "http://schemas.sun.com/ws/2006/05/trust/server",
                 "Contract"));
@@ -148,19 +107,23 @@ public class SunProprietaryPolicySelector implements PolicySelector{
                 "Issuer"));
         supportedAssertions.add(new QName(
                 "http://schemas.sun.com/ws/2006/05/trust/server",
-                "LifeTime"));
-        supportedAssertions.add(new QName(
-                "http://schemas.sun.com/ws/2006/05/trust/client",
-                "PreconfiguredSTS"));
-        
+                "LifeTime"));        
     }
     
     /** Creates a new instance of SunProprietaryPolicySelector */
     public SunProprietaryPolicySelector() {
     }
     
-    public PolicySelector.Fitness getFitness(PolicyAssertion assertion) {
+    public PolicyAssertionValidator.Fitness validateClientSide(PolicyAssertion assertion) {
         return supportedAssertions.contains(assertion.getName()) ? Fitness.SUPPORTED : Fitness.UNKNOWN;
+    }
+
+    public PolicyAssertionValidator.Fitness validateServerSide(PolicyAssertion assertion) {
+        return Fitness.UNKNOWN;
+    }
+
+    public String[] declareSupportedDomains() {
+        return new String[] {};
     }
     
 }

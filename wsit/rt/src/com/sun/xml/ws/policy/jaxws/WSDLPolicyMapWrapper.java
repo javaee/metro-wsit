@@ -83,8 +83,8 @@ public class WSDLPolicyMapWrapper implements WSDLExtension {
     public PolicyMap getPolicyMap() {
         return policyMap;
     }
-        
-    public void addClientConfigToMap(URL clientWsitConfig, PolicyMap clientPolicyMap) throws PolicyException {
+    
+    void addClientConfigToMap(URL clientWsitConfig, PolicyMap clientPolicyMap) throws PolicyException {
         logger.entering("addClientConfigToMap");
         
         try {
@@ -139,7 +139,7 @@ public class WSDLPolicyMapWrapper implements WSDLExtension {
         }
     }
     
-    public void configureModel(WSDLModel model) {
+    void configureModel(WSDLModel model) {
         try {
             for (ModelConfiguratorProvider configurator : getModelConfiguratorProviders()) {
                 configurator.configure(model, policyMap);
@@ -149,37 +149,37 @@ public class WSDLPolicyMapWrapper implements WSDLExtension {
         }
     }
     
-    public void putEndpointSubject(PolicyMapKey key, PolicySubject subject) {
+    void putEndpointSubject(PolicyMapKey key, PolicySubject subject) {
         if (null != this.mapExtender) {
             this.mapExtender.putEndpointSubject(key,subject);
         }
     }
     
-    public void putServiceSubject(PolicyMapKey key, PolicySubject subject) {
+    void putServiceSubject(PolicyMapKey key, PolicySubject subject) {
         if (null != this.mapExtender) {
             this.mapExtender.putServiceSubject(key,subject);
         }
     }
     
-    public void putOperationSubject(PolicyMapKey key, PolicySubject subject) {
+    void putOperationSubject(PolicyMapKey key, PolicySubject subject) {
         if (null != this.mapExtender) {
             this.mapExtender.putOperationSubject(key,subject);
         }
     }
     
-    public void putInputMessageSubject(PolicyMapKey key, PolicySubject subject) {
+    void putInputMessageSubject(PolicyMapKey key, PolicySubject subject) {
         if (null != this.mapExtender) {
             this.mapExtender.putInputMessageSubject(key,subject);
         }
     }
     
-    public void putOutputMessageSubject(PolicyMapKey key, PolicySubject subject) {
+    void putOutputMessageSubject(PolicyMapKey key, PolicySubject subject) {
         if (null != this.mapExtender) {
             this.mapExtender.putOutputMessageSubject(key,subject);
         }
     }
     
-    public void putFaultMessageSubject(PolicyMapKey key, PolicySubject subject) {
+    void putFaultMessageSubject(PolicyMapKey key, PolicySubject subject) {
         if (null != this.mapExtender) {
             this.mapExtender.putFaultMessageSubject(key,subject);
         }

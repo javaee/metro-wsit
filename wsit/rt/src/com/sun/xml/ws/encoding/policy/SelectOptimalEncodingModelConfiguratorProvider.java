@@ -37,17 +37,14 @@ import com.sun.xml.ws.policy.jaxws.spi.ModelConfiguratorProvider;
 import java.util.Iterator;
 import javax.xml.namespace.QName;
 
+import static com.sun.xml.ws.encoding.policy.EncodingConstants.SELECT_OPTIMAL_ENCODING_ASSERTION;
+        
 /**
  * A configurator provider for FastInfoset policy assertions.
  *
  * @author Paul.Sandoz@Sun.Com
  */
-public class SelectOptimalEncodingModelConfiguratorProvider implements ModelConfiguratorProvider{
-    
-    public static final QName selectOptimalEncodingAssertion = new QName(
-            "http://java.sun.com/xml/ns/wsit/2006/09/policy/encoding/client",
-            "AutomaticallySelectOptimalEncoding");
-        
+public class SelectOptimalEncodingModelConfiguratorProvider implements ModelConfiguratorProvider{        
     public static final QName enabled = new QName("enabled");
     
     /**
@@ -73,14 +70,14 @@ public class SelectOptimalEncodingModelConfiguratorProvider implements ModelConf
         
         PolicyMapKey key = PolicyMap.createWsdlEndpointScopeKey(port.getOwner().getName(),port.getName());
         Policy policy = policyMap.getEndpointEffectivePolicy(key);
-        if (null!=policy && policy.contains(selectOptimalEncodingAssertion)) {
+        if (null!=policy && policy.contains(SELECT_OPTIMAL_ENCODING_ASSERTION)) {
             Iterator <AssertionSet> assertions = policy.iterator();
             while(assertions.hasNext()){
                 AssertionSet assertionSet = assertions.next();
                 Iterator<PolicyAssertion> policyAssertion = assertionSet.iterator();
                 while(policyAssertion.hasNext()){
                     PolicyAssertion assertion = policyAssertion.next();
-                    if(assertion.getName().equals(selectOptimalEncodingAssertion)){
+                    if(SELECT_OPTIMAL_ENCODING_ASSERTION.equals(assertion.getName())){
                         String value = assertion.getAttributeValue(enabled);
                         boolean isSelectOptimalEncodingEnabled = Boolean.valueOf(value.trim());
                         port.addFeature(

@@ -33,18 +33,15 @@ import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.policy.jaxws.spi.ModelConfiguratorProvider;
 import java.util.Iterator;
-import javax.xml.namespace.QName;
 import javax.xml.ws.soap.MTOMFeature;
+
+import static com.sun.xml.ws.encoding.policy.EncodingConstants.OPTIMIZED_MIME_SERIALIZATION_ASSERTION;
 
 /**
  *
  * @author japod
  */
 public class MtomModelConfiguratorProvider implements ModelConfiguratorProvider{
-    
-    private static final QName mtomAssertion =
-            new QName("http://schemas.xmlsoap.org/ws/2004/09/policy/optimizedmimeserialization", "OptimizedMimeSerialization");
-    
     /**
      * Creates a new instance of MtomModelConfiguratorProvider
      */
@@ -66,14 +63,14 @@ public class MtomModelConfiguratorProvider implements ModelConfiguratorProvider{
             for (WSDLPort port : service.getPorts()) {
                 PolicyMapKey key = PolicyMap.createWsdlEndpointScopeKey(service.getName(),port.getName());
                 Policy policy = policyMap.getEndpointEffectivePolicy(key);
-                if (null!=policy && policy.contains(mtomAssertion)) {
+                if (null!=policy && policy.contains(OPTIMIZED_MIME_SERIALIZATION_ASSERTION)) {
                     Iterator <AssertionSet> assertions = policy.iterator();
                     while(assertions.hasNext()){
                         AssertionSet assertionSet = assertions.next();
                         Iterator<PolicyAssertion> policyAssertion = assertionSet.iterator();
                         while(policyAssertion.hasNext()){
                             PolicyAssertion assertion = policyAssertion.next();
-                            if(assertion.getName().equals(mtomAssertion) && !assertion.isOptional()){
+                            if(OPTIMIZED_MIME_SERIALIZATION_ASSERTION.equals(assertion.getName()) && !assertion.isOptional()){
                                 port.getBinding().addFeature(new MTOMFeature(true));
                             } // end-if non optional mtom assertion found
                         } // next assertion

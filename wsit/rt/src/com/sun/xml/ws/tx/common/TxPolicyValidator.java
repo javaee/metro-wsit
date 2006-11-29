@@ -23,9 +23,9 @@
 package com.sun.xml.ws.tx.common;
 
 import com.sun.xml.ws.policy.PolicyAssertion;
-import com.sun.xml.ws.policy.spi.PolicySelector;
-import static com.sun.xml.ws.tx.common.Constants.AT_ALWAYS_CAPABILITY;
-import static com.sun.xml.ws.tx.common.Constants.AT_ASSERTION;
+import com.sun.xml.ws.policy.spi.PolicyAssertionValidator;
+import com.sun.xml.ws.policy.spi.PolicyAssertionValidator.Fitness;
+import static com.sun.xml.ws.tx.common.Constants.*;
 
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
@@ -33,7 +33,7 @@ import java.util.ArrayList;
 /**
  * @author jf39279
  */
-public class TxPolicySelector implements PolicySelector {
+public class TxPolicyValidator implements PolicyAssertionValidator {
 
     private static final ArrayList<QName> supportedAssertions = new ArrayList<QName>();
 
@@ -43,13 +43,16 @@ public class TxPolicySelector implements PolicySelector {
         supportedAssertions.add(AT_ALWAYS_CAPABILITY);
     }
 
-    public Fitness getFitness(PolicyAssertion assertion) {
-        for (QName assertionName : supportedAssertions) {
-            if (assertion.getName().equals(assertionName)) {
-                return Fitness.SUPPORTED;
-            }
-        }
-        return Fitness.UNKNOWN;
+    public Fitness validateClientSide(PolicyAssertion assertion) {
+        return supportedAssertions.contains(assertion.getName()) ? Fitness.SUPPORTED : Fitness.UNKNOWN;
+    }
+
+    public Fitness validateServerSide(PolicyAssertion assertion) {
+        return supportedAssertions.contains(assertion.getName()) ? Fitness.SUPPORTED : Fitness.UNKNOWN;
+    }
+
+    public String[] declareSupportedDomains() {
+        return new String[] {WSAT_SOAP_NSURI};
     }
 
 }

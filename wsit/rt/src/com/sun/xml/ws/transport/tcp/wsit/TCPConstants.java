@@ -27,7 +27,15 @@ import javax.xml.namespace.QName;
 /**
  * @author Alexey Stashok
  */
-public class TCPConstants {
+public final class TCPConstants {
+    
+    /** Prevents instantiation */
+    private TCPConstants() {}
+    
     public static final String TCPTRANSPORT_POLICY_NAMESPACE_URI = "http://java.sun.com/xml/ns/wsit/2006/09/policy/soaptcp/service";
     public static final QName TCPTRANSPORT_POLICY_ASSERTION = new QName(TCPTRANSPORT_POLICY_NAMESPACE_URI, "OptimizedTCPTransport");
+    
+    public static final String CLIENT_TRANSPORT_NS = "http://java.sun.com/xml/ns/wsit/2006/09/policy/transport/client";
+    public static final QName SELECT_OPTIMAL_TRANSPORT_ASSERTION = new QName(CLIENT_TRANSPORT_NS, "AutomaticallySelectOptimalTransport");
+
 }

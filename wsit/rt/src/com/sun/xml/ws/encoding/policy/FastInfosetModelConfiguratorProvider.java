@@ -37,16 +37,14 @@ import com.sun.xml.ws.policy.jaxws.spi.ModelConfiguratorProvider;
 import java.util.Iterator;
 import javax.xml.namespace.QName;
 
+import static com.sun.xml.ws.encoding.policy.EncodingConstants.OPTIMIZED_FI_SERIALIZATION_ASSERTION;
+
 /**
  * A configurator provider for FastInfoset policy assertions.
  *
  * @author Paul.Sandoz@Sun.Com
  */
 public class FastInfosetModelConfiguratorProvider implements ModelConfiguratorProvider{
-    
-    public static final QName fastInfosetAssertion = new QName(
-            "http://java.sun.com/xml/ns/wsit/2006/09/policy/fastinfoset/service",
-            "OptimizedFastInfosetSerialization");
         
     public static final QName enabled = new QName("enabled");
     
@@ -64,14 +62,14 @@ public class FastInfosetModelConfiguratorProvider implements ModelConfiguratorPr
             for (WSDLPort port : service.getPorts()) {
                 PolicyMapKey key = PolicyMap.createWsdlEndpointScopeKey(service.getName(),port.getName());
                 Policy policy = policyMap.getEndpointEffectivePolicy(key);
-                if (null!=policy && policy.contains(fastInfosetAssertion)) {
+                if (null!=policy && policy.contains(OPTIMIZED_FI_SERIALIZATION_ASSERTION)) {
                     Iterator <AssertionSet> assertions = policy.iterator();
                     while(assertions.hasNext()){
                         AssertionSet assertionSet = assertions.next();
                         Iterator<PolicyAssertion> policyAssertion = assertionSet.iterator();
                         while(policyAssertion.hasNext()){
                             PolicyAssertion assertion = policyAssertion.next();
-                            if(assertion.getName().equals(fastInfosetAssertion)){
+                            if(OPTIMIZED_FI_SERIALIZATION_ASSERTION.equals(assertion.getName())){
                                 String value = assertion.getAttributeValue(enabled);
                                 boolean isFastInfosetEnabled = Boolean.valueOf(value.trim());
                                 port.addFeature(new FastInfosetFeature(isFastInfosetEnabled));

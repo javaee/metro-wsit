@@ -25,7 +25,7 @@ package com.sun.xml.ws.policy;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import com.sun.xml.ws.policy.privateutil.LocalizationMessages;
-import com.sun.xml.ws.policy.spi.PolicySelector;
+import com.sun.xml.ws.policy.spi.PolicyAssertionValidator;
 import java.util.Collection;
 import java.util.LinkedList;
 
@@ -41,7 +41,7 @@ public class EffectiveAlternativeSelector {
     
     private enum AssertionFitness {
         UNKNOWN {
-            AssertionFitness considerFitness(PolicySelector.Fitness f) {
+            AssertionFitness considerFitness(PolicyAssertionValidator.Fitness f) {
                 switch (f) {
                     case UNKNOWN:
                         return AssertionFitness.UNKNOWN;
@@ -54,7 +54,7 @@ public class EffectiveAlternativeSelector {
             }
         },
         SUPPORTED {
-            AssertionFitness considerFitness(PolicySelector.Fitness f) {
+            AssertionFitness considerFitness(PolicyAssertionValidator.Fitness f) {
                 switch (f) {
                     case UNKNOWN:
                         return AssertionFitness.SUPPORTED;
@@ -67,7 +67,7 @@ public class EffectiveAlternativeSelector {
             }
         },
         UNSUPPORTED {
-            AssertionFitness considerFitness(PolicySelector.Fitness f) {
+            AssertionFitness considerFitness(PolicyAssertionValidator.Fitness f) {
                 switch (f) {
                     case UNKNOWN:
                         return AssertionFitness.UNSUPPORTED;
@@ -80,12 +80,12 @@ public class EffectiveAlternativeSelector {
             }
         },
         AMBIVALENT {
-            AssertionFitness considerFitness(PolicySelector.Fitness f) {
+            AssertionFitness considerFitness(PolicyAssertionValidator.Fitness f) {
                 return AssertionFitness.AMBIVALENT;
             }
         };
         
-        abstract AssertionFitness considerFitness(PolicySelector.Fitness f);
+        abstract AssertionFitness considerFitness(PolicyAssertionValidator.Fitness f);
     }
     
     
@@ -179,12 +179,12 @@ public class EffectiveAlternativeSelector {
         abstract AlternativeFitness considerFitness(AssertionFitness f);
     }
     
-    private static PolicySelector[] selectors = null;
+    private static PolicyAssertionValidator[] selectors = null;
     private static final PolicyLogger logger = PolicyLogger.getLogger(EffectiveAlternativeSelector.class);
     
-    private static PolicySelector[] getSelectors() {
+    private static PolicyAssertionValidator[] getSelectors() {
         if (selectors == null) {
-            selectors = PolicyUtils.ServiceProvider.load(PolicySelector.class);
+            selectors = PolicyUtils.ServiceProvider.load(PolicyAssertionValidator.class);
         }
         return selectors;
     }
@@ -205,7 +205,7 @@ public class EffectiveAlternativeSelector {
      * @param selectors to be used
      */
     public static final void doSelection(EffectivePolicyModifier modifier
-            , PolicySelector[] selectors) throws PolicyException {
+            , PolicyAssertionValidator[] selectors) throws PolicyException {
         
         PolicyMap map = modifier.getMap();
         
@@ -237,7 +237,7 @@ public class EffectiveAlternativeSelector {
     }
     
     private static Policy getNewEffectivePolicy(
-            Policy oldPolicy, PolicySelector[] selectors) throws PolicyException {
+            Policy oldPolicy, PolicyAssertionValidator[] selectors) throws PolicyException {
         
         if(null==selectors || selectors.length==0) {
             logger.warning("getNewEffectivePolicy", LocalizationMessages.NO_POLICY_SELECTORS_FOUND());
@@ -250,8 +250,8 @@ public class EffectiveAlternativeSelector {
             AlternativeFitness alternativeFitness = AlternativeFitness.UNEVALUATED;
             for ( PolicyAssertion assertion : alternative ) {  // foreach assertion in alternative
                 AssertionFitness assertionFitness = AssertionFitness.UNKNOWN;
-                for ( PolicySelector selector : selectors ) {   // foreach selector
-                    assertionFitness = assertionFitness.considerFitness(selector.getFitness(assertion));
+                for ( PolicyAssertionValidator selector : selectors ) {   // foreach selector
+                    assertionFitness = assertionFitness.considerFitness(selector.validateClientSide(assertion));
                 } // end foreach selector
                 alternativeFitness = alternativeFitness.considerFitness(assertionFitness);
                 if (assertionFitness == assertionFitness.UNKNOWN) {
@@ -283,7 +283,7 @@ public class EffectiveAlternativeSelector {
         Collection<AssertionSet> alternativeSet = new LinkedList<AssertionSet>();
         alternativeSet.add(alternativePickedSoFar);
         logger.warning("getNewEffectivePolicy", 
-                LocalizationMessages.SUBOPTIMAL_ALTERNATIVE_PICKED_WITH_FITNESS(bestFitnessSoFar));
+                LocalizationMessages.SUBOPTIMAL_ALTERNATIVE_PICKED_WITH_FITNESS(bestFitnessSoFar));        
         return Policy.createPolicy(oldPolicy.getName(), oldPolicy.getId(), alternativeSet);
     }
     
