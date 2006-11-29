@@ -187,6 +187,8 @@ public class PolicyResolverImpl implements PolicyResolver{
             operation = cachedOperation;
         }else{
             operation = msg.getOperation(pipeConfig.getWSDLModel());
+            if(operation == null)
+                operation = getWSDLOpFromAction();
         }
         
         SecurityPolicyHolder sph = (SecurityPolicyHolder) inMessagePolicyMap.get(operation);

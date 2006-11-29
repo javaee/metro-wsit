@@ -219,6 +219,10 @@ public class SecurityServerPipe extends SecurityPipeBase {
         
         if(!isSCIssueMessage ){
             cachedOperation = msg.getOperation(pipeConfig.getWSDLModel());
+            if(cachedOperation == null){
+                if(addVer != null)
+                    cachedOperation = getWSDLOpFromAction(packet, true);
+            }
         }
         
         Packet retPacket = null;
