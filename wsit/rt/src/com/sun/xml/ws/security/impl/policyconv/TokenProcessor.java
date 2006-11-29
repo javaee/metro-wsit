@@ -175,6 +175,7 @@ public class TokenProcessor {
             AuthenticationTokenPolicy.SAMLAssertionBinding  key = null;
             key  = new AuthenticationTokenPolicy.SAMLAssertionBinding();
             setTokenInclusion(key,token);
+            key.setAssertionType(AuthenticationTokenPolicy.SAMLAssertionBinding.SV_ASSERTION);
             //key.setPolicyToken(token);
             key.setUUID(token.getTokenId());
             return key;
