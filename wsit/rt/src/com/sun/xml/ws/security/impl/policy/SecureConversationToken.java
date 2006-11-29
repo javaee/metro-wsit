@@ -54,7 +54,7 @@ public class SecureConversationToken extends PolicyAssertion implements com.sun.
     private static QName itQname = new QName(Constants.SECURITY_POLICY_NS, Constants.IncludeToken);
     private NestedPolicy bootstrapPolicy = null;
     private String id = null;
-    protected String includeToken = null;
+    protected String includeToken = Token.INCLUDE_ALWAYS;
     private boolean populated = false;
     private PolicyAssertion rdKey = null;
     private Set<String> referenceType = null;
@@ -141,7 +141,9 @@ public class SecureConversationToken extends PolicyAssertion implements com.sun.
         }
         synchronized (this.getClass()){
             if(!populated){
-                includeToken = getAttributeValue(itQname);
+                String tmp = getAttributeValue(itQname);
+                if(tmp != null)
+                    includeToken = tmp;
                 NestedPolicy policy = this.getNestedPolicy();
                 if(policy == null){
                     if(logger.getLevel() == Level.FINE){
