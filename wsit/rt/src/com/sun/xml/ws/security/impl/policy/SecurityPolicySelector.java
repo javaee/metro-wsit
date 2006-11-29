@@ -118,7 +118,7 @@ public class SecurityPolicySelector implements PolicySelector{
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,SupportingTokens));
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,SignedSupportingTokens));
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,EndorsingSupportingTokens));
-        
+        supportedAssertions.add(new QName(SECURITY_POLICY_NS,SignedEndorsingSupportingTokens));
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,MustSupportRefKeyIdentifier));
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,MustSupportRefIssuerSerial));
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,MustSupportRefExternalURI));
