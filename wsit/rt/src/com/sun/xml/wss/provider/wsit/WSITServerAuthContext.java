@@ -303,7 +303,13 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         }
         
         if(!isSCIssueMessage ){
-            cacheOperation (msg, packet);
+            WSDLBoundOperation cachedOperation = cacheOperation (msg, packet);
+            if(cachedOperation == null){
+                if(addVer != null) {
+                    cachedOperation = getWSDLOpFromAction(packet, true);
+                    packet.invocationProperties.put("WSDL_BOUND_OPERATION", cachedOperation);
+                }
+            }
         }
         
         sharedState.put("VALIDATE_REQ_PACKET", packet);
@@ -405,9 +411,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         }else{
             ctx = new ProcessingContextImpl( packet.invocationProperties);
         }
-        // set the policy, issued-token-map, and extraneous properties
-        ctx.setIssuedTokenContextMap(issuedTokenContextMap);
-        ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
+        
         try {
             MessagePolicy policy = null;
             if (packet.getMessage().isFault()) {
@@ -433,6 +437,9 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
             if (policy != null) {
                 ctx.setSecurityPolicy(policy);
             }
+            // set the policy, issued-token-map, and extraneous properties
+            ctx.setIssuedTokenContextMap(issuedTokenContextMap);
+            ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
             ctx.setSecurityEnvironment(secEnv);
             ctx.isInboundMessage(false);
         } catch (XWSSecurityException e) {

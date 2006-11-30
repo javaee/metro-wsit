@@ -393,9 +393,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
         }else{
             ctx = new ProcessingContextImpl( packet.invocationProperties);
         }
-        // set the policy, issued-token-map, and extraneous properties
-        ctx.setIssuedTokenContextMap(issuedTokenContextMap);
-        ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
+        
         try {
             MessagePolicy policy = null;
             if (packet.getMessage().isFault()) {
@@ -421,6 +419,9 @@ public class SecurityServerPipe extends SecurityPipeBase {
             if (policy != null) {
                 ctx.setSecurityPolicy(policy);
             }
+            // set the policy, issued-token-map, and extraneous properties
+            ctx.setIssuedTokenContextMap(issuedTokenContextMap);
+            ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
             ctx.setSecurityEnvironment(secEnv);
             ctx.isInboundMessage(false);
         } catch (XWSSecurityException e) {
