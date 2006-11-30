@@ -105,6 +105,7 @@ import com.sun.xml.wss.saml.SAMLAssertionFactory;
 import com.sun.xml.wss.saml.SAMLException;
 import com.sun.xml.wss.saml.SubjectConfirmation;
 import com.sun.xml.wss.saml.SubjectConfirmationData;
+import com.sun.xml.wss.saml.KeyInfoConfirmationData;
 import com.sun.xml.wss.saml.internal.saml11.jaxb20.AssertionType;
 
 import javax.security.auth.Subject;
@@ -123,7 +124,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+//import org.w3c.dom.Element;
+import org.w3c.dom.*;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -177,7 +179,7 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
             //javax.xml.bind.Unmarshaller u = eleFac.getContext().createUnmarshaller();
             //JAXBElement<AssertionType> aType = u.unmarshal(signedAssertion, AssertionType.class);
             //assertion =  new com.sun.xml.wss.saml.assertion.saml11.jaxb20.Assertion(aType.getValue());
-            token = new GenericToken(signedAssertion);
+            //token = new GenericToken(signedAssertion);
             
             if (config.getEncryptIssuedToken()){
                 // Create the encryption key 
@@ -306,7 +308,8 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
                 }
             }else{
                 BinarySecret bs = eleFac.createBinarySecret(key, BinarySecret.SYMMETRIC_KEY_TYPE);
-                keyInfo.addUnknownElement(eleFac.toElement(bs,doc));
+                Element bsEle= eleFac.toElement(bs,doc);
+                keyInfo.addUnknownElement(bsEle);
             }
        }else if(WSTrustConstants.PUBLIC_KEY.equals(keyType)){
             X509Data x509data = new X509Data(doc);
@@ -401,11 +404,13 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
 
             // Create Subject
             
-            SubjectConfirmationData subjComfData = samlFac.createSubjectConfirmationData(
-                    null, null, issueInst, notOnOrAfter, appliesTo, keyInfo.getElement());
+           // SubjectConfirmationData subjComfData = samlFac.createSubjectConfirmationData(
+                   // null, null, null, null, appliesTo, keyInfo.getElement());
+            
+            KeyInfoConfirmationData keyInfoConfData = samlFac.createKeyInfoConfirmationData(keyInfo.getElement());
 
             SubjectConfirmation subjectConfirmation = samlFac.createSubjectConfirmation(
-                null, subjComfData, SAML_HOLDER_OF_KEY);
+                null, keyInfoConfData, SAML_HOLDER_OF_KEY);
 
             com.sun.xml.wss.saml.Subject subj = null;
             QName principal = (QName)claimedAttrs.get(PRINCIPAL);
