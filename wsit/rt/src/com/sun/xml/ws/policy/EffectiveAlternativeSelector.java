@@ -179,67 +179,52 @@ public class EffectiveAlternativeSelector {
         abstract AlternativeFitness considerFitness(AssertionFitness f);
     }
     
-    private static PolicyAssertionValidator[] selectors = null;
     private static final PolicyLogger logger = PolicyLogger.getLogger(EffectiveAlternativeSelector.class);
-    
-    private static PolicyAssertionValidator[] getSelectors() {
-        if (selectors == null) {
-            selectors = PolicyUtils.ServiceProvider.load(PolicyAssertionValidator.class);
-        }
-        return selectors;
-    }
-    
+            
     /**
-     * Does the selection using implicit policy selectors 
-     *
+     * 
+     * Does the selection for policy map bound to given modifier using only the given validators 
+     * 
+     * 
      * @param modifier @see EffectivePolicyModifier which the map is bound to
-     */
-    public static final void doSelection(EffectivePolicyModifier modifier) throws PolicyException {
-        doSelection(modifier, getSelectors());
-    }
-    
-    /** 
-     * Does the selection for policy map bound to given modifier using only the given selectors 
-     *
-     * @param modifier @see EffectivePolicyModifier which the map is bound to
-     * @param selectors to be used
+     * @param validators to be used
      */
     public static final void doSelection(EffectivePolicyModifier modifier
-            , PolicyAssertionValidator[] selectors) throws PolicyException {
+            , PolicyAssertionValidator... validators) throws PolicyException {
         
         PolicyMap map = modifier.getMap();
         
         for (PolicyMapKey mapKey : map.getAllServiceScopeKeys()) {
             modifier.setNewEffectivePolicyForServiceScope(mapKey
-                    ,getNewEffectivePolicy(map.getServiceEffectivePolicy(mapKey),selectors));
+                    ,getNewEffectivePolicy(map.getServiceEffectivePolicy(mapKey),validators));
         }
         for (PolicyMapKey mapKey : map.getAllEndpointScopeKeys()) {
             modifier.setNewEffectivePolicyForEndpointScope(mapKey
-                    ,getNewEffectivePolicy(map.getEndpointEffectivePolicy(mapKey),selectors));
+                    ,getNewEffectivePolicy(map.getEndpointEffectivePolicy(mapKey),validators));
         }
         for (PolicyMapKey mapKey : map.getAllOperationScopeKeys()) {
             modifier.setNewEffectivePolicyForOperationScope(mapKey
-                    ,getNewEffectivePolicy(map.getOperationEffectivePolicy(mapKey),selectors));
+                    ,getNewEffectivePolicy(map.getOperationEffectivePolicy(mapKey),validators));
         }
         for (PolicyMapKey mapKey : map.getAllInputMessageScopeKeys()) {
             modifier.setNewEffectivePolicyForInputMessageScope(mapKey
-                    ,getNewEffectivePolicy(map.getInputMessageEffectivePolicy(mapKey),selectors));
+                    ,getNewEffectivePolicy(map.getInputMessageEffectivePolicy(mapKey),validators));
         }
         for (PolicyMapKey mapKey : map.getAllOutputMessageScopeKeys()) {
             modifier.setNewEffectivePolicyForOutputMessageScope(mapKey
-                    ,getNewEffectivePolicy(map.getOutputMessageEffectivePolicy(mapKey),selectors));
+                    ,getNewEffectivePolicy(map.getOutputMessageEffectivePolicy(mapKey),validators));
         }
         for (PolicyMapKey mapKey : map.getAllFaultMessageScopeKeys()) {
             modifier.setNewEffectivePolicyForFaultMessageScope(mapKey
-                    ,getNewEffectivePolicy(map.getFaultMessageEffectivePolicy(mapKey),selectors));
+                    ,getNewEffectivePolicy(map.getFaultMessageEffectivePolicy(mapKey),validators));
         }
         
     }
     
     private static Policy getNewEffectivePolicy(
-            Policy oldPolicy, PolicyAssertionValidator[] selectors) throws PolicyException {
+            Policy oldPolicy, PolicyAssertionValidator[] validators) throws PolicyException {
         
-        if(null==selectors || selectors.length==0) {
+        if(null==validators || validators.length==0) {
             logger.warning("getNewEffectivePolicy", LocalizationMessages.NO_POLICY_SELECTORS_FOUND());
         }
         
@@ -250,7 +235,7 @@ public class EffectiveAlternativeSelector {
             AlternativeFitness alternativeFitness = AlternativeFitness.UNEVALUATED;
             for ( PolicyAssertion assertion : alternative ) {  // foreach assertion in alternative
                 AssertionFitness assertionFitness = AssertionFitness.UNKNOWN;
-                for ( PolicyAssertionValidator selector : selectors ) {   // foreach selector
+                for ( PolicyAssertionValidator selector : validators ) {   // foreach selector
                     assertionFitness = assertionFitness.considerFitness(selector.validateClientSide(assertion));
                 } // end foreach selector
                 alternativeFitness = alternativeFitness.considerFitness(assertionFitness);

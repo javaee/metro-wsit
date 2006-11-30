@@ -55,6 +55,41 @@ public class PolicyMapTest extends TestCase {
         assertNotNull("Policy map instance should not be null", PolicyMap.createPolicyMap(Arrays.asList(new PolicyMapMutator[] {PolicyMapExtender.createPolicyMapExtender()})));                
     }
     
+    public void testPolicyMapIterator() throws Exception {
+        PolicyMapExtender extender = PolicyMapExtender.createPolicyMapExtender();
+        PolicyMap map = PolicyMap.createPolicyMap(Arrays.asList(new PolicyMapMutator[] {extender}));        
+
+        PolicySubject subject = new PolicySubject("dummy", Policy.createEmptyPolicy());
+        
+        PolicyMapKey key = map.createWsdlServiceScopeKey(new QName("1"));
+        extender.putServiceSubject(key, subject);
+        key = map.createWsdlServiceScopeKey(new QName("2"));
+        extender.putServiceSubject(key, subject);
+        
+        key = map.createWsdlEndpointScopeKey(new QName("3"), new QName("port"));
+        extender.putEndpointSubject(key, subject);
+        key = map.createWsdlEndpointScopeKey(new QName("4"), new QName("port"));
+        extender.putEndpointSubject(key, subject);
+        key = map.createWsdlEndpointScopeKey(new QName("5"), new QName("port"));
+        extender.putEndpointSubject(key, subject);
+
+        key = map.createWsdlMessageScopeKey(new QName("6"), new QName("port"), new QName("operation"));
+        extender.putInputMessageSubject(key, subject);
+
+        key = map.createWsdlMessageScopeKey(new QName("7"), new QName("port"), new QName("operation"));
+        extender.putOutputMessageSubject(key, subject);
+        
+        key = map.createWsdlMessageScopeKey(new QName("8"), new QName("port"), new QName("operation"));
+        extender.putFaultMessageSubject(key, subject);
+        
+        int counter = 0;
+        for (Policy policy : map) {
+            counter++;
+        }
+        
+        assertEquals("Did not iterate over expected number of policies.", 8, counter);        
+    }
+    
     public void testIsEmpty() {
         PolicyMap map = PolicyMap.createPolicyMap(null);
         assertTrue(map.isEmpty());

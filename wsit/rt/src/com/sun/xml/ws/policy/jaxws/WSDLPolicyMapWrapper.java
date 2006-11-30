@@ -22,11 +22,13 @@
 
 package com.sun.xml.ws.policy.jaxws;
 
+import com.sun.xml.ws.policy.PolicyAssertion;
 import javax.xml.namespace.QName;
 import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.ws.WebServiceException;
 import com.sun.xml.ws.api.model.wsdl.WSDLExtension;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
+import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.PolicyMapExtender;
 import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.policy.PolicySubject;
@@ -40,6 +42,7 @@ import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import com.sun.xml.ws.policy.jaxws.spi.ModelConfiguratorProvider;
 import com.sun.xml.ws.policy.jaxws.spi.PolicyMapUpdateProvider;
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
+import com.sun.xml.ws.policy.spi.PolicyAssertionValidator;
 import java.net.URL;
 
 /**
@@ -55,6 +58,12 @@ public class WSDLPolicyMapWrapper implements WSDLExtension {
     private PolicyMap policyMap;
     private EffectivePolicyModifier mapModifier;
     private PolicyMapExtender mapExtender;
+    
+    private static final PolicyAssertionValidator[] validators;
+    static {
+        validators = PolicyUtils.ServiceProvider.load(PolicyAssertionValidator.class);
+    }
+    
     
     private static ModelConfiguratorProvider[] getModelConfiguratorProviders() {
         if (configurators == null) {
@@ -131,11 +140,27 @@ public class WSDLPolicyMapWrapper implements WSDLExtension {
         logger.exiting("addClientToServerMap");
     }
     
-    public void doAlternativeSelection() {
-        try {
-            EffectiveAlternativeSelector.doSelection(mapModifier);
-        } catch (PolicyException e) {
-            throw new WebServiceException("Failed to find a valid policy alternative", e);
+    public void doAlternativeSelection() throws PolicyException {
+        EffectiveAlternativeSelector.doSelection(mapModifier, validators);
+    }
+    
+    void validateServerSidePolicies() throws PolicyException {
+        for (Policy policy : policyMap) {
+            
+            // TODO:  here is a good place to check if the actual policy has only one alternative...
+
+            for (AssertionSet assertionSet : policy) {
+                nextAssertion: for (PolicyAssertion assertion : assertionSet) {
+                    
+                    for (PolicyAssertionValidator validator : validators) {
+                        if (validator.validateServerSide(assertion) == PolicyAssertionValidator.Fitness.SUPPORTED) {
+                            continue nextAssertion;
+                        }
+                    }                    
+                    throw new PolicyException("Assertion not supported on the server side: [" + assertion.getName() + "]");
+                    
+                }
+            }
         }
     }
     

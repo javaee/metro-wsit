@@ -1143,9 +1143,18 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
                     throw new WebServiceException(pe);
                 }
                 logger.fine("postFinished", LocalizationMessages.INVOKING_CLIENT_POLICY_ALTERNATIVE_SELECTION());
-                mapWrapper.doAlternativeSelection();
+                try {
+                    mapWrapper.doAlternativeSelection();
+                } catch (PolicyException e) {
+                    throw new WebServiceException("Failed to find a valid policy alternative", e);
+                }
             } else { //server side
-                                
+                try {
+                    mapWrapper.validateServerSidePolicies();
+                } catch (PolicyException e) {
+                    logger.warning("postFinished", e.getMessage());
+                    // throw new WebServiceException("Failed to validate server side policies", e);
+                }
             }
             mapWrapper.configureModel(context.getWSDLModel());
         }

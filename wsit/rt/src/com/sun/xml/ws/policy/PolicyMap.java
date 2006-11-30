@@ -3,12 +3,12 @@
  * of the Common Development and Distribution License
  * (the License).  You may not use this file except in
  * compliance with the License.
- * 
+ *
  * You can obtain a copy of the license at
  * https://glassfish.dev.java.net/public/CDDLv1.0.html.
  * See the License for the specific language governing
  * permissions and limitations under the License.
- * 
+ *
  * When distributing Covered Code, include this CDDL
  * Header Notice in each file and include the License file
  * at https://glassfish.dev.java.net/public/CDDLv1.0.html.
@@ -16,17 +16,20 @@
  * with the fields enclosed by brackets [] replaced by
  * you own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * 
+ *
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
 package com.sun.xml.ws.policy;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import javax.xml.namespace.QName;
 
@@ -39,7 +42,7 @@ import javax.xml.namespace.QName;
  *
  * TODO: rename createWsdlMessageScopeKey to createWsdlInputOutputMessageScopeKey
  */
-public final class PolicyMap {
+public final class PolicyMap implements Iterable<Policy> {
     static enum ScopeType {
         SERVICE,
         ENDPOINT,
@@ -49,7 +52,7 @@ public final class PolicyMap {
         FAULT_MESSAGE
     }
     
-    private static final class ScopeMap {
+    private static final class ScopeMap implements Iterable<Policy> {
         private Map<PolicyMapKey, PolicyScope> internalMap = new HashMap<PolicyMapKey, PolicyScope>();
         private PolicyMapKeyHandler scopeKeyHandler;
         private PolicyMerger merger;
@@ -87,7 +90,7 @@ public final class PolicyMap {
             PolicySubject subject = new PolicySubject(key, newEffectivePolicy);
             
             PolicyMapKey localKey = createLocalCopy(key);
-            PolicyScope scope = internalMap.get(localKey);            
+            PolicyScope scope = internalMap.get(localKey);
             if (scope == null) {
                 List<PolicySubject> list = new LinkedList<PolicySubject>();
                 list.add(subject);
@@ -115,6 +118,29 @@ public final class PolicyMap {
             localKeyCopy.setHandler(scopeKeyHandler);
             
             return localKeyCopy;
+        }
+        
+        public Iterator<Policy> iterator() {
+            return new Iterator<Policy> () {
+                private final Iterator<PolicyMapKey> keysIterator = internalMap.keySet().iterator();
+                
+                public boolean hasNext() {
+                    return keysIterator.hasNext();
+                }
+                
+                public Policy next() {
+                    PolicyMapKey key = keysIterator.next();
+                    try {
+                        return getEffectivePolicy(key);
+                    } catch (PolicyException e) {
+                        throw new java.lang.IllegalStateException("Exception occured while retrieving effective policy for given key [" + key + "]", e);
+                    }
+                }
+                
+                public void remove() {
+                    throw new UnsupportedOperationException("Remove operation not supported by this iterator.");
+                }
+            };
         }
         
         public boolean isEmpty() {
@@ -162,7 +188,7 @@ public final class PolicyMap {
         }
     });
     
-    private PolicyMapKeyHandler operationAndInputOutputMessageKeyHandler = new PolicyMapKeyHandler() { 
+    private PolicyMapKeyHandler operationAndInputOutputMessageKeyHandler = new PolicyMapKeyHandler() {
         // we use the same algorithm to handle operation and input/output message keys
         
         public boolean areEqual(PolicyMapKey key1, PolicyMapKey key2) {
@@ -432,11 +458,11 @@ public final class PolicyMap {
     /*
      * TODO: reconsider this QUICK HACK FOR J1
      */
-    public boolean isInputMessageSubject (PolicySubject subject) {
+    public boolean isInputMessageSubject(PolicySubject subject) {
         for (PolicyScope scope : inputMessageMap.getStoredScopes()) {
             if (scope.getPolicySubjects().contains(subject)) {
                 return true;
-            } 
+            }
         }
         return false;
     }
@@ -444,7 +470,7 @@ public final class PolicyMap {
     /*
      * TODO: reconsider this QUICK HACK FOR J1
      */
-    public boolean isOutputMessageSubject (PolicySubject subject) {
+    public boolean isOutputMessageSubject(PolicySubject subject) {
         for (PolicyScope scope : outputMessageMap.getStoredScopes()) {
             if (scope.getPolicySubjects().contains(subject)) {
                 return true;
@@ -453,7 +479,7 @@ public final class PolicyMap {
         return false;
     }
     
-
+    
     /**
      * Returns true if this map contains no key - policy pairs
      *
@@ -463,10 +489,10 @@ public final class PolicyMap {
      */
     public boolean isEmpty() {
         return serviceMap.isEmpty() && endpointMap.isEmpty() &&
-               operationMap.isEmpty() && inputMessageMap.isEmpty() &&
-               outputMessageMap.isEmpty() && faultMessageMap.isEmpty();
+                operationMap.isEmpty() && inputMessageMap.isEmpty() &&
+                outputMessageMap.isEmpty() && faultMessageMap.isEmpty();
     }
-
+    
     
     /**
      * Add all subjects in the given map to the collection
@@ -540,7 +566,7 @@ public final class PolicyMap {
     public static PolicyMapKey createWsdlMessageScopeKey(QName service, QName port, QName operation) throws NullPointerException {
         return createOperationOrInputOutputMessageKey(service, port, operation);
     }
-
+    
     /**
      * Creates an fault message policy scope <emph>locator</emph> object identified by a bound operation, that serves as a
      * access key into {@code PolicyMap} where actual fault message policy scope for given input message of a bound operation
@@ -568,7 +594,7 @@ public final class PolicyMap {
         if (service == null || port == null || operation == null) {
             throw new NullPointerException("Parameters must not be 'null': service='" + service + "', port='" + port + "', operation='" + operation + "'");
         }
-
+        
         return new PolicyMapKey(service, port, operation);
     }
     
@@ -594,6 +620,50 @@ public final class PolicyMap {
             result.append("\nFaultMessageMap=").append(this.faultMessageMap);
         }
         return result.toString();
+    }
+    
+    public Iterator<Policy> iterator() {
+        return new Iterator<Policy> () {
+            private final Iterator<Iterator<Policy>> mainIterator;
+            private Iterator<Policy> currentScopeIterator;
+            
+            { // instance initialization
+                Collection<Iterator<Policy>> scopeIterators = new ArrayList<Iterator<Policy>>(6);
+                scopeIterators.add(serviceMap.iterator());
+                scopeIterators.add(endpointMap.iterator());
+                scopeIterators.add(operationMap.iterator());
+                scopeIterators.add(inputMessageMap.iterator());
+                scopeIterators.add(outputMessageMap.iterator());
+                scopeIterators.add(faultMessageMap.iterator());
+                
+                mainIterator = scopeIterators.iterator();
+                currentScopeIterator = mainIterator.next();
+            }
+            
+            public boolean hasNext() {
+                while (!currentScopeIterator.hasNext()) {
+                    if (mainIterator.hasNext()) {
+                        currentScopeIterator = mainIterator.next();
+                    } else {
+                        return false;
+                    }
+                }
+                
+                return true;
+            }
+            
+            public Policy next() {
+                if (hasNext()) {
+                    return currentScopeIterator.next();
+                }
+                
+                throw new NoSuchElementException("There are no more elements in the policy map.");
+            }
+            
+            public void remove() {
+                throw new UnsupportedOperationException("Remove operation not supported by this iterator.");
+            }
+        };
     }
     
 }
