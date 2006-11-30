@@ -118,6 +118,10 @@ public abstract class BindingProcessor {
     
     //TODO:WS-SX Spec:If we have a secondary signature should it protect the token too ?
     protected void protectToken(WSSPolicy token){
+        protectToken(token,false);
+    }
+    
+    protected void protectToken(WSSPolicy token,boolean ignoreSTR){
         String uid = token.getUUID();
         if(PolicyTypeUtil.x509CertificateBinding(token)){
             uid = ((AuthenticationTokenPolicy.X509CertificateBinding)token).getSTRID();
@@ -133,14 +137,22 @@ public abstract class BindingProcessor {
             }
         }
         //TODO:: Handle DTK and IssuedToken.
-        if ( uid != null ) {
+        if(!ignoreSTR){
+            if ( uid != null ) {
+                SignatureTargetCreator stc = iAP.getTargetCreator();
+                SignatureTarget st = stc.newURISignatureTarget(uid);
+                stc.addSTRTransform(st);
+                SignaturePolicy.FeatureBinding fb = (com.sun.xml.wss.impl.policy.mls.SignaturePolicy.FeatureBinding) primarySP.getFeatureBinding();
+                fb.addTargetBinding(st);
+            }
+        }else{
             SignatureTargetCreator stc = iAP.getTargetCreator();
-            SignatureTarget st = stc.newURISignatureTarget(uid);
-            stc.addSTRTransform(st);
+            SignatureTarget st = stc.newURISignatureTarget(token.getUUID());
             SignaturePolicy.FeatureBinding fb = (com.sun.xml.wss.impl.policy.mls.SignaturePolicy.FeatureBinding) primarySP.getFeatureBinding();
             fb.addTargetBinding(st);
         }
     }
+    
     
     protected abstract EncryptionPolicy getSecondaryEncryptionPolicy() throws PolicyException;
     

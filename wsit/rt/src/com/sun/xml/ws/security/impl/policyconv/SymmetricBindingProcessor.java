@@ -36,6 +36,7 @@ import com.sun.xml.ws.security.policy.SymmetricBinding;
 import com.sun.xml.ws.security.policy.Token;
 import com.sun.xml.ws.security.policy.X509Token;
 import com.sun.xml.wss.impl.MessageConstants;
+import com.sun.xml.wss.impl.PolicyTypeUtil;
 import com.sun.xml.wss.impl.policy.mls.AuthenticationTokenPolicy;
 import com.sun.xml.wss.impl.policy.mls.DerivedTokenKeyBinding;
 import com.sun.xml.wss.impl.policy.mls.EncryptionPolicy;
@@ -126,8 +127,13 @@ public class SymmetricBindingProcessor extends BindingProcessor{
         if(binding.isIncludeTimeStamp()){
             protectTimestamp();
         }
-        if(binding.getTokenProtection()){
-            protectToken((WSSPolicy) primarySP.getKeyBinding());
+        if(binding.getTokenProtection()){         
+            WSSPolicy policy = (WSSPolicy) primarySP.getKeyBinding();
+            if(PolicyTypeUtil.derivedTokenKeyBinding(policy)){
+                protectToken(policy,true);
+            }else{
+                protectToken((WSSPolicy) policy.getKeyBinding(),true);
+            }
         }
         
     }
