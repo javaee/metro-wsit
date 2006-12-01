@@ -1148,7 +1148,7 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
                 } catch (PolicyException e) {
                     throw new WebServiceException("Failed to find a valid policy alternative", e);
                 }
-            } else { //server side
+            } else if (!context.isClientSide() && !isForConfigFile) { //server side
                 try {
                     mapWrapper.validateServerSidePolicies();
                 } catch (PolicyException e) {
