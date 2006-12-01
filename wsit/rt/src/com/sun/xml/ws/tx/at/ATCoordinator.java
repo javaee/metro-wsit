@@ -86,11 +86,11 @@ import java.util.logging.Level;
  *
  * @author Ryan.Shoemaker@Sun.COM
  * @author Joe.Fialli@Sun.COM
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @since 1.0
  */
 public class ATCoordinator extends Coordinator implements Synchronization, XAResource {
-    // TODO: workaround until jaxws-ri stateful webservice can compute this URI 
+    // TODO: workaround until jaxws-ri stateful webservice can compute this URI
     public static final URI localCoordinationProtocolServiceURI =
             Util.createURI(WSTX_WS_URL_PREFIX, null, WSTX_WS_PORT, "/wstx-services/wsat/coordinator");
 
@@ -202,11 +202,17 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
      * @return the list of Registrant objects
      */
     public List<Registrant> getRegistrants() {
-        final ArrayList<Registrant> list =
-                new ArrayList<Registrant>(volatileParticipants.size() + durableParticipants.size() + 1);
+        final ArrayList<Registrant> list;
+        if(completionRegistrant != null) {
+            list = new ArrayList<Registrant>(volatileParticipants.size() + durableParticipants.size() + 1);
+        } else {
+            list = new ArrayList<Registrant>(volatileParticipants.size() + durableParticipants.size());
+        }
         list.addAll(volatileParticipants.values());
         list.addAll(durableParticipants.values());
-        list.add(completionRegistrant);
+        if(completionRegistrant != null) {
+            list.add(completionRegistrant);
+        }
         return Collections.unmodifiableList(list);
     }
 
@@ -230,7 +236,6 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
      */
     @Override
     public void addRegistrant(Registrant registrant) {
-        super.addRegistrant(registrant);
         if (! allowNewParticipants) {
             // TODO: send fault S4.1 ws:coor Invalid State ?
             throw new IllegalStateException(LocalizationMessages.LATE_PARTICIPANT_REGISTRATION());
@@ -279,6 +284,10 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
         return r;
     }
 
+    public void removeRegistrant(String id) {
+        // TODO: implement
+    }
+
     /**
      * Return a Collection of volatile 2pc participants.
      * <p/>
@@ -293,7 +302,7 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
     public Collection<ATParticipant> getVolatileParticipantsSnapshot() {
         // Try an alternative to clone to get rid unchecked cast warning
         // (HashMap<String, ATParticipant>) volatileParticipants.clone();
-        HashMap<String, ATParticipant> vp = 
+        HashMap<String, ATParticipant> vp =
                 new HashMap<String, ATParticipant>(volatileParticipants);
         return vp.values();
     }
@@ -934,7 +943,7 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
     }
 
     public int getTransactionTimeout() throws XAException {
-        return (int)(getExpires() / 1000L); 
+        return (int)(getExpires() / 1000L);
     }
 
     public boolean isSameRM(XAResource xAResource) throws XAException {
@@ -1154,5 +1163,14 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
             localCoordinatorProtocolService = epr;
         }
         return localCoordinatorProtocolService;
+    }
+
+    public boolean expirationGuard() {
+        // TODO: implement
+        return true;
+    }
+
+    public void forget() {
+        // TODO: implement
     }
 }    

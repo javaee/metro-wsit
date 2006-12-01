@@ -115,7 +115,7 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
 
     public long getDefaultTransactionTimeout() {
         // TODO: get this default from application server's transaction default timeout property
-        return 37376L;
+        return 120000L;
     }
 
 

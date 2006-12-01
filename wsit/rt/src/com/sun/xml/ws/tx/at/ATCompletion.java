@@ -33,7 +33,7 @@ import javax.xml.ws.EndpointReference;
  * This class encapsulates a WS-AT completion registrant
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 1.0
  */
 public class ATCompletion extends Registrant {
@@ -63,8 +63,7 @@ public class ATCompletion extends Registrant {
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
-    public boolean expirationGuard() {
-        throw new UnsupportedOperationException();
+    public void forget() {
+        // TODO: implement
     }
-
 }

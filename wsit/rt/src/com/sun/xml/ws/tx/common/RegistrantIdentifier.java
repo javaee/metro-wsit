@@ -22,6 +22,7 @@
 package com.sun.xml.ws.tx.common;
 
 import static com.sun.xml.ws.tx.common.Constants.WSCOOR_SUN_URI;
+import com.sun.istack.NotNull;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.namespace.QName;
@@ -40,10 +41,11 @@ public class RegistrantIdentifier extends Identifier {
     public RegistrantIdentifier() {
     }
 
-    public RegistrantIdentifier(String id) {
+    public RegistrantIdentifier(@NotNull String id) {
         value = id;
     }
 
+    @NotNull
     public QName getName() {
         return QNAME;
     }

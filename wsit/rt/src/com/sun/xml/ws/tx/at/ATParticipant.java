@@ -68,7 +68,7 @@ import java.util.logging.Level;
  * already decided to prepare.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 1.0
  */
 public class ATParticipant extends Registrant {
@@ -635,10 +635,6 @@ public class ATParticipant extends Registrant {
 
     protected String getCoordIdPartId() {
         return " coordId=" + getCoordinator().getIdValue() + " partId=" + getIdValue() + " ";
-    }
-
-    public boolean expirationGuard() {
-        throw new UnsupportedOperationException();
     }
 
     private EndpointReference localParticipantProtocolService = null;

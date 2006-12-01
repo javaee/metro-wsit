@@ -27,6 +27,7 @@ import static com.sun.xml.ws.tx.common.Constants.WSAT_2004_PROTOCOL;
 import static com.sun.xml.ws.tx.common.Constants.WSAT_OASIS_NSURI;
 import com.sun.xml.ws.tx.common.TxLogger;
 import com.sun.xml.ws.tx.webservice.member.coord.CreateCoordinationContextType;
+import com.sun.istack.NotNull;
 
 import java.util.logging.Level;
 import javax.xml.transform.Result;
@@ -37,7 +38,7 @@ import javax.xml.ws.EndpointReference;
  * in WS-Coordination 2004/10 member submission and 2006/03 OASIS.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 1.0
  */
 public class ContextFactory {
@@ -54,9 +55,10 @@ public class ContextFactory {
      *
      * @param coordType the nsuri of the coordination type, either {@link com.sun.xml.ws.tx.common.Constants#WSAT_2004_PROTOCOL}
      *                  or {@link com.sun.xml.ws.tx.common.Constants#WSAT_OASIS_NSURI}
+     * @param expires expiration timout in ms
      * @return the {@link CoordinationContextInterface}
      */
-    public static CoordinationContextInterface createContext(String coordType, long expires) {
+    public static CoordinationContextInterface createContext(@NotNull String coordType, long expires) {
 
         if (logger.isLogging(Level.FINER)) {
             logger.entering("ContextFactory.createContext: coordType=" + coordType + " expires=" + expires);
@@ -92,7 +94,12 @@ public class ContextFactory {
         return context;
     }
 
-    public static CoordinationContextInterface createContext(CreateCoordinationContextType contextRequest) {
+    /**
+     * Create a context from the incoming <createContext> message
+     * @param contextRequest <createContext> request
+     * @return the coordination context
+     */
+    public static CoordinationContextInterface createContext(@NotNull CreateCoordinationContextType contextRequest) {
         // TODO: send fault ws:coor S4.2 InvalidProtocol if createContext fails
         return createContext(contextRequest.getCoordinationType(), contextRequest.getExpires().getValue());
     }

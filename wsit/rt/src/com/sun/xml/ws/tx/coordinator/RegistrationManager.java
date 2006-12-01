@@ -42,6 +42,7 @@ import com.sun.xml.ws.tx.webservice.member.coord.RegisterResponseType;
 import com.sun.xml.ws.tx.webservice.member.coord.RegisterType;
 import com.sun.xml.ws.tx.webservice.member.coord.RegistrationCoordinatorPortType;
 import com.sun.xml.ws.tx.webservice.member.coord.RegistrationRequesterPortType;
+import com.sun.istack.NotNull;
 
 import javax.xml.ws.EndpointReference;
 import javax.xml.ws.WebServiceContext;
@@ -57,7 +58,7 @@ import java.util.logging.Level;
  * for register and registerResponse delegate to the methods in this class.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 1.0
  */
 public final class RegistrationManager {
@@ -132,10 +133,11 @@ public final class RegistrationManager {
      * Handle an incoming <register> web service request from an external Participant
      * and send a <registerResponse> back.
      *
-     * @param wsContext
-     * @param registerRequest
+     * @param wsContext webservice context
+     * @param registerRequest the incoming <register> request
+     * @param activityId activity id
      */
-    public void register(WebServiceContext wsContext, String activityId, RegisterType registerRequest) {
+    public void register(@NotNull WebServiceContext wsContext, @NotNull String activityId, @NotNull RegisterType registerRequest) {
         if (logger.isLogging(Level.FINER)) {
             logger.entering("RegistrationManager.register(WebserviceContext, RegisterType)");
         }
@@ -228,6 +230,7 @@ public final class RegistrationManager {
 
     private static com.sun.xml.ws.tx.webservice.member.coord.Coordinator coordinatorService = null;
 
+    @NotNull
     private com.sun.xml.ws.tx.webservice.member.coord.Coordinator getCoordinatorService() {
         if (coordinatorService == null) {
             coordinatorService = new com.sun.xml.ws.tx.webservice.member.coord.Coordinator();
@@ -249,7 +252,7 @@ public final class RegistrationManager {
             logger.entering("RegistrationManager.register(Coordinator, Registrant)");
         }
 
-        EndpointReference registrationEPR = null;
+        EndpointReference registrationEPR;
         if (c.registerWithRootRegistrationService(r)) {
             if (logger.isLogging(Level.FINE)) {
                 logger.fine("RegistrationManager.register", "register with remote coordinator");
@@ -378,13 +381,16 @@ public final class RegistrationManager {
 
     /**
      * Process an incoming <registerResponse> message.
+     * @param activityId activity id
+     * @param registrantId registrant id
+     * @param registerResponse <registerResponse> message
      */
-    public void registerResponse(String activityId, String registrantId, RegisterResponseType registerResponse) {
+    public void registerResponse(@NotNull String activityId, @NotNull String registrantId, @NotNull RegisterResponseType registerResponse) {
         if (logger.isLogging(Level.FINER)) {
             logger.entering("RegistrationManager.registerResponse");
         }
 
-        // look up the registrant and removeOutstandingRegistrant it from outstanding Registrants
+        // look up the registrant and remove it from outstanding Registrants
         Registrant r = Registrant.getOutstandingRegistrant(registrantId);
         if (r == null) {
             if (logger.isLogging(Level.WARNING)) {
@@ -416,8 +422,10 @@ public final class RegistrationManager {
      * 1. Transaction Initiating client commits transaction before register message is delivered and processed.
      * Participant misses being in transaction and thus no two phase commit.
      * 2. sun service trying to send prepared, aborted or readonly before receiving coordination protocol service in registerResponse.
+     * @param r registrant
+     * @param registrationEPR registration EPR
      */
-    private void waitForRegisterResponse(Registrant r, EndpointReference registrationEPR) {
+    private void waitForRegisterResponse(@NotNull Registrant r, @NotNull EndpointReference registrationEPR) {
         int i = 0;
 
         int MAX_RETRY = 40;
@@ -443,9 +451,13 @@ public final class RegistrationManager {
      * Register via request/reply message pattern.
      * <p/>
      * Add coordination faults to this method.
+     * @param activityId activity id
+     * @param registerRequest <register> request
+     * @return a new <registerResponse>
      */
-    public static RegisterResponseType synchronousRegister(String activityId,
-                                                           RegisterType registerRequest) {
+    @NotNull
+    public static RegisterResponseType synchronousRegister(@NotNull String activityId,
+                                                           @NotNull RegisterType registerRequest) {
         Protocol requestProtocol = Protocol.getProtocol(registerRequest.getProtocolIdentifier());
         if (logger.isLogging(Level.FINER)) {
             logger.entering("synchronousRegister", "protocol=" + requestProtocol +

@@ -21,6 +21,8 @@
  */
 package com.sun.xml.ws.tx.common;
 
+import com.sun.istack.NotNull;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
@@ -34,7 +36,7 @@ import javax.xml.soap.SOAPFactory;
  * This serves as a base class for different kinds of ids
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 1.0
  */
 
@@ -48,15 +50,18 @@ public abstract class Identifier {
 
     /**
      * Gets the value of the value property.
+     * @return the id value
      */
+    @NotNull
     public String getValue() {
         return value;
     }
 
     /**
      * Sets the value of the value property.
+     * @param value the non-null value
      */
-    public void setValue(String value) {
+    public void setValue(@NotNull String value) {
         this.value = value;
     }
 
@@ -66,7 +71,9 @@ public abstract class Identifier {
     /**
      * Workaround till ReferenceParameters could be JAXB element.
      * assumed to be SOAPElement now.
+     * @return the id as a soap element
      */
+    @NotNull
     public SOAPElement getSOAPElement() {
         SOAPElement element = null;
         try {

@@ -21,27 +21,31 @@
  */
 package com.sun.xml.ws.tx.coordinator;
 
+import com.sun.istack.NotNull;
+
 import javax.xml.ws.EndpointReference;
 
 /**
  * Abstract base class for implementations of {@link CoordinationContextInterface}
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 1.0
  */
 public abstract class CoordinationContextBase implements CoordinationContextInterface {
     EndpointReference rootRegistrationService = null;
 
-    public void setRootCoordinatorRegistrationService(EndpointReference rootRegistrationService) {
+    public void setRootCoordinatorRegistrationService(@NotNull EndpointReference rootRegistrationService) {
         this.rootRegistrationService = rootRegistrationService;
     }
 
+    @NotNull
     public EndpointReference getRootRegistrationService() {
         return rootRegistrationService;
     }
 
-    public static CoordinationContextInterface createCoordinationContext(Object cc) {
+    @NotNull
+    public static CoordinationContextInterface createCoordinationContext(@NotNull Object cc) {
         if (cc instanceof com.sun.xml.ws.tx.webservice.member.coord.CoordinationContext) {
             return new CoordinationContext200410((com.sun.xml.ws.tx.webservice.member.coord.CoordinationContext) cc);
         } else {

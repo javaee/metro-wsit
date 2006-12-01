@@ -23,11 +23,17 @@ package com.sun.xml.ws.tx.coordinator;
 
 import com.sun.xml.ws.tx.common.ActivityIdentifier;
 import com.sun.xml.ws.tx.common.Identifier;
+import com.sun.xml.ws.tx.common.TxLogger;
 import com.sun.xml.ws.tx.webservice.member.coord.CreateCoordinationContextType;
+import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 
 import javax.xml.ws.EndpointReference;
 import java.util.List;
 import java.util.TimerTask;
+import java.util.Timer;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Level;
 
 /**
  * This class encapsulates a coordinated activity.
@@ -36,7 +42,7 @@ import java.util.TimerTask;
  * is constructed and managed by this class.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 1.0
  */
 public abstract class Coordinator {
@@ -53,7 +59,10 @@ public abstract class Coordinator {
     /**
      * Timer to manage expiration of registrants
      */
-    // private static final Timer expirationTimer = new Timer("WS-TX Registrant Expiration Timer");
+    private final static Timer expirationTimer = new Timer("WS-TX Expiration Timer");
+    private boolean expired = false;
+
+    static private TxLogger logger = TxLogger.getCoordLogger(Coordinator.class);
 
     /**
      * Construct a new Coordinator object from the specified context and soap request.
@@ -61,11 +70,24 @@ public abstract class Coordinator {
      * @param context The coordination context
      * @param request The soap request
      */
-    public Coordinator(CoordinationContextInterface context, CreateCoordinationContextType request) {
+    public Coordinator(@NotNull CoordinationContextInterface context, @Nullable CreateCoordinationContextType request) {
         this.context = context;
         this.request = request;
 
         this.id = new ActivityIdentifier(context.getIdentifier());
+
+        if (logger.isLogging(Level.FINER)) {
+            logger.finer("Coordinator constructor", "New Coordinator created for activity: " + context.getIdentifier());
+        }
+
+        if (context.getExpires() != 0L) {
+            // start a expiration timer task if necessary
+            if (logger.isLogging(Level.FINER)) {
+                logger.finer("Coordinator constructor", "Starting expiration task for activity: "
+                        + context.getIdentifier() + " will expire in " + context.getExpires() + "ms");
+            }
+            expirationTimer.schedule(new ExpirationTask(this), context.getExpires());
+        }
     }
 
     /**
@@ -76,7 +98,7 @@ public abstract class Coordinator {
      *
      * @param context The coordination context
      */
-    public Coordinator(CoordinationContextInterface context) {
+    public Coordinator(@NotNull CoordinationContextInterface context) {
         this(context, null);
     }
 
@@ -85,6 +107,7 @@ public abstract class Coordinator {
      *
      * @return The coordination context
      */
+    @NotNull
     public CoordinationContextInterface getContext() {
         return context;
     }
@@ -96,6 +119,7 @@ public abstract class Coordinator {
      * @return The original SOAP request (createCoordinationContext) or null
      *         if it doesn't exist.
      */
+    @Nullable
     public CreateCoordinationContextType getRequest() {
         return request;
     }
@@ -105,6 +129,7 @@ public abstract class Coordinator {
      *
      * @return The activity id value
      */
+    @NotNull
     public String getIdValue() {
         return id.getValue();
     }
@@ -117,6 +142,7 @@ public abstract class Coordinator {
      *
      * @return The activity id object
      */
+    @NotNull
     public Identifier getId() {
         return id;
     }
@@ -129,7 +155,7 @@ public abstract class Coordinator {
     public long getExpires() {
         return context.getExpires();
     }
-    
+
     public void setExpires(long i) {
         if (context != null) {
             context.setExpires(i);
@@ -144,6 +170,7 @@ public abstract class Coordinator {
      *
      * @return the list of Registrant objects
      */
+    @NotNull
     public abstract List<Registrant> getRegistrants();
 
     /**
@@ -152,13 +179,7 @@ public abstract class Coordinator {
      *
      * @param registrant The {@link Registrant}
      */
-    public void addRegistrant(Registrant registrant) {
-        // if (context.getExpires() != 0L) {
-        //     expirationTimer.schedule(new ExpirationTask(registrant), context.getExpires());
-        // }
-
-        // actual addRegistrant logic implemented in subclasses
-    }
+    public abstract void addRegistrant(Registrant registrant);
 
     /**
      * Get the registrant with the specified id or null if it does not exist.
@@ -166,30 +187,97 @@ public abstract class Coordinator {
      * @param id the registrant id
      * @return the Registrant object or null if the id does not exist
      */
+    @Nullable
     public abstract Registrant getRegistrant(String id);
 
     /**
+     * Remove the registrant with the specified id
+     *
+     * @param id the registrant id
+     */
+
+    public abstract void removeRegistrant(String id);
+
+    /**
      * Return true iff this coordinator is delegating to a root coordinator
+     * @return true iff this coordinator is delegating to a root coordinator
      */
     public boolean isSubordinate() {
         return context.getRootRegistrationService() != null;
     }
 
     /**
-     * Return the CPS for registrant r.
+     * Return the Coordinator Protocol Service EPR for registrant r.
+     * @param r registrant
+     * @return the CPS EPT for the specified registrant
      */
-    public abstract EndpointReference getCoordinatorProtocolServiceForRegistrant(Registrant r);
+    @NotNull
+    public abstract EndpointReference getCoordinatorProtocolServiceForRegistrant(@NotNull Registrant r);
 
     /**
      * Return true iff registrant should register with its root registration service.
      * <p/>
      * Enables local participants to be cached with coordinator locally when this method returns
      * true.
+     * @param r restistrant
+     * @return Return true iff registrant should register with its root registration service
      */
-    public boolean registerWithRootRegistrationService(Registrant r) {
+    public boolean registerWithRootRegistrationService(@NotNull Registrant r) {
         return false;
     }
 
+    /**
+     * Sub classes will implement this method to indicate whether or not they
+     * are subject to expiration.
+     *
+     * @return true if the coordinator should NOT expire, false otherwise.
+     */
+    abstract public boolean expirationGuard();
+
+    /**
+     * Release resources held by this coordinator.
+     * <p>
+     * This method will be automatically invoked once if the activity has a non-zero expiration.
+     * <p>
+     * During expiration, the coordinator will iterate over all of its registrants and tell them
+     * to expire.  Depending on their state, registrants will either expire or not.  A coordinator
+     * will not completely expire until all of its registrants have expired.
+     */
+    public void expire() {
+        expired = true;
+        if(logger.isLogging(Level.FINEST)) {
+            logger.finest("Coordinator.expire", "attempting to expire coordinator: " + id.getValue());
+        }
+        if (!expirationGuard()) {
+            if(logger.isLogging(Level.FINEST)) {
+                logger.finest("Coordinator.expire", "forgetting resources for: " + id.getValue());
+            }
+            // TODO: send fault S4.4 wscoor:NoActivity
+
+            forget();
+
+            if(getRegistrants().size() == 0) {
+                CoordinationManager.getInstance().removeCoordinator(this.id.getValue());
+            }
+        } else {
+            if(logger.isLogging(Level.FINEST)) {
+                logger.finest("Coordinator.expire", "expiration was guarded, returning without expiration");
+            }
+        }
+    }
+
+    public boolean isExpired() {
+        return expired;
+    }
+
+    public void setExpired(boolean expired) {
+        this.expired = expired;
+    }
+
+    /**
+     * Release all resources associated with this coordinator
+     */
+    public abstract void forget();
 
     /**
      * Timer class for controlling the expiration of registrants.
@@ -198,16 +286,15 @@ public abstract class Coordinator {
      * ever the timers go off.
      */
     class ExpirationTask extends TimerTask {
-        Registrant r;
+        Coordinator c;
 
-        ExpirationTask(Registrant r) {
-            this.r = r;
+        ExpirationTask(Coordinator c) {
+            this.c = c;
         }
 
         public void run() {
-            if (r.expirationGuard()) {
-                r.expire();
-            }
+            c.expire();
+            this.cancel(); // we only want to be triggered once
         }
     }
 }

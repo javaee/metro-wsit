@@ -21,6 +21,8 @@
  */
 package com.sun.xml.ws.tx.common;
 
+import com.sun.istack.NotNull;
+
 import javax.xml.namespace.QName;
 
 /**
@@ -34,7 +36,7 @@ import javax.xml.namespace.QName;
  * specified by ws:coor or ws:at, so I'm leaving this field out as well
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 1.0
  */
 public enum TxFault {
@@ -77,7 +79,7 @@ public enum TxFault {
     public final QName subcode;
     public final String reason;
 
-    private TxFault(QName subcode, String reason) {
+    private TxFault(@NotNull QName subcode, @NotNull String reason) {
         this.subcode = subcode;
         this.reason = reason;
     }

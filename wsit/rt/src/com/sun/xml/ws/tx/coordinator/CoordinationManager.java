@@ -28,6 +28,8 @@ import static com.sun.xml.ws.tx.common.Constants.WSAT_2004_PROTOCOL;
 import static com.sun.xml.ws.tx.common.Constants.WSAT_OASIS_NSURI;
 import com.sun.xml.ws.tx.common.TxLogger;
 import com.sun.xml.ws.tx.webservice.member.coord.CreateCoordinationContextType;
+import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 
 import javax.xml.ws.EndpointReference;
 import java.util.HashMap;
@@ -42,7 +44,7 @@ import java.util.logging.Level;
  * <p/>
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 1.0
  */
 public final class CoordinationManager {
@@ -76,7 +78,8 @@ public final class CoordinationManager {
      * @param id the coordination context id
      * @return the Coordinator object or null if the id doesn't exist
      */
-    public Coordinator getCoordinator(String id) {
+    @Nullable
+    public Coordinator getCoordinator(@NotNull String id) {
         return coordinators.get(id);
     }
 
@@ -86,12 +89,29 @@ public final class CoordinationManager {
      * <p/>
      * TODO: what about duplicate keys or entries?
      *
-     * @param coordinator
+     * @param coordinator coordinator
      */
     public void putCoordinator(Coordinator coordinator) {
         coordinators.put(coordinator.getIdValue(), coordinator);
         if (logger.isLogging(Level.FINEST)) {
             logger.finest("putCoordinator", "add activity id:" + coordinator.getIdValue());
+        }
+    }
+
+    /**
+     * Remove the specified {@link Coordinator} object from the list of managed
+     * activities.
+     * <p>
+     * @param id activity id
+     */
+    public void removeCoordinator(@NotNull String id) {
+        Coordinator c = getCoordinator(id);
+        if(c!=null) {
+            c.forget();
+        }
+        coordinators.remove(id);
+        if (logger.isLogging(Level.FINEST)) {
+            logger.finest("removeCoordinator", "remove activity id:" + id);
         }
     }
 
@@ -109,7 +129,8 @@ public final class CoordinationManager {
      * @param contextRequest the incoming wscoor:createCoordinationContext message
      * @return the coordinator
      */
-    public Coordinator lookupOrCreateCoordinator(CreateCoordinationContextType contextRequest) {
+    @NotNull
+    public Coordinator lookupOrCreateCoordinator(@NotNull CreateCoordinationContextType contextRequest) {
         Coordinator c;
         if (contextRequest.getCurrentContext() != null) {
             c = createSubordinateCoordinator(null, contextRequest);
@@ -133,7 +154,8 @@ public final class CoordinationManager {
      * @param context the coordination context
      * @return the coordinator
      */
-    public Coordinator lookupOrCreateCoordinator(CoordinationContextInterface context) {
+    @NotNull
+    public Coordinator lookupOrCreateCoordinator(@NotNull CoordinationContextInterface context) {
         Coordinator c = getCoordinator(context.getIdentifier());
         if (c == null) {
             // If registration service EPR is not created locally, make this a subordinate coordinator
@@ -156,7 +178,9 @@ public final class CoordinationManager {
      * @param contextRequest createCoordinationContext soap msg
      * @return a Coordinator
      */
-    private Coordinator createCoordinator(CoordinationContextInterface context, CreateCoordinationContextType contextRequest) {
+    @NotNull
+    private Coordinator createCoordinator(@Nullable CoordinationContextInterface context,
+                                          @Nullable CreateCoordinationContextType contextRequest) {
 
         assert((context == null) ^ (contextRequest == null));  // xor
 
@@ -209,7 +233,9 @@ public final class CoordinationManager {
      * @param contextRequest the original createCordinationContext request message
      * @return a new subordinate coordinator that will delegate for our participants
      */
-    private Coordinator createSubordinateCoordinator(CoordinationContextInterface context, CreateCoordinationContextType contextRequest) {
+    @NotNull
+    private Coordinator createSubordinateCoordinator(@Nullable CoordinationContextInterface context,
+                                                     @Nullable CreateCoordinationContextType contextRequest) {
 
         assert((context == null) ^ (contextRequest == null));  // xor
 

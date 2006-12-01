@@ -30,6 +30,8 @@ import static com.sun.xml.ws.tx.common.Constants.COORDINATION_CONTEXT;
 import static com.sun.xml.ws.tx.common.Constants.WSCOOR_SOAP_NSURI;
 import com.sun.xml.ws.tx.coordinator.CoordinationContextBase;
 import com.sun.xml.ws.tx.coordinator.CoordinationContextInterface;
+import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
@@ -59,8 +61,9 @@ public class Message {
 
     /**
      * Public ctor takes wrapped JAX-WS message as its argument.
+     * @param message core message
      */
-    public Message(com.sun.xml.ws.api.message.Message message) {
+    public Message(@NotNull com.sun.xml.ws.api.message.Message message) {
         this.message = message;
     }
 
@@ -69,7 +72,9 @@ public class Message {
      * Get the CoordinationContext Header Element from the underlying
      * JAX-WS message's HeaderList. Only understand the header iff CoordinationContext is
      * for coordinationType.
+     * @return the coordination context in this message
      */
+    @NotNull
     public com.sun.xml.ws.api.message.Header getCoordCtxHeader() {
         if (ccHdr == null && message != null) {
             HeaderList hdrList = message.getHeaders();
@@ -97,9 +102,12 @@ public class Message {
      * JAX-WS message's HeaderList. Only understand the header iff CoordinationContext is
      * for coordinationType.
      *
-     * @return index of coordination context in header list
+     * @return index of coordination context in header list or null if not found
+     * @param namespace namespace
+     * @param localName local name
      */
-    public com.sun.xml.ws.api.message.Header getCoordCtxHeader(String namespace, String localName) {
+    @Nullable
+    public com.sun.xml.ws.api.message.Header getCoordCtxHeader(@NotNull String namespace, @NotNull String localName) {
         if (ccHdr == null && message != null) {
             ccHdrIndex = NOT_FOUND;
             HeaderList hlst = message.getHeaders();
@@ -115,12 +123,18 @@ public class Message {
         return ccHdr;
     }
 
-    public CoordinationContextInterface getCoordinationContext(Unmarshaller unmarshal) {
+    /**
+     * 
+     * @param unmarshaller jaxb unmarshaller
+     * @return the coordination context
+     */
+    @Nullable
+    public CoordinationContextInterface getCoordinationContext(@NotNull Unmarshaller unmarshaller) {
         if (CC == null) {
             Header ccHdr = getCoordCtxHeader(WSCOOR_SOAP_NSURI, COORDINATION_CONTEXT);
             if (ccHdr != null) {
                 try {
-                    CC = CoordinationContextBase.createCoordinationContext(ccHdr.readAsJAXB(unmarshal));
+                    CC = CoordinationContextBase.createCoordinationContext(ccHdr.readAsJAXB(unmarshaller));
                 } catch (JAXBException e) {
                     if (logger.isLogging(Level.WARNING)) {
                         logger.warning("getCoordinationContext", "getCoordinationContext handled unexpected exception " + e.getLocalizedMessage());
@@ -140,7 +154,13 @@ public class Message {
         }
     }
 
-    public WSDLBoundOperation getOperation(WSDLPort port) {
+    /**
+     * Get the wsdl bound operation for the specified port
+     * @param port port
+     * @return the wsdl operation or null if not found
+     */
+    @Nullable
+    public WSDLBoundOperation getOperation(@NotNull WSDLPort port) {
         return message.getOperation(port);
     }
 }

@@ -31,26 +31,30 @@ import java.net.URI;
  * This class ...
  *
  * @author Joe.Fialli@Sun.COM Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 1.0
  */
 public interface StatefulWebserviceFactory {
 
     /**
-     * @param serviceName
-     * @param portName
+     * Get the StatefulWebServiceManager with the specified name and port
+     *
+     * @param serviceName service name
+     * @param portName port name
      * @return StatefulWebserviceManager
      */
     public StatefulWebServiceManager getManager(String serviceName, String portName);
 
     /**
-     * @param serviceName
-     * @param portName
-     * @param address
-     * @param addressingVersion
-     * @param activityId
-     * @param registrantId
-     * @return EndpointReference
+     * Create an EPR with the specified data.
+     * 
+     * @param serviceName service name
+     * @param portName port name
+     * @param address address URI
+     * @param addressingVersion ws-addressing version
+     * @param activityId activity id
+     * @param registrantId registrant id
+     * @return EndpointReference for the service
      */
     public EndpointReference createService(String serviceName,
                                            String portName,

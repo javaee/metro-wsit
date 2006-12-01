@@ -337,6 +337,12 @@ public class ATSubCoordinator extends ATCoordinator {
         }
     }
 
+    @Override
+    public void expire() {
+        super.expire();
+        // TODO: forget durable and volatile roots
+    }
+
     /**
      * Get the registrant with the specified id or null if it does not exist.
      *
@@ -359,6 +365,11 @@ public class ATSubCoordinator extends ATCoordinator {
         }
 
         return result;
+    }
+
+    public void removeRegistrant(String id) {
+        super.removeRegistrant(id);
+        // TODO: implement
     }
 
     /**
@@ -393,4 +404,16 @@ public class ATSubCoordinator extends ATCoordinator {
         // see if just a regular participant of this coordinator
         super.forget(partId);
     }
+
+    @Override
+    public boolean expirationGuard() {
+        // TODO: implement
+        return true;
+    }
+
+    @Override
+    public void forget() {
+        // TODO: implement
+    }
+
 }

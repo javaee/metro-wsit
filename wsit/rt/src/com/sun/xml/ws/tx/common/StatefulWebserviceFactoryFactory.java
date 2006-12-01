@@ -22,6 +22,8 @@
 
 package com.sun.xml.ws.tx.common;
 
+import com.sun.istack.NotNull;
+
 /**
  * Get factory that enables creation of WS-TX Stateful Webservices.
  */
@@ -29,6 +31,12 @@ final public class StatefulWebserviceFactoryFactory {
 
     private static StatefulWebserviceFactory swsf = null;
 
+    /**
+     * Get an instance of the StatefulWebserviceFactory
+     *
+     * @return StatefulWebserviceFactory
+     */
+    @NotNull
     public static StatefulWebserviceFactory getInstance() {
         if (swsf == null) {
             try {

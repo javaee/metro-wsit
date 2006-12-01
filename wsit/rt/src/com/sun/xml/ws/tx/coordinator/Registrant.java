@@ -26,11 +26,15 @@ import static com.sun.xml.ws.api.tx.Protocol.*;
 import com.sun.xml.ws.developer.MemberSubmissionEndpointReference;
 import com.sun.xml.ws.tx.common.Identifier;
 import com.sun.xml.ws.tx.common.RegistrantIdentifier;
+import com.sun.xml.ws.tx.common.TxLogger;
 import com.sun.xml.ws.tx.webservice.member.coord.RegisterType;
+import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 
 import javax.xml.ws.EndpointReference;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 
 /**
  * This class encapsulates a coordination registrant.
@@ -39,7 +43,7 @@ import java.util.Map;
  * add protocol specific functionality.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 1.0
  */
 public abstract class Registrant {
@@ -60,13 +64,15 @@ public abstract class Registrant {
 
     private final RegistrantIdentifier id;
 
+    static private TxLogger logger = TxLogger.getCoordLogger(Registrant.class);
+
     /**
      * Create a new registrant
      *
-     * @param registerRequest
-     * @param parent
+     * @param registerRequest <register> request
+     * @param parent parent coordinator
      */
-    public Registrant(Coordinator parent, RegisterType registerRequest) {
+    public Registrant(@NotNull Coordinator parent, @NotNull RegisterType registerRequest) {
         this(parent, registerRequest.getProtocolIdentifier());
         this.registerRequest = registerRequest;
         // no need to add to outstanding registrants, the PPS is in registerRequest
@@ -78,8 +84,10 @@ public abstract class Registrant {
 
     /**
      * Create a Registratant with its coordinator parent for protocol.
+     * @param parent parent coordinator
+     * @param protocol activity protocol
      */
-    protected Registrant(Coordinator parent, Protocol protocol) {
+    protected Registrant(@NotNull Coordinator parent, @NotNull Protocol protocol) {
         id = new RegistrantIdentifier(Long.toString(nextId++));
 
         this.parent = parent;
@@ -94,6 +102,7 @@ public abstract class Registrant {
         }
     }
 
+    @NotNull
     private String getProtocolIdentifier() {
         switch (protocol) {
             case COMPLETION:
@@ -107,7 +116,7 @@ public abstract class Registrant {
         }
     }
 
-    public void setParticpantProtocolService(EndpointReference pps) {
+    public void setParticpantProtocolService(@NotNull EndpointReference pps) {
         if (registerRequest == null) {
             registerRequest = new RegisterType();
         }
@@ -115,6 +124,7 @@ public abstract class Registrant {
         registerRequest.setParticipantProtocolService((MemberSubmissionEndpointReference) pps);
     }
 
+    @NotNull
     public EndpointReference getParticipantProtocolService() {
         return (registerRequest != null) ?
                 registerRequest.getParticipantProtocolService() :
@@ -126,6 +136,7 @@ public abstract class Registrant {
      *
      * @return the SOAP register message
      */
+    @Nullable
     public RegisterType getRegisterRequest() {
         return registerRequest;
     }
@@ -135,6 +146,7 @@ public abstract class Registrant {
      *
      * @return the protocol identifier
      */
+    @NotNull
     public Protocol getProtocol() {
         return protocol;
     }
@@ -144,18 +156,21 @@ public abstract class Registrant {
      *
      * @return the parent coordinator
      */
+    @NotNull
     public Coordinator getCoordinator() {
         return parent;
     }
 
+    @NotNull
     public EndpointReference getCoordinatorProtocolService() {
         return coordinatorProtocolService;
     }
 
     /**
      * Set the coordinator protocol service received by coor:registerResponse.
+     * @param cps cps epr
      */
-    public void setCoordinatorProtocolService(EndpointReference cps) {
+    public void setCoordinatorProtocolService(@NotNull EndpointReference cps) {
         coordinatorProtocolService = cps;
         setRegistrationCompleted(true);
     }
@@ -164,10 +179,12 @@ public abstract class Registrant {
         RegistrationManager.getInstance().register(parent, this);
     }
 
+    @NotNull
     public Identifier getId() {
         return id;
     }
 
+    @NotNull
     public String getIdValue() {
         return id.getValue();
     }
@@ -177,15 +194,21 @@ public abstract class Registrant {
     protected static Map<String, Registrant> outstandingRegistrants = new HashMap<String, Registrant>();
 
     /**
-     * Lookup registrant by its id.
+     * Lookup outstanding registrant by id
+     * @param id registrant id
+     * @return the outstanding registrant or null if it doesn't exist
      */
+    @Nullable
     public static Registrant getOutstandingRegistrant(String id) {
         return outstandingRegistrants.get(id);
     }
 
     /**
-     * Lookup registrant by its id.
+     * Remove outstanding registrant by its id.
+     * @param id registrant id
+     * @return the outstanding registrant or null if it doesn't exist
      */
+    @Nullable
     public static Registrant removeOutstandingRegistrant(String id) {
         return outstandingRegistrants.remove(id);
     }
@@ -215,22 +238,7 @@ public abstract class Registrant {
     abstract public EndpointReference getLocalParticipantProtocolService();
 
     /**
-     * Sub classes will implement this method to indicate whether or not they
-     * are subject to expiration.
-     *
-     * @return true if the registrant should expire, false otherwise.
+     * Forget all resources associated with this Registrant
      */
-    abstract public boolean expirationGuard();
-
-    /**
-     * Expire this registrant, clean up resources, send fault messages
-     */
-    public void expire() {
-        if (expirationGuard()) {
-            // send fault S4.4 wscoor:NoActivity
-            // remove registrant from parent coordinator
-            parent.getRegistrants().remove(this);
-        }
-        throw new UnsupportedOperationException();
-    }
+    public abstract void forget();
 }

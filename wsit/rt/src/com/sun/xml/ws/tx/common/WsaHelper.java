@@ -23,6 +23,7 @@
 package com.sun.xml.ws.tx.common;
 
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.istack.NotNull;
 
 import javax.xml.soap.SOAPConstants;
 import javax.xml.soap.SOAPException;
@@ -44,7 +45,16 @@ public class WsaHelper {
         throw new UnsupportedOperationException("just use EndpointReference.toString() or WSEndpointReference.toString() instead");
     }
 
-    public static SOAPFault createFault(SOAPVersion soapVer, TxFault fault, String message) {
+    /**
+     * Create a SOAPFault from the specified information.
+     *
+     * @param soapVer soap version
+     * @param fault fault enum
+     * @param message message
+     * @return the new SOAPFault
+     */
+    @NotNull
+    public static SOAPFault createFault(@NotNull SOAPVersion soapVer, @NotNull TxFault fault, @NotNull String message) {
         try {
             SOAPFactory soapFactory = soapVer.saajSoapFactory;
             SOAPFault soapFault = soapFactory.createFault();

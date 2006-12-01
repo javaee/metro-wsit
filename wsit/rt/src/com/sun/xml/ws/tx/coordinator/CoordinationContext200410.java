@@ -25,6 +25,7 @@ import com.sun.xml.ws.developer.MemberSubmissionEndpointReference;
 import com.sun.xml.ws.tx.webservice.member.coord.CoordinationContext;
 import com.sun.xml.ws.tx.webservice.member.coord.CoordinationContextType.Identifier;
 import com.sun.xml.ws.tx.webservice.member.coord.Expires;
+import com.sun.istack.NotNull;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.EndpointReference;
@@ -35,7 +36,7 @@ import java.util.Map;
  * This class encapsulates the genertated 2004/10 version of {@link com.sun.xml.ws.tx.webservice.member.coord.CoordinationContextType}
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 1.0
  */
 public class CoordinationContext200410 extends CoordinationContextBase {
@@ -47,21 +48,18 @@ public class CoordinationContext200410 extends CoordinationContextBase {
 
     /**
      * wrapper around JAXB generated CoordinationContext type
+     * @param cc coordination context
      */
-    public CoordinationContext200410(CoordinationContext cc) {
+    public CoordinationContext200410(@NotNull CoordinationContext cc) {
         context = cc;
     }
 
+    @NotNull
     public String getIdentifier() {
-        Identifier id = context.getIdentifier();
-        if (id != null) {
-            return id.getValue();
-        } else {
-            return null;
-        }
+        return context.getIdentifier().getValue();
     }
 
-    public void setIdentifier(String identifier) {
+    public void setIdentifier(@NotNull String identifier) {
         Identifier id = new Identifier();
         id.setValue(identifier);
         context.setIdentifier(id);
@@ -87,19 +85,21 @@ public class CoordinationContext200410 extends CoordinationContextBase {
         }
     }
 
+    @NotNull
     public String getCoordinationType() {
         return context.getCoordinationType();
     }
 
-    public void setCoordinationType(String coordinationType) {
+    public void setCoordinationType(@NotNull String coordinationType) {
         context.setCoordinationType(coordinationType);
     }
 
+    @NotNull
     public EndpointReference getRegistrationService() {
         return context.getRegistrationService();
     }
 
-    public void setRegistrationService(EndpointReference registrationService) {
+    public void setRegistrationService(@NotNull EndpointReference registrationService) {
         context.setRegistrationService((MemberSubmissionEndpointReference) registrationService);
     }
 

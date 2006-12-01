@@ -30,6 +30,7 @@ import com.sun.xml.ws.tx.webservice.member.at.CoordinatorPortTypeImpl;
 import com.sun.xml.ws.tx.webservice.member.at.ParticipantPortTypeImpl;
 import com.sun.xml.ws.tx.webservice.member.coord.RegistrationCoordinatorPortTypeImpl;
 import com.sun.xml.ws.tx.webservice.member.coord.RegistrationRequesterPortTypeImpl;
+import com.sun.istack.NotNull;
 
 import javax.xml.ws.EndpointReference;
 import java.net.URI;
@@ -38,7 +39,7 @@ import java.net.URI;
  * This class ...
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 1.0
  */
 // suppress known deprecation warnings about using short term workaround StatefulWebService.export(Class, String webServiceEndpoint, PortType)
@@ -47,8 +48,8 @@ final public class TXStatefulWebserviceFactoryImpl implements StatefulWebservice
 
     private static final TxLogger logger = TxLogger.getLogger(TXStatefulWebserviceFactoryImpl.class);
 
-
-    public StatefulWebServiceManager getManager(String serviceName, String portName) {
+    @NotNull
+    public StatefulWebServiceManager getManager(@NotNull String serviceName, @NotNull String portName) {
         if (serviceName.equals(ParticipantPortTypeImpl.serviceName)) {
             // ParticipantPortTypeImpl && CoordinatorPortTypeImpl have the same serviceName
             if (portName.equals(ParticipantPortTypeImpl.portName)) {
@@ -71,9 +72,10 @@ final public class TXStatefulWebserviceFactoryImpl implements StatefulWebservice
         }
     }
 
-    public EndpointReference createService(String serviceName, String portName,
-                                           URI address, AddressingVersion addressingVersion,
-                                           String activityId, String registrantId) {
+    @NotNull
+    public EndpointReference createService(@NotNull String serviceName, @NotNull String portName,
+                                           @NotNull URI address, @NotNull AddressingVersion addressingVersion,
+                                           @NotNull String activityId, @NotNull String registrantId) {
         registerFallback();
         if (serviceName.equals(ParticipantPortTypeImpl.serviceName)) {
             // ParticipantPortTypeImpl && CoordinatorPortTypeImpl have the same serviceName
