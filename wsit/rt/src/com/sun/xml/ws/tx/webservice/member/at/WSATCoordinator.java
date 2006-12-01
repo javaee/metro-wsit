@@ -93,10 +93,21 @@ public class WSATCoordinator
     public CoordinatorPortType getCoordinator(EndpointReference epr, WebServiceFeature... features) {
         CoordinatorPortType result =
                 (CoordinatorPortType) super.getPort(epr, CoordinatorPortType.class, features);
-        BindingProvider bp = (BindingProvider) result;
-        Map<String, Object> requestCtx = bp.getRequestContext();
-        requestCtx.put("javax.xml.ws.service.endpoint.address", new WSEndpointReference(epr).getAddress().toString());
+        workaround((BindingProvider) result, epr);
+        
         return result;
+    }
+    
+    
+    private void workaround(BindingProvider bp, EndpointReference epr) {
+        Map<String, Object> requestCtx = bp.getRequestContext();
+        String eprAddress = new WSEndpointReference(epr).getAddress().toString();
+        String bpEndpointAddress = (String)requestCtx.get("javax.xml.ws.service.endpoint.address");
+        if (! bpEndpointAddress.equals(eprAddress)) {
+            System.out.println("Still need workaround for issue 104. eprAddress=" + eprAddress + 
+                    " javax.xml.ws.service.endpoint.address=" + bpEndpointAddress );
+            requestCtx.put("javax.xml.ws.service.endpoint.address", eprAddress);
+        }
     }
 
     /**
@@ -116,9 +127,7 @@ public class WSATCoordinator
     public ParticipantPortType getParticipant(EndpointReference epr, WebServiceFeature... features) {
         ParticipantPortType result =
                 (ParticipantPortType) super.getPort(epr, ParticipantPortType.class, features);
-        BindingProvider bp = (BindingProvider) result;
-        Map<String, Object> requestCtx = bp.getRequestContext();
-        requestCtx.put("javax.xml.ws.service.endpoint.address", new WSEndpointReference(epr).getAddress().toString());
+        workaround((BindingProvider) result, epr);
         return result;
     }
 
