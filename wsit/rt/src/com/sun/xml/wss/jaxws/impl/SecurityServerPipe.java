@@ -245,7 +245,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
                 //--------INVOKE NEXT PIPE------------
                 // Put the addressing headers as unread
                 // packet.invocationProperties.put(JAXWSAConstants.SERVER_ADDRESSING_PROPERTIES_INBOUND, null);
-                updateSCBootstrapCredentials(packet);
+                updateSCBootstrapCredentials(packet, ctx);
                 if (nextPipe != null) {
                     retPacket = nextPipe.process(packet);
                     
@@ -528,6 +528,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
         try {
             // Set the requestor authenticated Subject in the IssuedTokenContext
             Subject subject = SubjectAccessor.getRequesterSubject(ctx);
+            
             ictx.setRequestorSubject(subject);
             
             WSSCElementFactory eleFac = WSSCElementFactory.newInstance();
@@ -556,10 +557,10 @@ public class SecurityServerPipe extends SecurityPipeBase {
                 packet.invocationProperties.put(
                         Session.SESSION_KEY, session.getUserData());
                 
-                IssuedTokenContext itctx = session.getSecurityInfo().getIssuedTokenContext();
+                //IssuedTokenContext itctx = session.getSecurityInfo().getIssuedTokenContext();
                 //add the subject of requestor
-                itctx.setRequestorSubject(ictx.getRequestorSubject());
-                ((ProcessingContextImpl)ctx).getIssuedTokenContextMap().put(sctId, itctx);
+               // itctx.setRequestorSubject(ictx.getRequestorSubject());
+                ((ProcessingContextImpl)ctx).getIssuedTokenContextMap().put(sctId, ictx);
                 
             } else if (requestType.toString().equals(WSTrustConstants.CANCEL_REQUEST)) {
                 retAction = WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_RESPONSE_ACTION;
@@ -856,14 +857,15 @@ public class SecurityServerPipe extends SecurityPipeBase {
 
     //doing this here becuase doing inside keyselector of optimized security would
     //mean doing it twice (if SCT was used for sign and encrypt) which can impact performance
-    private void updateSCBootstrapCredentials(Packet packet) {
+    private void updateSCBootstrapCredentials(Packet packet, ProcessingContext ctx) {
         SecurityContextToken sct = 
                 (SecurityContextToken)packet.invocationProperties.get(MessageConstants.INCOMING_SCT);
         if (sct != null) {
-            Session session = this.sessionManager.getSession(sct.getIdentifier().toString());
-            IssuedTokenContext ctx = session.getSecurityInfo().getIssuedTokenContext();
-            if (ctx != null) {
-                Subject from = ctx.getRequestorSubject();
+            //Session session = this.sessionManager.getSession(sct.getIdentifier().toString());
+            //IssuedTokenContext ctx = session.getSecurityInfo().getIssuedTokenContext();
+            IssuedTokenContext itctx = (IssuedTokenContext)((ProcessingContextImpl)ctx).getIssuedTokenContextMap().get(sct.getIdentifier().toString());
+            if (itctx != null) {
+                Subject from = itctx.getRequestorSubject();
                 Subject to = DefaultSecurityEnvironmentImpl.getSubject(packet.invocationProperties);
                 copySubject(from,to);
             }
