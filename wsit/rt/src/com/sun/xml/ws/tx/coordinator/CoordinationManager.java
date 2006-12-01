@@ -44,7 +44,7 @@ import java.util.logging.Level;
  * <p/>
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @since 1.0
  */
 public final class CoordinationManager {
@@ -105,11 +105,10 @@ public final class CoordinationManager {
      * @param id activity id
      */
     public void removeCoordinator(@NotNull String id) {
-        Coordinator c = getCoordinator(id);
+        Coordinator c = coordinators.remove(id);
         if(c!=null) {
             c.forget();
         }
-        coordinators.remove(id);
         if (logger.isLogging(Level.FINEST)) {
             logger.finest("removeCoordinator", "remove activity id:" + id);
         }
