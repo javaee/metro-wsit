@@ -99,6 +99,8 @@ import static com.sun.xml.wss.jaxws.impl.Constants.OPERATION_SCOPE;
 import static com.sun.xml.wss.jaxws.impl.Constants.EMPTY_LIST;
 import static com.sun.xml.wss.jaxws.impl.Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS;
 import static com.sun.xml.wss.jaxws.impl.Constants.SUN_WSS_SECURITY_CLIENT_POLICY_NS;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 //import javax.servlet.ServletContext;
 
 
@@ -243,7 +245,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
                 //--------INVOKE NEXT PIPE------------
                 // Put the addressing headers as unread
                 // packet.invocationProperties.put(JAXWSAConstants.SERVER_ADDRESSING_PROPERTIES_INBOUND, null);
-                
+                updateSCBootstrapCredentials(packet);
                 if (nextPipe != null) {
                     retPacket = nextPipe.process(packet);
                     
@@ -555,6 +557,8 @@ public class SecurityServerPipe extends SecurityPipeBase {
                         Session.SESSION_KEY, session.getUserData());
                 
                 IssuedTokenContext itctx = session.getSecurityInfo().getIssuedTokenContext();
+                //add the subject of requestor
+                itctx.setRequestorSubject(ictx.getRequestorSubject());
                 ((ProcessingContextImpl)ctx).getIssuedTokenContextMap().put(sctId, itctx);
                 
             } else if (requestType.toString().equals(WSTrustConstants.CANCEL_REQUEST)) {
@@ -849,5 +853,34 @@ public class SecurityServerPipe extends SecurityPipeBase {
         }
         return null;
     }
+
+    //doing this here becuase doing inside keyselector of optimized security would
+    //mean doing it twice (if SCT was used for sign and encrypt) which can impact performance
+    private void updateSCBootstrapCredentials(Packet packet) {
+        SecurityContextToken sct = 
+                (SecurityContextToken)packet.invocationProperties.get(MessageConstants.INCOMING_SCT);
+        if (sct != null) {
+            Session session = this.sessionManager.getSession(sct.getIdentifier().toString());
+            IssuedTokenContext ctx = session.getSecurityInfo().getIssuedTokenContext();
+            if (ctx != null) {
+                Subject from = ctx.getRequestorSubject();
+                Subject to = DefaultSecurityEnvironmentImpl.getSubject(packet.invocationProperties);
+                copySubject(from,to);
+            }
+        }
+    }
     
+    private static void copySubject(final Subject from, final Subject to) {
+        if (from == null || to == null) {
+            return;
+        }
+        AccessController.doPrivileged(new PrivilegedAction() {
+            public Object run() {
+                to.getPrincipals().addAll(from.getPrincipals());
+                to.getPublicCredentials().addAll(from.getPublicCredentials());
+                to.getPrivateCredentials().addAll(from.getPrivateCredentials());
+                return null; // nothing to return
+            }
+        });
+    }
 }
