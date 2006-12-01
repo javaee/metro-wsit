@@ -39,6 +39,7 @@ import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponse;
 import com.sun.xml.wss.ProcessingContext;
 import com.sun.xml.wss.RealmAuthenticationAdapter;
+import com.sun.xml.wss.SubjectAccessor;
 import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.impl.NewSecurityRecipient;
@@ -580,6 +581,11 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         String retAction = null;
         
         try {
+            
+             // Set the requestor authenticated Subject in the IssuedTokenContext
+            Subject subject = SubjectAccessor.getRequesterSubject(ctx);
+            ictx.setRequestorSubject(subject);
+            
             WSSCElementFactory eleFac = WSSCElementFactory.newInstance();
             JAXBElement rstEle = msg.readPayloadAsJAXB(jaxbContext.createUnmarshaller());
             RequestSecurityToken rst = eleFac.createRSTFrom(rstEle);
@@ -621,6 +627,8 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
             // correct Action headers if any and return the message.
             retMsg = Messages.create(jaxbContext.createMarshaller(), eleFac.toJAXBElement(rstr), soapVersion);
         } catch (javax.xml.bind.JAXBException ex) {
+            throw new RuntimeException(ex);
+        } catch (com.sun.xml.wss.XWSSecurityException ex) {
             throw new RuntimeException(ex);
         } catch (WSSecureConversationException ex){
             throw new RuntimeException(ex);
