@@ -42,7 +42,7 @@ import java.util.logging.Level;
  * is constructed and managed by this class.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @since 1.0
  */
 public abstract class Coordinator {
@@ -255,10 +255,6 @@ public abstract class Coordinator {
             // TODO: send fault S4.4 wscoor:NoActivity
 
             forget();
-
-            if(getRegistrants().size() == 0) {
-                CoordinationManager.getInstance().removeCoordinator(this.id.getValue());
-            }
         } else {
             if(logger.isLogging(Level.FINEST)) {
                 logger.finest("Coordinator.expire", "expiration was guarded, returning without expiration");
@@ -277,7 +273,9 @@ public abstract class Coordinator {
     /**
      * Release all resources associated with this coordinator
      */
-    public abstract void forget();
+    public void forget() {
+        CoordinationManager.getInstance().removeCoordinator(this.id.getValue());
+    }
 
     /**
      * Timer class for controlling the expiration of registrants.
