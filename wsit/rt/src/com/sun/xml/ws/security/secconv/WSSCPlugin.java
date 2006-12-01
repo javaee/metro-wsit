@@ -28,6 +28,7 @@
 
 package com.sun.xml.ws.security.secconv;
 
+import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.Packet;
@@ -107,7 +108,7 @@ public class WSSCPlugin {
         this.config = config;
     }
     
-    public IssuedTokenContext process(PolicyAssertion token, WSDLPort wsdlPort, WSBinding binding, Pipe securityPipe, Marshaller marshaller, Unmarshaller unmarshaller, String endPointAddress, Packet packet){
+    public IssuedTokenContext process(PolicyAssertion token, WSDLPort wsdlPort, WSBinding binding, Pipe securityPipe, Marshaller marshaller, Unmarshaller unmarshaller, String endPointAddress, Packet packet, AddressingVersion addVer){
         
         this.packet = packet;
         
@@ -155,7 +156,7 @@ public class WSSCPlugin {
             throw new RuntimeException("There is a problem in the Trust layer creating an RST", ex);
         }
         
-        RequestSecurityTokenResponse rstr = sendRequest(token, wsdlPort, binding, securityPipe, marshaller, unmarshaller, rst, WSSCConstants.REQUEST_SECURITY_CONTEXT_TOKEN_ACTION, endPointAddress);
+        RequestSecurityTokenResponse rstr = sendRequest(token, wsdlPort, binding, securityPipe, marshaller, unmarshaller, rst, WSSCConstants.REQUEST_SECURITY_CONTEXT_TOKEN_ACTION, endPointAddress, addVer);
         
         // Handle the RequestSecurityTokenResponse
         IssuedTokenContext context = new IssuedTokenContextImpl();
@@ -175,7 +176,7 @@ public class WSSCPlugin {
         return assertions;
     }
     
-    public IssuedTokenContext processCancellation(IssuedTokenContext ctx, WSDLPort wsdlPort, WSBinding binding, Pipe securityPipe, Marshaller marshaller, Unmarshaller unmarshaller, String endPointAddress){
+    public IssuedTokenContext processCancellation(IssuedTokenContext ctx, WSDLPort wsdlPort, WSBinding binding, Pipe securityPipe, Marshaller marshaller, Unmarshaller unmarshaller, String endPointAddress, AddressingVersion addVer){
         
         //==============================
         // Create RequestSecurityToken
@@ -187,7 +188,7 @@ public class WSSCPlugin {
             throw new RuntimeException("There was a problem creating RST For Cancel", ex);
         }
         
-        RequestSecurityTokenResponse rstr = sendRequest(null, wsdlPort, binding, securityPipe, marshaller, unmarshaller, rst, WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_ACTION, endPointAddress);
+        RequestSecurityTokenResponse rstr = sendRequest(null, wsdlPort, binding, securityPipe, marshaller, unmarshaller, rst, WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_ACTION, endPointAddress, addVer);
         
         // Handle the RequestSecurityTokenResponse
         try {
@@ -199,7 +200,7 @@ public class WSSCPlugin {
         return ctx;
     }
     
-    private RequestSecurityTokenResponse sendRequest(PolicyAssertion issuedToken, WSDLPort wsdlPort, WSBinding binding, Pipe securityPipe, Marshaller marshaller, Unmarshaller unmarshaller, RequestSecurityToken rst, String action, String endPointAddress) {
+    private RequestSecurityTokenResponse sendRequest(PolicyAssertion issuedToken, WSDLPort wsdlPort, WSBinding binding, Pipe securityPipe, Marshaller marshaller, Unmarshaller unmarshaller, RequestSecurityToken rst, String action, String endPointAddress, AddressingVersion addVer) {
        // Marshaller marshaller;
         //Unmarshaller unmarshaller;
         
@@ -235,7 +236,7 @@ public class WSSCPlugin {
         
         // Add addressing headers to the message
         try{
-            reqPacket = addAddressingHeaders(reqPacket, wsdlPort, binding, action);
+            reqPacket = addAddressingHeaders(reqPacket, wsdlPort, binding, action, addVer);
         }catch (WSSecureConversationException ex){
             log.log(Level.SEVERE,"WSSC0017.problem.add.address.headers", ex);
             throw new RuntimeException(ex);
@@ -328,9 +329,9 @@ public class WSSCPlugin {
         }
     }
     
-    private Packet addAddressingHeaders(Packet packet, WSDLPort wsdlPort, WSBinding binding, String action)throws WSSecureConversationException {
+    private Packet addAddressingHeaders(Packet packet, WSDLPort wsdlPort, WSBinding binding, String action, AddressingVersion addVer)throws WSSecureConversationException {
         HeaderList hl = packet.getMessage().getHeaders();
-        hl.fillRequestAddressingHeaders(packet, binding.getAddressingVersion(),binding.getSOAPVersion(),false,action);
+        hl.fillRequestAddressingHeaders(packet, addVer,binding.getSOAPVersion(),false,action);
         
         return packet;
     }
