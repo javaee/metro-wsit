@@ -40,6 +40,7 @@ import static com.sun.xml.ws.policy.PolicyMap.createWsdlOperationScopeKey;
 import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.tx.at.ATCoordinator;
 import com.sun.xml.ws.tx.common.ATAssertion;
+import static com.sun.xml.ws.tx.common.ATAssertion.NOT_ALLOWED;
 import static com.sun.xml.ws.tx.common.ATAssertion.ALLOWED;
 import static com.sun.xml.ws.tx.common.ATAssertion.REQUIRED;
 import static com.sun.xml.ws.tx.common.Constants.AT_ASSERTION;
@@ -52,6 +53,7 @@ import com.sun.xml.ws.tx.coordinator.CoordinationContextInterface;
 import com.sun.xml.ws.tx.coordinator.CoordinationManager;
 import com.sun.xml.ws.tx.webservice.member.coord.CoordinationContext;
 import com.sun.xml.ws.tx.webservice.member.coord.CoordinationContextType;
+import java.util.logging.Level;
 
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
@@ -65,7 +67,7 @@ import java.util.Iterator;
  * This class process transactional context for client outgoing message.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 1.0
  */
 // suppress known deprecation warnings about using pipes.
@@ -145,11 +147,30 @@ public class TxClientPipe implements Pipe {
     /**
      * Process transactional context in outgoing message.
      *
+     * Transactional context is only flowed if the following conditions are met:
+     * <ul>
+     *   <li>current JTA Transaction</li>
+     *   <li>wsdl:binding/wsdl:operation of this packet has wsat:ATAssertion</li>
+     * </ul>
+     *
      * @param pkt
      * @return null
      */
     public Packet process(Packet pkt) {
+        final Message msg = pkt.getMessage();
+        final WSDLPort wsdlModel = pipeConfig.getWSDLModel();
         Packet responsePacket = null;
+        
+        // TODO:  minimizing process overhead for cases that do not flow a transaction.
+        //        Current assumption is it is cheaper to check if there is a current JTA transaction
+        //        than it is to check if a wsdl:binding/wsdl:operation has wsat:ATAssertion
+        //        If that assumption is incorrect, exchange this check with one checking for
+        //        existence of wsat policy assertion.
+        //        
+        Transaction currentTxn = checkCurrentJTATransaction(msg, wsdlModel);
+        if (currentTxn == null) {
+            return next.process(pkt);
+        }
 
         // NOTE: if necessary, use AddressingContext, don't set the values directly.  The
         //       context abstracts away WSA version differences.
@@ -158,36 +179,15 @@ public class TxClientPipe implements Pipe {
 
         // get trust plugin from security pipe
         // encryption through security pipe
-
-        final Message msg = pkt.getMessage();
-        final WSDLPort wsdlModel = pipeConfig.getWSDLModel();
-        final WSDLBoundOperation wsdlBoundOp = msg.getOperation(wsdlModel);
-
-        // get the ws-at policy assertion wsat:ATAssertion (don't need wsat:ATAlwaysCapable on the client side).
-        ATAssertion atAssertion = null;
-        try {
-            PolicyMap pmap = pipeConfig.getPolicyMap();
-            PolicyMapKey opKey =
-                    createWsdlOperationScopeKey(
-                            wsdlModel.getOwner().getName(), // service
-                            wsdlModel.getName(), // port
-                            wsdlBoundOp.getName() // operation
-                    );
-            Policy effectivePolicy =
-                    pmap.getOperationEffectivePolicy(opKey);
-            assert(effectivePolicy.contains(AT_ASSERTION));
-            Iterator<AssertionSet> assertionIter = effectivePolicy.iterator();
-            AssertionSet assertionSet;
-            while (assertionIter.hasNext()) {
-                assertionSet = assertionIter.next();
-                for (PolicyAssertion pa : assertionSet) {
-                    if (pa.getName().equals(AT_ASSERTION)) {
-                        atAssertion = pa.isOptional() ? ALLOWED : REQUIRED;
-                    }
+    
+        final WSDLBoundOperation wsdlBoundOp = msg.getOperation(wsdlModel);    
+        ATAssertion atAssertion = getOperationATPolicy(pipeConfig.getPolicyMap(), wsdlModel, wsdlBoundOp);
+        if (atAssertion == NOT_ALLOWED ) {
+                // no ws-at policy assertion on the wsdl:binding/wsdl:operation, so no work to do here
+                if (logger.isLogging(Level.FINE)) {
+                    logger.fine("process", "no ws-at policy asssertion for " + wsdlBoundOp.getName().toString());
                 }
-            }
-        } catch (PolicyException pe) {
-            throw new WebServiceException(pe.getMessage(), pe);
+                return next.process(pkt);
         }
 
         // get the coordination context from JTS ThreadLocal data
@@ -216,7 +216,7 @@ public class TxClientPipe implements Pipe {
         // TODO: Only need the suspend and resume when the web service invocation of this client is to a web service
         // in same application server.  Must figure out how to identify this case. For now, just hardcode assumption
         // that it is in same app server and this is necessary.  It does not hurt to do this, it is probably inefficient.
-        Transaction currentTxn;
+        
         try {
             currentTxn = TransactionManagerImpl.getInstance().suspend();
         } catch (SystemException ex) {
@@ -278,4 +278,57 @@ public class TxClientPipe implements Pipe {
         return result;
     }
 
+    private Transaction checkCurrentJTATransaction(Message msg, WSDLPort wsdlModel) {
+        Transaction currentTxn = null;
+        try {
+            currentTxn = TransactionManagerImpl.getInstance().getTransaction();
+        } catch (SystemException ex) {
+            // ignore
+        }
+        if (currentTxn == null) {
+            // no current JTA transaction, so no work to do here
+            if (logger.isLogging(Level.FINEST)) {
+                logger.finest("process", "no current JTA transaction for invoked operation " +
+                        msg.getOperation(wsdlModel).getName().toString());
+            }
+        }
+        return currentTxn;
+    }
+    
+    /**
+     * Return the ws-at policy assertion associated with wsdlBoundOp.
+     */ 
+    private ATAssertion getOperationATPolicy(PolicyMap pmap, WSDLPort wsdlModel, WSDLBoundOperation wsdlBoundOp) 
+        throws WebServiceException 
+    {
+        // get the ws-at policy assertion wsat:ATAssertion (don't need wsat:ATAlwaysCapable on the client side).
+        ATAssertion atAssertion = NOT_ALLOWED;
+        try {
+            if (pmap != null) {
+                PolicyMapKey opKey =
+                        createWsdlOperationScopeKey(
+                        wsdlModel.getOwner().getName(), // service
+                        wsdlModel.getName(), // port
+                        wsdlBoundOp.getName() // operation
+                        );
+                Policy effectivePolicy =
+                        pmap.getOperationEffectivePolicy(opKey);
+                if (effectivePolicy != null) {
+                    Iterator<AssertionSet> assertionIter = effectivePolicy.iterator();
+                    AssertionSet assertionSet;
+                    while (assertionIter.hasNext()) {
+                        assertionSet = assertionIter.next();
+                        for (PolicyAssertion pa : assertionSet) {
+                            if (pa.getName().equals(AT_ASSERTION)) {
+                                atAssertion = pa.isOptional() ? ALLOWED : REQUIRED;
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (PolicyException pe) {
+            throw new WebServiceException(pe.getMessage(), pe);
+        }
+        return atAssertion;
+    }
 }
