@@ -70,6 +70,7 @@ import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.WebServiceException;
 
+import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 
 import java.util.Properties;
@@ -85,6 +86,7 @@ import com.sun.xml.ws.security.secconv.WSSCElementFactory;
 import com.sun.xml.ws.security.secconv.WSSCFactory;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponse;
+import com.sun.xml.wss.SubjectAccessor;
 import com.sun.xml.wss.RealmAuthenticationAdapter;
 import com.sun.xml.wss.impl.NewSecurityRecipient;
 
@@ -516,11 +518,16 @@ public class SecurityServerPipe extends SecurityPipeBase {
             Packet packet, ProcessingContext ctx, boolean isSCTIssue, String action) {
         
         IssuedTokenContext ictx = new IssuedTokenContextImpl();
+            
         Message msg = packet.getMessage();
         Message retMsg = null;
         String retAction = null;
         
         try {
+            // Set the requestor authenticated Subject in the IssuedTokenContext
+            Subject subject = SubjectAccessor.getRequesterSubject(ctx);
+            ictx.setRequestorSubject(subject);
+            
             WSSCElementFactory eleFac = WSSCElementFactory.newInstance();
             JAXBElement rstEle = msg.readPayloadAsJAXB(jaxbContext.createUnmarshaller());
             RequestSecurityToken rst = eleFac.createRSTFrom(rstEle);
@@ -561,6 +568,8 @@ public class SecurityServerPipe extends SecurityPipeBase {
             // construct the complete message here containing the RSTR and the
             // correct Action headers if any and return the message.
             retMsg = Messages.create(jaxbContext.createMarshaller(), eleFac.toJAXBElement(rstr), soapVersion);
+        } catch (com.sun.xml.wss.XWSSecurityException ex) {
+            throw new RuntimeException(ex);
         } catch (javax.xml.bind.JAXBException ex) {
             throw new RuntimeException(ex);
         } catch (WSSecureConversationException ex){
