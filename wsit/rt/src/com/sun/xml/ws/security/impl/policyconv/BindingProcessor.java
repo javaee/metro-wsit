@@ -22,9 +22,7 @@
 
 package com.sun.xml.ws.security.impl.policyconv;
 
-import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyException;
-import com.sun.xml.ws.security.impl.policy.PolicyUtil;
 import com.sun.xml.ws.security.policy.Binding;
 import com.sun.xml.ws.security.policy.EncryptedElements;
 import com.sun.xml.ws.security.policy.EncryptedParts;
@@ -34,20 +32,17 @@ import com.sun.xml.ws.security.policy.SignedEndorsingSupportingTokens;
 import com.sun.xml.ws.security.policy.SignedParts;
 import com.sun.xml.ws.security.policy.SignedSupportingTokens;
 import com.sun.xml.ws.security.policy.SupportingTokens;
-import com.sun.xml.ws.security.policy.Target;
-import com.sun.xml.ws.security.policy.Token;
 import com.sun.xml.ws.security.policy.WSSAssertion;
-import com.sun.xml.ws.security.policy.X509Token;
-import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.impl.PolicyTypeUtil;
 import com.sun.xml.wss.impl.policy.mls.AuthenticationTokenPolicy;
+import com.sun.xml.wss.impl.policy.mls.DerivedTokenKeyBinding;
 import com.sun.xml.wss.impl.policy.mls.EncryptionPolicy;
 import com.sun.xml.wss.impl.policy.mls.EncryptionTarget;
+import com.sun.xml.wss.impl.policy.mls.KeyBindingBase;
 import com.sun.xml.wss.impl.policy.mls.SignaturePolicy;
 import com.sun.xml.wss.impl.policy.mls.SignatureTarget;
 import com.sun.xml.wss.impl.policy.mls.TimestampPolicy;
 import com.sun.xml.wss.impl.policy.mls.WSSPolicy;
-import java.util.Set;
 import java.util.Vector;
 import javax.xml.crypto.dsig.CanonicalizationMethod;
 import static com.sun.xml.wss.impl.policy.mls.Target.SIGNATURE_CONFIRMATION;
@@ -147,7 +142,18 @@ public abstract class BindingProcessor {
             }
         }else{
             SignatureTargetCreator stc = iAP.getTargetCreator();
-            SignatureTarget st = stc.newURISignatureTarget(token.getUUID());
+            SignatureTarget st = null;
+            if (PolicyTypeUtil.derivedTokenKeyBinding(token)) {
+                WSSPolicy kbd = ((DerivedTokenKeyBinding)token).getOriginalKeyBinding();
+                if (PolicyTypeUtil.symmetricKeyBinding(kbd)) {
+                    WSSPolicy sbd = (KeyBindingBase)kbd.getKeyBinding();
+                    st = stc.newURISignatureTarget(sbd.getUUID());
+                } else {
+                    st = stc.newURISignatureTarget(kbd.getUUID());
+                }
+            } else {
+                st = stc.newURISignatureTarget(token.getUUID());
+            }
             SignaturePolicy.FeatureBinding fb = (com.sun.xml.wss.impl.policy.mls.SignaturePolicy.FeatureBinding) primarySP.getFeatureBinding();
             fb.addTargetBinding(st);
         }
