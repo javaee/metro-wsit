@@ -70,7 +70,9 @@ public class ATSubCoordinator extends ATCoordinator {
 
     public void setTransaction(Transaction txn) {
         super.setTransaction(txn);
-        if (txn != null && xaTerminator != null) {
+        if (txn == null) {
+            xaTerminator = null;
+        } else if (xaTerminator == null) {
             xaTerminator = TransactionManagerImpl.getInstance().getXATerminator();
         }
     }
@@ -413,7 +415,15 @@ public class ATSubCoordinator extends ATCoordinator {
 
     @Override
     public void forget() {
-        // TODO: implement
+        if (rootVolatileParticipant != null){
+            rootVolatileParticipant.forget();
+            rootVolatileParticipant = null;
+        }
+        if (rootDurableParticipant != null){
+            rootDurableParticipant.forget();
+            rootDurableParticipant = null;
+        }
+        super.forget();
     }
 
 }
