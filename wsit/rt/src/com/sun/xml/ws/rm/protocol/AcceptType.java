@@ -28,6 +28,7 @@ import org.w3c.dom.Element;
 
 import javax.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
+import javax.xml.ws.wsaddressing.W3CEndpointReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -36,10 +37,13 @@ import java.util.Map;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "AcceptType", propOrder = {
+    "acksTo",
     "any"
 })
 public class AcceptType {
 
+    @XmlElement(name="AcksTo", namespace="http://schemas.xmlsoap.org/ws/2005/02/rm")
+    protected W3CEndpointReference acksTo;
     @XmlAnyElement(lax = true)
     protected List<Object> any = new ArrayList<Object>();
     @XmlAnyAttribute
@@ -53,14 +57,15 @@ public class AcceptType {
      *     {@link com.sun.xml.ws.api.addressing.WSEndpointReference }
      *
      */
-    public WSEndpointReference getAcksTo() {
-          for (int i = 0 ; i < any.size(); i++) {
+    public W3CEndpointReference getAcksTo() {
+       /*   for (int i = 0 ; i < any.size(); i++) {
 
             if (any.get(i) instanceof WSEndpointReference) {
                 return (WSEndpointReference)any.get(i);
             }
         }
-        return null;
+        return null;*/
+        return acksTo;
     }
 
     /**
@@ -71,8 +76,9 @@ public class AcceptType {
      *     {@link WSEndpointReference }
      *
      */
-    public void setAcksTo(WSEndpointReference value) {
-        this.any.add(value);
+    public void setAcksTo(W3CEndpointReference value) {
+        //this.any.add(value);
+        this.acksTo = value;
     }
 
     /**
