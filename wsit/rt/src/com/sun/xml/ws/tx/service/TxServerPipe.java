@@ -68,7 +68,7 @@ import java.util.logging.Level;
  * <p/>
  * Supports following WS-Coordination protocols: 2004 WS-Atomic Transaction protocol
  *
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @since 1.0
  */
 // suppress known deprecation warnings about using pipes.
@@ -177,12 +177,13 @@ public class TxServerPipe implements Pipe {
         /*
          * Absence of a ws-at atassertion does not forbid WS-AT CoordinationContext from flowing.
          * OASIS WS-TX refers to this case as no claims made.
-	 */
+         * Comment out this warning for now.
+
         if (CC != null && opat.atAssertion == ATAssertion.NOT_ALLOWED) {
             txLogger.warning("atomic transaction flowed with operation request that was not annotated with wsat:ATAssertion : " +
                     msgOperation.toString());
         }
-
+        */
         boolean importedTxn = false;
         Packet responsePkt = null;
         Transaction txn = null;
@@ -200,7 +201,9 @@ public class TxServerPipe implements Pipe {
                 } catch (IllegalStateException e) {
                     // ignore.  transaction context already setup
                     performSuspend = false;
-                } 
+                } catch (Exception ex) {
+                    throw new WebServiceException(ex.getMessage(), ex);
+                }
                 try {
                     responsePkt = next.process(pkt);
                 } catch (Exception e) {
@@ -210,7 +213,7 @@ public class TxServerPipe implements Pipe {
                     try {
                         tm.suspend();
                     } catch (SystemException ex) {
-			// ignore
+                        throw new WebServiceException(ex.getMessage(), ex);
                     }
                 }
             } else if (coord.isSubordinateCoordinator()) {
