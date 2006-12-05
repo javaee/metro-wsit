@@ -68,7 +68,7 @@ import java.util.logging.Level;
  * already decided to prepare.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @since 1.0
  */
 public class ATParticipant extends Registrant {
@@ -516,6 +516,7 @@ public class ATParticipant extends Registrant {
 
         //TODO. put switch statement over all possible 2pc transaction state.
         //      invalid states require fault to be sent
+        
         state = STATE.ABORTING;
 
         // local rollback
@@ -526,7 +527,16 @@ public class ATParticipant extends Registrant {
         // pass rollback to remote participant
         if (remoteParticipant) {
             remoteRollback();
+        } else {
+            localRollback();
         }
+
+        if (logger.isLogging(Level.FINER)) {
+            logger.exiting("abort", getCoordIdPartId());
+        }
+    }
+
+    private void localRollback() {
         if (isRemoteCPS()) {
             try {
                 getATCoordinatorWS(false).abortedOperation(null);
@@ -540,21 +550,14 @@ public class ATParticipant extends Registrant {
         } else {
             getATCoordinator().aborted(getIdValue());
         }
-
-        // try {
+        
         if (logger.isLogging(Level.FINE)) {
             logger.fine("abort", getCoordIdPartId());
         }
         forget();
-        // } catch (XAException ex) {
-        //    ex.printStackTrace();
-        //}
-
-        if (logger.isLogging(Level.FINER)) {
-            logger.exiting("abort", getCoordIdPartId());
-        }
     }
-
+    
+    
     /**
      * Send terminal notification
      */
