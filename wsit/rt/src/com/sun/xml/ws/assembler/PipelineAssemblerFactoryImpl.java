@@ -370,7 +370,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
         
         private Pipe dump(ClientPipeAssemblerContext context, String name, Pipe p) {
             if (Boolean.getBoolean(name)) {
-                context.createDumpPipe(name, System.out, p);
+                p = context.createDumpPipe(name, System.out, p);
             }
             
             return p;
@@ -388,7 +388,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
          * Checks to see whether OptimizedTransport is enabled or not.
          *
          * @param policyMap policy map for {@link this} assembler
-         * @param wsdlPort the WSDLPort object
+         * @param port the WSDLPort object
          * @param portInfo the WSPortInfo object
          * @return true if OptimizedTransport is enabled, false otherwise
          */
@@ -754,12 +754,10 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
     }
     
     private static Pipe initializeXWSSClientPipe(WSDLPort prt, WSService svc, WSBinding bnd, Pipe nextP) {
-        Pipe ret = new com.sun.xml.xwss.XWSSClientPipe(prt,svc, bnd, nextP);
-        return ret;
+        return new com.sun.xml.xwss.XWSSClientPipe(prt,svc, bnd, nextP);
     }
     
     private static Pipe initializeXWSSServerPipe(WSEndpoint epoint, WSDLPort prt, Pipe nextP) {
-        Pipe ret = new com.sun.xml.xwss.XWSSServerPipe(epoint, prt, nextP);
-        return ret;
+        return new com.sun.xml.xwss.XWSSServerPipe(epoint, prt, nextP);
     }
 }
