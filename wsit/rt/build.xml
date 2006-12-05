@@ -216,5 +216,5 @@
             <webinf dir="${wstx.tmp}/WEB-INF" includes="**/*" excludes="web.xml"/>
         </war>
     </target>
-
+    
 </project>

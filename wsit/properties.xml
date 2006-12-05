@@ -22,13 +22,6 @@
  Copyright 2006 Sun Microsystems Inc. All Rights Reserved
 -->
 
-<!--
- $Id: properties.xml,v 1.14 2006-11-28 10:18:18 ritzmann Exp $
-
- Copyright (c) 2005 Sun Microsystems, Inc.
- All rights reserved.
--->
-
 <project name="wsit.dev.java.net build properties">
     <property name="name" value="webservices"/>
     <property name="install.name" value="jax-ws-latest-wsit"/>
@@ -41,20 +34,20 @@
     <property name="dist.image.wsit.dir" value="${dist.image.dir}/jax-ws-latest-wsit"/>
     <property name="dist.image.wsit.lib.dir" value="${dist.image.wsit.dir}/lib"/>
     <property name="build.javadocs.dir" value="${basedir}/build/javadocs"/>
-
+    
     <property name="etc.dir" value="etc"/>
     <property name="etc.lib.dir" value="${etc.dir}/lib"/>
     <property name="etc.metainf.dir" value="${etc.dir}/META-INF"/>
     <property name="etc.metainf.services.dir" value="${etc.dir}/META-INF/services"/>
-
+    
     <property name="rt.dir" value="${basedir}/rt"/>
     <property name="rt.classes" value="${rt.dir}/build/classes"/>
     <property name="tools.dir" value="${basedir}/tools"/>
-
+    
     <property name="compile.debug" value="true"/>
     <property name="compile.deprecation" value="false"/>
     <property name="compile.optimize" value="false"/>
-
+    
     <property name="release.impl.version" value="1.0"/>
     <property name="release.impl.version.suffix" value="EA"/>
     <tstamp>
@@ -62,19 +55,48 @@
     </tstamp>
     <property name="build.id" value="${now}(${user.name})" />
     <property name="build.version" value="${ant.project.name} ${release.impl.version}-${build.id}-${release.impl.version.suffix}" />
-
+    
     <property name="tmpdir" value="${basedir}/build/tmp"/>
-
+    
     <macrodef name="updateManifestWithVersion"
-            description="updates a jar manifest file with the version information">
-      <attribute name="file" />
-      <sequential>
-        <manifest mode="update" file="@{file}">
-          <attribute name="Build-Id" value="${build.id}" />
-          <attribute name="Build-Version" value="${build.version}" />
-          <attribute name="Major-Version" value="${release.impl.version}" />
-        </manifest>
-      </sequential>
+              description="updates a jar manifest file with the version information">
+        <attribute name="file" />
+        <sequential>
+            <manifest mode="update" file="@{file}">
+                <attribute name="Build-Id" value="${build.id}" />
+                <attribute name="Build-Version" value="${build.version}" />
+                <attribute name="Major-Version" value="${release.impl.version}" />
+            </manifest>
+        </sequential>
     </macrodef>
-
+    
+    <target name="maven-tasks"
+            description="Import the Ant tasks from the Maven 2 Antlib and define a default Maven 2 repository">
+        <typedef resource="org/apache/maven/artifact/ant/antlib.xml">
+            <classpath>
+                <pathelement location="../etc/lib/maven-artifact-ant-2.0.4-dep.jar" />
+            </classpath>
+        </typedef>
+        <remoteRepository id="maven.repository" url="http://www.ibiblio.org/maven2/"/>
+    </target>
+    
+    <target name="pmd" depends="init, maven-tasks"
+            description="Run PMD on all source code">
+        <!-- Download PMD from Maven repository -->
+        <dependencies pathId="pmd.classpath" useScope="runtime">
+            <remoteRepository refid="maven.repository"/>
+            <dependency groupId="pmd" artifactId="pmd" version="3.7"/>
+        </dependencies>
+        <typedef name="pmd" classname="net.sourceforge.pmd.ant.PMDTask">
+            <classpath refid="pmd.classpath"/>
+        </typedef>
+        <pmd targetjdk="${javac.target}">
+            <ruleset>basic</ruleset>
+            <formatter type="html" toFile="${build.dir}/pmd.html"/>
+            <fileset dir="${src.dir}">
+                <include name="**/*.java"/>
+            </fileset>
+        </pmd>
+    </target>
+    
 </project>
