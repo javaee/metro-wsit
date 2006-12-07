@@ -33,6 +33,8 @@ package com.sun.xml.ws.rm.jaxws.runtime.server;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
+import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.*;
 import com.sun.xml.ws.api.message.Message;
@@ -54,6 +56,7 @@ import com.sun.xml.ws.security.SecurityContextToken;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.security.trust.elements.str.DirectReference;
 import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
+import com.sun.xml.ws.developer.MemberSubmissionEndpointReference;
 import com.sun.xml.wss.impl.MessageConstants;
 
 import javax.xml.bind.JAXBElement;
@@ -63,9 +66,17 @@ import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPFactory;
 import javax.xml.soap.SOAPFault;
 import javax.xml.ws.WebServiceException;
+import javax.xml.ws.EndpointReference;
+import javax.xml.ws.wsaddressing.W3CEndpointReference;
 import javax.xml.ws.soap.SOAPBinding;
+import javax.xml.transform.Source;
+import javax.xml.transform.sax.SAXSource;
+import javax.xml.transform.stream.StreamSource;
 import java.net.URI;
 import java.util.HashMap;
+import java.io.StringReader;
+
+import org.xml.sax.InputSource;
 
 /**
  * Server-side RM Pipe implementation
@@ -568,17 +579,16 @@ public class RMServerPipe extends PipeBase<RMDestination,
             }
             
             accept = new AcceptType();
-            /**
-             * ADDRESSING_FIXME
-             * This needs to be fixed commenting temporarily till I can discuss
-             * with Arun
-             */
-           /* if (RMConstants.getAddressingVersion() == AddressingVersion.MEMBER) {
-                accept.setAcksTo(new MemberSubmissionAcksToImpl(dest));
-            } else {
-                accept.setAcksTo(new W3CAcksToImpl(dest));
-            }*/
 
+            W3CEndpointReference endpointReference = null;
+            WSEndpointReference wsepr = new WSEndpointReference(dest,constants.getAddressingVersion());
+            if ( constants.getAddressingVersion()== AddressingVersion.W3C){
+                endpointReference = (W3CEndpointReference)wsepr.toSpec();
+                accept.setAcksTo(endpointReference);
+            }    /*else {
+                //TODO support MemberSubmissionEndpointReference when issue 131 of JAXB is resolved
+               //endpointReference = (MemberSubmissionEndpointReference)wsepr.toSpec() ;
+             }*/
             crsElement.setAccept(accept);
         }
 
