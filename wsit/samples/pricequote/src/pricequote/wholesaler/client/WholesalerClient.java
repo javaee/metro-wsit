@@ -20,7 +20,7 @@
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 /*
- $Id: WholesalerClient.java,v 1.3 2006-08-05 00:29:36 arungupta Exp $
+ $Id: WholesalerClient.java,v 1.4 2006-12-07 00:04:38 jdg6688 Exp $
 */
 
 package pricequote.wholesaler.client;
@@ -77,13 +77,13 @@ public class WholesalerClient {
         try {
             WholesalerQuoteService service = new WholesalerQuoteService(new URL(endpoint), name);
             port = service.getWholesalerPort();
-            configureSTS((BindingProvider)port);
+           // configureSTS((BindingProvider)port);
         } catch (MalformedURLException e) {
             throw new WebServiceException(e);
         }
     }
 
-    private static final void configureSTS(BindingProvider port) {
+ /*   private static final void configureSTS(BindingProvider port) {
         Map<String,String> map = configureMicrosoftSTS();
 
         try {
@@ -119,7 +119,8 @@ public class WholesalerClient {
 
         return map;
     }
-
+*/
+    
     public Quote getQuote(int pid) {
         return port.getQuote(pid);
     }
