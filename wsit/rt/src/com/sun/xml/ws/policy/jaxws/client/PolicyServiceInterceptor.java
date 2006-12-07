@@ -33,6 +33,7 @@ import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.jaxws.PolicyConfigParser;
 import com.sun.xml.ws.policy.jaxws.WSDLPolicyMapWrapper;
+import com.sun.xml.ws.policy.jaxws.privateutil.LocalizationMessages;
 import com.sun.xml.ws.policy.jaxws.spi.ModelConfiguratorProvider;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
@@ -60,13 +61,13 @@ public class PolicyServiceInterceptor extends ServiceInterceptor {
                 String clientCfgFileName = PolicyUtils.ConfigFile.generateFullName(PolicyConstants.CLIENT_CONFIGURATION_IDENTIFIER);
                 URL clientCfgFileUrl = PolicyUtils.ConfigFile.loadAsResource(clientCfgFileName, null);
                 if (clientCfgFileUrl != null) {
-                    logger.config("preCreateBinding", "Loading client config file: " + clientCfgFileUrl);
+                    logger.config("preCreateBinding", LocalizationMessages.LOADING_CLIENT_CFG_FILE(clientCfgFileUrl));
                     WSDLModel clientModel = PolicyConfigParser.parseModel(clientCfgFileUrl, true);
                     WSDLPolicyMapWrapper clientWrapper = clientModel.getExtension(WSDLPolicyMapWrapper.class);
                     if (clientWrapper != null) {
                         PolicyMap map = clientWrapper.getPolicyMap();
                         if (map != null) {
-                            logger.config("preCreateBinding", "invoking alternative selection on client policy map");
+                            logger.config("preCreateBinding", LocalizationMessages.INVOKING_CLI_SIDE_ALTERNATIVE_SELECTION());
                             clientWrapper.doAlternativeSelection();
                             for (ModelConfiguratorProvider configurator : PolicyUtils.ServiceProvider.load(ModelConfiguratorProvider.class)) {
                                 configurator.configure(clientModel, map);
@@ -79,8 +80,7 @@ public class PolicyServiceInterceptor extends ServiceInterceptor {
                     }
                 } else {
                     logger.config("preCreateBinding",
-                            "Could not find client configuration file \"" +
-                            clientCfgFileName + "\" on classpath");
+                            LocalizationMessages.COULD_NOT_FIND_CLIENT_CFG_FILE_ON_CLASSPATH(clientCfgFileName));
                 }
             }
         } catch (PolicyException e) {

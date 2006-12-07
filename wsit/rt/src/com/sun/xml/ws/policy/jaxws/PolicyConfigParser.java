@@ -75,12 +75,12 @@ public final class PolicyConfigParser {
                     context = container.getSPI(contextClass);
                 }
             } catch (ClassNotFoundException e) {
-                logger.fine("parse", "Did not find class " + SERVLET_CONTEXT_CLASSNAME + ". We are apparently not running in a container.");
+                logger.fine("parse", LocalizationMessages.CAN_NOT_FIND_CLASS(SERVLET_CONTEXT_CLASSNAME));
             }
-            logger.finest("parse", "context = '" + context + "'");
+            logger.finest("parse", LocalizationMessages.CONTEXT_IS(context));
             
             String cfgFile = PolicyUtils.ConfigFile.generateFullName(configFileIdentifier);
-            logger.finest("parse", "config file = '" + cfgFile + "'");
+            logger.finest("parse", LocalizationMessages.CONFIG_FILE_IS(cfgFile));
             
             URL configFileUrl = PolicyUtils.ConfigFile.loadAsResource(cfgFile, context);
             
@@ -144,7 +144,7 @@ public final class PolicyConfigParser {
             XMLStreamBuffer configFileSource = initConfigFileSource(configFileUrl);
 
             if (configFileSource == null) {
-                throw new PolicyException(LocalizationMessages.BUFFER_NOT_EXIST(configFileUrl));
+                throw new PolicyException(LocalizationMessages.BUFFER_DOES_NOT_EXIST(configFileUrl));
             }
 
             SDDocumentSource doc = SDDocumentSource.create(configFileUrl, configFileSource);

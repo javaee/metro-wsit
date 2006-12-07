@@ -27,6 +27,7 @@ import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapExtender;
 import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.policy.PolicySubject;
+import com.sun.xml.ws.policy.jaxws.privateutil.LocalizationMessages;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
 import java.util.Collection;
 import java.util.Map;
@@ -58,12 +59,12 @@ class BuilderHandlerOperationScope extends BuilderHandler{
     }
     
     void populate(PolicyMapExtender policyMapExtender) throws PolicyException{
-        if (null==policyMapExtender) {
-            throw new PolicyException("PolicyMap is null.");
+        if (null == policyMapExtender) {
+            throw new PolicyException(LocalizationMessages.POLICY_MAP_CAN_NOT_BE_NULL());
         }
-        PolicyMapKey mapKey = PolicyMap.createWsdlOperationScopeKey(service,port,operation);
+        PolicyMapKey mapKey = PolicyMap.createWsdlOperationScopeKey(service, port, operation);
         for (PolicySubject subject:getPolicySubjects()) {
-            policyMapExtender.putOperationSubject(mapKey,subject);
+            policyMapExtender.putOperationSubject(mapKey, subject);
         }
     }
 }

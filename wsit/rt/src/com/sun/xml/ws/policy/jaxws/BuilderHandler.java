@@ -54,11 +54,11 @@ abstract class BuilderHandler{
     abstract void populate(PolicyMapExtender policyMapExtender) throws PolicyException;
     
     Collection<Policy> getPolicies() throws PolicyException {
-        if (null==policyURIs) {
-            throw new PolicyException("Policy URIs can not be null.");
+        if (null == policyURIs) {
+            throw new PolicyException(LocalizationMessages.POLICY_URIS_CAN_NOT_BE_NULL());
         }
-        if (null==policyStore) {
-            throw new PolicyException("No policies defined.");
+        if (null == policyStore) {
+            throw new PolicyException(LocalizationMessages.NO_POLICIES_DEFINED());
         }
         
         Collection<Policy> result = new ArrayList<Policy>(policyURIs.size());
@@ -69,7 +69,7 @@ abstract class BuilderHandler{
                 result.add(PolicyModelTranslator.getTranslator().translate(sourceModel));
             }
             else {
-                throw new PolicyException(LocalizationMessages.POLICY_REFERENCE_NOT_EXIST(policyURI));
+                throw new PolicyException(LocalizationMessages.POLICY_REFERENCE_DOES_NOT_EXIST(policyURI));
             }
         }
         
@@ -79,8 +79,8 @@ abstract class BuilderHandler{
     Collection<PolicySubject> getPolicySubjects() throws PolicyException {
         Collection<Policy> policies = getPolicies();
         Collection<PolicySubject> result =  new ArrayList<PolicySubject>(policies.size());
-        for (Policy policy:policies) {
-            result.add(new PolicySubject(policySubject,policy));
+        for (Policy policy : policies) {
+            result.add(new PolicySubject(policySubject, policy));
         }
         return result;
     }

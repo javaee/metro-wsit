@@ -132,7 +132,7 @@ public class WSDLPolicyMapWrapper implements WSDLExtension {
                 // setting subject to provided URL of client WSIT config
                 mapExtender.putFaultMessageSubject(key, new PolicySubject(clientWsitConfig, policy));
             }
-            logger.fine("addClientToServerMap", "Client configuration policies transfered into final policy map: " + policyMap);
+            logger.fine("addClientToServerMap", LocalizationMessages.CLIENT_CFG_POLICIES_TRANSFERED_INTO_FINAL_POLICY_MAP(policyMap));
         } catch (FactoryConfigurationError ex) {
             throw new PolicyException(ex);
         }
@@ -157,7 +157,7 @@ public class WSDLPolicyMapWrapper implements WSDLExtension {
                             continue nextAssertion;
                         }
                     }                    
-                    throw new PolicyException("Assertion not supported on the server side: [" + assertion.getName() + "]");
+                    throw new PolicyException(LocalizationMessages.ASSERTION_NOT_SUPPORTED_ON_SERVER_SIDE(assertion.getName()));
                     
                 }
             }

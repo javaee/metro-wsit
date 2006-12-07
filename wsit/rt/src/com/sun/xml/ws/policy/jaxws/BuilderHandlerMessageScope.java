@@ -27,6 +27,7 @@ import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapExtender;
 import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.policy.PolicySubject;
+import com.sun.xml.ws.policy.jaxws.privateutil.LocalizationMessages;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
 import java.util.Collection;
 import java.util.Map;
@@ -69,29 +70,29 @@ class BuilderHandlerMessageScope extends BuilderHandler{
     }
     
     void populate(PolicyMapExtender policyMapExtender) throws PolicyException{
-        if (null==policyMapExtender) {
-            throw new PolicyException("PolicyMap can not be null.");
+        if (null == policyMapExtender) {
+            throw new PolicyException(LocalizationMessages.POLICY_MAP_EXTENDER_CAN_NOT_BE_NULL());
         }
         
         PolicyMapKey mapKey;
         
         if (Scope.FaultMessageScope == scope) {
-            mapKey = PolicyMap.createWsdlFaultMessageScopeKey(service,port,operation,message);
+            mapKey = PolicyMap.createWsdlFaultMessageScopeKey(service, port, operation, message);
         } else { // in|out msg scope
-            mapKey = PolicyMap.createWsdlMessageScopeKey(service,port,operation);
+            mapKey = PolicyMap.createWsdlMessageScopeKey(service, port, operation);
         }
         
         if (Scope.InputMessageScope == scope) {
             for (PolicySubject subject:getPolicySubjects()) {
-                policyMapExtender.putInputMessageSubject(mapKey,subject);
+                policyMapExtender.putInputMessageSubject(mapKey, subject);
             }
         } else if (Scope.OutputMessageScope == scope) {
             for (PolicySubject subject:getPolicySubjects()) {
-                policyMapExtender.putOutputMessageSubject(mapKey,subject);
+                policyMapExtender.putOutputMessageSubject(mapKey, subject);
             }
         } else if (Scope.FaultMessageScope == scope) {
-            for (PolicySubject subject:getPolicySubjects()) {
-                policyMapExtender.putFaultMessageSubject(mapKey,subject);
+            for (PolicySubject subject : getPolicySubjects()) {
+                policyMapExtender.putFaultMessageSubject(mapKey, subject);
             }
         }
     }
