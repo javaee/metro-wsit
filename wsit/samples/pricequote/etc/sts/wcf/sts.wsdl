@@ -149,9 +149,9 @@
     </wsdl:message>
     <wsdl:portType name="ISecurityTokenService">
         <wsdl:operation name="IssueToken">
-            <wsdl:input wsa10:Action="http://schemas.xmlsoap.org/ws/2005/02/trust/RST/Issue"
+            <wsdl:input wsap10:Action="http://schemas.xmlsoap.org/ws/2005/02/trust/RST/Issue"
                         message="tns:ISecurityTokenService_IssueToken_InputMessage"/>
-            <wsdl:output wsa10:Action="http://schemas.xmlsoap.org/ws/2005/02/trust/RSTR/Issue"
+            <wsdl:output wsap10:Action="http://schemas.xmlsoap.org/ws/2005/02/trust/RSTR/Issue"
                          message="tns:ISecurityTokenService_IssueToken_OutputMessage"/>
         </wsdl:operation>
     </wsdl:portType>
