@@ -89,6 +89,7 @@ public class EncryptedElements extends PolicyAssertion implements  com.sun.xml.w
     }
     
     public Iterator<String> getTargets() {
+        populate();
         if ( targetList != null ) {
             return targetList.iterator();
         }
@@ -125,7 +126,7 @@ public class EncryptedElements extends PolicyAssertion implements  com.sun.xml.w
                                 }
                                 if(isServer){
                                     throw new UnsupportedPolicyAssertion("Policy assertion "+
-                                              assertion+" is not supported under EncryptedElements assertion");
+                                            assertion+" is not supported under EncryptedElements assertion");
                                 }
                             }
                         }
@@ -133,8 +134,7 @@ public class EncryptedElements extends PolicyAssertion implements  com.sun.xml.w
                 }
                 populated = true;
             }
-        }
-        
+        }        
     }
     
 }
