@@ -137,7 +137,7 @@
     </wsp:Policy>
     <wsdl:types>
         <xsd:schema targetNamespace="http://tempuri.org/Imports">
-            <xsd:import schemaLocation="http://hp73123784316/WholesalerSTS/sts.svc?xsd=xsd0"
+            <xsd:import schemaLocation="sts_schema.xsd"
                         namespace="http://schemas.microsoft.com/Message"/>
         </xsd:schema>
     </wsdl:types>
