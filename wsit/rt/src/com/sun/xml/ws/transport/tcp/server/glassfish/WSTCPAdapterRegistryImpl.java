@@ -98,8 +98,7 @@ public class WSTCPAdapterRegistryImpl implements WSTCPAdapterRegistry {
             adapter = (Adapter) ejbEndPtInfo.prepareInvocation(true);
         } else {
             String uri = wsEndpointDescriptor.getURI();
-            String contextRoot = wsEndpointDescriptor.getContextRoot().substring(1);  // cut '/'
-            adapter = JAXWSAdapterRegistry.getInstance().getAdapter(contextRoot, uri, uri);
+            adapter = JAXWSAdapterRegistry.getInstance().getAdapter(wsEndpointDescriptor.getContextRoot(), uri, uri);
         }
         
 //@TODO implement checkAdapterSupportsTCP

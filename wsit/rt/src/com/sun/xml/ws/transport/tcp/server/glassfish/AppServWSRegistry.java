@@ -177,8 +177,7 @@ public class AppServWSRegistry {
     private @NotNull String getEndpointContextRoot(@NotNull WebServiceEndpoint wsServiceDescriptor) {
         String contextRoot;
         if(!wsServiceDescriptor.implementedByEjbComponent()) {
-            contextRoot = "/" +
-                    wsServiceDescriptor.getWebComponentImpl().
+            contextRoot = wsServiceDescriptor.getWebComponentImpl().
                     getWebBundleDescriptor().getContextRoot();
             logger.log(Level.FINE, "AppServWSRegistry.getEndpointContextRoot nonEJB WS. ContextRoot: {0}", contextRoot);
         } else {
