@@ -60,7 +60,7 @@ public class SecurityPolicyValidator implements PolicyAssertionValidator{
         //     supportedAssertions.add(new QName(SECURITY_POLICY_NS,SoapNormalization10));
         
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,STRTransform10));
-        //      supportedAssertions.add(new QName(SECURITY_POLICY_NS,XPath10));
+        //supportedAssertions.add(new QName(SECURITY_POLICY_NS,XPath10));
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,XPathFilter20));
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,Strict));
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,Lax));
@@ -74,7 +74,7 @@ public class SecurityPolicyValidator implements PolicyAssertionValidator{
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,ProtectTokens));
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,OnlySignEntireHeadersAndBody));
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,Body));
-        //     supportedAssertions.add(new QName(SECURITY_POLICY_NS,Header));
+        //supportedAssertions.add(new QName(SECURITY_POLICY_NS,Header));
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,XPath));
         
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,WssUsernameToken10));
@@ -114,7 +114,7 @@ public class SecurityPolicyValidator implements PolicyAssertionValidator{
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,WssRelV20Token10));
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,WssRelV10Token11));
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,WssRelV20Token11));
-        //     supportedAssertions.add(new QName(SECURITY_POLICY_NS,X509V3Token));
+        //supportedAssertions.add(new QName(SECURITY_POLICY_NS,X509V3Token));
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,SupportingTokens));
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,SignedSupportingTokens));
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,EndorsingSupportingTokens));
@@ -161,7 +161,7 @@ public class SecurityPolicyValidator implements PolicyAssertionValidator{
         
         supportedAssertions.add(new QName(SUN_WSS_SECURITY_SERVER_POLICY_NS,"DisableStreamingSecurity"));
         supportedAssertions.add(new QName(SUN_WSS_SECURITY_CLIENT_POLICY_NS,"DisableStreamingSecurity"));
-
+        
         // newly added by M.P.
         supportedAssertions.add(new QName(SUN_WSS_SECURITY_SERVER_POLICY_NS,"KeyStore"));
         supportedAssertions.add(new QName(SUN_WSS_SECURITY_SERVER_POLICY_NS,"TrustStore"));
@@ -181,6 +181,12 @@ public class SecurityPolicyValidator implements PolicyAssertionValidator{
     }
     
     public Fitness validateClientSide(PolicyAssertion policyAssertion) {
+        String uri = policyAssertion.getName().getNamespaceURI();
+        
+        if(uri.equals(SUN_WSS_SECURITY_SERVER_POLICY_NS) || uri.equals(SUN_TRUST_SERVER_SECURITY_POLICY_NS)){
+            return Fitness.UNSUPPORTED;
+        }
+        
         if (policyAssertion instanceof SecurityAssertionValidator) {
             return ((SecurityAssertionValidator)policyAssertion).validate() ? Fitness.SUPPORTED : Fitness.UNSUPPORTED;
         } else if (supportedAssertions.contains(policyAssertion.getName())) {
@@ -189,16 +195,29 @@ public class SecurityPolicyValidator implements PolicyAssertionValidator{
             return Fitness.UNKNOWN;
         }
     }
-
-    public Fitness validateServerSide(PolicyAssertion assertion) {
-        return Fitness.UNKNOWN; // TODO: implement
+    
+    public Fitness validateServerSide(PolicyAssertion policyAssertion) {
+        String uri = policyAssertion.getName().getNamespaceURI();
+        
+        if(uri.equals(SUN_WSS_SECURITY_CLIENT_POLICY_NS) || uri.equals(SUN_WSS_SECURITY_CLIENT_POLICY_NS)
+        || uri.equals(SUN_SECURE_CLIENT_CONVERSATION_POLICY_NS) || uri.equals(SUN_TRUST_CLIENT_SECURITY_POLICY_NS)){
+            return Fitness.UNSUPPORTED;
+        }
+        
+        if (policyAssertion instanceof SecurityAssertionValidator) {
+            return ((SecurityAssertionValidator)policyAssertion).validate() ? Fitness.SUPPORTED : Fitness.UNSUPPORTED;
+        } else if (supportedAssertions.contains(policyAssertion.getName())) {
+            return Fitness.SUPPORTED;
+        } else {
+            return Fitness.UNKNOWN;
+        }
     }
-
+    
     public String[] declareSupportedDomains() {
         return new String[] {
-            SECURITY_POLICY_NS, 
-            TRUST_NS, 
-            SUN_WSS_SECURITY_CLIENT_POLICY_NS, 
+            SECURITY_POLICY_NS,
+            TRUST_NS,
+            SUN_WSS_SECURITY_CLIENT_POLICY_NS,
             SUN_WSS_SECURITY_SERVER_POLICY_NS,
             SUN_SECURE_CLIENT_CONVERSATION_POLICY_NS,
             
