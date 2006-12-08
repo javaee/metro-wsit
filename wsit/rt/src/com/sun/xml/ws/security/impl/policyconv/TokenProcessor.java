@@ -98,6 +98,7 @@ public class TokenProcessor {
             AuthenticationTokenPolicy.SAMLAssertionBinding sab = new AuthenticationTokenPolicy.SAMLAssertionBinding();
             //(AuthenticationTokenPolicy.SAMLAssertionBinding)policy.newSAMLAssertionKeyBinding();
             sab.setUUID(token.getTokenId());
+            sab.setSTRID(token.getTokenId());
             sab.setReferenceType(MessageConstants.DIRECT_REFERENCE_TYPE);
             setTokenInclusion(sab,(Token) tokenAssertion);
             //sab.setPolicyToken((Token) tokenAssertion);
@@ -178,6 +179,7 @@ public class TokenProcessor {
             key.setAssertionType(AuthenticationTokenPolicy.SAMLAssertionBinding.SV_ASSERTION);
             //key.setPolicyToken(token);
             key.setUUID(token.getTokenId());
+            key.setSTRID(token.getTokenId());
             return key;
         }else if(PolicyUtil.isIssuedToken((PolicyAssertion) token)){
             IssuedTokenKeyBinding key = new IssuedTokenKeyBinding();
