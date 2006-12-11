@@ -112,6 +112,9 @@ public class SupportingTokensProcessor {
                 if(PolicyUtil.isUsernameToken((PolicyAssertion) token)){
                     encryptToken(token);
                 }
+                if(PolicyUtil.isSamlToken((PolicyAssertion)token)){
+                    correctSAMLBinding(policy);
+                }
                 
                 collectSignaturePolicies(token);
                 if(buildEP){
@@ -258,5 +261,9 @@ public class SupportingTokensProcessor {
             SignaturePolicy.FeatureBinding fb = (com.sun.xml.wss.impl.policy.mls.SignaturePolicy.FeatureBinding) sp.getFeatureBinding();
             fb.addTargetBinding(st);
         }
+    }
+
+    protected void correctSAMLBinding(WSSPolicy policy) {
+        //no-op
     }
 }

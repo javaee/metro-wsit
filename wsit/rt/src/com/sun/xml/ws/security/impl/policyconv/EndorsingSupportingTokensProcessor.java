@@ -73,4 +73,8 @@ public class EndorsingSupportingTokensProcessor extends SupportingTokensProcesso
         spFB.addTargetBinding(sigTarget);
         spFB.isEndorsingSignature(true);
     }
+    
+    protected void correctSAMLBinding(WSSPolicy policy) {
+        ((AuthenticationTokenPolicy.SAMLAssertionBinding)policy).setAssertionType(AuthenticationTokenPolicy.SAMLAssertionBinding.HOK_ASSERTION);
+    }
 }
