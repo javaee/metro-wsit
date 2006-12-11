@@ -22,6 +22,7 @@
 
 package com.sun.xml.ws.policy;
 
+import com.sun.xml.ws.policy.privateutil.LocalizationMessages;
 import javax.xml.namespace.QName;
 
 /**
@@ -91,7 +92,7 @@ final public class PolicyMapKey  {
         }
             
         if (handler == null) {
-            throw new IllegalStateException("Policy map key handler is not set.");
+            throw new IllegalStateException(LocalizationMessages.POLICY_MAP_KEY_HANDLER_NOT_SET());
         }
         
         if (that instanceof PolicyMapKey) {
@@ -103,7 +104,7 @@ final public class PolicyMapKey  {
 
     public int hashCode() {
         if (handler == null) {
-            throw new IllegalStateException("Policy map key handler is not set.");
+            throw new IllegalStateException(LocalizationMessages.POLICY_MAP_KEY_HANDLER_NOT_SET());
         }
 
         return handler.generateHashCode(this);

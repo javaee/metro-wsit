@@ -230,15 +230,15 @@ public final class PolicyUtils {
                 
                 return resultClass.cast(result);
             } catch (IllegalArgumentException e) {
-                throw new PolicyException(Messages.METHOD_INVOCATION_FAILED.format(methodName, target.getClass().getName(), Arrays.asList(parameters).toString()), e);
+                throw new PolicyException(LocalizationMessages.METHOD_INVOCATION_FAILED(target.getClass().getName(), methodName, Arrays.asList(parameters).toString()), e);
             } catch (InvocationTargetException e) {
-                throw new PolicyException(Messages.METHOD_INVOCATION_FAILED.format(methodName, target.getClass().getName(), Arrays.asList(parameters).toString()), e);
+                throw new PolicyException(LocalizationMessages.METHOD_INVOCATION_FAILED(target.getClass().getName(), methodName, Arrays.asList(parameters).toString()), e);
             } catch (IllegalAccessException e) {
-                throw new PolicyException(Messages.METHOD_INVOCATION_FAILED.format(methodName, target.getClass().getName(), Arrays.asList(parameters).toString()), e);
+                throw new PolicyException(LocalizationMessages.METHOD_INVOCATION_FAILED(target.getClass().getName(), methodName, Arrays.asList(parameters).toString()), e);
             } catch (SecurityException e) {
-                throw new PolicyException(Messages.METHOD_INVOCATION_FAILED.format(methodName, target.getClass().getName(), Arrays.asList(parameters).toString()), e);
+                throw new PolicyException(LocalizationMessages.METHOD_INVOCATION_FAILED(target.getClass().getName(), methodName, Arrays.asList(parameters).toString()), e);
             } catch (NoSuchMethodException e) {
-                throw new PolicyException(Messages.METHOD_INVOCATION_FAILED.format(methodName, target.getClass().getName(), Arrays.asList(parameters).toString()), e);
+                throw new PolicyException(LocalizationMessages.METHOD_INVOCATION_FAILED(target.getClass().getName(), methodName, Arrays.asList(parameters).toString()), e);
             }
         }
     }

@@ -23,6 +23,7 @@
 package com.sun.xml.ws.policy.sourcemodel;
 
 import com.sun.xml.ws.policy.PolicyConstants;
+import com.sun.xml.ws.policy.privateutil.LocalizationMessages;
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import java.util.Collection;
 import java.util.Collections;
@@ -61,7 +62,7 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
         
         /**
          * Method checks the PSM state machine if the creation of new child of given type is plausible for a node element
-         * with type set to this type instance. 
+         * with type set to this type instance.
          */
         boolean isChildTypeSupported(Type childType) {
             switch (this) {
@@ -93,7 +94,7 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
                             return false;
                     }
                 default:
-                    throw new IllegalStateException("Unknown model node type: " + this);
+                    throw new IllegalStateException(LocalizationMessages.MODEL_NODE_TYPE_UNKNOWN(this));
             }
         }
     }
@@ -123,7 +124,7 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
      */
     static ModelNode createRootPolicyNode(PolicySourceModel model) throws NullPointerException {
         if (model == null) {
-            throw new NullPointerException("Policy source model input argument must not be 'null'.");
+            throw new NullPointerException(LocalizationMessages.POLICY_SRC_MODEL_INPUT_PARAMETER_MUST_NOT_BE_NULL());
         }
         return new ModelNode(ModelNode.Type.POLICY, model);
     }
@@ -155,7 +156,7 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
      */
     public ModelNode createChildPolicyNode() {
         if (!this.type.isChildTypeSupported(Type.POLICY)) {
-            throw new UnsupportedOperationException("This operation is not supported for the '" + type + "' node type");
+            throw new UnsupportedOperationException(LocalizationMessages.OPERATION_NOT_SUPPORTED_FOR_NODE_TYPE(type));
         }
         
         ModelNode node = new ModelNode(ModelNode.Type.POLICY, parentModel);
@@ -172,7 +173,7 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
      */
     public ModelNode createChildAllNode() {
         if (!this.type.isChildTypeSupported(Type.ALL)) {
-            throw new UnsupportedOperationException("This operation is not supported for the '" + type + "' node type");
+            throw new UnsupportedOperationException(LocalizationMessages.OPERATION_NOT_SUPPORTED_FOR_NODE_TYPE(type));
         }
         
         ModelNode node = new ModelNode(ModelNode.Type.ALL, parentModel);
@@ -189,7 +190,7 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
      */
     public ModelNode createChildExactlyOneNode() {
         if (!this.type.isChildTypeSupported(Type.EXACTLY_ONE)) {
-            throw new UnsupportedOperationException("This operation is not supported for the '" + type + "' node type");
+            throw new UnsupportedOperationException(LocalizationMessages.OPERATION_NOT_SUPPORTED_FOR_NODE_TYPE(type));
         }
         
         ModelNode node = new ModelNode(ModelNode.Type.EXACTLY_ONE, parentModel);
@@ -206,8 +207,8 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
      */
     public ModelNode createChildAssertionNode() {
         if (!this.type.isChildTypeSupported(Type.ASSERTION)) {
-            throw new UnsupportedOperationException("This operation is not supported for the '" + type + "' node type");
-        }        
+            throw new UnsupportedOperationException(LocalizationMessages.OPERATION_NOT_SUPPORTED_FOR_NODE_TYPE(type));
+        }
         
         ModelNode node = new ModelNode(ModelNode.Type.ASSERTION, parentModel);
         this.addChild(node);
@@ -223,8 +224,8 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
      */
     public ModelNode createChildAssertionNode(AssertionData nodeData) {
         if (!this.type.isChildTypeSupported(Type.ASSERTION)) {
-            throw new UnsupportedOperationException("This operation is not supported for the '" + type + "' node type");
-        }        
+            throw new UnsupportedOperationException(LocalizationMessages.OPERATION_NOT_SUPPORTED_FOR_NODE_TYPE(type));
+        }
         
         ModelNode node = new ModelNode(Type.ASSERTION, parentModel, nodeData);
         this.addChild(node);
@@ -240,8 +241,8 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
      */
     public ModelNode createChildAssertionParameterNode() {
         if (!this.type.isChildTypeSupported(Type.ASSERTION_PARAMETER_NODE)) {
-            throw new UnsupportedOperationException("This operation is not supported for the '" + type + "' node type");
-        }        
+            throw new UnsupportedOperationException(LocalizationMessages.OPERATION_NOT_SUPPORTED_FOR_NODE_TYPE(type));
+        }
         
         ModelNode node = new ModelNode(ModelNode.Type.ASSERTION_PARAMETER_NODE, parentModel);
         this.addChild(node);
@@ -257,8 +258,8 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
      */
     public ModelNode createChildAssertionParameterNode(AssertionData nodeData) {
         if (!this.type.isChildTypeSupported(Type.ASSERTION_PARAMETER_NODE)) {
-            throw new UnsupportedOperationException("This operation is not supported for the '" + type + "' node type");
-        }        
+            throw new UnsupportedOperationException(LocalizationMessages.OPERATION_NOT_SUPPORTED_FOR_NODE_TYPE(type));
+        }
         
         ModelNode node = new ModelNode(Type.ASSERTION_PARAMETER_NODE, parentModel, nodeData);
         this.addChild(node);
@@ -274,8 +275,8 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
      */
     public ModelNode createChildPolicyReferenceNode(PolicyReferenceData referenceData) {
         if (!this.type.isChildTypeSupported(Type.POLICY_REFERENCE)) {
-            throw new UnsupportedOperationException("This operation is not supported for the '" + type + "' node type");
-        }        
+            throw new UnsupportedOperationException(LocalizationMessages.OPERATION_NOT_SUPPORTED_FOR_NODE_TYPE(type));
+        }
         
         ModelNode node = new ModelNode(parentModel, referenceData);
         this.parentModel.addNewPolicyReference(node);
@@ -315,7 +316,7 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
      */
     void setParentModel(PolicySourceModel model) throws IllegalAccessException {
         if (parentNode != null) {
-            throw new IllegalAccessException("The parent model may not be changed on a child node which is not a root of the policy source model tree.");
+            throw new IllegalAccessException(LocalizationMessages.PARENT_MODEL_CAN_NOT_BE_CHANGED());
         }
         
         this.updateParentModelReference(model);
@@ -398,7 +399,7 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
      */
     public AssertionData setOrReplaceNodeData(AssertionData newData) {
         if (!isAssertionRelatedNode()) {
-            throw new UnsupportedOperationException("This operation is supported only for 'ASSERTION' and 'ASSERTION_PARAMETER_NODE' node types. It is not supported for the node type of this instance: '" +  type + "'");
+            throw new UnsupportedOperationException(LocalizationMessages.OPERATION_NOT_SUPPORTED_FOR_THIS_BUT_ASSERTION_RELATED_NODE_TYPE(type));
         }
         
         AssertionData oldData = this.nodeData;
@@ -440,7 +441,8 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
      */
     void setReferencedModel(PolicySourceModel model) {
         if (this.type != Type.POLICY_REFERENCE) {
-            throw new UnsupportedOperationException("This operation is supported only for 'POLICY_REFERENCE' node types. It is not supported for the node type of this instance: '" +  type + "'");
+            throw new UnsupportedOperationException(
+                    LocalizationMessages.OPERATION_NOT_SUPPORTED_FOR_THIS_BUT_POLICY_REFERENCE_NODE_TYPE(type));
         }
         
         referencedModel = model;

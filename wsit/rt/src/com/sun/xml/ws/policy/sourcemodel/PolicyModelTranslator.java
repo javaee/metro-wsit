@@ -35,6 +35,7 @@ import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyException;
+import com.sun.xml.ws.policy.privateutil.LocalizationMessages;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import com.sun.xml.ws.policy.spi.AssertionCreationException;
@@ -96,11 +97,11 @@ public final class PolicyModelTranslator {
                                 }
                                 this.allNestedPolicies.add(nestedPolicy);
                             } else {
-                                throw new PolicyException("Unexpected multiple nested policy nodes within a single assertion.");
+                                throw new PolicyException(LocalizationMessages.UNEXPECTED_MULTIPLE_POLICY_NODES());
                             }
                             break;
                         default:
-                            throw new PolicyException("Unexpected type of child model node nested in an 'ASSERTION' node: '" + assertionNodeChild.getType() + "'");
+                            throw new PolicyException(LocalizationMessages.UNEXPECTED_CHILD_MODEL_TYPE(assertionNodeChild.getType()));
                     }
                 }
             }
@@ -151,26 +152,21 @@ public final class PolicyModelTranslator {
             String creatorClassName = creator.getClass().getName();
             
             if (supportedURIs == null || supportedURIs.length == 0) {
-                logger.warning("initPolicyAssertionCreatorsMap", "Discovered policy assertion creator of class='" + creatorClassName + "' does not support any URI. Implementation of getSupportedDomainNamespaceURIs() method returned '" + supportedURIs + "'.");
+                logger.warning("initPolicyAssertionCreatorsMap", LocalizationMessages.ASSERTION_CREATOR_DOES_NOT_SUPPORT_ANY_URI(creatorClassName));
                 continue;
             }
             
             for (String supportedURI : supportedURIs) {
-                logger.config("initPolicyAssertionCreatorsMap", "Policy assertion creator discovered: class='" + creatorClassName + "', supported namespace='" + supportedURI + "'");
+                logger.config("initPolicyAssertionCreatorsMap", LocalizationMessages.ASSERTION_CREATOR_DISCOVERED(creatorClassName, supportedURI));
                 if (supportedURI == null || supportedURI.length() == 0) {
-                    throw new PolicyException("Error registering policy assertion creator of class '" + creatorClassName + "'. Supported domain nemaspace URI string must not be neither null nor empty!");
+                    throw new PolicyException(LocalizationMessages.ERROR_REGISTERING_ASSERTION_CREATOR(creatorClassName));
                 }
                 
                 PolicyAssertionCreator oldCreator = pacMap.put(supportedURI, creator);
                 if (oldCreator != null) {
-                    StringBuffer buffer = new StringBuffer("Multiple policy assertion creators try to register for namespace '");
-                    buffer.append(supportedURI).append("'. Old creator`s class: '");
-                    buffer.append(oldCreator.getClass().getName()).append("', new creator`s class: '");
-                    buffer.append(creator.getClass().getName()).append("'.");
-                    
-                    String message = buffer.toString();
-                    logger.severe("initPolicyAssertionCreatorsMap", message);
-                    throw new PolicyException(message);
+                    logger.severe("initPolicyAssertionCreatorsMap", 
+                            LocalizationMessages.ERROR_MULTIPLE_ASSERTION_CREATORS_FOR_NAMESPACE(supportedURI, oldCreator.getClass().getName(), creator.getClass().getName()));
+                    throw new PolicyException(LocalizationMessages.ERROR_MULTIPLE_ASSERTION_CREATORS_FOR_NAMESPACE(supportedURI, oldCreator.getClass().getName(), creator.getClass().getName()));
                 }
             }
         }
@@ -204,33 +200,34 @@ public final class PolicyModelTranslator {
         logger.entering("translate", model);
         
         if (model == null) {
-            throw new PolicyException("Policy model translation error:  Input policy source model parameter is 'null'");
+            throw new PolicyException(LocalizationMessages.POLICY_MODEL_TRANSLATION_ERROR_INPUT_PARAM_NULL());
         }
         
         PolicySourceModel localPolicyModelCopy;
         try {
             localPolicyModelCopy = model.clone();
         } catch (CloneNotSupportedException e) {
-            logger.severe("translate", "Unable to clone input policy source model. Throwing policy exception.", e);
-            throw new PolicyException("Unable to clone input policy source model", e);
+            logger.severe("translate", LocalizationMessages.UNABLE_TO_CLONE_POLICY_SOURCE_MODEL(), e);
+            throw new PolicyException(LocalizationMessages.UNABLE_TO_CLONE_POLICY_SOURCE_MODEL(), e);
         }
         
         String policyId = localPolicyModelCopy.getPolicyId();
         String policyName = localPolicyModelCopy.getPolicyName();
         
         Collection<AssertionSet> alternatives = createPolicyAlternatives(localPolicyModelCopy);
-        logger.finest("translate", "Number of policy alternative combinations created: '" + alternatives.size() + "'");
+        logger.finest("translate", LocalizationMessages.NUMBER_OF_ALTERNATIVE_COMBINATIONS_CREATED(alternatives.size()));
         
         Policy policy = null;
         if (alternatives.size() == 0) {
             policy = Policy.createNullPolicy(policyName, policyId);
+            logger.finest("translate", LocalizationMessages.NO_ALTERNATIVE_COMBINATIONS_CREATED());
         } else if (alternatives.size() == 1 && alternatives.iterator().next().isEmpty()) {
-            logger.finest("translate", "No alternative combinations created: Returning 'nothing allowed' policy");
             policy = Policy.createEmptyPolicy(policyName, policyId);
-            logger.finest("translate", "Single empty alternative combination created: Returning 'anything allowed' policy");
+            logger.finest("translate", LocalizationMessages.SINGLE_EMPTY_ALTERNATIVE_COMBINATION_CREATED());
         } else {
             policy = Policy.createPolicy(policyName, policyId, alternatives);
-            logger.finest("translate", "'" + alternatives.size() + "' policy alternative combinations created: Returning created policy with '" + policy.getNumberOfAssertionSets() + "' inequal policy alternatives");
+            logger.finest("translate", 
+                    LocalizationMessages.N_ALTERNATIVE_COMBINATIONS_M_POLICY_ALTERNATIVES_CREATED(alternatives.size(), policy.getNumberOfAssertionSets()));
         }
         
         logger.exiting("translate", policy);
@@ -313,7 +310,7 @@ public final class PolicyModelTranslator {
                     decomposition.assertions.add(node);
                     break;
                 default :
-                    throw new PolicyException("Unexpected model node type found during policy expression content decomposition: '" + node.getType() + "'");
+                    throw new PolicyException(LocalizationMessages.UNEXPECTED_MODEL_NODE_TYPE_FOUND(node.getType()));
             }
         }
     }
@@ -325,9 +322,9 @@ public final class PolicyModelTranslator {
         } else {
             PolicyReferenceData refData = policyReferenceNode.getPolicyReferenceData();
             if (refData != null) {
-                throw new PolicyException("Unexpanded 'POLICY_REFERENCE' node found referencing '" + refData.getReferencedModelUri() + "' policy.");
+                throw new PolicyException(LocalizationMessages.UNEXPANDED_POLICY_REFERENCE_NODE_FOUND_REFERENCING(refData.getReferencedModelUri()));
             } else {
-                throw new PolicyException("Unexpanded 'POLICY_REFERENCE' node found containing no policy reference data.");
+                throw new PolicyException(LocalizationMessages.POLICY_REFERENCE_NODE_FOUND_WITH_NO_POLICY_REFERENCE_IN_IT());
             }
         }
     }
@@ -355,7 +352,7 @@ public final class PolicyModelTranslator {
                     eoContentQueue.addAll(node.getContent());
                     break;
                 default :
-                    throw new PolicyException("Unsupported model node type: '" + node.getType() + "'");
+                    throw new PolicyException(LocalizationMessages.UNSUPPORTED_MODEL_NODE_TYPE(node.getType()));
             }
         }
         
@@ -430,8 +427,7 @@ public final class PolicyModelTranslator {
     
     private static PolicyAssertion createPolicyAssertionParameter(ModelNode parameterNode) throws PolicyException {
         if (parameterNode.getType() != ModelNode.Type.ASSERTION_PARAMETER_NODE) {
-            throw new PolicyException("Inconsistency in policy source model detected: Cannot create policy assertion parameter " +
-                    "from a model node of this type: '" + parameterNode.getType() + "'");
+            throw new PolicyException(LocalizationMessages.INCONSISTENCY_IN_POLICY_SOURCE_MODEL(parameterNode.getType()));
         }
         
         List<PolicyAssertion> childParameters = null;

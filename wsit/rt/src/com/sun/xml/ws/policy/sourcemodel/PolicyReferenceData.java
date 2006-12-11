@@ -23,6 +23,7 @@
 package com.sun.xml.ws.policy.sourcemodel;
 
 import com.sun.xml.ws.policy.PolicyConstants;
+import com.sun.xml.ws.policy.privateutil.LocalizationMessages;
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -38,7 +39,7 @@ final class PolicyReferenceData {
     public static final QName ATTRIBUTE_DIGEST_ALGORITHM = new QName(PolicyConstants.POLICY_NAMESPACE_URI, "DigestAlgorithm");
     
     private static final URI DEFAULT_DIGEST_ALGORITHM_URI;
-    private static final URISyntaxException CLASS_INITIALIZATION_EXCAPTION;
+    private static final URISyntaxException CLASS_INITIALIZATION_EXCEPTION;
     static {
         URISyntaxException tempEx = null;
         URI tempUri = null;
@@ -48,7 +49,7 @@ final class PolicyReferenceData {
             tempEx = e;
         } finally {
             DEFAULT_DIGEST_ALGORITHM_URI = tempUri;
-            CLASS_INITIALIZATION_EXCAPTION = tempEx;
+            CLASS_INITIALIZATION_EXCEPTION = tempEx;
         }
     }
     
@@ -64,12 +65,12 @@ final class PolicyReferenceData {
     }
     
     public PolicyReferenceData(URI referencedModelUri, String expectedDigest, URI usedDigestAlgorithm) {
-        if (CLASS_INITIALIZATION_EXCAPTION != null) {
-            throw new IllegalStateException("Unable to instantiate static constant field 'DEFAULT_DIGEST_ALGORITHM_URI'", CLASS_INITIALIZATION_EXCAPTION);
+        if (CLASS_INITIALIZATION_EXCEPTION != null) {
+            throw new IllegalStateException(LocalizationMessages.UNABLE_TO_INSTANTIATE_DIGEST_ALG_URI_FIELD(), CLASS_INITIALIZATION_EXCEPTION);
         }
         
         if (usedDigestAlgorithm != null && expectedDigest == null) {
-            throw new IllegalArgumentException("Digest must not be null if the digest algorithm is defined.");
+            throw new IllegalArgumentException(LocalizationMessages.DIGEST_MUST_NOT_BE_NULL_WHEN_ALG_DEFINED());
         }
         
         this.referencedModelUri = referencedModelUri;

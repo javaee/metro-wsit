@@ -23,8 +23,8 @@
 package com.sun.xml.ws.policy.sourcemodel;
 
 import com.sun.xml.ws.policy.PolicyException;
+import com.sun.xml.ws.policy.privateutil.LocalizationMessages;
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -169,7 +169,7 @@ public final class PolicySourceModel implements Cloneable {
         try {
             clone.rootNode.setParentModel(this);
         } catch (IllegalAccessException e) {
-            CloneNotSupportedException cnse = new CloneNotSupportedException("Unable to set parent model on root model node.");
+            CloneNotSupportedException cnse = new CloneNotSupportedException(LocalizationMessages.UNABLE_TO_SET_PARENT_MODEL_ON_ROOT());
             cnse.initCause(e);
             throw cnse;
         }
@@ -239,7 +239,7 @@ public final class PolicySourceModel implements Cloneable {
     
     void addNewPolicyReference(ModelNode node) {
         if (node.getType() != ModelNode.Type.POLICY_REFERENCE) {
-            throw new IllegalArgumentException("Input model node argument is not a policy reference. Real node type: '" + node.getType() + "'");
+            throw new IllegalArgumentException(LocalizationMessages.POLICY_REFERENCE_NODE_EXPECTED_INSTEAD_OF(node.getType()));
         }
         
         references.add(node);

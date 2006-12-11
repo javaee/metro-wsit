@@ -22,6 +22,7 @@
 
 package com.sun.xml.ws.policy;
 
+import com.sun.xml.ws.policy.privateutil.LocalizationMessages;
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -42,7 +43,7 @@ final class PolicyScope {
     
     void attach(PolicySubject subject) {
         if (subject == null) {
-            throw new NullPointerException("Subject argument must not be 'null'");
+            throw new NullPointerException(LocalizationMessages.SUBJECT_PARAM_MUST_NOT_BE_NULL());
         }
         
         subjects.add(subject);

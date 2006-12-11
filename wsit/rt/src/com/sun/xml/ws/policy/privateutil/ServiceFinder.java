@@ -156,7 +156,7 @@ public final class ServiceFinder<T> implements Iterable<T> {
      */
     static <T> ServiceFinder<T> find(Class<T> service, ClassLoader loader) {
         if (null==service) {
-            throw new NullPointerException("service can not be null.");
+            throw new NullPointerException(LocalizationMessages.SERVICE_CAN_NOT_BE_NULL());
         }
         return new ServiceFinder<T>(service,loader);
     }
@@ -219,19 +219,21 @@ public final class ServiceFinder<T> implements Iterable<T> {
     private static void fail(Class service, String msg, Throwable cause)
         throws ServiceConfigurationError {
         ServiceConfigurationError sce
-            = new ServiceConfigurationError(service.getName() + ": " + msg);
-        sce.initCause(cause);
+            = new ServiceConfigurationError(LocalizationMessages.SPI_FAIL_SERVICE_MSG(service.getName(), msg));
+        if (null != cause) {
+            sce.initCause(cause);
+        }
         throw sce;
     }
 
-    private static void fail(Class service, String msg)
+/*    private static void fail(Class service, String msg)
         throws ServiceConfigurationError {
-        throw new ServiceConfigurationError(service.getName() + ": " + msg);
-    }
+        throw new ServiceConfigurationError(LocalizationMessages.SPI_FAIL_SERVICE_MSG(service.getName(), msg));
+    }*/
 
-    private static void fail(Class service, URL u, int line, String msg)
+    private static void fail(Class service, URL u, int line, String msg, Throwable cause)
         throws ServiceConfigurationError {
-        fail(service, u + ":" + line + ": " + msg);
+        fail(service, LocalizationMessages.SPI_FAIL_SERVICE_URL_LINE_MSG(u , line, msg), cause);
     }
 
     /**
@@ -252,14 +254,14 @@ public final class ServiceFinder<T> implements Iterable<T> {
         int n = ln.length();
         if (n != 0) {
             if ((ln.indexOf(' ') >= 0) || (ln.indexOf('\t') >= 0))
-                fail(service, u, lc, "Illegal configuration-file syntax");
+                fail(service, u, lc, LocalizationMessages.ILLEGAL_CFG_FILE_SYNTAX(), null);
             int cp = ln.codePointAt(0);
             if (!Character.isJavaIdentifierStart(cp))
-                fail(service, u, lc, "Illegal provider-class name: " + ln);
+                fail(service, u, lc, LocalizationMessages.ILLEGAL_PROVIDER_CLASSNAME(ln), null);
             for (int i = Character.charCount(cp); i < n; i += Character.charCount(cp)) {
                 cp = ln.codePointAt(i);
                 if (!Character.isJavaIdentifierPart(cp) && (cp != '.'))
-                    fail(service, u, lc, "Illegal provider-class name: " + ln);
+                    fail(service, u, lc, LocalizationMessages.ILLEGAL_PROVIDER_CLASSNAME(ln), null);
             }
             if (!returned.contains(ln)) {
                 names.add(ln);
@@ -296,13 +298,13 @@ public final class ServiceFinder<T> implements Iterable<T> {
             int lc = 1;
             while ((lc = parseLine(service, u, r, lc, names, returned)) >= 0) ;
         } catch (IOException x) {
-            fail(service, ": " + x);
+            fail(service, ": " + x, x);
         } finally {
             try {
                 if (r != null) r.close();
                 if (in != null) in.close();
             } catch (IOException y) {
-                fail(service, ": " + y);
+                fail(service, ": " + y, y);
             }
         }
         return names.iterator();
@@ -337,7 +339,7 @@ public final class ServiceFinder<T> implements Iterable<T> {
                     else
                         configs = loader.getResources(fullName);
                 } catch (IOException x) {
-                    fail(service, ": " + x);
+                    fail(service, ": " + x, x);
                 }
             }
             while ((pending == null) || !pending.hasNext()) {
@@ -359,12 +361,9 @@ public final class ServiceFinder<T> implements Iterable<T> {
             try {
                 return service.cast(Class.forName(cn, true, loader).newInstance());
             } catch (ClassNotFoundException x) {
-                fail(service,
-                    "Provider " + cn + " not found");
+                fail(service, LocalizationMessages.SERVICE_PROVIDER_NOT_FOUND(cn), x);
             } catch (Exception x) {
-                fail(service,
-                    "Provider " + cn + " could not be instantiated: " + x,
-                    x);
+                fail(service, LocalizationMessages.SERVICE_PROVIDER_COULD_NOT_BE_INSTANTIATED(cn), x);
             }
             return null;    /* This cannot happen */
         }

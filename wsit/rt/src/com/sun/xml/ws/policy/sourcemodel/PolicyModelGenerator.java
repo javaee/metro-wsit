@@ -27,6 +27,7 @@ import com.sun.xml.ws.policy.NestedPolicy;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyException;
+import com.sun.xml.ws.policy.privateutil.LocalizationMessages;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import java.util.Iterator;
 
@@ -63,7 +64,7 @@ public final class PolicyModelGenerator {
         PolicySourceModel model = null;
         
         if (policy == null) {
-            logger.fine("translate", "policy is null, returning");
+            logger.fine("translate", LocalizationMessages.POLICY_IS_NULL_RETURNING());
         } else {
             model = PolicySourceModel.createPolicySourceModel(policy.getId(), policy.getName());
             ModelNode rootNode = model.getRootNode();
@@ -125,7 +126,7 @@ public final class PolicyModelGenerator {
             AssertionData data = AssertionData.createAssertionParameterData(assertionParameter.getName(), assertionParameter.getValue(), assertionParameter.getAttributes());
             ModelNode assertionParameterNode = assertionNode.createChildAssertionParameterNode(data);
             if (assertionParameter.hasNestedPolicy()) {
-                throw new IllegalStateException("Unexpected nested policy element found in assertion parameter: " + assertionParameter);
+                throw new IllegalStateException(LocalizationMessages.UNEXPECTED_POLICY_ELEMENT_FOUND_IN_ASSERTION_PARAM(assertionParameter));
             }
             if (assertionParameter.hasNestedAssertions()) {
                 translate(assertionParameter.getNestedAssertionsIterator(), assertionParameterNode);

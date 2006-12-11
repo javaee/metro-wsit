@@ -22,6 +22,7 @@
 
 package com.sun.xml.ws.policy;
 
+import com.sun.xml.ws.policy.privateutil.LocalizationMessages;
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import java.util.Arrays;
 import java.util.Collection;
@@ -316,7 +317,7 @@ public class Policy implements Iterable<AssertionSet> {
      * @return {@code true} if all elements in the input collection were added to internal structure, {@code false} otherwise. 
      */
     private boolean addAll(Collection<AssertionSet> sets) {
-        assert (sets != null && !sets.isEmpty()) : "This private method does not accept null or empty collection";
+        assert (sets != null && !sets.isEmpty()) : LocalizationMessages.PRIVATE_METHOD_DOES_NOT_ACCEPT_NULL_OR_EMPTY_COLLECTION();
         
         boolean result = true;        
         for (AssertionSet set : sets) {

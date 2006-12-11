@@ -41,6 +41,7 @@ import javax.xml.stream.events.XMLEvent;
 
 import com.sun.xml.ws.policy.PolicyConstants;
 import com.sun.xml.ws.policy.PolicyException;
+import com.sun.xml.ws.policy.privateutil.LocalizationMessages;
 
 /**
  *
@@ -77,8 +78,7 @@ final class XmlPolicyModelUnmarshaller extends PolicyModelUnmarshaller {
                             if (policyId == null) {
                                 policyId = xmlId;
                             } else if (xmlId != null) {
-                                throw new PolicyException("Multiple identifiers of policy expression detected. Single " +
-                                        "policy expression must not contain both wsu:Id and xml:id identifiers at once.");
+                                throw new PolicyException(LocalizationMessages.MULTIPLE_POLICY_IDS_NOT_ALLOWED());
                             }
                             
                             Attribute policyName = getAttributeByName(element, PolicyConstants.POLICY_NAME);
@@ -90,10 +90,10 @@ final class XmlPolicyModelUnmarshaller extends PolicyModelUnmarshaller {
                         }
                         // else (this is not a policy tag) -> go to default => throw exception
                     default:
-                        throw new PolicyException("Failed to unmarshal policy expression. Expected 'Policy' as a first XML element.");
+                        throw new PolicyException(LocalizationMessages.POLICY_ELEMENT_EXPECTED_FIRST());
                 }
             } catch (XMLStreamException e) {
-                throw new PolicyException("Failed to unmarshal policy expression", e);
+                throw new PolicyException(LocalizationMessages.FAILED_TO_UNMARSHALL_POLICY_EXPRESSION(), e);
             }
         }
         return model;
@@ -133,7 +133,7 @@ final class XmlPolicyModelUnmarshaller extends PolicyModelUnmarshaller {
                             } else if (ModelNode.Type.POLICY_REFERENCE.asQName().equals(childElementName)) {
                                 Attribute uri = getAttributeByName(childElement, PolicyReferenceData.ATTRIBUTE_URI);
                                 if (uri == null) {
-                                    throw new PolicyException("Policy reference 'URI' attribute not found");
+                                    throw new PolicyException(LocalizationMessages.POLICY_REFERENCE_URI_ATTR_NOT_FOUND());
                                 } else {
                                     try {
                                         URI reference = new URI(uri.getValue());
@@ -151,7 +151,7 @@ final class XmlPolicyModelUnmarshaller extends PolicyModelUnmarshaller {
                                         }
                                         childNode = lastNode.createChildPolicyReferenceNode(refData);
                                     } catch (URISyntaxException e) {
-                                        throw new PolicyException("Unable to unmarshall policy referenced due to malformed URI value in attribute", e);
+                                        throw new PolicyException(LocalizationMessages.UNABLE_TO_UNMARSHALL_POLICY_MALFORMED_URI(), e);
                                     }
                                 }
                             } else {
@@ -168,10 +168,10 @@ final class XmlPolicyModelUnmarshaller extends PolicyModelUnmarshaller {
                         unmarshalNodeContent(childNode, childElement, reader);
                         break;
                     default:
-                        throw new PolicyException("Failed to unmarshal policy expression. Expected XML element.");
+                        throw new PolicyException(LocalizationMessages.UNABLE_TO_UNMARSHALL_POLICY_XML_ELEM_EXPECTED());
                 }
             } catch (XMLStreamException e) {
-                throw new PolicyException("Failed to unmarshal policy expression", e);
+                throw new PolicyException(LocalizationMessages.FAILED_TO_UNMARSHALL_POLICY_EXPRESSION(), e);
             }
         }
         
@@ -183,7 +183,7 @@ final class XmlPolicyModelUnmarshaller extends PolicyModelUnmarshaller {
                 Attribute a = (Attribute) iterator.next();
                 QName name = a.getName();
                 if (attributeMap.containsKey(name)) {
-                    throw new PolicyException("Multiple attributes with the same name '" + a.getName() + "' detected for assertion '" + lastElementName + "'");
+                    throw new PolicyException(LocalizationMessages.MULTIPLE_ATTRS_WITH_SAME_NAME_DETECTED_FOR_ASSERTION(a.getName(), lastElementName));
                 } else {
                     attributeMap.put(name , a.getValue());
                 }
@@ -194,7 +194,7 @@ final class XmlPolicyModelUnmarshaller extends PolicyModelUnmarshaller {
             if (nodeData.containsAttribute(PolicyConstants.VISIBILITY_ATTRIBUTE)) {
                 String visibilityValue = nodeData.getAttributeValue(PolicyConstants.VISIBILITY_ATTRIBUTE);
                 if (!PolicyConstants.VISIBILITY_VALUE_PRIVATE.equals(visibilityValue)) {
-                    throw new PolicyException("Unexpected visibility attribute value: '" + visibilityValue + "'");
+                    throw new PolicyException(LocalizationMessages.UNEXPECTED_VISIBILITY_ATTR_VALUE(visibilityValue));
                 }
             }
             
@@ -208,13 +208,13 @@ final class XmlPolicyModelUnmarshaller extends PolicyModelUnmarshaller {
      */
     private XMLEventReader createXMLEventReader(Object storage) throws PolicyException {
         if (!(storage instanceof Reader)) {
-            throw new PolicyException("Storage type '" + storage.getClass().getName() + "' not supported");
+            throw new PolicyException(LocalizationMessages.STORAGE_TYPE_NOT_SUPPORTED(storage.getClass().getName()));
         }
         
         try {
             return XMLInputFactory.newInstance().createXMLEventReader((Reader) storage);
         } catch (XMLStreamException e) {
-            throw new PolicyException("Unable to instantiate XMLEventReader for given storage", e);
+            throw new PolicyException(LocalizationMessages.UNABLE_TO_INSTANTIATE_READER_FOR_STORAGE(), e);
         }
     }
     
@@ -225,7 +225,7 @@ final class XmlPolicyModelUnmarshaller extends PolicyModelUnmarshaller {
     private void checkEndTagName(QName expected, EndElement element) throws PolicyException {
         QName actual = element.getName();
         if (!expected.equals(actual)) {
-            throw new PolicyException("Policy model unmarshalling failed: Actual XML end tag does not match current element. Expected tag FQN: '" + expected + "', actual tag FQN: '" + actual + "'");
+            throw new PolicyException(LocalizationMessages.UNMARSHALLING_FAILED_END_TAG_DOES_NOT_MATCH(expected, actual));
         }
     }
     
@@ -238,7 +238,7 @@ final class XmlPolicyModelUnmarshaller extends PolicyModelUnmarshaller {
             if (currentNodeType == ModelNode.Type.ASSERTION || currentNodeType == ModelNode.Type.ASSERTION_PARAMETER_NODE) {
                 return buffer.append(data);
             } else {
-                throw new PolicyException("Unexpected character data on current policy source model node '" + currentNodeType + "' : data = '" + data + "'");
+                throw new PolicyException(LocalizationMessages.UNEXPECTED_CDATA_ON_SOURCE_MODEL_NODE(currentNodeType, data));
             }
         }
     }

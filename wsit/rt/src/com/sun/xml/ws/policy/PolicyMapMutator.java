@@ -22,6 +22,8 @@
 
 package com.sun.xml.ws.policy;
 
+import com.sun.xml.ws.policy.privateutil.LocalizationMessages;
+
 /**
  * The class serves as a base for specific policy map mutator implementations. It provides common methods that allow
  * concrete mutator implementations to connect and disconnect to/from a policy map instance.
@@ -45,10 +47,7 @@ public abstract class PolicyMapMutator {
      */
     void connect(PolicyMap map) {
         if (isConnected()) {
-            throw new IllegalStateException(
-                    "This policy map mutator is already connected to a policy map. " +
-                    "Please, disconnect it first, before connecting to another policy map."
-                    );
+            throw new IllegalStateException(LocalizationMessages.POLICY_MAP_MUTATOR_ALREADY_CONNECTED());
         }
         
         this.map = map;

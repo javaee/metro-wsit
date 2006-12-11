@@ -22,6 +22,7 @@
 
 package com.sun.xml.ws.policy;
 
+import com.sun.xml.ws.policy.privateutil.LocalizationMessages;
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -45,7 +46,7 @@ public final class PolicySubject {
      */
     public PolicySubject(Object subject, Policy policy) {
         if (subject == null || policy == null) {
-            throw new NullPointerException("Input arguments must not be 'null'.");
+            throw new NullPointerException(LocalizationMessages.SUBJECT_AND_POLICY_PARAM_MUST_NOT_BE_NULL(subject, policy));
         }
         
         this.subject = subject;
@@ -63,11 +64,11 @@ public final class PolicySubject {
      */
     public PolicySubject(Object subject, Collection<Policy> policies) {
         if (subject == null || policies == null) {
-            throw new NullPointerException("Input arguments must not be 'null'.");
+            throw new NullPointerException(LocalizationMessages.INPUT_PARAMS_MUST_NOT_BE_NULL());
         }
         
         if (policies.isEmpty()) {
-            throw new IllegalArgumentException("Initial collection of policies must not be empty.");
+            throw new IllegalArgumentException(LocalizationMessages.INITIAL_POLICY_COLLECTION_MUST_NOT_BE_EMPTY());
         }
         
         this.subject = subject;
@@ -83,7 +84,7 @@ public final class PolicySubject {
      */
     public void attach(Policy policy) {
         if (policy == null) {
-            throw new NullPointerException("Added policy argument must not be 'null'");
+            throw new NullPointerException(LocalizationMessages.POLICY_TO_ATTACH_MUST_NOT_BE_NULL());
         }
         this.policies.add(policy);
     }

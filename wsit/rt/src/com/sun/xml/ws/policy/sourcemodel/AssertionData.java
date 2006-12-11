@@ -23,6 +23,7 @@
 package com.sun.xml.ws.policy.sourcemodel;
 
 import com.sun.xml.ws.policy.PolicyConstants;
+import com.sun.xml.ws.policy.privateutil.LocalizationMessages;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -123,8 +124,8 @@ public final class AssertionData implements Cloneable {
         if (type == ModelNode.Type.ASSERTION || type == ModelNode.Type.ASSERTION_PARAMETER_NODE) {
             this.type = type;
         } else {
-            throw new IllegalArgumentException("Cannot create AssertionData instance for this type of ModelNode: '" + type + "'; " +
-                    "Supported types are '" + ModelNode.Type.ASSERTION + "' and '" + ModelNode.Type.ASSERTION_PARAMETER_NODE + "'");
+            throw new IllegalArgumentException(
+                    LocalizationMessages.CANNOT_CREATE_ASSERTION_BAD_TYPE(type, ModelNode.Type.ASSERTION, ModelNode.Type.ASSERTION_PARAMETER_NODE));
         }
     }
     

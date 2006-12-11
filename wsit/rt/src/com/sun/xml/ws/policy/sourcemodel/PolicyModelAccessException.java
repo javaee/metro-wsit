@@ -23,6 +23,7 @@
 package com.sun.xml.ws.policy.sourcemodel;
 
 import com.sun.xml.ws.policy.PolicyException;
+import com.sun.xml.ws.policy.privateutil.LocalizationMessages;
 import java.net.URI;
 
 /**
@@ -50,13 +51,8 @@ public class PolicyModelAccessException extends PolicyException {
     }
     
     private static String createMessage(URI modelUri, String reason) {
-        StringBuffer buffer = new StringBuffer("Unable to access policy source model identified by URI: '");
-        buffer.append(modelUri.toString()).append('\'');
-        
-        if (reason != null && reason.length() > 0) {
-            buffer.append(" Detailed reason: '").append(reason).append('\'');
-        }        
-        
-        return buffer.toString();
+        return  (reason != null && reason.length() > 0) ? 
+            LocalizationMessages.UNABLE_TO_ACCESS_POLICY_SOURCE_MODEL_PLUS_REASON(modelUri, reason) :
+            LocalizationMessages.UNABLE_TO_ACCESS_POLICY_SOURCE_MODEL(modelUri);
     }
 }

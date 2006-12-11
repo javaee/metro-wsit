@@ -31,6 +31,7 @@ import java.util.TreeSet;
 
 import javax.xml.namespace.QName;
 
+import com.sun.xml.ws.policy.privateutil.LocalizationMessages;
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import java.util.LinkedList;
 import java.util.List;
@@ -90,7 +91,7 @@ public final class AssertionSet implements Iterable<PolicyAssertion>, Comparable
     private Collection<QName> immutableVocabulary = Collections.unmodifiableCollection(vocabulary);
     
     private AssertionSet(List<PolicyAssertion> list) {
-        assert (list != null) : "Private constructor must not receive 'null' argument as a initial policy assertion list";
+        assert (list != null) : LocalizationMessages.PRIVATE_CONSTRUCTOR_DOES_NOT_TAKE_NULL();
         this.assertions = list;
     }
     

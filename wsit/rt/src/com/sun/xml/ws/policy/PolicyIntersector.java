@@ -22,13 +22,13 @@
 
 package com.sun.xml.ws.policy;
 
-import java.net.PasswordAuthentication;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import com.sun.xml.ws.policy.privateutil.LocalizationMessages;
 
 /**
  * The instance of this class is intended to provide policy intersection mechanism.
@@ -65,7 +65,7 @@ public final class PolicyIntersector {
      */
     public Policy intersect(Collection<Policy> policies) {
         if (policies == null || policies.isEmpty()) {
-            throw new IllegalArgumentException("Input policy collection is expected not to be 'null' nor empty collection");
+            throw new IllegalArgumentException(LocalizationMessages.NEITHER_NULL_NOR_EMPTY_POLICY_COLLECTION_EXPECTED());
         } else if (policies.size() == 1) {
             return policies.iterator().next();
         }
@@ -103,7 +103,7 @@ public final class PolicyIntersector {
             while ((testedAlternative = testedAlternatives.poll()) != null) {
                 for (AssertionSet currentAlternative : currentAlternatives) {
                     if (testedAlternative.isCompatibleWith(currentAlternative)) {
-                        finalAlternatives.add(AssertionSet.createMergedAssertionSet(Arrays.asList(new AssertionSet[] {testedAlternative, currentAlternative})));                        
+                        finalAlternatives.add(AssertionSet.createMergedAssertionSet(Arrays.asList(new AssertionSet[] {testedAlternative, currentAlternative})));
                     }
                 }
             }
