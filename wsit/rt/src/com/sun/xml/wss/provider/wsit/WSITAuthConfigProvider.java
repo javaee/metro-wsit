@@ -9,6 +9,12 @@
 
 package com.sun.xml.wss.provider.wsit;
 
+import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.policy.Policy;
+import com.sun.xml.ws.policy.PolicyException;
+import com.sun.xml.ws.policy.PolicyMap;
+import com.sun.xml.ws.policy.PolicyMapKey;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.security.auth.callback.CallbackHandler;
@@ -17,13 +23,15 @@ import javax.security.auth.message.config.AuthConfigFactory;
 import javax.security.auth.message.config.AuthConfigProvider;
 import javax.security.auth.message.config.ClientAuthConfig;
 import javax.security.auth.message.config.ServerAuthConfig;
+import javax.xml.ws.WebServiceException;
 
 /**
  *
  * @author kumar.jayanti
  */
 public class WSITAuthConfigProvider implements AuthConfigProvider {
-    
+    private static final String SECURITY_POLICY_NAMESPACE_URI = 
+                "http://schemas.xmlsoap.org/ws/2005/07/securitypolicy";
     Map properties = null;
     String id = null;
     String description = "WSIT AuthConfigProvider";
@@ -97,6 +105,54 @@ public class WSITAuthConfigProvider implements AuthConfigProvider {
     }
 
     public void refresh() {
+    }
+    
+    /**
+     * Checks to see whether WS-Security is enabled or not.
+     *
+     * @param policyMap policy map for {@link this} assembler
+     * @param wsdlPort wsdl:port
+     * @return true if Security is enabled, false otherwise
+     */
+    
+    public static boolean isSecurityEnabled(PolicyMap policyMap, WSDLPort wsdlPort) {
+        if (policyMap == null || wsdlPort == null)
+            return false;
+        
+        try {
+            PolicyMapKey endpointKey = policyMap.createWsdlEndpointScopeKey(wsdlPort.getOwner().getName(),
+                    wsdlPort.getName());
+            Policy policy = policyMap.getEndpointEffectivePolicy(endpointKey);
+            
+            if ((policy != null) && policy.contains(SECURITY_POLICY_NAMESPACE_URI)) {
+                return true;
+            }
+            
+            for (WSDLBoundOperation wbo : wsdlPort.getBinding().getBindingOperations()) {
+                PolicyMapKey operationKey = policyMap.createWsdlOperationScopeKey(wsdlPort.getOwner().getName(),
+                        wsdlPort.getName(),
+                        wbo.getName());
+                policy = policyMap.getOperationEffectivePolicy(operationKey);
+                if ((policy != null) && policy.contains(SECURITY_POLICY_NAMESPACE_URI))
+                    return true;
+                
+                policy = policyMap.getInputMessageEffectivePolicy(operationKey);
+                if ((policy != null) && policy.contains(SECURITY_POLICY_NAMESPACE_URI))
+                    return true;
+                
+                policy = policyMap.getOutputMessageEffectivePolicy(operationKey);
+                if ((policy != null) && policy.contains(SECURITY_POLICY_NAMESPACE_URI))
+                    return true;
+                
+                policy = policyMap.getFaultMessageEffectivePolicy(operationKey);
+                if ((policy != null) && policy.contains(SECURITY_POLICY_NAMESPACE_URI))
+                    return true;
+            }
+        } catch (PolicyException e) {
+            throw new WebServiceException(e);
+        }
+        
+        return false;
     }
     
 }

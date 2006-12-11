@@ -9,6 +9,7 @@
 
 package com.sun.xml.wss.provider.wsit;
 
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.policy.PolicyMap;
 import java.util.Map;
 import javax.security.auth.Subject;
@@ -34,6 +35,9 @@ public class WSITServerAuthConfig implements ServerAuthConfig {
     private ReentrantReadWriteLock rwLock;
     private ReentrantReadWriteLock.ReadLock rLock;
     private ReentrantReadWriteLock.WriteLock wLock;
+    private String secDisabled = null;
+    private static final String TRUE="true";
+    private static final String FALSE="false";
     
     /** Creates a new instance of WSITServerAuthConfig */
     public WSITServerAuthConfig(String layer, String appContext, CallbackHandler callbackHandler) {
@@ -47,8 +51,24 @@ public class WSITServerAuthConfig implements ServerAuthConfig {
 
     public ServerAuthContext getAuthContext(String operation, Subject subject, Map map) throws AuthException {
          PolicyMap  pMap = (PolicyMap)map.get("POLICY");
-         if (pMap.isEmpty()) {
-            return null;
+         WSDLPort port =(WSDLPort)map.get("WSDL_MODEL");
+         if (pMap == null || pMap.isEmpty()) {
+             //TODO: log warning here if pMap == null
+             return null;
+         }
+         
+         //check if security is enabled
+         if (this.secDisabled == null) {
+             if (!WSITAuthConfigProvider.isSecurityEnabled(pMap,port)) {
+                 this.secDisabled = TRUE;
+                 return null;
+             } else {
+                 this.secDisabled = FALSE;
+             }
+         }
+         
+         if (this.secDisabled == TRUE) {
+             return null;
          }
          
          try {
@@ -96,5 +116,6 @@ public class WSITServerAuthConfig implements ServerAuthConfig {
     public boolean isProtected() {
         return true;
     }
+    
     
 }

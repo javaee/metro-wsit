@@ -10,8 +10,8 @@
 package com.sun.xml.wss.provider.wsit;
 
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.policy.PolicyMap;
-import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
 import com.sun.xml.ws.security.secconv.WSSecureConversationException;
 import java.util.Map;
 import javax.security.auth.Subject;
@@ -39,6 +39,9 @@ public class WSITClientAuthConfig implements ClientAuthConfig {
     private ReentrantReadWriteLock rwLock;
     private ReentrantReadWriteLock.ReadLock rLock;
     private ReentrantReadWriteLock.WriteLock wLock;
+    private String secDisabled = null;
+    private static final String TRUE="true";
+    private static final String FALSE="false";
     
     /** Creates a new instance of WSITClientAuthConfig */
     public WSITClientAuthConfig(String layer, String appContext, CallbackHandler callbackHandler) {
@@ -52,9 +55,25 @@ public class WSITClientAuthConfig implements ClientAuthConfig {
 
     public ClientAuthContext getAuthContext(String operation, Subject subject, Map map) throws AuthException {
         PolicyMap  pMap = (PolicyMap)map.get("POLICY");
-        if (pMap.isEmpty()) {
+        WSDLPort port =(WSDLPort)map.get("WSDL_MODEL");
+        if (pMap == null || pMap.isEmpty()) {
             return null;
         }
+        
+        //now check if security is enabled
+         if (this.secDisabled == null) {
+             if (!WSITAuthConfigProvider.isSecurityEnabled(pMap,port)) {
+                 this.secDisabled = TRUE;
+                 return null;
+             } else {
+                 this.secDisabled = FALSE;
+             }
+         }
+         
+         if (this.secDisabled == TRUE) {
+             return null;
+         }
+
         
         boolean authContextInitialized = false;
         
