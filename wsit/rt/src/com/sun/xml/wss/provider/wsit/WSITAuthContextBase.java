@@ -923,6 +923,7 @@ public abstract class WSITAuthContextBase  {
             ctx = new JAXBFilterProcessingContext(packet.invocationProperties);
             ((JAXBFilterProcessingContext)ctx).setAddressingVersion(addVer);
             ((JAXBFilterProcessingContext)ctx).setSOAPVersion(soapVersion);
+            ((JAXBFilterProcessingContext)ctx).setSecure(packet.wasTransportSecure);
         }else{
             ctx = new ProcessingContextImpl( packet.invocationProperties);
         }
