@@ -42,6 +42,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Hashtable;
+import javax.servlet.http.HttpServletRequest;
 import javax.xml.namespace.QName;
 import java.net.URI;
 import javax.xml.soap.SOAPBody;
@@ -87,6 +88,7 @@ import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.soap.SOAPFault;
 import javax.xml.soap.SOAPFactory;
+import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.soap.SOAPFaultException;
 import javax.xml.soap.SOAPConstants;
 
@@ -635,6 +637,8 @@ public abstract class SecurityPipeBase implements Pipe {
             ctx = new JAXBFilterProcessingContext(packet.invocationProperties);
             ((JAXBFilterProcessingContext)ctx).setAddressingVersion(addVer);
             ((JAXBFilterProcessingContext)ctx).setSOAPVersion(soapVersion);
+            ((JAXBFilterProcessingContext)ctx).setSecure(packet.wasTransportSecure);
+            
         }else{
             ctx = new ProcessingContextImpl( packet.invocationProperties);
         }
