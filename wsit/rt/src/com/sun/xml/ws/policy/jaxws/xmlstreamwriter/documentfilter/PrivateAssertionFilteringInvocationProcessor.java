@@ -148,11 +148,11 @@ final class PrivateAssertionFilteringInvocationProcessor implements InvocationPr
             
             return invocation.execute(invocationTarget);
         } catch (IllegalArgumentException ex) {
-            throw new InvocationProcessingException(LocalizationMessages.INVOCATION_ERROR(), ex);
+            throw new InvocationProcessingException(invocation, ex);
         } catch (InvocationTargetException ex) {
-            throw new InvocationProcessingException(LocalizationMessages.INVOCATION_ERROR(), ex.getCause());
+            throw new InvocationProcessingException(invocation, ex.getCause());
         } catch (IllegalAccessException ex) {
-            throw new InvocationProcessingException(LocalizationMessages.INVOCATION_ERROR(), ex);
+            throw new InvocationProcessingException(invocation, ex);
         } finally {
             LOGGER.exiting();
         }

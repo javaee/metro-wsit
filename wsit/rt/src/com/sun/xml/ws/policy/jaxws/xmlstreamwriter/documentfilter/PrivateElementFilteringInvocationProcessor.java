@@ -27,6 +27,8 @@ import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.*;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Queue;
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
@@ -106,11 +108,11 @@ final class PrivateElementFilteringInvocationProcessor implements InvocationProc
             
             return invocation.execute(invocationTarget);
         } catch (IllegalArgumentException ex) {
-            throw new InvocationProcessingException(LocalizationMessages.INVOCATION_ERROR(), ex);
+            throw new InvocationProcessingException(invocation, ex);
         } catch (InvocationTargetException ex) {
-            throw new InvocationProcessingException(LocalizationMessages.INVOCATION_ERROR(), ex.getCause());
+            throw new InvocationProcessingException(invocation, ex.getCause());
         } catch (IllegalAccessException ex) {
-            throw new InvocationProcessingException(LocalizationMessages.INVOCATION_ERROR(), ex);
+            throw new InvocationProcessingException(invocation, ex);
         } finally {
             LOGGER.exiting();
         }
