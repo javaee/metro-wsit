@@ -31,8 +31,7 @@ import static com.sun.xml.ws.tx.common.AT_2PC_State.ACTIVE;
 import static com.sun.xml.ws.tx.common.AT_2PC_State.COMMITTING;
 import static com.sun.xml.ws.tx.common.AT_2PC_State.PREPARED_SUCCESS;
 import static com.sun.xml.ws.tx.common.AT_2PC_State.PREPARING;
-import static com.sun.xml.ws.tx.common.Constants.WSTX_WS_PORT;
-import static com.sun.xml.ws.tx.common.Constants.WSTX_WS_URL_PREFIX;
+import static com.sun.xml.ws.tx.common.Constants.*;
 import com.sun.xml.ws.tx.common.TransactionManagerImpl;
 import com.sun.xml.ws.tx.common.TxLogger;
 import com.sun.xml.ws.tx.common.Util;
@@ -86,13 +85,13 @@ import java.util.logging.Level;
  *
  * @author Ryan.Shoemaker@Sun.COM
  * @author Joe.Fialli@Sun.COM
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @since 1.0
  */
 public class ATCoordinator extends Coordinator implements Synchronization, XAResource {
     // TODO: workaround until jaxws-ri stateful webservice can compute this URI
     public static final URI localCoordinationProtocolServiceURI =
-            Util.createURI(WSTX_WS_URL_PREFIX, null, WSTX_WS_PORT, "/wstx-services/wsat/coordinator");
+            Util.createURI(WSTX_WS_SCHEME, null, WSTX_WS_PORT, WSTX_WS_CONTEXT + "/wsat/coordinator");
 
 
     // TODO: short term solution so waitFor* do not hang.  Remove when implement transaction timeout.
@@ -203,14 +202,14 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
      */
     public List<Registrant> getRegistrants() {
         final ArrayList<Registrant> list;
-        if(completionRegistrant != null) {
+        if (completionRegistrant != null) {
             list = new ArrayList<Registrant>(volatileParticipants.size() + durableParticipants.size() + 1);
         } else {
             list = new ArrayList<Registrant>(volatileParticipants.size() + durableParticipants.size());
         }
         list.addAll(volatileParticipants.values());
         list.addAll(durableParticipants.values());
-        if(completionRegistrant != null) {
+        if (completionRegistrant != null) {
             list.add(completionRegistrant);
         }
         return Collections.unmodifiableList(list);
@@ -236,7 +235,7 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
      */
     @Override
     public void addRegistrant(Registrant registrant) {
-        if (! allowNewParticipants) {
+        if (!allowNewParticipants) {
             // TODO: send fault S4.1 ws:coor Invalid State ?
             throw new IllegalStateException(LocalizationMessages.LATE_PARTICIPANT_REGISTRATION());
         }
@@ -319,8 +318,8 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
     }
 
     public Collection<ATParticipant> getDurableParticipantsSnapshot() {
-       //return ((HashMap<String, ATParticipant>) durableParticipants.clone()).values();
-       return new HashMap<String, ATParticipant>(durableParticipants).values();
+        //return ((HashMap<String, ATParticipant>) durableParticipants.clone()).values();
+        return new HashMap<String, ATParticipant>(durableParticipants).values();
     }
 
 
@@ -402,7 +401,7 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
                     break;
             }
         }
-        if (! isAborting() && preparedSuccess == true) {
+        if (!isAborting() && preparedSuccess == true) {
             volatileParticipantsState = PREPARED_SUCCESS;
         }
     }
@@ -445,7 +444,7 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
                             try {
                                 participant.prepare();
                             } catch (TXException ex) {
-                                logger. warning("waitForVolatilePrepareResponse", "caught TXException during prepare");
+                                logger.warning("waitForVolatilePrepareResponse", "caught TXException during prepare");
                                 setAborting();
                             }
                         }
@@ -578,7 +577,7 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
                     break;
             }
         }
-        if (! isAborting() && preparedSuccess == true) {
+        if (!isAborting() && preparedSuccess == true) {
             durableParticipantsState = PREPARED_SUCCESS;
         }
 
@@ -943,7 +942,7 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
     }
 
     public int getTransactionTimeout() throws XAException {
-        return (int)(getExpires() / 1000L);
+        return (int) (getExpires() / 1000L);
     }
 
     public boolean isSameRM(XAResource xAResource) throws XAException {
@@ -1088,7 +1087,7 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
      * Initial volatile participant registration triggers this registration.
      */
     private void registerInterposedSynchronization() {
-        if (! registerInterposedSynchronization) {
+        if (!registerInterposedSynchronization) {
             if (logger.isLogging(Level.FINEST)) {
                 logger.finest("registerInterposedSynchronization", "for WS-AT coordinated activity " + this.getIdValue());
             }

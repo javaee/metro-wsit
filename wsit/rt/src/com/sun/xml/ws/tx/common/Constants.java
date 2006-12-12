@@ -28,7 +28,7 @@ import javax.xml.namespace.QName;
  * This class contains useful namespace uri constants
  *
  * @author Ryan.Shoemaker@Sun.COM, Joeseph.Fialli@Sun.COM
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 1.0
  */
 public class Constants {
@@ -131,8 +131,18 @@ public class Constants {
 
     public static final String WSAT_FAULT_ACTION_URI = "http://schemas.xmlsoap.org/ws/2004/10/wsat/fault";
 
-    public static final String WSTX_WS_URL_PREFIX = "https";
+    public static final String WSTX_WS_SCHEME = "https";
     public static final int WSTX_WS_PORT = 8181;
+    public static final String WSTX_WS_CONTEXT;
+
+    static {
+        String ctx = System.getProperty("com.sun.xml.ws.tx.contextroot", null);
+        if (ctx != null) {
+            WSTX_WS_CONTEXT = ctx;
+        } else {
+            WSTX_WS_CONTEXT = "/__wstx-services";
+        }
+    }
 
     public static final String UNKNOWN_ID = "-1";
 

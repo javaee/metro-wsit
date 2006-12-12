@@ -21,6 +21,7 @@
  */
 package com.sun.xml.ws.tx.coordinator;
 
+import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.addressing.OneWayFeature;
@@ -32,8 +33,7 @@ import com.sun.xml.ws.developer.MemberSubmissionEndpointReference;
 import com.sun.xml.ws.developer.StatefulWebServiceManager;
 import com.sun.xml.ws.tx.at.ATParticipant;
 import com.sun.xml.ws.tx.common.ActivityIdentifier;
-import static com.sun.xml.ws.tx.common.Constants.WSTX_WS_PORT;
-import static com.sun.xml.ws.tx.common.Constants.WSTX_WS_URL_PREFIX;
+import static com.sun.xml.ws.tx.common.Constants.*;
 import com.sun.xml.ws.tx.common.StatefulWebserviceFactory;
 import com.sun.xml.ws.tx.common.StatefulWebserviceFactoryFactory;
 import com.sun.xml.ws.tx.common.TxLogger;
@@ -42,7 +42,6 @@ import com.sun.xml.ws.tx.webservice.member.coord.RegisterResponseType;
 import com.sun.xml.ws.tx.webservice.member.coord.RegisterType;
 import com.sun.xml.ws.tx.webservice.member.coord.RegistrationCoordinatorPortType;
 import com.sun.xml.ws.tx.webservice.member.coord.RegistrationRequesterPortType;
-import com.sun.istack.NotNull;
 
 import javax.xml.ws.EndpointReference;
 import javax.xml.ws.WebServiceContext;
@@ -58,7 +57,7 @@ import java.util.logging.Level;
  * for register and registerResponse delegate to the methods in this class.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @since 1.0
  */
 public final class RegistrationManager {
@@ -68,13 +67,13 @@ public final class RegistrationManager {
 
 
     private static final URI localRegistrationURI =
-            Util.createURI(WSTX_WS_URL_PREFIX, null, WSTX_WS_PORT, "/wstx-services/wscoor/coordinator/synchRegister");
+            Util.createURI(WSTX_WS_SCHEME, null, WSTX_WS_PORT, WSTX_WS_CONTEXT + "/wscoor/coordinator/synchRegister");
 
     private static final URI localAsynchronousRegistrationURI =
-            Util.createURI(WSTX_WS_URL_PREFIX, null, WSTX_WS_PORT, "/wstx-services/wscoor/coordinator/register");
+            Util.createURI(WSTX_WS_SCHEME, null, WSTX_WS_PORT, WSTX_WS_CONTEXT + "/wscoor/coordinator/register");
 
     private static final URI localRegistrationRequesterURI =
-            Util.createURI(WSTX_WS_URL_PREFIX, null, WSTX_WS_PORT, "/wstx-services/wscoor/coordinator/registerResponse");
+            Util.createURI(WSTX_WS_SCHEME, null, WSTX_WS_PORT, WSTX_WS_CONTEXT + "/wscoor/coordinator/registerResponse");
 
 //    public static EndpointReference newSynchronousRegistrationEPR(ActivityIdentifier activityId) {
 //        EndpointReference registrationEPR =
@@ -99,13 +98,13 @@ public final class RegistrationManager {
                 localAsynchronousRegistrationURI, AddressingVersion.MEMBER,
                 activityId.getValue(), null);
     }
-    
+
     public static StatefulWebServiceManager getRegistrationCoordinatorStatefulWebServiceManager() {
         StatefulWebserviceFactory swf = StatefulWebserviceFactoryFactory.getInstance();
         return swf.getManager("Coordinator", "RegistrationCoordinator");
     }
 
-    static private TxLogger logger = TxLogger.getCoordLogger(RegistrationManager.class);
+    private static TxLogger logger = TxLogger.getCoordLogger(RegistrationManager.class);
 
 
     /**
@@ -133,9 +132,9 @@ public final class RegistrationManager {
      * Handle an incoming <register> web service request from an external Participant
      * and send a <registerResponse> back.
      *
-     * @param wsContext webservice context
+     * @param wsContext       webservice context
      * @param registerRequest the incoming <register> request
-     * @param activityId activity id
+     * @param activityId      activity id
      */
     public void register(@NotNull WebServiceContext wsContext, @NotNull String activityId, @NotNull RegisterType registerRequest) {
         if (logger.isLogging(Level.FINER)) {
@@ -260,7 +259,7 @@ public final class RegistrationManager {
             // if subordinate, send <register> message to root, wait for <registerResponse>, then return
             registrationEPR = c.getContext().getRootRegistrationService();
             r.setRemoteCPS(true);
-            assert(registrationEPR != null);
+            assert (registrationEPR != null);
 
             // Send register to remote registration coordinator to get Coordinator Protocol Service
             assert r.getCoordinatorProtocolService() == null;
@@ -361,6 +360,7 @@ public final class RegistrationManager {
                 // send soap fault that register response never received, timing out
                 if (logger.isLogging(Level.WARNING)) {
                     logger.warning("register", "registration timed out for activity id:" + c.getIdValue());
+                    // TODO: send fault S4.4 wscoor:No Activity
                 }
             }
 
@@ -381,8 +381,9 @@ public final class RegistrationManager {
 
     /**
      * Process an incoming <registerResponse> message.
-     * @param activityId activity id
-     * @param registrantId registrant id
+     *
+     * @param activityId       activity id
+     * @param registrantId     registrant id
      * @param registerResponse <registerResponse> message
      */
     public void registerResponse(@NotNull String activityId, @NotNull String registrantId, @NotNull RegisterResponseType registerResponse) {
@@ -422,7 +423,8 @@ public final class RegistrationManager {
      * 1. Transaction Initiating client commits transaction before register message is delivered and processed.
      * Participant misses being in transaction and thus no two phase commit.
      * 2. sun service trying to send prepared, aborted or readonly before receiving coordination protocol service in registerResponse.
-     * @param r registrant
+     *
+     * @param r               registrant
      * @param registrationEPR registration EPR
      */
     private void waitForRegisterResponse(@NotNull Registrant r, @NotNull EndpointReference registrationEPR) {
@@ -451,7 +453,8 @@ public final class RegistrationManager {
      * Register via request/reply message pattern.
      * <p/>
      * Add coordination faults to this method.
-     * @param activityId activity id
+     *
+     * @param activityId      activity id
      * @param registerRequest <register> request
      * @return a new <registerResponse>
      */

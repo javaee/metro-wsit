@@ -68,7 +68,7 @@ import java.util.logging.Level;
  * already decided to prepare.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @since 1.0
  */
 public class ATParticipant extends Registrant {
@@ -80,7 +80,7 @@ public class ATParticipant extends Registrant {
     /* PPS */
     // TODO: workaround until jaxws-ri stateful webservice can compute this URI 
     private static final URI LOCAL_PPS_URI =
-            Util.createURI(WSTX_WS_URL_PREFIX, null, WSTX_WS_PORT, "/wstx-services/wsat/2pc");
+            Util.createURI(WSTX_WS_SCHEME, null, WSTX_WS_PORT, WSTX_WS_CONTEXT + "/wsat/2pc");
 
     protected STATE state = STATE.NONE;
     protected Xid xid;
@@ -160,7 +160,7 @@ public class ATParticipant extends Registrant {
     }
 
     public CoordinatorPortType getATCoordinatorWS(boolean nonterminalNotification) {
-        if (getCoordinatorProtocolService() == null && ! isRegistrationCompleted()) {
+        if (getCoordinatorProtocolService() == null && !isRegistrationCompleted()) {
             if (logger.isLogging(Level.WARNING)) {
                 logger.warning("getATCoordinatorWS", "no register response received from  " +
                         getATCoordinator().getContext().getRootRegistrationService().toString() +
@@ -516,7 +516,7 @@ public class ATParticipant extends Registrant {
 
         //TODO. put switch statement over all possible 2pc transaction state.
         //      invalid states require fault to be sent
-        
+
         state = STATE.ABORTING;
 
         // local rollback
@@ -550,14 +550,14 @@ public class ATParticipant extends Registrant {
         } else {
             getATCoordinator().aborted(getIdValue());
         }
-        
+
         if (logger.isLogging(Level.FINE)) {
             logger.fine("abort", getCoordIdPartId());
         }
         forget();
     }
-    
-    
+
+
     /**
      * Send terminal notification
      */
