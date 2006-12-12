@@ -52,26 +52,31 @@
   <target name="wsit-enabled-fromjava">
 	<zip destfile="wsit-enabled-fromjava.zip" 
 		basedir="." includes="wsit-enabled-fromjava/**"
-		excludes="**/CVS"/>
+		excludes="**/CVS,**/build"/>
   </target>
   <target name="wsit-enabled-fromwsdl">
+        <ant dir="wsit-enabled-fromwsdl" target="clean"/>
 	<zip destfile="wsit-enabled-fromwsdl.zip" 
 		basedir="." includes="wsit-enabled-fromwsdl/**"
-		excludes="**/CVS"/>
+		excludes="**/CVS,**/build"/>
   </target>
   <target name="wsit-jaxws-fromjava">
+        <ant dir="wsit-jaxws-fromjava" target="clean"/>
 	<zip destfile="wsit-jaxws-fromjava.zip" 
 		basedir="." includes="wsit-jaxws-fromjava/**"
-		excludes="**/CVS"/>
+		excludes="**/CVS,**/build"/>
   </target>
   <target name="wsit-jaxws-fromwsdl">
+        <ant dir="wsit-jaxws-fromwsdl" target="clean"/>
 	<zip destfile="wsit-jaxws-fromwsdl.zip" 
 		basedir="." includes="wsit-jaxws-fromwsdl/**"
-		excludes="**/CVS"/>
+		excludes="**/CVS,**/build"/>
   </target>
 
-  <target name="all">
+  <target name="all" depends="all-java">
 	<antcall target="csclient-enabled-fromjava" />
+  </target>
+  <target name="all-java">
 	<antcall target="wsit-enabled-fromjava" />
 	<antcall target="wsit-enabled-fromwsdl" />
 	<antcall target="wsit-jaxws-fromjava" />
