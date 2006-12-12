@@ -90,7 +90,7 @@
 						<sp:RequireServerEntropy/>
 					</wsp:Policy>
 				</sp:Trust10>
-                                <sunsp:DisableStreamingSecurity xmlns:sunsp="http://schemas.sun.com/2006/03/wss/client"></sunsp:DisableStreamingSecurity>
+                                <!--sunsp:DisableStreamingSecurity xmlns:sunsp="http://schemas.sun.com/2006/03/wss/client"></sunsp:DisableStreamingSecurity-->
                                 <sc:KeyStore xmlns:sc="http://schemas.sun.com/2006/03/wss/server" location="$WSIT_HOME/xws-security/etc/sts-keystore.jks" storepass="changeit" alias="wssip's oasis interop test ca id"/>
                                 <sc:TrustStore xmlns:sc="http://schemas.sun.com/2006/03/wss/server" location="$WSIT_HOME/xws-security/etc/sts-truststore.jks" storepass="changeit"/>
 
