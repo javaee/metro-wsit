@@ -157,34 +157,31 @@ public class MetadataClient {
      * @return A list of PortInfo objects
      */
     public List<PortInfo> getServiceInformation(@NotNull Metadata data) {
-        List<PortInfo> portInfos = new ArrayList<PortInfo>();
         for (MetadataSection section : data.getMetadataSection()) {
             if (section.getDialect().equals(WSDL_DIALECT)) {
                 if (section.getAny() != null) {
-                    getServiceInformation(section.getAny(),portInfos);
+                    return getServiceInformationFromNode(section.getAny());
                 }
                 if (section.getMetadataReference() != null) {
                     Metadata newMetadata =
                         retrieveMetadata(section.getMetadataReference());
-                    getServiceInformation(newMetadata,portInfos);
+                    return getServiceInformation(newMetadata);
                 }
                 if (section.getLocation() != null) {
                     Metadata newMetadata =
                         retrieveMetadata(section.getLocation());
-                    getServiceInformation(newMetadata,portInfos);
+                    return getServiceInformation(newMetadata);
                 }
             }
         }
-        if(portInfos.size() == 0){
-            return null;
-        }
-        return portInfos;
+        return null;
     }
 
-    private void getServiceInformation(Object o, List<PortInfo> portInfos) {
+    private List<PortInfo> getServiceInformationFromNode(Object o) {
         if (o == null) {
-            return ;
+            return null;
         }
+        List<PortInfo> portInfos = new ArrayList<PortInfo>();
         Node wsdlNode = (Node) o;
         String ns = getAttributeValue(wsdlNode, "targetNamespace");
         NodeList nodes = wsdlNode.getChildNodes();
@@ -210,6 +207,7 @@ public class MetadataClient {
                 }
             }
         }
+        return portInfos;
     }
     
     /*
@@ -218,7 +216,7 @@ public class MetadataClient {
      * metadata refernces or HTTP GET location elements, these
      * are dereferenced later.
      */
-    private Metadata createMetadata(InputStream stream) throws Exception {        
+    private Metadata createMetadata(InputStream stream) throws Exception {
         XMLInputFactory factory = XMLInputFactory.newInstance();
         XMLStreamReader reader =
             factory.createXMLStreamReader(stream);
