@@ -1111,15 +1111,7 @@ empty Metadata element is sent from the WSIT client. </li>
 <h4>WCF Interoperability</h4>
 <p>n/a</p>
 <h4>What is Not Implemented</h4>
-<p>The following functionality is not implemented:</p>
-<ul>
-  <li>Client selecting and validating policy alternative at startup is
-currently disabled.</li>
-  <li>Configuring more than one WSDL port per application.</li>
-  <li>Filter private policy assertions from WSDL.</li>
-  <li>Policy support at tool-time.</li>
-  <li>Support for localization is incomplete.</li>
-</ul>
+<p>The policy implementation is feature-complete.</p>
 <h4>Known Issues</h4>
 <table border="1" cellpadding="2" cellspacing="2">
   <tbody>
@@ -1133,11 +1125,13 @@ currently disabled.</li>
     </tr>
     <tr>
       <td>
-      <p><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=6">assertions
-with visibility="private" in wsit.xml are ignored</a></p>
+      <p><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=110">
+relative references to wsu:id are resolved across XML documents</a></p>
       </td>
       <td>
-      <p>Assertions must not be set to invisible.</p>
+      <p>This is only an issue with manually written policies. Do not refer to polices that
+have the same ID in an imported WSDL document or make sure policies in imported WSDL documents
+have unique IDs.</p>
       </td>
     </tr>
   </tbody>
