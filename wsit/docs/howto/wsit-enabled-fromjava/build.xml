@@ -116,10 +116,7 @@
         <fileset dir="${lib.home}">
             <include name="webservices-rt.jar"/>
             <include name="webservices-tools.jar"/>
-            <exclude name="jaxws-update.jar"/>
-            <exclude name="j2ee*.jar"/>
-            <exclude name="javaee.jar"/>
-            <exclude name="appserv-*.jar"/>
+            <include name="javaee.jar"/>
         </fileset>
     </path>
 
