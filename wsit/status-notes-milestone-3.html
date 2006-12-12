@@ -24,6 +24,7 @@ Microsoft's WCF product and vice versa.</p>
 <p>This document covers the following topics:</p>
 <ul>
   <li><a href="#52974">Glassfish Classpath Change Requirements</a></li>
+  <li><a href="#1595">Glassfish and Netbeans Integration Requirements</a></li>
   <li><a href="#91780">Metadata Exchange Status</a></li>
   <li><a href="#68668">MTOM Status</a></li>
   <li><a href="#49498">Data Binding Status</a></li>
@@ -74,6 +75,25 @@ snippet excludes the conflicting Jar files from the classpath used to
 run the tools and the client application:</p>
 <pre>   &lt;path id="wsit.classpath"&gt;<br>       &lt;pathelement location="${java.home}/../lib/tools.jar"/&gt;<br>       &lt;fileset dir="${lib.home}"&gt;<br>           &lt;include name="webservices.jar"/&gt;<br>           &lt;include name="webservices-tools.jar"/&gt;<br>        &lt;/fileset&gt;<br>   &lt;/path&gt;<br></pre>
 <!-- ================================================== -->
+<hr/>
+<h2><a name="1595"></a>Glassfish and Netbeans Integration Requirements</h2>
+      <p>Issue <a href="https://glassfish.dev.java.net/issues/show_bug.cgi?id=1595">1595</a> prevents registration of Glassfish builds 26, 27 and 28 to Netbeans 5.5. Recommended workaround: <br/><br/><ol>
+<li>Install glassfish</li>
+<li>Use your favorite editor to open
+  <gfinstall>/lib/install/templates/default-domain.xml.template</li>
+<li>Replace <pre>
+&lt;?xml version="1.0" encoding="UTF-8" ?&gt;
+
+with
+
+&lt;?xml version="1.0" encoding="UTF-8" ?&gt;
+&lt;!DOCTYPE domain PUBLIC "-//Sun Microsystems Inc.//DTD Application Server 9.1
+Domain//EN" "http://www.sun.com/appserver/dtds/sun-domain_1_3.dtd"&gt;
+</pre>
+at the top for the file.</li>
+</ol></p>
+<!-- ================================================== -->
+
 <br>
 <hr>
 <h2><a name="91780"></a>Metadata Exchange Status</h2>
@@ -975,10 +995,6 @@ this time.</p>
 <ul>
   <li>WSIT support for Web Services and Web service clients is
 implemented in Web projects only. </li>
-  <li>Web Service Tester functionality for WSIT enabled Web services is
-not implemented. </li>
-  <li>Web Service Client wizard works when service WSDL URL is
-specified </li>
 </ul>
 <h4>Known Issues</h4>
 <table border="1" cellpadding="2" cellspacing="2">
@@ -993,59 +1009,24 @@ specified </li>
     </tr>
     <tr>
       <td>
-      <p>WSIT Security: A value that exceeds the maximum allowed can be
-saved to the Max Nonce Age.</p>
+      <p>Glassfish cannot be registered to Netbeans</p>
       </td>
       <td>
-      <p>EXPECTED BEHAVIOR: Max Nonce Age in Security -&gt; Advanced
-Configuration should not accept a value greater than 900000.</p>
-      <p>ACTUAL BEHAVIOR: Accepts and saves invalid value to the WSDL.</p>
-      </td>
-    </tr>
-    <tr>
-      <td>
-      <p>WSIT Security: A value that exceeds the maximum allowed can be
-saved to the Max Clock Skew.</p>
-      </td>
-      <td>
-      <p>EXPECTED BEHAVIOR: Max Nonce Age in Security -&gt; Advanced
-Configuration should not accept a value greater than 1200000.</p>
-      <p>ACTUAL BEHAVIOR: Accepts and saves invalid value (1200001) to
-the WSDL.</p>
-      </td>
-    </tr>
-    <tr>
-      <td>
-      <p>WSIT Security: Include Token in a message and X509 Version can
-be set incorrectly.</p>
-      </td>
-      <td>
-      <p>EXPECTED BEHAVIOR: Saved details show Security Binding and
-Encryption token with the same values.</p>
-      <p>ACTUAL BEHAVIOR: Saved values are incorrect.</p>
-      </td>
-    </tr>
-    <tr>
-      <td>
-      <p>WSIT Security Keystore Configuration: Behavior of child
-dialogs is incorrect.</p>
-      </td>
-      <td>
-      <p>EXPECTED BEHAVIOR: Do not expect values that specified on
-child dialogs to be saved to the WSDL.</p>
-      <p>ACTUAL BEHAVIOR: Values that are specified in child dialogs
-are saved to the WSDL. Saving should not occur until the OK button is
-clicked on parent dialog.</p>
-      </td>
-    </tr>
-    <tr>
-      <td>
-      <p>WSIT Security: Supporting Tokens are enabled even if there's
-No Security selected.</p>
-      </td>
-      <td>
-      <p>Do not specify Supporting Tokens before setting the security
-option.</p>
+      <p>Issue <a href="https://glassfish.dev.java.net/issues/show_bug.cgi?id=1595">1595</a> prevents registration of Glassfish builds 26, 27 and 28 to Netbeans. Recommended workaround: <br/><br/><ol>
+<li>Install glassfish</li>
+<li>Use your favorite editor to open
+  <gfinstall>/lib/install/templates/default-domain.xml.template</li>
+<li>Replace <pre>
+&lt;?xml version="1.0" encoding="UTF-8" ?&gt;
+
+with
+
+&lt;?xml version="1.0" encoding="UTF-8" ?&gt;
+&lt;!DOCTYPE domain PUBLIC "-//Sun Microsystems Inc.//DTD Application Server 9.1
+Domain//EN" "http://www.sun.com/appserver/dtds/sun-domain_1_3.dtd"&gt;
+</pre>
+at the top for the file.</li>
+</ol></p>
       </td>
     </tr>
     <tr>
@@ -1065,15 +1046,6 @@ not support JSR 109.</p>
       of <a
       href="https://glassfish.dev.java.net/public/downloadsindex.html">Glassfish
       v2</a>, but only on Solaris and Linux.</p>
-      </td>
-    </tr>
-    <tr>
-      <td>
-      <p>Support for multiple Web services and clients in a single
-project.</p>
-      </td>
-      <td>
-      <p>In each project, only one service and one client is supported.</p>
       </td>
     </tr>
     <tr>
