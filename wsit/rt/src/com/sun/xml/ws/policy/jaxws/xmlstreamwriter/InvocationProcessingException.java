@@ -49,15 +49,6 @@ public class InvocationProcessingException extends RuntimeException {
     }    
     
     private static String assemblyExceptionMessage(Invocation invocation) {
-        String methodName = invocation.getMethodName();
-        
-        int argCount = invocation.getArgumentsLength();
-        List argList = new ArrayList(argCount);
-        for (int i = 0; i < argCount; i++) {
-            argList.add(invocation.getArgument(i));
-        }
-        String argString = (argCount > 0) ? argList.toString() : "no arguments";
-        
-        return LocalizationMessages.INVOCATION_ERROR(methodName, argString);
+        return LocalizationMessages.INVOCATION_ERROR(invocation.getMethodName(), invocation.argsToString());
     }    
 }

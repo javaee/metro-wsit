@@ -118,10 +118,15 @@ final class PrivateElementFilteringInvocationProcessor implements InvocationProc
         }
     }
     
-    private void executeCommands(XMLStreamWriter writer) throws IllegalAccessException, InvocationTargetException {
+    private void executeCommands(XMLStreamWriter writer) throws IllegalAccessException, InvocationProcessingException {
         while (!invocationQueue.isEmpty()) {
             Invocation command = invocationQueue.poll();
-            command.execute(writer);
+            try {
+                command.execute(writer);
+            } catch (InvocationTargetException ex) {
+                LOGGER.severe("executeCommands", "Error invoking " + command.toString(), ex.getCause());
+                throw new InvocationProcessingException(command, ex.getCause());
+            }
         }
     }
     

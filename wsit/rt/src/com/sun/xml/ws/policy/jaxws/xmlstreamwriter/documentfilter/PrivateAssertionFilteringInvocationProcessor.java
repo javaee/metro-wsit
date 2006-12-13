@@ -50,25 +50,25 @@ KeyStore
 TrustStore
 CallbackHandlerConfiguration
 ValidatorConfiguration
-
+ 
 http://schemas.sun.com/2006/03/wss/client
 KeyStore
 TrustStore
 Timestamp
 CallbackHandlerConfiguration
 ValidatorConfiguration
-
+ 
 http://schemas.sun.com/ws/2006/05/sc/server
 SCConfiguration
-
+ 
 http://schemas.sun.com/ws/2006/05/sc/client
 SCClientConfiguration
-
+ 
 http://schemas.sun.com/ws/2006/05/trust/server
 STSConfiguration
-
+ 
 http://schemas.sun.com/ws/2006/05/trust/client
-PreconfiguredSTS 
+PreconfiguredSTS
  */
 final class PrivateAssertionFilteringInvocationProcessor implements InvocationProcessor {
     private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PrivateAssertionFilteringInvocationProcessor.class);
@@ -158,10 +158,15 @@ final class PrivateAssertionFilteringInvocationProcessor implements InvocationPr
         }
     }
     
-    private void executeCommands(XMLStreamWriter writer) throws IllegalAccessException, InvocationTargetException {
+    private void executeCommands(XMLStreamWriter writer) throws IllegalAccessException, InvocationProcessingException {
         while (!invocationQueue.isEmpty()) {
             Invocation command = invocationQueue.poll();
-            command.execute(writer);
+            try {
+                command.execute(writer);
+            } catch (InvocationTargetException ex) {
+                LOGGER.severe("executeCommands", "Error invoking " + command.toString(), ex.getCause());
+                throw new InvocationProcessingException(command, ex.getCause());
+            }
         }
     }
     

@@ -22,20 +22,23 @@
 
 package com.sun.xml.ws.policy.jaxws.xmlstreamwriter;
 
-import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter.XmlStreamWriterMethodType;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  *
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public final class Invocation {      
+public final class Invocation {
     private Method method;
     private Object[] arguments;
+    private String argsString;
     
-    public static Invocation createInvocation(Method method, Object[] args) {        
+    public static Invocation createInvocation(Method method, Object[] args) {
         Object[] arguments;
         if (args != null && args.length == 3 && "writeCharacters".equals(method.getName())) {
             Integer start = (Integer) args[1];
@@ -58,7 +61,7 @@ public final class Invocation {
         this.method = method;
         this.arguments = args;
     }
-      
+    
     public String getMethodName() {
         return method.getName();
     }
@@ -73,5 +76,32 @@ public final class Invocation {
     
     public Object execute(Object target) throws IllegalAccessException, InvocationTargetException {
         return method.invoke(target, arguments);
+    }
+    
+    public String toString() {
+        StringBuffer retValue = new StringBuffer("invocation {");
+        retValue.append("method='").append(method.getName()).append("', args=").append(argsToString());
+        retValue.append('}');
+        
+        return retValue.toString();
+    }
+    
+    public String argsToString() {
+        if (argsString == null) {
+            List argList = null;
+            if (arguments != null && arguments.length > 0) {
+                if (arguments.length == 3 && "writeCharacters".equals(method.getName())) {
+                    argList = new ArrayList(3);
+                    argList.add(new String((char[]) arguments[0]));
+                    argList.add(arguments[1]);
+                    argList.add(arguments[2]);
+                } else {
+                    argList = Arrays.asList(arguments);
+                }
+            }
+            argsString = (argList != null) ? argList.toString() : "no arguments";
+        }
+        
+        return argsString;
     }
 }
