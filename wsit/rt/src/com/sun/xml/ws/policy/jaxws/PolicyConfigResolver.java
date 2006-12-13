@@ -63,7 +63,7 @@ public class PolicyConfigResolver implements XMLEntityResolver {
 
         try {
             URL systemUrl = new URL(systemId);
-            XMLStreamReader reader = xmlInputFactory.createXMLStreamReader(systemUrl.openStream());
+            XMLStreamReader reader = xmlInputFactory.createXMLStreamReader(systemId, systemUrl.openStream());
 
             parser = new Parser(systemUrl, reader);
             return parser;
