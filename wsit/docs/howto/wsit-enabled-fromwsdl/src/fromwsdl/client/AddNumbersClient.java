@@ -41,11 +41,13 @@
  */
 package fromwsdl.client;
 
+import com.sun.xml.ws.Closeable;
+
 public class AddNumbersClient {
     public static void main (String[] args) {
+
+        AddNumbersPortType port = new AddNumbersService().getAddNumbersPort ();
         try {
-            AddNumbersPortType port = new AddNumbersService().getAddNumbersPort ();
-            
             int number1 = 10;
             int number2 = 20;
             
@@ -59,6 +61,8 @@ public class AddNumbersClient {
             System.out.printf ("The result of adding %d and %d is %d.\n", number1, number2, result);
         } catch (AddNumbersFault_Exception ex) {
             System.out.printf ("Caught AddNumbersFault_Exception: %s\n", ex.getFaultInfo().getFaultInfo ());
+        } finally {
+            ((Closeable)port).close();
         }
     }
 }
