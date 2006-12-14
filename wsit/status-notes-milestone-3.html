@@ -985,8 +985,43 @@ SecurityContextToken</p>
 <br>
 <hr>
 <h2><a name="98261"></a>Coordination/Atomic Transactions Status</h2>
-<p>This technology is under development but it is not available at
-this time.</p>
+Duh<h4>WCF Interoperability</h4>
+(Test config: GF b26, MS WCF RTM, WSIT Dec 12 Nightly)
+<pre>non-secure (meaning http used for WS-TX protocol messages, no security on application messages):<br><br>  MS-&gt;S : 0/0 (interop w/MS requires HTTPS)<br>  S-&gt;MS : 0/0 (interop w/MS requires HTTPS)<br>  S-&gt;S  : 3/3<br><br>secure (meaning https used for WS-TX protocol messages, no security on application messages):<br><br>  MS-&gt;S : 3/3<br>  S-&gt;MS : 3/3<br>  S-&gt;S  : 0/3 (haven't tested yet)<br><br></pre>
+<h4>What is Not Implemented</h4>
+<p>
+    <ul>
+        <li>Transaction recovery</li>
+    </ul>
+</p>
+<h4>Known Issues</h4>
+<table border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+    <tr>
+      <th>
+      <p>Interoperability Feature</p>
+      </th>
+      <th>
+      <p>Status/Workaround</p>
+      </th>
+    </tr>
+      <tr>
+          <td>Protocol service context root</td>
+          <td>The WS-Coordination / WS-AtomicTransaction protocol service context root changed in
+              GF b26.  If you are running against GF b26 or b27 you <b>must</b> place the
+              following in your AS_HOME/domains/domainXX/config/domain.xml under the
+              <b>&lt;java-config></b> element:<br>
+              <blockquote>&lt;jvm-options>-Dcom.sun.xml.ws.tx.contextroot=/wstx-services&lt;/jvm-options></blockquote>
+              When running against GF b28 or later, you <b>must</b> remove this setting.
+              </td>
+      </tr>
+      <tr>
+          <td>Faults</td>
+          <td>WS-Coordination / WS-AtomicTransaction are not currently generating the proper
+              Faults under certain error conditions.</td>
+      </tr>
+  </tbody>
+</table>
 <!-- ================================================== -->
 <br>
 <hr>
