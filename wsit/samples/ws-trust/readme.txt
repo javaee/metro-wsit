@@ -137,7 +137,35 @@ From this point on, all paths arerelative to the /wsit/wsit/samples/ws-trust dir
     This new target element places the additional jars and configuration files into
     the jaxws-sts war.
 
-13.  Edit /wsit/wsit/samples/ws-trust/src/fs/etc/sts/sts.wsdl:
+13. Replace the following in etc/targets.xml:
+
+    <target name="compile-callbacks" depends="setup-tc, setup-glassfish" >
+        <javac
+            fork="true"
+            debug="${debug}"
+            srcdir="${basedir}/.."
+            destdir="${build.classes.home}" 
+            includes="common/SampleUsernamePasswordCallbackHandler.java, common/SampleUsernamePasswordValidator.java">
+            <classpath refid="jaxws.classpath"/>
+        </javac>
+    </target>
+
+    by
+
+    <target name="compile-callbacks" depends="setup-tc, setup-glassfish" >
+        <javac
+            fork="true"
+            debug="${debug}"
+            srcdir="${basedir}/.."
+            destdir="${build.classes.home}" 
+            includes="common/SampleUsernamePasswordCallbackHandler.java, common/SampleAMContract, common/SampleAMUsernamePasswordValidator.java">
+            <classpath refid="jaxws.classpath"/>
+        </javac>
+    </target>
+
+     
+
+14.  Edit /wsit/wsit/samples/ws-trust/src/fs/etc/sts/sts.wsdl:
      replace 
        <sc:Validator name="usernameValidator"  classname="common.SampleUsernamePasswordValidator"/>  
      with
@@ -147,9 +175,9 @@ From this point on, all paths arerelative to the /wsit/wsit/samples/ws-trust dir
      with
        <tc:Contract>common.SampleContract</tc:Contract>
 
-14. Start the container.
+15. Start the container.
 
-15. Now build and run the sample with "ant run-sample" in src/fs directory. You will be prompted to enter 
+16. Now build and run the sample with "ant run-sample" in src/fs directory. You will be prompted to enter 
     the username/password. 
     Enter Alice/Alice, you should get the balance back from the service.
     Enter Bob/Bob, you should be authenticated in the STS and denied to be issued a SAML token. 

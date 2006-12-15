@@ -294,7 +294,7 @@
         debug="${debug}"
         srcdir="${basedir}/.."
         destdir="${build.classes.home}" 
-        includes="common/*">
+        includes="common/SampleUsernamePasswordCallbackHandler.java, common/SampleUsernamePasswordValidator.java">
         <classpath refid="jaxws.classpath"/>
     </javac>
 </target>
