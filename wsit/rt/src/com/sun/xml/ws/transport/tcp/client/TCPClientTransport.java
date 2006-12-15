@@ -25,6 +25,7 @@ package com.sun.xml.ws.transport.tcp.client;
 import com.sun.xml.ws.api.DistributedPropertySet;
 import com.sun.xml.ws.client.ClientTransportException;
 import com.sun.xml.ws.transport.tcp.io.Connection;
+import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
 import com.sun.xml.ws.transport.tcp.util.ChannelContext;
 import com.sun.xml.ws.transport.tcp.util.ContentType;
 import com.sun.xml.ws.transport.tcp.util.FrameType;
@@ -43,8 +44,8 @@ public class TCPClientTransport extends DistributedPropertySet {
     private static final int READ_TRY = 10;
     
     private static final Logger logger = Logger.getLogger(
-        com.sun.xml.ws.transport.tcp.util.TCPConstants.LoggingDomain + ".client");
-
+            com.sun.xml.ws.transport.tcp.util.TCPConstants.LoggingDomain + ".client");
+    
     private ChannelContext channelContext;
     private Connection connection;
     
@@ -79,7 +80,7 @@ public class TCPClientTransport extends DistributedPropertySet {
         ContentType.EncodedContentType ect = channelContext.encodeContentType(contentType);
         connection.setContentId(ect.mimeId);
         connection.setContentProps(ect.params);
-
+        
         outputStream = connection.openOutputStream();
         return outputStream;
     }
@@ -101,12 +102,8 @@ public class TCPClientTransport extends DistributedPropertySet {
         return inputStream;
     }
     
-    public void send() {
-        try {
-            connection.flush();
-        } catch (IOException e) {
-            throw new ClientTransportException("TCP.client.failed", e);
-        }
+    public void send() throws IOException {
+        connection.flush();
     }
     
     public void close() {
@@ -129,7 +126,7 @@ public class TCPClientTransport extends DistributedPropertySet {
         
         return TCPConstants.OK;
     }
-
+    
     @Property(TCPConstants.CHANNEL_CONTEXT)
     public ChannelContext getConnectionContext() {
         return channelContext;

@@ -162,7 +162,9 @@ public class WSConnectionManager {
             
             return connectionSession;
         } catch (IOException e) {
-            throw new ClientTransportException("TCP.client.failed", e);
+//@TODO uncommit after next JAX-WS integration            
+//            throw new ClientTransportException(MessagesMessages.localizableERROR_PROTOCOL_VERSION_EXCHANGE(), e);
+            throw new ClientTransportException(e);
         }
     }
     

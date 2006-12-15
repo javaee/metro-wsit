@@ -121,7 +121,7 @@ public class TCPTransportPipe implements Pipe {
                 }
             } catch(ClientTransportException e) {
                 prepareRetry(channelContext, retryNum, e);
-                failure = new WebServiceException(e);
+                failure = e;
             } catch(IOException e) {
                 prepareRetry(channelContext, retryNum, e);
                 failure = new WebServiceException(e);
