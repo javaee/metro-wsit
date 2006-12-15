@@ -22,6 +22,7 @@
 
 package com.sun.xml.ws.tx.at;
 
+import java.util.Random;
 import javax.transaction.xa.Xid;
 import java.util.HashMap;
 import java.util.Map;
@@ -74,20 +75,17 @@ public class CoordinationXid implements Xid {
         }
     }
 
-    static private long nextTxnId = 1;
+    static private Random random = new Random();
 
     /**
      * Creates a new instance of CoordinationXid representing an imported
      * coordination id.
      */
     private CoordinationXid(String coordinationXid) {
-        // TODO consider just using coordination id string to seed Xid txn id
-        //      in future.
-        gtrId = new byte[8];
-
-        long tid = nextTxnId++;
-        longToBytes(tid, gtrId, 0);
         imported = true;
+        
+        gtrId = new byte[16];
+        random.nextBytes(gtrId);
     }
 
     public byte[] getGlobalTransactionId() {
@@ -144,21 +142,4 @@ public class CoordinationXid implements Xid {
         return stringForm;
     }
 
-    /**
-     * Marshal an long to a byte array.
-     * The bytes are in BIGENDIAN order.
-     *
-     * @param array  The array of bytes.
-     * @param offset The offset from which to start marshalling.
-     */
-    public static void longToBytes(long value, byte[] array, int offset) {
-        array[offset++] = (byte) ((value >>> 56) & 0xFF);
-        array[offset++] = (byte) ((value >>> 48) & 0xFF);
-        array[offset++] = (byte) ((value >>> 40) & 0xFF);
-        array[offset++] = (byte) ((value >>> 32) & 0xFF);
-        array[offset++] = (byte) ((value >>> 24) & 0xFF);
-        array[offset++] = (byte) ((value >>> 16) & 0xFF);
-        array[offset++] = (byte) ((value >>> 8) & 0xFF);
-        array[offset++] = (byte) ((value >>> 0) & 0xFF);
-    }
 }
