@@ -105,6 +105,10 @@ public class TxMapUpdateProvider implements PolicyMapUpdateProvider {
                         CMTEJB = theClass;
                         classDefaultTxnAttr = TransactionAnnotationProcessor.getTransactionAttributeDefault(theClass);
                         port = method.getOwner().getPort();
+                        if (port == null) {
+                            logger.info("update", theClass.getName() + " has a null ws port. Unable to map CMT EJB TransactionAttribute to WS-AT policy asssertion");
+                            return;
+                        }
                     } else {
                         // not a CMT EJB, no transaction attributes to look for; just return
                         return;
@@ -116,11 +120,11 @@ public class TxMapUpdateProvider implements PolicyMapUpdateProvider {
                         TransactionAnnotationProcessor.getEffectiveTransactionAttribute(method.getSEIMethod(), classDefaultTxnAttr);
                 Policy policy = mapTransactionAttribute2WSATPolicy(txnAttr);
                 if (policy != null) {
-                    // insert ws-at policy assertion in operation scope into policyMapMutator
+                    // insert ws-at policy assertion in operation scope into policyMapMutator              
                     WSDLBoundOperation wsdlBop = port.getBinding().getOperation(port.getName().getNamespaceURI(), method.getOperationName());
                     PolicyMapKey operationKey =
-                            PolicyMap.createWsdlOperationScopeKey(port.getOwner().getName(),
-                                    port.getName(), wsdlBop.getName());
+                            PolicyMap.createWsdlOperationScopeKey(model.getServiceQName(),
+                                    model.getPortName(), wsdlBop.getName());
                     Policy existingPolicy = policyMap.getOperationEffectivePolicy(operationKey);
                     if (existingPolicy == null) {
 
