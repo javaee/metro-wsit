@@ -68,7 +68,7 @@ import java.util.logging.Level;
  * already decided to prepare.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @since 1.0
  */
 public class ATParticipant extends Registrant {
@@ -585,21 +585,33 @@ public class ATParticipant extends Registrant {
     void prepared() {
         // TODO:  given current state, check if it is valid to set to this state.
         state = STATE.PREPARED_SUCCESS;
+         if (logger.isLogging(Level.FINE)) {
+            logger.fine("prepared", this.getCoordIdPartId() + " STATE=" + state.toString());
+        }
     }
 
     void committed() {
         // TODO: verify state transition does not need to throw invalid state fault.
-        state = STATE.COMMITTING;
+        state = STATE.COMMITTED;
+        if (logger.isLogging(Level.FINE)) {
+            logger.fine("committed", this.getCoordIdPartId() + " STATE=" + state.toString());
+        }
     }
 
     void readonly() {
         // TODO: verify state transition does not need to throw invalid state fault.
         state = STATE.READONLY;
+        if (logger.isLogging(Level.FINE)) {
+            logger.fine("readonly", this.getCoordIdPartId() + " STATE=" + state.toString());
+        }
     }
 
     void aborted() {
         // TODO: verify state transition does not need to throw invalid state fault.
         state = STATE.ABORTED;
+        if (logger.isLogging(Level.FINE)) {
+            logger.fine("aborted", this.getCoordIdPartId() + " STATE=" + state.toString());
+        }
     }
 
     /**

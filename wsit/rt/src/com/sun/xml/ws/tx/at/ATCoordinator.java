@@ -21,6 +21,7 @@
  */
 package com.sun.xml.ws.tx.at;
 
+import com.sun.org.omg.CORBA.ParDescriptionSeqHelper;
 import com.sun.xml.ws.api.tx.Protocol;
 import com.sun.xml.ws.api.tx.TXException;
 import com.sun.xml.ws.developer.MemberSubmissionEndpointReference;
@@ -85,21 +86,24 @@ import java.util.logging.Level;
  *
  * @author Ryan.Shoemaker@Sun.COM
  * @author Joe.Fialli@Sun.COM
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  * @since 1.0
  */
 public class ATCoordinator extends Coordinator implements Synchronization, XAResource {
+
     // TODO: workaround until jaxws-ri stateful webservice can compute this URI
     public static final URI localCoordinationProtocolServiceURI =
             Util.createURI(WSTX_WS_SCHEME, null, WSTX_WS_PORT, WSTX_WS_CONTEXT + "/wsat/coordinator");
 
-
     // TODO: short term solution so waitFor* do not hang.  Remove when implement transaction timeout.
-    static private final int MAX_WAIT_ITERATION = 30;
+    static private final int MAX_WAIT_ITERATION = 300;
     static private final long WAIT_SLEEP = 2000;
 
     static private TxLogger logger = TxLogger.getATLogger(ATCoordinator.class);
 
+    enum ACTION { PREPARE, COMMIT, ROLLBACK };
+    enum KIND { VOLATILE, DURABLE };
+    
     /* map <Registrant.getId(), Registrant> of volatile 2pc participants */
     private final HashMap<String, ATParticipant> volatileParticipants = new HashMap<String, ATParticipant>();
     private AT_2PC_State volatileParticipantsState = ACTIVE;
@@ -154,8 +158,11 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
      */
     public void setTransaction(Transaction txn) {
         transaction = txn;
-        boolean result = false;
-        if (!isSubordinate()) {
+        if (txn == null) {
+            return;
+        }
+        
+//        if (!isSubordinateCoordinator()) {
             try {
                 registerWithDurableParent();
             } catch (SystemException ex) {
@@ -174,7 +181,7 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
                             ex.getLocalizedMessage());
                 }
             }
-        }
+//        }
     }
 
 
@@ -219,6 +226,9 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
         registerInterposedSynchronization();
     }
 
+    /**
+     * Enlist with parent of ATCoordinator which is JTA transaction manager.
+     */
     protected boolean registerWithDurableParent() throws RollbackException, SystemException {
         boolean result = false;
         if (getTransaction() != null) {
@@ -349,60 +359,34 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
             return;
         }
         volatileParticipantsState = PREPARING;
-        for (ATParticipant volatileP : getVolatileParticipantsSnapshot()) {
-            try {
-                volatileP.prepare();
-            } catch (TXException ex) {
-                setAborting();
-                return;
-            }
-        }
-
-        boolean preparedSuccess = true;
-        for (ATParticipant volatileP : getVolatileParticipantsSnapshot()) {
-            if (isAborting()) {
-                break;
-            }
-            switch (volatileP.getState()) {
-                case NONE:
-                case ACTIVE:
-                    // new particpant just joined.
+        actionForAllParticipants(getVolatileParticipantsSnapshot(), ACTION.PREPARE);
+    }
+    
+    private void actionForAllParticipants(Collection<ATParticipant> particpants, ACTION action) {
+        for (ATParticipant participant : particpants) {
+            switch (action) {
+                case PREPARE:
                     try {
-                        volatileP.prepare();
+                        participant.prepare();
                     } catch (TXException ex) {
                         setAborting();
                         return;
                     }
-            }
-
-            switch (volatileP.getState()) {
-                case PREPARING:
-                case PREPARED:
-                    // still waiting
-                    preparedSuccess = false;
-                    logger.finest("intitateVolatileParticipant", "not prepared, readonly or aborted " +
-                            getCoordIdPartId(volatileP) + " state=" + volatileP.getState());
                     break;
-
-                case PREPARED_SUCCESS:
-                case READONLY:
-                    // all acceptable states
+                    
+                case COMMIT:
+                     try {
+                        participant.commit();
+                    } catch (TXException ex) {
+                        setAborting();
+                        return;
+                    }
                     break;
-
-                case ABORTING:
-                case ABORTED:
-                    setAborting();
-                    break;
-
-                case COMMITTING:
-                    // TODO: Send Invalid State fault
-                    logger.warning("initiateVolatileParticipant", "state committing " +
-                            getCoordIdPartId(volatileP.getIdValue()));
+                    
+                case ROLLBACK:
+                    participant.abort();
                     break;
             }
-        }
-        if (!isAborting() && preparedSuccess == true) {
-            volatileParticipantsState = PREPARED_SUCCESS;
         }
     }
 
@@ -436,6 +420,12 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
                     case ACTIVE:
                         // accomodate late registration: volatile 2PC prepare can register new volatile or durable participant.
                         allPrepared = false;
+                        try {
+                            participant.prepare();
+                        } catch (TXException ex) {
+                                logger. warning("waitForVolatilePrepareResponse", "caught TXException during prepare");
+                                setAborting();
+                        }
                         break;
 
                     case PREPARING:
@@ -464,14 +454,14 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
                     case COMMITTED:
                     case ABORTED:
                     case READONLY:
-                        iter.remove();
+                        forget(participant);
                         break;
                 }
             }
-            if (allPrepared) {
-                if (!isAborting()) {
-                    volatileParticipantsState = PREPARED_SUCCESS;
-                }
+            if (isAborting()) {
+                return;
+            } else if (allPrepared) {
+                volatileParticipantsState = PREPARED_SUCCESS;
                 if (logger.isLogging(Level.FINER)) {
                     logger.exiting("waitForVolatilePrepare", "prepared coordId=" + getIdValue() + " state=" +
                             volatileParticipantsState);
@@ -487,6 +477,9 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
                     ex.printStackTrace();
                 }
             }
+        }
+        if (logger.isLogging(Level.FINE)) {
+            dumpParticipantsState(getVolatileParticipantsSnapshot(), KIND.VOLATILE); 
         }
         setAborting();
         if (logger.isLogging(Level.FINER)) {
@@ -521,66 +514,7 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
         // No new participants allowed as soon as durable 2PC begins.
         allowNewParticipants = false;
         durableParticipantsState = PREPARING;
-        for (ATParticipant durableP : getDurableParticipantsSnapshot()) {
-            try {
-                durableP.prepare();
-            } catch (TXException ex) {
-                logger.warning("initiateDurablePrepare", "caught TXException during prepare");
-                setAborting();
-                return;
-            }
-        }
-        boolean preparedSuccess = true;
-        for (ATParticipant durableP : getDurableParticipantsSnapshot()) {
-            if (isAborting()) {
-                break;
-            }
-            switch (durableP.getState()) {
-                case NONE:
-                case ACTIVE:
-                    // new particpant just joined.
-                    try {
-                        durableP.prepare();
-                    } catch (TXException ex) {
-                        setAborting();
-                        return;
-                    }
-            }
-
-            switch (durableP.getState()) {
-                case PREPARING:
-                case PREPARED:
-                    // still waiting
-                    preparedSuccess = false;
-                    if (logger.isLogging(Level.FINEST)) {
-                        logger.finest("intitatedurableParticipant", "not prepared, readonly or aborted " +
-                                getCoordIdPartId(durableP) + " state=" + durableP.getState());
-                    }
-                    break;
-
-                case PREPARED_SUCCESS:
-                case READONLY:
-                    // all acceptable states
-                    break;
-
-                case ABORTING:
-                case ABORTED:
-                    setAborting();
-                    break;
-
-                case COMMITTING:
-                    // TODO
-                    if (logger.isLogging(Level.WARNING)) {
-                        logger.warning("initiatedurableParticipant", "state committing " +
-                                getCoordIdPartId(durableP.getIdValue()));
-                    }
-                    break;
-            }
-        }
-        if (!isAborting() && preparedSuccess == true) {
-            durableParticipantsState = PREPARED_SUCCESS;
-        }
-
+        actionForAllParticipants(getDurableParticipantsSnapshot(), ACTION.PREPARE);
     }
 
     /**
@@ -604,10 +538,16 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
                 switch (participant.getState()) {
                     case PREPARING:
                         allPrepared = false;
+                        if (logger.isLogging(Level.FINEST)) {
+                            logger.finest("intitatedurableParticipant", "not prepared, readonly or aborted " +
+                                getCoordIdPartId(participant) + " state=" + participant.getState());
+                        }
                         break;
 
                     case ACTIVE:
                     case NONE:
+                        logger.warning("waitForDurablePrepareResponse", "initiate rollback. unexpected participant state for " +
+                                this.getCoordIdPartId(participant) + " state=" + participant.getState());
                         allPrepared = false;
                         setAborting();
 
@@ -618,23 +558,24 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
                         setAborting();
                         return;
 
-                        // these states indicate a response to prepare request
+                    // these states indicate a response to prepare request
                     case PREPARED:
                     case PREPARED_SUCCESS:
                     case COMMITTING:
                         break;
 
                     case ABORTED:
+                        setAborting();
                     case COMMITTED:
                     case READONLY:
                         participant.forget();
                         break;
                 }
             }
-            if (allPrepared) {
-                if (!isAborting()) {
-                    durableParticipantsState = PREPARED_SUCCESS;
-                }
+            if (isAborting()) {
+                return;
+            } else if (allPrepared) {
+                durableParticipantsState = PREPARED_SUCCESS;
                 if (logger.isLogging(Level.FINER)) {
                     logger.exiting("waitForDurablePrepare", "coordId=" + getIdValue() +
                             "state:" + durableParticipantsState);
@@ -651,12 +592,24 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
                 }
             }
         }
+        if (logger.isLogging(Level.FINE)) {
+            dumpParticipantsState(getDurableParticipantsSnapshot(), KIND.DURABLE); 
+        }
         // some participants not prepared still, timing out
         setAborting();
         if (logger.isLogging(Level.WARNING)) {
             logger.warning("waitForDurablePrepare", "timed out: coordId=" + getIdValue() + " state=" + durableParticipantsState);
         }
 
+    }
+    
+    private void dumpParticipantsState(Collection<ATParticipant> lst, KIND kind) {
+        StringBuffer str = new StringBuffer(100);
+        str.append(" " + kind.toString() + " ");
+        for (ATParticipant p: lst ) {
+            str.append("Part: " + p.getIdValue() + " state:" + p.getState());
+        }
+        logger.fine("dumpParticipantState", "coordId=" + getIdValue() + str);
     }
 
     public void initiateCommit() {
@@ -679,15 +632,7 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
             }
         }
         durableParticipantsState = COMMITTING;
-        for (ATParticipant durableP : getDurableParticipantsSnapshot()) {
-            try {
-                durableP.commit();
-            } catch (TXException ex) {
-                if (logger.isLogging(Level.WARNING)) {
-                    logger.warning("initiateCommit", ex.getLocalizedMessage());
-                }
-            }
-        }
+        actionForAllParticipants(getDurableParticipantsSnapshot(), ACTION.COMMIT);
     }
 
     public void initiateVolatileCommit() {
@@ -707,15 +652,7 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
 
         // No new participants allowed as soon as durable 2PC begins.
         volatileParticipantsState = COMMITTING;
-        for (ATParticipant volatileP : getVolatileParticipantsSnapshot()) {
-            try {
-                volatileP.commit();
-            } catch (TXException ex) {
-                if (logger.isLogging(Level.WARNING)) {
-                    logger.warning("initiateCommit", ex.getLocalizedMessage());
-                }
-            }
-        }
+        actionForAllParticipants(getVolatileParticipantsSnapshot(), ACTION.COMMIT);
     }
 
     public void initiateRollback() {
@@ -749,6 +686,7 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
     public void afterCompletion(int i) {
         waitForCommitOrRollbackResponse(Protocol.DURABLE);
         waitForCommitOrRollbackResponse(Protocol.VOLATILE);
+        forget();
     }
 
     protected void waitForCommitOrRollbackResponse(Protocol protocol) {
@@ -756,12 +694,12 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
         // wait for all outstanding participants to send final notification of wsat COMMITTED or ABORTED.
         boolean communicationTimeout = false;  // TODO: resend prepare due to communication timeout. Assume msg lost.
         boolean allProcessed;
-
-
+        
+        
         for (int i = 0; i < MAX_WAIT_ITERATION; i++) {
             allProcessed = true;  // assume all committed/aborted until encounter participant is not.
             if (protocol == Protocol.DURABLE) {
-
+                
                 for (ATParticipant participant : getDurableParticipantsSnapshot()) {
                     if (participant.getState() == COMMITTED ||
                             participant.getState() == ABORTED ||
@@ -782,7 +720,7 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
                                 logger.warning("waitForCommitOrRollbackResponse", ex.getLocalizedMessage());
                            }
                        }
-                        **/
+                         **/
                     }
                 }
             } else if (protocol == Protocol.VOLATILE) {
@@ -795,25 +733,25 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
                         if (logger.isLogging(Level.WARNING)) {
                             logger.warning("waitForCommitOrRollbackResponse",
                                     "forgetting volatile participant in unexpected state:" +
-                                            participant.getState() + "  " + getCoordIdPartId(participant));
+                                    participant.getState() + "  " + getCoordIdPartId(participant));
                         }
                         participant.forget();
                     }
                 }
-                if (allProcessed) {
-                    if (logger.isLogging(Level.FINER)) {
-                        logger.exiting("waitForCommitRollback", "coordId=" + getIdValue());
+            }
+            if (allProcessed) {
+                if (logger.isLogging(Level.FINER)) {
+                    logger.exiting("waitForCommitRollback", "coordId=" + getIdValue());
+                }
+                return;
+            } else { //wait some before checking again
+                try {
+                    if (logger.isLogging(Level.FINEST)) {
+                        logger.finest("waitForVolatilePrepare", "checking...");
                     }
-                    return;
-                } else { //wait some before checking again
-                    try {
-                        if (logger.isLogging(Level.FINEST)) {
-                            logger.finest("waitForVolatilePrepare", "checking...");
-                        }
-                        Thread.sleep(WAIT_SLEEP);
-                    } catch (InterruptedException ex) {
-                        ex.printStackTrace();
-                    }
+                    Thread.sleep(WAIT_SLEEP);
+                } catch (InterruptedException ex) {
+                    ex.printStackTrace();
                 }
             }
         }
@@ -856,37 +794,42 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
         if (logger.isLogging(Level.FINER)) {
             logger.entering("XAResource_commit(xid=" + xid + " ,onePhase=" + onePhase + ")");
         }
+   
         int result = 0;
         Exception throwThis = null;
         if (onePhase == true) {
             // if one phase commit, need to do prepare here
             try {
                 result = prepare(xid);
-            } catch (Exception e) {
+            } catch (XAException e) {
                 if (logger.isLogging(Level.WARNING)) {
-                    logger.warning("commit(1PC)", "prepare failed due to " + e.getLocalizedMessage());
+                    logger.warning("commit(1PC)", "prepare failed due to " + e.toString());
                 }
-                throwThis = e;
                 initiateRollback();
-                if (logger.isLogging(Level.FINER)) {
-                    logger.exiting("XAResource_commit", "failed throwing XAException");
+                try {
+                    waitForCommitOrRollbackResponse(Protocol.DURABLE);
+                } catch (Exception ex) {
+                    // ignore.
                 }
-                throw new XAException();
-            }
+                if (logger.isLogging(Level.FINER)) {
+                    logger.exiting("XAResource_commit", e);
+                }
+                throw e;
+            }   
         }
-
+        
         // Commit volatile and durable 2PC participants.  No ordering required.
         if (result != XAResource.XA_RDONLY) {
             initiateCommit();
             waitForCommitOrRollbackResponse(Protocol.DURABLE);
             waitForCommitOrRollbackResponse(Protocol.VOLATILE);
         }
-
+       
         if (logger.isLogging(Level.FINER)) {
             logger.exiting("XAResource_commit");
-        }
+        }   
     }
-
+    
     public void rollback(Xid xid) throws XAException {
         if (logger.isLogging(Level.FINER)) {
             logger.entering("XAResource_rollback(xid=" + xid + ")");
@@ -983,6 +926,7 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
         ATParticipant participant = (ATParticipant) getRegistrant(participantId);
         if (participant != null) {
             participant.committed();
+            participant.forget();
         } else {
             // TODO is there anything else needed here. perhaps a fault must be thrown
             if (logger.isLogging(Level.WARNING)) {
@@ -1008,6 +952,7 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
             }
         } else {
             participant.readonly();
+            participant.forget();
             if (logger.isLogging(Level.FINER)) {
                 logger.exiting("readonly", getCoordIdPartId(participantId));
             }
@@ -1029,6 +974,7 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
             }
         } else {
             participant.aborted();
+            participant.forget();
             if (logger.isLogging(Level.FINER)) {
                 logger.exiting("aborted", getCoordIdPartId(participantId));
             }
@@ -1164,13 +1110,43 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
         return localCoordinatorProtocolService;
     }
 
+    /**
+     * Return false if it is okay to rollback the transaction.
+     * Do not allow transaction expiration after Phase 2 begins.
+     */
     public boolean expirationGuard() {
-        // TODO: implement
-        return true;
+        for (ATParticipant participant : getDurableParticipantsSnapshot()) {
+            if (isSecondPhase(participant))
+                return true;
+        }
+        for (ATParticipant participant : getVolatileParticipantsSnapshot()) {
+            if (isSecondPhase(participant))
+                return true;
+        }
+        return false;
+    }
+    
+    private boolean isSecondPhase(ATParticipant p) {
+        switch (p.state) {
+            case ABORTING:
+            case COMMITTING:
+            case ABORTED:
+            case COMMITTED:
+                // too late to abort 2PC, already committed or rolled back transaction.
+                return true;
+            default:
+                return false;
+        }
     }
 
     @Override
     public void forget() {
-        // TODO: implement
+        for (ATParticipant participant : getDurableParticipantsSnapshot()) {
+            participant.forget();
+        }
+        for (ATParticipant participant : getVolatileParticipantsSnapshot()) {
+            participant.forget();
+        }
+        super.forget();
     }
 }    

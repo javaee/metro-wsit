@@ -158,7 +158,7 @@ public class ATSubCoordinator extends ATCoordinator {
     }
 
     public class DurableParticipant implements Participant {
-        int xaResult = XAResource.XA_RDONLY;
+        int xaResult = XAResource.XA_OK;
 
         public Protocol getProtocol() {
             return Protocol.DURABLE;
@@ -178,6 +178,7 @@ public class ATSubCoordinator extends ATCoordinator {
                         logger.exiting("XATerminator.prepare()", xaResult);
                     }
                 } catch (XAException ex) {
+                    ex.printStackTrace();
                     setAborting();
                     if (logger.isLogging(Level.INFO)) {
                         logger.info("DurableParticipant.prepare", "XATerminator threw exception " + ex.getLocalizedMessage());
@@ -186,14 +187,14 @@ public class ATSubCoordinator extends ATCoordinator {
                 }
             }
             // Next line required to support remote participants in this coordinators durable participants.
-            //waitForDurablePrepareResponse();
+            waitForDurablePrepareResponse();
             if (isAborting()) {
                 abort();
             } else if (xaResult == XAResource.XA_RDONLY && getDurableParticipants().size() == 0) {
-                rootVolatileParticipant.readonly();
+                rootDurableParticipant.readonly();
             } else if (xaResult == XAResource.XA_OK)
             {  //implied no durable participants are aborting since isAborting() is false
-                rootVolatileParticipant.prepared();
+                rootDurableParticipant.prepared();
             }
             if (logger.isLogging(Level.FINER)) {
                 logger.exiting("ATSubCoordinator.durableParticipant", getCoordIdPartId(rootDurableParticipant));
@@ -223,7 +224,7 @@ public class ATSubCoordinator extends ATCoordinator {
                             + getIdValue());
                 }
                 // TODO: check WS-AT CV state table if should send aborted to root coordinator here.
-                // rootVolatileParticipant.aborted();
+                rootDurableParticipant.aborted();
             } else {
                 if (logger.isLogging(Level.INFO)) {
                     logger.info("DurableParticipant.committed", "committed subordinate coordId=" + getIdValue());
@@ -233,8 +234,22 @@ public class ATSubCoordinator extends ATCoordinator {
         }
 
         public void abort() {
+             if (getXATerminator() != null && xaResult == XA_OK) {
+                try {
+                    if (logger.isLogging(Level.SEVERE)) {
+                        logger.severe("ATSubCoordinator.DurableParticipant.abort", "XATerminator abort. coordId="
+                            + getIdValue());
+                    }
+                    getXATerminator().rollback(getCoordinationXid());
+                } catch (XAException ex) {
+                    if (logger.isLogging(Level.SEVERE)) {
+                        logger.severe("ATSubCoordinator.DurableParticipant.abort", "caught XAException thrown by XATerminator.rollback() "
+                                + ex.getMessage());
+                    }
+                }
+            }
             initiateDurableRollback();
-            // waitForCommitOrRollbackResponse(Protocol.DURABLE);
+            waitForCommitOrRollbackResponse(Protocol.DURABLE);
             rootDurableParticipant.aborted();
         }
     }
