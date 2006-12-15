@@ -122,14 +122,15 @@ public class Message {
         }
         return ccHdr;
     }
-
+    
     /**
      * 
      * @param unmarshaller jaxb unmarshaller
      * @return the coordination context
      */
     @Nullable
-    public CoordinationContextInterface getCoordinationContext(@NotNull Unmarshaller unmarshaller) {
+    public CoordinationContextInterface getCoordinationContext(@NotNull Unmarshaller unmarshaller) throws JAXBException 
+    {
         if (CC == null) {
             Header ccHdr = getCoordCtxHeader(WSCOOR_SOAP_NSURI, COORDINATION_CONTEXT);
             if (ccHdr != null) {
@@ -137,8 +138,9 @@ public class Message {
                     CC = CoordinationContextBase.createCoordinationContext(ccHdr.readAsJAXB(unmarshaller));
                 } catch (JAXBException e) {
                     if (logger.isLogging(Level.WARNING)) {
-                        logger.warning("getCoordinationContext", "getCoordinationContext handled unexpected exception " + e.getLocalizedMessage());
+                        logger.warning("getCoordinationContext", "can not unmarshal 2004 WS-Coordination CoordinationContext. Exception message: " + e.getLocalizedMessage());
                     }
+                    throw e;
                 }
             }
         }
