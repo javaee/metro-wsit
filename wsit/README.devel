@@ -27,6 +27,11 @@ cd to the WSIT main directory and invoke "ant test".
 
 cd to the WSIT test subdirectory and invoke "ant e2e".
 
+3. HOW TO GENERATE PMD REPORTS
+
+PMD is a static code analysis tool that tries to find common coding mistakes. You can generate
+a HTML formatted PMD report on the WSIT code base by cd:ing to the WSIT main directory and
+invoking "ant pmd".
 
 
 # The contents of this file are subject to the terms
