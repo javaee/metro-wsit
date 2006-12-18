@@ -118,9 +118,6 @@
                                 <!--sunsp:DisableStreamingSecurity xmlns:sunsp="http://schemas.sun.com/2006/03/wss/client"></sunsp:DisableStreamingSecurity-->
                                 <sc:KeyStore xmlns:sc="http://schemas.sun.com/2006/03/wss/server" location="$WSIT_HOME/xws-security/etc/server-keystore.jks" storepass="changeit" alias="bob"/>
                                 <sc:TrustStore xmlns:sc="http://schemas.sun.com/2006/03/wss/server" location="$WSIT_HOME/xws-security/etc/server-truststore.jks" storepass="changeit"/>
-                                <sc:ValidatorConfiguration xmlns:sc="http://schemas.sun.com/2006/03/wss/server">
-                                    <sc:Validator name="usernameValidator"  classname="common.SampleUsernamePasswordValidator"/>  
-                                </sc:ValidatorConfiguration>
 				<wsap10:UsingAddressing/>
 			</wsp:All>
 		</wsp:ExactlyOne>

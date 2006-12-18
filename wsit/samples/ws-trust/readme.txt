@@ -91,7 +91,7 @@ To set up and run the sample with AccessManager:
 
     where 
     com.iplanet.services.configpath points to the Configuration Directory set up in step 4
-    common.org points to the Realm Name.
+    common.org points to the Realm Name (sample).
     
 
 From this point on, all paths arerelative to the /wsit/wsit/samples/ws-trust directory.
@@ -128,11 +128,15 @@ From this point on, all paths arerelative to the /wsit/wsit/samples/ws-trust dir
                            dir="../../etc/sts"
                            includes="wsit-server.xml"
                            prefix="WEB-INF/classes"/>
+                <zipfileset
+                            dir="../../etc/sts/services"
+                            includes="com.sun.*"
+                            prefix="WEB-INF/classes/META-INF/services"/>
                 <classes dir="${build.classes.home}" includes="**/sts/**,
                         **/com/**, **/common/**, AMConfig.properties"/>
                 <lib dir="${build.lib.home}" />
         </war>
-    </target>
+   </target>
 
     This new target element places the additional jars and configuration files into
     the jaxws-sts war.
@@ -158,22 +162,16 @@ From this point on, all paths arerelative to the /wsit/wsit/samples/ws-trust dir
             debug="${debug}"
             srcdir="${basedir}/.."
             destdir="${build.classes.home}" 
-            includes="common/SampleUsernamePasswordCallbackHandler.java, common/SampleAMContract, common/SampleAMUsernamePasswordValidator.java">
+            includes="common/SampleUsernamePasswordCallbackHandler.java, common/SampleAMSTSAuthorizationProvider.java, common/SampleAMUsernamePasswordValidator.java">
             <classpath refid="jaxws.classpath"/>
         </javac>
     </target>
-
-     
 
 14.  Edit /wsit/wsit/samples/ws-trust/src/fs/etc/sts/sts.wsdl:
      replace 
        <sc:Validator name="usernameValidator"  classname="common.SampleUsernamePasswordValidator"/>  
      with
-       <sc:Validator name="usernameValidator"  classname="common.SampleAMUsernamePasswordValidator"/>;
-     and replace
-       <tc:Contract>com.sun.xml.ws.security.trust.impl.IssueSamlTokenContractImpl</tc:Contract>
-     with
-       <tc:Contract>common.SampleContract</tc:Contract>
+       <sc:Validator name="usernameValidator"  classname="common.SampleAMUsernamePasswordValidator"/>
 
 15. Start the container.
 

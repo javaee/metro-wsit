@@ -1,4 +1,3 @@
-
 /*
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -20,25 +19,7 @@
  * 
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
-
 package common;
-
-/*
- * SampleContract.java
- *
- * Created on April 30, 2006, 11:18 PM
- *
- * To change this template, choose Tools | Options and locate the template under
- * the Source Creation and Management node. Right-click the template and choose
- * Open. You can then make changes to the template in the Source Editor.
- */
-
-/**
- *
- * @author localuser
- */
-
-import com.sun.xml.ws.security.trust.impl.IssueSamlTokenContractImpl;
 
 import com.sun.xml.wss.SubjectAccessor;
 
@@ -53,9 +34,11 @@ import com.iplanet.sso.SSOException;
 import com.sun.identity.policy.PolicyException;
 import com.sun.identity.policy.client.PolicyEvaluator;
 
-public class SampleAMContract extends IssueSamlTokenContractImpl{
+import com.sun.xml.ws.api.security.trust.STSAuthorizationProvider;
+
+public class SampleAMSTSAuthorizationProvider implements STSAuthorizationProvider {
     
-    private static Debug debug = Debug.getInstance("SampleAMContract");
+    private static Debug debug = Debug.getInstance("SampleAMSTSAuthorizationProvider");
 
     private static SSOToken getSSOToken(Subject subject)
     {
@@ -82,7 +65,7 @@ public class SampleAMContract extends IssueSamlTokenContractImpl{
         return null;
     }
     
-    protected boolean isAuthorized(Subject subject, String appliesTo, String tokenType, String keyType)
+    public boolean isAuthorized(Subject subject, String appliesTo, String tokenType, String keyType)
     {
         String serviceName = "iPlanetAMWebAgentService";
         String action = "POST";
@@ -108,5 +91,5 @@ public class SampleAMContract extends IssueSamlTokenContractImpl{
         }
 
         return false;
-    }
+    }  
 }

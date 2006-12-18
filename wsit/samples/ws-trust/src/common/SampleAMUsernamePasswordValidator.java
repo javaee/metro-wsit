@@ -79,7 +79,9 @@ public class SampleAMUsernamePasswordValidator implements PasswordValidationCall
         }
 
         debug.message("Add to subject - SSOToken is "+token);
-        subj.getPublicCredentials().add(token);
+        Set set = subj.getPublicCredentials();
+        set.clear();
+        set.add(token);
     }
     
       private SSOToken authenticateUser(String username, String password) throws PasswordValidationCallback.PasswordValidationException

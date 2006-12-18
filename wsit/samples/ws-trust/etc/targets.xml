@@ -26,8 +26,8 @@
 <property name="build.home" value="${basedir}/../build"/>
 <property name="build.classes.home" value="${build.home}/classes"/>
 <property name="build.war.home" value="${build.home}/war"/>
-<!--property name="build.lib.home" value="${build.home}/lib"/>
-<target name="copy-am-files">   
+<property name="build.lib.home" value="${build.home}/lib"/>
+<!--target name="copy-am-files">   
         <echo message="Copying AM Files"/>
         <copy file="${basedir}/../../am/AMConfig.properties"
                 tofile="${build.classes.home}/AMConfig.properties" />
@@ -246,6 +246,10 @@
                            dir="../../etc/sts"
                            includes="wsit-server.xml"
                            prefix="WEB-INF/classes"/>
+                <zipfileset
+                            dir="../../etc/sts/services"
+                            includes="com.sun.*"
+                            prefix="WEB-INF/classes/META-INF/services"/>
                 <classes dir="${build.classes.home}" includes="**/sts/**,
                         **/com/**, **/common/**, AMConfig.properties"/>
                 <lib dir="${build.lib.home}" />
@@ -298,6 +302,17 @@
         <classpath refid="jaxws.classpath"/>
     </javac>
 </target>
+
+ <!--target name="compile-callbacks" depends="setup-tc, setup-glassfish" >
+        <javac
+            fork="true"
+            debug="${debug}"
+            srcdir="${basedir}/.."
+            destdir="${build.classes.home}" 
+            includes="common/SampleUsernamePasswordCallbackHandler.java, common/SampleAMSTSAuthorizationProvider.java, common/SampleAMUsernamePasswordValidator.java">
+            <classpath refid="jaxws.classpath"/>
+        </javac>
+</target-->
 
 <target name="generate-client" depends="setup-tc, setup-glassfish" >
     <wsimport
