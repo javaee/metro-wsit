@@ -92,6 +92,20 @@
         </typedef>
         <pmd targetjdk="${javac.target}">
             <ruleset>basic</ruleset>
+            <ruleset>braces</ruleset>
+            <ruleset>clone</ruleset>
+            <ruleset>codesize</ruleset>
+            <ruleset>coupling</ruleset>
+            <ruleset>design</ruleset>
+            <ruleset>finalizers</ruleset>
+            <ruleset>imports</ruleset>
+            <ruleset>logging-java</ruleset>
+            <ruleset>naming</ruleset>
+            <ruleset>optimizations</ruleset>
+            <ruleset>strictexception</ruleset>
+            <ruleset>strings</ruleset>
+            <ruleset>sunsecure</ruleset>
+            <ruleset>unusedcode</ruleset>
             <formatter type="html" toFile="${build.dir}/pmd.html"/>
             <fileset dir="${src.dir}">
                 <include name="**/*.java"/>
