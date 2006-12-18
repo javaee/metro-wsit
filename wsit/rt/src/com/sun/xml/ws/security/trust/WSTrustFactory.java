@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustFactory.java,v 1.3 2006-11-01 19:41:39 manveen Exp $
+ * $Id: WSTrustFactory.java,v 1.4 2006-12-18 23:32:03 jdg6688 Exp $
  */
 
 /*
@@ -26,10 +26,18 @@
 
 package com.sun.xml.ws.security.trust;
 
+import com.sun.xml.ws.api.security.trust.STSAttributeProvider;
+import com.sun.xml.ws.api.security.trust.STSAuthorizationProvider;
+
+
+import com.sun.xml.ws.security.trust.impl.DefaultSTSAttributeProvider;
+import com.sun.xml.ws.security.trust.impl.DefaultSTSAuthorizationProvider;
 import com.sun.xml.ws.security.trust.impl.WSTrustClientContractImpl;
 import com.sun.xml.ws.security.trust.impl.TrustPluginImpl;
 import com.sun.xml.ws.security.trust.impl.STSConfiguration;
 import com.sun.xml.ws.security.trust.impl.TrustSPMetadata;
+
+import com.sun.xml.ws.util.ServiceFinder;
 
 import java.net.URI;
 
@@ -41,7 +49,7 @@ import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
  * A Factory for creating concrete WS-Trust contract instances
  */
 public class WSTrustFactory {
-    
+   
     private static Logger log =
             Logger.getLogger(
             LogDomainConstants.TRUST_IMPL_DOMAIN,
@@ -137,4 +145,44 @@ public class WSTrustFactory {
     public  static WSTrustClientContract createWSTrustClientContract(Configuration config) {
         return new WSTrustClientContractImpl(config);
     }
+    
+     /**
+     * Returns the single instance of STSAuthorizationProvider
+     * Use the usual services mechanism to find implementing class.  If not
+     * found, use <code>com.sun.xml.ws.security.trust.impl.DefaultSTSAuthorizationProvider</code> 
+     * by default.
+     *
+     */ 
+    public static STSAuthorizationProvider getSTSAuthorizationProvider() {
+        
+        STSAuthorizationProvider authzProvider = null;
+        ServiceFinder<STSAuthorizationProvider> finder = 
+                         ServiceFinder.find(STSAuthorizationProvider.class);
+        if (finder != null && finder.toArray().length > 0) {
+            authzProvider = finder.toArray()[0];
+        } else {
+            authzProvider = new DefaultSTSAuthorizationProvider();
+        }
+        return authzProvider;
+     }
+    
+      /**
+     * Returns the single instance of STSAttributeProvider
+     * Use the usual services mechanism to find implementing class.  If not
+     * found, use <code>com.sun.xml.ws.security.trust.impl.DefaultSTSAttributeProvider</code> 
+     * by default.
+     *
+     */ 
+    public static STSAttributeProvider getSTSAttributeProvider() {
+        
+        STSAttributeProvider attrProvider = null;
+        ServiceFinder<STSAttributeProvider> finder = 
+                ServiceFinder.find(STSAttributeProvider.class);
+        if (finder != null && finder.toArray().length > 0) {
+            attrProvider = finder.toArray()[0];
+        } else {
+            attrProvider = new DefaultSTSAttributeProvider();
+        }
+        return attrProvider;
+     }
 }

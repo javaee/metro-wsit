@@ -22,37 +22,32 @@
 
 package com.sun.xml.ws.security.trust.impl;
 
-import com.sun.xml.ws.policy.PolicyAssertion;
-import com.sun.xml.ws.security.policy.SecureConversationToken;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.security.SecureRandom;
-import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.UUID;
 
 import javax.security.auth.Subject;
-import javax.xml.transform.Source;
 
+import com.sun.xml.ws.api.security.trust.Claims;
+import com.sun.xml.ws.api.security.trust.STSAttributeProvider;
+import com.sun.xml.ws.api.security.trust.STSAuthorizationProvider;
 import com.sun.xml.ws.policy.impl.bindings.AppliesTo;
-import com.sun.xml.ws.security.trust.elements.str.DirectReference;
 import com.sun.xml.ws.security.IssuedTokenContext;
+import com.sun.xml.ws.security.policy.SecureConversationToken;
 import com.sun.xml.ws.security.trust.elements.str.KeyIdentifier;
 import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
 import com.sun.xml.ws.security.Token;
 import com.sun.xml.ws.security.trust.Configuration;
-import com.sun.xml.ws.security.trust.GenericToken;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.security.trust.WSTrustException;
 import com.sun.xml.ws.security.trust.WSTrustContract;
+import com.sun.xml.ws.security.trust.WSTrustFactory;
 import com.sun.xml.ws.security.trust.elements.BinarySecret;
 import com.sun.xml.ws.security.trust.elements.Entropy;
 import com.sun.xml.ws.security.trust.elements.Lifetime;
@@ -64,23 +59,13 @@ import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponse;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponseCollection;
 import com.sun.xml.ws.security.trust.elements.RequestedSecurityToken;
 import com.sun.xml.ws.security.trust.util.WSTrustUtil;
-
 import com.sun.xml.ws.security.wsu10.AttributedDateTime;
-
-import com.sun.xml.wss.SubjectAccessor;
 import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.impl.misc.SecurityUtil;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
 public abstract class IssueSamlTokenContract implements WSTrustContract {
     
@@ -142,14 +127,17 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
         }
         
         // Check if the client is authorized to be issued the token
-        if (!isAuthorized(subject, appliesTo, tokenType, keyType)){
+        STSAuthorizationProvider authzProvider = WSTrustFactory.getSTSAuthorizationProvider();
+        if (!authzProvider.isAuthorized(subject, appliesTo, tokenType, keyType)){
             log.log(Level.SEVERE, "WST0015.client.not.authorized",
                     new Object[]{subject.toString(), tokenType, appliesTo});
             throw new WSTrustException("The client is not authorized to be issued the token of type "+ tokenType + " apply to " + appliesTo);
         }
         
         // Get claimed attributes
-        Map claimedAttrs = getClaimedAttributes(subject, appliesTo, tokenType);
+        Claims claims = rst.getClaims();
+        STSAttributeProvider attrProvider = WSTrustFactory.getSTSAttributeProvider();
+        Map claimedAttrs = attrProvider.getClaimedAttributes(subject, appliesTo, tokenType, claims);
         
         RequestedProofToken proofToken = null;
         Entropy serverEntropy = null;
@@ -313,13 +301,13 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
     
     protected abstract Token createSAMLAssertion(String appliesTo, String tokenType, String keyType, String assertionId, String issuer, Map claimedAttrs, IssuedTokenContext context) throws WSTrustException;
     
-    protected abstract boolean isAuthorized(Subject subject, String appliesTo, String tokenType, String keyType);
+  /*protected abstract boolean isAuthorized(Subject subject, String appliesTo, String tokenType, String keyType);
     
     protected abstract Map getClaimedAttributes(Subject subject, String appliesTo, String tokenType);
     
- /*  protected byte[] createSecretKey(RequestSecurityToken rst)throws WSTrustException
-   {
-       // get key information
+    protected byte[] createSecretKey(RequestSecurityToken rst)throws WSTrustException
+    {
+        // get key information
         int keySize = (int)rst.getKeySize();
         if (keySize < 1){
             keySize = DEFAULT_KEY_SIZE;
@@ -346,7 +334,7 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
         }
   
         return key;
-   }*/
+    }*/
     
     private long currentTime;
     private Lifetime createLifetime() {

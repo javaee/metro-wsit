@@ -31,6 +31,7 @@
 
 package com.sun.xml.ws.security.trust.impl;
 
+import com.sun.xml.ws.api.security.trust.Claims;
 import com.sun.xml.ws.addressing.policy.Address;
 import com.sun.xml.ws.mex.client.MetadataClient;
 import com.sun.xml.ws.mex.client.PortInfo;
@@ -45,7 +46,6 @@ import com.sun.xml.ws.security.policy.Issuer;
 import com.sun.xml.ws.security.policy.RequestSecurityTokenTemplate;
 import com.sun.xml.ws.security.trust.*;
 import com.sun.xml.ws.security.trust.elements.BinarySecret;
-import com.sun.xml.ws.security.trust.elements.Claims;
 import com.sun.xml.ws.security.trust.elements.Entropy;
 import com.sun.xml.ws.security.trust.elements.Lifetime;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;

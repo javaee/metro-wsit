@@ -1,5 +1,5 @@
 /*
-* $Id: ClaimsImpl.java,v 1.3 2006-09-20 23:58:47 manveen Exp $
+* $Id: ClaimsImpl.java,v 1.4 2006-12-18 23:32:04 jdg6688 Exp $
  */
 
 /*
@@ -37,7 +37,7 @@ import javax.xml.bind.JAXBException;
 import com.sun.xml.ws.security.trust.WSTrustException;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 
-import com.sun.xml.ws.security.trust.elements.Claims;
+import com.sun.xml.ws.api.security.trust.Claims;
 import com.sun.xml.ws.security.trust.impl.bindings.ClaimsType;
 
 /**

@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityToken.java,v 1.1 2006-05-03 22:57:19 arungupta Exp $
+ * $Id: RequestSecurityToken.java,v 1.2 2006-12-18 23:32:01 jdg6688 Exp $
  */
 
 /*
@@ -32,6 +32,7 @@ import javax.xml.namespace.QName;
 
 import java.net.URI;
 
+import com.sun.xml.ws.api.security.trust.Claims;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
 
 /**

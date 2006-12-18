@@ -65,6 +65,7 @@ import com.sun.org.apache.xml.internal.security.encryption.XMLEncryptionExceptio
 //import com.sun.xml.security.core.xenc.EncryptedDataType;
 import com.sun.xml.wss.SubjectAccessor;
 
+import com.sun.xml.ws.api.security.trust.STSAttributeProvider;
 import com.sun.xml.ws.policy.impl.bindings.AppliesTo;
 import com.sun.xml.ws.security.trust.elements.str.DirectReference;
 import com.sun.xml.ws.security.IssuedTokenContext;
@@ -139,7 +140,7 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
             LogDomainConstants.TRUST_IMPL_DOMAIN_BUNDLE);
 
     private static final String SAML_HOLDER_OF_KEY = "urn:oasis:names:tc:SAML:1.0:cm:holder-of-key";
-    protected static final String PRINCIPAL = "principal";
+    //protected static final String PRINCIPAL = "principal";
    
     protected Token createSAMLAssertion(String appliesTo, String tokenType, String keyType, String assertionId, String issuer, Map claimedAttrs, IssuedTokenContext context) throws WSTrustException
     {       
@@ -221,7 +222,7 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
         return token;
    }
     
-   protected boolean isAuthorized(Subject subject, String appliesTo, String tokenType, String keyType){
+ /*  protected boolean isAuthorized(Subject subject, String appliesTo, String tokenType, String keyType){
        return true;
    }
    
@@ -250,7 +251,7 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
        attrs.put(key, value);
        
        return attrs;
-   }
+   } */
    
    private EncryptedKey encryptKey (Document doc, byte[] encryptedKey, X509Certificate cert) throws XMLEncryptionException, XWSSecurityException{
        PublicKey pubKey = cert.getPublicKey();
@@ -358,11 +359,11 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
                   confirmationMethods, null, keyInfo.getElement());
 
             com.sun.xml.wss.saml.Subject subj = null;
-            QName principal = (QName)claimedAttrs.get(PRINCIPAL);
+            QName principal = (QName)claimedAttrs.get(STSAttributeProvider.NAME_IDENTIFIER);
             if (principal != null){
                 NameIdentifier nameId = samlFac.createNameIdentifier(principal.getLocalPart(), null, null);
                 subj = samlFac.createSubject(nameId, subjectConfirmation);
-                claimedAttrs.remove(PRINCIPAL);
+                claimedAttrs.remove(STSAttributeProvider.NAME_IDENTIFIER);
             }
 
             List<Attribute> attrs = new ArrayList<Attribute>();
@@ -413,12 +414,12 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
                 null, keyInfoConfData, SAML_HOLDER_OF_KEY);
 
             com.sun.xml.wss.saml.Subject subj = null;
-            QName principal = (QName)claimedAttrs.get(PRINCIPAL);
+            QName principal = (QName)claimedAttrs.get(STSAttributeProvider.NAME_IDENTIFIER);
             
             if (principal != null){
                 NameID nameId = samlFac.createNameID(principal.getLocalPart(), principal.getNamespaceURI(), null);
                 subj = samlFac.createSubject(nameId, subjectConfirmation);
-                claimedAttrs.remove(PRINCIPAL);
+                claimedAttrs.remove(STSAttributeProvider.NAME_IDENTIFIER);
             }
 
             // Create AttributeStatement
