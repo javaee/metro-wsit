@@ -109,6 +109,7 @@
             <formatter type="html" toFile="${build.dir}/pmd.html"/>
             <fileset dir="${src.dir}">
                 <include name="**/*.java"/>
+                <exclude name="**/tx/webservice/member/**/*.java"/> <!-- ignore generated tx code -->
             </fileset>
         </pmd>
     </target>
