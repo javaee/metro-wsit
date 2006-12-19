@@ -135,7 +135,7 @@ public class MetadataServerPipe extends AbstractFilterPipeImpl {
             return response;
         } catch (XMLStreamException streamE) {
             throw new WebServiceException(
-                MessagesMessages.RESPONSE_WRITING_FAILURE(), streamE);
+                MessagesMessages.MEX_01_RESPONSE_WRITING_FAILURE(), streamE);
         }
     }
 

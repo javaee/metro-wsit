@@ -78,8 +78,7 @@ public class MetadataClient {
             jaxbContext = JAXBContext.newInstance(
                 "com.sun.xml.ws.mex.client.schema");
         } catch (JAXBException jaxbE) {
-            throw new WebServiceException(
-                MessagesMessages.JAXB_CONTEXT_CREATION_FAILURE(), jaxbE);
+            throw new AssertionError(jaxbE);
         }
     }
    
@@ -106,7 +105,7 @@ public class MetadataClient {
      * @return The metadata object, or null if no metadata could
      *     be obtained from the service
      */
-    public Metadata retrieveMetadata(@NotNull String address) {
+    public Metadata retrieveMetadata(@NotNull final String address) {
         for (String suffix : suffixes) {
             String newAddress = address.concat(suffix);
             for (Protocol p : Protocol.values()) {
@@ -116,16 +115,17 @@ public class MetadataClient {
                     return createMetadata(responseStream);
                 } catch (IOException e) {
                     logger.log(ERROR_LOG_LEVEL,
-                        MessagesMessages.RETRIEVING_MDATA_FAILURE(
+                        MessagesMessages.MEX_06_RETRIEVING_MDATA_FAILURE(
                         p, newAddress));
                     continue;
                 } catch (Exception e) {
                     logger.log(Level.WARNING,
-                        MessagesMessages.PARSING_MDATA_FAILURE());
+                        MessagesMessages.MEX_08_PARSING_MDATA_FAILURE());
                     continue;
                 }
             }
         }
+        logger.warning(MessagesMessages.MEX_07_RETURNING_NULL_MDATA());
         return null;
     }
     
@@ -254,7 +254,8 @@ public class MetadataClient {
                 return getAttributeValue(addressNode, "location");
             }
         }
-        logger.warning(MessagesMessages.ADDRESS_NOT_FOUND_FOR_PORT(portNode));
+        logger.warning(
+            MessagesMessages.MEX_09_ADDRESS_NOT_FOUND_FOR_PORT(portNode));
         return null;
     }
 

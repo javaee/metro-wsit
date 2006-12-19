@@ -90,17 +90,20 @@ public class HttpPoster {
             try {
                 if (logger.isLoggable(ERROR_LOG_LEVEL)) {
                     logger.log(ERROR_LOG_LEVEL,
-                        MessagesMessages.ERROR_FROM_SERVER());
+                        MessagesMessages.MEX_10_ERROR_FROM_SERVER());
                     String line = reader.readLine();
                     while (line != null) {
                         logger.log(ERROR_LOG_LEVEL, line);
                         line = reader.readLine();
                     }
+                    logger.log(ERROR_LOG_LEVEL,
+                        MessagesMessages.MEX_11_ERROR_FROM_SERVER_END());
                 }
             } catch (IOException ioe) {
                 // This exception has no more impact.
                 logger.log(ERROR_LOG_LEVEL,
-                    MessagesMessages.READING_ERROR_STREAM_FAILURE(), ioe);
+                    MessagesMessages.MEX_12_READING_ERROR_STREAM_FAILURE(),
+                    ioe);
             }
         }
     }

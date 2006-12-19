@@ -129,7 +129,7 @@ public class ServiceDescriptorImpl extends ServiceDescriptor {
             schemas.add(createSource(section, id));
         } else {
             logger.warning(
-                MessagesMessages.UNKNOWN_DIALECT_WITH_ID(dialect, id));
+                MessagesMessages.MEX_02_UNKNOWN_DIALECT_WITH_ID(dialect, id));
         }
     }
 
@@ -157,7 +157,7 @@ public class ServiceDescriptorImpl extends ServiceDescriptor {
             schemas.add(getSourceFromLocation(location, id));
         } else {
             logger.warning(
-                MessagesMessages.UNKNOWN_DIALECT_WITH_ID(dialect, id));
+                MessagesMessages.MEX_02_UNKNOWN_DIALECT_WITH_ID(dialect, id));
         }
     }
     
@@ -224,7 +224,8 @@ public class ServiceDescriptorImpl extends ServiceDescriptor {
         if (namespace == null) {
             // bug in the server? want to avoid NPE if so
             logger.warning(
-                MessagesMessages.UNKNOWN_WSDL_NAMESPACE(node.toString()));
+                MessagesMessages.MEX_03_UNKNOWN_WSDL_NAMESPACE(
+                node.getNodeName()));
             return null;
         }
         return namespace.getNodeValue();
@@ -275,7 +276,7 @@ public class ServiceDescriptorImpl extends ServiceDescriptor {
             return source;
         } catch (TransformerException te) {
             throw new WebServiceException(
-                MessagesMessages.TRANSFORMING_FAILURE(address), te);
+                MessagesMessages.MEX_04_TRANSFORMING_FAILURE(address), te);
         }
     }
 
@@ -291,9 +292,10 @@ public class ServiceDescriptorImpl extends ServiceDescriptor {
                 atts.getNamedItem(NAMESPACE).getNodeValue();
             String sysId = nsToSysIdMap.get(targetNamespace);
             if (sysId == null) {
-                logger.warning(MessagesMessages.WSDL_NOT_FOUND_WITH_NAMESPACE(
+                logger.warning(
+                    MessagesMessages.MEX_05_WSDL_NOT_FOUND_WITH_NAMESPACE(
                     targetNamespace));
-                return;
+                continue;
             }
             Attr locationAtt =
                 importNode.getOwnerDocument().createAttribute(LOCATION);

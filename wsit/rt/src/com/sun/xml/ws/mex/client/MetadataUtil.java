@@ -23,6 +23,7 @@ package com.sun.xml.ws.mex.client;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.xml.ws.WebServiceException;
@@ -61,7 +62,9 @@ public class MetadataUtil {
      */
     InputStream getMetadata(String address, Protocol p) throws IOException {
         String request = getMexWsdlRequest(address, p);
-        logger.fine("Request message:\n" + request + "\n");
+        if (logger.isLoggable(Level.FINE)) {
+            logger.fine("Request message:\n" + request + "\n");
+        }
         String contentType = "application/soap+xml"; // soap 1.2
         if (p == Protocol.SOAP_1_1) {
             contentType = "text/xml; charset=\"utf-8\"";
