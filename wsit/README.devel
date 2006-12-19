@@ -9,7 +9,8 @@ You need a working installation of Ant 1.6.5 to build the project.
 
 2. HOW TO RUN UNIT AND END-TO-END TESTS
 
-Unit tests test single classes only. End-to-end (e2e) tests test entire client-service invocations.
+Unit tests test single classes only. End-to-end (e2e) tests test entire client-service 
+invocations.
 
 2a. Run unit tests
 
@@ -29,10 +30,14 @@ cd to the WSIT test subdirectory and invoke "ant e2e".
 
 3. HOW TO GENERATE PMD REPORTS
 
-PMD is a static code analysis tool that tries to find common coding mistakes. You can generate
-a HTML formatted PMD report on the WSIT code base by cd:ing to the WSIT main directory and
-invoking "ant pmd". The resulting reports are written into wsit/rt/build/pmd.html and
-wsit/tools/build/pmd.html.
+PMD is a static code analysis tool that tries to find common coding mistakes. You 
+can generate a HTML formatted PMD report on the WSIT code base by cd-ing to the 
+wsit/rt or wsit/tools directory and invoking "ant pmd". The resulting reports are 
+written into wsit/rt/build/pmd.html and wsit/tools/build/pmd.html respectively.
+
+Also, you may need to setup the proxy settings properly in your JRE net.properties file
+which is located in $JAVA_HOME/jre/lib (if $JAVA_HOME points to JDK) or $JAVA_HOME/lib 
+(if $JAVA_HOME points to JRE) directory.
 
 
 # The contents of this file are subject to the terms
