@@ -136,7 +136,7 @@ public class ProtocolMessageSender {
 
         //1. Initialize  message adding CreateSequence to body
         if (cs != null) {
-            Message request = Messages.create(marshaller,cs,version);
+            Message request = Messages.create(constants.getJAXBContext(),cs,version);
 
 
             //Addressing Headers are added by configuring the following property
@@ -187,7 +187,7 @@ public class ProtocolMessageSender {
         //Used from com.sun.xml.ws.jaxws.runtime.client.ClientOutboundSequence.disconnect, where the
         //TerminateSequence message is initialzied.
 
-        Message request = Messages.create(marshaller,ts,version);
+        Message request = Messages.create(constants.getJAXBContext(),ts,version);
 
         //piggyback an acknowledgement if one is pending
         seq.processAcknowledgement(new com.sun.xml.ws.rm.Message(request), marshaller);

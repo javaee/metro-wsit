@@ -71,7 +71,7 @@ public enum RMConstants {
     private final AddressingVersion addressingVersion ;
     // TODO FIX ME ADDRESSING_FIXME
     // private static final JAXBContext jc;
-    private JAXBContext jc;
+    private JAXBRIContext jc;
     
     public JAXBRIContext jaxbricontext;
 
@@ -94,12 +94,12 @@ public enum RMConstants {
         try {
 
             List<Class> classes = getClassesToBeBound();
-            jc = JAXBContext.newInstance(classes.toArray(new Class[0]));
+            jc = JAXBRIContext.newInstance(classes.toArray(new Class[0]),null,null,null,false,null);
             
             Class[] clazzes = getHeaderClassesToBeBound().toArray(new Class[0]);
-            jaxbricontext = JAXBRIContext.newInstance(clazzes, 
+            jaxbricontext = JAXBRIContext.newInstance(clazzes,
                                                         null, 
-                                                        null, false);
+                                                        null, null,false, null);
             
         } catch (JAXBException e) {
             throw new Error(e);
@@ -273,7 +273,7 @@ public enum RMConstants {
         return new QName(Constants.microsoftVersion, "MaxReceiveBufferSize");
     }
 
-    public  JAXBContext getJAXBContext() {
+    public  JAXBRIContext getJAXBContext() {
         return jc;
     }
     
@@ -355,7 +355,7 @@ public enum RMConstants {
     public URI getAnonymousURI() {
         try {
 
-            return new URI(getAddressingVersion().getAnonymousUri());
+            return new URI(getAddressingVersion().anonymousUri);
         } catch (Exception e) {
             e.printStackTrace();
             throw new Error(e);
