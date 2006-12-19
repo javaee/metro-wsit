@@ -141,13 +141,11 @@ public final class PolicyConfigParser {
         logger.entering("parseModel", new Object[] {configFileUrl, mutators});
         WSDLModel model = null;
         try {
-            XMLStreamBuffer configFileSource = initConfigFileSource(configFileUrl);
-
-            if (configFileSource == null) {
-                throw new PolicyException(LocalizationMessages.BUFFER_DOES_NOT_EXIST(configFileUrl));
+            if (null == configFileUrl) {
+                throw new PolicyException(LocalizationMessages.FAILED_TO_READ_NULL_WSIT_CFG());
             }
 
-            SDDocumentSource doc = SDDocumentSource.create(configFileUrl, configFileSource);
+            SDDocumentSource doc = SDDocumentSource.create(configFileUrl);//, configFileSource);
             Parser parser =  new Parser(doc);
             model = WSDLModel.WSDLParser.parse(parser, new PolicyConfigResolver(), isClient,
                                                new WSDLParserExtension[] { new PolicyWSDLParserExtension(true, mutators) } );
@@ -162,33 +160,5 @@ public final class PolicyConfigParser {
             logger.exiting("parseModel", model);
         }
     }
-
     
-    /**
-     * Reads a WSIT config from an XMLStreamBuffer, parses it and returns a PolicyMap.
-     *
-     * @param configFileUrl URL of the config file resource that should be parsed. Must not be {@code null}.
-     *
-     * @return A PolicyMap populated from the WSIT config file
-     */
-    /*public static PolicyMap parse(URL configFileUrl) throws PolicyException {
-        return parse(configFileUrl, null);
-    }*/
-    
-    private static XMLStreamBuffer initConfigFileSource(URL configFileUrl) throws PolicyException {
-        XMLStreamReader reader = null;
-        try {
-            if (configFileUrl != null) {
-                InputStream input = configFileUrl.openStream();
-                reader = xmlInputFactory.createXMLStreamReader(input);
-                return XMLStreamBuffer.createNewBufferFromXMLStreamReader(reader);
-            }
-            
-            return null;
-        } catch (XMLStreamException e) {
-            throw new PolicyException(LocalizationMessages.READER_CREATE_FAILED(configFileUrl), e);
-        } catch (IOException e) {
-            throw new PolicyException(LocalizationMessages.URL_OPEN_FAILED(configFileUrl), e);
-        }
-    }
 }
