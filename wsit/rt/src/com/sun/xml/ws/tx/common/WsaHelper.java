@@ -95,20 +95,20 @@ public class WsaHelper {
      */
     public static void sendFault(@Nullable final WSEndpointReference faultTo, @NotNull final EndpointReference replyTo,
                                  @NotNull final SOAPFault fault, final String msgID) {
-        final WSEndpointReference to = faultTo != null ? faultTo : new WSEndpointReference(replyTo);
-
-        final WSService s = WSService.create();
-        final QName port = new QName("foo", "bar");
-        s.addPort(port, SOAPBinding.SOAP11HTTP_BINDING, to.getAddress());
-
-        // one-way feature
-        final OneWayFeature owf = new OneWayFeature();
-        owf.setRelatesToID(msgID);
-        // member submission addressing feature
-        final WebServiceFeature af = new MemberSubmissionAddressingFeature(true);
-
-        final Dispatch<Source> d = s.createDispatch(port, to, Source.class, Service.Mode.PAYLOAD, owf, af);
-        d.invokeOneWay(new DOMSource(fault));
+//        final WSEndpointReference to = faultTo != null ? faultTo : new WSEndpointReference(replyTo);
+//
+//        final WSService s = WSService.create();
+//        final QName port = new QName("foo", "bar");
+//        s.addPort(port, SOAPBinding.SOAP11HTTP_BINDING, to.getAddress());
+//
+//        // one-way feature
+//        final OneWayFeature owf = new OneWayFeature();
+//        owf.setRelatesToID(msgID);
+//        // member submission addressing feature
+//        final WebServiceFeature af = new MemberSubmissionAddressingFeature(true);
+//
+//        final Dispatch<Source> d = s.createDispatch(port, to, Source.class, Service.Mode.PAYLOAD, owf, af);
+//        d.invokeOneWay(new DOMSource(fault));
     }
 }
 
