@@ -37,10 +37,16 @@ public class RegistrantIdentifier extends Identifier {
     public static final String REGISTRANT_ID = "RegistrantId";
     public static final QName QNAME = new QName(WSCOOR_SUN_URI, REGISTRANT_ID);
 
-    // silence JAXB IllegalAnnotationsException: does not have a no-arg default constructor
+    /**
+     * silence JAXB IllegalAnnotationsException: does not have a no-arg default constructor
+     */
     public RegistrantIdentifier() {
     }
 
+    /**
+     * Create a new registrant id based on the supplied id string
+     * @param id id
+     */
     public RegistrantIdentifier(@NotNull String id) {
         value = id;
     }

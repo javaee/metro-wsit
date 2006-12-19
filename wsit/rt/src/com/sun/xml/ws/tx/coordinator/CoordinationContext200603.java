@@ -31,7 +31,7 @@ import java.util.Map;
  * Just a placeholder for future implementation work...
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 1.0
  */
 public class CoordinationContext200603 extends CoordinationContextBase {
@@ -44,7 +44,7 @@ public class CoordinationContext200603 extends CoordinationContextBase {
         throw new UnsupportedOperationException();
     }
 
-    public void setIdentifier(String identifier) {
+    public void setIdentifier(final String identifier) {
         throw new UnsupportedOperationException();
     }
 
@@ -52,7 +52,7 @@ public class CoordinationContext200603 extends CoordinationContextBase {
         throw new UnsupportedOperationException();
     }
 
-    public void setExpires(long expires) {
+    public void setExpires(final long expires) {
         throw new UnsupportedOperationException();
     }
 
@@ -60,7 +60,7 @@ public class CoordinationContext200603 extends CoordinationContextBase {
         throw new UnsupportedOperationException();
     }
 
-    public void setCoordinationType(String coordinationType) {
+    public void setCoordinationType(final String coordinationType) {
         throw new UnsupportedOperationException();
     }
 
@@ -68,7 +68,7 @@ public class CoordinationContext200603 extends CoordinationContextBase {
         throw new UnsupportedOperationException();
     }
 
-    public void setRegistrationService(EndpointReference registrationService) {
+    public void setRegistrationService(final EndpointReference registrationService) {
         throw new UnsupportedOperationException();
     }
 

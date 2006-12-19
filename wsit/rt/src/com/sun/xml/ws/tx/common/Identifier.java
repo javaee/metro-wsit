@@ -36,7 +36,7 @@ import javax.xml.soap.SOAPFactory;
  * This serves as a base class for different kinds of ids
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 1.0
  */
 
@@ -61,7 +61,7 @@ public abstract class Identifier {
      * Sets the value of the value property.
      * @param value the non-null value
      */
-    public void setValue(@NotNull String value) {
+    public void setValue(@NotNull final String value) {
         this.value = value;
     }
 

@@ -21,6 +21,8 @@
  */
 package com.sun.xml.ws.tx.coordinator;
 
+import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 import com.sun.xml.ws.tx.at.ATCoordinator;
 import com.sun.xml.ws.tx.at.ATSubCoordinator;
 import com.sun.xml.ws.tx.common.ActivityIdentifier;
@@ -28,11 +30,9 @@ import static com.sun.xml.ws.tx.common.Constants.WSAT_2004_PROTOCOL;
 import static com.sun.xml.ws.tx.common.Constants.WSAT_OASIS_NSURI;
 import com.sun.xml.ws.tx.common.TxLogger;
 import com.sun.xml.ws.tx.webservice.member.coord.CreateCoordinationContextType;
-import com.sun.istack.NotNull;
-import com.sun.istack.Nullable;
 
-import javax.xml.ws.EndpointReference;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 
 /**
@@ -44,7 +44,7 @@ import java.util.logging.Level;
  * <p/>
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @since 1.0
  */
 public final class CoordinationManager {
@@ -53,13 +53,13 @@ public final class CoordinationManager {
     private static final CoordinationManager instance = new CoordinationManager();
 
     /* HashMap<coordination id, Coordinator> */
-    private static final HashMap<String, Coordinator> coordinators = new HashMap<String, Coordinator>();
+    private static final Map<String, Coordinator> coordinators = new HashMap<String, Coordinator>();
 
     static private TxLogger logger = TxLogger.getCoordLogger(CoordinationManager.class);
 
-    /*
-    * private constructor for singleton
-    */
+    /**
+     * private constructor for singleton
+     */
     private CoordinationManager() {
     }
 
@@ -79,7 +79,7 @@ public final class CoordinationManager {
      * @return the Coordinator object or null if the id doesn't exist
      */
     @Nullable
-    public Coordinator getCoordinator(@NotNull String id) {
+    public Coordinator getCoordinator(@NotNull final String id) {
         return coordinators.get(id);
     }
 
@@ -91,7 +91,7 @@ public final class CoordinationManager {
      *
      * @param coordinator coordinator
      */
-    public void putCoordinator(Coordinator coordinator) {
+    public void putCoordinator(final Coordinator coordinator) {
         coordinators.put(coordinator.getIdValue(), coordinator);
         if (logger.isLogging(Level.FINEST)) {
             logger.finest("putCoordinator", "add activity id:" + coordinator.getIdValue());
@@ -104,8 +104,8 @@ public final class CoordinationManager {
      * <p>
      * @param id activity id
      */
-    public void removeCoordinator(@NotNull String id) {
-        Coordinator c = coordinators.remove(id);
+    public void removeCoordinator(@NotNull final String id) {
+        final Coordinator c = coordinators.remove(id);
         if(c!=null) {
             c.forget();
         }
@@ -129,12 +129,12 @@ public final class CoordinationManager {
      * @return the coordinator
      */
     @NotNull
-    public Coordinator lookupOrCreateCoordinator(@NotNull CreateCoordinationContextType contextRequest) {
+    public Coordinator lookupOrCreateCoordinator(@NotNull final CreateCoordinationContextType contextRequest) {
         Coordinator c;
-        if (contextRequest.getCurrentContext() != null) {
-            c = createSubordinateCoordinator(null, contextRequest);
-        } else {
+        if (contextRequest.getCurrentContext() == null) {
             c = createCoordinator(null, contextRequest);
+        } else {
+            c = createSubordinateCoordinator(null, contextRequest);
         }
         putCoordinator(c);
         return c;
@@ -154,7 +154,7 @@ public final class CoordinationManager {
      * @return the coordinator
      */
     @NotNull
-    public Coordinator lookupOrCreateCoordinator(@NotNull CoordinationContextInterface context) {
+    public Coordinator lookupOrCreateCoordinator(@NotNull final CoordinationContextInterface context) {
         Coordinator c = getCoordinator(context.getIdentifier());
         if (c == null) {
             // If registration service EPR is not created locally, make this a subordinate coordinator
@@ -178,8 +178,8 @@ public final class CoordinationManager {
      * @return a Coordinator
      */
     @NotNull
-    private Coordinator createCoordinator(@Nullable CoordinationContextInterface context,
-                                          @Nullable CreateCoordinationContextType contextRequest) {
+    private Coordinator createCoordinator(@Nullable final CoordinationContextInterface context,
+                                          @Nullable final CreateCoordinationContextType contextRequest) {
 
         assert((context == null) ^ (contextRequest == null));  // xor
 
@@ -188,21 +188,21 @@ public final class CoordinationManager {
         }
 
         final String coordType;
-        if (contextRequest != null) {
-            coordType = contextRequest.getCoordinationType();
-        } else {
+        if (contextRequest == null) {
             coordType = context.getCoordinationType();
+        } else {
+            coordType = contextRequest.getCoordinationType();
         }
 
         if (WSAT_2004_PROTOCOL.equals(coordType)) {
             final Coordinator coord;
-            if (contextRequest != null) {
+            if (contextRequest == null) {
+                coord = context.getRootRegistrationService() == null ?
+                        new ATCoordinator(context) : new ATSubCoordinator(context);
+            } else {
                 coord = contextRequest.getCurrentContext() == null ?
                         new ATCoordinator(ContextFactory.createContext(contextRequest), contextRequest) :
                         new ATSubCoordinator(ContextFactory.createContext(contextRequest), contextRequest);
-            } else {
-                coord = context.getRootRegistrationService() == null ?
-                        new ATCoordinator(context) : new ATSubCoordinator(context);
             }
             if (logger.isLogging(Level.FINEST)) {
                 logger.finest("CoordinationManager.createCoordinator id=", coord.getIdValue());
@@ -233,8 +233,8 @@ public final class CoordinationManager {
      * @return a new subordinate coordinator that will delegate for our participants
      */
     @NotNull
-    private Coordinator createSubordinateCoordinator(@Nullable CoordinationContextInterface context,
-                                                     @Nullable CreateCoordinationContextType contextRequest) {
+    private Coordinator createSubordinateCoordinator(@Nullable final CoordinationContextInterface context,
+                                                     @Nullable final CreateCoordinationContextType contextRequest) {
 
         assert((context == null) ^ (contextRequest == null));  // xor
 
@@ -242,25 +242,25 @@ public final class CoordinationManager {
             logger.entering("CoordinationManager.createSubordinateCoordinator");
         }
 
-        if (context != null) {
-            // replace the registration service EPR with our own, but remember the EPR of the
-            // root coordinator's registration EPR for delegation.
-            context.setRootCoordinatorRegistrationService(context.getRegistrationService());
-
-            // delegate
-            Coordinator coord = createCoordinator(context, null);
-            context.setRegistrationService(RegistrationManager.newRegistrationEPR((ActivityIdentifier) coord.getId()));
-            if (logger.isLogging(Level.FINER)) {
-                logger.exiting("CoordinationManager.createSubordinateCoordinator");
-            }
-            return coord;
-        } else {
+        if (context == null) {
             if (logger.isLogging(Level.FINER)) {
                 logger.exiting("CoordinationManager.createSubordinateCoordinator");
             }
             // in this case, the context should already have the registration EPRs initialized
             // properly, so we don't have to swap - just create a new coordinator
             return createCoordinator(null, contextRequest);
+        } else {
+            // replace the registration service EPR with our own, but remember the EPR of the
+            // root coordinator's registration EPR for delegation.
+            context.setRootCoordinatorRegistrationService(context.getRegistrationService());
+
+            // delegate
+            final Coordinator coord = createCoordinator(context, null);
+            context.setRegistrationService(RegistrationManager.newRegistrationEPR((ActivityIdentifier) coord.getId()));
+            if (logger.isLogging(Level.FINER)) {
+                logger.exiting("CoordinationManager.createSubordinateCoordinator");
+            }
+            return coord;
         }
     }
 

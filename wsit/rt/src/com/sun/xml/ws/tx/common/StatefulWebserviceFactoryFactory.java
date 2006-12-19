@@ -23,13 +23,14 @@
 package com.sun.xml.ws.tx.common;
 
 import com.sun.istack.NotNull;
+import com.sun.xml.ws.tx.webservice.member.TXStatefulWebserviceFactoryImpl;
 
 /**
  * Get factory that enables creation of WS-TX Stateful Webservices.
  */
 final public class StatefulWebserviceFactoryFactory {
 
-    private static StatefulWebserviceFactory swsf = null;
+    private final static StatefulWebserviceFactory swsf = new TXStatefulWebserviceFactoryImpl();
 
     /**
      * Get an instance of the StatefulWebserviceFactory
@@ -38,17 +39,6 @@ final public class StatefulWebserviceFactoryFactory {
      */
     @NotNull
     public static StatefulWebserviceFactory getInstance() {
-        if (swsf == null) {
-            try {
-                swsf = (StatefulWebserviceFactory) Class.forName("com.sun.xml.ws.tx.webservice.member.TXStatefulWebserviceFactoryImpl").newInstance();
-            } catch (IllegalAccessException ex) {
-                ex.printStackTrace();
-            } catch (ClassNotFoundException ex) {
-                ex.printStackTrace();
-            } catch (InstantiationException ex) {
-                ex.printStackTrace();
-            }
-        }
         return swsf;
     }
 }

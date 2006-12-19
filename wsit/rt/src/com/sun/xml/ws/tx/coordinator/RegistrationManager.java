@@ -38,6 +38,8 @@ import com.sun.xml.ws.tx.common.StatefulWebserviceFactory;
 import com.sun.xml.ws.tx.common.StatefulWebserviceFactoryFactory;
 import com.sun.xml.ws.tx.common.TxLogger;
 import com.sun.xml.ws.tx.common.Util;
+import com.sun.xml.ws.tx.common.WsaHelper;
+import com.sun.xml.ws.tx.common.TxFault;
 import com.sun.xml.ws.tx.webservice.member.coord.RegisterResponseType;
 import com.sun.xml.ws.tx.webservice.member.coord.RegisterType;
 import com.sun.xml.ws.tx.webservice.member.coord.RegistrationCoordinatorPortType;
@@ -57,7 +59,7 @@ import java.util.logging.Level;
  * for register and registerResponse delegate to the methods in this class.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @since 1.0
  */
 public final class RegistrationManager {
@@ -153,11 +155,30 @@ public final class RegistrationManager {
             logger.finest("register", "register request msg id=" + msgID);
         }
         EndpointReference registrationRequesterEPR = (headers.getReplyTo(AddressingVersion.MEMBER, SOAPVersion.SOAP_11)).toSpec();
+        WSEndpointReference faultTo = (headers.getFaultTo(AddressingVersion.MEMBER, SOAPVersion.SOAP_11));
         if (logger.isLogging(Level.FINEST)) {
             logger.finest("register", "replyTo:" + registrationRequesterEPR);
         }
+//        WsaHelper.sendFault(
+//                faultTo,
+//                registrationRequesterEPR,
+//                WsaHelper.createFault(
+//                        SOAPVersion.SOAP_11,
+//                        TxFault.InvalidParameters,
+//                        "NOSFERATU!"),
+//                msgID);
         if (registrationRequesterEPR == null) {
-            // TODO: send fault S4.3 wscoor:Invalid Parameters
+            if(faultTo != null) {
+                // send fault S4.3 wscoor:Invalid Parameters
+                WsaHelper.sendFault(
+                        faultTo,
+                        registrationRequesterEPR,
+                        WsaHelper.createFault(
+                                SOAPVersion.SOAP_11,
+                                TxFault.InvalidParameters,
+                                "register wsa:replyTo must be set"),
+                        msgID);
+            }
             throw new WebServiceException("register wsa:replyTo must be set");
         }
 
@@ -227,13 +248,11 @@ public final class RegistrationManager {
         }
     }
 
-    private static com.sun.xml.ws.tx.webservice.member.coord.Coordinator coordinatorService = null;
+    private static final com.sun.xml.ws.tx.webservice.member.coord.Coordinator coordinatorService = 
+            new com.sun.xml.ws.tx.webservice.member.coord.Coordinator();
 
     @NotNull
     private com.sun.xml.ws.tx.webservice.member.coord.Coordinator getCoordinatorService() {
-        if (coordinatorService == null) {
-            coordinatorService = new com.sun.xml.ws.tx.webservice.member.coord.Coordinator();
-        }
         return coordinatorService;
     }
 

@@ -36,7 +36,7 @@ import java.util.Map;
  * This class encapsulates the genertated 2004/10 version of {@link com.sun.xml.ws.tx.webservice.member.coord.CoordinationContextType}
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 1.0
  */
 public class CoordinationContext200410 extends CoordinationContextBase {
@@ -59,29 +59,29 @@ public class CoordinationContext200410 extends CoordinationContextBase {
         return context.getIdentifier().getValue();
     }
 
-    public void setIdentifier(@NotNull String identifier) {
-        Identifier id = new Identifier();
+    public void setIdentifier(@NotNull final String identifier) {
+        final Identifier id = new Identifier();
         id.setValue(identifier);
         context.setIdentifier(id);
     }
 
     public long getExpires() {
-        Expires exp = context.getExpires();
-        if (exp != null) {
-            return exp.getValue();
-        } else {
+        final Expires exp = context.getExpires();
+        if (exp == null) {
             return 0L;
+        } else {
+            return exp.getValue();
         }
     }
 
-    public void setExpires(long expires) {
+    public void setExpires(final long expires) {
         assert(!(expires < 0L));
-        if (expires != 0L) {
-            Expires exp = new Expires();
+        if (expires == 0L) {
+            context.setExpires(null);
+        } else {
+            final Expires exp = new Expires();
             exp.setValue(expires);
             context.setExpires(exp);
-        } else {
-            context.setExpires(null);
         }
     }
 
@@ -90,7 +90,7 @@ public class CoordinationContext200410 extends CoordinationContextBase {
         return context.getCoordinationType();
     }
 
-    public void setCoordinationType(@NotNull String coordinationType) {
+    public void setCoordinationType(@NotNull final String coordinationType) {
         context.setCoordinationType(coordinationType);
     }
 
@@ -99,7 +99,7 @@ public class CoordinationContext200410 extends CoordinationContextBase {
         return context.getRegistrationService();
     }
 
-    public void setRegistrationService(@NotNull EndpointReference registrationService) {
+    public void setRegistrationService(@NotNull final EndpointReference registrationService) {
         context.setRegistrationService((MemberSubmissionEndpointReference) registrationService);
     }
 

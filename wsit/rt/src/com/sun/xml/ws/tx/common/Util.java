@@ -31,7 +31,7 @@ import java.net.UnknownHostException;
  * other modules.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 1.0
  */
 public class Util {
@@ -99,21 +99,27 @@ public class Util {
      * @param path   path starting with '/'
      * @return the resulting URI
      */
-    public static URI createURI(String scheme, String host, int port, String path) {
+    public static URI createURI(final String scheme, final String host, final int port, final String path) {
+        final String hostname;
+        
         // calculate host name
-        if (hostOverride != null) {
-            host = hostOverride;
-        } else if (host == null) {
-            host = getServiceHostName();
-        } // else just use 'host' parameter
+        if (hostOverride == null) {
+            if (host == null) {
+                hostname = getServiceHostName();
+            } else {
+                hostname = host; // else just use 'host' parameter
+            }
+        } else {
+            hostname = hostOverride;
+        }
 
         URI uri = null;
         try {
             uri = new URI(
-                    schemeOverride != null ? schemeOverride : scheme,
+                    schemeOverride == null ? scheme : schemeOverride,
                     null, // user info
-                    host,
-                    portOverride != null ? Integer.parseInt(portOverride) : port,
+                    hostname,
+                    portOverride == null ? port : Integer.parseInt(portOverride),
                     path,
                     null, // query
                     null // fragment

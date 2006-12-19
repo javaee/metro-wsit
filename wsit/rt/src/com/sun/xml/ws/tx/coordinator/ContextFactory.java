@@ -21,29 +21,27 @@
  */
 package com.sun.xml.ws.tx.coordinator;
 
+import com.sun.istack.NotNull;
 import com.sun.xml.ws.developer.MemberSubmissionEndpointReference;
 import com.sun.xml.ws.tx.common.ActivityIdentifier;
 import static com.sun.xml.ws.tx.common.Constants.WSAT_2004_PROTOCOL;
 import static com.sun.xml.ws.tx.common.Constants.WSAT_OASIS_NSURI;
 import com.sun.xml.ws.tx.common.TxLogger;
 import com.sun.xml.ws.tx.webservice.member.coord.CreateCoordinationContextType;
-import com.sun.istack.NotNull;
 
 import java.util.logging.Level;
-import javax.xml.transform.Result;
-import javax.xml.ws.EndpointReference;
 
 /**
  * This class is an abstraction of the two kinds of CoordinationContexts defined
  * in WS-Coordination 2004/10 member submission and 2006/03 OASIS.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @since 1.0
  */
 public class ContextFactory {
 
-    private static long ACTIVITY_ID;
+    private static long activityId;
 
     static private TxLogger logger = TxLogger.getCoordLogger(ContextFactory.class);
 
@@ -58,7 +56,7 @@ public class ContextFactory {
      * @param expires expiration timout in ms
      * @return the {@link CoordinationContextInterface}
      */
-    public static CoordinationContextInterface createContext(@NotNull String coordType, long expires) {
+    public static CoordinationContextInterface createContext(@NotNull final String coordType, final long expires) {
 
         if (logger.isLogging(Level.FINER)) {
             logger.entering("ContextFactory.createContext: coordType=" + coordType + " expires=" + expires);
@@ -71,13 +69,14 @@ public class ContextFactory {
 
             context.setExpires(expires);
 
-            ACTIVITY_ID += 1;
-            context.setIdentifier("uuid:WSCOOR-SUN-" + ACTIVITY_ID);
+            activityId += 1;
+            context.setIdentifier("uuid:WSCOOR-SUN-" + activityId);
 
             // bake the activity id as <wsa:ReferenceParameters> into the registration service EPR, so we can
             // identify the activity when the <register> requests come in.
-            ActivityIdentifier activityId = new ActivityIdentifier(context.getIdentifier());
-            context.setRegistrationService(RegistrationManager.newRegistrationEPR(activityId));
+            context.setRegistrationService(
+                    RegistrationManager.newRegistrationEPR(
+                            new ActivityIdentifier(context.getIdentifier())));
         } else if (WSAT_OASIS_NSURI.equals(coordType)) {
             throw new UnsupportedOperationException(
                     LocalizationMessages.OASIS_UNSUPPORTED()
@@ -99,7 +98,7 @@ public class ContextFactory {
      * @param contextRequest <createContext> request
      * @return the coordination context
      */
-    public static CoordinationContextInterface createContext(@NotNull CreateCoordinationContextType contextRequest) {
+    public static CoordinationContextInterface createContext(@NotNull final CreateCoordinationContextType contextRequest) {
         // TODO: send fault ws:coor S4.2 InvalidProtocol if createContext fails
         return createContext(contextRequest.getCoordinationType(), contextRequest.getExpires().getValue());
     }
@@ -107,7 +106,7 @@ public class ContextFactory {
     /**
      * FOR UNIT TESTING ONLY 
      */
-    static CoordinationContextInterface createTestContext(String coordType, long expires) {
+    static CoordinationContextInterface createTestContext(final String coordType, final long expires) {
 
         CoordinationContextInterface context;
 
@@ -117,8 +116,8 @@ public class ContextFactory {
 
             context.setExpires(expires);
 
-            ACTIVITY_ID += 1;
-            context.setIdentifier("uuid:WSCOOR-SUN-" + ACTIVITY_ID);
+            activityId += 1;
+            context.setIdentifier("uuid:WSCOOR-SUN-" + activityId);
 
             ActivityIdentifier activityId = new ActivityIdentifier(context.getIdentifier());
             

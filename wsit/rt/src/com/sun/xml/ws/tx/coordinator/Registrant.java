@@ -21,6 +21,8 @@
  */
 package com.sun.xml.ws.tx.coordinator;
 
+import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.tx.Protocol;
 import static com.sun.xml.ws.api.tx.Protocol.*;
 import com.sun.xml.ws.developer.MemberSubmissionEndpointReference;
@@ -28,13 +30,10 @@ import com.sun.xml.ws.tx.common.Identifier;
 import com.sun.xml.ws.tx.common.RegistrantIdentifier;
 import com.sun.xml.ws.tx.common.TxLogger;
 import com.sun.xml.ws.tx.webservice.member.coord.RegisterType;
-import com.sun.istack.NotNull;
-import com.sun.istack.Nullable;
 
 import javax.xml.ws.EndpointReference;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
 
 /**
  * This class encapsulates a coordination registrant.
@@ -43,7 +42,7 @@ import java.util.logging.Level;
  * add protocol specific functionality.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 1.0
  */
 public abstract class Registrant {
@@ -116,7 +115,7 @@ public abstract class Registrant {
         }
     }
 
-    public void setParticpantProtocolService(@NotNull EndpointReference pps) {
+    public void setParticpantProtocolService(@NotNull final EndpointReference pps) {
         if (registerRequest == null) {
             registerRequest = new RegisterType();
         }
@@ -126,9 +125,9 @@ public abstract class Registrant {
 
     @NotNull
     public EndpointReference getParticipantProtocolService() {
-        return (registerRequest != null) ?
-                registerRequest.getParticipantProtocolService() :
-                getLocalParticipantProtocolService();
+        return (registerRequest == null) ?
+                getLocalParticipantProtocolService() :
+                registerRequest.getParticipantProtocolService();
     }
 
     /**
@@ -170,7 +169,7 @@ public abstract class Registrant {
      * Set the coordinator protocol service received by coor:registerResponse.
      * @param cps cps epr
      */
-    public void setCoordinatorProtocolService(@NotNull EndpointReference cps) {
+    public void setCoordinatorProtocolService(@NotNull final EndpointReference cps) {
         coordinatorProtocolService = cps;
         setRegistrationCompleted(true);
     }
@@ -199,7 +198,7 @@ public abstract class Registrant {
      * @return the outstanding registrant or null if it doesn't exist
      */
     @Nullable
-    public static Registrant getOutstandingRegistrant(String id) {
+    public static Registrant getOutstandingRegistrant(final String id) {
         return outstandingRegistrants.get(id);
     }
 
@@ -209,13 +208,13 @@ public abstract class Registrant {
      * @return the outstanding registrant or null if it doesn't exist
      */
     @Nullable
-    public static Registrant removeOutstandingRegistrant(String id) {
+    public static Registrant removeOutstandingRegistrant(final String id) {
         return outstandingRegistrants.remove(id);
     }
 
     private boolean remoteCPS = false;
 
-    public void setRemoteCPS(boolean value) {
+    public void setRemoteCPS(final boolean value) {
         remoteCPS = value;
     }
 
@@ -231,7 +230,7 @@ public abstract class Registrant {
         return registrationCompleted;
     }
 
-    public void setRegistrationCompleted(boolean value) {
+    public void setRegistrationCompleted(final boolean value) {
         registrationCompleted = value;
     }
 

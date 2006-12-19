@@ -37,10 +37,16 @@ public class ActivityIdentifier extends Identifier {
     public static final String ACTIVITY_ID = "ActivityId";
     public static final QName QNAME = new QName(WSCOOR_SUN_URI, ACTIVITY_ID);
 
-    // silence JAXB IllegalAnnotationsException: does not have a no-arg default constructor
+    /**
+     * silence JAXB IllegalAnnotationsException: does not have a no-arg default constructor
+     */
     public ActivityIdentifier() {
     }
 
+    /**
+     * Create an activity identified from the given id string
+     * @param id id
+     */
     public ActivityIdentifier(@NotNull String id) {
         value = id;
     }

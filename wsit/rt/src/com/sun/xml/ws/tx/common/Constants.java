@@ -28,7 +28,7 @@ import javax.xml.namespace.QName;
  * This class contains useful namespace uri constants
  *
  * @author Ryan.Shoemaker@Sun.COM, Joeseph.Fialli@Sun.COM
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 1.0
  */
 public class Constants {
@@ -137,10 +137,10 @@ public class Constants {
 
     static {
         String ctx = System.getProperty("com.sun.xml.ws.tx.contextroot", null);
-        if (ctx != null) {
-            WSTX_WS_CONTEXT = ctx;
-        } else {
+        if (ctx == null) {
             WSTX_WS_CONTEXT = "/__wstx-services";
+        } else {
+            WSTX_WS_CONTEXT = ctx;
         }
     }
 

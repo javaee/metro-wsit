@@ -23,7 +23,14 @@
 package com.sun.xml.ws.tx.common;
 
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.WSService;
+import com.sun.xml.ws.api.addressing.WSEndpointReference;
+import com.sun.xml.ws.api.addressing.OneWayFeature;
+import com.sun.xml.ws.api.message.Headers;
+import com.sun.xml.ws.developer.WSBindingProvider;
+import com.sun.xml.ws.developer.MemberSubmissionAddressingFeature;
 import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 
 import javax.xml.soap.SOAPConstants;
 import javax.xml.soap.SOAPException;
@@ -31,19 +38,24 @@ import javax.xml.soap.SOAPFactory;
 import javax.xml.soap.SOAPFault;
 import javax.xml.ws.EndpointReference;
 import javax.xml.ws.WebServiceException;
+import javax.xml.ws.Service;
+import javax.xml.ws.Dispatch;
+import javax.xml.ws.WebServiceFeature;
+import javax.xml.ws.soap.AddressingFeature;
+import javax.xml.ws.soap.SOAPBinding;
+import javax.xml.ws.http.HTTPBinding;
+import javax.xml.namespace.QName;
+import javax.xml.transform.Source;
+import javax.xml.transform.dom.DOMSource;
 import java.util.Locale;
+import java.util.Collections;
 
 /**
- * @author jf39279
+ * WS-Addressing helper methods.
+ * 
+ * @author Ryan.Shoemaker@Sun.COM
  */
 public class WsaHelper {
-
-    /**
-     * @deprecated
-     */
-    public static String dump(EndpointReference epr) {
-        throw new UnsupportedOperationException("just use EndpointReference.toString() or WSEndpointReference.toString() instead");
-    }
 
     /**
      * Create a SOAPFault from the specified information.
@@ -54,11 +66,12 @@ public class WsaHelper {
      * @return the new SOAPFault
      */
     @NotNull
-    public static SOAPFault createFault(@NotNull SOAPVersion soapVer, @NotNull TxFault fault, @NotNull String message) {
+    public static SOAPFault createFault(@NotNull final SOAPVersion soapVer, @NotNull final TxFault fault, 
+                                        @NotNull final String message) {
         try {
-            SOAPFactory soapFactory = soapVer.saajSoapFactory;
-            SOAPFault soapFault = soapFactory.createFault();
-
+            final SOAPFactory soapFactory = soapVer.saajSoapFactory;
+            final SOAPFault soapFault = soapFactory.createFault();
+ 
             if (soapVer == SOAPVersion.SOAP_11) {
                 soapFault.setFaultCode(fault.subcode);
                 soapFault.setFaultString(fault.reason + ": " + message, Locale.ENGLISH);
@@ -71,6 +84,31 @@ public class WsaHelper {
         } catch (SOAPException e) {
             throw new WebServiceException(e);
         }
+    }
+ 
+    /**
+     * Dispatch a fault, adding any necessary headers to 'fault' in the process.
+     *
+     * @param faultTo
+     * @param replyTo
+     * @param fault
+     */
+    public static void sendFault(@Nullable final WSEndpointReference faultTo, @NotNull final EndpointReference replyTo,
+                                 @NotNull final SOAPFault fault, final String msgID) {
+        final WSEndpointReference to = faultTo != null ? faultTo : new WSEndpointReference(replyTo);
+
+        final WSService s = WSService.create();
+        final QName port = new QName("foo", "bar");
+        s.addPort(port, SOAPBinding.SOAP11HTTP_BINDING, to.getAddress());
+
+        // one-way feature
+        final OneWayFeature owf = new OneWayFeature();
+        owf.setRelatesToID(msgID);
+        // member submission addressing feature
+        final WebServiceFeature af = new MemberSubmissionAddressingFeature(true);
+
+        final Dispatch<Source> d = s.createDispatch(port, to, Source.class, Service.Mode.PAYLOAD, owf, af);
+        d.invokeOneWay(new DOMSource(fault));
     }
 }
 

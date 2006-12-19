@@ -50,21 +50,21 @@ public class Message {
     /**
      * The JAX-WS Message wrapped by this instance.
      */
-    private com.sun.xml.ws.api.message.Message message = null;
+    final private com.sun.xml.ws.api.message.Message coreMessage;
 
     /* Caches of representations of CoordinationContext */
     private Header ccHdr = null;
     static final private int NOT_FOUND = -1;
     private int ccHdrIndex = NOT_FOUND;
 
-    private CoordinationContextInterface CC = null;
+    private CoordinationContextInterface cc = null;
 
     /**
      * Public ctor takes wrapped JAX-WS message as its argument.
      * @param message core message
      */
-    public Message(@NotNull com.sun.xml.ws.api.message.Message message) {
-        this.message = message;
+    public Message(@NotNull final com.sun.xml.ws.api.message.Message message) {
+        this.coreMessage = message;
     }
 
 
@@ -76,10 +76,10 @@ public class Message {
      */
     @NotNull
     public com.sun.xml.ws.api.message.Header getCoordCtxHeader() {
-        if (ccHdr == null && message != null) {
-            HeaderList hdrList = message.getHeaders();
+        if (ccHdr == null && coreMessage != null) {
+            HeaderList hdrList = coreMessage.getHeaders();
             if (hdrList != null) {
-                hdrList = message.getHeaders();
+                hdrList = coreMessage.getHeaders();
                 ccHdr = hdrList.get(WSCOOR_SOAP_NSURI, COORDINATION_CONTEXT, false);
 
                 /*
@@ -107,13 +107,13 @@ public class Message {
      * @param localName local name
      */
     @Nullable
-    public com.sun.xml.ws.api.message.Header getCoordCtxHeader(@NotNull String namespace, @NotNull String localName) {
-        if (ccHdr == null && message != null) {
+    public com.sun.xml.ws.api.message.Header getCoordCtxHeader(@NotNull final String namespace, @NotNull final String localName) {
+        if (ccHdr == null && coreMessage != null) {
             ccHdrIndex = NOT_FOUND;
-            HeaderList hlst = message.getHeaders();
-            int len = hlst.size();
+            final HeaderList hlst = coreMessage.getHeaders();
+            final int len = hlst.size();
             for (int i = 0; i < len; i++) {
-                Header h = hlst.get(i);
+                final Header h = hlst.get(i);
                 if (h.getLocalPart().equals(localName) && h.getNamespaceURI().equals(namespace)) {
                     ccHdrIndex = i;
                     ccHdr = h;
@@ -129,13 +129,13 @@ public class Message {
      * @return the coordination context
      */
     @Nullable
-    public CoordinationContextInterface getCoordinationContext(@NotNull Unmarshaller unmarshaller) throws JAXBException 
+    public CoordinationContextInterface getCoordinationContext(@NotNull final Unmarshaller unmarshaller) throws JAXBException
     {
-        if (CC == null) {
-            Header ccHdr = getCoordCtxHeader(WSCOOR_SOAP_NSURI, COORDINATION_CONTEXT);
+        if (cc == null) {
+            final Header ccHdr = getCoordCtxHeader(WSCOOR_SOAP_NSURI, COORDINATION_CONTEXT);
             if (ccHdr != null) {
                 try {
-                    CC = CoordinationContextBase.createCoordinationContext(ccHdr.readAsJAXB(unmarshaller));
+                    cc = CoordinationContextBase.createCoordinationContext(ccHdr.readAsJAXB(unmarshaller));
                 } catch (JAXBException e) {
                     if (logger.isLogging(Level.WARNING)) {
                         logger.warning("getCoordinationContext", "can not unmarshal 2004 WS-Coordination CoordinationContext. Exception message: " + e.getLocalizedMessage());
@@ -144,7 +144,7 @@ public class Message {
                 }
             }
         }
-        return CC;
+        return cc;
     }
 
     /**
@@ -152,7 +152,7 @@ public class Message {
      */
     public void setCoordCtxUnderstood() {
         if (ccHdr != null && ccHdrIndex != NOT_FOUND) {
-            message.getHeaders().understood(ccHdrIndex);
+            coreMessage.getHeaders().understood(ccHdrIndex);
         }
     }
 
@@ -162,7 +162,7 @@ public class Message {
      * @return the wsdl operation or null if not found
      */
     @Nullable
-    public WSDLBoundOperation getOperation(@NotNull WSDLPort port) {
-        return message.getOperation(port);
+    public WSDLBoundOperation getOperation(@NotNull final WSDLPort port) {
+        return coreMessage.getOperation(port);
     }
 }

@@ -21,18 +21,17 @@
  */
 package com.sun.xml.ws.tx.coordinator;
 
+import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 import com.sun.xml.ws.tx.common.ActivityIdentifier;
 import com.sun.xml.ws.tx.common.Identifier;
 import com.sun.xml.ws.tx.common.TxLogger;
 import com.sun.xml.ws.tx.webservice.member.coord.CreateCoordinationContextType;
-import com.sun.istack.NotNull;
-import com.sun.istack.Nullable;
 
 import javax.xml.ws.EndpointReference;
 import java.util.List;
-import java.util.TimerTask;
 import java.util.Timer;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.TimerTask;
 import java.util.logging.Level;
 
 /**
@@ -42,7 +41,7 @@ import java.util.logging.Level;
  * is constructed and managed by this class.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @since 1.0
  */
 public abstract class Coordinator {
@@ -156,7 +155,7 @@ public abstract class Coordinator {
         return context.getExpires();
     }
 
-    public void setExpires(long i) {
+    public void setExpires(final long i) {
         if (context != null) {
             context.setExpires(i);
         }
@@ -222,7 +221,7 @@ public abstract class Coordinator {
      * @param r restistrant
      * @return Return true iff registrant should register with its root registration service
      */
-    public boolean registerWithRootRegistrationService(@NotNull Registrant r) {
+    public boolean registerWithRootRegistrationService(@NotNull final Registrant r) {
         return false;
     }
 
@@ -266,7 +265,7 @@ public abstract class Coordinator {
         return expired;
     }
 
-    public void setExpired(boolean expired) {
+    public void setExpired(final boolean expired) {
         this.expired = expired;
     }
 

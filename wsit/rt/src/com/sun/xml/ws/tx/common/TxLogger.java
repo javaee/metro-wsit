@@ -62,8 +62,8 @@ public final class TxLogger {
         }
     }
 
-    private String componentClassName;
-    private java.util.logging.Logger logger;
+    private final String componentClassName;
+    private final java.util.logging.Logger logger;
 
     /**
      * Prevents creation of a new instance of this TxLogger
@@ -88,109 +88,109 @@ public final class TxLogger {
      * @return logger instance preconfigured for use with the component
      * @throws NullPointerException if the componentClass parameter is {@code null}.
      */
-    public static TxLogger getLogger(Class componentClass) {
+    public static TxLogger getLogger(final Class componentClass) {
         return new TxLogger(componentClass.getName());
     }
 
     /**
      * Logging specifically for *.wstx.wsat subsystem.
      */
-    public static TxLogger getATLogger(Class componentClass) {
+    public static TxLogger getATLogger(final Class componentClass) {
         return new TxLogger(componentClass.getName(), ".wsat");
     }
 
     /**
      * Logging specifically for *.wstx.wscoord subsystem.
      */
-    public static TxLogger getCoordLogger(Class componentClass) {
+    public static TxLogger getCoordLogger(final Class componentClass) {
         return new TxLogger(componentClass.getName(), ".wscoord");
     }
 
-    public void log(Level level, String methodName, String message) {
+    public void log(final Level level, final String methodName, final String message) {
         logger.logp(level, componentClassName, methodName, message);
     }
 
-    public void log(Level level, String methodName, String message, Throwable thrown) {
+    public void log(final Level level, final String methodName, final String message, final Throwable thrown) {
         logger.logp(level, componentClassName, methodName, message, thrown);
     }
 
-    public void finest(String methodName, String message) {
+    public void finest(final String methodName, final String message) {
         logger.logp(Level.FINEST, componentClassName, methodName, message);
     }
 
-    public void finest(String methodName, String message, Throwable thrown) {
+    public void finest(final String methodName, final String message, final Throwable thrown) {
         logger.logp(Level.FINEST, componentClassName, methodName, message, thrown);
     }
 
-    public void finer(String methodName, String message) {
+    public void finer(final String methodName, final String message) {
         logger.logp(Level.FINER, componentClassName, methodName, message);
     }
 
-    public void finer(String methodName, String message, Throwable thrown) {
+    public void finer(final String methodName, final String message, final Throwable thrown) {
         logger.logp(Level.FINER, componentClassName, methodName, message, thrown);
     }
 
-    public void fine(String methodName, String message) {
+    public void fine(final String methodName, final String message) {
         logger.logp(Level.FINE, componentClassName, methodName, message);
     }
 
-    public void fine(String methodName, String message, Throwable thrown) {
+    public void fine(final String methodName, final String message, final Throwable thrown) {
         logger.logp(Level.FINE, componentClassName, methodName, message, thrown);
     }
 
-    public void info(String methodName, String message) {
+    public void info(final String methodName, final String message) {
         logger.logp(Level.INFO, componentClassName, methodName, message);
     }
 
-    public void info(String methodName, String message, Throwable thrown) {
+    public void info(final String methodName, final String message, final Throwable thrown) {
         logger.logp(Level.INFO, componentClassName, methodName, message, thrown);
     }
 
-    public void config(String methodName, String message) {
+    public void config(final String methodName, final String message) {
         logger.logp(Level.CONFIG, componentClassName, methodName, message);
     }
 
-    public void config(String methodName, String message, Throwable thrown) {
+    public void config(final String methodName, final String message, final Throwable thrown) {
         logger.logp(Level.CONFIG, componentClassName, methodName, message, thrown);
     }
 
-    public void warning(String methodName, String message) {
+    public void warning(final String methodName, final String message) {
         logger.logp(Level.WARNING, componentClassName, methodName, message);
     }
 
-    public void warning(String methodName, String message, Throwable thrown) {
+    public void warning(final String methodName, final String message, final Throwable thrown) {
         logger.logp(Level.WARNING, componentClassName, methodName, message, thrown);
     }
 
-    public void severe(String methodName, String message) {
+    public void severe(final String methodName, final String message) {
         logger.logp(Level.SEVERE, componentClassName, methodName, message);
     }
 
-    public void severe(String methodName, String message, Throwable thrown) {
+    public void severe(final String methodName, final String message, final Throwable thrown) {
         logger.logp(Level.SEVERE, componentClassName, methodName, message, thrown);
     }
 
-    public void entering(String methodName) {
+    public void entering(final String methodName) {
         logger.entering(componentClassName, methodName);
     }
 
-    public void entering(String methodName, Object parameter) {
+    public void entering(final String methodName, final Object parameter) {
         logger.entering(componentClassName, methodName, parameter);
     }
 
-    public void entering(String methodName, Object[] parameters) {
+    public void entering(final String methodName, final Object[] parameters) {
         logger.entering(componentClassName, methodName, parameters);
     }
 
-    public void exiting(String methodName) {
+    public void exiting(final String methodName) {
         logger.exiting(componentClassName, methodName);
     }
 
-    public void exiting(String methodName, Object result) {
+    public void exiting(final String methodName, final Object result) {
         logger.exiting(componentClassName, methodName, result);
     }
 
-    public boolean isLogging(Level level) {
+    public boolean isLogging(final Level level) {
         return logger.isLoggable(level);
     }
 }

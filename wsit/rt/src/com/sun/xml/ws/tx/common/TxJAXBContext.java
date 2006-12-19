@@ -39,23 +39,24 @@ public class TxJAXBContext {
 
     private static JAXBContext jc;
 
-    public static JAXBContext getJAXBContext() {
-        if (jc == null) {
-            try {
-                List<Class> classes = getClassesToBeBound();
-                jc = JAXBContext.newInstance(classes.toArray(new Class[0]));
-            } catch (JAXBException e) {
-                if (logger.isLogging(Level.SEVERE)) {
-                    logger.severe("getJAXBContext", "failed to create", e);
-                }
-                throw new Error(e);
-            } catch (ClassNotFoundException e) {
-                if (logger.isLogging(Level.SEVERE)) {
-                    logger.severe("getJAXBContext", "failed to create", e);
-                }
-                throw new Error(e);
+    static {
+        try {
+            final List<Class> classes = getClassesToBeBound();
+            jc = JAXBContext.newInstance(classes.toArray(new Class[classes.size()]));
+        } catch (JAXBException e) {
+            if (logger.isLogging(Level.SEVERE)) {
+                logger.severe("getJAXBContext", "failed to create", e);
             }
+            throw new Error(e);
+        } catch (ClassNotFoundException e) {
+            if (logger.isLogging(Level.SEVERE)) {
+                logger.severe("getJAXBContext", "failed to create", e);
+            }
+            throw new Error(e);
         }
+    }
+
+    public static JAXBContext getJAXBContext() {
         return jc;
     }
 
@@ -64,7 +65,7 @@ public class TxJAXBContext {
      */
     public static Marshaller createMarshaller() {
         try {
-            Marshaller marshaller = getJAXBContext().createMarshaller();
+            final Marshaller marshaller = getJAXBContext().createMarshaller();
             marshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.TRUE);
             return marshaller;
         } catch (JAXBException e) {
