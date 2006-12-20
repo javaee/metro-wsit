@@ -58,12 +58,12 @@ class BuilderHandlerOperationScope extends BuilderHandler{
         this.operation = operation;
     }
     
-    void populate(PolicyMapExtender policyMapExtender) throws PolicyException{
+    void populate(final PolicyMapExtender policyMapExtender) throws PolicyException{
         if (null == policyMapExtender) {
             throw new PolicyException(LocalizationMessages.POLICY_MAP_CAN_NOT_BE_NULL());
         }
-        PolicyMapKey mapKey = PolicyMap.createWsdlOperationScopeKey(service, port, operation);
-        for (PolicySubject subject:getPolicySubjects()) {
+        final PolicyMapKey mapKey = PolicyMap.createWsdlOperationScopeKey(service, port, operation);
+        for (PolicySubject subject : getPolicySubjects()) {
             policyMapExtender.putOperationSubject(mapKey, subject);
         }
     }

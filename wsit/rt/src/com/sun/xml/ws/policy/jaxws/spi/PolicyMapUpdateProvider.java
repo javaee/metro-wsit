@@ -24,7 +24,6 @@ package com.sun.xml.ws.policy.jaxws.spi;
 
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.model.SEIModel;
-import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapExtender;

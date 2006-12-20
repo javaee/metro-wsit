@@ -26,7 +26,6 @@ import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapExtender;
 import com.sun.xml.ws.policy.PolicyMapMutator;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -56,7 +55,7 @@ class PolicyMapBuilder {
      *     PolicyMap is created in order to populate it's changes.
      *
      */
-    void registerHandler(BuilderHandler builder){
+    void registerHandler(final BuilderHandler builder){
         if (null != builder) {
             policyBuilders.add(builder);
         }
@@ -68,7 +67,7 @@ class PolicyMapBuilder {
      * their changes into PolicyMap. Registers mutators given as a parameter
      * with the newly created map.
      */
-    PolicyMap getPolicyMap(PolicyMapMutator... externalMutators) throws PolicyException{
+    PolicyMap getPolicyMap(final PolicyMapMutator... externalMutators) throws PolicyException{
         return getNewPolicyMap(externalMutators);
     }
     
@@ -78,14 +77,14 @@ class PolicyMapBuilder {
      * their changes into PolicyMap. Registers mutators from collection given as a parameter
      * with the newly created map.
      */
-    private PolicyMap getNewPolicyMap(PolicyMapMutator... externalMutators) throws PolicyException{
-        HashSet<PolicyMapMutator> mutators = new HashSet<PolicyMapMutator>();
-        PolicyMapExtender myExtender = PolicyMapExtender.createPolicyMapExtender();
+    private PolicyMap getNewPolicyMap(final PolicyMapMutator... externalMutators) throws PolicyException{
+        final HashSet<PolicyMapMutator> mutators = new HashSet<PolicyMapMutator>();
+        final PolicyMapExtender myExtender = PolicyMapExtender.createPolicyMapExtender();
         mutators.add(myExtender);
         if (null != externalMutators) {
             mutators.addAll(Arrays.asList(externalMutators));
         }
-        PolicyMap policyMap = PolicyMap.createPolicyMap(mutators);
+        final PolicyMap policyMap = PolicyMap.createPolicyMap(mutators);
         for(BuilderHandler builder : policyBuilders){
             builder.populate(myExtender);
         }

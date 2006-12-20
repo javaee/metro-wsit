@@ -25,9 +25,7 @@ package com.sun.xml.ws.policy.jaxws;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import com.sun.xml.ws.api.wsdl.parser.XMLEntityResolver;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
-import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
@@ -55,15 +53,15 @@ public class PolicyConfigResolver implements XMLEntityResolver {
      * @see javax.xml.stream.XMLStreamReader
      * @see com.sun.xml.ws.api.wsdl.parser.XMLEntityResolver.Parser
      */
-    public Parser resolveEntity(String publicId, String systemId)
+    public Parser resolveEntity(final String publicId, final String systemId)
         throws XMLStreamException, IOException {
         
         logger.entering("resolveEntity", new Object[] { publicId, systemId });
         Parser parser = null;
 
         try {
-            URL systemUrl = new URL(systemId);
-            XMLStreamReader reader = xmlInputFactory.createXMLStreamReader(systemId, systemUrl.openStream());
+            final URL systemUrl = new URL(systemId);
+            final XMLStreamReader reader = xmlInputFactory.createXMLStreamReader(systemId, systemUrl.openStream());
 
             parser = new Parser(systemUrl, reader);
             return parser;

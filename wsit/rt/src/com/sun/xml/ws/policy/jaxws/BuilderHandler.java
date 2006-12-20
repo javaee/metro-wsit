@@ -61,10 +61,10 @@ abstract class BuilderHandler{
             throw new PolicyException(LocalizationMessages.NO_POLICIES_DEFINED());
         }
         
-        Collection<Policy> result = new ArrayList<Policy>(policyURIs.size());
+        final Collection<Policy> result = new ArrayList<Policy>(policyURIs.size());
         
-        for (String policyURI:policyURIs) {
-            PolicySourceModel sourceModel = policyStore.get(policyURI);
+        for (String policyURI : policyURIs) {
+            final PolicySourceModel sourceModel = policyStore.get(policyURI);
             if (sourceModel != null) {
                 result.add(PolicyModelTranslator.getTranslator().translate(sourceModel));
             }
@@ -77,8 +77,8 @@ abstract class BuilderHandler{
     }
     
     Collection<PolicySubject> getPolicySubjects() throws PolicyException {
-        Collection<Policy> policies = getPolicies();
-        Collection<PolicySubject> result =  new ArrayList<PolicySubject>(policies.size());
+        final Collection<Policy> policies = getPolicies();
+        final Collection<PolicySubject> result =  new ArrayList<PolicySubject>(policies.size());
         for (Policy policy : policies) {
             result.add(new PolicySubject(policySubject, policy));
         }

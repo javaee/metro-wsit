@@ -114,11 +114,11 @@ public class SunProprietaryPolicySelector implements PolicyAssertionValidator{
     public SunProprietaryPolicySelector() {
     }
     
-    public PolicyAssertionValidator.Fitness validateClientSide(PolicyAssertion assertion) {
+    public PolicyAssertionValidator.Fitness validateClientSide(final PolicyAssertion assertion) {
         return supportedAssertions.contains(assertion.getName()) ? Fitness.SUPPORTED : Fitness.UNKNOWN;
     }
 
-    public PolicyAssertionValidator.Fitness validateServerSide(PolicyAssertion assertion) {
+    public PolicyAssertionValidator.Fitness validateServerSide(final PolicyAssertion assertion) {
         return Fitness.UNKNOWN;
     }
 

@@ -51,11 +51,11 @@ class BuilderHandlerEndpointScope extends BuilderHandler{
         this.port = port;
     }
     
-    void populate(PolicyMapExtender policyMapExtender) throws PolicyException{
+    void populate(final PolicyMapExtender policyMapExtender) throws PolicyException{
         if (null == policyMapExtender) {
             throw new PolicyException(LocalizationMessages.POLICY_MAP_EXTENDER_CAN_NOT_BE_NULL());
         }
-        PolicyMapKey mapKey = PolicyMap.createWsdlEndpointScopeKey(service, port);
+        final PolicyMapKey mapKey = PolicyMap.createWsdlEndpointScopeKey(service, port);
         for (PolicySubject subject : getPolicySubjects()) {
             policyMapExtender.putEndpointSubject(mapKey, subject);
         }

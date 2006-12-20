@@ -51,13 +51,13 @@ class BuilderHandlerServiceScope extends BuilderHandler{
         this.service = service;
     }
     
-    void populate(PolicyMapExtender policyMapExtender) throws PolicyException{
+    void populate(final PolicyMapExtender policyMapExtender) throws PolicyException{
         if (null == policyMapExtender) {
             throw new PolicyException(LocalizationMessages.POLICY_MAP_EXTENDER_CAN_NOT_BE_NULL());
         }
         
-        PolicyMapKey mapKey = PolicyMap.createWsdlServiceScopeKey(service);
-        for (PolicySubject subject:getPolicySubjects()) {
+        final PolicyMapKey mapKey = PolicyMap.createWsdlServiceScopeKey(service);
+        for (PolicySubject subject : getPolicySubjects()) {
             policyMapExtender.putServiceSubject(mapKey, subject);
         }
     }

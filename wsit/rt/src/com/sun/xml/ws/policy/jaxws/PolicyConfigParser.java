@@ -23,14 +23,10 @@
 package com.sun.xml.ws.policy.jaxws;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 
-import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
 
-import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.server.SDDocumentSource;
@@ -51,8 +47,6 @@ public final class PolicyConfigParser {
     
     private static final PolicyLogger logger = PolicyLogger.getLogger(PolicyConfigParser.class);
     private static final String SERVLET_CONTEXT_CLASSNAME = "javax.servlet.ServletContext";
-    private static final XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
-    
     
     /**
      * Reads a WSIT config file stored in META-INF or WEB-INF, parses it
@@ -64,13 +58,14 @@ public final class PolicyConfigParser {
      * @param mutators to be registered with the new policy map
      * @return A PolicyMap populated from the WSIT config file
      */
-    public static PolicyMap parse(String configFileIdentifier, Container container, PolicyMapMutator...  mutators) throws PolicyException {
+    public static PolicyMap parse(
+            final String configFileIdentifier, final Container container, final PolicyMapMutator...  mutators) throws PolicyException {
         logger.entering("parse", container);
         PolicyMap map = null;
         try {
             Object context = null;
             try {
-                Class<?> contextClass = Class.forName(SERVLET_CONTEXT_CLASSNAME);
+                final Class<?> contextClass = Class.forName(SERVLET_CONTEXT_CLASSNAME);
                 if (null!=container) {
                     context = container.getSPI(contextClass);
                 }
@@ -79,7 +74,7 @@ public final class PolicyConfigParser {
             }
             logger.finest("parse", LocalizationMessages.CONTEXT_IS(context));
             
-            String cfgFile = PolicyUtils.ConfigFile.generateFullName(configFileIdentifier);
+            final String cfgFile = PolicyUtils.ConfigFile.generateFullName(configFileIdentifier);
             logger.finest("parse", LocalizationMessages.CONFIG_FILE_IS(cfgFile));
             
             URL configFileUrl = PolicyUtils.ConfigFile.loadAsResource(cfgFile, context);
@@ -90,18 +85,18 @@ public final class PolicyConfigParser {
                 configFileUrl = PolicyUtils.ConfigFile.loadAsResource("wsit.xml", context);
             }
 // END REMOVE
-
+            
             if (configFileUrl != null) {
                 map = parse(configFileUrl, false, mutators);
             }
-
+            
             return map;
         } finally {
             logger.exiting("parse", map);
         }
     }
-
-
+    
+    
     /**
      * Reads a WSIT config from an XMLStreamBuffer, parses it and returns a PolicyMap. It gives you a chance
      * to register policy map mutators to the newly created map.
@@ -112,11 +107,12 @@ public final class PolicyConfigParser {
      *
      * @return A PolicyMap populated from the WSIT config file
      */
-    public static PolicyMap parse(URL configFileUrl, boolean isClient, PolicyMapMutator... mutators) throws PolicyException {
+    public static PolicyMap parse(
+            final URL configFileUrl, final boolean isClient, final PolicyMapMutator... mutators) throws PolicyException {
         logger.entering("parse", new Object[] {configFileUrl, mutators});
-        WSDLModel model = parseModel(configFileUrl, isClient, mutators);
-        WSDLPolicyMapWrapper wrapper = model.getExtension(WSDLPolicyMapWrapper.class);
-
+        final WSDLModel model = parseModel(configFileUrl, isClient, mutators);
+        final WSDLPolicyMapWrapper wrapper = model.getExtension(WSDLPolicyMapWrapper.class);
+        
         PolicyMap map = null;
         if (wrapper != null) {
             map = wrapper.getPolicyMap();
@@ -137,18 +133,19 @@ public final class PolicyConfigParser {
      *
      * @return A WSDLModel populated from the WSIT config file
      */
-    public static WSDLModel parseModel(URL configFileUrl, boolean isClient, PolicyMapMutator... mutators) throws PolicyException {
+    public static WSDLModel parseModel(
+            final URL configFileUrl, final boolean isClient, final PolicyMapMutator... mutators) throws PolicyException {
         logger.entering("parseModel", new Object[] {configFileUrl, mutators});
         WSDLModel model = null;
         try {
             if (null == configFileUrl) {
                 throw new PolicyException(LocalizationMessages.FAILED_TO_READ_NULL_WSIT_CFG());
             }
-
-            SDDocumentSource doc = SDDocumentSource.create(configFileUrl);//, configFileSource);
-            Parser parser =  new Parser(doc);
+            
+            final SDDocumentSource doc = SDDocumentSource.create(configFileUrl);//, configFileSource);
+            final Parser parser =  new Parser(doc);
             model = WSDLModel.WSDLParser.parse(parser, new PolicyConfigResolver(), isClient,
-                                               new WSDLParserExtension[] { new PolicyWSDLParserExtension(true, mutators) } );
+                    new WSDLParserExtension[] { new PolicyWSDLParserExtension(true, mutators) } );
             return model;
         } catch (XMLStreamException ex) {
             throw new PolicyException(LocalizationMessages.WSDL_IMPORT_FAILED(), ex);

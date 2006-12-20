@@ -87,23 +87,23 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
     private PolicyModelMarshaller marshaller = PolicyModelMarshaller.getXmlMarshaller(true);
     private PolicyMerger merger = PolicyMerger.getMerger();
     
-    public void start(WSDLGenExtnContext context) {
+    public void start(final WSDLGenExtnContext context) {
         logger.entering("start");
         try {
             this.seiModel = context.getModel();
             this.endpointClass = context.getEndpointClass();
-            PolicyMapUpdateProvider[] policyMapUpdateProviders = PolicyUtils.ServiceProvider.load(PolicyMapUpdateProvider.class);
+            final PolicyMapUpdateProvider[] policyMapUpdateProviders = PolicyUtils.ServiceProvider.load(PolicyMapUpdateProvider.class);
             PolicyMapExtender[] extenders = new PolicyMapExtender[policyMapUpdateProviders.length];
             for (int i=0; i<extenders.length; i++) {
                 extenders[i] = PolicyMapExtender.createPolicyMapExtender();
             }
             
-            String configId = context.getEndpointClass().getName();
+            final String configId = context.getEndpointClass().getName();
             policyMap = PolicyConfigParser.parse(configId, context.getContainer(), extenders);
             
             if (policyMap!= null) {
                 context.getRoot()._namespace(PolicyConstants.POLICY_NAMESPACE_URI, PolicyConstants.POLICY_NAMESPACE_PREFIX);
-                WSBinding binding = context.getBinding();
+                final WSBinding binding = context.getBinding();
                 for (int i=0; i<policyMapUpdateProviders.length; i++) {
                     policyMapUpdateProviders[i].update(extenders[i], policyMap, seiModel, binding);
                     extenders[i].disconnect();
@@ -116,7 +116,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         }
     }
     
-    public void addDefinitionsExtension(TypedXmlWriter definitions) {
+    public void addDefinitionsExtension(final TypedXmlWriter definitions) {
         try {
             logger.entering("addDefinitionsExtension");
             if (policyMap != null) {
@@ -125,7 +125,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
                 PolicyModelGenerator generator = null;
                 Set<String> policyIDsOrNamesWritten = null;
                 for (PolicySubject subject : subjects) {
-                    Object wsdlSubject = subject.getSubject();
+                    final Object wsdlSubject = subject.getSubject();
                     if (wsdlSubject != null) {
                         if (!usingPolicy) {
                             definitions._element(PolicyConstants.USING_POLICY, TypedXmlWriter.class);
@@ -133,9 +133,9 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
                             policyIDsOrNamesWritten = new HashSet<String>();
                             generator = PolicyModelGenerator.getGenerator();
                         }
-                        Policy policy = subject.getEffectivePolicy(merger);
+                        final Policy policy = subject.getEffectivePolicy(merger);
                         if ((null != policy.getIdOrName()) && (!policyIDsOrNamesWritten.contains(policy.getIdOrName()))) {
-                            PolicySourceModel policyInfoset = generator.translate(policy);
+                            final PolicySourceModel policyInfoset = generator.translate(policy);
                             marshaller.marshal(policyInfoset, definitions);
                             policyIDsOrNamesWritten.add(policy.getIdOrName());
                         }
@@ -154,129 +154,130 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         }
     }
     
-    public void addServiceExtension(TypedXmlWriter service) {
+    public void addServiceExtension(final TypedXmlWriter service) {
         logger.entering("addServiceExtension");
-        String serviceName = ((null != seiModel) && (null != endpointClass)) ?
+        final String serviceName = ((null != seiModel) && (null != endpointClass)) ?
             WSEndpoint.getDefaultServiceName(endpointClass).getLocalPart() :
             null;
         selectAndProcessSubject(service, WSDLService.class, ScopeType.SERVICE, serviceName);
         logger.exiting("addServiceExtension");
     }
     
-    public void addPortExtension(TypedXmlWriter port) {
+    public void addPortExtension(final TypedXmlWriter port) {
         logger.entering("addPortExtension");
-        String portName = ((null != seiModel) && (null != endpointClass)) ?
+        final String portName = ((null != seiModel) && (null != endpointClass)) ?
             WSEndpoint.getDefaultPortName(seiModel.getServiceQName(), endpointClass).getLocalPart() :
             null;
         selectAndProcessSubject(port, WSDLPort.class, ScopeType.ENDPOINT, portName);
         logger.exiting("addPortExtension");
     }
     
-    public void addPortTypeExtension(TypedXmlWriter portType) {
+    public void addPortTypeExtension(final TypedXmlWriter portType) {
         logger.entering("addPortTypeExtension");
-        String portTypeName = (null != seiModel) ? seiModel.getPortTypeName().getLocalPart() : null;
+        final String portTypeName = (null != seiModel) ? seiModel.getPortTypeName().getLocalPart() : null;
         selectAndProcessSubject(portType, WSDLPortType.class, ScopeType.ENDPOINT, portTypeName);
         logger.exiting("addPortTypeExtension");
     }
     
-    public void addBindingExtension(TypedXmlWriter binding) {
+    public void addBindingExtension(final TypedXmlWriter binding) {
         logger.entering("addBindingExtension");
-        String bindingName = ((null != seiModel) && (null != endpointClass))?
+        final String bindingName = ((null != seiModel) && (null != endpointClass))?
             (WSEndpoint.getDefaultPortName(seiModel.getServiceQName(), endpointClass).getLocalPart() + "Binding") :
             null;
         selectAndProcessSubject(binding, WSDLBoundPortType.class, ScopeType.ENDPOINT, bindingName);
         logger.exiting("addBindingExtension");
     }
     
-    public void addOperationExtension(TypedXmlWriter operation, JavaMethod method) {
+    public void addOperationExtension(final TypedXmlWriter operation, final JavaMethod method) {
         logger.entering("addOperationExtension");
-        String operationName = (null != method) ? method.getOperationName() : null;
+        final String operationName = (null != method) ? method.getOperationName() : null;
         selectAndProcessSubject(operation, WSDLOperation.class, ScopeType.OPERATION, operationName);
         logger.exiting("addOperationExtension");
     }
     
-    public void addBindingOperationExtension(TypedXmlWriter operation, JavaMethod method) {
+    public void addBindingOperationExtension(final TypedXmlWriter operation, final JavaMethod method) {
         logger.entering("addBindingOperationExtension");
-        String operationName = (null != method) ? method.getOperationName() : null;
+        final String operationName = (null != method) ? method.getOperationName() : null;
         selectAndProcessSubject(operation, WSDLBoundOperation.class, ScopeType.OPERATION, operationName);
         logger.exiting("addBindingOperationExtension");
     }
     
-    public void addInputMessageExtension(TypedXmlWriter message, JavaMethod method) {
+    public void addInputMessageExtension(final TypedXmlWriter message, final JavaMethod method) {
         logger.entering("addInputMessageExtension");
-        String messageName = (null != method) ? method.getRequestMessageName() : null;
+        final String messageName = (null != method) ? method.getRequestMessageName() : null;
         selectAndProcessSubject(message, WSDLMessage.class, ScopeType.INPUT_MESSAGE, messageName);
         logger.exiting("addInputMessageExtension");
     }
     
-    public void addOutputMessageExtension(TypedXmlWriter message, JavaMethod method) {
+    public void addOutputMessageExtension(final TypedXmlWriter message, final JavaMethod method) {
         logger.entering("addOutputMessageExtension");
-        String messageName = (null != method) ? method.getResponseMessageName() : null;
+        final String messageName = (null != method) ? method.getResponseMessageName() : null;
         selectAndProcessSubject(message, WSDLMessage.class, ScopeType.OUTPUT_MESSAGE, messageName);
         logger.exiting("addOutputMessageExtension");
     }
     
-    public void addFaultMessageExtension(TypedXmlWriter message, JavaMethod method, CheckedException ce) {
+    public void addFaultMessageExtension(final TypedXmlWriter message, final JavaMethod method, final CheckedException ce) {
         logger.entering("addFaultMessageExtension");
-        String messageName = (null != ce) ? ce.getMessageName() : null;
+        final String messageName = (null != ce) ? ce.getMessageName() : null;
         selectAndProcessSubject(message, WSDLMessage.class, ScopeType.FAULT_MESSAGE, messageName);
         logger.exiting("addFaultMessageExtension");
     }
     
-    public void addOperationInputExtension(TypedXmlWriter input, JavaMethod method) {
+    public void addOperationInputExtension(final TypedXmlWriter input, final JavaMethod method) {
         logger.entering("addOperationInputExtension");
-        String messageName = (null != method) ? method.getRequestMessageName() : null;
+        final String messageName = (null != method) ? method.getRequestMessageName() : null;
         selectAndProcessSubject(input, WSDLInput.class, ScopeType.INPUT_MESSAGE, messageName);
         logger.exiting("addOperationInputExtension");
     }
     
-    public void addOperationOutputExtension(TypedXmlWriter output, JavaMethod method) {
+    public void addOperationOutputExtension(final TypedXmlWriter output, final JavaMethod method) {
         logger.entering("addOperationOutputExtension");
-        String messageName = (null != method) ? method.getResponseMessageName() : null;
+        final String messageName = (null != method) ? method.getResponseMessageName() : null;
         selectAndProcessSubject(output, WSDLOutput.class, ScopeType.OUTPUT_MESSAGE, messageName);
         logger.exiting("addOperationOutputExtension");
     }
     
-    public void addOperationFaultExtension(TypedXmlWriter fault, JavaMethod method, CheckedException ce) {
+    public void addOperationFaultExtension(final TypedXmlWriter fault, final JavaMethod method, final CheckedException ce) {
         logger.entering("addOperationFaultExtension");
-        String messageName = (null != ce) ? ce.getMessageName() : null;
+        final String messageName = (null != ce) ? ce.getMessageName() : null;
         selectAndProcessSubject(fault, WSDLFault.class, ScopeType.FAULT_MESSAGE, messageName);
         logger.exiting("addOperationFaultExtension");
     }
     
-    public void addBindingOperationInputExtension(TypedXmlWriter input, JavaMethod method) {
+    public void addBindingOperationInputExtension(final TypedXmlWriter input, final JavaMethod method) {
         logger.entering("addBindingOperationInputExtension");
-        String messageName = (null != method) ? method.getOperationName() : null;
+        final String messageName = (null != method) ? method.getOperationName() : null;
         selectAndProcessSubject(input, WSDLBoundOperation.class, ScopeType.INPUT_MESSAGE, messageName);
         logger.exiting("addBindingOperationInputExtension");
     }
     
-    public void addBindingOperationOutputExtension(TypedXmlWriter output, JavaMethod method) {
+    public void addBindingOperationOutputExtension(final TypedXmlWriter output, final JavaMethod method) {
         logger.entering("addBindingOperationOutputExtension");
-        String messageName = (null != method) ? method.getOperationName() : null;
+        final String messageName = (null != method) ? method.getOperationName() : null;
         selectAndProcessSubject(output, WSDLBoundOperation.class, ScopeType.OUTPUT_MESSAGE, messageName);
         logger.exiting("addBindingOperationOutputExtension");
     }
     
-    public void addBindingOperationFaultExtension(TypedXmlWriter fault, JavaMethod method, CheckedException ce) {
+    public void addBindingOperationFaultExtension(final TypedXmlWriter fault, final JavaMethod method, final CheckedException ce) {
         logger.entering("addBindingOperationFaultExtension");
-        String messageName = (null != ce) ? ce.getMessageName() : null;;
+        final String messageName = (null != ce) ? ce.getMessageName() : null;
         selectAndProcessSubject(fault, WSDLFault.class, ScopeType.FAULT_MESSAGE, messageName);
         logger.exiting("addBindingOperationFaultExtension");
     }
     
-    private void selectAndProcessSubject(TypedXmlWriter xmlWriter, Class clazz, ScopeType scopeType, String wsdlName) {
+    private void selectAndProcessSubject(
+            final TypedXmlWriter xmlWriter, final Class clazz, final ScopeType scopeType, final String wsdlName) {
         logger.entering("selectAndProcessSubject");
         if (subjects != null) {
             for (PolicySubject subject : subjects) { // iterate over all subjects in policy map
                 if (isCorrectType(policyMap, subject, scopeType)) {
-                    Object wsdlSubject = subject.getSubject();
+                    final Object wsdlSubject = subject.getSubject();
                     if (wsdlSubject != null && clazz.isInstance(wsdlSubject)) { // is it our class?
                         if (null == wsdlName) { // no name provided to check
                             writePolicyOrReferenceIt(subject, xmlWriter);
                         } else {
                             try {
-                                Method getNameMethod = clazz.getDeclaredMethod("getName");
+                                final Method getNameMethod = clazz.getDeclaredMethod("getName");
                                 if (stringEqualsToStringOrQName(wsdlName, getNameMethod.invoke(wsdlSubject))) {
                                     writePolicyOrReferenceIt(subject, xmlWriter);
                                 }
@@ -295,7 +296,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         logger.exiting("selectAndProcessSubject");
     }
     
-    private static final boolean isCorrectType (PolicyMap map, PolicySubject subject, ScopeType type) {
+    private static final boolean isCorrectType (final PolicyMap map, final PolicySubject subject, final ScopeType type) {
         switch (type) {
             case OPERATION :
                 return ! (map.isInputMessageSubject(subject) || map.isOutputMessageSubject(subject));
@@ -309,11 +310,11 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
     }
     
     
-    private boolean stringEqualsToStringOrQName (String first, Object second) {
+    private boolean stringEqualsToStringOrQName (final String first, final Object second) {
         return (second instanceof QName) ? first.equals(((QName)second).getLocalPart()) : first.equals(second) ;
     }
     
-    private void handleCheckingElementQNameWithReflectionException(Exception e) {
+    private void handleCheckingElementQNameWithReflectionException(final Exception e) {
         logger.severe("handleCheckingElementQNameWithReflectionException",
                 LocalizationMessages.UNABLE_TO_CHECK_ELEMENT_NAME(), e);
         throw new WebServiceException(e);
@@ -327,16 +328,16 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
      * @param policy to be referenced or marshalled
      * @param element A TXW element to which we shall add the PolicyReference
      */
-    private void writePolicyOrReferenceIt(PolicySubject policySubject, TypedXmlWriter xmlWriter) {
+    private void writePolicyOrReferenceIt(final PolicySubject policySubject, final TypedXmlWriter xmlWriter) {
         try {
-            Policy policy = policySubject.getEffectivePolicy(merger);
+            final Policy policy = policySubject.getEffectivePolicy(merger);
             if (policy != null) {
                 if (null != policy.getIdOrName()) {
-                    TypedXmlWriter policyReference = xmlWriter._element(PolicyConstants.POLICY_REFERENCE, TypedXmlWriter.class);
+                    final TypedXmlWriter policyReference = xmlWriter._element(PolicyConstants.POLICY_REFERENCE, TypedXmlWriter.class);
                     policyReference._attribute(PolicyConstants.POLICY_URI.getLocalPart(), '#' + policy.getIdOrName());
                 } else {
-                    PolicyModelGenerator generator = PolicyModelGenerator.getGenerator();
-                    PolicySourceModel policyInfoset = generator.translate(policy);
+                    final PolicyModelGenerator generator = PolicyModelGenerator.getGenerator();
+                    final PolicySourceModel policyInfoset = generator.translate(policy);
                     marshaller.marshal(policyInfoset, xmlWriter);
                 }
             }
