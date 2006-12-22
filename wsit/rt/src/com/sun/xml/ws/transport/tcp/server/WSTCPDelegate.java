@@ -148,22 +148,22 @@ public class WSTCPDelegate implements WSTCPAdapterRegistry, TCPMessageListener {
             if (target != null) {
                 target.handle(channelContext);
             } else {
-                TCPAdapter.sendErrorResponse(channelContext, TCPConstants.RS_NOT_FOUND, MessagesMessages.TARGET_WS_NOT_FOUND());
+                TCPAdapter.sendErrorResponse(channelContext, TCPConstants.RS_NOT_FOUND, MessagesMessages.WSTCP_0003_TARGET_WS_NOT_FOUND());
             }
             
         } catch (JAXWSExceptionBase e) {
             logger.log(Level.SEVERE, e.getMessage(), e);
             try {
-                TCPAdapter.sendErrorResponse(channelContext, TCPConstants.RS_INTERNAL_SERVER_ERROR, MessagesMessages.CHECK_SERVER_LOG());
+                TCPAdapter.sendErrorResponse(channelContext, TCPConstants.RS_INTERNAL_SERVER_ERROR, MessagesMessages.WSTCP_0004_CHECK_SERVER_LOG());
             } catch (Throwable ex) {
-                logger.log(Level.SEVERE, MessagesMessages.SERVER_ERROR_MESSAGE_SENDING_FAILED(), ex);
+                logger.log(Level.SEVERE, MessagesMessages.WSTCP_0002_SERVER_ERROR_MESSAGE_SENDING_FAILED(), ex);
             }
         } catch (Throwable e) {
             logger.log(Level.SEVERE, e.getMessage(), e);
             try {
-                TCPAdapter.sendErrorResponse(channelContext, TCPConstants.RS_INTERNAL_SERVER_ERROR, MessagesMessages.CHECK_SERVER_LOG());
+                TCPAdapter.sendErrorResponse(channelContext, TCPConstants.RS_INTERNAL_SERVER_ERROR, MessagesMessages.WSTCP_0004_CHECK_SERVER_LOG());
             } catch (Throwable ex) {
-                logger.log(Level.SEVERE, MessagesMessages.SERVER_ERROR_MESSAGE_SENDING_FAILED(), ex);
+                logger.log(Level.SEVERE, MessagesMessages.WSTCP_0002_SERVER_ERROR_MESSAGE_SENDING_FAILED(), ex);
             }
         } finally {
             logger.log(Level.FINE, "WSTCPDelegate.onMessage exiting");

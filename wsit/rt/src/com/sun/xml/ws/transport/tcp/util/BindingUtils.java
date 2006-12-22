@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import javax.xml.ws.soap.MTOMFeature;
 
 /**
  * @author Alexey Stashok
@@ -83,20 +84,24 @@ public class BindingUtils {
     
     public static NegotiatedBindingContent getNegotiatedContentTypesAndParams(WSBinding binding) {
         if (binding.getSOAPVersion().equals(SOAPVersion.SOAP_11)) {
-            if (binding.isMTOMEnabled()) {
+            if (isMTOMEnabled(binding)) {
                 return MTOM11_BINDING_CONTENT;
             } else {
                 return SOAP11_BINDING_CONTENT;
             }
         } else if (binding.getSOAPVersion().equals(SOAPVersion.SOAP_12)) {
-            if (binding.isMTOMEnabled()) {
+            if (isMTOMEnabled(binding)) {
                 return MTOM12_BINDING_CONTENT;
             } else {
                 return SOAP12_BINDING_CONTENT;
             }
         }
         
-        throw new AssertionError(MessagesMessages.UNKNOWN_BINDING(binding));
+        throw new AssertionError(MessagesMessages.WSTCP_0009_UNKNOWN_BINDING(binding));
+    }
+    
+    private static boolean isMTOMEnabled(WSBinding binding) {
+        return binding.isFeatureEnabled(MTOMFeature.class);
     }
     
     public static class NegotiatedBindingContent {

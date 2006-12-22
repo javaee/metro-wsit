@@ -55,7 +55,7 @@ public class WSTCPProtocolHandler implements ProtocolHandler {
             tupple.byteBuffer.flip();
             processor.process(tupple.byteBuffer, (SocketChannel) tupple.key.channel());
         } else {
-            logger.log(Level.WARNING, MessagesMessages.TCP_PROCESSOR_NOT_REGISTERED());
+            logger.log(Level.WARNING, MessagesMessages.WSTCP_0013_TCP_PROCESSOR_NOT_REGISTERED());
         }
     }
 }

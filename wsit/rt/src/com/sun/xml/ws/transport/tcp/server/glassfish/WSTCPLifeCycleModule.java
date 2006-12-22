@@ -66,16 +66,6 @@ public class WSTCPLifeCycleModule implements LifecycleListener {
             try {
                 AppServWSRegistry.getInstance();
                 delegate.setCustomWSRegistry(WSTCPAdapterRegistryImpl.getInstance());
-//                String host = props.getProperty("host", "localhost");
-//                String portS = props.getProperty("port");
-//                int port;
-//                if (portS != null) {
-//                    port = Integer.parseInt(portS);
-//                } else {
-//                    throw new WSTCPException("Property 'port' is not set!");
-//                }
-                
-//                connector = new GrizzlyTCPConnector(host, port, delegate);
                 connector = new GrizzlyTCPConnector(delegate);
                 connector.listen();
                 
@@ -88,7 +78,7 @@ public class WSTCPLifeCycleModule implements LifecycleListener {
             try {
                 lifecycleEvent.getLifecycleEventContext().getInitialContext().unbind("TCPLifeCycle");
             } catch (NamingException ex) {
-                logger.log(Level.WARNING, MessagesMessages.TRANSPORT_MODULE_NOT_REGISTERED());
+                logger.log(Level.WARNING, MessagesMessages.WSTCP_0007_TRANSPORT_MODULE_NOT_REGISTERED());
             }
             
             if (delegate != null) {

@@ -241,7 +241,7 @@ public class WSConnectionManager {
         connection.setDirectMode(false);
 
         if (success != VersionController.VersionSupport.FULLY_SUPPORTED.ordinal()) {
-            throw new VersionMismatchException(MessagesMessages.VERSION_MISMATCH(), serverFramingVersion,
+            throw new VersionMismatchException(MessagesMessages.WSTCP_0006_VERSION_MISMATCH(), serverFramingVersion,
                     serverConnectionManagementVersion);
         }
     }

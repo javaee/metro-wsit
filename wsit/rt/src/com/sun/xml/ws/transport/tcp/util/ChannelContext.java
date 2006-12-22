@@ -25,7 +25,6 @@ package com.sun.xml.ws.transport.tcp.util;
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.encoding.fastinfoset.FastInfosetStreamSOAPCodec;
 import com.sun.xml.ws.transport.tcp.io.Connection;
@@ -204,7 +203,7 @@ public final class ChannelContext {
             return paramId;
         }
         
-        throw new AssertionError(MessagesMessages.UNKNOWN_PARAMETER(paramStr));
+        throw new AssertionError(MessagesMessages.WSTCP_0010_UNKNOWN_PARAMETER(paramStr));
     }
     
     private @NotNull String decodeParam(int paramId) {
@@ -218,7 +217,7 @@ public final class ChannelContext {
             return paramStr;
         }
         
-        throw new AssertionError(MessagesMessages.UNKNOWN_PARAMETER(paramId));
+        throw new AssertionError(MessagesMessages.WSTCP_0010_UNKNOWN_PARAMETER(paramId));
     }
     
     /**

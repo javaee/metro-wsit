@@ -84,7 +84,7 @@ public class ContentType {
             dct.parameters.clear();
         }
         
-        throw new AssertionError(MessagesMessages.UNKNOWN_CONTENT_TYPE(contentType));
+        throw new AssertionError(MessagesMessages.WSTCP_0011_UNKNOWN_CONTENT_TYPE(contentType));
     }
     
     public static class EncodedContentType {

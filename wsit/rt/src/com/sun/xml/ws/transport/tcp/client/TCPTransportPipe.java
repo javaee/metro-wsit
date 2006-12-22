@@ -137,12 +137,12 @@ public class TCPTransportPipe implements Pipe {
         } while (failure != null && ++retryNum <= TCPConstants.CLIENT_MAX_FAIL_TRIES);
         
         assert failure != null;
-        logger.log(Level.SEVERE, MessagesMessages.MESSAGE_PROCESS_FAILED(), failure);
+        logger.log(Level.SEVERE, MessagesMessages.WSTCP_0001_MESSAGE_PROCESS_FAILED(), failure);
         throw failure;
     }
     
     private void prepareRetry(ChannelContext channelContext, int retryNum, Exception e) {
-        logger.log(Level.WARNING, MessagesMessages.SEND_RETRY(retryNum), e);
+        logger.log(Level.WARNING, MessagesMessages.WSTCP_0012_SEND_RETRY(retryNum), e);
         clientTransport = null;
         if (channelContext != null) {
             WSConnectionManager.getInstance().abortConnection(channelContext);
@@ -155,7 +155,7 @@ public class TCPTransportPipe implements Pipe {
         logger.log(Level.FINE, "TCPTransportPipe.createClientTransport");
         
         WSTCPURI tcpURI = WSTCPURI.parse(uri);
-        if (tcpURI == null) throw new WebServiceException(MessagesMessages.INVALID_EP_URL());
+        if (tcpURI == null) throw new WebServiceException(MessagesMessages.WSTCP_0005_INVALID_EP_URL());
         ChannelContext channelContext = wsConnectionManager.openChannel(tcpURI, pipeAssemblerContext);
         return new TCPClientTransport(channelContext);
     }

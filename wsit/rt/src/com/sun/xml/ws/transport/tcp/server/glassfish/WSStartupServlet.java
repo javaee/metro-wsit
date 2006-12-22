@@ -98,14 +98,14 @@ public class WSStartupServlet extends HttpServlet
             
             transportModule = (WSTCPLifeCycleModule) initialContext.lookup("TCPLifeCycle");
             if (transportModule == null) {
-                throw new WSTCPException(MessagesMessages.TRANSPORT_MODULE_NOT_REGISTERED());
+                throw new WSTCPException(MessagesMessages.WSTCP_0007_TRANSPORT_MODULE_NOT_REGISTERED());
             }
             
             DeploymentDescriptorParser<TCPAdapter> parser = new DeploymentDescriptorParser<TCPAdapter>(
                     classLoader, new TCPResourceLoader(context), container, TCPAdapter.FACTORY);
             URL sunJaxWsXml = context.getResource(JAXWS_RI_RUNTIME);
             if(sunJaxWsXml==null)
-                throw new WebServiceException(MessagesMessages.NO_JAXWS_DESCRIPTOR());
+                throw new WebServiceException(MessagesMessages.WSTCP_0014_NO_JAXWS_DESCRIPTOR());
             adapters = parser.parse(sunJaxWsXml.toExternalForm(), sunJaxWsXml.openStream());
             
             transportModule.register(servletContext.getContextPath(), adapters);

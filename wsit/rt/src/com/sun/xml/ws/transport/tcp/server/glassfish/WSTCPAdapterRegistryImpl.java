@@ -73,7 +73,7 @@ public class WSTCPAdapterRegistryImpl implements WSTCPAdapterRegistry {
                     } catch (Exception e) {
                         // This common exception is thrown from ejbEndPtInfo.prepareInvocation(true)
                         logger.log(Level.SEVERE, "WSTCPAdapterRegistryImpl. " + 
-                                MessagesMessages.ERROR_TCP_ADAPTER_CREATE(
+                                MessagesMessages.WSTCP_0008_ERROR_TCP_ADAPTER_CREATE(
                                 wsEndpointDescriptor.getWSServiceName()), e);
                     }
                 }

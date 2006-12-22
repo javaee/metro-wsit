@@ -84,7 +84,7 @@ public class IncomeMessageProcessor {
                 returnConnectionSession(connectionSession);
             } else {
                 // Client's version is not supported
-                logger.log(Level.WARNING, "IncomeMessageProcessor.process: {0}", MessagesMessages.VERSION_MISMATCH());
+                logger.log(Level.WARNING, "IncomeMessageProcessor.process: {0}", MessagesMessages.WSTCP_0006_VERSION_MISMATCH());
             }
             return;
         }
