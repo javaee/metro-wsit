@@ -22,8 +22,6 @@
 
 package com.sun.xml.ws.transport.tcp.server;
 
-import com.sun.istack.NotNull;
-
 /**
  * @author Alexey Stashok
  */

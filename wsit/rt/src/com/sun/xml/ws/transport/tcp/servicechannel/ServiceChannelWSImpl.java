@@ -53,15 +53,15 @@ public class ServiceChannelWSImpl {
     private WebServiceContext wsContext;
     
     public int initiateSession() {
-        ChannelContext serviceChannelContext = getChannelContext();
-        ConnectionSession connectionSession = serviceChannelContext.getConnectionSession();
+        final ChannelContext serviceChannelContext = getChannelContext();
+        final ConnectionSession connectionSession = serviceChannelContext.getConnectionSession();
         logger.log(Level.FINE, "Session: {0} opened!", connectionSession.hashCode());
         return 0;
     }
     
     public int closeSession() {
-        ChannelContext serviceChannelContext = getChannelContext();
-        ConnectionSession connectionSession = serviceChannelContext.getConnectionSession();
+        final ChannelContext serviceChannelContext = getChannelContext();
+        final ConnectionSession connectionSession = serviceChannelContext.getConnectionSession();
         logger.log(Level.FINE, "Session: {0} closed!", connectionSession.hashCode());
         return 0;
     }
@@ -70,19 +70,19 @@ public class ServiceChannelWSImpl {
             @WebParam(name="channelSettings", mode=WebParam.Mode.IN) ChannelSettings channelSettings)
             throws ServiceChannelException {
         
-        ChannelContext serviceChannelContext = getChannelContext();
-        ConnectionSession connectionSession = serviceChannelContext.getConnectionSession();
+        final ChannelContext serviceChannelContext = getChannelContext();
+        final ConnectionSession connectionSession = serviceChannelContext.getConnectionSession();
         
-        WSTCPAdapterRegistry adapterRegistry = getAdapterRegistry();
-        WSTCPURI tcpURI = channelSettings.getTargetWSURI();
+        final WSTCPAdapterRegistry adapterRegistry = getAdapterRegistry();
+        final WSTCPURI tcpURI = channelSettings.getTargetWSURI();
         
-        TCPAdapter adapter = adapterRegistry.getTarget(tcpURI);
+        final TCPAdapter adapter = adapterRegistry.getTarget(tcpURI);
         if (adapter == null) throw new ServiceChannelException("Service " + channelSettings.getWSServiceName() + "(" + tcpURI.toString() + ") not found!");
         
         channelSettings.setChannelId(connectionSession.getNextAvailChannelId());
-        ChannelContext openedChannelContext = new ChannelContext(connectionSession, channelSettings);
-        SOAPVersion soapVersion = adapter.getEndpoint().getBinding().getSOAPVersion();
-        Codec defaultCodec = adapter.getEndpoint().createCodec();
+        final ChannelContext openedChannelContext = new ChannelContext(connectionSession, channelSettings);
+        final SOAPVersion soapVersion = adapter.getEndpoint().getBinding().getSOAPVersion();
+        final Codec defaultCodec = adapter.getEndpoint().createCodec();
         ChannelContext.configureCodec(openedChannelContext, soapVersion, defaultCodec);
         
         connectionSession.registerChannel(openedChannelContext.getChannelId(), openedChannelContext);
@@ -94,8 +94,8 @@ public class ServiceChannelWSImpl {
     }
     
     public int closeChannel(int channelId) {
-        ChannelContext serviceChannelContext = getChannelContext();
-        ConnectionSession connectionSession = serviceChannelContext.getConnectionSession();
+        final ChannelContext serviceChannelContext = getChannelContext();
+        final ConnectionSession connectionSession = serviceChannelContext.getConnectionSession();
         
         connectionSession.deregisterChannel(channelId);
         if (logger.isLoggable(Level.FINE)) {
@@ -105,12 +105,12 @@ public class ServiceChannelWSImpl {
     }
     
     private @NotNull ChannelContext getChannelContext() {
-        MessageContext messageContext = wsContext.getMessageContext();
+        final MessageContext messageContext = wsContext.getMessageContext();
         return (ChannelContext) messageContext.get(TCPConstants.CHANNEL_CONTEXT);
     }
     
     private @NotNull WSTCPAdapterRegistry getAdapterRegistry() {
-        MessageContext messageContext = wsContext.getMessageContext();
+        final MessageContext messageContext = wsContext.getMessageContext();
         return (WSTCPAdapterRegistry) messageContext.get(TCPConstants.ADAPTER_REGISTRY);
     }
 }

@@ -42,7 +42,7 @@ import com.sun.xml.ws.encoding.fastinfoset.FastInfosetMIMETypes;
  *
  * Class is not thread safe
  */
-public class MimeType {
+public final class MimeType {
     public static final Map<String, List<MimeType>> mimeName2mime;
     
     public static final MimeType SOAP11 = new MimeType("text/xml", Collections.<String, String>emptyMap());
@@ -88,7 +88,7 @@ public class MimeType {
     public MimeType() {
     }
     
-    public MimeType(String mimeType, Map<String, String> embeddedParams) {
+    public MimeType(final String mimeType, final Map<String, String> embeddedParams) {
         this.mimeType = mimeType;
         this.embeddedParams = embeddedParams;
         makeStringRepresentation();
@@ -98,7 +98,7 @@ public class MimeType {
         return mimeType;
     }
     
-    public void setMimeType(@NotNull String mimeType) {
+    public void setMimeType(@NotNull final String mimeType) {
         this.mimeType = mimeType;
         makeStringRepresentation();
     }
@@ -107,12 +107,12 @@ public class MimeType {
         return embeddedParams;
     }
     
-    public void setEmbeddedParams(@NotNull Map<String, String> embeddedParams) {
+    public void setEmbeddedParams(@NotNull final Map<String, String> embeddedParams) {
         this.embeddedParams = embeddedParams;
         makeStringRepresentation();
     }
     
-    public boolean equals(Object object) {
+    public boolean equals(final Object object) {
         if (object instanceof MimeType) {
             return object.hashCode() == hashCode();
         }
@@ -125,7 +125,7 @@ public class MimeType {
     }
     
     public String toString() {
-        int hashCode = hashCode();
+        final int hashCode = hashCode();
         if (srHashCode != hashCode) {
             srHashCode = hashCode;
             makeStringRepresentation();
@@ -135,7 +135,7 @@ public class MimeType {
     }
     
     private void makeStringRepresentation() {
-        StringBuffer buffer = new StringBuffer();
+        final StringBuffer buffer = new StringBuffer();
         if (mimeType != null) {
             buffer.append(mimeType);
             if (embeddedParams != null) {

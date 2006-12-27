@@ -23,9 +23,7 @@
 package com.sun.xml.ws.transport.tcp.client;
 
 import com.sun.xml.ws.api.DistributedPropertySet;
-import com.sun.xml.ws.client.ClientTransportException;
 import com.sun.xml.ws.transport.tcp.io.Connection;
-import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
 import com.sun.xml.ws.transport.tcp.util.ChannelContext;
 import com.sun.xml.ws.transport.tcp.util.ContentType;
 import com.sun.xml.ws.transport.tcp.util.FrameType;
@@ -33,21 +31,13 @@ import com.sun.xml.ws.transport.tcp.util.TCPConstants;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.logging.Logger;
 
 /**
  * @author Alexey Stashok
  */
 public class TCPClientTransport extends DistributedPropertySet {
-    private static final long TIMEOUT_INTERVAL = 60000;
-    private static final int COMPLETED = 0xFFFF;
-    private static final int READ_TRY = 10;
-    
-    private static final Logger logger = Logger.getLogger(
-            com.sun.xml.ws.transport.tcp.util.TCPConstants.LoggingDomain + ".client");
-    
-    private ChannelContext channelContext;
-    private Connection connection;
+    private final ChannelContext channelContext;
+    private final Connection connection;
     
     private InputStream inputStream;
     private OutputStream outputStream;
@@ -57,7 +47,7 @@ public class TCPClientTransport extends DistributedPropertySet {
     // Request/response content type
     private String contentType;
     
-    public TCPClientTransport(ChannelContext channelContext) {
+    public TCPClientTransport(final ChannelContext channelContext) {
         this.channelContext = channelContext;
         this.connection = channelContext.getConnection();
     }
@@ -66,7 +56,7 @@ public class TCPClientTransport extends DistributedPropertySet {
         return status;
     }
     
-    public void setStatus(int status) {
+    public void setStatus(final int status) {
         this.status = status;
     }
     
@@ -77,7 +67,7 @@ public class TCPClientTransport extends DistributedPropertySet {
     public OutputStream openOutputStream() {
         connection.setChannelId(channelContext.getChannelId());
         connection.setMessageId(FrameType.MESSAGE);
-        ContentType.EncodedContentType ect = channelContext.encodeContentType(contentType);
+        final ContentType.EncodedContentType ect = channelContext.encodeContentType(contentType);
         connection.setContentId(ect.mimeId);
         connection.setContentProps(ect.params);
         
@@ -92,7 +82,7 @@ public class TCPClientTransport extends DistributedPropertySet {
     public InputStream openInputStream() throws IOException {
         connection.prepareForReading();
         inputStream = connection.openInputStream();
-        int messageId = connection.getMessageId();
+        final int messageId = connection.getMessageId();
         status = convertToReplyStatus(messageId);
         if (FrameType.isFrameContainsParams(messageId)) {
             contentType = channelContext.decodeContentType(connection.getContentId(),
@@ -107,9 +97,10 @@ public class TCPClientTransport extends DistributedPropertySet {
     }
     
     public void close() {
+        // Perform some cleanings
     }
     
-    public void setContentType(String contentType) {
+    public void setContentType(final String contentType) {
         this.contentType = contentType;
     }
     
@@ -117,7 +108,7 @@ public class TCPClientTransport extends DistributedPropertySet {
         return contentType;
     }
     
-    private int convertToReplyStatus(int messageId) {
+    private int convertToReplyStatus(final int messageId) {
         if (messageId == FrameType.NULL) {
             return TCPConstants.ONE_WAY;
         } else if (messageId == FrameType.ERROR) {
@@ -132,7 +123,7 @@ public class TCPClientTransport extends DistributedPropertySet {
         return channelContext;
     }
     
-    private static PropertyMap model;
+    private static final PropertyMap model;
     static {
         model = parse(TCPClientTransport.class);
     }

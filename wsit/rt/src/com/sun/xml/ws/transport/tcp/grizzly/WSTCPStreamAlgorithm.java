@@ -30,7 +30,7 @@ import java.nio.channels.SocketChannel;
 /**
  * @author Alexey Stashok
  */
-public class WSTCPStreamAlgorithm extends StreamAlgorithmBase {
+public final class WSTCPStreamAlgorithm extends StreamAlgorithmBase {
     
     private ByteBuffer resultByteBuffer;
     
@@ -38,7 +38,7 @@ public class WSTCPStreamAlgorithm extends StreamAlgorithmBase {
         return handler;
     }
     
-    public boolean parse(ByteBuffer byteBuffer) {
+    public boolean parse(final ByteBuffer byteBuffer) {
         byteBuffer.flip();
         this.resultByteBuffer = byteBuffer;
         return true;
@@ -57,7 +57,7 @@ public class WSTCPStreamAlgorithm extends StreamAlgorithmBase {
      * is not set before,
      * but port value is required in handler's constructor
      */
-    public void setPort(int port) {
+    public void setPort(final int port) {
         super.setPort(port);
         handler = new WSTCPFramedConnectionHandler(this);
     }

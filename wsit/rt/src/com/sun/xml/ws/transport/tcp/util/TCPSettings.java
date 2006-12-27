@@ -25,8 +25,8 @@ package com.sun.xml.ws.transport.tcp.util;
 /**
  * @author Alexey Stashok
  */
-public class TCPSettings {
-    private static TCPSettings instance = new TCPSettings();
+public final class TCPSettings {
+    private static final TCPSettings instance = new TCPSettings();
     private static final String ENCODING_MODE_PROPERTY = "com.sun.xml.ws.transport.tcp.encodingMode";
     
     private EncodingMode encodingMode = EncodingMode.FI_STATEFUL;
@@ -51,7 +51,7 @@ public class TCPSettings {
     
     private void gatherSettings() {
         if (System.getProperty(ENCODING_MODE_PROPERTY) != null){
-            String encodingModeS = System.getProperty(ENCODING_MODE_PROPERTY);
+            final String encodingModeS = System.getProperty(ENCODING_MODE_PROPERTY);
             if ("xml".equalsIgnoreCase(encodingModeS)) {
                 encodingMode = EncodingMode.XML;
             } else if ("FIStateless".equalsIgnoreCase(encodingModeS)) {

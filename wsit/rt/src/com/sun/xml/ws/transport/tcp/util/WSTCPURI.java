@@ -32,7 +32,7 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
  *
  * @author Alexey Stashok
  */
-public class WSTCPURI {
+public final class WSTCPURI {
     public String host;
     public int port;
     public String path;
@@ -53,7 +53,7 @@ public class WSTCPURI {
         this.uri2string = uri2string;
     }
     
-    public String getParameter(String name) {
+    public String getParameter(final String name) {
         if (params != null) {
             return params.get(name);
         }
@@ -61,7 +61,7 @@ public class WSTCPURI {
         return null;
     }
     
-    public static WSTCPURI parse(String uri) {
+    public static WSTCPURI parse(final String uri) {
         try {
             return parse(new URI(uri));
         } catch (URISyntaxException ex) {
@@ -69,17 +69,17 @@ public class WSTCPURI {
         }
     }
     
-    public static WSTCPURI parse(URI uri) {
-        String path = uri.getPath();
-        String query = uri.getQuery();
+    public static WSTCPURI parse(final URI uri) {
+        final String path = uri.getPath();
+        final String query = uri.getQuery();
         Map<String, String> params = null;
         
         if (query != null && query.length() > 0) {
-            String[] paramsStr = query.split(";");
+            final String[] paramsStr = query.split(";");
             params = new HashMap<String, String>(paramsStr.length);
             for(String paramStr : paramsStr) {
                 if (paramStr.length() > 0) {
-                    String[] paramAsgn = paramStr.split("=");
+                    final String[] paramAsgn = paramStr.split("=");
                     if (paramAsgn != null && paramAsgn.length == 2 && paramAsgn[0].length() > 0 && paramAsgn[1].length() > 0) {
                         params.put(paramAsgn[0], paramAsgn[1]);
                     }
@@ -102,12 +102,12 @@ public class WSTCPURI {
      * Class is used to translate WSTCPURI to String and vice versa
      * This is used in JAXB serialization/deserialization
      */
-    public static class WSTCPURI2StringJAXBAdapter extends XmlAdapter<String, WSTCPURI> {
-        public String marshal(WSTCPURI tcpURI) throws Exception {
+    public static final class WSTCPURI2StringJAXBAdapter extends XmlAdapter<String, WSTCPURI> {
+        public String marshal(final WSTCPURI tcpURI) throws Exception {
             return tcpURI.toString();
         }
 
-        public WSTCPURI unmarshal(String uri) throws Exception {
+        public WSTCPURI unmarshal(final String uri) throws Exception {
             return WSTCPURI.parse(uri);
         }
         

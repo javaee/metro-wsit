@@ -54,11 +54,11 @@ public class TCPTransportPipe implements Pipe {
     
     final protected ClientPipeAssemblerContext pipeAssemblerContext;
     
-    public TCPTransportPipe(ClientPipeAssemblerContext context) {
+    public TCPTransportPipe(final ClientPipeAssemblerContext context) {
         this.pipeAssemblerContext = context;
     }
     
-    protected TCPTransportPipe(TCPTransportPipe that, PipeCloner cloner) {
+    protected TCPTransportPipe(final TCPTransportPipe that, final PipeCloner cloner) {
         this(that.pipeAssemblerContext);
         cloner.add(that, this);
     }
@@ -69,15 +69,15 @@ public class TCPTransportPipe implements Pipe {
         }
     }
     
-    public Pipe copy(PipeCloner cloner) {
+    public Pipe copy(final PipeCloner cloner) {
         return new TCPTransportPipe(this, cloner);
     }
     
-    public Packet process(Packet packet) {
+    public Packet process(final Packet packet) {
         logger.log(Level.FINE, "TCPTransportPipe.process entering");
         ChannelContext channelContext = null;
         WebServiceException failure = null;
-        WSConnectionManager wsConnectionManager = WSConnectionManager.getInstance();
+        final WSConnectionManager wsConnectionManager = WSConnectionManager.getInstance();
         
         int retryNum = 0;
         do {
@@ -92,8 +92,8 @@ public class TCPTransportPipe implements Pipe {
                 wsConnectionManager.lockConnection(channelContext);
                 
                 // Taking Codec from ChannelContext
-                Codec codec = channelContext.getCodec();
-                ContentType ct = codec.getStaticContentType(packet);
+                final Codec codec = channelContext.getCodec();
+                final ContentType ct = codec.getStaticContentType(packet);
                 
                 logger.log(Level.FINE, "TCPTransportPipe.process; send content-type: {0}", ct.getContentType());
                 clientTransport.setContentType(ct.getContentType());
@@ -105,13 +105,13 @@ public class TCPTransportPipe implements Pipe {
                 clientTransport.send();
                 
                 logger.log(Level.FINE, "TCPTransportPipe.process openInputStream");
-                InputStream replyInputStream = clientTransport.openInputStream();
+                final InputStream replyInputStream = clientTransport.openInputStream();
                 
                 logger.log(Level.FINE, "TCPTransportPipe.process process input data");
                 if (clientTransport.getStatus() != TCPConstants.ERROR) {
-                    Packet reply = packet.createClientResponse(null);
+                    final Packet reply = packet.createClientResponse(null);
                     if (clientTransport.getStatus() != TCPConstants.ONE_WAY && !Boolean.FALSE.equals(packet.expectReply)) {
-                        String contentTypeStr = clientTransport.getContentType();
+                        final String contentTypeStr = clientTransport.getContentType();
                         logger.log(Level.FINE, "TCPTransportPipe.process; received content-type: {0}", contentTypeStr);
                         codec.decode(replyInputStream, contentTypeStr, reply);
                     }
@@ -141,7 +141,7 @@ public class TCPTransportPipe implements Pipe {
         throw failure;
     }
     
-    private void prepareRetry(ChannelContext channelContext, int retryNum, Exception e) {
+    private void prepareRetry(final ChannelContext channelContext, final int retryNum, final Exception e) {
         logger.log(Level.WARNING, MessagesMessages.WSTCP_0012_SEND_RETRY(retryNum), e);
         clientTransport = null;
         if (channelContext != null) {
@@ -149,14 +149,14 @@ public class TCPTransportPipe implements Pipe {
         }
     }
     
-    private @NotNull TCPClientTransport createClientTransport(@NotNull WSConnectionManager wsConnectionManager,
-            @NotNull URI uri) throws InterruptedException, IOException, ServiceChannelException, VersionMismatchException {
+    private @NotNull TCPClientTransport createClientTransport(@NotNull final WSConnectionManager wsConnectionManager,
+            @NotNull final URI uri) throws InterruptedException, IOException, ServiceChannelException, VersionMismatchException {
         
         logger.log(Level.FINE, "TCPTransportPipe.createClientTransport");
         
-        WSTCPURI tcpURI = WSTCPURI.parse(uri);
+        final WSTCPURI tcpURI = WSTCPURI.parse(uri);
         if (tcpURI == null) throw new WebServiceException(MessagesMessages.WSTCP_0005_INVALID_EP_URL());
-        ChannelContext channelContext = wsConnectionManager.openChannel(tcpURI, pipeAssemblerContext);
+        final ChannelContext channelContext = wsConnectionManager.openChannel(tcpURI, pipeAssemblerContext);
         return new TCPClientTransport(channelContext);
     }
 }

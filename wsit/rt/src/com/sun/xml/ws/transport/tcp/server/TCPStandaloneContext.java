@@ -40,20 +40,20 @@ import java.util.zip.ZipFile;
 /**
  * @author Alexey Stashok
  */
-public class TCPStandaloneContext implements TCPContext {
+public final class TCPStandaloneContext implements TCPContext {
     
-    private ClassLoader classloader;
-    private Map<String, Object> attributes = new HashMap<String, Object>();
+    private final ClassLoader classloader;
+    private final Map<String, Object> attributes = new HashMap<String, Object>();
     
-    public TCPStandaloneContext(ClassLoader classloader) {
+    public TCPStandaloneContext(final ClassLoader classloader) {
         this.classloader = classloader;
     }
     
-    public InputStream getResourceAsStream(String resource) throws IOException {
+    public InputStream getResourceAsStream(final String resource) throws IOException {
         return classloader.getResourceAsStream(resource);
     }
     
-    public Set<String> getResourcePaths(String path) {
+    public Set<String> getResourcePaths(final String path) {
         try {
             return populateResourcePaths(path);
         } catch (Exception ex) {
@@ -64,7 +64,7 @@ public class TCPStandaloneContext implements TCPContext {
     
     
     public URL getResource(String resource) {
-        if (resource.startsWith("/")) {
+        if (resource.charAt(0) == '/') {
             resource = resource.substring(1, resource.length());
         }
         
@@ -72,18 +72,18 @@ public class TCPStandaloneContext implements TCPContext {
     }
     
     private Enumeration<URL> getResources(String resource) throws IOException {
-        if (resource.startsWith("/")) {
+        if (resource.charAt(0) == '/') {
             resource = resource.substring(1, resource.length());
         }
         
         return classloader.getResources(resource);
     }
     
-    private Set<String> populateResourcePaths(String path) throws Exception {
-        Set<String> resources = new HashSet<String>();
+    private Set<String> populateResourcePaths(final String path) throws Exception {
+        final Set<String> resources = new HashSet<String>();
         
-        for(Enumeration<URL> initResources = getResources(path); initResources.hasMoreElements(); ) {
-            URI resourceURI = initResources.nextElement().toURI();
+        for(final Enumeration<URL> initResources = getResources(path); initResources.hasMoreElements(); ) {
+            final URI resourceURI = initResources.nextElement().toURI();
             if (resourceURI.getScheme().equals("file")) {
                 gatherResourcesWithFileMode(path, resourceURI, resources);
             } else if (resourceURI.getScheme().equals("jar")) {
@@ -94,11 +94,11 @@ public class TCPStandaloneContext implements TCPContext {
         return resources;
     }
     
-    private void gatherResourcesWithFileMode(String path, URI resourceURI, Set<String> resources) {
-        File file = new File(resourceURI);
-        String[] list = file.list(new FilenameFilter() {
+    private void gatherResourcesWithFileMode(final String path, final URI resourceURI, final Set<String> resources) {
+        final File file = new File(resourceURI);
+        final String[] list = file.list(new FilenameFilter() {
             public boolean accept(File file, String name) {
-                return !name.startsWith(".");
+                return name.charAt(0) != '.';
             }
         });
         
@@ -107,25 +107,25 @@ public class TCPStandaloneContext implements TCPContext {
         }
     }
     
-    private void gatherResourcesWithJarMode(String path, URI resourceURI, Set<String> resources) {
-        String resourceURIAsString = resourceURI.toASCIIString();
-        int pathDelim = resourceURIAsString.indexOf("!");
-        String zipFile = resourceURIAsString.substring("jar:file:/".length(), (pathDelim != -1) ? pathDelim : resourceURIAsString.length());
+    private void gatherResourcesWithJarMode(final String path, final URI resourceURI, final Set<String> resources) {
+        final String resourceURIAsString = resourceURI.toASCIIString();
+        final int pathDelim = resourceURIAsString.indexOf('!');
+        final String zipFile = resourceURIAsString.substring("jar:file:/".length(), (pathDelim != -1) ? pathDelim : resourceURIAsString.length());
         ZipFile file = null;
         
         try {
             file = new ZipFile(zipFile);
             
             String pathToCompare = path;
-            if (pathToCompare.startsWith("/")) {
+            if (pathToCompare.charAt(0) == '/') {
                 pathToCompare = pathToCompare.substring(1, pathToCompare.length());
             }
             if (!pathToCompare.endsWith("/")) {
                 pathToCompare = pathToCompare + "/";
             }
             
-            for(Enumeration<? extends ZipEntry> e = file.entries(); e.hasMoreElements(); ) {
-                ZipEntry entry = e.nextElement();
+            for(final Enumeration<? extends ZipEntry> e = file.entries(); e.hasMoreElements(); ) {
+                final ZipEntry entry = e.nextElement();
                 if (entry.getName().startsWith(pathToCompare) && !entry.getName().equals(pathToCompare)) {
                     resources.add("/" + entry.getName());
                 }
@@ -141,11 +141,11 @@ public class TCPStandaloneContext implements TCPContext {
         }
     }
     
-    public Object getAttribute(String name) {
+    public Object getAttribute(final String name) {
         return attributes.get(name);
     }
     
-    public void setAttribute(String name, Object value) {
+    public void setAttribute(final String name, final Object value) {
         attributes.put(name, value);
     }
 }

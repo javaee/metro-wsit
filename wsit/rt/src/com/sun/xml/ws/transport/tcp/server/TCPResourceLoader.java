@@ -30,14 +30,14 @@ import java.util.Set;
 /**
  * @author Alexey Stashok
  */
-public class TCPResourceLoader implements ResourceLoader {
-    private TCPContext context;
+public final class TCPResourceLoader implements ResourceLoader {
+    private final TCPContext context;
     
-    public TCPResourceLoader(TCPContext context) {
+    public TCPResourceLoader(final TCPContext context) {
         this.context = context;
     }
     
-    public URL getResource(String path) throws MalformedURLException {
+    public URL getResource(final String path) throws MalformedURLException {
         return context.getResource(path);
     }
 
@@ -45,7 +45,7 @@ public class TCPResourceLoader implements ResourceLoader {
         return getResource("/WEB-INF/jax-ws-catalog.xml");
     }
 
-    public Set<String> getResourcePaths(String path) {
+    public Set<String> getResourcePaths(final String path) {
         return context.getResourcePaths(path);
     }
 }

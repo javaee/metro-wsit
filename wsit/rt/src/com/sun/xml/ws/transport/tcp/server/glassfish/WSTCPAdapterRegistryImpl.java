@@ -39,14 +39,14 @@ import java.util.logging.Logger;
 /**
  * @author Alexey Stashok
  */
-public class WSTCPAdapterRegistryImpl implements WSTCPAdapterRegistry {
+public final class WSTCPAdapterRegistryImpl implements WSTCPAdapterRegistry {
     private static final Logger logger = Logger.getLogger(
             com.sun.xml.ws.transport.tcp.util.TCPConstants.LoggingDomain + ".server");
     
     /**
      * Registry holds correspondents between service name and adapter
      */
-    Map<String, TCPAdapter> registry = new ConcurrentHashMap<String, TCPAdapter>();
+    final Map<String, TCPAdapter> registry = new ConcurrentHashMap<String, TCPAdapter>();
     private static final WSTCPAdapterRegistryImpl instance = new WSTCPAdapterRegistryImpl();
     
     private WSTCPAdapterRegistryImpl() {}
@@ -55,14 +55,14 @@ public class WSTCPAdapterRegistryImpl implements WSTCPAdapterRegistry {
         return instance;
     }
     
-    public TCPAdapter getTarget(@NotNull WSTCPURI requestURI) {
+    public TCPAdapter getTarget(@NotNull final WSTCPURI requestURI) {
         // path should have format like "/context-root/url-pattern"
-        int delim = requestURI.path.lastIndexOf('/');
-        String contextRoot = requestURI.path.substring(0, delim);
-        String urlPattern = requestURI.path.substring(delim, requestURI.path.length());
+        final int delim = requestURI.path.lastIndexOf('/');
+        final String contextRoot = requestURI.path.substring(0, delim);
+        final String urlPattern = requestURI.path.substring(delim, requestURI.path.length());
         
         if (contextRoot != null && urlPattern != null) {
-            WSEndpointDescriptor wsEndpointDescriptor = AppServWSRegistry.getInstance().get(contextRoot, urlPattern);
+            final WSEndpointDescriptor wsEndpointDescriptor = AppServWSRegistry.getInstance().get(contextRoot, urlPattern);
             if (wsEndpointDescriptor != null) {
                 TCPAdapter adapter = registry.get(requestURI.path);
                 if (adapter == null) {
@@ -85,25 +85,25 @@ public class WSTCPAdapterRegistryImpl implements WSTCPAdapterRegistry {
     }
     
     
-    public void deleteTargetFor(@NotNull String path) {
+    public void deleteTargetFor(@NotNull final String path) {
         logger.log(Level.FINE, "WSTCPAdapterRegistryImpl. DeRegister adapter for {0}", path);
         registry.remove(path);
     }
     
-    private TCPAdapter createWSAdapter(@NotNull WSEndpointDescriptor wsEndpointDescriptor) throws Exception {
+    private TCPAdapter createWSAdapter(@NotNull final WSEndpointDescriptor wsEndpointDescriptor) throws Exception {
         Adapter adapter;
         if (wsEndpointDescriptor.isEJB()) {
-            EjbRuntimeEndpointInfo ejbEndPtInfo = (EjbRuntimeEndpointInfo) WebServiceEjbEndpointRegistry.getRegistry().
+            final EjbRuntimeEndpointInfo ejbEndPtInfo = (EjbRuntimeEndpointInfo) WebServiceEjbEndpointRegistry.getRegistry().
                     getEjbWebServiceEndpoint(wsEndpointDescriptor.getURI(), "POST", null);
             adapter = (Adapter) ejbEndPtInfo.prepareInvocation(true);
         } else {
-            String uri = wsEndpointDescriptor.getURI();
+            final String uri = wsEndpointDescriptor.getURI();
             adapter = JAXWSAdapterRegistry.getInstance().getAdapter(wsEndpointDescriptor.getContextRoot(), uri, uri);
         }
         
 //@TODO implement checkAdapterSupportsTCP
 //        checkAdapterSupportsTCP(adapter);
-        TCPAdapter tcpAdapter = new TCP109Adapter(wsEndpointDescriptor.getWSServiceName().toString(),
+        final TCPAdapter tcpAdapter = new TCP109Adapter(wsEndpointDescriptor.getWSServiceName().toString(),
                 wsEndpointDescriptor.getContextRoot(),
                 wsEndpointDescriptor.getUrlPattern(),
                 adapter.getEndpoint(),

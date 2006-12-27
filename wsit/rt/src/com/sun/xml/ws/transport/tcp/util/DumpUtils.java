@@ -27,9 +27,9 @@ import java.nio.ByteBuffer;
 /**
  * @author Alexey Stashok
  */
-public class DumpUtils {
-    public static String dump(ByteBuffer[] bb) {
-        StringBuffer stringBuffer = new StringBuffer();
+public final class DumpUtils {
+    public static String dump(final ByteBuffer[] bb) {
+        final StringBuffer stringBuffer = new StringBuffer();
         for(int i=0; i<bb.length; i++) {
             stringBuffer.append(dump(bb[i]));
         }
@@ -37,29 +37,29 @@ public class DumpUtils {
         return stringBuffer.toString();
     }
 
-    public static String dump(ByteBuffer buffer) {
+    public static String dump(final ByteBuffer buffer) {
         return dump(buffer, buffer.position(), buffer.limit() - buffer.position());
     }
 
-    public static String dump(ByteBuffer buffer, int offset, int length) {
-        byte[] array = new byte[length];
-        int position = buffer.position();
+    public static String dump(final ByteBuffer buffer, final int offset, final int length) {
+        final byte[] array = new byte[length];
+        final int position = buffer.position();
         buffer.position(offset);
         buffer.get(array);
         buffer.position(position);
         return dump(array);
     }
     
-    public static String dump(byte[] buffer) {
+    public static String dump(final byte[] buffer) {
         return dump(buffer, 0, buffer.length);
     }
     
-    public static String dump(byte[] buffer, int offset, int length) {
-        StringBuffer stringBuffer = new StringBuffer();
+    public static String dump(final byte[] buffer, final int offset, final int length) {
+        final StringBuffer stringBuffer = new StringBuffer();
         for(int i=0; i<length; i++) {
-            int value = buffer[offset + i] & 0xFF;
-            String strValue = Integer.toHexString(value).toUpperCase();
-            String str = "00".substring(strValue.length()) + strValue;
+            final int value = buffer[offset + i] & 0xFF;
+            final String strValue = Integer.toHexString(value).toUpperCase();
+            final String str = "00".substring(strValue.length()) + strValue;
             stringBuffer.append(str);
             stringBuffer.append('(');
             stringBuffer.append((char) value);

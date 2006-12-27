@@ -37,7 +37,7 @@ public class BufferedMessageInputStream extends InputStream {
     
     private int bufferedSize;
     
-    public BufferedMessageInputStream(InputStream inputStream) {
+    public BufferedMessageInputStream(final InputStream inputStream) {
         this.inputStream = inputStream;
         isBuffered = false;
     }
@@ -47,13 +47,13 @@ public class BufferedMessageInputStream extends InputStream {
         return inputStream.read();
     }
     
-    public int read(byte[] b, int offset, int length) throws IOException {
+    public int read(final byte[] b, final int offset, final int length) throws IOException {
         return inputStream.read(b, offset, length);
     }
     
     public void bufferMessage() throws IOException {
         if (!isBuffered) {
-            ByteArrayBuffer baBuffer = new ByteArrayBuffer();
+            final ByteArrayBuffer baBuffer = new ByteArrayBuffer();
             try {
                 baBuffer.write(inputStream);
                 inputStream = baBuffer.newInputStream();

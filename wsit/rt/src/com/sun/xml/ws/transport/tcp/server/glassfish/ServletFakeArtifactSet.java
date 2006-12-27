@@ -43,12 +43,12 @@ import javax.xml.ws.handler.MessageContext;
 /**
  * @author Alexey Stashok
  */
-public class ServletFakeArtifactSet extends DistributedPropertySet {
+public final class ServletFakeArtifactSet extends DistributedPropertySet {
 
     private static final PropertyMap model;
 
-    private HttpServletRequest request;
-    private HttpServletResponse response;
+    private final HttpServletRequest request;
+    private final HttpServletResponse response;
     
     static {
         model = parse(ServletFakeArtifactSet.class);
@@ -58,7 +58,7 @@ public class ServletFakeArtifactSet extends DistributedPropertySet {
         return model;
     }
     
-    public ServletFakeArtifactSet(String requestURL) {
+    public ServletFakeArtifactSet(final String requestURL) {
         request = createRequest(requestURL);
         response = createResponse();
     }
@@ -73,7 +73,7 @@ public class ServletFakeArtifactSet extends DistributedPropertySet {
         return request;
     }
 
-    private static HttpServletRequest createRequest(String requestURL) {
+    private static HttpServletRequest createRequest(final String requestURL) {
         return new FakeServletHttpRequest(requestURL);
     }
     
@@ -81,10 +81,10 @@ public class ServletFakeArtifactSet extends DistributedPropertySet {
         return new FakeServletHttpResponse();
     }
 
-    public static class FakeServletHttpRequest implements HttpServletRequest {
-        private String requestURL;
+    public static final class FakeServletHttpRequest implements HttpServletRequest {
+        private final String requestURL;
         
-        public FakeServletHttpRequest(String requestURL) {
+        public FakeServletHttpRequest(final String requestURL) {
             this.requestURL = requestURL;
         }
         
@@ -96,15 +96,15 @@ public class ServletFakeArtifactSet extends DistributedPropertySet {
             return null;
         }
 
-        public long getDateHeader(String string) {
+        public long getDateHeader(final String string) {
             return 0L;
         }
 
-        public String getHeader(String string) {
+        public String getHeader(final String string) {
             return null;
         }
 
-        public Enumeration getHeaders(String string) {
+        public Enumeration getHeaders(final String string) {
             return null;
         }
 
@@ -112,7 +112,7 @@ public class ServletFakeArtifactSet extends DistributedPropertySet {
             return null;
         }
 
-        public int getIntHeader(String string) {
+        public int getIntHeader(final String string) {
             return -1;
         }
 
@@ -140,7 +140,7 @@ public class ServletFakeArtifactSet extends DistributedPropertySet {
             return null;
         }
 
-        public boolean isUserInRole(String string) {
+        public boolean isUserInRole(final String string) {
             return true;
         }
 
@@ -157,14 +157,14 @@ public class ServletFakeArtifactSet extends DistributedPropertySet {
         }
 
         public StringBuffer getRequestURL() {
-            return new StringBuffer(requestURL.toString());
+            return new StringBuffer(requestURL);
         }
 
         public String getServletPath() {
             return null;
         }
 
-        public HttpSession getSession(boolean b) {
+        public HttpSession getSession(final boolean b) {
             return null;
         }
 
@@ -188,7 +188,7 @@ public class ServletFakeArtifactSet extends DistributedPropertySet {
             return true;
         }
 
-        public Object getAttribute(String string) {
+        public Object getAttribute(final String string) {
             return null;
         }
 
@@ -200,7 +200,7 @@ public class ServletFakeArtifactSet extends DistributedPropertySet {
             return null;
         }
 
-        public void setCharacterEncoding(String string) throws UnsupportedEncodingException {
+        public void setCharacterEncoding(final String string) throws UnsupportedEncodingException {
         }
 
         public int getContentLength() {
@@ -215,7 +215,7 @@ public class ServletFakeArtifactSet extends DistributedPropertySet {
             return null;
         }
 
-        public String getParameter(String string) {
+        public String getParameter(final String string) {
             return null;
         }
 
@@ -223,7 +223,7 @@ public class ServletFakeArtifactSet extends DistributedPropertySet {
             return null;
         }
 
-        public String[] getParameterValues(String string) {
+        public String[] getParameterValues(final String string) {
             return null;
         }
 
@@ -259,10 +259,10 @@ public class ServletFakeArtifactSet extends DistributedPropertySet {
             return null;
         }
 
-        public void setAttribute(String string, Object object) {
+        public void setAttribute(final String string, final Object object) {
         }
 
-        public void removeAttribute(String string) {
+        public void removeAttribute(final String string) {
         }
 
         public Locale getLocale() {
@@ -277,11 +277,11 @@ public class ServletFakeArtifactSet extends DistributedPropertySet {
             return false;
         }
 
-        public RequestDispatcher getRequestDispatcher(String string) {
+        public RequestDispatcher getRequestDispatcher(final String string) {
             return null;
         }
 
-        public String getRealPath(String string) {
+        public String getRealPath(final String string) {
             return null;
         }
 
@@ -302,61 +302,61 @@ public class ServletFakeArtifactSet extends DistributedPropertySet {
         }
     }
     
-    public static class FakeServletHttpResponse implements HttpServletResponse {
-        public void addCookie(Cookie cookie) {
+    public static final class FakeServletHttpResponse implements HttpServletResponse {
+        public void addCookie(final Cookie cookie) {
         }
 
-        public boolean containsHeader(String string) {
+        public boolean containsHeader(final String string) {
             return true;
         }
 
-        public String encodeURL(String string) {
+        public String encodeURL(final String string) {
             return null;
         }
 
-        public String encodeRedirectURL(String string) {
+        public String encodeRedirectURL(final String string) {
             return null;
         }
 
-        public String encodeUrl(String string) {
+        public String encodeUrl(final String string) {
             return null;
         }
 
-        public String encodeRedirectUrl(String string) {
+        public String encodeRedirectUrl(final String string) {
             return null;
         }
 
-        public void sendError(int i, String string) throws IOException {
+        public void sendError(final int i, final String string) throws IOException {
         }
 
-        public void sendError(int i) throws IOException {
+        public void sendError(final int i) throws IOException {
         }
 
-        public void sendRedirect(String string) throws IOException {
+        public void sendRedirect(final String string) throws IOException {
         }
 
-        public void setDateHeader(String string, long l) {
+        public void setDateHeader(final String string, final long l) {
         }
 
-        public void addDateHeader(String string, long l) {
+        public void addDateHeader(final String string, final long l) {
         }
 
-        public void setHeader(String string, String string0) {
+        public void setHeader(final String string, final String string0) {
         }
 
-        public void addHeader(String string, String string0) {
+        public void addHeader(final String string,final  String string0) {
         }
 
-        public void setIntHeader(String string, int i) {
+        public void setIntHeader(final String string, final int i) {
         }
 
-        public void addIntHeader(String string, int i) {
+        public void addIntHeader(final String string, final int i) {
         }
 
-        public void setStatus(int i) {
+        public void setStatus(final int i) {
         }
 
-        public void setStatus(int i, String string) {
+        public void setStatus(final int i, final String string) {
         }
 
         public String getCharacterEncoding() {
@@ -375,16 +375,16 @@ public class ServletFakeArtifactSet extends DistributedPropertySet {
             return null;
         }
 
-        public void setCharacterEncoding(String string) {
+        public void setCharacterEncoding(final String string) {
         }
 
-        public void setContentLength(int i) {
+        public void setContentLength(final int i) {
         }
 
-        public void setContentType(String string) {
+        public void setContentType(final String string) {
         }
 
-        public void setBufferSize(int i) {
+        public void setBufferSize(final int i) {
         }
 
         public int getBufferSize() {
@@ -404,7 +404,7 @@ public class ServletFakeArtifactSet extends DistributedPropertySet {
         public void reset() {
         }
 
-        public void setLocale(Locale locale) {
+        public void setLocale(final Locale locale) {
         }
 
         public Locale getLocale() {

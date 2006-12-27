@@ -47,7 +47,7 @@ public final class OutputWriter {
      * Flush the buffer by looping until the <code>ByteBuffer</code> is empty
      * @param bb the ByteBuffer to write.
      */   
-    public static void flushChannel(SocketChannel socketChannel, ByteBuffer bb)
+    public static void flushChannel(final SocketChannel socketChannel, final ByteBuffer bb)
             throws IOException{
         if (logger.isLoggable(Level.FINEST)) {
             logger.log(Level.FINEST, "Output dump:");
@@ -59,7 +59,7 @@ public final class OutputWriter {
         int attempts = 0;
         try {
             while ( bb.hasRemaining() ) {
-                int len = socketChannel.write(bb);
+                final int len = socketChannel.write(bb);
                 attempts++;
                 if (len < 0){
                     throw new EOFException();
@@ -104,7 +104,7 @@ public final class OutputWriter {
      * Flush the buffer by looping until the <code>ByteBuffer</code> is empty
      * @param bb the ByteBuffer to write.
      */   
-    public static void flushChannel(SocketChannel socketChannel, ByteBuffer[] bb)
+    public static void flushChannel(final SocketChannel socketChannel, final ByteBuffer[] bb)
             throws IOException{
         if (logger.isLoggable(Level.FINEST)) {
             logger.log(Level.FINEST, "Output dump:");
@@ -115,7 +115,7 @@ public final class OutputWriter {
         int attempts = 0;
         try {
             while (hasRemaining(bb)) {
-                long len = socketChannel.write(bb);
+                final long len = socketChannel.write(bb);
                 attempts++;
                 if (len < 0){
                     throw new EOFException();
@@ -156,7 +156,7 @@ public final class OutputWriter {
         }
     }      
 
-    private static boolean hasRemaining(ByteBuffer[] bb) {
+    private static boolean hasRemaining(final ByteBuffer[] bb) {
         for(int i=0; i<bb.length; i++) {
             if (bb[i].hasRemaining()) {
                 return true;

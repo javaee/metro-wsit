@@ -35,15 +35,15 @@ public class ServiceChannelException extends Exception {
     public ServiceChannelException() {
     }
     
-    public ServiceChannelException(@Nullable String message) {
+    public ServiceChannelException(@Nullable final String message) {
         super(message);
     }
     
-    public ServiceChannelException(String message, ServiceChannelExceptionBean faultInfo) {
+    public ServiceChannelException(final String message, final ServiceChannelExceptionBean faultInfo) {
         super(message);
     }
 
-    public ServiceChannelException(String message, ServiceChannelExceptionBean faultInfo, Throwable cause) {
+    public ServiceChannelException(final String message, final ServiceChannelExceptionBean faultInfo, final Throwable cause) {
         super(message, cause);
     }
 
@@ -51,7 +51,7 @@ public class ServiceChannelException extends Exception {
         return new ServiceChannelExceptionBean();
     }
 
-    public void setFaultInfo(ServiceChannelExceptionBean faultInfo) {
+    public void setFaultInfo(final ServiceChannelExceptionBean faultInfo) {
         
     }
     
@@ -61,7 +61,7 @@ public class ServiceChannelException extends Exception {
         public ServiceChannelExceptionBean() {
         }
         
-        public ServiceChannelExceptionBean(String message) {
+        public ServiceChannelExceptionBean(final String message) {
             this.message = message;
         }
 
@@ -69,7 +69,7 @@ public class ServiceChannelException extends Exception {
             return this.message;
         }
 
-        public void setMessage(String message) {
+        public void setMessage(final String message) {
             this.message = message;
         }
     }

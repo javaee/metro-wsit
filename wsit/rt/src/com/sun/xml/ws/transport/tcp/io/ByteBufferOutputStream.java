@@ -31,19 +31,19 @@ import java.nio.ByteBuffer;
  * @author Alexey Stashok
  */
 public class ByteBufferOutputStream extends OutputStream {
-    private static final boolean useDirectBuffer = false;
+    private static final boolean USE_DIRECT_BUFFER = false;
     
     private ByteBuffer outputBuffer;
     
     public ByteBufferOutputStream() {
-        outputBuffer = ByteBufferFactory.allocateView(useDirectBuffer);
+        outputBuffer = ByteBufferFactory.allocateView(USE_DIRECT_BUFFER);
     }
     
     public ByteBufferOutputStream(int initSize) {
-        outputBuffer = ByteBufferFactory.allocateView(initSize, useDirectBuffer);
+        outputBuffer = ByteBufferFactory.allocateView(initSize, USE_DIRECT_BUFFER);
     }
 
-    public ByteBufferOutputStream(ByteBuffer outputBuffer) {
+    public ByteBufferOutputStream(final ByteBuffer outputBuffer) {
         this.outputBuffer = outputBuffer;
     }
 
@@ -56,9 +56,9 @@ public class ByteBufferOutputStream extends OutputStream {
         return outputBuffer;
     }
     
-    public void write(int data) throws IOException {
+    public void write(final int data) throws IOException {
         if (outputBuffer.position() == outputBuffer.capacity() - 1) {
-            ByteBuffer tmpBuffer = ByteBufferFactory.allocateView(outputBuffer.capacity() * 2, useDirectBuffer);
+            final ByteBuffer tmpBuffer = ByteBufferFactory.allocateView(outputBuffer.capacity() * 2, USE_DIRECT_BUFFER);
             tmpBuffer.put(outputBuffer);
             outputBuffer = tmpBuffer;
         }

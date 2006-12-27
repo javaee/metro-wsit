@@ -28,7 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * @author Alexey Stashok
  */
-public class TCPConstants {
+public final class TCPConstants {
     public static final String CHARSET_PROPERTY = "charset";
     public static final String CONTENT_TYPE_PROPERTY = "Content-Type";
     public static final String SOAP_ACTION_PROPERTY = "action";

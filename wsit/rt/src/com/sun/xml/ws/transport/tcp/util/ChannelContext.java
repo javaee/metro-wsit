@@ -41,11 +41,11 @@ public final class ChannelContext {
     private static final Logger logger = Logger.getLogger(
             com.sun.xml.ws.transport.tcp.util.TCPConstants.LoggingDomain);
     
-    private static Map<String, Integer> staticParamsEncodingMap = new HashMap<String, Integer>();
-    private static Map<Integer, String> staticParamsDecodingMap = new HashMap<Integer, String> ();
+    private static final Map<String, Integer> staticParamsEncodingMap = new HashMap<String, Integer>(4);
+    private static final Map<Integer, String> staticParamsDecodingMap = new HashMap<Integer, String> (4);
     
-    private static Map<MimeType, Integer> staticMimeTypeEncodingMap = new HashMap<MimeType, Integer>();
-    private static Map<Integer, MimeType> staticMimeTypeDecodingMap = new HashMap<Integer, MimeType>();
+    private static final Map<MimeType, Integer> staticMimeTypeEncodingMap = new HashMap<MimeType, Integer>(4);
+    private static final Map<Integer, MimeType> staticMimeTypeDecodingMap = new HashMap<Integer, MimeType>(4);
     static {
         staticParamsEncodingMap.put(TCPConstants.CHARSET_PROPERTY, 0);
         staticParamsEncodingMap.put(TCPConstants.SOAP_ACTION_PROPERTY, 1);
@@ -61,19 +61,20 @@ public final class ChannelContext {
     }
     
     // tcp connection session this channel belongs to
-    private ConnectionSession connectionSession;
+    private final ConnectionSession connectionSession;
     
     /**
      * Channel settings aggreed during client-service handshaking
      */
-    private ChannelSettings channelSettings;
+    private final ChannelSettings channelSettings;
     
     /**
      * Codec used to encode/decode messages on this channel
      */
     private Codec codec;
     
-    public ChannelContext(@NotNull ConnectionSession connectionSession, @NotNull ChannelSettings channelSettings) {
+    public ChannelContext(@NotNull final ConnectionSession connectionSession, 
+            @NotNull final ChannelSettings channelSettings) {
         this.connectionSession = connectionSession;
         this.channelSettings = channelSettings;
     }
@@ -100,7 +101,7 @@ public final class ChannelContext {
         return codec;
     }
     
-    private void setCodec(@NotNull Codec codec) {
+    private void setCodec(@NotNull final Codec codec) {
         this.codec = codec;
     }
     
@@ -125,7 +126,7 @@ public final class ChannelContext {
         return channelSettings.getWSServiceName();
     }
     
-    public void setWSServiceName(@NotNull QName wsServiceName) {
+    public void setWSServiceName(@NotNull final QName wsServiceName) {
         channelSettings.setWSServiceName(wsServiceName);
     }
     
@@ -139,9 +140,9 @@ public final class ChannelContext {
     /**
      * Encodes message's content type to TCP protocol specific representation
      */
-    public @NotNull ContentType.EncodedContentType encodeContentType(@NotNull String contentTypeS) {
+    public @NotNull ContentType.EncodedContentType encodeContentType(@NotNull final String contentTypeS) {
         logger.log(Level.FINEST, "ChannelContext.encodeContentType: {0}", contentTypeS);
-        ContentType contentType = ContentType.createContentType(contentTypeS);
+        final ContentType contentType = ContentType.createContentType(contentTypeS);
         
         Integer mt = staticMimeTypeEncodingMap.get(contentType.getMimeType());
         if (mt == null) {
@@ -152,9 +153,10 @@ public final class ChannelContext {
         
         assert mt != null && mt != -1;
         
-        Map<Integer, String> encodedParameterMap = new HashMap<Integer, String>();
-        for(Map.Entry<String, String> parameter : contentType.getParameters().entrySet()) {
-            int paramId = encodeParam(parameter.getKey());
+        final Map<String, String> parameters = contentType.getParameters();
+        final Map<Integer, String> encodedParameterMap = new HashMap<Integer, String>(parameters.size());
+        for(Map.Entry<String, String> parameter : parameters.entrySet()) {
+            final int paramId = encodeParam(parameter.getKey());
             encodedParameterMap.put(paramId, parameter.getValue());
         }
         
@@ -164,7 +166,7 @@ public final class ChannelContext {
     /**
      * Decodes message's content type from TCP protocol specific representation
      */
-    public @NotNull String decodeContentType(int mimeId, Map<Integer, String> params) {
+    public @NotNull String decodeContentType(final int mimeId, final Map<Integer, String> params) {
         if (logger.isLoggable(Level.FINEST)) {
             logger.log(Level.FINEST, "ChannelContext.decodeContentType mimeId: {0} params: {1}", new Object[] {mimeId, params});
         }
@@ -178,11 +180,11 @@ public final class ChannelContext {
         
         String contentTypeStr = mimeType.toString();
         if (params.size() > 0) {
-            StringBuffer ctBuf = new StringBuffer(contentTypeStr);
+            final StringBuffer ctBuf = new StringBuffer(contentTypeStr);
             for(Map.Entry<Integer, String> parameter : params.entrySet()) {
                 ctBuf.append(';');
-                String paramKey = decodeParam(parameter.getKey());
-                String paramValue = parameter.getValue();
+                final String paramKey = decodeParam(parameter.getKey());
+                final String paramValue = parameter.getValue();
                 ctBuf.append(paramKey);
                 ctBuf.append('=');
                 ctBuf.append(paramValue);
@@ -193,7 +195,7 @@ public final class ChannelContext {
         return contentTypeStr;
     }
     
-    private int encodeParam(@NotNull String paramStr) {
+    private int encodeParam(@NotNull final String paramStr) {
         Integer paramId = staticParamsEncodingMap.get(paramStr);
         if (paramId == null) {
             paramId = channelSettings.getNegotiatedParams().indexOf(paramStr);
@@ -206,7 +208,7 @@ public final class ChannelContext {
         throw new AssertionError(MessagesMessages.WSTCP_0010_UNKNOWN_PARAMETER(paramStr));
     }
     
-    private @NotNull String decodeParam(int paramId) {
+    private @NotNull String decodeParam(final int paramId) {
         String paramStr = staticParamsDecodingMap.get(paramId);
         if (paramStr == null) {
             paramStr = channelSettings.getNegotiatedParams().get(paramId - staticParamsDecodingMap.size());
@@ -223,10 +225,10 @@ public final class ChannelContext {
     /**
      * Configure Codec according to channel settings
      */
-    public static void configureCodec(@NotNull ChannelContext channelContext,
-            @NotNull SOAPVersion soapVersion,
-    @NotNull Codec defaultCodec) {
-        List<MimeType> supportedMimeTypes = channelContext.getChannelSettings().getNegotiatedMimeTypes();
+    public static void configureCodec(@NotNull final ChannelContext channelContext,
+            @NotNull final SOAPVersion soapVersion,
+            @NotNull final Codec defaultCodec) {
+        final List<MimeType> supportedMimeTypes = channelContext.getChannelSettings().getNegotiatedMimeTypes();
         if (supportedMimeTypes != null) {
             if (supportedMimeTypes.contains(MimeType.FAST_INFOSET_STATEFUL_SOAP11) ||
                     supportedMimeTypes.contains(MimeType.FAST_INFOSET_STATEFUL_SOAP12)) {

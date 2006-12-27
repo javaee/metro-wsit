@@ -32,11 +32,8 @@ import java.util.Map;
 /**
  * @author Alexey Stashok
  */
-public class ConnectionSession {
-    private static ChannelSettings zeroChannelSettings;
-    static {
-        zeroChannelSettings = new ChannelSettings();
-    }
+public final class ConnectionSession {
+    private static final ChannelSettings zeroChannelSettings = new ChannelSettings();
     
     private Map<Integer, ChannelContext> channelId2context;
     
@@ -45,15 +42,15 @@ public class ConnectionSession {
     private int channelCounter;
     
     private Connection connection;
-    private int dstAddressHashKey;
+    private final int dstAddressHashKey;
     
     private boolean isClosed;
     
-    public ConnectionSession(Connection connection) {
+    public ConnectionSession(final Connection connection) {
         this(-1, connection);
     }
     
-    public ConnectionSession(int dstAddressHashKey, Connection connection) {
+    public ConnectionSession(final int dstAddressHashKey, final Connection connection) {
         this.dstAddressHashKey = dstAddressHashKey;
         this.connection = connection;
         channelId2context = new HashMap<Integer, ChannelContext>();
@@ -63,19 +60,19 @@ public class ConnectionSession {
     }
     
     private void initServiceChannel() {
-        ChannelContext zeroChannelContext = new ChannelContext(this, zeroChannelSettings);
+        final ChannelContext zeroChannelContext = new ChannelContext(this, zeroChannelSettings);
         channelId2context.put(0, zeroChannelContext);
     }
     
-    public void registerChannel(int channelId, @NotNull ChannelContext context) {
+    public void registerChannel(final int channelId, @NotNull final ChannelContext context) {
         channelId2context.put(channelId, context);
     }
     
-    public ChannelContext findWSServiceContextByChannelId(int channelId) {
+    public ChannelContext findWSServiceContextByChannelId(final int channelId) {
         return channelId2context.get(channelId);
     }
     
-    public void deregisterChannel(int channelId) {
+    public void deregisterChannel(final int channelId) {
         channelId2context.remove(channelId);
     }
     
@@ -89,14 +86,14 @@ public class ConnectionSession {
             connection.close();
         } catch (IOException ex) {
         }
-        clear();
+        close();
     }
     
-    public void setAttribute(@NotNull String name, Object value) {
+    public void setAttribute(@NotNull final String name, final Object value) {
         attributes.put(name, value);
     }
     
-    public @Nullable Object getAttribute(@NotNull String name) {
+    public @Nullable Object getAttribute(@NotNull final String name) {
         return attributes.get(name);
     }
     
@@ -116,7 +113,7 @@ public class ConnectionSession {
         return channelCounter++;
     }
     
-    private void clear() {
+    private void close() {
         attributes = null;
         channelId2context = null;
         connection = null;

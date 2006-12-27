@@ -33,23 +33,23 @@ import java.io.IOException;
 /**
  * @author Alexey Stashok
  */
-public class TCP109Adapter extends TCPAdapter {
+public final class TCP109Adapter extends TCPAdapter {
     
     /**
      * Currently 109 deployed WS's pipeline relies on Servlet request and response
      * attributes. So its temporary workaround to make 109 work with TCP
      */
-    private ServletFakeArtifactSet servletFakeArtifactSet;
-    private boolean isEJB;
-    private String contextRoot;
+    private final ServletFakeArtifactSet servletFakeArtifactSet;
+    private final boolean isEJB;
+    private final String contextRoot;
     
     public TCP109Adapter(
-            @NotNull String name,
-    @NotNull String contextRoot,
-    @NotNull String urlPattern,
-    @NotNull WSEndpoint endpoint,
-    @NotNull ServletFakeArtifactSet servletFakeArtifactSet,
-    boolean isEJB) {
+            @NotNull final String name,
+    @NotNull final String contextRoot,
+    @NotNull final String urlPattern,
+    @NotNull final WSEndpoint endpoint,
+    @NotNull final ServletFakeArtifactSet servletFakeArtifactSet,
+    final boolean isEJB) {
         super(name, urlPattern, endpoint);
         this.contextRoot = contextRoot;
         this.servletFakeArtifactSet = servletFakeArtifactSet;
@@ -58,7 +58,7 @@ public class TCP109Adapter extends TCPAdapter {
     
     
     @Override
-    public void handle(@NotNull ChannelContext channelContext) throws IOException {
+    public void handle(@NotNull final ChannelContext channelContext) throws IOException {
         EjbRuntimeEndpointInfo ejbRuntimeEndpointInfo = null;
         
         if (isEJB) {
@@ -74,17 +74,16 @@ public class TCP109Adapter extends TCPAdapter {
         try {
             super.handle(channelContext);
         } finally {
-            if (isEJB) {
-                if(ejbRuntimeEndpointInfo != null)
-                    ejbRuntimeEndpointInfo.releaseImplementor();
+            if (isEJB && ejbRuntimeEndpointInfo != null) {
+                ejbRuntimeEndpointInfo.releaseImplementor();
             }
         }
     }
     
-    class TCP109Toolkit extends TCPAdapter.TCPToolkit {
+    final class TCP109Toolkit extends TCPAdapter.TCPToolkit {
         // if its Adapter from 109 deployed WS - add fake Servlet artifacts
         @Override
-        public void addCustomPacketSattellites(@NotNull Packet packet) {
+        public void addCustomPacketSattellites(@NotNull final Packet packet) {
             super.addCustomPacketSattellites(packet);
             packet.addSatellite(servletFakeArtifactSet);
         }

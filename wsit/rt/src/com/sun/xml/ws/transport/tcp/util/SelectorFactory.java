@@ -36,18 +36,18 @@ import java.util.Stack;
  * @author Scott Oaks
  * @author Jean-Francois Arcand
  */
-public class SelectorFactory{
+public final class SelectorFactory{
     
     /**
      * The timeout before we exit.
      */
-    protected static long timeout = 5000;
+    static long timeout = 5000;
     
     
     /**
      * The number of <code>Selector</code> to create.
      */
-    protected static int maxSelectors = 20;
+    static int maxSelectors = 20;
     
     
     /**
@@ -64,7 +64,6 @@ public class SelectorFactory{
             for (int i = 0; i < maxSelectors; i++) 
                 selectors.add(Selector.open());
         } catch (IOException ex){
-            ; // do nothing.
         }
     }
 
@@ -72,7 +71,7 @@ public class SelectorFactory{
     /**
      * Get a exclusive <code>Selector</code>
      */
-    public final static Selector getSelector() {
+    public static Selector getSelector() {
         synchronized(selectors) {
             Selector s = null;
             try {
@@ -101,7 +100,7 @@ public class SelectorFactory{
     /**
      * Return the <code>Selector</code> to the cache
      */
-    public final static void returnSelector(Selector s) {
+    public static void returnSelector(final Selector s) {
         synchronized(selectors) {
             selectors.push(s);
             if (selectors.size() == 1)

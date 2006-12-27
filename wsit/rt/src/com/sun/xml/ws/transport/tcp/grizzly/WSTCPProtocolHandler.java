@@ -36,13 +36,13 @@ import java.util.logging.Logger;
 /**
  * @author Alexey Stashok
  */
-public class WSTCPProtocolHandler implements ProtocolHandler {
+public final class WSTCPProtocolHandler implements ProtocolHandler {
     private static final Logger logger = Logger.getLogger(
             com.sun.xml.ws.transport.tcp.util.TCPConstants.LoggingDomain + ".server");
     
     private static IncomeMessageProcessor processor;
     
-    public static void setIncomingMessageProcessor(IncomeMessageProcessor processor) {
+    public static void setIncomingMessageProcessor(final IncomeMessageProcessor processor) {
         WSTCPProtocolHandler.processor = processor;
     }
     
@@ -50,7 +50,7 @@ public class WSTCPProtocolHandler implements ProtocolHandler {
         return new String[] {TCPConstants.PROTOCOL_SCHEMA};
     }
     
-    public void handle(ProtocolInfo tupple) throws IOException {
+    public void handle(final ProtocolInfo tupple) throws IOException {
         if (processor != null) {
             tupple.byteBuffer.flip();
             processor.process(tupple.byteBuffer, (SocketChannel) tupple.key.channel());

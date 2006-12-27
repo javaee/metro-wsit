@@ -23,7 +23,6 @@
 package com.sun.xml.ws.transport.tcp.util;
 
 import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
-import com.sun.xml.ws.transport.tcp.util.MimeType;
 import com.sun.xml.ws.transport.tcp.util.TCPSettings.EncodingMode;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
@@ -36,22 +35,18 @@ import javax.xml.ws.soap.MTOMFeature;
 /**
  * @author Alexey Stashok
  */
-public class BindingUtils {
-    private static List<String> MTOM_SOAP_PARAMS;
+public final class BindingUtils {
+    private static final List<String> MTOM_SOAP_PARAMS;
     
-    private static NegotiatedBindingContent SOAP11_BINDING_CONTENT;
+    private static final NegotiatedBindingContent SOAP11_BINDING_CONTENT;
     
-    private static NegotiatedBindingContent SOAP12_BINDING_CONTENT;
+    private static final NegotiatedBindingContent SOAP12_BINDING_CONTENT;
     
-    private static NegotiatedBindingContent MTOM11_BINDING_CONTENT;
+    private static final NegotiatedBindingContent MTOM11_BINDING_CONTENT;
     
-    private static NegotiatedBindingContent MTOM12_BINDING_CONTENT;
+    private static final NegotiatedBindingContent MTOM12_BINDING_CONTENT;
     
     static {
-        initiate();
-    }
-    
-    private static void initiate() {
         MTOM_SOAP_PARAMS = Arrays.asList(new String[] {"boundary"});
         
         SOAP11_BINDING_CONTENT =
@@ -82,7 +77,7 @@ public class BindingUtils {
         }
     }
     
-    public static NegotiatedBindingContent getNegotiatedContentTypesAndParams(WSBinding binding) {
+    public static NegotiatedBindingContent getNegotiatedContentTypesAndParams(final WSBinding binding) {
         if (binding.getSOAPVersion().equals(SOAPVersion.SOAP_11)) {
             if (isMTOMEnabled(binding)) {
                 return MTOM11_BINDING_CONTENT;
@@ -100,13 +95,13 @@ public class BindingUtils {
         throw new AssertionError(MessagesMessages.WSTCP_0009_UNKNOWN_BINDING(binding));
     }
     
-    private static boolean isMTOMEnabled(WSBinding binding) {
+    private static boolean isMTOMEnabled(final WSBinding binding) {
         return binding.isFeatureEnabled(MTOMFeature.class);
     }
     
-    public static class NegotiatedBindingContent {
-        public List<MimeType> negotiatedMimeTypes;
-        public List<String> negotiatedParams;
+    public static final class NegotiatedBindingContent {
+        public final List<MimeType> negotiatedMimeTypes;
+        public final List<String> negotiatedParams;
         
         public NegotiatedBindingContent(List<MimeType> negotiatedMimeTypes, List<String> negotiatedParams) {
             this.negotiatedMimeTypes = negotiatedMimeTypes;

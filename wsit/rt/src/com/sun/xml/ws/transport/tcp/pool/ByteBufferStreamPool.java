@@ -27,9 +27,9 @@ import com.sun.xml.ws.util.Pool;
 /**
  * @author Alexey Stashok
  */
-public class ByteBufferStreamPool<T extends LifeCycle> {
+public final class ByteBufferStreamPool<T extends LifeCycle> {
     
-    private Pool<T> pool;
+    private final Pool<T> pool;
     public ByteBufferStreamPool(final Class<T> memberClass) {
         pool = new Pool<T>() {
             protected T create() {
@@ -44,17 +44,17 @@ public class ByteBufferStreamPool<T extends LifeCycle> {
         };
     }
     
-    private T create(Class<T> memberClass) throws InstantiationException, IllegalAccessException {
+    private T create(final Class<T> memberClass) throws InstantiationException, IllegalAccessException {
         return memberClass.newInstance();
     }
     
     public T take() {
-        T member = pool.take();
+        final T member = pool.take();
         member.activate();
         return member;
     }
     
-    public void release(T member) {
+    public void release(final T member) {
         member.passivate();
         pool.recycle(member);
     }

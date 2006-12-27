@@ -35,7 +35,7 @@ import java.nio.ByteBuffer;
  *
  * @author Jean-Francois Arcand
  */
-public class ByteBufferFactory{
+public final class ByteBufferFactory{
 
     
     /**
@@ -68,7 +68,7 @@ public class ByteBufferFactory{
      * Return a direct <code>ByteBuffer</code> view
      * @param size the Size of the <code>ByteBuffer</code>
      */ 
-    public synchronized static ByteBuffer allocateView(int size, boolean direct){
+    public synchronized static ByteBuffer allocateView(final int size, final boolean direct){
         if (byteBuffer == null || 
                (byteBuffer.capacity() - byteBuffer.limit() < size)){
             if ( direct )
@@ -78,7 +78,7 @@ public class ByteBufferFactory{
         }
 
         byteBuffer.limit(byteBuffer.position() + size);
-        ByteBuffer view = byteBuffer.slice();
+        final ByteBuffer view = byteBuffer.slice();
         byteBuffer.position(byteBuffer.limit());  
         
         return view;
@@ -88,7 +88,7 @@ public class ByteBufferFactory{
     /**
      * Return a direct <code>ByteBuffer</code> view using the default size.
      */ 
-    public synchronized static ByteBuffer allocateView(boolean direct){
+    public synchronized static ByteBuffer allocateView(final boolean direct){
         return allocateView(defaultCapacity, direct);
     }
      

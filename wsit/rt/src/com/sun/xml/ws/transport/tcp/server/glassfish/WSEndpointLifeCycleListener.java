@@ -28,12 +28,12 @@ import com.sun.enterprise.webservice.monitoring.Endpoint;
 /**
  * @author Alexey Stashok
  */
-public class WSEndpointLifeCycleListener implements EndpointLifecycleListener {
-    public void endpointAdded(Endpoint endpoint) {
+public final class WSEndpointLifeCycleListener implements EndpointLifecycleListener {
+    public void endpointAdded(final Endpoint endpoint) {
         AppServWSRegistry.getInstance().registerEndpoint(endpoint);
     }
 
-    public void endpointRemoved(Endpoint endpoint) {
+    public void endpointRemoved(final Endpoint endpoint) {
         AppServWSRegistry.getInstance().deregisterEndpoint(endpoint);
     }
 }

@@ -34,14 +34,14 @@ import javax.xml.namespace.QName;
  * @author Alexey Stashok
  */
 public class TCPTransportPipeFactory extends TransportPipeFactory {
-    private static QName serviceChannelServiceName = new ServiceChannelWSImplService().getServiceName();
+    private static final QName serviceChannelServiceName = new ServiceChannelWSImplService().getServiceName();
     
     @Override
-    public Pipe doCreate(@NotNull ClientPipeAssemblerContext context) {
+    public Pipe doCreate(@NotNull final ClientPipeAssemblerContext context) {
         return doCreate(context, true);
     }
     
-    public static Pipe doCreate(@NotNull ClientPipeAssemblerContext context, boolean checkSchema) {
+    public static Pipe doCreate(@NotNull final ClientPipeAssemblerContext context, final boolean checkSchema) {
         if (checkSchema && !TCPConstants.PROTOCOL_SCHEMA.equalsIgnoreCase(context.getAddress().getURI().getScheme())) {
             return null;
         }

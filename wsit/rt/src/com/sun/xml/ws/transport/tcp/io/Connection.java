@@ -41,7 +41,7 @@ import java.util.logging.Logger;
 /**
  * @author Alexey Stashok
  */
-public class Connection {
+public final class Connection {
     private static final Logger logger = Logger.getLogger(
             com.sun.xml.ws.transport.tcp.util.TCPConstants.LoggingDomain);
     
@@ -65,7 +65,7 @@ public class Connection {
     private int contentId;
     private Map<Integer, String> contentProps;
     
-    public Connection(SocketChannel socketChannel) {
+    public Connection(final SocketChannel socketChannel) {
         inputStream = byteBufferInputStreamPool.take();
         outputStream = byteBufferOutputStreamPool.take();
         setSocketChannel(socketChannel);
@@ -75,7 +75,7 @@ public class Connection {
         return socketChannel;
     }
     
-    public void setSocketChannel(SocketChannel socketChannel) {
+    public void setSocketChannel(final SocketChannel socketChannel) {
         this.socketChannel = socketChannel;
         inputStream.setSocketChannel(socketChannel);
         outputStream.setSocketChannel(socketChannel);
@@ -86,7 +86,7 @@ public class Connection {
      */
     public void prepareForReading() throws IOException {
         if (inputStreamRef != null) {
-            BufferedMessageInputStream is = inputStreamRef.get();
+            final BufferedMessageInputStream is = inputStreamRef.get();
             // if InputStream is used by some lazy reader - buffer message
             if (inputStream.isMessageInProcess() && is != null && !is.isClosed()) {
                 is.bufferMessage();
@@ -116,7 +116,7 @@ public class Connection {
      * prepareForReading() should be called before!
      */
     public InputStream openInputStream() throws IOException {
-        BufferedMessageInputStream is = new BufferedMessageInputStream(inputStream);
+        final BufferedMessageInputStream is = new BufferedMessageInputStream(inputStream);
         inputStreamRef = new WeakReference<BufferedMessageInputStream>(is);
         return is;
     }
@@ -139,7 +139,7 @@ public class Connection {
         return isDirectMode;
     }
     
-    public void setDirectMode(boolean isDirectMode) {
+    public void setDirectMode(final boolean isDirectMode) {
         this.isDirectMode = isDirectMode;
         inputStream.setDirectMode(isDirectMode);
         outputStream.setDirectMode(isDirectMode);
@@ -154,7 +154,7 @@ public class Connection {
     /**
      * Set channel id
      */
-    public void setChannelId(int channelId) {
+    public void setChannelId(final int channelId) {
         this.channelId = channelId;
     }
     
@@ -168,7 +168,7 @@ public class Connection {
     /**
      * Set request/response messageId of 1st frame
      */
-    public void setMessageId(int messageId) {
+    public void setMessageId(final int messageId) {
         this.messageId = messageId;
     }
     
@@ -182,7 +182,7 @@ public class Connection {
     /**
      * Set request/response contentId
      */
-    public void setContentId(int contentId) {
+    public void setContentId(final int contentId) {
         this.contentId = contentId;
     }
     
@@ -196,7 +196,7 @@ public class Connection {
     /**
      * Set request/response contentProps
      */
-    public void setContentProps(Map<Integer, String> contentProps) {
+    public void setContentProps(final Map<Integer, String> contentProps) {
         this.contentProps = contentProps;
     }
     
@@ -204,7 +204,7 @@ public class Connection {
      * Set messageBuffer for InputStream
      * some message part could be preread before
      */
-    public void setInputStreamByteBuffer(ByteBuffer messageBuffer) {
+    public void setInputStreamByteBuffer(final ByteBuffer messageBuffer) {
         inputStream.setByteBuffer(messageBuffer);
     }
     
@@ -222,18 +222,18 @@ public class Connection {
         socketChannel.close();
     }
     
-    public static Connection create(String host, int port) throws IOException {
+    public static Connection create(final String host, final int port) throws IOException {
         if (logger.isLoggable(Level.FINE)) {
             logger.log(Level.FINE, "Opening connection host: {0} port: {1}", new Object[] {host, port});
         }
-        SocketChannel socketChannel = SocketChannel.open();
-        Socket socket = socketChannel.socket();
+        final SocketChannel socketChannel = SocketChannel.open();
+        final Socket socket = socketChannel.socket();
         socket.connect(new InetSocketAddress(host, port));
         socketChannel.configureBlocking(false);
         
-        Connection connection = new Connection(socketChannel);
+        final Connection connection = new Connection(socketChannel);
 
-        ByteBuffer byteBuffer = ByteBufferFactory.allocateView(TCPConstants.DEFAULT_FRAME_SIZE, TCPConstants.DEFAULT_USE_DIRECT_BUFFER);
+        final ByteBuffer byteBuffer = ByteBufferFactory.allocateView(TCPConstants.DEFAULT_FRAME_SIZE, TCPConstants.DEFAULT_USE_DIRECT_BUFFER);
         byteBuffer.position(0);
         byteBuffer.limit(0);
         
@@ -244,5 +244,6 @@ public class Connection {
     
     protected void finalize() throws Throwable {
         close();
+        super.finalize();
     }
 }

@@ -34,7 +34,7 @@ import static com.sun.xml.ws.transport.tcp.wsit.TCPConstants.*;
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class TCPTransportPolicyValidator implements PolicyAssertionValidator {
+public final class TCPTransportPolicyValidator implements PolicyAssertionValidator {
     
     private static final ArrayList<QName> supportedAssertions = new ArrayList<QName>();
     
@@ -47,12 +47,12 @@ public class TCPTransportPolicyValidator implements PolicyAssertionValidator {
     public TCPTransportPolicyValidator() {
     }
 
-     public PolicyAssertionValidator.Fitness validateClientSide(PolicyAssertion assertion) {
+     public PolicyAssertionValidator.Fitness validateClientSide(final PolicyAssertion assertion) {
         return supportedAssertions.contains(assertion.getName()) ? Fitness.SUPPORTED : Fitness.UNKNOWN;
     }
 
-    public PolicyAssertionValidator.Fitness validateServerSide(PolicyAssertion assertion) {
-        QName assertionName = assertion.getName();
+    public PolicyAssertionValidator.Fitness validateServerSide(final PolicyAssertion assertion) {
+        final QName assertionName = assertion.getName();
         if (supportedAssertions.contains(assertionName)) {
             if (TCPTRANSPORT_POLICY_ASSERTION.equals(assertionName)) {
                 return Fitness.SUPPORTED;

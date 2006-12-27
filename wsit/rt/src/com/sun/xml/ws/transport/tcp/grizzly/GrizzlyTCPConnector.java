@@ -22,42 +22,35 @@
 
 package com.sun.xml.ws.transport.tcp.grizzly;
 
-import com.sun.enterprise.web.connector.grizzly.Pipeline;
 import com.sun.enterprise.web.connector.grizzly.SelectorThread;
-import com.sun.enterprise.web.portunif.PortUnificationPipeline;
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.transport.tcp.util.TCPConstants;
 import com.sun.xml.ws.transport.tcp.server.IncomeMessageProcessor;
 import com.sun.xml.ws.transport.tcp.server.TCPMessageListener;
 import com.sun.xml.ws.transport.tcp.server.WSTCPConnector;
 import java.net.InetAddress;
-import java.util.Enumeration;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * @author Alexey Stashok
  */
 public class GrizzlyTCPConnector implements WSTCPConnector {
-    private static final Logger logger = Logger.getLogger(
-            com.sun.xml.ws.transport.tcp.util.TCPConstants.LoggingDomain + ".server");
-    
     private SelectorThread selectorThread;
     
     private String host;
     private int port;
     private TCPMessageListener listener;
     
-    private boolean isPortUnificationMode;
+    private final boolean isPortUnificationMode;
     
-    public GrizzlyTCPConnector(@NotNull String host, int port,
-            @NotNull TCPMessageListener listener) {
+    public GrizzlyTCPConnector(@NotNull final String host, final int port,
+            @NotNull final TCPMessageListener listener) {
         this.host = host;
         this.port = port;
         this.listener = listener;
+        isPortUnificationMode = false;
     }
     
-    public GrizzlyTCPConnector(@NotNull TCPMessageListener listener) {
+    public GrizzlyTCPConnector(@NotNull final TCPMessageListener listener) {
         this.listener = listener;
         isPortUnificationMode = true;
     }
@@ -103,7 +96,7 @@ public class GrizzlyTCPConnector implements WSTCPConnector {
         return host;
     }
     
-    public void setHost(String host) {
+    public void setHost(final String host) {
         this.host = host;
     }
     
@@ -111,7 +104,7 @@ public class GrizzlyTCPConnector implements WSTCPConnector {
         return port;
     }
     
-    public void setPort(int port) {
+    public void setPort(final int port) {
         this.port = port;
     }
     
@@ -119,12 +112,12 @@ public class GrizzlyTCPConnector implements WSTCPConnector {
         return listener;
     }
     
-    public void setListener(TCPMessageListener listener) {
+    public void setListener(final TCPMessageListener listener) {
         this.listener = listener;
     }
     
     
-    public void setFrameSize(int frameSize) {
+    public void setFrameSize(final int frameSize) {
         selectorThread.setBufferSize(frameSize);
     }
     

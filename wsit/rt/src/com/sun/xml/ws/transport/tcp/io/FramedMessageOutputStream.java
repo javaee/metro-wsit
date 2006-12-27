@@ -36,7 +36,7 @@ import java.util.Map;
 /**
  * @author Alexey Stashok
  */
-public class FramedMessageOutputStream extends OutputStream implements LifeCycle {
+public final class FramedMessageOutputStream extends OutputStream implements LifeCycle {
     private static final int HEADER_BUFFER_SIZE = 10;
     
     private boolean useDirectBuffer;
@@ -58,14 +58,14 @@ public class FramedMessageOutputStream extends OutputStream implements LifeCycle
     /** is message framed or direct mode is used */
     private boolean isDirectMode;
     // ByteBuffer for channel_id and message_id, which present in all messages
-    private ByteBuffer headerBuffer;
+    private final ByteBuffer headerBuffer;
     // ByteBuffer for content_id, parameters for first frames only
-    private ByteBuffer headerParamsBuffer;
+    private final ByteBuffer headerParamsBuffer;
     // ByteBuffer for payload_length
     private ByteBuffer payloadLengthBuffer;
     
-    private ByteBuffer[] frameWithParams = new ByteBuffer[4];
-    private ByteBuffer[] frameWithoutParams = new ByteBuffer[3];
+    private final ByteBuffer[] frameWithParams = new ByteBuffer[4];
+    private final ByteBuffer[] frameWithoutParams = new ByteBuffer[3];
     
     /**
      * could be useful for debug reasons
@@ -87,7 +87,7 @@ public class FramedMessageOutputStream extends OutputStream implements LifeCycle
         setFrameSize(frameSize);
     }
     
-    public void setFrameSize(int frameSize) {
+    public void setFrameSize(final int frameSize) {
         this.frameSize = frameSize;
         payloadlengthLength = (int) Math.ceil(Math.log(frameSize) / Math.log(2));
         payloadLengthBuffer = ByteBufferFactory.allocateView(payloadlengthLength, useDirectBuffer);
@@ -99,32 +99,32 @@ public class FramedMessageOutputStream extends OutputStream implements LifeCycle
         return isDirectMode;
     }
     
-    public void setDirectMode(boolean isDirectMode) {
+    public void setDirectMode(final boolean isDirectMode) {
         reset();
         this.isDirectMode = isDirectMode;
     }
     
-    public void setSocketChannel(SocketChannel socketChannel) {
+    public void setSocketChannel(final SocketChannel socketChannel) {
         this.socketChannel = socketChannel;
     }
     
-    public void setChannelId(int channelId) {
+    public void setChannelId(final int channelId) {
         this.channelId = channelId;
     }
     
-    public void setMessageId(int messageId) {
+    public void setMessageId(final int messageId) {
         this.messageId = messageId;
     }
     
-    public void setContentId(int contentId) {
+    public void setContentId(final int contentId) {
         this.contentId = contentId;
     }
     
-    public void setContentProps(Map<Integer, String> contentProps) {
+    public void setContentProps(final Map<Integer, String> contentProps) {
         this.contentProps = contentProps;
     }
     
-    public void write(int data) throws IOException {
+    public void write(final int data) throws IOException {
         if (!outputBuffer.hasRemaining()) {
             outputBuffer.flip();
             flushBuffer();
@@ -134,9 +134,9 @@ public class FramedMessageOutputStream extends OutputStream implements LifeCycle
         outputBuffer.put((byte) data);
     }
     
-    public void write(byte[] data, int offset, int size) throws IOException {
+    public void write(final byte[] data, int offset, int size) throws IOException {
         while(size > 0) {
-            int bytesToWrite = Math.min(size, outputBuffer.remaining());
+            final int bytesToWrite = Math.min(size, outputBuffer.remaining());
             outputBuffer.put(data, offset, bytesToWrite);
             size -= bytesToWrite;
             offset += bytesToWrite;
@@ -163,7 +163,7 @@ public class FramedMessageOutputStream extends OutputStream implements LifeCycle
     private void flushBuffer() throws IOException {
         ByteBuffer[] frameBuffersArray = frameWithoutParams;
         
-        int payloadLength = outputBuffer.remaining();
+        final int payloadLength = outputBuffer.remaining();
         if (!isDirectMode) {
             int readyBytesToSend = 1 + payloadlengthLength + payloadLength;
             if (FrameType.isFrameContainsParams(messageId) && frameNumber == 0) {
@@ -174,8 +174,8 @@ public class FramedMessageOutputStream extends OutputStream implements LifeCycle
             
             prepareHeader(isFlushLast && readyBytesToSend <= frameSize);
             
-            int sendingPayloadLength = preparePayloadHeader(readyBytesToSend);
-            int payloadLimit = outputBuffer.limit();
+            final int sendingPayloadLength = preparePayloadHeader(readyBytesToSend);
+            final int payloadLimit = outputBuffer.limit();
             if (sendingPayloadLength < payloadLength) {
                 // check to change for outputBuffer.limit(sendingPayloadLength);
                 outputBuffer.limit(outputBuffer.limit() - (payloadLength - sendingPayloadLength));
@@ -190,7 +190,7 @@ public class FramedMessageOutputStream extends OutputStream implements LifeCycle
         }
     }
     
-    private int preparePayloadHeader(int readyBytesToSend) throws IOException {
+    private int preparePayloadHeader(final int readyBytesToSend) throws IOException {
         int payloadLength = outputBuffer.remaining();
         if (readyBytesToSend > frameSize) {
             payloadLength -= (readyBytesToSend - frameSize);
@@ -202,7 +202,7 @@ public class FramedMessageOutputStream extends OutputStream implements LifeCycle
         return payloadLength;
     }
     
-    private void prepareHeader(boolean isLastFrame) throws IOException {
+    private void prepareHeader(final boolean isLastFrame) throws IOException {
         headerBuffer.clear();
         int frameMessageId = messageId;
         if (messageId == FrameType.MESSAGE) {
@@ -224,13 +224,13 @@ public class FramedMessageOutputStream extends OutputStream implements LifeCycle
     
     private void prepareHeaderParams() throws IOException {
         headerParamsBuffer.clear();
-        int propsCount = contentProps.size();
+        final int propsCount = contentProps.size();
         
-        int highValue = DataInOutUtils.writeInt4(headerParamsBuffer, contentId, 0, false);
+        final int highValue = DataInOutUtils.writeInt4(headerParamsBuffer, contentId, 0, false);
         DataInOutUtils.writeInt4(headerParamsBuffer, propsCount, highValue, true);
-        ByteBufferOutputStream bbos = new ByteBufferOutputStream(headerParamsBuffer);
+        final ByteBufferOutputStream bbos = new ByteBufferOutputStream(headerParamsBuffer);
         //@TODO improve string serialization
-        DataOutputStream dos = new DataOutputStream(bbos);
+        final DataOutputStream dos = new DataOutputStream(bbos);
         for(Map.Entry<Integer, String> entry : contentProps.entrySet()) {
             DataInOutUtils.writeInt4(headerParamsBuffer, entry.getKey(), 0, true);
             dos.writeUTF(entry.getValue());

@@ -30,7 +30,6 @@ import com.sun.xml.ws.transport.tcp.grizzly.GrizzlyTCPConnector;
 import com.sun.xml.ws.transport.tcp.server.*;
 import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
 import java.util.List;
-import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.naming.NamingException;
@@ -39,7 +38,7 @@ import javax.naming.NamingException;
  * @author Alexey Stashok
  */
 
-public class WSTCPLifeCycleModule implements LifecycleListener {
+public final class WSTCPLifeCycleModule implements LifecycleListener {
     private static final Logger logger = Logger.getLogger(
             com.sun.xml.ws.transport.tcp.util.TCPConstants.LoggingDomain + ".server");
     
@@ -47,18 +46,17 @@ public class WSTCPLifeCycleModule implements LifecycleListener {
     private WSTCPDelegate delegate;
 //    private Properties props;
     
-    public void handleEvent(@NotNull LifecycleEvent lifecycleEvent) throws ServerLifecycleException {
-        int eventType = lifecycleEvent.getEventType();
+    public void handleEvent(@NotNull final LifecycleEvent lifecycleEvent) throws ServerLifecycleException {
+        final int eventType = lifecycleEvent.getEventType();
         if (eventType == LifecycleEvent.INIT_EVENT) {
             logger.log(Level.FINE, "WSTCPLifeCycleModule.INIT_EVENT");
-//            props = (Properties) lifecycleEvent.getData();
         } else if (eventType == LifecycleEvent.STARTUP_EVENT) {
             logger.log(Level.FINE, "WSTCPLifeCycleModule.STARTUP_EVENT");
             try {
                 delegate = new WSTCPDelegate();
                 
                 lifecycleEvent.getLifecycleEventContext().getInitialContext().bind("TCPLifeCycle", this);
-            } catch (Throwable e) {
+            } catch (Exception e) {
                 logger.log(Level.SEVERE, e.getMessage(), e);
             }
         } else if (eventType == LifecycleEvent.READY_EVENT) {
@@ -70,7 +68,7 @@ public class WSTCPLifeCycleModule implements LifecycleListener {
                 connector.listen();
                 
                 
-            } catch (Throwable e) {
+            } catch (Exception e) {
                 logger.log(Level.SEVERE, e.getMessage(), e);
             }
         } else if (eventType == LifecycleEvent.SHUTDOWN_EVENT) {
@@ -92,13 +90,13 @@ public class WSTCPLifeCycleModule implements LifecycleListener {
         }
     }
     
-    public void register(@NotNull String contextPath,
-            @NotNull List<TCPAdapter> adapters) {
+    public void register(@NotNull final String contextPath,
+            @NotNull final List<TCPAdapter> adapters) {
         delegate.registerAdapters(contextPath, adapters);
     }
     
-    public void free(@NotNull String contextPath, 
-            @NotNull List<TCPAdapter> adapters) {
+    public void free(@NotNull final String contextPath, 
+            @NotNull final List<TCPAdapter> adapters) {
         delegate.freeAdapters(contextPath, adapters);
     }
 }

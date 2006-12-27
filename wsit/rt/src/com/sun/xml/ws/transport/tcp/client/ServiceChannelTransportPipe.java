@@ -40,26 +40,26 @@ import javax.xml.ws.WebServiceException;
 /**
  * @author Alexey Stashok
  */
-public class ServiceChannelTransportPipe extends TCPTransportPipe {
+public final class ServiceChannelTransportPipe extends TCPTransportPipe {
     private static final Logger logger = Logger.getLogger(
             com.sun.xml.ws.transport.tcp.util.TCPConstants.LoggingDomain + ".client");
     
-    public ServiceChannelTransportPipe(@NotNull ClientPipeAssemblerContext context) {
+    public ServiceChannelTransportPipe(@NotNull final ClientPipeAssemblerContext context) {
         super(context);
     }
     
-    private ServiceChannelTransportPipe(ServiceChannelTransportPipe that, PipeCloner cloner) {
+    private ServiceChannelTransportPipe(final ServiceChannelTransportPipe that, final PipeCloner cloner) {
         super(that, cloner);
     }
     
-    public Packet process(Packet packet) {
+    public Packet process(final Packet packet) {
         logger.log(Level.FINE, "ServiceChannelTransportPipe.process entering");
         ChannelContext channelContext = null;
-        WSConnectionManager wsConnectionManager = WSConnectionManager.getInstance();
+        final WSConnectionManager wsConnectionManager = WSConnectionManager.getInstance();
         
         try {
-            Codec codec = pipeAssemblerContext.getCodec();
-            ContentType ct = codec.getStaticContentType(packet);
+            final Codec codec = pipeAssemblerContext.getCodec();
+            final ContentType ct = codec.getStaticContentType(packet);
             
             if (clientTransport != null) {
                 logger.log(Level.FINE, "ServiceChannelTransportPipe.process use client transport");
@@ -68,7 +68,7 @@ public class ServiceChannelTransportPipe extends TCPTransportPipe {
             } else {
                 // Initiate new connection session
                 logger.log(Level.FINE, "ServiceChannelTransportPipe.process create client transport");
-                ConnectionSession connectionSession = (ConnectionSession) packet.invocationProperties.get(TCPConstants.TCP_SESSION);
+                final ConnectionSession connectionSession = (ConnectionSession) packet.invocationProperties.get(TCPConstants.TCP_SESSION);
                 channelContext = connectionSession.findWSServiceContextByChannelId(0);
                 clientTransport = new TCPClientTransport(channelContext);
             }
@@ -81,14 +81,14 @@ public class ServiceChannelTransportPipe extends TCPTransportPipe {
             clientTransport.send();
             
             logger.log(Level.FINE, "ServiceChannelTransportPipe.process openInputStream");
-            InputStream replyInputStream = clientTransport.openInputStream();
+            final InputStream replyInputStream = clientTransport.openInputStream();
             
             logger.log(Level.FINE, "ServiceChannelTransportPipe.process process input data");
             if (clientTransport.getStatus() != TCPConstants.ERROR) {
-                String contentTypeStr = clientTransport.getContentType();
+                final String contentTypeStr = clientTransport.getContentType();
                 logger.log(Level.FINE, "ServiceChannelTransportPipe.process; received content-type: {0}", contentTypeStr);
                 
-                Packet reply = packet.createClientResponse(null);
+                final Packet reply = packet.createClientResponse(null);
                 codec.decode(replyInputStream, contentTypeStr, reply);
                 
                 reply.addSatellite(clientTransport);
@@ -112,7 +112,7 @@ public class ServiceChannelTransportPipe extends TCPTransportPipe {
         }
     }
     
-    public Pipe copy(PipeCloner cloner) {
+    public Pipe copy(final PipeCloner cloner) {
         return new ServiceChannelTransportPipe(this, cloner);
     }
     

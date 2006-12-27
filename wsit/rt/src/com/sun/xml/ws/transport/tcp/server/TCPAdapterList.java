@@ -36,15 +36,15 @@ import java.util.Map;
 /**
  * @author jax-ws team
  */
-public class TCPAdapterList extends AbstractList<TCPAdapter> implements AdapterFactory<TCPAdapter> {
+public final class TCPAdapterList extends AbstractList<TCPAdapter> implements AdapterFactory<TCPAdapter> {
     private final List<TCPAdapter> adapters = new ArrayList<TCPAdapter>();
     private final Map<String, String> addressMap = new HashMap<String, String>();
     
     // TODO: documented because it's used by AS
-    public TCPAdapter createAdapter(String name, String urlPattern, WSEndpoint<?> endpoint) {
-        TCPAdapter tcpAdapter = new TCPAdapter(name, urlPattern, endpoint);
+    public TCPAdapter createAdapter(final String name, final String urlPattern, final WSEndpoint<?> endpoint) {
+        final TCPAdapter tcpAdapter = new TCPAdapter(name, urlPattern, endpoint);
         adapters.add(tcpAdapter);
-        WSDLPort port = endpoint.getPort();
+        final WSDLPort port = endpoint.getPort();
         if (port != null) {
             addressMap.put(port.getName().getLocalPart(), getValidPath(urlPattern));
         }
@@ -54,7 +54,7 @@ public class TCPAdapterList extends AbstractList<TCPAdapter> implements AdapterF
     /**
      * @return urlPattern without "/*"
      */
-    private String getValidPath(@NotNull String urlPattern) {
+    private String getValidPath(@NotNull final String urlPattern) {
         if (urlPattern.endsWith("/*")) {
             return urlPattern.substring(0, urlPattern.length() - 2);
         } else {
@@ -68,14 +68,14 @@ public class TCPAdapterList extends AbstractList<TCPAdapter> implements AdapterF
     protected PortAddressResolver createPortAddressResolver(final String baseAddress) {
         return new PortAddressResolver() {
             public String getAddressFor(@NotNull String portName) {
-                String urlPattern = addressMap.get(portName);
+                final String urlPattern = addressMap.get(portName);
                 return (urlPattern == null) ? null : baseAddress+urlPattern;
             }
         };
     }
     
     
-    public TCPAdapter get(int index) {
+    public TCPAdapter get(final int index) {
         return adapters.get(index);
     }
     

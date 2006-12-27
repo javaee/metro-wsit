@@ -48,25 +48,25 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
-public class ServiceChannelWSDLGenerator {
+public final class ServiceChannelWSDLGenerator {
 
     private static final String TCP_ENDPOINT_ADDRESS_STUB = TCPConstants.PROTOCOL_SCHEMA + "://CHANGED_BY_RUNTIME";
     
-    public static void main(String[] args) throws Exception {
-        QName serviceName = WSEndpoint.getDefaultServiceName(ServiceChannelWSImpl.class);
-        QName portName = WSEndpoint.getDefaultPortName(serviceName, ServiceChannelWSImpl.class);
-        BindingID bindingId = BindingID.parse(ServiceChannelWSImpl.class);
-        WSBinding binding = bindingId.createBinding();
-        Collection<SDDocumentSource> docs = new ArrayList<SDDocumentSource>(0);
+    public static void main(final String[] args) throws Exception {
+        final QName serviceName = WSEndpoint.getDefaultServiceName(ServiceChannelWSImpl.class);
+        final QName portName = WSEndpoint.getDefaultPortName(serviceName, ServiceChannelWSImpl.class);
+        final BindingID bindingId = BindingID.parse(ServiceChannelWSImpl.class);
+        final WSBinding binding = bindingId.createBinding();
+        final Collection<SDDocumentSource> docs = new ArrayList<SDDocumentSource>(0);
         
-        WSEndpoint<?> endpoint = WSEndpoint.create(
+        final WSEndpoint<?> endpoint = WSEndpoint.create(
                 ServiceChannelWSImpl.class, true,
                 InstanceResolver.createSingleton(ServiceChannelWSImpl.class.newInstance()).createInvoker(),
                 serviceName, portName, null, binding,
                 null, docs, (URL) null
                 );
         
-        DocumentAddressResolver resolver = new DocumentAddressResolver() {
+        final DocumentAddressResolver resolver = new DocumentAddressResolver() {
             public String getRelativeAddressFor(SDDocument current, SDDocument referenced) {
                 if (current.isWSDL() && referenced.isSchema() && referenced.getURL().getProtocol().equals("file")) {
                     return referenced.getURL().getFile().substring(1);
@@ -76,17 +76,17 @@ public class ServiceChannelWSDLGenerator {
             }
         };
         
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
         /* seems now transformer doesnt support "pretty-output",
         but may be for future using it will make sense */
-        TransformerFactory tFactory =
+        final TransformerFactory tFactory =
                 TransformerFactory.newInstance();
-        Transformer transformer = tFactory.newTransformer();
+        final Transformer transformer = tFactory.newTransformer();
         transformer.setOutputProperty(OutputKeys.INDENT,"yes");
         
-        for(Iterator<SDDocument> it = endpoint.getServiceDefinition().iterator(); it.hasNext();) {
-            SDDocument document = it.next();
+        for(final Iterator<SDDocument> it = endpoint.getServiceDefinition().iterator(); it.hasNext();) {
+            final SDDocument document = it.next();
             baos.reset();
             
             document.writeTo(new PortAddressResolver() {
@@ -94,11 +94,11 @@ public class ServiceChannelWSDLGenerator {
                     return TCP_ENDPOINT_ADDRESS_STUB;
                 }
             }, resolver, baos);
-            ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+            final ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
             
-            FileOutputStream fos = new FileOutputStream("./etc/" + document.getURL().getFile());
-            Source source = new StreamSource(bais);
-            StreamResult result = new StreamResult(fos);
+            final FileOutputStream fos = new FileOutputStream("./etc/" + document.getURL().getFile());
+            final Source source = new StreamSource(bais);
+            final StreamResult result = new StreamResult(fos);
             transformer.transform(source, result);
             fos.close();
             bais.close();

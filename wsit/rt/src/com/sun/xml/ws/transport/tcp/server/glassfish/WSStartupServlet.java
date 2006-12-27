@@ -52,7 +52,7 @@ import javax.xml.ws.WebServiceException;
 /**
  * @author JAX-WS team
  */
-public class WSStartupServlet extends HttpServlet
+public final class WSStartupServlet extends HttpServlet
         implements ServletContextAttributeListener, ServletContextListener {
     
     private static final Logger logger = Logger.getLogger(
@@ -64,66 +64,45 @@ public class WSStartupServlet extends HttpServlet
     
     private List<TCPAdapter> adapters;
     
-    public void init(ServletConfig config) throws ServletException {
-        super.init(config);
+    protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
     }
     
-    public void init() throws ServletException {
-        super.init();
+    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
     }
     
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-    }
-    
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-    }
-    
-    public void destroy() {
-        super.destroy();
-    }
-    
-    public void contextInitialized(ServletContextEvent contextEvent) {
+    public void contextInitialized(final ServletContextEvent contextEvent) {
         logger.log(Level.FINE, "WSStartupServlet.contextInitialized");
-        InputStream is = null;
-        ServletContext servletContext = contextEvent.getServletContext();
-        TCPContext context = new TCPServletContext(servletContext);
+        final ServletContext servletContext = contextEvent.getServletContext();
+        final TCPContext context = new TCPServletContext(servletContext);
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         if (classLoader == null) {
             classLoader = getClass().getClassLoader();
         }
-        ServletContainer container = new ServletContainer(servletContext);
+        final ServletContainer container = new ServletContainer(servletContext);
         
         try {
-            InitialContext initialContext = new InitialContext();
+            final InitialContext initialContext = new InitialContext();
             
             transportModule = (WSTCPLifeCycleModule) initialContext.lookup("TCPLifeCycle");
             if (transportModule == null) {
                 throw new WSTCPException(MessagesMessages.WSTCP_0007_TRANSPORT_MODULE_NOT_REGISTERED());
             }
             
-            DeploymentDescriptorParser<TCPAdapter> parser = new DeploymentDescriptorParser<TCPAdapter>(
+            final DeploymentDescriptorParser<TCPAdapter> parser = new DeploymentDescriptorParser<TCPAdapter>(
                     classLoader, new TCPResourceLoader(context), container, TCPAdapter.FACTORY);
-            URL sunJaxWsXml = context.getResource(JAXWS_RI_RUNTIME);
+            final URL sunJaxWsXml = context.getResource(JAXWS_RI_RUNTIME);
             if(sunJaxWsXml==null)
                 throw new WebServiceException(MessagesMessages.WSTCP_0014_NO_JAXWS_DESCRIPTOR());
             adapters = parser.parse(sunJaxWsXml.toExternalForm(), sunJaxWsXml.openStream());
             
             transportModule.register(servletContext.getContextPath(), adapters);
-        } catch (Throwable e) {
+        } catch (Exception e) {
             logger.log(Level.SEVERE, e.getMessage(), e);
             throw new WSTCPException("listener.parsingFailed", e);
-        } finally {
-            if (is != null) {
-                try {
-                    is.close();
-                } catch (IOException ex) {
-                }
-            }
         }
-        
     }
     
-    public void contextDestroyed(ServletContextEvent contextEvent) {
+    public void contextDestroyed(final ServletContextEvent contextEvent) {
         logger.log(Level.FINE, "WSStartupServlet.contextDestroyed");
         if (transportModule != null && adapters != null) {
             transportModule.free(contextEvent.getServletContext().getContextPath(),
@@ -131,27 +110,27 @@ public class WSStartupServlet extends HttpServlet
         }
     }
     
-    public void attributeAdded(ServletContextAttributeEvent scab) {
+    public void attributeAdded(final ServletContextAttributeEvent scab) {
     }
     
-    public void attributeRemoved(ServletContextAttributeEvent scab) {
+    public void attributeRemoved(final ServletContextAttributeEvent scab) {
     }
     
-    public void attributeReplaced(ServletContextAttributeEvent scab) {
+    public void attributeReplaced(final ServletContextAttributeEvent scab) {
     }
     
     /**
      * Provides access to {@link ServletContext} via {@link Container}. Pipes
      * can get ServletContext from Container and use it to load some resources.
      */
-    private static class ServletContainer extends Container {
+    private static final class ServletContainer extends Container {
         private final ServletContext servletContext;
         
-        ServletContainer(ServletContext servletContext) {
+        ServletContainer(final ServletContext servletContext) {
             this.servletContext = servletContext;
         }
         
-        public <T> T getSPI(Class<T> spiType) {
+        public <T> T getSPI(final Class<T> spiType) {
             if (spiType == ServletContext.class) {
                 return (T) servletContext;
             }

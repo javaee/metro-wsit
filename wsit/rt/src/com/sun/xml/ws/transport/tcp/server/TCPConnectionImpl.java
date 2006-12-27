@@ -40,8 +40,8 @@ import com.sun.istack.NotNull;
  * @author Alexey Stashok
  */
 public class TCPConnectionImpl implements WebServiceContextDelegate {
-    private ChannelContext channelContext;
-    private Connection connection;
+    private final ChannelContext channelContext;
+    private final Connection connection;
     
     private String contentType;
     private int replyStatus;
@@ -51,7 +51,7 @@ public class TCPConnectionImpl implements WebServiceContextDelegate {
     
     private boolean isHeaderSerialized;
     
-    public TCPConnectionImpl(ChannelContext channelContext) {
+    public TCPConnectionImpl(final ChannelContext channelContext) {
         this.channelContext = channelContext;
         this.connection = channelContext.getConnection();
     }
@@ -77,7 +77,7 @@ public class TCPConnectionImpl implements WebServiceContextDelegate {
         return replyStatus;
     }
     
-    public void setStatus(int statusCode) {
+    public void setStatus(final int statusCode) {
         replyStatus = statusCode;
     }
     
@@ -85,7 +85,7 @@ public class TCPConnectionImpl implements WebServiceContextDelegate {
         return contentType;
     }
     
-    public void setContentType(String contentType) {
+    public void setContentType(final String contentType) {
         this.contentType = contentType;
     }
     
@@ -102,20 +102,21 @@ public class TCPConnectionImpl implements WebServiceContextDelegate {
     }
     
     // Not supported
-    public Principal getUserPrincipal(Packet request) {
+    public Principal getUserPrincipal(final Packet request) {
         return null;
     }
     
     // Not supported
-    public boolean isUserInRole(Packet request, String role) {
+    public boolean isUserInRole(final Packet request, final String role) {
         return false;
     }
     
-    public @NotNull String getEPRAddress(@NotNull Packet request, @NotNull WSEndpoint endpoint) {
+    public @NotNull String getEPRAddress(@NotNull final Packet request, @NotNull final WSEndpoint endpoint) {
         return channelContext.getTargetWSURI().toString();
     }
 
-    public String getWSDLAddress(@NotNull Packet request, @NotNull WSEndpoint endpoint) {
+    public String getWSDLAddress(@NotNull final Packet request, 
+            @NotNull final WSEndpoint endpoint) {
         return null;
     }
     
@@ -123,10 +124,10 @@ public class TCPConnectionImpl implements WebServiceContextDelegate {
         if (!isHeaderSerialized) {
             isHeaderSerialized = true;
             
-            int messageId = getMessageId();
+            final int messageId = getMessageId();
             connection.setMessageId(messageId);
             if (FrameType.isFrameContainsParams(messageId)) {
-                ContentType.EncodedContentType ect = channelContext.encodeContentType(contentType);
+                final ContentType.EncodedContentType ect = channelContext.encodeContentType(contentType);
                 connection.setContentId(ect.mimeId);
                 connection.setContentProps(ect.params);
             }

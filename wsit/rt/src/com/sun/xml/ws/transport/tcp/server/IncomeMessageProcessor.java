@@ -46,32 +46,32 @@ import java.util.logging.Logger;
 /**
  * @author Alexey Stashok
  */
-public class IncomeMessageProcessor {
+public final class IncomeMessageProcessor {
     private static final Logger logger = Logger.getLogger(
             com.sun.xml.ws.transport.tcp.util.TCPConstants.LoggingDomain + ".server");
     
-    private TCPMessageListener listener;
+    private final TCPMessageListener listener;
     
     private static Map<Integer, IncomeMessageProcessor> portMessageProcessors =
             new HashMap<Integer, IncomeMessageProcessor>(1);
     
-    public static void registerListener(int port, @NotNull TCPMessageListener listener) {
+    public static void registerListener(final int port, @NotNull final TCPMessageListener listener) {
         portMessageProcessors.put(port, new IncomeMessageProcessor(listener));
     }
     
-    public static void releaseListener(int port) {
+    public static void releaseListener(final int port) {
         portMessageProcessors.remove(port);
     }
     
-    public static @Nullable IncomeMessageProcessor getMessageProcessorForPort(int port) {
+    public static @Nullable IncomeMessageProcessor getMessageProcessorForPort(final int port) {
         return portMessageProcessors.get(port);
     }
     
-    public IncomeMessageProcessor(TCPMessageListener listener) {
+    public IncomeMessageProcessor(final TCPMessageListener listener) {
         this.listener = listener;
     }
     
-    public void process(@NotNull ByteBuffer messageBuffer, @NotNull SocketChannel socketChannel) throws IOException {
+    public void process(@NotNull final ByteBuffer messageBuffer, @NotNull final SocketChannel socketChannel) throws IOException {
         // get TCPConnectionSession associated with SocketChannel
         logger.log(Level.FINE, "IncomeMessageProcessor.process entering");
         
@@ -89,15 +89,15 @@ public class IncomeMessageProcessor {
             return;
         }
         
-        Connection connection = connectionSession.getConnection();
+        final Connection connection = connectionSession.getConnection();
         connection.setInputStreamByteBuffer(messageBuffer);
         
         try {
             do {
                 connection.prepareForReading();  // Reading headers
                 
-                int channelId = connection.getChannelId();
-                ChannelContext channelContext = connectionSession.findWSServiceContextByChannelId(channelId);
+                final int channelId = connection.getChannelId();
+                final ChannelContext channelContext = connectionSession.findWSServiceContextByChannelId(channelId);
                 
                 listener.onMessage(channelContext);
             } while(messageBuffer.hasRemaining());
@@ -113,12 +113,12 @@ public class IncomeMessageProcessor {
      *  in future probably should be replaced, as could be handled by
      *  nio framework
      */
-    private Map<SocketChannel, ConnectionSession> connectionSessionMap =
+    private final Map<SocketChannel, ConnectionSession> connectionSessionMap =
             new WeakHashMap<SocketChannel, ConnectionSession>();
     private @Nullable ConnectionSession getConnectionSession(
-            @NotNull SocketChannel socketChannel) throws IOException {
+            @NotNull final SocketChannel socketChannel) throws IOException {
         
-        ConnectionSession connectionSession = connectionSessionMap.get(socketChannel);
+        final ConnectionSession connectionSession = connectionSessionMap.get(socketChannel);
         if (connectionSession == null) {
             return null;
         }
@@ -133,11 +133,11 @@ public class IncomeMessageProcessor {
      *  version compatibilities before
      */
     private @Nullable ConnectionSession createConnectionSession(
-            @NotNull SocketChannel socketChannel,
-    @NotNull ByteBuffer messageBuffer) throws IOException {
+            @NotNull final SocketChannel socketChannel,
+    @NotNull final ByteBuffer messageBuffer) throws IOException {
         logger.log(Level.FINE, "IncomeMessageProcessor.createConnectionSession entering");
         
-        Connection connection = new Connection(socketChannel);
+        final Connection connection = new Connection(socketChannel);
         connection.setInputStreamByteBuffer(messageBuffer);
         if (!checkMagicAndVersionCompatibility(connection)) {
             connection.close();
@@ -148,42 +148,42 @@ public class IncomeMessageProcessor {
         return new ConnectionSession(connection);
     }
     
-    private void returnConnectionSession(@NotNull ConnectionSession connectionSession) {
+    private void returnConnectionSession(@NotNull final ConnectionSession connectionSession) {
         connectionSessionMap.put(connectionSession.getConnection().getSocketChannel(), connectionSession);
         
         // to let WeakHashMap clean socketChannel if not use
         connectionSession.getConnection().setSocketChannel(null);
     }
     
-    private boolean checkMagicAndVersionCompatibility(@NotNull Connection connection) throws IOException {
+    private boolean checkMagicAndVersionCompatibility(@NotNull final Connection connection) throws IOException {
         logger.log(Level.FINE, "IncomeMessageProcessor.checkMagicAndVersionCompatibility entering");
         
         connection.setDirectMode(true);
-        InputStream inputStream = connection.openInputStream();
+        final InputStream inputStream = connection.openInputStream();
         
-        byte[] magicBuf = new byte[TCPConstants.PROTOCOL_SCHEMA.length()];
+        final byte[] magicBuf = new byte[TCPConstants.PROTOCOL_SCHEMA.length()];
         DataInOutUtils.readFully(inputStream, magicBuf);
-        String magic = new String(magicBuf, "US-ASCII");
+        final String magic = new String(magicBuf, "US-ASCII");
         if (!TCPConstants.PROTOCOL_SCHEMA.equals(magic)) {
             logger.log(Level.WARNING, "IncomeMessageProcessor.checkMagicAndVersionCompatibility wrong magic: {0}", magic);
             return false;
         }
         
-        int[] versionInfo = new int[4];
+        final int[] versionInfo = new int[4];
         
         DataInOutUtils.readInts4(inputStream, versionInfo, 4);
         
-        Version clientFramingVersion = new Version(versionInfo[0], versionInfo[1]);
-        Version clientConnectionManagementVersion = new Version(versionInfo[2], versionInfo[3]);
+        final Version clientFramingVersion = new Version(versionInfo[0], versionInfo[1]);
+        final Version clientConnectionManagementVersion = new Version(versionInfo[2], versionInfo[3]);
         
-        VersionController versionController = VersionController.getInstance();
+        final VersionController versionController = VersionController.getInstance();
         
-        VersionController.VersionSupport successCode = versionController.checkVersionSupport(
+        final VersionController.VersionSupport successCode = versionController.checkVersionSupport(
                 clientFramingVersion, clientConnectionManagementVersion);
         
-        OutputStream outputStream = connection.openOutputStream();
-        Version framingVersion = versionController.getFramingVersion();
-        Version connectionManagementVersion = versionController.getConnectionManagementVersion();
+        final OutputStream outputStream = connection.openOutputStream();
+        final Version framingVersion = versionController.getFramingVersion();
+        final Version connectionManagementVersion = versionController.getConnectionManagementVersion();
         
         DataInOutUtils.writeInts4(outputStream, successCode.ordinal(),
                 framingVersion.getMajor(),

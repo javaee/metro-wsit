@@ -90,7 +90,7 @@ public class ByteBufferInputStream extends InputStream {
     /**
      * Read the bytes from the wrapped <code>ByteBuffer</code>.
      */
-    public int read(byte[] b) {
+    public int read(final byte[] b) {
         return (read(b, 0, b.length));
     }
     
@@ -98,7 +98,7 @@ public class ByteBufferInputStream extends InputStream {
     /**
      * Read the first byte of the wrapped <code>ByteBuffer</code>.
      */
-    public int read(byte[] b, int offset, int length) {
+    public int read(final byte[] b, final int offset, int length) {
         if (!byteBuffer.hasRemaining()) {
             return -1;
         }

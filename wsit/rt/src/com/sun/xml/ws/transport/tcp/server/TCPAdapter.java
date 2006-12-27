@@ -47,16 +47,16 @@ public class TCPAdapter<TCPTK extends TCPAdapter.TCPToolkit> extends Adapter<TCP
     final String name;
     final String urlPattern;
     
-    public TCPAdapter(@NotNull String name, @NotNull String urlPattern, @NotNull WSEndpoint endpoint) {
+    public TCPAdapter(@NotNull final String name, @NotNull final String urlPattern, @NotNull final WSEndpoint endpoint) {
         super(endpoint);
         this.name = name;
         this.urlPattern = urlPattern;
     }
     
-    public void handle(@NotNull ChannelContext channelContext) throws IOException {
-        TCPConnectionImpl connection = new TCPConnectionImpl(channelContext);
+    public void handle(@NotNull final ChannelContext channelContext) throws IOException {
+        final TCPConnectionImpl connection = new TCPConnectionImpl(channelContext);
         
-        TCPToolkit tk = pool.take();
+        final TCPToolkit tk = pool.take();
         try {
             tk.handle(connection);
             connection.flush();
@@ -82,12 +82,12 @@ public class TCPAdapter<TCPTK extends TCPAdapter.TCPToolkit> extends Adapter<TCP
         }
     }
     
-    public static void sendErrorResponse(@NotNull ChannelContext channelContext,
-            int errorCode,
-            @NotNull String errorDescription) throws IOException {
-        TCPConnectionImpl connection = new TCPConnectionImpl(channelContext);
+    public static void sendErrorResponse(@NotNull final ChannelContext channelContext,
+            final int errorCode,
+            @NotNull final String errorDescription) throws IOException {
+        final TCPConnectionImpl connection = new TCPConnectionImpl(channelContext);
         try {
-            StringBuffer contentType = new StringBuffer();
+            final StringBuffer contentType = new StringBuffer();
             contentType.append(MimeType.ERROR.getMimeType());
             contentType.append(';');
             contentType.append(TCPConstants.ERROR_CODE_PROPERTY);
@@ -109,12 +109,12 @@ public class TCPAdapter<TCPTK extends TCPAdapter.TCPToolkit> extends Adapter<TCP
         protected TCPConnectionImpl connection;
         private boolean isClosed;
         
-        protected void handle(@NotNull TCPConnectionImpl con) throws IOException {
+        protected void handle(@NotNull final TCPConnectionImpl con) throws IOException {
             connection = con;
             isClosed = false;
             
-            InputStream in = connection.openInput();
-            Codec codec = getCodec(connection.getChannelContext());
+            final InputStream in = connection.openInput();
+            final Codec codec = getCodec(connection.getChannelContext());
             
             String ct = connection.getContentType();
             logger.log(Level.FINE, "TCPAdapter.TCPToolkit.handle; received content-type: {0}", ct);
@@ -153,14 +153,14 @@ public class TCPAdapter<TCPTK extends TCPAdapter.TCPToolkit> extends Adapter<TCP
         }
         
         // Taking Codec from virtual connection's ChannelContext
-        protected @NotNull Codec getCodec(@NotNull ChannelContext context) {
+        protected @NotNull Codec getCodec(@NotNull final ChannelContext context) {
             return context.getCodec();
         }
         
         /**
          * Method could be overwritten by children to add some extra Satellites to Packet
          */
-        public void addCustomPacketSattellites(@NotNull Packet packet) {
+        public void addCustomPacketSattellites(@NotNull final Packet packet) {
         }
         
         public void close() {

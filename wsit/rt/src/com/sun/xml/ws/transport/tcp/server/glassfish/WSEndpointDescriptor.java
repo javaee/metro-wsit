@@ -31,18 +31,18 @@ import com.sun.enterprise.deployment.WebServiceEndpoint;
  */
 public class WSEndpointDescriptor {
     
-    private QName wsServiceName;
-    private String uri;
-    private String contextRoot;
-    private String urlPattern;
-    private boolean isEJB;
-    private WebServiceEndpoint wsServiceEndpoint;
+    final private QName wsServiceName;
+    final private String uri;
+    final private String contextRoot;
+    final private String urlPattern;
+    final private boolean isEJB;
+    final private WebServiceEndpoint wsServiceEndpoint;
     
     // Full address to endpoint
-    private String requestURL;
+    final private String requestURL;
     
-    public WSEndpointDescriptor(WebServiceEndpoint wsServiceDescriptor, String contextRoot, 
-            String urlPattern, String requestURL) {
+    public WSEndpointDescriptor(final WebServiceEndpoint wsServiceDescriptor, final String contextRoot, 
+            final String urlPattern, final String requestURL) {
         this.wsServiceName = wsServiceDescriptor.getServiceName();
         this.uri = wsServiceDescriptor.getEndpointAddressUri();
         this.isEJB = wsServiceDescriptor.implementedByEjbComponent();

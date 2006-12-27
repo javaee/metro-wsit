@@ -25,9 +25,9 @@ package com.sun.xml.ws.transport.tcp.util;
 /**
  * @author Alexey Stashok
  */
-public class Version {
-    private int major;
-    private int minor;
+public final class Version {
+    private final int major;
+    private final int minor;
     
     public Version(int major, int minor) {
         this.major = major;
@@ -42,9 +42,9 @@ public class Version {
         return minor;
     }
 
-    public boolean equals(Object object) {
+    public boolean equals(final Object object) {
         if (object instanceof Version) {
-            Version version = (Version) object;
+            final Version version = (Version) object;
             return major == version.major && minor == version.minor;
         }
         

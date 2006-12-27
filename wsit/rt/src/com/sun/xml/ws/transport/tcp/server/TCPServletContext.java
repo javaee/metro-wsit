@@ -34,33 +34,33 @@ import javax.servlet.ServletContext;
 /**
  * @author Alexey Stashok
  */
-public class TCPServletContext implements TCPContext {
+public final class TCPServletContext implements TCPContext {
     
-    private ServletContext servletContext;
-    private Map<String, Object> attributes = new HashMap<String, Object>();
+    private final ServletContext servletContext;
+    private final Map<String, Object> attributes = new HashMap<String, Object>();
     
-    public TCPServletContext(ServletContext servletContext) {
+    public TCPServletContext(final ServletContext servletContext) {
         this.servletContext = servletContext;
     }
     
-    public InputStream getResourceAsStream(String resource) throws IOException {
+    public InputStream getResourceAsStream(final String resource) throws IOException {
         return servletContext.getResourceAsStream(resource);
     }
     
-    public Set<String> getResourcePaths(String path) {
+    public Set<String> getResourcePaths(final String path) {
         return (Set<String>) servletContext.getResourcePaths(path);
     }
     
-    public URL getResource(String resource) throws MalformedURLException {
+    public URL getResource(final String resource) throws MalformedURLException {
         return servletContext.getResource(resource);
     }
     
     
-    public Object getAttribute(String name) {
+    public Object getAttribute(final String name) {
         return attributes.get(name);
     }
     
-    public void setAttribute(String name, Object value) {
+    public void setAttribute(final String name, final Object value) {
         attributes.put(name, value);
     }
 }

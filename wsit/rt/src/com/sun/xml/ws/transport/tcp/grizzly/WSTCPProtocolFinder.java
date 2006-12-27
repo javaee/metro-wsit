@@ -25,6 +25,7 @@ package com.sun.xml.ws.transport.tcp.grizzly;
 
 import com.sun.enterprise.web.portunif.ProtocolFinder;
 import com.sun.enterprise.web.portunif.util.ProtocolInfo;
+import com.sun.istack.NotNull;
 import com.sun.xml.ws.transport.tcp.util.TCPConstants;
 import java.io.IOException;
 import java.nio.BufferUnderflowException;
@@ -42,7 +43,7 @@ import java.nio.channels.SocketChannel;
  * @author Jeanfrancois Arcand
  * @author Alexey Stashok
  */
-public class WSTCPProtocolFinder implements ProtocolFinder {
+public final class WSTCPProtocolFinder implements ProtocolFinder {
     
     public WSTCPProtocolFinder() {
     }
@@ -55,13 +56,12 @@ public class WSTCPProtocolFinder implements ProtocolFinder {
      * @return ProtocolInfo The ProtocolInfo that contains the information about the
      *                   current protocol.
      */
-    public void find(ProtocolInfo protocolInfo) throws IOException {
-        SelectionKey key = protocolInfo.key;
-        SocketChannel socketChannel = (SocketChannel)key.channel();
-        ByteBuffer byteBuffer = protocolInfo.byteBuffer;
+    public void find(@NotNull final ProtocolInfo protocolInfo) throws IOException {
+        final SelectionKey key = protocolInfo.key;
+        final SocketChannel socketChannel = (SocketChannel)key.channel();
+        final ByteBuffer byteBuffer = protocolInfo.byteBuffer;
         
         int loop = 0;
-        int bufferSize = 0;
         int count = -1;
         
         if (protocolInfo.bytesRead == 0) {
@@ -86,10 +86,9 @@ public class WSTCPProtocolFinder implements ProtocolFinder {
                 protocolInfo.bytesRead = count;
             }
         }
-        boolean isFound = false;
-        
-        int curPosition = byteBuffer.position();
-        int curLimit = byteBuffer.limit();
+
+        final int curPosition = byteBuffer.position();
+        final int curLimit = byteBuffer.limit();
         
         // Rule a - If read length < PROTOCOL_ID.length, return to the Selector.
         if (curPosition < TCPConstants.PROTOCOL_SCHEMA.length()){
@@ -101,9 +100,9 @@ public class WSTCPProtocolFinder implements ProtocolFinder {
         
         // Rule b - check protocol id
         try {
-            byte[] protocolBytes = new byte[TCPConstants.PROTOCOL_SCHEMA.length()];
+            final byte[] protocolBytes = new byte[TCPConstants.PROTOCOL_SCHEMA.length()];
             byteBuffer.get(protocolBytes);
-            String incomeProtocolId = new String(protocolBytes);
+            final String incomeProtocolId = new String(protocolBytes);
             if (TCPConstants.PROTOCOL_SCHEMA.equals(incomeProtocolId)) {
                 protocolInfo.protocol = TCPConstants.PROTOCOL_SCHEMA;
                 protocolInfo.byteBuffer = byteBuffer;
@@ -116,8 +115,6 @@ public class WSTCPProtocolFinder implements ProtocolFinder {
             byteBuffer.limit(curLimit);
             byteBuffer.position(curPosition);
         }
-        
-        return;
     }
     
 }

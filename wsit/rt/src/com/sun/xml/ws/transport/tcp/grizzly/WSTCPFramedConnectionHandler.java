@@ -22,6 +22,7 @@
 
 package com.sun.xml.ws.transport.tcp.grizzly;
 
+import com.sun.istack.NotNull;
 import com.sun.xml.ws.transport.tcp.server.IncomeMessageProcessor;
 import com.sun.enterprise.web.connector.grizzly.Handler;
 import java.io.IOException;
@@ -32,25 +33,25 @@ import java.nio.channels.SocketChannel;
  * @author Alexey Stashok
  */
 
-public class WSTCPFramedConnectionHandler implements Handler {
-    private WSTCPStreamAlgorithm streamAlgorithm;
-    private IncomeMessageProcessor messageProcessor;
+public final class WSTCPFramedConnectionHandler implements Handler {
+    private final WSTCPStreamAlgorithm streamAlgorithm;
+    private final IncomeMessageProcessor messageProcessor;
     
-    public WSTCPFramedConnectionHandler(WSTCPStreamAlgorithm streamAlgorithm) {
+    public WSTCPFramedConnectionHandler(@NotNull final WSTCPStreamAlgorithm streamAlgorithm) {
         this.streamAlgorithm = streamAlgorithm;
         this.messageProcessor = IncomeMessageProcessor.getMessageProcessorForPort(streamAlgorithm.getPort());
     }
     
-    public int handle(Object request, int code) throws IOException {
+    public int handle(final Object request, final int code) throws IOException {
         if (code == REQUEST_BUFFERED) {
-            ByteBuffer messageBuffer = streamAlgorithm.getByteBuffer();
-            SocketChannel socketChannel = streamAlgorithm.getSocketChannel();
+            final ByteBuffer messageBuffer = streamAlgorithm.getByteBuffer();
+            final SocketChannel socketChannel = streamAlgorithm.getSocketChannel();
             messageProcessor.process(messageBuffer, socketChannel);
         }
         
         return BREAK;
     }
     
-    public void attachChannel(SocketChannel socketChannel) {
+    public void attachChannel(final SocketChannel socketChannel) {
     }
 }

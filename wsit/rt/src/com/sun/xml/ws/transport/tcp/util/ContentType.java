@@ -22,6 +22,7 @@
 
 package com.sun.xml.ws.transport.tcp.util;
 
+import com.sun.istack.NotNull;
 import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
 import java.util.HashMap;
 import java.util.List;
@@ -30,68 +31,62 @@ import java.util.Map;
 /**
  * @author Alexey Stashok
  */
-public class ContentType {
-    private MimeType mimeType;
-    private Map<String, String> parameters = new HashMap<String, String>();
+public final class ContentType {
+    private final MimeType mimeType;
+    private final Map<String, String> parameters;
     
+    private ContentType(@NotNull final MimeType mimeType, @NotNull final Map<String, String> parameters) {
+        this.mimeType = mimeType;
+        this.parameters = parameters;
+    }
     public MimeType getMimeType() {
         return mimeType;
-    }
-    
-    public void setMimeType(MimeType mimeType) {
-        this.mimeType = mimeType;
     }
     
     public Map<String, String> getParameters() {
         return parameters;
     }
     
-    public void setParameters(Map<String, String> parameters) {
-        this.parameters = parameters;
-    }
-    
-    public static ContentType createContentType(String contentType) {
-        String[] entities = contentType.split(";");
-        String mimeTypeS = entities[0].trim().toLowerCase();
-        List<MimeType> mimeTypeList = MimeType.mimeName2mime.get(mimeTypeS);
+    public static ContentType createContentType(final String contentType) {
+        final String[] entities = contentType.split(";");
+        final String mimeTypeS = entities[0].trim().toLowerCase();
+        final List<MimeType> mimeTypeList = MimeType.mimeName2mime.get(mimeTypeS);
         assert mimeTypeList != null;
         
-        ContentType dct = new ContentType();
+        final Map<String, String> parameters = new HashMap<String, String>(4);
         for(MimeType mime : mimeTypeList) {
             int ctEmbedParamsAmount = mime.getEmbeddedParams().size();
             
             for(int i=1; i<entities.length; i++) {
-                String[] keyVal = entities[i].split("=");
+                final String[] keyVal = entities[i].split("=");
                 assert keyVal.length == 2;
                 
-                String key = keyVal[0].trim();
-                String value = keyVal[1].trim();
-                String valToCompare = mime.getEmbeddedParams().get(key);
+                final String key = keyVal[0].trim();
+                final String value = keyVal[1].trim();
+                final String valToCompare = mime.getEmbeddedParams().get(key);
                 if (valToCompare != null) {
                     if (valToCompare.equals(value)) {
                         ctEmbedParamsAmount--;
                     }
                 } else {
-                    dct.parameters.put(key, value);
+                    parameters.put(key, value);
                 }
             }
             
             if (ctEmbedParamsAmount == 0) {
-                dct.mimeType = mime;
-                return dct;
+                return new ContentType(mime, parameters);
             }
             
-            dct.parameters.clear();
         }
         
         throw new AssertionError(MessagesMessages.WSTCP_0011_UNKNOWN_CONTENT_TYPE(contentType));
     }
     
-    public static class EncodedContentType {
-        public int mimeId;
-        public Map<Integer, String> params;
+    public static final class EncodedContentType {
+        public final int mimeId;
+        public final Map<Integer, String> params;
         
-        public EncodedContentType(int mimeId, Map<Integer, String> params) {
+        public EncodedContentType(final int mimeId, final Map<Integer, String> params) {
             this.mimeId = mimeId;
             this.params = params;
         }

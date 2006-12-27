@@ -42,32 +42,30 @@ import java.util.logging.Logger;
 /**
  * Stream wrapper around a <code>ByteBuffer</code>
  */
-public class FramedMessageInputStream extends InputStream implements LifeCycle {
+public final class FramedMessageInputStream extends InputStream implements LifeCycle {
     private static final Logger logger = Logger.getLogger(
             com.sun.xml.ws.transport.tcp.util.TCPConstants.LoggingDomain + ".streams");
     
     private ByteBuffer byteBuffer;
-    private boolean useDirectBuffer;
     
-    private DataInputStream dis = new DataInputStream(this);
+    private final DataInputStream dis = new DataInputStream(this);
     private SocketChannel socketChannel;
     
     private int bufferClearLimit;  // clear buffer before read from socket if its size already more than this value
     /**
      * The time to wait before timing out when reading bytes
      */
-    private int readTimeout = 1000;
-    
-    
-    private int[] headerTmpArray = new int[2];
-    
-    /** is message framed or direct mode is used */
-    private boolean isDirectMode;
+    final private static int READ_TIMEOUT = 1000;
     
     /**
      * Number of times to retry before return EOF
      */
-    protected int readTry = 10;
+    final static int READ_TRY = 10;
+    
+    private final int[] headerTmpArray = new int[2];
+    
+    /** is message framed or direct mode is used */
+    private boolean isDirectMode;
     
     private int frameSize;
     private int frameBytesRead;
@@ -77,7 +75,7 @@ public class FramedMessageInputStream extends InputStream implements LifeCycle {
     private int channelId;
     private int contentId;
     private int messageId;
-    private Map<Integer, String> contentParameters = new HashMap<Integer, String>();
+    private final Map<Integer, String> contentParameters = new HashMap<Integer, String>();
     
     private boolean isReadingHeader;
     
@@ -99,7 +97,7 @@ public class FramedMessageInputStream extends InputStream implements LifeCycle {
     // ---------------------------------------------------------------------//
     
     
-    public void setSocketChannel(SocketChannel socketChannel){
+    public void setSocketChannel(final SocketChannel socketChannel){
         this.socketChannel = socketChannel;
     }
     
@@ -123,16 +121,16 @@ public class FramedMessageInputStream extends InputStream implements LifeCycle {
         return isDirectMode;
     }
     
-    public void setDirectMode(boolean isDirectMode) {
+    public void setDirectMode(final boolean isDirectMode) {
         reset();
         this.isDirectMode = isDirectMode;
     }
     
-    public void setFrameSize(int frameSize) {
+    public void setFrameSize(final int frameSize) {
         this.frameSize = frameSize;
     }
     
-    public void setByteBuffer(ByteBuffer byteBuffer) {
+    public void setByteBuffer(final ByteBuffer byteBuffer) {
         this.byteBuffer = byteBuffer;
         if (byteBuffer != null) {
             bufferClearLimit = byteBuffer.capacity() * 3 / 4;
@@ -181,8 +179,7 @@ public class FramedMessageInputStream extends InputStream implements LifeCycle {
         if (byteBuffer.hasRemaining()) {
             frameBytesRead++;
             receivedMessageLength ++;
-            int ret = byteBuffer.get() & 0xff;
-            return ret;
+            return byteBuffer.get() & 0xff;
         }
         
         return read();
@@ -192,7 +189,7 @@ public class FramedMessageInputStream extends InputStream implements LifeCycle {
     /**
      * Read the bytes from the wrapped <code>ByteBuffer</code>.
      */
-    public int read(byte[] b) {
+    public int read(final byte[] b) {
         return (read(b, 0, b.length));
     }
     
@@ -200,9 +197,9 @@ public class FramedMessageInputStream extends InputStream implements LifeCycle {
     /**
      * Read the first byte of the wrapped <code>ByteBuffer</code>.
      */
-    public int read(byte[] b, int offset, int length) {
+    public int read(final byte[] b, final int offset, int length) {
         if (!byteBuffer.hasRemaining()) {
-            int eof = readFromChannel();
+            final int eof = readFromChannel();
             if (eof <= 0){
                 return -1;
             }
@@ -213,7 +210,7 @@ public class FramedMessageInputStream extends InputStream implements LifeCycle {
         if (readFrameHeaderIfRequired() == -1) return -1;
         
         //@TODO add logic for reading from several frames if required
-        int remaining = remaining();
+        final int remaining = remaining();
         if (length > remaining) {
             length = remaining;
         }
@@ -268,17 +265,17 @@ public class FramedMessageInputStream extends InputStream implements LifeCycle {
     private void readHeaderContentDescription() throws IOException {
         DataInOutUtils.readInts4(this, headerTmpArray, 2);
         contentId = headerTmpArray[0];
-        int paramNumber = headerTmpArray[1];
+        final int paramNumber = headerTmpArray[1];
         for(int i=0; i<paramNumber; i++) {
-            int paramId = DataInOutUtils.readInt4(this);
-            String paramValue = dis.readUTF();
+            final int paramId = DataInOutUtils.readInt4(this);
+            final String paramValue = dis.readUTF();
             contentParameters.put(paramId, paramValue);
         }
     }
     
     private int readFromChannel() {
         int eof = 0;
-        for (int i=0; i < readTry; i++) {
+        for (int i=0; i < READ_TRY; i++) {
             eof = doRead();
             
             if (eof != 0) {
@@ -300,7 +297,7 @@ public class FramedMessageInputStream extends InputStream implements LifeCycle {
     private void skipToEndOfFrame() throws EOFException {
         if (currentFrameDataSize > 0) {
             if (byteBuffer.hasRemaining()) {
-                int remainFrameBytes = currentFrameDataSize - frameBytesRead;
+                final int remainFrameBytes = currentFrameDataSize - frameBytesRead;
                 if (remainFrameBytes <= byteBuffer.remaining()) {
                     byteBuffer.position(byteBuffer.position() + remainFrameBytes);
                     return;
@@ -311,7 +308,7 @@ public class FramedMessageInputStream extends InputStream implements LifeCycle {
             }
             
             while(frameBytesRead < currentFrameDataSize) {
-                int eof = readFromChannel();
+                final int eof = readFromChannel();
                 if (eof == -1) {
                     throw new EOFException("Unexpected eof. isLastFrame: " + isLastFrame + " frameBytesRead: " + frameBytesRead + " frameSize: " + frameSize + " currentFrameDataSize: " + currentFrameDataSize);
                 }
@@ -337,7 +334,7 @@ public class FramedMessageInputStream extends InputStream implements LifeCycle {
             byteBuffer.clear();
         }
         
-        int bbPosition = byteBuffer.position();
+        final int bbPosition = byteBuffer.position();
         byteBuffer.limit(byteBuffer.capacity());
         
         int count;
@@ -362,7 +359,7 @@ public class FramedMessageInputStream extends InputStream implements LifeCycle {
                 tmpKey = socketChannel
                         .register(readSelector,SelectionKey.OP_READ);
                 tmpKey.interestOps(tmpKey.interestOps() | SelectionKey.OP_READ);
-                int code = readSelector.select(readTimeout);
+                final int code = readSelector.select(READ_TIMEOUT);
                 
                 //Nothing so return.
                 tmpKey.interestOps(tmpKey.interestOps() & (~SelectionKey.OP_READ));
@@ -376,8 +373,8 @@ public class FramedMessageInputStream extends InputStream implements LifeCycle {
                 } while (count > 0);
                 if (count == -1 && byteRead >= 0) byteRead++;
             }
-        } catch (Throwable t){
-            logger.log(Level.SEVERE, t.getMessage(), t);
+        } catch (Exception e){
+            logger.log(Level.SEVERE, e.getMessage(), e);
             return -1;
         } finally {
             if (tmpKey != null)
@@ -437,7 +434,7 @@ public class FramedMessageInputStream extends InputStream implements LifeCycle {
     }
     
     public String toString() {
-        StringBuffer buffer = new StringBuffer();
+        final StringBuffer buffer = new StringBuffer(100);
         buffer.append("ByteBuffer: ");
         buffer.append(byteBuffer);
         buffer.append(" FrameBytesRead: ");

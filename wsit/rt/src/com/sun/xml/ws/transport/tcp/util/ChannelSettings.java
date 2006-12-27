@@ -42,7 +42,7 @@ import javax.xml.namespace.QName;
     "channelId",
     "wsServiceName"    
 })
-public class ChannelSettings {
+public final class ChannelSettings {
     
     private List<MimeType> negotiatedMimeTypes;
     
@@ -58,8 +58,11 @@ public class ChannelSettings {
     public ChannelSettings() {
     }
 
-    public ChannelSettings(@NotNull List<MimeType> negotiatedMimeTypes, @NotNull List<String> negotiatedParams, 
-            int channelId, QName wsServiceName, WSTCPURI targetWSURI) {
+    public ChannelSettings(@NotNull final List<MimeType> negotiatedMimeTypes, 
+            @NotNull final List<String> negotiatedParams, 
+            final int channelId, 
+            final QName wsServiceName, 
+            final WSTCPURI targetWSURI) {
         this.negotiatedMimeTypes = negotiatedMimeTypes;
         this.negotiatedParams = negotiatedParams;
         this.channelId = channelId;
@@ -71,7 +74,7 @@ public class ChannelSettings {
         return negotiatedMimeTypes;
     }
 
-    public void setNegotiatedMimeTypes(@NotNull List<MimeType> negotiatedMimeTypes) {
+    public void setNegotiatedMimeTypes(@NotNull final List<MimeType> negotiatedMimeTypes) {
         this.negotiatedMimeTypes = negotiatedMimeTypes;
     }
 
@@ -79,7 +82,7 @@ public class ChannelSettings {
         return negotiatedParams;
     }
 
-    public void setNegotiatedParams(@NotNull List<String> negotiatedParams) {
+    public void setNegotiatedParams(@NotNull final List<String> negotiatedParams) {
         this.negotiatedParams = negotiatedParams;
     }
 
@@ -87,7 +90,7 @@ public class ChannelSettings {
         return targetWSURI;
     }
 
-    public void setTargetWSURI(@NotNull WSTCPURI targetWSURI) {
+    public void setTargetWSURI(@NotNull final WSTCPURI targetWSURI) {
         this.targetWSURI = targetWSURI;
     }
 
@@ -95,7 +98,7 @@ public class ChannelSettings {
         return channelId;
     }
 
-    public void setChannelId(int channelId) {
+    public void setChannelId(final int channelId) {
         this.channelId = channelId;
     }
 
@@ -103,7 +106,7 @@ public class ChannelSettings {
         return wsServiceName;
     }
 
-    public void setWSServiceName(@NotNull QName wsServiceName) {
+    public void setWSServiceName(@NotNull final QName wsServiceName) {
         this.wsServiceName = wsServiceName;
     }
     

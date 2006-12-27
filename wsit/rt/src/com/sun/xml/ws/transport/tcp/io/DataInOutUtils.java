@@ -31,14 +31,14 @@ import java.nio.ByteBuffer;
 /**
  * @author Alexey Stashok
  */
-public class DataInOutUtils {
-    public static int readInt4(InputStream is) throws IOException {
+public final class DataInOutUtils {
+    public static int readInt4(final InputStream is) throws IOException {
         int value = 0;
         
         for(int shVal = 0, neeble = 8; (neeble & 8) != 0; shVal += 6) {
-            int octet = is.read();
+            final int octet = is.read();
             if (octet == -1) {
-                throw new EOFException("End of stream");
+                throw new EOFException();
             }
             neeble = octet >> 4;
             
@@ -52,7 +52,7 @@ public class DataInOutUtils {
         return value;
     }
     
-    public static int[] readInts4(InputStream is, int[] array, int count) throws IOException {
+    public static int[] readInts4(final InputStream is, final int[] array, final int count) throws IOException {
         int value = 0;
         int octet = 0;
         int readInts = 0;
@@ -62,7 +62,7 @@ public class DataInOutUtils {
             if (neebleNum % 2 == 0) {
                 octet = is.read();
                 if (octet == -1) {
-                    throw new EOFException("End of stream");
+                    throw new EOFException();
                 }
                 neeble = octet >> 4;
             } else {
@@ -82,7 +82,7 @@ public class DataInOutUtils {
         return array;
     }
     
-    public static void writeInt4(OutputStream os, int value) throws IOException {
+    public static void writeInt4(final OutputStream os, int value) throws IOException {
         int nibbleL;
         int nibbleH;
         do {
@@ -104,12 +104,12 @@ public class DataInOutUtils {
         } while(value != 0);
     }
     
-    public static int readInt8(InputStream is) throws IOException {
+    public static int readInt8(final InputStream is) throws IOException {
         int value = 0;
         for(int shVal = 0, octet = 0x80; (octet & 0x80) != 0; shVal += 7) {
             octet = is.read();
             if (octet == -1) {
-                throw new EOFException("End of stream");
+                throw new EOFException();
             }
             
             value |= ((octet & 0x7F) << shVal);
@@ -118,7 +118,7 @@ public class DataInOutUtils {
         return value;
     }
     
-    public static void writeInt8(OutputStream os, int value) throws IOException {
+    public static void writeInt8(final OutputStream os, int value) throws IOException {
         int octet;
         do {
             octet = value & 0x7F;
@@ -132,7 +132,7 @@ public class DataInOutUtils {
         } while(value != 0);
     }
     
-    public static void writeInt8(ByteBuffer bb, int value) throws IOException {
+    public static void writeInt8(final ByteBuffer bb, int value) throws IOException {
         int octet;
         do {
             octet = value & 0x7F;
@@ -146,15 +146,15 @@ public class DataInOutUtils {
         } while(value != 0);
     }
     
-    public static int readInt4(ByteBuffer buffer) throws IOException {
+    public static int readInt4(final ByteBuffer buffer) throws IOException {
         int value = 0;
         
         for(int shVal = 0, neeble = 8; (neeble & 8) != 0; shVal += 6) {
             if (!buffer.hasRemaining()) {
-                throw new EOFException("End of stream");
+                throw new EOFException();
             }
             
-            int octet = buffer.get();
+            final int octet = buffer.get();
             neeble = octet >> 4;
             
             value |= ((neeble & 7) << shVal);
@@ -167,7 +167,7 @@ public class DataInOutUtils {
         return value;
     }
     
-    public static int[] readInts4(ByteBuffer buffer, int[] array, int count) throws IOException {
+    public static int[] readInts4(final ByteBuffer buffer, final int[] array, final int count) throws IOException {
         int value = 0;
         int octet = 0;
         int readInts = 0;
@@ -176,7 +176,7 @@ public class DataInOutUtils {
         for(int neebleNum = 0; readInts < count; neebleNum++) {
             if (neebleNum % 2 == 0) {
                 if (!buffer.hasRemaining()) {
-                    throw new EOFException("End of stream");
+                    throw new EOFException();
                 }
                 octet = buffer.get();
                 
@@ -198,14 +198,14 @@ public class DataInOutUtils {
         return array;
     }
     
-    public static void writeInts4(ByteBuffer bb, int ... values) throws IOException {
+    public static void writeInts4(final ByteBuffer bb, final int ... values) throws IOException {
         writeInts4(bb, values, 0, values.length);
     }
     
-    public static void writeInts4(ByteBuffer bb, int[] array, int offset, int count) throws IOException {
+    public static void writeInts4(final ByteBuffer bb, final int[] array, final int offset, final int count) throws IOException {
         int shiftValue = 0;
         for(int i=0; i<count - 1; i++) {
-            int value = array[offset + i];
+            final int value = array[offset + i];
             shiftValue = writeInt4(bb, value, shiftValue, false);
         }
         
@@ -215,14 +215,15 @@ public class DataInOutUtils {
     }
     
     
-    public static void writeInts4(OutputStream out, int ... values) throws IOException {
+    public static void writeInts4(final OutputStream out, final int ... values) throws IOException {
         writeInts4(out, values, 0, values.length);
     }
     
-    public static void writeInts4(OutputStream out, int[] array, int offset, int count) throws IOException {
+    public static void writeInts4(final OutputStream out, final int[] array, 
+            final int offset, final int count) throws IOException {
         int shiftValue = 0;
         for(int i=0; i<count - 1; i++) {
-            int value = array[offset + i];
+            final int value = array[offset + i];
             shiftValue = writeInt4(out, value, shiftValue, false);
         }
         
@@ -231,8 +232,7 @@ public class DataInOutUtils {
         }
     }
     
-    public static int writeInt4(OutputStream out, int value, int highValue, boolean flush) throws IOException {
-        int writeShift = 0;
+    public static int writeInt4(final OutputStream out, int value, int highValue, final boolean flush) throws IOException {
         int nibbleL;
         int nibbleH;
         
@@ -277,8 +277,7 @@ public class DataInOutUtils {
         return 0;
     }
     
-    public static int writeInt4(ByteBuffer bb, int value, int highValue, boolean flush) throws IOException {
-        int writeShift = 0;
+    public static int writeInt4(final ByteBuffer bb, int value, int highValue, final boolean flush) throws IOException {
         int nibbleL;
         int nibbleH;
         
@@ -323,11 +322,11 @@ public class DataInOutUtils {
         return 0;
     }
     
-    public static int readInt8(ByteBuffer buffer) throws IOException {
+    public static int readInt8(final ByteBuffer buffer) throws IOException {
         int value = 0;
         for(int shVal = 0, octet = 0x80; (octet & 0x80) != 0; shVal += 7) {
             if (!buffer.hasRemaining()) {
-                throw new EOFException("End of stream");
+                throw new EOFException();
             }
             
             octet = buffer.get();
@@ -338,14 +337,15 @@ public class DataInOutUtils {
         return value;
     }
     
-    public static void readFully(InputStream inputStream, byte[] magicBuf) throws IOException {
-        readFully(inputStream, magicBuf, 0, magicBuf.length);
+    public static void readFully(final InputStream inputStream, final byte[] buffer) throws IOException {
+        readFully(inputStream, buffer, 0, buffer.length);
     }
     
-    public static void readFully(InputStream inputStream, byte[] magicBuf, int offset, int length) throws IOException {
+    public static void readFully(final InputStream inputStream, final byte[] buffer,
+            final int offset, final int length) throws IOException {
         int bytesRead = 0;
         while(bytesRead < length) {
-            int count = inputStream.read(magicBuf, offset + bytesRead, length - bytesRead);
+            final int count = inputStream.read(buffer, offset + bytesRead, length - bytesRead);
             if (count < 0) {
                 throw new EOFException();
             }

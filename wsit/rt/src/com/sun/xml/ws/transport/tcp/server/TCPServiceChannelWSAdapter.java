@@ -35,13 +35,13 @@ import java.io.IOException;
 /**
  * @author Alexey Stashok
  */
-public class TCPServiceChannelWSAdapter extends TCPAdapter {
-    private WSTCPAdapterRegistry adapterRegistry;
+public final class TCPServiceChannelWSAdapter extends TCPAdapter {
+    private final WSTCPAdapterRegistry adapterRegistry;
     
-    public TCPServiceChannelWSAdapter(@NotNull String name,
-            @NotNull String urlPattern,
-    @NotNull WSEndpoint endpoint,
-    @NotNull WSTCPAdapterRegistry adapterRegistry) {
+    public TCPServiceChannelWSAdapter(@NotNull final String name,
+            @NotNull final String urlPattern,
+    @NotNull final WSEndpoint endpoint,
+    @NotNull final WSTCPAdapterRegistry adapterRegistry) {
         super(name, urlPattern, endpoint);
         this.adapterRegistry = adapterRegistry;
     }
@@ -53,7 +53,7 @@ public class TCPServiceChannelWSAdapter extends TCPAdapter {
     
     
     class ServiceChannelTCPToolkit extends TCPAdapter.TCPToolkit {
-        private ServiceChannelWSSatellite serviceChannelWSSatellite;
+        private final ServiceChannelWSSatellite serviceChannelWSSatellite;
         
         public ServiceChannelTCPToolkit() {
             serviceChannelWSSatellite = new ServiceChannelWSSatellite(TCPServiceChannelWSAdapter.this);
@@ -61,33 +61,33 @@ public class TCPServiceChannelWSAdapter extends TCPAdapter {
         
         // Taking Codec from virtual connection's ChannelContext
         @Override
-        protected @NotNull Codec getCodec(@NotNull ChannelContext context) {
+        protected @NotNull Codec getCodec(@NotNull final ChannelContext context) {
             return codec;
         }
         
         @Override
-        protected void handle(@NotNull TCPConnectionImpl con) throws IOException {
+        protected void handle(@NotNull final TCPConnectionImpl con) throws IOException {
             serviceChannelWSSatellite.setConnectionContext(con.getChannelContext());
             super.handle(con);
         }
         
         @Override
-        public void addCustomPacketSattellites(@NotNull Packet packet) {
+        public void addCustomPacketSattellites(@NotNull final Packet packet) {
             super.addCustomPacketSattellites(packet);
             packet.addSatellite(serviceChannelWSSatellite);
         }
     };
     
     
-    public static class ServiceChannelWSSatellite extends DistributedPropertySet {
-        private TCPServiceChannelWSAdapter serviceChannelWSAdapter;
+    public static final class ServiceChannelWSSatellite extends DistributedPropertySet {
+        private final TCPServiceChannelWSAdapter serviceChannelWSAdapter;
         private ChannelContext channelContext;
         
-        ServiceChannelWSSatellite(@NotNull TCPServiceChannelWSAdapter serviceChannelWSAdapter) {
+        ServiceChannelWSSatellite(@NotNull final TCPServiceChannelWSAdapter serviceChannelWSAdapter) {
             this.serviceChannelWSAdapter = serviceChannelWSAdapter;
         }
         
-        protected void setConnectionContext(ChannelContext channelContext) {
+        protected void setConnectionContext(final ChannelContext channelContext) {
             this.channelContext = channelContext;
         }
         
@@ -101,7 +101,7 @@ public class TCPServiceChannelWSAdapter extends TCPAdapter {
             return channelContext;
         }
         
-        private static PropertyMap model;
+        private static final PropertyMap model;
         static {
             model = parse(ServiceChannelWSSatellite.class);
         }

@@ -29,7 +29,7 @@ import java.util.Set;
  * @author Alexey Stashok
  */
 
-public class FrameType {
+public final class FrameType {
     public static final int MESSAGE = 0;
     public static final int MESSAGE_START_CHUNK = 1;
     public static final int MESSAGE_CHUNK = 2;
@@ -46,11 +46,11 @@ public class FrameType {
         typesContainParameters.add(ERROR);
     }
     
-    public static boolean isFrameContainsParams(int msgId) {
+    public static boolean isFrameContainsParams(final int msgId) {
         return typesContainParameters.contains(msgId);
     }
     
-    public static boolean isLastFrame(int msgId) {
+    public static boolean isLastFrame(final int msgId) {
         return msgId == MESSAGE || msgId == MESSAGE_END_CHUNK || 
                 msgId == ERROR || msgId == NULL;
     }

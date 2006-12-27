@@ -25,7 +25,7 @@ package com.sun.xml.ws.transport.tcp.util;
 /**
  * @author Alexey Stashok
  */
-public class VersionController {
+public final class VersionController {
     
     public static enum VersionSupport {
         FULLY_SUPPORTED,
@@ -36,11 +36,11 @@ public class VersionController {
     private static final VersionController instance = new VersionController(
             new Version(1, 0), new Version(1, 0));
     
-    private Version framingVersion;
-    private Version connectionManagementVersion;
+    private final Version framingVersion;
+    private final Version connectionManagementVersion;
     
-    private VersionController(Version framingVersion,
-            Version connectionManagementVersion) {
+    private VersionController(final Version framingVersion,
+            final Version connectionManagementVersion) {
         this.framingVersion = framingVersion;
         this.connectionManagementVersion = connectionManagementVersion;
     }
@@ -62,8 +62,8 @@ public class VersionController {
  *  and returns FULLY_SUPPORTED in case of success, or other value, which could
  *  correspond to exact problem (not supported, particullary supported, etc)
  */
-    public VersionSupport checkVersionSupport(Version clientFramingVersion,
-            Version clientConnectionManagementVersion) {
+    public VersionSupport checkVersionSupport(final Version clientFramingVersion,
+            final Version clientConnectionManagementVersion) {
         
         if (framingVersion.equals(clientFramingVersion) &&
                 connectionManagementVersion.equals(clientConnectionManagementVersion)) {
