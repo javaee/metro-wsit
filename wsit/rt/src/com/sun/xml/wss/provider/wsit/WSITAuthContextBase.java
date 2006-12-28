@@ -1062,6 +1062,9 @@ public abstract class WSITAuthContextBase  {
     
     
     protected com.sun.xml.wss.impl.AlgorithmSuite getAlgoSuite(AlgorithmSuite suite) {
+        if (suite == null) {
+            return null;
+        }
         com.sun.xml.wss.impl.AlgorithmSuite als = new com.sun.xml.wss.impl.AlgorithmSuite(
                 suite.getDigestAlgorithm(),
                 suite.getEncryptionAlgorithm(),
