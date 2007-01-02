@@ -58,7 +58,7 @@ public final class PolicyModelGenerator {
      * null.
      * @throw PolicyException in case Policy translation fails.
      */
-    public PolicySourceModel translate(Policy policy) throws PolicyException {
+    public PolicySourceModel translate(final Policy policy) throws PolicyException {
         logger.entering("translate", policy);
         
         PolicySourceModel model = null;
@@ -67,16 +67,15 @@ public final class PolicyModelGenerator {
             logger.fine("translate", LocalizationMessages.POLICY_IS_NULL_RETURNING());
         } else {
             model = PolicySourceModel.createPolicySourceModel(policy.getId(), policy.getName());
-            ModelNode rootNode = model.getRootNode();
-            ModelNode exactlyOneNode = rootNode.createChildExactlyOneNode();
+            final ModelNode rootNode = model.getRootNode();
+            final ModelNode exactlyOneNode = rootNode.createChildExactlyOneNode();
             for (AssertionSet set : policy) {
-                ModelNode alternativeNode = exactlyOneNode.createChildAllNode();
+                final ModelNode alternativeNode = exactlyOneNode.createChildAllNode();
                 for (PolicyAssertion assertion : set) {
-                    AssertionData data = AssertionData.createAssertionData(assertion.getName(), assertion.getValue(), assertion.getAttributes());
-                    ModelNode assertionNode = alternativeNode.createChildAssertionNode(data);
+                    final AssertionData data = AssertionData.createAssertionData(assertion.getName(), assertion.getValue(), assertion.getAttributes());
+                    final ModelNode assertionNode = alternativeNode.createChildAssertionNode(data);
                     if (assertion.hasNestedPolicy()) {
-                        NestedPolicy nestedPolicy = assertion.getNestedPolicy();
-                        ModelNode nestedPolicyNode = translate(assertionNode, nestedPolicy);
+                        translate(assertionNode, assertion.getNestedPolicy());
                     }
                     if (assertion.hasNestedAssertions()) {
                         translate(assertion.getNestedAssertionsIterator(), assertionNode);
@@ -95,17 +94,16 @@ public final class PolicyModelGenerator {
      * @param policy The nested policy
      * @return The nested policy translated to the policy info model
      */
-    private ModelNode translate(ModelNode parentAssertion, NestedPolicy policy) {
-        ModelNode nestedPolicyRoot = parentAssertion.createChildPolicyNode();
-        ModelNode exactlyOneNode = nestedPolicyRoot.createChildExactlyOneNode();
-        AssertionSet set = policy.getAssertionSet();
-        ModelNode alternativeNode = exactlyOneNode.createChildAllNode();
+    private ModelNode translate(final ModelNode parentAssertion, final NestedPolicy policy) {
+        final ModelNode nestedPolicyRoot = parentAssertion.createChildPolicyNode();
+        final ModelNode exactlyOneNode = nestedPolicyRoot.createChildExactlyOneNode();
+        final AssertionSet set = policy.getAssertionSet();
+        final ModelNode alternativeNode = exactlyOneNode.createChildAllNode();
         for (PolicyAssertion assertion : set) {
-            AssertionData data = AssertionData.createAssertionData(assertion.getName(), assertion.getValue(), assertion.getAttributes()); 
-            ModelNode assertionNode = alternativeNode.createChildAssertionNode(data);
+            final AssertionData data = AssertionData.createAssertionData(assertion.getName(), assertion.getValue(), assertion.getAttributes()); 
+            final ModelNode assertionNode = alternativeNode.createChildAssertionNode(data);
             if (assertion.hasNestedPolicy()) {
-                NestedPolicy nestedPolicy = assertion.getNestedPolicy();
-                ModelNode nestedPolicyNode = translate(assertionNode, nestedPolicy);
+                translate(assertionNode, assertion.getNestedPolicy());
             }
             if (assertion.hasNestedAssertions()) {
                 translate(assertion.getNestedAssertionsIterator(), assertionNode);
@@ -120,11 +118,11 @@ public final class PolicyModelGenerator {
      * @param assertions The set of contained assertions
      * @param assertionNode The node to which the assertions are added as child nodes
      */
-    private void translate(Iterator<PolicyAssertion> assertionParametersIterator, ModelNode assertionNode) {
+    private void translate(final Iterator<PolicyAssertion> assertionParametersIterator, final ModelNode assertionNode) {
         while (assertionParametersIterator.hasNext()) {
-            PolicyAssertion assertionParameter = assertionParametersIterator.next();
-            AssertionData data = AssertionData.createAssertionParameterData(assertionParameter.getName(), assertionParameter.getValue(), assertionParameter.getAttributes());
-            ModelNode assertionParameterNode = assertionNode.createChildAssertionParameterNode(data);
+            final PolicyAssertion assertionParameter = assertionParametersIterator.next();
+            final AssertionData data = AssertionData.createAssertionParameterData(assertionParameter.getName(), assertionParameter.getValue(), assertionParameter.getAttributes());
+            final ModelNode assertionParameterNode = assertionNode.createChildAssertionParameterNode(data);
             if (assertionParameter.hasNestedPolicy()) {
                 throw new IllegalStateException(LocalizationMessages.UNEXPECTED_POLICY_ELEMENT_FOUND_IN_ASSERTION_PARAM(assertionParameter));
             }

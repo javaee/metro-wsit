@@ -61,8 +61,8 @@ public final class PolicyUtils {
          * @return indentation string as specified by indentation level
          *
          */
-        public static String createIndent(int indentLevel) {
-            char[] charData = new char[indentLevel * 4];
+        public static String createIndent(final int indentLevel) {
+            final char[] charData = new char[indentLevel * 4];
             Arrays.fill(charData, ' ');
             return String.valueOf(charData);
         }
@@ -77,7 +77,7 @@ public final class PolicyUtils {
          * 2. local name (not null String)
          */
         public static final Comparator<QName> QNAME_COMPARATOR = new Comparator<QName>() {
-            public int compare(QName qn1, QName qn2) {
+            public int compare(final QName qn1, final QName qn2) {
                 if (qn1 == qn2 || qn1.equals(qn2)) {
                     return 0;
                 }
@@ -98,9 +98,9 @@ public final class PolicyUtils {
          *
          * @returns {@code -1} if {@code b1 < b2}, {@code 0} if {@code b1 == b2}, {@code 1} if {@code b1 > b2}
          */
-        public static int compareBoolean(boolean b1, boolean b2) {
-            int i1 = (b1) ? 1 : 0;
-            int i2 = (b2) ? 1 : 0;
+        public static int compareBoolean(final boolean b1, final boolean b2) {
+            final int i1 = (b1) ? 1 : 0;
+            final int i2 = (b2) ? 1 : 0;
             
             return i1 - i2;
         }
@@ -110,7 +110,7 @@ public final class PolicyUtils {
          *
          * @returns {@code -1} if {@code s1 < s2}, {@code 0} if {@code s1 == s2}, {@code 1} if {@code s1 > s2}
          */
-        public static int compareNullableStrings(String s1, String s2) {
+        public static int compareNullableStrings(final String s1, final String s2) {
             return ((s1 == null) ? ((s2 == null) ? 0 : -1) : s1.compareTo(s2));
         }
     }
@@ -125,7 +125,7 @@ public final class PolicyUtils {
          *        processing and return {@code null} when an empty option is encountered
          * @return TODO
          */
-        public static <E, T extends Collection<? extends E>, U extends Collection<? extends E>> Collection<Collection<E>> combine(final U initialBase, final Collection<T> options, boolean ignoreEmptyOption) {
+        public static <E, T extends Collection<? extends E>, U extends Collection<? extends E>> Collection<Collection<E>> combine(final U initialBase, final Collection<T> options, final boolean ignoreEmptyOption) {
             List<Collection<E>> combinations = null;
             if (options == null || options.isEmpty()) {
                 // no combination creation needed
@@ -137,7 +137,7 @@ public final class PolicyUtils {
             }
             
             // creating defensive and modifiable copy of the base
-            Collection<E> base = new LinkedList<E>();
+            final Collection<E> base = new LinkedList<E>();
             if (initialBase != null && !initialBase.isEmpty()) {
                 base.addAll(initialBase);
             }
@@ -150,9 +150,9 @@ public final class PolicyUtils {
              *      resulting collection of combinations.
              */
             int finalCombinationsSize = 1;
-            Queue<T> optionProcessingQueue = new LinkedList<T>();
+            final Queue<T> optionProcessingQueue = new LinkedList<T>();
             for (T option : options) {
-                int optionSize =  option.size();
+                final int optionSize =  option.size();
                 
                 if (optionSize == 0) {
                     if (ignoreEmptyOption) {
@@ -174,13 +174,13 @@ public final class PolicyUtils {
             if (finalCombinationsSize > 1) {
                 T processedOption;
                 while ((processedOption = optionProcessingQueue.poll()) != null) {
-                    int actualSemiCombinationCollectionSize = combinations.size();
-                    int newSemiCombinationCollectionSize = actualSemiCombinationCollectionSize * processedOption.size();
+                    final int actualSemiCombinationCollectionSize = combinations.size();
+                    final int newSemiCombinationCollectionSize = actualSemiCombinationCollectionSize * processedOption.size();
                     
                     int semiCombinationIndex = 0;
                     for (E optionElement : processedOption) {
                         for (int i = 0; i < actualSemiCombinationCollectionSize; i++) {
-                            Collection<E> semiCombination = combinations.get(semiCombinationIndex); // unfinished combination
+                            final Collection<E> semiCombination = combinations.get(semiCombinationIndex); // unfinished combination
                             
                             if (semiCombinationIndex + actualSemiCombinationCollectionSize < newSemiCombinationCollectionSize) {
                                 // this is not the last optionElement => we create a new combination copy for the next child
@@ -205,7 +205,8 @@ public final class PolicyUtils {
         /**
          * Reflectively invokes specified method on the specified target
          */
-        public static <T> T invoke(Object target, String methodName, Class<T> resultClass, Object... parameters) throws PolicyException {
+        public static <T> T invoke(final Object target, final String methodName, 
+                                    final Class<T> resultClass, final Object... parameters) throws PolicyException {
             Class[] parameterTypes;
             if (parameters != null && parameters.length > 0) {
                 parameterTypes = new Class[parameters.length];
@@ -223,10 +224,11 @@ public final class PolicyUtils {
         /**
          * Reflectively invokes specified method on the specified target
          */
-        public static <T> T invoke(Object target, String methodName, Class<T> resultClass, Object[] parameters, Class[] parameterTypes) throws PolicyException {
+        public static <T> T invoke(final Object target, final String methodName, final Class<T> resultClass, 
+                                    final Object[] parameters, final Class[] parameterTypes) throws PolicyException {
             try {
-                Method method = target.getClass().getMethod(methodName, parameterTypes);
-                Object result = method.invoke(target, parameters);
+                final Method method = target.getClass().getMethod(methodName, parameterTypes);
+                final Object result = method.invoke(target, parameters);
                 
                 return resultClass.cast(result);
             } catch (IllegalArgumentException e) {
@@ -252,10 +254,10 @@ public final class PolicyUtils {
          *        file is in form of <code>wsit-<i>{configFileIdentifier}</i>.xml</code>. Must not be {@code null}.
          * @return generated config file resource name
          */
-        public static String generateFullName(String configFileIdentifier) {
+        public static String generateFullName(final String configFileIdentifier) {
             //TODO: replace with some algorithm that retrieves the actual file name.
             if (configFileIdentifier != null) {
-                StringBuffer buffer = new StringBuffer("wsit-");
+                final StringBuffer buffer = new StringBuffer("wsit-");
                 buffer.append(configFileIdentifier).append(".xml");
                 return buffer.toString();
             } else {
@@ -266,9 +268,9 @@ public final class PolicyUtils {
         /**
          * Loads the config file as an URL resource.
          */
-        public static URL loadAsResource(String configFileName, Object context) throws PolicyException {
+        public static URL loadAsResource(final String configFileName, final Object context) throws PolicyException {
             if (context == null) {
-                ClassLoader cl = Thread.currentThread().getContextClassLoader();
+                final ClassLoader cl = Thread.currentThread().getContextClassLoader();
                 if (cl == null) {
                     return ClassLoader.getSystemResource(configFileName);
                 } else {
@@ -309,7 +311,7 @@ public final class PolicyUtils {
          *                                   or names a provider class that cannot be found and instantiated
          * @see #load(Class)
          */
-        public static <T> T[] load(Class<T> serviceClass, ClassLoader loader) {
+        public static <T> T[] load(final Class<T> serviceClass, final ClassLoader loader) {
             return ServiceFinder.find(serviceClass, loader).toArray();
         }
         
@@ -330,7 +332,7 @@ public final class PolicyUtils {
          *                                   or names a provider class that cannot be found and instantiated
          * @see #load(Class, ClassLoader)
          */
-        public static <T> T[] load(Class<T> serviceClass) {
+        public static <T> T[] load(final Class<T> serviceClass) {
             return ServiceFinder.find(serviceClass).toArray();
         }
     }    

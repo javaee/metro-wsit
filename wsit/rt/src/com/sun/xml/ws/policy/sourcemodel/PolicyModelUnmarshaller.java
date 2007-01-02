@@ -23,7 +23,6 @@
 package com.sun.xml.ws.policy.sourcemodel;
 
 import com.sun.xml.ws.policy.PolicyException;
-import java.util.List;
 
 /**
  * Abstract class defines interface for policy model unmarshaller implementations that are specific to underlying

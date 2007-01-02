@@ -41,7 +41,7 @@ public final class XmlPolicyModelMarshaller extends PolicyModelMarshaller {
         this.marshallInvisible = marshallInvisible;
     }
     
-    public void marshal(PolicySourceModel model, Object storage) throws PolicyException {
+    public void marshal(final PolicySourceModel model, final Object storage) throws PolicyException {
         if (storage instanceof TypedXmlWriter) {
             marshal(model, (TypedXmlWriter) storage);
         } else if (storage instanceof XMLStreamWriter) {
@@ -51,7 +51,7 @@ public final class XmlPolicyModelMarshaller extends PolicyModelMarshaller {
         }
     }
     
-    public void marshal(Collection<PolicySourceModel> models, Object storage) throws PolicyException {
+    public void marshal(final Collection<PolicySourceModel> models, final Object storage) throws PolicyException {
         for (PolicySourceModel model : models) {
             marshal(model, storage);
         }
@@ -63,8 +63,8 @@ public final class XmlPolicyModelMarshaller extends PolicyModelMarshaller {
      * @param model A policy source model.
      * @param writer A typed XML writer.
      */
-    private void marshal(PolicySourceModel model, TypedXmlWriter writer) throws PolicyException {
-        TypedXmlWriter policy = writer._element(PolicyConstants.POLICY, TypedXmlWriter.class);
+    private void marshal(final PolicySourceModel model, final TypedXmlWriter writer) throws PolicyException {
+        final TypedXmlWriter policy = writer._element(PolicyConstants.POLICY, TypedXmlWriter.class);
         marshalPolicyAttributes(model, policy);
         marshal(model.getRootNode(), policy);
     }
@@ -75,9 +75,9 @@ public final class XmlPolicyModelMarshaller extends PolicyModelMarshaller {
      * @param model A policy source model.
      * @param writer An XML stream writer.
      */
-    private void marshal(PolicySourceModel model, XMLStreamWriter writer) throws PolicyException {
-        StaxSerializer serializer = new StaxSerializer(writer);
-        TypedXmlWriter policy = TXW.create(PolicyConstants.POLICY, TypedXmlWriter.class, serializer);
+    private void marshal(final PolicySourceModel model, final XMLStreamWriter writer) throws PolicyException {
+        final StaxSerializer serializer = new StaxSerializer(writer);
+        final TypedXmlWriter policy = TXW.create(PolicyConstants.POLICY, TypedXmlWriter.class, serializer);
         policy._namespace(PolicyConstants.POLICY_NAMESPACE_URI, PolicyConstants.POLICY_NAMESPACE_PREFIX);
         marshalPolicyAttributes(model, policy);
         marshal(model.getRootNode(), policy);
@@ -91,13 +91,13 @@ public final class XmlPolicyModelMarshaller extends PolicyModelMarshaller {
      * @param model The policy source model.
      * @param writer The typed XML writer.
      */
-    private static void marshalPolicyAttributes(PolicySourceModel model, TypedXmlWriter writer) {
-        String policyId = model.getPolicyId();
+    private static void marshalPolicyAttributes(final PolicySourceModel model, final TypedXmlWriter writer) {
+        final String policyId = model.getPolicyId();
         if (policyId != null) {
             writer._attribute(PolicyConstants.WSU_ID, policyId);
         }
         
-        String policyName = model.getPolicyName();
+        final String policyName = model.getPolicyName();
         if (policyName != null) {
             writer._attribute(PolicyConstants.POLICY_NAME, policyName);
         }
@@ -109,16 +109,16 @@ public final class XmlPolicyModelMarshaller extends PolicyModelMarshaller {
      * @param rootNode The ModelNode that is marshalled.
      * @param writer The TypedXmlWriter onto which the content of the rootNode is marshalled.
      */
-    private void marshal(ModelNode rootNode, TypedXmlWriter writer) {
+    private void marshal(final ModelNode rootNode, final TypedXmlWriter writer) {
         for (ModelNode node : rootNode) {
-            AssertionData data = node.getNodeData();
+            final AssertionData data = node.getNodeData();
             if (marshallInvisible || data == null || !data.isPrivateAttributeSet()) {
                 TypedXmlWriter child = null;
                 if (data == null) {
                     child = writer._element(node.getType().asQName(), TypedXmlWriter.class);
                 } else {
                     child = writer._element(data.getName(), TypedXmlWriter.class);
-                    String value = data.getValue();
+                    final String value = data.getValue();
                     if (value != null) {
                         child._pcdata(value);
                     }

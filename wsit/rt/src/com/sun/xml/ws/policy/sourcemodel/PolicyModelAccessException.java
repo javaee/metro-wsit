@@ -32,25 +32,25 @@ import java.net.URI;
  */
 public class PolicyModelAccessException extends PolicyException {
     
-    public PolicyModelAccessException(URI modelUri) {
+    public PolicyModelAccessException(final URI modelUri) {
         super(PolicyModelAccessException.createMessage(modelUri, null));
     }
     
     
-    public PolicyModelAccessException(URI modelUri, String reason) {
+    public PolicyModelAccessException(final URI modelUri, final String reason) {
         super(PolicyModelAccessException.createMessage(modelUri, reason));
     }
     
-    public PolicyModelAccessException(URI modelUri, String reason, Throwable cause) {
+    public PolicyModelAccessException(final URI modelUri, final String reason, final Throwable cause) {
         super(PolicyModelAccessException.createMessage(modelUri, reason), cause);
     }
     
     
-    public PolicyModelAccessException(URI modelUri, Throwable cause) {
+    public PolicyModelAccessException(final URI modelUri, final Throwable cause) {
         super(PolicyModelAccessException.createMessage(modelUri, null), cause);
     }
     
-    private static String createMessage(URI modelUri, String reason) {
+    private static String createMessage(final URI modelUri, final String reason) {
         return  (reason != null && reason.length() > 0) ? 
             LocalizationMessages.UNABLE_TO_ACCESS_POLICY_SOURCE_MODEL_PLUS_REASON(modelUri, reason) :
             LocalizationMessages.UNABLE_TO_ACCESS_POLICY_SOURCE_MODEL(modelUri);

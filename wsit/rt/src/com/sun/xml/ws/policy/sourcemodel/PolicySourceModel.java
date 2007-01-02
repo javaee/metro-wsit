@@ -59,7 +59,7 @@ public final class PolicySourceModel implements Cloneable {
      * @param policyName global policy identifier - absolute policy expression URI. May be {@code null}.
      * @return newly created policy source model instance with its name and id properly set
      */
-    public static PolicySourceModel createPolicySourceModel(String policyId, String policyName) {
+    public static PolicySourceModel createPolicySourceModel(final String policyId, final String policyName) {
         return new PolicySourceModel(policyId, policyName);
     }
     
@@ -112,7 +112,7 @@ public final class PolicySourceModel implements Cloneable {
      * When child nodes are tested for equality, the parent policy source model is not considered. Thus two different
      * policy source models instances may be equal based on their node content.
      */
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj)
             return true;
         
@@ -120,7 +120,7 @@ public final class PolicySourceModel implements Cloneable {
             return false;
         
         boolean result = true;
-        PolicySourceModel that = (PolicySourceModel) obj;
+        final PolicySourceModel that = (PolicySourceModel) obj;
         
         result = result && ((this.policyId == null) ? that.policyId == null : this.policyId.equals(that.policyId));
         result = result && ((this.policyName == null) ? that.policyName == null : this.policyName.equals(that.policyName));
@@ -151,8 +151,8 @@ public final class PolicySourceModel implements Cloneable {
      * @return  a string representation of the object.
      */
     public String toString() {
-        String innerIndent = PolicyUtils.Text.createIndent(1);
-        StringBuffer buffer = new StringBuffer("Policy source model {");
+        final String innerIndent = PolicyUtils.Text.createIndent(1);
+        final StringBuffer buffer = new StringBuffer("Policy source model {");
         
         buffer.append(PolicyUtils.Text.NEW_LINE);
         buffer.append(innerIndent).append("policy id = '").append(policyId).append('\'').append(PolicyUtils.Text.NEW_LINE);
@@ -163,13 +163,13 @@ public final class PolicySourceModel implements Cloneable {
     }
     
     protected PolicySourceModel clone() throws CloneNotSupportedException {
-        PolicySourceModel clone = (PolicySourceModel) super.clone();
+        final PolicySourceModel clone = (PolicySourceModel) super.clone();
         
         clone.rootNode = this.rootNode.clone();
         try {
             clone.rootNode.setParentModel(this);
         } catch (IllegalAccessException e) {
-            CloneNotSupportedException cnse = new CloneNotSupportedException(LocalizationMessages.UNABLE_TO_SET_PARENT_MODEL_ON_ROOT());
+            final CloneNotSupportedException cnse = new CloneNotSupportedException(LocalizationMessages.UNABLE_TO_SET_PARENT_MODEL_ON_ROOT());
             cnse.initCause(e);
             throw cnse;
         }
@@ -219,11 +219,11 @@ public final class PolicySourceModel implements Cloneable {
      *
      * @param context a policy source model context holding the set of unmarshalled policy source models within the same context.
      */
-    public synchronized void expand(PolicySourceModelContext context) throws PolicyException {
+    public synchronized void expand(final PolicySourceModelContext context) throws PolicyException {
         if (!isExpanded()) {
             for (ModelNode reference : references) {
-                PolicyReferenceData refData = reference.getPolicyReferenceData();
-                String digest = refData.getDigest();
+                final PolicyReferenceData refData = reference.getPolicyReferenceData();
+                final String digest = refData.getDigest();
                 PolicySourceModel referencedModel;
                 if (digest == null) {
                     referencedModel = context.retrieveModel(refData.getReferencedModelUri());
@@ -237,7 +237,7 @@ public final class PolicySourceModel implements Cloneable {
         }
     }
     
-    void addNewPolicyReference(ModelNode node) {
+    void addNewPolicyReference(final ModelNode node) {
         if (node.getType() != ModelNode.Type.POLICY_REFERENCE) {
             throw new IllegalArgumentException(LocalizationMessages.POLICY_REFERENCE_NODE_EXPECTED_INSTEAD_OF(node.getType()));
         }

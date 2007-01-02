@@ -62,7 +62,7 @@ public final class PolicyLogger {
     /**
      * Prevents creation of a new instance of this PolicyLogger
      */
-    private PolicyLogger(String componentName) {
+    private PolicyLogger(final String componentName) {
         this.componentClassName = "[" + componentName + "] ";
         this.logger = java.util.logging.Logger.getLogger(LOGGING_SUBSYSTEM_NAME);
     }
@@ -76,71 +76,71 @@ public final class PolicyLogger {
      * @return logger instance preconfigured for use with the component
      * @throws NullPointerException if the componentClass parameter is {@code null}.
      */
-    public static PolicyLogger getLogger(Class componentClass) {
+    public static PolicyLogger getLogger(final Class componentClass) {
         return new PolicyLogger(componentClass.getName());
     }
  
-    public void log(Level level, String methodName, String message) {
+    public void log(final Level level, final String methodName, final String message) {
         logger.logp(level, componentClassName, methodName, message);
     }
 
-    public void log(Level level, String methodName, String message, Throwable thrown) {
+    public void log(final Level level, final String methodName, final String message, final Throwable thrown) {
         logger.logp(level, componentClassName, methodName, message, thrown);
     }
 
-    public void finest(String methodName, String message) {
+    public void finest(final String methodName, final String message) {
         logger.logp(Level.FINEST, componentClassName, methodName, message);
     }
 
-    public void finest(String methodName, String message, Throwable thrown) {
+    public void finest(final String methodName, final String message, final Throwable thrown) {
         logger.logp(Level.FINEST, componentClassName, methodName, message, thrown);
     }
 
-    public void finer(String methodName, String message) {
+    public void finer(final String methodName, final String message) {
         logger.logp(Level.FINER, componentClassName, methodName, message);
     }
 
-    public void finer(String methodName, String message, Throwable thrown) {
+    public void finer(final String methodName, final String message, final Throwable thrown) {
         logger.logp(Level.FINER, componentClassName, methodName, message, thrown);
     }
 
-    public void fine(String methodName, String message) {
+    public void fine(final String methodName, final String message) {
         logger.logp(Level.FINE, componentClassName, methodName, message);
     }
 
-    public void fine(String methodName, String message, Throwable thrown) {
+    public void fine(final String methodName, final String message, final Throwable thrown) {
         logger.logp(Level.FINE, componentClassName, methodName, message, thrown);
     }
 
-    public void info(String methodName, String message) {
+    public void info(final String methodName, final String message) {
         logger.logp(Level.INFO, componentClassName, methodName, message);
     }
 
-    public void info(String methodName, String message, Throwable thrown) {
+    public void info(final String methodName, final String message, final Throwable thrown) {
         logger.logp(Level.INFO, componentClassName, methodName, message, thrown);
     }
 
-    public void config(String methodName, String message) {
+    public void config(final String methodName, final String message) {
         logger.logp(Level.CONFIG, componentClassName, methodName, message);
     }
 
-    public void config(String methodName, String message, Throwable thrown) {
+    public void config(final String methodName, final String message, final Throwable thrown) {
         logger.logp(Level.CONFIG, componentClassName, methodName, message, thrown);
     }
 
-    public void warning(String methodName, String message) {
+    public void warning(final String methodName, final String message) {
         logger.logp(Level.WARNING, componentClassName, methodName, message);
     }
 
-    public void warning(String methodName, String message, Throwable thrown) {
+    public void warning(final String methodName, final String message, final Throwable thrown) {
         logger.logp(Level.WARNING, componentClassName, methodName, message, thrown);
     }
 
-    public void severe(String methodName, String message) {
+    public void severe(final String methodName, final String message) {
         logger.logp(Level.SEVERE, componentClassName, methodName, message);
     }
 
-    public void severe(String methodName, String message, Throwable thrown) {
+    public void severe(final String methodName, final String message, final Throwable thrown) {
         logger.logp(Level.SEVERE, componentClassName, methodName, message, thrown);
     }
     
@@ -152,7 +152,7 @@ public final class PolicyLogger {
         logger.entering(componentClassName, getStackMethodName(4));
     }
 
-    public void entering(Object[] parameters) {
+    public void entering(final Object[] parameters) {
         if (!this.logger.isLoggable(METHOD_CALL_LEVEL_VALUE)) {
             return;
         }
@@ -167,17 +167,17 @@ public final class PolicyLogger {
         logger.exiting(componentClassName, getStackMethodName(4));
     }
     
-    public void exiting(Object result) {
+    public void exiting(final Object result) {
         if (!this.logger.isLoggable(METHOD_CALL_LEVEL_VALUE)) {
             return;
         }
         logger.exiting(componentClassName, getStackMethodName(4), result);
     }
 
-    private String getStackMethodName(int index) {
+    private String getStackMethodName(final int index) {
         String methodName;
 
-        StackTraceElement[] stack = Thread.currentThread().getStackTrace();
+        final StackTraceElement[] stack = Thread.currentThread().getStackTrace();
         if (stack.length > index + 1) {
             methodName = stack[index].getMethodName();
         } else {
@@ -188,23 +188,23 @@ public final class PolicyLogger {
     }
     
     // TODO: refactor and remove usage of the following methods (replace with the version above): 
-    public void entering(String methodName) {
+    public void entering(final String methodName) {
         logger.entering(componentClassName, methodName);
     }
 
-    public void entering(String methodName, Object parameter) {
+    public void entering(final String methodName, final Object parameter) {
         logger.entering(componentClassName, methodName, parameter);
     }
     
-    public void entering(String methodName, Object[] parameters) {
+    public void entering(final String methodName, final Object[] parameters) {
         logger.entering(componentClassName, methodName, parameters);
     }
     
-    public void exiting(String methodName) {
+    public void exiting(final String methodName) {
         logger.exiting(componentClassName, methodName);
     }
     
-    public void exiting(String methodName, Object result) {
+    public void exiting(final String methodName, final Object result) {
         logger.exiting(componentClassName, methodName, result);
     }
     

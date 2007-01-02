@@ -45,7 +45,7 @@ public final class PolicySourceModelContext {
         return policyModels;
     }
     
-    public void addModel(URI modelUri, PolicySourceModel model) {
+    public void addModel(final URI modelUri, final PolicySourceModel model) {
         getModels().put(modelUri,model);
     }
     
@@ -53,15 +53,15 @@ public final class PolicySourceModelContext {
         return new PolicySourceModelContext();
     }
     
-    public boolean containsModel(URI modelUri) {
+    public boolean containsModel(final URI modelUri) {
         return getModels().containsKey(modelUri);
     }
     
-    PolicySourceModel retrieveModel(URI modelUri) throws PolicyModelAccessException {
+    PolicySourceModel retrieveModel(final URI modelUri) throws PolicyModelAccessException {
         return getModels().get(modelUri);
     }
     
-    PolicySourceModel retrieveModel(URI modelUri, URI digestAlgorithm, String digest) throws PolicyModelAccessException {
+    PolicySourceModel retrieveModel(final URI modelUri, final URI digestAlgorithm, final String digest) throws PolicyModelAccessException {
         // TODO: implement
         throw new UnsupportedOperationException();
     }

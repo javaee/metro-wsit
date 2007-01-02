@@ -55,7 +55,7 @@ public final class AssertionData implements Cloneable {
      *
      * @throws IllegalArgumentException in case the {@code type} parameter is not {@link ModelNode.Type.ASSERTION} or {@link ModelNode.Type.ASSERTION_PARAMETER_NODE}
      */
-    public static AssertionData createAssertionData(QName name) throws IllegalArgumentException {
+    public static AssertionData createAssertionData(final QName name) throws IllegalArgumentException {
         return new AssertionData(name, null, null, ModelNode.Type.ASSERTION);
     }
     
@@ -68,7 +68,7 @@ public final class AssertionData implements Cloneable {
      *
      * @throws IllegalArgumentException in case the {@code type} parameter is not 'ModelNode.Type.ASSERTION' or 'ModelNode.Type.ASSERTION_PARAMETER_NODE'
      */
-    public static AssertionData createAssertionParameterData(QName name) throws IllegalArgumentException {
+    public static AssertionData createAssertionParameterData(final QName name) throws IllegalArgumentException {
         return new AssertionData(name, null, null, ModelNode.Type.ASSERTION_PARAMETER_NODE);
     }
     
@@ -79,7 +79,7 @@ public final class AssertionData implements Cloneable {
      *
      * @throws IllegalArgumentException in case the {@code type} parameter is not {@link ModelNode.Type.ASSERTION} or {@link ModelNode.Type.ASSERTION_PARAMETER_NODE}
      */
-    public static AssertionData createAssertionData(QName name, String value, Map<QName, String> attributes) throws IllegalArgumentException {
+    public static AssertionData createAssertionData(final QName name, final String value, final Map<QName, String> attributes) throws IllegalArgumentException {
         return new AssertionData(name, value, attributes, ModelNode.Type.ASSERTION);
     }
     
@@ -92,7 +92,7 @@ public final class AssertionData implements Cloneable {
      *
      * @throws IllegalArgumentException in case the {@code type} parameter is not 'ModelNode.Type.ASSERTION' or 'ModelNode.Type.ASSERTION_PARAMETER_NODE'
      */
-    public static AssertionData createAssertionParameterData(QName name, String value, Map<QName, String> attributes) throws IllegalArgumentException {
+    public static AssertionData createAssertionParameterData(final QName name, final String value, final Map<QName, String> attributes) throws IllegalArgumentException {
         return new AssertionData(name, value, attributes, ModelNode.Type.ASSERTION_PARAMETER_NODE);
     }
     
@@ -132,7 +132,7 @@ public final class AssertionData implements Cloneable {
     /**
      * TODO: javadoc
      */
-    AssertionData(AssertionData data) {
+    AssertionData(final AssertionData data) {
         this.name = data.name;
         this.value = data.value;
         if (attributes != null) {
@@ -142,7 +142,7 @@ public final class AssertionData implements Cloneable {
     }
     
     protected AssertionData clone() throws CloneNotSupportedException {
-        AssertionData clone = (AssertionData) super.clone();
+        final AssertionData clone = (AssertionData) super.clone();
         
         clone.attributes = new HashMap<QName, String>(this.attributes);
         
@@ -152,7 +152,7 @@ public final class AssertionData implements Cloneable {
     /**
      * TODO: javadoc
      */
-    public boolean containsAttribute(QName name) {
+    public boolean containsAttribute(final QName name) {
         synchronized (attributes) {
             return attributes.containsKey(name);
         }
@@ -162,7 +162,7 @@ public final class AssertionData implements Cloneable {
     /**
      * An {@code Object.equals(Object obj)} method override.
      */
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj)
             return true;
         
@@ -170,7 +170,7 @@ public final class AssertionData implements Cloneable {
             return false;
         
         boolean result = true;
-        AssertionData that = (AssertionData) obj;
+        final AssertionData that = (AssertionData) obj;
         
         result = result && this.name.equals(that.name);
         result = result && ((this.value == null) ? that.value == null : this.value.equals(that.value));
@@ -185,7 +185,7 @@ public final class AssertionData implements Cloneable {
     /**
      * TODO: javadoc
      */
-    public String getAttributeValue(QName name) {
+    public String getAttributeValue(final QName name) {
         synchronized (attributes) {
             return attributes.get(name);
         }
@@ -273,7 +273,7 @@ public final class AssertionData implements Cloneable {
     /**
      * TODO: javadoc
      */
-    public String removeAttribute(QName name) {
+    public String removeAttribute(final QName name) {
         synchronized (attributes) {
             return attributes.remove(name);
         }
@@ -282,7 +282,7 @@ public final class AssertionData implements Cloneable {
     /**
      * TODO: javadoc
      */
-    public void setAttribute(QName name, String value) {
+    public void setAttribute(final QName name, final String value) {
         synchronized (attributes) {
             attributes.put(name, value);
         }
@@ -291,7 +291,7 @@ public final class AssertionData implements Cloneable {
     /**
      * TODO: javadoc
      */
-    public void setOptionalAttribute(boolean value) {
+    public void setOptionalAttribute(final boolean value) {
         setAttribute(PolicyConstants.OPTIONAL, Boolean.toString(value));
     }
     
@@ -309,10 +309,10 @@ public final class AssertionData implements Cloneable {
      * @param buffer buffer to be used for appending string representation of this instance
      * @return modified buffer containing new string representation of the instance
      */
-    public StringBuffer toString(int indentLevel, StringBuffer buffer) {
-        String indent = PolicyUtils.Text.createIndent(indentLevel);
-        String innerIndent = PolicyUtils.Text.createIndent(indentLevel + 1);
-        String innerDoubleIndent = PolicyUtils.Text.createIndent(indentLevel + 2);
+    public StringBuffer toString(final int indentLevel, final StringBuffer buffer) {
+        final String indent = PolicyUtils.Text.createIndent(indentLevel);
+        final String innerIndent = PolicyUtils.Text.createIndent(indentLevel + 1);
+        final String innerDoubleIndent = PolicyUtils.Text.createIndent(indentLevel + 2);
         
         buffer.append(indent);
         if (type == ModelNode.Type.ASSERTION) {
@@ -333,7 +333,7 @@ public final class AssertionData implements Cloneable {
                 
                 buffer.append(innerIndent).append("attributes {").append(PolicyUtils.Text.NEW_LINE);
                 for(Map.Entry<QName, String> entry : attributes.entrySet()) {
-                    QName aName = entry.getKey();
+                    final QName aName = entry.getKey();
                     buffer.append(innerDoubleIndent).append("name = '").append(aName.getNamespaceURI()).append(':').append(aName.getLocalPart());
                     buffer.append("', value = '").append(entry.getValue()).append('\'').append(PolicyUtils.Text.NEW_LINE);
                 }

@@ -64,7 +64,7 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
          * Method checks the PSM state machine if the creation of new child of given type is plausible for a node element
          * with type set to this type instance.
          */
-        boolean isChildTypeSupported(Type childType) {
+        boolean isChildTypeSupported(final Type childType) {
             switch (this) {
                 case POLICY:
                 case ALL:
@@ -122,7 +122,7 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
      * @return POLICY model node with the parent model reference initialized to the model supplied as an input parameter
      * @throws NullPointerException if the {@code model} input parameter is {@code null}
      */
-    static ModelNode createRootPolicyNode(PolicySourceModel model) throws NullPointerException {
+    static ModelNode createRootPolicyNode(final PolicySourceModel model) throws NullPointerException {
         if (model == null) {
             throw new NullPointerException(LocalizationMessages.POLICY_SRC_MODEL_INPUT_PARAMETER_MUST_NOT_BE_NULL());
         }
@@ -159,7 +159,7 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
             throw new UnsupportedOperationException(LocalizationMessages.OPERATION_NOT_SUPPORTED_FOR_NODE_TYPE(type));
         }
         
-        ModelNode node = new ModelNode(ModelNode.Type.POLICY, parentModel);
+        final ModelNode node = new ModelNode(ModelNode.Type.POLICY, parentModel);
         this.addChild(node);
         
         return node;
@@ -176,7 +176,7 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
             throw new UnsupportedOperationException(LocalizationMessages.OPERATION_NOT_SUPPORTED_FOR_NODE_TYPE(type));
         }
         
-        ModelNode node = new ModelNode(ModelNode.Type.ALL, parentModel);
+        final ModelNode node = new ModelNode(ModelNode.Type.ALL, parentModel);
         this.addChild(node);
         
         return node;
@@ -193,7 +193,7 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
             throw new UnsupportedOperationException(LocalizationMessages.OPERATION_NOT_SUPPORTED_FOR_NODE_TYPE(type));
         }
         
-        ModelNode node = new ModelNode(ModelNode.Type.EXACTLY_ONE, parentModel);
+        final ModelNode node = new ModelNode(ModelNode.Type.EXACTLY_ONE, parentModel);
         this.addChild(node);
         
         return node;
@@ -210,7 +210,7 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
             throw new UnsupportedOperationException(LocalizationMessages.OPERATION_NOT_SUPPORTED_FOR_NODE_TYPE(type));
         }
         
-        ModelNode node = new ModelNode(ModelNode.Type.ASSERTION, parentModel);
+        final ModelNode node = new ModelNode(ModelNode.Type.ASSERTION, parentModel);
         this.addChild(node);
         
         return node;
@@ -222,12 +222,12 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
      * Factory method that creates new policy source model node as specified by a factory method name and input parameters.
      * Each node is created with respect to its enclosing policy source model.
      */
-    public ModelNode createChildAssertionNode(AssertionData nodeData) {
+    public ModelNode createChildAssertionNode(final AssertionData nodeData) {
         if (!this.type.isChildTypeSupported(Type.ASSERTION)) {
             throw new UnsupportedOperationException(LocalizationMessages.OPERATION_NOT_SUPPORTED_FOR_NODE_TYPE(type));
         }
         
-        ModelNode node = new ModelNode(Type.ASSERTION, parentModel, nodeData);
+        final ModelNode node = new ModelNode(Type.ASSERTION, parentModel, nodeData);
         this.addChild(node);
         
         return node;
@@ -244,7 +244,7 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
             throw new UnsupportedOperationException(LocalizationMessages.OPERATION_NOT_SUPPORTED_FOR_NODE_TYPE(type));
         }
         
-        ModelNode node = new ModelNode(ModelNode.Type.ASSERTION_PARAMETER_NODE, parentModel);
+        final ModelNode node = new ModelNode(ModelNode.Type.ASSERTION_PARAMETER_NODE, parentModel);
         this.addChild(node);
         
         return node;
@@ -256,12 +256,12 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
      * Factory method that creates new policy source model node as specified by a factory method name and input parameters.
      * Each node is created with respect to its enclosing policy source model.
      */
-    public ModelNode createChildAssertionParameterNode(AssertionData nodeData) {
+    public ModelNode createChildAssertionParameterNode(final AssertionData nodeData) {
         if (!this.type.isChildTypeSupported(Type.ASSERTION_PARAMETER_NODE)) {
             throw new UnsupportedOperationException(LocalizationMessages.OPERATION_NOT_SUPPORTED_FOR_NODE_TYPE(type));
         }
         
-        ModelNode node = new ModelNode(Type.ASSERTION_PARAMETER_NODE, parentModel, nodeData);
+        final ModelNode node = new ModelNode(Type.ASSERTION_PARAMETER_NODE, parentModel, nodeData);
         this.addChild(node);
         
         return node;
@@ -273,12 +273,12 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
      * Factory method that creates new policy source model node as specified by a factory method name and input parameters.
      * Each node is created with respect to its enclosing policy source model.
      */
-    public ModelNode createChildPolicyReferenceNode(PolicyReferenceData referenceData) {
+    public ModelNode createChildPolicyReferenceNode(final PolicyReferenceData referenceData) {
         if (!this.type.isChildTypeSupported(Type.POLICY_REFERENCE)) {
             throw new UnsupportedOperationException(LocalizationMessages.OPERATION_NOT_SUPPORTED_FOR_NODE_TYPE(type));
         }
         
-        ModelNode node = new ModelNode(parentModel, referenceData);
+        final ModelNode node = new ModelNode(parentModel, referenceData);
         this.parentModel.addNewPolicyReference(node);
         this.addChild(node);
         
@@ -314,7 +314,7 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
      * @param model new parent policy source model to be set.
      * @throws IllegalAccessException in case this node references a parent node (i.e. is not a root node of the model).
      */
-    void setParentModel(PolicySourceModel model) throws IllegalAccessException {
+    void setParentModel(final PolicySourceModel model) throws IllegalAccessException {
         if (parentNode != null) {
             throw new IllegalAccessException(LocalizationMessages.PARENT_MODEL_CAN_NOT_BE_CHANGED());
         }
@@ -327,7 +327,7 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
      *
      * @param model new policy source model reference.
      */
-    private void updateParentModelReference(PolicySourceModel model) {
+    private void updateParentModelReference(final PolicySourceModel model) {
         this.parentModel = model;
         
         for (ModelNode child : content) {
@@ -397,12 +397,12 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
      * @throws UnsupportedOperationException in case this method is called on nodes of type other than {@code ASSERTION}
      * or {@code ASSERTION_PARAMETER_NODE}
      */
-    public AssertionData setOrReplaceNodeData(AssertionData newData) {
+    public AssertionData setOrReplaceNodeData(final AssertionData newData) {
         if (!isAssertionRelatedNode()) {
             throw new UnsupportedOperationException(LocalizationMessages.OPERATION_NOT_SUPPORTED_FOR_THIS_BUT_ASSERTION_RELATED_NODE_TYPE(type));
         }
         
-        AssertionData oldData = this.nodeData;
+        final AssertionData oldData = this.nodeData;
         this.nodeData = newData;
         
         return oldData;
@@ -429,7 +429,7 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
      * @throws NullPointerException if the specified node is {@code null}.
      * @throws IllegalArgumentException if child has a parent node set already to point to some node
      */
-    private boolean addChild(ModelNode child) {
+    private boolean addChild(final ModelNode child) {
         content.add(child);
         child.parentNode = this;
         
@@ -439,7 +439,7 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
     /**
      *
      */
-    void setReferencedModel(PolicySourceModel model) {
+    void setReferencedModel(final PolicySourceModel model) {
         if (this.type != Type.POLICY_REFERENCE) {
             throw new UnsupportedOperationException(
                     LocalizationMessages.OPERATION_NOT_SUPPORTED_FOR_THIS_BUT_POLICY_REFERENCE_NODE_TYPE(type));
@@ -488,7 +488,7 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
      * test is sufficient ({@code nodeA.getParentModel() == nodeB.getParentModel()}), since all model nodes are created
      * for specific model instances.
      */
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj)
             return true;
         
@@ -496,7 +496,7 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
             return false;
         
         boolean result = true;
-        ModelNode that = (ModelNode) obj;
+        final ModelNode that = (ModelNode) obj;
         
         result = result && this.type.equals(that.type);
         // result = result && ((this.parentNode == null) ? that.parentNode == null : this.parentNode.equals(that.parentNode));
@@ -537,9 +537,9 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
      * @param buffer buffer to be used for appending string representation of this instance
      * @return modified buffer containing new string representation of the instance
      */
-    public StringBuffer toString(int indentLevel, StringBuffer buffer) {
-        String indent = PolicyUtils.Text.createIndent(indentLevel);
-        String innerIndent = PolicyUtils.Text.createIndent(indentLevel + 1);
+    public StringBuffer toString(final int indentLevel, final StringBuffer buffer) {
+        final String indent = PolicyUtils.Text.createIndent(indentLevel);
+        final String innerIndent = PolicyUtils.Text.createIndent(indentLevel + 1);
         
         buffer.append(indent).append(type).append(" {").append(PolicyUtils.Text.NEW_LINE);
         if (type == Type.ASSERTION) {
@@ -571,7 +571,7 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
     }
     
     protected ModelNode clone() throws CloneNotSupportedException {
-        ModelNode clone = (ModelNode) super.clone();
+        final ModelNode clone = (ModelNode) super.clone();
         
         if (this.nodeData != null) {
             clone.nodeData = this.nodeData.clone();

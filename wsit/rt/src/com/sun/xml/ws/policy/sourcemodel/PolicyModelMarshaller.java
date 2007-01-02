@@ -70,7 +70,7 @@ public abstract class PolicyModelMarshaller {
      * @return policy model marshaller that either marshalls private assertions or not
      *         based on the input argument.
      */
-    public static PolicyModelMarshaller getXmlMarshaller(boolean marshallInvisible) {
+    public static PolicyModelMarshaller getXmlMarshaller(final boolean marshallInvisible) {
         return (marshallInvisible) ? invisibleAssertionXmlMarshaller : defaultXmlMarshaller;
     }
 }

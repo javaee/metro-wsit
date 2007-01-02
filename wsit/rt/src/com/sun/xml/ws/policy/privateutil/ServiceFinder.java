@@ -154,7 +154,7 @@ public final class ServiceFinder<T> implements Iterable<T> {
      *                                   or names a provider class that cannot be found and instantiated
      * @see #find(Class)
      */
-    static <T> ServiceFinder<T> find(Class<T> service, ClassLoader loader) {
+    static <T> ServiceFinder<T> find(final Class<T> service, final ClassLoader loader) {
         if (null==service) {
             throw new NullPointerException(LocalizationMessages.SERVICE_CAN_NOT_BE_NULL());
         }
@@ -177,7 +177,7 @@ public final class ServiceFinder<T> implements Iterable<T> {
      *                                   or names a provider class that cannot be found and instantiated
      * @see #find(Class, ClassLoader)
      */
-    public static <T> ServiceFinder<T> find(Class<T> service) {
+    public static <T> ServiceFinder<T> find(final Class<T> service) {
         return find(service,Thread.currentThread().getContextClassLoader());
     }
 
@@ -216,9 +216,9 @@ public final class ServiceFinder<T> implements Iterable<T> {
         return result.toArray((T[])Array.newInstance(serviceClass,result.size()));
     }
 
-    private static void fail(Class service, String msg, Throwable cause)
+    private static void fail(final Class service, final String msg, final Throwable cause)
         throws ServiceConfigurationError {
-        ServiceConfigurationError sce
+        final ServiceConfigurationError sce
             = new ServiceConfigurationError(LocalizationMessages.SPI_FAIL_SERVICE_MSG(service.getName(), msg));
         if (null != cause) {
             sce.initCause(cause);
@@ -231,7 +231,7 @@ public final class ServiceFinder<T> implements Iterable<T> {
         throw new ServiceConfigurationError(LocalizationMessages.SPI_FAIL_SERVICE_MSG(service.getName(), msg));
     }*/
 
-    private static void fail(Class service, URL u, int line, String msg, Throwable cause)
+    private static void fail(final Class service, final URL u, final int line, final String msg, final Throwable cause)
         throws ServiceConfigurationError {
         fail(service, LocalizationMessages.SPI_FAIL_SERVICE_URL_LINE_MSG(u , line, msg), cause);
     }
@@ -241,17 +241,17 @@ public final class ServiceFinder<T> implements Iterable<T> {
      * on the line to both the names list and the returned set iff the name is
      * not already a member of the returned set.
      */
-    private static int parseLine(Class service, URL u, BufferedReader r, int lc,
-                                 List<String> names, Set<String> returned)
+    private static int parseLine(final Class service, final URL u, final BufferedReader r, final int lc,
+                                 final List<String> names, final Set<String> returned)
         throws IOException, ServiceConfigurationError {
         String ln = r.readLine();
         if (ln == null) {
             return -1;
         }
-        int ci = ln.indexOf('#');
+        final int ci = ln.indexOf('#');
         if (ci >= 0) ln = ln.substring(0, ci);
         ln = ln.trim();
-        int n = ln.length();
+        final int n = ln.length();
         if (n != 0) {
             if ((ln.indexOf(' ') >= 0) || (ln.indexOf('\t') >= 0))
                 fail(service, u, lc, LocalizationMessages.ILLEGAL_CFG_FILE_SYNTAX(), null);
@@ -333,7 +333,7 @@ public final class ServiceFinder<T> implements Iterable<T> {
             }
             if (configs == null) {
                 try {
-                    String fullName = prefix + service.getName();
+                    final String fullName = prefix + service.getName();
                     if (loader == null)
                         configs = ClassLoader.getSystemResources(fullName);
                     else
@@ -356,7 +356,7 @@ public final class ServiceFinder<T> implements Iterable<T> {
             if (!hasNext()) {
                 throw new NoSuchElementException();
             }
-            String cn = nextName;
+            final String cn = nextName;
             nextName = null;
             try {
                 return service.cast(Class.forName(cn, true, loader).newInstance());

@@ -55,7 +55,7 @@ class DefaultPolicyAssertionCreator implements PolicyAssertionCreator {
         return ANY_NAMESPACE;
     }
 
-    public PolicyAssertion createAssertion(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative, PolicyAssertionCreator defaultCreator) throws AssertionCreationException {
+    public PolicyAssertion createAssertion(final AssertionData data, final Collection<PolicyAssertion> assertionParameters, final AssertionSet nestedAlternative, final PolicyAssertionCreator defaultCreator) throws AssertionCreationException {
         return new DefaultPolicyAssertion(data, assertionParameters, nestedAlternative);
     }    
 }
