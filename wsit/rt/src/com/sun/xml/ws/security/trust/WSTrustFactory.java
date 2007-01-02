@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustFactory.java,v 1.4 2006-12-18 23:32:03 jdg6688 Exp $
+ * $Id: WSTrustFactory.java,v 1.5 2007-01-02 23:41:22 manveen Exp $
  */
 
 /*
@@ -44,6 +44,7 @@ import java.net.URI;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
+import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
 
 /**
  * A Factory for creating concrete WS-Trust contract instances
@@ -77,8 +78,7 @@ public class WSTrustFactory {
         }
         if (spMetadata == null){
             log.log(Level.SEVERE,
-                    "WST1004.unknown.serviceprovider",
-                    new Object[] {appliesTo});
+                    LogStringsMessages.WST_0004_UNKNOWN_SERVICEPROVIDER(appliesTo));
             throw new WSTrustException("Unknown target service provider " + appliesTo);
         }
         String type = spMetadata.getType();
@@ -86,8 +86,7 @@ public class WSTrustFactory {
             type = stsConfig.getDefaultType();
         if(log.isLoggable(Level.FINE)) {
             log.log(Level.FINE,
-                    "WST1002.provider.type",
-                    new Object[] {type});
+                    LogStringsMessages.WST_1002_PROVIDER_TYPE(type));
         }
         WSTrustContract contract = null;
         try {
@@ -107,8 +106,7 @@ public class WSTrustFactory {
         } catch (ClassNotFoundException ex) {
             contract = null;
             log.log(Level.SEVERE,
-                    "WST0005.classnotfound.null.contract",
-                    new Object[] {type});
+                    LogStringsMessages.WST_0005_CLASSNOTFOUND_NULL_CONTRACT(type));
             ex.printStackTrace();
         } catch (Exception ex) {
             throw new WSTrustException(ex.toString(), ex);
