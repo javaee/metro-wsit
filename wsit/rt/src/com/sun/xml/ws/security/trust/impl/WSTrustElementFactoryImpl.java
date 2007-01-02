@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustElementFactoryImpl.java,v 1.6 2006-12-18 23:32:02 jdg6688 Exp $
+ * $Id: WSTrustElementFactoryImpl.java,v 1.7 2007-01-02 23:57:00 manveen Exp $
  */
 
 /*
@@ -112,6 +112,8 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.bind.util.JAXBSource;
 
 import javax.xml.bind.Marshaller;
+
+import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
 
 /**
  * A Factory for creating the WS-Trust schema elements,
@@ -279,8 +281,9 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
      */
     public  RequestSecurityTokenResponse createRSTRForCancel() {
         RequestSecurityTokenResponse rstr =  new RequestSecurityTokenResponseImpl();
-        rstr.setRequestedTokenCancelled(new RequestedTokenCancelledImpl());
-        log.log(Level.INFO,"WST0003.created.rstr.cancel", new Object[]{rstr.toString()});
+        rstr.setRequestedTokenCancelled(new RequestedTokenCancelledImpl());        
+        log.log(Level.FINE,
+                LogStringsMessages.WST_1008_CREATED_RSTR_CANCEL(rstr.toString()));
         return rstr;
     }
     
@@ -328,8 +331,8 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
             RequestSecurityTokenType type = rstType.getValue();
             return new RequestSecurityTokenImpl(type);
         } catch ( Exception ex) {
-            log.log(Level.SEVERE,
-                    "WST0005.fail.rst.source", new Object[]{src.toString(), ex});
+            log.log(Level.SEVERE, 
+                    LogStringsMessages.WST_0006_FAIL_RST_SOURCE(src.toString(), ex));
             throw new RuntimeException(ex.getMessage(), ex);
         }
     }
@@ -345,7 +348,7 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
             return new RequestSecurityTokenImpl(type);
         } catch ( Exception ex) {
             log.log(Level.SEVERE,
-                    "WST0006.fail.rst.elem", new Object[]{elem.toString(), ex});
+                    LogStringsMessages.WST_0006_FAIL_RST_SOURCE(elem.toString(), ex));
             throw new RuntimeException(ex.getMessage(), ex);
         }
     }
@@ -361,7 +364,7 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
             return new RequestSecurityTokenResponseImpl(type);
         } catch ( Exception ex) {
             log.log(Level.SEVERE,
-                    "WST0007.fail.rstr.source", new Object[]{src.toString(), ex});
+                    LogStringsMessages.WST_0008_FAIL_RSTR_SOURCE(src.toString(), ex));
             throw new RuntimeException(ex.getMessage(), ex);
         }
     }
@@ -377,7 +380,7 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
             return new RequestSecurityTokenResponseImpl(type);
         } catch ( Exception ex) {
             log.log(Level.SEVERE,
-                    "WST0008.fail.rstr.elem", new Object[]{elem.toString(), ex});
+                    LogStringsMessages.WST_0008_FAIL_RSTR_SOURCE(elem.toString(), ex));
             throw new RuntimeException(ex.getMessage(), ex);
         }
     }
@@ -413,8 +416,9 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
         try {
             RequestSecurityTokenType type = (RequestSecurityTokenType)elem.getValue();
             return new RequestSecurityTokenImpl(type);
-        } catch (Exception e) {
-            log.log(Level.SEVERE,"WST0010.failed.creation.from.jaxbele", new Object[] {"RST", e});
+        } catch (Exception e) {            
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0010_FAILED_CREATION_FROM_JAXBELE("RST", e));
             throw new RuntimeException("There was a problem while creating RST from JAXBElement", e);
         }
     }
@@ -436,7 +440,8 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
             RequestSecurityTokenResponseType type = (RequestSecurityTokenResponseType)elem.getValue();
             return new RequestSecurityTokenResponseImpl(type);
         } catch (Exception e) {
-            log.log(Level.SEVERE,"WST0010.failed.creation.from.jaxbele", new Object[] {"RSTR", e});
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0010_FAILED_CREATION_FROM_JAXBELE("RSTR", e));
             throw new RuntimeException("There was a problem while creating RSTR from JAXBElement", e);
         }
     }
@@ -457,7 +462,8 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
             RequestSecurityTokenResponseCollectionType type = (RequestSecurityTokenResponseCollectionType)elem.getValue();
             return new RequestSecurityTokenResponseCollectionImpl(type);
         } catch (Exception e) {
-            log.log(Level.SEVERE,"WST0010.failed.creation.from.jaxbele", new Object[] {"RSTRCollection", e});
+            log.log(Level.SEVERE,                                        
+                    LogStringsMessages.WST_0010_FAILED_CREATION_FROM_JAXBELE("RSTRCollection", e));
             throw new RuntimeException("There was a problem while creating RSTRCollection from JAXBElement", e);
         }
     }
@@ -467,7 +473,8 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
             SecurityTokenReferenceType type = (SecurityTokenReferenceType)elem.getValue();
             return new SecurityTokenReferenceImpl(type);
         } catch (Exception e) {
-            log.log(Level.SEVERE,"WST0010.failed.creation.from.jaxbele", new Object[] {"STR", e});
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0010_FAILED_CREATION_FROM_JAXBELE("STR", e));
             throw new RuntimeException("There was a problem while creating STR from JAXBElement", e);
         }
     }
@@ -581,10 +588,12 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
             return doc.getDocumentElement();
             
         } catch (javax.xml.parsers.ParserConfigurationException ex) {
-            log.log(Level.SEVERE,"WST0011.parserconfig.ex.toElement", ex);
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0011_PARSERCONFIG_EX_TO_ELEMENT(ex));
             throw new RuntimeException(ex.getMessage(), ex);
-        } catch (JAXBException e) {
-            log.log(Level.SEVERE,"WST0012.jaxb.ex.toElement", e);
+        } catch (JAXBException e) {            
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0012_JAXB_EX_TO_ELEMENT(e));
             throw new RuntimeException(e.getMessage(), e);
         }
     }
@@ -608,20 +617,21 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
             return doc.getDocumentElement();
             
         } catch (Exception ex) {
-            log.log(Level.SEVERE,"WST0012.jaxb.ex.toElement", ex);
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0012_JAXB_EX_TO_ELEMENT(ex));
             throw new RuntimeException(ex.getMessage(), ex);
         }
     }
     
     public Element toElement(RequestSecurityTokenResponse rstr, Document doc) {
         try {
-            //javax.xml.bind.Marshaller marshaller = getContext().createMarshaller();
             JAXBElement<RequestSecurityTokenResponseType> rstrElement =  (new ObjectFactory()).createRequestSecurityTokenResponse((RequestSecurityTokenResponseType)rstr);
             marshaller.marshal(rstrElement, doc);
             return doc.getDocumentElement();
             
-        } catch (JAXBException ex) {
-            log.log(Level.SEVERE,"WST0012.jaxb.ex.toElement", ex);
+        } catch (JAXBException ex) {            
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0012_JAXB_EX_TO_ELEMENT(ex));
             throw new RuntimeException(ex.getMessage(), ex);
         }
     }
@@ -645,10 +655,12 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
             marshaller.marshal(rstElement, doc);
             return doc.getDocumentElement();
         } catch (javax.xml.parsers.ParserConfigurationException pe) {
-            log.log(Level.SEVERE,"WST0011.parserconfig.ex.toElement", pe);
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0011_PARSERCONFIG_EX_TO_ELEMENT(pe));
             throw new RuntimeException(pe.getMessage(), pe);
         } catch (JAXBException ex) {
-            log.log(Level.SEVERE,"WST0012.jaxb.ex.toElement", ex);
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0012_JAXB_EX_TO_ELEMENT(ex));
             throw new RuntimeException(ex.getMessage(), ex);
         }
     }
@@ -669,7 +681,8 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
             log.log(Level.SEVERE,"WST0011.parserconfig.ex.toElement", new Object[] {bs, pe});
             throw new RuntimeException(pe.getMessage(), pe);
         } catch (JAXBException ex) {
-            log.log(Level.SEVERE,"WST0012.jaxb.ex.toElement", ex);
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0012_JAXB_EX_TO_ELEMENT(ex));
             throw new RuntimeException(ex.getMessage(), ex);
         }
     }
@@ -697,7 +710,8 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
             log.log(Level.SEVERE,"WST0011.parserconfig.ex.toElement", pe);
             throw new RuntimeException(pe.getMessage(), pe);
         } catch (JAXBException ex) {
-            log.log(Level.SEVERE,"WST0012.jaxb.ex.toElement", ex);
+            log.log(Level.SEVERE,
+                LogStringsMessages.WST_0012_JAXB_EX_TO_ELEMENT(ex));
             throw new RuntimeException(ex.getMessage(), ex);
         }
     }
@@ -728,7 +742,8 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
             log.log(Level.SEVERE,"WST0011.parserconfig.ex.toElement", pe);
             throw new RuntimeException(pe.getMessage(), pe);
         } catch (JAXBException ex) {
-            log.log(Level.SEVERE,"WST0012.jaxb.ex.toElement", ex);
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0012_JAXB_EX_TO_ELEMENT(ex));
             throw new RuntimeException(ex.getMessage(), ex);
         }
     }     
