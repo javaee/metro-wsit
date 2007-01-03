@@ -39,6 +39,19 @@ Also, you may need to setup the proxy settings properly in your JRE net.properti
 which is located in $JAVA_HOME/jre/lib (if $JAVA_HOME points to JDK) or $JAVA_HOME/lib 
 (if $JAVA_HOME points to JRE) directory.
 
+4. HOW TO GENERATE FINDBUGS REPORTS
+
+Findbugs is very similar to PMD in that it is a static code analysis tool that tries to
+find common coding mistakes. Unlike PMD it analyses compiled code instead of source code.
+You can generate a HTML formatted findbugs report on the WSIT code base by cd-ing to the 
+wsit/rt or wsit/tools directory and invoking "ant findbugs". The resulting reports are 
+written into wsit/rt/build/findbugs.html and wsit/tools/build/findbugs.html respectively.
+
+Also, you may need to setup the proxy settings properly in your JRE net.properties file
+which is located in $JAVA_HOME/jre/lib (if $JAVA_HOME points to JDK) or $JAVA_HOME/lib 
+(if $JAVA_HOME points to JRE) directory.
+
+
 
 # The contents of this file are subject to the terms
 # of the Common Development and Distribution License

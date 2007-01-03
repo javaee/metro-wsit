@@ -114,4 +114,36 @@
         </pmd>
     </target>
     
+    <target name="findbugs" depends="init, maven-tasks"
+            description="Run findbugs on all code">
+        <!-- Download findbugs from Maven repository -->
+        <dependencies pathId="findbugs.classpath"
+                      useScope="runtime">
+            <remoteRepository refid="maven.repository"/>
+            <dependency groupId="net.sourceforge.findbugs"
+                       artifactId="findbugs"
+                       version="1.0.0"/>
+            <dependency groupId="net.sourceforge.findbugs"
+                       artifactId="coreplugin"
+                       version="1.0.0"/>
+        </dependencies>
+        <typedef name="findbugs" classname="edu.umd.cs.findbugs.anttask.FindBugsTask">
+            <classpath refid="findbugs.classpath"/>
+        </typedef>
+        <!-- We need to pass a classpath property into the findbugs task             -->
+        <!-- Convert the path that was created by the depencies task into a property -->
+        <pathconvert property="findbugs.classpath">
+            <path refid="findbugs.classpath"/>
+        </pathconvert>
+        <findbugs output="html" outputFile="${build.dir}/findbugs.html"
+                  classpath="${findbugs.classpath}"
+                  pluginList="${user.home}/.m2/repository/findbugs/coreplugin/1.0.0/coreplugin-1.0.0.jar">
+            <class location="${build.classes.dir}"/>
+            <auxClasspath>
+                <path path="${run.classpath}"/>
+            </auxClasspath>
+            <sourcePath path="${src.dir}"/>
+        </findbugs>
+    </target>
+
 </project>
