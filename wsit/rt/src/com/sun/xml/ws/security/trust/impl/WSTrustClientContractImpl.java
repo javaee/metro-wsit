@@ -47,6 +47,7 @@ import com.sun.xml.ws.security.trust.elements.RequestedProofToken;
 import com.sun.xml.ws.security.trust.elements.RequestedUnattachedReference;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponse;
+import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
 import com.sun.xml.ws.security.wsu10.AttributedDateTime;
 import com.sun.xml.wss.impl.misc.SecurityUtil;
 
@@ -117,7 +118,8 @@ public class WSTrustClientContractImpl implements WSTrustClientContract {
             // if securityToken == null and proofToken == null
             // throw exception
             if(securityToken == null && proofToken == null){
-                log.log(Level.SEVERE, "WST0018.tokens.null");
+                log.log(Level.SEVERE, 
+                        LogStringsMessages.WST_0018_TOKENS_NULL());
                 throw new WSTrustException(
                         "Invalid Security Token or Proof Token");
             }
@@ -197,16 +199,22 @@ public class WSTrustClientContractImpl implements WSTrustClientContract {
                 key = computeKey(rstr, proofToken, rst);
             } else if (RequestedProofToken.TOKEN_REF_TYPE.equals(proofTokenType)){
                 //ToDo
-                throw new UnsupportedOperationException("Unsupported proof token type: " + proofTokenType);
+                log.log(Level.SEVERE, 
+                        LogStringsMessages.WST_0001_UNSUPPORTED_PROOF_TOKEN_TYPE(proofTokenType));
+                // TBD- Shouldn't this be a WSTrustException?
+                //throw new UnsupportedOperationException("Unsupported proof token type: " + proofTokenType);
+                throw new WSTrustException("Unsupported proof token type: " + proofTokenType);
             } else if (RequestedProofToken.ENCRYPTED_KEY_TYPE.equals(proofTokenType)){
-                //ToDo
-                throw new UnsupportedOperationException("Unsupported proof token type: " + proofTokenType);
+                log.log(Level.SEVERE, 
+                        LogStringsMessages.WST_0001_UNSUPPORTED_PROOF_TOKEN_TYPE(proofTokenType));
+                throw new WSTrustException("Unsupported proof token type: " + proofTokenType);
             } else if (RequestedProofToken.BINARY_SECRET_TYPE.equals(proofTokenType)){
                 BinarySecret binarySecret = proofToken.getBinarySecret();
                 key = binarySecret.getRawValue();
             } else{
                 if (log.isLoggable(Level.FINE)) {
-                    log.log(Level.FINE,"WST0019.invalid.proofToken.type", new Object[]{proofTokenType});
+                    log.log(Level.FINE,
+                            LogStringsMessages.WST_0019_INVALID_PROOF_TOKEN_TYPE(proofTokenType));
                 }
                 throw new WSTrustException("Invalid Proof Token Type: " + proofTokenType);
             }
