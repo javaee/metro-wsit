@@ -114,7 +114,7 @@
         </pmd>
     </target>
     
-    <target name="findbugs" depends="init, maven-tasks"
+    <target name="findbugs" depends="init, maven-tasks, compile"
             description="Run findbugs on all code">
         <!-- Download findbugs from Maven repository -->
         <dependencies pathId="findbugs.classpath"
@@ -136,6 +136,7 @@
             <path refid="findbugs.classpath"/>
         </pathconvert>
         <findbugs output="html" outputFile="${build.dir}/findbugs.html"
+                  stylesheet="fancy.xsl"
                   classpath="${findbugs.classpath}"
                   pluginList="${user.home}/.m2/repository/findbugs/coreplugin/1.0.0/coreplugin-1.0.0.jar">
             <class location="${build.classes.dir}"/>
