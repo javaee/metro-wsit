@@ -37,13 +37,11 @@ import javax.xml.namespace.QName;
  *
  * @author japod
  */
-class BuilderHandlerOperationScope extends BuilderHandler{
+final class BuilderHandlerOperationScope extends BuilderHandler{
     
     QName service;
     QName port;
     QName operation;
-    QName inputMsg;
-    QName outputMsg;
     
     /** Creates a new instance of WSDLServiceScopeBuilderHandler */
     BuilderHandlerOperationScope(

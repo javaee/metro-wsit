@@ -37,7 +37,7 @@ import javax.xml.namespace.QName;
  *
  * @author japod
  */
-class BuilderHandlerServiceScope extends BuilderHandler{
+final class BuilderHandlerServiceScope extends BuilderHandler{
     
     QName service;
     
