@@ -380,7 +380,7 @@ public abstract class OutboundSequence extends Sequence {
     
     protected com.sun.xml.ws.api.message.Header createHeader(Object obj) {
         return Headers.create(
-                config.getRMConstants().getJAXBRIContext(), 
+                config.getRMConstants().getJAXBRIContextHeaders(),
                 obj);
     }
     

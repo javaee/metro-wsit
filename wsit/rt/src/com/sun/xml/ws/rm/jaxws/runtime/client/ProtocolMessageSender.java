@@ -375,7 +375,7 @@ public class ProtocolMessageSender {
     }
     
     private com.sun.xml.ws.api.message.Header createHeader(Object obj) {
-        return com.sun.xml.ws.api.message.Headers.create(constants.getJAXBRIContext(), obj);
+        return com.sun.xml.ws.api.message.Headers.create(constants.getJAXBRIContextHeaders(), obj);
     }
 
     

@@ -277,7 +277,7 @@ public enum RMConstants {
         return jc;
     }
     
-    public JAXBRIContext getJAXBRIContext() {
+    public JAXBRIContext getJAXBRIContextHeaders() {
         return jaxbricontext;
     }
 

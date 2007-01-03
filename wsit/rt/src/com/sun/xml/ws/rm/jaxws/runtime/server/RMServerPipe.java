@@ -56,7 +56,6 @@ import com.sun.xml.ws.security.SecurityContextToken;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.security.trust.elements.str.DirectReference;
 import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
-import com.sun.xml.ws.developer.MemberSubmissionEndpointReference;
 import com.sun.xml.wss.impl.MessageConstants;
 
 import javax.xml.bind.JAXBElement;
@@ -66,17 +65,10 @@ import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPFactory;
 import javax.xml.soap.SOAPFault;
 import javax.xml.ws.WebServiceException;
-import javax.xml.ws.EndpointReference;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
 import javax.xml.ws.soap.SOAPBinding;
-import javax.xml.transform.Source;
-import javax.xml.transform.sax.SAXSource;
-import javax.xml.transform.stream.StreamSource;
 import java.net.URI;
 import java.util.HashMap;
-import java.io.StringReader;
-
-import org.xml.sax.InputSource;
 
 /**
  * Server-side RM Pipe implementation
@@ -162,7 +154,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
     public Packet process(Packet packet) {
 
         com.sun.xml.ws.rm.Message message = null;
-        ServerInboundSequence inboundSequence = null;
+        ServerInboundSequence inboundSequence ;
         SOAPFault soapFault = null;
 
         try {
@@ -201,7 +193,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
                 //SequenceFault is to be added for only SOAP 1.1
                 if (binding.getSOAPVersion() == SOAPVersion.SOAP_11) {
                     //FIXME - need JAXBRIContext that can marshall SequenceFaultElement
-                    Header header = Headers.create(binding.getSOAPVersion(),marshaller, new SequenceFaultElement());
+                    Header header = Headers.create(constants.getJAXBContext(), new SequenceFaultElement());
                     m.getHeaders().add(header);
                 }
 
@@ -446,7 +438,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
     public Packet handleProtocolMessage(Packet packet) throws RMException {
 
         ActionHandler handler ;
-        String actionValue = null;
+        String actionValue ;
         actionValue = packet.getMessage()
                     .getHeaders().getAction(constants.getAddressingVersion(),
                                             config.getSoapVersion());
@@ -487,8 +479,8 @@ public class RMServerPipe extends PipeBase<RMDestination,
          *  Assume for now that AcksTo is anonymous.
          */
         URI acksTo = constants.getAnonymousURI();
-        String acksToString = acksTo.toString();
-        String replyToString = acksToString;
+        /*String acksToString = acksTo.toString();*/
+        /*String replyToString = acksToString;*/
         /*
         EndpointReference replyTo = inboundAddressingProperties.getReplyTo();
         if (replyTo == null) {
@@ -580,7 +572,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
             
             accept = new AcceptType();
 
-            W3CEndpointReference endpointReference = null;
+            W3CEndpointReference endpointReference ;
             WSEndpointReference wsepr = new WSEndpointReference(dest,constants.getAddressingVersion());
             if ( constants.getAddressingVersion()== AddressingVersion.W3C){
                 endpointReference = (W3CEndpointReference)wsepr.toSpec();
@@ -592,7 +584,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
             crsElement.setAccept(accept);
         }
 
-        Message response = com.sun.xml.ws.api.message.Messages.create(marshaller,
+        Message response = com.sun.xml.ws.api.message.Messages.create(constants.getJAXBContext(),
                             crsElement,
                             config.getSoapVersion());
 
@@ -668,7 +660,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
             id2.setValue(outboundSequence.getId());
 
             terminateSeqResponse.setIdentifier(id2);
-            Message response = com.sun.xml.ws.api.message.Messages.create(marshaller,
+            Message response = com.sun.xml.ws.api.message.Messages.create(constants.getJAXBContext(),
                     terminateSeqResponse,
                     config.getSoapVersion());
 
@@ -713,7 +705,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
 
             //add message to ClientInboundSequence so that this message
             //number appears in sequence acknowledgement
-            int messageNumber = (int)el.getNumber();
+            int messageNumber = el.getNumber();
             seq.set(messageNumber, new com.sun.xml.ws.rm.Message(message));
 
             return generateAckMessage(inbound, seq, constants.getLastAction());
@@ -759,7 +751,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
         try {
 
             Message message = inbound.getMessage();
-            Header header = message.getHeaders().get(constants.getSequenceAcknowledgementQName());
+            Header header = message.getHeaders().get(constants.getSequenceAcknowledgementQName(),false);
             if (header == null) {
                 throw new RMException(Messages.INVALID_SEQ_ACKNOWLEDGEMENT.format());
             }
@@ -1128,7 +1120,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
     }
     
     private Header createHeader(Object obj) {
-        return Headers.create(constants.getJAXBRIContext(), obj);
+        return Headers.create(constants.getJAXBRIContextHeaders(), obj);
     }
 
     /**
