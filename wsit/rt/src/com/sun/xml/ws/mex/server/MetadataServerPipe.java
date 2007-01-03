@@ -26,7 +26,6 @@ import javax.xml.stream.XMLStreamWriter;
 import javax.xml.ws.WebServiceException;
 
 import com.sun.xml.stream.buffer.MutableXMLStreamBuffer;
-import com.sun.xml.ws.addressing.model.ActionNotSupportedException;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
@@ -107,7 +106,11 @@ public class MetadataServerPipe extends AbstractFilterPipeImpl {
                 final String toAddress = headers.getTo(adVersion, soapVersion);
                 return processGetRequest(request, toAddress, adVersion);
             } else if (action.equals(GET_MDATA_REQUEST)) {
-                throw new ActionNotSupportedException(GET_MDATA_REQUEST);
+                final Message faultMessage = Messages.create(GET_MDATA_REQUEST,
+                    adVersion, soapVersion);
+                return request.createServerResponse(
+                    faultMessage, adVersion, soapVersion,
+                    adVersion.getDefaultFaultAction());
             }
         }
         return next.process(request);
