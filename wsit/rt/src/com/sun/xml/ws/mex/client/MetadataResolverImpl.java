@@ -26,19 +26,15 @@ import com.sun.xml.ws.mex.client.schema.Metadata;
 import com.sun.xml.ws.api.wsdl.parser.MetaDataResolver;
 import com.sun.xml.ws.api.wsdl.parser.ServiceDescriptor;
 
-import org.xml.sax.EntityResolver;
-
 /**
  * Plugin to wsimport for mex/ws-transfer requests.
  */
 public class MetadataResolverImpl extends MetaDataResolver {
     
     MetadataClient mClient;
-    EntityResolver resolver;
     
-    protected MetadataResolverImpl(EntityResolver resolver) {
+    protected MetadataResolverImpl() {
         mClient = new MetadataClient();
-        this.resolver = resolver;
     }
     
     /**
@@ -48,8 +44,8 @@ public class MetadataResolverImpl extends MetaDataResolver {
      * code can try retrieving it another way (for instance, with
      * a ?wsdl http GET call).
      */
-    public ServiceDescriptor resolve(URI location) {
-        Metadata mData = mClient.retrieveMetadata(location.toString());
+    public ServiceDescriptor resolve(final URI location) {
+        final Metadata mData = mClient.retrieveMetadata(location.toString());
         if (mData == null) {
             return null;
         }

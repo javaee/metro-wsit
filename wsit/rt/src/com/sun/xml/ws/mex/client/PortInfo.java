@@ -31,9 +31,9 @@ import javax.xml.namespace.QName;
  */
 public class PortInfo {
 
-    private QName serviceName;
-    private QName portName;
-    private String address;
+    private final QName serviceName;
+    private final QName portName;
+    private final String address;
     
     PortInfo(QName serviceName, QName portName, String address) {
         this.serviceName = serviceName;

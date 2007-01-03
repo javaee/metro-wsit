@@ -33,8 +33,8 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-import javax.xml.ws.WebServiceException;
 
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.mex.MessagesMessages;
@@ -66,8 +66,8 @@ public class MetadataClient {
     
     enum Protocol { SOAP_1_2, SOAP_1_1 };
     
-    private String [] suffixes = { "" , "/mex" };
-    private MetadataUtil mexUtil;
+    private final String [] suffixes = { "" , "/mex" };
+    private final MetadataUtil mexUtil;
     private static final JAXBContext jaxbContext;
     
     private static final Logger logger =
@@ -107,7 +107,7 @@ public class MetadataClient {
      */
     public Metadata retrieveMetadata(@NotNull final String address) {
         for (String suffix : suffixes) {
-            String newAddress = address.concat(suffix);
+            final String newAddress = address.concat(suffix);
             for (Protocol p : Protocol.values()) {
                 InputStream responseStream = null;
                 try {
@@ -136,12 +136,14 @@ public class MetadataClient {
      *
      * @see #retrieveMetadata(String)
      */
-    public Metadata retrieveMetadata(@NotNull MetadataReference reference) {
-        List nodes = reference.getAny();
+    public Metadata retrieveMetadata(
+        @NotNull final MetadataReference reference) {
+        
+        final List nodes = reference.getAny();
         for (Object o : nodes) {
-            Node node = (Node) o;
+            final Node node = (Node) o;
             if (node.getLocalName().equals("Address")) {
-                String address = node.getFirstChild().getNodeValue();
+                final String address = node.getFirstChild().getNodeValue();
                 return retrieveMetadata(address);
             }
         }
@@ -156,19 +158,19 @@ public class MetadataClient {
      * @see com.sun.xml.ws.mex.client.PortInfo
      * @return A list of PortInfo objects
      */
-    public List<PortInfo> getServiceInformation(@NotNull Metadata data) {
+    public List<PortInfo> getServiceInformation(@NotNull final Metadata data) {
         for (MetadataSection section : data.getMetadataSection()) {
             if (section.getDialect().equals(WSDL_DIALECT)) {
                 if (section.getAny() != null) {
                     return getServiceInformationFromNode(section.getAny());
                 }
                 if (section.getMetadataReference() != null) {
-                    Metadata newMetadata =
+                    final Metadata newMetadata =
                         retrieveMetadata(section.getMetadataReference());
                     return getServiceInformation(newMetadata);
                 }
                 if (section.getLocation() != null) {
-                    Metadata newMetadata =
+                    final Metadata newMetadata =
                         retrieveMetadata(section.getLocation());
                     return getServiceInformation(newMetadata);
                 }
@@ -177,30 +179,31 @@ public class MetadataClient {
         return null;
     }
 
-    private List<PortInfo> getServiceInformationFromNode(Object o) {
-        if (o == null) {
+    private List<PortInfo> getServiceInformationFromNode(final Object node) {
+        if (node == null) {
             return null;
         }
-        List<PortInfo> portInfos = new ArrayList<PortInfo>();
-        Node wsdlNode = (Node) o;
-        String ns = getAttributeValue(wsdlNode, "targetNamespace");
-        NodeList nodes = wsdlNode.getChildNodes();
+        final List<PortInfo> portInfos = new ArrayList<PortInfo>();
+        final Node wsdlNode = (Node) node;
+        final String namespace = getAttributeValue(wsdlNode, "targetNamespace");
+        final NodeList nodes = wsdlNode.getChildNodes();
         for (int i=0; i<nodes.getLength(); i++) {
-            Node serviceNode = nodes.item(i);
+            final Node serviceNode = nodes.item(i);
             if (serviceNode.getLocalName() != null &&
                 serviceNode.getLocalName().equals("service")) {
                 
-                Node nameAtt = wsdlNode.getAttributes().getNamedItem("name");
-                QName serviceName = new QName(ns, nameAtt.getNodeValue());
-                NodeList portNodes = serviceNode.getChildNodes();
+                final Node nameAtt = wsdlNode.getAttributes().getNamedItem("name");
+                final QName serviceName = new QName(namespace,
+                    nameAtt.getNodeValue());
+                final NodeList portNodes = serviceNode.getChildNodes();
                 for (int j=0; j<portNodes.getLength(); j++) {
-                    Node portNode = portNodes.item(j);
+                    final Node portNode = portNodes.item(j);
                     if (portNode.getLocalName() != null &&
                         portNode.getLocalName().equals("port")) {
                         
-                        QName portName = new QName(ns,
+                        final QName portName = new QName(namespace,
                             getAttributeValue(portNode, "name"));
-                        String address = getPortAddress(portNode);
+                        final String address = getPortAddress(portNode);
                         portInfos.add(new PortInfo(serviceName,
                             portName, address));
                     }
@@ -216,9 +219,11 @@ public class MetadataClient {
      * metadata refernces or HTTP GET location elements, these
      * are dereferenced later.
      */
-    private Metadata createMetadata(InputStream stream) throws Exception {
-        XMLInputFactory factory = XMLInputFactory.newInstance();
-        XMLStreamReader reader =
+    private Metadata createMetadata(final InputStream stream)
+        throws XMLStreamException, JAXBException {
+        
+        final XMLInputFactory factory = XMLInputFactory.newInstance();
+        final XMLStreamReader reader =
             factory.createXMLStreamReader(stream);
         int state = 0;
         do {
@@ -226,8 +231,8 @@ public class MetadataClient {
         } while (state != reader.START_ELEMENT ||
             !reader.getLocalName().equals("Metadata"));
         
-        Unmarshaller uMarhaller = jaxbContext.createUnmarshaller();
-        Metadata mData = (Metadata) uMarhaller.unmarshal(reader);
+        final Unmarshaller uMarhaller = jaxbContext.createUnmarshaller();
+        final Metadata mData = (Metadata) uMarhaller.unmarshal(reader);
         cleanData(mData);
         return mData;
     }
@@ -235,19 +240,18 @@ public class MetadataClient {
     /*
      * Get the value of an attribute from a given node.
      */
-    private String getAttributeValue(Node node, String attName) {
-        Node attNode = node.getAttributes().getNamedItem(attName);
-        return attNode.getNodeValue();
+    private String getAttributeValue(final Node node, final String attName) {
+        return node.getAttributes().getNamedItem(attName).getNodeValue();
     }
 
     /*
      * Get the port address from a port node. Returns null
      * if there is not one (which would be an error).
      */
-    private String getPortAddress(Node portNode) {
-        NodeList portDetails = portNode.getChildNodes();
+    private String getPortAddress(final Node portNode) {
+        final NodeList portDetails = portNode.getChildNodes();
         for (int i=0; i<portDetails.getLength(); i++){
-            Node addressNode = portDetails.item(i);
+            final Node addressNode = portDetails.item(i);
             if (addressNode.getLocalName() != null &&
                 addressNode.getLocalName().equals("address")) {
                 
@@ -267,8 +271,8 @@ public class MetadataClient {
      * If getAny() returns null, the metadata section contains
      * a metadata reference or location rather than the wsdl.
      */
-    private void cleanData(Metadata md) {
-        for (MetadataSection section : md.getMetadataSection()) {
+    private void cleanData(final Metadata mData) {
+        for (MetadataSection section : mData.getMetadataSection()) {
             if (section.getDialect().equals(WSDL_DIALECT) &&
                 section.getAny() != null) {
                 cleanWSDLNode((Node) section.getAny());
@@ -284,14 +288,14 @@ public class MetadataClient {
      * This should be passed the top level wsdl:definitions node.
      */
     private void cleanWSDLNode(final Node wsdlNode) {
-        NodeList nodes = wsdlNode.getChildNodes();
+        final NodeList nodes = wsdlNode.getChildNodes();
         for (int i=0; i<nodes.getLength(); i++) {
-            Node node = nodes.item(i);
+            final Node node = nodes.item(i);
             if (node.getLocalName() != null) {
                 if (node.getLocalName().equals("types")) {
-                    NodeList schemaNodes = node.getChildNodes();
+                    final NodeList schemaNodes = node.getChildNodes();
                     for (int j=0; j<schemaNodes.getLength(); j++) {
-                        Node schemaNode = schemaNodes.item(j);
+                        final Node schemaNode = schemaNodes.item(j);
                         if (schemaNode.getLocalName() != null &&
                             schemaNode.getLocalName().equals("schema")) {
                             
@@ -305,10 +309,10 @@ public class MetadataClient {
         }
     }
     
-    private void cleanSchemaNode(Node schemaNode) {
-        NodeList children = schemaNode.getChildNodes();
+    private void cleanSchemaNode(final Node schemaNode) {
+        final NodeList children = schemaNode.getChildNodes();
         for (int i=0; i<children.getLength(); i++) {
-            Node importNode = children.item(i);
+            final Node importNode = children.item(i);
             if (importNode.getLocalName() != null &&
                 importNode.getLocalName().equals("import")) {
                 cleanImport(importNode);            }
@@ -321,8 +325,8 @@ public class MetadataClient {
      * only be one or the other, so the method returns if
      * it finds a schema location.
      */
-    private void cleanImport(Node importNode) {
-        NamedNodeMap atts = importNode.getAttributes();
+    private void cleanImport(final Node importNode) {
+        final NamedNodeMap atts = importNode.getAttributes();
         Node location = atts.getNamedItem("schemaLocation");
         if (location != null &&
             location.getNodeValue().equals("")) {

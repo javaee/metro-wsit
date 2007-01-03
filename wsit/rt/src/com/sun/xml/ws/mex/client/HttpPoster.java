@@ -59,18 +59,18 @@ public class HttpPoster {
      * @return The java.io.InputStream returned by the http
      *     url connection.
      */
-    InputStream post(String request, String address, String contentType)
-        throws IOException {
+    InputStream post(final String request, final String address,
+        final String contentType) throws IOException {
         
-        URL url = new URL(address);
-        HttpURLConnection conn = createConnection(url);
+        final URL url = new URL(address);
+        final HttpURLConnection conn = createConnection(url);
         conn.setDoOutput(true);
         conn.setDoInput(true);
         conn.setRequestMethod("POST");
         conn.setRequestProperty("Content-Type", contentType);
         conn.setRequestProperty("SOAPAction", GET_REQUEST);
 
-        Writer writer = new OutputStreamWriter(conn.getOutputStream());
+        final Writer writer = new OutputStreamWriter(conn.getOutputStream());
         writer.write(request);
         writer.flush();
 
@@ -79,13 +79,15 @@ public class HttpPoster {
         } catch (IOException ioe) {
             outputErrorStream(conn);
             throw ioe;
+        } finally {
+            writer.close();
         }
     }
     
-    private void outputErrorStream(HttpURLConnection conn) {
-        InputStream error = conn.getErrorStream();
+    private void outputErrorStream(final HttpURLConnection conn) {
+        final InputStream error = conn.getErrorStream();
         if (error != null) {
-            BufferedReader reader = new BufferedReader(
+            final BufferedReader reader = new BufferedReader(
                 new InputStreamReader(error));
             try {
                 if (logger.isLoggable(ERROR_LOG_LEVEL)) {
@@ -104,6 +106,15 @@ public class HttpPoster {
                 logger.log(ERROR_LOG_LEVEL,
                     MessagesMessages.MEX_12_READING_ERROR_STREAM_FAILURE(),
                     ioe);
+            } finally {
+                try {
+                    reader.close();
+                } catch (IOException ex) {
+                    // This exception has no more impact.
+                    logger.log(ERROR_LOG_LEVEL,
+                        MessagesMessages.MEX_13_CLOSING_ERROR_STREAM_FAILURE(),
+                        ex);
+                }
             }
         }
     }
@@ -118,9 +129,9 @@ public class HttpPoster {
      * @return The java.io.InputStream returned by the http
      *     url connection.
      */
-    public InputStream makeGetCall(String address) throws Exception {
-        URL url = new URL(address);
-        HttpURLConnection conn = createConnection(url);
+    public InputStream makeGetCall(final String address) throws IOException {
+        final URL url = new URL(address);
+        final HttpURLConnection conn = createConnection(url);
         conn.setRequestMethod("GET");
         conn.setRequestProperty("Content-Type",
             "application/x-www-form-urlencoded"); // taken from wsimport
@@ -136,8 +147,10 @@ public class HttpPoster {
      * This method creates an http url connection and sets the
      * hostname verifier on it if it's an ssl connection.
      */
-    private HttpURLConnection createConnection(URL url) throws IOException {
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+    private HttpURLConnection createConnection(final URL url)
+        throws IOException {
+        
+        final HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         if (conn instanceof HttpsURLConnection) {
             ((HttpsURLConnection) conn).setHostnameVerifier(
                 new HostnameVerifier() {

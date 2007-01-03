@@ -39,7 +39,7 @@ import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.mex.MessagesMessages;
 
-import static com.sun.xml.ws.mex.MetadataConstants.GET_METADATA_REQUEST;
+import static com.sun.xml.ws.mex.MetadataConstants.GET_MDATA_REQUEST;
 import static com.sun.xml.ws.mex.MetadataConstants.GET_REQUEST;
 import static com.sun.xml.ws.mex.MetadataConstants.GET_RESPONSE;
 import static com.sun.xml.ws.mex.MetadataConstants.MEX_NAMESPACE;
@@ -76,7 +76,7 @@ public class MetadataServerPipe extends AbstractFilterPipeImpl {
         wsdlRetriever = that.wsdlRetriever;
     }
 
-    public Pipe copy(PipeCloner cloner) {
+    public Pipe copy(final PipeCloner cloner) {
         return new MetadataServerPipe(this, cloner);
     }
 
@@ -88,26 +88,26 @@ public class MetadataServerPipe extends AbstractFilterPipeImpl {
      * request, then ask addressing again for the address and
      * process the request.
      */
-    public Packet process(Packet request) {
+    public Packet process(final Packet request) {
         if (request.getMessage()==null || !request.getMessage().hasHeaders()) {
             return next.process(request);
         }
         
         // try w3c version of ws-a first, then member submission version
-        HeaderList headers = request.getMessage().getHeaders();
+        final HeaderList headers = request.getMessage().getHeaders();
         String action = headers.getAction(AddressingVersion.W3C, soapVersion);
-        AddressingVersion av = AddressingVersion.W3C;
+        AddressingVersion adVersion = AddressingVersion.W3C;
         if (action == null) {
             action = headers.getAction(AddressingVersion.MEMBER, soapVersion);
-            av = AddressingVersion.MEMBER;
+            adVersion = AddressingVersion.MEMBER;
         }
         
         if (action != null) {
             if (action.equals(GET_REQUEST)) {
-                String toAddress = headers.getTo(av, soapVersion);
-                return processGetRequest(request, toAddress, av);
-            } else if (action.equals(GET_METADATA_REQUEST)) {
-                throw new ActionNotSupportedException(GET_METADATA_REQUEST);
+                final String toAddress = headers.getTo(adVersion, soapVersion);
+                return processGetRequest(request, toAddress, adVersion);
+            } else if (action.equals(GET_MDATA_REQUEST)) {
+                throw new ActionNotSupportedException(GET_MDATA_REQUEST);
             }
         }
         return next.process(request);
@@ -117,21 +117,21 @@ public class MetadataServerPipe extends AbstractFilterPipeImpl {
      * This method creates an xml stream buffer, writes the response to
      * it, and uses it to create a response message.
      */
-    private Packet processGetRequest(Packet request,
-        String address, AddressingVersion av) {
+    private Packet processGetRequest(final Packet request,
+        final String address, final AddressingVersion adVersion) {
         
         try {
-            MutableXMLStreamBuffer buffer = new MutableXMLStreamBuffer();
-            XMLStreamWriter writer = buffer.createFromXMLStreamWriter();
+            final MutableXMLStreamBuffer buffer = new MutableXMLStreamBuffer();
+            final XMLStreamWriter writer = buffer.createFromXMLStreamWriter();
 
-            writeStartEnvelope(writer, av);
+            writeStartEnvelope(writer, adVersion);
             wsdlRetriever.addDocuments(writer, request, address);
             writer.writeEndDocument();
             writer.flush();
 
-            Message responseMessage = Messages.create(buffer);
-            Packet response = request.createServerResponse(responseMessage,
-                av, soapVersion, GET_RESPONSE);
+            final Message responseMessage = Messages.create(buffer);
+            final Packet response = request.createServerResponse(
+                responseMessage, adVersion, soapVersion, GET_RESPONSE);
             return response;
         } catch (XMLStreamException streamE) {
             throw new WebServiceException(
@@ -139,10 +139,10 @@ public class MetadataServerPipe extends AbstractFilterPipeImpl {
         }
     }
 
-    private void writeStartEnvelope(XMLStreamWriter writer,
-        AddressingVersion av) throws XMLStreamException {
+    private void writeStartEnvelope(final XMLStreamWriter writer,
+        final AddressingVersion adVersion) throws XMLStreamException {
 
-        String soapPrefix = "soapenv";
+        final String soapPrefix = "soapenv";
 
         writer.writeStartDocument();
         writer.writeStartElement(soapPrefix, "Envelope", soapVersion.nsUri);
@@ -150,7 +150,7 @@ public class MetadataServerPipe extends AbstractFilterPipeImpl {
         // todo: this line should go away after bug fix - 6418039
         writer.writeNamespace(soapPrefix, soapVersion.nsUri);
 
-        writer.writeNamespace(WSA_PREFIX, av.nsUri);
+        writer.writeNamespace(WSA_PREFIX, adVersion.nsUri);
         writer.writeNamespace(MEX_PREFIX, MEX_NAMESPACE);
 
         writer.writeStartElement(soapPrefix, "Body", soapVersion.nsUri);

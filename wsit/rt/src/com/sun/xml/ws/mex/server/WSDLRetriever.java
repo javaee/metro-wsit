@@ -48,7 +48,7 @@ import static com.sun.xml.ws.mex.MetadataConstants.WSDL_DIALECT;
  */
 public class WSDLRetriever {
 
-    private WSEndpoint endpoint;
+    private final WSEndpoint endpoint;
     
     /*
      * This class is used by the SDDocument object in the
@@ -59,7 +59,9 @@ public class WSDLRetriever {
      */
     private static final DocumentAddressResolver dar =
         new DocumentAddressResolver() {
-        public String getRelativeAddressFor(SDDocument d1, SDDocument d2) {
+        public String getRelativeAddressFor(final SDDocument doc1,
+            final SDDocument doc2) {
+            
             return null;
         }
     };
@@ -72,11 +74,11 @@ public class WSDLRetriever {
      * This method is called by the server pipe to write out
      * the wsdl and schema documents to the mex response.
      */
-    void addDocuments(XMLStreamWriter writer, Packet request, String address)
-        throws XMLStreamException {
+    void addDocuments(final XMLStreamWriter writer, final Packet request,
+        final String address) throws XMLStreamException {
         
-        ServiceDefinition sDef = endpoint.getServiceDefinition();
-        Iterator<SDDocument> docs = sDef.iterator();
+        final ServiceDefinition sDef = endpoint.getServiceDefinition();
+        final Iterator<SDDocument> docs = sDef.iterator();
         while (docs.hasNext()) {
             writeDoc(writer, docs.next(), address);
         }
@@ -89,8 +91,8 @@ public class WSDLRetriever {
      * of the section so that sections can be classified as
      * wsdl, schema, etc. when parsed.
      */
-    private void writeDoc(XMLStreamWriter writer, SDDocument doc, String add)
-        throws XMLStreamException {
+    private void writeDoc(final XMLStreamWriter writer, final SDDocument doc,
+        final String add) throws XMLStreamException {
         
         try {
             writer.writeStartElement(MEX_PREFIX,
@@ -118,13 +120,13 @@ public class WSDLRetriever {
      */
     static class PortAddressResolverImpl implements PortAddressResolver {
 
-        private String address;
+        private final String address;
         
         PortAddressResolverImpl(String address) {
             this.address = address;
         }
         
-        public String getAddressFor(String portName) {
+        public String getAddressFor(final String portName) {
             return address;
         }
         

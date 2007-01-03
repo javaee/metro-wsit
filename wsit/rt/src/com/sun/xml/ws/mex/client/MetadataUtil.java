@@ -26,8 +26,6 @@ import java.io.InputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.xml.ws.WebServiceException;
-
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.mex.client.MetadataClient.Protocol;
 
@@ -45,7 +43,7 @@ import static com.sun.xml.ws.mex.MetadataConstants.WSA_PREFIX;
 public class MetadataUtil {
     
     // the transport-specific code is (mostly) here
-    private HttpPoster postClient;
+    private final HttpPoster postClient;
     
     private static final Logger logger =
         Logger.getLogger(MetadataUtil.class.getName());
@@ -60,23 +58,27 @@ public class MetadataUtil {
      * @param address The address to query for metadata.
      * @return The full response from the server.
      */
-    InputStream getMetadata(String address, Protocol p) throws IOException {
-        String request = getMexWsdlRequest(address, p);
+    InputStream getMetadata(final String address,
+        final Protocol protocol) throws IOException {
+        
+        final String request = getMexWsdlRequest(address, protocol);
         if (logger.isLoggable(Level.FINE)) {
             logger.fine("Request message:\n" + request + "\n");
         }
         String contentType = "application/soap+xml"; // soap 1.2
-        if (p == Protocol.SOAP_1_1) {
+        if (protocol == Protocol.SOAP_1_1) {
             contentType = "text/xml; charset=\"utf-8\"";
         }
         return postClient.post(request, address, contentType);
     }
     
-    private String getMexWsdlRequest(String address, Protocol p) {
+    private String getMexWsdlRequest(final String address,
+        final Protocol protocol) {
+        
         // start with soap 1.2
         String soapPrefix = "s12";
         String soapNamespace = SOAP_1_2;
-        if (p == Protocol.SOAP_1_1) {
+        if (protocol == Protocol.SOAP_1_1) {
             soapPrefix = "soap-env";
             soapNamespace = SOAP_1_1;
         }

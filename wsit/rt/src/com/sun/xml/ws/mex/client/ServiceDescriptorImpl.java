@@ -71,7 +71,7 @@ public class ServiceDescriptorImpl extends ServiceDescriptor {
     private final List<Source> schemas;
     
     // holds nodes that are missing location attributes
-    private final List<Node> importNodesToPatch;
+    private final List<Node> importsToPatch;
     
     // holds sysId for wsdls, key is wsdl targetNamespace
     private final Map<String, String> nsToSysIdMap;
@@ -89,10 +89,10 @@ public class ServiceDescriptorImpl extends ServiceDescriptor {
     public ServiceDescriptorImpl(Metadata mData) {
         wsdls = new ArrayList<Source>();
         schemas = new ArrayList<Source>();
-        importNodesToPatch = new ArrayList<Node>();
+        importsToPatch = new ArrayList<Node>();
         nsToSysIdMap = new HashMap<String, String>();
         populateLists(mData);
-        if (!importNodesToPatch.isEmpty()) {
+        if (!importsToPatch.isEmpty()) {
             patchImports();
         }
     }
@@ -104,7 +104,7 @@ public class ServiceDescriptorImpl extends ServiceDescriptor {
      * metadata reference that needs to be retrieved, or a
      * mex location which can be retrieved with http GET call.
      */
-    private void populateLists(Metadata mData) {
+    private void populateLists(final Metadata mData) {
         for (MetadataSection section : mData.getMetadataSection()) {
             if (section.getMetadataReference() != null) {
                 handleReference(section);
@@ -120,16 +120,17 @@ public class ServiceDescriptorImpl extends ServiceDescriptor {
      * This is the normal case where a metadata section contains
      * xml representing a wsdl, schema, etc.
      */
-    private void handleXml(MetadataSection section) {
-        String dialect = section.getDialect();
-        String id = section.getIdentifier();
+    private void handleXml(final MetadataSection section) {
+        final String dialect = section.getDialect();
+        final String identifier = section.getIdentifier();
         if (dialect.equals(WSDL_DIALECT)) {
-            wsdls.add(createSource(section, id));
+            wsdls.add(createSource(section, identifier));
         } else if (dialect.equals(SCHEMA_DIALECT)) {
-            schemas.add(createSource(section, id));
+            schemas.add(createSource(section, identifier));
         } else {
             logger.warning(
-                MessagesMessages.MEX_02_UNKNOWN_DIALECT_WITH_ID(dialect, id));
+                MessagesMessages.MEX_02_UNKNOWN_DIALECT_WITH_ID(
+                dialect, identifier));
         }
     }
 
@@ -138,8 +139,8 @@ public class ServiceDescriptorImpl extends ServiceDescriptor {
      * retrieve the new metadata and add it to the lists. This
      * method recursively calls the the populateLists method.
      */
-    private void handleReference(MetadataSection section) {
-        MetadataReference ref = section.getMetadataReference();
+    private void handleReference(final MetadataSection section) {
+        final MetadataReference ref = section.getMetadataReference();
         populateLists(new MetadataClient().retrieveMetadata(ref));
     }
     
@@ -147,17 +148,18 @@ public class ServiceDescriptorImpl extends ServiceDescriptor {
      * A mex location is simply the url of a document that can
      * be retrieved with an http GET call.
      */
-    private void handleLocation(MetadataSection section) {
-        String location = section.getLocation();
-        String dialect = section.getDialect();
-        String id = section.getIdentifier();
+    private void handleLocation(final MetadataSection section) {
+        final String location = section.getLocation();
+        final String dialect = section.getDialect();
+        final String identifier = section.getIdentifier();
         if (dialect.equals(WSDL_DIALECT)) {
-            wsdls.add(getSourceFromLocation(location, id));
+            wsdls.add(getSourceFromLocation(location, identifier));
         } else if (dialect.equals(SCHEMA_DIALECT)) {
-            schemas.add(getSourceFromLocation(location, id));
+            schemas.add(getSourceFromLocation(location, identifier));
         } else {
             logger.warning(
-                MessagesMessages.MEX_02_UNKNOWN_DIALECT_WITH_ID(dialect, id));
+                MessagesMessages.MEX_02_UNKNOWN_DIALECT_WITH_ID(
+                dialect, identifier));
         }
     }
     
@@ -175,22 +177,25 @@ public class ServiceDescriptorImpl extends ServiceDescriptor {
      * adding data to the nsToSysIdMap map for wsdl sections in
      * case there are wsdl:import elements that need to be patched.
      */
-    private Source createSource(MetadataSection section, String id) {
-        Node n = (Node) section.getAny();
+    private Source createSource(final MetadataSection section,
+        final String identifier) {
+        
+        final Node node = (Node) section.getAny();
+        String sysId = identifier;
         if (section.getDialect().equals(WSDL_DIALECT)) {
-            String targetNamespace = getNamespaceFromNode(n);
-            if (id == null) {
-                id = targetNamespace;
+            final String targetNamespace = getNamespaceFromNode(node);
+            if (sysId == null) {
+                sysId = targetNamespace;
             }
-            nsToSysIdMap.put(targetNamespace, id);
-            checkWsdlImports(n);
+            nsToSysIdMap.put(targetNamespace, sysId);
+            checkWsdlImports(node);
         } else {
-            if (id == null) {
-                id = getNamespaceFromNode(n);
+            if (sysId == null) {
+                sysId = getNamespaceFromNode(node);
             }
         }
-        Source source = new DOMSource(n);
-        source.setSystemId(id);
+        final Source source = new DOMSource(node);
+        source.setSystemId(sysId);
         return source;
     }
     
@@ -199,13 +204,15 @@ public class ServiceDescriptorImpl extends ServiceDescriptor {
      * referred to in a mex location element must be retrievable
      * with an HTTP GET call.
      */
-    private Source getSourceFromLocation(String address, String id) {
+    private Source getSourceFromLocation(final String address,
+        final String identifier) {
+        
         try {
-            HttpPoster poster = new HttpPoster();
-            InputStream response = poster.makeGetCall(address);
-            if (id != null) {
-                StreamSource source = new StreamSource(response);
-                source.setSystemId(id);
+            final HttpPoster poster = new HttpPoster();
+            final InputStream response = poster.makeGetCall(address);
+            if (identifier != null) {
+                final StreamSource source = new StreamSource(response);
+                source.setSystemId(identifier);
                 return source;
             }
             return parseAndConvertStream(address, response);
@@ -219,8 +226,8 @@ public class ServiceDescriptorImpl extends ServiceDescriptor {
      * an identifier. The node passed in must be a wsdl:definitions
      * or an xsd:schema node.
      */
-    private String getNamespaceFromNode(Node node) {
-        Node namespace = node.getAttributes().getNamedItem("targetNamespace");
+    private String getNamespaceFromNode(final Node node) {
+        final Node namespace = node.getAttributes().getNamedItem("targetNamespace");
         if (namespace == null) {
             // bug in the server? want to avoid NPE if so
             logger.warning(
@@ -236,17 +243,17 @@ public class ServiceDescriptorImpl extends ServiceDescriptor {
      * that have no location attribute and add them to
      * the list to be patched.
      */
-    private void checkWsdlImports(Node wsdl) {
-        NodeList kids = wsdl.getChildNodes();
+    private void checkWsdlImports(final Node wsdl) {
+        final NodeList kids = wsdl.getChildNodes();
         for (int i=0; i<kids.getLength(); i++) {
-            Node importNode = kids.item(i);
+            final Node importNode = kids.item(i);
             if (importNode.getLocalName() != null &&
                 importNode.getLocalName().equals("import")) {
                 
-                Node location =
+                final Node location =
                     importNode.getAttributes().getNamedItem(LOCATION);
                 if (location == null) {
-                    importNodesToPatch.add(importNode);
+                    importsToPatch.add(importNode);
                 }
             }
         }
@@ -263,14 +270,16 @@ public class ServiceDescriptorImpl extends ServiceDescriptor {
      * will import another wsdl in the mex response, so this
      * wsdl is not checked for empty wsdl import locations.
      */
-    private Source parseAndConvertStream(String address, InputStream stream) {
+    private Source parseAndConvertStream(final String address,
+        final InputStream stream) {
+        
         try {
-            Transformer xFormer =
+            final Transformer xFormer =
                 TransformerFactory.newInstance().newTransformer();
             Source source = new StreamSource(stream);
-            DOMResult result = new DOMResult();
+            final DOMResult result = new DOMResult();
             xFormer.transform(source, result);
-            Node wsdlDoc = result.getNode();
+            final Node wsdlDoc = result.getNode();
             source = new DOMSource(wsdlDoc);
             source.setSystemId(getNamespaceFromNode(wsdlDoc.getFirstChild()));
             return source;
@@ -286,18 +295,18 @@ public class ServiceDescriptorImpl extends ServiceDescriptor {
      * wsdl.
      */
     private void patchImports() throws DOMException {
-        for (Node importNode : importNodesToPatch) {
-            NamedNodeMap atts = importNode.getAttributes();
-            String targetNamespace =
+        for (Node importNode : importsToPatch) {
+            final NamedNodeMap atts = importNode.getAttributes();
+            final String targetNamespace =
                 atts.getNamedItem(NAMESPACE).getNodeValue();
-            String sysId = nsToSysIdMap.get(targetNamespace);
+            final String sysId = nsToSysIdMap.get(targetNamespace);
             if (sysId == null) {
                 logger.warning(
                     MessagesMessages.MEX_05_WSDL_NOT_FOUND_WITH_NAMESPACE(
                     targetNamespace));
                 continue;
             }
-            Attr locationAtt =
+            final Attr locationAtt =
                 importNode.getOwnerDocument().createAttribute(LOCATION);
             locationAtt.setValue(sysId);
             atts.setNamedItem(locationAtt);

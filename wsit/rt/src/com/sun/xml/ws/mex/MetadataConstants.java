@@ -34,7 +34,7 @@ public class MetadataConstants {
     public static final String GET_REQUEST = XMLSOAP_2004_09 + "transfer/Get";
     public static final String GET_RESPONSE =
         XMLSOAP_2004_09 + "transfer/GetResponse";
-    public static final String GET_METADATA_REQUEST =
+    public static final String GET_MDATA_REQUEST =
         XMLSOAP_2004_09 + "mex/GetMetadata/Request";
     
     public static final String MEX_NAMESPACE = XMLSOAP_2004_09 + "mex";

@@ -33,7 +33,8 @@ import com.sun.xml.ws.api.wsdl.parser.MetaDataResolver;
  */
 public class MetadataResolverFactoryImpl extends MetadataResolverFactory {
 
-    public MetaDataResolver metadataResolver(EntityResolver resolver) {
-        return new MetadataResolverImpl(resolver);
+    // not currently using EntityResolver, but may later
+    public MetaDataResolver metadataResolver(final EntityResolver resolver) {
+        return new MetadataResolverImpl();
     }
 }
