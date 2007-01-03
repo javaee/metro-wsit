@@ -30,7 +30,7 @@ public class PolicyServiceInterceptorFactory extends ServiceInterceptorFactory {
     
     private static final PolicyServiceInterceptor interceptor = new PolicyServiceInterceptor();
     
-    public ServiceInterceptor create(WSService service) {
+    public ServiceInterceptor create(final WSService service) {
         return this.interceptor;
     }
 }

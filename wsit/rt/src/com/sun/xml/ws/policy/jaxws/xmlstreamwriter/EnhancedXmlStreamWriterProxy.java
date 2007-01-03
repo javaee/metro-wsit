@@ -78,7 +78,8 @@ public final class EnhancedXmlStreamWriterProxy implements InvocationHandler {
      * @return new enhanced {XMLStreamWriter} (proxy) instance
      * @throws XMLStreamException
      */
-    public static XMLStreamWriter createProxy(XMLStreamWriter writer, InvocationProcessorFactory processorFactory) throws XMLStreamException {
+    public static XMLStreamWriter createProxy(
+            final XMLStreamWriter writer, final InvocationProcessorFactory processorFactory) throws XMLStreamException {
         LOGGER.entering();
         
         XMLStreamWriter proxy = null;
@@ -94,23 +95,24 @@ public final class EnhancedXmlStreamWriterProxy implements InvocationHandler {
         }
     }
     
-    private EnhancedXmlStreamWriterProxy(XMLStreamWriter writer, InvocationProcessorFactory processorFactory) throws XMLStreamException {
+    private EnhancedXmlStreamWriterProxy(
+            final XMLStreamWriter writer, final InvocationProcessorFactory processorFactory) throws XMLStreamException {
         this.invocationProcessor = processorFactory.createInvocationProcessor(writer);
     }
             
-    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+    public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
         LOGGER.entering(new Object[] {method, args});
         
-        Class declaringClass = method.getDeclaringClass();
+        final Class declaringClass = method.getDeclaringClass();
         if (declaringClass == Object.class) {
             return handleObjectMethodCall(proxy, method, args);
         } else {
-            Invocation invocation = Invocation.createInvocation(method, args);
+            final Invocation invocation = Invocation.createInvocation(method, args);
             return invocationProcessor.process(invocation);            
         }
     }
     
-    private Object handleObjectMethodCall(Object proxy, Method method, Object[] args) {
+    private Object handleObjectMethodCall(final Object proxy, final Method method, final Object[] args) {
         if (method.equals(hashCodeMethod)) {
             return new Integer(System.identityHashCode(proxy));
         } else if (method.equals(equalsMethod)) {

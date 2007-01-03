@@ -59,24 +59,24 @@ public final class PolicyMerger {
      *         collection of policies contains only single policy, the policy is returned.
      * @throws NullPointerException if any element of input policies collection is {@code null}.
      */
-    public Policy merge(Collection<Policy> policies) throws PolicyException {
+    public Policy merge(final Collection<Policy> policies) throws PolicyException {
         if (policies == null || policies.isEmpty()) {
             return null;
         } else if (policies.size() == 1) {
             return policies.iterator().next();
         }
         
-        Collection<Collection<AssertionSet>> alternativeSets = new LinkedList<Collection<AssertionSet>>();
+        final Collection<Collection<AssertionSet>> alternativeSets = new LinkedList<Collection<AssertionSet>>();
         for (Policy policy : policies) {
             alternativeSets.add(policy.getContent());
         }
         
-        Collection<Collection<AssertionSet>> combinedAlternatives = PolicyUtils.Collections.combine(null, alternativeSets, false);
+        final Collection<Collection<AssertionSet>> combinedAlternatives = PolicyUtils.Collections.combine(null, alternativeSets, false);
         
         if (combinedAlternatives == null || combinedAlternatives.isEmpty()) {
             return Policy.createNullPolicy();
         } else {
-            Collection<AssertionSet> mergedSetList = new ArrayList<AssertionSet>(combinedAlternatives.size());
+            final Collection<AssertionSet> mergedSetList = new ArrayList<AssertionSet>(combinedAlternatives.size());
             for (Collection<AssertionSet> toBeMerged : combinedAlternatives) {
                 mergedSetList.add(AssertionSet.createMergedAssertionSet(toBeMerged));
             }

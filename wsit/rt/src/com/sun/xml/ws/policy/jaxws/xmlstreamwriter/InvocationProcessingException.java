@@ -32,23 +32,23 @@ import com.sun.xml.ws.policy.jaxws.privateutil.LocalizationMessages;
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public class InvocationProcessingException extends RuntimeException {
-    public InvocationProcessingException(String message) {
+    public InvocationProcessingException(final String message) {
 	super(message);
     }
 
-    public InvocationProcessingException(String message, Throwable cause) {
+    public InvocationProcessingException(final String message, final Throwable cause) {
         super(message, cause);
     }    
 
-    public InvocationProcessingException(Invocation invocation) {
+    public InvocationProcessingException(final Invocation invocation) {
 	super(assemblyExceptionMessage(invocation));
     }
 
-    public InvocationProcessingException(Invocation invocation, Throwable cause) {
+    public InvocationProcessingException(final Invocation invocation, final Throwable cause) {
         super(assemblyExceptionMessage(invocation), cause);
     }    
     
-    private static String assemblyExceptionMessage(Invocation invocation) {
+    private static String assemblyExceptionMessage(final Invocation invocation) {
         return LocalizationMessages.INVOCATION_ERROR(invocation.getMethodName(), invocation.argsToString());
     }    
 }

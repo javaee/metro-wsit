@@ -38,12 +38,12 @@ public final class Invocation {
     private Object[] arguments;
     private String argsString;
     
-    public static Invocation createInvocation(Method method, Object[] args) {
+    public static Invocation createInvocation(final Method method, final Object[] args) {
         Object[] arguments;
         if (args != null && args.length == 3 && "writeCharacters".equals(method.getName())) {
-            Integer start = (Integer) args[1];
-            Integer length = (Integer) args[2];
-            char[] text = new char[length.intValue()];
+            final Integer start = (Integer) args[1];
+            final Integer length = (Integer) args[2];
+            final char[] text = new char[length.intValue()];
             System.arraycopy(args[0], start, text, 0, length);
             
             arguments = new Object[3];
@@ -57,7 +57,7 @@ public final class Invocation {
         return new Invocation(method, arguments);
     }
     
-    private Invocation(Method method, Object[] args) {
+    private Invocation(final Method method, final Object[] args) {
         this.method = method;
         this.arguments = args;
     }
@@ -66,7 +66,7 @@ public final class Invocation {
         return method.getName();
     }
     
-    public Object getArgument(int index) {
+    public Object getArgument(final int index) {
         return arguments[index];
     }
     
@@ -74,12 +74,12 @@ public final class Invocation {
         return (arguments != null) ? arguments.length : 0;
     }
     
-    public Object execute(Object target) throws IllegalAccessException, InvocationTargetException {
+    public Object execute(final Object target) throws IllegalAccessException, InvocationTargetException {
         return method.invoke(target, arguments);
     }
     
     public String toString() {
-        StringBuffer retValue = new StringBuffer("invocation {");
+        final StringBuffer retValue = new StringBuffer("invocation {");
         retValue.append("method='").append(method.getName()).append("', args=").append(argsToString());
         retValue.append('}');
         

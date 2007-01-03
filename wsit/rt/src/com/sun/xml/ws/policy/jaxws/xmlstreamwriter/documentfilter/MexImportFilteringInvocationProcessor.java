@@ -68,9 +68,10 @@ public final class MexImportFilteringInvocationProcessor implements InvocationPr
         this.invocationQueue = new LinkedList<Invocation>();
     }
     
-    public Object process(Invocation invocation) throws InvocationProcessingException {
+    public Object process(final Invocation invocation) throws InvocationProcessingException {
         try {
-            XmlStreamWriterMethodType methodType = XmlStreamWriterMethodType.getMethodType(invocation.getMethodName());
+            final XmlStreamWriterMethodType methodType = 
+                    XmlStreamWriterMethodType.getMethodType(invocation.getMethodName());
             switch (methodType) {
                 case WRITE_START_ELEMENT:
                     if (filteringOn) {
@@ -134,9 +135,9 @@ public final class MexImportFilteringInvocationProcessor implements InvocationPr
         }
     }
     
-    private void executeCommands(XMLStreamWriter writer) throws IllegalAccessException, InvocationProcessingException {
+    private void executeCommands(final XMLStreamWriter writer) throws IllegalAccessException, InvocationProcessingException {
         while (!invocationQueue.isEmpty()) {
-            Invocation command = invocationQueue.poll();
+            final Invocation command = invocationQueue.poll();
             try {
                 command.execute(writer);
             } catch (InvocationTargetException ex) {
@@ -146,13 +147,13 @@ public final class MexImportFilteringInvocationProcessor implements InvocationPr
         }
     }
     
-    private boolean startFiltering(Invocation invocation) {
+    private boolean startFiltering(final Invocation invocation) {
         /*
          * void writeAttribute(String localName, String value)
          * void writeAttribute(String namespaceURI, String localName, String value)
          * void writeAttribute(String prefix, String namespaceURI, String localName, String value)
          */
-        int argumentsCount = invocation.getArgumentsLength();
+        final int argumentsCount = invocation.getArgumentsLength();
         String namespaceURI, localName, value;
         
         switch (argumentsCount) {
@@ -177,17 +178,17 @@ public final class MexImportFilteringInvocationProcessor implements InvocationPr
                         );
         }
         
-        QName attributeName = new QName(namespaceURI, localName);
+        final QName attributeName = new QName(namespaceURI, localName);
         return IMPORT_NAMESPACE_ATTIBUTE.equals(attributeName) && MEX_NAMESPACE.equals(value);
     }
     
-    private boolean startBuffering(Invocation invocation) {
+    private boolean startBuffering(final Invocation invocation) {
         /**
          * void writeStartElement(String localName)
          * void writeStartElement(String namespaceURI, String localName)
          * void writeStartElement(String prefix, String localName, String namespaceURI)
          */
-        int argumentsCount = invocation.getArgumentsLength();
+        final int argumentsCount = invocation.getArgumentsLength();
         String namespaceURI, localName;
         
         switch (argumentsCount) {
@@ -209,7 +210,7 @@ public final class MexImportFilteringInvocationProcessor implements InvocationPr
                         );
         }
         
-        QName elementName = new QName(namespaceURI, localName);
+        final QName elementName = new QName(namespaceURI, localName);
         return WSDL_IMPORT_ELEMENT.equals(elementName);
     }
 }

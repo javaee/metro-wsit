@@ -137,7 +137,7 @@ public class Policy implements Iterable<AssertionSet> {
      * @param id local URI of the policy. May be {@code null}.
      * @return policy instance which represents a <emph>'nothing allowed'</emph> (no policy alternatives).
      */
-    public static Policy createNullPolicy(String name, String id) {
+    public static Policy createNullPolicy(final String name, final String id) {
         if (name == null && id == null) {
             return ANONYMOUS_NULL_POLICY;
         } else {
@@ -155,7 +155,7 @@ public class Policy implements Iterable<AssertionSet> {
      * @return policy instance which represents a <emph>'anything allowed'</emph> (empty policy alternative with no plicy
      * assertions prescribed).
      */
-    public static Policy createEmptyPolicy(String name, String id) {
+    public static Policy createEmptyPolicy(final String name, final String id) {
         if (name == null && id == null) {
             return ANONYMOUS_EMPTY_POLICY;
         } else {
@@ -175,7 +175,7 @@ public class Policy implements Iterable<AssertionSet> {
      *
      * @return policy instance which represents the policy with given alternatives.
      */
-    public static Policy createPolicy(Collection<AssertionSet> sets) {
+    public static Policy createPolicy(final Collection<AssertionSet> sets) {
         if (sets == null || sets.isEmpty()) {
             return createNullPolicy();
         } else {
@@ -197,7 +197,8 @@ public class Policy implements Iterable<AssertionSet> {
      *
      * @return policy instance which represents the policy with given alternatives.
      */
-    public static Policy createPolicy(String name, String id, Collection<AssertionSet> sets) {
+    public static Policy createPolicy(
+            final String name, final String id, final Collection<AssertionSet> sets) {
         if (sets == null || sets.isEmpty()) {
             return createNullPolicy(name, id);
         } else {
@@ -217,7 +218,11 @@ public class Policy implements Iterable<AssertionSet> {
      * @param vocabulary represents the vocabulary of the policy object. Subsequent manipulations on the collection
      * must be handled with care.
      */
-    private Policy(String name, String id, List<AssertionSet> assertionSets, Set<QName> vocabulary) {
+    private Policy(
+            final String name, 
+            final String id, 
+            final List<AssertionSet> assertionSets, 
+            final Set<QName> vocabulary) {
         this.toStringName = POLICY_TOSTRING_NAME;
         this.name = name;
         this.id = id;
@@ -237,7 +242,7 @@ public class Policy implements Iterable<AssertionSet> {
      * thus any subsequent operations on the collection will have no impact on the newly constructed policy object. The 
      * collection may be {@code null} or empty. In such case a 'NULL' policy object is constructed.
      */
-    Policy(String toStringName, Collection<AssertionSet> sets) {
+    Policy(final String toStringName, final Collection<AssertionSet> sets) {
         this.toStringName = toStringName;
         
         if (sets != null && !sets.isEmpty()) {
@@ -266,7 +271,7 @@ public class Policy implements Iterable<AssertionSet> {
      * thus any subsequent operations on the collection will have no impact on the newly constructed policy object. The 
      * collection may be {@code null} or empty. In such case a 'NULL' policy object is constructed.
      */
-    Policy(String toStringName, String name, String id, Collection<AssertionSet> sets) {
+    Policy(final String toStringName, final String name, final String id, final Collection<AssertionSet> sets) {
         this.name = name;
         this.id = id;
         this.toStringName = toStringName;
@@ -292,7 +297,7 @@ public class Policy implements Iterable<AssertionSet> {
      * 
      * @return {@code true} or {@code false} depending on whether the new alternative was added to the policy object or not.
      */
-    private boolean add(AssertionSet set) {
+    private boolean add(final AssertionSet set) {
         if (set == null) {
             return false;
         }
@@ -316,7 +321,7 @@ public class Policy implements Iterable<AssertionSet> {
      *
      * @return {@code true} if all elements in the input collection were added to internal structure, {@code false} otherwise. 
      */
-    private boolean addAll(Collection<AssertionSet> sets) {
+    private boolean addAll(final Collection<AssertionSet> sets) {
         assert (sets != null && !sets.isEmpty()) : LocalizationMessages.PRIVATE_METHOD_DOES_NOT_ACCEPT_NULL_OR_EMPTY_COLLECTION();
         
         boolean result = true;        
@@ -408,7 +413,7 @@ public class Policy implements Iterable<AssertionSet> {
      * @param namespaceUri the assertion namespace URI (identifying assertion domain)
      * @return {@code true}, if an assertion with the given name could be found in the policy vocabulary {@code false} otherwise.
      */
-    public boolean contains(String namespaceUri) {
+    public boolean contains(final String namespaceUri) {
         for (QName entry : vocabulary) {
             if (entry.getNamespaceURI().equals(namespaceUri)) {
                 return true;
@@ -436,21 +441,21 @@ public class Policy implements Iterable<AssertionSet> {
      * @return {@code true} if the assertion with the specified name is part of the policy instance's vocabulary,
      * {@code false} otherwise.
      */
-    public boolean contains(QName assertionName) {
+    public boolean contains(final QName assertionName) {
         return vocabulary.contains(assertionName);
     }
     
     /**
      * An {@code Object.equals(Object obj)} method override.
      */
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj)
             return true;
         
         if (!(obj instanceof Policy))
             return false;
         
-        Policy that = (Policy) obj;
+        final Policy that = (Policy) obj;
         
         boolean result = true;
         
@@ -486,10 +491,10 @@ public class Policy implements Iterable<AssertionSet> {
      * @param buffer buffer to be used for appending string representation of this instance
      * @return modified buffer containing new string representation of the instance
      */
-    StringBuffer toString(int indentLevel, StringBuffer buffer) {
-        String indent = PolicyUtils.Text.createIndent(indentLevel);
-        String innerIndent = PolicyUtils.Text.createIndent(indentLevel + 1);
-        String innerDoubleIndent = PolicyUtils.Text.createIndent(indentLevel + 2);
+    StringBuffer toString(final int indentLevel, final StringBuffer buffer) {
+        final String indent = PolicyUtils.Text.createIndent(indentLevel);
+        final String innerIndent = PolicyUtils.Text.createIndent(indentLevel + 1);
+        final String innerDoubleIndent = PolicyUtils.Text.createIndent(indentLevel + 2);
         
         buffer.append(indent).append(toStringName).append(" {").append(PolicyUtils.Text.NEW_LINE);
         buffer.append(innerIndent).append("id = '").append(id).append('\'').append(PolicyUtils.Text.NEW_LINE);

@@ -36,19 +36,19 @@ public final class NestedPolicy extends Policy {
     
     private Policy standardPolicyImpl;
         
-    private NestedPolicy(AssertionSet set) {
+    private NestedPolicy(final AssertionSet set) {
         super(NESTED_POLICY_TOSTRING_NAME, Arrays.asList(new AssertionSet[] { set }));
     }
     
-    private NestedPolicy(String name, String id, AssertionSet set) {
+    private NestedPolicy(final String name, final String id, final AssertionSet set) {
         super(NESTED_POLICY_TOSTRING_NAME, name, id, Arrays.asList(new AssertionSet[] { set }));
     }
 
-    static NestedPolicy createNestedPolicy(AssertionSet set) {
+    static NestedPolicy createNestedPolicy(final AssertionSet set) {
         return new NestedPolicy(set);
     }
 
-    static NestedPolicy createNestedPolicy(String name, String id, AssertionSet set) {
+    static NestedPolicy createNestedPolicy(final String name, final String id, final AssertionSet set) {
         return new NestedPolicy(name, id, set);
     }
     
@@ -60,7 +60,7 @@ public final class NestedPolicy extends Policy {
      * represents 'nothing allowed' policy.
      */
     public AssertionSet getAssertionSet() {
-        Iterator<AssertionSet> iterator = iterator();
+        final Iterator<AssertionSet> iterator = iterator();
         if (iterator.hasNext()) {
             return iterator.next();
         } else {
@@ -71,14 +71,14 @@ public final class NestedPolicy extends Policy {
     /**
      * An {@code Object.equals(Object obj)} method override.
      */
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj)
             return true;
         
         if (!(obj instanceof NestedPolicy))
             return false;
         
-        NestedPolicy that = (NestedPolicy) obj;
+        final NestedPolicy that = (NestedPolicy) obj;
         
         return super.equals(that);
     }
@@ -104,7 +104,7 @@ public final class NestedPolicy extends Policy {
      * @param buffer buffer to be used for appending string representation of this instance
      * @return modified buffer containing new string representation of the instance
      */
-    StringBuffer toString(int indentLevel, StringBuffer buffer) {
+    StringBuffer toString(final int indentLevel, final StringBuffer buffer) {
         return super.toString(indentLevel, buffer);
     }
     

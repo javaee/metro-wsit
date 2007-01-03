@@ -92,9 +92,9 @@ final class PrivateAssertionFilteringInvocationProcessor implements InvocationPr
         this.invocationQueue = new LinkedList<Invocation>();
     }
     
-    public Object process(Invocation invocation) throws InvocationProcessingException {
+    public Object process(final Invocation invocation) throws InvocationProcessingException {
         try {
-            XmlStreamWriterMethodType methodType = XmlStreamWriterMethodType.getMethodType(invocation.getMethodName());
+            final XmlStreamWriterMethodType methodType = XmlStreamWriterMethodType.getMethodType(invocation.getMethodName());
             switch (methodType) {
                 case WRITE_START_ELEMENT:
                     if (filteringOn) {
@@ -158,9 +158,9 @@ final class PrivateAssertionFilteringInvocationProcessor implements InvocationPr
         }
     }
     
-    private void executeCommands(XMLStreamWriter writer) throws IllegalAccessException, InvocationProcessingException {
+    private void executeCommands(final XMLStreamWriter writer) throws IllegalAccessException, InvocationProcessingException {
         while (!invocationQueue.isEmpty()) {
-            Invocation command = invocationQueue.poll();
+            final Invocation command = invocationQueue.poll();
             try {
                 command.execute(writer);
             } catch (InvocationTargetException ex) {
@@ -170,13 +170,13 @@ final class PrivateAssertionFilteringInvocationProcessor implements InvocationPr
         }
     }
     
-    private boolean startFiltering(Invocation invocation) {
+    private boolean startFiltering(final Invocation invocation) {
         /*
          * void writeAttribute(String localName, String value)
          * void writeAttribute(String namespaceURI, String localName, String value)
          * void writeAttribute(String prefix, String namespaceURI, String localName, String value)
          */
-        int argumentsCount = invocation.getArgumentsLength();
+        final int argumentsCount = invocation.getArgumentsLength();
         String namespaceURI, localName, value;
         
         switch (argumentsCount) {
@@ -201,7 +201,7 @@ final class PrivateAssertionFilteringInvocationProcessor implements InvocationPr
                         );
         }
         
-        QName attributeName = new QName(namespaceURI, localName);
+        final QName attributeName = new QName(namespaceURI, localName);
         return PolicyConstants.VISIBILITY_ATTRIBUTE.equals(attributeName) && PolicyConstants.VISIBILITY_VALUE_PRIVATE.equals(value);
     }
     

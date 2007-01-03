@@ -49,7 +49,8 @@ public final class EffectivePolicyModifier extends PolicyMapMutator {
      *
      * @throw NullPointerException in case any of the input parameters is {@code null}
      */
-    public void setNewEffectivePolicyForServiceScope(PolicyMapKey key, Policy newEffectivePolicy) {
+    public void setNewEffectivePolicyForServiceScope(
+            final PolicyMapKey key, final Policy newEffectivePolicy) {
         getMap().setNewEffectivePolicyForScope(PolicyMap.ScopeType.SERVICE, key, newEffectivePolicy);
     }
             
@@ -62,7 +63,8 @@ public final class EffectivePolicyModifier extends PolicyMapMutator {
      *
      * @throw NullPointerException in case any of the input parameters is {@code null}
      */
-    public void setNewEffectivePolicyForEndpointScope(PolicyMapKey key, Policy newEffectivePolicy) {
+    public void setNewEffectivePolicyForEndpointScope(
+            final PolicyMapKey key, final Policy newEffectivePolicy) {
         getMap().setNewEffectivePolicyForScope(PolicyMap.ScopeType.ENDPOINT, key, newEffectivePolicy);
     }
             
@@ -76,7 +78,8 @@ public final class EffectivePolicyModifier extends PolicyMapMutator {
      *
      * @throw NullPointerException in case any of the input parameters is {@code null}
      */
-    public void setNewEffectivePolicyForOperationScope(PolicyMapKey key, Policy newEffectivePolicy) {
+    public void setNewEffectivePolicyForOperationScope(
+            final PolicyMapKey key, final Policy newEffectivePolicy) {
         getMap().setNewEffectivePolicyForScope(PolicyMap.ScopeType.OPERATION, key, newEffectivePolicy);
     }
             
@@ -90,7 +93,8 @@ public final class EffectivePolicyModifier extends PolicyMapMutator {
      *
      * @throw NullPointerException in case any of the input parameters is {@code null}
      */
-    public void setNewEffectivePolicyForInputMessageScope(PolicyMapKey key, Policy newEffectivePolicy) {
+    public void setNewEffectivePolicyForInputMessageScope(
+            final PolicyMapKey key, final Policy newEffectivePolicy) {
         getMap().setNewEffectivePolicyForScope(PolicyMap.ScopeType.INPUT_MESSAGE, key, newEffectivePolicy);
     }
             
@@ -104,7 +108,8 @@ public final class EffectivePolicyModifier extends PolicyMapMutator {
      *
      * @throw NullPointerException in case any of the input parameters is {@code null}
      */
-    public void setNewEffectivePolicyForOutputMessageScope(PolicyMapKey key, Policy newEffectivePolicy) {
+    public void setNewEffectivePolicyForOutputMessageScope(
+            final PolicyMapKey key, final Policy newEffectivePolicy) {
         getMap().setNewEffectivePolicyForScope(PolicyMap.ScopeType.OUTPUT_MESSAGE, key, newEffectivePolicy);
     }
             
@@ -118,7 +123,8 @@ public final class EffectivePolicyModifier extends PolicyMapMutator {
      *
      * @throw NullPointerException in case any of the input parameters is {@code null}
      */
-    public void setNewEffectivePolicyForFaultMessageScope(PolicyMapKey key, Policy newEffectivePolicy) {
+    public void setNewEffectivePolicyForFaultMessageScope(
+            final PolicyMapKey key, final Policy newEffectivePolicy) {
         getMap().setNewEffectivePolicyForScope(PolicyMap.ScopeType.FAULT_MESSAGE, key, newEffectivePolicy);
     }
 }

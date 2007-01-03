@@ -41,7 +41,7 @@ final class PolicyScope {
         }
     }
     
-    void attach(PolicySubject subject) {
+    void attach(final PolicySubject subject) {
         if (subject == null) {
             throw new NullPointerException(LocalizationMessages.SUBJECT_PARAM_MUST_NOT_BE_NULL());
         }
@@ -58,8 +58,8 @@ final class PolicyScope {
      *
      * @return effective policy of the scope
      */
-    Policy getEffectivePolicy(PolicyMerger merger) throws PolicyException {
-        LinkedList<Policy> policies = new LinkedList<Policy>();
+    Policy getEffectivePolicy(final PolicyMerger merger) throws PolicyException {
+        final LinkedList<Policy> policies = new LinkedList<Policy>();
         for (PolicySubject subject : subjects) {
             policies.add(subject.getEffectivePolicy(merger));
         }
@@ -73,8 +73,8 @@ final class PolicyScope {
      *
      * @return effective policy with respect to the provided namespaces.
      */
-    Policy getEffectivePolicy(Collection<String> namespaces, PolicyMerger merger) throws PolicyException {
-        LinkedList<Policy> policies = new LinkedList<Policy>();
+    Policy getEffectivePolicy(final Collection<String> namespaces, final PolicyMerger merger) throws PolicyException {
+        final LinkedList<Policy> policies = new LinkedList<Policy>();
         for (PolicySubject subject: subjects) {
             policies.add(subject.getEffectivePolicy(namespaces, merger));
         }
@@ -105,8 +105,8 @@ final class PolicyScope {
      * @param buffer buffer to be used for appending string representation of this instance
      * @return modified buffer containing new string representation of the instance
      */
-    StringBuffer toString(int indentLevel, StringBuffer buffer) {
-        String indent = PolicyUtils.Text.createIndent(indentLevel);
+    StringBuffer toString(final int indentLevel, final StringBuffer buffer) {
+        final String indent = PolicyUtils.Text.createIndent(indentLevel);
         
         buffer.append(indent).append("policy scope {").append(PolicyUtils.Text.NEW_LINE);
         for (PolicySubject policySubject : subjects) {

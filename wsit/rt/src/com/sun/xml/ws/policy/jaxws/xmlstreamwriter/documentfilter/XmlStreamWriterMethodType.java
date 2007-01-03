@@ -42,7 +42,7 @@ public enum XmlStreamWriterMethodType {
         WRITE_CHARACTERS,
         CLOSE
     };
-    public static XmlStreamWriterMethodType getMethodType(String methodName) {
+    public static XmlStreamWriterMethodType getMethodType(final String methodName) {
         for (XmlStreamWriterMethodType type : types) {
             if (type.methodName.equals(methodName)) {
                 return type;

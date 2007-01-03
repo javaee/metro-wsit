@@ -59,7 +59,7 @@ final class XmlPolicyModelUnmarshaller extends PolicyModelUnmarshaller {
         
         loop : while (reader.hasNext()) {
             try {
-                XMLEvent event = reader.peek();
+                final XMLEvent event = reader.peek();
                 switch (event.getEventType()) {
                     case XMLStreamConstants.START_DOCUMENT:
                     case XMLStreamConstants.COMMENT:

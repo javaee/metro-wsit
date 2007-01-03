@@ -38,19 +38,19 @@ import javax.xml.stream.XMLStreamWriter;
  */
 public class WsdlDocumentFilter implements SDDocumentFilter {
     private static final InvocationProcessorFactory PRIVATE_ASSERTION_FILTER_FACTORY = new InvocationProcessorFactory() {
-        public InvocationProcessor createInvocationProcessor(XMLStreamWriter writer) throws XMLStreamException {
+        public InvocationProcessor createInvocationProcessor(final XMLStreamWriter writer) throws XMLStreamException {
             return new PrivateAssertionFilteringInvocationProcessor(writer);
         }
     };
     
     private static final InvocationProcessorFactory MEX_IMPORT_FILTER_FACTORY = new InvocationProcessorFactory() {
-        public InvocationProcessor createInvocationProcessor(XMLStreamWriter writer) throws XMLStreamException {
+        public InvocationProcessor createInvocationProcessor(final XMLStreamWriter writer) throws XMLStreamException {
             return new MexImportFilteringInvocationProcessor(writer);
         }
     };
     
     private static final InvocationProcessorFactory PRIVATE_ELEMENTS_FILTER_FACTORY = new InvocationProcessorFactory() {
-        public InvocationProcessor createInvocationProcessor(XMLStreamWriter writer) throws XMLStreamException {
+        public InvocationProcessor createInvocationProcessor(final XMLStreamWriter writer) throws XMLStreamException {
             return new PrivateElementFilteringInvocationProcessor(
                     writer,
                     new QName("http://schemas.sun.com/2006/03/wss/server", "KeyStore"),
@@ -74,7 +74,8 @@ public class WsdlDocumentFilter implements SDDocumentFilter {
         }
     };
     
-    public XMLStreamWriter filter(SDDocument sdDocument, XMLStreamWriter xmlStreamWriter) throws XMLStreamException {
+    public XMLStreamWriter filter(
+            final SDDocument sdDocument, final XMLStreamWriter xmlStreamWriter) throws XMLStreamException {
         XMLStreamWriter result = EnhancedXmlStreamWriterProxy.createProxy(xmlStreamWriter, PRIVATE_ASSERTION_FILTER_FACTORY);
         result = EnhancedXmlStreamWriterProxy.createProxy(result, MEX_IMPORT_FILTER_FACTORY);
         result = EnhancedXmlStreamWriterProxy.createProxy(result, PRIVATE_ELEMENTS_FILTER_FACTORY);

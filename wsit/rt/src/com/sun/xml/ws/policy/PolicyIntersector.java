@@ -63,7 +63,7 @@ public final class PolicyIntersector {
      *
      * @throw IllegalArgumentException in case {@code policies} argument is either {@code null} or empty collection.
      */
-    public Policy intersect(Collection<Policy> policies) {
+    public Policy intersect(final Collection<Policy> policies) {
         if (policies == null || policies.isEmpty()) {
             throw new IllegalArgumentException(LocalizationMessages.NEITHER_NULL_NOR_EMPTY_POLICY_COLLECTION_EXPECTED());
         } else if (policies.size() == 1) {
@@ -92,13 +92,13 @@ public final class PolicyIntersector {
         }
         
         // simple tests didn't lead to final answer => let's performe some intersecting ;)
-        Iterator<Policy> policyIterator = policies.iterator();
-        List<AssertionSet> finalAlternatives = new LinkedList<AssertionSet>(policyIterator.next().getContent());
+        final Iterator<Policy> policyIterator = policies.iterator();
+        final List<AssertionSet> finalAlternatives = new LinkedList<AssertionSet>(policyIterator.next().getContent());
         while (policyIterator.hasNext()) {
-            Collection<AssertionSet> currentAlternatives = policyIterator.next().getContent();
+            final Collection<AssertionSet> currentAlternatives = policyIterator.next().getContent();
 
             AssertionSet testedAlternative;
-            Queue<AssertionSet> testedAlternatives = new LinkedList<AssertionSet>(finalAlternatives);
+            final Queue<AssertionSet> testedAlternatives = new LinkedList<AssertionSet>(finalAlternatives);
             finalAlternatives.clear();
             while ((testedAlternative = testedAlternatives.poll()) != null) {
                 for (AssertionSet currentAlternative : currentAlternatives) {
@@ -112,7 +112,7 @@ public final class PolicyIntersector {
         return Policy.createPolicy(finalAlternatives);
     }
     
-    public Policy intersect(Policy policyA, Policy policyB) {
+    public Policy intersect(final Policy policyA, final Policy policyB) {
         return intersect(Arrays.asList(new Policy[] {policyA, policyB}));
     }
 }

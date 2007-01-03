@@ -45,7 +45,7 @@ public abstract class PolicyMapMutator {
      * @param map the policy map instance that will be mutable by this mutator.
      * @throws IllegalStateException in case this mutator object is already connected to a policy map.
      */
-    void connect(PolicyMap map) {
+    void connect(final PolicyMap map) {
         if (isConnected()) {
             throw new IllegalStateException(LocalizationMessages.POLICY_MAP_MUTATOR_ALREADY_CONNECTED());
         }

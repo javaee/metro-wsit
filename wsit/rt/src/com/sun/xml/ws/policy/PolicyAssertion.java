@@ -54,7 +54,10 @@ public abstract class PolicyAssertion {
      * @param nestedAssertions collection of nested assertions of this policy alternative. May be {@code null}.
      * @param nestedAlternative assertion set specifying nested policy alternative. May be {@code null}.
      */
-    protected PolicyAssertion(AssertionData assertionData, Collection<? extends PolicyAssertion> assertionParameters, AssertionSet nestedAlternative) {
+    protected PolicyAssertion(
+            final AssertionData assertionData, 
+            final Collection<? extends PolicyAssertion> assertionParameters, 
+            final AssertionSet nestedAlternative) {
         this.data = assertionData;
         if (nestedAlternative != null) {
             this.nestedPolicy = NestedPolicy.createNestedPolicy(nestedAlternative);
@@ -91,7 +94,7 @@ public abstract class PolicyAssertion {
      */
     public boolean isOptional() {
         boolean result = false;
-        String attributeValue = getAttributeValue(PolicyConstants.OPTIONAL);
+        final String attributeValue = getAttributeValue(PolicyConstants.OPTIONAL);
         if (attributeValue != null) {
             result = Boolean.parseBoolean(attributeValue);
         }
@@ -141,7 +144,7 @@ public abstract class PolicyAssertion {
      * @param name The fully qualified name of the attribute
      * @return The value of the attribute. Returns {@code null} if there is no such attribute or if it's value is null.
      */
-    public final String getAttributeValue(QName name) {
+    public final String getAttributeValue(final QName name) {
         return data.getAttributeValue(name);
     }
     
@@ -199,9 +202,9 @@ public abstract class PolicyAssertion {
      * @param buffer buffer to be used for appending string representation of this instance
      * @return modified buffer containing new string representation of the instance
      */
-    protected StringBuffer toString(int indentLevel, StringBuffer buffer) {
-        String indent = PolicyUtils.Text.createIndent(indentLevel);
-        String innerIndent = PolicyUtils.Text.createIndent(indentLevel + 1);
+    protected StringBuffer toString(final int indentLevel, final StringBuffer buffer) {
+        final String indent = PolicyUtils.Text.createIndent(indentLevel);
+        final String innerIndent = PolicyUtils.Text.createIndent(indentLevel + 1);
         
         buffer.append(indent).append("Assertion {").append(PolicyUtils.Text.NEW_LINE);
         data.toString(indentLevel + 1, buffer);
@@ -231,7 +234,7 @@ public abstract class PolicyAssertion {
     /**
      * An {@code Object.equals(Object obj)} method override.
      */
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
@@ -240,7 +243,7 @@ public abstract class PolicyAssertion {
             return false;
         }
         
-        PolicyAssertion that = (PolicyAssertion) obj;
+        final PolicyAssertion that = (PolicyAssertion) obj;
         boolean result = true;
         
         result = result && this.data.equals(that.data);

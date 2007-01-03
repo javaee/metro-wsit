@@ -46,7 +46,7 @@ final public class PolicyMapKey  {
     
     private PolicyMapKeyHandler handler;
     
-    PolicyMapKey(QName service, QName port, QName operation) {
+    PolicyMapKey(final QName service, final QName port, final QName operation) {
         this.service = service;
         this.port = port;
         this.operation = operation;
@@ -55,7 +55,7 @@ final public class PolicyMapKey  {
 //        this.outputMessage = outputMessage;
     }
     
-    PolicyMapKey(QName service, QName port, QName operation, QName faultMessage) {
+    PolicyMapKey(final QName service, final QName port, final QName operation, final QName faultMessage) {
         this.service = service;
         this.port = port;
         this.operation = operation;
@@ -66,7 +66,7 @@ final public class PolicyMapKey  {
         this.faultMessage = faultMessage;
     }
     
-    PolicyMapKey(PolicyMapKey that) {
+    PolicyMapKey(final PolicyMapKey that) {
         this.service = that.service;
         this.port = that.port;
         this.operation = that.operation;
@@ -78,11 +78,11 @@ final public class PolicyMapKey  {
         this.handler = that.handler;
     }
     
-    void setHandler(PolicyMapKeyHandler handler) {
+    void setHandler(final PolicyMapKeyHandler handler) {
         this.handler = handler;
     }
     
-    public boolean equals(Object that) {
+    public boolean equals(final Object that) {
         if (this == that) {
             return true; // we are lucky here => no special handling is required
         }
@@ -111,7 +111,7 @@ final public class PolicyMapKey  {
     }    
     
     public String toString() {
-        StringBuffer result = new StringBuffer("WsdlPolicyMapKey(");
+        final StringBuffer result = new StringBuffer("WsdlPolicyMapKey(");
         result.append(this.service).append(", ").append(port).append(", ").append(operation).append(", ").append(faultMessage);
         return result.append(")").toString();
     }

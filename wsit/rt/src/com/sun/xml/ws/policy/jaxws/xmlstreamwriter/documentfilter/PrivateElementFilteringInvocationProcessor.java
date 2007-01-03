@@ -73,9 +73,10 @@ final class PrivateElementFilteringInvocationProcessor implements InvocationProc
         this.mirrorWriter = XML_OUTPUT_FACTORY.createXMLStreamWriter(new StringWriter());
     }
     
-    public Object process(Invocation invocation) throws InvocationProcessingException {
+    public Object process(final Invocation invocation) throws InvocationProcessingException {
         try {
-            XmlStreamWriterMethodType methodType = XmlStreamWriterMethodType.getMethodType(invocation.getMethodName());
+            final XmlStreamWriterMethodType methodType = 
+                    XmlStreamWriterMethodType.getMethodType(invocation.getMethodName());
             switch (methodType) {
                 case WRITE_START_ELEMENT:
                     if (filteringOn) {
@@ -118,9 +119,9 @@ final class PrivateElementFilteringInvocationProcessor implements InvocationProc
         }
     }
     
-    private void executeCommands(XMLStreamWriter writer) throws IllegalAccessException, InvocationProcessingException {
+    private void executeCommands(final XMLStreamWriter writer) throws IllegalAccessException, InvocationProcessingException {
         while (!invocationQueue.isEmpty()) {
-            Invocation command = invocationQueue.poll();
+            final Invocation command = invocationQueue.poll();
             try {
                 command.execute(writer);
             } catch (InvocationTargetException ex) {
@@ -130,13 +131,13 @@ final class PrivateElementFilteringInvocationProcessor implements InvocationProc
         }
     }
     
-    private boolean startFiltering(Invocation invocation) {
+    private boolean startFiltering(final Invocation invocation) {
         /**
          * void writeStartElement(String localName)
          * void writeStartElement(String namespaceURI, String localName)
          * void writeStartElement(String prefix, String localName, String namespaceURI)
          */
-        int argumentsCount = invocation.getArgumentsLength();
+        final int argumentsCount = invocation.getArgumentsLength();
         String namespaceURI, localName;
         
         switch (argumentsCount) {
@@ -158,7 +159,7 @@ final class PrivateElementFilteringInvocationProcessor implements InvocationProc
                         );
         }
         
-        QName elementName = new QName(namespaceURI, localName);
+        final QName elementName = new QName(namespaceURI, localName);
         
         for (QName filteredElement : filteredElements) {
             if (filteredElement.equals(elementName)) {

@@ -82,7 +82,7 @@ public final class PolicySubject {
      *
      * @throw NullPointerException in case {@code policy} argument is {@code null}.
      */
-    public void attach(Policy policy) {
+    public void attach(final Policy policy) {
         if (policy == null) {
             throw new NullPointerException(LocalizationMessages.POLICY_TO_ATTACH_MUST_NOT_BE_NULL());
         }
@@ -93,7 +93,7 @@ public final class PolicySubject {
      * Returns the effective policy of the subject, i.e. all policies of the subject
      * merged together
      */
-    public Policy getEffectivePolicy(PolicyMerger merger) throws PolicyException {
+    public Policy getEffectivePolicy(final PolicyMerger merger) throws PolicyException {
         return merger.merge(policies);
     }
     
@@ -101,8 +101,9 @@ public final class PolicySubject {
      * Retrieve only the assertions of the effective policy that match the given set of
      * namespaces
      */
-    public Policy getEffectivePolicy(Collection<String> namespaces, PolicyMerger merger) throws PolicyException {
-        LinkedList<Policy> reducedPolicies = new LinkedList<Policy>();
+    public Policy getEffectivePolicy(
+            final Collection<String> namespaces, final PolicyMerger merger) throws PolicyException {
+        final LinkedList<Policy> reducedPolicies = new LinkedList<Policy>();
         for (Policy policy : policies) {
             // Policy reducedPolicy = policy.reduce(namespaces);
             // reducedPolicies.add(reducedPolicy);
@@ -135,9 +136,9 @@ public final class PolicySubject {
      * @param buffer buffer to be used for appending string representation of this instance
      * @return modified buffer containing new string representation of the instance
      */
-    StringBuffer toString(int indentLevel, StringBuffer buffer) {
-        String indent = PolicyUtils.Text.createIndent(indentLevel);
-        String innerIndent = PolicyUtils.Text.createIndent(indentLevel + 1);
+    StringBuffer toString(final int indentLevel, final StringBuffer buffer) {
+        final String indent = PolicyUtils.Text.createIndent(indentLevel);
+        final String innerIndent = PolicyUtils.Text.createIndent(indentLevel + 1);
         
         buffer.append(indent).append("policy subject {").append(PolicyUtils.Text.NEW_LINE);
         buffer.append(innerIndent).append("subject = '").append(subject).append('\'').append(PolicyUtils.Text.NEW_LINE);

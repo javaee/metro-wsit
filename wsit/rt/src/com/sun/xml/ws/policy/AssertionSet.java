@@ -55,7 +55,7 @@ public final class AssertionSet implements Iterable<PolicyAssertion>, Comparable
      * 6. hashCode comparison
      */
     private static final Comparator<PolicyAssertion> ASSERTION_COMPARATOR = new Comparator<PolicyAssertion>() {
-        public int compare(PolicyAssertion pa1, PolicyAssertion pa2) {
+        public int compare(final PolicyAssertion pa1, final PolicyAssertion pa2) {
             if (pa1 == pa2 || pa1.equals(pa2)) {
                 return 0;
             }
@@ -95,14 +95,14 @@ public final class AssertionSet implements Iterable<PolicyAssertion>, Comparable
         this.assertions = list;
     }
     
-    private AssertionSet(Collection<AssertionSet> alternatives) {
+    private AssertionSet(final Collection<AssertionSet> alternatives) {
         this.assertions = new LinkedList<PolicyAssertion>();
         for (AssertionSet alternative : alternatives) {
             addAll(alternative.assertions);
         }
     }
     
-    private boolean add(PolicyAssertion assertion) {
+    private boolean add(final PolicyAssertion assertion) {
         if (assertion == null) {
             return false;
         }
@@ -116,7 +116,7 @@ public final class AssertionSet implements Iterable<PolicyAssertion>, Comparable
         }
     }
     
-    private boolean addAll(Collection<? extends PolicyAssertion> assertions) {
+    private boolean addAll(final Collection<? extends PolicyAssertion> assertions) {
         boolean result = true;
         
         if (assertions != null) {
@@ -153,7 +153,7 @@ public final class AssertionSet implements Iterable<PolicyAssertion>, Comparable
      * @param alternative policy alternative used for compatibility test
      * @return {@code true} if the two policy alternatives are compatible, {@code false} otherwise
      */
-    boolean isCompatibleWith(AssertionSet alternative) {
+    boolean isCompatibleWith(final AssertionSet alternative) {
         return this.vocabulary.equals(alternative.vocabulary);
     }
     
@@ -168,12 +168,12 @@ public final class AssertionSet implements Iterable<PolicyAssertion>, Comparable
      *        May be {@code null} - empty assertion set is returned in such case.
      * @return new instance of assertion set holding the content of all provided policy assertion sets.
      */
-    public static AssertionSet createMergedAssertionSet(Collection<AssertionSet> alternatives) {
+    public static AssertionSet createMergedAssertionSet(final Collection<AssertionSet> alternatives) {
         if (alternatives == null || alternatives.isEmpty()) {
             return EMPTY_ASSERTION_SET;
         }
         
-        AssertionSet result = new AssertionSet(alternatives);
+        final AssertionSet result = new AssertionSet(alternatives);
         Collections.sort(result.assertions, ASSERTION_COMPARATOR);
         
         return result;
@@ -185,12 +185,12 @@ public final class AssertionSet implements Iterable<PolicyAssertion>, Comparable
      * @param assertions collection of provided policy assertions to be stored in the assertion set. May be {@code null}.
      * @return new instance of assertion set holding the provided policy assertions
      */
-    public static AssertionSet createAssertionSet(Collection<? extends PolicyAssertion> assertions) {
+    public static AssertionSet createAssertionSet(final Collection<? extends PolicyAssertion> assertions) {
         if (assertions == null || assertions.isEmpty()) {
             return EMPTY_ASSERTION_SET;
         }
         
-        AssertionSet result = new AssertionSet(new LinkedList<PolicyAssertion>());
+        final AssertionSet result = new AssertionSet(new LinkedList<PolicyAssertion>());
         result.addAll(assertions);
         Collections.sort(result.assertions, ASSERTION_COMPARATOR);
         
@@ -217,8 +217,8 @@ public final class AssertionSet implements Iterable<PolicyAssertion>, Comparable
      * @return List of all assertions matching the requested name. If no assertions are found, the returned list is empty
      * (i.e. {@code null} value is never returned).
      */
-    public Collection<PolicyAssertion> get(QName name) {
-        List<PolicyAssertion> matched = new LinkedList<PolicyAssertion>();
+    public Collection<PolicyAssertion> get(final QName name) {
+        final List<PolicyAssertion> matched = new LinkedList<PolicyAssertion>();
         
         if (vocabulary.contains(name)) {
             // we iterate the assertion set only if we are sure we contain such assertion name in our vocabulary
@@ -247,26 +247,26 @@ public final class AssertionSet implements Iterable<PolicyAssertion>, Comparable
      * @param assertionName the fully qualified name of the assertion
      * @return {@code true}, if an assertion with the given name could be found in the assertion set vocabulary {@code false} otherwise.
      */
-    public boolean contains(QName assertionName) {
+    public boolean contains(final QName assertionName) {
         return vocabulary.contains(assertionName);
     }
 
     /**
      * An {@code Comparable<T>.compareTo(T o)} interface method implementation.
      */
-    public int compareTo(AssertionSet that) {
+    public int compareTo(final AssertionSet that) {
         if (this.equals(that)) {
             return 0;
         }
         
         { // comparing vocabularies
-            Iterator<QName> vIterator1 = this.getVocabulary().iterator();
-            Iterator<QName> vIterator2 = that.getVocabulary().iterator();
+            final Iterator<QName> vIterator1 = this.getVocabulary().iterator();
+            final Iterator<QName> vIterator2 = that.getVocabulary().iterator();
             while (vIterator1.hasNext()) {
-                QName entry1 = vIterator1.next();
+                final QName entry1 = vIterator1.next();
                 if (vIterator2.hasNext()) {
-                    QName entry2 = vIterator2.next();
-                    int result = PolicyUtils.Comparison.QNAME_COMPARATOR.compare(entry1, entry2);
+                    final QName entry2 = vIterator2.next();
+                    final int result = PolicyUtils.Comparison.QNAME_COMPARATOR.compare(entry1, entry2);
                     if (result != 0) {
                         return result;
                     }
@@ -281,13 +281,13 @@ public final class AssertionSet implements Iterable<PolicyAssertion>, Comparable
         }
         
         { // vocabularies are equal => comparing assertions
-            Iterator<PolicyAssertion> pIterator1 = this.getAssertions().iterator();
-            Iterator<PolicyAssertion> pIterator2 = that.getAssertions().iterator();
+            final Iterator<PolicyAssertion> pIterator1 = this.getAssertions().iterator();
+            final Iterator<PolicyAssertion> pIterator2 = that.getAssertions().iterator();
             while (pIterator1.hasNext()) {
-                PolicyAssertion pa1 = pIterator1.next();
+                final PolicyAssertion pa1 = pIterator1.next();
                 if (pIterator2.hasNext()) {
-                    PolicyAssertion pa2 = pIterator2.next();
-                    int result = ASSERTION_COMPARATOR.compare(pa1, pa2);
+                    final PolicyAssertion pa2 = pIterator2.next();
+                    final int result = ASSERTION_COMPARATOR.compare(pa1, pa2);
                     if (result != 0) {
                         return result;
                     }
@@ -310,14 +310,14 @@ public final class AssertionSet implements Iterable<PolicyAssertion>, Comparable
     /**
      * An {@code Object.equals(Object obj)} method override.
      */
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj)
             return true;
         
         if (!(obj instanceof AssertionSet))
             return false;
         
-        AssertionSet that = (AssertionSet) obj;
+        final AssertionSet that = (AssertionSet) obj;
         
         boolean result = true;
         
@@ -353,9 +353,9 @@ public final class AssertionSet implements Iterable<PolicyAssertion>, Comparable
      * @param buffer buffer to be used for appending string representation of this instance
      * @return modified buffer containing new string representation of the instance
      */
-    StringBuffer toString(int indentLevel, StringBuffer buffer) {
-        String indent = PolicyUtils.Text.createIndent(indentLevel);
-        String innerIndent = PolicyUtils.Text.createIndent(indentLevel + 1);
+    StringBuffer toString(final int indentLevel, final StringBuffer buffer) {
+        final String indent = PolicyUtils.Text.createIndent(indentLevel);
+        final String innerIndent = PolicyUtils.Text.createIndent(indentLevel + 1);
         
         buffer.append(indent).append("assertion set {").append(PolicyUtils.Text.NEW_LINE);
         
