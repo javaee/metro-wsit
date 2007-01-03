@@ -67,6 +67,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
 
+import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
+
+import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
+
 public abstract class IssueSamlTokenContract implements WSTrustContract {
     
     private static Logger log =
@@ -123,14 +128,17 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
         // Get authenticaed client Subject
         Subject subject = context.getRequestorSubject();
         if(subject == null){
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0030_REQUESTOR_NULL());
             throw new WSTrustException("Requester subject is null");
         }
         
         // Check if the client is authorized to be issued the token
         STSAuthorizationProvider authzProvider = WSTrustFactory.getSTSAuthorizationProvider();
         if (!authzProvider.isAuthorized(subject, appliesTo, tokenType, keyType)){
-            log.log(Level.SEVERE, "WST0015.client.not.authorized",
-                    new Object[]{subject.toString(), tokenType, appliesTo});
+            log.log(Level.SEVERE, 
+                    LogStringsMessages.WST_0015_CLIENT_NOT_AUTHORIZED(
+                    subject.toString(), tokenType, appliesTo));
             throw new WSTrustException("The client is not authorized to be issued the token of type "+ tokenType + " apply to " + appliesTo);
         }
         
@@ -156,7 +164,8 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
                 BinarySecret clientBS = clientEntropy.getBinarySecret();
                 if (clientBS == null){
                     if(log.isLoggable(Level.FINE)) {
-                        log.log(Level.FINE, "WST1009.null.binary.secret");
+                        log.log(Level.FINE, 
+                                LogStringsMessages.WST_1009_NULL_BINARY_SECRET());
                     }
                 }else {
                     clientEntropyValue = clientBS.getRawValue();
@@ -168,7 +177,8 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
                 keySize = DEFAULT_KEY_SIZE;
             }
             if(log.isLoggable(Level.FINE)) {
-                log.log(Level.FINE, "WST1010.key.size", new Object[] {keySize});
+                log.log(Level.FINE, 
+                        LogStringsMessages.WST_1010_KEY_SIZE(keySize));
             }
             
             byte[] key = WSTrustUtil.generateRandomSecret(keySize/8);
@@ -181,14 +191,17 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
                 proofToken.setComputedKey(URI.create(WSTrustConstants.CK_PSHA1));
                 key = SecurityUtil.P_SHA1(clientEntropyValue, key, keySize/8);
             } catch (Exception ex){
-                log.log(Level.SEVERE, "WST0013.error.secret.key", ex);
-                throw new WSTrustException(ex.getMessage(), ex);
+                log.log(Level.SEVERE, 
+                        LogStringsMessages.WST_0013_ERROR_SECRET_KEY(ex));
+                throw new WSTrustException("There was an error computing secret key", ex);
             }
             
             context.setProofKey(key);
         }else if(WSTrustConstants.PUBLIC_KEY.equals(keyType)){
             // Get client certificate and put it in the IssuedTokenContext
         }else{
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0025_INVALID_KEY_TYPE(keyType));
             throw new WSTrustException("Unsupport key type: " + keyType);
         }
         
@@ -203,8 +216,9 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
             if (rstCtx != null)
                 ctx = new URI(rst.getContext());
         } catch (URISyntaxException ex) {
-            log.log(Level.SEVERE, "WST0014.uri.syntax", new Object[] {rst.getContext()});
-            throw new WSTrustException(ex.getMessage(), ex);
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0014_URI_SYNTAX());
+            throw new WSTrustException("Error in URI" + ex);
         }
         
         // Create RequestedSecurityToken with SAML assertion
