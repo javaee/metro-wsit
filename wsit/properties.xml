@@ -138,7 +138,7 @@
         <findbugs output="html" outputFile="${build.dir}/findbugs.html"
                   stylesheet="fancy.xsl"
                   classpath="${findbugs.classpath}"
-                  pluginList="${user.home}/.m2/repository/findbugs/coreplugin/1.0.0/coreplugin-1.0.0.jar">
+                  pluginList="${user.home}/.m2/repository/net/sourceforge/findbugs/coreplugin/1.0.0/coreplugin-1.0.0.jar">
             <class location="${build.classes.dir}"/>
             <auxClasspath>
                 <path path="${run.classpath}"/>
