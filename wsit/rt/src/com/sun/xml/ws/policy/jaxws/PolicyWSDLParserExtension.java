@@ -72,13 +72,13 @@ import javax.xml.ws.WebServiceException;
  *
  * @author japod
  */
-public class PolicyWSDLParserExtension extends WSDLParserExtension {
+final public class PolicyWSDLParserExtension extends WSDLParserExtension {
     
     enum HandlerType {
         PolicyUri, AnonymousPolicyId
     }
     
-    class PolicyRecordHandler {
+    final static class PolicyRecordHandler {
         String handler;
         HandlerType type;
         
@@ -96,7 +96,7 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
         }
     }
     
-    class PolicyRecord {
+    final static class PolicyRecord {
         PolicyRecord next;
         String uri;
         PolicySourceModel policyModel;
@@ -111,9 +111,9 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
                 return insertedRec;
             }
             final PolicyRecord head = this;
-            final PolicyRecord oneBeforeCurrent = null;
+            PolicyRecord oneBeforeCurrent = null;
             PolicyRecord current;
-            for (current = head; null!=current.next; ) {
+            for (current = head ; null != current.next ; ) {
                 if ((null != current.unresolvedURIs) && current.unresolvedURIs.contains(insertedRec.uri)) {
                     if (null == oneBeforeCurrent) {
                         insertedRec.next = current;
@@ -129,7 +129,8 @@ public class PolicyWSDLParserExtension extends WSDLParserExtension {
                     current.next = insertedRec;
                     return head;
                 } // end-if one of unresolved URIs resolved by current record and thus unresolvedURIs empty
-                current=current.next;
+                oneBeforeCurrent = current;
+                current = current.next;
             } // end for (current = head; null!=current.next; )
             insertedRec.next = null;
             current.next = insertedRec;
