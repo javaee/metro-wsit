@@ -28,7 +28,6 @@ import static com.sun.xml.ws.api.tx.Protocol.*;
 import com.sun.xml.ws.developer.MemberSubmissionEndpointReference;
 import com.sun.xml.ws.tx.common.Identifier;
 import com.sun.xml.ws.tx.common.RegistrantIdentifier;
-import com.sun.xml.ws.tx.common.TxLogger;
 import com.sun.xml.ws.tx.webservice.member.coord.RegisterType;
 
 import javax.xml.ws.EndpointReference;
@@ -42,7 +41,7 @@ import java.util.Map;
  * add protocol specific functionality.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @since 1.0
  */
 public abstract class Registrant {
@@ -63,13 +62,13 @@ public abstract class Registrant {
 
     private final RegistrantIdentifier id;
 
-    static private TxLogger logger = TxLogger.getCoordLogger(Registrant.class);
+    // static private TxLogger logger = TxLogger.getCoordLogger(Registrant.class);
 
     /**
      * Create a new registrant
      *
      * @param registerRequest <register> request
-     * @param parent parent coordinator
+     * @param parent          parent coordinator
      */
     public Registrant(@NotNull Coordinator parent, @NotNull RegisterType registerRequest) {
         this(parent, registerRequest.getProtocolIdentifier());
@@ -83,7 +82,8 @@ public abstract class Registrant {
 
     /**
      * Create a Registratant with its coordinator parent for protocol.
-     * @param parent parent coordinator
+     *
+     * @param parent   parent coordinator
      * @param protocol activity protocol
      */
     protected Registrant(@NotNull Coordinator parent, @NotNull Protocol protocol) {
@@ -167,6 +167,7 @@ public abstract class Registrant {
 
     /**
      * Set the coordinator protocol service received by coor:registerResponse.
+     *
      * @param cps cps epr
      */
     public void setCoordinatorProtocolService(@NotNull final EndpointReference cps) {
@@ -190,10 +191,11 @@ public abstract class Registrant {
 
 
     // extent of participants
-    protected static Map<String, Registrant> outstandingRegistrants = new HashMap<String, Registrant>();
+    protected static final Map<String, Registrant> outstandingRegistrants = new HashMap<String, Registrant>();
 
     /**
      * Lookup outstanding registrant by id
+     *
      * @param id registrant id
      * @return the outstanding registrant or null if it doesn't exist
      */
@@ -204,6 +206,7 @@ public abstract class Registrant {
 
     /**
      * Remove outstanding registrant by its id.
+     *
      * @param id registrant id
      * @return the outstanding registrant or null if it doesn't exist
      */

@@ -41,7 +41,7 @@ import java.util.logging.Level;
  * is constructed and managed by this class.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @since 1.0
  */
 public abstract class Coordinator {
@@ -199,6 +199,7 @@ public abstract class Coordinator {
 
     /**
      * Return true iff this coordinator is delegating to a root coordinator
+     *
      * @return true iff this coordinator is delegating to a root coordinator
      */
     public boolean isSubordinate() {
@@ -207,6 +208,7 @@ public abstract class Coordinator {
 
     /**
      * Return the Coordinator Protocol Service EPR for registrant r.
+     *
      * @param r registrant
      * @return the CPS EPT for the specified registrant
      */
@@ -218,6 +220,7 @@ public abstract class Coordinator {
      * <p/>
      * Enables local participants to be cached with coordinator locally when this method returns
      * true.
+     *
      * @param r restistrant
      * @return Return true iff registrant should register with its root registration service
      */
@@ -235,27 +238,27 @@ public abstract class Coordinator {
 
     /**
      * Release resources held by this coordinator.
-     * <p>
+     * <p/>
      * This method will be automatically invoked once if the activity has a non-zero expiration.
-     * <p>
+     * <p/>
      * During expiration, the coordinator will iterate over all of its registrants and tell them
      * to expire.  Depending on their state, registrants will either expire or not.  A coordinator
      * will not completely expire until all of its registrants have expired.
      */
     public void expire() {
         expired = true;
-        if(logger.isLogging(Level.FINEST)) {
+        if (logger.isLogging(Level.FINEST)) {
             logger.finest("Coordinator.expire", "attempting to expire coordinator: " + id.getValue());
         }
         if (!expirationGuard()) {
-            if(logger.isLogging(Level.FINEST)) {
+            if (logger.isLogging(Level.FINEST)) {
                 logger.finest("Coordinator.expire", "forgetting resources for: " + id.getValue());
             }
             // TODO: send fault S4.4 wscoor:NoActivity
 
             forget();
         } else {
-            if(logger.isLogging(Level.FINEST)) {
+            if (logger.isLogging(Level.FINEST)) {
                 logger.finest("Coordinator.expire", "expiration was guarded, returning without expiration");
             }
         }
@@ -282,7 +285,7 @@ public abstract class Coordinator {
      * Schedule timer tasks whenever we add a registrant and expire them when
      * ever the timers go off.
      */
-    class ExpirationTask extends TimerTask {
+    static class ExpirationTask extends TimerTask {
         Coordinator c;
 
         ExpirationTask(Coordinator c) {

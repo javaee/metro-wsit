@@ -36,10 +36,10 @@ import com.sun.xml.ws.tx.common.ActivityIdentifier;
 import static com.sun.xml.ws.tx.common.Constants.*;
 import com.sun.xml.ws.tx.common.StatefulWebserviceFactory;
 import com.sun.xml.ws.tx.common.StatefulWebserviceFactoryFactory;
+import com.sun.xml.ws.tx.common.TxFault;
 import com.sun.xml.ws.tx.common.TxLogger;
 import com.sun.xml.ws.tx.common.Util;
 import com.sun.xml.ws.tx.common.WsaHelper;
-import com.sun.xml.ws.tx.common.TxFault;
 import com.sun.xml.ws.tx.webservice.member.coord.RegisterResponseType;
 import com.sun.xml.ws.tx.webservice.member.coord.RegisterType;
 import com.sun.xml.ws.tx.webservice.member.coord.RegistrationCoordinatorPortType;
@@ -59,7 +59,7 @@ import java.util.logging.Level;
  * for register and registerResponse delegate to the methods in this class.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @since 1.0
  */
 public final class RegistrationManager {
@@ -168,11 +168,11 @@ public final class RegistrationManager {
 //                        "NOSFERATU!"),
 //                msgID);
         if (registrationRequesterEPR == null) {
-            if(faultTo != null) {
+            if (faultTo != null) {
                 // send fault S4.3 wscoor:Invalid Parameters
                 WsaHelper.sendFault(
                         faultTo,
-                        registrationRequesterEPR,
+                        null,
                         WsaHelper.createFault(
                                 SOAPVersion.SOAP_11,
                                 TxFault.InvalidParameters,
@@ -248,7 +248,7 @@ public final class RegistrationManager {
         }
     }
 
-    private static final com.sun.xml.ws.tx.webservice.member.coord.Coordinator coordinatorService = 
+    private static final com.sun.xml.ws.tx.webservice.member.coord.Coordinator coordinatorService =
             new com.sun.xml.ws.tx.webservice.member.coord.Coordinator();
 
     @NotNull

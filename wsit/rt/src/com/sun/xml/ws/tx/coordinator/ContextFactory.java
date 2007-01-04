@@ -36,7 +36,7 @@ import java.util.logging.Level;
  * in WS-Coordination 2004/10 member submission and 2006/03 OASIS.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @since 1.0
  */
 public class ContextFactory {
@@ -53,7 +53,7 @@ public class ContextFactory {
      *
      * @param coordType the nsuri of the coordination type, either {@link com.sun.xml.ws.tx.common.Constants#WSAT_2004_PROTOCOL}
      *                  or {@link com.sun.xml.ws.tx.common.Constants#WSAT_OASIS_NSURI}
-     * @param expires expiration timout in ms
+     * @param expires   expiration timout in ms
      * @return the {@link CoordinationContextInterface}
      */
     public static CoordinationContextInterface createContext(@NotNull final String coordType, final long expires) {
@@ -95,6 +95,7 @@ public class ContextFactory {
 
     /**
      * Create a context from the incoming <createContext> message
+     *
      * @param contextRequest <createContext> request
      * @return the coordination context
      */
@@ -104,7 +105,7 @@ public class ContextFactory {
     }
 
     /**
-     * FOR UNIT TESTING ONLY 
+     * FOR UNIT TESTING ONLY
      */
     static CoordinationContextInterface createTestContext(final String coordType, final long expires) {
 
@@ -119,11 +120,11 @@ public class ContextFactory {
             activityId += 1;
             context.setIdentifier("uuid:WSCOOR-SUN-" + activityId);
 
-            ActivityIdentifier activityId = new ActivityIdentifier(context.getIdentifier());
-            
             // we can't unit test the normal creation of an EPR this way because
             // it requires the use of injected stateful webservice managers on
             // the port type impls.  So set a dummy EPR instead.
+            //
+            // ActivityIdentifier activityId = new ActivityIdentifier(context.getIdentifier());
             // context.setRegistrationService(RegistrationManager.newRegistrationEPR(activityId));
             context.setRegistrationService(new MemberSubmissionEndpointReference());
         } else if (WSAT_OASIS_NSURI.equals(coordType)) {
