@@ -33,8 +33,6 @@ import javax.xml.namespace.QName;
  */
 public final class NestedPolicy extends Policy {
     private static final String NESTED_POLICY_TOSTRING_NAME = "nested policy";
-    
-    private Policy standardPolicyImpl;
         
     private NestedPolicy(final AssertionSet set) {
         super(NESTED_POLICY_TOSTRING_NAME, Arrays.asList(new AssertionSet[] { set }));
