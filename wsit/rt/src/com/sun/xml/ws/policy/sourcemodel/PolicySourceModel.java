@@ -202,7 +202,7 @@ public final class PolicySourceModel implements Cloneable {
      *
      * @return {@code true} or {@code false} depending on whether this policy source model contains is expanded or not.
      */
-    public boolean isExpanded() {
+    private boolean isExpanded() {
         return references.isEmpty() || expanded;
     }
     

@@ -53,10 +53,8 @@ final class PrivateElementFilteringInvocationProcessor implements InvocationProc
     private XMLStreamWriter originalWriter; // underlying XML stream writer which we use to eventually serve the requests
     private XMLStreamWriter mirrorWriter;
     
-    private Queue<Invocation> invocationQueue; // parser method invocation queue that stores invocation requests to be still executed on the underlying XML output stream
     private int depth; // indicates the depth in which we are currently nested in the element that should be filtered out
     private boolean filteringOn; // indicates that currently processed elements will be filtered out.
-    private boolean cmdBufferingOn; // indicates whether the commands should be buffered or whether they can be directly executed on the underlying XML output stream
     
     private QName[] filteredElements;
     
@@ -116,18 +114,6 @@ final class PrivateElementFilteringInvocationProcessor implements InvocationProc
             throw new InvocationProcessingException(invocation, ex);
         } finally {
             LOGGER.exiting();
-        }
-    }
-    
-    private void executeCommands(final XMLStreamWriter writer) throws IllegalAccessException, InvocationProcessingException {
-        while (!invocationQueue.isEmpty()) {
-            final Invocation command = invocationQueue.poll();
-            try {
-                command.execute(writer);
-            } catch (InvocationTargetException ex) {
-                LOGGER.severe("executeCommands", "Error invoking " + command.toString(), ex.getCause());
-                throw new InvocationProcessingException(command, ex.getCause());
-            }
         }
     }
     

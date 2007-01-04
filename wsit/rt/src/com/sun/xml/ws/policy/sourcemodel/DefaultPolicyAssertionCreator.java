@@ -38,9 +38,7 @@ import java.util.Collection;
  * @author Marek Potociar
  */
 
-class DefaultPolicyAssertionCreator implements PolicyAssertionCreator {
-    static final String[] ANY_NAMESPACE = null;
-    
+class DefaultPolicyAssertionCreator implements PolicyAssertionCreator {    
     private static final class DefaultPolicyAssertion extends PolicyAssertion {
         DefaultPolicyAssertion(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative) {
             super (data, assertionParameters, nestedAlternative);
@@ -52,7 +50,7 @@ class DefaultPolicyAssertionCreator implements PolicyAssertionCreator {
     }
 
     public String[] getSupportedDomainNamespaceURIs() {
-        return ANY_NAMESPACE;
+        return null;
     }
 
     public PolicyAssertion createAssertion(final AssertionData data, final Collection<PolicyAssertion> assertionParameters, final AssertionSet nestedAlternative, final PolicyAssertionCreator defaultCreator) throws AssertionCreationException {
