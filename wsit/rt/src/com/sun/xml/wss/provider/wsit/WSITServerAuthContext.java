@@ -270,7 +270,13 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         
         if (thereWasAFault) {
             sharedState.put("THERE_WAS_A_FAULT", new Boolean(thereWasAFault));
-            return packet;
+             if (this.isAddressingEnabled()) {
+                Packet ret = packet.createServerResponse(
+                        msg, this.addVer, this.soapVersion, this.addVer.getDefaultFaultAction());
+                return ret;
+             } else {
+                return packet;
+             }
         }
         
         if (isAddressingEnabled()) {
