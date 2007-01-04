@@ -24,7 +24,6 @@ package com.sun.xml.ws.security.impl.policy;
 
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.NestedPolicy;
-import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.security.policy.AlgorithmSuite;
@@ -33,10 +32,8 @@ import com.sun.xml.ws.security.policy.Token;
 import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.xml.namespace.QName;
 import static com.sun.xml.ws.security.impl.policy.Constants.*;
 
 

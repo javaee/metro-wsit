@@ -55,7 +55,7 @@ public class SecurityContextTokenInfoImpl implements SecurityContextTokenInfo {
     String identifier = null;
     String extId = null;
     byte[] secret = null;
-    HashMap<String, byte[]> secretMap = new HashMap();
+    HashMap<String, byte[]> secretMap = new HashMap<String, byte[]>();
     Date creationTime = null;
     Date expirationTime = null;
     

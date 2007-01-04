@@ -33,14 +33,10 @@ package com.sun.xml.ws.security.impl.policy;
 
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.NestedPolicy;
-import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import java.util.Collection;
-
-import java.util.Date;
-import java.util.Iterator;
 import static com.sun.xml.ws.security.impl.policy.Constants.logger;
 import java.util.logging.Level;
 /**

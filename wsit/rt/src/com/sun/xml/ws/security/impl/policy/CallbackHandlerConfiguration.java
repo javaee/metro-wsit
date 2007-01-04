@@ -21,15 +21,11 @@
  */
 package com.sun.xml.ws.security.impl.policy;
 
-import com.sun.xml.ws.policy.NestedPolicy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import java.util.Iterator;
 import com.sun.xml.ws.policy.AssertionSet;
-import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import java.util.Collection;
-import java.util.logging.Level;
-import static com.sun.xml.ws.security.impl.policy.Constants.logger;
 import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
 
 /**

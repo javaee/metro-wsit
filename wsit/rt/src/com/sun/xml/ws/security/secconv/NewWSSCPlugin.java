@@ -18,11 +18,8 @@ import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.NestedPolicy;
-//import com.sun.xml.ws.fault.SOAPFaultBuilder;
-
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.security.IssuedTokenContext;
-import com.sun.xml.ws.security.impl.IssuedTokenContextImpl;
 import com.sun.xml.ws.security.impl.policy.PolicyUtil;
 import com.sun.xml.ws.security.impl.policy.Trust10;
 import com.sun.xml.ws.security.policy.AlgorithmSuite;
@@ -39,20 +36,16 @@ import com.sun.xml.ws.security.trust.elements.Entropy;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponse;
 import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
-
 import java.net.URI;
 import java.security.SecureRandom;
 import java.util.Set;
-import java.util.UUID;
 import javax.xml.soap.SOAPException;
 import javax.xml.ws.soap.SOAPFaultException;
-
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.sun.xml.ws.security.secconv.logging.LogDomainConstants;

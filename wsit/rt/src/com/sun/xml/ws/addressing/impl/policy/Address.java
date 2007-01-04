@@ -37,7 +37,6 @@ import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
-import javax.xml.namespace.QName;
 import java.util.logging.Level;
 import static com.sun.xml.ws.security.impl.policy.Constants.logger;
 /**

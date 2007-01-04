@@ -23,14 +23,10 @@
 package com.sun.xml.ws.security.impl.policy;
 
 import com.sun.xml.ws.policy.NestedPolicy;
-import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.security.policy.MessageLayout;
 import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map;
-import javax.xml.namespace.QName;
 import java.util.logging.Level;
 import static com.sun.xml.ws.security.impl.policy.Constants.logger;
 import com.sun.xml.ws.policy.AssertionSet;
@@ -60,10 +56,6 @@ public class Layout extends PolicyAssertion implements SecurityAssertionValidato
         populate();
         return ml;
     }
-    
-//    public QName getName() {
-//        return _Layout_QNAME;
-//    }
     
     public boolean validate() {
         try{
@@ -98,7 +90,7 @@ public class Layout extends PolicyAssertion implements SecurityAssertionValidato
                             }
                             if(isServer){
                                 throw new UnsupportedPolicyAssertion("Policy assertion "+
-                                          assertion+" is not supported under Layout assertion");
+                                        assertion+" is not supported under Layout assertion");
                             }
                         }
                     }

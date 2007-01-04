@@ -52,7 +52,7 @@ public class RelToken extends PolicyAssertion implements com.sun.xml.ws.security
     private String tokenType;
     private String includeTokenType;
     private PolicyAssertion rdKey = null;
-    private Set referenceType = null;
+
     private static QName itQname = new QName(Constants.SECURITY_POLICY_NS, Constants.IncludeToken);
     private boolean isServer = false;
     

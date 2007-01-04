@@ -22,9 +22,7 @@
 
 package com.sun.xml.ws.security.policy;
 
-import com.sun.xml.ws.policy.PolicyAssertion;
 import java.util.Iterator;
-import javax.xml.namespace.QName;
 
 
 

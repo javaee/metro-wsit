@@ -21,18 +21,13 @@
  */
 package com.sun.xml.ws.security.impl.policy;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import javax.xml.namespace.QName;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.NestedPolicy;
-import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import static com.sun.xml.ws.security.impl.policy.Constants.logger;
@@ -47,7 +42,7 @@ public class Wss11 extends PolicyAssertion implements com.sun.xml.ws.security.po
     String version = "1.1";
     QName name;
     boolean populated = false;
-    private boolean isServer = false;
+    
     /**
      * Creates a new instance of WSSAssertion
      */
@@ -73,10 +68,6 @@ public class Wss11 extends PolicyAssertion implements com.sun.xml.ws.security.po
     public String getType() {
         return version;
     }
-    
-//    public QName getName() {
-//        return Constants._Wss11_QNAME;
-//    }
     
     public boolean validate() {
         try{
@@ -112,7 +103,7 @@ public class Wss11 extends PolicyAssertion implements com.sun.xml.ws.security.po
                                 logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{pa,"WSS11"});
                             }
                             throw new UnsupportedPolicyAssertion("Policy assertion "+
-                                      pa+" is not supported under WSS11 assertion");
+                                    pa+" is not supported under WSS11 assertion");
                             
                         }
                     }

@@ -127,7 +127,6 @@ public class SecurityPolicyAssertionCreator implements PolicyAssertionCreator{
     public PolicyAssertion createAssertion(AssertionData assertionData, Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative,PolicyAssertionCreator policyAssertionCreator) throws AssertionCreationException {
         String localName = assertionData.getName().getLocalPart();
         if(implementedAssertions.contains(localName)){
-            String className = localName;
             Class cl=null;
             cl = getClass(assertionData);
             try {

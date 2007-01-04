@@ -22,7 +22,6 @@
 
 package com.sun.xml.ws.security.impl.policyconv;
 
-import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.security.policy.RequiredElements;
 import com.sun.xml.wss.impl.policy.PolicyGenerationException;
 import com.sun.xml.wss.impl.policy.mls.MandatoryTargetPolicy;

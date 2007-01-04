@@ -304,7 +304,7 @@ public class SBIssuedSamlTokenContractImpl extends IssueSamlTokenContract{
                     samlFac.createConditions(issuerInst, notOnOrAfter, null, null, null);
             Advice advice = samlFac.createAdvice(null, null, null);
             
-            List  confirmationMethods = new ArrayList<String>();
+            List<String>  confirmationMethods = new ArrayList<String>();
             confirmationMethods.add(SAML_HOLDER_OF_KEY);
             
             SubjectConfirmation subjectConfirmation = samlFac.createSubjectConfirmation(confirmationMethods,null, keyInfo);
@@ -566,7 +566,7 @@ public class SBIssuedSamlTokenContractImpl extends IssueSamlTokenContract{
             
             //Note : Signature algorithm parameters null for now , fix me.
             
-            ArrayList<Transform> transformList = new ArrayList();
+            ArrayList<Transform> transformList = new ArrayList<Transform>();
             Transform tr1;
             
             tr1 = signatureFactory.newTransform(Transform.ENVELOPED, (TransformParameterSpec) null);
@@ -622,7 +622,7 @@ public class SBIssuedSamlTokenContractImpl extends IssueSamlTokenContract{
 //        }
         } catch (NoSuchAlgorithmException ex) {
             log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0035_UNABLE_CREATE_SIGN_SAML_ASSERTION(ex));         
+                    LogStringsMessages.WST_0035_UNABLE_CREATE_SIGN_SAML_ASSERTION(ex));
             throw new WSTrustException("Unable to create sign SAML Assertion",ex);
         } catch (InvalidAlgorithmParameterException ex) {
             log.log(Level.SEVERE,

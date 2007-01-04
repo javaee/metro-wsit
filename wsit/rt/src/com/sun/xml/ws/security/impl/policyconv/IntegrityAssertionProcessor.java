@@ -21,8 +21,6 @@
  */
 
 package com.sun.xml.ws.security.impl.policyconv;
-import com.sun.xml.ws.policy.Policy;
-import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.security.policy.SignedParts;
 import com.sun.xml.ws.security.policy.AlgorithmSuite;
 import com.sun.xml.ws.security.policy.Header;
@@ -32,7 +30,6 @@ import com.sun.xml.wss.impl.policy.mls.SignatureTarget;
 import com.sun.xml.wss.impl.policy.mls.Target;
 import java.util.HashSet;
 import java.util.Iterator;
-import javax.xml.crypto.dsig.CanonicalizationMethod;
 import javax.xml.namespace.QName;
 
 /**

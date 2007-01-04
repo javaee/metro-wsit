@@ -520,7 +520,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
             Packet packet, ProcessingContext ctx, boolean isSCTIssue, String action) {
         
         IssuedTokenContext ictx = new IssuedTokenContextImpl();
-            
+        
         Message msg = packet.getMessage();
         Message retMsg = null;
         String retAction = null;
@@ -559,7 +559,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
                 
                 //IssuedTokenContext itctx = session.getSecurityInfo().getIssuedTokenContext();
                 //add the subject of requestor
-               // itctx.setRequestorSubject(ictx.getRequestorSubject());
+                // itctx.setRequestorSubject(ictx.getRequestorSubject());
                 ((ProcessingContextImpl)ctx).getIssuedTokenContextMap().put(sctId, ictx);
                 
             } else if (requestType.toString().equals(WSTrustConstants.CANCEL_REQUEST)) {
@@ -799,11 +799,11 @@ public class SecurityServerPipe extends SecurityPipeBase {
                 }
                 return (CallbackHandler)obj;
             }
-           // ServletContext context = 
-           //         ((ServerPipeConfiguration)pipeConfig).getEndpoint().getContainer().getSPI(ServletContext.class);
-           RealmAuthenticationAdapter adapter = getRealmAuthenticationAdapter(((ServerPipeConfiguration)pipeConfig).getEndpoint());
-           return new DefaultCallbackHandler("server", props, adapter);
-           //return new DefaultCallbackHandler("server", props);
+            // ServletContext context =
+            //         ((ServerPipeConfiguration)pipeConfig).getEndpoint().getContainer().getSPI(ServletContext.class);
+            RealmAuthenticationAdapter adapter = getRealmAuthenticationAdapter(((ServerPipeConfiguration)pipeConfig).getEndpoint());
+            return new DefaultCallbackHandler("server", props, adapter);
+            //return new DefaultCallbackHandler("server", props);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -824,7 +824,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
 ////        }
 //        return wsitConfig;
 //    }
-
+    
     @SuppressWarnings("unchecked")
     private RealmAuthenticationAdapter getRealmAuthenticationAdapter(WSEndpoint wSEndpoint) {
         String className = "javax.servlet.ServletContext";
@@ -850,15 +850,15 @@ public class SecurityServerPipe extends SecurityPipeBase {
             Object obj = wSEndpoint.getContainer().getSPI(ret);
             if (obj != null) {
                 return RealmAuthenticationAdapter.newInstance(obj);
-            } 
+            }
         }
         return null;
     }
-
+    
     //doing this here becuase doing inside keyselector of optimized security would
     //mean doing it twice (if SCT was used for sign and encrypt) which can impact performance
     private void updateSCBootstrapCredentials(Packet packet, ProcessingContext ctx) {
-        SecurityContextToken sct = 
+        SecurityContextToken sct =
                 (SecurityContextToken)packet.invocationProperties.get(MessageConstants.INCOMING_SCT);
         if (sct != null) {
             //Session session = this.sessionManager.getSession(sct.getIdentifier().toString());

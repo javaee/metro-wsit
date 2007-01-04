@@ -24,12 +24,9 @@ package com.sun.xml.ws.security.impl.policy;
 import static com.sun.xml.ws.security.impl.policy.Constants.logger;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.NestedPolicy;
-import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 import javax.xml.namespace.QName;
@@ -59,10 +56,6 @@ public class TransportToken extends Token implements com.sun.xml.ws.security.pol
         UUID uid = UUID.randomUUID();
         id= uid.toString();
     }
-    
-//    public QName getName() {
-//        return Constants._TransportToken_QNAME;
-//    }
     
     public String getTokenId() {
         return id;
@@ -112,7 +105,7 @@ public class TransportToken extends Token implements com.sun.xml.ws.security.pol
                             }
                             if(isServer){
                                 throw new UnsupportedPolicyAssertion("Policy assertion "+
-                                          assertion+" is not supported under TransportToken assertion");
+                                        assertion+" is not supported under TransportToken assertion");
                             }
                         }
                     }

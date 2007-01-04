@@ -32,7 +32,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Level;
 import javax.xml.namespace.QName;
 import static com.sun.xml.ws.security.impl.policy.Constants.*;

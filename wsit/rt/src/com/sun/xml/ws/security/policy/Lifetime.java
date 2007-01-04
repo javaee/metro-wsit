@@ -31,7 +31,6 @@
 
 package com.sun.xml.ws.security.policy;
 
-import java.util.Date;
 
 /**
  *

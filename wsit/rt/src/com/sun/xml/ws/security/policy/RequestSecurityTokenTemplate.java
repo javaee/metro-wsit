@@ -22,10 +22,6 @@
 
 package com.sun.xml.ws.security.policy;
 
-
-import com.sun.xml.ws.policy.Policy;
-
-import com.sun.xml.ws.security.policy.UseKey;
 import com.sun.xml.ws.security.policy.Lifetime;
 
 /**

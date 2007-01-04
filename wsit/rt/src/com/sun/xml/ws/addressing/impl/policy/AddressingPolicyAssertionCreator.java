@@ -23,14 +23,9 @@
 package com.sun.xml.ws.addressing.impl.policy;
 
 import com.sun.xml.ws.api.addressing.AddressingVersion;
-import com.sun.xml.ws.policy.AssertionSet;
-import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.policy.spi.AssertionCreationException;
-import com.sun.xml.ws.policy.spi.PolicyAssertionCreator;
-import com.sun.xml.ws.security.impl.policy.Constants;
 import com.sun.xml.ws.security.impl.policy.SecurityPolicyAssertionCreator;
-import java.util.Collection;
 
 /**
  *

@@ -32,18 +32,12 @@
 package com.sun.xml.ws.addressing.impl.policy;
 
 import com.sun.xml.ws.policy.AssertionSet;
-import com.sun.xml.ws.policy.NestedPolicy;
-import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.security.impl.policy.PolicyUtil;
 import java.util.Collection;
 
 import java.util.Iterator;
-
-import static com.sun.xml.ws.security.impl.policy.Constants.logger;
-import java.util.List;
-import javax.xml.namespace.QName;
 
 /**
  *

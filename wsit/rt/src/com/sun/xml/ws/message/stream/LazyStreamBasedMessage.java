@@ -24,51 +24,25 @@ package com.sun.xml.ws.message.stream;
 
 import com.sun.xml.stream.buffer.MutableXMLStreamBuffer;
 import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.model.JavaMethod;
-import com.sun.xml.ws.api.model.SEIModel;
-import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
-import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.api.pipe.StreamSOAPCodec;
-import com.sun.xml.ws.message.AbstractMessageImpl;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamReader;
-
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.bind.api.Bridge;
-import com.sun.xml.bind.api.BridgeContext;
-import com.sun.xml.stream.buffer.XMLStreamBuffer;
-import com.sun.xml.stream.buffer.XMLStreamBufferException;
-import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.AttachmentSet;
-import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.HeaderList;
-import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.encoding.TagInfoset;
-import com.sun.xml.ws.message.AbstractMessageImpl;
-import com.sun.xml.ws.message.AttachmentSetImpl;
-import com.sun.xml.ws.message.AttachmentUnmarshallerImpl;
-import com.sun.xml.ws.util.xml.DummyLocation;
-import com.sun.xml.ws.util.xml.StAXSource;
-import com.sun.xml.ws.util.xml.XMLStreamReaderToContentHandler;
-import com.sun.xml.ws.util.xml.XMLStreamReaderToXMLStreamWriter;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
-
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.stream.Location;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Source;
-import javax.xml.ws.WebServiceException;
 /**
  *
  * @author K.Venugopal@sun.com

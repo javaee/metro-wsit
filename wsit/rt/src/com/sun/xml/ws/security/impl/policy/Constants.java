@@ -22,7 +22,6 @@
 package com.sun.xml.ws.security.impl.policy;
 
 import java.util.logging.Logger;
-import javax.xml.namespace.QName;
 
 public class Constants {
     

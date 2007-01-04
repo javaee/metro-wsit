@@ -25,21 +25,14 @@ package com.sun.xml.ws.security.impl.policy;
 
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.NestedPolicy;
-import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.security.policy.AlgorithmSuiteValue;
-import java.lang.UnsupportedOperationException;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import javax.xml.namespace.QName;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import static com.sun.xml.ws.security.impl.policy.Constants.*;
 
 
@@ -71,11 +64,7 @@ public class AlgorithmSuite extends com.sun.xml.ws.policy.PolicyAssertion implem
     
     public void setAdditionalProps(Set properties) {
     }
-    
-//    public QName getName() {
-//        return _AlgorithmSuite_QNAME;
-//    }
-    
+
     public void setType(AlgorithmSuiteValue value) {
         this.value = value;
         populated = true;

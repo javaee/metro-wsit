@@ -42,18 +42,15 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Hashtable;
-import javax.servlet.http.HttpServletRequest;
 import javax.xml.namespace.QName;
 import java.net.URI;
 import javax.xml.soap.SOAPBody;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.ws.WebServiceException;
 import java.util.Set;
-
 import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
@@ -78,85 +75,56 @@ import com.sun.xml.ws.security.policy.SecureConversationToken;
 import com.sun.xml.ws.security.policy.SupportingTokens;
 import com.sun.xml.ws.security.policy.SymmetricBinding;
 import com.sun.xml.ws.security.impl.policy.PolicyUtil;
-
 import com.sun.xml.ws.security.IssuedTokenContext;
-
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelTranslator;
-
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.soap.SOAPFault;
 import javax.xml.soap.SOAPFactory;
-import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.soap.SOAPFaultException;
 import javax.xml.soap.SOAPConstants;
-
 import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.SecurityEnvironment;
 import com.sun.xml.wss.impl.policy.mls.MessagePolicy;
 import com.sun.xml.wss.impl.ProcessingContextImpl;
 import com.sun.xml.wss.impl.SecurityAnnotator;
-//import com.sun.xml.wss.impl.SecurityRecipient;
 import com.sun.xml.wss.impl.NewSecurityRecipient;
 import com.sun.xml.wss.impl.PolicyViolationException;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelUnmarshaller;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.policy.PolicyAssertion;
-
-
 import com.sun.xml.ws.security.policy.Token;
-
-
 import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.JAXBException;
-
 import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.ProcessingContext;
 import com.sun.xml.wss.impl.SecurableSoapMessage;
 import com.sun.xml.wss.impl.WssSoapFaultException;
 import com.sun.xml.wss.impl.misc.DefaultCallbackHandler;
-
 import com.sun.xml.ws.security.trust.WSTrustConstants;
-
 import com.sun.xml.ws.security.policy.KeyStore;
 import com.sun.xml.ws.security.policy.TrustStore;
 import com.sun.xml.ws.security.policy.CallbackHandlerConfiguration;
 import com.sun.xml.ws.security.policy.Validator;
 import com.sun.xml.ws.security.policy.ValidatorConfiguration;
 import com.sun.xml.ws.security.policy.WSSAssertion;
-//import com.sun.xml.wss.impl.OperationResolver;
-
 import java.util.Properties;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
 import com.sun.xml.ws.api.addressing.*;
 import com.sun.xml.ws.rm.Constants;
 import com.sun.xml.wss.impl.filter.DumpFilter;
-import static com.sun.xml.wss.jaxws.impl.Constants.ACTION_HEADER;
-import static com.sun.xml.wss.jaxws.impl.Constants.OPERATION_SCOPE;
 import static com.sun.xml.wss.jaxws.impl.Constants.BINDING_SCOPE;
 import static com.sun.xml.wss.jaxws.impl.Constants.rstSCTURI;
-import static com.sun.xml.wss.jaxws.impl.Constants.rstrSCTURI;
-import static com.sun.xml.wss.jaxws.impl.Constants.rstTrustURI;
-import static com.sun.xml.wss.jaxws.impl.Constants.rstrTrustURI;
-import static com.sun.xml.wss.jaxws.impl.Constants.wsaURI;
 import static com.sun.xml.wss.jaxws.impl.Constants.SC_ASSERTION;
 import static com.sun.xml.wss.jaxws.impl.Constants.bsOperationName;
-import static com.sun.xml.wss.jaxws.impl.Constants._SecureConversationToken_QNAME;
 import static com.sun.xml.wss.jaxws.impl.Constants.SECURITY_POLICY_2005_07_NAMESPACE;
 import static com.sun.xml.wss.jaxws.impl.Constants.XENC_NS;
 import static com.sun.xml.wss.jaxws.impl.Constants.ENCRYPTED_DATA_LNAME;
-import static com.sun.xml.wss.jaxws.impl.Constants.MESSAGE_ID_HEADER;
 import static com.sun.xml.wss.jaxws.impl.Constants.EMPTY_LIST;
-
-import static com.sun.xml.wss.jaxws.impl.Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS;
-import static com.sun.xml.wss.jaxws.impl.Constants.SUN_WSS_SECURITY_CLIENT_POLICY_NS;
 import static com.sun.xml.wss.jaxws.impl.Constants.RM_CREATE_SEQ;
 import static com.sun.xml.wss.jaxws.impl.Constants.RM_CREATE_SEQ_RESP;
 import static com.sun.xml.wss.jaxws.impl.Constants.RM_SEQ_ACK;

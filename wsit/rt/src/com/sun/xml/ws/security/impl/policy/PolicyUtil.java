@@ -22,11 +22,8 @@
 
 package com.sun.xml.ws.security.impl.policy;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
-import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.security.policy.AlgorithmSuiteValue;
-import com.sun.xml.ws.security.policy.Target;
-import com.sun.xml.ws.security.policy.Token;
 import static com.sun.xml.ws.security.impl.policy.Constants.*;
 import javax.xml.namespace.QName;
 /**

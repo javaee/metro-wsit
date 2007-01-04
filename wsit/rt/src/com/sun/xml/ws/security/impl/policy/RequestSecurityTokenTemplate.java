@@ -26,12 +26,10 @@ package com.sun.xml.ws.security.impl.policy;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
-import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.security.policy.UseKey;
 import com.sun.xml.ws.security.policy.Lifetime;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.Set;
 import java.util.logging.Level;
 import static com.sun.xml.ws.security.impl.policy.Constants.*;
 import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
@@ -46,32 +44,17 @@ public class RequestSecurityTokenTemplate extends PolicyAssertion implements com
     String tokenType;
     String requestType;
     Lifetime lifeTime;
-    String authenticationType;
-    
-    //private AppliesTo appliesTo;
-    
-    private String keyType;
-    
-    private int keySize;
-    
-    private String sigAlgo;
-    
-    private String encAlgo;
-    
-    private String canonAlgo;
-    
-    private UseKey useKey;
-    
-    private boolean isProofEncRequired = false;
-    
-    private String computedKeyAlgo;
-    
-    private boolean isEncRequired = false;
-    
-    private String signWith;
-    
-    private String encryptWith;
-    
+    String authenticationType;    
+    private String keyType;    
+    private int keySize;    
+    private String sigAlgo;    
+    private String encAlgo;    
+    private String canonAlgo;  
+    private boolean isProofEncRequired = false;    
+    private String computedKeyAlgo;    
+    private boolean isEncRequired = false;    
+    private String signWith;    
+    private String encryptWith;    
     
     /**
      * Creates a new instance of RequestSecurityTokenTemplate
@@ -91,27 +74,13 @@ public class RequestSecurityTokenTemplate extends PolicyAssertion implements com
     public String getRequestType() {
         populate();
         return this.requestType;
-    }
-    
-    
-    
+    }  
+        
     public Lifetime getLifetime() {
         populate();
         return lifeTime;
-    }
-    
-    
-    
-    
-//    public void setAppliesTo(AppliesTo appliesTo) {
-//        this.appliesTo = appliesTo;
-//    }
-//
-//    public AppliesTo getAppliesTo() {
-//        return appliesTo;
-//    }
-    
-    
+    }   
+ 
     
     public String getAuthenticationType() {
         populate();

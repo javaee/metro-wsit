@@ -22,7 +22,6 @@
 
 package com.sun.xml.ws.security.policy;
 
-import java.util.Iterator;
 import java.util.Set;
 
 /**

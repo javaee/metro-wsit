@@ -145,7 +145,6 @@ public class TokenProcessor {
     
     
     protected void setTokenInclusion(KeyBindingBase xwssToken , Token token) throws PolicyException  {
-        Token newToken = null;
         boolean change = false;
         if(this.isServer && !isIncoming){
             if(!Token.INCLUDE_ALWAYS.equals(token.getIncludeToken())){

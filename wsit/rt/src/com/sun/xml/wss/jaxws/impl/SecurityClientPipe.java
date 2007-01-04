@@ -25,119 +25,55 @@ package com.sun.xml.wss.jaxws.impl;
 
 
 import com.sun.xml.ws.api.model.wsdl.WSDLFault;
-
-import com.sun.xml.ws.policy.sourcemodel.PolicyModelTranslator;
-import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
 import com.sun.xml.ws.security.impl.policy.Constants;
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Hashtable;
 import java.util.Enumeration;
-import java.util.Collection;
-import java.util.Collections;
-import java.net.URL;
 import java.net.URI;
 import java.util.List;
-import java.util.ArrayList;
-import java.util.Map;
 import java.util.Set;
-
 import javax.xml.namespace.QName;
-
-import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
-import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.HeaderList;
-import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
-import com.sun.xml.ws.api.model.wsdl.WSDLInput;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
-import com.sun.xml.ws.api.model.wsdl.WSDLOutput;
-import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
-import com.sun.xml.ws.policy.AssertionSet;
-import com.sun.xml.ws.policy.NestedPolicy;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
-import com.sun.xml.ws.policy.PolicyMapKey;
-import com.sun.xml.ws.policy.PolicyMerger;
 import com.sun.xml.ws.assembler.ClientPipeConfiguration;
-import com.sun.xml.ws.security.impl.policyconv.SCTokenWrapper;
 import com.sun.xml.ws.security.impl.policyconv.SecurityPolicyHolder;
-import com.sun.xml.ws.security.impl.policyconv.XWSSPolicyGenerator;
-import com.sun.xml.ws.security.policy.SecureConversationToken;
-import com.sun.xml.ws.security.impl.policy.PolicyUtil;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
-
-
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPFault;
-import javax.xml.soap.SOAPConstants;
 import javax.xml.soap.SOAPMessage;
-
 import javax.xml.ws.WebServiceException;
-
 import com.sun.xml.ws.security.IssuedTokenContext;
-import com.sun.xml.ws.security.impl.IssuedTokenContextImpl;
 import com.sun.xml.ws.security.SecurityContextToken;
-
 import com.sun.xml.wss.XWSSecurityException;
-import com.sun.xml.wss.impl.SecurableSoapMessage;
-import com.sun.xml.wss.impl.policy.mls.MessagePolicy;
-import com.sun.xml.wss.impl.ProcessingContextImpl;
 import com.sun.xml.wss.ProcessingContext;
 import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
-
 import com.sun.xml.ws.security.secconv.WSSecureConversationException;
-import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.ws.security.trust.WSTrustFactory;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.security.trust.TrustPlugin;
 import com.sun.xml.ws.security.secconv.WSSCFactory;
 import com.sun.xml.ws.security.secconv.WSSCPlugin;
-
 import com.sun.xml.ws.security.policy.Token;
-
-
 import javax.security.auth.callback.CallbackHandler;
-
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
-import javax.xml.bind.Unmarshaller;
-
-import com.sun.xml.wss.SecurityEnvironment;
 import com.sun.xml.wss.impl.misc.DefaultSecurityEnvironmentImpl;
-
 import com.sun.xml.ws.policy.PolicyAssertion;
-
-import com.sun.xml.wss.impl.MessageConstants;
-import com.sun.xml.wss.ProcessingContext;
-import com.sun.xml.wss.impl.SecurityAnnotator;
-import com.sun.xml.wss.impl.SecurityRecipient;
-import com.sun.xml.wss.impl.SecurableSoapMessage;
-import com.sun.xml.wss.XWSSecurityException;
-import com.sun.xml.wss.impl.WssSoapFaultException;
-
 import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
-
-import javax.xml.soap.SOAPFactory;
 import javax.xml.ws.soap.SOAPFaultException;
-
 import com.sun.xml.wss.impl.filter.DumpFilter;
 import com.sun.xml.wss.impl.misc.DefaultCallbackHandler;
-
 import java.util.Properties;
 import static com.sun.xml.wss.jaxws.impl.Constants.SC_ASSERTION;
 import static com.sun.xml.wss.jaxws.impl.Constants.OPERATION_SCOPE;
 import static com.sun.xml.wss.jaxws.impl.Constants.EMPTY_LIST;
-import static com.sun.xml.wss.jaxws.impl.Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS;
 import static com.sun.xml.wss.jaxws.impl.Constants.SUN_WSS_SECURITY_CLIENT_POLICY_NS;
 
 

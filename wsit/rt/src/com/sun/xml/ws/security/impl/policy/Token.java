@@ -26,11 +26,7 @@ import com.sun.xml.ws.policy.NestedPolicy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import java.util.Collection;
-
-import com.sun.xml.ws.policy.Policy;
-import com.sun.xml.ws.policy.PolicyAssertion;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 import javax.xml.namespace.QName;
@@ -48,17 +44,17 @@ public class Token extends PolicyAssertion implements  com.sun.xml.ws.security.p
     private String _includeToken;
     private String _id;
     private boolean populated= false;
-    
     private com.sun.xml.ws.security.policy.Token _token;
-    private QName _name;
     private boolean isServer = false;
     /**
      * Creates a new instance of Token
      */
     
     public Token(){
-        
+        UUID uid = UUID.randomUUID();
+        _id= uid.toString();        
     }
+   
     public Token(QName name) {
         UUID uid = UUID.randomUUID();
         _id= uid.toString();
@@ -136,7 +132,7 @@ public class Token extends PolicyAssertion implements  com.sun.xml.ws.security.p
                             }
                             if(isServer){
                                 throw new UnsupportedPolicyAssertion("Policy assertion "+
-                                          assertion+" is not supported under Token assertion");
+                                        assertion+" is not supported under Token assertion");
                             }
                         }
                     }

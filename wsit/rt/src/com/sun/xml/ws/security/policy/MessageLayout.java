@@ -23,7 +23,6 @@
 
 package com.sun.xml.ws.security.policy;
 
-import com.sun.xml.ws.policy.PolicyAssertion;
 
 /**
  * Represents Security Header layout.

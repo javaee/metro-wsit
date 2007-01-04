@@ -23,7 +23,6 @@
 package com.sun.xml.ws.security.policy;
 
 import java.util.Iterator;
-import javax.xml.namespace.QName;
 
 /**
  * Identifies targets that if present in the message should be confidentiality protected.

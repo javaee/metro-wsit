@@ -28,7 +28,6 @@ import com.sun.xml.ws.security.policy.EncryptedParts;
 import com.sun.xml.ws.security.policy.Header;
 import com.sun.xml.wss.impl.policy.mls.EncryptionPolicy;
 import com.sun.xml.wss.impl.policy.mls.EncryptionTarget;
-import com.sun.xml.wss.impl.policy.mls.Target;
 import java.util.HashSet;
 import java.util.Iterator;
 import javax.xml.namespace.QName;

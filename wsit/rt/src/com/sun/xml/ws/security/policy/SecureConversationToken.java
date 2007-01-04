@@ -25,9 +25,7 @@ package com.sun.xml.ws.security.policy;
 
 import com.sun.xml.ws.policy.NestedPolicy;
 import java.util.Set;
-import com.sun.xml.ws.policy.Policy;
-import java.util.Iterator;
-import java.util.List;
+
 
 
 /**

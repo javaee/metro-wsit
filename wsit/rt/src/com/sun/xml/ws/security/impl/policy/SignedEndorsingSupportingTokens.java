@@ -24,7 +24,6 @@ package com.sun.xml.ws.security.impl.policy;
 
 
 import java.util.Collection;
-import javax.xml.namespace.QName;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;

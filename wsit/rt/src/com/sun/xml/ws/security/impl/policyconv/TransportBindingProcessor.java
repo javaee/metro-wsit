@@ -22,7 +22,6 @@
 
 package com.sun.xml.ws.security.impl.policyconv;
 
-import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.security.policy.Binding;
 import com.sun.xml.ws.security.policy.EndorsingSupportingTokens;
@@ -99,7 +98,7 @@ public class TransportBindingProcessor extends BindingProcessor {
             sp.setUUID(pid.generateID());
             tokenProcessor.addKeyBinding(sp, token,false);
            // container.insert(sp.getKeyBinding());
-            WSSPolicy key = (WSSPolicy) sp.getKeyBinding();
+
             if(tp != null ){
                 SignatureTarget target = iAP.getTargetCreator().newURISignatureTarget(tp.getUUID());
                 SecurityPolicyUtil.setName(target, tp);
@@ -122,7 +121,7 @@ public class TransportBindingProcessor extends BindingProcessor {
             SignaturePolicy.FeatureBinding spFB = (com.sun.xml.wss.impl.policy.mls.SignaturePolicy.FeatureBinding)sp.getFeatureBinding();
             spFB.setCanonicalizationAlgorithm(CanonicalizationMethod.EXCLUSIVE);
             tokenProcessor.addKeyBinding(sp, token,false);
-            WSSPolicy key = (WSSPolicy) sp.getKeyBinding();
+           
             //protect primary signature
             
             if(tp != null){

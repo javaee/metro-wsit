@@ -29,8 +29,6 @@ import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.security.impl.policy.Trust10;
-import com.sun.xml.ws.security.impl.policy.Wss10;
-import com.sun.xml.ws.security.impl.policy.Wss11;
 import com.sun.xml.ws.security.impl.policyconv.IntegrityAssertionProcessor;
 import com.sun.xml.ws.security.impl.policyconv.XWSSPolicyContainer;
 import com.sun.xml.ws.security.policy.AsymmetricBinding;
@@ -39,52 +37,22 @@ import com.sun.xml.ws.security.policy.Binding;
 import com.sun.xml.ws.security.policy.EncryptedElements;
 import com.sun.xml.ws.security.policy.EncryptedParts;
 import com.sun.xml.ws.security.policy.EndorsingSupportingTokens;
-import com.sun.xml.ws.security.policy.Header;
 import com.sun.xml.ws.security.policy.RequiredElements;
-import com.sun.xml.ws.security.policy.SamlToken;
-import com.sun.xml.ws.security.policy.SecureConversationToken;
 import com.sun.xml.ws.security.policy.SignedElements;
 import com.sun.xml.ws.security.policy.SignedEndorsingSupportingTokens;
 import com.sun.xml.ws.security.policy.SignedParts;
 import com.sun.xml.ws.security.policy.SignedSupportingTokens;
 import com.sun.xml.ws.security.policy.SupportingTokens;
 import com.sun.xml.ws.security.policy.SymmetricBinding;
-import com.sun.xml.ws.security.policy.Target;
-import com.sun.xml.ws.security.policy.Token;
 import com.sun.xml.ws.security.policy.TransportBinding;
-import com.sun.xml.ws.security.policy.X509Token;
 import static com.sun.xml.ws.security.impl.policy.Constants.*;
-import com.sun.xml.ws.security.impl.policy.PolicyUtil;
-import com.sun.xml.wss.core.UsernameToken;
 import com.sun.xml.wss.impl.policy.PolicyGenerationException;
-import com.sun.xml.wss.impl.policy.mls.AuthenticationTokenPolicy;
-import com.sun.xml.wss.impl.policy.mls.DerivedTokenKeyBinding;
 import com.sun.xml.wss.impl.policy.mls.EncryptionPolicy;
-import com.sun.xml.wss.impl.policy.mls.EncryptionPolicy.FeatureBinding;
-import com.sun.xml.wss.impl.policy.mls.EncryptionTarget;
-import com.sun.xml.wss.impl.policy.mls.IssuedTokenKeyBinding;
-import com.sun.xml.wss.impl.policy.mls.KeyBindingBase;
-import com.sun.xml.wss.impl.policy.mls.MandatoryTargetPolicy;
 import com.sun.xml.wss.impl.policy.mls.MessagePolicy;
-import com.sun.xml.wss.impl.policy.mls.SecureConversationTokenKeyBinding;
 import com.sun.xml.wss.impl.policy.mls.SignaturePolicy;
-import com.sun.xml.wss.impl.policy.mls.SignatureTarget;
-import com.sun.xml.wss.impl.policy.mls.TimestampPolicy;
-import com.sun.xml.wss.impl.policy.mls.WSSKeyBindingExtension;
-import com.sun.xml.wss.impl.policy.mls.WSSPolicy;
-import java.lang.UnsupportedOperationException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.Vector;
-import javax.xml.crypto.dsig.CanonicalizationMethod;
-import javax.xml.namespace.QName;
-import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.ws.security.policy.WSSAssertion;
 
 
@@ -113,7 +81,7 @@ public class XWSSPolicyGenerator {
     boolean isServer = false;
     boolean isIncoming = false;
     private PolicyAssertion wssAssertion = null;
-    //private WSSAssertion wss11 = null;
+    private WSSAssertion wss11 = null;
     private Trust10 trust10 = null;
     private AlgorithmSuite algSuite = null;
     //true if signed by primary signature
@@ -182,8 +150,8 @@ public class XWSSPolicyGenerator {
             if(PolicyUtil.isSymmetricBinding(binding.getName())) {
                 //  _policyContainer.getMessagePolicy().setAlgorithmSuite(((SymmetricBinding) _binding).getAlgorithmSuite());
                 SymmetricBindingProcessor sbp =  new SymmetricBindingProcessor((SymmetricBinding) _binding, _policyContainer,
-                          isServer, isIncoming,signedParts,encryptedParts,
-                          signedElements,encryptedElements);
+                        isServer, isIncoming,signedParts,encryptedParts,
+                        signedElements,encryptedElements);
                 if(wssAssertion != null && PolicyUtil.isWSS11(wssAssertion)){
                     sbp.setWSS11((WSSAssertion)wssAssertion);
                 }
@@ -193,8 +161,8 @@ public class XWSSPolicyGenerator {
                 
             }else if(PolicyUtil.isAsymmetricBinding(binding.getName()) ){
                 AsymmetricBindingProcessor abp = new AsymmetricBindingProcessor((AsymmetricBinding) _binding, _policyContainer,
-                          isServer, isIncoming,signedParts,encryptedParts,
-                          signedElements,encryptedElements);
+                        isServer, isIncoming,signedParts,encryptedParts,
+                        signedElements,encryptedElements);
                 if( wssAssertion != null && PolicyUtil.isWSS11(wssAssertion)){
                     abp.setWSS11((WSSAssertion)wssAssertion);
                 }
@@ -219,8 +187,8 @@ public class XWSSPolicyGenerator {
                 mp.setLayout(getLayout(policyBinding.getLayout()));
             }
             if(isIncoming && reqElements.size() > 0){
-               RequiredElementsProcessor rep =  new RequiredElementsProcessor(reqElements,mp);
-               rep.process();
+                RequiredElementsProcessor rep =  new RequiredElementsProcessor(reqElements,mp);
+                rep.process();
             }
         }catch(PolicyGenerationException pe){
             pe.printStackTrace();
@@ -297,9 +265,9 @@ public class XWSSPolicyGenerator {
         com.sun.xml.wss.impl.AlgorithmSuite als = new com.sun.xml.wss.impl.AlgorithmSuite(
                 suite.getDigestAlgorithm(),
                 suite.getEncryptionAlgorithm(),
-                suite.getSymmetricKeyAlgorithm(), 
+                suite.getSymmetricKeyAlgorithm(),
                 suite.getAsymmetricKeyAlgorithm());
-                
+        
         return als;
     }
     
@@ -313,20 +281,20 @@ public class XWSSPolicyGenerator {
     protected com.sun.xml.wss.impl.MessageLayout getLayout(
             com.sun.xml.ws.security.policy.MessageLayout layout) {
         
-       switch(layout) {
-           case Strict :
-               return com.sun.xml.wss.impl.MessageLayout.Strict;
-           case Lax : 
-               return com.sun.xml.wss.impl.MessageLayout.Lax;
-           case LaxTsFirst : 
-               return com.sun.xml.wss.impl.MessageLayout.LaxTsFirst;
-           case LaxTsLast :
-               return com.sun.xml.wss.impl.MessageLayout.LaxTsLast;
-           default :
-               throw new RuntimeException("Unkown MessageLayout Enum Value Encountered");
-               
-       }
+        switch(layout) {
+            case Strict :
+                return com.sun.xml.wss.impl.MessageLayout.Strict;
+            case Lax :
+                return com.sun.xml.wss.impl.MessageLayout.Lax;
+            case LaxTsFirst :
+                return com.sun.xml.wss.impl.MessageLayout.LaxTsFirst;
+            case LaxTsLast :
+                return com.sun.xml.wss.impl.MessageLayout.LaxTsLast;
+            default :
+                throw new RuntimeException("Unkown MessageLayout Enum Value Encountered");
+                
+        }
         
     }
-
+    
 }
