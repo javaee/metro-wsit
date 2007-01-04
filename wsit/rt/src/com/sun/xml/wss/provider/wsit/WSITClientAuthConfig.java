@@ -124,7 +124,8 @@ public class WSITClientAuthConfig implements ClientAuthConfig {
     public boolean isProtected() {
         return true;
     }
-    
+
+    @SuppressWarnings("unchecked")
     public JAXBElement startSecureConversation(Map map) {
         //check if we need to start secure conversation
         JAXBElement ret = null;

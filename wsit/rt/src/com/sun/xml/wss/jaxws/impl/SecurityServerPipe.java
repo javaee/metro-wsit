@@ -522,6 +522,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
     
     // The packet has the Message with RST/SCT inside it
     // TODO: Need to inspect if it is really a Issue or a Cancel
+    @SuppressWarnings("unchecked")
     private Packet invokeSecureConversationContract(
             Packet packet, ProcessingContext ctx, boolean isSCTIssue, String action) {
         
@@ -743,7 +744,8 @@ public class SecurityServerPipe extends SecurityPipeBase {
                 || RM_LAST_MESSAGE.equals(action)) {
                     return true;
                 }
-            }
+            }
+
         }
         return false;
     }
@@ -863,6 +865,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
     
     //doing this here becuase doing inside keyselector of optimized security would
     //mean doing it twice (if SCT was used for sign and encrypt) which can impact performance
+    @SuppressWarnings("unchecked")
     private void updateSCBootstrapCredentials(Packet packet, ProcessingContext ctx) {
         SecurityContextToken sct =
                 (SecurityContextToken)packet.invocationProperties.get(MessageConstants.INCOMING_SCT);
@@ -877,7 +880,8 @@ public class SecurityServerPipe extends SecurityPipeBase {
             }
         }
     }
-    
+
+     @SuppressWarnings("unchecked")
     private static void copySubject(final Subject from, final Subject to) {
         if (from == null || to == null) {
             return;
