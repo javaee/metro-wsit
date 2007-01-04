@@ -300,7 +300,7 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
         try{
             doc = docFactory.newDocumentBuilder().newDocument();
         }catch(ParserConfigurationException ex){
-            throw new WSTrustException(ex.getMessage(), ex);
+            throw new WSTrustException("Error creating DocumentFactory ", ex);
         }
         
         KeyInfo keyInfo = new KeyInfo(doc);
@@ -334,7 +334,9 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
                         x509data.addCertificate(clientCert);
                         addedClientCert = true;
                     }catch(com.sun.org.apache.xml.internal.security.exceptions.XMLSecurityException ex){
-                        throw new WSTrustException(ex.getMessage(), ex);
+                        log.log(Level.SEVERE,
+                                LogStringsMessages.WST_0034_UNABLE_GET_CLIENT_CERT(), ex);
+                        throw new WSTrustException("Unable to obtain client certificate", ex);
                     }
                 }
             }

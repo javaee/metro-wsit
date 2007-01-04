@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityTokenResponseImpl.java,v 1.4 2006-10-05 00:19:10 jdg6688 Exp $
+ * $Id: RequestSecurityTokenResponseImpl.java,v 1.5 2007-01-04 00:47:14 manveen Exp $
  */
 
 /*
@@ -59,7 +59,6 @@ import com.sun.xml.ws.security.trust.impl.bindings.RequestedSecurityTokenType;
 import com.sun.xml.ws.security.trust.impl.bindings.RequestedTokenCancelledType;
 
 import com.sun.xml.ws.security.trust.impl.bindings.ObjectFactory;
-import com.sun.xml.ws.security.trust.impl.bindings.OnBehalfOfType;
 import com.sun.xml.ws.security.trust.impl.bindings.ProofEncryptionType;
 import com.sun.xml.ws.security.trust.impl.bindings.RenewingType;
 import com.sun.xml.ws.security.trust.impl.bindings.SignChallengeType;
@@ -69,6 +68,10 @@ import com.sun.xml.ws.security.trust.impl.bindings.UseKeyType;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
+
+import com.sun.istack.NotNull;
+
+import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
 
 /**
  * Implementation of a RequestSecurityTokenResponse.
@@ -297,16 +300,12 @@ public class RequestSecurityTokenResponseImpl extends RequestSecurityTokenRespon
         return authenticationType;
     }
     
-    public void setKeyType(URI keytype) throws WSTrustException {
-        
-        if (keytype == null) {
-            log.log(Level.SEVERE,"WST0025.invalid.key.type", "null");
-            throw new WSTrustException("Invalid KeyType: null");
-        }
-        
+    public void setKeyType(@NotNull final URI keytype) throws WSTrustException {
+                
         if (! (keytype.toString().equalsIgnoreCase(RequestSecurityToken.PUBLIC_KEY_TYPE)
         || keytype.toString().equalsIgnoreCase(RequestSecurityToken.SYMMETRIC_KEY_TYPE) )){
-            log.log(Level.SEVERE,"WST0025.invalid.key.type", keytype.toString());
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0025_INVALID_KEY_TYPE(keytype.toString()));
             throw new WSTrustException("Invalid KeyType " + keytype.toString());
         } else {
             this.keyType = keytype;
@@ -320,7 +319,7 @@ public class RequestSecurityTokenResponseImpl extends RequestSecurityTokenRespon
         return keyType;
     }
     
-    public void setKeySize(long size) {
+    public void setKeySize(@NotNull final long size) {
         keySize = size;
         JAXBElement<Long> ksElement =  (new ObjectFactory()).createKeySize(size);
         getAny().add(ksElement);
@@ -330,7 +329,7 @@ public class RequestSecurityTokenResponseImpl extends RequestSecurityTokenRespon
         return keySize;
     }
     
-    public void setSignatureAlgorithm(URI algorithm) {
+    public void setSignatureAlgorithm(@NotNull final URI algorithm) {
         signatureAlgorithm = algorithm;
         JAXBElement<String> signElement =
                 (new ObjectFactory()).createSignatureAlgorithm(algorithm.toString());
@@ -341,7 +340,7 @@ public class RequestSecurityTokenResponseImpl extends RequestSecurityTokenRespon
         return signatureAlgorithm;
     }
     
-    public void setEncryptionAlgorithm(URI algorithm) {
+    public void setEncryptionAlgorithm(@NotNull final URI algorithm) {
         encryptionAlgorithm = algorithm;
         JAXBElement<String> encElement =
                 (new ObjectFactory()).createEncryptionAlgorithm(algorithm.toString());
@@ -352,7 +351,7 @@ public class RequestSecurityTokenResponseImpl extends RequestSecurityTokenRespon
         return encryptionAlgorithm;
     }
     
-    public void setCanonicalizationAlgorithm(URI algorithm) {
+    public void setCanonicalizationAlgorithm(@NotNull final URI algorithm) {
         canonAlgorithm = algorithm;
         JAXBElement<String> canonElement =
                 (new ObjectFactory()).createCanonicalizationAlgorithm(algorithm.toString());
@@ -385,7 +384,7 @@ public class RequestSecurityTokenResponseImpl extends RequestSecurityTokenRespon
         return proofEncryption;
     }
     
-    public void setComputedKeyAlgorithm(URI algorithm) {
+    public void setComputedKeyAlgorithm(@NotNull final URI algorithm) {
         if (algorithm != null) {
             String ckaString = algorithm.toString();
             if (!ckaString.equalsIgnoreCase(WSTrustConstants.CK_HASH)
@@ -424,7 +423,7 @@ public class RequestSecurityTokenResponseImpl extends RequestSecurityTokenRespon
         return signWith;
     }
     
-    public void setEncryptWith(URI algorithm) {
+    public void setEncryptWith(@NotNull final URI algorithm) {
         encryptWith = algorithm;
         JAXBElement<String> sElement =  (new ObjectFactory()).createEncryptWith(algorithm.toString());
         getAny().add(sElement);

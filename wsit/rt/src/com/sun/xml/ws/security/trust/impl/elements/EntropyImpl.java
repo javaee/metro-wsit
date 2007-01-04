@@ -1,5 +1,5 @@
 /*
- * $Id: EntropyImpl.java,v 1.4 2006-09-20 23:58:47 manveen Exp $
+ * $Id: EntropyImpl.java,v 1.5 2007-01-04 00:45:08 manveen Exp $
  */
 
 /*
@@ -27,7 +27,6 @@
 package com.sun.xml.ws.security.trust.impl.elements;
 
 
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 
 import javax.xml.namespace.QName;
@@ -43,10 +42,14 @@ import com.sun.xml.ws.security.trust.impl.bindings.BinarySecretType;
 import com.sun.xml.ws.security.trust.impl.bindings.ObjectFactory;
 import java.util.List;
 
+import com.sun.istack.NotNull;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
 
+import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
+import javax.xml.bind.JAXBException;
 /**
  * Implementation of Entropy Interface.
  *
@@ -78,7 +81,7 @@ public class EntropyImpl extends EntropyType implements Entropy {
         setEncryptedKey(encryptedKey);
     }
     
-    public EntropyImpl(EntropyType etype) {
+    public EntropyImpl(@NotNull final EntropyType etype) {
         entropyType = etype.getOtherAttributes().get(_EntropyType_QNAME);
         List list = etype.getAny();
         for (int i = 0; i < list.size(); i++) {
@@ -107,9 +110,10 @@ public class EntropyImpl extends EntropyType implements Entropy {
         try {
             javax.xml.bind.Unmarshaller u = WSTrustElementFactory.getContext().createUnmarshaller();
             return (EntropyType)u.unmarshal(element);
-        } catch ( Exception ex) {
-            log.log(Level.SEVERE,"WST0021.error.unmarshal.domElement", ex);            
-            throw new WSTrustException(ex.getMessage(), ex);
+        } catch (JAXBException ex) {
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0021_ERROR_UNMARSHAL_DOM_ELEMENT(ex));
+            throw new WSTrustException("Error while unmarshalling DOM element ", ex);
         }
     }
     
@@ -123,12 +127,12 @@ public class EntropyImpl extends EntropyType implements Entropy {
     /**
      *Sets the type of the Entropy contents
      */
-    public void setEntropyType(String type)  {
+    public void setEntropyType(@NotNull final String type)  {
         if (!(type.equalsIgnoreCase(this.BINARY_SECRET_TYPE)  ||
                 type.equalsIgnoreCase(this.CUSTOM_TYPE)
                 || type.equalsIgnoreCase(this.ENCRYPTED_KEY_TYPE))) {
             log.log(Level.SEVERE,
-                    "WST0022.invalid.entropy", type);               
+                    LogStringsMessages.WST_0022_INVALID_ENTROPY(type));
             throw new RuntimeException("Invalid Entropy Type: " + type);
         }
         entropyType = type;

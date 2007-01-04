@@ -1,5 +1,5 @@
 /*
- * $Id: AuthenticatorImpl.java,v 1.2 2006-09-20 23:58:47 manveen Exp $
+ * $Id: AuthenticatorImpl.java,v 1.3 2007-01-04 00:42:14 manveen Exp $
  */
 
 /*
@@ -36,6 +36,8 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
+
+import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
 
 /**
  * Provides verification (authentication) of a computed hash.
@@ -82,9 +84,9 @@ public class AuthenticatorImpl extends AuthenticatorType implements Authenticato
         try {
             setRawCombinedHash(Base64.decode(encodedCombinedHash));
         } catch (Base64DecodingException de) {
-            log.log(Level.SEVERE,"WST0020.error.decoding", new Object[] {encodedCombinedHash});
-            throw new RuntimeException("Error while decoding combineHash" +
-                    de.getMessage());
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0020_ERROR_DECODING(encodedCombinedHash, de));
+            throw new RuntimeException("Error while decoding combineHash: " + encodedCombinedHash , de);
         }
     }
     

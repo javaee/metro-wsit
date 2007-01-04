@@ -1,5 +1,5 @@
 /*
- * $Id: RequestedProofTokenImpl.java,v 1.4 2006-10-17 05:45:46 raharsha Exp $
+ * $Id: RequestedProofTokenImpl.java,v 1.5 2007-01-04 00:47:27 manveen Exp $
  */
 
 /*
@@ -26,9 +26,6 @@
 
 package com.sun.xml.ws.security.trust.impl.elements;
 
-import org.w3c.dom.Element;
-
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
@@ -53,6 +50,10 @@ import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
+
+import com.sun.istack.NotNull;
+
+import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
 
 /**
  * @author Manveen Kaur
@@ -84,13 +85,17 @@ public class RequestedProofTokenImpl extends RequestedProofTokenType implements 
             try {
                 setComputedKey(new URI((String)obj.getValue()));
             } catch (URISyntaxException ex){
-                throw new RuntimeException(ex);
+                log.log(Level.SEVERE,
+                        LogStringsMessages.WST_0037_ERROR_SETTING_COMPUTED_KEY(ex));
+                throw new RuntimeException("Error while setting computed Key", ex);
             }
         }else if (local.equalsIgnoreCase("BinarySecret")){
             BinarySecretType bsType = (BinarySecretType)obj.getValue();
             setBinarySecret(new BinarySecretImpl(bsType));
         } else{
-            throw new UnsupportedOperationException("Unsupported requested proof token: " + local);
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0019_INVALID_PROOF_TOKEN_TYPE(local));
+            throw new RuntimeException("Unsupported requested proof token: " + local);
         }
     }
     
@@ -98,14 +103,15 @@ public class RequestedProofTokenImpl extends RequestedProofTokenType implements 
         return tokenType;
     }
     
-    public void setProofTokenType(String proofTokenType) {
+    public void setProofTokenType(@NotNull final String proofTokenType) {
         if (! (proofTokenType.equalsIgnoreCase(RequestedProofToken.BINARY_SECRET_TYPE)
         || proofTokenType.equalsIgnoreCase(RequestedProofToken.COMPUTED_KEY_TYPE)
         || proofTokenType.equalsIgnoreCase(RequestedProofToken.ENCRYPTED_KEY_TYPE)
         || proofTokenType.equalsIgnoreCase(RequestedProofToken.CUSTOM_TYPE)
         || proofTokenType.equalsIgnoreCase(RequestedProofToken.TOKEN_REF_TYPE)
         )) {
-            log.log(Level.SEVERE,"WST0027.invalid.proofToken.type", proofTokenType);
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0019_INVALID_PROOF_TOKEN_TYPE(proofTokenType));
             throw new RuntimeException("Invalid ProofToken Type: " + proofTokenType);
         }
         tokenType = proofTokenType;
@@ -125,17 +131,13 @@ public class RequestedProofTokenImpl extends RequestedProofTokenType implements 
         return str;
     }
     
-    public void setComputedKey(URI computedKey) {
+    public void setComputedKey(@NotNull final URI computedKey) {
         
-        if (computedKey == null) {
-            log.log(Level.SEVERE,"WST0028.invalid.ck", "null");
-            throw new RuntimeException("Null Computed Key specified");
-        }
-                
         if (computedKey != null) {
             String ckString = computedKey.toString();
             if (!(ckString.equalsIgnoreCase(WSTrustConstants.CK_HASH) || (ckString.equalsIgnoreCase(WSTrustConstants.CK_PSHA1)))) {
-                log.log(Level.SEVERE,"WST0028.invalid.ck", ckString);
+                log.log(Level.SEVERE,
+                        LogStringsMessages.WST_0028_INVALID_CK(ckString));
                 throw new RuntimeException("Invalid computedKeyURI: " + ckString);
             }
             this.computedKey = computedKey;
@@ -159,7 +161,7 @@ public class RequestedProofTokenImpl extends RequestedProofTokenType implements 
         }
         setProofTokenType(RequestedProofToken.BINARY_SECRET_TYPE);
     }
-        
+    
     public BinarySecret getBinarySecret() {
         return secret;
     }
@@ -169,7 +171,7 @@ public class RequestedProofTokenImpl extends RequestedProofTokenType implements 
         try {
             javax.xml.bind.Unmarshaller u = WSTrustElementFactory.getContext().createUnmarshaller();
             return (RequestedProofTokenType)u.unmarshal(element);
-        } catch ( Exception ex) {
+        } catch (JAXBException ex) {
             throw new WSTrustException(ex.getMessage(), ex);
         }
     }

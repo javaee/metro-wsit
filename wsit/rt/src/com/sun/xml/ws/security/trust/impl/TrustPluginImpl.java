@@ -160,7 +160,9 @@ public class TrustPluginImpl implements TrustPlugin {
                         wsdlLocation = new URI(wsdlLocationStr);
                     }
                 } catch (URISyntaxException ex) {
-                    throw new RuntimeException(ex);
+                    log.log(Level.SEVERE,
+                            LogStringsMessages.WST_0014_URI_SYNTAX(ex));
+                    throw new RuntimeException("Invalid URI", ex);
                 }
                 
                 String serviceNameStr = attrs.get(new QName(CONFIG_NAMESPACE,SERVICE_NAME));
@@ -182,7 +184,7 @@ public class TrustPluginImpl implements TrustPlugin {
         if(stsURI == null){
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0029_COULD_NOT_GET_STS_LOCATION());
-            new IllegalArgumentException("STS information not passed");
+            throw new RuntimeException("STS information not passed");
         }
         
         RequestSecurityTokenResponse result = null;
@@ -194,7 +196,6 @@ public class TrustPluginImpl implements TrustPlugin {
             contract.handleRSTR(request, result, itc);
             return itc;
         } catch (RemoteException ex) {
-            // TBD- Why catch the three separately when handling is the same??
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0016_PROBLEM_IT_CTX(ex));
             throw new RuntimeException(ex);

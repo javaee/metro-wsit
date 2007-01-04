@@ -1,5 +1,5 @@
 /*
- * $Id: RequestedSecurityTokenImpl.java,v 1.3 2006-10-03 22:46:03 jdg6688 Exp $
+ * $Id: RequestedSecurityTokenImpl.java,v 1.4 2007-01-04 00:47:34 manveen Exp $
  */
 
 /*
@@ -46,9 +46,13 @@ import com.sun.xml.ws.security.secconv.impl.bindings.SecurityContextTokenType;
 import com.sun.xml.wss.saml.assertion.saml11.jaxb20.Assertion;
 import com.sun.xml.wss.saml.internal.saml11.jaxb20.AssertionType;
 
+import com.sun.istack.NotNull;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
+
+import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
 
 /**
  * Implementation for the RequestedSecurityToken.
@@ -78,7 +82,7 @@ public class RequestedSecurityTokenImpl extends RequestedSecurityTokenType imple
     public RequestedSecurityTokenImpl() {
     }
     
-    public RequestedSecurityTokenImpl(RequestedSecurityTokenType rdstType){
+    public RequestedSecurityTokenImpl(@NotNull final RequestedSecurityTokenType rdstType){
         Object rdst = rdstType.getAny();
         if (rdst instanceof JAXBElement){
             JAXBElement rdstEle = (JAXBElement)rdst; 
@@ -118,7 +122,7 @@ public class RequestedSecurityTokenImpl extends RequestedSecurityTokenType imple
      *            <code>org.w3c.dom.Element</code> properly, implying that
      *            there is an error in the sender or in the element definition.
      */
-    public static RequestedSecurityTokenType fromElement(org.w3c.dom.Element element)
+    public static RequestedSecurityTokenType fromElement(@NotNull final org.w3c.dom.Element element)
         throws WSTrustException {
         try {
             JAXBContext jc =
@@ -127,9 +131,10 @@ public class RequestedSecurityTokenImpl extends RequestedSecurityTokenType imple
             
             JAXBElement<RequestedSecurityTokenType> rstType = u.unmarshal(element, RequestedSecurityTokenType.class);
             return rstType.getValue();
-        } catch ( Exception ex) {
-            log.log(Level.SEVERE,"WST0021.error.unmarshal.domElement", ex);                        
-            throw new WSTrustException(ex.getMessage(), ex);
+        } catch (JAXBException ex) {
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0021_ERROR_UNMARSHAL_DOM_ELEMENT(ex));                        
+            throw new WSTrustException("Error in unmarshalling DOM Element", ex);
         }
     }
 

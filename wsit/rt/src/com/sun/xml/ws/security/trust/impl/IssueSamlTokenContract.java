@@ -67,9 +67,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
 
-import com.sun.istack.NotNull;
-import com.sun.istack.Nullable;
-
 import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
 
 public abstract class IssueSamlTokenContract implements WSTrustContract {
@@ -217,7 +214,7 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
                 ctx = new URI(rst.getContext());
         } catch (URISyntaxException ex) {
             log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0014_URI_SYNTAX());
+                    LogStringsMessages.WST_0014_URI_SYNTAX(ex));
             throw new WSTrustException("Error in URI" + ex);
         }
         

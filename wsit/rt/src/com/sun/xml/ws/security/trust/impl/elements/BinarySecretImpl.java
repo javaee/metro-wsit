@@ -1,5 +1,5 @@
 /*
- * $Id: BinarySecretImpl.java,v 1.4 2006-09-20 23:58:47 manveen Exp $
+ * $Id: BinarySecretImpl.java,v 1.5 2007-01-04 00:42:43 manveen Exp $
  */
 
 /*
@@ -50,9 +50,13 @@ import com.sun.xml.ws.security.trust.elements.BinarySecret;
 import com.sun.org.apache.xml.internal.security.utils.Base64;
 import com.sun.org.apache.xml.internal.security.exceptions.Base64DecodingException;
 
+import com.sun.istack.NotNull;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
+
+import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
 
 /**
  *
@@ -65,13 +69,13 @@ public class BinarySecretImpl extends BinarySecretType implements BinarySecret {
             LogDomainConstants.TRUST_IMPL_DOMAIN,
             LogDomainConstants.TRUST_IMPL_DOMAIN_BUNDLE);
 
-    public BinarySecretImpl(byte[] rawValue, String type) {        
+    public BinarySecretImpl(@NotNull final byte[] rawValue, String type) {        
         setRawValue(rawValue);
         setType(type);
         
     }
     
-    public BinarySecretImpl(BinarySecretType bsType){
+    public BinarySecretImpl(@NotNull final BinarySecretType bsType){
         this(bsType.getValue(), bsType.getType());
         
     }
@@ -87,37 +91,39 @@ public class BinarySecretImpl extends BinarySecretType implements BinarySecret {
      *            <code>org.w3c.dom.Element</code> properly, implying that
      *            there is an error in the sender or in the element definition.
      */
-    public static BinarySecretType fromElement(org.w3c.dom.Element element)
+    public static BinarySecretType fromElement(@NotNull final org.w3c.dom.Element element)
         throws WSTrustException {
         try {
             javax.xml.bind.Unmarshaller u = WSTrustElementFactory.getContext().createUnmarshaller();
             return (BinarySecretType)((JAXBElement)u.unmarshal(element)).getValue();
-        } catch (Exception ex) {
-            log.log(Level.SEVERE,"WST0021.error.unmarshal.domElement", ex);            
-            throw new WSTrustException(ex.getMessage(), ex);
+        } catch (JAXBException ex) {
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0021_ERROR_UNMARSHAL_DOM_ELEMENT(ex));
+            throw new WSTrustException("Error while unmarhsalling DOM Element ", ex);
         }
     }
 
+    @NotNull
      public byte[] getRawValue() {
         return super.getValue();
      }
      
-     
+     @NotNull
      public String getTextValue() {
         return Base64.encode(getRawValue());         
      }
      
-     public void setRawValue(byte[] rawText) {
+     public void setRawValue(@NotNull final byte[] rawText) {
         setValue(rawText);
      }
       
-     public void setTextValue(String encodedText) {
+     public void setTextValue(@NotNull final String encodedText) {
          try {
              setValue(Base64.decode(encodedText));
          } catch (Base64DecodingException de) {
-            log.log(Level.SEVERE,"WST0020.error.decoding", new Object[] {encodedText});             
-             throw new RuntimeException("Error while decoding " + 
-                                        de.getMessage()); 
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0020_ERROR_DECODING(encodedText, de));
+             throw new RuntimeException("Error while decoding :" + encodedText , de); 
          }
      }     
 }

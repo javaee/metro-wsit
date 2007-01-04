@@ -118,7 +118,7 @@ public class WSTrustClientContractImpl implements WSTrustClientContract {
             // if securityToken == null and proofToken == null
             // throw exception
             if(securityToken == null && proofToken == null){
-                log.log(Level.SEVERE, 
+                log.log(Level.SEVERE,
                         LogStringsMessages.WST_0018_TOKENS_NULL());
                 throw new WSTrustException(
                         "Invalid Security Token or Proof Token");
@@ -199,23 +199,19 @@ public class WSTrustClientContractImpl implements WSTrustClientContract {
                 key = computeKey(rstr, proofToken, rst);
             } else if (RequestedProofToken.TOKEN_REF_TYPE.equals(proofTokenType)){
                 //ToDo
-                log.log(Level.SEVERE, 
+                log.log(Level.SEVERE,
                         LogStringsMessages.WST_0001_UNSUPPORTED_PROOF_TOKEN_TYPE(proofTokenType));
-                // TBD- Shouldn't this be a WSTrustException?
-                //throw new UnsupportedOperationException("Unsupported proof token type: " + proofTokenType);
                 throw new WSTrustException("Unsupported proof token type: " + proofTokenType);
             } else if (RequestedProofToken.ENCRYPTED_KEY_TYPE.equals(proofTokenType)){
-                log.log(Level.SEVERE, 
+                log.log(Level.SEVERE,
                         LogStringsMessages.WST_0001_UNSUPPORTED_PROOF_TOKEN_TYPE(proofTokenType));
                 throw new WSTrustException("Unsupported proof token type: " + proofTokenType);
             } else if (RequestedProofToken.BINARY_SECRET_TYPE.equals(proofTokenType)){
                 BinarySecret binarySecret = proofToken.getBinarySecret();
                 key = binarySecret.getRawValue();
             } else{
-                if (log.isLoggable(Level.FINE)) {
-                    log.log(Level.FINE,
-                            LogStringsMessages.WST_0019_INVALID_PROOF_TOKEN_TYPE(proofTokenType));
-                }
+                log.log(Level.SEVERE,
+                        LogStringsMessages.WST_0019_INVALID_PROOF_TOKEN_TYPE(proofTokenType));
                 throw new WSTrustException("Invalid Proof Token Type: " + proofTokenType);
             }
         }
@@ -245,11 +241,12 @@ public class WSTrustClientContractImpl implements WSTrustClientContract {
             try {
                 key = SecurityUtil.P_SHA1(clientEntropyBytes,serverEntropyBytes, keySize);
             } catch (Exception ex) {
-                throw new WSTrustException(ex.getMessage(), ex);
+                throw new WSTrustException("Error while computing key", ex);
             }
         } else {
-            //ToDo
-            throw new UnsupportedOperationException("Unsupported compute key algorithm: " + computedKey);
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0026_INVALID_CK_ALGORITHM(computedKey));
+            throw new WSTrustException("Unsupported compute key algorithm: " + computedKey);
         }
         return key;
     }

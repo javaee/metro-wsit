@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustElementFactoryImpl.java,v 1.8 2007-01-03 22:18:01 manveen Exp $
+ * $Id: WSTrustElementFactoryImpl.java,v 1.9 2007-01-04 00:40:50 manveen Exp $
  */
 
 /*
@@ -607,11 +607,11 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
         } catch (javax.xml.parsers.ParserConfigurationException ex) {
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0011_PARSERCONFIG_EX_TO_ELEMENT(ex));
-            throw new RuntimeException(ex);
+            throw new RuntimeException("Error converting RST to element", ex);
         } catch (JAXBException e) {
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0012_JAXB_EX_TO_ELEMENT(e));
-            throw new RuntimeException(e);
+            throw new RuntimeException("Error converting RST to element", e);
         }
     }
     
@@ -636,7 +636,7 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
         } catch (Exception ex) {
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0012_JAXB_EX_TO_ELEMENT(ex));
-            throw new RuntimeException(ex);
+            throw new RuntimeException("Error converting RSTR to element", ex);
         }
     }
     
@@ -649,7 +649,7 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
         } catch (JAXBException ex) {
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0012_JAXB_EX_TO_ELEMENT(ex));
-            throw new RuntimeException(ex);
+            throw new RuntimeException("Error converting RSTR to element", ex);
         }
     }
     
@@ -674,11 +674,11 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
         } catch (javax.xml.parsers.ParserConfigurationException pe) {
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0011_PARSERCONFIG_EX_TO_ELEMENT(pe));
-            throw new RuntimeException(pe);
+            throw new RuntimeException("Parsing error while creating Element from RSTRCollection", pe);
         } catch (JAXBException ex) {
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0012_JAXB_EX_TO_ELEMENT(ex));
-            throw new RuntimeException(ex);
+            throw new RuntimeException("JAXB Exception while creating Element from RSTRCollection", ex);
         }
     }
     
@@ -697,11 +697,11 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
         } catch (javax.xml.parsers.ParserConfigurationException pe) {
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0011_PARSERCONFIG_EX_TO_ELEMENT(pe));
-            throw new RuntimeException(pe);
+            throw new RuntimeException("Error converting Binary secret to element", pe);
         } catch (JAXBException ex) {
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0012_JAXB_EX_TO_ELEMENT(ex));
-            throw new RuntimeException(ex);
+            throw new RuntimeException("Error converting Binary secret to element", ex);
         }
     }
     
@@ -727,11 +727,11 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
         } catch (javax.xml.parsers.ParserConfigurationException pe) {
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0011_PARSERCONFIG_EX_TO_ELEMENT(pe));
-            throw new RuntimeException(pe);
+            throw new RuntimeException("Error converting STR to element", pe);
         } catch (JAXBException ex) {
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0012_JAXB_EX_TO_ELEMENT(ex));
-            throw new RuntimeException(ex);
+            throw new RuntimeException("Error converting STR to element", ex);
         }
     }
     
@@ -757,14 +757,13 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
             return doc.getDocumentElement();
             
         } catch (javax.xml.parsers.ParserConfigurationException pe) {
-            // TODOFIXME - print JAXBelement
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0011_PARSERCONFIG_EX_TO_ELEMENT(pe));
-            throw new RuntimeException(pe);
+            throw new RuntimeException("Parser error while converting BinarySecret to element", pe);
         } catch (JAXBException ex) {
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0012_JAXB_EX_TO_ELEMENT(ex));
-            throw new RuntimeException(ex);
+            throw new RuntimeException("Error while converting Binary secret to Element", ex);
         }
     }
     

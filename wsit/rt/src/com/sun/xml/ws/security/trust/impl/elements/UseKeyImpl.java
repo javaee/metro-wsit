@@ -1,5 +1,5 @@
 /*
- * $Id: UseKeyImpl.java,v 1.3 2006-10-17 05:45:46 raharsha Exp $
+ * $Id: UseKeyImpl.java,v 1.4 2007-01-04 00:47:50 manveen Exp $
  */
 
 /*
@@ -38,9 +38,14 @@ import com.sun.xml.ws.security.trust.impl.bindings.UseKeyType;
 import java.net.URISyntaxException;
 import javax.xml.bind.JAXBElement;
 
+import com.sun.istack.NotNull;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
+
+import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
+
 
 /**
  * @author Manveen Kaur
@@ -62,7 +67,7 @@ public class UseKeyImpl extends UseKeyType implements UseKey {
         setTargetType(WSTrustConstants.STR_TYPE);
     }
     
-    public UseKeyImpl (UseKeyType ukType)throws Exception{
+    public UseKeyImpl (@NotNull final UseKeyType ukType)throws Exception{
         JAXBElement obj = (JAXBElement)ukType.getAny();
         String local = obj.getName().getLocalPart();
         if ("SecurityTokenReference".equals(local)) {
@@ -83,7 +88,7 @@ public class UseKeyImpl extends UseKeyType implements UseKey {
         targetType = ttype;
     }
     
-    public void setSecurityTokenReference(SecurityTokenReference ref) {
+    public void setSecurityTokenReference(@NotNull final SecurityTokenReference ref) {
         if (ref != null) {
             str = ref;
             JAXBElement<SecurityTokenReferenceType> strElement=
@@ -98,7 +103,7 @@ public class UseKeyImpl extends UseKeyType implements UseKey {
         return str;
     }
     
-    public void setToken(Token token) {
+    public void setToken(@NotNull final Token token) {
         if (token != null) {
             this.token = token;
             setAny(token);
@@ -111,7 +116,7 @@ public class UseKeyImpl extends UseKeyType implements UseKey {
         return token;
     }
     
-    public void setSignatureID(URI sigID) {
+    public void setSignatureID(@NotNull final URI sigID) {
         setSig(sigID.toString());
     }
     
@@ -119,8 +124,9 @@ public class UseKeyImpl extends UseKeyType implements UseKey {
         try {
             return new URI(getSig());
         } catch (URISyntaxException ue) {
-            log.log(Level.SEVERE, "WST0023.invalid.uri.syntax", getSig());            
-            throw new RuntimeException("URI syntax invalid ", ue);
+            log.log(Level.SEVERE, 
+                    LogStringsMessages.WST_0023_INVALID_URI_SYNTAX(getSig()));
+            throw new RuntimeException("URI syntax invalid in " + getSig(), ue);
         }
     }
     

@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityTokenImpl.java,v 1.6 2006-12-18 23:32:04 jdg6688 Exp $
+ * $Id: RequestSecurityTokenImpl.java,v 1.7 2007-01-04 00:46:53 manveen Exp $
  */
 
 /*
@@ -65,6 +65,11 @@ import com.sun.xml.ws.security.trust.impl.bindings.UseKeyType;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
+
+import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
+
+import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
 
 /**
  * Implementation of the RequestSecurityToken interface.
@@ -243,19 +248,17 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
         return requestType;
     }
     
-    public void setRequestType(URI requestType) {
-        if (requestType == null) {
-            log.log(Level.SEVERE,"WST0024.invalid.request.type", "null");
-            throw new RuntimeException("RequestType cannot be null");
-        }
+    public void setRequestType(@NotNull final URI requestType) {
+        
         String rtString = requestType.toString();
         if (!rtString.equalsIgnoreCase(WSTrustConstants.ISSUE_REQUEST)
         && !rtString.equalsIgnoreCase(WSTrustConstants.CANCEL_REQUEST)
         && !rtString.equalsIgnoreCase(WSTrustConstants.KEY_EXCHANGE_REQUEST)
         && !rtString.equalsIgnoreCase(WSTrustConstants.RENEW_REQUEST)
         && !rtString.equalsIgnoreCase(WSTrustConstants.VALIDATE_REQUEST)) {
-            log.log(Level.SEVERE,"WST0024.invalid.request.type", rtString);
-            throw new RuntimeException("Invalid Request Type specified");
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0024_INVALID_REQUEST_TYPE(rtString));
+            throw new RuntimeException("Invalid Request Type specified: " + rtString);
         }
         this.requestType = requestType;
         JAXBElement<String> rtElement =
@@ -357,16 +360,12 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
         return authenticationType;
     }
     
-    public void setKeyType(URI keytype) throws WSTrustException {
-        
-        if (keytype == null) {
-            log.log(Level.SEVERE,"WST0025.invalid.key.type", "null");
-            throw new WSTrustException("Invalid KeyType: null");
-        }
+    public void setKeyType(@NotNull final URI keytype) throws WSTrustException {
         
         if (! (keytype.toString().equalsIgnoreCase(RequestSecurityToken.PUBLIC_KEY_TYPE)
         || keytype.toString().equalsIgnoreCase(RequestSecurityToken.SYMMETRIC_KEY_TYPE) )){
-            log.log(Level.SEVERE,"WST0025.invalid.key.type", keytype.toString());
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0025_INVALID_KEY_TYPE(keytype.toString()));
             throw new WSTrustException("Invalid KeyType " + keytype.toString());
         } else {
             this.keyType = keytype;
@@ -445,18 +444,16 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
         return proofEncryption;
     }
     
-    public void setComputedKeyAlgorithm(URI algorithm) {
-        if (algorithm == null) {
-            log.log(Level.SEVERE,"WST0026.invalid.ck.algorithm", "null");
-            throw new RuntimeException("Null Computed Key Algorithm specified");
-        }
+    public void setComputedKeyAlgorithm(@NotNull final URI algorithm) {
         
         if (algorithm != null) {
             String ckaString = algorithm.toString();
             if (!ckaString.equalsIgnoreCase(WSTrustConstants.CK_HASH)
             && !ckaString.equalsIgnoreCase(WSTrustConstants.CK_PSHA1)) {
-                log.log(Level.SEVERE,"WST0026.invalid.ck.algorithm", ckaString);
-                throw new RuntimeException("Invalid Computed Key Algorithm specified :" + ckaString);
+                log.log(Level.SEVERE,
+                        LogStringsMessages.WST_0026_INVALID_CK_ALGORITHM(ckaString));
+                throw new RuntimeException("Invalid Computed Key Algorithm specified :" + 
+                        ckaString);
             }
             computedKeyAlgorithm = algorithm;
             JAXBElement<String> ckaElement =

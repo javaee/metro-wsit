@@ -1,5 +1,5 @@
 /*
- * $Id: LifetimeImpl.java,v 1.4 2006-10-17 05:45:46 raharsha Exp $
+ * $Id: LifetimeImpl.java,v 1.5 2007-01-04 00:45:15 manveen Exp $
  */
 
 /*
@@ -39,10 +39,14 @@ import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.security.trust.impl.bindings.LifetimeType;
 
 import com.sun.xml.ws.security.trust.elements.Lifetime;
+import com.sun.istack.NotNull;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
+
+import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
+
 
 /**
  *
@@ -68,7 +72,7 @@ public class LifetimeImpl extends LifetimeType implements Lifetime {
         }
     }
     
-    public LifetimeImpl(LifetimeType ltType){
+    public LifetimeImpl(@NotNull final LifetimeType ltType){
         this(ltType.getCreated(), ltType.getExpires());
     }
     
@@ -83,14 +87,15 @@ public class LifetimeImpl extends LifetimeType implements Lifetime {
      *            <code>org.w3c.dom.Element</code> properly, implying that
      *            there is an error in the sender or in the element definition.
      */
-    public static LifetimeType fromElement(org.w3c.dom.Element element)
+    public static LifetimeType fromElement(@NotNull final org.w3c.dom.Element element)
     throws WSTrustException {
         try {
             javax.xml.bind.Unmarshaller u = WSTrustElementFactory.getContext().createUnmarshaller();
             return (LifetimeType)u.unmarshal(element);
-        } catch ( Exception ex) {
-            log.log(Level.SEVERE,"WST0021.error.unmarshal.domElement", ex);
-            throw new WSTrustException(ex.getMessage(), ex);
+        } catch ( JAXBException ex) {
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0021_ERROR_UNMARSHAL_DOM_ELEMENT(ex));
+            throw new WSTrustException("Error in unmarshalling DOM element", ex);
         }
     }
     

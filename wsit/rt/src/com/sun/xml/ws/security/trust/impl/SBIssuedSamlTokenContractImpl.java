@@ -114,16 +114,10 @@ import javax.xml.crypto.dsig.spec.C14NMethodParameterSpec;
 import javax.xml.crypto.dsig.spec.TransformParameterSpec;
 import javax.xml.transform.Source;
 
-//import com.sun.org.apache.xml.internal.security.encryption.XMLEncryptionException;
-
-//import com.sun.xml.security.core.xenc.EncryptedDataType;
 import com.sun.xml.wss.SubjectAccessor;
 
 import com.sun.xml.ws.policy.impl.bindings.AppliesTo;
 import com.sun.xml.ws.security.trust.elements.str.DirectReference;
-//import com.sun.xml.ws.security.IssuedTokenContext;
-//import com.sun.xml.ws.security.trust.elements.str.KeyIdentifier;
-//import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
 import com.sun.xml.ws.security.Token;
 import com.sun.xml.ws.security.trust.Configuration;
 import com.sun.xml.ws.security.trust.GenericToken;
@@ -182,17 +176,24 @@ import org.w3c.dom.Element;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
+import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
+
 /**
  *
  * @author
  */
 public class SBIssuedSamlTokenContractImpl extends IssueSamlTokenContract{
+    
     //move to base class
     private static final String SAML_HOLDER_OF_KEY = "urn:oasis:names:tc:SAML:1.0:cm:holder-of-key";
     protected static final String PRINCIPAL = "principal";
     private SOAPVersion soapVersion = SOAPVersion.SOAP_11;
     WSSElementFactory wef = new WSSElementFactory(SOAPVersion.SOAP_11);//TODO:: Pick up proper SOAPVersion.
     
+    private static Logger log =
+            Logger.getLogger(
+            LogDomainConstants.TRUST_IMPL_DOMAIN,
+            LogDomainConstants.TRUST_IMPL_DOMAIN_BUNDLE);
     
     /** Creates a new instance of SBIssuedSamlTokenContractImpl */
     public SBIssuedSamlTokenContractImpl(SOAPVersion soapVersion) {
@@ -237,6 +238,8 @@ public class SBIssuedSamlTokenContractImpl extends IssueSamlTokenContract{
                 assertion = createSAML20Assertion(assertionId, issuer, appliesTo, keyInfo, claimedAttrs);
                 st = new SAMLToken(assertion,SAMLJAXBUtil.getJAXBContext(),soapVersion);
             } else{
+                log.log(Level.SEVERE,
+                        LogStringsMessages.WST_0031_UNSUPPORTED_TOKEN_TYPE(tokenType));
                 throw new WSTrustException("Unsupported token type: " + tokenType);
             }
             
@@ -275,11 +278,13 @@ public class SBIssuedSamlTokenContractImpl extends IssueSamlTokenContract{
                 token = new GenericToken(signedAssertion);
             }
         } catch (XWSSecurityException ex){
-            ex.printStackTrace();
-            throw new WSTrustException(ex.getMessage(), ex);
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0032_ERROR_CREATING_SAML_ASSERTION(ex));
+            throw new WSTrustException("Error creating SAML Assertion", ex);
         }catch (Exception ex) {
-            ex.printStackTrace();
-            throw new WSTrustException(ex.getMessage(), ex);
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0032_ERROR_CREATING_SAML_ASSERTION(ex));
+            throw new WSTrustException("Error creating SAML Assertion", ex);
         }
         return token;
     }
@@ -329,8 +334,12 @@ public class SBIssuedSamlTokenContractImpl extends IssueSamlTokenContract{
             assertion =
                     samlFac.createAssertion(assertionId, issuer, issuerInst, conditions, advice, statements);
         }catch(SAMLException ex){
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0032_ERROR_CREATING_SAML_ASSERTION(ex));
             throw new WSTrustException("Unable to create SAML assertion", ex);
         }catch(XWSSecurityException ex){
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0032_ERROR_CREATING_SAML_ASSERTION(ex));
             throw new WSTrustException("Unable to create the SAML assertion", ex);
         }
         
@@ -390,8 +399,12 @@ public class SBIssuedSamlTokenContractImpl extends IssueSamlTokenContract{
             assertion =
                     samlFac.createAssertion(assertionId, issuerID, issueInst, conditions, null, subj, statements);
         }catch(SAMLException ex){
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0032_ERROR_CREATING_SAML_ASSERTION(ex));
             throw new WSTrustException("Unable to create SAML assertion", ex);
         }catch(XWSSecurityException ex){
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0032_ERROR_CREATING_SAML_ASSERTION(ex));
             throw new WSTrustException("Unable to create the SAML assertion", ex);
         }
         
@@ -419,6 +432,8 @@ public class SBIssuedSamlTokenContractImpl extends IssueSamlTokenContract{
             X509Data x509Data = new X509Data();
             Set certs = ctx.getRequestorSubject().getPublicCredentials();
             if(certs == null){
+                log.log(Level.SEVERE,
+                        LogStringsMessages.WST_0034_UNABLE_GET_CLIENT_CERT());
                 throw new WSTrustException("Unable to obtain client certificate");
             }
             boolean addedClientCert = false;
@@ -440,6 +455,8 @@ public class SBIssuedSamlTokenContractImpl extends IssueSamlTokenContract{
                 }
             }
             if(!addedClientCert){
+                log.log(Level.SEVERE,
+                        LogStringsMessages.WST_0034_UNABLE_GET_CLIENT_CERT());
                 throw new WSTrustException("Unable to obtain client certificate");
             }
             keyInfo.getContent().add(x509Data);
@@ -471,8 +488,12 @@ public class SBIssuedSamlTokenContractImpl extends IssueSamlTokenContract{
         try{
             callbackHandler.handle(callbacks);
         }catch(IOException ex){
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(ex));
             throw new WSTrustException("Unable to get the service certificate", ex);
         }catch(UnsupportedCallbackException ex){
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(ex));
             throw new WSTrustException("Unable to get the service certificate", ex);
         }
         
@@ -577,8 +598,8 @@ public class SBIssuedSamlTokenContractImpl extends IssueSamlTokenContract{
                 dsa = signatureFactory.newDSAKeyValue(p,q,g,y,null,null,null);
                 kv = signatureFactory.newKeyValue(Collections.singletonList(dsa));
                 
-            } else if (pubKey instanceof java.security.interfaces.RSAPublicKey) {                
-                RSAKeyValue rsa = null;                
+            } else if (pubKey instanceof java.security.interfaces.RSAPublicKey) {
+                RSAKeyValue rsa = null;
                 RSAPublicKey key = (RSAPublicKey)pubKey;
                 rsa = signatureFactory.newRSAKeyValue(key.getModulus().toByteArray(),key.getPublicExponent().toByteArray());
                 kv = signatureFactory.newKeyValue(Collections.singletonList(rsa));
@@ -598,12 +619,14 @@ public class SBIssuedSamlTokenContractImpl extends IssueSamlTokenContract{
 //        } catch (KeyException ex) {
 //            ex.printStackTrace();
 //            throw new WSTrustException("Unable to create sign SAML Assertion",ex);
-//        } 
+//        }
         } catch (NoSuchAlgorithmException ex) {
-            ex.printStackTrace();
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0035_UNABLE_CREATE_SIGN_SAML_ASSERTION(ex));         
             throw new WSTrustException("Unable to create sign SAML Assertion",ex);
         } catch (InvalidAlgorithmParameterException ex) {
-            ex.printStackTrace();
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0035_UNABLE_CREATE_SIGN_SAML_ASSERTION(ex));
             throw new WSTrustException("Unable to create sign SAML Assertion",ex);
         }
     }

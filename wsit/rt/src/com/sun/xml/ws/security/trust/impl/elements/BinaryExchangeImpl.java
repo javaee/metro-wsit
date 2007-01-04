@@ -1,5 +1,5 @@
 /*
- * $Id: BinaryExchangeImpl.java,v 1.2 2006-09-20 23:58:47 manveen Exp $
+ * $Id: BinaryExchangeImpl.java,v 1.3 2007-01-04 00:42:25 manveen Exp $
  */
 
 /*
@@ -35,6 +35,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
 
+import com.sun.istack.NotNull;
+
+import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
+
 /**
  *
  * @author Manveen Kaur (manveen.kaur@sun.com).
@@ -63,9 +67,9 @@ public class BinaryExchangeImpl extends BinaryExchangeType implements BinaryExch
         try {
             return Base64.decode(getTextValue());
         } catch (Base64DecodingException de) {
-            log.log(Level.SEVERE,"WST0020.error.decoding", new Object[] {getTextValue()});
-            throw new RuntimeException("Error while decoding " +
-                    de.getMessage());
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0020_ERROR_DECODING(getTextValue(), de));
+            throw new RuntimeException("Error while decoding :" + getTextValue() , de);
         }
     }
     
@@ -73,11 +77,11 @@ public class BinaryExchangeImpl extends BinaryExchangeType implements BinaryExch
         return super.getValue();
     }
     
-    public void setTextValue(String encodedText) {
+    public void setTextValue(@NotNull final String encodedText) {
         super.setValue(encodedText);
     }
     
-    public void setRawValue(byte[] rawText) {
+    public void setRawValue(@NotNull final byte[] rawText) {
         super.setValue(Base64.encode(rawText));
     }
     
