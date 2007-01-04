@@ -88,10 +88,10 @@ public final class Invocation {
     
     public String argsToString() {
         if (argsString == null) {
-            List argList = null;
+            List<Object> argList = null;
             if (arguments != null && arguments.length > 0) {
                 if (arguments.length == 3 && "writeCharacters".equals(method.getName())) {
-                    argList = new ArrayList(3);
+                    argList = new ArrayList<Object>(3);
                     argList.add(new String((char[]) arguments[0]));
                     argList.add(arguments[1]);
                     argList.add(arguments[2]);
