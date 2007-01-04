@@ -232,7 +232,13 @@ public class SecurityServerPipe extends SecurityPipeBase {
         Packet retPacket = null;
         
         if (thereWasAFault) {
-            retPacket = packet;
+            //retPacket = packet;
+            if (this.isAddressingEnabled()) {
+                retPacket = packet.createServerResponse(
+                        msg, this.addVer, this.soapVersion, this.addVer.getDefaultFaultAction());
+            } else {
+                retPacket = packet;
+            }
         } else {
             
             if (isSCIssueMessage || isSCCancelMessage) {
@@ -737,7 +743,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
                 || RM_LAST_MESSAGE.equals(action)) {
                     return true;
                 }
-            }
+            }
         }
         return false;
     }
