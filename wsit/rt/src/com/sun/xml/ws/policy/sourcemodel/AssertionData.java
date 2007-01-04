@@ -31,6 +31,7 @@ import java.util.Set;
 import javax.xml.namespace.QName;
 
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
+import java.io.Serializable;
 
 /**
  * Wrapper class for possible data that each 'assertion' and 'assertion parameter content' policy source model node may
@@ -42,7 +43,7 @@ import com.sun.xml.ws.policy.privateutil.PolicyUtils;
  *
  * @author Marek Potociar (marek.potociar@sun.com)
  */
-public final class AssertionData implements Cloneable {
+public final class AssertionData implements Cloneable, Serializable {
     private QName name;
     private String value;
     private HashMap<QName, String> attributes = new HashMap<QName, String>();
