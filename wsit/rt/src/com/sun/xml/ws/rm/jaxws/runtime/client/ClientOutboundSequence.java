@@ -187,7 +187,7 @@ public class ClientOutboundSequence extends OutboundSequence {
      * @param listener The <code>AcknowledgementListener</code>
      */
     public void setAckListener(AcknowledgementListener listener) {
-        this.ackListener = ackListener;
+        this.ackListener = listener;
     }
     
     /**

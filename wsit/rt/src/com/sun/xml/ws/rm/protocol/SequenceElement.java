@@ -70,7 +70,7 @@ public class SequenceElement   {
 
 
     public String getLocalPart(){
-        return new String ( "Sequence");
+        return  "Sequence";
     }
 
 

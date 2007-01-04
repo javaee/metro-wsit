@@ -763,7 +763,8 @@ public class RMServerPipe extends PipeBase<RMDestination,
             ServerInboundSequence seq = provider.getInboundSequence(id);
 
             //reset inactivity timer
-            seq.resetLastActivityTime();
+            //Fixed redundant null check bug found by Findbugs
+            //seq.resetLastActivityTime();
 
             if (seq == null) {
                 //we may be in the pipeline of a ProtocolMessageReceiver.  In
@@ -772,6 +773,8 @@ public class RMServerPipe extends PipeBase<RMDestination,
                 ProtocolMessageReceiver.handleAcknowledgement(el);
 
             } else {
+                //reset inactivity timer
+                seq.resetLastActivityTime();
                 handleInboundMessage(inbound);
             }
 

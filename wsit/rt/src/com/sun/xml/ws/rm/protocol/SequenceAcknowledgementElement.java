@@ -147,7 +147,7 @@ public class SequenceAcknowledgementElement   {
 
 
     public String getLocalPart(){
-        return new String ( "SequenceAcknowledgement");
+        return  "SequenceAcknowledgement";
     }
 
     public void setId(String id) {

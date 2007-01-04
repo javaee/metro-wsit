@@ -59,7 +59,7 @@ public class AckRequestedElement  {
     }
 
     public String getLocalPart(){
-        return new String ("AckRequested");
+        return "AckRequested";
     }
 
     //Introduce accessors using simple types rather than BigInteger and

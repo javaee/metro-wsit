@@ -50,10 +50,10 @@ public class InboundMessageProcessor {
 
 
     private  RMProvider provider;
-    private  RMConstants constants;
+
 
     public InboundMessageProcessor(RMProvider provider) {
-        constants = RMBuilder.getConstants();
+       
         this.provider = provider;
     }
 
@@ -105,7 +105,7 @@ public class InboundMessageProcessor {
 
                     //add message to ClientInboundSequence
                     int messageNumber = (int)el.getNumber();
-                    if (messageNumber > Integer.MAX_VALUE){
+                    if (messageNumber == Integer.MAX_VALUE){
                         throw new MessageNumberRolloverException(String.format(Constants.MESSAGE_NUMBER_ROLLOVER_TEXT,messageNumber),messageNumber);
                     }
                     

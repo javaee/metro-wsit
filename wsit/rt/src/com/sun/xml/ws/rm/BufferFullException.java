@@ -39,7 +39,7 @@ public class BufferFullException extends RMException {
    /**
     * Sequence whose buffer is full.
     */
-   private Sequence seq;
+   private final Sequence seq;
    
    public BufferFullException(Sequence seq) {
         super();
