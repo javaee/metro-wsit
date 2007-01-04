@@ -64,7 +64,7 @@ public class X509Token extends PolicyAssertion implements com.sun.xml.ws.securit
      */
     private String id = null;
     private boolean reqDK=false;
-
+    
     private boolean isServer = false;
     
     public X509Token() {
@@ -132,44 +132,41 @@ public class X509Token extends PolicyAssertion implements com.sun.xml.ws.securit
         }
     }
     
-    private void populate() {
-        if(populated){
-            return ;
-        }
-        synchronized (this.getClass()){
-            if(!populated){
-                if(this.getAttributeValue(itQname)!=null){
-                    this.includeToken = this.getAttributeValue(itQname);
+    private synchronized void populate() {
+        
+        if(!populated){
+            if(this.getAttributeValue(itQname)!=null){
+                this.includeToken = this.getAttributeValue(itQname);
+            }
+            NestedPolicy policy = this.getNestedPolicy();
+            if(policy == null){
+                if(logger.getLevel() == Level.FINE){
+                    logger.log(Level.FINE,"NestedPolicy is null");
                 }
-                NestedPolicy policy = this.getNestedPolicy();
-                if(policy == null){
-                    if(logger.getLevel() == Level.FINE){
-                        logger.log(Level.FINE,"NestedPolicy is null");
-                    }
-                    populated = true;
-                    return;
-                }
-                AssertionSet assertionSet = policy.getAssertionSet();
-                for(PolicyAssertion assertion: assertionSet){
-                    if(PolicyUtil.isTokenReferenceType(assertion)){
-                        referenceType.add(assertion.getName().getLocalPart().intern());
-                    }else if(PolicyUtil.isTokenType(assertion)) {
-                        tokenType = assertion.getName().getLocalPart();
-                    }else if (PolicyUtil.isRequireDerivedKeys(assertion)) {
-                        reqDK = true;
-                    }else{
-                        if(!assertion.isOptional()){
-                            if(logger.getLevel() == Level.SEVERE){
-                                logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"X509Token"});
-                            }
-                            if(isServer){
-                                throw new UnsupportedPolicyAssertion("Policy assertion "+
-                                          assertion+" is not supported under X509Token assertion");
-                            }
+                populated = true;
+                return;
+            }
+            AssertionSet assertionSet = policy.getAssertionSet();
+            for(PolicyAssertion assertion: assertionSet){
+                if(PolicyUtil.isTokenReferenceType(assertion)){
+                    referenceType.add(assertion.getName().getLocalPart().intern());
+                }else if(PolicyUtil.isTokenType(assertion)) {
+                    tokenType = assertion.getName().getLocalPart();
+                }else if (PolicyUtil.isRequireDerivedKeys(assertion)) {
+                    reqDK = true;
+                }else{
+                    if(!assertion.isOptional()){
+                        if(logger.getLevel() == Level.SEVERE){
+                            logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"X509Token"});
+                        }
+                        if(isServer){
+                            throw new UnsupportedPolicyAssertion("Policy assertion "+
+                                    assertion+" is not supported under X509Token assertion");
                         }
                     }
                 }
             }
+            
             populated = true;
         }
     }

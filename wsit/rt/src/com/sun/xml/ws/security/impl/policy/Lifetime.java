@@ -3,12 +3,12 @@
  * of the Common Development and Distribution License
  * (the License).  You may not use this file except in
  * compliance with the License.
- * 
+ *
  * You can obtain a copy of the license at
  * https://glassfish.dev.java.net/public/CDDLv1.0.html.
  * See the License for the specific language governing
  * permissions and limitations under the License.
- * 
+ *
  * When distributing Covered Code, include this CDDL
  * Header Notice in each file and include the License file
  * at https://glassfish.dev.java.net/public/CDDLv1.0.html.
@@ -16,7 +16,7 @@
  * with the fields enclosed by brackets [] replaced by
  * you own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * 
+ *
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
@@ -82,30 +82,25 @@ public class Lifetime extends PolicyAssertion implements com.sun.xml.ws.security
         }
     }
     
-    private void populate() {
-        if(populated){
-            return;
-        }
-        synchronized (this.getClass()){
-            if(!populated){
-                NestedPolicy policy = this.getNestedPolicy();
-                if(policy == null){
-                    if(logger.getLevel() == Level.FINE){
-                        logger.log(Level.FINE,"NestedPolicy is null");
-                    }
-                    populated = true;
-                    return;
+    private synchronized void populate() {
+        if(!populated){
+            NestedPolicy policy = this.getNestedPolicy();
+            if(policy == null){
+                if(logger.getLevel() == Level.FINE){
+                    logger.log(Level.FINE,"NestedPolicy is null");
                 }
-                AssertionSet as = policy.getAssertionSet();
-                for(PolicyAssertion pa : as){
-                    if ( PolicyUtil.isCreated(pa) ) {
-                        this.created = pa.getValue();
-                    } else if ( PolicyUtil.isExpires(pa) ) {
-                        this.expires = pa.getValue();
-                    }
+                populated = true;
+                return;
+            }
+            AssertionSet as = policy.getAssertionSet();
+            for(PolicyAssertion pa : as){
+                if ( PolicyUtil.isCreated(pa) ) {
+                    this.created = pa.getValue();
+                } else if ( PolicyUtil.isExpires(pa) ) {
+                    this.expires = pa.getValue();
                 }
             }
             populated = true;
-        }
+        }        
     }
 }

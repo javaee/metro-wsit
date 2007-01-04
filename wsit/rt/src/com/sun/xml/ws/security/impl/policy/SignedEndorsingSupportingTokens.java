@@ -44,8 +44,5 @@ public class SignedEndorsingSupportingTokens extends SupportingTokens implements
     public SignedEndorsingSupportingTokens(AssertionData name,Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) {
         super(name,nestedAssertions,nestedAlternative);
     }
-    
-//    public QName getName(){
-//        return Constants._SignedEndorsingSupportingTokens_QNAME;
-//    }
+
 }

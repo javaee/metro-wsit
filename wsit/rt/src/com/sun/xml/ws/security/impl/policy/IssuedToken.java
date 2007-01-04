@@ -63,7 +63,7 @@ public class IssuedToken extends PolicyAssertion implements  com.sun.xml.ws.secu
     
     public IssuedToken(AssertionData name,Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) {
         super(name,nestedAssertions,nestedAlternative);
-        UUID uid = UUID.randomUUID(); 
+        UUID uid = UUID.randomUUID();
         id= uid.toString();
     }
     
@@ -111,77 +111,72 @@ public class IssuedToken extends PolicyAssertion implements  com.sun.xml.ws.secu
         }
     }
     
-    private void populate() {
-        if(populated){
-            return;
-        }
-        synchronized (this.getClass()){
-            if(!populated){
-                if(this.getAttributeValue(itQname)!=null){
-                    this.includeToken = this.getAttributeValue(itQname);
-                }
-                if ( this.hasNestedAssertions() ) {
-                    Iterator <PolicyAssertion> it = this.getNestedAssertionsIterator();
-                    while ( it.hasNext() ) {
-                        PolicyAssertion assertion = it.next();
-                        if ( PolicyUtil.isIssuer(assertion) ) {
-                            this.issuer = (Issuer) assertion;
-                        } else if ( PolicyUtil.isRequestSecurityTokenTemplate(assertion)) {
-                            this.rstTemplate = (RequestSecurityTokenTemplate) assertion;
-                        }else{
-                            if(!assertion.isOptional()){
-                                if(logger.getLevel() == Level.SEVERE){
-                                    logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"IssuedToken"});
-                                }
-                                throw new UnsupportedPolicyAssertion("Policy assertion "+
-                                          assertion+" is not supported under IssuedToken assertion");
-                                
-                            }
-                        }
-                    }
-                }
-                NestedPolicy policy = this.getNestedPolicy();
-                if(policy == null){
-                    if(logger.getLevel() == Level.FINE){
-                        logger.log(Level.FINE,"NestedPolicy is null");
-                    }
-                    populated = true;
-                    return;
-                }
-                AssertionSet as = policy.getAssertionSet();
-                if(as == null){
-                    if(logger.getLevel() == Level.FINE){
-                        logger.log(Level.FINE," Nested Policy is empty");
-                    }
-                    populated = true;
-                    return;
-                }
-                Iterator<PolicyAssertion> ast = as.iterator();
-                
-                while(ast.hasNext()){
-                    PolicyAssertion assertion = ast.next();
-                    if(referenceType == null){
-                        referenceType = new ArrayList<String>();
-                    }
-                    if ( PolicyUtil.isRequireDerivedKeys(assertion)) {
-                        reqDK = true;
-                    } else if ( PolicyUtil.isRequireExternalReference(assertion)) {
-                        referenceType.add(assertion.getName().getLocalPart().intern());
-                    } else if ( PolicyUtil.isRequireInternalReference(assertion)) {
-                        referenceType.add(assertion.getName().getLocalPart().intern());
-                    } else{
-                        if(logger.getLevel() == Level.SEVERE){
-                            logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"IssuedToken"});
-                        }
-                        if(isServer){
-                            throw new UnsupportedPolicyAssertion("Policy assertion "+
-                                      assertion+" is not supported under IssuedToken assertion");
-                        }
-                    }
-                }
-                
-                populated = true;
+    private synchronized void populate() {
+        
+        if(!populated){
+            if(this.getAttributeValue(itQname)!=null){
+                this.includeToken = this.getAttributeValue(itQname);
             }
-        }
+            if ( this.hasNestedAssertions() ) {
+                Iterator <PolicyAssertion> it = this.getNestedAssertionsIterator();
+                while ( it.hasNext() ) {
+                    PolicyAssertion assertion = it.next();
+                    if ( PolicyUtil.isIssuer(assertion) ) {
+                        this.issuer = (Issuer) assertion;
+                    } else if ( PolicyUtil.isRequestSecurityTokenTemplate(assertion)) {
+                        this.rstTemplate = (RequestSecurityTokenTemplate) assertion;
+                    }else{
+                        if(!assertion.isOptional()){
+                            if(logger.getLevel() == Level.SEVERE){
+                                logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"IssuedToken"});
+                            }
+                            throw new UnsupportedPolicyAssertion("Policy assertion "+
+                                    assertion+" is not supported under IssuedToken assertion");
+                            
+                        }
+                    }
+                }
+            }
+            NestedPolicy policy = this.getNestedPolicy();
+            if(policy == null){
+                if(logger.getLevel() == Level.FINE){
+                    logger.log(Level.FINE,"NestedPolicy is null");
+                }
+                populated = true;
+                return;
+            }
+            AssertionSet as = policy.getAssertionSet();
+            if(as == null){
+                if(logger.getLevel() == Level.FINE){
+                    logger.log(Level.FINE," Nested Policy is empty");
+                }
+                populated = true;
+                return;
+            }
+            Iterator<PolicyAssertion> ast = as.iterator();
+            
+            while(ast.hasNext()){
+                PolicyAssertion assertion = ast.next();
+                if(referenceType == null){
+                    referenceType = new ArrayList<String>();
+                }
+                if ( PolicyUtil.isRequireDerivedKeys(assertion)) {
+                    reqDK = true;
+                } else if ( PolicyUtil.isRequireExternalReference(assertion)) {
+                    referenceType.add(assertion.getName().getLocalPart().intern());
+                } else if ( PolicyUtil.isRequireInternalReference(assertion)) {
+                    referenceType.add(assertion.getName().getLocalPart().intern());
+                } else{
+                    if(logger.getLevel() == Level.SEVERE){
+                        logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"IssuedToken"});
+                    }
+                    if(isServer){
+                        throw new UnsupportedPolicyAssertion("Policy assertion "+
+                                assertion+" is not supported under IssuedToken assertion");
+                    }
+                }
+            }            
+            populated = true;
+        }        
     }
 }

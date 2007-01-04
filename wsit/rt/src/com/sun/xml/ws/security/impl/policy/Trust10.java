@@ -81,45 +81,41 @@ public class Trust10 extends PolicyAssertion implements com.sun.xml.ws.security.
     
     
     
-    void populate(){
-        if(populated){
-            return ;
-        }
-        synchronized (this.getClass()){
-            if(!populated){
-                NestedPolicy policy = this.getNestedPolicy();
-                if(policy == null){
-                    if(logger.getLevel() == Level.FINE){
-                        logger.log(Level.FINE,"NestedPolicy is null");
-                    }
-                    populated = true;
-                    return;
+    private synchronized void populate(){
+        if(!populated){
+            NestedPolicy policy = this.getNestedPolicy();
+            if(policy == null){
+                if(logger.getLevel() == Level.FINE){
+                    logger.log(Level.FINE,"NestedPolicy is null");
                 }
-                AssertionSet as = policy.getAssertionSet();
-                for(PolicyAssertion assertion:as){
-                    if(PolicyUtil.isSupportClientChallenge(assertion)){
-                        addRequiredProperty(Constants.MUST_SUPPORT_CLIENT_CHALLENGE);
-                    }else if(PolicyUtil.isSupportServerChallenge(assertion)){
-                        addRequiredProperty(Constants.MUST_SUPPORT_SERVER_CHALLENGE);
-                    }else if(PolicyUtil.isRequireClientEntropy(assertion)){
-                        addRequiredProperty(Constants.REQUIRE_CLIENT_ENTROPY);
-                    }else if(PolicyUtil.isRequireServerEntropy(assertion)){
-                        addRequiredProperty(Constants.REQUIRE_SERVER_ENTROPY);
-                    }else if(PolicyUtil.isSupportIssuedTokens(assertion)){
-                        addRequiredProperty(Constants.MUST_SUPPORT_ISSUED_TOKENS);
-                    }else{
-                        if(!assertion.isOptional()){
-                            if(logger.getLevel() == Level.SEVERE){
-                                logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"Trust10"});
-                            }
-                            if(isServer){
-                                throw new UnsupportedPolicyAssertion("Policy assertion "+
-                                          assertion+" is not supported under Trust10 assertion");
-                            }
+                populated = true;
+                return;
+            }
+            AssertionSet as = policy.getAssertionSet();
+            for(PolicyAssertion assertion:as){
+                if(PolicyUtil.isSupportClientChallenge(assertion)){
+                    addRequiredProperty(Constants.MUST_SUPPORT_CLIENT_CHALLENGE);
+                }else if(PolicyUtil.isSupportServerChallenge(assertion)){
+                    addRequiredProperty(Constants.MUST_SUPPORT_SERVER_CHALLENGE);
+                }else if(PolicyUtil.isRequireClientEntropy(assertion)){
+                    addRequiredProperty(Constants.REQUIRE_CLIENT_ENTROPY);
+                }else if(PolicyUtil.isRequireServerEntropy(assertion)){
+                    addRequiredProperty(Constants.REQUIRE_SERVER_ENTROPY);
+                }else if(PolicyUtil.isSupportIssuedTokens(assertion)){
+                    addRequiredProperty(Constants.MUST_SUPPORT_ISSUED_TOKENS);
+                }else{
+                    if(!assertion.isOptional()){
+                        if(logger.getLevel() == Level.SEVERE){
+                            logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"Trust10"});
+                        }
+                        if(isServer){
+                            throw new UnsupportedPolicyAssertion("Policy assertion "+
+                                    assertion+" is not supported under Trust10 assertion");
                         }
                     }
                 }
             }
+            
             populated = true;
         }
     }

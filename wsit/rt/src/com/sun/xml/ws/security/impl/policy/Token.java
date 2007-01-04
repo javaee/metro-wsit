@@ -52,9 +52,9 @@ public class Token extends PolicyAssertion implements  com.sun.xml.ws.security.p
     
     public Token(){
         UUID uid = UUID.randomUUID();
-        _id= uid.toString();        
+        _id= uid.toString();
     }
-   
+    
     public Token(QName name) {
         UUID uid = UUID.randomUUID();
         _id= uid.toString();
@@ -80,10 +80,6 @@ public class Token extends PolicyAssertion implements  com.sun.xml.ws.security.p
     public void setIncludeToken(String type) {
     }
     
-//    public QName getName() {
-//        return _name;
-//    }
-    
     public void setToken(com.sun.xml.ws.security.policy.Token token) {
         //TODO
     }
@@ -104,42 +100,37 @@ public class Token extends PolicyAssertion implements  com.sun.xml.ws.security.p
     
     
     
-    private void populate(){
-        if(populated){
-            return;
-        }
-        synchronized (this.getClass()){
-            if(!populated){
-                _includeToken = getAttributeValue(itQname);
-                NestedPolicy policy = this.getNestedPolicy();
-                if(policy == null){
-                    if(logger.getLevel() == Level.FINE){
-                        logger.log(Level.FINE,"NestedPolicy is null");
-                    }
-                    populated = true;
-                    return;
+    private synchronized void populate(){        
+        if(!populated){
+            _includeToken = getAttributeValue(itQname);
+            NestedPolicy policy = this.getNestedPolicy();
+            if(policy == null){
+                if(logger.getLevel() == Level.FINE){
+                    logger.log(Level.FINE,"NestedPolicy is null");
                 }
-                AssertionSet as = policy.getAssertionSet();
-                Iterator<PolicyAssertion> ast = as.iterator();
-                while(ast.hasNext()){
-                    PolicyAssertion assertion = ast.next();
-                    if(PolicyUtil.isToken(assertion)){
-                        _token = (com.sun.xml.ws.security.policy.Token)assertion;
-                    }else{
-                        if(!assertion.isOptional()){
-                            if(logger.getLevel() == Level.SEVERE){
-                                logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"Token"});
-                            }
-                            if(isServer){
-                                throw new UnsupportedPolicyAssertion("Policy assertion "+
-                                        assertion+" is not supported under Token assertion");
-                            }
+                populated = true;
+                return;
+            }
+            AssertionSet as = policy.getAssertionSet();
+            Iterator<PolicyAssertion> ast = as.iterator();
+            while(ast.hasNext()){
+                PolicyAssertion assertion = ast.next();
+                if(PolicyUtil.isToken(assertion)){
+                    _token = (com.sun.xml.ws.security.policy.Token)assertion;
+                }else{
+                    if(!assertion.isOptional()){
+                        if(logger.getLevel() == Level.SEVERE){
+                            logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"Token"});
+                        }
+                        if(isServer){
+                            throw new UnsupportedPolicyAssertion("Policy assertion "+
+                                    assertion+" is not supported under Token assertion");
                         }
                     }
                 }
-                
-                populated = true;
             }
-        }
+            
+            populated = true;
+        }        
     }
 }

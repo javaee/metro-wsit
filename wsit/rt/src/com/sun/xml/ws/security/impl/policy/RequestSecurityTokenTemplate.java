@@ -44,17 +44,17 @@ public class RequestSecurityTokenTemplate extends PolicyAssertion implements com
     String tokenType;
     String requestType;
     Lifetime lifeTime;
-    String authenticationType;    
-    private String keyType;    
-    private int keySize;    
-    private String sigAlgo;    
-    private String encAlgo;    
-    private String canonAlgo;  
-    private boolean isProofEncRequired = false;    
-    private String computedKeyAlgo;    
-    private boolean isEncRequired = false;    
-    private String signWith;    
-    private String encryptWith;    
+    String authenticationType;
+    private String keyType;
+    private int keySize;
+    private String sigAlgo;
+    private String encAlgo;
+    private String canonAlgo;
+    private boolean isProofEncRequired = false;
+    private String computedKeyAlgo;
+    private boolean isEncRequired = false;
+    private String signWith;
+    private String encryptWith;
     
     /**
      * Creates a new instance of RequestSecurityTokenTemplate
@@ -74,13 +74,13 @@ public class RequestSecurityTokenTemplate extends PolicyAssertion implements com
     public String getRequestType() {
         populate();
         return this.requestType;
-    }  
-        
+    }
+    
     public Lifetime getLifetime() {
         populate();
         return lifeTime;
-    }   
- 
+    }
+    
     
     public String getAuthenticationType() {
         populate();
@@ -165,64 +165,59 @@ public class RequestSecurityTokenTemplate extends PolicyAssertion implements com
         }
     }
     
-    private void populate() {
-        if(populated){
-            return;
-        }
-        synchronized (this.getClass()){
-            if(!populated){
-                if ( this.hasNestedAssertions() ) {
-                    
-                    Iterator <PolicyAssertion> it =this.getNestedAssertionsIterator();
-                    while( it.hasNext() ) {
-                        PolicyAssertion assertion = (PolicyAssertion) it.next();
-                        //TODO: Support all RequestSecurityTokenTemplate elements
-                        if ( PolicyUtil.isKeyType(assertion) ) {
-                            this.keyType = assertion.getValue();
-                        } else if ( PolicyUtil.isKeySize(assertion) ) {
-                            this.keySize = Integer.valueOf(assertion.getValue());
-                        }  else if ( PolicyUtil.isEncryption(assertion) ) {
-                            this.isEncRequired = true;
-                        } else if ( PolicyUtil.isProofEncryption(assertion) ) {
-                            this.isProofEncRequired = true;
-                        } else if ( PolicyUtil.isLifeTime(assertion) ) {
-                            this.lifeTime = (Lifetime) assertion;
-                        }else if(PolicyUtil.isSignWith(assertion)){
-                            this.signWith = assertion.getValue();
-                        }else if(PolicyUtil.isTrustTokenType(assertion)){
-                            this.tokenType = assertion.getValue();
-                        }else if(PolicyUtil.isRequestType(assertion)){
-                            this.tokenType = assertion.getValue();
-                        }else if(PolicyUtil.isAuthenticationType(assertion)){
-                            this.tokenType = assertion.getValue();
-                        }else if(PolicyUtil.isSignatureAlgorithm(assertion)){
-                            this.tokenType = assertion.getValue();
-                        }else if(PolicyUtil.isEncryptionAlgorithm(assertion)){
-                            this.tokenType = assertion.getValue();
-                        }else if(PolicyUtil.isCanonicalizationAlgorithm(assertion)){
-                            this.tokenType = assertion.getValue();
-                        }else if(PolicyUtil.isComputedKeyAlgorithm(assertion)){
-                            this.tokenType = assertion.getValue();
-                        }else if(PolicyUtil.isProofEncryption(assertion)){
-                            isProofEncRequired = true;
-                        }else if(PolicyUtil.isEncryption(assertion)){
-                            isEncRequired = true;
-                        }else {
-                            if(!assertion.isOptional()){
-                                if(logger.getLevel() == Level.SEVERE){
-                                    logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"RequestSecurityTokenTemplate"});
-                                }
-                                if(isServer){
-                                    throw new UnsupportedPolicyAssertion("Policy assertion "+
-                                              assertion+" is not supported under RequestSecurityTokenTemplate assertion");
-                                }
+    private synchronized void populate() {        
+        if(!populated){
+            if ( this.hasNestedAssertions() ) {
+                
+                Iterator <PolicyAssertion> it =this.getNestedAssertionsIterator();
+                while( it.hasNext() ) {
+                    PolicyAssertion assertion = (PolicyAssertion) it.next();
+                    //TODO: Support all RequestSecurityTokenTemplate elements
+                    if ( PolicyUtil.isKeyType(assertion) ) {
+                        this.keyType = assertion.getValue();
+                    } else if ( PolicyUtil.isKeySize(assertion) ) {
+                        this.keySize = Integer.valueOf(assertion.getValue());
+                    }  else if ( PolicyUtil.isEncryption(assertion) ) {
+                        this.isEncRequired = true;
+                    } else if ( PolicyUtil.isProofEncryption(assertion) ) {
+                        this.isProofEncRequired = true;
+                    } else if ( PolicyUtil.isLifeTime(assertion) ) {
+                        this.lifeTime = (Lifetime) assertion;
+                    }else if(PolicyUtil.isSignWith(assertion)){
+                        this.signWith = assertion.getValue();
+                    }else if(PolicyUtil.isTrustTokenType(assertion)){
+                        this.tokenType = assertion.getValue();
+                    }else if(PolicyUtil.isRequestType(assertion)){
+                        this.tokenType = assertion.getValue();
+                    }else if(PolicyUtil.isAuthenticationType(assertion)){
+                        this.tokenType = assertion.getValue();
+                    }else if(PolicyUtil.isSignatureAlgorithm(assertion)){
+                        this.tokenType = assertion.getValue();
+                    }else if(PolicyUtil.isEncryptionAlgorithm(assertion)){
+                        this.tokenType = assertion.getValue();
+                    }else if(PolicyUtil.isCanonicalizationAlgorithm(assertion)){
+                        this.tokenType = assertion.getValue();
+                    }else if(PolicyUtil.isComputedKeyAlgorithm(assertion)){
+                        this.tokenType = assertion.getValue();
+                    }else if(PolicyUtil.isProofEncryption(assertion)){
+                        isProofEncRequired = true;
+                    }else if(PolicyUtil.isEncryption(assertion)){
+                        isEncRequired = true;
+                    }else {
+                        if(!assertion.isOptional()){
+                            if(logger.getLevel() == Level.SEVERE){
+                                logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"RequestSecurityTokenTemplate"});
+                            }
+                            if(isServer){
+                                throw new UnsupportedPolicyAssertion("Policy assertion "+
+                                        assertion+" is not supported under RequestSecurityTokenTemplate assertion");
                             }
                         }
-                        
                     }
+                    
                 }
-                populated = true;
             }
-        }
+            populated = true;
+        }        
     }
 }

@@ -66,36 +66,32 @@ public class Layout extends PolicyAssertion implements SecurityAssertionValidato
         }
     }
     
-    private void populate(){
-        if(populated){
-            return;
-        }
-        synchronized (this.getClass()){
-            if(!populated){
-                NestedPolicy policy = this.getNestedPolicy();
-                AssertionSet assertionSet = policy.getAssertionSet();
-                for(PolicyAssertion assertion : assertionSet){
-                    if(PolicyUtil.isLax(assertion)){
-                        ml =  MessageLayout.Lax;
-                    }else if(PolicyUtil.isLaxTsFirst(assertion)){
-                        ml = MessageLayout.LaxTsFirst;
-                    }else if(PolicyUtil.isLaxTsLast(assertion)){
-                        ml = MessageLayout.LaxTsLast;
-                    }else if(PolicyUtil.isStrict(assertion)){
-                        ml= MessageLayout.Strict;
-                    } else{
-                        if(!assertion.isOptional()){
-                            if(logger.getLevel() == Level.SEVERE){
-                                logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"Layout"});
-                            }
-                            if(isServer){
-                                throw new UnsupportedPolicyAssertion("Policy assertion "+
-                                        assertion+" is not supported under Layout assertion");
-                            }
+    private synchronized void populate(){
+        if(!populated){
+            NestedPolicy policy = this.getNestedPolicy();
+            AssertionSet assertionSet = policy.getAssertionSet();
+            for(PolicyAssertion assertion : assertionSet){
+                if(PolicyUtil.isLax(assertion)){
+                    ml =  MessageLayout.Lax;
+                }else if(PolicyUtil.isLaxTsFirst(assertion)){
+                    ml = MessageLayout.LaxTsFirst;
+                }else if(PolicyUtil.isLaxTsLast(assertion)){
+                    ml = MessageLayout.LaxTsLast;
+                }else if(PolicyUtil.isStrict(assertion)){
+                    ml= MessageLayout.Strict;
+                } else{
+                    if(!assertion.isOptional()){
+                        if(logger.getLevel() == Level.SEVERE){
+                            logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"Layout"});
+                        }
+                        if(isServer){
+                            throw new UnsupportedPolicyAssertion("Policy assertion "+
+                                    assertion+" is not supported under Layout assertion");
                         }
                     }
                 }
             }
-        }
+            populated = true;
+        }        
     }
 }

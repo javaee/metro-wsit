@@ -32,11 +32,8 @@ import javax.xml.namespace.QName;
  * @author K.Venugopal@sun.com
  */
 public abstract class WSSecurityPolicyFactory{
-    
-    /** Creates a new instance of WSSecurityPolicyFactory */
-    public void WSSecurityPolicyFactory() {
-    }
-    
+   
+       
     public static WSSecurityPolicyFactory getInstance(){
         //default
         throw new UnsupportedOperationException();

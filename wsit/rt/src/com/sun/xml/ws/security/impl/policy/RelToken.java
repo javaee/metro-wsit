@@ -52,7 +52,7 @@ public class RelToken extends PolicyAssertion implements com.sun.xml.ws.security
     private String tokenType;
     private String includeTokenType;
     private PolicyAssertion rdKey = null;
-
+    
     private static QName itQname = new QName(Constants.SECURITY_POLICY_NS, Constants.IncludeToken);
     private boolean isServer = false;
     
@@ -104,44 +104,39 @@ public class RelToken extends PolicyAssertion implements com.sun.xml.ws.security
     }
     
     
-    private void populate(){
-        if(populated){
-            return;
-        }
-        synchronized (this.getClass()){
-            if(!populated){
-                NestedPolicy policy = this.getNestedPolicy();
-                includeTokenType = this.getAttributeValue(itQname);
-                if(policy == null){
-                    if(logger.getLevel() == Level.FINE){
-                        logger.log(Level.FINE,"NestedPolicy is null");
-                    }
-                    populated = true;
-                    return;
+    private synchronized void populate(){
+        if(!populated){
+            NestedPolicy policy = this.getNestedPolicy();
+            includeTokenType = this.getAttributeValue(itQname);
+            if(policy == null){
+                if(logger.getLevel() == Level.FINE){
+                    logger.log(Level.FINE,"NestedPolicy is null");
                 }
-                AssertionSet as = policy.getAssertionSet();
-                Iterator<PolicyAssertion> paItr = as.iterator();
-                
-                while(paItr.hasNext()){
-                    PolicyAssertion assertion  = paItr.next();
-                    if(PolicyUtil.isRelTokenType(assertion)){
-                        tokenType = assertion.getName().getLocalPart().intern();
-                    }else if(PolicyUtil.isRequireDerivedKeys(assertion)){
-                        rdKey = assertion;
-                    }else if(PolicyUtil.isRequireKeyIR(assertion)){
-                        if(tokenRefType == null){
-                            tokenRefType = new ArrayList<String>();
+                populated = true;
+                return;
+            }
+            AssertionSet as = policy.getAssertionSet();
+            Iterator<PolicyAssertion> paItr = as.iterator();
+            
+            while(paItr.hasNext()){
+                PolicyAssertion assertion  = paItr.next();
+                if(PolicyUtil.isRelTokenType(assertion)){
+                    tokenType = assertion.getName().getLocalPart().intern();
+                }else if(PolicyUtil.isRequireDerivedKeys(assertion)){
+                    rdKey = assertion;
+                }else if(PolicyUtil.isRequireKeyIR(assertion)){
+                    if(tokenRefType == null){
+                        tokenRefType = new ArrayList<String>();
+                    }
+                    tokenRefType.add(assertion.getName().getLocalPart().intern());
+                } else{
+                    if(!assertion.isOptional()){
+                        if(logger.getLevel() == Level.SEVERE){
+                            logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"RelToken"});
                         }
-                        tokenRefType.add(assertion.getName().getLocalPart().intern());
-                    } else{
-                        if(!assertion.isOptional()){
-                            if(logger.getLevel() == Level.SEVERE){
-                                logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"RelToken"});
-                            }
-                            if(isServer){
-                                throw new UnsupportedPolicyAssertion("Policy assertion "+
-                                          assertion+" is not supported under RelToken assertion");
-                            }
+                        if(isServer){
+                            throw new UnsupportedPolicyAssertion("Policy assertion "+
+                                    assertion+" is not supported under RelToken assertion");
                         }
                     }
                 }

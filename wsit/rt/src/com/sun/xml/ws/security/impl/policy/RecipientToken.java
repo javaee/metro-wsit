@@ -40,7 +40,4 @@ public class RecipientToken extends com.sun.xml.ws.security.impl.policy.Token{
         super(name,nestedAssertions,nestedAlternative);
     }
     
-//    public QName getName(){
-//        return Constants._RecipientToken_QNAME;
-//    }
 }

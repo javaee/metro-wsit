@@ -106,10 +106,6 @@ public class AsymmetricBinding extends com.sun.xml.ws.policy.PolicyAssertion imp
         return layout;
     }
     
-//    public QName getName() {
-//        return Constants._AsymmetricBinding_QNAME;
-//    }
-    
     public void setInitiatorToken(Token token) {
         this.initiatorToken = token;
     }
@@ -164,59 +160,52 @@ public class AsymmetricBinding extends com.sun.xml.ws.policy.PolicyAssertion imp
     }
     
     
-    private void populate(){
-        if(populated){
-            return;
-        }
-        synchronized (this.getClass()){
-            if(!populated){
-                NestedPolicy policy = this.getNestedPolicy();
-                if(policy == null){
-                    if(logger.getLevel() == Level.FINE){
-                        logger.log(Level.FINE,"NestedPolicy is null");
-                    }
-                    populated = true;
-                    return;
+    private synchronized void populate(){
+        if(!populated){
+            NestedPolicy policy = this.getNestedPolicy();
+            if(policy == null){
+                if(logger.getLevel() == Level.FINE){
+                    logger.log(Level.FINE,"NestedPolicy is null");
                 }
-                AssertionSet as = policy.getAssertionSet();
-                Iterator<PolicyAssertion> ast = as.iterator();
-                while(ast.hasNext()){
-                    PolicyAssertion assertion = ast.next();
-                    if(PolicyUtil.isInitiatorToken(assertion)){
-                        this.initiatorToken = ((com.sun.xml.ws.security.impl.policy.Token)assertion).getToken();
-                    }else if(PolicyUtil.isRecipientToken(assertion)){
-                        this.recipientToken = ((com.sun.xml.ws.security.impl.policy.Token)assertion).getToken();
-                    }else if(PolicyUtil.isAlgorithmAssertion(assertion)){
-                        this.algSuite = (AlgorithmSuite) assertion;
-                    }else if(PolicyUtil.isIncludeTimestamp(assertion)){
-                        this.includeTimestamp = true;
-                    }else if(PolicyUtil.isProtectionOrder(assertion)){
-                        this.protectionOrder = ENCRYPT_SIGN;
-                    }else if(PolicyUtil.isContentOnlyAssertion(assertion)){
-                        this.contentOnly = false;
-                    }else if(PolicyUtil.isMessageLayout(assertion)){
-                        layout = ((Layout)assertion).getMessageLayout();
-                    }else if(PolicyUtil.isProtectTokens(assertion)){
-                        this.protectToken = true;
-                    }else if(PolicyUtil.isEncryptSignature(assertion)){
-                        this.protectSignature = true;
-                    }else{
-                        if(!assertion.isOptional()){
-                            if(logger.getLevel() == Level.SEVERE){
-                                logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"AsymmetricBinding"});
-                            }
-                            if(isServer){
-                                throw new UnsupportedPolicyAssertion("Policy assertion "+
-                                          assertion+" is not supported under AsymmetricBinding assertion");
-                            }
+                populated = true;
+                return;
+            }
+            AssertionSet as = policy.getAssertionSet();
+            Iterator<PolicyAssertion> ast = as.iterator();
+            while(ast.hasNext()){
+                PolicyAssertion assertion = ast.next();
+                if(PolicyUtil.isInitiatorToken(assertion)){
+                    this.initiatorToken = ((com.sun.xml.ws.security.impl.policy.Token)assertion).getToken();
+                }else if(PolicyUtil.isRecipientToken(assertion)){
+                    this.recipientToken = ((com.sun.xml.ws.security.impl.policy.Token)assertion).getToken();
+                }else if(PolicyUtil.isAlgorithmAssertion(assertion)){
+                    this.algSuite = (AlgorithmSuite) assertion;
+                }else if(PolicyUtil.isIncludeTimestamp(assertion)){
+                    this.includeTimestamp = true;
+                }else if(PolicyUtil.isProtectionOrder(assertion)){
+                    this.protectionOrder = ENCRYPT_SIGN;
+                }else if(PolicyUtil.isContentOnlyAssertion(assertion)){
+                    this.contentOnly = false;
+                }else if(PolicyUtil.isMessageLayout(assertion)){
+                    layout = ((Layout)assertion).getMessageLayout();
+                }else if(PolicyUtil.isProtectTokens(assertion)){
+                    this.protectToken = true;
+                }else if(PolicyUtil.isEncryptSignature(assertion)){
+                    this.protectSignature = true;
+                }else{
+                    if(!assertion.isOptional()){
+                        if(logger.getLevel() == Level.SEVERE){
+                            logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"AsymmetricBinding"});
+                        }
+                        if(isServer){
+                            throw new UnsupportedPolicyAssertion("Policy assertion "+
+                                    assertion+" is not supported under AsymmetricBinding assertion");
                         }
                     }
                 }
-                
-                populated = true;
             }
+            populated = true;
         }
     }
-    
     
 }

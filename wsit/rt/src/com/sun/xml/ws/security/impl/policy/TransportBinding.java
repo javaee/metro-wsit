@@ -132,43 +132,38 @@ public class TransportBinding extends PolicyAssertion implements com.sun.xml.ws.
         }
     }
     
-    private void populate(){
-        if(populated){
-            return;
-        }
-        synchronized (this.getClass()){
-            if(!populated){
-                NestedPolicy policy = this.getNestedPolicy();
-                AssertionSet assertions = policy.getAssertionSet();
-                if(assertions == null){
-                    if(logger.getLevel() == Level.FINE){
-                        logger.log(Level.FINE,"NestedPolicy is null");
-                    }
-                    populated = true;
-                    return;
+    private synchronized void populate(){
+        if(!populated){
+            NestedPolicy policy = this.getNestedPolicy();
+            AssertionSet assertions = policy.getAssertionSet();
+            if(assertions == null){
+                if(logger.getLevel() == Level.FINE){
+                    logger.log(Level.FINE,"NestedPolicy is null");
                 }
-                for(PolicyAssertion assertion : assertions){
-                    if(PolicyUtil.isAlgorithmAssertion(assertion)){
-                        this.algSuite = (AlgorithmSuite) assertion;
-                    }else if(PolicyUtil.isToken(assertion)){
-                        transportToken = (HttpsToken)((com.sun.xml.ws.security.impl.policy.Token)assertion).getToken();
-                    }else if(PolicyUtil.isMessageLayout(assertion)){
-                        layout = ((Layout)assertion).getMessageLayout();
-                    }else if(PolicyUtil.isIncludeTimestamp(assertion)){
-                        includeTimeStamp=true;
-                    } else{
-                        if(!assertion.isOptional()){
-                            if(logger.getLevel() == Level.SEVERE){
-                                logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"TransportBinding"});
-                            }
-                            if(isServer){
-                                throw new UnsupportedPolicyAssertion("Policy assertion "+
-                                        assertion+" is not supported under TransportBinding assertion");
-                            }
+                populated = true;
+                return;
+            }
+            for(PolicyAssertion assertion : assertions){
+                if(PolicyUtil.isAlgorithmAssertion(assertion)){
+                    this.algSuite = (AlgorithmSuite) assertion;
+                }else if(PolicyUtil.isToken(assertion)){
+                    transportToken = (HttpsToken)((com.sun.xml.ws.security.impl.policy.Token)assertion).getToken();
+                }else if(PolicyUtil.isMessageLayout(assertion)){
+                    layout = ((Layout)assertion).getMessageLayout();
+                }else if(PolicyUtil.isIncludeTimestamp(assertion)){
+                    includeTimeStamp=true;
+                } else{
+                    if(!assertion.isOptional()){
+                        if(logger.getLevel() == Level.SEVERE){
+                            logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"TransportBinding"});
+                        }
+                        if(isServer){
+                            throw new UnsupportedPolicyAssertion("Policy assertion "+
+                                    assertion+" is not supported under TransportBinding assertion");
                         }
                     }
                 }
-            }
+            }            
             populated = true;
         }
     }

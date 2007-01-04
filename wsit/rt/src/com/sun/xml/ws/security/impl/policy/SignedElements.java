@@ -104,36 +104,32 @@ public class SignedElements extends PolicyAssertion implements com.sun.xml.ws.se
     
     
     
-    private void populate() {
-        if(populated){
-            return;
-        }
-        synchronized (this.getClass()){
-            if ( !populated ) {
-                this.xpathVersion = this.getAttributeValue(XPathVersion);
+    private synchronized void populate() {
+        if ( !populated ) {
+            this.xpathVersion = this.getAttributeValue(XPathVersion);
+            
+            if ( this.hasNestedAssertions() ) {
                 
-                if ( this.hasNestedAssertions() ) {
-                    
-                    Iterator <PolicyAssertion> it = this.getNestedAssertionsIterator();
-                    while( it.hasNext() ) {
-                        PolicyAssertion assertion = (PolicyAssertion) it.next();
-                        if ( PolicyUtil.isXPath(assertion )) {
-                            addTarget(assertion.getValue());
-                        }else{
-                            if(!assertion.isOptional()){
-                                if(logger.getLevel() == Level.SEVERE){
-                                    logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"SignedElements"});
-                                }
-                                if(isServer){
-                                    throw new UnsupportedPolicyAssertion("Policy assertion "+
-                                              assertion+" is not supported under SignedElements assertion");
-                                }
+                Iterator <PolicyAssertion> it = this.getNestedAssertionsIterator();
+                while( it.hasNext() ) {
+                    PolicyAssertion assertion = (PolicyAssertion) it.next();
+                    if ( PolicyUtil.isXPath(assertion )) {
+                        addTarget(assertion.getValue());
+                    }else{
+                        if(!assertion.isOptional()){
+                            if(logger.getLevel() == Level.SEVERE){
+                                logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"SignedElements"});
+                            }
+                            if(isServer){
+                                throw new UnsupportedPolicyAssertion("Policy assertion "+
+                                        assertion+" is not supported under SignedElements assertion");
                             }
                         }
                     }
                 }
-                populated = true;
             }
+            populated = true;
         }
+        
     }
 }

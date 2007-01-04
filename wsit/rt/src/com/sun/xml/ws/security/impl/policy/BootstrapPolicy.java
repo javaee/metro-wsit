@@ -41,11 +41,6 @@ public class BootstrapPolicy extends PolicyAssertion {
         super(name,nestedAssertions,nestedAlternative);
     }
     
-    
-    
-//    public QName getName(){
-//        return Constants._BootstrapPolicy_QNAME;
-//    }
-    
+   
     
 }

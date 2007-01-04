@@ -71,20 +71,6 @@ public class SupportingTokens extends PolicyAssertion implements com.sun.xml.ws.
         return algSuite;
     }
     
-//    public void addTarget(Target target) {
-//        if(targetList == null){
-//            targetList = new ArrayList<Target>();
-//        }
-//        targetList.add(target);
-//    }
-//
-//    public Iterator getTargets() {
-//        populate();
-//        if ( targetList != null ) {
-//            return targetList.iterator();
-//        }
-//        return Collections.emptyList().iterator();
-//    }
     
     public void addToken(Token token) {
         if(_tokenList == null){
@@ -104,50 +90,42 @@ public class SupportingTokens extends PolicyAssertion implements com.sun.xml.ws.
         return Collections.emptyList().iterator();
     }
     
-//    public QName getName() {
-//        return Constants._SupportingTokens_QNAME;
-//    }
-    
-    private void populate(){
-        if(populated){
-            return;
-        }
-        synchronized (this.getClass()){
-            if(!populated){
-                NestedPolicy policy = this.getNestedPolicy();
-                if(policy == null){
-                    if(logger.getLevel() == Level.FINE){
-                        logger.log(Level.FINE,"NestedPolicy is null");
-                    }
-                    populated = true;
-                    return;
+    private synchronized void populate(){
+        
+        if(!populated){
+            NestedPolicy policy = this.getNestedPolicy();
+            if(policy == null){
+                if(logger.getLevel() == Level.FINE){
+                    logger.log(Level.FINE,"NestedPolicy is null");
                 }
-                AssertionSet as = policy.getAssertionSet();
-                Iterator<PolicyAssertion> ast = as.iterator();
-                while(ast.hasNext()){
-                    PolicyAssertion assertion = ast.next();
-                    if(PolicyUtil.isAlgorithmAssertion(assertion)){
-                        this.algSuite = (AlgorithmSuite) assertion;
-                    }else if(PolicyUtil.isToken(assertion)){
-                        addToken((Token)assertion);
-                        //this._tokenList.add((Token)assertion);
-                    }else if(PolicyUtil.isSignedParts(assertion)){
-                        spList.add((SignedParts) assertion);
-                    }else if(PolicyUtil.isSignedElements(assertion)){
-                        seList.add((SignedElements)assertion);
-                    }else if(PolicyUtil.isEncryptParts(assertion)){
-                        epList.add((EncryptedParts)assertion);
-                    }else if(PolicyUtil.isEncryptedElements(assertion)){
-                        eeList.add((EncryptedElements)assertion);
-                    }else{
-                        if(!assertion.isOptional()){
-                            if(logger.getLevel() == Level.SEVERE){
-                                logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"SupportingTokens"});
-                            }
-                            if(isServer){
-                                throw new UnsupportedPolicyAssertion("Policy assertion "+
-                                          assertion+" is not supported under SupportingTokens assertion");
-                            }
+                populated = true;
+                return;
+            }
+            AssertionSet as = policy.getAssertionSet();
+            Iterator<PolicyAssertion> ast = as.iterator();
+            while(ast.hasNext()){
+                PolicyAssertion assertion = ast.next();
+                if(PolicyUtil.isAlgorithmAssertion(assertion)){
+                    this.algSuite = (AlgorithmSuite) assertion;
+                }else if(PolicyUtil.isToken(assertion)){
+                    addToken((Token)assertion);
+                    //this._tokenList.add((Token)assertion);
+                }else if(PolicyUtil.isSignedParts(assertion)){
+                    spList.add((SignedParts) assertion);
+                }else if(PolicyUtil.isSignedElements(assertion)){
+                    seList.add((SignedElements)assertion);
+                }else if(PolicyUtil.isEncryptParts(assertion)){
+                    epList.add((EncryptedParts)assertion);
+                }else if(PolicyUtil.isEncryptedElements(assertion)){
+                    eeList.add((EncryptedElements)assertion);
+                }else{
+                    if(!assertion.isOptional()){
+                        if(logger.getLevel() == Level.SEVERE){
+                            logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"SupportingTokens"});
+                        }
+                        if(isServer){
+                            throw new UnsupportedPolicyAssertion("Policy assertion "+
+                                    assertion+" is not supported under SupportingTokens assertion");
                         }
                     }
                 }

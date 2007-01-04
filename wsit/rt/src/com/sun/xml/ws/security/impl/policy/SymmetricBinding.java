@@ -106,10 +106,6 @@ public class SymmetricBinding extends PolicyAssertion implements com.sun.xml.ws.
         return layout;
     }
     
-//    public QName getName() {
-//        return Constants._SymmetricBinding_QNAME;
-//    }
-    
     
     public void setEncryptionToken(Token token) {
         encryptionToken = token ;
@@ -168,54 +164,49 @@ public class SymmetricBinding extends PolicyAssertion implements com.sun.xml.ws.
         }
     }
     
-    private void populate(){
-        if(populated){
-            return;
-        }
-        synchronized (this.getClass()){
-            if(!populated){
-                NestedPolicy policy = this.getNestedPolicy();
-                if(policy == null){
-                    if(logger.getLevel() == Level.FINE){
-                        logger.log(Level.FINE,"NestedPolicy is null");
-                    }
-                    populated = true;
-                    return;
+    private synchronized void populate(){
+        if(!populated){
+            NestedPolicy policy = this.getNestedPolicy();
+            if(policy == null){
+                if(logger.getLevel() == Level.FINE){
+                    logger.log(Level.FINE,"NestedPolicy is null");
                 }
-                AssertionSet as = policy.getAssertionSet();
-                Iterator<PolicyAssertion> ast = as.iterator();
-                
-                while(ast.hasNext()){
-                    PolicyAssertion assertion = ast.next();
-                    if(PolicyUtil.isSignatureToken(assertion)){
-                        this.signatureToken = ((com.sun.xml.ws.security.impl.policy.Token)assertion).getToken();
-                    }else if(PolicyUtil.isEncryptionToken(assertion)){
-                        this.encryptionToken =((com.sun.xml.ws.security.impl.policy.Token)assertion).getToken();
-                    }else if(PolicyUtil.isProtectionToken(assertion)){
-                        this.protectionToken = ((com.sun.xml.ws.security.impl.policy.Token)assertion).getToken();
-                    }else if(PolicyUtil.isAlgorithmAssertion(assertion)){
-                        this.algSuite = (AlgorithmSuite) assertion;
-                    }else if(PolicyUtil.isIncludeTimestamp(assertion)){
-                        this.includeTimestamp = true;
-                    }else if(PolicyUtil.isProtectionOrder(assertion)){
-                        this.protectionOrder = ENCRYPT_SIGN;
-                    }else if(PolicyUtil.isContentOnlyAssertion(assertion)){
-                        this.contentOnly = false;
-                    }else if(PolicyUtil.isMessageLayout(assertion)){
-                        layout = ((Layout)assertion).getMessageLayout();
-                    }else if(PolicyUtil.isProtectTokens(assertion)){
-                        this.protectToken = true;
-                    }else if(PolicyUtil.isEncryptSignature(assertion)){
-                        this.protectSignature = true;
-                    }else{
-                        if(!assertion.isOptional()){
-                            if(logger.getLevel() == Level.SEVERE){
-                                logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"SymmetricBinding"});
-                            }
-                            if(isServer){
-                                throw new UnsupportedPolicyAssertion("Policy assertion "+
-                                          assertion+" is not supported under SymmetricBinding assertion");
-                            }
+                populated = true;
+                return;
+            }
+            AssertionSet as = policy.getAssertionSet();
+            Iterator<PolicyAssertion> ast = as.iterator();
+            
+            while(ast.hasNext()){
+                PolicyAssertion assertion = ast.next();
+                if(PolicyUtil.isSignatureToken(assertion)){
+                    this.signatureToken = ((com.sun.xml.ws.security.impl.policy.Token)assertion).getToken();
+                }else if(PolicyUtil.isEncryptionToken(assertion)){
+                    this.encryptionToken =((com.sun.xml.ws.security.impl.policy.Token)assertion).getToken();
+                }else if(PolicyUtil.isProtectionToken(assertion)){
+                    this.protectionToken = ((com.sun.xml.ws.security.impl.policy.Token)assertion).getToken();
+                }else if(PolicyUtil.isAlgorithmAssertion(assertion)){
+                    this.algSuite = (AlgorithmSuite) assertion;
+                }else if(PolicyUtil.isIncludeTimestamp(assertion)){
+                    this.includeTimestamp = true;
+                }else if(PolicyUtil.isProtectionOrder(assertion)){
+                    this.protectionOrder = ENCRYPT_SIGN;
+                }else if(PolicyUtil.isContentOnlyAssertion(assertion)){
+                    this.contentOnly = false;
+                }else if(PolicyUtil.isMessageLayout(assertion)){
+                    layout = ((Layout)assertion).getMessageLayout();
+                }else if(PolicyUtil.isProtectTokens(assertion)){
+                    this.protectToken = true;
+                }else if(PolicyUtil.isEncryptSignature(assertion)){
+                    this.protectSignature = true;
+                }else{
+                    if(!assertion.isOptional()){
+                        if(logger.getLevel() == Level.SEVERE){
+                            logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"SymmetricBinding"});
+                        }
+                        if(isServer){
+                            throw new UnsupportedPolicyAssertion("Policy assertion "+
+                                    assertion+" is not supported under SymmetricBinding assertion");
                         }
                     }
                 }

@@ -78,37 +78,34 @@ public class Wss11 extends PolicyAssertion implements com.sun.xml.ws.security.po
         }
     }
     
-    void populate(){
-        if(populated){
-            return ;
-        }
-        synchronized (this.getClass()){
-            if(!populated){
-                NestedPolicy policy = this.getNestedPolicy();
-                if(policy == null){
-                    if(logger.getLevel() == Level.FINE){
-                        logger.log(Level.FINE,"NestedPolicy is null");
-                    }
-                    populated = true;
-                    return;
+    private synchronized  void populate(){
+        
+        if(!populated){
+            NestedPolicy policy = this.getNestedPolicy();
+            if(policy == null){
+                if(logger.getLevel() == Level.FINE){
+                    logger.log(Level.FINE,"NestedPolicy is null");
                 }
-                AssertionSet as = policy.getAssertionSet();
-                
-                for(PolicyAssertion pa : as){
-                    if(PolicyUtil.isWSS11PolicyContent(pa)){
-                        addRequiredProperty(pa.getName().getLocalPart().intern());
-                    }else{
-                        if(!pa.isOptional()){
-                            if(logger.getLevel() == Level.SEVERE){
-                                logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{pa,"WSS11"});
-                            }
-                            throw new UnsupportedPolicyAssertion("Policy assertion "+
-                                    pa+" is not supported under WSS11 assertion");
-                            
+                populated = true;
+                return;
+            }
+            AssertionSet as = policy.getAssertionSet();
+            
+            for(PolicyAssertion pa : as){
+                if(PolicyUtil.isWSS11PolicyContent(pa)){
+                    addRequiredProperty(pa.getName().getLocalPart().intern());
+                }else{
+                    if(!pa.isOptional()){
+                        if(logger.getLevel() == Level.SEVERE){
+                            logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{pa,"WSS11"});
                         }
+                        throw new UnsupportedPolicyAssertion("Policy assertion "+
+                                pa+" is not supported under WSS11 assertion");
+                        
                     }
                 }
             }
+            
             populated = true;
         }
     }

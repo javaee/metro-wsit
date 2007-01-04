@@ -45,7 +45,5 @@ public class SignedSupportingTokens extends SupportingTokens implements com.sun.
     public SignedSupportingTokens(AssertionData name,Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) {
         super(name,nestedAssertions,nestedAlternative);
     }
-//    public QName getName(){
-//        return Constants._SignedSupportingTokens_QNAME;
-//    }
+
 }

@@ -64,7 +64,7 @@ public class AlgorithmSuite extends com.sun.xml.ws.policy.PolicyAssertion implem
     
     public void setAdditionalProps(Set properties) {
     }
-
+    
     public void setType(AlgorithmSuiteValue value) {
         this.value = value;
         populated = true;
@@ -121,57 +121,53 @@ public class AlgorithmSuite extends com.sun.xml.ws.policy.PolicyAssertion implem
     }
     
     
-    private void populate() {
-        if(populated){
-            return;
-        }
-        synchronized (this.getClass()){
-            if(!populated){
-                NestedPolicy policy = this.getNestedPolicy();
-                if(policy == null){
-                    if(logger.getLevel() == Level.FINE){
-                        logger.log(Level.FINE,"NestedPolicy is null");
-                    }
-                    return;
+    private synchronized void populate() {
+        
+        if(!populated){
+            NestedPolicy policy = this.getNestedPolicy();
+            if(policy == null){
+                if(logger.getLevel() == Level.FINE){
+                    logger.log(Level.FINE,"NestedPolicy is null");
                 }
-                AssertionSet as = policy.getAssertionSet();
-                
-                Iterator<PolicyAssertion> ast = as.iterator();
-                while(ast.hasNext()){
-                    PolicyAssertion assertion = ast.next();
-                    if(this.value == null){
-                        AlgorithmSuiteValue av = PolicyUtil.isValidAlgorithmSuiteValue(assertion);
-                        if(av != null){
-                            this.value = av;
-                            continue;
-                        }
-                        
+                return;
+            }
+            AssertionSet as = policy.getAssertionSet();
+            
+            Iterator<PolicyAssertion> ast = as.iterator();
+            while(ast.hasNext()){
+                PolicyAssertion assertion = ast.next();
+                if(this.value == null){
+                    AlgorithmSuiteValue av = PolicyUtil.isValidAlgorithmSuiteValue(assertion);
+                    if(av != null){
+                        this.value = av;
+                        continue;
                     }
-                    if(PolicyUtil.isInclusiveC14N(assertion)){
-                        this.props.add(Constants.InclusiveC14N);
-                    }else if(PolicyUtil.isXPath(assertion)){
-                        this.props.add(Constants.XPath);
-                    }else if(PolicyUtil.isXPathFilter20(assertion)){
-                        this.props.add(Constants.XPathFilter20);
-                    }else if(PolicyUtil.isSTRTransform10(assertion)){
-                        this.props.add(Constants.STRTransform10);
-                    }else{
-                        if(!assertion.isOptional()){
-                            if(logger.getLevel() == Level.SEVERE){
-                                logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"AlgorithmSuite"});
-                            }
-                            if(isServer){
-                                throw new UnsupportedPolicyAssertion("Policy assertion "+
-                                          assertion+" is not supported under AlgorithmSuite assertion");
-                            }
+                    
+                }
+                if(PolicyUtil.isInclusiveC14N(assertion)){
+                    this.props.add(Constants.InclusiveC14N);
+                }else if(PolicyUtil.isXPath(assertion)){
+                    this.props.add(Constants.XPath);
+                }else if(PolicyUtil.isXPathFilter20(assertion)){
+                    this.props.add(Constants.XPathFilter20);
+                }else if(PolicyUtil.isSTRTransform10(assertion)){
+                    this.props.add(Constants.STRTransform10);
+                }else{
+                    if(!assertion.isOptional()){
+                        if(logger.getLevel() == Level.SEVERE){
+                            logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"AlgorithmSuite"});
+                        }
+                        if(isServer){
+                            throw new UnsupportedPolicyAssertion("Policy assertion "+
+                                    assertion+" is not supported under AlgorithmSuite assertion");
                         }
                     }
                 }
             }
-            
             populated = true;
         }
     }
+    
     
     public String getComputedKeyAlgorithm() {
         return com.sun.xml.ws.security.policy.Constants.PSHA1;

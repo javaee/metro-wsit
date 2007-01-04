@@ -40,9 +40,6 @@ public class SignatureToken extends com.sun.xml.ws.security.impl.policy.Token{
     public SignatureToken(AssertionData name,Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) {
         super(name,nestedAssertions,nestedAlternative);
     }
-    
-//    public QName getName(){
-//        return Constants._SignatureToken_QNAME;
-//    }
+
     
 }

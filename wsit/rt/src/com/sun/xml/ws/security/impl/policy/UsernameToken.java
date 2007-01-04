@@ -70,11 +70,6 @@ public class UsernameToken extends PolicyAssertion implements com.sun.xml.ws.sec
     }
     
     
-//    public QName getName() {
-//        return Constants._UsernameToken_QNAME;
-//    }
-    
-    
     public String getTokenId() {
         return id;
     }
@@ -103,38 +98,35 @@ public class UsernameToken extends PolicyAssertion implements com.sun.xml.ws.sec
         }
     }
     
-    private void populate(){
-        if(populated){
-            return ;
-        }
-        synchronized (this.getClass()){
-            if(!populated){
-                this.includeToken = this.getAttributeValue(itQname);
-                NestedPolicy policy = this.getNestedPolicy();
-                if(policy == null){
-                    if(logger.getLevel() == Level.FINE){
-                        logger.log(Level.FINE,"NestedPolicy is null");
-                    }
-                    populated = true;
-                    return;
+    private synchronized void populate(){
+        
+        if(!populated){
+            this.includeToken = this.getAttributeValue(itQname);
+            NestedPolicy policy = this.getNestedPolicy();
+            if(policy == null){
+                if(logger.getLevel() == Level.FINE){
+                    logger.log(Level.FINE,"NestedPolicy is null");
                 }
-                AssertionSet assertionSet = policy.getAssertionSet();
-                for(PolicyAssertion assertion: assertionSet){
-                    if(PolicyUtil.isUsernameTokenType(assertion)){
-                        tokenType = assertion.getName().getLocalPart();
-                    }else{
-                        if(!assertion.isOptional()){
-                            if(logger.getLevel() == Level.SEVERE){
-                                logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"UsernameToken"});
-                            }
-                            if(isServer){
-                                throw new UnsupportedPolicyAssertion("Policy assertion "+
-                                          assertion+" is not supported under UsernameToken assertion");
-                            }
+                populated = true;
+                return;
+            }
+            AssertionSet assertionSet = policy.getAssertionSet();
+            for(PolicyAssertion assertion: assertionSet){
+                if(PolicyUtil.isUsernameTokenType(assertion)){
+                    tokenType = assertion.getName().getLocalPart();
+                }else{
+                    if(!assertion.isOptional()){
+                        if(logger.getLevel() == Level.SEVERE){
+                            logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"UsernameToken"});
+                        }
+                        if(isServer){
+                            throw new UnsupportedPolicyAssertion("Policy assertion "+
+                                    assertion+" is not supported under UsernameToken assertion");
                         }
                     }
                 }
             }
+            
             populated = true;
         }
     }

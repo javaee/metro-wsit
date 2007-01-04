@@ -98,41 +98,37 @@ public class SpnegoContextToken extends PolicyAssertion implements com.sun.xml.w
         }
     }
     
-    private void populate(){
-        if(populated){
-            return;
-        }
-        synchronized (this.getClass()){
-            if(!populated){
-                NestedPolicy policy = this.getNestedPolicy();
-                includeTokenType = this.getAttributeValue(itQname);
-                if(policy == null){
-                    if(logger.getLevel() == Level.FINE){
-                        logger.log(Level.FINE,"NestedPolicy is null");
-                    }
-                    populated = true;
-                    return;
+    private synchronized void populate(){
+        if(!populated){
+            NestedPolicy policy = this.getNestedPolicy();
+            includeTokenType = this.getAttributeValue(itQname);
+            if(policy == null){
+                if(logger.getLevel() == Level.FINE){
+                    logger.log(Level.FINE,"NestedPolicy is null");
                 }
-                AssertionSet as = policy.getAssertionSet();
-                Iterator<PolicyAssertion> paItr = as.iterator();
-                
-                while(paItr.hasNext()){
-                    PolicyAssertion assertion  = paItr.next();
-                    if(PolicyUtil.isRequireDerivedKeys(assertion)){
-                        rdKey = assertion;
-                    } else{
-                        if(!assertion.isOptional()){
-                            if(logger.getLevel() == Level.SEVERE){
-                                logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"RelToken"});
-                            }
-                            if(isServer){
-                                throw new UnsupportedPolicyAssertion("Policy assertion "+
-                                          assertion+" is not supported under RelToken assertion");
-                            }
+                populated = true;
+                return;
+            }
+            AssertionSet as = policy.getAssertionSet();
+            Iterator<PolicyAssertion> paItr = as.iterator();
+            
+            while(paItr.hasNext()){
+                PolicyAssertion assertion  = paItr.next();
+                if(PolicyUtil.isRequireDerivedKeys(assertion)){
+                    rdKey = assertion;
+                } else{
+                    if(!assertion.isOptional()){
+                        if(logger.getLevel() == Level.SEVERE){
+                            logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"RelToken"});
+                        }
+                        if(isServer){
+                            throw new UnsupportedPolicyAssertion("Policy assertion "+
+                                    assertion+" is not supported under RelToken assertion");
                         }
                     }
                 }
             }
+            
             if ( this.hasNestedAssertions() ) {
                 Iterator <PolicyAssertion> it = this.getNestedAssertionsIterator();
                 while(it.hasNext()){

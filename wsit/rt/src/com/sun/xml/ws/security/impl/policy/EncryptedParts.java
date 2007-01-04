@@ -87,42 +87,37 @@ public class EncryptedParts extends PolicyAssertion implements com.sun.xml.ws.se
         }
     }
     
-    private void populate() {
-        if(populated){
-            return;
-        }
-        synchronized (this.getClass()){
-            if(!populated){
-                if ( this.hasNestedAssertions() ) {
-                    
-                    Iterator <PolicyAssertion> it = this.getNestedAssertionsIterator();
-                    while( it.hasNext() ) {
-                        PolicyAssertion assertion = it.next();
-                        if ( PolicyUtil.isBody(assertion)) {
-                            this._body = true;
-                        } else {
-                            if(header == null){
-                                header = new ArrayList<Header>();
-                            }
-                            if(PolicyUtil.isHeader(assertion)){
-                                this.header.add((Header)assertion);
-                            }else{
-                                if(!assertion.isOptional()){
-                                    if(logger.getLevel() == Level.SEVERE){
-                                        logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"EncyptedParts"});
-                                    }
-                                    if(isServer){
-                                        throw new UnsupportedPolicyAssertion("Policy assertion "+
-                                                  assertion+" is not supported under EncyptedParts assertion");
-                                    }
+    private synchronized void populate() {        
+        if(!populated){
+            if ( this.hasNestedAssertions() ) {
+                
+                Iterator <PolicyAssertion> it = this.getNestedAssertionsIterator();
+                while( it.hasNext() ) {
+                    PolicyAssertion assertion = it.next();
+                    if ( PolicyUtil.isBody(assertion)) {
+                        this._body = true;
+                    } else {
+                        if(header == null){
+                            header = new ArrayList<Header>();
+                        }
+                        if(PolicyUtil.isHeader(assertion)){
+                            this.header.add((Header)assertion);
+                        }else{
+                            if(!assertion.isOptional()){
+                                if(logger.getLevel() == Level.SEVERE){
+                                    logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"EncyptedParts"});
+                                }
+                                if(isServer){
+                                    throw new UnsupportedPolicyAssertion("Policy assertion "+
+                                            assertion+" is not supported under EncyptedParts assertion");
                                 }
                             }
                         }
                     }
                 }
-                populated = true;
             }
-        }
+            populated = true;
+        }        
     }
     
     public void removeTarget(QName targetName) {

@@ -43,8 +43,5 @@ public class InitiatorToken extends com.sun.xml.ws.security.impl.policy.Token{
         super(name,nestedAssertions,nestedAlternative);
         
     }
-    
-//    public QName getName(){
-//        return Constants._InitiatorToken_QNAME;
-//    }
+
 }

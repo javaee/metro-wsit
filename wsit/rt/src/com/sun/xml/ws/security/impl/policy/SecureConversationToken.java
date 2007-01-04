@@ -128,50 +128,45 @@ public class SecureConversationToken extends PolicyAssertion implements com.sun.
     }
     
     
-    private void populate(){
-        if(populated){
-            return;
-        }
-        synchronized (this.getClass()){
-            if(!populated){
-                String tmp = getAttributeValue(itQname);
-                if(tmp != null)
-                    includeToken = tmp;
-                NestedPolicy policy = this.getNestedPolicy();
-                if(policy == null){
-                    if(logger.getLevel() == Level.FINE){
-                        logger.log(Level.FINE,"NestedPolicy is null");
-                    }
-                    populated = true;
-                    return;
+    private synchronized void populate(){
+        if(!populated){
+            String tmp = getAttributeValue(itQname);
+            if(tmp != null)
+                includeToken = tmp;
+            NestedPolicy policy = this.getNestedPolicy();
+            if(policy == null){
+                if(logger.getLevel() == Level.FINE){
+                    logger.log(Level.FINE,"NestedPolicy is null");
                 }
-                AssertionSet as = policy.getAssertionSet();
-                Iterator<PolicyAssertion> paItr = as.iterator();
-                while(paItr.hasNext()){
-                    PolicyAssertion assertion = paItr.next();
-                    if(PolicyUtil.isBootstrapPolicy(assertion)){
-                        bootstrapPolicy = assertion.getNestedPolicy();
-                    }else if(PolicyUtil.isRequireDerivedKeys(assertion)){
-                        rdKey =  assertion;
-                    }else if(PolicyUtil.isRequireExternalUriReference(assertion)){
-                        if(referenceType == null){
-                            referenceType =new HashSet<String>();
-                        }
-                        referenceType.add(assertion.getName().getLocalPart().intern());
-                    }else if(PolicyUtil.isSC10SecurityContextToken(assertion)){
-                        tokenType = assertion.getName().getLocalPart();
-                    }else{
-                        if(!assertion.isOptional()){
-                            if(logger.getLevel() == Level.SEVERE){
-                                logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"SecureConversationToken"});
-                            }
-                            if(isServer){
-                                throw new UnsupportedPolicyAssertion("Policy assertion "+
-                                          assertion+" is not supported under SecureConversationToken assertion");
-                            }
-                        }
-                        
+                populated = true;
+                return;
+            }
+            AssertionSet as = policy.getAssertionSet();
+            Iterator<PolicyAssertion> paItr = as.iterator();
+            while(paItr.hasNext()){
+                PolicyAssertion assertion = paItr.next();
+                if(PolicyUtil.isBootstrapPolicy(assertion)){
+                    bootstrapPolicy = assertion.getNestedPolicy();
+                }else if(PolicyUtil.isRequireDerivedKeys(assertion)){
+                    rdKey =  assertion;
+                }else if(PolicyUtil.isRequireExternalUriReference(assertion)){
+                    if(referenceType == null){
+                        referenceType =new HashSet<String>();
                     }
+                    referenceType.add(assertion.getName().getLocalPart().intern());
+                }else if(PolicyUtil.isSC10SecurityContextToken(assertion)){
+                    tokenType = assertion.getName().getLocalPart();
+                }else{
+                    if(!assertion.isOptional()){
+                        if(logger.getLevel() == Level.SEVERE){
+                            logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"SecureConversationToken"});
+                        }
+                        if(isServer){
+                            throw new UnsupportedPolicyAssertion("Policy assertion "+
+                                    assertion+" is not supported under SecureConversationToken assertion");
+                        }
+                    }
+                    
                 }
             }
             if ( this.hasNestedAssertions() ) {

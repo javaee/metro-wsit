@@ -102,36 +102,29 @@ public class RequiredElements extends PolicyAssertion implements com.sun.xml.ws.
         }
     }
     
-    private void populate() {
-        if(populated){
-            return;
-        }
-        synchronized (this.getClass()){
-            if(!populated){
-                this.xpathVersion = (String)this.getAttributeValue(XPathVersion);
-                if ( this.hasNestedAssertions() ) {
-                    Iterator <PolicyAssertion> it = this.getNestedAssertionsIterator();
-                    if ( it.hasNext() ) {
-                        PolicyAssertion assertion = it.next();
-                        if ( PolicyUtil.isXPath(assertion)) {
-                            addTarget(assertion.getValue());
-                        } else{
-                            if(!assertion.isOptional()){
-                                if(logger.getLevel() == Level.SEVERE){
-                                    logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"RequiredElements"});
-                                }
-                                if(isServer){
-                                    throw new UnsupportedPolicyAssertion("Policy assertion "+
-                                              assertion+" is not supported under RequiredElements assertion");
-                                }
+    private synchronized void populate() {
+        if(!populated){
+            this.xpathVersion = (String)this.getAttributeValue(XPathVersion);
+            if ( this.hasNestedAssertions() ) {
+                Iterator <PolicyAssertion> it = this.getNestedAssertionsIterator();
+                if ( it.hasNext() ) {
+                    PolicyAssertion assertion = it.next();
+                    if ( PolicyUtil.isXPath(assertion)) {
+                        addTarget(assertion.getValue());
+                    } else{
+                        if(!assertion.isOptional()){
+                            if(logger.getLevel() == Level.SEVERE){
+                                logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"RequiredElements"});
+                            }
+                            if(isServer){
+                                throw new UnsupportedPolicyAssertion("Policy assertion "+
+                                        assertion+" is not supported under RequiredElements assertion");
                             }
                         }
                     }
                 }
-                populated = true;
             }
+            populated = true;
         }
-        
-    }
-    
+    }    
 }

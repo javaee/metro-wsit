@@ -86,32 +86,27 @@ public class TransportToken extends Token implements com.sun.xml.ws.security.pol
         }
     }
     
-    private void populate(){
-        if(populated){
-            return ;
-        }
-        synchronized (this.getClass()){
-            if(!populated){
-                this.includeToken = this.getAttributeValue(itQname);
-                NestedPolicy policy = this.getNestedPolicy();
-                AssertionSet assertionSet = policy.getAssertionSet();
-                for(PolicyAssertion assertion: assertionSet){
-                    if(PolicyUtil.isHttpsToken(assertion)){
-                        token = (HttpsToken) assertion;
-                    }else{
-                        if(!assertion.isOptional()){
-                            if(logger.getLevel() == Level.SEVERE){
-                                logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"TransportToken"});
-                            }
-                            if(isServer){
-                                throw new UnsupportedPolicyAssertion("Policy assertion "+
-                                        assertion+" is not supported under TransportToken assertion");
-                            }
+    private synchronized void populate(){        
+        if(!populated){
+            this.includeToken = this.getAttributeValue(itQname);
+            NestedPolicy policy = this.getNestedPolicy();
+            AssertionSet assertionSet = policy.getAssertionSet();
+            for(PolicyAssertion assertion: assertionSet){
+                if(PolicyUtil.isHttpsToken(assertion)){
+                    token = (HttpsToken) assertion;
+                }else{
+                    if(!assertion.isOptional()){
+                        if(logger.getLevel() == Level.SEVERE){
+                            logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"TransportToken"});
+                        }
+                        if(isServer){
+                            throw new UnsupportedPolicyAssertion("Policy assertion "+
+                                    assertion+" is not supported under TransportToken assertion");
                         }
                     }
                 }
-                this.populated  = true;
             }
-        }
+            this.populated  = true;
+        }        
     }
 }
