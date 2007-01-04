@@ -350,7 +350,10 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
      */
     public PolicyWSDLParserExtension(boolean isForConfigFile, PolicyMapMutator... externalMutators) {
         this.isForConfigFile = isForConfigFile;
-        this.externalMutators = externalMutators;
+        if (null != externalMutators) {
+            this.externalMutators = new PolicyMapMutator[externalMutators.length];
+            System.arraycopy(externalMutators, 0, this.externalMutators, 0, externalMutators.length);
+        }
     }
     
     private PolicyRecordHandler readSinglePolicy(final PolicyRecord policyRec, final boolean inner) {
