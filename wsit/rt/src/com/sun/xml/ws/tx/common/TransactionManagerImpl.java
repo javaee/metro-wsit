@@ -43,10 +43,12 @@ import java.util.Map;
  * @author jf39279
  */
 public class TransactionManagerImpl implements TransactionManager, TransactionSynchronizationRegistry, TransactionImport {
-    private static TransactionManagerImpl singleton = null;
-    private TransactionManager javaeeTM;
-    private TransactionSynchronizationRegistry javaeeSynchReg;
-    private Map<Xid, ATTransactionImpl> jtaatTxnMap;
+    final private static TransactionManagerImpl singleton = new TransactionManagerImpl();
+    final private TransactionManager javaeeTM;
+    final private TransactionSynchronizationRegistry javaeeSynchReg;
+    final private Map<Xid, ATTransactionImpl> jtaatTxnMap;
+    
+    final static private TxLogger logger = TxLogger.getATLogger(TransactionManagerImpl.class);
 
     // no standardized JNDI name exists across as implementations for TM, this is Sun App Server specific.
     private static final String AS_TXN_MGR_JNDI_NAME = "java:appserver/TransactionManager";
@@ -55,23 +57,16 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
     private static final String TXN_SYNC_REG_JNDI_NAME = "java:comp/TransactionSynchronizationRegistry";
 
     static public TransactionManagerImpl getInstance() {
-        if (singleton == null) {
-            singleton = new TransactionManagerImpl();
-
-            // call this to install WSAT Transaction Manager into jndi namespace.
-            ATTransactionManagerImpl.getInstance();
-        }
         return singleton;
     }
 
-    static private Object jndiLookup(String jndiName) {
+    static private Object jndiLookup(final String jndiName) {
         Object result = null;
         try {
-            Context ctx = new InitialContext();
+            final Context ctx = new InitialContext();
             result = ctx.lookup(jndiName);
         } catch (NamingException e) {
-            // Handle the error
-            System.err.println(e);
+            logger.warning("jndiLookup", "failed jndi lookup of " + jndiName);
         }
         return result;
     }
@@ -100,15 +95,14 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
     }
 
     public javax.transaction.Transaction getTransaction() throws SystemException {
-        Transaction javaeeTxn = javaeeTM.getTransaction();
-        return javaeeTxn;
+        return javaeeTM.getTransaction();
     }
 
-    public Transaction getTransaction(CoordinationContextInterface cc) throws SystemException {
-        return getTransaction(cc.getIdentifier());
+    public Transaction getTransaction(final CoordinationContextInterface coordCtx) throws SystemException {
+        return getTransaction(coordCtx.getIdentifier());
     }
 
-    public Transaction getTransaction(String CoordinationCtxId) throws SystemException {
+    public Transaction getTransaction(final String CoordinationCtxId) throws SystemException {
         return jtaatTxnMap.get(CoordinationXid.get(CoordinationCtxId));
 
     }
@@ -119,7 +113,7 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
     }
 
 
-    public void resume(Transaction transaction) throws InvalidTransactionException, IllegalStateException, SystemException {
+    public void resume(final Transaction transaction) throws InvalidTransactionException, IllegalStateException, SystemException {
         javaeeTM.resume(transaction);
     }
 
@@ -131,8 +125,8 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
         javaeeSynchReg.setRollbackOnly();
     }
 
-    public void setTransactionTimeout(int i) throws SystemException {
-        javaeeTM.setTransactionTimeout(i);
+    public void setTransactionTimeout(final int seconds) throws SystemException {
+        javaeeTM.setTransactionTimeout(seconds);
     }
 
     public Transaction suspend() throws SystemException {
@@ -143,25 +137,23 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
         return javaeeSynchReg.getTransactionKey();
     }
 
-    public void putResource(Object object, Object object0) {
+    public void putResource(final Object object, final Object object0) {
         javaeeSynchReg.putResource(object, object0);
     }
 
-    public Object getResource(Object object) {
+    public Object getResource(final Object object) {
         return javaeeSynchReg.getResource(object);
     }
 
-    public void registerInterposedSynchronization(Synchronization synchronization) {
+    public void registerInterposedSynchronization(final Synchronization synchronization) {
         javaeeSynchReg.registerInterposedSynchronization(synchronization);
     }
 
     public int getTransactionStatus() {
-        // TODO:
         return javaeeSynchReg.getTransactionStatus();
     }
 
     public boolean getRollbackOnly() {
-        // TODO:
         return javaeeSynchReg.getRollbackOnly();
     }
 
@@ -179,7 +171,7 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
      *
      * @param xid the Xid object representing a transaction.
      */
-    public void recreate(Xid xid, long timeout) {
+    public void recreate(final Xid xid, final long timeout) {
         getTxnImportTM().recreate(xid, timeout);
     }
 
@@ -189,7 +181,7 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
      *
      * @param xid the Xid object representing a transaction.
      */
-    public void release(Xid xid) {
+    public void release(final Xid xid) {
         getTxnImportTM().release(xid);
     }
 
@@ -212,7 +204,7 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
     /**
      * Set the coordination context associated with the current transaction.
      */
-    public void setCoordinationContext(CoordinationContextInterface coordinationContext) {
-        putResource("WSCOOR-SUN", coordinationContext);
+    public void setCoordinationContext(final CoordinationContextInterface coordCtx) {
+        putResource("WSCOOR-SUN", coordCtx);
     }
 }

@@ -28,7 +28,6 @@ import com.sun.xml.ws.tx.common.TransactionManagerImpl;
 import com.sun.xml.ws.tx.common.TxLogger;
 import com.sun.xml.ws.tx.coordinator.CoordinationContextInterface;
 import com.sun.xml.ws.tx.coordinator.Registrant;
-import com.sun.xml.ws.tx.webservice.member.at.CoordinatorPortType;
 import com.sun.xml.ws.tx.webservice.member.coord.CreateCoordinationContextType;
 
 import javax.resource.spi.XATerminator;
@@ -43,11 +42,6 @@ import java.util.logging.Level;
  */
 public class ATSubCoordinator extends ATCoordinator {
     static private TxLogger logger = TxLogger.getATLogger(ATCoordinator.class);
-
-    // get EPR from rootVolatileParticipant.getCoordinationProtocolService() (after registerResponse)
-    private CoordinatorPortType parentVolatileCoordinator = null;
-    // get EPR from rootDurableParticipant.getCoordinationProtocolService() (after registerResponse)
-    private CoordinatorPortType parentDurableCoordinator = null;
 
     // This Subordinate coordinator is a volatile participant of parent coordinator.
     private ATParticipant rootVolatileParticipant = null;
@@ -68,7 +62,7 @@ public class ATSubCoordinator extends ATCoordinator {
         assert getContext().getRootRegistrationService() != null;
     }
 
-    public void setTransaction(Transaction txn) {
+    public void setTransaction(final Transaction txn) {
         super.setTransaction(txn);
         if (txn == null) {
             xaTerminator = null;
@@ -100,11 +94,8 @@ public class ATSubCoordinator extends ATCoordinator {
                 rootDurableParticipant.register();
                 result = true;
             } catch (Exception e) {
-                // TODO: must retry in future several times.
-                if (logger.isLogging(Level.SEVERE)) {
-                    logger.severe("registerWithDurableParent", " failed. " + getCoordIdPartId(rootDurableParticipant));
-                }
-                e.printStackTrace();
+                // TODO: ROBUSTNESS retry register when it fails 
+                logger.severe("registerWithDurableParent", " failed. " + getCoordIdPartId(rootDurableParticipant));
             }
         }
         return result;
@@ -165,8 +156,9 @@ public class ATSubCoordinator extends ATCoordinator {
         }
 
         public Participant.STATE prepare() throws TXException {
-            logger.entering("ATSubCoordinator.durableParticipant", getCoordIdPartId(rootDurableParticipant));
-            XAException xaPrepareException = null;
+            if (logger.isLogging(Level.FINER)) {
+                logger.entering("ATSubCoordinator.durableParticipant", getCoordIdPartId(rootDurableParticipant));
+            }
             initiateDurablePrepare();
             if (getXATerminator() != null) {
                 try {
@@ -178,12 +170,11 @@ public class ATSubCoordinator extends ATCoordinator {
                         logger.exiting("XATerminator.prepare()", xaResult);
                     }
                 } catch (XAException ex) {
-                    ex.printStackTrace();
                     setAborting();
                     if (logger.isLogging(Level.INFO)) {
                         logger.info("DurableParticipant.prepare", "XATerminator threw exception " + ex.getLocalizedMessage());
                     }
-                    throw new TXException("DurableParticipant.prepare threw " + ex.getClass().getName());
+                    throw new TXException("DurableParticipant.prepare threw " +  ex.getClass().getName());
                 }
             }
             // Next line required to support remote participants in this coordinators durable participants.
@@ -210,19 +201,19 @@ public class ATSubCoordinator extends ATCoordinator {
                     getXATerminator().commit(getCoordinationXid(), false);
                 } catch (XAException ex) {
                     xaCommitFailed = true;
-                    if (logger.isLogging(Level.SEVERE)) {
-                        logger.severe("ATSubCoordinator.DurableParticipant.commit", "XATerminator.commit() threw exception "
-                                + ex.getLocalizedMessage());
-                    }
+                    
+                    logger.severe("ATSubCoordinator.DurableParticipant.commit", "XATerminator.commit() threw exception "
+                            + ex.getLocalizedMessage());
+                    
                 }
             }
             // TODO send fault when failure occur in commit
             // waitForCommitOrRollbackResponse(Protocol.DURABLE);
             if (xaCommitFailed || isAborting()) {
-                if (logger.isLogging(Level.SEVERE)) {
-                    logger.severe("ATSubCoordinator.DurableParticipant.commit", "abort during commit processing. coordId="
-                            + getIdValue());
-                }
+                
+                logger.severe("ATSubCoordinator.DurableParticipant.commit", "abort during commit processing. coordId="
+                        + getIdValue());
+                
                 // TODO: check WS-AT CV state table if should send aborted to root coordinator here.
                 rootDurableParticipant.aborted();
             } else {
@@ -274,7 +265,7 @@ public class ATSubCoordinator extends ATCoordinator {
         throw new UnsupportedOperationException("No beforeCompletion for subordinate coordinator");
     }
 
-    public void afterCompletion(int i) {
+    public void afterCompletion(final int i) {
         // Ensure that afterCompletion disabled for subordinate coordinator    
         //    waitForCommitOrRollbackResponse();
         throw new UnsupportedOperationException("No beforeCompletion for subordinate coordinator");
@@ -287,11 +278,12 @@ public class ATSubCoordinator extends ATCoordinator {
      * <p/>
      * <p>Prepare this coordinator and return result of preparation.
      */
-    public int prepare(Xid xid) throws XAException {
+    public int prepare(final Xid xid) throws XAException {
         if (logger.isLogging(Level.FINER)) {
             logger.entering("XAResource_prepare(xid=" + xid + ")");
         }
-        int result = XA_OK;
+        int result = 0;
+        result = XA_OK;
         // TODO: Prepare AT Subordinate Coordinator state so it can be recovered in case of failure.
         //       Only durable participants need to be recoverable.
 
@@ -303,7 +295,7 @@ public class ATSubCoordinator extends ATCoordinator {
         return result;
     }
 
-    public void commit(Xid xid, boolean onePhase) throws XAException {
+    public void commit(final Xid xid, final boolean onePhase) throws XAException {
         if (logger.isLogging(Level.FINER)) {
             logger.entering("XAResource_commit(xid=" + xid + " ,onePhase=" + onePhase + ")");
         }
@@ -317,7 +309,7 @@ public class ATSubCoordinator extends ATCoordinator {
         }
     }
 
-    public void rollback(Xid xid) throws XAException {
+    public void rollback(final Xid xid) throws XAException {
         if (logger.isLogging(Level.FINER)) {
             logger.entering("XAResource_rollback(xid=" + xid + ")");
         }
@@ -332,7 +324,7 @@ public class ATSubCoordinator extends ATCoordinator {
     }
 
     @Override
-    public void addRegistrant(Registrant registrant) {
+    public void addRegistrant(final Registrant registrant) {
         //
         if (registerWithRootRegistrationService(registrant)) {
             // registrant is either volatile or durable participant with subordinate coordinator's parent coordinator.
@@ -356,8 +348,7 @@ public class ATSubCoordinator extends ATCoordinator {
 
     @Override
     public void expire() {
-        super.expire();
-        // TODO: forget durable and volatile roots
+        forget();
     }
 
     /**
@@ -366,27 +357,24 @@ public class ATSubCoordinator extends ATCoordinator {
      * @param id the registrant id
      * @return the Registrant object or null if the id does not exist
      */
-    public Registrant getRegistrant(String id) {
+    public Registrant getRegistrant(final String id) {
         Registrant result = super.getRegistrant(id);
 
         // check subordinate participants
-        if (result == null && rootVolatileParticipant != null) {
-            if (rootVolatileParticipant.getIdValue().equals(id)) {
+        if (result == null && rootVolatileParticipant != null &&
+            rootVolatileParticipant.getIdValue().equals(id)) {
                 result = rootVolatileParticipant;
-            }
         }
-        if (result == null && rootDurableParticipant != null) {
-            if (rootDurableParticipant.getIdValue().equals(id)) {
+        if (result == null && rootDurableParticipant != null &&
+            rootDurableParticipant.getIdValue().equals(id)) {
                 result = rootDurableParticipant;
-            }
         }
 
         return result;
     }
 
-    public void removeRegistrant(String id) {
-        super.removeRegistrant(id);
-        // TODO: implement
+    public void removeRegistrant(final String id) {
+        forget(id);
     }
 
     /**
@@ -394,15 +382,16 @@ public class ATSubCoordinator extends ATCoordinator {
      * two special participants of SubordinateCoordinator. They are the only participants that parent
      * coordinator is aware of.
      */
-    public boolean registerWithRootRegistrationService(Registrant r) {
-        if (r == rootVolatileParticipant || r == rootDurableParticipant) {
+    public boolean registerWithRootRegistrationService(final Registrant participant) {
+        // Note: intended instance comparision, not object comparison
+        if (participant == rootVolatileParticipant || participant == rootDurableParticipant) {
             return true;
         } else {
-            return super.registerWithRootRegistrationService(r);
+            return super.registerWithRootRegistrationService(participant);
         }
     }
 
-    public void forget(String partId) {
+    public void forget(final String partId) {
         if (rootVolatileParticipant != null && rootVolatileParticipant.getIdValue().equals(partId)) {
             rootVolatileParticipant = null;
             if (logger.isLogging(Level.FINE)) {

@@ -41,6 +41,7 @@ public class ActivityIdentifier extends Identifier {
      * silence JAXB IllegalAnnotationsException: does not have a no-arg default constructor
      */
     public ActivityIdentifier() {
+        // JAXB annotation processing requires public no-arg default ctor 
     }
 
     /**

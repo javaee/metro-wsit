@@ -46,7 +46,7 @@ public final class TxLogger {
     private final static String LOGGING_SUBSYSTEM_NAME;
 
     static {
-        String loggingSubsystemName = "wstx";
+        String loggingSubsystemName = null;
         try {
             // Looking up JAX-WS class at run-time, so that we don't need to depend
             // on it at compile-time.
@@ -57,6 +57,7 @@ public final class TxLogger {
         } catch (Exception e) {
             // If we don't manage to extract the logging domain from JAX-WS, we
             // fall back to a default.
+            loggingSubsystemName = "wstx";
         } finally {
             LOGGING_SUBSYSTEM_NAME = loggingSubsystemName;
         }

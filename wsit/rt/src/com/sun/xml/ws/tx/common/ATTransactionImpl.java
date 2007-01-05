@@ -51,28 +51,30 @@ import java.util.Map;
  */
 public class ATTransactionImpl implements ATTransaction {
     // related Java EE transaction
-    private Transaction txn;
+    final private Transaction txn;
 
-    private CoordinationContextInterface cc;
-    private ATCoordinator coordinator = null;
-
+    final private CoordinationContextInterface coordCtx;
+    final private ATCoordinator COORDINATOR; 
+            
     private static Map<String, ATTransactionImpl> coordIdATtxnMap =
             new HashMap<String, ATTransactionImpl>();
 
-    static public ATTransactionImpl get(String coordinationIdentity) {
-        return coordIdATtxnMap.get(coordinationIdentity);
+    static public ATTransactionImpl get(final String coordinationId) {
+        return coordIdATtxnMap.get(coordinationId);
     }
 
     public void forget() {
-        coordIdATtxnMap.remove(cc.getIdentifier());
+        coordIdATtxnMap.remove(coordCtx.getIdentifier());
     }
 
     /**
      * Creates a new instance of ATTransactionImpl
      */
-    public ATTransactionImpl(Transaction jtaTxn, CoordinationContextInterface cc) {
+    public ATTransactionImpl(Transaction jtaTxn, CoordinationContextInterface coordCtx) {
         this.txn = jtaTxn;
-        this.cc = cc;
+        this.coordCtx = coordCtx;
+        COORDINATOR = 
+               (ATCoordinator) CoordinationManager.getInstance().getCoordinator(coordCtx.getIdentifier());
     }
 
     public void commit() throws RollbackException, HeuristicMixedException, HeuristicRollbackException, SecurityException, IllegalStateException, SystemException {
@@ -80,9 +82,9 @@ public class ATTransactionImpl implements ATTransaction {
         txn.commit();
     }
 
-    public boolean delistResource(XAResource xAResource, int i) throws IllegalStateException, SystemException {
+    public boolean delistResource(final XAResource xAResource, final int state) throws IllegalStateException, SystemException {
         // TODO: First pass only.
-        return txn.delistResource(xAResource, i);
+        return txn.delistResource(xAResource, state);
     }
 
     /**
@@ -92,20 +94,20 @@ public class ATTransactionImpl implements ATTransaction {
      * <p/>
      * XAResources from managed connections are automatically enlisted with Java EE transaction.
      */
-    public boolean enlistResource(XAResource xaResource) throws RollbackException, IllegalStateException, SystemException {
+    public boolean enlistResource(final XAResource xaResource) throws RollbackException, IllegalStateException, SystemException {
         return txn.enlistResource(xaResource);
 
     }
 
-    public boolean enlistParticipant(Participant participant) {
-        ATParticipant atParticipant =
+    public boolean enlistParticipant(final Participant participant) {
+        final ATParticipant atParticipant =
                 new ATParticipant(getATCoordinator(), participant);
         atParticipant.register();
         return true;
     }
 
 
-    public void registerSynchronization(Synchronization synchronization) throws RollbackException, IllegalStateException, SystemException {
+    public void registerSynchronization(final Synchronization synchronization) throws RollbackException, IllegalStateException, SystemException {
         txn.registerSynchronization(synchronization);
     }
 
@@ -121,10 +123,7 @@ public class ATTransactionImpl implements ATTransaction {
      * Get coordinator for this transaction.
      */
     private Coordinator getATCoordinator() {
-        if (coordinator == null) {
-            coordinator = (ATCoordinator) CoordinationManager.getInstance().getCoordinator(cc.getIdentifier());
-        }
-        return coordinator;
+        return COORDINATOR;
     }
 
     // TODO Support transaction created on remote Coordination Service

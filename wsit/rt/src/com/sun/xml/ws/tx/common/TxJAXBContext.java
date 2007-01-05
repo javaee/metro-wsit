@@ -44,15 +44,9 @@ public class TxJAXBContext {
             final List<Class> classes = getClassesToBeBound();
             jc = JAXBContext.newInstance(classes.toArray(new Class[classes.size()]));
         } catch (JAXBException e) {
-            if (logger.isLogging(Level.SEVERE)) {
-                logger.severe("getJAXBContext", "failed to create", e);
-            }
-            throw new Error(e);
+            logger.severe("getJAXBContext", "failed to create", e);
         } catch (ClassNotFoundException e) {
-            if (logger.isLogging(Level.SEVERE)) {
-                logger.severe("getJAXBContext", "failed to create", e);
-            }
-            throw new Error(e);
+            logger.severe("getJAXBContext", "failed to create", e);
         }
     }
 

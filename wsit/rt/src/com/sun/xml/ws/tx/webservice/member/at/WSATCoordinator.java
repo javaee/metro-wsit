@@ -101,7 +101,7 @@ public class WSATCoordinator
     
     private void workaround(BindingProvider bp, EndpointReference epr) {
         Map<String, Object> requestCtx = bp.getRequestContext();
-        String eprAddress = new WSEndpointReference(epr).getAddress().toString();
+        String eprAddress = new WSEndpointReference(epr).getAddress();
         String bpEndpointAddress = (String)requestCtx.get("javax.xml.ws.service.endpoint.address");
         if (! bpEndpointAddress.equals(eprAddress)) {
             System.out.println("Still need workaround for issue 104. eprAddress=" + eprAddress + 

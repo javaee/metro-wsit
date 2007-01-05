@@ -24,10 +24,6 @@ package com.sun.xml.ws.tx.common;
 
 import com.sun.xml.ws.api.tx.ATTransaction;
 import com.sun.xml.ws.tx.coordinator.CoordinationContextInterface;
-
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.transaction.HeuristicMixedException;
 import javax.transaction.HeuristicRollbackException;
 import javax.transaction.InvalidTransactionException;
@@ -49,33 +45,17 @@ import java.util.Map;
  */
 public class ATTransactionManagerImpl implements TransactionManager {
 
-    private static ATTransactionManagerImpl singleton = null;
-    private TransactionManager javaeeTM;
-    private TransactionSynchronizationRegistry javaeeSynchReg;
-    private Map<String, ATTransaction> coordIdTxnMap;
+    final private static ATTransactionManagerImpl singleton = new ATTransactionManagerImpl();
+    final private TransactionManager javaeeTM;
+    final private TransactionSynchronizationRegistry javaeeSynchReg;
+    final private Map<String, ATTransaction> coordIdTxnMap;
 
 
     static public ATTransactionManagerImpl getInstance() {
-        if (singleton == null) {
-            singleton = new ATTransactionManagerImpl();
-            // Application server does not allow this.  Only known app server services can use this technique.
-            // Pursuing alternative mechanism.
-            // jndiBind("java:comp/env/WSATTransactionManager", singleton);
-        }
         return singleton;
     }
 
-    static private void jndiBind(String jndiName, Object obj) {
-        try {
-            Context ctx = new InitialContext();
-            ctx.bind(jndiName, obj);
-        } catch (NamingException e) {
-            // Handle the error
-            System.err.println(e);
-        }
-    }
-
-    public ATTransaction getTransaction(String coordId) {
+    public ATTransaction getTransaction(final String coordId) {
         return coordIdTxnMap.get(coordId);
     }
 
@@ -103,7 +83,7 @@ public class ATTransactionManagerImpl implements TransactionManager {
     }
 
     public javax.transaction.Transaction getTransaction() throws SystemException {
-        String currentCoordId = getCoordinationContext().getIdentifier();
+        final String currentCoordId = getCoordinationContext().getIdentifier();
         ATTransaction result = getTransaction(currentCoordId);
         if (result == null) {
             result = new ATTransactionImpl(javaeeTM.getTransaction(), getCoordinationContext());
@@ -118,7 +98,7 @@ public class ATTransactionManagerImpl implements TransactionManager {
     }
 
 
-    public void resume(Transaction transaction) throws InvalidTransactionException, IllegalStateException, SystemException {
+    public void resume(final Transaction transaction) throws InvalidTransactionException, IllegalStateException, SystemException {
         javaeeTM.resume(transaction);
     }
 
@@ -130,8 +110,8 @@ public class ATTransactionManagerImpl implements TransactionManager {
         javaeeSynchReg.setRollbackOnly();
     }
 
-    public void setTransactionTimeout(int i) throws SystemException {
-        javaeeTM.setTransactionTimeout(i);
+    public void setTransactionTimeout(final int seconds) throws SystemException {
+        javaeeTM.setTransactionTimeout(seconds);
     }
 
     public Transaction suspend() throws SystemException {
@@ -150,8 +130,8 @@ public class ATTransactionManagerImpl implements TransactionManager {
     /**
      * Set the coordination context associated with the current transaction.
      */
-    public void setCoordinationContext(CoordinationContextInterface coordinationContext) {
-        javaeeSynchReg.putResource("WSCOOR-SUN", coordinationContext);
+    public void setCoordinationContext(final CoordinationContextInterface coordinationCtx) {
+        javaeeSynchReg.putResource("WSCOOR-SUN", coordinationCtx);
     }
 
 

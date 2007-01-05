@@ -42,8 +42,9 @@ public class CoordinationXid implements Xid {
 
     private static Map<String, Xid> coordId2Xid = new HashMap<String, Xid>();
     private static Map<Xid, String> xid2CoordId = new HashMap<Xid, String>();
+    final private String coordId;
 
-    public static Xid lookupOrCreate(String coordId) {
+    public static Xid lookupOrCreate(final String coordId) {
         Xid result = get(coordId);
         if (result == null) {
             result = new CoordinationXid(coordId);
@@ -52,24 +53,28 @@ public class CoordinationXid implements Xid {
         }
         return result;
     }
+    
+    public String getCoordinationId() {
+        return coordId;
+    }
 
-    public static Xid get(String coordId) {
+    public static Xid get(final String coordId) {
         return coordId2Xid.get(coordId);
     }
 
-    private static Xid remove(String coordId) {
+    private static Xid remove(final String coordId) {
         return coordId2Xid.remove(coordId);
     }
 
-    private static String remove(Xid coordId) {
+    private static String remove(final Xid coordId) {
         return xid2CoordId.remove(coordId);
     }
 
     /**
      * Cleanup.
      */
-    public static void forget(String coordId) {
-        Xid removed = remove(coordId);
+    public static void forget(final String coordId) {
+        final Xid removed = remove(coordId);
         if (removed != null) {
             remove(removed);
         }
@@ -81,29 +86,27 @@ public class CoordinationXid implements Xid {
      * Creates a new instance of CoordinationXid representing an imported
      * coordination id.
      */
-    private CoordinationXid(String coordinationXid) {
-        imported = true;
-        
+    private CoordinationXid(final String coordinationXid) {
         gtrId = new byte[16];
         random.nextBytes(gtrId);
+        coordId = coordinationXid;
     }
 
     public byte[] getGlobalTransactionId() {
-        return gtrId;
+        return gtrId.clone();
     }
 
     public byte[] getBranchQualifier() {
-        return branchQualifier;
+        return BRANCH_QUALIFIER;
     }
 
-    private static final int formatId = 200408; // any constant but -1 that is invalid format
-    private byte[] gtrId;
-    static private byte[] branchQualifier = {1}; // no nested txn
+    private static final int FORMAT_ID = 200408; // any constant but -1 that is invalid format
+    final private byte[] gtrId;
+    static private final byte[] BRANCH_QUALIFIER = {1}; // no nested txn
     private String stringForm = null; //cache
-    private boolean imported = true;
 
     public int getFormatId() {
-        return formatId;
+        return FORMAT_ID;
     }
 
     /*
@@ -111,7 +114,9 @@ public class CoordinationXid implements Xid {
     */
     public String toString() {
         // return cache if it exists
-        if (stringForm != null) return stringForm;
+        if (stringForm != null){
+            return stringForm;
+        }
 
         // Otherwise format the global identifier.
         //char[] buff = new char[gtrId.length*2 + 2/*'[' and ']'*/ + 3/*bqual and ':'*/];
@@ -121,18 +126,18 @@ public class CoordinationXid implements Xid {
 
         // Convert the global transaction identifier into a string of hex digits.
 
-        int globalLen = gtrId.length;
+        final int globalLen = gtrId.length;
         for (int i = 0; i < globalLen; i++) {
-            int currCharHigh = (gtrId[i] & 0xf0) >> 4;
-            int currCharLow = gtrId[i] & 0x0f;
+            final int currCharHigh = (gtrId[i] & 0xf0) >> 4;
+            final int currCharLow = gtrId[i] & 0x0f;
             buff[pos++] = (char) (currCharHigh + (currCharHigh > 9 ? 'A' - 10 : '0'));
             buff[pos++] = (char) (currCharLow + (currCharLow > 9 ? 'A' - 10 : '0'));
         }
 
         //buff[pos++] = ':';
         buff[pos++] = '_';
-        int currCharHigh = (0 & 0xf0) >> 4;
-        int currCharLow = 0 & 0x0f;
+        final int currCharHigh = (0 & 0xf0) >> 4;
+        final int currCharLow = 0 & 0x0f;
         buff[pos++] = (char) (currCharHigh + (currCharHigh > 9 ? 'A' - 10 : '0'));
         buff[pos++] = (char) (currCharLow + (currCharLow > 9 ? 'A' - 10 : '0'));
         //buff[pos] = ']';

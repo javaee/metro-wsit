@@ -44,12 +44,7 @@ import com.sun.xml.ws.tx.common.TxJAXBContext;
 import com.sun.xml.ws.tx.common.TxLogger;
 import com.sun.xml.ws.tx.coordinator.CoordinationContextInterface;
 import com.sun.xml.ws.tx.coordinator.CoordinationManager;
-
-import javax.transaction.HeuristicMixedException;
-import javax.transaction.HeuristicRollbackException;
-import javax.transaction.InvalidTransactionException;
 import javax.transaction.NotSupportedException;
-import javax.transaction.RollbackException;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.xa.Xid;
@@ -70,9 +65,9 @@ import java.util.logging.Level;
  * Supports following WS-Coordination protocols: 2004 WS-Atomic Transaction protocol
  *
 <<<<<<< TxServerPipe.java
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
 =======
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
 >>>>>>> 1.5
  * @since 1.0
  */
@@ -339,7 +334,6 @@ public class TxServerPipe implements Pipe {
     private void endImportTransaction(CoordinationContextInterface CC) {
         assert activeImportedXid != null;
 
-        Xid importXid = CoordinationXid.get(CC.getIdentifier());
         try {
             ((TransactionImport) tm).release(activeImportedXid);
         } catch (Error e) {

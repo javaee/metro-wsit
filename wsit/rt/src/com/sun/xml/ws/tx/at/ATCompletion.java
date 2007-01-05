@@ -33,10 +33,12 @@ import javax.xml.ws.EndpointReference;
  * This class encapsulates a WS-AT completion registrant
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 1.0
  */
 public class ATCompletion extends Registrant {
+    
+    static final String NYI = "Not yet implemented";
 
     public ATCompletion(Coordinator parent, RegisterType registerRequest) {
         super(parent, registerRequest);
@@ -46,21 +48,21 @@ public class ATCompletion extends Registrant {
     }
 
     public EndpointReference getParticipantProtocolService() {
-        throw new UnsupportedOperationException("Not yet implemented");
+        throw new UnsupportedOperationException(NYI);
     }
 
     public void commit() {
         // TODO send completion committed to Completion Intiator web service
-        throw new UnsupportedOperationException("Not yet implemented");
+        throw new UnsupportedOperationException(NYI);
     }
 
     public void rollback() {
         // TODO send completion aborted to Completion Initiator web service
-        throw new UnsupportedOperationException("Not yet implemented");
+        throw new UnsupportedOperationException(NYI);
     }
 
     public EndpointReference getLocalParticipantProtocolService() {
-        throw new UnsupportedOperationException("Not yet implemented");
+        throw new UnsupportedOperationException(NYI);
     }
 
     public void forget() {

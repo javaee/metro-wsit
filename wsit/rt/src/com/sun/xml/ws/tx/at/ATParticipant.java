@@ -25,12 +25,10 @@ import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.addressing.OneWayFeature;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
-import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.tx.Participant;
 import com.sun.xml.ws.api.tx.Protocol;
 import com.sun.xml.ws.api.tx.TXException;
 import com.sun.xml.ws.developer.MemberSubmissionEndpointReference;
-import com.sun.xml.ws.developer.StatefulWebServiceManager;
 import static com.sun.xml.ws.tx.common.Constants.*;
 import com.sun.xml.ws.tx.common.StatefulWebserviceFactory;
 import com.sun.xml.ws.tx.common.StatefulWebserviceFactoryFactory;
@@ -39,7 +37,9 @@ import com.sun.xml.ws.tx.common.Util;
 import com.sun.xml.ws.tx.coordinator.Coordinator;
 import com.sun.xml.ws.tx.coordinator.Registrant;
 import com.sun.xml.ws.tx.webservice.member.at.CoordinatorPortType;
+import com.sun.xml.ws.tx.webservice.member.at.CoordinatorPortTypeImpl;
 import com.sun.xml.ws.tx.webservice.member.at.ParticipantPortType;
+import com.sun.xml.ws.tx.webservice.member.at.ParticipantPortTypeImpl;
 import com.sun.xml.ws.tx.webservice.member.coord.RegisterType;
 
 import javax.transaction.xa.Xid;
@@ -68,7 +68,7 @@ import java.util.logging.Level;
  * already decided to prepare.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  * @since 1.0
  */
 public class ATParticipant extends Registrant {
@@ -87,19 +87,15 @@ public class ATParticipant extends Registrant {
 
     // Equivalent to an XAResource for WSAT
     private Participant participant = null;
-    private boolean remoteParticipant;
+    final private boolean remoteParticipant;
 
     static private TxLogger logger = TxLogger.getATLogger(ATParticipant.class);
-
-    static private boolean fallbackSet = false;
     static final String WSAT_COORDINATOR = "WSATCoordinator";
-    private StatefulWebServiceManager swsMgr = null;
-
-    private EndpointReference exportCoordinatorProtocolServiceForATParticipant(Coordinator c) {
-        StatefulWebserviceFactory swf = StatefulWebserviceFactoryFactory.getInstance();
-        return swf.createService(WSAT_COORDINATOR, "Coordinator",
+    
+    private EndpointReference exportCoordinatorProtocolServiceForATParticipant(final Coordinator coord) {
+        return StatefulWebserviceFactoryFactory.getInstance().createService(WSAT_COORDINATOR, "Coordinator",
                 ATCoordinator.localCoordinationProtocolServiceURI, AddressingVersion.MEMBER,
-                c.getIdValue(), this.getIdValue());
+                coord.getIdValue(), this.getIdValue());
     }
 
     /**
@@ -134,7 +130,7 @@ public class ATParticipant extends Registrant {
     }
 
 
-    public ParticipantPortType getParticipantPort(EndpointReference epr) {
+    public ParticipantPortType getParticipantPort(final EndpointReference epr) {
         return ATCoordinator.getWSATCoordinatorService().getParticipant(epr);
     }
 
@@ -151,83 +147,83 @@ public class ATParticipant extends Registrant {
      * A participant is forgotten after it has sent committed or aborted to coordinator.
      */
     public void forget() {
-        if (swsMgr != null && this.localParticipantProtocolService != null) {
-            swsMgr.unexport(localParticipantProtocolService);
-            localParticipantProtocolService = null;
-            swsMgr = null;
+        if (isRemoteCPS() && localParticipantProtocolService != null) {
+            final ParticipantPortTypeImpl ppti = 
+                    ParticipantPortTypeImpl.manager.resolve(localParticipantProtocolService);
+            
+            // could resolve to null if stateful webservice timeout already unexported automatically.
+            if (ppti != null) {
+                ParticipantPortTypeImpl.manager.unexport(ppti);
+            } 
         }
+        localParticipantProtocolService = null;
+        if (remoteParticipant) {
+            final CoordinatorPortTypeImpl cpti = CoordinatorPortTypeImpl.manager.resolve(getCoordinatorProtocolService());
+            if (cpti != null) {
+                CoordinatorPortTypeImpl.manager.unexport(cpti);
+            }
+        }
+        
         getATCoordinator().forget(this);
     }
 
-    public CoordinatorPortType getATCoordinatorWS(boolean nonterminalNotification) {
+    public CoordinatorPortType getATCoordinatorWS(final boolean nonterminalNotify) {
         if (getCoordinatorProtocolService() == null && !isRegistrationCompleted()) {
-            if (logger.isLogging(Level.WARNING)) {
-                logger.warning("getATCoordinatorWS", "no register response received from  " +
+            logger.warning("getATCoordinatorWS", "no register response received from  " +
                         getATCoordinator().getContext().getRootRegistrationService().toString() +
                         " for " + getCoordIdPartId());
-            }
         }
 
         return getATCoordinatorWS(getCoordinatorProtocolService(),
-                getParticipantProtocolService(),
-                nonterminalNotification);
+                getParticipantProtocolService(), nonterminalNotify);
     }
 
-    public static CoordinatorPortType getATCoordinatorWS(EndpointReference toCPS, EndpointReference replyToPPS,
-                                                         boolean nonterminalNotification) {
-        OneWayFeature owf = new OneWayFeature();
+    public static CoordinatorPortType getATCoordinatorWS(final EndpointReference toCPS, 
+                                                         final EndpointReference replyToPPS,
+                                                         final boolean nonterminalNotify) {
+        final OneWayFeature owf = new OneWayFeature();
         WSEndpointReference wsepr = null;
-        if (nonterminalNotification) {
-            if (replyToPPS != null) {
-                try {
-                    wsepr = new WSEndpointReference(replyToPPS);
-                } catch (Exception xse) {
-                    if (logger.isLogging(Level.SEVERE)) {
-                        logger.severe("getATCoordinatorWS", "unexpected exception converting replyToPPS " + replyToPPS.toString() +
-                                " exception" + xse.getLocalizedMessage());
-                    }
-                }
-                if (wsepr != null) {
-                    owf.setReplyTo(wsepr);
-                }
-            } else {
-                if (logger.isLogging(Level.WARNING)) {
-                    logger.warning("getATCoordinatorWS", "Protocol Provider Service EPR should not be null for non-terminal notfication");
-                }
+        if (nonterminalNotify && replyToPPS != null) {
+            try {
+                wsepr = new WSEndpointReference(replyToPPS);
+            } catch (Exception xse) {
+                logger.severe("getATCoordinatorWS", "unexpected exception converting replyToPPS " + replyToPPS.toString() +
+                        " exception" + xse.getLocalizedMessage());
             }
+            if (wsepr != null) {
+                owf.setReplyTo(wsepr);
+            }
+        } else {
+            logger.warning("getATCoordinatorWS", "Protocol Provider Service EPR should not be null for non-terminal notfication");
         }
         assert toCPS != null;
         return ATCoordinator.getWSATCoordinatorService().getCoordinator(toCPS, owf);
     }
 
-    public ParticipantPortType getATParticipantWS(boolean nonterminalNotification) {
+    public ParticipantPortType getATParticipantWS(final boolean nonterminalNotification) {
         return this.getATParticipantWS(this.getParticipantProtocolService(),
                 this.getCoordinatorProtocolService(), nonterminalNotification);
     }
 
 
-    public static ParticipantPortType getATParticipantWS(EndpointReference toPPS, EndpointReference replyToCPS,
-                                                         boolean nonterminalNotification) {
-        OneWayFeature owf = new OneWayFeature();
+    public static ParticipantPortType getATParticipantWS(final EndpointReference toPPS, 
+                                                         final EndpointReference replyToCPS,
+                                                         final boolean nonterminalNotification) {
+        final OneWayFeature owf = new OneWayFeature();
         WSEndpointReference wsepr = null;
-        if (nonterminalNotification) {
-            if (replyToCPS != null) {
-                try {
-                    wsepr = new WSEndpointReference(replyToCPS);
-                } catch (Exception xse) {
-                    if (logger.isLogging(Level.SEVERE)) {
-                        logger.severe("getATCoordinatorWS", "unexpected exception converting replyToCPS " + replyToCPS.toString() +
-                                " exception" + xse.getLocalizedMessage());
-                    }
-                }
-                if (wsepr != null) {
-                    owf.setReplyTo(wsepr);
-                } else {
-                    if (logger.isLogging(Level.WARNING)) {
-                        logger.warning("getATParticipantWS", "Coordinator Provider Service EPR should not be null for non-terminal notfication");
-                    }
-                }
+        if (nonterminalNotification && replyToCPS != null) {
+            try {
+                wsepr = new WSEndpointReference(replyToCPS);
+            } catch (Exception xse) {
+                logger.severe("getATCoordinatorWS", "unexpected exception converting replyToCPS " + replyToCPS.toString() +
+                        " exception" + xse.getLocalizedMessage());
             }
+            if (wsepr != null) {
+                owf.setReplyTo(wsepr);
+            } else {
+                logger.warning("getATParticipantWS", "Coordinator Provider Service EPR should not be null for non-terminal notfication");
+            }
+            
         }
         assert toPPS != null;
         return ATCoordinator.getWSATCoordinatorService().getParticipant(toPPS, owf);
@@ -253,8 +249,10 @@ public class ATParticipant extends Registrant {
      * Returns participant state. or (something for abort).
      */
     public void prepare() throws TXException {
+        final String METHOD_NAME = "prepare";
+        
         if (logger.isLogging(Level.FINER)) {
-            logger.entering("prepare", "coordId=" + getCoordinator().getIdValue() + " partId=" + getIdValue());
+            logger.entering(METHOD_NAME, "coordId=" + getCoordinator().getIdValue() + " partId=" + getIdValue());
         }
         switch (getState()) {
             case NONE:
@@ -272,21 +270,19 @@ public class ATParticipant extends Registrant {
                     try {
                         getATCoordinatorWS(true).preparedOperation(null);
                     } catch (WebServiceException wse) {
-                        if (logger.isLogging(Level.WARNING)) {
-                            logger.warning("prepare", "prepared to web service failed. "
+                        logger.warning(METHOD_NAME, "prepared to web service failed. "
                                     + wse.getLocalizedMessage());
-                        }
+                       
                         throw wse;
                     } catch (Exception e) {
-                        if (logger.isLogging(Level.SEVERE)) {
-                            logger.severe("prepare", "prepared to web service failed. "
+                        logger.severe(METHOD_NAME, "prepared to web service failed. "
                                     + e.getLocalizedMessage());
-                        }
                     }
                 } else {
                     getATCoordinator().prepared(getIdValue());
                 }
                 break;
+                
             case PREPARING:
             case PREPARED:
             case COMMITTING:
@@ -294,17 +290,12 @@ public class ATParticipant extends Registrant {
                 break;
         }
         if (logger.isLogging(Level.FINER)) {
-            logger.exiting("prepare", "coordId=" + getCoordinator().getIdValue() + " partId=" + getIdValue());
+            logger.exiting(METHOD_NAME, "coordId=" + getCoordinator().getIdValue() + " partId=" + getIdValue());
         }
     }
 
     private void internalPrepare() throws TXException {
         if (remoteParticipant) {
-            if (participant != null) {
-                if (logger.isLogging(Level.WARNING)) {
-                    logger.warning("remotePrepare", "detected non-null participant that will not be prepared locally");
-                }
-            }
             remotePrepare();
         } else {
             localPrepare();
@@ -314,32 +305,22 @@ public class ATParticipant extends Registrant {
     private void remotePrepare() {
         state = STATE.PREPARING;
         // TODO: resend if don't receive prepared notfication from coordinator in some communication timeout amount of time
-        if (logger.isLogging(Level.FINER)) {
-            logger.entering("remotePrepare", getCoordIdPartId());
-        }
         try {
             getATParticipantWS(true).prepareOperation(null);
         } catch (WebServiceException wse) {
-            if (logger.isLogging(Level.WARNING)) {
-                logger.warning("remotePrepare", "prepared to web service failed. "
+            logger.warning("remotePrepare", "prepared to web service failed. "
                         + wse.getLocalizedMessage());
-            }
             throw wse;
         } catch (Exception e) {
-            if (logger.isLogging(Level.SEVERE)) {
-                logger.severe("remotePrepare", "prepared to web service failed. "
+            logger.severe("remotePrepare", "prepared to web service failed. "
                         + e.getLocalizedMessage());
-            }
-        }
-
-        if (logger.isLogging(Level.FINER)) {
-            logger.exiting("remotePrepare", getCoordIdPartId());
         }
     }
 
     private void localPrepare() throws TXException {
+        final String METHOD_NAME = "localPrepare";
         if (logger.isLogging(Level.FINER)) {
-            logger.entering("localPrepare", getCoordIdPartId());
+            logger.entering(METHOD_NAME, getCoordIdPartId());
         }
         Participant.STATE result = null;
         state = STATE.PREPARING;
@@ -362,21 +343,21 @@ public class ATParticipant extends Registrant {
                 state = STATE.PREPARED;
                 if (isRemoteCPS()) {
                     if (logger.isLogging(Level.FINEST)) {
-                        logger.finest("localPrepare", "send prepared to remote coordinator"
+                        logger.finest(METHOD_NAME, "send prepared to remote coordinator"
                                 + getIdValue());
                     }
                     try {
                         getATCoordinatorWS(true).preparedOperation(null);
                     } catch (WebServiceException wse) {
                         if (logger.isLogging(Level.WARNING)) {
-                            logger.warning("localPrepare", "prepared to web service failed. "
+                            logger.warning(METHOD_NAME, "prepared to web service failed. "
                                     + wse.getLocalizedMessage());
                         }
                         throw wse;
                     }
                 } else {
                     if (logger.isLogging(Level.FINEST)) {
-                        logger.finest("localPrepare", "send prepared to local coordinator"
+                        logger.finest(METHOD_NAME, "send prepared to local coordinator"
                                 + getIdValue());
                     }
                     getATCoordinator().prepared(this.getIdValue());
@@ -388,27 +369,27 @@ public class ATParticipant extends Registrant {
                 state = STATE.READONLY;
                 if (isRemoteCPS()) {
                     if (logger.isLogging(Level.FINEST)) {
-                        logger.finest("localPrepare", "send readonly to remote coordinator for participant id"
+                        logger.finest(METHOD_NAME, "send readonly to remote coordinator for participant id"
                                 + getIdValue());
                     }
                     try {
                         getATCoordinatorWS(false).readOnlyOperation(null);
                     } catch (WebServiceException wse) {
                         if (logger.isLogging(Level.WARNING)) {
-                            logger.warning("localPrepare", "readonly to web service failed. "
+                            logger.warning(METHOD_NAME, "readonly to web service failed. "
                                     + wse.getLocalizedMessage());
                         }
                         throw wse;
                     }
                 } else {
                     if (logger.isLogging(Level.FINEST)) {
-                        logger.finest("localPrepare", "send readonly to remote coordinator for participant id" +
+                        logger.finest(METHOD_NAME, "send readonly to remote coordinator for participant id" +
                                 getIdValue());
                     }
                     getATCoordinator().readonly(getIdValue());
                 }
                 if (logger.isLogging(Level.FINE)) {
-                    logger.fine("prepare", "readonly " + getCoordIdPartId());
+                    logger.fine(METHOD_NAME, "readonly " + getCoordIdPartId());
                 }
                 forget();
                 break;
@@ -448,6 +429,7 @@ public class ATParticipant extends Registrant {
     }
 
     private void localCommit() {
+        final String METHOD_NAME = "localCommit";
         switch (getState()) {
             case NONE:
 
@@ -456,7 +438,7 @@ public class ATParticipant extends Registrant {
                 break;
             case ABORTING:
                 if (logger.isLogging(Level.WARNING)) {
-                    logger.warning("localCommit", "fault inconsistent internal state: " + getState() +
+                    logger.warning(METHOD_NAME, "fault inconsistent internal state: " + getState() +
                             " for " + getCoordIdPartId());
                 }
                 //fault wsat:InconsistentInternalState
@@ -467,7 +449,7 @@ public class ATParticipant extends Registrant {
             case PREPARING:
             case PREPARED:
                 if (logger.isLogging(Level.WARNING)) {
-                    logger.warning("localCommit", "fault invalid state: " + getState() +
+                    logger.warning(METHOD_NAME, "fault invalid state: " + getState() +
                             " for " + getCoordIdPartId());
                 }
                 // TODO throw fault coor:InvalidState
@@ -479,16 +461,14 @@ public class ATParticipant extends Registrant {
                 participant.commit();
                 participant = null;   // no longer need to contact participant.
                 if (logger.isLogging(Level.INFO)) {
-                    logger.info("localCommit", "committed " + getCoordIdPartId());
+                    logger.info(METHOD_NAME, "committed " + getCoordIdPartId());
                 }
                 if (isRemoteCPS()) {
                     try {
                         getATCoordinatorWS(false).committedOperation(null);
                     } catch (WebServiceException wse) {
-                        if (logger.isLogging(Level.WARNING)) {
-                            logger.warning("localCommit", "committed to web service failed. "
-                                    + wse.getLocalizedMessage());
-                        }
+                       logger.warning(METHOD_NAME, "committed to web service failed. "
+                                      + wse.getLocalizedMessage());
                         throw wse;
                     }
                 } else {
@@ -542,7 +522,7 @@ public class ATParticipant extends Registrant {
                 getATCoordinatorWS(false).abortedOperation(null);
             } catch (WebServiceException wse) {
                 if (logger.isLogging(Level.WARNING)) {
-                    logger.warning("localPrepare", "prepared to web service failed. "
+                    logger.warning("localRollback", "prepared to web service failed. "
                             + wse.getLocalizedMessage());
                 }
                 throw wse;
@@ -573,7 +553,7 @@ public class ATParticipant extends Registrant {
         }
     }
 
-    public void setCoordinatorProtocolService(EndpointReference cps) {
+    public void setCoordinatorProtocolService(final EndpointReference cps) {
         super.setCoordinatorProtocolService(cps);
 
         if (cps != null) {
@@ -620,7 +600,8 @@ public class ATParticipant extends Registrant {
      *
      * @param soapVersion SOAP verion for returned fault.
      */
-    private Packet newInconsistentInternalStateFault(SOAPVersion soapVersion, String detail) {
+    /*
+    private Packet newInconsistentInternalStateFault(final SOAPVersion soapVersion, final String detail) {
         Packet faultResponsePacket = null;
         // wsa:Action Constants.WSAT_FAULT_ACTION_URI
         // [Code] Sender
@@ -629,14 +610,15 @@ public class ATParticipant extends Registrant {
         // [Detail] detail
         throw new UnsupportedOperationException("Not implemented yet");
     }
+    */
 
     /**
      * @see com.sun.xml.ws.tx.common.WsaHelper
      * @deprecated since now
      */
-    SOAPFault createSOAPFault(String message) {
+    SOAPFault createSOAPFault(final String message) {
         try {
-            SOAPFault fault = SOAPVersion.SOAP_11.saajSoapFactory.createFault();
+            final SOAPFault fault = SOAPVersion.SOAP_11.saajSoapFactory.createFault();
             fault.setFaultString(message);
             // TODO: fix deprecated constant reference
             // fault.setFaultCode(JAXWSAConstants.SOAP11_SENDER_QNAME);
@@ -648,7 +630,7 @@ public class ATParticipant extends Registrant {
         }
     }
 
-    protected String getCoordIdPartId() {
+    private String getCoordIdPartId() {
         return " coordId=" + getCoordinator().getIdValue() + " partId=" + getIdValue() + " ";
     }
 
@@ -660,14 +642,13 @@ public class ATParticipant extends Registrant {
     public EndpointReference getLocalParticipantProtocolService() {
         if (localParticipantProtocolService == null) {
             if (isRemoteCPS()) {
-                StatefulWebserviceFactory swf = StatefulWebserviceFactoryFactory.getInstance();
+                final StatefulWebserviceFactory swf = StatefulWebserviceFactoryFactory.getInstance();
                 localParticipantProtocolService =
                         swf.createService(WSAT_COORDINATOR, "Participant",
                                 LOCAL_PPS_URI, AddressingVersion.MEMBER,
                                 getATCoordinator().getIdValue(), this.getId().getValue());
-                swsMgr = swf.getManager(WSAT_COORDINATOR, "Participant");
             } else {
-                MemberSubmissionEndpointReference epr = new MemberSubmissionEndpointReference();
+                final MemberSubmissionEndpointReference epr = new MemberSubmissionEndpointReference();
                 epr.addr = new MemberSubmissionEndpointReference.Address();
                 epr.addr.uri = LOCAL_PPS_URI.toString();
                 localParticipantProtocolService = epr;

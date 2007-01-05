@@ -43,11 +43,11 @@ public class TxPolicyValidator implements PolicyAssertionValidator {
         supportedAssertions.add(AT_ALWAYS_CAPABILITY);
     }
 
-    public Fitness validateClientSide(PolicyAssertion assertion) {
+    public Fitness validateClientSide(final PolicyAssertion assertion) {
         return supportedAssertions.contains(assertion.getName()) ? Fitness.SUPPORTED : Fitness.UNKNOWN;
     }
 
-    public Fitness validateServerSide(PolicyAssertion assertion) {
+    public Fitness validateServerSide(final PolicyAssertion assertion) {
         return supportedAssertions.contains(assertion.getName()) ? Fitness.SUPPORTED : Fitness.UNKNOWN;
     }
 
