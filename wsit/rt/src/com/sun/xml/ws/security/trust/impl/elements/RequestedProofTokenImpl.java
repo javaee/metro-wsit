@@ -1,5 +1,5 @@
 /*
- * $Id: RequestedProofTokenImpl.java,v 1.5 2007-01-04 00:47:27 manveen Exp $
+ * $Id: RequestedProofTokenImpl.java,v 1.6 2007-01-05 22:27:27 manveen Exp $
  */
 
 /*
@@ -86,8 +86,8 @@ public class RequestedProofTokenImpl extends RequestedProofTokenType implements 
                 setComputedKey(new URI((String)obj.getValue()));
             } catch (URISyntaxException ex){
                 log.log(Level.SEVERE,
-                        LogStringsMessages.WST_0037_ERROR_SETTING_COMPUTED_KEY(ex));
-                throw new RuntimeException("Error while setting computed Key", ex);
+                        LogStringsMessages.WST_0037_ERROR_COMPUTING_KEY(), ex);
+                throw new RuntimeException(LogStringsMessages.WST_0037_ERROR_COMPUTING_KEY(), ex);
             }
         }else if (local.equalsIgnoreCase("BinarySecret")){
             BinarySecretType bsType = (BinarySecretType)obj.getValue();

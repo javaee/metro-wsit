@@ -201,18 +201,18 @@ public class WSTrustClientContractImpl implements WSTrustClientContract {
                 //ToDo
                 log.log(Level.SEVERE,
                         LogStringsMessages.WST_0001_UNSUPPORTED_PROOF_TOKEN_TYPE(proofTokenType));
-                throw new WSTrustException("Unsupported proof token type: " + proofTokenType);
+                throw new WSTrustException( LogStringsMessages.WST_0001_UNSUPPORTED_PROOF_TOKEN_TYPE(proofTokenType));
             } else if (RequestedProofToken.ENCRYPTED_KEY_TYPE.equals(proofTokenType)){
                 log.log(Level.SEVERE,
                         LogStringsMessages.WST_0001_UNSUPPORTED_PROOF_TOKEN_TYPE(proofTokenType));
-                throw new WSTrustException("Unsupported proof token type: " + proofTokenType);
+                throw new WSTrustException( LogStringsMessages.WST_0001_UNSUPPORTED_PROOF_TOKEN_TYPE(proofTokenType));
             } else if (RequestedProofToken.BINARY_SECRET_TYPE.equals(proofTokenType)){
                 BinarySecret binarySecret = proofToken.getBinarySecret();
                 key = binarySecret.getRawValue();
             } else{
                 log.log(Level.SEVERE,
                         LogStringsMessages.WST_0019_INVALID_PROOF_TOKEN_TYPE(proofTokenType));
-                throw new WSTrustException("Invalid Proof Token Type: " + proofTokenType);
+                throw new WSTrustException( LogStringsMessages.WST_0001_UNSUPPORTED_PROOF_TOKEN_TYPE(proofTokenType));
             }
         }
         return key;
@@ -241,12 +241,14 @@ public class WSTrustClientContractImpl implements WSTrustClientContract {
             try {
                 key = SecurityUtil.P_SHA1(clientEntropyBytes,serverEntropyBytes, keySize);
             } catch (Exception ex) {
-                throw new WSTrustException("Error while computing key", ex);
+                log.log(Level.SEVERE,
+                        LogStringsMessages.WST_0037_ERROR_COMPUTING_KEY(), ex);
+                throw new WSTrustException(LogStringsMessages.WST_0037_ERROR_COMPUTING_KEY(), ex);
             }
         } else {
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0026_INVALID_CK_ALGORITHM(computedKey));
-            throw new WSTrustException("Unsupported compute key algorithm: " + computedKey);
+            throw new WSTrustException(LogStringsMessages.WST_0026_INVALID_CK_ALGORITHM(computedKey));
         }
         return key;
     }

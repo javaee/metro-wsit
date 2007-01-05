@@ -127,7 +127,7 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
         if(subject == null){
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0030_REQUESTOR_NULL());
-            throw new WSTrustException("Requester subject is null");
+            throw new WSTrustException(LogStringsMessages.WST_0030_REQUESTOR_NULL());
         }
         
         // Check if the client is authorized to be issued the token
@@ -136,7 +136,8 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
             log.log(Level.SEVERE, 
                     LogStringsMessages.WST_0015_CLIENT_NOT_AUTHORIZED(
                     subject.toString(), tokenType, appliesTo));
-            throw new WSTrustException("The client is not authorized to be issued the token of type "+ tokenType + " apply to " + appliesTo);
+            throw new WSTrustException(LogStringsMessages.WST_0015_CLIENT_NOT_AUTHORIZED(
+                    subject.toString(), tokenType, appliesTo));
         }
         
         // Get claimed attributes
@@ -189,8 +190,8 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
                 key = SecurityUtil.P_SHA1(clientEntropyValue, key, keySize/8);
             } catch (Exception ex){
                 log.log(Level.SEVERE, 
-                        LogStringsMessages.WST_0013_ERROR_SECRET_KEY(ex));
-                throw new WSTrustException("There was an error computing secret key", ex);
+                        LogStringsMessages.WST_0013_ERROR_SECRET_KEY(), ex);
+                throw new WSTrustException(LogStringsMessages.WST_0013_ERROR_SECRET_KEY(), ex);
             }
             
             context.setProofKey(key);
@@ -199,7 +200,7 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
         }else{
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0025_INVALID_KEY_TYPE(keyType));
-            throw new WSTrustException("Unsupport key type: " + keyType);
+            throw new WSTrustException(LogStringsMessages.WST_0025_INVALID_KEY_TYPE(keyType));
         }
         
         //==================
@@ -214,8 +215,9 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
                 ctx = new URI(rst.getContext());
         } catch (URISyntaxException ex) {
             log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0014_URI_SYNTAX(ex));
-            throw new WSTrustException("Error in URI" + ex);
+                    LogStringsMessages.WST_0014_URI_SYNTAX(rst.getContext()));
+            throw new WSTrustException(
+                    LogStringsMessages.WST_0014_URI_SYNTAX(rst.getContext()) ,ex);
         }
         
         // Create RequestedSecurityToken with SAML assertion

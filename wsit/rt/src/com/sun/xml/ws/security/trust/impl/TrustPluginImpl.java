@@ -130,7 +130,7 @@ public class TrustPluginImpl implements TrustPlugin {
             } catch (MalformedURLException ex) {
                 if (log.isLoggable(Level.WARNING)) {
                     log.log(Level.WARNING,
-                            LogStringsMessages.WST_1011_PROBLEM_METADATA(ex));
+                            LogStringsMessages.WST_1011_PROBLEM_METADATA(stsURI), ex);
                 }
             }
             
@@ -184,7 +184,7 @@ public class TrustPluginImpl implements TrustPlugin {
         if(stsURI == null){
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0029_COULD_NOT_GET_STS_LOCATION());
-            throw new RuntimeException("STS information not passed");
+            throw new RuntimeException(LogStringsMessages.WST_0029_COULD_NOT_GET_STS_LOCATION());
         }
         
         RequestSecurityTokenResponse result = null;
@@ -197,16 +197,16 @@ public class TrustPluginImpl implements TrustPlugin {
             return itc;
         } catch (RemoteException ex) {
             log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0016_PROBLEM_IT_CTX(ex));
-            throw new RuntimeException(ex);
+                    LogStringsMessages.WST_0016_PROBLEM_IT_CTX());
+            throw new RuntimeException(LogStringsMessages.WST_0016_PROBLEM_IT_CTX(), ex);
         } catch (URISyntaxException ex){
             log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0016_PROBLEM_IT_CTX(ex));
-            throw new RuntimeException(ex);
+                    LogStringsMessages.WST_0016_PROBLEM_IT_CTX(), ex);
+            throw new RuntimeException(LogStringsMessages.WST_0016_PROBLEM_IT_CTX());
         } catch (WSTrustException ex){
             log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0016_PROBLEM_IT_CTX(ex));
-            throw new RuntimeException(ex);
+                    LogStringsMessages.WST_0016_PROBLEM_IT_CTX(), ex);
+            throw new RuntimeException(LogStringsMessages.WST_0016_PROBLEM_IT_CTX());
         }
     }
     
@@ -302,7 +302,8 @@ public class TrustPluginImpl implements TrustPlugin {
             }else{
                 log.log(Level.SEVERE,
                         LogStringsMessages.WST_0017_SERVICE_PORTNAME_ERROR(serviceName, portName));
-                throw new WSTrustException("Could not obtain STS service and port names through MEX");
+                throw new WSTrustException(
+                        LogStringsMessages.WST_0017_SERVICE_PORTNAME_ERROR(serviceName, portName));
             }
         }
         
@@ -311,8 +312,8 @@ public class TrustPluginImpl implements TrustPlugin {
             service = Service.create(wsdlLocation.toURL(), serviceName);
         }catch (MalformedURLException ex){
             log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0016_PROBLEM_IT_CTX(ex));
-            throw new RuntimeException(ex);
+                    LogStringsMessages.WST_0016_PROBLEM_IT_CTX(), ex);
+            throw new RuntimeException(LogStringsMessages.WST_0016_PROBLEM_IT_CTX());
         }
         Dispatch<Object> dispatch = service.createDispatch(portName, fact.getContext(), Service.Mode.PAYLOAD, new WebServiceFeature[]{new RespectBindingFeature(), new AddressingFeature(false)});
         //Dispatch<SOAPMessage> dispatch = service.createDispatch(portName, SOAPMessage.class, Service.Mode.MESSAGE, new WebServiceFeature[]{new AddressingFeature(false)});
@@ -515,7 +516,7 @@ public class TrustPluginImpl implements TrustPlugin {
         } catch (Exception e) {
             if(log.isLoggable(Level.FINE)) {
                 log.log(Level.FINE,
-                        LogStringsMessages.WST_1004_ERROR_MARSHAL_TO_STRING(e));
+                        LogStringsMessages.WST_1004_ERROR_MARSHAL_TO_STRING(), e);
             }
             throw new RuntimeException("Error in Marshalling RST to string for logging ", e);
         }
@@ -532,9 +533,9 @@ public class TrustPluginImpl implements TrustPlugin {
         } catch (Exception e) {
             if (log.isLoggable(Level.FINE)) {
                 log.log(Level.FINE,
-                        LogStringsMessages.WST_1004_ERROR_MARSHAL_TO_STRING(e));
+                        LogStringsMessages.WST_1004_ERROR_MARSHAL_TO_STRING(), e);
             }
-            throw new RuntimeException("Error in Marshalling RSTR to string for logging ", e);
+            throw new RuntimeException(LogStringsMessages.WST_1004_ERROR_MARSHAL_TO_STRING(), e);
         }
     }
     
