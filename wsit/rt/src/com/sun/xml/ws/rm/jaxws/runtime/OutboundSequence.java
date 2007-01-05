@@ -324,9 +324,8 @@ public abstract class OutboundSequence extends Sequence {
                 //Doing this, we lose the ability to recover
                 //from spurious wakeups.
                 wait(5000);
-                if (storedMessages > 0) {
-                    logger.severe("Timeout in waitForAcks with " +
-                            storedMessages + " unacked messages.");
+                if (storedMessages > 0) {      
+                    logger.severe(Messages.TIMEOUT_IN_WAITFORACKS_STRING.format(storedMessages));
                     break;
                 }
             } catch (InterruptedException e) {}

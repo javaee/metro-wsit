@@ -115,10 +115,10 @@ public class SequenceConfig {
         //Use anonymous URI for acksTo.  Its value depends on 
         //WS-Addressing version being used
 
-
-        //hardcoding W3C as default
-        constants = RMConstants.getRMConstants(AddressingVersion.W3C);
-
+        if (constants == null) {
+            //hardcoding W3C as default
+            constants = RMConstants.getRMConstants(AddressingVersion.W3C);
+        }
         acksTo = constants.getAnonymousURI().toString();
         
         ordered = false;
@@ -352,9 +352,7 @@ public class SequenceConfig {
                         
                         if (rmAssertion != null) {
                            handleRMAssertion(rmAssertion);
-                        } else {
-                            throw new RMException("RM cannot be enabled as RM Assertion is missing");
-                        }
+                        } 
 
                         if (flowAssertion != null)
                            handleFlowAssertion(flowAssertion);
@@ -380,10 +378,10 @@ public class SequenceConfig {
                 if (num != null) {
                     inactivityTimeout = Long.parseLong(num);
                 }
-            } /*else if (assertion.getName().equals(constants.getAcknowledgementIntervalQName())) {
+            } else if (assertion.getName().equals(constants.getAcknowledgementIntervalQName())) {
                 //don't have a member variable for it.  Do we need it?
                  
-            }   */
+            }
         }
     }
     
