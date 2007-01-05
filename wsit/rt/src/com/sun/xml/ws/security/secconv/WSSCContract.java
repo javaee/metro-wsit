@@ -303,11 +303,11 @@ public class WSSCContract implements WSTrustContract   {
             id = ((DirectReference)ref).getURIAttr().toString();
         }
         
-        context = (IssuedTokenContext)issuedTokenContextMap.get(id);
-        if (context == null || context.getSecurityToken() == null){
+        IssuedTokenContext cxt = (IssuedTokenContext)issuedTokenContextMap.get(id);
+        if (cxt == null || cxt.getSecurityToken() == null){
             log.log(Level.SEVERE,
                     "WSSC0015.unknown.context", new Object[] {id});
-            throw new WSSecureConversationException("Unknown security context token to cancel:"+id);
+            throw new WSSecureConversationException("Unknown security context token to cancel: "+id);
         }
         
         RequestSecurityTokenResponse rstr = eleFac.createRSTRForCancel();

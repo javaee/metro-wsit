@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityTokenResponseImpl.java,v 1.5 2007-01-04 00:47:14 manveen Exp $
+ * $Id: RequestSecurityTokenResponseImpl.java,v 1.6 2007-01-05 23:44:38 jdg6688 Exp $
  */
 
 /*
@@ -173,7 +173,7 @@ public class RequestSecurityTokenResponseImpl extends RequestSecurityTokenRespon
     }
     
     public  Map<QName, String> getOtherAttributes() {
-        return getOtherAttributes();
+        return super.getOtherAttributes();
     }
     
     public Lifetime getLifetime() {
@@ -225,7 +225,7 @@ public class RequestSecurityTokenResponseImpl extends RequestSecurityTokenRespon
     }
     
     public String getContext() {
-        return getContext();
+        return super.getContext();
     }
     
     public void setAppliesTo(AppliesTo appliesTo) {
