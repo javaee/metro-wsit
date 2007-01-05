@@ -1,5 +1,5 @@
 /*
- * $Id: Message.java,v 1.3 2006-11-04 22:49:57 mikeg Exp $
+ * $Id: Message.java,v 1.4 2007-01-05 18:17:54 mikeg Exp $
  */
 
 /*
@@ -269,14 +269,11 @@ public class Message {
     
     public String toString() {
         
-        String ret = "Message:\n";
-        ret += "\tmessageNumber = " + messageNumber + "\n"; 
-        Sequence seq = getSequence();
-        if (seq != null) {
-            ret +="\tsequence = " + getSequence().getId() + "\n";
-        } else {
-            ret += "\tnone\n";
-        }
+         
+        String ret = Messages.MESSAGE_NUMBER_STRING.format(messageNumber);
+        ret += Messages.SEQUENCE_STRING.format(getSequence() != null ?
+                                                getSequence().getId() :
+                                                "null");
         
         SequenceElement sel;
         SequenceAcknowledgementElement sael;

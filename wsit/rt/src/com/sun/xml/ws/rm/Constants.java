@@ -31,16 +31,17 @@ import javax.xml.soap.SOAPConstants;
  * @author Bhakti Mehta
  */
 public class Constants {
+    
+    
+   
 
     public static final String WS_RM_NAMESPACE = "http://schemas.xmlsoap.org/ws/2005/02/rm";
 
     public static final QName MESSAGE_NUMBER_ROLLOVER_QNAME = new QName(WS_RM_NAMESPACE,"MessageNumberRollover");
 
-    public static final String MESSAGE_NUMBER_ROLLOVER_TEXT = "The maximum value %s for "+ WS_RM_NAMESPACE +":MessageNumber has been exceeded";
-
     public static final QName UNKNOWN_SEQUENCE_QNAME = new QName(WS_RM_NAMESPACE,"UnknownSequence");
 
-    public static final String UNKNOWN_SEQUENCE_TEXT = "The message contains an unknown sequence id %s ";
+    
     /**
      * Name of Sender fault defined by SOAP 1.2.
      */
@@ -51,10 +52,6 @@ public class Constants {
     public static final QName CREATE_SEQUENCE_REFUSED_QNAME = new QName(WS_RM_NAMESPACE,"CreateSequenceRefused");
 
     public static final QName SEQUENCE_TERMINATED_QNAME = new QName(WS_RM_NAMESPACE,"SequenceTerminated");
-
-    public static final String CREATE_SEQUENCE_REFUSED_TEXT = "The create sequence request has been refused by RM Destination %s ";
-
-    public static final String SEQUENCE_TERMINATED_TEXT = "The sequence has been terminated because of an unrecoverable error";
 
     public static final String CREATE_SEQUENCE_ACTION="http://schemas.xmlsoap.org/ws/2005/02/rm/CreateSequence";
 
@@ -94,5 +91,18 @@ public class Constants {
     
     public static final String createSequenceNamespace = 
             "http://com.sun/createSequence";
+    
+    
+    //INTERNATIONALIZE THESE
+    
+     public static final String MESSAGE_NUMBER_ROLLOVER_TEXT = "The maximum value,  %s,  for {"+ WS_RM_NAMESPACE +
+            "}:MessageNumber has been exceeded";
+     
+     public static final String UNKNOWN_SEQUENCE_TEXT = "The message contains an unknown sequence id,  %s ";
+     
+     public static final String CREATE_SEQUENCE_REFUSED_TEXT = "The create sequence request has been refused by RM Destination -- %s ";
+
+     public static final String SEQUENCE_TERMINATED_TEXT = "The sequence has been terminated because of an unrecoverable error";
+
 
 }

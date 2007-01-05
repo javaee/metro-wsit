@@ -1,5 +1,5 @@
 /*
- * $Id: Sequence.java,v 1.7 2006-11-21 19:45:39 mikeg Exp $
+ * $Id: Sequence.java,v 1.8 2007-01-05 18:17:54 mikeg Exp $
  */
 
 /*
@@ -114,8 +114,9 @@ public class Sequence {
         list.add(null);
         allowDuplicates = false;
         firstKnownGap = 1;
+
 	resetLastActivityTime();
-	
+
     }
     
     /**
@@ -137,7 +138,8 @@ public class Sequence {
                 throws InvalidMessageNumberException {
         
         if (index >= nextIndex) {
-            throw new InvalidMessageNumberException("Invalid index -  " + index);
+            throw new InvalidMessageNumberException(
+                    Messages.INVALID_INDEX_MESSAGE.format(index));
         }
         return list.get(index);
     }
