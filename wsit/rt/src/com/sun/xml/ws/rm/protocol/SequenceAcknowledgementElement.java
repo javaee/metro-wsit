@@ -147,7 +147,7 @@ public class SequenceAcknowledgementElement   {
 
 
     public String getLocalPart(){
-        return  "SequenceAcknowledgement";
+        return new String ( "SequenceAcknowledgement");
     }
 
     public void setId(String id) {
@@ -173,12 +173,11 @@ public class SequenceAcknowledgementElement   {
 
     public void addAckRange(long lower, long upper) {
         if (nack != null) {
-            throw new IllegalArgumentException("SequenceAcknowledgement cannot contain both " +
-                    "AcknowledgementRanges and Nacks");
+            throw new IllegalArgumentException(Messages.BOTH_ACKS_AND_NACKS_MESSAGE.format());
         }
         //check validity of indices
         if (lower > upper) {
-            throw new IllegalArgumentException("Upper bound of range less than lower bound.");
+            throw new IllegalArgumentException(Messages.UPPERBOUND_LESSTHAN_LOWERBOUND_MESSAGE.format());
         }
 
         //TODO Further validity checking
@@ -192,22 +191,15 @@ public class SequenceAcknowledgementElement   {
 
     public void addNack(long index) {
         if (acknowledgementRange != null) {
-            throw new IllegalArgumentException("SequenceAcknowledgement cannot contain both " +
-                    "AcknowledgementRanges and Nacks");
+            throw new IllegalArgumentException(Messages.BOTH_ACKS_AND_NACKS_MESSAGE.format());
         }
 
         getNack().add(BigInteger.valueOf(index));
     }
     
     public String toString() {
-        String ret = "SequenceAcknowledgement:\n";
-        ret += "\tid = " + getId() + "\n";
-        
-        if (bufferRemaining != null) {
-            ret += "\tbufferRemaining = " + getBufferRemaining() + "\n";
-        }
-        
-        ret += "\tRanges:\n";
+       
+        String ret = Messages.SEQUENCE_ACKNOWLEDGEMENT_TOSTRING_STRING.format(getId(), getBufferRemaining());
         List<AcknowledgementRange> ranges = getAcknowledgementRange();
         if (ranges != null) {
             for (AcknowledgementRange range: ranges) {
@@ -295,7 +287,7 @@ public class SequenceAcknowledgementElement   {
         }
         
         public String toString() {
-            return "AckRange (" + lower.intValue() + "," + 
+            return "AcknowledgementRange (" + lower.intValue() + "," + 
                     upper.intValue() + ")";
         }
     }

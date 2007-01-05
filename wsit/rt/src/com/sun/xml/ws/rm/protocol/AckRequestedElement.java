@@ -59,7 +59,7 @@ public class AckRequestedElement  {
     }
 
     public String getLocalPart(){
-        return "AckRequested";
+        return new String ("AckRequested");
     }
 
     //Introduce accessors using simple types rather than BigInteger and
@@ -131,11 +131,8 @@ public class AckRequestedElement  {
     }
     
     public String toString() {
-        String ret = "AckRequestedElement:\n";
-        ret += "\tid = " + getId() + "\n";
-        ret += "\tmaxMessageNumber = " + getMaxMessageNumber() + "\n";
-        return ret;
-        
+        return Messages.ACKREQUESTED_TOSTRING_STRING.format(
+                getId(), getMaxMessageNumber());
     }
 
 

@@ -70,7 +70,7 @@ public class SequenceElement   {
 
 
     public String getLocalPart(){
-        return  "Sequence";
+        return new String ( "Sequence");
     }
 
 
@@ -227,17 +227,12 @@ public class SequenceElement   {
 
 
     public String toString() {
-        String ret =  "SequenceElement:\n";
-               ret += "\tid = " + getId() + "\n";
-               ret += "\tnumber = " + getNumber() + "\n";
-               ret += "\tlast = ";
-        if (getLast()) {
-            ret += "true\n";
-        } else {
-            ret += "false\n";
-        }
-        return ret;
-    }
+       
+        return Messages.SEQUENCE_TOSTRING_STRING
+                .format(getId(),
+                        getNumber(),
+                        getLast() ? "true" : "false");
+         }
     
     /**
      * <p>Java class for anonymous complex type.  That acts as a

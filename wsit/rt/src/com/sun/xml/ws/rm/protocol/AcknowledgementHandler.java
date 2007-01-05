@@ -139,9 +139,8 @@ public class AcknowledgementHandler {
         } catch (InvalidMessageNumberException e) {
             //this can happen if the sequence has been resurrected
             //after a restart.
-            logger.fine("Received acknowledgement of unknown message.  " +
-                        "Sequence = " + seq.getId() +
-                        "MessageNumber = " + i);
+            logger.fine(Messages.ACKNOWLEDGEMENT_MESSAGE.format(seq.getId(), i));
+            
         }
     }
     
