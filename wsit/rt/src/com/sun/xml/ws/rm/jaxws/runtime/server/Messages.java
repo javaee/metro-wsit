@@ -24,7 +24,9 @@ enum Messages {
     INVALID_CREATE_SEQUENCE_RESPONSE , //0 args
     CREATE_SEQUENCE_CORRELATION_ERROR , //0 args
     SECURITY_TOKEN_MISMATCH, //0 args
-    NOT_RELIABLE_SEQ_OR_PROTOCOL_MESSAGE //0args
+    NOT_RELIABLE_SEQ_OR_PROTOCOL_MESSAGE ,//0args
+    NON_RM_REQUEST_OR_MISSING_WSA_ACTION_HEADER, //0 args
+    INVALID_OR_MISSING_TO_ON_CS_MESSAGE //0 args
     ;
 
     private static final ResourceBundle rb = ResourceBundle.getBundle(Messages.class.getName());

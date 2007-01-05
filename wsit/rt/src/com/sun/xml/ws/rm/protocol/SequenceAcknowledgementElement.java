@@ -146,9 +146,7 @@ public class SequenceAcknowledgementElement   {
     }
 
 
-    public String getLocalPart(){
-        return new String ( "SequenceAcknowledgement");
-    }
+    
 
     public void setId(String id) {
         Identifier identifier = new Identifier();

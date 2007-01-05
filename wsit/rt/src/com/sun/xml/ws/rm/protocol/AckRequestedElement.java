@@ -58,9 +58,7 @@ public class AckRequestedElement  {
         return  RMBuilder.getConstants().getAckRequestedQName();
     }
 
-    public String getLocalPart(){
-        return new String ("AckRequested");
-    }
+    
 
     //Introduce accessors using simple types rather than BigInteger and
     //Identifier

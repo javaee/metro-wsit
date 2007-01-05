@@ -442,7 +442,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
                     .getHeaders().getAction(constants.getAddressingVersion(),
                                             config.getSoapVersion());
         if (actionValue == null || actionValue.equals("")) {
-          throw new RMException("Non RM Request or Missing wsa:Action header" )
+          throw new RMException(Messages.NON_RM_REQUEST_OR_MISSING_WSA_ACTION_HEADER.format() )
                                         ;
         }
 
@@ -565,8 +565,8 @@ public class RMServerPipe extends PipeBase<RMDestination,
             try {
                 dest = new URI(destString);
             } catch (Exception e) {
-                throw new RMException(
-                        "Invalid or missing \"To\" header on CreateSequence messge.");
+                throw new RMException(Messages.INVALID_OR_MISSING_TO_ON_CS_MESSAGE.format()
+                        );
             }
             
             accept = new AcceptType();
