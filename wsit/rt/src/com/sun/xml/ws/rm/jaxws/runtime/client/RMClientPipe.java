@@ -213,6 +213,7 @@ public class RMClientPipe
      *      Destination EndpointAddress URI from the request context.  Default to EndpointAddress
      *          from WSDLPort if it is missing
      */
+    @SuppressWarnings("unchecked")
     private synchronized void initialize(Packet packet) throws RMException {
         
         String dest = packet.endpointAddress.toString();
@@ -235,8 +236,7 @@ public class RMClientPipe
         } else {
             
             if (binding.getAddressingVersion() == AddressingVersion.MEMBER) {
-                throw new RMException("The Reliable Messaging Client does not "+ 
-                        "support the Member submission addressing version.");
+                throw new RMException(Messages.UNSUPPORTED_ADDRESSING_VERSION.format());
             }
             //store this in field
             this.proxy = packet.proxy;
@@ -278,7 +278,9 @@ public class RMClientPipe
                 
                 if (secureReliableMessaging) {
                     try {
-                        JAXBElement<SecurityTokenReferenceType> str = securityPipe.startSecureConversation(packet);
+                        JAXBElement<SecurityTokenReferenceType> str = 
+                                 securityPipe.startSecureConversation(packet);
+                        
                         outboundSequence.setSecurityTokenReference(str);
                     } catch (Exception e) {
                         secureReliableMessaging = false;
@@ -406,13 +408,12 @@ public class RMClientPipe
                 return null;
                 
             } else {
-                logger.log(Level.SEVERE,
-                        "Unexpected exception wrapped in WS exception ", e);
+                logger.log(Level.SEVERE, Messages.UNEXPECTED_WRAPPED_EXCEPTION.format(), e);
                 
                 throw e;
             }
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Unexpected exception in trySend " , e);
+            logger.log(Level.SEVERE, Messages.UNEXPECTED_TRY_SEND_EXCEPTION.format() , e);
             //fill the gap in the sequence
             
             throw new WebServiceException(e);
@@ -649,7 +650,7 @@ public class RMClientPipe
             }
         } catch (Throwable ee) {
             logger.log(Level.SEVERE,
-                    "Unexpected  Exception in RMClientPipe.process",
+                    Messages.UNEXPECTED_PROCESS_EXCEPTION.format(),                  
                     ee);
             throw new WebServiceException(ee);
             
@@ -670,7 +671,9 @@ public class RMClientPipe
             provider.terminateSequence(outboundSequence);
             nextPipe.preDestroy();
         } catch (Exception e) {
-            logger.log(Level.FINE, "RMClientPipe threw Exception in preDestroy", e);
+            logger.log(Level.FINE, 
+                       Messages.UNEXPECTED_PREDESTROY_EXCEPTION.format(), 
+                       e);
         }
     }
     

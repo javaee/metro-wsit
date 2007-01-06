@@ -41,6 +41,7 @@ import javax.xml.transform.stream.StreamSource;
 import java.io.ByteArrayInputStream;
 import com.sun.xml.ws.rm.Constants;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 /**
  * An RMSource represents a Collection of RMSequences with a
@@ -90,7 +91,7 @@ public class RMSource  extends RMProvider<ClientInboundSequence,
     }
     
     public synchronized void addOutboundSequence(ClientOutboundSequence seq) {
-        logger.fine("adding sequence " + seq.getId());    
+        logger.fine(Messages.ADDING_SEQUENCE_MESSAGE.format(seq.getId()));
         
         boolean firstSequence = outboundMap.isEmpty();
         outboundMap.put(seq.getId(), seq);
@@ -109,7 +110,8 @@ public class RMSource  extends RMProvider<ClientInboundSequence,
     }
     
     public synchronized void removeOutboundSequence(ClientOutboundSequence seq) {
-         logger.fine("removing sequence " + seq.getId());
+        
+         logger.fine(Messages.REMOVING_SEQUENCE_MESSAGE.format( seq.getId()));
          
          String id = seq.getId();
          
@@ -134,29 +136,14 @@ public class RMSource  extends RMProvider<ClientInboundSequence,
          if (seq != null) {
             removeOutboundSequence(seq);
          } else {
-             throw new IllegalArgumentException("No Outbound sequence with id " +
-                                                 id + " exists.");
+             String message = Messages.NO_SUCH_OUTBOUND_SEQUENCE.format(id);
+             IllegalArgumentException e = new IllegalArgumentException(message);
+             logger.log(Level.FINE, message, e);
+             throw e;
          }
     }
     
-    /**
-     * Allow a clean shutdown
-     *
-     * @deprecated - This was a plugfest hack.  The Retry thread is now a
-     * daemon, obviating the need to shut it down.  At the moment, we do not
-     * need a ProtocolMessageReceiver, since we are not doing duplex
-     * bindings.
-     */
-    /*
-    public static void stop() {
-        
-        //allow the RetryThread to exit
-        running = false;
-        
-        //allow the Protocol message listenter, if any to stop listening
-        ProtocolMessageReceiver.stop();
-    }
-     **/
+    
     
     /**
      * Do the necessary maintenance tasks for each <code>ClientInboundSequence</code>
@@ -266,27 +253,41 @@ public class RMSource  extends RMProvider<ClientInboundSequence,
         if (companionSequenceID != null) {
            
             if (iseq == null || iseq.getId() == null) {
-                throw new IllegalArgumentException(
-                        "Sequence does not contain a two-way operation, " +
-                        "but an inbound sequence id is specified");
+                
+                String message = Messages.NO_TWO_WAY_OPERATION.format();
+                IllegalArgumentException e = new IllegalArgumentException(message);
+                logger.log(Level.FINE, message, e);
+                throw e;
             }     
             iseq.setId(companionSequenceID);
+            
         } else if (iseq != null && iseq.getId() != null) {
-            throw new IllegalArgumentException(
-                    "Sequence id for inbound sequence must be specified.");
+            
+            String message = Messages.NO_INBOUND_SEQUENCE_ID_SPECIFIED.format();
+            IllegalArgumentException e = new IllegalArgumentException(message);
+            logger.log(Level.FINE, message,e);
+            throw e;
         }
         
         if (outboundMap.get(sequenceID) != null) {
-            throw new IllegalArgumentException(
-                    "Sequence " + sequenceID + " already exists.");
+            
+            String message = Messages.SEQUENCE_ALREADY_EXISTS.format(sequenceID);
+            IllegalArgumentException e = new IllegalArgumentException(message);
+            logger.log(Level.FINE, message, e);
+            throw e;
+           
         }
         
         if (companionSequenceID != null &&
                 inboundMap.get(companionSequenceID) != null) {
-            throw new IllegalArgumentException(
-                    "Sequence " + companionSequenceID + " already exists.");
+            
+            String message = Messages.SEQUENCE_ALREADY_EXISTS.format(companionSequenceID);
+            IllegalArgumentException e = new IllegalArgumentException(message);
+            logger.log(Level.FINE, message, e);
+            throw e;
+           
         }
-        
+               
         addOutboundSequence(seq);
         
         return seq;

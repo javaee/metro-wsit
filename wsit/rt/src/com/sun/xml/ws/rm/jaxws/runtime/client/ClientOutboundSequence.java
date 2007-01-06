@@ -602,8 +602,9 @@ public class ClientOutboundSequence extends OutboundSequence {
                
                 if (sendHeartbeats) {
                     
-                    logger.fine("Sending heartbeat message for sequence " + sequence.getId() + 
-                            " time = " + System.currentTimeMillis()); 
+                    logger.fine(Messages.HEARTBEAT_MESSAGE_MESSAGE
+                            .format(sequence.getId(), System.currentTimeMillis()));
+                    
                     protocolMessageSender.sendAckRequested(sequence, 
                                                        version);
                 }
@@ -615,8 +616,9 @@ public class ClientOutboundSequence extends OutboundSequence {
                 //
                 //In both cases the sequence is of no further use.  We
                 //will assume for now that this is already the case.
-                logger.log(Level.FINE, "Exception from sending heartbeat message for sequence " +
-                        sequence.getId(), e);
+                logger.log(Level.FINE, 
+                           Messages.HEARTBEAT_MESSAGE_EXCEPTION.format() + " " +
+                           sequence.getId(), e);
                 try {
                     RMSource.getRMSource().removeOutboundSequence(sequence);
                 } catch (Exception ex){

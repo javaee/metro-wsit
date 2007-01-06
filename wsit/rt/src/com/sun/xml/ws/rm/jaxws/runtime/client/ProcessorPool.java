@@ -37,6 +37,7 @@ import java.util.Stack;
  * Pool of Pipelines used by RMClientPipe to insure that
  * no two invocations of nextPipe.process() are done concurrently.
  */
+@SuppressWarnings("unchecked")
 public class ProcessorPool<T extends Pipe> extends Stack<T> {
     
     private T pipe;
