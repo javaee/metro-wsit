@@ -27,7 +27,7 @@ package com.sun.xml.ws.security.secconv;
  * Common Constants pertaining to WS-SecureConversation
  * @author WS-Trust Implementation Team
  */
-public interface WSSCConstants {
+public class WSSCConstants {
     
     /** the SecureConversation namespace URI */
     public static final String WSC_NAMESPACE = "http://schemas.xmlsoap.org/ws/2005/02/sc";
@@ -39,9 +39,9 @@ public interface WSSCConstants {
     public static final String SECURITY_CONTEXT_TOKEN_TYPE = WSC_NAMESPACE + "/sct";
 
     /** SecurityContextToken Type String */
-    public final String SECURITY_CONTEXT_TOKEN = "SecurityContextToken";
+    public static final String SECURITY_CONTEXT_TOKEN = "SecurityContextToken";
     
-    public final String SECURITY_CONTEXT_ID = "Incomimg_SCT";
+    public static final String SECURITY_CONTEXT_ID = "Incomimg_SCT";
     
     /** Action URIs */
     public static final String REQUEST_SECURITY_CONTEXT_TOKEN_ACTION = "http://schemas.xmlsoap.org/ws/2005/02/trust/RST/SCT";    

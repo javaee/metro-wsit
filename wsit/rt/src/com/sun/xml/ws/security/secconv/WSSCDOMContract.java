@@ -29,11 +29,9 @@
 
 package com.sun.xml.ws.security.secconv;
 
-import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.security.policy.SecureConversationToken;
 import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.trust.Configuration;
-import com.sun.xml.ws.security.trust.WSTrustException;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.security.trust.WSTrustDOMContract;
 
@@ -50,33 +48,33 @@ public class WSSCDOMContract implements WSTrustDOMContract {
     private static WSTrustElementFactory eleFac = WSTrustElementFactory.newInstance();
     
     /** Creates a new instance of WSSCDOMContract */
-    public void init(Configuration config) {
+    public void init(final Configuration config) {
         contract = new WSSCContract();
         contract.init(config);
     }
     
     /** Issue a Token */
-    public Element issue(Element request, IssuedTokenContext context,SecureConversationToken policy)throws WSSecureConversationException {
+    public Element issue(final Element request, final IssuedTokenContext context,final SecureConversationToken policy)throws WSSecureConversationException {
         return eleFac.toElement(contract.issue(eleFac.createRSTFrom(request), context, policy));
     }
 
     /** Issue a Collection of Token(s) possibly for different scopes */
-    public Element issueMultiple(Element request, IssuedTokenContext context) throws WSSecureConversationException {
+    public Element issueMultiple(final Element request, final IssuedTokenContext context) throws WSSecureConversationException {
         return null;
     }
 
     /** Renew a Token */
-    public Element renew(Element request, IssuedTokenContext context) throws WSSecureConversationException {
+    public Element renew(final Element request, final IssuedTokenContext context) throws WSSecureConversationException {
         return null;
     }
 
     /** Cancel a Token */
-    public Element cancel(Element request, IssuedTokenContext context) throws WSSecureConversationException {
+    public Element cancel(final Element request, final IssuedTokenContext context) throws WSSecureConversationException {
         return null;
     }
 
     /** Validate a Token */
-    public Element validate(Element request, IssuedTokenContext context) throws WSSecureConversationException {
+    public Element validate(final Element request, final IssuedTokenContext context) throws WSSecureConversationException {
         return null;
     }
     
@@ -84,7 +82,7 @@ public class WSSCDOMContract implements WSTrustDOMContract {
      * handle an unsolicited RSTR like in the case of 
      * Client Initiated Secure Conversation.
      */
-   public void handleUnsolicited(Element rstr, IssuedTokenContext context) throws WSSecureConversationException {
+   public void handleUnsolicited(final Element rstr, final IssuedTokenContext context) throws WSSecureConversationException {
        
    }
    
@@ -95,7 +93,7 @@ public class WSSCDOMContract implements WSTrustDOMContract {
     *  contains Initial Negotiation/Challenge information
     * for a Multi-Message exchange.
     */
-   public boolean containsChallenge(Element rstORrstr){
+   public boolean containsChallenge(final Element rstORrstr){
        return false;
    }
    

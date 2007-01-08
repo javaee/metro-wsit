@@ -23,19 +23,10 @@
 
 package com.sun.xml.ws.security.secconv;
 
-import java.net.URI;
 
-import javax.xml.soap.SOAPFault;
 
 import com.sun.xml.ws.security.trust.Configuration;
-import com.sun.xml.ws.security.trust.TrustPlugin;
-import com.sun.xml.ws.security.trust.WSTrustElementFactory;
-import com.sun.xml.ws.security.trust.WSTrustClientContract;
-import com.sun.xml.ws.security.trust.WSTrustContract;
 import com.sun.xml.ws.security.trust.WSTrustDOMContract;
-import com.sun.xml.ws.security.trust.WSTrustFactory;
-import com.sun.xml.ws.security.trust.WSTrustSourceContract;
-import com.sun.xml.ws.security.trust.WSTrustSOAPFaultException;
  
 /**
  * A Factory for creating WS-SecureConversation contract instances.
@@ -43,38 +34,42 @@ import com.sun.xml.ws.security.trust.WSTrustSOAPFaultException;
 
 public class WSSCFactory {
     
-    public static WSSCPlugin newSCPlugin(Configuration config) {
+    private WSSCFactory(){
+        //empty constructor
+    }
+    
+    public static WSSCPlugin newSCPlugin(final Configuration config) {
         return new WSSCPlugin(config);
     }
 
-     public static NewWSSCPlugin newNewSCPlugin(Configuration config) {
+     public static NewWSSCPlugin newNewSCPlugin(final Configuration config) {
         return new NewWSSCPlugin(config);
     }
 
 
-    public static WSSCContract newWSSCContract(Configuration config) {
-        WSSCContract contract = new WSSCContract();
+    public static WSSCContract newWSSCContract(final Configuration config) {
+        final WSSCContract contract = new WSSCContract();
         contract.init(config); 
         
         return contract;
     }
     
    
-    public static WSSCSourceContract newWSSCSourceContract(Configuration config) {
-        WSSCSourceContract contract = new WSSCSourceContract();
+    public static WSSCSourceContract newWSSCSourceContract(final Configuration config) {
+        final WSSCSourceContract contract = new WSSCSourceContract();
         contract.init(config); 
         
         return contract;
     }
    
-    public static WSTrustDOMContract newWSSCDOMContract(Configuration config) {
-        WSSCDOMContract contract = new WSSCDOMContract();
+    public static WSTrustDOMContract newWSSCDOMContract(final Configuration config) {
+        final WSSCDOMContract contract = new WSSCDOMContract();
         contract.init(config); 
         
         return contract;
     }
     
-    public static WSSCClientContract newWSSCClientContract(Configuration config) {
+    public static WSSCClientContract newWSSCClientContract(final Configuration config) {
         return new WSSCClientContract(config);
     }
 }

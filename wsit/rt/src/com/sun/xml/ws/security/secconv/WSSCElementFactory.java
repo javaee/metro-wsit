@@ -44,16 +44,13 @@ import java.net.URI;
  */
 public class WSSCElementFactory extends WSTrustElementFactoryImpl{
     
-    private static WSSCElementFactory scElemFactory = null;
+    private static final WSSCElementFactory scElemFactory = new WSSCElementFactory();
     
     public static WSSCElementFactory newInstance() {
-        if (scElemFactory == null) {
-            scElemFactory = new WSSCElementFactory();
-        }
         return scElemFactory;
     }
     
-    public SecurityContextToken createSecurityContextToken(URI identifier, String instance, String wsuId){
+    public SecurityContextToken createSecurityContextToken(final URI identifier, final String instance, final String wsuId){
         return new SecurityContextTokenImpl(identifier, instance, wsuId);
     }
 }

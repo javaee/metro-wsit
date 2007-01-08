@@ -47,6 +47,7 @@ import java.net.URI;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -54,14 +55,14 @@ import com.sun.xml.ws.security.secconv.logging.LogDomainConstants;
 
 public class WSSCClientContract implements WSTrustClientContract{
     
-    private static Logger log =
+    private static final Logger log =
             Logger.getLogger(
             LogDomainConstants.WSSC_IMPL_DOMAIN,
             LogDomainConstants.WSSC_IMPL_DOMAIN_BUNDLE);
     
     private Configuration config;
     private static final SimpleDateFormat calendarFormatter
-            = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'sss'Z'");
+            = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'sss'Z'",Locale.getDefault());
     
     private static final int DEFAULT_KEY_SIZE = 256;
     
@@ -74,23 +75,23 @@ public class WSSCClientContract implements WSTrustClientContract{
      * IssuedTokenContext.
      */
     public void handleRSTR(
-            RequestSecurityToken rst, RequestSecurityTokenResponse rstr, IssuedTokenContext context) throws WSSecureConversationException {
+            final RequestSecurityToken rst, final RequestSecurityTokenResponse rstr, final IssuedTokenContext context) throws WSSecureConversationException {
         if (rst.getRequestType().toString().equals(WSTrustConstants.ISSUE_REQUEST)){
             // ToDo
-            AppliesTo requestAppliesTo = rst.getAppliesTo();
-            AppliesTo responseAppliesTo = rstr.getAppliesTo();
+            final AppliesTo requestAppliesTo = rst.getAppliesTo();
+            final AppliesTo responseAppliesTo = rstr.getAppliesTo();
             
-            RequestedSecurityToken securityToken = rstr.getRequestedSecurityToken();
+            final RequestedSecurityToken securityToken = rstr.getRequestedSecurityToken();
             
             // Requested References
-            RequestedAttachedReference attachedRef = rstr.getRequestedAttachedReference();
-            RequestedUnattachedReference unattachedRef = rstr.getRequestedUnattachedReference();
+            final RequestedAttachedReference attachedRef = rstr.getRequestedAttachedReference();
+            final RequestedUnattachedReference unattachedRef = rstr.getRequestedUnattachedReference();
             
             // RequestedProofToken
-            RequestedProofToken proofToken = rstr.getRequestedProofToken();
+            final RequestedProofToken proofToken = rstr.getRequestedProofToken();
             
             // Obtain the secret key for the context
-            byte[] key = getKey(rstr, proofToken, rst);
+            final byte[] key = getKey(rstr, proofToken, rst);
             
             if(key != null){
                 context.setProofKey(key);
@@ -123,7 +124,7 @@ public class WSSCClientContract implements WSTrustClientContract{
             
             // Check if the rstr contains the RequestTedTokenCancelled element
             // if yes cleanup the IssuedTokenContext accordingly
-            RequestedTokenCancelled cancelled = rstr.getRequestedTokenCancelled();
+            final RequestedTokenCancelled cancelled = rstr.getRequestedTokenCancelled();
             if(cancelled!=null){
                 context.setSecurityToken(null);
                 context.setProofKey(null);
@@ -160,11 +161,11 @@ public class WSSCClientContract implements WSTrustClientContract{
         
         // Get Created and Expires from Lifetime
         try{
-            Lifetime lifetime = rstr.getLifetime();
-            AttributedDateTime created = lifetime.getCreated();
-            AttributedDateTime expires = lifetime.getExpires();
-            Date dateCreated = calendarFormatter.parse(created.getValue());
-            Date dateExpires = calendarFormatter.parse(expires.getValue());
+            final Lifetime lifetime = rstr.getLifetime();
+            final AttributedDateTime created = lifetime.getCreated();
+            final AttributedDateTime expires = lifetime.getExpires();
+            final Date dateCreated = calendarFormatter.parse(created.getValue());
+            final Date dateExpires = calendarFormatter.parse(expires.getValue());
             
             // populate the IssuedTokenContext
             context.setCreationTime(dateCreated);
@@ -179,18 +180,18 @@ public class WSSCClientContract implements WSTrustClientContract{
     private byte[] computeKey(final RequestSecurityTokenResponse rstr, final RequestedProofToken proofToken, final RequestSecurityToken rst) throws WSSecureConversationException, UnsupportedOperationException {
         // get ComputeKey algorithm URI, client entropy, server entropy and compute
         // the SecretKey
-        URI computedKey = proofToken.getComputedKey();
-        Entropy clientEntropy = rst.getEntropy();
-        Entropy serverEntropy = rstr.getEntropy();
-        BinarySecret clientBinarySecret = clientEntropy.getBinarySecret();
-        BinarySecret serverBinarySecret = serverEntropy.getBinarySecret();
-        byte [] clientEntropyBytes = null;
-        byte [] serverEntropyBytes = null;
-        if(clientBinarySecret!=null){
-            clientEntropyBytes = clientBinarySecret.getRawValue();
+        final URI computedKey = proofToken.getComputedKey();
+        final Entropy clientEntropy = rst.getEntropy();
+        final Entropy serverEntropy = rstr.getEntropy();
+        final BinarySecret clientBS = clientEntropy.getBinarySecret();
+        final BinarySecret serverBS = serverEntropy.getBinarySecret();
+        byte [] clientEntr = null;
+        byte [] serverEntr = null;
+        if(clientBS!=null){
+            clientEntr = clientBS.getRawValue();
         }
-        if(serverBinarySecret!=null){
-            serverEntropyBytes = serverBinarySecret.getRawValue();
+        if(serverBS!=null){
+            serverEntr = serverBS.getRawValue();
         }
         byte[] key = null;
         int keySize = (int)rstr.getKeySize();
@@ -206,7 +207,7 @@ public class WSSCClientContract implements WSTrustClientContract{
         }
         if(computedKey.toString().equals(WSTrustConstants.CK_PSHA1)){
             try {
-                key = SecurityUtil.P_SHA1(clientEntropyBytes,serverEntropyBytes, keySize/8);
+                key = SecurityUtil.P_SHA1(clientEntr,serverEntr, keySize/8);
             } catch (Exception ex) {
                 log.log(Level.SEVERE,
                         "WSSC0006.unabletoextract.key");
@@ -224,7 +225,7 @@ public class WSSCClientContract implements WSTrustClientContract{
      *
      */
     public RequestSecurityTokenResponse handleRSTRForNegotiatedExchange(
-            RequestSecurityToken rst, RequestSecurityTokenResponse rstr, IssuedTokenContext context) throws WSSecureConversationException {
+            final RequestSecurityToken rst, final RequestSecurityTokenResponse rstr, final IssuedTokenContext context) throws WSSecureConversationException {
         return null;
     }
     
@@ -233,20 +234,20 @@ public class WSSCClientContract implements WSTrustClientContract{
      * for example a Client Initiated WS-SecureConversation context.
      *
      */
-    public RequestSecurityTokenResponse createRSTRForClientInitiatedIssuedTokenContext(AppliesTo scopes,IssuedTokenContext context) throws WSSecureConversationException {
-        WSSCElementFactory eleFac = WSSCElementFactory.newInstance();
+    public RequestSecurityTokenResponse createRSTRForClientInitiatedIssuedTokenContext(final AppliesTo scopes,final IssuedTokenContext context) throws WSSecureConversationException {
+        final WSSCElementFactory eleFac = WSSCElementFactory.newInstance();
         
-        byte[] secret = WSTrustUtil.generateRandomSecret(DEFAULT_KEY_SIZE);
-        BinarySecret binarySecret = eleFac.createBinarySecret(secret, BinarySecret.SYMMETRIC_KEY_TYPE);
+        final byte[] secret = WSTrustUtil.generateRandomSecret(DEFAULT_KEY_SIZE);
+        final BinarySecret binarySecret = eleFac.createBinarySecret(secret, BinarySecret.SYMMETRIC_KEY_TYPE);
         
-        RequestedProofToken proofToken = eleFac.createRequestedProofToken();
+        final RequestedProofToken proofToken = eleFac.createRequestedProofToken();
         proofToken.setProofTokenType(RequestedProofToken.BINARY_SECRET_TYPE);
         proofToken.setBinarySecret(binarySecret);
         
-        SecurityContextToken token = WSTrustUtil.createSecurityContextToken(eleFac);
-        RequestedSecurityToken rst = eleFac.createRequestedSecurityToken(token);
+        final SecurityContextToken token = WSTrustUtil.createSecurityContextToken(eleFac);
+        final RequestedSecurityToken rst = eleFac.createRequestedSecurityToken(token);
         
-        RequestSecurityTokenResponse rstr = eleFac.createRSTR();
+        final RequestSecurityTokenResponse rstr = eleFac.createRSTR();
         rstr.setAppliesTo(scopes);
         rstr.setRequestedSecurityToken(rst);
         rstr.setRequestedProofToken(proofToken);
@@ -265,14 +266,14 @@ public class WSSCClientContract implements WSTrustClientContract{
      * @return true if the RSTR contains a SignChallenge/BinaryExchange or
      *  some other custom challenge recognized by this implementation.
      */
-    public boolean containsChallenge(RequestSecurityTokenResponse rstr) {
+    public boolean containsChallenge(final RequestSecurityTokenResponse rstr) {
         return false;
     }
     
     /**
      * Return the &lt;wst:ComputedKey&gt; URI if any inside the RSTR, null otherwise
      */
-    public URI getComputedKeyAlgorithmFromProofToken(RequestSecurityTokenResponse rstr) {
+    public URI getComputedKeyAlgorithmFromProofToken(final RequestSecurityTokenResponse rstr) {
         return null;
     }
 }
