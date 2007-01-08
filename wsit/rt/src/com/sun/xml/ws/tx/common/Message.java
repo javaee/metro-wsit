@@ -22,6 +22,8 @@
 
 package com.sun.xml.ws.tx.common;
 
+import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
@@ -30,8 +32,6 @@ import static com.sun.xml.ws.tx.common.Constants.COORDINATION_CONTEXT;
 import static com.sun.xml.ws.tx.common.Constants.WSCOOR_SOAP_NSURI;
 import com.sun.xml.ws.tx.coordinator.CoordinationContextBase;
 import com.sun.xml.ws.tx.coordinator.CoordinationContextInterface;
-import com.sun.istack.NotNull;
-import com.sun.istack.Nullable;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
@@ -61,6 +61,7 @@ public class Message {
 
     /**
      * Public ctor takes wrapped JAX-WS message as its argument.
+     *
      * @param message core message
      */
     public Message(@NotNull final com.sun.xml.ws.api.message.Message message) {
@@ -72,6 +73,7 @@ public class Message {
      * Get the CoordinationContext Header Element from the underlying
      * JAX-WS message's HeaderList. Only understand the header iff CoordinationContext is
      * for coordinationType.
+     *
      * @return the coordination context in this message
      */
     @NotNull
@@ -102,9 +104,9 @@ public class Message {
      * JAX-WS message's HeaderList. Only understand the header iff CoordinationContext is
      * for coordinationType.
      *
-     * @return index of coordination context in header list or null if not found
      * @param namespace namespace
      * @param localName local name
+     * @return index of coordination context in header list or null if not found
      */
     @Nullable
     public com.sun.xml.ws.api.message.Header getCoordCtxHeader(@NotNull final String namespace, @NotNull final String localName) {
@@ -122,15 +124,13 @@ public class Message {
         }
         return ccHdr;
     }
-    
+
     /**
-     * 
      * @param unmarshaller jaxb unmarshaller
      * @return the coordination context
      */
     @Nullable
-    public CoordinationContextInterface getCoordinationContext(@NotNull final Unmarshaller unmarshaller) throws JAXBException
-    {
+    public CoordinationContextInterface getCoordinationContext(@NotNull final Unmarshaller unmarshaller) throws JAXBException {
         if (cc == null) {
             final Header ccHdr = getCoordCtxHeader(WSCOOR_SOAP_NSURI, COORDINATION_CONTEXT);
             if (ccHdr != null) {
@@ -138,7 +138,7 @@ public class Message {
                     cc = CoordinationContextBase.createCoordinationContext(ccHdr.readAsJAXB(unmarshaller));
                 } catch (JAXBException e) {
                     if (logger.isLogging(Level.WARNING)) {
-                        logger.warning("getCoordinationContext", "can not unmarshal 2004 WS-Coordination CoordinationContext. Exception message: " + e.getLocalizedMessage());
+                        logger.warning("getCoordinationContext", LocalizationMessages.CANNOT_UNMARSHAL_CONTEXT(e.getLocalizedMessage()));
                     }
                     throw e;
                 }
@@ -158,6 +158,7 @@ public class Message {
 
     /**
      * Get the wsdl bound operation for the specified port
+     *
      * @param port port
      * @return the wsdl operation or null if not found
      */

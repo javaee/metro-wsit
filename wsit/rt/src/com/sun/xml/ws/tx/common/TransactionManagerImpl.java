@@ -47,7 +47,7 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
     final private TransactionManager javaeeTM;
     final private TransactionSynchronizationRegistry javaeeSynchReg;
     final private Map<Xid, ATTransactionImpl> jtaatTxnMap;
-    
+
     final static private TxLogger logger = TxLogger.getATLogger(TransactionManagerImpl.class);
 
     // no standardized JNDI name exists across as implementations for TM, this is Sun App Server specific.
@@ -66,7 +66,7 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
             final Context ctx = new InitialContext();
             result = ctx.lookup(jndiName);
         } catch (NamingException e) {
-            logger.warning("jndiLookup", "failed jndi lookup of " + jndiName);
+            logger.warning("jndiLookup", LocalizationMessages.FAILED_JNDI_LOOKUP(jndiName));
         }
         return result;
     }

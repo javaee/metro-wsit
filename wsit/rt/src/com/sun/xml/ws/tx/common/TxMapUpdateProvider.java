@@ -54,7 +54,7 @@ import java.util.logging.Level;
 public class TxMapUpdateProvider implements PolicyMapUpdateProvider {
 
     final static private TxLogger logger = TxLogger.getATLogger(TxMapUpdateProvider.class);
-    
+
     static private boolean nonJavaEEContainer = false;
 
     /**
@@ -67,14 +67,14 @@ public class TxMapUpdateProvider implements PolicyMapUpdateProvider {
      * @param model
      * @param wsBinding
      */
-    public void update(final PolicyMapExtender policyMapMutator, final PolicyMap policyMap, 
+    public void update(final PolicyMapExtender policyMapMutator, final PolicyMap policyMap,
                        final SEIModel model, final WSBinding wsBinding) throws PolicyException {
-        final String METHOD_NAME="update";
-        
+        final String METHOD_NAME = "update";
+
         if (nonJavaEEContainer) {
             return;
         }
-        
+
         // For each method of a CMT EJB, map its effective javax.ejb.TransactionAttribute to semantically equivalent 
         // ws-at policy assertion.
         if (model != null) {
@@ -90,15 +90,15 @@ public class TxMapUpdateProvider implements PolicyMapUpdateProvider {
                     try {
                         isCMTEJB = TransactionAnnotationProcessor.isContainerManagedEJB(theClass);
                     } catch (NoClassDefFoundError e) {
-                      // running in a container that does not support EJBs; terminate processing of EJB annotations
-                      nonJavaEEContainer = true;
-                      if (logger.isLogging(Level.FINEST)) { 
-                        logger.finest(METHOD_NAME, "handled exception " + e.getLocalizedMessage());
-                      }
-                      if (logger.isLogging(Level.INFO)) {
-                        logger.info(METHOD_NAME, "running in a non Java EE container; disable mapping of Container Managed Transaction EJB to WS-AT Policy assertions");
-                      }
-                       return;  
+                        // running in a container that does not support EJBs; terminate processing of EJB annotations
+                        nonJavaEEContainer = true;
+                        if (logger.isLogging(Level.FINEST)) {
+                            logger.finest(METHOD_NAME, "handled exception " + e.getLocalizedMessage());
+                        }
+                        if (logger.isLogging(Level.INFO)) {
+                            logger.info(METHOD_NAME, LocalizationMessages.NON_EE_CONTAINER());
+                        }
+                        return;
                     }
                     if (isCMTEJB) {
                         // perform class level caching of info
@@ -107,7 +107,7 @@ public class TxMapUpdateProvider implements PolicyMapUpdateProvider {
                         port = method.getOwner().getPort();
                         if (port == null) {
                             if (logger.isLogging(Level.INFO)) {
-                                logger.info(METHOD_NAME, theClass.getName() + " has a null ws port. Unable to map CMT EJB TransactionAttribute to WS-AT policy asssertion");
+                                logger.info(METHOD_NAME, LocalizationMessages.NULL_WS_PORT(theClass.getName()));
                             }
                             return;
                         }
@@ -135,7 +135,7 @@ public class TxMapUpdateProvider implements PolicyMapUpdateProvider {
                         final PolicySubject wsatPolicySubject = new PolicySubject(wsdlBop, policy);
                         policyMapMutator.putOperationSubject(operationKey, wsatPolicySubject);
                         if (logger.isLogging(Level.INFO)) {
-                            logger.info(METHOD_NAME, "for wsdl bounded operation " + wsdlBop.getName() + " add ws-at policy assertion(s) for effective javax.ejb.TransactionAttribute " +
+                            logger.info(METHOD_NAME, LocalizationMessages.ADD_AT_POLICY_ASSERTION(wsdlBop.getName()) +
                                     txnAttr.toString());
                         }
                     } else {
@@ -158,13 +158,13 @@ public class TxMapUpdateProvider implements PolicyMapUpdateProvider {
 
 
     static class WsatPolicyAssertion extends PolicyAssertion {
-        
+
         static private AssertionData createAssertionData(final QName assertionQName, final boolean isOptional) {
             final AssertionData result = AssertionData.createAssertionData(assertionQName);
             result.setOptionalAttribute(isOptional);
             return result;
         }
-        
+
         WsatPolicyAssertion(final QName wsatPolicyAssertionName, final boolean isOptional) {
             super(createAssertionData(wsatPolicyAssertionName, isOptional), null, null);
         }

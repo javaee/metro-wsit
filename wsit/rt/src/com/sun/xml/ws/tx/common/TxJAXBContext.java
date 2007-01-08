@@ -44,9 +44,9 @@ public class TxJAXBContext {
             final List<Class> classes = getClassesToBeBound();
             jc = JAXBContext.newInstance(classes.toArray(new Class[classes.size()]));
         } catch (JAXBException e) {
-            logger.severe("getJAXBContext", "failed to create", e);
+            logger.severe("getJAXBContext", LocalizationMessages.FAILED_TO_CREATE_JAXBCONTEXT(e));
         } catch (ClassNotFoundException e) {
-            logger.severe("getJAXBContext", "failed to create", e);
+            logger.severe("getJAXBContext", LocalizationMessages.FAILED_TO_CREATE_JAXBCONTEXT(e));
         }
     }
 
@@ -64,7 +64,7 @@ public class TxJAXBContext {
             return marshaller;
         } catch (JAXBException e) {
             if (logger.isLogging(Level.SEVERE)) {
-                logger.severe("createMarshaller", "failed creation", e);
+                logger.severe("createMarshaller", LocalizationMessages.FAILED_TO_CREATE_MARSHALLER(e));
             }
             // TODO should this throw an exception also
             return null;
@@ -76,7 +76,7 @@ public class TxJAXBContext {
             return getJAXBContext().createUnmarshaller();
         } catch (JAXBException e) {
             if (logger.isLogging(Level.SEVERE)) {
-                logger.severe("createMarshaller", "failed creation", e);
+                logger.severe("createMarshaller", LocalizationMessages.FAILED_TO_CREATE_UNMARSHALLER(e));
             }
             // TODO: rethrow some exception.
             return null;
