@@ -92,19 +92,19 @@ public class HttpPoster {
             try {
                 if (logger.isLoggable(ERROR_LOG_LEVEL)) {
                     logger.log(ERROR_LOG_LEVEL,
-                        MessagesMessages.MEX_10_ERROR_FROM_SERVER());
+                        MessagesMessages.MEX_0010_ERROR_FROM_SERVER());
                     String line = reader.readLine();
                     while (line != null) {
                         logger.log(ERROR_LOG_LEVEL, line);
                         line = reader.readLine();
                     }
                     logger.log(ERROR_LOG_LEVEL,
-                        MessagesMessages.MEX_11_ERROR_FROM_SERVER_END());
+                        MessagesMessages.MEX_0011_ERROR_FROM_SERVER_END());
                 }
             } catch (IOException ioe) {
                 // This exception has no more impact.
                 logger.log(ERROR_LOG_LEVEL,
-                    MessagesMessages.MEX_12_READING_ERROR_STREAM_FAILURE(),
+                    MessagesMessages.MEX_0012_READING_ERROR_STREAM_FAILURE(),
                     ioe);
             } finally {
                 try {
@@ -112,7 +112,7 @@ public class HttpPoster {
                 } catch (IOException ex) {
                     // This exception has no more impact.
                     logger.log(ERROR_LOG_LEVEL,
-                        MessagesMessages.MEX_13_CLOSING_ERROR_STREAM_FAILURE(),
+                        MessagesMessages.MEX_0013_CLOSING_ERROR_STREAM_FAILURE(),
                         ex);
                 }
             }

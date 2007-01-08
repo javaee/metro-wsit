@@ -115,17 +115,17 @@ public class MetadataClient {
                     return createMetadata(responseStream);
                 } catch (IOException e) {
                     logger.log(ERROR_LOG_LEVEL,
-                        MessagesMessages.MEX_06_RETRIEVING_MDATA_FAILURE(
+                        MessagesMessages.MEX_0006_RETRIEVING_MDATA_FAILURE(
                         p, newAddress));
                     continue;
                 } catch (Exception e) {
                     logger.log(Level.WARNING,
-                        MessagesMessages.MEX_08_PARSING_MDATA_FAILURE());
+                        MessagesMessages.MEX_0008_PARSING_MDATA_FAILURE());
                     continue;
                 }
             }
         }
-        logger.warning(MessagesMessages.MEX_07_RETURNING_NULL_MDATA());
+        logger.warning(MessagesMessages.MEX_0007_RETURNING_NULL_MDATA());
         return null;
     }
     
@@ -259,7 +259,7 @@ public class MetadataClient {
             }
         }
         logger.warning(
-            MessagesMessages.MEX_09_ADDRESS_NOT_FOUND_FOR_PORT(portNode));
+            MessagesMessages.MEX_0009_ADDRESS_NOT_FOUND_FOR_PORT(portNode));
         return null;
     }
 

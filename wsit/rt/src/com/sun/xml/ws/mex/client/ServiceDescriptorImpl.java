@@ -129,7 +129,7 @@ public class ServiceDescriptorImpl extends ServiceDescriptor {
             schemas.add(createSource(section, identifier));
         } else {
             logger.warning(
-                MessagesMessages.MEX_02_UNKNOWN_DIALECT_WITH_ID(
+                MessagesMessages.MEX_0002_UNKNOWN_DIALECT_WITH_ID(
                 dialect, identifier));
         }
     }
@@ -158,7 +158,7 @@ public class ServiceDescriptorImpl extends ServiceDescriptor {
             schemas.add(getSourceFromLocation(location, identifier));
         } else {
             logger.warning(
-                MessagesMessages.MEX_02_UNKNOWN_DIALECT_WITH_ID(
+                MessagesMessages.MEX_0002_UNKNOWN_DIALECT_WITH_ID(
                 dialect, identifier));
         }
     }
@@ -231,7 +231,7 @@ public class ServiceDescriptorImpl extends ServiceDescriptor {
         if (namespace == null) {
             // bug in the server? want to avoid NPE if so
             logger.warning(
-                MessagesMessages.MEX_03_UNKNOWN_WSDL_NAMESPACE(
+                MessagesMessages.MEX_0003_UNKNOWN_WSDL_NAMESPACE(
                 node.getNodeName()));
             return null;
         }
@@ -285,7 +285,7 @@ public class ServiceDescriptorImpl extends ServiceDescriptor {
             return source;
         } catch (TransformerException te) {
             throw new WebServiceException(
-                MessagesMessages.MEX_04_TRANSFORMING_FAILURE(address), te);
+                MessagesMessages.MEX_0004_TRANSFORMING_FAILURE(address), te);
         }
     }
 
@@ -302,7 +302,7 @@ public class ServiceDescriptorImpl extends ServiceDescriptor {
             final String sysId = nsToSysIdMap.get(targetNamespace);
             if (sysId == null) {
                 logger.warning(
-                    MessagesMessages.MEX_05_WSDL_NOT_FOUND_WITH_NAMESPACE(
+                    MessagesMessages.MEX_0005_WSDL_NOT_FOUND_WITH_NAMESPACE(
                     targetNamespace));
                 continue;
             }
