@@ -68,7 +68,7 @@ public class MtomMapUpdateProvider implements PolicyMapUpdateProvider{
     
     public void update(PolicyMapExtender policyMapMutator, PolicyMap policyMap, SEIModel model, WSBinding wsBinding) throws PolicyException {
         logger.entering("update");
-        MTOMFeature mtomFeature = (MTOMFeature) wsBinding.getFeature(MTOMFeature.ID);
+        MTOMFeature mtomFeature = (MTOMFeature) wsBinding.getFeature(MTOMFeature.class);
         if (policyMap != null) {
             Collection<PolicySubject> subjects = policyMap.getPolicySubjects();
             PolicyModelMarshaller marshaller = PolicyModelMarshaller.getXmlMarshaller(true);
