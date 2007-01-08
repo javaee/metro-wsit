@@ -49,7 +49,7 @@ public class AddressingModelConfiguratorProviderTest extends TestCase {
         PolicyMap policyMap = model.getExtension(WSDLPolicyMapWrapper.class).getPolicyMap();
         
         assertTrue(model.getService(new QName("http://example.org","DictionaryService")).
-                getFirstPort().getFeature(AddressingFeature.ID).isEnabled());
+                getFirstPort().getFeature(AddressingFeature.class).isEnabled());
     }
     
     /**
@@ -61,7 +61,7 @@ public class AddressingModelConfiguratorProviderTest extends TestCase {
         PolicyMap policyMap = model.getExtension(WSDLPolicyMapWrapper.class).getPolicyMap();
         
         assertTrue(model.getService(new QName("http://example.org","DictionaryService")).
-                getFirstPort().getFeature(MemberSubmissionAddressingFeature.ID).isEnabled());
+                getFirstPort().getFeature(MemberSubmissionAddressingFeature.class).isEnabled());
     }
 
     /**
@@ -73,7 +73,7 @@ public class AddressingModelConfiguratorProviderTest extends TestCase {
         PolicyMap policyMap = model.getExtension(WSDLPolicyMapWrapper.class).getPolicyMap();
         
         assertNull(model.getService(new QName("http://example.org","DictionaryService")).
-                getFirstPort().getFeature(AddressingFeature.ID));
+                getFirstPort().getFeature(AddressingFeature.class));
     }
     
 }
