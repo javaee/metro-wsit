@@ -23,6 +23,8 @@ package com.sun.xml.ws.mex.server;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
@@ -34,6 +36,8 @@ import com.sun.xml.ws.api.server.PortAddressResolver;
 import com.sun.xml.ws.api.server.SDDocument;
 import com.sun.xml.ws.api.server.ServiceDefinition;
 import com.sun.xml.ws.api.server.WSEndpoint;
+
+import com.sun.xml.ws.mex.MessagesMessages;
 
 import static com.sun.xml.ws.mex.MetadataConstants.MEX_NAMESPACE;
 import static com.sun.xml.ws.mex.MetadataConstants.MEX_PREFIX;
@@ -49,6 +53,9 @@ import static com.sun.xml.ws.mex.MetadataConstants.WSDL_DIALECT;
 public class WSDLRetriever {
 
     private final WSEndpoint endpoint;
+    
+    private static final Logger logger =
+        Logger.getLogger(WSDLRetriever.class.getName());
     
     /*
      * This class is used by the SDDocument object in the
@@ -110,7 +117,10 @@ public class WSDLRetriever {
             writer.writeEndElement();
         } catch (IOException ioe) {
             // this should be very rare
-            throw new WebServiceException(ioe);
+            String exceptionMessage =
+                MessagesMessages.MEX_0015_IOEXCEPTION_WHILE_WRITING_RESPONSE();
+            logger.log(Level.SEVERE, exceptionMessage, ioe);
+            throw new WebServiceException(exceptionMessage, ioe);
         }
     }
 

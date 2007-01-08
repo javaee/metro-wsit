@@ -51,7 +51,9 @@ public class HttpPoster {
         Logger.getLogger(HttpPoster.class.getName());
 
     /**
-     * Makes the request to the service.
+     * Makes the request to the service. It is expected that this
+     * method may throw IOException several times before metadata
+     * is returned successfully.
      *
      * @param request A String containing the xml that
      *     will be the payload of the message. 
@@ -78,6 +80,8 @@ public class HttpPoster {
             return conn.getInputStream();
         } catch (IOException ioe) {
             outputErrorStream(conn);
+            
+            // this exception is caught within the mex code and is logged there
             throw ioe;
         } finally {
             writer.close();
@@ -139,6 +143,8 @@ public class HttpPoster {
             return conn.getInputStream();
         } catch (IOException ioe) {
             outputErrorStream(conn);
+            
+            // this exception is caught within the mex code and is logged there
             throw ioe;
         }
     }

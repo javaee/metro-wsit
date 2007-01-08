@@ -21,11 +21,13 @@
  */
 package com.sun.xml.ws.mex.client;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.xml.transform.Source;
@@ -216,8 +218,12 @@ public class ServiceDescriptorImpl extends ServiceDescriptor {
                 return source;
             }
             return parseAndConvertStream(address, response);
-        } catch (Exception e) {
-            throw new WebServiceException(e);
+        } catch (IOException ioe) {
+            final String exceptionMessage =
+                MessagesMessages.MEX_0014_RETRIEVAL_FROM_ADDRESS_FAILURE(
+                address);
+            logger.log(Level.SEVERE, exceptionMessage, ioe);
+            throw new WebServiceException(exceptionMessage, ioe);
         }
     }
     
@@ -284,8 +290,10 @@ public class ServiceDescriptorImpl extends ServiceDescriptor {
             source.setSystemId(getNamespaceFromNode(wsdlDoc.getFirstChild()));
             return source;
         } catch (TransformerException te) {
-            throw new WebServiceException(
-                MessagesMessages.MEX_0004_TRANSFORMING_FAILURE(address), te);
+            final String exceptionMessage =
+                MessagesMessages.MEX_0004_TRANSFORMING_FAILURE(address);
+            logger.log(Level.SEVERE, exceptionMessage, te);
+            throw new WebServiceException(exceptionMessage, te);
         }
     }
 

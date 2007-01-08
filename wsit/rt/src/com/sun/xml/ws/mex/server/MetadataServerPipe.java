@@ -21,6 +21,8 @@
  */
 package com.sun.xml.ws.mex.server;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.ws.WebServiceException;
@@ -62,6 +64,9 @@ public class MetadataServerPipe extends AbstractFilterPipeImpl {
 
     private final WSDLRetriever wsdlRetriever;
     private final SOAPVersion soapVersion;
+    
+    private static final Logger logger =
+        Logger.getLogger(MetadataServerPipe.class.getName());
     
     public MetadataServerPipe(WSEndpoint endpoint, Pipe next) {
         super(next);
@@ -137,8 +142,10 @@ public class MetadataServerPipe extends AbstractFilterPipeImpl {
                 responseMessage, adVersion, soapVersion, GET_RESPONSE);
             return response;
         } catch (XMLStreamException streamE) {
-            throw new WebServiceException(
-                MessagesMessages.MEX_0001_RESPONSE_WRITING_FAILURE(), streamE);
+            final String exceptionMessage =
+                MessagesMessages.MEX_0001_RESPONSE_WRITING_FAILURE();
+            logger.log(Level.SEVERE, exceptionMessage, streamE);
+            throw new WebServiceException(exceptionMessage, streamE);
         }
     }
 
