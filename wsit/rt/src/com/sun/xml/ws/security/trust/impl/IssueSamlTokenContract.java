@@ -176,7 +176,7 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
             }
             if(log.isLoggable(Level.FINE)) {
                 log.log(Level.FINE, 
-                        LogStringsMessages.WST_1010_KEY_SIZE(keySize));
+                        LogStringsMessages.WST_1010_KEY_SIZE(keySize, DEFAULT_KEY_SIZE));
             }
             
             byte[] key = WSTrustUtil.generateRandomSecret(keySize/8);
@@ -215,7 +215,7 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
                 ctx = new URI(rst.getContext());
         } catch (URISyntaxException ex) {
             log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0014_URI_SYNTAX(rst.getContext()));
+                    LogStringsMessages.WST_0014_URI_SYNTAX(rst.getContext()), ex);
             throw new WSTrustException(
                     LogStringsMessages.WST_0014_URI_SYNTAX(rst.getContext()) ,ex);
         }
