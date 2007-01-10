@@ -1,5 +1,5 @@
 /*
- * $Id: SecurityContextTokenImpl.java,v 1.5 2006-11-01 19:41:03 manveen Exp $
+ * $Id: SecurityContextTokenImpl.java,v 1.6 2007-01-10 23:42:52 manveen Exp $
  */
 
 /*
@@ -49,6 +49,7 @@ import org.w3c.dom.Document;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.sun.xml.ws.security.secconv.logging.LogDomainConstants;
+import com.sun.xml.ws.security.secconv.logging.LogStringsMessages;
 
 /**
  * SecurityContextToken Implementation
@@ -80,7 +81,7 @@ public class SecurityContextTokenImpl extends SecurityContextTokenType implement
         
         if (wsuId != null){
             setWsuId(wsuId);
-        }                
+        }
     }
     
     // useful for converting from JAXB to our owm impl class
@@ -123,9 +124,8 @@ public class SecurityContextTokenImpl extends SecurityContextTokenType implement
                 (new ObjectFactory()).createIdentifier(identifier.toString());
         getAny().add(iElement);
         if (log.isLoggable(Level.FINE)) {
-        log.log(Level.FINE,
-                "WSSC1004.secctx.token.id.value",
-                new Object[] {identifier.toString()});
+            log.log(Level.FINE,
+                    LogStringsMessages.WSSC_1004_SECCTX_TOKEN_ID_VALUE(identifier.toString()));
         }
     }
     
@@ -141,12 +141,11 @@ public class SecurityContextTokenImpl extends SecurityContextTokenType implement
     }
     
     public void setWsuId(String wsuId){
-                setId(wsuId);        
-                if (log.isLoggable(Level.FINE)) {
-        log.log(Level.FINE,
-                "WSSC1005.secctx.token.wsuid.value",
-                new Object[] {wsuId});
-                }
+        setId(wsuId);
+        if (log.isLoggable(Level.FINE)) {
+            log.log(Level.FINE,
+                    LogStringsMessages.WSSC_1005_SECCTX_TOKEN_WSUID_VALUE(wsuId));
+        }
     }
     
     public String getWsuId(){
@@ -170,7 +169,9 @@ public class SecurityContextTokenImpl extends SecurityContextTokenType implement
             return doc.getDocumentElement();
             
         } catch (Exception ex) {
-            throw new RuntimeException(ex.getMessage(), ex);
+            log.log(Level.SEVERE, 
+                    LogStringsMessages.WSSC_0019_ERR_TOKEN_VALUE(), ex);
+            throw new RuntimeException(LogStringsMessages.WSSC_0019_ERR_TOKEN_VALUE(), ex);
         }
     }
     

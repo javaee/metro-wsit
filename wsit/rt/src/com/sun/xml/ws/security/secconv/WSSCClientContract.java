@@ -52,6 +52,7 @@ import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.sun.xml.ws.security.secconv.logging.LogDomainConstants;
+import com.sun.xml.ws.security.secconv.logging.LogStringsMessages;
 
 public class WSSCClientContract implements WSTrustClientContract{
     
@@ -150,8 +151,8 @@ public class WSSCClientContract implements WSTrustClientContract{
                 key = binarySecret.getRawValue();
             } else{
                 log.log(Level.SEVERE,
-                        "WSSC0003.invalid.prooftoken", new Object[] {proofTokenType});
-                throw new WSSecureConversationException("Invalid Proof Token Type: " + proofTokenType);
+                        LogStringsMessages.WSSC_0003_INVALID_PROOFTOKEN(proofTokenType));
+                throw new WSSecureConversationException(LogStringsMessages.WSSC_0003_INVALID_PROOFTOKEN(proofTokenType));
             }
         }
         return key;
@@ -171,9 +172,9 @@ public class WSSCClientContract implements WSTrustClientContract{
             context.setCreationTime(dateCreated);
             context.setExpirationTime(dateExpires);
         }catch(ParseException ex){
-            log.log(Level.SEVERE,
-                    "WSSC0004.parse.exception");
-            throw new WSSecureConversationException(ex.getMessage(), ex);
+            log.log(Level.SEVERE, 
+                    LogStringsMessages.WSSC_0004_PARSE_EXCEPTION(), ex);
+            throw new WSSecureConversationException(LogStringsMessages.WSSC_0004_PARSE_EXCEPTION(), ex);
         }
     }
     
@@ -203,15 +204,15 @@ public class WSSCClientContract implements WSTrustClientContract{
         }
         if (log.isLoggable(Level.FINE)) {
             log.log(Level.FINE,
-                    "WSSC0005.computed.keysize", new Object[] {keySize});
+                    LogStringsMessages.WSSC_0005_COMPUTED_KEYSIZE(keySize, DEFAULT_KEY_SIZE));
         }
         if(computedKey.toString().equals(WSTrustConstants.CK_PSHA1)){
             try {
                 key = SecurityUtil.P_SHA1(clientEntr,serverEntr, keySize/8);
             } catch (Exception ex) {
                 log.log(Level.SEVERE,
-                        "WSSC0006.unabletoextract.key");
-                throw new WSSecureConversationException(ex.getMessage(), ex);
+                        LogStringsMessages.WSSC_0006_UNABLETOEXTRACT_KEY(), ex);
+                throw new WSSecureConversationException(LogStringsMessages.WSSC_0006_UNABLETOEXTRACT_KEY(), ex);
             }
         } else {
             //ToDo
@@ -256,7 +257,7 @@ public class WSSCClientContract implements WSTrustClientContract{
         context.setProofKey(secret);
         if (log.isLoggable(Level.FINE)) {
             log.log(Level.FINE,
-                    "WSSC0007.created.rstr", new Object[] {rstr});
+                    LogStringsMessages.WSSC_0007_CREATED_RSTR(rstr.toString()));
         }
         return rstr;
     }
