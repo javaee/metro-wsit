@@ -1,4 +1,4 @@
-<descriptor skip="false">
+<descriptor skip="true">
   <description>This is a test of createSequence functionality</description>
   <client href ="test.bsh"/>
   <service basedir="./server">
