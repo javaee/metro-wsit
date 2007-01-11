@@ -62,6 +62,7 @@ import com.sun.xml.ws.rm.Constants;
 import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
 import java.util.logging.Logger;
 import java.util.logging.Level;
+import com.sun.xml.ws.rm.jaxws.util.LoggingHelper;
 
 
 
@@ -74,7 +75,10 @@ public class RMClientPipe
         ClientInboundSequence>{
     
     public static final Logger logger =
-            Logger.getLogger(RMClientPipe.class.getName());
+            Logger.getLogger(
+                LoggingHelper.getLoggerName(RMClientPipe.class));
+    public static final LoggingHelper logHelper = 
+            new LoggingHelper(logger);
     
     /*
      * Metadata from ctor.
@@ -175,7 +179,7 @@ public class RMClientPipe
         nextPipe = cloner.copy(toCopy.nextPipe);
         
         if (securityPipe != null) {
-            //securityPipe = cloner.copy(toCopy.securityPipe);
+            
             securityPipe = toCopy.securityPipe;
             this.secureReliableMessaging = true;
         } else {
@@ -230,12 +234,14 @@ public class RMClientPipe
             
             if (dest != null && !dest.equals("") &&
                     outboundSequence.getDestination().toString() != dest) {
+                //WSRM2017: The Endpoint Address cannot be changed by a client of an RM-enabled endpoint//
                 throw new RMException(Messages.UNCHANGEABLE_ENDPOINT_ADDRESS.format());
             }
             
         } else {
             
             if (binding.getAddressingVersion() == AddressingVersion.MEMBER) {
+                //WSRM2008: The Reliable Messaging Client does not support the Member submission addressing version, which is used by the endpoint.//
                 throw new RMException(Messages.UNSUPPORTED_ADDRESSING_VERSION.format());
             }
             //store this in field
@@ -258,12 +264,14 @@ public class RMClientPipe
             try {
                 destURI = new URI(dest);
             } catch (URISyntaxException e) {
+                //Invalid destination URI   {0}//
                 throw new RMException(Messages.INVALID_DEST_URI.format( dest));
             }
             
             try {
                 acksToURI = new URI(acksTo);
-            } catch (URISyntaxException e) {
+            } catch (URISyntaxException e) {              
+                //Invalid acksTo URI   {0}//
                 throw new RMException(Messages.INVALID_ACKS_TO_URI.format( acksTo));
             }
             
@@ -380,13 +388,7 @@ public class RMClientPipe
             //use a copy of the original message
             com.sun.xml.ws.api.message.Message copy = message.getCopy();
             packet.setMessage(copy);
-            
-            //HACK - Do this now.  Any marshallings of the message need to be
-            //done on this Thread.  Tbis will at least keep JAXBMessage.sniff
-            //from doing marshallings.
-            //copy.isOneWay(port);
-            
-            
+           
             //We are sending one-way requests in the background.  The
             //tail of the Pipeline is non-reentrant.  We are using a pool
             //of copies of nextPipe here.
@@ -394,6 +396,12 @@ public class RMClientPipe
             
         } catch (ClientTransportException ee) {
             //resend in this case
+            if (logger.isLoggable(Level.FINE)) {
+                logger.log(Level.FINE, 
+                        //WSRM2000: Sending message caused {0}. Queuing for resend.//
+                        Messages.QUEUE_FOR_RESEND.format(ee.toString()),
+                        ee);
+            }
             return null;
             
         } catch (WebServiceException e) {
@@ -403,20 +411,32 @@ public class RMClientPipe
             if (cause != null &&
                     (cause instanceof IOException ||
                     cause instanceof SocketTimeoutException)) {
-                
+                if (logger.isLoggable(Level.FINE)) {
+                    //Sending message caused {0}. Queuing for resend.//
+                    logger.log(Level.FINE, 
+                                //WSRM2000: Sending message caused {0}. Queuing for resend.//
+                                Messages.QUEUE_FOR_RESEND.format(e.toString()),
+                                e);
+                }
                 //cause the retry loop in the process method to resend
                 return null;
                 
             } else {
-                logger.log(Level.SEVERE, Messages.UNEXPECTED_WRAPPED_EXCEPTION.format(), e);
+               //non-transport-related Exception;
+                logger.log(Level.SEVERE,
+                         //WSRM2003: Unexpected exception  wrapped in WSException.//
+                           Messages.UNEXPECTED_WRAPPED_EXCEPTION.format(), e);
                 
                 throw e;
             }
         } catch (Exception e) {
-            logger.log(Level.SEVERE, Messages.UNEXPECTED_TRY_SEND_EXCEPTION.format() , e);
-            //fill the gap in the sequence
-            
+            //Bug in software somewhere..  Any RuntimeException here must be a 
+            //WebServiceException
+            logger.log(Level.SEVERE, 
+                       //  WSRM2001: Unexpected exception in trySend.//
+                       Messages.UNEXPECTED_TRY_SEND_EXCEPTION.format(), e);
             throw new WebServiceException(e);
+           
         }
         
     }
@@ -458,6 +478,10 @@ public class RMClientPipe
 
                         if (mess != null && mess.isFault()) {
                             //don't want to resend
+                            logger.log(Level.FINE, 
+                                    //WSRM2004: Marking faulted message {0} as acked.
+                                    Messages.ACKING_FAULTED_MESSAGE
+                                          .format(message.getMessageNumber()));
                             outboundSequence.acknowledge(message.getMessageNumber());
                         }
 
@@ -473,6 +497,11 @@ public class RMClientPipe
                         if (mess != null && !packet.getMessage().isOneWay(port) &&
                                 mess.getPayloadNamespaceURI() == null) {
                             //resend
+                            logger.log(Level.FINE, 
+                                    //WSRM2005: Queuing dropped message for resend.
+                                    Messages.RESENDING_DROPPED_MESSAGE
+                                        .format());
+                          
                             ret = null;
                         }
 
@@ -519,7 +548,7 @@ public class RMClientPipe
         } catch (RuntimeException e) {
             //There will not be any more opportunities to resend the message, so we may as
             //well fill the gap in the sequence so the maintenance thread can ignore it.
-            //If this happens due to an Exception, it will be logged in process()
+            //This will be logged in process()
             
             //FIXME - Refactor.. This is being called twice in most cases
             if (message != null) {
@@ -650,6 +679,7 @@ public class RMClientPipe
             }
         } catch (Throwable ee) {
             logger.log(Level.SEVERE,
+                    //WSRM2006: Unexpected  Exception in RMClientPipe.process.
                     Messages.UNEXPECTED_PROCESS_EXCEPTION.format(),                  
                     ee);
             throw new WebServiceException(ee);
@@ -671,7 +701,10 @@ public class RMClientPipe
             provider.terminateSequence(outboundSequence);
             nextPipe.preDestroy();
         } catch (Exception e) {
-            logger.log(Level.FINE, 
+            //Faulted TerminateSequence message of bug downstream.  We are
+            //done with the sequence anyway.  Log and go about our business
+            logger.log(Level.FINE,
+                       //WSRM2007: RMClientPipe threw Exception in preDestroy//
                        Messages.UNEXPECTED_PREDESTROY_EXCEPTION.format(), 
                        e);
         }
