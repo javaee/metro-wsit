@@ -51,13 +51,12 @@ Tomcat.<br>
     <li>The <a href="http://glassfish.dev.java.net/">GlassFish</a>
 Open
 Source JavaEE 5 Application Server: Requires the GlassFish v2 Main
-branch <a href="https://glassfish.dev.java.net/downloads/v2-b15.html">b15
-Promoted Build</a><a
- href="http://download.java.net/javaee5/installer-nightly/Linux/glassfish-installer-b43-nightly-01_may_2006.jar"></a>.&nbsp;
+branch <a href="https://glassfish.dev.java.net/downloads/v2-b30.html">b30
+Promoted Build</a>.&nbsp;
 If you have not installed GlassFish before, please read <a
  href="https://glassfish.dev.java.net/public/downloadsindex.html#Instructions_to_unbundle_and_configure">Instructions
 to Unbundle and Configure GlassFish</a> and the GlassFish <a
- href="https://glassfish.dev.java.net/downloads/quickstart/index.html">Quickstart</a>.<br>
+ href="https://glassfish.dev.java.net/downloads/quickstart/index.html">Quickstart</a>.
     </li>
   </ul>
   <ul>
@@ -65,18 +64,33 @@ to Unbundle and Configure GlassFish</a> and the GlassFish <a
 Tomcat 5.5</a> web container: Requires version 5.5.16 or later.<br>
     </li>
   </ul>
-  <li><a href="http://java.sun.com/j2se/1.5.0/download.jsp">Sun Java SE
-5.0 Developers Kit (JDK 5.0)</a>: Requires JDK 5.0 Update 2 or later.<br>
+  <li><a href="http://java.sun.com/javase/downloads/index_jdk5.jsp">Sun
+Java SE
+5.0 Developers Kit (JDK 5.0)</a>: Requires JDK 5.0 Update 2 or later.
+Alternately <a href="http://java.sun.com/javase/downloads/index.jsp">JDK
+6.0</a> [TODO: LINK] can be used.<br>
   </li>
   <li><a href="http://ant.apache.org/bindownload.cgi">Apache Ant</a>:
 Requires Ant
-version 1.6.5 or later. Please note that GlassFish bundles Ant 1.6.5 in
-its installation image. The GlassFish installation instructions provide
-more detail.<br>
+version 1.6.5 or later. <br>
   </li>
   <li><a href="http://ftp.gnu.org/non-gnu/cvs/source/stable/">CVS:</a>
-Requires CVS version 1.11.17 or later.<br>
-  </li>
+Requires CVS version 1.11.17 or later.</li>
+  <li><a href="http://www.netbeans.org">NetBeans</a>: Optional. If you
+use NetBeans, WSIT requires version 5.5.1 or later.</li>
+</ul>
+<span style="font-weight: bold; font-style: italic;">GlassFish users:</span>
+WSIT is now bundled as part of GlassFish. So, if you do not require a
+specific build or version of WSIT
+and are using GlassFish, you probably want to use the version of WSIT
+which is now already integrated into the GlassFish distribution
+bundle.&nbsp;
+No extra configuration is necessary and newer versions of WSIT can be
+overlaid later if needed. Also note that GlassFish inclues Ant 1.6.5 in
+its installation image. The GlassFish installation instructions provide
+more detail on using that bundled version.<br>
+<br>
+<ul>
 </ul>
 <h2><a name="Retrieving"></a>Retrieving Sources</h2>
 To build WSIT from sources, you use CVS to
@@ -145,17 +159,16 @@ files and directories listed below reside within that top-level <span
       </th>
     </tr>
     <tr>
-      <td style="vertical-align: middle;"><span
- style="font-family: monospace;">/wsit</span><br>
+      <td style="vertical-align: middle; font-family: monospace;">/wsit<br>
       </td>
       <td style="vertical-align: top;">Top-level directory of the WSIT
 repository.<br>
       </td>
     </tr>
     <tr>
-      <td style="width: 20%; vertical-align: middle;">
-      <div style="margin-left: 40px;"><span
- style="font-family: monospace;">/wsit</span><br>
+      <td
+ style="width: 20%; vertical-align: middle; font-family: monospace;">
+      <div style="margin-left: 40px;">/wsit<br>
       </div>
       </td>
       <td style="vertical-align: top;">Top-level directory of the WSIT
@@ -163,9 +176,17 @@ project sources.<br>
       </td>
     </tr>
     <tr>
-      <td style="width: 20%; vertical-align: middle;">
-      <div style="margin-left: 80px;"><span
- style="font-family: monospace;">/build.xml</span><br>
+      <td style="vertical-align: middle; font-family: monospace;">
+      <div style="margin-left: 80px;">/benchmark<br>
+      </div>
+      </td>
+      <td style="vertical-align: top;">Currently empty.<br>
+      </td>
+    </tr>
+    <tr>
+      <td
+ style="width: 20%; vertical-align: middle; font-family: monospace;">
+      <div style="margin-left: 80px;">/build.xml<br>
       </div>
       </td>
       <td style="vertical-align: top;">The Apache Ant build file. Tells
@@ -174,9 +195,9 @@ WSIT.<br>
       </td>
     </tr>
     <tr>
-      <td style="width: 20%; vertical-align: middle;">
-      <div style="margin-left: 80px;"><span
- style="font-family: monospace;">/CDDLv1.0.1.*</span><br>
+      <td
+ style="width: 20%; vertical-align: middle; font-family: monospace;">
+      <div style="margin-left: 80px;">/CDDLv1.0.1.*<br>
       </div>
       </td>
       <td style="vertical-align: top;">File specifying the licensing
@@ -185,7 +206,7 @@ terms under that WSIT is distributed.<br>
     </tr>
     <tr>
       <td
- style="width: 20%; font-family: monospace; vertical-align: middle;">
+ style="width: 20%; vertical-align: middle; font-family: monospace;">
       <div style="margin-left: 80px;">/dist</div>
       </td>
       <td style="vertical-align: top;">Created during WSIT build
@@ -199,9 +220,8 @@ WSIT
 directory image.</td>
     </tr>
     <tr>
-      <td style="vertical-align: middle;">
-      <div style="margin-left: 80px;"><span
- style="font-family: monospace;">/docs</span><br>
+      <td style="vertical-align: middle; font-family: monospace;">
+      <div style="margin-left: 80px;">/docs<br>
       </div>
       </td>
       <td style="vertical-align: top;">Contains WSIT documentation
@@ -214,27 +234,27 @@ sub-directory.<br>
       </td>
     </tr>
     <tr>
-      <td style="width: 20%; vertical-align: middle;">
-      <div style="margin-left: 80px;"><span
- style="font-family: monospace;">/etc</span><br>
+      <td
+ style="width: 20%; vertical-align: middle; font-family: monospace;">
+      <div style="margin-left: 80px;">/etc<br>
       </div>
       </td>
       <td style="vertical-align: top;">Contains miscellaneous
 supporting tools and jars for building WSIT.</td>
     </tr>
     <tr>
-      <td style="width: 20%; vertical-align: middle;">
-      <div style="margin-left: 80px;"><span
- style="font-family: monospace;">/lib</span><br>
+      <td
+ style="width: 20%; vertical-align: middle; font-family: monospace;">
+      <div style="margin-left: 80px;">/lib<br>
       </div>
       </td>
       <td style="vertical-align: top;">Contains supporting binary jar
 files that are used to build the WSIT jars.</td>
     </tr>
     <tr>
-      <td style="width: 20%; vertical-align: middle;">
-      <div style="margin-left: 80px;"><span
- style="font-family: monospace;">/licenses</span><br>
+      <td
+ style="width: 20%; vertical-align: middle; font-family: monospace;">
+      <div style="margin-left: 80px;">/licenses<br>
       </div>
       </td>
       <td style="vertical-align: top;">Contains files that specify the
@@ -243,9 +263,8 @@ WSIT.<br>
       </td>
     </tr>
     <tr>
-      <td style="vertical-align: middle;">
-      <div style="margin-left: 80px;"><span
- style="font-family: monospace;">/nbproject</span><br>
+      <td style="vertical-align: middle; font-family: monospace;">
+      <div style="margin-left: 80px;">/nbproject<br>
       </div>
       </td>
       <td style="vertical-align: top;">Contains NetBeans 5.5 project
@@ -253,18 +272,28 @@ files. These files enable users to build WSIT from within NetBeans.<br>
       </td>
     </tr>
     <tr>
-      <td style="width: 20%; vertical-align: middle;">
-      <div style="margin-left: 80px;"><span
- style="font-family: monospace;">/properties.xml</span><br>
+      <td
+ style="width: 20%; vertical-align: middle; font-family: monospace;">
+      <div style="margin-left: 80px;">/properties.xml<br>
       </div>
       </td>
       <td style="vertical-align: top;">Properties file that contains
 general settings needed during the WSIT build process.</td>
     </tr>
     <tr>
-      <td style="width: 20%; vertical-align: middle;">
-      <div style="margin-left: 80px;"><span
- style="font-family: monospace;">/rt</span><br>
+      <td style="vertical-align: middle; font-family: monospace;">
+      <div style="margin-left: 80px;">/README.devel<br>
+      </div>
+      </td>
+      <td style="vertical-align: top;">README file explaining how to
+run the unit and end-to-end (e2e) tests and code analysis tools for
+WSIT.<br>
+      </td>
+    </tr>
+    <tr>
+      <td
+ style="width: 20%; vertical-align: middle; font-family: monospace;">
+      <div style="margin-left: 80px;">/rt<br>
       </div>
       </td>
       <td style="vertical-align: top;">Contains 'run-time' sources that
@@ -273,17 +302,28 @@ execute WSIT applications.<br>
       </td>
     </tr>
     <tr>
-      <td style="width: 20%; vertical-align: middle;">
-      <div style="margin-left: 80px;"><span
- style="font-family: monospace;">/samples</span><br>
+      <td
+ style="width: 20%; vertical-align: middle; font-family: monospace;">
+      <div style="margin-left: 80px;">/samples<br>
       </div>
       </td>
       <td style="vertical-align: top;">Contains sample code for each of
 the individual WSIT technologies.</td>
     </tr>
     <tr>
+      <td style="vertical-align: middle;">
+      <div style="margin-left: 80px;"><span
+ style="font-family: monospace;">/status-notes-milestone-*</span><br>
+      </div>
+      </td>
+      <td style="vertical-align: top;">These are status documents which
+describe known issues and workarounds
+with any particular piece of WSIT at the time of the particular
+milestone release.</td>
+    </tr>
+    <tr>
       <td
- style="width: 20%; font-family: monospace; vertical-align: middle;">
+ style="width: 20%; vertical-align: middle; font-family: monospace;">
       <div style="margin-left: 80px;">/test</div>
       </td>
       <td style="vertical-align: top;">Contains the unit tests for each
@@ -291,7 +331,7 @@ individual WSIT technology.</td>
     </tr>
     <tr>
       <td
- style="width: 20%; font-family: monospace; vertical-align: middle;">
+ style="width: 20%; vertical-align: middle; font-family: monospace;">
       <div style="margin-left: 80px;">/tools</div>
       </td>
       <td style="vertical-align: top;">Contains sources that add
@@ -300,6 +340,16 @@ functionality to various tools (such as <span
  style="font-style: italic;"> </span>and <span
  style="font-family: monospace;">apt</span>) needed to build WSIT
 applications.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: middle; font-family: monospace;">
+      <div style="margin-left: 80px;">/transports<br>
+      </div>
+      </td>
+      <td style="vertical-align: top;">Currently contains the source
+code for the optional SOAP/TCP transport. May include others in the
+future.<br>
       </td>
     </tr>
   </tbody>
@@ -351,9 +401,9 @@ binary artifacts need to be installed into the web container.&nbsp;
 There are two
 signficant WSIT jar files: <span style="font-family: monospace;">webservices-rt.jar</span>
 and <span style="font-family: monospace;">webservices-tools.jar</span>.
-Both of these files live in 
-<span style="font-family: monospace;">dist/image/jax-ws-latest-wsit/lib</span>.
-The <span style="font-family: monospace;">webservices-rt.jar</span> file
+Both of these files live in <span style="font-family: monospace;">dist/image/jax-ws-latest-wsit/lib</span>.
+The <span style="font-family: monospace;">webservices-rt.jar</span>
+file
 contains the classes required by the hosting web container at run-time
 to execute a WSIT application. The<span style="font-family: monospace;">
 webservices-tools.jar</span> file
@@ -371,7 +421,7 @@ contains two <span style="font-family: monospace;">ant</span> files, <span
 two files are used to install the WSIT binaries into the respective web
 containers. That procedure is explained next.<br>
 <br>
-<a name="Installing_On_GlassFish"/>
+<a name="Installing_On_GlassFish">
 <span style="font-weight: bold;">GlassFish<br>
 </span>To install WSIT into GlassFish, you must pass the name
 of the GlassFish top-level directory into <span
@@ -385,17 +435,21 @@ into which you are installing WSIT, change directories, invoke the <span
 restart the GlassFish instance, please run the following sequence of
 commands:<br>
 <br>
+</a>
 <div style="margin-left: 40px;"><span
  style="font-weight: bold; font-family: monospace;"></span><span
- style="font-family: monospace;">asadmin stop-domain domain1<br>
+ style="font-family: monospace;"><a name="Installing_On_GlassFish">asadmin
+stop-domain domain1<br>
 cd dist/image/jax-ws-latest-wsit<br>
-</span><span style="font-family: monospace;">ant
+</a></span><span style="font-family: monospace;"><a
+ name="Installing_On_GlassFish">ant
 -Das.home=&lt;GlassFish install
 directory&gt; -f wsit-on-glassfish.xml install<br>
-</span><span style="font-weight: bold; font-family: monospace;"></span><span
- style="font-family: monospace;">asadmin start-domain domain1</span><br>
-</div>
-<br>
+</a></span><span style="font-weight: bold; font-family: monospace;"></span><span
+ style="font-family: monospace;"><a name="Installing_On_GlassFish">asadmin
+start-domain domain1</a></span><a name="Installing_On_GlassFish"><br>
+</a></div>
+<a name="Installing_On_GlassFish"><br>
 This process copies the two WSIT jar files into your GlassFish
 installation's <span style="font-family: monospace;">lib</span>
 directory and make the necessary classpath alterations in the
@@ -404,7 +458,7 @@ It will also update the classpath for the utility script files: <span
  style="font-family: monospace;">wsimport</span> and
 <span style="font-family: monospace;">wsgen</span>.<br>
 <br>
-<a name="Installing_On_Tomcat"/>
+</a><a name="Installing_On_Tomcat">
 <span style="font-weight: bold;">Tomcat</span><br>
 The installation process for Tomcat is very similar to that of
 GlassFish.&nbsp; Again, the top-level
@@ -414,20 +468,27 @@ Tomcat, change directories, invoke <span
  style="font-family: monospace;">ant</span>, and restart Tomcat execute
 these commands:<br>
 <br>
-<div style="margin-left: 40px;"><span style="font-family: monospace;">catalina.sh
+</a>
+<div style="margin-left: 40px;"><span style="font-family: monospace;"><a
+ name="Installing_On_Tomcat">catalina.sh
 stop<br>
-cd dist/image/jax-ws-latest-wsit</span><br>
-</div>
+cd dist/image/jax-ws-latest-wsit</a></span><a
+ name="Installing_On_Tomcat"><br>
+</a></div>
 <div style="margin-left: 40px;"><span
  style="font-weight: bold; font-family: monospace;"></span><span
- style="font-family: monospace;">ant -Dtomcat.home=&lt;tomcat install
+ style="font-family: monospace;"><a name="Installing_On_Tomcat">ant
+-Dtomcat.home=&lt;tomcat install
 directory&gt; -f wsit-on-tomcat.xml install<br>
-</span><span style="font-family: monospace;">catalina.sh start</span><br>
-</div>
-<br>
+</a></span><span style="font-family: monospace;"><a
+ name="Installing_On_Tomcat">catalina.sh start</a></span><a
+ name="Installing_On_Tomcat"><br>
+</a></div>
+<a name="Installing_On_Tomcat"><br>
 For Tomcat, the installation process copies the two WSIT jar files
 into Tomcat's <span style="font-family: monospace;">shared/lib</span>
 directory. No Tomcat configuration files are modified.<br>
+</a>
 <h2><a name="Verifying"></a>Verifying Successful Build and Installation</h2>
 At this point, you should have a WSIT-enabled web container. It
 is suggested that you verify WSIT installed correctly to your web
@@ -499,10 +560,11 @@ NetBeans IDE 5.5</a><br>
 <a href="http://java.sun.com/webservices/jaxws/index.jsp">JAX-WS at
 java.sun.com</a><br>
 <a href="http://www.jcp.org/en/jsr/detail?id=224">Java
-API for XML Web Services (JAX-WS) 2.0</a><a
+API for XML Web Services (JAX-WS)</a><a
  href="https://jaxws.dev.java.net"><span style="font-family: monospace;"></span></a><br>
-<a href="http://java.sun.com/j2se/1.5.0/download.jsp">Sun Java SE 5.0
-Developers Kit (JDK 5.0)</a><br>
+Sun Java Developers Kit (<a
+ href="http://java.sun.com/javase/downloads/index_jdk5.jsp">JDK 5.0</a>,
+<a href="http://java.sun.com/javase/downloads/index.jsp">JDK 6.0)</a><br>
 <a href="http://ant.apache.org/">Apache Ant (1.6.5)</a><br>
 <a href="http://www.nongnu.org/cvs">CVS (1.11.17)</a><br>
 <br>

@@ -21,7 +21,7 @@
 The intent of this second installment of the
 <span style="font-style: italic;">Getting Started with WSIT</span>
 series is to demonstrate the steps required to build a
-JAX-WS 2.0 web service starting both from Java code and from a WSDL
+JAX-WS web service starting both from Java code and from a WSDL
 document, to deploy that application into a web container, and to
 build a corresponding web service client application. In this
 example, no WSIT-specific technologies will be enabled. It is
@@ -58,10 +58,10 @@ enable WSIT technologies.<br>
 <h2>Contents</h2>
 <a href="#Prerequisites">Prerequisites</a><br>
 <a href="#Environment">Environment Configuration Settings</a><br>
-<a href="#Building_Server">Building a JAX-WS 2.0 Web Service</a><br>
+<a href="#Building_Server">Building a JAX-WS Web Service</a><br>
 <a href="#Deploying">Deploying the Web Service to a Web
 Container</a><br>
-<a href="#Building_Client">Building a JAX-WS 2.0 Web Service Client</a><br>
+<a href="#Building_Client">Building a JAX-WS Web Service Client</a><br>
 <a href="#Running">Running the Web Service Client</a><br>
 <a href="#Undeploying">Undeploying a JAX-WS Web Service</a><br>
 <a href="#Summary">Summary and Resources</a><br>
@@ -119,7 +119,7 @@ There are two commented lines, one each for GlassFish (<span
 and Tomcat (<span style="font-family: monospace;">catalina.home</span>).
 Simply uncomment the appropriate
 line and edit the value for the directory name.</p>
-<h2><a name="Building_Server"></a>Building a JAX-WS 2.0 Web Service<br>
+<h2><a name="Building_Server"></a>Building a JAX-WS Web Service<br>
 </h2>
 <p style="margin-bottom: 0in;"><b>Starting from Java</b></p>
 <p style="margin-bottom: 0in;">One way to
@@ -129,13 +129,13 @@ have an existing Java class you wish to expose as a web service, this
 is the most direct path.</p>
 <p style="margin-bottom: 0in;">The <a
  href="http://www.jcp.org/en/jsr/detail?id=224">Java
-API for XML Web Services (JAX-WS) 2.0, JSR 224</a> relies heavily on
+API for XML Web Services (JAX-WS), JSR 224</a> relies heavily on
 the use of annotations as specified in <a
  href="http://www.jcp.org/en/jsr/detail?id=175">A
 Metadata Facility for the Java Programming Language</a> (JSR 175) and
 <a href="http://www.jcp.org/en/jsr/detail?id=181">Web Services
 Metadata for the Java Platform</a> (JSR 181), as well as additional
-annotations defined by the JAX-WS 2.0 specification.</p>
+annotations defined by the JAX-WS specification.</p>
 <p style="margin-bottom: 0in;">The web service is
 written as a normal Java class. Then the class and its methods that
 are to be exposed are annotated with specific web service
@@ -367,7 +367,7 @@ deployed. For GlassFish, the appropriate log can be found at <span
  style="font-family: monospace;">&lt;glassfish-install-directory&gt;/domains/&lt;your-domain&gt;/logs/server.log</span>.
 For Tomcat 5.5, the appropriate log file will be <span
  style="font-family: monospace;">&lt;tomcat-install-directory&gt;/logs/catalina.out</span>.</p>
-<h2><a name="Building_Client"></a>Building a JAX-WS 2.0 Web Service
+<h2><a name="Building_Client"></a>Building a JAX-WS Web Service
 Client<br>
 </h2>
 Unlike developing a web service provider, the process for creating
@@ -491,25 +491,33 @@ $CATALINA_HOME/webapps/wsit-jaxws-fromwsdl.war</span><br>
 to building,
 deploying, and running almost any JAX-WS web service. However there
 are many more details. </span>For further information on
-developing Java web services with JAX-WS 2.0, WSIT, Netbeans,
+developing Java web services with JAX-WS, WSIT, Netbeans,
 GlassFish, and more, please visit the links below.
-<p style="margin-bottom: 0in;"><a href="http://wsit.dev.java.net">WSIT
+<p style="margin-bottom: 0in;"><a href="http://wsit.dev.java.net/">WSIT
 at java.net<br>
-</a><a href="http://glassfish.dev.java.net">GlassFish at java.net</a><br>
+</a><a href="http://glassfish.dev.java.net/">GlassFish at java.net</a><br>
 <a href="http://jax-ws.dev.java.net/"><span
  style="text-decoration: underline;">JAX-WS at java.net</span></a><br>
-<a href="http://www.netbeans.org">Netbeans</a>,
+<a href="http://www.netbeans.org/">Netbeans</a>,
 <a href="http://websvc.netbeans.org/wsit/">Developing Web
 Services with
 NetBeans IDE 5.5</a><br>
+<a href="http://java.sun.com/webservices/jaxws/index.jsp">JAX-WS at
+java.sun.com</a><br>
 <a href="http://www.jcp.org/en/jsr/detail?id=224">Java
-API for XML Web Services (JAX-WS) 2.0</a> (JSR 224)<br>
+API for XML Web Services (JAX-WS)</a>&nbsp; (JSR 224)<a
+ href="https://jaxws.dev.java.net/"><span
+ style="text-decoration: underline;"></span></a><br>
 <a href="http://www.jcp.org/en/jsr/detail?id=175">A
 Metadata Facility for the Java Programming Language</a> (JSR 175)<br>
 <a href="http://www.jcp.org/en/jsr/detail?id=181">Web
 Services Metadata for the Java Platform</a> (JSR 181)<br>
-<a href="http://java.sun.com/j2se/1.5.0/download.jsp">Sun Java
-SE 5.0 Developers Kit (JDK 5.0)</a></p>
+Sun Java Developers Kit (<a
+ href="http://java.sun.com/javase/downloads/index_jdk5.jsp">JDK 5.0</a>,
+<a href="http://java.sun.com/javase/downloads/index.jsp">JDK 6.0)</a><br>
+</p>
+<p style="margin-bottom: 0in;"><a
+ href="http://java.sun.com/j2se/1.5.0/download.jsp"></a></p>
 <p style="margin-bottom: 0in;"><br>
 </p>
 </body>
