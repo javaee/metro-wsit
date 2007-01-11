@@ -73,8 +73,7 @@ public class LazyStreamCodec implements StreamSOAPCodec{
     }
     
     public void decode(InputStream inputStream, String string, Packet packet) throws IOException {
-        //throw new UnsupportedOperationException();
-        XMLStreamReader reader = XMLStreamReaderFactory.createXMLStreamReader(inputStream,true);
+        XMLStreamReader reader = XMLStreamReaderFactory.create(null, inputStream,true);
         packet.setMessage(decode(reader));
     }
     
