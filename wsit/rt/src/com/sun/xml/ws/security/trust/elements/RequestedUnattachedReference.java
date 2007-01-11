@@ -1,5 +1,5 @@
 /*
- * $Id: RequestedUnattachedReference.java,v 1.1 2006-05-03 22:57:20 arungupta Exp $
+ * $Id: RequestedUnattachedReference.java,v 1.2 2007-01-11 13:15:10 raharsha Exp $
  */
 
 /*
@@ -26,7 +26,6 @@
 
 package com.sun.xml.ws.security.trust.elements;
 
-import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
 
 
 /**

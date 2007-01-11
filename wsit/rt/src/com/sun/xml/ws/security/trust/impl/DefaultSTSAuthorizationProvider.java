@@ -31,7 +31,7 @@ import javax.security.auth.Subject;
  */
 public class DefaultSTSAuthorizationProvider implements STSAuthorizationProvider{
     
-     public boolean isAuthorized(Subject subject, String appliesTo, String tokenType, String keyType){
+     public boolean isAuthorized(final Subject subject, final String appliesTo, final String tokenType, final String keyType){
         return true;
    }
 }

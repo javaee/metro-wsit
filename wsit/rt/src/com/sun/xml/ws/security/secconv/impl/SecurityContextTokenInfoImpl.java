@@ -30,8 +30,6 @@ import com.sun.xml.ws.security.SecurityContextTokenInfo;
 import com.sun.xml.ws.security.secconv.WSSCConstants;
 import com.sun.xml.ws.security.impl.IssuedTokenContextImpl;
 import com.sun.xml.ws.security.secconv.WSSCElementFactory;
-import com.sun.xml.ws.security.trust.elements.RequestedAttachedReference;
-import com.sun.xml.ws.security.trust.elements.RequestedUnattachedReference;
 
 import com.sun.xml.ws.security.trust.elements.str.Reference;
 import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
@@ -40,6 +38,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -55,7 +54,7 @@ public class SecurityContextTokenInfoImpl implements SecurityContextTokenInfo {
     String identifier = null;
     String extId = null;
     byte[] secret = null;
-    HashMap<String, byte[]> secretMap = new HashMap<String, byte[]>();
+    Map<String, byte[]> secretMap = new HashMap<String, byte[]>();
     Date creationTime = null;
     Date expirationTime = null;
     
@@ -63,14 +62,14 @@ public class SecurityContextTokenInfoImpl implements SecurityContextTokenInfo {
     
     // default constructor
     public SecurityContextTokenInfoImpl() {
-        
+        //empty constructor
     }
     
     public String getIdentifier() {
         return identifier;
     }
     
-    public void setIdentifier(String identifier) {
+    public void setIdentifier(final String identifier) {
         this.identifier = identifier;
     }
     
@@ -81,7 +80,7 @@ public class SecurityContextTokenInfoImpl implements SecurityContextTokenInfo {
         return extId;
     }
     
-    public void setExternalId(String externalId) {
+    public void setExternalId(final String externalId) {
         this.extId = externalId;
     }
     
@@ -89,11 +88,11 @@ public class SecurityContextTokenInfoImpl implements SecurityContextTokenInfo {
         return secret;
     }
     
-    public byte[] getInstanceSecret(String instance) {
+    public byte[] getInstanceSecret(final String instance) {
         return secretMap.get(instance);
     }
     
-    public void addInstance(String instance, byte[] key) {
+    public void addInstance(final String instance, final byte[] key) {
         if (instance == null) {
             this.secret = key;
         } else {
@@ -105,7 +104,7 @@ public class SecurityContextTokenInfoImpl implements SecurityContextTokenInfo {
         return creationTime;
     }
     
-    public void setCreationTime(Date creationTime) {
+    public void setCreationTime(final Date creationTime) {
         this.creationTime = creationTime;
     }
     
@@ -113,7 +112,7 @@ public class SecurityContextTokenInfoImpl implements SecurityContextTokenInfo {
         return expirationTime;
     }
     
-    public void setExpirationTime(Date expirationTime) {
+    public void setExpirationTime(final Date expirationTime) {
         this.expirationTime = expirationTime;
     }
     
@@ -125,7 +124,7 @@ public class SecurityContextTokenInfoImpl implements SecurityContextTokenInfo {
     
     public IssuedTokenContext getIssuedTokenContext() {
         
-        IssuedTokenContext itc = new IssuedTokenContextImpl();
+        final IssuedTokenContext itc = new IssuedTokenContextImpl();
         itc.setCreationTime(this.getCreationTime());
         itc.setExpirationTime(this.getExpirationTime());
         itc.setProofKey(this.getSecret());
@@ -139,35 +138,35 @@ public class SecurityContextTokenInfoImpl implements SecurityContextTokenInfo {
             throw new RuntimeException(ex.getMessage(), ex);
         }
         
-        SecurityContextToken token = factory.createSecurityContextToken(
+        final SecurityContextToken token = factory.createSecurityContextToken(
                 uri, null , this.getExternalId().toString());
         itc.setSecurityToken(token);
         
         // Create references
-        SecurityTokenReference attachedReference = createSecurityTokenReference(token.getWsuId(),false);
-        RequestedAttachedReference rar = factory.createRequestedAttachedReference(attachedReference);
-        SecurityTokenReference unattachedReference = createSecurityTokenReference(token.getIdentifier().toString(), true);
-        RequestedUnattachedReference rur = factory.createRequestedUnattachedReference(unattachedReference);
+        final SecurityTokenReference attachedReference = createSecurityTokenReference(token.getWsuId(),false);
+        //RequestedAttachedReference rar = factory.createRequestedAttachedReference(attachedReference);
+        final SecurityTokenReference unattachedRef = createSecurityTokenReference(token.getIdentifier().toString(), true);
+        //RequestedUnattachedReference rur = factory.createRequestedUnattachedReference(unattachedRef);
         
         itc.setAttachedSecurityTokenReference(attachedReference);
-        itc.setUnAttachedSecurityTokenReference(unattachedReference);
+        itc.setUnAttachedSecurityTokenReference(unattachedRef);
         
         return itc;
     }
     
-    private SecurityTokenReference createSecurityTokenReference(String id, boolean unattached){
-        String uri = (unattached?id:"#"+id);
-        Reference ref = factory.createDirectReference(WSSCConstants.SECURITY_CONTEXT_TOKEN_TYPE, uri);
+    private SecurityTokenReference createSecurityTokenReference(final String id, final boolean unattached){
+        final String uri = (unattached?id:"#"+id);
+        final Reference ref = factory.createDirectReference(WSSCConstants.SECURITY_CONTEXT_TOKEN_TYPE, uri);
         return factory.createSecurityTokenReference(ref);
     }
     
     //public static IssuedTokenContext getIssuedTokenContext(SecurityTokenReference reference) {
-    public IssuedTokenContext getIssuedTokenContext(com.sun.xml.ws.security.SecurityTokenReference reference) {
+    public IssuedTokenContext getIssuedTokenContext(final com.sun.xml.ws.security.SecurityTokenReference reference) {
         // get str id -> get Session corresponding to id
         // from session get corresponding SCTInfo ->
         // return sctinfo's IssuedTokenContext.
-        String id = reference.getId();
-        Session session =
+        final String id = reference.getId();
+        final Session session =
                 SessionManager.getSessionManager().getSession(id);
         return session.getSecurityInfo().getIssuedTokenContext();
     }

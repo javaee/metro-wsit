@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustDOMContract.java,v 1.1 2006-05-03 22:57:14 arungupta Exp $
+ * $Id: WSTrustDOMContract.java,v 1.2 2007-01-11 13:15:09 raharsha Exp $
  */
 
 /*
@@ -26,7 +26,6 @@
 
 package com.sun.xml.ws.security.trust;
 
-import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.security.policy.SecureConversationToken;
 import com.sun.xml.ws.security.IssuedTokenContext;
 import org.w3c.dom.Element;

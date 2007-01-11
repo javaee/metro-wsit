@@ -28,6 +28,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
@@ -71,7 +72,7 @@ import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
 
 public abstract class IssueSamlTokenContract implements WSTrustContract {
     
-    private static Logger log =
+    private static final Logger log =
             Logger.getLogger(
             LogDomainConstants.TRUST_IMPL_DOMAIN,
             LogDomainConstants.TRUST_IMPL_DOMAIN_BUNDLE);
@@ -80,20 +81,20 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
     
     protected static final WSTrustElementFactory eleFac = WSTrustElementFactory.newInstance();
     protected static final SimpleDateFormat calendarFormatter
-            = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'sss'Z'");
+            = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'sss'Z'", Locale.getDefault());
     
     private static final int DEFAULT_KEY_SIZE = 256;
 
     
-    public void init(Configuration config) {
+    public void init(final Configuration config) {
         this.config = (TrustSPMetadata)config;
     }
     
     /** Issue a Token */
-    public RequestSecurityTokenResponse issue(RequestSecurityToken rst, IssuedTokenContext context, SecureConversationToken policy)throws WSTrustException {
+    public RequestSecurityTokenResponse issue(final RequestSecurityToken rst, final IssuedTokenContext context, final SecureConversationToken policy)throws WSTrustException {
         // Get TokenType
         String tokenType = null;
-        URI tokenTypeURI = rst.getTokenType();
+        final URI tokenTypeURI = rst.getTokenType();
         if (tokenTypeURI != null){
             tokenType = tokenTypeURI.toString();
         }else{
@@ -105,7 +106,7 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
         
         // Get KeyType
         String keyType = null;
-        URI keyTypeURI = rst.getKeyType();
+        final URI keyTypeURI = rst.getKeyType();
         if (keyTypeURI != null){
             keyType = keyTypeURI.toString();
         }else{
@@ -116,14 +117,14 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
         }
         
         // Get AppliesTo
-        AppliesTo ap = rst.getAppliesTo();
+        final AppliesTo applies = rst.getAppliesTo();
         String appliesTo = null;
-        if(ap != null){
-            appliesTo = WSTrustUtil.getAppliesToURI(ap);
+        if(applies != null){
+            appliesTo = WSTrustUtil.getAppliesToURI(applies);
         }
         
         // Get authenticaed client Subject
-        Subject subject = context.getRequestorSubject();
+        final Subject subject = context.getRequestorSubject();
         if(subject == null){
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0030_REQUESTOR_NULL());
@@ -131,7 +132,7 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
         }
         
         // Check if the client is authorized to be issued the token
-        STSAuthorizationProvider authzProvider = WSTrustFactory.getSTSAuthorizationProvider();
+        final STSAuthorizationProvider authzProvider = WSTrustFactory.getSTSAuthorizationProvider();
         if (!authzProvider.isAuthorized(subject, appliesTo, tokenType, keyType)){
             log.log(Level.SEVERE, 
                     LogStringsMessages.WST_0015_CLIENT_NOT_AUTHORIZED(
@@ -141,9 +142,9 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
         }
         
         // Get claimed attributes
-        Claims claims = rst.getClaims();
-        STSAttributeProvider attrProvider = WSTrustFactory.getSTSAttributeProvider();
-        Map claimedAttrs = attrProvider.getClaimedAttributes(subject, appliesTo, tokenType, claims);
+        final Claims claims = rst.getClaims();
+        final STSAttributeProvider attrProvider = WSTrustFactory.getSTSAttributeProvider();
+        final Map claimedAttrs = attrProvider.getClaimedAttributes(subject, appliesTo, tokenType, claims);
         
         RequestedProofToken proofToken = null;
         Entropy serverEntropy = null;
@@ -156,17 +157,17 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
             proofToken = eleFac.createRequestedProofToken();
             
             // Get client entropy
-            byte[] clientEntropyValue = null;
-            Entropy clientEntropy = rst.getEntropy();
+            byte[] clientEntr = null;
+            final Entropy clientEntropy = rst.getEntropy();
             if (clientEntropy != null){
-                BinarySecret clientBS = clientEntropy.getBinarySecret();
+                final BinarySecret clientBS = clientEntropy.getBinarySecret();
                 if (clientBS == null){
                     if(log.isLoggable(Level.FINE)) {
                         log.log(Level.FINE, 
                                 LogStringsMessages.WST_1009_NULL_BINARY_SECRET());
                     }
                 }else {
-                    clientEntropyValue = clientBS.getRawValue();
+                    clientEntr = clientBS.getRawValue();
                 }
             }
             
@@ -180,14 +181,14 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
             }
             
             byte[] key = WSTrustUtil.generateRandomSecret(keySize/8);
-            BinarySecret serverBS = eleFac.createBinarySecret(key, BinarySecret.NONCE_KEY_TYPE);
+            final BinarySecret serverBS = eleFac.createBinarySecret(key, BinarySecret.NONCE_KEY_TYPE);
             serverEntropy = eleFac.createEntropy(serverBS);
             proofToken.setProofTokenType(RequestedProofToken.COMPUTED_KEY_TYPE);
             
             // compute the secret key
             try {
                 proofToken.setComputedKey(URI.create(WSTrustConstants.CK_PSHA1));
-                key = SecurityUtil.P_SHA1(clientEntropyValue, key, keySize/8);
+                key = SecurityUtil.P_SHA1(clientEntr, key, keySize/8);
             } catch (Exception ex){
                 log.log(Level.SEVERE, 
                         LogStringsMessages.WST_0013_ERROR_SECRET_KEY(), ex);
@@ -210,9 +211,10 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
         // get Context
         URI ctx = null;
         try {
-            String rstCtx = rst.getContext();
-            if (rstCtx != null)
+            final String rstCtx = rst.getContext();
+            if (rstCtx != null){
                 ctx = new URI(rst.getContext());
+            }
         } catch (URISyntaxException ex) {
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0014_URI_SYNTAX(rst.getContext()), ex);
@@ -221,27 +223,27 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
         }
         
         // Create RequestedSecurityToken with SAML assertion
-        String assertionId = "uuid-" + UUID.randomUUID().toString();
-        RequestedSecurityToken st = eleFac.createRequestedSecurityToken();
-        Token samlToken = createSAMLAssertion(appliesTo, tokenType, keyType, assertionId, config.getIssuer(), claimedAttrs, context);
-        st.setToken(samlToken);
+        final String assertionId = "uuid-" + UUID.randomUUID().toString();
+        final RequestedSecurityToken reqSecTok = eleFac.createRequestedSecurityToken();
+        final Token samlToken = createSAMLAssertion(appliesTo, tokenType, keyType, assertionId, config.getIssuer(), claimedAttrs, context);
+        reqSecTok.setToken(samlToken);
         
         // Create RequestedAttachedReference and RequestedUnattachedReference
-        SecurityTokenReference samlReference = createSecurityTokenReference(assertionId, tokenType);
-        RequestedAttachedReference raRef =  eleFac.createRequestedAttachedReference(samlReference);
-        RequestedUnattachedReference ruRef =  eleFac.createRequestedUnattachedReference(samlReference);
+        final SecurityTokenReference samlReference = createSecurityTokenReference(assertionId, tokenType);
+        final RequestedAttachedReference raRef =  eleFac.createRequestedAttachedReference(samlReference);
+        final RequestedUnattachedReference ruRef =  eleFac.createRequestedUnattachedReference(samlReference);
         
         // Create Lifetime
-        Lifetime lifetime = createLifetime();
+        final Lifetime lifetime = createLifetime();
         
-        RequestSecurityTokenResponse rstr =
-                eleFac.createRSTRForIssue(rst.getTokenType(), ctx, st, ap, raRef, ruRef, proofToken, serverEntropy, lifetime);
+        final RequestSecurityTokenResponse rstr =
+                eleFac.createRSTRForIssue(rst.getTokenType(), ctx, reqSecTok, applies, raRef, ruRef, proofToken, serverEntropy, lifetime);
         
         if (keySize > 0){
             rstr.setKeySize(keySize);
         }
         
-       String issuer = config.getIssuer();
+       //String issuer = config.getIssuer();
         
       // Token samlToken = createSAMLAssertion(appliesTo, tokenType, keyType, assertionId, issuer, claimedAttrs, context);
        //rstr.getRequestedSecurityToken().setToken(samlToken);
@@ -258,28 +260,28 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
     
     /** Issue a Collection of Token(s) possibly for different scopes */
     public RequestSecurityTokenResponseCollection issueMultiple(
-            RequestSecurityToken request, IssuedTokenContext context)
+            final RequestSecurityToken request, final IssuedTokenContext context)
             throws WSTrustException{
         throw new UnsupportedOperationException("Unsupported operation: issueMultiple");
     }
     
     /** Renew a Token */
     public RequestSecurityTokenResponse renew(
-            RequestSecurityToken request, IssuedTokenContext context)
+            final RequestSecurityToken request, final IssuedTokenContext context)
             throws WSTrustException{
         throw new UnsupportedOperationException("Unsupported operation: renew");
     }
     
     /** Cancel a Token */
     public RequestSecurityTokenResponse cancel(
-            RequestSecurityToken request, IssuedTokenContext context, Map issuedTokenContextMap)
+            final RequestSecurityToken request, final IssuedTokenContext context, final Map issuedTokenCtxMap)
             throws WSTrustException{
         throw new UnsupportedOperationException("Unsupported operation: cancel");
     }
     
     /** Validate a Token */
     public RequestSecurityTokenResponse validate(
-            RequestSecurityToken request, IssuedTokenContext context)
+            final RequestSecurityToken request, final IssuedTokenContext context)
             throws WSTrustException{
         throw new UnsupportedOperationException("Unsupported operation: validate");
     }
@@ -289,7 +291,7 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
      * Client Initiated Secure Conversation.
      */
     public void handleUnsolicited(
-            RequestSecurityTokenResponse rstr, IssuedTokenContext context)
+            final RequestSecurityTokenResponse rstr, final IssuedTokenContext context)
             throws WSTrustException{
         throw new UnsupportedOperationException("Unsupported operation: handleUnsolicited");
     }
@@ -299,7 +301,7 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
      * @return true if the RSTR contains a SignChallenge/BinaryExchange or
      *  some other custom challenge recognized by this implementation.
      */
-    public boolean containsChallenge(RequestSecurityTokenResponse rstr){
+    public boolean containsChallenge(final RequestSecurityTokenResponse rstr){
         throw new UnsupportedOperationException("Unsupported operation: containsChallenge");
     }
     
@@ -308,7 +310,7 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
      * @return true if the RST contains Initial Negotiation/Challenge information
      * for a Multi-Message exchange.
      */
-    public boolean containsChallenge(RequestSecurityToken rst){
+    public boolean containsChallenge(final RequestSecurityToken rst){
         throw new UnsupportedOperationException("Unsupported operation: containsChallenge");
     }
     
@@ -351,33 +353,33 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
     
     private long currentTime;
     private Lifetime createLifetime() {
-        Calendar c = new GregorianCalendar();
-        int offset = c.get(Calendar.ZONE_OFFSET);
-        if (c.getTimeZone().inDaylightTime(c.getTime())) {
-            offset += c.getTimeZone().getDSTSavings();
+        final Calendar cal = new GregorianCalendar();
+        int offset = cal.get(Calendar.ZONE_OFFSET);
+        if (cal.getTimeZone().inDaylightTime(cal.getTime())) {
+            offset += cal.getTimeZone().getDSTSavings();
         }
         synchronized (calendarFormatter) {
-            calendarFormatter.setTimeZone(c.getTimeZone());
+            calendarFormatter.setTimeZone(cal.getTimeZone());
             
             // always send UTC/GMT time
-            long beforeTime = c.getTimeInMillis();
+            final long beforeTime = cal.getTimeInMillis();
             currentTime = beforeTime - offset;
-            c.setTimeInMillis(currentTime);
+            cal.setTimeInMillis(currentTime);
             
-            AttributedDateTime created = new AttributedDateTime();
-            created.setValue(calendarFormatter.format(c.getTime()));
+            final AttributedDateTime created = new AttributedDateTime();
+            created.setValue(calendarFormatter.format(cal.getTime()));
             
-            AttributedDateTime expires = new AttributedDateTime();
-            c.setTimeInMillis(currentTime + config.getIssuedTokenTimeout());
-            expires.setValue(calendarFormatter.format(c.getTime()));
+            final AttributedDateTime expires = new AttributedDateTime();
+            cal.setTimeInMillis(currentTime + config.getIssuedTokenTimeout());
+            expires.setValue(calendarFormatter.format(cal.getTime()));
             
-            Lifetime lifetime = eleFac.createLifetime(created, expires);
+            final Lifetime lifetime = eleFac.createLifetime(created, expires);
             
             return lifetime;
         }
     }
     
-    private SecurityTokenReference createSecurityTokenReference(String id, String tokenType){
+    private SecurityTokenReference createSecurityTokenReference(final String id, final String tokenType){
         String valueType = null;
          if (WSTrustConstants.SAML10_ASSERTION_TOKEN_TYPE.equals(tokenType)||
                 WSTrustConstants.SAML11_ASSERTION_TOKEN_TYPE.equals(tokenType)){
@@ -385,7 +387,7 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
             } else if (WSTrustConstants.SAML20_ASSERTION_TOKEN_TYPE.equals(tokenType)){
                 valueType = MessageConstants.WSSE_SAML_v2_0_KEY_IDENTIFIER_VALUE_TYPE;
             }
-        KeyIdentifier ref = eleFac.createKeyIdentifier(valueType, null);
+        final KeyIdentifier ref = eleFac.createKeyIdentifier(valueType, null);
         ref.setValue(id);
         return eleFac.createSecurityTokenReference(ref);
     }

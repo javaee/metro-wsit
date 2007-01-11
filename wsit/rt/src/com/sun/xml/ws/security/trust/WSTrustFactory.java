@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustFactory.java,v 1.5 2007-01-02 23:41:22 manveen Exp $
+ * $Id: WSTrustFactory.java,v 1.6 2007-01-11 13:15:09 raharsha Exp $
  */
 
 /*
@@ -39,7 +39,6 @@ import com.sun.xml.ws.security.trust.impl.TrustSPMetadata;
 
 import com.sun.xml.ws.util.ServiceFinder;
 
-import java.net.URI;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -51,7 +50,7 @@ import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
  */
 public class WSTrustFactory {
    
-    private static Logger log =
+    private static final Logger log =
             Logger.getLogger(
             LogDomainConstants.TRUST_IMPL_DOMAIN,
             LogDomainConstants.TRUST_IMPL_DOMAIN_BUNDLE);
@@ -59,7 +58,7 @@ public class WSTrustFactory {
     /**
      * return a concrete implementation for the TrustPlugin.
      */
-    public static TrustPlugin newTrustPlugin(Configuration config) {
+    public static TrustPlugin newTrustPlugin(final Configuration config) {
         return new TrustPluginImpl(config);
     }
     
@@ -70,8 +69,8 @@ public class WSTrustFactory {
      * </p>
      * @Exception UnsupportedOperationException if this factory does not support this contract
      */
-    public static WSTrustContract newWSTrustContract(Configuration config, String appliesTo) throws WSTrustException {
-        STSConfiguration stsConfig = (STSConfiguration)config;
+    public static WSTrustContract newWSTrustContract(final Configuration config, final String appliesTo) throws WSTrustException {
+        final STSConfiguration stsConfig = (STSConfiguration)config;
         TrustSPMetadata spMetadata = stsConfig.getTrustSPMetadata(appliesTo);
         if(spMetadata == null){
             spMetadata = stsConfig.getTrustSPMetadata(WSTrustConstants.DEFAULT_APPLIESTO);
@@ -82,8 +81,9 @@ public class WSTrustFactory {
             throw new WSTrustException("Unknown target service provider " + appliesTo);
         }
         String type = spMetadata.getType();
-        if (type == null)
+        if (type == null){
             type = stsConfig.getDefaultType();
+        }
         if(log.isLoggable(Level.FINE)) {
             log.log(Level.FINE,
                     LogStringsMessages.WST_1002_PROVIDER_TYPE(type));
@@ -91,7 +91,7 @@ public class WSTrustFactory {
         WSTrustContract contract = null;
         try {
             Class clazz = null;
-            ClassLoader loader = Thread.currentThread().getContextClassLoader();
+            final ClassLoader loader = Thread.currentThread().getContextClassLoader();
             
             if (loader == null) {
                 clazz = Class.forName(type);
@@ -107,7 +107,7 @@ public class WSTrustFactory {
             contract = null;
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0005_CLASSNOTFOUND_NULL_CONTRACT(type));
-            ex.printStackTrace();
+            //ex.printStackTrace();
         } catch (Exception ex) {
             throw new WSTrustException(ex.toString(), ex);
         }
@@ -122,7 +122,7 @@ public class WSTrustFactory {
      * </p>
      * @Exception UnsupportedOperationException if this factory does not support this contract
      */
-    public static WSTrustSourceContract newWSTrustSourceContract(Configuration config) {
+    public static WSTrustSourceContract newWSTrustSourceContract(final Configuration config) {
         throw new UnsupportedOperationException("To Do");
     }
     
@@ -133,14 +133,14 @@ public class WSTrustFactory {
      * </p>
      * @Exception UnsupportedOperationException if this factory does not support this contract
      */
-    public static WSTrustDOMContract newWSTrustDOMContract(Configuration config) {
+    public static WSTrustDOMContract newWSTrustDOMContract(final Configuration config) {
         throw new UnsupportedOperationException("To be overridden by Actual Factories");
     }
     
     /**
      * return a concrete implementor for WS-Trust Client Contract
      */
-    public  static WSTrustClientContract createWSTrustClientContract(Configuration config) {
+    public  static WSTrustClientContract createWSTrustClientContract(final Configuration config) {
         return new WSTrustClientContractImpl(config);
     }
     
@@ -154,7 +154,7 @@ public class WSTrustFactory {
     public static STSAuthorizationProvider getSTSAuthorizationProvider() {
         
         STSAuthorizationProvider authzProvider = null;
-        ServiceFinder<STSAuthorizationProvider> finder = 
+        final ServiceFinder<STSAuthorizationProvider> finder = 
                          ServiceFinder.find(STSAuthorizationProvider.class);
         if (finder != null && finder.toArray().length > 0) {
             authzProvider = finder.toArray()[0];
@@ -174,7 +174,7 @@ public class WSTrustFactory {
     public static STSAttributeProvider getSTSAttributeProvider() {
         
         STSAttributeProvider attrProvider = null;
-        ServiceFinder<STSAttributeProvider> finder = 
+        final ServiceFinder<STSAttributeProvider> finder = 
                 ServiceFinder.find(STSAttributeProvider.class);
         if (finder != null && finder.toArray().length > 0) {
             attrProvider = finder.toArray()[0];
@@ -183,4 +183,8 @@ public class WSTrustFactory {
         }
         return attrProvider;
      }
+
+    private WSTrustFactory() {
+        //private constructor
+    }
 }

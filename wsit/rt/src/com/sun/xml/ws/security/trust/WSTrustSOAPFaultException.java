@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustSOAPFaultException.java,v 1.1 2006-05-03 22:57:15 arungupta Exp $
+ * $Id: WSTrustSOAPFaultException.java,v 1.2 2007-01-11 13:15:09 raharsha Exp $
  */
 
 /*
@@ -60,8 +60,9 @@ public class WSTrustSOAPFaultException extends RuntimeException {
     public static final String WS_TRUST_UNABLE_TO_RENEW_FAULTSTRING = "The requested renewal failed";
     
     
-    private QName faultCode;
-    private String faultString;
+
+    private final QName faultCode;
+    private final String faultString;
     
     /** 
      * Creates a new instance of WSTrustSOAPFaultException 

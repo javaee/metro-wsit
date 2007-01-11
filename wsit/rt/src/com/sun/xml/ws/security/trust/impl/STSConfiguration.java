@@ -47,11 +47,11 @@ public class STSConfiguration implements Configuration{
         spMap = new HashMap<String, TrustSPMetadata>();
     }
     
-    public void addTrustSPMetadata(TrustSPMetadata data, String spEndpoint){
+    public void addTrustSPMetadata(final TrustSPMetadata data, final String spEndpoint){
         spMap.put(spEndpoint, data);
     }
     
-    public TrustSPMetadata getTrustSPMetadata(String spEndpoint){
+    public TrustSPMetadata getTrustSPMetadata(final String spEndpoint){
         return (TrustSPMetadata)spMap.get(spEndpoint);
     }
     

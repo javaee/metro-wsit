@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustConstants.java,v 1.4 2006-10-09 05:25:22 jdg6688 Exp $
+ * $Id: WSTrustConstants.java,v 1.5 2007-01-11 13:15:09 raharsha Exp $
  */
 
 /*
@@ -30,7 +30,7 @@ package com.sun.xml.ws.security.trust;
  * Common Constants pertaining to WS-Trust
  * @author WS-Trust Implementation Team
  */
-public interface WSTrustConstants {
+public class WSTrustConstants {
     
     public static final String STS_CALL_BACK_HANDLER = "stsCallbackHandler";
     

@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustSourceContract.java,v 1.1 2006-05-03 22:57:15 arungupta Exp $
+ * $Id: WSTrustSourceContract.java,v 1.2 2007-01-11 13:15:10 raharsha Exp $
  */
 
 /*
@@ -25,7 +25,6 @@
  */
 package com.sun.xml.ws.security.trust;
 
-import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.security.policy.SecureConversationToken;
 import com.sun.xml.ws.security.IssuedTokenContext;
 import javax.xml.transform.Source;

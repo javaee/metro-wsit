@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustElementFactory.java,v 1.6 2006-12-18 23:32:03 jdg6688 Exp $
+ * $Id: WSTrustElementFactory.java,v 1.7 2007-01-11 13:15:09 raharsha Exp $
  */
 
 /*
@@ -123,18 +123,18 @@ public abstract class WSTrustElementFactory {
      * Create an RST for Issue from the given arguments
      * Any of the arguments can be null since they are all optional, but one of tokenType and AppliesTo must be present 
      */
-    public abstract RequestSecurityToken createRSTForIssue(URI tokenType, URI requestType, URI context, AppliesTo scopes, Claims claims, Entropy entropy, Lifetime lt) throws WSTrustException;
+    public abstract RequestSecurityToken createRSTForIssue(URI tokenType, URI requestType, URI context, AppliesTo scopes, Claims claims, Entropy entropy, Lifetime lifetime) throws WSTrustException;
     
     /** 
      * create an RSTR for Issue from the given arguments
      * Any of the arguments can be null since they are all optional, but one of RequestedSecurityToken or RequestedProofToken should be returned  
      */
-    public abstract RequestSecurityTokenResponse createRSTRForIssue(URI tokenType, URI context, RequestedSecurityToken token, AppliesTo scopes, RequestedAttachedReference attachedReference, RequestedUnattachedReference unattachedReference, RequestedProofToken proofToken, Entropy entropy, Lifetime lt) throws WSTrustException;
+    public abstract RequestSecurityTokenResponse createRSTRForIssue(URI tokenType, URI context, RequestedSecurityToken token, AppliesTo scopes, RequestedAttachedReference attachedRef, RequestedUnattachedReference unattachedRef, RequestedProofToken proofToken, Entropy entropy, Lifetime lifetime) throws WSTrustException;
 
     /** 
      *Create  a collection of RequestSecurityTokenResponse(s)  
      */
-    public abstract RequestSecurityTokenResponseCollection createRSTRCollectionForIssue(URI tokenType, URI context, RequestedSecurityToken token, AppliesTo scopes, RequestedAttachedReference attachedReference, RequestedUnattachedReference unattachedReference, RequestedProofToken proofToken, Entropy entropy, Lifetime lt) throws WSTrustException;
+    public abstract RequestSecurityTokenResponseCollection createRSTRCollectionForIssue(URI tokenType, URI context, RequestedSecurityToken token, AppliesTo scopes, RequestedAttachedReference attachedRef, RequestedUnattachedReference unattachedRef, RequestedProofToken proofToken, Entropy entropy, Lifetime lifetime) throws WSTrustException;
 
     /** 
      * Create a wst:IssuedTokens object
@@ -388,7 +388,7 @@ public abstract class WSTrustElementFactory {
      * </p>
      */
     
-     public abstract Element toElement(BinarySecret bs);
+     public abstract Element toElement(BinarySecret binarySecret);
 
      /**
      * Marshal an STR to a DOM Element.
@@ -404,5 +404,5 @@ public abstract class WSTrustElementFactory {
      * Note: Useful for Dispatch Client implementations
      * </p>
      */
-     public abstract Element toElement(BinarySecret bs, Document doc);
+     public abstract Element toElement(BinarySecret binarySecret, Document doc);
 }

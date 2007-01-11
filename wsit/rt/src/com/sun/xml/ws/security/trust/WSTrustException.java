@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustException.java,v 1.1 2006-05-03 22:57:15 arungupta Exp $
+ * $Id: WSTrustException.java,v 1.2 2007-01-11 13:15:09 raharsha Exp $
  */
 
 /*
@@ -26,7 +26,6 @@
 
 package com.sun.xml.ws.security.trust;
 
-import javax.xml.namespace.QName;
 
 /**
  * A General WS-Trust Implementation Exception

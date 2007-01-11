@@ -87,12 +87,12 @@ import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
  */
 public class TrustPluginImpl implements TrustPlugin {
     
-    private static Logger log =
+    private static final Logger log =
             Logger.getLogger(
             LogDomainConstants.TRUST_IMPL_DOMAIN,
             LogDomainConstants.TRUST_IMPL_DOMAIN_BUNDLE);
     
-    private Configuration config;
+    private final Configuration config;
     private static WSTrustElementFactory fact = WSTrustElementFactory.newInstance();
     
     private static final String PRE_CONFIGURED_STS = "PreconfiguredSTS";
@@ -114,9 +114,9 @@ public class TrustPluginImpl implements TrustPlugin {
      * @param issuedToken, an instance of <sp:IssuedToken> or <sp:SecureConversation> assertion
      * @return issuedTokenContext, a context containing the issued Token and related information
      */
-    public IssuedTokenContext process(PolicyAssertion token, PolicyAssertion localToken, String appliesTo){
-        IssuedToken issuedToken = (IssuedToken)token;
-        RequestSecurityTokenTemplate rstTemplate = issuedToken.getRequestSecurityTokenTemplate();
+    public IssuedTokenContext process(final PolicyAssertion token, final PolicyAssertion localToken, final String appliesTo){
+        final IssuedToken issuedToken = (IssuedToken)token;
+        final RequestSecurityTokenTemplate rstTemplate = issuedToken.getRequestSecurityTokenTemplate();
         URI stsURI =  getSTSURI(issuedToken);
         URI wsdlLocation = null;
         QName serviceName = null;
@@ -142,20 +142,20 @@ public class TrustPluginImpl implements TrustPlugin {
         }else if (localToken != null){
             // Get STS information from local configuration
             if (PRE_CONFIGURED_STS.equals(localToken.getName().getLocalPart())) {
-                Map<QName,String> attrs = localToken.getAttributes();
-                String namespace = attrs.get(new QName(CONFIG_NAMESPACE,NAMESPACE));
+                final Map<QName,String> attrs = localToken.getAttributes();
+                final String namespace = attrs.get(new QName(CONFIG_NAMESPACE,NAMESPACE));
                 try {
-                    String stsEPStr = attrs.get(new QName(CONFIG_NAMESPACE,ENDPOINT));
+                    final String stsEPStr = attrs.get(new QName(CONFIG_NAMESPACE,ENDPOINT));
                     if (stsEPStr != null){
                         stsURI = new URI(stsEPStr);
                     }
                     
-                    String metadataStr = attrs.get(new QName(CONFIG_NAMESPACE, METADATA));
+                    final String metadataStr = attrs.get(new QName(CONFIG_NAMESPACE, METADATA));
                     if (metadataStr != null){
                         wsdlLocation = new URI(metadataStr);
                     }
                     
-                    String wsdlLocationStr = attrs.get(new QName(CONFIG_NAMESPACE,WSDL_LOCATION));
+                    final String wsdlLocationStr = attrs.get(new QName(CONFIG_NAMESPACE,WSDL_LOCATION));
                     if (wsdlLocationStr != null){
                         wsdlLocation = new URI(wsdlLocationStr);
                     }
@@ -165,7 +165,7 @@ public class TrustPluginImpl implements TrustPlugin {
                     throw new RuntimeException("Invalid URI", ex);
                 }
                 
-                String serviceNameStr = attrs.get(new QName(CONFIG_NAMESPACE,SERVICE_NAME));
+                final String serviceNameStr = attrs.get(new QName(CONFIG_NAMESPACE,SERVICE_NAME));
                 if (serviceNameStr != null && namespace != null){
                     serviceName = new QName(namespace,serviceNameStr);
                 }
@@ -174,7 +174,7 @@ public class TrustPluginImpl implements TrustPlugin {
                     wsdlLocation = stsURI;
                 }
                 
-                String portNameStr = attrs.get(new QName(CONFIG_NAMESPACE,PORT_NAME));
+                final String portNameStr = attrs.get(new QName(CONFIG_NAMESPACE,PORT_NAME));
                 if (portNameStr != null && namespace != null){
                     portName = new QName(namespace, portNameStr);
                 }
@@ -189,10 +189,10 @@ public class TrustPluginImpl implements TrustPlugin {
         
         RequestSecurityTokenResponse result = null;
         try {
-            RequestSecurityToken request = createRequest(rstTemplate, appliesTo);
+            final RequestSecurityToken request = createRequest(rstTemplate, appliesTo);
             result = invokeRST(request, wsdlLocation, serviceName, portName, stsURI.toString());
-            IssuedTokenContext itc = new IssuedTokenContextImpl();
-            WSTrustClientContract contract = WSTrustFactory.createWSTrustClientContract(config);
+            final IssuedTokenContext itc = new IssuedTokenContextImpl();
+            final WSTrustClientContract contract = WSTrustFactory.createWSTrustClientContract(config);
             contract.handleRSTR(request, result, itc);
             return itc;
         } catch (RemoteException ex) {
@@ -211,14 +211,14 @@ public class TrustPluginImpl implements TrustPlugin {
     }
     
     private IssuedTokenContext createIssuedTokenContext(final RequestSecurityTokenResponse rstr) {
-        URI tokType = rstr.getTokenType();
-        long keySize = rstr.getKeySize();
-        URI keyType = rstr.getKeyType();
-        RequestedSecurityToken securityToken = rstr.getRequestedSecurityToken();
-        RequestedAttachedReference attachedRef = rstr.getRequestedAttachedReference();
-        RequestedUnattachedReference unattachedRef = rstr.getRequestedUnattachedReference();
-        RequestedProofToken proofToken = rstr.getRequestedProofToken();
-        IssuedTokenContext itc = new IssuedTokenContextImpl();
+        final URI tokType = rstr.getTokenType();
+        final long keySize = rstr.getKeySize();
+        final URI keyType = rstr.getKeyType();
+        final RequestedSecurityToken securityToken = rstr.getRequestedSecurityToken();
+        final RequestedAttachedReference attachedRef = rstr.getRequestedAttachedReference();
+        final RequestedUnattachedReference unattachedRef = rstr.getRequestedUnattachedReference();
+        final RequestedProofToken proofToken = rstr.getRequestedProofToken();
+        final IssuedTokenContext itc = new IssuedTokenContextImpl();
         itc.setSecurityToken(securityToken.getToken());
         if(proofToken != null){
             itc.setAssociatedProofToken(proofToken.getSecurityTokenReference());
@@ -231,52 +231,52 @@ public class TrustPluginImpl implements TrustPlugin {
         return itc;
     }
     
-    private RequestSecurityToken createRequest(final RequestSecurityTokenTemplate rstTemplate, String appliesTo) throws URISyntaxException, WSTrustException, NumberFormatException {
-        URI requestType = URI.create(WSTrustConstants.ISSUE_REQUEST);
-        AppliesTo at = null;
+    private RequestSecurityToken createRequest(final RequestSecurityTokenTemplate rstTemplate, final String appliesTo) throws URISyntaxException, WSTrustException, NumberFormatException {
+        final URI requestType = URI.create(WSTrustConstants.ISSUE_REQUEST);
+        AppliesTo applTo = null;
         if (appliesTo != null){
-            at = WSTrustUtil.createAppliesTo(appliesTo);
+            applTo = WSTrustUtil.createAppliesTo(appliesTo);
         }
         
         int len = 32;
-        long keySize = rstTemplate.getKeySize();
+        final long keySize = rstTemplate.getKeySize();
         if (keySize > 0){
             len = (int)keySize/8;
         }
         
-        SecureRandom sr = new SecureRandom();
-        byte[] nonce = new byte[len];
-        sr.nextBytes(nonce);
-        BinarySecret binarySecret = fact.createBinarySecret(nonce, BinarySecret.NONCE_KEY_TYPE);
-        Entropy entropy = fact.createEntropy(binarySecret);
+        final SecureRandom secRandom = new SecureRandom();
+        final byte[] nonce = new byte[len];
+        secRandom.nextBytes(nonce);
+        final BinarySecret binarySecret = fact.createBinarySecret(nonce, BinarySecret.NONCE_KEY_TYPE);
+        final Entropy entropy = fact.createEntropy(binarySecret);
         URI tokenType = new URI(WSTrustConstants.SAML11_ASSERTION_TOKEN_TYPE);
         if (rstTemplate.getTokenType() != null){
             tokenType = new URI(rstTemplate.getTokenType().trim());
         }
-        URI context = null;
-        Claims claims = null;
-        Lifetime lifetime = null;
-        RequestSecurityToken requestSecurityToken= fact.createRSTForIssue(tokenType,requestType,context,at,claims,entropy,lifetime);
+        final URI context = null;
+        final Claims claims = null;
+        final Lifetime lifetime = null;
+        final RequestSecurityToken rst= fact.createRSTForIssue(tokenType,requestType,context,applTo,claims,entropy,lifetime);
         
         if (keySize > 0){
-            requestSecurityToken.setKeySize(keySize);
+            rst.setKeySize(keySize);
         }
         
-        String keyType = rstTemplate.getKeyType();
+        final String keyType = rstTemplate.getKeyType();
         if (keyType != null){
-            requestSecurityToken.setKeyType(new URI(keyType.trim()));
+            rst.setKeyType(new URI(keyType.trim()));
         }
-        requestSecurityToken.setComputedKeyAlgorithm(URI.create(WSTrustConstants.CK_PSHA1));
+        rst.setComputedKeyAlgorithm(URI.create(WSTrustConstants.CK_PSHA1));
         
         if (log.isLoggable(Level.FINE)) {
             log.log(Level.FINE,
-                    LogStringsMessages.WST_1006_CREATED_RST_ISSUE(elemToString(requestSecurityToken)));
+                    LogStringsMessages.WST_1006_CREATED_RST_ISSUE(elemToString(rst)));
         }
         
-        return requestSecurityToken;
+        return rst;
     }
     
-    private RequestSecurityTokenResponse invokeRST(RequestSecurityToken request, URI wsdlLocation, QName serviceName, QName portName, String stsURI) throws RemoteException, WSTrustException {
+    private RequestSecurityTokenResponse invokeRST(final RequestSecurityToken request, final URI wsdlLocation, QName serviceName, QName portName, String stsURI) throws RemoteException, WSTrustException {
         
         if(serviceName == null || portName==null){
             //we have to get the serviceName and portName through MEX
@@ -315,7 +315,7 @@ public class TrustPluginImpl implements TrustPlugin {
                     LogStringsMessages.WST_0016_PROBLEM_IT_CTX(), ex);
             throw new RuntimeException(LogStringsMessages.WST_0016_PROBLEM_IT_CTX());
         }
-        Dispatch<Object> dispatch = service.createDispatch(portName, fact.getContext(), Service.Mode.PAYLOAD, new WebServiceFeature[]{new RespectBindingFeature(), new AddressingFeature(false)});
+        final Dispatch<Object> dispatch = service.createDispatch(portName, fact.getContext(), Service.Mode.PAYLOAD, new WebServiceFeature[]{new RespectBindingFeature(), new AddressingFeature(false)});
         //Dispatch<SOAPMessage> dispatch = service.createDispatch(portName, SOAPMessage.class, Service.Mode.MESSAGE, new WebServiceFeature[]{new AddressingFeature(false)});
         //WSBinding wsbinding = (WSBinding) dispatch.getBinding();
         //AddressingVersion addVer = wsbinding.getAddressingVersion();
@@ -351,7 +351,7 @@ public class TrustPluginImpl implements TrustPlugin {
         // ex.printStackTrace();
         // }
         
-        RequestSecurityTokenResponse rstr =  fact.createRSTRFrom((JAXBElement)dispatch.invoke(fact.toJAXBElement(request)));
+        final RequestSecurityTokenResponse rstr =  fact.createRSTRFrom((JAXBElement)dispatch.invoke(fact.toJAXBElement(request)));
         if (log.isLoggable(Level.FINE)) {
             log.log(Level.FINE,
                     LogStringsMessages.WST_1014_RESPONSE_INVOKING_RST(elemToString(rstr)));
@@ -367,21 +367,21 @@ public class TrustPluginImpl implements TrustPlugin {
      * and the second one will be portName.
      */
     protected static QName[]  doMexRequest(final String wsdlLocation, final String stsURI) {
-        MetadataClient mexClient = new MetadataClient();
+        final MetadataClient mexClient = new MetadataClient();
         
-        Metadata metadata = mexClient.retrieveMetadata(wsdlLocation);
+        final Metadata metadata = mexClient.retrieveMetadata(wsdlLocation);
         
         //this method gives the names of services and the corresponding port details
-        List<PortInfo> ports = mexClient.getServiceInformation(metadata);
+        final List<PortInfo> ports = mexClient.getServiceInformation(metadata);
         
         //we have to iterate through this to get the appropriate serviceName and portname
+        QName[] serviceInfo = new QName[2];
         for(PortInfo port : ports){
-            String uri = port.getAddress();
+            final String uri = port.getAddress();
             
             //if the stsAddress what we have matches the address of this port, return
             //this port information
             if(uri.equals(stsURI)){
-                QName[] serviceInfo = new QName[2];
                 serviceInfo[0]= port.getServiceName();
                 serviceInfo[1]= port.getPortName();
                 return serviceInfo;
@@ -397,9 +397,9 @@ public class TrustPluginImpl implements TrustPlugin {
      * @return The URI of the Issuer in IssuedToken, which is nothing but the URI of STS.
      */
     private URI getSTSURI(final IssuedToken issuedToken) {
-        Issuer issuer = issuedToken.getIssuer();
+        final Issuer issuer = issuedToken.getIssuer();
         if(issuer != null){
-            Address address = issuer.getAddress();
+            final Address address = issuer.getAddress();
             if (address != null){
                 return address.getURI();
             }
@@ -408,7 +408,7 @@ public class TrustPluginImpl implements TrustPlugin {
     }
     
     private URI getAddressFromMetadata(final IssuedToken issuedToken) throws MalformedURLException {
-        PolicyAssertion issuer = (PolicyAssertion)issuedToken.getIssuer();
+        final PolicyAssertion issuer = (PolicyAssertion)issuedToken.getIssuer();
         PolicyAssertion addressingMetadata = null;
         PolicyAssertion metadata = null;
         PolicyAssertion metadataSection = null;
@@ -418,9 +418,9 @@ public class TrustPluginImpl implements TrustPlugin {
             address = ((Issuer)issuer).getAddress();
             
             if ( issuer.hasNestedAssertions() ) {
-                Iterator <PolicyAssertion> it = issuer.getNestedAssertionsIterator();
+                final Iterator <PolicyAssertion> it = issuer.getNestedAssertionsIterator();
                 while ( it.hasNext() ) {
-                    PolicyAssertion assertion = it.next();
+                    final PolicyAssertion assertion = it.next();
                     if ( WSTrustUtil.isAddressingMetadata(assertion)) {
                         addressingMetadata = assertion;
                         break;
@@ -431,9 +431,9 @@ public class TrustPluginImpl implements TrustPlugin {
         
         if(addressingMetadata != null){
             if ( addressingMetadata.hasNestedAssertions() ) {
-                Iterator <PolicyAssertion> it = addressingMetadata.getNestedAssertionsIterator();
+                final Iterator <PolicyAssertion> it = addressingMetadata.getNestedAssertionsIterator();
                 while ( it.hasNext() ) {
-                    PolicyAssertion assertion = it.next();
+                    final PolicyAssertion assertion = it.next();
                     if ( WSTrustUtil.isMetadata(assertion)) {
                         metadata = assertion;
                         break;
@@ -444,9 +444,9 @@ public class TrustPluginImpl implements TrustPlugin {
         
         if(metadata != null){
             if ( metadata.hasNestedAssertions() ) {
-                Iterator <PolicyAssertion> it = metadata.getNestedAssertionsIterator();
+                final Iterator <PolicyAssertion> it = metadata.getNestedAssertionsIterator();
                 while ( it.hasNext() ) {
-                    PolicyAssertion assertion = it.next();
+                    final PolicyAssertion assertion = it.next();
                     if ( WSTrustUtil.isMetadataSection(assertion)) {
                         metadataSection = assertion;
                         break;
@@ -458,9 +458,9 @@ public class TrustPluginImpl implements TrustPlugin {
         
         if(metadataSection != null){
             if ( metadataSection.hasNestedAssertions() ) {
-                Iterator <PolicyAssertion> it = metadataSection.getNestedAssertionsIterator();
+                final Iterator <PolicyAssertion> it = metadataSection.getNestedAssertionsIterator();
                 while ( it.hasNext() ) {
-                    PolicyAssertion assertion = it.next();
+                    final PolicyAssertion assertion = it.next();
                     if ( WSTrustUtil.isMetadataReference(assertion)) {
                         metadataReference = assertion;
                         break;
@@ -471,9 +471,9 @@ public class TrustPluginImpl implements TrustPlugin {
         }
         if(metadataReference != null){
             if ( metadataReference.hasNestedAssertions() ) {
-                Iterator <PolicyAssertion> it = metadataReference.getNestedAssertionsIterator();
+                final Iterator <PolicyAssertion> it = metadataReference.getNestedAssertionsIterator();
                 while ( it.hasNext() ) {
-                    PolicyAssertion assertion = it.next();
+                    final PolicyAssertion assertion = it.next();
                     if ( PolicyUtil.isAddress(assertion)) {
                         address = (Address)assertion;
                         // return address.getURI();
@@ -505,14 +505,14 @@ public class TrustPluginImpl implements TrustPlugin {
      * Prints out the RST created as string.
      * This method is primarily used for logging purposes.
      */
-    private String elemToString(RequestSecurityToken rst) {
+    private String elemToString(final RequestSecurityToken rst) {
         try {
-            javax.xml.bind.Marshaller marshaller = fact.getContext().createMarshaller();
-            JAXBElement<RequestSecurityTokenType> rstElement =  (new ObjectFactory()).createRequestSecurityToken((RequestSecurityTokenType)rst);
+            final javax.xml.bind.Marshaller marshaller = fact.getContext().createMarshaller();
+            final JAXBElement<RequestSecurityTokenType> rstElement =  (new ObjectFactory()).createRequestSecurityToken((RequestSecurityTokenType)rst);
             marshaller.setProperty(javax.xml.bind.Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-            java.io.StringWriter sw = new java.io.StringWriter();
-            marshaller.marshal(rstElement, sw);
-            return sw.toString();
+            final java.io.StringWriter writer = new java.io.StringWriter();
+            marshaller.marshal(rstElement, writer);
+            return writer.toString();
         } catch (Exception e) {
             if(log.isLoggable(Level.FINE)) {
                 log.log(Level.FINE,
@@ -522,14 +522,14 @@ public class TrustPluginImpl implements TrustPlugin {
         }
     }
     
-    private String elemToString(RequestSecurityTokenResponse rstr){
+    private String elemToString(final RequestSecurityTokenResponse rstr){
         try {
-            javax.xml.bind.Marshaller marshaller = fact.getContext().createMarshaller();
-            JAXBElement<RequestSecurityTokenResponseType> rstrElement =  (new ObjectFactory()).createRequestSecurityTokenResponse((RequestSecurityTokenResponseType)rstr);
+            final javax.xml.bind.Marshaller marshaller = fact.getContext().createMarshaller();
+            final JAXBElement<RequestSecurityTokenResponseType> rstrElement =  (new ObjectFactory()).createRequestSecurityTokenResponse((RequestSecurityTokenResponseType)rstr);
             marshaller.setProperty(javax.xml.bind.Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-            java.io.StringWriter sw = new java.io.StringWriter();
-            marshaller.marshal(rstrElement, sw);
-            return sw.toString();
+            final java.io.StringWriter writer = new java.io.StringWriter();
+            marshaller.marshal(rstrElement, writer);
+            return writer.toString();
         } catch (Exception e) {
             if (log.isLoggable(Level.FINE)) {
                 log.log(Level.FINE,

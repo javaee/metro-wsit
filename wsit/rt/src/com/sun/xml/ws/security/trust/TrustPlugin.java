@@ -1,5 +1,5 @@
 /*
- * $Id: TrustPlugin.java,v 1.3 2006-11-01 20:20:30 jdg6688 Exp $
+ * $Id: TrustPlugin.java,v 1.4 2007-01-11 13:15:09 raharsha Exp $
  */
 
 /*
@@ -28,10 +28,7 @@ package com.sun.xml.ws.security.trust;
 
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.security.IssuedTokenContext;
-import java.net.URI;
 
-import java.util.Map;
-import javax.xml.namespace.QName;
 
 public interface TrustPlugin {
 

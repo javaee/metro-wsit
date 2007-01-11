@@ -46,14 +46,14 @@ import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
  */
 public class GenericToken implements Token{
     
-    private static Logger log =
+    private static final Logger log =
             Logger.getLogger(
             LogDomainConstants.TRUST_IMPL_DOMAIN,
             LogDomainConstants.TRUST_IMPL_DOMAIN_BUNDLE);
     
     private Element token;
     
-    private JAXBElement tokenEle;
+    //private JAXBElement tokenEle;
     
     private String tokenType;
     private SecurityHeaderElement she = null;
@@ -84,8 +84,8 @@ public class GenericToken implements Token{
         this.tokenType = tokenType;
     }
     
-    public GenericToken(SecurityHeaderElement se){
-        this.she = se;
+    public GenericToken(SecurityHeaderElement headerElement){
+        this.she = headerElement;
     }
     
     public String getType(){

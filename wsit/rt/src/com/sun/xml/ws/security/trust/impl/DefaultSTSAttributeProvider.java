@@ -39,13 +39,13 @@ import javax.xml.namespace.QName;
  */
 public class DefaultSTSAttributeProvider implements STSAttributeProvider{
     
-    public Map<String, QName> getClaimedAttributes(Subject subject, String appliesTo, String tokenType, Claims claims){
-        Set<Principal> principals = subject.getPrincipals();
-        Map<String, QName> attrs = new HashMap<String, QName>();
+    public Map<String, QName> getClaimedAttributes(final Subject subject, final String appliesTo, final String tokenType, final Claims claims){
+        final Set<Principal> principals = subject.getPrincipals();
+        final Map<String, QName> attrs = new HashMap<String, QName>();
         if (principals != null){
-            Iterator iterator = principals.iterator();
+            final Iterator iterator = principals.iterator();
             while (iterator.hasNext()){
-                String name = principals.iterator().next().getName();
+                final String name = principals.iterator().next().getName();
                 if (name != null){
                     //attrs.add(name);
                     attrs.put(NAME_IDENTIFIER, new QName("http://sun.com", name));
@@ -59,8 +59,8 @@ public class DefaultSTSAttributeProvider implements STSAttributeProvider{
         } */
        
         // Set up a dumy attribute value
-        String key = "name";
-        QName value = new QName("http://sun.com", "value");
+        final String key = "name";
+        final QName value = new QName("http://sun.com", "value");
         attrs.put(key, value);
        
         return attrs;

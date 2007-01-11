@@ -28,7 +28,6 @@
 
 package com.sun.xml.ws.security.secconv;
 
-import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.security.policy.SecureConversationToken;
 import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.trust.Configuration;
@@ -49,34 +48,34 @@ public class WSSCSourceContract implements WSTrustSourceContract {
     private static WSTrustElementFactory eleFac = WSTrustElementFactory.newInstance();
     
    
-   public void init(Configuration config){
+   public void init(final Configuration config){
        contract = new WSSCContract();
        contract.init(config);
    }
     
     /** Issue a Token */
-    public Source issue(Source request, IssuedTokenContext context,SecureConversationToken policy)throws WSTrustException {
+    public Source issue(final Source request, final IssuedTokenContext context,final SecureConversationToken policy)throws WSTrustException {
         
         return eleFac.toSource(contract.issue(eleFac.createRSTFrom(request), context, policy));
     }
 
     /** Issue a Collection of Token(s) possibly for different scopes */
-    public Source issueMultiple(Source request, IssuedTokenContext context) throws WSTrustException {
+    public Source issueMultiple(final Source request, final IssuedTokenContext context) throws WSTrustException {
         return null;
     }
 
     /** Renew a Token */
-    public Source renew(Source request, IssuedTokenContext context) throws WSSecureConversationException{
+    public Source renew(final Source request, final IssuedTokenContext context) throws WSSecureConversationException{
         return null;
     }
 
     /** Cancel a Token */
-    public Source cancel(Source request, IssuedTokenContext context) throws WSTrustException {
+    public Source cancel(final Source request, final IssuedTokenContext context) throws WSTrustException {
         return null;
     }
 
     /** Validate a Token */
-    public Source validate(Source request, IssuedTokenContext context) throws WSTrustException {
+    public Source validate(final Source request, final IssuedTokenContext context) throws WSTrustException {
         return null;
     }
 
@@ -84,7 +83,7 @@ public class WSSCSourceContract implements WSTrustSourceContract {
      * handle an unsolicited RSTR like in the case of 
      * Client Initiated Secure Conversation.
      */
-   public void handleUnsolicited(Source rstr, IssuedTokenContext context) throws WSTrustException {
+   public void handleUnsolicited(final Source rstr, final IssuedTokenContext context) throws WSTrustException {
        
    }
    
@@ -95,7 +94,7 @@ public class WSSCSourceContract implements WSTrustSourceContract {
     *  RST contains Initial Negotiation/Challenge information
     *   for a Multi-Message exchange.
     */
-   public boolean containsChallenge(Source rstORrstr){
+   public boolean containsChallenge(final Source rstORrstr){
        return false;
    }
    
