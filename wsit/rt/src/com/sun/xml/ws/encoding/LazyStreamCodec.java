@@ -22,20 +22,20 @@
 
 package com.sun.xml.ws.encoding;
 
-import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.api.pipe.ContentType;
-import com.sun.xml.ws.message.stream.StreamHeader;
-import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
+import com.sun.xml.ws.api.pipe.StreamSOAPCodec;
+import com.sun.xml.ws.api.streaming.XMLStreamReaderFactory;
+
+import javax.xml.stream.XMLStreamReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
-import javax.xml.stream.XMLStreamReader;
-import com.sun.xml.ws.api.pipe.StreamSOAPCodec;
+
 /**
  *
  * @author K.Venugopal@sun.com
