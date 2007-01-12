@@ -128,7 +128,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
             if (isGF != null) {
                 handler = loadGFHandler(false);
                 try {
-                    secEnv = new WSITProviderSecurityEnvironment(handler, map);
+                    secEnv = new WSITProviderSecurityEnvironment(handler, map, null);
                 }catch (XWSSecurityException ex) {
                     throw new WebServiceException(ex);
                 }

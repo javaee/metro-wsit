@@ -121,7 +121,7 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
             if (isACC) {
                 handler = loadGFHandler(true);
                 try {
-                    secEnv = new WSITProviderSecurityEnvironment(handler, map);
+                    secEnv = new WSITProviderSecurityEnvironment(handler, map, null);
                 }catch (XWSSecurityException ex) {
                     throw new WebServiceException(ex);
                 }
