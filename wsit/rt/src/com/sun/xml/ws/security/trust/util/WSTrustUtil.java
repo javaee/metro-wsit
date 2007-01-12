@@ -164,7 +164,7 @@ public class WSTrustUtil {
                 if (epr != null){
                     AttributedURI uri = epr.getAddress();
                     if (uri != null){
-                        return uri.getValue().toString();
+                        return uri.getValue();
                     }
                 }
             }

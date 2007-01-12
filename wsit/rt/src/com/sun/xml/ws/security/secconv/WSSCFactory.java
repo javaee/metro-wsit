@@ -54,22 +54,7 @@ public class WSSCFactory {
         return contract;
     }
     
-   
-    public static WSSCSourceContract newWSSCSourceContract(final Configuration config) {
-        final WSSCSourceContract contract = new WSSCSourceContract();
-        contract.init(config); 
-        
-        return contract;
-    }
-   
-    public static WSTrustDOMContract newWSSCDOMContract(final Configuration config) {
-        final WSSCDOMContract contract = new WSSCDOMContract();
-        contract.init(config); 
-        
-        return contract;
-    }
-    
-    public static WSSCClientContract newWSSCClientContract(final Configuration config) {
+    public static WSSCClientContract newWSSCClientContract(Configuration config) {
         return new WSSCClientContract(config);
     }
 }
