@@ -49,6 +49,7 @@ import javax.xml.bind.Unmarshaller;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.sun.xml.ws.security.secconv.logging.LogDomainConstants;
+import com.sun.xml.ws.security.secconv.logging.LogStringsMessages;
 import java.io.StringWriter;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -72,7 +73,7 @@ public class NewWSSCPlugin {
     
     private static final int DEFAULT_KEY_SIZE = 256;
     private static final String SC_ASSERTION = "SecureConversationAssertion";
-   
+    
     /** Creates a new instance of NewWSSCPlugin */
     public NewWSSCPlugin(Configuration config) {
         this.config = config;
@@ -105,7 +106,8 @@ public class NewWSSCPlugin {
                 skl = DEFAULT_KEY_SIZE;
             }
             if (log.isLoggable(Level.FINE)) {
-                log.log(Level.FINE,"WSSC1006.sym.bin.keysize", new Object[] {skl});
+                log.log(Level.FINE,
+                        LogStringsMessages.WSSC_1006_SYM_BIN_KEYSIZE(skl, DEFAULT_KEY_SIZE));
             }
         }
         if(trust10 != null){
@@ -120,19 +122,23 @@ public class NewWSSCPlugin {
         try{
             rst = createRequestSecurityToken(requireClientEntropy,skl);
         } catch (WSSecureConversationException ex){
-            throw new RuntimeException("There is a problem creating RST", ex);
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSSC_0024_ERROR_CREATING_RST(""), ex);
+            throw new RuntimeException(LogStringsMessages.WSSC_0024_ERROR_CREATING_RST(""), ex);
         } catch (WSTrustException ex){
-            throw new RuntimeException("There is a problem in the Trust layer creating an RST", ex);
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSSC_0021_PROBLEM_CREATING_RST_TRUST(), ex);
+            throw new RuntimeException(LogStringsMessages.WSSC_0021_PROBLEM_CREATING_RST_TRUST(), ex);
         }
-     
-        return rst;    
+        
+        return rst;
     }
     
     public Packet  createIssuePacket(
             PolicyAssertion token, RequestSecurityToken rst, WSDLPort wsdlPort, WSBinding binding, JAXBContext jbCxt, String endPointAddress, Packet packet) {
         Packet ret = createSendRequestPacket(
                 token, wsdlPort, binding,  jbCxt, rst, WSSCConstants.REQUEST_SECURITY_CONTEXT_TOKEN_ACTION, endPointAddress, packet);
-
+        
         return ret;
     }
     
@@ -142,8 +148,9 @@ public class NewWSSCPlugin {
         try {
             unmarshaller = jbCxt.createUnmarshaller();
         } catch (JAXBException ex){
-            log.log(Level.SEVERE,"WSSC0016.problem.mar.unmar", ex);
-            throw new RuntimeException("Problem creating JAXB Marshaller/Unmarshaller", ex);
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSSC_0016_PROBLEM_MAR_UNMAR(), ex);
+            throw new RuntimeException(LogStringsMessages.WSSC_0016_PROBLEM_MAR_UNMAR(), ex);
         }
         
         // Obtain the RequestSecurtyTokenResponse
@@ -154,33 +161,37 @@ public class NewWSSCPlugin {
             try {
                 rstrEle = (JAXBElement)response.readPayloadAsJAXB(unmarshaller);
             }catch (JAXBException ex){
-                log.log(Level.SEVERE,"WSSC0018.err.jaxb.rstr", ex);
-                throw new RuntimeException(ex);
+                log.log(Level.SEVERE,
+                        LogStringsMessages.WSSC_0018_ERR_JAXB_RSTR(),ex);
+                throw new RuntimeException( LogStringsMessages.WSSC_0018_ERR_JAXB_RSTR(),ex);
             }
             rstr = eleFac.createRSTRFrom(rstrEle);
         } else {
             try{
                 throw new SOAPFaultException(response.readAsSOAPMessage().getSOAPBody().getFault());
             } catch (SOAPException ex){
-                throw new RuntimeException(ex);
+                log.log(Level.SEVERE,
+                        LogStringsMessages.WSSC_0022_PROBLEM_CREATING_FAULT(), ex);
+                throw new RuntimeException(LogStringsMessages.WSSC_0022_PROBLEM_CREATING_FAULT(), ex);
             }
         }
         
         return rstr;
     }
     
-    public IssuedTokenContext processRSTR(IssuedTokenContext context, 
+    public IssuedTokenContext processRSTR(IssuedTokenContext context,
             RequestSecurityToken rst, RequestSecurityTokenResponse rstr, String endPointAddress) {
-    
+        
         // Handle the RequestSecurityTokenResponse
         //IssuedTokenContext context = new IssuedTokenContextImpl();
         try {
             processRequestSecurityTokenResponse(rst, rstr, context);
         } catch (WSSecureConversationException ex){
-            throw new RuntimeException(ex);
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSSC_0023_ERROR_PROCESSING_RSTR(), ex);
+            throw new RuntimeException(LogStringsMessages.WSSC_0023_ERROR_PROCESSING_RSTR(), ex);
         }
         context.setEndpointAddress(endPointAddress);
-        
         return context;
     }
     
@@ -199,12 +210,14 @@ public class NewWSSCPlugin {
         try{
             rst = createRequestSecurityTokenForCancel(ctx);
         } catch (WSSecureConversationException ex){
-            throw new RuntimeException("There was a problem creating RST For Cancel", ex);
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSSC_0024_ERROR_CREATING_RST("For Cancel"), ex);
+            throw new RuntimeException(LogStringsMessages.WSSC_0024_ERROR_CREATING_RST("For Cancel"), ex);
         }
         return rst;
     }
     
-     public Packet  createCancelPacket(
+    public Packet  createCancelPacket(
             RequestSecurityToken rst, WSDLPort wsdlPort, WSBinding binding, JAXBContext jbCxt, String endPointAddress) {
         Packet ret = createSendRequestPacket(
                 null, wsdlPort, binding,  jbCxt, rst, WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_ACTION, endPointAddress, null);
@@ -221,7 +234,9 @@ public class NewWSSCPlugin {
         try{
             rst = createRequestSecurityTokenForCancel(ctx);
         } catch (WSSecureConversationException ex){
-            throw new RuntimeException("There was a problem creating RST For Cancel", ex);
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSSC_0024_ERROR_CREATING_RST("For Cancel"), ex);
+            throw new RuntimeException(LogStringsMessages.WSSC_0024_ERROR_CREATING_RST("For Cancel"), ex);
         }
         
         RequestSecurityTokenResponse rstr = sendRequest(null, wsdlPort, binding, securityPipe, jbCxt, rst, WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_ACTION, endPointAddress, null);
@@ -230,7 +245,9 @@ public class NewWSSCPlugin {
         try {
             processRequestSecurityTokenResponse(rst, rstr, ctx);
         } catch (WSSecureConversationException ex){
-            throw new RuntimeException("Problem processing RSTR", ex);
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSSC_0020_PROBLEM_CREATING_RSTR(), ex);
+            throw new RuntimeException(LogStringsMessages.WSSC_0020_PROBLEM_CREATING_RSTR(), ex);
         }
         
         return ctx;
@@ -243,12 +260,13 @@ public class NewWSSCPlugin {
         try {
             marshaller = jbCxt.createMarshaller();
         } catch (JAXBException ex){
-            log.log(Level.SEVERE,"WSSC0016.problem.mar.unmar", ex);
-            throw new RuntimeException("Problem creating JAXB Marshaller/Unmarshaller", ex);
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSSC_0016_PROBLEM_MAR_UNMAR(), ex);
+            throw new RuntimeException(LogStringsMessages.WSSC_0016_PROBLEM_MAR_UNMAR(), ex);
         }
         
         Message request = Messages.create(marshaller, eleFac.toJAXBElement(rst), binding.getSOAPVersion());
-
+        
         // Log Request created
         if (log.isLoggable(Level.FINE)) {
             log.log(Level.FINE,"WSSC1009.send.req.message", new Object[] {printMessageAsString(request)});
@@ -265,16 +283,17 @@ public class NewWSSCPlugin {
         
         reqPacket.setEndPointAddressString(endPointAddress);
         if (log.isLoggable(Level.FINE)) {
-            log.log(Level.FINE,"WSSC1008.set.ep.address",
-                    new Object[]{endPointAddress});
+            log.log(Level.FINE,
+                    LogStringsMessages.WSSC_1008_SET_EP_ADDRESS(endPointAddress));
         }
         
         // Add addressing headers to the message
         try{
             reqPacket = addAddressingHeaders(reqPacket, wsdlPort, binding, action);
         }catch (WSSecureConversationException ex){
-            log.log(Level.SEVERE,"WSSC0017.problem.add.address.headers", ex);
-            throw new RuntimeException(ex);
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSSC_0017_PROBLEM_ADD_ADDRESS_HEADERS(), ex);
+            throw new RuntimeException(LogStringsMessages.WSSC_0017_PROBLEM_ADD_ADDRESS_HEADERS(), ex);
         }
         
         // Ideally this property for enabling FI or not should be available to the pipeline.
@@ -287,8 +306,6 @@ public class NewWSSCPlugin {
         return reqPacket;
     }
     
-    
-    
     private RequestSecurityTokenResponse sendRequest(PolicyAssertion issuedToken, WSDLPort wsdlPort, WSBinding binding, Pipe securityPipe, JAXBContext jbCxt, RequestSecurityToken rst, String action, String endPointAddress, Packet packet) {
         Marshaller marshaller;
         Unmarshaller unmarshaller;
@@ -297,15 +314,17 @@ public class NewWSSCPlugin {
             marshaller = jbCxt.createMarshaller();
             unmarshaller = jbCxt.createUnmarshaller();
         } catch (JAXBException ex){
-            log.log(Level.SEVERE,"WSSC0016.problem.mar.unmar", ex);
-            throw new RuntimeException("Problem creating JAXB Marshaller/Unmarshaller", ex);
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSSC_0016_PROBLEM_MAR_UNMAR(), ex);
+            throw new RuntimeException(LogStringsMessages.WSSC_0016_PROBLEM_MAR_UNMAR(), ex);
         }
         
         Message request = Messages.create(marshaller, eleFac.toJAXBElement(rst), binding.getSOAPVersion());
-
+        
         // Log Request created
         if (log.isLoggable(Level.FINE)) {
-            log.log(Level.FINE,"WSSC1009.send.req.message", new Object[] {printMessageAsString(request)});
+            log.log(Level.FINE,
+                    LogStringsMessages.WSSC_1009_SEND_REQ_MESSAGE(printMessageAsString(request)));
         }
         Packet reqPacket = new Packet(request);
         if (issuedToken != null){
@@ -318,15 +337,16 @@ public class NewWSSCPlugin {
         }
         
         reqPacket.setEndPointAddressString(endPointAddress);
-         log.log(Level.FINE,"WSSC1008.set.ep.address",
-                new Object[]{endPointAddress});
+        log.log(Level.FINE,
+                LogStringsMessages.WSSC_1008_SET_EP_ADDRESS(endPointAddress));
         
         // Add addressing headers to the message
         try{
             reqPacket = addAddressingHeaders(reqPacket, wsdlPort, binding, action);
         }catch (WSSecureConversationException ex){
-            log.log(Level.SEVERE,"WSSC0017.problem.add.address.headers", ex);
-            throw new RuntimeException(ex);
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSSC_0017_PROBLEM_ADD_ADDRESS_HEADERS(), ex);
+            throw new RuntimeException(LogStringsMessages.WSSC_0017_PROBLEM_ADD_ADDRESS_HEADERS(), ex);
         }
         
         // Ideally this property for enabling FI or not should be available to the pipeline.
@@ -347,17 +367,20 @@ public class NewWSSCPlugin {
             try {
                 rstrEle = (JAXBElement)response.readPayloadAsJAXB(unmarshaller);
             }catch (JAXBException ex){
-                log.log(Level.SEVERE,"WSSC0018.err.jaxb.rstr", ex);
-                throw new RuntimeException(ex);
+                log.log(Level.SEVERE,
+                        LogStringsMessages.WSSC_0018_ERR_JAXB_RSTR(), ex);
+                throw new RuntimeException(LogStringsMessages.WSSC_0018_ERR_JAXB_RSTR(), ex);
             }
             rstr = eleFac.createRSTRFrom(rstrEle);
         } else {
             try{
-               // SOAPFaultBuilder builder = SOAPFaultBuilder.create(response);
+                // SOAPFaultBuilder builder = SOAPFaultBuilder.create(response);
                 //throw (SOAPFaultException)builder.createException(null, response);
                 throw new SOAPFaultException(response.readAsSOAPMessage().getSOAPBody().getFault());
             } catch (SOAPException ex){
-                throw new RuntimeException(ex);
+                log.log(Level.SEVERE,
+                        LogStringsMessages.WSSC_0022_PROBLEM_CREATING_FAULT(), ex);
+                throw new RuntimeException(LogStringsMessages.WSSC_0022_PROBLEM_CREATING_FAULT(), ex);
             }
         }
         
@@ -378,7 +401,9 @@ public class NewWSSCPlugin {
         try {
             rst = eleFac.createRSTForIssue(tokenType, requestType, null, null, null, entropy, null);
         } catch (WSTrustException ex){
-            throw new WSSecureConversationException(ex);
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSSC_0024_ERROR_CREATING_RST("For Issue"), ex);
+            throw new RuntimeException(LogStringsMessages.WSSC_0024_ERROR_CREATING_RST("For Issue"), ex);
         }
         rst.setKeySize(skl);
         rst.setKeyType(URI.create(WSTrustConstants.SYMMETRIC_KEY));
@@ -412,14 +437,16 @@ public class NewWSSCPlugin {
             streamWriter.flush();
             return writer.toString();
         } catch (XMLStreamException ex) {
-            throw new RuntimeException("Problem Printing message ", ex);
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSSC_0025_PROBLEM_PRINTING_MSG(), ex);
+            throw new RuntimeException(LogStringsMessages.WSSC_0025_PROBLEM_PRINTING_MSG(), ex);
         }
     }
     
     private Packet addAddressingHeaders(Packet packet, WSDLPort wsdlPort, WSBinding binding, String action)throws WSSecureConversationException {
         HeaderList hl = packet.getMessage().getHeaders();
         hl.fillRequestAddressingHeaders(packet, binding.getAddressingVersion(),binding.getSOAPVersion(),false,action);
-    
+        
         return packet;
     }
 }

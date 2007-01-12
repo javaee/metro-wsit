@@ -103,9 +103,8 @@ public class WSSCClientContract implements WSTrustClientContract{
             
             if(securityToken == null && proofToken == null){
                 log.log(Level.SEVERE,
-                        "WSSC0002.null.token");
-                throw new WSSecureConversationException(
-                        "Invalid (null) Security Token and Proof Token");
+                        LogStringsMessages.WSSC_0002_NULL_TOKEN());
+                throw new WSSecureConversationException(LogStringsMessages.WSSC_0002_NULL_TOKEN());
             }
             
             if (securityToken != null){
@@ -215,8 +214,9 @@ public class WSSCClientContract implements WSTrustClientContract{
                 throw new WSSecureConversationException(LogStringsMessages.WSSC_0006_UNABLETOEXTRACT_KEY(), ex);
             }
         } else {
-            //ToDo
-            throw new UnsupportedOperationException("Unsupported compute key algorithm:" + computedKey);
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSSC_0026_UNSUPPORTED_COMPUTED_KEY(computedKey));
+            throw new WSSecureConversationException(LogStringsMessages.WSSC_0026_UNSUPPORTED_COMPUTED_KEY(computedKey));
         }
         return key;
     }
