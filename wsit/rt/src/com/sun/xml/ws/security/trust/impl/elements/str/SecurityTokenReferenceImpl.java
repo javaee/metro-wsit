@@ -1,5 +1,5 @@
 /*
- * $Id: SecurityTokenReferenceImpl.java,v 1.2 2006-10-17 05:45:47 raharsha Exp $
+ * $Id: SecurityTokenReferenceImpl.java,v 1.3 2007-01-12 14:44:14 raharsha Exp $
  */
 
 /*
@@ -31,7 +31,6 @@ import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
 import com.sun.xml.ws.security.secext10.ObjectFactory;
 import com.sun.xml.ws.security.secext10.ReferenceType;
-import com.sun.xml.ws.security.trust.elements.str.KeyIdentifier;
 import com.sun.xml.ws.security.trust.elements.str.Reference;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
@@ -40,7 +39,6 @@ import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import java.util.List;
 import javax.xml.bind.JAXBElement;
 
-import org.w3c.dom.Element;
 import org.w3c.dom.Document;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -56,16 +54,16 @@ public class SecurityTokenReferenceImpl extends SecurityTokenReferenceType imple
     }
     
     public SecurityTokenReferenceImpl(SecurityTokenReferenceType strType)
-    throws Exception {
-        Reference ref = getReference(strType);
+    {
+        final Reference ref = getReference(strType);
         setReference(ref);
     }
     
-    public void setReference(Reference ref){
+    public final void setReference(final Reference ref){
         
         JAXBElement rElement = null;
-        String type = ref.getType();
-        ObjectFactory objFac = new ObjectFactory();
+        final String type = ref.getType();
+        final ObjectFactory objFac = new ObjectFactory();
         if (KEYIDENTIFIER.equals(type)){
             rElement = objFac.createKeyIdentifier((KeyIdentifierType)ref);
         }
@@ -85,11 +83,11 @@ public class SecurityTokenReferenceImpl extends SecurityTokenReferenceType imple
         return getReference((SecurityTokenReferenceType)this);
     }
     
-    private Reference getReference(SecurityTokenReferenceType strType){
-        List<Object> list = strType.getAny();
-        JAXBElement obj = (JAXBElement)list.get(0);
-        String local = obj.getName().getLocalPart();
-        Reference ref = null;
+    private Reference getReference(final SecurityTokenReferenceType strType){
+        final List<Object> list = strType.getAny();
+        final JAXBElement obj = (JAXBElement)list.get(0);
+        final String local = obj.getName().getLocalPart();
+        //final Reference ref = null;
         if (REFERENCE.equals(local)) {
             return new DirectReferenceImpl((ReferenceType)obj.getValue());
         }
@@ -108,13 +106,13 @@ public class SecurityTokenReferenceImpl extends SecurityTokenReferenceType imple
     
     public Object getTokenValue() {
         try {
-            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             dbf.setNamespaceAware(true);
-            DocumentBuilder db = dbf.newDocumentBuilder();
-            Document doc = db.newDocument();
+            final DocumentBuilder db = dbf.newDocumentBuilder();
+            final Document doc = db.newDocument();
             
-            javax.xml.bind.Marshaller marshaller = WSTrustElementFactory.getContext().createMarshaller();
-            JAXBElement<SecurityTokenReferenceType> rstElement =  (new ObjectFactory()).createSecurityTokenReference((SecurityTokenReferenceType)this);
+            final javax.xml.bind.Marshaller marshaller = WSTrustElementFactory.getContext().createMarshaller();
+            final JAXBElement<SecurityTokenReferenceType> rstElement =  (new ObjectFactory()).createSecurityTokenReference((SecurityTokenReferenceType)this);
             marshaller.marshal(rstElement, doc);
             return doc.getDocumentElement();
             

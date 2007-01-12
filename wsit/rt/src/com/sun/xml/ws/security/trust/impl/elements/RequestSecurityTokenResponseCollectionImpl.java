@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityTokenResponseCollectionImpl.java,v 1.2 2007-01-05 23:44:38 jdg6688 Exp $
+ * $Id: RequestSecurityTokenResponseCollectionImpl.java,v 1.3 2007-01-12 14:44:13 raharsha Exp $
  */
 
 /*
@@ -27,6 +27,7 @@
 package com.sun.xml.ws.security.trust.impl.elements;
 
 import com.sun.xml.ws.policy.impl.bindings.AppliesTo;
+import com.sun.xml.ws.security.trust.WSTrustException;
 import com.sun.xml.ws.security.trust.elements.Entropy;
 import com.sun.xml.ws.security.trust.elements.Lifetime;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponse;
@@ -35,13 +36,12 @@ import com.sun.xml.ws.security.trust.elements.RequestedAttachedReference;
 import com.sun.xml.ws.security.trust.elements.RequestedProofToken;
 import com.sun.xml.ws.security.trust.elements.RequestedSecurityToken;
 import com.sun.xml.ws.security.trust.elements.RequestedUnattachedReference;
-import com.sun.xml.ws.security.trust.impl.bindings.ObjectFactory;
 import com.sun.xml.ws.security.trust.impl.bindings.RequestSecurityTokenResponseCollectionType;
 import com.sun.xml.ws.security.trust.impl.bindings.RequestSecurityTokenResponseType;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-import javax.xml.bind.JAXBElement;
 
 /**
  * @author Manveen Kaur.
@@ -57,15 +57,15 @@ public class RequestSecurityTokenResponseCollectionImpl extends RequestSecurityT
     
     public RequestSecurityTokenResponseCollectionImpl(URI tokenType, URI context, RequestedSecurityToken token, AppliesTo scopes,
             RequestedAttachedReference attached, RequestedUnattachedReference unattached, RequestedProofToken proofToken, Entropy entropy, Lifetime lt) {
-        RequestSecurityTokenResponse rstr = new RequestSecurityTokenResponseImpl(tokenType, context, token, scopes,
+        final RequestSecurityTokenResponse rstr = new RequestSecurityTokenResponseImpl(tokenType, context, token, scopes,
                 attached, unattached, proofToken, entropy, lt, null);
         addRequestSecurityTokenResponse(rstr);
         
     }
     
     public RequestSecurityTokenResponseCollectionImpl(RequestSecurityTokenResponseCollectionType rstrcType)
-    throws Exception {
-        List<RequestSecurityTokenResponseType> list = rstrcType.getRequestSecurityTokenResponse();
+    throws URISyntaxException,WSTrustException{
+        final List<RequestSecurityTokenResponseType> list = rstrcType.getRequestSecurityTokenResponse();
         for (int i = 0; i < list.size(); i++) {
             addRequestSecurityTokenResponse(new RequestSecurityTokenResponseImpl((RequestSecurityTokenResponseType)list.get(i)));
         }
@@ -78,7 +78,7 @@ public class RequestSecurityTokenResponseCollectionImpl extends RequestSecurityT
         return this.requestSecurityTokenResponses;
     }
     
-    public void addRequestSecurityTokenResponse(RequestSecurityTokenResponse rstr){
+    public final void addRequestSecurityTokenResponse(final RequestSecurityTokenResponse rstr){
          getRequestSecurityTokenResponses().add(rstr);
          
         //JAXBElement<RequestSecurityTokenResponseType> rstrEl =

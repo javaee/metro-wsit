@@ -1,5 +1,5 @@
 /*
- * $Id: UseKeyImpl.java,v 1.4 2007-01-04 00:47:50 manveen Exp $
+ * $Id: UseKeyImpl.java,v 1.5 2007-01-12 14:44:14 raharsha Exp $
  */
 
 /*
@@ -52,7 +52,7 @@ import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
  */
 public class UseKeyImpl extends UseKeyType implements UseKey {
     
-    private static Logger log =
+    private static final Logger log =
             Logger.getLogger(
             LogDomainConstants.TRUST_IMPL_DOMAIN,
             LogDomainConstants.TRUST_IMPL_DOMAIN_BUNDLE);
@@ -67,11 +67,11 @@ public class UseKeyImpl extends UseKeyType implements UseKey {
         setTargetType(WSTrustConstants.STR_TYPE);
     }
     
-    public UseKeyImpl (@NotNull final UseKeyType ukType)throws Exception{
-        JAXBElement obj = (JAXBElement)ukType.getAny();
-        String local = obj.getName().getLocalPart();
+    public UseKeyImpl (@NotNull final UseKeyType ukType){
+        final JAXBElement obj = (JAXBElement)ukType.getAny();
+        final String local = obj.getName().getLocalPart();
         if ("SecurityTokenReference".equals(local)) {
-            SecurityTokenReference str = 
+            final SecurityTokenReference str = 
                         new SecurityTokenReferenceImpl((SecurityTokenReferenceType)obj.getValue());
             setSecurityTokenReference(str);
             setTargetType(WSTrustConstants.STR_TYPE);
@@ -84,14 +84,14 @@ public class UseKeyImpl extends UseKeyType implements UseKey {
         return targetType;
     }
     
-    public void setTargetType(String ttype) {
+    public final void setTargetType(final String ttype) {
         targetType = ttype;
     }
     
-    public void setSecurityTokenReference(@NotNull final SecurityTokenReference ref) {
+    public final void setSecurityTokenReference(@NotNull final SecurityTokenReference ref) {
         if (ref != null) {
             str = ref;
-            JAXBElement<SecurityTokenReferenceType> strElement=
+            final JAXBElement<SecurityTokenReferenceType> strElement=
                     (new com.sun.xml.ws.security.secext10.ObjectFactory()).createSecurityTokenReference((SecurityTokenReferenceType)ref);
             setAny(strElement);
         }

@@ -1,5 +1,5 @@
 /*
- * $Id: ClaimsImpl.java,v 1.5 2007-01-04 00:45:29 manveen Exp $
+ * $Id: ClaimsImpl.java,v 1.6 2007-01-12 14:44:10 raharsha Exp $
  */
 
 /*
@@ -26,12 +26,8 @@
 
 package com.sun.xml.ws.security.trust.impl.elements;
 
-import java.util.List;
-import java.util.Map;
 
-import org.w3c.dom.Element;
 
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 
 import com.sun.xml.ws.security.trust.WSTrustException;
@@ -52,7 +48,7 @@ import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
  */
 public class ClaimsImpl extends ClaimsType implements Claims {
     
-    private static Logger log =
+    private static final Logger log =
             Logger.getLogger(
             LogDomainConstants.TRUST_IMPL_DOMAIN,
             LogDomainConstants.TRUST_IMPL_DOMAIN_BUNDLE);
@@ -65,14 +61,14 @@ public class ClaimsImpl extends ClaimsType implements Claims {
         setDialect(dialect);
     }
     
-    public ClaimsImpl(ClaimsType clType)throws Exception{
+    public ClaimsImpl(ClaimsType clType){
         setDialect(clType.getDialect());
     }
     
-    public static ClaimsType fromElement(org.w3c.dom.Element element)
+    public static ClaimsType fromElement(final org.w3c.dom.Element element)
     throws WSTrustException {
         try {
-            javax.xml.bind.Unmarshaller u = WSTrustElementFactory.getContext().createUnmarshaller();
+            final javax.xml.bind.Unmarshaller u = WSTrustElementFactory.getContext().createUnmarshaller();
             return (ClaimsType)u.unmarshal(element);
         } catch (JAXBException ex) {
             log.log(Level.SEVERE,

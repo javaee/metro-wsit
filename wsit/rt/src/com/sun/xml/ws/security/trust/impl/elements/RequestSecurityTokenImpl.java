@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityTokenImpl.java,v 1.7 2007-01-04 00:46:53 manveen Exp $
+ * $Id: RequestSecurityTokenImpl.java,v 1.8 2007-01-12 14:44:12 raharsha Exp $
  */
 
 /*
@@ -26,6 +26,7 @@
 
 package com.sun.xml.ws.security.trust.impl.elements;
 
+import java.net.URISyntaxException;
 import java.util.List;
 
 import java.net.URI;
@@ -39,11 +40,7 @@ import javax.xml.bind.JAXBElement;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.ws.security.trust.WSTrustException;
 import com.sun.xml.ws.security.trust.elements.*;
-import com.sun.xml.ws.security.trust.elements.Entropy;
-import com.sun.xml.ws.security.trust.elements.Lifetime;
-import com.sun.xml.ws.security.trust.elements.Participants;
 
-import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
 import com.sun.xml.ws.security.trust.impl.bindings.AllowPostdatingType;
 import com.sun.xml.ws.security.trust.impl.bindings.BinaryExchangeType;
 import com.sun.xml.ws.security.trust.impl.bindings.CancelTargetType;
@@ -67,7 +64,6 @@ import java.util.logging.Logger;
 import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
 
 import com.sun.istack.NotNull;
-import com.sun.istack.Nullable;
 
 import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
 
@@ -79,7 +75,7 @@ import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
 public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
         implements RequestSecurityToken {
     
-    private static Logger log =
+    private static final Logger log =
             Logger.getLogger(
             LogDomainConstants.TRUST_IMPL_DOMAIN,
             LogDomainConstants.TRUST_IMPL_DOMAIN_BUNDLE);
@@ -148,12 +144,15 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
         if (claims != null) {
             setClaims(claims);
         }
-        if (entropy !=null)
+        if (entropy !=null) {
             setEntropy(entropy);
-        if (lt!=null)
+        }
+        if (lt!=null) {
             setLifetime(lt);
-        if (algorithm !=null)
+        }
+        if (algorithm !=null) {
             setComputedKeyAlgorithm(algorithm);
+        }
     }
     
     public RequestSecurityTokenImpl(URI tokenType, URI requestType, URI context,
@@ -183,13 +182,9 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
         setCancelTarget(cancel);
     }
     
-    public String getContext() {
-        return super.getContext();
-    }
-    
-    public void setClaims(Claims claims) {
+    public final void setClaims(final Claims claims) {
         this.claims = claims;
-        JAXBElement<ClaimsType> cElement =
+        final JAXBElement<ClaimsType> cElement =
                 (new ObjectFactory()).createClaims((ClaimsType)claims);
         getAny().add(cElement);
     }
@@ -198,9 +193,9 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
         return claims;
     }
     
-    public void setCancelTarget(CancelTarget cTarget) {
+    public final void setCancelTarget(final CancelTarget cTarget) {
         this.cancelTarget = cTarget;
-        JAXBElement<CancelTargetType> ctElement =
+        final JAXBElement<CancelTargetType> ctElement =
                 (new ObjectFactory()).createCancelTarget((CancelTargetType)cTarget);
         getAny().add(ctElement);
     }
@@ -209,9 +204,9 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
         return cancelTarget;
     }
     
-    public void setRenewTarget(RenewTarget target) {
+    public final void setRenewTarget(final RenewTarget target) {
         this.renewTarget = target;
-        JAXBElement<RenewTargetType> rElement =
+        final JAXBElement<RenewTargetType> rElement =
                 (new ObjectFactory()).createRenewTarget((RenewTargetType)target);
         getAny().add(rElement);
     }
@@ -220,9 +215,9 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
         return renewTarget;
     }
     
-    public void setParticipants(Participants participants) {
+    public final void setParticipants(final Participants participants) {
         this.participants = participants;
-        JAXBElement<ParticipantsType> rElement =
+        final JAXBElement<ParticipantsType> rElement =
                 (new ObjectFactory()).createParticipants((ParticipantsType)participants);
         getAny().add(rElement);
     }
@@ -235,10 +230,10 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
         return tokenType;
     }
     
-    public void setTokenType(URI tokenType) {
+    public final void setTokenType(final URI tokenType) {
         if (tokenType != null) {
             this.tokenType = tokenType;
-            JAXBElement<String> ttElement =
+            final JAXBElement<String> ttElement =
                     (new ObjectFactory()).createTokenType(tokenType.toString());
             getAny().add(ttElement);
         }
@@ -248,9 +243,9 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
         return requestType;
     }
     
-    public void setRequestType(@NotNull final URI requestType) {
+    public final void setRequestType(@NotNull final URI requestType) {
         
-        String rtString = requestType.toString();
+        final String rtString = requestType.toString();
         if (!rtString.equalsIgnoreCase(WSTrustConstants.ISSUE_REQUEST)
         && !rtString.equalsIgnoreCase(WSTrustConstants.CANCEL_REQUEST)
         && !rtString.equalsIgnoreCase(WSTrustConstants.KEY_EXCHANGE_REQUEST)
@@ -261,7 +256,7 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
             throw new RuntimeException("Invalid Request Type specified: " + rtString);
         }
         this.requestType = requestType;
-        JAXBElement<String> rtElement =
+        final JAXBElement<String> rtElement =
                 (new ObjectFactory()).createRequestType(rtString);
         getAny().add(rtElement);
     }
@@ -270,9 +265,9 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
         return lifetime;
     }
     
-    public void setLifetime(Lifetime lifetime) {
+    public final void setLifetime(final Lifetime lifetime) {
         this.lifetime = lifetime;
-        JAXBElement<LifetimeType> ltElement =
+        final JAXBElement<LifetimeType> ltElement =
                 (new ObjectFactory()).createLifetime((LifetimeType)lifetime);
         getAny().add(ltElement);
     }
@@ -281,14 +276,14 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
         return entropy;
     }
     
-    public void setEntropy(Entropy entropy) {
+    public final void setEntropy(final Entropy entropy) {
         this.entropy = entropy;
-        JAXBElement<EntropyType> etElement =
+        final JAXBElement<EntropyType> etElement =
                 (new ObjectFactory()).createEntropy((EntropyType)entropy);
         getAny().add(etElement);
     }
     
-    public void setAppliesTo(AppliesTo appliesTo) {
+    public final void setAppliesTo(final AppliesTo appliesTo) {
         getAny().add(appliesTo);
         this.appliesTo = appliesTo;
     }
@@ -297,7 +292,7 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
         return appliesTo;
     }
     
-    public void setOnBehalfOf(OnBehalfOf onBehalfOf) {
+    public final void setOnBehalfOf(final OnBehalfOf onBehalfOf) {
         obo = onBehalfOf;
     }
     
@@ -305,7 +300,7 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
         return obo;
     }
     
-    public void setIssuer(Issuer issuer) {
+    public final void setIssuer(final Issuer issuer) {
         this.issuer = issuer;
         /*JAXBElement<EndpointReferenceImpl> eprType =
                 (new com.sun.xml.ws.security.trust.impl.bindings.ObjectFactory()).createIssuer((EndpointReferenceImpl)issuer);
@@ -316,9 +311,9 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
         return issuer;
     }
     
-    public void setRenewable(Renewing renew) {
+    public final void setRenewable(final Renewing renew) {
         renewable = renew;
-        JAXBElement<RenewingType> renewType =
+        final JAXBElement<RenewingType> renewType =
                 (new ObjectFactory()).createRenewing((RenewingType)renew);
         getAny().add(renewType);
     }
@@ -327,9 +322,9 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
         return renewable;
     }
     
-    public void setSignChallenge(SignChallenge challenge) {
+    public final void setSignChallenge(final SignChallenge challenge) {
         signChallenge = challenge;
-        JAXBElement<SignChallengeType> challengeType =
+        final JAXBElement<SignChallengeType> challengeType =
                 (new ObjectFactory()).createSignChallenge((SignChallengeType)challenge);
         getAny().add(challengeType);
     }
@@ -338,9 +333,9 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
         return signChallenge;
     }
     
-    public void setBinaryExchange(BinaryExchange exchange) {
+    public final void setBinaryExchange(final BinaryExchange exchange) {
         binaryExchange = exchange;
-        JAXBElement<BinaryExchangeType> exchangeType =
+        final JAXBElement<BinaryExchangeType> exchangeType =
                 (new ObjectFactory()).createBinaryExchange((BinaryExchangeType)exchange);
         getAny().add(exchangeType);
     }
@@ -349,9 +344,9 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
         return binaryExchange;
     }
     
-    public void setAuthenticationType(URI uri) {
+    public final void setAuthenticationType(final URI uri) {
         this.authenticationType = uri;
-        JAXBElement<String> atElement =
+        final JAXBElement<String> atElement =
                 (new ObjectFactory()).createAuthenticationType(uri.toString());
         getAny().add(atElement);
     }
@@ -360,7 +355,7 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
         return authenticationType;
     }
     
-    public void setKeyType(@NotNull final URI keytype) throws WSTrustException {
+    public final void setKeyType(@NotNull final URI keytype) throws WSTrustException {
         
         if (! (keytype.toString().equalsIgnoreCase(RequestSecurityToken.PUBLIC_KEY_TYPE)
         || keytype.toString().equalsIgnoreCase(RequestSecurityToken.SYMMETRIC_KEY_TYPE) )){
@@ -369,7 +364,7 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
             throw new WSTrustException("Invalid KeyType " + keytype.toString());
         } else {
             this.keyType = keytype;
-            JAXBElement<String> ktElement =
+            final JAXBElement<String> ktElement =
                     (new ObjectFactory()).createKeyType(keyType.toString());
             getAny().add(ktElement);
         }
@@ -379,9 +374,9 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
         return keyType;
     }
     
-    public void setKeySize(long size) {
+    public final void setKeySize(final long size) {
         keySize = size;
-        JAXBElement<Long> ksElement =  (new ObjectFactory()).createKeySize(size);
+        final JAXBElement<Long> ksElement =  (new ObjectFactory()).createKeySize(size);
         getAny().add(ksElement);
     }
     
@@ -389,9 +384,9 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
         return keySize;
     }
     
-    public void setSignatureAlgorithm(URI algorithm) {
+    public final void setSignatureAlgorithm(final URI algorithm) {
         signatureAlgorithm = algorithm;
-        JAXBElement<String> signElement =
+        final JAXBElement<String> signElement =
                 (new ObjectFactory()).createSignatureAlgorithm(algorithm.toString());
         getAny().add(signElement);
     }
@@ -400,9 +395,9 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
         return signatureAlgorithm;
     }
     
-    public void setEncryptionAlgorithm(URI algorithm) {
+    public final void setEncryptionAlgorithm(final URI algorithm) {
         encryptionAlgorithm = algorithm;
-        JAXBElement<String> encElement =
+        final JAXBElement<String> encElement =
                 (new ObjectFactory()).createEncryptionAlgorithm(algorithm.toString());
         getAny().add(encElement);
     }
@@ -411,9 +406,9 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
         return encryptionAlgorithm;
     }
     
-    public void setCanonicalizationAlgorithm(URI algorithm) {
+    public final void setCanonicalizationAlgorithm(final URI algorithm) {
         canonAlgorithm = algorithm;
-        JAXBElement<String> canonElement =
+        final JAXBElement<String> canonElement =
                 (new ObjectFactory()).createCanonicalizationAlgorithm(algorithm.toString());
         getAny().add(canonElement);
     }
@@ -422,9 +417,9 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
         return canonAlgorithm;
     }
     
-    public void setUseKey(UseKey useKey) {
+    public final void setUseKey(final UseKey useKey) {
         this.useKey = useKey;
-        JAXBElement<UseKeyType> ukElement =
+        final JAXBElement<UseKeyType> ukElement =
                 (new ObjectFactory()).createUseKey((UseKeyType)useKey);
         getAny().add(ukElement);
     }
@@ -433,9 +428,9 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
         return useKey;
     }
     
-    public void setProofEncryption(ProofEncryption proofEncryption) {
+    public final void setProofEncryption(final ProofEncryption proofEncryption) {
         this.proofEncryption = proofEncryption;
-        JAXBElement<ProofEncryptionType> proofElement =
+        final JAXBElement<ProofEncryptionType> proofElement =
                 (new ObjectFactory()).createProofEncryption((ProofEncryptionType)proofEncryption);
         getAny().add(proofElement);
     }
@@ -444,10 +439,10 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
         return proofEncryption;
     }
     
-    public void setComputedKeyAlgorithm(@NotNull final URI algorithm) {
+    public final void setComputedKeyAlgorithm(@NotNull final URI algorithm) {
         
         if (algorithm != null) {
-            String ckaString = algorithm.toString();
+            final String ckaString = algorithm.toString();
             if (!ckaString.equalsIgnoreCase(WSTrustConstants.CK_HASH)
             && !ckaString.equalsIgnoreCase(WSTrustConstants.CK_PSHA1)) {
                 log.log(Level.SEVERE,
@@ -456,7 +451,7 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
                         ckaString);
             }
             computedKeyAlgorithm = algorithm;
-            JAXBElement<String> ckaElement =
+            final JAXBElement<String> ckaElement =
                     (new ObjectFactory()).createComputedKeyAlgorithm(ckaString);
             getAny().add(ckaElement);
         }
@@ -466,9 +461,9 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
         return computedKeyAlgorithm;
     }
     
-    public void setEncryption(Encryption enc) {
+    public final void setEncryption(final Encryption enc) {
         this.encryption = enc;
-        JAXBElement<EncryptionType> encElement =
+        final JAXBElement<EncryptionType> encElement =
                 (new ObjectFactory()).createEncryption((EncryptionType)enc);
         getAny().add(encElement);
     }
@@ -477,9 +472,9 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
         return encryption;
     }
     
-    public void setSignWith(URI algorithm) {
+    public final void setSignWith(final URI algorithm) {
         signWith = algorithm;
-        JAXBElement<String> sElement =  (new ObjectFactory()).createSignWith(algorithm.toString());
+        final JAXBElement<String> sElement =  (new ObjectFactory()).createSignWith(algorithm.toString());
         getAny().add(sElement);
     }
     
@@ -487,9 +482,9 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
         return signWith;
     }
     
-    public void setEncryptWith(URI algorithm) {
+    public final void setEncryptWith(final URI algorithm) {
         encryptWith = algorithm;
-        JAXBElement<String> sElement =  (new ObjectFactory()).createEncryptWith(algorithm.toString());
+        final JAXBElement<String> sElement =  (new ObjectFactory()).createEncryptWith(algorithm.toString());
         getAny().add(sElement);
     }
     
@@ -497,9 +492,9 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
         return encryptWith;
     }
     
-    public void setDelegateTo(DelegateTo to) {
+    public final void setDelegateTo(final DelegateTo to) {
         this.delegateTo = to;
-        JAXBElement<DelegateToType> dtElement =
+        final JAXBElement<DelegateToType> dtElement =
                 (new ObjectFactory()).createDelegateTo((DelegateToType)to);
         getAny().add(dtElement);
     }
@@ -508,9 +503,9 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
         return delegateTo;
     }
     
-    public void setForwardable(boolean flag) {
+    public final void setForwardable(final boolean flag) {
         forwardable = flag;
-        JAXBElement<Boolean> forward =
+        final JAXBElement<Boolean> forward =
                 (new ObjectFactory()).createForwardable(flag);
         getAny().add(forward);
     }
@@ -519,9 +514,9 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
         return forwardable;
     }
     
-    public void setDelegatable(boolean flag) {
+    public final void setDelegatable(final boolean flag) {
         delegatable = flag;
-        JAXBElement<Boolean> del =
+        final JAXBElement<Boolean> del =
                 (new ObjectFactory()).createDelegatable(flag);
         getAny().add(del);
     }
@@ -530,7 +525,7 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
         return delegatable;
     }
     
-    public void setPolicy(Policy policy) {
+    public final void setPolicy(final Policy policy) {
         this.policy = policy;
         getAny().add(policy);
     }
@@ -539,7 +534,7 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
         return policy;
     }
     
-    public void setPolicyReference(PolicyReference policyRef) {
+    public final void setPolicyReference(final PolicyReference policyRef) {
         this.policyRef = policyRef;
         getAny().add(policyRef);
     }
@@ -552,26 +547,26 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
         return apd;
     }
     
-    public void setAllowPostdating(AllowPostdating allowPostdating) {
+    public final void setAllowPostdating(final AllowPostdating allowPostdating) {
         apd = allowPostdating;
-        JAXBElement<AllowPostdatingType> allowPd =
+        final JAXBElement<AllowPostdatingType> allowPd =
                 (new ObjectFactory()).createAllowPostdating((AllowPostdatingType)apd);
         getAny().add(allowPd);
     }
     
-    public RequestSecurityTokenImpl(RequestSecurityTokenType rstType)
-    throws Exception {
+    public RequestSecurityTokenImpl(final RequestSecurityTokenType rstType)
+    throws URISyntaxException,WSTrustException {
         this.context = rstType.getContext();
-        List<Object> list = rstType.getAny();
+        final List<Object> list = rstType.getAny();
         for (int i = 0; i < list.size(); i++) {
             if(list.get(i) instanceof AppliesTo){
                 setAppliesTo((AppliesTo)list.get(i));
                 continue;
             }
             if (list.get(i) instanceof JAXBElement){
-                JAXBElement obj = (JAXBElement)list.get(i);
+                final JAXBElement obj = (JAXBElement)list.get(i);
                 
-                String local = obj.getName().getLocalPart();
+                final String local = obj.getName().getLocalPart();
                 if (local.equalsIgnoreCase("RequestType")) {
                     setRequestType(new URI((String)obj.getValue()));
                 } else if (local.equalsIgnoreCase("KeySize")) {
@@ -585,10 +580,10 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
                 } else if (local.equalsIgnoreCase("AuthenticationType")){
                     setAuthenticationType(new URI((String)obj.getValue()));
                 } else if (local.equalsIgnoreCase("Lifetime")){
-                    LifetimeType ltType = (LifetimeType)obj.getValue();
+                    final LifetimeType ltType = (LifetimeType)obj.getValue();
                     setLifetime(new LifetimeImpl(ltType.getCreated(), ltType.getExpires()));
                 } else if (local.equalsIgnoreCase("Entropy")){
-                    EntropyType eType = (EntropyType)obj.getValue();
+                    final EntropyType eType = (EntropyType)obj.getValue();
                     setEntropy(new EntropyImpl(eType));
                 } else if (local.equalsIgnoreCase("Forwardable")){
                     setForwardable((Boolean)obj.getValue());
@@ -609,21 +604,21 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
                 }  else if (local.equalsIgnoreCase("SignChallenge")){
                     setSignChallenge(new SignChallengeImpl());
                 }else if (local.equalsIgnoreCase("BinaryExchange")){
-                    BinaryExchangeType bcType = (BinaryExchangeType)obj.getValue();
+                    final BinaryExchangeType bcType = (BinaryExchangeType)obj.getValue();
                     setBinaryExchange(new BinaryExchangeImpl(bcType));
                 } else if (local.equalsIgnoreCase("Issuer")){
                    // EndpointReferenceImpl isType = (EndpointReferenceImpl)obj.getValue();
                    // setIssuer(new IssuerImpl(isType));
                 } else if (local.equalsIgnoreCase("Claims")){
-                    ClaimsType cType = (ClaimsType)obj.getValue();
+                    final ClaimsType cType = (ClaimsType)obj.getValue();
                     setClaims(new ClaimsImpl(cType));
                 } else if (local.equalsIgnoreCase("Participants")){
-                    ParticipantsType psType = (ParticipantsType)obj.getValue();
+                    final ParticipantsType psType = (ParticipantsType)obj.getValue();
                     setParticipants(new ParticipantsImpl(psType));
                 } else if (local.equalsIgnoreCase("Renewing")){
                     setRenewable(new RenewingImpl());
                 } else if (local.equalsIgnoreCase("ProofEncryption")){
-                    ProofEncryptionType peType = (ProofEncryptionType)obj.getValue();
+                    final ProofEncryptionType peType = (ProofEncryptionType)obj.getValue();
                     setProofEncryption(new ProofEncryptionImpl(peType));
                 } else if (local.equalsIgnoreCase("Policy")){
                     setPolicy((Policy)obj.getValue());
@@ -632,22 +627,22 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
                 } else if (local.equalsIgnoreCase("AppliesTo")){
                     setAppliesTo((AppliesTo)obj.getValue());
                 } else if (local.equalsIgnoreCase("OnBehalfOf")){
-                    OnBehalfOfType oboType = (OnBehalfOfType)obj.getValue();
+                    final OnBehalfOfType oboType = (OnBehalfOfType)obj.getValue();
                     setOnBehalfOf(new OnBehalfOfImpl(oboType));
                 } else if (local.equalsIgnoreCase("Encryption")){
-                    EncryptionType encType = (EncryptionType)obj.getValue();
+                    final EncryptionType encType = (EncryptionType)obj.getValue();
                     setEncryption(new EncryptionImpl(encType));
                 } else if (local.equalsIgnoreCase("UseKey")){
-                    UseKeyType ukType = (UseKeyType)obj.getValue();
+                    final UseKeyType ukType = (UseKeyType)obj.getValue();
                     setUseKey(new UseKeyImpl(ukType));
                 } else if (local.equalsIgnoreCase("DelegateTo")){
-                    DelegateToType dtType  = (DelegateToType)obj.getValue();
+                    final DelegateToType dtType  = (DelegateToType)obj.getValue();
                     setDelegateTo(new DelegateToImpl(dtType));
                 } else if (local.equalsIgnoreCase("RenewTarget")){
-                    RenewTargetType rtType = (RenewTargetType)obj.getValue();
+                    final RenewTargetType rtType = (RenewTargetType)obj.getValue();
                     setRenewTarget(new RenewTargetImpl(rtType));
                 } else if (local.equalsIgnoreCase("CancelTarget")){
-                    CancelTargetType ctType = (CancelTargetType)obj.getValue();
+                    final CancelTargetType ctType = (CancelTargetType)obj.getValue();
                     setCancelTarget(new CancelTargetImpl(ctType));
                 } else if (local.equalsIgnoreCase("AppliesTo")) {
                     setAppliesTo((AppliesTo)obj.getValue());

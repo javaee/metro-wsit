@@ -1,5 +1,5 @@
 /*
- * $Id: RequestedAttachedReferenceImpl.java,v 1.2 2006-10-17 05:45:46 raharsha Exp $
+ * $Id: RequestedAttachedReferenceImpl.java,v 1.3 2007-01-12 14:44:13 raharsha Exp $
  */
 
 /*
@@ -50,7 +50,7 @@ public class RequestedAttachedReferenceImpl extends RequestedReferenceType imple
         setSTR(str);
     }
     
-    public RequestedAttachedReferenceImpl(RequestedReferenceType rrType) throws Exception {
+    public RequestedAttachedReferenceImpl(RequestedReferenceType rrType) {
         this(new SecurityTokenReferenceImpl(rrType.getSecurityTokenReference()));
     }
     
@@ -58,7 +58,7 @@ public class RequestedAttachedReferenceImpl extends RequestedReferenceType imple
         return str;
     }
 
-    public void setSTR(SecurityTokenReference str) {
+    public final void setSTR(final SecurityTokenReference str) {
         if (str != null) {
             setSecurityTokenReference((SecurityTokenReferenceType)str);
         }

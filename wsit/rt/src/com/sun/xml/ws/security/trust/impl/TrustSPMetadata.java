@@ -42,7 +42,7 @@ import javax.security.auth.callback.CallbackHandler;
  */
 public class TrustSPMetadata implements Configuration{
     
-    private String endpoint;
+    //private String endpoint;
     private String tokenType;
     private String keyType;
     private String type;
@@ -56,10 +56,10 @@ public class TrustSPMetadata implements Configuration{
         
     /** Creates a new instance of TrustSPMetedata */
     public TrustSPMetadata(String endpoint) {
-        this.endpoint = endpoint;
+        //this.endpoint = endpoint;
     }
         
-    public void setType(String type){
+    public void setType(final String type){
         this.type = type;
     }
         
@@ -67,7 +67,7 @@ public class TrustSPMetadata implements Configuration{
         return this.type;
     }
     
-    public void setIssuer(String issuer){
+    public void setIssuer(final String issuer){
         this.issuer = issuer;
     }
         
@@ -75,7 +75,7 @@ public class TrustSPMetadata implements Configuration{
         return this.issuer;
     }
         
-    public void setEncryptIssuedToken(boolean encryptIssuedToken){
+    public void setEncryptIssuedToken(final boolean encryptIssuedToken){
         this.encryptIssuedToken = encryptIssuedToken;
     }
         
@@ -83,7 +83,7 @@ public class TrustSPMetadata implements Configuration{
         return this.encryptIssuedToken;
     }
         
-    public void setEncryptIssuedKey(boolean encryptIssuedKey){
+    public void setEncryptIssuedKey(final boolean encryptIssuedKey){
         this.encryptIssuedKey = encryptIssuedKey;
     }
         
@@ -91,7 +91,7 @@ public class TrustSPMetadata implements Configuration{
         return this.encryptIssuedKey;
     }
         
-    public void setCertAlias(String certAlias){
+    public void setCertAlias(final String certAlias){
         this.certAlias = certAlias;
     }
         
@@ -99,7 +99,7 @@ public class TrustSPMetadata implements Configuration{
         return this.certAlias;
     }
         
-    public void setIssuedTokenTimeout(long issuedTokenTimeout){
+    public void setIssuedTokenTimeout(final long issuedTokenTimeout){
         this.issuedTokenTimeout = issuedTokenTimeout;
     }
         
@@ -107,7 +107,7 @@ public class TrustSPMetadata implements Configuration{
         return this.issuedTokenTimeout;
     }
     
-    public void setCallbackHandler(CallbackHandler handler){
+    public void setCallbackHandler(final CallbackHandler handler){
         this.handler = handler;
     }
     
@@ -115,7 +115,7 @@ public class TrustSPMetadata implements Configuration{
         return this.handler;
     }
     
-    public void setTokenType(String tokenType){
+    public void setTokenType(final String tokenType){
         this.tokenType = tokenType;
     }
     
@@ -123,7 +123,7 @@ public class TrustSPMetadata implements Configuration{
         return this.tokenType;
     }
      
-    public void setKeyType(String keyType){
+    public void setKeyType(final String keyType){
         this.keyType = keyType;
     }
     

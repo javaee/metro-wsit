@@ -1,5 +1,5 @@
 /*
- * $Id: EncryptionImpl.java,v 1.2 2006-10-17 05:45:46 raharsha Exp $
+ * $Id: EncryptionImpl.java,v 1.3 2007-01-12 14:44:11 raharsha Exp $
  */
 
 /*
@@ -55,11 +55,11 @@ public class EncryptionImpl extends EncryptionType implements Encryption {
         setTargetType(WSTrustConstants.TOKEN_TYPE);
     }
     
-    public EncryptionImpl (EncryptionType encType)throws Exception{
-        JAXBElement obj = (JAXBElement)encType.getAny();
-        String local = obj.getName().getLocalPart();
+    public EncryptionImpl (EncryptionType encType){
+        final JAXBElement obj = (JAXBElement)encType.getAny();
+        final String local = obj.getName().getLocalPart();
         if ("SecurityTokenReference".equals(local)) {
-            SecurityTokenReference str = 
+            final SecurityTokenReference str = 
                         new SecurityTokenReferenceImpl((SecurityTokenReferenceType)obj.getValue());
             setSecurityTokenReference(str);
             setTargetType(WSTrustConstants.STR_TYPE);
@@ -72,14 +72,14 @@ public class EncryptionImpl extends EncryptionType implements Encryption {
         return targetType;
     }
     
-    public void setTargetType(String ttype) {
+    public final void setTargetType(final String ttype) {
         targetType = ttype;
     }
     
-    public void setSecurityTokenReference(SecurityTokenReference ref) {
+    public final void setSecurityTokenReference(final SecurityTokenReference ref) {
         if (ref != null) {
             str = ref;
-            JAXBElement<SecurityTokenReferenceType> strElement=
+            final JAXBElement<SecurityTokenReferenceType> strElement=
                     (new com.sun.xml.ws.security.secext10.ObjectFactory()).createSecurityTokenReference((SecurityTokenReferenceType)ref);
             setAny(strElement);
         }
@@ -91,7 +91,7 @@ public class EncryptionImpl extends EncryptionType implements Encryption {
         return str;
     }
     
-    public void setToken(Token token) {
+    public final void setToken(final Token token) {
         if (token != null) {
             this.token = token;
             setAny(token);

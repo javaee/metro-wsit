@@ -1,5 +1,5 @@
 /*
- * $Id: IssuedTokensImpl.java,v 1.1 2006-05-03 22:57:24 arungupta Exp $
+ * $Id: IssuedTokensImpl.java,v 1.2 2007-01-12 14:44:11 raharsha Exp $
  */
 
 /*
@@ -48,7 +48,7 @@ public class IssuedTokensImpl implements IssuedTokens {
         return collection;
     }
     
-    public void setIssuedTokens(RequestSecurityTokenResponseCollection rcollection) {
+    public final void setIssuedTokens(final RequestSecurityTokenResponseCollection rcollection) {
         collection = rcollection;
     }
     

@@ -1,5 +1,5 @@
 /*
- * $Id: EntropyImpl.java,v 1.5 2007-01-04 00:45:08 manveen Exp $
+ * $Id: EntropyImpl.java,v 1.6 2007-01-12 14:44:11 raharsha Exp $
  */
 
 /*
@@ -57,7 +57,7 @@ import javax.xml.bind.JAXBException;
  */
 public class EntropyImpl extends EntropyType implements Entropy {
     
-    private static Logger log =
+    private static final Logger log =
             Logger.getLogger(
             LogDomainConstants.TRUST_IMPL_DOMAIN,
             LogDomainConstants.TRUST_IMPL_DOMAIN_BUNDLE);
@@ -70,6 +70,7 @@ public class EntropyImpl extends EntropyType implements Entropy {
     private EncryptedKey encryptedKey = null;
     
     public EntropyImpl() {
+        //default constructor
     }
     
     public EntropyImpl(BinarySecret binarySecret) {
@@ -83,12 +84,12 @@ public class EntropyImpl extends EntropyType implements Entropy {
     
     public EntropyImpl(@NotNull final EntropyType etype) {
         entropyType = etype.getOtherAttributes().get(_EntropyType_QNAME);
-        List list = etype.getAny();
+        final List list = etype.getAny();
         for (int i = 0; i < list.size(); i++) {
-            JAXBElement obj = (JAXBElement)list.get(i);
-            String local = obj.getName().getLocalPart();
+            final JAXBElement obj = (JAXBElement)list.get(i);
+            final String local = obj.getName().getLocalPart();
             if (local.equalsIgnoreCase("BinarySecret")) {
-                BinarySecretType bst = (BinarySecretType) obj.getValue();
+                final BinarySecretType bst = (BinarySecretType) obj.getValue();
                 setBinarySecret(new BinarySecretImpl(bst));
             }
         }
@@ -105,10 +106,10 @@ public class EntropyImpl extends EntropyType implements Entropy {
      *            <code>org.w3c.dom.Element</code> properly, implying that
      *            there is an error in the sender or in the element definition.
      */
-    public static EntropyType fromElement(org.w3c.dom.Element element)
+    public static EntropyType fromElement(final org.w3c.dom.Element element)
     throws WSTrustException {
         try {
-            javax.xml.bind.Unmarshaller u = WSTrustElementFactory.getContext().createUnmarshaller();
+            final javax.xml.bind.Unmarshaller u = WSTrustElementFactory.getContext().createUnmarshaller();
             return (EntropyType)u.unmarshal(element);
         } catch (JAXBException ex) {
             log.log(Level.SEVERE,
@@ -127,7 +128,7 @@ public class EntropyImpl extends EntropyType implements Entropy {
     /**
      *Sets the type of the Entropy contents
      */
-    public void setEntropyType(@NotNull final String type)  {
+    public final void setEntropyType(@NotNull final String type)  {
         if (!(type.equalsIgnoreCase(this.BINARY_SECRET_TYPE)  ||
                 type.equalsIgnoreCase(this.CUSTOM_TYPE)
                 || type.equalsIgnoreCase(this.ENCRYPTED_KEY_TYPE))) {
@@ -150,10 +151,10 @@ public class EntropyImpl extends EntropyType implements Entropy {
     /**
      * Sets the BinarySecret (if any) inside this Entropy
      */
-    public void setBinarySecret(BinarySecret binarySecret) {
+    public final void setBinarySecret(final BinarySecret binarySecret) {
         if (binarySecret != null) {
             this.binarySecret = binarySecret;
-            JAXBElement<BinarySecretType> bsElement =
+            final JAXBElement<BinarySecretType> bsElement =
                     (new ObjectFactory()).createBinarySecret((BinarySecretType)binarySecret);
             getAny().add(bsElement);
         }
@@ -170,7 +171,7 @@ public class EntropyImpl extends EntropyType implements Entropy {
     /**
      * Sets the xenc:EncryptedKey set inside this Entropy instance
      */
-    public void setEncryptedKey(EncryptedKey encryptedKey) {
+    public final void setEncryptedKey(final EncryptedKey encryptedKey) {
         if (encryptedKey != null) {
             this.encryptedKey = encryptedKey;
             getAny().add(encryptedKey);

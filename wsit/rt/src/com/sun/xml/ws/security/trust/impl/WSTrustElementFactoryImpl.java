@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustElementFactoryImpl.java,v 1.9 2007-01-04 00:40:50 manveen Exp $
+ * $Id: WSTrustElementFactoryImpl.java,v 1.10 2007-01-12 14:44:09 raharsha Exp $
  */
 
 /*
@@ -44,18 +44,13 @@ import com.sun.xml.ws.security.trust.elements.RequestedAttachedReference;
 import com.sun.xml.ws.security.trust.elements.RequestedUnattachedReference;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
 import com.sun.xml.ws.security.trust.elements.RequestedSecurityToken;
-import com.sun.xml.ws.security.trust.elements.RequestedTokenCancelled;
 import com.sun.xml.ws.security.trust.elements.Status;
 
-import com.sun.xml.ws.security.trust.impl.elements.AllowPostdatingImpl;
 import com.sun.xml.ws.security.trust.impl.elements.BinarySecretImpl;
 import com.sun.xml.ws.security.trust.impl.elements.CancelTargetImpl;
-import com.sun.xml.ws.security.trust.impl.elements.ClaimsImpl;
 import com.sun.xml.ws.security.trust.impl.elements.EntropyImpl;
 import com.sun.xml.ws.security.trust.impl.elements.IssuedTokensImpl;
 import com.sun.xml.ws.security.trust.impl.elements.LifetimeImpl;
-import com.sun.xml.ws.security.trust.impl.elements.RenewTargetImpl;
-import com.sun.xml.ws.security.trust.impl.elements.RenewingImpl;
 import com.sun.xml.ws.security.trust.impl.elements.RequestSecurityTokenResponseImpl;
 import com.sun.xml.ws.security.trust.impl.elements.RequestSecurityTokenResponseCollectionImpl;
 import com.sun.xml.ws.security.trust.impl.elements.RequestedProofTokenImpl;
@@ -64,7 +59,6 @@ import com.sun.xml.ws.security.trust.impl.elements.RequestedUnattachedReferenceI
 import com.sun.xml.ws.security.trust.impl.elements.RequestSecurityTokenImpl;
 import com.sun.xml.ws.security.trust.impl.elements.RequestedSecurityTokenImpl;
 import com.sun.xml.ws.security.trust.impl.elements.RequestedTokenCancelledImpl;
-import com.sun.xml.ws.security.trust.impl.elements.StatusImpl;
 import com.sun.xml.ws.security.trust.impl.elements.str.DirectReferenceImpl;
 import com.sun.xml.ws.security.trust.impl.elements.str.SecurityTokenReferenceImpl;
 import com.sun.xml.ws.security.trust.impl.elements.str.KeyIdentifierImpl;
@@ -83,15 +77,12 @@ import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
 import com.sun.xml.ws.security.Token;
 import com.sun.xml.ws.security.wsu10.AttributedDateTime;
 
-import com.sun.xml.ws.security.trust.util.TrustNamespacePrefixMapper;
 
 import javax.xml.bind.PropertyException;
 
 
 import java.net.URI;
 
-import com.sun.istack.NotNull;
-import com.sun.istack.Nullable;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -106,12 +97,10 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.JAXBContext;
 
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.security.trust.WSTrustException;
 import com.sun.xml.ws.security.trust.impl.bindings.RequestSecurityTokenResponseCollectionType;
-import javax.xml.transform.dom.DOMSource;
 import javax.xml.bind.util.JAXBSource;
 
 import javax.xml.bind.Marshaller;
@@ -126,7 +115,7 @@ import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
  */
 public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
     
-    private static Logger log =
+    private static final Logger log =
             Logger.getLogger(
             LogDomainConstants.TRUST_IMPL_DOMAIN,
             LogDomainConstants.TRUST_IMPL_DOMAIN_BUNDLE);
@@ -152,26 +141,25 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
      * Create an RST for Issue from the given arguments
      * Any of the arguments can be null since they are all optional, but one of tokenType and AppliesTo must be present
      */
-    public  RequestSecurityToken createRSTForIssue(URI tokenType,
-            URI requestType,
-            URI context,
-            AppliesTo scopes,
-            Claims claims, Entropy entropy, Lifetime lt) throws WSTrustException {
+    public  RequestSecurityToken createRSTForIssue(final URI tokenType,
+            final URI requestType,
+            final URI context,
+            final AppliesTo scopes,
+            final Claims claims, final Entropy entropy, final Lifetime lt) throws WSTrustException {
         
         if (tokenType==null && scopes==null) {
             log.log(Level.WARNING,
                     LogStringsMessages.WST_1003_TOKENTYPE_APPLIESTO_NULL());
         }
-        RequestSecurityToken rst = new RequestSecurityTokenImpl(tokenType, requestType, context, scopes, claims, entropy, lt, null);
-        return rst;
+        return new RequestSecurityTokenImpl(tokenType, requestType, context, scopes, claims, entropy, lt, null);
     }
     
     /**
      * Create an RSTR for Issue from the given arguments. TokenType should be Issue.
      * Any of the arguments can be null since they are all optional, but one of RequestedSecurityToken or RequestedProofToken should be returned
      */
-    public  RequestSecurityTokenResponse createRSTRForIssue(URI tokenType, URI context, RequestedSecurityToken token, AppliesTo scopes, RequestedAttachedReference attachedReference, RequestedUnattachedReference unattachedReference, RequestedProofToken proofToken, Entropy entropy, Lifetime lt) throws WSTrustException {
-        RequestSecurityTokenResponse rstr =
+    public  RequestSecurityTokenResponse createRSTRForIssue(final URI tokenType, final URI context, final RequestedSecurityToken token, final AppliesTo scopes, final RequestedAttachedReference attachedReference, final RequestedUnattachedReference unattachedReference, final RequestedProofToken proofToken, final Entropy entropy, final Lifetime lt) throws WSTrustException {
+        final RequestSecurityTokenResponse rstr =
                 new RequestSecurityTokenResponseImpl(tokenType, context, token, scopes,
                 attachedReference, unattachedReference, proofToken, entropy, lt, null);
         return rstr;
@@ -180,8 +168,8 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
     /**
      * Create a collection of RequestSecurityTokenResponse(s)
      */
-    public  RequestSecurityTokenResponseCollection createRSTRCollectionForIssue(URI tokenType, URI context, RequestedSecurityToken token, AppliesTo scopes, RequestedAttachedReference attached, RequestedUnattachedReference unattached, RequestedProofToken proofToken, Entropy entropy, Lifetime lt) throws WSTrustException {
-        RequestSecurityTokenResponseCollection rstrCollection =
+    public  RequestSecurityTokenResponseCollection createRSTRCollectionForIssue(final URI tokenType, final URI context, final RequestedSecurityToken token, final AppliesTo scopes, final RequestedAttachedReference attached, final RequestedUnattachedReference unattached, final RequestedProofToken proofToken, final Entropy entropy, final Lifetime lt) throws WSTrustException {
+        final RequestSecurityTokenResponseCollection rstrCollection =
                 new RequestSecurityTokenResponseCollectionImpl(tokenType, context, token, scopes, attached, unattached, proofToken, entropy, lt);
         return rstrCollection;
     }
@@ -189,43 +177,43 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
     /**
      * Create a wst:IssuedTokens object
      */
-    public  IssuedTokens createIssuedTokens(RequestSecurityTokenResponseCollection issuedTokens) {
+    public  IssuedTokens createIssuedTokens(final RequestSecurityTokenResponseCollection issuedTokens) {
         return new IssuedTokensImpl(issuedTokens);
     }
     
     /**
      * Create an Entropy with a BinarySecret
      */
-    public Entropy createEntropy(BinarySecret secret) {
+    public Entropy createEntropy(final BinarySecret secret) {
         return new EntropyImpl(secret);
     }
     
     /**
      * Create an Entropy with an xenc:EncryptedKey
      */
-    public  Entropy createEntropy(EncryptedKey key) {
+    public  Entropy createEntropy(final EncryptedKey key) {
         return new EntropyImpl(key);
     }
     
-    public BinarySecret createBinarySecret(byte[] rawValue, String type) {
+    public BinarySecret createBinarySecret(final byte[] rawValue, final String type) {
         return new BinarySecretImpl(rawValue, type);
     }
     
-    public BinarySecret createBinarySecret(Element elem) throws WSTrustException {
+    public BinarySecret createBinarySecret(final Element elem) throws WSTrustException {
         return new BinarySecretImpl(BinarySecretImpl.fromElement(elem));
     }
     
     /**
      * Create a Lifetime.
      */
-    public Lifetime createLifetime(AttributedDateTime created,  AttributedDateTime expires) {
+    public Lifetime createLifetime(final AttributedDateTime created,  final AttributedDateTime expires) {
         return new LifetimeImpl(created, expires);
     }
     
     /**
      * Create a RequestedSecurityToken.
      */
-    public RequestedSecurityToken createRequestedSecurityToken(Token token) {
+    public RequestedSecurityToken createRequestedSecurityToken(final Token token) {
         return new RequestedSecurityTokenImpl(token);
     }
     
@@ -236,28 +224,28 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
         return new RequestedSecurityTokenImpl();
     }
     
-    public DirectReference createDirectReference(String valueType, String uri){
+    public DirectReference createDirectReference(final String valueType, final String uri){
         return new DirectReferenceImpl(valueType, uri);
     }
     
-    public KeyIdentifier createKeyIdentifier(String valueType, String encodingType){
+    public KeyIdentifier createKeyIdentifier(final String valueType, final String encodingType){
         return new KeyIdentifierImpl(valueType, encodingType);
     }
     
-    public SecurityTokenReference createSecurityTokenReference(Reference ref){
+    public SecurityTokenReference createSecurityTokenReference(final Reference ref){
         return new SecurityTokenReferenceImpl(ref);
     }
     /**
      * Create a RequestedAttachedReference.
      */
-    public RequestedAttachedReference createRequestedAttachedReference(SecurityTokenReference str) {
+    public RequestedAttachedReference createRequestedAttachedReference(final SecurityTokenReference str) {
         return new RequestedAttachedReferenceImpl(str);
     }
     
     /**
      * Create a RequestedUnattachedReference.
      */
-    public RequestedUnattachedReference createRequestedUnattachedReference(SecurityTokenReference str) {
+    public RequestedUnattachedReference createRequestedUnattachedReference(final SecurityTokenReference str) {
         return new RequestedUnattachedReferenceImpl(str);
     }
     
@@ -272,18 +260,18 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
     /**
      *Create an RST for a Renewal Request
      */
-    public  RequestSecurityToken createRSTForRenew(URI tokenType, URI requestType, URI context, RenewTarget target, AllowPostdating apd, Renewing renewingInfo) {
+    public  RequestSecurityToken createRSTForRenew(final URI tokenType, final URI requestType, final URI context, final RenewTarget target, final AllowPostdating apd, final Renewing renewingInfo) {
         return new RequestSecurityTokenImpl(tokenType, requestType, context, target, apd, renewingInfo);
     }
     
-    public CancelTarget createCancelTarget(SecurityTokenReference str){
+    public CancelTarget createCancelTarget(final SecurityTokenReference str){
         return new CancelTargetImpl(str);
     }
     
     /**
      *Create an RST for Token Cancellation
      */
-    public  RequestSecurityToken createRSTForCancel(URI requestType, CancelTarget target) {
+    public  RequestSecurityToken createRSTForCancel(final URI requestType, final CancelTarget target) {
         return new RequestSecurityTokenImpl(null, requestType, target);
     }
     
@@ -291,7 +279,7 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
      *Create an RSTR for a Successful Token Cancellation
      */
     public  RequestSecurityTokenResponse createRSTRForCancel() {
-        RequestSecurityTokenResponse rstr =  new RequestSecurityTokenResponseImpl();
+        final RequestSecurityTokenResponse rstr =  new RequestSecurityTokenResponseImpl();
         rstr.setRequestedTokenCancelled(new RequestedTokenCancelledImpl());
         if(log.isLoggable(Level.FINE)) {            
             log.log(Level.FINE,
@@ -308,14 +296,14 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
      * a security token if the requestor desires the envelope to be validated.
      *</p>
      */
-    public  RequestSecurityToken createRSTForValidate(URI tokenType, URI requestType) {
+    public  RequestSecurityToken createRSTForValidate(final URI tokenType, final URI requestType) {
         return new RequestSecurityTokenImpl(tokenType, requestType);
     }
     
     /**
      * create an RSTR for validate request.
      */
-    public  RequestSecurityTokenResponse createRSTRForValidate(URI tokenType, RequestedSecurityToken token, Status status) {
+    public  RequestSecurityTokenResponse createRSTRForValidate(final URI tokenType, final RequestedSecurityToken token, final Status status) {
         return new RequestSecurityTokenResponseImpl(tokenType, null, token, null, null, null, null, null, null, status);
     }
     
@@ -337,11 +325,11 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
     /**
      * create an RST from a Source
      */
-    public RequestSecurityToken createRSTFrom(Source src) {
+    public RequestSecurityToken createRSTFrom(final Source src) {
         try {
-            javax.xml.bind.Unmarshaller u = getContext().createUnmarshaller();
-            JAXBElement<RequestSecurityTokenType> rstType = u.unmarshal(src, RequestSecurityTokenType.class);
-            RequestSecurityTokenType type = rstType.getValue();
+            final javax.xml.bind.Unmarshaller u = getContext().createUnmarshaller();
+            final JAXBElement<RequestSecurityTokenType> rstType = u.unmarshal(src, RequestSecurityTokenType.class);
+            final RequestSecurityTokenType type = rstType.getValue();
             return new RequestSecurityTokenImpl(type);
         } catch ( Exception ex) {
             log.log(Level.SEVERE,
@@ -353,11 +341,11 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
     /**
      * create an RST from DOM Element
      */
-    public  RequestSecurityToken createRSTFrom(Element elem) {
+    public  RequestSecurityToken createRSTFrom(final Element elem) {
         try {
-            javax.xml.bind.Unmarshaller u = getContext().createUnmarshaller();
-            JAXBElement<RequestSecurityTokenType> rstType = u.unmarshal(elem, RequestSecurityTokenType.class);
-            RequestSecurityTokenType type = rstType.getValue();
+            final javax.xml.bind.Unmarshaller unmarshaller = getContext().createUnmarshaller();
+            final JAXBElement<RequestSecurityTokenType> rstType = unmarshaller.unmarshal(elem, RequestSecurityTokenType.class);
+            final RequestSecurityTokenType type = rstType.getValue();
             return new RequestSecurityTokenImpl(type);
         } catch ( Exception ex) {
             log.log(Level.SEVERE,
@@ -369,11 +357,11 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
     /**
      * create an RSTR from a Source
      */
-    public  RequestSecurityTokenResponse createRSTRFrom(Source src) {
+    public  RequestSecurityTokenResponse createRSTRFrom(final Source src) {
         try {
-            javax.xml.bind.Unmarshaller u = getContext().createUnmarshaller();
-            JAXBElement<RequestSecurityTokenResponseType> rstType = u.unmarshal(src, RequestSecurityTokenResponseType.class);
-            RequestSecurityTokenResponseType type = rstType.getValue();
+            final javax.xml.bind.Unmarshaller u = getContext().createUnmarshaller();
+            final JAXBElement<RequestSecurityTokenResponseType> rstType = u.unmarshal(src, RequestSecurityTokenResponseType.class);
+            final RequestSecurityTokenResponseType type = rstType.getValue();
             return new RequestSecurityTokenResponseImpl(type);
         } catch ( Exception ex) {
             log.log(Level.SEVERE,
@@ -385,11 +373,11 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
     /**
      * create an RSTR from DOM Element
      */
-    public  RequestSecurityTokenResponse createRSTRFrom(Element elem) {
+    public  RequestSecurityTokenResponse createRSTRFrom(final Element elem) {
         try {
-            javax.xml.bind.Unmarshaller u = getContext().createUnmarshaller();
-            JAXBElement<RequestSecurityTokenResponseType> rstType = u.unmarshal(elem, RequestSecurityTokenResponseType.class);
-            RequestSecurityTokenResponseType type = rstType.getValue();
+            final javax.xml.bind.Unmarshaller u = getContext().createUnmarshaller();
+            final JAXBElement<RequestSecurityTokenResponseType> rstType = u.unmarshal(elem, RequestSecurityTokenResponseType.class);
+            final RequestSecurityTokenResponseType type = rstType.getValue();
             return new RequestSecurityTokenResponseImpl(type);
         } catch ( Exception ex) {
             log.log(Level.SEVERE,
@@ -401,14 +389,14 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
     /**
      * Create RSTR Collection from Source
      */
-    public  RequestSecurityTokenResponseCollection createRSTRCollectionFrom(Source src) {
+    public  RequestSecurityTokenResponseCollection createRSTRCollectionFrom(final Source src) {
         throw new UnsupportedOperationException("Not yet implemented!");
     }
     
     /**
      * Create RSTR Collection from Element
      */
-    public  RequestSecurityTokenResponseCollection createRSTRCollectionFrom(Element elem) {
+    public  RequestSecurityTokenResponseCollection createRSTRCollectionFrom(final Element elem) {
         throw new UnsupportedOperationException("Not yet implemented!");
     }
     
@@ -425,9 +413,9 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
      * The default implementation expects the packagename of the generated JAXB Beans to be fixed.
      * </p>
      */
-    public RequestSecurityToken createRSTFrom(JAXBElement elem) {
+    public RequestSecurityToken createRSTFrom(final JAXBElement elem) {
         try {
-            RequestSecurityTokenType type = (RequestSecurityTokenType)elem.getValue();
+            final RequestSecurityTokenType type = (RequestSecurityTokenType)elem.getValue();
             return new RequestSecurityTokenImpl(type);
         } catch (Exception e) {
             log.log(Level.SEVERE,
@@ -448,9 +436,9 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
      * The default implementation expects the packagename of the generated JAXB Beans to be fixed.
      * </p>
      */
-    public  RequestSecurityTokenResponse createRSTRFrom(JAXBElement elem) {
+    public  RequestSecurityTokenResponse createRSTRFrom(final JAXBElement elem) {
         try {
-            RequestSecurityTokenResponseType type = (RequestSecurityTokenResponseType)elem.getValue();
+            final RequestSecurityTokenResponseType type = (RequestSecurityTokenResponseType)elem.getValue();
             return new RequestSecurityTokenResponseImpl(type);
         } catch (Exception e) {
             log.log(Level.SEVERE,
@@ -470,9 +458,9 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
      * The default implementation expects the packagename of the generated JAXB Beans to be fixed.
      * </p>
      */
-    public  RequestSecurityTokenResponseCollection createRSTRCollectionFrom(JAXBElement elem) {
+    public  RequestSecurityTokenResponseCollection createRSTRCollectionFrom(final JAXBElement elem) {
         try {
-            RequestSecurityTokenResponseCollectionType type = (RequestSecurityTokenResponseCollectionType)elem.getValue();
+            final RequestSecurityTokenResponseCollectionType type = (RequestSecurityTokenResponseCollectionType)elem.getValue();
             return new RequestSecurityTokenResponseCollectionImpl(type);
         } catch (Exception e) {
             log.log(Level.SEVERE,
@@ -481,9 +469,9 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
         }
     }
     
-    public SecurityTokenReference createSecurityTokenReference(JAXBElement elem){
+    public SecurityTokenReference createSecurityTokenReference(final JAXBElement elem){
         try {
-            SecurityTokenReferenceType type = (SecurityTokenReferenceType)elem.getValue();
+            final SecurityTokenReferenceType type = (SecurityTokenReferenceType)elem.getValue();
             return new SecurityTokenReferenceImpl(type);
         } catch (Exception e) {
             log.log(Level.SEVERE,
@@ -495,8 +483,8 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
     /**
      * convert an SecurityTokenReference to a JAXBElement
      */
-    public JAXBElement toJAXBElement(SecurityTokenReference str){
-        JAXBElement<SecurityTokenReferenceType> strElement =
+    public JAXBElement toJAXBElement(final SecurityTokenReference str){
+        final JAXBElement<SecurityTokenReferenceType> strElement =
                 (new com.sun.xml.ws.security.secext10.ObjectFactory()).createSecurityTokenReference((SecurityTokenReferenceType)str);
         return strElement;
     }
@@ -504,8 +492,8 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
     /**
      * convert an RST to a JAXBElement
      */
-    public JAXBElement toJAXBElement(RequestSecurityToken rst) {
-        JAXBElement<RequestSecurityTokenType> rstElement=
+    public JAXBElement toJAXBElement(final RequestSecurityToken rst) {
+        final JAXBElement<RequestSecurityTokenType> rstElement=
                 (new ObjectFactory()).createRequestSecurityToken((RequestSecurityTokenType)rst);
         return rstElement;
     }
@@ -513,8 +501,8 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
     /**
      * convert an RSTR to a JAXBElement
      */
-    public  JAXBElement toJAXBElement(RequestSecurityTokenResponse rstr) {
-        JAXBElement<RequestSecurityTokenResponseType> rstElement=
+    public  JAXBElement toJAXBElement(final RequestSecurityTokenResponse rstr) {
+        final JAXBElement<RequestSecurityTokenResponseType> rstElement=
                 (new ObjectFactory()).createRequestSecurityTokenResponse((RequestSecurityTokenResponseType)rstr);
         return rstElement;
     }
@@ -522,8 +510,8 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
     /**
      * convert a Entropy to a JAXBElement
      */
-    public  JAXBElement toJAXBElement(Entropy entropy) {
-        JAXBElement<EntropyType> etElement=
+    public  JAXBElement toJAXBElement(final Entropy entropy) {
+        final JAXBElement<EntropyType> etElement=
                 (new ObjectFactory()).createEntropy((EntropyType)entropy);
         return etElement;
     }
@@ -531,8 +519,8 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
     /**
      * convert an RSTR Collection to a JAXBElement
      */
-    public  JAXBElement toJAXBElement(RequestSecurityTokenResponseCollection rstrCollection) {
-        JAXBElement<RequestSecurityTokenResponseCollectionType> rstElement=
+    public  JAXBElement toJAXBElement(final RequestSecurityTokenResponseCollection rstrCollection) {
+        final JAXBElement<RequestSecurityTokenResponseCollectionType> rstElement=
                 (new ObjectFactory()).createRequestSecurityTokenResponseCollection((RequestSecurityTokenResponseCollectionType)rstrCollection);
         return rstElement;
     }
@@ -543,7 +531,7 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
      * Note: Useful for Dispatch Client implementations
      * </p>
      */
-    public Source toSource(RequestSecurityToken rst) {
+    public Source toSource(final RequestSecurityToken rst) {
         try{
             return new JAXBSource(marshaller, toJAXBElement(rst));
         }catch(JAXBException ex){
@@ -559,7 +547,7 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
      * Note: Useful for STS implementations which are JAXWS Providers
      * </p>
      */
-    public Source toSource(RequestSecurityTokenResponse rstr) {
+    public Source toSource(final RequestSecurityTokenResponse rstr) {
         //return new DOMSource(toElement(rstr));
         try{
             return new JAXBSource(marshaller, toJAXBElement(rstr));
@@ -576,7 +564,7 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
      * Note: Useful for STS implementations which are JAXWS Providers
      * </p>
      */
-    public  Source toSource(RequestSecurityTokenResponseCollection rstrCollection) {
+    public  Source toSource(final RequestSecurityTokenResponseCollection rstrCollection) {
         try{
             return new JAXBSource(marshaller, toJAXBElement(rstrCollection));
         }catch(JAXBException ex){
@@ -592,15 +580,15 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
      * Note: Useful for Dispatch Client implementations
      * </p>
      */
-    public Element toElement(RequestSecurityToken rst) {
+    public Element toElement(final RequestSecurityToken rst) {
         try {
-            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             dbf.setNamespaceAware(true);
-            DocumentBuilder db = dbf.newDocumentBuilder();
-            Document doc = db.newDocument();
+            final DocumentBuilder db = dbf.newDocumentBuilder();
+            final Document doc = db.newDocument();
             
             //javax.xml.bind.Marshaller marshaller = getContext().createMarshaller();
-            JAXBElement<RequestSecurityTokenType> rstElement =  (new ObjectFactory()).createRequestSecurityToken((RequestSecurityTokenType)rst);
+            final JAXBElement<RequestSecurityTokenType> rstElement =  (new ObjectFactory()).createRequestSecurityToken((RequestSecurityTokenType)rst);
             marshaller.marshal(rstElement, doc);
             return doc.getDocumentElement();
             
@@ -621,15 +609,15 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
      * Note: Useful for STS implementations which are JAXWS Providers
      * </p>
      */
-    public Element toElement(RequestSecurityTokenResponse rstr) {
+    public Element toElement(final RequestSecurityTokenResponse rstr) {
         try {
-            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             dbf.setNamespaceAware(true);
-            DocumentBuilder db = dbf.newDocumentBuilder();
-            Document doc = db.newDocument();
+            final DocumentBuilder db = dbf.newDocumentBuilder();
+            final Document doc = db.newDocument();
             
             //javax.xml.bind.Marshaller marshaller = getContext().createMarshaller();
-            JAXBElement<RequestSecurityTokenResponseType> rstrElement =  (new ObjectFactory()).createRequestSecurityTokenResponse((RequestSecurityTokenResponseType)rstr);
+            final JAXBElement<RequestSecurityTokenResponseType> rstrElement =  (new ObjectFactory()).createRequestSecurityTokenResponse((RequestSecurityTokenResponseType)rstr);
             marshaller.marshal(rstrElement, doc);
             return doc.getDocumentElement();
             
@@ -640,9 +628,9 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
         }
     }
     
-    public Element toElement(RequestSecurityTokenResponse rstr, Document doc) {
+    public Element toElement(final RequestSecurityTokenResponse rstr, final Document doc) {
         try {
-            JAXBElement<RequestSecurityTokenResponseType> rstrElement =  (new ObjectFactory()).createRequestSecurityTokenResponse((RequestSecurityTokenResponseType)rstr);
+            final JAXBElement<RequestSecurityTokenResponseType> rstrElement =  (new ObjectFactory()).createRequestSecurityTokenResponse((RequestSecurityTokenResponseType)rstr);
             marshaller.marshal(rstrElement, doc);
             return doc.getDocumentElement();
             
@@ -659,15 +647,15 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
      * Note: Useful for STS implementations which are JAXWS Providers
      * </p>
      */
-    public  Element toElement(RequestSecurityTokenResponseCollection rstrCollection) {
+    public  Element toElement(final RequestSecurityTokenResponseCollection rstrCollection) {
         try {
-            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             dbf.setNamespaceAware(true);
-            DocumentBuilder db = dbf.newDocumentBuilder();
-            Document doc = db.newDocument();
+            final DocumentBuilder db = dbf.newDocumentBuilder();
+            final Document doc = db.newDocument();
             
             //javax.xml.bind.Marshaller marshaller = getContext().createMarshaller();
-            JAXBElement<RequestSecurityTokenResponseCollectionType> rstElement =
+            final JAXBElement<RequestSecurityTokenResponseCollectionType> rstElement =
                     (new ObjectFactory()).createRequestSecurityTokenResponseCollection((RequestSecurityTokenResponseCollectionType)rstrCollection);
             marshaller.marshal(rstElement, doc);
             return doc.getDocumentElement();
@@ -682,15 +670,15 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
         }
     }
     
-    public Element toElement(BinarySecret bs){
+    public Element toElement(final BinarySecret bs){
         try {
-            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             dbf.setNamespaceAware(true);
-            DocumentBuilder db = dbf.newDocumentBuilder();
-            Document doc = db.newDocument();
+            final DocumentBuilder db = dbf.newDocumentBuilder();
+            final Document doc = db.newDocument();
             
             //javax.xml.bind.Marshaller marshaller = getContext().createMarshaller();
-            JAXBElement<BinarySecretType> bsElement =
+            final JAXBElement<BinarySecretType> bsElement =
                     (new ObjectFactory()).createBinarySecret((BinarySecretType)bs);
             marshaller.marshal(bsElement, doc);
             return doc.getDocumentElement();
@@ -711,17 +699,17 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
      * Note: Useful for Dispatch Client implementations
      * </p>
      */
-    public Element toElement(SecurityTokenReference str, Document doc) {
+    public Element toElement(final SecurityTokenReference str, Document doc) {
         try {
             if(doc == null){
-                DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+                final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
                 dbf.setNamespaceAware(true);
-                DocumentBuilder db = dbf.newDocumentBuilder();
+                final DocumentBuilder db = dbf.newDocumentBuilder();
                 doc = db.newDocument();
             }
             
             //javax.xml.bind.Marshaller marshaller = getContext().createMarshaller();
-            JAXBElement<SecurityTokenReferenceType> strElement =  (new com.sun.xml.ws.security.secext10.ObjectFactory()).createSecurityTokenReference((SecurityTokenReferenceType)str);
+            final JAXBElement<SecurityTokenReferenceType> strElement =  (new com.sun.xml.ws.security.secext10.ObjectFactory()).createSecurityTokenReference((SecurityTokenReferenceType)str);
             marshaller.marshal(strElement, doc);
             return doc.getDocumentElement();
         } catch (javax.xml.parsers.ParserConfigurationException pe) {
@@ -741,17 +729,17 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
      * Note: Useful for Dispatch Client implementations
      * </p>
      */
-    public Element toElement(BinarySecret bs, Document doc) {
+    public Element toElement(final BinarySecret bs, Document doc) {
         try {
             if(doc == null){
-                DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+                final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
                 dbf.setNamespaceAware(true);
-                DocumentBuilder db = dbf.newDocumentBuilder();
+                final DocumentBuilder db = dbf.newDocumentBuilder();
                 doc = db.newDocument();
             }
             
             //javax.xml.bind.Marshaller marshaller = getContext().createMarshaller();
-            JAXBElement<BinarySecretType> bsElement =
+            final JAXBElement<BinarySecretType> bsElement =
                     (new ObjectFactory()).createBinarySecret((BinarySecretType)bs);
             marshaller.marshal(bsElement, doc);
             return doc.getDocumentElement();

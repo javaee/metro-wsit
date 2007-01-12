@@ -1,5 +1,5 @@
 /*
- * $Id: RequestedProofTokenImpl.java,v 1.6 2007-01-05 22:27:27 manveen Exp $
+ * $Id: RequestedProofTokenImpl.java,v 1.7 2007-01-12 14:44:13 raharsha Exp $
  */
 
 /*
@@ -60,7 +60,7 @@ import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
  */
 public class RequestedProofTokenImpl extends RequestedProofTokenType implements RequestedProofToken {
     
-    private static Logger log =
+    private static final Logger log =
             Logger.getLogger(
             LogDomainConstants.TRUST_IMPL_DOMAIN,
             LogDomainConstants.TRUST_IMPL_DOMAIN_BUNDLE);
@@ -79,8 +79,8 @@ public class RequestedProofTokenImpl extends RequestedProofTokenType implements 
     }
     
     public RequestedProofTokenImpl(RequestedProofTokenType rptType){
-        JAXBElement obj = (JAXBElement)rptType.getAny();
-        String local = obj.getName().getLocalPart();
+        final JAXBElement obj = (JAXBElement)rptType.getAny();
+        final String local = obj.getName().getLocalPart();
         if (local.equalsIgnoreCase("ComputedKey")) {
             try {
                 setComputedKey(new URI((String)obj.getValue()));
@@ -90,7 +90,7 @@ public class RequestedProofTokenImpl extends RequestedProofTokenType implements 
                 throw new RuntimeException(LogStringsMessages.WST_0037_ERROR_COMPUTING_KEY(), ex);
             }
         }else if (local.equalsIgnoreCase("BinarySecret")){
-            BinarySecretType bsType = (BinarySecretType)obj.getValue();
+            final BinarySecretType bsType = (BinarySecretType)obj.getValue();
             setBinarySecret(new BinarySecretImpl(bsType));
         } else{
             log.log(Level.SEVERE,
@@ -103,7 +103,7 @@ public class RequestedProofTokenImpl extends RequestedProofTokenType implements 
         return tokenType;
     }
     
-    public void setProofTokenType(@NotNull final String proofTokenType) {
+    public final void setProofTokenType(@NotNull final String proofTokenType) {
         if (! (proofTokenType.equalsIgnoreCase(RequestedProofToken.BINARY_SECRET_TYPE)
         || proofTokenType.equalsIgnoreCase(RequestedProofToken.COMPUTED_KEY_TYPE)
         || proofTokenType.equalsIgnoreCase(RequestedProofToken.ENCRYPTED_KEY_TYPE)
@@ -117,10 +117,10 @@ public class RequestedProofTokenImpl extends RequestedProofTokenType implements 
         tokenType = proofTokenType;
     }
     
-    public void setSecurityTokenReference(SecurityTokenReference reference) {
+    public void setSecurityTokenReference(final SecurityTokenReference reference) {
         if (reference != null) {
             str = reference;
-            JAXBElement<SecurityTokenReferenceType> strElement=
+            final JAXBElement<SecurityTokenReferenceType> strElement=
                     (new com.sun.xml.ws.security.secext10.ObjectFactory()).createSecurityTokenReference((SecurityTokenReferenceType)reference);
             setAny(strElement);
         }
@@ -131,17 +131,17 @@ public class RequestedProofTokenImpl extends RequestedProofTokenType implements 
         return str;
     }
     
-    public void setComputedKey(@NotNull final URI computedKey) {
+    public final void setComputedKey(@NotNull final URI computedKey) {
         
         if (computedKey != null) {
-            String ckString = computedKey.toString();
+            final String ckString = computedKey.toString();
             if (!(ckString.equalsIgnoreCase(WSTrustConstants.CK_HASH) || (ckString.equalsIgnoreCase(WSTrustConstants.CK_PSHA1)))) {
                 log.log(Level.SEVERE,
                         LogStringsMessages.WST_0028_INVALID_CK(ckString));
                 throw new RuntimeException("Invalid computedKeyURI: " + ckString);
             }
             this.computedKey = computedKey;
-            JAXBElement<String> ckElement=
+            final JAXBElement<String> ckElement=
                     (new ObjectFactory()).createComputedKey(computedKey.toString());
             setAny(ckElement);
         }
@@ -152,10 +152,10 @@ public class RequestedProofTokenImpl extends RequestedProofTokenType implements 
         return computedKey;
     }
     
-    public void setBinarySecret(BinarySecret secret) {
+    public final void setBinarySecret(final BinarySecret secret) {
         if (secret != null) {
             this.secret = secret;
-            JAXBElement<BinarySecretType> bsElement=
+            final JAXBElement<BinarySecretType> bsElement=
                     (new ObjectFactory()).createBinarySecret((BinarySecretType)secret);
             setAny(bsElement);
         }
@@ -166,10 +166,10 @@ public class RequestedProofTokenImpl extends RequestedProofTokenType implements 
         return secret;
     }
     
-    public static RequestedProofTokenType fromElement(org.w3c.dom.Element element)
+    public static RequestedProofTokenType fromElement(final org.w3c.dom.Element element)
     throws WSTrustException {
         try {
-            javax.xml.bind.Unmarshaller u = WSTrustElementFactory.getContext().createUnmarshaller();
+            final javax.xml.bind.Unmarshaller u = WSTrustElementFactory.getContext().createUnmarshaller();
             return (RequestedProofTokenType)u.unmarshal(element);
         } catch (JAXBException ex) {
             throw new WSTrustException(ex.getMessage(), ex);

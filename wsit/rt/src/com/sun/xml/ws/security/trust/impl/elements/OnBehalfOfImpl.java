@@ -1,5 +1,5 @@
 /*
- * $Id: OnBehalfOfImpl.java,v 1.4 2006-10-17 05:45:46 raharsha Exp $
+ * $Id: OnBehalfOfImpl.java,v 1.5 2007-01-12 14:44:12 raharsha Exp $
  */
 
 /*
@@ -43,14 +43,14 @@ public class OnBehalfOfImpl extends OnBehalfOfType implements OnBehalfOf {
     private EndpointReference epr = null;
     private SecurityTokenReference str = null;
     
-    public OnBehalfOfImpl(OnBehalfOfType oboType)throws Exception{
+    public OnBehalfOfImpl(OnBehalfOfType oboType){
         //ToDo
     }
     public EndpointReference getEndpointReference() {
         return epr;
     }
     
-    public void setEndpointReference(EndpointReference endpointReference) {
+    public void setEndpointReference(final EndpointReference endpointReference) {
         epr = endpointReference;
        /* if (endpointReference != null) {
             JAXBElement<EndpointReferenceImpl> eprElement=
@@ -61,10 +61,10 @@ public class OnBehalfOfImpl extends OnBehalfOfType implements OnBehalfOf {
         str = null;
     }
     
-    public void setSecurityTokenReference(SecurityTokenReference ref) {
+    public void setSecurityTokenReference(final SecurityTokenReference ref) {
         str = ref;
         if (ref != null) {
-            JAXBElement<SecurityTokenReferenceType> strElement=
+            final JAXBElement<SecurityTokenReferenceType> strElement=
                     (new com.sun.xml.ws.security.secext10.ObjectFactory()).createSecurityTokenReference((SecurityTokenReferenceType)ref);
             setAny(strElement);
         }

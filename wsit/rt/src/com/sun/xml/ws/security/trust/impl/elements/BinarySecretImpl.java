@@ -1,5 +1,5 @@
 /*
- * $Id: BinarySecretImpl.java,v 1.5 2007-01-04 00:42:43 manveen Exp $
+ * $Id: BinarySecretImpl.java,v 1.6 2007-01-12 14:44:10 raharsha Exp $
  */
 
 /*
@@ -27,19 +27,11 @@
 package com.sun.xml.ws.security.trust.impl.elements;
 
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
-import org.w3c.dom.Element;
 
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
-import javax.xml.namespace.QName;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlAccessorType;
 
 import com.sun.xml.ws.security.trust.WSTrustException;
 
@@ -64,7 +56,7 @@ import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
  */
 public class BinarySecretImpl extends BinarySecretType implements BinarySecret {
    
-    private static Logger log =
+    private static final Logger log =
             Logger.getLogger(
             LogDomainConstants.TRUST_IMPL_DOMAIN,
             LogDomainConstants.TRUST_IMPL_DOMAIN_BUNDLE);
@@ -94,7 +86,7 @@ public class BinarySecretImpl extends BinarySecretType implements BinarySecret {
     public static BinarySecretType fromElement(@NotNull final org.w3c.dom.Element element)
         throws WSTrustException {
         try {
-            javax.xml.bind.Unmarshaller u = WSTrustElementFactory.getContext().createUnmarshaller();
+            final javax.xml.bind.Unmarshaller u = WSTrustElementFactory.getContext().createUnmarshaller();
             return (BinarySecretType)((JAXBElement)u.unmarshal(element)).getValue();
         } catch (JAXBException ex) {
             log.log(Level.SEVERE,
@@ -113,7 +105,7 @@ public class BinarySecretImpl extends BinarySecretType implements BinarySecret {
         return Base64.encode(getRawValue());         
      }
      
-     public void setRawValue(@NotNull final byte[] rawText) {
+     public final void setRawValue(@NotNull final byte[] rawText) {
         setValue(rawText);
      }
       

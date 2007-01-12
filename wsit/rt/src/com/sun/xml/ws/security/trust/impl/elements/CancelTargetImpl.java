@@ -1,5 +1,5 @@
 /*
- * $Id: CancelTargetImpl.java,v 1.2 2006-10-17 05:45:46 raharsha Exp $
+ * $Id: CancelTargetImpl.java,v 1.3 2007-01-12 14:44:10 raharsha Exp $
  */
 
 /*
@@ -58,11 +58,11 @@ public class CancelTargetImpl extends CancelTargetType implements CancelTarget {
         setTargetType(CancelTarget.CUSTOM_TARGET_TYPE);
     }
     
-    public CancelTargetImpl (CancelTargetType ctType)throws Exception{
-        JAXBElement obj = (JAXBElement)ctType.getAny();
-        String local = obj.getName().getLocalPart();
+    public CancelTargetImpl (CancelTargetType ctType){
+        final JAXBElement obj = (JAXBElement)ctType.getAny();
+        final String local = obj.getName().getLocalPart();
         if ("SecurityTokenReference".equals(local)) {
-            SecurityTokenReference str = 
+            final SecurityTokenReference str = 
                         new SecurityTokenReferenceImpl((SecurityTokenReferenceType)obj.getValue());
             setSecurityTokenReference(str);
             setTargetType(CancelTarget.STR_TARGET_TYPE);
@@ -75,14 +75,14 @@ public class CancelTargetImpl extends CancelTargetType implements CancelTarget {
         return targetType;
     }
     
-    public void setTargetType(String ttype) {
+    public final void setTargetType(final String ttype) {
         targetType = ttype;
     }
     
-    public void setSecurityTokenReference(SecurityTokenReference ref) {
+    public final void setSecurityTokenReference(final SecurityTokenReference ref) {
         if (ref != null) {
             str = ref;
-            JAXBElement<SecurityTokenReferenceType> strElement=
+            final JAXBElement<SecurityTokenReferenceType> strElement=
                     (new com.sun.xml.ws.security.secext10.ObjectFactory()).createSecurityTokenReference((SecurityTokenReferenceType)ref);
             setAny(strElement);
         }
@@ -94,7 +94,7 @@ public class CancelTargetImpl extends CancelTargetType implements CancelTarget {
         return str;
     }
     
-    public void setToken(Token token) {
+    public final void setToken(final Token token) {
         if (token != null) {
             this.token = token;
             setAny(token);

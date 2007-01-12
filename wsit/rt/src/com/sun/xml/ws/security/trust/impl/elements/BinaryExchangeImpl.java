@@ -1,5 +1,5 @@
 /*
- * $Id: BinaryExchangeImpl.java,v 1.3 2007-01-04 00:42:25 manveen Exp $
+ * $Id: BinaryExchangeImpl.java,v 1.4 2007-01-12 14:44:10 raharsha Exp $
  */
 
 /*
@@ -46,7 +46,7 @@ import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
 
 public class BinaryExchangeImpl extends BinaryExchangeType implements BinaryExchange {
     
-    private static Logger log =
+    private static final Logger log =
             Logger.getLogger(
             LogDomainConstants.TRUST_IMPL_DOMAIN,
             LogDomainConstants.TRUST_IMPL_DOMAIN_BUNDLE);
@@ -57,7 +57,7 @@ public class BinaryExchangeImpl extends BinaryExchangeType implements BinaryExch
         setRawValue(rawText);
     }
     
-    public BinaryExchangeImpl(BinaryExchangeType bcType)throws Exception{
+    public BinaryExchangeImpl(BinaryExchangeType bcType)throws RuntimeException{
         setEncodingType(bcType.getEncodingType());
         setValueType(bcType.getValueType());
         setValue(bcType.getValue());
@@ -81,7 +81,7 @@ public class BinaryExchangeImpl extends BinaryExchangeType implements BinaryExch
         super.setValue(encodedText);
     }
     
-    public void setRawValue(@NotNull final byte[] rawText) {
+    public final void setRawValue(@NotNull final byte[] rawText) {
         super.setValue(Base64.encode(rawText));
     }
     

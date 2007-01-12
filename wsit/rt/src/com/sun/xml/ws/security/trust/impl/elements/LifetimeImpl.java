@@ -1,5 +1,5 @@
 /*
- * $Id: LifetimeImpl.java,v 1.5 2007-01-04 00:45:15 manveen Exp $
+ * $Id: LifetimeImpl.java,v 1.6 2007-01-12 14:44:11 raharsha Exp $
  */
 
 /*
@@ -26,12 +26,8 @@
 
 package com.sun.xml.ws.security.trust.impl.elements;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.annotation.XmlRootElement;
 
 import com.sun.xml.ws.security.wsu10.AttributedDateTime;
 import com.sun.xml.ws.security.trust.WSTrustException;
@@ -54,7 +50,7 @@ import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
  */
 public class LifetimeImpl extends LifetimeType implements Lifetime {
     
-    private static Logger log =
+    private static final Logger log =
             Logger.getLogger(
             LogDomainConstants.TRUST_IMPL_DOMAIN,
             LogDomainConstants.TRUST_IMPL_DOMAIN_BUNDLE);
@@ -90,7 +86,7 @@ public class LifetimeImpl extends LifetimeType implements Lifetime {
     public static LifetimeType fromElement(@NotNull final org.w3c.dom.Element element)
     throws WSTrustException {
         try {
-            javax.xml.bind.Unmarshaller u = WSTrustElementFactory.getContext().createUnmarshaller();
+            final javax.xml.bind.Unmarshaller u = WSTrustElementFactory.getContext().createUnmarshaller();
             return (LifetimeType)u.unmarshal(element);
         } catch ( JAXBException ex) {
             log.log(Level.SEVERE,

@@ -1,5 +1,5 @@
 /*
- * $Id: ParticipantsImpl.java,v 1.1 2006-05-03 22:57:25 arungupta Exp $
+ * $Id: ParticipantsImpl.java,v 1.2 2007-01-12 14:44:12 raharsha Exp $
  */
 
 /*
@@ -40,7 +40,7 @@ import java.util.List;
  */
 public class ParticipantsImpl extends ParticipantsType implements Participants {
 
-    public ParticipantsImpl(ParticipantsType psType)throws Exception{
+    public ParticipantsImpl(ParticipantsType psType){
         //ToDo
     }
     public List<Participant> getParticipants() {
@@ -51,7 +51,7 @@ public class ParticipantsImpl extends ParticipantsType implements Participants {
         return (Participant)getPrimary();
     }
 
-    public void setPrimaryParticipant(Participant primary) {
+    public void setPrimaryParticipant(final Participant primary) {
         setPrimary((ParticipantType) primary);
     }
     

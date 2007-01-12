@@ -1,5 +1,5 @@
 /*
- * $Id: IssuerImpl.java,v 1.3 2006-10-05 00:19:10 jdg6688 Exp $
+ * $Id: IssuerImpl.java,v 1.4 2007-01-12 14:44:11 raharsha Exp $
  */
 
 /*
@@ -41,6 +41,7 @@ public class IssuerImpl implements Issuer {
     EndpointReference epr = null;
 
     public IssuerImpl() {
+        //default constructor
     }
 
     public IssuerImpl(EndpointReference epr) {
@@ -55,7 +56,7 @@ public class IssuerImpl implements Issuer {
         return epr;
     }
 
-    public void setEndpointReference(EndpointReference endpointReference) {
+    public final void setEndpointReference(final EndpointReference endpointReference) {
         epr = endpointReference;                
         // ToDo
     }

@@ -1,5 +1,5 @@
 /*
- * $Id: AuthenticatorImpl.java,v 1.3 2007-01-04 00:42:14 manveen Exp $
+ * $Id: AuthenticatorImpl.java,v 1.4 2007-01-12 14:44:09 raharsha Exp $
  */
 
 /*
@@ -31,7 +31,6 @@ import com.sun.org.apache.xml.internal.security.utils.Base64;
 import com.sun.xml.ws.security.trust.elements.Authenticator;
 import com.sun.xml.ws.security.trust.impl.bindings.AuthenticatorType;
 
-import java.util.List;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -47,7 +46,7 @@ import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
 
 public class AuthenticatorImpl extends AuthenticatorType implements Authenticator {
 
-    private static Logger log =
+    private static final Logger log =
             Logger.getLogger(
             LogDomainConstants.TRUST_IMPL_DOMAIN,
             LogDomainConstants.TRUST_IMPL_DOMAIN_BUNDLE);
@@ -56,7 +55,7 @@ public class AuthenticatorImpl extends AuthenticatorType implements Authenticato
         // empty constructor
     }
     
-    public AuthenticatorImpl(AuthenticatorType aType) throws Exception{
+    public AuthenticatorImpl(AuthenticatorType aType) throws RuntimeException{
         //ToDo
     }
     
@@ -64,15 +63,11 @@ public class AuthenticatorImpl extends AuthenticatorType implements Authenticato
         setRawCombinedHash(hash);
     }
     
-    public List<Object> getAny() {
-        return super.getAny();
-    }
-    
     public byte[] getRawCombinedHash() {
         return getCombinedHash();
     }
     
-    public void setRawCombinedHash(byte[] rawCombinedHash) {
+    public final void setRawCombinedHash(final byte[] rawCombinedHash) {
         setCombinedHash(rawCombinedHash);
     }
     
@@ -80,7 +75,7 @@ public class AuthenticatorImpl extends AuthenticatorType implements Authenticato
         return Base64.encode(getRawCombinedHash());
     }
     
-    public void setTextCombinedHash(String encodedCombinedHash) {
+    public void setTextCombinedHash(final String encodedCombinedHash) {
         try {
             setRawCombinedHash(Base64.decode(encodedCombinedHash));
         } catch (Base64DecodingException de) {
