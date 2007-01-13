@@ -74,6 +74,7 @@ import javax.xml.bind.Unmarshaller;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.sun.xml.ws.security.secconv.logging.LogDomainConstants;
+import com.sun.xml.ws.security.secconv.logging.LogStringsMessages;
 import java.io.StringWriter;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -134,7 +135,8 @@ public class WSSCPlugin {
                 skl = DEFAULT_KEY_SIZE;
             }
             if (log.isLoggable(Level.FINE)) {
-                log.log(Level.FINE,"WSSC1006.sym.bin.keysize", new Object[] {skl});
+                log.log(Level.FINE,
+                        LogStringsMessages.WSSC_1006_SYM_BIN_KEYSIZE(skl, this.DEFAULT_KEY_SIZE));
             }
         }
         if(trust10 != null){
@@ -149,9 +151,13 @@ public class WSSCPlugin {
         try{
             rst = createRequestSecurityToken(requireClientEntropy,skl);
         } catch (WSSecureConversationException ex){
-            throw new RuntimeException("There is a problem creating RST", ex);
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSSC_0024_ERROR_CREATING_RST(""), ex);
+            throw new RuntimeException(LogStringsMessages.WSSC_0024_ERROR_CREATING_RST(""), ex);
         } catch (WSTrustException ex){
-            throw new RuntimeException("There is a problem in the Trust layer creating an RST", ex);
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSSC_0021_PROBLEM_CREATING_RST_TRUST(), ex);
+            throw new RuntimeException(LogStringsMessages.WSSC_0021_PROBLEM_CREATING_RST_TRUST(), ex);
         }
         
         final RequestSecurityTokenResponse rstr = sendRequest(token, wsdlPort, binding, securityPipe, marshaller, unmarshaller, rst, WSSCConstants.REQUEST_SECURITY_CONTEXT_TOKEN_ACTION, endPointAddress, addVer);
@@ -198,22 +204,23 @@ public class WSSCPlugin {
     }
     
     private RequestSecurityTokenResponse sendRequest(final PolicyAssertion issuedToken, final WSDLPort wsdlPort, final WSBinding binding, final Pipe securityPipe, final Marshaller marshaller, final Unmarshaller unmarshaller, final RequestSecurityToken rst, final String action, final String endPointAddress, final AddressingVersion addVer) {
-       // Marshaller marshaller;
+        // Marshaller marshaller;
         //Unmarshaller unmarshaller;
         
-       // try {
-         //   marshaller = jbCxt.createMarshaller();
-           // unmarshaller = jbCxt.createUnmarshaller();
+        // try {
+        //   marshaller = jbCxt.createMarshaller();
+        // unmarshaller = jbCxt.createUnmarshaller();
         //} catch (JAXBException ex){
-         //   log.log(Level.SEVERE,"WSSC0016.problem.mar.unmar", ex);
-          //  throw new RuntimeException("Problem creating JAXB Marshaller/Unmarshaller", ex);
+        //   log.log(Level.SEVERE,"WSSC0016.problem.mar.unmar", ex);
+        //  throw new RuntimeException("Problem creating JAXB Marshaller/Unmarshaller", ex);
         //}
         
         final Message request = Messages.create(marshaller, eleFac.toJAXBElement(rst), binding.getSOAPVersion());
         
         // Log Request created
         if (log.isLoggable(Level.FINE)) {
-            log.log(Level.FINE,"WSSC1009.send.req.message", new Object[] {printMessageAsString(request)});
+            log.log(Level.FINE,
+                    LogStringsMessages.WSSC_1009_SEND_REQ_MESSAGE(printMessageAsString(request)));
         }
         Packet reqPacket = new Packet(request);
         if (issuedToken != null){
@@ -227,16 +234,17 @@ public class WSSCPlugin {
         
         reqPacket.setEndPointAddressString(endPointAddress);
         if (log.isLoggable(Level.FINE)) {
-            log.log(Level.FINE,"WSSC1008.set.ep.address",
-                    new Object[]{endPointAddress});
+            log.log(Level.FINE,
+                    LogStringsMessages.WSSC_1008_SET_EP_ADDRESS(endPointAddress));
         }
         
         // Add addressing headers to the message
         try{
             reqPacket = addAddressingHeaders(reqPacket, wsdlPort, binding, action, addVer);
         }catch (WSSecureConversationException ex){
-            log.log(Level.SEVERE,"WSSC0017.problem.add.address.headers", ex);
-            throw new RuntimeException(ex);
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSSC_0017_PROBLEM_ADD_ADDRESS_HEADERS(), ex);
+            throw new RuntimeException(LogStringsMessages.WSSC_0017_PROBLEM_ADD_ADDRESS_HEADERS(), ex);
         }
         
         // Ideally this property for enabling FI or not should be available to the pipeline.
@@ -257,8 +265,9 @@ public class WSSCPlugin {
             try {
                 rstrEle = (JAXBElement)response.readPayloadAsJAXB(unmarshaller);
             }catch (JAXBException ex){
-                log.log(Level.SEVERE,"WSSC0018.err.jaxb.rstr", ex);
-                throw new RuntimeException(ex);
+                log.log(Level.SEVERE,
+                        LogStringsMessages.WSSC_0018_ERR_JAXB_RSTR(), ex);
+                throw new RuntimeException(LogStringsMessages.WSSC_0018_ERR_JAXB_RSTR(), ex);
             }
             rstr = eleFac.createRSTRFrom(rstrEle);
         } else {
@@ -267,7 +276,9 @@ public class WSSCPlugin {
                 //throw (SOAPFaultException)builder.createException(null, response);
                 throw new SOAPFaultException(response.readAsSOAPMessage().getSOAPBody().getFault());
             } catch (SOAPException ex){
-                throw new RuntimeException(ex);
+                log.log(Level.SEVERE,
+                        LogStringsMessages.WSSC_0022_PROBLEM_CREATING_FAULT(), ex);
+                throw new RuntimeException(LogStringsMessages.WSSC_0022_PROBLEM_CREATING_FAULT(), ex);
             }
         }
         
@@ -322,7 +333,9 @@ public class WSSCPlugin {
             streamWriter.flush();
             return writer.toString();
         } catch (XMLStreamException ex) {
-            throw new RuntimeException("Problem Printing message ", ex);
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSSC_0025_PROBLEM_PRINTING_MSG(), ex);
+            throw new RuntimeException(LogStringsMessages.WSSC_0025_PROBLEM_PRINTING_MSG(), ex);
         }
     }
     

@@ -76,6 +76,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.sun.xml.ws.security.secconv.logging.LogDomainConstants;
+import com.sun.xml.ws.security.secconv.logging.LogStringsMessages;
 import javax.xml.bind.JAXBElement;
 
 public class WSSCContract implements WSTrustContract   {
@@ -125,9 +126,8 @@ public class WSSCContract implements WSTrustContract   {
             computeKeyAlgo = URI.create(WSTrustConstants.CK_PSHA1);
         } catch (URISyntaxException ex){
             log.log(Level.SEVERE,
-                    "WSSC0008.urisyntax.exception",
-                    new Object[] {request.getContext()});
-            throw new WSSecureConversationException(ex.getMessage(), ex);
+                    LogStringsMessages.WSSC_0008_URISYNTAX_EXCEPTION(request.getContext()), ex);
+            throw new WSSecureConversationException(LogStringsMessages.WSSC_0008_URISYNTAX_EXCEPTION(request.getContext()), ex);
         }
         
         // AppliesTo
@@ -145,15 +145,13 @@ public class WSSCContract implements WSTrustContract   {
                 //ToDo
                 if (log.isLoggable(Level.FINE)) {
                     log.log(Level.FINE,
-                            "WSSC0009.clientEntropy.value",
-                            new Object[] {"null"});
+                            LogStringsMessages.WSSC_0009_CLIENT_ENTROPY_VALUE("null"));
                 }
             }else {
                 clientEntr = clientBS.getRawValue();
                 if (log.isLoggable(Level.FINE)) {
                     log.log(Level.FINE,
-                            "WSSC0009.clientEntropy.value",
-                            new Object[] {clientEntropy.toString()});
+                            LogStringsMessages.WSSC_0009_CLIENT_ENTROPY_VALUE(clientEntropy.toString()));
                 }
             }
         }
@@ -178,8 +176,8 @@ public class WSSCContract implements WSTrustContract   {
         
         if((!reqServerEntr) && (clientEntropy == null)){
             log.log(Level.SEVERE,
-                    "WSSC0010.clientEntropy.cannot.null");
-            throw new WSSecureConversationException("client entropy cannot be null when RequireServerEntropy is not enabled");
+                    LogStringsMessages.WSSC_0010_CLIENT_ENTROPY_CANNOT_NULL());
+            throw new WSSecureConversationException(LogStringsMessages.WSSC_0010_CLIENT_ENTROPY_CANNOT_NULL());
         }
         
         int keySize = (int)request.getKeySize();
@@ -192,7 +190,7 @@ public class WSSCContract implements WSTrustContract   {
         }
         if (log.isLoggable(Level.FINE)) {
         log.log(Level.FINE,
-                "WSSC0011.keySize.value", new Object[] {keySize});
+                LogStringsMessages.WSSC_0011_KEY_SIZE_VALUE(keySize, this.DEFAULT_KEY_SIZE));
         }
         
         byte[] secret = WSTrustUtil.generateRandomSecret(keySize/8);
@@ -211,8 +209,8 @@ public class WSSCContract implements WSTrustContract   {
                     secret = SecurityUtil.P_SHA1(clientEntr, secret, keySize/8);
                 } catch (Exception ex){
                     log.log(Level.SEVERE,
-                            "WSSC0012.compute.seckey", new Object[] {ex});
-                    throw new WSSecureConversationException(ex.getMessage(), ex);
+                            LogStringsMessages.WSSC_0012_COMPUTE_SECKEY(), ex);
+                    throw new WSSecureConversationException(LogStringsMessages.WSSC_0012_COMPUTE_SECKEY(), ex);
                 }
                 
             } else {
@@ -244,8 +242,8 @@ public class WSSCContract implements WSTrustContract   {
                     eleFac.createRSTRForIssue(tokenType, con, rst, scopes, rar, rur, proofToken, serverEntropy, lifetime);
         } catch (WSTrustException ex){
             log.log(Level.SEVERE,
-                    "WSSC0013.cannot.create.rstr.response", new Object[] {ex.getMessage()});
-            throw new WSSecureConversationException(ex);
+                    LogStringsMessages.WSSC_0013_CANNOT_CREATE_RSTR_RESPONSE(), ex);
+            throw new WSSecureConversationException(LogStringsMessages.WSSC_0013_CANNOT_CREATE_RSTR_RESPONSE(), ex);
         }
         
         final Session session =
@@ -273,7 +271,7 @@ public class WSSCContract implements WSTrustContract   {
         
         if (log.isLoggable(Level.FINE)) {
             log.log(Level.FINE,
-                    "WSSC0014.rstr.response", new Object[] {elemToString(response)});
+                    LogStringsMessages.WSSC_0014_RSTR_RESPONSE(elemToString(response)));
         }
         return response;
     }
@@ -307,14 +305,14 @@ public class WSSCContract implements WSTrustContract   {
         final IssuedTokenContext cxt = (IssuedTokenContext)issuedTokCtxMap.get(id);
         if (cxt == null || cxt.getSecurityToken() == null){
             log.log(Level.SEVERE,
-                    "WSSC0015.unknown.context", new Object[] {id});
-            throw new WSSecureConversationException("Unknown security context token to cancel: "+id);
+                    LogStringsMessages.WSSC_0015_UNKNOWN_CONTEXT(id));
+            throw new WSSecureConversationException(LogStringsMessages.WSSC_0015_UNKNOWN_CONTEXT(id));
         }
         
         final RequestSecurityTokenResponse rstr = eleFac.createRSTRForCancel();
         if (log.isLoggable(Level.FINE)) {
             log.log(Level.FINE,
-                    "WSSC0014.rstr.response", new Object[] {elemToString(rstr)});
+                    LogStringsMessages.WSSC_0014_RSTR_RESPONSE(elemToString(rstr)));
         }
         return rstr;
     }
@@ -356,8 +354,7 @@ public class WSSCContract implements WSTrustContract   {
         context.setExpirationTime(expirationTime);
         if (log.isLoggable(Level.FINER)) {
             log.log(Level.FINER,
-                    "WSSC1003.setting.times",
-                    new Object[] {creationTime.toString(), expirationTime.toString()});
+                    LogStringsMessages.WSSC_1003_SETTING_TIMES(creationTime.toString(), expirationTime.toString()));
         }
     }
     
@@ -422,10 +419,9 @@ public class WSSCContract implements WSTrustContract   {
             marshaller.marshal(rstrElement, writer);
             return writer.toString();
         } catch (Exception e) {
-            if (log.isLoggable(Level.FINE)) {
-                log.log(Level.FINE, "WST1004.error.marshal.toString", e);
-            }
-            throw new RuntimeException("Error in Marshalling RSTR to string for logging ", e);
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSSC_0027_ERROR_MARSHAL_LOG());
+            throw new RuntimeException(LogStringsMessages.WSSC_0027_ERROR_MARSHAL_LOG(), e);
         }
     }
     

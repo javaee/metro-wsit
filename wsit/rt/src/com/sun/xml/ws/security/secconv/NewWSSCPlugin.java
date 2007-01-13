@@ -269,7 +269,8 @@ public class NewWSSCPlugin {
         
         // Log Request created
         if (log.isLoggable(Level.FINE)) {
-            log.log(Level.FINE,"WSSC1009.send.req.message", new Object[] {printMessageAsString(request)});
+            log.log(Level.FINE,
+                    LogStringsMessages.WSSC_1009_SEND_REQ_MESSAGE(printMessageAsString(request)));
         }
         Packet reqPacket = new Packet(request);
         if (issuedToken != null){
