@@ -132,7 +132,7 @@ public class WSITClientAuthConfig implements ClientAuthConfig {
         try {
             MessageInfo info = (MessageInfo)map.get("SECURITY_TOKEN");
             if (info != null) {
-                Packet packet = (Packet)info.getMap().get("REQ_PACKET");
+                Packet packet = (Packet)info.getMap().get(WSITAuthContextBase.REQ_PACKET);
                 if (packet != null) {
                     if (clientAuthContext != null) {
                         ret =  ((WSITClientAuthContext)clientAuthContext).startSecureConversation(packet);

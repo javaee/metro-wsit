@@ -116,30 +116,28 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
         trustConfig = holder.getConfigAssertions(
                 com.sun.xml.ws.security.impl.policy.Constants.SUN_TRUST_CLIENT_SECURITY_POLICY_NS);
         
-        if (configAssertions == null || configAssertions.isEmpty()) {
-            boolean isACC = isGFAppClient();
-            if (isACC) {
-                handler = loadGFHandler(true);
-                try {
-                    secEnv = new WSITProviderSecurityEnvironment(handler, map, null);
-                }catch (XWSSecurityException ex) {
-                    throw new WebServiceException(ex);
-                }
-            } else {
-                //handler = configureClientHandler(configAssertions);
-                //secEnv = new DefaultSecurityEnvironmentImpl(handler);
-                throw new RuntimeException(
-                        "Error: Could Initialize CallbackHandler: No configuration assertions found in wsit-client.xml");
+
+        boolean isACC = isGFAppClient();
+        String isGF = System.getProperty("com.sun.aas.installRoot");
+        //this client is an ACC client or a WebClient
+        if (isACC || (isGF != null) ) {
+            handler = loadGFHandler(true);
+            try {
+                Properties props = new Properties();
+                populateConfigProperties(configAssertions, props);
+                secEnv = new WSITProviderSecurityEnvironment(handler, map, props);
+            }catch (XWSSecurityException ex) {
+                throw new WebServiceException(ex);
             }
         } else {
             handler = configureClientHandler(configAssertions);
             secEnv = new DefaultSecurityEnvironmentImpl(handler);
         }
-        
+                
         //initialize the AuthModules and keep references to them
         authModule = new WSITClientAuthModule();
         try {
-        authModule.initialize(null, null, null,map);
+            authModule.initialize(null, null, null,map);
         } catch (AuthException e) {
             throw new RuntimeException(e);
         }

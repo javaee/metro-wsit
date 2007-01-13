@@ -210,6 +210,8 @@ public abstract class WSITAuthContextBase  {
     AddressingVersion addVer = null;
     WSDLPort port = null;
     
+    protected static final String REQ_PACKET = "REQ_PACKET";
+    protected static final String RES_PACKET = "RES_PACKET";
     
     static {
         try {
@@ -1356,21 +1358,21 @@ public abstract class WSITAuthContextBase  {
     }
     
     protected Packet getRequestPacket(MessageInfo messageInfo) {
-        return (Packet)messageInfo.getMap().get("REQ_PACKET");
+        return (Packet)messageInfo.getMap().get(REQ_PACKET);
     }
     
     protected Packet getResponsePacket(MessageInfo messageInfo) {
-        return (Packet)messageInfo.getMap().get("RES_PACKET");
+        return (Packet)messageInfo.getMap().get(RES_PACKET);
     }
     
     @SuppressWarnings("unchecked")
     protected void setRequestPacket(MessageInfo messageInfo, Packet ret) {
-        messageInfo.getMap().put("REQ_PACKET", ret);    
+        messageInfo.getMap().put(REQ_PACKET, ret);    
     }
     
     @SuppressWarnings("unchecked")
     protected void setResponsePacket(MessageInfo messageInfo, Packet ret) {
-        messageInfo.getMap().put("RES_PACKET", ret);    
+        messageInfo.getMap().put(RES_PACKET, ret);    
     }
     
     protected abstract void addIncomingFaultPolicy(Policy effectivePolicy,SecurityPolicyHolder sph,WSDLFault fault)throws PolicyException;

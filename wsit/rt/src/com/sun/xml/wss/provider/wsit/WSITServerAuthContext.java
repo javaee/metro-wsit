@@ -123,27 +123,24 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         trustConfig = holder.getConfigAssertions(
                 com.sun.xml.ws.security.impl.policy.Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS);
         
-        if (configAssertions == null || configAssertions.isEmpty()) {
-            String isGF = System.getProperty("com.sun.aas.installRoot");
-            if (isGF != null) {
-                handler = loadGFHandler(false);
-                try {
-                    secEnv = new WSITProviderSecurityEnvironment(handler, map, null);
-                }catch (XWSSecurityException ex) {
-                    throw new WebServiceException(ex);
-                }
-            } else {
-                //This will handle Non-GF containers where no config assertions
-                // are required in the WSDL. Ex. UsernamePassword validatio
-                // with Default Realm Authentication
-                handler = configureServerHandler(configAssertions);
-                secEnv = new DefaultSecurityEnvironmentImpl(handler);
+        String isGF = System.getProperty("com.sun.aas.installRoot");
+        if (isGF != null) {
+            handler = loadGFHandler(false);
+            try {
+                Properties props = new Properties();
+                populateConfigProperties(configAssertions, props);
+                secEnv = new WSITProviderSecurityEnvironment(handler, map, props);
+            }catch (XWSSecurityException ex) {
+                throw new WebServiceException(ex);
             }
         } else {
+            //This will handle Non-GF containers where no config assertions
+            // are required in the WSDL. Ex. UsernamePassword validatio
+            // with Default Realm Authentication
             handler = configureServerHandler(configAssertions);
             secEnv = new DefaultSecurityEnvironmentImpl(handler);
         }
-                    
+        
         //initialize the AuthModules and keep references to them
         authModule = new WSITServerAuthModule();
         try {
