@@ -1,5 +1,5 @@
 /*
- * $Id: EntropyImpl.java,v 1.6 2007-01-12 14:44:11 raharsha Exp $
+ * $Id: EntropyImpl.java,v 1.7 2007-01-13 11:39:13 manveen Exp $
  */
 
 /*
@@ -113,8 +113,8 @@ public class EntropyImpl extends EntropyType implements Entropy {
             return (EntropyType)u.unmarshal(element);
         } catch (JAXBException ex) {
             log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0021_ERROR_UNMARSHAL_DOM_ELEMENT(ex));
-            throw new WSTrustException("Error while unmarshalling DOM element ", ex);
+                    LogStringsMessages.WST_0021_ERROR_UNMARSHAL_DOM_ELEMENT(), ex);
+            throw new WSTrustException(LogStringsMessages.WST_0021_ERROR_UNMARSHAL_DOM_ELEMENT(), ex);
         }
     }
     
@@ -134,7 +134,7 @@ public class EntropyImpl extends EntropyType implements Entropy {
                 || type.equalsIgnoreCase(this.ENCRYPTED_KEY_TYPE))) {
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0022_INVALID_ENTROPY(type));
-            throw new RuntimeException("Invalid Entropy Type: " + type);
+            throw new RuntimeException(LogStringsMessages.WST_0022_INVALID_ENTROPY(type));
         }
         entropyType = type;
         getOtherAttributes().put(_EntropyType_QNAME,type);

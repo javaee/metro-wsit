@@ -1,5 +1,5 @@
 /*
- * $Id: BinaryExchangeImpl.java,v 1.4 2007-01-12 14:44:10 raharsha Exp $
+ * $Id: BinaryExchangeImpl.java,v 1.5 2007-01-13 11:39:13 manveen Exp $
  */
 
 /*
@@ -68,8 +68,8 @@ public class BinaryExchangeImpl extends BinaryExchangeType implements BinaryExch
             return Base64.decode(getTextValue());
         } catch (Base64DecodingException de) {
             log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0020_ERROR_DECODING(getTextValue(), de));
-            throw new RuntimeException("Error while decoding :" + getTextValue() , de);
+                    LogStringsMessages.WST_0020_ERROR_DECODING(getTextValue()), de);
+            throw new RuntimeException(LogStringsMessages.WST_0020_ERROR_DECODING(getTextValue()), de);
         }
     }
     

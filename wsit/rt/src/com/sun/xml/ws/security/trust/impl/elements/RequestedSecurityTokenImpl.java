@@ -1,5 +1,5 @@
 /*
- * $Id: RequestedSecurityTokenImpl.java,v 1.4 2007-01-04 00:47:34 manveen Exp $
+ * $Id: RequestedSecurityTokenImpl.java,v 1.5 2007-01-13 11:39:14 manveen Exp $
  */
 
 /*
@@ -133,8 +133,8 @@ public class RequestedSecurityTokenImpl extends RequestedSecurityTokenType imple
             return rstType.getValue();
         } catch (JAXBException ex) {
             log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0021_ERROR_UNMARSHAL_DOM_ELEMENT(ex));                        
-            throw new WSTrustException("Error in unmarshalling DOM Element", ex);
+                    LogStringsMessages.WST_0021_ERROR_UNMARSHAL_DOM_ELEMENT(), ex);                        
+            throw new WSTrustException(LogStringsMessages.WST_0021_ERROR_UNMARSHAL_DOM_ELEMENT(), ex);
         }
     }
 

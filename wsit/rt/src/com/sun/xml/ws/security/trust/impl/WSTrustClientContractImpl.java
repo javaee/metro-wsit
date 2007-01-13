@@ -121,7 +121,7 @@ public class WSTrustClientContractImpl implements WSTrustClientContract {
                 log.log(Level.SEVERE,
                         LogStringsMessages.WST_0018_TOKENS_NULL());
                 throw new WSTrustException(
-                        "Invalid Security Token or Proof Token");
+                        LogStringsMessages.WST_0018_TOKENS_NULL());
             }
             
             if (securityToken != null){

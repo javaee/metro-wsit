@@ -1,5 +1,5 @@
 /*
- * $Id: LifetimeImpl.java,v 1.6 2007-01-12 14:44:11 raharsha Exp $
+ * $Id: LifetimeImpl.java,v 1.7 2007-01-13 11:39:13 manveen Exp $
  */
 
 /*
@@ -90,8 +90,8 @@ public class LifetimeImpl extends LifetimeType implements Lifetime {
             return (LifetimeType)u.unmarshal(element);
         } catch ( JAXBException ex) {
             log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0021_ERROR_UNMARSHAL_DOM_ELEMENT(ex));
-            throw new WSTrustException("Error in unmarshalling DOM element", ex);
+                    LogStringsMessages.WST_0021_ERROR_UNMARSHAL_DOM_ELEMENT());
+            throw new WSTrustException(LogStringsMessages.WST_0021_ERROR_UNMARSHAL_DOM_ELEMENT(), ex);
         }
     }
     

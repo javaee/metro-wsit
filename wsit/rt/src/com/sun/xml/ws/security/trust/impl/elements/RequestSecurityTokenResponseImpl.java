@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityTokenResponseImpl.java,v 1.7 2007-01-12 14:44:13 raharsha Exp $
+ * $Id: RequestSecurityTokenResponseImpl.java,v 1.8 2007-01-13 11:39:14 manveen Exp $
  */
 
 /*
@@ -290,7 +290,7 @@ public class RequestSecurityTokenResponseImpl extends RequestSecurityTokenRespon
         || keytype.toString().equalsIgnoreCase(RequestSecurityToken.SYMMETRIC_KEY_TYPE) )){
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0025_INVALID_KEY_TYPE(keytype.toString()));
-            throw new WSTrustException("Invalid KeyType " + keytype.toString());
+            throw new WSTrustException(LogStringsMessages.WST_0025_INVALID_KEY_TYPE(keytype.toString()));
         } else {
             this.keyType = keytype;
             final JAXBElement<String> ktElement =

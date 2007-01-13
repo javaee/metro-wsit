@@ -39,6 +39,7 @@ import org.w3c.dom.Element;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
+import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
 
 /**
  *
@@ -92,8 +93,7 @@ public class GenericToken implements Token{
         if (tokenType != null) {
             if(log.isLoggable(Level.FINE)) {
                 log.log(Level.FINE,
-                        "WST1001.token.type",
-                        new Object[] {tokenType});
+                       LogStringsMessages.WST_1001_TOKEN_TYPE(tokenType)); 
             }
             return tokenType;
         }

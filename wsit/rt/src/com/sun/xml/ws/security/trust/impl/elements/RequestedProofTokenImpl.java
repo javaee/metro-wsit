@@ -1,5 +1,5 @@
 /*
- * $Id: RequestedProofTokenImpl.java,v 1.7 2007-01-12 14:44:13 raharsha Exp $
+ * $Id: RequestedProofTokenImpl.java,v 1.8 2007-01-13 11:39:14 manveen Exp $
  */
 
 /*
@@ -95,7 +95,7 @@ public class RequestedProofTokenImpl extends RequestedProofTokenType implements 
         } else{
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0019_INVALID_PROOF_TOKEN_TYPE(local));
-            throw new RuntimeException("Unsupported requested proof token: " + local);
+            throw new RuntimeException(LogStringsMessages.WST_0019_INVALID_PROOF_TOKEN_TYPE(local));
         }
     }
     
@@ -112,7 +112,7 @@ public class RequestedProofTokenImpl extends RequestedProofTokenType implements 
         )) {
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0019_INVALID_PROOF_TOKEN_TYPE(proofTokenType));
-            throw new RuntimeException("Invalid ProofToken Type: " + proofTokenType);
+            throw new RuntimeException(LogStringsMessages.WST_0019_INVALID_PROOF_TOKEN_TYPE(proofTokenType));
         }
         tokenType = proofTokenType;
     }
@@ -138,7 +138,7 @@ public class RequestedProofTokenImpl extends RequestedProofTokenType implements 
             if (!(ckString.equalsIgnoreCase(WSTrustConstants.CK_HASH) || (ckString.equalsIgnoreCase(WSTrustConstants.CK_PSHA1)))) {
                 log.log(Level.SEVERE,
                         LogStringsMessages.WST_0028_INVALID_CK(ckString));
-                throw new RuntimeException("Invalid computedKeyURI: " + ckString);
+                throw new RuntimeException(LogStringsMessages.WST_0028_INVALID_CK(ckString));
             }
             this.computedKey = computedKey;
             final JAXBElement<String> ckElement=
@@ -172,7 +172,9 @@ public class RequestedProofTokenImpl extends RequestedProofTokenType implements 
             final javax.xml.bind.Unmarshaller u = WSTrustElementFactory.getContext().createUnmarshaller();
             return (RequestedProofTokenType)u.unmarshal(element);
         } catch (JAXBException ex) {
-            throw new WSTrustException(ex.getMessage(), ex);
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0021_ERROR_UNMARSHAL_DOM_ELEMENT(), ex);
+            throw new WSTrustException(LogStringsMessages.WST_0021_ERROR_UNMARSHAL_DOM_ELEMENT(), ex);
         }
     }
     

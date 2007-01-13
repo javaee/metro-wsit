@@ -1,5 +1,5 @@
 /*
- * $Id: BinarySecretImpl.java,v 1.6 2007-01-12 14:44:10 raharsha Exp $
+ * $Id: BinarySecretImpl.java,v 1.7 2007-01-13 11:39:13 manveen Exp $
  */
 
 /*
@@ -90,8 +90,8 @@ public class BinarySecretImpl extends BinarySecretType implements BinarySecret {
             return (BinarySecretType)((JAXBElement)u.unmarshal(element)).getValue();
         } catch (JAXBException ex) {
             log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0021_ERROR_UNMARSHAL_DOM_ELEMENT(ex));
-            throw new WSTrustException("Error while unmarhsalling DOM Element ", ex);
+                    LogStringsMessages.WST_0021_ERROR_UNMARSHAL_DOM_ELEMENT(), ex);
+            throw new WSTrustException(LogStringsMessages.WST_0021_ERROR_UNMARSHAL_DOM_ELEMENT(), ex);
         }
     }
 
@@ -114,8 +114,8 @@ public class BinarySecretImpl extends BinarySecretType implements BinarySecret {
              setValue(Base64.decode(encodedText));
          } catch (Base64DecodingException de) {
             log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0020_ERROR_DECODING(encodedText, de));
-             throw new RuntimeException("Error while decoding :" + encodedText , de); 
+                    LogStringsMessages.WST_0020_ERROR_DECODING(encodedText), de);
+             throw new RuntimeException(LogStringsMessages.WST_0020_ERROR_DECODING(encodedText), de); 
          }
      }     
 }

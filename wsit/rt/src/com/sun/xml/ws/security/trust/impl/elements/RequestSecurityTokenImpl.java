@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityTokenImpl.java,v 1.8 2007-01-12 14:44:12 raharsha Exp $
+ * $Id: RequestSecurityTokenImpl.java,v 1.9 2007-01-13 11:39:14 manveen Exp $
  */
 
 /*
@@ -253,7 +253,7 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
         && !rtString.equalsIgnoreCase(WSTrustConstants.VALIDATE_REQUEST)) {
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0024_INVALID_REQUEST_TYPE(rtString));
-            throw new RuntimeException("Invalid Request Type specified: " + rtString);
+            throw new RuntimeException(LogStringsMessages.WST_0024_INVALID_REQUEST_TYPE(rtString));
         }
         this.requestType = requestType;
         final JAXBElement<String> rtElement =
@@ -361,7 +361,7 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
         || keytype.toString().equalsIgnoreCase(RequestSecurityToken.SYMMETRIC_KEY_TYPE) )){
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0025_INVALID_KEY_TYPE(keytype.toString()));
-            throw new WSTrustException("Invalid KeyType " + keytype.toString());
+            throw new WSTrustException(LogStringsMessages.WST_0025_INVALID_KEY_TYPE(keytype.toString()));
         } else {
             this.keyType = keytype;
             final JAXBElement<String> ktElement =
@@ -447,8 +447,7 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
             && !ckaString.equalsIgnoreCase(WSTrustConstants.CK_PSHA1)) {
                 log.log(Level.SEVERE,
                         LogStringsMessages.WST_0026_INVALID_CK_ALGORITHM(ckaString));
-                throw new RuntimeException("Invalid Computed Key Algorithm specified :" + 
-                        ckaString);
+                throw new RuntimeException(LogStringsMessages.WST_0026_INVALID_CK_ALGORITHM(ckaString));
             }
             computedKeyAlgorithm = algorithm;
             final JAXBElement<String> ckaElement =

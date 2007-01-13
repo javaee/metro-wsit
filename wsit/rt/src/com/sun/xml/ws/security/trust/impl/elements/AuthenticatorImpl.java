@@ -1,5 +1,5 @@
 /*
- * $Id: AuthenticatorImpl.java,v 1.4 2007-01-12 14:44:09 raharsha Exp $
+ * $Id: AuthenticatorImpl.java,v 1.5 2007-01-13 11:39:13 manveen Exp $
  */
 
 /*
@@ -80,8 +80,8 @@ public class AuthenticatorImpl extends AuthenticatorType implements Authenticato
             setRawCombinedHash(Base64.decode(encodedCombinedHash));
         } catch (Base64DecodingException de) {
             log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0020_ERROR_DECODING(encodedCombinedHash, de));
-            throw new RuntimeException("Error while decoding combineHash: " + encodedCombinedHash , de);
+                    LogStringsMessages.WST_0020_ERROR_DECODING(encodedCombinedHash), de);
+            throw new RuntimeException(LogStringsMessages.WST_0020_ERROR_DECODING(encodedCombinedHash) , de);
         }
     }
     

@@ -193,7 +193,7 @@ public class SBIssuedSamlTokenContractImpl extends IssueSamlTokenContract{
             } else{
                 log.log(Level.SEVERE,
                         LogStringsMessages.WST_0031_UNSUPPORTED_TOKEN_TYPE(tokenType));
-                throw new WSTrustException("Unsupported token type: " + tokenType);
+                throw new WSTrustException(LogStringsMessages.WST_0031_UNSUPPORTED_TOKEN_TYPE(tokenType));
             }
             
             // Get the STS's public and private key
@@ -387,7 +387,7 @@ public class SBIssuedSamlTokenContractImpl extends IssueSamlTokenContract{
             if(certs == null){
                 log.log(Level.SEVERE,
                         LogStringsMessages.WST_0034_UNABLE_GET_CLIENT_CERT());
-                throw new WSTrustException("Unable to obtain client certificate");
+                throw new WSTrustException(LogStringsMessages.WST_0034_UNABLE_GET_CLIENT_CERT());
             }
             boolean addedClientCert = false;
             for(Object o : certs){
@@ -410,7 +410,7 @@ public class SBIssuedSamlTokenContractImpl extends IssueSamlTokenContract{
             if(!addedClientCert){
                 log.log(Level.SEVERE,
                         LogStringsMessages.WST_0034_UNABLE_GET_CLIENT_CERT());
-                throw new WSTrustException("Unable to obtain client certificate");
+                throw new WSTrustException(LogStringsMessages.WST_0034_UNABLE_GET_CLIENT_CERT());
             }
             keyInfo.getContent().add(x509Data);
         }
@@ -574,12 +574,12 @@ public class SBIssuedSamlTokenContractImpl extends IssueSamlTokenContract{
 //        }
         } catch (NoSuchAlgorithmException ex) {
             log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0035_UNABLE_CREATE_SIGN_SAML_ASSERTION(ex));
-            throw new WSTrustException("Unable to create sign SAML Assertion",ex);
+                    LogStringsMessages.WST_0035_UNABLE_CREATE_SIGN_SAML_ASSERTION(), ex);
+            throw new WSTrustException(LogStringsMessages.WST_0035_UNABLE_CREATE_SIGN_SAML_ASSERTION(),ex);
         } catch (InvalidAlgorithmParameterException ex) {
             log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0035_UNABLE_CREATE_SIGN_SAML_ASSERTION(ex));
-            throw new WSTrustException("Unable to create sign SAML Assertion",ex);
+                    LogStringsMessages.WST_0035_UNABLE_CREATE_SIGN_SAML_ASSERTION(), ex);
+            throw new WSTrustException(LogStringsMessages.WST_0035_UNABLE_CREATE_SIGN_SAML_ASSERTION(),ex);
         }
     }
     

@@ -217,9 +217,9 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
             }
         } catch (URISyntaxException ex) {
             log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0014_URI_SYNTAX(rst.getContext()), ex);
+                    LogStringsMessages.WST_0014_URI_SYNTAX(), ex);
             throw new WSTrustException(
-                    LogStringsMessages.WST_0014_URI_SYNTAX(rst.getContext()) ,ex);
+                    LogStringsMessages.WST_0014_URI_SYNTAX() ,ex);
         }
         
         // Create RequestedSecurityToken with SAML assertion

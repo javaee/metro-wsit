@@ -161,8 +161,8 @@ public class TrustPluginImpl implements TrustPlugin {
                     }
                 } catch (URISyntaxException ex) {
                     log.log(Level.SEVERE,
-                            LogStringsMessages.WST_0014_URI_SYNTAX(ex));
-                    throw new RuntimeException("Invalid URI", ex);
+                            LogStringsMessages.WST_0014_URI_SYNTAX(), ex);
+                    throw new RuntimeException(LogStringsMessages.WST_0014_URI_SYNTAX(), ex);
                 }
                 
                 final String serviceNameStr = attrs.get(new QName(CONFIG_NAMESPACE,SERVICE_NAME));
