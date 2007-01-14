@@ -10,7 +10,7 @@
       <wsp:ExactlyOne>
          <wsp:All>
              <sc:KeyStore xmlns:sc="http://schemas.sun.com/2006/03/wss/client" location="$WSIT_HOME/xws-security/etc/client-keystore.jks" storepass="changeit" alias="alice"/>
-             <sc:TrustStore xmlns:sc="http://schemas.sun.com/2006/03/wss/client" location="$WSIT_HOME/xws-security/etc/client-truststore.jks" storepass="changeit"/>
+             <sc:TrustStore xmlns:sc="http://schemas.sun.com/2006/03/wss/client" location="$WSIT_HOME/xws-security/etc/client-truststore.jks" storepass="changeit" peeralias="bob"/>
              <sc:CallbackHandlerConfiguration xmlns:sc="http://schemas.sun.com/2006/03/wss/client">
        <sc:CallbackHandler  name="usernameHandler"  default="Alice"/>
        <!--<sc:CallbackHandler  name="passwordHandler"  default="abcd!1234"/>-->
