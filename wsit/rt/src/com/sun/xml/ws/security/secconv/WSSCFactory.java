@@ -26,7 +26,7 @@ package com.sun.xml.ws.security.secconv;
 
 
 import com.sun.xml.ws.security.trust.Configuration;
-import com.sun.xml.ws.security.trust.WSTrustDOMContract;
+//import com.sun.xml.ws.security.trust.WSTrustDOMContract;
  
 /**
  * A Factory for creating WS-SecureConversation contract instances.
