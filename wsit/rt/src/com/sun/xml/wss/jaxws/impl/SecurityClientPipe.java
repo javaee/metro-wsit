@@ -347,8 +347,8 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
             while(it!=null && it.hasNext()) {
                 preSetSTSAssertion = (PolicyAssertion)it.next();
             }
-            serviceName = (QName)packet.invocationProperties.get(WSTrustConstants.PROPERTY_SERVICE_NAME);
-            portName = (QName)packet.invocationProperties.get(WSTrustConstants.PROPERTY_PORT_NAME);
+            //serviceName = (QName)packet.invocationProperties.get(WSTrustConstants.PROPERTY_SERVICE_NAME);
+            //portName = (QName)packet.invocationProperties.get(WSTrustConstants.PROPERTY_PORT_NAME);
         }
         
         for (PolicyAssertion issuedTokenAssertion : policies) {

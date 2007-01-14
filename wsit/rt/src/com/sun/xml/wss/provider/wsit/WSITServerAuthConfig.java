@@ -28,7 +28,7 @@ public class WSITServerAuthConfig implements ServerAuthConfig {
     
     String layer = null;
     String appContext = null;
-    CallbackHandler cbh = null;
+    //CallbackHandler cbh = null;
     
     WSITServerAuthContext serverAuthContext = null;
 
@@ -43,7 +43,7 @@ public class WSITServerAuthConfig implements ServerAuthConfig {
     public WSITServerAuthConfig(String layer, String appContext, CallbackHandler callbackHandler) {
         this.layer = layer;
         this.appContext = appContext;
-        this.cbh = callbackHandler;
+        //this.cbh = callbackHandler;
         this.rwLock = new ReentrantReadWriteLock(true);
         this.rLock = rwLock.readLock();
         this.wLock = rwLock.writeLock();

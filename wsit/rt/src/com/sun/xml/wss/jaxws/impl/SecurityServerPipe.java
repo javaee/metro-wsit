@@ -114,7 +114,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
     
     private SessionManager sessionManager =
             SessionManager.getSessionManager();
-    private WSDLBoundOperation cachedOperation = null;
+    //private WSDLBoundOperation cachedOperation = null;
     private Set trustConfig = null;
     private CallbackHandler handler = null;
     
@@ -446,14 +446,14 @@ public class SecurityServerPipe extends SecurityPipeBase {
             Token scToken = (Token)packet.invocationProperties.get(SC_ASSERTION);
             return getOutgoingXWSBootstrapPolicy(scToken);
         }
-        Message message = packet.getMessage();
+        //Message message = packet.getMessage();
         
         MessagePolicy mp = null;
-        if(cachedOperation == null){
+        //if(cachedOperation == null){
             //Body could be encrypted. Security will have to infer the
             //policy from the message till the Body is decrypted.
-            mp = emptyMessagePolicy;
-        }
+        //    mp = emptyMessagePolicy;
+        //}
         if (outMessagePolicyMap == null) {
             //empty message policy
             return new MessagePolicy();

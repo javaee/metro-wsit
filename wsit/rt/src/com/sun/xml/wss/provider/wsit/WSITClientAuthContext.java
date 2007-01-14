@@ -92,9 +92,9 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
     
     //******************INSTANCE VARIABLES*******
     // do not use this operation it will be null
-    String operation = null;
-    Subject subject = null; 
-    Map map = null;
+    //String operation = null;
+    //Subject subject = null; 
+    //Map map = null;
   
     private Set trustConfig = null;
     private CallbackHandler handler = null;
@@ -105,9 +105,9 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
     /** Creates a new instance of WSITClientAuthContext */
     public WSITClientAuthContext(String operation, Subject subject, Map map) {
         super(map);
-        this.operation = operation;
-        this.subject = subject;
-        this.map = map;
+        //this.operation = operation;
+        //this.subject = subject;
+        //this.map = map;
         
         
         Iterator it = outMessagePolicyMap.values().iterator();
@@ -160,10 +160,10 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
             }
             
             //set the isTrustProperty into MessageInfo
-            messageInfo.getMap().put("IS_TRUST_MSG", new Boolean(isTrustMsg));
+            messageInfo.getMap().put("IS_TRUST_MSG", Boolean.valueOf(isTrustMsg));
             
             // keep the message
-            Message msg = packet.getMessage();
+            //Message msg = packet.getMessage();
             
             //invoke the SCPlugin here
             invokeSCPlugin(packet);
@@ -540,8 +540,8 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
             while(it!=null && it.hasNext()) {
                 preSetSTSAssertion = (PolicyAssertion)it.next();
             }
-            serviceName = (QName)packet.invocationProperties.get(WSTrustConstants.PROPERTY_SERVICE_NAME);
-            portName = (QName)packet.invocationProperties.get(WSTrustConstants.PROPERTY_PORT_NAME);
+            //serviceName = (QName)packet.invocationProperties.get(WSTrustConstants.PROPERTY_SERVICE_NAME);
+            //portName = (QName)packet.invocationProperties.get(WSTrustConstants.PROPERTY_PORT_NAME);
         }
         
         for (PolicyAssertion issuedTokenAssertion : policies) {

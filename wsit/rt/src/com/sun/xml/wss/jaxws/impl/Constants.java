@@ -56,7 +56,7 @@ public abstract class Constants {
     public static final QName MESSAGE_ID_HEADER = new QName(wsaURI,"MessageID");
     public static final List<PolicyAssertion> EMPTY_LIST = Collections.emptyList();
     
-    public static QName bsOperationName =
+    public static final QName bsOperationName =
             new QName("http://schemas.xmlsoap.org/ws/2005/02/trust","RequestSecurityToken");
 
     public static final String SUN_WSS_SECURITY_SERVER_POLICY_NS="http://schemas.sun.com/2006/03/wss/server";

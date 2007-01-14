@@ -89,7 +89,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
     
     protected static final String TRUE="true";
     //****************Class Variables***************
-    private static SessionManager sessionManager= 
+    private SessionManager sessionManager= 
                 SessionManager.getSessionManager();
 
     
@@ -99,8 +99,8 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
     
     //****************Variables passed to Context CTOR********
     String operation = null;
-    Subject subject = null; 
-    Map map = null;
+    //Subject subject = null; 
+    //Map map = null;
     WSEndpoint endPoint =  null;
     
     //***************AuthModule Instance**********
@@ -111,11 +111,9 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
     public WSITServerAuthContext(String operation, Subject subject, Map map) {
         super(map);
         this.operation = operation;
-        this.subject = subject;
-        this.map = map;
-        endPoint = (WSEndpoint)map.get("ENDPOINT");
-        
-        sessionManager = SessionManager.getSessionManager();
+        //this.subject = subject;
+        //this.map = map;
+        endPoint = (WSEndpoint)map.get("ENDPOINT");                
         
         Iterator it = inMessagePolicyMap.values().iterator();
         SecurityPolicyHolder holder = (SecurityPolicyHolder)it.next();
@@ -266,7 +264,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         packet.setMessage(msg);
         
         if (thereWasAFault) {
-            sharedState.put("THERE_WAS_A_FAULT", new Boolean(thereWasAFault));
+            sharedState.put("THERE_WAS_A_FAULT", Boolean.valueOf(thereWasAFault));
              if (this.isAddressingEnabled()) {
                 Packet ret = packet.createServerResponse(
                         msg, this.addVer, this.soapVersion, this.addVer.getDefaultFaultAction());
@@ -369,7 +367,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
                 }
             }
         } catch (WssSoapFaultException ex) {
-            sharedState.put("THERE_WAS_A_FAULT", new Boolean(true));
+            sharedState.put("THERE_WAS_A_FAULT", Boolean.valueOf(true));
             msg = Messages.create(getSOAPFault(ex));
         } catch(SOAPException se) {
             // internal error
@@ -469,15 +467,15 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
             Token scToken = (Token)packet.invocationProperties.get(SC_ASSERTION);
             return getOutgoingXWSBootstrapPolicy(scToken);
         }
-        Message message = packet.getMessage();
+        //Message message = packet.getMessage();
         
         MessagePolicy mp = null;
         WSDLBoundOperation operation = cachedOperation(packet); 
-        if(operation == null){
+        //if(operation == null){
             //Body could be encrypted. Security will have to infer the
             //policy from the message till the Body is decrypted.
-            mp = emptyMessagePolicy;
-        }
+        //    mp = emptyMessagePolicy;
+        //}
         if (outMessagePolicyMap == null) {
             //empty message policy
             return new MessagePolicy();

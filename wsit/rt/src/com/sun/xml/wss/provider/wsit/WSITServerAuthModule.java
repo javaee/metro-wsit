@@ -69,7 +69,7 @@ public class WSITServerAuthModule implements ServerAuthModule {
 
              if (!subject.isReadOnly()) {
                  // log
-                 subject = new Subject();
+                 //subject = new Subject();
                  return;
              }
 

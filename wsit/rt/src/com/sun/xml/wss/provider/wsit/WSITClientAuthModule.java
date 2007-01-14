@@ -69,7 +69,7 @@ public class WSITClientAuthModule implements ClientAuthModule {
         
         if (!subject.isReadOnly()) {
             // log
-            subject = new Subject();
+            //subject = new Subject();
             return;
         }
         

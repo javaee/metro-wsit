@@ -82,12 +82,12 @@ public class PolicyResolverImpl implements PolicyResolver{
     private HashMap<WSDLBoundOperation,SecurityPolicyHolder> inMessagePolicyMap = null;
     private HashMap<String,SecurityPolicyHolder> inProtocolPM = null;
     
-    private PolicyAttributes pa = null;
+    //private PolicyAttributes pa = null;
     private AddressingVersion addVer = null;
     private PipeConfiguration pipeConfig = null;
     private boolean isClient = false;
     private boolean isSCMessage = false;
-    private boolean isTrustOrSCMessage = false;
+    //private boolean isTrustOrSCMessage = false;
     private String action =  "";
     /**
      * Creates a new instance of OperationResolverImpl

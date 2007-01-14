@@ -33,7 +33,7 @@ public class WSITClientAuthConfig implements ClientAuthConfig {
     String layer = null;
     String appContext = null;
     //ignore the CBH here
-    CallbackHandler cbh = null;
+    //CallbackHandler cbh = null;
     WSITClientAuthContext clientAuthContext = null;
 
     private ReentrantReadWriteLock rwLock;
@@ -47,7 +47,7 @@ public class WSITClientAuthConfig implements ClientAuthConfig {
     public WSITClientAuthConfig(String layer, String appContext, CallbackHandler callbackHandler) {
         this.layer = layer;
         this.appContext = appContext;
-        this.cbh = callbackHandler;
+        //this.cbh = callbackHandler;
         this.rwLock = new ReentrantReadWriteLock(true);
         this.rLock = rwLock.readLock();
         this.wLock = rwLock.writeLock(); 

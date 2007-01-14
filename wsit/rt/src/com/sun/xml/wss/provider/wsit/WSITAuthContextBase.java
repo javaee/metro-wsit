@@ -156,21 +156,21 @@ public abstract class WSITAuthContextBase  {
     protected Hashtable<String, IssuedTokenContext> issuedTokenContextMap = new Hashtable<String, IssuedTokenContext>();
     
     //*************STATIC(s)**************************************
-    protected static QName bsOperationName =
-            new QName("http://schemas.xmlsoap.org/ws/2005/02/trust","RequestSecurityToken");
+    //protected static QName bsOperationName =
+    //        new QName("http://schemas.xmlsoap.org/ws/2005/02/trust","RequestSecurityToken");
     private final QName optServerSecurity = new QName("http://schemas.sun.com/2006/03/wss/server","DisableStreamingSecurity");
     private final QName optClientSecurity = new QName("http://schemas.sun.com/2006/03/wss/client","DisableStreamingSecurity");
     
     //static JAXBContext used across the Pipe
-    protected static JAXBContext jaxbContext = null;
-    protected static ArrayList<String> securityPolicyNamespaces = null;
+    protected static final JAXBContext jaxbContext ;
+    protected static final ArrayList<String> securityPolicyNamespaces ;
     //TODO: not initialized anywhere and is being used at one place in server auth-ctx
-    protected static MessagePolicy emptyMessagePolicy;
+    //protected static MessagePolicy emptyMessagePolicy;
     protected static final List<PolicyAssertion> EMPTY_LIST = Collections.emptyList();
     // debug the Secure SOAP Messages (enable dumping)
-    protected static boolean debug = true;
-    public static  URI ISSUE_REQUEST_URI = null;
-    public static  URI CANCEL_REQUEST_URI = null;
+    protected static final boolean debug ;
+    public static final URI ISSUE_REQUEST_URI ;
+    public static final URI CANCEL_REQUEST_URI ;
     
     
     //***********CTOR initialized Instance Variables**************
@@ -312,10 +312,11 @@ public abstract class WSITAuthContextBase  {
                 } else if (endpointPolicy.contains(AddressingVersion.MEMBER.policyNsUri)){
                     addVer = AddressingVersion.MEMBER;
                 }
+                if(endpointPolicy.contains(optServerSecurity) || endpointPolicy.contains(optClientSecurity)){
+                    optimized = false;
+                }
             }
-            if(endpointPolicy.contains(optServerSecurity) || endpointPolicy.contains(optClientSecurity)){
-                optimized = false;
-            }
+            
             buildProtocolPolicy(endpointPolicy);
             ArrayList<Policy> policyList = new ArrayList<Policy>();
             if(endpointPolicy != null){
@@ -533,7 +534,7 @@ public abstract class WSITAuthContextBase  {
     }
     
     private void addConfigAssertions(Policy policy,SecurityPolicyHolder sph){
-        ArrayList<PolicyAssertion> tokenList = new ArrayList<PolicyAssertion>();
+        //ArrayList<PolicyAssertion> tokenList = new ArrayList<PolicyAssertion>();
         for(AssertionSet assertionSet : policy){
             for(PolicyAssertion assertion:assertionSet){
                 if(PolicyUtil.isConfigPolicyAssertion(assertion)){
@@ -555,10 +556,10 @@ public abstract class WSITAuthContextBase  {
         WSDLOperation wsdlOperation = operation.getOperation();
         QName serviceName = pipeConfig.getWSDLModel().getOwner().getName();
         QName portName = pipeConfig.getWSDLModel().getName();
-        WSDLInput input = wsdlOperation.getInput();
-        WSDLOutput output = wsdlOperation.getOutput();
-        QName inputMessageName = input.getMessage().getName();
-        QName outputMessageName = output.getMessage().getName();
+        //WSDLInput input = wsdlOperation.getInput();
+        //WSDLOutput output = wsdlOperation.getOutput();
+        //QName inputMessageName = input.getMessage().getName();
+        //QName outputMessageName = output.getMessage().getName();
         PolicyMapKey messageKey =  wsPolicyMap.createWsdlMessageScopeKey(
                 serviceName,portName,wsdlOperation.getName());
         return messageKey;
@@ -589,7 +590,7 @@ public abstract class WSITAuthContextBase  {
     
     private boolean hasTargets(NestedPolicy policy){
         AssertionSet as = policy.getAssertionSet();
-        Iterator<PolicyAssertion> paItr = as.iterator();
+        //Iterator<PolicyAssertion> paItr = as.iterator();
         boolean foundTargets = false;
         for(PolicyAssertion assertion : as){
             if(PolicyUtil.isSignedParts(assertion) || PolicyUtil.isEncryptParts(assertion)){
@@ -1204,11 +1205,11 @@ public abstract class WSITAuthContextBase  {
         //Review : Will this return operation name in all cases , doclit,rpclit, wrap / non wrap ?
         
         MessagePolicy mp = null;
-        if(operation == null){
+        //if(operation == null){
             //Body could be encrypted. Security will have to infer the
             //policy from the message till the Body is decrypted.
-            mp =  new MessagePolicy();
-        }
+        //    mp =  new MessagePolicy();
+        //}
         if (outMessagePolicyMap == null) {
             //empty message policy
             return new MessagePolicy();

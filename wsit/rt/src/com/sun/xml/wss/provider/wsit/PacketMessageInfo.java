@@ -21,7 +21,7 @@ import javax.security.auth.message.MessageInfo;
 public class PacketMessageInfo implements MessageInfo {
     Map properties = new HashMap();
     Packet reqPacket = null;
-    Packet responsePacket = null;
+    //Packet responsePacket = null;
     /** Creates a new instance of PacketMessageInfo */
     public PacketMessageInfo() {
     }
@@ -44,7 +44,7 @@ public class PacketMessageInfo implements MessageInfo {
 
     @SuppressWarnings("unchecked")
     public void setResponseMessage(Object object) {
-        responsePacket = (Packet)object;
+        //responsePacket = (Packet)object;
         properties.put("RES_PACKET", reqPacket);
     }
 

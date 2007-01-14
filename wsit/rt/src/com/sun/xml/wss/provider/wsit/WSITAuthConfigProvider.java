@@ -32,13 +32,13 @@ import javax.xml.ws.WebServiceException;
 public class WSITAuthConfigProvider implements AuthConfigProvider {
     private static final String SECURITY_POLICY_NAMESPACE_URI = 
                 "http://schemas.xmlsoap.org/ws/2005/07/securitypolicy";
-    Map properties = null;
+    //Map properties = null;
     String id = null;
     String description = "WSIT AuthConfigProvider";
     
     ClientAuthConfig clientConfig = null;
     ServerAuthConfig serverConfig = null;
-    AuthConfigFactory factory = null;
+    //AuthConfigFactory factory = null;
     
     private ReentrantReadWriteLock rwLock;
     private ReentrantReadWriteLock.ReadLock rLock;
@@ -46,8 +46,8 @@ public class WSITAuthConfigProvider implements AuthConfigProvider {
     
     /** Creates a new instance of WSITAuthConfigProvider */
     public WSITAuthConfigProvider(Map props, AuthConfigFactory factory) {
-        properties = props;
-        this.factory = factory;
+        //properties = props;
+        //this.factory = factory;
         if (factory != null) {
             factory.registerConfigProvider(this, "SOAP", null,description);
         }
@@ -59,7 +59,7 @@ public class WSITAuthConfigProvider implements AuthConfigProvider {
     public  ClientAuthConfig getClientAuthConfig(String layer, String appContext, CallbackHandler callbackHandler) throws AuthException {
         try {
             this.rLock.lock();
-            if (clientConfig != null) {
+            if (clientConfig != null) {                
                 return clientConfig;
             }
         } finally {
