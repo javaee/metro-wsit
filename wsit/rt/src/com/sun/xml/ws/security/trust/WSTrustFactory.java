@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustFactory.java,v 1.6 2007-01-11 13:15:09 raharsha Exp $
+ * $Id: WSTrustFactory.java,v 1.7 2007-01-14 07:41:26 jdg6688 Exp $
  */
 
 /*
@@ -115,27 +115,6 @@ public class WSTrustFactory {
         return contract;
     }
     
-    /**
-     * return a concrete implementor of WSTrustSourceContract
-     * <p>
-     * Note: This contract is useful when the STS is implemented as a JAXWS Provider
-     * </p>
-     * @Exception UnsupportedOperationException if this factory does not support this contract
-     */
-    public static WSTrustSourceContract newWSTrustSourceContract(final Configuration config) {
-        throw new UnsupportedOperationException("To Do");
-    }
-    
-    /**
-     * return a concrete implementor of WSTrustDomContract
-     * <p>
-     * Note: This contract is useful when the STS is implemented as a JAXWS Provider
-     * </p>
-     * @Exception UnsupportedOperationException if this factory does not support this contract
-     */
-    public static WSTrustDOMContract newWSTrustDOMContract(final Configuration config) {
-        throw new UnsupportedOperationException("To be overridden by Actual Factories");
-    }
     
     /**
      * return a concrete implementor for WS-Trust Client Contract
