@@ -109,7 +109,13 @@ public final class AppServWSRegistry {
         if(wsServiceDescriptor != null && isTCPEnabled(wsServiceDescriptor)) {
             final String contextRoot = getEndpointContextRoot(wsServiceDescriptor);
             final String urlPattern = getEndpointUrlPattern(wsServiceDescriptor);
-            final String path = contextRoot + urlPattern;
+            
+            // ContextRoot could be represented as leading slash or without (GF API changes from time to time)
+            // So we use slashed version for registries
+            final String slashedContextRoot = ensureSlash(contextRoot);
+            final String slashedUrlPattern = ensureSlash(urlPattern);
+            
+            final String path = slashedContextRoot + slashedUrlPattern;
             if (logger.isLoggable(Level.FINE)) {
                 logger.log(Level.FINE, "AppServWSRegistry.registerEndpoint: ServiceName: {0} path: {1} isEJB: {2}",
                         new Object[] {wsServiceDescriptor.getServiceName(), path, wsServiceDescriptor.implementedByEjbComponent()});
@@ -118,7 +124,7 @@ public final class AppServWSRegistry {
                     contextRoot,
                     urlPattern,
                     endpoint.getEndpointSelector());
-            addToRegistry(contextRoot, urlPattern, descriptor);
+            addToRegistry(slashedContextRoot, slashedUrlPattern, descriptor);
         }
     }
     
@@ -130,7 +136,12 @@ public final class AppServWSRegistry {
         final String contextRoot = getEndpointContextRoot(wsServiceDescriptor);
         final String urlPattern = getEndpointUrlPattern(wsServiceDescriptor);
         
-        final String path = contextRoot + urlPattern;
+        // ContextRoot could be represented as leading slash or without (GF API changes from time to time)
+        // So we use slashed version for registries
+        final String slashedContextRoot = ensureSlash(contextRoot);
+        final String slashedUrlPattern = ensureSlash(urlPattern);
+
+        final String path = slashedContextRoot + slashedUrlPattern;
         
         if (logger.isLoggable(Level.FINE)) {
             logger.log(Level.FINE, "AppServWSRegistry.deregisterEndpoint: ServiceName: {0}" +
@@ -138,14 +149,16 @@ public final class AppServWSRegistry {
                     new Object[] {wsServiceDescriptor.getWebService().getName(),
                     path, wsServiceDescriptor.implementedByEjbComponent()});
         }
-        removeFromRegistry(contextRoot, urlPattern);
+        removeFromRegistry(slashedContextRoot, slashedUrlPattern);
         WSTCPAdapterRegistryImpl.getInstance().deleteTargetFor(path);
     }
     
-    private void addToRegistry(@NotNull final String contextRoot,
-            @NotNull final String urlPattern,
+    private void addToRegistry(@NotNull String contextRoot,
+            @NotNull String urlPattern,
     @NotNull final WSEndpointDescriptor wsDescriptor) {
         
+        contextRoot = ensureSlash(contextRoot);
+        urlPattern = ensureSlash(urlPattern);
         Map<String, WSEndpointDescriptor> endpointMap = registry.get(contextRoot);
         if (endpointMap == null) {
             endpointMap = new HashMap<String, WSEndpointDescriptor>();
@@ -197,6 +210,15 @@ public final class AppServWSRegistry {
         
         return urlPattern;
     }
+
+    private @Nullable String ensureSlash(@Nullable String s) {
+        if (s != null && s.length() > 0 && s.charAt(0) != '/') {
+            return "/" + s;
+        }
+        
+        return s;
+    }
+    
     private boolean isTCPEnabled(final com.sun.enterprise.deployment.WebServiceEndpoint webServiceDesc) {
         return true;
     }

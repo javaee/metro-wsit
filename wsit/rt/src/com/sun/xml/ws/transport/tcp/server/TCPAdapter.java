@@ -105,7 +105,7 @@ public class TCPAdapter<TCPTK extends TCPAdapter.TCPToolkit> extends Adapter<TCP
         }
     }
     
-    protected class TCPToolkit extends Adapter.Toolkit implements TransportBackChannel {
+    public class TCPToolkit extends Adapter.Toolkit implements TransportBackChannel {
         protected TCPConnectionImpl connection;
         private boolean isClosed;
         

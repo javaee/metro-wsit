@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -52,7 +53,7 @@ public final class FramedMessageOutputStream extends OutputStream implements Lif
     private int channelId;
     private int messageId;
     private int contentId;
-    private Map<Integer, String> contentProps;
+    private Map<Integer, String> contentProps = new HashMap<Integer, String>(8);
     private int payloadlengthLength;
     
     /** is message framed or direct mode is used */
@@ -120,10 +121,14 @@ public final class FramedMessageOutputStream extends OutputStream implements Lif
         this.contentId = contentId;
     }
     
-    public void setContentProps(final Map<Integer, String> contentProps) {
-        this.contentProps = contentProps;
+    public void setContentProperty(int key, String value) {
+        this.contentProps.put(key, value);
     }
     
+    public void addAllContentProperties(Map<Integer, String> properties) {
+        this.contentProps.putAll(properties);
+    }
+
     public void write(final int data) throws IOException {
         if (!outputBuffer.hasRemaining()) {
             outputBuffer.flip();
@@ -180,7 +185,7 @@ public final class FramedMessageOutputStream extends OutputStream implements Lif
                 // check to change for outputBuffer.limit(sendingPayloadLength);
                 outputBuffer.limit(outputBuffer.limit() - (payloadLength - sendingPayloadLength));
             }
-
+            
             OutputWriter.flushChannel(socketChannel, frameBuffersArray);
             outputBuffer.limit(payloadLimit);
             sentMessageLength += sendingPayloadLength;
@@ -253,7 +258,7 @@ public final class FramedMessageOutputStream extends OutputStream implements Lif
         headerParamsBuffer.clear();
         messageId = -1;
         contentId = -1;
-        contentProps = null;
+        contentProps.clear();
         frameNumber = 0;
         isFlushLast = false;
         sentMessageLength = 0;

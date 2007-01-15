@@ -75,7 +75,7 @@ public final class FramedMessageInputStream extends InputStream implements LifeC
     private int channelId;
     private int contentId;
     private int messageId;
-    private final Map<Integer, String> contentParameters = new HashMap<Integer, String>();
+    private final Map<Integer, String> contentProps = new HashMap<Integer, String>(8);
     
     private boolean isReadingHeader;
     
@@ -114,7 +114,7 @@ public final class FramedMessageInputStream extends InputStream implements LifeC
     }
     
     public Map<Integer, String> getContentProps() {
-        return contentParameters;
+        return contentProps;
     }
     
     public boolean isDirectMode() {
@@ -258,7 +258,7 @@ public final class FramedMessageInputStream extends InputStream implements LifeC
             logger.log(Level.FINEST, "FramedMessageInputStream.readHeader done. " +
                     "channelId: {0}\nmessageId: {1}\ncontent-id: {2}\n" +
                     "content-params: {3}\ncurrentFrameDataSize: {4}\nisLastFrame: {5}",
-                    new Object[] {channelId, messageId, contentId, contentParameters, currentFrameDataSize, isLastFrame});
+                    new Object[] {channelId, messageId, contentId, contentProps, currentFrameDataSize, isLastFrame});
         }
     }
     
@@ -269,7 +269,7 @@ public final class FramedMessageInputStream extends InputStream implements LifeC
         for(int i=0; i<paramNumber; i++) {
             final int paramId = DataInOutUtils.readInt4(this);
             final String paramValue = dis.readUTF();
-            contentParameters.put(paramId, paramValue);
+            contentProps.put(paramId, paramValue);
         }
     }
     
@@ -420,7 +420,7 @@ public final class FramedMessageInputStream extends InputStream implements LifeC
         isReadingHeader = false;
         contentId = -1;
         messageId = -1;
-        contentParameters.clear();
+        contentProps.clear();
         receivedMessageLength = 0;
     }
     

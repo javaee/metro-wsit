@@ -22,7 +22,6 @@
 
 package com.sun.xml.ws.transport.tcp.util;
 
-import com.sun.istack.NotNull;
 import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
 import java.util.HashMap;
 import java.util.List;
@@ -32,13 +31,12 @@ import java.util.Map;
  * @author Alexey Stashok
  */
 public final class ContentType {
-    private final MimeType mimeType;
-    private final Map<String, String> parameters;
+    private MimeType mimeType;
+    private final Map<String, String> parameters = new HashMap<String, String>(4);
     
-    private ContentType(@NotNull final MimeType mimeType, @NotNull final Map<String, String> parameters) {
-        this.mimeType = mimeType;
-        this.parameters = parameters;
+    public ContentType() {
     }
+    
     public MimeType getMimeType() {
         return mimeType;
     }
@@ -47,48 +45,63 @@ public final class ContentType {
         return parameters;
     }
     
-    public static ContentType createContentType(final String contentType) {
-        final String[] entities = contentType.split(";");
-        final String mimeTypeS = entities[0].trim().toLowerCase();
-        final List<MimeType> mimeTypeList = MimeType.mimeName2mime.get(mimeTypeS);
-        assert mimeTypeList != null;
+    public void parse(final String contentType) {
+        parameters.clear();
         
-        final Map<String, String> parameters = new HashMap<String, String>(4);
-        for(MimeType mime : mimeTypeList) {
-            int ctEmbedParamsAmount = mime.getEmbeddedParams().size();
-            
-            for(int i=1; i<entities.length; i++) {
-                final String[] keyVal = entities[i].split("=");
-                assert keyVal.length == 2;
-                
-                final String key = keyVal[0].trim();
-                final String value = keyVal[1].trim();
-                final String valToCompare = mime.getEmbeddedParams().get(key);
-                if (valToCompare != null) {
-                    if (valToCompare.equals(value)) {
+        final int mimeDelim = contentType.indexOf(';');
+        final String mimeTypeS;
+        final List<MimeType> mimeTypeList;
+        
+        if (mimeDelim == -1) { // If the contentType doesn't have params
+            mimeTypeS = contentType.trim().toLowerCase();
+            mimeTypeList = MimeType.mimeName2mime.get(mimeTypeS);
+            final MimeType mimeType;
+            // If there is only one corresponding MimeType in List without embedded params - it is the one
+            if (mimeTypeList != null && mimeTypeList.size() == 1 &&
+                    ((mimeType = mimeTypeList.get(0)).getEmbeddedParams().size() == 0)) {
+                // this situation is expected when working with FI codec. Process it fast
+                this.mimeType = mimeType;
+                return;
+            }
+        } else {
+            mimeTypeS = contentType.substring(0, mimeDelim).trim().toLowerCase();
+            mimeTypeList = MimeType.mimeName2mime.get(mimeTypeS);
+        }
+        
+        if (mimeTypeList != null) {
+            // If several ContentTypes have the same mimeType - check each according to embedded params
+            for(MimeType mime : mimeTypeList) {
+                int ctEmbedParamsAmount = mime.getEmbeddedParams().size();
+                int delim = mimeDelim + 1;
+                // Scan ContentType string's params, decode them
+                while(delim < contentType.length()) {
+                    int nextDelim = contentType.indexOf(';', delim) + 1;
+                    if (nextDelim == 0) nextDelim = contentType.length();
+                    
+                    int eqDelim = contentType.indexOf('=', delim);
+                    if (eqDelim == -1) eqDelim = nextDelim;
+                    
+                    final String key = contentType.substring(delim, eqDelim).trim();
+                    final String value = contentType.substring(eqDelim, nextDelim).trim();
+                    final String valToCompare = mime.getEmbeddedParams().get(key);
+                    if (valToCompare != null && valToCompare.equals(value)) {
                         ctEmbedParamsAmount--;
+                    } else {
+                        parameters.put(key, value);
                     }
-                } else {
-                    parameters.put(key, value);
+                    
+                    delim = nextDelim;
                 }
+                
+                if (ctEmbedParamsAmount == 0) {
+                    this.mimeType = mime;
+                    return;
+                }
+
+                parameters.clear();
             }
-            
-            if (ctEmbedParamsAmount == 0) {
-                return new ContentType(mime, parameters);
-            }
-            
         }
         
         throw new AssertionError(MessagesMessages.WSTCP_0011_UNKNOWN_CONTENT_TYPE(contentType));
-    }
-    
-    public static final class EncodedContentType {
-        public final int mimeId;
-        public final Map<Integer, String> params;
-        
-        public EncodedContentType(final int mimeId, final Map<Integer, String> params) {
-            this.mimeId = mimeId;
-            this.params = params;
-        }
     }
 }

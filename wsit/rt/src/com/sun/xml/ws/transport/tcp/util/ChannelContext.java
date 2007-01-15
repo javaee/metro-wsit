@@ -73,6 +73,9 @@ public final class ChannelContext {
      */
     private Codec codec;
     
+    // Temp storage for decode content type from String representation
+    private final ContentType contentType = new ContentType();
+    
     public ChannelContext(@NotNull final ConnectionSession connectionSession, 
             @NotNull final ChannelSettings channelSettings) {
         this.connectionSession = connectionSession;
@@ -140,9 +143,10 @@ public final class ChannelContext {
     /**
      * Encodes message's content type to TCP protocol specific representation
      */
-    public @NotNull ContentType.EncodedContentType encodeContentType(@NotNull final String contentTypeS) {
+    public void encodeContentType(@NotNull final String contentTypeS) {
+        Connection connection = connectionSession.getConnection();
         logger.log(Level.FINEST, "ChannelContext.encodeContentType: {0}", contentTypeS);
-        final ContentType contentType = ContentType.createContentType(contentTypeS);
+        contentType.parse(contentTypeS);
         
         Integer mt = staticMimeTypeEncodingMap.get(contentType.getMimeType());
         if (mt == null) {
@@ -153,20 +157,22 @@ public final class ChannelContext {
         
         assert mt != null && mt != -1;
         
+        connection.setContentId(mt);
         final Map<String, String> parameters = contentType.getParameters();
-        final Map<Integer, String> encodedParameterMap = new HashMap<Integer, String>(parameters.size());
         for(Map.Entry<String, String> parameter : parameters.entrySet()) {
             final int paramId = encodeParam(parameter.getKey());
-            encodedParameterMap.put(paramId, parameter.getValue());
+            connection.setContentProperty(paramId, parameter.getValue());
         }
-        
-        return new ContentType.EncodedContentType(mt, encodedParameterMap);
     }
     
     /**
      * Decodes message's content type from TCP protocol specific representation
      */
-    public @NotNull String decodeContentType(final int mimeId, final Map<Integer, String> params) {
+    public @NotNull String decodeContentType() {
+        Connection connection = connectionSession.getConnection();
+        final int mimeId = connection.getContentId();
+        Map<Integer, String> params = connection.getContentProps();
+        
         if (logger.isLoggable(Level.FINEST)) {
             logger.log(Level.FINEST, "ChannelContext.decodeContentType mimeId: {0} params: {1}", new Object[] {mimeId, params});
         }

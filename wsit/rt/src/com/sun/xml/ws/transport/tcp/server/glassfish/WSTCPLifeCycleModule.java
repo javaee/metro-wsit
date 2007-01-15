@@ -44,7 +44,6 @@ public final class WSTCPLifeCycleModule implements LifecycleListener {
     
     private WSTCPConnector connector;
     private WSTCPDelegate delegate;
-//    private Properties props;
     
     public void handleEvent(@NotNull final LifecycleEvent lifecycleEvent) throws ServerLifecycleException {
         final int eventType = lifecycleEvent.getEventType();
@@ -56,13 +55,12 @@ public final class WSTCPLifeCycleModule implements LifecycleListener {
                 delegate = new WSTCPDelegate();
                 
                 lifecycleEvent.getLifecycleEventContext().getInitialContext().bind("TCPLifeCycle", this);
-            } catch (Exception e) {
+            } catch (NamingException e) {
                 logger.log(Level.SEVERE, e.getMessage(), e);
             }
         } else if (eventType == LifecycleEvent.READY_EVENT) {
             logger.log(Level.FINE, "WSTCPLifeCycleModule.READY_EVENT");
             try {
-                AppServWSRegistry.getInstance();
                 delegate.setCustomWSRegistry(WSTCPAdapterRegistryImpl.getInstance());
                 connector = new GrizzlyTCPConnector(delegate);
                 connector.listen();
@@ -76,7 +74,7 @@ public final class WSTCPLifeCycleModule implements LifecycleListener {
             try {
                 lifecycleEvent.getLifecycleEventContext().getInitialContext().unbind("TCPLifeCycle");
             } catch (NamingException ex) {
-                logger.log(Level.WARNING, MessagesMessages.WSTCP_0007_TRANSPORT_MODULE_NOT_REGISTERED());
+                logger.log(Level.WARNING, MessagesMessages.WSTCP_0007_TRANSPORT_MODULE_NOT_REGISTERED(), ex);
             }
             
             if (delegate != null) {

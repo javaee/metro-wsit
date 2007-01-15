@@ -33,7 +33,8 @@ import java.io.IOException;
 /**
  * @author Alexey Stashok
  */
-public final class TCP109Adapter extends TCPAdapter {
+public final class TCP109Adapter<TCPTK extends TCP109Adapter.TCP109Toolkit>
+        extends TCPAdapter<TCP109Adapter.TCP109Toolkit> {
     
     /**
      * Currently 109 deployed WS's pipeline relies on Servlet request and response
@@ -80,6 +81,11 @@ public final class TCP109Adapter extends TCPAdapter {
         }
     }
     
+    @Override
+    protected TCPAdapter.TCPToolkit createToolkit() {
+        return new TCP109Toolkit();
+    }
+
     final class TCP109Toolkit extends TCPAdapter.TCPToolkit {
         // if its Adapter from 109 deployed WS - add fake Servlet artifacts
         @Override

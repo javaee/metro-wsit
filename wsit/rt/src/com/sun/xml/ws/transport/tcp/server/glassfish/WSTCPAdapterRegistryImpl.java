@@ -107,7 +107,7 @@ public final class WSTCPAdapterRegistryImpl implements WSTCPAdapterRegistry {
                 wsEndpointDescriptor.getContextRoot(),
                 wsEndpointDescriptor.getUrlPattern(),
                 adapter.getEndpoint(),
-                new ServletFakeArtifactSet(wsEndpointDescriptor.getRequestURL()),
+                new ServletFakeArtifactSet(wsEndpointDescriptor.getRequestURL(), wsEndpointDescriptor.getUrlPattern()),
                 wsEndpointDescriptor.isEJB());
         
         return tcpAdapter;

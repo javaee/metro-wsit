@@ -63,7 +63,6 @@ public final class Connection {
     private int messageId;
     private int channelId;
     private int contentId;
-    private Map<Integer, String> contentProps;
     
     public Connection(final SocketChannel socketChannel) {
         inputStream = byteBufferInputStreamPool.take();
@@ -107,7 +106,6 @@ public final class Connection {
         
         if (FrameType.isFrameContainsParams(messageId)) {
             contentId = inputStream.getContentId();
-            contentProps = inputStream.getContentProps();
         }
     }
     
@@ -126,7 +124,6 @@ public final class Connection {
         outputStream.setChannelId(channelId);
         outputStream.setMessageId(messageId);
         outputStream.setContentId(contentId);
-        outputStream.setContentProps(contentProps);
         
         return outputStream;
     }
@@ -187,17 +184,17 @@ public final class Connection {
     }
     
     /**
-     * Get request/response contentProps
+     * Get request content properties
      */
     public Map<Integer, String> getContentProps() {
-        return contentProps;
+        return inputStream.getContentProps();
     }
     
     /**
-     * Set request/response contentProps
+     * Set response content properties
      */
-    public void setContentProps(final Map<Integer, String> contentProps) {
-        this.contentProps = contentProps;
+    public void setContentProperty(int key, String value) {
+        outputStream.setContentProperty(key, value);
     }
     
     /**

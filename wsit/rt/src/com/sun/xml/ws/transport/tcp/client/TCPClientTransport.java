@@ -25,7 +25,6 @@ package com.sun.xml.ws.transport.tcp.client;
 import com.sun.xml.ws.api.DistributedPropertySet;
 import com.sun.xml.ws.transport.tcp.io.Connection;
 import com.sun.xml.ws.transport.tcp.util.ChannelContext;
-import com.sun.xml.ws.transport.tcp.util.ContentType;
 import com.sun.xml.ws.transport.tcp.util.FrameType;
 import com.sun.xml.ws.transport.tcp.util.TCPConstants;
 import java.io.IOException;
@@ -67,9 +66,7 @@ public class TCPClientTransport extends DistributedPropertySet {
     public OutputStream openOutputStream() {
         connection.setChannelId(channelContext.getChannelId());
         connection.setMessageId(FrameType.MESSAGE);
-        final ContentType.EncodedContentType ect = channelContext.encodeContentType(contentType);
-        connection.setContentId(ect.mimeId);
-        connection.setContentProps(ect.params);
+        channelContext.encodeContentType(contentType);
         
         outputStream = connection.openOutputStream();
         return outputStream;
@@ -85,8 +82,7 @@ public class TCPClientTransport extends DistributedPropertySet {
         final int messageId = connection.getMessageId();
         status = convertToReplyStatus(messageId);
         if (FrameType.isFrameContainsParams(messageId)) {
-            contentType = channelContext.decodeContentType(connection.getContentId(),
-                    connection.getContentProps());
+            contentType = channelContext.decodeContentType();
         }
         
         return inputStream;

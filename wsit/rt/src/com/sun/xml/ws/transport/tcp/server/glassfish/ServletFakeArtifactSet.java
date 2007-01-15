@@ -58,8 +58,8 @@ public final class ServletFakeArtifactSet extends DistributedPropertySet {
         return model;
     }
     
-    public ServletFakeArtifactSet(final String requestURL) {
-        request = createRequest(requestURL);
+    public ServletFakeArtifactSet(final String requestURL, final String servletPath) {
+        request = createRequest(requestURL, servletPath);
         response = createResponse();
     }
     
@@ -73,8 +73,8 @@ public final class ServletFakeArtifactSet extends DistributedPropertySet {
         return request;
     }
 
-    private static HttpServletRequest createRequest(final String requestURL) {
-        return new FakeServletHttpRequest(requestURL);
+    private static HttpServletRequest createRequest(final String requestURL, final String servletPath) {
+        return new FakeServletHttpRequest(requestURL, servletPath);
     }
     
     private static HttpServletResponse createResponse() {
@@ -82,10 +82,14 @@ public final class ServletFakeArtifactSet extends DistributedPropertySet {
     }
 
     public static final class FakeServletHttpRequest implements HttpServletRequest {
-        private final String requestURL;
+        private final StringBuffer requestURL;
+        private final String requestURI;
+        private final String servletPath;
         
-        public FakeServletHttpRequest(final String requestURL) {
-            this.requestURL = requestURL;
+        public FakeServletHttpRequest(final String requestURL, final String servletPath) {
+            this.requestURI = requestURL;
+            this.requestURL = new StringBuffer(requestURL);
+            this.servletPath = servletPath;
         }
         
         public String getAuthType() {
@@ -153,15 +157,15 @@ public final class ServletFakeArtifactSet extends DistributedPropertySet {
         }
 
         public String getRequestURI() {
-            return null;
+            return requestURI;
         }
 
         public StringBuffer getRequestURL() {
-            return new StringBuffer(requestURL);
+            return requestURL;
         }
 
         public String getServletPath() {
-            return null;
+            return servletPath;
         }
 
         public HttpSession getSession(final boolean b) {

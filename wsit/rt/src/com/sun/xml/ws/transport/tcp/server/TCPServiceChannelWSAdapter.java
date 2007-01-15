@@ -35,7 +35,8 @@ import java.io.IOException;
 /**
  * @author Alexey Stashok
  */
-public final class TCPServiceChannelWSAdapter extends TCPAdapter {
+public final class TCPServiceChannelWSAdapter<TCPTK extends TCPServiceChannelWSAdapter.ServiceChannelTCPToolkit> 
+        extends TCPAdapter<TCPServiceChannelWSAdapter.ServiceChannelTCPToolkit> {
     private final WSTCPAdapterRegistry adapterRegistry;
     
     public TCPServiceChannelWSAdapter(@NotNull final String name,
@@ -49,8 +50,7 @@ public final class TCPServiceChannelWSAdapter extends TCPAdapter {
     @Override
     protected TCPAdapter.TCPToolkit createToolkit() {
         return new ServiceChannelTCPToolkit();
-    }
-    
+    }    
     
     class ServiceChannelTCPToolkit extends TCPAdapter.TCPToolkit {
         private final ServiceChannelWSSatellite serviceChannelWSSatellite;
