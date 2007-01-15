@@ -50,10 +50,6 @@ import com.sun.xml.ws.security.trust.elements.Entropy;
 import com.sun.xml.ws.security.trust.elements.Lifetime;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponse;
-import com.sun.xml.ws.security.trust.elements.RequestedAttachedReference;
-import com.sun.xml.ws.security.trust.elements.RequestedProofToken;
-import com.sun.xml.ws.security.trust.elements.RequestedSecurityToken;
-import com.sun.xml.ws.security.trust.elements.RequestedUnattachedReference;
 import com.sun.xml.ws.security.trust.impl.bindings.ObjectFactory;
 import com.sun.xml.ws.security.trust.impl.bindings.RequestSecurityTokenResponseType;
 import com.sun.xml.ws.security.trust.impl.bindings.RequestSecurityTokenType;
@@ -209,11 +205,12 @@ public class TrustPluginImpl implements TrustPlugin {
             throw new RuntimeException(LogStringsMessages.WST_0016_PROBLEM_IT_CTX());
         }
     }
-    
+
+    /*
     private IssuedTokenContext createIssuedTokenContext(final RequestSecurityTokenResponse rstr) {
-        final URI tokType = rstr.getTokenType();
-        final long keySize = rstr.getKeySize();
-        final URI keyType = rstr.getKeyType();
+        //final URI tokType = rstr.getTokenType();
+        //final long keySize = rstr.getKeySize();
+        //final URI keyType = rstr.getKeyType();
         final RequestedSecurityToken securityToken = rstr.getRequestedSecurityToken();
         final RequestedAttachedReference attachedRef = rstr.getRequestedAttachedReference();
         final RequestedUnattachedReference unattachedRef = rstr.getRequestedUnattachedReference();
@@ -230,6 +227,7 @@ public class TrustPluginImpl implements TrustPlugin {
         }
         return itc;
     }
+     */
     
     private RequestSecurityToken createRequest(final RequestSecurityTokenTemplate rstTemplate, final String appliesTo) throws URISyntaxException, WSTrustException, NumberFormatException {
         final URI requestType = URI.create(WSTrustConstants.ISSUE_REQUEST);
@@ -295,7 +293,7 @@ public class TrustPluginImpl implements TrustPlugin {
                 }
             }
             //do the actual mex request
-            QName[] names = doMexRequest(wsdlLocation.toString(), stsURI);
+            final QName[] names = doMexRequest(wsdlLocation.toString(), stsURI);
             if(names!=null){
                 serviceName = names[0];
                 portName = names[1];
@@ -418,9 +416,9 @@ public class TrustPluginImpl implements TrustPlugin {
             address = ((Issuer)issuer).getAddress();
             
             if ( issuer.hasNestedAssertions() ) {
-                final Iterator <PolicyAssertion> it = issuer.getNestedAssertionsIterator();
-                while ( it.hasNext() ) {
-                    final PolicyAssertion assertion = it.next();
+                final Iterator <PolicyAssertion> iterator = issuer.getNestedAssertionsIterator();
+                while ( iterator.hasNext() ) {
+                    final PolicyAssertion assertion = iterator.next();
                     if ( WSTrustUtil.isAddressingMetadata(assertion)) {
                         addressingMetadata = assertion;
                         break;
@@ -431,9 +429,9 @@ public class TrustPluginImpl implements TrustPlugin {
         
         if(addressingMetadata != null){
             if ( addressingMetadata.hasNestedAssertions() ) {
-                final Iterator <PolicyAssertion> it = addressingMetadata.getNestedAssertionsIterator();
-                while ( it.hasNext() ) {
-                    final PolicyAssertion assertion = it.next();
+                final Iterator <PolicyAssertion> iterator = addressingMetadata.getNestedAssertionsIterator();
+                while ( iterator.hasNext() ) {
+                    final PolicyAssertion assertion = iterator.next();
                     if ( WSTrustUtil.isMetadata(assertion)) {
                         metadata = assertion;
                         break;
@@ -444,9 +442,9 @@ public class TrustPluginImpl implements TrustPlugin {
         
         if(metadata != null){
             if ( metadata.hasNestedAssertions() ) {
-                final Iterator <PolicyAssertion> it = metadata.getNestedAssertionsIterator();
-                while ( it.hasNext() ) {
-                    final PolicyAssertion assertion = it.next();
+                final Iterator <PolicyAssertion> iterator = metadata.getNestedAssertionsIterator();
+                while ( iterator.hasNext() ) {
+                    final PolicyAssertion assertion = iterator.next();
                     if ( WSTrustUtil.isMetadataSection(assertion)) {
                         metadataSection = assertion;
                         break;
@@ -458,9 +456,9 @@ public class TrustPluginImpl implements TrustPlugin {
         
         if(metadataSection != null){
             if ( metadataSection.hasNestedAssertions() ) {
-                final Iterator <PolicyAssertion> it = metadataSection.getNestedAssertionsIterator();
-                while ( it.hasNext() ) {
-                    final PolicyAssertion assertion = it.next();
+                final Iterator <PolicyAssertion> iterator = metadataSection.getNestedAssertionsIterator();
+                while ( iterator.hasNext() ) {
+                    final PolicyAssertion assertion = iterator.next();
                     if ( WSTrustUtil.isMetadataReference(assertion)) {
                         metadataReference = assertion;
                         break;
@@ -471,9 +469,9 @@ public class TrustPluginImpl implements TrustPlugin {
         }
         if(metadataReference != null){
             if ( metadataReference.hasNestedAssertions() ) {
-                final Iterator <PolicyAssertion> it = metadataReference.getNestedAssertionsIterator();
-                while ( it.hasNext() ) {
-                    final PolicyAssertion assertion = it.next();
+                final Iterator <PolicyAssertion> iterator = metadataReference.getNestedAssertionsIterator();
+                while ( iterator.hasNext() ) {
+                    final PolicyAssertion assertion = iterator.next();
                     if ( PolicyUtil.isAddress(assertion)) {
                         address = (Address)assertion;
                         // return address.getURI();

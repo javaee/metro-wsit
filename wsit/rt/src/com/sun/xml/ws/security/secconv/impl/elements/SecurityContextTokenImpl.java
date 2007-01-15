@@ -1,5 +1,5 @@
 /*
- * $Id: SecurityContextTokenImpl.java,v 1.6 2007-01-10 23:42:52 manveen Exp $
+ * $Id: SecurityContextTokenImpl.java,v 1.7 2007-01-15 10:29:50 raharsha Exp $
  */
 
 /*
@@ -31,17 +31,12 @@ import com.sun.xml.ws.security.secconv.WSSCConstants;
 import com.sun.xml.ws.security.secconv.impl.bindings.ObjectFactory;
 import com.sun.xml.ws.security.secconv.impl.bindings.SecurityContextTokenType;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
-import com.sun.xml.ws.security.trust.impl.bindings.RequestSecurityTokenType;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Document;
@@ -62,7 +57,7 @@ public class SecurityContextTokenImpl extends SecurityContextTokenType implement
     private URI identifier = null;
     private List<Object> extElements = null;
     
-    private static Logger log =
+    private static final Logger log =
             Logger.getLogger(
             LogDomainConstants.WSSC_IMPL_DOMAIN,
             LogDomainConstants.WSSC_IMPL_DOMAIN_BUNDLE);
@@ -86,13 +81,13 @@ public class SecurityContextTokenImpl extends SecurityContextTokenType implement
     
     // useful for converting from JAXB to our owm impl class
     public SecurityContextTokenImpl(SecurityContextTokenType sTokenType){
-        List<Object> list = sTokenType.getAny();
+        final List<Object> list = sTokenType.getAny();
         for (int i = 0; i < list.size(); i++) {
-            Object object = list.get(i);
+            final Object object = list.get(i);
             if(object instanceof JAXBElement){
-                JAXBElement obj = (JAXBElement)object;
+                final JAXBElement obj = (JAXBElement)object;
                 
-                String local = obj.getName().getLocalPart();
+                final String local = obj.getName().getLocalPart();
                 if (local.equalsIgnoreCase("Instance")) {
                     setInstance((String)obj.getValue());
                 } else if (local.equalsIgnoreCase("Identifier")){
@@ -118,9 +113,9 @@ public class SecurityContextTokenImpl extends SecurityContextTokenType implement
         return identifier;
     }
     
-    public void setIdentifier(URI identifier) {
+    public final void setIdentifier(final URI identifier) {
         this.identifier = identifier;
-        JAXBElement<String> iElement =
+        final JAXBElement<String> iElement =
                 (new ObjectFactory()).createIdentifier(identifier.toString());
         getAny().add(iElement);
         if (log.isLoggable(Level.FINE)) {
@@ -133,14 +128,14 @@ public class SecurityContextTokenImpl extends SecurityContextTokenType implement
         return instance;
     }
     
-    public void setInstance(String instance) {
+    public final void setInstance(final String instance) {
         this.instance = instance;
-        JAXBElement<String> iElement =
+        final JAXBElement<String> iElement =
                 (new ObjectFactory()).createInstance(instance);
         getAny().add(iElement);
     }
     
-    public void setWsuId(String wsuId){
+    public final void setWsuId(final String wsuId){
         setId(wsuId);
         if (log.isLoggable(Level.FINE)) {
             log.log(Level.FINE,
@@ -158,13 +153,13 @@ public class SecurityContextTokenImpl extends SecurityContextTokenType implement
     
     public Object getTokenValue() {
         try {
-            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             dbf.setNamespaceAware(true);
-            DocumentBuilder db = dbf.newDocumentBuilder();
-            Document doc = db.newDocument();
+            final DocumentBuilder builder = dbf.newDocumentBuilder();
+            final Document doc = builder.newDocument();
             
-            javax.xml.bind.Marshaller marshaller = WSTrustElementFactory.getContext().createMarshaller();
-            JAXBElement<SecurityContextTokenType> tElement =  (new ObjectFactory()).createSecurityContextToken((SecurityContextTokenType)this);
+            final javax.xml.bind.Marshaller marshaller = WSTrustElementFactory.getContext().createMarshaller();
+            final JAXBElement<SecurityContextTokenType> tElement =  (new ObjectFactory()).createSecurityContextToken((SecurityContextTokenType)this);
             marshaller.marshal(tElement, doc);
             return doc.getDocumentElement();
             

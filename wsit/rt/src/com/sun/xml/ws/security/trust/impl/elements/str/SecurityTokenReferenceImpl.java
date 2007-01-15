@@ -1,5 +1,5 @@
 /*
- * $Id: SecurityTokenReferenceImpl.java,v 1.3 2007-01-12 14:44:14 raharsha Exp $
+ * $Id: SecurityTokenReferenceImpl.java,v 1.4 2007-01-15 10:29:53 raharsha Exp $
  */
 
 /*
@@ -108,8 +108,8 @@ public class SecurityTokenReferenceImpl extends SecurityTokenReferenceType imple
         try {
             final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             dbf.setNamespaceAware(true);
-            final DocumentBuilder db = dbf.newDocumentBuilder();
-            final Document doc = db.newDocument();
+            final DocumentBuilder builder = dbf.newDocumentBuilder();
+            final Document doc = builder.newDocument();
             
             final javax.xml.bind.Marshaller marshaller = WSTrustElementFactory.getContext().createMarshaller();
             final JAXBElement<SecurityTokenReferenceType> rstElement =  (new ObjectFactory()).createSecurityTokenReference((SecurityTokenReferenceType)this);

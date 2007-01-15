@@ -1,5 +1,5 @@
 /*
-* $Id: StatusImpl.java,v 1.1 2006-05-03 22:57:28 arungupta Exp $
+* $Id: StatusImpl.java,v 1.2 2007-01-15 10:29:52 raharsha Exp $
  */
 
 /*
@@ -26,7 +26,6 @@
 
 package com.sun.xml.ws.security.trust.impl.elements;
 
-import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.ws.security.trust.elements.Status;
 import com.sun.xml.ws.security.trust.impl.bindings.StatusType;
 

@@ -66,10 +66,14 @@ import org.w3c.dom.NodeList;
  */
 public class WSTrustUtil {
     
+    private WSTrustUtil(){
+        //private constructor
+    }
+    
     /**
      *create and return a SOAP 1.1 Fault corresponding to this exception
      */
-    public static SOAPFault createSOAP1_1Fault(WSTrustSOAPFaultException ex){
+    public static SOAPFault createSOAP11Fault(final WSTrustSOAPFaultException sfex){
         
         throw new UnsupportedOperationException("To Do");
     }
@@ -77,25 +81,26 @@ public class WSTrustUtil {
     /**
      *create and return a SOAP 1.2 Fault corresponding to this exception
      */
-    public static SOAPFault createSOAP1_2Fault(WSTrustSOAPFaultException ex){
+    public static SOAPFault createSOAP12Fault(final WSTrustSOAPFaultException sfex){
         
         throw new UnsupportedOperationException("To Do");
     }
     
-    public static String getSecurityContext(Message msg){
+    public static String getSecurityContext(final Message msg){
         
         try {
-            SOAPMessage soapMessage = msg.readAsSOAPMessage();
-            SOAPHeader header = soapMessage.getSOAPHeader();
+            final SOAPMessage soapMessage = msg.readAsSOAPMessage();
+            final SOAPHeader header = soapMessage.getSOAPHeader();
             if (header != null){
-                NodeList list = header.getElementsByTagNameNS(WSSCConstants.WSC_NAMESPACE, 
+                final NodeList list = header.getElementsByTagNameNS(WSSCConstants.WSC_NAMESPACE, 
                                                   WSSCConstants.SECURITY_CONTEXT_TOKEN);
                 SOAPElement sctElement = null;
-                if (list.getLength() > 0)
+                if (list.getLength() > 0) {
                     sctElement = (SOAPElement)list.item(0);
+                }
         
                 if (sctElement != null){
-                    SecurityContextToken sct = new SecurityContextTokenImpl(sctElement);
+                    final SecurityContextToken sct = new SecurityContextTokenImpl(sctElement);
         
                     return sct.getIdentifier().toString();   
                 }
@@ -109,60 +114,59 @@ public class WSTrustUtil {
 
     public static byte[] generateRandomSecret(final int keySize) {        
         // Create binary secret
-        SecureRandom sr = new SecureRandom();
-        byte[] secret = new byte[(int)keySize];
-        sr.nextBytes(secret);
+        final SecureRandom random = new SecureRandom();
+        final byte[] secret = new byte[(int)keySize];
+        random.nextBytes(secret);
         return secret;
     }
     
-   public static SecurityContextToken createSecurityContextToken(WSSCElementFactory eleFac) throws WSSecureConversationException{
-       String identifier = "urn:uuid:" + UUID.randomUUID().toString();
+   public static SecurityContextToken createSecurityContextToken(final WSSCElementFactory eleFac) throws WSSecureConversationException{
+       final String identifier = "urn:uuid:" + UUID.randomUUID().toString();
        URI idURI;
        try{
            idURI = new URI(identifier);
        }catch (URISyntaxException ex){
            throw new WSSecureConversationException(ex.getMessage(), ex);
        }
-       String wsuId = "uuid-" + UUID.randomUUID().toString();
+       final String wsuId = "uuid-" + UUID.randomUUID().toString();
        
-       SecurityContextToken sct = eleFac.createSecurityContextToken(idURI, null, wsuId);
-       return sct;
+       return eleFac.createSecurityContextToken(idURI, null, wsuId);
    }
    
-   public static AppliesTo createAppliesTo(String appliesTo){
+   public static AppliesTo createAppliesTo(final String appliesTo){
        EndpointReference epr = null;
        try{
-           AttributedURI uri = new AttributedURI();
+           final AttributedURI uri = new AttributedURI();
            uri.setValue(appliesTo);
            epr = new EndpointReference();
            epr.setAddress(uri);
        } catch (Exception ex){
            throw new RuntimeException(ex);
        }
-       AppliesTo ap = (new com.sun.xml.ws.policy.impl.bindings.ObjectFactory()).createAppliesTo();
-       ap.getAny().add((new com.sun.xml.ws.security.trust.impl.bindings.ObjectFactory()).createEndpointReference(epr));
+       final AppliesTo applTo = (new com.sun.xml.ws.policy.impl.bindings.ObjectFactory()).createAppliesTo();
+       applTo.getAny().add((new com.sun.xml.ws.security.trust.impl.bindings.ObjectFactory()).createEndpointReference(epr));
        
-       return ap;
+       return applTo;
    }
    
-   public static String getAppliesToURI(AppliesTo appliesTo){
-       List list = appliesTo.getAny();
+   public static String getAppliesToURI(final AppliesTo appliesTo){
+       final List list = appliesTo.getAny();
        EndpointReference epr = null;
        if (!list.isEmpty()){
             for (int i = 0; i < list.size(); i++) {
-                Object obj = list.get(i);
+                final Object obj = list.get(i);
                 if (obj instanceof EndpointReference){
                     epr = (EndpointReference)obj;
                 } else if (obj instanceof JAXBElement){
-                    JAXBElement ele = (JAXBElement)obj;    
-                    String local = ele.getName().getLocalPart();
+                    final JAXBElement ele = (JAXBElement)obj;    
+                    final String local = ele.getName().getLocalPart();
                     if (local.equalsIgnoreCase("EndpointReference")) {
                         epr = (EndpointReference)ele.getValue();
                     }
                 }
                 
                 if (epr != null){
-                    AttributedURI uri = epr.getAddress();
+                    final AttributedURI uri = epr.getAddress();
                     if (uri != null){
                         return uri.getValue();
                     }
@@ -172,7 +176,7 @@ public class WSTrustUtil {
         return null;
     }
    
-    public static boolean isMetadata(PolicyAssertion assertion ) {
+    public static boolean isMetadata(final PolicyAssertion assertion ) {
         if ( !isMEXNS(assertion)) {
             return false;
         }
@@ -189,14 +193,14 @@ public class WSTrustUtil {
     public static final String MetadataSection = "MetadataSection";
     public static final String MetadataReference = "MetadataReference";
     
-    public static boolean isMEXNS(PolicyAssertion pa) {
-        if ( MEX_NS.equals(pa.getName().getNamespaceURI()) ) {
+    public static boolean isMEXNS(final PolicyAssertion assertion) {
+        if ( MEX_NS.equals(assertion.getName().getNamespaceURI()) ) {
             return true;
         }
         return false;
     }
 
-    public static boolean isMetadataSection(PolicyAssertion assertion) {
+    public static boolean isMetadataSection(final PolicyAssertion assertion) {
         if ( !isMEXNS(assertion)) {
             return false;
         }
@@ -208,7 +212,7 @@ public class WSTrustUtil {
         return false;
     }
 
-    public static boolean isMetadataReference(PolicyAssertion assertion) {
+    public static boolean isMetadataReference(final PolicyAssertion assertion) {
         if ( !isMEXNS(assertion)) {
             return false;
         }
@@ -220,7 +224,7 @@ public class WSTrustUtil {
         return false;
     }
 
-    public static boolean isAddressingMetadata(PolicyAssertion assertion) {
+    public static boolean isAddressingMetadata(final PolicyAssertion assertion) {
         if ( !PolicyUtil.isAddressingNS(assertion)) {
             return false;
         }

@@ -1,5 +1,5 @@
 /*
- * $Id: ClaimsImpl.java,v 1.7 2007-01-13 11:39:13 manveen Exp $
+ * $Id: ClaimsImpl.java,v 1.8 2007-01-15 10:29:51 raharsha Exp $
  */
 
 /*
@@ -68,8 +68,8 @@ public class ClaimsImpl extends ClaimsType implements Claims {
     public static ClaimsType fromElement(final org.w3c.dom.Element element)
     throws WSTrustException {
         try {
-            final javax.xml.bind.Unmarshaller u = WSTrustElementFactory.getContext().createUnmarshaller();
-            return (ClaimsType)u.unmarshal(element);
+            final javax.xml.bind.Unmarshaller unmarshaller = WSTrustElementFactory.getContext().createUnmarshaller();
+            return (ClaimsType)unmarshaller.unmarshal(element);
         } catch (JAXBException ex) {
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0021_ERROR_UNMARSHAL_DOM_ELEMENT(), ex);

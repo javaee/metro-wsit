@@ -127,7 +127,7 @@ public class WSSCPlugin {
         }
         
         int skl = DEFAULT_KEY_SIZE;
-        boolean requireClientEntropy = true;
+        boolean reqClientEntropy = true;
         if(symBinding!=null){
             final AlgorithmSuite algoSuite = symBinding.getAlgorithmSuite();
             skl = algoSuite.getMinSKLAlgorithm();
@@ -141,7 +141,7 @@ public class WSSCPlugin {
         }
         if(trust10 != null){
             final Set trustReqdProps = trust10.getRequiredProperties();
-            requireClientEntropy = trustReqdProps.contains(Constants.REQUIRE_CLIENT_ENTROPY);
+            reqClientEntropy = trustReqdProps.contains(Constants.REQUIRE_CLIENT_ENTROPY);
         }
         
         //==============================
@@ -149,7 +149,7 @@ public class WSSCPlugin {
         //==============================
         RequestSecurityToken rst = null;
         try{
-            rst = createRequestSecurityToken(requireClientEntropy,skl);
+            rst = createRequestSecurityToken(reqClientEntropy,skl);
         } catch (WSSecureConversationException ex){
             log.log(Level.SEVERE,
                     LogStringsMessages.WSSC_0024_ERROR_CREATING_RST(""), ex);
@@ -175,8 +175,7 @@ public class WSSCPlugin {
     }
     
     private AssertionSet getAssertions(final SecureConversationToken scToken) {
-        final NestedPolicy policy = scToken.getBootstrapPolicy();
-        return policy.getAssertionSet();
+        return scToken.getBootstrapPolicy().getAssertionSet();
     }
     
     public IssuedTokenContext processCancellation(final IssuedTokenContext ctx, final WSDLPort wsdlPort, final WSBinding binding, final Pipe securityPipe, final Marshaller marshaller, final Unmarshaller unmarshaller, final String endPointAddress, final AddressingVersion addVer){
@@ -285,15 +284,15 @@ public class WSSCPlugin {
         return rstr;
     }
     
-    private RequestSecurityToken createRequestSecurityToken(final boolean requireClientEntropy,final int skl) throws WSSecureConversationException, WSTrustException{
+    private RequestSecurityToken createRequestSecurityToken(final boolean reqClientEntropy,final int skl) throws WSSecureConversationException, WSTrustException{
         
         final URI tokenType = URI.create(WSSCConstants.SECURITY_CONTEXT_TOKEN_TYPE);
         final URI requestType = URI.create(WSTrustConstants.ISSUE_REQUEST);
-        final SecureRandom sr = new SecureRandom();
+        final SecureRandom random = new SecureRandom();
         final byte[] rawValue = new byte[skl/8];
-        sr.nextBytes(rawValue);
+        random.nextBytes(rawValue);
         final BinarySecret secret = eleFac.createBinarySecret(rawValue, BinarySecret.NONCE_KEY_TYPE);
-        final Entropy entropy = requireClientEntropy?eleFac.createEntropy(secret):null;
+        final Entropy entropy = reqClientEntropy?eleFac.createEntropy(secret):null;
         
         RequestSecurityToken rst = null;
         try {

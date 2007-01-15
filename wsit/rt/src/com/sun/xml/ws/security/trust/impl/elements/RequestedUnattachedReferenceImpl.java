@@ -1,5 +1,5 @@
 /*
- * $Id: RequestedUnattachedReferenceImpl.java,v 1.3 2007-01-12 14:44:13 raharsha Exp $
+ * $Id: RequestedUnattachedReferenceImpl.java,v 1.4 2007-01-15 10:29:52 raharsha Exp $
  */
 
 /*
@@ -58,7 +58,7 @@ public class RequestedUnattachedReferenceImpl extends RequestedReferenceType imp
         return str;
     }
 
-    public void setSTR(SecurityTokenReference str) {
+    public final void setSTR(final SecurityTokenReference str) {
         if (str != null) {
             setSecurityTokenReference((SecurityTokenReferenceType)str);
         }

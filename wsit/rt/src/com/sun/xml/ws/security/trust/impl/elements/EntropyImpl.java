@@ -1,5 +1,5 @@
 /*
- * $Id: EntropyImpl.java,v 1.7 2007-01-13 11:39:13 manveen Exp $
+ * $Id: EntropyImpl.java,v 1.8 2007-01-15 10:29:51 raharsha Exp $
  */
 
 /*
@@ -109,8 +109,8 @@ public class EntropyImpl extends EntropyType implements Entropy {
     public static EntropyType fromElement(final org.w3c.dom.Element element)
     throws WSTrustException {
         try {
-            final javax.xml.bind.Unmarshaller u = WSTrustElementFactory.getContext().createUnmarshaller();
-            return (EntropyType)u.unmarshal(element);
+            final javax.xml.bind.Unmarshaller unmarshaller = WSTrustElementFactory.getContext().createUnmarshaller();
+            return (EntropyType)unmarshaller.unmarshal(element);
         } catch (JAXBException ex) {
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0021_ERROR_UNMARSHAL_DOM_ELEMENT(), ex);

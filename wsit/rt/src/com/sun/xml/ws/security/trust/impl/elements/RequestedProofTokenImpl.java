@@ -1,5 +1,5 @@
 /*
- * $Id: RequestedProofTokenImpl.java,v 1.8 2007-01-13 11:39:14 manveen Exp $
+ * $Id: RequestedProofTokenImpl.java,v 1.9 2007-01-15 10:29:52 raharsha Exp $
  */
 
 /*
@@ -169,8 +169,8 @@ public class RequestedProofTokenImpl extends RequestedProofTokenType implements 
     public static RequestedProofTokenType fromElement(final org.w3c.dom.Element element)
     throws WSTrustException {
         try {
-            final javax.xml.bind.Unmarshaller u = WSTrustElementFactory.getContext().createUnmarshaller();
-            return (RequestedProofTokenType)u.unmarshal(element);
+            final javax.xml.bind.Unmarshaller unmarshaller = WSTrustElementFactory.getContext().createUnmarshaller();
+            return (RequestedProofTokenType)unmarshaller.unmarshal(element);
         } catch (JAXBException ex) {
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0021_ERROR_UNMARSHAL_DOM_ELEMENT(), ex);

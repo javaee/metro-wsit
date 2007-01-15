@@ -55,6 +55,7 @@ import java.net.URI;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -73,16 +74,16 @@ public class WSTrustClientContractImpl implements WSTrustClientContract {
     
     //private static final int DEFAULT_KEY_SIZE = 256;
     
-    private final Configuration config;
+    //private final Configuration config;
     
     private static final SimpleDateFormat calendarFormatter
-            = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'sss'Z'");
+            = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'sss'Z'",Locale.getDefault());
     
     /**
      * Creates a new instance of WSTrustClientContractImpl
      */
     public WSTrustClientContractImpl(Configuration config) {
-        this.config = config;
+        //this.config = config;
     }
     
     /**
@@ -179,12 +180,14 @@ public class WSTrustClientContractImpl implements WSTrustClientContract {
             final Lifetime lifetime = rstr.getLifetime();
             final AttributedDateTime created = lifetime.getCreated();
             final AttributedDateTime expires = lifetime.getExpires();
-            final Date dateCreated = calendarFormatter.parse(created.getValue());
-            final Date dateExpires = calendarFormatter.parse(expires.getValue());
-            
-            // populate the IssuedTokenContext
-            context.setCreationTime(dateCreated);
-            context.setExpirationTime(dateExpires);
+            synchronized (calendarFormatter){
+                final Date dateCreated = calendarFormatter.parse(created.getValue());
+                final Date dateExpires = calendarFormatter.parse(expires.getValue());
+                
+                // populate the IssuedTokenContext
+                context.setCreationTime(dateCreated);
+                context.setExpirationTime(dateExpires);
+            }
         }catch(ParseException ex){
             throw new WSTrustException(ex.getMessage(), ex);
         }

@@ -38,7 +38,7 @@ public class WSSecureConversationException extends WSTrustException {
         super(msg);
     }
      
-    public WSSecureConversationException(WSTrustException ex){
-        super(ex.getMessage(), ex.getCause());
+    public WSSecureConversationException(WSTrustException tex){
+        super(tex.getMessage(), tex.getCause());
     }
 }

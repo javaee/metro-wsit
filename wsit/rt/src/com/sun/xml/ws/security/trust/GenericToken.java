@@ -30,7 +30,6 @@ package com.sun.xml.ws.security.trust;
 
 import com.sun.xml.ws.security.opt.api.SecurityHeaderElement;
 import java.util.UUID;
-import javax.xml.bind.JAXBElement;
 
 import com.sun.xml.ws.security.Token;
 
@@ -112,7 +111,7 @@ public class GenericToken implements Token{
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(final String id) {
         this.id = id;
     }
 }

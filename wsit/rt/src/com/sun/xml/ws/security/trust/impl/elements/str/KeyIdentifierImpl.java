@@ -1,5 +1,5 @@
 /*
- * $Id: KeyIdentifierImpl.java,v 1.2 2006-10-17 05:45:47 raharsha Exp $
+ * $Id: KeyIdentifierImpl.java,v 1.3 2007-01-15 10:29:52 raharsha Exp $
  */
 
 /*
@@ -72,14 +72,6 @@ public class KeyIdentifierImpl extends KeyIdentifierType implements KeyIdentifie
         }
         
         return encType;
-    }
-    
-    public void setValue (String value){
-        super.setValue(value);
-    }
-    
-    public String getValue (){
-        return super.getValue();
     }
     
     public String getType(){

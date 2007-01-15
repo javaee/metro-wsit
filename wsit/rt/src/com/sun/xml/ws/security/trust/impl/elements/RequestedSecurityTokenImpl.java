@@ -1,5 +1,5 @@
 /*
- * $Id: RequestedSecurityTokenImpl.java,v 1.5 2007-01-13 11:39:14 manveen Exp $
+ * $Id: RequestedSecurityTokenImpl.java,v 1.6 2007-01-15 10:29:52 raharsha Exp $
  */
 
 /*
@@ -43,8 +43,6 @@ import com.sun.xml.ws.security.secconv.WSSCConstants;
 import com.sun.xml.ws.security.secconv.impl.elements.SecurityContextTokenImpl;
 import com.sun.xml.ws.security.secconv.impl.bindings.SecurityContextTokenType;
 
-import com.sun.xml.wss.saml.assertion.saml11.jaxb20.Assertion;
-import com.sun.xml.wss.saml.internal.saml11.jaxb20.AssertionType;
 
 import com.sun.istack.NotNull;
 
@@ -61,34 +59,35 @@ import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
  */
 public class RequestedSecurityTokenImpl extends RequestedSecurityTokenType implements RequestedSecurityToken {
 
-    private static Logger log =
+    private static final Logger log =
             Logger.getLogger(
             LogDomainConstants.TRUST_IMPL_DOMAIN,
             LogDomainConstants.TRUST_IMPL_DOMAIN_BUNDLE);
 
     Token containedToken = null;
     
-    private final static QName SecurityContextToken_QNAME = 
+    private final static QName SCT_QNAME = 
             new QName("http://schemas.xmlsoap.org/ws/2005/02/sc", "SecurityContextToken");
     
-    private final static QName SAML11_Assertion_QNAME = 
-            new QName("urn:oasis:names:tc:SAML:1.0:assertion", "Assertion");
+    //private final static QName SAML11_Assertion_QNAME = 
+      //      new QName("urn:oasis:names:tc:SAML:1.0:assertion", "Assertion");
     
-    private final static QName EncryptedData_QNAME = new QName("http://www.w3.org/2001/04/xmlenc#", "EncryptedData");
+    //private final static QName EncryptedData_QNAME = new QName("http://www.w3.org/2001/04/xmlenc#", "EncryptedData");
     
     /**
       * Empty default constructor.
       */
     public RequestedSecurityTokenImpl() {
+        //Empty default constructor.
     }
     
     public RequestedSecurityTokenImpl(@NotNull final RequestedSecurityTokenType rdstType){
-        Object rdst = rdstType.getAny();
+        final Object rdst = rdstType.getAny();
         if (rdst instanceof JAXBElement){
-            JAXBElement rdstEle = (JAXBElement)rdst; 
-           QName name = rdstEle.getName();
-            if(SecurityContextToken_QNAME.equals(name)){
-                SecurityContextTokenType sctType = (SecurityContextTokenType)rdstEle.getValue();
+            final JAXBElement rdstEle = (JAXBElement)rdst; 
+           final QName name = rdstEle.getName();
+            if(SCT_QNAME.equals(name)){
+                final SecurityContextTokenType sctType = (SecurityContextTokenType)rdstEle.getValue();
                 setToken(new SecurityContextTokenImpl(sctType));
             }/*else if(EncryptedData_QNAME.equals(name)){
                EncryptedDataType edType = (EncryptedDataType)rdstEle.getValue();
@@ -125,12 +124,11 @@ public class RequestedSecurityTokenImpl extends RequestedSecurityTokenType imple
     public static RequestedSecurityTokenType fromElement(@NotNull final org.w3c.dom.Element element)
         throws WSTrustException {
         try {
-            JAXBContext jc =
+            final JAXBContext context =
                 WSTrustElementFactory.getContext();
-            javax.xml.bind.Unmarshaller u = jc.createUnmarshaller();
+            final javax.xml.bind.Unmarshaller unmarshaller = context.createUnmarshaller();
             
-            JAXBElement<RequestedSecurityTokenType> rstType = u.unmarshal(element, RequestedSecurityTokenType.class);
-            return rstType.getValue();
+            return unmarshaller.unmarshal(element, RequestedSecurityTokenType.class).getValue();
         } catch (JAXBException ex) {
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0021_ERROR_UNMARSHAL_DOM_ELEMENT(), ex);                        
@@ -145,15 +143,15 @@ public class RequestedSecurityTokenImpl extends RequestedSecurityTokenType imple
         return containedToken;
     }
     
-    public void setToken(Token token) {
+    public final void setToken(final Token token) {
         if (token != null)  {
-            String tokenType = token.getType();
+            final String tokenType = token.getType();
             if (WSSCConstants.SECURITY_CONTEXT_TOKEN.equals(tokenType)){
-                JAXBElement<SecurityContextTokenType> sctElement =
+                final JAXBElement<SecurityContextTokenType> sctElement =
                 (new com.sun.xml.ws.security.secconv.impl.bindings.ObjectFactory()).createSecurityContextToken((SecurityContextTokenType)token);
                 setAny(sctElement);
             }else {
-                Element element = (Element)token.getTokenValue();
+                final Element element = (Element)token.getTokenValue();
                 setAny(element);
             }
         }

@@ -24,7 +24,6 @@ package com.sun.xml.ws.security.trust.sts;
 
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.security.IssuedTokenContext;
-import com.sun.xml.ws.security.Token;
 import com.sun.xml.ws.security.impl.IssuedTokenContextImpl;
 import com.sun.xml.ws.security.impl.policy.Constants;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
@@ -44,7 +43,6 @@ import java.util.Iterator;
 import javax.xml.namespace.QName;
 
 import javax.security.auth.callback.CallbackHandler;
-import javax.xml.transform.dom.DOMSource;
 
 import javax.xml.ws.Provider;
 import javax.xml.ws.WebServiceException;
@@ -131,6 +129,12 @@ public abstract class BaseSTSImpl implements Provider<Source> {
      */
     public static final String END_POINT = "endPoint";
     
+    private static final QName Q_EK = new QName("",ENCRYPT_KEY);
+    
+    private static final QName Q_ET = new QName("",ENCRYPT_TOKEN);
+    
+    private static final QName Q_EP = new QName("",END_POINT);
+    
     
   /** Implementation of the invoke method of the Provider interface
    *
@@ -141,19 +145,19 @@ public abstract class BaseSTSImpl implements Provider<Source> {
    *          of ProtocolException to control the protocol level
    *          representation of the exception.
   **/
-    public Source invoke(Source rstElement){
+    public Source invoke(final Source rstElement){
         
         Source rstrEle = null;
         try{
             // Get RequestSecurityToken
-            WSTrustElementFactory eleFac = WSTrustElementFactory.newInstance();
-            RequestSecurityToken rst = eleFac.createRSTFrom(rstElement);
-            String tokenType = null;
+            final WSTrustElementFactory eleFac = WSTrustElementFactory.newInstance();
+            final RequestSecurityToken rst = eleFac.createRSTFrom(rstElement);
+            String tokenType = null;            
             
             String appliesTo = null;
-            AppliesTo ap = rst.getAppliesTo();
-            if(ap != null){
-                appliesTo = WSTrustUtil.getAppliesToURI(ap);
+            final AppliesTo applTo = rst.getAppliesTo();
+            if(applTo != null){
+                appliesTo = WSTrustUtil.getAppliesToURI(applTo);
             }
             
             if (appliesTo == null){
@@ -163,7 +167,7 @@ public abstract class BaseSTSImpl implements Provider<Source> {
             if(rst.getTokenType()!=null){
                 tokenType = rst.getTokenType().toString();
             }
-            STSConfiguration config = getConfiguration();
+            final STSConfiguration config = getConfiguration();
             if(rst.getRequestType().toString().equals(WSTrustConstants.ISSUE_REQUEST)){
                 rstrEle = issue(config, appliesTo, eleFac, rst);                
             }else if(rst.getRequestType().toString().equals(WSTrustConstants.CANCEL_REQUEST)){
@@ -178,7 +182,7 @@ public abstract class BaseSTSImpl implements Provider<Source> {
                 rstrEle = validate(config, appliesTo, eleFac, rst);
             }            
         } catch (Exception ex){
-            ex.printStackTrace();
+            //ex.printStackTrace();
             throw new WebServiceException(ex);
         }
         
@@ -186,13 +190,13 @@ public abstract class BaseSTSImpl implements Provider<Source> {
     }
 
     STSConfiguration getConfiguration() {
-        STSConfiguration config = new STSConfiguration();
+        final STSConfiguration config = new STSConfiguration();
         
-        MessageContext msgCtx = getMessageContext();
-        Iterator it = (Iterator)msgCtx.get(
+        final MessageContext msgCtx = getMessageContext();
+        final Iterator iterator = (Iterator)msgCtx.get(
                 Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS);
-        CallbackHandler handler = (CallbackHandler)msgCtx.get(WSTrustConstants.STS_CALL_BACK_HANDLER);
-        if (it == null){
+        final CallbackHandler handler = (CallbackHandler)msgCtx.get(WSTrustConstants.STS_CALL_BACK_HANDLER);
+        if (iterator == null){
             throw new WebServiceException("STS configuration information is not available");
         }
         String impl = DEFAULT_IMPL;
@@ -204,17 +208,17 @@ public abstract class BaseSTSImpl implements Provider<Source> {
         String endpointUri = null;
         String tokenType = null;
         String keyType = null;
-        while(it.hasNext()) {
-            PolicyAssertion as = (PolicyAssertion)it.next();
-            if (!STS_CONFIGURATION.equals(as.getName().getLocalPart())) {
+        while(iterator.hasNext()) {
+            final PolicyAssertion assertion = (PolicyAssertion)iterator.next();
+            if (!STS_CONFIGURATION.equals(assertion.getName().getLocalPart())) {
                 continue;
             }
-            encKey = Boolean.parseBoolean(as.getAttributeValue(new QName("",ENCRYPT_KEY)));
-            encToken = Boolean.parseBoolean(as.getAttributeValue(new QName("",ENCRYPT_TOKEN)));
-            Iterator<PolicyAssertion> stsConfig =
-                    as.getNestedAssertionsIterator();
+            encKey = Boolean.parseBoolean(assertion.getAttributeValue(Q_EK));
+            encToken = Boolean.parseBoolean(assertion.getAttributeValue(Q_ET));
+            final Iterator<PolicyAssertion> stsConfig =
+                    assertion.getNestedAssertionsIterator();
             while(stsConfig.hasNext()){
-                PolicyAssertion serviceSTSPolicy = stsConfig.next();
+                final PolicyAssertion serviceSTSPolicy = stsConfig.next();
                 if(LIFETIME.equals(serviceSTSPolicy.getName().getLocalPart())){
                     timeout = Integer.parseInt(serviceSTSPolicy.getValue());
                     continue;
@@ -229,21 +233,21 @@ public abstract class BaseSTSImpl implements Provider<Source> {
                 }
                 
                 if(SERVICE_PROVIDERS.equals(serviceSTSPolicy.getName().getLocalPart())){
-                    Iterator<PolicyAssertion> serviceProviders =
+                    final Iterator<PolicyAssertion> serviceProviders =
                     serviceSTSPolicy.getNestedAssertionsIterator();
                     while(serviceProviders.hasNext()){
-                        PolicyAssertion serviceProvider = serviceProviders.next();
-                        endpointUri = serviceProvider.getAttributeValue(new QName("",END_POINT));
-                        TrustSPMetadata data = new TrustSPMetadata(endpointUri);
-                        Iterator<PolicyAssertion> spConfig = serviceProvider.getNestedAssertionsIterator();
+                        final PolicyAssertion serviceProvider = serviceProviders.next();
+                        endpointUri = serviceProvider.getAttributeValue(Q_EP);
+                        final TrustSPMetadata data = new TrustSPMetadata(endpointUri);
+                        final Iterator<PolicyAssertion> spConfig = serviceProvider.getNestedAssertionsIterator();
                         while(spConfig.hasNext()){
-                            PolicyAssertion pa = spConfig.next();
-                            if(ALIAS.equals(pa.getName().getLocalPart())){
-                                alias = pa.getValue();
-                            }else if (TOKEN_TYPE.equals(pa.getName().getLocalPart())){
-                                tokenType = pa.getValue();
-                            }else if (KEY_TYPE.equals(pa.getName().getLocalPart())){
-                                keyType = pa.getValue();
+                            final PolicyAssertion policy = spConfig.next();
+                            if(ALIAS.equals(policy.getName().getLocalPart())){
+                                alias = policy.getValue();
+                            }else if (TOKEN_TYPE.equals(policy.getName().getLocalPart())){
+                                tokenType = policy.getValue();
+                            }else if (KEY_TYPE.equals(policy.getName().getLocalPart())){
+                                keyType = policy.getValue();
                             }
                         }
                         data.setType(impl);
@@ -276,16 +280,16 @@ public abstract class BaseSTSImpl implements Provider<Source> {
             throws WSTrustException {
         
         // Create the RequestSecurityTokenResponse message
-        WSTrustContract contract = WSTrustFactory.newWSTrustContract(config, 
+        final WSTrustContract contract = WSTrustFactory.newWSTrustContract(config, 
                 appliesTo);
-        IssuedTokenContext context = new IssuedTokenContextImpl();
+        final IssuedTokenContext context = new IssuedTokenContextImpl();
         try {
             context.setRequestorSubject(SubjectAccessor.getRequesterSubject(getMessageContext()));
         } catch (XWSSecurityException ex) {
             throw new WSTrustException("error getting subject",ex);
         }
 
-        RequestSecurityTokenResponse rstr = contract.issue(rst, context, null);
+        final RequestSecurityTokenResponse rstr = contract.issue(rst, context, null);
         
     /*    Token samlToken = rstr.getRequestedSecurityToken().getToken();
         rstr.getRequestedSecurityToken().setAny(null);
@@ -313,11 +317,11 @@ public abstract class BaseSTSImpl implements Provider<Source> {
         Source rstrEle;
 
         // Create the RequestSecurityTokenResponse message
-        WSTrustContract contract = WSTrustFactory.newWSTrustContract(config, 
+        final WSTrustContract contract = WSTrustFactory.newWSTrustContract(config, 
                 appliesTo);
-        IssuedTokenContext context = new IssuedTokenContextImpl();
+        final IssuedTokenContext context = new IssuedTokenContextImpl();
         
-        RequestSecurityTokenResponse rstr = contract.renew(rst, context);
+        final RequestSecurityTokenResponse rstr = contract.renew(rst, context);
 
         rstrEle = eleFac.toSource(rstr);
         return rstrEle;
@@ -335,11 +339,11 @@ public abstract class BaseSTSImpl implements Provider<Source> {
         Source rstrEle;
 
         // Create the RequestSecurityTokenResponse message
-        WSTrustContract contract = WSTrustFactory.newWSTrustContract(config, 
+        final WSTrustContract contract = WSTrustFactory.newWSTrustContract(config, 
                 appliesTo);
-        IssuedTokenContext context = new IssuedTokenContextImpl();
+        final IssuedTokenContext context = new IssuedTokenContextImpl();
         
-        RequestSecurityTokenResponse rstr = contract.validate(rst, context);
+        final RequestSecurityTokenResponse rstr = contract.validate(rst, context);
 
         rstrEle = eleFac.toSource(rstr);
         return rstrEle;

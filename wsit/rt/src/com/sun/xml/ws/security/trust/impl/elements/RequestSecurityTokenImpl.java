@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityTokenImpl.java,v 1.9 2007-01-13 11:39:14 manveen Exp $
+ * $Id: RequestSecurityTokenImpl.java,v 1.10 2007-01-15 10:29:52 raharsha Exp $
  */
 
 /*
@@ -132,7 +132,7 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
     public RequestSecurityTokenImpl(URI tokenType, URI requestType,
             URI context, AppliesTo scopes,
             Claims claims, Entropy entropy,
-            Lifetime lt, URI algorithm) {
+            Lifetime lifetime, URI algorithm) {
         setTokenType(tokenType);
         setRequestType(requestType);
         if (context != null) {
@@ -147,8 +147,8 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
         if (entropy !=null) {
             setEntropy(entropy);
         }
-        if (lt!=null) {
-            setLifetime(lt);
+        if (lifetime!=null) {
+            setLifetime(lifetime);
         }
         if (algorithm !=null) {
             setComputedKeyAlgorithm(algorithm);
@@ -491,10 +491,10 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
         return encryptWith;
     }
     
-    public final void setDelegateTo(final DelegateTo to) {
-        this.delegateTo = to;
+    public final void setDelegateTo(final DelegateTo delegateTo) {
+        this.delegateTo = delegateTo;
         final JAXBElement<DelegateToType> dtElement =
-                (new ObjectFactory()).createDelegateTo((DelegateToType)to);
+                (new ObjectFactory()).createDelegateTo((DelegateToType)delegateTo);
         getAny().add(dtElement);
     }
     

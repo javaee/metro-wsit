@@ -1,5 +1,5 @@
 /*
- * $Id: SignChallengeResponseImpl.java,v 1.1 2006-05-03 22:57:28 arungupta Exp $
+ * $Id: SignChallengeResponseImpl.java,v 1.2 2007-01-15 10:29:52 raharsha Exp $
  */
 
 /*
@@ -37,6 +37,6 @@ import com.sun.xml.ws.security.trust.impl.bindings.SignChallengeType;
 public class SignChallengeResponseImpl extends SignChallengeType implements SignChallengeResponse {    
 
     public SignChallengeResponseImpl (){
-        
+        //Empty default constructor
     }
 }

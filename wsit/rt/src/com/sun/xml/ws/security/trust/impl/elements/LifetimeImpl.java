@@ -1,5 +1,5 @@
 /*
- * $Id: LifetimeImpl.java,v 1.7 2007-01-13 11:39:13 manveen Exp $
+ * $Id: LifetimeImpl.java,v 1.8 2007-01-15 10:29:52 raharsha Exp $
  */
 
 /*
@@ -86,8 +86,8 @@ public class LifetimeImpl extends LifetimeType implements Lifetime {
     public static LifetimeType fromElement(@NotNull final org.w3c.dom.Element element)
     throws WSTrustException {
         try {
-            final javax.xml.bind.Unmarshaller u = WSTrustElementFactory.getContext().createUnmarshaller();
-            return (LifetimeType)u.unmarshal(element);
+            final javax.xml.bind.Unmarshaller unmarshaller = WSTrustElementFactory.getContext().createUnmarshaller();
+            return (LifetimeType)unmarshaller.unmarshal(element);
         } catch ( JAXBException ex) {
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0021_ERROR_UNMARSHAL_DOM_ELEMENT());

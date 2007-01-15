@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustElementFactory.java,v 1.7 2007-01-11 13:15:09 raharsha Exp $
+ * $Id: WSTrustElementFactory.java,v 1.8 2007-01-15 10:29:50 raharsha Exp $
  */
 
 /*
@@ -104,7 +104,7 @@ public abstract class WSTrustElementFactory {
         try {
             jaxbContext = JAXBContext.newInstance("com.sun.xml.ws.security.trust.impl.bindings:com.sun.xml.ws.security.secconv.impl.bindings:com.sun.xml.ws.security.secext10:com.sun.xml.ws.policy.impl.bindings");
         } catch (JAXBException jbe) {
-            throw new RuntimeException(jbe.getMessage());
+            throw new RuntimeException(jbe.getMessage(),jbe);
         }        
     }
     

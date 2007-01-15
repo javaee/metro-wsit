@@ -1,5 +1,5 @@
 /*
- * $Id: LogDomainConstants.java,v 1.1 2006-09-18 23:00:54 manveen Exp $
+ * $Id: LogDomainConstants.java,v 1.2 2007-01-15 10:29:50 raharsha Exp $
  */
 
 /*
@@ -34,7 +34,7 @@ package com.sun.xml.ws.security.secconv.logging;
  * This interface defines a number of constants pertaining to Logging domains.
  */
 
-public interface LogDomainConstants {
+public class LogDomainConstants {
     
     public static final String MODULE_TOP_LEVEL_DOMAIN =
             "javax.enterprise.resource.xml.webservices.security.secconv";

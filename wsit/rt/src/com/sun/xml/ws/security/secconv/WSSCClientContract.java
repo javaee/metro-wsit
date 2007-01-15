@@ -61,14 +61,14 @@ public class WSSCClientContract implements WSTrustClientContract{
             LogDomainConstants.WSSC_IMPL_DOMAIN,
             LogDomainConstants.WSSC_IMPL_DOMAIN_BUNDLE);
     
-    private Configuration config;
+    //private final Configuration config;
     private static final SimpleDateFormat calendarFormatter
             = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'sss'Z'",Locale.getDefault());
     
     private static final int DEFAULT_KEY_SIZE = 256;
     
     public WSSCClientContract(Configuration config) {
-        this.config = config;
+        //this.config = config;
     }
     
     /**
@@ -79,8 +79,8 @@ public class WSSCClientContract implements WSTrustClientContract{
             final RequestSecurityToken rst, final RequestSecurityTokenResponse rstr, final IssuedTokenContext context) throws WSSecureConversationException {
         if (rst.getRequestType().toString().equals(WSTrustConstants.ISSUE_REQUEST)){
             // ToDo
-            final AppliesTo requestAppliesTo = rst.getAppliesTo();
-            final AppliesTo responseAppliesTo = rstr.getAppliesTo();
+            //final AppliesTo requestAppliesTo = rst.getAppliesTo();
+            //final AppliesTo responseAppliesTo = rstr.getAppliesTo();
             
             final RequestedSecurityToken securityToken = rstr.getRequestedSecurityToken();
             
@@ -136,7 +136,7 @@ public class WSSCClientContract implements WSTrustClientContract{
     private byte[] getKey(final RequestSecurityTokenResponse rstr, final RequestedProofToken proofToken, final RequestSecurityToken rst) throws UnsupportedOperationException, WSSecureConversationException, WSSecureConversationException, UnsupportedOperationException {
         byte[] key = null;
         if (proofToken != null){
-            String proofTokenType = proofToken.getProofTokenType();
+            final String proofTokenType = proofToken.getProofTokenType();
             if (RequestedProofToken.COMPUTED_KEY_TYPE.equals(proofTokenType)){
                 key = computeKey(rstr, proofToken, rst);
             } else if (RequestedProofToken.TOKEN_REF_TYPE.equals(proofTokenType)){
@@ -146,7 +146,7 @@ public class WSSCClientContract implements WSTrustClientContract{
                 //ToDo
                 throw new UnsupportedOperationException("To Do");
             } else if (RequestedProofToken.BINARY_SECRET_TYPE.equals(proofTokenType)){
-                BinarySecret binarySecret = proofToken.getBinarySecret();
+                final BinarySecret binarySecret = proofToken.getBinarySecret();
                 key = binarySecret.getRawValue();
             } else{
                 log.log(Level.SEVERE,
@@ -164,12 +164,14 @@ public class WSSCClientContract implements WSTrustClientContract{
             final Lifetime lifetime = rstr.getLifetime();
             final AttributedDateTime created = lifetime.getCreated();
             final AttributedDateTime expires = lifetime.getExpires();
-            final Date dateCreated = calendarFormatter.parse(created.getValue());
-            final Date dateExpires = calendarFormatter.parse(expires.getValue());
-            
-            // populate the IssuedTokenContext
-            context.setCreationTime(dateCreated);
-            context.setExpirationTime(dateExpires);
+            synchronized (calendarFormatter){
+                final Date dateCreated = calendarFormatter.parse(created.getValue());
+                final Date dateExpires = calendarFormatter.parse(expires.getValue());
+                
+                // populate the IssuedTokenContext
+                context.setCreationTime(dateCreated);
+                context.setExpirationTime(dateExpires);
+            }
         }catch(ParseException ex){
             log.log(Level.SEVERE, 
                     LogStringsMessages.WSSC_0004_PARSE_EXCEPTION(), ex);

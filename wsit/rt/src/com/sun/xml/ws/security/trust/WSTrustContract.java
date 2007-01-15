@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustContract.java,v 1.1 2006-05-03 22:57:14 arungupta Exp $
+ * $Id: WSTrustContract.java,v 1.2 2007-01-15 10:29:50 raharsha Exp $
  */
 
 /*
@@ -26,11 +26,9 @@
 
 package com.sun.xml.ws.security.trust;
 
-import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.security.policy.SecureConversationToken;
 import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
-import com.sun.xml.ws.security.trust.elements.IssuedTokens;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponse;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponseCollection;
 
@@ -69,7 +67,7 @@ public interface WSTrustContract   {
 
     /** Cancel a Token */
     public RequestSecurityTokenResponse cancel(
-        RequestSecurityToken request, IssuedTokenContext context, Map issuedTokenContextMap)
+        RequestSecurityToken request, IssuedTokenContext context, Map map)
             throws WSTrustException;
 
     /** Validate a Token */

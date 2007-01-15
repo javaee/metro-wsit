@@ -86,7 +86,7 @@ public class WSSCContract implements WSTrustContract   {
             LogDomainConstants.WSSC_IMPL_DOMAIN,
             LogDomainConstants.WSSC_IMPL_DOMAIN_BUNDLE);
     
-    private Configuration config;
+    //private Configuration config;
     
     private long currentTime;
     
@@ -100,15 +100,15 @@ public class WSSCContract implements WSTrustContract   {
             = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'sss'Z'",Locale.getDefault());
     
     public WSSCContract(){
-        
+        //Empty default constructor
     }
     
     public WSSCContract(Configuration config){
         init(config);
     }
     
-    public void init(final Configuration config){
-        this.config = config;
+    public final void init(final Configuration config){
+        //this.config = config;
     }
     
     /** Issue a SecurityContextToken */
@@ -121,8 +121,9 @@ public class WSSCContract implements WSTrustContract   {
         try {
             tokenType = URI.create(WSSCConstants.SECURITY_CONTEXT_TOKEN_TYPE);
             final String conStr = request.getContext();
-            if (conStr != null)
+            if (conStr != null) {
                 con = new URI(conStr);
+            }
             computeKeyAlgo = URI.create(WSTrustConstants.CK_PSHA1);
         } catch (URISyntaxException ex){
             log.log(Level.SEVERE,
@@ -133,7 +134,6 @@ public class WSSCContract implements WSTrustContract   {
         // AppliesTo
         final AppliesTo scopes = request.getAppliesTo();
         
-        Entropy serverEntropy = null;
         final RequestedProofToken proofToken = eleFac.createRequestedProofToken();
         
         // Get client entropy
@@ -155,6 +155,16 @@ public class WSSCContract implements WSTrustContract   {
                 }
             }
         }
+        final RequestSecurityTokenResponse response = createRSTR(computeKeyAlgo, scToken, request, scopes, clientEntr, proofToken, tokenType, clientEntropy, context, con);
+        
+        if (log.isLoggable(Level.FINE)) {
+            log.log(Level.FINE,
+                    LogStringsMessages.WSSC_0014_RSTR_RESPONSE(elemToString(response)));
+        }
+        return response;
+    }
+
+    private RequestSecurityTokenResponse createRSTR(final URI computeKeyAlgo, final SecureConversationToken scToken, final RequestSecurityToken request, final AppliesTo scopes, final byte[] clientEntr, final RequestedProofToken proofToken, final URI tokenType, final Entropy clientEntropy, final IssuedTokenContext context, final URI con) throws WSSecureConversationException, WSSecureConversationException {
         
         Trust10 trust10 = null;
         SymmetricBinding symBinding = null;
@@ -196,7 +206,7 @@ public class WSSCContract implements WSTrustContract   {
         byte[] secret = WSTrustUtil.generateRandomSecret(keySize/8);
         final String proofTokenType = (clientEntr == null ||clientEntr.length ==0)
         ? BinarySecret.SYMMETRIC_KEY_TYPE :BinarySecret.NONCE_KEY_TYPE;
-        
+        Entropy serverEntropy = null;
         if(reqServerEntr){
             final BinarySecret serverBS = eleFac.createBinarySecret(secret, proofTokenType);
             if (proofTokenType.equals(BinarySecret.NONCE_KEY_TYPE)){
@@ -223,6 +233,11 @@ public class WSSCContract implements WSTrustContract   {
             proofToken.setBinarySecret(clientEntropy.getBinarySecret());
         }
         
+        return createResponse(serverEntropy, con, scopes, secret, proofToken, context, tokenType);
+    }
+
+    private RequestSecurityTokenResponse createResponse(final Entropy serverEntropy, final URI con, final AppliesTo scopes, final byte[] secret, final RequestedProofToken proofToken, final IssuedTokenContext context, final URI tokenType) throws WSSecureConversationException {
+
         // Create Security Context and SecurityContextToken
         final SecurityContextToken token = WSTrustUtil.createSecurityContextToken(eleFac);
         final RequestedSecurityToken rst = eleFac.createRequestedSecurityToken(token);
@@ -249,6 +264,11 @@ public class WSSCContract implements WSTrustContract   {
         final Session session =
                 SessionManager.getSessionManager().createSession(token.getIdentifier().toString());
         log.fine("Creating session for : "  + token.getIdentifier());
+        populateITC(session, secret, token, attachedReference, context, unattachedRef);
+        return response;
+    }
+
+    private void populateITC(final Session session, final byte[] secret, final SecurityContextToken token, final SecurityTokenReference attachedReference, final IssuedTokenContext context, final SecurityTokenReference unattachedRef) {
         
         // Populate the IssuedTokenContext
         context.setSecurityToken(token);
@@ -268,12 +288,6 @@ public class WSSCContract implements WSTrustContract   {
         sctinfo.setExpirationTime(new Date(currentTime + TIMEOUT));
         
         session.setSecurityInfo(sctinfo);
-        
-        if (log.isLoggable(Level.FINE)) {
-            log.log(Level.FINE,
-                    LogStringsMessages.WSSC_0014_RSTR_RESPONSE(elemToString(response)));
-        }
-        return response;
     }
     
     
@@ -331,7 +345,7 @@ public class WSSCContract implements WSTrustContract   {
     public void handleUnsolicited(
             final RequestSecurityTokenResponse rstr, final IssuedTokenContext context)
             throws WSSecureConversationException {
-        final AppliesTo scope = rstr.getAppliesTo();
+        //final AppliesTo scope = rstr.getAppliesTo();
         final RequestedSecurityToken rqSecToken = rstr.getRequestedSecurityToken();
         final Token token = rqSecToken.getToken();
         final RequestedProofToken rqProofToken = rstr.getRequestedProofToken();

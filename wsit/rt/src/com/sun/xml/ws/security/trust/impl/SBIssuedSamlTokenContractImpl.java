@@ -273,10 +273,10 @@ public class SBIssuedSamlTokenContractImpl extends IssueSamlTokenContract{
             final List<Attribute> attrs = new ArrayList<Attribute>();
             final Set keys = claimedAttrs.keySet();
             final Iterator iterator = keys.iterator();
+            final List<String> values = new ArrayList<String>();
             while (iterator.hasNext()){
                 final String attrKey = (String)iterator.next();
                 final QName value = (QName)claimedAttrs.get(attrKey);
-                final List<String> values = new ArrayList<String>();
                 values.add(value.getLocalPart());
                 final Attribute attr = samlFac.createAttribute(attrKey, value.getNamespaceURI(), values);
                 attrs.add(attr);
@@ -334,10 +334,10 @@ public class SBIssuedSamlTokenContractImpl extends IssueSamlTokenContract{
             final List<Attribute> attrs = new ArrayList<Attribute>();
             final Set keys = claimedAttrs.keySet();
             final Iterator iterator = keys.iterator();
+            final List<String> values = new ArrayList<String>();
             while (iterator.hasNext()){
                 final String attrKey = (String)iterator.next();
                 final QName value = (QName)claimedAttrs.get(attrKey);
-                final List<String> values = new ArrayList<String>();
                 values.add(value.getLocalPart());
                 final Attribute attr = samlFac.createAttribute(attrKey, values);
                 attrs.add(attr);
@@ -377,8 +377,8 @@ public class SBIssuedSamlTokenContractImpl extends IssueSamlTokenContract{
                     throw new WSTrustException(ex.getMessage(), ex);
                 }
             }else{
-                final BinarySecret bs = eleFac.createBinarySecret(key, BinarySecret.SYMMETRIC_KEY_TYPE);
-                keyInfo.getContent().add(bs);
+                final BinarySecret secret = eleFac.createBinarySecret(key, BinarySecret.SYMMETRIC_KEY_TYPE);
+                keyInfo.getContent().add(secret);
             }
         }else if(WSTrustConstants.PUBLIC_KEY.equals(keyType)){
             
@@ -390,11 +390,11 @@ public class SBIssuedSamlTokenContractImpl extends IssueSamlTokenContract{
                 throw new WSTrustException(LogStringsMessages.WST_0034_UNABLE_GET_CLIENT_CERT());
             }
             boolean addedClientCert = false;
+            final ObjectFactory dsigOF = new ObjectFactory();
             for(Object o : certs){
                 if(o instanceof X509Certificate){
                     final X509Certificate clientCert = (X509Certificate)o;
                     
-                    final ObjectFactory dsigOF = new ObjectFactory();
                     JAXBElement<byte[]> certElement;
                     try {
                         certElement = dsigOF.createX509DataTypeX509Certificate(clientCert.getEncoded());
@@ -480,16 +480,20 @@ public class SBIssuedSamlTokenContractImpl extends IssueSamlTokenContract{
     protected Map getClaimedAttributes(final Subject subject, final String appliesTo, final String tokenType){
         final Set<Principal> principals = subject.getPrincipals();
         final Map<String, QName> attrs = new HashMap<String, QName>();
+        String attrName=null;
         if (principals != null){
             final Iterator iterator = principals.iterator();
             while (iterator.hasNext()){
                 final String name = principals.iterator().next().getName();
                 if (name != null){
                     //attrs.add(name);
-                    attrs.put(PRINCIPAL, new QName("http://sun.com", name));
+                    attrName = name;
                     break;
                 }
             }
+        }
+        if(attrName != null){
+            attrs.put(PRINCIPAL, new QName("http://sun.com", attrName));
         }
         
         if (attrs.get(PRINCIPAL) == null){

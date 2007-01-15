@@ -1,5 +1,5 @@
 /*
- * $Id: LogDomainConstants.java,v 1.1 2006-09-21 14:57:13 manveen Exp $
+ * $Id: LogDomainConstants.java,v 1.2 2007-01-15 10:29:53 raharsha Exp $
  */
 
 /*
@@ -31,10 +31,10 @@ import com.sun.xml.wss.*;
 /**
  * @author Manveen Kaur
  *
- * This interface defines a number of constants pertaining to Logging domains.
+ * This class defines a number of constants pertaining to Logging domains.
  */
 
-public interface LogDomainConstants {
+public class LogDomainConstants {
     
     public static final String MODULE_TOP_LEVEL_DOMAIN =
             "javax.enterprise.resource.xml.webservices.security.trust";
