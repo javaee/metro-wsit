@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustConstants.java,v 1.5 2007-01-11 13:15:09 raharsha Exp $
+ * $Id: WSTrustConstants.java,v 1.6 2007-01-16 11:46:54 raharsha Exp $
  */
 
 /*
@@ -102,7 +102,7 @@ public class WSTrustConstants {
     /**
      * List of STS Properties
      */
-    public static final String [] STS_PROPERTIES = { PROPERTY_URL, PROPERTY_PORT_NAME, PROPERTY_SERVICE_NAME, PROPERTY_SERVICE_END_POINT };
+    public static  enum STS_PROPERTIES  { PROPERTY_URL, PROPERTY_PORT_NAME, PROPERTY_SERVICE_NAME, PROPERTY_SERVICE_END_POINT };
     
     public static final String IS_TRUST_MESSAGE = "isTrustMessage";
 }

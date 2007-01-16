@@ -276,8 +276,8 @@ public class NewWSSCPlugin {
             reqPacket.invocationProperties.put(SC_ASSERTION, issuedToken);
         }
         if (packet != null){
-            for(String stsProperty : WSTrustConstants.STS_PROPERTIES) {
-                reqPacket.invocationProperties.put(stsProperty,packet.invocationProperties.get(stsProperty));
+            for(WSTrustConstants.STS_PROPERTIES stsProperty : WSTrustConstants.STS_PROPERTIES.values()) {
+                reqPacket.invocationProperties.put(stsProperty.toString(),packet.invocationProperties.get(stsProperty.toString()));
             }
         }
         
@@ -331,8 +331,8 @@ public class NewWSSCPlugin {
             reqPacket.invocationProperties.put(SC_ASSERTION, issuedToken);
         }
         if (packet != null){
-            for(String stsProperty : WSTrustConstants.STS_PROPERTIES) {
-                reqPacket.invocationProperties.put(stsProperty,packet.invocationProperties.get(stsProperty));
+            for(WSTrustConstants.STS_PROPERTIES stsProperty : WSTrustConstants.STS_PROPERTIES.values()) {
+                reqPacket.invocationProperties.put(stsProperty.toString(),packet.invocationProperties.get(stsProperty.toString()));
             }
         }
         

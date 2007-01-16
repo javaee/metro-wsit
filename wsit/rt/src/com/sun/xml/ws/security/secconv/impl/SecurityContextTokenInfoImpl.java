@@ -85,7 +85,9 @@ public class SecurityContextTokenInfoImpl implements SecurityContextTokenInfo {
     }
     
     public byte[] getSecret() {
-        return secret;
+        byte [] newSecret = new byte[secret.length];
+        System.arraycopy(secret,0,newSecret,0,secret.length);
+        return newSecret;
     }
     
     public byte[] getInstanceSecret(final String instance) {
@@ -93,27 +95,29 @@ public class SecurityContextTokenInfoImpl implements SecurityContextTokenInfo {
     }
     
     public void addInstance(final String instance, final byte[] key) {
+        byte [] newKey = new byte[key.length];
+        System.arraycopy(key,0,newKey,0,key.length);
         if (instance == null) {
-            this.secret = key;
+            this.secret = newKey;
         } else {
-            secretMap.put(instance, key);
+            secretMap.put(instance, newKey);
         }
     }
     
     public Date getCreationTime() {
-        return creationTime;
+        return new Date(creationTime.getTime());
     }
     
     public void setCreationTime(final Date creationTime) {
-        this.creationTime = creationTime;
+        this.creationTime = new Date(creationTime.getTime());
     }
     
     public Date getExpirationTime() {
-        return expirationTime;
+        return new Date(expirationTime.getTime());
     }
     
     public void setExpirationTime(final Date expirationTime) {
-        this.expirationTime = expirationTime;
+        this.expirationTime = new Date(expirationTime.getTime());
     }
     
     public Set getInstanceKeys() {
@@ -139,7 +143,7 @@ public class SecurityContextTokenInfoImpl implements SecurityContextTokenInfo {
         }
         
         final SecurityContextToken token = factory.createSecurityContextToken(
-                uri, null , this.getExternalId().toString());
+                uri, null , this.getExternalId());
         itc.setSecurityToken(token);
         
         // Create references

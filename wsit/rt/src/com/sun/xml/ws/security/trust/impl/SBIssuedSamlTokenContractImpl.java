@@ -271,12 +271,13 @@ public class SBIssuedSamlTokenContractImpl extends IssueSamlTokenContract{
             }
             
             final List<Attribute> attrs = new ArrayList<Attribute>();
-            final Set keys = claimedAttrs.keySet();
-            final Iterator iterator = keys.iterator();
+            final Set<Map.Entry> entries = claimedAttrs.entrySet();
+            final Iterator iterator = entries.iterator();
             final List<String> values = new ArrayList<String>();
             while (iterator.hasNext()){
-                final String attrKey = (String)iterator.next();
-                final QName value = (QName)claimedAttrs.get(attrKey);
+                final Map.Entry entry = (Map.Entry)iterator.next();
+                final String attrKey = (String)entry.getKey();
+                final QName value = (QName)entry.getValue();
                 values.add(value.getLocalPart());
                 final Attribute attr = samlFac.createAttribute(attrKey, value.getNamespaceURI(), values);
                 attrs.add(attr);
@@ -332,12 +333,13 @@ public class SBIssuedSamlTokenContractImpl extends IssueSamlTokenContract{
             
             // Create AttributeStatement
             final List<Attribute> attrs = new ArrayList<Attribute>();
-            final Set keys = claimedAttrs.keySet();
-            final Iterator iterator = keys.iterator();
+            final Set entries = claimedAttrs.entrySet();
+            final Iterator iterator = entries.iterator();
             final List<String> values = new ArrayList<String>();
             while (iterator.hasNext()){
-                final String attrKey = (String)iterator.next();
-                final QName value = (QName)claimedAttrs.get(attrKey);
+                final Map.Entry entry = (Map.Entry)iterator.next();
+                final String attrKey = (String)entry.getKey();
+                final QName value = (QName)entry.getValue();
                 values.add(value.getLocalPart());
                 final Attribute attr = samlFac.createAttribute(attrKey, values);
                 attrs.add(attr);
@@ -587,7 +589,7 @@ public class SBIssuedSamlTokenContractImpl extends IssueSamlTokenContract{
         }
     }
     
-    private class DSigResolver implements URIDereferencer{
+    private static class DSigResolver implements URIDereferencer{
         public Data data = null;
         DSigResolver(Data data){
             this.data = data;

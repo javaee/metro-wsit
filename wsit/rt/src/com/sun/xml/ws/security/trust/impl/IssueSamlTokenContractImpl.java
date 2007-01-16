@@ -352,11 +352,10 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
             }
             
             final List<Attribute> attrs = new ArrayList<Attribute>();
-            final Set keys = claimedAttrs.keySet();
-            final Iterator iterator = keys.iterator();
-            while (iterator.hasNext()){
-                final String attrKey = (String)iterator.next();
-                final QName value = (QName)claimedAttrs.get(attrKey);
+            final Set<Map.Entry> entries = claimedAttrs.entrySet();
+            for(Map.Entry entry : entries){
+                final String attrKey = (String)entry.getKey();
+                final QName value = (QName)entry.getValue();
                 final List<String> values = new ArrayList<String>();
                 values.add(value.getLocalPart());
                 final Attribute attr = samlFac.createAttribute(attrKey, value.getNamespaceURI(), values);
@@ -415,15 +414,14 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
             
             // Create AttributeStatement
             final List<Attribute> attrs = new ArrayList<Attribute>();
-            final Set keys = claimedAttrs.keySet();
-            final Iterator iterator = keys.iterator();
-            while (iterator.hasNext()){
-                final String attrKey = (String)iterator.next();
-                final QName value = (QName)claimedAttrs.get(attrKey);
+            final Set<Map.Entry> entries = claimedAttrs.entrySet();
+            for(Map.Entry entry : entries){
+                final String attrKey = (String)entry.getKey();
+                final QName value = (QName)entry.getValue();
                 final List<String> values = new ArrayList<String>();
                 values.add(value.getLocalPart());
                 final Attribute attr = samlFac.createAttribute(attrKey, values);
-                attrs.add(attr);
+                attrs.add(attr);                
             }
             final AttributeStatement statement = samlFac.createAttributeStatement(attrs);
             final List<AttributeStatement> statements = new ArrayList<AttributeStatement>();

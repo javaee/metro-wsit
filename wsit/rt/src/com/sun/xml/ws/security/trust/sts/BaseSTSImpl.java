@@ -152,7 +152,7 @@ public abstract class BaseSTSImpl implements Provider<Source> {
             // Get RequestSecurityToken
             final WSTrustElementFactory eleFac = WSTrustElementFactory.newInstance();
             final RequestSecurityToken rst = eleFac.createRSTFrom(rstElement);
-            String tokenType = null;            
+            //String tokenType = null;            
             
             String appliesTo = null;
             final AppliesTo applTo = rst.getAppliesTo();
@@ -164,9 +164,9 @@ public abstract class BaseSTSImpl implements Provider<Source> {
                 appliesTo = DEFAULT_APPLIESTO;
             }
             
-            if(rst.getTokenType()!=null){
-                tokenType = rst.getTokenType().toString();
-            }
+//            if(rst.getTokenType()!=null){
+//                tokenType = rst.getTokenType().toString();
+//            }
             final STSConfiguration config = getConfiguration();
             if(rst.getRequestType().toString().equals(WSTrustConstants.ISSUE_REQUEST)){
                 rstrEle = issue(config, appliesTo, eleFac, rst);                
