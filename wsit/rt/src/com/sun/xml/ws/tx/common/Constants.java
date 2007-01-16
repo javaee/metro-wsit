@@ -28,7 +28,7 @@ import javax.xml.namespace.QName;
  * This class contains useful namespace uri constants
  *
  * @author Ryan.Shoemaker@Sun.COM, Joeseph.Fialli@Sun.COM
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @since 1.0
  */
 public class Constants {
@@ -129,7 +129,8 @@ public class Constants {
     // use as key for transaction resource that references wsat transactional context
     public static final String WSAT_TRANSACTION_CONTEXT = "wsatTransactionContext";
 
-    public static final String WSAT_FAULT_ACTION_URI = "http://schemas.xmlsoap.org/ws/2004/10/wsat/fault";
+    public static final String WSAT_FAULT_ACTION_URI   = "http://schemas.xmlsoap.org/ws/2004/10/wsat/fault";
+    public static final String WSCOOR_FAULT_ACTION_URI = "http://schemas.xmlsoap.org/ws/2004/10/wscoor/fault";
 
     public static final String WSTX_WS_SCHEME = "https";
     public static final int WSTX_WS_PORT = 8181;

@@ -22,6 +22,9 @@
 package com.sun.xml.ws.tx.service;
 
 import com.sun.enterprise.transaction.TransactionImport;
+import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
@@ -42,6 +45,8 @@ import com.sun.xml.ws.tx.common.Message;
 import com.sun.xml.ws.tx.common.TransactionManagerImpl;
 import com.sun.xml.ws.tx.common.TxJAXBContext;
 import com.sun.xml.ws.tx.common.TxLogger;
+import com.sun.xml.ws.tx.common.WsaHelper;
+import com.sun.xml.ws.tx.common.TxFault;
 import com.sun.xml.ws.tx.coordinator.CoordinationContextInterface;
 import com.sun.xml.ws.tx.coordinator.CoordinationManager;
 import javax.transaction.NotSupportedException;
@@ -64,11 +69,7 @@ import java.util.logging.Level;
  * <p/>
  * Supports following WS-Coordination protocols: 2004 WS-Atomic Transaction protocol
  *
-<<<<<<< TxServerPipe.java
- * @version $Revision: 1.7 $
-=======
- * @version $Revision: 1.7 $
->>>>>>> 1.5
+ * @version $Revision: 1.8 $
  * @since 1.0
  */
 // suppress known deprecation warnings about using pipes.
@@ -86,6 +87,7 @@ public class TxServerPipe implements Pipe {
     // might need additional classes due to extensibility of CoordinationContext (anyAttribute, any element)
     private Unmarshaller unmarshaller = null;
     private WSDLPort port = null;
+    final WSBinding wsbinding;
     final Pipe next;
 
 
@@ -95,10 +97,12 @@ public class TxServerPipe implements Pipe {
      * @param next Next pipe to be executed.
      */
     public TxServerPipe(WSDLPort port,
+                        WSBinding wsbinding,
                         PolicyMap map,
                         Pipe next) {
         unmarshaller = TxJAXBContext.createUnmarshaller();
         this.port = port;
+        this.wsbinding = wsbinding;
         try {
             cacheOperationToPolicyMappings(map, port.getBinding());
         } catch (PolicyException e) {
@@ -114,6 +118,7 @@ public class TxServerPipe implements Pipe {
         cloner.add(from, this);
         this.next = cloner.copy(from.next);
         this.port = from.port;
+        this.wsbinding = from.wsbinding;
         this.unmarshaller = TxJAXBContext.createUnmarshaller();
         this.opPolicyCache = from.opPolicyCache;
     }
@@ -152,7 +157,7 @@ public class TxServerPipe implements Pipe {
         // Precondition check
         assertNoCurrentTransaction("JTA Transaction MUST not exist at start of TxServerPipe.process.");
         
-        com.sun.xml.ws.tx.common.Message msg = new Message(pkt.getMessage());
+        com.sun.xml.ws.tx.common.Message msg = new Message(pkt.getMessage(), wsbinding);
         WSDLBoundOperation msgOp = msg.getOperation(port);
         QName msgOperation = msgOp.getName();
         OperationATPolicy opat = getATPolicy(msgOperation);
@@ -162,9 +167,17 @@ public class TxServerPipe implements Pipe {
             CC = msg.getCoordinationContext(unmarshaller);
         } catch (JAXBException je) {
             if (opat.atAssertion == ATAssertion.REQUIRED || opat.atAssertion == ATAssertion.ALLOWED) {
+                // send fault S4.3 wscoor:InvalidParameters
+                WsaHelper.sendFault(
+                        msg.getFaultTo(),
+                        msg.getReplyTo().toSpec(),
+                        SOAPVersion.SOAP_11,
+                        TxFault.InvalidParameters,
+                        "failed to unmarshal CoordinationContext with JAXBException " + je.getLocalizedMessage(),
+                        msg.getMessageID());
                 throw new WebServiceException(je.getLocalizedMessage());
             } else {
-                logger.warning("TxServerPipe", "failed to unmarshall unexpected CoordinationContext with JAXBException " + je.getLocalizedMessage());
+                logger.warning("TxServerPipe", "failed to unmarshal unexpected CoordinationContext with JAXBException " + je.getLocalizedMessage());
             }
         }
         

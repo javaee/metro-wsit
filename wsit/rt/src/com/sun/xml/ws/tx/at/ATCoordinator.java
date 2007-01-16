@@ -23,6 +23,7 @@ package com.sun.xml.ws.tx.at;
 
 import com.sun.xml.ws.api.tx.Protocol;
 import com.sun.xml.ws.api.tx.TXException;
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.developer.MemberSubmissionEndpointReference;
 import static com.sun.xml.ws.tx.at.ATParticipant.STATE.*;
 import com.sun.xml.ws.tx.common.AT_2PC_State;
@@ -35,6 +36,8 @@ import static com.sun.xml.ws.tx.common.Constants.*;
 import com.sun.xml.ws.tx.common.TransactionManagerImpl;
 import com.sun.xml.ws.tx.common.TxLogger;
 import com.sun.xml.ws.tx.common.Util;
+import com.sun.xml.ws.tx.common.WsaHelper;
+import com.sun.xml.ws.tx.common.TxFault;
 import com.sun.xml.ws.tx.coordinator.CoordinationContextInterface;
 import com.sun.xml.ws.tx.coordinator.Coordinator;
 import com.sun.xml.ws.tx.coordinator.Registrant;
@@ -50,6 +53,7 @@ import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
 import javax.xml.ws.EndpointReference;
+import javax.xml.ws.WebServiceContext;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -86,7 +90,7 @@ import java.util.logging.Level;
  *
  * @author Ryan.Shoemaker@Sun.COM
  * @author Joe.Fialli@Sun.COM
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  * @since 1.0
  */
 public class ATCoordinator extends Coordinator implements Synchronization, XAResource {
@@ -202,7 +206,7 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
      * Get the list of {@link com.sun.xml.ws.tx.coordinator.Registrant}s for this coordinated activity.
      * <p/>
      * The returned list is unmodifiable (read-only).  Add new Registrants
-     * with the {@link #addRegistrant(com.sun.xml.ws.tx.coordinator.Registrant)} api instead.
+     * with the {@link #addRegistrant(com.sun.xml.ws.tx.coordinator.Registrant, javax.xml.ws.WebServiceContext)} api instead.
      * <p/>
      *
      * @return the list of Registrant objects
@@ -244,9 +248,17 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
      * @param registrant The {@link Registrant}
      */
     @Override
-    public void addRegistrant(final Registrant registrant) {
+    public void addRegistrant(final Registrant registrant, final WebServiceContext wsContext) {
         if (!allowNewParticipants) {
-            // TODO: send fault S4.1 ws:coor Invalid State ?
+            // send fault S4.1 ws:coor Invalid State
+            if(wsContext != null) {
+                WsaHelper.sendFault(
+                        wsContext,
+                        SOAPVersion.SOAP_11,
+                        TxFault.InvalidState,
+                        "Invalid to register a new participant after the first durable participant is prepared.  Registrant id: " +
+                                registrant.getIdValue());
+            }
             throw new IllegalStateException(LocalizationMessages.LATE_PARTICIPANT_REGISTRATION());
         }
         // TODO: check for duplicate registration and send fault S4.6 ws:coor Already Registered

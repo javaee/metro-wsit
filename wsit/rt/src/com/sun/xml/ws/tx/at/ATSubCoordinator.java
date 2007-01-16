@@ -35,6 +35,7 @@ import javax.transaction.Transaction;
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
+import javax.xml.ws.WebServiceContext;
 import java.util.logging.Level;
 
 /**
@@ -324,14 +325,14 @@ public class ATSubCoordinator extends ATCoordinator {
     }
 
     @Override
-    public void addRegistrant(final Registrant registrant) {
+    public void addRegistrant(final Registrant registrant, final WebServiceContext wsContext) {
         //
         if (registerWithRootRegistrationService(registrant)) {
             // registrant is either volatile or durable participant with subordinate coordinator's parent coordinator.
             // do not add this participant to ATSubCoordinator list of participants it is managing.
             return;
         }
-        super.addRegistrant(registrant);
+        super.addRegistrant(registrant, wsContext);
         switch (registrant.getProtocol()) {
             case VOLATILE:
                 registerWithVolatileParent();

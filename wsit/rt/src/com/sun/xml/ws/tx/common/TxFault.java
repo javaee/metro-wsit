@@ -22,6 +22,8 @@
 package com.sun.xml.ws.tx.common;
 
 import com.sun.istack.NotNull;
+import static com.sun.xml.ws.tx.common.Constants.WSCOOR_FAULT_ACTION_URI;
+import static com.sun.xml.ws.tx.common.Constants.WSAT_FAULT_ACTION_URI;
 
 import javax.xml.namespace.QName;
 
@@ -36,51 +38,60 @@ import javax.xml.namespace.QName;
  * specified by ws:coor or ws:at, so I'm leaving this field out as well
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 1.0
  */
 public enum TxFault {
 
     InvalidState(
             new QName(Constants.WSCOOR_SOAP_NSURI, "InvalidState", "wscoor"),
-            "The message was invalid for the current state of the activity"
+            "The message was invalid for the current state of the activity",
+            WSCOOR_FAULT_ACTION_URI
     ),
 
     InvalidProtocol(
             new QName(Constants.WSCOOR_SOAP_NSURI, "InvalidProtocol", "wscoor"),
-            "The protocol is invalid or is not supported by the coordinator"
+            "The protocol is invalid or is not supported by the coordinator",
+            WSCOOR_FAULT_ACTION_URI
     ),
 
     InvalidParameters(
             new QName(Constants.WSCOOR_SOAP_NSURI, "InvalidParameters", "wscoor"),
-            "The message contained invalid parameters and could not be processed"
+            "The message contained invalid parameters and could not be processed",
+            WSCOOR_FAULT_ACTION_URI
     ),
 
     NoActivity(
             new QName(Constants.WSCOOR_SOAP_NSURI, "NoActivity", "wscoor"),
-            "The participant is not responding and is presumed to have ended"
+            "The participant is not responding and is presumed to have ended",
+            WSCOOR_FAULT_ACTION_URI
     ),
 
     ContextRefused(
             new QName(Constants.WSCOOR_SOAP_NSURI, "ContextRefused", "wscoor"),
-            "The coordination context that was provided could not be accepted"
+            "The coordination context that was provided could not be accepted",
+            WSCOOR_FAULT_ACTION_URI
     ),
 
     AlreadyRegistered(
             new QName(Constants.WSCOOR_SOAP_NSURI, "AlreadyRegistered", "wscoor"),
-            "The participant has already registered for the same protocol"
+            "The participant has already registered for the same protocol",
+            WSCOOR_FAULT_ACTION_URI
     ),
 
     InconsistentState(
             new QName(Constants.WSAT_OASIS_NSURI, "InconsistentState", "wsat"),
-            "A global consistency failure has occurred.  This is an unrecoverable condition"
+            "A global consistency failure has occurred.  This is an unrecoverable condition",
+            WSAT_FAULT_ACTION_URI
     );
 
     public final QName subcode;
     public final String reason;
+    public final String actionURI;
 
-    private TxFault(@NotNull QName subcode, @NotNull String reason) {
+    private TxFault(@NotNull QName subcode, @NotNull String reason, @NotNull String action) {
         this.subcode = subcode;
         this.reason = reason;
+        this.actionURI = action;
     }
 }

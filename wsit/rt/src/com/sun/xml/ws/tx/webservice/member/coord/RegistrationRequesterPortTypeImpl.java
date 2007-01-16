@@ -36,7 +36,7 @@ import java.util.logging.Level;
  * This class handles the registerResponce web service method
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 1.0
  */
 @MemberSubmissionAddressing
@@ -91,7 +91,7 @@ public class RegistrationRequesterPortTypeImpl implements RegistrationRequesterP
         if (logger.isLogging(Level.FINER)) {
             logger.entering("wscoor:registerResponse", parameters);
         }
-        RegistrationManager.getInstance().registerResponse(activityId, registrantId, parameters);
+        RegistrationManager.getInstance().registerResponse(wsContext, activityId, registrantId, parameters);
         if (logger.isLogging(Level.FINER)) {
             logger.exiting("wscoor:registerResponse");
         }

@@ -36,7 +36,7 @@ import java.util.logging.Level;
  * in WS-Coordination 2004/10 member submission and 2006/03 OASIS.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @since 1.0
  */
 public class ContextFactory {
@@ -100,7 +100,6 @@ public class ContextFactory {
      * @return the coordination context
      */
     public static CoordinationContextInterface createContext(@NotNull final CreateCoordinationContextType contextRequest) {
-        // TODO: send fault ws:coor S4.2 InvalidProtocol if createContext fails
         return createContext(contextRequest.getCoordinationType(), contextRequest.getExpires().getValue());
     }
 

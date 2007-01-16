@@ -24,6 +24,10 @@ package com.sun.xml.ws.tx.common;
 
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
+import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
+import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
@@ -51,7 +55,10 @@ public class Message {
      * The JAX-WS Message wrapped by this instance.
      */
     final private com.sun.xml.ws.api.message.Message coreMessage;
-
+    final private com.sun.xml.ws.api.message.HeaderList hdrList;
+    private SOAPVersion SOAP_VERSION;
+    private AddressingVersion ADDRESSING_VERSION;
+    
     /* Caches of representations of CoordinationContext */
     private Header ccHdr = null;
     static final private int NOT_FOUND = -1;
@@ -64,11 +71,23 @@ public class Message {
      *
      * @param message core message
      */
-    public Message(@NotNull final com.sun.xml.ws.api.message.Message message) {
+    public Message(@NotNull final com.sun.xml.ws.api.message.Message message,
+                   final WSBinding wsBinding) {
         this.coreMessage = message;
+        this.hdrList = (message == null ? null : message.getHeaders());
+        SOAP_VERSION = (wsBinding == null ? null : wsBinding.getSOAPVersion());
+        ADDRESSING_VERSION = (wsBinding == null ? null : wsBinding.getAddressingVersion());
     }
 
-
+    /**
+     * Public ctor takes wrapped JAX-WS message as its argument.
+     *
+     * @param message core message
+     */
+    public Message(@NotNull final com.sun.xml.ws.api.message.Message message) {
+         this(message, null);
+    }
+    
     /**
      * Get the CoordinationContext Header Element from the underlying
      * JAX-WS message's HeaderList. Only understand the header iff CoordinationContext is
@@ -78,10 +97,8 @@ public class Message {
      */
     @NotNull
     public com.sun.xml.ws.api.message.Header getCoordCtxHeader() {
-        if (ccHdr == null && coreMessage != null) {
-            HeaderList hdrList = coreMessage.getHeaders();
+        if (ccHdr == null) {
             if (hdrList != null) {
-                hdrList = coreMessage.getHeaders();
                 ccHdr = hdrList.get(WSCOOR_SOAP_NSURI, COORDINATION_CONTEXT, false);
 
                 /*
@@ -112,13 +129,13 @@ public class Message {
     public com.sun.xml.ws.api.message.Header getCoordCtxHeader(@NotNull final String namespace, @NotNull final String localName) {
         if (ccHdr == null && coreMessage != null) {
             ccHdrIndex = NOT_FOUND;
-            final HeaderList hlst = coreMessage.getHeaders();
-            final int len = hlst.size();
+            final int len = hdrList.size();
             for (int i = 0; i < len; i++) {
-                final Header h = hlst.get(i);
+                final Header h = hdrList.get(i);
                 if (h.getLocalPart().equals(localName) && h.getNamespaceURI().equals(namespace)) {
                     ccHdrIndex = i;
                     ccHdr = h;
+                    break;
                 }
             }
         }
@@ -165,5 +182,60 @@ public class Message {
     @Nullable
     public WSDLBoundOperation getOperation(@NotNull final WSDLPort port) {
         return coreMessage.getOperation(port);
+    }
+    
+   /**
+     * @return the ws-addressing MessageId for this message
+     */
+    public String getMessageID() {
+        String result = null;
+        if (hdrList != null) {
+            result = hdrList.getMessageID(ADDRESSING_VERSION, SOAP_VERSION);
+        }
+        return result;
+    }
+    
+    /**
+     * @return the ws-addressing To for this message
+     */
+    public String getTo() {
+        String result = null;
+        if (hdrList != null) {
+            result = hdrList.getTo(ADDRESSING_VERSION, SOAP_VERSION);
+        }
+        return result;
+    }
+    
+     /**
+     * @return the ws-addressing Action for this message
+     */
+    public String getAction() {
+        String result = null;
+        if (hdrList != null) {
+            result = hdrList.getAction(ADDRESSING_VERSION, SOAP_VERSION);
+        }
+        return result;
+    }
+    
+     /**
+     * @return the ws-addressing FaultTo for this message
+     */
+    public WSEndpointReference getFaultTo() {
+        WSEndpointReference result = null;
+        if (hdrList != null) {
+            result = hdrList.getFaultTo(ADDRESSING_VERSION, SOAP_VERSION);
+        }
+        return result;
+    }
+    
+    /**
+     * @return the ws-addressing ReplyTo for this message
+     */
+    public WSEndpointReference getReplyTo() {
+        WSEndpointReference result = null;
+        if (hdrList != null) {
+            result = hdrList.getReplyTo(ADDRESSING_VERSION, SOAP_VERSION);
+        }
+        return result;
     }
 }

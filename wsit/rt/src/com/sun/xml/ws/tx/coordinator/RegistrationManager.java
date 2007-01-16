@@ -59,7 +59,7 @@ import java.util.logging.Level;
  * for register and registerResponse delegate to the methods in this class.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  * @since 1.0
  */
 public final class RegistrationManager {
@@ -144,39 +144,27 @@ public final class RegistrationManager {
         }
 
         // request message must have wsa:MessageId and wsa:ReplyTo, cache them
-        MessageContext msgContext = wsContext.getMessageContext();
-        HeaderList headers = (HeaderList) msgContext.get(JAXWSProperties.INBOUND_HEADER_LIST_PROPERTY);
-
         if (logger.isLogging(Level.FINEST)) {
             logger.finest("register with coordination id=", activityId);
         }
-        String msgID = headers.getMessageID(AddressingVersion.MEMBER, SOAPVersion.SOAP_11);
+        String msgID = WsaHelper.getMsgID(wsContext);
         if (logger.isLogging(Level.FINEST)) {
             logger.finest("register", "register request msg id=" + msgID);
         }
-        EndpointReference registrationRequesterEPR = (headers.getReplyTo(AddressingVersion.MEMBER, SOAPVersion.SOAP_11)).toSpec();
-        WSEndpointReference faultTo = (headers.getFaultTo(AddressingVersion.MEMBER, SOAPVersion.SOAP_11));
+        EndpointReference registrationRequesterEPR = WsaHelper.getReplyTo(wsContext);
+        WSEndpointReference faultTo = WsaHelper.getFaultTo(wsContext);
         if (logger.isLogging(Level.FINEST)) {
             logger.finest("register", "replyTo:" + registrationRequesterEPR);
         }
-//        WsaHelper.sendFault(
-//                faultTo,
-//                registrationRequesterEPR,
-//                WsaHelper.createFault(
-//                        SOAPVersion.SOAP_11,
-//                        TxFault.InvalidParameters,
-//                        "NOSFERATU!"),
-//                msgID);
         if (registrationRequesterEPR == null) {
             if (faultTo != null) {
                 // send fault S4.3 wscoor:Invalid Parameters
                 WsaHelper.sendFault(
                         faultTo,
                         null,
-                        WsaHelper.createFault(
-                                SOAPVersion.SOAP_11,
-                                TxFault.InvalidParameters,
-                                "register wsa:replyTo must be set"),
+                        SOAPVersion.SOAP_11,
+                        TxFault.InvalidParameters,
+                        "register wsa:replyTo must be set",
                         msgID);
             }
             throw new WebServiceException("register wsa:replyTo must be set");
@@ -184,8 +172,14 @@ public final class RegistrationManager {
 
         Coordinator c = coordinationManager.getCoordinator(activityId);
         if (c == null) {
-            // TODO: send fault S4.3 wscoor:Invalid Parameters or S4.1 wscoor:Invalid State ???
-            //       log as warning for now.
+            // send fault S4.1 wscoor:Invalid State
+            WsaHelper.sendFault(
+                    faultTo,
+                    null,
+                    SOAPVersion.SOAP_11,
+                    TxFault.InvalidState,
+                    "attempting to register for an unknown activity id: " + activityId,
+                    msgID);
             if (logger.isLogging(Level.WARNING)) {
                 logger.warning("register", "unknown activity identifier:" + activityId);
             }
@@ -198,12 +192,19 @@ public final class RegistrationManager {
             case VOLATILE:
             case COMPLETION:
                 r = new ATParticipant(c, registerRequest);
-                c.addRegistrant(r);
+                c.addRegistrant(r, wsContext);
                 break;
 
             case WSAT2004:
             case UNKNOWN:
-                // TODO:send fault S4.2 wscoor:Invalid Protocol
+                // send fault S4.2 wscoor:Invalid Protocol
+                WsaHelper.sendFault(
+                        faultTo,
+                        null,
+                        SOAPVersion.SOAP_11,
+                        TxFault.InvalidState,
+                        registerRequest.getProtocolIdentifier() + " is not a recognized coordination type",
+                        msgID);
                 throw new UnsupportedOperationException(
                         LocalizationMessages.UNRECOGNIZED_COORDINATION_TYPE(registerRequest.getProtocolIdentifier()));
         }
@@ -213,10 +214,6 @@ public final class RegistrationManager {
         // setup relatesTo and get the remote port EPR
         OneWayFeature owf = new OneWayFeature();
         owf.setRelatesToID(msgID);
-        // TODO: remove log msg when wsit issue 111 resolved
-        if (logger.isLogging(Level.FINEST)) {
-            logger.finest("register", "registrationRequesterEPR:" + registrationRequesterEPR.toString());
-        }
         RegistrationRequesterPortType registrationRequester =
                 getCoordinatorService().getRegistrationRequester(registrationRequesterEPR, owf);
 
@@ -376,10 +373,16 @@ public final class RegistrationManager {
                             r.getCoordinatorProtocolService());
                 }
             } else {
-                // send soap fault that register response never received, timing out
+                // send fault S4.4 wscoor:No Activity
+                WsaHelper.sendFault(
+                        null,
+                        registrationEPR,
+                        SOAPVersion.SOAP_11,
+                        TxFault.NoActivity,
+                        "registration timed out for activity id: " + c.getIdValue(),
+                        null /* TODO: what is RelatesTo in this case? */ );
                 if (logger.isLogging(Level.WARNING)) {
                     logger.warning("register", "registration timed out for activity id:" + c.getIdValue());
-                    // TODO: send fault S4.4 wscoor:No Activity
                 }
             }
 
@@ -390,7 +393,7 @@ public final class RegistrationManager {
             }
             // else root coordinator, simply register and return
             r.setCoordinatorProtocolService(c.getCoordinatorProtocolServiceForRegistrant(r));
-            c.addRegistrant(r);
+            c.addRegistrant(r, null);
         }
 
         if (logger.isLogging(Level.FINER)) {
@@ -404,25 +407,32 @@ public final class RegistrationManager {
      * @param activityId       activity id
      * @param registrantId     registrant id
      * @param registerResponse <registerResponse> message
+     * @param wsContext        context of the inbound web service invocation
      */
-    public void registerResponse(@NotNull String activityId, @NotNull String registrantId, @NotNull RegisterResponseType registerResponse) {
+    public void registerResponse(@NotNull WebServiceContext wsContext, @NotNull String activityId, @NotNull String registrantId, @NotNull RegisterResponseType registerResponse) {
         if (logger.isLogging(Level.FINER)) {
             logger.entering("RegistrationManager.registerResponse");
         }
 
-        // look up the registrant and remove it from outstanding Registrants
+         // look up the registrant and remove it from outstanding Registrants
         Registrant r = Registrant.getOutstandingRegistrant(registrantId);
         if (r == null) {
+            // send fault S4.1 wscoor:Invalid State
+            WsaHelper.sendFault(
+                    wsContext,
+                    SOAPVersion.SOAP_11,
+                    TxFault.InvalidState,
+                    "received registerResponse for non-existent registrant : " +
+                            registrantId + " for CoordId:" + activityId );
             if (logger.isLogging(Level.WARNING)) {
                 logger.warning("registerResponse", "received registerResponse for non-existent registrant " +
                         registrantId + " for CoordId:" + activityId);
             }
-            // TODO: send fault S4.1 wscoor:Invalid State
         } else {
             // set coordinator protocol service on registrant
             r.setCoordinatorProtocolService(registerResponse.getCoordinatorProtocolService());
             r.setRemoteCPS(true);
-            r.getCoordinator().addRegistrant(r);
+            r.getCoordinator().addRegistrant(r, wsContext);
             Registrant.removeOutstandingRegistrant(registrantId);
             if (logger.isLogging(Level.FINEST)) {
                 logger.finest("registerResponse", "Completed registration for CoordId:" + activityId +
@@ -476,9 +486,11 @@ public final class RegistrationManager {
      * @param activityId      activity id
      * @param registerRequest <register> request
      * @return a new <registerResponse>
+     * @param wsContext context for incoming web service invocation
      */
     @NotNull
-    public static RegisterResponseType synchronousRegister(@NotNull String activityId,
+    public static RegisterResponseType synchronousRegister(@NotNull WebServiceContext wsContext,
+                                                           @NotNull String activityId,
                                                            @NotNull RegisterType registerRequest) {
         Protocol requestProtocol = Protocol.getProtocol(registerRequest.getProtocolIdentifier());
         if (logger.isLogging(Level.FINER)) {
@@ -488,8 +500,12 @@ public final class RegistrationManager {
 
         Coordinator c = coordinationManager.getCoordinator(activityId);
         if (c == null) {
-            // TODO: coordinated activity unknown, send fault S4.3 wscoor:Invalid Parameters
-            //       log as warning for now.
+            // send fault S4.3 wscoor:Invalid Parameters
+            WsaHelper.sendFault(
+                    wsContext,
+                    SOAPVersion.SOAP_11,
+                    TxFault.InvalidParameters,
+                    "Received RegisterResponse for unknown activity id: " + activityId );
             if (logger.isLogging(Level.WARNING)) {
                 logger.warning("synchronousRegister", "unknown coordId=" + activityId);
             }
@@ -501,12 +517,17 @@ public final class RegistrationManager {
             case VOLATILE:
             case COMPLETION:
                 r = new ATParticipant(c, registerRequest);
-                c.addRegistrant(r);
+                c.addRegistrant(r, wsContext);
                 break;
 
             case WSAT2004:
             case UNKNOWN:
-                // TODO:send fault S4.3 wscoor:Invalid Parameters
+                // send fault S4.3 wscoor:Invalid Parameters
+                WsaHelper.sendFault(
+                        wsContext,
+                        SOAPVersion.SOAP_11,
+                        TxFault.InvalidParameters,
+                        requestProtocol.getUri() + " is not a recognized coordination type" );
                 throw new UnsupportedOperationException(LocalizationMessages.UNRECOGNIZED_COORDINATION_TYPE(requestProtocol));
         }
 

@@ -70,6 +70,8 @@ import com.sun.xml.ws.rm.jaxws.runtime.server.RMServerPipe;
 import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
 import com.sun.xml.ws.transport.tcp.client.TCPTransportPipeFactory;
 import com.sun.xml.ws.util.ServiceFinder;
+import com.sun.xml.ws.tx.client.TxClientPipe;
+import com.sun.xml.ws.tx.service.TxServerPipe;
 import com.sun.xml.wss.jaxws.impl.SecurityClientPipe;
 import com.sun.xml.wss.jaxws.impl.SecurityServerPipe;
 
@@ -232,26 +234,13 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             p = dump(context, CLIENT_PREFIX + WSTX_SUFFIX + AFTER_SUFFIX, p);
             // check for WS-Atomic Transactions
             if (isTransactionsEnabled(policyMap, wsdlPort, false)) {
-                try {
-                    Class c = Class.forName("com.sun.xml.ws.tx.client.TxClientPipe");
-                    Constructor ctor = c.getConstructor(ClientPipeConfiguration.class, Pipe.class);
-                    p = (Pipe) ctor.newInstance(new ClientPipeConfiguration(policyMap,
-                            wsdlPort,
-                            context.getService(),
-                            context.getBinding()),
-                            p);
-                } catch (ClassNotFoundException e) {
-                    throw new WebServiceException(e);
-                } catch (NoSuchMethodException e) {
-                    throw new WebServiceException(e);
-                } catch (InstantiationException e) {
-                    throw new WebServiceException(e);
-                } catch (IllegalAccessException e) {
-                    throw new WebServiceException(e);
-                } catch (InvocationTargetException e) {
-                    throw new WebServiceException(e);
-                }
-//                    p = new TxClientPipe(new ClientPipeConfiguration(policyMap, wsdlPort, service, binding), p);
+                p = new TxClientPipe(
+                        new ClientPipeConfiguration(
+                                policyMap,
+                                wsdlPort,
+                                context.getService(),
+                                context.getBinding()),
+                        p);
             }
             p = dump(context, CLIENT_PREFIX + WSTX_SUFFIX + BEFORE_SUFFIX, p);
             
@@ -285,22 +274,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             p = dump(context, SERVER_PREFIX + WSTX_SUFFIX + AFTER_SUFFIX, p);
             // check for WS-Atomic Transactions
             if (isTransactionsEnabled(policyMap, context.getWsdlModel(), true)) {
-                try {
-                    Class c = Class.forName("com.sun.xml.ws.tx.service.TxServerPipe");
-                    Constructor ctor = c.getConstructor(WSDLPort.class, PolicyMap.class, Pipe.class);
-                    p = (Pipe) ctor.newInstance(context.getWsdlModel(), policyMap, p);
-                } catch (ClassNotFoundException e) {
-                    throw new WebServiceException(e);
-                } catch (NoSuchMethodException e) {
-                    throw new WebServiceException(e);
-                } catch (InstantiationException e) {
-                    throw new WebServiceException(e);
-                } catch (IllegalAccessException e) {
-                    throw new WebServiceException(e);
-                } catch (InvocationTargetException e) {
-                    throw new WebServiceException(e);
-                }
-//                    p = new TxServerPipe(wsdlPort, policyMap, p);
+                p = new TxServerPipe(context.getWsdlModel(), context.getEndpoint().getBinding(), policyMap, p);
             }
             p = dump(context, SERVER_PREFIX + WSTX_SUFFIX + BEFORE_SUFFIX, p);
             

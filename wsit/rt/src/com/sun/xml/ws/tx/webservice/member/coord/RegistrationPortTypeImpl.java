@@ -36,7 +36,7 @@ import java.util.logging.Level;
 /**
  * This class handles the synchronous register =
  *
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 1.0
  */
 @MemberSubmissionAddressing
@@ -69,7 +69,7 @@ public class RegistrationPortTypeImpl implements com.sun.xml.ws.tx.webservice.me
             logger.entering("wscoor:synchRegister", parameters);
         }
         RegisterResponseType registerResponse =
-                RegistrationManager.synchronousRegister(activityId, parameters);
+                RegistrationManager.synchronousRegister(wsContext, activityId, parameters);
         if (logger.isLogging(Level.FINER)) {
             logger.exiting("wscoor:synchRegister", registerResponse);
         }

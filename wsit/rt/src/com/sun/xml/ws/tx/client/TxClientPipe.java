@@ -67,7 +67,7 @@ import java.util.Iterator;
  * This class process transactional context for client outgoing message.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 1.0
  */
 // suppress known deprecation warnings about using pipes.
@@ -261,7 +261,6 @@ public class TxClientPipe implements Pipe {
             // see if a coordination context is already associated with the current JTA transaction.
             result = TransactionManagerImpl.getInstance().getCoordinationContext();
             if (result == null) {
-                // TODO: send fault ws:coor S4.2 Invalid Protocol if createContext fails
                 // create & associate a coordination context with current thread's transaction context
                 result = ContextFactory.createContext(WSAT_2004_PROTOCOL,
                         TransactionManagerImpl.getInstance().getDefaultTransactionTimeout());

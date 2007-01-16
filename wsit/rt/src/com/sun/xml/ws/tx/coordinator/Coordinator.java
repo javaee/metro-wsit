@@ -29,6 +29,7 @@ import com.sun.xml.ws.tx.common.TxLogger;
 import com.sun.xml.ws.tx.webservice.member.coord.CreateCoordinationContextType;
 
 import javax.xml.ws.EndpointReference;
+import javax.xml.ws.WebServiceContext;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -41,7 +42,7 @@ import java.util.logging.Level;
  * is constructed and managed by this class.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  * @since 1.0
  */
 public abstract class Coordinator {
@@ -165,7 +166,7 @@ public abstract class Coordinator {
      * Get the list of {@link Registrant}s for this coordinated activity.
      * <p/>
      * The returned list is unmodifiable (read-only).  Add new Registrants
-     * with the {@link #addRegistrant(Registrant)} api instead.
+     * with the {@link #addRegistrant(Registrant,WebServiceContext)} api instead.
      *
      * @return the list of Registrant objects
      */
@@ -177,8 +178,9 @@ public abstract class Coordinator {
      * coordinated activity.
      *
      * @param registrant The {@link Registrant}
+     * @param wsContext the web service context of the incoming message or null if it isn't available
      */
-    public abstract void addRegistrant(Registrant registrant);
+    public abstract void addRegistrant(Registrant registrant, WebServiceContext wsContext);
 
     /**
      * Get the registrant with the specified id or null if it does not exist.
