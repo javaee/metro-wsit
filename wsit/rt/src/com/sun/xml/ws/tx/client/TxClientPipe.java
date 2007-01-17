@@ -67,7 +67,7 @@ import java.util.Iterator;
  * This class process transactional context for client outgoing message.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @since 1.0
  */
 // suppress known deprecation warnings about using pipes.
@@ -232,8 +232,8 @@ public class TxClientPipe implements Pipe {
                 // flow of control is transfered back from caller, resume transaction.
                 TransactionManagerImpl.getInstance().resume(currentTxn);
             } catch (Exception ex) {
-                // TODO: should we somehow link in rethrow if it isn't null???
-                throw new WebServiceException(ex.getMessage(), ex);
+                rethrow.initCause(ex);
+                throw new WebServiceException(ex.getMessage(), rethrow);
             }
             if (rethrow != null) {
                 throw new WebServiceException(rethrow.getMessage(), rethrow);
@@ -251,10 +251,10 @@ public class TxClientPipe implements Pipe {
             throw new WebServiceException(e.getMessage(), e);
         }
 
-        //wsat policy assertion validation when no current txn scope CC
+        // wsat policy assertion validation when no current txn scope CC
         if ((currentTxn == null) && (required == REQUIRED)) {
             // txn scope required to invoke this operation, notify user
-            throw new WebServiceException(LocalizationMessages.MISSING_TX_SCOPE());
+            throw new WebServiceException(LocalizationMessages.MISSING_TX_SCOPE_1000());
         }
 
         if (currentTxn != null) {
