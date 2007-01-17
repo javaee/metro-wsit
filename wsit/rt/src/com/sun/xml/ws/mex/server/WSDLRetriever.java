@@ -29,6 +29,7 @@ import java.util.logging.Logger;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.ws.WebServiceException;
+import javax.xml.namespace.QName;
 
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.server.DocumentAddressResolver;
@@ -128,7 +129,7 @@ public class WSDLRetriever {
      * This object is passed to the jax-ws runtime to give
      * the address to be included in the wsdl.
      */
-    static class PortAddressResolverImpl implements PortAddressResolver {
+    static class PortAddressResolverImpl extends PortAddressResolver {
 
         private final String address;
         
@@ -136,7 +137,7 @@ public class WSDLRetriever {
             this.address = address;
         }
         
-        public String getAddressFor(final String portName) {
+        public String getAddressFor(QName serviceName, final String portName) {
             return address;
         }
         

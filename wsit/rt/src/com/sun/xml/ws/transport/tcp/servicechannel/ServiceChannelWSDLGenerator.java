@@ -90,7 +90,7 @@ public final class ServiceChannelWSDLGenerator {
             baos.reset();
             
             document.writeTo(new PortAddressResolver() {
-                public @Nullable String getAddressFor(@NotNull String portName) {
+                public @Nullable String getAddressFor(QName serviceName, @NotNull String portName) {
                     return TCP_ENDPOINT_ADDRESS_STUB;
                 }
             }, resolver, baos);

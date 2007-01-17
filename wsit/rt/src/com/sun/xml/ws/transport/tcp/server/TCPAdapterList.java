@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.xml.namespace.QName;
 
 /**
  * @author jax-ws team
@@ -67,7 +68,7 @@ public final class TCPAdapterList extends AbstractList<TCPAdapter> implements Ad
      */
     protected PortAddressResolver createPortAddressResolver(final String baseAddress) {
         return new PortAddressResolver() {
-            public String getAddressFor(@NotNull String portName) {
+            public String getAddressFor(QName serviceName, @NotNull String portName) {
                 final String urlPattern = addressMap.get(portName);
                 return (urlPattern == null) ? null : baseAddress+urlPattern;
             }
