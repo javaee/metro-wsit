@@ -47,9 +47,11 @@ import java.net.URL;
 
 /**
  * TODO: write doc
+ *
+ * @author Jakub Podlesak (jakub.podlesak at sun.com)
  */
 public class WSDLPolicyMapWrapper implements WSDLExtension {
-    private static final PolicyLogger logger = PolicyLogger.getLogger(WSDLPolicyMapWrapper.class);
+    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(WSDLPolicyMapWrapper.class);
     private static final QName NAME = new QName(null, "WSDLPolicyMapWrapper");
     
     private static ModelConfiguratorProvider[] configurators = null;
@@ -86,7 +88,7 @@ public class WSDLPolicyMapWrapper implements WSDLExtension {
     }
     
     void addClientConfigToMap(final URL clientWsitConfig, final PolicyMap clientPolicyMap) throws PolicyException {
-        logger.entering("addClientConfigToMap");
+        LOGGER.entering("addClientConfigToMap");
         
         try {
             for (PolicyMapKey key : clientPolicyMap.getAllServiceScopeKeys()) {
@@ -124,12 +126,13 @@ public class WSDLPolicyMapWrapper implements WSDLExtension {
                 // setting subject to provided URL of client WSIT config
                 mapExtender.putFaultMessageSubject(key, new PolicySubject(clientWsitConfig, policy));
             }
-            logger.fine("addClientToServerMap", LocalizationMessages.CLIENT_CFG_POLICIES_TRANSFERED_INTO_FINAL_POLICY_MAP(policyMap));
+            LOGGER.fine("addClientToServerMap", LocalizationMessages.CLIENT_CFG_POLICIES_TRANSFERED_INTO_FINAL_POLICY_MAP(policyMap));
         } catch (FactoryConfigurationError ex) {
+            LOGGER.severe("addClientConfigToMap", ex.getMessage(), ex);
             throw new PolicyException(ex);
         }
         
-        logger.exiting("addClientToServerMap");
+        LOGGER.exiting("addClientToServerMap");
     }
     
     public void doAlternativeSelection() throws PolicyException {
@@ -148,7 +151,9 @@ public class WSDLPolicyMapWrapper implements WSDLExtension {
                         if (validator.validateServerSide(assertion) == PolicyAssertionValidator.Fitness.SUPPORTED) {
                             continue nextAssertion;
                         }
-                    }                    
+                    }            
+                    
+                    LOGGER.severe("validateServerSidePolicies", LocalizationMessages.ASSERTION_NOT_SUPPORTED_ON_SERVER_SIDE(assertion.getName()));
                     throw new PolicyException(LocalizationMessages.ASSERTION_NOT_SUPPORTED_ON_SERVER_SIDE(assertion.getName()));
                     
                 }
@@ -162,6 +167,7 @@ public class WSDLPolicyMapWrapper implements WSDLExtension {
                 configurator.configure(model, policyMap);
             }
         } catch (PolicyException e) {
+            LOGGER.severe("configureModel", LocalizationMessages.FAILED_CONFIGURE_WSDL_MODEL(), e);
             throw new WebServiceException(LocalizationMessages.FAILED_CONFIGURE_WSDL_MODEL(), e);
         }
     }

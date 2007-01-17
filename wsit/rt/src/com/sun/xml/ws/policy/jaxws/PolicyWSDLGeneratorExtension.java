@@ -65,6 +65,8 @@ import javax.xml.ws.WebServiceException;
 
 /**
  * Marshals the contents of a policy map to WSDL.
+ *
+ * @author Jakub Podlesak (jakub.podlesak at sun.com)
  */
 public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
     
@@ -148,7 +150,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
             }
         } catch (PolicyException e) {
             logger.severe("addDefinitionsExtension", LocalizationMessages.FAILED_TO_MARSHALL_POLICIES(), e);
-            throw new WebServiceException(e);
+            throw new WebServiceException(LocalizationMessages.FAILED_TO_MARSHALL_POLICIES(), e);
         } finally {
             logger.exiting("addDefinitionsExtension");
         }
@@ -315,9 +317,8 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
     }
     
     private void handleCheckingElementQNameWithReflectionException(final Exception e) {
-        logger.severe("handleCheckingElementQNameWithReflectionException",
-                LocalizationMessages.UNABLE_TO_CHECK_ELEMENT_NAME(), e);
-        throw new WebServiceException(e);
+        logger.severe("handleCheckingElementQNameWithReflectionException", LocalizationMessages.UNABLE_TO_CHECK_ELEMENT_NAME(), e);
+        throw new WebServiceException(LocalizationMessages.UNABLE_TO_CHECK_ELEMENT_NAME(), e);
     }
     
     
@@ -343,7 +344,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
             }
         } catch (PolicyException pe) {
             logger.severe("processPolicy", LocalizationMessages.UNABLE_TO_MARSHALL_POLICY_OR_POLICY_REFERENCE(), pe);
-            throw new WebServiceException(pe);
+            throw new WebServiceException(LocalizationMessages.UNABLE_TO_MARSHALL_POLICY_OR_POLICY_REFERENCE(), pe);
         }
     }
     

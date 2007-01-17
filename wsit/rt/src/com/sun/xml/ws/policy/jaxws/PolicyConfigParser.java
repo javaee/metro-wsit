@@ -42,10 +42,11 @@ import org.xml.sax.SAXException;
 
 /**
  * Reads a policy configuration file and returns the WSDL model generated from it.
+ *
+ * @author Marek Potociar (marek.potociar at sun.com)
  */
-public final class PolicyConfigParser {
-    
-    private static final PolicyLogger logger = PolicyLogger.getLogger(PolicyConfigParser.class);
+public final class PolicyConfigParser {   
+    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyConfigParser.class);
     private static final String SERVLET_CONTEXT_CLASSNAME = "javax.servlet.ServletContext";
     
     /**
@@ -60,7 +61,7 @@ public final class PolicyConfigParser {
      */
     public static PolicyMap parse(
             final String configFileIdentifier, final Container container, final PolicyMapMutator...  mutators) throws PolicyException {
-        logger.entering("parse", container);
+        LOGGER.entering("parse", container);
         PolicyMap map = null;
         try {
             Object context = null;
@@ -70,12 +71,12 @@ public final class PolicyConfigParser {
                     context = container.getSPI(contextClass);
                 }
             } catch (ClassNotFoundException e) {
-                logger.fine("parse", LocalizationMessages.CAN_NOT_FIND_CLASS(SERVLET_CONTEXT_CLASSNAME));
+                LOGGER.fine("parse", LocalizationMessages.CAN_NOT_FIND_CLASS(SERVLET_CONTEXT_CLASSNAME));
             }
-            logger.finest("parse", LocalizationMessages.CONTEXT_IS(context));
+            LOGGER.finest("parse", LocalizationMessages.CONTEXT_IS(context));
             
             final String cfgFile = PolicyUtils.ConfigFile.generateFullName(configFileIdentifier);
-            logger.finest("parse", LocalizationMessages.CONFIG_FILE_IS(cfgFile));
+            LOGGER.finest("parse", LocalizationMessages.CONFIG_FILE_IS(cfgFile));
             
             URL configFileUrl = PolicyUtils.ConfigFile.loadAsResource(cfgFile, context);
             
@@ -92,7 +93,7 @@ public final class PolicyConfigParser {
             
             return map;
         } finally {
-            logger.exiting("parse", map);
+            LOGGER.exiting("parse", map);
         }
     }
     
@@ -107,9 +108,8 @@ public final class PolicyConfigParser {
      *
      * @return A PolicyMap populated from the WSIT config file
      */
-    public static PolicyMap parse(
-            final URL configFileUrl, final boolean isClient, final PolicyMapMutator... mutators) throws PolicyException {
-        logger.entering("parse", new Object[] {configFileUrl, mutators});
+    public static PolicyMap parse(final URL configFileUrl, final boolean isClient, final PolicyMapMutator... mutators) throws PolicyException {
+        LOGGER.entering("parse", new Object[] {configFileUrl, mutators});
         final WSDLModel model = parseModel(configFileUrl, isClient, mutators);
         final WSDLPolicyMapWrapper wrapper = model.getExtension(WSDLPolicyMapWrapper.class);
         
@@ -117,7 +117,7 @@ public final class PolicyConfigParser {
         if (wrapper != null) {
             map = wrapper.getPolicyMap();
         }
-        logger.exiting("parse", map);
+        LOGGER.exiting("parse", map);
         return map;
     }
     
@@ -135,10 +135,11 @@ public final class PolicyConfigParser {
      */
     public static WSDLModel parseModel(
             final URL configFileUrl, final boolean isClient, final PolicyMapMutator... mutators) throws PolicyException {
-        logger.entering("parseModel", new Object[] {configFileUrl, mutators});
+        LOGGER.entering("parseModel", new Object[] {configFileUrl, mutators});
         WSDLModel model = null;
         try {
             if (null == configFileUrl) {
+                LOGGER.severe("parseModel", LocalizationMessages.FAILED_TO_READ_NULL_WSIT_CFG());
                 throw new PolicyException(LocalizationMessages.FAILED_TO_READ_NULL_WSIT_CFG());
             }
             
@@ -148,13 +149,16 @@ public final class PolicyConfigParser {
                     new WSDLParserExtension[] { new PolicyWSDLParserExtension(true, mutators) } );
             return model;
         } catch (XMLStreamException ex) {
+            LOGGER.severe("parseModel", LocalizationMessages.WSDL_IMPORT_FAILED(), ex);
             throw new PolicyException(LocalizationMessages.WSDL_IMPORT_FAILED(), ex);
         } catch (IOException ex) {
+            LOGGER.severe("parseModel", LocalizationMessages.WSDL_IMPORT_FAILED(), ex);
             throw new PolicyException(LocalizationMessages.WSDL_IMPORT_FAILED(), ex);
         } catch (SAXException ex) {
+            LOGGER.severe("parseModel", LocalizationMessages.WSDL_IMPORT_FAILED(), ex);
             throw new PolicyException(LocalizationMessages.WSDL_IMPORT_FAILED(), ex);
         } finally {
-            logger.exiting("parseModel", model);
+            LOGGER.exiting("parseModel", model);
         }
     }
     

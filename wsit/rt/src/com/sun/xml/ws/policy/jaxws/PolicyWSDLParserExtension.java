@@ -70,7 +70,7 @@ import javax.xml.ws.WebServiceException;
 
 /**
  *
- * @author japod
+ * @author Jakub Podlesak (jakub.podlesak at sun.com)
  */
 final public class PolicyWSDLParserExtension extends WSDLParserExtension {
     
@@ -146,7 +146,7 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
         }
     }
     
-    private static final PolicyLogger logger = PolicyLogger.getLogger(PolicyWSDLParserExtension.class);
+    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyWSDLParserExtension.class);
     
     //anonymous policy id prefix
     private static final StringBuffer AnonymnousPolicyIdPrefix = new StringBuffer("#__anonymousPolicy__ID");
@@ -430,188 +430,188 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
     }
     
     public boolean portElements(final WSDLPort port, final XMLStreamReader reader) {
-        logger.entering("portElements");
+        LOGGER.entering("portElements");
         final boolean result = processSubelement(port, reader, getHandlers4PortMap());
-        logger.exiting("portElements");
+        LOGGER.exiting("portElements");
         return result;
     }
     
     public void portAttributes(final WSDLPort port, final XMLStreamReader reader) {
-        logger.entering("portAttributes");
+        LOGGER.entering("portAttributes");
         processAttributes(port, reader, getHandlers4PortMap());
-        logger.exiting("portAttributes");
+        LOGGER.exiting("portAttributes");
     }
     
     public boolean serviceElements(final WSDLService service, final XMLStreamReader reader) {
-        logger.entering("serviceElements");
+        LOGGER.entering("serviceElements");
         final boolean result = processSubelement(service, reader, getHandlers4ServiceMap());
-        logger.exiting("serviceElements");
+        LOGGER.exiting("serviceElements");
         return result;
     }
     
     public void serviceAttributes(final WSDLService service, final XMLStreamReader reader) {
-        logger.entering("serviceAttributes");
+        LOGGER.entering("serviceAttributes");
         processAttributes(service, reader, getHandlers4ServiceMap());
-        logger.exiting("serviceAttributes");
+        LOGGER.exiting("serviceAttributes");
     }
     
     
     public boolean definitionsElements(final XMLStreamReader reader){
-        logger.entering("definitionsElements");
+        LOGGER.entering("definitionsElements");
         if (PolicyConstants.POLICY.equals(reader.getName())) {     // Only "Policy" element interests me
             readSinglePolicy(skipPolicyElement(reader, ""), false);
-            logger.exiting("definitionsElements");
+            LOGGER.exiting("definitionsElements");
             return true;
         }
-        logger.exiting("definitionsElements");
+        LOGGER.exiting("definitionsElements");
         return false;
     }
     
     public boolean bindingElements(final WSDLBoundPortType binding, final XMLStreamReader reader) {
-        logger.entering("bindingElements");
+        LOGGER.entering("bindingElements");
         final boolean result = processSubelement(binding, reader, getHandlers4BindingMap());
-        logger.exiting("bindingElements");
+        LOGGER.exiting("bindingElements");
         return result;
     }
     
     public void bindingAttributes(final WSDLBoundPortType binding, final XMLStreamReader reader) {
-        logger.entering("bindingAttributes");
+        LOGGER.entering("bindingAttributes");
         processAttributes(binding, reader, getHandlers4BindingMap());
-        logger.exiting("bindingAttributes");
+        LOGGER.exiting("bindingAttributes");
     }
     
     public boolean portTypeElements(final WSDLPortType portType, final XMLStreamReader reader) {
-        logger.entering("portTypeElements");
+        LOGGER.entering("portTypeElements");
         final boolean result = processSubelement(portType, reader, getHandlers4PortTypeMap());
-        logger.exiting("portTypeElements");
+        LOGGER.exiting("portTypeElements");
         return result;
     }
     
     public void portTypeAttributes(final WSDLPortType portType, final XMLStreamReader reader) {
-        logger.entering("portTypeAttributes");
+        LOGGER.entering("portTypeAttributes");
         processAttributes(portType, reader, getHandlers4PortTypeMap());
-        logger.exiting("portTypeAttributes");
+        LOGGER.exiting("portTypeAttributes");
     }
     
     public boolean portTypeOperationElements(final WSDLOperation operation, final XMLStreamReader reader) {
-        logger.entering("portTypeOperationElements");
+        LOGGER.entering("portTypeOperationElements");
         final boolean result = processSubelement(operation, reader, getHandlers4OperationMap());
-        logger.exiting("portTypeOperationElements");
+        LOGGER.exiting("portTypeOperationElements");
         return result;
     }
     
     public void portTypeOperationAttributes(final WSDLOperation operation, final XMLStreamReader reader) {
-        logger.entering("portTypeOperationAttributes");
+        LOGGER.entering("portTypeOperationAttributes");
         processAttributes(operation, reader, getHandlers4OperationMap());
-        logger.exiting("portTypeOperationAttributes");
+        LOGGER.exiting("portTypeOperationAttributes");
     }
     
     public boolean bindingOperationElements(final WSDLBoundOperation boundOperation, final XMLStreamReader reader) {
-        logger.entering("bindingOperationElements");
+        LOGGER.entering("bindingOperationElements");
         final boolean result = processSubelement(boundOperation, reader, getHandlers4BoundOperationMap());
-        logger.exiting("bindingOperationElements");
+        LOGGER.exiting("bindingOperationElements");
         return result;
     }
     
     public void bindingOperationAttributes(final WSDLBoundOperation boundOperation, final XMLStreamReader reader) {
-        logger.entering("bindingOperationAttributes");
+        LOGGER.entering("bindingOperationAttributes");
         processAttributes(boundOperation, reader, getHandlers4BoundOperationMap());
-        logger.exiting("bindingOperationAttributes");
+        LOGGER.exiting("bindingOperationAttributes");
     }
     
     public boolean messageElements(final WSDLMessage msg, final XMLStreamReader reader) {
-        logger.entering("messageElements");
+        LOGGER.entering("messageElements");
         final boolean result = processSubelement(msg, reader, getHandlers4MessageMap());
-        logger.exiting("messageElements");
+        LOGGER.exiting("messageElements");
         return result;
     }
     
     public void messageAttributes(final WSDLMessage msg, final XMLStreamReader reader) {
-        logger.entering("messageAttributes");
+        LOGGER.entering("messageAttributes");
         processAttributes(msg, reader, getHandlers4MessageMap());
-        logger.exiting("messageAttributes");
+        LOGGER.exiting("messageAttributes");
     }
     
     
     public boolean portTypeOperationInputElements(final WSDLInput input, final XMLStreamReader reader) {
-        logger.entering("portTypeOperationInputElements");
+        LOGGER.entering("portTypeOperationInputElements");
         final boolean result = processSubelement(input, reader, getHandlers4InputMap());
-        logger.exiting("portTypeOperationInputElements");
+        LOGGER.exiting("portTypeOperationInputElements");
         return result;
     }
     
     public void portTypeOperationInputAttributes(final WSDLInput input, final XMLStreamReader reader) {
-        logger.entering("portTypeOperationInputAttributes");
+        LOGGER.entering("portTypeOperationInputAttributes");
         processAttributes(input, reader, getHandlers4InputMap());
-        logger.exiting("portTypeOperationInputAttributes");
+        LOGGER.exiting("portTypeOperationInputAttributes");
     }
     
     
     public boolean portTypeOperationOutputElements(final WSDLOutput output, final XMLStreamReader reader) {
-        logger.entering("portTypeOperationOutputElements");
+        LOGGER.entering("portTypeOperationOutputElements");
         final boolean result = processSubelement(output, reader, getHandlers4OutputMap());
-        logger.exiting("portTypeOperationOutputElements");
+        LOGGER.exiting("portTypeOperationOutputElements");
         return result;
     }
     
     public void portTypeOperationOutputAttributes(final WSDLOutput output, final XMLStreamReader reader) {
-        logger.entering("portTypeOperationOutputAttributes");
+        LOGGER.entering("portTypeOperationOutputAttributes");
         processAttributes(output, reader, getHandlers4OutputMap());
-        logger.exiting("portTypeOperationOutputAttributes");
+        LOGGER.exiting("portTypeOperationOutputAttributes");
     }
     
     
     public boolean portTypeOperationFaultElements(final WSDLFault fault, final XMLStreamReader reader) {
-        logger.entering("portTypeOperationFaultElements");
+        LOGGER.entering("portTypeOperationFaultElements");
         final boolean result = processSubelement(fault, reader, getHandlers4FaultMap());
-        logger.exiting("portTypeOperationFaultElements");
+        LOGGER.exiting("portTypeOperationFaultElements");
         return result;
     }
     
     public void portTypeOperationFaultAttributes(final WSDLFault fault, final XMLStreamReader reader) {
-        logger.entering("portTypeOperationFaultAttributes");
+        LOGGER.entering("portTypeOperationFaultAttributes");
         processAttributes(fault, reader, getHandlers4FaultMap());
-        logger.exiting("portTypeOperationFaultAttributes");
+        LOGGER.exiting("portTypeOperationFaultAttributes");
     }
     
     public boolean bindingOperationInputElements(final WSDLBoundOperation operation, final XMLStreamReader reader) {
-        logger.entering("bindingOperationInputElements");
+        LOGGER.entering("bindingOperationInputElements");
         final boolean result = processSubelement(operation, reader, getHandlers4BindingInputOpMap());
-        logger.exiting("bindingOperationInputElements");
+        LOGGER.exiting("bindingOperationInputElements");
         return result;
     }
     
     public void bindingOperationInputAttributes(final WSDLBoundOperation operation, final XMLStreamReader reader) {
-        logger.entering("bindingOperationInputAttributes");
+        LOGGER.entering("bindingOperationInputAttributes");
         processAttributes(operation, reader, getHandlers4BindingInputOpMap());
-        logger.exiting("bindingOperationInputAttributes");
+        LOGGER.exiting("bindingOperationInputAttributes");
     }
     
     
     public boolean bindingOperationOutputElements(final WSDLBoundOperation operation, final XMLStreamReader reader) {
-        logger.entering("bindingOperationOutputElements");
+        LOGGER.entering("bindingOperationOutputElements");
         final boolean result = processSubelement(operation, reader, getHandlers4BindingOutputOpMap());
-        logger.exiting("bindingOperationOutputElements");
+        LOGGER.exiting("bindingOperationOutputElements");
         return result;
     }
     
     public void bindingOperationOutputAttributes(final WSDLBoundOperation operation, final XMLStreamReader reader) {
-        logger.entering("bindingOperationOutputAttributes");
+        LOGGER.entering("bindingOperationOutputAttributes");
         processAttributes(operation, reader, getHandlers4BindingOutputOpMap());
-        logger.exiting("bindingOperationOutputAttributes");
+        LOGGER.exiting("bindingOperationOutputAttributes");
     }
     
     public boolean bindingOperationFaultElements(final WSDLBoundOperation operation, final XMLStreamReader reader) {
-        logger.entering("bindingOperationFaultElements");
+        LOGGER.entering("bindingOperationFaultElements");
         final boolean result = processSubelement(operation, reader, getHandlers4BindingFaultOpMap());
-        logger.exiting("bindingOperationFaultElements");
+        LOGGER.exiting("bindingOperationFaultElements");
         return result;
     }
     
     public void bindingOperationFaultAttributes(final WSDLBoundOperation operation, final XMLStreamReader reader) {
-        logger.entering("bindingOperationFaultAttributes");
+        LOGGER.entering("bindingOperationFaultAttributes");
         processAttributes(operation, reader, getHandlers4BindingFaultOpMap());
-        logger.exiting("bindingOperationFaultAttributes");
+        LOGGER.exiting("bindingOperationFaultAttributes");
     }
     
     
@@ -661,7 +661,7 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
     }
     
     public void finished(final WSDLParserExtensionContext context) {
-        logger.entering("finished");
+        LOGGER.entering("finished");
         try {
             // need to make sure proper beginning order of internal policies within unresolvedUris list
             if (null != expandQueueHead) { // any policies found
@@ -690,6 +690,7 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
                             addNewPolicyNeeded(currentUri, prefetchedRecord.policyModel);
                         } else { // policy has not been yet passed by
                             if (urlsRead.contains(getBaseUrl(currentUri))) { // big problem --> unresolvable policy
+                                LOGGER.severe("finished", LocalizationMessages.CAN_NOT_RESOLVE_POLICY(currentUri));
                                 throw new PolicyException(LocalizationMessages.CAN_NOT_RESOLVE_POLICY(currentUri));
                             } else {
                                 if (readExternalFile(getBaseUrl(currentUri))) {
@@ -707,7 +708,7 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
                     sourceModel.expand(modelContext);
                     modelContext.addModel(new URI(policyUri), sourceModel);
                 } catch (URISyntaxException use) {
-                    logger.severe("finished", LocalizationMessages.URI_SYNTAX_EXCEPTION_THROWN_WHEN_PROCESSING_URI(policyUri), use);
+                    LOGGER.severe("finished", LocalizationMessages.URI_SYNTAX_EXCEPTION_THROWN_WHEN_PROCESSING_URI(policyUri), use);
                     throw new WebServiceException(use);
                 }
             }
@@ -941,10 +942,10 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
             }
             
         } catch(PolicyException pe) {
-            logger.severe("finished", LocalizationMessages.POLICY_EXCEPTION_WHILE_FINISHING_PARSING_WSDL(),pe);
+            LOGGER.severe("finished", LocalizationMessages.POLICY_EXCEPTION_WHILE_FINISHING_PARSING_WSDL(),pe);
             throw new WebServiceException(pe);
         }
-        logger.exiting("finished");
+        LOGGER.exiting("finished");
     }
     
     /**
@@ -964,7 +965,7 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
             reader.next();
             return null;
         } catch(XMLStreamException e) {
-            logger.severe("readPolicyReferenceElement", LocalizationMessages.XML_EXCEPTION_WHEN_PROCESSING_POLICY_REFERENCE());
+            LOGGER.severe("readPolicyReferenceElement", LocalizationMessages.XML_EXCEPTION_WHEN_PROCESSING_POLICY_REFERENCE());
             throw new WebServiceException(e);
         }
     }
@@ -1114,10 +1115,7 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
                 policyRec.uri = policyRec.policyModel.getPolicyName();
             }
         } catch(Exception e) {
-            logger.log(Level.SEVERE,
-                    "definitionsElements",
-                    LocalizationMessages.EXCEPTION_WHEN_READING_POLICY_ELEMENT(elementCode.toString()),
-                    e);
+            LOGGER.severe("definitionsElements", LocalizationMessages.EXCEPTION_WHEN_READING_POLICY_ELEMENT(elementCode.toString()), e);
             throw new WebServiceException(e);
         }
         
@@ -1126,7 +1124,7 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
     
     // time to read possible config file and do alternative selection (on client side)
     public void postFinished(final WSDLParserExtensionContext context) {
-        logger.entering("postFinished");
+        LOGGER.entering("postFinished");
         final WSDLPolicyMapWrapper mapWrapper = context.getWSDLModel().getExtension(WSDLPolicyMapWrapper.class);
         if (mapWrapper != null) {
             if (context.isClientSide() && (!isForConfigFile)) {
@@ -1134,33 +1132,34 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
                 try {
                     final URL clientCfgFileUrl = PolicyUtils.ConfigFile.loadAsResource(clientCfgFileName, null);
                     if (clientCfgFileUrl == null) {
-                        logger.config("postFinished", LocalizationMessages.CLIENT_CONFIG_FILE_MISSING());
+                        LOGGER.config("postFinished", LocalizationMessages.CLIENT_CONFIG_FILE_MISSING());
                     } else {
-                        logger.config("postFinished", LocalizationMessages.CLIENT_CONFIG_FILE_URL_IS(clientCfgFileUrl));
+                        LOGGER.config("postFinished", LocalizationMessages.CLIENT_CONFIG_FILE_URL_IS(clientCfgFileUrl));
                         final PolicyMap clientPolicyMap = PolicyConfigParser.parse(clientCfgFileUrl, true);
-                        logger.fine("postFinished", LocalizationMessages.CLIENT_CONFIG_FILE_POLICY_MAP_IS(clientPolicyMap));
+                        LOGGER.fine("postFinished", LocalizationMessages.CLIENT_CONFIG_FILE_POLICY_MAP_IS(clientPolicyMap));
                         mapWrapper.addClientConfigToMap(clientCfgFileUrl, clientPolicyMap);
                     }
                 } catch (PolicyException pe) {
-                    logger.log(Level.SEVERE ,"postFinished", LocalizationMessages.POLICY_EXCEPTION_WHILE_READING_CLIENT_CONFIG(), pe);
+                    LOGGER.severe("postFinished", LocalizationMessages.POLICY_EXCEPTION_WHILE_READING_CLIENT_CONFIG(), pe);
                     throw new WebServiceException(pe);
                 }
-                logger.fine("postFinished", LocalizationMessages.INVOKING_CLIENT_POLICY_ALTERNATIVE_SELECTION());
+                LOGGER.fine("postFinished", LocalizationMessages.INVOKING_CLIENT_POLICY_ALTERNATIVE_SELECTION());
                 try {
                     mapWrapper.doAlternativeSelection();
                 } catch (PolicyException e) {
-                    throw new WebServiceException("Failed to find a valid policy alternative", e);
+                    LOGGER.severe("postFinished", LocalizationMessages.VALID_POLICY_ALTERNATIVE_NOT_FOUND(), e);
+                    throw new WebServiceException(LocalizationMessages.VALID_POLICY_ALTERNATIVE_NOT_FOUND(), e);
                 }
             } else if (!context.isClientSide() && !isForConfigFile) { //server side
                 try {
                     mapWrapper.validateServerSidePolicies();
                 } catch (PolicyException e) {
-                    logger.warning("postFinished", e.getMessage());
+                    LOGGER.warning("postFinished", e.getMessage());
                     // throw new WebServiceException("Failed to validate server side policies", e);
                 }
             }
             mapWrapper.configureModel(context.getWSDLModel());
         }
-        logger.exiting("postFinished");
+        LOGGER.exiting("postFinished");
     }
 }

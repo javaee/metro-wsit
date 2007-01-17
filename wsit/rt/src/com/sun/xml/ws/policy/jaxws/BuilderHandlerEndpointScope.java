@@ -28,6 +28,7 @@ import com.sun.xml.ws.policy.PolicyMapExtender;
 import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.policy.PolicySubject;
 import com.sun.xml.ws.policy.jaxws.privateutil.LocalizationMessages;
+import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
 import java.util.Collection;
 import java.util.Map;
@@ -35,26 +36,23 @@ import javax.xml.namespace.QName;
 
 /**
  *
- * @author japod
+ * @author Jakub Podlesak (jakub.podlesak at sun.com)
  */
 final class BuilderHandlerEndpointScope extends BuilderHandler{
+    public static final PolicyLogger LOGGER = PolicyLogger.getLogger(BuilderHandlerEndpointScope.class);
     
     QName service;
     QName port;
     
     /** Creates a new instance of WSDLServiceScopeBuilderHandler */
-    BuilderHandlerEndpointScope(
-            Collection<String> policyURIs, Map<String,PolicySourceModel> policyStore, Object policySubject, QName service, QName port) {
+    BuilderHandlerEndpointScope(Collection<String> policyURIs, Map<String,PolicySourceModel> policyStore, Object policySubject, QName service, QName port) {
         
         super(policyURIs, policyStore, policySubject);
         this.service = service;
         this.port = port;
     }
     
-    void populate(final PolicyMapExtender policyMapExtender) throws PolicyException{
-        if (null == policyMapExtender) {
-            throw new PolicyException(LocalizationMessages.POLICY_MAP_EXTENDER_CAN_NOT_BE_NULL());
-        }
+    protected void doPopulate(final PolicyMapExtender policyMapExtender) throws PolicyException {
         final PolicyMapKey mapKey = PolicyMap.createWsdlEndpointScopeKey(service, port);
         for (PolicySubject subject : getPolicySubjects()) {
             policyMapExtender.putEndpointSubject(mapKey, subject);

@@ -34,10 +34,11 @@ import javax.xml.stream.XMLStreamReader;
  * Assumes that a given XML entity holds a valid URL and returns an
  * XMLEntityResolver.Parser for that URL. An XMLEntityResolver.Parser is
  * essentially a wrapper around an XMLStreamReader.
+ *
+ * @author Jakub Podlesak (jakub.podlesak at sun.com)
  */
 public class PolicyConfigResolver implements XMLEntityResolver {
-
-    private static final PolicyLogger logger = PolicyLogger.getLogger(PolicyConfigResolver.class);
+    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyConfigResolver.class);
     private static final XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
 
     /**
@@ -56,7 +57,7 @@ public class PolicyConfigResolver implements XMLEntityResolver {
     public Parser resolveEntity(final String publicId, final String systemId)
         throws XMLStreamException, IOException {
         
-        logger.entering("resolveEntity", new Object[] { publicId, systemId });
+        LOGGER.entering("resolveEntity", new Object[] { publicId, systemId });
         Parser parser = null;
 
         try {
@@ -66,7 +67,7 @@ public class PolicyConfigResolver implements XMLEntityResolver {
             parser = new Parser(systemUrl, reader);
             return parser;
         } finally {
-            logger.exiting("resolveEntity", parser);
+            LOGGER.exiting("resolveEntity", parser);
         }
     }
 }

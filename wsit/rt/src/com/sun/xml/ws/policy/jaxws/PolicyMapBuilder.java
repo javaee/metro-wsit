@@ -36,7 +36,7 @@ import java.util.List;
  * changes to the PolicyMap.
  *
  *
- * @author japod
+ * @author Jakub Podlesak (jakub.podlesak at sun.com)
  */
 class PolicyMapBuilder {
     /**
@@ -59,8 +59,7 @@ class PolicyMapBuilder {
         if (null != builder) {
             policyBuilders.add(builder);
         }
-    }
-    
+    }    
    
     /**
      * Iterates all the registered PolicyBuilders and lets them populate
@@ -93,6 +92,5 @@ class PolicyMapBuilder {
     
     void unregisterAll() {
         this.policyBuilders = null;
-    }
-    
+    }    
 }
