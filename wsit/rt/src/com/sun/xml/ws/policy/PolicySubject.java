@@ -23,6 +23,7 @@
 package com.sun.xml.ws.policy;
 
 import com.sun.xml.ws.policy.privateutil.LocalizationMessages;
+import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -33,6 +34,8 @@ import java.util.List;
  * service) with which a policy can be associated.
  */
 public final class PolicySubject {
+    public static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicySubject.class);
+    
     private List<Policy> policies = new LinkedList<Policy>();
     private Object subject;
     
@@ -46,6 +49,7 @@ public final class PolicySubject {
      */
     public PolicySubject(Object subject, Policy policy) {
         if (subject == null || policy == null) {
+            LOGGER.severe("<init>", LocalizationMessages.SUBJECT_AND_POLICY_PARAM_MUST_NOT_BE_NULL(subject, policy));
             throw new NullPointerException(LocalizationMessages.SUBJECT_AND_POLICY_PARAM_MUST_NOT_BE_NULL(subject, policy));
         }
         
@@ -64,10 +68,12 @@ public final class PolicySubject {
      */
     public PolicySubject(Object subject, Collection<Policy> policies) {
         if (subject == null || policies == null) {
+            LOGGER.severe("<init>", LocalizationMessages.INPUT_PARAMS_MUST_NOT_BE_NULL());
             throw new NullPointerException(LocalizationMessages.INPUT_PARAMS_MUST_NOT_BE_NULL());
         }
         
         if (policies.isEmpty()) {
+            LOGGER.severe("<init>",LocalizationMessages.INITIAL_POLICY_COLLECTION_MUST_NOT_BE_EMPTY());
             throw new IllegalArgumentException(LocalizationMessages.INITIAL_POLICY_COLLECTION_MUST_NOT_BE_EMPTY());
         }
         
@@ -84,6 +90,7 @@ public final class PolicySubject {
      */
     public void attach(final Policy policy) {
         if (policy == null) {
+            LOGGER.severe("attach", LocalizationMessages.POLICY_TO_ATTACH_MUST_NOT_BE_NULL());
             throw new NullPointerException(LocalizationMessages.POLICY_TO_ATTACH_MUST_NOT_BE_NULL());
         }
         this.policies.add(policy);

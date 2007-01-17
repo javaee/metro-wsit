@@ -23,6 +23,7 @@
 package com.sun.xml.ws.policy;
 
 import com.sun.xml.ws.policy.privateutil.LocalizationMessages;
+import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -33,6 +34,8 @@ import java.util.List;
  * hold policies
  */
 final class PolicyScope {
+    public static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyScope.class);
+    
     private List<PolicySubject> subjects = new LinkedList<PolicySubject>();
     
     PolicyScope(List<PolicySubject> initialSubjects) {
@@ -43,6 +46,7 @@ final class PolicyScope {
     
     void attach(final PolicySubject subject) {
         if (subject == null) {
+            LOGGER.severe("attach", LocalizationMessages.SUBJECT_PARAM_MUST_NOT_BE_NULL());
             throw new NullPointerException(LocalizationMessages.SUBJECT_PARAM_MUST_NOT_BE_NULL());
         }
         

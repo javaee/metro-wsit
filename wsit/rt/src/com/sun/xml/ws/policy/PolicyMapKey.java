@@ -23,6 +23,7 @@
 package com.sun.xml.ws.policy;
 
 import com.sun.xml.ws.policy.privateutil.LocalizationMessages;
+import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import javax.xml.namespace.QName;
 
 /**
@@ -37,6 +38,8 @@ import javax.xml.namespace.QName;
  * @author Marek Potociar
  */
 final public class PolicyMapKey  {
+    public static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyMapKey.class);
+    
     QName service;
     QName port;
     QName operation;
@@ -92,6 +95,7 @@ final public class PolicyMapKey  {
         }
             
         if (handler == null) {
+            LOGGER.severe("equals", LocalizationMessages.POLICY_MAP_KEY_HANDLER_NOT_SET());
             throw new IllegalStateException(LocalizationMessages.POLICY_MAP_KEY_HANDLER_NOT_SET());
         }
         
@@ -104,6 +108,7 @@ final public class PolicyMapKey  {
 
     public int hashCode() {
         if (handler == null) {
+            LOGGER.severe("hashCode", LocalizationMessages.POLICY_MAP_KEY_HANDLER_NOT_SET());
             throw new IllegalStateException(LocalizationMessages.POLICY_MAP_KEY_HANDLER_NOT_SET());
         }
 

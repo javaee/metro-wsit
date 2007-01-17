@@ -23,6 +23,7 @@
 package com.sun.xml.ws.policy;
 
 import com.sun.xml.ws.policy.privateutil.LocalizationMessages;
+import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 
 /**
  * The class serves as a base for specific policy map mutator implementations. It provides common methods that allow
@@ -31,6 +32,8 @@ import com.sun.xml.ws.policy.privateutil.LocalizationMessages;
  * @author Marek Potociar (marek.potociar@sun.com)
  */
 public abstract class PolicyMapMutator {
+    public static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyMapMutator.class);
+    
     private PolicyMap map = null;
     
     /**
@@ -47,6 +50,7 @@ public abstract class PolicyMapMutator {
      */
     void connect(final PolicyMap map) {
         if (isConnected()) {
+            LOGGER.severe("connect", LocalizationMessages.POLICY_MAP_MUTATOR_ALREADY_CONNECTED());
             throw new IllegalStateException(LocalizationMessages.POLICY_MAP_MUTATOR_ALREADY_CONNECTED());
         }
         
