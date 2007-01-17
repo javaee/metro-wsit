@@ -82,7 +82,7 @@ import com.sun.xml.wss.jaxws.impl.SecurityServerPipe;
  */
 @SuppressWarnings("deprecation")
 public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory {
-    
+
     private static final String PREFIX = "com.sun.xml.ws.assembler";
     private static final String CLIENT_PREFIX = PREFIX + ".client";
     private static final String SERVER_PREFIX = PREFIX + ".server";
@@ -95,27 +95,27 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
     private static final String WSMEX_SUFFIX = ".wsmex";
     private static final String WSRM_SUFFIX = ".wsrm";
     private static final String WSTX_SUFFIX = ".wstx";
-    
+
     private static final String SECURITY_POLICY_NAMESPACE_URI = "http://schemas.xmlsoap.org/ws/2005/07/securitypolicy";
     private static final String WSAT_SOAP_NSURI = "http://schemas.xmlsoap.org/ws/2004/10/wsat";
     private static final QName AT_ALWAYS_CAPABILITY = new QName(WSAT_SOAP_NSURI, "ATAlwaysCapability");
     private static final QName AT_ASSERTION = new QName(WSAT_SOAP_NSURI, "ATAssertion");
     private static final String AUTO_OPTIMIZED_TRANSPORT_POLICY_NAMESPACE_URI = "http://java.sun.com/xml/ns/wsit/2006/09/policy/transport/client";
     private static final QName AUTO_OPTIMIZED_TRANSPORT_POLICY_ASSERTION = new QName(AUTO_OPTIMIZED_TRANSPORT_POLICY_NAMESPACE_URI, "AutomaticallySelectOptimalTransport");
-    
+
     //default security pipe classes for XWSS 2.0 Style Security Configuration Support
     private static final String xwss20ClientPipe = "com.sun.xml.xwss.XWSSClientPipe";
     private static final String xwss20ServerPipe = "com.sun.xml.xwss.XWSSServerPipe";
-    
+
     private static final Logger logger = Logger.getLogger(PipelineAssemblerFactoryImpl.class.getName());
 
     private static class WsitPipelineAssembler implements PipelineAssembler {
         private BindingID bindingId;
-        
+
         WsitPipelineAssembler(final BindingID bindingId) {
             this.bindingId = bindingId;
         }
-        
+
         @NotNull
         @SuppressWarnings("unchecked")
         public Pipe createClient(@NotNull ClientPipeAssemblerContext context) {
@@ -130,7 +130,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             // This variable is only set if WSDL port is null and there is a
             // client configuration file
             WSPortInfo portInfo = null;
-            
+
             if (feature != null) {
                 wsdlModel = feature.getWsdlModel();
                 policyMap = feature.getPolicyMap();
@@ -162,9 +162,9 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             p = dump(context, CLIENT_PREFIX, p);
             p = dumpAction(CLIENT_PREFIX + ACTION_SUFFIX, context.getBinding(), p);
             p = dump(context, CLIENT_PREFIX + TRANSPORT_SUFFIX, p);
-            
+
             p = dump(context, CLIENT_PREFIX + WSS_SUFFIX + AFTER_SUFFIX, p);
-            
+
             // check for Security
             //SecurityClientPipe securityClientPipe = null;
             SecureConversationInitiator scInit = null;
@@ -190,14 +190,14 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
                         }
                     }*/
                 }
-                
+
             } else {
                 if (isSecurityEnabled) {
                    ClientPipeConfiguration config = new ClientPipeConfiguration(
                             policyMap, wsdlPort, context.getService(), context.getBinding());
                     p = new SecurityClientPipe(config, p);
                     scInit = (SecureConversationInitiator) p;
-                    
+
                     /*
                    HashMap propBag = new HashMap();
                     propBag.put("POLICY", policyMap);
@@ -207,7 +207,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
                     System.out.println("<<<<<<<<<Creating WSITClientSecurityPipe>>>>>>>>>");
                     p = new WSITClientSecurityPipe(propBag, p);
                     scInit = (SecureConversationInitiator)propBag.get("SC_INITIATOR");*/
-                    
+
                 } else {
                     //look for XWSS 2.0 Style Security
                     // policyMap may be null in case of client dispatch without a client config file
@@ -217,9 +217,9 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
                 }
             }
             p = dump(context, CLIENT_PREFIX + WSS_SUFFIX + BEFORE_SUFFIX, p);
-            
+
             // MEX pipe here
-            
+
             p = dump(context, CLIENT_PREFIX + WSRM_SUFFIX + AFTER_SUFFIX, p);
             // check for WS-Reliable Messaging
             if (isReliableMessagingEnabled(policyMap, wsdlPort)) {
@@ -230,7 +230,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
                         p);
             }
             p = dump(context, CLIENT_PREFIX + WSRM_SUFFIX + BEFORE_SUFFIX, p);
-            
+
             p = dump(context, CLIENT_PREFIX + WSTX_SUFFIX + AFTER_SUFFIX, p);
             // check for WS-Atomic Transactions
             if (isTransactionsEnabled(policyMap, wsdlPort, false)) {
@@ -243,20 +243,19 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
                         p);
             }
             p = dump(context, CLIENT_PREFIX + WSTX_SUFFIX + BEFORE_SUFFIX, p);
-            
-            p = context.createClientMUPipe(p);
-            p = context.createHandlerPipe(p);
-            
+
             p = dump(context, CLIENT_PREFIX + WSA_SUFFIX + AFTER_SUFFIX, p);
             // check for WS-Addressing
             if (isAddressingEnabled(policyMap, wsdlPort, context.getBinding())) {
                 p = context.createWsaPipe(p);
             }
             p = dump(context, CLIENT_PREFIX + WSA_SUFFIX + BEFORE_SUFFIX, p);
-            
+            p = context.createClientMUPipe(p);
+            p = context.createHandlerPipe(p);
+
             return p;
         }
-        
+
         @NotNull
         @SuppressWarnings("unchecked")
         public Pipe createServer(ServerPipeAssemblerContext context) {
@@ -265,12 +264,12 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
                 sd.addFilter(new WsdlDocumentFilter());
             }
             PolicyMap policyMap = initPolicyMap(context);
-            
+
             Pipe p = context.getTerminalPipe();
             p = context.createHandlerPipe(p);
             p = context.createServerMUPipe(p);
             p = context.createMonitoringPipe(p);
-            
+
             p = dump(context, SERVER_PREFIX + WSTX_SUFFIX + AFTER_SUFFIX, p);
             // check for WS-Atomic Transactions
             if (isTransactionsEnabled(policyMap, context.getWsdlModel(), true)) {
