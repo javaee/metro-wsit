@@ -49,6 +49,7 @@ import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.PipeBase;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
 import com.sun.xml.ws.rm.jaxws.runtime.client.ProtocolMessageReceiver;
+import com.sun.xml.ws.rm.jaxws.util.LoggingHelper;
 import com.sun.xml.ws.rm.protocol.*;
 import com.sun.xml.ws.runtime.util.Session;
 import com.sun.xml.ws.runtime.util.SessionManager;
@@ -69,6 +70,10 @@ import javax.xml.ws.wsaddressing.W3CEndpointReference;
 import javax.xml.ws.soap.SOAPBinding;
 import java.net.URI;
 import java.util.HashMap;
+import java.util.ResourceBundle;
+import java.util.logging.Logger;
+import java.util.logging.Level;
+//import com.sun.xml.ws.rm.jaxws.util.LoggingHelper;
 
 /**
  * Server-side RM Pipe implementation
@@ -76,6 +81,15 @@ import java.util.HashMap;
 public class RMServerPipe extends PipeBase<RMDestination,
         ServerOutboundSequence,
         ServerInboundSequence> {
+
+
+
+    public static final Logger logger =
+            Logger.getLogger(LoggingHelper.getLoggerName(RMServerPipe.class),
+                    Messages.class.getName());
+
+
+    public static final LoggingHelper loggingHelper = new LoggingHelper(logger);
 
     private static HashMap<String, ActionHandler> actionMap =
             new HashMap<String, ActionHandler>();
@@ -216,6 +230,8 @@ public class RMServerPipe extends PipeBase<RMDestination,
                     (ServerInboundSequence)message.getSequence();
 
             if (inboundSequence == null ) {
+                logger.log(Level.SEVERE, Messages.NOT_RELIABLE_SEQ_OR_PROTOCOL_MESSAGE.format()
+                    );
                 throw new RMException(Messages.NOT_RELIABLE_SEQ_OR_PROTOCOL_MESSAGE.format());
 
             }
@@ -350,6 +366,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
                     return null;
                 }
             } catch (RMException ee) {
+                logger.severe(Messages.ACKNOWLEDGEMENT_MESSAGE_EXCEPTION.format() +e);
                 throw new WebServiceException(Messages.ACKNOWLEDGEMENT_MESSAGE_EXCEPTION.format() +e);
             }
 
@@ -442,6 +459,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
                     .getHeaders().getAction(constants.getAddressingVersion(),
                                             config.getSoapVersion());
         if (actionValue == null || actionValue.equals("")) {
+          logger.severe(Messages.NON_RM_REQUEST_OR_MISSING_WSA_ACTION_HEADER.format());
           throw new RMException(Messages.NON_RM_REQUEST_OR_MISSING_WSA_ACTION_HEADER.format() )
                                         ;
         }
@@ -471,6 +489,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
         try {
             csrElement = message.readPayloadAsJAXB(unmarshaller);
         } catch (JAXBException e) {
+            logger.severe(Messages.CREATESEQUENCE_HEADER_PROBLEM.format() + e);
             throw new RMException(Messages.CREATESEQUENCE_HEADER_PROBLEM.format() + e);
         }
 
@@ -565,6 +584,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
             try {
                 dest = new URI(destString);
             } catch (Exception e) {
+                logger.severe(Messages.INVALID_OR_MISSING_TO_ON_CS_MESSAGE.format()) ;
                 throw new RMException(Messages.INVALID_OR_MISSING_TO_ON_CS_MESSAGE.format()
                         );
             }
@@ -632,12 +652,14 @@ public class RMServerPipe extends PipeBase<RMDestination,
         try {
             tsElement = message.readPayloadAsJAXB(unmarshaller);
         } catch (JAXBException e) {
+            logger.severe(Messages.TERMINATE_SEQUENCE_EXCEPTION.format() + e);
             throw new TerminateSequenceException(Messages.TERMINATE_SEQUENCE_EXCEPTION.format() + e);
         }
 
         String id = tsElement.getIdentifier().getValue();
         ServerInboundSequence seq = provider.getInboundSequence(id);
         if (seq == null) {
+            logger.severe(String.format(Constants.UNKNOWN_SEQUENCE_TEXT + id));
             throw new InvalidSequenceException(String.format(Constants.UNKNOWN_SEQUENCE_TEXT,id),id);
         }
 
@@ -691,6 +713,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
             Message message = inbound.getMessage();
             Header header = message.getHeaders().get(constants.getSequenceQName(), true);
             if (header == null) {
+                logger.severe(Messages.INVALID_LAST_MESSAGE.format());
                 throw new RMException(Messages.INVALID_LAST_MESSAGE.format());
             }
 
@@ -699,6 +722,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
 
             ServerInboundSequence seq = provider.getInboundSequence(id);
             if (seq == null) {
+                logger.severe(String.format(Constants.UNKNOWN_SEQUENCE_TEXT,id +id));
                 throw new InvalidSequenceException(String.format(Constants.UNKNOWN_SEQUENCE_TEXT,id),id);
             }
 
@@ -710,6 +734,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
             return generateAckMessage(inbound, seq, constants.getLastAction());
 
         } catch (JAXBException e) {
+            logger.severe(Messages.LAST_MESSAGE_EXCEPTION.format() +e);
             throw new RMException(Messages.LAST_MESSAGE_EXCEPTION.format() +e);
         }
     }
@@ -721,6 +746,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
             Message message = inbound.getMessage();
             Header header = message.getHeaders().get(constants.getAckRequestedQName(), true);
             if (header == null) {
+                logger.severe(Messages.INVALID_ACK_REQUESTED.format());
                 throw new RMException(Messages.INVALID_ACK_REQUESTED.format());
             }
 
@@ -731,6 +757,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
             ServerInboundSequence seq = provider.getInboundSequence(id);
 
             if (seq == null) {
+                logger.severe(Constants.UNKNOWN_SEQUENCE_TEXT + id);
                 throw new InvalidSequenceException(String.format(Constants.UNKNOWN_SEQUENCE_TEXT,id),id);
             }
             seq.resetLastActivityTime();
@@ -738,6 +765,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
             return generateAckMessage(inbound, seq);
 
         } catch (JAXBException e) {
+            logger.severe(Messages.ACK_REQUESTED_EXCEPTION.format());
             throw new RMException(Messages.ACK_REQUESTED_EXCEPTION.format() +e);
         }
 
@@ -752,6 +780,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
             Message message = inbound.getMessage();
             Header header = message.getHeaders().get(constants.getSequenceAcknowledgementQName(),false);
             if (header == null) {
+                logger.severe(Messages.INVALID_SEQ_ACKNOWLEDGEMENT.format());
                 throw new RMException(Messages.INVALID_SEQ_ACKNOWLEDGEMENT.format());
             }
 
@@ -785,6 +814,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
 
 
         } catch (JAXBException e) {
+            logger.severe(Messages.SEQ_ACKNOWLEDGEMENT_EXCEPTION.format());
             throw new RMException(Messages.SEQ_ACKNOWLEDGEMENT_EXCEPTION.format() +e);
         }
     }
@@ -955,6 +985,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
         SecurityContextToken sct = (SecurityContextToken)packet.invocationProperties.get(MessageConstants.INCOMING_SCT);
         URI uri = sct.getIdentifier();
         if(!uri.toString().equals(seq.getStrId())){
+            logger.severe(Messages.SECURITY_TOKEN_MISMATCH.format());
             throw new RMSecurityException(Messages.SECURITY_TOKEN_MISMATCH.format());
         }
     }
