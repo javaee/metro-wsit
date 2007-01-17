@@ -319,16 +319,20 @@ public abstract class OutboundSequence extends Sequence {
     
         while (storedMessages != 0) {
             try {
-                //FIXME - Temporarily, we will let this
-                //timeout to allow debugging of ack failures.
-                //Doing this, we lose the ability to recover
-                //from spurious wakeups.
-                wait(5000);
+                //wait for the specified timeout or a notify(), which is called
+                //whenever a message is acked.
+                long timeout = config.getCloseTimeout();
+                wait(timeout);
+                
                 if (storedMessages > 0) {      
-                    logger.severe(Messages.TIMEOUT_IN_WAITFORACKS_STRING.format(storedMessages));
+                    logger.severe(Messages.TIMEOUT_IN_WAITFORACKS_STRING
+                            .format(timeout / 1000 , storedMessages));
                     break;
                 }
-            } catch (InterruptedException e) {}
+            } catch (InterruptedException e) {
+                //allow preDestroy to continue
+                break;
+            }
         }
     }
 

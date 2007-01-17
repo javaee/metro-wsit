@@ -46,6 +46,7 @@ import java.net.URI;
 import java.util.UUID;
 import java.util.logging.Logger;
 import java.util.logging.Level;
+import com.sun.xml.ws.rm.jaxws.util.LoggingHelper;
 
 /**
  * ClientOutboundSequence represents the set of all messages from a single BindingProvider instance.
@@ -56,7 +57,7 @@ import java.util.logging.Level;
 public class ClientOutboundSequence extends OutboundSequence {
 
     private static final Logger logger =
-        Logger.getLogger(ClientOutboundSequence.class.getName());
+        Logger.getLogger(LoggingHelper.getLoggerName(ClientOutboundSequence.class));
 
     /**
      * Current value of receive buffer read from incoming SequenceAcknowledgement

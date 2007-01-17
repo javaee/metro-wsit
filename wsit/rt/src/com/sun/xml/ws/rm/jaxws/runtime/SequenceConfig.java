@@ -96,6 +96,13 @@ public class SequenceConfig {
      * Length of time between ackRequests.
      */
     public long ackRequestInterval;
+    
+    
+    /**
+     * Lenth of time that RMClientPipe.preDestroy will block while
+     * waiting for unacknowledged messages to arrive.
+     */
+    public long closeTimeout;
 
 
     /**
@@ -127,14 +134,11 @@ public class SequenceConfig {
         flowControl = false;
         bufferSize = 32;
         soapVersion = SOAPVersion.SOAP_12;
-        
-        /*
-        ackRequestInterval = 200;
-        resendInterval = 200;
-         */
-        
+             
         ackRequestInterval = 0;
         resendInterval = 0;
+        
+        closeTimeout = 0; //infinite
     }
     
     public SequenceConfig(WSDLPort port, WSBinding wsbinding) {
@@ -224,6 +228,24 @@ public class SequenceConfig {
      */
     public void setBufferSize(int bufferSize) {
         this.bufferSize = bufferSize;
+    }
+    
+    /**
+     * Accessor for the closeTimeout property.
+     *
+     * @return The value of the property.
+     */
+    public long getCloseTimeout() {
+        return closeTimeout;
+    }
+    
+    /**
+     * Mutator for the closeTimeout property.
+     *
+     * @param The new value.
+     */
+    public void setCloseTimeout(long timeout) {
+        closeTimeout = timeout;
     }
 
     /**
@@ -345,7 +367,12 @@ public class SequenceConfig {
                                 if (num != null) {
                                     resendInterval = Long.parseLong(num);
                                 }
-                            } else {
+                            } else if (qname.equals(constants.getCloseTimeoutQName())) {
+                                String num = assertion.getAttributeValue(new QName("", "Milliseconds"));
+                                if (num != null) {
+                                    closeTimeout = Long.parseLong(num);
+                                }
+                            }   else {
                                 //TODO handle error condition here
                             }
                         }

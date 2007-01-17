@@ -252,6 +252,10 @@ public enum RMConstants {
     public QName getAckRequestIntervalQName() {
         return new QName(Constants.sunClientVersion, "AckRequestInterval");
     }
+    
+    public QName getCloseTimeoutQName() {
+        return new QName(Constants.sunClientVersion, "CloseTimeout");
+    }
 
     public QName getInactivityTimeoutQName() {
         return new QName(Constants.version, "InactivityTimeout");
