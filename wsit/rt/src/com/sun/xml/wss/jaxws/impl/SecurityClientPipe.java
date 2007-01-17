@@ -227,7 +227,8 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
         ret.setMessage(msg);
         
         if (isTrustMsg){
-            String action = getAction(ret);
+            //String action = getAction(ret);
+            getAction(ret);
         }
         
         return ret;

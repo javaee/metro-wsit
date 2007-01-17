@@ -26,8 +26,10 @@ import com.sun.xml.ws.api.security.trust.Claims;
 import com.sun.xml.ws.api.security.trust.STSAttributeProvider;
 
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.security.auth.Subject;
@@ -39,29 +41,27 @@ import javax.xml.namespace.QName;
  */
 public class DefaultSTSAttributeProvider implements STSAttributeProvider{
     
-    public Map<String, QName> getClaimedAttributes(final Subject subject, final String appliesTo, final String tokenType, final Claims claims){
+    public Map<QName, List<String>> getClaimedAttributes(final Subject subject, final String appliesTo, final String tokenType, final Claims claims){
         final Set<Principal> principals = subject.getPrincipals();
-        final Map<String, QName> attrs = new HashMap<String, QName>();
+        final Map<QName, List<String>> attrs = new HashMap<QName, List<String>>();
         if (principals != null){
             final Iterator iterator = principals.iterator();
             while (iterator.hasNext()){
                 final String name = principals.iterator().next().getName();
                 if (name != null){
-                    //attrs.add(name);
-                    attrs.put(NAME_IDENTIFIER, new QName("http://sun.com", name));
+                    List<String> nameIds = new ArrayList<String>();
+                    nameIds.add(name);
+                    attrs.put(new QName("http://sun.com", NAME_IDENTIFIER), nameIds);
                     break;
                 }
             }       
         }
        
-     /*   if (attrs.get(NAME_IDENTIFIER) == null){
-            attrs.put(NAME_IDENTIFIER, new QName("http://sun.com", "principal"));
-        } */
-       
         // Set up a dumy attribute value
-        final String key = "name";
-        final QName value = new QName("http://sun.com", "value");
-        attrs.put(key, value);
+        final QName key = new QName("http://sun.com", "token-requestor");
+        List<String> tokenRequestor = new ArrayList<String>();
+        tokenRequestor.add("authenticated");
+        attrs.put(key, tokenRequestor);
        
         return attrs;
     }   

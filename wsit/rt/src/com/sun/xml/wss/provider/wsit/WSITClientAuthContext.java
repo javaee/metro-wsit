@@ -230,7 +230,8 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
             Boolean trustMsgProp = (Boolean)messageInfo.getMap().get("IS_TRUST_MSG");
             boolean isTrustMsg = (trustMsgProp != null) ? trustMsgProp.booleanValue() : false;
             if (isTrustMsg){
-                String action = getAction(ret);
+                //String action = getAction(ret);
+                getAction(ret);
             }
             
             setResponsePacket(messageInfo, ret);

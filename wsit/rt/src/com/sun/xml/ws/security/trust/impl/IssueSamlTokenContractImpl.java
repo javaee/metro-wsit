@@ -105,7 +105,7 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
     
     private static final String SAML_HOLDER_OF_KEY = "urn:oasis:names:tc:SAML:1.0:cm:holder-of-key";
     
-    protected Token createSAMLAssertion(final String appliesTo, final String tokenType, final String keyType, final String assertionId, final String issuer, final Map claimedAttrs, final IssuedTokenContext context) throws WSTrustException {
+    protected Token createSAMLAssertion(final String appliesTo, final String tokenType, final String keyType, final String assertionId, final String issuer, final  Map<QName, List<String>> claimedAttrs, final IssuedTokenContext context) throws WSTrustException {
         Token token = null;
         
         final CallbackHandler callbackHandler = config.getCallbackHandler();
@@ -324,7 +324,7 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
         return keyInfo;
     }
     
-    private Assertion createSAML11Assertion(final String assertionId, final String issuer, final String appliesTo, final KeyInfo keyInfo, final Map claimedAttrs) throws WSTrustException{
+    private Assertion createSAML11Assertion(final String assertionId, final String issuer, final String appliesTo, final KeyInfo keyInfo, final Map<QName, List<String>> claimedAttrs) throws WSTrustException{
         Assertion assertion = null;
         try{
             final SAMLAssertionFactory samlFac = SAMLAssertionFactory.newInstance(SAMLAssertionFactory.SAML1_1);
@@ -344,22 +344,21 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
                     confirmMethods, null, keyInfo.getElement());
             
             com.sun.xml.wss.saml.Subject subj = null;
-            final QName principal = (QName)claimedAttrs.get(STSAttributeProvider.NAME_IDENTIFIER);
-            if (principal != null){
-                final NameIdentifier nameId = samlFac.createNameIdentifier(principal.getLocalPart(), null, null);
-                subj = samlFac.createSubject(nameId, subjectConfirm);
-                claimedAttrs.remove(STSAttributeProvider.NAME_IDENTIFIER);
-            }
-            
             final List<Attribute> attrs = new ArrayList<Attribute>();
-            final Set<Map.Entry> entries = claimedAttrs.entrySet();
-            for(Map.Entry entry : entries){
-                final String attrKey = (String)entry.getKey();
-                final QName value = (QName)entry.getValue();
-                final List<String> values = new ArrayList<String>();
-                values.add(value.getLocalPart());
-                final Attribute attr = samlFac.createAttribute(attrKey, value.getNamespaceURI(), values);
-                attrs.add(attr);
+            final Set<Map.Entry<QName, List<String>>> entries = claimedAttrs.entrySet();
+            for(Map.Entry<QName, List<String>> entry : entries){
+                final QName attrKey = (QName)entry.getKey();
+                final List<String> values = (List<String>)entry.getValue();
+                if (values != null && values.size() > 0){
+                    if (STSAttributeProvider.NAME_IDENTIFIER.equals(attrKey.getLocalPart()) && subj == null){
+                        final NameIdentifier nameId = samlFac.createNameIdentifier(values.get(0), attrKey.getNamespaceURI(), null);
+                        subj = samlFac.createSubject(nameId, subjectConfirm);
+                    }
+                    else{
+                        final Attribute attr = samlFac.createAttribute(attrKey.getLocalPart(), attrKey.getNamespaceURI(), values);
+                        attrs.add(attr);
+                    }
+                }
             }
             final AttributeStatement statement = samlFac.createAttributeStatement(subj, attrs);
             final List<AttributeStatement> statements = new ArrayList<AttributeStatement>();
@@ -381,7 +380,7 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
         return assertion;
     }
     
-    private Assertion createSAML20Assertion(final String assertionId, final String issuer, final String appliesTo, final KeyInfo keyInfo, final Map claimedAttrs) throws WSTrustException{
+    private Assertion createSAML20Assertion(final String assertionId, final String issuer, final String appliesTo, final KeyInfo keyInfo, final  Map<QName, List<String>> claimedAttrs) throws WSTrustException{
         Assertion assertion = null;
         try{
             final SAMLAssertionFactory samlFac = SAMLAssertionFactory.newInstance(SAMLAssertionFactory.SAML2_0);
@@ -404,24 +403,21 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
                     null, keyInfoConfData, SAML_HOLDER_OF_KEY);
             
             com.sun.xml.wss.saml.Subject subj = null;
-            final QName principal = (QName)claimedAttrs.get(STSAttributeProvider.NAME_IDENTIFIER);
-            
-            if (principal != null){
-                final NameID nameId = samlFac.createNameID(principal.getLocalPart(), principal.getNamespaceURI(), null);
-                subj = samlFac.createSubject(nameId, subjectConfirm);
-                claimedAttrs.remove(STSAttributeProvider.NAME_IDENTIFIER);
-            }
-            
-            // Create AttributeStatement
             final List<Attribute> attrs = new ArrayList<Attribute>();
-            final Set<Map.Entry> entries = claimedAttrs.entrySet();
-            for(Map.Entry entry : entries){
-                final String attrKey = (String)entry.getKey();
-                final QName value = (QName)entry.getValue();
-                final List<String> values = new ArrayList<String>();
-                values.add(value.getLocalPart());
-                final Attribute attr = samlFac.createAttribute(attrKey, values);
-                attrs.add(attr);                
+            final Set<Map.Entry<QName, List<String>>> entries = claimedAttrs.entrySet();
+            for(Map.Entry<QName, List<String>> entry : entries){
+                final QName attrKey = (QName)entry.getKey();
+                final List<String> values = (List<String>)entry.getValue();
+                if (values != null && values.size() > 0){
+                    if (STSAttributeProvider.NAME_IDENTIFIER.equals(attrKey.getLocalPart()) && subj == null){
+                        final NameID nameId = samlFac.createNameID(values.get(0), attrKey.getNamespaceURI(), null);
+                        subj = samlFac.createSubject(nameId, subjectConfirm);
+                    }
+                    else{
+                        final Attribute attr = samlFac.createAttribute(attrKey.getLocalPart(), values);
+                        attrs.add(attr);
+                    }
+                }
             }
             final AttributeStatement statement = samlFac.createAttributeStatement(attrs);
             final List<AttributeStatement> statements = new ArrayList<AttributeStatement>();

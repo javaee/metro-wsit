@@ -28,9 +28,12 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+
+import javax.xml.namespace.QName;
 
 import javax.security.auth.Subject;
 
@@ -144,7 +147,7 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
         // Get claimed attributes
         final Claims claims = rst.getClaims();
         final STSAttributeProvider attrProvider = WSTrustFactory.getSTSAttributeProvider();
-        final Map claimedAttrs = attrProvider.getClaimedAttributes(subject, appliesTo, tokenType, claims);
+        final Map<QName, List<String>> claimedAttrs = attrProvider.getClaimedAttributes(subject, appliesTo, tokenType, claims);
         
         RequestedProofToken proofToken = null;
         Entropy serverEntropy = null;
@@ -314,7 +317,7 @@ public abstract class IssueSamlTokenContract implements WSTrustContract {
         throw new UnsupportedOperationException("Unsupported operation: containsChallenge");
     }
     
-    protected abstract Token createSAMLAssertion(String appliesTo, String tokenType, String keyType, String assertionId, String issuer, Map claimedAttrs, IssuedTokenContext context) throws WSTrustException;
+    protected abstract Token createSAMLAssertion(String appliesTo, String tokenType, String keyType, String assertionId, String issuer, Map<QName, List<String>> claimedAttrs, IssuedTokenContext context) throws WSTrustException;
     
   /*protected abstract boolean isAuthorized(Subject subject, String appliesTo, String tokenType, String keyType);
     

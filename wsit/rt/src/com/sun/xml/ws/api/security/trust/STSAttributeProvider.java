@@ -22,6 +22,7 @@
 
 package com.sun.xml.ws.api.security.trust;
 
+import java.util.List;
 import java.util.Map;
 import javax.security.auth.Subject;
 import javax.xml.namespace.QName;
@@ -46,9 +47,10 @@ public interface STSAttributeProvider {
      * @param appliesTo Identifying target service(s) 
      * @param tokenType Type of token to be issued which will contain these attributes.
      * @param cliams Identifying the attributes of the requestor claimed by the target service.
-     * @return map of attribute value pairs. The value of the map is a <code>QName</code> contains
-     *         the value and the namespace of the value. One particular value with the requestor 
-     *         identity to be in the issued token with key <code>NAME_IDENTIFIER</code> must be in the map.
+     * @return map of attribut key and values. The key of the map is a <code>QName</code> contains the key name the the name space 
+     *         for the key. The value of the map is a <code>List</code> of <code>String</code> contains
+     *         a list of the values. One particular value with the requestor 
+     *         identity to be in the issued token with key name<code>NAME_IDENTIFIER</code> must be in the map.
      */  
-    Map<String, QName> getClaimedAttributes(Subject subject, String appliesTo, String tokenType, Claims claims);
+    Map<QName, List<String>> getClaimedAttributes(Subject subject, String appliesTo, String tokenType, Claims claims);
 }
