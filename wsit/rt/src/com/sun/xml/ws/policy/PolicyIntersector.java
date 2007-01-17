@@ -22,6 +22,7 @@
 
 package com.sun.xml.ws.policy;
 
+import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
@@ -37,6 +38,7 @@ import com.sun.xml.ws.policy.privateutil.LocalizationMessages;
  */
 public final class PolicyIntersector {
     private static final PolicyIntersector INSTANCE = new PolicyIntersector();
+    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyIntersector.class);
     
     /**
      * Creates a new instance of PolicyIntersector
@@ -65,6 +67,7 @@ public final class PolicyIntersector {
      */
     public Policy intersect(final Collection<Policy> policies) {
         if (policies == null || policies.isEmpty()) {
+            LOGGER.severe("intersect", LocalizationMessages.NEITHER_NULL_NOR_EMPTY_POLICY_COLLECTION_EXPECTED())
             throw new IllegalArgumentException(LocalizationMessages.NEITHER_NULL_NOR_EMPTY_POLICY_COLLECTION_EXPECTED());
         } else if (policies.size() == 1) {
             return policies.iterator().next();
