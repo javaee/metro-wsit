@@ -68,7 +68,7 @@ import java.util.logging.Level;
  * already decided to prepare.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  * @since 1.0
  */
 public class ATParticipant extends Registrant {
@@ -169,9 +169,10 @@ public class ATParticipant extends Registrant {
 
     public CoordinatorPortType getATCoordinatorWS(final boolean nonterminalNotify) {
         if (getCoordinatorProtocolService() == null && !isRegistrationCompleted()) {
-            logger.warning("getATCoordinatorWS", "no register response received from  " +
-                        getATCoordinator().getContext().getRootRegistrationService().toString() +
-                        " for " + getCoordIdPartId());
+            logger.warning("getATCoordinatorWS",
+                    LocalizationMessages.NO_REG_RESP_0014(
+                            getATCoordinator().getContext().getRootRegistrationService().toString(),
+                            getCoordIdPartId()));
         }
 
         return getATCoordinatorWS(getCoordinatorProtocolService(),
@@ -187,14 +188,13 @@ public class ATParticipant extends Registrant {
             try {
                 wsepr = new WSEndpointReference(replyToPPS);
             } catch (Exception xse) {
-                logger.severe("getATCoordinatorWS", "unexpected exception converting replyToPPS " + replyToPPS.toString() +
-                        " exception" + xse.getLocalizedMessage());
+                logger.severe("getATCoordinatorWS", LocalizationMessages.REPLYTOPPS_EPR_EXCEPTION_0015(replyToPPS.toString(), xse.getLocalizedMessage()));
             }
             if (wsepr != null) {
                 owf.setReplyTo(wsepr);
             }
         } else {
-            logger.warning("getATCoordinatorWS", "Protocol Provider Service EPR should not be null for non-terminal notfication");
+            logger.warning("getATCoordinatorWS", LocalizationMessages.NULL_PPS_EPR_WARNING_0016());
         }
         assert toCPS != null;
         return ATCoordinator.getWSATCoordinatorService().getCoordinator(toCPS, owf);
@@ -215,13 +215,12 @@ public class ATParticipant extends Registrant {
             try {
                 wsepr = new WSEndpointReference(replyToCPS);
             } catch (Exception xse) {
-                logger.severe("getATCoordinatorWS", "unexpected exception converting replyToCPS " + replyToCPS.toString() +
-                        " exception" + xse.getLocalizedMessage());
+                logger.severe("getATCoordinatorWS", LocalizationMessages.REPLYTOPPS_EPR_EXCEPTION_0015(replyToCPS.toString(), xse.getLocalizedMessage()));
             }
             if (wsepr != null) {
                 owf.setReplyTo(wsepr);
             } else {
-                logger.warning("getATParticipantWS", "Coordinator Provider Service EPR should not be null for non-terminal notfication");
+                logger.warning("getATParticipantWS", LocalizationMessages.NULL_CPS_EPR_WARNING_0018());
             }
             
         }
@@ -270,13 +269,11 @@ public class ATParticipant extends Registrant {
                     try {
                         getATCoordinatorWS(true).preparedOperation(null);
                     } catch (WebServiceException wse) {
-                        logger.warning(METHOD_NAME, "prepared to web service failed. "
-                                    + wse.getLocalizedMessage());
+                        logger.warning(METHOD_NAME, LocalizationMessages.PREPARE_FAILED_0010(wse.getLocalizedMessage()));
                        
                         throw wse;
                     } catch (Exception e) {
-                        logger.severe(METHOD_NAME, "prepared to web service failed. "
-                                    + e.getLocalizedMessage());
+                        logger.severe(METHOD_NAME, LocalizationMessages.PREPARE_FAILED_0010(e.getLocalizedMessage()));
                     }
                 } else {
                     getATCoordinator().prepared(getIdValue());
@@ -308,12 +305,10 @@ public class ATParticipant extends Registrant {
         try {
             getATParticipantWS(true).prepareOperation(null);
         } catch (WebServiceException wse) {
-            logger.warning("remotePrepare", "prepared to web service failed. "
-                        + wse.getLocalizedMessage());
+            logger.warning("remotePrepare", LocalizationMessages.PREPARE_FAILED_0010(wse.getLocalizedMessage()));
             throw wse;
         } catch (Exception e) {
-            logger.severe("remotePrepare", "prepared to web service failed. "
-                        + e.getLocalizedMessage());
+            logger.severe("remotePrepare", LocalizationMessages.PREPARE_FAILED_0010(e.getLocalizedMessage()));
         }
     }
 
@@ -350,8 +345,7 @@ public class ATParticipant extends Registrant {
                         getATCoordinatorWS(true).preparedOperation(null);
                     } catch (WebServiceException wse) {
                         if (logger.isLogging(Level.WARNING)) {
-                            logger.warning(METHOD_NAME, "prepared to web service failed. "
-                                    + wse.getLocalizedMessage());
+                            logger.warning(METHOD_NAME, LocalizationMessages.PREPARE_FAILED_0010(wse.getLocalizedMessage()));
                         }
                         throw wse;
                     }
@@ -438,8 +432,7 @@ public class ATParticipant extends Registrant {
                 break;
             case ABORTING:
                 if (logger.isLogging(Level.WARNING)) {
-                    logger.warning(METHOD_NAME, "fault inconsistent internal state: " + getState() +
-                            " for " + getCoordIdPartId());
+                    logger.warning(METHOD_NAME, LocalizationMessages.INCONSISTENT_STATE_0020(getState(), getCoordIdPartId()));
                 }
                 //fault wsat:InconsistentInternalState
                 abort();
@@ -449,8 +442,7 @@ public class ATParticipant extends Registrant {
             case PREPARING:
             case PREPARED:
                 if (logger.isLogging(Level.WARNING)) {
-                    logger.warning(METHOD_NAME, "fault invalid state: " + getState() +
-                            " for " + getCoordIdPartId());
+                    logger.warning(METHOD_NAME, LocalizationMessages.INCONSISTENT_STATE_0020(getState(), getCoordIdPartId()));
                 }
                 // TODO throw fault coor:InvalidState
                 abort();
@@ -467,8 +459,7 @@ public class ATParticipant extends Registrant {
                     try {
                         getATCoordinatorWS(false).committedOperation(null);
                     } catch (WebServiceException wse) {
-                       logger.warning(METHOD_NAME, "committed to web service failed. "
-                                      + wse.getLocalizedMessage());
+                       logger.warning(METHOD_NAME, LocalizationMessages.COMMITTED_FAILED_0021(wse.getLocalizedMessage()));
                         throw wse;
                     }
                 } else {
@@ -522,8 +513,7 @@ public class ATParticipant extends Registrant {
                 getATCoordinatorWS(false).abortedOperation(null);
             } catch (WebServiceException wse) {
                 if (logger.isLogging(Level.WARNING)) {
-                    logger.warning("localRollback", "prepared to web service failed. "
-                            + wse.getLocalizedMessage());
+                    logger.warning("localRollback", LocalizationMessages.PREPARED_FAILED_0019(wse.getLocalizedMessage()));
                 }
                 throw wse;
             }

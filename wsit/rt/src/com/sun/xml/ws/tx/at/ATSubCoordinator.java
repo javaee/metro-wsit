@@ -96,7 +96,7 @@ public class ATSubCoordinator extends ATCoordinator {
                 result = true;
             } catch (Exception e) {
                 // TODO: ROBUSTNESS retry register when it fails 
-                logger.severe("registerWithDurableParent", " failed. " + getCoordIdPartId(rootDurableParticipant));
+                logger.severe("registerWithDurableParent", LocalizationMessages.REG_WITH_DURABLE_FAILED_0022(getCoordIdPartId(rootDurableParticipant)));
             }
         }
         return result;
@@ -173,9 +173,9 @@ public class ATSubCoordinator extends ATCoordinator {
                 } catch (XAException ex) {
                     setAborting();
                     if (logger.isLogging(Level.INFO)) {
-                        logger.info("DurableParticipant.prepare", "XATerminator threw exception " + ex.getLocalizedMessage());
+                        logger.info("DurableParticipant.prepare", LocalizationMessages.XATERM_THREW_0023(ex.getLocalizedMessage()));
                     }
-                    throw new TXException("DurableParticipant.prepare threw " +  ex.getClass().getName());
+                    throw new TXException(ex.getClass().getName());
                 }
             }
             // Next line required to support remote participants in this coordinators durable participants.
@@ -203,8 +203,7 @@ public class ATSubCoordinator extends ATCoordinator {
                 } catch (XAException ex) {
                     xaCommitFailed = true;
                     
-                    logger.severe("ATSubCoordinator.DurableParticipant.commit", "XATerminator.commit() threw exception "
-                            + ex.getLocalizedMessage());
+                    logger.severe("ATSubCoordinator.DurableParticipant.commit", LocalizationMessages.XATERM_THREW_0023(ex.getLocalizedMessage()));
                     
                 }
             }
@@ -212,14 +211,13 @@ public class ATSubCoordinator extends ATCoordinator {
             // waitForCommitOrRollbackResponse(Protocol.DURABLE);
             if (xaCommitFailed || isAborting()) {
                 
-                logger.severe("ATSubCoordinator.DurableParticipant.commit", "abort during commit processing. coordId="
-                        + getIdValue());
+                logger.severe("ATSubCoordinator.DurableParticipant.commit", LocalizationMessages.ABORT_DURING_COMMIT_0024(getIdValue()));
                 
                 // TODO: check WS-AT CV state table if should send aborted to root coordinator here.
                 rootDurableParticipant.aborted();
             } else {
                 if (logger.isLogging(Level.INFO)) {
-                    logger.info("DurableParticipant.committed", "committed subordinate coordId=" + getIdValue());
+                    logger.info("DurableParticipant.committed", LocalizationMessages.COMMITTED_SUB_COOR_0025(getIdValue()));
                 }
                 rootDurableParticipant.committed();
             }
@@ -229,14 +227,12 @@ public class ATSubCoordinator extends ATCoordinator {
              if (getXATerminator() != null && xaResult == XA_OK) {
                 try {
                     if (logger.isLogging(Level.SEVERE)) {
-                        logger.severe("ATSubCoordinator.DurableParticipant.abort", "XATerminator abort. coordId="
-                            + getIdValue());
+                        logger.severe("ATSubCoordinator.DurableParticipant.abort", LocalizationMessages.XATERM_ABORT_0026(getIdValue()));
                     }
                     getXATerminator().rollback(getCoordinationXid());
                 } catch (XAException ex) {
                     if (logger.isLogging(Level.SEVERE)) {
-                        logger.severe("ATSubCoordinator.DurableParticipant.abort", "caught XAException thrown by XATerminator.rollback() "
-                                + ex.getMessage());
+                        logger.severe("ATSubCoordinator.DurableParticipant.abort", LocalizationMessages.CAUGHT_XAEX_0027(ex.getMessage()));
                     }
                 }
             }
