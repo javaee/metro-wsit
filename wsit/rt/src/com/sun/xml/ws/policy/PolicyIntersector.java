@@ -67,7 +67,7 @@ public final class PolicyIntersector {
      */
     public Policy intersect(final Collection<Policy> policies) {
         if (policies == null || policies.isEmpty()) {
-            LOGGER.severe("intersect", LocalizationMessages.NEITHER_NULL_NOR_EMPTY_POLICY_COLLECTION_EXPECTED())
+            LOGGER.severe("intersect", LocalizationMessages.NEITHER_NULL_NOR_EMPTY_POLICY_COLLECTION_EXPECTED());
             throw new IllegalArgumentException(LocalizationMessages.NEITHER_NULL_NOR_EMPTY_POLICY_COLLECTION_EXPECTED());
         } else if (policies.size() == 1) {
             return policies.iterator().next();
