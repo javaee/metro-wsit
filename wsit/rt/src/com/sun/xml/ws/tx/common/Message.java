@@ -29,7 +29,6 @@ import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.message.Header;
-import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import static com.sun.xml.ws.tx.common.Constants.COORDINATION_CONTEXT;
@@ -155,7 +154,7 @@ public class Message {
                     cc = CoordinationContextBase.createCoordinationContext(ccHdr.readAsJAXB(unmarshaller));
                 } catch (JAXBException e) {
                     if (logger.isLogging(Level.WARNING)) {
-                        logger.warning("getCoordinationContext", LocalizationMessages.CANNOT_UNMARSHAL_CONTEXT(e.getLocalizedMessage()));
+                        logger.warning("getCoordinationContext", LocalizationMessages.CANNOT_UNMARSHAL_CONTEXT_2000(e.getLocalizedMessage()));
                     }
                     throw e;
                 }

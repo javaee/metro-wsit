@@ -22,39 +22,34 @@
 
 package com.sun.xml.ws.tx.common;
 
-import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.api.WSService;
-import com.sun.xml.ws.api.addressing.WSEndpointReference;
-import com.sun.xml.ws.api.addressing.OneWayFeature;
-import com.sun.xml.ws.api.addressing.AddressingVersion;
-import com.sun.xml.ws.api.message.Headers;
-import com.sun.xml.ws.api.message.HeaderList;
-import com.sun.xml.ws.developer.WSBindingProvider;
-import com.sun.xml.ws.developer.MemberSubmissionAddressingFeature;
-import com.sun.xml.ws.developer.JAXWSProperties;
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
+import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.WSService;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
+import com.sun.xml.ws.api.addressing.OneWayFeature;
+import com.sun.xml.ws.api.addressing.WSEndpointReference;
+import com.sun.xml.ws.api.message.HeaderList;
+import com.sun.xml.ws.developer.JAXWSProperties;
+import com.sun.xml.ws.developer.MemberSubmissionAddressingFeature;
 
+import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPConstants;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPFactory;
 import javax.xml.soap.SOAPFault;
-import javax.xml.ws.EndpointReference;
-import javax.xml.ws.WebServiceException;
-import javax.xml.ws.Service;
-import javax.xml.ws.Dispatch;
-import javax.xml.ws.WebServiceFeature;
-import javax.xml.ws.BindingProvider;
-import javax.xml.ws.WebServiceContext;
-import javax.xml.ws.handler.MessageContext;
-import javax.xml.ws.soap.AddressingFeature;
-import javax.xml.ws.soap.SOAPBinding;
-import javax.xml.ws.http.HTTPBinding;
-import javax.xml.namespace.QName;
 import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
+import javax.xml.ws.BindingProvider;
+import javax.xml.ws.Dispatch;
+import javax.xml.ws.EndpointReference;
+import javax.xml.ws.Service;
+import javax.xml.ws.WebServiceContext;
+import javax.xml.ws.WebServiceException;
+import javax.xml.ws.WebServiceFeature;
+import javax.xml.ws.handler.MessageContext;
+import javax.xml.ws.soap.SOAPBinding;
 import java.util.Locale;
-import java.util.Collections;
 
 /**
  * WS-Addressing helper methods.
@@ -94,7 +89,7 @@ public class WsaHelper {
      */
     @NotNull
     static SOAPFault createFault(@NotNull final SOAPVersion soapVer, @NotNull final TxFault fault,
-                                        @NotNull final String message) {
+                                 @NotNull final String message) {
         try {
             final SOAPFactory soapFactory = soapVer.saajSoapFactory;
             final SOAPFault soapFault = soapFactory.createFault();

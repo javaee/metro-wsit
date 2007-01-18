@@ -22,8 +22,8 @@
 package com.sun.xml.ws.tx.common;
 
 import com.sun.istack.NotNull;
-import static com.sun.xml.ws.tx.common.Constants.WSCOOR_FAULT_ACTION_URI;
 import static com.sun.xml.ws.tx.common.Constants.WSAT_FAULT_ACTION_URI;
+import static com.sun.xml.ws.tx.common.Constants.WSCOOR_FAULT_ACTION_URI;
 
 import javax.xml.namespace.QName;
 
@@ -38,7 +38,7 @@ import javax.xml.namespace.QName;
  * specified by ws:coor or ws:at, so I'm leaving this field out as well
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @since 1.0
  */
 public enum TxFault {

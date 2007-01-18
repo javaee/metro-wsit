@@ -31,7 +31,7 @@ import java.net.UnknownHostException;
  * other modules.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 1.0
  */
 public class Util {
@@ -48,6 +48,7 @@ public class Util {
         try {
             return InetAddress.getLocalHost();
         } catch (UnknownHostException e) {
+            // TODO: this is bad, but we're going to replace this whole method when wsit issue 278 is fixed
             e.printStackTrace();
         }
         return null;

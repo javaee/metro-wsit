@@ -24,7 +24,6 @@ package com.sun.xml.ws.tx.common;
 
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.spi.PolicyAssertionValidator;
-import com.sun.xml.ws.policy.spi.PolicyAssertionValidator.Fitness;
 import static com.sun.xml.ws.tx.common.Constants.*;
 
 import javax.xml.namespace.QName;

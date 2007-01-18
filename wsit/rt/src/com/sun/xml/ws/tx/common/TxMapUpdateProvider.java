@@ -96,7 +96,7 @@ public class TxMapUpdateProvider implements PolicyMapUpdateProvider {
                             logger.finest(METHOD_NAME, "handled exception " + e.getLocalizedMessage());
                         }
                         if (logger.isLogging(Level.INFO)) {
-                            logger.info(METHOD_NAME, LocalizationMessages.NON_EE_CONTAINER());
+                            logger.info(METHOD_NAME, LocalizationMessages.NON_EE_CONTAINER_2005());
                         }
                         return;
                     }
@@ -107,7 +107,7 @@ public class TxMapUpdateProvider implements PolicyMapUpdateProvider {
                         port = method.getOwner().getPort();
                         if (port == null) {
                             if (logger.isLogging(Level.INFO)) {
-                                logger.info(METHOD_NAME, LocalizationMessages.NULL_WS_PORT(theClass.getName()));
+                                logger.info(METHOD_NAME, LocalizationMessages.NULL_WS_PORT_2006(theClass.getName()));
                             }
                             return;
                         }
@@ -135,7 +135,7 @@ public class TxMapUpdateProvider implements PolicyMapUpdateProvider {
                         final PolicySubject wsatPolicySubject = new PolicySubject(wsdlBop, policy);
                         policyMapMutator.putOperationSubject(operationKey, wsatPolicySubject);
                         if (logger.isLogging(Level.INFO)) {
-                            logger.info(METHOD_NAME, LocalizationMessages.ADD_AT_POLICY_ASSERTION(wsdlBop.getName()) +
+                            logger.info(METHOD_NAME, LocalizationMessages.ADD_AT_POLICY_ASSERTION_2007(wsdlBop.getName()) +
                                     txnAttr.toString());
                         }
                     } else {
