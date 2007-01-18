@@ -190,8 +190,8 @@ public class NewWSSCPlugin {
             processRequestSecurityTokenResponse(rst, rstr, context);
         } catch (WSSecureConversationException ex){
             log.log(Level.SEVERE,
-                    LogStringsMessages.WSSC_0023_ERROR_PROCESSING_RSTR(), ex);
-            throw new RuntimeException(LogStringsMessages.WSSC_0023_ERROR_PROCESSING_RSTR(), ex);
+                    LogStringsMessages.WSSC_0020_PROBLEM_CREATING_RSTR(), ex);
+            throw new RuntimeException(LogStringsMessages.WSSC_0020_PROBLEM_CREATING_RSTR(), ex);
         }
         context.setEndpointAddress(endPointAddress);
         return context;
@@ -400,13 +400,9 @@ public class NewWSSCPlugin {
         final Entropy entropy = reqClientEntropy?eleFac.createEntropy(secret):null;
         
         RequestSecurityToken rst = null;
-        try {
-            rst = eleFac.createRSTForIssue(tokenType, requestType, null, null, null, entropy, null);
-        } catch (WSTrustException ex){
-            log.log(Level.SEVERE,
-                    LogStringsMessages.WSSC_0024_ERROR_CREATING_RST(FOR_ISSUE), ex);
-            throw new RuntimeException(LogStringsMessages.WSSC_0024_ERROR_CREATING_RST(FOR_ISSUE), ex);
-        }
+        
+        rst = eleFac.createRSTForIssue(tokenType, requestType, null, null, null, entropy, null);
+        
         rst.setKeySize(skl);
         rst.setKeyType(URI.create(WSTrustConstants.SYMMETRIC_KEY));
         rst.setComputedKeyAlgorithm(URI.create(WSTrustConstants.CK_PSHA1));
