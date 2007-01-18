@@ -245,6 +245,22 @@ public final class Connection {
         super.finalize();
     }
     
+    public String getHost() {
+        return getHost(socketChannel);
+    }
+
+    public int getPort() {
+        return getPort(socketChannel);
+    }
+    
+    public String getLocalHost() {
+        return getLocalHost(socketChannel);
+    }
+
+    public int getLocalPort() {
+        return getLocalPort(socketChannel);
+    }
+
     public static String getHost(final SocketChannel socketChannel) {
         return socketChannel.socket().getInetAddress().getHostAddress();
     }

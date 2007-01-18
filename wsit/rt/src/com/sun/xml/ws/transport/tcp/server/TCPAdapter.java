@@ -29,6 +29,7 @@ import com.sun.xml.ws.api.server.Adapter;
 import com.sun.xml.ws.transport.http.DeploymentDescriptorParser.AdapterFactory;
 import com.sun.xml.ws.api.server.TransportBackChannel;
 import com.sun.xml.ws.api.server.WSEndpoint;
+import com.sun.xml.ws.transport.tcp.io.Connection;
 import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
 import com.sun.xml.ws.transport.tcp.util.ChannelContext;
 import com.sun.xml.ws.transport.tcp.util.MimeType;
@@ -127,7 +128,8 @@ public class TCPAdapter<TCPTK extends TCPAdapter.TCPToolkit> extends Adapter<TCP
             try {
                 packet = head.process(packet, connection, this);
             } catch(Exception e) {
-                logger.log(Level.WARNING, MessagesMessages.WSTCP_0022_ERROR_WS_EXECUTION(), e);
+                final Connection connection = con.getChannelContext().getConnection();
+                logger.log(Level.WARNING, MessagesMessages.WSTCP_0022_ERROR_WS_EXECUTION(connection.getHost(), connection.getPort()), e);
                 if (!isClosed) {
                     writeInternalServerError();
                 }
