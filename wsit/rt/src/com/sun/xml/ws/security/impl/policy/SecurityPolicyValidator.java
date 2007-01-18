@@ -158,9 +158,12 @@ public class SecurityPolicyValidator implements PolicyAssertionValidator{
         supportedAssertions.add(new QName(TRUST_NS,SignWith));
         
         supportedAssertions.add(new QName(TRUST_NS,EncryptWith));
-        
+                
         supportedAssertions.add(new QName(SUN_WSS_SECURITY_SERVER_POLICY_NS,"DisableStreamingSecurity"));
         supportedAssertions.add(new QName(SUN_WSS_SECURITY_CLIENT_POLICY_NS,"DisableStreamingSecurity"));
+
+        supportedAssertions.add(new QName(SUN_WSS_SECURITY_SERVER_POLICY_NS,"DisablePayloadBuffering"));
+        supportedAssertions.add(new QName(SUN_WSS_SECURITY_CLIENT_POLICY_NS,"DisablePayloadBuffering"));
         
         // newly added by M.P.
         supportedAssertions.add(new QName(SUN_WSS_SECURITY_SERVER_POLICY_NS,"KeyStore"));

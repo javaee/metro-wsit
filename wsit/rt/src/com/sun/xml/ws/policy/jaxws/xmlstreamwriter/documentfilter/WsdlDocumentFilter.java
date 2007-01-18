@@ -57,11 +57,13 @@ public class WsdlDocumentFilter implements SDDocumentFilter {
                     new QName("http://schemas.sun.com/2006/03/wss/server", "TrustStore"),
                     new QName("http://schemas.sun.com/2006/03/wss/server", "CallbackHandlerConfiguration"),
                     new QName("http://schemas.sun.com/2006/03/wss/server", "ValidatorConfiguration"),
+                    new QName("http://schemas.sun.com/2006/03/wss/server", "DisablePayloadBuffering"),
                     
                     new QName("http://schemas.sun.com/2006/03/wss/client", "KeyStore"),
                     new QName("http://schemas.sun.com/2006/03/wss/client", "TrustStore"),
                     new QName("http://schemas.sun.com/2006/03/wss/client", "CallbackHandlerConfiguration"),
                     new QName("http://schemas.sun.com/2006/03/wss/client", "ValidatorConfiguration"),
+                    new QName("http://schemas.sun.com/2006/03/wss/client", "DisablePayloadBuffering"),
                     
                     new QName("http://schemas.sun.com/ws/2006/05/sc/server", "SCConfiguration"),
                     

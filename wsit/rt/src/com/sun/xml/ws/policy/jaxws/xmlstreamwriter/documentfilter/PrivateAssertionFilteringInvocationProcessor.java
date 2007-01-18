@@ -41,35 +41,6 @@ import javax.xml.stream.XMLStreamWriter;
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-
-/*
-TODO: Filter these (even if there is not visibility attribute set)
- 
-http://schemas.sun.com/2006/03/wss/server
-KeyStore
-TrustStore
-CallbackHandlerConfiguration
-ValidatorConfiguration
- 
-http://schemas.sun.com/2006/03/wss/client
-KeyStore
-TrustStore
-Timestamp
-CallbackHandlerConfiguration
-ValidatorConfiguration
- 
-http://schemas.sun.com/ws/2006/05/sc/server
-SCConfiguration
- 
-http://schemas.sun.com/ws/2006/05/sc/client
-SCClientConfiguration
- 
-http://schemas.sun.com/ws/2006/05/trust/server
-STSConfiguration
- 
-http://schemas.sun.com/ws/2006/05/trust/client
-PreconfiguredSTS
- */
 final class PrivateAssertionFilteringInvocationProcessor implements InvocationProcessor {
     private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PrivateAssertionFilteringInvocationProcessor.class);
     
