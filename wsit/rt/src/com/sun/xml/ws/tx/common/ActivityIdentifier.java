@@ -21,28 +21,18 @@
  */
 package com.sun.xml.ws.tx.common;
 
-import static com.sun.xml.ws.tx.common.Constants.WSCOOR_SUN_URI;
 import com.sun.istack.NotNull;
+import static com.sun.xml.ws.tx.common.Constants.WSCOOR_SUN_URI;
 
-import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.namespace.QName;
 
 /**
  * @author jf39279
  */
-
-@XmlRootElement(name = ActivityIdentifier.ACTIVITY_ID, namespace = WSCOOR_SUN_URI)
 public class ActivityIdentifier extends Identifier {
 
     public static final String ACTIVITY_ID = "ActivityId";
     public static final QName QNAME = new QName(WSCOOR_SUN_URI, ACTIVITY_ID);
-
-    /**
-     * silence JAXB IllegalAnnotationsException: does not have a no-arg default constructor
-     */
-    public ActivityIdentifier() {
-        // JAXB annotation processing requires public no-arg default ctor 
-    }
 
     /**
      * Create an activity identified from the given id string

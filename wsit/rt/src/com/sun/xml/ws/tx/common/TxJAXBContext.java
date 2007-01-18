@@ -88,9 +88,7 @@ public class TxJAXBContext {
         final ArrayList<Class> classList;
 
         classes = new Class[]{
-                Class.forName("com.sun.xml.ws.tx.webservice.member.coord.CoordinationContext"),
-                Class.forName("com.sun.xml.ws.tx.common.RegistrantIdentifier"), //reference param
-                Class.forName("com.sun.xml.ws.tx.common.ActivityIdentifier")    // reference param
+                Class.forName("com.sun.xml.ws.tx.webservice.member.coord.CoordinationContext")
         };
         classList = new ArrayList<Class>(Arrays.asList(classes));
         return classList;

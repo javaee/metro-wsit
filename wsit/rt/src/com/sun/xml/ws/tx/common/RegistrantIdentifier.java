@@ -21,27 +21,18 @@
  */
 package com.sun.xml.ws.tx.common;
 
-import static com.sun.xml.ws.tx.common.Constants.WSCOOR_SUN_URI;
 import com.sun.istack.NotNull;
+import static com.sun.xml.ws.tx.common.Constants.WSCOOR_SUN_URI;
 
-import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.namespace.QName;
 
 /**
  * @author jf39279
  */
-
-@XmlRootElement(name = RegistrantIdentifier.REGISTRANT_ID, namespace = WSCOOR_SUN_URI)
 public class RegistrantIdentifier extends Identifier {
 
     public static final String REGISTRANT_ID = "RegistrantId";
     public static final QName QNAME = new QName(WSCOOR_SUN_URI, REGISTRANT_ID);
-
-    /**
-     * silence JAXB IllegalAnnotationsException: does not have a no-arg default constructor
-     */
-    public RegistrantIdentifier() {
-    }
 
     /**
      * Create a new registrant id based on the supplied id string
