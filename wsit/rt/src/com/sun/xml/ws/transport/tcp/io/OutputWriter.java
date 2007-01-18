@@ -22,10 +22,12 @@
 
 package com.sun.xml.ws.transport.tcp.io;
 
+import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
 import com.sun.xml.ws.transport.tcp.util.DumpUtils;
 import com.sun.xml.ws.transport.tcp.util.SelectorFactory;
 import java.io.EOFException;
 import java.io.IOException;
+import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -46,11 +48,12 @@ public final class OutputWriter {
     /**
      * Flush the buffer by looping until the <code>ByteBuffer</code> is empty
      * @param bb the ByteBuffer to write.
-     */   
+     */
     public static void flushChannel(final SocketChannel socketChannel, final ByteBuffer bb)
-            throws IOException{
+    throws IOException{
         if (logger.isLoggable(Level.FINEST)) {
-            logger.log(Level.FINEST, "Output dump:");
+            Socket socket = socketChannel.socket();
+            logger.log(Level.FINEST, MessagesMessages.WSTCP_1070_OUTPUT_WRITER_DUMP(socket.getInetAddress().getHostAddress(), socketChannel.socket().getPort()));
             logger.log(Level.FINEST, DumpUtils.dump(bb));
         }
         
@@ -63,8 +66,8 @@ public final class OutputWriter {
                 attempts++;
                 if (len < 0){
                     throw new EOFException();
-                } 
-            
+                }
+                
                 if (len == 0) {
                     if ( writeSelector == null ){
                         writeSelector = SelectorFactory.getSelector();
@@ -77,15 +80,17 @@ public final class OutputWriter {
                     key = socketChannel.register(writeSelector, key.OP_WRITE);
                     
                     if (writeSelector.select(30 * 1000) == 0) {
-                        if (attempts > 2)
-                            throw new IOException("Client disconnected");
+                        if (attempts > 2) {
+                            Socket socket = socketChannel.socket();
+                            throw new IOException(MessagesMessages.WSTCP_0019_PEER_DISCONNECTED(socket.getInetAddress().getHostAddress(), socketChannel.socket().getPort()));
+                        }
                     } else {
                         attempts--;
                     }
                 } else {
                     attempts = 0;
                 }
-            }   
+            }
         } finally {
             if (key != null) {
                 key.cancel();
@@ -98,16 +103,17 @@ public final class OutputWriter {
                 SelectorFactory.returnSelector(writeSelector);
             }
         }
-    }      
-
+    }
+    
     /**
      * Flush the buffer by looping until the <code>ByteBuffer</code> is empty
      * @param bb the ByteBuffer to write.
-     */   
+     */
     public static void flushChannel(final SocketChannel socketChannel, final ByteBuffer[] bb)
-            throws IOException{
+    throws IOException{
         if (logger.isLoggable(Level.FINEST)) {
-            logger.log(Level.FINEST, "Output dump:");
+            Socket socket = socketChannel.socket();
+            logger.log(Level.FINEST, MessagesMessages.WSTCP_1070_OUTPUT_WRITER_DUMP(socket.getInetAddress().getHostAddress(), socketChannel.socket().getPort()));
             logger.log(Level.FINEST, DumpUtils.dump(bb));
         }
         SelectionKey key = null;
@@ -119,8 +125,8 @@ public final class OutputWriter {
                 attempts++;
                 if (len < 0){
                     throw new EOFException();
-                } 
-            
+                }
+                
                 if (len == 0) {
                     if ( writeSelector == null ){
                         writeSelector = SelectorFactory.getSelector();
@@ -133,15 +139,17 @@ public final class OutputWriter {
                     key = socketChannel.register(writeSelector, key.OP_WRITE);
                     
                     if (writeSelector.select(30 * 1000) == 0) {
-                        if (attempts > 2)
-                            throw new IOException("Client disconnected");
+                        if (attempts > 2) {
+                            Socket socket = socketChannel.socket();
+                            throw new IOException(MessagesMessages.WSTCP_0019_PEER_DISCONNECTED(socket.getInetAddress().getHostAddress(), socketChannel.socket().getPort()));
+                        }
                     } else {
                         attempts--;
                     }
                 } else {
                     attempts = 0;
                 }
-            }   
+            }
         } finally {
             if (key != null) {
                 key.cancel();
@@ -154,8 +162,8 @@ public final class OutputWriter {
                 SelectorFactory.returnSelector(writeSelector);
             }
         }
-    }      
-
+    }
+    
     private static boolean hasRemaining(final ByteBuffer[] bb) {
         for(int i=0; i<bb.length; i++) {
             if (bb[i].hasRemaining()) {

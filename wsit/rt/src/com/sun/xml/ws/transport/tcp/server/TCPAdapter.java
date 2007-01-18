@@ -29,6 +29,7 @@ import com.sun.xml.ws.api.server.Adapter;
 import com.sun.xml.ws.transport.http.DeploymentDescriptorParser.AdapterFactory;
 import com.sun.xml.ws.api.server.TransportBackChannel;
 import com.sun.xml.ws.api.server.WSEndpoint;
+import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
 import com.sun.xml.ws.transport.tcp.util.ChannelContext;
 import com.sun.xml.ws.transport.tcp.util.MimeType;
 import com.sun.xml.ws.transport.tcp.util.TCPConstants;
@@ -117,16 +118,16 @@ public class TCPAdapter<TCPTK extends TCPAdapter.TCPToolkit> extends Adapter<TCP
             final Codec codec = getCodec(connection.getChannelContext());
             
             String ct = connection.getContentType();
-            logger.log(Level.FINE, "TCPAdapter.TCPToolkit.handle; received content-type: {0}", ct);
+            logger.log(Level.FINE, MessagesMessages.WSTCP_1090_TCP_ADAPTER_REQ_CONTENT_TYPE(ct));
             
             Packet packet = new Packet();
             codec.decode(in, ct, packet);
-            logger.log(Level.FINE, "TCPAdapter.TCPToolkit.handle decoded");
+            logger.log(Level.FINE, MessagesMessages.WSTCP_1091_TCP_ADAPTER_DECODED());
             addCustomPacketSattellites(packet);
             try {
-                logger.log(Level.FINE, "TCPAdapter.TCPToolkit.handle head.process");
                 packet = head.process(packet, connection, this);
             } catch(Exception e) {
+                logger.log(Level.WARNING, MessagesMessages.WSTCP_0022_ERROR_WS_EXECUTION(), e);
                 if (!isClosed) {
                     writeInternalServerError();
                 }
@@ -138,15 +139,15 @@ public class TCPAdapter<TCPTK extends TCPAdapter.TCPToolkit> extends Adapter<TCP
             }
             
             ct = codec.getStaticContentType(packet).getContentType();
+            logger.log(Level.FINE, MessagesMessages.WSTCP_1092_TCP_ADAPTER_RPL_CONTENT_TYPE(ct));
             if (ct == null) {
-                throw new UnsupportedOperationException();
+                throw new UnsupportedOperationException(MessagesMessages.WSTCP_0021_TCP_ADAPTER_UNSUPPORTER_OPERATION());
             } else {
                 connection.setContentType(ct);
                 if (packet.getMessage() == null) {
-                    logger.log(Level.FINE, "TCPAdapter.TCPToolkit.handle; OneWay");
+                    logger.log(Level.FINE, MessagesMessages.WSTCP_1093_TCP_ADAPTER_ONE_WAY());
                     connection.setStatus(TCPConstants.ONE_WAY);
                 } else {
-                    logger.log(Level.FINE, "TCPAdapter.TCPToolkit.handle; send content-type: {0}", ct);
                     codec.encode(packet, connection.openOutput());
                 }
             }
@@ -164,13 +165,13 @@ public class TCPAdapter<TCPTK extends TCPAdapter.TCPToolkit> extends Adapter<TCP
         }
         
         public void close() {
-            logger.log(Level.FINE, "TCPAdapter.TCPToolkit.close; OneWay");
+            logger.log(Level.FINE, MessagesMessages.WSTCP_1094_TCP_ADAPTER_CLOSE());
             connection.setStatus(TCPConstants.ONE_WAY);
             isClosed = true;
         }
         
         private void writeInternalServerError() {
-            logger.log(Level.FINE, "TCPAdapter.TCPToolkit.writeInternalServerError");
+            logger.log(Level.FINE, MessagesMessages.WSTCP_1095_TCP_ADAPTER_WRITE_INTERNAL_SERVER_ERROR());
             connection.setStatus(TCPConstants.RS_INTERNAL_ERROR);
         }
     };

@@ -28,12 +28,14 @@ import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.server.InstanceResolver;
 import com.sun.xml.ws.api.server.WSEndpoint;
+import com.sun.xml.ws.transport.tcp.io.Connection;
 import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
 import com.sun.xml.ws.transport.tcp.util.ChannelContext;
 import com.sun.xml.ws.transport.tcp.util.TCPConstants;
 import com.sun.xml.ws.transport.tcp.util.WSTCPURI;
 import com.sun.xml.ws.transport.tcp.servicechannel.ServiceChannelWSImpl;
 import com.sun.xml.ws.util.exception.JAXWSExceptionBase;
+import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -79,7 +81,7 @@ public final class WSTCPDelegate implements WSTCPAdapterRegistry, TCPMessageList
         
         for(TCPAdapter adapter : adapters) {
             final String urlPattern = contextPath + adapter.urlPattern;
-            logger.log(Level.FINE, "Deregister adapter: {0}", urlPattern);
+            logger.log(Level.FINE, MessagesMessages.WSTCP_1100_WSTCP_DELEGATE_DEREGISTER_ADAPTER(urlPattern));
             
             if (fixedUrlPatternEndpoints.remove(urlPattern) == null) {
                 pathUrlPatternEndpoints.remove(adapter);
@@ -91,7 +93,7 @@ public final class WSTCPDelegate implements WSTCPAdapterRegistry, TCPMessageList
             @NotNull final TCPAdapter adapter) {
         
         final String urlPattern = contextPath + adapter.urlPattern;
-        logger.log(Level.FINE, "Register adapter: {0}", urlPattern);
+        logger.log(Level.FINE, MessagesMessages.WSTCP_1101_WSTCP_DELEGATE_REGISTER_ADAPTER(urlPattern));
         
         if (urlPattern.endsWith("/*")) {
             pathUrlPatternEndpoints.add(adapter);
@@ -123,7 +125,7 @@ public final class WSTCPDelegate implements WSTCPAdapterRegistry, TCPMessageList
         }
         
         if (result ==  null && customWSRegistry != null) {
-            logger.log(Level.FINE, "Going to custom registry");
+            logger.log(Level.FINE, MessagesMessages.WSTCP_1102_WSTCP_DELEGATE_GOING_TO_CUSTOM_REG(tcpURI));
             return customWSRegistry.getTarget(tcpURI);
         }
         
@@ -135,7 +137,11 @@ public final class WSTCPDelegate implements WSTCPAdapterRegistry, TCPMessageList
      * method is called once request message come
      */
     public void onMessage(@NotNull final ChannelContext channelContext) {
-        logger.log(Level.FINE, "WSTCPDelegate.onMessage entering");
+        if (logger.isLoggable(Level.FINE)) {
+            final SocketChannel channel = channelContext.getConnection().getSocketChannel();
+            logger.log(Level.FINE, MessagesMessages.WSTCP_1103_WSTCP_DELEGATE_ON_MESSAGE(Connection.getHost(channel), Connection.getPort(channel),
+                    Connection.getLocalHost(channel), Connection.getLocalPort(channel)));
+        }
         try {
             TCPAdapter target = null;
             if (channelContext.getChannelId() > 0) {
@@ -152,26 +158,29 @@ public final class WSTCPDelegate implements WSTCPAdapterRegistry, TCPMessageList
             }
             
         } catch (JAXWSExceptionBase e) {
-            logger.log(Level.SEVERE, e.getMessage(), e);
+            final SocketChannel channel = channelContext.getConnection().getSocketChannel();
+            logger.log(Level.SEVERE, MessagesMessages.WSTCP_0023_TARGET_EXEC_ERROR(Connection.getHost(channel), Connection.getPort(channel)), e);
+            
             try {
                 TCPAdapter.sendErrorResponse(channelContext, TCPConstants.RS_INTERNAL_SERVER_ERROR, MessagesMessages.WSTCP_0004_CHECK_SERVER_LOG());
             } catch (Throwable ex) {
                 logger.log(Level.SEVERE, MessagesMessages.WSTCP_0002_SERVER_ERROR_MESSAGE_SENDING_FAILED(), ex);
             }
         } catch (Throwable e) {
-            logger.log(Level.SEVERE, e.getMessage(), e);
+            final SocketChannel channel = channelContext.getConnection().getSocketChannel();
+            logger.log(Level.SEVERE, MessagesMessages.WSTCP_0023_TARGET_EXEC_ERROR(Connection.getHost(channel), Connection.getPort(channel)), e);
             try {
                 TCPAdapter.sendErrorResponse(channelContext, TCPConstants.RS_INTERNAL_SERVER_ERROR, MessagesMessages.WSTCP_0004_CHECK_SERVER_LOG());
             } catch (Throwable ex) {
                 logger.log(Level.SEVERE, MessagesMessages.WSTCP_0002_SERVER_ERROR_MESSAGE_SENDING_FAILED(), ex);
             }
         } finally {
-            logger.log(Level.FINE, "WSTCPDelegate.onMessage exiting");
+            logger.log(Level.FINE, MessagesMessages.WSTCP_1104_WSTCP_DELEGATE_ON_MESSAGE_COMPLETED());
         }
     }
     
     public void destroy() {
-        logger.log(Level.FINE, "WSTCPDelegate.destroy");
+        logger.log(Level.FINE, MessagesMessages.WSTCP_1105_WSTCP_DELEGATE_DESTROY());
     }
     
     /**

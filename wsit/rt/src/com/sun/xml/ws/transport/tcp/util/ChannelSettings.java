@@ -110,5 +110,19 @@ public final class ChannelSettings {
         this.wsServiceName = wsServiceName;
     }
     
-    
+    public String toString() {
+        StringBuffer sb = new StringBuffer(200);
+        sb.append("TargetURI: ");
+        sb.append(targetWSURI);
+        sb.append(" wsServiceName: ");
+        sb.append(wsServiceName);
+        sb.append(" channelId: ");
+        sb.append(channelId);
+        sb.append(" negotiatedParams: ");
+        sb.append(negotiatedParams);
+        sb.append(" negotiatedMimeTypes: ");
+        sb.append(negotiatedMimeTypes);
+                
+        return sb.toString();
+    }
 }

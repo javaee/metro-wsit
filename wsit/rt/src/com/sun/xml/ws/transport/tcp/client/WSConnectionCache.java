@@ -24,6 +24,7 @@ package com.sun.xml.ws.transport.tcp.client;
 
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
+import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
 import com.sun.xml.ws.transport.tcp.util.SessionAbortedException;
 import com.sun.xml.ws.transport.tcp.util.ConnectionSession;
 import java.util.Collections;
@@ -121,12 +122,12 @@ public class WSConnectionCache {
     }
     
     public void lockConnection(final @NotNull ConnectionSession tcpConnectionSession) throws InterruptedException, SessionAbortedException {
-        logger.log(Level.FINEST, "WSConnectionCache.lockConnection entering");
+        logger.log(Level.FINEST, MessagesMessages.WSTCP_1020_CONNECTION_CACHE_ENTER());
         final Thread lockedThread = lockedConnections.get(tcpConnectionSession);
         if (Thread.currentThread().equals(lockedThread)) return;
         
         synchronized(tcpConnectionSession) {
-            logger.log(Level.FINEST, "WSConnectionCache.lockConnection inside sync");
+            logger.log(Level.FINEST, MessagesMessages.WSTCP_1021_CONNECTION_CACHE_SYNC());
             while(lockedConnections.containsKey(tcpConnectionSession)) {
                 tcpConnectionSession.wait();
             }
@@ -134,10 +135,10 @@ public class WSConnectionCache {
             // check whether session was aborted?
             final Set<ConnectionSession> allConnectionSessions = allDstAddress2connectionSession.get(tcpConnectionSession.getDstAddressHashKey());
             if (allConnectionSessions.contains(tcpConnectionSession)) {
-                logger.log(Level.FINEST, "WSConnectionCache.lockConnection lock");
+                logger.log(Level.FINEST, MessagesMessages.WSTCP_1022_CONNECTION_CACHE_LOCK());
                 lockedConnections.put(tcpConnectionSession, Thread.currentThread());
             } else {
-                logger.log(Level.FINEST, "WSConnectionCache.lockConnection session aborted");
+                logger.log(Level.FINEST, MessagesMessages.WSTCP_1023_CONNECTION_CACHE_SESSION_ABORTED());
                 throw new SessionAbortedException();
             }
         }

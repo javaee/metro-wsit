@@ -23,6 +23,7 @@
 package com.sun.xml.ws.transport.tcp.io;
 
 import com.sun.xml.ws.transport.tcp.pool.LifeCycle;
+import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
 import com.sun.xml.ws.transport.tcp.util.FrameType;
 import com.sun.xml.ws.transport.tcp.util.SelectorFactory;
 import com.sun.xml.ws.transport.tcp.util.TCPConstants;
@@ -240,7 +241,7 @@ public final class FramedMessageInputStream extends InputStream implements LifeC
     }
     
     private void readHeader() throws IOException {
-        logger.log(Level.FINEST, "FramedMessageInputStream.readHeader");
+        logger.log(Level.FINEST, MessagesMessages.WSTCP_1060_FRAMED_MESSAGE_IS_READ_HEADER_ENTER());
         frameBytesRead = 0;
         isReadingHeader = true;
         DataInOutUtils.readInts4(this, headerTmpArray, 2);
@@ -255,10 +256,7 @@ public final class FramedMessageInputStream extends InputStream implements LifeC
         currentFrameDataSize += frameBytesRead;
         isReadingHeader = false;
         if (logger.isLoggable(Level.FINEST)) {
-            logger.log(Level.FINEST, "FramedMessageInputStream.readHeader done. " +
-                    "channelId: {0}\nmessageId: {1}\ncontent-id: {2}\n" +
-                    "content-params: {3}\ncurrentFrameDataSize: {4}\nisLastFrame: {5}",
-                    new Object[] {channelId, messageId, contentId, contentProps, currentFrameDataSize, isLastFrame});
+            logger.log(Level.FINEST, MessagesMessages.WSTCP_1061_FRAMED_MESSAGE_IS_READ_HEADER_DONE(channelId, messageId, contentId, contentProps, currentFrameDataSize, isLastFrame));
         }
     }
     
@@ -310,7 +308,9 @@ public final class FramedMessageInputStream extends InputStream implements LifeC
             while(frameBytesRead < currentFrameDataSize) {
                 final int eof = readFromChannel();
                 if (eof == -1) {
-                    throw new EOFException("Unexpected eof. isLastFrame: " + isLastFrame + " frameBytesRead: " + frameBytesRead + " frameSize: " + frameSize + " currentFrameDataSize: " + currentFrameDataSize);
+                    String errorMessage = MessagesMessages.WSTCP_1062_FRAMED_MESSAGE_IS_READ_UNEXPECTED_EOF(isLastFrame, frameBytesRead, frameSize, currentFrameDataSize);
+                    logger.log(Level.SEVERE, errorMessage);
+                    throw new EOFException(errorMessage);
                 }
                 frameBytesRead += eof;
                 byteBuffer.position(byteBuffer.position() + eof);
@@ -374,7 +374,7 @@ public final class FramedMessageInputStream extends InputStream implements LifeC
                 if (count == -1 && byteRead >= 0) byteRead++;
             }
         } catch (Exception e){
-            logger.log(Level.SEVERE, e.getMessage(), e);
+            logger.log(Level.SEVERE, MessagesMessages.WSTCP_0018_ERROR_READING_FROM_SOCKET(), e);
             return -1;
         } finally {
             if (tmpKey != null)

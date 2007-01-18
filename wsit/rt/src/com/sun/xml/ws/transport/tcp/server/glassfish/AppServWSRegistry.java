@@ -30,6 +30,7 @@ import com.sun.enterprise.webservice.monitoring.WebServiceEngineFactory;
 import com.sun.enterprise.webservice.monitoring.WebServiceEngine;
 import com.sun.enterprise.webservice.monitoring.Endpoint;
 import com.sun.enterprise.deployment.WebServiceEndpoint;
+import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -117,8 +118,8 @@ public final class AppServWSRegistry {
             
             final String path = slashedContextRoot + slashedUrlPattern;
             if (logger.isLoggable(Level.FINE)) {
-                logger.log(Level.FINE, "AppServWSRegistry.registerEndpoint: ServiceName: {0} path: {1} isEJB: {2}",
-                        new Object[] {wsServiceDescriptor.getServiceName(), path, wsServiceDescriptor.implementedByEjbComponent()});
+                logger.log(Level.FINE, MessagesMessages.WSTCP_1110_APP_SERV_REG_REGISTER_ENDPOINT(
+                        wsServiceDescriptor.getServiceName(), path, wsServiceDescriptor.implementedByEjbComponent()));
             }
             final WSEndpointDescriptor descriptor = new WSEndpointDescriptor(wsServiceDescriptor,
                     contextRoot,
@@ -144,10 +145,9 @@ public final class AppServWSRegistry {
         final String path = slashedContextRoot + slashedUrlPattern;
         
         if (logger.isLoggable(Level.FINE)) {
-            logger.log(Level.FINE, "AppServWSRegistry.deregisterEndpoint: ServiceName: {0}" +
-                    " path: {1} isEJB: {2}",
-                    new Object[] {wsServiceDescriptor.getWebService().getName(),
-                    path, wsServiceDescriptor.implementedByEjbComponent()});
+            logger.log(Level.FINE, MessagesMessages.WSTCP_1111_APP_SERV_REG_DEREGISTER_ENDPOINT(
+                    wsServiceDescriptor.getWebService().getName(),
+                    path, wsServiceDescriptor.implementedByEjbComponent()));
         }
         removeFromRegistry(slashedContextRoot, slashedUrlPattern);
         WSTCPAdapterRegistryImpl.getInstance().deleteTargetFor(path);
@@ -183,11 +183,11 @@ public final class AppServWSRegistry {
         if(!wsServiceDescriptor.implementedByEjbComponent()) {
             contextRoot = wsServiceDescriptor.getWebComponentImpl().
                     getWebBundleDescriptor().getContextRoot();
-            logger.log(Level.FINE, "AppServWSRegistry.getEndpointContextRoot nonEJB WS. ContextRoot: {0}", contextRoot);
+            logger.log(Level.FINE, MessagesMessages.WSTCP_1112_APP_SERV_REG_GET_ENDP_CR_NON_EJB(contextRoot));
         } else {
-            logger.log(Level.FINE, "AppServWSRegistry.getEndpointContextRoot EJB WS. ContextRoot: {0}", wsServiceDescriptor.getEndpointAddressUri());
             final String[] path = wsServiceDescriptor.getEndpointAddressUri().split("/");
             contextRoot = "/" + path[1];
+            logger.log(Level.FINE, MessagesMessages.WSTCP_1113_APP_SERV_REG_GET_ENDP_CR_EJB(contextRoot));
         }
         
         return contextRoot;
@@ -197,15 +197,15 @@ public final class AppServWSRegistry {
         String urlPattern;
         if(!wsServiceDescriptor.implementedByEjbComponent()) {
             urlPattern = wsServiceDescriptor.getEndpointAddressUri();
-            logger.log(Level.FINE, "AppServWSRegistry.getEndpointUrlPattern nonEJB WS. URLPattern: {0}", urlPattern);
+            logger.log(Level.FINE, MessagesMessages.WSTCP_1114_APP_SERV_REG_GET_ENDP_URL_PATTERN_NON_EJB(urlPattern));
         } else {
-            logger.log(Level.FINE, "AppServWSRegistry.getEndpointUrlPattern EJB WS. URLPattern: {0}", wsServiceDescriptor.getEndpointAddressUri());
             final String[] path = wsServiceDescriptor.getEndpointAddressUri().split("/");
             if (path.length < 3) {
                 return "";
             }
             
             urlPattern = "/" + path[2];
+            logger.log(Level.FINE, MessagesMessages.WSTCP_1115_APP_SERV_REG_GET_ENDP_URL_PATTERN_EJB(urlPattern));
         }
         
         return urlPattern;

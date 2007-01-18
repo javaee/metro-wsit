@@ -73,18 +73,19 @@ public final class IncomeMessageProcessor {
     
     public void process(@NotNull final ByteBuffer messageBuffer, @NotNull final SocketChannel socketChannel) throws IOException {
         // get TCPConnectionSession associated with SocketChannel
-        logger.log(Level.FINE, "IncomeMessageProcessor.process entering");
+        logger.log(Level.FINE, MessagesMessages.WSTCP_1080_INCOME_MSG_PROC_ENTER(Connection.getHost(socketChannel), Connection.getPort(socketChannel)));
         
         ConnectionSession connectionSession = getConnectionSession(socketChannel); //@TODO take it from nio framework?
         
         if (connectionSession == null) {
             // First message on connection
+            logger.log(Level.FINE, MessagesMessages.WSTCP_1081_INCOME_MSG_CREATE_NEW_SESSION());
             connectionSession = createConnectionSession(socketChannel, messageBuffer);
             if (connectionSession != null) {
-                returnConnectionSession(connectionSession);
+                offerConnectionSession(connectionSession);
             } else {
                 // Client's version is not supported
-                logger.log(Level.WARNING, "IncomeMessageProcessor.process: {0}", MessagesMessages.WSTCP_0006_VERSION_MISMATCH());
+                logger.log(Level.WARNING, MessagesMessages.WSTCP_0006_VERSION_MISMATCH());
             }
             return;
         }
@@ -102,10 +103,8 @@ public final class IncomeMessageProcessor {
                 listener.onMessage(channelContext);
             } while(messageBuffer.hasRemaining());
         } finally {
-            returnConnectionSession(connectionSession);
+            offerConnectionSession(connectionSession);
         }
-        
-        logger.log(Level.FINE, "IncomeMessageProcessor.process exiting");
     }
     
     /**
@@ -135,7 +134,6 @@ public final class IncomeMessageProcessor {
     private @Nullable ConnectionSession createConnectionSession(
             @NotNull final SocketChannel socketChannel,
     @NotNull final ByteBuffer messageBuffer) throws IOException {
-        logger.log(Level.FINE, "IncomeMessageProcessor.createConnectionSession entering");
         
         final Connection connection = new Connection(socketChannel);
         connection.setInputStreamByteBuffer(messageBuffer);
@@ -144,11 +142,10 @@ public final class IncomeMessageProcessor {
             return null;
         }
         
-        logger.log(Level.FINE, "IncomeMessageProcessor.createConnectionSession exiting");
         return new ConnectionSession(connection);
     }
     
-    private void returnConnectionSession(@NotNull final ConnectionSession connectionSession) {
+    private void offerConnectionSession(@NotNull final ConnectionSession connectionSession) {
         connectionSessionMap.put(connectionSession.getConnection().getSocketChannel(), connectionSession);
         
         // to let WeakHashMap clean socketChannel if not use
@@ -156,7 +153,7 @@ public final class IncomeMessageProcessor {
     }
     
     private boolean checkMagicAndVersionCompatibility(@NotNull final Connection connection) throws IOException {
-        logger.log(Level.FINE, "IncomeMessageProcessor.checkMagicAndVersionCompatibility entering");
+        logger.log(Level.FINE, MessagesMessages.WSTCP_1082_INCOME_MSG_VERSION_CHECK_ENTER());
         
         connection.setDirectMode(true);
         final InputStream inputStream = connection.openInputStream();
@@ -165,7 +162,7 @@ public final class IncomeMessageProcessor {
         DataInOutUtils.readFully(inputStream, magicBuf);
         final String magic = new String(magicBuf, "US-ASCII");
         if (!TCPConstants.PROTOCOL_SCHEMA.equals(magic)) {
-            logger.log(Level.WARNING, "IncomeMessageProcessor.checkMagicAndVersionCompatibility wrong magic: {0}", magic);
+            logger.log(Level.WARNING, MessagesMessages.WSTCP_0020_WRONG_MAGIC(magic));
             return false;
         }
         
@@ -195,7 +192,7 @@ public final class IncomeMessageProcessor {
         
         connection.setDirectMode(false);
         
-        logger.log(Level.FINE, "IncomeMessageProcessor.checkMagicAndVersionCompatibility successCode: {0}", successCode);
+        logger.log(Level.FINE, MessagesMessages.WSTCP_1083_INCOME_MSG_VERSION_CHECK_RESULT(clientFramingVersion, clientConnectionManagementVersion, framingVersion, connectionManagementVersion, successCode));
         return successCode == VersionController.VersionSupport.FULLY_SUPPORTED;
     }
     

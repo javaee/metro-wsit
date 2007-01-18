@@ -50,4 +50,8 @@ public final class Version {
         
         return false;
     }
+    
+    public String toString() {
+        return major + "." + minor;
+    }
 }

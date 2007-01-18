@@ -23,6 +23,7 @@
 package com.sun.xml.ws.transport.tcp.io;
 
 import com.sun.xml.ws.transport.tcp.pool.ByteBufferStreamPool;
+import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
 import com.sun.xml.ws.transport.tcp.util.ByteBufferFactory;
 import com.sun.xml.ws.transport.tcp.util.FrameType;
 import com.sun.xml.ws.transport.tcp.util.TCPConstants;
@@ -89,7 +90,7 @@ public final class Connection {
             // if InputStream is used by some lazy reader - buffer message
             if (inputStream.isMessageInProcess() && is != null && !is.isClosed()) {
                 is.bufferMessage();
-                logger.log(Level.FINEST, "Buffering Connection.InputStream. Size: {0}", is.getBufferedSize());
+                logger.log(Level.FINEST, MessagesMessages.WSTCP_1050_CONNECTION_BUFFERING_IS(is.getBufferedSize()));
             }
         }
         
@@ -221,7 +222,7 @@ public final class Connection {
     
     public static Connection create(final String host, final int port) throws IOException {
         if (logger.isLoggable(Level.FINE)) {
-            logger.log(Level.FINE, "Opening connection host: {0} port: {1}", new Object[] {host, port});
+            logger.log(Level.FINE, MessagesMessages.WSTCP_1051_CONNECTION_OPEN_TCP_SOCKET(host, port));
         }
         final SocketChannel socketChannel = SocketChannel.open();
         final Socket socket = socketChannel.socket();
@@ -242,5 +243,21 @@ public final class Connection {
     protected void finalize() throws Throwable {
         close();
         super.finalize();
+    }
+    
+    public static String getHost(final SocketChannel socketChannel) {
+        return socketChannel.socket().getInetAddress().getHostAddress();
+    }
+
+    public static int getPort(final SocketChannel socketChannel) {
+        return socketChannel.socket().getPort();
+    }
+    
+    public static String getLocalHost(final SocketChannel socketChannel) {
+        return socketChannel.socket().getLocalAddress().getHostAddress();
+    }
+
+    public static int getLocalPort(final SocketChannel socketChannel) {
+        return socketChannel.socket().getLocalPort();
     }
 }
