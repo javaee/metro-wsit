@@ -39,7 +39,7 @@ import javax.xml.namespace.QName;
  * @author Jakub Podlesak (jakub.podlesak at sun.com)
  */
 final class BuilderHandlerMessageScope extends BuilderHandler{
-    public static final PolicyLogger LOGGER = PolicyLogger.getLogger(BuilderHandlerMessageScope.class);
+    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(BuilderHandlerMessageScope.class);
     
     QName service;
     QName port;

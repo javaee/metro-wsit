@@ -123,6 +123,7 @@ import java.util.TreeSet;
  * @since 1.3
  */
 public final class ServiceFinder<T> implements Iterable<T> {
+    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(ServiceFinder.class);
 
     private static final String prefix = "META-INF/services/";
 
@@ -156,6 +157,7 @@ public final class ServiceFinder<T> implements Iterable<T> {
      */
     static <T> ServiceFinder<T> find(final Class<T> service, final ClassLoader loader) {
         if (null==service) {
+            LOGGER.severe("find", LocalizationMessages.SERVICE_CAN_NOT_BE_NULL());
             throw new NullPointerException(LocalizationMessages.SERVICE_CAN_NOT_BE_NULL());
         }
         return new ServiceFinder<T>(service,loader);
@@ -223,6 +225,8 @@ public final class ServiceFinder<T> implements Iterable<T> {
         if (null != cause) {
             sce.initCause(cause);
         }
+        
+        LOGGER.severe("fail", sce.getMessage());
         throw sce;
     }
 

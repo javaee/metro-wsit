@@ -24,6 +24,7 @@ package com.sun.xml.ws.policy.sourcemodel;
 
 import com.sun.xml.ws.policy.PolicyConstants;
 import com.sun.xml.ws.policy.privateutil.LocalizationMessages;
+import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -34,6 +35,8 @@ import javax.xml.namespace.QName;
  * @author Marek Potociar
  */
 final class PolicyReferenceData {
+    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyReferenceData.class);
+    
     public static final QName ATTRIBUTE_URI = new QName(PolicyConstants.POLICY_NAMESPACE_URI, "URI");
     public static final QName ATTRIBUTE_DIGEST = new QName(PolicyConstants.POLICY_NAMESPACE_URI, "Digest");
     public static final QName ATTRIBUTE_DIGEST_ALGORITHM = new QName(PolicyConstants.POLICY_NAMESPACE_URI, "DigestAlgorithm");
@@ -66,10 +69,12 @@ final class PolicyReferenceData {
     
     public PolicyReferenceData(URI referencedModelUri, String expectedDigest, URI usedDigestAlgorithm) {
         if (CLASS_INITIALIZATION_EXCEPTION != null) {
+            LOGGER.severe("<init>", LocalizationMessages.UNABLE_TO_INSTANTIATE_DIGEST_ALG_URI_FIELD(), CLASS_INITIALIZATION_EXCEPTION);
             throw new IllegalStateException(LocalizationMessages.UNABLE_TO_INSTANTIATE_DIGEST_ALG_URI_FIELD(), CLASS_INITIALIZATION_EXCEPTION);
         }
         
         if (usedDigestAlgorithm != null && expectedDigest == null) {
+            LOGGER.severe("<init>", LocalizationMessages.DIGEST_MUST_NOT_BE_NULL_WHEN_ALG_DEFINED());
             throw new IllegalArgumentException(LocalizationMessages.DIGEST_MUST_NOT_BE_NULL_WHEN_ALG_DEFINED());
         }
         

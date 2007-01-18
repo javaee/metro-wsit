@@ -27,9 +27,6 @@ import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.*;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Queue;
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLOutputFactory;
@@ -73,7 +70,7 @@ final class PrivateElementFilteringInvocationProcessor implements InvocationProc
     
     public Object process(final Invocation invocation) throws InvocationProcessingException {
         try {
-            final XmlStreamWriterMethodType methodType = 
+            final XmlStreamWriterMethodType methodType =
                     XmlStreamWriterMethodType.getMethodType(invocation.getMethodName());
             switch (methodType) {
                 case WRITE_START_ELEMENT:
@@ -107,14 +104,21 @@ final class PrivateElementFilteringInvocationProcessor implements InvocationProc
             
             return invocation.execute(invocationTarget);
         } catch (IllegalArgumentException ex) {
-            throw new InvocationProcessingException(invocation, ex);
+            throw logAndWrapException(invocation, ex, "process");
         } catch (InvocationTargetException ex) {
-            throw new InvocationProcessingException(invocation, ex.getCause());
+            throw logAndWrapException(invocation, ex.getCause(), "process");
         } catch (IllegalAccessException ex) {
-            throw new InvocationProcessingException(invocation, ex);
+            throw logAndWrapException(invocation, ex, "process");
         } finally {
             LOGGER.exiting();
         }
+    }
+    
+    private InvocationProcessingException logAndWrapException(Invocation invocation, Throwable cause, String processingMethodName) {
+        final InvocationProcessingException e = new InvocationProcessingException(invocation, cause);
+        LOGGER.severe(processingMethodName, e.getMessage(), cause);
+        
+        return e;
     }
     
     private boolean startFiltering(final Invocation invocation) {
@@ -140,9 +144,9 @@ final class PrivateElementFilteringInvocationProcessor implements InvocationProc
                 namespaceURI = invocation.getArgument(2).toString();
                 break;
             default:
-                throw new IllegalArgumentException(
-                        LocalizationMessages.UNEXPECTED_ARGUMENTS_COUNT(XmlStreamWriterMethodType.WRITE_START_ELEMENT + "(...)", argumentsCount)
-                        );
+                final String message = LocalizationMessages.UNEXPECTED_ARGUMENTS_COUNT(XmlStreamWriterMethodType.WRITE_START_ELEMENT + "(...)", argumentsCount);
+                LOGGER.severe("startFiltering", message);
+                throw new IllegalArgumentException(message);
         }
         
         final QName elementName = new QName(namespaceURI, localName);

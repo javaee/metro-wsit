@@ -32,7 +32,7 @@ import com.sun.xml.ws.policy.privateutil.PolicyLogger;
  * @author Marek Potociar (marek.potociar@sun.com)
  */
 public abstract class PolicyMapMutator {
-    public static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyMapMutator.class);
+    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyMapMutator.class);
     
     private PolicyMap map = null;
     

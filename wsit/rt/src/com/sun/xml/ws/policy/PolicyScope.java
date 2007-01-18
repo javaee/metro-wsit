@@ -34,7 +34,7 @@ import java.util.List;
  * hold policies
  */
 final class PolicyScope {
-    public static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyScope.class);
+    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyScope.class);
     
     private List<PolicySubject> subjects = new LinkedList<PolicySubject>();
     

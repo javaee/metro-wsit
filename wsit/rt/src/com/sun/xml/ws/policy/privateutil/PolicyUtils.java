@@ -41,7 +41,7 @@ import javax.xml.namespace.QName;
  *
  * @author Marek Potociar
  */
-public final class PolicyUtils {
+public final class PolicyUtils {    
     private PolicyUtils() { }
     
     /**
@@ -201,6 +201,7 @@ public final class PolicyUtils {
      * Reflection utilities wrapper
      */
     public static class Reflection {
+        private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyUtils.Reflection.class);
         
         /**
          * Reflectively invokes specified method on the specified target
@@ -232,16 +233,22 @@ public final class PolicyUtils {
                 
                 return resultClass.cast(result);
             } catch (IllegalArgumentException e) {
-                throw new PolicyException(LocalizationMessages.METHOD_INVOCATION_FAILED(target.getClass().getName(), methodName, Arrays.asList(parameters).toString()), e);
+                throw logAndWrapException(target, parameters, methodName, "invoke", e);
             } catch (InvocationTargetException e) {
-                throw new PolicyException(LocalizationMessages.METHOD_INVOCATION_FAILED(target.getClass().getName(), methodName, Arrays.asList(parameters).toString()), e);
+                throw logAndWrapException(target, parameters, methodName, "invoke", e.getCause());
             } catch (IllegalAccessException e) {
-                throw new PolicyException(LocalizationMessages.METHOD_INVOCATION_FAILED(target.getClass().getName(), methodName, Arrays.asList(parameters).toString()), e);
+                throw logAndWrapException(target, parameters, methodName, "invoke", e);
             } catch (SecurityException e) {
-                throw new PolicyException(LocalizationMessages.METHOD_INVOCATION_FAILED(target.getClass().getName(), methodName, Arrays.asList(parameters).toString()), e);
+                throw logAndWrapException(target, parameters, methodName, "invoke", e);
             } catch (NoSuchMethodException e) {
-                throw new PolicyException(LocalizationMessages.METHOD_INVOCATION_FAILED(target.getClass().getName(), methodName, Arrays.asList(parameters).toString()), e);
+                throw logAndWrapException(target, parameters, methodName, "invoke", e);
             }
+        }
+        
+        private static PolicyException logAndWrapException(final Object target, final Object[] parameters, final String methodName, final String processingMethodName, final Throwable cause) {
+            final String message = LocalizationMessages.METHOD_INVOCATION_FAILED(target.getClass().getName(), methodName, Arrays.asList(parameters).toString());
+            LOGGER.severe(processingMethodName, message, cause);
+            return new PolicyException(message, cause);
         }
     }
     

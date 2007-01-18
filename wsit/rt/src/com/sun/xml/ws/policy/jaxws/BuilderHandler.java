@@ -38,7 +38,7 @@ import java.util.Map;
  * @author Jakub Podlesak (jakub.podlesak at sun.com)
  */
 abstract class BuilderHandler{
-    public static final PolicyLogger LOGGER = PolicyLogger.getLogger(BuilderHandler.class);
+    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(BuilderHandler.class);
     
     Map<String,PolicySourceModel> policyStore;
     Collection<String> policyURIs;

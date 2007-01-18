@@ -45,7 +45,7 @@ import javax.xml.namespace.QName;
  * TODO: rename createWsdlMessageScopeKey to createWsdlInputOutputMessageScopeKey
  */
 public final class PolicyMap implements Iterable<Policy> {
-   public static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyMap.class);
+   private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyMap.class);
     
     static enum ScopeType {
         SERVICE,

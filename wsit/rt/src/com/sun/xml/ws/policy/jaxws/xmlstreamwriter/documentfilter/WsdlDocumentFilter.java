@@ -74,8 +74,7 @@ public class WsdlDocumentFilter implements SDDocumentFilter {
         }
     };
     
-    public XMLStreamWriter filter(
-            final SDDocument sdDocument, final XMLStreamWriter xmlStreamWriter) throws XMLStreamException {
+    public XMLStreamWriter filter(final SDDocument sdDocument, final XMLStreamWriter xmlStreamWriter) throws XMLStreamException {
         XMLStreamWriter result = EnhancedXmlStreamWriterProxy.createProxy(xmlStreamWriter, PRIVATE_ASSERTION_FILTER_FACTORY);
         result = EnhancedXmlStreamWriterProxy.createProxy(result, MEX_IMPORT_FILTER_FACTORY);
         result = EnhancedXmlStreamWriterProxy.createProxy(result, PRIVATE_ELEMENTS_FILTER_FACTORY);

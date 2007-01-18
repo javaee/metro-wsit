@@ -42,15 +42,17 @@ import javax.xml.stream.events.XMLEvent;
 import com.sun.xml.ws.policy.PolicyConstants;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.privateutil.LocalizationMessages;
+import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 
 /**
  *
  * @author Marek Potociar
  */
 final class XmlPolicyModelUnmarshaller extends PolicyModelUnmarshaller {
-
+    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(XmlPolicyModelUnmarshaller.class);
+    
     /** Creates a new instance of WsdlPolicyModelUnmarshaller */
-    XmlPolicyModelUnmarshaller() {        
+    XmlPolicyModelUnmarshaller() {
     }
     
     public PolicySourceModel unmarshalModel(final Object storage) throws PolicyException {
@@ -78,6 +80,7 @@ final class XmlPolicyModelUnmarshaller extends PolicyModelUnmarshaller {
                             if (policyId == null) {
                                 policyId = xmlId;
                             } else if (xmlId != null) {
+                                LOGGER.severe("unmarshalModel", LocalizationMessages.MULTIPLE_POLICY_IDS_NOT_ALLOWED());
                                 throw new PolicyException(LocalizationMessages.MULTIPLE_POLICY_IDS_NOT_ALLOWED());
                             }
                             
@@ -90,9 +93,11 @@ final class XmlPolicyModelUnmarshaller extends PolicyModelUnmarshaller {
                         }
                         // else (this is not a policy tag) -> go to default => throw exception
                     default:
+                        LOGGER.severe("unmarshalModel", LocalizationMessages.POLICY_ELEMENT_EXPECTED_FIRST());
                         throw new PolicyException(LocalizationMessages.POLICY_ELEMENT_EXPECTED_FIRST());
                 }
             } catch (XMLStreamException e) {
+                LOGGER.severe("unmarshalModel", LocalizationMessages.FAILED_TO_UNMARSHALL_POLICY_EXPRESSION(), e);
                 throw new PolicyException(LocalizationMessages.FAILED_TO_UNMARSHALL_POLICY_EXPRESSION(), e);
             }
         }
@@ -133,6 +138,7 @@ final class XmlPolicyModelUnmarshaller extends PolicyModelUnmarshaller {
                             } else if (ModelNode.Type.POLICY_REFERENCE.asQName().equals(childElementName)) {
                                 final Attribute uri = getAttributeByName(childElement, PolicyReferenceData.ATTRIBUTE_URI);
                                 if (uri == null) {
+                                    LOGGER.severe("unmarshalNodeContent", LocalizationMessages.POLICY_REFERENCE_URI_ATTR_NOT_FOUND());
                                     throw new PolicyException(LocalizationMessages.POLICY_REFERENCE_URI_ATTR_NOT_FOUND());
                                 } else {
                                     try {
@@ -151,6 +157,7 @@ final class XmlPolicyModelUnmarshaller extends PolicyModelUnmarshaller {
                                         }
                                         childNode = lastNode.createChildPolicyReferenceNode(refData);
                                     } catch (URISyntaxException e) {
+                                        LOGGER.severe("unmarshalNodeContent", LocalizationMessages.UNABLE_TO_UNMARSHALL_POLICY_MALFORMED_URI(), e);
                                         throw new PolicyException(LocalizationMessages.UNABLE_TO_UNMARSHALL_POLICY_MALFORMED_URI(), e);
                                     }
                                 }
@@ -158,7 +165,7 @@ final class XmlPolicyModelUnmarshaller extends PolicyModelUnmarshaller {
                                 if (!lastNode.isAssertionRelatedNode()) {
                                     childNode = lastNode.createChildAssertionNode();
                                 } else {
-                                    childNode = lastNode.createChildAssertionParameterNode();                                    
+                                    childNode = lastNode.createChildAssertionParameterNode();
                                 }
                             }
                         } else {
@@ -168,9 +175,11 @@ final class XmlPolicyModelUnmarshaller extends PolicyModelUnmarshaller {
                         unmarshalNodeContent(childNode, childElement, reader);
                         break;
                     default:
+                        LOGGER.severe("unmarshalNodeContent", LocalizationMessages.UNABLE_TO_UNMARSHALL_POLICY_XML_ELEM_EXPECTED());
                         throw new PolicyException(LocalizationMessages.UNABLE_TO_UNMARSHALL_POLICY_XML_ELEM_EXPECTED());
                 }
             } catch (XMLStreamException e) {
+                LOGGER.severe("unmarshalNodeContent", LocalizationMessages.FAILED_TO_UNMARSHALL_POLICY_EXPRESSION(), e);
                 throw new PolicyException(LocalizationMessages.FAILED_TO_UNMARSHALL_POLICY_EXPRESSION(), e);
             }
         }
@@ -183,6 +192,7 @@ final class XmlPolicyModelUnmarshaller extends PolicyModelUnmarshaller {
                 final Attribute a = (Attribute) iterator.next();
                 final QName name = a.getName();
                 if (attributeMap.containsKey(name)) {
+                    LOGGER.severe("unmarshalNodeContent", LocalizationMessages.MULTIPLE_ATTRS_WITH_SAME_NAME_DETECTED_FOR_ASSERTION(a.getName(), lastElementName));
                     throw new PolicyException(LocalizationMessages.MULTIPLE_ATTRS_WITH_SAME_NAME_DETECTED_FOR_ASSERTION(a.getName(), lastElementName));
                 } else {
                     attributeMap.put(name , a.getValue());
@@ -194,6 +204,7 @@ final class XmlPolicyModelUnmarshaller extends PolicyModelUnmarshaller {
             if (nodeData.containsAttribute(PolicyConstants.VISIBILITY_ATTRIBUTE)) {
                 final String visibilityValue = nodeData.getAttributeValue(PolicyConstants.VISIBILITY_ATTRIBUTE);
                 if (!PolicyConstants.VISIBILITY_VALUE_PRIVATE.equals(visibilityValue)) {
+                    LOGGER.severe("unmarshalNodeContent", LocalizationMessages.UNEXPECTED_VISIBILITY_ATTR_VALUE(visibilityValue));
                     throw new PolicyException(LocalizationMessages.UNEXPECTED_VISIBILITY_ATTR_VALUE(visibilityValue));
                 }
             }
@@ -208,12 +219,14 @@ final class XmlPolicyModelUnmarshaller extends PolicyModelUnmarshaller {
      */
     private XMLEventReader createXMLEventReader(final Object storage) throws PolicyException {
         if (!(storage instanceof Reader)) {
+            LOGGER.severe("createXMLEventReader", LocalizationMessages.STORAGE_TYPE_NOT_SUPPORTED(storage.getClass().getName()));
             throw new PolicyException(LocalizationMessages.STORAGE_TYPE_NOT_SUPPORTED(storage.getClass().getName()));
         }
         
         try {
             return XMLInputFactory.newInstance().createXMLEventReader((Reader) storage);
         } catch (XMLStreamException e) {
+            LOGGER.severe("createXMLEventReader", LocalizationMessages.UNABLE_TO_INSTANTIATE_READER_FOR_STORAGE(), e);
             throw new PolicyException(LocalizationMessages.UNABLE_TO_INSTANTIATE_READER_FOR_STORAGE(), e);
         }
     }
@@ -225,6 +238,7 @@ final class XmlPolicyModelUnmarshaller extends PolicyModelUnmarshaller {
     private void checkEndTagName(final QName expected, final EndElement element) throws PolicyException {
         final QName actual = element.getName();
         if (!expected.equals(actual)) {
+            LOGGER.severe("checkEndTagName", LocalizationMessages.UNMARSHALLING_FAILED_END_TAG_DOES_NOT_MATCH(expected, actual));
             throw new PolicyException(LocalizationMessages.UNMARSHALLING_FAILED_END_TAG_DOES_NOT_MATCH(expected, actual));
         }
     }
@@ -238,6 +252,7 @@ final class XmlPolicyModelUnmarshaller extends PolicyModelUnmarshaller {
             if (currentNodeType == ModelNode.Type.ASSERTION || currentNodeType == ModelNode.Type.ASSERTION_PARAMETER_NODE) {
                 return buffer.append(data);
             } else {
+                LOGGER.severe("processCharacters", LocalizationMessages.UNEXPECTED_CDATA_ON_SOURCE_MODEL_NODE(currentNodeType, data));
                 throw new PolicyException(LocalizationMessages.UNEXPECTED_CDATA_ON_SOURCE_MODEL_NODE(currentNodeType, data));
             }
         }

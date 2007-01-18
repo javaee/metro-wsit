@@ -34,7 +34,7 @@ import java.util.List;
  * service) with which a policy can be associated.
  */
 public final class PolicySubject {
-    public static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicySubject.class);
+    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicySubject.class);
     
     private List<Policy> policies = new LinkedList<Policy>();
     private Object subject;

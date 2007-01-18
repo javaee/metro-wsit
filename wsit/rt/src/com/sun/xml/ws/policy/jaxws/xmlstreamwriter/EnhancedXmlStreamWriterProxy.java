@@ -58,6 +58,7 @@ public final class EnhancedXmlStreamWriterProxy implements InvocationHandler {
             equalsMethod = Object.class.getMethod("equals", new Class[] { Object.class });
             toStringMethod = Object.class.getMethod("toString");
         } catch (NoSuchMethodException e) {
+            LOGGER.severe("<static initialization>", e.getMessage());
             throw new NoSuchMethodError(e.getMessage());
         }
     }
@@ -78,8 +79,7 @@ public final class EnhancedXmlStreamWriterProxy implements InvocationHandler {
      * @return new enhanced {XMLStreamWriter} (proxy) instance
      * @throws XMLStreamException
      */
-    public static XMLStreamWriter createProxy(
-            final XMLStreamWriter writer, final InvocationProcessorFactory processorFactory) throws XMLStreamException {
+    public static XMLStreamWriter createProxy(final XMLStreamWriter writer, final InvocationProcessorFactory processorFactory) throws XMLStreamException {
         LOGGER.entering();
         
         XMLStreamWriter proxy = null;
@@ -95,8 +95,7 @@ public final class EnhancedXmlStreamWriterProxy implements InvocationHandler {
         }
     }
     
-    private EnhancedXmlStreamWriterProxy(
-            final XMLStreamWriter writer, final InvocationProcessorFactory processorFactory) throws XMLStreamException {
+    private EnhancedXmlStreamWriterProxy(final XMLStreamWriter writer, final InvocationProcessorFactory processorFactory) throws XMLStreamException {
         this.invocationProcessor = processorFactory.createInvocationProcessor(writer);
     }
             
@@ -120,6 +119,7 @@ public final class EnhancedXmlStreamWriterProxy implements InvocationHandler {
         } else if (method.equals(toStringMethod)) {
             return proxy.getClass().getName() + '@' + Integer.toHexString(proxy.hashCode());
         } else {
+            LOGGER.severe("handleObjectMethodCall", LocalizationMessages.UNEXPECTED_OBJECT_METHOD(method));
             throw new InternalError(LocalizationMessages.UNEXPECTED_OBJECT_METHOD(method));
         }
     }

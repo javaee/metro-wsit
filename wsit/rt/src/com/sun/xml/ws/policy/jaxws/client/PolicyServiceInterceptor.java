@@ -45,13 +45,12 @@ import javax.xml.ws.WebServiceException;
 import javax.xml.ws.WebServiceFeature;
 
 public class PolicyServiceInterceptor extends ServiceInterceptor {
-    
-    private static final PolicyLogger logger = PolicyLogger.getLogger(PolicyServiceInterceptor.class);
+    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyServiceInterceptor.class);
     
     public List<WebServiceFeature> preCreateBinding(final WSPortInfo port,
             final java.lang.Class<?> serviceEndpointInterface,
             final WSFeatureList defaultFeatures) {
-        logger.entering("preCreateBinding",
+        LOGGER.entering("preCreateBinding",
                 new Object[] {port, serviceEndpointInterface, defaultFeatures});
         final LinkedList<WebServiceFeature> features = new LinkedList<WebServiceFeature>();
         try {
@@ -61,13 +60,13 @@ public class PolicyServiceInterceptor extends ServiceInterceptor {
                 final String clientCfgFileName = PolicyUtils.ConfigFile.generateFullName(PolicyConstants.CLIENT_CONFIGURATION_IDENTIFIER);
                 final URL clientCfgFileUrl = PolicyUtils.ConfigFile.loadAsResource(clientCfgFileName, null);
                 if (clientCfgFileUrl != null) {
-                    logger.config("preCreateBinding", LocalizationMessages.LOADING_CLIENT_CFG_FILE(clientCfgFileUrl));
+                    LOGGER.config("preCreateBinding", LocalizationMessages.LOADING_CLIENT_CFG_FILE(clientCfgFileUrl));
                     final WSDLModel clientModel = PolicyConfigParser.parseModel(clientCfgFileUrl, true);
                     final WSDLPolicyMapWrapper clientWrapper = clientModel.getExtension(WSDLPolicyMapWrapper.class);
                     if (clientWrapper != null) {
                         final PolicyMap map = clientWrapper.getPolicyMap();
                         if (map != null) {
-                            logger.config("preCreateBinding", LocalizationMessages.INVOKING_CLI_SIDE_ALTERNATIVE_SELECTION());
+                            LOGGER.config("preCreateBinding", LocalizationMessages.INVOKING_CLI_SIDE_ALTERNATIVE_SELECTION());
                             clientWrapper.doAlternativeSelection();
                             for (ModelConfiguratorProvider configurator : PolicyUtils.ServiceProvider.load(ModelConfiguratorProvider.class)) {
                                 configurator.configure(clientModel, map);
@@ -79,15 +78,16 @@ public class PolicyServiceInterceptor extends ServiceInterceptor {
                         }
                     }
                 } else {
-                    logger.config("preCreateBinding",
+                    LOGGER.config("preCreateBinding",
                             LocalizationMessages.COULD_NOT_FIND_CLIENT_CFG_FILE_ON_CLASSPATH(clientCfgFileName));
                 }
             }
         } catch (PolicyException e) {
+            LOGGER.severe("preCreateBinding", e.getMessage(), e);
             throw new WebServiceException(e);
         }
         
-        logger.exiting("preCreateBinding", features);
+        LOGGER.exiting("preCreateBinding", features);
         return features;
     }
     
@@ -96,7 +96,7 @@ public class PolicyServiceInterceptor extends ServiceInterceptor {
      */
     private void addFeatures(
             final List<WebServiceFeature> features, final WSDLModel model, final QName portName) {
-        logger.entering("addFeatures", new Object[] { features, model, portName });
+        LOGGER.entering("addFeatures", new Object[] { features, model, portName });
         for (WSDLService service : model.getServices().values()) {
             final WSDLPort port = service.get(portName);
             if (port != null) {
@@ -105,7 +105,7 @@ public class PolicyServiceInterceptor extends ServiceInterceptor {
                 break;
             }
         }
-        logger.exiting("addFeatures", features);
+        LOGGER.exiting("addFeatures", features);
     }
     
     private void addFeatureListToList(final List<WebServiceFeature> list, final WSFeatureList featureList) {

@@ -148,14 +148,21 @@ final class PrivateAssertionFilteringInvocationProcessor implements InvocationPr
             
             return invocation.execute(invocationTarget);
         } catch (IllegalArgumentException ex) {
-            throw new InvocationProcessingException(invocation, ex);
+            throw logAndWrapException(invocation, ex, "process");
         } catch (InvocationTargetException ex) {
-            throw new InvocationProcessingException(invocation, ex.getCause());
+            throw logAndWrapException(invocation, ex.getCause(), "process");
         } catch (IllegalAccessException ex) {
-            throw new InvocationProcessingException(invocation, ex);
+            throw logAndWrapException(invocation, ex, "process");
         } finally {
             LOGGER.exiting();
         }
+    }
+    
+    private InvocationProcessingException logAndWrapException(Invocation invocation, Throwable cause, String processingMethodName) {
+        final InvocationProcessingException e = new InvocationProcessingException(invocation, cause);
+        LOGGER.severe(processingMethodName, e.getMessage(), cause);
+        
+        return e;
     }
     
     private void executeCommands(final XMLStreamWriter writer) throws IllegalAccessException, InvocationProcessingException {
@@ -163,9 +170,8 @@ final class PrivateAssertionFilteringInvocationProcessor implements InvocationPr
             final Invocation command = invocationQueue.poll();
             try {
                 command.execute(writer);
-            } catch (InvocationTargetException ex) {
-                LOGGER.severe("executeCommands", "Error invoking " + command.toString(), ex.getCause());
-                throw new InvocationProcessingException(command, ex.getCause());
+            } catch (InvocationTargetException e) {
+                throw logAndWrapException(command, e.getCause(), "executeCommands");
             }
         }
     }
@@ -196,9 +202,9 @@ final class PrivateAssertionFilteringInvocationProcessor implements InvocationPr
                 value = invocation.getArgument(3).toString();
                 break;
             default:
-                throw new IllegalArgumentException(
-                        LocalizationMessages.UNEXPECTED_ARGUMENTS_COUNT(XmlStreamWriterMethodType.WRITE_ATTRIBUTE + "(...)", argumentsCount)
-                        );
+                final String message = LocalizationMessages.UNEXPECTED_ARGUMENTS_COUNT(XmlStreamWriterMethodType.WRITE_ATTRIBUTE + "(...)", argumentsCount);
+                LOGGER.severe("startFiltering", message);
+                throw new IllegalArgumentException(message);
         }
         
         final QName attributeName = new QName(namespaceURI, localName);

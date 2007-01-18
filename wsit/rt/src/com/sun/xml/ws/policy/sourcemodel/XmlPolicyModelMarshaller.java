@@ -32,8 +32,10 @@ import com.sun.xml.txw2.output.StaxSerializer;
 import com.sun.xml.ws.policy.PolicyConstants;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.privateutil.LocalizationMessages;
+import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 
 public final class XmlPolicyModelMarshaller extends PolicyModelMarshaller {
+    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(XmlPolicyModelMarshaller.class);
     
     private boolean marshallInvisible;
     
@@ -47,6 +49,7 @@ public final class XmlPolicyModelMarshaller extends PolicyModelMarshaller {
         } else if (storage instanceof XMLStreamWriter) {
             marshal(model, (XMLStreamWriter) storage);
         } else {
+            LOGGER.severe("marshal", LocalizationMessages.STORAGE_TYPE_NOT_SUPPORTED(storage.getClass().getName()));
             throw new PolicyException(LocalizationMessages.STORAGE_TYPE_NOT_SUPPORTED(storage.getClass().getName()));
         }
     }

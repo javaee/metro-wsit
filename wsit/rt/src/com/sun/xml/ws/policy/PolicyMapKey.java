@@ -38,7 +38,7 @@ import javax.xml.namespace.QName;
  * @author Marek Potociar
  */
 final public class PolicyMapKey  {
-    public static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyMapKey.class);
+    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyMapKey.class);
     
     QName service;
     QName port;

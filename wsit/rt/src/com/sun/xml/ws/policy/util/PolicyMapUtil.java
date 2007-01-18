@@ -27,13 +27,15 @@ import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.policy.privateutil.LocalizationMessages;
+import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import java.util.Collection;
 
 /**
  * Utility methods for PolicyMap
  */
 public final class PolicyMapUtil {
-
+    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyMapUtil.class);
+    
     /**
      * Throw an exception if the policy map contains any policy with at least two
      * policy alternatives.
@@ -50,6 +52,7 @@ public final class PolicyMapUtil {
         for (PolicyMapKey key : keys) {
             final Policy policy = map.getServiceEffectivePolicy(key);
             if (policy.getNumberOfAssertionSets() > 1) {
+                LOGGER.severe("rejectAlternatives", LocalizationMessages.RECONFIGURE_ALTERNATIVES(policy.getIdOrName()));
                 throw new PolicyException(LocalizationMessages.RECONFIGURE_ALTERNATIVES(policy.getIdOrName()));
             }
         }
@@ -57,6 +60,7 @@ public final class PolicyMapUtil {
         for (PolicyMapKey key : keys) {
             final Policy policy = map.getEndpointEffectivePolicy(key);
             if (policy.getNumberOfAssertionSets() > 1) {
+                LOGGER.severe("rejectAlternatives", LocalizationMessages.RECONFIGURE_ALTERNATIVES(policy.getIdOrName()));
                 throw new PolicyException(LocalizationMessages.RECONFIGURE_ALTERNATIVES(policy.getIdOrName()));
             }
         }
@@ -64,6 +68,7 @@ public final class PolicyMapUtil {
         for (PolicyMapKey key : keys) {
             final Policy policy = map.getOperationEffectivePolicy(key);
             if (policy.getNumberOfAssertionSets() > 1) {
+                LOGGER.severe("rejectAlternatives", LocalizationMessages.RECONFIGURE_ALTERNATIVES(policy.getIdOrName()));
                 throw new PolicyException(LocalizationMessages.RECONFIGURE_ALTERNATIVES(policy.getIdOrName()));
             }
         }
@@ -71,6 +76,7 @@ public final class PolicyMapUtil {
         for (PolicyMapKey key : keys) {
             final Policy policy = map.getInputMessageEffectivePolicy(key);
             if (policy.getNumberOfAssertionSets() > 1) {
+                LOGGER.severe("rejectAlternatives", LocalizationMessages.RECONFIGURE_ALTERNATIVES(policy.getIdOrName()));
                 throw new PolicyException(LocalizationMessages.RECONFIGURE_ALTERNATIVES(policy.getIdOrName()));
             }
         }
@@ -78,6 +84,7 @@ public final class PolicyMapUtil {
         for (PolicyMapKey key : keys) {
             final Policy policy = map.getOutputMessageEffectivePolicy(key);
             if (policy.getNumberOfAssertionSets() > 1) {
+                LOGGER.severe("rejectAlternatives", LocalizationMessages.RECONFIGURE_ALTERNATIVES(policy.getIdOrName()));
                 throw new PolicyException(LocalizationMessages.RECONFIGURE_ALTERNATIVES(policy.getIdOrName()));
             }
         }
@@ -85,6 +92,7 @@ public final class PolicyMapUtil {
         for (PolicyMapKey key : keys) {
             final Policy policy = map.getFaultMessageEffectivePolicy(key);
             if (policy.getNumberOfAssertionSets() > 1) {
+                LOGGER.severe("rejectAlternatives", LocalizationMessages.RECONFIGURE_ALTERNATIVES(policy.getIdOrName()));
                 throw new PolicyException(LocalizationMessages.RECONFIGURE_ALTERNATIVES(policy.getIdOrName()));
             }
         }

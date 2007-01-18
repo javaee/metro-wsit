@@ -36,7 +36,7 @@ import java.util.Iterator;
  * @author Marek Potociar
  */
 public final class PolicyModelGenerator {
-    private static final PolicyLogger logger = PolicyLogger.getLogger(PolicyModelTranslator.class);
+    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyModelTranslator.class);
     private static final PolicyModelGenerator generator = new PolicyModelGenerator();
     
     private PolicyModelGenerator () {
@@ -59,12 +59,12 @@ public final class PolicyModelGenerator {
      * @throw PolicyException in case Policy translation fails.
      */
     public PolicySourceModel translate(final Policy policy) throws PolicyException {
-        logger.entering("translate", policy);
+        LOGGER.entering("translate", policy);
         
         PolicySourceModel model = null;
         
         if (policy == null) {
-            logger.fine("translate", LocalizationMessages.POLICY_IS_NULL_RETURNING());
+            LOGGER.fine("translate", LocalizationMessages.POLICY_IS_NULL_RETURNING());
         } else {
             model = PolicySourceModel.createPolicySourceModel(policy.getId(), policy.getName());
             final ModelNode rootNode = model.getRootNode();
@@ -84,7 +84,7 @@ public final class PolicyModelGenerator {
             }
         }
         
-        logger.exiting("translate", model);
+        LOGGER.exiting("translate", model);
         return model;
     }
     
@@ -124,6 +124,7 @@ public final class PolicyModelGenerator {
             final AssertionData data = AssertionData.createAssertionParameterData(assertionParameter.getName(), assertionParameter.getValue(), assertionParameter.getAttributes());
             final ModelNode assertionParameterNode = assertionNode.createChildAssertionParameterNode(data);
             if (assertionParameter.hasNestedPolicy()) {
+                LOGGER.severe("translate", LocalizationMessages.UNEXPECTED_POLICY_ELEMENT_FOUND_IN_ASSERTION_PARAM(assertionParameter));
                 throw new IllegalStateException(LocalizationMessages.UNEXPECTED_POLICY_ELEMENT_FOUND_IN_ASSERTION_PARAM(assertionParameter));
             }
             if (assertionParameter.hasNestedAssertions()) {

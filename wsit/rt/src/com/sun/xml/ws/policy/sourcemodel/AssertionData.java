@@ -24,6 +24,7 @@ package com.sun.xml.ws.policy.sourcemodel;
 
 import com.sun.xml.ws.policy.PolicyConstants;
 import com.sun.xml.ws.policy.privateutil.LocalizationMessages;
+import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -44,6 +45,8 @@ import java.io.Serializable;
  * @author Marek Potociar (marek.potociar@sun.com)
  */
 public final class AssertionData implements Cloneable, Serializable {
+    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(AssertionData.class);
+    
     private QName name;
     private String value;
     private HashMap<QName, String> attributes = new HashMap<QName, String>();
@@ -125,6 +128,7 @@ public final class AssertionData implements Cloneable, Serializable {
         if (type == ModelNode.Type.ASSERTION || type == ModelNode.Type.ASSERTION_PARAMETER_NODE) {
             this.type = type;
         } else {
+            LOGGER.severe("setModelNodeType", LocalizationMessages.CANNOT_CREATE_ASSERTION_BAD_TYPE(type, ModelNode.Type.ASSERTION, ModelNode.Type.ASSERTION_PARAMETER_NODE));
             throw new IllegalArgumentException(
                     LocalizationMessages.CANNOT_CREATE_ASSERTION_BAD_TYPE(type, ModelNode.Type.ASSERTION, ModelNode.Type.ASSERTION_PARAMETER_NODE));
         }
