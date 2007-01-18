@@ -395,19 +395,42 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
         return (fragmentIdx == -1) ? policyUri : policyUri.substring(0, fragmentIdx);
     }
     
+    // adding current url even to locally referenced policies
+    // in order to distinguish imported policies
+    private void processReferenceUri(
+            final String policyUri, 
+            final WSDLObject element, 
+            final XMLStreamReader reader, 
+            final Map<WSDLObject, Collection<PolicyRecordHandler>> map) {
+        
+        if (null == policyUri) {
+            return;
+        }
+        if ('#' != policyUri.charAt(0)) { // external uri (already)
+            getUnresolvedUris(false).add(policyUri);
+            addHandlerToMap(map, element, new PolicyRecordHandler(HandlerType.PolicyUri, policyUri));
+        } else { // local (relative) policy uri
+            addHandlerToMap(map, element, 
+                    new PolicyRecordHandler(
+                        HandlerType.PolicyUri, 
+                        (null == reader.getLocation().getSystemId()) ?
+                            policyUri : reader.getLocation().getSystemId() + policyUri));
+        }
+    }
+    
     private boolean processSubelement(
             final WSDLObject element, final XMLStreamReader reader, final Map<WSDLObject, Collection<PolicyRecordHandler>> map) {
         if (PolicyConstants.POLICY_REFERENCE.equals(reader.getName())) {     // "PolicyReference" element interests us
-            final String policyUri = readPolicyReferenceElement(reader);      // get the URI
-            if (null != policyUri) {
-                addHandlerToMap(map, element, new PolicyRecordHandler(HandlerType.PolicyUri, policyUri));
-                if ('#' != policyUri.charAt(0)) {
-                    getUnresolvedUris(false).add(policyUri);
-                } // end-if external policy uri
-            } //endif null != policyUri
+            processReferenceUri(readPolicyReferenceElement(reader), element, reader, map);
             return true;
         } else if (PolicyConstants.POLICY.equals(reader.getName())) {   // policy could be defined here
-            final PolicyRecordHandler handler = readSinglePolicy(skipPolicyElement(reader, ""), true);
+            final PolicyRecordHandler handler = 
+                readSinglePolicy(
+                    skipPolicyElement(
+                        reader, 
+                        (null == reader.getLocation().getSystemId()) ? // baseUrl
+                            "" : reader.getLocation().getSystemId()),
+                    true);
             if (null != handler) {           // only policies with an Id can work for us
                 addHandlerToMap(map, element, handler);
             } // endif null != handler
@@ -421,10 +444,7 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
         final String[] uriArray = getPolicyURIsFromAttr(reader);
         if (null != uriArray) {
             for (String policyUri : uriArray) {
-                addHandlerToMap(map, element, new PolicyRecordHandler(HandlerType.PolicyUri, policyUri));
-                if ('#' != policyUri.charAt(0)) {
-                    getUnresolvedUris(false).add(policyUri);
-                } // end-if external policy uri
+                processReferenceUri(policyUri, element, reader, map);
             }
         }
     }
@@ -459,7 +479,12 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
     public boolean definitionsElements(final XMLStreamReader reader){
         LOGGER.entering("definitionsElements");
         if (PolicyConstants.POLICY.equals(reader.getName())) {     // Only "Policy" element interests me
-            readSinglePolicy(skipPolicyElement(reader, ""), false);
+            readSinglePolicy(
+                    skipPolicyElement(
+                        reader, 
+                        (null == reader.getLocation().getSystemId()) ? // baseUrl
+                            "" : reader.getLocation().getSystemId()),
+                    false);
             LOGGER.exiting("definitionsElements");
             return true;
         }

@@ -37,6 +37,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.channels.FileChannel;
 import javax.xml.namespace.QName;
+import javax.xml.ws.WebServiceException;
 import junit.framework.TestCase;
 
 /**
@@ -202,11 +203,12 @@ public class PolicyConfigParserTest extends TestCase {
     }
     
     public void testParseBufferExternalReference() throws Exception {
-        PolicyMap map = parseConfigFile("config/service.wsdl");
-        PolicyMapKey key = map.createWsdlEndpointScopeKey(new QName("http://example.org/AddNumbers/service", "AddNumbersService"), new QName("http://example.org/AddNumbers/service", "AddNumbersPort"));
-        Policy policy = map.getEndpointEffectivePolicy(key);
-        assertNotNull(policy);
-        assertEquals("AddNumbersServicePolicy", policy.getId());
+        PolicyMap map = null;
+        try {
+            map = parseConfigFile("config/service.wsdl");
+            assert false; // should throw "failed to find policy" exception
+        } catch (WebServiceException wse) {
+        }
     }
     
     public void testParseBufferExternalReferenceName() throws Exception {

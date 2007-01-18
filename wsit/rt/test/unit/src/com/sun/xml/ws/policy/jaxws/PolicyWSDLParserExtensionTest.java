@@ -31,8 +31,8 @@
 
 package com.sun.xml.ws.policy.jaxws;
 
+import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyMap;
-import com.sun.xml.ws.policy.testutils.PolicyResourceLoader;
 import javax.xml.namespace.QName;
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -60,6 +60,17 @@ public class PolicyWSDLParserExtensionTest extends TestCase{
     
     public void testWsdlParserBasics() throws Exception {
         assertNotNull("PolicyMap can not be null", getPolicyMap("parser/testWsdlParserBasics.wsdl"));
+    }
+    
+    public void testWsdlParserImport() throws Exception {
+        PolicyMap policyMap = getPolicyMap("parser/testWsdlImportMain.wsdl");
+        Policy policy;
+        assertNotNull("PolicyMap can not be null", policyMap);
+        assertNotNull(policy = policyMap.getEndpointEffectivePolicy(PolicyMap.createWsdlEndpointScopeKey(
+                new QName("http://example.org","DictionaryService")
+                ,new QName("http://example.org","CzechToEnglish"))));
+        assertTrue(policy.contains(new QName("http://example.org","dummyAssertion")));
+        
     }
     
     public void testServiceElementAttachment() throws Exception {
