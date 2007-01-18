@@ -102,14 +102,17 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
             
             final String configId = context.getEndpointClass().getName();
             policyMap = PolicyConfigParser.parse(configId, context.getContainer(), extenders);
+
+            if (policyMap == null) {
+                logger.fine("start", LocalizationMessages.CREATE_POLICY_MAP_FOR_CONFIG());
+                policyMap = PolicyMap.createPolicyMap(null);
+            }
             
-            if (policyMap!= null) {
-                context.getRoot()._namespace(PolicyConstants.POLICY_NAMESPACE_URI, PolicyConstants.POLICY_NAMESPACE_PREFIX);
-                final WSBinding binding = context.getBinding();
-                for (int i=0; i<policyMapUpdateProviders.length; i++) {
-                    policyMapUpdateProviders[i].update(extenders[i], policyMap, seiModel, binding);
-                    extenders[i].disconnect();
-                }
+            context.getRoot()._namespace(PolicyConstants.POLICY_NAMESPACE_URI, PolicyConstants.POLICY_NAMESPACE_PREFIX);
+            final WSBinding binding = context.getBinding();
+            for (int i=0; i<policyMapUpdateProviders.length; i++) {
+                policyMapUpdateProviders[i].update(extenders[i], policyMap, seiModel, binding);
+                extenders[i].disconnect();
             }
         } catch (PolicyException e) {
             logger.fine("start", LocalizationMessages.FAILED_TO_READ_WSIT_CFG(), e);
