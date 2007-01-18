@@ -338,9 +338,10 @@ public class NewWSSCPlugin {
         }
         
         reqPacket.setEndPointAddressString(endPointAddress);
-        log.log(Level.FINE,
-                LogStringsMessages.WSSC_1008_SET_EP_ADDRESS(endPointAddress));
-        
+        if (log.isLoggable(Level.FINE)) {
+            log.log(Level.FINE,
+                    LogStringsMessages.WSSC_1008_SET_EP_ADDRESS(endPointAddress));
+        }
         // Add addressing headers to the message
         try{
             reqPacket = addAddressingHeaders(reqPacket, wsdlPort, binding, action);
