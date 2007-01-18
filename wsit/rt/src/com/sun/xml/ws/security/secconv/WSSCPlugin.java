@@ -99,6 +99,7 @@ public class WSSCPlugin {
     
     private static final int DEFAULT_KEY_SIZE = 256;
     private static final String SC_ASSERTION = "SecureConversationAssertion";
+    private static final String FOR_CANCEL = "For Cancel";
     
     private Packet packet = null;
     
@@ -187,7 +188,9 @@ public class WSSCPlugin {
         try{
             rst = createRequestSecurityTokenForCancel(ctx);
         } catch (WSSecureConversationException ex){
-            throw new RuntimeException("There was a problem creating RST For Cancel", ex);
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSSC_0024_ERROR_CREATING_RST(FOR_CANCEL), ex);
+            throw new RuntimeException(LogStringsMessages.WSSC_0024_ERROR_CREATING_RST(FOR_CANCEL), ex);
         }
         
         final RequestSecurityTokenResponse rstr = sendRequest(null, wsdlPort, binding, securityPipe, marshaller, unmarshaller, rst, WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_ACTION, endPointAddress, addVer);
@@ -196,7 +199,9 @@ public class WSSCPlugin {
         try {
             processRequestSecurityTokenResponse(rst, rstr, ctx);
         } catch (WSSecureConversationException ex){
-            throw new RuntimeException("Problem processing RSTR", ex);
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSSC_0020_PROBLEM_CREATING_RSTR(), ex);
+            throw new RuntimeException(LogStringsMessages.WSSC_0020_PROBLEM_CREATING_RSTR(), ex);
         }
         
         return ctx;

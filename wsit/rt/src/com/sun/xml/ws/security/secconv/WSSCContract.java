@@ -257,13 +257,16 @@ public class WSSCContract implements WSTrustContract   {
                     eleFac.createRSTRForIssue(tokenType, con, rst, scopes, rar, rur, proofToken, serverEntropy, lifetime);
         } catch (WSTrustException ex){
             log.log(Level.SEVERE,
-                    LogStringsMessages.WSSC_0013_CANNOT_CREATE_RSTR_RESPONSE(), ex);
-            throw new WSSecureConversationException(LogStringsMessages.WSSC_0013_CANNOT_CREATE_RSTR_RESPONSE(), ex);
+                    LogStringsMessages.WSSC_0020_PROBLEM_CREATING_RSTR(), ex);
+            throw new WSSecureConversationException(LogStringsMessages.WSSC_0020_PROBLEM_CREATING_RSTR(), ex);
         }
         
         final Session session =
                 SessionManager.getSessionManager().createSession(token.getIdentifier().toString());
-        log.fine("Creating session for : "  + token.getIdentifier());
+        if (log.isLoggable(Level.FINE)) {
+            log.log(Level.FINE,
+                    "Creating session for : "  + token.getIdentifier());
+        }
         populateITC(session, secret, token, attachedReference, context, unattachedRef);
         return response;
     }
