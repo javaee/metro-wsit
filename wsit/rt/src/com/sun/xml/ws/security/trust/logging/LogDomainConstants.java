@@ -1,5 +1,5 @@
 /*
- * $Id: LogDomainConstants.java,v 1.2 2007-01-15 10:29:53 raharsha Exp $
+ * $Id: LogDomainConstants.java,v 1.3 2007-01-18 16:26:15 manveen Exp $
  */
 
 /*
@@ -37,7 +37,7 @@ import com.sun.xml.wss.*;
 public class LogDomainConstants {
     
     public static final String MODULE_TOP_LEVEL_DOMAIN =
-            "javax.enterprise.resource.xml.webservices.security.trust";
+            "com.sun.xml.ws.security.trust";
     
     public static final String TRUST_IMPL_DOMAIN = MODULE_TOP_LEVEL_DOMAIN;
     

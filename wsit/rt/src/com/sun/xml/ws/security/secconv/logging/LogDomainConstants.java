@@ -1,5 +1,5 @@
 /*
- * $Id: LogDomainConstants.java,v 1.2 2007-01-15 10:29:50 raharsha Exp $
+ * $Id: LogDomainConstants.java,v 1.3 2007-01-18 16:25:43 manveen Exp $
  */
 
 /*
@@ -37,7 +37,7 @@ package com.sun.xml.ws.security.secconv.logging;
 public class LogDomainConstants {
     
     public static final String MODULE_TOP_LEVEL_DOMAIN =
-            "javax.enterprise.resource.xml.webservices.security.secconv";
+            "com.sun.xml.ws.security.secconv";
     
     public static final String WSSC_IMPL_DOMAIN = MODULE_TOP_LEVEL_DOMAIN;
     
