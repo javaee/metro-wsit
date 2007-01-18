@@ -73,6 +73,7 @@ public class NewWSSCPlugin {
     
     private static final int DEFAULT_KEY_SIZE = 256;
     private static final String SC_ASSERTION = "SecureConversationAssertion";
+    private static final String FOR_ISSUE = "For Issue";
     private static final String FOR_CANCEL = "For Cancel";
     
     /** Creates a new instance of NewWSSCPlugin */
@@ -124,8 +125,8 @@ public class NewWSSCPlugin {
             rst = createRequestSecurityToken(reqClientEntropy,skl);
         } catch (WSSecureConversationException ex){
             log.log(Level.SEVERE,
-                    LogStringsMessages.WSSC_0024_ERROR_CREATING_RST(""), ex);
-            throw new RuntimeException(LogStringsMessages.WSSC_0024_ERROR_CREATING_RST(""), ex);
+                    LogStringsMessages.WSSC_0024_ERROR_CREATING_RST(FOR_ISSUE), ex);
+            throw new RuntimeException(LogStringsMessages.WSSC_0024_ERROR_CREATING_RST(FOR_ISSUE), ex);
         } catch (WSTrustException ex){
             log.log(Level.SEVERE,
                     LogStringsMessages.WSSC_0021_PROBLEM_CREATING_RST_TRUST(), ex);
@@ -402,8 +403,8 @@ public class NewWSSCPlugin {
             rst = eleFac.createRSTForIssue(tokenType, requestType, null, null, null, entropy, null);
         } catch (WSTrustException ex){
             log.log(Level.SEVERE,
-                    LogStringsMessages.WSSC_0024_ERROR_CREATING_RST("For Issue"), ex);
-            throw new RuntimeException(LogStringsMessages.WSSC_0024_ERROR_CREATING_RST("For Issue"), ex);
+                    LogStringsMessages.WSSC_0024_ERROR_CREATING_RST(FOR_ISSUE), ex);
+            throw new RuntimeException(LogStringsMessages.WSSC_0024_ERROR_CREATING_RST(FOR_ISSUE), ex);
         }
         rst.setKeySize(skl);
         rst.setKeyType(URI.create(WSTrustConstants.SYMMETRIC_KEY));
