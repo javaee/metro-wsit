@@ -83,11 +83,18 @@ public class ATTransactionManagerImpl implements TransactionManager {
     }
 
     public javax.transaction.Transaction getTransaction() throws SystemException {
-        final String currentCoordId = getCoordinationContext().getIdentifier();
-        ATTransaction result = getTransaction(currentCoordId);
-        if (result == null) {
-            result = new ATTransactionImpl(javaeeTM.getTransaction(), getCoordinationContext());
-            coordIdTxnMap.put(currentCoordId, result);
+        ATTransaction result = null;
+        final Transaction jtaTxn = javaeeTM.getTransaction();
+        if (jtaTxn == null) {
+            return result;
+        } 
+        CoordinationContextInterface cc = this.getCoordinationContext();
+        if (cc != null) {
+            result = getTransaction(cc.getIdentifier());
+            if (result == null) {
+                result = new ATTransactionImpl(jtaTxn, cc);
+                coordIdTxnMap.put(cc.getIdentifier(), result);
+            }
         }
         return result;
     }
@@ -124,7 +131,11 @@ public class ATTransactionManagerImpl implements TransactionManager {
      * Returns null if none set.
      */
     public CoordinationContextInterface getCoordinationContext() {
-        return (CoordinationContextInterface) javaeeSynchReg.getResource("WSCOOR-SUN");
+        try { 
+            return (CoordinationContextInterface) javaeeSynchReg.getResource("WSCOOR-SUN");
+        } catch (IllegalStateException ise) {
+            return null;  // no current JTA transaction, so return null
+        }
     }
 
     /**
