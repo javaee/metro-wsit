@@ -144,7 +144,7 @@ final class PrivateElementFilteringInvocationProcessor implements InvocationProc
                 namespaceURI = invocation.getArgument(2).toString();
                 break;
             default:
-                final String message = LocalizationMessages.UNEXPECTED_ARGUMENTS_COUNT(XmlStreamWriterMethodType.WRITE_START_ELEMENT + "(...)", argumentsCount);
+                final String message = LocalizationMessages.WSP_001009_UNEXPECTED_ARGUMENTS_COUNT(XmlStreamWriterMethodType.WRITE_START_ELEMENT + "(...)", argumentsCount);
                 LOGGER.severe("startFiltering", message);
                 throw new IllegalArgumentException(message);
         }

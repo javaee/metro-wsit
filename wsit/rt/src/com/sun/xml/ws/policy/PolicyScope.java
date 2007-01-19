@@ -46,8 +46,8 @@ final class PolicyScope {
     
     void attach(final PolicySubject subject) {
         if (subject == null) {
-            LOGGER.severe("attach", LocalizationMessages.SUBJECT_PARAM_MUST_NOT_BE_NULL());
-            throw new NullPointerException(LocalizationMessages.SUBJECT_PARAM_MUST_NOT_BE_NULL());
+            LOGGER.severe("attach", LocalizationMessages.WSP_000020_SUBJECT_PARAM_MUST_NOT_BE_NULL());
+            throw new NullPointerException(LocalizationMessages.WSP_000020_SUBJECT_PARAM_MUST_NOT_BE_NULL());
         }
         
         subjects.add(subject);

@@ -715,8 +715,8 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
                             addNewPolicyNeeded(currentUri, prefetchedRecord.policyModel);
                         } else { // policy has not been yet passed by
                             if (urlsRead.contains(getBaseUrl(currentUri))) { // big problem --> unresolvable policy
-                                LOGGER.severe("finished", LocalizationMessages.CAN_NOT_RESOLVE_POLICY(currentUri));
-                                throw new PolicyException(LocalizationMessages.CAN_NOT_RESOLVE_POLICY(currentUri));
+                                LOGGER.severe("finished", LocalizationMessages.WSP_001042_CAN_NOT_RESOLVE_POLICY(currentUri));
+                                throw new PolicyException(LocalizationMessages.WSP_001042_CAN_NOT_RESOLVE_POLICY(currentUri));
                             } else {
                                 if (readExternalFile(getBaseUrl(currentUri))) {
                                     getUnresolvedUris(false).add(currentUri);
@@ -733,7 +733,7 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
                     sourceModel.expand(modelContext);
                     modelContext.addModel(new URI(policyUri), sourceModel);
                 } catch (URISyntaxException use) {
-                    LOGGER.severe("finished", LocalizationMessages.URI_SYNTAX_EXCEPTION_THROWN_WHEN_PROCESSING_URI(policyUri), use);
+                    LOGGER.severe("finished", LocalizationMessages.WSP_001005_URI_SYNTAX_EXCEPTION_THROWN_WHEN_PROCESSING_URI(policyUri), use);
                     throw new WebServiceException(use);
                 }
             }
@@ -967,7 +967,7 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
             }
             
         } catch(PolicyException pe) {
-            LOGGER.severe("finished", LocalizationMessages.POLICY_EXCEPTION_WHILE_FINISHING_PARSING_WSDL(),pe);
+            LOGGER.severe("finished", LocalizationMessages.WSP_001018_POLICY_EXCEPTION_WHILE_FINISHING_PARSING_WSDL(),pe);
             throw new WebServiceException(pe);
         }
         LOGGER.exiting("finished");
@@ -990,7 +990,7 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
             reader.next();
             return null;
         } catch(XMLStreamException e) {
-            LOGGER.severe("readPolicyReferenceElement", LocalizationMessages.XML_EXCEPTION_WHEN_PROCESSING_POLICY_REFERENCE());
+            LOGGER.severe("readPolicyReferenceElement", LocalizationMessages.WSP_001001_XML_EXCEPTION_WHEN_PROCESSING_POLICY_REFERENCE());
             throw new WebServiceException(e);
         }
     }
@@ -1140,7 +1140,7 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
                 policyRec.uri = policyRec.policyModel.getPolicyName();
             }
         } catch(Exception e) {
-            LOGGER.severe("definitionsElements", LocalizationMessages.EXCEPTION_WHEN_READING_POLICY_ELEMENT(elementCode.toString()), e);
+            LOGGER.severe("definitionsElements", LocalizationMessages.WSP_001033_EXCEPTION_WHEN_READING_POLICY_ELEMENT(elementCode.toString()), e);
             throw new WebServiceException(e);
         }
         
@@ -1157,23 +1157,23 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
                 try {
                     final URL clientCfgFileUrl = PolicyUtils.ConfigFile.loadAsResource(clientCfgFileName, null);
                     if (clientCfgFileUrl == null) {
-                        LOGGER.config("postFinished", LocalizationMessages.CLIENT_CONFIG_FILE_MISSING());
+                        LOGGER.config("postFinished", LocalizationMessages.WSP_001040_CLIENT_CONFIG_FILE_MISSING());
                     } else {
-                        LOGGER.config("postFinished", LocalizationMessages.CLIENT_CONFIG_FILE_URL_IS(clientCfgFileUrl));
+                        LOGGER.config("postFinished", LocalizationMessages.WSP_001038_CLIENT_CONFIG_FILE_URL_IS(clientCfgFileUrl));
                         final PolicyMap clientPolicyMap = PolicyConfigParser.parse(clientCfgFileUrl, true);
-                        LOGGER.fine("postFinished", LocalizationMessages.CLIENT_CONFIG_FILE_POLICY_MAP_IS(clientPolicyMap));
+                        LOGGER.fine("postFinished", LocalizationMessages.WSP_001039_CLIENT_CONFIG_FILE_POLICY_MAP_IS(clientPolicyMap));
                         mapWrapper.addClientConfigToMap(clientCfgFileUrl, clientPolicyMap);
                     }
                 } catch (PolicyException pe) {
-                    LOGGER.severe("postFinished", LocalizationMessages.POLICY_EXCEPTION_WHILE_READING_CLIENT_CONFIG(), pe);
+                    LOGGER.severe("postFinished", LocalizationMessages.WSP_001017_POLICY_EXCEPTION_WHILE_READING_CLIENT_CONFIG(), pe);
                     throw new WebServiceException(pe);
                 }
-                LOGGER.fine("postFinished", LocalizationMessages.INVOKING_CLIENT_POLICY_ALTERNATIVE_SELECTION());
+                LOGGER.fine("postFinished", LocalizationMessages.WSP_001024_INVOKING_CLIENT_POLICY_ALTERNATIVE_SELECTION());
                 try {
                     mapWrapper.doAlternativeSelection();
                 } catch (PolicyException e) {
-                    LOGGER.severe("postFinished", LocalizationMessages.VALID_POLICY_ALTERNATIVE_NOT_FOUND(), e);
-                    throw new WebServiceException(LocalizationMessages.VALID_POLICY_ALTERNATIVE_NOT_FOUND(), e);
+                    LOGGER.severe("postFinished", LocalizationMessages.WSP_001003_VALID_POLICY_ALTERNATIVE_NOT_FOUND(), e);
+                    throw new WebServiceException(LocalizationMessages.WSP_001003_VALID_POLICY_ALTERNATIVE_NOT_FOUND(), e);
                 }
             } else if (!context.isClientSide() && !isForConfigFile) { //server side
                 try {

@@ -119,8 +119,8 @@ public final class EnhancedXmlStreamWriterProxy implements InvocationHandler {
         } else if (method.equals(toStringMethod)) {
             return proxy.getClass().getName() + '@' + Integer.toHexString(proxy.hashCode());
         } else {
-            LOGGER.severe("handleObjectMethodCall", LocalizationMessages.UNEXPECTED_OBJECT_METHOD(method));
-            throw new InternalError(LocalizationMessages.UNEXPECTED_OBJECT_METHOD(method));
+            LOGGER.severe("handleObjectMethodCall", LocalizationMessages.WSP_001007_UNEXPECTED_OBJECT_METHOD(method));
+            throw new InternalError(LocalizationMessages.WSP_001007_UNEXPECTED_OBJECT_METHOD(method));
         }
     }
 }

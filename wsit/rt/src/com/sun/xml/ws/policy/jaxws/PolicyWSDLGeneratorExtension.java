@@ -104,7 +104,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
             policyMap = PolicyConfigParser.parse(configId, context.getContainer(), extenders);
 
             if (policyMap == null) {
-                logger.fine("start", LocalizationMessages.CREATE_POLICY_MAP_FOR_CONFIG());
+                logger.fine("start", LocalizationMessages.WSP_001034_CREATE_POLICY_MAP_FOR_CONFIG());
                 policyMap = PolicyMap.createPolicyMap(null);
             }
             
@@ -115,7 +115,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
                 extenders[i].disconnect();
             }
         } catch (PolicyException e) {
-            logger.fine("start", LocalizationMessages.FAILED_TO_READ_WSIT_CFG(), e);
+            logger.fine("start", LocalizationMessages.WSP_001027_FAILED_TO_READ_WSIT_CFG(), e);
         } finally {
             logger.exiting("start");
         }
@@ -145,15 +145,15 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
                             policyIDsOrNamesWritten.add(policy.getIdOrName());
                         }
                     } else {
-                        logger.fine("addDefinitionsExtension", LocalizationMessages.NOT_MARSHALLING_WSDL_SUBJ_NULL(subject));
+                        logger.fine("addDefinitionsExtension", LocalizationMessages.WSP_001019_NOT_MARSHALLING_WSDL_SUBJ_NULL(subject));
                     }
                 }
             } else {
-                logger.fine("addDefinitionsExtension", LocalizationMessages.NOT_MARSHALLING_ANY_POLICIES_POLICY_MAP_IS_NULL());
+                logger.fine("addDefinitionsExtension", LocalizationMessages.WSP_001020_NOT_MARSHALLING_ANY_POLICIES_POLICY_MAP_IS_NULL());
             }
         } catch (PolicyException e) {
-            logger.severe("addDefinitionsExtension", LocalizationMessages.FAILED_TO_MARSHALL_POLICIES(), e);
-            throw new WebServiceException(LocalizationMessages.FAILED_TO_MARSHALL_POLICIES(), e);
+            logger.severe("addDefinitionsExtension", LocalizationMessages.WSP_001029_FAILED_TO_MARSHALL_POLICIES(), e);
+            throw new WebServiceException(LocalizationMessages.WSP_001029_FAILED_TO_MARSHALL_POLICIES(), e);
         } finally {
             logger.exiting("addDefinitionsExtension");
         }
@@ -320,8 +320,8 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
     }
     
     private void handleCheckingElementQNameWithReflectionException(final Exception e) {
-        logger.severe("handleCheckingElementQNameWithReflectionException", LocalizationMessages.UNABLE_TO_CHECK_ELEMENT_NAME(), e);
-        throw new WebServiceException(LocalizationMessages.UNABLE_TO_CHECK_ELEMENT_NAME(), e);
+        logger.severe("handleCheckingElementQNameWithReflectionException", LocalizationMessages.WSP_001011_UNABLE_TO_CHECK_ELEMENT_NAME(), e);
+        throw new WebServiceException(LocalizationMessages.WSP_001011_UNABLE_TO_CHECK_ELEMENT_NAME(), e);
     }
     
     
@@ -346,9 +346,9 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
                 }
             }
         } catch (PolicyException pe) {
-            logger.severe("processPolicy", LocalizationMessages.UNABLE_TO_MARSHALL_POLICY_OR_POLICY_REFERENCE(), pe);
-            throw new WebServiceException(LocalizationMessages.UNABLE_TO_MARSHALL_POLICY_OR_POLICY_REFERENCE(), pe);
+            logger.severe("processPolicy", LocalizationMessages.WSP_001010_UNABLE_TO_MARSHALL_POLICY_OR_POLICY_REFERENCE(), pe);
+            throw new WebServiceException(LocalizationMessages.WSP_001010_UNABLE_TO_MARSHALL_POLICY_OR_POLICY_REFERENCE(), pe);
         }
     }
-    
 }
+

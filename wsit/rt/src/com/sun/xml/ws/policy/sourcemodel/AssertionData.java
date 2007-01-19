@@ -128,9 +128,9 @@ public final class AssertionData implements Cloneable, Serializable {
         if (type == ModelNode.Type.ASSERTION || type == ModelNode.Type.ASSERTION_PARAMETER_NODE) {
             this.type = type;
         } else {
-            LOGGER.severe("setModelNodeType", LocalizationMessages.CANNOT_CREATE_ASSERTION_BAD_TYPE(type, ModelNode.Type.ASSERTION, ModelNode.Type.ASSERTION_PARAMETER_NODE));
+            LOGGER.severe("setModelNodeType", LocalizationMessages.WSP_000074_CANNOT_CREATE_ASSERTION_BAD_TYPE(type, ModelNode.Type.ASSERTION, ModelNode.Type.ASSERTION_PARAMETER_NODE));
             throw new IllegalArgumentException(
-                    LocalizationMessages.CANNOT_CREATE_ASSERTION_BAD_TYPE(type, ModelNode.Type.ASSERTION, ModelNode.Type.ASSERTION_PARAMETER_NODE));
+                    LocalizationMessages.WSP_000074_CANNOT_CREATE_ASSERTION_BAD_TYPE(type, ModelNode.Type.ASSERTION, ModelNode.Type.ASSERTION_PARAMETER_NODE));
         }
     }
     

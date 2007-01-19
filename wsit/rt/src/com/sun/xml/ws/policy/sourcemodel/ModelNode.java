@@ -97,8 +97,8 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
                             return false;
                     }
                 default:
-                    LOGGER.severe("isChildTypeSupported", LocalizationMessages.MODEL_NODE_TYPE_UNKNOWN(this));
-                    throw new IllegalStateException(LocalizationMessages.MODEL_NODE_TYPE_UNKNOWN(this));
+                    LOGGER.severe("isChildTypeSupported", LocalizationMessages.WSP_000060_MODEL_NODE_TYPE_UNKNOWN(this));
+                    throw new IllegalStateException(LocalizationMessages.WSP_000060_MODEL_NODE_TYPE_UNKNOWN(this));
             }
         }
     }
@@ -128,8 +128,8 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
      */
     static ModelNode createRootPolicyNode(final PolicySourceModel model) throws NullPointerException {
         if (model == null) {
-            LOGGER.severe("createRootPolicyNode", LocalizationMessages.POLICY_SRC_MODEL_INPUT_PARAMETER_MUST_NOT_BE_NULL());
-            throw new NullPointerException(LocalizationMessages.POLICY_SRC_MODEL_INPUT_PARAMETER_MUST_NOT_BE_NULL());
+            LOGGER.severe("createRootPolicyNode", LocalizationMessages.WSP_000039_POLICY_SRC_MODEL_INPUT_PARAMETER_MUST_NOT_BE_NULL());
+            throw new NullPointerException(LocalizationMessages.WSP_000039_POLICY_SRC_MODEL_INPUT_PARAMETER_MUST_NOT_BE_NULL());
         }
         return new ModelNode(ModelNode.Type.POLICY, model);
     }
@@ -155,7 +155,7 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
     
     private void checkCreateChildOperationSupportForType(Type type) throws UnsupportedOperationException {
         if (!this.type.isChildTypeSupported(type)) {
-            final String message = LocalizationMessages.CREATE_CHILD_NODE_OPERATION_NOT_SUPPORTED(type, this.type);
+            final String message = LocalizationMessages.WSP_000073_CREATE_CHILD_NODE_OPERATION_NOT_SUPPORTED(type, this.type);
             LOGGER.severe("checkCreateOperationSupportForType", message);
             throw new UnsupportedOperationException(message);
         }
@@ -313,8 +313,8 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
      */
     void setParentModel(final PolicySourceModel model) throws IllegalAccessException {
         if (parentNode != null) {
-            LOGGER.severe("setParentModel", LocalizationMessages.PARENT_MODEL_CAN_NOT_BE_CHANGED());
-            throw new IllegalAccessException(LocalizationMessages.PARENT_MODEL_CAN_NOT_BE_CHANGED());
+            LOGGER.severe("setParentModel", LocalizationMessages.WSP_000049_PARENT_MODEL_CAN_NOT_BE_CHANGED());
+            throw new IllegalAccessException(LocalizationMessages.WSP_000049_PARENT_MODEL_CAN_NOT_BE_CHANGED());
         }
         
         this.updateParentModelReference(model);
@@ -397,8 +397,8 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
      */
     public AssertionData setOrReplaceNodeData(final AssertionData newData) {
         if (!isAssertionRelatedNode()) {
-            LOGGER.severe("setOrReplaceNodeData", LocalizationMessages.OPERATION_NOT_SUPPORTED_FOR_THIS_BUT_ASSERTION_RELATED_NODE_TYPE(type));
-            throw new UnsupportedOperationException(LocalizationMessages.OPERATION_NOT_SUPPORTED_FOR_THIS_BUT_ASSERTION_RELATED_NODE_TYPE(type));
+            LOGGER.severe("setOrReplaceNodeData", LocalizationMessages.WSP_000051_OPERATION_NOT_SUPPORTED_FOR_THIS_BUT_ASSERTION_RELATED_NODE_TYPE(type));
+            throw new UnsupportedOperationException(LocalizationMessages.WSP_000051_OPERATION_NOT_SUPPORTED_FOR_THIS_BUT_ASSERTION_RELATED_NODE_TYPE(type));
         }
         
         final AssertionData oldData = this.nodeData;
@@ -440,8 +440,8 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
      */
     void setReferencedModel(final PolicySourceModel model) {
         if (this.type != Type.POLICY_REFERENCE) {
-            LOGGER.severe("setReferencedModel", LocalizationMessages.OPERATION_NOT_SUPPORTED_FOR_THIS_BUT_POLICY_REFERENCE_NODE_TYPE(type));            
-            throw new UnsupportedOperationException(LocalizationMessages.OPERATION_NOT_SUPPORTED_FOR_THIS_BUT_POLICY_REFERENCE_NODE_TYPE(type));
+            LOGGER.severe("setReferencedModel", LocalizationMessages.WSP_000050_OPERATION_NOT_SUPPORTED_FOR_THIS_BUT_POLICY_REFERENCE_NODE_TYPE(type));            
+            throw new UnsupportedOperationException(LocalizationMessages.WSP_000050_OPERATION_NOT_SUPPORTED_FOR_THIS_BUT_POLICY_REFERENCE_NODE_TYPE(type));
         }
         
         referencedModel = model;

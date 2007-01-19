@@ -71,12 +71,12 @@ public final class PolicyConfigParser {
                     context = container.getSPI(contextClass);
                 }
             } catch (ClassNotFoundException e) {
-                LOGGER.fine("parse", LocalizationMessages.CAN_NOT_FIND_CLASS(SERVLET_CONTEXT_CLASSNAME));
+                LOGGER.fine("parse", LocalizationMessages.WSP_001043_CAN_NOT_FIND_CLASS(SERVLET_CONTEXT_CLASSNAME));
             }
-            LOGGER.finest("parse", LocalizationMessages.CONTEXT_IS(context));
+            LOGGER.finest("parse", LocalizationMessages.WSP_001036_CONTEXT_IS(context));
             
             final String cfgFile = PolicyUtils.ConfigFile.generateFullName(configFileIdentifier);
-            LOGGER.finest("parse", LocalizationMessages.CONFIG_FILE_IS(cfgFile));
+            LOGGER.finest("parse", LocalizationMessages.WSP_001037_CONFIG_FILE_IS(cfgFile));
             
             URL configFileUrl = PolicyUtils.ConfigFile.loadAsResource(cfgFile, context);
             
@@ -139,8 +139,8 @@ public final class PolicyConfigParser {
         WSDLModel model = null;
         try {
             if (null == configFileUrl) {
-                LOGGER.severe("parseModel", LocalizationMessages.FAILED_TO_READ_NULL_WSIT_CFG());
-                throw new PolicyException(LocalizationMessages.FAILED_TO_READ_NULL_WSIT_CFG());
+                LOGGER.severe("parseModel", LocalizationMessages.WSP_001028_FAILED_TO_READ_NULL_WSIT_CFG());
+                throw new PolicyException(LocalizationMessages.WSP_001028_FAILED_TO_READ_NULL_WSIT_CFG());
             }
             
             final SDDocumentSource doc = SDDocumentSource.create(configFileUrl);//, configFileSource);
@@ -149,14 +149,14 @@ public final class PolicyConfigParser {
                     new WSDLParserExtension[] { new PolicyWSDLParserExtension(true, mutators) } );
             return model;
         } catch (XMLStreamException ex) {
-            LOGGER.severe("parseModel", LocalizationMessages.WSDL_IMPORT_FAILED(), ex);
-            throw new PolicyException(LocalizationMessages.WSDL_IMPORT_FAILED(), ex);
+            LOGGER.severe("parseModel", LocalizationMessages.WSP_001002_WSDL_IMPORT_FAILED(), ex);
+            throw new PolicyException(LocalizationMessages.WSP_001002_WSDL_IMPORT_FAILED(), ex);
         } catch (IOException ex) {
-            LOGGER.severe("parseModel", LocalizationMessages.WSDL_IMPORT_FAILED(), ex);
-            throw new PolicyException(LocalizationMessages.WSDL_IMPORT_FAILED(), ex);
+            LOGGER.severe("parseModel", LocalizationMessages.WSP_001002_WSDL_IMPORT_FAILED(), ex);
+            throw new PolicyException(LocalizationMessages.WSP_001002_WSDL_IMPORT_FAILED(), ex);
         } catch (SAXException ex) {
-            LOGGER.severe("parseModel", LocalizationMessages.WSDL_IMPORT_FAILED(), ex);
-            throw new PolicyException(LocalizationMessages.WSDL_IMPORT_FAILED(), ex);
+            LOGGER.severe("parseModel", LocalizationMessages.WSP_001002_WSDL_IMPORT_FAILED(), ex);
+            throw new PolicyException(LocalizationMessages.WSP_001002_WSDL_IMPORT_FAILED(), ex);
         } finally {
             LOGGER.exiting("parseModel", model);
         }

@@ -60,13 +60,13 @@ public class PolicyServiceInterceptor extends ServiceInterceptor {
                 final String clientCfgFileName = PolicyUtils.ConfigFile.generateFullName(PolicyConstants.CLIENT_CONFIGURATION_IDENTIFIER);
                 final URL clientCfgFileUrl = PolicyUtils.ConfigFile.loadAsResource(clientCfgFileName, null);
                 if (clientCfgFileUrl != null) {
-                    LOGGER.config("preCreateBinding", LocalizationMessages.LOADING_CLIENT_CFG_FILE(clientCfgFileUrl));
+                    LOGGER.config("preCreateBinding", LocalizationMessages.WSP_001022_LOADING_CLIENT_CFG_FILE(clientCfgFileUrl));
                     final WSDLModel clientModel = PolicyConfigParser.parseModel(clientCfgFileUrl, true);
                     final WSDLPolicyMapWrapper clientWrapper = clientModel.getExtension(WSDLPolicyMapWrapper.class);
                     if (clientWrapper != null) {
                         final PolicyMap map = clientWrapper.getPolicyMap();
                         if (map != null) {
-                            LOGGER.config("preCreateBinding", LocalizationMessages.INVOKING_CLI_SIDE_ALTERNATIVE_SELECTION());
+                            LOGGER.config("preCreateBinding", LocalizationMessages.WSP_001023_INVOKING_CLI_SIDE_ALTERNATIVE_SELECTION());
                             clientWrapper.doAlternativeSelection();
                             for (ModelConfiguratorProvider configurator : PolicyUtils.ServiceProvider.load(ModelConfiguratorProvider.class)) {
                                 configurator.configure(clientModel, map);
@@ -79,7 +79,7 @@ public class PolicyServiceInterceptor extends ServiceInterceptor {
                     }
                 } else {
                     LOGGER.config("preCreateBinding",
-                            LocalizationMessages.COULD_NOT_FIND_CLIENT_CFG_FILE_ON_CLASSPATH(clientCfgFileName));
+                            LocalizationMessages.WSP_001035_COULD_NOT_FIND_CLIENT_CFG_FILE_ON_CLASSPATH(clientCfgFileName));
                 }
             }
         } catch (PolicyException e) {

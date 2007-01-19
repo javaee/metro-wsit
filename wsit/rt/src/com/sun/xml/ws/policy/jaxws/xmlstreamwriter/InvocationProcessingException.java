@@ -49,6 +49,6 @@ public class InvocationProcessingException extends RuntimeException {
     }    
     
     private static String assemblyExceptionMessage(final Invocation invocation) {
-        return LocalizationMessages.INVOCATION_ERROR(invocation.getMethodName(), invocation.argsToString());
+        return LocalizationMessages.WSP_001025_INVOCATION_ERROR(invocation.getMethodName(), invocation.argsToString());
     }    
 }

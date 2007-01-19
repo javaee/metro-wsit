@@ -100,13 +100,13 @@ public final class PolicyModelTranslator {
                                 }
                                 this.allNestedPolicies.add(nestedPolicy);
                             } else {
-                                LOGGER.severe("<init>", LocalizationMessages.UNEXPECTED_MULTIPLE_POLICY_NODES());
-                                throw new PolicyException(LocalizationMessages.UNEXPECTED_MULTIPLE_POLICY_NODES());
+                                LOGGER.severe("<init>", LocalizationMessages.WSP_000006_UNEXPECTED_MULTIPLE_POLICY_NODES());
+                                throw new PolicyException(LocalizationMessages.WSP_000006_UNEXPECTED_MULTIPLE_POLICY_NODES());
                             }
                             break;
                         default:
-                            LOGGER.severe("<init>", LocalizationMessages.UNEXPECTED_CHILD_MODEL_TYPE(assertionNodeChild.getType()));
-                            throw new PolicyException(LocalizationMessages.UNEXPECTED_CHILD_MODEL_TYPE(assertionNodeChild.getType()));
+                            LOGGER.severe("<init>", LocalizationMessages.WSP_000008_UNEXPECTED_CHILD_MODEL_TYPE(assertionNodeChild.getType()));
+                            throw new PolicyException(LocalizationMessages.WSP_000008_UNEXPECTED_CHILD_MODEL_TYPE(assertionNodeChild.getType()));
                     }
                 }
             }
@@ -157,21 +157,21 @@ public final class PolicyModelTranslator {
             final String creatorClassName = creator.getClass().getName();
             
             if (supportedURIs == null || supportedURIs.length == 0) {
-                LOGGER.warning("initPolicyAssertionCreatorsMap", LocalizationMessages.ASSERTION_CREATOR_DOES_NOT_SUPPORT_ANY_URI(creatorClassName));
+                LOGGER.warning("initPolicyAssertionCreatorsMap", LocalizationMessages.WSP_000077_ASSERTION_CREATOR_DOES_NOT_SUPPORT_ANY_URI(creatorClassName));
                 continue;
             }
             
             for (String supportedURI : supportedURIs) {
-                LOGGER.config("initPolicyAssertionCreatorsMap", LocalizationMessages.ASSERTION_CREATOR_DISCOVERED(creatorClassName, supportedURI));
+                LOGGER.config("initPolicyAssertionCreatorsMap", LocalizationMessages.WSP_000078_ASSERTION_CREATOR_DISCOVERED(creatorClassName, supportedURI));
                 if (supportedURI == null || supportedURI.length() == 0) {
-                    LOGGER.severe("initPolicyAssertionCreatorsMap", LocalizationMessages.ERROR_REGISTERING_ASSERTION_CREATOR(creatorClassName));
-                    throw new PolicyException(LocalizationMessages.ERROR_REGISTERING_ASSERTION_CREATOR(creatorClassName));
+                    LOGGER.severe("initPolicyAssertionCreatorsMap", LocalizationMessages.WSP_000070_ERROR_REGISTERING_ASSERTION_CREATOR(creatorClassName));
+                    throw new PolicyException(LocalizationMessages.WSP_000070_ERROR_REGISTERING_ASSERTION_CREATOR(creatorClassName));
                 }
                 
                 final PolicyAssertionCreator oldCreator = pacMap.put(supportedURI, creator);
                 if (oldCreator != null) {
-                    LOGGER.severe("initPolicyAssertionCreatorsMap", LocalizationMessages.ERROR_MULTIPLE_ASSERTION_CREATORS_FOR_NAMESPACE(supportedURI, oldCreator.getClass().getName(), creator.getClass().getName()));
-                    throw new PolicyException(LocalizationMessages.ERROR_MULTIPLE_ASSERTION_CREATORS_FOR_NAMESPACE(supportedURI, oldCreator.getClass().getName(), creator.getClass().getName()));
+                    LOGGER.severe("initPolicyAssertionCreatorsMap", LocalizationMessages.WSP_000071_ERROR_MULTIPLE_ASSERTION_CREATORS_FOR_NAMESPACE(supportedURI, oldCreator.getClass().getName(), creator.getClass().getName()));
+                    throw new PolicyException(LocalizationMessages.WSP_000071_ERROR_MULTIPLE_ASSERTION_CREATORS_FOR_NAMESPACE(supportedURI, oldCreator.getClass().getName(), creator.getClass().getName()));
                 }
             }
         }
@@ -207,35 +207,35 @@ public final class PolicyModelTranslator {
         LOGGER.entering("translate", model);
         
         if (model == null) {
-            LOGGER.severe("translate", LocalizationMessages.POLICY_MODEL_TRANSLATION_ERROR_INPUT_PARAM_NULL());
-            throw new PolicyException(LocalizationMessages.POLICY_MODEL_TRANSLATION_ERROR_INPUT_PARAM_NULL());
+            LOGGER.severe("translate", LocalizationMessages.WSP_000043_POLICY_MODEL_TRANSLATION_ERROR_INPUT_PARAM_NULL());
+            throw new PolicyException(LocalizationMessages.WSP_000043_POLICY_MODEL_TRANSLATION_ERROR_INPUT_PARAM_NULL());
         }
         
         PolicySourceModel localPolicyModelCopy;
         try {
             localPolicyModelCopy = model.clone();
         } catch (CloneNotSupportedException e) {
-            LOGGER.severe("translate", LocalizationMessages.UNABLE_TO_CLONE_POLICY_SOURCE_MODEL(), e);
-            throw new PolicyException(LocalizationMessages.UNABLE_TO_CLONE_POLICY_SOURCE_MODEL(), e);
+            LOGGER.severe("translate", LocalizationMessages.WSP_000016_UNABLE_TO_CLONE_POLICY_SOURCE_MODEL(), e);
+            throw new PolicyException(LocalizationMessages.WSP_000016_UNABLE_TO_CLONE_POLICY_SOURCE_MODEL(), e);
         }
         
         final String policyId = localPolicyModelCopy.getPolicyId();
         final String policyName = localPolicyModelCopy.getPolicyName();
         
         final Collection<AssertionSet> alternatives = createPolicyAlternatives(localPolicyModelCopy);
-        LOGGER.finest("translate", LocalizationMessages.NUMBER_OF_ALTERNATIVE_COMBINATIONS_CREATED(alternatives.size()));
+        LOGGER.finest("translate", LocalizationMessages.WSP_000052_NUMBER_OF_ALTERNATIVE_COMBINATIONS_CREATED(alternatives.size()));
         
         Policy policy = null;
         if (alternatives.size() == 0) {
             policy = Policy.createNullPolicy(policyName, policyId);
-            LOGGER.finest("translate", LocalizationMessages.NO_ALTERNATIVE_COMBINATIONS_CREATED());
+            LOGGER.finest("translate", LocalizationMessages.WSP_000055_NO_ALTERNATIVE_COMBINATIONS_CREATED());
         } else if (alternatives.size() == 1 && alternatives.iterator().next().isEmpty()) {
             policy = Policy.createEmptyPolicy(policyName, policyId);
-            LOGGER.finest("translate", LocalizationMessages.SINGLE_EMPTY_ALTERNATIVE_COMBINATION_CREATED());
+            LOGGER.finest("translate", LocalizationMessages.WSP_000026_SINGLE_EMPTY_ALTERNATIVE_COMBINATION_CREATED());
         } else {
             policy = Policy.createPolicy(policyName, policyId, alternatives);
             LOGGER.finest("translate",
-                    LocalizationMessages.N_ALTERNATIVE_COMBINATIONS_M_POLICY_ALTERNATIVES_CREATED(alternatives.size(), policy.getNumberOfAssertionSets()));
+                    LocalizationMessages.WSP_000057_N_ALTERNATIVE_COMBINATIONS_M_POLICY_ALTERNATIVES_CREATED(alternatives.size(), policy.getNumberOfAssertionSets()));
         }
         
         LOGGER.exiting("translate", policy);
@@ -317,8 +317,8 @@ public final class PolicyModelTranslator {
                     decomposition.assertions.add(node);
                     break;
                 default :
-                    LOGGER.severe("decompose", LocalizationMessages.UNEXPECTED_MODEL_NODE_TYPE_FOUND(node.getType()));
-                    throw new PolicyException(LocalizationMessages.UNEXPECTED_MODEL_NODE_TYPE_FOUND(node.getType()));
+                    LOGGER.severe("decompose", LocalizationMessages.WSP_000007_UNEXPECTED_MODEL_NODE_TYPE_FOUND(node.getType()));
+                    throw new PolicyException(LocalizationMessages.WSP_000007_UNEXPECTED_MODEL_NODE_TYPE_FOUND(node.getType()));
             }
         }
     }
@@ -330,11 +330,11 @@ public final class PolicyModelTranslator {
         } else {
             final PolicyReferenceData refData = policyReferenceNode.getPolicyReferenceData();
             if (refData != null) {
-                LOGGER.severe("getReferencedModelRootNode", LocalizationMessages.UNEXPANDED_POLICY_REFERENCE_NODE_FOUND_REFERENCING(refData.getReferencedModelUri()));
-                throw new PolicyException(LocalizationMessages.UNEXPANDED_POLICY_REFERENCE_NODE_FOUND_REFERENCING(refData.getReferencedModelUri()));
+                LOGGER.severe("getReferencedModelRootNode", LocalizationMessages.WSP_000010_UNEXPANDED_POLICY_REFERENCE_NODE_FOUND_REFERENCING(refData.getReferencedModelUri()));
+                throw new PolicyException(LocalizationMessages.WSP_000010_UNEXPANDED_POLICY_REFERENCE_NODE_FOUND_REFERENCING(refData.getReferencedModelUri()));
             } else {
-                LOGGER.severe("getReferencedModelRootNode", LocalizationMessages.POLICY_REFERENCE_NODE_FOUND_WITH_NO_POLICY_REFERENCE_IN_IT());
-                throw new PolicyException(LocalizationMessages.POLICY_REFERENCE_NODE_FOUND_WITH_NO_POLICY_REFERENCE_IN_IT());
+                LOGGER.severe("getReferencedModelRootNode", LocalizationMessages.WSP_000041_POLICY_REFERENCE_NODE_FOUND_WITH_NO_POLICY_REFERENCE_IN_IT());
+                throw new PolicyException(LocalizationMessages.WSP_000041_POLICY_REFERENCE_NODE_FOUND_WITH_NO_POLICY_REFERENCE_IN_IT());
             }
         }
     }
@@ -362,8 +362,8 @@ public final class PolicyModelTranslator {
                     eoContentQueue.addAll(node.getContent());
                     break;
                 default :
-                    LOGGER.severe("expandsExactlyOneContent", LocalizationMessages.UNSUPPORTED_MODEL_NODE_TYPE(node.getType()));
-                    throw new PolicyException(LocalizationMessages.UNSUPPORTED_MODEL_NODE_TYPE(node.getType()));
+                    LOGGER.severe("expandsExactlyOneContent", LocalizationMessages.WSP_000001_UNSUPPORTED_MODEL_NODE_TYPE(node.getType()));
+                    throw new PolicyException(LocalizationMessages.WSP_000001_UNSUPPORTED_MODEL_NODE_TYPE(node.getType()));
             }
         }
         
@@ -438,8 +438,8 @@ public final class PolicyModelTranslator {
     
     private static PolicyAssertion createPolicyAssertionParameter(final ModelNode parameterNode) throws PolicyException {
         if (parameterNode.getType() != ModelNode.Type.ASSERTION_PARAMETER_NODE) {
-            LOGGER.severe("createPolicyAssertionParameter", LocalizationMessages.INCONSISTENCY_IN_POLICY_SOURCE_MODEL(parameterNode.getType()));
-            throw new PolicyException(LocalizationMessages.INCONSISTENCY_IN_POLICY_SOURCE_MODEL(parameterNode.getType()));
+            LOGGER.severe("createPolicyAssertionParameter", LocalizationMessages.WSP_000065_INCONSISTENCY_IN_POLICY_SOURCE_MODEL(parameterNode.getType()));
+            throw new PolicyException(LocalizationMessages.WSP_000065_INCONSISTENCY_IN_POLICY_SOURCE_MODEL(parameterNode.getType()));
         }
         
         List<PolicyAssertion> childParameters = null;

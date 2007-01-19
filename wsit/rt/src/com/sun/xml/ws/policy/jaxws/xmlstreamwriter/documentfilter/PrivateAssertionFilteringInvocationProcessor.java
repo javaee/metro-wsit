@@ -173,7 +173,7 @@ final class PrivateAssertionFilteringInvocationProcessor implements InvocationPr
                 value = invocation.getArgument(3).toString();
                 break;
             default:
-                final String message = LocalizationMessages.UNEXPECTED_ARGUMENTS_COUNT(XmlStreamWriterMethodType.WRITE_ATTRIBUTE + "(...)", argumentsCount);
+                final String message = LocalizationMessages.WSP_001009_UNEXPECTED_ARGUMENTS_COUNT(XmlStreamWriterMethodType.WRITE_ATTRIBUTE + "(...)", argumentsCount);
                 LOGGER.severe("startFiltering", message);
                 throw new IllegalArgumentException(message);
         }

@@ -246,7 +246,7 @@ public final class PolicyUtils {
         }
         
         private static PolicyException logAndWrapException(final Object target, final Object[] parameters, final String methodName, final String processingMethodName, final Throwable cause) {
-            final String message = LocalizationMessages.METHOD_INVOCATION_FAILED(target.getClass().getName(), methodName, Arrays.asList(parameters).toString());
+            final String message = LocalizationMessages.WSP_000061_METHOD_INVOCATION_FAILED(target.getClass().getName(), methodName, Arrays.asList(parameters).toString());
             LOGGER.severe(processingMethodName, message, cause);
             return new PolicyException(message, cause);
         }
