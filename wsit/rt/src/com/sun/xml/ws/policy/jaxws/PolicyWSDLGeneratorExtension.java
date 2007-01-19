@@ -95,24 +95,25 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
             this.seiModel = context.getModel();
             this.endpointClass = context.getEndpointClass();
             final PolicyMapUpdateProvider[] policyMapUpdateProviders = PolicyUtils.ServiceProvider.load(PolicyMapUpdateProvider.class);
-            PolicyMapExtender[] extenders = new PolicyMapExtender[policyMapUpdateProviders.length];
-            for (int i=0; i<extenders.length; i++) {
-                extenders[i] = PolicyMapExtender.createPolicyMapExtender();
+            LinkedList<PolicyMapExtender> extenders = new LinkedList<PolicyMapExtender>();
+            for (int i=0; i < policyMapUpdateProviders.length; i++) {
+                extenders.add(i, PolicyMapExtender.createPolicyMapExtender());
             }
             
             final String configId = context.getEndpointClass().getName();
-            policyMap = PolicyConfigParser.parse(configId, context.getContainer(), extenders);
+            policyMap = PolicyConfigParser.parse(configId, context.getContainer(),
+                                                 extenders.toArray(new PolicyMapExtender[policyMapUpdateProviders.length]));
 
             if (policyMap == null) {
                 logger.fine("start", LocalizationMessages.WSP_001034_CREATE_POLICY_MAP_FOR_CONFIG());
-                policyMap = PolicyMap.createPolicyMap(null);
+                policyMap = PolicyMap.createPolicyMap(extenders);
             }
             
             context.getRoot()._namespace(PolicyConstants.POLICY_NAMESPACE_URI, PolicyConstants.POLICY_NAMESPACE_PREFIX);
             final WSBinding binding = context.getBinding();
             for (int i=0; i<policyMapUpdateProviders.length; i++) {
-                policyMapUpdateProviders[i].update(extenders[i], policyMap, seiModel, binding);
-                extenders[i].disconnect();
+                policyMapUpdateProviders[i].update(extenders.get(i), policyMap, seiModel, binding);
+                extenders.get(i).disconnect();
             }
         } catch (PolicyException e) {
             logger.fine("start", LocalizationMessages.WSP_001027_FAILED_TO_READ_WSIT_CFG(), e);
@@ -143,6 +144,9 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
                             final PolicySourceModel policyInfoset = generator.translate(policy);
                             marshaller.marshal(policyInfoset, definitions);
                             policyIDsOrNamesWritten.add(policy.getIdOrName());
+                        }
+                        else {
+                            logger.fine("addDefinitionsExtension", LocalizationMessages.WSP_001047_POLICY_ID_NULL_OR_DUPLICATE(policy));
                         }
                     } else {
                         logger.fine("addDefinitionsExtension", LocalizationMessages.WSP_001019_NOT_MARSHALLING_WSDL_SUBJ_NULL(subject));
