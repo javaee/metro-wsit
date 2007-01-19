@@ -29,7 +29,7 @@ import javax.xml.ws.EndpointReference;
  * Abstract base class for implementations of {@link CoordinationContextInterface}
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @since 1.0
  */
 public abstract class CoordinationContextBase implements CoordinationContextInterface {
@@ -49,8 +49,8 @@ public abstract class CoordinationContextBase implements CoordinationContextInte
         if (cc instanceof com.sun.xml.ws.tx.webservice.member.coord.CoordinationContext) {
             return new CoordinationContext200410((com.sun.xml.ws.tx.webservice.member.coord.CoordinationContext) cc);
         } else {
-            throw new UnsupportedOperationException("CoordinationContextBase:createCoordinatorContext(): instance of unsupported class:" +
-                    cc.getClass().getName());
+            throw new UnsupportedOperationException(
+                    LocalizationMessages.UNSUPPORTED_CONTEXT_TYPE_3002(cc.getClass().getName()));
         }
     }
 }

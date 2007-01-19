@@ -36,7 +36,7 @@ import java.util.logging.Level;
  * in WS-Coordination 2004/10 member submission and 2006/03 OASIS.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  * @since 1.0
  */
 public class ContextFactory {
@@ -79,11 +79,11 @@ public class ContextFactory {
                             new ActivityIdentifier(context.getIdentifier())));
         } else if (WSAT_OASIS_NSURI.equals(coordType)) {
             throw new UnsupportedOperationException(
-                    LocalizationMessages.OASIS_UNSUPPORTED()
+                    LocalizationMessages.OASIS_UNSUPPORTED_3000()
             );
         } else {
             throw new UnsupportedOperationException(
-                    LocalizationMessages.UNRECOGNIZED_COORDINATION_TYPE(coordType)
+                    LocalizationMessages.UNRECOGNIZED_COORDINATION_TYPE_3001(coordType)
             );
         }
 
@@ -128,11 +128,11 @@ public class ContextFactory {
             context.setRegistrationService(new MemberSubmissionEndpointReference());
         } else if (WSAT_OASIS_NSURI.equals(coordType)) {
             throw new UnsupportedOperationException(
-                    LocalizationMessages.OASIS_UNSUPPORTED()
+                    LocalizationMessages.OASIS_UNSUPPORTED_3000()
             );
         } else {
             throw new UnsupportedOperationException(
-                    LocalizationMessages.UNRECOGNIZED_COORDINATION_TYPE(coordType)
+                    LocalizationMessages.UNRECOGNIZED_COORDINATION_TYPE_3001(coordType)
             );
         }
 

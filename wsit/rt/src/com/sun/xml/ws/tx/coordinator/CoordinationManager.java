@@ -44,7 +44,7 @@ import java.util.logging.Level;
  * <p/>
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @since 1.0
  */
 public final class CoordinationManager {
@@ -213,11 +213,11 @@ public final class CoordinationManager {
             return coord;
         } else if (WSAT_OASIS_NSURI.equals(coordType)) {
             throw new UnsupportedOperationException(
-                    LocalizationMessages.OASIS_UNSUPPORTED()
+                    LocalizationMessages.OASIS_UNSUPPORTED_3000()
             );
         } else {
             throw new UnsupportedOperationException(
-                    LocalizationMessages.UNRECOGNIZED_COORDINATION_TYPE(coordType)
+                    LocalizationMessages.UNRECOGNIZED_COORDINATION_TYPE_3001(coordType)
             );
         }
     }

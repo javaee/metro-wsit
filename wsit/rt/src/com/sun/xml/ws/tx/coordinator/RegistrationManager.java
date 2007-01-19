@@ -59,7 +59,7 @@ import java.util.logging.Level;
  * for register and registerResponse delegate to the methods in this class.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  * @since 1.0
  */
 public final class RegistrationManager {
@@ -167,7 +167,7 @@ public final class RegistrationManager {
                         "register wsa:replyTo must be set",
                         msgID);
             }
-            throw new WebServiceException("register wsa:replyTo must be set");
+            throw new WebServiceException(LocalizationMessages.REGISTER_REPLYTO_NOT_SET_3003());
         }
 
         Coordinator c = coordinationManager.getCoordinator(activityId);
@@ -181,7 +181,7 @@ public final class RegistrationManager {
                     "attempting to register for an unknown activity id: " + activityId,
                     msgID);
             if (logger.isLogging(Level.WARNING)) {
-                logger.warning("register", "unknown activity identifier:" + activityId);
+                logger.warning("register",  LocalizationMessages.REGISTER_FOR_UNKNOWN_ACTIVITY_3004(activityId));
             }
         }
 
@@ -206,7 +206,7 @@ public final class RegistrationManager {
                         registerRequest.getProtocolIdentifier() + " is not a recognized coordination type",
                         msgID);
                 throw new UnsupportedOperationException(
-                        LocalizationMessages.UNRECOGNIZED_COORDINATION_TYPE(registerRequest.getProtocolIdentifier()));
+                        LocalizationMessages.UNRECOGNIZED_COORDINATION_TYPE_3001(registerRequest.getProtocolIdentifier()));
         }
 
         /* send <registerResponse> to RegistrationRequesterEPR */
@@ -227,16 +227,18 @@ public final class RegistrationManager {
             registrationRequester.registerResponseOperation(registerResponse);
         } catch (WebServiceException wse) {
             if (logger.isLogging(Level.WARNING)) {
-                logger.warning("register", "registerResponse to web service at " +
-                        registrationRequesterEPR + " failed. "
-                        + wse.getLocalizedMessage());
+                logger.warning("register",
+                        LocalizationMessages.REGISTERRESPONSE_FAILED_3005(
+                                registrationRequesterEPR,
+                                wse.getLocalizedMessage()));
             }
             throw wse;
         } catch (Exception e) {
             if (logger.isLogging(Level.SEVERE)) {
-                logger.severe("register", "registerResponse to web service at " +
-                        registrationRequesterEPR + " failed. "
-                        + e.getLocalizedMessage());
+                logger.severe("register",
+                        LocalizationMessages.REGISTERRESPONSE_FAILED_3005(
+                                registrationRequesterEPR,
+                                e.getLocalizedMessage()));
             }
         }
 
@@ -359,9 +361,8 @@ public final class RegistrationManager {
                 waitForRegisterResponse(r, registrationEPR);
             } catch (WebServiceException wse) {
                 if (logger.isLogging(Level.WARNING)) {
-                    logger.warning("register", "register to web service at " +
-                            registrationEPR + " failed. "
-                            + wse.getLocalizedMessage());
+                    logger.warning("register",
+                            LocalizationMessages.REGISTER_FAILED_3006(registrationEPR, wse.getLocalizedMessage()));
                 }
                 wse.printStackTrace();
                 throw wse;
@@ -382,7 +383,7 @@ public final class RegistrationManager {
                         "registration timed out for activity id: " + c.getIdValue(),
                         null /* TODO: what is RelatesTo in this case? */ );
                 if (logger.isLogging(Level.WARNING)) {
-                    logger.warning("register", "registration timed out for activity id:" + c.getIdValue());
+                    logger.warning("register", LocalizationMessages.REGISTRATION_TIMEOUT_3007(c.getIdValue()));
                 }
             }
 
@@ -425,8 +426,8 @@ public final class RegistrationManager {
                     "received registerResponse for non-existent registrant : " +
                             registrantId + " for CoordId:" + activityId );
             if (logger.isLogging(Level.WARNING)) {
-                logger.warning("registerResponse", "received registerResponse for non-existent registrant " +
-                        registrantId + " for CoordId:" + activityId);
+                logger.warning("registerResponse",
+                        LocalizationMessages.NONEXISTENT_REGISTRANT_3008(registrantId, activityId));
             }
         } else {
             // set coordinator protocol service on registrant
@@ -463,7 +464,7 @@ public final class RegistrationManager {
         while (!r.isRegistrationCompleted()) {
             if (i++ > MAX_RETRY) {
                 if (logger.isLogging(Level.WARNING)) {
-                    logger.warning("register", "no register response received from " + registrationEPR);
+                    logger.warning("register", LocalizationMessages.NO_RESPONSE_3009(registrationEPR, r.getIdValue()));
                 }
                 // TODO: do we want to ever resend another <register> message in this case?
                 break;
@@ -507,7 +508,7 @@ public final class RegistrationManager {
                     TxFault.InvalidParameters,
                     "Received RegisterResponse for unknown activity id: " + activityId );
             if (logger.isLogging(Level.WARNING)) {
-                logger.warning("synchronousRegister", "unknown coordId=" + activityId);
+                logger.warning("synchronousRegister", LocalizationMessages.NONEXISTENT_ACTIVITY_3010(activityId));
             }
         }
 
@@ -528,7 +529,7 @@ public final class RegistrationManager {
                         SOAPVersion.SOAP_11,
                         TxFault.InvalidParameters,
                         requestProtocol.getUri() + " is not a recognized coordination type" );
-                throw new UnsupportedOperationException(LocalizationMessages.UNRECOGNIZED_COORDINATION_TYPE(requestProtocol));
+                throw new UnsupportedOperationException(LocalizationMessages.UNRECOGNIZED_COORDINATION_TYPE_3001(requestProtocol));
         }
 
         // build the registerResponse message
