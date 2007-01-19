@@ -75,14 +75,14 @@ public final class ContentType {
                 int delim = mimeDelim + 1;
                 // Scan ContentType string's params, decode them
                 while(delim < contentType.length()) {
-                    int nextDelim = contentType.indexOf(';', delim) + 1;
-                    if (nextDelim == 0) nextDelim = contentType.length();
+                    int nextDelim = contentType.indexOf(';', delim);
+                    if (nextDelim == -1) nextDelim = contentType.length();
                     
                     int eqDelim = contentType.indexOf('=', delim);
                     if (eqDelim == -1) eqDelim = nextDelim;
                     
                     final String key = contentType.substring(delim, eqDelim).trim();
-                    final String value = contentType.substring(eqDelim, nextDelim).trim();
+                    final String value = contentType.substring(eqDelim + 1, nextDelim).trim();
                     final String valToCompare = mime.getEmbeddedParams().get(key);
                     if (valToCompare != null && valToCompare.equals(value)) {
                         ctEmbedParamsAmount--;
@@ -90,9 +90,8 @@ public final class ContentType {
                         parameters.put(key, value);
                     }
                     
-                    delim = nextDelim;
+                    delim = nextDelim + 1;
                 }
-                
                 if (ctEmbedParamsAmount == 0) {
                     this.mimeType = mime;
                     return;
