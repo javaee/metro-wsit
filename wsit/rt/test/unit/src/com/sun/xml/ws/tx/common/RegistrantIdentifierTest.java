@@ -54,11 +54,4 @@ public class RegistrantIdentifierTest extends TestCase {
         assertEquals("808", id.getValue());
         id.setValue(idValue);
     }
-
-    public void testSoapElement() throws Exception {
-        SOAPElement e = id.getSOAPElement();
-        assertEquals(new QName(Constants.WSCOOR_SUN_URI, RegistrantIdentifier.REGISTRANT_ID), 
-                     e.getElementQName());
-        // TODO: more?  we don't really even marshal ID's any more so no need
-    }
 }
