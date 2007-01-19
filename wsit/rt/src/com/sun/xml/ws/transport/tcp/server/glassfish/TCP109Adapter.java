@@ -33,8 +33,7 @@ import java.io.IOException;
 /**
  * @author Alexey Stashok
  */
-public final class TCP109Adapter<TCPTK extends TCP109Adapter.TCP109Toolkit>
-        extends TCPAdapter<TCP109Adapter.TCP109Toolkit> {
+public final class TCP109Adapter extends TCPAdapter {
     
     /**
      * Currently 109 deployed WS's pipeline relies on Servlet request and response

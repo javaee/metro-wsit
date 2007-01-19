@@ -100,6 +100,8 @@ public final class Connection {
         }
         
         inputStream.reset();
+        outputStream.reset();
+
         inputStream.forceHeaderRead();
         
         channelId = inputStream.getChannelId();
@@ -121,7 +123,6 @@ public final class Connection {
     }
     
     public OutputStream openOutputStream() {
-        outputStream.reset();
         outputStream.setChannelId(channelId);
         outputStream.setMessageId(messageId);
         outputStream.setContentId(contentId);

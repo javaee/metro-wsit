@@ -153,7 +153,7 @@ public final class WSTCPDelegate implements WSTCPAdapterRegistry, TCPMessageList
             if (target != null) {
                 target.handle(channelContext);
             } else {
-                TCPAdapter.sendErrorResponse(channelContext, TCPConstants.RS_NOT_FOUND, MessagesMessages.WSTCP_0003_TARGET_WS_NOT_FOUND());
+                TCPAdapter.sendErrorResponse(channelContext, TCPConstants.RS_NOT_FOUND, MessagesMessages.WSTCP_0003_TARGET_WS_NOT_FOUND(channelContext.getTargetWSURI()));
             }
             
         } catch (JAXWSExceptionBase e) {

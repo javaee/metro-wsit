@@ -42,7 +42,7 @@ import java.util.logging.Logger;
 /**
  * @author Alexey Stashok
  */
-public class TCPAdapter<TCPTK extends TCPAdapter.TCPToolkit> extends Adapter<TCPAdapter.TCPToolkit> {
+public class TCPAdapter extends Adapter<TCPAdapter.TCPToolkit> {
     private static final Logger logger = Logger.getLogger(
             com.sun.xml.ws.transport.tcp.util.TCPConstants.LoggingDomain + ".server");
     
