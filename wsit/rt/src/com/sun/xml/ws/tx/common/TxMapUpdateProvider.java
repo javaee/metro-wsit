@@ -115,17 +115,19 @@ public class TxMapUpdateProvider implements PolicyMapUpdateProvider {
                         TransactionAnnotationProcessor.getEffectiveTransactionAttribute(method.getSEIMethod(), classDefaultTxnAttr);
                 final Policy policy = mapTransactionAttribute2WSATPolicy(POLICY_PREFIX + method.getOperationName(), txnAttr);
                 if (policy != null) {
-                    final String targetNamespace = model.getTargetNamespace();
                     // insert ws-at policy assertion in operation scope into policyMapMutator
                     final PolicyMapKey operationKey =
                             PolicyMap.createWsdlOperationScopeKey(model.getServiceQName(),
-                                    model.getPortName(), new QName(targetNamespace, method.getOperationName()));
+                                    model.getPortName(), new QName(model.getTargetNamespace(), method.getOperationName()));
                     final Policy existingPolicy = policyMap.getOperationEffectivePolicy(operationKey);
                     if (existingPolicy == null) {
 
                         // this is the case we should have for java to wsdl generation.  
                         // it is the only case we are intereste in for time being.
-                        final PolicySubject wsatPolicySubject = new PolicySubject(operationKey, policy);
+                        // We usually expect a WSDLObject as PolicySubject. In this case however no WSDL
+                        // model is available. The PolicyWSDLGeneratorExtension has code to deal with a
+                        // JavaMethod instead.
+                        final PolicySubject wsatPolicySubject = new PolicySubject(method, policy);
                         policyMapMutator.putOperationSubject(operationKey, wsatPolicySubject);
                         if (logger.isLogging(Level.CONFIG)) {
                             logger.config(METHOD_NAME, LocalizationMessages.ADD_AT_POLICY_ASSERTION_2007(method.getOperationName()) +

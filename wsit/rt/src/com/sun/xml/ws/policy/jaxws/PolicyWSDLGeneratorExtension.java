@@ -199,15 +199,13 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
     
     public void addOperationExtension(final TypedXmlWriter operation, final JavaMethod method) {
         logger.entering("addOperationExtension");
-        final String operationName = (null != method) ? method.getOperationName() : null;
-        selectAndProcessSubject(operation, WSDLOperation.class, ScopeType.OPERATION, operationName);
+        selectAndProcessSubject(operation, WSDLOperation.class, ScopeType.OPERATION, method);
         logger.exiting("addOperationExtension");
     }
     
     public void addBindingOperationExtension(final TypedXmlWriter operation, final JavaMethod method) {
         logger.entering("addBindingOperationExtension");
-        final String operationName = (null != method) ? method.getOperationName() : null;
-        selectAndProcessSubject(operation, WSDLBoundOperation.class, ScopeType.OPERATION, operationName);
+        selectAndProcessSubject(operation, WSDLBoundOperation.class, ScopeType.OPERATION, method);
         logger.exiting("addBindingOperationExtension");
     }
     
@@ -272,6 +270,30 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         final String messageName = (null != ce) ? ce.getMessageName() : null;
         selectAndProcessSubject(fault, WSDLFault.class, ScopeType.FAULT_MESSAGE, messageName);
         logger.exiting("addBindingOperationFaultExtension");
+    }
+    
+    /**
+     * This method should only be invoked by interface methods that deal with operations because they
+     * may use JavaMethod as PolicySubject instead of a WSDL object.
+     */
+    private void selectAndProcessSubject(
+            final TypedXmlWriter xmlWriter, final Class clazz, final ScopeType scopeType, final JavaMethod method) {
+        logger.entering("selectAndProcessSubject", new Object[] {xmlWriter, clazz, scopeType, method});
+        if (method != null) {
+            if (subjects != null) {
+                for (PolicySubject subject : subjects) {
+                    if (method.equals(subject.getSubject())) {
+                        writePolicyOrReferenceIt(subject, xmlWriter);
+                        return;
+                    }
+                }
+            }
+            selectAndProcessSubject(xmlWriter, clazz, scopeType, method.getOperationName());
+        }
+        else {
+            selectAndProcessSubject(xmlWriter, clazz, scopeType, (String) null);
+        }
+        logger.exiting("selectAndProcessSubject");
     }
     
     private void selectAndProcessSubject(
