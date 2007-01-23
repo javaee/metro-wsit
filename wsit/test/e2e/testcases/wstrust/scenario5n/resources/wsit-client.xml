@@ -26,7 +26,7 @@
     <wsp:Policy xmlns:sc="http://schemas.sun.com/2006/03/wss/client" xmlns:wspp="http://java.sun.com/xml/ns/wsit/policy" xmlns:scc="http://schemas.sun.com/ws/2006/05/sc/client" wsu:Id="ClientKeystorePolicy">
         <wsp:ExactlyOne>
             <wsp:All>
-		<!-- <sunsp:DisableStreamingSecurity xmlns:sunsp="http://schemas.sun.com/2006/03/wss/client"></sunsp:DisableStreamingSecurity>-->
+		 <!--<sunsp:DisableStreamingSecurity xmlns:sunsp="http://schemas.sun.com/2006/03/wss/client"></sunsp:DisableStreamingSecurity>-->
                 <sc:KeyStore wspp:visibility="private" location="$WSIT_HOME/xws-security/etc/client-keystore.jks" type="JKS" alias="alice" storepass="changeit"/>
                 <sc:TrustStore wspp:visibility="private" location="$WSIT_HOME/xws-security/etc/client-truststore.jks" type="JKS" storepass="changeit" peeralias="bob"/>
                 
@@ -40,7 +40,7 @@
                     <!--<sc:CallbackHandler  name="passwordHandler"  default="abcd!1234"/>-->
                 </sc:CallbackHandlerConfiguration>
                 
-                <tc:PreconfiguredSTS xmlns:tc="http://schemas.sun.com/ws/2006/05/trust/client" endpoint="local:///space/harsha/source/latest1/wsit/wsit/test/e2e/testcases/wstrust/scenario6/work/services/sts/war/" wsdlLocation="file:/space/harsha/source/latest1/wsit/wsit/test/e2e/testcases/wstrust/scenario6/./sts/sts.wsdl" serviceName="SecurityTokenService" portName="CustomBinding_ISecurityTokenService" namespace="http://tempuri.org/">
+                <tc:PreconfiguredSTS xmlns:tc="http://schemas.sun.com/ws/2006/05/trust/client" endpoint="local:///space/harsha/source/latest1/wsit/wsit/test/e2e/testcases/wstrust/scenario5n/work/services/sts/war/" wsdlLocation="file:/space/harsha/source/latest1/wsit/wsit/test/e2e/testcases/wstrust/scenario5n/./sts/sts.wsdl" serviceName="SecurityTokenService" portName="CustomBinding_ISecurityTokenService" namespace="http://tempuri.org/">
                 </tc:PreconfiguredSTS>
 
                 <!--endpoint="http://localhost:8080/jaxws-s5-sts/sts?wsdl"-->

@@ -40,7 +40,7 @@
                     <!--<sc:CallbackHandler  name="passwordHandler"  default="abcd!1234"/>-->
                 </sc:CallbackHandlerConfiguration>
                 
-                <tc:PreconfiguredSTS xmlns:tc="http://schemas.sun.com/ws/2006/05/trust/client" endpoint="local:///home/venu/work/security/xwssdev/wsit/wsit/test/e2e/testcases/wstrust/scenario5/work/services/sts/war/" wsdlLocation="file:/home/venu/work/security/xwssdev/wsit/wsit/test/e2e/testcases/wstrust/scenario5/./sts/sts.wsdl" serviceName="SecurityTokenService" portName="CustomBinding_ISecurityTokenService" namespace="http://tempuri.org/">
+                <tc:PreconfiguredSTS xmlns:tc="http://schemas.sun.com/ws/2006/05/trust/client" endpoint="local:///space/harsha/source/latest1/wsit/wsit/test/e2e/testcases/wstrust/scenario5/work/services/sts/war/" wsdlLocation="file:/space/harsha/source/latest1/wsit/wsit/test/e2e/testcases/wstrust/scenario5/./sts/sts.wsdl" serviceName="SecurityTokenService" portName="CustomBinding_ISecurityTokenService" namespace="http://tempuri.org/">
                 </tc:PreconfiguredSTS>
 
                 <!--endpoint="http://localhost:8080/jaxws-s5-sts/sts?wsdl"-->
