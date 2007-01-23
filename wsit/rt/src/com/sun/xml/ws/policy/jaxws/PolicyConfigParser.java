@@ -22,9 +22,12 @@
 
 package com.sun.xml.ws.policy.jaxws;
 
+import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 
+import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
@@ -47,6 +50,10 @@ import org.xml.sax.SAXException;
  */
 public final class PolicyConfigParser {   
     private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyConfigParser.class);
+    
+    private static final XMLInputFactory XML_INPUT_FACTORY = XMLInputFactory.newInstance();
+
+    
     private static final String SERVLET_CONTEXT_CLASSNAME = "javax.servlet.ServletContext";
     // Prefixing with META-INF/ instead of /META-INF/. /META-INF/ is working fine
     // when loading from a JAR file but not when loading from a plain directory.
@@ -162,7 +169,8 @@ public final class PolicyConfigParser {
                 throw new PolicyException(LocalizationMessages.WSP_001028_FAILED_TO_READ_NULL_WSIT_CFG());
             }
             
-            final SDDocumentSource doc = SDDocumentSource.create(configFileUrl);//, configFileSource);
+            final XMLStreamBuffer buffer = XMLStreamBuffer.createNewBufferFromXMLStreamReader(XML_INPUT_FACTORY.createXMLStreamReader(configFileUrl.openStream()));            
+            final SDDocumentSource doc = SDDocumentSource.create(configFileUrl, buffer);            
             final Parser parser =  new Parser(doc);
             model = WSDLModel.WSDLParser.parse(parser, new PolicyConfigResolver(), isClient,
                     new WSDLParserExtension[] { new PolicyWSDLParserExtension(true, mutators) } );
