@@ -1,5 +1,5 @@
 /*
- * $Id: SecurityContextTokenImpl.java,v 1.7 2007-01-15 10:29:50 raharsha Exp $
+ * $Id: SecurityContextTokenImpl.java,v 1.8 2007-01-23 11:41:57 raharsha Exp $
  */
 
 /*
@@ -33,7 +33,6 @@ import com.sun.xml.ws.security.secconv.impl.bindings.SecurityContextTokenType;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.JAXBElement;
@@ -91,11 +90,7 @@ public class SecurityContextTokenImpl extends SecurityContextTokenType implement
                 if (local.equalsIgnoreCase("Instance")) {
                     setInstance((String)obj.getValue());
                 } else if (local.equalsIgnoreCase("Identifier")){
-                    try {
-                        setIdentifier(new URI((String)obj.getValue()));
-                    }catch (URISyntaxException ex){
-                        throw new RuntimeException(ex);
-                    }
+                    setIdentifier(URI.create((String)obj.getValue()));
                 }
             }else{
                 getAny().add(object);

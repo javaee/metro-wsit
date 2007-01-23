@@ -86,7 +86,7 @@ public class WSTrustUtil {
         throw new UnsupportedOperationException("To Do");
     }
     
-    public static String getSecurityContext(final Message msg){
+    /*public static String getSecurityContext(final Message msg){
         
         try {
             final SOAPMessage soapMessage = msg.readAsSOAPMessage();
@@ -110,7 +110,7 @@ public class WSTrustUtil {
         }
         
         return null;
-    } 
+    } */
 
     public static byte[] generateRandomSecret(final int keySize) {        
         // Create binary secret
@@ -134,15 +134,10 @@ public class WSTrustUtil {
    }
    
    public static AppliesTo createAppliesTo(final String appliesTo){
-       EndpointReference epr = null;
-       try{
-           final AttributedURI uri = new AttributedURI();
-           uri.setValue(appliesTo);
-           epr = new EndpointReference();
-           epr.setAddress(uri);
-       } catch (Exception ex){
-           throw new RuntimeException(ex);
-       }
+       final AttributedURI uri = new AttributedURI();
+       uri.setValue(appliesTo);
+       final EndpointReference epr = new EndpointReference();
+       epr.setAddress(uri);
        final AppliesTo applTo = (new com.sun.xml.ws.policy.impl.bindings.ObjectFactory()).createAppliesTo();
        applTo.getAny().add((new com.sun.xml.ws.security.trust.impl.bindings.ObjectFactory()).createEndpointReference(epr));
        

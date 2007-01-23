@@ -1,5 +1,5 @@
 /*
- * $Id: DirectReferenceImpl.java,v 1.2 2006-10-17 05:45:47 raharsha Exp $
+ * $Id: DirectReferenceImpl.java,v 1.3 2007-01-23 11:41:58 raharsha Exp $
  */
 
 /*
@@ -30,7 +30,6 @@ import com.sun.xml.ws.security.secext10.ReferenceType;
 import com.sun.xml.ws.security.trust.elements.str.DirectReference;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 
 /**
  * Reference Interface
@@ -47,25 +46,11 @@ public class DirectReferenceImpl extends ReferenceType implements DirectReferenc
     }
 
     public URI getURIAttr(){
-        URI uri = null;
-        try {
-             uri = new URI(super.getURI());
-        } catch (URISyntaxException ex){
-            throw new RuntimeException(ex);
-        }
-        
-        return uri;
+        return URI.create(super.getURI());
     }
 
     public URI getValueTypeURI(){
-        URI valueType = null;
-        try {
-             valueType = new URI(super.getValueType());
-        } catch (URISyntaxException ex){
-            throw new RuntimeException(ex);
-        }
-        
-        return valueType;
+        return URI.create(super.getValueType());
     }
     
     public String getType(){

@@ -1,5 +1,5 @@
 /*
- * $Id: RequestedProofTokenImpl.java,v 1.9 2007-01-15 10:29:52 raharsha Exp $
+ * $Id: RequestedProofTokenImpl.java,v 1.10 2007-01-23 11:41:58 raharsha Exp $
  */
 
 /*
@@ -82,13 +82,7 @@ public class RequestedProofTokenImpl extends RequestedProofTokenType implements 
         final JAXBElement obj = (JAXBElement)rptType.getAny();
         final String local = obj.getName().getLocalPart();
         if (local.equalsIgnoreCase("ComputedKey")) {
-            try {
-                setComputedKey(new URI((String)obj.getValue()));
-            } catch (URISyntaxException ex){
-                log.log(Level.SEVERE,
-                        LogStringsMessages.WST_0037_ERROR_COMPUTING_KEY(), ex);
-                throw new RuntimeException(LogStringsMessages.WST_0037_ERROR_COMPUTING_KEY(), ex);
-            }
+            setComputedKey(URI.create((String)obj.getValue()));
         }else if (local.equalsIgnoreCase("BinarySecret")){
             final BinarySecretType bsType = (BinarySecretType)obj.getValue();
             setBinarySecret(new BinarySecretImpl(bsType));

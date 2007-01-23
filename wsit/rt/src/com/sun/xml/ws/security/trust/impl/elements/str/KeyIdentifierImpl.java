@@ -1,5 +1,5 @@
 /*
- * $Id: KeyIdentifierImpl.java,v 1.3 2007-01-15 10:29:52 raharsha Exp $
+ * $Id: KeyIdentifierImpl.java,v 1.4 2007-01-23 11:41:58 raharsha Exp $
  */
 
 /*
@@ -30,7 +30,6 @@ import com.sun.xml.ws.security.secext10.KeyIdentifierType;
 import com.sun.xml.ws.security.trust.elements.str.KeyIdentifier;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 
 /**
  * KeyIdentifier implementation
@@ -53,25 +52,11 @@ public class KeyIdentifierImpl extends KeyIdentifierType implements KeyIdentifie
     }
     
     public URI getValueTypeURI(){
-        URI valueType = null;
-        try {
-             valueType = new URI(super.getValueType());
-        } catch (URISyntaxException ex){
-            throw new RuntimeException(ex);
-        }
-        
-        return valueType;
+        return URI.create(super.getValueType());
     }
     
     public URI getEncodingTypeURI (){
-        URI encType = null;
-        try {
-             encType = new URI(super.getEncodingType());
-        } catch (URISyntaxException ex){
-            throw new RuntimeException(ex);
-        }
-        
-        return encType;
+        return URI.create(super.getEncodingType());
     }
     
     public String getType(){

@@ -135,12 +135,7 @@ public class SecurityContextTokenInfoImpl implements SecurityContextTokenInfo {
         itc.setSecurityContextTokenInfo(this);
         
         // create security token based on id and extId
-        URI uri = null;
-        try {
-            uri = new URI(this.getIdentifier());
-        } catch (URISyntaxException ex){
-            throw new RuntimeException(ex.getMessage(), ex);
-        }
+        URI uri = URI.create(this.getIdentifier());
         
         final SecurityContextToken token = factory.createSecurityContextToken(
                 uri, null , this.getExternalId());

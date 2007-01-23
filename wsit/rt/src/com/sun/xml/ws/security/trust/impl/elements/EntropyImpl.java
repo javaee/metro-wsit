@@ -1,5 +1,5 @@
 /*
- * $Id: EntropyImpl.java,v 1.8 2007-01-15 10:29:51 raharsha Exp $
+ * $Id: EntropyImpl.java,v 1.9 2007-01-23 11:41:58 raharsha Exp $
  */
 
 /*
@@ -74,11 +74,12 @@ public class EntropyImpl extends EntropyType implements Entropy {
     }
     
     public EntropyImpl(BinarySecret binarySecret) {
+        setEntropyType(Entropy.BINARY_SECRET_TYPE);
         setBinarySecret(binarySecret);
     }
     
     public EntropyImpl(EncryptedKey encryptedKey) {
-        setEntropyType(this.ENCRYPTED_KEY_TYPE);
+        setEntropyType(Entropy.ENCRYPTED_KEY_TYPE);
         setEncryptedKey(encryptedKey);
     }
     

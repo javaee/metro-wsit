@@ -118,18 +118,18 @@ public class WSSCContract implements WSTrustContract   {
         URI tokenType = null;
         URI con = null;
         URI computeKeyAlgo = null;
-        try {
-            tokenType = URI.create(WSSCConstants.SECURITY_CONTEXT_TOKEN_TYPE);
-            final String conStr = request.getContext();
-            if (conStr != null) {
+        tokenType = URI.create(WSSCConstants.SECURITY_CONTEXT_TOKEN_TYPE);
+        final String conStr = request.getContext();
+        if (conStr != null) {
+            try {
                 con = new URI(conStr);
+            } catch (URISyntaxException ex){
+                log.log(Level.SEVERE,
+                        LogStringsMessages.WSSC_0008_URISYNTAX_EXCEPTION(request.getContext()), ex);
+                throw new WSSecureConversationException(LogStringsMessages.WSSC_0008_URISYNTAX_EXCEPTION(request.getContext()), ex);
             }
-            computeKeyAlgo = URI.create(WSTrustConstants.CK_PSHA1);
-        } catch (URISyntaxException ex){
-            log.log(Level.SEVERE,
-                    LogStringsMessages.WSSC_0008_URISYNTAX_EXCEPTION(request.getContext()), ex);
-            throw new WSSecureConversationException(LogStringsMessages.WSSC_0008_URISYNTAX_EXCEPTION(request.getContext()), ex);
         }
+        computeKeyAlgo = URI.create(WSTrustConstants.CK_PSHA1);
         
         // AppliesTo
         final AppliesTo scopes = request.getAppliesTo();

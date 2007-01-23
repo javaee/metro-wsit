@@ -120,15 +120,7 @@ public class TrustPluginImpl implements TrustPlugin {
         
         // Get STS information from IssuedToken
         if (stsURI != null){
-            URI metadataAddress = null;
-            try {
-                metadataAddress = getAddressFromMetadata(issuedToken);
-            } catch (MalformedURLException ex) {
-                if (log.isLoggable(Level.WARNING)) {
-                    log.log(Level.WARNING,
-                            LogStringsMessages.WST_1011_PROBLEM_METADATA(stsURI), ex);
-                }
-            }
+            URI metadataAddress = getAddressFromMetadata(issuedToken);
             
             if(metadataAddress != null){
                 wsdlLocation = metadataAddress;
@@ -140,25 +132,19 @@ public class TrustPluginImpl implements TrustPlugin {
             if (PRE_CONFIGURED_STS.equals(localToken.getName().getLocalPart())) {
                 final Map<QName,String> attrs = localToken.getAttributes();
                 final String namespace = attrs.get(new QName(CONFIG_NAMESPACE,NAMESPACE));
-                try {
-                    final String stsEPStr = attrs.get(new QName(CONFIG_NAMESPACE,ENDPOINT));
-                    if (stsEPStr != null){
-                        stsURI = new URI(stsEPStr);
-                    }
-                    
-                    final String metadataStr = attrs.get(new QName(CONFIG_NAMESPACE, METADATA));
-                    if (metadataStr != null){
-                        wsdlLocation = new URI(metadataStr);
-                    }
-                    
-                    final String wsdlLocationStr = attrs.get(new QName(CONFIG_NAMESPACE,WSDL_LOCATION));
-                    if (wsdlLocationStr != null){
-                        wsdlLocation = new URI(wsdlLocationStr);
-                    }
-                } catch (URISyntaxException ex) {
-                    log.log(Level.SEVERE,
-                            LogStringsMessages.WST_0014_URI_SYNTAX(), ex);
-                    throw new RuntimeException(LogStringsMessages.WST_0014_URI_SYNTAX(), ex);
+                final String stsEPStr = attrs.get(new QName(CONFIG_NAMESPACE,ENDPOINT));
+                if (stsEPStr != null){
+                    stsURI = URI.create(stsEPStr);
+                }
+                
+                final String metadataStr = attrs.get(new QName(CONFIG_NAMESPACE, METADATA));
+                if (metadataStr != null){
+                    wsdlLocation = URI.create(metadataStr);
+                }
+                
+                final String wsdlLocationStr = attrs.get(new QName(CONFIG_NAMESPACE,WSDL_LOCATION));
+                if (wsdlLocationStr != null){
+                    wsdlLocation = URI.create(wsdlLocationStr);
                 }
                 
                 final String serviceNameStr = attrs.get(new QName(CONFIG_NAMESPACE,SERVICE_NAME));
@@ -247,7 +233,7 @@ public class TrustPluginImpl implements TrustPlugin {
         secRandom.nextBytes(nonce);
         final BinarySecret binarySecret = fact.createBinarySecret(nonce, BinarySecret.NONCE_KEY_TYPE);
         final Entropy entropy = fact.createEntropy(binarySecret);
-        URI tokenType = new URI(WSTrustConstants.SAML11_ASSERTION_TOKEN_TYPE);
+        URI tokenType = URI.create(WSTrustConstants.SAML11_ASSERTION_TOKEN_TYPE);
         if (rstTemplate.getTokenType() != null){
             tokenType = new URI(rstTemplate.getTokenType().trim());
         }
@@ -294,7 +280,7 @@ public class TrustPluginImpl implements TrustPlugin {
             }
             //do the actual mex request
             final QName[] names = doMexRequest(wsdlLocation.toString(), stsURI);
-            if(names!=null){
+            if(names!=null && names[0]!=null && names[1]!=null){
                 serviceName = names[0];
                 portName = names[1];
             }else{
@@ -365,27 +351,28 @@ public class TrustPluginImpl implements TrustPlugin {
      * and the second one will be portName.
      */
     protected static QName[]  doMexRequest(final String wsdlLocation, final String stsURI) {
+        final QName[] serviceInfo = new QName[2];
         final MetadataClient mexClient = new MetadataClient();
         
         final Metadata metadata = mexClient.retrieveMetadata(wsdlLocation);
         
         //this method gives the names of services and the corresponding port details
-        final List<PortInfo> ports = mexClient.getServiceInformation(metadata);
-        
-        //we have to iterate through this to get the appropriate serviceName and portname
-        QName[] serviceInfo = new QName[2];
-        for(PortInfo port : ports){
-            final String uri = port.getAddress();
+        if(metadata != null){
+            final List<PortInfo> ports = mexClient.getServiceInformation(metadata);
             
-            //if the stsAddress what we have matches the address of this port, return
-            //this port information
-            if(uri.equals(stsURI)){
-                serviceInfo[0]= port.getServiceName();
-                serviceInfo[1]= port.getPortName();
-                return serviceInfo;
+            //we have to iterate through this to get the appropriate serviceName and portname
+            for(PortInfo port : ports){
+                final String uri = port.getAddress();
+                
+                //if the stsAddress what we have matches the address of this port, return
+                //this port information
+                if(uri.equals(stsURI)){
+                    serviceInfo[0]= port.getServiceName();
+                    serviceInfo[1]= port.getPortName();
+                }
             }
         }
-        return null;
+        return serviceInfo;
     }
     
     /**
@@ -405,7 +392,7 @@ public class TrustPluginImpl implements TrustPlugin {
         return null;
     }
     
-    private URI getAddressFromMetadata(final IssuedToken issuedToken) throws MalformedURLException {
+    private URI getAddressFromMetadata(final IssuedToken issuedToken)  {
         final PolicyAssertion issuer = (PolicyAssertion)issuedToken.getIssuer();
         PolicyAssertion addressingMetadata = null;
         PolicyAssertion metadata = null;

@@ -1,5 +1,5 @@
 /*
- * $Id: UseKeyImpl.java,v 1.6 2007-01-13 11:39:14 manveen Exp $
+ * $Id: UseKeyImpl.java,v 1.7 2007-01-23 11:41:58 raharsha Exp $
  */
 
 /*
@@ -121,13 +121,7 @@ public class UseKeyImpl extends UseKeyType implements UseKey {
     }
     
     public URI getSignatureID() {
-        try {
-            return new URI(getSig());
-        } catch (URISyntaxException ue) {
-            log.log(Level.SEVERE, 
-                    LogStringsMessages.WST_0023_INVALID_URI_SYNTAX(getSig()), ue);
-            throw new RuntimeException(LogStringsMessages.WST_0023_INVALID_URI_SYNTAX(getSig()), ue);
-        }
+        return URI.create(getSig());
     }
     
 }
