@@ -159,5 +159,24 @@ public class IssuedTokenTest extends TestCase {
         }
     }
     
+    
+     public void testIssuedTokenAssertions4() throws Exception{
+         // test for bug
+         //https://wsit.dev.java.net/issues/show_bug.cgi?id=314
+        String fileName = "security/IssuedTokenAssertions_issuer.xml";
+        Policy policy = unmarshalPolicy(fileName);
+        Iterator <AssertionSet> itr = policy.iterator();
+        if(itr.hasNext()) {
+            AssertionSet as = itr.next();
+            for(PolicyAssertion assertion : as) {
+                assertEquals("Invalid assertion","IssuedToken",assertion.getName().getLocalPart());
+                IssuedToken it = (IssuedToken)assertion;
+               assertNotNull(it.getIssuer().getAddress().getURI());
+            }
+        } else {
+            throw new Exception("No Assertions found!. Unmarshalling of "+fileName+" failed!");
+        }
+    }
+    
 
 }
