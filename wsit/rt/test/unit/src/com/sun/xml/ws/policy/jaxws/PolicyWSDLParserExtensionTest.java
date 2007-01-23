@@ -39,27 +39,29 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import static com.sun.xml.ws.policy.testutils.PolicyResourceLoader.getPolicyMap;
-
 /**
  *
- * @author japod
+ * @author Jakub Podlesak (jakub.podlesak at sun.com)
  */
 public class PolicyWSDLParserExtensionTest extends TestCase{
-    
     
     public PolicyWSDLParserExtensionTest(String testName) {
         super(testName);
     }
-    
     
     public static Test suite() {
         TestSuite suite = new TestSuite(PolicyWSDLParserExtensionTest.class);
         return suite;
     }
     
-    
     public void testWsdlParserBasics() throws Exception {
         assertNotNull("PolicyMap can not be null", getPolicyMap("parser/testWsdlParserBasics.wsdl"));
+    }
+    
+    public void testPolicyReferences() throws Exception {
+        PolicyMap map = getPolicyMap("parser/testPolicyReferences.wsdl");
+        assertNotNull("PolicyMap can not be null", map);
+        
     }
     
     public void testWsdlParserImport() throws Exception {
