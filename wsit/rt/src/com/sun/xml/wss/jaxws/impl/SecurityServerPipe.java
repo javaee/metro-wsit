@@ -103,8 +103,8 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 //import javax.servlet.ServletContext;
 
-
-//TODO: add logging before 4/13
+import java.util.logging.Level;
+import com.sun.xml.wss.jaxws.impl.logging.LogStringsMessages;
 
 /**
  * @author K.Venugopal@sun.com
@@ -133,9 +133,11 @@ public class SecurityServerPipe extends SecurityPipeBase {
             }*/
             handler = configureServerHandler(configAssertions);
             secEnv = new DefaultSecurityEnvironmentImpl(handler);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
+        } catch (Exception e) {            
+            log.log(Level.SEVERE, 
+                    LogStringsMessages.WSSPIPE_0028_ERROR_CREATING_NEW_INSTANCE_SEC_SERVER_PIPE(), e);            
+            throw new RuntimeException(
+                    LogStringsMessages.WSSPIPE_0028_ERROR_CREATING_NEW_INSTANCE_SEC_SERVER_PIPE(), e);            
         }
     }
     
@@ -189,7 +191,9 @@ public class SecurityServerPipe extends SecurityPipeBase {
             
         } catch(SOAPException se){
             // internal error
-            throw new WebServiceException(se);
+            log.log(Level.SEVERE, 
+                    LogStringsMessages.WSSPIPE_0025_ERROR_VERIFY_INBOUND_MSG(), se);            
+            throw new WebServiceException(LogStringsMessages.WSSPIPE_0025_ERROR_VERIFY_INBOUND_MSG(), se);
         }
         packet.setMessage(msg);
         
@@ -285,7 +289,10 @@ public class SecurityServerPipe extends SecurityPipeBase {
                 Message newMsg = Messages.create(sm);
                 retPacket.setMessage(newMsg);
             }catch(SOAPException ex){
-                throw new WebServiceException(ex);
+                log.log(Level.SEVERE, 
+                        LogStringsMessages.WSSPIPE_0005_PROBLEM_PROC_SOAP_MESSAGE(), ex);                
+                throw new WebServiceException(
+                        LogStringsMessages.WSSPIPE_0005_PROBLEM_PROC_SOAP_MESSAGE(), ex);                
             }
         }
         
@@ -307,7 +314,10 @@ public class SecurityServerPipe extends SecurityPipeBase {
             msg = Messages.create(getSOAPFault(ex));
         } catch(SOAPException se) {
             // internal error
-            throw new WebServiceException(se);
+            log.log(Level.SEVERE, 
+                    LogStringsMessages.WSSPIPE_0024_ERROR_SECURING_OUTBOUND_MSG(), se);                        
+            throw new WebServiceException(
+                    LogStringsMessages.WSSPIPE_0024_ERROR_SECURING_OUTBOUND_MSG(), se);
         } finally{
             if (isSCCancel(retPacket)){
                 removeContext(packet);
@@ -361,30 +371,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
     public InputStreamMessage processInputStream(Message msg) {
         //TODO:Optimized security
         throw new UnsupportedOperationException();
-    }
-    
-    /*public ServerEdgePipe.RequestResponseTypes getRequestResponseType() {
-        //TODO:Optimized security
-        throw new UnsupportedOperationException();
-    }*/
-    
-    
-//    protected ProcessingContext initializeInboundProcessingContext(
-//            Packet packet /*, boolean isSCMessage, boolean isTrustMessage*/) {
-//
-//        ProcessingContextImpl ctx =
-//                (ProcessingContextImpl)initializeInboundProcessingContext(packet /*, isSCMessage*/);
-//
-//
-////        if (isTrustMessage /*|| isSCMessage*/) {
-////            // this is an RST to the STS
-////            // Security runtime would populate received client creds into it
-////            // for use by the STS (for TRUST/SC)
-////            IssuedTokenContext trustCredHolder = new IssuedTokenContextImpl();
-////            ctx.setTrustCredentialHolder(trustCredHolder);
-////        }
-//        return ctx;
-//    }
+    }    
     
     protected ProcessingContext initializeOutgoingProcessingContext(
             Packet packet, boolean isSCMessage, boolean isTrustMessage /*, boolean thereWasAFault*/) {
@@ -435,7 +422,10 @@ public class SecurityServerPipe extends SecurityPipeBase {
             ctx.setSecurityEnvironment(secEnv);
             ctx.isInboundMessage(false);
         } catch (XWSSecurityException e) {
-            throw new RuntimeException(e);
+            log.log(
+                    Level.SEVERE, LogStringsMessages.WSSPIPE_0006_PROBLEM_INIT_OUT_PROC_CONTEXT(), e);
+            throw new RuntimeException(
+                    LogStringsMessages.WSSPIPE_0006_PROBLEM_INIT_OUT_PROC_CONTEXT(), e);
         }
         return ctx;
     }
@@ -553,8 +543,9 @@ public class SecurityServerPipe extends SecurityPipeBase {
                 
                 Session session = sessionManager.getSession(sctId);
                 if (session == null) {
-                    throw new WSSecureConversationException("Session could not be " + "" +
-                            "created successfully while issuing");
+                    log.log(Level.SEVERE, LogStringsMessages.WSSPIPE_0029_ERROR_SESSION_CREATION());                   
+                    throw new WSSecureConversationException(
+                            LogStringsMessages.WSSPIPE_0029_ERROR_SESSION_CREATION());
                 }
                 
                 // Put it here for RM to pick up
@@ -573,19 +564,24 @@ public class SecurityServerPipe extends SecurityPipeBase {
                 retAction = WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_RESPONSE_ACTION;
                 rstr =  scContract.cancel(rst, ictx, issuedTokenContextMap);
             } else {
+                log.log(Level.SEVERE, 
+                        LogStringsMessages.WSSPIPE_0030_UNSUPPORTED_OPERATION_EXCEPTION(requestType));                
                 throw new UnsupportedOperationException(
-                        "RequestType :" + requestType + " not supported");
+                        LogStringsMessages.WSSPIPE_0030_UNSUPPORTED_OPERATION_EXCEPTION(requestType)); 
             }
             
             // construct the complete message here containing the RSTR and the
             // correct Action headers if any and return the message.
             retMsg = Messages.create(jaxbContext.createMarshaller(), eleFac.toJAXBElement(rstr), soapVersion);
         } catch (com.sun.xml.wss.XWSSecurityException ex) {
-            throw new RuntimeException(ex);
+            log.log(Level.SEVERE, LogStringsMessages.WSSPIPE_0031_ERROR_INVOKE_SC_CONTRACT(), ex);  
+            throw new RuntimeException(LogStringsMessages.WSSPIPE_0031_ERROR_INVOKE_SC_CONTRACT(), ex);
         } catch (javax.xml.bind.JAXBException ex) {
-            throw new RuntimeException(ex);
+            log.log(Level.SEVERE, LogStringsMessages.WSSPIPE_0001_PROBLEM_MAR_UNMAR(), ex);
+            throw new RuntimeException(LogStringsMessages.WSSPIPE_0001_PROBLEM_MAR_UNMAR(), ex);
         } catch (WSSecureConversationException ex){
-            throw new RuntimeException(ex);
+            log.log(Level.SEVERE, LogStringsMessages.WSSPIPE_0031_ERROR_INVOKE_SC_CONTRACT(), ex);
+            throw new RuntimeException(LogStringsMessages.WSSPIPE_0031_ERROR_INVOKE_SC_CONTRACT(), ex);
         }
         
         
@@ -727,72 +723,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
         retPacket.invocationProperties.putAll(packet.invocationProperties);
         
         return retPacket;
-    }
-    
-   /* protected boolean isRMMessage(Packet packet){
-        //TODO: For incoming messages we need to look at the
-        //Action header
-        AddressingProperties ap = (AddressingProperties)packet.invocationProperties
-                .get(JAXWSAConstants.SERVER_ADDRESSING_PROPERTIES_OUTBOUND);
-    
-        if (ap != null) {
-            AttributedURI uri = ap.getAction();
-            if (uri != null) {
-                String action = uri.toString();
-                if (RM_CREATE_SEQ.equals(action) || RM_CREATE_SEQ_RESP.equals(action)
-                || RM_SEQ_ACK.equals(action) || RM_TERMINATE_SEQ.equals(action)
-                || RM_LAST_MESSAGE.equals(action)) {
-                    return true;
-                }
-            }
-
-        }
-        return false;
-    }
-    
-    protected boolean isSCCancel(Packet packet){
-        AddressingProperties ap = (AddressingProperties)packet.invocationProperties
-                  .get(JAXWSAConstants.SERVER_ADDRESSING_PROPERTIES_OUTBOUND);
-        if (ap != null) {
-            AttributedURI uri = ap.getAction();
-            if (uri != null){
-                String uriValue = uri.toString();
-                if(WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_RESPONSE_ACTION.equals(uriValue) ||
-                      WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_ACTION .equals(uriValue)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-    
-    protected boolean isTrustMessage(Packet packet){
-        AddressingProperties ap = (AddressingProperties)packet.invocationProperties
-                .get(JAXWSAConstants.SERVER_ADDRESSING_PROPERTIES_OUTBOUND);
-        if (ap != null) {
-            AttributedURI uri = ap.getAction();
-            if (uri != null){
-                String uriValue = uri.toString();
-                if(WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION.equals(uriValue) ||
-                        WSTrustConstants.REQUEST_SECURITY_TOKEN_RESPONSE_ISSUE_ACTION.equals(uriValue)){
-                    return true;
-                }
-            }
-        }
-        return false;
-    
-    }*/
-    
-    /**  protected AttributedURI getAction(Packet packet ){
-     * AddressingProperties ap = (AddressingProperties)packet.invocationProperties
-     * .get(JAXWSAConstants.SERVER_ADDRESSING_PROPERTIES_OUTBOUND);
-     * if (ap != null) {
-     * AttributedURI uri = ap.getAction();
-     *
-     * return uri;
-     * }
-     * return null;
-     * }*/
+    }       
     
     private CallbackHandler configureServerHandler(Set configAssertions) {
         Properties props = new Properties();
@@ -802,8 +733,10 @@ public class SecurityServerPipe extends SecurityPipeBase {
                 Class handler = loadClass(ret);
                 Object obj = handler.newInstance();
                 if (!(obj instanceof CallbackHandler)) {
-                    throw new RuntimeException("The specified CallbackHandler class, " +
-                            ret + ", Is not a valid CallbackHandler");
+                    log.log(Level.SEVERE, 
+                            LogStringsMessages.WSSPIPE_0033_INVALID_CALLBACK_HANDLER_CLASS(ret));
+                    throw new RuntimeException(
+                            LogStringsMessages.WSSPIPE_0033_INVALID_CALLBACK_HANDLER_CLASS(ret));                                        
                 }
                 return (CallbackHandler)obj;
             }
@@ -813,25 +746,11 @@ public class SecurityServerPipe extends SecurityPipeBase {
             return new DefaultCallbackHandler("server", props, adapter);
             //return new DefaultCallbackHandler("server", props);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            log.log(Level.SEVERE, 
+                    LogStringsMessages.WSSPIPE_0032_ERROR_CONFIGURE_SERVER_HANDLER(), e);                 
+            throw new RuntimeException(LogStringsMessages.WSSPIPE_0032_ERROR_CONFIGURE_SERVER_HANDLER(), e);
         }
-    }
-    
-//    protected Policy getWSITConfig(){
-////        if(wsitConfig == null){
-////            try{
-////                PolicySourceModel model =  unmarshalPolicy("wsit-server.xml");
-////                if(model != null){
-////                    wsitConfig =  PolicyModelTranslator.getTranslator().translate(model);
-////                }
-////            }catch(PolicyException ex){
-////                ex.printStackTrace();
-////            }catch(IOException ex){
-////                ex.printStackTrace();
-////            }
-////        }
-//        return wsitConfig;
-//    }
+    }    
     
     @SuppressWarnings("unchecked")
     private RealmAuthenticationAdapter getRealmAuthenticationAdapter(WSEndpoint wSEndpoint) {

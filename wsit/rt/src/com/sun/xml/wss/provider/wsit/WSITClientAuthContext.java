@@ -78,6 +78,11 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.soap.SOAPFaultException;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import com.sun.xml.wss.provider.wsit.logging.LogDomainConstants;
+import com.sun.xml.wss.provider.wsit.logging.LogStringsMessages;
+
 /**
  *
  * @author kumar jayanti
@@ -127,7 +132,10 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
                 populateConfigProperties(configAssertions, props);
                 secEnv = new WSITProviderSecurityEnvironment(handler, map, props);
             }catch (XWSSecurityException ex) {
-                throw new WebServiceException(ex);
+                log.log(Level.SEVERE, 
+                        LogStringsMessages.WSITPVD_0027_ERROR_POPULATING_CLIENT_CONFIG_PROP(), ex);
+                throw new WebServiceException(
+                        LogStringsMessages.WSITPVD_0027_ERROR_POPULATING_CLIENT_CONFIG_PROP(), ex);  
             }
         } else {
             handler = configureClientHandler(configAssertions);
@@ -139,7 +147,8 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
         try {
             authModule.initialize(null, null, null,map);
         } catch (AuthException e) {
-            throw new RuntimeException(e);
+            log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0028_ERROR_INIT_AUTH_MODULE(), e);                         
+            throw new RuntimeException(LogStringsMessages.WSITPVD_0028_ERROR_INIT_AUTH_MODULE(), e);
         }
     }
     
@@ -202,7 +211,10 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
                 msg = secureOutboundMessage(msg, ctx);
             }
         } catch(SOAPException se){
-            throw new WebServiceException(se);
+            log.log(Level.SEVERE, 
+                    LogStringsMessages.WSITPVD_0029_ERROR_SECURING_OUTBOUND_MSG(), se);
+            throw new WebServiceException(
+                    LogStringsMessages.WSITPVD_0029_ERROR_SECURING_OUTBOUND_MSG(), se);
         }
         packet.setMessage(msg);
         return packet;
@@ -221,7 +233,10 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
                     Message newMsg = Messages.create(sm);
                     ret.setMessage(newMsg);
                 }catch(SOAPException ex){
-                    throw new WebServiceException(ex);
+                    log.log(Level.SEVERE, 
+                            LogStringsMessages.WSITPVD_0033_ERROR_VALIDATE_RESPONSE(), ex);                    
+                    throw new WebServiceException(
+                            LogStringsMessages.WSITPVD_0033_ERROR_VALIDATE_RESPONSE(), ex);
                 }
             }
             ret = validateResponse(ret, clientSubject, serviceSubject);
@@ -265,6 +280,8 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
                         DumpFilter.process(ctx);
                     }
                     SOAPFault fault = soapMessage.getSOAPBody().getFault();
+                    //log.log(Level.SEVERE, 
+                    //        LogStringsMessages.WSITPVD_0034_FAULTY_RESPONSE_MSG(fault));                    
                     throw new SOAPFaultException(fault);
                 }
                 msg = Messages.create(soapMessage);
@@ -274,7 +291,10 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
         } catch (XWSSecurityException xwse) {
             throw getSOAPFaultException(xwse);
         }catch(SOAPException se){
-            throw new WebServiceException(se);
+            log.log(Level.SEVERE, 
+                    LogStringsMessages.WSITPVD_0035_ERROR_VERIFY_INBOUND_MSG(), se);            
+            throw new WebServiceException(
+                    LogStringsMessages.WSITPVD_0035_ERROR_VERIFY_INBOUND_MSG(), se);            
         }
         
         //set the verified message back into the packet
@@ -348,7 +368,8 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
             try {
                 ((LazyStreamBasedMessage)message).print();
             } catch (XMLStreamException ex) {
-                throw new XWSSecurityException("Error occurred when printing message",ex);
+                log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0003_PROBLEM_PRINTING_MSG(), ex);
+                throw new XWSSecurityException(LogStringsMessages.WSITPVD_0003_PROBLEM_PRINTING_MSG(), ex);                
             }
         }
         com.sun.xml.ws.security.opt.impl.incoming.SecurityRecipient recipient =
@@ -404,7 +425,10 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
         
         List toks =getOutBoundSCP(packet.getMessage());
         if (toks.isEmpty()) {
-            throw new WSSecureConversationException("Cannot start SecureConversation, no policy found");
+            log.log(Level.SEVERE, 
+                    LogStringsMessages.WSITPVD_0030_NO_POLICY_FOUND_FOR_SC());
+            throw new WSSecureConversationException(
+                    LogStringsMessages.WSITPVD_0030_NO_POLICY_FOUND_FOR_SC());            
         }
         //Note: Assuming only one SC assertion
         Token tok = (Token)toks.get(0);
@@ -418,19 +442,21 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
             Packet requestPacket = scPlugin.createIssuePacket((PolicyAssertion)tok, rst, pipeConfig.getWSDLModel(), pipeConfig.getBinding(),
                     jaxbContext, packet.endpointAddress.toString(), packet);
             
-            try {
-            
-            Packet secureRequestPacket = secureRequest(requestPacket, null, true);
-            Packet responsePacket = nextPipe.process(secureRequestPacket);
-            Packet validatedResponsePacket = validateResponse(responsePacket, null, null);
-            
-            RequestSecurityTokenResponse  rstr = scPlugin.getRSTR(jaxbContext, validatedResponsePacket);
-            ctx = new IssuedTokenContextImpl();
-            ctx = scPlugin.processRSTR(ctx,rst, rstr,packet.endpointAddress.toString());
-             
-            issuedTokenContextMap.put(((Token)tok).getTokenId(), ctx);
+            try {            
+                Packet secureRequestPacket = secureRequest(requestPacket, null, true);
+                Packet responsePacket = nextPipe.process(secureRequestPacket);
+                Packet validatedResponsePacket = validateResponse(responsePacket, null, null);
+
+                RequestSecurityTokenResponse  rstr = scPlugin.getRSTR(jaxbContext, validatedResponsePacket);
+                ctx = new IssuedTokenContextImpl();
+                ctx = scPlugin.processRSTR(ctx,rst, rstr,packet.endpointAddress.toString());
+
+                issuedTokenContextMap.put(((Token)tok).getTokenId(), ctx);
             } catch (XWSSecurityException e) {
-                throw new RuntimeException(e);
+                log.log(Level.SEVERE, 
+                        LogStringsMessages.WSITPVD_0036_ERROR_PROC_REQ_PACKET(), e);                
+                throw new RuntimeException(
+                        LogStringsMessages.WSITPVD_0036_ERROR_PROC_REQ_PACKET(), e);
             }
         }
         
@@ -447,14 +473,19 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
                 Class handler = loadClass(ret);
                 Object obj = handler.newInstance();
                 if (!(obj instanceof CallbackHandler)) {
-                    throw new RuntimeException("The specified CallbackHandler class, " +
-                            ret + ", Is not a valid CallbackHandler");
+                    log.log(Level.SEVERE, 
+                            LogStringsMessages.WSITPVD_0031_INVALID_CALLBACK_HANDLER_CLASS(ret));
+                    throw new RuntimeException(
+                            LogStringsMessages.WSITPVD_0031_INVALID_CALLBACK_HANDLER_CLASS(ret));
                 }
                 return (CallbackHandler)obj;
             }
             return new DefaultCallbackHandler("client", props);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            log.log(Level.SEVERE, 
+                    LogStringsMessages.WSITPVD_0032_ERROR_CONFIGURE_CLIENT_HANDLER(), e);
+            throw new RuntimeException(
+                    LogStringsMessages.WSITPVD_0032_ERROR_CONFIGURE_CLIENT_HANDLER(), e);            
         }
     }
     

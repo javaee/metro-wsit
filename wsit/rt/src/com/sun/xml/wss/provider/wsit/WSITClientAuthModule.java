@@ -24,11 +24,21 @@ import javax.security.auth.message.MessagePolicy;
 import javax.security.auth.message.module.ClientAuthModule;
 import javax.xml.soap.SOAPMessage;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import com.sun.xml.wss.provider.wsit.logging.LogDomainConstants;
+import com.sun.xml.wss.provider.wsit.logging.LogStringsMessages;
+
 /**
  *
  * @author kumar.jayanti
  */
 public class WSITClientAuthModule implements ClientAuthModule {
+    
+    private static final Logger log =
+        Logger.getLogger(
+        LogDomainConstants.WSIT_PVD_DOMAIN,
+        LogDomainConstants.WSIT_PVD_DOMAIN_BUNDLE);
     
     private Class[] supported = new Class[2];
     protected static final String DEBUG = "debug";
@@ -64,7 +74,8 @@ public class WSITClientAuthModule implements ClientAuthModule {
     public void cleanSubject(MessageInfo messageInfo, Subject subject) throws AuthException {
         if (subject == null) {
             // log
-            throw new AuthException("Error disposing Subject: null value for Subject");
+            log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0037_NULL_SUBJECT());
+            throw new AuthException(LogStringsMessages.WSITPVD_0037_NULL_SUBJECT());
         }
         
         if (!subject.isReadOnly()) {

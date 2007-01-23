@@ -81,6 +81,11 @@ import static com.sun.xml.wss.jaxws.impl.Constants.SUN_WSS_SECURITY_CLIENT_POLIC
 import java.net.URI;
 import javax.xml.bind.JAXBElement;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import com.sun.xml.wss.provider.wsit.logging.LogDomainConstants;
+import com.sun.xml.wss.provider.wsit.logging.LogStringsMessages;
+
 /**
  *
  * @author kumar jayanti
@@ -129,7 +134,10 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
                 populateConfigProperties(configAssertions, props);
                 secEnv = new WSITProviderSecurityEnvironment(handler, map, props);
             }catch (XWSSecurityException ex) {
-                throw new WebServiceException(ex);
+                log.log(Level.SEVERE, 
+                        LogStringsMessages.WSITPVD_0048_ERROR_POPULATING_SERVER_CONFIG_PROP(), ex);
+                throw new WebServiceException(
+                        LogStringsMessages.WSITPVD_0048_ERROR_POPULATING_SERVER_CONFIG_PROP(), ex);                  
             }
         } else {
             //This will handle Non-GF containers where no config assertions
@@ -144,7 +152,8 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         try {
             authModule.initialize(null, null, null,map);
         }catch (AuthException e) {
-            throw new RuntimeException(e);
+            log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0028_ERROR_INIT_AUTH_MODULE(), e);                         
+            throw new RuntimeException(LogStringsMessages.WSITPVD_0028_ERROR_INIT_AUTH_MODULE(), e);            
         }
                 
     }
@@ -249,17 +258,18 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
                 msg = verifyInboundMessage(msg, ctx);
             }
         } catch (WssSoapFaultException ex) {
-            thereWasAFault = true;
-            ex.printStackTrace();
+            thereWasAFault = true;            
             msg = Messages.create(ex, pipeConfig.getBinding().getSOAPVersion());
         } catch (XWSSecurityException xwse) {
-            thereWasAFault = true;
-            xwse.printStackTrace();
+            thereWasAFault = true;            
             msg = Messages.create(xwse, pipeConfig.getBinding().getSOAPVersion());
             
         } catch(SOAPException se){
             // internal error
-            throw new WebServiceException(se);
+            log.log(Level.SEVERE, 
+                    LogStringsMessages.WSITPVD_0035_ERROR_VERIFY_INBOUND_MSG(), se);
+            throw new WebServiceException(
+                    LogStringsMessages.WSITPVD_0035_ERROR_VERIFY_INBOUND_MSG(), se);
         }
         packet.setMessage(msg);
         
@@ -371,7 +381,10 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
             msg = Messages.create(getSOAPFault(ex));
         } catch(SOAPException se) {
             // internal error
-            throw new WebServiceException(se);
+            log.log(Level.SEVERE, 
+                    LogStringsMessages.WSITPVD_0029_ERROR_SECURING_OUTBOUND_MSG(), se);                        
+            throw new WebServiceException(
+                    LogStringsMessages.WSITPVD_0029_ERROR_SECURING_OUTBOUND_MSG(), se);            
         } finally{
             if (isSCCancel(retPacket)){
                 removeContext(packet);
@@ -445,7 +458,10 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
             ctx.setSecurityEnvironment(secEnv);
             ctx.isInboundMessage(false);
         } catch (XWSSecurityException e) {
-            throw new RuntimeException(e);
+            log.log(
+                    Level.SEVERE, LogStringsMessages.WSITPVD_0006_PROBLEM_INIT_OUT_PROC_CONTEXT(), e);
+            throw new RuntimeException(
+                    LogStringsMessages.WSITPVD_0006_PROBLEM_INIT_OUT_PROC_CONTEXT(), e);                        
         }
         return ctx;
     }
@@ -544,8 +560,10 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
                 Class hdlr = loadClass(ret);
                 Object obj = hdlr.newInstance();
                 if (!(obj instanceof CallbackHandler)) {
-                    throw new RuntimeException("The specified CallbackHandler class, " +
-                            ret + ", Is not a valid CallbackHandler");
+                    log.log(Level.SEVERE, 
+                            LogStringsMessages.WSITPVD_0031_INVALID_CALLBACK_HANDLER_CLASS(ret));
+                    throw new RuntimeException(
+                            LogStringsMessages.WSITPVD_0031_INVALID_CALLBACK_HANDLER_CLASS(ret));                    
                 }
                 return (CallbackHandler)obj;
             } else {
@@ -554,7 +572,10 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
                 return new DefaultCallbackHandler("server", props, adapter);
             }
         }catch (Exception e) {
-            throw new RuntimeException(e);
+            log.log(Level.SEVERE, 
+                    LogStringsMessages.WSITPVD_0043_ERROR_CONFIGURE_SERVER_HANDLER(), e);                 
+            throw new RuntimeException(
+                    LogStringsMessages.WSITPVD_0043_ERROR_CONFIGURE_SERVER_HANDLER(), e);            
         }
     }
     
@@ -602,8 +623,10 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
                 
                 Session session = sessionManager.getSession(sctId);
                 if (session == null) {
-                    throw new WSSecureConversationException("Session could not be " + "" +
-                            "created successfully while issuing");
+                    log.log(Level.SEVERE, 
+                            LogStringsMessages.WSITPVD_0044_ERROR_SESSION_CREATION());                   
+                    throw new WSSecureConversationException(
+                            LogStringsMessages.WSITPVD_0044_ERROR_SESSION_CREATION());                    
                 }
                 
                 // Put it here for RM to pick up
@@ -622,19 +645,24 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
                 retAction = WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_RESPONSE_ACTION;
                 rstr =  scContract.cancel(rst, ictx, issuedTokenContextMap);
             } else {
+                log.log(Level.SEVERE, 
+                        LogStringsMessages.WSITPVD_0045_UNSUPPORTED_OPERATION_EXCEPTION(requestType));                
                 throw new UnsupportedOperationException(
-                        "RequestType :" + requestType + " not supported");
+                        LogStringsMessages.WSITPVD_0045_UNSUPPORTED_OPERATION_EXCEPTION(requestType));                
             }
             
             // construct the complete message here containing the RSTR and the
             // correct Action headers if any and return the message.
             retMsg = Messages.create(jaxbContext.createMarshaller(), eleFac.toJAXBElement(rstr), soapVersion);
         } catch (javax.xml.bind.JAXBException ex) {
-            throw new RuntimeException(ex);
+            log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0001_PROBLEM_MAR_UNMAR(), ex);
+            throw new RuntimeException(LogStringsMessages.WSITPVD_0001_PROBLEM_MAR_UNMAR(), ex);            
         } catch (com.sun.xml.wss.XWSSecurityException ex) {
-            throw new RuntimeException(ex);
+            log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0046_ERROR_INVOKE_SC_CONTRACT(), ex);  
+            throw new RuntimeException(LogStringsMessages.WSITPVD_0046_ERROR_INVOKE_SC_CONTRACT(), ex);            
         } catch (WSSecureConversationException ex){
-            throw new RuntimeException(ex);
+            log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0046_ERROR_INVOKE_SC_CONTRACT(), ex);
+            throw new RuntimeException(LogStringsMessages.WSITPVD_0046_ERROR_INVOKE_SC_CONTRACT(), ex);            
         }
         
         

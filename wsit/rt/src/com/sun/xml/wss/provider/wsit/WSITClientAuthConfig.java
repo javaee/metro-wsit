@@ -23,12 +23,21 @@ import javax.security.auth.message.config.ClientAuthContext;
 import javax.xml.bind.JAXBElement;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import com.sun.xml.wss.provider.wsit.logging.LogDomainConstants;
+import com.sun.xml.wss.provider.wsit.logging.LogStringsMessages;
 
 /**
  *
  * @author kumar jayanti
  */
 public class WSITClientAuthConfig implements ClientAuthConfig {
+    
+    private static final Logger log =
+        Logger.getLogger(
+        LogDomainConstants.WSIT_PVD_DOMAIN,
+        LogDomainConstants.WSIT_PVD_DOMAIN_BUNDLE);
     
     String layer = null;
     String appContext = null;
@@ -138,15 +147,19 @@ public class WSITClientAuthConfig implements ClientAuthConfig {
                         ret =  ((WSITClientAuthContext)clientAuthContext).startSecureConversation(packet);
                         map.put("SECURITY_TOKEN", ret);
                     } else {
-                        throw new WSSecureConversationException("Error: Client Authentication Context was not Initialized");
+                        log.log(Level.SEVERE, 
+                                LogStringsMessages.WSITPVD_0024_NULL_CLIENT_AUTH_CONTEXT());                                
+                        throw new WSSecureConversationException(
+                                LogStringsMessages.WSITPVD_0024_NULL_CLIENT_AUTH_CONTEXT());
                     }
                 } else {
-                    throw new RuntimeException(
-                            "A Packet required for starting a secure session was not supplied to getAuthContext()");
+                    log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0025_NULL_PACKET());
+                    throw new RuntimeException(LogStringsMessages.WSITPVD_0025_NULL_PACKET());                            
                 }
             }
         } catch (WSSecureConversationException ex) {
-            throw new RuntimeException(ex);
+            log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0026_ERROR_STARTING_SC(), ex);            
+            throw new RuntimeException(LogStringsMessages.WSITPVD_0026_ERROR_STARTING_SC(), ex);
         }
         return ret;
     }

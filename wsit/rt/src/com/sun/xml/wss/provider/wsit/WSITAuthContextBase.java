@@ -143,11 +143,21 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.message.MessageInfo;
 import javax.xml.soap.SOAPMessage;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import com.sun.xml.wss.provider.wsit.logging.LogDomainConstants;
+import com.sun.xml.wss.provider.wsit.logging.LogStringsMessages;
+
 /**
  *
  * @author kumar jayanti
  */
 public abstract class WSITAuthContextBase  {
+    
+    protected static final Logger log =
+            Logger.getLogger(
+            LogDomainConstants.WSIT_PVD_DOMAIN,
+            LogDomainConstants.WSIT_PVD_DOMAIN_BUNDLE);
     
     //*************Synchronized And Modified at Runtime***********
     // Per-Proxy State for SecureConversation sessions
@@ -271,7 +281,9 @@ public abstract class WSITAuthContextBase  {
             hasReliableMessaging = isReliableMessagingEnabled(wsPolicyMap, pipeConfig.getWSDLModel());
             //opResolver = new OperationResolverImpl(inMessagePolicyMap,pipeConfig.getWSDLModel().getBinding());
         }catch (Exception e) {
-            throw new RuntimeException(e);
+            log.log(Level.SEVERE, 
+                    LogStringsMessages.WSITPVD_0012_PROBLEM_CHECKING_RELIABLE_MESSAGE_ENABLE(), e);  
+            throw new RuntimeException(LogStringsMessages.WSITPVD_0012_PROBLEM_CHECKING_RELIABLE_MESSAGE_ENABLE(), e);            
         }
         
         //put properties for use by AuthModule init
@@ -427,7 +439,8 @@ public abstract class WSITAuthContextBase  {
                 fault = soapFactory.createFault(ex.getMessage(), MessageConstants.WSSE_INTERNAL_SERVER_ERROR);
             }
         } catch (Exception e) {
-            throw new RuntimeException("Security Pipe: Internal Error while trying to create a SOAPFault");
+            log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0002_INTERNAL_SERVER_ERROR(), e);
+            throw new RuntimeException(LogStringsMessages.WSITPVD_0002_INTERNAL_SERVER_ERROR(), e);            
         }
         return new SOAPFaultException(fault);
     }
@@ -583,7 +596,8 @@ public abstract class WSITAuthContextBase  {
                 packet.setMessage(message);
             }catch(SOAPException se){
                 // internal error
-                throw new WebServiceException(se);
+                log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0005_PROBLEM_PROC_SOAP_MESSAGE(), se);                
+                throw new WebServiceException(LogStringsMessages.WSITPVD_0005_PROBLEM_PROC_SOAP_MESSAGE(), se);                
             }
         }
     }
@@ -614,9 +628,9 @@ public abstract class WSITAuthContextBase  {
             PolicyMerger pm = PolicyMerger.getMerger();
             Policy ep = pm.merge(pl);
             return ep;
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new PolicyException(e);
+        } catch (Exception e) {            
+            log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0007_PROBLEM_GETTING_EFF_BOOT_POLICY(), e);                            
+            throw new PolicyException(LogStringsMessages.WSITPVD_0007_PROBLEM_GETTING_EFF_BOOT_POLICY(), e);            
         }
         
     }
@@ -784,7 +798,10 @@ public abstract class WSITAuthContextBase  {
             addIncomingProtocolPolicy(ep,"SC");
             addOutgoingProtocolPolicy(ep,"SC");
         }catch(IOException ie){
-            throw new PolicyException(ie);
+            log.log(Level.SEVERE, 
+                    LogStringsMessages.WSITPVD_0008_PROBLEM_BUILDING_PROTOCOL_POLICY(), ie);            
+            throw new PolicyException(
+                    LogStringsMessages.WSITPVD_0008_PROBLEM_BUILDING_PROTOCOL_POLICY(), ie);   
         }
     }
     
@@ -893,7 +910,9 @@ public abstract class WSITAuthContextBase  {
             props.put(DefaultCallbackHandler.KEYSTORE_URL, store.getLocation());
         } else {
             //throw RuntimeException for now
-            throw new RuntimeException("KeyStore URL was obtained as NULL from ConfigAssertion");
+            log.log(Level.SEVERE, 
+                    LogStringsMessages.WSITPVD_0014_KEYSTORE_URL_NULL_CONFIG_ASSERTION());                        
+            throw new RuntimeException(LogStringsMessages.WSITPVD_0014_KEYSTORE_URL_NULL_CONFIG_ASSERTION());            
         }
         
         if (store.getType() != null) {
@@ -905,7 +924,9 @@ public abstract class WSITAuthContextBase  {
         if (store.getPassword() != null) {
             props.put(DefaultCallbackHandler.KEYSTORE_PASSWORD, new String(store.getPassword()));
         } else {
-            throw new RuntimeException("KeyStore Password was obtained as NULL from ConfigAssertion");
+            log.log(Level.SEVERE, 
+                    LogStringsMessages.WSITPVD_0015_KEYSTORE_PASSWORD_NULL_CONFIG_ASSERTION());                        
+            throw new RuntimeException(LogStringsMessages.WSITPVD_0015_KEYSTORE_PASSWORD_NULL_CONFIG_ASSERTION() );            
         }
         
         if (store.getAlias() != null) {
@@ -949,7 +970,9 @@ public abstract class WSITAuthContextBase  {
             props.put(DefaultCallbackHandler.TRUSTSTORE_URL, store.getLocation());
         } else {
             //throw RuntimeException for now
-            throw new RuntimeException("TrustStore URL was obtained as NULL from ConfigAssertion");
+            log.log(Level.SEVERE, 
+                    LogStringsMessages.WSITPVD_0016_TRUSTSTORE_URL_NULL_CONFIG_ASSERTION());                        
+            throw new RuntimeException(LogStringsMessages.WSITPVD_0016_TRUSTSTORE_URL_NULL_CONFIG_ASSERTION() );            
         }
         
         if (store.getType() != null) {
@@ -961,7 +984,9 @@ public abstract class WSITAuthContextBase  {
         if (store.getPassword() != null) {
             props.put(DefaultCallbackHandler.TRUSTSTORE_PASSWORD, new String(store.getPassword()));
         } else {
-            throw new RuntimeException("TrustStore Password was obtained as NULL from ConfigAssertion");
+            log.log(Level.SEVERE, 
+                    LogStringsMessages.WSITPVD_0017_TRUSTSTORE_PASSWORD_NULL_CONFIG_ASSERTION());                        
+            throw new RuntimeException(LogStringsMessages.WSITPVD_0017_TRUSTSTORE_PASSWORD_NULL_CONFIG_ASSERTION() );             
         }
         
         if (store.getPeerAlias() != null) {
@@ -988,7 +1013,9 @@ public abstract class WSITAuthContextBase  {
                 if (ret != null && !"".equals(ret)) {
                     return ret;
                 } else {
-                    throw new RuntimeException("Null or Empty Value specified for xwssCallbackHandler classname");
+                    log.log(Level.SEVERE, 
+                            LogStringsMessages.WSITPVD_0018_NULL_OR_EMPTY_XWSS_CALLBACK_HANDLER_CLASSNAME());  
+                    throw new RuntimeException(LogStringsMessages.WSITPVD_0018_NULL_OR_EMPTY_XWSS_CALLBACK_HANDLER_CLASSNAME());
                 }
             } else if ("usernameHandler".equals(name)) {
                 if (ret != null && !"".equals(ret)) {
@@ -999,7 +1026,9 @@ public abstract class WSITAuthContextBase  {
                     if (def != null && !"".equals(def)) {
                         props.put(DefaultCallbackHandler.MY_USERNAME, def);
                     } else {
-                        throw new RuntimeException("Null or Empty Value specified for usernameHandler classname");
+                        log.log(Level.SEVERE, 
+                            LogStringsMessages.WSITPVD_0019_NULL_OR_EMPTY_USERNAME_HANDLER_CLASSNAME());  
+                        throw new RuntimeException(LogStringsMessages.WSITPVD_0019_NULL_OR_EMPTY_USERNAME_HANDLER_CLASSNAME());
                     }
                 }
             } else if ("passwordHandler".equals(name)) {
@@ -1011,16 +1040,22 @@ public abstract class WSITAuthContextBase  {
                     if (def != null && !"".equals(def)) {
                         props.put(DefaultCallbackHandler.MY_PASSWORD, def);
                     } else {
-                        throw new RuntimeException("Null or Empty Value specified for passwordHandler classname");
+                        log.log(Level.SEVERE, 
+                            LogStringsMessages.WSITPVD_0020_NULL_OR_EMPTY_PASSWORD_HANDLER_CLASSNAME());  
+                        throw new RuntimeException(LogStringsMessages.WSITPVD_0020_NULL_OR_EMPTY_PASSWORD_HANDLER_CLASSNAME());
                     }
                 }
             } else if ("samlHandler".equals(name)) {
                 if (ret == null || "".equals(ret)) {
-                    throw new RuntimeException("Null or Empty Value specified for samlHandler classname");
+                    log.log(Level.SEVERE, 
+                            LogStringsMessages.WSITPVD_0021_NULL_OR_EMPTY_SAML_HANDLER_CLASSNAME());  
+                        throw new RuntimeException(LogStringsMessages.WSITPVD_0021_NULL_OR_EMPTY_SAML_HANDLER_CLASSNAME());
                 }
                 props.put(DefaultCallbackHandler.SAML_CBH, ret);
             } else {
-                throw new RuntimeException("Unsupported CallbackHandler Type " + name + " encountered");
+                log.log(Level.SEVERE, 
+                        LogStringsMessages.WSITPVD_0009_UNSUPPORTED_CALLBACK_TYPE_ENCOUNTERED(name));                            
+                throw new RuntimeException(LogStringsMessages.WSITPVD_0009_UNSUPPORTED_CALLBACK_TYPE_ENCOUNTERED(name));
             }
         }
         return null;
@@ -1046,9 +1081,10 @@ public abstract class WSITAuthContextBase  {
             String name = v.getValidatorName();
             String validator = v.getValidator();
             if (validator == null || "".equals(validator)) {
-                throw new RuntimeException("Null or Empty Validator classname set for " + name);
-            }
-            
+                log.log(Level.SEVERE, 
+                        LogStringsMessages.WSITPVD_0022_NULL_OR_EMPTY_VALIDATOR_CLASSNAME(name));                                            
+                throw new RuntimeException(LogStringsMessages.WSITPVD_0022_NULL_OR_EMPTY_VALIDATOR_CLASSNAME(name));
+            }            
             if ("usernameValidator".equals(name)) {
                 props.put(DefaultCallbackHandler.USERNAME_VALIDATOR, validator);
             } else if ("timestampValidator".equals(name)) {
@@ -1058,7 +1094,9 @@ public abstract class WSITAuthContextBase  {
             } else if ("samlAssertionValidator".equals(name)) {
                 props.put(DefaultCallbackHandler.SAML_VALIDATOR, validator);
             } else {
-                throw new RuntimeException("Unknown Validator type " + name + " in config Assertion");
+                log.log(Level.SEVERE, 
+                    LogStringsMessages.WSITPVD_0010_UNKNOWN_VALIDATOR_TYPE_CONFIG(name));                
+                throw new RuntimeException(LogStringsMessages.WSITPVD_0010_UNKNOWN_VALIDATOR_TYPE_CONFIG(name));
             }
         }
     }
@@ -1096,7 +1134,9 @@ public abstract class WSITAuthContextBase  {
             
             return (policy != null) && policy.contains(Constants.version);
         } catch (PolicyException e) {
-            throw new WebServiceException(e);
+            log.log(Level.SEVERE, 
+                    LogStringsMessages.WSITPVD_0012_PROBLEM_CHECKING_RELIABLE_MESSAGE_ENABLE(), e);                    
+            throw new WebServiceException(LogStringsMessages.WSITPVD_0012_PROBLEM_CHECKING_RELIABLE_MESSAGE_ENABLE(), e);
         }
     }
     
@@ -1134,7 +1174,9 @@ public abstract class WSITAuthContextBase  {
         } catch (ClassNotFoundException e) {
             // ignore
         }
-        throw new XWSSecurityException("Could not find User Class " + classname);
+        log.log(Level.FINE, 
+                LogStringsMessages.WSITPVD_0011_COULD_NOT_FIND_USER_CLASS(), classname);                
+        throw new XWSSecurityException(LogStringsMessages.WSITPVD_0011_COULD_NOT_FIND_USER_CLASS() +" : " +classname);
     }
 
      protected WSDLBoundOperation getOperation(Message message, Packet packet){
@@ -1181,7 +1223,8 @@ public abstract class WSITAuthContextBase  {
             ctx.setSecurityEnvironment(secEnv);
             ctx.isInboundMessage(false);
         } catch (XWSSecurityException e) {
-            throw new RuntimeException(e);
+            log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0006_PROBLEM_INIT_OUT_PROC_CONTEXT(), e);
+            throw new RuntimeException(LogStringsMessages.WSITPVD_0006_PROBLEM_INIT_OUT_PROC_CONTEXT(), e);            
         }
         return ctx;
     }
@@ -1237,7 +1280,8 @@ public abstract class WSITAuthContextBase  {
                 fault = soapFactory.createFault(sfe.getFaultString(), sfe.getFaultCode());
             }
         } catch (Exception e) {
-            throw new RuntimeException("Security Pipe: Internal Error while trying to create a SOAPFault");
+            log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0002_INTERNAL_SERVER_ERROR());
+            throw new RuntimeException(LogStringsMessages.WSITPVD_0002_INTERNAL_SERVER_ERROR(), e);
         }
         return new SOAPFaultException(fault);
         
@@ -1304,7 +1348,8 @@ public abstract class WSITAuthContextBase  {
                 fault = soapFactory.createFault(sfe.getFaultString(), sfe.getFaultCode());
             }
         } catch (Exception e) {
-            throw new RuntimeException("Security Pipe: Internal Error while trying to create a SOAPFault");
+            log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0002_INTERNAL_SERVER_ERROR());
+            throw new RuntimeException(LogStringsMessages.WSITPVD_0002_INTERNAL_SERVER_ERROR(), e);
         }
         return fault;
     }
@@ -1344,7 +1389,10 @@ public abstract class WSITAuthContextBase  {
         } catch(IllegalAccessException ex) {
             
         }
-        throw new RuntimeException("Internal Error: Could Not Load CallbackHandler Class: " + classname);
+        log.log(Level.SEVERE, 
+                LogStringsMessages.WSITPVD_0023_COULD_NOT_LOAD_CALLBACK_HANDLER_CLASS(classname));        
+        throw new RuntimeException(
+                LogStringsMessages.WSITPVD_0023_COULD_NOT_LOAD_CALLBACK_HANDLER_CLASS(classname));
     }
     
     protected boolean isGFAppClient() {

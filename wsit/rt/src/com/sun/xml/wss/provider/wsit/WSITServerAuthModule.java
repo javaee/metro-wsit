@@ -24,12 +24,22 @@ import javax.security.auth.message.MessagePolicy;
 import javax.security.auth.message.module.ServerAuthModule;
 import javax.xml.soap.SOAPMessage;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import com.sun.xml.wss.provider.wsit.logging.LogDomainConstants;
+import com.sun.xml.wss.provider.wsit.logging.LogStringsMessages;
+
 /**
  *
  * @author kumar.jayanti
  */
 public class WSITServerAuthModule implements ServerAuthModule {
 
+    private static final Logger log =
+        Logger.getLogger(
+        LogDomainConstants.WSIT_PVD_DOMAIN,
+        LogDomainConstants.WSIT_PVD_DOMAIN_BUNDLE);
+    
     Class[] supported = new Class[2];
     boolean debug = false;
     protected static final String DEBUG = "debug";
@@ -64,50 +74,51 @@ public class WSITServerAuthModule implements ServerAuthModule {
     public void cleanSubject(MessageInfo messageInfo, Subject subject) throws AuthException {
         if (subject == null) {
                 // log
-                throw new AuthException("Subject is null in disposeSubject");
-             }
+                log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0037_NULL_SUBJECT());
+                throw new AuthException(LogStringsMessages.WSITPVD_0037_NULL_SUBJECT());
+         }
 
-             if (!subject.isReadOnly()) {
-                 // log
-                 //subject = new Subject();
-                 return;
-             }
+         if (!subject.isReadOnly()) {
+             // log
+             //subject = new Subject();
+             return;
+         }
 
-             Set principals = subject.getPrincipals();
-             Set privateCredentials = subject.getPrivateCredentials();
-             Set publicCredentials = subject.getPublicCredentials();
+         Set principals = subject.getPrincipals();
+         Set privateCredentials = subject.getPrivateCredentials();
+         Set publicCredentials = subject.getPublicCredentials();
 
-             try {
-                principals.clear();
-             } catch (UnsupportedOperationException uoe) {
-                // log
-             }
+         try {
+            principals.clear();
+         } catch (UnsupportedOperationException uoe) {
+            // log
+         }
 
-             Iterator pi = privateCredentials.iterator();
-             while (pi.hasNext()) {
-                try {
-                    Destroyable dstroyable = 
-                                   (Destroyable)pi.next();
-                    dstroyable.destroy(); 
-                } catch (DestroyFailedException dfe) {
-                   // log
-                } catch (ClassCastException cce) {
-                   // log
-                }  
-             }
+         Iterator pi = privateCredentials.iterator();
+         while (pi.hasNext()) {
+            try {
+                Destroyable dstroyable = 
+                               (Destroyable)pi.next();
+                dstroyable.destroy(); 
+            } catch (DestroyFailedException dfe) {
+               // log
+            } catch (ClassCastException cce) {
+               // log
+            }  
+         }
 
-             Iterator qi = publicCredentials.iterator();
-             while (qi.hasNext()) {
-              try {
-                    Destroyable dstroyable = 
-                                   (Destroyable)qi.next();
-                    dstroyable.destroy(); 
-                } catch (DestroyFailedException dfe) {
-                   // log
-                } catch (ClassCastException cce) {
-                   // log
-                }   
-             }
+         Iterator qi = publicCredentials.iterator();
+         while (qi.hasNext()) {
+          try {
+                Destroyable dstroyable = 
+                               (Destroyable)qi.next();
+                dstroyable.destroy(); 
+            } catch (DestroyFailedException dfe) {
+               // log
+            } catch (ClassCastException cce) {
+               // log
+            }   
+         }
     }
     
 }

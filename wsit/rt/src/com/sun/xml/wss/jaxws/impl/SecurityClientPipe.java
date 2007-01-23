@@ -76,8 +76,9 @@ import static com.sun.xml.wss.jaxws.impl.Constants.OPERATION_SCOPE;
 import static com.sun.xml.wss.jaxws.impl.Constants.EMPTY_LIST;
 import static com.sun.xml.wss.jaxws.impl.Constants.SUN_WSS_SECURITY_CLIENT_POLICY_NS;
 
+import java.util.logging.Level;
+import com.sun.xml.wss.jaxws.impl.logging.LogStringsMessages;
 
-//TODO: add logging before 4/13
 /**
  *
  *  @author Vbkumar.Jayanti@Sun.COM, K.Venugopal@sun.com
@@ -105,8 +106,11 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
             }*/
             handler = configureClientHandler(configAssertions);
             secEnv = new DefaultSecurityEnvironmentImpl(handler);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        } catch (Exception e) {            
+            log.log(Level.SEVERE, 
+                    LogStringsMessages.WSSPIPE_0023_ERROR_CREATING_NEW_INSTANCE_SEC_CLIENT_PIPE(), e);            
+            throw new RuntimeException(
+                    LogStringsMessages.WSSPIPE_0023_ERROR_CREATING_NEW_INSTANCE_SEC_CLIENT_PIPE(), e);
         }
         
         /*if(nextPipe != null && nextPipe instanceof ClientEdgePipe){
@@ -160,7 +164,10 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
                 msg = secureOutboundMessage(msg, ctx);
             }
         } catch(SOAPException se){
-            throw new WebServiceException(se);
+            log.log(Level.SEVERE, 
+                    LogStringsMessages.WSSPIPE_0024_ERROR_SECURING_OUTBOUND_MSG(), se);                        
+            throw new WebServiceException(
+                    LogStringsMessages.WSSPIPE_0024_ERROR_SECURING_OUTBOUND_MSG(), se);
         }
         
         packet.setMessage(msg);
@@ -179,7 +186,10 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
                 Message newMsg = Messages.create(sm);
                 ret.setMessage(newMsg);
             }catch(SOAPException ex){
-                throw new WebServiceException(ex);
+                log.log(Level.SEVERE, 
+                        LogStringsMessages.WSSPIPE_0005_PROBLEM_PROC_SOAP_MESSAGE(), ex);
+                throw new WebServiceException(
+                        LogStringsMessages.WSSPIPE_0005_PROBLEM_PROC_SOAP_MESSAGE(), ex);                
             }
         }
         //---------------INBOUND SECURITY VERIFICATION----------
@@ -212,7 +222,9 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
                         DumpFilter.process(ctx);
                     }
                     SOAPFault fault = soapMessage.getSOAPBody().getFault();
-                    throw new SOAPFaultException(fault);
+                    //log.log(Level.SEVERE, 
+                    //        LogStringsMessages.WSSPIPE_0034_FAULTY_RESPONSE_MSG(fault));                    
+                    throw new SOAPFaultException(fault);                    
                 }
                 msg = Messages.create(soapMessage);
             }else{
@@ -221,7 +233,9 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
         } catch (XWSSecurityException xwse) {
             throw getSOAPFaultException(xwse);
         }catch(SOAPException se){
-            throw new WebServiceException(se);
+            log.log(Level.SEVERE, 
+                    LogStringsMessages.WSSPIPE_0025_ERROR_VERIFY_INBOUND_MSG(), se);            
+            throw new WebServiceException(LogStringsMessages.WSSPIPE_0025_ERROR_VERIFY_INBOUND_MSG(), se);
         }
         resetCachedOperation();
         ret.setMessage(msg);
@@ -276,7 +290,9 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
         
         List toks =getOutBoundSCP(packet.getMessage());
         if (toks.isEmpty()) {
-            throw new WSSecureConversationException("Cannot start SecureConversation, no policy found");
+            log.log(Level.SEVERE, 
+                    LogStringsMessages.WSSPIPE_0026_NO_POLICY_FOUND_FOR_SC());                        
+            throw new WSSecureConversationException(LogStringsMessages.WSSPIPE_0026_NO_POLICY_FOUND_FOR_SC());
         }
         //Note: Assuming only one SC assertion
         Token tok = (Token)toks.get(0);
@@ -409,31 +425,19 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
                 Class handler = loadClass(ret);
                 Object obj = handler.newInstance();
                 if (!(obj instanceof CallbackHandler)) {
-                    throw new RuntimeException("The specified CallbackHandler class, " +
-                            ret + ", Is not a valid CallbackHandler");
+                    log.log(Level.SEVERE, 
+                            LogStringsMessages.WSSPIPE_0033_INVALID_CALLBACK_HANDLER_CLASS(ret));
+                    throw new RuntimeException(
+                            LogStringsMessages.WSSPIPE_0033_INVALID_CALLBACK_HANDLER_CLASS(ret));                    
                 }
                 return (CallbackHandler)obj;
             }
             return new DefaultCallbackHandler("client", props);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            log.log(Level.SEVERE, 
+                    LogStringsMessages.WSSPIPE_0027_ERROR_CONFIGURE_CLIENT_HANDLER(), e);                                    
+            throw new RuntimeException(LogStringsMessages.WSSPIPE_0027_ERROR_CONFIGURE_CLIENT_HANDLER(), e);
         }
     }
-    
-//    protected Policy getWSITConfig(){
-//        if(wsitConfig == null){
-//            try{
-//                PolicySourceModel model =  unmarshalPolicy("wsit-client.xml");
-//                if(model != null){
-//                    wsitConfig =  PolicyModelTranslator.getTranslator().translate(model);
-//                }
-//            }catch(PolicyException ex){
-//                ex.printStackTrace();
-//            }catch(IOException ex){
-//                ex.printStackTrace();
-//            }
-//        }
-//        return wsitConfig;
-//    }
     
 }

@@ -21,11 +21,21 @@ import javax.security.auth.message.config.ClientAuthConfig;
 import javax.security.auth.message.config.ClientAuthContext;
 import javax.xml.ws.WebServiceException;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import com.sun.xml.wss.provider.wsit.logging.LogDomainConstants;
+import com.sun.xml.wss.provider.wsit.logging.LogStringsMessages;
+
 /**
  *
  * @author kumar.jayanti
  */
 public class WSITClientSecurityPipe implements Pipe {
+    
+    private static final Logger log =
+        Logger.getLogger(
+        LogDomainConstants.WSIT_PVD_DOMAIN,
+        LogDomainConstants.WSIT_PVD_DOMAIN_BUNDLE);
     
     Pipe nextPipe = null;
     Map  properties = null;
@@ -55,7 +65,10 @@ public class WSITClientSecurityPipe implements Pipe {
             clientAuthContext = clientConfig.getAuthContext(null, null, properties);
             properties.put("SC_INITIATOR", clientAuthContext);
         } catch (AuthException e) {
-            throw new RuntimeException(e);
+            log.log(Level.SEVERE, 
+                    LogStringsMessages.WSITPVD_0038_ERROR_CREATING_NEW_INSTANCE_WSIT_CLIENT_SEC_PIPE(), e);
+            throw new RuntimeException(
+                    LogStringsMessages.WSITPVD_0038_ERROR_CREATING_NEW_INSTANCE_WSIT_CLIENT_SEC_PIPE(), e);
         }
     }
 
@@ -63,27 +76,33 @@ public class WSITClientSecurityPipe implements Pipe {
     public Packet process(Packet packet) {
         MessageInfo messageInfo = new PacketMessageInfo();
         try {
-        messageInfo.getMap().put("REQ_PACKET",packet);
-        clientAuthContext.secureRequest(messageInfo, null);
-        
-        Packet retPacket = nextPipe.process((Packet)messageInfo.getMap().get("REQ_PACKET"));
-        messageInfo.getMap().put("RES_PACKET", retPacket);
-        if (retPacket.getMessage() == null) {
-            return retPacket;
-        }
-         
-        clientAuthContext.validateResponse(messageInfo, null, null);
+            messageInfo.getMap().put("REQ_PACKET",packet);
+            clientAuthContext.secureRequest(messageInfo, null);
+
+            Packet retPacket = nextPipe.process((Packet)messageInfo.getMap().get("REQ_PACKET"));
+            messageInfo.getMap().put("RES_PACKET", retPacket);
+            if (retPacket.getMessage() == null) {
+                return retPacket;
+            }
+
+            clientAuthContext.validateResponse(messageInfo, null, null);
         } catch (AuthException e) {
-            throw new WebServiceException(e);
+            log.log(Level.SEVERE, 
+                    LogStringsMessages.WSITPVD_0039_ERROR_PROCESSING_INCOMING_PACKET(), e);
+            throw new WebServiceException(
+                    LogStringsMessages.WSITPVD_0039_ERROR_PROCESSING_INCOMING_PACKET(), e);
         }
         return (Packet)messageInfo.getMap().get("RES_PACKET");
     }
 
     public void preDestroy() {
         try {
-        clientAuthContext.cleanSubject(null, null);
+            clientAuthContext.cleanSubject(null, null);
         } catch (AuthException e) {
-            throw new RuntimeException(e);
+            log.log(Level.SEVERE, 
+                    LogStringsMessages.WSITPVD_0040_ERROR_CLEAN_SUBJECT(), e);            
+            throw new RuntimeException(
+                    LogStringsMessages.WSITPVD_0040_ERROR_CLEAN_SUBJECT(), e);
         }
         if (nextPipe != null) {
             nextPipe.preDestroy();
