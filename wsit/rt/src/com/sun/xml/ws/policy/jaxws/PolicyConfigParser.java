@@ -48,6 +48,10 @@ import org.xml.sax.SAXException;
 public final class PolicyConfigParser {   
     private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyConfigParser.class);
     private static final String SERVLET_CONTEXT_CLASSNAME = "javax.servlet.ServletContext";
+    // Prefixing with META-INF/ instead of /META-INF/. /META-INF/ is working fine
+    // when loading from a JAR file but not when loading from a plain directory.
+    private static final String EJB_PREFIX = "META-INF/";
+    private static final String WEB_PREFIX = "/WEB-INF/";
     
     /**
      * Reads a WSIT config file stored in META-INF or WEB-INF, parses it
@@ -64,6 +68,9 @@ public final class PolicyConfigParser {
         LOGGER.entering("parse", container);
         PolicyMap map = null;
         try {
+//            if (configFileIdentifier == null) {
+//                return null;
+//            }
             Object context = null;
             try {
                 final Class<?> contextClass = Class.forName(SERVLET_CONTEXT_CLASSNAME);
@@ -78,14 +85,26 @@ public final class PolicyConfigParser {
             final String cfgFile = PolicyUtils.ConfigFile.generateFullName(configFileIdentifier);
             LOGGER.finest("parse", LocalizationMessages.WSP_001037_CONFIG_FILE_IS(cfgFile));
             
-            URL configFileUrl = PolicyUtils.ConfigFile.loadAsResource(cfgFile, context);
-            
+            URL configFileUrl = null;
+
+            if (context == null) {
+                configFileUrl = PolicyUtils.ConfigFile.loadFromClasspath(EJB_PREFIX + cfgFile);
 //TODO: remove after NB plugin starts generating differnet names
 // BEGIN REMOVE
-            if (configFileUrl == null) {
-                configFileUrl = PolicyUtils.ConfigFile.loadAsResource("wsit.xml", context);
-            }
+                if (configFileUrl == null) {
+                    configFileUrl = PolicyUtils.ConfigFile.loadFromClasspath(EJB_PREFIX + "wsit.xml");
+                }
 // END REMOVE
+            }
+            else {
+                configFileUrl = PolicyUtils.ConfigFile.loadFromContext(WEB_PREFIX + cfgFile, context);
+//TODO: remove after NB plugin starts generating differnet names
+// BEGIN REMOVE
+                if (configFileUrl == null) {
+                    configFileUrl = PolicyUtils.ConfigFile.loadFromContext(WEB_PREFIX + "wsit.xml", context);
+                }
+// END REMOVE
+            }
             
             if (configFileUrl != null) {
                 map = parse(configFileUrl, false, mutators);

@@ -1155,7 +1155,7 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
             if (context.isClientSide() && (!isForConfigFile)) {
                 final String clientCfgFileName = PolicyUtils.ConfigFile.generateFullName(PolicyConstants.CLIENT_CONFIGURATION_IDENTIFIER);
                 try {
-                    final URL clientCfgFileUrl = PolicyUtils.ConfigFile.loadAsResource(clientCfgFileName, null);
+                    final URL clientCfgFileUrl = PolicyUtils.ConfigFile.loadFromClasspath(clientCfgFileName);
                     if (clientCfgFileUrl == null) {
                         LOGGER.config("postFinished", LocalizationMessages.WSP_001040_CLIENT_CONFIG_FILE_MISSING());
                     } else {

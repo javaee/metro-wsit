@@ -65,15 +65,17 @@ public class PolicyConfigParserTest extends TestCase {
     }
     
     public void testParseContainerNullWithConfig() throws Exception {
-        Container container = null;
+        final String CONFIG_FILE_PATH = "test/unit/data/META-INF";
+        final String CONFIG_FILE_NAME = "wsit.xml";
         
+        Container container = null;
         PolicyMap map = null;
         
         try {
-            copyFile("test/unit/data/policy/config/wsit.xml", "test/unit/data/wsit.xml");
+            copyFile("test/unit/data/policy/config/wsit.xml", CONFIG_FILE_PATH, CONFIG_FILE_NAME);
             map = PolicyConfigParser.parse(null, container);
         } finally {
-            File wsitxml = new File("test/unit/data/wsit.xml");
+            File wsitxml = new File(CONFIG_FILE_PATH + File.separatorChar + CONFIG_FILE_NAME);
             wsitxml.delete();
         }
         PolicyMapKey key = map.createWsdlEndpointScopeKey(new QName("http://example.org/", "AddNumbersService"), new QName("http://example.org/", "AddNumbersPort"));
@@ -92,15 +94,17 @@ public class PolicyConfigParserTest extends TestCase {
     }
     
     public void testParseContainerWithoutContext() throws Exception {
-        Container container = new MockContainer(null);
+        final String CONFIG_FILE_PATH = "test/unit/data/META-INF";
+        final String CONFIG_FILE_NAME = "wsit.xml";
         
+        Container container = new MockContainer(null);
         PolicyMap map = null;
         
         try {
-            copyFile("test/unit/data/policy/config/wsit.xml", "test/unit/data/wsit.xml");
+            copyFile("test/unit/data/policy/config/wsit.xml", CONFIG_FILE_PATH, CONFIG_FILE_NAME);
             map = PolicyConfigParser.parse(null, container);
         } finally {
-            File wsitxml = new File("test/unit/data/wsit.xml");
+            File wsitxml = new File(CONFIG_FILE_PATH + File.separatorChar + CONFIG_FILE_NAME);
             wsitxml.delete();
         }
         PolicyMapKey key = map.createWsdlEndpointScopeKey(new QName("http://example.org/", "AddNumbersService"), new QName("http://example.org/", "AddNumbersPort"));
@@ -219,22 +223,25 @@ public class PolicyConfigParserTest extends TestCase {
     }
         
     private PolicyMap parseConfigFile(String configFile) throws Exception {
-        URL url = PolicyUtils.ConfigFile.loadAsResource(PolicyResourceLoader.POLICY_UNIT_TEST_RESOURCE_ROOT + configFile, null);
+        URL url = PolicyUtils.ConfigFile.loadFromClasspath(PolicyResourceLoader.POLICY_UNIT_TEST_RESOURCE_ROOT + configFile);
         return PolicyConfigParser.parse(url, false);
     }
 
     /**
      * Copy a file
      */
-    private static final void copyFile(String sourceName, String destName) throws IOException {
+    private static final void copyFile(String sourceName, String destPath, String destName) throws IOException {
         FileChannel source = null;
         FileChannel dest = null;
         try {
+            File destDir = new File(destPath);
+            destDir.mkdir();
+            
             // Create channel on the source
             source = new FileInputStream(sourceName).getChannel();
             
             // Create channel on the destination
-            dest = new FileOutputStream(destName).getChannel();
+            dest = new FileOutputStream(destPath + File.separatorChar + destName).getChannel();
             
             // Copy file contents from source to destination
             dest.transferFrom(source, 0, source.size());

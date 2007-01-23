@@ -58,7 +58,7 @@ public class PolicyServiceInterceptor extends ServiceInterceptor {
             // We only need to read the client config if the server WSDL was not parsed
             if (wsdlPort == null) {
                 final String clientCfgFileName = PolicyUtils.ConfigFile.generateFullName(PolicyConstants.CLIENT_CONFIGURATION_IDENTIFIER);
-                final URL clientCfgFileUrl = PolicyUtils.ConfigFile.loadAsResource(clientCfgFileName, null);
+                final URL clientCfgFileUrl = PolicyUtils.ConfigFile.loadFromClasspath(clientCfgFileName);
                 if (clientCfgFileUrl != null) {
                     LOGGER.config("preCreateBinding", LocalizationMessages.WSP_001022_LOADING_CLIENT_CFG_FILE(clientCfgFileUrl));
                     final WSDLModel clientModel = PolicyConfigParser.parseModel(clientCfgFileUrl, true);

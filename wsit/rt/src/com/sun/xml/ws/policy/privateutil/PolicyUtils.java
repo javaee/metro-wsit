@@ -273,22 +273,36 @@ public final class PolicyUtils {
         }
         
         /**
-         * Loads the config file as an URL resource.
+         * Returns a URL pointing to the given config file. The file name is
+         * looked up as a resource from a ServletContext.
+         *
+         * May return null if the file can not be found.
+         *
+         * @param configFileName The name of the file resource
+         * @param context A ServletContext object. May not be null.
          */
-        public static URL loadAsResource(final String configFileName, final Object context) throws PolicyException {
-            if (context == null) {
-                final ClassLoader cl = Thread.currentThread().getContextClassLoader();
-                if (cl == null) {
-                    return ClassLoader.getSystemResource(configFileName);
-                } else {
-                    return cl.getResource(configFileName);
-                }
+        public static URL loadFromContext(final String configFileName, final Object context) throws PolicyException {
+            return Reflection.invoke(context, "getResource", URL.class, configFileName);
+        }
+        
+        /**
+         * Returns a URL pointing to the given config file. The file is looked up as
+         * a resource on the classpath.
+         *
+         * May return null if the file can not be found.
+         *
+         * @param The name of the file resource. May not be null.
+         */
+        public static URL loadFromClasspath(final String configFileName) {
+            final ClassLoader cl = Thread.currentThread().getContextClassLoader();
+            if (cl == null) {
+                return ClassLoader.getSystemResource(configFileName);
             } else {
-                return Reflection.invoke(context, "getResource", URL.class, "/WEB-INF/" + configFileName);
+                return cl.getResource(configFileName);
             }
         }
     }
-
+        
     /**
      * Wrapper for ServiceFinder class which is not part of the Java SE yet.
      */
