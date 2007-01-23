@@ -47,7 +47,7 @@
         <mkdir dir="${build.gen-src.dir}"/>
 
         <resgen destdir="${build.gen-src.dir}">
-            <resource dir="${src.dir}" includes="com/sun/xml/ws/**/*.properties"/>
+            <resource dir="${src.dir}" includes="com/sun/xml/ws/**/*.properties, com/sun/xml/wss/**/*.properties"/>
         </resgen>
     </target>
 
