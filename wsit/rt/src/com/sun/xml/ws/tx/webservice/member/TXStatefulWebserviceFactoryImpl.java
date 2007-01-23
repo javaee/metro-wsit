@@ -23,14 +23,22 @@ package com.sun.xml.ws.tx.webservice.member;
 
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.developer.StatefulWebServiceManager;
+import com.sun.xml.ws.tx.at.ATCoordinator;
+import com.sun.xml.ws.tx.at.ATParticipant;
 import static com.sun.xml.ws.tx.common.Constants.UNKNOWN_ID;
+import static com.sun.xml.ws.tx.common.Constants.LOCAL_PING;
 import com.sun.xml.ws.tx.common.StatefulWebserviceFactory;
 import com.sun.xml.ws.tx.common.TxLogger;
+import com.sun.xml.ws.tx.webservice.member.at.CoordinatorPortType;
 import com.sun.xml.ws.tx.webservice.member.at.CoordinatorPortTypeImpl;
+import com.sun.xml.ws.tx.webservice.member.at.Notification;
+import com.sun.xml.ws.tx.webservice.member.at.ParticipantPortType;
 import com.sun.xml.ws.tx.webservice.member.at.ParticipantPortTypeImpl;
 import com.sun.xml.ws.tx.webservice.member.coord.RegistrationCoordinatorPortTypeImpl;
 import com.sun.xml.ws.tx.webservice.member.coord.RegistrationRequesterPortTypeImpl;
 import com.sun.istack.NotNull;
+import java.util.Map;
+import javax.xml.namespace.QName;
 
 import javax.xml.ws.EndpointReference;
 import java.net.URI;
@@ -39,7 +47,7 @@ import java.net.URI;
  * This class ...
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @since 1.0
  */
 // suppress known deprecation warnings about using short term workaround StatefulWebService.export(Class, String webServiceEndpoint, PortType)
@@ -137,4 +145,21 @@ final public class TXStatefulWebserviceFactoryImpl implements StatefulWebservice
             RegistrationCoordinatorPortTypeImpl.manager.setFallbackInstance(registrationCoordinator);
         }
     }
+    
+    
+    private void pingAT() {
+        final Notification pingNotification = new Notification();
+        final Map<QName, String> attrs = pingNotification.getOtherAttributes();
+        attrs.put(LOCAL_PING, "true");
+        final ParticipantPortType ppt = 
+                ATParticipant.getATParticipantWS(ATParticipant.getLocalParticipantProtocolServiceEPR(), 
+                                                 null, false);
+        ppt.rollbackOperation(pingNotification);
+        
+        final CoordinatorPortType cpt =
+                ATParticipant.getATCoordinatorWS(ATCoordinator.localCoordinatorProtocolService, 
+                                                 null, false);
+        cpt.replayOperation(pingNotification);
+    }
+    
 }

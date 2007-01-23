@@ -33,11 +33,14 @@ import com.sun.xml.ws.developer.StatefulWebServiceManager;
 import com.sun.xml.ws.tx.at.ATCoordinator;
 import com.sun.xml.ws.tx.at.ATParticipant;
 import static com.sun.xml.ws.tx.common.Constants.UNKNOWN_ID;
+import static com.sun.xml.ws.tx.common.Constants.LOCAL_PING;
 import com.sun.xml.ws.tx.common.TxLogger;
 import com.sun.xml.ws.tx.coordinator.CoordinationManager;
+import java.util.Map;
 
 import javax.annotation.Resource;
 import javax.jws.WebService;
+import javax.xml.namespace.QName;
 import javax.xml.ws.EndpointReference;
 import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.handler.MessageContext;
@@ -47,7 +50,7 @@ import java.util.logging.Level;
  * WS-Atomic Transaction participant protocol service
  *
  * @author Joe.Fialli@Sun.COM
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 1.0
  */
 @MemberSubmissionAddressing
@@ -211,6 +214,11 @@ public class ParticipantPortTypeImpl implements ParticipantPortType {
             (Notification
                     parameters) {
         final String METHOD_NAME = "rollbackOperation";
+        
+         if (isPing(parameters)) {
+            logger.fine(METHOD_NAME, "local ping of WS-AT Participant web service endpoint");
+            return;
+        }
 
         initPerOperationData();
         if (logger.isLogging(Level.FINER)) {
@@ -240,5 +248,14 @@ public class ParticipantPortTypeImpl implements ParticipantPortType {
     private String getCoordIdPartId
             () {
         return "CoorId=" + activityId + " PartId=" + participantId + " ";
+    }
+    
+    private boolean isPing(Notification parameters) {
+        if (parameters == null) {
+            return false;
+        }
+        
+        Map<QName, String> attrs = parameters.getOtherAttributes();
+        return attrs != null && attrs.get(LOCAL_PING) != null;
     }
 }

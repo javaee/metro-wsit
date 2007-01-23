@@ -30,11 +30,14 @@ import com.sun.xml.ws.developer.MemberSubmissionEndpointReference;
 import com.sun.xml.ws.developer.StatefulWebServiceManager;
 import com.sun.xml.ws.tx.at.ATCoordinator;
 import static com.sun.xml.ws.tx.common.Constants.UNKNOWN_ID;
+import static com.sun.xml.ws.tx.common.Constants.LOCAL_PING;
 import com.sun.xml.ws.tx.common.TxLogger;
 import com.sun.xml.ws.tx.coordinator.CoordinationManager;
+import java.util.Map;
 
 import javax.annotation.Resource;
 import javax.jws.WebService;
+import javax.xml.namespace.QName;
 import javax.xml.ws.EndpointReference;
 import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.handler.MessageContext;
@@ -46,7 +49,7 @@ import java.util.logging.Level;
  * Proceses notificaions from participants in coordinated atomic transaction activity.
  *
  * @author Joe.Fialli@Sun.COM
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 1.0
  */
 @MemberSubmissionAddressing
@@ -188,9 +191,22 @@ public class CoordinatorPortTypeImpl implements CoordinatorPortType {
         }
     }
 
+    /**
+     * replay last operation.
+     *
+     * ping capability added since this service is lazily deployed when first called.
+     * Issue is it needs to be deployed before exporting a stateful web service.
+     *
+     * @param parameters - if parameter has attribute LOCAL_PING defined, treat this as a ping. 
+     */
     public void replayOperation(Notification parameters) {
         final String METHOD_NAME = "replayOperation";
 
+        if (isPing(parameters)) {
+            logger.fine(METHOD_NAME, "local ping of WS-AT web service endpoint");
+            return;
+        }
+        
         initContextFromIncomingMessage();
         if (logger.isLogging(Level.FINER)) {
             logger.entering(METHOD_NAME, getCoordIdPartId());
@@ -206,6 +222,15 @@ public class CoordinatorPortTypeImpl implements CoordinatorPortType {
         if (logger.isLogging(Level.FINER)) {
             logger.exiting(METHOD_NAME, getCoordIdPartId());
         }
+    }
+    
+    private boolean isPing(Notification parameters) {
+        if (parameters == null) {
+            return false;
+        }
+        
+        Map<QName, String> attrs = parameters.getOtherAttributes();
+        return attrs != null && attrs.get(LOCAL_PING) != null;
     }
 
     private String getCoordIdPartId() {

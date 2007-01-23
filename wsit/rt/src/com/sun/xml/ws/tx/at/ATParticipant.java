@@ -68,7 +68,7 @@ import java.util.logging.Level;
  * already decided to prepare.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  * @since 1.0
  */
 public class ATParticipant extends Registrant {
@@ -638,12 +638,16 @@ public class ATParticipant extends Registrant {
                                 LOCAL_PPS_URI, AddressingVersion.MEMBER,
                                 getATCoordinator().getIdValue(), this.getId().getValue());
             } else {
-                final MemberSubmissionEndpointReference epr = new MemberSubmissionEndpointReference();
-                epr.addr = new MemberSubmissionEndpointReference.Address();
-                epr.addr.uri = LOCAL_PPS_URI.toString();
-                localParticipantProtocolService = epr;
+                localParticipantProtocolService = getLocalParticipantProtocolServiceEPR();
             }
         }
         return localParticipantProtocolService;
+    }
+    
+    static public EndpointReference getLocalParticipantProtocolServiceEPR() {
+         final MemberSubmissionEndpointReference epr = new MemberSubmissionEndpointReference();
+         epr.addr = new MemberSubmissionEndpointReference.Address();
+         epr.addr.uri = LOCAL_PPS_URI.toString();
+         return epr;
     }
 }
