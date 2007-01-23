@@ -968,7 +968,7 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
             
         } catch(PolicyException pe) {
             LOGGER.severe("finished", LocalizationMessages.WSP_001018_POLICY_EXCEPTION_WHILE_FINISHING_PARSING_WSDL(),pe);
-            throw new WebServiceException(pe);
+            throw new WebServiceException(LocalizationMessages.WSP_001018_POLICY_EXCEPTION_WHILE_FINISHING_PARSING_WSDL(), pe);
         }
         LOGGER.exiting("finished");
     }
