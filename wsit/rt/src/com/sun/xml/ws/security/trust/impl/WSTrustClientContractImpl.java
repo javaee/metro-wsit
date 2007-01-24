@@ -206,6 +206,7 @@ public class WSTrustClientContractImpl implements WSTrustClientContract {
                         LogStringsMessages.WST_0001_UNSUPPORTED_PROOF_TOKEN_TYPE(proofTokenType));
                 throw new WSTrustException( LogStringsMessages.WST_0001_UNSUPPORTED_PROOF_TOKEN_TYPE(proofTokenType));
             } else if (RequestedProofToken.ENCRYPTED_KEY_TYPE.equals(proofTokenType)){
+                // ToDo
                 log.log(Level.SEVERE,
                         LogStringsMessages.WST_0001_UNSUPPORTED_PROOF_TOKEN_TYPE(proofTokenType));
                 throw new WSTrustException( LogStringsMessages.WST_0001_UNSUPPORTED_PROOF_TOKEN_TYPE(proofTokenType));
@@ -251,7 +252,7 @@ public class WSTrustClientContractImpl implements WSTrustClientContract {
         } else {
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0026_INVALID_CK_ALGORITHM(computedKey));
-            throw new WSTrustException(LogStringsMessages.WST_0026_INVALID_CK_ALGORITHM(computedKey));
+            throw new WSTrustException(LogStringsMessages.WST_0026_INVALID_CK_ALGORITHM_E(computedKey));
         }
         return key;
     }

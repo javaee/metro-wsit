@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustFactory.java,v 1.7 2007-01-14 07:41:26 jdg6688 Exp $
+ * $Id: WSTrustFactory.java,v 1.8 2007-01-24 21:49:21 manveen Exp $
  */
 
 /*
@@ -78,7 +78,7 @@ public class WSTrustFactory {
         if (spMetadata == null){
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0004_UNKNOWN_SERVICEPROVIDER(appliesTo));
-            throw new WSTrustException("Unknown target service provider " + appliesTo);
+            throw new WSTrustException(LogStringsMessages.WST_0004_UNKNOWN_SERVICEPROVIDER(appliesTo));
         }
         String type = spMetadata.getType();
         if (type == null){
@@ -106,10 +106,12 @@ public class WSTrustFactory {
         } catch (ClassNotFoundException ex) {
             contract = null;
             log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0005_CLASSNOTFOUND_NULL_CONTRACT(type));
-            //ex.printStackTrace();
+                    LogStringsMessages.WST_0005_CLASSNOTFOUND_NULL_CONTRACT(type), ex);
+            throw new WSTrustException(LogStringsMessages.WST_0005_CLASSNOTFOUND_NULL_CONTRACT(type), ex);
         } catch (Exception ex) {
-            throw new WSTrustException(ex.toString(), ex);
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0038_INIT_CONTRACT_FAIL(), ex);
+            throw new WSTrustException(LogStringsMessages.WST_0038_INIT_CONTRACT_FAIL(), ex);
         }
         
         return contract;

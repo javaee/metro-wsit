@@ -191,7 +191,7 @@ public class TrustPluginImpl implements TrustPlugin {
             throw new RuntimeException(LogStringsMessages.WST_0016_PROBLEM_IT_CTX());
         }
     }
-
+    
     /*
     private IssuedTokenContext createIssuedTokenContext(final RequestSecurityTokenResponse rstr) {
         //final URI tokType = rstr.getTokenType();
@@ -285,9 +285,9 @@ public class TrustPluginImpl implements TrustPlugin {
                 portName = names[1];
             }else{
                 log.log(Level.SEVERE,
-                        LogStringsMessages.WST_0017_SERVICE_PORTNAME_ERROR(serviceName, portName));
+                        LogStringsMessages.WST_0017_SERVICE_PORTNAME_ERROR(serviceName, portName, wsdlLocation.toString()));
                 throw new WSTrustException(
-                        LogStringsMessages.WST_0017_SERVICE_PORTNAME_ERROR(serviceName, portName));
+                        LogStringsMessages.WST_0017_SERVICE_PORTNAME_ERROR(serviceName, portName, wsdlLocation.toString()));
             }
         }
         
@@ -296,8 +296,8 @@ public class TrustPluginImpl implements TrustPlugin {
             service = Service.create(wsdlLocation.toURL(), serviceName);
         }catch (MalformedURLException ex){
             log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0016_PROBLEM_IT_CTX(), ex);
-            throw new RuntimeException(LogStringsMessages.WST_0016_PROBLEM_IT_CTX());
+                    LogStringsMessages.WST_0041_SERVICE_NOT_CREATED(wsdlLocation.toString()), ex);
+            throw new RuntimeException(LogStringsMessages.WST_0041_SERVICE_NOT_CREATED(wsdlLocation.toString()), ex);
         }
         final Dispatch<Object> dispatch = service.createDispatch(portName, fact.getContext(), Service.Mode.PAYLOAD, new WebServiceFeature[]{new RespectBindingFeature(), new AddressingFeature(false)});
         //Dispatch<SOAPMessage> dispatch = service.createDispatch(portName, SOAPMessage.class, Service.Mode.MESSAGE, new WebServiceFeature[]{new AddressingFeature(false)});
@@ -503,7 +503,7 @@ public class TrustPluginImpl implements TrustPlugin {
                 log.log(Level.FINE,
                         LogStringsMessages.WST_1004_ERROR_MARSHAL_TO_STRING(), e);
             }
-            throw new RuntimeException("Error in Marshalling RST to string for logging ", e);
+            throw new RuntimeException(LogStringsMessages.WST_1004_ERROR_MARSHAL_TO_STRING(), e);
         }
     }
     

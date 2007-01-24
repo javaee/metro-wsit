@@ -253,7 +253,7 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(), ex);
             throw new WSTrustException(
-                    LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(), ex);
+                    LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(), ex);            
         }catch(UnsupportedCallbackException ex){
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(), ex);
@@ -271,7 +271,9 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
         try{
             doc = docFactory.newDocumentBuilder().newDocument();
         }catch(ParserConfigurationException ex){
-            throw new WSTrustException("Error creating DocumentFactory ", ex);
+            log.log(Level.SEVERE, 
+                    LogStringsMessages.WST_0039_ERROR_CREATING_DOCFACTORY(), ex);
+            throw new WSTrustException(LogStringsMessages.WST_0039_ERROR_CREATING_DOCFACTORY(), ex);
         }
         
         final KeyInfo keyInfo = new KeyInfo(doc);
@@ -282,7 +284,9 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
                     final EncryptedKey encKey = encryptKey(doc, key, serCert);
                     keyInfo.add(encKey);
                 }catch(Exception ex){
-                    throw new WSTrustException(ex.getMessage(), ex);
+                    log.log(Level.SEVERE,
+                            LogStringsMessages.WST_0040_ERROR_ENCRYPT_PROOFKEY(), ex);
+                    throw new WSTrustException( LogStringsMessages.WST_0040_ERROR_ENCRYPT_PROOFKEY(), ex);
                 }
             }else{
                 final BinarySecret secret = eleFac.createBinarySecret(key, BinarySecret.SYMMETRIC_KEY_TYPE);
