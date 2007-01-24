@@ -21,33 +21,37 @@
  */
 package com.sun.xml.ws.tx.webservice.member;
 
+import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.developer.StatefulWebServiceManager;
 import com.sun.xml.ws.tx.at.ATCoordinator;
 import com.sun.xml.ws.tx.at.ATParticipant;
 import static com.sun.xml.ws.tx.common.Constants.UNKNOWN_ID;
-import static com.sun.xml.ws.tx.common.Constants.LOCAL_PING;
 import com.sun.xml.ws.tx.common.StatefulWebserviceFactory;
 import com.sun.xml.ws.tx.common.TxLogger;
-import com.sun.xml.ws.tx.webservice.member.at.CoordinatorPortType;
+import com.sun.xml.ws.tx.coordinator.RegistrationManager;
 import com.sun.xml.ws.tx.webservice.member.at.CoordinatorPortTypeImpl;
-import com.sun.xml.ws.tx.webservice.member.at.Notification;
-import com.sun.xml.ws.tx.webservice.member.at.ParticipantPortType;
 import com.sun.xml.ws.tx.webservice.member.at.ParticipantPortTypeImpl;
 import com.sun.xml.ws.tx.webservice.member.coord.RegistrationCoordinatorPortTypeImpl;
 import com.sun.xml.ws.tx.webservice.member.coord.RegistrationRequesterPortTypeImpl;
-import com.sun.istack.NotNull;
-import java.util.Map;
-import javax.xml.namespace.QName;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLSession;
 import javax.xml.ws.EndpointReference;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.URI;
+import java.net.URL;
+import java.util.logging.Level;
 
 /**
  * This class ...
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @since 1.0
  */
 // suppress known deprecation warnings about using short term workaround StatefulWebService.export(Class, String webServiceEndpoint, PortType)
@@ -128,6 +132,10 @@ final public class TXStatefulWebserviceFactoryImpl implements StatefulWebservice
     private void registerFallback() {
         if (!registeredFallback ) {
             registeredFallback = true;
+
+            // force the lazy deployment of our ws so we can access the stateful manager field
+            pingStatefulServices();
+
             ParticipantPortTypeImpl participant =
                     new ParticipantPortTypeImpl(UNKNOWN_ID, UNKNOWN_ID);
             ParticipantPortTypeImpl.manager.setFallbackInstance(participant);
@@ -139,27 +147,98 @@ final public class TXStatefulWebserviceFactoryImpl implements StatefulWebservice
             RegistrationRequesterPortTypeImpl registrationRequester =
                     new RegistrationRequesterPortTypeImpl(UNKNOWN_ID, UNKNOWN_ID);
             RegistrationRequesterPortTypeImpl.manager.setFallbackInstance(registrationRequester);
-            
+
             RegistrationCoordinatorPortTypeImpl registrationCoordinator =
                     new RegistrationCoordinatorPortTypeImpl(UNKNOWN_ID);
             RegistrationCoordinatorPortTypeImpl.manager.setFallbackInstance(registrationCoordinator);
         }
     }
-    
-    
-    private void pingAT() {
-        final Notification pingNotification = new Notification();
-        final Map<QName, String> attrs = pingNotification.getOtherAttributes();
-        attrs.put(LOCAL_PING, "true");
-        final ParticipantPortType ppt = 
-                ATParticipant.getATParticipantWS(ATParticipant.getLocalParticipantProtocolServiceEPR(), 
-                                                 null, false);
-        ppt.rollbackOperation(pingNotification);
-        
-        final CoordinatorPortType cpt =
-                ATParticipant.getATCoordinatorWS(ATCoordinator.localCoordinatorProtocolService, 
-                                                 null, false);
-        cpt.replayOperation(pingNotification);
+
+    private boolean pingServices = true;
+
+    /**
+     * A workaround for WSIT issue 309
+     * <p/>
+     * The GF performance team does not want our wstx services to load during app server
+     * startup, so they are marked to lazy deploy upon the first invocation.  Unfortunately
+     * we need to access the stateful webservice manager field in some of these services
+     * before the first invocation, so we will ping each of them to force the load to happen.
+     * <p/>
+     * This will only happen once and it will only happen after we are certain that an app
+     * needs these services running.
+     */
+    private void pingStatefulServices() {
+        if (pingServices) {
+            pingServices = false;
+
+            if (logger.isLogging(Level.FINEST)) {
+                logger.finest("pingStatefulServices", "pinging register service...");
+            }
+            pingService(RegistrationManager.getLocalAsyncRegistrationURI().toString() + "?wsdl", RegistrationCoordinatorPortTypeImpl.class);
+            if (logger.isLogging(Level.FINEST)) {
+                logger.finest("pingStatefulServices", "pinging registerResponse service...");
+            }
+            pingService(RegistrationManager.getLocalRegistrationRequesterURI().toString() + "?wsdl", RegistrationRequesterPortTypeImpl.class);
+            if (logger.isLogging(Level.FINEST)) {
+                logger.finest("pingStatefulServices", "pinging ATCoordinator service...");
+            }
+            pingService(ATCoordinator.localCoordinationProtocolServiceURI.toString() + "?wsdl", CoordinatorPortTypeImpl.class);
+            if (logger.isLogging(Level.FINEST)) {
+                logger.finest("pingStatefulServices", "pinging ATParticipant service...");
+            }
+            pingService(ATParticipant.LOCAL_PPS_URI.toString() + "?wsdl", ParticipantPortTypeImpl.class);
+        }
     }
-    
+
+    /*
+     * This method accesses a url specifically to force the app server to completely
+     * load our stateful webservices.  We're pinging the services by accessing their
+     * wsdl files.
+     */
+    private void pingService(String urlAddr, Class sws) {
+        HttpURLConnection conn = null;
+        InputStream response = null;
+        BufferedReader reader = null;
+        try {
+            URL url = new URL(urlAddr);
+            conn = (HttpURLConnection) url.openConnection();
+            if (conn instanceof HttpsURLConnection) {
+                ((HttpsURLConnection) conn).setHostnameVerifier(
+                        new HostnameVerifier() {
+                            public boolean verify(String string, SSLSession sSLSession) {
+                                return true;
+                            }
+                        });
+            }
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("Content-Type",
+                    "application/x-www-form-urlencoded"); // taken from wsimport
+            conn.connect();
+            response = conn.getInputStream();
+            reader = new BufferedReader(
+                    new InputStreamReader(response));
+            String line = reader.readLine();
+            while (line != null) {
+//                    logger.finest("pingService", line);
+                line = reader.readLine();
+            }
+
+            logger.finest("pingService", "RESPONSE CODE: " + conn.getResponseCode());
+            if (sws.getDeclaredField("manager").equals(null)) {
+                logger.severe("pingService", "Injection failed");
+            } else {
+                logger.finest("pingService", "Injection succeeded");
+            }
+        } catch (Exception e) {
+            logger.severe("pingService", "Injection failed: " + e.getLocalizedMessage());
+            e.printStackTrace();
+        } finally {
+            try {
+                if (conn != null) conn.disconnect();
+                if (reader != null) reader.close();
+            } catch (Exception e) {
+                // ignore
+            }
+        }
+    }
 }

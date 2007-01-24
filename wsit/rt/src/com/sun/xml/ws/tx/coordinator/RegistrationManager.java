@@ -26,9 +26,7 @@ import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.addressing.OneWayFeature;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
-import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.tx.Protocol;
-import com.sun.xml.ws.developer.JAXWSProperties;
 import com.sun.xml.ws.developer.MemberSubmissionEndpointReference;
 import com.sun.xml.ws.developer.StatefulWebServiceManager;
 import com.sun.xml.ws.tx.at.ATParticipant;
@@ -49,7 +47,6 @@ import javax.xml.ws.EndpointReference;
 import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.WebServiceFeature;
-import javax.xml.ws.handler.MessageContext;
 import java.net.URI;
 import java.util.logging.Level;
 
@@ -59,7 +56,7 @@ import java.util.logging.Level;
  * for register and registerResponse delegate to the methods in this class.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  * @since 1.0
  */
 public final class RegistrationManager {
@@ -83,6 +80,18 @@ public final class RegistrationManager {
 //        WsaHelper.addRefParam(registrationEPR, activityId.getSOAPElement());
 //        return registrationEPR;
 //    }
+
+    public static URI getLocalRegistrationURI() {
+        return localRegistrationURI;
+    }
+
+    public static URI getLocalAsyncRegistrationURI() {
+        return localAsynchronousRegistrationURI;
+    }
+
+    public static URI getLocalRegistrationRequesterURI() {
+        return localRegistrationRequesterURI;
+    }
 
     /**
      * Create a new EPR for our registration service.
@@ -239,6 +248,7 @@ public final class RegistrationManager {
                         LocalizationMessages.REGISTERRESPONSE_FAILED_3005(
                                 registrationRequesterEPR,
                                 e.getLocalizedMessage()));
+                // TODO: throw an exception
             }
         }
 

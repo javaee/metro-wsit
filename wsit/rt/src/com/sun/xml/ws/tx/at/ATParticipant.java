@@ -68,7 +68,7 @@ import java.util.logging.Level;
  * already decided to prepare.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  * @since 1.0
  */
 public class ATParticipant extends Registrant {
@@ -79,7 +79,7 @@ public class ATParticipant extends Registrant {
 
     /* PPS */
     // TODO: workaround until jaxws-ri stateful webservice can compute this URI 
-    private static final URI LOCAL_PPS_URI =
+    public  static final URI LOCAL_PPS_URI =
             Util.createURI(WSTX_WS_SCHEME, null, WSTX_WS_PORT, WSTX_WS_CONTEXT + "/wsat/2pc");
 
     protected STATE state = STATE.NONE;

@@ -22,14 +22,13 @@
 package com.sun.xml.ws.tx.common;
 
 
-import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 
 /**
  * This class contains useful namespace uri constants
  *
  * @author Ryan.Shoemaker@Sun.COM, Joeseph.Fialli@Sun.COM
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @since 1.0
  */
 public class Constants {
@@ -147,6 +146,5 @@ public class Constants {
     }
 
     public static final String UNKNOWN_ID = "-1";
-    
-    public static final QName LOCAL_PING = new QName(XMLConstants.NULL_NS_URI, "localPing");
+
 }
