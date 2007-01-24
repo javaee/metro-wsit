@@ -51,7 +51,7 @@ import java.util.logging.Level;
  * This class ...
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @since 1.0
  */
 // suppress known deprecation warnings about using short term workaround StatefulWebService.export(Class, String webServiceEndpoint, PortType)
@@ -62,6 +62,7 @@ final public class TXStatefulWebserviceFactoryImpl implements StatefulWebservice
 
     @NotNull
     public StatefulWebServiceManager getManager(@NotNull String serviceName, @NotNull String portName) {
+        registerFallback();
         if (serviceName.equals(ParticipantPortTypeImpl.serviceName)) {
             // ParticipantPortTypeImpl && CoordinatorPortTypeImpl have the same serviceName
             if (portName.equals(ParticipantPortTypeImpl.portName)) {
