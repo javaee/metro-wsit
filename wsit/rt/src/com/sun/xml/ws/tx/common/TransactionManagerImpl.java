@@ -55,6 +55,8 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
 
     // standardized name by JTA 1.1 spec
     private static final String TXN_SYNC_REG_JNDI_NAME = "java:comp/TransactionSynchronizationRegistry";
+    
+    private static final String USER_TRANSACTION_JNDI_NAME = "java:comp/UserTransaction";
 
     static public TransactionManagerImpl getInstance() {
         return singleton;
@@ -70,8 +72,11 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
         }
         return result;
     }
-
-
+    
+    public UserTransaction getUserTransaction() {
+        return (UserTransaction)jndiLookup(USER_TRANSACTION_JNDI_NAME);
+    }
+    
     /**
      * Creates a new instance of TransactionManagerImpl
      */

@@ -49,6 +49,7 @@ import com.sun.xml.ws.tx.common.WsaHelper;
 import com.sun.xml.ws.tx.common.TxFault;
 import com.sun.xml.ws.tx.coordinator.CoordinationContextInterface;
 import com.sun.xml.ws.tx.coordinator.CoordinationManager;
+import javax.servlet.ServletContext;
 import javax.transaction.NotSupportedException;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
@@ -69,7 +70,7 @@ import java.util.logging.Level;
  * <p/>
  * Supports following WS-Coordination protocols: 2004 WS-Atomic Transaction protocol
  *
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  * @since 1.0
  */
 // suppress known deprecation warnings about using pipes.
@@ -274,17 +275,21 @@ public class TxServerPipe implements Pipe {
         } else if (opat.ATAlwaysCapability == true) {
              if (logger.isLogging(Level.FINEST)) {
                     logger.finest("TxServerPipe", "create JTA Transaction, no CoordinationContext flowed with operation and wsat:ATAlwaysCapability is enabled");
-                }
+             }
             // no Transaction context flowed with message but WS-AT policy assertion requests auto creation of txn 
             // context on server side invocation of method.
-            beginTransaction();
+            if (isServlet(pkt)) {
+                 beginTransaction();
+            }    // else allow Java EE EJB container to create transaction context
             try {
                 responsePkt = next.process(pkt);
             } catch (Exception e) {
                 rethrow = e;
                 tm.setRollbackOnly();
             }
-            commitTransaction();
+            if (isServlet(pkt)) {
+                 commitTransaction();
+            } // else allow Java EE EJB container to finish transaction context
         } else {  // just in case first two cases are not met
             responsePkt = next.process(pkt);
         }
@@ -305,6 +310,11 @@ public class TxServerPipe implements Pipe {
     }
     private Xid activeImportedXid = null;
 
+    private boolean isServlet(Packet pkt) {
+        ServletContext sCtx = pkt.endpoint.getContainer().getSPI(javax.servlet.ServletContext.class);
+        return sCtx != null;
+    }
+    
     /**
      * Import a transactional context from an external transaction manager via WS-AT Coordination Context.
      *
@@ -426,6 +436,12 @@ public class TxServerPipe implements Pipe {
                         }
                     }
                 }
+//                if (logger.isLogging(Level.FINEST)) {
+//                    logger.finest("cacheOperationToPolicyMappings", "Operation: " +
+//                        binding.getName() + ":" +
+//                        bindingOp.getName() + " WS-AT Policy Assertions: ATAssertion:" + opat.atAssertion +
+//                                         " ATAlwaysCapability:" + opat.ATAlwaysCapability);
+//               }
                 opPolicyCache.put(bindingOp.getName(), opat);
             }
         }
@@ -436,7 +452,7 @@ public class TxServerPipe implements Pipe {
      */
     private void beginTransaction() {
         try {
-            tm.begin();
+           tm.getUserTransaction().begin();
         } catch (NotSupportedException ex) {
             throw new WebServiceException(ex.getMessage(), ex);
         } catch (SystemException ex) {
@@ -449,7 +465,7 @@ public class TxServerPipe implements Pipe {
      */
     private void commitTransaction() {
         try {
-            tm.commit();
+            tm.getUserTransaction().commit();
         } catch (Exception ex) {
             logger.warning("commitTransaction", "commit failed with exception " + ex.getLocalizedMessage());
             ex.printStackTrace();
