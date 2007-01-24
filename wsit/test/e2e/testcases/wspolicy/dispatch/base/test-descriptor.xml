@@ -20,7 +20,7 @@
  Copyright 2007 Sun Microsystems Inc. All Rights Reserved
 -->
 <descriptor>
-  <description>Test for the PolicyWSDLGeneratorExtension</description>
+  <description>Tests a basid dispatch client without WSIT extensions</description>
   <client href ="test.bsh"/>
   <service basedir="./server"/>
 </descriptor>
