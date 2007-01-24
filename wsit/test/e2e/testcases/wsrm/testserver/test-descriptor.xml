@@ -1,4 +1,4 @@
-<descriptor skip="false">
+<descriptor skip="true">
   <description>This is a test for checking the Delivery assurances of RM </description>
   <client href ="test.bsh"/>
   <client href ="test1.bsh"/>

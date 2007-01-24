@@ -1,4 +1,4 @@
-<descriptor skip="false">
+<descriptor skip="true">
   <description>This is a test of timeout and keep-alive functionality</description>
   <client href ="test.bsh"/>
   <service basedir="./server">
