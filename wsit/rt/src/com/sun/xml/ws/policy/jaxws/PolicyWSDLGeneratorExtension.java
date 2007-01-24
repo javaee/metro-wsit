@@ -105,7 +105,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
                                                  extenders.toArray(new PolicyMapExtender[policyMapUpdateProviders.length]));
 
             if (policyMap == null) {
-                logger.fine("start", LocalizationMessages.WSP_001034_CREATE_POLICY_MAP_FOR_CONFIG());
+                logger.fine("start", LocalizationMessages.WSP_001034_CREATE_POLICY_MAP_FOR_CONFIG(configId));
                 policyMap = PolicyMap.createPolicyMap(extenders);
             }
             
