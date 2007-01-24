@@ -265,7 +265,7 @@ public class WSSCContract implements WSTrustContract   {
                 SessionManager.getSessionManager().createSession(token.getIdentifier().toString());
         if (log.isLoggable(Level.FINE)) {
             log.log(Level.FINE,
-                    "Creating session for : "  + token.getIdentifier());
+                    LogStringsMessages.WSSC_1010_CREATING_SESSION(token.getIdentifier()));
         }
         populateITC(session, secret, token, attachedReference, context, unattachedRef);
         return response;
@@ -437,8 +437,8 @@ public class WSSCContract implements WSTrustContract   {
             return writer.toString();
         } catch (Exception e) {
             log.log(Level.SEVERE,
-                    LogStringsMessages.WSSC_0027_ERROR_MARSHAL_LOG());
-            throw new RuntimeException(LogStringsMessages.WSSC_0027_ERROR_MARSHAL_LOG(), e);
+                    LogStringsMessages.WSSC_0001_ERROR_MARSHAL_LOG());
+            throw new RuntimeException(LogStringsMessages.WSSC_0001_ERROR_MARSHAL_LOG(), e);
         }
     }
     

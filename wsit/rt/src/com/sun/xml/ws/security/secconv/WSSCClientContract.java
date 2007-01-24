@@ -218,7 +218,7 @@ public class WSSCClientContract implements WSTrustClientContract{
         } else {
             log.log(Level.SEVERE,
                     LogStringsMessages.WSSC_0026_UNSUPPORTED_COMPUTED_KEY(computedKey));
-            throw new WSSecureConversationException(LogStringsMessages.WSSC_0026_UNSUPPORTED_COMPUTED_KEY(computedKey));
+            throw new WSSecureConversationException(LogStringsMessages.WSSC_0026_UNSUPPORTED_COMPUTED_KEY_E(computedKey));
         }
         return key;
     }
