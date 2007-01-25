@@ -102,6 +102,7 @@
         <delete dir="${tmpdir}/META-INF" includeemptydirs="true"/>
         <zip destfile="${build.dir}/${name}-tools-src.zip">
             <fileset dir="src"/>
+            <fileset dir="${build.gen-src.dir}"/>
             <fileset dir="${tmpdir}"/>
         </zip>
     </target>
