@@ -23,6 +23,8 @@
 package com.sun.xml.ws.policy.privateutil;
 
 import com.sun.xml.ws.policy.PolicyException;
+import java.io.Closeable;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -41,8 +43,28 @@ import javax.xml.namespace.QName;
  *
  * @author Marek Potociar
  */
-public final class PolicyUtils {    
+public final class PolicyUtils {
     private PolicyUtils() { }
+    
+    public static class IO {
+        private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyUtils.IO.class);
+        /**
+         * If the {@code resource} is not null, this method will try to close the 
+         * {@code resource} instance and log warning about any unexpected 
+         * {@link IOException} that may occur.
+         *
+         * @param resource resource to be closed         
+         */
+        public static void closeResource(Closeable resource) {
+            if (resource != null) {
+                try {
+                    resource.close();
+                } catch (IOException e) {
+                    LOGGER.warning("closeResource", LocalizationMessages.WSP_000023_UNEXPECTED_ERROR_WHILE_CLOSING_RESOURCE(resource.toString()), e);
+                }
+            }
+        }
+    }
     
     /**
      * Text utilities wrapper.
@@ -206,8 +228,8 @@ public final class PolicyUtils {
         /**
          * Reflectively invokes specified method on the specified target
          */
-        public static <T> T invoke(final Object target, final String methodName, 
-                                    final Class<T> resultClass, final Object... parameters) throws PolicyException {
+        public static <T> T invoke(final Object target, final String methodName,
+                final Class<T> resultClass, final Object... parameters) throws PolicyException {
             Class[] parameterTypes;
             if (parameters != null && parameters.length > 0) {
                 parameterTypes = new Class[parameters.length];
@@ -225,8 +247,8 @@ public final class PolicyUtils {
         /**
          * Reflectively invokes specified method on the specified target
          */
-        public static <T> T invoke(final Object target, final String methodName, final Class<T> resultClass, 
-                                    final Object[] parameters, final Class[] parameterTypes) throws PolicyException {
+        public static <T> T invoke(final Object target, final String methodName, final Class<T> resultClass,
+                final Object[] parameters, final Class[] parameterTypes) throws PolicyException {
             try {
                 final Method method = target.getClass().getMethod(methodName, parameterTypes);
                 final Object result = method.invoke(target, parameters);
@@ -262,7 +284,6 @@ public final class PolicyUtils {
          * @return generated config file resource name
          */
         public static String generateFullName(final String configFileIdentifier) {
-            //TODO: replace with some algorithm that retrieves the actual file name.
             if (configFileIdentifier != null) {
                 final StringBuffer buffer = new StringBuffer("wsit-");
                 buffer.append(configFileIdentifier).append(".xml");
@@ -302,7 +323,7 @@ public final class PolicyUtils {
             }
         }
     }
-        
+    
     /**
      * Wrapper for ServiceFinder class which is not part of the Java SE yet.
      */
@@ -356,5 +377,5 @@ public final class PolicyUtils {
         public static <T> T[] load(final Class<T> serviceClass) {
             return ServiceFinder.find(serviceClass).toArray();
         }
-    }    
+    }
 }
