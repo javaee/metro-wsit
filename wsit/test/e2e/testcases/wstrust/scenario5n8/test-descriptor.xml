@@ -1,0 +1,11 @@
+<descriptor since="2.0">
+  <description>This is a trust test with invalid algorithm suite being specified in the sts wsdl </description>
+  <client href ="test.bsh" since="2.0"/>
+  <sts basedir="./sts">
+    <wsdl href="sts.wsdl"/>
+  </sts>
+  <service basedir="./server">
+    <wsdl href="PingService.wsdl"/>
+  </service>
+</descriptor>
+
