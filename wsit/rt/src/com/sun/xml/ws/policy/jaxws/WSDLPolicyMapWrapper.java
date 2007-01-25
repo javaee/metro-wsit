@@ -74,6 +74,10 @@ public class WSDLPolicyMapWrapper implements WSDLExtension {
     }
 
     protected WSDLPolicyMapWrapper(PolicyMap policyMap) {
+        if (policyMap == null) {
+            throw new NullPointerException(LocalizationMessages.WSP_001016_POLICY_MAP_CAN_NOT_BE_NULL());
+        }
+        
         this.policyMap = policyMap;
     }
     
@@ -87,44 +91,44 @@ public class WSDLPolicyMapWrapper implements WSDLExtension {
         return policyMap;
     }
     
-    void addClientConfigToMap(final URL clientWsitConfig, final PolicyMap clientPolicyMap) throws PolicyException {
+    void addClientConfigToMap(final Object clientWsitConfigId, final PolicyMap clientPolicyMap) throws PolicyException {
         LOGGER.entering("addClientConfigToMap");
         
         try {
             for (PolicyMapKey key : clientPolicyMap.getAllServiceScopeKeys()) {
                 final Policy policy = clientPolicyMap.getServiceEffectivePolicy(key);
                 // setting subject to provided URL of client WSIT config
-                mapExtender.putServiceSubject(key, new PolicySubject(clientWsitConfig, policy));
+                mapExtender.putServiceSubject(key, new PolicySubject(clientWsitConfigId, policy));
             }
             
             for (PolicyMapKey key : clientPolicyMap.getAllEndpointScopeKeys()) {
                 final Policy policy = clientPolicyMap.getEndpointEffectivePolicy(key);
                 // setting subject to provided URL of client WSIT config
-                mapExtender.putEndpointSubject(key, new PolicySubject(clientWsitConfig, policy));
+                mapExtender.putEndpointSubject(key, new PolicySubject(clientWsitConfigId, policy));
             }
             
             for (PolicyMapKey key : clientPolicyMap.getAllOperationScopeKeys()) {
                 final Policy policy = clientPolicyMap.getOperationEffectivePolicy(key);
                 // setting subject to provided URL of client WSIT config
-                mapExtender.putOperationSubject(key, new PolicySubject(clientWsitConfig, policy));
+                mapExtender.putOperationSubject(key, new PolicySubject(clientWsitConfigId, policy));
             }
             
             for (PolicyMapKey key : clientPolicyMap.getAllInputMessageScopeKeys()) {
                 final Policy policy = clientPolicyMap.getInputMessageEffectivePolicy(key);
                 // setting subject to provided URL of client WSIT config
-                mapExtender.putInputMessageSubject(key, new PolicySubject(clientWsitConfig, policy));
+                mapExtender.putInputMessageSubject(key, new PolicySubject(clientWsitConfigId, policy));
             }
             
             for (PolicyMapKey key : clientPolicyMap.getAllOutputMessageScopeKeys()) {
                 final Policy policy = clientPolicyMap.getOutputMessageEffectivePolicy(key);
                 // setting subject to provided URL of client WSIT config
-                mapExtender.putOutputMessageSubject(key, new PolicySubject(clientWsitConfig, policy));
+                mapExtender.putOutputMessageSubject(key, new PolicySubject(clientWsitConfigId, policy));
             }
             
             for (PolicyMapKey key : clientPolicyMap.getAllFaultMessageScopeKeys()) {
                 final Policy policy = clientPolicyMap.getFaultMessageEffectivePolicy(key);
                 // setting subject to provided URL of client WSIT config
-                mapExtender.putFaultMessageSubject(key, new PolicySubject(clientWsitConfig, policy));
+                mapExtender.putFaultMessageSubject(key, new PolicySubject(clientWsitConfigId, policy));
             }
             LOGGER.fine("addClientToServerMap", LocalizationMessages.WSP_001041_CLIENT_CFG_POLICIES_TRANSFERED_INTO_FINAL_POLICY_MAP(policyMap));
         } catch (FactoryConfigurationError ex) {

@@ -42,7 +42,6 @@ import com.sun.xml.ws.policy.PolicyMapExtender;
 import com.sun.xml.ws.policy.PolicyMapMutator;
 import com.sun.xml.ws.policy.jaxws.privateutil.LocalizationMessages;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
-import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelUnmarshaller;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModelContext;
@@ -60,7 +59,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
@@ -398,9 +396,9 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
     // adding current url even to locally referenced policies
     // in order to distinguish imported policies
     private void processReferenceUri(
-            final String policyUri, 
-            final WSDLObject element, 
-            final XMLStreamReader reader, 
+            final String policyUri,
+            final WSDLObject element,
+            final XMLStreamReader reader,
             final Map<WSDLObject, Collection<PolicyRecordHandler>> map) {
         
         if (null == policyUri) {
@@ -410,11 +408,11 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
             getUnresolvedUris(false).add(policyUri);
             addHandlerToMap(map, element, new PolicyRecordHandler(HandlerType.PolicyUri, policyUri));
         } else { // local (relative) policy uri
-            addHandlerToMap(map, element, 
+            addHandlerToMap(map, element,
                     new PolicyRecordHandler(
-                        HandlerType.PolicyUri, 
-                        (null == reader.getLocation().getSystemId()) ?
-                            policyUri : reader.getLocation().getSystemId() + policyUri));
+                    HandlerType.PolicyUri,
+                    (null == reader.getLocation().getSystemId()) ?
+                        policyUri : reader.getLocation().getSystemId() + policyUri));
         }
     }
     
@@ -424,12 +422,12 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
             processReferenceUri(readPolicyReferenceElement(reader), element, reader, map);
             return true;
         } else if (PolicyConstants.POLICY.equals(reader.getName())) {   // policy could be defined here
-            final PolicyRecordHandler handler = 
-                readSinglePolicy(
+            final PolicyRecordHandler handler =
+                    readSinglePolicy(
                     skipPolicyElement(
-                        reader, 
-                        (null == reader.getLocation().getSystemId()) ? // baseUrl
-                            "" : reader.getLocation().getSystemId()),
+                    reader,
+                    (null == reader.getLocation().getSystemId()) ? // baseUrl
+                        "" : reader.getLocation().getSystemId()),
                     true);
             if (null != handler) {           // only policies with an Id can work for us
                 addHandlerToMap(map, element, handler);
@@ -481,9 +479,9 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
         if (PolicyConstants.POLICY.equals(reader.getName())) {     // Only "Policy" element interests me
             readSinglePolicy(
                     skipPolicyElement(
-                        reader, 
-                        (null == reader.getLocation().getSystemId()) ? // baseUrl
-                            "" : reader.getLocation().getSystemId()),
+                    reader,
+                    (null == reader.getLocation().getSystemId()) ? // baseUrl
+                        "" : reader.getLocation().getSystemId()),
                     false);
             LOGGER.exiting("definitionsElements");
             return true;
@@ -1153,28 +1151,23 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
         final WSDLPolicyMapWrapper mapWrapper = context.getWSDLModel().getExtension(WSDLPolicyMapWrapper.class);
         if (mapWrapper != null) {
             if (context.isClientSide() && (!isForConfigFile)) {
-                final String clientCfgFileName = PolicyUtils.ConfigFile.generateFullName(PolicyConstants.CLIENT_CONFIGURATION_IDENTIFIER);
                 try {
-                    final URL clientCfgFileUrl = PolicyUtils.ConfigFile.loadFromClasspath(clientCfgFileName);
-                    if (clientCfgFileUrl == null) {
-                        LOGGER.config("postFinished", LocalizationMessages.WSP_001040_CLIENT_CONFIG_FILE_MISSING());
+                    final PolicyMap clientPolicyMap = PolicyConfigParser.parse(PolicyConstants.CLIENT_CONFIGURATION_IDENTIFIER, null);
+                    if (clientPolicyMap != null) {
+                        mapWrapper.addClientConfigToMap(PolicyConstants.CLIENT_CONFIGURATION_IDENTIFIER, clientPolicyMap);
                     } else {
-                        LOGGER.config("postFinished", LocalizationMessages.WSP_001038_CLIENT_CONFIG_FILE_URL_IS(clientCfgFileUrl));
-                        final PolicyMap clientPolicyMap = PolicyConfigParser.parse(clientCfgFileUrl, true);
-                        LOGGER.fine("postFinished", LocalizationMessages.WSP_001039_CLIENT_CONFIG_FILE_POLICY_MAP_IS(clientPolicyMap));
-                        mapWrapper.addClientConfigToMap(clientCfgFileUrl, clientPolicyMap);
+                        LOGGER.config("postFinished", LocalizationMessages.WSP_001040_CLIENT_CONFIG_PROCESSING_SKIPPED());
                     }
                 } catch (PolicyException pe) {
-                    LOGGER.severe("postFinished", LocalizationMessages.WSP_001017_POLICY_EXCEPTION_WHILE_READING_CLIENT_CONFIG(), pe);
-                    throw new WebServiceException(pe);
+                    throw logAndWrapException("postFinished", LocalizationMessages.WSP_001017_ERROR_WHILE_PROCESSING_CLIENT_CONFIG(), pe);
                 }
+                
                 LOGGER.fine("postFinished", LocalizationMessages.WSP_001024_INVOKING_CLIENT_POLICY_ALTERNATIVE_SELECTION());
                 try {
                     mapWrapper.doAlternativeSelection();
                 } catch (PolicyException e) {
-                    LOGGER.severe("postFinished", LocalizationMessages.WSP_001003_VALID_POLICY_ALTERNATIVE_NOT_FOUND(), e);
-                    throw new WebServiceException(LocalizationMessages.WSP_001003_VALID_POLICY_ALTERNATIVE_NOT_FOUND(), e);
-                }
+                    throw logAndWrapException("postFinished", LocalizationMessages.WSP_001003_VALID_POLICY_ALTERNATIVE_NOT_FOUND(), e);
+                }                
             } else if (!context.isClientSide() && !isForConfigFile) { //server side
                 try {
                     mapWrapper.validateServerSidePolicies();
@@ -1186,5 +1179,10 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
             mapWrapper.configureModel(context.getWSDLModel());
         }
         LOGGER.exiting("postFinished");
+    }
+    
+    private WebServiceException logAndWrapException(final String methodName, final String message, final Throwable cause) {
+        LOGGER.severe(methodName, message, cause);
+        return new WebServiceException(message, cause);
     }
 }

@@ -47,65 +47,77 @@ import javax.xml.ws.WebServiceFeature;
 public class PolicyServiceInterceptor extends ServiceInterceptor {
     private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyServiceInterceptor.class);
     
-    public List<WebServiceFeature> preCreateBinding(final WSPortInfo port,
-            final java.lang.Class<?> serviceEndpointInterface,
-            final WSFeatureList defaultFeatures) {
-        LOGGER.entering("preCreateBinding",
-                new Object[] {port, serviceEndpointInterface, defaultFeatures});
+    public List<WebServiceFeature> preCreateBinding(final WSPortInfo port, final java.lang.Class<?> serviceEndpointInterface, final WSFeatureList defaultFeatures) {
+        LOGGER.entering("preCreateBinding", new Object[] {port, serviceEndpointInterface, defaultFeatures});
         final LinkedList<WebServiceFeature> features = new LinkedList<WebServiceFeature>();
         try {
             final WSDLPort wsdlPort = port.getPort();
             // We only need to read the client config if the server WSDL was not parsed
             if (wsdlPort == null) {
-                final String clientCfgFileName = PolicyUtils.ConfigFile.generateFullName(PolicyConstants.CLIENT_CONFIGURATION_IDENTIFIER);
-                final URL clientCfgFileUrl = PolicyUtils.ConfigFile.loadFromClasspath(clientCfgFileName);
-                if (clientCfgFileUrl != null) {
-                    LOGGER.config("preCreateBinding", LocalizationMessages.WSP_001022_LOADING_CLIENT_CFG_FILE(clientCfgFileUrl));
-                    final WSDLModel clientModel = PolicyConfigParser.parseModel(clientCfgFileUrl, true);
-                    final WSDLPolicyMapWrapper clientWrapper = clientModel.getExtension(WSDLPolicyMapWrapper.class);
-                    if (clientWrapper != null) {
-                        final PolicyMap map = clientWrapper.getPolicyMap();
-                        if (map != null) {
-                            LOGGER.config("preCreateBinding", LocalizationMessages.WSP_001023_INVOKING_CLI_SIDE_ALTERNATIVE_SELECTION());
-                            clientWrapper.doAlternativeSelection();
+                final WSDLModel clientModel;
+                try {
+                    clientModel = PolicyConfigParser.parseModel(PolicyConstants.CLIENT_CONFIGURATION_IDENTIFIER, null);
+                } catch (PolicyException pe) {
+                    throw logAndWrapException("preCreateBinding", LocalizationMessages.WSP_001017_ERROR_WHILE_PROCESSING_CLIENT_CONFIG(), pe);
+                }
+                
+                if (clientModel != null) {
+                    final WSDLPolicyMapWrapper policyMapWrapper = clientModel.getExtension(WSDLPolicyMapWrapper.class);
+                    if (policyMapWrapper != null) {
+                        LOGGER.config("preCreateBinding", LocalizationMessages.WSP_001024_INVOKING_CLIENT_POLICY_ALTERNATIVE_SELECTION());
+                        try {
+                            policyMapWrapper.doAlternativeSelection();
+                        } catch (PolicyException e) {
+                            throw logAndWrapException("preCreateBinding", LocalizationMessages.WSP_001003_VALID_POLICY_ALTERNATIVE_NOT_FOUND(), e);
+                        }
+                        
+                        final PolicyMap map = policyMapWrapper.getPolicyMap();
+                        
+                        try {
                             for (ModelConfiguratorProvider configurator : PolicyUtils.ServiceProvider.load(ModelConfiguratorProvider.class)) {
                                 configurator.configure(clientModel, map);
                             }
-                            // We can not read the features directly from port.getPort() because in the
-                            // case of dispatch that object may be null.
-                            addFeatures(features, clientModel, port.getPortName());
-                            features.add(new PolicyFeature(map, clientModel, port));
+                        } catch (PolicyException e) {
+                            throw logAndWrapException("preCreateBinding", LocalizationMessages.WSP_001023_ERROR_WHILE_CONFIGURING_MODEL(), e);
                         }
+                        // We can not read the features directly from port.getPort() because in the
+                        // case of dispatch that object may be null.
+                        addFeatures(features, clientModel, port.getPortName());
+                        features.add(new PolicyFeature(map, clientModel, port));
+                    } else {
+                        LOGGER.config("preCreateBinding", LocalizationMessages.WSP_001022_POLICY_MAP_NOT_IN_MODEL());
                     }
-                } else {
-                    LOGGER.config("preCreateBinding",
-                            LocalizationMessages.WSP_001035_COULD_NOT_FIND_CLIENT_CFG_FILE_ON_CLASSPATH(clientCfgFileName));
                 }
             }
-        } catch (PolicyException e) {
-            LOGGER.severe("preCreateBinding", e.getMessage(), e);
-            throw new WebServiceException(e);
+            
+            return features;
+        } finally {
+            LOGGER.exiting("preCreateBinding", features);
         }
-        
-        LOGGER.exiting("preCreateBinding", features);
-        return features;
+    }
+    
+    private WebServiceException logAndWrapException(final String methodName, final String message, final Throwable cause) {
+        LOGGER.severe(methodName, message, cause);
+        return new WebServiceException(message, cause);
     }
     
     /**
      * Add the features in the WSDL model for the given port to the list
      */
-    private void addFeatures(
-            final List<WebServiceFeature> features, final WSDLModel model, final QName portName) {
+    private void addFeatures(final List<WebServiceFeature> features, final WSDLModel model, final QName portName) {
         LOGGER.entering("addFeatures", new Object[] { features, model, portName });
-        for (WSDLService service : model.getServices().values()) {
-            final WSDLPort port = service.get(portName);
-            if (port != null) {
-                addFeatureListToList(features, port.getFeatures());
-                addFeatureListToList(features, port.getBinding().getFeatures());
-                break;
+        try {
+            for (WSDLService service : model.getServices().values()) {
+                final WSDLPort port = service.get(portName);
+                if (port != null) {
+                    addFeatureListToList(features, port.getFeatures());
+                    addFeatureListToList(features, port.getBinding().getFeatures());
+                    break;
+                }
             }
+        } finally {
+            LOGGER.exiting("addFeatures", features);
         }
-        LOGGER.exiting("addFeatures", features);
     }
     
     private void addFeatureListToList(final List<WebServiceFeature> list, final WSFeatureList featureList) {
@@ -113,5 +125,4 @@ public class PolicyServiceInterceptor extends ServiceInterceptor {
             list.add(feature);
         }
     }
-    
 }

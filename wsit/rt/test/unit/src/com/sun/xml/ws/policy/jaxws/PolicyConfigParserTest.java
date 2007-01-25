@@ -44,6 +44,8 @@ import junit.framework.TestCase;
  *
  */
 public class PolicyConfigParserTest extends TestCase {
+    private static final String CONFIG_FILE_PATH = "test/unit/data/META-INF";
+    private static final String CONFIG_FILE_NAME = "wsit-test.xml";
     
     public PolicyConfigParserTest(String testName) {
         super(testName);
@@ -60,20 +62,18 @@ public class PolicyConfigParserTest extends TestCase {
         
         PolicyMap result = null;
         
-        result = PolicyConfigParser.parse(null, container);
+        result = PolicyConfigParser.parse((String) null, container);
         assertNull(result);
     }
     
     public void testParseContainerNullWithConfig() throws Exception {
-        final String CONFIG_FILE_PATH = "test/unit/data/META-INF";
-        final String CONFIG_FILE_NAME = "wsit.xml";
         
         Container container = null;
         PolicyMap map = null;
         
         try {
             copyFile("test/unit/data/policy/config/wsit.xml", CONFIG_FILE_PATH, CONFIG_FILE_NAME);
-            map = PolicyConfigParser.parse(null, container);
+            map = PolicyConfigParser.parse("test", container);
         } finally {
             File wsitxml = new File(CONFIG_FILE_PATH + File.separatorChar + CONFIG_FILE_NAME);
             wsitxml.delete();
@@ -89,20 +89,17 @@ public class PolicyConfigParserTest extends TestCase {
         
         PolicyMap result = null;
         
-        result = PolicyConfigParser.parse(null, container);
+        result = PolicyConfigParser.parse((String) null, container);
         assertNull(result);
     }
     
     public void testParseContainerWithoutContext() throws Exception {
-        final String CONFIG_FILE_PATH = "test/unit/data/META-INF";
-        final String CONFIG_FILE_NAME = "wsit.xml";
-        
         Container container = new MockContainer(null);
         PolicyMap map = null;
         
         try {
             copyFile("test/unit/data/policy/config/wsit.xml", CONFIG_FILE_PATH, CONFIG_FILE_NAME);
-            map = PolicyConfigParser.parse(null, container);
+            map = PolicyConfigParser.parse("test", container);
         } finally {
             File wsitxml = new File(CONFIG_FILE_PATH + File.separatorChar + CONFIG_FILE_NAME);
             wsitxml.delete();
@@ -125,8 +122,8 @@ public class PolicyConfigParserTest extends TestCase {
         
         try {
             result = PolicyConfigParser.parse((URL) null, false);
-            fail("Expected PolicyException");
-        } catch (PolicyException e) {
+            fail("Expected NullPointerException");
+        } catch (NullPointerException e) {
         }
         assertNull(result);
     }
