@@ -1,0 +1,11 @@
+<descriptor since="2.0">
+  <description>This is a trust test with invalid class being specified for the contract and the endpoint being nondefault</description>
+  <client href ="test.bsh" since="2.0"/>
+  <sts basedir="./sts">
+    <wsdl href="sts.wsdl"/>
+  </sts>
+  <service basedir="./server">
+    <wsdl href="PingService.wsdl"/>
+  </service>
+</descriptor>
+
