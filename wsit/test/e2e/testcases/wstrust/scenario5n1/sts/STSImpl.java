@@ -17,7 +17,6 @@ import javax.xml.ws.ServiceMode;
 import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.WebServiceProvider;
 
-import java.util.List;
 import javax.xml.transform.Source;
 import javax.xml.ws.handler.MessageContext;
 
