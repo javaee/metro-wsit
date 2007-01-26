@@ -85,11 +85,11 @@ public class DefaultSTSConfiguration implements STSConfiguration{
     }
         
     public void setEncryptIssuedKey(boolean encryptIssuedKey){
-        this.encryptIssuedToken = encryptIssuedKey;
+        this.encryptIssuedKey = encryptIssuedKey;
     }
     
     public boolean getEncryptIssuedKey(){
-        return this.encryptIssuedToken;
+        return this.encryptIssuedKey;
     }
         
     public void setIssuedTokenTimeout(long issuedTokenTimeout){
