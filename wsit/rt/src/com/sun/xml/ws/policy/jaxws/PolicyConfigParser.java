@@ -219,7 +219,7 @@ public final class PolicyConfigParser {
                 // TODO: remove after NB plugin starts generating differnet names
                 // BEGIN REMOVE
                 if (configFileUrl == null) {
-                    examinedPath = examinedPath + File.pathSeparator + JAR_PREFIX + "wsit.xml";
+                    examinedPath = examinedPath + File.pathSeparator + " " + JAR_PREFIX + "wsit.xml";
                     configFileUrl = PolicyUtils.ConfigFile.loadFromClasspath(JAR_PREFIX + "wsit.xml");
                 }
                 // END REMOVE
@@ -229,7 +229,7 @@ public final class PolicyConfigParser {
                 // TODO: remove after NB plugin starts generating differnet names
                 // BEGIN REMOVE
                 if (configFileUrl == null) {
-                    examinedPath = examinedPath + File.pathSeparator + WAR_PREFIX + "wsit.xml";
+                    examinedPath = examinedPath + File.pathSeparator + " " + WAR_PREFIX + "wsit.xml";
                     configFileUrl = PolicyUtils.ConfigFile.loadFromContext(WAR_PREFIX + "wsit.xml", context);
                 }
                 // END REMOVE
@@ -238,7 +238,7 @@ public final class PolicyConfigParser {
             if (configFileUrl != null) {
                 model = parseModel(configFileUrl, isClientConfig, mutators);
             } else {
-                LOGGER.warning("parseModel", LocalizationMessages.WSP_001035_COULD_NOT_LOCATE_WSIT_CFG_FILE(configFileIdentifier, examinedPath));
+                LOGGER.config("parseModel", LocalizationMessages.WSP_001035_COULD_NOT_LOCATE_WSIT_CFG_FILE(configFileIdentifier, examinedPath));
             }
             
             return model;
