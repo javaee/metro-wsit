@@ -32,12 +32,12 @@
 
 package com.sun.xml.ws.security.trust.impl;
 
+import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.policy.impl.bindings.AppliesTo;
 import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.trust.Configuration;
 import com.sun.xml.ws.security.trust.WSTrustClientContract;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
-import com.sun.xml.ws.security.trust.WSTrustException;
 import com.sun.xml.ws.security.trust.elements.BinarySecret;
 import com.sun.xml.ws.security.trust.elements.Entropy;
 import com.sun.xml.ws.security.trust.elements.Lifetime;

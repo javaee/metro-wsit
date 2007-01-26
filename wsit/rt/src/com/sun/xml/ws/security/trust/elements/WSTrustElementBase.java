@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustElementBase.java,v 1.1 2006-05-03 22:57:21 arungupta Exp $
+ * $Id: WSTrustElementBase.java,v 1.2 2007-01-26 05:57:56 jdg6688 Exp $
  */
 
 /*
@@ -32,7 +32,7 @@ import com.sun.xml.ws.policy.impl.bindings.AppliesTo;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.impl.bindings.PolicyReference;
 
-import com.sun.xml.ws.security.trust.WSTrustException;
+import com.sun.xml.ws.api.security.trust.WSTrustException;
 
 /**
  * @author WS-Trust Implementation Team.

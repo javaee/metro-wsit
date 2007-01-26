@@ -1,6 +1,3 @@
-/*
- * $Id: WSTrustException.java,v 1.2 2007-01-11 13:15:09 raharsha Exp $
- */
 
 /*
  * The contents of this file are subject to the terms
@@ -24,7 +21,7 @@
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
-package com.sun.xml.ws.security.trust;
+package com.sun.xml.ws.api.security.trust;
 
 
 /**

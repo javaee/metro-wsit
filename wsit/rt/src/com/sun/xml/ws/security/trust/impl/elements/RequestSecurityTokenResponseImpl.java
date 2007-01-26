@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityTokenResponseImpl.java,v 1.8 2007-01-13 11:39:14 manveen Exp $
+ * $Id: RequestSecurityTokenResponseImpl.java,v 1.9 2007-01-26 05:57:46 jdg6688 Exp $
  */
 
 /*
@@ -36,7 +36,7 @@ import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.impl.bindings.PolicyReference;
 import javax.xml.bind.JAXBElement;
 
-import com.sun.xml.ws.security.trust.WSTrustException;
+import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
 
 import com.sun.xml.ws.security.trust.elements.*;

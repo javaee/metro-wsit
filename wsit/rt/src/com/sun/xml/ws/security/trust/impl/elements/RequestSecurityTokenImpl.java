@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityTokenImpl.java,v 1.10 2007-01-15 10:29:52 raharsha Exp $
+ * $Id: RequestSecurityTokenImpl.java,v 1.11 2007-01-26 05:57:46 jdg6688 Exp $
  */
 
 /*
@@ -32,13 +32,13 @@ import java.util.List;
 import java.net.URI;
 
 import com.sun.xml.ws.api.security.trust.Claims;
+import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.policy.impl.bindings.AppliesTo;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.impl.bindings.PolicyReference;
 import javax.xml.bind.JAXBElement;
 
 import com.sun.xml.ws.security.trust.WSTrustConstants;
-import com.sun.xml.ws.security.trust.WSTrustException;
 import com.sun.xml.ws.security.trust.elements.*;
 
 import com.sun.xml.ws.security.trust.impl.bindings.AllowPostdatingType;

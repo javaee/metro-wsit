@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustFactory.java,v 1.8 2007-01-24 21:49:21 manveen Exp $
+ * $Id: WSTrustFactory.java,v 1.9 2007-01-26 05:57:48 jdg6688 Exp $
  */
 
 /*
@@ -28,14 +28,17 @@ package com.sun.xml.ws.security.trust;
 
 import com.sun.xml.ws.api.security.trust.STSAttributeProvider;
 import com.sun.xml.ws.api.security.trust.STSAuthorizationProvider;
-
+import com.sun.xml.ws.api.security.trust.WSTrustContract;
+import com.sun.xml.ws.api.security.trust.WSTrustException;
+import com.sun.xml.ws.api.security.trust.config.STSConfiguration;
+import com.sun.xml.ws.api.security.trust.config.STSConfigurationProvider;
+import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
+import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponse;
 
 import com.sun.xml.ws.security.trust.impl.DefaultSTSAttributeProvider;
 import com.sun.xml.ws.security.trust.impl.DefaultSTSAuthorizationProvider;
 import com.sun.xml.ws.security.trust.impl.WSTrustClientContractImpl;
 import com.sun.xml.ws.security.trust.impl.TrustPluginImpl;
-import com.sun.xml.ws.security.trust.impl.STSConfiguration;
-import com.sun.xml.ws.security.trust.impl.TrustSPMetadata;
 
 import com.sun.xml.ws.util.ServiceFinder;
 
@@ -69,26 +72,23 @@ public class WSTrustFactory {
      * </p>
      * @Exception UnsupportedOperationException if this factory does not support this contract
      */
-    public static WSTrustContract newWSTrustContract(final Configuration config, final String appliesTo) throws WSTrustException {
-        final STSConfiguration stsConfig = (STSConfiguration)config;
-        TrustSPMetadata spMetadata = stsConfig.getTrustSPMetadata(appliesTo);
-        if(spMetadata == null){
-            spMetadata = stsConfig.getTrustSPMetadata(WSTrustConstants.DEFAULT_APPLIESTO);
-        }
-        if (spMetadata == null){
-            log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0004_UNKNOWN_SERVICEPROVIDER(appliesTo));
-            throw new WSTrustException(LogStringsMessages.WST_0004_UNKNOWN_SERVICEPROVIDER(appliesTo));
-        }
-        String type = spMetadata.getType();
-        if (type == null){
-            type = stsConfig.getDefaultType();
-        }
+    public static WSTrustContract<RequestSecurityToken, RequestSecurityTokenResponse> newWSTrustContract(final STSConfiguration config, final String appliesTo) throws WSTrustException {
+        //final STSConfiguration stsConfig = (STSConfiguration)config;
+        //TrustSPMetadata spMetadata = stsConfig.getTrustSPMetadata(appliesTo);
+       // if(spMetadata == null){
+           // spMetadata = stsConfig.getTrustSPMetadata(WSTrustConstants.DEFAULT_APPLIESTO);
+       // }
+        //if (config. == null){
+           // log.log(Level.SEVERE,
+              //      LogStringsMessages.WST_0004_UNKNOWN_SERVICEPROVIDER(appliesTo));
+           // throw new WSTrustException(LogStringsMessages.WST_0004_UNKNOWN_SERVICEPROVIDER(appliesTo));
+       // }
+        String type = config.getType();
         if(log.isLoggable(Level.FINE)) {
             log.log(Level.FINE,
                     LogStringsMessages.WST_1002_PROVIDER_TYPE(type));
         }
-        WSTrustContract contract = null;
+        WSTrustContract<RequestSecurityToken, RequestSecurityTokenResponse> contract = null;
         try {
             Class clazz = null;
             final ClassLoader loader = Thread.currentThread().getContextClassLoader();
@@ -100,8 +100,8 @@ public class WSTrustFactory {
             }
             
             if (clazz != null) {
-                contract = (WSTrustContract) clazz.newInstance();
-                contract.init(spMetadata);
+                contract = (WSTrustContract<RequestSecurityToken, RequestSecurityTokenResponse>) clazz.newInstance();
+                contract.init(config);
             }
         } catch (ClassNotFoundException ex) {
             contract = null;
@@ -163,7 +163,22 @@ public class WSTrustFactory {
             attrProvider = new DefaultSTSAttributeProvider();
         }
         return attrProvider;
-     }
+    }
+    
+    public static STSConfiguration getRuntimeSTSConfiguration(){
+        STSConfigurationProvider configProvider = null;
+        final ServiceFinder<STSConfigurationProvider> finder = 
+                ServiceFinder.find(STSConfigurationProvider.class);
+        if (finder != null && finder.toArray().length > 0) {
+            configProvider = finder.toArray()[0];
+        } 
+        
+        if (configProvider != null){
+            return configProvider.getSTSConfiguration();
+        }
+        
+        return null;
+    }
 
     private WSTrustFactory() {
         //private constructor

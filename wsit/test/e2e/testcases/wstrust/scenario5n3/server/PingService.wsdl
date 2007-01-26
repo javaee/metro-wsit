@@ -183,7 +183,7 @@
         <wsdl:port name="CustomBinding_IPingService" binding="tns:Scenario_5_IssuedTokenForCertificate_MutualCertificate11">
             <soap12:address location="REPLACE_WITH_ACTUAL_URL"/>
             <wsa10:EndpointReference>
-                <wsa10:Address>http://131.107.72.15/Security_Federation_FederatedService_Indigo/Symmetric.svc/Scenario_5_IssuedTokenForCertificate_MutualCertificate11</wsa10:Address>
+                <wsa10:Address>default</wsa10:Address>
                 <Identity>
                     <KeyInfo>
                         <X509Data>

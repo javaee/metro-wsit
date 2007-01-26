@@ -23,7 +23,7 @@
 
 package com.sun.xml.ws.security.secconv;
 
-import com.sun.xml.ws.security.trust.WSTrustException;
+import com.sun.xml.ws.api.security.trust.WSTrustException;
 
 /**
  * A General WS-SecureConversation Implementation Exception

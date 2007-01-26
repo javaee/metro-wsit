@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustElementFactory.java,v 1.8 2007-01-15 10:29:50 raharsha Exp $
+ * $Id: WSTrustElementFactory.java,v 1.9 2007-01-26 05:57:49 jdg6688 Exp $
  */
 
 /*
@@ -30,6 +30,7 @@ import com.sun.xml.ws.security.trust.elements.str.DirectReference;
 import com.sun.xml.ws.security.trust.elements.str.KeyIdentifier;
 
 import com.sun.xml.ws.api.security.trust.Claims;
+import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.security.trust.elements.AllowPostdating;
 import com.sun.xml.ws.security.trust.elements.BinarySecret;
 import com.sun.xml.ws.security.trust.elements.CancelTarget;

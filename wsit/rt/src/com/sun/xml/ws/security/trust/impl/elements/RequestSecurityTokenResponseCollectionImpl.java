@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityTokenResponseCollectionImpl.java,v 1.3 2007-01-12 14:44:13 raharsha Exp $
+ * $Id: RequestSecurityTokenResponseCollectionImpl.java,v 1.4 2007-01-26 05:57:46 jdg6688 Exp $
  */
 
 /*
@@ -27,7 +27,7 @@
 package com.sun.xml.ws.security.trust.impl.elements;
 
 import com.sun.xml.ws.policy.impl.bindings.AppliesTo;
-import com.sun.xml.ws.security.trust.WSTrustException;
+import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.security.trust.elements.Entropy;
 import com.sun.xml.ws.security.trust.elements.Lifetime;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponse;

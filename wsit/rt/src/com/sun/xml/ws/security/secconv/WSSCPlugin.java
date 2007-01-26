@@ -36,6 +36,7 @@ import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.NestedPolicy;
 //import com.sun.xml.ws.fault.SOAPFaultBuilder;
@@ -52,7 +53,7 @@ import com.sun.xml.ws.security.policy.SymmetricBinding;
 import com.sun.xml.ws.security.trust.Configuration;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
-import com.sun.xml.ws.security.trust.WSTrustException;
+import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.security.trust.elements.BinarySecret;
 import com.sun.xml.ws.security.trust.elements.CancelTarget;
 import com.sun.xml.ws.security.trust.elements.Entropy;
@@ -155,11 +156,11 @@ public class WSSCPlugin {
             log.log(Level.SEVERE,
                     LogStringsMessages.WSSC_0024_ERROR_CREATING_RST(""), ex);
             throw new RuntimeException(LogStringsMessages.WSSC_0024_ERROR_CREATING_RST(""), ex);
-        } catch (WSTrustException ex){
+        }/* catch (WSTrustException ex){
             log.log(Level.SEVERE,
                     LogStringsMessages.WSSC_0021_PROBLEM_CREATING_RST_TRUST(), ex);
             throw new RuntimeException(LogStringsMessages.WSSC_0021_PROBLEM_CREATING_RST_TRUST(), ex);
-        }
+        }*/
         
         final RequestSecurityTokenResponse rstr = sendRequest(token, wsdlPort, binding, securityPipe, marshaller, unmarshaller, rst, WSSCConstants.REQUEST_SECURITY_CONTEXT_TOKEN_ACTION, endPointAddress, addVer);
         
@@ -289,7 +290,7 @@ public class WSSCPlugin {
         return rstr;
     }
     
-    private RequestSecurityToken createRequestSecurityToken(final boolean reqClientEntropy,final int skl) throws WSSecureConversationException, WSTrustException{
+    private RequestSecurityToken createRequestSecurityToken(final boolean reqClientEntropy,final int skl) throws WSSecureConversationException{
         
         final URI tokenType = URI.create(WSSCConstants.SECURITY_CONTEXT_TOKEN_TYPE);
         final URI requestType = URI.create(WSTrustConstants.ISSUE_REQUEST);
@@ -302,12 +303,12 @@ public class WSSCPlugin {
         RequestSecurityToken rst = null;
         try {
             rst = eleFac.createRSTForIssue(tokenType, requestType, null, null, null, entropy, null);
+            rst.setKeySize(skl);
+            rst.setKeyType(URI.create(WSTrustConstants.SYMMETRIC_KEY));
+            rst.setComputedKeyAlgorithm(URI.create(WSTrustConstants.CK_PSHA1));
         } catch (WSTrustException ex){
             throw new WSSecureConversationException(ex);
         }
-        rst.setKeySize(skl);
-        rst.setKeyType(URI.create(WSTrustConstants.SYMMETRIC_KEY));
-        rst.setComputedKeyAlgorithm(URI.create(WSTrustConstants.CK_PSHA1));
         
         return rst;
     }

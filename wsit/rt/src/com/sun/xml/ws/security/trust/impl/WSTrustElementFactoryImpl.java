@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustElementFactoryImpl.java,v 1.12 2007-01-15 10:29:51 raharsha Exp $
+ * $Id: WSTrustElementFactoryImpl.java,v 1.13 2007-01-26 05:57:48 jdg6688 Exp $
  */
 
 /*
@@ -29,6 +29,7 @@ package com.sun.xml.ws.security.trust.impl;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
 
 import com.sun.xml.ws.api.security.trust.Claims;
+import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.security.trust.elements.AllowPostdating;
 import com.sun.xml.ws.security.trust.elements.BinarySecret;
 import com.sun.xml.ws.security.trust.elements.CancelTarget;
@@ -99,7 +100,7 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
-import com.sun.xml.ws.security.trust.WSTrustException;
+import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.security.trust.impl.bindings.RequestSecurityTokenResponseCollectionType;
 import javax.xml.bind.util.JAXBSource;
 

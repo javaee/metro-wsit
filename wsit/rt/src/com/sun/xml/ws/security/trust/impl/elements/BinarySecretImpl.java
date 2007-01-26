@@ -1,5 +1,5 @@
 /*
- * $Id: BinarySecretImpl.java,v 1.7 2007-01-13 11:39:13 manveen Exp $
+ * $Id: BinarySecretImpl.java,v 1.8 2007-01-26 05:57:46 jdg6688 Exp $
  */
 
 /*
@@ -33,7 +33,7 @@ import javax.xml.bind.JAXBException;
 
 
 
-import com.sun.xml.ws.security.trust.WSTrustException;
+import com.sun.xml.ws.api.security.trust.WSTrustException;
 
 import com.sun.xml.ws.security.trust.impl.bindings.BinarySecretType;
 

@@ -21,29 +21,37 @@
  */
 
 /*
- * TrustSPMetedata.java
+ * STSConfiguration.java
  *
- * To change this template, choose Tools | Options and locate the template under
- * the Source Creation and Management node. Right-click the template and choose
- * Open. You can then make changes to the template in the Source Editor.
+ * Created on January 23, 2007, 1:19 PM
+ *
  */
 
 package com.sun.xml.ws.api.security.trust.config;
 
-import java.util.Map;
 import javax.security.auth.callback.CallbackHandler;
 
 /**
  *
  * @author Jiandong Guo
  */
-public interface TrustSPMetadata{
-                
-    String getCertAlias();
+public interface STSConfiguration {
     
-    String getTokenType();
-     
-    String getKeyType();
+    String getType();
+        
+    String getIssuer();
+        
+    boolean getEncryptIssuedToken();
+        
+    boolean getEncryptIssuedKey();
+        
+    long getIssuedTokenTimeout();
     
-    Map<String, Object> getOtherOptions(); 
+    void setCallbackHandler(CallbackHandler callbackHandler);
+    
+    CallbackHandler getCallbackHandler();
+    
+    void addTrustSPMetadata(TrustSPMetadata data, String spEndpoint);
+    
+    TrustSPMetadata getTrustSPMetadata(String spEndpoint);
 }

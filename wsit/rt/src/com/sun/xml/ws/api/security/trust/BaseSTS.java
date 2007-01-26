@@ -20,30 +20,14 @@
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
-/*
- * TrustSPMetedata.java
- *
- * To change this template, choose Tools | Options and locate the template under
- * the Source Creation and Management node. Right-click the template and choose
- * Open. You can then make changes to the template in the Source Editor.
- */
+package com.sun.xml.ws.api.security.trust;
 
-package com.sun.xml.ws.api.security.trust.config;
+import javax.xml.transform.Source;
+import javax.xml.ws.Provider;
+import javax.xml.ws.handler.MessageContext;
 
-import java.util.Map;
-import javax.security.auth.callback.CallbackHandler;
 
-/**
- *
- * @author Jiandong Guo
- */
-public interface TrustSPMetadata{
-                
-    String getCertAlias();
+public interface BaseSTS extends Provider<Source> {
     
-    String getTokenType();
-     
-    String getKeyType();
-    
-    Map<String, Object> getOtherOptions(); 
+    public Source invoke(Source rst);
 }

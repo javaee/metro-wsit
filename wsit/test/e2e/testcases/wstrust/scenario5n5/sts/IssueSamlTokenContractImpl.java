@@ -53,6 +53,8 @@ import com.sun.org.apache.xml.internal.security.encryption.XMLEncryptionExceptio
 
 
 import com.sun.xml.ws.api.security.trust.STSAttributeProvider;
+import com.sun.xml.ws.api.security.trust.WSTrustException;
+import com.sun.xml.ws.api.security.trust.config.TrustSPMetadata;
 import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.trust.elements.str.KeyIdentifier;
 import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
@@ -60,7 +62,6 @@ import com.sun.xml.ws.security.Token;
 import com.sun.xml.ws.security.trust.GenericToken;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
-import com.sun.xml.ws.security.trust.WSTrustException;
 import com.sun.xml.ws.security.trust.util.WSTrustUtil;
 import com.sun.xml.ws.security.trust.elements.BinarySecret;
 
@@ -105,14 +106,14 @@ public  class IssueSamlTokenContractImpl extends MyIssueSamlTokenContract {
     
     private static final String SAML_HOLDER_OF_KEY = "urn:oasis:names:tc:SAML:1.0:cm:holder-of-key";
     
-    protected Token createSAMLAssertion(final String appliesTo, final String tokenType, final String keyType, final String assertionId, final String issuer, final  Map<QName, List<String>> claimedAttrs, final IssuedTokenContext context) throws WSTrustException {
+    public Token createSAMLAssertion(final String appliesTo, final String tokenType, final String keyType, final String assertionId, final String issuer, final  Map<QName, List<String>> claimedAttrs, final IssuedTokenContext context) throws WSTrustException {
         Token token = null;
         
-        final CallbackHandler callbackHandler = config.getCallbackHandler();
+        final CallbackHandler callbackHandler = stsConfig.getCallbackHandler();
         
         try{
             // Get the service certificate
-            final X509Certificate serCert = getServiceCertificate(callbackHandler);
+            final X509Certificate serCert = getServiceCertificate(callbackHandler, stsConfig.getTrustSPMetadata(appliesTo));
             
             // Create the KeyInfo for SubjectConfirmation
             final KeyInfo keyInfo = createKeyInfo(keyType, serCert, context);
@@ -145,7 +146,7 @@ public  class IssueSamlTokenContractImpl extends MyIssueSamlTokenContract {
             //assertion =  new com.sun.xml.wss.saml.assertion.saml11.jaxb20.Assertion(aType.getValue());
             //token = new GenericToken(signedAssertion);
             
-            if (config.getEncryptIssuedToken()){
+            if (stsConfig.getEncryptIssuedToken()){
                 // Create the encryption key
                 final XMLCipher cipher = XMLCipher.getInstance(XMLCipher.AES_256);
                 final int keysizeInBytes = 32;
@@ -242,9 +243,9 @@ public  class IssueSamlTokenContractImpl extends MyIssueSamlTokenContract {
         return encKey;
     }
     
-    private X509Certificate getServiceCertificate(final CallbackHandler callbackHandler)throws WSTrustException{
+    private X509Certificate getServiceCertificate(final CallbackHandler callbackHandler, TrustSPMetadata spMd)throws WSTrustException{
         // Get the service certificate
-        final EncryptionKeyCallback.AliasX509CertificateRequest req = new EncryptionKeyCallback.AliasX509CertificateRequest(config.getCertAlias());
+        final EncryptionKeyCallback.AliasX509CertificateRequest req = new EncryptionKeyCallback.AliasX509CertificateRequest(spMd.getCertAlias());
         final EncryptionKeyCallback callback = new EncryptionKeyCallback(req);
         final Callback[] callbacks = {callback};
         try{
@@ -253,7 +254,7 @@ public  class IssueSamlTokenContractImpl extends MyIssueSamlTokenContract {
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(), ex);
             throw new WSTrustException(
-                    LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(), ex);
+                    LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(), ex);            
         }catch(UnsupportedCallbackException ex){
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(), ex);
@@ -271,18 +272,22 @@ public  class IssueSamlTokenContractImpl extends MyIssueSamlTokenContract {
         try{
             doc = docFactory.newDocumentBuilder().newDocument();
         }catch(ParserConfigurationException ex){
-            throw new WSTrustException("Error creating DocumentFactory ", ex);
+            log.log(Level.SEVERE, 
+                    LogStringsMessages.WST_0039_ERROR_CREATING_DOCFACTORY(), ex);
+            throw new WSTrustException(LogStringsMessages.WST_0039_ERROR_CREATING_DOCFACTORY(), ex);
         }
         
         final KeyInfo keyInfo = new KeyInfo(doc);
         if (WSTrustConstants.SYMMETRIC_KEY.equals(keyType)){
             final byte[] key = ctx.getProofKey();
-            if (!config.getEncryptIssuedToken() && config.getEncryptIssuedKey()){
+            if (!stsConfig.getEncryptIssuedToken() && stsConfig.getEncryptIssuedKey()){
                 try{
                     final EncryptedKey encKey = encryptKey(doc, key, serCert);
                     keyInfo.add(encKey);
                 }catch(Exception ex){
-                    throw new WSTrustException(ex.getMessage(), ex);
+                    log.log(Level.SEVERE,
+                            LogStringsMessages.WST_0040_ERROR_ENCRYPT_PROOFKEY(), ex);
+                    throw new WSTrustException( LogStringsMessages.WST_0040_ERROR_ENCRYPT_PROOFKEY(), ex);
                 }
             }else{
                 final BinarySecret secret = eleFac.createBinarySecret(key, BinarySecret.SYMMETRIC_KEY_TYPE);
@@ -331,7 +336,7 @@ public  class IssueSamlTokenContractImpl extends MyIssueSamlTokenContract {
             
             final GregorianCalendar issuerInst = new GregorianCalendar();
             final GregorianCalendar notOnOrAfter = new GregorianCalendar();
-            notOnOrAfter.add(Calendar.MILLISECOND, (int)config.getIssuedTokenTimeout());
+            notOnOrAfter.add(Calendar.MILLISECOND, (int)stsConfig.getIssuedTokenTimeout());
             
             final Conditions conditions =
                     samlFac.createConditions(issuerInst, notOnOrAfter, null, null, null);
@@ -388,7 +393,7 @@ public  class IssueSamlTokenContractImpl extends MyIssueSamlTokenContract {
             // Create Conditions
             final GregorianCalendar issueInst = new GregorianCalendar();
             final GregorianCalendar notOnOrAfter = new GregorianCalendar();
-            notOnOrAfter.add(Calendar.MILLISECOND, (int)config.getIssuedTokenTimeout());
+            notOnOrAfter.add(Calendar.MILLISECOND, (int)stsConfig.getIssuedTokenTimeout());
             
             final Conditions conditions = samlFac.createConditions(issueInst, notOnOrAfter, null, null, null, null);
             

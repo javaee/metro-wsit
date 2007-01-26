@@ -97,10 +97,11 @@ import javax.xml.crypto.dsig.spec.C14NMethodParameterSpec;
 import javax.xml.crypto.dsig.spec.TransformParameterSpec;
 
 
+import com.sun.xml.ws.api.security.trust.WSTrustException;
+import com.sun.xml.ws.api.security.trust.config.TrustSPMetadata;
 import com.sun.xml.ws.security.Token;
 import com.sun.xml.ws.security.trust.GenericToken;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
-import com.sun.xml.ws.security.trust.WSTrustException;
 import com.sun.xml.ws.security.trust.util.WSTrustUtil;
 import com.sun.xml.ws.security.trust.elements.BinarySecret;
 
@@ -158,10 +159,10 @@ public class SBIssuedSamlTokenContractImpl extends IssueSamlTokenContract{
         //constructor
     }
     
-    protected Token createSAMLAssertion(final String appliesTo, final String tokenType, final String keyType, final String assertionId, final String issuer, final Map<QName, List<String>> claimedAttrs, final IssuedTokenContext context) throws WSTrustException {
+    public Token createSAMLAssertion(final String appliesTo, final String tokenType, final String keyType, final String assertionId, final String issuer, final Map<QName, List<String>> claimedAttrs, final IssuedTokenContext context) throws WSTrustException {
         Token token = null;
         
-        final CallbackHandler callbackHandler = config.getCallbackHandler();
+        final CallbackHandler callbackHandler = stsConfig.getCallbackHandler();
         
         try{
             NamespaceContextEx nsContext = null;
@@ -176,7 +177,7 @@ public class SBIssuedSamlTokenContractImpl extends IssueSamlTokenContract{
             nsContext.addSignatureNS();
             nsContext.addWSSNS();
             // Get the service certificate
-            final X509Certificate serCert = getServiceCertificate(callbackHandler);
+            final X509Certificate serCert = getServiceCertificate(callbackHandler, stsConfig.getTrustSPMetadata(appliesTo));
             
             // Create the KeyInfo for SubjectConfirmation
             final KeyInfo keyInfo = createKeyInfo(keyType, serCert, context);
@@ -215,7 +216,7 @@ public class SBIssuedSamlTokenContractImpl extends IssueSamlTokenContract{
             //assertion =  new com.sun.xml.wss.saml.assertion.saml11.jaxb20.Assertion(aType.getValue());
             token = new GenericToken(signedAssertion);
             
-            if (config.getEncryptIssuedToken()){
+            if (stsConfig.getEncryptIssuedToken()){
                 final String id = "uuid-" + UUID.randomUUID().toString();
                 final int keysizeInBytes = 32;
                 final byte[] skey = WSTrustUtil.generateRandomSecret(keysizeInBytes);
@@ -253,7 +254,7 @@ public class SBIssuedSamlTokenContractImpl extends IssueSamlTokenContract{
             
             final GregorianCalendar issuerInst = new GregorianCalendar();
             final GregorianCalendar notOnOrAfter = new GregorianCalendar();
-            notOnOrAfter.add(Calendar.MILLISECOND, (int)config.getIssuedTokenTimeout());
+            notOnOrAfter.add(Calendar.MILLISECOND, (int)stsConfig.getIssuedTokenTimeout());
             
             final Conditions conditions =
                     samlFac.createConditions(issuerInst, notOnOrAfter, null, null, null);
@@ -309,7 +310,7 @@ public class SBIssuedSamlTokenContractImpl extends IssueSamlTokenContract{
             // Create Conditions
             final GregorianCalendar issueInst = new GregorianCalendar();
             final GregorianCalendar notOnOrAfter = new GregorianCalendar();
-            notOnOrAfter.add(Calendar.MILLISECOND, (int)config.getIssuedTokenTimeout());
+            notOnOrAfter.add(Calendar.MILLISECOND, (int)stsConfig.getIssuedTokenTimeout());
             
             final Conditions conditions = samlFac.createConditions(issueInst, notOnOrAfter, null, null, null, null);
             
@@ -364,7 +365,7 @@ public class SBIssuedSamlTokenContractImpl extends IssueSamlTokenContract{
         final KeyInfo keyInfo = new KeyInfo();
         if (WSTrustConstants.SYMMETRIC_KEY.equals(keyType)){
             final byte[] key = ctx.getProofKey();
-            if (!config.getEncryptIssuedToken() && config.getEncryptIssuedKey()){
+            if (!stsConfig.getEncryptIssuedToken() && stsConfig.getEncryptIssuedKey()){
                 try{
                     final Key secKey = new SecretKeySpec(key, "AES");
                     final EncryptedKey encKey = encryptKey(secKey, serCert);
@@ -428,9 +429,9 @@ public class SBIssuedSamlTokenContractImpl extends IssueSamlTokenContract{
     
     
     //common method to be moved to Base Class
-    private X509Certificate getServiceCertificate(final CallbackHandler callbackHandler)throws WSTrustException{
+    private X509Certificate getServiceCertificate(final CallbackHandler callbackHandler, TrustSPMetadata spMd)throws WSTrustException{
         // Get the service certificate
-        final EncryptionKeyCallback.AliasX509CertificateRequest req = new EncryptionKeyCallback.AliasX509CertificateRequest(config.getCertAlias());
+        final EncryptionKeyCallback.AliasX509CertificateRequest req = new EncryptionKeyCallback.AliasX509CertificateRequest(spMd.getCertAlias());
         final EncryptionKeyCallback callback = new EncryptionKeyCallback(req);
         final Callback[] callbacks = {callback};
         try{

@@ -22,6 +22,7 @@
 
 package com.sun.xml.ws.security.secconv;
 
+import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.NestedPolicy;
 import com.sun.xml.ws.policy.PolicyAssertion;
@@ -39,8 +40,6 @@ import com.sun.xml.ws.security.policy.Constants;
 import com.sun.xml.ws.security.policy.SymmetricBinding;
 import com.sun.xml.ws.security.trust.impl.bindings.ObjectFactory;
 import com.sun.xml.ws.security.trust.Configuration;
-import com.sun.xml.ws.security.trust.WSTrustException;
-import com.sun.xml.ws.security.trust.WSTrustContract;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.ws.security.trust.elements.BinarySecret;
 import com.sun.xml.ws.security.trust.elements.CancelTarget;
@@ -79,7 +78,7 @@ import com.sun.xml.ws.security.secconv.logging.LogDomainConstants;
 import com.sun.xml.ws.security.secconv.logging.LogStringsMessages;
 import javax.xml.bind.JAXBElement;
 
-public class WSSCContract implements WSTrustContract   {
+public class WSSCContract {
     
     private static final Logger log =
             Logger.getLogger(
@@ -373,24 +372,6 @@ public class WSSCContract implements WSTrustContract   {
             log.log(Level.FINER,
                     LogStringsMessages.WSSC_1003_SETTING_TIMES(creationTime.toString(), expirationTime.toString()));
         }
-    }
-    
-    /**
-     * Contains Challenge
-     * @return true if the RSTR contains a SignChallenge/BinaryExchange or
-     *  some other custom challenge recognized by this implementation.
-     */
-    public boolean containsChallenge(final RequestSecurityTokenResponse rstr) {
-        return false;
-    }
-    
-    /**
-     * Contains Challenge
-     * @return true if the RST contains Initial Negotiation/Challenge information
-     * for a Multi-Message exchange.
-     */
-    public boolean containsChallenge(final RequestSecurityToken rst) {
-        return false;
     }
     
     private SecurityTokenReference createSecurityTokenReference(final String id, final boolean unattached){

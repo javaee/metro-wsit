@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustClientContract.java,v 1.1 2006-05-03 22:57:14 arungupta Exp $
+ * $Id: WSTrustClientContract.java,v 1.2 2007-01-26 05:57:49 jdg6688 Exp $
  */
 
 /*
@@ -26,6 +26,7 @@
 
 package com.sun.xml.ws.security.trust;
 
+import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.policy.impl.bindings.AppliesTo;
 import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;

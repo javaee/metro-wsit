@@ -20,42 +20,14 @@
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
-/*
- * STSConfiguration.java
- *
- * Created on March 24, 2006, 1:19 PM
- *
- */
 
-package com.sun.xml.ws.security.trust.impl;
-
-import com.sun.xml.ws.security.trust.Configuration;
-import com.sun.xml.ws.security.trust.sts.BaseSTSImpl;
-
-import java.util.HashMap;
-import java.util.Map;
+package com.sun.xml.ws.api.security.trust.config;
 
 /**
  *
  * @author Jiandong Guo
  */
-public class STSConfiguration implements Configuration{
-    Map<String, TrustSPMetadata> spMap;
-    String defaultType = BaseSTSImpl.DEFAULT_IMPL;
+public interface STSConfigurationProvider {
     
-    public STSConfiguration(){
-        spMap = new HashMap<String, TrustSPMetadata>();
-    }
-    
-    public void addTrustSPMetadata(final TrustSPMetadata data, final String spEndpoint){
-        spMap.put(spEndpoint, data);
-    }
-    
-    public TrustSPMetadata getTrustSPMetadata(final String spEndpoint){
-        return (TrustSPMetadata)spMap.get(spEndpoint);
-    }
-    
-    public String getDefaultType(){
-        return this.defaultType;
-    }
+    STSConfiguration getSTSConfiguration();
 }

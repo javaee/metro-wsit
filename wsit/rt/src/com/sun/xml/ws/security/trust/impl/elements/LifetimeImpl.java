@@ -1,5 +1,5 @@
 /*
- * $Id: LifetimeImpl.java,v 1.8 2007-01-15 10:29:52 raharsha Exp $
+ * $Id: LifetimeImpl.java,v 1.9 2007-01-26 05:57:46 jdg6688 Exp $
  */
 
 /*
@@ -30,7 +30,7 @@ package com.sun.xml.ws.security.trust.impl.elements;
 import javax.xml.bind.JAXBException;
 
 import com.sun.xml.ws.security.wsu10.AttributedDateTime;
-import com.sun.xml.ws.security.trust.WSTrustException;
+import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.security.trust.impl.bindings.LifetimeType;
 
