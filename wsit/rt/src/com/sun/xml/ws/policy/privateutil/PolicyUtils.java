@@ -36,6 +36,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 
 /**
  * This is a wrapper class for various utilities that may be reused within Policy API implementation.
@@ -48,12 +50,13 @@ public final class PolicyUtils {
     
     public static class IO {
         private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyUtils.IO.class);
+        
         /**
-         * If the {@code resource} is not null, this method will try to close the 
-         * {@code resource} instance and log warning about any unexpected 
+         * If the {@code resource} is not {@code null}, this method will try to close the
+         * {@code resource} instance and log warning about any unexpected
          * {@link IOException} that may occur.
          *
-         * @param resource resource to be closed         
+         * @param resource resource to be closed
          */
         public static void closeResource(Closeable resource) {
             if (resource != null) {
@@ -61,6 +64,23 @@ public final class PolicyUtils {
                     resource.close();
                 } catch (IOException e) {
                     LOGGER.warning("closeResource", LocalizationMessages.WSP_000023_UNEXPECTED_ERROR_WHILE_CLOSING_RESOURCE(resource.toString()), e);
+                }
+            }
+        }
+
+        /**
+         * If the {@code reader} is not {@code null}, this method will try to close the
+         * {@code reader} instance and log warning about any unexpected
+         * {@link IOException} that may occur.
+         *
+         * @param reader resource to be closed
+         */
+        public static void closeResource(XMLStreamReader reader) {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (XMLStreamException e) {
+                    LOGGER.warning("closeResource", LocalizationMessages.WSP_000023_UNEXPECTED_ERROR_WHILE_CLOSING_RESOURCE(reader.toString()), e);
                 }
             }
         }

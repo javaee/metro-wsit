@@ -42,6 +42,7 @@ import com.sun.xml.ws.policy.PolicyMapExtender;
 import com.sun.xml.ws.policy.PolicyMapMutator;
 import com.sun.xml.ws.policy.jaxws.privateutil.LocalizationMessages;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
+import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelUnmarshaller;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModelContext;
@@ -665,22 +666,27 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
     }
     
     private boolean readExternalFile(final String fileUrl) {
+        InputStream ios = null;
+        XMLStreamReader reader = null;
         try {
             final URL xmlURL = new URL(fileUrl);
-            final InputStream ios = xmlURL.openStream();
-            final XMLStreamReader reader = XMLInputFactory.newInstance().createXMLStreamReader(ios);
+            ios = xmlURL.openStream();
+            reader = XMLInputFactory.newInstance().createXMLStreamReader(ios);
             while (reader.hasNext()) {
                 if (reader.isStartElement() && PolicyConstants.POLICY.equals(reader.getName())) {
                     readSinglePolicy(skipPolicyElement(reader, fileUrl), false);
                 }
                 reader.next();
             }
+            return true;
         } catch (IOException ioe) {
             return false;
         } catch (XMLStreamException xmlse) {
             return false;
+        } finally {
+            PolicyUtils.IO.closeResource(reader);
+            PolicyUtils.IO.closeResource(ios);
         }
-        return true;
     }
     
     public void finished(final WSDLParserExtensionContext context) {
@@ -1167,7 +1173,7 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
                     mapWrapper.doAlternativeSelection();
                 } catch (PolicyException e) {
                     throw logAndWrapException("postFinished", LocalizationMessages.WSP_001003_VALID_POLICY_ALTERNATIVE_NOT_FOUND(), e);
-                }                
+                }
             } else if (!context.isClientSide() && !isForConfigFile) { //server side
                 try {
                     mapWrapper.validateServerSidePolicies();

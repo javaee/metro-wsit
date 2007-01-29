@@ -24,7 +24,9 @@ package com.sun.xml.ws.policy.jaxws;
 
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import com.sun.xml.ws.api.wsdl.parser.XMLEntityResolver;
+import com.sun.xml.ws.streaming.TidyXMLStreamReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -62,7 +64,8 @@ public class PolicyConfigResolver implements XMLEntityResolver {
 
         try {
             final URL systemUrl = new URL(systemId);
-            final XMLStreamReader reader = xmlInputFactory.createXMLStreamReader(systemId, systemUrl.openStream());
+            InputStream is = systemUrl.openStream();
+            final XMLStreamReader reader = new TidyXMLStreamReader(xmlInputFactory.createXMLStreamReader(systemId, systemUrl.openStream()), is);
 
             parser = new Parser(systemUrl, reader);
             return parser;
