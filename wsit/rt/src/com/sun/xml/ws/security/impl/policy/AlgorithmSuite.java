@@ -126,7 +126,7 @@ public class AlgorithmSuite extends com.sun.xml.ws.policy.PolicyAssertion implem
         if(!populated){
             NestedPolicy policy = this.getNestedPolicy();
             if(policy == null){
-                if(logger.getLevel() == Level.FINE){
+                if(logger.isLoggable(Level.FINE)){
                     logger.log(Level.FINE,"NestedPolicy is null");
                 }
                 return;
@@ -141,8 +141,7 @@ public class AlgorithmSuite extends com.sun.xml.ws.policy.PolicyAssertion implem
                     if(av != null){
                         this.value = av;
                         continue;
-                    }
-                    
+                    }                    
                 }
                 if(PolicyUtil.isInclusiveC14N(assertion)){
                     this.props.add(Constants.InclusiveC14N);
@@ -154,8 +153,8 @@ public class AlgorithmSuite extends com.sun.xml.ws.policy.PolicyAssertion implem
                     this.props.add(Constants.STRTransform10);
                 }else{
                     if(!assertion.isOptional()){
-                        if(logger.getLevel() == Level.SEVERE){
-                            logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"AlgorithmSuite"});
+                        if(logger.isLoggable(Level.SEVERE)){
+                            logger.log(Level.SEVERE,LogStringsMessages.SP_0100_INVALID_SECURITY_ASSERTION(assertion,AlgorithmSuite));                                    
                         }
                         if(isServer){
                             throw new UnsupportedPolicyAssertion("Policy assertion "+
@@ -165,7 +164,7 @@ public class AlgorithmSuite extends com.sun.xml.ws.policy.PolicyAssertion implem
                 }
             }
             if(this.value == null){
-                this.value = AlgorithmSuiteValue.Basic256;
+                this.value = AlgorithmSuiteValue.Basic128;
             }
             populated = true;
         }
