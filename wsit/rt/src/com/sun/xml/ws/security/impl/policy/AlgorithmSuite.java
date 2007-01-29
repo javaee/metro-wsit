@@ -164,6 +164,9 @@ public class AlgorithmSuite extends com.sun.xml.ws.policy.PolicyAssertion implem
                     }
                 }
             }
+            if(this.value == null){
+                this.value = AlgorithmSuiteValue.Basic256;
+            }
             populated = true;
         }
     }
