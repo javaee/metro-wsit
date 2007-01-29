@@ -65,7 +65,7 @@ public class PolicyConfigResolver implements XMLEntityResolver {
         try {
             final URL systemUrl = new URL(systemId);
             InputStream is = systemUrl.openStream();
-            final XMLStreamReader reader = new TidyXMLStreamReader(xmlInputFactory.createXMLStreamReader(systemId, systemUrl.openStream()), is);
+            final XMLStreamReader reader = new TidyXMLStreamReader(xmlInputFactory.createXMLStreamReader(systemId, is), is);
 
             parser = new Parser(systemUrl, reader);
             return parser;
