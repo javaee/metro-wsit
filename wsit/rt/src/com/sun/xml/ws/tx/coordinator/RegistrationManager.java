@@ -56,7 +56,7 @@ import java.util.logging.Level;
  * for register and registerResponse delegate to the methods in this class.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  * @since 1.0
  */
 public final class RegistrationManager {
@@ -209,7 +209,7 @@ public final class RegistrationManager {
                                 activityId + " and msgId " + msgID,
                         msgID);
                 throw new UnsupportedOperationException(
-                        LocalizationMessages.UNRECOGNIZED_COORDINATION_TYPE_3001(
+                        LocalizationMessages.UNRECOGNIZED_COORDINATION_TYPE_3011(
                                 registerRequest.getProtocolIdentifier(), activityId, msgID));
         }
 
@@ -528,7 +528,7 @@ public final class RegistrationManager {
                         TxFault.InvalidParameters,
                         requestProtocol.getUri() + " is not a recognized coordination type" );
                 throw new UnsupportedOperationException(
-                        LocalizationMessages.UNRECOGNIZED_COORDINATION_TYPE_3001(
+                        LocalizationMessages.UNRECOGNIZED_COORDINATION_TYPE_3011(
                                 requestProtocol, activityId, WsaHelper.getMsgID(wsContext)));
         }
 
