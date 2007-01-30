@@ -122,7 +122,7 @@ import java.util.TreeSet;
  * @version 1.11, 03/12/19
  * @since 1.3
  */
-public final class ServiceFinder<T> implements Iterable<T> {
+final class ServiceFinder<T> implements Iterable<T> {
     private static final PolicyLogger LOGGER = PolicyLogger.getLogger(ServiceFinder.class);
 
     private static final String prefix = "META-INF/services/";
