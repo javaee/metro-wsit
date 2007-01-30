@@ -53,7 +53,7 @@ public final class PolicyUtils {
         private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyUtils.Commons.class);
         
         public static <T extends Throwable> T createAndLogException(Class<T> exceptionClass, String message, Throwable cause, PolicyLogger logger) {
-            final String errorMessage = "Unexpected exception occured"; // TODO: localize
+            final String errorMessage = LocalizationMessages.WSP_000063_ERROR_WHILE_CONSTRUCTING_EXCEPTION(exceptionClass);
             try {
                 Constructor<T> constructor = exceptionClass.getConstructor(String.class);
                 T exception = constructor.newInstance(message);
