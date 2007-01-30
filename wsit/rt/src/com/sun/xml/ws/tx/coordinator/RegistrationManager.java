@@ -56,7 +56,7 @@ import java.util.logging.Level;
  * for register and registerResponse delegate to the methods in this class.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  * @since 1.0
  */
 public final class RegistrationManager {
@@ -153,17 +153,12 @@ public final class RegistrationManager {
         }
 
         // request message must have wsa:MessageId and wsa:ReplyTo, cache them
-        if (logger.isLogging(Level.FINEST)) {
-            logger.finest("register with coordination id=", activityId);
-        }
         String msgID = WsaHelper.getMsgID(wsContext);
-        if (logger.isLogging(Level.FINEST)) {
-            logger.finest("register", "register request msg id=" + msgID);
-        }
         EndpointReference registrationRequesterEPR = WsaHelper.getReplyTo(wsContext);
         WSEndpointReference faultTo = WsaHelper.getFaultTo(wsContext);
         if (logger.isLogging(Level.FINEST)) {
-            logger.finest("register", "replyTo:" + registrationRequesterEPR);
+            logger.finest("register", "activityId:" + activityId + " register request msg id: " +
+                    msgID + " replyTo: " + registrationRequesterEPR);
         }
         if (registrationRequesterEPR == null) {
             if (faultTo != null) {
@@ -173,10 +168,10 @@ public final class RegistrationManager {
                         null,
                         SOAPVersion.SOAP_11,
                         TxFault.InvalidParameters,
-                        "register wsa:replyTo must be set",
+                        "register wsa:replyTo must be set for activityId " + activityId + " and msgId: " + msgID,
                         msgID);
             }
-            throw new WebServiceException(LocalizationMessages.REGISTER_REPLYTO_NOT_SET_3003());
+            throw new WebServiceException(LocalizationMessages.REGISTER_REPLYTO_NOT_SET_3003(activityId, msgID));
         }
 
         Coordinator c = coordinationManager.getCoordinator(activityId);
@@ -187,11 +182,9 @@ public final class RegistrationManager {
                     null,
                     SOAPVersion.SOAP_11,
                     TxFault.InvalidState,
-                    "attempting to register for an unknown activity id: " + activityId,
+                    "attempting to register for an unknown activity Id: " + activityId + " and msgId: " + msgID,
                     msgID);
-            if (logger.isLogging(Level.WARNING)) {
-                logger.warning("register",  LocalizationMessages.REGISTER_FOR_UNKNOWN_ACTIVITY_3004(activityId));
-            }
+            logger.warning("register", LocalizationMessages.REGISTER_FOR_UNKNOWN_ACTIVITY_3004(activityId, msgID));
         }
 
         Registrant r = null;
@@ -212,10 +205,12 @@ public final class RegistrationManager {
                         null,
                         SOAPVersion.SOAP_11,
                         TxFault.InvalidState,
-                        registerRequest.getProtocolIdentifier() + " is not a recognized coordination type",
+                        registerRequest.getProtocolIdentifier() + " is not a recognized coordination type: activityId " +
+                                activityId + " and msgId " + msgID,
                         msgID);
                 throw new UnsupportedOperationException(
-                        LocalizationMessages.UNRECOGNIZED_COORDINATION_TYPE_3001(registerRequest.getProtocolIdentifier()));
+                        LocalizationMessages.UNRECOGNIZED_COORDINATION_TYPE_3001(
+                                registerRequest.getProtocolIdentifier(), activityId, msgID));
         }
 
         /* send <registerResponse> to RegistrationRequesterEPR */
@@ -235,21 +230,21 @@ public final class RegistrationManager {
         try {
             registrationRequester.registerResponseOperation(registerResponse);
         } catch (WebServiceException wse) {
-            if (logger.isLogging(Level.WARNING)) {
-                logger.warning("register",
-                        LocalizationMessages.REGISTERRESPONSE_FAILED_3005(
-                                registrationRequesterEPR,
-                                wse.getLocalizedMessage()));
-            }
+            logger.warning("register",
+                    LocalizationMessages.REGISTERRESPONSE_FAILED_3005(
+                            registrationRequesterEPR,
+                            activityId,
+                            msgID,
+                            wse.getLocalizedMessage()));
             throw wse;
         } catch (Exception e) {
-            if (logger.isLogging(Level.SEVERE)) {
-                logger.severe("register",
-                        LocalizationMessages.REGISTERRESPONSE_FAILED_3005(
-                                registrationRequesterEPR,
-                                e.getLocalizedMessage()));
-                // TODO: throw an exception
-            }
+            logger.severe("register",
+                    LocalizationMessages.REGISTERRESPONSE_FAILED_3005(
+                            registrationRequesterEPR,
+                            activityId,
+                            msgID,
+                            e.getLocalizedMessage()));
+            // TODO: throw an exception
         }
 
         if (logger.isLogging(Level.FINER)) {
@@ -302,38 +297,12 @@ public final class RegistrationManager {
                 logger.fine("register", "participant protocol service" + ppsEpr.toString());
             }
 
-//            // register following request/reply mep
-//
-//            RegistrationPortTypeRPC registerRPC = getCoordinatorService().getRegistration();
-//            WsaHelper.initializeAsDestination((BindingProvider) registerRPC, registrationEPR);
-//            ap = WsaHelper.getAddressingProperties((BindingProvider) registerRPC,
-//                    WsaHelper.BindingProviderContextType.REQUEST_CONTEXT);
-//            ap.setReplyTo(newSynchronousRegistrationEPR((ActivityIdentifier)c.getId()));
-//            try {
-//                RegisterResponseType response = registerRPC.registerOperation(registerParam);
-//                if (response == null) {
-//                    logger.warning("register", "synchronousRegisterRPC failed to get a non-null response.");
-//                } else {
-//                    registerResponse(c.getIdValue(), r.getIdValue(), response);
-//                    logger.exiting("register", "synchronous register succeeded. Coordination Protocol Service:" +
-//                        r.getCoordinatorProtocolService());
-//                    return;
-//                }
-//            } catch (WebServiceException wse) {
-//                // very likely that some WS-AT implementations might not implement this optional
-//                // binding.  be prepared to use async version of register/register response.
-//                logger.warning("register", "synchronous register failed, trying required registration protocol");
-//                wse.printStackTrace();
-//            }
-//            logger.warning("register", "synchronous register failed, trying required registration protocol");
-//
+            // try synchronous register first and fallback to async if it fails
+            // if (synchronousRegister(registrationEPR, c, registerParam, r)) return;
 
             // Asynchronous register/wait for asynchronous registerReply
 
             // setup stateful ws instance for registerResponse from remote registration coordinator
-            if (logger.isLogging(Level.FINE)) {
-                logger.fine("RegistrationManager.register", "Creating stateful ws...");
-            }
             StatefulWebserviceFactory swf = StatefulWebserviceFactoryFactory.getInstance();
             EndpointReference registrationRequesterEPR =
                     swf.createService("Coordinator", "RegistrationRequester",
@@ -341,14 +310,8 @@ public final class RegistrationManager {
                             r.getCoordinator().getIdValue(), r.getIdValue());
 
             // set replyTo for outgoing register message
-            if (logger.isLogging(Level.FINE)) {
-                logger.fine("RegistrationManager.register", "setting replyTo...");
-            }
             OneWayFeature owf = new OneWayFeature();
             owf.setReplyTo((new WSEndpointReference(registrationRequesterEPR)));
-            if (logger.isLogging(Level.FINE)) {
-                logger.fine("RegistrationManager.register", "getting port...");
-            }
             RegistrationCoordinatorPortType registerCoordinator =
                     getCoordinatorService().getRegistrationCoordinator(registrationEPR, (WebServiceFeature) owf);
 
@@ -360,20 +323,17 @@ public final class RegistrationManager {
             r.setRegistrationCompleted(false);
             try {
                 // prefer to try synchronouos register/register response than busy wait.
-                if (logger.isLogging(Level.FINE)) {
-                    logger.fine("RegistrationManager.register", "invoking remote registerOperation...");
-                }
                 registerCoordinator.registerOperation(registerParam);
 
                 // next line is necessary. race condition that register did not complete before
                 // tranaction initiator committed/rolled back tranaction.
                 // This is why synchronous register preferable to asynchronous register.
                 waitForRegisterResponse(r, registrationEPR);
+//                r.waitForRegistrationResponse();
             } catch (WebServiceException wse) {
-                if (logger.isLogging(Level.WARNING)) {
-                    logger.warning("register",
-                            LocalizationMessages.REGISTER_FAILED_3006(registrationEPR, wse.getLocalizedMessage()));
-                }
+                logger.warning("register",
+                        LocalizationMessages.REGISTER_FAILED_3006(
+                                registrationEPR, c.getIdValue(), wse.getLocalizedMessage()));
                 wse.printStackTrace();
                 throw wse;
             }
@@ -392,9 +352,7 @@ public final class RegistrationManager {
                         TxFault.NoActivity,
                         "registration timed out for activity id: " + c.getIdValue(),
                         null /* TODO: what is RelatesTo in this case? */ );
-                if (logger.isLogging(Level.WARNING)) {
-                    logger.warning("register", LocalizationMessages.REGISTRATION_TIMEOUT_3007(c.getIdValue()));
-                }
+                logger.warning("register", LocalizationMessages.REGISTRATION_TIMEOUT_3007(c.getIdValue()));
             }
 
             // reply processed in #registerResponse(WebServiceContext, RegisterResponseType) gets CPS for registrant.
@@ -420,7 +378,8 @@ public final class RegistrationManager {
      * @param registerResponse <registerResponse> message
      * @param wsContext        context of the inbound web service invocation
      */
-    public void registerResponse(@NotNull WebServiceContext wsContext, @NotNull String activityId, @NotNull String registrantId, @NotNull RegisterResponseType registerResponse) {
+    public void registerResponse(@NotNull WebServiceContext wsContext, @NotNull String activityId,
+                                 @NotNull String registrantId, @NotNull RegisterResponseType registerResponse) {
         if (logger.isLogging(Level.FINER)) {
             logger.entering("RegistrationManager.registerResponse");
         }
@@ -434,11 +393,9 @@ public final class RegistrationManager {
                     SOAPVersion.SOAP_11,
                     TxFault.InvalidState,
                     "received registerResponse for non-existent registrant : " +
-                            registrantId + " for CoordId:" + activityId );
-            if (logger.isLogging(Level.WARNING)) {
-                logger.warning("registerResponse",
-                        LocalizationMessages.NONEXISTENT_REGISTRANT_3008(registrantId, activityId));
-            }
+                            registrantId + " for activityId:" + activityId);
+            logger.warning("registerResponse",
+                    LocalizationMessages.NONEXISTENT_REGISTRANT_3008(registrantId, activityId));
         } else {
             // set coordinator protocol service on registrant
             r.setCoordinatorProtocolService(registerResponse.getCoordinatorProtocolService());
@@ -473,9 +430,7 @@ public final class RegistrationManager {
         int MAX_RETRY = 40;
         while (!r.isRegistrationCompleted()) {
             if (i++ > MAX_RETRY) {
-                if (logger.isLogging(Level.WARNING)) {
-                    logger.warning("register", LocalizationMessages.NO_RESPONSE_3009(registrationEPR, r.getIdValue()));
-                }
+                logger.warning("register", LocalizationMessages.NO_RESPONSE_3009(registrationEPR, r.getIdValue()));
                 // TODO: do we want to ever resend another <register> message in this case?
                 break;
             }
@@ -490,9 +445,44 @@ public final class RegistrationManager {
     }
 
     /**
-     * Register via request/reply message pattern.
-     * <p/>
-     * Add coordination faults to this method.
+     * Synchronously register with remote coordinator.  Not all
+     * providers will support the synchronous register/registerReply
+     * since it is optional in the 2004 OASIS version of WS-COOR.
+     *
+     * @param registrationEPR epr of remote registration service
+     * @param c coordinator
+     * @param registerParam <register> message
+     * @param r registrant
+     * @return true if registration suceeded, false otherwise
+     */
+    private boolean synchronousRegister(EndpointReference registrationEPR, Coordinator c, RegisterType registerParam, Registrant r) {
+//        RegistrationPortTypeRPC registerRPC = getCoordinatorService().getRegistration();
+//        WsaHelper.initializeAsDestination((BindingProvider) registerRPC, registrationEPR);
+//        ap = WsaHelper.getAddressingProperties((BindingProvider) registerRPC,
+//                WsaHelper.BindingProviderContextType.REQUEST_CONTEXT);
+//        ap.setReplyTo(newSynchronousRegistrationEPR((ActivityIdentifier)c.getId()));
+//        try {
+//            RegisterResponseType response = registerRPC.registerOperation(registerParam);
+//            if (response == null) {
+//                logger.warning("register", "synchronousRegisterRPC failed to get a non-null response.");
+//            } else {
+//                registerResponse(c.getIdValue(), r.getIdValue(), response);
+//                logger.exiting("register", "synchronous register succeeded. Coordination Protocol Service:" +
+//                    r.getCoordinatorProtocolService());
+//                return true;
+//            }
+//        } catch (WebServiceException wse) {
+//            // very likely that some WS-AT implementations might not implement this optional
+//            // binding.  be prepared to use async version of register/register response.
+//            logger.warning("register", "synchronous register failed, trying required registration protocol");
+//            wse.printStackTrace();
+//        }
+//        logger.warning("register", "synchronous register failed, trying required registration protocol");
+        return false;
+    }
+
+    /**
+     * Handling incoming synchronous <register> and return <registerResponse>.
      *
      * @param activityId      activity id
      * @param registerRequest <register> request
@@ -517,9 +507,7 @@ public final class RegistrationManager {
                     SOAPVersion.SOAP_11,
                     TxFault.InvalidParameters,
                     "Received RegisterResponse for unknown activity id: " + activityId );
-            if (logger.isLogging(Level.WARNING)) {
-                logger.warning("synchronousRegister", LocalizationMessages.NONEXISTENT_ACTIVITY_3010(activityId));
-            }
+            logger.warning("synchronousRegister", LocalizationMessages.NONEXISTENT_ACTIVITY_3010(activityId));
         }
 
         Registrant r = null;
@@ -539,7 +527,9 @@ public final class RegistrationManager {
                         SOAPVersion.SOAP_11,
                         TxFault.InvalidParameters,
                         requestProtocol.getUri() + " is not a recognized coordination type" );
-                throw new UnsupportedOperationException(LocalizationMessages.UNRECOGNIZED_COORDINATION_TYPE_3001(requestProtocol));
+                throw new UnsupportedOperationException(
+                        LocalizationMessages.UNRECOGNIZED_COORDINATION_TYPE_3001(
+                                requestProtocol, activityId, WsaHelper.getMsgID(wsContext)));
         }
 
         // build the registerResponse message
