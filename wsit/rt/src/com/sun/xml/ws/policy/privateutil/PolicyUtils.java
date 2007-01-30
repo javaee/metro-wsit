@@ -52,16 +52,36 @@ public final class PolicyUtils {
     public static class Commons {
         private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyUtils.Commons.class);
         
-        public static <T extends Throwable> T createAndLogException(Class<T> exceptionClass, String message, Throwable cause, PolicyLogger logger) {
+        /**
+         * Method instantiates an exception of class {@code exceptionClass} and initializes it with {@code message}.
+         * If {@code cause} parameter is not {@code null}, exception cause is initialized as well using the content
+         * of this parameter.
+         * <p/>
+         * Before returning the created and initialized exception, a {@code message} parameter content is logged as
+         * a {@code SEVERE} logging level message using a {@link PolicyLogger} instance passed in the {@code logger}
+         * parameter.
+         *
+         * @param exceptionClass class of the exception to be instantiated. Must not be {@code null}.
+         * @param message message that should be set for the exception and logged. Should not be {@code null}.
+         * @param cause initial cause of the exception that is being created. May be {@code null}.
+         * @param logger logger to be used for logging the exception message.
+         * @return created and initialized exception of class defined by {@code exceptionClass}.
+         *
+         * @throw RuntimePolicyUtilsException in case of any problems with instantiation and initialization of the new
+         *        exception object.
+         */
+        public static <T extends Throwable> T createAndLogException(Class<T> exceptionClass, String message, Throwable cause, PolicyLogger logger) throws RuntimePolicyUtilsException {
             final String errorMessage = LocalizationMessages.WSP_000063_ERROR_WHILE_CONSTRUCTING_EXCEPTION(exceptionClass);
             try {
                 Constructor<T> constructor = exceptionClass.getConstructor(String.class);
                 T exception = constructor.newInstance(message);
                 if (cause != null) {
                     exception.initCause(cause);
+                    logger.severe(getCallerMethodName(), message, cause);
+                } else {
+                    logger.severe(getCallerMethodName(), message);                    
                 }
                 
-                logger.severe(getCallerMethodName(), message, cause);
                 return exception;
             } catch (IllegalArgumentException e) {
                 LOGGER.severe("createAndLogException", errorMessage, e);
@@ -84,6 +104,14 @@ public final class PolicyUtils {
             }
         }
         
+        /**
+         * Method returns the name of the method that is on the {@code methodIndexInStack}
+         * position in the call stack of the current {@link Thread}.
+         * 
+         * @param methodIndexInStack index to the call stack to get the method name for.
+         * @return the name of the method that is on the {@code methodIndexInStack}
+         *         position in the call stack of the current {@link Thread}.
+         */
         public static String getStackMethodName(final int methodIndexInStack) {
             String methodName;
             
@@ -97,6 +125,12 @@ public final class PolicyUtils {
             return methodName;
         }
         
+        /**
+         * Function returns the name of the caller method for the method executing this
+         * function.
+         * 
+         * @return caller method name from the call stack of the current {@link Thread}.
+         */
         public static String getCallerMethodName() {
             return getStackMethodName(5);
         }
@@ -330,34 +364,34 @@ public final class PolicyUtils {
                 return resultClass.cast(result);
             } catch (IllegalArgumentException e) {
                 throw PolicyUtils.Commons.createAndLogException(
-                        RuntimePolicyUtilsException.class, 
-                        createExceptionMessage(target, parameters, methodName), 
-                        e, 
-                        LOGGER);                
+                        RuntimePolicyUtilsException.class,
+                        createExceptionMessage(target, parameters, methodName),
+                        e,
+                        LOGGER);
             } catch (InvocationTargetException e) {
                 throw PolicyUtils.Commons.createAndLogException(
-                        RuntimePolicyUtilsException.class, 
-                        createExceptionMessage(target, parameters, methodName), 
-                        e, 
-                        LOGGER);                
+                        RuntimePolicyUtilsException.class,
+                        createExceptionMessage(target, parameters, methodName),
+                        e,
+                        LOGGER);
             } catch (IllegalAccessException e) {
                 throw PolicyUtils.Commons.createAndLogException(
-                        RuntimePolicyUtilsException.class, 
-                        createExceptionMessage(target, parameters, methodName), 
-                        e.getCause(), 
-                        LOGGER);                
+                        RuntimePolicyUtilsException.class,
+                        createExceptionMessage(target, parameters, methodName),
+                        e.getCause(),
+                        LOGGER);
             } catch (SecurityException e) {
                 throw PolicyUtils.Commons.createAndLogException(
-                        RuntimePolicyUtilsException.class, 
-                        createExceptionMessage(target, parameters, methodName), 
-                        e, 
-                        LOGGER);                
+                        RuntimePolicyUtilsException.class,
+                        createExceptionMessage(target, parameters, methodName),
+                        e,
+                        LOGGER);
             } catch (NoSuchMethodException e) {
                 throw PolicyUtils.Commons.createAndLogException(
-                        RuntimePolicyUtilsException.class, 
-                        createExceptionMessage(target, parameters, methodName), 
-                        e, 
-                        LOGGER);                
+                        RuntimePolicyUtilsException.class,
+                        createExceptionMessage(target, parameters, methodName),
+                        e,
+                        LOGGER);
             }
         }
         
