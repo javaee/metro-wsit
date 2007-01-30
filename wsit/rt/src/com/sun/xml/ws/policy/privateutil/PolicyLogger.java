@@ -149,7 +149,7 @@ public final class PolicyLogger {
             return;
         }
         
-        logger.entering(componentClassName, getStackMethodName(4));
+        logger.entering(componentClassName, PolicyUtils.Commons.getCallerMethodName());
     }
 
     public void entering(final Object[] parameters) {
@@ -157,34 +157,21 @@ public final class PolicyLogger {
             return;
         }
                 
-        logger.entering(componentClassName, getStackMethodName(4), parameters);
+        logger.entering(componentClassName, PolicyUtils.Commons.getCallerMethodName(), parameters);
     }
     
     public void exiting() {
         if (!this.logger.isLoggable(METHOD_CALL_LEVEL_VALUE)) {
             return;
         }
-        logger.exiting(componentClassName, getStackMethodName(4));
+        logger.exiting(componentClassName, PolicyUtils.Commons.getCallerMethodName());
     }
     
     public void exiting(final Object result) {
         if (!this.logger.isLoggable(METHOD_CALL_LEVEL_VALUE)) {
             return;
         }
-        logger.exiting(componentClassName, getStackMethodName(4), result);
-    }
-
-    private String getStackMethodName(final int index) {
-        String methodName;
-
-        final StackTraceElement[] stack = Thread.currentThread().getStackTrace();
-        if (stack.length > index + 1) {
-            methodName = stack[index].getMethodName();
-        } else {
-            methodName = "UNKNOWN METHOD";
-        }       
-        
-        return methodName;
+        logger.exiting(componentClassName, PolicyUtils.Commons.getCallerMethodName(), result);
     }
     
     // TODO: refactor and remove usage of the following methods (replace with the version above): 

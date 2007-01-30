@@ -25,6 +25,7 @@ package com.sun.xml.ws.policy.privateutil;
 import com.sun.xml.ws.policy.PolicyException;
 import java.io.Closeable;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -48,6 +49,59 @@ import javax.xml.stream.XMLStreamReader;
 public final class PolicyUtils {
     private PolicyUtils() { }
     
+    public static class Commons {
+        private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyUtils.Commons.class);
+        
+        public static <T extends Throwable> T createAndLogException(Class<T> exceptionClass, String message, Throwable cause, PolicyLogger logger) {
+            final String errorMessage = "Unexpected exception occured"; // TODO: localize
+            try {
+                Constructor<T> constructor = exceptionClass.getConstructor(String.class);
+                T exception = constructor.newInstance(message);
+                if (cause != null) {
+                    exception.initCause(cause);
+                }
+                
+                logger.severe(getCallerMethodName(), message, cause);
+                return exception;
+            } catch (IllegalArgumentException e) {
+                LOGGER.severe("createAndLogException", errorMessage, e);
+                throw new RuntimePolicyUtilsException(errorMessage, e);
+            } catch (InstantiationException e) {
+                LOGGER.severe("createAndLogException", errorMessage, e);
+                throw new RuntimePolicyUtilsException(errorMessage, e);
+            } catch (IllegalAccessException e) {
+                LOGGER.severe("createAndLogException", errorMessage, e);
+                throw new RuntimePolicyUtilsException(errorMessage, e);
+            } catch (InvocationTargetException e) {
+                LOGGER.severe("createAndLogException", errorMessage, e.getCause());
+                throw new RuntimePolicyUtilsException(errorMessage, e.getCause());
+            } catch (SecurityException e) {
+                LOGGER.severe("createAndLogException", errorMessage, e);
+                throw new RuntimePolicyUtilsException(errorMessage, e);
+            } catch (NoSuchMethodException e) {
+                LOGGER.severe("createAndLogException", errorMessage, e);
+                throw new RuntimePolicyUtilsException(errorMessage, e);
+            }
+        }
+        
+        public static String getStackMethodName(final int methodIndexInStack) {
+            String methodName;
+            
+            final StackTraceElement[] stack = Thread.currentThread().getStackTrace();
+            if (stack.length > methodIndexInStack + 1) {
+                methodName = stack[methodIndexInStack].getMethodName();
+            } else {
+                methodName = "UNKNOWN METHOD";
+            }
+            
+            return methodName;
+        }
+        
+        public static String getCallerMethodName() {
+            return getStackMethodName(5);
+        }
+    }
+    
     public static class IO {
         private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyUtils.IO.class);
         
@@ -67,7 +121,7 @@ public final class PolicyUtils {
                 }
             }
         }
-
+        
         /**
          * If the {@code reader} is not {@code null}, this method will try to close the
          * {@code reader} instance and log warning about any unexpected
@@ -153,7 +207,7 @@ public final class PolicyUtils {
          * @returns {@code -1} if {@code s1 < s2}, {@code 0} if {@code s1 == s2}, {@code 1} if {@code s1 > s2}
          */
         public static int compareNullableStrings(final String s1, final String s2) {
-            return ((s1 == null) ? ((s2 == null) ? 0 : -1) : s1.compareTo(s2));
+            return ((s1 == null) ? ((s2 == null) ? 0 : -1) : ((s2 == null) ? 1 : s1.compareTo(s2)));
         }
     }
     
@@ -249,7 +303,7 @@ public final class PolicyUtils {
          * Reflectively invokes specified method on the specified target
          */
         public static <T> T invoke(final Object target, final String methodName,
-                final Class<T> resultClass, final Object... parameters) throws PolicyException {
+                final Class<T> resultClass, final Object... parameters) throws RuntimePolicyUtilsException {
             Class[] parameterTypes;
             if (parameters != null && parameters.length > 0) {
                 parameterTypes = new Class[parameters.length];
@@ -268,29 +322,47 @@ public final class PolicyUtils {
          * Reflectively invokes specified method on the specified target
          */
         public static <T> T invoke(final Object target, final String methodName, final Class<T> resultClass,
-                final Object[] parameters, final Class[] parameterTypes) throws PolicyException {
+                final Object[] parameters, final Class[] parameterTypes) throws RuntimePolicyUtilsException {
             try {
                 final Method method = target.getClass().getMethod(methodName, parameterTypes);
                 final Object result = method.invoke(target, parameters);
                 
                 return resultClass.cast(result);
             } catch (IllegalArgumentException e) {
-                throw logAndWrapException(target, parameters, methodName, "invoke", e);
+                throw PolicyUtils.Commons.createAndLogException(
+                        RuntimePolicyUtilsException.class, 
+                        createExceptionMessage(target, parameters, methodName), 
+                        e, 
+                        LOGGER);                
             } catch (InvocationTargetException e) {
-                throw logAndWrapException(target, parameters, methodName, "invoke", e.getCause());
+                throw PolicyUtils.Commons.createAndLogException(
+                        RuntimePolicyUtilsException.class, 
+                        createExceptionMessage(target, parameters, methodName), 
+                        e, 
+                        LOGGER);                
             } catch (IllegalAccessException e) {
-                throw logAndWrapException(target, parameters, methodName, "invoke", e);
+                throw PolicyUtils.Commons.createAndLogException(
+                        RuntimePolicyUtilsException.class, 
+                        createExceptionMessage(target, parameters, methodName), 
+                        e.getCause(), 
+                        LOGGER);                
             } catch (SecurityException e) {
-                throw logAndWrapException(target, parameters, methodName, "invoke", e);
+                throw PolicyUtils.Commons.createAndLogException(
+                        RuntimePolicyUtilsException.class, 
+                        createExceptionMessage(target, parameters, methodName), 
+                        e, 
+                        LOGGER);                
             } catch (NoSuchMethodException e) {
-                throw logAndWrapException(target, parameters, methodName, "invoke", e);
+                throw PolicyUtils.Commons.createAndLogException(
+                        RuntimePolicyUtilsException.class, 
+                        createExceptionMessage(target, parameters, methodName), 
+                        e, 
+                        LOGGER);                
             }
         }
         
-        private static PolicyException logAndWrapException(final Object target, final Object[] parameters, final String methodName, final String processingMethodName, final Throwable cause) {
-            final String message = LocalizationMessages.WSP_000061_METHOD_INVOCATION_FAILED(target.getClass().getName(), methodName, Arrays.asList(parameters).toString());
-            LOGGER.severe(processingMethodName, message, cause);
-            return new PolicyException(message, cause);
+        private static String createExceptionMessage(final Object target, final Object[] parameters, final String methodName) {
+            return LocalizationMessages.WSP_000061_METHOD_INVOCATION_FAILED(target.getClass().getName(), methodName, Arrays.asList(parameters).toString());
         }
     }
     
@@ -322,7 +394,7 @@ public final class PolicyUtils {
          * @param configFileName The name of the file resource
          * @param context A ServletContext object. May not be null.
          */
-        public static URL loadFromContext(final String configFileName, final Object context) throws PolicyException {
+        public static URL loadFromContext(final String configFileName, final Object context) {
             return Reflection.invoke(context, "getResource", URL.class, configFileName);
         }
         
