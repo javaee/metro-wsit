@@ -110,7 +110,7 @@ final class PrivateElementFilteringInvocationProcessor implements InvocationProc
         } catch (IllegalAccessException ex) {
             throw logAndWrapException(invocation, ex, "process");
         } finally {
-            LOGGER.exiting();
+            LOGGER.exiting("process");
         }
     }
     

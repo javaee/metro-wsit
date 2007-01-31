@@ -131,7 +131,7 @@ public final class MexImportFilteringInvocationProcessor implements InvocationPr
         } catch (IllegalAccessException ex) {
             throw logAndWrapException(invocation, ex, "process");
         } finally {
-            LOGGER.exiting();
+            LOGGER.exiting("process");
         }
     }
     
