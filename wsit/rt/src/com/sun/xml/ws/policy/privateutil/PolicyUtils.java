@@ -51,73 +51,146 @@ public final class PolicyUtils {
     
     public static class Commons {
         private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyUtils.Commons.class);
-        
         private static final LinkedList<StackTraceElement> stackTraceElements= new LinkedList<StackTraceElement>();
         
         /**
-         * Method instantiates an exception of class {@code exceptionClass} and initializes it with {@code message}.
-         * If {@code cause} parameter is not {@code null}, exception cause is initialized as well using the content
-         * of this parameter.
-         * <p/>
-         * Before returning the created and initialized exception, a {@code message} parameter content is logged as
-         * a {@code SEVERE} logging level message using a {@link PolicyLogger} instance passed in the {@code logger}
+         * Method logs {@code exception}'s message as a {@code SEVERE} logging level 
+         * message using a {@link PolicyLogger} instance passed in the {@code logger}
          * parameter.
+         * <p/>
+         * If {@code cause} parameter is not {@code null}, it is logged as well and 
+         * {@code exception} original cause is initialized with instance referenced 
+         * by {@code cause} parameter.
          *
-         * @param exceptionClass class of the exception to be instantiated. Must not be {@code null}.
-         * @param message message that should be set for the exception and logged. Should not be {@code null}.
-         * @param cause initial cause of the exception that is being created. May be {@code null}.
-         * @param logger logger to be used for logging the exception message.
-         * @return created and initialized exception of class defined by {@code exceptionClass}.
-         *
-         * @throw RuntimePolicyUtilsException in case of any problems with instantiation and initialization of the new
-         *        exception object.
+         * @param exception exception whose message should be logged. Must not be 
+         *        {@code null}.
+         * @param cause initial cause of the exception that should be logged as well
+         *        and set as {@code exception}'s original cause. May be {@code null}.
+         * @param logger {@link PolicyLogger} instance to be used for logging the 
+         *        exception message.
+         * @return the same exception instance that was passed in as the {@code exception}
+         *         parameter.
          */
-        public static <T extends Throwable> T createAndLogException(final Class<T> exceptionClass, final String message, final Throwable cause, final PolicyLogger logger) throws RuntimePolicyUtilsException {
-            final String errorMessage = LocalizationMessages.WSP_000063_ERROR_WHILE_CONSTRUCTING_EXCEPTION(exceptionClass);
-            try {
-                final Constructor<T> constructor = exceptionClass.getConstructor(String.class);
-                final T exception = constructor.newInstance(message);
-                
-                final String callerMethodName = getCallerMethodName();
-                
-                // adjusting stack trace (removing calls to exception's constructor and this method from the stack trace)
-                stackTraceElements.addAll(Arrays.asList(exception.getStackTrace()));                
-                while (!stackTraceElements.isEmpty() && !stackTraceElements.getFirst().getMethodName().equals(callerMethodName)) {
-                    stackTraceElements.removeFirst();
-                }
-                exception.setStackTrace(stackTraceElements.toArray(new StackTraceElement[stackTraceElements.size()]));
-                stackTraceElements.clear();
-                
-                // initializing original cause (if any)
-                if (cause != null) {
-                    exception.initCause(cause);
-                    logger.severe(callerMethodName, message, cause);
-                } else {
-                    logger.severe(callerMethodName, message);
-                }
-                
-                return exception;
-            } catch (IllegalArgumentException e) {
-                LOGGER.severe("createAndLogException", errorMessage, e);
-                throw new RuntimePolicyUtilsException(errorMessage, e);
-            } catch (InstantiationException e) {
-                LOGGER.severe("createAndLogException", errorMessage, e);
-                throw new RuntimePolicyUtilsException(errorMessage, e);
-            } catch (IllegalAccessException e) {
-                LOGGER.severe("createAndLogException", errorMessage, e);
-                throw new RuntimePolicyUtilsException(errorMessage, e);
-            } catch (InvocationTargetException e) {
-                LOGGER.severe("createAndLogException", errorMessage, e.getCause());
-                throw new RuntimePolicyUtilsException(errorMessage, e.getCause());
-            } catch (SecurityException e) {
-                LOGGER.severe("createAndLogException", errorMessage, e);
-                throw new RuntimePolicyUtilsException(errorMessage, e);
-            } catch (NoSuchMethodException e) {
-                LOGGER.severe("createAndLogException", errorMessage, e);
-                throw new RuntimePolicyUtilsException(errorMessage, e);
+        public static <T extends Throwable> T logException(final T exception, final Throwable cause, final PolicyLogger logger) {
+            if (cause != null) {
+                exception.initCause(cause);
+                logger.severe(getCallerMethodName(), exception.getMessage(), cause);
+            } else {
+                logger.severe(getCallerMethodName(), exception.getMessage());
             }
-        }
+            
+            return exception;
+        }        
         
+        /**
+         * Method logs {@code exception}'s message as a {@code SEVERE} logging level 
+         * message using a {@link PolicyLogger} instance passed in the {@code logger}
+         * parameter.
+         * <p/>
+         * If {@code logCause} parameter is {@code true}, {@code exception}'s original
+         * cause is logged as well (if exists). This may be used in cases when 
+         * {@code exception}'s class provides constructor to initialize the original 
+         * cause. In such case you do not need to use 
+         * {@link PolicyUtils.Commons.logException(final T, final Throwable, final PolicyLogger)} 
+         * method version but you might still want to log the original cause as well.
+         *
+         * @param exception exception whose message should be logged. Must not be 
+         *        {@code null}.
+         * @param logCause deterimnes whether initial cause of the exception should 
+         *        be logged as well
+         * @param logger {@link PolicyLogger} instance to be used for logging the 
+         *        exception message.
+         * @return the same exception instance that was passed in as the {@code exception}
+         *         parameter.
+         */
+        public static <T extends Throwable> T logException(final T exception, final boolean logCause, final PolicyLogger logger) {
+            if (logCause && exception.getCause() != null) {
+                logger.severe(getCallerMethodName(), exception.getMessage(), exception.getCause());
+            } else {
+                logger.severe(getCallerMethodName(), exception.getMessage());
+            }
+            
+            return exception;
+        }
+
+        /**
+         * Same as {@code PolicyUtils.Commons.logException(exception, true, logger)}.
+         */
+        public static <T extends Throwable> T logException(final T exception, final PolicyLogger logger) {
+            if (exception.getCause() != null) {
+                logger.severe(getCallerMethodName(), exception.getMessage(), exception.getCause());
+            } else {
+                logger.severe(getCallerMethodName(), exception.getMessage());
+            }
+            
+            return exception;
+        }
+
+//
+//        /**
+//         * Method instantiates an exception of class {@code exceptionClass} and initializes it with {@code message}.
+//         * If {@code cause} parameter is not {@code null}, exception cause is initialized as well using the content
+//         * of this parameter.
+//         * <p/>
+//         * Before returning the created and initialized exception, a {@code message} parameter content is logged as
+//         * a {@code SEVERE} logging level message using a {@link PolicyLogger} instance passed in the {@code logger}
+//         * parameter.
+//         *
+//         * @param exceptionClass class of the exception to be instantiated. Must not be {@code null}.
+//         * @param message message that should be set for the exception and logged. Should not be {@code null}.
+//         * @param cause initial cause of the exception that is being created. May be {@code null}.
+//         * @param logger logger to be used for logging the exception message.
+//         * @return created and initialized exception of class defined by {@code exceptionClass}.
+//         *
+//         * @throw RuntimePolicyUtilsException in case of any problems with instantiation and initialization of the new
+//         *        exception object.
+//         */
+//        public static <T extends Throwable> T createAndLogException(final Class<T> exceptionClass, final String message, final Throwable cause, final PolicyLogger logger) throws RuntimePolicyUtilsException {
+//            final String errorMessage = LocalizationMessages.WSP_000063_ERROR_WHILE_CONSTRUCTING_EXCEPTION(exceptionClass);
+//            try {
+//                final Constructor<T> constructor = exceptionClass.getConstructor(String.class);
+//                final T exception = constructor.newInstance(message);
+//
+//                final String callerMethodName = getCallerMethodName();
+//
+//                // adjusting stack trace (removing calls to exception's constructor and this method from the stack trace)
+//                stackTraceElements.addAll(Arrays.asList(exception.getStackTrace()));
+//                while (!stackTraceElements.isEmpty() && !stackTraceElements.getFirst().getMethodName().equals(callerMethodName)) {
+//                    stackTraceElements.removeFirst();
+//                }
+//                exception.setStackTrace(stackTraceElements.toArray(new StackTraceElement[stackTraceElements.size()]));
+//                stackTraceElements.clear();
+//
+//                // initializing original cause (if any)
+//                if (cause != null) {
+//                    exception.initCause(cause);
+//                    logger.severe(callerMethodName, message, cause);
+//                } else {
+//                    logger.severe(callerMethodName, message);
+//                }
+//
+//                return exception;
+//            } catch (IllegalArgumentException e) {
+//                LOGGER.severe("createAndLogException", errorMessage, e);
+//                throw new RuntimePolicyUtilsException(errorMessage, e);
+//            } catch (InstantiationException e) {
+//                LOGGER.severe("createAndLogException", errorMessage, e);
+//                throw new RuntimePolicyUtilsException(errorMessage, e);
+//            } catch (IllegalAccessException e) {
+//                LOGGER.severe("createAndLogException", errorMessage, e);
+//                throw new RuntimePolicyUtilsException(errorMessage, e);
+//            } catch (InvocationTargetException e) {
+//                LOGGER.severe("createAndLogException", errorMessage, e.getCause());
+//                throw new RuntimePolicyUtilsException(errorMessage, e.getCause());
+//            } catch (SecurityException e) {
+//                LOGGER.severe("createAndLogException", errorMessage, e);
+//                throw new RuntimePolicyUtilsException(errorMessage, e);
+//            } catch (NoSuchMethodException e) {
+//                LOGGER.severe("createAndLogException", errorMessage, e);
+//                throw new RuntimePolicyUtilsException(errorMessage, e);
+//            }
+//        }
+
         /**
          * Method returns the name of the method that is on the {@code methodIndexInStack}
          * position in the call stack of the current {@link Thread}.
@@ -377,35 +450,15 @@ public final class PolicyUtils {
                 
                 return resultClass.cast(result);
             } catch (IllegalArgumentException e) {
-                throw PolicyUtils.Commons.createAndLogException(
-                        RuntimePolicyUtilsException.class,
-                        createExceptionMessage(target, parameters, methodName),
-                        e,
-                        LOGGER);
+                throw Commons.logException(new RuntimePolicyUtilsException(createExceptionMessage(target, parameters, methodName), e), true, LOGGER);
             } catch (InvocationTargetException e) {
-                throw PolicyUtils.Commons.createAndLogException(
-                        RuntimePolicyUtilsException.class,
-                        createExceptionMessage(target, parameters, methodName),
-                        e,
-                        LOGGER);
+                throw Commons.logException(new RuntimePolicyUtilsException(createExceptionMessage(target, parameters, methodName), e), true, LOGGER);
             } catch (IllegalAccessException e) {
-                throw PolicyUtils.Commons.createAndLogException(
-                        RuntimePolicyUtilsException.class,
-                        createExceptionMessage(target, parameters, methodName),
-                        e.getCause(),
-                        LOGGER);
+                throw Commons.logException(new RuntimePolicyUtilsException(createExceptionMessage(target, parameters, methodName), e.getCause()), true, LOGGER);
             } catch (SecurityException e) {
-                throw PolicyUtils.Commons.createAndLogException(
-                        RuntimePolicyUtilsException.class,
-                        createExceptionMessage(target, parameters, methodName),
-                        e,
-                        LOGGER);
+                throw Commons.logException(new RuntimePolicyUtilsException(createExceptionMessage(target, parameters, methodName), e), true, LOGGER);
             } catch (NoSuchMethodException e) {
-                throw PolicyUtils.Commons.createAndLogException(
-                        RuntimePolicyUtilsException.class,
-                        createExceptionMessage(target, parameters, methodName),
-                        e,
-                        LOGGER);
+                throw Commons.logException(new RuntimePolicyUtilsException(createExceptionMessage(target, parameters, methodName), e), true, LOGGER);
             }
         }
         
