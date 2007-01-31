@@ -69,7 +69,6 @@ public class AbstractFilteringTest extends TestCase { // must not be abstract to
             writer.close();
             
             String marshalledData = buffer.toString();
-            System.out.println("Filtered output: \n" + marshalledData);
             
             PolicySourceModel result = PolicyResourceLoader.unmarshallModel(new StringReader(marshalledData));
             assertEquals("Result is not as expected for '" + testResourceName + "' test resource.", expected, result);
@@ -87,7 +86,6 @@ public class AbstractFilteringTest extends TestCase { // must not be abstract to
             writer.close();
             
             String marshalledData = buffer.toString();
-            System.out.println("Filtered output: \n" + marshalledData);
             
             PolicySourceModel result = PolicyResourceLoader.unmarshallModel(new StringReader(marshalledData));
             assertEquals("Result is not as expected for '" + testResourceName + "' test resource.", expected, result);

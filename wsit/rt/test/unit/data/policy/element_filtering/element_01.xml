@@ -37,11 +37,13 @@
     <wsss:TrustStore></wsss:TrustStore>
     <wsss:CallbackHandlerConfiguration></wsss:CallbackHandlerConfiguration>
     <wsss:ValidatorConfiguration></wsss:ValidatorConfiguration>
+    <wsss:DisablePayloadBuffering></wsss:DisablePayloadBuffering>
     
     <wssc:KeyStore></wssc:KeyStore>
     <wssc:TrustStore></wssc:TrustStore>
     <wssc:CallbackHandlerConfiguration></wssc:CallbackHandlerConfiguration>
     <wssc:ValidatorConfiguration></wssc:ValidatorConfiguration>
+    <wssc:DisablePayloadBuffering></wssc:DisablePayloadBuffering>
     
     <scs:SCConfiguration></scs:SCConfiguration>
     

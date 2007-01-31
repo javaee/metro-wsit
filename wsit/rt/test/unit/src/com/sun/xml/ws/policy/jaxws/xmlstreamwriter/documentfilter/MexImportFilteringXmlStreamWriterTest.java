@@ -45,7 +45,7 @@ public final class MexImportFilteringXmlStreamWriterTest extends AbstractFilteri
     
     private static final InvocationProcessorFactory factory = new InvocationProcessorFactory() {
         public InvocationProcessor createInvocationProcessor(XMLStreamWriter writer) throws XMLStreamException {
-            return new MexImportFilteringInvocationProcessor(writer);
+            return new FilteringInvocationProcessor(writer, new MexImportFilteringStateMachine());
         }
     };
     

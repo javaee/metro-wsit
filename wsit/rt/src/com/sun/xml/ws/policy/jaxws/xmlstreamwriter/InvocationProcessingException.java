@@ -40,6 +40,10 @@ public class InvocationProcessingException extends RuntimeException {
         super(message, cause);
     }    
 
+    public InvocationProcessingException(final Throwable cause) {
+        super(cause.getMessage(), cause);
+    }    
+
     public InvocationProcessingException(final Invocation invocation) {
 	super(assemblyExceptionMessage(invocation));
     }

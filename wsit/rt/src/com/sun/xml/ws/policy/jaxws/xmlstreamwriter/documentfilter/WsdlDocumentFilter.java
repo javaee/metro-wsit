@@ -27,6 +27,7 @@ import com.sun.xml.ws.api.server.SDDocumentFilter;
 import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.EnhancedXmlStreamWriterProxy;
 import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.InvocationProcessor;
 import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.InvocationProcessorFactory;
+import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
@@ -37,22 +38,15 @@ import javax.xml.stream.XMLStreamWriter;
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public class WsdlDocumentFilter implements SDDocumentFilter {
-    private static final InvocationProcessorFactory PRIVATE_ASSERTION_FILTER_FACTORY = new InvocationProcessorFactory() {
-        public InvocationProcessor createInvocationProcessor(final XMLStreamWriter writer) throws XMLStreamException {
-            return new PrivateAssertionFilteringInvocationProcessor(writer);
-        }
-    };
+    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(WsdlDocumentFilter.class);
     
-    private static final InvocationProcessorFactory MEX_IMPORT_FILTER_FACTORY = new InvocationProcessorFactory() {
-        public InvocationProcessor createInvocationProcessor(final XMLStreamWriter writer) throws XMLStreamException {
-            return new MexImportFilteringInvocationProcessor(writer);
-        }
-    };
-    
-    private static final InvocationProcessorFactory PRIVATE_ELEMENTS_FILTER_FACTORY = new InvocationProcessorFactory() {
-        public InvocationProcessor createInvocationProcessor(final XMLStreamWriter writer) throws XMLStreamException {
-            return new PrivateElementFilteringInvocationProcessor(
+    private static final InvocationProcessorFactory FILTERING_FACOTRY = new InvocationProcessorFactory() {
+        public InvocationProcessor createInvocationProcessor(XMLStreamWriter writer) throws XMLStreamException {
+            return new FilteringInvocationProcessor(
                     writer,
+                    new MexImportFilteringStateMachine(),
+                    new PrivateAttributeFilteringStateMachine(),
+                    new PrivateElementFilteringStateMachine(
                     new QName("http://schemas.sun.com/2006/03/wss/server", "KeyStore"),
                     new QName("http://schemas.sun.com/2006/03/wss/server", "TrustStore"),
                     new QName("http://schemas.sun.com/2006/03/wss/server", "CallbackHandlerConfiguration"),
@@ -72,15 +66,21 @@ public class WsdlDocumentFilter implements SDDocumentFilter {
                     new QName("http://schemas.sun.com/ws/2006/05/trust/server", "STSConfiguration"),
                     
                     new QName("http://schemas.sun.com/ws/2006/05/trust/client", "PreconfiguredSTS")
+                    )
                     );
         }
     };
     
     public XMLStreamWriter filter(final SDDocument sdDocument, final XMLStreamWriter xmlStreamWriter) throws XMLStreamException {
-        XMLStreamWriter result = EnhancedXmlStreamWriterProxy.createProxy(xmlStreamWriter, PRIVATE_ASSERTION_FILTER_FACTORY);
-        result = EnhancedXmlStreamWriterProxy.createProxy(result, MEX_IMPORT_FILTER_FACTORY);
-        result = EnhancedXmlStreamWriterProxy.createProxy(result, PRIVATE_ELEMENTS_FILTER_FACTORY);
-        
-        return result;
+        if (LOGGER.isMethodCallLoggable()) {
+            LOGGER.entering("filter", new Object[] {sdDocument, xmlStreamWriter});
+        }
+        XMLStreamWriter result = null;
+        try {
+            result = EnhancedXmlStreamWriterProxy.createProxy(xmlStreamWriter, FILTERING_FACOTRY);
+            return result;
+        } finally {
+            LOGGER.exiting("filter", result);
+        }
     }
 }

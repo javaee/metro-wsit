@@ -43,9 +43,10 @@ public final class PrivateAssertionFilteringXmlStreamWriterTest extends Abstract
     private static final String[] testResources = new String[] {
         "policy_0_visible",
     };
+
     private static final InvocationProcessorFactory factory = new InvocationProcessorFactory() {
         public InvocationProcessor createInvocationProcessor(XMLStreamWriter writer) throws XMLStreamException {
-            return new PrivateAssertionFilteringInvocationProcessor(writer);
+            return new FilteringInvocationProcessor(writer, new PrivateAttributeFilteringStateMachine());
         }
     };
     
