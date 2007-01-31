@@ -52,6 +52,8 @@ public final class PolicyUtils {
     public static class Commons {
         private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyUtils.Commons.class);
         
+        private static final LinkedList<StackTraceElement> stackTraceElements= new LinkedList<StackTraceElement>();
+        
         /**
          * Method instantiates an exception of class {@code exceptionClass} and initializes it with {@code message}.
          * If {@code cause} parameter is not {@code null}, exception cause is initialized as well using the content
@@ -70,16 +72,28 @@ public final class PolicyUtils {
          * @throw RuntimePolicyUtilsException in case of any problems with instantiation and initialization of the new
          *        exception object.
          */
-        public static <T extends Throwable> T createAndLogException(Class<T> exceptionClass, String message, Throwable cause, PolicyLogger logger) throws RuntimePolicyUtilsException {
+        public static <T extends Throwable> T createAndLogException(final Class<T> exceptionClass, final String message, final Throwable cause, final PolicyLogger logger) throws RuntimePolicyUtilsException {
             final String errorMessage = LocalizationMessages.WSP_000063_ERROR_WHILE_CONSTRUCTING_EXCEPTION(exceptionClass);
             try {
-                Constructor<T> constructor = exceptionClass.getConstructor(String.class);
-                T exception = constructor.newInstance(message);
+                final Constructor<T> constructor = exceptionClass.getConstructor(String.class);
+                final T exception = constructor.newInstance(message);
+                
+                final String callerMethodName = getCallerMethodName();
+                
+                // adjusting stack trace (removing calls to exception's constructor and this method from the stack trace)
+                stackTraceElements.addAll(Arrays.asList(exception.getStackTrace()));                
+                while (!stackTraceElements.isEmpty() && !stackTraceElements.getFirst().getMethodName().equals(callerMethodName)) {
+                    stackTraceElements.removeFirst();
+                }
+                exception.setStackTrace(stackTraceElements.toArray(new StackTraceElement[stackTraceElements.size()]));
+                stackTraceElements.clear();
+                
+                // initializing original cause (if any)
                 if (cause != null) {
                     exception.initCause(cause);
-                    logger.severe(getCallerMethodName(), message, cause);
+                    logger.severe(callerMethodName, message, cause);
                 } else {
-                    logger.severe(getCallerMethodName(), message);                    
+                    logger.severe(callerMethodName, message);
                 }
                 
                 return exception;
@@ -107,13 +121,13 @@ public final class PolicyUtils {
         /**
          * Method returns the name of the method that is on the {@code methodIndexInStack}
          * position in the call stack of the current {@link Thread}.
-         * 
+         *
          * @param methodIndexInStack index to the call stack to get the method name for.
          * @return the name of the method that is on the {@code methodIndexInStack}
          *         position in the call stack of the current {@link Thread}.
          */
         public static String getStackMethodName(final int methodIndexInStack) {
-            String methodName;
+            final String methodName;
             
             final StackTraceElement[] stack = Thread.currentThread().getStackTrace();
             if (stack.length > methodIndexInStack + 1) {
@@ -128,7 +142,7 @@ public final class PolicyUtils {
         /**
          * Function returns the name of the caller method for the method executing this
          * function.
-         * 
+         *
          * @return caller method name from the call stack of the current {@link Thread}.
          */
         public static String getCallerMethodName() {

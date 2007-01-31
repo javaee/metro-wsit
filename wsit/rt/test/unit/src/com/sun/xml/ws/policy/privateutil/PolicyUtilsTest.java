@@ -45,6 +45,7 @@ public class PolicyUtilsTest extends TestCase {
         assertEquals(clazz, result.getClass());
         assertEquals(message, result.getMessage());
         assertEquals(cause, result.getCause());
+        assertEquals("testCommonsCreateAndLogException", result.getStackTrace()[0].getMethodName());
 
         cause = null;
         message = "Test message.";
@@ -53,6 +54,7 @@ public class PolicyUtilsTest extends TestCase {
         assertEquals(clazz, result.getClass());
         assertEquals(message, result.getMessage());
         assertEquals(cause, result.getCause());
+        assertEquals("testCommonsCreateAndLogException", result.getStackTrace()[0].getMethodName());
 
         cause = null;
         message = null;
@@ -61,6 +63,7 @@ public class PolicyUtilsTest extends TestCase {
         assertEquals(clazz, result.getClass());
         assertEquals(message, result.getMessage());
         assertEquals(cause, result.getCause());    
+        assertEquals("testCommonsCreateAndLogException", result.getStackTrace()[0].getMethodName());
     }
     
     /**
