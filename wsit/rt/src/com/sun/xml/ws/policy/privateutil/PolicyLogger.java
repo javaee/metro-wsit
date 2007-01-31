@@ -56,6 +56,7 @@ public final class PolicyLogger {
         }
     }
 
+    
     private String componentClassName;
     private java.util.logging.Logger logger;
     
@@ -79,7 +80,7 @@ public final class PolicyLogger {
     public static PolicyLogger getLogger(final Class componentClass) {
         return new PolicyLogger(componentClass.getName());
     }
- 
+     
     public void log(final Level level, final String methodName, final String message) {
         logger.logp(level, componentClassName, methodName, message);
     }
@@ -144,37 +145,42 @@ public final class PolicyLogger {
         logger.logp(Level.SEVERE, componentClassName, methodName, message, thrown);
     }
     
-    public void entering() {
-        if (!this.logger.isLoggable(METHOD_CALL_LEVEL_VALUE)) {
-            return;
-        }
-        
-        logger.entering(componentClassName, PolicyUtils.Commons.getCallerMethodName());
+    public boolean isMethodCallLoggable() {
+        return this.logger.isLoggable(METHOD_CALL_LEVEL_VALUE);
     }
 
-    public void entering(final Object[] parameters) {
-        if (!this.logger.isLoggable(METHOD_CALL_LEVEL_VALUE)) {
-            return;
-        }
-                
-        logger.entering(componentClassName, PolicyUtils.Commons.getCallerMethodName(), parameters);
-    }
     
-    public void exiting() {
-        if (!this.logger.isLoggable(METHOD_CALL_LEVEL_VALUE)) {
-            return;
-        }
-        logger.exiting(componentClassName, PolicyUtils.Commons.getCallerMethodName());
-    }
+//    public void entering() {
+//        if (!this.logger.isLoggable(METHOD_CALL_LEVEL_VALUE)) {
+//            return;
+//        }
+//        
+//        logger.entering(componentClassName, PolicyUtils.Commons.getCallerMethodName());
+//    }
+//
+//    public void entering(final Object... parameters) {
+//        if (!this.logger.isLoggable(METHOD_CALL_LEVEL_VALUE)) {
+//            return;
+//        }
+//                
+//        logger.entering(componentClassName, PolicyUtils.Commons.getCallerMethodName(), parameters);
+//    }
+//    
+//    public void exiting() {
+//        if (!this.logger.isLoggable(METHOD_CALL_LEVEL_VALUE)) {
+//            return;
+//        }
+//        logger.exiting(componentClassName, PolicyUtils.Commons.getCallerMethodName());
+//    }
+//    
+//    public void exiting(final Object result) {
+//        if (!this.logger.isLoggable(METHOD_CALL_LEVEL_VALUE)) {
+//            return;
+//        }
+//        logger.exiting(componentClassName, PolicyUtils.Commons.getCallerMethodName(), result);
+//    }
     
-    public void exiting(final Object result) {
-        if (!this.logger.isLoggable(METHOD_CALL_LEVEL_VALUE)) {
-            return;
-        }
-        logger.exiting(componentClassName, PolicyUtils.Commons.getCallerMethodName(), result);
-    }
-    
-    // TODO: refactor and remove usage of the following methods (replace with the version above): 
+    // TODO: refactor and remove usage of the following methods (replace with the currently commented version above): 
     public void entering(final String methodName) {
         logger.entering(componentClassName, methodName);
     }
@@ -186,13 +192,12 @@ public final class PolicyLogger {
     public void entering(final String methodName, final Object[] parameters) {
         logger.entering(componentClassName, methodName, parameters);
     }
-    
+
     public void exiting(final String methodName) {
         logger.exiting(componentClassName, methodName);
     }
     
     public void exiting(final String methodName, final Object result) {
         logger.exiting(componentClassName, methodName, result);
-    }
-    
+    }    
 }

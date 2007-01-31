@@ -34,11 +34,11 @@ import javax.xml.stream.XMLStreamWriter;
  * The class provides an implementation of an {@link InvocationHandler} interface
  * that handles requests of {@link XMLStreamWriter} proxy instances.
  *<p/>
- * This {@link InvocationHandler} implementation adds additional feature or enhancement 
+ * This {@link InvocationHandler} implementation adds additional feature or enhancement
  * to the underlying {@link XMLStreamWriter} instance. The new enhancement or feature is
  * defined by an {@link InvocationProcessor} implementation.
  * <p/>
- * The class also contains a static factory method for creating such 'enhanced' 
+ * The class also contains a static factory method for creating such 'enhanced'
  * {@link XMLStreamWriter} proxies.
  *
  * @author Marek Potociar (marek.potociar at sun.com)
@@ -63,24 +63,24 @@ public final class EnhancedXmlStreamWriterProxy implements InvocationHandler {
         }
     }
     
-    // invocation procesor that processes 
+    // invocation procesor that processes
     private InvocationProcessor invocationProcessor;
     
     /**
      * Creates a wrapper {@link XMLStreamWriter} proxy that adds enhanced feature
      * to the {@code writer} instance.
-     * 
+     *
      * @param writer {@link XMLStreamWriter} instance that should be enhanced with
      *        content filtering feature.
-     * @param processorFactory {@link InvocationProcessorFactory} instance that 
+     * @param processorFactory {@link InvocationProcessorFactory} instance that
      *        is used to create {@InvocationProcessor} which implements new enhancement
-     *        or feature.   
+     *        or feature.
      *
      * @return new enhanced {XMLStreamWriter} (proxy) instance
      * @throws XMLStreamException
      */
     public static XMLStreamWriter createProxy(final XMLStreamWriter writer, final InvocationProcessorFactory processorFactory) throws XMLStreamException {
-        LOGGER.entering();
+        LOGGER.entering("createProxy");
         
         XMLStreamWriter proxy = null;
         try {
@@ -91,23 +91,31 @@ public final class EnhancedXmlStreamWriterProxy implements InvocationHandler {
             
             return proxy;
         } finally {
-            LOGGER.exiting(proxy);
+            LOGGER.exiting("createProxy", proxy);
         }
     }
     
     private EnhancedXmlStreamWriterProxy(final XMLStreamWriter writer, final InvocationProcessorFactory processorFactory) throws XMLStreamException {
         this.invocationProcessor = processorFactory.createInvocationProcessor(writer);
     }
-            
+    
     public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
-        LOGGER.entering(new Object[] {method, args});
+        if (LOGGER.isMethodCallLoggable()) {
+            LOGGER.entering("createProxy", new Object[] {method, args});
+        }
         
-        final Class declaringClass = method.getDeclaringClass();
-        if (declaringClass == Object.class) {
-            return handleObjectMethodCall(proxy, method, args);
-        } else {
-            final Invocation invocation = Invocation.createInvocation(method, args);
-            return invocationProcessor.process(invocation);            
+        Object result = null;
+        try {
+            final Class declaringClass = method.getDeclaringClass();
+            if (declaringClass == Object.class) {
+                return handleObjectMethodCall(proxy, method, args);
+            } else {
+                final Invocation invocation = Invocation.createInvocation(method, args);
+                result = invocationProcessor.process(invocation);
+                return result;
+            }
+        } finally {
+            LOGGER.exiting("invoke", result);
         }
     }
     
