@@ -50,6 +50,7 @@ import com.sun.xml.ws.tx.common.TxFault;
 import com.sun.xml.ws.tx.coordinator.CoordinationContextInterface;
 import com.sun.xml.ws.tx.coordinator.CoordinationManager;
 import javax.servlet.ServletContext;
+import javax.transaction.InvalidTransactionException;
 import javax.transaction.NotSupportedException;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
@@ -70,7 +71,7 @@ import java.util.logging.Level;
  * <p/>
  * Supports following WS-Coordination protocols: 2004 WS-Atomic Transaction protocol
  *
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  * @since 1.0
  */
 // suppress known deprecation warnings about using pipes.
@@ -80,19 +81,20 @@ public class TxServerPipe implements Pipe {
     static private TxLogger logger = TxLogger.getLogger(TxServerPipe.class);
     static private TransactionManagerImpl tm = TransactionManagerImpl.getInstance();
 
-    // In future there can be multiple WS-AT namespaces: 2004 member submission, OASIS WS-TX
-    final static private List<String> WSAT_NS_LST = Arrays.asList(WSAT_SOAP_NSURI);
-
-    // Might need CoordinationContext for OASIS and 2004 input submission.
-    // They will have different target namespaces.
-    // might need additional classes due to extensibility of CoordinationContext (anyAttribute, any element)
-    private Unmarshaller unmarshaller = null;
-    private WSDLPort port = null;
-    final WSBinding wsbinding;
-    final Pipe next;
+    // unmarshalls supported WS-AT coordination context formats
+    final private Unmarshaller unmarshaller;
+    
+    final private WSDLPort port;
+    final private WSBinding wsbinding;
+    final private Pipe next;
 
 
     /**
+     * Deployment time computations for WS-Atomic Tranaction processing.
+     *
+     * <p>
+     * Computes WS-Atomic Policy Assertions for all wsdl bound operations for this <code>wsbinding</code>.
+     *
      * @param port WSDL port for this pipe
      * @param map  PolicyMap
      * @param next Next pipe to be executed.
@@ -104,14 +106,7 @@ public class TxServerPipe implements Pipe {
         unmarshaller = TxJAXBContext.createUnmarshaller();
         this.port = port;
         this.wsbinding = wsbinding;
-        try {
-            cacheOperationToPolicyMappings(map, port.getBinding());
-        } catch (PolicyException e) {
-            throw new WebServiceException(
-                    LocalizationMessages.AT_POLICY_ASSERTION_PROCESSING_FAILED(e.getLocalizedMessage(),
-                            port.getAddress().getURI(),
-                            port.getBinding().getName().toString()));
-        }
+        cacheOperationToPolicyMappings(map, port.getBinding());
         this.next = next;
     }
 
@@ -140,48 +135,54 @@ public class TxServerPipe implements Pipe {
     }
 
     /**
-     * Process WS-AT transactional context in incoming message.
+     * Process WS-AT transactional context in incoming request message.
      * <p/>
-     * <p/>
+     * <p>
      * Transactional context processing is driven by ws-at policy assertions associated with
      * wsdl:binding/wsdl:operation of parameter <code>pkt</code>.
      *
-     * @param pkt a packet with JAX-WS properties that has an incoming request message
+     * @param pkt a packet is an incoming request message with JAX-WS properties
      * @return processing of pkt by next pipe in pipeline
      */
     public Packet process(Packet pkt) {
-         if (logger.isLogging(Level.FINEST)) {
-            logger.finest("process(Packet)", "Enter TxServerPipe.process(pkt=" + pkt.toString() + " Thread: " +
-                    "name:" + Thread.currentThread().getName() + " thread instance:" + Thread.currentThread().toString());
+         final String METHOD_NAME = "TxServerPipe.process";
+         if (logger.isLogging(Level.FINER)) {
+             Object[] params = new Object[1];
+             params[0] = pkt;
+             logger.entering(METHOD_NAME, params);
          }
-        
-        // Precondition check
-        assertNoCurrentTransaction("JTA Transaction MUST not exist at start of TxServerPipe.process.");
         
         com.sun.xml.ws.tx.common.Message msg = new Message(pkt.getMessage(), wsbinding);
         WSDLBoundOperation msgOp = msg.getOperation(port);
         QName msgOperation = msgOp.getName();
         OperationATPolicy opat = getATPolicy(msgOperation);
+        String bindingName = port.getBinding().getName().toString();
         CoordinationContextInterface CC = null;
+        
+        // Precondition check
+        assertNoCurrentTransaction(
+           LocalizationMessages.INVALID_JTA_TRANSACTION_ENTERING_5002(bindingName, msgOperation.toString()));
         
         try {
             CC = msg.getCoordinationContext(unmarshaller);
         } catch (JAXBException je) {
-            if (opat.atAssertion == ATAssertion.REQUIRED || opat.atAssertion == ATAssertion.ALLOWED) {
-                // send fault S4.3 wscoor:InvalidParameters
-                WsaHelper.sendFault(
-                        msg.getFaultTo(),
-                        msg.getReplyTo().toSpec(),
-                        SOAPVersion.SOAP_11,
-                        TxFault.InvalidParameters,
-                        "failed to unmarshal CoordinationContext with JAXBException " + je.getLocalizedMessage(),
-                        msg.getMessageID());
-                throw new WebServiceException(je.getLocalizedMessage());
-            } else {
-                logger.warning("TxServerPipe", "failed to unmarshal unexpected CoordinationContext with JAXBException " + je.getLocalizedMessage());
-            }
+            String invalidMsg = 
+                    LocalizationMessages.INVALID_COORDINATION_CONTEXT_5006(
+                                    msg.getMessageID().toString(), 
+                                    bindingName, 
+                                    msgOperation.toString(), 
+                                    je.getLocalizedMessage());
+            logger.warning(METHOD_NAME, invalidMsg, je);
+            
+            // send fault S4.3 wscoor:InvalidParameters
+            WsaHelper.sendFault(
+                    msg.getFaultTo(),
+                    msg.getReplyTo().toSpec(),
+                    SOAPVersion.SOAP_11,
+                    TxFault.InvalidParameters,
+                    invalidMsg,
+                    msg.getMessageID());
         }
-        
         
         // verify coordination type protocol
         if (CC != null) {
@@ -189,33 +190,47 @@ public class TxServerPipe implements Pipe {
                 //  let jax-ws runtime know that coordination context header was understood.
                 if (logger.isLogging(Level.FINEST)) {
                     
-                    logger.finest("process(Packet)", "Processing wscoor:CoordinationContext for protocol " + CC.getCoordinationType() + "  in " + msgOp.getName().toString());
+                    logger.finest(METHOD_NAME, "Processing wscoor:CoordinationContext(protocol=" + CC.getCoordinationType() +
+                                  "coordId=" + CC.getIdentifier().toString() + ") for binding:" + bindingName + 
+                                  "operation:"  + msgOp.getName().toString());
                 }
                 msg.setCoordCtxUnderstood();
             } // else check for other supported protocols in future.
             else {  // unrecognized ws coordination protocol type
-                // Another pipe *may* process CoordinationContext with this unknown protocol type.  log for now.
-                if (logger.isLogging(Level.WARNING)) {
-                    logger.warning("TxServerPipe.process(Packet)", "ignoring unrecognized CoordinationContext protocol:" + CC.getCoordinationType());
-                }
+                // Another pipe *may* process CoordinationContext with this unknown protocol type so just log this.
+                logger.info(METHOD_NAME, 
+                        LocalizationMessages.IGNORING_UNRECOGNIZED_PROTOCOL_5005(
+                        CC.getCoordinationType(),
+                        CC.getIdentifier().toString(),
+                        bindingName,
+                        msgOperation.toString()));
                 CC = null;
             }
         }
 
         // wsat:ATAssertion policy assertion check.  Note 2004 WS-AT does not require this.
-        if (opat.atAssertion == ATAssertion.REQUIRED && CC == null) {
-            throw new WebServiceException(
-                    LocalizationMessages.MUST_FLOW_WSAT_COORDINATION_CONTEXT(msgOperation.toString()));
+        if (opat.atAssertion == ATAssertion.MANDATORY && CC == null) {
+            String inconsistencyMsg = 
+                    LocalizationMessages.MUST_FLOW_WSAT_COORDINATION_CONTEXT_5000(
+                                bindingName, msgOperation.toString(), msg.getMessageID().toString());
+            logger.warning(METHOD_NAME, inconsistencyMsg);
+            // TODO:  complete evaluation if desire to throw this as an exception or not.
+            //        Since WS-AT specification does not require this, might be best not to throw exception.
+            throw new WebServiceException(inconsistencyMsg);
         }
 
         /*
-         * Absence of a ws-at atassertion does not forbid WS-AT CoordinationContext from flowing.
-         * OASIS WS-TX refers to this case as no claims made.
+         * Absence of a ws-at ATAssertion does not forbid WS-AT CoordinationContext from flowing.
+         * OASIS WS-AT refers to this case as no claims made. Rules external to WS-AT may have
+         * caused this situation to occur.
          */
         if (CC != null && opat.atAssertion == ATAssertion.NOT_ALLOWED) {
-            // Not an error just log this is occuring.
-            logger.warning("TxServerPipe", "atomic transaction flowed with operation request that was not annotated with wsat:ATAssertion : " +
-                    msgOperation.toString());
+            
+            // Not an error just log this as occuring since it would be helpful to know about this.
+            logger.info(METHOD_NAME, 
+                    LocalizationMessages.UNEXPECTED_FLOWED_TXN_CONTEXT_5004(
+                                  bindingName, msgOperation.toString(), msg.getMessageID().toString(),
+                                  CC.getIdentifier().toString()));
         }
 
         boolean importedTxn = false;
@@ -230,84 +245,82 @@ public class TxServerPipe implements Pipe {
 
             txn = coord.getTransaction();
             if (txn != null) {
-                if (logger.isLogging(Level.FINEST)) {
-                    logger.finest("TxServerPipe", "JTA transaction flowed within same app server instance, resume the JTA transaction.");
+                if (logger.isLogging(Level.FINER)) {
+                    logger.finer(METHOD_NAME, "A WS-AT Transaction flowed within same app server instance, resume the JTA transaction already associated with WS-AT CoordinationContext.");
                 }
-                boolean performSuspend = true;
-                try {
-                    tm.resume(txn);
-                } catch (IllegalStateException e) {
-                    // ignore.  transaction context already setup
-                    performSuspend = false;
-                } catch (Exception ex) {
-                    throw new WebServiceException(ex.getMessage(), ex);
-                }
+                resumeTransaction(txn);    
                 try {
                     responsePkt = next.process(pkt);
                 } catch (Exception e) {
+                    logger.warning(METHOD_NAME,
+                                   LocalizationMessages.HANDLE_EXCEPTION_TO_COMPLETE_TRANSACTION_5012(CC.getIdentifier().toString(),
+                                                                                                 txn.toString()), 
+                                   e);
                     rethrow = e;
+                    tm.setRollbackOnly();
                 }
-                if (performSuspend) {
-                    try {
-                        tm.suspend();
-                    } catch (SystemException ex) {
-                        //ignore
-                    }
-                }
+                suspemdTransaction();
             } else if (coord.isSubordinateCoordinator()) {
-                if (logger.isLogging(Level.FINEST)) {
-                    logger.finest("TxServerPipe", "importing ws-at activity id:" + CC.getIdentifier() +   
-                                  " from external WS-AT coordinator");
+                if (logger.isLogging(Level.FINER)) {
+                    logger.finer(METHOD_NAME, "importing ws-at activity id:" + CC.getIdentifier() +   
+                                              " from external WS-AT coordinator");
                 }
                 importedTxn = true;
                 beginImportTransaction(CC, coord);
                 try {
                     responsePkt = next.process(pkt);
                 } catch (Exception e) {
+                    logger.warning(METHOD_NAME,
+                                   LocalizationMessages.HANDLE_EXCEPTION_TO_RELEASE_IMPORTED_TXN_5013(CC.getIdentifier().toString(),
+                                                                                                 txn.toString()), 
+                                   e);
                     rethrow = e;
                     tm.setRollbackOnly();
                 }
                 endImportTransaction(CC);
             } else {
-                // just in case first two cases are not met
                 responsePkt = next.process(pkt);
             }
         } else if (opat.ATAlwaysCapability == true) {
-             if (logger.isLogging(Level.FINEST)) {
-                    logger.finest("TxServerPipe", "create JTA Transaction, no CoordinationContext flowed with operation and wsat:ATAlwaysCapability is enabled");
+             if (logger.isLogging(Level.FINER)) {
+                    logger.finer(METHOD_NAME, "create JTA Transaction, no CoordinationContext flowed with operation and wsat:ATAlwaysCapability is enabled");
              }
             // no Transaction context flowed with message but WS-AT policy assertion requests auto creation of txn 
             // context on server side invocation of method.
             if (isServlet(pkt)) {
                  beginTransaction();
             }    // else allow Java EE EJB container to create transaction context
+                 // for Sun Application Server:  see BaseContainer.preInvokeTx
             try {
                 responsePkt = next.process(pkt);
             } catch (Exception e) {
                 rethrow = e;
+                logger.warning(METHOD_NAME, 
+                               LocalizationMessages.HANDLE_EXCEPTION_TO_COMMIT_CREATED_TXN_5015(), e);
                 tm.setRollbackOnly();
             }
             if (isServlet(pkt)) {
                  commitTransaction();
             } // else allow Java EE EJB container to finish transaction context
-        } else {  // just in case first two cases are not met
+              // for Sun Application Server:  see BaseContainer.postInvokeTx
+        } else { 
             responsePkt = next.process(pkt);
         }
-        // Postcondition check
-        assertNoCurrentTransaction("JTA Transaction MUST not exist when returning from TxServerPipe.process ");
         
+        // Postcondition check
+        assertNoCurrentTransaction(
+                LocalizationMessages.INVALID_JTA_TRANSACTION_RETURNING_5003(bindingName, 
+                                                                       msgOperation.toString()));
         if (rethrow != null) {
-            if (logger.isLogging(Level.FINE)) {
-                logger.fine("TxServerPipe", "rethrowing caught exception " + rethrow.getMessage());
-            }    
-            throw new WebServiceException(rethrow.getMessage(), rethrow);
+            String exMsg = LocalizationMessages.WSTXRETHROW_5014(bindingName, 
+                                                                 msgOperation.toString());
+            throw new WebServiceException(exMsg, rethrow);
         }
-        if (logger.isLogging(Level.FINEST)) {
-            logger.finest("process(Packet)", "Exit TxServerPipe.process(pkt=" + pkt.toString() + " Thread: " +
-                    "name:" + Thread.currentThread().getName() + " thread instance:" + Thread.currentThread().toString());
-         }
+        
+        logger.exiting(METHOD_NAME, responsePkt);
         return responsePkt;
     }
+    
     private Xid activeImportedXid = null;
 
     private boolean isServlet(Packet pkt) {
@@ -323,23 +336,21 @@ public class TxServerPipe implements Pipe {
     private void beginImportTransaction(CoordinationContextInterface CC, ATCoordinator coordinator) {
         assert activeImportedXid == null;
 
-        // TODO:
-        // JTS recovery must process WS-AT SubordinateCoordinator.
-        // So  WS-AT SubordinateCoordinator mustbe registered as coordinator resource with JTS.
-
         Transaction currentTxn;
         activeImportedXid = CoordinationXid.lookupOrCreate(CC.getIdentifier());
         try {    
             ((TransactionImport) tm).recreate(activeImportedXid, CC.getExpires());
         } catch (IllegalStateException ex) {
-            logger.warning("beginImportTransaction", "beginImportTransaction failed. caught exception " + ex.getLocalizedMessage(), ex);
-            throw new WebServiceException(ex.getMessage(), ex);
+            String message = LocalizationMessages.IMPORT_TRANSACTION_FAILED_5009(CC.getIdentifier().toString());
+            logger.warning("beginImportTransaction", message, ex);
+            throw new WebServiceException(message, ex);
         } 
         try{  
             currentTxn = tm.getTransaction();
         } catch (SystemException ex) {
-            logger.warning("beginImportTransaction", "getTransaction() failed. caught exception " + ex.getLocalizedMessage(), ex);
-            throw new WebServiceException(ex.getMessage(), ex);
+            String message = LocalizationMessages.IMPORT_TXN_GET_TXN_FAILED_5010(CC.getIdentifier().toString());
+            logger.warning("beginImportTransaction", message, ex);
+            throw new WebServiceException(message, ex);
         }     
         assert currentTxn != null;
         coordinator.setTransaction(currentTxn);
@@ -360,7 +371,8 @@ public class TxServerPipe implements Pipe {
         try {
             ((TransactionImport) tm).release(activeImportedXid);
         } catch (Error e) {
-            logger.warning("endImportTransaction", "ignoring exception raised while releasing imported transaction", e);
+            logger.warning("endImportTransaction",
+                    LocalizationMessages.EXCEPTION_RELEASING_IMPORTED_TRANSACTION_5007(), e);
         }
         activeImportedXid = null;
         ATCoordinator coord = (ATCoordinator) CoordinationManager.getInstance().getCoordinator(CC.getIdentifier());
@@ -368,7 +380,7 @@ public class TxServerPipe implements Pipe {
     }
 
     enum ATAssertion {
-        NOT_ALLOWED, ALLOWED, REQUIRED
+        NOT_ALLOWED, ALLOWED, MANDATORY
     }
 
     static class OperationATPolicy {
@@ -379,21 +391,23 @@ public class TxServerPipe implements Pipe {
     /**
      * Cache of operation name to its WS-AT policies computed in constructor.
      * An operation is not inserted into cache if its WS-AT policies are the default values.
+     * This is a space/time tradeoff.  Saves time in process call by taking up
+     * more memory for pipe.  Makes sense for server-side, probably not for client-side
      */
-    /* this is a space/time tradeoff.  Saves time in process call by taking up
-       more memory for pipe.  Makes sense for server-side, probably not for client-side*/
     private Map<QName, OperationATPolicy> opPolicyCache = new HashMap<QName, OperationATPolicy>();
 
-    static OperationATPolicy DEFAULT = null;
+    static private OperationATPolicy DEFAULT = new OperationATPolicy();
 
-    OperationATPolicy getDefaultATPolicy() {
-        if (DEFAULT == null) {
-            DEFAULT = new OperationATPolicy();
-        }
+    private OperationATPolicy getDefaultATPolicy() {
         return DEFAULT;
     }
 
-    // Does not handle overloaded operationName.
+    /**
+     * Return the WS-AT policy assertions for wsdl bounded <code>operationName</code>.
+     *
+     * @param operationName wsdl bound operation
+     * @return WS-AT policy assertions for <code>operationName</code> 
+     */
     private OperationATPolicy getATPolicy(QName operationName) {
         OperationATPolicy result = opPolicyCache.get(operationName);
         if (result == null) {
@@ -408,14 +422,21 @@ public class TxServerPipe implements Pipe {
      * If an operation has the default WS-AT policy assertions, nothing is inserted in cache for
      * method, the getATPolicy() method handles this case.
      */
-    private void cacheOperationToPolicyMappings(PolicyMap pmap, WSDLBoundPortType binding) throws PolicyException {
+    private void cacheOperationToPolicyMappings(PolicyMap pmap, WSDLBoundPortType binding) {
 
         // Cache wsat policy for each wsdl:binding/wsdl:operation for binding
         for (WSDLBoundOperation bindingOp : binding.getBindingOperations()) {
             WSDLOperation op = bindingOp.getOperation();
             PolicyMapKey opKey = pmap.createWsdlMessageScopeKey(port.getOwner().getName(), port.getName(), bindingOp.getName());
-            Policy effectivePolicy =
-                    pmap.getOperationEffectivePolicy(opKey);
+            Policy effectivePolicy = null;
+            try {
+                effectivePolicy = pmap.getOperationEffectivePolicy(opKey);
+            } catch (PolicyException ex) {
+                logger.warning("cacheOperationToPolicyMappings", 
+                        LocalizationMessages.AT_POLICY_ASSERTION_PROCESSING_FAILED_5001(binding.getName().toString(),
+                                                                                   bindingOp.getName().toString()), 
+                        ex);
+            }
 
             if (effectivePolicy != null) {
                 OperationATPolicy opat = new OperationATPolicy();
@@ -426,24 +447,45 @@ public class TxServerPipe implements Pipe {
                     AssertionSet wsatAssertionSet = iter.next();
                     for (PolicyAssertion wsatpa : wsatAssertionSet) {
 
-                        // Code below needs to be updated to not use wsat namespace
-                        // in comparison when need to support xmlsoap 2004 and OASIS WS-TX ns
+                        // Check for 2004 WS-Atomic Transaction Policy Assertions
                         if (wsatpa.getName().equals(AT_ASSERTION)) {
                             opat.atAssertion = (wsatpa.isOptional() ?
-                                    ATAssertion.ALLOWED : ATAssertion.REQUIRED);
+                                    ATAssertion.ALLOWED : ATAssertion.MANDATORY);
                         } else if (wsatpa.getName().equals(AT_ALWAYS_CAPABILITY)) {
                             opat.ATAlwaysCapability = true;
                         }
+                        
+                        // TODO: To implement OASIS WS-Atomic Transaction,
+                        // check for OASIS WS-Atomic Transaction Policy Assertion ATAssertion here
                     }
                 }
-//                if (logger.isLogging(Level.FINEST)) {
-//                    logger.finest("cacheOperationToPolicyMappings", "Operation: " +
-//                        binding.getName() + ":" +
-//                        bindingOp.getName() + " WS-AT Policy Assertions: ATAssertion:" + opat.atAssertion +
-//                                         " ATAlwaysCapability:" + opat.ATAlwaysCapability);
-//               }
-                opPolicyCache.put(bindingOp.getName(), opat);
+                if (logger.isLogging(Level.FINE)) {
+                    logger.fine("cacheOperationToPolicyMappings", "Operation: " +
+                                 binding.getName() + ":" +
+                                 bindingOp.getName() + " WS-AT Policy Assertions: ATAssertion:" + opat.atAssertion +
+                                         " ATAlwaysCapability:" + opat.ATAlwaysCapability);
+               }
+               opPolicyCache.put(bindingOp.getName(), opat);
             }
+        }
+    }
+    
+    private void resumeTransaction(Transaction txn) throws WebServiceException {
+        try {
+            tm.resume(txn);
+        } catch (Exception ex) {
+            String handlerMsg = LocalizationMessages.TXN_MGR_OPERATION_FAILED_5011("resume");
+            logger.severe("resumeTransaction", handlerMsg, ex);
+            throw new WebServiceException(handlerMsg, ex);
+        }
+    }
+    
+    private void suspemdTransaction() {
+        try {
+            tm.suspend();
+        } catch (SystemException ex) {
+            String handlerMsg = LocalizationMessages.TXN_MGR_OPERATION_FAILED_5011("suspend");
+            logger.warning("suspendTransaction", handlerMsg, ex);
         }
     }
 
@@ -454,9 +496,13 @@ public class TxServerPipe implements Pipe {
         try {
            tm.getUserTransaction().begin();
         } catch (NotSupportedException ex) {
-            throw new WebServiceException(ex.getMessage(), ex);
+            String handlerMsg = LocalizationMessages.TXN_MGR_OPERATION_FAILED_5011("getUserTransaction().begin()");
+            logger.warning("beginTransaction", handlerMsg, ex);
+            throw new WebServiceException(handlerMsg, ex);
         } catch (SystemException ex) {
-            throw new WebServiceException(ex.getMessage(), ex);
+            String handlerMsg = LocalizationMessages.TXN_MGR_OPERATION_FAILED_5011("getUserTransaction().begin()");
+            logger.warning("beginTransaction", handlerMsg, ex);
+            throw new WebServiceException(handlerMsg, ex);
         }
     }
 
@@ -467,8 +513,9 @@ public class TxServerPipe implements Pipe {
         try {
             tm.getUserTransaction().commit();
         } catch (Exception ex) {
-            logger.warning("commitTransaction", "commit failed with exception " + ex.getLocalizedMessage());
-            ex.printStackTrace();
+            String commitExceptionMsg = LocalizationMessages.EXCEPTION_DURING_COMMIT_5008();
+            logger.warning("commitTransaction", commitExceptionMsg, ex);
+            throw new WebServiceException(commitExceptionMsg, ex);
         }
     }
     
@@ -477,14 +524,18 @@ public class TxServerPipe implements Pipe {
         try {
             txn = tm.getTransaction();
         } catch (SystemException ex) {
-            ex.printStackTrace();
+            String handlerMsg = LocalizationMessages.TXN_MGR_OPERATION_FAILED_5011("getTransaction");
+            logger.warning("assertNoCurrentTransaction", handlerMsg);
+            throw new WebServiceException(handlerMsg, ex);
         }     
         if (txn != null) {
-            logger.severe("TxServerPipe.process", message + " Unexpected JTA Txn: " + txn.toString());
+            logger.severe("TxServerPipe.process", message + " " + txn.toString());
             try {
                 tm.suspend();
             } catch (SystemException ex) {
-                ex.printStackTrace();
+                String handlerMsg = LocalizationMessages.TXN_MGR_OPERATION_FAILED_5011("suspend");
+                logger.warning("assertNoCurrentTransaction", handlerMsg);
+                throw new WebServiceException(handlerMsg, ex);
             }
         } 
     }
