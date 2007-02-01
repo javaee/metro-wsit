@@ -25,6 +25,7 @@ package com.sun.xml.ws.policy.jaxws;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.policy.Policy;
+import com.sun.xml.ws.policy.PolicyConstants;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
@@ -44,8 +45,11 @@ import junit.framework.TestCase;
  *
  */
 public class PolicyConfigParserTest extends TestCase {
+    private static final String TEST_FILE_PATH = "test/unit/data/policy/config/wsit.xml";
     private static final String CONFIG_FILE_PATH = "test/unit/data/META-INF";
+    private static final String CLASSPATH_CONFIG_FILE_PATH = "test/unit/data";
     private static final String CONFIG_FILE_NAME = "wsit-test.xml";
+    private static final String CLIENT_CONFIG_FILE_NAME = "wsit-client.xml";
     
     public PolicyConfigParserTest(String testName) {
         super(testName);
@@ -58,60 +62,59 @@ public class PolicyConfigParserTest extends TestCase {
     }
     
     public void testParseContainerNullWithoutConfig() throws Exception {
-        Container container = null;
-        
-        PolicyMap result = null;
-        
-        result = PolicyConfigParser.parse((String) null, container);
+        PolicyMap result = PolicyConfigParser.parse((String) null, null);
         assertNull(result);
-    }
-    
-    public void testParseContainerNullWithConfig() throws Exception {
-        
-        Container container = null;
-        PolicyMap map = null;
-        
-        try {
-            copyFile("test/unit/data/policy/config/wsit.xml", CONFIG_FILE_PATH, CONFIG_FILE_NAME);
-            map = PolicyConfigParser.parse("test", container);
-        } finally {
-            File wsitxml = new File(CONFIG_FILE_PATH + File.separatorChar + CONFIG_FILE_NAME);
-            wsitxml.delete();
-        }
-        PolicyMapKey key = map.createWsdlEndpointScopeKey(new QName("http://example.org/", "AddNumbersService"), new QName("http://example.org/", "AddNumbersPort"));
-        Policy policy = map.getEndpointEffectivePolicy(key);
-        assertNotNull(policy);
-        assertEquals("MutualCertificate10Sign_IPingService_policy", policy.getId());
     }
     
     public void testParseContainerWithoutContextWithoutConfig() throws Exception {
-        Container container = new MockContainer(null);
-        
-        PolicyMap result = null;
-        
-        result = PolicyConfigParser.parse((String) null, container);
+        Container container = new MockContainer(null);        
+        PolicyMap result = PolicyConfigParser.parse((String) null, container);
         assertNull(result);
     }
     
+    public void testParseContainerNullWithConfig() throws Exception {        
+        Container container = null;
+        PolicyMap map = prepareTestFileAndLoadPolicyMap(TEST_FILE_PATH, CONFIG_FILE_PATH, CONFIG_FILE_NAME, "test", container);
+        testLoadedMap(map);
+    }
+
     public void testParseContainerWithoutContext() throws Exception {
         Container container = new MockContainer(null);
-        PolicyMap map = null;
-        
-        try {
-            copyFile("test/unit/data/policy/config/wsit.xml", CONFIG_FILE_PATH, CONFIG_FILE_NAME);
-            map = PolicyConfigParser.parse("test", container);
-        } finally {
-            File wsitxml = new File(CONFIG_FILE_PATH + File.separatorChar + CONFIG_FILE_NAME);
-            wsitxml.delete();
-        }
-        PolicyMapKey key = map.createWsdlEndpointScopeKey(new QName("http://example.org/", "AddNumbersService"), new QName("http://example.org/", "AddNumbersPort"));
-        Policy policy = map.getEndpointEffectivePolicy(key);
-        assertNotNull(policy);
-        assertEquals("MutualCertificate10Sign_IPingService_policy", policy.getId());
+        PolicyMap map = prepareTestFileAndLoadPolicyMap(TEST_FILE_PATH, CONFIG_FILE_PATH, CONFIG_FILE_NAME, "test", container);
+        testLoadedMap(map);
     }
     
     public void testParseContainerWithContext() throws Exception {
         // TODO Need MockServletContext
+    }
+    
+    public void testParseClientWithoutContextWithoutConfig() throws Exception {
+        PolicyMap result = PolicyConfigParser.parse(PolicyConstants.CLIENT_CONFIGURATION_IDENTIFIER, null);
+        assertNull(result);
+    }
+    
+    public void testParseClientMetainfContainerNullWithConfig() throws Exception {        
+        Container container = null;        
+        PolicyMap map = prepareTestFileAndLoadPolicyMap(TEST_FILE_PATH, CONFIG_FILE_PATH, CLIENT_CONFIG_FILE_NAME, PolicyConstants.CLIENT_CONFIGURATION_IDENTIFIER, container);
+        testLoadedMap(map);
+    }
+    
+    public void testParseClientMetainfWithoutContext() throws Exception {
+        Container container = new MockContainer(null);
+        PolicyMap map = prepareTestFileAndLoadPolicyMap(TEST_FILE_PATH, CONFIG_FILE_PATH, CLIENT_CONFIG_FILE_NAME, PolicyConstants.CLIENT_CONFIGURATION_IDENTIFIER, container);
+        testLoadedMap(map);
+    }
+    
+    public void testParseClientClasspathContainerNullWithConfig() throws Exception {        
+        Container container = null;        
+        PolicyMap map = prepareTestFileAndLoadPolicyMap(TEST_FILE_PATH, CLASSPATH_CONFIG_FILE_PATH, CLIENT_CONFIG_FILE_NAME, PolicyConstants.CLIENT_CONFIGURATION_IDENTIFIER, container);
+        testLoadedMap(map);
+    }
+    
+    public void testParseClientClasspathWithoutContext() throws Exception {
+        Container container = new MockContainer(null);
+        PolicyMap map = prepareTestFileAndLoadPolicyMap(TEST_FILE_PATH, CLASSPATH_CONFIG_FILE_PATH, CLIENT_CONFIG_FILE_NAME, PolicyConstants.CLIENT_CONFIGURATION_IDENTIFIER, container);
+        testLoadedMap(map);
     }
     
     /**
@@ -255,6 +258,25 @@ public class PolicyConfigParserTest extends TestCase {
                 dest.close();
             }
         }
+    }
+
+    private PolicyMap prepareTestFileAndLoadPolicyMap(String sourceName, String destPath, String destName, String cfgFileId, Container container) throws PolicyException, IOException {
+        PolicyMap result;
+        try {
+            copyFile("test/unit/data/policy/config/wsit.xml", CONFIG_FILE_PATH, CONFIG_FILE_NAME);
+            result = PolicyConfigParser.parse("test", container);
+            return result;
+        } finally {
+            File wsitxml = new File(CONFIG_FILE_PATH + File.separatorChar + CONFIG_FILE_NAME);
+            wsitxml.delete();
+        }
+    }
+    
+    private void testLoadedMap(PolicyMap map) throws PolicyException {
+        PolicyMapKey key = map.createWsdlEndpointScopeKey(new QName("http://example.org/", "AddNumbersService"), new QName("http://example.org/", "AddNumbersPort"));
+        Policy policy = map.getEndpointEffectivePolicy(key);
+        assertNotNull(policy);
+        assertEquals("MutualCertificate10Sign_IPingService_policy", policy.getId());        
     }
     
     class MockContainer extends Container {

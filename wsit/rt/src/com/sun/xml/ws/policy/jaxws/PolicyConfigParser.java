@@ -210,19 +210,21 @@ public final class PolicyConfigParser {
             URL configFileUrl = null;
             final boolean isClientConfig = PolicyConstants.CLIENT_CONFIGURATION_IDENTIFIER.equals(configFileIdentifier);
             String examinedPath;
-            if (isClientConfig) {
-                examinedPath = configFileName;
-                configFileUrl = PolicyUtils.ConfigFile.loadFromClasspath(examinedPath);
-            } else if (context == null) {
+            if (context == null || isClientConfig) {
                 examinedPath = JAR_PREFIX + configFileName;
                 configFileUrl = PolicyUtils.ConfigFile.loadFromClasspath(examinedPath);
-                // TODO: remove after NB plugin starts generating differnet names
-                // BEGIN REMOVE
-                if (configFileUrl == null) {
-                    examinedPath = examinedPath + File.pathSeparator + " " + JAR_PREFIX + "wsit.xml";
-                    configFileUrl = PolicyUtils.ConfigFile.loadFromClasspath(JAR_PREFIX + "wsit.xml");
+                if (configFileUrl == null && isClientConfig) {
+                    examinedPath = examinedPath + File.pathSeparator + " " + configFileName;
+                    configFileUrl = PolicyUtils.ConfigFile.loadFromClasspath(configFileName);
+                } else {
+                    // TODO: remove after NB plugin starts generating differnet names
+                    // BEGIN REMOVE
+                    if (configFileUrl == null) {
+                        examinedPath = examinedPath + File.pathSeparator + " " + JAR_PREFIX + "wsit.xml";
+                        configFileUrl = PolicyUtils.ConfigFile.loadFromClasspath(JAR_PREFIX + "wsit.xml");
+                    }
+                    // END REMOVE
                 }
-                // END REMOVE
             } else {
                 examinedPath = WAR_PREFIX + configFileName;
                 configFileUrl = PolicyUtils.ConfigFile.loadFromContext(examinedPath, context);
