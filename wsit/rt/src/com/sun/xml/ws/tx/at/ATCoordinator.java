@@ -21,9 +21,9 @@
  */
 package com.sun.xml.ws.tx.at;
 
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.tx.Protocol;
 import com.sun.xml.ws.api.tx.TXException;
-import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.developer.MemberSubmissionEndpointReference;
 import static com.sun.xml.ws.tx.at.ATParticipant.STATE.*;
 import com.sun.xml.ws.tx.common.AT_2PC_State;
@@ -34,16 +34,15 @@ import static com.sun.xml.ws.tx.common.AT_2PC_State.PREPARED_SUCCESS;
 import static com.sun.xml.ws.tx.common.AT_2PC_State.PREPARING;
 import static com.sun.xml.ws.tx.common.Constants.*;
 import com.sun.xml.ws.tx.common.TransactionManagerImpl;
+import com.sun.xml.ws.tx.common.TxFault;
 import com.sun.xml.ws.tx.common.TxLogger;
 import com.sun.xml.ws.tx.common.Util;
 import com.sun.xml.ws.tx.common.WsaHelper;
-import com.sun.xml.ws.tx.common.TxFault;
 import com.sun.xml.ws.tx.coordinator.CoordinationContextInterface;
 import com.sun.xml.ws.tx.coordinator.Coordinator;
 import com.sun.xml.ws.tx.coordinator.Registrant;
 import com.sun.xml.ws.tx.webservice.member.at.WSATCoordinator;
 import com.sun.xml.ws.tx.webservice.member.coord.CreateCoordinationContextType;
-import java.util.Map;
 
 import javax.transaction.RollbackException;
 import javax.transaction.Synchronization;
@@ -61,6 +60,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 
 /**
@@ -90,7 +90,7 @@ import java.util.logging.Level;
  *
  * @author Ryan.Shoemaker@Sun.COM
  * @author Joe.Fialli@Sun.COM
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  * @since 1.0
  */
 public class ATCoordinator extends Coordinator implements Synchronization, XAResource {
@@ -256,7 +256,7 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
                         wsContext,
                         SOAPVersion.SOAP_11,
                         TxFault.InvalidState,
-                        "Invalid to register a new participant after the first durable participant is prepared.  Registrant id: " +
+                        "Invalid to register a new participant after the first durable participant is prepared.  Registrant id: " +  // no I18N - spec requires xml:lang="en"
                                 registrant.getIdValue());
             }
             throw new IllegalStateException(LocalizationMessages.LATE_PARTICIPANT_REGISTRATION_0002());

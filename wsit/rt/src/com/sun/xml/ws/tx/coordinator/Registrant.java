@@ -28,11 +28,15 @@ import static com.sun.xml.ws.api.tx.Protocol.*;
 import com.sun.xml.ws.developer.MemberSubmissionEndpointReference;
 import com.sun.xml.ws.tx.common.Identifier;
 import com.sun.xml.ws.tx.common.RegistrantIdentifier;
+import com.sun.xml.ws.tx.common.TxLogger;
 import com.sun.xml.ws.tx.webservice.member.coord.RegisterType;
 
 import javax.xml.ws.EndpointReference;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 
 /**
  * This class encapsulates a coordination registrant.
@@ -41,7 +45,7 @@ import java.util.Map;
  * add protocol specific functionality.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @since 1.0
  */
 public abstract class Registrant {
@@ -62,7 +66,14 @@ public abstract class Registrant {
 
     private final RegistrantIdentifier id;
 
-    // static private TxLogger logger = TxLogger.getCoordLogger(Registrant.class);
+    static private TxLogger logger = TxLogger.getCoordLogger(Registrant.class);
+
+    // only set to false when constucting a Registrant with a remote coordination service.
+    // when this value is true, coordination protocol service will be properly set.
+    private Boolean registrationCompleted = true;
+
+    /* mutex used for asynch register / registerResponse MEP with REMOTE CPS */
+    private Semaphore registrationCompletedGate;
 
     /**
      * Create a new registrant
@@ -94,6 +105,7 @@ public abstract class Registrant {
         if (parent.isSubordinate()) {
             outstandingRegistrants.put(getIdValue(), this);
             registrationCompleted = false;
+            registrationCompletedGate = new Semaphore(0); // initially closed
         } else {
             if (registerRequest == null) {
                 this.setParticpantProtocolService(getLocalParticipantProtocolService());
@@ -170,7 +182,7 @@ public abstract class Registrant {
      *
      * @param cps cps epr
      */
-    public void setCoordinatorProtocolService(@NotNull final EndpointReference cps) {
+    public synchronized void setCoordinatorProtocolService(@NotNull final EndpointReference cps) {
         coordinatorProtocolService = cps;
         setRegistrationCompleted(true);
     }
@@ -225,18 +237,47 @@ public abstract class Registrant {
         return remoteCPS;
     }
 
-    // only set to false when constucting a Registrant with a remote coordination service.
-    // when this value is true, coordination protocol service will be properly set.
-    private Boolean registrationCompleted = true;
-
     public boolean isRegistrationCompleted() {
         return registrationCompleted;
     }
 
-    public void setRegistrationCompleted(final boolean value) {
+    public synchronized void setRegistrationCompleted(final boolean value) {
         registrationCompleted = value;
+        
+        if (isRemoteCPS()) {
+            if (logger.isLogging(Level.FINEST)) {
+                logger.finest(
+                        "setRegistrationCompleted(" + value + ")",
+                        "semaphore has " + registrationCompletedGate.availablePermits() + " permits.");
+            }
+            if (value) {
+                assert (registrationCompletedGate.availablePermits() <= 0);
+                registrationCompletedGate.release();
+                if (logger.isLogging(Level.FINEST)) {
+                    logger.finest(
+                            "setRegistrationCompleted(" + value + ")",
+                            "released a permit, semaphore now has " + registrationCompletedGate.availablePermits() + " permits.");
+                }
+            }
+        }
     }
 
+    /*
+     * wait for a registerResponse to arrive - this method is only used with remote CPSs
+     */
+    public boolean waitForRegistrationResponse() {
+        try {
+            if(logger.isLogging(Level.FINEST)) {
+                logger.finest("waitForRegistrationResponse", "semaphore should have 0 permits. actual available permits: " + registrationCompletedGate.availablePermits());
+                assert (registrationCompletedGate.availablePermits() <= 0);
+                logger.finest("waitForRegistrationResponse", "Waiting for registration response.  Calling tryAcquire()...");
+            }
+            return registrationCompletedGate.tryAcquire(1, 40, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
     abstract public EndpointReference getLocalParticipantProtocolService();
 
     /**

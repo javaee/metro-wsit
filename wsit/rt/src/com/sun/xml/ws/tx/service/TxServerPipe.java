@@ -22,9 +22,8 @@
 package com.sun.xml.ws.tx.service;
 
 import com.sun.enterprise.transaction.TransactionImport;
-import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.api.addressing.WSEndpointReference;
+import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
@@ -43,14 +42,14 @@ import com.sun.xml.ws.tx.at.CoordinationXid;
 import static com.sun.xml.ws.tx.common.Constants.*;
 import com.sun.xml.ws.tx.common.Message;
 import com.sun.xml.ws.tx.common.TransactionManagerImpl;
+import com.sun.xml.ws.tx.common.TxFault;
 import com.sun.xml.ws.tx.common.TxJAXBContext;
 import com.sun.xml.ws.tx.common.TxLogger;
 import com.sun.xml.ws.tx.common.WsaHelper;
-import com.sun.xml.ws.tx.common.TxFault;
 import com.sun.xml.ws.tx.coordinator.CoordinationContextInterface;
 import com.sun.xml.ws.tx.coordinator.CoordinationManager;
+
 import javax.servlet.ServletContext;
-import javax.transaction.InvalidTransactionException;
 import javax.transaction.NotSupportedException;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
@@ -59,10 +58,8 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
@@ -71,7 +68,7 @@ import java.util.logging.Level;
  * <p/>
  * Supports following WS-Coordination protocols: 2004 WS-Atomic Transaction protocol
  *
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  * @since 1.0
  */
 // suppress known deprecation warnings about using pipes.
@@ -180,7 +177,7 @@ public class TxServerPipe implements Pipe {
                     msg.getReplyTo().toSpec(),
                     SOAPVersion.SOAP_11,
                     TxFault.InvalidParameters,
-                    invalidMsg,
+                    invalidMsg,  // TODO: no I18N - spec requires xml:lang="en"
                     msg.getMessageID());
         }
         

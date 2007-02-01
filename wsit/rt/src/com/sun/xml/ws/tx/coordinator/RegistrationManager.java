@@ -56,7 +56,7 @@ import java.util.logging.Level;
  * for register and registerResponse delegate to the methods in this class.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  * @since 1.0
  */
 public final class RegistrationManager {
@@ -168,7 +168,7 @@ public final class RegistrationManager {
                         null,
                         SOAPVersion.SOAP_11,
                         TxFault.InvalidParameters,
-                        "register wsa:replyTo must be set for activityId " + activityId + " and msgId: " + msgID,
+                        "register wsa:replyTo must be set for activityId " + activityId + " and msgId: " + msgID,  // no I18N - spec requires xml:lang="en"
                         msgID);
             }
             throw new WebServiceException(LocalizationMessages.REGISTER_REPLYTO_NOT_SET_3003(activityId, msgID));
@@ -182,7 +182,7 @@ public final class RegistrationManager {
                     null,
                     SOAPVersion.SOAP_11,
                     TxFault.InvalidState,
-                    "attempting to register for an unknown activity Id: " + activityId + " and msgId: " + msgID,
+                    "attempting to register for an unknown activity Id: " + activityId + " and msgId: " + msgID,  // no I18N - spec requires xml:lang="en"
                     msgID);
             logger.warning("register", LocalizationMessages.REGISTER_FOR_UNKNOWN_ACTIVITY_3004(activityId, msgID));
         }
@@ -205,7 +205,7 @@ public final class RegistrationManager {
                         null,
                         SOAPVersion.SOAP_11,
                         TxFault.InvalidState,
-                        registerRequest.getProtocolIdentifier() + " is not a recognized coordination type: activityId " +
+                        registerRequest.getProtocolIdentifier() + " is not a recognized coordination type: activityId " +  // no I18N - spec requires xml:lang="en"
                                 activityId + " and msgId " + msgID,
                         msgID);
                 throw new UnsupportedOperationException(
@@ -244,7 +244,7 @@ public final class RegistrationManager {
                             activityId,
                             msgID,
                             e.getLocalizedMessage()));
-            // TODO: throw an exception
+            throw new WebServiceException(e);
         }
 
         if (logger.isLogging(Level.FINER)) {
@@ -320,6 +320,7 @@ public final class RegistrationManager {
                         + " replyTo EPR: " + owf.getReplyTo());
             }
 
+            boolean timedOut;
             r.setRegistrationCompleted(false);
             try {
                 // prefer to try synchronouos register/register response than busy wait.
@@ -328,13 +329,11 @@ public final class RegistrationManager {
                 // next line is necessary. race condition that register did not complete before
                 // tranaction initiator committed/rolled back tranaction.
                 // This is why synchronous register preferable to asynchronous register.
-                waitForRegisterResponse(r, registrationEPR);
-//                r.waitForRegistrationResponse();
+                timedOut = r.waitForRegistrationResponse();
             } catch (WebServiceException wse) {
                 logger.warning("register",
                         LocalizationMessages.REGISTER_FAILED_3006(
                                 registrationEPR, c.getIdValue(), wse.getLocalizedMessage()));
-                wse.printStackTrace();
                 throw wse;
             }
 
@@ -343,16 +342,18 @@ public final class RegistrationManager {
                     logger.fine("register", "asynch registration succeeded. Coordinator Protocol Service is " +
                             r.getCoordinatorProtocolService());
                 }
-            } else {
+            }
+
+            if (timedOut) {
                 // send fault S4.4 wscoor:No Activity
                 WsaHelper.sendFault(
                         null,
                         registrationEPR,
                         SOAPVersion.SOAP_11,
                         TxFault.NoActivity,
-                        "registration timed out for activity id: " + c.getIdValue(),
+                        "registration timed out for activity id: " + c.getIdValue(),  // no I18N - spec requires xml:lang="en"
                         null /* TODO: what is RelatesTo in this case? */ );
-                logger.warning("register", LocalizationMessages.REGISTRATION_TIMEOUT_3007(c.getIdValue()));
+                logger.warning("register", LocalizationMessages.REGISTRATION_TIMEOUT_3007(c.getIdValue(), registrationEPR));
             }
 
             // reply processed in #registerResponse(WebServiceContext, RegisterResponseType) gets CPS for registrant.
@@ -392,7 +393,7 @@ public final class RegistrationManager {
                     wsContext,
                     SOAPVersion.SOAP_11,
                     TxFault.InvalidState,
-                    "received registerResponse for non-existent registrant : " +
+                    "received registerResponse for non-existent registrant : " +  // no I18N - spec requires xml:lang="en"
                             registrantId + " for activityId:" + activityId);
             logger.warning("registerResponse",
                     LocalizationMessages.NONEXISTENT_REGISTRANT_3008(registrantId, activityId));
@@ -410,37 +411,6 @@ public final class RegistrationManager {
 
         if (logger.isLogging(Level.FINER)) {
             logger.exiting("RegistrationManager.registerResponse");
-        }
-    }
-
-    /**
-     * Must wait for response.
-     * <p/>
-     * Race conditions without wait:
-     * 1. Transaction Initiating client commits transaction before register message is delivered and processed.
-     * Participant misses being in transaction and thus no two phase commit.
-     * 2. sun service trying to send prepared, aborted or readonly before receiving coordination protocol service in registerResponse.
-     *
-     * @param r               registrant
-     * @param registrationEPR registration EPR
-     */
-    private void waitForRegisterResponse(@NotNull Registrant r, @NotNull EndpointReference registrationEPR) {
-        int i = 0;
-
-        int MAX_RETRY = 40;
-        while (!r.isRegistrationCompleted()) {
-            if (i++ > MAX_RETRY) {
-                logger.warning("register", LocalizationMessages.NO_RESPONSE_3009(registrationEPR, r.getIdValue()));
-                // TODO: do we want to ever resend another <register> message in this case?
-                break;
-            }
-            if (logger.isLogging(Level.FINEST)) {
-                logger.finest("register", "waiting for registerResponse");
-            }
-            try {
-                Thread.sleep(1000L);
-            } catch (Exception e) {
-            }
         }
     }
 
@@ -506,7 +476,7 @@ public final class RegistrationManager {
                     wsContext,
                     SOAPVersion.SOAP_11,
                     TxFault.InvalidParameters,
-                    "Received RegisterResponse for unknown activity id: " + activityId );
+                    "Received RegisterResponse for unknown activity id: " + activityId );  // no I18N - spec requires xml:lang="en"
             logger.warning("synchronousRegister", LocalizationMessages.NONEXISTENT_ACTIVITY_3010(activityId));
         }
 
@@ -526,7 +496,7 @@ public final class RegistrationManager {
                         wsContext,
                         SOAPVersion.SOAP_11,
                         TxFault.InvalidParameters,
-                        requestProtocol.getUri() + " is not a recognized coordination type" );
+                        requestProtocol.getUri() + " is not a recognized coordination type" );  // no I18N - spec requires xml:lang="en"
                 throw new UnsupportedOperationException(
                         LocalizationMessages.UNRECOGNIZED_COORDINATION_TYPE_3011(
                                 requestProtocol, activityId, WsaHelper.getMsgID(wsContext)));
