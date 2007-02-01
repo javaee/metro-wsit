@@ -155,7 +155,7 @@
                          message="tns:ISecurityTokenService_IssueToken_OutputMessage"/>
         </wsdl:operation>
     </wsdl:portType>
-    <wsdl:binding name="WSHttpBinding_ISecurityTokenService" type="tns:ISecurityTokenService">
+    <wsdl:binding name="CustomBinding_ISecurityTokenService" type="tns:ISecurityTokenService">
         <wsp:PolicyReference URI="#WSHttpBinding_ISecurityTokenService_policy"/>
         <soap:binding transport="http://schemas.xmlsoap.org/soap/http"/>
         <wsdl:operation name="IssueToken">
@@ -171,7 +171,7 @@
         </wsdl:operation>
     </wsdl:binding>
     <wsdl:service name="SecurityTokenService">
-        <wsdl:port name="WSHttpBinding_ISecurityTokenService" binding="tns:WSHttpBinding_ISecurityTokenService">
+        <wsdl:port name="CustomBinding_ISecurityTokenService" binding="tns:CustomBinding_ISecurityTokenService">
             <soap:address location="http://localhost:8080/pricequote-wcf/sts"/>
             <wsa10:EndpointReference>
                 <wsa10:Address>http://localhost:8080/pricequote-wcf/sts</wsa10:Address>

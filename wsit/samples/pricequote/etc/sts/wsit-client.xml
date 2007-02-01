@@ -20,7 +20,7 @@
  *
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
 --><!--
- $Id: wsit-client.xml,v 1.5 2007-02-01 20:34:28 jdg6688 Exp $
+ $Id: wsit-client.xml,v 1.6 2007-02-01 23:51:39 jdg6688 Exp $
 -->
 
 <wsdl:definitions targetNamespace="http://tempuri.org/" xmlns:tns="http://tempuri.org/"
@@ -58,7 +58,7 @@
                                      endpoint="http://localhost:8080/pricequote/sts"
                                      wsdlLocation="http://localhost:8080/pricequote/sts?wsdl"
                                      serviceName="SecurityTokenServiceSun"
-                                     portName="CustomBinding_ISecurityTokenService"
+                                     portName="WSHttpBinding_ISecurityTokenService"
                                      namespace="http://tempuri.org/">
                 </tc:PreconfiguredSTS>
                 
@@ -118,22 +118,15 @@
     <!--
     Sun STS
     -->
-    
     <wsdl:service name="SecurityTokenServiceSun">
-        <wsdl:port name="CustomBinding_ISecurityTokenService" binding="tns:CustomBinding_ISecurityTokenService">
-            <soap:address location="http://localhost:8080/pricequote/sts"/>
-        </wsdl:port>
-    </wsdl:service>
-
-    <!--
-    Microsoft STS
-    -->
-    <wsdl:service name="SecurityTokenService">
         <wsdl:port name="WSHttpBinding_ISecurityTokenService" binding="tns:WSHttpBinding_ISecurityTokenService">
             <soap:address location="http://localhost:8080/pricequote-wcf/sts"/>
         </wsdl:port>
     </wsdl:service>
     
+     <!--
+    Microsoft STS
+    -->
     <wsdl:service name="SecurityTokenService">
         <wsdl:port name="CustomBinding_ISecurityTokenService" binding="tns:CustomBinding_ISecurityTokenService">
             <soap:address location="http://localhost:8080/pricequote/sts"/>

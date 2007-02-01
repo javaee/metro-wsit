@@ -20,7 +20,7 @@
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 /*
- $Id: Retailer.java,v 1.3 2006-08-05 00:29:36 arungupta Exp $
+ $Id: Retailer.java,v 1.4 2007-02-01 23:51:39 jdg6688 Exp $
 */
 
 package pricequote.retailer.server;
@@ -113,6 +113,7 @@ public class Retailer implements RetailerPortType {
     private String getMSEndpointAddress(ServletContext sc) {
         String endpoint = sc.getInitParameter("wqs.wcf.endpoint");
         if (endpoint == null || endpoint.equals("")) {
+            //endpoint = "http://131.107.72.15/Wholesaler/WholesalerService.svc?wsdl";
             endpoint = "http://localhost:8080/pricequote-wcf/wholesaler?wsdl";
         }
 
@@ -122,6 +123,7 @@ public class Retailer implements RetailerPortType {
     private String getMSServiceName(ServletContext sc) {
         String serviceName = sc.getInitParameter("wqs.wcf.serviceName");
         if (serviceName == null || serviceName.equals("")) {
+            //serviceName = "WholesalerService";
             serviceName = "WholesaleService";
         }
 

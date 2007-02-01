@@ -21,7 +21,7 @@
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
 -->
 <!--
- $Id: sts.wsdl,v 1.4 2007-02-01 20:34:28 jdg6688 Exp $
+ $Id: sts.wsdl,v 1.5 2007-02-01 23:51:39 jdg6688 Exp $
 -->
         
 <wsdl:definitions name="SecurityTokenService" targetNamespace="http://tempuri.org/"
@@ -180,7 +180,7 @@
                          message="tns:ISecurityTokenService_IssueToken_OutputMessage"/>
         </wsdl:operation>
     </wsdl:portType>
-    <wsdl:binding name="CustomBinding_ISecurityTokenService" type="tns:ISecurityTokenService">
+    <wsdl:binding name="WSHttpBinding_ISecurityTokenService" type="tns:ISecurityTokenService">
         <wsp:PolicyReference URI="#CustomBinding_ISecurityTokenService2_policy"/>
         <soap:binding transport="http://schemas.xmlsoap.org/soap/http"/>
         <wsdl:operation name="IssueToken">
@@ -196,7 +196,7 @@
         </wsdl:operation>
     </wsdl:binding>
     <wsdl:service name="SecurityTokenServiceSun">
-        <wsdl:port name="CustomBinding_ISecurityTokenService" binding="tns:CustomBinding_ISecurityTokenService">
+        <wsdl:port name="WSHttpBinding_ISecurityTokenService" binding="tns:WSHttpBinding_ISecurityTokenService">
             <soap:address location="http://localhost:8080/pricequote/sts"/>
         </wsdl:port>
     </wsdl:service>
