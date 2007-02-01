@@ -216,25 +216,10 @@ public final class PolicyConfigParser {
                 if (configFileUrl == null && isClientConfig) {
                     examinedPath = examinedPath + File.pathSeparator + " " + configFileName;
                     configFileUrl = PolicyUtils.ConfigFile.loadFromClasspath(configFileName);
-                } else {
-                    // TODO: remove after NB plugin starts generating differnet names
-                    // BEGIN REMOVE
-                    if (configFileUrl == null) {
-                        examinedPath = examinedPath + File.pathSeparator + " " + JAR_PREFIX + "wsit.xml";
-                        configFileUrl = PolicyUtils.ConfigFile.loadFromClasspath(JAR_PREFIX + "wsit.xml");
-                    }
-                    // END REMOVE
                 }
             } else {
                 examinedPath = WAR_PREFIX + configFileName;
                 configFileUrl = PolicyUtils.ConfigFile.loadFromContext(examinedPath, context);
-                // TODO: remove after NB plugin starts generating differnet names
-                // BEGIN REMOVE
-                if (configFileUrl == null) {
-                    examinedPath = examinedPath + File.pathSeparator + " " + WAR_PREFIX + "wsit.xml";
-                    configFileUrl = PolicyUtils.ConfigFile.loadFromContext(WAR_PREFIX + "wsit.xml", context);
-                }
-                // END REMOVE
             }
             
             if (configFileUrl != null) {

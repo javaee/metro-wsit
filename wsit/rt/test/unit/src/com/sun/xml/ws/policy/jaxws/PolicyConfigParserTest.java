@@ -73,8 +73,7 @@ public class PolicyConfigParserTest extends TestCase {
     }
     
     public void testParseContainerNullWithConfig() throws Exception {        
-        Container container = null;
-        PolicyMap map = prepareTestFileAndLoadPolicyMap(TEST_FILE_PATH, CONFIG_FILE_PATH, CONFIG_FILE_NAME, "test", container);
+        PolicyMap map = prepareTestFileAndLoadPolicyMap(TEST_FILE_PATH, CONFIG_FILE_PATH, CONFIG_FILE_NAME, "test", null);
         testLoadedMap(map);
     }
 
@@ -88,14 +87,28 @@ public class PolicyConfigParserTest extends TestCase {
         // TODO Need MockServletContext
     }
     
+    public void testWsitXmlNotLoadedContainerNullWithConfig() throws Exception {        
+        PolicyMap map = prepareTestFileAndLoadPolicyMap(TEST_FILE_PATH, CONFIG_FILE_PATH, "wsit.xml", "test", null);
+        assertNull(map);
+    }
+
+    public void testWsitXmlNotLoadedContainerWithoutContext() throws Exception {
+        Container container = new MockContainer(null);
+        PolicyMap map = prepareTestFileAndLoadPolicyMap(TEST_FILE_PATH, CONFIG_FILE_PATH, "wsit.xml", "test", container);
+        assertNull(map);
+    }
+    
+    public void testWsitXmlNotLoadedContainerWithContext() throws Exception {
+        // TODO Need MockServletContext
+    }
+    
     public void testParseClientWithoutContextWithoutConfig() throws Exception {
         PolicyMap result = PolicyConfigParser.parse(PolicyConstants.CLIENT_CONFIGURATION_IDENTIFIER, null);
         assertNull(result);
     }
     
     public void testParseClientMetainfContainerNullWithConfig() throws Exception {        
-        Container container = null;        
-        PolicyMap map = prepareTestFileAndLoadPolicyMap(TEST_FILE_PATH, CONFIG_FILE_PATH, CLIENT_CONFIG_FILE_NAME, PolicyConstants.CLIENT_CONFIGURATION_IDENTIFIER, container);
+        PolicyMap map = prepareTestFileAndLoadPolicyMap(TEST_FILE_PATH, CONFIG_FILE_PATH, CLIENT_CONFIG_FILE_NAME, PolicyConstants.CLIENT_CONFIGURATION_IDENTIFIER, null);
         testLoadedMap(map);
     }
     
@@ -106,8 +119,7 @@ public class PolicyConfigParserTest extends TestCase {
     }
     
     public void testParseClientClasspathContainerNullWithConfig() throws Exception {        
-        Container container = null;        
-        PolicyMap map = prepareTestFileAndLoadPolicyMap(TEST_FILE_PATH, CLASSPATH_CONFIG_FILE_PATH, CLIENT_CONFIG_FILE_NAME, PolicyConstants.CLIENT_CONFIGURATION_IDENTIFIER, container);
+        PolicyMap map = prepareTestFileAndLoadPolicyMap(TEST_FILE_PATH, CLASSPATH_CONFIG_FILE_PATH, CLIENT_CONFIG_FILE_NAME, PolicyConstants.CLIENT_CONFIGURATION_IDENTIFIER, null);
         testLoadedMap(map);
     }
     
@@ -263,17 +275,17 @@ public class PolicyConfigParserTest extends TestCase {
     private PolicyMap prepareTestFileAndLoadPolicyMap(String sourceName, String destPath, String destName, String cfgFileId, Container container) throws PolicyException, IOException {
         PolicyMap result;
         try {
-            copyFile("test/unit/data/policy/config/wsit.xml", CONFIG_FILE_PATH, CONFIG_FILE_NAME);
-            result = PolicyConfigParser.parse("test", container);
+            copyFile(sourceName, destPath, destName);
+            result = PolicyConfigParser.parse(cfgFileId, container);
             return result;
         } finally {
-            File wsitxml = new File(CONFIG_FILE_PATH + File.separatorChar + CONFIG_FILE_NAME);
+            File wsitxml = new File(destPath + File.separatorChar + destName);
             wsitxml.delete();
         }
     }
     
     private void testLoadedMap(PolicyMap map) throws PolicyException {
-        PolicyMapKey key = map.createWsdlEndpointScopeKey(new QName("http://example.org/", "AddNumbersService"), new QName("http://example.org/", "AddNumbersPort"));
+        PolicyMapKey key = PolicyMap.createWsdlEndpointScopeKey(new QName("http://example.org/", "AddNumbersService"), new QName("http://example.org/", "AddNumbersPort"));
         Policy policy = map.getEndpointEffectivePolicy(key);
         assertNotNull(policy);
         assertEquals("MutualCertificate10Sign_IPingService_policy", policy.getId());        
