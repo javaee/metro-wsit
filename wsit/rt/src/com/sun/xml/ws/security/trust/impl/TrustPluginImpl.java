@@ -56,6 +56,7 @@ import com.sun.xml.ws.security.trust.impl.bindings.RequestSecurityTokenResponseT
 import com.sun.xml.ws.security.trust.impl.bindings.RequestSecurityTokenType;
 import com.sun.xml.ws.security.trust.util.WSTrustUtil;
 import java.net.URI;
+import java.net.URL;
 import java.net.URISyntaxException;
 import java.net.MalformedURLException;
 import java.rmi.RemoteException;
@@ -294,7 +295,13 @@ public class TrustPluginImpl implements TrustPlugin {
         
         Service service = null;
         try{
-            service = Service.create(wsdlLocation.toURL(), serviceName);
+            // Work around for issue 338
+            String url = wsdlLocation.toString();
+            if (url.endsWith("/mex")){
+                int index = url.lastIndexOf("/mex");
+                url = url.substring(0, index);
+            }
+            service = Service.create(new URL(url), serviceName);
         }catch (MalformedURLException ex){
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0041_SERVICE_NOT_CREATED(wsdlLocation.toString()), ex);
@@ -352,6 +359,7 @@ public class TrustPluginImpl implements TrustPlugin {
      * and the second one will be portName.
      */
     protected static QName[]  doMexRequest(final String wsdlLocation, final String stsURI) {
+        
         final QName[] serviceInfo = new QName[2];
         final MetadataClient mexClient = new MetadataClient();
         
