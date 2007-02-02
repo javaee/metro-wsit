@@ -15,7 +15,10 @@ import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.WeakHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.message.AuthException;
@@ -36,9 +39,10 @@ public class WSITAuthConfigProvider implements AuthConfigProvider {
     String id = null;
     String description = "WSIT AuthConfigProvider";
     
-    ClientAuthConfig clientConfig = null;
-    ServerAuthConfig serverConfig = null;
-    //AuthConfigFactory factory = null;
+    //ClientAuthConfig clientConfig = null;
+    //ServerAuthConfig serverConfig = null;
+    WeakHashMap clientConfigMap = new WeakHashMap();
+    WeakHashMap serverConfigMap = new WeakHashMap();
     
     private ReentrantReadWriteLock rwLock;
     private ReentrantReadWriteLock.ReadLock rLock;
@@ -57,10 +61,13 @@ public class WSITAuthConfigProvider implements AuthConfigProvider {
     }
 
     public  ClientAuthConfig getClientAuthConfig(String layer, String appContext, CallbackHandler callbackHandler) throws AuthException {
+        
+        ClientAuthConfig clientConfig = null;
         try {
             this.rLock.lock();
-            if (clientConfig != null) {                
-                return clientConfig;
+            clientConfig = (ClientAuthConfig)this.clientConfigMap.get(appContext);
+            if (clientConfig != null) {
+                    return clientConfig;
             }
         } finally {
             this.rLock.unlock();
@@ -73,6 +80,7 @@ public class WSITAuthConfigProvider implements AuthConfigProvider {
             // recheck the precondition, since the rlock was released.
             if (clientConfig == null) {
                 clientConfig = new WSITClientAuthConfig(layer, appContext, callbackHandler);
+                this.clientConfigMap.put(appContext, clientConfig);
             }
             return clientConfig;
         } finally {
@@ -81,8 +89,10 @@ public class WSITAuthConfigProvider implements AuthConfigProvider {
     }
     
     public  ServerAuthConfig getServerAuthConfig(String layer, String appContext, CallbackHandler callbackHandler) throws AuthException {
+        ServerAuthConfig serverConfig = null;
          try {
              this.rLock.lock();
+             serverConfig = (ServerAuthConfig)this.serverConfigMap.get(appContext);
              if (serverConfig != null) {
                  return serverConfig;
              }
@@ -97,6 +107,7 @@ public class WSITAuthConfigProvider implements AuthConfigProvider {
              // recheck the precondition, since the rlock was released.
              if (serverConfig == null) {
                  serverConfig = new WSITServerAuthConfig(layer, appContext, callbackHandler);
+                 this.serverConfigMap.put(appContext,serverConfig);
              }
              return serverConfig;
          } finally {
