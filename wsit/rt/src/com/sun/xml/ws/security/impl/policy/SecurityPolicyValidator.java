@@ -24,6 +24,7 @@ package com.sun.xml.ws.security.impl.policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.spi.PolicyAssertionValidator;
 import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
+import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
 import static com.sun.xml.ws.security.impl.policy.Constants.*;
 import java.util.ArrayList;
 import javax.xml.namespace.QName;
@@ -158,10 +159,10 @@ public class SecurityPolicyValidator implements PolicyAssertionValidator{
         supportedAssertions.add(new QName(TRUST_NS,SignWith));
         
         supportedAssertions.add(new QName(TRUST_NS,EncryptWith));
-                
+        
         supportedAssertions.add(new QName(SUN_WSS_SECURITY_SERVER_POLICY_NS,"DisableStreamingSecurity"));
         supportedAssertions.add(new QName(SUN_WSS_SECURITY_CLIENT_POLICY_NS,"DisableStreamingSecurity"));
-
+        
         supportedAssertions.add(new QName(SUN_WSS_SECURITY_SERVER_POLICY_NS,"DisablePayloadBuffering"));
         supportedAssertions.add(new QName(SUN_WSS_SECURITY_CLIENT_POLICY_NS,"DisablePayloadBuffering"));
         
@@ -191,7 +192,14 @@ public class SecurityPolicyValidator implements PolicyAssertionValidator{
         }
         
         if (policyAssertion instanceof SecurityAssertionValidator) {
-            return ((SecurityAssertionValidator)policyAssertion).validate() ? Fitness.SUPPORTED : Fitness.UNSUPPORTED;
+            SecurityAssertionValidator.AssertionFitness fitness =((SecurityAssertionValidator)policyAssertion).validate(false);
+            if(fitness == fitness.IS_VALID){
+                return Fitness.SUPPORTED;
+            }else {
+                return Fitness.UNSUPPORTED;
+            }
+            
+            //return ((SecurityAssertionValidator)policyAssertion).validate() ? Fitness.SUPPORTED : Fitness.UNSUPPORTED;
         } else if (supportedAssertions.contains(policyAssertion.getName())) {
             return Fitness.SUPPORTED;
         } else {
@@ -203,12 +211,12 @@ public class SecurityPolicyValidator implements PolicyAssertionValidator{
         String uri = policyAssertion.getName().getNamespaceURI();
         
         if(uri.equals(SUN_WSS_SECURITY_CLIENT_POLICY_NS) || uri.equals(SUN_WSS_SECURITY_CLIENT_POLICY_NS)
-        || uri.equals(SUN_SECURE_CLIENT_CONVERSATION_POLICY_NS) || uri.equals(SUN_TRUST_CLIENT_SECURITY_POLICY_NS)){
+                || uri.equals(SUN_SECURE_CLIENT_CONVERSATION_POLICY_NS) || uri.equals(SUN_TRUST_CLIENT_SECURITY_POLICY_NS)){
             return Fitness.UNSUPPORTED;
         }
         
         if (policyAssertion instanceof SecurityAssertionValidator) {
-            return ((SecurityAssertionValidator)policyAssertion).validate() ? Fitness.SUPPORTED : Fitness.UNSUPPORTED;
+            return (((SecurityAssertionValidator)policyAssertion).validate(true) == SecurityAssertionValidator.AssertionFitness.IS_VALID )? Fitness.SUPPORTED : Fitness.UNSUPPORTED;
         } else if (supportedAssertions.contains(policyAssertion.getName())) {
             return Fitness.SUPPORTED;
         } else {

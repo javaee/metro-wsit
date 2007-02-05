@@ -41,6 +41,7 @@ import static com.sun.xml.ws.security.impl.policy.Constants.*;
  */
 
 public class SymmetricBinding extends PolicyAssertion implements com.sun.xml.ws.security.policy.SymmetricBinding, SecurityAssertionValidator{
+    private AssertionFitness fitness = AssertionFitness.IS_VALID;
     boolean populated = false;
     Token protectionToken ;
     Token signatureToken ;
@@ -52,7 +53,6 @@ public class SymmetricBinding extends PolicyAssertion implements com.sun.xml.ws.
     String protectionOrder = SIGN_ENCRYPT;
     boolean protectToken = false;
     boolean protectSignature = false;
-    private boolean isServer = false;
     
     /**
      * Creates a new instance of SymmetricBinding
@@ -155,16 +155,12 @@ public class SymmetricBinding extends PolicyAssertion implements com.sun.xml.ws.
         return protectSignature;
     }
     
-    public boolean validate() {
-        try{
-            populate();
-            return true;
-        }catch(UnsupportedPolicyAssertion upaex) {
-            return false;
-        }
+   
+    private void populate(){
+        populate(false);
     }
     
-    private synchronized void populate(){
+    private synchronized AssertionFitness populate(boolean isServer) {
         if(!populated){
             NestedPolicy policy = this.getNestedPolicy();
             if(policy == null){
@@ -172,7 +168,7 @@ public class SymmetricBinding extends PolicyAssertion implements com.sun.xml.ws.
                     logger.log(Level.FINE,"NestedPolicy is null");
                 }
                 populated = true;
-                return;
+                return fitness;
             }
             AssertionSet as = policy.getAssertionSet();
             Iterator<PolicyAssertion> ast = as.iterator();
@@ -201,18 +197,18 @@ public class SymmetricBinding extends PolicyAssertion implements com.sun.xml.ws.
                     this.protectSignature = true;
                 }else{
                     if(!assertion.isOptional()){
-                        if(logger.getLevel() == Level.SEVERE){
-                            logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"SymmetricBinding"});
-                        }
-                        if(isServer){
-                            throw new UnsupportedPolicyAssertion("Policy assertion "+
-                                    assertion+" is not supported under SymmetricBinding assertion");
-                        }
+                        log_invalid_assertion(assertion, isServer,SymmetricBinding);
+                        fitness = AssertionFitness.HAS_UNKNOWN_ASSERTION;
                     }
                 }
             }
+            
             populated = true;
         }
+        return fitness;
     }
     
+    public AssertionFitness validate(boolean isServer) {
+        return populate(isServer);
+    }
 }

@@ -43,7 +43,7 @@ import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
  * @author Abhijit Das
  */
 public class Issuer extends PolicyAssertion implements com.sun.xml.ws.security.policy.Issuer, SecurityAssertionValidator {
-    
+    private AssertionFitness fitness = AssertionFitness.IS_VALID;
     private Address address;
     private boolean populated = false;
     private PolicyAssertion refProps = null;
@@ -61,16 +61,14 @@ public class Issuer extends PolicyAssertion implements com.sun.xml.ws.security.p
         super(name,nestedAssertions,nestedAlternative);
     }
     
-    public boolean validate() {
-        try{
-            populate();
-            return true;
-        }catch(UnsupportedPolicyAssertion upaex) {
-            return false;
-        }
+    public AssertionFitness validate(boolean isServer) {
+        return populate(isServer);
+    }
+    private void populate(){
+        populate(false);
     }
     
-    private synchronized void populate(){
+    private synchronized AssertionFitness populate(boolean isServer) {
         if(!populated){
             if ( this.hasNestedAssertions() ) {
                 Iterator <PolicyAssertion> it = this.getNestedAssertionsIterator();
@@ -91,6 +89,7 @@ public class Issuer extends PolicyAssertion implements com.sun.xml.ws.security.p
             }
             populated = true;
         }
+        return fitness;
     }
     
     public Address getAddress() {

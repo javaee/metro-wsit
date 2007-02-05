@@ -32,7 +32,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
 import com.sun.xml.ws.security.policy.Constants;
-import static com.sun.xml.ws.security.impl.policy.Constants.logger;
+import static com.sun.xml.ws.security.impl.policy.Constants.*;
 /**
  *
  * @author K.Venugopal@sun.com
@@ -41,7 +41,7 @@ public class Trust10 extends PolicyAssertion implements com.sun.xml.ws.security.
     Set<String> requiredProps;
     String version = "1.0";
     private boolean populated = false;
-    private boolean isServer = false;
+    private AssertionFitness fitness = AssertionFitness.IS_VALID;
     
     /**
      * Creates a new instance of Trust10
@@ -70,18 +70,14 @@ public class Trust10 extends PolicyAssertion implements com.sun.xml.ws.security.
         return version;
     }
     
-    public boolean validate() {
-        try{
-            populate();
-            return true;
-        }catch(UnsupportedPolicyAssertion upaex) {
-            return false;
-        }
+    public AssertionFitness validate(boolean isServer) {
+        return populate(isServer);
+    }
+    private void populate(){
+        populate(false);
     }
     
-    
-    
-    private synchronized void populate(){
+    private synchronized AssertionFitness populate(boolean isServer) {
         if(!populated){
             NestedPolicy policy = this.getNestedPolicy();
             if(policy == null){
@@ -89,7 +85,7 @@ public class Trust10 extends PolicyAssertion implements com.sun.xml.ws.security.
                     logger.log(Level.FINE,"NestedPolicy is null");
                 }
                 populated = true;
-                return;
+                return fitness;
             }
             AssertionSet as = policy.getAssertionSet();
             for(PolicyAssertion assertion:as){
@@ -105,19 +101,15 @@ public class Trust10 extends PolicyAssertion implements com.sun.xml.ws.security.
                     addRequiredProperty(Constants.MUST_SUPPORT_ISSUED_TOKENS);
                 }else{
                     if(!assertion.isOptional()){
-                        if(logger.getLevel() == Level.SEVERE){
-                            logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"Trust10"});
-                        }
-                        if(isServer){
-                            throw new UnsupportedPolicyAssertion("Policy assertion "+
-                                    assertion+" is not supported under Trust10 assertion");
-                        }
+                        log_invalid_assertion(assertion, isServer,"Trust10");
+                        fitness = AssertionFitness.HAS_UNKNOWN_ASSERTION;
                     }
                 }
             }
             
             populated = true;
         }
+        return fitness;
     }
     
 }

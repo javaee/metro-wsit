@@ -39,8 +39,10 @@ import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
+import java.util.logging.Level;
 import javax.xml.namespace.QName;
 
+import static com.sun.xml.ws.security.impl.policy.Constants.*;
 /**
  *
  * @author Abhijit Das
@@ -50,31 +52,31 @@ public class UseKey extends PolicyAssertion implements com.sun.xml.ws.security.p
     private static QName sig = new QName("sig");
     private URI signatureID;
     private boolean populated = false;
-    
+    private AssertionFitness fitness = AssertionFitness.IS_VALID;
     /** Creates a new instance of UseKeyIMpl */
     public UseKey(AssertionData name,Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) {
         super(name,nestedAssertions,nestedAlternative);
     }
     
-    public boolean validate() {
-        try{
-            populate();
-            return true;
-        }catch(UnsupportedPolicyAssertion upaex) {
-            return false;
-        }
+    public AssertionFitness validate(boolean isServer) {
+        return populate(isServer);
+    }
+    private void populate(){
+        populate(false);
     }
     
-    
-    private synchronized void populate() {
+    private synchronized AssertionFitness populate(boolean isServer) {
         if(!populated){
             try {
                 this.signatureID = new URI(this.getAttributeValue(sig));
             } catch (URISyntaxException ex) {
-                ex.printStackTrace();
+                logger.log(Level.SEVERE,"",ex);
+                fitness = AssertionFitness.HAS_INVALID_VALUE;
             }
             populated = true;
+            
         }        
+        return fitness;
     }
     
 }

@@ -54,7 +54,7 @@ public class RequiredElements extends PolicyAssertion implements com.sun.xml.ws.
     private List<String> targetList;
     private boolean populated = false;
     private static QName XPathVersion = new QName("XPathVersion");
-    private boolean isServer = false;
+    private AssertionFitness fitness = AssertionFitness.IS_VALID;
     /** Creates a new instance of RequiredElements */
     public RequiredElements() {
     }
@@ -93,16 +93,15 @@ public class RequiredElements extends PolicyAssertion implements com.sun.xml.ws.
         return Collections.emptyList().iterator();
     }
     
-    public boolean validate() {
-        try{
-            populate();
-            return true;
-        }catch(UnsupportedPolicyAssertion upaex) {
-            return false;
-        }
+    
+    public AssertionFitness validate(boolean isServer) {
+        return populate(isServer);
+    }
+    private void populate(){
+        populate(false);
     }
     
-    private synchronized void populate() {
+    private synchronized AssertionFitness populate(boolean isServer) {
         if(!populated){
             this.xpathVersion = (String)this.getAttributeValue(XPathVersion);
             if ( this.hasNestedAssertions() ) {
@@ -113,18 +112,14 @@ public class RequiredElements extends PolicyAssertion implements com.sun.xml.ws.
                         addTarget(assertion.getValue());
                     } else{
                         if(!assertion.isOptional()){
-                            if(logger.getLevel() == Level.SEVERE){
-                                logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"RequiredElements"});
-                            }
-                            if(isServer){
-                                throw new UnsupportedPolicyAssertion("Policy assertion "+
-                                        assertion+" is not supported under RequiredElements assertion");
-                            }
+                            log_invalid_assertion(assertion, isServer,RequiredElements);
+                            fitness = AssertionFitness.HAS_UNKNOWN_ASSERTION;
                         }
                     }
                 }
             }
             populated = true;
         }
-    }    
+        return fitness;
+    }
 }

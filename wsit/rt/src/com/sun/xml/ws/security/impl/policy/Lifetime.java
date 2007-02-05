@@ -37,7 +37,7 @@ import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import java.util.Collection;
-import static com.sun.xml.ws.security.impl.policy.Constants.logger;
+import static com.sun.xml.ws.security.impl.policy.Constants.*;
 import java.util.logging.Level;
 /**
  *
@@ -47,7 +47,7 @@ public class Lifetime extends PolicyAssertion implements com.sun.xml.ws.security
     
     private String created;
     private String expires;
-    
+    private AssertionFitness fitness = AssertionFitness.IS_VALID;
     private boolean populated = false;
     
     /** Creates a new instance of LifeTimeImpl */
@@ -73,16 +73,14 @@ public class Lifetime extends PolicyAssertion implements com.sun.xml.ws.security
         this.expires = expires;
     }
     
-    public boolean validate() {
-        try{
-            populate();
-            return true;
-        }catch(UnsupportedPolicyAssertion upaex) {
-            return false;
-        }
+    public AssertionFitness validate(boolean isServer) {
+        return populate(isServer);
+    }
+    private void populate(){
+        populate(false);
     }
     
-    private synchronized void populate() {
+    private synchronized AssertionFitness populate(boolean isServer) {
         if(!populated){
             NestedPolicy policy = this.getNestedPolicy();
             if(policy == null){
@@ -90,7 +88,7 @@ public class Lifetime extends PolicyAssertion implements com.sun.xml.ws.security
                     logger.log(Level.FINE,"NestedPolicy is null");
                 }
                 populated = true;
-                return;
+                return fitness;
             }
             AssertionSet as = policy.getAssertionSet();
             for(PolicyAssertion pa : as){
@@ -101,6 +99,7 @@ public class Lifetime extends PolicyAssertion implements com.sun.xml.ws.security
                 }
             }
             populated = true;
-        }        
+        }
+        return fitness;
     }
 }

@@ -28,7 +28,6 @@ import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
 import java.util.Collection;
-import java.util.logging.Level;
 import javax.xml.namespace.QName;
 
 /**
@@ -43,7 +42,7 @@ public class ValidatorConfiguration extends PolicyAssertion implements com.sun.x
     private static QName maxClockSkew =  new QName("maxClockSkew");
     private static QName timestampFreshnessLimit  =  new QName("timestampFreshnessLimit ");
     private static QName maxNonceAge =  new QName("maxNonceAge");
-    
+    private AssertionFitness fitness = AssertionFitness.IS_VALID;
     /** Creates a new instance of ValidatorConfiguration */
     public ValidatorConfiguration() {
     }
@@ -57,22 +56,20 @@ public class ValidatorConfiguration extends PolicyAssertion implements com.sun.x
         return ast;
     }
     
-    public boolean validate() {
-        try{
-            populate();
-            return true;
-        }catch(UnsupportedPolicyAssertion upaex) {
-            return false;
-        }
+    public AssertionFitness validate(boolean isServer) {
+        return populate(isServer);
     }
     
-    private synchronized void populate(){
-        
+    private void populate(){
+        populate(false);
+    }
+    
+    private synchronized AssertionFitness populate(boolean isServer) {        
         if(!populated){
             this.ast  = this.getNestedAssertionsIterator();
             populated  = true;
         }
-        
+        return fitness;        
     }
     
     public String getMaxClockSkew() {

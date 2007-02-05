@@ -27,8 +27,7 @@ import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.security.policy.MessageLayout;
 import java.util.Collection;
-import java.util.logging.Level;
-import static com.sun.xml.ws.security.impl.policy.Constants.logger;
+import static com.sun.xml.ws.security.impl.policy.Constants.*;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
 
@@ -40,9 +39,8 @@ import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
 public class Layout extends PolicyAssertion implements SecurityAssertionValidator {
     
     MessageLayout ml;
-    
+    private AssertionFitness fitness = AssertionFitness.IS_VALID;
     private boolean populated = false;
-    private boolean isServer = false;
     /**
      * Creates a new instance of Layout
      */
@@ -57,16 +55,14 @@ public class Layout extends PolicyAssertion implements SecurityAssertionValidato
         return ml;
     }
     
-    public boolean validate() {
-        try{
-            populate();
-            return true;
-        }catch(UnsupportedPolicyAssertion upaex) {
-            return false;
-        }
+    public AssertionFitness validate(boolean isServer) {
+        return populate(isServer);
+    }
+    private void populate(){
+        populate(false);
     }
     
-    private synchronized void populate(){
+    private synchronized AssertionFitness populate(boolean isServer) {
         if(!populated){
             NestedPolicy policy = this.getNestedPolicy();
             AssertionSet assertionSet = policy.getAssertionSet();
@@ -81,17 +77,13 @@ public class Layout extends PolicyAssertion implements SecurityAssertionValidato
                     ml= MessageLayout.Strict;
                 } else{
                     if(!assertion.isOptional()){
-                        if(logger.getLevel() == Level.SEVERE){
-                            logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"Layout"});
-                        }
-                        if(isServer){
-                            throw new UnsupportedPolicyAssertion("Policy assertion "+
-                                    assertion+" is not supported under Layout assertion");
-                        }
+                        log_invalid_assertion(assertion, isServer,Layout);
+                        fitness = AssertionFitness.HAS_UNKNOWN_ASSERTION;
                     }
                 }
             }
             populated = true;
-        }        
+        }
+        return fitness;
     }
 }

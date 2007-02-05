@@ -51,7 +51,7 @@ public class IssuedToken extends PolicyAssertion implements  com.sun.xml.ws.secu
     private static QName itQname = new QName(Constants.SECURITY_POLICY_NS, Constants.IncludeToken);
     private ArrayList<String> referenceType;
     private String id;
-    private boolean isServer = false;
+    private AssertionFitness fitness = AssertionFitness.IS_VALID;
     private boolean reqDK=false;
     /**
      * Creates a new instance of IssuedToken
@@ -102,16 +102,14 @@ public class IssuedToken extends PolicyAssertion implements  com.sun.xml.ws.secu
         return reqDK;
     }
     
-    public boolean validate() {
-        try{
-            populate();
-            return true;
-        }catch(UnsupportedPolicyAssertion upaex) {
-            return false;
-        }
+    public AssertionFitness validate(boolean isServer) {
+        return populate(isServer);
+    }
+    private void populate(){
+        populate(false);
     }
     
-    private synchronized void populate() {
+    private synchronized AssertionFitness populate(boolean isServer) {
         
         if(!populated){
             if(this.getAttributeValue(itQname)!=null){
@@ -127,12 +125,8 @@ public class IssuedToken extends PolicyAssertion implements  com.sun.xml.ws.secu
                         this.rstTemplate = (RequestSecurityTokenTemplate) assertion;
                     }else{
                         if(!assertion.isOptional()){
-                            if(logger.getLevel() == Level.SEVERE){
-                                logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"IssuedToken"});
-                            }
-                            throw new UnsupportedPolicyAssertion("Policy assertion "+
-                                    assertion+" is not supported under IssuedToken assertion");
-                            
+                            log_invalid_assertion(assertion, isServer,IssuedToken);
+                            fitness = AssertionFitness.HAS_UNKNOWN_ASSERTION;
                         }
                     }
                 }
@@ -143,7 +137,7 @@ public class IssuedToken extends PolicyAssertion implements  com.sun.xml.ws.secu
                     logger.log(Level.FINE,"NestedPolicy is null");
                 }
                 populated = true;
-                return;
+                return fitness;
             }
             AssertionSet as = policy.getAssertionSet();
             if(as == null){
@@ -151,7 +145,7 @@ public class IssuedToken extends PolicyAssertion implements  com.sun.xml.ws.secu
                     logger.log(Level.FINE," Nested Policy is empty");
                 }
                 populated = true;
-                return;
+                return fitness;
             }
             Iterator<PolicyAssertion> ast = as.iterator();
             
@@ -167,16 +161,14 @@ public class IssuedToken extends PolicyAssertion implements  com.sun.xml.ws.secu
                 } else if ( PolicyUtil.isRequireInternalReference(assertion)) {
                     referenceType.add(assertion.getName().getLocalPart().intern());
                 } else{
-                    if(logger.getLevel() == Level.SEVERE){
-                        logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"IssuedToken"});
-                    }
-                    if(isServer){
-                        throw new UnsupportedPolicyAssertion("Policy assertion "+
-                                assertion+" is not supported under IssuedToken assertion");
+                    if(!assertion.isOptional()){
+                        log_invalid_assertion(assertion, isServer,IssuedToken);
+                        fitness = AssertionFitness.HAS_UNKNOWN_ASSERTION;
                     }
                 }
-            }            
+            }
             populated = true;
-        }        
+        }
+        return fitness;
     }
 }

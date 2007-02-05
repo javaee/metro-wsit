@@ -49,7 +49,7 @@ public class SpnegoContextToken extends PolicyAssertion implements com.sun.xml.w
     private String id;
     private Issuer issuer = null;
     private static QName itQname = new QName(Constants.SECURITY_POLICY_NS, Constants.IncludeToken);
-    private boolean isServer = false;
+    private AssertionFitness fitness = AssertionFitness.IS_VALID;
     /**
      * Creates a new instance of SpnegoContextToken
      */
@@ -89,16 +89,14 @@ public class SpnegoContextToken extends PolicyAssertion implements com.sun.xml.w
         return id;
     }
     
-    public boolean validate() {
-        try{
-            populate();
-            return true;
-        }catch(UnsupportedPolicyAssertion upaex) {
-            return false;
-        }
+    public AssertionFitness validate(boolean isServer) {
+        return populate(isServer);
+    }
+    private void populate(){
+        populate(false);
     }
     
-    private synchronized void populate(){
+    private synchronized AssertionFitness populate(boolean isServer) {
         if(!populated){
             NestedPolicy policy = this.getNestedPolicy();
             includeTokenType = this.getAttributeValue(itQname);
@@ -107,7 +105,7 @@ public class SpnegoContextToken extends PolicyAssertion implements com.sun.xml.w
                     logger.log(Level.FINE,"NestedPolicy is null");
                 }
                 populated = true;
-                return;
+                return fitness;
             }
             AssertionSet as = policy.getAssertionSet();
             Iterator<PolicyAssertion> paItr = as.iterator();
@@ -118,13 +116,8 @@ public class SpnegoContextToken extends PolicyAssertion implements com.sun.xml.w
                     rdKey = assertion;
                 } else{
                     if(!assertion.isOptional()){
-                        if(logger.getLevel() == Level.SEVERE){
-                            logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"RelToken"});
-                        }
-                        if(isServer){
-                            throw new UnsupportedPolicyAssertion("Policy assertion "+
-                                    assertion+" is not supported under RelToken assertion");
-                        }
+                        log_invalid_assertion(assertion, isServer,"SpnegoContextToken");
+                        fitness = AssertionFitness.HAS_UNKNOWN_ASSERTION;
                     }
                 }
             }
@@ -140,6 +133,7 @@ public class SpnegoContextToken extends PolicyAssertion implements com.sun.xml.w
             }
             populated = true;
         }
+		return fitness;
     }
     
     

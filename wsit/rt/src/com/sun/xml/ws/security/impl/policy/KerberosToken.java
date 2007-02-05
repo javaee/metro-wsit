@@ -50,6 +50,7 @@ import static com.sun.xml.ws.security.impl.policy.Constants.*;
  * @author mayank.mishra@Sun.com
  */
 public class KerberosToken extends PolicyAssertion implements com.sun.xml.ws.security.policy.KerberosToken, SecurityAssertionValidator {
+    private AssertionFitness fitness = AssertionFitness.IS_VALID;
     private String id;
     private List<String> tokenRefType;
     private boolean populated = false;
@@ -66,14 +67,6 @@ public class KerberosToken extends PolicyAssertion implements com.sun.xml.ws.sec
         this.id = id.toString();
     }
     
-    public boolean validate() {
-        try{
-            populate();
-            return true;
-        }catch(UnsupportedPolicyAssertion upaex) {
-            return false;
-        }
-    }
     
     public String getTokenType() {
         populate();
@@ -107,7 +100,14 @@ public class KerberosToken extends PolicyAssertion implements com.sun.xml.ws.sec
     }
     
     
-    private synchronized void populate(){
+    public AssertionFitness validate(boolean isServer) {
+        return populate(isServer);
+    }
+    private void populate(){
+        populate(false);
+    }
+    
+    private synchronized AssertionFitness populate(boolean isServer) {
         if(!populated){
             NestedPolicy policy = this.getNestedPolicy();
             includeTokenType = this.getAttributeValue(itQname);
@@ -116,7 +116,7 @@ public class KerberosToken extends PolicyAssertion implements com.sun.xml.ws.sec
                     logger.log(Level.FINE,"NestedPolicy is null");
                 }
                 populated = true;
-                return;
+                return fitness;
             }
             AssertionSet as = policy.getAssertionSet();
             Iterator<PolicyAssertion> paItr = as.iterator();
@@ -134,18 +134,14 @@ public class KerberosToken extends PolicyAssertion implements com.sun.xml.ws.sec
                     tokenRefType.add(assertion.getName().getLocalPart().intern());
                 } else{
                     if(!assertion.isOptional()){
-                        if(logger.getLevel() == Level.SEVERE){
-                            logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"KerberosToken"});
-                        }
-                        if(isServer){
-                            throw new UnsupportedPolicyAssertion("Policy assertion "+
-                                    assertion+" is not supported under KerberosToken assertion");
-                        }
+                        log_invalid_assertion(assertion, isServer,KerberosToken);
+                        fitness = AssertionFitness.HAS_UNKNOWN_ASSERTION;
                     }
                 }
             }
             populated = true;
         }
-    }    
+        return fitness;
+    }
     
 }

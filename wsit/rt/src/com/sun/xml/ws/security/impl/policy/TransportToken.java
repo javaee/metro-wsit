@@ -21,14 +21,13 @@
  */
 
 package com.sun.xml.ws.security.impl.policy;
-import static com.sun.xml.ws.security.impl.policy.Constants.logger;
+import static com.sun.xml.ws.security.impl.policy.Constants.*;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.NestedPolicy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import java.util.Collection;
 import java.util.UUID;
-import java.util.logging.Level;
 import javax.xml.namespace.QName;
 import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
 
@@ -42,7 +41,7 @@ public class TransportToken extends Token implements com.sun.xml.ws.security.pol
     private String includeToken = "";
     private HttpsToken token = null;
     private boolean populated;
-    private boolean isServer = false;
+    private AssertionFitness fitness = AssertionFitness.IS_VALID;
     /**
      * Creates a new instance of TransportToken
      */
@@ -77,16 +76,14 @@ public class TransportToken extends Token implements com.sun.xml.ws.security.pol
         //TODO::
     }
     
-    public boolean validate() {
-        try{
-            populate();
-            return true;
-        }catch(UnsupportedPolicyAssertion upaex) {
-            return false;
-        }
+    public AssertionFitness validate(boolean isServer) {
+        return populate(isServer);
+    }
+    private void populate(){
+        populate(false);
     }
     
-    private synchronized void populate(){        
+    private synchronized AssertionFitness populate(boolean isServer) {
         if(!populated){
             this.includeToken = this.getAttributeValue(itQname);
             NestedPolicy policy = this.getNestedPolicy();
@@ -96,17 +93,13 @@ public class TransportToken extends Token implements com.sun.xml.ws.security.pol
                     token = (HttpsToken) assertion;
                 }else{
                     if(!assertion.isOptional()){
-                        if(logger.getLevel() == Level.SEVERE){
-                            logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"TransportToken"});
-                        }
-                        if(isServer){
-                            throw new UnsupportedPolicyAssertion("Policy assertion "+
-                                    assertion+" is not supported under TransportToken assertion");
-                        }
+                        log_invalid_assertion(assertion, isServer,"TransportToken");
+                        fitness = AssertionFitness.HAS_UNKNOWN_ASSERTION;
                     }
                 }
             }
             this.populated  = true;
-        }        
+        }
+        return fitness;
     }
 }

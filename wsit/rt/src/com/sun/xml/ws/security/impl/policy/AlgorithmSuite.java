@@ -28,6 +28,7 @@ import com.sun.xml.ws.policy.NestedPolicy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.security.policy.AlgorithmSuiteValue;
+import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -41,13 +42,13 @@ import static com.sun.xml.ws.security.impl.policy.Constants.*;
  * @author K.Venugopal@sun.com Abhijit.das@Sun.com
  */
 
-public class AlgorithmSuite extends com.sun.xml.ws.policy.PolicyAssertion implements com.sun.xml.ws.security.policy.AlgorithmSuite{
+public class AlgorithmSuite extends com.sun.xml.ws.policy.PolicyAssertion implements com.sun.xml.ws.security.policy.AlgorithmSuite,SecurityAssertionValidator{
     
-    
+    private AssertionFitness fitness = AssertionFitness.IS_VALID;
     private AlgorithmSuiteValue value;
     private HashSet<String> props = new HashSet<String>();
     private boolean populated = false;
-    private boolean isServer = false;
+    private boolean isValid = true;
     /**
      * Creates a new instance of AlgorithmSuite
      */
@@ -120,8 +121,11 @@ public class AlgorithmSuite extends com.sun.xml.ws.policy.PolicyAssertion implem
         return com.sun.xml.ws.security.policy.Constants.RSA_SHA1;
     }
     
+    private void populate(){
+        populate(false);
+    }
     
-    private synchronized void populate() {
+    private synchronized AssertionFitness populate(boolean isServer) {
         
         if(!populated){
             NestedPolicy policy = this.getNestedPolicy();
@@ -129,7 +133,10 @@ public class AlgorithmSuite extends com.sun.xml.ws.policy.PolicyAssertion implem
                 if(logger.isLoggable(Level.FINE)){
                     logger.log(Level.FINE,"NestedPolicy is null");
                 }
-                return;
+                if(this.value == null){
+                    this.value = AlgorithmSuiteValue.Basic128;
+                }
+                return fitness;
             }
             AssertionSet as = policy.getAssertionSet();
             
@@ -141,7 +148,7 @@ public class AlgorithmSuite extends com.sun.xml.ws.policy.PolicyAssertion implem
                     if(av != null){
                         this.value = av;
                         continue;
-                    }                    
+                    }
                 }
                 if(PolicyUtil.isInclusiveC14N(assertion)){
                     this.props.add(Constants.InclusiveC14N);
@@ -153,13 +160,8 @@ public class AlgorithmSuite extends com.sun.xml.ws.policy.PolicyAssertion implem
                     this.props.add(Constants.STRTransform10);
                 }else{
                     if(!assertion.isOptional()){
-                        if(logger.isLoggable(Level.SEVERE)){
-                            logger.log(Level.SEVERE,LogStringsMessages.SP_0100_INVALID_SECURITY_ASSERTION(assertion,AlgorithmSuite));                                    
-                        }
-                        if(isServer){
-                            throw new UnsupportedPolicyAssertion("Policy assertion "+
-                                    assertion+" is not supported under AlgorithmSuite assertion");
-                        }
+                        log_invalid_assertion(assertion, isServer,AlgorithmSuite);
+                        fitness = AssertionFitness.HAS_UNKNOWN_ASSERTION;
                     }
                 }
             }
@@ -168,6 +170,7 @@ public class AlgorithmSuite extends com.sun.xml.ws.policy.PolicyAssertion implem
             }
             populated = true;
         }
+        return fitness;
     }
     
     
@@ -185,5 +188,9 @@ public class AlgorithmSuite extends com.sun.xml.ws.policy.PolicyAssertion implem
     
     public int getMaxAsymmetricKeyLength() {
         return MAX_AKL;
+    }
+    
+    public AssertionFitness validate(boolean isServer) {
+        return populate(isServer);
     }
 }

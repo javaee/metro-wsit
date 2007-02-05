@@ -28,8 +28,6 @@ import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import java.util.Collection;
-
-import java.util.Iterator;
 import java.util.Map;
 import javax.xml.namespace.QName;
 /**

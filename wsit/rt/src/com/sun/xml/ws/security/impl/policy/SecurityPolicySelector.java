@@ -176,7 +176,7 @@ public class SecurityPolicySelector {
     
     public Fitness getFitness(PolicyAssertion policyAssertion) {
         if (policyAssertion instanceof SecurityAssertionValidator) {
-            return ((SecurityAssertionValidator)policyAssertion).validate() ? Fitness.SUPPORTED : Fitness.UNSUPPORTED;
+            return (((SecurityAssertionValidator)policyAssertion).validate(true) == SecurityAssertionValidator.AssertionFitness.IS_VALID )? Fitness.SUPPORTED : Fitness.UNSUPPORTED;
         } else if (supportedAssertions.contains(policyAssertion.getName())) {
             return Fitness.SUPPORTED;
         } else {

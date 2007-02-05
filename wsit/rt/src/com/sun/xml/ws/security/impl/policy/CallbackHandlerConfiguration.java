@@ -35,8 +35,9 @@ import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
 public class CallbackHandlerConfiguration extends PolicyAssertion implements com.sun.xml.ws.security.policy.CallbackHandlerConfiguration, SecurityAssertionValidator{
     
     private boolean populated = false;
-    private Iterator<PolicyAssertion> ast  = null;
     
+    private Iterator<PolicyAssertion> ast  = null;
+    private AssertionFitness fitness = AssertionFitness.IS_VALID;
     /** Creates a new instance of CallbackHandlerConfiguration */
     public CallbackHandlerConfiguration() {
     }
@@ -50,19 +51,19 @@ public class CallbackHandlerConfiguration extends PolicyAssertion implements com
         return ast;
     }
     
-    public boolean validate() {
-        try{
-            populate();
-            return true;
-        }catch(UnsupportedPolicyAssertion upaex) {
-            return false;
-        }
-    }    
+    public AssertionFitness validate(boolean isServer) {
+        return populate(isServer);
+    }
+    private void populate(){
+        populate(false);
+    }
     
-    private synchronized void populate(){
+    private synchronized AssertionFitness populate(boolean isServer) {
         if(!populated){
             this.ast  = this.getNestedAssertionsIterator();
             populated  = true;
-        }        
+            
+        }
+        return fitness;
     }
 }

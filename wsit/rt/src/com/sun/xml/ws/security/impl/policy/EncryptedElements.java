@@ -55,7 +55,7 @@ public class EncryptedElements extends PolicyAssertion implements  com.sun.xml.w
     private static List<String> emptyList = Collections.emptyList();
     private boolean populated = false;
     private static QName XPathVersion = new QName("XPathVersion");
-    private boolean isServer = false;
+    private AssertionFitness fitness = AssertionFitness.IS_VALID;
     /**
      * Creates a new instance of EncryptedElements
      */
@@ -95,17 +95,14 @@ public class EncryptedElements extends PolicyAssertion implements  com.sun.xml.w
         return emptyList.iterator();
     }
     
-    public boolean validate() {
-        try{
-            populate();
-            return true;
-        }catch(UnsupportedPolicyAssertion upaex) {
-            return false;
-        }
+    public AssertionFitness validate(boolean isServer) {
+        return populate(isServer);
+    }
+    private void populate(){
+        populate(false);
     }
     
-    
-    private synchronized void populate() {
+    private synchronized AssertionFitness populate(boolean isServer) {
         if(!populated){
             this.xpathVersion = (String)this.getAttributeValue(XPathVersion);
             if ( this.hasNestedAssertions() ) {
@@ -116,19 +113,15 @@ public class EncryptedElements extends PolicyAssertion implements  com.sun.xml.w
                         addTarget(assertion.getValue());
                     } else{
                         if(!assertion.isOptional()){
-                            if(logger.getLevel() == Level.SEVERE){
-                                logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"EncryptedElements"});
-                            }
-                            if(isServer){
-                                throw new UnsupportedPolicyAssertion("Policy assertion "+
-                                        assertion+" is not supported under EncryptedElements assertion");
-                            }
+                            log_invalid_assertion(assertion, isServer,EncryptedElements);
+                            fitness = AssertionFitness.HAS_UNKNOWN_ASSERTION;
                         }
                     }
                 }
             }
             populated = true;
-        }        
+        }
+        return fitness;
     }
     
 }

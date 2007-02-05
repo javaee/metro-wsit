@@ -32,7 +32,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Level;
 import javax.xml.namespace.QName;
 import static com.sun.xml.ws.security.impl.policy.Constants.*;
 import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
@@ -45,7 +44,7 @@ public class EncryptedParts extends PolicyAssertion implements com.sun.xml.ws.se
     private boolean _body;
     private List<Header> header;
     private boolean populated = false;
-    private boolean isServer = false;
+    private AssertionFitness fitness = AssertionFitness.IS_VALID;
     /** Creates a new instance of EncryptedPartImpl */
     public EncryptedParts() {
     }
@@ -74,20 +73,18 @@ public class EncryptedParts extends PolicyAssertion implements com.sun.xml.ws.se
         return header.iterator();
     }
     
-//    public QName getName() {
-//        return Constants._EncryptedParts_QNAME;
-//    }
+    //    public QName getName() {
+    //        return Constants._EncryptedParts_QNAME;
+    //    }
     
-    public boolean validate() {
-        try{
-            populate();
-            return true;
-        }catch(UnsupportedPolicyAssertion upaex) {
-            return false;
-        }
+    public AssertionFitness validate(boolean isServer) {
+        return populate(isServer);
+    }
+    private void populate(){
+        populate(false);
     }
     
-    private synchronized void populate() {        
+    private synchronized AssertionFitness populate(boolean isServer) {
         if(!populated){
             if ( this.hasNestedAssertions() ) {
                 
@@ -104,20 +101,16 @@ public class EncryptedParts extends PolicyAssertion implements com.sun.xml.ws.se
                             this.header.add((Header)assertion);
                         }else{
                             if(!assertion.isOptional()){
-                                if(logger.getLevel() == Level.SEVERE){
-                                    logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"EncyptedParts"});
-                                }
-                                if(isServer){
-                                    throw new UnsupportedPolicyAssertion("Policy assertion "+
-                                            assertion+" is not supported under EncyptedParts assertion");
-                                }
+                                log_invalid_assertion(assertion, isServer,EncryptedParts);
+                                fitness = AssertionFitness.HAS_UNKNOWN_ASSERTION;
                             }
                         }
                     }
                 }
             }
             populated = true;
-        }        
+        }
+        return fitness;
     }
     
     public void removeTarget(QName targetName) {

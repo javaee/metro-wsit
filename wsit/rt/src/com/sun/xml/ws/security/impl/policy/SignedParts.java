@@ -40,7 +40,7 @@ import java.util.Set;
 
 
 public class SignedParts extends PolicyAssertion implements com.sun.xml.ws.security.policy.SignedParts, SecurityAssertionValidator {
-    
+    private AssertionFitness fitness = AssertionFitness.IS_VALID;
     private boolean body;
     private boolean populated = false;
     private Set<PolicyAssertion> targets = new HashSet<PolicyAssertion>();
@@ -64,18 +64,14 @@ public class SignedParts extends PolicyAssertion implements com.sun.xml.ws.secur
         return body;
     }
     
-    public boolean validate() {
-        try{
-            populate();
-            return true;
-        }catch(UnsupportedPolicyAssertion upaex) {
-            return false;
-        }
+    public AssertionFitness validate(boolean isServer) {
+        return populate(isServer);
+    }
+    private void populate(){
+        populate(false);
     }
     
-    
-    
-    private synchronized void populate(){
+    private synchronized AssertionFitness populate(boolean isServer) {
         if(!populated){
             if(this.hasNestedAssertions()){
                 Iterator <PolicyAssertion> it = this.getNestedAssertionsIterator();
@@ -93,7 +89,7 @@ public class SignedParts extends PolicyAssertion implements com.sun.xml.ws.secur
             }
             populated = true;
         }
-        
+        return fitness;
     }
     
     public void addHeader(Header header) {

@@ -35,7 +35,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import javax.xml.namespace.QName;
@@ -52,6 +51,7 @@ public class RelToken extends PolicyAssertion implements com.sun.xml.ws.security
     private String tokenType;
     private String includeTokenType;
     private PolicyAssertion rdKey = null;
+    private AssertionFitness fitness = AssertionFitness.IS_VALID;
     
     private static QName itQname = new QName(Constants.SECURITY_POLICY_NS, Constants.IncludeToken);
     private boolean isServer = false;
@@ -63,14 +63,6 @@ public class RelToken extends PolicyAssertion implements com.sun.xml.ws.security
         this.id = id.toString();
     }
     
-    public boolean validate() {
-        try{
-            populate();
-            return true;
-        }catch(UnsupportedPolicyAssertion upaex) {
-            return false;
-        }
-    }
     
     public String getTokenType() {
         populate();
@@ -104,7 +96,14 @@ public class RelToken extends PolicyAssertion implements com.sun.xml.ws.security
     }
     
     
-    private synchronized void populate(){
+    public AssertionFitness validate(boolean isServer) {
+        return populate(isServer);
+    }
+    private void populate(){
+        populate(false);
+    }
+    
+    private synchronized AssertionFitness populate(boolean isServer) {
         if(!populated){
             NestedPolicy policy = this.getNestedPolicy();
             includeTokenType = this.getAttributeValue(itQname);
@@ -113,7 +112,7 @@ public class RelToken extends PolicyAssertion implements com.sun.xml.ws.security
                     logger.log(Level.FINE,"NestedPolicy is null");
                 }
                 populated = true;
-                return;
+                return fitness;
             }
             AssertionSet as = policy.getAssertionSet();
             Iterator<PolicyAssertion> paItr = as.iterator();
@@ -131,18 +130,15 @@ public class RelToken extends PolicyAssertion implements com.sun.xml.ws.security
                     tokenRefType.add(assertion.getName().getLocalPart().intern());
                 } else{
                     if(!assertion.isOptional()){
-                        if(logger.getLevel() == Level.SEVERE){
-                            logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"RelToken"});
-                        }
-                        if(isServer){
-                            throw new UnsupportedPolicyAssertion("Policy assertion "+
-                                    assertion+" is not supported under RelToken assertion");
-                        }
+                        
+                        log_invalid_assertion(assertion, isServer,RelToken);
+                        fitness = AssertionFitness.HAS_UNKNOWN_ASSERTION;
                     }
                 }
             }
             populated = true;
         }
+        return fitness;
     }
     
 }

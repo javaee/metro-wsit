@@ -44,7 +44,7 @@ public class TransportBinding extends PolicyAssertion implements com.sun.xml.ws.
     boolean includeTimeStamp=false;
     MessageLayout layout = MessageLayout.Lax;
     boolean populated = false;
-    private boolean isServer = false;
+    private AssertionFitness fitness = AssertionFitness.IS_VALID;
     /**
      * Creates a new instance of TransportBinding
      */
@@ -123,16 +123,14 @@ public class TransportBinding extends PolicyAssertion implements com.sun.xml.ws.
         throw new UnsupportedOperationException("Not supported");
     }
     
-    public boolean validate() {
-        try{
-            populate();
-            return true;
-        }catch(UnsupportedPolicyAssertion upaex) {
-            return false;
-        }
+    public AssertionFitness validate(boolean isServer) {
+        return populate(isServer);
+    }
+    private void populate(){
+        populate(false);
     }
     
-    private synchronized void populate(){
+    private synchronized AssertionFitness populate(boolean isServer) {
         if(!populated){
             NestedPolicy policy = this.getNestedPolicy();
             AssertionSet assertions = policy.getAssertionSet();
@@ -141,7 +139,7 @@ public class TransportBinding extends PolicyAssertion implements com.sun.xml.ws.
                     logger.log(Level.FINE,"NestedPolicy is null");
                 }
                 populated = true;
-                return;
+                return fitness;
             }
             for(PolicyAssertion assertion : assertions){
                 if(PolicyUtil.isAlgorithmAssertion(assertion)){
@@ -154,17 +152,13 @@ public class TransportBinding extends PolicyAssertion implements com.sun.xml.ws.
                     includeTimeStamp=true;
                 } else{
                     if(!assertion.isOptional()){
-                        if(logger.getLevel() == Level.SEVERE){
-                            logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"TransportBinding"});
-                        }
-                        if(isServer){
-                            throw new UnsupportedPolicyAssertion("Policy assertion "+
-                                    assertion+" is not supported under TransportBinding assertion");
-                        }
+                        log_invalid_assertion(assertion, isServer,TransportBinding);
+                        fitness = AssertionFitness.HAS_UNKNOWN_ASSERTION;
                     }
                 }
-            }            
+            }
             populated = true;
         }
+        return fitness;
     }
 }

@@ -3,12 +3,12 @@
  * of the Common Development and Distribution License
  * (the License).  You may not use this file except in
  * compliance with the License.
- * 
+ *
  * You can obtain a copy of the license at
  * https://glassfish.dev.java.net/public/CDDLv1.0.html.
  * See the License for the specific language governing
  * permissions and limitations under the License.
- * 
+ *
  * When distributing Covered Code, include this CDDL
  * Header Notice in each file and include the License file
  * at https://glassfish.dev.java.net/public/CDDLv1.0.html.
@@ -16,13 +16,15 @@
  * with the fields enclosed by brackets [] replaced by
  * you own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * 
+ *
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 package com.sun.xml.ws.security.impl.policy;
 
+import com.sun.xml.ws.policy.PolicyAssertion;
+import java.util.logging.Level;
 import java.util.logging.Logger;
-
+import com.sun.xml.ws.policy.privateutil.LocalizationMessages;
 public class Constants {
     
     
@@ -32,7 +34,7 @@ public class Constants {
     public final static String XPATH_NS = "http://www.w3.org/TR/1999/REC-xpath-19991116";
     public final static String TRUST_NS = "http://schemas.xmlsoap.org/ws/2005/02/trust";
     public final static String UTILITY_NS = "http://docs.oasis-open.org/wss/2004/01/oasis- 200401-wss-wssecurity-utility-1.0.xsd";
-    public final static String _XPATHVERSION = "XPathVersion";    
+    public final static String _XPATHVERSION = "XPathVersion";
     public final static String InclusiveC14N = "InclusiveC14N";
     public final static String MustSupportServerChallenge = "MustSupportServerChallenge";
     public final static String Basic192Sha256Rsa15 = "Basic192Sha256Rsa15";
@@ -169,7 +171,7 @@ public class Constants {
     public final static String TokenType ="TokenType";
     public final static String RequestType = "RequestType";
     public final static String RequestSecurityToken = "RequestSecurityToken";
-    public final static String OnBehalfOf ="OnBehalfOf"; 
+    public final static String OnBehalfOf ="OnBehalfOf";
     public final static String AuthenticationType = "AuthenticationType";
     public final static String CanonicalizationAlgorithm ="CanonicalizationAlgorithm";
     public final static String SignatureAlgorithm ="SignatureAlgorithm";
@@ -198,4 +200,16 @@ public class Constants {
     public static final String ReferenceProperties = "ReferenceProperties";
     public final static String PortType ="PortType";
     public final static String ServiceName ="ServiceName";
+
+    public static void log_invalid_assertion(PolicyAssertion assertion , boolean isServer,String parentAssertion){
+        
+        Level level = Level.SEVERE;
+        if(!isServer){
+            level = Level.WARNING;
+        }
+        if(logger.isLoggable(level)){
+            logger.log(level,LogStringsMessages.SP_0100_INVALID_SECURITY_ASSERTION(assertion,parentAssertion));
+        }
+        
+    }
 }

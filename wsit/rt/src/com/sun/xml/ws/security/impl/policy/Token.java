@@ -45,7 +45,7 @@ public class Token extends PolicyAssertion implements  com.sun.xml.ws.security.p
     private String _id;
     private boolean populated= false;
     private com.sun.xml.ws.security.policy.Token _token;
-    private boolean isServer = false;
+    private AssertionFitness fitness = AssertionFitness.IS_VALID;
     /**
      * Creates a new instance of Token
      */
@@ -89,18 +89,14 @@ public class Token extends PolicyAssertion implements  com.sun.xml.ws.security.p
         return _id;
     }
     
-    public boolean validate() {
-        try{
-            populate();
-            return true;
-        }catch(UnsupportedPolicyAssertion upaex) {
-            return false;
-        }
+    public AssertionFitness validate(boolean isServer) {
+        return populate(isServer);
+    }
+    private void populate(){
+        populate(false);
     }
     
-    
-    
-    private synchronized void populate(){        
+    private synchronized AssertionFitness populate(boolean isServer) {
         if(!populated){
             _includeToken = getAttributeValue(itQname);
             NestedPolicy policy = this.getNestedPolicy();
@@ -109,7 +105,7 @@ public class Token extends PolicyAssertion implements  com.sun.xml.ws.security.p
                     logger.log(Level.FINE,"NestedPolicy is null");
                 }
                 populated = true;
-                return;
+                return fitness;
             }
             AssertionSet as = policy.getAssertionSet();
             Iterator<PolicyAssertion> ast = as.iterator();
@@ -119,18 +115,14 @@ public class Token extends PolicyAssertion implements  com.sun.xml.ws.security.p
                     _token = (com.sun.xml.ws.security.policy.Token)assertion;
                 }else{
                     if(!assertion.isOptional()){
-                        if(logger.getLevel() == Level.SEVERE){
-                            logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"Token"});
-                        }
-                        if(isServer){
-                            throw new UnsupportedPolicyAssertion("Policy assertion "+
-                                    assertion+" is not supported under Token assertion");
-                        }
+                        log_invalid_assertion(assertion, isServer,"Token");
+                        fitness = AssertionFitness.HAS_UNKNOWN_ASSERTION;
                     }
                 }
             }
             
             populated = true;
-        }        
+        }
+        return fitness;
     }
 }

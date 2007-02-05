@@ -39,7 +39,7 @@ import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
  * @author K.Venugopal@sun.com
  */
 public class HttpsToken extends PolicyAssertion implements com.sun.xml.ws.security.policy.HttpsToken, SecurityAssertionValidator{
-    
+    private AssertionFitness fitness = AssertionFitness.IS_VALID;
     private boolean populated = false;
     private boolean requireCC = false;
     private String id = "";
@@ -82,22 +82,22 @@ public class HttpsToken extends PolicyAssertion implements com.sun.xml.ws.securi
         return id;
     }
     
-    public boolean validate() {
-        try{
-            populate();
-            return true;
-        }catch(UnsupportedPolicyAssertion upaex) {
-            return false;
-        }
+    public AssertionFitness validate(boolean isServer) {
+        return populate(isServer);
+    }
+    private void populate(){
+        populate(false);
     }
     
-    private synchronized void populate(){
+    private synchronized AssertionFitness populate(boolean isServer) {
         
         if(!populated){
             String value = this.getAttributeValue(rccQname);
             requireCC = Boolean.valueOf(value);
             populated = true;
+            
         }
+        return fitness;
         
     }
 }

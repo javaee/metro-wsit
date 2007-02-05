@@ -41,7 +41,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
-import static com.sun.xml.ws.security.impl.policy.Constants.logger;
+import static com.sun.xml.ws.security.impl.policy.Constants.*;
 import javax.xml.namespace.QName;
 
 
@@ -54,7 +54,7 @@ public class X509Token extends PolicyAssertion implements com.sun.xml.ws.securit
     
     private static QName itQname = new QName(Constants.SECURITY_POLICY_NS, Constants.IncludeToken);
     private String includeToken = Token.INCLUDE_ALWAYS;
-    
+    private AssertionFitness fitness = AssertionFitness.IS_VALID;
     private boolean populated = false;
     private String tokenType = null;
     private HashSet<String> referenceType = null;
@@ -110,9 +110,6 @@ public class X509Token extends PolicyAssertion implements com.sun.xml.ws.securit
         includeToken = type;
     }
     
-//    public QName getName() {
-//        return Constants._X509Token_QNAME;
-//    }
     
     public String getTokenId() {
         return id;
@@ -123,17 +120,14 @@ public class X509Token extends PolicyAssertion implements com.sun.xml.ws.securit
         return reqDK;
     }
     
-    public boolean validate() {
-        try{
-            populate();
-            return true;
-        }catch(UnsupportedPolicyAssertion upaex) {
-            return false;
-        }
+    public AssertionFitness validate(boolean isServer) {
+        return populate(isServer);
+    }
+    private void populate(){
+        populate(false);
     }
     
-    private synchronized void populate() {
-        
+    private synchronized AssertionFitness populate(boolean isServer) {
         if(!populated){
             if(this.getAttributeValue(itQname)!=null){
                 this.includeToken = this.getAttributeValue(itQname);
@@ -144,7 +138,7 @@ public class X509Token extends PolicyAssertion implements com.sun.xml.ws.securit
                     logger.log(Level.FINE,"NestedPolicy is null");
                 }
                 populated = true;
-                return;
+                return fitness;
             }
             AssertionSet assertionSet = policy.getAssertionSet();
             for(PolicyAssertion assertion: assertionSet){
@@ -156,19 +150,15 @@ public class X509Token extends PolicyAssertion implements com.sun.xml.ws.securit
                     reqDK = true;
                 }else{
                     if(!assertion.isOptional()){
-                        if(logger.getLevel() == Level.SEVERE){
-                            logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"X509Token"});
-                        }
-                        if(isServer){
-                            throw new UnsupportedPolicyAssertion("Policy assertion "+
-                                    assertion+" is not supported under X509Token assertion");
-                        }
+                        log_invalid_assertion(assertion, isServer,"X509Token");
+                        fitness = AssertionFitness.HAS_UNKNOWN_ASSERTION;
                     }
                 }
             }
             
             populated = true;
         }
+        return fitness;
     }
     
     public Object clone()throws CloneNotSupportedException{

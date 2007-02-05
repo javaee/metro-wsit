@@ -32,7 +32,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 import javax.xml.namespace.QName;
-import static com.sun.xml.ws.security.impl.policy.Constants.logger;
+import static com.sun.xml.ws.security.impl.policy.Constants.*;
 
 /**
  *
@@ -45,7 +45,7 @@ public class UsernameToken extends PolicyAssertion implements com.sun.xml.ws.sec
     private String includeToken;
     private boolean populated;
     private QName itQname = new QName(Constants.SECURITY_POLICY_NS, Constants.IncludeToken);
-    private boolean isServer = false;
+    private AssertionFitness fitness = AssertionFitness.IS_VALID;
     /**
      * Creates a new instance of UsernameToken
      */
@@ -89,16 +89,14 @@ public class UsernameToken extends PolicyAssertion implements com.sun.xml.ws.sec
         attrs.put(itQname,type);
     }
     
-    public boolean validate() {
-        try{
-            populate();
-            return true;
-        }catch(UnsupportedPolicyAssertion upaex) {
-            return false;
-        }
+    public AssertionFitness validate(boolean isServer) {
+        return populate(isServer);
+    }
+    private void populate(){
+        populate(false);
     }
     
-    private synchronized void populate(){
+    private synchronized AssertionFitness populate(boolean isServer) {
         
         if(!populated){
             this.includeToken = this.getAttributeValue(itQname);
@@ -108,7 +106,7 @@ public class UsernameToken extends PolicyAssertion implements com.sun.xml.ws.sec
                     logger.log(Level.FINE,"NestedPolicy is null");
                 }
                 populated = true;
-                return;
+                return fitness;
             }
             AssertionSet assertionSet = policy.getAssertionSet();
             for(PolicyAssertion assertion: assertionSet){
@@ -116,29 +114,25 @@ public class UsernameToken extends PolicyAssertion implements com.sun.xml.ws.sec
                     tokenType = assertion.getName().getLocalPart();
                 }else{
                     if(!assertion.isOptional()){
-                        if(logger.getLevel() == Level.SEVERE){
-                            logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"UsernameToken"});
-                        }
-                        if(isServer){
-                            throw new UnsupportedPolicyAssertion("Policy assertion "+
-                                    assertion+" is not supported under UsernameToken assertion");
-                        }
+                        log_invalid_assertion(assertion, isServer,"UsernameToken");
+                        fitness = AssertionFitness.HAS_UNKNOWN_ASSERTION;
                     }
                 }
             }
             
             populated = true;
         }
+        return fitness;
     }
     
     
     public Object clone() throws CloneNotSupportedException  {
         throw new UnsupportedOperationException();
-//        UsernameToken ut = new UsernameToken();
-//        ut.setIncludeToken(this.getIncludeToken());
-//        ut.nestedPolicy = (WSPolicy) this.getPolicy();
-//        ut.setTokenId(this.id);
-//        return ut;
+        //        UsernameToken ut = new UsernameToken();
+        //        ut.setIncludeToken(this.getIncludeToken());
+        //        ut.nestedPolicy = (WSPolicy) this.getPolicy();
+        //        ut.setTokenId(this.id);
+        //        return ut;
     }
     
 }

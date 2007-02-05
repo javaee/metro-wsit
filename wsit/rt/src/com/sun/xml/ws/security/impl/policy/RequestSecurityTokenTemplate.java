@@ -26,11 +26,9 @@ package com.sun.xml.ws.security.impl.policy;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
-import com.sun.xml.ws.security.policy.UseKey;
 import com.sun.xml.ws.security.policy.Lifetime;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.logging.Level;
 import static com.sun.xml.ws.security.impl.policy.Constants.*;
 import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
 /**
@@ -40,7 +38,7 @@ import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
 public class RequestSecurityTokenTemplate extends PolicyAssertion implements com.sun.xml.ws.security.policy.RequestSecurityTokenTemplate, SecurityAssertionValidator {
     
     private boolean populated = false;
-    private boolean isServer = false;
+    private AssertionFitness fitness = AssertionFitness.IS_VALID;
     String tokenType;
     String requestType;
     Lifetime lifeTime;
@@ -156,16 +154,15 @@ public class RequestSecurityTokenTemplate extends PolicyAssertion implements com
         throw new UnsupportedOperationException();
     }
     
-    public boolean validate() {
-        try{
-            populate();
-            return true;
-        }catch(UnsupportedPolicyAssertion upaex) {
-            return false;
-        }
+    
+    public AssertionFitness validate(boolean isServer) {
+        return populate(isServer);
+    }
+    private void populate(){
+        populate(false);
     }
     
-    private synchronized void populate() {        
+    private synchronized AssertionFitness populate(boolean isServer) {
         if(!populated){
             if ( this.hasNestedAssertions() ) {
                 
@@ -205,19 +202,15 @@ public class RequestSecurityTokenTemplate extends PolicyAssertion implements com
                         isEncRequired = true;
                     }else {
                         if(!assertion.isOptional()){
-                            if(logger.getLevel() == Level.SEVERE){
-                                logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"RequestSecurityTokenTemplate"});
-                            }
-                            if(isServer){
-                                throw new UnsupportedPolicyAssertion("Policy assertion "+
-                                        assertion+" is not supported under RequestSecurityTokenTemplate assertion");
-                            }
+                            log_invalid_assertion(assertion, isServer,RequestSecurityTokenTemplate);
+                            fitness = AssertionFitness.HAS_UNKNOWN_ASSERTION;
                         }
                     }
                     
                 }
             }
             populated = true;
-        }        
+        }
+        return fitness;
     }
 }

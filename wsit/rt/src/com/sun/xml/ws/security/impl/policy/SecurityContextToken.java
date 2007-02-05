@@ -56,7 +56,7 @@ public class SecurityContextToken extends PolicyAssertion implements com.sun.xml
     private PolicyAssertion rdKey = null;
     private Set<String> referenceType = null;
     private static QName itQname = new QName(Constants.SECURITY_POLICY_NS, Constants.IncludeToken);
-    private boolean isServer = false;
+    private AssertionFitness fitness = AssertionFitness.IS_VALID;
     /** Creates a new instance of SecurityContextToken */
     public SecurityContextToken(AssertionData name,Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) {
         super(name,nestedAssertions,nestedAlternative);
@@ -96,17 +96,14 @@ public class SecurityContextToken extends PolicyAssertion implements com.sun.xml
     }
     
     
-    public boolean validate() {
-        try{
-            populate();
-            return true;
-        }catch(UnsupportedPolicyAssertion upaex) {
-            return false;
-        }
+    public AssertionFitness validate(boolean isServer) {
+        return populate(isServer);
+    }
+    private void populate(){
+        populate(false);
     }
     
-    private synchronized void populate(){
-        
+    private synchronized AssertionFitness populate(boolean isServer) {
         if(!populated){
             NestedPolicy policy = this.getNestedPolicy();
             includeTokenType = this.getAttributeValue(itQname);
@@ -115,7 +112,7 @@ public class SecurityContextToken extends PolicyAssertion implements com.sun.xml
                     logger.log(Level.FINE,"NestedPolicy is null");
                 }
                 populated = true;
-                return;
+                return fitness;
             }
             AssertionSet as = policy.getAssertionSet();
             Iterator<PolicyAssertion> paItr = as.iterator();
@@ -144,8 +141,8 @@ public class SecurityContextToken extends PolicyAssertion implements com.sun.xml
                 }
             }
             populated = true;
-        }     
-        
+        }
+        return fitness;
     }
     
 }

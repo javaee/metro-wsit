@@ -53,7 +53,7 @@ public class SecureConversationToken extends PolicyAssertion implements com.sun.
     private Set<String> referenceType = null;
     private Issuer issuer = null;
     private String tokenType = null;
-    private boolean isServer = false;
+    private AssertionFitness fitness = AssertionFitness.IS_VALID;
     /**
      * Creates a new instance of SecureConversationToken
      */
@@ -118,17 +118,15 @@ public class SecureConversationToken extends PolicyAssertion implements com.sun.
         return id;
     }
     
-    public boolean validate() {
-        try{
-            populate();
-            return true;
-        }catch(UnsupportedPolicyAssertion upaex) {
-            return false;
-        }
+    
+    public AssertionFitness validate(boolean isServer) {
+        return populate(isServer);
+    }
+    private void populate(){
+        populate(false);
     }
     
-    
-    private synchronized void populate(){
+    private synchronized AssertionFitness populate(boolean isServer) {
         if(!populated){
             String tmp = getAttributeValue(itQname);
             if(tmp != null)
@@ -139,7 +137,7 @@ public class SecureConversationToken extends PolicyAssertion implements com.sun.
                     logger.log(Level.FINE,"NestedPolicy is null");
                 }
                 populated = true;
-                return;
+                return fitness;
             }
             AssertionSet as = policy.getAssertionSet();
             Iterator<PolicyAssertion> paItr = as.iterator();
@@ -158,13 +156,8 @@ public class SecureConversationToken extends PolicyAssertion implements com.sun.
                     tokenType = assertion.getName().getLocalPart();
                 }else{
                     if(!assertion.isOptional()){
-                        if(logger.getLevel() == Level.SEVERE){
-                            logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"SecureConversationToken"});
-                        }
-                        if(isServer){
-                            throw new UnsupportedPolicyAssertion("Policy assertion "+
-                                    assertion+" is not supported under SecureConversationToken assertion");
-                        }
+                        log_invalid_assertion(assertion, isServer,SecureConversationToken);
+                        fitness = AssertionFitness.HAS_UNKNOWN_ASSERTION;
                     }
                     
                 }
@@ -180,6 +173,7 @@ public class SecureConversationToken extends PolicyAssertion implements com.sun.
             }
             populated = true;
         }
+        return fitness;
     }
 }
 
