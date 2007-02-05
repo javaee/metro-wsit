@@ -56,7 +56,7 @@ import java.util.logging.Level;
  * for register and registerResponse delegate to the methods in this class.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  * @since 1.0
  */
 public final class RegistrationManager {
@@ -342,9 +342,7 @@ public final class RegistrationManager {
                     logger.fine("register", "asynch registration succeeded. Coordinator Protocol Service is " +
                             r.getCoordinatorProtocolService());
                 }
-            }
-
-            if (timedOut) {
+            } else {
                 // send fault S4.4 wscoor:No Activity
                 WsaHelper.sendFault(
                         null,
