@@ -134,12 +134,12 @@ public final class XmlFilteringUtils {
     
     private static final void checkInvocationParameter(final Invocation invocation, XmlStreamWriterMethodType expectedType) {
         if (invocation == null) {
-            throw logException(new NullPointerException("Invocation parameter must not be null"), //TODO localize message
+            throw logException(new NullPointerException(LocalizationMessages.WSP_001038_METHOD_PARAMETER_CANNOT_BE_NULL("Invocation parameter")),
                     LOGGER);
         } else {
             XmlStreamWriterMethodType methodType = XmlStreamWriterMethodType.getMethodType(invocation.getMethodName());
             if (methodType != expectedType) {
-                throw logException(new IllegalArgumentException("Illegal invocation method type '" + methodType + "' found. Invocation parameter passed to this method must represent '" + expectedType + "' method invocation."), //TODO localize message
+                throw logException(new IllegalArgumentException(LocalizationMessages.WSP_001039_ILLEGAL_INVOCATION_METHOD_TYPE(methodType, expectedType)),
                         LOGGER);
             }
         }
