@@ -543,7 +543,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
                         
                     }
                 }catch(SOAPException sx){
-                    sx.printStackTrace();
+                    //sx.printStackTrace();
                     //log error
                 }
             }

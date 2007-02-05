@@ -1306,11 +1306,9 @@ public abstract class WSITAuthContextBase  {
             ctx.setSOAPMessage(message);
             SecurityAnnotator.secureMessage(ctx);
             return ctx.getSOAPMessage();
-        } catch (WssSoapFaultException soapFaultException) {
-            soapFaultException.printStackTrace();
+        } catch (WssSoapFaultException soapFaultException) {            
             throw getSOAPFaultException(soapFaultException);
-        } catch (XWSSecurityException xwse) {
-            xwse.printStackTrace();
+        } catch (XWSSecurityException xwse) {            
             WssSoapFaultException wsfe =
                     SecurableSoapMessage.newSOAPFaultException(
                     MessageConstants.WSSE_INTERNAL_SERVER_ERROR,
@@ -1327,8 +1325,7 @@ public abstract class WSITAuthContextBase  {
             context.isOneWayMessage(message.isOneWay(this.pipeConfig.getWSDLModel()));
             SecurityAnnotator.secureMessage(context);
             return context.getJAXWSMessage();
-        } catch(XWSSecurityException xwse){
-            xwse.printStackTrace();
+        } catch(XWSSecurityException xwse){            
             WssSoapFaultException wsfe =
                     SecurableSoapMessage.newSOAPFaultException(
                     MessageConstants.WSSE_INTERNAL_SERVER_ERROR,

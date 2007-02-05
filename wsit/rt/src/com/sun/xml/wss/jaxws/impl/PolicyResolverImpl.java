@@ -138,7 +138,7 @@ public class PolicyResolverImpl implements PolicyResolver{
                 try {
                     soapMsg = msg.readAsSOAPMessage();
                 } catch (SOAPException ex) {
-                    ex.printStackTrace();
+                    //ex.printStackTrace();
                 }
             }
             mp = getInboundFaultPolicy(soapMsg);
@@ -236,7 +236,7 @@ public class PolicyResolverImpl implements PolicyResolver{
                     return faultPolicy;
                 }
             }catch(SOAPException sx){
-                sx.printStackTrace();
+                //sx.printStackTrace();
                 //log error
             }
         }

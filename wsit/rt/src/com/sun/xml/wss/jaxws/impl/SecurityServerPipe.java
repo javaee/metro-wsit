@@ -181,12 +181,10 @@ public class SecurityServerPipe extends SecurityPipeBase {
                 msg = verifyInboundMessage(msg, ctx);
             }
         } catch (WssSoapFaultException ex) {
-            thereWasAFault = true;
-            ex.printStackTrace();
+            thereWasAFault = true;            
             msg = Messages.create(ex, pipeConfig.getBinding().getSOAPVersion());
         } catch (XWSSecurityException xwse) {
-            thereWasAFault = true;
-            xwse.printStackTrace();
+            thereWasAFault = true;            
             msg = Messages.create(xwse, pipeConfig.getBinding().getSOAPVersion());
             
         } catch(SOAPException se){
@@ -492,7 +490,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
                     
                 }
             }catch(SOAPException sx){
-                sx.printStackTrace();
+                //sx.printStackTrace();
                 //log error
             }
         }
