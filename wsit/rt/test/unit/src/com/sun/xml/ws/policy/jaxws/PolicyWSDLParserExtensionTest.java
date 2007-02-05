@@ -31,8 +31,14 @@
 
 package com.sun.xml.ws.policy.jaxws;
 
+import com.sun.xml.stream.buffer.XMLStreamBuffer;
+import com.sun.xml.ws.api.model.wsdl.WSDLModel;
+import com.sun.xml.ws.api.server.SDDocumentSource;
+import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
+import com.sun.xml.ws.api.wsdl.parser.XMLEntityResolver;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyMap;
+import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import com.sun.xml.ws.policy.testutils.PolicyResourceLoader;
 import javax.xml.namespace.QName;
 import junit.framework.Test;
@@ -40,11 +46,15 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import static com.sun.xml.ws.policy.testutils.PolicyResourceLoader.getPolicyMap;
+import java.io.InputStream;
+import java.net.URL;
+import javax.xml.stream.XMLInputFactory;
 /**
  *
  * @author Jakub Podlesak (jakub.podlesak at sun.com)
  */
 public class PolicyWSDLParserExtensionTest extends TestCase{
+    private static final XMLInputFactory XML_INPUT_FACTORY = XMLInputFactory.newInstance();
     
     public PolicyWSDLParserExtensionTest(String testName) {
         super(testName);
@@ -54,7 +64,43 @@ public class PolicyWSDLParserExtensionTest extends TestCase{
         TestSuite suite = new TestSuite(PolicyWSDLParserExtensionTest.class);
         return suite;
     }
-
+    
+    public void testClientParsingWithDifferentlyCreatedSDDocumentSource() throws Exception {
+        InputStream configFileIS = null;
+        final URL configFileUrl = PolicyResourceLoader.getResourceUrl("parser/wsit-client.xml");
+        try {
+            WSDLModel model = null;
+            configFileIS = configFileUrl.openStream();
+            final XMLStreamBuffer buffer = XMLStreamBuffer.createNewBufferFromXMLStreamReader(XML_INPUT_FACTORY.createXMLStreamReader(configFileIS));
+            final SDDocumentSource doc = SDDocumentSource.create(configFileUrl, buffer);
+            final XMLEntityResolver.Parser parser =  new XMLEntityResolver.Parser(doc);
+            model = WSDLModel.WSDLParser.parse(
+                    parser,
+                    new PolicyConfigResolver(),
+                    true,
+                    new WSDLParserExtension[] { new PolicyWSDLParserExtension(true) }
+            );
+            
+            assertNotNull(model);
+        } finally {
+            PolicyUtils.IO.closeResource(configFileIS);
+        }
+        
+// Uncomment to see problems when document source is created in a different way:
+//
+//        WSDLModel model = null;
+//        final SDDocumentSource doc = SDDocumentSource.create(configFileUrl);
+//        final XMLEntityResolver.Parser parser =  new XMLEntityResolver.Parser(doc);
+//        model = WSDLModel.WSDLParser.parse(
+//                parser,
+//                new PolicyConfigResolver(),
+//                true,
+//                new WSDLParserExtension[] { new PolicyWSDLParserExtension(true) }
+//        );
+//        
+//        assertNotNull(model);
+    }
+    
     public void testWsdlParserBasics() throws Exception {
         assertNotNull("PolicyMap can not be null", getPolicyMap("parser/testWsdlParserBasics.wsdl"));
     }
@@ -62,8 +108,8 @@ public class PolicyWSDLParserExtensionTest extends TestCase{
     public void testPolicyReferences() throws Exception {
         PolicyMap map = getPolicyMap("parser/testPolicyReferences.wsdl");
         assertNotNull("PolicyMap can not be null", map);
-
-        map = PolicyConfigParser.parse(PolicyResourceLoader.getResourceUrl("parser/testPolicyReferences.wsdl"), false);        
+        
+        map = PolicyConfigParser.parse(PolicyResourceLoader.getResourceUrl("parser/testPolicyReferences.wsdl"), false);
         assertNotNull("PolicyMap can not be null", map);
     }
     
