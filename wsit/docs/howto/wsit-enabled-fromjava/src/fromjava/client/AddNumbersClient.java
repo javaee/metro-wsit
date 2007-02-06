@@ -41,12 +41,14 @@
  */
 package fromjava.client;
 
+import com.sun.xml.ws.Closeable;
 import java.rmi.RemoteException;
 
 public class AddNumbersClient {
     public static void main (String[] args) {
+        AddNumbersImpl port = null;
         try {
-            AddNumbersImpl port = new AddNumbersImplService().getAddNumbersImplPort();
+            port = new AddNumbersImplService().getAddNumbersImplPort();
             
             int number1 = 10;
             int number2 = 20;
@@ -61,6 +63,8 @@ public class AddNumbersClient {
             System.out.printf ("The result of adding %d and %d is %d.\n", number1, number2, result);
         } catch (AddNumbersException_Exception ex) {
             System.out.printf ("Caught AddNumbersException_Exception: %s\n", ex.getFaultInfo ().getDetail ());
-        }
+        } finally {
+            ((Closeable)port).close();
+        }        
     }
 }

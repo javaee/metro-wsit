@@ -168,7 +168,7 @@
     <target name="create-war">
         <war warfile="${war.file}" webxml="etc/web.xml">
     	      <webinf dir="${basedir}/etc" includes="sun-jaxws.xml"/>
-              <webinf file="${basedir}/etc/wsit.xml"/>
+              <webinf file="${basedir}/etc/wsit-fromjava.server.AddNumbersImpl.xml"/>
     	      <zipfileset
                 dir="${basedir}/etc"
                 includes="*.wsdl, *.xsd"
