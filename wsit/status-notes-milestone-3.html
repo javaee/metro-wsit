@@ -786,10 +786,10 @@ SecurityContextToken</p>
 <br>
 <hr>
 <h2><a name="98261"></a>Coordination/Atomic Transactions Status</h2>
-Duh
+
 <h4>WCF Interoperability</h4>
-(Test config: GF b26, MS WCF RTM, WSIT Dec 12 Nightly)
-<pre>non-secure (meaning http used for WS-TX protocol messages, no security on application messages):<br><br>  MS-&gt;S : 0/0 (interop w/MS requires HTTPS)<br>  S-&gt;MS : 0/0 (interop w/MS requires HTTPS)<br>  S-&gt;S  : 3/3<br><br>secure (meaning https used for WS-TX protocol messages, no security on application messages):<br><br>  MS-&gt;S : 3/3<br>  S-&gt;MS : 3/3<br>  S-&gt;S  : 0/3 (haven't tested yet)<br><br></pre>
+(Test config: GF b34, MS WCF RTM, WSIT M3(b06), JDK 5)
+<pre>non-secure (meaning http used for WS-TX protocol messages, no security on application messages):<br><br>  MS-&gt;S : 0/0 (interop w/MS requires HTTPS)<br>  S-&gt;MS : 0/0 (interop w/MS requires HTTPS)<br>  S-&gt;S  : 3/3<br><br>secure (meaning https used for WS-TX protocol messages, no security on application messages):<br><br>  MS-&gt;S : 3/3 (see &quot;Known Issues&quot; below)<br>  S-&gt;MS : 3/3<br>  S-&gt;S  : 0/3 (haven't tested yet)<br><br></pre>
 <h4>What is Not Implemented</h4>
 <p> </p>
 <ul>
@@ -819,9 +819,10 @@ When running against GF b28 or later, you <b>must</b> remove this
 setting. </td>
     </tr>
     <tr>
-      <td>Faults</td>
-      <td>WS-Coordination / WS-AtomicTransaction are not currently
-generating the proper Faults under certain error conditions.</td>
+      <td>MS-&gt;S SOAP Fault</td>
+      <td>An extraneous SOAP fault is being generated and sent to the MS 
+service immediately after WSIT recieves and processes a &lt;RegisterResponse>
+message.  This does not impact the successful completion of the tests.</td>
     </tr>
   </tbody>
 </table>
