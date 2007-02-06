@@ -922,29 +922,48 @@ empty Metadata element is sent from the WSIT client. </li>
 <p>The policy implementation is feature-complete.</p>
 <h4>Known Issues</h4>
 <table border="1" cellpadding="2" cellspacing="2">
-  <tbody>
-    <tr>
-      <th>
-      <p>Interoperability Feature</p>
-      </th>
-      <th>
-      <p>Status/Workaround</p>
-      </th>
-    </tr>
-    <tr>
-      <td>
-      <p><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=110">relative
-references to wsu:id are resolved across XML documents</a></p>
-      </td>
-      <td>
-      <p>This is only an issue with manually written policies. Do not
-refer to polices that
-have the same ID in an imported WSDL document or make sure policies in
-imported WSDL documents
-have unique IDs.</p>
-      </td>
-    </tr>
-  </tbody>
+    <tbody>
+        <tr>
+            <th>
+                <p>Interoperability Feature</p>
+            </th>
+            <th>
+                <p>Status/Workaround</p>
+            </th>
+        </tr>
+        <tr>
+            <td>
+                <p><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=110">Relative
+                references to wsu:id are resolved across XML documents</a></p>
+            </td>
+            <td>
+                <p>This is only an issue with manually written policies. Do not
+                    refer to polices that
+                    have the same ID in an imported WSDL document or make sure policies in
+                    imported WSDL documents
+                have unique IDs.</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=303">MtomMapUpdater can not rely on WSDL model</a></p>
+            </td>
+            <td>
+                <p>There may be some edge cases where an MTOM feature is not properly 
+                translated into an MTOM policy assertion. Make sure you use a policy assertion if you
+                care about MTOM policy assertions being advertised.</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=346">There seem to be problems with loading client config files from classpath in app client</a></p>
+            </td>
+            <td>
+                <p>A WSIT client running from NetBeans may not work properly if stored in a directory
+                with spaces in the name. Store your client projects in a directory without spaces.</p>
+            </td>
+        </tr>
+    </tbody>
 </table>
 <!-- ================================================== -->
 <br>
