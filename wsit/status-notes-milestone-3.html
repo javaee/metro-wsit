@@ -154,8 +154,7 @@ the Sun Client classpath</p>
 <h4>Known Issues</h4>
 <ul>
   <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=341">
-   WCF-RTM-BUG : Serializer bug with multi-dimemsional arrays </a>
-  </li>
+WCF-RTM-BUG : Serializer bug with multi-dimemsional arrays </a> </li>
 </ul>
 <!-- ================================================== -->
 <br>
@@ -219,7 +218,13 @@ Service Policy and the Policy used by the Client to secure the message
 is not supported in this release<br>
   </li>
   <li>The Following WS-SecurityPolicy Features from specification Draft
-: Jul 2005 Ver 1.1 are unsupported in this release of WSIT </li>
+: Jul 2005 Ver 1.1 are unsupported in this release of WSIT</li>
+  <li>SAML Security Mechanisms defined in Netbeans WSIT Plugin do not
+work for JSR 109 Applications</li>
+  <li>Use of ThumbprintReference type for X509 Tokens
+(&lt;sp:RequireThumbprintReference/&gt; under &lt;sp:X509Token&gt;) is
+not supported for JSR 109 Applications.<br>
+  </li>
 </ul>
 <table border="1" cellpadding="2" cellspacing="3" width="884">
   <col width="92"> <col width="214"> <col width="552"> <tbody>
@@ -775,10 +780,9 @@ SecurityContextToken</p>
 <br>
 <hr>
 <h2><a name="98261"></a>Coordination/Atomic Transactions Status</h2>
-
 <h4>WCF Interoperability</h4>
 (Test config: GF b34, MS WCF RTM, WSIT M3(b06), JDK 5)
-<pre>non-secure (meaning http used for WS-TX protocol messages, no security on application messages):<br><br>  MS-&gt;S : 0/0 (interop w/MS requires HTTPS)<br>  S-&gt;MS : 0/0 (interop w/MS requires HTTPS)<br>  S-&gt;S  : 3/3<br><br>secure (meaning https used for WS-TX protocol messages, no security on application messages):<br><br>  MS-&gt;S : 3/3 (see &quot;Known Issues&quot; below)<br>  S-&gt;MS : 3/3<br>  S-&gt;S  : 0/3 (haven't tested yet)<br><br></pre>
+<pre>non-secure (meaning http used for WS-TX protocol messages, no security on application messages):<br><br>  MS-&gt;S : 0/0 (interop w/MS requires HTTPS)<br>  S-&gt;MS : 0/0 (interop w/MS requires HTTPS)<br>  S-&gt;S  : 3/3<br><br>secure (meaning https used for WS-TX protocol messages, no security on application messages):<br><br>  MS-&gt;S : 3/3 (see "Known Issues" below)<br>  S-&gt;MS : 3/3<br>  S-&gt;S  : 0/3 (haven't tested yet)<br><br></pre>
 <h4>What is Not Implemented</h4>
 <p> </p>
 <ul>
@@ -809,9 +813,10 @@ setting. </td>
     </tr>
     <tr>
       <td>MS-&gt;S SOAP Fault</td>
-      <td>An extraneous SOAP fault is being generated and sent to the MS 
-service immediately after WSIT recieves and processes a &lt;RegisterResponse>
-message.  This does not impact the successful completion of the tests.</td>
+      <td>An extraneous SOAP fault is being generated and sent to the
+MS service immediately after WSIT recieves and processes a
+&lt;RegisterResponse&gt;
+message. This does not impact the successful completion of the tests.</td>
     </tr>
   </tbody>
 </table>
@@ -912,48 +917,51 @@ empty Metadata element is sent from the WSIT client. </li>
 <p>The policy implementation is feature-complete.</p>
 <h4>Known Issues</h4>
 <table border="1" cellpadding="2" cellspacing="2">
-    <tbody>
-        <tr>
-            <th>
-                <p>Interoperability Feature</p>
-            </th>
-            <th>
-                <p>Status/Workaround</p>
-            </th>
-        </tr>
-        <tr>
-            <td>
-                <p><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=110">Relative
-                references to wsu:id are resolved across XML documents</a></p>
-            </td>
-            <td>
-                <p>This is only an issue with manually written policies. Do not
-                    refer to polices that
-                    have the same ID in an imported WSDL document or make sure policies in
-                    imported WSDL documents
-                have unique IDs.</p>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <p><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=303">MtomMapUpdater can not rely on WSDL model</a></p>
-            </td>
-            <td>
-                <p>There may be some edge cases where an MTOM feature is not properly 
-                translated into an MTOM policy assertion. Make sure you use a policy assertion if you
-                care about MTOM policy assertions being advertised.</p>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <p><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=346">There seem to be problems with loading client config files from classpath in app client</a></p>
-            </td>
-            <td>
-                <p>A WSIT client running from NetBeans may not work properly if stored in a directory
-                with spaces in the name. Store your client projects in a directory without spaces.</p>
-            </td>
-        </tr>
-    </tbody>
+  <tbody>
+    <tr>
+      <th>
+      <p>Interoperability Feature</p>
+      </th>
+      <th>
+      <p>Status/Workaround</p>
+      </th>
+    </tr>
+    <tr>
+      <td>
+      <p><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=110">Relative
+references to wsu:id are resolved across XML documents</a></p>
+      </td>
+      <td>
+      <p>This is only an issue with manually written policies. Do not
+refer to polices that have the same ID in an imported WSDL document or
+make sure policies in imported WSDL documents have unique IDs.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+      <p><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=303">MtomMapUpdater
+can not rely on WSDL model</a></p>
+      </td>
+      <td>
+      <p>There may be some edge cases where an MTOM feature is not
+properly translated into an MTOM policy assertion. Make sure you use a
+policy assertion if you care about MTOM policy assertions being
+advertised.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+      <p><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=346">There
+seem to be problems with loading client config files from classpath in
+app client</a></p>
+      </td>
+      <td>
+      <p>A WSIT client running from NetBeans may not work properly if
+stored in a directory with spaces in the name. Store your client
+projects in a directory without spaces.</p>
+      </td>
+    </tr>
+  </tbody>
 </table>
 <!-- ================================================== -->
 <br>
