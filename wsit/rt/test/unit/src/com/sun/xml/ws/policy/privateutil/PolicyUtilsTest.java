@@ -329,4 +329,8 @@ public class PolicyUtilsTest extends TestCase {
         PolicyAssertionCreator[] result = PolicyUtils.ServiceProvider.load(PolicyAssertionCreator.class, this.getClass().getClassLoader());
         assertEquals(9, result.length);
     }
+    
+    public void testRtf2396Unquote() {
+        assertEquals("hello Vasku", PolicyUtils.Rfc2396.unquote("hello%20Vasku"));
+    }
 }

@@ -22,10 +22,9 @@
 
 package com.sun.xml.ws.policy.privateutil;
 
-import com.sun.xml.ws.policy.PolicyException;
 import java.io.Closeable;
 import java.io.IOException;
-import java.lang.reflect.Constructor;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -54,19 +53,19 @@ public final class PolicyUtils {
         private static final LinkedList<StackTraceElement> stackTraceElements= new LinkedList<StackTraceElement>();
         
         /**
-         * Method logs {@code exception}'s message as a {@code SEVERE} logging level 
+         * Method logs {@code exception}'s message as a {@code SEVERE} logging level
          * message using a {@link PolicyLogger} instance passed in the {@code logger}
          * parameter.
          * <p/>
-         * If {@code cause} parameter is not {@code null}, it is logged as well and 
-         * {@code exception} original cause is initialized with instance referenced 
+         * If {@code cause} parameter is not {@code null}, it is logged as well and
+         * {@code exception} original cause is initialized with instance referenced
          * by {@code cause} parameter.
          *
-         * @param exception exception whose message should be logged. Must not be 
+         * @param exception exception whose message should be logged. Must not be
          *        {@code null}.
          * @param cause initial cause of the exception that should be logged as well
          *        and set as {@code exception}'s original cause. May be {@code null}.
-         * @param logger {@link PolicyLogger} instance to be used for logging the 
+         * @param logger {@link PolicyLogger} instance to be used for logging the
          *        exception message.
          * @return the same exception instance that was passed in as the {@code exception}
          *         parameter.
@@ -80,25 +79,25 @@ public final class PolicyUtils {
             }
             
             return exception;
-        }        
+        }
         
         /**
-         * Method logs {@code exception}'s message as a {@code SEVERE} logging level 
+         * Method logs {@code exception}'s message as a {@code SEVERE} logging level
          * message using a {@link PolicyLogger} instance passed in the {@code logger}
          * parameter.
          * <p/>
          * If {@code logCause} parameter is {@code true}, {@code exception}'s original
-         * cause is logged as well (if exists). This may be used in cases when 
-         * {@code exception}'s class provides constructor to initialize the original 
-         * cause. In such case you do not need to use 
-         * {@link PolicyUtils.Commons.logException(final T, final Throwable, final PolicyLogger)} 
+         * cause is logged as well (if exists). This may be used in cases when
+         * {@code exception}'s class provides constructor to initialize the original
+         * cause. In such case you do not need to use
+         * {@link PolicyUtils.Commons.logException(final T, final Throwable, final PolicyLogger)}
          * method version but you might still want to log the original cause as well.
          *
-         * @param exception exception whose message should be logged. Must not be 
+         * @param exception exception whose message should be logged. Must not be
          *        {@code null}.
-         * @param logCause deterimnes whether initial cause of the exception should 
+         * @param logCause deterimnes whether initial cause of the exception should
          *        be logged as well
-         * @param logger {@link PolicyLogger} instance to be used for logging the 
+         * @param logger {@link PolicyLogger} instance to be used for logging the
          *        exception message.
          * @return the same exception instance that was passed in as the {@code exception}
          *         parameter.
@@ -112,7 +111,7 @@ public final class PolicyUtils {
             
             return exception;
         }
-
+        
         /**
          * Same as {@code PolicyUtils.Commons.logException(exception, true, logger)}.
          */
@@ -125,7 +124,7 @@ public final class PolicyUtils {
             
             return exception;
         }
-
+        
 //
 //        /**
 //         * Method instantiates an exception of class {@code exceptionClass} and initializes it with {@code message}.
@@ -190,7 +189,7 @@ public final class PolicyUtils {
 //                throw new RuntimePolicyUtilsException(errorMessage, e);
 //            }
 //        }
-
+        
         /**
          * Method returns the name of the method that is on the {@code methodIndexInStack}
          * position in the call stack of the current {@link Thread}.
@@ -569,6 +568,46 @@ public final class PolicyUtils {
          */
         public static <T> T[] load(final Class<T> serviceClass) {
             return ServiceFinder.find(serviceClass).toArray();
+        }
+    }
+    
+    public static class Rfc2396 {
+        
+        private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyUtils.Reflection.class);
+        
+        // converts "hello%20world" into "hello world"
+        public static String unquote(final String quoted) {
+            if (null == quoted) {
+                return null;
+            }
+            final byte[] unquoted = new byte[quoted.length()]; // result cannot be longer than original string
+            int newLength = 0;
+            char c;
+            int hi, lo;
+            for (int i=0; i < quoted.length(); i++) {    // iterarate over all chars in the input
+                c = quoted.charAt(i);
+                if ('%' == c) {                         // next escape sequence found
+                    if ((i + 2) > quoted.length()) {
+                        throw Commons.logException(new RuntimePolicyUtilsException(LocalizationMessages.WSP_000079_ERROR_WHILE_RFC_2396_UNESCAPING(quoted)),
+                                false, LOGGER);
+                    }
+                    hi = Character.digit(quoted.charAt(++i), 16);
+                    lo = Character.digit(quoted.charAt(++i), 16);
+                    if ((0 > hi) || (0 > lo)) {
+                        throw Commons.logException(new RuntimePolicyUtilsException(LocalizationMessages.WSP_000079_ERROR_WHILE_RFC_2396_UNESCAPING(quoted)),
+                                false, LOGGER);
+                    }
+                    unquoted[newLength++] = (byte) (hi * 16 + lo);
+                } else { // regular character found
+                    unquoted[newLength++] = (byte) c;
+                }
+            }
+            try {
+                return new String(unquoted, 0, newLength, "utf-8");
+            } catch (UnsupportedEncodingException uee) {
+                throw Commons.logException(new RuntimePolicyUtilsException(LocalizationMessages.WSP_000079_ERROR_WHILE_RFC_2396_UNESCAPING(quoted), uee),
+                        true, LOGGER);
+            }
         }
     }
 }

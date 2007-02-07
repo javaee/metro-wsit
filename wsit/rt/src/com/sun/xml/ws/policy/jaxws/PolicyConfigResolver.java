@@ -24,6 +24,8 @@ package com.sun.xml.ws.policy.jaxws;
 
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import com.sun.xml.ws.api.wsdl.parser.XMLEntityResolver;
+import com.sun.xml.ws.api.wsdl.parser.XMLEntityResolver.Parser;
+import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import com.sun.xml.ws.streaming.TidyXMLStreamReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -63,7 +65,8 @@ public class PolicyConfigResolver implements XMLEntityResolver {
         Parser parser = null;
 
         try {
-            final URL systemUrl = new URL(systemId);
+            // TODO: think about using alg from http://www.w3.org/International/O-URL-code.html
+            final URL systemUrl = new URL(PolicyUtils.Rfc2396.unquote(systemId));
             InputStream is = systemUrl.openStream();
             final XMLStreamReader reader = new TidyXMLStreamReader(xmlInputFactory.createXMLStreamReader(systemId, is), is);
 
