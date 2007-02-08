@@ -188,8 +188,8 @@ public final class Connection {
     /**
      * Get request content properties
      */
-    public Map<Integer, String> getContentProps() {
-        return inputStream.getContentProps();
+    public Map<Integer, String> getContentProperties() {
+        return inputStream.getContentProperties();
     }
     
     /**

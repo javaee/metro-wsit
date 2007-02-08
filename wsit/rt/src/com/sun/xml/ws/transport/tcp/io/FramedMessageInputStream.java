@@ -122,7 +122,7 @@ public final class FramedMessageInputStream extends InputStream implements LifeC
         return contentId;
     }
     
-    public Map<Integer, String> getContentProps() {
+    public Map<Integer, String> getContentProperties() {
         return contentProps;
     }
     

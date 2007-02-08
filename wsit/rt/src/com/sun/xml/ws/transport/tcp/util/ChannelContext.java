@@ -142,9 +142,9 @@ public final class ChannelContext implements WSTCPFastInfosetStreamReaderRecycla
     }
     
     /**
-     * Encodes message's content type to TCP protocol specific representation
+     * Sets message's content type to TCP protocol specific representation
      */
-    public void encodeContentType(@NotNull final String contentTypeS) {
+    public void setContentType(@NotNull final String contentTypeS) {
         Connection connection = connectionSession.getConnection();
         if (logger.isLoggable(Level.FINEST)) {
             logger.log(Level.FINEST, MessagesMessages.WSTCP_1120_CHANNEL_CONTEXT_ENCODE_CT(contentTypeS));
@@ -173,12 +173,12 @@ public final class ChannelContext implements WSTCPFastInfosetStreamReaderRecycla
     }
     
     /**
-     * Decodes message's content type from TCP protocol specific representation
+     * Gets message's content type from TCP protocol specific representation
      */
-    public @NotNull String decodeContentType() {
+    public @NotNull String getContentType() {
         Connection connection = connectionSession.getConnection();
         final int mimeId = connection.getContentId();
-        Map<Integer, String> params = connection.getContentProps();
+        Map<Integer, String> params = connection.getContentProperties();
         
         if (logger.isLoggable(Level.FINEST)) {
             logger.log(Level.FINEST, MessagesMessages.WSTCP_1122_CHANNEL_CONTEXT_DECODE_CT(mimeId, params));

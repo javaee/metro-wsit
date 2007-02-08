@@ -58,7 +58,7 @@ public class TCPConnectionImpl implements WebServiceContextDelegate {
     
     public InputStream openInput() throws IOException {
         inputStream = connection.openInputStream();
-        contentType = channelContext.decodeContentType();
+        contentType = channelContext.getContentType();
         return inputStream;
     }
     
@@ -126,7 +126,7 @@ public class TCPConnectionImpl implements WebServiceContextDelegate {
             final int messageId = getMessageId();
             connection.setMessageId(messageId);
             if (FrameType.isFrameContainsParams(messageId)) {
-                channelContext.encodeContentType(contentType);
+                channelContext.setContentType(contentType);
             }
         }
     }

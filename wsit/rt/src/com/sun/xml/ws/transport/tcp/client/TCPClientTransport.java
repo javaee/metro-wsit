@@ -74,7 +74,7 @@ public class TCPClientTransport extends DistributedPropertySet {
     public OutputStream openOutputStream() {
         connection.setChannelId(channelContext.getChannelId());
         connection.setMessageId(FrameType.MESSAGE);
-        channelContext.encodeContentType(contentType);
+        channelContext.setContentType(contentType);
         
         outputStream = connection.openOutputStream();
         return outputStream;
@@ -90,7 +90,7 @@ public class TCPClientTransport extends DistributedPropertySet {
         final int messageId = connection.getMessageId();
         status = convertToReplyStatus(messageId);
         if (FrameType.isFrameContainsParams(messageId)) {
-            contentType = channelContext.decodeContentType();
+            contentType = channelContext.getContentType();
         }
         
         return inputStream;
