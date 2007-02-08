@@ -20,12 +20,13 @@
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
-package com.sun.xml.ws.transport.tcp.client;
+package com.sun.xml.ws.transport.tcp.wsit;
 
 import com.sun.istack.NotNull;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.ClientPipeAssemblerContext;
 import com.sun.xml.ws.api.pipe.Pipe;
-import com.sun.xml.ws.api.pipe.TransportPipeFactory;
+import com.sun.xml.ws.transport.tcp.client.*;
 import com.sun.xml.ws.transport.tcp.util.TCPConstants;
 import com.sun.xml.ws.transport.tcp.servicechannel.stubs.ServiceChannelWSImplService;
 import javax.xml.namespace.QName;
@@ -33,15 +34,20 @@ import javax.xml.namespace.QName;
 /**
  * @author Alexey Stashok
  */
-public class TCPTransportPipeFactory extends TransportPipeFactory {
+public class TCPTransportPipeFactory extends com.sun.xml.ws.transport.tcp.client.TCPTransportPipeFactory {
     private static final QName serviceChannelServiceName = new ServiceChannelWSImplService().getServiceName();
     
     @Override
     public Pipe doCreate(@NotNull final ClientPipeAssemblerContext context) {
-        if (!TCPConstants.PROTOCOL_SCHEMA.equalsIgnoreCase(context.getAddress().getURI().getScheme())) {
+        return doCreate(context, true);
+    }
+    
+    public static Pipe doCreate(@NotNull final ClientPipeAssemblerContext context, final boolean checkSchema) {
+        if (checkSchema && !TCPConstants.PROTOCOL_SCHEMA.equalsIgnoreCase(context.getAddress().getURI().getScheme())) {
             return null;
         }
         
+        setClientSettingsIfRequired(context.getWsdlModel());
         if (context.getService().getServiceName().equals(serviceChannelServiceName)) {
             return new ServiceChannelTransportPipe(context);
         }
@@ -49,4 +55,17 @@ public class TCPTransportPipeFactory extends TransportPipeFactory {
         return new TCPTransportPipe(context);
     }
     
+    /**
+     * Sets the client ConnectionManagement settings, which are passed via cliend
+     * side policies for ServiceChannelWS
+     */
+    private static void setClientSettingsIfRequired(WSDLPort port) {
+        if (ConnectionManagementSettings.clientSettings == null) {
+            synchronized(ConnectionManagementSettings.class) {
+                if (ConnectionManagementSettings.clientSettings == null) {
+                    ConnectionManagementSettings.clientSettings = ConnectionManagementSettings.createSettingsInstance(port);
+                }
+            }
+        }
+    }
 }

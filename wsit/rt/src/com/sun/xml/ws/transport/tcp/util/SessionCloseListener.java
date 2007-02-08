@@ -20,14 +20,11 @@
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
-package com.sun.xml.ws.transport.tcp.server;
-
-import com.sun.xml.ws.transport.tcp.util.ChannelContext;
-import java.io.IOException;
+package com.sun.xml.ws.transport.tcp.util;
 
 /**
  * @author Alexey Stashok
  */
-public interface TCPMessageListener {
-    public void onMessage(ChannelContext channelContext) throws IOException;
+public interface SessionCloseListener<T extends ConnectionSession> {
+    public void notifySessionClose(T connectionSession);
 }

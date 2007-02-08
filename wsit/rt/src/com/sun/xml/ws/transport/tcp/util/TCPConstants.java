@@ -24,6 +24,7 @@ package com.sun.xml.ws.transport.tcp.util;
 
 import java.net.HttpURLConnection;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.namespace.QName;
 
 /**
  * @author Alexey Stashok
@@ -70,4 +71,12 @@ public final class TCPConstants {
     
     /** SOAP/TCP logging domain root */
     public static final String LoggingDomain = "com.sun.xml.ws.transport.tcp";
+    
+    /** Lifecycle module paratemer names*/
+    public static final String HIGH_WATER_MARK = "high-water-mark";
+    public static final String NUMBER_TO_RECLAIM = "number-to-reclaim";
+
+    /** Service Channel web service: Service and Port names*/
+    public static final QName SERVICE_CHANNEL_WS_NAME = new QName("http://servicechannel.tcp.transport.ws.xml.sun.com/", "ServiceChannelWSImplService");
+    public static final QName SERVICE_CHANNEL_WS_PORT_NAME = new QName("http://servicechannel.tcp.transport.ws.xml.sun.com/", "ServiceChannelWSImplPort");
 }

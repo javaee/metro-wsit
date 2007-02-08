@@ -27,14 +27,17 @@ import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
 import com.sun.xml.ws.transport.tcp.util.FrameType;
 import com.sun.xml.ws.transport.tcp.util.SelectorFactory;
 import com.sun.xml.ws.transport.tcp.util.TCPConstants;
-import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CoderResult;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -44,12 +47,17 @@ import java.util.logging.Logger;
  * Stream wrapper around a <code>ByteBuffer</code>
  */
 public final class FramedMessageInputStream extends InputStream implements LifeCycle {
+    private static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
+    private static final int MAX_PARAM_VALUE_LENGTH = 1024;
+    
     private static final Logger logger = Logger.getLogger(
             com.sun.xml.ws.transport.tcp.util.TCPConstants.LoggingDomain + ".streams");
     
+    private final CharsetDecoder decoder = UTF8_CHARSET.newDecoder();
+    private final CharBuffer utf8TmpCharBuffer = CharBuffer.allocate(MAX_PARAM_VALUE_LENGTH);
+    
     private ByteBuffer byteBuffer;
     
-    private final DataInputStream dis = new DataInputStream(this);
     private SocketChannel socketChannel;
     
     private int bufferClearLimit;  // clear buffer before read from socket if its size already more than this value
@@ -151,10 +159,6 @@ public final class FramedMessageInputStream extends InputStream implements LifeC
      * Close this stream.
      */
     public void close() {
-        try {
-            dis.close();
-        } catch (IOException ex) {
-        }
     }
     
     /**
@@ -241,7 +245,9 @@ public final class FramedMessageInputStream extends InputStream implements LifeC
     }
     
     private void readHeader() throws IOException {
-        logger.log(Level.FINEST, MessagesMessages.WSTCP_1060_FRAMED_MESSAGE_IS_READ_HEADER_ENTER());
+        if (logger.isLoggable(Level.FINEST)) {
+            logger.log(Level.FINEST, MessagesMessages.WSTCP_1060_FRAMED_MESSAGE_IS_READ_HEADER_ENTER());
+        }
         frameBytesRead = 0;
         isReadingHeader = true;
         DataInOutUtils.readInts4(this, headerTmpArray, 2);
@@ -265,8 +271,10 @@ public final class FramedMessageInputStream extends InputStream implements LifeC
         contentId = headerTmpArray[0];
         final int paramNumber = headerTmpArray[1];
         for(int i=0; i<paramNumber; i++) {
-            final int paramId = DataInOutUtils.readInt4(this);
-            final String paramValue = dis.readUTF();
+            DataInOutUtils.readInts4(this, headerTmpArray, 2);
+            final int paramId = headerTmpArray[0];
+            final int paramValueLen = headerTmpArray[1];
+            final String paramValue = readUTFWithoutLengthPrefix(paramValueLen);
             contentProps.put(paramId, paramValue);
         }
     }
@@ -411,6 +419,27 @@ public final class FramedMessageInputStream extends InputStream implements LifeC
         }
         
         return Math.min(currentFrameDataSize - frameBytesRead, byteBuffer.remaining());
+    }
+    
+    public String readUTFWithoutLengthPrefix(int length) throws IOException {
+        decoder.reset();
+        utf8TmpCharBuffer.position(0);
+        utf8TmpCharBuffer.limit(length);
+        CoderResult result = null;
+        boolean isCompleted = false;
+        do {
+            result = decoder.decode(byteBuffer, utf8TmpCharBuffer, false);
+            isCompleted = !utf8TmpCharBuffer.hasRemaining();
+            if (!isCompleted && result.isUnderflow() && doRead() == -1) {
+                throw new EOFException();
+            }
+        } while (!isCompleted && !result.isError());
+        
+        if (!isCompleted && result.isError()) result.throwException();
+        decoder.decode(byteBuffer, utf8TmpCharBuffer, true);
+        decoder.flush(utf8TmpCharBuffer);
+        utf8TmpCharBuffer.flip();
+        return utf8TmpCharBuffer.toString();
     }
     
     public void reset() {

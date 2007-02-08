@@ -52,7 +52,7 @@ public class TCPTransportPipe implements Pipe {
     private static final Logger logger = Logger.getLogger(
             com.sun.xml.ws.transport.tcp.util.TCPConstants.LoggingDomain + ".client");
     
-    protected TCPClientTransport clientTransport;
+    protected TCPClientTransport clientTransport = new TCPClientTransport();
     
     final protected Codec defaultCodec;
     final protected WSBinding wsBinding;
@@ -84,7 +84,9 @@ public class TCPTransportPipe implements Pipe {
     }
     
     public Packet process(final Packet packet) {
-        logger.log(Level.FINE, MessagesMessages.WSTCP_1010_TCP_TP_PROCESS_ENTER(packet.endpointAddress));
+        if (logger.isLoggable(Level.FINE)) {
+            logger.log(Level.FINE, MessagesMessages.WSTCP_1010_TCP_TP_PROCESS_ENTER(packet.endpointAddress));
+        }
         ChannelContext channelContext = null;
         WebServiceException failure = null;
         final WSConnectionManager wsConnectionManager = WSConnectionManager.getInstance();
@@ -92,33 +94,34 @@ public class TCPTransportPipe implements Pipe {
         int retryNum = 0;
         do {
             try {
-                if (clientTransport == null) {
-                    logger.log(Level.FINE, MessagesMessages.WSTCP_1011_TCP_TP_PROCESS_TRANSPORT_CREATE());
-                    clientTransport = createClientTransport(wsConnectionManager,
-                            packet.endpointAddress.getURI());
-                } else {
-                    logger.log(Level.FINE, MessagesMessages.WSTCP_1012_TCP_TP_PROCESS_TRANSPORT_REUSE());
-                }
-                
+                setupClientTransport(wsConnectionManager, packet.endpointAddress.getURI());
                 channelContext = clientTransport.getConnectionContext();
                 
-                wsConnectionManager.lockConnection(channelContext);
+                wsConnectionManager.lockConnection(channelContext.getConnectionSession());
                 
                 // Taking Codec from ChannelContext
                 final Codec codec = channelContext.getCodec();
                 final ContentType ct = codec.getStaticContentType(packet);
                 clientTransport.setContentType(ct.getContentType());
                 
-                logger.log(Level.FINE, MessagesMessages.WSTCP_1013_TCP_TP_PROCESS_ENCODE(ct.getContentType()));
+                if (logger.isLoggable(Level.FINE)) {
+                    logger.log(Level.FINE, MessagesMessages.WSTCP_1013_TCP_TP_PROCESS_ENCODE(ct.getContentType()));
+                }
                 codec.encode(packet, clientTransport.openOutputStream());
                 
-                logger.log(Level.FINE, MessagesMessages.WSTCP_1014_TCP_TP_PROCESS_SEND());
+                if (logger.isLoggable(Level.FINE)) {
+                    logger.log(Level.FINE, MessagesMessages.WSTCP_1014_TCP_TP_PROCESS_SEND());
+                }
                 clientTransport.send();
                 
-                logger.log(Level.FINE, MessagesMessages.WSTCP_1015_TCP_TP_PROCESS_OPEN_PREPARE_READING());
+                if (logger.isLoggable(Level.FINE)) {
+                    logger.log(Level.FINE, MessagesMessages.WSTCP_1015_TCP_TP_PROCESS_OPEN_PREPARE_READING());
+                }
                 final InputStream replyInputStream = clientTransport.openInputStream();
                 
-                logger.log(Level.FINE, MessagesMessages.WSTCP_1016_TCP_TP_PROCESS_OPEN_PROCESS_READING(clientTransport.getStatus(), clientTransport.getContentType()));
+                if (logger.isLoggable(Level.FINE)) {
+                    logger.log(Level.FINE, MessagesMessages.WSTCP_1016_TCP_TP_PROCESS_OPEN_PROCESS_READING(clientTransport.getStatus(), clientTransport.getContentType()));
+                }
                 if (clientTransport.getStatus() != TCPConstants.ERROR) {
                     final Packet reply = packet.createClientResponse(null);
                     if (clientTransport.getStatus() != TCPConstants.ONE_WAY && !Boolean.FALSE.equals(packet.expectReply)) {
@@ -127,7 +130,9 @@ public class TCPTransportPipe implements Pipe {
                     }
                     return reply;
                 } else {
-                    logger.log(Level.SEVERE, MessagesMessages.WSTCP_0016_ERROR_WS_EXECUTION_ON_SERVER(clientTransport.getContentType()));
+                    if (logger.isLoggable(Level.FINE)) {
+                        logger.log(Level.SEVERE, MessagesMessages.WSTCP_0016_ERROR_WS_EXECUTION_ON_SERVER(clientTransport.getContentType()));
+                    }
                     throw new WebServiceException(MessagesMessages.WSTCP_0016_ERROR_WS_EXECUTION_ON_SERVER(clientTransport.getContentType()));
                 }
             } catch(ClientTransportException e) {
@@ -139,10 +144,6 @@ public class TCPTransportPipe implements Pipe {
             } catch(Exception e) {
                 retryNum = TCPConstants.CLIENT_MAX_FAIL_TRIES + 1;
                 failure = new WebServiceException(MessagesMessages.WSTCP_0017_ERROR_WS_EXECUTION_ON_CLIENT(), e);
-            } finally {
-                if (channelContext != null) {
-                    wsConnectionManager.freeConnection(channelContext);
-                }
             }
             
         } while (failure != null && ++retryNum <= TCPConstants.CLIENT_MAX_FAIL_TRIES);
@@ -154,18 +155,17 @@ public class TCPTransportPipe implements Pipe {
     
     private void prepareRetry(final ChannelContext channelContext, final int retryNum, final Exception e) {
         logger.log(Level.FINE, MessagesMessages.WSTCP_0012_SEND_RETRY(retryNum), e);
-        clientTransport = null;
         if (channelContext != null) {
-            WSConnectionManager.getInstance().abortConnection(channelContext);
+            WSConnectionManager.getInstance().abortConnection(channelContext.getConnectionSession());
         }
     }
     
-    private @NotNull TCPClientTransport createClientTransport(@NotNull final WSConnectionManager wsConnectionManager,
+    private @NotNull void setupClientTransport(@NotNull final WSConnectionManager wsConnectionManager,
             @NotNull final URI uri) throws InterruptedException, IOException, ServiceChannelException, VersionMismatchException {
         
         final WSTCPURI tcpURI = WSTCPURI.parse(uri);
         if (tcpURI == null) throw new WebServiceException(MessagesMessages.WSTCP_0005_INVALID_EP_URL(uri.toString()));
         final ChannelContext channelContext = wsConnectionManager.openChannel(tcpURI, wsService, wsBinding, defaultCodec);
-        return new TCPClientTransport(channelContext);
+        clientTransport.setup(channelContext);
     }
 }

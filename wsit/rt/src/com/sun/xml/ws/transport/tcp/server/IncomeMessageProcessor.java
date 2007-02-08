@@ -22,9 +22,12 @@
 
 package com.sun.xml.ws.transport.tcp.server;
 
+import com.sun.corba.se.spi.orbutil.transport.ConnectionCacheFactory;
+import com.sun.corba.se.spi.orbutil.transport.InboundConnectionCache;
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.transport.tcp.io.Connection;
+import com.sun.xml.ws.transport.tcp.util.SessionCloseListener;
 import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
 import com.sun.xml.ws.transport.tcp.util.ChannelContext;
 import com.sun.xml.ws.transport.tcp.util.ConnectionSession;
@@ -32,6 +35,7 @@ import com.sun.xml.ws.transport.tcp.util.TCPConstants;
 import com.sun.xml.ws.transport.tcp.util.Version;
 import com.sun.xml.ws.transport.tcp.util.VersionController;
 import com.sun.xml.ws.transport.tcp.io.DataInOutUtils;
+import com.sun.xml.ws.transport.tcp.wsit.ConnectionManagementSettings;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -39,6 +43,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import java.util.WeakHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -46,17 +51,30 @@ import java.util.logging.Logger;
 /**
  * @author Alexey Stashok
  */
-public final class IncomeMessageProcessor {
+@SuppressWarnings({"unchecked"})
+public final class IncomeMessageProcessor implements SessionCloseListener {
+    private static final int HIGH_WATER_MARK = 1500;
+    private static final int NUMBER_TO_RECLAIM = 1;
+    
     private static final Logger logger = Logger.getLogger(
             com.sun.xml.ws.transport.tcp.util.TCPConstants.LoggingDomain + ".server");
     
     private final TCPMessageListener listener;
     
+    // Properties passed to IncomeMessageProcessor by SOAP/TCP launcher
+    private final Properties properties;
+    
+    // Cache for inbound connections (orb). Initialized on first SOAP/TCP request
+    private volatile InboundConnectionCache<ServerConnectionSession> connectionCache;
+
     private static Map<Integer, IncomeMessageProcessor> portMessageProcessors =
             new HashMap<Integer, IncomeMessageProcessor>(1);
     
-    public static void registerListener(final int port, @NotNull final TCPMessageListener listener) {
-        portMessageProcessors.put(port, new IncomeMessageProcessor(listener));
+    public static IncomeMessageProcessor registerListener(final int port, @NotNull final TCPMessageListener listener,
+            @NotNull final Properties properties) {
+        IncomeMessageProcessor processor = new IncomeMessageProcessor(listener, properties);
+        portMessageProcessors.put(port, processor);
+        return processor;
     }
     
     public static void releaseListener(final int port) {
@@ -67,21 +85,37 @@ public final class IncomeMessageProcessor {
         return portMessageProcessors.get(port);
     }
     
-    public IncomeMessageProcessor(final TCPMessageListener listener) {
+    private IncomeMessageProcessor(final @NotNull TCPMessageListener listener) {
+        this(listener, null);
+    }
+    
+    private IncomeMessageProcessor(final @NotNull TCPMessageListener listener, final @Nullable Properties properties) {
         this.listener = listener;
+        this.properties = properties;
     }
     
     public void process(@NotNull final ByteBuffer messageBuffer, @NotNull final SocketChannel socketChannel) throws IOException {
         // get TCPConnectionSession associated with SocketChannel
-        logger.log(Level.FINE, MessagesMessages.WSTCP_1080_INCOME_MSG_PROC_ENTER(Connection.getHost(socketChannel), Connection.getPort(socketChannel)));
+        if (logger.isLoggable(Level.FINE)) {
+            logger.log(Level.FINE, MessagesMessages.WSTCP_1080_INCOME_MSG_PROC_ENTER(Connection.getHost(socketChannel), Connection.getPort(socketChannel)));
+        }
         
-        ConnectionSession connectionSession = getConnectionSession(socketChannel); //@TODO take it from nio framework?
+        if (connectionCache == null) {
+            setupInboundConnectionCache();
+        }
+        
+        ServerConnectionSession connectionSession = getConnectionSession(socketChannel); //@TODO take it from nio framework?
         
         if (connectionSession == null) {
             // First message on connection
-            logger.log(Level.FINE, MessagesMessages.WSTCP_1081_INCOME_MSG_CREATE_NEW_SESSION());
+            if (logger.isLoggable(Level.FINE)) {
+                logger.log(Level.FINE, MessagesMessages.WSTCP_1081_INCOME_MSG_CREATE_NEW_SESSION());
+            }
             connectionSession = createConnectionSession(socketChannel, messageBuffer);
             if (connectionSession != null) {
+                // Connection is opened. Magic and version are compatible
+                connectionCache.requestReceived(connectionSession);
+                connectionCache.responseSent(connectionSession);
                 offerConnectionSession(connectionSession);
             } else {
                 // Client's version is not supported
@@ -92,6 +126,7 @@ public final class IncomeMessageProcessor {
         
         final Connection connection = connectionSession.getConnection();
         connection.setInputStreamByteBuffer(messageBuffer);
+        connectionCache.requestReceived(connectionSession);
         
         try {
             do {
@@ -104,6 +139,7 @@ public final class IncomeMessageProcessor {
             } while(messageBuffer.hasRemaining());
         } finally {
             offerConnectionSession(connectionSession);
+            connectionCache.responseSent(connectionSession);
         }
     }
     
@@ -112,12 +148,12 @@ public final class IncomeMessageProcessor {
      *  in future probably should be replaced, as could be handled by
      *  nio framework
      */
-    private final Map<SocketChannel, ConnectionSession> connectionSessionMap =
-            new WeakHashMap<SocketChannel, ConnectionSession>();
-    private @Nullable ConnectionSession getConnectionSession(
-            @NotNull final SocketChannel socketChannel) throws IOException {
+    private final Map<SocketChannel, ServerConnectionSession> connectionSessionMap =
+            new WeakHashMap<SocketChannel, ServerConnectionSession>();
+    private @Nullable ServerConnectionSession getConnectionSession(
+            @NotNull final SocketChannel socketChannel) {
         
-        final ConnectionSession connectionSession = connectionSessionMap.get(socketChannel);
+        final ServerConnectionSession connectionSession = connectionSessionMap.get(socketChannel);
         if (connectionSession == null) {
             return null;
         }
@@ -127,11 +163,25 @@ public final class IncomeMessageProcessor {
         return connectionSession;
     }
     
+    private void offerConnectionSession(@NotNull final ServerConnectionSession connectionSession) {
+        connectionSessionMap.put(connectionSession.getConnection().getSocketChannel(), connectionSession);
+        
+        // to let WeakHashMap clean socketChannel if not use
+        connectionSession.getConnection().setSocketChannel(null);
+    }
+    
+    /**
+     * Remove session entry from session map
+     */
+    private void removeConnectionSessionBySocketChannel(@NotNull final SocketChannel socketChannel) {
+        connectionSessionMap.remove(socketChannel);
+    }
+    
     /**
      *  Create new ConnectionSession for just came request, but check
      *  version compatibilities before
      */
-    private @Nullable ConnectionSession createConnectionSession(
+    private @Nullable ServerConnectionSession createConnectionSession(
             @NotNull final SocketChannel socketChannel,
     @NotNull final ByteBuffer messageBuffer) throws IOException {
         
@@ -142,14 +192,7 @@ public final class IncomeMessageProcessor {
             return null;
         }
         
-        return new ConnectionSession(connection);
-    }
-    
-    private void offerConnectionSession(@NotNull final ConnectionSession connectionSession) {
-        connectionSessionMap.put(connectionSession.getConnection().getSocketChannel(), connectionSession);
-        
-        // to let WeakHashMap clean socketChannel if not use
-        connectionSession.getConnection().setSocketChannel(null);
+        return new ServerConnectionSession(connection, this);
     }
     
     private boolean checkMagicAndVersionCompatibility(@NotNull final Connection connection) throws IOException {
@@ -194,6 +237,44 @@ public final class IncomeMessageProcessor {
         
         logger.log(Level.FINE, MessagesMessages.WSTCP_1083_INCOME_MSG_VERSION_CHECK_RESULT(clientFramingVersion, clientConnectionManagementVersion, framingVersion, connectionManagementVersion, successCode));
         return successCode == VersionController.VersionSupport.FULLY_SUPPORTED;
+    }
+    
+    /**
+     * Close callback method
+     * Will be called by NIO framework, when it will decide to close connection
+     */
+    public void notifyClosed(@NotNull final SocketChannel socketChannel) {
+        connectionCache.close(getConnectionSession(socketChannel));
+    }
+    
+    /**
+     * Close callback method
+     * Will be called by Connection.close() to let IncomeMessageProcessor
+     * remove the correspondent session from Map
+     */
+    public void notifySessionClose(@NotNull final ConnectionSession connectionSession) {
+        removeConnectionSessionBySocketChannel(connectionSession.getConnection().getSocketChannel());
+    }
+    
+    private synchronized void setupInboundConnectionCache() {
+        if (connectionCache == null) {
+            int highWatermark = HIGH_WATER_MARK;
+            int numberToReclaim = NUMBER_TO_RECLAIM;
+            
+            ConnectionManagementSettings policySettings = ConnectionManagementSettings.getServerSettingsInstance();
+            if (policySettings != null) {
+                highWatermark = policySettings.getHighWatermark(HIGH_WATER_MARK);
+                numberToReclaim = policySettings.getNumberToReclaim(NUMBER_TO_RECLAIM);
+            } else if (properties != null) {
+                String highWaterMarkStr = properties.getProperty(TCPConstants.HIGH_WATER_MARK, Integer.toString(HIGH_WATER_MARK));
+                String numberToReclaimStr = properties.getProperty(TCPConstants.NUMBER_TO_RECLAIM, Integer.toString(NUMBER_TO_RECLAIM));
+                highWatermark = Integer.parseInt(highWaterMarkStr);
+                numberToReclaim = Integer.parseInt(numberToReclaimStr);
+            }
+            
+            connectionCache = ConnectionCacheFactory.<ServerConnectionSession>makeBlockingInboundConnectionCache("SOAP/TCP server side cache",
+                    highWatermark, numberToReclaim, logger);
+        }
     }
     
     

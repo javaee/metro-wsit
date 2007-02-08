@@ -22,6 +22,10 @@
 
 package com.sun.xml.ws.transport.tcp.client;
 
+import com.sun.corba.se.spi.orbutil.transport.ConnectionCacheFactory;
+import com.sun.corba.se.spi.orbutil.transport.ConnectionFinder;
+import com.sun.corba.se.spi.orbutil.transport.ContactInfo;
+import com.sun.corba.se.spi.orbutil.transport.OutboundConnectionCache;
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.WSService;
@@ -31,8 +35,9 @@ import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
 import com.sun.xml.ws.transport.tcp.util.ChannelSettings;
 import com.sun.xml.ws.transport.tcp.io.Connection;
 import com.sun.xml.ws.transport.tcp.util.ChannelContext;
-import com.sun.xml.ws.transport.tcp.util.SessionAbortedException;
 import com.sun.xml.ws.transport.tcp.util.ConnectionSession;
+import com.sun.xml.ws.transport.tcp.util.SessionAbortedException;
+import com.sun.xml.ws.transport.tcp.util.SessionCloseListener;
 import com.sun.xml.ws.transport.tcp.util.TCPConstants;
 import com.sun.xml.ws.transport.tcp.util.Version;
 import com.sun.xml.ws.transport.tcp.util.VersionController;
@@ -43,9 +48,13 @@ import com.sun.xml.ws.transport.tcp.servicechannel.stubs.ServiceChannelWSImpl;
 import com.sun.xml.ws.transport.tcp.servicechannel.stubs.ServiceChannelWSImplService;
 import com.sun.xml.ws.transport.tcp.util.BindingUtils;
 import com.sun.xml.ws.transport.tcp.io.DataInOutUtils;
+import com.sun.xml.ws.transport.tcp.wsit.ConnectionManagementSettings;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.ws.BindingProvider;
@@ -53,22 +62,42 @@ import javax.xml.ws.BindingProvider;
 /**
  * @author Alexey Stashok
  */
-public class WSConnectionManager {
+@SuppressWarnings({"unchecked"})
+public class WSConnectionManager implements ConnectionFinder<ConnectionSession>,
+        SessionCloseListener<ConnectionSession> {
     private static final Logger logger = Logger.getLogger(
             com.sun.xml.ws.transport.tcp.util.TCPConstants.LoggingDomain + ".client");
     
-    private static final int MAX_CHANNELS_PER_CONNECTION = 10;
+    private static final int HIGH_WATER_MARK = 1500;
+    private static final int NUMBER_TO_RECLAIM = 1;
+    private static final int MAX_PARALLEL_CONNECTIONS = 5;
     
     private static final WSConnectionManager instance = new WSConnectionManager();
+    
+    // set of locked connections, which are in use
+    private final Map<ConnectionSession, Thread> lockedConnections = new HashMap<ConnectionSession, Thread>();
     
     public static WSConnectionManager getInstance() {
         return instance;
     }
     
-    private final WSConnectionCache wsConnectionCache;
+    // Cache for outbound connections (orb)
+    private volatile OutboundConnectionCache<ConnectionSession> connectionCache;
     
     private WSConnectionManager() {
-        wsConnectionCache = new WSConnectionCache();
+        int highWatermark = HIGH_WATER_MARK;
+        int numberToReclaim = NUMBER_TO_RECLAIM;
+        int maxParallelConnections = MAX_PARALLEL_CONNECTIONS;
+        
+        ConnectionManagementSettings policySettings = ConnectionManagementSettings.getClientSettingsInstance();
+        if (policySettings != null) {
+            highWatermark = policySettings.getHighWatermark(HIGH_WATER_MARK);
+            numberToReclaim = policySettings.getNumberToReclaim(NUMBER_TO_RECLAIM);
+            maxParallelConnections = policySettings.getMaxParallelConnections(MAX_PARALLEL_CONNECTIONS);
+        }
+        
+        connectionCache = ConnectionCacheFactory.<ConnectionSession>makeBlockingOutboundConnectionCache("SOAP/TCP client side cache",
+                highWatermark, numberToReclaim, maxParallelConnections, logger);
     }
     
     public @NotNull ChannelContext openChannel(@NotNull final WSTCPURI uri,
@@ -76,34 +105,20 @@ public class WSConnectionManager {
     ServiceChannelException, VersionMismatchException {
         final int uriHashKey = uri.hashCode();
         
-        logger.log(Level.FINE, MessagesMessages.WSTCP_1030_CONNECTION_MANAGER_ENTER(uri, wsService.getServiceName(), wsBinding.getBindingID(), defaultCodec.getClass().getName()));
-        // Try to use available connection to endpoint
-        final ConnectionSession availableConnectionSession = wsConnectionCache.pollAvailableConnectionByAddr(uriHashKey);
-        
-        if (availableConnectionSession != null) {
-            logger.log(Level.FINE, MessagesMessages.WSTCP_1031_CONNECTION_MANAGER_USE_OPENED_SESSION());
-            
-            // if there is available connection session - use it
-            wsConnectionCache.lockConnection(availableConnectionSession);
-            
-            final ChannelContext channelContext = doOpenChannel(availableConnectionSession, uri, wsService, wsBinding, defaultCodec);
-            
-            // if session is supposed to accept more virtual connections - return it to available queue
-            if (availableConnectionSession.getChannelsAmount() < MAX_CHANNELS_PER_CONNECTION) {
-                logger.log(Level.FINEST, MessagesMessages.WSTCP_1032_CONNECTION_MANAGER_OFFER_SESSION_FOR_REUSE());
-                wsConnectionCache.offerAvailableConnectionByAddr(availableConnectionSession, uriHashKey);
-            }
-            
-            logger.log(Level.FINE, MessagesMessages.WSTCP_1033_CONNECTION_MANAGER_RETURN_CHANNEL_CONTEXT(channelContext.getChannelId()));
-            return channelContext;
+        if (logger.isLoggable(Level.FINE)) {
+            logger.log(Level.FINE, MessagesMessages.WSTCP_1030_CONNECTION_MANAGER_ENTER(uri, wsService.getServiceName(), wsBinding.getBindingID(), defaultCodec.getClass().getName()));
         }
         
-        // if there is no available sessions to endpoint - create new
-        final ConnectionSession connectionSession = createConnectionSession(uri);
-        wsConnectionCache.registerConnectionSession(connectionSession, uriHashKey);
-        wsConnectionCache.lockConnection(connectionSession);
-        final ChannelContext channelContext = doOpenChannel(connectionSession, uri, wsService, wsBinding, defaultCodec);
-        logger.log(Level.FINE, MessagesMessages.WSTCP_1033_CONNECTION_MANAGER_RETURN_CHANNEL_CONTEXT(channelContext.getChannelId()));
+        // Try to use available connection to endpoint
+        final ConnectionSession session = connectionCache.get(uri, this);
+        ChannelContext channelContext = session.findWSServiceContextByURI(uri);
+        if (channelContext == null) {
+            channelContext = doOpenChannel(session, uri, wsService, wsBinding, defaultCodec);
+        }
+        
+        if (logger.isLoggable(Level.FINE)) {
+            logger.log(Level.FINE, MessagesMessages.WSTCP_1033_CONNECTION_MANAGER_RETURN_CHANNEL_CONTEXT(channelContext.getChannelId()));
+        }
         return channelContext;
     }
     
@@ -112,41 +127,55 @@ public class WSConnectionManager {
         final ServiceChannelWSImpl serviceChannelWSImplPort = getSessionServiceChannel(connectionSession);
         
         try {
-            lockConnection(channelContext);
-            final int channelId = channelContext.getChannelId();
-            serviceChannelWSImplPort.closeChannel(channelId);
-            connectionSession.deregisterChannel(channelId);
+            lockConnection(connectionSession);
+            serviceChannelWSImplPort.closeChannel(channelContext.getChannelId());
+            connectionSession.deregisterChannel(channelContext);
         } catch (SessionAbortedException ex) {
             // if session was closed before
         } catch (InterruptedException ex) {
         } finally {
-            freeConnection(channelContext);
+            freeConnection(connectionSession);
         }
     }
     
-    public void lockConnection(@NotNull final ChannelContext channelContext) throws InterruptedException, SessionAbortedException {
-        wsConnectionCache.lockConnection(channelContext.getConnectionSession());
+    public void lockConnection(@NotNull final ConnectionSession connectionSession) throws InterruptedException, SessionAbortedException {
+        synchronized(connectionSession) {
+            do {
+                final Thread thread = lockedConnections.get(connectionSession);
+                if (thread == null) {
+                    lockedConnections.put(connectionSession, Thread.currentThread());
+                    return;
+                } else if (thread.equals(Thread.currentThread())) {
+                    return;
+                }
+                connectionSession.wait(500);
+            } while(true);
+        }
     }
     
-    public void freeConnection(@NotNull final ChannelContext channelContext) {
-        wsConnectionCache.unlockConnection(channelContext.getConnectionSession());
+    public void freeConnection(@NotNull final ConnectionSession connectionSession) {
+        connectionCache.release(connectionSession, 0);
+        synchronized(connectionSession) {
+            lockedConnections.put(connectionSession, null);
+            connectionSession.notify();
+        }
     }
     
-    public void abortConnection(@NotNull final ChannelContext channelContext) {
-        final ConnectionSession tcpConnectionSession = channelContext.getConnectionSession();
-        wsConnectionCache.removeConnectionSession(tcpConnectionSession);
-        tcpConnectionSession.abort();
+    public void abortConnection(@NotNull final ConnectionSession connectionSession) {
+        connectionCache.close(connectionSession);
     }
     
     /**
      * Open new tcp connection and establish service virtual connection
      */
-    private @NotNull ConnectionSession createConnectionSession(@NotNull final WSTCPURI tcpURI) throws VersionMismatchException {
+    public @NotNull ConnectionSession createConnectionSession(@NotNull final WSTCPURI tcpURI) throws VersionMismatchException {
         try {
-            logger.log(Level.FINE, MessagesMessages.WSTCP_1034_CONNECTION_MANAGER_CREATE_SESSION_ENTER(tcpURI));
+            if (logger.isLoggable(Level.FINE)) {
+                logger.log(Level.FINE, MessagesMessages.WSTCP_1034_CONNECTION_MANAGER_CREATE_SESSION_ENTER(tcpURI));
+            }
             final Connection connection = Connection.create(tcpURI.host, tcpURI.port);
             doSendMagicAndCheckVersions(connection);
-            final ConnectionSession connectionSession = new ConnectionSession(tcpURI.hashCode(), connection);
+            final ConnectionSession connectionSession = new ClientConnectionSession(tcpURI.hashCode(), connection, this);
             
             final ServiceChannelWSImplService serviceChannelWS = new ServiceChannelWSImplService();
             final ServiceChannelWSImpl serviceChannelWSImplPort = serviceChannelWS.getServiceChannelWSImplPort();
@@ -155,16 +184,16 @@ public class WSConnectionManager {
             final BindingProvider bindingProvider = (BindingProvider) serviceChannelWSImplPort;
             bindingProvider.getRequestContext().put(TCPConstants.TCP_SESSION, connectionSession);
             
-            logger.log(Level.FINE, MessagesMessages.WSTCP_1035_CONNECTION_MANAGER_INITIATE_SESSION());
+            if (logger.isLoggable(Level.FINE)) {
+                logger.log(Level.FINE, MessagesMessages.WSTCP_1035_CONNECTION_MANAGER_INITIATE_SESSION());
+            }
             
             //@TODO check initiateSession result
             serviceChannelWSImplPort.initiateSession();
             
             return connectionSession;
         } catch (IOException e) {
-//@TODO uncommit after next JAX-WS integration
-//            throw new ClientTransportException(MessagesMessages.localizableERROR_PROTOCOL_VERSION_EXCHANGE(), e);
-            throw new ClientTransportException(e);
+            throw new ClientTransportException(MessagesMessages.localizableWSTCP_0015_ERROR_PROTOCOL_VERSION_EXCHANGE(), e);
         }
     }
     
@@ -178,8 +207,9 @@ public class WSConnectionManager {
     @NotNull final WSBinding wsBinding,
     final @NotNull Codec defaultCodec)
     throws IOException, ServiceChannelException {
-        logger.log(Level.FINEST, MessagesMessages.WSTCP_1036_CONNECTION_MANAGER_DO_OPEN_CHANNEL_ENTER());
-        
+        if (logger.isLoggable(Level.FINEST)) {
+            logger.log(Level.FINEST, MessagesMessages.WSTCP_1036_CONNECTION_MANAGER_DO_OPEN_CHANNEL_ENTER());
+        }
         final ServiceChannelWSImpl serviceChannelWSImplPort = getSessionServiceChannel(connectionSession);
         
         // Send to server possible mime types and parameters
@@ -187,15 +217,21 @@ public class WSConnectionManager {
         final ChannelSettings clientSettings = new ChannelSettings(negotiatedContent.negotiatedMimeTypes, negotiatedContent.negotiatedParams,
                 0, wsService.getServiceName(), targetWSURI);
         
-        logger.log(Level.FINEST, MessagesMessages.WSTCP_1037_CONNECTION_MANAGER_DO_OPEN_WS_CALL(clientSettings));
+        if (logger.isLoggable(Level.FINEST)) {
+            logger.log(Level.FINEST, MessagesMessages.WSTCP_1037_CONNECTION_MANAGER_DO_OPEN_WS_CALL(clientSettings));
+        }
         final ChannelSettings serverSettings = serviceChannelWSImplPort.openChannel(clientSettings);
-        logger.log(Level.FINEST, MessagesMessages.WSTCP_1038_CONNECTION_MANAGER_DO_OPEN_PROCESS_SERVER_SETTINGS(serverSettings));
+        if (logger.isLoggable(Level.FINEST)) {
+            logger.log(Level.FINEST, MessagesMessages.WSTCP_1038_CONNECTION_MANAGER_DO_OPEN_PROCESS_SERVER_SETTINGS(serverSettings));
+        }
         final ChannelContext channelContext = new ChannelContext(connectionSession, serverSettings);
         
         ChannelContext.configureCodec(channelContext, wsBinding.getSOAPVersion(), defaultCodec);
         
-        logger.log(Level.FINEST, MessagesMessages.WSTCP_1039_CONNECTION_MANAGER_DO_OPEN_REGISTER_CHANNEL(channelContext.getChannelId()));
-        connectionSession.registerChannel(serverSettings.getChannelId(), channelContext);
+        if (logger.isLoggable(Level.FINEST)) {
+            logger.log(Level.FINEST, MessagesMessages.WSTCP_1039_CONNECTION_MANAGER_DO_OPEN_REGISTER_CHANNEL(channelContext.getChannelId()));
+        }
+        connectionSession.registerChannel(channelContext);
         return channelContext;
     }
     
@@ -211,7 +247,9 @@ public class WSConnectionManager {
         final Version framingVersion = versionController.getFramingVersion();
         final Version connectionManagementVersion = versionController.getConnectionManagementVersion();
         
-        logger.log(Level.FINE, MessagesMessages.WSTCP_1040_CONNECTION_MANAGER_DO_CHECK_VERSION_ENTER(framingVersion, connectionManagementVersion));
+        if (logger.isLoggable(Level.FINE)) {
+            logger.log(Level.FINE, MessagesMessages.WSTCP_1040_CONNECTION_MANAGER_DO_CHECK_VERSION_ENTER(framingVersion, connectionManagementVersion));
+        }
         connection.setDirectMode(true);
         
         final OutputStream outputStream = connection.openOutputStream();
@@ -222,7 +260,9 @@ public class WSConnectionManager {
                 connectionManagementVersion.getMajor(),
                 connectionManagementVersion.getMinor());
         connection.flush();
-        logger.log(Level.FINE, MessagesMessages.WSTCP_1041_CONNECTION_MANAGER_DO_CHECK_VERSION_SENT());
+        if (logger.isLoggable(Level.FINE)) {
+            logger.log(Level.FINE, MessagesMessages.WSTCP_1041_CONNECTION_MANAGER_DO_CHECK_VERSION_SENT());
+        }
         
         final InputStream inputStream = connection.openInputStream();
         final int[] versionInfo = new int[5];
@@ -230,7 +270,9 @@ public class WSConnectionManager {
         DataInOutUtils.readInts4(inputStream, versionInfo, 5);
         final int success = versionInfo[0];
         
-        logger.log(Level.FINE, MessagesMessages.WSTCP_1042_CONNECTION_MANAGER_DO_CHECK_VERSION_RESULT(success));
+        if (logger.isLoggable(Level.FINE)) {
+            logger.log(Level.FINE, MessagesMessages.WSTCP_1042_CONNECTION_MANAGER_DO_CHECK_VERSION_RESULT(success));
+        }
         final Version serverFramingVersion = new Version(versionInfo[1], versionInfo[2]);
         final Version serverConnectionManagementVersion = new Version(versionInfo[3], versionInfo[4]);
         
@@ -242,4 +284,34 @@ public class WSConnectionManager {
         }
     }
     
+    public ConnectionSession find(final ContactInfo<ConnectionSession> contactInfo,
+            final Collection<ConnectionSession> idleConnections,
+            final Collection<ConnectionSession> busyConnections) throws IOException {
+        final WSTCPURI wsTCPURI = (WSTCPURI) contactInfo;
+        ConnectionSession lru = null;
+        for(ConnectionSession connectionSession : idleConnections) {
+            if (connectionSession.findWSServiceContextByURI(wsTCPURI) != null) {
+                return connectionSession;
+            }
+            if (lru == null) lru = connectionSession;
+        }
+        
+        if (lru != null || connectionCache.canCreateNewConnection(contactInfo)) return lru;
+        
+        for(ConnectionSession connectionSession : busyConnections) {
+            if (connectionSession.findWSServiceContextByURI(wsTCPURI) != null) {
+                return connectionSession;
+            }
+            if (lru == null) lru = connectionSession;
+        }
+        
+        return lru;
+    }
+    
+    public void notifySessionClose(ConnectionSession connectionSession) {
+        if (logger.isLoggable(Level.FINE)) {
+            logger.log(Level.FINE, MessagesMessages.WSTCP_1043_CONNECTION_MANAGER_NOTIFY_SESSION_CLOSE(connectionSession.getConnection()));
+        }
+        freeConnection(connectionSession);
+    }
 }

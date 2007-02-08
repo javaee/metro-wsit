@@ -38,4 +38,10 @@ public final class TCPConstants {
     public static final String CLIENT_TRANSPORT_NS = "http://java.sun.com/xml/ns/wsit/2006/09/policy/transport/client";
     public static final QName SELECT_OPTIMAL_TRANSPORT_ASSERTION = new QName(CLIENT_TRANSPORT_NS, "AutomaticallySelectOptimalTransport");
 
+    public static final String TCPTRANSPORT_CONNECTION_MANAGEMENT_NAMESPACE_URI = "http://java.sun.com/xml/ns/wsit/2006/09/policy/soaptcp";
+    public static final QName TCPTRANSPORT_CONNECTION_MANAGEMENT_ASSERTION = new QName(TCPTRANSPORT_CONNECTION_MANAGEMENT_NAMESPACE_URI, "ConnectionManagement");
+    public static final String TCPTRANSPORT_CONNECTION_MANAGEMENT_HIGH_WATERMARK_ATTR = "HighWatermark";
+    public static final String TCPTRANSPORT_CONNECTION_MANAGEMENT_MAX_PARALLEL_CONNECTIONS_ATTR = "MaxParallelConnections";
+    public static final String TCPTRANSPORT_CONNECTION_MANAGEMENT_NUMBER_TO_RECLAIM_ATTR = "NumberToReclaim";
+
 }

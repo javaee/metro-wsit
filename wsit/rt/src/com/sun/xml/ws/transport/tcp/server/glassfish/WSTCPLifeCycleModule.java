@@ -30,6 +30,7 @@ import com.sun.xml.ws.transport.tcp.grizzly.GrizzlyTCPConnector;
 import com.sun.xml.ws.transport.tcp.server.*;
 import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
 import java.util.List;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.naming.NamingException;
@@ -44,11 +45,13 @@ public final class WSTCPLifeCycleModule implements LifecycleListener {
     
     private WSTCPConnector connector;
     private WSTCPDelegate delegate;
+    private Properties properties;
     
     public void handleEvent(@NotNull final LifecycleEvent lifecycleEvent) throws ServerLifecycleException {
         final int eventType = lifecycleEvent.getEventType();
         if (eventType == LifecycleEvent.INIT_EVENT) {
             logger.log(Level.FINE, "WSTCPLifeCycleModule.INIT_EVENT");
+            properties = (Properties) lifecycleEvent.getData();
         } else if (eventType == LifecycleEvent.STARTUP_EVENT) {
             logger.log(Level.FINE, "WSTCPLifeCycleModule.STARTUP_EVENT");
             try {
@@ -62,7 +65,7 @@ public final class WSTCPLifeCycleModule implements LifecycleListener {
             logger.log(Level.FINE, "WSTCPLifeCycleModule.READY_EVENT");
             try {
                 delegate.setCustomWSRegistry(WSTCPAdapterRegistryImpl.getInstance());
-                connector = new GrizzlyTCPConnector(delegate);
+                connector = new GrizzlyTCPConnector(delegate, properties);
                 connector.listen();
                 
                 

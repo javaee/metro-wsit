@@ -29,6 +29,7 @@ import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
 import com.sun.xml.ws.transport.tcp.server.IncomeMessageProcessor;
 import com.sun.xml.ws.transport.tcp.util.TCPConstants;
 import java.io.IOException;
+import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -57,5 +58,18 @@ public final class WSTCPProtocolHandler implements ProtocolHandler {
         } else {
             logger.log(Level.WARNING, MessagesMessages.WSTCP_0013_TCP_PROCESSOR_NOT_REGISTERED());
         }
+    }
+    
+    /**
+     * Invoked when the SelectorThread is about to expire a SelectionKey.
+     * @return true if the SelectorThread should expire the SelectionKey, false
+     * if not.
+     */
+    public boolean expireKey(SelectionKey key) {
+        if (processor != null) {
+            processor.notifyClosed((SocketChannel) key.channel());
+        }
+        
+        return true;
     }
 }

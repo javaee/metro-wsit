@@ -24,14 +24,13 @@ package com.sun.xml.ws.transport.tcp.wsit;
 
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.spi.PolicyAssertionValidator;
+import com.sun.xml.ws.policy.spi.PolicyAssertionValidator.Fitness;
 import java.util.ArrayList;
 import javax.xml.namespace.QName;
 
 import static com.sun.xml.ws.transport.tcp.wsit.TCPConstants.*;
 
 /**
- *
- *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public final class TCPTransportPolicyValidator implements PolicyAssertionValidator {
@@ -41,6 +40,7 @@ public final class TCPTransportPolicyValidator implements PolicyAssertionValidat
     static {
         supportedAssertions.add(TCPTRANSPORT_POLICY_ASSERTION);
         supportedAssertions.add(SELECT_OPTIMAL_TRANSPORT_ASSERTION);
+        supportedAssertions.add(TCPTRANSPORT_CONNECTION_MANAGEMENT_ASSERTION);
     }
     
     /** Creates a new instance of TCPTransportPolicyValidator */
@@ -65,7 +65,8 @@ public final class TCPTransportPolicyValidator implements PolicyAssertionValidat
     }
 
     public String[] declareSupportedDomains() {
-        return new String[] {TCPTRANSPORT_POLICY_NAMESPACE_URI, CLIENT_TRANSPORT_NS};
+        return new String[] {TCPTRANSPORT_POLICY_NAMESPACE_URI, 
+        CLIENT_TRANSPORT_NS, TCPTRANSPORT_CONNECTION_MANAGEMENT_NAMESPACE_URI};
     }
     
 }

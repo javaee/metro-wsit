@@ -29,6 +29,7 @@ import com.sun.xml.ws.transport.tcp.server.IncomeMessageProcessor;
 import com.sun.xml.ws.transport.tcp.server.TCPMessageListener;
 import com.sun.xml.ws.transport.tcp.server.WSTCPConnector;
 import java.net.InetAddress;
+import java.util.Properties;
 
 /**
  * @author Alexey Stashok
@@ -39,6 +40,7 @@ public class GrizzlyTCPConnector implements WSTCPConnector {
     private String host;
     private int port;
     private TCPMessageListener listener;
+    private final Properties properties;
     
     private final boolean isPortUnificationMode;
     
@@ -48,11 +50,13 @@ public class GrizzlyTCPConnector implements WSTCPConnector {
         this.port = port;
         this.listener = listener;
         isPortUnificationMode = false;
+        properties = new Properties();
     }
     
-    public GrizzlyTCPConnector(@NotNull final TCPMessageListener listener) {
+    public GrizzlyTCPConnector(@NotNull final TCPMessageListener listener, @NotNull final Properties properties) {
         this.listener = listener;
         isPortUnificationMode = true;
+        this.properties = properties;
     }
     
     public void listen() throws Exception {
@@ -65,13 +69,13 @@ public class GrizzlyTCPConnector implements WSTCPConnector {
     
     public void listenOnNewPort() throws Exception {
         try {
-            IncomeMessageProcessor.registerListener(getPort(), getListener());
+            IncomeMessageProcessor.registerListener(port, listener, properties);
             
             selectorThread = new SelectorThread();
             selectorThread.setClassLoader(WSTCPStreamAlgorithm.class.getClassLoader());
             selectorThread.setAlgorithmClassName(WSTCPStreamAlgorithm.class.getName());
-            selectorThread.setAddress(InetAddress.getByName(getHost()));
-            selectorThread.setPort(getPort());
+            selectorThread.setAddress(InetAddress.getByName(host));
+            selectorThread.setPort(port);
             selectorThread.setBufferSize(TCPConstants.DEFAULT_FRAME_SIZE);
             selectorThread.initEndpoint();
             selectorThread.start();
@@ -82,7 +86,7 @@ public class GrizzlyTCPConnector implements WSTCPConnector {
     }
     
     public void listenOnUnifiedPort() {
-        WSTCPProtocolHandler.setIncomingMessageProcessor(new IncomeMessageProcessor(listener));
+        WSTCPProtocolHandler.setIncomingMessageProcessor(IncomeMessageProcessor.registerListener(0, listener, properties));
     }
     
     public void close() {

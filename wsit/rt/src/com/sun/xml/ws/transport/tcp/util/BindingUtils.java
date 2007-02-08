@@ -36,17 +36,21 @@ import javax.xml.ws.soap.MTOMFeature;
  * @author Alexey Stashok
  */
 public final class BindingUtils {
-    private static final List<String> MTOM_SOAP_PARAMS;
+    private static List<String> MTOM_SOAP_PARAMS;
     
-    private static final NegotiatedBindingContent SOAP11_BINDING_CONTENT;
+    private static NegotiatedBindingContent SOAP11_BINDING_CONTENT;
     
-    private static final NegotiatedBindingContent SOAP12_BINDING_CONTENT;
+    private static NegotiatedBindingContent SOAP12_BINDING_CONTENT;
     
-    private static final NegotiatedBindingContent MTOM11_BINDING_CONTENT;
+    private static NegotiatedBindingContent MTOM11_BINDING_CONTENT;
     
-    private static final NegotiatedBindingContent MTOM12_BINDING_CONTENT;
+    private static NegotiatedBindingContent MTOM12_BINDING_CONTENT;
     
     static {
+        initiate();
+    }
+    
+    private static void initiate() {
         MTOM_SOAP_PARAMS = Arrays.asList(new String[] {"boundary"});
         
         SOAP11_BINDING_CONTENT =

@@ -22,6 +22,8 @@
 
 package com.sun.xml.ws.transport.tcp.util;
 
+import com.sun.xml.ws.transport.tcp.client.WSConnectionManager;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
@@ -32,7 +34,7 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
  *
  * @author Alexey Stashok
  */
-public final class WSTCPURI {
+public final class WSTCPURI implements com.sun.corba.se.spi.orbutil.transport.ContactInfo<ConnectionSession> {
     public String host;
     public int port;
     public String path;
@@ -94,8 +96,25 @@ public final class WSTCPURI {
         return uri2string;
     }
 
+    public boolean equals(Object o) {
+        if (o instanceof WSTCPURI) {
+            WSTCPURI toCmp = (WSTCPURI) o;
+            return port == toCmp.port && host.equals(toCmp.host);
+        }
+        
+        return false;
+    }
+    
     public int hashCode() {
         return host.hashCode() + port;
+    }
+
+    public ConnectionSession createConnection() throws IOException {
+        try {
+            return WSConnectionManager.getInstance().createConnectionSession(this);
+        } catch (VersionMismatchException e) {
+            throw new IOException(e.getMessage());
+        }
     }
     
     /**

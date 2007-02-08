@@ -22,6 +22,7 @@
 
 package com.sun.xml.ws.transport.tcp.client;
 
+import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.DistributedPropertySet;
 import com.sun.xml.ws.transport.tcp.io.Connection;
 import com.sun.xml.ws.transport.tcp.util.ChannelContext;
@@ -35,8 +36,8 @@ import java.io.OutputStream;
  * @author Alexey Stashok
  */
 public class TCPClientTransport extends DistributedPropertySet {
-    private final ChannelContext channelContext;
-    private final Connection connection;
+    private ChannelContext channelContext;
+    private Connection connection;
     
     private InputStream inputStream;
     private OutputStream outputStream;
@@ -46,7 +47,14 @@ public class TCPClientTransport extends DistributedPropertySet {
     // Request/response content type
     private String contentType;
     
-    public TCPClientTransport(final ChannelContext channelContext) {
+    public TCPClientTransport() {
+    }
+    
+    public TCPClientTransport(final @NotNull ChannelContext channelContext) {
+        setup(channelContext);
+    }
+    
+    public void setup(final ChannelContext channelContext) {
         this.channelContext = channelContext;
         this.connection = channelContext.getConnection();
     }

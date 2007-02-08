@@ -23,8 +23,6 @@
 package com.sun.xml.ws.assembler;
 
 import java.io.InputStream;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletContext;
@@ -68,7 +66,7 @@ import com.sun.xml.ws.rm.Constants;
 import com.sun.xml.ws.rm.jaxws.runtime.client.RMClientPipe;
 import com.sun.xml.ws.rm.jaxws.runtime.server.RMServerPipe;
 import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
-import com.sun.xml.ws.transport.tcp.client.TCPTransportPipeFactory;
+import com.sun.xml.ws.transport.tcp.wsit.TCPTransportPipeFactory;
 import com.sun.xml.ws.util.ServiceFinder;
 import com.sun.xml.ws.tx.client.TxClientPipe;
 import com.sun.xml.ws.tx.service.TxServerPipe;

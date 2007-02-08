@@ -24,25 +24,22 @@ package com.sun.xml.ws.transport.tcp.server;
 
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
-import com.sun.xml.ws.api.BindingID;
-import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.server.InstanceResolver;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.transport.tcp.io.Connection;
 import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
+import com.sun.xml.ws.transport.tcp.servicechannel.ServiceChannelCreator;
 import com.sun.xml.ws.transport.tcp.util.ChannelContext;
 import com.sun.xml.ws.transport.tcp.util.TCPConstants;
 import com.sun.xml.ws.transport.tcp.util.WSTCPURI;
 import com.sun.xml.ws.transport.tcp.servicechannel.ServiceChannelWSImpl;
 import com.sun.xml.ws.util.exception.JAXWSExceptionBase;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.xml.namespace.QName;
-import org.xml.sax.EntityResolver;
 
 /**
  * @author Alexey Stashok
@@ -54,7 +51,7 @@ public final class WSTCPDelegate implements WSTCPAdapterRegistry, TCPMessageList
     private final Map<String, TCPAdapter> fixedUrlPatternEndpoints = new HashMap<String, TCPAdapter>();
     private final List<TCPAdapter> pathUrlPatternEndpoints = new ArrayList<TCPAdapter>();
     
-    private TCPAdapter serviceChannelWSAdapter;
+    private volatile TCPAdapter serviceChannelWSAdapter;
     
     /**
      * Custom registry, where its possible to delegate Adapter search
@@ -135,7 +132,7 @@ public final class WSTCPDelegate implements WSTCPAdapterRegistry, TCPMessageList
      * Implementation of TCPMessageListener.onMessage
      * method is called once request message come
      */
-    public void onMessage(@NotNull final ChannelContext channelContext) {
+    public void onMessage(@NotNull final ChannelContext channelContext) throws IOException {
         if (logger.isLoggable(Level.FINE)) {
             final Connection connection = channelContext.getConnection();
             logger.log(Level.FINE, MessagesMessages.WSTCP_1103_WSTCP_DELEGATE_ON_MESSAGE(connection.getHost(), connection.getPort(),
@@ -165,17 +162,21 @@ public final class WSTCPDelegate implements WSTCPAdapterRegistry, TCPMessageList
             } catch (Throwable ex) {
                 logger.log(Level.SEVERE, MessagesMessages.WSTCP_0002_SERVER_ERROR_MESSAGE_SENDING_FAILED(), ex);
             }
+        } catch (IOException e) {
+            throw e;
         } catch (Throwable e) {
             final Connection connection = channelContext.getConnection();
             logger.log(Level.SEVERE, MessagesMessages.WSTCP_0023_TARGET_EXEC_ERROR(connection.getHost(), connection.getPort()), e);
-
+            
             try {
                 TCPAdapter.sendErrorResponse(channelContext, TCPConstants.RS_INTERNAL_SERVER_ERROR, MessagesMessages.WSTCP_0004_CHECK_SERVER_LOG());
             } catch (Throwable ex) {
                 logger.log(Level.SEVERE, MessagesMessages.WSTCP_0002_SERVER_ERROR_MESSAGE_SENDING_FAILED(), ex);
             }
         } finally {
-            logger.log(Level.FINE, MessagesMessages.WSTCP_1104_WSTCP_DELEGATE_ON_MESSAGE_COMPLETED());
+            if (logger.isLoggable(Level.FINE)) {
+                logger.log(Level.FINE, MessagesMessages.WSTCP_1104_WSTCP_DELEGATE_ON_MESSAGE_COMPLETED());
+            }
         }
     }
     
@@ -189,35 +190,24 @@ public final class WSTCPDelegate implements WSTCPAdapterRegistry, TCPMessageList
      * initialize it lazy
      */
     private @NotNull TCPAdapter getServiceChannelWSAdapter() throws Exception {
-        synchronized(this) {
-            if (serviceChannelWSAdapter == null) {
-                registerServiceChannelWSAdapter();
-            }
+        if (serviceChannelWSAdapter == null) {
+            registerServiceChannelWSAdapter();
         }
         
         return serviceChannelWSAdapter;
     }
     
-    private void registerServiceChannelWSAdapter() throws Exception {
-        final QName serviceName = WSEndpoint.getDefaultServiceName(ServiceChannelWSImpl.class);
-        final QName portName = WSEndpoint.getDefaultPortName(serviceName, ServiceChannelWSImpl.class);
-        final BindingID bindingId = BindingID.parse(ServiceChannelWSImpl.class);
-        final WSBinding binding = bindingId.createBinding();
-        
-        final WSEndpoint<ServiceChannelWSImpl> endpoint = WSEndpoint.create(
-                ServiceChannelWSImpl.class, true,
-                InstanceResolver.createSingleton(ServiceChannelWSImpl.class.newInstance()).createInvoker(),
-                serviceName, portName, null, binding,
-                null, null, (EntityResolver) null, true
-                );
-        
-        final String serviceNameLocal = serviceName.getLocalPart();
-        
-        serviceChannelWSAdapter = new TCPServiceChannelWSAdapter(serviceNameLocal,
-                TCPConstants.SERVICE_CHANNEL_URL_PATTERN,
-                endpoint,
-                this);
-        registerEndpointUrlPattern(TCPConstants.SERVICE_CHANNEL_CONTEXT_PATH,
-                serviceChannelWSAdapter);
+    private synchronized void registerServiceChannelWSAdapter() throws Exception {
+        if (serviceChannelWSAdapter == null) {
+            WSEndpoint<ServiceChannelWSImpl> endpoint = ServiceChannelCreator.getServiceChannelEndpointInstance();
+            final String serviceNameLocal = endpoint.getServiceName().getLocalPart();
+            
+            serviceChannelWSAdapter = new TCPServiceChannelWSAdapter(serviceNameLocal,
+                    TCPConstants.SERVICE_CHANNEL_URL_PATTERN,
+                    endpoint,
+                    this);
+            registerEndpointUrlPattern(TCPConstants.SERVICE_CHANNEL_CONTEXT_PATH,
+                    serviceChannelWSAdapter);
+        }
     }
 }

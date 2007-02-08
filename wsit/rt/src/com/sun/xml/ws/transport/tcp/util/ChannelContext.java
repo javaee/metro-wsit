@@ -26,7 +26,8 @@ import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.pipe.Codec;
-import com.sun.xml.ws.encoding.fastinfoset.FastInfosetStreamSOAPCodec;
+import com.sun.xml.ws.transport.tcp.encoding.WSTCPFastInfosetStreamCodec;
+import com.sun.xml.ws.transport.tcp.encoding.WSTCPFastInfosetStreamReaderRecyclable;
 import com.sun.xml.ws.transport.tcp.io.Connection;
 import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
 import java.util.HashMap;
@@ -37,7 +38,7 @@ import java.util.logging.Logger;
 import javax.xml.namespace.QName;
 
 
-public final class ChannelContext {
+public final class ChannelContext implements WSTCPFastInfosetStreamReaderRecyclable.RecycleAwareListener {
     private static final Logger logger = Logger.getLogger(
             com.sun.xml.ws.transport.tcp.util.TCPConstants.LoggingDomain);
     
@@ -76,7 +77,7 @@ public final class ChannelContext {
     // Temp storage for decode content type from String representation
     private final ContentType contentType = new ContentType();
     
-    public ChannelContext(@NotNull final ConnectionSession connectionSession, 
+    public ChannelContext(@NotNull final ConnectionSession connectionSession,
             @NotNull final ChannelSettings channelSettings) {
         this.connectionSession = connectionSession;
         this.channelSettings = channelSettings;
@@ -145,7 +146,9 @@ public final class ChannelContext {
      */
     public void encodeContentType(@NotNull final String contentTypeS) {
         Connection connection = connectionSession.getConnection();
-        logger.log(Level.FINEST, "ChannelContext.encodeContentType: {0}", contentTypeS);
+        if (logger.isLoggable(Level.FINEST)) {
+            logger.log(Level.FINEST, MessagesMessages.WSTCP_1120_CHANNEL_CONTEXT_ENCODE_CT(contentTypeS));
+        }
         contentType.parse(contentTypeS);
         
         Integer mt = staticMimeTypeEncodingMap.get(contentType.getMimeType());
@@ -155,13 +158,17 @@ public final class ChannelContext {
                 mt += staticMimeTypeEncodingMap.size();
         }
         
-        assert mt != null && mt != -1;
+        if (mt == null || mt == -1)  throw new IllegalStateException(MessagesMessages.WSTCP_0011_UNKNOWN_CONTENT_TYPE(contentTypeS));
         
         connection.setContentId(mt);
         final Map<String, String> parameters = contentType.getParameters();
         for(Map.Entry<String, String> parameter : parameters.entrySet()) {
             final int paramId = encodeParam(parameter.getKey());
             connection.setContentProperty(paramId, parameter.getValue());
+        }
+
+        if (logger.isLoggable(Level.FINEST)) {
+            logger.log(Level.FINEST, MessagesMessages.WSTCP_1121_CHANNEL_CONTEXT_ENCODED_CT(mt, parameters));
         }
     }
     
@@ -174,15 +181,14 @@ public final class ChannelContext {
         Map<Integer, String> params = connection.getContentProps();
         
         if (logger.isLoggable(Level.FINEST)) {
-            logger.log(Level.FINEST, "ChannelContext.decodeContentType mimeId: {0} params: {1}", new Object[] {mimeId, params});
-        }
-        
+            logger.log(Level.FINEST, MessagesMessages.WSTCP_1122_CHANNEL_CONTEXT_DECODE_CT(mimeId, params));
+        }        
         MimeType mimeType = staticMimeTypeDecodingMap.get(mimeId);
         if (mimeType == null) {
             mimeType = channelSettings.getNegotiatedMimeTypes().get(mimeId - staticMimeTypeDecodingMap.size());
         }
         
-        assert mimeType != null;
+        if (mimeType == null) throw new IllegalStateException(MessagesMessages.WSTCP_0011_UNKNOWN_CONTENT_TYPE(mimeId));
         
         String contentTypeStr = mimeType.toString();
         if (params.size() > 0) {
@@ -198,6 +204,9 @@ public final class ChannelContext {
             contentTypeStr = ctBuf.toString();
         }
         
+        if (logger.isLoggable(Level.FINEST)) {
+            logger.log(Level.FINEST, MessagesMessages.WSTCP_1123_CHANNEL_CONTEXT_DECODED_CT(contentTypeStr));
+        }
         return contentTypeStr;
     }
     
@@ -211,7 +220,7 @@ public final class ChannelContext {
             return paramId;
         }
         
-        throw new AssertionError(MessagesMessages.WSTCP_0010_UNKNOWN_PARAMETER(paramStr));
+        throw new IllegalStateException(MessagesMessages.WSTCP_0010_UNKNOWN_PARAMETER(paramStr));
     }
     
     private @NotNull String decodeParam(final int paramId) {
@@ -225,7 +234,7 @@ public final class ChannelContext {
             return paramStr;
         }
         
-        throw new AssertionError(MessagesMessages.WSTCP_0010_UNKNOWN_PARAMETER(paramId));
+        throw new IllegalStateException(MessagesMessages.WSTCP_0010_UNKNOWN_PARAMETER(paramId));
     }
     
     /**
@@ -233,18 +242,18 @@ public final class ChannelContext {
      */
     public static void configureCodec(@NotNull final ChannelContext channelContext,
             @NotNull final SOAPVersion soapVersion,
-            @NotNull final Codec defaultCodec) {
+    @NotNull final Codec defaultCodec) {
         final List<MimeType> supportedMimeTypes = channelContext.getChannelSettings().getNegotiatedMimeTypes();
         if (supportedMimeTypes != null) {
             if (supportedMimeTypes.contains(MimeType.FAST_INFOSET_STATEFUL_SOAP11) ||
                     supportedMimeTypes.contains(MimeType.FAST_INFOSET_STATEFUL_SOAP12)) {
                 logger.log(Level.FINEST, "ChannelContext.configureCodec: FI Stateful");
-                channelContext.setCodec(FastInfosetStreamSOAPCodec.create(soapVersion, true));
+                channelContext.setCodec(WSTCPFastInfosetStreamCodec.create(soapVersion, channelContext, true));
                 return;
             } else if (supportedMimeTypes.contains(MimeType.FAST_INFOSET_SOAP11) ||
                     supportedMimeTypes.contains(MimeType.FAST_INFOSET_SOAP12)) {
                 logger.log(Level.FINEST, "ChannelContext.configureCodec: FI Stateless");
-                channelContext.setCodec(FastInfosetStreamSOAPCodec.create(soapVersion));
+                channelContext.setCodec(WSTCPFastInfosetStreamCodec.create(soapVersion, channelContext, false));
                 return;
             }
         }
@@ -256,5 +265,9 @@ public final class ChannelContext {
     @Override
     public String toString() {
         return String.format("ID: %d\nURI: %s\nCodec:%s", new Object[] {getChannelId(), getTargetWSURI(), getCodec()});
+    }
+    
+    public void onRecycled() {
+        connectionSession.onReadCompleted();
     }
 }

@@ -34,6 +34,7 @@ import javax.servlet.ServletContext;
 /**
  * @author Alexey Stashok
  */
+@SuppressWarnings({"unchecked"})
 public final class TCPServletContext implements TCPContext {
     
     private final ServletContext servletContext;

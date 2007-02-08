@@ -26,96 +26,74 @@ import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.transport.tcp.io.Connection;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author Alexey Stashok
  */
-public final class ConnectionSession {
-    private static final ChannelSettings zeroChannelSettings = new ChannelSettings();
-    
-    private Map<Integer, ChannelContext> channelId2context;
-    
-    private Map<String, Object> attributes;
-    
-    private int channelCounter;
+@SuppressWarnings({"unchecked"})
+public abstract class ConnectionSession implements com.sun.corba.se.spi.orbutil.transport.Connection {
+    protected static final ChannelSettings zeroChannelSettings = new ChannelSettings();
     
     private Connection connection;
-    private final int dstAddressHashKey;
     
     private boolean isClosed;
     
-    public ConnectionSession(final Connection connection) {
-        this(-1, connection);
-    }
+    private ChannelContext zeroChannelContext;
+    private final SessionCloseListener sessionCloseListener;
     
-    public ConnectionSession(final int dstAddressHashKey, final Connection connection) {
-        this.dstAddressHashKey = dstAddressHashKey;
+    public abstract void registerChannel(@NotNull final ChannelContext context);
+    
+    public abstract void deregisterChannel(@NotNull final ChannelContext context);
+    
+    public abstract int getChannelsAmount();
+    
+    public ConnectionSession(final Connection connection, final SessionCloseListener sessionCloseListener) {
         this.connection = connection;
-        channelId2context = new HashMap<Integer, ChannelContext>();
-        attributes = new HashMap<String, Object>(1);
-        channelCounter = 1;
-        initServiceChannel();
+        this.sessionCloseListener = sessionCloseListener;
     }
     
-    private void initServiceChannel() {
-        final ChannelContext zeroChannelContext = new ChannelContext(this, zeroChannelSettings);
-        channelId2context.put(0, zeroChannelContext);
+    protected void init() {
+        zeroChannelContext = new ChannelContext(this, zeroChannelSettings);
+        registerChannel(zeroChannelContext);
     }
     
-    public void registerChannel(final int channelId, @NotNull final ChannelContext context) {
-        channelId2context.put(channelId, context);
+    // Stub for getAttribute
+    public @Nullable Object getAttribute(@NotNull final String name) {return null;}
+    
+    // Stub for setAttribute
+    public void setAttribute(@NotNull final String name, @Nullable final Object value) {}
+    
+    // Stub for read completed event processing
+    public void onReadCompleted() {}
+    
+    public @Nullable ChannelContext findWSServiceContextByURI(@NotNull final WSTCPURI wsTCPURI) {return null;}
+    
+    public @Nullable ChannelContext findWSServiceContextByChannelId(final int channelId) {return null;}
+    
+    public @NotNull ChannelContext getServiceChannelContext() {
+        return zeroChannelContext;
     }
     
-    public ChannelContext findWSServiceContextByChannelId(final int channelId) {
-        return channelId2context.get(channelId);
-    }
-    
-    public void deregisterChannel(final int channelId) {
-        channelId2context.remove(channelId);
-    }
-    
-    public void abort() {
+    public void close() {
+        if (sessionCloseListener != null) {
+            sessionCloseListener.notifySessionClose(this);
+        }
+        
         synchronized(this) {
             if (isClosed) return;
             isClosed = true;
         }
-
+        
         try {
             connection.close();
         } catch (IOException ex) {
         }
-        close();
-    }
-    
-    public void setAttribute(@NotNull final String name, final Object value) {
-        attributes.put(name, value);
-    }
-    
-    public @Nullable Object getAttribute(@NotNull final String name) {
-        return attributes.get(name);
+        
+        connection = null;
     }
     
     public Connection getConnection() {
         return connection;
     }
-    
-    public int getDstAddressHashKey() {
-        return dstAddressHashKey;
-    }
-    
-    public int getChannelsAmount() {
-        return channelId2context.size();
-    }
-    
-    public synchronized int getNextAvailChannelId() {
-        return channelCounter++;
-    }
-    
-    private void close() {
-        attributes = null;
-        channelId2context = null;
-        connection = null;
-    }
+
 }

@@ -26,11 +26,13 @@ import com.sun.xml.ws.transport.tcp.pool.LifeCycle;
 import com.sun.xml.ws.transport.tcp.util.ByteBufferFactory;
 import com.sun.xml.ws.transport.tcp.util.FrameType;
 import com.sun.xml.ws.transport.tcp.util.TCPConstants;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.channels.SocketChannel;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,10 +41,14 @@ import java.util.Map;
  */
 public final class FramedMessageOutputStream extends OutputStream implements LifeCycle {
     private static final int HEADER_BUFFER_SIZE = 10;
+    private static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
     
     private boolean useDirectBuffer;
     
     private ByteBuffer outputBuffer;
+    
+    // Encoder for UTF-8 String serializing
+    private final CharsetEncoder encoder = UTF8_CHARSET.newEncoder();
     
     private SocketChannel socketChannel;
     private int frameNumber;
@@ -128,7 +134,7 @@ public final class FramedMessageOutputStream extends OutputStream implements Lif
     public void addAllContentProperties(Map<Integer, String> properties) {
         this.contentProps.putAll(properties);
     }
-
+    
     public void write(final int data) throws IOException {
         if (!outputBuffer.hasRemaining()) {
             outputBuffer.flip();
@@ -231,17 +237,14 @@ public final class FramedMessageOutputStream extends OutputStream implements Lif
         headerParamsBuffer.clear();
         final int propsCount = contentProps.size();
         
-        final int highValue = DataInOutUtils.writeInt4(headerParamsBuffer, contentId, 0, false);
-        DataInOutUtils.writeInt4(headerParamsBuffer, propsCount, highValue, true);
-        final ByteBufferOutputStream bbos = new ByteBufferOutputStream(headerParamsBuffer);
+        DataInOutUtils.writeInts4(headerParamsBuffer, contentId, propsCount);
         //@TODO improve string serialization
-        final DataOutputStream dos = new DataOutputStream(bbos);
         for(Map.Entry<Integer, String> entry : contentProps.entrySet()) {
-            DataInOutUtils.writeInt4(headerParamsBuffer, entry.getKey(), 0, true);
-            dos.writeUTF(entry.getValue());
+            final String value = entry.getValue();
+            DataInOutUtils.writeInts4(headerParamsBuffer, entry.getKey(), value.length());
+            writeUTFWithoutLengthPrefix(headerParamsBuffer, value);
         }
         
-        dos.close();
         headerParamsBuffer.flip();
     }
     
@@ -250,6 +253,12 @@ public final class FramedMessageOutputStream extends OutputStream implements Lif
         frameWithParams[1] = headerParamsBuffer;
         frameWithParams[2] = frameWithoutParams[1] = payloadLengthBuffer;
         frameWithParams[3] = frameWithoutParams[2] = outputBuffer;
+    }
+    
+    public void writeUTFWithoutLengthPrefix(ByteBuffer bb, String s) {
+        encoder.reset();
+        encoder.encode(CharBuffer.wrap(s), bb, true);
+        encoder.flush(bb);
     }
     
     public void reset() {

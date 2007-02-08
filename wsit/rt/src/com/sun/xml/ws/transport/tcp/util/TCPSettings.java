@@ -29,7 +29,7 @@ public final class TCPSettings {
     private static final TCPSettings instance = new TCPSettings();
     private static final String ENCODING_MODE_PROPERTY = "com.sun.xml.ws.transport.tcp.encodingMode";
     
-    private EncodingMode encodingMode = EncodingMode.FI_STATEFUL;
+    private EncodingMode encodingMode;
     
     public enum EncodingMode {
         XML,
@@ -56,7 +56,11 @@ public final class TCPSettings {
                 encodingMode = EncodingMode.XML;
             } else if ("FIStateless".equalsIgnoreCase(encodingModeS)) {
                 encodingMode = EncodingMode.FI_STATELESS;
+            } else {
+                encodingMode = EncodingMode.FI_STATEFUL;
             }
+        } else {
+            encodingMode = EncodingMode.FI_STATEFUL;
         }
     }
 }

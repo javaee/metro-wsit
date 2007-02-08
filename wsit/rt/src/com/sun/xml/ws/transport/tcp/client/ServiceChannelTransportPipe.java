@@ -53,36 +53,50 @@ public final class ServiceChannelTransportPipe extends TCPTransportPipe {
     }
     
     public Packet process(final Packet packet) {
-        logger.log(Level.FINE, MessagesMessages.WSTCP_1001_TCP_SERVICE_TP_PROCESS_ENTER(packet.endpointAddress));
+        if (logger.isLoggable(Level.FINE)) {
+            logger.log(Level.FINE, MessagesMessages.WSTCP_1001_TCP_SERVICE_TP_PROCESS_ENTER(packet.endpointAddress));
+        }
         ChannelContext channelContext = null;
         final WSConnectionManager wsConnectionManager = WSConnectionManager.getInstance();
         
         try {
             final ContentType ct = defaultCodec.getStaticContentType(packet);
             
-            if (clientTransport != null) {
-                logger.log(Level.FINE, MessagesMessages.WSTCP_1002_TCP_SERVICE_TP_PROCESS_TRANSPORT_REUSE());
-                channelContext = clientTransport.getConnectionContext();
-                wsConnectionManager.lockConnection(channelContext);
+            channelContext = clientTransport.getConnectionContext();
+            if (channelContext != null) {
+                if (logger.isLoggable(Level.FINE)) {
+                    logger.log(Level.FINE, MessagesMessages.WSTCP_1002_TCP_SERVICE_TP_PROCESS_TRANSPORT_REUSE());
+                }
+                wsConnectionManager.lockConnection(channelContext.getConnectionSession());
             } else {
                 // Initiate new connection session
-                logger.log(Level.FINE, MessagesMessages.WSTCP_1003_TCP_SERVICE_TP_PROCESS_TRANSPORT_CREATE());
+                if (logger.isLoggable(Level.FINE)) {
+                    logger.log(Level.FINE, MessagesMessages.WSTCP_1003_TCP_SERVICE_TP_PROCESS_TRANSPORT_CREATE());
+                }
                 final ConnectionSession connectionSession = (ConnectionSession) packet.invocationProperties.get(TCPConstants.TCP_SESSION);
-                channelContext = connectionSession.findWSServiceContextByChannelId(0);
-                clientTransport = new TCPClientTransport(channelContext);
+                channelContext = connectionSession.getServiceChannelContext();
+                clientTransport.setup(channelContext);
             }
             
             clientTransport.setContentType(ct.getContentType());
-            logger.log(Level.FINE, MessagesMessages.WSTCP_1004_TCP_SERVICE_TP_PROCESS_ENCODE(ct.getContentType()));
+            if (logger.isLoggable(Level.FINE)) {
+                logger.log(Level.FINE, MessagesMessages.WSTCP_1004_TCP_SERVICE_TP_PROCESS_ENCODE(ct.getContentType()));
+            }
             defaultCodec.encode(packet, clientTransport.openOutputStream());
             
-            logger.log(Level.FINE, MessagesMessages.WSTCP_1005_TCP_SERVICE_TP_PROCESS_SEND());
+            if (logger.isLoggable(Level.FINE)) {
+                logger.log(Level.FINE, MessagesMessages.WSTCP_1005_TCP_SERVICE_TP_PROCESS_SEND());
+            }
             clientTransport.send();
             
-            logger.log(Level.FINE, MessagesMessages.WSTCP_1006_TCP_SERVICE_TP_PROCESS_OPEN_PREPARE_READING());
+            if (logger.isLoggable(Level.FINE)) {
+                logger.log(Level.FINE, MessagesMessages.WSTCP_1006_TCP_SERVICE_TP_PROCESS_OPEN_PREPARE_READING());
+            }
             final InputStream replyInputStream = clientTransport.openInputStream();
             
-            logger.log(Level.FINE, MessagesMessages.WSTCP_1007_TCP_SERVICE_TP_PROCESS_OPEN_PROCESS_READING(clientTransport.getStatus(), clientTransport.getContentType()));
+            if (logger.isLoggable(Level.FINE)) {
+                logger.log(Level.FINE, MessagesMessages.WSTCP_1007_TCP_SERVICE_TP_PROCESS_OPEN_PROCESS_READING(clientTransport.getStatus(), clientTransport.getContentType()));
+            }
             if (clientTransport.getStatus() != TCPConstants.ERROR) {
                 final String contentTypeStr = clientTransport.getContentType();
                 
@@ -92,23 +106,21 @@ public final class ServiceChannelTransportPipe extends TCPTransportPipe {
                 reply.addSatellite(clientTransport);
                 return reply;
             } else {
-                logger.log(Level.SEVERE, MessagesMessages.WSTCP_0016_ERROR_WS_EXECUTION_ON_SERVER(clientTransport.getContentType()));
+                if (logger.isLoggable(Level.FINE)) {
+                    logger.log(Level.SEVERE, MessagesMessages.WSTCP_0016_ERROR_WS_EXECUTION_ON_SERVER(clientTransport.getContentType()));
+                }
                 throw new WebServiceException(MessagesMessages.WSTCP_0016_ERROR_WS_EXECUTION_ON_SERVER(clientTransport.getContentType()));
             }
         } catch(WebServiceException wex) {
             throw wex;
         } catch(Exception ex) {
             if (channelContext != null) {
-                wsConnectionManager.abortConnection(channelContext);
+                wsConnectionManager.abortConnection(channelContext.getConnectionSession());
             }
-            clientTransport = null;
-
+            clientTransport.setup(null);
+            
             logger.log(Level.SEVERE, MessagesMessages.WSTCP_0017_ERROR_WS_EXECUTION_ON_CLIENT(), ex);
             throw new WebServiceException(MessagesMessages.WSTCP_0017_ERROR_WS_EXECUTION_ON_CLIENT(), ex);
-        } finally {
-            if (channelContext != null) {
-                wsConnectionManager.freeConnection(channelContext);
-            }
         }
     }
     

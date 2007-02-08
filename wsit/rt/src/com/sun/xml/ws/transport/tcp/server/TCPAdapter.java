@@ -119,11 +119,15 @@ public class TCPAdapter extends Adapter<TCPAdapter.TCPToolkit> {
             final Codec codec = getCodec(connection.getChannelContext());
             
             String ct = connection.getContentType();
-            logger.log(Level.FINE, MessagesMessages.WSTCP_1090_TCP_ADAPTER_REQ_CONTENT_TYPE(ct));
+            if (logger.isLoggable(Level.FINE)) {
+                logger.log(Level.FINE, MessagesMessages.WSTCP_1090_TCP_ADAPTER_REQ_CONTENT_TYPE(ct));
+            }
             
             Packet packet = new Packet();
             codec.decode(in, ct, packet);
-            logger.log(Level.FINE, MessagesMessages.WSTCP_1091_TCP_ADAPTER_DECODED());
+            if (logger.isLoggable(Level.FINE)) {
+                logger.log(Level.FINE, MessagesMessages.WSTCP_1091_TCP_ADAPTER_DECODED());
+            }
             addCustomPacketSattellites(packet);
             try {
                 packet = head.process(packet, connection, this);
@@ -141,13 +145,17 @@ public class TCPAdapter extends Adapter<TCPAdapter.TCPToolkit> {
             }
             
             ct = codec.getStaticContentType(packet).getContentType();
-            logger.log(Level.FINE, MessagesMessages.WSTCP_1092_TCP_ADAPTER_RPL_CONTENT_TYPE(ct));
+            if (logger.isLoggable(Level.FINE)) {
+                logger.log(Level.FINE, MessagesMessages.WSTCP_1092_TCP_ADAPTER_RPL_CONTENT_TYPE(ct));
+            }
             if (ct == null) {
                 throw new UnsupportedOperationException(MessagesMessages.WSTCP_0021_TCP_ADAPTER_UNSUPPORTER_OPERATION());
             } else {
                 connection.setContentType(ct);
                 if (packet.getMessage() == null) {
-                    logger.log(Level.FINE, MessagesMessages.WSTCP_1093_TCP_ADAPTER_ONE_WAY());
+                    if (logger.isLoggable(Level.FINE)) {
+                        logger.log(Level.FINE, MessagesMessages.WSTCP_1093_TCP_ADAPTER_ONE_WAY());
+                    }
                     connection.setStatus(TCPConstants.ONE_WAY);
                 } else {
                     codec.encode(packet, connection.openOutput());
@@ -167,7 +175,9 @@ public class TCPAdapter extends Adapter<TCPAdapter.TCPToolkit> {
         }
         
         public void close() {
-            logger.log(Level.FINE, MessagesMessages.WSTCP_1094_TCP_ADAPTER_CLOSE());
+            if (logger.isLoggable(Level.FINE)) {
+                logger.log(Level.FINE, MessagesMessages.WSTCP_1094_TCP_ADAPTER_CLOSE());
+            }
             connection.setStatus(TCPConstants.ONE_WAY);
             isClosed = true;
         }

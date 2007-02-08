@@ -54,7 +54,7 @@ public final class OutputWriter {
         if (logger.isLoggable(Level.FINEST)) {
             Socket socket = socketChannel.socket();
             logger.log(Level.FINEST, MessagesMessages.WSTCP_1070_OUTPUT_WRITER_DUMP(socket.getInetAddress().getHostAddress(), socketChannel.socket().getPort()));
-            logger.log(Level.FINEST, DumpUtils.dump(bb));
+            logger.log(Level.FINEST, DumpUtils.dumpBytes(bb));
         }
         
         SelectionKey key = null;
@@ -114,7 +114,7 @@ public final class OutputWriter {
         if (logger.isLoggable(Level.FINEST)) {
             Socket socket = socketChannel.socket();
             logger.log(Level.FINEST, MessagesMessages.WSTCP_1070_OUTPUT_WRITER_DUMP(socket.getInetAddress().getHostAddress(), socketChannel.socket().getPort()));
-            logger.log(Level.FINEST, DumpUtils.dump(bb));
+            logger.log(Level.FINEST, DumpUtils.dumpBytes(bb));
         }
         SelectionKey key = null;
         Selector writeSelector = null;
@@ -165,7 +165,7 @@ public final class OutputWriter {
     }
     
     private static boolean hasRemaining(final ByteBuffer[] bb) {
-        for(int i=0; i<bb.length; i++) {
+        for(int i=bb.length - 1; i>=0; i--) {
             if (bb[i].hasRemaining()) {
                 return true;
             }

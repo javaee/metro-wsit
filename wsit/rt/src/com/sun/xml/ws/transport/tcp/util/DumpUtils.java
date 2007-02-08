@@ -28,6 +28,50 @@ import java.nio.ByteBuffer;
  * @author Alexey Stashok
  */
 public final class DumpUtils {
+    public static String dumpBytes(final ByteBuffer[] bb) {
+        final StringBuffer stringBuffer = new StringBuffer();
+        for(int i=0; i<bb.length; i++) {
+            stringBuffer.append(dumpBytes(bb[i]));
+        }
+        
+        return stringBuffer.toString();
+    }
+
+    public static String dumpBytes(final ByteBuffer buffer) {
+        return dumpBytes(buffer, buffer.position(), buffer.limit() - buffer.position());
+    }
+
+    public static String dumpBytes(final ByteBuffer buffer, final int offset, final int length) {
+        final byte[] array = new byte[length];
+        final int position = buffer.position();
+        buffer.position(offset);
+        buffer.get(array);
+        buffer.position(position);
+        return dumpBytes(array);
+    }
+
+    public static String dumpOctets(final ByteBuffer[] bb) {
+        final StringBuffer stringBuffer = new StringBuffer();
+        for(int i=0; i<bb.length; i++) {
+            stringBuffer.append(dumpOctets(bb[i]));
+        }
+        
+        return stringBuffer.toString();
+    }
+
+    public static String dumpOctets(final ByteBuffer buffer) {
+        return dumpOctets(buffer, buffer.position(), buffer.limit() - buffer.position());
+    }
+
+    public static String dumpOctets(final ByteBuffer buffer, final int offset, final int length) {
+        final byte[] array = new byte[length];
+        final int position = buffer.position();
+        buffer.position(offset);
+        buffer.get(array);
+        buffer.position(position);
+        return dumpBytes(array);
+    }
+
     public static String dump(final ByteBuffer[] bb) {
         final StringBuffer stringBuffer = new StringBuffer();
         for(int i=0; i<bb.length; i++) {
@@ -70,4 +114,34 @@ public final class DumpUtils {
         return stringBuffer.toString();
     }
 
+    public static String dumpOctets(final byte[] buffer) {
+        return dumpOctets(buffer, 0, buffer.length);
+    }
+
+    public static String dumpOctets(final byte[] buffer, final int offset, final int length) {
+        final StringBuffer stringBuffer = new StringBuffer();
+        for(int i=0; i<length; i++) {
+            final int value = buffer[offset + i] & 0xFF;
+            final String strValue = Integer.toHexString(value).toUpperCase();
+            final String str = "00".substring(strValue.length()) + strValue;
+            stringBuffer.append(str);
+            stringBuffer.append(' ');
+        }
+        
+        return stringBuffer.toString();
+    }
+
+    public static String dumpBytes(final byte[] buffer) {
+        return dumpBytes(buffer, 0, buffer.length);
+    }
+
+    public static String dumpBytes(final byte[] buffer, final int offset, final int length) {
+        final StringBuffer stringBuffer = new StringBuffer();
+        for(int i=0; i<length; i++) {
+            final int value = buffer[offset + i] & 0xFF;
+            stringBuffer.append((char) value);
+        }
+        
+        return stringBuffer.toString();
+    }
 }

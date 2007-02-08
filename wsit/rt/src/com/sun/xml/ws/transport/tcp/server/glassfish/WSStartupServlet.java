@@ -52,6 +52,7 @@ import javax.xml.ws.WebServiceException;
 /**
  * @author JAX-WS team
  */
+@SuppressWarnings({"unchecked"})
 public final class WSStartupServlet extends HttpServlet
         implements ServletContextAttributeListener, ServletContextListener {
     

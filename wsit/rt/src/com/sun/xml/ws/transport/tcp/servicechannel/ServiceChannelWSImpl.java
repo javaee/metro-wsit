@@ -25,6 +25,7 @@ package com.sun.xml.ws.transport.tcp.servicechannel;
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.pipe.Codec;
+import com.sun.xml.ws.transport.tcp.server.ServerConnectionSession;
 import com.sun.xml.ws.transport.tcp.util.ChannelContext;
 import com.sun.xml.ws.transport.tcp.util.ChannelSettings;
 import com.sun.xml.ws.transport.tcp.util.ConnectionSession;
@@ -44,6 +45,7 @@ import javax.xml.ws.handler.MessageContext;
  * @author Alexey Stashok
  */
 
+@SuppressWarnings({"unchecked"})
 @WebService
 public class ServiceChannelWSImpl {
     private static final Logger logger = Logger.getLogger(
@@ -71,7 +73,7 @@ public class ServiceChannelWSImpl {
             throws ServiceChannelException {
         
         final ChannelContext serviceChannelContext = getChannelContext();
-        final ConnectionSession connectionSession = serviceChannelContext.getConnectionSession();
+        final ServerConnectionSession connectionSession = (ServerConnectionSession) serviceChannelContext.getConnectionSession();
         
         final WSTCPAdapterRegistry adapterRegistry = getAdapterRegistry();
         final WSTCPURI tcpURI = channelSettings.getTargetWSURI();
@@ -85,7 +87,7 @@ public class ServiceChannelWSImpl {
         final Codec defaultCodec = adapter.getEndpoint().createCodec();
         ChannelContext.configureCodec(openedChannelContext, soapVersion, defaultCodec);
         
-        connectionSession.registerChannel(openedChannelContext.getChannelId(), openedChannelContext);
+        connectionSession.registerChannel(openedChannelContext);
         
         if (logger.isLoggable(Level.FINE)) {
             logger.log(Level.FINE, "Session: {0}. Channel #{1} was opened for WS: {2}",  new Object[] {connectionSession.hashCode(), openedChannelContext.getChannelId(), openedChannelContext.getWSServiceName()});
@@ -95,7 +97,7 @@ public class ServiceChannelWSImpl {
     
     public int closeChannel(int channelId) {
         final ChannelContext serviceChannelContext = getChannelContext();
-        final ConnectionSession connectionSession = serviceChannelContext.getConnectionSession();
+        final ServerConnectionSession connectionSession = (ServerConnectionSession) serviceChannelContext.getConnectionSession();
         
         connectionSession.deregisterChannel(channelId);
         if (logger.isLoggable(Level.FINE)) {
