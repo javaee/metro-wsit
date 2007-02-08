@@ -26,6 +26,7 @@ import com.sun.xml.stream.buffer.MutableXMLStreamBuffer;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.StreamSOAPCodec;
+import java.io.IOException;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.stream.XMLOutputFactory;
@@ -209,10 +210,10 @@ public class LazyStreamBasedMessage extends Message{
      */
     public boolean isFault() {
         return false;
-//        if(!readMessage){
-//            cacheMessage();
-//        }
-//        return message.isFault();
+        //        if(!readMessage){
+        //            cacheMessage();
+        //        }
+        //        return message.isFault();
     }
     
     /**
@@ -440,20 +441,55 @@ public class LazyStreamBasedMessage extends Message{
     }
     
     public XMLStreamReader readMessage(){
-        if(!readMessage){
+        
+        if (!readMessage) {
             return reader;
         }
-        return null; //message read;
+        try     {
+            if (buffer == null) {
+                try {
+                    buffer = new com.sun.xml.stream.buffer.MutableXMLStreamBuffer();
+                    javax.xml.stream.XMLStreamWriter writer = buffer.createFromXMLStreamWriter();
+                    
+                    message.writeTo(writer);
+                } catch (javax.xml.stream.XMLStreamException ex) {
+                    java.util.logging.Logger.getLogger("global").log(java.util.logging.Level.SEVERE,
+                            ex.getMessage(),
+                            ex);
+                }
+            }
+            reader = buffer.readAsXMLStreamReader();
+            return reader;
+        } catch (XMLStreamException ex) {
+            java.util.logging.Logger.getLogger("global").log(java.util.logging.Level.SEVERE,
+                    ex.getMessage(), ex);
+        }
+        return null;
     }
     
+    
     public void print() throws XMLStreamException{
+        if(readMessage){
+            try         {
+                message.readAsSOAPMessage().writeTo(java.lang.System.out);
+                return;
+            } catch (SOAPException ex) {
+                java.util.logging.Logger.getLogger("global").log(java.util.logging.Level.SEVERE,
+                        ex.getMessage(),
+                        ex);
+            } catch (IOException ex) {
+                java.util.logging.Logger.getLogger("global").log(java.util.logging.Level.SEVERE,
+                        ex.getMessage(),
+                        ex);
+            }
+        }
         if(buffer == null){
             buffer = new MutableXMLStreamBuffer();
-            buffer.createFromXMLStreamReader(reader); 
+            buffer.createFromXMLStreamReader(reader);
             reader =  buffer.readAsXMLStreamReader();
         }
-        XMLOutputFactory xof = XMLOutputFactory.newInstance();        
-        buffer.writeToXMLStreamWriter(xof.createXMLStreamWriter(System.out));            
+        XMLOutputFactory xof = XMLOutputFactory.newInstance();
+        buffer.writeToXMLStreamWriter(xof.createXMLStreamWriter(System.out));
     }
     
 }
