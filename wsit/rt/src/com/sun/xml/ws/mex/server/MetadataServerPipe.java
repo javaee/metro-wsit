@@ -34,8 +34,10 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Pipe;
-import com.sun.xml.ws.api.pipe.PipeCloner;
-import com.sun.xml.ws.api.pipe.helper.AbstractFilterPipeImpl;
+import com.sun.xml.ws.api.pipe.TubeCloner;
+import com.sun.xml.ws.api.pipe.NextAction;
+import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
+import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.mex.MessagesMessages;
@@ -60,7 +62,7 @@ import static com.sun.xml.ws.mex.MetadataConstants.WSA_PREFIX;
  *
  * @author WS Development Team
  */
-public class MetadataServerPipe extends AbstractFilterPipeImpl {
+public class MetadataServerPipe extends AbstractFilterTubeImpl {
 
     private final WSDLRetriever wsdlRetriever;
     private final SOAPVersion soapVersion;
@@ -69,18 +71,18 @@ public class MetadataServerPipe extends AbstractFilterPipeImpl {
         Logger.getLogger(MetadataServerPipe.class.getName());
     
     public MetadataServerPipe(WSEndpoint endpoint, Pipe next) {
-        super(next);
+        super(PipeAdapter.adapt(next));
         wsdlRetriever = new WSDLRetriever(endpoint);
         soapVersion = endpoint.getBinding().getSOAPVersion();
     }
 
-    protected MetadataServerPipe(MetadataServerPipe that, PipeCloner cloner) {
+    protected MetadataServerPipe(MetadataServerPipe that, TubeCloner cloner) {
         super(that, cloner);
         soapVersion = that.soapVersion;
         wsdlRetriever = that.wsdlRetriever;
     }
 
-    public Pipe copy(final PipeCloner cloner) {
+    public MetadataServerPipe copy(TubeCloner cloner) {
         return new MetadataServerPipe(this, cloner);
     }
 
@@ -92,9 +94,10 @@ public class MetadataServerPipe extends AbstractFilterPipeImpl {
      * request, then ask addressing again for the address and
      * process the request.
      */
-    public Packet process(final Packet request) {
+    @Override
+    public NextAction processRequest(final Packet request) {
         if (request.getMessage()==null || !request.getMessage().hasHeaders()) {
-            return next.process(request);
+            return super.processRequest(request);
         }
         
         // try w3c version of ws-a first, then member submission version
@@ -109,16 +112,16 @@ public class MetadataServerPipe extends AbstractFilterPipeImpl {
         if (action != null) {
             if (action.equals(GET_REQUEST)) {
                 final String toAddress = headers.getTo(adVersion, soapVersion);
-                return processGetRequest(request, toAddress, adVersion);
+                return doReturnWith(processGetRequest(request, toAddress, adVersion));
             } else if (action.equals(GET_MDATA_REQUEST)) {
                 final Message faultMessage = Messages.create(GET_MDATA_REQUEST,
                     adVersion, soapVersion);
-                return request.createServerResponse(
+                return doReturnWith(request.createServerResponse(
                     faultMessage, adVersion, soapVersion,
-                    adVersion.getDefaultFaultAction());
+                    adVersion.getDefaultFaultAction()));
             }
         }
-        return next.process(request);
+        return super.processRequest(request);
     }
 
     /*
