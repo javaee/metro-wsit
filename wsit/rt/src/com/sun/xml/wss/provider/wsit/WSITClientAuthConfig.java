@@ -39,12 +39,13 @@ public class WSITClientAuthConfig implements ClientAuthConfig {
         LogDomainConstants.WSIT_PVD_DOMAIN,
         LogDomainConstants.WSIT_PVD_DOMAIN_BUNDLE);
     
-    String layer = null;
-    String appContext = null;
+    private String layer = null;
+    private String appContext = null;
     //ignore the CBH here
     //CallbackHandler cbh = null;
-    WSITClientAuthContext clientAuthContext = null;
-
+    private WSITClientAuthContext clientAuthContext = null;
+    private PolicyMap policyMap = null;
+    
     private ReentrantReadWriteLock rwLock;
     private ReentrantReadWriteLock.ReadLock rLock;
     private ReentrantReadWriteLock.WriteLock wLock;
@@ -70,15 +71,23 @@ public class WSITClientAuthConfig implements ClientAuthConfig {
         }
         
         //now check if security is enabled
-         if (this.secDisabled == null) {
-             if (!WSITAuthConfigProvider.isSecurityEnabled(pMap,port)) {
-                 this.secDisabled = TRUE;
-                 return null;
-             } else {
-                 this.secDisabled = FALSE;
-             }
-         }
-         
+        //if the policy has changed due to redeploy recheck if security is enabled
+        if (this.secDisabled == null || (policyMap != pMap)) {
+            try {
+                this.wLock.lock();
+                if (this.secDisabled == null || (policyMap != pMap)) {
+                    if (!WSITAuthConfigProvider.isSecurityEnabled(pMap,port)) {
+                        this.secDisabled = TRUE;
+                        return null;
+                    } else {
+                        this.secDisabled = FALSE;
+                    }
+                }
+            } finally {
+                this.wLock.unlock();
+            }
+        }
+        
          if (this.secDisabled == TRUE) {
              return null;
          }
@@ -89,7 +98,11 @@ public class WSITClientAuthConfig implements ClientAuthConfig {
         try {
             this.rLock.lock();
             if (clientAuthContext != null) {
-                authContextInitialized = true;
+               //probably the app was redeployed
+               //if so reacquire the AuthContext
+                if (pMap == policyMap) {
+                    authContextInitialized = true;
+                }
             }
         } finally {
             this.rLock.unlock();
@@ -99,8 +112,9 @@ public class WSITClientAuthConfig implements ClientAuthConfig {
             try {
                 this.wLock.lock();
                 // recheck the precondition, since the rlock was released.
-                if (clientAuthContext == null) {
+                if (clientAuthContext == null || (policyMap != pMap)) {
                     clientAuthContext = new WSITClientAuthContext(operation, subject, map);
+                    policyMap = pMap;
                 }
             } finally {
                 this.wLock.unlock();

@@ -26,16 +26,18 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 public class WSITServerAuthConfig implements ServerAuthConfig {
     
-    String layer = null;
-    String appContext = null;
+    private String layer = null;
+    private String appContext = null;
     //CallbackHandler cbh = null;
     
-    WSITServerAuthContext serverAuthContext = null;
-
+    private WSITServerAuthContext serverAuthContext = null;
+    private PolicyMap policyMap = null;
+    private String secDisabled = null;
+    
     private ReentrantReadWriteLock rwLock;
     private ReentrantReadWriteLock.ReadLock rLock;
     private ReentrantReadWriteLock.WriteLock wLock;
-    private String secDisabled = null;
+    
     private static final String TRUE="true";
     private static final String FALSE="false";
     
@@ -58,12 +60,20 @@ public class WSITServerAuthConfig implements ServerAuthConfig {
          }
          
          //check if security is enabled
-         if (this.secDisabled == null) {
-             if (!WSITAuthConfigProvider.isSecurityEnabled(pMap,port)) {
-                 this.secDisabled = TRUE;
-                 return null;
-             } else {
-                 this.secDisabled = FALSE;
+         //if policy has changed due to redeploy, check if security is enabled
+         if (this.secDisabled == null || (policyMap != pMap)) {
+             try {
+                 this.wLock.lock();
+                 if (this.secDisabled == null || (policyMap != pMap)) {
+                     if (!WSITAuthConfigProvider.isSecurityEnabled(pMap,port)) {
+                         this.secDisabled = TRUE;
+                         return null;
+                     } else {
+                         this.secDisabled = FALSE;
+                     }
+                 }
+             } finally {
+                 this.wLock.unlock();
              }
          }
          
@@ -74,7 +84,10 @@ public class WSITServerAuthConfig implements ServerAuthConfig {
          try {
              this.rLock.lock();
              if (serverAuthContext != null) {
-                 return serverAuthContext;
+                 //return the cached one only if the same policyMap was passed in
+                 if (policyMap == pMap) {
+                     return serverAuthContext;
+                 }
              }
          } finally {
              this.rLock.unlock();
@@ -85,8 +98,9 @@ public class WSITServerAuthConfig implements ServerAuthConfig {
          try {
              this.wLock.lock();
              // recheck the precondition, since the rlock was released.
-             if (serverAuthContext == null) {
+             if ((serverAuthContext == null) || (policyMap != pMap)) {
                  serverAuthContext = new WSITServerAuthContext(operation, subject, map);
+                 policyMap = pMap;
              }
              return serverAuthContext;
          } finally {
