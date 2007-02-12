@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+     Copyright (c) 2005 Sun Microsystems, Inc.
+     All rights reserved.
+-->
+<bindings wsdlLocation="sts.wsdl" xmlns="http://java.sun.com/xml/ns/jaxws" xmlns:jaxb="http://java.sun.com/xml/ns/jaxb" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <bindings node="wsdl:definitions">
+        <package name="simple.sts"/>
+        <enableWrapperStyle>false</enableWrapperStyle>
+    </bindings>
+    <!--
+         <bindings node="wsdl:definitions/wsdl:types/xsd:schema[@targetNamespace='http://xmlsoap.org/Ping/Imports']">
+         <jaxb:schemaBindings>
+         <jaxb:package name="simple.sts"/>
+         </jaxb:schemaBindings>
+         </bindings>
+    -->
+    <jaxb:bindings xmlns:jaxb="http://java.sun.com/xml/ns/jaxb" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+        <jaxb:bindings node="/xsd:schema" schemaLocation="sts_schema.xsd">
+            <jaxb:schemaBindings>
+                <jaxb:package name="simple.server.binding"/>
+            </jaxb:schemaBindings>
+        </jaxb:bindings>
+    </jaxb:bindings>
+</bindings>

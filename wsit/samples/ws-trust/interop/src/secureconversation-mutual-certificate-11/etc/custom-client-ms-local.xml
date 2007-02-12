@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+     Copyright (c) 2005 Sun Microsystems, Inc.
+     All rights reserved.
+-->
+<bindings wsdlLocation="service/PingServiceSunSTSMSServer.wsdl" xmlns="http://java.sun.com/xml/ns/jaxws" xmlns:jaxb="http://java.sun.com/xml/ns/jaxb" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <bindings node="wsdl:definitions">
+        <package name="simple.client"/>
+    </bindings>
+    <!--
+         <bindings node="wsdl:definitions/wsdl:types/xsd:schema[@targetNamespace='http://xmlsoap.org/Ping/Imports']">
+         <jaxb:schemaBindings>
+         <jaxb:package name="simple.client"/>
+         </jaxb:schemaBindings>
+         </bindings>
+    -->
+    <jxb:bindings version="1.0" xmlns:jxb="http://java.sun.com/xml/ns/jaxb" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+        <jxb:bindings node="/xs:schema" schemaLocation="service/Service_schema.xsd">
+            <jxb:schemaBindings>
+                <jxb:package name="server.provider.wsdl_hello_lit.client"/>
+            </jxb:schemaBindings>
+        </jxb:bindings>
+    </jxb:bindings>
+</bindings>
