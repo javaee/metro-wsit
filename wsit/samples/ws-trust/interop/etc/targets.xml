@@ -29,22 +29,52 @@
 <property name="build.war.home" value="${build.home}/war"/>
 <property name="build.lib.home" value="${build.home}/lib"/>
     <condition property="client" value="sun">
-	<matches string="${test.type}" pattern="s-.-." />
+	<or>
+	<equals arg1="${test.type}" arg2="s-m-m" />
+	<equals arg1="${test.type}" arg2="s-m-s" />
+	<equals arg1="${test.type}" arg2="s-s-m" />
+	<equals arg1="${test.type}" arg2="s-s-s" />
+	</or>
     </condition>
     <condition property="client" value="ms">
-	<matches string="${test.type}" pattern="m-.-." />
+	<or>
+	<equals arg1="${test.type}" arg2="m-s-s" />
+	<equals arg1="${test.type}" arg2="m-s-m" />
+	<equals arg1="${test.type}" arg2="m-m-s" />
+	<equals arg1="${test.type}" arg2="m-m-m" />
+	</or>
     </condition>
     <condition property="sts" value="sun">
-	<matches string="${test.type}" pattern=".-s-." />
+	<or>
+	<equals arg1="${test.type}" arg2="m-s-m" />
+	<equals arg1="${test.type}" arg2="m-s-s" />
+	<equals arg1="${test.type}" arg2="s-s-m" />
+	<equals arg1="${test.type}" arg2="s-s-s" />
+	</or>
     </condition>
     <condition property="sts" value="ms">
-	<matches string="${test.type}" pattern=".-m-." />
+	<or>
+	<equals arg1="${test.type}" arg2="m-m-m" />
+	<equals arg1="${test.type}" arg2="m-m-s" />
+	<equals arg1="${test.type}" arg2="s-m-m" />
+	<equals arg1="${test.type}" arg2="s-m-s" />
+	</or>
     </condition>
     <condition property="server" value="sun">
-	<matches string="${test.type}" pattern=".-.-s" />
+	<or>
+	<equals arg1="${test.type}" arg2="m-m-s" />
+	<equals arg1="${test.type}" arg2="m-s-s" />
+	<equals arg1="${test.type}" arg2="s-m-s" />
+	<equals arg1="${test.type}" arg2="s-s-s" />
+	</or>
     </condition>
     <condition property="server" value="ms">
-	<matches string="${test.type}" pattern=".-.-m" />
+	<or>
+	<equals arg1="${test.type}" arg2="m-m-m" />
+	<equals arg1="${test.type}" arg2="m-s-m" />
+	<equals arg1="${test.type}" arg2="s-m-m" />
+	<equals arg1="${test.type}" arg2="s-s-m" />
+	</or>
     </condition>
     <condition property="client.wsdl" value="${sunsts-sunserver.client.wsdl}">
 	<and>
