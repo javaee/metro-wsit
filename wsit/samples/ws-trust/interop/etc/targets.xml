@@ -578,6 +578,7 @@
         <sysproperty key="msclient.sunsts.url" value="${msclient.sunsts.url}"/>
         <sysproperty key="msclient.mssts.url" value="${msclient.mssts.url}"/>
         <sysproperty key="sts" value="${sts}"/>
+	<sysproperty key="java.endorsed.dirs" value="${glassfish.home}/lib/endorsed"/> 
         <classpath>
             <path refid="jaxws.classpath"/>
             <pathelement location="${build.classes.home}"/>
@@ -613,6 +614,7 @@
         <sysproperty key="msclient.sunsts.url" value="${msclient.sunsts.url}"/>
         <sysproperty key="msclient.mssts.url" value="${msclient.mssts.url}"/>
         <sysproperty key="sts" value="${sts}"/>
+	<sysproperty key="java.endorsed.dirs" value="${glassfish.home}/lib/endorsed"/> 
         <classpath>
             <path refid="jaxws.classpath"/>
             <pathelement location="${build.classes.home}"/>
