@@ -223,6 +223,7 @@
     </condition>
 
 <target name="setup-tc" if="tomcat.home">
+    <replace  dir="etc/service" includes="PingService*.wsdl" token="WCF-HOST" value="${ms.host}"/>
     <mkdir dir="${build.home}"/>
     <mkdir dir="${build.classes.home}"/>
     <mkdir dir="${build.war.home}"/>
@@ -333,37 +334,7 @@
     <replace  file="etc/service/sun-jaxws.xml" value="PingService.wsdl" token="${server.wsdl.name}"/>
 </target>
 
-  <!--Tomcat -->
-  <target name="check-if-server-deployed-tom" if="tomcat.home">
-    <condition property="tom.webapp.deployed">
-      <http url="http://${endpoint.host}:${endpoint.port}/${server.path}/"/>
-    </condition>
-  </target>
-
- <target name="undeploy-tomcat-proper" if="webapp.deployed">
-      <undeploy-catalina url="http://${endpoint.host}:${endpoint.port}/manager/" username="${username}" password="${password}" path="/${path}"/>
-  </target>
-                                                                                                                          
-  <target name="undeploy-tomcat-war-present" if="war.present">
-      <undeploy-catalina url="http://${endpoint.host}:${endpoint.port}/manager/" username="${username}" password="${password}" path="/${path}"/>
-  </target>
-                                                                                                                          
-  <target name="undeploy-server-tomcat" if="tomcat.home">
-    <condition  property="war.present">
-        <available file="${tomcat.home}/webapps/jaxws-${ant.project.name}.war" />
-    </condition>
-    <!--antcall target="undeploy-tomcat-war-present" /-->
-    <!--<condition property="webapp.deployed">
-      <http url="http://${endpoint.host}:${endpoint.port}/${path}/"/>
-    </condition>
-    <antcall target="undeploy-tomcat-proper" />-->
- </target>
-
-<target name="deploy-server-tc" depends="check-if-server-deployed-tom, undeploy-server-tomcat" if="tomcat.home">
-
-
-<!--deploy-catalina url="http://localhost:8080/manager" username="${username}" password="${password}"
-            path="/${path}" war="file:${build.war.home}/jaxws-${ant.project.name}.war"/-->
+<target name="deploy-server-tc" if="tomcat.home">
      <copy file="${build.war.home}/jaxws-${ant.project.name}.war" todir="${tomcat.home}/webapps"/>
 </target>
 
@@ -407,30 +378,9 @@
     </war>
 </target>
 
-<target name="deploy-sts-tc" depends="check-if-sts-deployed-tom, undeploy-sts-tomcat" if="tomcat.home">
-
-
-<!--deploy-catalina url="http://localhost:8080/manager" username="${username}" password="${password}"
-            path="/${path}" war="file:${build.war.home}/jaxws-${ant.project.name}-sts.war"/-->
+<target name="deploy-sts-tc" if="tomcat.home">
      <copy file="${build.war.home}/jaxws-${ant.project.name}-sts.war" todir="${tomcat.home}/webapps"/>
 </target>
-
- <target name="check-if-sts-deployed-tom" if="tomcat.home">
-    <condition property="tom.webapp.deployed">
-      <http url="http://${sts.host}:${sts.port}/${sts.path}/"/>
-    </condition>
-  </target>
-  
-   <target name="undeploy-sts-tomcat" if="tomcat.home">
-    <condition  property="war.present">
-        <available file="${tomcat.home}/webapps/jaxws-${ant.project.name}-sts.war" />
-    </condition>
-    <!--antcall target="undeploy-tomcat-war-present" /-->
-    <!--<condition property="webapp.deployed">
-      <http url="http://${endpoint.host}:${endpoint.port}/${path}/"/>
-    </condition>
-    <antcall target="undeploy-tomcat-proper" />-->
- </target>
 
 <target name="deploy-sts-glassfish" if="glassfish.home">
     <copy file="${build.war.home}/jaxws-${ant.project.name}-sts.war"
@@ -510,22 +460,22 @@
     <replace  dir="${basedir}/etc/client-config" token="WCF-HOST" value="${ms.host}"/>
    <java fork="true" classname="${client.class}">
         <sysproperty key="tomcat.home" value="${tomcat.home}"/>
-        <sysproperty key="endpoint.host" value="${endpoint.host}"/>
-        <sysproperty key="endpoint.port" value="${endpoint.port}"/>
         <sysproperty key="service.url" value="${service.url}"/>
-        <sysproperty key="DebugSecurity" value="true"/>
         <sysproperty key="javax.net.ssl.keyStore" value="${javax.net.ssl.keyStore}"/>
         <sysproperty key="javax.net.ssl.keyStoreType" value="${javax.net.ssl.keyStoreType}"/>
         <sysproperty key="javax.net.ssl.keyStorePassword" value="${javax.net.ssl.keyStorePassword}"/>
        <sysproperty key="javax.net.ssl.trustStore" value="${javax.net.ssl.trustStore}"/>
        <sysproperty key="javax.net.ssl.trustStoreType" value="${javax.net.ssl.trustStoreType}"/>
        <sysproperty key="javax.net.ssl.trustStorePassword" value="${javax.net.ssl.trustStorePassword}"/>
-       <sysproperty key="javax.net.debug" value="ssl, handshake" />
+        <sysproperty key="msclient.sunsts.url" value="${msclient.sunsts.url}"/>
+        <sysproperty key="msclient.mssts.url" value="${msclient.mssts.url}"/>
+        <sysproperty key="sts" value="${sts}"/>
         <classpath>
             <path refid="jaxws.classpath"/>
             <pathelement location="${build.classes.home}"/>
             <pathelement location="${build.classes.home}/../"/>
         </classpath>
+        <jvmarg value="-DWSIT_HOME=${tomcat.home}"/>
         <!--
         <jvmarg value="-Xdebug"/>
         <jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=9009"/>
@@ -540,15 +490,11 @@
     <replace  dir="${basedir}/etc/client-config" token="WCF-HOST" value="${ms.host}"/>
    <java fork="true" classname="${client.class}">
         <sysproperty key="tomcat.home" value="${tomcat.home}"/>
-        <sysproperty key="endpoint.host" value="${endpoint.host}"/>
-        <sysproperty key="endpoint.port" value="${endpoint.port}"/>
         <sysproperty key="service.url" value="${service.url}"/>
-        <sysproperty key="sts.host" value="${sts.host}"/>
-        <sysproperty key="sts.port" value="${sts.port}"/>
-        <sysproperty key="sts.url" value="${sts.url}"/>
-        <sysproperty key="DebugSecurity" value="true"/>
+	<!--
         <sysproperty key="com.sun.xml.ws.assembler.client.wss.before" value="true"/>
         <sysproperty key="com.sun.xml.ws.assembler.client.wss.after" value="true"/>
+	-->
         <classpath>
             <path refid="jaxws.classpath"/>
             <pathelement location="${build.classes.home}"/>
@@ -557,8 +503,12 @@
         <jvmarg value="-DWSIT_HOME=${tomcat.home}"/>
         <!--
         <jvmarg value="-Xdebug"/>
-        <jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=9009"/>
+        <jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=9006"/>
         -->
+        <sysproperty key="msclient.sunsts.url" value="${msclient.sunsts.url}"/>
+        <sysproperty key="msclient.mssts.url" value="${msclient.mssts.url}"/>
+        <sysproperty key="sts" value="${sts}"/>
+	<sysproperty key="java.endorsed.dirs" value="${glassfish.home}/lib/endorsed"/> 
     </java>  
     <replace  dir="etc/service" includes="PingService*.wsdl" value="WCF-HOST" token="${ms.host}"/>
     <replace  dir="${basedir}/etc/client-config" value="WCF-HOST" token="${ms.host}"/>
