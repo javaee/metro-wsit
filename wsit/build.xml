@@ -151,7 +151,6 @@
         <copy todir="${wsit.integration.dir}">
             <fileset dir="${lib.runtime.dir}">
                 <include name="xws-security.jar"/>
-                <include name="orb-connection-cache.jar"/>
                 <include name="trust-jaxbbindings.jar"/>
                 <include name="secconv-jaxbbindings.jar"/>
             </fileset>
@@ -162,7 +161,6 @@
                        <include name="wsit-tools*.*"/>
                        <include name="xws-security.jar"/>
                        <include name="*src*"/>
-                       <include name="orb-connection-cache.jar"/>
                        <include name="trust-jaxbbindings.jar"/>
                        <include name="wstx-*.*"/>
                    </fileset>

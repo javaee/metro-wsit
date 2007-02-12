@@ -22,8 +22,6 @@
 
 package com.sun.xml.ws.transport.tcp.server;
 
-import com.sun.corba.se.spi.orbutil.transport.ConnectionCacheFactory;
-import com.sun.corba.se.spi.orbutil.transport.InboundConnectionCache;
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.transport.tcp.io.Connection;
@@ -36,6 +34,8 @@ import com.sun.xml.ws.transport.tcp.util.Version;
 import com.sun.xml.ws.transport.tcp.util.VersionController;
 import com.sun.xml.ws.transport.tcp.io.DataInOutUtils;
 import com.sun.xml.ws.transport.tcp.wsit.ConnectionManagementSettings;
+import com.sun.xml.ws.transport.tcp.connectioncache.spi.transport.InboundConnectionCache;
+import com.sun.xml.ws.transport.tcp.connectioncache.spi.transport.ConnectionCacheFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;

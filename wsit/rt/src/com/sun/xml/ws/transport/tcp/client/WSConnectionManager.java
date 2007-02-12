@@ -22,10 +22,6 @@
 
 package com.sun.xml.ws.transport.tcp.client;
 
-import com.sun.corba.se.spi.orbutil.transport.ConnectionCacheFactory;
-import com.sun.corba.se.spi.orbutil.transport.ConnectionFinder;
-import com.sun.corba.se.spi.orbutil.transport.ContactInfo;
-import com.sun.corba.se.spi.orbutil.transport.OutboundConnectionCache;
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.WSService;
@@ -49,6 +45,10 @@ import com.sun.xml.ws.transport.tcp.servicechannel.stubs.ServiceChannelWSImplSer
 import com.sun.xml.ws.transport.tcp.util.BindingUtils;
 import com.sun.xml.ws.transport.tcp.io.DataInOutUtils;
 import com.sun.xml.ws.transport.tcp.wsit.ConnectionManagementSettings;
+import com.sun.xml.ws.transport.tcp.connectioncache.spi.transport.ConnectionFinder;
+import com.sun.xml.ws.transport.tcp.connectioncache.spi.transport.OutboundConnectionCache;
+import com.sun.xml.ws.transport.tcp.connectioncache.spi.transport.ConnectionCacheFactory;
+import com.sun.xml.ws.transport.tcp.connectioncache.spi.transport.ContactInfo;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;

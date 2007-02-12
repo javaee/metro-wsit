@@ -31,10 +31,9 @@ import java.util.Map;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 /**
- *
  * @author Alexey Stashok
  */
-public final class WSTCPURI implements com.sun.corba.se.spi.orbutil.transport.ContactInfo<ConnectionSession> {
+public final class WSTCPURI implements com.sun.xml.ws.transport.tcp.connectioncache.spi.transport.ContactInfo<ConnectionSession> {
     public String host;
     public int port;
     public String path;

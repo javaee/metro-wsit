@@ -31,7 +31,7 @@ import java.io.IOException;
  * @author Alexey Stashok
  */
 @SuppressWarnings({"unchecked"})
-public abstract class ConnectionSession implements com.sun.corba.se.spi.orbutil.transport.Connection {
+public abstract class ConnectionSession implements com.sun.xml.ws.transport.tcp.connectioncache.spi.transport.Connection {
     protected static final ChannelSettings zeroChannelSettings = new ChannelSettings();
     
     private Connection connection;
