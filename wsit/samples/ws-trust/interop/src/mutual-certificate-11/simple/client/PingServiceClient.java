@@ -7,7 +7,7 @@ package simple.client;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Holder;
 
-import simple.client.PingService;
+import simple.client.SymmetricFederatedService;
 import simple.client.IPingService;
 import simple.schema.client.Ping;
 
@@ -15,8 +15,8 @@ public class PingServiceClient {
     
     public static void main (String[] args) {
             
-            PingService service = new PingService();
-            IPingService stub = service.getCustomBindingIPingService(); 
+            SymmetricFederatedService service = new SymmetricFederatedService();
+            IPingService stub = service.getScenario5IssuedTokenForCertificateMutualCertificate11(); 
                     
             // use static stubs to override endpoint property of WSDL       
             String serviceURL = System.getProperty("service.url");

@@ -175,8 +175,8 @@
         </wsdl:operation>
     </wsdl:binding>
     
-    <wsdl:service name="PingService">        
-        <wsdl:port name="CustomBinding_IPingService" binding="tns:Scenario_5_IssuedTokenForCertificate_MutualCertificate11">
+    <wsdl:service name="SymmetricFederatedService">
+        <wsdl:port binding="tns:Scenario_5_IssuedTokenForCertificate_MutualCertificate11" name="Scenario_5_IssuedTokenForCertificate_MutualCertificate11">
             <soap12:address location="REPLACE_WITH_ACTUAL_URL"/>
         </wsdl:port>
     </wsdl:service>

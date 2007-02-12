@@ -31,8 +31,8 @@
         interface="simple.server.IPingService"
         implementation="simple.server.PingImpl"
         wsdl="WEB-INF/wsdl/PingService.wsdl"    
-        service="{http://tempuri.org/}PingService"
-        port="{http://tempuri.org/}CustomBinding_IPingService"
+        service="{http://tempuri.org/}SymmetricFederatedService"
+        port="{http://tempuri.org/}Scenario_5_IssuedTokenForCertificate_MutualCertificate11"
         binding="http://www.w3.org/2003/05/soap/bindings/HTTP/" 
         url-pattern="/simple" />
         <!-- add binding to enable addressing. 
