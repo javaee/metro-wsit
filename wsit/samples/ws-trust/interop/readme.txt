@@ -46,6 +46,11 @@ To Install WSIT and run the samples:
 
 <jvm-options>-Djavax.net.ssl.keyStore=${com.sun.aas.installRoot}/xws-security/etc/server-keystore.jks</jvm-options>
 <jvm-options>-Djavax.net.ssl.trustStore=${com.sun.aas.installRoot}/xws-security/etc/server-truststore.jks</jvm-options>
+	For tomcat, the connection attributes should be set as follows. 
+<Connector port="8181" ....... 
+keystoreFile="xws-security/etc/server-keystore.jks" truststoreFile="xws-security/etc/server-truststore.jks" keyAlias="bob"
+
+Note that the port number is changed to 8181 as by default the URLs work with glassfish default SSL port number of 8181.
 
 
 -------------------------------------------------------------------------------------------------------
