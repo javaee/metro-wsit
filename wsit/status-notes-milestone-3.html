@@ -694,7 +694,7 @@ make the Application Context Identifiers unique.<br>
 <hr>
 <h2><a name="44691"></a>Secure Conversation Status</h2>
 <h4>WCF Interoperability</h4>
-<pre>  MS-&gt;S :  5/5 : (starting from WSDL)<br>  S-&gt;MS :  5/5 : (starting from WSDL)<br>  S -&gt;S :  5/5 : (starting from WSDL)<br><br></pre>
+<pre>  MS-&gt;S :  35/36 : (starting from WSDL)<br>  S-&gt;MS :  36/36 : (starting from WSDL)<br>  S -&gt;S :  36/36 : (starting from WSDL)<br><br></pre>
 <p>NOTE: No test scenarios were executed that started from Java.</p>
 <h4>What is Not Implemented</h4>
 <p>The following features have not been implemented:</p>
@@ -702,80 +702,22 @@ make the Application Context Identifiers unique.<br>
   <li>Renewing of Security Context </li>
   <li>Client initiated security context </li>
 </ul>
-<h4>Known Issues</h4>
-<table border="1" cellpadding="2" cellspacing="2">
-  <tbody>
-    <tr>
-      <th>
-      <p>Interoperability Feature</p>
-      </th>
-      <th>
-      <p>Status/Workaround</p>
-      </th>
-    </tr>
-    <tr>
-      <td>
-      <p>Client provided entropy for generating SecurityContextToken</p>
-      </td>
-      <td>
-      <p>We rely on security policy to determine if client entropy is
-needed. MS require it by default. This breaks interoperbility in
-certain casees. <br>
-      <br>
-WORKAROUND: We believe this is an issue with MS. To interop with MS for
-now, we have to modified their security policy to include assertion for
-requiring client entropy.</p>
-      </td>
-    </tr>
-  </tbody>
-</table>
-<p>Notes:</p>
-<p>For MS to SUN TransportBinding scenario, import the issuer of SSL
-certificate as Trusted Root CA and provide the username and password in
-the client program as shown below
-</p>
-<pre>client.ClientCredentials.UserName.UserName = "username";<br>client.ClientCredentials.UserName.Password = "password";<br></pre>
-The other point to note is that app.config file should not have
-identity element for the endpoint
-for TransportBinding scenario.
-<p></p>
+
 <!-- ================================================== -->
 <br>
 <hr>
 <h2><a name="96126"></a>Trust Status</h2>
 <h4>WCF Interoperability</h4>
-<pre>   Client -&gt; STS -&gt; Service<br>    MS    -&gt;  S  -&gt; MS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp; 0/4 : (not tested yet)<br><br>&nbsp;&nbsp;&nbsp; MS    -&gt; MS&nbsp; -&gt; S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp; 0/4 : (not tested yet)<br><br>&nbsp;&nbsp;&nbsp; MS    -&gt; S&nbsp;&nbsp; -&gt; S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp; 3/4 : (starting from WSDL)&nbsp;&nbsp;&nbsp; <br>&nbsp;  <br>    S     -&gt; S&nbsp;&nbsp; -&gt; S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp; 4/4 : (starting from WSDL)<br><br>&nbsp;&nbsp;&nbsp; S     -&gt; S&nbsp;&nbsp; -&gt; MS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp; 4/4 : (starting from WSDL)<br><br>&nbsp;&nbsp;&nbsp; S     -&gt; MS&nbsp; -&gt; MS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp; 3/4 : (starting from WSDL)<br><br>&nbsp;&nbsp;&nbsp; S     -&gt; MS&nbsp; -&gt; S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp; 4/4 : (starting from WSDL)<br></pre>
+<pre>   Client -&gt; STS -&gt; Service<br>    MS    -&gt;  S  -&gt; MS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp; 4/4 <br><br>&nbsp;&nbsp;&nbsp; MS    -&gt; MS&nbsp; -&gt; S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp; 4/4 <br><br>&nbsp;&nbsp;&nbsp; MS    -&gt; S&nbsp;&nbsp; -&gt; S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp; 4/4 : (starting from WSDL)&nbsp;&nbsp;&nbsp; <br>&nbsp;  <br>    S     -&gt; S&nbsp;&nbsp; -&gt; S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp; 5/5 : (starting from WSDL)<br><br>&nbsp;&nbsp;&nbsp; S     -&gt; S&nbsp;&nbsp; -&gt; MS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp; 5/5 : (starting from WSDL)<br><br>&nbsp;&nbsp;&nbsp; S     -&gt; MS&nbsp; -&gt; MS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp; 5/5 : (starting from WSDL)<br><br>&nbsp;&nbsp;&nbsp; S     -&gt; MS&nbsp; -&gt; S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp; 5/5 : (starting from WSDL)<br></pre>
 <p>NOTE: No test scenarios were executed that started from Java.</p>
 <h4>What is Not Implemented</h4>
 <p>The following features have not been implemented:</p>
 <ul>
   <li>Token Validation protocol. </li>
-  <li>Issusing SAML 2.0 assertion. </li>
-  <li>Support for issuring key types other than symmetric key </li>
-  <li>Support for claim types attributes </li>
+  <li>Token Cancellation Protocol. </li>
+  <li>Token Renewing Protocol </li>
 </ul>
-<h4>Known Issues</h4>
-<table border="1" cellpadding="2" cellspacing="2">
-  <tbody>
-    <tr>
-      <th>
-      <p>Interoperability Feature</p>
-      </th>
-      <th>
-      <p>Status/Workaround</p>
-      </th>
-    </tr>
-    <tr>
-      <td>
-      <p>Issued token in encrypted formis used to establish a
-SecurityContextToken</p>
-      </td>
-      <td>
-      <p>An error is thrown on the service side for the RST/SCT request.</p>
-      </td>
-    </tr>
-  </tbody>
-</table>
+
 <!-- ================================================== -->
 <br>
 <hr>
