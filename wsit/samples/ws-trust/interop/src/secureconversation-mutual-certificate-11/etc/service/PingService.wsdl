@@ -192,7 +192,7 @@
         <wsdl:part name="PingResponse" element="q:PingResponse" xmlns:q="http://xmlsoap.org/Ping"/>
     </wsdl:message>
     
-    <wsdl:portType msc:usingSession="false" name="IPingService">
+    <wsdl:portType  name="IPingService">
         <wsdl:operation name="Ping">
             <wsdl:input wsap10:Action="http://xmlsoap.org/Ping" name="PingRequest" message="tns:PingRequest"/>
             <wsdl:output wsap10:Action="http://xmlsoap.org/Ping" name="PingResponse" message="tns:PingResponse"/>

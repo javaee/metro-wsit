@@ -41,6 +41,13 @@ To Install WSIT and run the samples:
    in the microsoft wsdl, set the STS manually by uncommenting the approprite STS in etc/client-config/wsit-client.xml .
    For s-m-m, set the microsoft STS, and for s-s-m, set the sun STS
 
+10. For the transport-binding , set the keystore and trust store of server to the keystores used in the samples. For eg, in domain.xml
+   the properties should be as follows in glassfish
+
+<jvm-options>-Djavax.net.ssl.keyStore=${com.sun.aas.installRoot}/xws-security/etc/server-keystore.jks</jvm-options>
+<jvm-options>-Djavax.net.ssl.trustStore=${com.sun.aas.installRoot}/xws-security/etc/server-truststore.jks</jvm-options>
+
+
 -------------------------------------------------------------------------------------------------------
 [1] https://wsit.dev.java.net/source/browse/*checkout*/wsit/wsit/docs/howto/WSIT_Download_Build_Install.html
 [2] http://java.sun.com/javaee/downloads/index.jsp
