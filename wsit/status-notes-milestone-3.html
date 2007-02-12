@@ -724,11 +724,12 @@ make the Application Context Identifiers unique.<br>
 <h2><a name="98261"></a>Coordination/Atomic Transactions Status</h2>
 <h4>WCF Interoperability</h4>
 (Test config: GF b34, MS WCF RTM, WSIT M3(b06), JDK 5)
-<pre>non-secure (meaning http used for WS-TX protocol messages, no security on application messages):<br><br>  MS-&gt;S : 0/0 (interop w/MS requires HTTPS)<br>  S-&gt;MS : 0/0 (interop w/MS requires HTTPS)<br>  S-&gt;S  : 3/3<br><br>secure (meaning https used for WS-TX protocol messages, no security on application messages):<br><br>  MS-&gt;S : 3/3 (see "Known Issues" below)<br>  S-&gt;MS : 3/3<br>  S-&gt;S  : 0/3 (haven't tested yet)<br><br></pre>
+<pre>non-secure (meaning http used for WS-TX protocol messages, no security on application messages):<br><br>  MS-&gt;S : 0/0 (interop w/MS requires HTTPS)<br>  S-&gt;MS : 0/0 (interop w/MS requires HTTPS)<br>  S-&gt;S  : 3/3<br><br>secure (meaning https used for WS-TX protocol messages, no security on application messages):<br><br>  MS-&gt;S : 3/3<br>  S-&gt;MS : 3/3<br>  S-&gt;S  : 0/3 (haven't tested yet)<br><br></pre>
 <h4>What is Not Implemented</h4>
 <p> </p>
 <ul>
   <li>Transaction recovery</li>
+  <li>Processing Transaction Attributes in EJB deployment descriptor</li>
 </ul>
 <p></p>
 <h4>Known Issues</h4>
@@ -736,29 +737,27 @@ make the Application Context Identifiers unique.<br>
   <tbody>
     <tr>
       <th>
-      <p>Interoperability Feature</p>
+      <p>Feature</p>
       </th>
       <th>
       <p>Status/Workaround</p>
       </th>
     </tr>
     <tr>
-      <td>Protocol service context root</td>
-      <td>The WS-Coordination / WS-AtomicTransaction protocol service
-context root changed in GF b26. If you are running against GF b26 or
-b27 you <b>must</b> place the following in your
-AS_HOME/domains/domainXX/config/domain.xml under the <b>&lt;java-config&gt;</b>
-element:<br>
-      <blockquote>&lt;jvm-options&gt;-Dcom.sun.xml.ws.tx.contextroot=/wstx-services&lt;/jvm-options&gt;</blockquote>
-When running against GF b28 or later, you <b>must</b> remove this
-setting. </td>
+      <td>Running WS-TX tutorial sample results in stack trace in server.log. <a
+ href="https://wsit.dev.java.net/issues/show_bug.cgi?id=336">See Issue# 336</a> for details.</td>
+      <td>To Be Fixed in next release</td>
     </tr>
     <tr>
-      <td>MS-&gt;S SOAP Fault</td>
-      <td>An extraneous SOAP fault is being generated and sent to the
-MS service immediately after WSIT recieves and processes a
-&lt;RegisterResponse&gt;
-message. This does not impact the successful completion of the tests.</td>
+      <td>Workaround built into running WS-TX tutorial sample. <a
+ href="https://wsit.dev.java.net/issues/show_bug.cgi?id=278">See Issue# 278</a> for details.</td>
+      <td>To Be Fixed in next release. Extraneous step to run tutorial will be removed.</td>
+    </tr>
+    <tr>
+      <td>Support for Persistence Context with Toplink Entity Manager. See <a
+ href="https://glassfish.dev.java.net/issues/show_bug.cgi?id=2376">See Issue# 2376</a>
+      </td>
+      <td>To be fixed in Glassfish v2 in future release.</td>
     </tr>
   </tbody>
 </table>
