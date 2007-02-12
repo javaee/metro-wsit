@@ -175,7 +175,7 @@ public class WSConnectionManager implements ConnectionFinder<ConnectionSession>,
             }
             final Connection connection = Connection.create(tcpURI.host, tcpURI.port);
             doSendMagicAndCheckVersions(connection);
-            final ConnectionSession connectionSession = new ClientConnectionSession(tcpURI.hashCode(), connection, this);
+            final ConnectionSession connectionSession = new ClientConnectionSession(connection, this);
             
             final ServiceChannelWSImplService serviceChannelWS = new ServiceChannelWSImplService();
             final ServiceChannelWSImpl serviceChannelWSImplPort = serviceChannelWS.getServiceChannelWSImplPort();

@@ -46,13 +46,10 @@ public final class ClientConnectionSession extends ConnectionSession {
     private Map<String, Object> attributes = new HashMap<String, Object>(2);
     private Map<String, ChannelContext> url2ChannelMap = new HashMap<String, ChannelContext>();
     
-    private final int dstAddressHashKey;
-    
     private boolean isClosed;
     
-    public ClientConnectionSession(final int dstAddressHashKey, final Connection connection, final SessionCloseListener sessionCloseListener) {
+    public ClientConnectionSession(final Connection connection, final SessionCloseListener sessionCloseListener) {
         super(connection, sessionCloseListener);
-        this.dstAddressHashKey = dstAddressHashKey;
         init();
     }
     
@@ -87,10 +84,6 @@ public final class ClientConnectionSession extends ConnectionSession {
     
     public @Nullable Object getAttribute(@NotNull final String name) {
         return attributes.get(name);
-    }
-    
-    public int getDstAddressHashKey() {
-        return dstAddressHashKey;
     }
     
     public int getChannelsAmount() {
