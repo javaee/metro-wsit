@@ -62,7 +62,7 @@
                                      <tc:Contract>com.sun.xml.ws.security.trust.impl.IssueSamlTokenContractImpl</tc:Contract>
                                      <tc:Issuer>SunSTS</tc:Issuer>
                                      <tc:ServiceProviders>
-                                            <tc:ServiceProvider endPoint="http://localhost:8080/jaxws-fs/simple" >
+                                            <tc:ServiceProvider endPoint="http://localhost:8080/jaxws-trust-interop-mutual-certificate10/simple" >
                                                   <tc:CertAlias>bob</tc:CertAlias>
                                                   <tc:TokenType>http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV1.1</tc:TokenType>
                                             </tc:ServiceProvider>
@@ -117,7 +117,7 @@
     </wsp:Policy>
     <wsdl:types>
         <xsd:schema targetNamespace="http://tempuri.org/Imports">
-            <xsd:import namespace="http://schemas.message.com/Message" schemaLocation="http://localhost:8080/jaxws-sts/sts?xsd=1"/>
+            <xsd:import namespace="http://schemas.message.com/Message" schemaLocation="http://localhost:8080/jaxws-trust-interop-mutual-certificate10-sts/sts?xsd=1"/>
         </xsd:schema>
     </wsdl:types>
     <wsdl:message name="ISecurityTokenService_IssueToken_InputMessage">
