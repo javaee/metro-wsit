@@ -68,7 +68,7 @@ import java.util.logging.Level;
  * already decided to prepare.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  * @since 1.0
  */
 public class ATParticipant extends Registrant {
@@ -192,9 +192,9 @@ public class ATParticipant extends Registrant {
             }
             if (wsepr != null) {
                 owf.setReplyTo(wsepr);
+            } else {
+                logger.warning("getATCoordinatorWS", LocalizationMessages.NULL_PPS_EPR_WARNING_0016());
             }
-        } else {
-            logger.warning("getATCoordinatorWS", LocalizationMessages.NULL_PPS_EPR_WARNING_0016());
         }
         assert toCPS != null;
         return ATCoordinator.getWSATCoordinatorService().getCoordinator(toCPS, owf);
