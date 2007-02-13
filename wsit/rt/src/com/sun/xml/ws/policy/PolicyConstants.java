@@ -45,9 +45,14 @@ public final class PolicyConstants {
     public static final String POLICY_NAMESPACE_PREFIX = "wsp";
 
     /**
-     * Standard WS-Policy namespace URI
-     */       
+     * Standard WS-Security Utility namespace URI, used in Policy Id
+     */
     public static final String WSU_NAMESPACE_URI = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd";
+    
+    /**
+     * Standard WS-Security Utility namespace prefix, used in Policy Id
+     */
+    public static final String WSU_NAMESPACE_PREFIX = "wsu";
 
     /**
      * Standard XML namespace URI

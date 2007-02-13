@@ -113,10 +113,12 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
                 LOGGER.fine("start", LocalizationMessages.WSP_001027_FAILED_TO_READ_WSIT_CFG(), e);
             }            
             
-            try {
-                context.getRoot()._namespace(PolicyConstants.POLICY_NAMESPACE_URI, PolicyConstants.POLICY_NAMESPACE_PREFIX);
-                final WSBinding binding = context.getBinding();
+            final TypedXmlWriter root = context.getRoot();
+            root._namespace(PolicyConstants.POLICY_NAMESPACE_URI, PolicyConstants.POLICY_NAMESPACE_PREFIX);
+            root._namespace(PolicyConstants.WSU_NAMESPACE_URI, PolicyConstants.WSU_NAMESPACE_PREFIX);
+            final WSBinding binding = context.getBinding();
                 
+            try {
                 for (int i = 0; i < policyMapUpdateProviders.length; i++) {
                     policyMapUpdateProviders[i].update(extenders[i], policyMap, seiModel, binding);
                     extenders[i].disconnect();
