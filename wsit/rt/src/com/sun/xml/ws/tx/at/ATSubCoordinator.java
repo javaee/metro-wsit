@@ -142,7 +142,6 @@ public class ATSubCoordinator extends ATCoordinator {
         }
 
         public void abort() {
-            // TODO: should this only be volatile participants or is okay to do both.
             initiateVolatileRollback();
             // TODO: is waitForVolatileRollbackResponse needed.
             rootVolatileParticipant.aborted();
@@ -172,9 +171,7 @@ public class ATSubCoordinator extends ATCoordinator {
                     }
                 } catch (XAException ex) {
                     setAborting();
-                    if (logger.isLogging(Level.INFO)) {
-                        logger.info("DurableParticipant.prepare", LocalizationMessages.XATERM_THREW_0023(ex.getLocalizedMessage()));
-                    }
+                    logger.info("DurableParticipant.prepare", LocalizationMessages.XATERM_THREW_0023(ex.getLocalizedMessage()));
                     throw new TXException(ex.getClass().getName());
                 }
             }
@@ -216,9 +213,7 @@ public class ATSubCoordinator extends ATCoordinator {
                 // TODO: check WS-AT CV state table if should send aborted to root coordinator here.
                 rootDurableParticipant.aborted();
             } else {
-                if (logger.isLogging(Level.INFO)) {
-                    logger.info("DurableParticipant.committed", LocalizationMessages.COMMITTED_SUB_COOR_0025(getIdValue()));
-                }
+                logger.info("DurableParticipant.committed", LocalizationMessages.COMMITTED_SUB_COOR_0025(getIdValue()));
                 rootDurableParticipant.committed();
             }
         }
@@ -226,14 +221,10 @@ public class ATSubCoordinator extends ATCoordinator {
         public void abort() {
              if (getXATerminator() != null && xaResult == XA_OK) {
                 try {
-                    if (logger.isLogging(Level.SEVERE)) {
-                        logger.severe("ATSubCoordinator.DurableParticipant.abort", LocalizationMessages.XATERM_ABORT_0026(getIdValue()));
-                    }
+                    logger.severe("ATSubCoordinator.DurableParticipant.abort", LocalizationMessages.XATERM_ABORT_0026(getIdValue()));
                     getXATerminator().rollback(getCoordinationXid());
                 } catch (XAException ex) {
-                    if (logger.isLogging(Level.SEVERE)) {
-                        logger.severe("ATSubCoordinator.DurableParticipant.abort", LocalizationMessages.CAUGHT_XAEX_0027(ex.getMessage()));
-                    }
+                    logger.severe("ATSubCoordinator.DurableParticipant.abort", LocalizationMessages.CAUGHT_XAEX_0027(ex.getMessage()));
                 }
             }
             initiateDurableRollback();
@@ -426,5 +417,5 @@ public class ATSubCoordinator extends ATCoordinator {
         }
         super.forget();
     }
-
+    
 }
