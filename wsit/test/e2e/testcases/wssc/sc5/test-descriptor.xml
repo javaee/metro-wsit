@@ -1,4 +1,4 @@
-<descriptor>
+<descriptor transport="http">
   <description>This is SC5 test </description>
   <client href ="test.bsh"/>
   <service basedir="./server">
