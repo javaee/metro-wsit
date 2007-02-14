@@ -117,6 +117,7 @@
             <include name="webservices-rt.jar"/>
             <include name="webservices-tools.jar"/>
             <include name="javaee.jar"/>
+            <include name="activation.jar"/>
         </fileset>
     </path>
 
