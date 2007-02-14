@@ -96,7 +96,7 @@ public class XWSSPolicyGenerator {
     private Vector<SignedElements> signedElements = new Vector<SignedElements>();
     private Vector<EncryptedElements> encryptedElements = new Vector<EncryptedElements>();
     private boolean ignoreST = false;
-    
+    private boolean transportBinding = true;
     private IntegrityAssertionProcessor iAP = null;
     private EncryptionAssertionProcessor eAP = null;
     private Binding policyBinding = null;
@@ -130,25 +130,16 @@ public class XWSSPolicyGenerator {
         }
         if(PolicyUtil.isTransportBinding(binding)){
             TransportBindingProcessor tbp= new TransportBindingProcessor((TransportBinding)binding,isServer, isIncoming,_policyContainer);
-            //    _policyContainer.getMessagePolicy().setAlgorithmSuite(((TransportBinding)binding).getAlgorithmSuite());
-            tbp.process();
-            //   _policyContainer.getMessagePolicy().setLayout(((TransportBinding)binding).getLayout());
-            processNonBindingAssertions(tbp);
-            //TODO
-            //else if(PolicyUtil.isTransportBinding(binding.getName()) ){
-//            //handle Transport Binding.
-//            processTransportBindingPolicy((TransportBinding)binding);
-//
-//        }
+            tbp.process();            
+            processNonBindingAssertions(tbp);   
+            transportBinding = true;
         }else{
             
             iAP = new IntegrityAssertionProcessor(_binding.getAlgorithmSuite(),_binding.isSignContent());
             eAP = new EncryptionAssertionProcessor(_binding.getAlgorithmSuite(),false);
             
             _policyContainer.setPolicyContainerMode(_binding.getLayout());
-            //  _policyContainer.getMessagePolicy().setLayout(_binding.getLayout());
-            if(PolicyUtil.isSymmetricBinding(binding.getName())) {
-                //  _policyContainer.getMessagePolicy().setAlgorithmSuite(((SymmetricBinding) _binding).getAlgorithmSuite());
+            if(PolicyUtil.isSymmetricBinding(binding.getName())) {                
                 SymmetricBindingProcessor sbp =  new SymmetricBindingProcessor((SymmetricBinding) _binding, _policyContainer,
                         isServer, isIncoming,signedParts,encryptedParts,
                         signedElements,encryptedElements);
@@ -166,8 +157,7 @@ public class XWSSPolicyGenerator {
                 if( wssAssertion != null && PolicyUtil.isWSS11(wssAssertion)){
                     abp.setWSS11((WSSAssertion)wssAssertion);
                 }
-                abp.process();
-                //  _policyContainer.getMessagePolicy().setAlgorithmSuite(((AsymmetricBinding) _binding).getAlgorithmSuite());
+                abp.process();                
                 processNonBindingAssertions(abp);
                 abp.close();
             }
@@ -189,6 +179,9 @@ public class XWSSPolicyGenerator {
             if(isIncoming && reqElements.size() > 0){
                 RequiredElementsProcessor rep =  new RequiredElementsProcessor(reqElements,mp);
                 rep.process();
+            }
+            if(transportBinding){
+                mp.setSSL(transportBinding);
             }
         }catch(PolicyGenerationException pe){
             pe.printStackTrace();
