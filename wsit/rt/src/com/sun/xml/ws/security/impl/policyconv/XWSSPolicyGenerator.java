@@ -96,7 +96,7 @@ public class XWSSPolicyGenerator {
     private Vector<SignedElements> signedElements = new Vector<SignedElements>();
     private Vector<EncryptedElements> encryptedElements = new Vector<EncryptedElements>();
     private boolean ignoreST = false;
-    private boolean transportBinding = true;
+    private boolean transportBinding = false;
     private IntegrityAssertionProcessor iAP = null;
     private EncryptionAssertionProcessor eAP = null;
     private Binding policyBinding = null;
