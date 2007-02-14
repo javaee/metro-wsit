@@ -153,8 +153,8 @@ the Sun Client classpath</p>
 <h4>What is Not Implemented</h4>
 <h4>Known Issues</h4>
 <ul>
-  <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=341">
-WCF-RTM-BUG : Serializer bug with multi-dimemsional arrays </a> </li>
+  <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=341">WCF-RTM-BUG
+: Serializer bug with multi-dimemsional arrays </a> </li>
 </ul>
 <!-- ================================================== -->
 <br>
@@ -207,24 +207,22 @@ SecureTokenRequest is not supported in this release </li>
   <li>The @wsc:Instance attribute on wsse:Reference for referencing
 specific Secure Context Token instances is not supported in this
 release </li>
-  <li>The sha256 signature algorithm is not supported by the underlying
-JSR 105 RI&nbsp; and therefore all AlgorithmSuite identifiers that
-imply the sha256 signature algorithm are not supported.</li>
+  <li>The sha256 and sha512 signature algorithm(s) are not supported
+for this release and therefore all AlgorithmSuite identifiers that
+imply the sha256 and sha512 signature algorithm are not supported.</li>
   <li>The Policy Verification for incoming messages is not capable
 of&nbsp; catching a Mismatch in AlgorithmSuite values between the
 Service Policy and the Policy used by the Client to secure the message
 (refer known Issue# 22)</li>
   <li>The use of a Certstore to configure Trusted Non-CA Certificates
-is not supported in this release<br>
-  </li>
-  <li>The Following WS-SecurityPolicy Features from specification Draft
-: Jul 2005 Ver 1.1 are unsupported in this release of WSIT</li>
+is not supported in this release</li>
   <li>SAML Security Mechanisms defined in Netbeans WSIT Plugin do not
 work for JSR 109 Applications</li>
   <li>Use of ThumbprintReference type for X509 Tokens
 (&lt;sp:RequireThumbprintReference/&gt; under &lt;sp:X509Token&gt;) is
-not supported for JSR 109 Applications.<br>
-  </li>
+not supported for JSR 109 Applications.</li>
+  <li>The Following WS-SecurityPolicy Features from specification Draft
+: Jul 2005 Ver 1.1 are unsupported in this release of WSIT</li>
 </ul>
 <table border="1" cellpadding="2" cellspacing="3" width="884">
   <col width="92"> <col width="214"> <col width="552"> <tbody>
@@ -702,7 +700,6 @@ make the Application Context Identifiers unique.<br>
   <li>Renewing of Security Context </li>
   <li>Client initiated security context </li>
 </ul>
-
 <!-- ================================================== -->
 <br>
 <hr>
@@ -717,7 +714,6 @@ make the Application Context Identifiers unique.<br>
   <li>Token Cancellation Protocol. </li>
   <li>Token Renewing Protocol </li>
 </ul>
-
 <!-- ================================================== -->
 <br>
 <hr>
@@ -744,19 +740,24 @@ make the Application Context Identifiers unique.<br>
       </th>
     </tr>
     <tr>
-      <td>Running WS-TX tutorial sample results in meaningless stack traces in server.log. <a
- href="https://wsit.dev.java.net/issues/show_bug.cgi?id=336">See Issue# 336</a> for details.</td>
+      <td>Running WS-TX tutorial sample results in meaningless stack
+traces in server.log. <a
+ href="https://wsit.dev.java.net/issues/show_bug.cgi?id=336">See Issue#
+336</a> for details.</td>
       <td>To Be Fixed in next release</td>
     </tr>
     <tr>
       <td>Workaround built into running WS-TX tutorial sample. <a
- href="https://wsit.dev.java.net/issues/show_bug.cgi?id=278">See Issue# 278</a> for details.</td>
-      <td>To Be Fixed in next release. Extraneous step to run tutorial will be removed.</td>
+ href="https://wsit.dev.java.net/issues/show_bug.cgi?id=278">See Issue#
+278</a> for details.</td>
+      <td>To Be Fixed in next release. Extraneous step to run tutorial
+will be removed.</td>
     </tr>
     <tr>
-      <td>Support for Persistence Context with TopLink Entity Manager. See <a
- href="https://glassfish.dev.java.net/issues/show_bug.cgi?id=2376">See Issue# 2376</a>
-      </td>
+      <td>Support for Persistence Context with TopLink Entity Manager.
+See <a
+ href="https://glassfish.dev.java.net/issues/show_bug.cgi?id=2376">See
+Issue# 2376</a> </td>
       <td>To be fixed in future release of GlassFish v2.</td>
     </tr>
   </tbody>
