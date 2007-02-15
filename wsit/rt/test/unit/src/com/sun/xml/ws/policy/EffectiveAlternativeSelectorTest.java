@@ -22,9 +22,7 @@
 
 package com.sun.xml.ws.policy;
 
-import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelUnmarshaller;
-import com.sun.xml.ws.policy.spi.PolicyAssertionValidator;
 import java.util.HashSet;
 import javax.xml.namespace.QName;
 import junit.framework.Test;
@@ -40,11 +38,6 @@ import static com.sun.xml.ws.policy.testutils.PolicyResourceLoader.loadPolicy;
 public class EffectiveAlternativeSelectorTest extends TestCase {
     
     private static final PolicyModelUnmarshaller xmlUnmarshaller = PolicyModelUnmarshaller.getXmlUnmarshaller();
-    private static final PolicyAssertionValidator[] selectors;
-    static {
-        selectors = PolicyUtils.ServiceProvider.load(PolicyAssertionValidator.class);
-    }
-    
     
     public EffectiveAlternativeSelectorTest(String testName) {
         super(testName);
@@ -82,7 +75,7 @@ public class EffectiveAlternativeSelectorTest extends TestCase {
             fail("Insufficient number of alternatives found. At least 2 of them needed.");
         };
         
-        EffectiveAlternativeSelector.doSelection(myModifier, selectors);
+        EffectiveAlternativeSelector.doSelection(myModifier);
         
         if(1!=myExtender.getMap().getEndpointEffectivePolicy(aKey).getNumberOfAssertionSets()) {
             fail("Too many alternatives has left.");
@@ -112,13 +105,13 @@ public class EffectiveAlternativeSelectorTest extends TestCase {
             fail("Insufficient number of alternatives found. At least 2 of them needed.");
         };
         
-        EffectiveAlternativeSelector.doSelection(myModifier, selectors);
+        EffectiveAlternativeSelector.doSelection(myModifier);
         
         if(1!=myExtender.getMap().getEndpointEffectivePolicy(aKey).getNumberOfAssertionSets()) {
             fail("Too many alternatives has left.");
         }
         
-        EffectiveAlternativeSelector.doSelection(myModifier, selectors);
+        EffectiveAlternativeSelector.doSelection(myModifier);
         
         if(1!=myExtender.getMap().getEndpointEffectivePolicy(aKey).getNumberOfAssertionSets()) {
             fail("Too many alternatives has left.");
@@ -137,7 +130,7 @@ public class EffectiveAlternativeSelectorTest extends TestCase {
         PolicyMapKey key = PolicyMap.createWsdlEndpointScopeKey(new QName("service"), new QName("port"));
         extender.putEndpointSubject(key, new PolicySubject("two", emptyPolicy));
         
-        EffectiveAlternativeSelector.doSelection(modifier, selectors);
+        EffectiveAlternativeSelector.doSelection(modifier);
         
         assertTrue(extender.getMap().getEndpointEffectivePolicy(key).isEmpty());
     }
@@ -154,7 +147,7 @@ public class EffectiveAlternativeSelectorTest extends TestCase {
         PolicyMapKey key = PolicyMap.createWsdlEndpointScopeKey(new QName("service"), new QName("port"));
         extender.putEndpointSubject(key, new PolicySubject("two", nullPolicy));
         
-        EffectiveAlternativeSelector.doSelection(modifier, selectors);
+        EffectiveAlternativeSelector.doSelection(modifier);
         
         assertTrue(extender.getMap().getEndpointEffectivePolicy(key).isNull());
     }

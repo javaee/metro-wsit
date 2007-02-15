@@ -22,6 +22,7 @@
 
 package com.sun.xml.ws.policy.jaxws;
 
+import com.sun.xml.ws.policy.AssertionValidationProcessor;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import javax.xml.namespace.QName;
 import javax.xml.stream.FactoryConfigurationError;
@@ -40,11 +41,10 @@ import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.jaxws.privateutil.LocalizationMessages;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import com.sun.xml.ws.policy.jaxws.spi.ModelConfiguratorProvider;
-import com.sun.xml.ws.policy.jaxws.spi.PolicyMapUpdateProvider;
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import com.sun.xml.ws.policy.spi.PolicyAssertionValidator;
-import java.net.URL;
 
+import static com.sun.xml.ws.policy.privateutil.PolicyUtils.Commons.logException;
 /**
  * TODO: write doc
  *
@@ -60,19 +60,13 @@ public class WSDLPolicyMapWrapper implements WSDLExtension {
     private EffectivePolicyModifier mapModifier;
     private PolicyMapExtender mapExtender;
     
-    private static final PolicyAssertionValidator[] validators;
-    static {
-        validators = PolicyUtils.ServiceProvider.load(PolicyAssertionValidator.class);
-    }
-    
-    
     private static ModelConfiguratorProvider[] getModelConfiguratorProviders() {
         if (configurators == null) {
             configurators = PolicyUtils.ServiceProvider.load(ModelConfiguratorProvider.class);
         }
         return configurators;
     }
-
+    
     protected WSDLPolicyMapWrapper(PolicyMap policyMap) {
         if (policyMap == null) {
             throw new NullPointerException(LocalizationMessages.WSP_1016_POLICY_MAP_CAN_NOT_BE_NULL());
@@ -132,34 +126,30 @@ public class WSDLPolicyMapWrapper implements WSDLExtension {
             }
             LOGGER.fine("addClientToServerMap", LocalizationMessages.WSP_1041_CLIENT_CFG_POLICIES_TRANSFERED_INTO_FINAL_POLICY_MAP(policyMap));
         } catch (FactoryConfigurationError ex) {
-            LOGGER.severe("addClientConfigToMap", ex.getMessage(), ex);
-            throw new PolicyException(ex);
+            throw logException(new PolicyException(ex), LOGGER);
         }
         
         LOGGER.exiting("addClientToServerMap");
     }
     
     public void doAlternativeSelection() throws PolicyException {
-        EffectiveAlternativeSelector.doSelection(mapModifier, validators);
+        EffectiveAlternativeSelector.doSelection(mapModifier);
     }
     
     void validateServerSidePolicies() throws PolicyException {
+        AssertionValidationProcessor validationProcessor = AssertionValidationProcessor.getInstance();
         for (Policy policy : policyMap) {
             
             // TODO:  here is a good place to check if the actual policy has only one alternative...
-
+            
             for (AssertionSet assertionSet : policy) {
-                nextAssertion: for (PolicyAssertion assertion : assertionSet) {
-                    
-                    for (PolicyAssertionValidator validator : validators) {
-                        if (validator.validateServerSide(assertion) == PolicyAssertionValidator.Fitness.SUPPORTED) {
-                            continue nextAssertion;
-                        }
-                    }            
-                    
-                    LOGGER.severe("validateServerSidePolicies", LocalizationMessages.WSP_1046_ASSERTION_NOT_SUPPORTED_ON_SERVER_SIDE(assertion.getName()));
-                    throw new PolicyException(LocalizationMessages.WSP_1046_ASSERTION_NOT_SUPPORTED_ON_SERVER_SIDE(assertion.getName()));
-                    
+                for (PolicyAssertion assertion : assertionSet) {
+                    PolicyAssertionValidator.Fitness validationResult = validationProcessor.validateServerSide(assertion);
+                    if (validationResult != PolicyAssertionValidator.Fitness.SUPPORTED) {
+                        throw logException(new PolicyException(LocalizationMessages.WSP_1046_SERVER_SIDE_ASSERTION_VALIDATION_FAILED(
+                                assertion.getName(),
+                                validationResult)), LOGGER);
+                    }
                 }
             }
         }
@@ -171,8 +161,7 @@ public class WSDLPolicyMapWrapper implements WSDLExtension {
                 configurator.configure(model, policyMap);
             }
         } catch (PolicyException e) {
-            LOGGER.severe("configureModel", LocalizationMessages.WSP_1032_FAILED_CONFIGURE_WSDL_MODEL(), e);
-            throw new WebServiceException(LocalizationMessages.WSP_1032_FAILED_CONFIGURE_WSDL_MODEL(), e);
+            throw logException(new WebServiceException(LocalizationMessages.WSP_1032_FAILED_CONFIGURE_WSDL_MODEL(), e), LOGGER);
         }
     }
     
