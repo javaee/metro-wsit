@@ -87,6 +87,7 @@ public class EncryptionAssertionProcessor {
         while(eeItr.hasNext()){
             String xpathTarget = eeItr.next();
             EncryptionTarget target = etCreator.newXpathEncryptionTarget(xpathTarget);
+            binding.addTargetBinding(target);
         }
     }
     
