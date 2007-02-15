@@ -214,6 +214,15 @@ imply the sha256 and sha512 signature algorithm are not supported.</li>
 of&nbsp; catching a Mismatch in AlgorithmSuite values between the
 Service Policy and the Policy used by the Client to secure the message
 (refer known Issue# 22)</li>
+  <li>The Policy Verification for incoming messages is not capable
+of&nbsp; catching&nbsp; a Mismatch in reference types used in Keyinfo
+of Signature (for example if the server requires a KeyIdentifier, but
+the incoming request makes use of&nbsp; Direct reference, then we do
+not detect this). Part of the problem arises from the fact that the
+&lt;sp:Require*&gt; does not entirely govern the reference type
+actually used, the IncludeTokenPolicy on the Token overrides the
+&lt;sp:Require*&gt;. This will be fixed in future releases.<br>
+  </li>
   <li>The use of a Certstore to configure Trusted Non-CA Certificates
 is not supported in this release</li>
   <li>SAML Security Mechanisms defined in Netbeans WSIT Plugin do not
