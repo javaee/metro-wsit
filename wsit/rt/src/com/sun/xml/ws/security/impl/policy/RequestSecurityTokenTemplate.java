@@ -200,6 +200,10 @@ public class RequestSecurityTokenTemplate extends PolicyAssertion implements com
                         isProofEncRequired = true;
                     }else if(PolicyUtil.isEncryption(assertion)){
                         isEncRequired = true;
+                    }else if(PolicyUtil.isClaimsElement(assertion)) {
+                        // Valid assertion.
+                    }else if(PolicyUtil.isEntropyElement(assertion)){
+                        // Valid assertion.
                     }else {
                         if(!assertion.isOptional()){
                             log_invalid_assertion(assertion, isServer,RequestSecurityTokenTemplate);

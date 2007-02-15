@@ -149,8 +149,8 @@ public class Constants {
     public final static String IncludeToken = "IncludeToken";
     public final static String XPath = "XPath";
     public final static String RequireClientCertificate = "RequireClientCertificate";
-    
-    
+    public final static String Claims = "Claims";
+    public final static String Entropy = "Entropy";
     //Trust constants
     public final static String KeyType = "KeyType";
     public final static String KeySize = "KeySize";
@@ -200,7 +200,7 @@ public class Constants {
     public static final String ReferenceProperties = "ReferenceProperties";
     public final static String PortType ="PortType";
     public final static String ServiceName ="ServiceName";
-
+    
     public static void log_invalid_assertion(PolicyAssertion assertion , boolean isServer,String parentAssertion){
         
         Level level = Level.SEVERE;
