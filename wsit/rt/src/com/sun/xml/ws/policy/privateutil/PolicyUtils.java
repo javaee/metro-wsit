@@ -145,7 +145,7 @@ public final class PolicyUtils {
 //         *        exception object.
 //         */
 //        public static <T extends Throwable> T createAndLogException(final Class<T> exceptionClass, final String message, final Throwable cause, final PolicyLogger logger) throws RuntimePolicyUtilsException {
-//            final String errorMessage = LocalizationMessages.WSP_000063_ERROR_WHILE_CONSTRUCTING_EXCEPTION(exceptionClass);
+//            final String errorMessage = LocalizationMessages.WSP_0063_ERROR_WHILE_CONSTRUCTING_EXCEPTION(exceptionClass);
 //            try {
 //                final Constructor<T> constructor = exceptionClass.getConstructor(String.class);
 //                final T exception = constructor.newInstance(message);
@@ -237,7 +237,7 @@ public final class PolicyUtils {
                 try {
                     resource.close();
                 } catch (IOException e) {
-                    LOGGER.warning("closeResource", LocalizationMessages.WSP_000023_UNEXPECTED_ERROR_WHILE_CLOSING_RESOURCE(resource.toString()), e);
+                    LOGGER.warning("closeResource", LocalizationMessages.WSP_0023_UNEXPECTED_ERROR_WHILE_CLOSING_RESOURCE(resource.toString()), e);
                 }
             }
         }
@@ -254,7 +254,7 @@ public final class PolicyUtils {
                 try {
                     reader.close();
                 } catch (XMLStreamException e) {
-                    LOGGER.warning("closeResource", LocalizationMessages.WSP_000023_UNEXPECTED_ERROR_WHILE_CLOSING_RESOURCE(reader.toString()), e);
+                    LOGGER.warning("closeResource", LocalizationMessages.WSP_0023_UNEXPECTED_ERROR_WHILE_CLOSING_RESOURCE(reader.toString()), e);
                 }
             }
         }
@@ -462,7 +462,7 @@ public final class PolicyUtils {
         }
         
         private static String createExceptionMessage(final Object target, final Object[] parameters, final String methodName) {
-            return LocalizationMessages.WSP_000061_METHOD_INVOCATION_FAILED(target.getClass().getName(), methodName, Arrays.asList(parameters).toString());
+            return LocalizationMessages.WSP_0061_METHOD_INVOCATION_FAILED(target.getClass().getName(), methodName, Arrays.asList(parameters).toString());
         }
     }
     
@@ -588,13 +588,13 @@ public final class PolicyUtils {
                 c = quoted.charAt(i);
                 if ('%' == c) {                         // next escape sequence found
                     if ((i + 2) > quoted.length()) {
-                        throw Commons.logException(new RuntimePolicyUtilsException(LocalizationMessages.WSP_000079_ERROR_WHILE_RFC_2396_UNESCAPING(quoted)),
+                        throw Commons.logException(new RuntimePolicyUtilsException(LocalizationMessages.WSP_0079_ERROR_WHILE_RFC_2396_UNESCAPING(quoted)),
                                 false, LOGGER);
                     }
                     hi = Character.digit(quoted.charAt(++i), 16);
                     lo = Character.digit(quoted.charAt(++i), 16);
                     if ((0 > hi) || (0 > lo)) {
-                        throw Commons.logException(new RuntimePolicyUtilsException(LocalizationMessages.WSP_000079_ERROR_WHILE_RFC_2396_UNESCAPING(quoted)),
+                        throw Commons.logException(new RuntimePolicyUtilsException(LocalizationMessages.WSP_0079_ERROR_WHILE_RFC_2396_UNESCAPING(quoted)),
                                 false, LOGGER);
                     }
                     unquoted[newLength++] = (byte) (hi * 16 + lo);
@@ -605,7 +605,7 @@ public final class PolicyUtils {
             try {
                 return new String(unquoted, 0, newLength, "utf-8");
             } catch (UnsupportedEncodingException uee) {
-                throw Commons.logException(new RuntimePolicyUtilsException(LocalizationMessages.WSP_000079_ERROR_WHILE_RFC_2396_UNESCAPING(quoted), uee),
+                throw Commons.logException(new RuntimePolicyUtilsException(LocalizationMessages.WSP_0079_ERROR_WHILE_RFC_2396_UNESCAPING(quoted), uee),
                         true, LOGGER);
             }
         }

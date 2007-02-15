@@ -115,8 +115,8 @@ public final class PolicyMap implements Iterable<Policy> {
         
         private PolicyMapKey createLocalCopy(final PolicyMapKey key) {
             if (key == null) {
-                LOGGER.severe("createLocalCopy", LocalizationMessages.WSP_000045_POLICY_MAP_KEY_MUST_NOT_BE_NULL());
-                throw new NullPointerException(LocalizationMessages.WSP_000045_POLICY_MAP_KEY_MUST_NOT_BE_NULL());
+                LOGGER.severe("createLocalCopy", LocalizationMessages.WSP_0045_POLICY_MAP_KEY_MUST_NOT_BE_NULL());
+                throw new NullPointerException(LocalizationMessages.WSP_0045_POLICY_MAP_KEY_MUST_NOT_BE_NULL());
             }
             
             final PolicyMapKey localKeyCopy = new PolicyMapKey(key);
@@ -138,14 +138,14 @@ public final class PolicyMap implements Iterable<Policy> {
                     try {
                         return getEffectivePolicy(key);
                     } catch (PolicyException e) {
-                        LOGGER.severe("iterator:next", LocalizationMessages.WSP_000069_EXCEPTION_WHILE_RETRIEVING_EFFECTIVE_POLICY_FOR_KEY(key), e);
-                        throw new java.lang.IllegalStateException(LocalizationMessages.WSP_000069_EXCEPTION_WHILE_RETRIEVING_EFFECTIVE_POLICY_FOR_KEY(key), e);
+                        LOGGER.severe("iterator:next", LocalizationMessages.WSP_0069_EXCEPTION_WHILE_RETRIEVING_EFFECTIVE_POLICY_FOR_KEY(key), e);
+                        throw new java.lang.IllegalStateException(LocalizationMessages.WSP_0069_EXCEPTION_WHILE_RETRIEVING_EFFECTIVE_POLICY_FOR_KEY(key), e);
                     }
                 }
                 
                 public void remove() {
-                    LOGGER.severe("iterator:remove", LocalizationMessages.WSP_000034_REMOVE_OPERATION_NOT_SUPPORTED());
-                    throw new UnsupportedOperationException(LocalizationMessages.WSP_000034_REMOVE_OPERATION_NOT_SUPPORTED());
+                    LOGGER.severe("iterator:remove", LocalizationMessages.WSP_0034_REMOVE_OPERATION_NOT_SUPPORTED());
+                    throw new UnsupportedOperationException(LocalizationMessages.WSP_0034_REMOVE_OPERATION_NOT_SUPPORTED());
                 }
             };
         }
@@ -407,8 +407,8 @@ public final class PolicyMap implements Iterable<Policy> {
                 faultMessageMap.putSubject(key, subject);
                 break;
             default:
-                LOGGER.severe("putSubject", LocalizationMessages.WSP_000002_UNRECOGNIZED_SCOPE_TYPE(scopeType));
-                throw new IllegalArgumentException(LocalizationMessages.WSP_000002_UNRECOGNIZED_SCOPE_TYPE(scopeType));
+                LOGGER.severe("putSubject", LocalizationMessages.WSP_0002_UNRECOGNIZED_SCOPE_TYPE(scopeType));
+                throw new IllegalArgumentException(LocalizationMessages.WSP_0002_UNRECOGNIZED_SCOPE_TYPE(scopeType));
         }
     }
     
@@ -427,8 +427,8 @@ public final class PolicyMap implements Iterable<Policy> {
     void setNewEffectivePolicyForScope(
             final ScopeType scopeType, final PolicyMapKey key, final Policy newEffectivePolicy) {
         if (scopeType == null || key == null || newEffectivePolicy == null) {
-            LOGGER.severe("setNewEffectivePolicyForScope", LocalizationMessages.WSP_000062_INPUT_PARAMS_MUST_NOT_BE_NULL());
-            throw new NullPointerException(LocalizationMessages.WSP_000062_INPUT_PARAMS_MUST_NOT_BE_NULL());
+            LOGGER.severe("setNewEffectivePolicyForScope", LocalizationMessages.WSP_0062_INPUT_PARAMS_MUST_NOT_BE_NULL());
+            throw new NullPointerException(LocalizationMessages.WSP_0062_INPUT_PARAMS_MUST_NOT_BE_NULL());
         }
         
         switch (scopeType) {
@@ -451,8 +451,8 @@ public final class PolicyMap implements Iterable<Policy> {
                 faultMessageMap.setNewEffectivePolicy(key, newEffectivePolicy);
                 break;
             default:
-                LOGGER.severe("setNewEffectivePolicyForScope", LocalizationMessages.WSP_000002_UNRECOGNIZED_SCOPE_TYPE(scopeType));
-                throw new IllegalArgumentException(LocalizationMessages.WSP_000002_UNRECOGNIZED_SCOPE_TYPE(scopeType));
+                LOGGER.severe("setNewEffectivePolicyForScope", LocalizationMessages.WSP_0002_UNRECOGNIZED_SCOPE_TYPE(scopeType));
+                throw new IllegalArgumentException(LocalizationMessages.WSP_0002_UNRECOGNIZED_SCOPE_TYPE(scopeType));
         }
     }
     
@@ -533,8 +533,8 @@ public final class PolicyMap implements Iterable<Policy> {
      */
     public static PolicyMapKey createWsdlServiceScopeKey(final QName service) throws NullPointerException {
         if (service == null) {
-            LOGGER.severe("createWsdlServiceScopeKey", LocalizationMessages.WSP_000031_SERVICE_PARAM_MUST_NOT_BE_NULL());
-            throw new NullPointerException(LocalizationMessages.WSP_000031_SERVICE_PARAM_MUST_NOT_BE_NULL());
+            LOGGER.severe("createWsdlServiceScopeKey", LocalizationMessages.WSP_0031_SERVICE_PARAM_MUST_NOT_BE_NULL());
+            throw new NullPointerException(LocalizationMessages.WSP_0031_SERVICE_PARAM_MUST_NOT_BE_NULL());
         }
         return new PolicyMapKey(service, null, null);
     }
@@ -549,8 +549,8 @@ public final class PolicyMap implements Iterable<Policy> {
      */
     public static PolicyMapKey createWsdlEndpointScopeKey(final QName service, final QName port) throws NullPointerException {
         if (service == null || port == null) {
-            LOGGER.severe("createWsdlEndpointScopeKey", LocalizationMessages.WSP_000033_SERVICE_AND_PORT_PARAM_MUST_NOT_BE_NULL(service, port));
-            throw new NullPointerException(LocalizationMessages.WSP_000033_SERVICE_AND_PORT_PARAM_MUST_NOT_BE_NULL(service, port));
+            LOGGER.severe("createWsdlEndpointScopeKey", LocalizationMessages.WSP_0033_SERVICE_AND_PORT_PARAM_MUST_NOT_BE_NULL(service, port));
+            throw new NullPointerException(LocalizationMessages.WSP_0033_SERVICE_AND_PORT_PARAM_MUST_NOT_BE_NULL(service, port));
         }
         return new PolicyMapKey(service, port, null);
     }
@@ -606,8 +606,8 @@ public final class PolicyMap implements Iterable<Policy> {
     public static PolicyMapKey createWsdlFaultMessageScopeKey(
             final QName service, final QName port, final QName operation, final QName faultMessage) throws NullPointerException {
         if (service == null || port == null || operation == null || faultMessage == null) {
-            LOGGER.severe("createWsdlFaultMessageScopeKey", LocalizationMessages.WSP_000030_SERVICE_PORT_OPERATION_FAULT_MSG_PARAM_MUST_NOT_BE_NULL(service, port, operation, faultMessage));
-            throw new NullPointerException(LocalizationMessages.WSP_000030_SERVICE_PORT_OPERATION_FAULT_MSG_PARAM_MUST_NOT_BE_NULL(service, port, operation, faultMessage));
+            LOGGER.severe("createWsdlFaultMessageScopeKey", LocalizationMessages.WSP_0030_SERVICE_PORT_OPERATION_FAULT_MSG_PARAM_MUST_NOT_BE_NULL(service, port, operation, faultMessage));
+            throw new NullPointerException(LocalizationMessages.WSP_0030_SERVICE_PORT_OPERATION_FAULT_MSG_PARAM_MUST_NOT_BE_NULL(service, port, operation, faultMessage));
         }
         
         return new PolicyMapKey(service, port, operation, faultMessage);
@@ -615,8 +615,8 @@ public final class PolicyMap implements Iterable<Policy> {
     
     private static PolicyMapKey createOperationOrInputOutputMessageKey(final QName service, final QName port, final QName operation) {
         if (service == null || port == null || operation == null) {
-            LOGGER.severe("createOperationOrInputOutputMessageKey", LocalizationMessages.WSP_000029_SERVICE_PORT_OPERATION_PARAM_MUST_NOT_BE_NULL(service, port, operation));
-            throw new NullPointerException(LocalizationMessages.WSP_000029_SERVICE_PORT_OPERATION_PARAM_MUST_NOT_BE_NULL(service, port, operation));
+            LOGGER.severe("createOperationOrInputOutputMessageKey", LocalizationMessages.WSP_0029_SERVICE_PORT_OPERATION_PARAM_MUST_NOT_BE_NULL(service, port, operation));
+            throw new NullPointerException(LocalizationMessages.WSP_0029_SERVICE_PORT_OPERATION_PARAM_MUST_NOT_BE_NULL(service, port, operation));
         }
         
         return new PolicyMapKey(service, port, operation);
@@ -680,13 +680,13 @@ public final class PolicyMap implements Iterable<Policy> {
                 if (hasNext()) {
                     return currentScopeIterator.next();
                 }
-                LOGGER.severe("iterator:next", LocalizationMessages.WSP_000054_NO_MORE_ELEMS_IN_POLICY_MAP());
-                throw new NoSuchElementException(LocalizationMessages.WSP_000054_NO_MORE_ELEMS_IN_POLICY_MAP());
+                LOGGER.severe("iterator:next", LocalizationMessages.WSP_0054_NO_MORE_ELEMS_IN_POLICY_MAP());
+                throw new NoSuchElementException(LocalizationMessages.WSP_0054_NO_MORE_ELEMS_IN_POLICY_MAP());
             }
             
             public void remove() {
-                LOGGER.severe("iterator:remove", LocalizationMessages.WSP_000034_REMOVE_OPERATION_NOT_SUPPORTED());
-                throw new UnsupportedOperationException(LocalizationMessages.WSP_000034_REMOVE_OPERATION_NOT_SUPPORTED());
+                LOGGER.severe("iterator:remove", LocalizationMessages.WSP_0034_REMOVE_OPERATION_NOT_SUPPORTED());
+                throw new UnsupportedOperationException(LocalizationMessages.WSP_0034_REMOVE_OPERATION_NOT_SUPPORTED());
             }
         };
     }

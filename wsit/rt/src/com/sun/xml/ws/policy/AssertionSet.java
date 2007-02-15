@@ -91,7 +91,7 @@ public final class AssertionSet implements Iterable<PolicyAssertion>, Comparable
     private Collection<QName> immutableVocabulary = Collections.unmodifiableCollection(vocabulary);
     
     private AssertionSet(List<PolicyAssertion> list) {
-        assert (list != null) : LocalizationMessages.WSP_000037_PRIVATE_CONSTRUCTOR_DOES_NOT_TAKE_NULL();
+        assert (list != null) : LocalizationMessages.WSP_0037_PRIVATE_CONSTRUCTOR_DOES_NOT_TAKE_NULL();
         this.assertions = list;
     }
     

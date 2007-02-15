@@ -171,8 +171,8 @@ public final class PolicySourceModel implements Cloneable {
         try {
             clone.rootNode.setParentModel(this);
         } catch (IllegalAccessException e) {
-            LOGGER.severe("clone", LocalizationMessages.WSP_000013_UNABLE_TO_SET_PARENT_MODEL_ON_ROOT(), e);
-            final CloneNotSupportedException cnse = new CloneNotSupportedException(LocalizationMessages.WSP_000013_UNABLE_TO_SET_PARENT_MODEL_ON_ROOT());
+            LOGGER.severe("clone", LocalizationMessages.WSP_0013_UNABLE_TO_SET_PARENT_MODEL_ON_ROOT(), e);
+            final CloneNotSupportedException cnse = new CloneNotSupportedException(LocalizationMessages.WSP_0013_UNABLE_TO_SET_PARENT_MODEL_ON_ROOT());
             cnse.initCause(e);
             throw cnse;
         }
@@ -242,7 +242,7 @@ public final class PolicySourceModel implements Cloneable {
     
     void addNewPolicyReference(final ModelNode node) {
         if (node.getType() != ModelNode.Type.POLICY_REFERENCE) {
-            throw new IllegalArgumentException(LocalizationMessages.WSP_000042_POLICY_REFERENCE_NODE_EXPECTED_INSTEAD_OF(node.getType()));
+            throw new IllegalArgumentException(LocalizationMessages.WSP_0042_POLICY_REFERENCE_NODE_EXPECTED_INSTEAD_OF(node.getType()));
         }
         
         references.add(node);

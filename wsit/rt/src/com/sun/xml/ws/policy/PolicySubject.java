@@ -49,8 +49,8 @@ public final class PolicySubject {
      */
     public PolicySubject(Object subject, Policy policy) {
         if (subject == null || policy == null) {
-            LOGGER.severe("<init>", LocalizationMessages.WSP_000021_SUBJECT_AND_POLICY_PARAM_MUST_NOT_BE_NULL(subject, policy));
-            throw new NullPointerException(LocalizationMessages.WSP_000021_SUBJECT_AND_POLICY_PARAM_MUST_NOT_BE_NULL(subject, policy));
+            LOGGER.severe("<init>", LocalizationMessages.WSP_0021_SUBJECT_AND_POLICY_PARAM_MUST_NOT_BE_NULL(subject, policy));
+            throw new NullPointerException(LocalizationMessages.WSP_0021_SUBJECT_AND_POLICY_PARAM_MUST_NOT_BE_NULL(subject, policy));
         }
         
         this.subject = subject;
@@ -68,13 +68,13 @@ public final class PolicySubject {
      */
     public PolicySubject(Object subject, Collection<Policy> policies) {
         if (subject == null || policies == null) {
-            LOGGER.severe("<init>", LocalizationMessages.WSP_000062_INPUT_PARAMS_MUST_NOT_BE_NULL());
-            throw new NullPointerException(LocalizationMessages.WSP_000062_INPUT_PARAMS_MUST_NOT_BE_NULL());
+            LOGGER.severe("<init>", LocalizationMessages.WSP_0062_INPUT_PARAMS_MUST_NOT_BE_NULL());
+            throw new NullPointerException(LocalizationMessages.WSP_0062_INPUT_PARAMS_MUST_NOT_BE_NULL());
         }
         
         if (policies.isEmpty()) {
-            LOGGER.severe("<init>",LocalizationMessages.WSP_000064_INITIAL_POLICY_COLLECTION_MUST_NOT_BE_EMPTY());
-            throw new IllegalArgumentException(LocalizationMessages.WSP_000064_INITIAL_POLICY_COLLECTION_MUST_NOT_BE_EMPTY());
+            LOGGER.severe("<init>",LocalizationMessages.WSP_0064_INITIAL_POLICY_COLLECTION_MUST_NOT_BE_EMPTY());
+            throw new IllegalArgumentException(LocalizationMessages.WSP_0064_INITIAL_POLICY_COLLECTION_MUST_NOT_BE_EMPTY());
         }
         
         this.subject = subject;
@@ -90,8 +90,8 @@ public final class PolicySubject {
      */
     public void attach(final Policy policy) {
         if (policy == null) {
-            LOGGER.severe("attach", LocalizationMessages.WSP_000038_POLICY_TO_ATTACH_MUST_NOT_BE_NULL());
-            throw new NullPointerException(LocalizationMessages.WSP_000038_POLICY_TO_ATTACH_MUST_NOT_BE_NULL());
+            LOGGER.severe("attach", LocalizationMessages.WSP_0038_POLICY_TO_ATTACH_MUST_NOT_BE_NULL());
+            throw new NullPointerException(LocalizationMessages.WSP_0038_POLICY_TO_ATTACH_MUST_NOT_BE_NULL());
         }
         this.policies.add(policy);
     }

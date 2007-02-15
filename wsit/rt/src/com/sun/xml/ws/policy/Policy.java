@@ -322,7 +322,7 @@ public class Policy implements Iterable<AssertionSet> {
      * @return {@code true} if all elements in the input collection were added to internal structure, {@code false} otherwise. 
      */
     private boolean addAll(final Collection<AssertionSet> sets) {
-        assert (sets != null && !sets.isEmpty()) : LocalizationMessages.WSP_000036_PRIVATE_METHOD_DOES_NOT_ACCEPT_NULL_OR_EMPTY_COLLECTION();
+        assert (sets != null && !sets.isEmpty()) : LocalizationMessages.WSP_0036_PRIVATE_METHOD_DOES_NOT_ACCEPT_NULL_OR_EMPTY_COLLECTION();
         
         boolean result = true;        
         for (AssertionSet set : sets) {

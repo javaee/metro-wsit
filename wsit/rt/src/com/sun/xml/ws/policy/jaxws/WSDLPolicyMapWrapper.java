@@ -75,7 +75,7 @@ public class WSDLPolicyMapWrapper implements WSDLExtension {
 
     protected WSDLPolicyMapWrapper(PolicyMap policyMap) {
         if (policyMap == null) {
-            throw new NullPointerException(LocalizationMessages.WSP_001016_POLICY_MAP_CAN_NOT_BE_NULL());
+            throw new NullPointerException(LocalizationMessages.WSP_1016_POLICY_MAP_CAN_NOT_BE_NULL());
         }
         
         this.policyMap = policyMap;
@@ -130,7 +130,7 @@ public class WSDLPolicyMapWrapper implements WSDLExtension {
                 // setting subject to provided URL of client WSIT config
                 mapExtender.putFaultMessageSubject(key, new PolicySubject(clientWsitConfigId, policy));
             }
-            LOGGER.fine("addClientToServerMap", LocalizationMessages.WSP_001041_CLIENT_CFG_POLICIES_TRANSFERED_INTO_FINAL_POLICY_MAP(policyMap));
+            LOGGER.fine("addClientToServerMap", LocalizationMessages.WSP_1041_CLIENT_CFG_POLICIES_TRANSFERED_INTO_FINAL_POLICY_MAP(policyMap));
         } catch (FactoryConfigurationError ex) {
             LOGGER.severe("addClientConfigToMap", ex.getMessage(), ex);
             throw new PolicyException(ex);
@@ -157,8 +157,8 @@ public class WSDLPolicyMapWrapper implements WSDLExtension {
                         }
                     }            
                     
-                    LOGGER.severe("validateServerSidePolicies", LocalizationMessages.WSP_001046_ASSERTION_NOT_SUPPORTED_ON_SERVER_SIDE(assertion.getName()));
-                    throw new PolicyException(LocalizationMessages.WSP_001046_ASSERTION_NOT_SUPPORTED_ON_SERVER_SIDE(assertion.getName()));
+                    LOGGER.severe("validateServerSidePolicies", LocalizationMessages.WSP_1046_ASSERTION_NOT_SUPPORTED_ON_SERVER_SIDE(assertion.getName()));
+                    throw new PolicyException(LocalizationMessages.WSP_1046_ASSERTION_NOT_SUPPORTED_ON_SERVER_SIDE(assertion.getName()));
                     
                 }
             }
@@ -171,8 +171,8 @@ public class WSDLPolicyMapWrapper implements WSDLExtension {
                 configurator.configure(model, policyMap);
             }
         } catch (PolicyException e) {
-            LOGGER.severe("configureModel", LocalizationMessages.WSP_001032_FAILED_CONFIGURE_WSDL_MODEL(), e);
-            throw new WebServiceException(LocalizationMessages.WSP_001032_FAILED_CONFIGURE_WSDL_MODEL(), e);
+            LOGGER.severe("configureModel", LocalizationMessages.WSP_1032_FAILED_CONFIGURE_WSDL_MODEL(), e);
+            throw new WebServiceException(LocalizationMessages.WSP_1032_FAILED_CONFIGURE_WSDL_MODEL(), e);
         }
     }
     

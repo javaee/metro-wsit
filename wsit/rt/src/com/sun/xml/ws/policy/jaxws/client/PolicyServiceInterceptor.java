@@ -58,17 +58,17 @@ public class PolicyServiceInterceptor extends ServiceInterceptor {
                 try {
                     clientModel = PolicyConfigParser.parseModel(PolicyConstants.CLIENT_CONFIGURATION_IDENTIFIER, null);
                 } catch (PolicyException pe) {
-                    throw logAndWrapException("preCreateBinding", LocalizationMessages.WSP_001017_ERROR_WHILE_PROCESSING_CLIENT_CONFIG(), pe);
+                    throw logAndWrapException("preCreateBinding", LocalizationMessages.WSP_1017_ERROR_WHILE_PROCESSING_CLIENT_CONFIG(), pe);
                 }
                 
                 if (clientModel != null) {
                     final WSDLPolicyMapWrapper policyMapWrapper = clientModel.getExtension(WSDLPolicyMapWrapper.class);
                     if (policyMapWrapper != null) {
-                        LOGGER.config("preCreateBinding", LocalizationMessages.WSP_001024_INVOKING_CLIENT_POLICY_ALTERNATIVE_SELECTION());
+                        LOGGER.config("preCreateBinding", LocalizationMessages.WSP_1024_INVOKING_CLIENT_POLICY_ALTERNATIVE_SELECTION());
                         try {
                             policyMapWrapper.doAlternativeSelection();
                         } catch (PolicyException e) {
-                            throw logAndWrapException("preCreateBinding", LocalizationMessages.WSP_001003_VALID_POLICY_ALTERNATIVE_NOT_FOUND(), e);
+                            throw logAndWrapException("preCreateBinding", LocalizationMessages.WSP_1003_VALID_POLICY_ALTERNATIVE_NOT_FOUND(), e);
                         }
                         
                         final PolicyMap map = policyMapWrapper.getPolicyMap();
@@ -78,14 +78,14 @@ public class PolicyServiceInterceptor extends ServiceInterceptor {
                                 configurator.configure(clientModel, map);
                             }
                         } catch (PolicyException e) {
-                            throw logAndWrapException("preCreateBinding", LocalizationMessages.WSP_001023_ERROR_WHILE_CONFIGURING_MODEL(), e);
+                            throw logAndWrapException("preCreateBinding", LocalizationMessages.WSP_1023_ERROR_WHILE_CONFIGURING_MODEL(), e);
                         }
                         // We can not read the features directly from port.getPort() because in the
                         // case of dispatch that object may be null.
                         addFeatures(features, clientModel, port.getPortName());
                         features.add(new PolicyFeature(map, clientModel, port));
                     } else {
-                        LOGGER.config("preCreateBinding", LocalizationMessages.WSP_001022_POLICY_MAP_NOT_IN_MODEL());
+                        LOGGER.config("preCreateBinding", LocalizationMessages.WSP_1022_POLICY_MAP_NOT_IN_MODEL());
                     }
                 }
             }

@@ -157,8 +157,8 @@ final class ServiceFinder<T> implements Iterable<T> {
      */
     static <T> ServiceFinder<T> find(final Class<T> service, final ClassLoader loader) {
         if (null==service) {
-            LOGGER.severe("find", LocalizationMessages.WSP_000032_SERVICE_CAN_NOT_BE_NULL());
-            throw new NullPointerException(LocalizationMessages.WSP_000032_SERVICE_CAN_NOT_BE_NULL());
+            LOGGER.severe("find", LocalizationMessages.WSP_0032_SERVICE_CAN_NOT_BE_NULL());
+            throw new NullPointerException(LocalizationMessages.WSP_0032_SERVICE_CAN_NOT_BE_NULL());
         }
         return new ServiceFinder<T>(service,loader);
     }
@@ -221,7 +221,7 @@ final class ServiceFinder<T> implements Iterable<T> {
     private static void fail(final Class service, final String msg, final Throwable cause)
         throws ServiceConfigurationError {
         final ServiceConfigurationError sce
-            = new ServiceConfigurationError(LocalizationMessages.WSP_000025_SPI_FAIL_SERVICE_MSG(service.getName(), msg));
+            = new ServiceConfigurationError(LocalizationMessages.WSP_0025_SPI_FAIL_SERVICE_MSG(service.getName(), msg));
         if (null != cause) {
             sce.initCause(cause);
         }
@@ -232,12 +232,12 @@ final class ServiceFinder<T> implements Iterable<T> {
 
 /*    private static void fail(Class service, String msg)
         throws ServiceConfigurationError {
-        throw new ServiceConfigurationError(LocalizationMessages.WSP_000025_SPI_FAIL_SERVICE_MSG(service.getName(), msg));
+        throw new ServiceConfigurationError(LocalizationMessages.WSP_0025_SPI_FAIL_SERVICE_MSG(service.getName(), msg));
     }*/
 
     private static void fail(final Class service, final URL u, final int line, final String msg, final Throwable cause)
         throws ServiceConfigurationError {
-        fail(service, LocalizationMessages.WSP_000024_SPI_FAIL_SERVICE_URL_LINE_MSG(u , line, msg), cause);
+        fail(service, LocalizationMessages.WSP_0024_SPI_FAIL_SERVICE_URL_LINE_MSG(u , line, msg), cause);
     }
 
     /**
@@ -258,14 +258,14 @@ final class ServiceFinder<T> implements Iterable<T> {
         final int n = ln.length();
         if (n != 0) {
             if ((ln.indexOf(' ') >= 0) || (ln.indexOf('\t') >= 0))
-                fail(service, u, lc, LocalizationMessages.WSP_000067_ILLEGAL_CFG_FILE_SYNTAX(), null);
+                fail(service, u, lc, LocalizationMessages.WSP_0067_ILLEGAL_CFG_FILE_SYNTAX(), null);
             int cp = ln.codePointAt(0);
             if (!Character.isJavaIdentifierStart(cp))
-                fail(service, u, lc, LocalizationMessages.WSP_000066_ILLEGAL_PROVIDER_CLASSNAME(ln), null);
+                fail(service, u, lc, LocalizationMessages.WSP_0066_ILLEGAL_PROVIDER_CLASSNAME(ln), null);
             for (int i = Character.charCount(cp); i < n; i += Character.charCount(cp)) {
                 cp = ln.codePointAt(i);
                 if (!Character.isJavaIdentifierPart(cp) && (cp != '.'))
-                    fail(service, u, lc, LocalizationMessages.WSP_000066_ILLEGAL_PROVIDER_CLASSNAME(ln), null);
+                    fail(service, u, lc, LocalizationMessages.WSP_0066_ILLEGAL_PROVIDER_CLASSNAME(ln), null);
             }
             if (!returned.contains(ln)) {
                 names.add(ln);
@@ -365,9 +365,9 @@ final class ServiceFinder<T> implements Iterable<T> {
             try {
                 return service.cast(Class.forName(cn, true, loader).newInstance());
             } catch (ClassNotFoundException x) {
-                fail(service, LocalizationMessages.WSP_000027_SERVICE_PROVIDER_NOT_FOUND(cn), x);
+                fail(service, LocalizationMessages.WSP_0027_SERVICE_PROVIDER_NOT_FOUND(cn), x);
             } catch (Exception x) {
-                fail(service, LocalizationMessages.WSP_000028_SERVICE_PROVIDER_COULD_NOT_BE_INSTANTIATED(cn), x);
+                fail(service, LocalizationMessages.WSP_0028_SERVICE_PROVIDER_COULD_NOT_BE_INSTANTIATED(cn), x);
             }
             return null;    /* This cannot happen */
         }

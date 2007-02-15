@@ -80,8 +80,8 @@ final class XmlPolicyModelUnmarshaller extends PolicyModelUnmarshaller {
                             if (policyId == null) {
                                 policyId = xmlId;
                             } else if (xmlId != null) {
-                                LOGGER.severe("unmarshalModel", LocalizationMessages.WSP_000058_MULTIPLE_POLICY_IDS_NOT_ALLOWED());
-                                throw new PolicyException(LocalizationMessages.WSP_000058_MULTIPLE_POLICY_IDS_NOT_ALLOWED());
+                                LOGGER.severe("unmarshalModel", LocalizationMessages.WSP_0058_MULTIPLE_POLICY_IDS_NOT_ALLOWED());
+                                throw new PolicyException(LocalizationMessages.WSP_0058_MULTIPLE_POLICY_IDS_NOT_ALLOWED());
                             }
                             
                             final Attribute policyName = getAttributeByName(element, PolicyConstants.POLICY_NAME);
@@ -93,12 +93,12 @@ final class XmlPolicyModelUnmarshaller extends PolicyModelUnmarshaller {
                         }
                         // else (this is not a policy tag) -> go to default => throw exception
                     default:
-                        LOGGER.severe("unmarshalModel", LocalizationMessages.WSP_000048_POLICY_ELEMENT_EXPECTED_FIRST());
-                        throw new PolicyException(LocalizationMessages.WSP_000048_POLICY_ELEMENT_EXPECTED_FIRST());
+                        LOGGER.severe("unmarshalModel", LocalizationMessages.WSP_0048_POLICY_ELEMENT_EXPECTED_FIRST());
+                        throw new PolicyException(LocalizationMessages.WSP_0048_POLICY_ELEMENT_EXPECTED_FIRST());
                 }
             } catch (XMLStreamException e) {
-                LOGGER.severe("unmarshalModel", LocalizationMessages.WSP_000068_FAILED_TO_UNMARSHALL_POLICY_EXPRESSION(), e);
-                throw new PolicyException(LocalizationMessages.WSP_000068_FAILED_TO_UNMARSHALL_POLICY_EXPRESSION(), e);
+                LOGGER.severe("unmarshalModel", LocalizationMessages.WSP_0068_FAILED_TO_UNMARSHALL_POLICY_EXPRESSION(), e);
+                throw new PolicyException(LocalizationMessages.WSP_0068_FAILED_TO_UNMARSHALL_POLICY_EXPRESSION(), e);
             }
         }
         return model;
@@ -138,8 +138,8 @@ final class XmlPolicyModelUnmarshaller extends PolicyModelUnmarshaller {
                             } else if (ModelNode.Type.POLICY_REFERENCE.asQName().equals(childElementName)) {
                                 final Attribute uri = getAttributeByName(childElement, PolicyReferenceData.ATTRIBUTE_URI);
                                 if (uri == null) {
-                                    LOGGER.severe("unmarshalNodeContent", LocalizationMessages.WSP_000040_POLICY_REFERENCE_URI_ATTR_NOT_FOUND());
-                                    throw new PolicyException(LocalizationMessages.WSP_000040_POLICY_REFERENCE_URI_ATTR_NOT_FOUND());
+                                    LOGGER.severe("unmarshalNodeContent", LocalizationMessages.WSP_0040_POLICY_REFERENCE_URI_ATTR_NOT_FOUND());
+                                    throw new PolicyException(LocalizationMessages.WSP_0040_POLICY_REFERENCE_URI_ATTR_NOT_FOUND());
                                 } else {
                                     try {
                                         final URI reference = new URI(uri.getValue());
@@ -157,8 +157,8 @@ final class XmlPolicyModelUnmarshaller extends PolicyModelUnmarshaller {
                                         }
                                         childNode = lastNode.createChildPolicyReferenceNode(refData);
                                     } catch (URISyntaxException e) {
-                                        LOGGER.severe("unmarshalNodeContent", LocalizationMessages.WSP_000012_UNABLE_TO_UNMARSHALL_POLICY_MALFORMED_URI(), e);
-                                        throw new PolicyException(LocalizationMessages.WSP_000012_UNABLE_TO_UNMARSHALL_POLICY_MALFORMED_URI(), e);
+                                        LOGGER.severe("unmarshalNodeContent", LocalizationMessages.WSP_0012_UNABLE_TO_UNMARSHALL_POLICY_MALFORMED_URI(), e);
+                                        throw new PolicyException(LocalizationMessages.WSP_0012_UNABLE_TO_UNMARSHALL_POLICY_MALFORMED_URI(), e);
                                     }
                                 }
                             } else {
@@ -175,12 +175,12 @@ final class XmlPolicyModelUnmarshaller extends PolicyModelUnmarshaller {
                         unmarshalNodeContent(childNode, childElement, reader);
                         break;
                     default:
-                        LOGGER.severe("unmarshalNodeContent", LocalizationMessages.WSP_000011_UNABLE_TO_UNMARSHALL_POLICY_XML_ELEM_EXPECTED());
-                        throw new PolicyException(LocalizationMessages.WSP_000011_UNABLE_TO_UNMARSHALL_POLICY_XML_ELEM_EXPECTED());
+                        LOGGER.severe("unmarshalNodeContent", LocalizationMessages.WSP_0011_UNABLE_TO_UNMARSHALL_POLICY_XML_ELEM_EXPECTED());
+                        throw new PolicyException(LocalizationMessages.WSP_0011_UNABLE_TO_UNMARSHALL_POLICY_XML_ELEM_EXPECTED());
                 }
             } catch (XMLStreamException e) {
-                LOGGER.severe("unmarshalNodeContent", LocalizationMessages.WSP_000068_FAILED_TO_UNMARSHALL_POLICY_EXPRESSION(), e);
-                throw new PolicyException(LocalizationMessages.WSP_000068_FAILED_TO_UNMARSHALL_POLICY_EXPRESSION(), e);
+                LOGGER.severe("unmarshalNodeContent", LocalizationMessages.WSP_0068_FAILED_TO_UNMARSHALL_POLICY_EXPRESSION(), e);
+                throw new PolicyException(LocalizationMessages.WSP_0068_FAILED_TO_UNMARSHALL_POLICY_EXPRESSION(), e);
             }
         }
         
@@ -192,8 +192,8 @@ final class XmlPolicyModelUnmarshaller extends PolicyModelUnmarshaller {
                 final Attribute a = (Attribute) iterator.next();
                 final QName name = a.getName();
                 if (attributeMap.containsKey(name)) {
-                    LOGGER.severe("unmarshalNodeContent", LocalizationMessages.WSP_000059_MULTIPLE_ATTRS_WITH_SAME_NAME_DETECTED_FOR_ASSERTION(a.getName(), lastElementName));
-                    throw new PolicyException(LocalizationMessages.WSP_000059_MULTIPLE_ATTRS_WITH_SAME_NAME_DETECTED_FOR_ASSERTION(a.getName(), lastElementName));
+                    LOGGER.severe("unmarshalNodeContent", LocalizationMessages.WSP_0059_MULTIPLE_ATTRS_WITH_SAME_NAME_DETECTED_FOR_ASSERTION(a.getName(), lastElementName));
+                    throw new PolicyException(LocalizationMessages.WSP_0059_MULTIPLE_ATTRS_WITH_SAME_NAME_DETECTED_FOR_ASSERTION(a.getName(), lastElementName));
                 } else {
                     attributeMap.put(name , a.getValue());
                 }
@@ -204,8 +204,8 @@ final class XmlPolicyModelUnmarshaller extends PolicyModelUnmarshaller {
             if (nodeData.containsAttribute(PolicyConstants.VISIBILITY_ATTRIBUTE)) {
                 final String visibilityValue = nodeData.getAttributeValue(PolicyConstants.VISIBILITY_ATTRIBUTE);
                 if (!PolicyConstants.VISIBILITY_VALUE_PRIVATE.equals(visibilityValue)) {
-                    LOGGER.severe("unmarshalNodeContent", LocalizationMessages.WSP_000004_UNEXPECTED_VISIBILITY_ATTR_VALUE(visibilityValue));
-                    throw new PolicyException(LocalizationMessages.WSP_000004_UNEXPECTED_VISIBILITY_ATTR_VALUE(visibilityValue));
+                    LOGGER.severe("unmarshalNodeContent", LocalizationMessages.WSP_0004_UNEXPECTED_VISIBILITY_ATTR_VALUE(visibilityValue));
+                    throw new PolicyException(LocalizationMessages.WSP_0004_UNEXPECTED_VISIBILITY_ATTR_VALUE(visibilityValue));
                 }
             }
             
@@ -219,15 +219,15 @@ final class XmlPolicyModelUnmarshaller extends PolicyModelUnmarshaller {
      */
     private XMLEventReader createXMLEventReader(final Object storage) throws PolicyException {
         if (!(storage instanceof Reader)) {
-            LOGGER.severe("createXMLEventReader", LocalizationMessages.WSP_000022_STORAGE_TYPE_NOT_SUPPORTED(storage.getClass().getName()));
-            throw new PolicyException(LocalizationMessages.WSP_000022_STORAGE_TYPE_NOT_SUPPORTED(storage.getClass().getName()));
+            LOGGER.severe("createXMLEventReader", LocalizationMessages.WSP_0022_STORAGE_TYPE_NOT_SUPPORTED(storage.getClass().getName()));
+            throw new PolicyException(LocalizationMessages.WSP_0022_STORAGE_TYPE_NOT_SUPPORTED(storage.getClass().getName()));
         }
         
         try {
             return XMLInputFactory.newInstance().createXMLEventReader((Reader) storage);
         } catch (XMLStreamException e) {
-            LOGGER.severe("createXMLEventReader", LocalizationMessages.WSP_000014_UNABLE_TO_INSTANTIATE_READER_FOR_STORAGE(), e);
-            throw new PolicyException(LocalizationMessages.WSP_000014_UNABLE_TO_INSTANTIATE_READER_FOR_STORAGE(), e);
+            LOGGER.severe("createXMLEventReader", LocalizationMessages.WSP_0014_UNABLE_TO_INSTANTIATE_READER_FOR_STORAGE(), e);
+            throw new PolicyException(LocalizationMessages.WSP_0014_UNABLE_TO_INSTANTIATE_READER_FOR_STORAGE(), e);
         }
     }
     
@@ -238,8 +238,8 @@ final class XmlPolicyModelUnmarshaller extends PolicyModelUnmarshaller {
     private void checkEndTagName(final QName expected, final EndElement element) throws PolicyException {
         final QName actual = element.getName();
         if (!expected.equals(actual)) {
-            LOGGER.severe("checkEndTagName", LocalizationMessages.WSP_000003_UNMARSHALLING_FAILED_END_TAG_DOES_NOT_MATCH(expected, actual));
-            throw new PolicyException(LocalizationMessages.WSP_000003_UNMARSHALLING_FAILED_END_TAG_DOES_NOT_MATCH(expected, actual));
+            LOGGER.severe("checkEndTagName", LocalizationMessages.WSP_0003_UNMARSHALLING_FAILED_END_TAG_DOES_NOT_MATCH(expected, actual));
+            throw new PolicyException(LocalizationMessages.WSP_0003_UNMARSHALLING_FAILED_END_TAG_DOES_NOT_MATCH(expected, actual));
         }
     }
     
@@ -252,8 +252,8 @@ final class XmlPolicyModelUnmarshaller extends PolicyModelUnmarshaller {
             if (currentNodeType == ModelNode.Type.ASSERTION || currentNodeType == ModelNode.Type.ASSERTION_PARAMETER_NODE) {
                 return buffer.append(data);
             } else {
-                LOGGER.severe("processCharacters", LocalizationMessages.WSP_000009_UNEXPECTED_CDATA_ON_SOURCE_MODEL_NODE(currentNodeType, data));
-                throw new PolicyException(LocalizationMessages.WSP_000009_UNEXPECTED_CDATA_ON_SOURCE_MODEL_NODE(currentNodeType, data));
+                LOGGER.severe("processCharacters", LocalizationMessages.WSP_0009_UNEXPECTED_CDATA_ON_SOURCE_MODEL_NODE(currentNodeType, data));
+                throw new PolicyException(LocalizationMessages.WSP_0009_UNEXPECTED_CDATA_ON_SOURCE_MODEL_NODE(currentNodeType, data));
             }
         }
     }

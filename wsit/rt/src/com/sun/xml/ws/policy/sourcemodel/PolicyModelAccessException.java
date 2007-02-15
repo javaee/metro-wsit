@@ -52,7 +52,7 @@ public class PolicyModelAccessException extends PolicyException {
     
     private static String createMessage(final URI modelUri, final String reason) {
         return  (reason != null && reason.length() > 0) ? 
-            LocalizationMessages.WSP_000017_UNABLE_TO_ACCESS_POLICY_SOURCE_MODEL_PLUS_REASON(modelUri, reason) :
-            LocalizationMessages.WSP_000018_UNABLE_TO_ACCESS_POLICY_SOURCE_MODEL(modelUri);
+            LocalizationMessages.WSP_0017_UNABLE_TO_ACCESS_POLICY_SOURCE_MODEL_PLUS_REASON(modelUri, reason) :
+            LocalizationMessages.WSP_0018_UNABLE_TO_ACCESS_POLICY_SOURCE_MODEL(modelUri);
     }
 }

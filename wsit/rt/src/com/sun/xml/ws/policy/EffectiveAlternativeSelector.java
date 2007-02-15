@@ -224,7 +224,7 @@ public class EffectiveAlternativeSelector {
             final Policy oldPolicy, final PolicyAssertionValidator[] validators) throws PolicyException {
         
         if(null==validators || validators.length==0) {
-            logger.warning("getNewEffectivePolicy", LocalizationMessages.WSP_000053_NO_POLICY_SELECTORS_FOUND());
+            logger.warning("getNewEffectivePolicy", LocalizationMessages.WSP_0053_NO_POLICY_SELECTORS_FOUND());
         }
         
         AssertionSet alternativePickedSoFar = null;
@@ -240,10 +240,10 @@ public class EffectiveAlternativeSelector {
                 alternativeFitness = alternativeFitness.considerFitness(assertionFitness);
                 if (assertionFitness == assertionFitness.UNKNOWN) {
                     logger.warning("getNewEffectivePolicy", 
-                            LocalizationMessages.WSP_000076_ASSERTION_UNKNOWN(assertion.getName()));
+                            LocalizationMessages.WSP_0076_ASSERTION_UNKNOWN(assertion.getName()));
                 } else if (assertionFitness == assertionFitness.UNSUPPORTED) {
                     logger.warning("getNewEffectivePolicy", 
-                            LocalizationMessages.WSP_000075_ASSERTION_UNSUPPORTED(assertion.getName()));
+                            LocalizationMessages.WSP_0075_ASSERTION_UNSUPPORTED(assertion.getName()));
                 }
             } // end foreach assertion in current alternative
             
@@ -267,7 +267,7 @@ public class EffectiveAlternativeSelector {
         final Collection<AssertionSet> alternativeSet = new LinkedList<AssertionSet>();
         alternativeSet.add(alternativePickedSoFar);
         logger.warning("getNewEffectivePolicy", 
-                LocalizationMessages.WSP_000019_SUBOPTIMAL_ALTERNATIVE_PICKED_WITH_FITNESS(bestFitnessSoFar));        
+                LocalizationMessages.WSP_0019_SUBOPTIMAL_ALTERNATIVE_PICKED_WITH_FITNESS(bestFitnessSoFar));        
         return Policy.createPolicy(oldPolicy.getName(), oldPolicy.getId(), alternativeSet);
     }
     

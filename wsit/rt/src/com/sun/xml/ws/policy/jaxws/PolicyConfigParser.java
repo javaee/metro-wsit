@@ -193,7 +193,7 @@ public final class PolicyConfigParser {
         WSDLModel model = null;
         try {
             final String configFileName = PolicyUtils.ConfigFile.generateFullName(configFileIdentifier);
-            LOGGER.finest("parse", LocalizationMessages.WSP_001037_CONFIG_FILE_IS(configFileName));
+            LOGGER.finest("parse", LocalizationMessages.WSP_1037_CONFIG_FILE_IS(configFileName));
             
             Object context = null;
             if (container != null) {
@@ -201,9 +201,9 @@ public final class PolicyConfigParser {
                     final Class<?> contextClass = Class.forName(SERVLET_CONTEXT_CLASSNAME);
                     context = container.getSPI(contextClass);
                 } catch (ClassNotFoundException e) {
-                    LOGGER.fine("parse", LocalizationMessages.WSP_001043_CAN_NOT_FIND_CLASS(SERVLET_CONTEXT_CLASSNAME));
+                    LOGGER.fine("parse", LocalizationMessages.WSP_1043_CAN_NOT_FIND_CLASS(SERVLET_CONTEXT_CLASSNAME));
                 }
-                LOGGER.finest("parse", LocalizationMessages.WSP_001036_CONTEXT_IS(context));
+                LOGGER.finest("parse", LocalizationMessages.WSP_1036_CONTEXT_IS(context));
                 
             }
             
@@ -224,9 +224,9 @@ public final class PolicyConfigParser {
             
             if (configFileUrl != null) {
                 model = parseModel(configFileUrl, isClientConfig, mutators);
-                LOGGER.info("parseModel", LocalizationMessages.WSP_001049_LOADED_WSIT_CFG_FILE(configFileUrl.toExternalForm()));
+                LOGGER.info("parseModel", LocalizationMessages.WSP_1049_LOADED_WSIT_CFG_FILE(configFileUrl.toExternalForm()));
             } else {
-                LOGGER.config("parseModel", LocalizationMessages.WSP_001035_COULD_NOT_LOCATE_WSIT_CFG_FILE(configFileIdentifier, examinedPath));
+                LOGGER.config("parseModel", LocalizationMessages.WSP_1035_COULD_NOT_LOCATE_WSIT_CFG_FILE(configFileIdentifier, examinedPath));
             }
             
             return model;
@@ -259,8 +259,8 @@ public final class PolicyConfigParser {
         InputStream configFileIS = null;
         try {
             if (null == configFileUrl) {
-                LOGGER.severe("parseModel", LocalizationMessages.WSP_001028_FAILED_TO_READ_NULL_WSIT_CFG());
-                throw new NullPointerException(LocalizationMessages.WSP_001028_FAILED_TO_READ_NULL_WSIT_CFG());
+                LOGGER.severe("parseModel", LocalizationMessages.WSP_1028_FAILED_TO_READ_NULL_WSIT_CFG());
+                throw new NullPointerException(LocalizationMessages.WSP_1028_FAILED_TO_READ_NULL_WSIT_CFG());
             }
             
             configFileIS = configFileUrl.openStream();
@@ -276,17 +276,18 @@ public final class PolicyConfigParser {
             
             return model;
         } catch (XMLStreamException ex) {
-            LOGGER.severe("parseModel", LocalizationMessages.WSP_001002_WSDL_IMPORT_FAILED(), ex);
-            throw new PolicyException(LocalizationMessages.WSP_001002_WSDL_IMPORT_FAILED(), ex);
+            LOGGER.severe("parseModel", LocalizationMessages.WSP_1002_WSDL_IMPORT_FAILED(), ex);
+            throw new PolicyException(LocalizationMessages.WSP_1002_WSDL_IMPORT_FAILED(), ex);
         } catch (IOException ex) {
-            LOGGER.severe("parseModel", LocalizationMessages.WSP_001002_WSDL_IMPORT_FAILED(), ex);
-            throw new PolicyException(LocalizationMessages.WSP_001002_WSDL_IMPORT_FAILED(), ex);
+            LOGGER.severe("parseModel", LocalizationMessages.WSP_1002_WSDL_IMPORT_FAILED(), ex);
+            throw new PolicyException(LocalizationMessages.WSP_1002_WSDL_IMPORT_FAILED(), ex);
         } catch (SAXException ex) {
-            LOGGER.severe("parseModel", LocalizationMessages.WSP_001002_WSDL_IMPORT_FAILED(), ex);
-            throw new PolicyException(LocalizationMessages.WSP_001002_WSDL_IMPORT_FAILED(), ex);
+            LOGGER.severe("parseModel", LocalizationMessages.WSP_1002_WSDL_IMPORT_FAILED(), ex);
+            throw new PolicyException(LocalizationMessages.WSP_1002_WSDL_IMPORT_FAILED(), ex);
         } finally {
             PolicyUtils.IO.closeResource(configFileIS);
             LOGGER.exiting("parseModel", model);
         }
     }
 }
+

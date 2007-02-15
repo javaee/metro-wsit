@@ -89,7 +89,7 @@ public final class XmlFilteringUtils {
                 break;
             default:
                 throw logException(
-                        new IllegalArgumentException(LocalizationMessages.WSP_001009_UNEXPECTED_ARGUMENTS_COUNT(XmlStreamWriterMethodType.WRITE_START_ELEMENT + "(...)", argumentsCount)),
+                        new IllegalArgumentException(LocalizationMessages.WSP_1009_UNEXPECTED_ARGUMENTS_COUNT(XmlStreamWriterMethodType.WRITE_START_ELEMENT + "(...)", argumentsCount)),
                         LOGGER);
         }
         
@@ -125,7 +125,7 @@ public final class XmlFilteringUtils {
                 break;
             default:
                 throw logException(
-                        new IllegalArgumentException(LocalizationMessages.WSP_001009_UNEXPECTED_ARGUMENTS_COUNT(XmlStreamWriterMethodType.WRITE_ATTRIBUTE + "(...)", argumentsCount)),
+                        new IllegalArgumentException(LocalizationMessages.WSP_1009_UNEXPECTED_ARGUMENTS_COUNT(XmlStreamWriterMethodType.WRITE_ATTRIBUTE + "(...)", argumentsCount)),
                         LOGGER);
         }
         
@@ -134,12 +134,12 @@ public final class XmlFilteringUtils {
     
     private static final void checkInvocationParameter(final Invocation invocation, XmlStreamWriterMethodType expectedType) {
         if (invocation == null) {
-            throw logException(new NullPointerException(LocalizationMessages.WSP_001038_METHOD_PARAMETER_CANNOT_BE_NULL("Invocation parameter")),
+            throw logException(new NullPointerException(LocalizationMessages.WSP_1038_METHOD_PARAMETER_CANNOT_BE_NULL("Invocation parameter")),
                     LOGGER);
         } else {
             XmlStreamWriterMethodType methodType = XmlStreamWriterMethodType.getMethodType(invocation.getMethodName());
             if (methodType != expectedType) {
-                throw logException(new IllegalArgumentException(LocalizationMessages.WSP_001039_ILLEGAL_INVOCATION_METHOD_TYPE(methodType, expectedType)),
+                throw logException(new IllegalArgumentException(LocalizationMessages.WSP_1039_ILLEGAL_INVOCATION_METHOD_TYPE(methodType, expectedType)),
                         LOGGER);
             }
         }

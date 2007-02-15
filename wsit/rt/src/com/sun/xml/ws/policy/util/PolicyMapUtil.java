@@ -52,48 +52,48 @@ public final class PolicyMapUtil {
         for (PolicyMapKey key : keys) {
             final Policy policy = map.getServiceEffectivePolicy(key);
             if (policy.getNumberOfAssertionSets() > 1) {
-                LOGGER.severe("rejectAlternatives", LocalizationMessages.WSP_000035_RECONFIGURE_ALTERNATIVES(policy.getIdOrName()));
-                throw new PolicyException(LocalizationMessages.WSP_000035_RECONFIGURE_ALTERNATIVES(policy.getIdOrName()));
+                LOGGER.severe("rejectAlternatives", LocalizationMessages.WSP_0035_RECONFIGURE_ALTERNATIVES(policy.getIdOrName()));
+                throw new PolicyException(LocalizationMessages.WSP_0035_RECONFIGURE_ALTERNATIVES(policy.getIdOrName()));
             }
         }
         keys = map.getAllEndpointScopeKeys();
         for (PolicyMapKey key : keys) {
             final Policy policy = map.getEndpointEffectivePolicy(key);
             if (policy.getNumberOfAssertionSets() > 1) {
-                LOGGER.severe("rejectAlternatives", LocalizationMessages.WSP_000035_RECONFIGURE_ALTERNATIVES(policy.getIdOrName()));
-                throw new PolicyException(LocalizationMessages.WSP_000035_RECONFIGURE_ALTERNATIVES(policy.getIdOrName()));
+                LOGGER.severe("rejectAlternatives", LocalizationMessages.WSP_0035_RECONFIGURE_ALTERNATIVES(policy.getIdOrName()));
+                throw new PolicyException(LocalizationMessages.WSP_0035_RECONFIGURE_ALTERNATIVES(policy.getIdOrName()));
             }
         }
         keys = map.getAllOperationScopeKeys();
         for (PolicyMapKey key : keys) {
             final Policy policy = map.getOperationEffectivePolicy(key);
             if (policy.getNumberOfAssertionSets() > 1) {
-                LOGGER.severe("rejectAlternatives", LocalizationMessages.WSP_000035_RECONFIGURE_ALTERNATIVES(policy.getIdOrName()));
-                throw new PolicyException(LocalizationMessages.WSP_000035_RECONFIGURE_ALTERNATIVES(policy.getIdOrName()));
+                LOGGER.severe("rejectAlternatives", LocalizationMessages.WSP_0035_RECONFIGURE_ALTERNATIVES(policy.getIdOrName()));
+                throw new PolicyException(LocalizationMessages.WSP_0035_RECONFIGURE_ALTERNATIVES(policy.getIdOrName()));
             }
         }
         keys = map.getAllInputMessageScopeKeys();
         for (PolicyMapKey key : keys) {
             final Policy policy = map.getInputMessageEffectivePolicy(key);
             if (policy.getNumberOfAssertionSets() > 1) {
-                LOGGER.severe("rejectAlternatives", LocalizationMessages.WSP_000035_RECONFIGURE_ALTERNATIVES(policy.getIdOrName()));
-                throw new PolicyException(LocalizationMessages.WSP_000035_RECONFIGURE_ALTERNATIVES(policy.getIdOrName()));
+                LOGGER.severe("rejectAlternatives", LocalizationMessages.WSP_0035_RECONFIGURE_ALTERNATIVES(policy.getIdOrName()));
+                throw new PolicyException(LocalizationMessages.WSP_0035_RECONFIGURE_ALTERNATIVES(policy.getIdOrName()));
             }
         }
         keys = map.getAllOutputMessageScopeKeys();
         for (PolicyMapKey key : keys) {
             final Policy policy = map.getOutputMessageEffectivePolicy(key);
             if (policy.getNumberOfAssertionSets() > 1) {
-                LOGGER.severe("rejectAlternatives", LocalizationMessages.WSP_000035_RECONFIGURE_ALTERNATIVES(policy.getIdOrName()));
-                throw new PolicyException(LocalizationMessages.WSP_000035_RECONFIGURE_ALTERNATIVES(policy.getIdOrName()));
+                LOGGER.severe("rejectAlternatives", LocalizationMessages.WSP_0035_RECONFIGURE_ALTERNATIVES(policy.getIdOrName()));
+                throw new PolicyException(LocalizationMessages.WSP_0035_RECONFIGURE_ALTERNATIVES(policy.getIdOrName()));
             }
         }
         keys = map.getAllFaultMessageScopeKeys();
         for (PolicyMapKey key : keys) {
             final Policy policy = map.getFaultMessageEffectivePolicy(key);
             if (policy.getNumberOfAssertionSets() > 1) {
-                LOGGER.severe("rejectAlternatives", LocalizationMessages.WSP_000035_RECONFIGURE_ALTERNATIVES(policy.getIdOrName()));
-                throw new PolicyException(LocalizationMessages.WSP_000035_RECONFIGURE_ALTERNATIVES(policy.getIdOrName()));
+                LOGGER.severe("rejectAlternatives", LocalizationMessages.WSP_0035_RECONFIGURE_ALTERNATIVES(policy.getIdOrName()));
+                throw new PolicyException(LocalizationMessages.WSP_0035_RECONFIGURE_ALTERNATIVES(policy.getIdOrName()));
             }
         }
     }

@@ -55,8 +55,8 @@ abstract class BuilderHandler{
     
     final void populate(final PolicyMapExtender policyMapExtender) throws PolicyException {
         if (null == policyMapExtender) {
-            LOGGER.severe("populate", LocalizationMessages.WSP_001015_POLICY_MAP_EXTENDER_CAN_NOT_BE_NULL());
-            throw new PolicyException(LocalizationMessages.WSP_001015_POLICY_MAP_EXTENDER_CAN_NOT_BE_NULL());
+            LOGGER.severe("populate", LocalizationMessages.WSP_1015_POLICY_MAP_EXTENDER_CAN_NOT_BE_NULL());
+            throw new PolicyException(LocalizationMessages.WSP_1015_POLICY_MAP_EXTENDER_CAN_NOT_BE_NULL());
         }
         
         doPopulate(policyMapExtender);
@@ -66,12 +66,12 @@ abstract class BuilderHandler{
     
     final Collection<Policy> getPolicies() throws PolicyException {
         if (null == policyURIs) {
-            LOGGER.severe("getPolicies", LocalizationMessages.WSP_001013_POLICY_URIS_CAN_NOT_BE_NULL());
-            throw new PolicyException(LocalizationMessages.WSP_001013_POLICY_URIS_CAN_NOT_BE_NULL());
+            LOGGER.severe("getPolicies", LocalizationMessages.WSP_1013_POLICY_URIS_CAN_NOT_BE_NULL());
+            throw new PolicyException(LocalizationMessages.WSP_1013_POLICY_URIS_CAN_NOT_BE_NULL());
         }
         if (null == policyStore) {
-            LOGGER.severe("getPolicies", LocalizationMessages.WSP_001021_NO_POLICIES_DEFINED());
-            throw new PolicyException(LocalizationMessages.WSP_001021_NO_POLICIES_DEFINED());
+            LOGGER.severe("getPolicies", LocalizationMessages.WSP_1021_NO_POLICIES_DEFINED());
+            throw new PolicyException(LocalizationMessages.WSP_1021_NO_POLICIES_DEFINED());
         }
         
         final Collection<Policy> result = new ArrayList<Policy>(policyURIs.size());
@@ -81,8 +81,8 @@ abstract class BuilderHandler{
             if (sourceModel != null) {
                 result.add(PolicyModelTranslator.getTranslator().translate(sourceModel));
             } else {
-                LOGGER.severe("getPolicies", LocalizationMessages.WSP_001014_POLICY_REFERENCE_DOES_NOT_EXIST(policyURI));
-                throw new PolicyException(LocalizationMessages.WSP_001014_POLICY_REFERENCE_DOES_NOT_EXIST(policyURI));
+                LOGGER.severe("getPolicies", LocalizationMessages.WSP_1014_POLICY_REFERENCE_DOES_NOT_EXIST(policyURI));
+                throw new PolicyException(LocalizationMessages.WSP_1014_POLICY_REFERENCE_DOES_NOT_EXIST(policyURI));
             }
         }
         
