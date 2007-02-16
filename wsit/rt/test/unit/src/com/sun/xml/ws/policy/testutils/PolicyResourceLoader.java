@@ -118,21 +118,31 @@ public final class PolicyResourceLoader {
     public static PolicyMap getPolicyMap(String resourceName)
         throws PolicyException {
         
-        WSDLModel model = getWSDLModel(resourceName);
+        WSDLModel model = getWSDLModel(resourceName, true);
         WSDLPolicyMapWrapper wrapper = model.getExtension(WSDLPolicyMapWrapper.class);
         return wrapper.getPolicyMap();
     }
     
-    // reads wsdl model from given wsdl document
-    public static WSDLModel getWSDLModel(String resourceName)
+    public static PolicyMap getPolicyMap(String resourceName, boolean isClient)
         throws PolicyException {
         
+        WSDLModel model = getWSDLModel(resourceName, isClient);
+        WSDLPolicyMapWrapper wrapper = model.getExtension(WSDLPolicyMapWrapper.class);
+        return wrapper.getPolicyMap();
+    }
+
+    public static WSDLModel getWSDLModel(String resourceName) throws PolicyException {
+        return getWSDLModel(resourceName, true);        
+    }
+    
+    // reads wsdl model from given wsdl document
+    public static WSDLModel getWSDLModel(String resourceName, boolean isClient) throws PolicyException {        
         URL resourceUrl = getResourceUrl(resourceName);
         XMLStreamBuffer resourceBuffer = getResourceXmlBuffer(resourceName);
         SDDocumentSource doc = SDDocumentSource.create(resourceUrl, resourceBuffer);
         try {
             Parser parser = new Parser(doc);
-            WSDLModel model = WSDLModel.WSDLParser.parse(parser, new PolicyConfigResolver(), true, new WSDLParserExtension[] {new PolicyWSDLParserExtension()});
+            WSDLModel model = WSDLModel.WSDLParser.parse(parser, new PolicyConfigResolver(), isClient, new WSDLParserExtension[] {new PolicyWSDLParserExtension()});
             return model;
         } catch (XMLStreamException ex) {
             throw new PolicyException("Failed to parse document", ex);

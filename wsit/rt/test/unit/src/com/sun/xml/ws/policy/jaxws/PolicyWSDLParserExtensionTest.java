@@ -37,6 +37,7 @@ import com.sun.xml.ws.api.server.SDDocumentSource;
 import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
 import com.sun.xml.ws.api.wsdl.parser.XMLEntityResolver;
 import com.sun.xml.ws.policy.Policy;
+import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import com.sun.xml.ws.policy.testutils.PolicyResourceLoader;
@@ -97,7 +98,7 @@ public class PolicyWSDLParserExtensionTest extends TestCase{
 //                true,
 //                new WSDLParserExtension[] { new PolicyWSDLParserExtension(true) }
 //        );
-//        
+//
 //        assertNotNull(model);
     }
     
@@ -544,4 +545,12 @@ public class PolicyWSDLParserExtensionTest extends TestCase{
                 ,new QName("http://example.org","DictFault"))));
     }
     
+//    public void testInvalidAssertionShouldCauseException() throws Exception {
+//        try {
+//            PolicyMap policyMap = getPolicyMap("parser/testInvalidAssertionError.wsdl", false);
+//            fail("WSDL validation should fail");
+//        } catch (PolicyException e) {
+//            // ok
+//        }
+//    }
 }
