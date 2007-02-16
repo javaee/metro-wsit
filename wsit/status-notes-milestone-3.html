@@ -728,8 +728,8 @@ make the Application Context Identifiers unique.<br>
 <hr>
 <h2><a name="98261"></a>Coordination/Atomic Transactions Status</h2>
 <h4>WCF Interoperability</h4>
-(Test config: GF b34, MS WCF RTM, WSIT M3(b06), JDK 5)
-<pre>non-secure (meaning http used for WS-TX protocol messages, no security on application messages):<br><br>  MS-&gt;S : 0/0 (interop w/MS requires HTTPS)<br>  S-&gt;MS : 0/0 (interop w/MS requires HTTPS)<br>  S-&gt;S  : 3/3<br><br>secure (meaning https used for WS-TX protocol messages, no security on application messages):<br><br>  MS-&gt;S : 3/3<br>  S-&gt;MS : 3/3<br>  S-&gt;S  : 0/3 (haven't tested yet)<br><br></pre>
+(Test config: GF b33c, MS WCF RTM, WSIT M3(b07), JDK 5, JDK 6)
+<pre>non-secure (meaning http used for WS-TX protocol messages, no security on application messages):<br><br>  MS-&gt;S : 0/0 (interop w/MS requires HTTPS)<br>  S-&gt;MS : 0/0 (interop w/MS requires HTTPS)<br>  S-&gt;S  : 3/3<br><br>secure (meaning https used for WS-TX protocol messages, no security on application messages):<br><br>  MS-&gt;S : 3/3<br>  S-&gt;MS : 3/3<br>  S-&gt;S  : 3/3<br><br></pre>
 <h4>What is Not Implemented</h4>
 <p> </p>
 <ul>
