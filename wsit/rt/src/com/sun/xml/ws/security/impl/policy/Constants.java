@@ -47,6 +47,7 @@ public class Constants {
     public final static String Basic256Sha256Rsa15 = "Basic256Sha256Rsa15";
     public final static String WssGssKerberosV5ApReqToken11 = "WssGssKerberosV5ApReqToken11";
     public final static String EncryptBeforeSigning = "EncryptBeforeSigning";
+    public final static String SignBeforeEncrypting = "SignBeforeEncrypting";
     public final static String WssX509V3Token10 = "WssX509V3Token10";
     public final static String SpnegoContextToken = "SpnegoContextToken";
     public final static String EncryptSignature = "EncryptSignature";

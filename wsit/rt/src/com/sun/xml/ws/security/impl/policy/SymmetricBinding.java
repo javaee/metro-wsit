@@ -199,8 +199,10 @@ public class SymmetricBinding extends PolicyAssertion implements com.sun.xml.ws.
                     this.algSuite = (AlgorithmSuite) assertion;         
                 }else if(PolicyUtil.isIncludeTimestamp(assertion)){      
                     this.includeTimestamp = true;                        
-                }else if(PolicyUtil.isProtectionOrder(assertion)){       
+                }else if(PolicyUtil.isEncryptBeforeSign(assertion)){       
                     this.protectionOrder = ENCRYPT_SIGN;                 
+                }else if (PolicyUtil.isSignBeforeEncrypt(assertion)){
+                    this.protectionOrder = SIGN_ENCRYPT;
                 }else if(PolicyUtil.isContentOnlyAssertion(assertion)){  
                     this.contentOnly = false;                            
                 }else if(PolicyUtil.isMessageLayout(assertion)){         

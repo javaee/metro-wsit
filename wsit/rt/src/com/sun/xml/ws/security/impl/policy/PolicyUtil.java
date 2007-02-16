@@ -326,12 +326,23 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isProtectionOrder(PolicyAssertion assertion) {
+    public static boolean isEncryptBeforeSign(PolicyAssertion assertion) {
         if ( !isSecurityPolicyNS(assertion )) {
             return false;
         }
         
         if(assertion.getName().getLocalPart().equals(EncryptBeforeSigning)) {
+            return true;
+        }
+        return false;
+    }
+    
+    public static boolean isSignBeforeEncrypt(PolicyAssertion assertion) {
+        if ( !isSecurityPolicyNS(assertion )) {
+            return false;
+        }
+        
+        if(assertion.getName().getLocalPart().equals(SignBeforeEncrypting)) {
             return true;
         }
         return false;
