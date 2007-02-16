@@ -72,6 +72,7 @@ public class AsymmetricBindingProcessor extends BindingProcessor {
             SignaturePolicy.FeatureBinding spFB = (com.sun.xml.wss.impl.policy.mls.SignaturePolicy.FeatureBinding)
             primarySP.getFeatureBinding();
             spFB.setCanonicalizationAlgorithm(CanonicalizationMethod.EXCLUSIVE);
+            spFB.isPrimarySignature(true);
         }
         if(et != null){
             primaryEP = new EncryptionPolicy();
