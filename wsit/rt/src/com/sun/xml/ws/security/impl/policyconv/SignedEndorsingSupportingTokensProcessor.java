@@ -49,7 +49,7 @@ public class SignedEndorsingSupportingTokensProcessor extends EndorsingSupportin
     protected void addToPrimarySignature(WSSPolicy policy,Token token) throws PolicyException{
         SignatureTarget target = stc.newURISignatureTarget(policy.getUUID());
         SecurityPolicyUtil.setName(target, policy);
-        if(!PolicyUtil.isUsernameToken((PolicyAssertion) token)){
+        if(!PolicyUtil.isUsernameToken((PolicyAssertion) token) && !PolicyUtil.isSecureConversationToken((PolicyAssertion)token)){
             stc.addSTRTransform(target);
         }
         SignaturePolicy.FeatureBinding spFB = (SignaturePolicy.FeatureBinding)signaturePolicy.getFeatureBinding();

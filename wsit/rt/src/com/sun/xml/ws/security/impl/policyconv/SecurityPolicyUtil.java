@@ -90,6 +90,8 @@ public class SecurityPolicyUtil {
             return x509TokenPolicy;
         } else if(PolicyTypeUtil.usernameTokenPolicy(policy)){
             return usernameTokenPolicy;
+        } else if(PolicyTypeUtil.secureConversationTokenKeyBinding(policy)){
+            return MessageConstants.SCT_NAME;
         }
         return null;
     }
