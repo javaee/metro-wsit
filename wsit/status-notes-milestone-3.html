@@ -230,6 +230,12 @@ work for JSR 109 Applications</li>
   <li>Use of ThumbprintReference type for X509 Tokens
 (&lt;sp:RequireThumbprintReference/&gt; under &lt;sp:X509Token&gt;) is
 not supported for JSR 109 Applications.</li>
+  <li>The SAML 2.0 API's supported&nbsp; by WSIT security has only a
+placeholder for AuthnContextStatement implementation. This will be
+fixed by adding an appropriate Constructor which takes necessary
+arguments.&nbsp; Getters will also be provided to retrieve the
+individual members.<br>
+  </li>
   <li>The Following WS-SecurityPolicy Features from specification Draft
 : Jul 2005 Ver 1.1 are unsupported in this release of WSIT</li>
 </ul>
@@ -689,6 +695,17 @@ Security Module to disthinguish the two different Applications.<br>
       </td>
       <td style="vertical-align: top;">GlassFish development needs to
 make the Application Context Identifiers unique.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">&lt;sp:RequireIssuerSerialReference/&gt;
+and &lt;sp:MustSupportIssuerSerialReference/&gt; for &lt;X509Token&gt;
+do not work because of a Bug.<br>
+      </td>
+      <td style="vertical-align: top;"><a
+ href="https://wsit.dev.java.net/issues/show_bug.cgi?id=375">Issue#375</a><br>
+      </td>
+      <td style="vertical-align: top;"><br>
       </td>
     </tr>
   </tbody>
