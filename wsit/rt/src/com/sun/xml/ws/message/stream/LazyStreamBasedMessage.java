@@ -36,6 +36,8 @@ import com.sun.istack.Nullable;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.ws.api.message.AttachmentSet;
 import com.sun.xml.ws.api.message.HeaderList;
+import com.sun.xml.wss.jaxws.impl.logging.LogDomainConstants;
+import java.util.logging.Logger;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
@@ -49,7 +51,10 @@ import javax.xml.transform.Source;
  * @author K.Venugopal@sun.com
  */
 public class LazyStreamBasedMessage extends Message{
-    
+    protected static final Logger logger =
+            Logger.getLogger(
+            LogDomainConstants.WSS_JAXWS_IMPL_DOMAIN,
+            LogDomainConstants.WSS_JAXWS_IMPL_DOMAIN_BUNDLE);
     private StreamSOAPCodec codec = null;
     private boolean readMessage = false;
     private XMLStreamReader reader = null;
@@ -445,24 +450,22 @@ public class LazyStreamBasedMessage extends Message{
         if (!readMessage) {
             return reader;
         }
-        try     {
-            if (buffer == null) {
-                try {
-                    buffer = new com.sun.xml.stream.buffer.MutableXMLStreamBuffer();
-                    javax.xml.stream.XMLStreamWriter writer = buffer.createFromXMLStreamWriter();
-                    
-                    message.writeTo(writer);
-                } catch (javax.xml.stream.XMLStreamException ex) {
-                    java.util.logging.Logger.getLogger("global").log(java.util.logging.Level.SEVERE,
-                            ex.getMessage(),
-                            ex);
-                }
+        
+        if (buffer == null) {
+            try {
+                buffer = new com.sun.xml.stream.buffer.MutableXMLStreamBuffer();
+                javax.xml.stream.XMLStreamWriter writer = buffer.createFromXMLStreamWriter();
+                
+                message.writeTo(writer);
+            } catch (javax.xml.stream.XMLStreamException ex) {
+                logger.log(java.util.logging.Level.SEVERE,LogStringsMessages.WSSMSG_0001_PROBLEM_CACHING(),ex);
             }
+        }
+        try     {
             reader = buffer.readAsXMLStreamReader();
             return reader;
         } catch (XMLStreamException ex) {
-            java.util.logging.Logger.getLogger("global").log(java.util.logging.Level.SEVERE,
-                    ex.getMessage(), ex);
+            logger.log(java.util.logging.Level.SEVERE,LogStringsMessages.WSSMSG_0002_ERROR_READING_BUFFER(),ex);                   
         }
         return null;
     }
@@ -474,13 +477,11 @@ public class LazyStreamBasedMessage extends Message{
                 message.readAsSOAPMessage().writeTo(java.lang.System.out);
                 return;
             } catch (SOAPException ex) {
-                java.util.logging.Logger.getLogger("global").log(java.util.logging.Level.SEVERE,
-                        ex.getMessage(),
-                        ex);
+                logger.log(java.util.logging.Level.SEVERE,
+                       LogStringsMessages.WSSMSG_0003_ERROR_PRINT(),ex);
             } catch (IOException ex) {
-                java.util.logging.Logger.getLogger("global").log(java.util.logging.Level.SEVERE,
-                        ex.getMessage(),
-                        ex);
+                logger.log(java.util.logging.Level.SEVERE,
+                       LogStringsMessages.WSSMSG_0003_ERROR_PRINT(),ex);
             }
         }
         if(buffer == null){
