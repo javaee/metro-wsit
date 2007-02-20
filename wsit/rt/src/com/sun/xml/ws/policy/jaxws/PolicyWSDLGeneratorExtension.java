@@ -202,14 +202,6 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         selectAndProcessSubject(binding, WSDLBoundPortType.class, ScopeType.ENDPOINT, bindingName);
         LOGGER.exiting("addBindingExtension");
     }
-//    public void addBindingExtension(final TypedXmlWriter binding) {
-//        LOGGER.entering("addBindingExtension");
-//        final String bindingName = ((null != seiModel) && (null != endpointClass))?
-//            (WSEndpoint.getDefaultPortName(seiModel.getServiceQName(), endpointClass).getLocalPart() + "Binding") :
-//            null;
-//        selectAndProcessSubject(binding, WSDLBoundPortType.class, ScopeType.ENDPOINT, bindingName);
-//        LOGGER.exiting("addBindingExtension");
-//    }
     
     public void addOperationExtension(final TypedXmlWriter operation, final JavaMethod method) {
         LOGGER.entering("addOperationExtension");
