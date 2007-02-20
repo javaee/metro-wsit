@@ -29,6 +29,7 @@ import static com.sun.xml.ws.tx.common.Constants.WSAT_OASIS_NSURI;
 import com.sun.xml.ws.tx.common.TxLogger;
 import com.sun.xml.ws.tx.webservice.member.coord.CreateCoordinationContextType;
 
+import java.util.UUID;
 import java.util.logging.Level;
 
 /**
@@ -36,12 +37,12 @@ import java.util.logging.Level;
  * in WS-Coordination 2004/10 member submission and 2006/03 OASIS.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  * @since 1.0
  */
 public class ContextFactory {
 
-    private static long activityId;
+    private static String activityId;
 
     static private TxLogger logger = TxLogger.getCoordLogger(ContextFactory.class);
 
@@ -69,7 +70,7 @@ public class ContextFactory {
 
             context.setExpires(expires);
 
-            activityId += 1;
+            activityId = UUID.randomUUID().toString();
             context.setIdentifier("uuid:WSCOOR-SUN-" + activityId);
 
             // bake the activity id as <wsa:ReferenceParameters> into the registration service EPR, so we can
@@ -103,7 +104,7 @@ public class ContextFactory {
         return createContext(contextRequest.getCoordinationType(), contextRequest.getExpires().getValue());
     }
 
-    /**
+    /*
      * FOR UNIT TESTING ONLY
      */
     static CoordinationContextInterface createTestContext(final String coordType, final long expires) {
@@ -116,7 +117,7 @@ public class ContextFactory {
 
             context.setExpires(expires);
 
-            activityId += 1;
+            activityId = UUID.randomUUID().toString();
             context.setIdentifier("uuid:WSCOOR-SUN-" + activityId);
 
             // we can't unit test the normal creation of an EPR this way because

@@ -56,7 +56,7 @@ import java.util.logging.Level;
  * for register and registerResponse delegate to the methods in this class.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  * @since 1.0
  */
 public final class RegistrationManager {
@@ -330,6 +330,9 @@ public final class RegistrationManager {
                 // tranaction initiator committed/rolled back tranaction.
                 // This is why synchronous register preferable to asynchronous register.
                 timedOut = r.waitForRegistrationResponse();
+                if(logger.isLogging(Level.FINEST)) {
+                    logger.finest("register(Coordinator, Registrant)", "timedOut = " + timedOut);
+                }
             } catch (WebServiceException wse) {
                 logger.warning("register",
                         LocalizationMessages.REGISTER_FAILED_3006(
@@ -342,7 +345,9 @@ public final class RegistrationManager {
                     logger.fine("register", "asynch registration succeeded. Coordinator Protocol Service is " +
                             r.getCoordinatorProtocolService());
                 }
-            } else {
+            }
+
+            if(timedOut) {
                 // send fault S4.4 wscoor:No Activity
                 WsaHelper.sendFault(
                         null,

@@ -45,7 +45,7 @@ import java.util.logging.Level;
  * add protocol specific functionality.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @since 1.0
  */
 public abstract class Registrant {
@@ -262,8 +262,10 @@ public abstract class Registrant {
         }
     }
 
-    /*
+    /**
      * wait for a registerResponse to arrive - this method is only used with remote CPSs
+     *
+     * @return true if &lt;RegistrationResponse> was received, false if there was a timeout.
      */
     public boolean waitForRegistrationResponse() {
         try {
@@ -272,7 +274,7 @@ public abstract class Registrant {
                 assert (registrationCompletedGate.availablePermits() <= 0);
                 logger.finest("waitForRegistrationResponse", "Waiting for registration response.  Calling tryAcquire()...");
             }
-            return registrationCompletedGate.tryAcquire(1, 40, TimeUnit.SECONDS);
+            return !registrationCompletedGate.tryAcquire(1, 40, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             e.printStackTrace();
             return false;
