@@ -44,8 +44,10 @@ import java.util.Collection;
 import javax.xml.ws.soap.MTOMFeature;
 
 import static com.sun.xml.ws.encoding.policy.EncodingConstants.OPTIMIZED_MIME_SERIALIZATION_ASSERTION;
+import javax.xml.namespace.QName;
 
 /**
+ * Generate an MTOM policy if MTOM was enabled.
  *
  * @author Jakub Podlesak (japod at sun.com)
  */
@@ -61,55 +63,60 @@ public class MtomMapUpdateProvider implements PolicyMapUpdateProvider{
             super(mtomData, null, null);
         }
     }
-    
-    /** Creates a new instance of MtomMapUpdateProvider */
-    public MtomMapUpdateProvider() {
-    }
-    
+
+    /**
+     * Generates an MTOM policy if MTOM is enabled.
+     *
+     * <ol>
+     * <li>If MTOM is enabled
+     * <ol>
+     * <li>If MTOM policy does not already exist, generate
+     * <li>Otherwise do nothing
+     * </ol>
+     * <li>Otherwise, do nothing (that implies that we do not remove any MTOM policies if MTOM is disabled)
+     * </ol>
+     *
+     */
     public void update(PolicyMapExtender policyMapMutator, PolicyMap policyMap, SEIModel model, WSBinding wsBinding) throws PolicyException {
-        logger.entering("update");
-        MTOMFeature mtomFeature = (MTOMFeature) wsBinding.getFeature(MTOMFeature.class);
+        logger.entering("update", new Object[] {policyMapMutator, policyMap, model, wsBinding});
+
         if (policyMap != null) {
-            Collection<PolicySubject> subjects = policyMap.getPolicySubjects();
-            PolicyModelMarshaller marshaller = PolicyModelMarshaller.getXmlMarshaller(true);
-            PolicyModelGenerator generator = PolicyModelGenerator.getGenerator();
-            PolicyMerger merger = PolicyMerger.getMerger();
-            boolean usingPolicy = false;
-            for (PolicySubject subject : subjects) {
-                Object wsdlSubject = subject.getSubject();
-                if (wsdlSubject != null) {
-                    Policy policy = subject.getEffectivePolicy(merger);
-                    if (wsdlSubject instanceof WSDLBoundPortType) {
-                        WSDLBoundPortType binding = (WSDLBoundPortType)wsdlSubject;
-                        // TODO: ? should we make sure binding.getName().equals(model.getPort().getBinding().getName()) ???
-                        if (mtomFeature != null) {
-                            if (mtomFeature.isEnabled()) {
-                                if (policy.contains(OPTIMIZED_MIME_SERIALIZATION_ASSERTION)) {
-                                    // TODO: make sure the attached policy is in sync with mtomEnabled setting
-                                } else { // policy does not contain mtom assertion yet
-                                    PolicySubject mtomPolicySubject = new PolicySubject(wsdlSubject, createMtomPolicy());
-                                    PolicyMapKey aKey = PolicyMap.createWsdlEndpointScopeKey(
-                                            model.getPort().getOwner().getName(), model.getPortName());
-                                    policyMapMutator.putEndpointSubject(aKey, mtomPolicySubject);
-                                    logger.fine("update","a new mtom endpoint subject just added to policy map");
-                                } // endif policy already contains an mtom assertion
-                            } else { // mtom is disabled
-                                // TODO: make sure there is no mtom assertion attached already or it disables mtom setting
-                            } // endif mtom enabled
-                        } // endif mtomFeature not null
-                    } // endif wsdlSubject instanceof WSDLBoundPortType
-                } // endif wsdlSubject not null
-            } //endforall policy map subjects
+            final MTOMFeature mtomFeature = wsBinding.getFeature(MTOMFeature.class);
+            logger.finest("update", "mtomFeature = " + mtomFeature);
+            if ((mtomFeature != null) && mtomFeature.isEnabled()) {
+                final PolicyMapKey endpointKey = PolicyMap.createWsdlEndpointScopeKey(model.getServiceQName(), model.getPortName());
+                final Policy existingPolicy = policyMap.getEndpointEffectivePolicy(endpointKey);
+                if ((existingPolicy == null) || ! existingPolicy.contains(OPTIMIZED_MIME_SERIALIZATION_ASSERTION)) {
+                    final QName bindingName = model.getBoundPortTypeName();
+                    final Policy mtomPolicy = createMtomPolicy(bindingName);
+                    PolicySubject mtomPolicySubject = new PolicySubject(bindingName, mtomPolicy);
+                    PolicyMapKey aKey = PolicyMap.createWsdlEndpointScopeKey(model.getServiceQName(), model.getPortName());
+                    policyMapMutator.putEndpointSubject(aKey, mtomPolicySubject);
+                    logger.fine("update", "Added MTOM policy with ID \"" + mtomPolicy.getIdOrName() +
+                                  "\" to binding element \"" + bindingName + "\"");
+                }
+                else {
+                    logger.fine("update", "MTOM policy exists already, doing nothing");
+                }
+            }
         } // endif policy map not null
+        
         logger.exiting("update");
     }
-    
-    private Policy createMtomPolicy() {
+        
+
+    /**
+     * Create a policy with an MTOM assertion.
+     *
+     * @param model The binding element name. Used to generate a (locally) unique ID for the policy.
+     * @return The policy.
+     */
+    private Policy createMtomPolicy(final QName bindingName) {
         ArrayList<AssertionSet> assertionSets = new ArrayList<AssertionSet>(1);
         ArrayList<PolicyAssertion> assertions = new ArrayList<PolicyAssertion>(1);
         assertions.add(new MtomAssertion());
         assertionSets.add(AssertionSet.createAssertionSet(assertions));
-        return Policy.createPolicy(null, null, assertionSets);
+        return Policy.createPolicy(null, bindingName.getLocalPart() + "_MTOM_Policy", assertionSets);
     }
     
 }

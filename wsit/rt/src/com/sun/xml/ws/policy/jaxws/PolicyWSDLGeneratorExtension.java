@@ -198,12 +198,18 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
     
     public void addBindingExtension(final TypedXmlWriter binding) {
         LOGGER.entering("addBindingExtension");
-        final String bindingName = ((null != seiModel) && (null != endpointClass))?
-            (WSEndpoint.getDefaultPortName(seiModel.getServiceQName(), endpointClass).getLocalPart() + "Binding") :
-            null;
+        final QName bindingName = (null != seiModel) ? seiModel.getBoundPortTypeName() : null;
         selectAndProcessSubject(binding, WSDLBoundPortType.class, ScopeType.ENDPOINT, bindingName);
         LOGGER.exiting("addBindingExtension");
     }
+//    public void addBindingExtension(final TypedXmlWriter binding) {
+//        LOGGER.entering("addBindingExtension");
+//        final String bindingName = ((null != seiModel) && (null != endpointClass))?
+//            (WSEndpoint.getDefaultPortName(seiModel.getServiceQName(), endpointClass).getLocalPart() + "Binding") :
+//            null;
+//        selectAndProcessSubject(binding, WSDLBoundPortType.class, ScopeType.ENDPOINT, bindingName);
+//        LOGGER.exiting("addBindingExtension");
+//    }
     
     public void addOperationExtension(final TypedXmlWriter operation, final JavaMethod method) {
         LOGGER.entering("addOperationExtension");
@@ -291,11 +297,32 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
                 for (PolicySubject subject : subjects) {
                     if (method.equals(subject.getSubject())) {
                         writePolicyOrReferenceIt(subject, xmlWriter);
-                        return;
                     }
                 }
             }
             selectAndProcessSubject(xmlWriter, clazz, scopeType, method.getOperationName());
+        }
+        else {
+            selectAndProcessSubject(xmlWriter, clazz, scopeType, (String) null);
+        }
+        LOGGER.exiting("selectAndProcessSubject");
+    }
+    
+    /**
+     * This method should only be invoked by interface methods that deal with WSDL binding because they
+     * may use the QName of the WSDL binding element as PolicySubject instead of a WSDL object.
+     */
+    private void selectAndProcessSubject(final TypedXmlWriter xmlWriter, final Class clazz, final ScopeType scopeType, final QName bindingName) {
+        LOGGER.entering("selectAndProcessSubject", new Object[] {xmlWriter, clazz, scopeType, bindingName});
+        if (bindingName != null) {
+            if (subjects != null) {
+                for (PolicySubject subject : subjects) {
+                    if (bindingName.equals(subject.getSubject())) {
+                        writePolicyOrReferenceIt(subject, xmlWriter);
+                    }
+                }
+            }
+            selectAndProcessSubject(xmlWriter, clazz, scopeType, bindingName.getLocalPart());
         }
         else {
             selectAndProcessSubject(xmlWriter, clazz, scopeType, (String) null);
@@ -308,14 +335,14 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         if (subjects != null) {
             for (PolicySubject subject : subjects) { // iterate over all subjects in policy map
                 if (isCorrectType(policyMap, subject, scopeType)) {
-                    final Object wsdlSubject = subject.getSubject();
-                    if (wsdlSubject != null && clazz.isInstance(wsdlSubject)) { // is it our class?
+                    final Object concreteSubject = subject.getSubject();
+                    if (concreteSubject != null && clazz.isInstance(concreteSubject)) { // is it our class?
                         if (null == wsdlName) { // no name provided to check
                             writePolicyOrReferenceIt(subject, xmlWriter);
                         } else {
                             try {
                                 final Method getNameMethod = clazz.getDeclaredMethod("getName");
-                                if (stringEqualsToStringOrQName(wsdlName, getNameMethod.invoke(wsdlSubject))) {
+                                if (stringEqualsToStringOrQName(wsdlName, getNameMethod.invoke(concreteSubject))) {
                                     writePolicyOrReferenceIt(subject, xmlWriter);
                                 }
                             } catch (NoSuchMethodException nsme) {
