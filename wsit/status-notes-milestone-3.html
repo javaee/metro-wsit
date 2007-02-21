@@ -260,29 +260,29 @@ individual members.<br>
   <li>The Following WS-SecurityPolicy Features from specification Draft
 : Jul 2005 Ver 1.1 are unsupported in this release of WSIT</li>
 </ul>
-<table border="1" cellpadding="2" cellspacing="3" width="884">
-  <col width="92"> <col width="214"> <col width="552"> <tbody>
+<table border="1" cellpadding="2" cellspacing="3">
+  <tbody>
     <tr>
-      <td width="92">
+      <td>
       <p>WS-SecurityPolicy<br>
 Specification<br>
 Section</p>
       </td>
-      <td width="214">
+      <td>
       <p>Assertion</p>
       </td>
-      <td width="552">
+      <td>
       <p>Remark</p>
       </td>
     </tr>
     <tr>
-      <td width="92">
+      <td>
       <p>5.2.2</p>
       </td>
-      <td width="214">
+      <td>
       <p>EncryptedElements</p>
       </td>
-      <td width="552">
+      <td>
       <p>Not working even though the implementation is present (refer
 known <a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=24">issues
 # 24</a>) <br>
@@ -290,24 +290,24 @@ known <a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=24">issues
       </td>
     </tr>
     <tr>
-      <td width="92">
+      <td>
       <p>5.3.1</p>
       </td>
-      <td width="214">
+      <td>
       <p>RequiredElements</p>
       </td>
-      <td width="552">
+      <td>
       <p>Will be supported in a future release</p>
       </td>
     </tr>
     <tr>
-      <td width="92">
+      <td>
       <p>6.1.1</p>
       </td>
-      <td width="214">
+      <td>
       <p>TokenInclusion</p>
       </td>
-      <td width="552">
+      <td>
       <p><span style="font-weight: bold;">&nbsp;includeTokenPolicy=Once</span>&nbsp;
 is NOT supported,&nbsp;
 Always, AlwaysToRecipient and Never are supported (refer known <a
@@ -316,26 +316,26 @@ Always, AlwaysToRecipient and Never are supported (refer known <a
       </td>
     </tr>
     <tr>
-      <td width="92">
+      <td>
       <p>6.3.1</p>
       </td>
-      <td width="214">
+      <td>
       <p>UsernameToken</p>
       </td>
-      <td width="552">
+      <td>
       <p>Only &lt;sp:UsernameToken10&gt;&nbsp; is supported in this
 release, &lt;sp:UsernameToken11&gt;&nbsp; and Password Derived Keys
 will be supported in a future release</p>
       </td>
     </tr>
     <tr>
-      <td width="92">
+      <td>
       <p>6.3.3</p>
       </td>
-      <td width="214">
+      <td>
       <p>X509Token</p>
       </td>
-      <td width="552">
+      <td>
       <p>Only &lt;sp:WssX509V3Token10&gt; is supported in this release.
       <br>
       <br>
@@ -348,57 +348,57 @@ based on real-world usecases and customer preferences.</p>
       </td>
     </tr>
     <tr>
-      <td width="92">
+      <td>
       <p>6.3.4</p>
       </td>
-      <td width="214">
+      <td>
       <p>KerberosToken</p>
       </td>
-      <td width="552">
+      <td>
       <p>Will be supported in a future release</p>
       </td>
     </tr>
     <tr>
-      <td width="92">
+      <td>
       <p>6.3.9</p>
       </td>
-      <td width="214">
+      <td>
       <p>RelToken</p>
       </td>
-      <td width="552">
+      <td>
       <p>No Plan for supporting this token.</p>
       </td>
     </tr>
     <tr>
-      <td width="92">
+      <td>
       <p>6.3.6</p>
       </td>
-      <td width="214">
+      <td>
       <p>SecurityContextToken</p>
       </td>
-      <td width="552">
+      <td>
       <p>No Plan for supporting this token</p>
       </td>
     </tr>
     <tr>
-      <td width="92">
+      <td>
       <p>6.3.5</p>
       </td>
-      <td width="214">
+      <td>
       <p>SpnegoContextToken</p>
       </td>
-      <td width="552">
+      <td>
       <p>Will be supported in a future release</p>
       </td>
     </tr>
     <tr>
-      <td width="92">
+      <td>
       <p>7.1/8.1</p>
       </td>
-      <td width="214">
+      <td>
       <p>AlgorithmSuite</p>
       </td>
-      <td width="552">
+      <td>
       <p>All algorithms are supported&nbsp; <font color="#000000">with
 the exception of&nbsp; algorithms under&nbsp; Asymmetric KeyWrap, and
 Sha256.<br>
@@ -416,13 +416,13 @@ deploy failure(refer known <a
       </td>
     </tr>
     <tr>
-      <td width="92">
+      <td>
       <p>7.5</p>
       </td>
-      <td width="214">
+      <td>
       <p>Token Protection</p>
       </td>
-      <td width="552">
+      <td>
       <p>Token Protection in cases where includeTokenPolicy="Never" or
 in cases where the Token is not in the Message, is not handled
 correctly yet (refer known <a
@@ -432,13 +432,13 @@ correctly yet (refer known <a
       </td>
     </tr>
     <tr>
-      <td width="92">
+      <td>
       <p>8.3</p>
       </td>
-      <td width="214">
+      <td>
       <p>TransportBinding</p>
       </td>
-      <td width="552">
+      <td>
       <p><span style="font-weight: bold;">Is Supported in principle,</span>
 but no policy verification is
 performed on the Server side to ensure that SSL was indeed used at the
@@ -446,13 +446,13 @@ Transport Layer. This check will be added in a future release.</p>
       </td>
     </tr>
     <tr>
-      <td width="92">
+      <td>
       <p>9.2</p>
       </td>
-      <td width="214">
+      <td>
       <p>SignedSupportingTokens</p>
       </td>
-      <td width="552">
+      <td>
       <p>&nbsp;The runtime will not be able to sign the supporting
 token in cases where the Token is not in the Message (such as for
 includeTokenPolicy=Never/Once). <br>
@@ -460,13 +460,13 @@ includeTokenPolicy=Never/Once). <br>
       </td>
     </tr>
     <tr>
-      <td width="92">
+      <td>
       <p>9.4</p>
       </td>
-      <td width="214">
+      <td>
       <p>SignedEndorsingSupportingTokens</p>
       </td>
-      <td width="552">
+      <td>
       <p>The runtime will not be able to sign the supporting token in
 cases where the Token is not in the Message (such as for
 includeTokenPolicy=Never/Once).<br>
@@ -474,37 +474,37 @@ includeTokenPolicy=Never/Once).<br>
       </td>
     </tr>
     <tr>
-      <td width="92">
+      <td>
       <p>10.1</p>
       </td>
-      <td width="214">
+      <td>
       <p>WSS10 Assertion</p>
       </td>
-      <td width="552">
+      <td>
       <p><font color="#000000">Everything is supported with the
 Exception of&nbsp; &lt;sp:MustSupportRefEmbeddedToken&gt;. </font> </p>
       </td>
     </tr>
     <tr>
-      <td width="92">
+      <td>
       <p>10.2</p>
       </td>
-      <td width="214">
+      <td>
       <p>WSS11 Assertion</p>
       </td>
-      <td width="552">
+      <td>
       <p><font color="#000000">Everything is supported with the
 Exception of&nbsp; &lt;sp:MustSupportRefEmbeddedToken&gt;. </font> </p>
       </td>
     </tr>
     <tr>
-      <td width="92">
+      <td>
       <p>11.1</p>
       </td>
-      <td width="214">
+      <td>
       <p>Trust10 Assertion</p>
       </td>
-      <td width="552">
+      <td>
       <p>MustSupportClientChallenge, MustSupportServerChallenge are not
 supported in this release.</p>
       </td>
@@ -521,66 +521,66 @@ the server side by setting :&nbsp; <span
   <li>Issue# 318 :&nbsp; UnsupportedOperationException when message
 dumping is enabled&nbsp; <span style="font-family: monospace;">: </span>com.sun.xml.ws.assembler.client.action=true</li>
 </ul>
-<table border="1" cellpadding="2" cellspacing="3" width="884">
-  <col width="210"> <col width="397"> <col width="251"> <tbody>
+<table border="1" cellpadding="2" cellspacing="3">
+  <tbody>
     <tr>
-      <th width="210">
+      <th>
       <p>Interoperability Feature</p>
       </th>
-      <th width="397">
+      <th>
       <p>Status</p>
       </th>
-      <td width="251">
+      <td>
       <p><b>Remark</b></p>
       </td>
     </tr>
     <tr>
-      <td width="210">
+      <td>
       <p>"" URI Reference not supported in Signature<br>
       </p>
       </td>
-      <td width="397">
+      <td>
       <pre>Need to support empty URI Reference in Signature <a
  href="https://wsit.dev.java.net/issues/show_bug.cgi?id=269">Issue#269</a></pre>
       </td>
-      <td width="251">
+      <td>
       <p><font color="#000000">Will be supported in a future release</font></p>
       </td>
     </tr>
     <tr>
-      <td width="210">
+      <td>
       <p><font color="#000000">includeToken Policy ONCE</font></p>
       </td>
-      <td width="397">
+      <td>
       <p><font color="#000000">WSSecurityPolicy:TokenInclusion:
 includeToken Policy ONCE is not Supported</font></p>
       <p><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=19">Issue#19</a>
 on IssueTracker</p>
       </td>
-      <td width="251">
+      <td>
       <p><font color="#000000">Will be supported in a future release</font></p>
       </td>
     </tr>
     <tr>
-      <td width="210">
+      <td>
       <p>Returning of SOAP fault : Negative tests with Mismatched
 client and server policies</p>
       </td>
-      <td width="397">
+      <td>
       <p>SOAP Fault not returned: Different Algorithm suites used by
 Service Consumer/Provider.</p>
       <p><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=22">Issue#22</a>
 on IssueTracker</p>
       </td>
-      <td width="251">
+      <td>
       <p>Will be supported in a future release.</p>
       </td>
     </tr>
     <tr>
-      <td width="210">
+      <td>
       <p>SignedElements and EncryptedElements</p>
       </td>
-      <td width="397">
+      <td>
       <p>sp:EncryptedElements/sp:XPath fails to encrypt the element
 specified in the XPath element<br>
       </p>
@@ -589,67 +589,67 @@ specified in the XPath element<br>
       <br>
       </p>
       </td>
-      <td width="251">
+      <td>
       <p><font color="#000000">Feature implemented, but Fails due to a
 bug in the runtime.</font></p>
       </td>
     </tr>
     <tr>
-      <td width="210">
+      <td>
       <p>EncryptedParts in SupportingTokens</p>
       </td>
-      <td width="397">
+      <td>
       <p>EncryptedParts in SupportingTokens assertion in message policy
 does not work <br>
       <a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=12">Issue
 #12</a> on IssueTracker<br>
       </p>
       </td>
-      <td width="251">
+      <td>
       <p>Need a clarification from the WS-SecurityPolicy Specification
 as to whether Encrypted Parts inside SupportingTokens makes sense.</p>
       </td>
     </tr>
     <tr>
-      <td width="210">
+      <td>
       <p>SecurityPolicy:sp:AlgorithmSuite/wsp:Policy/<br>
 sp:SoapNormalization10&nbsp; assertion</p>
       </td>
-      <td width="397">
+      <td>
       <p>SecurityPolicy:sp:AlgorithmSuite/wsp:Policy/sp:SoapNormalization10
 assertion causes deploy failure <a
  href="https://wsit.dev.java.net/issues/show_bug.cgi?id=16">Issue#16</a><br>
       </p>
       </td>
-      <td width="251">
+      <td>
       <p>Feature Not Implemented</p>
       </td>
     </tr>
     <tr>
-      <td width="210">
+      <td>
       <p>SecurityPolicy: sp:AlgorithmSuite/wsp:Policy/sp:XPath10
 assertion</p>
       </td>
-      <td width="397">
+      <td>
       <p>SecurityPolicy: sp:AlgorithmSuite/wsp:Policy/sp:XPath10
 assertion causes deploy failure <a
  href="https://wsit.dev.java.net/issues/show_bug.cgi?id=15"> Issue#15</a></p>
       </td>
-      <td width="251">
+      <td>
       <p>Feature Not Implemented</p>
       </td>
     </tr>
     <tr>
-      <td width="210">
+      <td>
       <p>SecurityPolicy: sp:AlgorithmSuite/wsp:Policy/sp:XPathFilter20
 assertion</p>
       </td>
-      <td width="397">
+      <td>
       <p>SecurityPolicy: sp:AlgorithmSuite/wsp:Policy/sp:XPathFilter20
 assertion causes deploy failure <a
  href="https://wsit.dev.java.net/issues/show_bug.cgi?id=14"> Issue#14</a></p>
       </td>
-      <td width="251">
+      <td>
       <p>Feature Not Implemented&nbsp;&nbsp; <br>
       </p>
       </td>
@@ -659,8 +659,9 @@ assertion causes deploy failure <a
 RequireDerivedKeys<br>
       </td>
       <td style="vertical-align: top;">
-      <pre>The client is uanble to generate the request soap message and the exception<br>thrown is :<br>javax.xml.crypto.URIReferenceException: No elements exist with Id/WsuId: 3<br><a
- href="https://wsit.dev.java.net/issues/show_bug.cgi?id=76">Issue#76</a><br></pre>
+      The client is uanble to generate the request soap message and the exception thrown is: <pre>javax.xml.crypto.URIReferenceException: 
+ No elements exist with Id/WsuId: 3</pre><a
+ href="https://wsit.dev.java.net/issues/show_bug.cgi?id=76">Issue#76</a>
       </td>
       <td style="vertical-align: top;">Will be fixed in a future
 release.<br>
@@ -672,8 +673,8 @@ AsymmetricBinding, with ProtectTokens fails with :: Could not find
 Reference #5 under Signature with ID1<br>
       </td>
       <td style="vertical-align: top;">
-      <pre>WSDL has AsymmetricBinding (X509Token as Initiator and RecipientToken),SamlToken<br>as SignedSupportingToken.Request/Response messages are signed and encrypted.<br>The client side has a SamlCallbackHandler meant to populate an SenderVouches<br>saml assertion into the request message.<br>The test fails on the server side with the following exception trace :<br>Could not find Reference<br>#ff63e9e3-248d-4f77-8802-5326d58da1a9 under Signature with ID1<br><br><a
- href="https://wsit.dev.java.net/issues/show_bug.cgi?id=206">Issue#206</a><br></pre>
+      WSDL has AsymmetricBinding (X509Token as Initiator and RecipientToken),SamlToken as SignedSupportingToken.Request/Response messages are signed and encrypted. The client side has a SamlCallbackHandler meant to populate an SenderVouches saml assertion into the request message. The test fails on the server side with the following exception trace :<pre>Could not find Reference<br>#ff63e9e3-248d-4f77-8802-5326d58da1a9 under Signature with ID1</pre><a
+ href="https://wsit.dev.java.net/issues/show_bug.cgi?id=206">Issue#206</a><br>
       </td>
       <td style="vertical-align: top;">Will be fixed in a future release<br>
       </td>
@@ -683,8 +684,8 @@ Reference #5 under Signature with ID1<br>
 client side :AsymmetricBinding&nbsp; with ProtectTokens<br>
       </td>
       <td style="vertical-align: top;">
-      <pre>The test case has AsymmetricBinding with X509Token as the<br>Initiator(IncludeToken=AlwaysToRecipient) and the<br>RecipientToken(IncludeToken=Never) and ProtectTokens assertion.<br>The test fails with the following on the client side:<br><br>Exception in thread "main" java.lang.StackOverflowError<br><br><a
- href="https://wsit.dev.java.net/issues/show_bug.cgi?id=211">Issue# 211</a><br></pre>
+      The test case has AsymmetricBinding with X509Token as the Initiator(IncludeToken=AlwaysToRecipient) and the RecipientToken(IncludeToken=Never) and ProtectTokens assertion. The test fails with the following on the client side: <pre>Exception in thread "main" java.lang.StackOverflowError</pre><a
+ href="https://wsit.dev.java.net/issues/show_bug.cgi?id=211">Issue# 211</a>
       </td>
       <td style="vertical-align: top;">Will be fixed in a future release<br>
       </td>
@@ -695,7 +696,7 @@ client side :AsymmetricBinding&nbsp; with ProtectTokens<br>
 certificate for the alias ''"<br>
       </td>
       <td style="vertical-align: top;">
-      <pre>It has been observed that wssecurity on servlet based jaxws webservice with<br>WS-Policy is not working when the StreamSecurity is disabled. The issue is<br>server side certificate exception during the secureResponse from the WSIT provider.<br><br><a
+      It has been observed that wssecurity on servlet based jaxws webservice with WS-Policy is not working when the StreamSecurity is disabled. The issue is server side certificate exception during the secureResponse from the WSIT provider.<<a
  href="https://wsit.dev.java.net/issues/show_bug.cgi?id=336">Issue# 336</a><br></pre>
       </td>
       <td style="vertical-align: top;">Will be fixed in a future
@@ -1012,55 +1013,55 @@ implementation.</p>
 is present. </li>
 </ul>
 <h4>Known Issues</h4>
-<table border="1" cellpadding="2" cellspacing="3" width="987">
-  <col width="231"> <col width="737"> <tbody>
+<table border="1" cellpadding="2" cellspacing="3">
+  <tbody>
     <tr>
-      <th width="231">
+      <th>
       <p>Interoperability Feature</p>
       </th>
-      <th width="737">
+      <th>
       <p>Status/Workaround</p>
       </th>
     </tr>
     <tr>
-      <td width="231">
+      <td>
       <p>sp:EncryptedElements/sp </p>
       <p>Issue number <a
  href="https://wsit.dev.java.net/issues/show_bug.cgi?id=24">24</a></p>
       </td>
-      <td width="737">
+      <td>
       <p>sp:EncryptedElements/sp:XPath fails to encrypt the element
 specified in the XPath element</p>
       </td>
     </tr>
     <tr>
-      <td width="231">
+      <td>
       <p>SupportingTokens assertion</p>
       <p>Issue number <a
  href="https://wsit.dev.java.net/issues/show_bug.cgi?id=12">12</a></p>
       </td>
-      <td width="737">
+      <td>
       <p>EncryptedParts in SupportingTokens assertion in message policy
 does not work</p>
       </td>
     </tr>
     <tr>
-      <td width="231">
+      <td>
       <p>WSSecurity Policy Exception</p>
       </td>
-      <td width="737">
+      <td>
       <p>WSSecurity Policy Exception: Default implementation of
 IncludeToken takes "Never".</p>
       </td>
     </tr>
     <tr>
-      <td width="231">
+      <td>
       <p>WSSecurity Policy deploy Issue number <a
  href="https://wsit.dev.java.net/issues/show_bug.cgi?id=14">14</a>,<a
  href="https://wsit.dev.java.net/issues/show_bug.cgi?id=15">15</a>,<a
  href="https://wsit.dev.java.net/issues/show_bug.cgi?id=16">16</a></p>
       </td>
-      <td width="737">
+      <td>
       <p>The following security policy assertions cause a deploy
 failure:</p>
       <p>-
