@@ -224,6 +224,9 @@
 
 <target name="setup-tc" if="tomcat.home">
     <replace  dir="etc/service" includes="PingService*.wsdl" token="WCF-HOST" value="${ms.host}"/>
+    <replace  dir="etc/service" includes="PingService*.wsdl" token="$WSIT_HOME" value="${basedir}/../../../certs"/>
+    <replace  dir="etc/sts" includes="sts.wsdl" token="$WSIT_HOME" value="${basedir}/../../../certs"/>
+    <replace  dir="etc/client-config" includes="wsit-client.xml" token="$WSIT_HOME" value="${basedir}/../../../certs"/>
     <mkdir dir="${build.home}"/>
     <mkdir dir="${build.classes.home}"/>
     <mkdir dir="${build.war.home}"/>
@@ -236,6 +239,9 @@
 
 <target name="setup-glassfish" if="glassfish.home">
     <replace  dir="etc/service" includes="PingService*.wsdl" token="WCF-HOST" value="${ms.host}"/>
+    <replace  dir="etc/service" includes="PingService*.wsdl" token="$WSIT_HOME" value="${basedir}/../../../certs"/>
+    <replace  dir="etc/sts" includes="sts.wsdl" token="$WSIT_HOME" value="${basedir}/../../../certs"/>
+    <replace  dir="etc/client-config" includes="wsit-client.xml" token="$WSIT_HOME" value="${basedir}/../../../certs"/>
     <mkdir dir="${build.home}"/>
     <mkdir dir="${build.classes.home}"/>
     <mkdir dir="${build.war.home}"/>
@@ -483,6 +489,9 @@
     </java>  
     <replace  dir="etc/service" includes="PingService*.wsdl" value="WCF-HOST" token="${ms.host}"/>
     <replace  dir="${basedir}/etc/client-config" value="WCF-HOST" token="${ms.host}"/>
+    <replace  dir="etc/service" includes="PingService*.wsdl" value="$WSIT_HOME" token="${basedir}/../../../certs"/>
+    <replace  dir="etc/sts" includes="sts.wsdl" value="$WSIT_HOME" token="${basedir}/../../../certs"/>
+    <replace  dir="etc/client-config" includes="wsit-client.xml" value="$WSIT_HOME" token="${basedir}/../../../certs"/>
 </target>
 
 <target name="run-tc" if="tomcat.home">
@@ -512,6 +521,9 @@
     </java>  
     <replace  dir="etc/service" includes="PingService*.wsdl" value="WCF-HOST" token="${ms.host}"/>
     <replace  dir="${basedir}/etc/client-config" value="WCF-HOST" token="${ms.host}"/>
+    <replace  dir="etc/service" includes="PingService*.wsdl" value="$WSIT_HOME" token="${basedir}/../../../certs"/>
+    <replace  dir="etc/sts" includes="sts.wsdl" value="$WSIT_HOME" token="${basedir}/../../../certs"/>
+    <replace  dir="etc/client-config" includes="wsit-client.xml" value="$WSIT_HOME" token="${basedir}/../../../certs"/>
 </target>
 
 <target name="run-glassfish" if="glassfish.home">
@@ -542,6 +554,9 @@
     </java>  
     <replace  dir="etc/service" includes="PingService*.wsdl" value="WCF-HOST" token="${ms.host}"/>
     <replace  dir="${basedir}/etc/client-config" value="WCF-HOST" token="${ms.host}"/>
+    <replace  dir="etc/service" includes="PingService*.wsdl" value="$WSIT_HOME" token="${basedir}/../../../certs"/>
+    <replace  dir="etc/sts" includes="sts.wsdl" value="$WSIT_HOME" token="${basedir}/../../../certs"/>
+    <replace  dir="etc/client-config" includes="wsit-client.xml" value="$WSIT_HOME" token="${basedir}/../../../certs"/>
 </target>
 
 <target name="run-glassfish-ssl" if="glassfish.home">
@@ -578,6 +593,9 @@
     </java>  
     <replace  dir="etc/service" includes="PingService*.wsdl" value="WCF-HOST" token="${ms.host}"/>
     <replace  dir="${basedir}/etc/client-config" value="WCF-HOST" token="${ms.host}"/>
+    <replace  dir="etc/service" includes="PingService*.wsdl" value="$WSIT_HOME" token="${basedir}/../../../certs"/>
+    <replace  dir="etc/sts" includes="sts.wsdl" value="$WSIT_HOME" token="${basedir}/../../../certs"/>
+    <replace  dir="etc/client-config" includes="wsit-client.xml" value="$WSIT_HOME" token="${basedir}/../../../certs"/>
 </target>
 
 <target name="run-ssl" depends="setup-tc, run-tc-ssl, setup-glassfish, run-glassfish-ssl" if="sun.client"/>
