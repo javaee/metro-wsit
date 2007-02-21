@@ -42,7 +42,6 @@
 				</net:RmFlowControl>
 				<wspe:Utf816FFFECharacterEncoding xmlns:wspe="http://schemas.xmlsoap.org/ws/2004/09/policy/encoding"/>
 				<wsap10:UsingAddressing/>
-                <sunclient:AckRequestInterval xmlns:sunclient="http://sun.com/2006/03/rm/client" Milliseconds="400"/>
 
               
             </wsp:All>
