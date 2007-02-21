@@ -63,9 +63,8 @@ public class TxJAXBContext {
             marshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.TRUE);
             return marshaller;
         } catch (JAXBException e) {
-            if (logger.isLogging(Level.SEVERE)) {
-                logger.severe("createMarshaller", LocalizationMessages.FAILED_TO_CREATE_MARSHALLER_2003(e));
-            }
+            logger.severe("createMarshaller", LocalizationMessages.FAILED_TO_CREATE_MARSHALLER_2003(e));
+            
             // TODO should this throw an exception also
             return null;
         }
@@ -75,9 +74,8 @@ public class TxJAXBContext {
         try {
             return getJAXBContext().createUnmarshaller();
         } catch (JAXBException e) {
-            if (logger.isLogging(Level.SEVERE)) {
-                logger.severe("createMarshaller", LocalizationMessages.FAILED_TO_CREATE_UNMARSHALLER_2004(e));
-            }
+            logger.severe("createUnmarshaller", LocalizationMessages.FAILED_TO_CREATE_UNMARSHALLER_2004(e));
+      
             // TODO: rethrow some exception.
             return null;
         }
