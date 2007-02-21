@@ -91,7 +91,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
     private PolicyMerger merger = PolicyMerger.getMerger();
     
     public void start(final WSDLGenExtnContext context) {
-        LOGGER.entering("start");
+        LOGGER.entering();
         try {
             this.seiModel = context.getModel();
             this.endpointClass = context.getEndpointClass();
@@ -106,11 +106,11 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
                 final String configId = context.getEndpointClass().getName();
                 policyMap = PolicyConfigParser.parse(configId, context.getContainer(), extenders);
                 if (policyMap == null) {
-                    LOGGER.fine("start", LocalizationMessages.WSP_1034_CREATE_POLICY_MAP_FOR_CONFIG(configId));
+                    LOGGER.fine(LocalizationMessages.WSP_1034_CREATE_POLICY_MAP_FOR_CONFIG(configId));
                     policyMap = PolicyMap.createPolicyMap(Arrays.asList(extenders));
                 }
             } catch (PolicyException e) {
-                LOGGER.fine("start", LocalizationMessages.WSP_1027_FAILED_TO_READ_WSIT_CFG(), e);
+                LOGGER.fine(LocalizationMessages.WSP_1027_FAILED_TO_READ_WSIT_CFG(), e);
             }            
             
             final TypedXmlWriter root = context.getRoot();
@@ -124,17 +124,16 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
                     extenders[i].disconnect();
                 }
             } catch (PolicyException e) {
-                LOGGER.severe("start", LocalizationMessages.WSP_1048_MAP_UPDATE_FAILED(), e);
-                throw new WebServiceException(LocalizationMessages.WSP_1048_MAP_UPDATE_FAILED(), e);
+                throw LOGGER.logSevereException(new WebServiceException(LocalizationMessages.WSP_1048_MAP_UPDATE_FAILED(), e));
             }
         } finally {
-            LOGGER.exiting("start");
+            LOGGER.exiting();
         }
     }
     
     public void addDefinitionsExtension(final TypedXmlWriter definitions) {
         try {
-            LOGGER.entering("addDefinitionsExtension");
+            LOGGER.entering();
             if (policyMap != null) {
                 subjects.addAll(policyMap.getPolicySubjects());
                 boolean usingPolicy = false;
@@ -154,128 +153,127 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
                             marshaller.marshal(policyInfoset, definitions);
                             policyIDsOrNamesWritten.add(policy.getIdOrName());
                         } else {
-                            LOGGER.fine("addDefinitionsExtension", LocalizationMessages.WSP_1047_POLICY_ID_NULL_OR_DUPLICATE(policy));
+                            LOGGER.fine(LocalizationMessages.WSP_1047_POLICY_ID_NULL_OR_DUPLICATE(policy));
                         }
                     } else {
-                        LOGGER.fine("addDefinitionsExtension", LocalizationMessages.WSP_1019_NOT_MARSHALLING_WSDL_SUBJ_NULL(subject));
+                        LOGGER.fine(LocalizationMessages.WSP_1019_NOT_MARSHALLING_WSDL_SUBJ_NULL(subject));
                     }
                 }
             } else {
-                LOGGER.fine("addDefinitionsExtension", LocalizationMessages.WSP_1020_NOT_MARSHALLING_ANY_POLICIES_POLICY_MAP_IS_NULL());
+                LOGGER.fine(LocalizationMessages.WSP_1020_NOT_MARSHALLING_ANY_POLICIES_POLICY_MAP_IS_NULL());
             }
         } catch (PolicyException e) {
-            LOGGER.severe("addDefinitionsExtension", LocalizationMessages.WSP_1029_FAILED_TO_MARSHALL_POLICIES(), e);
-            throw new WebServiceException(LocalizationMessages.WSP_1029_FAILED_TO_MARSHALL_POLICIES(), e);
+            throw LOGGER.logSevereException(new WebServiceException(LocalizationMessages.WSP_1029_FAILED_TO_MARSHALL_POLICIES(), e));
         } finally {
-            LOGGER.exiting("addDefinitionsExtension");
+            LOGGER.exiting();
         }
     }
     
     public void addServiceExtension(final TypedXmlWriter service) {
-        LOGGER.entering("addServiceExtension");
+        LOGGER.entering();
         final String serviceName = ((null != seiModel) && (null != endpointClass)) ?
             WSEndpoint.getDefaultServiceName(endpointClass).getLocalPart() :
             null;
         selectAndProcessSubject(service, WSDLService.class, ScopeType.SERVICE, serviceName);
-        LOGGER.exiting("addServiceExtension");
+        LOGGER.exiting();
     }
     
     public void addPortExtension(final TypedXmlWriter port) {
-        LOGGER.entering("addPortExtension");
+        LOGGER.entering();
         final String portName = ((null != seiModel) && (null != endpointClass)) ?
             WSEndpoint.getDefaultPortName(seiModel.getServiceQName(), endpointClass).getLocalPart() :
             null;
         selectAndProcessSubject(port, WSDLPort.class, ScopeType.ENDPOINT, portName);
-        LOGGER.exiting("addPortExtension");
+        LOGGER.exiting();
     }
     
     public void addPortTypeExtension(final TypedXmlWriter portType) {
-        LOGGER.entering("addPortTypeExtension");
+        LOGGER.entering();
         final String portTypeName = (null != seiModel) ? seiModel.getPortTypeName().getLocalPart() : null;
         selectAndProcessSubject(portType, WSDLPortType.class, ScopeType.ENDPOINT, portTypeName);
-        LOGGER.exiting("addPortTypeExtension");
+        LOGGER.exiting();
     }
     
     public void addBindingExtension(final TypedXmlWriter binding) {
-        LOGGER.entering("addBindingExtension");
+        LOGGER.entering();
         final QName bindingName = (null != seiModel) ? seiModel.getBoundPortTypeName() : null;
         selectAndProcessSubject(binding, WSDLBoundPortType.class, ScopeType.ENDPOINT, bindingName);
-        LOGGER.exiting("addBindingExtension");
+        LOGGER.exiting();
     }
     
     public void addOperationExtension(final TypedXmlWriter operation, final JavaMethod method) {
-        LOGGER.entering("addOperationExtension");
+        LOGGER.entering();
         selectAndProcessSubject(operation, WSDLOperation.class, ScopeType.OPERATION, method);
-        LOGGER.exiting("addOperationExtension");
+        LOGGER.exiting();
     }
     
     public void addBindingOperationExtension(final TypedXmlWriter operation, final JavaMethod method) {
-        LOGGER.entering("addBindingOperationExtension");
+        LOGGER.entering();
         selectAndProcessSubject(operation, WSDLBoundOperation.class, ScopeType.OPERATION, method);
-        LOGGER.exiting("addBindingOperationExtension");
+        LOGGER.exiting();
     }
     
     public void addInputMessageExtension(final TypedXmlWriter message, final JavaMethod method) {
-        LOGGER.entering("addInputMessageExtension");
+        LOGGER.entering();
         final String messageName = (null != method) ? method.getRequestMessageName() : null;
         selectAndProcessSubject(message, WSDLMessage.class, ScopeType.INPUT_MESSAGE, messageName);
-        LOGGER.exiting("addInputMessageExtension");
+        LOGGER.exiting();
     }
     
     public void addOutputMessageExtension(final TypedXmlWriter message, final JavaMethod method) {
-        LOGGER.entering("addOutputMessageExtension");
+        LOGGER.entering();
         final String messageName = (null != method) ? method.getResponseMessageName() : null;
         selectAndProcessSubject(message, WSDLMessage.class, ScopeType.OUTPUT_MESSAGE, messageName);
-        LOGGER.exiting("addOutputMessageExtension");
+        LOGGER.exiting();
     }
     
     public void addFaultMessageExtension(final TypedXmlWriter message, final JavaMethod method, final CheckedException ce) {
-        LOGGER.entering("addFaultMessageExtension");
+        LOGGER.entering();
         final String messageName = (null != ce) ? ce.getMessageName() : null;
         selectAndProcessSubject(message, WSDLMessage.class, ScopeType.FAULT_MESSAGE, messageName);
-        LOGGER.exiting("addFaultMessageExtension");
+        LOGGER.exiting();
     }
     
     public void addOperationInputExtension(final TypedXmlWriter input, final JavaMethod method) {
-        LOGGER.entering("addOperationInputExtension");
+        LOGGER.entering();
         final String messageName = (null != method) ? method.getRequestMessageName() : null;
         selectAndProcessSubject(input, WSDLInput.class, ScopeType.INPUT_MESSAGE, messageName);
-        LOGGER.exiting("addOperationInputExtension");
+        LOGGER.exiting();
     }
     
     public void addOperationOutputExtension(final TypedXmlWriter output, final JavaMethod method) {
-        LOGGER.entering("addOperationOutputExtension");
+        LOGGER.entering();
         final String messageName = (null != method) ? method.getResponseMessageName() : null;
         selectAndProcessSubject(output, WSDLOutput.class, ScopeType.OUTPUT_MESSAGE, messageName);
-        LOGGER.exiting("addOperationOutputExtension");
+        LOGGER.exiting();
     }
     
     public void addOperationFaultExtension(final TypedXmlWriter fault, final JavaMethod method, final CheckedException ce) {
-        LOGGER.entering("addOperationFaultExtension");
+        LOGGER.entering();
         final String messageName = (null != ce) ? ce.getMessageName() : null;
         selectAndProcessSubject(fault, WSDLFault.class, ScopeType.FAULT_MESSAGE, messageName);
-        LOGGER.exiting("addOperationFaultExtension");
+        LOGGER.exiting();
     }
     
     public void addBindingOperationInputExtension(final TypedXmlWriter input, final JavaMethod method) {
-        LOGGER.entering("addBindingOperationInputExtension");
+        LOGGER.entering();
         final String messageName = (null != method) ? method.getOperationName() : null;
         selectAndProcessSubject(input, WSDLBoundOperation.class, ScopeType.INPUT_MESSAGE, messageName);
-        LOGGER.exiting("addBindingOperationInputExtension");
+        LOGGER.exiting();
     }
     
     public void addBindingOperationOutputExtension(final TypedXmlWriter output, final JavaMethod method) {
-        LOGGER.entering("addBindingOperationOutputExtension");
+        LOGGER.entering();
         final String messageName = (null != method) ? method.getOperationName() : null;
         selectAndProcessSubject(output, WSDLBoundOperation.class, ScopeType.OUTPUT_MESSAGE, messageName);
-        LOGGER.exiting("addBindingOperationOutputExtension");
+        LOGGER.exiting();
     }
     
     public void addBindingOperationFaultExtension(final TypedXmlWriter fault, final JavaMethod method, final CheckedException ce) {
-        LOGGER.entering("addBindingOperationFaultExtension");
+        LOGGER.entering();
         final String messageName = (null != ce) ? ce.getMessageName() : null;
         selectAndProcessSubject(fault, WSDLFault.class, ScopeType.FAULT_MESSAGE, messageName);
-        LOGGER.exiting("addBindingOperationFaultExtension");
+        LOGGER.exiting();
     }
     
     /**
@@ -283,7 +281,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
      * may use JavaMethod as PolicySubject instead of a WSDL object.
      */
     private void selectAndProcessSubject(final TypedXmlWriter xmlWriter, final Class clazz, final ScopeType scopeType, final JavaMethod method) {
-        LOGGER.entering("selectAndProcessSubject", new Object[] {xmlWriter, clazz, scopeType, method});
+        LOGGER.entering(xmlWriter, clazz, scopeType, method);
         if (method != null) {
             if (subjects != null) {
                 for (PolicySubject subject : subjects) {
@@ -297,7 +295,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         else {
             selectAndProcessSubject(xmlWriter, clazz, scopeType, (String) null);
         }
-        LOGGER.exiting("selectAndProcessSubject");
+        LOGGER.exiting();
     }
     
     /**
@@ -305,7 +303,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
      * may use the QName of the WSDL binding element as PolicySubject instead of a WSDL object.
      */
     private void selectAndProcessSubject(final TypedXmlWriter xmlWriter, final Class clazz, final ScopeType scopeType, final QName bindingName) {
-        LOGGER.entering("selectAndProcessSubject", new Object[] {xmlWriter, clazz, scopeType, bindingName});
+        LOGGER.entering(xmlWriter, clazz, scopeType, bindingName);
         if (bindingName != null) {
             if (subjects != null) {
                 for (PolicySubject subject : subjects) {
@@ -319,11 +317,11 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         else {
             selectAndProcessSubject(xmlWriter, clazz, scopeType, (String) null);
         }
-        LOGGER.exiting("selectAndProcessSubject");
+        LOGGER.exiting();
     }
     
     private void selectAndProcessSubject(final TypedXmlWriter xmlWriter, final Class clazz, final ScopeType scopeType, final String wsdlName) {
-        LOGGER.entering("selectAndProcessSubject");
+        LOGGER.entering();
         if (subjects != null) {
             for (PolicySubject subject : subjects) { // iterate over all subjects in policy map
                 if (isCorrectType(policyMap, subject, scopeType)) {
@@ -349,7 +347,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
                 }
             }
         }
-        LOGGER.exiting("selectAndProcessSubject");
+        LOGGER.exiting();
     }
     
     private static final boolean isCorrectType(final PolicyMap map, final PolicySubject subject, final ScopeType type) {
@@ -371,8 +369,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
     }
     
     private void handleCheckingElementQNameWithReflectionException(final Exception e) {
-        LOGGER.severe("handleCheckingElementQNameWithReflectionException", LocalizationMessages.WSP_1011_UNABLE_TO_CHECK_ELEMENT_NAME(), e);
-        throw new WebServiceException(LocalizationMessages.WSP_1011_UNABLE_TO_CHECK_ELEMENT_NAME(), e);
+        throw LOGGER.logSevereException(new WebServiceException(LocalizationMessages.WSP_1011_UNABLE_TO_CHECK_ELEMENT_NAME(), e));
     }
     
     
@@ -397,8 +394,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
                 }
             }
         } catch (PolicyException pe) {
-            LOGGER.severe("processPolicy", LocalizationMessages.WSP_1010_UNABLE_TO_MARSHALL_POLICY_OR_POLICY_REFERENCE(), pe);
-            throw new WebServiceException(LocalizationMessages.WSP_1010_UNABLE_TO_MARSHALL_POLICY_OR_POLICY_REFERENCE(), pe);
+            throw LOGGER.logSevereException(new WebServiceException(LocalizationMessages.WSP_1010_UNABLE_TO_MARSHALL_POLICY_OR_POLICY_REFERENCE(), pe));
         }
     }
 }

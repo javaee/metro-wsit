@@ -26,7 +26,6 @@ import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import com.sun.xml.ws.policy.spi.PolicyAssertionValidator;
 
 import static com.sun.xml.ws.policy.privateutil.LocalizationMessages.WSP_0076_NO_SERVICE_PROVIDERS_FOUND;
-import static com.sun.xml.ws.policy.privateutil.PolicyUtils.Commons.logException;
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
@@ -45,7 +44,7 @@ public final class AssertionValidationProcessor {
     
     public static AssertionValidationProcessor getInstance() throws PolicyException {
         if (validators.length == 0) {
-            throw logException(new PolicyException(WSP_0076_NO_SERVICE_PROVIDERS_FOUND(PolicyAssertionValidator.class.getName())), LOGGER);
+            throw LOGGER.logSevereException(new PolicyException(WSP_0076_NO_SERVICE_PROVIDERS_FOUND(PolicyAssertionValidator.class.getName())));
         }
         return processor;
     }

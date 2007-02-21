@@ -157,8 +157,7 @@ final class ServiceFinder<T> implements Iterable<T> {
      */
     static <T> ServiceFinder<T> find(final Class<T> service, final ClassLoader loader) {
         if (null==service) {
-            LOGGER.severe("find", LocalizationMessages.WSP_0032_SERVICE_CAN_NOT_BE_NULL());
-            throw new NullPointerException(LocalizationMessages.WSP_0032_SERVICE_CAN_NOT_BE_NULL());
+            throw LOGGER.logSevereException(new NullPointerException(LocalizationMessages.WSP_0032_SERVICE_CAN_NOT_BE_NULL()));
         }
         return new ServiceFinder<T>(service,loader);
     }
@@ -226,8 +225,7 @@ final class ServiceFinder<T> implements Iterable<T> {
             sce.initCause(cause);
         }
         
-        LOGGER.severe("fail", sce.getMessage());
-        throw sce;
+        throw LOGGER.logSevereException(sce);
     }
 
 /*    private static void fail(Class service, String msg)

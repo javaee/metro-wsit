@@ -52,7 +52,7 @@ public class PrivateElementFilteringStateMachine implements FilteringStateMachin
     }
     
     public InvocationProcessingState getState(final Invocation invocation, final XMLStreamWriter writer) {
-        LOGGER.entering("getState", invocation);
+        LOGGER.entering(invocation);
         InvocationProcessingState resultingState = NO_STATE_CHANGE;
         try {
             final XmlStreamWriterMethodType methodType = XmlStreamWriterMethodType.getMethodType(invocation.getMethodName());
@@ -90,7 +90,7 @@ public class PrivateElementFilteringStateMachine implements FilteringStateMachin
             return resultingState;
             
         } finally {
-            LOGGER.exiting("getState", resultingState);
+            LOGGER.exiting(resultingState);
         }
     }
 

@@ -50,8 +50,7 @@ public abstract class PolicyMapMutator {
      */
     void connect(final PolicyMap map) {
         if (isConnected()) {
-            LOGGER.severe("connect", LocalizationMessages.WSP_0044_POLICY_MAP_MUTATOR_ALREADY_CONNECTED());
-            throw new IllegalStateException(LocalizationMessages.WSP_0044_POLICY_MAP_MUTATOR_ALREADY_CONNECTED());
+            throw LOGGER.logSevereException(new IllegalStateException(LocalizationMessages.WSP_0044_POLICY_MAP_MUTATOR_ALREADY_CONNECTED()));
         }
         
         this.map = map;

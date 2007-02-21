@@ -37,7 +37,6 @@ import com.sun.xml.ws.policy.jaxws.privateutil.LocalizationMessages;
 import com.sun.xml.ws.policy.jaxws.spi.ModelConfiguratorProvider;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
-import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 import javax.xml.namespace.QName;
@@ -48,7 +47,7 @@ public class PolicyServiceInterceptor extends ServiceInterceptor {
     private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyServiceInterceptor.class);
     
     public List<WebServiceFeature> preCreateBinding(final WSPortInfo port, final java.lang.Class<?> serviceEndpointInterface, final WSFeatureList defaultFeatures) {
-        LOGGER.entering("preCreateBinding", new Object[] {port, serviceEndpointInterface, defaultFeatures});
+        LOGGER.entering(port, serviceEndpointInterface, defaultFeatures);
         final LinkedList<WebServiceFeature> features = new LinkedList<WebServiceFeature>();
         try {
             final WSDLPort wsdlPort = port.getPort();
@@ -58,17 +57,17 @@ public class PolicyServiceInterceptor extends ServiceInterceptor {
                 try {
                     clientModel = PolicyConfigParser.parseModel(PolicyConstants.CLIENT_CONFIGURATION_IDENTIFIER, null);
                 } catch (PolicyException pe) {
-                    throw logAndWrapException("preCreateBinding", LocalizationMessages.WSP_1017_ERROR_WHILE_PROCESSING_CLIENT_CONFIG(), pe);
+                    throw LOGGER.logSevereException(new WebServiceException(LocalizationMessages.WSP_1017_ERROR_WHILE_PROCESSING_CLIENT_CONFIG(), pe));
                 }
                 
                 if (clientModel != null) {
                     final WSDLPolicyMapWrapper policyMapWrapper = clientModel.getExtension(WSDLPolicyMapWrapper.class);
                     if (policyMapWrapper != null) {
-                        LOGGER.config("preCreateBinding", LocalizationMessages.WSP_1024_INVOKING_CLIENT_POLICY_ALTERNATIVE_SELECTION());
+                        LOGGER.config(LocalizationMessages.WSP_1024_INVOKING_CLIENT_POLICY_ALTERNATIVE_SELECTION());
                         try {
                             policyMapWrapper.doAlternativeSelection();
                         } catch (PolicyException e) {
-                            throw logAndWrapException("preCreateBinding", LocalizationMessages.WSP_1003_VALID_POLICY_ALTERNATIVE_NOT_FOUND(), e);
+                            throw LOGGER.logSevereException(new WebServiceException(LocalizationMessages.WSP_1003_VALID_POLICY_ALTERNATIVE_NOT_FOUND(), e));
                         }
                         
                         final PolicyMap map = policyMapWrapper.getPolicyMap();
@@ -78,34 +77,29 @@ public class PolicyServiceInterceptor extends ServiceInterceptor {
                                 configurator.configure(clientModel, map);
                             }
                         } catch (PolicyException e) {
-                            throw logAndWrapException("preCreateBinding", LocalizationMessages.WSP_1023_ERROR_WHILE_CONFIGURING_MODEL(), e);
+                            throw LOGGER.logSevereException(new WebServiceException(LocalizationMessages.WSP_1023_ERROR_WHILE_CONFIGURING_MODEL(), e));
                         }
                         // We can not read the features directly from port.getPort() because in the
                         // case of dispatch that object may be null.
                         addFeatures(features, clientModel, port.getPortName());
                         features.add(new PolicyFeature(map, clientModel, port));
                     } else {
-                        LOGGER.config("preCreateBinding", LocalizationMessages.WSP_1022_POLICY_MAP_NOT_IN_MODEL());
+                        LOGGER.config(LocalizationMessages.WSP_1022_POLICY_MAP_NOT_IN_MODEL());
                     }
                 }
             }
             
             return features;
         } finally {
-            LOGGER.exiting("preCreateBinding", features);
+            LOGGER.exiting(features);
         }
-    }
-    
-    private WebServiceException logAndWrapException(final String methodName, final String message, final Throwable cause) {
-        LOGGER.severe(methodName, message, cause);
-        return new WebServiceException(message, cause);
     }
     
     /**
      * Add the features in the WSDL model for the given port to the list
      */
     private void addFeatures(final List<WebServiceFeature> features, final WSDLModel model, final QName portName) {
-        LOGGER.entering("addFeatures", new Object[] { features, model, portName });
+        LOGGER.entering(features, model, portName);
         try {
             for (WSDLService service : model.getServices().values()) {
                 final WSDLPort port = service.get(portName);
@@ -116,7 +110,7 @@ public class PolicyServiceInterceptor extends ServiceInterceptor {
                 }
             }
         } finally {
-            LOGGER.exiting("addFeatures", features);
+            LOGGER.exiting(features);
         }
     }
     

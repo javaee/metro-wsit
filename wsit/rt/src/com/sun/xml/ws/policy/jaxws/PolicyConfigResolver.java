@@ -61,7 +61,7 @@ public class PolicyConfigResolver implements XMLEntityResolver {
     public Parser resolveEntity(final String publicId, final String systemId)
         throws XMLStreamException, IOException {
         
-        LOGGER.entering("resolveEntity", new Object[] { publicId, systemId });
+        LOGGER.entering(publicId, systemId);
         Parser parser = null;
 
         try {
@@ -73,7 +73,7 @@ public class PolicyConfigResolver implements XMLEntityResolver {
             parser = new Parser(systemUrl, reader);
             return parser;
         } finally {
-            LOGGER.exiting("resolveEntity", parser);
+            LOGGER.exiting(parser);
         }
     }
 }

@@ -35,7 +35,6 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
-import static com.sun.xml.ws.policy.privateutil.PolicyUtils.Commons.logException;
 import static com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter.InvocationProcessingState.START_BUFFERING;
 
 /**
@@ -123,7 +122,7 @@ public final class FilteringInvocationProcessor implements InvocationProcessor {
     }
     
     public Object process(final Invocation invocation) throws InvocationProcessingException {
-        LOGGER.entering("process", invocation);
+        LOGGER.entering(invocation);
         try {
             this.startBufferingCandidates.clear();
             this.stopBufferingCandidates.clear();
@@ -223,13 +222,13 @@ public final class FilteringInvocationProcessor implements InvocationProcessor {
             
             return invocation.execute(invocationTarget);
         } catch (IllegalArgumentException e) {
-            throw logException(new InvocationProcessingException(invocation, e), LOGGER);
+            throw LOGGER.logSevereException(new InvocationProcessingException(invocation, e));
         } catch (InvocationTargetException e) {
-            throw logException(new InvocationProcessingException(invocation, e.getCause()), LOGGER);
+            throw LOGGER.logSevereException(new InvocationProcessingException(invocation, e.getCause()));
         } catch (IllegalAccessException e) {
-            throw logException(new InvocationProcessingException(invocation, e), LOGGER);
+            throw LOGGER.logSevereException(new InvocationProcessingException(invocation, e));
         } finally {
-            LOGGER.exiting("process");
+            LOGGER.exiting();
         }
     }
     
@@ -240,7 +239,7 @@ public final class FilteringInvocationProcessor implements InvocationProcessor {
             try {
                 command.execute(writer);
             } catch (InvocationTargetException e) {
-                throw logException(new InvocationProcessingException(command, e), LOGGER);
+                throw LOGGER.logSevereException(new InvocationProcessingException(command, e));
             }
         }
     }

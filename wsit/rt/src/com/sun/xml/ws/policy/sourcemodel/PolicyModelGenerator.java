@@ -59,12 +59,12 @@ public final class PolicyModelGenerator {
      * @throw PolicyException in case Policy translation fails.
      */
     public PolicySourceModel translate(final Policy policy) throws PolicyException {
-        LOGGER.entering("translate", policy);
+        LOGGER.entering(policy);
         
         PolicySourceModel model = null;
         
         if (policy == null) {
-            LOGGER.fine("translate", LocalizationMessages.WSP_0047_POLICY_IS_NULL_RETURNING());
+            LOGGER.fine(LocalizationMessages.WSP_0047_POLICY_IS_NULL_RETURNING());
         } else {
             model = PolicySourceModel.createPolicySourceModel(policy.getId(), policy.getName());
             final ModelNode rootNode = model.getRootNode();
@@ -84,7 +84,7 @@ public final class PolicyModelGenerator {
             }
         }
         
-        LOGGER.exiting("translate", model);
+        LOGGER.exiting(model);
         return model;
     }
     
@@ -124,8 +124,7 @@ public final class PolicyModelGenerator {
             final AssertionData data = AssertionData.createAssertionParameterData(assertionParameter.getName(), assertionParameter.getValue(), assertionParameter.getAttributes());
             final ModelNode assertionParameterNode = assertionNode.createChildAssertionParameterNode(data);
             if (assertionParameter.hasNestedPolicy()) {
-                LOGGER.severe("translate", LocalizationMessages.WSP_0005_UNEXPECTED_POLICY_ELEMENT_FOUND_IN_ASSERTION_PARAM(assertionParameter));
-                throw new IllegalStateException(LocalizationMessages.WSP_0005_UNEXPECTED_POLICY_ELEMENT_FOUND_IN_ASSERTION_PARAM(assertionParameter));
+                throw LOGGER.logSevereException(new IllegalStateException(LocalizationMessages.WSP_0005_UNEXPECTED_POLICY_ELEMENT_FOUND_IN_ASSERTION_PARAM(assertionParameter)));
             }
             if (assertionParameter.hasNestedAssertions()) {
                 translate(assertionParameter.getNestedAssertionsIterator(), assertionParameterNode);

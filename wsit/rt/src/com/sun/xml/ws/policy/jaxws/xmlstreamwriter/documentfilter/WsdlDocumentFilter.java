@@ -73,14 +73,14 @@ public class WsdlDocumentFilter implements SDDocumentFilter {
     
     public XMLStreamWriter filter(final SDDocument sdDocument, final XMLStreamWriter xmlStreamWriter) throws XMLStreamException {
         if (LOGGER.isMethodCallLoggable()) {
-            LOGGER.entering("filter", new Object[] {sdDocument, xmlStreamWriter});
+            LOGGER.entering(sdDocument, xmlStreamWriter);
         }
         XMLStreamWriter result = null;
         try {
             result = EnhancedXmlStreamWriterProxy.createProxy(xmlStreamWriter, FILTERING_FACOTRY);
             return result;
         } finally {
-            LOGGER.exiting("filter", result);
+            LOGGER.exiting(result);
         }
     }
 }

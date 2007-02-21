@@ -95,8 +95,7 @@ final public class PolicyMapKey  {
         }
             
         if (handler == null) {
-            LOGGER.severe("equals", LocalizationMessages.WSP_0046_POLICY_MAP_KEY_HANDLER_NOT_SET());
-            throw new IllegalStateException(LocalizationMessages.WSP_0046_POLICY_MAP_KEY_HANDLER_NOT_SET());
+            throw LOGGER.logSevereException(new IllegalStateException(LocalizationMessages.WSP_0046_POLICY_MAP_KEY_HANDLER_NOT_SET()));
         }
         
         if (that instanceof PolicyMapKey) {
@@ -108,8 +107,7 @@ final public class PolicyMapKey  {
 
     public int hashCode() {
         if (handler == null) {
-            LOGGER.severe("hashCode", LocalizationMessages.WSP_0046_POLICY_MAP_KEY_HANDLER_NOT_SET());
-            throw new IllegalStateException(LocalizationMessages.WSP_0046_POLICY_MAP_KEY_HANDLER_NOT_SET());
+            throw LOGGER.logSevereException(new IllegalStateException(LocalizationMessages.WSP_0046_POLICY_MAP_KEY_HANDLER_NOT_SET()));
         }
 
         return handler.generateHashCode(this);

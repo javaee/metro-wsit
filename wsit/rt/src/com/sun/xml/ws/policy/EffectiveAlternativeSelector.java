@@ -24,14 +24,9 @@ package com.sun.xml.ws.policy;
 
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import com.sun.xml.ws.policy.privateutil.LocalizationMessages;
-import com.sun.xml.ws.policy.spi.PolicyAssertionValidator;
 import com.sun.xml.ws.policy.spi.PolicyAssertionValidator.Fitness;
 import java.util.Collection;
 import java.util.LinkedList;
-
-import static com.sun.xml.ws.policy.privateutil.PolicyUtils.Commons.logException;
-
-
 
 /**
  * Contains static methods for policy alternative selection. Given policy map is changed so that
@@ -134,7 +129,7 @@ public class EffectiveAlternativeSelector {
         abstract AlternativeFitness combine(Fitness assertionFitness);
     }
     
-    private static final PolicyLogger logger = PolicyLogger.getLogger(EffectiveAlternativeSelector.class);
+    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(EffectiveAlternativeSelector.class);
     
     /**
      *
@@ -186,7 +181,7 @@ public class EffectiveAlternativeSelector {
                     case UNKNOWN:
                     case UNSUPPORTED:
                     case INVALID:
-                        logger.warning("getNewEffectivePolicy", LocalizationMessages.WSP_0075_PROBLEMATIC_ASSERTION_STATE(assertion.getName(), assertionFitness));
+                        LOGGER.warning(LocalizationMessages.WSP_0075_PROBLEMATIC_ASSERTION_STATE(assertion.getName(), assertionFitness));
                         break;
                 }
                 
@@ -207,11 +202,11 @@ public class EffectiveAlternativeSelector {
         
         switch (bestAlternativeFitness) {
             case INVALID:
-                throw logException(new PolicyException(LocalizationMessages.WSP_0053_INVALID_CLIENT_SIDE_ALTERNATIVE()), logger);
+                throw LOGGER.logSevereException(new PolicyException(LocalizationMessages.WSP_0053_INVALID_CLIENT_SIDE_ALTERNATIVE()));
             case UNKNOWN:
             case UNSUPPORTED:
             case PARTIALLY_SUPPORTED:
-                logger.warning("getNewEffectivePolicy", LocalizationMessages.WSP_0019_SUBOPTIMAL_ALTERNATIVE_SELECTED(bestAlternativeFitness));
+                LOGGER.warning(LocalizationMessages.WSP_0019_SUBOPTIMAL_ALTERNATIVE_SELECTED(bestAlternativeFitness));
         }
         
         Collection<AssertionSet> alternativeSet = null;

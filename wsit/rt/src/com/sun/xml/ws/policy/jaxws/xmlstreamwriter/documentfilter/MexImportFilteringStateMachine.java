@@ -50,7 +50,7 @@ public final class MexImportFilteringStateMachine implements FilteringStateMachi
     }
     
     public InvocationProcessingState getState(final Invocation invocation, final XMLStreamWriter writer) {
-        LOGGER.entering("getState", invocation);
+        LOGGER.entering(invocation);
         InvocationProcessingState resultingState = NO_STATE_CHANGE;
         try {
             final XmlStreamWriterMethodType methodType = XmlStreamWriterMethodType.getMethodType(invocation.getMethodName());
@@ -101,7 +101,7 @@ public final class MexImportFilteringStateMachine implements FilteringStateMachi
             return resultingState;
             
         } finally {
-            LOGGER.exiting("getState", resultingState);
+            LOGGER.exiting(resultingState);
         }
     }
     

@@ -24,12 +24,10 @@ package com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter;
 import com.sun.xml.ws.policy.jaxws.privateutil.LocalizationMessages;
 import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.Invocation;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
-import java.util.HashMap;
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamWriter;
 
-import static com.sun.xml.ws.policy.privateutil.PolicyUtils.Commons.logException;
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
@@ -88,9 +86,7 @@ public final class XmlFilteringUtils {
                 namespaceURI = invocation.getArgument(2).toString();
                 break;
             default:
-                throw logException(
-                        new IllegalArgumentException(LocalizationMessages.WSP_1009_UNEXPECTED_ARGUMENTS_COUNT(XmlStreamWriterMethodType.WRITE_START_ELEMENT + "(...)", argumentsCount)),
-                        LOGGER);
+                throw LOGGER.logSevereException(new IllegalArgumentException(LocalizationMessages.WSP_1009_UNEXPECTED_ARGUMENTS_COUNT(XmlStreamWriterMethodType.WRITE_START_ELEMENT + "(...)", argumentsCount)));
         }
         
         return new QName(namespaceURI, localName);
@@ -124,9 +120,7 @@ public final class XmlFilteringUtils {
                 value = invocation.getArgument(3).toString();
                 break;
             default:
-                throw logException(
-                        new IllegalArgumentException(LocalizationMessages.WSP_1009_UNEXPECTED_ARGUMENTS_COUNT(XmlStreamWriterMethodType.WRITE_ATTRIBUTE + "(...)", argumentsCount)),
-                        LOGGER);
+                throw LOGGER.logSevereException(new IllegalArgumentException(LocalizationMessages.WSP_1009_UNEXPECTED_ARGUMENTS_COUNT(XmlStreamWriterMethodType.WRITE_ATTRIBUTE + "(...)", argumentsCount)));
         }
         
         return new AttributeInfo(new QName(namespaceURI, localName), value);
@@ -134,13 +128,11 @@ public final class XmlFilteringUtils {
     
     private static final void checkInvocationParameter(final Invocation invocation, XmlStreamWriterMethodType expectedType) {
         if (invocation == null) {
-            throw logException(new NullPointerException(LocalizationMessages.WSP_1038_METHOD_PARAMETER_CANNOT_BE_NULL("Invocation parameter")),
-                    LOGGER);
+            throw LOGGER.logSevereException(new NullPointerException(LocalizationMessages.WSP_1038_METHOD_PARAMETER_CANNOT_BE_NULL("Invocation parameter")));
         } else {
             XmlStreamWriterMethodType methodType = XmlStreamWriterMethodType.getMethodType(invocation.getMethodName());
             if (methodType != expectedType) {
-                throw logException(new IllegalArgumentException(LocalizationMessages.WSP_1039_ILLEGAL_INVOCATION_METHOD_TYPE(methodType, expectedType)),
-                        LOGGER);
+                throw LOGGER.logSevereException(new IllegalArgumentException(LocalizationMessages.WSP_1039_ILLEGAL_INVOCATION_METHOD_TYPE(methodType, expectedType)));
             }
         }
     }

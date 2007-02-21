@@ -24,7 +24,6 @@ package com.sun.xml.ws.encoding.policy;
 
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.model.SEIModel;
-import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
@@ -32,18 +31,15 @@ import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapExtender;
 import com.sun.xml.ws.policy.PolicyMapKey;
-import com.sun.xml.ws.policy.PolicyMerger;
 import com.sun.xml.ws.policy.PolicySubject;
 import com.sun.xml.ws.policy.jaxws.spi.PolicyMapUpdateProvider;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
-import com.sun.xml.ws.policy.sourcemodel.PolicyModelGenerator;
-import com.sun.xml.ws.policy.sourcemodel.PolicyModelMarshaller;
 import java.util.ArrayList;
-import java.util.Collection;
 import javax.xml.ws.soap.MTOMFeature;
 
 import static com.sun.xml.ws.encoding.policy.EncodingConstants.OPTIMIZED_MIME_SERIALIZATION_ASSERTION;
+import java.util.logging.Level;
 import javax.xml.namespace.QName;
 
 /**
@@ -63,7 +59,7 @@ public class MtomMapUpdateProvider implements PolicyMapUpdateProvider{
             super(mtomData, null, null);
         }
     }
-
+    
     /**
      * Generates an MTOM policy if MTOM is enabled.
      *
@@ -78,11 +74,13 @@ public class MtomMapUpdateProvider implements PolicyMapUpdateProvider{
      *
      */
     public void update(PolicyMapExtender policyMapMutator, PolicyMap policyMap, SEIModel model, WSBinding wsBinding) throws PolicyException {
-        logger.entering("update", new Object[] {policyMapMutator, policyMap, model, wsBinding});
-
+        logger.entering(policyMapMutator, policyMap, model, wsBinding);
+        
         if (policyMap != null) {
             final MTOMFeature mtomFeature = wsBinding.getFeature(MTOMFeature.class);
-            logger.finest("update", "mtomFeature = " + mtomFeature);
+            if (logger.isLoggable(Level.FINEST)) {
+                logger.finest("mtomFeature = " + mtomFeature);
+            }
             if ((mtomFeature != null) && mtomFeature.isEnabled()) {
                 final PolicyMapKey endpointKey = PolicyMap.createWsdlEndpointScopeKey(model.getServiceQName(), model.getPortName());
                 final Policy existingPolicy = policyMap.getEndpointEffectivePolicy(endpointKey);
@@ -92,19 +90,17 @@ public class MtomMapUpdateProvider implements PolicyMapUpdateProvider{
                     PolicySubject mtomPolicySubject = new PolicySubject(bindingName, mtomPolicy);
                     PolicyMapKey aKey = PolicyMap.createWsdlEndpointScopeKey(model.getServiceQName(), model.getPortName());
                     policyMapMutator.putEndpointSubject(aKey, mtomPolicySubject);
-                    logger.fine("update", "Added MTOM policy with ID \"" + mtomPolicy.getIdOrName() +
-                                  "\" to binding element \"" + bindingName + "\"");
-                }
-                else {
-                    logger.fine("update", "MTOM policy exists already, doing nothing");
+                    logger.fine("Added MTOM policy with ID \"" + mtomPolicy.getIdOrName() + "\" to binding element \"" + bindingName + "\"");
+                } else {
+                    logger.fine("MTOM policy exists already, doing nothing");
                 }
             }
         } // endif policy map not null
         
-        logger.exiting("update");
+        logger.exiting();
     }
-        
-
+    
+    
     /**
      * Create a policy with an MTOM assertion.
      *

@@ -7,7 +7,6 @@
 
 package com.sun.xml.ws.policy.privateutil;
 
-import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.spi.PolicyAssertionCreator;
 import junit.framework.*;
 import java.io.Closeable;
@@ -29,80 +28,7 @@ public class PolicyUtilsTest extends TestCase {
     
     protected void tearDown() throws Exception {
     }
-    
-    /**
-     * Test of createAndLogException method, of class com.sun.xml.ws.policy.privateutil.PolicyUtils.Commons.
-     */
-    public void testCommonsCreateAndLogException() {
-        Throwable cause, result;        
-        String message;
         
-        cause = new Exception();
-        message = "Test message.";
-        result = PolicyUtils.Commons.logException(new IllegalArgumentException(message), cause, LOGGER);
-        assertEquals(message, result.getMessage());
-        assertEquals(cause, result.getCause());
-        assertEquals("testCommonsCreateAndLogException", result.getStackTrace()[0].getMethodName());
-
-        message = "Test message.";
-        result = PolicyUtils.Commons.logException(new NullPointerException(message), cause, LOGGER);
-        assertEquals(message, result.getMessage());
-        assertEquals(cause, result.getCause());
-        assertEquals("testCommonsCreateAndLogException", result.getStackTrace()[0].getMethodName());
-
-        message = null;
-        result = PolicyUtils.Commons.logException(new PolicyException(message), true, LOGGER);
-        assertEquals(message, result.getMessage());
-        assertEquals(null, result.getCause());    
-        assertEquals("testCommonsCreateAndLogException", result.getStackTrace()[0].getMethodName());
-
-        message = "Test message.";
-        result = PolicyUtils.Commons.logException(new PolicyException(message), false, LOGGER);
-        assertEquals(message, result.getMessage());
-        assertEquals(null, result.getCause());    
-        assertEquals("testCommonsCreateAndLogException", result.getStackTrace()[0].getMethodName());
-
-        cause = new NullPointerException("test");
-        message = null;
-        result = PolicyUtils.Commons.logException(new PolicyException(message, cause), true, LOGGER);
-        assertEquals(message, result.getMessage());
-        assertEquals(cause, result.getCause());    
-        assertEquals("testCommonsCreateAndLogException", result.getStackTrace()[0].getMethodName());
-
-        cause = new NullPointerException("test");
-        message = "Test message.";
-        result = PolicyUtils.Commons.logException(new PolicyException(message, cause), false, LOGGER);
-        assertEquals(message, result.getMessage());
-        assertEquals(cause, result.getCause());    
-        assertEquals("testCommonsCreateAndLogException", result.getStackTrace()[0].getMethodName());
-
-        message = null;
-        result = PolicyUtils.Commons.logException(new PolicyException(message), LOGGER);
-        assertEquals(message, result.getMessage());
-        assertEquals(null, result.getCause());    
-        assertEquals("testCommonsCreateAndLogException", result.getStackTrace()[0].getMethodName());
-
-        message = "Test message.";
-        result = PolicyUtils.Commons.logException(new PolicyException(message), LOGGER);
-        assertEquals(message, result.getMessage());
-        assertEquals(null, result.getCause());    
-        assertEquals("testCommonsCreateAndLogException", result.getStackTrace()[0].getMethodName());
-
-        cause = new NullPointerException("test");
-        message = null;
-        result = PolicyUtils.Commons.logException(new PolicyException(message, cause), LOGGER);
-        assertEquals(message, result.getMessage());
-        assertEquals(cause, result.getCause());    
-        assertEquals("testCommonsCreateAndLogException", result.getStackTrace()[0].getMethodName());
-
-        cause = new NullPointerException("test");
-        message = "Test message.";
-        result = PolicyUtils.Commons.logException(new PolicyException(message, cause), LOGGER);
-        assertEquals(message, result.getMessage());
-        assertEquals(cause, result.getCause());    
-        assertEquals("testCommonsCreateAndLogException", result.getStackTrace()[0].getMethodName());
-    }
-    
     /**
      * Test of getStackMethodName method, of class com.sun.xml.ws.policy.privateutil.PolicyUtils.Commons.
      */

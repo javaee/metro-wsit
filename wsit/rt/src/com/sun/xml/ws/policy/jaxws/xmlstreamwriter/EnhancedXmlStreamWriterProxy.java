@@ -58,8 +58,7 @@ public final class EnhancedXmlStreamWriterProxy implements InvocationHandler {
             equalsMethod = Object.class.getMethod("equals", new Class[] { Object.class });
             toStringMethod = Object.class.getMethod("toString");
         } catch (NoSuchMethodException e) {
-            LOGGER.severe("<static initialization>", e.getMessage());
-            throw new NoSuchMethodError(e.getMessage());
+            throw LOGGER.logSevereException(new NoSuchMethodError(e.getMessage()));
         }
     }
     
@@ -80,7 +79,7 @@ public final class EnhancedXmlStreamWriterProxy implements InvocationHandler {
      * @throws XMLStreamException
      */
     public static XMLStreamWriter createProxy(final XMLStreamWriter writer, final InvocationProcessorFactory processorFactory) throws XMLStreamException {
-        LOGGER.entering("createProxy");
+        LOGGER.entering();
         
         XMLStreamWriter proxy = null;
         try {
@@ -91,7 +90,7 @@ public final class EnhancedXmlStreamWriterProxy implements InvocationHandler {
             
             return proxy;
         } finally {
-            LOGGER.exiting("createProxy", proxy);
+            LOGGER.exiting(proxy);
         }
     }
     
@@ -101,7 +100,7 @@ public final class EnhancedXmlStreamWriterProxy implements InvocationHandler {
     
     public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
         if (LOGGER.isMethodCallLoggable()) {
-            LOGGER.entering("createProxy", new Object[] {method, args});
+            LOGGER.entering(method, args);
         }
         
         Object result = null;
@@ -115,7 +114,7 @@ public final class EnhancedXmlStreamWriterProxy implements InvocationHandler {
                 return result;
             }
         } finally {
-            LOGGER.exiting("invoke", result);
+            LOGGER.exiting(result);
         }
     }
     
@@ -127,8 +126,7 @@ public final class EnhancedXmlStreamWriterProxy implements InvocationHandler {
         } else if (method.equals(toStringMethod)) {
             return proxy.getClass().getName() + '@' + Integer.toHexString(proxy.hashCode());
         } else {
-            LOGGER.severe("handleObjectMethodCall", LocalizationMessages.WSP_1007_UNEXPECTED_OBJECT_METHOD(method));
-            throw new InternalError(LocalizationMessages.WSP_1007_UNEXPECTED_OBJECT_METHOD(method));
+            throw LOGGER.logSevereException(new InternalError(LocalizationMessages.WSP_1007_UNEXPECTED_OBJECT_METHOD(method)));
         }
     }
 }

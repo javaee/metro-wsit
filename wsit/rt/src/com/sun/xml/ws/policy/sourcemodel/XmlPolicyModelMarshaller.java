@@ -49,8 +49,7 @@ public final class XmlPolicyModelMarshaller extends PolicyModelMarshaller {
         } else if (storage instanceof XMLStreamWriter) {
             marshal(model, (XMLStreamWriter) storage);
         } else {
-            LOGGER.severe("marshal", LocalizationMessages.WSP_0022_STORAGE_TYPE_NOT_SUPPORTED(storage.getClass().getName()));
-            throw new PolicyException(LocalizationMessages.WSP_0022_STORAGE_TYPE_NOT_SUPPORTED(storage.getClass().getName()));
+            throw LOGGER.logSevereException(new PolicyException(LocalizationMessages.WSP_0022_STORAGE_TYPE_NOT_SUPPORTED(storage.getClass().getName())));
         }
     }
     
