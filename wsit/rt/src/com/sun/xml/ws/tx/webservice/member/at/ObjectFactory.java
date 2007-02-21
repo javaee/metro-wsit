@@ -60,34 +60,6 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link ATAssertion }
-     */
-    public ATAssertion createATAssertion() {
-        return new ATAssertion();
-    }
-
-    /**
-     * Create an instance of {@link ATAlwaysCapability }
-     */
-    public ATAlwaysCapability createATAlwaysCapability() {
-        return new ATAlwaysCapability();
-    }
-
-    /**
-     * Create an instance of {@link ReplayResponse }
-     */
-    public ReplayResponse createReplayResponse() {
-        return new ReplayResponse();
-    }
-
-    /**
-     * Create an instance of {@link PrepareResponse }
-     */
-    public PrepareResponse createPrepareResponse() {
-        return new PrepareResponse();
-    }
-
-    /**
      * Create an instance of {@link Notification }
      */
     public Notification createNotification() {

@@ -68,7 +68,7 @@ import java.util.logging.Level;
  * already decided to prepare.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  * @since 1.0
  */
 public class ATParticipant extends Registrant {
@@ -167,7 +167,7 @@ public class ATParticipant extends Registrant {
         getATCoordinator().forget(this);
     }
 
-    public CoordinatorPortType getATCoordinatorWS(final boolean nonterminalNotify) {
+    private CoordinatorPortType getATCoordinatorWS(final boolean nonterminalNotify) {
         if (getCoordinatorProtocolService() == null && !isRegistrationCompleted()) {
             logger.warning("getATCoordinatorWS",
                     LocalizationMessages.NO_REG_RESP_0014(
@@ -200,7 +200,7 @@ public class ATParticipant extends Registrant {
         return ATCoordinator.getWSATCoordinatorService().getCoordinator(toCPS, owf);
     }
 
-    public ParticipantPortType getATParticipantWS(final boolean nonterminalNotification) {
+    private ParticipantPortType getATParticipantWS(final boolean nonterminalNotification) {
         return this.getATParticipantWS(this.getParticipantProtocolService(),
                 this.getCoordinatorProtocolService(), nonterminalNotification);
     }

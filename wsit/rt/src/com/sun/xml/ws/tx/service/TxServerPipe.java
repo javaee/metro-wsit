@@ -38,6 +38,7 @@ import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.tx.at.ATCoordinator;
+import com.sun.xml.ws.tx.at.ATSubCoordinator;
 import com.sun.xml.ws.tx.at.CoordinationXid;
 import static com.sun.xml.ws.tx.common.Constants.*;
 import com.sun.xml.ws.tx.common.Message;
@@ -68,7 +69,7 @@ import java.util.logging.Level;
  * <p/>
  * Supports following WS-Coordination protocols: 2004 WS-Atomic Transaction protocol
  *
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  * @since 1.0
  */
 // suppress known deprecation warnings about using pipes.
@@ -172,12 +173,18 @@ public class TxServerPipe implements Pipe {
             logger.warning(METHOD_NAME, invalidMsg, je);
             
             // send fault S4.3 wscoor:InvalidParameters
+            
+            // DO NOT LOCALIZE englishReason
+            // 2004 WS-Coordination, S4. Coordination Faults "[Reason] The English language reason element""
+            String englishReason = "WSTX-SERVICE-5006: Unable to read CoordinationContext in request message, msgId=" + 
+                                msg.getMessageID().toString() + ", sent to endpoint:operation " + bindingName + ":" + 
+                                msgOperation.toString() + " due to JAXException " + je.getMessage(); 
             WsaHelper.sendFault(
                     msg.getFaultTo(),
                     msg.getReplyTo().toSpec(),
                     SOAPVersion.SOAP_11,
                     TxFault.InvalidParameters,
-                    invalidMsg,  // TODO: no I18N - spec requires xml:lang="en"
+                    englishReason,
                     msg.getMessageID());
         }
         
@@ -263,7 +270,7 @@ public class TxServerPipe implements Pipe {
                                               " from external WS-AT coordinator");
                 }
                 importedTxn = true;
-                beginImportTransaction(coordTxnCtx, coord);
+                beginImportTransaction(coordTxnCtx, (ATSubCoordinator)coord);
                 try {
                     responsePkt = next.process(pkt);
                 } catch (Exception e) {
@@ -280,14 +287,14 @@ public class TxServerPipe implements Pipe {
             }
         } else if (msgOpATPolicy.ATAlwaysCapability == true) {
             
-            // no Transaction context flowed with message but WS-AT policy assertion requests auto creation of txn 
+            // no Transaction context flowed with message but WS-AT policy assertion requests auto creation of txn
             // context on server side invocation of method.
             if (isServlet(pkt)) {
-                 beginTransaction();
-                 
-                  if (logger.isLogging(Level.FINER)) {
+                beginTransaction();
+                
+                if (logger.isLogging(Level.FINER)) {
                     logger.finer(METHOD_NAME, "create JTA Transaction, no CoordinationContext flowed with operation and wsat:ATAlwaysCapability is enabled");
-                  }
+                }
             }    // else allow Java EE EJB container to create transaction context
                  // for Sun Application Server:  see BaseContainer.preInvokeTx
             try {
@@ -338,11 +345,11 @@ public class TxServerPipe implements Pipe {
      *
      * @see #endImportTransaction(CoordinationContextInterface)
      */
-    private void beginImportTransaction(CoordinationContextInterface CC, ATCoordinator coordinator) {
+    private void beginImportTransaction(CoordinationContextInterface CC, ATSubCoordinator coordinator) {
         assert activeImportedXid == null;
 
         Transaction currentTxn;
-        activeImportedXid = CoordinationXid.lookupOrCreate(CC.getIdentifier());
+        activeImportedXid = coordinator.getCoordinationXid();
         try {    
             ((TransactionImport) tm).recreate(activeImportedXid, CC.getExpires());
         } catch (IllegalStateException ex) {

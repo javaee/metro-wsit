@@ -108,13 +108,12 @@ public class ATSubCoordinator extends ATCoordinator {
 
     private Xid xid = null;
 
-    private Xid getCoordinationXid() {
+    public Xid getCoordinationXid() {
         if (xid == null) {
             xid = CoordinationXid.lookupOrCreate(getContext().getIdentifier());
         }
         return xid;
     }
-
 
     public class VolatileParticipant implements Participant {
         public Protocol getProtocol() {
@@ -415,6 +414,7 @@ public class ATSubCoordinator extends ATCoordinator {
             rootDurableParticipant.forget();
             rootDurableParticipant = null;
         }
+        CoordinationXid.forget(this.getIdValue());
         super.forget();
     }
     
