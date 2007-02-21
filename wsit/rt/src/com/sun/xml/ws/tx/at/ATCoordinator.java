@@ -43,6 +43,8 @@ import com.sun.xml.ws.tx.coordinator.Coordinator;
 import com.sun.xml.ws.tx.coordinator.Registrant;
 import com.sun.xml.ws.tx.webservice.member.at.WSATCoordinator;
 import com.sun.xml.ws.tx.webservice.member.coord.CreateCoordinationContextType;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import javax.transaction.RollbackException;
 import javax.transaction.Synchronization;
@@ -57,7 +59,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -90,7 +91,7 @@ import java.util.logging.Level;
  *
  * @author Ryan.Shoemaker@Sun.COM
  * @author Joe.Fialli@Sun.COM
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  * @since 1.0
  */
 public class ATCoordinator extends Coordinator implements Synchronization, XAResource {
@@ -109,11 +110,11 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
     enum KIND { VOLATILE, DURABLE };
     
     /* map <Registrant.getId(), Registrant> of volatile 2pc participants */
-    private final Map<String, ATParticipant> volatileParticipants = new HashMap<String, ATParticipant>();
+    private final Map<String, ATParticipant> volatileParticipants = new LinkedHashMap<String, ATParticipant>(4);
     private AT_2PC_State volatileParticipantsState = ACTIVE;
 
     /* map <Registrant.getId(), Registrant> of durable 2pc participants */
-    private final HashMap<String, ATParticipant> durableParticipants = new HashMap<String, ATParticipant>();
+    private final Map<String, ATParticipant> durableParticipants = new LinkedHashMap<String, ATParticipant>(4);
     private AT_2PC_State durableParticipantsState = ACTIVE;
 
     /* the completion registrant  - only allowed on root ATCoordinator
@@ -322,11 +323,7 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
     }
 
     public Collection<ATParticipant> getVolatileParticipantsSnapshot() {
-        // Try an alternative to clone to get rid unchecked cast warning
-        // (HashMap<String, ATParticipant>) volatileParticipants.clone();
-        final HashMap<String, ATParticipant> vp =
-                new HashMap<String, ATParticipant>(volatileParticipants);
-        return vp.values();
+        return new ArrayList<ATParticipant>(volatileParticipants.values());
     }
 
     /**
@@ -341,8 +338,7 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
     }
 
     public Collection<ATParticipant> getDurableParticipantsSnapshot() {
-        //return ((HashMap<String, ATParticipant>) durableParticipants.clone()).values();
-        return new HashMap<String, ATParticipant>(durableParticipants).values();
+        return new ArrayList<ATParticipant>(durableParticipants.values());
     }
 
 
