@@ -201,7 +201,7 @@
               </wsp:Policy>
             </sp:Layout>
             <sp:IncludeTimestamp/>
-            <sp:SignBeforeEncrypting/>
+            <sp:SignxxBeforeEncrypting/>
             <sp:EncryptSignature/>
             <sp:OnlySignEntireHeadersAndBody/>
           </wsp:Policy>

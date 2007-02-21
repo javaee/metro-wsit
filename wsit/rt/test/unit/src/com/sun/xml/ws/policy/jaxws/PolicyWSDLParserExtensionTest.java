@@ -42,6 +42,7 @@ import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import com.sun.xml.ws.policy.testutils.PolicyResourceLoader;
 import javax.xml.namespace.QName;
+import javax.xml.ws.WebServiceException;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -545,12 +546,12 @@ public class PolicyWSDLParserExtensionTest extends TestCase{
                 ,new QName("http://example.org","DictFault"))));
     }
     
-//    public void testInvalidAssertionShouldCauseException() throws Exception {
-//        try {
-//            PolicyMap policyMap = getPolicyMap("parser/testInvalidAssertionError.wsdl", false);
-//            fail("WSDL validation should fail");
-//        } catch (PolicyException e) {
-//            // ok
-//        }
-//    }
+    public void testInvalidAssertionShouldCauseException() throws Exception {
+        try {
+            PolicyMap policyMap = getPolicyMap("parser/testInvalidAssertionError.wsdl", false);
+            fail("WSDL validation should fail");
+        } catch (WebServiceException e) {
+            // ok - exception thrown as expected
+        }
+    }
 }

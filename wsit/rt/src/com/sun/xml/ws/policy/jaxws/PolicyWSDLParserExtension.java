@@ -67,6 +67,8 @@ import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.ws.WebServiceException;
 
+import static com.sun.xml.ws.policy.privateutil.PolicyUtils.Commons.logException;
+
 /**
  *
  * @author Jakub Podlesak (jakub.podlesak at sun.com)
@@ -719,8 +721,7 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
                             addNewPolicyNeeded(currentUri, prefetchedRecord.policyModel);
                         } else { // policy has not been yet passed by
                             if (urlsRead.contains(getBaseUrl(currentUri))) { // big problem --> unresolvable policy
-                                LOGGER.severe("finished", LocalizationMessages.WSP_1042_CAN_NOT_RESOLVE_POLICY(currentUri));
-                                throw new PolicyException(LocalizationMessages.WSP_1042_CAN_NOT_RESOLVE_POLICY(currentUri));
+                                throw logException(new PolicyException(LocalizationMessages.WSP_1042_CAN_NOT_RESOLVE_POLICY(currentUri)), LOGGER);
                             } else {
                                 if (readExternalFile(getBaseUrl(currentUri))) {
                                     getUnresolvedUris(false).add(currentUri);
@@ -736,9 +737,8 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
                 try {
                     sourceModel.expand(modelContext);
                     modelContext.addModel(new URI(policyUri), sourceModel);
-                } catch (URISyntaxException use) {
-                    LOGGER.severe("finished", LocalizationMessages.WSP_1005_URI_SYNTAX_EXCEPTION_THROWN_WHEN_PROCESSING_URI(policyUri), use);
-                    throw new WebServiceException(use);
+                } catch (URISyntaxException e) {
+                    throw logException( new WebServiceException(LocalizationMessages.WSP_1005_URI_SYNTAX_EXCEPTION_THROWN_WHEN_PROCESSING_URI(policyUri), e), LOGGER);
                 }
             }
             // iterating over all services and binding all the policies read before
@@ -970,9 +970,8 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
                 context.getWSDLModel().addExtension(new WSDLPolicyMapWrapper(policyBuilder.getPolicyMap(modifier, extender), modifier, extender));
             }
             
-        } catch(PolicyException pe) {
-            LOGGER.severe("finished", LocalizationMessages.WSP_1018_POLICY_EXCEPTION_WHILE_FINISHING_PARSING_WSDL(),pe);
-            throw new WebServiceException(LocalizationMessages.WSP_1018_POLICY_EXCEPTION_WHILE_FINISHING_PARSING_WSDL(), pe);
+        } catch(PolicyException e) {
+            throw logException(new WebServiceException(LocalizationMessages.WSP_1018_POLICY_EXCEPTION_WHILE_FINISHING_PARSING_WSDL(), e), LOGGER);
         }
         LOGGER.exiting("finished");
     }
@@ -994,8 +993,7 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
             reader.next();
             return null;
         } catch(XMLStreamException e) {
-            LOGGER.severe("readPolicyReferenceElement", LocalizationMessages.WSP_1001_XML_EXCEPTION_WHEN_PROCESSING_POLICY_REFERENCE());
-            throw new WebServiceException(e);
+            throw logException(new WebServiceException(LocalizationMessages.WSP_1001_XML_EXCEPTION_WHEN_PROCESSING_POLICY_REFERENCE(), e), LOGGER);
         }
     }
     
@@ -1144,8 +1142,7 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
                 policyRec.uri = policyRec.policyModel.getPolicyName();
             }
         } catch(Exception e) {
-            LOGGER.severe("definitionsElements", LocalizationMessages.WSP_1033_EXCEPTION_WHEN_READING_POLICY_ELEMENT(elementCode.toString()), e);
-            throw new WebServiceException(e);
+            throw logException(new WebServiceException(LocalizationMessages.WSP_1033_EXCEPTION_WHEN_READING_POLICY_ELEMENT(elementCode.toString()), e), LOGGER);
         }
         
         return policyRec;
@@ -1164,31 +1161,25 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
                     } else {
                         LOGGER.config("postFinished", LocalizationMessages.WSP_1040_CLIENT_CONFIG_PROCESSING_SKIPPED());
                     }
-                } catch (PolicyException pe) {
-                    throw logAndWrapException("postFinished", LocalizationMessages.WSP_1017_ERROR_WHILE_PROCESSING_CLIENT_CONFIG(), pe);
+                } catch (PolicyException e) {
+                    throw logException(new WebServiceException(LocalizationMessages.WSP_1017_ERROR_WHILE_PROCESSING_CLIENT_CONFIG(), e), LOGGER);
                 }
                 
                 LOGGER.fine("postFinished", LocalizationMessages.WSP_1024_INVOKING_CLIENT_POLICY_ALTERNATIVE_SELECTION());
                 try {
                     mapWrapper.doAlternativeSelection();
                 } catch (PolicyException e) {
-                    throw logAndWrapException("postFinished", LocalizationMessages.WSP_1003_VALID_POLICY_ALTERNATIVE_NOT_FOUND(), e);
+                    throw logException(new WebServiceException(LocalizationMessages.WSP_1003_VALID_POLICY_ALTERNATIVE_NOT_FOUND(), e), LOGGER);
                 }
-            } else if (!context.isClientSide() && !isForConfigFile) { //server side
+            } else if (!context.isClientSide() && !isForConfigFile) { // not client side and not config file => server side
                 try {
                     mapWrapper.validateServerSidePolicies();
                 } catch (PolicyException e) {
-                    LOGGER.warning("postFinished", e.getMessage());
-                    // throw new WebServiceException("Failed to validate server side policies", e);
+                    throw logException(new WebServiceException(LocalizationMessages.WSP_1050_SERVER_SIDE_POLICY_VALIDATION_FAILED(), e), LOGGER);
                 }
             }
             mapWrapper.configureModel(context.getWSDLModel());
         }
         LOGGER.exiting("postFinished");
-    }
-    
-    private WebServiceException logAndWrapException(final String methodName, final String message, final Throwable cause) {
-        LOGGER.severe(methodName, message, cause);
-        return new WebServiceException(message, cause);
     }
 }
