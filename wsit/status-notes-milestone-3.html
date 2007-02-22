@@ -59,9 +59,9 @@ means tests with or without security turned on.</li>
 <br>
 <hr>
 <h2><a name="52974"></a>Glassfish Classpath Change Requirements</h2>
-
-<p><pre>Updated: December 11, 2006</pre></p>
-
+<p></p>
+<pre>Updated: December 11, 2006</pre>
+<p></p>
 <p>GlassFish contains several Jar files which contain classes that can
 conflict with the newer versions of those classes provided by the WSIT
 environment. To avoid problems, the classpath for both the Glassfish
@@ -80,9 +80,9 @@ run the tools and the client application:</p>
 <!-- ================================================== -->
 <hr>
 <h2><a name="1595"></a>Glassfish and Netbeans Integration Requirements</h2>
-
-<p><pre>Updated: December 11, 2006</pre></p>
-
+<p></p>
+<pre>Updated: December 11, 2006</pre>
+<p></p>
 <p>Issue <a
  href="https://glassfish.dev.java.net/issues/show_bug.cgi?id=1595">1595</a>
 prevents registration of Glassfish builds 26, 27 and 28 to Netbeans
@@ -101,9 +101,9 @@ at the top for the file.</li>
 <br>
 <hr>
 <h2><a name="91780"></a>Metadata Exchange Status</h2>
-
-<p><pre>Updated: December 11, 2006</pre></p>
-
+<p></p>
+<pre>Updated: December 11, 2006</pre>
+<p></p>
 <h4>WCF Interoperability</h4>
 <pre>non-secure:<br><br>  MS-&gt;S : 1/1<br>  S-&gt;MS : 0/1 (wsimport will still work using ?wsdl when mex fails)<br>  S-&gt;S  : 1/1<br><br>secure:<br><br>  MS-&gt;S : 0/1<br>  S-&gt;MS : 0/1<br>  S-&gt;S  : 0/1<br><br></pre>
 <h4>What is Not Implemented</h4>
@@ -112,9 +112,9 @@ at the top for the file.</li>
 <br>
 <hr>
 <h2><a name="68668"></a>MTOM Status</h2>
-
-<p><pre>Updated: December 11, 2006</pre></p>
-
+<p></p>
+<pre>Updated: December 11, 2006</pre>
+<p></p>
 <h4>WCF Interoperability</h4>
 <pre wrap="">Internal endpoint running July CTP<br><br>Non-Secure Scenarios<br><br>S -&gt; S : 15/15<br>S -&gt; MS : 15/15<br>MS -&gt; S :  15/15<br><br>Secure Scenarios</pre>
 <pre wrap="">S -&gt; S : 15/15<br>S -&gt; MS : 0/15<br>MS -&gt; S :  0/15</pre>
@@ -160,9 +160,9 @@ the Sun Client classpath</p>
 </p>
 <hr>
 <h2><a name="49498"></a>Data Binding Status</h2>
-
-<p><pre>Updated: December 11, 2006</pre></p>
-
+<p></p>
+<pre>Updated: December 11, 2006</pre>
+<p></p>
 <h4>WCF Interoperability</h4>
 <pre>non-secure:<br><br>  S-&gt;MS (Schema and WSDL Interop scenario 1):  827/852 (starting from WCF WSDL)<br>  MS-&gt;S (Schema and WSDL Interop scenario 2):  851/851 (starting from WCF WSDL) <br>  MS-&gt;S (Schema and WSDL Interop scenario 3):  1061/1091 (Starting from Java)<br>  S-&gt;S  : 824/852<br><br>secure:<br><br> (not tested)<br></pre>
 <h4>What is Not Implemented</h4>
@@ -175,9 +175,9 @@ the Sun Client classpath</p>
 <br>
 <hr>
 <h2><a name="60313"></a>Reliable Messaging Status</h2>
-
-<p><pre>Updated: February 21, 2006</pre></p>
-
+<p></p>
+<pre>Updated: February 21, 2006</pre>
+<p></p>
 <h4>WCF Interoperability</h4>
 <pre>non-secure:<br><br>  MS-&gt;S :  2/2 <br>  S-&gt;MS :  3/3<br> <br>secure:<br><br>  MS-&gt;S :  0/2 : (not tested)<br>  S-&gt;MS :  2/2<br></pre>
 <p> NOTE: The interoperability tests do not include duplex binding
@@ -204,9 +204,9 @@ release
 <!-- ================================================== --><br>
 <hr>
 <h2><a name="35385"></a>Security Status</h2>
-
-<p><pre>Updated: December 11, 2006</pre></p>
-
+<p></p>
+<pre>Updated: February 22, 2007</pre>
+<p></p>
 <h4>WCF Interoperability</h4>
 <pre>  MS-&gt;S :   26/26 <br>  S-&gt;MS :   25/26  (One Scenario fails due to WCF Issue# CSD 4051)<br>  S -&gt;S :   26/26<br></pre>
 <h4>What is Not Implemented</h4>
@@ -658,10 +658,10 @@ assertion causes deploy failure <a
       <td style="vertical-align: top;">ProtectToken with X509Token and
 RequireDerivedKeys<br>
       </td>
-      <td style="vertical-align: top;">
-      The client is uanble to generate the request soap message and the exception thrown is: <pre>javax.xml.crypto.URIReferenceException: 
- No elements exist with Id/WsuId: 3</pre><a
- href="https://wsit.dev.java.net/issues/show_bug.cgi?id=76">Issue#76</a>
+      <td style="vertical-align: top;"> The client is uanble to
+generate the request soap message and the exception thrown is:
+      <pre>javax.xml.crypto.URIReferenceException: <br> No elements exist with Id/WsuId: 3</pre>
+      <a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=76">Issue#76</a>
       </td>
       <td style="vertical-align: top;">Will be fixed in a future
 release.<br>
@@ -672,9 +672,14 @@ release.<br>
 AsymmetricBinding, with ProtectTokens fails with :: Could not find
 Reference #5 under Signature with ID1<br>
       </td>
-      <td style="vertical-align: top;">
-      WSDL has AsymmetricBinding (X509Token as Initiator and RecipientToken),SamlToken as SignedSupportingToken.Request/Response messages are signed and encrypted. The client side has a SamlCallbackHandler meant to populate an SenderVouches saml assertion into the request message. The test fails on the server side with the following exception trace :<pre>Could not find Reference<br>#ff63e9e3-248d-4f77-8802-5326d58da1a9 under Signature with ID1</pre><a
- href="https://wsit.dev.java.net/issues/show_bug.cgi?id=206">Issue#206</a><br>
+      <td style="vertical-align: top;"> WSDL has AsymmetricBinding
+(X509Token as Initiator and RecipientToken),SamlToken as
+SignedSupportingToken.Request/Response messages are signed and
+encrypted. The client side has a SamlCallbackHandler meant to populate
+an SenderVouches saml assertion into the request message. The test
+fails on the server side with the following exception trace :
+      <pre>Could not find Reference<br>#ff63e9e3-248d-4f77-8802-5326d58da1a9 under Signature with ID1</pre>
+      <a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=206">Issue#206</a><br>
       </td>
       <td style="vertical-align: top;">Will be fixed in a future release<br>
       </td>
@@ -683,10 +688,14 @@ Reference #5 under Signature with ID1<br>
       <td style="vertical-align: top;">java.lang.StackOverflowError on
 client side :AsymmetricBinding&nbsp; with ProtectTokens<br>
       </td>
-      <td style="vertical-align: top;">
-      The test case has AsymmetricBinding with X509Token as the Initiator(IncludeToken=AlwaysToRecipient) and the RecipientToken(IncludeToken=Never) and ProtectTokens assertion. The test fails with the following on the client side: <pre>Exception in thread "main" java.lang.StackOverflowError</pre><a
- href="https://wsit.dev.java.net/issues/show_bug.cgi?id=211">Issue# 211</a>
-      </td>
+      <td style="vertical-align: top;"> The test case has
+AsymmetricBinding with X509Token as the
+Initiator(IncludeToken=AlwaysToRecipient) and the
+RecipientToken(IncludeToken=Never) and ProtectTokens assertion. The
+test fails with the following on the client side:
+      <pre>Exception in thread "main" java.lang.StackOverflowError</pre>
+      <a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=211">Issue#
+211</a> </td>
       <td style="vertical-align: top;">Will be fixed in a future release<br>
       </td>
     </tr>
@@ -695,9 +704,12 @@ client side :AsymmetricBinding&nbsp; with ProtectTokens<br>
 &lt;DisableStreamingSecurity&gt; causing error "Unable to locate
 certificate for the alias ''"<br>
       </td>
-      <td style="vertical-align: top;">
-      It has been observed that wssecurity on servlet based jaxws webservice with WS-Policy is not working when the StreamSecurity is disabled. The issue is server side certificate exception during the secureResponse from the WSIT provider.<<a
- href="https://wsit.dev.java.net/issues/show_bug.cgi?id=336">Issue# 336</a><br></pre>
+      <td style="vertical-align: top;"> It has been observed that
+wssecurity on servlet based jaxws webservice with WS-Policy is not
+working when the StreamSecurity is disabled. The issue is server side
+certificate exception during the secureResponse from the WSIT
+provider.&lt;<a
+ href="https://wsit.dev.java.net/issues/show_bug.cgi?id=336">Issue# 336</a><br>
       </td>
       <td style="vertical-align: top;">Will be fixed in a future
 release.<br>
@@ -738,16 +750,32 @@ do not work because of a Bug.<br>
 <p><br>
 </p>
 <hr>
-<h2><a name="44691"></a>Secure Conversation Status</h2><p><pre>Updated: December 11, 2006</pre></p><h4>WCF Interoperability</h4><pre>&nbsp; MS-&gt;S :&nbsp; 35/36 : (starting from WSDL)<br>&nbsp; S-&gt;MS :&nbsp; 36/36 : (starting from WSDL)<br>&nbsp; S -&gt;S :&nbsp; 36/36 : (starting from WSDL)<br><br></pre>
-<p>NOTE: No test scenarios were executed that started from Java.</p><h4>What is Not Implemented</h4><p>The following features have not been implemented:</p><ul>
+<h2><a name="44691"></a>Secure Conversation Status</h2>
+<p></p>
+<pre>Updated: December 11, 2006</pre>
+<p></p>
+<h4>WCF Interoperability</h4>
+<pre>&nbsp; MS-&gt;S :&nbsp; 35/36 : (starting from WSDL)<br>&nbsp; S-&gt;MS :&nbsp; 36/36 : (starting from WSDL)<br>&nbsp; S -&gt;S :&nbsp; 36/36 : (starting from WSDL)<br><br></pre>
+<p>NOTE: No test scenarios were executed that started from Java.</p>
+<h4>What is Not Implemented</h4>
+<p>The following features have not been implemented:</p>
+<ul>
   <li>Renewing of Security Context </li>
   <li>Client initiated security context </li>
 </ul>
 <!-- ================================================== -->
 <br>
 <hr>
-<h2><a name="96126"></a>Trust Status</h2><p><pre>Updated: December 11, 2006</pre></p><h4>WCF Interoperability</h4><pre>&nbsp;&nbsp; Client -&gt; STS -&gt; Service<br>&nbsp;&nbsp;&nbsp; MS&nbsp;&nbsp;&nbsp; -&gt;&nbsp; S&nbsp; -&gt; MS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp; 4/4 <br><br>&nbsp;&nbsp;&nbsp; MS&nbsp;&nbsp;&nbsp; -&gt; MS&nbsp; -&gt; S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp; 4/4 <br><br>&nbsp;&nbsp;&nbsp; MS&nbsp;&nbsp;&nbsp; -&gt; S&nbsp;&nbsp; -&gt; S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp; 4/4 : (starting from WSDL)&nbsp;&nbsp;&nbsp; <br>&nbsp;&nbsp; <br>&nbsp;&nbsp;&nbsp; S&nbsp;&nbsp;&nbsp;&nbsp; -&gt; S&nbsp;&nbsp; -&gt; S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp; 5/5 : (starting from WSDL)<br><br>&nbsp;&nbsp;&nbsp; S&nbsp;&nbsp;&nbsp;&nbsp; -&gt; S&nbsp;&nbsp; -&gt; MS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp; 5/5 : (starting from WSDL)<br><br>&nbsp;&nbsp;&nbsp; S&nbsp;&nbsp;&nbsp;&nbsp; -&gt; MS&nbsp; -&gt; MS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp; 5/5 : (starting from WSDL)<br><br>&nbsp;&nbsp;&nbsp; S&nbsp;&nbsp;&nbsp;&nbsp; -&gt; MS&nbsp; -&gt; S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp; 5/5 : (starting from WSDL)<br></pre>
-<p>NOTE: No test scenarios were executed that started from Java.</p><h4>What is Not Implemented</h4><p>The following features have not been implemented:</p><ul>
+<h2><a name="96126"></a>Trust Status</h2>
+<p></p>
+<pre>Updated: December 11, 2006</pre>
+<p></p>
+<h4>WCF Interoperability</h4>
+<pre>&nbsp;&nbsp; Client -&gt; STS -&gt; Service<br>&nbsp;&nbsp;&nbsp; MS&nbsp;&nbsp;&nbsp; -&gt;&nbsp; S&nbsp; -&gt; MS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp; 4/4 <br><br>&nbsp;&nbsp;&nbsp; MS&nbsp;&nbsp;&nbsp; -&gt; MS&nbsp; -&gt; S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp; 4/4 <br><br>&nbsp;&nbsp;&nbsp; MS&nbsp;&nbsp;&nbsp; -&gt; S&nbsp;&nbsp; -&gt; S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp; 4/4 : (starting from WSDL)&nbsp;&nbsp;&nbsp; <br>&nbsp;&nbsp; <br>&nbsp;&nbsp;&nbsp; S&nbsp;&nbsp;&nbsp;&nbsp; -&gt; S&nbsp;&nbsp; -&gt; S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp; 5/5 : (starting from WSDL)<br><br>&nbsp;&nbsp;&nbsp; S&nbsp;&nbsp;&nbsp;&nbsp; -&gt; S&nbsp;&nbsp; -&gt; MS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp; 5/5 : (starting from WSDL)<br><br>&nbsp;&nbsp;&nbsp; S&nbsp;&nbsp;&nbsp;&nbsp; -&gt; MS&nbsp; -&gt; MS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp; 5/5 : (starting from WSDL)<br><br>&nbsp;&nbsp;&nbsp; S&nbsp;&nbsp;&nbsp;&nbsp; -&gt; MS&nbsp; -&gt; S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp; 5/5 : (starting from WSDL)<br></pre>
+<p>NOTE: No test scenarios were executed that started from Java.</p>
+<h4>What is Not Implemented</h4>
+<p>The following features have not been implemented:</p>
+<ul>
   <li>Token Validation protocol. </li>
   <li>Token Cancellation Protocol. </li>
   <li>Token Renewing Protocol </li>
@@ -755,44 +783,89 @@ do not work because of a Bug.<br>
 <!-- ================================================== -->
 <br>
 <hr>
-<h2><a name="98261"></a>Coordination/Atomic Transactions Status</h2><p><pre>Updated: December 11, 2006</pre></p><h4>WCF Interoperability</h4>(Test config: GF b33c, MS WCF RTM, WSIT M3(b07), JDK 5, JDK 6)
+<h2><a name="98261"></a>Coordination/Atomic Transactions Status</h2>
+<p></p>
+<pre>Updated: December 11, 2006</pre>
+<p></p>
+<h4>WCF Interoperability</h4>
+(Test config: GF b33c, MS WCF RTM, WSIT M3(b07), JDK 5, JDK 6)
 <pre>non-secure (meaning http used for WS-TX protocol messages, no security on application messages):<br><br>&nbsp; MS-&gt;S : 0/0 (interop w/MS requires HTTPS)<br>&nbsp; S-&gt;MS : 0/0 (interop w/MS requires HTTPS)<br>&nbsp; S-&gt;S&nbsp; : 3/3<br><br>secure (meaning https used for WS-TX protocol messages, no security on application messages):<br><br>&nbsp; MS-&gt;S : 3/3<br>&nbsp; S-&gt;MS : 3/3<br>&nbsp; S-&gt;S&nbsp; : 3/3<br><br></pre>
-<h4>What is Not Implemented</h4><p> </p>
+<h4>What is Not Implemented</h4>
+<p> </p>
 <ul>
-  <li>Transaction recovery</li><li>Processing Transaction Attributes in EJB deployment descriptor</li></ul><p></p>
-<h4>Known Issues</h4><table border="1" cellpadding="2" cellspacing="2">
+  <li>Transaction recovery</li>
+  <li>Processing Transaction Attributes in EJB deployment descriptor</li>
+</ul>
+<p></p>
+<h4>Known Issues</h4>
+<table border="1" cellpadding="2" cellspacing="2">
   <tbody>
     <tr>
       <th>
-      <p>Feature</p></th><th>
-      <p>Status/Workaround</p></th></tr><tr>
+      <p>Feature</p>
+      </th>
+      <th>
+      <p>Status/Workaround</p>
+      </th>
+    </tr>
+    <tr>
       <td>Running WS-TX tutorial sample results in meaningless stack
 traces in server.log. <a
  href="https://wsit.dev.java.net/issues/show_bug.cgi?id=336">See Issue#
-336</a> for details.</td><td>To Be Fixed in next release</td></tr><tr>
+336</a> for details.</td>
+      <td>To Be Fixed in next release</td>
+    </tr>
+    <tr>
       <td>Workaround built into running WS-TX tutorial sample. <a
  href="https://wsit.dev.java.net/issues/show_bug.cgi?id=278">See Issue#
-278</a> for details.</td><td>To Be Fixed in next release. Extraneous step to run tutorial
-will be removed.</td></tr><tr>
+278</a> for details.</td>
+      <td>To Be Fixed in next release. Extraneous step to run tutorial
+will be removed.</td>
+    </tr>
+    <tr>
       <td>Support for Persistence Context with TopLink Entity Manager.
 See <a
  href="https://glassfish.dev.java.net/issues/show_bug.cgi?id=2376">See
 Issue# 2376</a> </td>
-      <td>To be fixed in future release of GlassFish v2.</td></tr><tr>
-      <td>Glassfish <a href="https://glassfish.dev.java.net/issues/show_bug.cgi?id=2429">Issue 2429</a> prevents the WS-TX tutorial from working on native Glassfish build b33c (i.e., without WSIT M3 having been installed).</td><td>Copy <tt>webservices-rt.jar</tt> from WSIT M3 into <tt>$AS_INSTALL/lib</tt> before starting Glassfish.</td></tr></tbody></table><!-- ================================================== --><br>
+      <td>To be fixed in future release of GlassFish v2.</td>
+    </tr>
+    <tr>
+      <td>Glassfish <a
+ href="https://glassfish.dev.java.net/issues/show_bug.cgi?id=2429">Issue
+2429</a> prevents the WS-TX tutorial from working on native Glassfish
+build b33c (i.e., without WSIT M3 having been installed).</td>
+      <td>Copy <tt>webservices-rt.jar</tt> from WSIT M3 into <tt>$AS_INSTALL/lib</tt>
+before starting Glassfish.</td>
+    </tr>
+  </tbody>
+</table>
+<!-- ================================================== --><br>
 <hr>
-<h2><a name="35087"></a>NetBeans WSIT Module Status</h2><p><pre>Updated: December 11, 2006</pre></p><h4>What is Not Implemented</h4><ul>
+<h2><a name="35087"></a>NetBeans WSIT Module Status</h2>
+<p></p>
+<pre>Updated: December 11, 2006</pre>
+<p></p>
+<h4>What is Not Implemented</h4>
+<ul>
   <li>WSIT support for Web Services and Web service clients is
 implemented in Web projects only. </li>
 </ul>
-<h4>Known Issues</h4><table border="1" cellpadding="2" cellspacing="2">
+<h4>Known Issues</h4>
+<table border="1" cellpadding="2" cellspacing="2">
   <tbody>
     <tr>
       <th>
-      <p>Interoperability Feature</p></th><th>
-      <p>Status/Workaround</p></th></tr><tr>
+      <p>Interoperability Feature</p>
+      </th>
+      <th>
+      <p>Status/Workaround</p>
+      </th>
+    </tr>
+    <tr>
       <td>
-      <p>Glassfish cannot be registered to Netbeans</p></td><td>
+      <p>Glassfish cannot be registered to Netbeans</p>
+      </td>
+      <td>
       <p>Issue <a
  href="https://glassfish.dev.java.net/issues/show_bug.cgi?id=1595">1595</a>
 prevents registration of Glassfish builds 26, 27 and 28 to Netbeans.
@@ -800,33 +873,58 @@ Recommended workaround: <br>
       <br>
       </p>
       <ol>
-        <li>Install glassfish</li><li>Use your favorite editor to open <gfinstall>/lib/install/templates/default-domain.xml.template</gfinstall></li><li>Replace
+        <li>Install glassfish</li>
+        <li>Use your favorite editor to open <gfinstall>/lib/install/templates/default-domain.xml.template</gfinstall></li>
+        <li>Replace
           <pre>&lt;?xml version="1.0" encoding="UTF-8" ?&gt;<br><br>with<br><br>&lt;?xml version="1.0" encoding="UTF-8" ?&gt;<br>&lt;!DOCTYPE domain PUBLIC "-//Sun Microsystems Inc.//DTD Application Server 9.1<br>Domain//EN" "http://www.sun.com/appserver/dtds/sun-domain_1_3.dtd"&gt;<br></pre>
-at the top for the file.</li></ol><p></p>
+at the top for the file.</li>
+      </ol>
+      <p></p>
       </td>
     </tr>
     <tr>
       <td>
-      <p>WSIT features</p></td><td>
+      <p>WSIT features</p>
+      </td>
+      <td>
       <p>When creating a Web Service project to use WSIT features, you
 must select J2EE 1.4 in the New Web Application window and set the
-Source Level to 1.5 in the Project Properties window.</p><p>NOTE: With these configuration settings the NetBeans 5.5 does
-not support JSR 109.</p><p>If you don't need WSIT features and choose to accept NetBeans'
+Source Level to 1.5 in the Project Properties window.</p>
+      <p>NOTE: With these configuration settings the NetBeans 5.5 does
+not support JSR 109.</p>
+      <p>If you don't need WSIT features and choose to accept NetBeans'
 default setting of J2EE 1.5, an <a
  href="https://wsit.dev.java.net/issues/show_bug.cgi?id=71">issue</a>
 prevents you from deploying your application to Builds 15 and 16 of <a
  href="https://glassfish.dev.java.net/public/downloadsindex.html">Glassfish
-v2</a>, but only on Solaris and Linux.</p></td></tr><tr>
+v2</a>, but only on Solaris and Linux.</p>
+      </td>
+    </tr>
+    <tr>
       <td>
-      <p>Navigator functionality</p></td><td>
+      <p>Navigator functionality</p>
+      </td>
+      <td>
       <p>The WSIT configuration file and the WSIT configuration GUI
-should never be opened at the same time.</p></td></tr></tbody></table><!-- ================================================== --><br>
+should never be opened at the same time.</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<!-- ================================================== --><br>
 <hr>
-<h2><a name="70368"></a>Web Services Addressing Status</h2><p><pre>Updated: December 11, 2006</pre></p><h4>WCF Interoperability</h4><pre>non-secure:<br><br>&nbsp; MS-&gt;S : No client code available<br>&nbsp; S-&gt;MS : 53/66<br>&nbsp; S -&gt;S : 62/66<br><br>secure:<br><br>&nbsp; MS-&gt;S : No client code available<br>&nbsp; S-&gt;MS : Not tested<br>&nbsp; S -&gt;S : Not tested<br></pre>
-<h4>What is Not Implemented</h4><ul>
+<h2><a name="70368"></a>Web Services Addressing Status</h2>
+<p></p>
+<pre>Updated: December 11, 2006</pre>
+<p></p>
+<h4>WCF Interoperability</h4>
+<pre>non-secure:<br><br>&nbsp; MS-&gt;S : No client code available<br>&nbsp; S-&gt;MS : 53/66<br>&nbsp; S -&gt;S : 62/66<br><br>secure:<br><br>&nbsp; MS-&gt;S : No client code available<br>&nbsp; S-&gt;MS : Not tested<br>&nbsp; S -&gt;S : Not tested<br></pre>
+<h4>What is Not Implemented</h4>
+<ul>
   <li>Transparent support for WS-Addressing Member Submission Version. </li>
 </ul>
-<h4>Known Issues</h4><ul>
+<h4>Known Issues</h4>
+<ul>
   <li>Member Submission needs to be enabled explicitly using <a
  href="docs/enabling-addressing-submission.htm">this link</a>. </li>
   <li>A WCF endpoint responds back with "HTTP 400 Bad Request" if an
@@ -835,33 +933,81 @@ empty Metadata element is sent from the WSIT client. </li>
 <!-- ================================================== -->
 <br>
 <hr>
-<h2><a name="13158"></a>Policy Status</h2><p><pre>Updated: February 14, 2007</pre></p><h4>WCF Interoperability</h4><p>n/a</p><h4>What is Not Implemented</h4><p>The policy implementation is feature-complete.</p><h4>Known Issues</h4><table border="1" cellpadding="2" cellspacing="2">
+<h2><a name="13158"></a>Policy Status</h2>
+<p></p>
+<pre>Updated: February 14, 2007</pre>
+<p></p>
+<h4>WCF Interoperability</h4>
+<p>n/a</p>
+<h4>What is Not Implemented</h4>
+<p>The policy implementation is feature-complete.</p>
+<h4>Known Issues</h4>
+<table border="1" cellpadding="2" cellspacing="2">
   <tbody>
     <tr>
       <th>
-      <p>Interoperability Feature</p></th><th>
-      <p>Status/Workaround</p></th></tr><tr>
+      <p>Interoperability Feature</p>
+      </th>
+      <th>
+      <p>Status/Workaround</p>
+      </th>
+    </tr>
+    <tr>
       <td>
       <p><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=110">Relative
-references to wsu:id are resolved across XML documents</a></p></td><td>
+references to wsu:id are resolved across XML documents</a></p>
+      </td>
+      <td>
       <p>This is only an issue with manually written policies. Do not
 refer to polices that have the same ID in an imported WSDL document or
-make sure policies in imported WSDL documents have unique IDs.</p></td></tr><tr>
+make sure policies in imported WSDL documents have unique IDs.</p>
+      </td>
+    </tr>
+    <tr>
       <td>
       <p><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=303">MtomMapUpdater
-can not rely on WSDL model</a></p></td><td>
+can not rely on WSDL model</a></p>
+      </td>
+      <td>
       <p>There may be some edge cases where an MTOM feature is not
 properly translated into an MTOM policy assertion. Make sure you use a
 policy assertion if you care about MTOM policy assertions being
-advertised.</p></td></tr></tbody></table><!-- ================================================== --><br>
+advertised.</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<!-- ================================================== --><br>
 <hr>
-<h2><a name="jax-ws"></a>JAX-WS Status</h2><p><pre>Updated: February 21, 2007</pre></p><h4>What is Not Implemented</h4><p>JAX-WS RI 2.1.1 is integrated with the WSIT M3. It is undergoing active development. Most of the changes are related to bug fixing and performance tuning. </p><h4>Known Issues</h4><ul>
-  <li>See the <a href="https://jax-ws.dev.java.net/issues/buglist.cgi?Submit+query=Submit+query&issue_type=DEFECT&component=jax-ws&issue_status=NEW&issue_status=STARTED&issue_status=REOPENED&target_milestone=2.1&target_milestone=2.1.1&email1=&emailtype1=exact&emailassigned_to1=1">open bugs</a>.</li></ul><p><br>
-</p><hr>
-<h2><a name="55934"></a>Security Policy Status</h2><p><pre>Updated: December 11, 2006</pre></p><h4>WCF Interoperability</h4><p>Interoperability test is based on use of SecurityPolicy in
+<h2><a name="jax-ws"></a>JAX-WS Status</h2>
+<p></p>
+<pre>Updated: February 21, 2007</pre>
+<p></p>
+<h4>What is Not Implemented</h4>
+<p>JAX-WS RI 2.1.1 is integrated with the WSIT M3. It is undergoing
+active development. Most of the changes are related to bug fixing and
+performance tuning. </p>
+<h4>Known Issues</h4>
+<ul>
+  <li>See the <a
+ href="https://jax-ws.dev.java.net/issues/buglist.cgi?Submit+query=Submit+query&amp;issue_type=DEFECT&amp;component=jax-ws&amp;issue_status=NEW&amp;issue_status=STARTED&amp;issue_status=REOPENED&amp;target_milestone=2.1&amp;target_milestone=2.1.1&amp;email1=&amp;emailtype1=exact&amp;emailassigned_to1=1">open
+bugs</a>.</li>
+</ul>
+<p><br>
+</p>
+<hr>
+<h2><a name="55934"></a>Security Policy Status</h2>
+<p></p>
+<pre>Updated: December 11, 2006</pre>
+<p></p>
+<h4>WCF Interoperability</h4>
+<p>Interoperability test is based on use of SecurityPolicy in
 WS-Security,WS-SecureConversation,WS-Trust,WS Reliable Messaging,
-MTOM,WS-Addressing interop tests.</p><h4>What is Not Implemented</h4><p>The Following assertions are not yet supported by Security Policy
-implementation.</p><ul>
+MTOM,WS-Addressing interop tests.</p>
+<h4>What is Not Implemented</h4>
+<p>The Following assertions are not yet supported by Security Policy
+implementation.</p>
+<ul>
   <li>XPathFilter </li>
   <li>Xpath Targets </li>
   <li>RequiredElements </li>
@@ -869,35 +1015,67 @@ implementation.</p><ul>
   <li>Use of https URL's for endpoints when TransportBinding assertion
 is present. </li>
 </ul>
-<h4>Known Issues</h4><table border="1" cellpadding="2" cellspacing="3">
+<h4>Known Issues</h4>
+<table border="1" cellpadding="2" cellspacing="3">
   <tbody>
     <tr>
       <th>
-      <p>Interoperability Feature</p></th><th>
-      <p>Status/Workaround</p></th></tr><tr>
+      <p>Interoperability Feature</p>
+      </th>
+      <th>
+      <p>Status/Workaround</p>
+      </th>
+    </tr>
+    <tr>
       <td>
       <p>sp:EncryptedElements/sp </p>
       <p>Issue number <a
- href="https://wsit.dev.java.net/issues/show_bug.cgi?id=24">24</a></p></td><td>
+ href="https://wsit.dev.java.net/issues/show_bug.cgi?id=24">24</a></p>
+      </td>
+      <td>
       <p>sp:EncryptedElements/sp:XPath fails to encrypt the element
-specified in the XPath element</p></td></tr><tr>
+specified in the XPath element</p>
+      </td>
+    </tr>
+    <tr>
       <td>
-      <p>SupportingTokens assertion</p><p>Issue number <a
- href="https://wsit.dev.java.net/issues/show_bug.cgi?id=12">12</a></p></td><td>
+      <p>SupportingTokens assertion</p>
+      <p>Issue number <a
+ href="https://wsit.dev.java.net/issues/show_bug.cgi?id=12">12</a></p>
+      </td>
+      <td>
       <p>EncryptedParts in SupportingTokens assertion in message policy
-does not work</p></td></tr><tr>
+does not work</p>
+      </td>
+    </tr>
+    <tr>
       <td>
-      <p>WSSecurity Policy Exception</p></td><td>
+      <p>WSSecurity Policy Exception</p>
+      </td>
+      <td>
       <p>WSSecurity Policy Exception: Default implementation of
-IncludeToken takes "Never".</p></td></tr><tr>
+IncludeToken takes "Never".</p>
+      </td>
+    </tr>
+    <tr>
       <td>
       <p>WSSecurity Policy deploy Issue number <a
  href="https://wsit.dev.java.net/issues/show_bug.cgi?id=14">14</a>,<a
  href="https://wsit.dev.java.net/issues/show_bug.cgi?id=15">15</a>,<a
- href="https://wsit.dev.java.net/issues/show_bug.cgi?id=16">16</a></p></td><td>
+ href="https://wsit.dev.java.net/issues/show_bug.cgi?id=16">16</a></p>
+      </td>
+      <td>
       <p>The following security policy assertions cause a deploy
-failure:</p><p>-
-SecurityPolicy:sp:AlgorithmSuite/wsp:Policy/sp:SoapNormalization10</p><p>- SecurityPolicy: sp:AlgorithmSuite/wsp:Policy/sp:XPath10</p><p>- SecurityPolicy: sp:AlgorithmSuite/wsp:Policy/sp:XPathFilter20</p></td></tr></tbody></table><p><br>
+failure:</p>
+      <p>-
+SecurityPolicy:sp:AlgorithmSuite/wsp:Policy/sp:SoapNormalization10</p>
+      <p>- SecurityPolicy: sp:AlgorithmSuite/wsp:Policy/sp:XPath10</p>
+      <p>- SecurityPolicy: sp:AlgorithmSuite/wsp:Policy/sp:XPathFilter20</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p><br>
 <br>
 </p>
 </body>
