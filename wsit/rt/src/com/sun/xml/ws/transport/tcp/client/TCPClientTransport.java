@@ -23,6 +23,7 @@
 package com.sun.xml.ws.transport.tcp.client;
 
 import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.DistributedPropertySet;
 import com.sun.xml.ws.transport.tcp.io.Connection;
 import com.sun.xml.ws.transport.tcp.util.ChannelContext;
@@ -54,9 +55,11 @@ public class TCPClientTransport extends DistributedPropertySet {
         setup(channelContext);
     }
     
-    public void setup(final ChannelContext channelContext) {
+    public void setup(final @Nullable ChannelContext channelContext) {
         this.channelContext = channelContext;
-        this.connection = channelContext.getConnection();
+        if (channelContext != null) {
+            this.connection = channelContext.getConnection();
+        }
     }
     
     public int getStatus() {

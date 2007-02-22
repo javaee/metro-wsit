@@ -22,8 +22,6 @@
 
 package com.sun.xml.ws.transport.tcp.util;
 
-import java.net.HttpURLConnection;
-import javax.servlet.http.HttpServletResponse;
 import javax.xml.namespace.QName;
 
 /**
@@ -40,9 +38,9 @@ public final class TCPConstants {
     public static final int ONE_WAY = 202;
     public static final int ERROR = 400;
     
-    public static final int RS_INTERNAL_SERVER_ERROR = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
-    public static final int RS_INTERNAL_ERROR = HttpURLConnection.HTTP_INTERNAL_ERROR;
-    public static final int RS_NOT_FOUND = HttpServletResponse.SC_NOT_FOUND;
+    // Values should be synchronized with localized messages description file
+    public static final int WS_NOT_FOUND_ERROR = 1;
+    public static final int INTERNAL_SERVER_ERROR = 2;
 
     /** ByteBuffer settings for FramedBufferInputStream and FramedBufferOutputStream */
     public static final int DEFAULT_FRAME_SIZE = 4096;

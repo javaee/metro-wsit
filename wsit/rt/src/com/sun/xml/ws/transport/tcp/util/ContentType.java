@@ -101,6 +101,15 @@ public final class ContentType {
             }
         }
         
-        throw new AssertionError(MessagesMessages.WSTCP_0011_UNKNOWN_CONTENT_TYPE(contentType));
+        throw new IllegalStateException(MessagesMessages.WSTCP_0011_UNKNOWN_CONTENT_TYPE(contentType));
+    }
+    
+    public boolean equals(Object o) {
+        if (o != null && o instanceof ContentType) {
+            ContentType ctToCompare = (ContentType) o;
+            return ctToCompare.mimeType == mimeType && ctToCompare.parameters.equals(parameters);
+        }
+        
+        return false;
     }
 }

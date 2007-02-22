@@ -26,13 +26,15 @@ import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.transport.tcp.io.Connection;
 import java.io.IOException;
+import java.util.Collections;
 
 /**
  * @author Alexey Stashok
  */
 @SuppressWarnings({"unchecked"})
 public abstract class ConnectionSession implements com.sun.xml.ws.transport.tcp.connectioncache.spi.transport.Connection {
-    protected static final ChannelSettings zeroChannelSettings = new ChannelSettings();
+    protected static final ChannelSettings zeroChannelSettings = new ChannelSettings(Collections.<MimeType>emptyList(), 
+            Collections.<String>emptyList(), 0, TCPConstants.SERVICE_CHANNEL_WS_NAME, null);
     
     private Connection connection;
     

@@ -184,7 +184,7 @@ public class TCPAdapter extends Adapter<TCPAdapter.TCPToolkit> {
         
         private void writeInternalServerError() {
             logger.log(Level.FINE, MessagesMessages.WSTCP_1095_TCP_ADAPTER_WRITE_INTERNAL_SERVER_ERROR());
-            connection.setStatus(TCPConstants.RS_INTERNAL_ERROR);
+            connection.setStatus(TCPConstants.INTERNAL_SERVER_ERROR);
         }
     };
     

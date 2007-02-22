@@ -55,7 +55,9 @@ public final class ChannelContext implements WSTCPFastInfosetStreamReaderRecycla
         
         staticMimeTypeEncodingMap.put(MimeType.SOAP11, 0);   //default mime type for soap1.1
         staticMimeTypeEncodingMap.put(MimeType.SOAP12, 1);   //default mime type for soap1.2
-        staticMimeTypeEncodingMap.put(MimeType.ERROR, 2);    //mime type for error messages
+        staticMimeTypeEncodingMap.put(MimeType.FAST_INFOSET_SOAP11, 3);   //default mime type for stateless FI 1.1
+        staticMimeTypeEncodingMap.put(MimeType.FAST_INFOSET_SOAP12, 4);   //default mime type for stateless FI 1.2
+        staticMimeTypeEncodingMap.put(MimeType.ERROR, 5);    //mime type for error messages
         
         for(Map.Entry<MimeType, Integer> entry : staticMimeTypeEncodingMap.entrySet()) staticMimeTypeDecodingMap.put(entry.getValue(), entry.getKey());
         for(Map.Entry<String, Integer> entry : staticParamsEncodingMap.entrySet()) staticParamsDecodingMap.put(entry.getValue(), entry.getKey());
