@@ -97,7 +97,12 @@
             <copy file="../${etc.metainf.dir}/MANIFEST.MF" todir="${tmpdir}"/>
             <updateManifestWithVersion file="${tmpdir}/MANIFEST.MF"/>
             <concatmanifest tempdir="${tmpdir}" manifest="${tmpdir}/MANIFEST.MF">
-                <fileset dir="@{libdir}" includes="*api*.jar">
+                <fileset dir="@{libdir}" >
+                    <include name="jaxb-api.jar"/>
+                    <include name="jsr173_api.jar"/>
+                    <include name="saaj-api.jar"/>
+                    <include name="jaxws-api.jar"/>
+                    <include name="jsr181-api.jar"/>
 
                     <exclude name="*javadocs*.jar"/>
                 </fileset>
@@ -117,6 +122,25 @@
             <updateManifestWithVersion file="${tmpdir}/MANIFEST.MF"/>
             <concatmanifest tempdir="${tmpdir}" manifest="${tmpdir}/MANIFEST.MF">
                 <fileset dir="@{libdir}" includes="activation.jar,http.jar,jsr-250-api.jar,mail-1.4.jar">
+                    <!--<includesfile name="*.jar"/>-->
+                    <exclude name="*javadocs*.jar"/>
+                </fileset>
+            </concatmanifest>
+          <delete dir="${tmpdir}/META-INF" includeemptydirs="true" excludes="services/**"/>
+            <metainf/>
+        </sequential>
+    </macrodef>
+
+    <macrodef name="expand-extra-api-jars-macro">
+        <attribute name="libdir"/>
+        <element name="metainf" optional="true"/>
+        <sequential>
+            <delete dir="${tmpdir}"/>
+            <mkdir dir="${tmpdir}"/>
+            <copy file="../${etc.metainf.dir}/MANIFEST.MF" todir="${tmpdir}"/>
+            <updateManifestWithVersion file="${tmpdir}/MANIFEST.MF"/>
+            <concatmanifest tempdir="${tmpdir}" manifest="${tmpdir}/MANIFEST.MF">
+                <fileset dir="@{libdir}" includes="jaxr-api.jar,jaxrpc-api.jar">
                     <!--<includesfile name="*.jar"/>-->
                     <exclude name="*javadocs*.jar"/>
                 </fileset>
@@ -145,6 +169,8 @@
         <antcall target="combine-jars-api"/>
         <antcall target="expand-jars-extra"/>
         <antcall target="combine-jars-extra"/>
+        <antcall target="expand-jars-extra-api"/>
+        <antcall target="combine-jars-extra-api"/>
     </target>
 
     <target name="-post-jar" depends="create-wstx-war"/>
@@ -193,6 +219,13 @@
 
     </target>
 
+    <target name="expand-jars-extra-api" unless="runtime.jars.expanded">
+        <expand-extra-api-jars-macro libdir="../${lib.runtime.dir}">
+
+        </expand-extra-api-jars-macro>
+
+    </target>
+
     <target name="expand-jars-extra" unless="runtime.jars.expanded">
         <expand-extra-jars-macro libdir="../${lib.runtime.dir}">
 
@@ -221,6 +254,12 @@
 
      <target name="combine-jars-extra">
         <combine-jars-macro jarname="${name}-extra" classesdir="${tmpdir}"/>
+
+
+    </target>
+
+    <target name="combine-jars-extra-api">
+        <combine-jars-macro jarname="${name}-extra-api" classesdir="${tmpdir}"/>
 
 
     </target>
