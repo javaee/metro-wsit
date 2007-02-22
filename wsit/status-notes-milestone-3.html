@@ -4,7 +4,7 @@
   <meta http-equiv="CONTENT-TYPE"
  content="text/html; charset=windows-1252">
   <title>WSIT Status Notes - Milestone 3</title>
-  <meta name="GENERATOR" content="Microsoft FrontPage 6.0">
+  <meta name="GENERATOR" content="Microsoft FrontPage 4.0">
   <meta name="CREATED" content="20060713;8550900">
   <meta name="CHANGED" content="20060713;21281095">
   <meta http-equiv="Content-Style-Type" content="text/css">
@@ -76,7 +76,14 @@ from the application's classpath. Should you create a build.xml file
 of your own, you will need to do the same thing. The following code
 snippet excludes the conflicting Jar files from the classpath used to
 run the tools and the client application:</p>
-<pre>   &lt;path id="wsit.classpath"&gt;<br>       &lt;pathelement location="${java.home}/../lib/tools.jar"/&gt;<br>       &lt;fileset dir="${lib.home}"&gt;<br>           &lt;include name="webservices.jar"/&gt;<br>           &lt;include name="webservices-tools.jar"/&gt;<br>        &lt;/fileset&gt;<br>   &lt;/path&gt;<br></pre>
+<pre>   &lt;path id=&quot;wsit.classpath&quot;&gt;
+       &lt;pathelement location=&quot;${java.home}/../lib/tools.jar&quot;/&gt;
+       &lt;fileset dir=&quot;${lib.home}&quot;&gt;
+           &lt;include name=&quot;webservices.jar&quot;/&gt;
+           &lt;include name=&quot;webservices-tools.jar&quot;/&gt;
+        &lt;/fileset&gt;
+   &lt;/path&gt;
+</pre>
 <!-- ================================================== -->
 <hr>
 <h2><a name="1595"></a>Glassfish and Netbeans Integration Requirements</h2>
@@ -93,7 +100,14 @@ prevents registration of Glassfish builds 26, 27 and 28 to Netbeans
   <li>Install glassfish</li>
   <li>Use your favorite editor to open <gfinstall>/lib/install/templates/default-domain.xml.template</gfinstall></li>
   <li>Replace
-    <pre>&lt;?xml version="1.0" encoding="UTF-8" ?&gt;<br><br>with<br><br>&lt;?xml version="1.0" encoding="UTF-8" ?&gt;<br>&lt;!DOCTYPE domain PUBLIC "-//Sun Microsystems Inc.//DTD Application Server 9.1<br>Domain//EN" "http://www.sun.com/appserver/dtds/sun-domain_1_3.dtd"&gt;<br></pre>
+    <pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
+
+with
+
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
+&lt;!DOCTYPE domain PUBLIC &quot;-//Sun Microsystems Inc.//DTD Application Server 9.1
+Domain//EN&quot; &quot;http://www.sun.com/appserver/dtds/sun-domain_1_3.dtd&quot;&gt;
+</pre>
 at the top for the file.</li>
 </ol>
 <p></p>
@@ -105,7 +119,19 @@ at the top for the file.</li>
 <pre>Updated: December 11, 2006</pre>
 <p></p>
 <h4>WCF Interoperability</h4>
-<pre>non-secure:<br><br>  MS-&gt;S : 1/1<br>  S-&gt;MS : 0/1 (wsimport will still work using ?wsdl when mex fails)<br>  S-&gt;S  : 1/1<br><br>secure:<br><br>  MS-&gt;S : 0/1<br>  S-&gt;MS : 0/1<br>  S-&gt;S  : 0/1<br><br></pre>
+<pre>non-secure:
+
+  MS-&gt;S : 1/1
+  S-&gt;MS : 0/1 (wsimport will still work using ?wsdl when mex fails)
+  S-&gt;S  : 1/1
+
+secure:
+
+  MS-&gt;S : 0/1
+  S-&gt;MS : 0/1
+  S-&gt;S  : 0/1
+
+</pre>
 <h4>What is Not Implemented</h4>
 <p>Secure metadata exchange.</p>
 <!-- ================================================== -->
@@ -116,9 +142,20 @@ at the top for the file.</li>
 <pre>Updated: December 11, 2006</pre>
 <p></p>
 <h4>WCF Interoperability</h4>
-<pre wrap="">Internal endpoint running July CTP<br><br>Non-Secure Scenarios<br><br>S -&gt; S : 15/15<br>S -&gt; MS : 15/15<br>MS -&gt; S :  15/15<br><br>Secure Scenarios</pre>
-<pre wrap="">S -&gt; S : 15/15<br>S -&gt; MS : 0/15<br>MS -&gt; S :  0/15</pre>
-<pre><br></pre>
+<pre wrap="">Internal endpoint running July CTP
+
+Non-Secure Scenarios
+
+S -&gt; S : 15/15
+S -&gt; MS : 15/15
+MS -&gt; S :  15/15
+
+Secure Scenarios</pre>
+<pre wrap="">S -&gt; S : 15/15
+S -&gt; MS : 0/15
+MS -&gt; S :  0/15</pre>
+<pre>
+</pre>
 <h4>What is Not Implemented</h4>
 <p>All MTOM functionality has been implemented.</p>
 <h4>Known Issues</h4>
@@ -164,7 +201,17 @@ the Sun Client classpath</p>
 <pre>Updated: December 11, 2006</pre>
 <p></p>
 <h4>WCF Interoperability</h4>
-<pre>non-secure:<br><br>  S-&gt;MS (Schema and WSDL Interop scenario 1):  827/852 (starting from WCF WSDL)<br>  MS-&gt;S (Schema and WSDL Interop scenario 2):  851/851 (starting from WCF WSDL) <br>  MS-&gt;S (Schema and WSDL Interop scenario 3):  1061/1091 (Starting from Java)<br>  S-&gt;S  : 824/852<br><br>secure:<br><br> (not tested)<br></pre>
+<pre>non-secure:
+
+  S-&gt;MS (Schema and WSDL Interop scenario 1):  827/852 (starting from WCF WSDL)
+  MS-&gt;S (Schema and WSDL Interop scenario 2):  851/851 (starting from WCF WSDL) 
+  MS-&gt;S (Schema and WSDL Interop scenario 3):  1061/1091 (Starting from Java)
+  S-&gt;S  : 824/852
+
+secure:
+
+ (not tested)
+</pre>
 <h4>What is Not Implemented</h4>
 <h4>Known Issues</h4>
 <ul>
@@ -179,7 +226,16 @@ the Sun Client classpath</p>
 <pre>Updated: February 21, 2006</pre>
 <p></p>
 <h4>WCF Interoperability</h4>
-<pre>non-secure:<br><br>  MS-&gt;S :  2/2 <br>  S-&gt;MS :  3/3<br> <br>secure:<br><br>  MS-&gt;S :  0/2 : (not tested)<br>  S-&gt;MS :  2/2<br></pre>
+<pre>non-secure:
+
+  MS-&gt;S :  2/2 
+  S-&gt;MS :  3/3
+ 
+secure:
+
+  MS-&gt;S :  0/2 : (not tested)
+  S-&gt;MS :  2/2
+</pre>
 <p> NOTE: The interoperability tests do not include duplex binding
 tests.</p>
 <!--<h4>What is Not Implemented</h4>
@@ -208,7 +264,10 @@ release
 <pre>Updated: February 22, 2007</pre>
 <p></p>
 <h4>WCF Interoperability</h4>
-<pre>  MS-&gt;S :   26/26 <br>  S-&gt;MS :   25/26  (One Scenario fails due to WCF Issue# CSD 4051)<br>  S -&gt;S :   26/26<br></pre>
+<pre>  MS-&gt;S :   26/26 
+  S-&gt;MS :   25/26  (One Scenario fails due to WCF Issue# CSD 4051)
+  S -&gt;S :   26/26
+</pre>
 <h4>What is Not Implemented</h4>
 <p>The following features have&nbsp; not been implemented:</p>
 <ul>
@@ -660,7 +719,8 @@ RequireDerivedKeys<br>
       </td>
       <td style="vertical-align: top;"> The client is uanble to
 generate the request soap message and the exception thrown is:
-      <pre>javax.xml.crypto.URIReferenceException: <br> No elements exist with Id/WsuId: 3</pre>
+      <pre>javax.xml.crypto.URIReferenceException: 
+ No elements exist with Id/WsuId: 3</pre>
       <a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=76">Issue#76</a>
       </td>
       <td style="vertical-align: top;">Will be fixed in a future
@@ -678,7 +738,8 @@ SignedSupportingToken.Request/Response messages are signed and
 encrypted. The client side has a SamlCallbackHandler meant to populate
 an SenderVouches saml assertion into the request message. The test
 fails on the server side with the following exception trace :
-      <pre>Could not find Reference<br>#ff63e9e3-248d-4f77-8802-5326d58da1a9 under Signature with ID1</pre>
+      <pre>Could not find Reference
+#ff63e9e3-248d-4f77-8802-5326d58da1a9 under Signature with ID1</pre>
       <a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=206">Issue#206</a><br>
       </td>
       <td style="vertical-align: top;">Will be fixed in a future release<br>
@@ -693,7 +754,7 @@ AsymmetricBinding with X509Token as the
 Initiator(IncludeToken=AlwaysToRecipient) and the
 RecipientToken(IncludeToken=Never) and ProtectTokens assertion. The
 test fails with the following on the client side:
-      <pre>Exception in thread "main" java.lang.StackOverflowError</pre>
+      <pre>Exception in thread &quot;main&quot; java.lang.StackOverflowError</pre>
       <a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=211">Issue#
 211</a> </td>
       <td style="vertical-align: top;">Will be fixed in a future release<br>
@@ -755,7 +816,11 @@ do not work because of a Bug.<br>
 <pre>Updated: December 11, 2006</pre>
 <p></p>
 <h4>WCF Interoperability</h4>
-<pre>&nbsp; MS-&gt;S :&nbsp; 35/36 : (starting from WSDL)<br>&nbsp; S-&gt;MS :&nbsp; 36/36 : (starting from WSDL)<br>&nbsp; S -&gt;S :&nbsp; 36/36 : (starting from WSDL)<br><br></pre>
+<pre>&nbsp; MS-&gt;S :&nbsp; 35/36 : (starting from WSDL)
+&nbsp; S-&gt;MS :&nbsp; 36/36 : (starting from WSDL)
+&nbsp; S -&gt;S :&nbsp; 36/36 : (starting from WSDL)
+
+</pre>
 <p>NOTE: No test scenarios were executed that started from Java.</p>
 <h4>What is Not Implemented</h4>
 <p>The following features have not been implemented:</p>
@@ -771,7 +836,21 @@ do not work because of a Bug.<br>
 <pre>Updated: December 11, 2006</pre>
 <p></p>
 <h4>WCF Interoperability</h4>
-<pre>&nbsp;&nbsp; Client -&gt; STS -&gt; Service<br>&nbsp;&nbsp;&nbsp; MS&nbsp;&nbsp;&nbsp; -&gt;&nbsp; S&nbsp; -&gt; MS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp; 4/4 <br><br>&nbsp;&nbsp;&nbsp; MS&nbsp;&nbsp;&nbsp; -&gt; MS&nbsp; -&gt; S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp; 4/4 <br><br>&nbsp;&nbsp;&nbsp; MS&nbsp;&nbsp;&nbsp; -&gt; S&nbsp;&nbsp; -&gt; S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp; 4/4 : (starting from WSDL)&nbsp;&nbsp;&nbsp; <br>&nbsp;&nbsp; <br>&nbsp;&nbsp;&nbsp; S&nbsp;&nbsp;&nbsp;&nbsp; -&gt; S&nbsp;&nbsp; -&gt; S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp; 5/5 : (starting from WSDL)<br><br>&nbsp;&nbsp;&nbsp; S&nbsp;&nbsp;&nbsp;&nbsp; -&gt; S&nbsp;&nbsp; -&gt; MS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp; 5/5 : (starting from WSDL)<br><br>&nbsp;&nbsp;&nbsp; S&nbsp;&nbsp;&nbsp;&nbsp; -&gt; MS&nbsp; -&gt; MS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp; 5/5 : (starting from WSDL)<br><br>&nbsp;&nbsp;&nbsp; S&nbsp;&nbsp;&nbsp;&nbsp; -&gt; MS&nbsp; -&gt; S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp; 5/5 : (starting from WSDL)<br></pre>
+<pre>&nbsp;&nbsp; Client -&gt; STS -&gt; Service
+&nbsp;&nbsp;&nbsp; MS&nbsp;&nbsp;&nbsp; -&gt;&nbsp; S&nbsp; -&gt; MS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp; 4/4 
+
+&nbsp;&nbsp;&nbsp; MS&nbsp;&nbsp;&nbsp; -&gt; MS&nbsp; -&gt; S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp; 4/4 
+
+&nbsp;&nbsp;&nbsp; MS&nbsp;&nbsp;&nbsp; -&gt; S&nbsp;&nbsp; -&gt; S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp; 4/4 : (starting from WSDL)&nbsp;&nbsp;&nbsp; 
+&nbsp;&nbsp; 
+&nbsp;&nbsp;&nbsp; S&nbsp;&nbsp;&nbsp;&nbsp; -&gt; S&nbsp;&nbsp; -&gt; S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp; 5/5 : (starting from WSDL)
+
+&nbsp;&nbsp;&nbsp; S&nbsp;&nbsp;&nbsp;&nbsp; -&gt; S&nbsp;&nbsp; -&gt; MS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp; 5/5 : (starting from WSDL)
+
+&nbsp;&nbsp;&nbsp; S&nbsp;&nbsp;&nbsp;&nbsp; -&gt; MS&nbsp; -&gt; MS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp; 5/5 : (starting from WSDL)
+
+&nbsp;&nbsp;&nbsp; S&nbsp;&nbsp;&nbsp;&nbsp; -&gt; MS&nbsp; -&gt; S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp; 5/5 : (starting from WSDL)
+</pre>
 <p>NOTE: No test scenarios were executed that started from Java.</p>
 <h4>What is Not Implemented</h4>
 <p>The following features have not been implemented:</p>
@@ -789,7 +868,19 @@ do not work because of a Bug.<br>
 <p></p>
 <h4>WCF Interoperability</h4>
 (Test config: GF b33c, MS WCF RTM, WSIT M3(b07), JDK 5, JDK 6)
-<pre>non-secure (meaning http used for WS-TX protocol messages, no security on application messages):<br><br>&nbsp; MS-&gt;S : 0/0 (interop w/MS requires HTTPS)<br>&nbsp; S-&gt;MS : 0/0 (interop w/MS requires HTTPS)<br>&nbsp; S-&gt;S&nbsp; : 3/3<br><br>secure (meaning https used for WS-TX protocol messages, no security on application messages):<br><br>&nbsp; MS-&gt;S : 3/3<br>&nbsp; S-&gt;MS : 3/3<br>&nbsp; S-&gt;S&nbsp; : 3/3<br><br></pre>
+<pre>non-secure (meaning http used for WS-TX protocol messages, no security on application messages):
+
+&nbsp; MS-&gt;S : 0/0 (interop w/MS requires HTTPS)
+&nbsp; S-&gt;MS : 0/0 (interop w/MS requires HTTPS)
+&nbsp; S-&gt;S&nbsp; : 3/3
+
+secure (meaning https used for WS-TX protocol messages, no security on application messages):
+
+&nbsp; MS-&gt;S : 3/3
+&nbsp; S-&gt;MS : 3/3
+&nbsp; S-&gt;S&nbsp; : 3/3
+
+</pre>
 <h4>What is Not Implemented</h4>
 <p> </p>
 <ul>
@@ -876,7 +967,14 @@ Recommended workaround: <br>
         <li>Install glassfish</li>
         <li>Use your favorite editor to open <gfinstall>/lib/install/templates/default-domain.xml.template</gfinstall></li>
         <li>Replace
-          <pre>&lt;?xml version="1.0" encoding="UTF-8" ?&gt;<br><br>with<br><br>&lt;?xml version="1.0" encoding="UTF-8" ?&gt;<br>&lt;!DOCTYPE domain PUBLIC "-//Sun Microsystems Inc.//DTD Application Server 9.1<br>Domain//EN" "http://www.sun.com/appserver/dtds/sun-domain_1_3.dtd"&gt;<br></pre>
+          <pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
+
+with
+
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
+&lt;!DOCTYPE domain PUBLIC &quot;-//Sun Microsystems Inc.//DTD Application Server 9.1
+Domain//EN&quot; &quot;http://www.sun.com/appserver/dtds/sun-domain_1_3.dtd&quot;&gt;
+</pre>
 at the top for the file.</li>
       </ol>
       <p></p>
@@ -918,15 +1016,20 @@ should never be opened at the same time.</p>
 <pre>Updated: December 11, 2006</pre>
 <p></p>
 <h4>WCF Interoperability</h4>
-<pre>non-secure:<br><br>&nbsp; MS-&gt;S : No client code available<br>&nbsp; S-&gt;MS : 53/66<br>&nbsp; S -&gt;S : 62/66<br><br>secure:<br><br>&nbsp; MS-&gt;S : No client code available<br>&nbsp; S-&gt;MS : Not tested<br>&nbsp; S -&gt;S : Not tested<br></pre>
-<h4>What is Not Implemented</h4>
-<ul>
-  <li>Transparent support for WS-Addressing Member Submission Version. </li>
-</ul>
+<pre>non-secure:
+
+&nbsp; MS-&gt;S : 70/70
+&nbsp; S-&gt;MS : 69/69
+&nbsp; S -&gt;S : 86/86
+
+secure:
+
+&nbsp; MS-&gt;S : Not tested
+&nbsp; S-&gt;MS : Not tested
+&nbsp; S -&gt;S : Not tested
+</pre>
 <h4>Known Issues</h4>
 <ul>
-  <li>Member Submission needs to be enabled explicitly using <a
- href="docs/enabling-addressing-submission.htm">this link</a>. </li>
   <li>A WCF endpoint responds back with "HTTP 400 Bad Request" if an
 empty Metadata element is sent from the WSIT client. </li>
 </ul>
