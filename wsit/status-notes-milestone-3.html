@@ -4,7 +4,7 @@
   <meta http-equiv="CONTENT-TYPE"
  content="text/html; charset=windows-1252">
   <title>WSIT Status Notes - Milestone 3</title>
-  <meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+  <meta name="GENERATOR" content="Microsoft FrontPage 6.0">
   <meta name="CREATED" content="20060713;8550900">
   <meta name="CHANGED" content="20060713;21281095">
   <meta http-equiv="Content-Style-Type" content="text/css">
@@ -139,61 +139,25 @@ secure:
 <hr>
 <h2><a name="68668"></a>MTOM Status</h2>
 <p></p>
-<pre>Updated: December 11, 2006</pre>
+<pre>Updated: February 22, 2007</pre>
 <p></p>
 <h4>WCF Interoperability</h4>
-<pre wrap="">Internal endpoint running July CTP
+<pre wrap="">Internal endpoint running Windows RTM and Vista. All the MTOM interoperability tests passes with success.</pre>
+<pre wrap="">
+<b>Non-Secure Scenarios 
+</b>
+S -&gt; S : 20/20 
+S -&gt; MS : 20/20 
+MS -&gt; S :&nbsp; 20/20 
 
-Non-Secure Scenarios
-
-S -&gt; S : 15/15
-S -&gt; MS : 15/15
-MS -&gt; S :  15/15
-
-Secure Scenarios</pre>
-<pre wrap="">S -&gt; S : 15/15
-S -&gt; MS : 0/15
-MS -&gt; S :  0/15</pre>
+<b>Secure Scenarios </b></pre>
+<pre wrap="">S -&gt; S : 18/18 
+S -&gt; MS : 18/18 
+MS -&gt; S :&nbsp; 18/18 </pre>
 <pre>
 </pre>
 <h4>What is Not Implemented</h4>
-<p>All MTOM functionality has been implemented.</p>
-<h4>Known Issues</h4>
-<table border="1" cellpadding="2" cellspacing="2">
-  <tbody>
-    <tr>
-      <th>
-      <p>Interoperability Feature</p>
-      </th>
-      <th>
-      <p>Status/Workaround</p>
-      </th>
-    </tr>
-    <tr>
-      <td>
-      <p>Using MTOM with WS-Addressing for Sun &lt;-&gt;Microsoft
-Interoperability</p>
-      </td>
-      <td>
-      <p>MTOM with WS-Addressing interoperablity with Microsoft would
-not work, if the CR version of addressing is used in Sun
-implementation. To workaround with this:</p>
-      <p>If Sun service is used with Microsoft client; put ms.jar in
-the Sun Service classpath.</p>
-      <p>If Microsoft service is used with Sun client; put ms.jar in
-the Sun Client classpath</p>
-      </td>
-    </tr>
-    <tr>
-      <td> Secure MTOM Scenario</td>
-      <td>All secure scenarios fail owing to WSIT <a
- href="https://wsit.dev.java.net/issues/show_bug.cgi?id=59">issue #59</a>
-(Fix is available on public MS endpoint though). Please see <a
- href="#35385">WSS status</a> notes for workaround/more details.</td>
-    </tr>
-  </tbody>
-</table>
-<p style="margin-bottom: 0in;"><!-- ================================================== --><br>
+<p>All MTOM functionality has been implemented.<br>
 </p>
 <hr>
 <h2><a name="49498"></a>Data Binding Status</h2>
