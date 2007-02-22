@@ -121,7 +121,7 @@
             <copy file="../${etc.metainf.dir}/MANIFEST.MF" todir="${tmpdir}"/>
             <updateManifestWithVersion file="${tmpdir}/MANIFEST.MF"/>
             <concatmanifest tempdir="${tmpdir}" manifest="${tmpdir}/MANIFEST.MF">
-                <fileset dir="@{libdir}" includes="activation.jar,http.jar,jsr-250-api.jar,mail-1.4.jar">
+                <fileset dir="@{libdir}" includes="activation.jar,http.jar,jsr250-api.jar,mail-1.4.jar">
                     <!--<includesfile name="*.jar"/>-->
                     <exclude name="*javadocs*.jar"/>
                 </fileset>
