@@ -26,22 +26,51 @@
     <property environment="env"/>
     <property name="tomcat.home" value="${env.CATALINA_HOME}"/>
     <property name="tomcat.lib.home" value="${tomcat.home}/shared/lib"/>
+    <property name="tomcat.endorsed" value="${tomcat.home}/common/endorsed"/>
+    <property name="java.home" value="${env.JAVA_HOME}"/>
 
-    <target name="install">
+    <target name="install" depends="install-api-check">
         <echo message="Installing WSIT 1.0 EA on ${tomcat.home} ..."/>
 
         <!-- TODO: Identify placeholder for tools.jar -->
         <copy toDir="${tomcat.lib.home}" overwrite="true">
             <fileset dir="lib">
-                <include name="*.jar"/>
+                <include name="webservices-rt.jar"/>
+                <include name="webservices-tools.jar"/>
+                <include name="webservices-extra.jar"/>
+            </fileset>
+        </copy>
+        <copy toDir="${tomcat.endorsed}" overwrite="true">
+            <fileset dir="lib">
+                <include name="webservices-api.jar"/>
             </fileset>
         </copy>
 
         <echo message="... installation complete."/>
     </target>
 
+    <target name="install-api-check" if="install.api">
+        <antcall target="install-api"/>
+    </target>
+
+    <target name="install-api">
+        <copy toDir="${java.home}/lib/endorsed" overwrite="true">
+            <fileset dir="lib">
+                <include name="webservices-api.jar"/>
+            </fileset>
+        </copy>
+    </target>
+
     <target name="uninstall">
-        <delete dir="${tomcat.lib.home}" includes="webservices-rt.jar, webservices-tools.jar"/>
+        <delete>
+            <fileset dir="${tomcat.lib.home}" includes="webservices-rt.jar, webservices-tools.jar, webservices-extra.jar"/>
+        </delete>
+        <delete>
+            <fileset dir="${tomcat.endorsed}" includes="webservices-api.jar"/>
+        </delete>
+        <delete quiet="true">
+            <fileset dir="${java.home}/lib/endorsed" includes="webservices-api.jar"/>
+        </delete>
     </target>
 
     <target name="help">

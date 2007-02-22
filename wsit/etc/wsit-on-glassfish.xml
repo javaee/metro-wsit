@@ -43,38 +43,58 @@
         <os family="unix"/>
     </condition>
 
-    <target name="init" if="notInstalled" description="backup existing WSIT jars and JAX-WS/JAXB scripts">
+    <target name="init" if="notInstalled" description="Backup existing WSIT jars and tool scripts">
         <mkdir dir="${backup.dir}"/>
         <copy todir="${backup.dir}" failonerror="false">
             <fileset dir="${as.home}/bin" includes="wsimport${ext}, wsgen${ext}, xjc${ext}, schemagen${ext}"/>
             <fileset dir="${as.home}/lib" includes="webservices-rt.jar, webservices-tools.jar"/>
+            <fileset dir="${as.home}/lib/endorsed" includes="webservices-api.jar"/>
         </copy>
     </target>
 
-    <target name="install" depends="init,update-classpath" description="install latest WSIT jars">
+    <target name="install" depends="init,update-classpath,install-api-check" description="Install latest WSIT jars">
         <echo message="Installing WSIT 1.0 EA on ${as.home} ..."/>
 
         <copy todir="${as.lib.home}" overwrite="true">
-            <fileset dir="${basedir}/lib" includes="*.jar"/>
+            <fileset dir="${basedir}/lib">
+                <include name="webservices-rt.jar"/>
+                <include name="webservices-tools.jar"/>
+            </fileset>  
         </copy>
 
         <echo message="... installation complete."/>
     </target>
 
+    <target name="install-api-check" if="install.api" description="Internal-use, conditional target calls install-api">
+        <antcall target="install-api"/>
+    </target>
+
+    <target name="install-api" description="Installs 'webservices-api.jar' into JAVA_HOME/lib/endorsed">
+        <copy toDir="${java.home}/lib/endorsed" overwrite="true">
+            <fileset dir="lib">
+                <include name="webservices-api.jar"/>
+            </fileset>
+        </copy>
+    </target>
+
     <target name="uninstall" unless="notInstalled"
-            description="restore original WSIT jars and JAX-WS/JAXB scripts">
+            description="Restore original WSIT jars and tool scripts">
         <echo message="Uninstalling WSIT 1.0 EA from ${as.home} ..."/>
 
         <copy todir="${as.home}/bin" overwrite="true">
             <fileset dir="${backup.dir}" includes="wsimport${ext}, wsgen${ext}, xjc${ext}, schemagen${ext}"/>
         </copy>
+        <!-- The 'copy' task does not preserve permissions -->
         <chmod perm="+x" dir="${as.home}/bin" includes="wsimport${ext}, wsgen${ext}, xjc${ext}, schemagen${ext}"/>
-        <delete>
-            <fileset dir="${as.home}/lib" includes="webservices-rt.jar, webservices-tools.jar"/>
-        </delete>
+
         <copy todir="${as.home}/lib" overwrite="true">
             <fileset dir="${backup.dir}" includes="webservices-rt.jar, webservices-tools.jar"/>
         </copy>
+
+        <copy todir="${as.home}/lib/endorsed" overwrite="true">
+            <fileset dir="${backup.dir}" includes="webservices-api.jar"/>
+        </copy>
+
         <delete dir="${backup.dir}" includeemptydirs="true"/>
 
         <echo message="... uninstall complete."/>
@@ -89,7 +109,7 @@
     <target name="update-classpath-unix" if="unix">
         <replace dir="${as.home}/bin" includes="wsimport, wsgen, xjc, schemagen">
             <replacetoken>CLASSPATH=</replacetoken>
-            <replacevalue>WSIT_CLASSPATH="$AS_INSTALL"/lib/webservices-tools.jar:"$AS_INSTALL"/lib/webservices-rt.jar
+            <replacevalue>WSIT_CLASSPATH="$AS_INSTALL"/lib/webservices-tools.jar:"$AS_INSTALL"/lib/webservices-rt.jar:"$AS_INSTALL"/lib/endorsed/webservices-api.jar
 
 CLASSPATH=${WSIT_CLASSPATH}:</replacevalue>
         </replace>
@@ -99,7 +119,7 @@ CLASSPATH=${WSIT_CLASSPATH}:</replacevalue>
     <target name="update-classpath-win" unless="unix">
         <replace dir="${as.home}/bin" includes="wsimport${ext}, wsgen${ext}, xjc${ext}, schemagen${ext}">
             <replacetoken>CLASSPATH=</replacetoken>
-            <replacevalue>WSIT_CLASSPATH=%AS_INSTALL%\lib\webservices-tools.jar;%AS_INSTALL%\lib\webservices-rt.jar
+            <replacevalue>WSIT_CLASSPATH=%AS_INSTALL%\lib\webservices-tools.jar;%AS_INSTALL%\lib\webservices-rt.jar;"%AS_INSTALL%"\lib\endorsed\webservices-api.jar
 
 set CLASSPATH=%WSIT_CLASSPATH%;</replacevalue>
         </replace>
