@@ -736,7 +736,7 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
                     sourceModel.expand(modelContext);
                     modelContext.addModel(new URI(policyUri), sourceModel);
                 } catch (URISyntaxException e) {
-                    throw LOGGER.logSevereException( new WebServiceException(LocalizationMessages.WSP_1005_URI_SYNTAX_EXCEPTION_THROWN_WHEN_PROCESSING_URI(policyUri), e));
+                    throw LOGGER.logSevereException(new WebServiceException(LocalizationMessages.WSP_1005_URI_SYNTAX_EXCEPTION_WHEN_PROCESSING_URI(policyUri), e));
                 }
             }
             // iterating over all services and binding all the policies read before

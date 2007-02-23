@@ -53,8 +53,7 @@ import java.io.File;
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public final class PolicyConfigParser {
-    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyConfigParser.class);
-    
+    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyConfigParser.class);    
     private static final XMLInputFactory XML_INPUT_FACTORY = XMLInputFactory.newInstance();
     
     
@@ -109,9 +108,9 @@ public final class PolicyConfigParser {
      *         from the WSIT config file.
      * @throw PolicyException in case of any problems that may occur while reading WSIT config file
      *        and constructing the {@link WSDLModel} object or populating {@link PolicyMap} instance.
-     * @throw NullPointerException in case {@code configFileUrl} parameter is {@code null}.
+     * @throw IllegalArgumentException in case {@code configFileUrl} parameter is {@code null}.
      */
-    public static PolicyMap parse(final URL configFileUrl, final boolean isClient, final PolicyMapMutator... mutators) throws PolicyException, NullPointerException {
+    public static PolicyMap parse(final URL configFileUrl, final boolean isClient, final PolicyMapMutator... mutators) throws PolicyException, IllegalArgumentException {
         LOGGER.entering(configFileUrl, isClient, mutators);
         PolicyMap map = null;
         try {
@@ -251,15 +250,15 @@ public final class PolicyConfigParser {
      *         from the WSIT config file.
      * @throw PolicyException in case of any problems that may occur while reading WSIT config file
      *        and constructing the {@link WSDLModel} object or populating {@link PolicyMap} instance.
-     * @throw NullPointerException in case {@code configFileUrl} parameter is {@code null}.
+     * @throw IllegalArgumentException in case {@code configFileUrl} parameter is {@code null}.
      */
-    public static WSDLModel parseModel(final URL configFileUrl, final boolean isClient, final PolicyMapMutator... mutators) throws PolicyException, NullPointerException {
+    public static WSDLModel parseModel(final URL configFileUrl, final boolean isClient, final PolicyMapMutator... mutators) throws PolicyException, IllegalArgumentException {
         LOGGER.entering(configFileUrl, isClient, mutators);
         WSDLModel model = null;
         InputStream configFileIS = null;
         try {
             if (null == configFileUrl) {
-                throw LOGGER.logSevereException(new NullPointerException(LocalizationMessages.WSP_1028_FAILED_TO_READ_NULL_WSIT_CFG()));
+                throw LOGGER.logSevereException(new IllegalArgumentException(LocalizationMessages.WSP_1028_FAILED_TO_READ_NULL_WSIT_CFG()));
             }
             
             configFileIS = configFileUrl.openStream();
@@ -275,11 +274,11 @@ public final class PolicyConfigParser {
             
             return model;
         } catch (XMLStreamException ex) {
-            throw LOGGER.logSevereException(new PolicyException(LocalizationMessages.WSP_1002_WSDL_IMPORT_FAILED(), ex));
+            throw LOGGER.logSevereException(new PolicyException(LocalizationMessages.WSP_1002_WSIT_CFG_FILE_PROCESSING_FAILED(configFileUrl.toString()), ex));
         } catch (IOException ex) {
-            throw LOGGER.logSevereException(new PolicyException(LocalizationMessages.WSP_1002_WSDL_IMPORT_FAILED(), ex));
+            throw LOGGER.logSevereException(new PolicyException(LocalizationMessages.WSP_1002_WSIT_CFG_FILE_PROCESSING_FAILED(configFileUrl.toString()), ex));
         } catch (SAXException ex) {
-            throw LOGGER.logSevereException(new PolicyException(LocalizationMessages.WSP_1002_WSDL_IMPORT_FAILED(), ex));
+            throw LOGGER.logSevereException(new PolicyException(LocalizationMessages.WSP_1002_WSIT_CFG_FILE_PROCESSING_FAILED(configFileUrl.toString()), ex));
         } finally {
             PolicyUtils.IO.closeResource(configFileIS);
             LOGGER.exiting(model);

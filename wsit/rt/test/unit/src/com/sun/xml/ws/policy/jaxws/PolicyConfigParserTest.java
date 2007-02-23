@@ -137,8 +137,8 @@ public class PolicyConfigParserTest extends TestCase {
         
         try {
             result = PolicyConfigParser.parse((URL) null, false);
-            fail("Expected NullPointerException");
-        } catch (NullPointerException e) {
+            fail("Expected IllegalArgumentException");
+        } catch (IllegalArgumentException e) {
         }
         assertNull(result);
     }

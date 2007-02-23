@@ -43,7 +43,7 @@ public final class PolicyModelGenerator {
         
     }
     
-    public static PolicyModelGenerator getGenerator() throws PolicyException {
+    public static PolicyModelGenerator getGenerator() {
         return generator;
     }
     
