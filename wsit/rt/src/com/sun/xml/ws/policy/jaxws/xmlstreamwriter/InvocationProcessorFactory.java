@@ -26,7 +26,7 @@ import javax.xml.stream.XMLStreamWriter;
 
 /**
  * The interface provides API contract for {@link InvocationProcessor} factory 
- * implementations. Implementations of this interface may be passed into {@link }
+ * implementations. Implementations of this interface may be passed into {@link EnhancedXmlStreamWriterProxy}
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */

@@ -33,6 +33,12 @@ import static com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter.Invocat
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public final class MexImportFilteringStateMachine implements FilteringStateMachine {
+    private enum StateMachineMode {
+        INACTIVE,
+        BUFFERING,
+        FILTERING
+    }
+    
     private static final PolicyLogger LOGGER = PolicyLogger.getLogger(MexImportFilteringStateMachine.class);
     
     private static final String MEX_NAMESPACE = "http://schemas.xmlsoap.org/ws/2004/09/mex";
@@ -41,8 +47,10 @@ public final class MexImportFilteringStateMachine implements FilteringStateMachi
     private static final QName IMPORT_NAMESPACE_ATTIBUTE = new QName(WSDL_NAMESPACE, "namespace");
     
     private int depth; // indicates the depth in which we are currently nested in the element that should be filtered out
+    private StateMachineMode currentMode = StateMachineMode.INACTIVE; // indicates that current mode of the filtering state machine
+    
     private boolean filteringOn; // indicates that currently processed elements will be filtered out.
-    private boolean cmdBufferingOn; // indicates whether the commands should be buffered or whether they can be directly executed on the underlying XML output stream
+    private boolean bufferingOn; // indicates whether the commands should be buffered or whether they can be directly executed on the underlying XML output stream
     
     
     /** Creates a new instance of InvocationProcessor */
@@ -56,43 +64,39 @@ public final class MexImportFilteringStateMachine implements FilteringStateMachi
             final XmlStreamWriterMethodType methodType = XmlStreamWriterMethodType.getMethodType(invocation.getMethodName());
             switch (methodType) {
                 case WRITE_START_ELEMENT:
-                    if (filteringOn) {
+                    if (currentMode != StateMachineMode.INACTIVE) {
                         depth++;
                     } else {
-                        cmdBufferingOn = startBuffering(invocation, writer);
-                        if (cmdBufferingOn) {
+                        if (startBuffering(invocation, writer)) {
                             resultingState = START_BUFFERING;
+                            currentMode = StateMachineMode.BUFFERING;
                         }
                     }
                     break;
                 case WRITE_END_ELEMENT:
-                    if (cmdBufferingOn) {
-                        resultingState = STOP_BUFFERING;
-                        cmdBufferingOn = false;
-                    } else if (filteringOn) {
+                    if (currentMode != StateMachineMode.INACTIVE) {
                         if (depth == 0) {
-                            filteringOn = false;
-                            resultingState = STOP_FILTERING;
+                            resultingState = (currentMode == StateMachineMode.BUFFERING) ? STOP_BUFFERING : STOP_FILTERING;
+                            currentMode = StateMachineMode.INACTIVE;
                         } else {
                             depth--;
                         }
                     }
                     break;
                 case WRITE_ATTRIBUTE:
-                    if (!filteringOn && cmdBufferingOn && startFiltering(invocation, writer)) {
-                        filteringOn = true;
-                        cmdBufferingOn = false;
+                    if (currentMode == StateMachineMode.BUFFERING && startFiltering(invocation, writer)) {
                         resultingState = START_FILTERING;
+                        currentMode = StateMachineMode.FILTERING;
                     }
                     break;
                 case CLOSE:
-                    if (cmdBufferingOn) {
-                        cmdBufferingOn = false;
-                        resultingState = STOP_BUFFERING;
-                    } else if (filteringOn) {
-                        filteringOn = false;
-                        resultingState = STOP_FILTERING;
+                    switch (currentMode) {
+                        case BUFFERING:
+                        resultingState = STOP_BUFFERING; break;
+                        case FILTERING:
+                        resultingState = STOP_FILTERING; break;
                     }
+                    currentMode = StateMachineMode.INACTIVE;
                     break;
                 default:
                     break;
