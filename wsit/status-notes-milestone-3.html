@@ -898,78 +898,28 @@ before starting Glassfish.</td>
 <hr>
 <h2><a name="35087"></a>NetBeans WSIT Module Status</h2>
 <p></p>
-<pre>Updated: December 11, 2006</pre>
+<pre>Updated: February 23rd, 2006</pre>
 <p></p>
 <h4>What is Not Implemented</h4>
-<ul>
-  <li>WSIT support for Web Services and Web service clients is
-implemented in Web projects only. </li>
-</ul>
+<ul> Module allows to specify several pieces of Key/Truststore configuration which are not required for 
+specific security mechanisms. Please refer to WSIT security documentation.
+ </ul>
 <h4>Known Issues</h4>
 <table border="1" cellpadding="2" cellspacing="2">
   <tbody>
     <tr>
       <th>
-      <p>Interoperability Feature</p>
+      <p>Feature</p>
       </th>
       <th>
       <p>Status/Workaround</p>
       </th>
     </tr>
     <tr>
-      <td>
-      <p>Glassfish cannot be registered to Netbeans</p>
-      </td>
-      <td>
-      <p>Issue <a
- href="https://glassfish.dev.java.net/issues/show_bug.cgi?id=1595">1595</a>
-prevents registration of Glassfish builds 26, 27 and 28 to Netbeans.
-Recommended workaround: <br>
-      <br>
-      </p>
-      <ol>
-        <li>Install glassfish</li>
-        <li>Use your favorite editor to open <gfinstall>/lib/install/templates/default-domain.xml.template</gfinstall></li>
-        <li>Replace
-          <pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
-
-with
-
-&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
-&lt;!DOCTYPE domain PUBLIC &quot;-//Sun Microsystems Inc.//DTD Application Server 9.1
-Domain//EN&quot; &quot;http://www.sun.com/appserver/dtds/sun-domain_1_3.dtd&quot;&gt;
-</pre>
-at the top for the file.</li>
-      </ol>
-      <p></p>
-      </td>
-    </tr>
-    <tr>
-      <td>
-      <p>WSIT features</p>
-      </td>
-      <td>
-      <p>When creating a Web Service project to use WSIT features, you
-must select J2EE 1.4 in the New Web Application window and set the
-Source Level to 1.5 in the Project Properties window.</p>
-      <p>NOTE: With these configuration settings the NetBeans 5.5 does
-not support JSR 109.</p>
-      <p>If you don't need WSIT features and choose to accept NetBeans'
-default setting of J2EE 1.5, an <a
- href="https://wsit.dev.java.net/issues/show_bug.cgi?id=71">issue</a>
-prevents you from deploying your application to Builds 15 and 16 of <a
- href="https://glassfish.dev.java.net/public/downloadsindex.html">Glassfish
-v2</a>, but only on Solaris and Linux.</p>
-      </td>
-    </tr>
-    <tr>
-      <td>
-      <p>Navigator functionality</p>
-      </td>
-      <td>
-      <p>The WSIT configuration file and the WSIT configuration GUI
-should never be opened at the same time.</p>
-      </td>
+      <td>The dialog is empty, or an exception is thrown when you try to open it. <a
+ href="http://www.netbeans.org/issues/show_bug.cgi?id=93192">See
+Issue# 93192</a> </td>
+      <td>Please wait until classpath scanning is finished, and try to open the dialog again.</td>
     </tr>
   </tbody>
 </table>
