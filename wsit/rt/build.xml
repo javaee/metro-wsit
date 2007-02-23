@@ -212,6 +212,17 @@
         <copy todir="${rtjar-tmpdir}/WEB-INF" overwrite="true">
             <fileset dir="${tx.tmp.webinf}"/>
         </copy>
+
+        <!--This step is required so that jaxrpc and xwss can run at the
+            same time. When jars are getting merged in webservices-rt.jar
+            the toolPlugin of one overwrites the other. This ToolPlugin.xml 
+            is a consolidated version of both 
+            -->
+        <copy todir="${rtjar-tmpdir}/META-INF/jaxrpc" overwrite="true">
+            <fileset dir="toolPlugin">
+                <include name="ToolPlugin.xml"/>
+            </fileset>
+        </copy>
     </target>
 
     <target name="expand-jars-api" unless="runtime.jars.expanded">
