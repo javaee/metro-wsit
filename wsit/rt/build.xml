@@ -67,11 +67,11 @@
         <attribute name="libdir"/>
         <element name="metainf" optional="true"/>
         <sequential>
-            <delete dir="${tmpdir}"/>
-            <mkdir dir="${tmpdir}"/>
-            <copy file="../${etc.metainf.dir}/MANIFEST.MF" todir="${tmpdir}"/>
-            <updateManifestWithVersion file="${tmpdir}/MANIFEST.MF"/>
-            <concatmanifest tempdir="${tmpdir}" manifest="${tmpdir}/MANIFEST.MF">
+            <delete dir="${rtjar-tmpdir}"/>
+            <mkdir dir="${rtjar-tmpdir}"/>
+            <copy file="../${etc.metainf.dir}/MANIFEST.MF" todir="${rtjar-tmpdir}"/>
+            <updateManifestWithVersion file="${rtjar-tmpdir}/MANIFEST.MF"/>
+            <concatmanifest tempdir="${rtjar-tmpdir}" manifest="${rtjar-tmpdir}/MANIFEST.MF">
                 <fileset dir="@{libdir}">
                     <include name="*.jar"/>
                     <exclude name="*javadocs*.jar"/>
@@ -82,7 +82,7 @@
                     <exclude name="mail-1.4.jar"/>
                 </fileset>
             </concatmanifest>
-            <delete dir="${tmpdir}/META-INF" includeemptydirs="true" excludes="services/**"/>
+            <delete dir="${rtjar-tmpdir}/META-INF" includeemptydirs="true" excludes="services/**"/>
             <metainf/>
         </sequential>
     </macrodef>
@@ -92,11 +92,11 @@
         <attribute name="libdir"/>
         <element name="metainf" optional="true"/>
         <sequential>
-            <delete dir="${tmpdir}"/>
-            <mkdir dir="${tmpdir}"/>
-            <copy file="../${etc.metainf.dir}/MANIFEST.MF" todir="${tmpdir}"/>
-            <updateManifestWithVersion file="${tmpdir}/MANIFEST.MF"/>
-            <concatmanifest tempdir="${tmpdir}" manifest="${tmpdir}/MANIFEST.MF">
+            <delete dir="${apijar-tmpdir}"/>
+            <mkdir dir="${apijar-tmpdir}"/>
+            <copy file="../${etc.metainf.dir}/MANIFEST.MF" todir="${apijar-tmpdir}"/>
+            <updateManifestWithVersion file="${apijar-tmpdir}/MANIFEST.MF"/>
+            <concatmanifest tempdir="${apijar-tmpdir}" manifest="${apijar-tmpdir}/MANIFEST.MF">
                 <fileset dir="@{libdir}" >
                     <include name="jaxb-api.jar"/>
                     <include name="jsr173_api.jar"/>
@@ -107,7 +107,7 @@
                     <exclude name="*javadocs*.jar"/>
                 </fileset>
             </concatmanifest>
-          <delete dir="${tmpdir}/META-INF" includeemptydirs="true" excludes="services/**"/>
+          <delete dir="${apijar-tmpdir}/META-INF" includeemptydirs="true" excludes="services/**"/>
             <metainf/>
         </sequential>
     </macrodef>
@@ -116,17 +116,17 @@
         <attribute name="libdir"/>
         <element name="metainf" optional="true"/>
         <sequential>
-            <delete dir="${tmpdir}"/>
-            <mkdir dir="${tmpdir}"/>
-            <copy file="../${etc.metainf.dir}/MANIFEST.MF" todir="${tmpdir}"/>
-            <updateManifestWithVersion file="${tmpdir}/MANIFEST.MF"/>
-            <concatmanifest tempdir="${tmpdir}" manifest="${tmpdir}/MANIFEST.MF">
+            <delete dir="${extrajar-tmpdir}"/>
+            <mkdir dir="${extrajar-tmpdir}"/>
+            <copy file="../${etc.metainf.dir}/MANIFEST.MF" todir="${extrajar-tmpdir}"/>
+            <updateManifestWithVersion file="${extrajar-tmpdir}/MANIFEST.MF"/>
+            <concatmanifest tempdir="${extrajar-tmpdir}" manifest="${extrajar-tmpdir}/MANIFEST.MF">
                 <fileset dir="@{libdir}" includes="activation.jar,http.jar,jsr250-api.jar,mail-1.4.jar">
                     <!--<includesfile name="*.jar"/>-->
                     <exclude name="*javadocs*.jar"/>
                 </fileset>
             </concatmanifest>
-          <delete dir="${tmpdir}/META-INF" includeemptydirs="true" excludes="services/**"/>
+          <delete dir="${extrajar-tmpdir}/META-INF" includeemptydirs="true" excludes="services/**"/>
             <metainf/>
         </sequential>
     </macrodef>
@@ -135,26 +135,27 @@
         <attribute name="libdir"/>
         <element name="metainf" optional="true"/>
         <sequential>
-            <delete dir="${tmpdir}"/>
-            <mkdir dir="${tmpdir}"/>
-            <copy file="../${etc.metainf.dir}/MANIFEST.MF" todir="${tmpdir}"/>
-            <updateManifestWithVersion file="${tmpdir}/MANIFEST.MF"/>
-            <concatmanifest tempdir="${tmpdir}" manifest="${tmpdir}/MANIFEST.MF">
+            <delete dir="${extraapijar-tmpdir}"/>
+            <mkdir dir="${extraapijar-tmpdir}"/>
+            <copy file="../${etc.metainf.dir}/MANIFEST.MF" todir="${extraapijar-tmpdir}"/>
+            <updateManifestWithVersion file="${extraapijar-tmpdir}/MANIFEST.MF"/>
+            <concatmanifest tempdir="${extraapijar-tmpdir}" manifest="${extraapijar-tmpdir}/MANIFEST.MF">
                 <fileset dir="@{libdir}" includes="jaxr-api.jar,jaxrpc-api.jar">
                     <!--<includesfile name="*.jar"/>-->
                     <exclude name="*javadocs*.jar"/>
                 </fileset>
             </concatmanifest>
-          <delete dir="${tmpdir}/META-INF" includeemptydirs="true" excludes="services/**"/>
+          <delete dir="${extraapijar-tmpdir}/META-INF" includeemptydirs="true" excludes="services/**"/>
             <metainf/>
         </sequential>
     </macrodef>
     <macrodef name="combine-jars-macro">
         <attribute name="classesdir"/>
         <attribute name="jarname"/>
+        <attribute name="jar-tmpdir"/>
         <element name="services" optional="true"/>
         <sequential>
-            <jar destfile="../${dist.image.wsit.lib.dir}/@{jarname}.jar" manifest="${tmpdir}/MANIFEST.MF">
+            <jar destfile="../${dist.image.wsit.lib.dir}/@{jarname}.jar" manifest="@{jar-tmpdir}/MANIFEST.MF">
                 <services/>
                 <fileset dir="@{classesdir}"/>
             </jar>
@@ -194,9 +195,10 @@
     </macrodef>
 
     <target name="expand-jars-runtime" unless="runtime.jars.expanded">
-        <expand-jars-macro libdir="../${lib.runtime.dir}">
+
+        <expand-jars-macro libdir="../${lib.runtime.dir}" >
             <metainf>
-                <copy todir="${tmpdir}/META-INF/services" overwrite="true">
+                <copy todir="${rtjar-tmpdir}/META-INF/services" overwrite="true">
                     <fileset dir="../etc/META-INF/services">
                         <include name="*.*"/>
                     </fileset>
@@ -206,14 +208,14 @@
 
         <!-- include wsdl files for wstx resource lookups -->
         <include-wstx-resources/>
-        <mkdir dir="${tmpdir}/WEB-INF"/>
-        <copy todir="${tmpdir}/WEB-INF" overwrite="true">
+        <mkdir dir="${rtjar-tmpdir}/WEB-INF"/>
+        <copy todir="${rtjar-tmpdir}/WEB-INF" overwrite="true">
             <fileset dir="${tx.tmp.webinf}"/>
         </copy>
     </target>
 
     <target name="expand-jars-api" unless="runtime.jars.expanded">
-        <expand-api-jars-macro libdir="../${lib.runtime.dir}">
+        <expand-api-jars-macro libdir="../${lib.runtime.dir}" >
 
         </expand-api-jars-macro>
 
@@ -235,9 +237,9 @@
     </target>
 
     <target name="combine-jars-runtime">
-        <combine-jars-macro jarname="${name}-rt" classesdir="build/classes">
+        <combine-jars-macro jarname="${name}-rt" classesdir="build/classes" jar-tmpdir="${rtjar-tmpdir}">
             <services>
-                <fileset dir="${tmpdir}">
+                <fileset dir="${rtjar-tmpdir}">
                     <include name="**/*.*"/>
                     <exclude name="**/version.properties"/>
                     <exclude name="**/*.TWSDL*"/>
@@ -248,18 +250,18 @@
     </target>
 
     <target name="combine-jars-api">
-        <combine-jars-macro jarname="${name}-api" classesdir="${tmpdir}"/>
+        <combine-jars-macro jarname="${name}-api" classesdir="${apijar-tmpdir}" jar-tmpdir="${apijar-tmpdir}"/>
 
      </target>
 
      <target name="combine-jars-extra">
-        <combine-jars-macro jarname="${name}-extra" classesdir="${tmpdir}"/>
+        <combine-jars-macro jarname="${name}-extra" classesdir="${extrajar-tmpdir}" jar-tmpdir="${extrajar-tmpdir}"/>
 
 
     </target>
 
     <target name="combine-jars-extra-api">
-        <combine-jars-macro jarname="${name}-extra-api" classesdir="${tmpdir}"/>
+        <combine-jars-macro jarname="${name}-extra-api" classesdir="${extraapijar-tmpdir}" jar-tmpdir="${extraapijar-tmpdir}"/>
 
 
     </target>
