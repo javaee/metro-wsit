@@ -38,6 +38,7 @@
                 <include name="webservices-rt.jar"/>
                 <include name="webservices-tools.jar"/>
                 <include name="webservices-extra.jar"/>
+                <include name="webservices-extra-api.jar"/>
             </fileset>
         </copy>
         <copy toDir="${tomcat.endorsed}" overwrite="true">
@@ -63,7 +64,7 @@
 
     <target name="uninstall">
         <delete>
-            <fileset dir="${tomcat.lib.home}" includes="webservices-rt.jar, webservices-tools.jar, webservices-extra.jar"/>
+            <fileset dir="${tomcat.lib.home}" includes="webservices-rt.jar, webservices-tools.jar, webservices-extra.jar, webservices-extra-api.jar"/>
         </delete>
         <delete>
             <fileset dir="${tomcat.endorsed}" includes="webservices-api.jar"/>
