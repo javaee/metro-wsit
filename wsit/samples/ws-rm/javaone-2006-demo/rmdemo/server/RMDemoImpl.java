@@ -21,20 +21,22 @@
  */
 package rmdemo.server;
 
+import com.sun.xml.ws.runtime.util.SessionManager;
+import com.sun.xml.ws.rm.jaxws.runtime.Session;
+
 import javax.annotation.Resource;
 import javax.jws.WebMethod;
 import javax.jws.WebService;
 import javax.xml.ws.WebServiceContext;
 import java.util.HashMap;
-
+import java.util.Hashtable;
 
 
 @WebService(endpointInterface="rmdemo.server.RMDemo")
 public class RMDemoImpl {
 
     /* Store a String for each session */
-    private final HashMap<String, String> sessionTable =
-            new HashMap<String, String>();
+    private final SessionManager sessionManager = SessionManager.getSessionManager();
 
     /* JAX-WS initializes context for each request */
     @Resource
@@ -51,14 +53,19 @@ public class RMDemoImpl {
 
     private String getSessionData() {
         String id = getSessionId();
-        String ret = sessionTable.get(id);
+        Hashtable userData = (Hashtable)sessionManager.getSession(id).getUserData();
+       String ret = (String)userData.get(id);
         return ret != null ? ret : "";
 
     }
 
     /* Store String associated with SessionID for current request */
     private void setSessionData(String data) {
-        sessionTable.put(getSessionId(), data);
+        String id = getSessionId();
+        com.sun.xml.ws.runtime.util.Session session = sessionManager.getSession(id);
+        Hashtable table = (Hashtable)session.getUserData()   ;
+        table.put(id,data);
+     
     }
 
     /* RMDemo Methods */

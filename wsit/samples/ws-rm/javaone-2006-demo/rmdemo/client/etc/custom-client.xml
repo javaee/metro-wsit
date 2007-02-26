@@ -25,7 +25,7 @@
 
 
 <bindings
-    wsdlLocation="http://localhost:8080/rmdemo?wsdl"
+    wsdlLocation="http://localhost:8080/rmdemo/?wsdl"
     xmlns="http://java.sun.com/xml/ns/jaxws"
     xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
     <bindings node="wsdl:definitions">
