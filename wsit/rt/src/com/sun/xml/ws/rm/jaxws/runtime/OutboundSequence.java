@@ -42,10 +42,11 @@ import java.util.logging.Logger;
 import javax.xml.bind.Marshaller;
 import java.net.URI;
 
+
 /**
  *
  */
-public abstract class OutboundSequence extends Sequence {
+public abstract class OutboundSequence extends Sequence  {
     
     private static final Logger logger = 
             Logger.getLogger(OutboundSequence.class.getName());

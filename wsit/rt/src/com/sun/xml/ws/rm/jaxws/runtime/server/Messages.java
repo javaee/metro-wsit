@@ -26,7 +26,8 @@ enum Messages {
     SECURITY_TOKEN_MISMATCH, //0 args
     NOT_RELIABLE_SEQ_OR_PROTOCOL_MESSAGE ,//0args
     NON_RM_REQUEST_OR_MISSING_WSA_ACTION_HEADER, //0 args
-    INVALID_OR_MISSING_TO_ON_CS_MESSAGE //0 args
+    INVALID_OR_MISSING_TO_ON_CS_MESSAGE, //0 args
+    COULD_NOT_RESET_MESSAGE //2 args
     ;
 
     private static final ResourceBundle rb = ResourceBundle.getBundle(Messages.class.getName());

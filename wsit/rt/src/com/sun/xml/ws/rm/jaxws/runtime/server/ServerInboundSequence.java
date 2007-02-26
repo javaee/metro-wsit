@@ -31,27 +31,39 @@
 package com.sun.xml.ws.rm.jaxws.runtime.server;
 
 
+import com.sun.mail.imap.protocol.MessageSet;
 import com.sun.xml.ws.rm.BufferFullException;
 import com.sun.xml.ws.rm.InvalidMessageNumberException;
 import com.sun.xml.ws.rm.Message;
 import com.sun.xml.ws.rm.RMException;
 import com.sun.xml.ws.rm.jaxws.runtime.InboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
+import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
 
 import java.net.URI;
 import java.util.UUID;
 import com.sun.xml.ws.runtime.util.Session;
+import com.sun.xml.ws.api.rm.server.ServerSequence;
+import com.sun.xml.ws.api.rm.SequenceSettings;
+import java.util.logging.Logger;
+import java.util.logging.Level;
+import com.sun.xml.ws.rm.jaxws.util.LoggingHelper;
 
 /**
  * An <code>ServerInboundSequence</code> represents a sequence of incoming messages.  For an 
  * <code>RMDestination</code>, an <code>InboundSequnce</code> consists of all
  * the requests to a service from a particular proxy.
  */
-public class ServerInboundSequence extends InboundSequence {
+public class ServerInboundSequence extends InboundSequence
+                                   implements ServerSequence {
 
     /**
      * Session associated with this sequence.
      */
+    
+    private static final Logger logger = Logger.getLogger(
+                                    LoggingHelper.getLoggerName(ServerInboundSequence.class));
+    
     private Session session;
     
     public ServerInboundSequence(URI acksTo,
@@ -164,6 +176,48 @@ public class ServerInboundSequence extends InboundSequence {
         } catch (InvalidMessageNumberException e) {}
     }
     
+    /**
+     * Used to re-populate a sequence with persisted messages
+     * after a restart.  Do not use for other purposes.
+     *
+     * @param index The index to add message at.
+     * @param message The JAX-WS message to add
+     * @param complete Indicates whether to mark the message
+     *          as complete.
+     */
+    public void resetMessage(int index, 
+            com.sun.xml.ws.api.message.Message message, 
+            boolean complete) {
+        
+        try {
+        com.sun.xml.ws.rm.Message mess = new com.sun.xml.ws.rm.Message(message);
+        set(index, mess);
+        
+        if (complete) {
+            mess.complete();
+        }
+        
+        } catch (RMException e) {
+            String m = Messages.COULD_NOT_RESET_MESSAGE.format(index, getId());
+            logger.log(Level.SEVERE, m, e);
+        }
+        
+    }
+    
+    /**
+     * Implementation of ServerSequence.getSequenceSettings..
+     */
+    public SequenceSettings getSequenceSettings() {
+        SequenceSettings settings = getSequenceConfig();
+        settings.sequenceId = getId();
+        
+        OutboundSequence oseq = getOutboundSequence();
+        
+        settings.companionSequenceId = (oseq != null) ?
+                                       oseq.getId() :
+                                       null;
+        return settings;
+    }
     
     /**
      * Return value determines whether the interval since last activity

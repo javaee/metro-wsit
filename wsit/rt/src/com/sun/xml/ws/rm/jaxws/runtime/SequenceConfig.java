@@ -35,6 +35,7 @@ import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.rm.*;
+import com.sun.xml.ws.api.rm.SequenceSettings;
 
 import javax.xml.ws.WebServiceException;
 
@@ -52,68 +53,9 @@ import java.util.Iterator;
  * to which the policy assertion is attached.  (Placeholder for now pending WS-Policy
  * implementation)
  */
-public class SequenceConfig {
+public class SequenceConfig extends SequenceSettings {
 
-    /**
-     * AcksTo URI for the sequence
-     */
-    public String acksTo;
-
-    /**
-     * For OutboundSequences, determines whether destination guarantees ordered delivery.
-     */
-    public boolean ordered;
-
-    /**
-     * Number of milliseconds after which destination may terminate sequence.
-     */
-    public long inactivityTimeout;
-
-
-    /**
-     * Indicates whether flow control is enabled.
-     */
-    public boolean flowControl;
-    
-    /**
-     * Number of messages that destination will buffer pending delivery.
-     */
-    public int bufferSize;
-
-    /**
-     * The SOAPVersion which will be passed on to the protocol elements
-     * populated from the Pipe
-     */
-    public SOAPVersion soapVersion;
-    
-    
-    /**
-     * Length of time between resends
-     */
-    public long resendInterval;
-    
-    /**
-     * Length of time between ackRequests.
-     */
-    public long ackRequestInterval;
-    
-    
-    /**
-     * Lenth of time that RMClientPipe.preDestroy will block while
-     * waiting for unacknowledged messages to arrive.
-     */
-    public long closeTimeout;
-
-
-    /**
-     * Do we suppress duplicates at the endpoint?
-     */
-    public boolean allowDuplicates;
-    
-    public RMConstants constants ;
-
-
-
+   
     /**
      * Constructor initializes with default values.
      */
@@ -156,6 +98,25 @@ public class SequenceConfig {
                 throw new WebServiceException(e);
             }
         } 
+    }
+    
+    /**
+     * Copies the members of a specified SequenceSettings
+     */
+    public SequenceConfig(SequenceSettings toCopy) {
+        
+        this.ackRequestInterval = toCopy.ackRequestInterval;
+        this.acksTo = toCopy.acksTo;
+        this.allowDuplicates = toCopy.allowDuplicates;
+        this.bufferSize = toCopy.bufferSize;
+        this.closeTimeout = toCopy.closeTimeout;
+        this.constants = toCopy.constants;
+        this.flowControl = toCopy.flowControl;
+        this.inactivityTimeout = toCopy.inactivityTimeout;
+        this.ordered = toCopy.ordered;
+        this.resendInterval = toCopy.resendInterval;
+        this.soapVersion = toCopy.soapVersion;
+  
     }
     
     /**
@@ -432,6 +393,14 @@ public class SequenceConfig {
      */
     public RMConstants getRMConstants() {
         return constants;
+    }
+
+    public RMConstants getConstants() {
+        return constants;
+    }
+
+    public boolean isAllowDuplicates() {
+        return allowDuplicates;
     }
         
 }

@@ -47,14 +47,18 @@ import java.util.UUID;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 import com.sun.xml.ws.rm.jaxws.util.LoggingHelper;
-
+import com.sun.xml.ws.api.rm.client.ClientSequence;
+import com.sun.xml.ws.api.rm.AcknowledgementListener;
+import com.sun.xml.ws.api.rm.SequenceSettings;
+import com.sun.xml.ws.rm.jaxws.runtime.InboundSequence;
 /**
  * ClientOutboundSequence represents the set of all messages from a single BindingProvider instance.
  * It includes methods that connect and disconnect to a remote RMDestination using
  * a client for a WebService that uses CreateSequence and TerminateSequence as its request messages.
  */
 
-public class ClientOutboundSequence extends OutboundSequence {
+public class ClientOutboundSequence extends OutboundSequence
+                                    implements ClientSequence {
 
     private static final Logger logger =
         Logger.getLogger(LoggingHelper.getLoggerName(ClientOutboundSequence.class));
@@ -126,8 +130,14 @@ public class ClientOutboundSequence extends OutboundSequence {
     private Service service;
 
 
+    /**
+     * This field is used only as a hack to test Server-side
+     * timeout functionality.  It is not intended to be used
+     * for any other purpose.
+     */
     private static boolean sendHeartbeats = true;
 
+    
     public ClientOutboundSequence(SequenceConfig config) {
         this.config = config;
 
@@ -187,8 +197,30 @@ public class ClientOutboundSequence extends OutboundSequence {
      *
      * @param listener The <code>AcknowledgementListener</code>
      */
-    public void setAckListener(AcknowledgementListener listener) {
+  
+    public void setAcknowledgementListener(AcknowledgementListener listener) {
         this.ackListener = listener;
+    }
+    
+   
+    /**
+     * Implementation of the getSequenceSettings method in
+     * com.sun.xml.ws.rm.api.client.ClientSequence.  Need
+     * to populate the sequence ids in the returned SequenceSettings
+     * object, since in general, they will not be set in the underlying
+     * SequenceConfig object.
+     */
+    public SequenceSettings getSequenceSettings() {
+        
+        SequenceSettings settings = getSequenceConfig();
+        settings.sequenceId = getId();
+        
+        InboundSequence iseq = getInboundSequence();
+        
+        settings.companionSequenceId = (iseq != null) ?
+                                       iseq.getId() :
+                                       null;
+        return settings;
     }
     
     /**
@@ -196,7 +228,7 @@ public class ClientOutboundSequence extends OutboundSequence {
      *
      * @return The AcknowledgementListener.
      */
-    public AcknowledgementListener getAckListener() {
+    public AcknowledgementListener getAcknowledgementListener() {
         return ackListener;
     }
 

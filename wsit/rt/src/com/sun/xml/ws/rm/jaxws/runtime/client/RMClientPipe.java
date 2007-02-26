@@ -660,7 +660,14 @@ public class RMClientPipe
                 t.start();
                 //client is not expecting a response here.
                 Packet ret = new Packet(/*com.sun.xml.ws.api.message.Messages.createEmpty(binding.getSOAPVersion())*/);
-                ret.invocationProperties.putAll(packet.invocationProperties);
+               	//The invocationProperties.putAll throws a 
+		//ConcurrentModificationException one out of a billion times.
+		//The copying of the invocation properties is probably 
+		//unnecessary, but this fix is more conservative.
+		try { 
+			ret.invocationProperties.putAll(packet.invocationProperties);
+		} catch (Exception e) {
+		}
                 return ret;
                 
             }
