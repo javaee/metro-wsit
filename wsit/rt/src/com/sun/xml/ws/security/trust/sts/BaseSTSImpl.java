@@ -38,6 +38,7 @@ import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponse;
 import com.sun.xml.ws.security.trust.impl.DefaultSTSConfiguration;
 import com.sun.xml.ws.security.trust.impl.DefaultTrustSPMetadata;
 import com.sun.xml.ws.security.trust.util.WSTrustUtil;
+import com.sun.xml.wss.SecurityEnvironment;
 import com.sun.xml.wss.SubjectAccessor;
 import com.sun.xml.wss.XWSSecurityException;
 
@@ -196,20 +197,22 @@ public abstract class BaseSTSImpl implements BaseSTS {
 
     STSConfiguration getConfiguration() {
         final MessageContext msgCtx = getMessageContext();
-        final CallbackHandler handler = (CallbackHandler)msgCtx.get(WSTrustConstants.STS_CALL_BACK_HANDLER);
-       
+        //final CallbackHandler handler = (CallbackHandler)msgCtx.get(WSTrustConstants.STS_CALL_BACK_HANDLER);
+        final SecurityEnvironment secEnv = (SecurityEnvironment)msgCtx.get(WSTrustConstants.SECURITY_ENVIRONMENT);
+        
         //Get Runtime STSConfiguration
         STSConfiguration rtConfig = WSTrustFactory.getRuntimeSTSConfiguration();
         if (rtConfig != null){
             if (rtConfig.getCallbackHandler() == null){
-                rtConfig.setCallbackHandler(handler);
+                rtConfig.getOtherOptions().put(WSTrustConstants.SECURITY_ENVIRONMENT, secEnv);
             }
             return rtConfig;
         }
         
         // Get default STSConfiguration
         DefaultSTSConfiguration config = new DefaultSTSConfiguration();
-        config.setCallbackHandler(handler);
+        config.getOtherOptions().put(WSTrustConstants.SECURITY_ENVIRONMENT, secEnv);
+        //config.setCallbackHandler(handler);
         final Iterator iterator = (Iterator)msgCtx.get(
                 Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS);
         if (iterator == null){
@@ -270,7 +273,7 @@ public abstract class BaseSTSImpl implements BaseSTS {
         return config;
     }
 
-    private Source issue(final STSConfiguration config,final String appliesTo, 
+    private Source issue(final STSConfiguration config, final String appliesTo, 
             final WSTrustElementFactory eleFac, final RequestSecurityToken rst) 
             throws WSTrustException {
         

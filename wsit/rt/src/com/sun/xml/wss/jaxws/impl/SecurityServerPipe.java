@@ -211,7 +211,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
                 }
                 
                 //set the callbackhandler
-                packet.invocationProperties.put(WSTrustConstants.STS_CALL_BACK_HANDLER, handler);
+                packet.invocationProperties.put(WSTrustConstants.SECURITY_ENVIRONMENT, secEnv);
                 // packet.getHandlerScopePropertyNames(false).add(WSTrustConstants.STS_CALL_BACK_HANDLER);
             }
             

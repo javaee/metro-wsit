@@ -31,6 +31,8 @@ package com.sun.xml.ws.api.security.trust.config;
 
 import javax.security.auth.callback.CallbackHandler;
 
+import java.util.Map;
+
 /**
  *
  * @author Jiandong Guo
@@ -48,6 +50,8 @@ public interface STSConfiguration {
     long getIssuedTokenTimeout();
     
     void setCallbackHandler(CallbackHandler callbackHandler);
+    
+    Map<String, Object> getOtherOptions();
     
     CallbackHandler getCallbackHandler();
     

@@ -23,6 +23,7 @@
 <path id="jaxws.classpath">
     <pathelement location="${glassfish.home}/lib/webservices-rt.jar"/>
     <pathelement location="${glassfish.home}/lib/webservices-tools.jar"/>
+    <pathelement location="${glassfish.home}/lib/webservices-api.jar"/>
     <pathelement location="${basedir}/../../etc"/>
     <pathelement location="etc/client-config"/>
 </path>

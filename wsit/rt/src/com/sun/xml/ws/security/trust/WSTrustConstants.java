@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustConstants.java,v 1.6 2007-01-16 11:46:54 raharsha Exp $
+ * $Id: WSTrustConstants.java,v 1.7 2007-02-26 18:59:59 jdg6688 Exp $
  */
 
 /*
@@ -33,6 +33,8 @@ package com.sun.xml.ws.security.trust;
 public class WSTrustConstants {
     
     public static final String STS_CALL_BACK_HANDLER = "stsCallbackHandler";
+    
+    public static final String SECURITY_ENVIRONMENT = "SecurityEnvironment";
     
     public static final String SAML10_ASSERTION_TOKEN_TYPE = "urn:oasis:names:tc:SAML:1.0:assertion";
     

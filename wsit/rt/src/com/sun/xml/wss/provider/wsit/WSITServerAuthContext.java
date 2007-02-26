@@ -302,8 +302,8 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
                             com.sun.xml.ws.security.impl.policy.Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS,trustConfig.iterator());
                 }
                 
-                //set the callbackhandler
-                packet.invocationProperties.put(WSTrustConstants.STS_CALL_BACK_HANDLER, handler);
+                //set the SecurityEnvironment
+                packet.invocationProperties.put(WSTrustConstants.SECURITY_ENVIRONMENT, secEnv);
             }
             
             if (isSCIssueMessage){

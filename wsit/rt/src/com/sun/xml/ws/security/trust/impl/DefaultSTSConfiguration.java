@@ -51,6 +51,8 @@ public class DefaultSTSConfiguration implements STSConfiguration{
     
     private CallbackHandler callbackHandler;
     
+    private Map<String, Object> otherOptions = new HashMap<String, Object>();
+    
     
     public void addTrustSPMetadata(final TrustSPMetadata data, final String spEndpoint){
         spMap.put(spEndpoint, data);
@@ -106,5 +108,9 @@ public class DefaultSTSConfiguration implements STSConfiguration{
     
     public CallbackHandler getCallbackHandler(){
         return this.callbackHandler;
+    }
+    
+    public Map<String, Object> getOtherOptions(){
+        return this.otherOptions;
     }
 }

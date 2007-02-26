@@ -35,6 +35,7 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -65,6 +66,7 @@ import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.security.trust.util.WSTrustUtil;
 import com.sun.xml.ws.security.trust.elements.BinarySecret;
 
+import com.sun.xml.wss.SecurityEnvironment;
 import com.sun.xml.wss.core.reference.X509SubjectKeyIdentifier;
 import com.sun.xml.wss.impl.callback.EncryptionKeyCallback;
 import com.sun.xml.wss.impl.callback.SignatureKeyCallback;
@@ -73,6 +75,9 @@ import com.sun.xml.wss.saml.Advice;
 import com.sun.xml.wss.saml.Assertion;
 import com.sun.xml.wss.saml.Attribute;
 import com.sun.xml.wss.saml.AttributeStatement;
+import com.sun.xml.wss.saml.AuthenticationStatement;
+import com.sun.xml.wss.saml.AuthnContext;
+import com.sun.xml.wss.saml.AuthnStatement;
 import com.sun.xml.wss.saml.Conditions;
 import com.sun.xml.wss.saml.NameIdentifier;
 import com.sun.xml.wss.saml.SAMLAssertionFactory;
@@ -109,15 +114,13 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
     public Token createSAMLAssertion(final String appliesTo, final String tokenType, final String keyType, final String assertionId, final String issuer, final  Map<QName, List<String>> claimedAttrs, final IssuedTokenContext context) throws WSTrustException {
         Token token = null;
         
-        final CallbackHandler callbackHandler = stsConfig.getCallbackHandler();
-        
         try{
             // Get the service certificate
             TrustSPMetadata spMd = stsConfig.getTrustSPMetadata(appliesTo);
             if (spMd == null){
                 spMd = stsConfig.getTrustSPMetadata("default");
             }
-            final X509Certificate serCert = getServiceCertificate(callbackHandler, spMd);
+            final X509Certificate serCert = getServiceCertificate(spMd);
             
             // Create the KeyInfo for SubjectConfirmation
             final KeyInfo keyInfo = createKeyInfo(keyType, serCert, context);
@@ -134,16 +137,13 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
                 throw new WSTrustException(LogStringsMessages.WST_0031_UNSUPPORTED_TOKEN_TYPE(tokenType));
             }
             
-            // Get the STS's public and private key
-            final SignatureKeyCallback.DefaultPrivKeyCertRequest request =
-                    new SignatureKeyCallback.DefaultPrivKeyCertRequest();
-            final Callback skc = new SignatureKeyCallback(request);
-            final Callback[] callbacks = {skc};
-            callbackHandler.handle(callbacks);
-            final PrivateKey stsPrivKey = request.getPrivateKey();
+            // Get the STS's certificate and private key
+            Object[] stsCertsAndPrikey = getSTSCertAndPrivateKey();
+            final X509Certificate stsCert = (X509Certificate)stsCertsAndPrikey[0];
+            final PrivateKey stsPrivKey = (PrivateKey)stsCertsAndPrikey[1];
             
             // Sign the assertion with STS's private key
-            final Element signedAssertion = assertion.sign(request.getX509Certificate(), stsPrivKey);
+            final Element signedAssertion = assertion.sign(stsCert, stsPrivKey);
             
             //javax.xml.bind.Unmarshaller u = eleFac.getContext().createUnmarshaller();
             //JAXBElement<AssertionType> aType = u.unmarshal(signedAssertion, AssertionType.class);
@@ -198,37 +198,6 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
         return token;
     }
     
- /*  protected boolean isAuthorized(Subject subject, String appliesTo, String tokenType, String keyType){
-       return true;
-   }
-  
-   protected Map getClaimedAttributes(Subject subject, String appliesTo, String tokenType){
-       Set<Principal> principals = subject.getPrincipals();
-       Map<String, QName> attrs = new HashMap<String, QName>();
-       if (principals != null){
-           Iterator iterator = principals.iterator();
-           while (iterator.hasNext()){
-                String name = principals.iterator().next().getName();
-                if (name != null){
-                    //attrs.add(name);
-                    attrs.put(PRINCIPAL, new QName("http://sun.com", name));
-                    break;
-                }
-           }
-       }
-  
-       if (attrs.get(PRINCIPAL) == null){
-           attrs.put(PRINCIPAL, new QName("http://sun.com", "principal"));
-       }
-  
-       // Set up a dumy attribute value
-       String key = "name";
-       QName value = new QName("http://sun.com", "value");
-       attrs.put(key, value);
-  
-       return attrs;
-   } */
-    
     private EncryptedKey encryptKey(final Document doc, final byte[] encryptedKey, final X509Certificate cert) throws XMLEncryptionException, XWSSecurityException{
         final PublicKey pubKey = cert.getPublicKey();
         final XMLCipher cipher = XMLCipher.getInstance(XMLCipher.RSA_OAEP);
@@ -247,26 +216,88 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
         return encKey;
     }
     
-    private X509Certificate getServiceCertificate(final CallbackHandler callbackHandler, TrustSPMetadata spMd)throws WSTrustException{
-        // Get the service certificate
-        final EncryptionKeyCallback.AliasX509CertificateRequest req = new EncryptionKeyCallback.AliasX509CertificateRequest(spMd.getCertAlias());
-        final EncryptionKeyCallback callback = new EncryptionKeyCallback(req);
-        final Callback[] callbacks = {callback};
-        try{
-            callbackHandler.handle(callbacks);
-        }catch(IOException ex){
-            log.log(Level.SEVERE,
+    private X509Certificate getServiceCertificate(TrustSPMetadata spMd)throws WSTrustException{
+        String certAlias = spMd.getCertAlias();
+        X509Certificate cert = null;
+        CallbackHandler callbackHandler = stsConfig.getCallbackHandler();
+        if (callbackHandler != null){
+            // Get the service certificate
+            final EncryptionKeyCallback.AliasX509CertificateRequest req = new EncryptionKeyCallback.AliasX509CertificateRequest(spMd.getCertAlias());
+            final EncryptionKeyCallback callback = new EncryptionKeyCallback(req);
+            final Callback[] callbacks = {callback};
+            try{
+                callbackHandler.handle(callbacks);
+            }catch(IOException ex){
+                log.log(Level.SEVERE,
                     LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(), ex);
-            throw new WSTrustException(
+                throw new WSTrustException(
                     LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(), ex);            
-        }catch(UnsupportedCallbackException ex){
-            log.log(Level.SEVERE,
+            }catch(UnsupportedCallbackException ex){
+                log.log(Level.SEVERE,
                     LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(), ex);
-            throw new WSTrustException(
+                throw new WSTrustException(
                     LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(), ex);
+            }
+        
+            cert = req.getX509Certificate();
+        }else{
+            SecurityEnvironment secEnv = (SecurityEnvironment)stsConfig.getOtherOptions().get(WSTrustConstants.SECURITY_ENVIRONMENT);
+            try{
+                cert = secEnv.getCertificate(new HashMap(), certAlias, false);
+            }catch( XWSSecurityException ex){
+                log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(), ex);
+                throw new WSTrustException(
+                    LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(), ex);
+            }
         }
         
-        return req.getX509Certificate();
+        return cert;
+    }
+    
+    private Object[] getSTSCertAndPrivateKey() throws WSTrustException{
+        
+        X509Certificate stsCert = null;
+        PrivateKey stsPrivKey = null;
+        CallbackHandler callbackHandler = stsConfig.getCallbackHandler();
+        if (callbackHandler != null){
+            final SignatureKeyCallback.DefaultPrivKeyCertRequest request =
+                    new SignatureKeyCallback.DefaultPrivKeyCertRequest();
+            final Callback skc = new SignatureKeyCallback(request);
+            final Callback[] callbacks = {skc};
+            try{
+                callbackHandler.handle(callbacks);
+            }catch(IOException ex){
+                log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(), ex);
+                throw new WSTrustException(
+                    LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(), ex);            
+            }catch(UnsupportedCallbackException ex){
+                log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(), ex);
+                throw new WSTrustException(
+                    LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(), ex);
+            }
+                
+            stsPrivKey = request.getPrivateKey();
+            stsCert = request.getX509Certificate();
+        }else{
+            SecurityEnvironment secEnv = (SecurityEnvironment)stsConfig.getOtherOptions().get(WSTrustConstants.SECURITY_ENVIRONMENT);
+            try{
+                stsCert = secEnv.getDefaultCertificate(new HashMap());
+                stsPrivKey = secEnv.getPrivateKey(new HashMap(), stsCert);
+            }catch( XWSSecurityException ex){
+                log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(), ex);
+                throw new WSTrustException(
+                    LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(), ex);
+            }
+        }
+        
+        Object[] results = new Object[2];
+        results[0] = stsCert;
+        results[1] = stsPrivKey;
+        return results;
     }
     
     private KeyInfo createKeyInfo(final String keyType, final X509Certificate serCert, final IssuedTokenContext ctx)throws WSTrustException{
@@ -369,9 +400,15 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
                     }
                 }
             }
-            final AttributeStatement statement = samlFac.createAttributeStatement(subj, attrs);
-            final List<AttributeStatement> statements = new ArrayList<AttributeStatement>();
-            statements.add(statement);
+            
+            final List<Object> statements = new ArrayList<Object>();
+            if (attrs.isEmpty()){
+                final AuthenticationStatement statement = samlFac.createAuthenticationStatement(null, issuerInst, subj, null, null);
+                statements.add(statement); 
+            }else{
+                final AttributeStatement statement = samlFac.createAttributeStatement(subj, attrs);
+                statements.add(statement);
+            }
             assertion =
                     samlFac.createAssertion(assertionId, issuer, issuerInst, conditions, advice, statements);
         }catch(SAMLException ex){
@@ -428,9 +465,18 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
                     }
                 }
             }
-            final AttributeStatement statement = samlFac.createAttributeStatement(attrs);
-            final List<AttributeStatement> statements = new ArrayList<AttributeStatement>();
-            statements.add(statement);
+        
+            final List<Object> statements = new ArrayList<Object>();
+            if (attrs.isEmpty()){
+                // To Do: create AuthnContext with proper content. Currently what 
+                // we have is a place holder.
+                AuthnContext ctx = samlFac.createAuthnContext();
+                final AuthnStatement statement = samlFac.createAuthnStatement(issueInst, null, ctx);
+                statements.add(statement); 
+            }else{
+                final AttributeStatement statement = samlFac.createAttributeStatement(attrs);
+                statements.add(statement);
+            }
             
             final NameID issuerID = samlFac.createNameID(issuer, null, null);
             

@@ -115,6 +115,10 @@ public class TrustPluginImpl implements TrustPlugin {
     public IssuedTokenContext process(final PolicyAssertion token, final PolicyAssertion localToken, final String appliesTo){
         final IssuedToken issuedToken = (IssuedToken)token;
         final RequestSecurityTokenTemplate rstTemplate = issuedToken.getRequestSecurityTokenTemplate();
+       
+        // get Claims in the the PolicyAssertion; 
+        // Note: should be obtained from RequestSecurityTokenTemplate
+        
         URI stsURI =  getSTSURI(issuedToken);
         URI wsdlLocation = null;
         QName serviceName = null;
@@ -297,10 +301,10 @@ public class TrustPluginImpl implements TrustPlugin {
         try{
             // Work around for issue 338
             String url = wsdlLocation.toString();
-            if (url.endsWith("/mex")){
-                int index = url.lastIndexOf("/mex");
-                url = url.substring(0, index);
-            }
+           // if (url.endsWith("/mex")){
+             //   int index = url.lastIndexOf("/mex");
+              //  url = url.substring(0, index);
+            //}
             service = Service.create(new URL(url), serviceName);
         }catch (MalformedURLException ex){
             log.log(Level.SEVERE,
