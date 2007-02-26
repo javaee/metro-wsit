@@ -719,7 +719,7 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
                             addNewPolicyNeeded(currentUri, prefetchedRecord.policyModel);
                         } else { // policy has not been yet passed by
                             if (urlsRead.contains(getBaseUrl(currentUri))) { // big problem --> unresolvable policy
-                                throw LOGGER.logSevereException(new PolicyException(LocalizationMessages.WSP_1042_CAN_NOT_RESOLVE_POLICY(currentUri)));
+                                throw LOGGER.logSevereException(new PolicyException(LocalizationMessages.WSP_1042_CAN_NOT_FIND_POLICY(currentUri)));
                             } else {
                                 if (readExternalFile(getBaseUrl(currentUri))) {
                                     getUnresolvedUris(false).add(currentUri);
