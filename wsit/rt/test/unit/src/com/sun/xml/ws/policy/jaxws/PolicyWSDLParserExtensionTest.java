@@ -558,7 +558,7 @@ public class PolicyWSDLParserExtensionTest extends TestCase{
     public void testCircularReference() throws Exception {
         try {
             PolicyMap policyMap = getPolicyMap("parser/testPolicyCircularReferences.wsdl", false);
-            fail("WSDL validation should fail");
+            fail("Parsing WSDL containing circular policy references should fail");
         } catch (WebServiceException e) {
             // ok - exception thrown as expected
         }
