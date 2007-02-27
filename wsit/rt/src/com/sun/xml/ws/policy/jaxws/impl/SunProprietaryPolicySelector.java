@@ -28,6 +28,8 @@ import com.sun.xml.ws.policy.spi.PolicyAssertionValidator.Fitness;
 import java.util.ArrayList;
 import javax.xml.namespace.QName;
 
+import com.sun.xml.ws.security.impl.policy.Constants;
+
 /**
  * Implements SPI for selecting wsit related SUN's proprietary assertions.
  *
@@ -40,73 +42,73 @@ public class SunProprietaryPolicySelector implements PolicyAssertionValidator{
     static {
         
         supportedAssertions.add(new QName(
-                "http://schemas.sun.com/2006/03/wss/server",
+                Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS,
                 "CertStore"));
         supportedAssertions.add(new QName(
-                "http://schemas.sun.com/2006/03/wss/server",
+                Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS,
                 "CallbackHandlerConfiguration"));
         supportedAssertions.add(new QName(
-                "http://schemas.sun.com/2006/03/wss/server",
+                Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS,
                 "CallbackHandler"));
         supportedAssertions.add(new QName(
-                "http://schemas.sun.com/2006/03/wss/server",
+                Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS,
                 "ValidatorConfiguration"));
         supportedAssertions.add(new QName(
-                "http://schemas.sun.com/2006/03/wss/server",
+                Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS,
                 "Validator"));
         supportedAssertions.add(new QName(
-                "http://schemas.sun.com/2006/03/wss/server",
+                Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS,
                 "Timestamp"));
         supportedAssertions.add(new QName(
-                "http://schemas.sun.com/2006/03/wss/client",
+                Constants.SUN_WSS_SECURITY_CLIENT_POLICY_NS,
                 "CertStore"));
         supportedAssertions.add(new QName(
-                "http://schemas.sun.com/2006/03/wss/client",
+                Constants.SUN_WSS_SECURITY_CLIENT_POLICY_NS,
                 "CallbackHandlerConfiguration"));
         supportedAssertions.add(new QName(
-                "http://schemas.sun.com/2006/03/wss/client",
+                Constants.SUN_WSS_SECURITY_CLIENT_POLICY_NS,
                 "CallbackHandler"));
         supportedAssertions.add(new QName(
-                "http://schemas.sun.com/2006/03/wss/client",
+                Constants.SUN_WSS_SECURITY_CLIENT_POLICY_NS,
                 "ValidatorConfiguration"));
         supportedAssertions.add(new QName(
-                "http://schemas.sun.com/2006/03/wss/client",
+                Constants.SUN_WSS_SECURITY_CLIENT_POLICY_NS,
                 "Validator"));
         supportedAssertions.add(new QName(
-                "http://schemas.sun.com/2006/03/wss/client",
+                Constants.SUN_WSS_SECURITY_CLIENT_POLICY_NS,
                 "Timestamp"));
         supportedAssertions.add(new QName(
-                "http://schemas.sun.com/ws/2006/05/sc/server",
+                Constants.SUN_SECURE_SERVER_CONVERSATION_POLICY_NS,
                 "SCConfiguration"));
         supportedAssertions.add(new QName(
-                "http://schemas.sun.com/ws/2006/05/sc/server",
+                Constants.SUN_SECURE_SERVER_CONVERSATION_POLICY_NS,
                 "Lifetime"));
         supportedAssertions.add(new QName(
-                "http://schemas.sun.com/ws/2006/05/sc/client",
+                Constants.SUN_SECURE_CLIENT_CONVERSATION_POLICY_NS,
                 "LifeTime"));
         supportedAssertions.add(new QName(
-                "http://schemas.sun.com/ws/2006/05/trust/server",
+                Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS,
                 "Contract"));
         supportedAssertions.add(new QName(
-                "http://schemas.sun.com/ws/2006/05/trust/server",
+                Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS,
                 "ServiceProviders"));
         supportedAssertions.add(new QName(
-                "http://schemas.sun.com/ws/2006/05/trust/server",
+                Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS,
                 "ServiceProvider"));
         supportedAssertions.add(new QName(
-                "http://schemas.sun.com/ws/2006/05/trust/server",
+                Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS,
                 "CertAlias"));
         supportedAssertions.add(new QName(
-                "http://schemas.sun.com/ws/2006/05/trust/server",
+                Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS,
                 "TokenType"));
         supportedAssertions.add(new QName(
-                "http://schemas.sun.com/ws/2006/05/trust/server",
+                Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS,
                 "KeyType"));
         supportedAssertions.add(new QName(
-                "http://schemas.sun.com/ws/2006/05/trust/server",
+                Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS,
                 "Issuer"));
         supportedAssertions.add(new QName(
-                "http://schemas.sun.com/ws/2006/05/trust/server",
+                Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS,
                 "LifeTime"));        
     }
     

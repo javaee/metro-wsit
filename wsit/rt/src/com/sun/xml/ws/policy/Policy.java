@@ -429,7 +429,7 @@ public class Policy implements Iterable<AssertionSet> {
      *
      * @return immutable collection of assertion types contained in the policy (a policy vocabulary).
      */
-    Collection<QName> getVocabulary() {
+    public Collection<QName> getVocabulary() {
         return immutableVocabulary;
     }
     

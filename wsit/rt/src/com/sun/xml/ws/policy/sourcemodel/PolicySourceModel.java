@@ -22,12 +22,16 @@
 
 package com.sun.xml.ws.policy.sourcemodel;
 
+import com.sun.xml.ws.policy.PolicyConstants;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.privateutil.LocalizationMessages;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This class is a root of unmarshaled policy source structure. Each instance of the class contains factory method
@@ -41,6 +45,7 @@ public final class PolicySourceModel implements Cloneable {
     private ModelNode rootNode;
     private String policyId;
     private String policyName;
+    private Map<String, String> nsToPrefixMap;
     
     private List<ModelNode> references = new LinkedList<ModelNode>(); // links to policy reference nodes
     private boolean expanded = false;
@@ -66,17 +71,26 @@ public final class PolicySourceModel implements Cloneable {
     }
     
     /**
-     * TODO: proper java doc
+     * Private constructor that creats new policy source model instance without any
+     * id or name identifier. The namespace-to-prefix map is initialized with mapping 
+     * of policy namespace to the default value set by 
+     * {@link PolicyConstants#POLICY_NAMESPACE_PREFIX POLICY_NAMESPACE_PREFIX constant}
      */
     private PolicySourceModel() {
         this.rootNode = ModelNode.createRootPolicyNode(this);
+        this.nsToPrefixMap = new HashMap<String, String>();
+        this.nsToPrefixMap.put(PolicyConstants.POLICY_NAMESPACE_URI, PolicyConstants.POLICY_NAMESPACE_PREFIX);
     }
     
     /**
-     * TODO: proper java doc
+     * Private constructor that creats new policy source model instance with given
+     * id or name identifier.
+     * 
+     * @param policyId relative policy reference within an XML document. May be {@code null}.
+     * @param policyName absloute IRI of policy expression. May be {@code null}.
      */
     private PolicySourceModel(String policyId, String policyName) {
-        this.rootNode = ModelNode.createRootPolicyNode(this);
+        this();
         this.policyId = policyId;
         this.policyName = policyName;
     }
@@ -107,6 +121,18 @@ public final class PolicySourceModel implements Cloneable {
     public String getPolicyId() {
         return policyId;
     }
+    
+    /**
+     * Provides information about how namespaces used in this {@link PolicySourceModel}
+     * instance should be mapped to thier default prefixes when marshalled.
+     *
+     * @return immutable map that holds information about namespaces used in the 
+     *         model and their mapping to prefixes that should be used when marshalling 
+     *         this model.
+     */
+    public Map<String, String> getNamespaceToPrefixMapping() {
+        return Collections.unmodifiableMap(nsToPrefixMap);
+    }    
     
     /**
      * An {@code Object.equals(Object obj)} method override.
@@ -237,12 +263,31 @@ public final class PolicySourceModel implements Cloneable {
         }
     }
     
+    /**
+     * Adds new policy reference to the policy source model. The method is used by 
+     * the ModelNode instances of type POLICY_REFERENCE that need to register themselves
+     * as policy references in the model.
+     * 
+     * @param node policy reference model node to be registered as a policy reference
+     *        in this model.
+     */
     void addNewPolicyReference(final ModelNode node) {
         if (node.getType() != ModelNode.Type.POLICY_REFERENCE) {
             throw new IllegalArgumentException(LocalizationMessages.WSP_0042_POLICY_REFERENCE_NODE_EXPECTED_INSTEAD_OF(node.getType()));
         }
         
         references.add(node);
+    }
+    
+    /**
+     * Adds new namespace to prefix mapping, so that marshalling code can use these 
+     * predefined prefixes when marshaling policy source model.
+     *
+     * @param namespace namespace to be registered
+     * @param prefix prefix to be used for the namespace
+     */
+    void addNewNamespaceToPrefixMapping(String namespace, String prefix) {
+        nsToPrefixMap.put(namespace, prefix);
     }
 }
 

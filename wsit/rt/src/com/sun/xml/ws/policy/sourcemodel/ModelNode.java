@@ -123,11 +123,11 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
      *
      * @param model policy source model to be used as a parent model of the newly created {@link ModelNode}. Must not be {@code null}
      * @return POLICY model node with the parent model reference initialized to the model supplied as an input parameter
-     * @throws NullPointerException if the {@code model} input parameter is {@code null}
+     * @throws IllegalArgumentException if the {@code model} input parameter is {@code null}
      */
     static ModelNode createRootPolicyNode(final PolicySourceModel model) throws NullPointerException {
         if (model == null) {
-            throw LOGGER.logSevereException(new NullPointerException(LocalizationMessages.WSP_0039_POLICY_SRC_MODEL_INPUT_PARAMETER_MUST_NOT_BE_NULL()));
+            throw LOGGER.logSevereException(new IllegalArgumentException(LocalizationMessages.WSP_0039_POLICY_SRC_MODEL_INPUT_PARAMETER_MUST_NOT_BE_NULL()));
         }
         return new ModelNode(ModelNode.Type.POLICY, model);
     }

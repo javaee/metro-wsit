@@ -33,6 +33,7 @@ import com.sun.xml.ws.policy.PolicyConstants;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.privateutil.LocalizationMessages;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
+import java.util.Map;
 
 public final class XmlPolicyModelMarshaller extends PolicyModelMarshaller {
     private static final PolicyLogger LOGGER = PolicyLogger.getLogger(XmlPolicyModelMarshaller.class);
@@ -80,7 +81,12 @@ public final class XmlPolicyModelMarshaller extends PolicyModelMarshaller {
     private void marshal(final PolicySourceModel model, final XMLStreamWriter writer) throws PolicyException {
         final StaxSerializer serializer = new StaxSerializer(writer);
         final TypedXmlWriter policy = TXW.create(PolicyConstants.POLICY, TypedXmlWriter.class, serializer);
-        policy._namespace(PolicyConstants.POLICY_NAMESPACE_URI, PolicyConstants.POLICY_NAMESPACE_PREFIX);
+        
+        Map<String, String> nsMap = model.getNamespaceToPrefixMapping();
+        for (Map.Entry<String, String> nsMappingEntry : nsMap.entrySet()) {            
+            policy._namespace(nsMappingEntry.getKey(), nsMappingEntry.getValue());
+        }
+        
         marshalPolicyAttributes(model, policy);
         marshal(model.getRootNode(), policy);
         policy.commit();

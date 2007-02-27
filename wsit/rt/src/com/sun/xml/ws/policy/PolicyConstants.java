@@ -40,7 +40,7 @@ public final class PolicyConstants {
     public static final String SUN_POLICY_NAMESPACE_URI = "http://java.sun.com/xml/ns/wsit/policy";
 
     /**
-     * WS-Policy namespace prefix
+     * Default WS-Policy namespace prefix
      */       
     public static final String POLICY_NAMESPACE_PREFIX = "wsp";
 
