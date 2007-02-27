@@ -29,14 +29,17 @@ import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import java.util.Collection;
 
 /**
- * The interface defines contract for custom (domain specific) policy assertion factories. The implementations
- * are discovered using service provider mechanism described in the 
+ * The interface defines contract for custom (domain specific) policy assertion 
+ * factories. The implementations are discovered using service provider mechanism 
+ * described in the 
  * <a href="http://java.sun.com/j2se/1.5.0/docs/guide/jar/jar.html#Service%20Provider">J2SE JAR File Specification</a>.
- *
- * Every implementation of policy assertion creator is expected to <b>fully</b> handle the creation of assertions for the 
- * domain (namespace) it claims to support by returning the namespace string from the {link #getSupportedDomainNamespaceUri()} 
- * method. To handle creation of domain-specific assertions that are not intended to be customized, the default policy assertion 
- * creator (passed as one of the input parameters into the {@link createAssertion(AssertionData, PolicyAssertionCreator)} method) 
+ *<p/>
+ * Every implementation of policy assertion creator is expected to <b>fully</b> 
+ * handle the creation of assertions for the domain (namespace) it claims to 
+ * support by returning the namespace string from the {link #getSupportedDomainNamespaceUri()} 
+ * method. To handle creation of domain-specific assertions that are not intended 
+ * to be customized, the default policy assertion creator (passed as one of the 
+ * input parameters into the {@link #createAssertion(AssertionData, Collection, AssertionSet, PolicyAssertionCreator)} method) 
  * shall be used.
  *
  * @author Marek Potociar
@@ -76,7 +79,7 @@ public interface PolicyAssertionCreator {
      * which are not explicitly supported by this policy assertion creator implementation
      * @return domain specific policy assertion implementation according to assertion data provided.
      * 
-     * @throw AssertionCreationException in case of assertion creation failure
+     * @throws AssertionCreationException in case of assertion creation failure
      */
     PolicyAssertion createAssertion(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative, PolicyAssertionCreator defaultCreator) throws AssertionCreationException;
 }

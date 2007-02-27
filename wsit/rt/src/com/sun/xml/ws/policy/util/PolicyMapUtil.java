@@ -43,7 +43,7 @@ public final class PolicyMapUtil {
      * Optional assertions are not considered (unless they have been normalized into
      * two policy alternatives).
      *
-     * @param A policy map
+     * @param map policy map to be processed
      * @throws PolicyException Thrown if the policy map contains at least one policy
      * with more than one policy alternative
      */

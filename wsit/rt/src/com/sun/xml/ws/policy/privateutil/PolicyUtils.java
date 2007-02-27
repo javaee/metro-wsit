@@ -173,7 +173,7 @@ public final class PolicyUtils {
         /**
          * Compares two boolean values in the following way: {@code false < true}
          *
-         * @returns {@code -1} if {@code b1 < b2}, {@code 0} if {@code b1 == b2}, {@code 1} if {@code b1 > b2}
+         * @return {@code -1} if {@code b1 < b2}, {@code 0} if {@code b1 == b2}, {@code 1} if {@code b1 > b2}
          */
         public static int compareBoolean(final boolean b1, final boolean b2) {
             final int i1 = (b1) ? 1 : 0;
@@ -185,7 +185,7 @@ public final class PolicyUtils {
         /**
          * Compares two String values, that may possibly be null in the following way: {@code null < "string value"}
          *
-         * @returns {@code -1} if {@code s1 < s2}, {@code 0} if {@code s1 == s2}, {@code 1} if {@code s1 > s2}
+         * @return {@code -1} if {@code s1 < s2}, {@code 0} if {@code s1 == s2}, {@code 1} if {@code s1 > s2}
          */
         public static int compareNullableStrings(final String s1, final String s2) {
             return ((s1 == null) ? ((s2 == null) ? 0 : -1) : ((s2 == null) ? 1 : s1.compareTo(s2)));
@@ -196,7 +196,7 @@ public final class PolicyUtils {
         /**
          * TODO javadocs
          *
-         * @param base the combination base that will be present in each combination. May be {@code null} or empty.
+         * @param initialBase the combination base that will be present in each combination. May be {@code null} or empty.
          * @param options options that should be combined. May be {@code null} or empty.
          * @param ignoreEmptyOption flag identifies whether empty options should be ignored or whether the method should halt
          *        processing and return {@code null} when an empty option is encountered
@@ -329,8 +329,10 @@ public final class PolicyUtils {
     
     public static class ConfigFile {
         /**
-         * Generates a config file resource name from provided config file identifier. The generated file name can be
-         * transformed into a URL instance using {@link #loadResource(String, Object)} method.
+         * Generates a config file resource name from provided config file identifier. 
+         * The generated file name can be transformed into a URL instance using 
+         * {@link #loadFromContext(String, Object)} or {@link #loadFromClasspath(String)} 
+         * method.
          *
          * @param configFileIdentifier the string used to generate the config file URL that will be parsed. Each WSIT config
          *        file is in form of <code>wsit-<i>{configFileIdentifier}</i>.xml</code>. Must not be {@code null}.
@@ -365,7 +367,7 @@ public final class PolicyUtils {
          *
          * May return null if the file can not be found.
          *
-         * @param The name of the file resource. May not be null.
+         * @param configFileName the name of the file resource. May not be {@code null}.
          */
         public static URL loadFromClasspath(final String configFileName) {
             final ClassLoader cl = Thread.currentThread().getContextClassLoader();
@@ -396,7 +398,7 @@ public final class PolicyUtils {
          * Java virtual machine, this method may return different results each time
          * it is invoked. <p>
          *
-         * @param service The service's abstract service class. Must not be {@code null}.
+         * @param serviceClass The service's abstract service class. Must not be {@code null}.
          * @param loader  The class loader to be used to load provider-configuration files
          *                and instantiate provider classes, or <tt>null</tt> if the system
          *                class loader (or, failing that the bootstrap class loader) is to
@@ -420,7 +422,7 @@ public final class PolicyUtils {
          *   return PolicyUtils.ServiceProvider.load(service, cl);
          * </pre>
          *
-         * @param service The service's abstract service class. Must not be {@code null}.
+         * @param serviceClass The service's abstract service class. Must not be {@code null}.
          *
          * @throws NullPointerException in case {@code service} input parameter is {@code null}.
          * @throws ServiceConfigurationError If a provider-configuration file violates the specified format

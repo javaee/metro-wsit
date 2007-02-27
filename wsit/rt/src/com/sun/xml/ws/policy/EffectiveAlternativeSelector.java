@@ -34,7 +34,7 @@ import java.util.LinkedList;
  * specific @see com.sun.xml.ws.policy.spi.PolicySelector
  * to find out whether particular policy assertion is actually supported.
  *
- * @author japod
+ * @author Jakub Podlesak (jakub.podlesak at sun.com)
  */
 public class EffectiveAlternativeSelector {
     private enum AlternativeFitness {
@@ -132,12 +132,9 @@ public class EffectiveAlternativeSelector {
     private static final PolicyLogger LOGGER = PolicyLogger.getLogger(EffectiveAlternativeSelector.class);
     
     /**
-     *
-     * Does the selection for policy map bound to given modifier using only the given validators
-     *
+     * Does the selection for policy map bound to given modifier
      *
      * @param modifier @see EffectivePolicyModifier which the map is bound to
-     * @param validators to be used
      */
     public static final void doSelection(final EffectivePolicyModifier modifier) throws PolicyException {
         final PolicyMap map = modifier.getMap();

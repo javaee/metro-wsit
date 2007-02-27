@@ -28,7 +28,7 @@ import java.util.logging.Level;
 import static com.sun.xml.ws.policy.privateutil.PolicyUtils.Commons.getCallerMethodName;
 /**
  * This is a helper class that provides some conveniece methods wrapped around the
- * standard {@link java.util.logging.PolicyLogger} interface.
+ * standard {@link java.util.logging.Logger} interface.
  *
  * @author Marek Potociar
  */
@@ -272,7 +272,7 @@ public final class PolicyLogger {
      * cause is logged as well (if exists). This may be used in cases when
      * {@code exception}'s class provides constructor to initialize the original
      * cause. In such case you do not need to use
-     * {@link #logException(final T, final Throwable)}
+     * {@link #logSevereException(Throwable, Throwable)}
      * method version but you might still want to log the original cause as well.
      *
      * @param exception exception whose message should be logged. Must not be
@@ -295,7 +295,7 @@ public final class PolicyLogger {
     }
     
     /**
-     * Same as {@code #logSevereException(exception, true)}.
+     * Same as {@link #logSevereException(Throwable, boolean) logSevereException(exception, true)}.
      */
     public <T extends Throwable> T logSevereException(final T exception) {
         if (this.logger.isLoggable(Level.SEVERE)) {
@@ -346,7 +346,7 @@ public final class PolicyLogger {
      * cause is logged as well (if exists). This may be used in cases when
      * {@code exception}'s class provides constructor to initialize the original
      * cause. In such case you do not need to use
-     * {@link #logException(final T, final Throwable)}
+     * {@link #logException(Throwable, Throwable, Level) logException(exception, cause, level)}
      * method version but you might still want to log the original cause as well.
      *
      * @param exception exception whose message should be logged. Must not be
@@ -357,7 +357,7 @@ public final class PolicyLogger {
      * @return the same exception instance that was passed in as the {@code exception}
      *         parameter.
      */
-    public <T extends Throwable> T logSevereException(final T exception, final boolean logCause, final Level level) {
+    public <T extends Throwable> T logException(final T exception, final boolean logCause, final Level level) {
         if (this.logger.isLoggable(level)) {
             if (logCause && exception.getCause() != null) {
                 logger.logp(level, componentClassName, getCallerMethodName(), exception.getMessage(), exception.getCause());
@@ -370,9 +370,10 @@ public final class PolicyLogger {
     }
     
     /**
-     * Same as {@code logException(exception, true, level)}.
+     * Same as {@link #logException(Throwable, Throwable, Level) 
+     * logException(exception, true, level)}.
      */
-    public <T extends Throwable> T logSevereException(final T exception, final Level level) {
+    public <T extends Throwable> T logException(final T exception, final Level level) {
         if (this.logger.isLoggable(level)) {
             if (exception.getCause() != null) {
                 logger.logp(level, componentClassName, getCallerMethodName(), exception.getMessage(), exception.getCause());

@@ -27,15 +27,15 @@ import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import javax.xml.namespace.QName;
 
 /**
- * This class provides implementation of PolicyMapKey interface to be used in connection with {@link WSPolicyMap}.
- * Instances of the class are created by a call to one of {@link WSPolicyFactory} <code>createWsdl<emph>XXX</emph>PolicyMapKey(...)</code>
+ * This class provides implementation of PolicyMapKey interface to be used in connection with {@link PolicyMap}.
+ * Instances of the class are created by a call to one of {@link PolicyMap} <code>createWsdl<emph>XXX</emph>PolicyMapKey(...)</code>
  * methods.
  * <p/>
  * The class wraps scope information and adds a package setter method to allow injection of actual equality comparator/tester. This injection
- * is made within a <code>get...</code> call on {@link WSPolicyMap}, before the actual scope map search is performed.
+ * is made within a <code>get...</code> call on {@link PolicyMap}, before the actual scope map search is performed.
  * 
  * 
- * @author Marek Potociar
+ * @author Marek Potociar (marek.potociar at sun.com)
  */
 final public class PolicyMapKey  {
     private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyMapKey.class);

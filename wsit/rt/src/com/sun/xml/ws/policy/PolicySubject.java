@@ -83,7 +83,7 @@ public final class PolicySubject {
      *
      * @param policy new policy instance to be attached to this subject
      *
-     * @throw NullPointerException in case {@code policy} argument is {@code null}.
+     * @throws NullPointerException in case {@code policy} argument is {@code null}.
      */
     public void attach(final Policy policy) {
         if (policy == null) {
@@ -94,7 +94,9 @@ public final class PolicySubject {
     
     /**
      * Returns the effective policy of the subject, i.e. all policies of the subject
-     * merged together
+     * merged together.
+     * 
+     * @return effective policy of the subject
      */
     public Policy getEffectivePolicy(final PolicyMerger merger) throws PolicyException {
         return merger.merge(policies);

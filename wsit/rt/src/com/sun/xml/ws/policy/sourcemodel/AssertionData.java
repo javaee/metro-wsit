@@ -53,48 +53,60 @@ public final class AssertionData implements Cloneable, Serializable {
     private ModelNode.Type type;
     
     /**
-     * Constructs assertion data wrapper instance for an assertion that does not contain any value nor any attributes.
+     * Constructs assertion data wrapper instance for an assertion that does not 
+     * contain any value nor any attributes.
      *
-     * @param name the FQN of the assertion or assertion parameter
+     * @param name the FQN of the assertion
      *
-     * @throws IllegalArgumentException in case the {@code type} parameter is not {@link ModelNode.Type.ASSERTION} or {@link ModelNode.Type.ASSERTION_PARAMETER_NODE}
+     * @throws IllegalArgumentException in case the {@code type} parameter is not 
+     * {@link ModelNode.Type#ASSERTION ASSERTION} or 
+     * {@link ModelNode.Type#ASSERTION_PARAMETER_NODE ASSERTION_PARAMETER_NODE}
      */
     public static AssertionData createAssertionData(final QName name) throws IllegalArgumentException {
         return new AssertionData(name, null, null, ModelNode.Type.ASSERTION);
     }
     
     /**
-     * Constructs assertion data wrapper instance for an assertion or assertion parameter that contains a value or
+     * Constructs assertion data wrapper instance for an assertion parameter that 
+     * does not contain any value nor any attributes.
      *
-     * @param name the FQN of the assertion or assertion parameter
-     * @param value a {@link String} representation of model node value
-     * @param attributes map of model node's &lt;attribute name, attribute value&gt; pairs
+     * @param name the FQN of the assertion parameter
      *
-     * @throws IllegalArgumentException in case the {@code type} parameter is not 'ModelNode.Type.ASSERTION' or 'ModelNode.Type.ASSERTION_PARAMETER_NODE'
+     * @throws IllegalArgumentException in case the {@code type} parameter is not 
+     * {@link ModelNode.Type#ASSERTION ASSERTION} or 
+     * {@link ModelNode.Type#ASSERTION_PARAMETER_NODE ASSERTION_PARAMETER_NODE}
      */
     public static AssertionData createAssertionParameterData(final QName name) throws IllegalArgumentException {
         return new AssertionData(name, null, null, ModelNode.Type.ASSERTION_PARAMETER_NODE);
     }
     
     /**
-     * Constructs assertion data wrapper instance for an assertion that does not contain any value nor any attributes.
+     * Constructs assertion data wrapper instance for an assertion that does 
+     * contain a value or attributes.
      *
-     * @param name the FQN of the assertion or assertion parameter
+     * @param name the FQN of the assertion
+     * @param value a {@link String} representation of model node value
+     * @param attributes map of model node's &lt;attribute name, attribute value&gt; pairs
      *
-     * @throws IllegalArgumentException in case the {@code type} parameter is not {@link ModelNode.Type.ASSERTION} or {@link ModelNode.Type.ASSERTION_PARAMETER_NODE}
+     * @throws IllegalArgumentException in case the {@code type} parameter is not 
+     * {@link ModelNode.Type#ASSERTION ASSERTION} or 
+     * {@link ModelNode.Type#ASSERTION_PARAMETER_NODE ASSERTION_PARAMETER_NODE}
      */
     public static AssertionData createAssertionData(final QName name, final String value, final Map<QName, String> attributes) throws IllegalArgumentException {
         return new AssertionData(name, value, attributes, ModelNode.Type.ASSERTION);
     }
     
     /**
-     * Constructs assertion data wrapper instance for an assertion or assertion parameter that contains a value or
+     * Constructs assertion data wrapper instance for an assertion parameter that 
+     * contains a value or attributes
      *
-     * @param name the FQN of the assertion or assertion parameter
+     * @param name the FQN of the assertion parameter
      * @param value a {@link String} representation of model node value
      * @param attributes map of model node's &lt;attribute name, attribute value&gt; pairs
      *
-     * @throws IllegalArgumentException in case the {@code type} parameter is not 'ModelNode.Type.ASSERTION' or 'ModelNode.Type.ASSERTION_PARAMETER_NODE'
+     * @throws IllegalArgumentException in case the {@code type} parameter is not 
+     * {@link ModelNode.Type#ASSERTION ASSERTION} or 
+     * {@link ModelNode.Type#ASSERTION_PARAMETER_NODE ASSERTION_PARAMETER_NODE}
      */
     public static AssertionData createAssertionParameterData(final QName name, final String value, final Map<QName, String> attributes) throws IllegalArgumentException {
         return new AssertionData(name, value, attributes, ModelNode.Type.ASSERTION_PARAMETER_NODE);
@@ -113,7 +125,9 @@ public final class AssertionData implements Cloneable, Serializable {
      *             a policy assertion instance factory without actualy having to touch the {@link PolicyAssertionCreator}
      *             interface and protected {@link PolicyAssertion} constructors.
      *
-     * @throws IllegalArgumentException in case the {@code type} parameter is not 'ModelNode.Type.ASSERTION' or 'ModelNode.Type.ASSERTION_PARAMETER_NODE'
+     * @throws IllegalArgumentException in case the {@code type} parameter is not 
+     * {@link ModelNode.Type#ASSERTION ASSERTION} or 
+     * {@link ModelNode.Type#ASSERTION_PARAMETER_NODE ASSERTION_PARAMETER_NODE}
      */
     AssertionData(QName name, String value, Map<QName, String> attributes, ModelNode.Type type) throws IllegalArgumentException {
         this.name = name;

@@ -63,7 +63,7 @@ public final class PolicyIntersector {
      * @param policies collection of policies to be intersected. Must not be {@code null} nor empty, otherwise exception is thrown.
      * @return intersected policy as a result of perfromed policy intersection. A {@code null} value is never returned.
      *
-     * @throw IllegalArgumentException in case {@code policies} argument is either {@code null} or empty collection.
+     * @throws IllegalArgumentException in case {@code policies} argument is either {@code null} or empty collection.
      */
     public Policy intersect(final Collection<Policy> policies) {
         if (policies == null || policies.isEmpty()) {

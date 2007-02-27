@@ -94,7 +94,7 @@ public final class PolicyModelGenerator {
      * @param policy The policy to be translated into an infoset. May be null.
      * @return translated The policy infoset. May be null if the input policy was
      * null.
-     * @throw PolicyException in case Policy translation fails.
+     * @throws PolicyException in case Policy translation fails.
      */
     public PolicySourceModel translate(final Policy policy) throws PolicyException {
         LOGGER.entering(policy);

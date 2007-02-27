@@ -55,7 +55,7 @@ public abstract class PolicyModelMarshaller {
     /**
      * Marshalls the collection of policy source models using provided storage reference
      *
-     * @param model policy source model to be marshalled
+     * @param models collection of policy source models to be marshalled
      * @param storage reference to underlying storage that should be used for model marshalling
      * @throws PolicyException If marshalling failed
      */

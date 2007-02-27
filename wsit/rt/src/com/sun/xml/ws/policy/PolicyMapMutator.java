@@ -59,7 +59,7 @@ public abstract class PolicyMapMutator {
     /**
      * Can be used to retrieve the policy map currently connected to this mutator. Will return {@code null} if not connected.
      *
-     * @returns policy map currently connected to this mutator. May return {@code null} if the mutator is not connected.
+     * @return policy map currently connected to this mutator. May return {@code null} if the mutator is not connected.
      *
      * @see #isConnected()
      * @see #disconnect()
@@ -82,7 +82,7 @@ public abstract class PolicyMapMutator {
     /**
      * This method provides connection status information of the policy map mutator instance.
      *
-     * @returns {@code true} if the mutator instance is connected to a policy map, otherwise returns {@code false}.
+     * @return {@code true} if the mutator instance is connected to a policy map, otherwise returns {@code false}.
      */
     public boolean isConnected() {
         return this.map != null;

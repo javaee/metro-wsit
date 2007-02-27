@@ -22,20 +22,20 @@
 package com.sun.xml.ws.policy.jaxws.xmlstreamwriter;
 
 /**
- * Invocation processor implements processing of {@link XMLStreamWriter} method invocations.
+ * Invocation processor implements processing of {@code XMLStreamWriter} method invocations.
  * This allows to implement and plug in additional features or enhancements to the standard
- * {@link XMLStreamWriter} implementations.
+ * {@code XMLStreamWriter} implementations.
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public interface InvocationProcessor {
     
     /**
-     * Processes the {@link XMLStreamWriter} invocation.
+     * Processes the {@code XMLStreamWriter} invocation.
      *
-     * @invocation description of the {@link XMLStreamWriter} invocation to be processed
+     * @param invocation description of the {@code XMLStreamWriter} invocation to be processed
      *
-     * @return {@link XMLStreamWriter} invocation result.
+     * @return {@code XMLStreamWriter} invocation result.
      */
     public Object process(Invocation invocation) throws InvocationProcessingException;
 }

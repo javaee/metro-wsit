@@ -72,11 +72,11 @@ public final class EnhancedXmlStreamWriterProxy implements InvocationHandler {
      * @param writer {@link XMLStreamWriter} instance that should be enhanced with
      *        content filtering feature.
      * @param processorFactory {@link InvocationProcessorFactory} instance that
-     *        is used to create {@InvocationProcessor} which implements new enhancement
+     *        is used to create {@link InvocationProcessor} which implements new enhancement
      *        or feature.
      *
      * @return new enhanced {XMLStreamWriter} (proxy) instance
-     * @throws XMLStreamException
+     * @throws XMLStreamException in case of any problems with creating the proxy
      */
     public static XMLStreamWriter createProxy(final XMLStreamWriter writer, final InvocationProcessorFactory processorFactory) throws XMLStreamException {
         LOGGER.entering();

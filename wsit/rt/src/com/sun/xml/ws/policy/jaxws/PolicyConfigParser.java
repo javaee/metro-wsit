@@ -66,7 +66,7 @@ public final class PolicyConfigParser {
     /**
      * This is a helper method that returns directly {@link PolicyMap} instance populated
      * from information in WSIT config file. For more details on the whole process see
-     * {@link #parseModel(final String configFileIdentifier, final Container container, final PolicyMapMutator...  mutators) parseModel}
+     * {@link #parseModel(String, Container, PolicyMapMutator[]) parseModel}
      * method.
      *
      * @param configFileIdentifier base of WSIT config file name (web service name for WSIT service
@@ -80,7 +80,7 @@ public final class PolicyConfigParser {
      *
      * @return A {@link WSDLModel} with a {@link PolicyMap} object populated with information read
      *         from the WSIT config file.
-     * @throw PolicyException in case of any problems that may occur while reading WSIT config file
+     * @throws PolicyException in case of any problems that may occur while reading WSIT config file
      *        and constructing the {@link WSDLModel} object or populating {@link PolicyMap} instance.
      */
     public static PolicyMap parse(final String configFileIdentifier, final Container container, final PolicyMapMutator...  mutators) throws PolicyException {
@@ -96,7 +96,7 @@ public final class PolicyConfigParser {
     /**
      * This is a helper method that returns directly {@link PolicyMap} instance populated
      * from information in WSIT config file. For more details on the whole process see
-     * {@link #parseModel(final URL configFileUrl, final boolean isClient, final PolicyMapMutator... mutators) parseModel}
+     * {@link #parseModel(URL, boolean, PolicyMapMutator[]) parseModel}
      * method.
      *
      * @param configFileUrl {@link URL} of the config file resource that should be parsed. Must not be {@code null}.
@@ -106,9 +106,9 @@ public final class PolicyConfigParser {
      *
      * @return A {@link WSDLModel} with a {@link PolicyMap} object populated with information read
      *         from the WSIT config file.
-     * @throw PolicyException in case of any problems that may occur while reading WSIT config file
+     * @throws PolicyException in case of any problems that may occur while reading WSIT config file
      *        and constructing the {@link WSDLModel} object or populating {@link PolicyMap} instance.
-     * @throw IllegalArgumentException in case {@code configFileUrl} parameter is {@code null}.
+     * @throws IllegalArgumentException in case {@code configFileUrl} parameter is {@code null}.
      */
     public static PolicyMap parse(final URL configFileUrl, final boolean isClient, final PolicyMapMutator... mutators) throws PolicyException, IllegalArgumentException {
         LOGGER.entering(configFileUrl, isClient, mutators);
@@ -184,7 +184,7 @@ public final class PolicyConfigParser {
      *
      * @return A {@link WSDLModel} with a {@link PolicyMap} object populated with information read
      *         from the WSIT config file.
-     * @throw PolicyException in case of any problems that may occur while reading WSIT config file
+     * @throws PolicyException in case of any problems that may occur while reading WSIT config file
      *        and constructing the {@link WSDLModel} object or populating {@link PolicyMap} instance.
      */
     public static WSDLModel parseModel(final String configFileIdentifier, final Container container, final PolicyMapMutator...  mutators) throws PolicyException {
@@ -248,9 +248,9 @@ public final class PolicyConfigParser {
      *
      * @return A {@link WSDLModel} with a {@link PolicyMap} object populated with information read
      *         from the WSIT config file.
-     * @throw PolicyException in case of any problems that may occur while reading WSIT config file
+     * @throws PolicyException in case of any problems that may occur while reading WSIT config file
      *        and constructing the {@link WSDLModel} object or populating {@link PolicyMap} instance.
-     * @throw IllegalArgumentException in case {@code configFileUrl} parameter is {@code null}.
+     * @throws IllegalArgumentException in case {@code configFileUrl} parameter is {@code null}.
      */
     public static WSDLModel parseModel(final URL configFileUrl, final boolean isClient, final PolicyMapMutator... mutators) throws PolicyException, IllegalArgumentException {
         LOGGER.entering(configFileUrl, isClient, mutators);

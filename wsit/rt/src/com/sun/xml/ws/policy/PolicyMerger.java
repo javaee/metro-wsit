@@ -53,7 +53,7 @@ public final class PolicyMerger {
      * WS-PolicyAttachment specification. None of the original policis in the collection is modified in
      * any way.
      *
-     * @param collection of policies to be merged. The collection must not contain '{@code null}' elements!
+     * @param policies collection of policies to be merged. The collection must not contain '{@code null}' elements!
      * @return merged policy containing combination of policy alternatives stored in all input policies.
      *         If provided collection of policies is {@code null} or empty, returns {@code null}. If provided
      *         collection of policies contains only single policy, the policy is returned.

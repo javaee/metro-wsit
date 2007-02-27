@@ -48,10 +48,10 @@ public abstract class PolicyAssertion {
     }
     
     /**
-     * TODO javadoc
+     * Creates generic assertionand stores the data specified in input parameters
      *
-     * @param data assertion creation data specifying the details of newly created assertion
-     * @param nestedAssertions collection of nested assertions of this policy alternative. May be {@code null}.
+     * @param assertionData assertion creation data specifying the details of newly created assertion
+     * @param assertionParameters collection of assertions parameters of this policy assertion. May be {@code null}.
      * @param nestedAlternative assertion set specifying nested policy alternative. May be {@code null}.
      */
     protected PolicyAssertion(
