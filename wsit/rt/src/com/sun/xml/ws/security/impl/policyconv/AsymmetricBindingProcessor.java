@@ -3,12 +3,12 @@
  * of the Common Development and Distribution License
  * (the License).  You may not use this file except in
  * compliance with the License.
- * 
+ *
  * You can obtain a copy of the license at
  * https://glassfish.dev.java.net/public/CDDLv1.0.html.
  * See the License for the specific language governing
  * permissions and limitations under the License.
- * 
+ *
  * When distributing Covered Code, include this CDDL
  * Header Notice in each file and include the License file
  * at https://glassfish.dev.java.net/public/CDDLv1.0.html.
@@ -16,7 +16,7 @@
  * with the fields enclosed by brackets [] replaced by
  * you own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * 
+ *
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
@@ -34,8 +34,9 @@ import com.sun.xml.wss.impl.policy.mls.EncryptionPolicy;
 import com.sun.xml.wss.impl.policy.mls.SignaturePolicy;
 import com.sun.xml.wss.impl.policy.mls.WSSPolicy;
 import java.util.Vector;
+import java.util.logging.Level;
 import javax.xml.crypto.dsig.CanonicalizationMethod;
-
+import static com.sun.xml.ws.security.impl.policy.Constants.logger;
 /**
  *
  * @author K.Venugopal@sun.com
@@ -68,9 +69,12 @@ public class AsymmetricBindingProcessor extends BindingProcessor {
         if(st != null){
             primarySP = new SignaturePolicy();
             primarySP.setUUID(pid.generateID());
+            if(logger.isLoggable(Level.FINEST)){
+                logger.log(Level.FINEST,"ID of Primary signature policy is "+primarySP.getUUID());
+            }
             tokenProcessor.addKeyBinding(primarySP,st,true);
             SignaturePolicy.FeatureBinding spFB = (com.sun.xml.wss.impl.policy.mls.SignaturePolicy.FeatureBinding)
-            primarySP.getFeatureBinding();
+                    primarySP.getFeatureBinding();
             spFB.setCanonicalizationAlgorithm(CanonicalizationMethod.EXCLUSIVE);
             spFB.isPrimarySignature(true);
         }
@@ -78,6 +82,9 @@ public class AsymmetricBindingProcessor extends BindingProcessor {
             primaryEP = new EncryptionPolicy();
             primaryEP.setUUID(pid.generateID());
             tokenProcessor.addKeyBinding(primaryEP,et,false);
+            if(logger.isLoggable(Level.FINEST)){
+                logger.log(Level.FINEST,"ID of Encryption policy is "+primaryEP.getUUID());
+            }
         }
         if(protectionOrder == Binding.SIGN_ENCRYPT){
             container.insert(primarySP);
@@ -88,15 +95,24 @@ public class AsymmetricBindingProcessor extends BindingProcessor {
         }
         addPrimaryTargets();
         if(foundEncryptTargets && binding.getSignatureProtection()){
+            if(logger.isLoggable(Level.FINEST)){
+                logger.log(Level.FINEST,"PrimarySignature will be Encrypted");
+            }
             protectPrimarySignature();
         }
         if(binding.isIncludeTimeStamp()){
+            if(logger.isLoggable(Level.FINEST)){
+                logger.log(Level.FINEST,"Timestamp header will be added to the message and will be Integrity protected ");
+            }
             protectTimestamp();
         }
         if(binding.getTokenProtection()){
+            if(logger.isLoggable(Level.FINEST)){
+                logger.log(Level.FINEST,"Token reference by primary signature with ID "+primarySP.getUUID()+" will be Integrity protected");
+            }
             protectToken((WSSPolicy) primarySP.getKeyBinding());
         }
-     
+        
     }
     
     protected Token getEncryptionToken(){

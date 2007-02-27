@@ -30,8 +30,9 @@ import com.sun.xml.wss.impl.policy.mls.EncryptionPolicy;
 import com.sun.xml.wss.impl.policy.mls.EncryptionTarget;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.logging.Level;
 import javax.xml.namespace.QName;
-
+import static com.sun.xml.ws.security.impl.policy.Constants.logger;
 /**
  *
  * @author K.Venugopal@sun.com
@@ -59,7 +60,7 @@ public class EncryptionAssertionProcessor {
             if(!bodyEncrypted){
                 EncryptionTarget target = etCreator.newQNameEncryptionTarget(EncryptionTarget.BODY_QNAME);
                 target.setContentOnly(true);
-                binding.addTargetBinding(target);
+                binding.addTargetBinding(target);              
                 bodyEncrypted = true;
             }
         }
@@ -69,14 +70,14 @@ public class EncryptionAssertionProcessor {
             if(!seenEncryptedParts(ht)){
                 EncryptionTarget target = etCreator.newQNameEncryptionTarget(new QName(ht.getURI(),ht.getLocalName()));
                 target.isSOAPHeadersOnly(true);
-                binding.addTargetBinding(target);
+                binding.addTargetBinding(target);               
             }
         }
         
         if(encryptParts.hasBody() && !bodyEncrypted){
             EncryptionTarget target = etCreator.newQNameEncryptionTarget(EncryptionTarget.BODY_QNAME);
             target.setContentOnly(true);
-            binding.addTargetBinding(target);
+            binding.addTargetBinding(target);         
             bodyEncrypted = true;
         }
     }
@@ -87,7 +88,7 @@ public class EncryptionAssertionProcessor {
         while(eeItr.hasNext()){
             String xpathTarget = eeItr.next();
             EncryptionTarget target = etCreator.newXpathEncryptionTarget(xpathTarget);
-            binding.addTargetBinding(target);
+            binding.addTargetBinding(target);          
         }
     }
     
@@ -101,6 +102,6 @@ public class EncryptionAssertionProcessor {
     
     public void process(QName targetName,EncryptionPolicy.FeatureBinding binding){
         EncryptionTarget target = etCreator.newQNameEncryptionTarget(targetName);
-        binding.addTargetBinding(target);
+        binding.addTargetBinding(target);      
     }
 }

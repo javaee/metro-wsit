@@ -3,12 +3,12 @@
  * of the Common Development and Distribution License
  * (the License).  You may not use this file except in
  * compliance with the License.
- * 
+ *
  * You can obtain a copy of the license at
  * https://glassfish.dev.java.net/public/CDDLv1.0.html.
  * See the License for the specific language governing
  * permissions and limitations under the License.
- * 
+ *
  * When distributing Covered Code, include this CDDL
  * Header Notice in each file and include the License file
  * at https://glassfish.dev.java.net/public/CDDLv1.0.html.
@@ -16,7 +16,7 @@
  * with the fields enclosed by brackets [] replaced by
  * you own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * 
+ *
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
@@ -27,6 +27,7 @@ import com.sun.xml.ws.policy.NestedPolicy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.security.impl.policy.Constants;
+import com.sun.xml.ws.security.impl.policy.LogStringsMessages;
 import com.sun.xml.ws.security.impl.policy.PolicyUtil;
 import com.sun.xml.ws.security.policy.IssuedToken;
 import com.sun.xml.ws.security.policy.SamlToken;
@@ -42,7 +43,8 @@ import com.sun.xml.wss.impl.policy.mls.SecureConversationTokenKeyBinding;
 import com.sun.xml.wss.impl.policy.mls.WSSPolicy;
 import java.util.Iterator;
 import java.util.Set;
-
+import java.util.logging.Level;
+import static com.sun.xml.ws.security.impl.policy.Constants.logger;
 /**
  *
  * @author K.Venugopal@sun.com
@@ -62,16 +64,30 @@ public class TokenProcessor {
         Set tokenRefTypes = token.getTokenRefernceType();
         if(!tokenRefTypes.isEmpty()){
             if(tokenRefTypes.contains(Token.REQUIRE_THUMBPRINT_REFERENCE)){
+                if(logger.isLoggable(Level.FINEST)){
+                    logger.log(Level.FINEST," ReferenceType set to KeyBinding"+x509CB+" is Thumbprint");
+                }
                 x509CB.setReferenceType(SecurityPolicyUtil.convertToXWSSConstants(Token.REQUIRE_THUMBPRINT_REFERENCE));
             }else if(tokenRefTypes.contains(Token.REQUIRE_KEY_IDENTIFIER_REFERENCE)){
+                if(logger.isLoggable(Level.FINEST)){
+                    logger.log(Level.FINEST," ReferenceType set to KeyBinding"+x509CB+" is KeyIdentifier");
+                }
                 x509CB.setReferenceType(SecurityPolicyUtil.convertToXWSSConstants(Token.REQUIRE_KEY_IDENTIFIER_REFERENCE));
             }else if(tokenRefTypes.contains(Token.REQUIRE_ISSUER_SERIAL_REFERENCE)){
+                if(logger.isLoggable(Level.FINEST)){
+                    logger.log(Level.FINEST," ReferenceType set to KeyBinding "+x509CB+" is IssuerSerial");
+                }
                 x509CB.setReferenceType(SecurityPolicyUtil.convertToXWSSConstants(Token.REQUIRE_ISSUER_SERIAL_REFERENCE));
             }else{
+                if(logger.isLoggable(Level.FINEST)){
+                    logger.log(Level.FINEST," ReferenceType "+x509CB+" set is DirectReference");
+                }
                 x509CB.setReferenceType(MessageConstants.DIRECT_REFERENCE_TYPE);
             }
-            
         }else{
+            if(logger.isLoggable(Level.FINEST)){
+                logger.log(Level.FINEST," ReferenceType set is REQUIRE_THUMBPRINT_REFERENCE");
+            }
             x509CB.setReferenceType(MessageConstants.DIRECT_REFERENCE_TYPE);
         }
     }
@@ -91,9 +107,11 @@ public class TokenProcessor {
                 dtKB.setOriginalKeyBinding(x509CB);
                 policy.setKeyBinding(dtKB);
                 dtKB.setUUID(pid.generateID());
+                
             }else{
                 policy.setKeyBinding(x509CB);
             }
+            
         }else if(PolicyUtil.isSamlToken(tokenAssertion)){
             AuthenticationTokenPolicy.SAMLAssertionBinding sab = new AuthenticationTokenPolicy.SAMLAssertionBinding();
             //(AuthenticationTokenPolicy.SAMLAssertionBinding)policy.newSAMLAssertionKeyBinding();
@@ -141,6 +159,9 @@ public class TokenProcessor {
         }else{
             throw new UnsupportedOperationException("addKeyBinding for "+ token + "is not supported");
         }
+        if(logger.isLoggable(Level.FINEST)){
+            logger.log(Level.FINEST,"KeyBinding type "+policy.getKeyBinding()+ "has been added to policy"+policy);
+        }
     }
     
     
@@ -149,14 +170,25 @@ public class TokenProcessor {
         if(this.isServer && !isIncoming){
             if(!Token.INCLUDE_ALWAYS.equals(token.getIncludeToken())){
                 xwssToken.setIncludeToken(Token.INCLUDE_NEVER);
+                if(logger.isLoggable(Level.FINEST)){
+                    logger.log(Level.FINEST,"Token Inclusion value of INCLUDE NEVER has been set to Token"+ xwssToken);
+                }
                 return;
             }
         }else if(!this.isServer && isIncoming){
             if(Token.INCLUDE_ALWAYS_TO_RECIPIENT.equals(token.getIncludeToken()) ||
                     Token.INCLUDE_ONCE.equals(token.getIncludeToken())){
                 xwssToken.setIncludeToken(Token.INCLUDE_NEVER);
+                
+                if(logger.isLoggable(Level.FINEST)){
+                    logger.log(Level.FINEST,"Token Inclusion value of INCLUDE NEVER has been set to Token"+ xwssToken);
+                }
                 return;
             }
+        }
+        
+        if(logger.isLoggable(Level.FINEST)){
+            logger.log(Level.FINEST,"Token Inclusion value of"+token.getIncludeToken()+" has been set to Token"+ xwssToken);
         }
         xwssToken.setIncludeToken(token.getIncludeToken());
     }
@@ -200,26 +232,29 @@ public class TokenProcessor {
             setX509TokenRefType(xt, (X509Token) token);
             return xt;
         }
+        if(logger.isLoggable(Level.SEVERE)){
+            logger.log(Level.SEVERE,LogStringsMessages.SP_0107_UNKNOWN_TOKEN_TYPE(token));
+        }
+        
         throw new UnsupportedOperationException("Unsupported  "+ token + "format");
     }
     
-       public void setTokenValueType(AuthenticationTokenPolicy.X509CertificateBinding x509CB, PolicyAssertion tokenAssertion){
-           
-         NestedPolicy policy = tokenAssertion.getNestedPolicy();
-         if(policy==null){
-             return;
-         }
-         AssertionSet as = policy.getAssertionSet();
-         Iterator<PolicyAssertion> itr = as.iterator();
-         while(itr.hasNext()){
-             PolicyAssertion policyAssertion = (PolicyAssertion)itr.next();
-             if(policyAssertion.getName().getLocalPart().equals(Constants.WssX509V1Token11)||policyAssertion.getName().getLocalPart().equals(Constants.WssX509V1Token10)){
-                 x509CB.setValueType(MessageConstants.X509v1_NS);
-             }else if(policyAssertion.getName().getLocalPart().equals(Constants.WssX509V3Token10)||policyAssertion.getName().getLocalPart().equals(Constants.WssX509V3Token11)){
-                 x509CB.setValueType(MessageConstants.X509v3_NS);          
-             }
-         }
-       
-     }
+    public void setTokenValueType(AuthenticationTokenPolicy.X509CertificateBinding x509CB, PolicyAssertion tokenAssertion){
+        
+        NestedPolicy policy = tokenAssertion.getNestedPolicy();
+        if(policy==null){
+            return;
+        }
+        AssertionSet as = policy.getAssertionSet();
+        Iterator<PolicyAssertion> itr = as.iterator();
+        while(itr.hasNext()){
+            PolicyAssertion policyAssertion = (PolicyAssertion)itr.next();
+            if(policyAssertion.getName().getLocalPart().equals(Constants.WssX509V1Token11)||policyAssertion.getName().getLocalPart().equals(Constants.WssX509V1Token10)){
+                x509CB.setValueType(MessageConstants.X509v1_NS);
+            }else if(policyAssertion.getName().getLocalPart().equals(Constants.WssX509V3Token10)||policyAssertion.getName().getLocalPart().equals(Constants.WssX509V3Token11)){
+                x509CB.setValueType(MessageConstants.X509v3_NS);
+            }
+        }        
+    }
     
 }

@@ -3,12 +3,12 @@
  * of the Common Development and Distribution License
  * (the License).  You may not use this file except in
  * compliance with the License.
- * 
+ *
  * You can obtain a copy of the license at
  * https://glassfish.dev.java.net/public/CDDLv1.0.html.
  * See the License for the specific language governing
  * permissions and limitations under the License.
- * 
+ *
  * When distributing Covered Code, include this CDDL
  * Header Notice in each file and include the License file
  * at https://glassfish.dev.java.net/public/CDDLv1.0.html.
@@ -16,7 +16,7 @@
  * with the fields enclosed by brackets [] replaced by
  * you own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * 
+ *
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
@@ -26,9 +26,9 @@ package com.sun.xml.ws.security.impl.policyconv;
 
 import com.sun.xml.wss.impl.PolicyTypeUtil;
 import com.sun.xml.wss.impl.policy.MLSPolicy;
-
 import com.sun.xml.wss.impl.policy.SecurityPolicy;
 import com.sun.xml.ws.security.policy.MessageLayout;
+import com.sun.xml.wss.impl.policy.PolicyGenerationException;
 import com.sun.xml.wss.impl.policy.mls.AuthenticationTokenPolicy;
 import com.sun.xml.wss.impl.policy.mls.EncryptionPolicy;
 import com.sun.xml.wss.impl.policy.mls.MessagePolicy;
@@ -94,28 +94,25 @@ public class XWSSPolicyContainer {
         }
         if ( isSupportingToken(secPolicy)) {
             switch (section) {
-                case ServerOutgoingPolicy:
-                case ClientIncomingPolicy:
-                    return;
+            case ServerOutgoingPolicy:
+            case ClientIncomingPolicy:
+                return;
             }
         }
         modified = true;
         policyList.add(secPolicy);
     }
-    public MessagePolicy getMessagePolicy() {
+    public MessagePolicy getMessagePolicy()throws PolicyGenerationException {
         if ( modified ) {
             convert();
             modified = false;
         }
         MessagePolicy msgPolicy = new MessagePolicy();
-        try {
-            msgPolicy.appendAll(effectivePolicyList);
-            removeEmptyPrimaryPolicies(msgPolicy);
-            return msgPolicy;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
+        
+        msgPolicy.appendAll(effectivePolicyList);
+        removeEmptyPrimaryPolicies(msgPolicy);
+        return msgPolicy;
+        
     }
     private void removeEmptyPrimaryPolicies(MessagePolicy msgPolicy) {
         for ( Object policy : msgPolicy.getPrimaryPolicies() ) {
@@ -145,7 +142,7 @@ public class XWSSPolicyContainer {
             if ( isSupportingToken(secPolicy) || isTimestamp(secPolicy)) {
                 continue;
             } else {
-                pos = effectivePolicyList.indexOf(secPolicy);                
+                pos = effectivePolicyList.indexOf(secPolicy);
                 break;
             }
         }
@@ -165,7 +162,7 @@ public class XWSSPolicyContainer {
             if ( !isSupportingToken(secPolicy)) {
                 continue;
             } else {
-                pos = effectivePolicyList.indexOf(secPolicy);                
+                pos = effectivePolicyList.indexOf(secPolicy);
             }
         }
         if ( pos != -1 ) {
@@ -231,32 +228,23 @@ public class XWSSPolicyContainer {
             
             if ( !isSupportingToken(xwssPolicy)) {
                 switch(section) {
-                    case ClientIncomingPolicy:
-                        prepend(xwssPolicy);
-                        break;
-                    case ClientOutgoingPolicy:
-                        append(xwssPolicy);
-                        break;
-                    case ServerIncomingPolicy:
-                        appendAfterToken(xwssPolicy);
-                        break;
-                    case ServerOutgoingPolicy:
-                        append(xwssPolicy);
-                        break;
+                case ClientIncomingPolicy:
+                    prepend(xwssPolicy);
+                    break;
+                case ClientOutgoingPolicy:
+                    append(xwssPolicy);
+                    break;
+                case ServerIncomingPolicy:
+                    appendAfterToken(xwssPolicy);
+                    break;
+                case ServerOutgoingPolicy:
+                    append(xwssPolicy);
+                    break;
                 }
             } else if ( isSupportingToken(xwssPolicy) || isTimestamp(xwssPolicy)) {
                 prepend(xwssPolicy);
                 
-//                switch(section) {
-//                    case ClientOutgoingPolicy:
-//                        prepend(xwssPolicy);
-//                        break;
-//                    case ServerIncomingPolicy:
-//                        append(xwssPolicy);
-//                        break;
-//                    case ServerOutgoingPolicy:
-//                        break;
-//                }
+             
             }
         }
     }
@@ -268,30 +256,23 @@ public class XWSSPolicyContainer {
         for ( SecurityPolicy xwssPolicy : policyList ) {
             if ( isSupportingToken(xwssPolicy)) {
                 prepend(xwssPolicy);
-//                switch (section) {
-//                    case ClientOutgoingPolicy:
-//                        prepend(xwssPolicy);
-//                        break;
-//                    case ServerIncomingPolicy:
-//                        append(xwssPolicy);
-//                        break;
-//                }
+       
             } else if ( isTimestamp(xwssPolicy)) {
                 prepend(xwssPolicy);
             } else {
                 switch (section ) {
-                    case ClientIncomingPolicy:
-                        appendAfterToken(xwssPolicy);
-                        break;
-                    case ClientOutgoingPolicy:
-                        append(xwssPolicy);
-                        break;
-                    case ServerIncomingPolicy:
-                        appendAfterToken(xwssPolicy);
-                        break;
-                    case ServerOutgoingPolicy:
-                        append(xwssPolicy);
-                        break;
+                case ClientIncomingPolicy:
+                    appendAfterToken(xwssPolicy);
+                    break;
+                case ClientOutgoingPolicy:
+                    append(xwssPolicy);
+                    break;
+                case ServerIncomingPolicy:
+                    appendAfterToken(xwssPolicy);
+                    break;
+                case ServerOutgoingPolicy:
+                    append(xwssPolicy);
+                    break;
                 }
             }
         }
@@ -304,12 +285,12 @@ public class XWSSPolicyContainer {
         convertLax();
         if ( foundTimestamp != -1 ) {
             switch (section ) {
-                case ClientOutgoingPolicy:
-                    effectivePolicyList.add(0, effectivePolicyList.remove(foundTimestamp));
-                    break;
-                case ServerOutgoingPolicy:
-                    effectivePolicyList.add(0, effectivePolicyList.remove(foundTimestamp));
-                    break;
+            case ClientOutgoingPolicy:
+                effectivePolicyList.add(0, effectivePolicyList.remove(foundTimestamp));
+                break;
+            case ServerOutgoingPolicy:
+                effectivePolicyList.add(0, effectivePolicyList.remove(foundTimestamp));
+                break;
             }
         }
         
@@ -322,12 +303,12 @@ public class XWSSPolicyContainer {
         convertLax();
         if ( foundTimestamp != -1 ) {
             switch (section) {
-                case ClientOutgoingPolicy:
-                    effectivePolicyList.add(effectivePolicyList.size() -1, effectivePolicyList.remove(foundTimestamp));
-                    break;
-                case ServerOutgoingPolicy:
-                    effectivePolicyList.add(effectivePolicyList.size() -1, effectivePolicyList.remove(foundTimestamp));
-                    break;
+            case ClientOutgoingPolicy:
+                effectivePolicyList.add(effectivePolicyList.size() -1, effectivePolicyList.remove(foundTimestamp));
+                break;
+            case ServerOutgoingPolicy:
+                effectivePolicyList.add(effectivePolicyList.size() -1, effectivePolicyList.remove(foundTimestamp));
+                break;
             }
         }
     }

@@ -3,12 +3,12 @@
  * of the Common Development and Distribution License
  * (the License).  You may not use this file except in
  * compliance with the License.
- * 
+ *
  * You can obtain a copy of the license at
  * https://glassfish.dev.java.net/public/CDDLv1.0.html.
  * See the License for the specific language governing
  * permissions and limitations under the License.
- * 
+ *
  * When distributing Covered Code, include this CDDL
  * Header Notice in each file and include the License file
  * at https://glassfish.dev.java.net/public/CDDLv1.0.html.
@@ -16,7 +16,7 @@
  * with the fields enclosed by brackets [] replaced by
  * you own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * 
+ *
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
@@ -31,7 +31,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.HashSet;
-
+import java.util.logging.Level;
+import static com.sun.xml.ws.security.impl.policy.Constants.logger;
 /**
  *
  * @author K.Venugopal@sun.com
@@ -41,10 +42,10 @@ public class SecurityPolicyAssertionCreator implements PolicyAssertionCreator{
     
     private static HashSet<String> implementedAssertions = new HashSet<String>();
     private static final String [] nsSupportedList = new String[]{Constants.SECURITY_POLICY_NS};
-//    Constants.SUN_WSS_SECURITY_CLIENT_POLICY_NS,    
-//    Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS,
-//    Constants.SUN_SECURE_CLIENT_CONVERSATION_POLICY_NS,Constants.SUN_SECURE_SERVER_CONVERSATION_POLICY_NS
-//    ,Constants.SUN_TRUST_CLIENT_SECURITY_POLICY_NS,Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS};
+    //    Constants.SUN_WSS_SECURITY_CLIENT_POLICY_NS,
+    //    Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS,
+    //    Constants.SUN_SECURE_CLIENT_CONVERSATION_POLICY_NS,Constants.SUN_SECURE_SERVER_CONVERSATION_POLICY_NS
+    //    ,Constants.SUN_TRUST_CLIENT_SECURITY_POLICY_NS,Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS};
     static{
         implementedAssertions.add(Constants.AlgorithmSuite);
         implementedAssertions.add(Constants.AsymmetricBinding);
@@ -115,11 +116,14 @@ public class SecurityPolicyAssertionCreator implements PolicyAssertionCreator{
         return nsSupportedList;
     }
     protected Class getClass(AssertionData assertionData) throws AssertionCreationException{
+        String className ="";
         try {
-            String className = assertionData.getName().getLocalPart();
+            className = assertionData.getName().getLocalPart();
             return Class.forName("com.sun.xml.ws.security.impl.policy." + className);
         } catch (ClassNotFoundException ex) {
-            ex.printStackTrace();
+            if(logger.isLoggable(Level.FINE)){
+                logger.log(Level.FINE,"Error occurred while location SecurityPolicy assertion creator class "+"com.sun.xml.ws.security.impl.policy." +className,ex);
+            }
             throw new AssertionCreationException(assertionData,ex);
         }
     }
@@ -129,41 +133,66 @@ public class SecurityPolicyAssertionCreator implements PolicyAssertionCreator{
         if(implementedAssertions.contains(localName)){
             Class cl=null;
             cl = getClass(assertionData);
+            //            try {
+            Constructor cons = null;
             try {
-                Constructor cons = null;
-                try {
-                    
-                    cons = getConstructor(cl);
-                    
-                    //cl.getConstructor(javax.xml.stream.events.StartElement.class);
-                } catch (NoSuchMethodException ex) {
-                    ex.printStackTrace();
-                    throw new AssertionCreationException(assertionData,ex);
-                }catch (SecurityException ex) {
-                    ex.printStackTrace();
-                    throw new AssertionCreationException(assertionData,ex);
-                }
-                if(cons != null){
-                    try {
-                        return (PolicyAssertion)cons.newInstance(assertionData,nestedAssertions,nestedAlternative);
-                    } catch (IllegalArgumentException ex) {
-                        throw new AssertionCreationException(assertionData,ex);
-                    } catch (InvocationTargetException ex) {
-                        throw new AssertionCreationException(assertionData,ex);
-                    } catch (InstantiationException ex) {
-                        throw new AssertionCreationException(assertionData,ex);
-                    } catch (IllegalAccessException ex) {
-                        throw new AssertionCreationException(assertionData,ex);
-                    }
-                }else{
-                    return (PolicyAssertion)cl.newInstance();
-                }
                 
-            } catch (InstantiationException ex) {
+                cons = getConstructor(cl);
+                
+                //cl.getConstructor(javax.xml.stream.events.StartElement.class);
+            } catch (NoSuchMethodException ex) {
+                if(logger.isLoggable(Level.FINE)){
+                    logger.log(Level.FINE,"Error occurred while obtaining the constructor for SecurityPolicy assertion"+assertionData.getName());
+                }
                 throw new AssertionCreationException(assertionData,ex);
-            } catch (IllegalAccessException ex) {
+            }catch (SecurityException ex) {
+                if(logger.isLoggable(Level.FINE)){
+                    logger.log(Level.FINE,"Error occurred while obtaining the constructor for SecurityPolicy assertion"+assertionData.getName());
+                }
                 throw new AssertionCreationException(assertionData,ex);
             }
+            if(cons != null){
+                try {
+                    return (PolicyAssertion)cons.newInstance(assertionData,nestedAssertions,nestedAlternative);
+                } catch (IllegalArgumentException ex) {
+                    if(logger.isLoggable(Level.FINE)){
+                        logger.log(Level.FINE,"Error occurred while instantiating  SecurityPolicy assertion"+assertionData.getName());
+                    }
+                    
+                    throw new AssertionCreationException(assertionData,ex);
+                } catch (InvocationTargetException ex) {
+                    if(logger.isLoggable(Level.FINE)){
+                        logger.log(Level.FINE,"Error occurred while instantiating  SecurityPolicy assertion"+assertionData.getName());
+                    }
+                    throw new AssertionCreationException(assertionData,ex);
+                } catch (InstantiationException ex) {
+                    if(logger.isLoggable(Level.FINE)){
+                        logger.log(Level.FINE,"Error occurred while instantiating  SecurityPolicy assertion"+assertionData.getName());
+                    }
+                    throw new AssertionCreationException(assertionData,ex);
+                } catch (IllegalAccessException ex) {
+                    if(logger.isLoggable(Level.FINE)){
+                        logger.log(Level.FINE,"Error occurred while instantiating  SecurityPolicy assertion"+assertionData.getName());
+                    }
+                    throw new AssertionCreationException(assertionData,ex);
+                }
+            }else{
+                try{
+                    return (PolicyAssertion)cl.newInstance();
+                } catch (InstantiationException ex) {
+                    if(logger.isLoggable(Level.FINE)){
+                        logger.log(Level.FINE,"Error occurred while instantiating  SecurityPolicy assertion"+assertionData.getName());
+                    }
+                    throw new AssertionCreationException(assertionData,ex);
+                } catch (IllegalAccessException ex) {
+                    if(logger.isLoggable(Level.FINE)){
+                        logger.log(Level.FINE,"Error occurred while instantiating  SecurityPolicy assertion"+assertionData.getName());
+                    }
+                    throw new AssertionCreationException(assertionData,ex);
+                }
+            }
+            
+            
         }
         return policyAssertionCreator.createAssertion(assertionData,nestedAssertions,nestedAlternative,policyAssertionCreator);
         

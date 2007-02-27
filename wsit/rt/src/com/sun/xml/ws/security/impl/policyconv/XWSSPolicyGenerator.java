@@ -28,6 +28,7 @@ import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.PolicyException;
+import com.sun.xml.ws.security.impl.policy.LogStringsMessages;
 import com.sun.xml.ws.security.impl.policy.Trust10;
 import com.sun.xml.ws.security.impl.policyconv.IntegrityAssertionProcessor;
 import com.sun.xml.ws.security.impl.policyconv.XWSSPolicyContainer;
@@ -54,6 +55,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 import com.sun.xml.ws.security.policy.WSSAssertion;
+import java.util.logging.Level;
 
 
 /**
@@ -126,12 +128,16 @@ public class XWSSPolicyGenerator {
         policyBinding =(Binding) binding;
         if(binding == null){
             //log error.
-            throw new PolicyException("Error Effective Security Policy does not have a Binding");
+            logger.log(Level.SEVERE,LogStringsMessages.SP_0105_ERROR_BINDING_ASSR_NOT_PRESENT());
+            throw new PolicyException("Effective SecurityPolicy does not have a Binding");
         }
         if(PolicyUtil.isTransportBinding(binding)){
+            if(logger.isLoggable(Level.FINE)){
+                logger.log(Level.FINE, "TransportBinding was configured in the policy");
+            }
             TransportBindingProcessor tbp= new TransportBindingProcessor((TransportBinding)binding,isServer, isIncoming,_policyContainer);
-            tbp.process();            
-            processNonBindingAssertions(tbp);   
+            tbp.process();
+            processNonBindingAssertions(tbp);
             transportBinding = true;
         }else{
             
@@ -139,7 +145,11 @@ public class XWSSPolicyGenerator {
             eAP = new EncryptionAssertionProcessor(_binding.getAlgorithmSuite(),false);
             
             _policyContainer.setPolicyContainerMode(_binding.getLayout());
-            if(PolicyUtil.isSymmetricBinding(binding.getName())) {                
+            if(PolicyUtil.isSymmetricBinding(binding.getName())) {
+                
+                if(logger.isLoggable(Level.FINE)){
+                    logger.log(Level.FINE, "SymmetricBinding was configured in the policy");
+                }
                 SymmetricBindingProcessor sbp =  new SymmetricBindingProcessor((SymmetricBinding) _binding, _policyContainer,
                         isServer, isIncoming,signedParts,encryptedParts,
                         signedElements,encryptedElements);
@@ -151,40 +161,58 @@ public class XWSSPolicyGenerator {
                 sbp.close();
                 
             }else if(PolicyUtil.isAsymmetricBinding(binding.getName()) ){
+                
+                if(logger.isLoggable(Level.FINE)){
+                    logger.log(Level.FINE, "AsymmetricBinding was configured in the policy");
+                }
                 AsymmetricBindingProcessor abp = new AsymmetricBindingProcessor((AsymmetricBinding) _binding, _policyContainer,
                         isServer, isIncoming,signedParts,encryptedParts,
                         signedElements,encryptedElements);
                 if( wssAssertion != null && PolicyUtil.isWSS11(wssAssertion)){
                     abp.setWSS11((WSSAssertion)wssAssertion);
                 }
-                abp.process();                
+                abp.process();
                 processNonBindingAssertions(abp);
                 abp.close();
             }
         }
     }
     
-    public MessagePolicy getXWSSPolicy(){
-        MessagePolicy mp = _policyContainer.getMessagePolicy();
+    public MessagePolicy getXWSSPolicy()throws PolicyException{
+        MessagePolicy mp = null;
         try{
-            if(wssAssertion != null){
-                mp.setWSSAssertion(getWssAssertion((WSSAssertion)wssAssertion));
+            mp = _policyContainer.getMessagePolicy();
+        }catch(PolicyGenerationException ex){
+            logger.log(Level.SEVERE,""+effectivePolicy,ex);
+            throw new PolicyException("Unable to digest SecurityPolicy ");
+        }
+        //try{
+        if(wssAssertion != null){
+            try{
+                mp.setWSSAssertion(getWssAssertion((com.sun.xml.ws.security.policy.WSSAssertion) wssAssertion));
+            } catch (PolicyGenerationException ex) {
+                logger.log(Level.SEVERE,LogStringsMessages.SP_0104_ERROR_SIGNATURE_CONFIRMATION_ELEMENT(ex.getMessage()),ex);
+                 throw new PolicyException("Unable to process WSSAssertion");
             }
-            if(policyBinding.getAlgorithmSuite() != null){
-                mp.setAlgorithmSuite(getAlgoSuite(policyBinding.getAlgorithmSuite()));
-            }
-            if(policyBinding.getLayout()!= null){
-                mp.setLayout(getLayout(policyBinding.getLayout()));
-            }
-            if(isIncoming && reqElements.size() > 0){
-                RequiredElementsProcessor rep =  new RequiredElementsProcessor(reqElements,mp);
+        }
+        if(policyBinding.getAlgorithmSuite() != null){
+            mp.setAlgorithmSuite(getAlgoSuite(policyBinding.getAlgorithmSuite()));
+        }
+        if(policyBinding.getLayout()!= null){
+            mp.setLayout(getLayout(policyBinding.getLayout()));
+        }
+        if(isIncoming && reqElements.size() > 0){
+            try {
+                com.sun.xml.ws.security.impl.policyconv.RequiredElementsProcessor rep =
+                        new com.sun.xml.ws.security.impl.policyconv.RequiredElementsProcessor(reqElements, mp);
                 rep.process();
+            } catch (PolicyGenerationException ex) {
+                logger.log(Level.SEVERE,LogStringsMessages.SP_0103_ERROR_REQUIRED_ELEMENTS(ex.getMessage()),ex);
+                throw new PolicyException("Unable to process RequiredElements");
             }
-            if(transportBinding){
-                mp.setSSL(transportBinding);
-            }
-        }catch(PolicyGenerationException pe){
-            pe.printStackTrace();
+        }
+        if(transportBinding){
+            mp.setSSL(transportBinding);
         }
         return mp;
     }
@@ -275,19 +303,36 @@ public class XWSSPolicyGenerator {
             com.sun.xml.ws.security.policy.MessageLayout layout) {
         
         switch(layout) {
-            case Strict :
-                return com.sun.xml.wss.impl.MessageLayout.Strict;
-            case Lax :
-                return com.sun.xml.wss.impl.MessageLayout.Lax;
-            case LaxTsFirst :
-                return com.sun.xml.wss.impl.MessageLayout.LaxTsFirst;
-            case LaxTsLast :
-                return com.sun.xml.wss.impl.MessageLayout.LaxTsLast;
-            default :
-                throw new RuntimeException("Unkown MessageLayout Enum Value Encountered");
-                
+        case Strict :{
+            if(logger.isLoggable(Level.FINE)){
+                logger.log(Level.FINE,"MessageLayout has been configured to be  STRICT ");
+            }
+            return com.sun.xml.wss.impl.MessageLayout.Strict;
         }
-        
+        case Lax :{
+            if(logger.isLoggable(Level.FINE)){
+                logger.log(Level.FINE,"MessageLayout has been configured to be LAX ");
+            }
+            return com.sun.xml.wss.impl.MessageLayout.Lax;
+        }
+        case LaxTsFirst :{
+            if(logger.isLoggable(Level.FINE)){
+                logger.log(Level.FINE,"MessageLayout has been configured to be LaxTimestampFirst ");
+            }
+            return com.sun.xml.wss.impl.MessageLayout.LaxTsFirst;
+        }
+        case LaxTsLast :{
+            if(logger.isLoggable(Level.FINE)){
+                logger.log(Level.FINE,"MessageLayout has been configured tp be LaxTimestampLast ");
+            }
+            return com.sun.xml.wss.impl.MessageLayout.LaxTsLast;
+        }default :{
+            if(logger.isLoggable(Level.SEVERE)){
+                logger.log(Level.SEVERE,LogStringsMessages.SP_0106_UNKNOWN_MESSAGE_LAYOUT(layout));
+            }
+            throw new RuntimeException("Unkown MessageLayout Enum Value Encountered");
+        }
+        }        
     }
     
 }

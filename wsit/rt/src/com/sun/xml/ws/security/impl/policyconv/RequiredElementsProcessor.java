@@ -42,8 +42,8 @@ public class RequiredElementsProcessor {
     /** Creates a new instance of RequiredElementProcessor */
     public RequiredElementsProcessor(List<RequiredElements> al,MessagePolicy mp) {
         this.assertionList = al;
-    }
-    
+        this.mp = mp;
+    }    
     
     public void process() throws PolicyGenerationException{
         Vector<String> targetValues = new Vector<String>();
