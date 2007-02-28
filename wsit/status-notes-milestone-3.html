@@ -858,8 +858,11 @@ open the dialog again.</td>
 <h4>Known Issues</h4>
 <ul>
   <li>A WCF endpoint responds back with "HTTP 400 Bad Request" if an
-empty Metadata element is sent from the WSIT client. (Microsoft bug #:
-60972) </li>
+empty Metadata element is sent from the WSIT client.</li>
+<li>When a WCF client tries to send a message to a Tango service, with wsa:FaultTo set to
+ "http://www.w3.org/2005/08/addressing/none" , a System.InvalidOperationException is thrown by the WCF runtime (Microsoft bug #: 60972).
+  This bug occurs when a developer manually sets the value of wsa:FaultTo to none, which is not the default.
+   Also this bug occurs both on WCF RTM bits as well as Vista.</li>
 </ul>
 <!-- ================================================== -->
 <br>
