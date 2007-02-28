@@ -77,11 +77,21 @@
     <target name="help">
         <echo message="install  :"/>
         <echo message="  Installs WSIT 1.0 EA on Tomcat"/>
+        <echo/>
+        <echo message="  NOTE: If using JDK 6, adding -Dinstall.api='true' when invoking the 'install' target will copy"/>
+        <echo message="  webservices-api.jar into JAVA_HOME/lib/endorsed"/>
+        <echo message="  to prevent conflicts between the JAX-WS 2.0 implementation bundled with JDK 6 and JAX-WS 2.1 bundled with WSIT."/>
+        <echo message="  For JDK 5, it is unnecessary to copy 'webservices-api.jar' to the 'endorsed' directory but doing so will not cause problems."/>
+        <echo/>
+        <echo message="install-api: "/>
+        <echo message="  Installs 'webservices-api.jar' into JAVA_HOME/lib/endorsed (and nothing else)"/>
+        <echo message="  Only needed for JDK 6 and only if -Dinstall.api='true' was not passed during WSIT installation"/>
+        <echo/>
         <echo message="uninstall:"/>
         <echo message="  Uninstalls WSIT 1.0 EA from Tomcat"/>
         <echo/>
-        <echo message="  Make sure CATALINA_HOME is set to the installation directory of Tomcat."/>
+        <echo message="CATALINA_HOME must be set to the installation directory of Tomcat."/>
         <echo/>
-        <echo message="  Usage: ANT_HOME/bin/ant -f wsit-on-tomcat.xml install"/>
+        <echo message="Usage: ANT_HOME/bin/ant -f wsit-on-tomcat.xml [-Dinstall.api='true'] {install,uninstall}"/>        
     </target>
 </project>

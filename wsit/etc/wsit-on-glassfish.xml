@@ -145,7 +145,7 @@ set CLASSPATH=%WSIT_CLASSPATH%;</replacevalue>
         <echo message="uninstall: "/>
         <echo message="  Uninstalls WSIT 1.0 EA from GlassFish v2"/>
         <echo/>
-        <echo message="AS_HOME is set to the installation directory of GlassFish v2."/>
+        <echo message="AS_HOME must be set to the installation directory of GlassFish v2."/>
         <echo/>
         <echo message="Usage: ANT_HOME/bin/ant -f wsit-on-glassfish.xml [-Dinstall.api='true'] {install,uninstall}"/>
     </target>
