@@ -39,9 +39,11 @@ public class ValidatorConfiguration extends PolicyAssertion implements com.sun.x
     
     private boolean populated = false;
     private Iterator<PolicyAssertion> ast  = null;
-    private static QName maxClockSkew =  new QName("maxClockSkew");
-    private static QName timestampFreshnessLimit  =  new QName("timestampFreshnessLimit ");
-    private static QName maxNonceAge =  new QName("maxNonceAge");
+    private static QName cmaxClockSkew =  new QName(Constants.SUN_WSS_SECURITY_CLIENT_POLICY_NS,"maxClockSkew");
+    private static QName smaxClockSkew =  new QName(Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS,"maxClockSkew");
+    private static QName ctimestampFreshnessLimit  =  new QName(Constants.SUN_WSS_SECURITY_CLIENT_POLICY_NS,"timestampFreshnessLimit ");
+    private static QName stimestampFreshnessLimit  =  new QName(Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS,"timestampFreshnessLimit "); 
+    private static QName smaxNonceAge =  new QName(Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS,"maxNonceAge");
     private AssertionFitness fitness = AssertionFitness.IS_VALID;
     /** Creates a new instance of ValidatorConfiguration */
     public ValidatorConfiguration() {
@@ -72,15 +74,28 @@ public class ValidatorConfiguration extends PolicyAssertion implements com.sun.x
         return fitness;        
     }
     
-    public String getMaxClockSkew() {
-        return this.getAttributeValue(maxClockSkew);
+    public String getMaxClockSkew() {       
+        if(this.getAttributes().containsKey(cmaxClockSkew)){
+            return this.getAttributeValue(cmaxClockSkew);
+        }else if(this.getAttributes().containsKey(smaxClockSkew)){
+            return this.getAttributeValue(smaxClockSkew);
+        }
+        return null;
     }
     
     public String getTimestampFreshnessLimit() {
-        return this.getAttributeValue(timestampFreshnessLimit);
+         if(this.getAttributes().containsKey(ctimestampFreshnessLimit)){
+            return this.getAttributeValue(ctimestampFreshnessLimit);
+        }else if(this.getAttributes().containsKey(stimestampFreshnessLimit)){
+            return this.getAttributeValue(stimestampFreshnessLimit);
+        }
+        return null;        
     }
     
     public String getMaxNonceAge() {
-        return this.getAttributeValue(maxNonceAge);
+        if(this.getAttributes().containsKey(smaxNonceAge)){
+            return this.getAttributeValue(smaxNonceAge);
+        }
+        return null;            
     }
 }
