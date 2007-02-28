@@ -41,8 +41,8 @@ public class ValidatorConfiguration extends PolicyAssertion implements com.sun.x
     private Iterator<PolicyAssertion> ast  = null;
     private static QName cmaxClockSkew =  new QName(Constants.SUN_WSS_SECURITY_CLIENT_POLICY_NS,"maxClockSkew");
     private static QName smaxClockSkew =  new QName(Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS,"maxClockSkew");
-    private static QName ctimestampFreshnessLimit  =  new QName(Constants.SUN_WSS_SECURITY_CLIENT_POLICY_NS,"timestampFreshnessLimit ");
-    private static QName stimestampFreshnessLimit  =  new QName(Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS,"timestampFreshnessLimit "); 
+    private static QName ctimestampFreshnessLimit  =  new QName(Constants.SUN_WSS_SECURITY_CLIENT_POLICY_NS,"timestampFreshnessLimit");
+    private static QName stimestampFreshnessLimit  =  new QName(Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS,"timestampFreshnessLimit"); 
     private static QName smaxNonceAge =  new QName(Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS,"maxNonceAge");
     private AssertionFitness fitness = AssertionFitness.IS_VALID;
     /** Creates a new instance of ValidatorConfiguration */
