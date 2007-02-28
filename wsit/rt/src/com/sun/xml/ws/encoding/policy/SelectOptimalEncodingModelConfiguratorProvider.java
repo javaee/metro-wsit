@@ -79,7 +79,7 @@ public class SelectOptimalEncodingModelConfiguratorProvider implements ModelConf
                     PolicyAssertion assertion = policyAssertion.next();
                     if(SELECT_OPTIMAL_ENCODING_ASSERTION.equals(assertion.getName())){
                         String value = assertion.getAttributeValue(enabled);
-                        boolean isSelectOptimalEncodingEnabled = Boolean.valueOf(value.trim());
+                        boolean isSelectOptimalEncodingEnabled = value == null || Boolean.valueOf(value.trim());
                         port.addFeature(
                                 new SelectOptimalEncodingFeature(isSelectOptimalEncodingEnabled));
                     } 
