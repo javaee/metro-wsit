@@ -47,8 +47,8 @@
         <mkdir dir="${backup.dir}"/>
         <copy todir="${backup.dir}" failonerror="false">
             <fileset dir="${as.home}/bin" includes="wsimport${ext}, wsgen${ext}, xjc${ext}, schemagen${ext}"/>
-            <fileset dir="${as.home}/lib" includes="webservices-rt.jar, webservices-tools.jar"/>
-            <fileset dir="${as.home}/lib/endorsed" includes="webservices-api.jar"/>
+            <fileset dir="${as.lib.home}" includes="webservices-rt.jar, webservices-tools.jar"/>
+            <fileset dir="${as.lib.home}/endorsed" includes="webservices-api.jar"/>
         </copy>
     </target>
 
@@ -61,7 +61,11 @@
                 <include name="webservices-tools.jar"/>
             </fileset>  
         </copy>
-
+        <copy todir="${as.lib.home}/endorsed" overwrite="true">
+            <fileset dir="${basedir}/lib">
+                <include name="webservices-api.jar"/>
+            </fileset>
+        </copy>
         <echo message="... installation complete."/>
     </target>
 
@@ -126,13 +130,23 @@ set CLASSPATH=%WSIT_CLASSPATH%;</replacevalue>
     </target>
 
     <target name="help">
-        <echo message="install  : "/>
+        <echo message="install: "/>
         <echo message="  Installs WSIT 1.0 EA on GlassFish v2"/>
+        <echo/>
+        <echo message="  NOTE: If using JDK 6, adding -Dinstall.api='true' when invoking the 'install' target will copy"/>
+        <echo message="  webservices-api.jar into JAVA_HOME/lib/endorsed"/>
+        <echo message="  to prevent conflicts between the JAX-WS 2.0 implementation bundled with JDK 6 and JAX-WS 2.1 bundled with WSIT."/>
+        <echo message="  For JDK 5, it is unnecessary to copy 'webservices-api.jar' to the 'endorsed' directory but doing so will not cause problems."/>
+        <echo/>
+        <echo message="install-api: "/>
+        <echo message="  Installs 'webservices-api.jar' into JAVA_HOME/lib/endorsed (and nothing else)"/>
+        <echo message="  Only needed for JDK 6 and only if -Dinstall.api='true' was not passed during WSIT installation"/>
+        <echo/>
         <echo message="uninstall: "/>
         <echo message="  Uninstalls WSIT 1.0 EA from GlassFish v2"/>
         <echo/>
-        <echo message="  Make sure AS_HOME is set to the installation directory of GlassFish v2."/>
+        <echo message="AS_HOME is set to the installation directory of GlassFish v2."/>
         <echo/>
-        <echo message="  Usage: ANT_HOME/bin/ant -f wsit-on-glassfish.xml install"/>
+        <echo message="Usage: ANT_HOME/bin/ant -f wsit-on-glassfish.xml [-Dinstall.api='true'] {install,uninstall}"/>
     </target>
 </project>
