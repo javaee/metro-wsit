@@ -24,7 +24,7 @@ package com.sun.xml.ws.security.impl.policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import com.sun.xml.ws.policy.privateutil.LocalizationMessages;
+
 public class Constants {
     
     
