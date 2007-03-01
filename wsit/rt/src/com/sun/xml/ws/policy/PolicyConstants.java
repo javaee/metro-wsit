@@ -35,7 +35,7 @@ public final class PolicyConstants {
     public static final String POLICY_NAMESPACE_URI = "http://schemas.xmlsoap.org/ws/2004/09/policy";
 
     /**
-     * Sun proprietary WS-Policy namespace URI
+     * Sun proprietary policy namespace URI
      */       
     public static final String SUN_POLICY_NAMESPACE_URI = "http://java.sun.com/xml/ns/wsit/policy";
 
@@ -43,6 +43,11 @@ public final class PolicyConstants {
      * Default WS-Policy namespace prefix
      */       
     public static final String POLICY_NAMESPACE_PREFIX = "wsp";
+
+    /**
+     * Sun proprietary policy namespace prefix
+     */       
+    public static final String SUN_POLICY_NAMESPACE_PREFIX = "sunwsp";
 
     /**
      * Standard WS-Security Utility namespace URI, used in Policy Id

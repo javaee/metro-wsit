@@ -83,6 +83,13 @@ public final class XmlPolicyModelMarshaller extends PolicyModelMarshaller {
         final TypedXmlWriter policy = TXW.create(PolicyConstants.POLICY, TypedXmlWriter.class, serializer);
         
         Map<String, String> nsMap = model.getNamespaceToPrefixMapping();
+        
+        if (!marshallInvisible) {
+            if (nsMap.containsKey(PolicyConstants.SUN_POLICY_NAMESPACE_URI)) {
+                nsMap.remove(PolicyConstants.SUN_POLICY_NAMESPACE_URI);
+            }
+        }
+        
         for (Map.Entry<String, String> nsMappingEntry : nsMap.entrySet()) {            
             policy._namespace(nsMappingEntry.getKey(), nsMappingEntry.getValue());
         }

@@ -282,23 +282,23 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
         return unmodifiableViewOnContent;
     }
     
-    Collection<ModelNode> getAssertionParameterNodeChildren() {
-        Collection<ModelNode> result = null;
-        
-        if (isAssertionRelatedNode()) {
-            
-            result = new LinkedList<ModelNode>();
-            
-            for (ModelNode child : content) {
-                if (child.type == Type.ASSERTION_PARAMETER_NODE) {
-                    result.add(child);
-                }
-            }
-        }
-        
-        return result;
-    }
-    
+//    Collection<ModelNode> getAssertionParameterNodeChildren() {
+//        Collection<ModelNode> result = null;
+//        
+//        if (isAssertionRelatedNode()) {
+//            
+//            result = new LinkedList<ModelNode>();
+//            
+//            for (ModelNode child : content) {
+//                if (child.type == Type.ASSERTION_PARAMETER_NODE) {
+//                    result.add(child);
+//                }
+//            }
+//        }
+//        
+//        return result;
+//    }
+//    
     /**
      * Sets the parent model reference on the node and its children. The method may be invoked only on the root node
      * of the policy source model (or - in general - on a model node that dose not reference a parent node). Otherwise an

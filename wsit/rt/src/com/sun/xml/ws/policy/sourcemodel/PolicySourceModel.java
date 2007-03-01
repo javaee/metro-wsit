@@ -27,11 +27,16 @@ import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.privateutil.LocalizationMessages;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Queue;
+import java.util.Set;
+import javax.xml.namespace.QName;
 
 /**
  * This class is a root of unmarshaled policy source structure. Each instance of the class contains factory method
@@ -42,10 +47,45 @@ import java.util.Map;
 public final class PolicySourceModel implements Cloneable {
     private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicySourceModel.class);
     
+    // TODO: move responisbility for default namespacing to the domain SPI implementation
+    private static final Map<String, String> defaultNamespaceToPrefixMap = new HashMap<String, String>();
+    static {
+        defaultNamespaceToPrefixMap.put(PolicyConstants.POLICY_NAMESPACE_URI, PolicyConstants.POLICY_NAMESPACE_PREFIX);
+        defaultNamespaceToPrefixMap.put(PolicyConstants.SUN_POLICY_NAMESPACE_URI, PolicyConstants.SUN_POLICY_NAMESPACE_PREFIX);
+        
+//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.encoding.policy.EncodingConstants.OPTIMIZED_MIME_NS, "");
+//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.encoding.policy.EncodingConstants.ENCODING_NS, "");
+//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.encoding.policy.EncodingConstants.SUN_ENCODING_CLIENT_NS, "");
+//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.encoding.policy.EncodingConstants.SUN_FI_SERVICE_NS, "");
+//
+//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.security.impl.policy.Constants.TRUST_NS, "");
+//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.security.impl.policy.Constants.SECURITY_POLICY_NS, "");
+        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.security.impl.policy.Constants.UTILITY_NS, PolicyConstants.WSU_NAMESPACE_PREFIX);
+//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.security.impl.policy.Constants.SUN_WSS_SECURITY_CLIENT_POLICY_NS, "");
+//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.security.impl.policy.Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS, "");
+//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.security.impl.policy.Constants.SUN_TRUST_CLIENT_SECURITY_POLICY_NS, "");
+//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.security.impl.policy.Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS, "");
+//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.security.impl.policy.Constants.SUN_SECURE_CLIENT_CONVERSATION_POLICY_NS, "");
+//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.security.impl.policy.Constants.SUN_SECURE_SERVER_CONVERSATION_POLICY_NS, "");
+//
+//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.rm.Constants.version, "");
+//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.rm.Constants.microsoftVersion, "");
+//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.rm.Constants.sunVersion, "");
+//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.rm.Constants.sunClientVersion, "");
+//
+//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.transport.tcp.wsit.TCPConstants.TCPTRANSPORT_POLICY_NAMESPACE_URI, "");
+//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.transport.tcp.wsit.TCPConstants.CLIENT_TRANSPORT_NS, "");
+//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.transport.tcp.wsit.TCPConstants.TCPTRANSPORT_CONNECTION_MANAGEMENT_NAMESPACE_URI, "");
+//
+//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.api.addressing.AddressingVersion.MEMBER.policyNsUri, "");
+//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.api.addressing.AddressingVersion.W3C.policyNsUri, "");
+//
+//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.tx.common.Constants.WSAT_SOAP_NSURI, "");
+    }
+    
     private ModelNode rootNode;
     private String policyId;
     private String policyName;
-    private Map<String, String> nsToPrefixMap;
     
     private List<ModelNode> references = new LinkedList<ModelNode>(); // links to policy reference nodes
     private boolean expanded = false;
@@ -72,20 +112,18 @@ public final class PolicySourceModel implements Cloneable {
     
     /**
      * Private constructor that creats new policy source model instance without any
-     * id or name identifier. The namespace-to-prefix map is initialized with mapping 
-     * of policy namespace to the default value set by 
+     * id or name identifier. The namespace-to-prefix map is initialized with mapping
+     * of policy namespace to the default value set by
      * {@link PolicyConstants#POLICY_NAMESPACE_PREFIX POLICY_NAMESPACE_PREFIX constant}
      */
     private PolicySourceModel() {
         this.rootNode = ModelNode.createRootPolicyNode(this);
-        this.nsToPrefixMap = new HashMap<String, String>();
-        this.nsToPrefixMap.put(PolicyConstants.POLICY_NAMESPACE_URI, PolicyConstants.POLICY_NAMESPACE_PREFIX);
     }
     
     /**
      * Private constructor that creats new policy source model instance with given
      * id or name identifier.
-     * 
+     *
      * @param policyId relative policy reference within an XML document. May be {@code null}.
      * @param policyName absloute IRI of policy expression. May be {@code null}.
      */
@@ -126,13 +164,23 @@ public final class PolicySourceModel implements Cloneable {
      * Provides information about how namespaces used in this {@link PolicySourceModel}
      * instance should be mapped to thier default prefixes when marshalled.
      *
-     * @return immutable map that holds information about namespaces used in the 
-     *         model and their mapping to prefixes that should be used when marshalling 
+     * @return immutable map that holds information about namespaces used in the
+     *         model and their mapping to prefixes that should be used when marshalling
      *         this model.
      */
-    public Map<String, String> getNamespaceToPrefixMapping() {
-        return Collections.unmodifiableMap(nsToPrefixMap);
-    }    
+    Map<String, String> getNamespaceToPrefixMapping() {
+        Map<String, String> nsToPrefixMap = new HashMap<String, String>();
+
+        Collection<String> namespaces = getUsedNamespaces();
+        for (String namespace : namespaces) {
+            String prefix = getDefaultPrefix(namespace);
+            if (prefix != null) {
+                nsToPrefixMap.put(namespace, prefix);
+            }
+        }        
+        
+        return nsToPrefixMap;
+    }
     
     /**
      * An {@code Object.equals(Object obj)} method override.
@@ -264,10 +312,10 @@ public final class PolicySourceModel implements Cloneable {
     }
     
     /**
-     * Adds new policy reference to the policy source model. The method is used by 
+     * Adds new policy reference to the policy source model. The method is used by
      * the ModelNode instances of type POLICY_REFERENCE that need to register themselves
      * as policy references in the model.
-     * 
+     *
      * @param node policy reference model node to be registered as a policy reference
      *        in this model.
      */
@@ -280,14 +328,57 @@ public final class PolicySourceModel implements Cloneable {
     }
     
     /**
-     * Adds new namespace to prefix mapping, so that marshalling code can use these 
-     * predefined prefixes when marshaling policy source model.
+     * Iterates through policy vocabulary and extracts set of namespaces used in
+     * the policy expression.
      *
-     * @param namespace namespace to be registered
-     * @param prefix prefix to be used for the namespace
+     * @param policy policy instance to check fro used namespaces
+     * @return collection of used namespaces within given policy instance
      */
-    void addNewNamespaceToPrefixMapping(String namespace, String prefix) {
-        nsToPrefixMap.put(namespace, prefix);
+    private Collection<String> getUsedNamespaces() {
+        Set<String> namespaces = new HashSet<String>();
+        namespaces.add(PolicyConstants.POLICY_NAMESPACE_URI);
+        
+        if (this.policyId != null) {
+            namespaces.add(PolicyConstants.WSU_NAMESPACE_URI);            
+        }
+        
+        Queue<ModelNode> nodesToBeProcessed = new LinkedList<ModelNode>();
+        nodesToBeProcessed.add(rootNode);
+        
+        ModelNode processedNode;
+        while ((processedNode = nodesToBeProcessed.poll()) != null) {
+            for (ModelNode child : processedNode.getContent()) {
+                if (child.hasChildren()) {
+                    nodesToBeProcessed.offer(child);
+                }
+                
+                if (child.isAssertionRelatedNode()) {
+                    AssertionData nodeData = child.getNodeData();
+                    namespaces.add(nodeData.getName().getNamespaceURI());
+                    if (nodeData.isPrivateAttributeSet()) {
+                        namespaces.add(PolicyConstants.SUN_POLICY_NAMESPACE_URI);
+                    }
+                    
+                    for (Entry<QName, String> attribute : nodeData.getAttributesSet()) {
+                        namespaces.add(attribute.getKey().getNamespaceURI());
+                    }                    
+                }
+            }
+        }
+        
+        return namespaces;
+    }
+    
+    /**
+     * Method retrieves default prefix for given namespace. Method returns null if
+     * no default prefix is defined..
+     *
+     * @param namespace to get default prefix for.
+     * @return default prefix for given namespace. May return {@code null} if the
+     *         default prefix for given namespace is not defined.
+     */
+    private String getDefaultPrefix(String namespace) {
+        return defaultNamespaceToPrefixMap.get(namespace);
     }
 }
 

@@ -44,39 +44,7 @@ import javax.xml.namespace.QName;
 public final class PolicyModelGenerator {
     private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyModelTranslator.class);
     private static final PolicyModelGenerator generator = new PolicyModelGenerator();
-    
-    // TODO: move responisbility for default namespacing to the domain SPI implementation
-    private static final Map<String, String> defaultNamespaceToPrefixMap = new HashMap<String, String>();
-    static {
-//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.encoding.policy.EncodingConstants.OPTIMIZED_MIME_NS, "");
-//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.encoding.policy.EncodingConstants.ENCODING_NS, "");
-//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.encoding.policy.EncodingConstants.SUN_ENCODING_CLIENT_NS, "");
-//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.encoding.policy.EncodingConstants.SUN_FI_SERVICE_NS, "");
-//        
-//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.security.impl.policy.Constants.TRUST_NS, "");
-//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.security.impl.policy.Constants.SECURITY_POLICY_NS, "");
-//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.security.impl.policy.Constants.SUN_WSS_SECURITY_CLIENT_POLICY_NS, "");
-//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.security.impl.policy.Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS, "");
-//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.security.impl.policy.Constants.SUN_TRUST_CLIENT_SECURITY_POLICY_NS, "");
-//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.security.impl.policy.Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS, "");
-//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.security.impl.policy.Constants.SUN_SECURE_CLIENT_CONVERSATION_POLICY_NS, "");
-//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.security.impl.policy.Constants.SUN_SECURE_SERVER_CONVERSATION_POLICY_NS, "");
-//        
-//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.rm.Constants.version, "");
-//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.rm.Constants.microsoftVersion, "");
-//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.rm.Constants.sunVersion, "");
-//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.rm.Constants.sunClientVersion, "");
-//        
-//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.transport.tcp.wsit.TCPConstants.TCPTRANSPORT_POLICY_NAMESPACE_URI, "");
-//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.transport.tcp.wsit.TCPConstants.CLIENT_TRANSPORT_NS, "");
-//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.transport.tcp.wsit.TCPConstants.TCPTRANSPORT_CONNECTION_MANAGEMENT_NAMESPACE_URI, "");
-//        
-//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.api.addressing.AddressingVersion.MEMBER.policyNsUri, "");
-//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.api.addressing.AddressingVersion.W3C.policyNsUri, "");
-//        
-//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.tx.common.Constants.WSAT_SOAP_NSURI, "");
-    }
-    
+       
     private PolicyModelGenerator() {
         
     }
@@ -105,13 +73,6 @@ public final class PolicyModelGenerator {
             LOGGER.fine(LocalizationMessages.WSP_0047_POLICY_IS_NULL_RETURNING());
         } else {
             model = PolicySourceModel.createPolicySourceModel(policy.getId(), policy.getName());
-            Collection<String> namespaces = getUsedNamespaces(policy);
-            for (String namespace : namespaces) {
-                String prefix = getDefaultPrefix(namespace);
-                if (prefix != null) {
-                    model.addNewNamespaceToPrefixMapping(namespace, prefix);
-                }
-            }
             
             final ModelNode rootNode = model.getRootNode();
             final ModelNode exactlyOneNode = rootNode.createChildExactlyOneNode();
@@ -176,33 +137,5 @@ public final class PolicyModelGenerator {
                 translate(assertionParameter.getNestedAssertionsIterator(), assertionParameterNode);
             }
         }
-    }
-    
-    /**
-     * Iterates through policy vocabulary and extracts set of namespaces used in
-     * the policy expression.
-     *
-     * @param policy policy instance to check fro used namespaces
-     * @return collection of used namespaces within given policy instance
-     */
-    private Collection<String> getUsedNamespaces(Policy policy) {
-        Collection<QName> vocabulary = policy.getVocabulary();
-        Set<String> namespaces = new HashSet<String>();
-        for (QName assertionType : vocabulary) {
-            namespaces.add(assertionType.getNamespaceURI());
-        }
-        return namespaces;
-    }
-    
-    /**
-     * Method retrieves default prefix for given namespace. Method returns null if
-     * no default prefix is defined..
-     *
-     * @param namespace to get default prefix for.
-     * @return default prefix for given namespace. May return {@code null} if the
-     *         default prefix for given namespace is not defined.
-     */
-    private String getDefaultPrefix(String namespace) {
-        return defaultNamespaceToPrefixMap.get(namespace);
     }
 }
