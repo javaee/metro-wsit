@@ -67,7 +67,7 @@ import java.util.Iterator;
  * This class process transactional context for client outgoing message.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @since 1.0
  */
 // suppress known deprecation warnings about using pipes.
@@ -141,7 +141,7 @@ public class TxClientPipe implements Pipe {
      * to give Pipes a chance to clean up any resources.
      */
     public void preDestroy() {
-        // no-op
+        next.preDestroy();
     }
 
     /**
