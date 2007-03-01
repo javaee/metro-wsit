@@ -31,8 +31,6 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 
 import org.xml.sax.SAXException;
-
-import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.server.SDDocumentSource;
@@ -53,7 +51,7 @@ import java.io.File;
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public final class PolicyConfigParser {
-    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyConfigParser.class);    
+    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyConfigParser.class);
     private static final XMLInputFactory XML_INPUT_FACTORY = XMLInputFactory.newInstance();
     
     
@@ -261,9 +259,7 @@ public final class PolicyConfigParser {
                 throw LOGGER.logSevereException(new IllegalArgumentException(LocalizationMessages.WSP_1028_FAILED_TO_READ_NULL_WSIT_CFG()));
             }
             
-            configFileIS = configFileUrl.openStream();
-            final XMLStreamBuffer buffer = XMLStreamBuffer.createNewBufferFromXMLStreamReader(XML_INPUT_FACTORY.createXMLStreamReader(configFileIS));
-            final SDDocumentSource doc = SDDocumentSource.create(configFileUrl, buffer);
+            final SDDocumentSource doc = SDDocumentSource.create(configFileUrl);
             final XMLEntityResolver.Parser parser =  new XMLEntityResolver.Parser(doc);
             model = WSDLModel.WSDLParser.parse(
                     parser,
@@ -280,7 +276,6 @@ public final class PolicyConfigParser {
         } catch (SAXException ex) {
             throw LOGGER.logSevereException(new PolicyException(LocalizationMessages.WSP_1002_WSIT_CFG_FILE_PROCESSING_FAILED(configFileUrl.toString()), ex));
         } finally {
-            PolicyUtils.IO.closeResource(configFileIS);
             LOGGER.exiting(model);
         }
     }
