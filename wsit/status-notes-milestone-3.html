@@ -13,10 +13,7 @@
 <!--
 Created       : 2007 Feb 13 (Tue) 10:32:31 by Harold Carr.
 -->
-<pre>
-Last Modified : $Date: 2007-03-01 12:45:21 $ by $Author: sekhar $
-
-</pre>
+<pre>Last Modified : $Date: 2007-03-01 13:30:30 $ by $Author: kumarjayanti $<br><br></pre>
 <h5>Date: February 21, 2007</h5>
 <h2>Introduction</h2>
 <p>This document provides the status of the interoperability testing
@@ -114,14 +111,7 @@ WSIT -&gt; WSIT : 20/20
 
 
 <b>Secure Scenarios </b></pre>
-<pre wrap="">
-WSIT -&gt; WSIT : 18/18 
-
-WSIT -&gt; WCF  : 18/18
-
- WCF -&gt; WSIT :&nbsp; 18/18 
-
-</pre>
+<pre wrap="">WSIT -&gt; WSIT : 18/18 <br><br>WSIT -&gt; WCF  : 18/18<br><br> WCF -&gt; WSIT :&nbsp; 18/18 <br><br></pre>
 <h4>What is Not Implemented</h4>
 <p>All MTOM functionality has been implemented.<br>
 </p>
@@ -172,17 +162,10 @@ release
 <hr>
 <h2><a name="35385"></a>Security Status</h2>
 <p></p>
-<pre>Updated: February 22, 2007</pre>
+<pre>Updated: March 1, 2007</pre>
 <p></p>
 <h4>WCF Interoperability</h4>
-<pre>
-   WCF-&gt;WSIT :   26/26
-
-  WSIT-&gt;WCF  :   25/26  (One Scenario fails due to WCF Issue# CSD 4051)
-
-  WSIT-&gt;WSIT :   26/26
-
-</pre>
+<pre>   WCF-&gt;WSIT :   26/26<br><br>  WSIT-&gt;WCF  :   25/26  (One Scenario fails due to WCF Issue# CSD 4051)<br><br>  WSIT-&gt;WSIT :   26/26<br><br></pre>
 <h4>What is Not Implemented</h4>
 <p>The following features have&nbsp; not been implemented:</p>
 <ul>
@@ -739,14 +722,7 @@ do not work because of a Bug.<br>
 <pre>Updated: February 22, 2007</pre>
 <p></p>
 <h4>WCF Interoperability</h4>
-<pre>
-  WCF-&gt;WSIT : 35/36 : (starting from WSDL)
-
- WSIT-&gt;WCF  : 35/36 : (starting from WSDL)
-
- WSIT-&gt;WSIT : 36/36 : (starting from WSDL)
-
-</pre>
+<pre>  WCF-&gt;WSIT : 35/36 : (starting from WSDL)<br><br> WSIT-&gt;WCF  : 35/36 : (starting from WSDL)<br><br> WSIT-&gt;WSIT : 36/36 : (starting from WSDL)<br><br></pre>
 <p>NOTE: No test scenarios were executed that started from Java.</p>
 <h4>What is Not Implemented</h4>
 <p>The following features have not been implemented:</p>
@@ -762,26 +738,7 @@ do not work because of a Bug.<br>
 <pre>Updated: February 22, 2006</pre>
 <p></p>
 <h4>WCF Interoperability</h4>
-<pre>
-   Client -&gt;   STS    -&gt;  Service
-
-   --------------------------------------------------------------
-
-     WCF  -&gt;  WSIT    -&gt;  WCF         :  4/4
-
-     WCF  -&gt;   WCF    -&gt;  WSIT        :  4/4
-
-     WCF  -&gt;  WSIT    -&gt;  WSIT        :  4/4 : (starting from WSDL)
-
-    WSIT  -&gt;  WSIT    -&gt;  WSIT        :  5/5 : (starting from WSDL)
-
-    WSIT  -&gt;  WSIT    -&gt;  WCF         :  5/5 : (starting from WSDL)
-
-    WSIT  -&gt;   WCF    -&gt;  WCF         :  5/5 : (starting from WSDL)
-
-    WSIT  -&gt;   WCF    -&gt;  WSIT        :  5/5 : (starting from WSDL)
-
-</pre>
+<pre>   Client -&gt;   STS    -&gt;  Service<br><br>   --------------------------------------------------------------<br><br>     WCF  -&gt;  WSIT    -&gt;  WCF         :  4/4<br><br>     WCF  -&gt;   WCF    -&gt;  WSIT        :  4/4<br><br>     WCF  -&gt;  WSIT    -&gt;  WSIT        :  4/4 : (starting from WSDL)<br><br>    WSIT  -&gt;  WSIT    -&gt;  WSIT        :  5/5 : (starting from WSDL)<br><br>    WSIT  -&gt;  WSIT    -&gt;  WCF         :  5/5 : (starting from WSDL)<br><br>    WSIT  -&gt;   WCF    -&gt;  WCF         :  5/5 : (starting from WSDL)<br><br>    WSIT  -&gt;   WCF    -&gt;  WSIT        :  5/5 : (starting from WSDL)<br><br></pre>
 <p>NOTE: No test scenarios were executed that started from Java.</p>
 <h4>What is Not Implemented</h4>
 <p>The following features have not been implemented:</p>
@@ -799,30 +756,7 @@ do not work because of a Bug.<br>
 <p></p>
 <h4>WCF Interoperability</h4>
 (Test config: GF b33c, MS WCF RTM, WSIT M3(b07), JDK 5, JDK 6)
-<pre>
-non-secure (meaning http used for WS-TX protocol messages, no security on application messages):
-
-
-
- WCF-&gt;WSIT : 0/0 (interop w/MS requires HTTPS)
-
-WSIT-&gt;WCF  : 0/0 (interop w/MS requires HTTPS)
-
-WSIT-&gt;WSIT : 3/3
-
-
-
-secure (meaning https used for WS-TX protocol messages, no security on application messages):
-
-
-
- WCF-&gt;WSIT : 3/3
-
-WSIT-&gt;WCF  : 3/3
-
-WSIT-&gt;WSIT : 3/3
-
-</pre>
+<pre>non-secure (meaning http used for WS-TX protocol messages, no security on application messages):<br><br><br><br> WCF-&gt;WSIT : 0/0 (interop w/MS requires HTTPS)<br><br>WSIT-&gt;WCF  : 0/0 (interop w/MS requires HTTPS)<br><br>WSIT-&gt;WSIT : 3/3<br><br><br><br>secure (meaning https used for WS-TX protocol messages, no security on application messages):<br><br><br><br> WCF-&gt;WSIT : 3/3<br><br>WSIT-&gt;WCF  : 3/3<br><br>WSIT-&gt;WSIT : 3/3<br><br></pre>
 <h4>What is Not Implemented</h4>
 <p> </p>
 <ul>
@@ -912,30 +846,7 @@ open the dialog again.</td>
 <pre>Updated: February 22, 2007</pre>
 <p></p>
 <h4>WCF Interoperability</h4>
-<pre>
-non-secure:
-
-
-
- WCF-&gt;WSIT : 70/70
-
-WSIT-&gt;WCF  : 69/69
-
-WSIT-&gt;WSIT : 86/86
-
-
-
-secure:
-
-
-
- WCF-&gt;WSIT : Not tested
-
-WSIT-&gt;WCF  : Not tested
-
-WSIT-&gt;WSIT : Not tested
-
-</pre>
+<pre>non-secure:<br><br><br><br> WCF-&gt;WSIT : 70/70<br><br>WSIT-&gt;WCF  : 69/69<br><br>WSIT-&gt;WSIT : 86/86<br><br><br><br>secure:<br><br><br><br> WCF-&gt;WSIT : Not tested<br><br>WSIT-&gt;WCF  : Not tested<br><br>WSIT-&gt;WSIT : Not tested<br><br></pre>
 <h4>Known Issues</h4>
 <ul>
   <li>A WCF endpoint responds back with "HTTP 400 Bad Request" if an
