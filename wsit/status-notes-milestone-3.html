@@ -14,7 +14,8 @@
 Created       : 2007 Feb 13 (Tue) 10:32:31 by Harold Carr.
 -->
 <pre>
-Last Modified : $Date: 2007-02-28 23:23:16 $ by $Author: haroldcarr $
+Last Modified : $Date: 2007-03-01 07:58:07 $ by $Author: kumarjayanti $
+
 </pre>
 <h5>Date: February 21, 2007</h5>
 <h2>Introduction</h2>
@@ -82,7 +83,6 @@ of your own, you will need to do the same thing. The following code
 snippet excludes the conflicting Jar files from the classpath used to
 run the tools and the client application:</p>
 <pre>   &lt;path id="wsit.classpath"&gt;<br>       &lt;pathelement location="${java.home}/../lib/tools.jar"/&gt;<br>       &lt;fileset dir="${lib.home}"&gt;<br>           &lt;include name="webservices.jar"/&gt;<br>           &lt;include name="webservices-tools.jar"/&gt;<br>        &lt;/fileset&gt;<br>   &lt;/path&gt;<br></pre>
-
 <!-- ================================================== -->
 <br>
 <hr>
@@ -104,15 +104,23 @@ run the tools and the client application:</p>
 <h4>WCF Interoperability</h4>
 <pre wrap="">Internal endpoint running Windows RTM and Vista. All the MTOM interoperability tests passes with success.</pre>
 <pre wrap=""><b>Non-Secure Scenarios <br></b>
+
  WCF -&gt; WSIT : 20/20 
+
 WSIT -&gt; WCF  : 20/20 
+
 WSIT -&gt; WSIT : 20/20 
+
+
 
 <b>Secure Scenarios </b></pre>
 <pre wrap="">
 WSIT -&gt; WSIT : 18/18 
+
 WSIT -&gt; WCF  : 18/18
+
  WCF -&gt; WSIT :&nbsp; 18/18 
+
 </pre>
 <h4>What is Not Implemented</h4>
 <p>All MTOM functionality has been implemented.<br>
@@ -123,19 +131,7 @@ WSIT -&gt; WCF  : 18/18
 <pre>Updated: December 11, 2006</pre>
 <p></p>
 <h4>WCF Interoperability</h4>
-<pre>non-secure:
-
-WSIT-&gt;WCF  (Schema and WSDL Interop scenario 1):   827/852 (starting from WCF WSDL)
- WCF-&gt;WSIT (Schema and WSDL Interop scenario 2):   851/851 (starting from WCF WSDL) 
- WCF-&gt;WSIT (Schema and WSDL Interop scenario 3):  1061/1091 (Starting from Java)
-WSIT-&gt;WSIT  : 824/852
-
-secure:
-
-(not tested)
-
-</pre>
-
+<pre>non-secure:<br><br><br><br>WSIT-&gt;WCF  (Schema and WSDL Interop scenario 1):   827/852 (starting from WCF WSDL)<br><br> WCF-&gt;WSIT (Schema and WSDL Interop scenario 2):   851/851 (starting from WCF WSDL) <br><br> WCF-&gt;WSIT (Schema and WSDL Interop scenario 3):  1061/1091 (Starting from Java)<br><br>WSIT-&gt;WSIT  : 824/852<br><br><br><br>secure:<br><br><br><br>(not tested)<br><br><br><br></pre>
 <h4>What is Not Implemented</h4>
 <h4>Known Issues</h4>
 <ul>
@@ -150,17 +146,7 @@ secure:
 <pre>Updated: February 21, 2006</pre>
 <p></p>
 <h4>WCF Interoperability</h4>
-<pre>non-secure:
-
-  WCF-&gt;WSIT :  2/2
-  WSIT-&gt;WCF :  3/3
-
-secure:
-
-  WCF-&gt;WSIT :  0/2 : (not tested)
-  WSIT-&gt;WCF :  2/2
-</pre>
-
+<pre>non-secure:<br><br><br><br>  WCF-&gt;WSIT :  2/2<br><br>  WSIT-&gt;WCF :  3/3<br><br><br><br>secure:<br><br><br><br>  WCF-&gt;WSIT :  0/2 : (not tested)<br><br>  WSIT-&gt;WCF :  2/2<br><br></pre>
 <p> NOTE: The interoperability tests do not include duplex binding
 tests.</p>
 <!--<h4>What is Not Implemented</h4>
@@ -191,8 +177,11 @@ release
 <h4>WCF Interoperability</h4>
 <pre>
    WCF-&gt;WSIT :   26/26
+
   WSIT-&gt;WCF  :   25/26  (One Scenario fails due to WCF Issue# CSD 4051)
+
   WSIT-&gt;WSIT :   26/26
+
 </pre>
 <h4>What is Not Implemented</h4>
 <p>The following features have&nbsp; not been implemented:</p>
@@ -509,6 +498,12 @@ the server side by setting :&nbsp; <span
   </li>
   <li>Issue# 318 :&nbsp; UnsupportedOperationException when message
 dumping is enabled&nbsp; <span style="font-family: monospace;">: </span>com.sun.xml.ws.assembler.client.action=true</li>
+  <li>Issue#360&nbsp; : When you use the NetBeans tooling to configure
+security&nbsp; mechanisms and you&nbsp; see&nbsp; the message&nbsp;
+"No security header found in message" on running a client that
+previously worked, you need to
+restart GlassFish. Although this issue is fixed in WSIT Trunk, the
+Milestone 3 bits do not have the fix in them.</li>
 </ul>
 <table border="1" cellpadding="2" cellspacing="3">
   <tbody>
@@ -746,10 +741,12 @@ do not work because of a Bug.<br>
 <h4>WCF Interoperability</h4>
 <pre>
   WCF-&gt;WSIT : 35/36 : (starting from WSDL)
- WSIT-&gt;WCF  : 35/36 : (starting from WSDL)
- WSIT-&gt;WSIT : 36/36 : (starting from WSDL)
-</pre>
 
+ WSIT-&gt;WCF  : 35/36 : (starting from WSDL)
+
+ WSIT-&gt;WSIT : 36/36 : (starting from WSDL)
+
+</pre>
 <p>NOTE: No test scenarios were executed that started from Java.</p>
 <h4>What is Not Implemented</h4>
 <p>The following features have not been implemented:</p>
@@ -767,14 +764,23 @@ do not work because of a Bug.<br>
 <h4>WCF Interoperability</h4>
 <pre>
    Client -&gt;   STS    -&gt;  Service
+
    --------------------------------------------------------------
+
      WCF  -&gt;  WSIT    -&gt;  WCF         :  4/4
+
      WCF  -&gt;   WCF    -&gt;  WSIT        :  4/4
+
      WCF  -&gt;  WSIT    -&gt;  WSIT        :  4/4 : (starting from WSDL)
+
     WSIT  -&gt;  WSIT    -&gt;  WSIT        :  5/5 : (starting from WSDL)
+
     WSIT  -&gt;  WSIT    -&gt;  WCF         :  5/5 : (starting from WSDL)
+
     WSIT  -&gt;   WCF    -&gt;  WCF         :  5/5 : (starting from WSDL)
+
     WSIT  -&gt;   WCF    -&gt;  WSIT        :  5/5 : (starting from WSDL)
+
 </pre>
 <p>NOTE: No test scenarios were executed that started from Java.</p>
 <h4>What is Not Implemented</h4>
@@ -796,17 +802,27 @@ do not work because of a Bug.<br>
 <pre>
 non-secure (meaning http used for WS-TX protocol messages, no security on application messages):
 
+
+
  WCF-&gt;WSIT : 0/0 (interop w/MS requires HTTPS)
+
 WSIT-&gt;WCF  : 0/0 (interop w/MS requires HTTPS)
+
 WSIT-&gt;WSIT : 3/3
+
+
 
 secure (meaning https used for WS-TX protocol messages, no security on application messages):
 
- WCF-&gt;WSIT : 3/3
-WSIT-&gt;WCF  : 3/3
-WSIT-&gt;WSIT : 3/3
-</pre>
 
+
+ WCF-&gt;WSIT : 3/3
+
+WSIT-&gt;WCF  : 3/3
+
+WSIT-&gt;WSIT : 3/3
+
+</pre>
 <h4>What is Not Implemented</h4>
 <p> </p>
 <ul>
@@ -899,25 +915,37 @@ open the dialog again.</td>
 <pre>
 non-secure:
 
+
+
  WCF-&gt;WSIT : 70/70
+
 WSIT-&gt;WCF  : 69/69
+
 WSIT-&gt;WSIT : 86/86
+
+
 
 secure:
 
- WCF-&gt;WSIT : Not tested
-WSIT-&gt;WCF  : Not tested
-WSIT-&gt;WSIT : Not tested
-</pre>
 
+
+ WCF-&gt;WSIT : Not tested
+
+WSIT-&gt;WCF  : Not tested
+
+WSIT-&gt;WSIT : Not tested
+
+</pre>
 <h4>Known Issues</h4>
 <ul>
   <li>A WCF endpoint responds back with "HTTP 400 Bad Request" if an
 empty Metadata element is sent from the WSIT client.</li>
-<li>When a WCF client tries to send a message to a Tango service, with wsa:FaultTo set to
- "http://www.w3.org/2005/08/addressing/none" , a System.InvalidOperationException is thrown by the WCF runtime (Microsoft bug #: 60972).
-  This bug occurs when a developer manually sets the value of wsa:FaultTo to none, which is not the default.
-   Also this bug occurs both on WCF RTM bits as well as Vista.</li>
+  <li>When a WCF client tries to send a message to a Tango service,
+with wsa:FaultTo set to "http://www.w3.org/2005/08/addressing/none" , a
+System.InvalidOperationException is thrown by the WCF runtime
+(Microsoft bug #: 60972). This bug occurs when a developer manually
+sets the value of wsa:FaultTo to none, which is not the default. Also
+this bug occurs both on WCF RTM bits as well as Vista.</li>
 </ul>
 <!-- ================================================== -->
 <br>
@@ -1061,8 +1089,6 @@ SecurityPolicy:sp:AlgorithmSuite/wsp:Policy/sp:SoapNormalization10</p>
       <p>- SecurityPolicy: sp:AlgorithmSuite/wsp:Policy/sp:XPathFilter20</p>
       </td>
     </tr>
-
-
   </tbody>
 </table>
 <!-- ================================================== --><br>
