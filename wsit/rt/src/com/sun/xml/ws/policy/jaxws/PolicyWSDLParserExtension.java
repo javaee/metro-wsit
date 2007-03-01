@@ -167,6 +167,9 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
     // container for URIs of policies referenced
     private List<String> unresolvedUris = null;
     
+    // urls of xml docs policies were read from
+    final Set<String> urlsRead = new HashSet<String>();
+    
     // structures for policies really needed to build a map
     private LinkedList<String> urisNeeded = new LinkedList<String>();
     private Map<String, PolicySourceModel> modelsNeeded = new HashMap<String, PolicySourceModel>();
@@ -394,6 +397,13 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
         return (fragmentIdx == -1) ? policyUri : policyUri.substring(0, fragmentIdx);
     }
     
+    private String relativeToAbsoluteUrl(String relativeUri, String baseUri) {
+        if ('#' != relativeUri.charAt(0)) {  // TODO: escaped char could be an issue?
+            return relativeUri; // absolute already
+        }
+        return (null == baseUri) ? relativeUri : baseUri + relativeUri;
+    }
+    
     // adding current url even to locally referenced policies
     // in order to distinguish imported policies
     private void processReferenceUri(
@@ -407,14 +417,12 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
         }
         if ('#' != policyUri.charAt(0)) { // external uri (already)
             getUnresolvedUris(false).add(policyUri);
-            addHandlerToMap(map, element, new PolicyRecordHandler(HandlerType.PolicyUri, policyUri));
-        } else { // local (relative) policy uri
-            addHandlerToMap(map, element,
-                    new PolicyRecordHandler(
-                    HandlerType.PolicyUri,
-                    (null == reader.getLocation().getSystemId()) ?
-                        policyUri : reader.getLocation().getSystemId() + policyUri));
         }
+        
+        addHandlerToMap(map, element,
+                new PolicyRecordHandler(
+                HandlerType.PolicyUri,
+                relativeToAbsoluteUrl(policyUri, reader.getLocation().getSystemId())));
     }
     
     private boolean processSubelement(
@@ -691,55 +699,59 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
     
     public void finished(final WSDLParserExtensionContext context) {
         LOGGER.entering();
-        try {
-            // need to make sure proper beginning order of internal policies within unresolvedUris list
-            if (null != expandQueueHead) { // any policies found
-                final List<String> externalUris = getUnresolvedUris(false); // protect list of possible external policies
-                getUnresolvedUris(true); // cleaning up the list only
-                final LinkedList<String> baseUnresolvedUris = new LinkedList<String>();
-                for (PolicyRecord currentRec = expandQueueHead ; null != currentRec ; currentRec = currentRec.next) {
-                    baseUnresolvedUris.addFirst(currentRec.uri);
-                }
-                getUnresolvedUris(false).addAll(baseUnresolvedUris);
-                expandQueueHead = null; // cut the queue off
-                getUnresolvedUris(false).addAll(externalUris);
+        // need to make sure proper beginning order of internal policies within unresolvedUris list
+        if (null != expandQueueHead) { // any policies found
+            final List<String> externalUris = getUnresolvedUris(false); // protect list of possible external policies
+            getUnresolvedUris(true); // cleaning up the list only
+            final LinkedList<String> baseUnresolvedUris = new LinkedList<String>();
+            for (PolicyRecord currentRec = expandQueueHead ; null != currentRec ; currentRec = currentRec.next) {
+                baseUnresolvedUris.addFirst(currentRec.uri);
             }
-            final Set<String> urlsRead = new HashSet<String>();
-            urlsRead.add("");
-            while (!getUnresolvedUris(false).isEmpty()) {
-                final List<String> urisToBeSolvedList = getUnresolvedUris(false);
-                getUnresolvedUris(true); // just cleaning up the list
-                for (String currentUri : urisToBeSolvedList) {
-                    if (!isPolicyProcessed(currentUri)) {
-                        final PolicyRecord prefetchedRecord = getPolicyRecordsPassedBy().get(currentUri);
-                        if (null != prefetchedRecord) {
-                            if (null != prefetchedRecord.unresolvedURIs) {
-                                getUnresolvedUris(false).addAll(prefetchedRecord.unresolvedURIs);
-                            } // end-if null != prefetchedRecord.unresolvedURIs
-                            addNewPolicyNeeded(currentUri, prefetchedRecord.policyModel);
-                        } else { // policy has not been yet passed by
-                            if (urlsRead.contains(getBaseUrl(currentUri))) { // big problem --> unresolvable policy
-                                throw LOGGER.logSevereException(new PolicyException(LocalizationMessages.WSP_1042_CAN_NOT_FIND_POLICY(currentUri)));
-                            } else {
-                                if (readExternalFile(getBaseUrl(currentUri))) {
-                                    getUnresolvedUris(false).add(currentUri);
-                                }
+            getUnresolvedUris(false).addAll(baseUnresolvedUris);
+            expandQueueHead = null; // cut the queue off
+            getUnresolvedUris(false).addAll(externalUris);
+        }
+//        final Set<String> urlsRead = new HashSet<String>();
+//        urlsRead.add("");
+        while (!getUnresolvedUris(false).isEmpty()) {
+            final List<String> urisToBeSolvedList = getUnresolvedUris(false);
+            getUnresolvedUris(true); // just cleaning up the list
+            for (String currentUri : urisToBeSolvedList) {
+                if (!isPolicyProcessed(currentUri)) {
+                    final PolicyRecord prefetchedRecord = getPolicyRecordsPassedBy().get(currentUri);
+                    if (null != prefetchedRecord) {
+                        if (null != prefetchedRecord.unresolvedURIs) {
+                            getUnresolvedUris(false).addAll(prefetchedRecord.unresolvedURIs);
+                        } // end-if null != prefetchedRecord.unresolvedURIs
+                        addNewPolicyNeeded(currentUri, prefetchedRecord.policyModel);
+                    } else { // policy has not been yet passed by
+                        if (urlsRead.contains(getBaseUrl(currentUri))) { // big problem --> unresolvable policy
+                            LOGGER.logSevereException(new PolicyException(LocalizationMessages.WSP_1042_CAN_NOT_FIND_POLICY(currentUri)));
+                        } else {
+                            if (readExternalFile(getBaseUrl(currentUri))) {
+                                getUnresolvedUris(false).add(currentUri);
                             }
                         }
-                    } // end-if policy already processed
-                } // end-foreach unresolved uris
+                    }
+                } // end-if policy already processed
+            } // end-foreach unresolved uris
+        }
+        final PolicySourceModelContext modelContext = PolicySourceModelContext.createContext();
+        for (String policyUri : urisNeeded) {
+            final PolicySourceModel sourceModel = modelsNeeded.get(policyUri);
+            try {
+                sourceModel.expand(modelContext);
+                modelContext.addModel(new URI(policyUri), sourceModel);
+            } catch (URISyntaxException e) {
+                LOGGER.logSevereException(e);
+            } catch (PolicyException e) {
+                LOGGER.logSevereException(e);
             }
-            final PolicySourceModelContext modelContext = PolicySourceModelContext.createContext();
-            for (String policyUri : urisNeeded) {
-                final PolicySourceModel sourceModel = modelsNeeded.get(policyUri);
-                try {
-                    sourceModel.expand(modelContext);
-                    modelContext.addModel(new URI(policyUri), sourceModel);
-                } catch (URISyntaxException e) {
-                    throw LOGGER.logSevereException(new WebServiceException(LocalizationMessages.WSP_1005_URI_SYNTAX_EXCEPTION_WHEN_PROCESSING_URI(policyUri), e));
-                }
-            }
-            // iterating over all services and binding all the policies read before
+        }
+        
+        // Start-preparation of policy map builder
+        // iterating over all services and binding all the policies read before
+        try {
             for (WSDLService service : context.getWSDLModel().getServices().values()) {
                 if (getHandlers4ServiceMap().containsKey(service)) {
                     getPolicyMapBuilder().registerHandler(new BuilderHandlerServiceScope(
@@ -848,7 +860,7 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
                             } // endif input msg scope -- by binding output op
                             if ( // fault msg scope -- by binding fault op
                                     getHandlers4BindingFaultOpMap().containsKey(boundOperation)) {
-                                for (WSDLFault fault :boundOperation.getOperation().getFaults()) {
+                                for (WSDLFault fault : boundOperation.getOperation().getFaults()) {
                                     getPolicyMapBuilder()
                                     .registerHandler(
                                             new BuilderHandlerMessageScope(
@@ -953,11 +965,17 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
                     } // endif port.getBinding() != null
                 } // end foreach port in service
             } // end foreach service in wsdl
-            // finally register a wrapper for getting WSDL policy map
-            
-            final EffectivePolicyModifier modifier = EffectivePolicyModifier.createEffectivePolicyModifier();
-            final PolicyMapExtender extender = PolicyMapExtender.createPolicyMapExtender();
-            
+        } catch(PolicyException e) {
+            LOGGER.logSevereException(e);
+        }
+        // End-preparation of policy map builder
+        
+        // finally register a wrapper for getting WSDL policy map
+        
+        final EffectivePolicyModifier modifier = EffectivePolicyModifier.createEffectivePolicyModifier();
+        final PolicyMapExtender extender = PolicyMapExtender.createPolicyMapExtender();
+        
+        try {
             if (null != externalMutators && externalMutators.length > 0) {
                 PolicyMapMutator[] mutators = new PolicyMapMutator[externalMutators.length+2];
                 mutators[0] = modifier;
@@ -967,10 +985,11 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
             } else {
                 context.getWSDLModel().addExtension(new WSDLPolicyMapWrapper(policyBuilder.getPolicyMap(modifier, extender), modifier, extender));
             }
-            
         } catch(PolicyException e) {
+            LOGGER.logSevereException(e);
             throw LOGGER.logSevereException(new WebServiceException(LocalizationMessages.WSP_1018_POLICY_EXCEPTION_WHILE_FINISHING_PARSING_WSDL(), e));
         }
+        
         LOGGER.exiting();
     }
     
@@ -1018,7 +1037,9 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
         final StringBuffer elementCode = new StringBuffer();
         final PolicyRecord policyRec = new PolicyRecord();
         final QName elementName = reader.getName();
+        String absoluteUri;
         boolean insidePolicyReferenceAttr;
+        String policyRefrenceURL;
         int depth = 0;
         try{
             do {
@@ -1057,12 +1078,15 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
                         final int attrCount = reader.getAttributeCount();     // process element attributes
                         final StringBuffer attrCode = new StringBuffer();
                         for (int i=0; i < attrCount; i++) {
+                            boolean uriAttrFlg = false;
                             if (insidePolicyReferenceAttr && "URI".equals(
                                     reader.getAttributeName(i).getLocalPart())) { // PolicyReference found
+                                uriAttrFlg = true;
                                 if (null == policyRec.unresolvedURIs) { // first such URI found
                                     policyRec.unresolvedURIs = new HashSet<String>(); // initialize URIs set
                                 }
-                                policyRec.unresolvedURIs.add(reader.getAttributeValue(i)); // add the URI
+                                policyRec.unresolvedURIs.add(  // add the URI
+                                        relativeToAbsoluteUrl(reader.getAttributeValue(i), baseUrl));
                             } // end-if PolicyReference attribute found
                             if ("xmlns".equals(reader.getAttributePrefix(i)) && tmpNsSet.contains(reader.getAttributeLocalName(i))) {
                                 continue; // do not append already defined ns
@@ -1072,7 +1096,7 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
                                         .append(' ')
                                         .append(reader.getAttributeLocalName(i))
                                         .append("=\"")
-                                        .append(reader.getAttributeValue(i))
+                                        .append(uriAttrFlg ? relativeToAbsoluteUrl(reader.getAttributeValue(i), baseUrl) : reader.getAttributeValue(i))
                                         .append('"');
                             } else {                                        // prefix`presented
                                 attrCode
@@ -1081,7 +1105,7 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
                                         .append(':')
                                         .append(reader.getAttributeLocalName(i))
                                         .append("=\"")
-                                        .append(reader.getAttributeValue(i))
+                                        .append(uriAttrFlg ? relativeToAbsoluteUrl(reader.getAttributeValue(i), baseUrl) : reader.getAttributeValue(i))
                                         .append('"');
                                 if (!tmpNsSet.contains(reader.getAttributePrefix(i))) {
                                     xmlnsCode
@@ -1142,7 +1166,7 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
         } catch(Exception e) {
             throw LOGGER.logSevereException(new WebServiceException(LocalizationMessages.WSP_1033_EXCEPTION_WHEN_READING_POLICY_ELEMENT(elementCode.toString()), e));
         }
-        
+        urlsRead.add(baseUrl);
         return policyRec;
     }
     

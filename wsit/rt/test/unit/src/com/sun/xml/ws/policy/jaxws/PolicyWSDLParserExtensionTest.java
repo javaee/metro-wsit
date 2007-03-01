@@ -88,19 +88,19 @@ public class PolicyWSDLParserExtensionTest extends TestCase{
             PolicyUtils.IO.closeResource(configFileIS);
         }
         
-// Uncomment to see problems when document source is created in a different way:
-//
-//        WSDLModel model = null;
-//        final SDDocumentSource doc = SDDocumentSource.create(configFileUrl);
-//        final XMLEntityResolver.Parser parser =  new XMLEntityResolver.Parser(doc);
-//        model = WSDLModel.WSDLParser.parse(
-//                parser,
-//                new PolicyConfigResolver(),
-//                true,
-//                new WSDLParserExtension[] { new PolicyWSDLParserExtension(true) }
-//        );
-//
-//        assertNotNull(model);
+// What about when document source is created in a different way:
+        
+        WSDLModel model = null;
+        final SDDocumentSource doc = SDDocumentSource.create(configFileUrl);
+        final XMLEntityResolver.Parser parser =  new XMLEntityResolver.Parser(doc);
+        model = WSDLModel.WSDLParser.parse(
+                parser,
+                new PolicyConfigResolver(),
+                true,
+                new WSDLParserExtension[] { new PolicyWSDLParserExtension(true) }
+        );
+        
+        assertNotNull(model);
     }
     
     public void testWsdlParserBasics() throws Exception {
@@ -562,5 +562,5 @@ public class PolicyWSDLParserExtensionTest extends TestCase{
         } catch (WebServiceException e) {
             // ok - exception thrown as expected
         }
-    }    
+    }
 }
