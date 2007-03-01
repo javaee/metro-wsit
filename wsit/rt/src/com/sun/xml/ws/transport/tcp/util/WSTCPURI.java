@@ -23,6 +23,8 @@
 package com.sun.xml.ws.transport.tcp.util;
 
 import com.sun.xml.ws.transport.tcp.client.WSConnectionManager;
+import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
+import com.sun.xml.ws.transport.tcp.servicechannel.ServiceChannelException;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -113,6 +115,8 @@ public final class WSTCPURI implements com.sun.xml.ws.transport.tcp.connectionca
             return WSConnectionManager.getInstance().createConnectionSession(this);
         } catch (VersionMismatchException e) {
             throw new IOException(e.getMessage());
+        } catch (ServiceChannelException e) {
+            throw new IOException(MessagesMessages.WSTCP_0024_SERVICE_CHANNEL_EXCEPTION(e.getFaultInfo().getId(), e.getMessage()));
         }
     }
     

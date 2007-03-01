@@ -79,6 +79,11 @@ public final class ServiceChannelTransportPipe extends TCPTransportPipe {
             }
             
             clientTransport.setContentType(ct.getContentType());
+            /* write transport SOAPAction header if required
+             * in HTTP this param is sent as HTTP header, in SOAP/TCP
+             * it is part of content-type (similar to SOAP 1.2) */
+            writeTransportSOAPActionHeaderIfRequired(channelContext, ct, packet);
+            
             if (logger.isLoggable(Level.FINE)) {
                 logger.log(Level.FINE, MessagesMessages.WSTCP_1004_TCP_SERVICE_TP_PROCESS_ENCODE(ct.getContentType()));
             }

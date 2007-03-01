@@ -35,37 +35,31 @@ import static com.sun.xml.ws.transport.tcp.wsit.TCPConstants.*;
  */
 public final class TCPTransportPolicyValidator implements PolicyAssertionValidator {
     
-    private static final ArrayList<QName> supportedAssertions = new ArrayList<QName>();
+    private static final ArrayList<QName> clientSupportedAssertions = new ArrayList<QName>(2);
+    private static final ArrayList<QName> commonSupportedAssertions = new ArrayList<QName>(2);
     
     static {
-        supportedAssertions.add(TCPTRANSPORT_POLICY_ASSERTION);
-        supportedAssertions.add(SELECT_OPTIMAL_TRANSPORT_ASSERTION);
-        supportedAssertions.add(TCPTRANSPORT_CONNECTION_MANAGEMENT_ASSERTION);
+        clientSupportedAssertions.add(SELECT_OPTIMAL_TRANSPORT_ASSERTION);
+        commonSupportedAssertions.add(TCPTRANSPORT_POLICY_ASSERTION);
+        commonSupportedAssertions.add(TCPTRANSPORT_CONNECTION_MANAGEMENT_ASSERTION);
     }
     
     /** Creates a new instance of TCPTransportPolicyValidator */
     public TCPTransportPolicyValidator() {
     }
-
-     public PolicyAssertionValidator.Fitness validateClientSide(final PolicyAssertion assertion) {
-        return supportedAssertions.contains(assertion.getName()) ? Fitness.SUPPORTED : Fitness.UNKNOWN;
+    
+    public PolicyAssertionValidator.Fitness validateClientSide(final PolicyAssertion assertion) {
+        return clientSupportedAssertions.contains(assertion.getName()) ||
+                commonSupportedAssertions.contains(assertion.getName()) ? Fitness.SUPPORTED : Fitness.UNKNOWN;
     }
-
+    
     public PolicyAssertionValidator.Fitness validateServerSide(final PolicyAssertion assertion) {
         final QName assertionName = assertion.getName();
-        if (supportedAssertions.contains(assertionName)) {
-            if (TCPTRANSPORT_POLICY_ASSERTION.equals(assertionName)) {
-                return Fitness.SUPPORTED;
-            } else {
-                return Fitness.UNSUPPORTED;
-            }
-        }
-        
-        return Fitness.UNKNOWN;
+        return commonSupportedAssertions.contains(assertion.getName()) ? Fitness.SUPPORTED : Fitness.UNKNOWN;
     }
-
+    
     public String[] declareSupportedDomains() {
-        return new String[] {TCPTRANSPORT_POLICY_NAMESPACE_URI, 
+        return new String[] {TCPTRANSPORT_POLICY_NAMESPACE_URI,
         CLIENT_TRANSPORT_NS, TCPTRANSPORT_CONNECTION_MANAGEMENT_NAMESPACE_URI};
     }
     

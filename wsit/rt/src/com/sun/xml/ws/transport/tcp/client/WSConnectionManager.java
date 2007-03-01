@@ -130,9 +130,10 @@ public class WSConnectionManager implements ConnectionFinder<ConnectionSession>,
             lockConnection(connectionSession);
             serviceChannelWSImplPort.closeChannel(channelContext.getChannelId());
             connectionSession.deregisterChannel(channelContext);
-        } catch (SessionAbortedException ex) {
+        } catch (SessionAbortedException e) {
             // if session was closed before
-        } catch (InterruptedException ex) {
+        } catch (InterruptedException e) {
+        } catch (ServiceChannelException e) {
         } finally {
             freeConnection(connectionSession);
         }
@@ -168,7 +169,7 @@ public class WSConnectionManager implements ConnectionFinder<ConnectionSession>,
     /**
      * Open new tcp connection and establish service virtual connection
      */
-    public @NotNull ConnectionSession createConnectionSession(@NotNull final WSTCPURI tcpURI) throws VersionMismatchException {
+    public @NotNull ConnectionSession createConnectionSession(@NotNull final WSTCPURI tcpURI) throws VersionMismatchException, ServiceChannelException {
         try {
             if (logger.isLoggable(Level.FINE)) {
                 logger.log(Level.FINE, MessagesMessages.WSTCP_1034_CONNECTION_MANAGER_CREATE_SESSION_ENTER(tcpURI));
@@ -193,6 +194,7 @@ public class WSConnectionManager implements ConnectionFinder<ConnectionSession>,
             
             return connectionSession;
         } catch (IOException e) {
+            // ClientTransportException could be processed special way, outside transport layer
             throw new ClientTransportException(MessagesMessages.localizableWSTCP_0015_ERROR_PROTOCOL_VERSION_EXCHANGE(), e);
         }
     }

@@ -32,39 +32,55 @@ import javax.xml.ws.WebFault;
 faultBean = "com.sun.xml.ws.transport.tcp.servicechannel.ServiceChannelException$ServiceChannelExceptionBean")
 public class ServiceChannelException extends Exception {
     
+    private ServiceChannelExceptionBean faultInfo;
+    
     public ServiceChannelException() {
+        faultInfo = new ServiceChannelExceptionBean();
     }
     
-    public ServiceChannelException(@Nullable final String message) {
+    public ServiceChannelException(int id, @Nullable final String message) {
         super(message);
+        faultInfo = new ServiceChannelExceptionBean(id , message);
     }
     
     public ServiceChannelException(final String message, final ServiceChannelExceptionBean faultInfo) {
         super(message);
+        this.faultInfo = faultInfo;
     }
 
     public ServiceChannelException(final String message, final ServiceChannelExceptionBean faultInfo, final Throwable cause) {
         super(message, cause);
+        this.faultInfo = faultInfo;
     }
 
     public ServiceChannelExceptionBean getFaultInfo() {
-        return new ServiceChannelExceptionBean();
+        return faultInfo;
     }
 
     public void setFaultInfo(final ServiceChannelExceptionBean faultInfo) {
-        
+        this.faultInfo = faultInfo;
     }
     
     public static class ServiceChannelExceptionBean {
         private String message;
+        private int id;
         
         public ServiceChannelExceptionBean() {
         }
         
-        public ServiceChannelExceptionBean(final String message) {
+        public ServiceChannelExceptionBean(final int id, final String message) {
+            this.id = id;
             this.message = message;
         }
 
+        public int getId() {
+            return id;
+        }
+        
+        public void setId(int id)  {
+            this.id = id;
+        }
+        
         public String getMessage() {
             return this.message;
         }

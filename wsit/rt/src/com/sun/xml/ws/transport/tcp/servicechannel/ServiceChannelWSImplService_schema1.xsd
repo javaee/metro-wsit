@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://servicechannel.tcp.transport.ws.xml.sun.com/" version="1.0" targetNamespace="http://servicechannel.tcp.transport.ws.xml.sun.com/">
-<xs:element name="ServiceChannelException" type="tns:ServiceChannelException"/>
+<xs:element name="ServiceChannelException" nillable="true" type="tns:serviceChannelExceptionBean"/>
 <xs:element name="closeChannel" type="tns:closeChannel"/>
 <xs:element name="closeChannelResponse" type="tns:closeChannelResponse"/>
 <xs:element name="closeSession" type="tns:closeSession"/>
@@ -9,10 +9,18 @@
 <xs:element name="initiateSessionResponse" type="tns:initiateSessionResponse"/>
 <xs:element name="openChannel" type="tns:openChannel"/>
 <xs:element name="openChannelResponse" type="tns:openChannelResponse"/>
-<xs:complexType name="initiateSession"/>
+<xs:complexType name="initiateSession">
+<xs:sequence/>
+</xs:complexType>
 <xs:complexType name="initiateSessionResponse">
 <xs:sequence>
 <xs:element name="return" type="xs:int"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="serviceChannelExceptionBean">
+<xs:sequence>
+<xs:element name="id" type="xs:int"/>
+<xs:element name="message" type="xs:string" minOccurs="0"/>
 </xs:sequence>
 </xs:complexType>
 <xs:complexType name="closeChannel">
@@ -25,7 +33,9 @@
 <xs:element name="return" type="xs:int"/>
 </xs:sequence>
 </xs:complexType>
-<xs:complexType name="closeSession"/>
+<xs:complexType name="closeSession">
+<xs:sequence/>
+</xs:complexType>
 <xs:complexType name="closeSessionResponse">
 <xs:sequence>
 <xs:element name="return" type="xs:int"/>
@@ -36,18 +46,17 @@
 <xs:element name="channelSettings" type="tns:channelSettings" minOccurs="0"/>
 </xs:sequence>
 </xs:complexType>
-<xs:complexType name="channelSettings">
+<xs:complexType name="channelSettings" final="extension restriction">
 <xs:sequence>
-<xs:element name="negotiatedMimeTypes" type="tns:mimeType" nillable="true" maxOccurs="unbounded" minOccurs="0"/>
-<xs:element name="negotiatedParams" type="xs:string" nillable="true" maxOccurs="unbounded" minOccurs="0"/>
+<xs:element name="negotiatedMimeTypes" type="tns:mimeType" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+<xs:element name="negotiatedParams" type="xs:string" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
 <xs:element name="targetWSURI" type="xs:string" minOccurs="0"/>
 <xs:element name="channelId" type="xs:int"/>
 <xs:element name="wsServiceName" type="xs:QName" minOccurs="0"/>
 </xs:sequence>
 </xs:complexType>
-<xs:complexType name="mimeType">
+<xs:complexType name="mimeType" final="extension restriction">
 <xs:sequence>
-<xs:element name="mimeType" type="xs:string" minOccurs="0"/>
 <xs:element name="embeddedParams">
 <xs:complexType>
 <xs:sequence>
@@ -62,16 +71,12 @@
 </xs:sequence>
 </xs:complexType>
 </xs:element>
+<xs:element name="mimeType" type="xs:string" minOccurs="0"/>
 </xs:sequence>
 </xs:complexType>
 <xs:complexType name="openChannelResponse">
 <xs:sequence>
 <xs:element name="return" type="tns:channelSettings" minOccurs="0"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="ServiceChannelException">
-<xs:sequence>
-<xs:element name="message" type="xs:string" minOccurs="0"/>
 </xs:sequence>
 </xs:complexType>
 </xs:schema>

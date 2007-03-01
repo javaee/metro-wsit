@@ -31,9 +31,10 @@ public final class TCPConstants {
     public static final String CHARSET_PROPERTY = "charset";
     public static final String CONTENT_TYPE_PROPERTY = "Content-Type";
     public static final String SOAP_ACTION_PROPERTY = "action";
+    public static final String TRANSPORT_SOAP_ACTION_PROPERTY = "SOAPAction";
     public static final String ERROR_CODE_PROPERTY = "ErrorCode";
     public static final String ERROR_DESCRIPTION_PROPERTY = "ErrorDescription";
-
+    
     public static final int OK = 0;
     public static final int ONE_WAY = 202;
     public static final int ERROR = 400;
@@ -41,15 +42,15 @@ public final class TCPConstants {
     // Values should be synchronized with localized messages description file
     public static final int WS_NOT_FOUND_ERROR = 1;
     public static final int INTERNAL_SERVER_ERROR = 2;
-
+    
     /** ByteBuffer settings for FramedBufferInputStream and FramedBufferOutputStream */
     public static final int DEFAULT_FRAME_SIZE = 4096;
     public static final boolean DEFAULT_USE_DIRECT_BUFFER = false;
-
+    
     /** Name of property in MessageContext, which hold tcp connection context */
     public static final String CHANNEL_CONTEXT = "channelContext";
     public static final String TCP_SESSION = "tcpSession";
-
+    
     /** Name of Service pipeline attribute in client's connection session */
     public static final String SERVICE_PIPELINE_ATTR_NAME = "ServicePipeline";
     
@@ -73,7 +74,7 @@ public final class TCPConstants {
     /** Lifecycle module paratemer names*/
     public static final String HIGH_WATER_MARK = "high-water-mark";
     public static final String NUMBER_TO_RECLAIM = "number-to-reclaim";
-
+    
     /** Service Channel web service: Service and Port names*/
     public static final QName SERVICE_CHANNEL_WS_NAME = new QName("http://servicechannel.tcp.transport.ws.xml.sun.com/", "ServiceChannelWSImplService");
     public static final QName SERVICE_CHANNEL_WS_PORT_NAME = new QName("http://servicechannel.tcp.transport.ws.xml.sun.com/", "ServiceChannelWSImplPort");

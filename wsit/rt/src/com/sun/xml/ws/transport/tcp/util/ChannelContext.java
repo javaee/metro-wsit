@@ -42,16 +42,17 @@ public final class ChannelContext implements WSTCPFastInfosetStreamReaderRecycla
     private static final Logger logger = Logger.getLogger(
             com.sun.xml.ws.transport.tcp.util.TCPConstants.LoggingDomain);
     
-    private static final Map<String, Integer> staticParamsEncodingMap = new HashMap<String, Integer>(4);
-    private static final Map<Integer, String> staticParamsDecodingMap = new HashMap<Integer, String> (4);
+    private static final Map<String, Integer> staticParamsEncodingMap = new HashMap<String, Integer>(8);
+    private static final Map<Integer, String> staticParamsDecodingMap = new HashMap<Integer, String> (8);
     
-    private static final Map<MimeType, Integer> staticMimeTypeEncodingMap = new HashMap<MimeType, Integer>(4);
-    private static final Map<Integer, MimeType> staticMimeTypeDecodingMap = new HashMap<Integer, MimeType>(4);
+    private static final Map<MimeType, Integer> staticMimeTypeEncodingMap = new HashMap<MimeType, Integer>(8);
+    private static final Map<Integer, MimeType> staticMimeTypeDecodingMap = new HashMap<Integer, MimeType>(8);
     static {
         staticParamsEncodingMap.put(TCPConstants.CHARSET_PROPERTY, 0);
         staticParamsEncodingMap.put(TCPConstants.SOAP_ACTION_PROPERTY, 1);
-        staticParamsEncodingMap.put(TCPConstants.ERROR_CODE_PROPERTY, 2);
-        staticParamsEncodingMap.put(TCPConstants.ERROR_DESCRIPTION_PROPERTY, 3);
+        staticParamsEncodingMap.put(TCPConstants.TRANSPORT_SOAP_ACTION_PROPERTY, 2);
+        staticParamsEncodingMap.put(TCPConstants.ERROR_CODE_PROPERTY, 3);
+        staticParamsEncodingMap.put(TCPConstants.ERROR_DESCRIPTION_PROPERTY, 4);
         
         staticMimeTypeEncodingMap.put(MimeType.SOAP11, 0);   //default mime type for soap1.1
         staticMimeTypeEncodingMap.put(MimeType.SOAP12, 1);   //default mime type for soap1.2
@@ -78,6 +79,14 @@ public final class ChannelContext implements WSTCPFastInfosetStreamReaderRecycla
     
     // Temp storage for decode content type from String representation
     private final ContentType contentType = new ContentType();
+    
+    public final static @Nullable Integer getStaticMimeTypeId(@NotNull String mimeType) {
+        return staticMimeTypeEncodingMap.get(mimeType);
+    }
+    
+    public final static @Nullable Integer getStaticParameterId(@NotNull String parameter) {
+        return staticParamsEncodingMap.get(parameter);
+    }
     
     public ChannelContext(@NotNull final ConnectionSession connectionSession,
             @NotNull final ChannelSettings channelSettings) {
@@ -168,7 +177,7 @@ public final class ChannelContext implements WSTCPFastInfosetStreamReaderRecycla
             final int paramId = encodeParam(parameter.getKey());
             connection.setContentProperty(paramId, parameter.getValue());
         }
-
+        
         if (logger.isLoggable(Level.FINEST)) {
             logger.log(Level.FINEST, MessagesMessages.WSTCP_1121_CHANNEL_CONTEXT_ENCODED_CT(mt, parameters));
         }
@@ -184,7 +193,7 @@ public final class ChannelContext implements WSTCPFastInfosetStreamReaderRecycla
         
         if (logger.isLoggable(Level.FINEST)) {
             logger.log(Level.FINEST, MessagesMessages.WSTCP_1122_CHANNEL_CONTEXT_DECODE_CT(mimeId, params));
-        }        
+        }
         MimeType mimeType = staticMimeTypeDecodingMap.get(mimeId);
         if (mimeType == null) {
             mimeType = channelSettings.getNegotiatedMimeTypes().get(mimeId - staticMimeTypeDecodingMap.size());

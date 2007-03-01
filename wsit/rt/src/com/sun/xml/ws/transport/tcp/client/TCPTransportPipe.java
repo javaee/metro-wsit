@@ -23,6 +23,7 @@
 package com.sun.xml.ws.transport.tcp.client;
 
 import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.pipe.ClientPipeAssemblerContext;
@@ -43,6 +44,7 @@ import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.transport.tcp.util.TCPConstants;
 import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
 import java.io.InputStream;
+import javax.xml.ws.BindingProvider;
 import javax.xml.ws.WebServiceException;
 
 /**
@@ -103,6 +105,10 @@ public class TCPTransportPipe implements Pipe {
                 final Codec codec = channelContext.getCodec();
                 final ContentType ct = codec.getStaticContentType(packet);
                 clientTransport.setContentType(ct.getContentType());
+                /* write transport SOAPAction header if required
+                 * in HTTP this param is sent as HTTP header, in SOAP/TCP
+                 * it is part of content-type (similar to SOAP 1.2) */
+                writeTransportSOAPActionHeaderIfRequired(channelContext, ct, packet);
                 
                 if (logger.isLoggable(Level.FINE)) {
                     logger.log(Level.FINE, MessagesMessages.WSTCP_1013_TCP_TP_PROCESS_ENCODE(ct.getContentType()));
@@ -141,6 +147,9 @@ public class TCPTransportPipe implements Pipe {
             } catch(IOException e) {
                 prepareRetry(channelContext, retryNum, e);
                 failure = new WebServiceException(MessagesMessages.WSTCP_0017_ERROR_WS_EXECUTION_ON_CLIENT(), e);
+            } catch(ServiceChannelException e) {
+                retryNum = TCPConstants.CLIENT_MAX_FAIL_TRIES + 1;
+                failure = new WebServiceException(MessagesMessages.WSTCP_0016_ERROR_WS_EXECUTION_ON_SERVER(e.getFaultInfo().getId() + ":" + e.getMessage()), e);
             } catch(Exception e) {
                 retryNum = TCPConstants.CLIENT_MAX_FAIL_TRIES + 1;
                 failure = new WebServiceException(MessagesMessages.WSTCP_0017_ERROR_WS_EXECUTION_ON_CLIENT(), e);
@@ -153,6 +162,13 @@ public class TCPTransportPipe implements Pipe {
         throw failure;
     }
     
+    protected void writeTransportSOAPActionHeaderIfRequired(ChannelContext channelContext, ContentType ct, Packet packet) {
+        String soapActionTransportHeader = getSOAPAction(ct.getSOAPActionHeader(), packet);
+        if (soapActionTransportHeader != null) {
+            channelContext.getConnection().setContentProperty(ChannelContext.getStaticParameterId(TCPConstants.TRANSPORT_SOAP_ACTION_PROPERTY), soapActionTransportHeader);
+        }        
+    }
+
     private void prepareRetry(final ChannelContext channelContext, final int retryNum, final Exception e) {
         logger.log(Level.FINE, MessagesMessages.WSTCP_0012_SEND_RETRY(retryNum), e);
         if (channelContext != null) {
@@ -168,4 +184,25 @@ public class TCPTransportPipe implements Pipe {
         final ChannelContext channelContext = wsConnectionManager.openChannel(tcpURI, wsService, wsBinding, defaultCodec);
         clientTransport.setup(channelContext);
     }
+    
+    /**
+     * get SOAPAction header if the soapAction parameter is non-null or BindingProvider properties set.
+     * BindingProvider properties take precedence.
+     */
+    private @Nullable String getSOAPAction(String soapAction, Packet packet) {
+        Boolean useAction = (Boolean) packet.invocationProperties.get(BindingProvider.SOAPACTION_USE_PROPERTY);
+        String sAction = null;
+        boolean use = (useAction != null) ? useAction.booleanValue() : false;
+        
+        if (use) {
+            //TODO check if it needs to be quoted
+            sAction = packet.soapAction;
+        }
+        //request Property soapAction overrides wsdl
+        if (sAction != null) {
+            return sAction;
+        } else {
+            return soapAction;
+        }
+    }    
 }

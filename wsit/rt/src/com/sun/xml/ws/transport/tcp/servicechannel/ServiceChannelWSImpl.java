@@ -54,18 +54,16 @@ public class ServiceChannelWSImpl {
     @Resource
     private WebServiceContext wsContext;
     
-    public int initiateSession() {
+    public void initiateSession() throws ServiceChannelException {
         final ChannelContext serviceChannelContext = getChannelContext();
         final ConnectionSession connectionSession = serviceChannelContext.getConnectionSession();
         logger.log(Level.FINE, "Session: {0} opened!", connectionSession.hashCode());
-        return 0;
     }
     
-    public int closeSession() {
+    public void closeSession() throws ServiceChannelException {
         final ChannelContext serviceChannelContext = getChannelContext();
         final ConnectionSession connectionSession = serviceChannelContext.getConnectionSession();
         logger.log(Level.FINE, "Session: {0} closed!", connectionSession.hashCode());
-        return 0;
     }
     
     public ChannelSettings openChannel(
@@ -79,7 +77,7 @@ public class ServiceChannelWSImpl {
         final WSTCPURI tcpURI = channelSettings.getTargetWSURI();
         
         final TCPAdapter adapter = adapterRegistry.getTarget(tcpURI);
-        if (adapter == null) throw new ServiceChannelException("Service " + channelSettings.getWSServiceName() + "(" + tcpURI.toString() + ") not found!");
+        if (adapter == null) throw new ServiceChannelException(TCPConstants.WS_NOT_FOUND_ERROR, "Service " + channelSettings.getWSServiceName() + "(" + tcpURI.toString() + ") not found!");
         
         channelSettings.setChannelId(connectionSession.getNextAvailChannelId());
         final ChannelContext openedChannelContext = new ChannelContext(connectionSession, channelSettings);
@@ -95,7 +93,7 @@ public class ServiceChannelWSImpl {
         return channelSettings;
     }
     
-    public int closeChannel(int channelId) {
+    public void closeChannel(int channelId)  throws ServiceChannelException {
         final ChannelContext serviceChannelContext = getChannelContext();
         final ServerConnectionSession connectionSession = (ServerConnectionSession) serviceChannelContext.getConnectionSession();
         
@@ -103,7 +101,6 @@ public class ServiceChannelWSImpl {
         if (logger.isLoggable(Level.FINE)) {
             logger.log(Level.FINE, "Session: {0}. Channel #{1} was closed!", new Object[] {connectionSession.hashCode(), channelId});
         }
-        return 0;
     }
     
     private @NotNull ChannelContext getChannelContext() {

@@ -51,7 +51,9 @@ public interface ServiceChannelWSImpl {
     @WebResult(targetNamespace = "")
     @RequestWrapper(localName = "initiateSession", targetNamespace = "http://servicechannel.tcp.transport.ws.xml.sun.com/", className = "com.sun.xml.ws.transport.tcp.servicechannel.stubs.InitiateSession")
     @ResponseWrapper(localName = "initiateSessionResponse", targetNamespace = "http://servicechannel.tcp.transport.ws.xml.sun.com/", className = "com.sun.xml.ws.transport.tcp.servicechannel.stubs.InitiateSessionResponse")
-    public int initiateSession();
+    public void initiateSession()
+        throws ServiceChannelException
+    ;
 
     /**
      * 
@@ -62,7 +64,9 @@ public interface ServiceChannelWSImpl {
     @WebResult(targetNamespace = "")
     @RequestWrapper(localName = "closeSession", targetNamespace = "http://servicechannel.tcp.transport.ws.xml.sun.com/", className = "com.sun.xml.ws.transport.tcp.servicechannel.stubs.CloseSession")
     @ResponseWrapper(localName = "closeSessionResponse", targetNamespace = "http://servicechannel.tcp.transport.ws.xml.sun.com/", className = "com.sun.xml.ws.transport.tcp.servicechannel.stubs.CloseSessionResponse")
-    public int closeSession();
+    public void closeSession()
+        throws ServiceChannelException
+    ;
 
     /**
      * 
@@ -91,8 +95,10 @@ public interface ServiceChannelWSImpl {
     @WebResult(targetNamespace = "")
     @RequestWrapper(localName = "closeChannel", targetNamespace = "http://servicechannel.tcp.transport.ws.xml.sun.com/", className = "com.sun.xml.ws.transport.tcp.servicechannel.stubs.CloseChannel")
     @ResponseWrapper(localName = "closeChannelResponse", targetNamespace = "http://servicechannel.tcp.transport.ws.xml.sun.com/", className = "com.sun.xml.ws.transport.tcp.servicechannel.stubs.CloseChannelResponse")
-    public int closeChannel(
+    public void closeChannel(
         @WebParam(name = "arg0", targetNamespace = "")
-        int arg0);
+        int arg0)
+        throws ServiceChannelException
+    ;
 
 }

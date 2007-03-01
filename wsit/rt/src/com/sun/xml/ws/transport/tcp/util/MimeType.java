@@ -57,7 +57,7 @@ public final class MimeType {
     public static final MimeType MTOM11 = new MimeType("multipart/related", new HashMap<String, String>());
     public static final MimeType MTOM12 = new MimeType("multipart/related", new HashMap<String, String>());
     
-    public static final MimeType ERROR = new MimeType("x-tcp/error", Collections.<String, String>emptyMap());
+    public static final MimeType ERROR = new MimeType("error/" + TCPConstants.PROTOCOL_SCHEMA, Collections.<String, String>emptyMap());
     
     static {
         MTOM11.getEmbeddedParams().put("start-info", "\"text/xml\"");

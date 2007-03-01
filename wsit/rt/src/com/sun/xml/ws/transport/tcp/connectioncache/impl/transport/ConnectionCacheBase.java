@@ -92,8 +92,8 @@ public abstract class ConnectionCacheBase<C extends Connection>
 	this.numberToReclaim = numberToReclaim ;
     }
     
-    protected final void dprint( final String msg) {
-	logger.finer( thisClassName() + msg );
+    protected final void dprint(final String msg) {
+	logger.finer(thisClassName() + msg);
     }
 
     public String toString() {
