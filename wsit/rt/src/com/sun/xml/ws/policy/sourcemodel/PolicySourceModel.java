@@ -55,31 +55,31 @@ public final class PolicySourceModel implements Cloneable {
         
 //        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.encoding.policy.EncodingConstants.OPTIMIZED_MIME_NS, "");
 //        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.encoding.policy.EncodingConstants.ENCODING_NS, "");
-//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.encoding.policy.EncodingConstants.SUN_ENCODING_CLIENT_NS, "");
-//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.encoding.policy.EncodingConstants.SUN_FI_SERVICE_NS, "");
-//
-//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.security.impl.policy.Constants.TRUST_NS, "");
-//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.security.impl.policy.Constants.SECURITY_POLICY_NS, "");
+        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.encoding.policy.EncodingConstants.SUN_ENCODING_CLIENT_NS, "cenc");
+        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.encoding.policy.EncodingConstants.SUN_FI_SERVICE_NS, "fi");
+        
+        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.security.impl.policy.Constants.TRUST_NS, "wst");
+        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.security.impl.policy.Constants.SECURITY_POLICY_NS, "sp");
         defaultNamespaceToPrefixMap.put(com.sun.xml.ws.security.impl.policy.Constants.UTILITY_NS, PolicyConstants.WSU_NAMESPACE_PREFIX);
-//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.security.impl.policy.Constants.SUN_WSS_SECURITY_CLIENT_POLICY_NS, "");
-//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.security.impl.policy.Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS, "");
-//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.security.impl.policy.Constants.SUN_TRUST_CLIENT_SECURITY_POLICY_NS, "");
-//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.security.impl.policy.Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS, "");
-//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.security.impl.policy.Constants.SUN_SECURE_CLIENT_CONVERSATION_POLICY_NS, "");
-//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.security.impl.policy.Constants.SUN_SECURE_SERVER_CONVERSATION_POLICY_NS, "");
-//
-//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.rm.Constants.version, "");
-//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.rm.Constants.microsoftVersion, "");
-//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.rm.Constants.sunVersion, "");
-//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.rm.Constants.sunClientVersion, "");
-//
-//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.transport.tcp.wsit.TCPConstants.TCPTRANSPORT_POLICY_NAMESPACE_URI, "");
-//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.transport.tcp.wsit.TCPConstants.CLIENT_TRANSPORT_NS, "");
-//        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.transport.tcp.wsit.TCPConstants.TCPTRANSPORT_CONNECTION_MANAGEMENT_NAMESPACE_URI, "");
-//
+        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.security.impl.policy.Constants.SUN_WSS_SECURITY_CLIENT_POLICY_NS, "csp");
+        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.security.impl.policy.Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS, "ssp");
+        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.security.impl.policy.Constants.SUN_TRUST_CLIENT_SECURITY_POLICY_NS, "ctp");
+        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.security.impl.policy.Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS, "stp");
+        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.security.impl.policy.Constants.SUN_SECURE_CLIENT_CONVERSATION_POLICY_NS, "cscp");
+        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.security.impl.policy.Constants.SUN_SECURE_SERVER_CONVERSATION_POLICY_NS, "sscp");
+
+        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.rm.Constants.version, "wsrmp");
+        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.rm.Constants.microsoftVersion, "msrmp");
+        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.rm.Constants.sunVersion, "sunrmp");
+        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.rm.Constants.sunClientVersion, "sunrmcp");
+
+        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.transport.tcp.wsit.TCPConstants.TCPTRANSPORT_POLICY_NAMESPACE_URI, "soaptcpsvc");
+        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.transport.tcp.wsit.TCPConstants.CLIENT_TRANSPORT_NS, "transport");
+        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.transport.tcp.wsit.TCPConstants.TCPTRANSPORT_CONNECTION_MANAGEMENT_NAMESPACE_URI, "soaptcp");
+
 //        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.api.addressing.AddressingVersion.MEMBER.policyNsUri, "");
 //        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.api.addressing.AddressingVersion.W3C.policyNsUri, "");
-//
+
 //        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.tx.common.Constants.WSAT_SOAP_NSURI, "");
     }
     
