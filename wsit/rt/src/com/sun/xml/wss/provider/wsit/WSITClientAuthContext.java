@@ -184,7 +184,11 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
             setRequestPacket(messageInfo, ret);
             
         } catch (XWSSecurityException e) {
-            throw getSOAPFaultException(e);
+            log.log(Level.SEVERE, 
+                LogStringsMessages.WSITPVD_0050_ERROR_SECURE_REQUEST(), e);
+            throw new WebServiceException(
+                LogStringsMessages.WSITPVD_0050_ERROR_SECURE_REQUEST(), 
+                    getSOAPFaultException(e));                        
         }
 
        return AuthStatus.SEND_SUCCESS;
@@ -252,7 +256,11 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
             setResponsePacket(messageInfo, ret);
             
         } catch (XWSSecurityException ex) {
-            throw getSOAPFaultException(ex);
+            log.log(Level.SEVERE, 
+                LogStringsMessages.WSITPVD_0033_ERROR_VALIDATE_RESPONSE(), ex);                    
+            throw new WebServiceException(
+                LogStringsMessages.WSITPVD_0033_ERROR_VALIDATE_RESPONSE(), 
+                    getSOAPFaultException(ex));            
         }
         return AuthStatus.SUCCESS;
     }
@@ -289,7 +297,11 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
                 msg = verifyInboundMessage(msg, ctx);
             }
         } catch (XWSSecurityException xwse) {
-            throw getSOAPFaultException(xwse);
+            log.log(Level.SEVERE, 
+                    LogStringsMessages.WSITPVD_0035_ERROR_VERIFY_INBOUND_MSG(), xwse);
+            throw new WebServiceException(
+                LogStringsMessages.WSITPVD_0035_ERROR_VERIFY_INBOUND_MSG(), 
+                    getSOAPFaultException(xwse));            
         }catch(SOAPException se){
             log.log(Level.SEVERE, 
                     LogStringsMessages.WSITPVD_0035_ERROR_VERIFY_INBOUND_MSG(), se);            
@@ -308,14 +320,22 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
             ctx.setSOAPMessage(message);
             SecurityAnnotator.secureMessage(ctx);
             return ctx.getSOAPMessage();
-        } catch (WssSoapFaultException soapFaultException) {            
-            throw getSOAPFaultException(soapFaultException);
+        } catch (WssSoapFaultException soapFaultException) {
+            log.log(Level.SEVERE, 
+                LogStringsMessages.WSITPVD_0029_ERROR_SECURING_OUTBOUND_MSG(), soapFaultException);
+            throw new WebServiceException(
+                LogStringsMessages.WSITPVD_0029_ERROR_SECURING_OUTBOUND_MSG(), 
+                    getSOAPFaultException(soapFaultException));            
         } catch (XWSSecurityException xwse) {            
             WssSoapFaultException wsfe =
                     SecurableSoapMessage.newSOAPFaultException(
                     MessageConstants.WSSE_INTERNAL_SERVER_ERROR,
                     xwse.getMessage(), xwse);
-            throw getSOAPFaultException(wsfe);
+            log.log(Level.SEVERE, 
+                LogStringsMessages.WSITPVD_0029_ERROR_SECURING_OUTBOUND_MSG(), wsfe);
+            throw new WebServiceException(
+                LogStringsMessages.WSITPVD_0029_ERROR_SECURING_OUTBOUND_MSG(), 
+                    getSOAPFaultException(wsfe));         
         }
     }
     
@@ -331,7 +351,11 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
                     SecurableSoapMessage.newSOAPFaultException(
                     MessageConstants.WSSE_INTERNAL_SERVER_ERROR,
                     xwse.getMessage(), xwse);
-            throw getSOAPFaultException(wsfe);
+            log.log(Level.SEVERE, 
+                LogStringsMessages.WSITPVD_0029_ERROR_SECURING_OUTBOUND_MSG(), wsfe);
+            throw new WebServiceException(
+                LogStringsMessages.WSITPVD_0029_ERROR_SECURING_OUTBOUND_MSG(), 
+                    getSOAPFaultException(wsfe));             
         }
     }
     
@@ -345,14 +369,22 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
             }
             NewSecurityRecipient.validateMessage(ctx);
             return ctx.getSOAPMessage();
-        } catch (WssSoapFaultException soapFaultException) {            
-            throw getSOAPFaultException(soapFaultException);
+        } catch (WssSoapFaultException soapFaultException) {    
+            log.log(Level.SEVERE, 
+                    LogStringsMessages.WSITPVD_0035_ERROR_VERIFY_INBOUND_MSG(), soapFaultException);
+            throw new WebServiceException(
+                    LogStringsMessages.WSITPVD_0035_ERROR_VERIFY_INBOUND_MSG(), 
+                       getSOAPFaultException(soapFaultException));                        
         } catch (XWSSecurityException xwse) {            
             WssSoapFaultException wsfe =
                     SecurableSoapMessage.newSOAPFaultException(
                     MessageConstants.WSSE_INTERNAL_SERVER_ERROR,
                     xwse.getMessage(), xwse);
-            throw getSOAPFaultException(wsfe);
+            log.log(Level.SEVERE, 
+                    LogStringsMessages.WSITPVD_0035_ERROR_VERIFY_INBOUND_MSG(), wsfe);
+            throw new WebServiceException(
+                    LogStringsMessages.WSITPVD_0035_ERROR_VERIFY_INBOUND_MSG(), 
+                        getSOAPFaultException(wsfe));          
         }
     }
     
@@ -540,7 +572,11 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
                     
                     issuedTokenContextMap.remove(id);
                 } catch (XWSSecurityException ex) {
-                    throw getSOAPFaultException(ex);
+                    log.log(Level.SEVERE, 
+                        LogStringsMessages.WSITPVD_0049_ERROR_CANCEL_SECURITY_CONTEXT_TOKEN(), ex);
+                    throw new WebServiceException(
+                        LogStringsMessages.WSITPVD_0049_ERROR_CANCEL_SECURITY_CONTEXT_TOKEN(), 
+                            getSOAPFaultException(ex));                                                    
                 }
             }
         }
