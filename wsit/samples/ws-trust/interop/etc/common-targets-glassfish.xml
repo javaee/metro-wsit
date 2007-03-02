@@ -22,6 +22,9 @@
 -->
 <property name="domain" value="domain1"/>
 <path id="jaxws.classpath">
+    <pathelement location="${glassfish.home}/lib/webservices-api.jar"/>
+    <pathelement location="${glassfish.home}/lib/webservices-extra-api.jar"/>
+    <pathelement location="${glassfish.home}/lib/webservices-extra.jar"/>
     <pathelement location="${glassfish.home}/lib/webservices-rt.jar"/>
     <pathelement location="${glassfish.home}/lib/webservices-tools.jar"/>
     <pathelement location="${basedir}/../etc"/>
