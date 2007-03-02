@@ -100,10 +100,7 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
             SecurityPolicyHolder holder = (SecurityPolicyHolder)it.next();
             Set configAssertions = holder.getConfigAssertions(SUN_WSS_SECURITY_CLIENT_POLICY_NS);
             trustConfig = holder.getConfigAssertions(Constants.SUN_TRUST_CLIENT_SECURITY_POLICY_NS);
-            /*
-            if (configAssertions == null || configAssertions.isEmpty()) {
-                throw new RuntimeException("Null or Empty Config WSDL encountered");
-            }*/
+         
             handler = configureClientHandler(configAssertions);
             secEnv = new DefaultSecurityEnvironmentImpl(handler);
         } catch (Exception e) {            
@@ -113,9 +110,7 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
                     LogStringsMessages.WSSPIPE_0023_ERROR_CREATING_NEW_INSTANCE_SEC_CLIENT_PIPE(), e);
         }
         
-        /*if(nextPipe != null && nextPipe instanceof ClientEdgePipe){
-            transportOptimization = true;
-        }*/
+     
     }
     
     // copy constructor
@@ -194,16 +189,7 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
         }
         //---------------INBOUND SECURITY VERIFICATION----------
         
-        /* unused code after migration to new policyverification
-        isSCMessage = isSCMessage(packet);
-        if(isSCMessage){
-         
-            List<PolicyAssertion> policies = getInBoundSCP(packet.getMessage());
-            if (!policies.isEmpty()) {
-                ret.invocationProperties.put(SC_ASSERTION, (PolicyAssertion)policies.get(0));
-            }
-        }*/
-        
+     
         ctx = initializeInboundProcessingContext(ret);
         ctx.setExtraneousProperty(ctx.OPERATION_RESOLVER, new PolicyResolverImpl(inMessagePolicyMap,inProtocolPM,cachedOperation,pipeConfig,addVer,true));
         

@@ -101,7 +101,7 @@ import static com.sun.xml.wss.jaxws.impl.Constants.SUN_WSS_SECURITY_SERVER_POLIC
 import static com.sun.xml.wss.jaxws.impl.Constants.SUN_WSS_SECURITY_CLIENT_POLICY_NS;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-//import javax.servlet.ServletContext;
+
 
 import java.util.logging.Level;
 import com.sun.xml.wss.jaxws.impl.logging.LogStringsMessages;
@@ -127,10 +127,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
             SecurityPolicyHolder holder = (SecurityPolicyHolder)it.next();
             Set configAssertions = holder.getConfigAssertions(SUN_WSS_SECURITY_SERVER_POLICY_NS);
             trustConfig = holder.getConfigAssertions(Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS);
-            /*
-            if (configAssertions == null || configAssertions.isEmpty()) {
-                throw new RuntimeException("Null or Empty Config WSDL encountered");
-            }*/
+          
             handler = configureServerHandler(configAssertions);
             secEnv = new DefaultSecurityEnvironmentImpl(handler);
         } catch (Exception e) {            
@@ -207,12 +204,12 @@ public class SecurityServerPipe extends SecurityPipeBase {
                 
                 if(trustConfig != null){
                     packet.invocationProperties.put(Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS,trustConfig.iterator());
-                    //packet.getHandlerScopePropertyNames(false).add(Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS);
+
                 }
                 
                 //set the callbackhandler
                 packet.invocationProperties.put(WSTrustConstants.SECURITY_ENVIRONMENT, secEnv);
-                // packet.getHandlerScopePropertyNames(false).add(WSTrustConstants.STS_CALL_BACK_HANDLER);
+
             }
             
             if (isSCIssueMessage){
@@ -265,15 +262,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
                     retPacket = packet;
                 }
                 
-               /* // Add addrsssing headers to trust message
-                if (isTrustMessage){
-                    System.out.println("****It is a trust message. Adding addressing herder to it");
-                    Packet newRetPacket = packet.createServerResponse(retPacket.getMessage(), addVer, pipeConfig.getBinding().getSOAPVersion(), WSTrustConstants.REQUEST_SECURITY_TOKEN_RESPONSE_ISSUE_ACTION);
-                    newRetPacket.proxy = retPacket.proxy;
-                    newRetPacket.invocationProperties.putAll(retPacket.invocationProperties);
-                
-                    retPacket = newRetPacket;
-                }*/
+             
             }
         }
         
@@ -434,14 +423,9 @@ public class SecurityServerPipe extends SecurityPipeBase {
             Token scToken = (Token)packet.invocationProperties.get(SC_ASSERTION);
             return getOutgoingXWSBootstrapPolicy(scToken);
         }
-        //Message message = packet.getMessage();
-        
+       
         MessagePolicy mp = null;
-        //if(cachedOperation == null){
-            //Body could be encrypted. Security will have to infer the
-            //policy from the message till the Body is decrypted.
-        //    mp = emptyMessagePolicy;
-        //}
+     
         if (outMessagePolicyMap == null) {
             //empty message policy
             return new MessagePolicy();
@@ -552,10 +536,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
                 
                 packet.invocationProperties.put(
                         Session.SESSION_KEY, session.getUserData());
-                
-                //IssuedTokenContext itctx = session.getSecurityInfo().getIssuedTokenContext();
-                //add the subject of requestor
-                // itctx.setRequestorSubject(ictx.getRequestorSubject());
+           
                 ((ProcessingContextImpl)ctx).getIssuedTokenContextMap().put(sctId, ictx);
                 
             } else if (requestType.toString().equals(WSTrustConstants.CANCEL_REQUEST)) {
@@ -582,11 +563,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
             throw new RuntimeException(LogStringsMessages.WSSPIPE_0031_ERROR_INVOKE_SC_CONTRACT(), ex);
         }
         
-        
-        //SecurityContextToken sct = (SecurityContextToken)ictx.getSecurityToken();
-        //String sctId = sct.getIdentifier().toString();
-        //((ProcessingContextImpl)ctx).getIssuedTokenContextMap().put(sctId, ictx);
-        
+      
         Packet retPacket = addAddressingHeaders(packet, retMsg, retAction);
         if (isSCTIssue){
             List<PolicyAssertion> policies = getOutBoundSCP(packet.getMessage());
@@ -632,57 +609,14 @@ public class SecurityServerPipe extends SecurityPipeBase {
      * }*/
     
     protected SecurityPolicyHolder addOutgoingMP(WSDLBoundOperation operation,Policy policy)throws PolicyException{
-        
-//        XWSSPolicyGenerator xwssPolicyGenerator = new XWSSPolicyGenerator(policy,true,true);
-//        xwssPolicyGenerator.process();
-//        MessagePolicy messagePolicy = xwssPolicyGenerator.getXWSSPolicy();
-//        SecurityPolicyHolder sph = new SecurityPolicyHolder();
-//        sph.setMessagePolicy(messagePolicy);
-//        sph.setBindingLevelAlgSuite(xwssPolicyGenerator.getBindingLevelAlgSuite());
-//        this.bindingLevelAlgSuite = xwssPolicyGenerator.getBindingLevelAlgSuite();
-//        List<PolicyAssertion> tokenList = getTokens(policy);
-//        for(PolicyAssertion token:tokenList){
-//            if(PolicyUtil.isSecureConversationToken(token)){
-//                NestedPolicy bootstrapPolicy = ((SecureConversationToken)token).getBootstrapPolicy();
-//                Policy effectiveBP = getEffectiveBootstrapPolicy(bootstrapPolicy);
-//                xwssPolicyGenerator = new XWSSPolicyGenerator(effectiveBP,true,true);
-//                xwssPolicyGenerator.process();
-//                MessagePolicy bmp = xwssPolicyGenerator.getXWSSPolicy();
-//                PolicyAssertion sct = new SCTokenWrapper(token,bmp);
-//                sph.addSecureConversationToken(sct);
-//            }else if(PolicyUtil.isIssuedToken(token)){
-//                sph.addIssuedToken(token);
-//            }
-//        }
-//
+
         SecurityPolicyHolder sph = constructPolicyHolder(policy,true,true);
         inMessagePolicyMap.put(operation,sph);
         return sph;
     }
     
     protected SecurityPolicyHolder addIncomingMP(WSDLBoundOperation operation,Policy policy)throws PolicyException{
-//
-//        XWSSPolicyGenerator xwssPolicyGenerator = new XWSSPolicyGenerator(policy,true,false);
-//        xwssPolicyGenerator.process();
-//        MessagePolicy messagePolicy = xwssPolicyGenerator.getXWSSPolicy();
-//        SecurityPolicyHolder sph = new SecurityPolicyHolder();
-//        sph.setMessagePolicy(messagePolicy);
-//        sph.setBindingLevelAlgSuite(xwssPolicyGenerator.getBindingLevelAlgSuite());
-//        this.bindingLevelAlgSuite = xwssPolicyGenerator.getBindingLevelAlgSuite();
-//        List<PolicyAssertion> tokenList = getTokens(policy);
-//        for(PolicyAssertion token:tokenList){
-//            if(PolicyUtil.isSecureConversationToken(token)){
-//                NestedPolicy bootstrapPolicy = ((SecureConversationToken)token).getBootstrapPolicy();
-//                Policy effectiveBP = getEffectiveBootstrapPolicy(bootstrapPolicy);
-//                xwssPolicyGenerator = new XWSSPolicyGenerator(effectiveBP,true,false);
-//                xwssPolicyGenerator.process();
-//                MessagePolicy bmp = xwssPolicyGenerator.getXWSSPolicy();
-//                PolicyAssertion sct = new SCTokenWrapper(token,bmp);
-//                sph.addSecureConversationToken(sct);
-//            }else if(PolicyUtil.isIssuedToken(token)){
-//                sph.addIssuedToken(token);
-//            }
-//        }
+
         SecurityPolicyHolder sph = constructPolicyHolder(policy,true,false);
         outMessagePolicyMap.put(operation,sph);
         return sph;
