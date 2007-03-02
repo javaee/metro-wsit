@@ -44,7 +44,6 @@ import java.util.Iterator;
 import java.util.Hashtable;
 import javax.xml.namespace.QName;
 import java.net.URI;
-import javax.xml.soap.SOAPBody;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.ws.WebServiceException;
 import java.util.Set;
@@ -111,9 +110,6 @@ import com.sun.xml.ws.security.policy.Validator;
 import com.sun.xml.ws.security.policy.ValidatorConfiguration;
 import com.sun.xml.ws.security.policy.WSSAssertion;
 import java.util.Properties;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import com.sun.xml.ws.api.addressing.*;
 import com.sun.xml.ws.rm.Constants;
 import com.sun.xml.wss.impl.filter.DumpFilter;
@@ -162,35 +158,36 @@ public abstract class SecurityPipeBase implements Pipe {
     
     //static JAXBContext used across the Pipe
     protected static final JAXBContext jaxbContext;
-    
+    protected boolean disablePayloadBuffer = false;
     protected AlgorithmSuite bindingLevelAlgSuite = null;
-//    protected static QName bsOperationName =
-//            new QName("http://schemas.xmlsoap.org/ws/2005/02/trust","RequestSecurityToken");
+    //    protected static QName bsOperationName =
+    //            new QName("http://schemas.xmlsoap.org/ws/2005/02/trust","RequestSecurityToken");
     private final QName optServerSecurity = new QName("http://schemas.sun.com/2006/03/wss/server","DisableStreamingSecurity");
     private final QName optClientSecurity = new QName("http://schemas.sun.com/2006/03/wss/client","DisableStreamingSecurity");
-    
+    private final QName disableSPBuffering = new QName("http://schemas.sun.com/2006/03/wss/server","DisablePayloadBuffering");
+    private final QName disableCPBuffering = new QName("http://schemas.sun.com/2006/03/wss/client","DisablePayloadBuffering");
     // CONSTANTs
-//    protected static final String OPERATION_SCOPE = "operation-policy-scope".intern();
-//    protected static final String BINDING_SCOPE = "binding-policy-scope".intern();
-//    protected static final String rstSCTURI = "http://schemas.xmlsoap.org/ws/2005/02/trust/RST/SCT".intern();
-//    protected static final String rstrSCTURI = "http://schemas.xmlsoap.org/ws/2005/02/trust/RSTR/SCT".intern();
-//    protected static final String rstTrustURI = "http://schemas.xmlsoap.org/ws/2005/02/trust/RST/Issue".intern();
-//    protected static final String rstrTrustURI = "http://schemas.xmlsoap.org/ws/2005/02/trust/RSTR/Issue".intern();
-//    protected static final String wsaURI = "http://schemas.xmlsoap.org/ws/2004/08/addressing".intern();
-//    protected static final String SC_ASSERTION = "SecureConversationAssertion".intern();
-//    protected static final QName ACTION_HEADER = new QName(wsaURI,"Action");
-//    protected final static QName _SecureConversationToken_QNAME =
-//            new QName("http://schemas.xmlsoap.org/ws/2005/07/securitypolicy", "SecureConversationToken");
-//    protected static final String SECURITY_POLICY_2005_07_NAMESPACE=
-//            "http://schemas.xmlsoap.org/ws/2005/07/securitypolicy".intern();
-//    protected static final String TRUST_2005_02_NAMESPACE ="http://schemas.xmlsoap.org/ws/2005/02/trust".intern();
-//    private static final String ADDRESSING_POLICY_NAMESPACE_URI =
-//            "http://schemas.xmlsoap.org/ws/2004/09/policy/addressing";
-//    protected static final String XENC_NS = "http://www.w3.org/2001/04/xmlenc#";
-//    protected static final String ENCRYPTED_DATA_LNAME = "EncryptedData";
+    //    protected static final String OPERATION_SCOPE = "operation-policy-scope".intern();
+    //    protected static final String BINDING_SCOPE = "binding-policy-scope".intern();
+    //    protected static final String rstSCTURI = "http://schemas.xmlsoap.org/ws/2005/02/trust/RST/SCT".intern();
+    //    protected static final String rstrSCTURI = "http://schemas.xmlsoap.org/ws/2005/02/trust/RSTR/SCT".intern();
+    //    protected static final String rstTrustURI = "http://schemas.xmlsoap.org/ws/2005/02/trust/RST/Issue".intern();
+    //    protected static final String rstrTrustURI = "http://schemas.xmlsoap.org/ws/2005/02/trust/RSTR/Issue".intern();
+    //    protected static final String wsaURI = "http://schemas.xmlsoap.org/ws/2004/08/addressing".intern();
+    //    protected static final String SC_ASSERTION = "SecureConversationAssertion".intern();
+    //    protected static final QName ACTION_HEADER = new QName(wsaURI,"Action");
+    //    protected final static QName _SecureConversationToken_QNAME =
+    //            new QName("http://schemas.xmlsoap.org/ws/2005/07/securitypolicy", "SecureConversationToken");
+    //    protected static final String SECURITY_POLICY_2005_07_NAMESPACE=
+    //            "http://schemas.xmlsoap.org/ws/2005/07/securitypolicy".intern();
+    //    protected static final String TRUST_2005_02_NAMESPACE ="http://schemas.xmlsoap.org/ws/2005/02/trust".intern();
+    //    private static final String ADDRESSING_POLICY_NAMESPACE_URI =
+    //            "http://schemas.xmlsoap.org/ws/2004/09/policy/addressing";
+    //    protected static final String XENC_NS = "http://www.w3.org/2001/04/xmlenc#";
+    //    protected static final String ENCRYPTED_DATA_LNAME = "EncryptedData";
     protected static final ArrayList<String> securityPolicyNamespaces ;
     //protected static MessagePolicy emptyMessagePolicy ;
-//    protected static final QName MESSAGE_ID_HEADER = new QName(wsaURI,"MessageID");
+    //    protected static final QName MESSAGE_ID_HEADER = new QName(wsaURI,"MessageID");
     protected static final List<PolicyAssertion> EMPTY_LIST = Collections.emptyList();
     
     // Security Environment reference initialized with a JAAS CallbackHandler
@@ -220,16 +217,16 @@ public abstract class SecurityPipeBase implements Pipe {
      * Constants for RM Security Processing
      */
     
-//    protected static final String RM_CREATE_SEQ= "http://schemas.xmlsoap.org/ws/2005/02/rm/CreateSequence";
-//    protected static final String RM_CREATE_SEQ_RESP= "http://schemas.xmlsoap.org/ws/2005/02/rm/CreateSequenceResponse";
-//    protected static final String RM_SEQ_ACK = "http://schemas.xmlsoap.org/ws/2005/02/rm/SequenceAcknowledgement";
-//    protected static final String RM_TERMINATE_SEQ = "http://schemas.xmlsoap.org/ws/2005/02/rm/TerminateSequence";
-//    protected static final String RM_LAST_MESSAGE= "http://schemas.xmlsoap.org/ws/2005/02/rm/LastMessage";
-//
-//
+    //    protected static final String RM_CREATE_SEQ= "http://schemas.xmlsoap.org/ws/2005/02/rm/CreateSequence";
+    //    protected static final String RM_CREATE_SEQ_RESP= "http://schemas.xmlsoap.org/ws/2005/02/rm/CreateSequenceResponse";
+    //    protected static final String RM_SEQ_ACK = "http://schemas.xmlsoap.org/ws/2005/02/rm/SequenceAcknowledgement";
+    //    protected static final String RM_TERMINATE_SEQ = "http://schemas.xmlsoap.org/ws/2005/02/rm/TerminateSequence";
+    //    protected static final String RM_LAST_MESSAGE= "http://schemas.xmlsoap.org/ws/2005/02/rm/LastMessage";
+    //
+    //
     protected WSDLBoundOperation cachedOperation = null;
-//    protected static final String SUN_WSS_SECURITY_SERVER_POLICY_NS="http://schemas.sun.com/2006/03/wss/server";
-//    protected static final String SUN_WSS_SECURITY_CLIENT_POLICY_NS="http://schemas.sun.com/2006/03/wss/client";
+    //    protected static final String SUN_WSS_SECURITY_SERVER_POLICY_NS="http://schemas.sun.com/2006/03/wss/server";
+    //    protected static final String SUN_WSS_SECURITY_CLIENT_POLICY_NS="http://schemas.sun.com/2006/03/wss/client";
     
     protected Policy wsitConfig =null;
     // store as instance variable
@@ -259,14 +256,14 @@ public abstract class SecurityPipeBase implements Pipe {
             securityPolicyNamespaces = new ArrayList<String>();
             securityPolicyNamespaces.add(SECURITY_POLICY_2005_07_NAMESPACE);
             
-        } catch (Exception e) {            
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
     
     public SecurityPipeBase(PipeConfiguration config, Pipe nextPipe) {
-//        System.setProperty("com.sun.xml.ws.policy.PolicyFactory",
-//                "com.sun.xml.ws.security.impl.policy.WSSecurityPolicyFactory");
+        //        System.setProperty("com.sun.xml.ws.policy.PolicyFactory",
+        //                "com.sun.xml.ws.security.impl.policy.WSSecurityPolicyFactory");
         this.nextPipe= nextPipe;
         this.pipeConfig = config;
         this.inMessagePolicyMap = new HashMap<WSDLBoundOperation,SecurityPolicyHolder>();
@@ -282,9 +279,9 @@ public abstract class SecurityPipeBase implements Pipe {
         try {
             this.marshaller = jaxbContext.createMarshaller();
             this.unmarshaller = jaxbContext.createUnmarshaller();
-        }catch (javax.xml.bind.JAXBException ex) {                        
+        }catch (javax.xml.bind.JAXBException ex) {
             log.log(Level.SEVERE, LogStringsMessages.WSSPIPE_0001_PROBLEM_MAR_UNMAR(), ex);
-            throw new RuntimeException(LogStringsMessages.WSSPIPE_0001_PROBLEM_MAR_UNMAR(), ex);            
+            throw new RuntimeException(LogStringsMessages.WSSPIPE_0001_PROBLEM_MAR_UNMAR(), ex);
         }
         
         try {
@@ -296,8 +293,8 @@ public abstract class SecurityPipeBase implements Pipe {
             hasReliableMessaging = isReliableMessagingEnabled(wsPolicyMap, pipeConfig.getWSDLModel());
             //   opResolver = new OperationResolverImpl(inMessagePolicyMap,pipeConfig.getWSDLModel().getBinding());
         }catch (Exception e) {
-            log.log(Level.SEVERE, 
-                    LogStringsMessages.WSSPIPE_0012_PROBLEM_CHECKING_RELIABLE_MESSAGE_ENABLE(), e);  
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSSPIPE_0012_PROBLEM_CHECKING_RELIABLE_MESSAGE_ENABLE(), e);
             throw new RuntimeException(LogStringsMessages.WSSPIPE_0012_PROBLEM_CHECKING_RELIABLE_MESSAGE_ENABLE(), e);
         }
         
@@ -330,18 +327,18 @@ public abstract class SecurityPipeBase implements Pipe {
             this.unmarshaller = jaxbContext.createUnmarshaller();
         }catch (javax.xml.bind.JAXBException ex) {
             log.log(Level.SEVERE, LogStringsMessages.WSSPIPE_0001_PROBLEM_MAR_UNMAR(), ex);
-            throw new RuntimeException("Problem creating JAXB Marshaller/Unmarshaller", ex);                    
+            throw new RuntimeException("Problem creating JAXB Marshaller/Unmarshaller", ex);
         }
     }
-        
+    
     protected SOAPMessage secureOutboundMessage(SOAPMessage message, ProcessingContext ctx){
         try {
             ctx.setSOAPMessage(message);
             SecurityAnnotator.secureMessage(ctx);
             return ctx.getSOAPMessage();
-        } catch (WssSoapFaultException soapFaultException) {            
+        } catch (WssSoapFaultException soapFaultException) {
             throw getSOAPFaultException(soapFaultException);
-        } catch (XWSSecurityException xwse) {            
+        } catch (XWSSecurityException xwse) {
             WssSoapFaultException wsfe =
                     SecurableSoapMessage.newSOAPFaultException(
                     MessageConstants.WSSE_INTERNAL_SERVER_ERROR,
@@ -373,10 +370,10 @@ public abstract class SecurityPipeBase implements Pipe {
             JAXBFilterProcessingContext  context = (JAXBFilterProcessingContext)ctx;
             context.setSOAPVersion(soapVersion);
             context.setJAXWSMessage(message, soapVersion);
-            context.isOneWayMessage(message.isOneWay(this.pipeConfig.getWSDLModel()));
-            SecurityAnnotator.secureMessage(context);
+            context.isOneWayMessage(message.isOneWay(this.pipeConfig.getWSDLModel()));            
+            SecurityAnnotator.secureMessage(context);            
             return context.getJAXWSMessage();
-        } catch(XWSSecurityException xwse){            
+        } catch(XWSSecurityException xwse){
             WssSoapFaultException wsfe =
                     SecurableSoapMessage.newSOAPFaultException(
                     MessageConstants.WSSE_INTERNAL_SERVER_ERROR,
@@ -388,7 +385,7 @@ public abstract class SecurityPipeBase implements Pipe {
     
     
     protected SOAPMessage verifyInboundMessage(SOAPMessage message, ProcessingContext ctx)
-    throws WssSoapFaultException, XWSSecurityException {
+            throws WssSoapFaultException, XWSSecurityException {
         try {
             ctx.setSOAPMessage(message);
             if (debug) {
@@ -396,9 +393,9 @@ public abstract class SecurityPipeBase implements Pipe {
             }
             NewSecurityRecipient.validateMessage(ctx);
             return ctx.getSOAPMessage();
-        } catch (WssSoapFaultException soapFaultException) {            
+        } catch (WssSoapFaultException soapFaultException) {
             throw getSOAPFaultException(soapFaultException);
-        } catch (XWSSecurityException xwse) {            
+        } catch (XWSSecurityException xwse) {
             WssSoapFaultException wsfe =
                     SecurableSoapMessage.newSOAPFaultException(
                     MessageConstants.WSSE_INTERNAL_SERVER_ERROR,
@@ -409,11 +406,12 @@ public abstract class SecurityPipeBase implements Pipe {
     
     protected Message verifyInboundMessage(Message message, ProcessingContext ctx) throws XWSSecurityException{
         JAXBFilterProcessingContext  context = (JAXBFilterProcessingContext)ctx;
+        context.setDisablePayloadBuffering(disablePayloadBuffer);
         //  context.setJAXWSMessage(message, soapVersion);
         if(debug){
             try {
                 ((LazyStreamBasedMessage)message).print();
-            } catch (XMLStreamException ex) {                
+            } catch (XMLStreamException ex) {
                 log.log(Level.SEVERE, LogStringsMessages.WSSPIPE_0003_PROBLEM_PRINTING_MSG(), ex);
                 throw new XWSSecurityException(LogStringsMessages.WSSPIPE_0003_PROBLEM_PRINTING_MSG(), ex);
             }
@@ -456,8 +454,8 @@ public abstract class SecurityPipeBase implements Pipe {
         
         MessagePolicy mp = null;
         //if(operation == null){
-            //Body could be encrypted. Security will have to infer the
-            //policy from the message till the Body is decrypted.
+        //Body could be encrypted. Security will have to infer the
+        //policy from the message till the Body is decrypted.
         //    mp =  new MessagePolicy();
         //}
         if (outMessagePolicyMap == null) {
@@ -470,15 +468,15 @@ public abstract class SecurityPipeBase implements Pipe {
         }
         mp = sph.getMessagePolicy();
         return mp;
-    }        
+    }
     
     protected WSDLBoundOperation getOperation(Message message){
         if(cachedOperation == null){
             cachedOperation = message.getOperation(pipeConfig.getWSDLModel());
         }
         return cachedOperation;
-    }        
-        
+    }
+    
     protected MessagePolicy getInboundXWSBootstrapPolicy(Token scAssertion) {
         return ((SCTokenWrapper)scAssertion).getMessagePolicy();
     }
@@ -501,7 +499,7 @@ public abstract class SecurityPipeBase implements Pipe {
         }
         ctx.setIssuedTokenContextMap(issuedTokenContextMap);
         ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
-
+        
         // setting a flag if issued tokens present
         ctx.hasIssuedToken(bindingHasIssuedTokenPolicy());
         ctx.setSecurityEnvironment(secEnv);
@@ -520,7 +518,7 @@ public abstract class SecurityPipeBase implements Pipe {
     
     protected boolean bindingHasRMPolicy() {
         return hasReliableMessaging;
-    }    
+    }
     
     protected ProcessingContext initializeOutgoingProcessingContext(
             Packet packet, boolean isSCMessage) {
@@ -652,7 +650,12 @@ public abstract class SecurityPipeBase implements Pipe {
                 if(endpointPolicy.contains(optServerSecurity) || endpointPolicy.contains(optClientSecurity)){
                     optimized = false;
                 }
+                if(endpointPolicy.contains(disableCPBuffering) || endpointPolicy.contains(disableSPBuffering)){
+                    disablePayloadBuffer = true;
+                }    
+                
             }
+            
             
             buildProtocolPolicy(endpointPolicy);
             ArrayList<Policy> policyList = new ArrayList<Policy>();
@@ -825,7 +828,7 @@ public abstract class SecurityPipeBase implements Pipe {
         
     }
     
-//TODO :: Refactor
+    //TODO :: Refactor
     protected ArrayList<PolicyAssertion> getTokens(Policy policy){
         ArrayList<PolicyAssertion> tokenList = new ArrayList<PolicyAssertion>();
         for(AssertionSet assertionSet : policy){
@@ -905,7 +908,7 @@ public abstract class SecurityPipeBase implements Pipe {
                 packet.setMessage(message);
             }catch(SOAPException se){
                 // internal error
-                log.log(Level.SEVERE, LogStringsMessages.WSSPIPE_0005_PROBLEM_PROC_SOAP_MESSAGE(), se);                
+                log.log(Level.SEVERE, LogStringsMessages.WSSPIPE_0005_PROBLEM_PROC_SOAP_MESSAGE(), se);
                 throw new WebServiceException(LogStringsMessages.WSSPIPE_0005_PROBLEM_PROC_SOAP_MESSAGE(), se);
             }
         }
@@ -937,8 +940,8 @@ public abstract class SecurityPipeBase implements Pipe {
             PolicyMerger pm = PolicyMerger.getMerger();
             Policy ep = pm.merge(pl);
             return ep;
-        } catch (Exception e) {            
-            log.log(Level.SEVERE, LogStringsMessages.WSSPIPE_0007_PROBLEM_GETTING_EFF_BOOT_POLICY(), e);                            
+        } catch (Exception e) {
+            log.log(Level.SEVERE, LogStringsMessages.WSSPIPE_0007_PROBLEM_GETTING_EFF_BOOT_POLICY(), e);
             throw new PolicyException(LogStringsMessages.WSSPIPE_0007_PROBLEM_GETTING_EFF_BOOT_POLICY(), e);
         }
         
@@ -1040,8 +1043,8 @@ public abstract class SecurityPipeBase implements Pipe {
         }
         String action = getAction(packet);
         if (RM_CREATE_SEQ.equals(action) || RM_CREATE_SEQ_RESP.equals(action)
-        || RM_SEQ_ACK.equals(action) || RM_TERMINATE_SEQ.equals(action)
-        || RM_LAST_MESSAGE.equals(action)) {
+                || RM_SEQ_ACK.equals(action) || RM_TERMINATE_SEQ.equals(action)
+                || RM_LAST_MESSAGE.equals(action)) {
             return true;
         }
         
@@ -1096,10 +1099,10 @@ public abstract class SecurityPipeBase implements Pipe {
             addIncomingProtocolPolicy(ep,"SC");
             addOutgoingProtocolPolicy(ep,"SC");
         }catch(IOException ie){
-            log.log(Level.SEVERE, 
-                    LogStringsMessages.WSSPIPE_0008_PROBLEM_BUILDING_PROTOCOL_POLICY(), ie);            
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSSPIPE_0008_PROBLEM_BUILDING_PROTOCOL_POLICY(), ie);
             throw new PolicyException(
-                    LogStringsMessages.WSSPIPE_0008_PROBLEM_BUILDING_PROTOCOL_POLICY(), ie);            
+                    LogStringsMessages.WSSPIPE_0008_PROBLEM_BUILDING_PROTOCOL_POLICY(), ie);
         }
     }
     
@@ -1172,8 +1175,8 @@ public abstract class SecurityPipeBase implements Pipe {
         return sph;
     }
     
-// return the callbackhandler if the xwssCallbackHandler was set
-// otherwise populate the props and return null.
+    // return the callbackhandler if the xwssCallbackHandler was set
+    // otherwise populate the props and return null.
     protected String populateConfigProperties(Set configAssertions, Properties props) {
         if (configAssertions == null) {
             return null;
@@ -1202,8 +1205,8 @@ public abstract class SecurityPipeBase implements Pipe {
             props.put(DefaultCallbackHandler.KEYSTORE_URL, store.getLocation());
         } else {
             //throw RuntimeException for now
-            log.log(Level.SEVERE, 
-                    LogStringsMessages.WSSPIPE_0014_KEYSTORE_URL_NULL_CONFIG_ASSERTION());                        
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSSPIPE_0014_KEYSTORE_URL_NULL_CONFIG_ASSERTION());
             throw new RuntimeException(LogStringsMessages.WSSPIPE_0014_KEYSTORE_URL_NULL_CONFIG_ASSERTION());
         }
         
@@ -1216,9 +1219,9 @@ public abstract class SecurityPipeBase implements Pipe {
         if (store.getPassword() != null) {
             props.put(DefaultCallbackHandler.KEYSTORE_PASSWORD, new String(store.getPassword()));
         } else {
-            log.log(Level.SEVERE, 
-                    LogStringsMessages.WSSPIPE_0015_KEYSTORE_PASSWORD_NULL_CONFIG_ASSERTION());                        
-            throw new RuntimeException(LogStringsMessages.WSSPIPE_0015_KEYSTORE_PASSWORD_NULL_CONFIG_ASSERTION() );            
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSSPIPE_0015_KEYSTORE_PASSWORD_NULL_CONFIG_ASSERTION());
+            throw new RuntimeException(LogStringsMessages.WSSPIPE_0015_KEYSTORE_PASSWORD_NULL_CONFIG_ASSERTION() );
         }
         
         if (store.getAlias() != null) {
@@ -1238,9 +1241,9 @@ public abstract class SecurityPipeBase implements Pipe {
             props.put(DefaultCallbackHandler.TRUSTSTORE_URL, store.getLocation());
         } else {
             //throw RuntimeException for now
-            log.log(Level.SEVERE, 
-                    LogStringsMessages.WSSPIPE_0016_TRUSTSTORE_URL_NULL_CONFIG_ASSERTION());                        
-            throw new RuntimeException(LogStringsMessages.WSSPIPE_0016_TRUSTSTORE_URL_NULL_CONFIG_ASSERTION() );            
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSSPIPE_0016_TRUSTSTORE_URL_NULL_CONFIG_ASSERTION());
+            throw new RuntimeException(LogStringsMessages.WSSPIPE_0016_TRUSTSTORE_URL_NULL_CONFIG_ASSERTION() );
         }
         
         if (store.getType() != null) {
@@ -1252,9 +1255,9 @@ public abstract class SecurityPipeBase implements Pipe {
         if (store.getPassword() != null) {
             props.put(DefaultCallbackHandler.TRUSTSTORE_PASSWORD, new String(store.getPassword()));
         } else {
-            log.log(Level.SEVERE, 
-                    LogStringsMessages.WSSPIPE_0017_TRUSTSTORE_PASSWORD_NULL_CONFIG_ASSERTION());                        
-            throw new RuntimeException(LogStringsMessages.WSSPIPE_0017_TRUSTSTORE_PASSWORD_NULL_CONFIG_ASSERTION() );             
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSSPIPE_0017_TRUSTSTORE_PASSWORD_NULL_CONFIG_ASSERTION());
+            throw new RuntimeException(LogStringsMessages.WSSPIPE_0017_TRUSTSTORE_PASSWORD_NULL_CONFIG_ASSERTION() );
         }
         
         if (store.getPeerAlias() != null) {
@@ -1281,8 +1284,8 @@ public abstract class SecurityPipeBase implements Pipe {
                 if (ret != null && !"".equals(ret)) {
                     return ret;
                 } else {
-                    log.log(Level.SEVERE, 
-                            LogStringsMessages.WSSPIPE_0018_NULL_OR_EMPTY_XWSS_CALLBACK_HANDLER_CLASSNAME());  
+                    log.log(Level.SEVERE,
+                            LogStringsMessages.WSSPIPE_0018_NULL_OR_EMPTY_XWSS_CALLBACK_HANDLER_CLASSNAME());
                     throw new RuntimeException(LogStringsMessages.WSSPIPE_0018_NULL_OR_EMPTY_XWSS_CALLBACK_HANDLER_CLASSNAME());
                 }
             } else if ("usernameHandler".equals(name)) {
@@ -1294,8 +1297,8 @@ public abstract class SecurityPipeBase implements Pipe {
                     if (def != null && !"".equals(def)) {
                         props.put(DefaultCallbackHandler.MY_USERNAME, def);
                     } else {
-                        log.log(Level.SEVERE, 
-                            LogStringsMessages.WSSPIPE_0019_NULL_OR_EMPTY_USERNAME_HANDLER_CLASSNAME());  
+                        log.log(Level.SEVERE,
+                                LogStringsMessages.WSSPIPE_0019_NULL_OR_EMPTY_USERNAME_HANDLER_CLASSNAME());
                         throw new RuntimeException(LogStringsMessages.WSSPIPE_0019_NULL_OR_EMPTY_USERNAME_HANDLER_CLASSNAME());
                     }
                 }
@@ -1308,21 +1311,21 @@ public abstract class SecurityPipeBase implements Pipe {
                     if (def != null && !"".equals(def)) {
                         props.put(DefaultCallbackHandler.MY_PASSWORD, def);
                     } else {
-                        log.log(Level.SEVERE, 
-                            LogStringsMessages.WSSPIPE_0020_NULL_OR_EMPTY_PASSWORD_HANDLER_CLASSNAME());  
+                        log.log(Level.SEVERE,
+                                LogStringsMessages.WSSPIPE_0020_NULL_OR_EMPTY_PASSWORD_HANDLER_CLASSNAME());
                         throw new RuntimeException(LogStringsMessages.WSSPIPE_0020_NULL_OR_EMPTY_PASSWORD_HANDLER_CLASSNAME());
                     }
                 }
             } else if ("samlHandler".equals(name)) {
                 if (ret == null || "".equals(ret)) {
-                    log.log(Level.SEVERE, 
-                            LogStringsMessages.WSSPIPE_0021_NULL_OR_EMPTY_SAML_HANDLER_CLASSNAME());  
-                        throw new RuntimeException(LogStringsMessages.WSSPIPE_0021_NULL_OR_EMPTY_SAML_HANDLER_CLASSNAME());                    
+                    log.log(Level.SEVERE,
+                            LogStringsMessages.WSSPIPE_0021_NULL_OR_EMPTY_SAML_HANDLER_CLASSNAME());
+                    throw new RuntimeException(LogStringsMessages.WSSPIPE_0021_NULL_OR_EMPTY_SAML_HANDLER_CLASSNAME());
                 }
                 props.put(DefaultCallbackHandler.SAML_CBH, ret);
             } else {
-                log.log(Level.SEVERE, 
-                        LogStringsMessages.WSSPIPE_0009_UNSUPPORTED_CALLBACK_TYPE_ENCOUNTERED(name));                            
+                log.log(Level.SEVERE,
+                        LogStringsMessages.WSSPIPE_0009_UNSUPPORTED_CALLBACK_TYPE_ENCOUNTERED(name));
                 throw new RuntimeException(LogStringsMessages.WSSPIPE_0009_UNSUPPORTED_CALLBACK_TYPE_ENCOUNTERED(name));
             }
         }
@@ -1349,8 +1352,8 @@ public abstract class SecurityPipeBase implements Pipe {
             String name = v.getValidatorName();
             String validator = v.getValidator();
             if (validator == null || "".equals(validator)) {
-                log.log(Level.SEVERE, 
-                        LogStringsMessages.WSSPIPE_0022_NULL_OR_EMPTY_VALIDATOR_CLASSNAME(name));                                            
+                log.log(Level.SEVERE,
+                        LogStringsMessages.WSSPIPE_0022_NULL_OR_EMPTY_VALIDATOR_CLASSNAME(name));
                 throw new RuntimeException(LogStringsMessages.WSSPIPE_0022_NULL_OR_EMPTY_VALIDATOR_CLASSNAME(name));
             }
             
@@ -1363,8 +1366,8 @@ public abstract class SecurityPipeBase implements Pipe {
             } else if ("samlAssertionValidator".equals(name)) {
                 props.put(DefaultCallbackHandler.SAML_VALIDATOR, validator);
             } else {
-                log.log(Level.SEVERE, 
-                    LogStringsMessages.WSSPIPE_0010_UNKNOWN_VALIDATOR_TYPE_CONFIG(name));                
+                log.log(Level.SEVERE,
+                        LogStringsMessages.WSSPIPE_0010_UNKNOWN_VALIDATOR_TYPE_CONFIG(name));
                 throw new RuntimeException(LogStringsMessages.WSSPIPE_0010_UNKNOWN_VALIDATOR_TYPE_CONFIG(name));
             }
         }
@@ -1392,8 +1395,8 @@ public abstract class SecurityPipeBase implements Pipe {
         } catch (ClassNotFoundException e) {
             // ignore
         }
-        log.log(Level.FINE, 
-                LogStringsMessages.WSSPIPE_0011_COULD_NOT_FIND_USER_CLASS(), classname);                
+        log.log(Level.FINE,
+                LogStringsMessages.WSSPIPE_0011_COULD_NOT_FIND_USER_CLASS(), classname);
         throw new XWSSecurityException(LogStringsMessages.WSSPIPE_0011_COULD_NOT_FIND_USER_CLASS());
     }
     
@@ -1430,11 +1433,11 @@ public abstract class SecurityPipeBase implements Pipe {
             
             return (policy != null) && policy.contains(Constants.version);
         } catch (PolicyException e) {
-            log.log(Level.SEVERE, 
-                    LogStringsMessages.WSSPIPE_0012_PROBLEM_CHECKING_RELIABLE_MESSAGE_ENABLE(), e);                    
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSSPIPE_0012_PROBLEM_CHECKING_RELIABLE_MESSAGE_ENABLE(), e);
             throw new WebServiceException(LogStringsMessages.WSSPIPE_0012_PROBLEM_CHECKING_RELIABLE_MESSAGE_ENABLE(), e);
         }
-    }           
+    }
     
     protected abstract void addIncomingFaultPolicy(Policy effectivePolicy,SecurityPolicyHolder sph,WSDLFault fault)throws PolicyException;
     
