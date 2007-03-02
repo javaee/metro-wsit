@@ -55,6 +55,7 @@ public class WsdlDocumentFilterTest extends AbstractFilteringTest {
     };
     
     private static final String[] testWsdlResources = new String[] {
+        "PingService",
         "W2JRLR2010TestService"
     };
     
@@ -78,13 +79,16 @@ public class WsdlDocumentFilterTest extends AbstractFilteringTest {
     }
     
     public void testFilterWSDL() throws Exception {
-        StringWriter filteredBuffer = new StringWriter();
-        StringWriter unfilteredBuffer = new StringWriter();
-
-        readAndWriteWsdl(testWsdlResources[0], filteredBuffer, true);
-        readAndWriteWsdl(testWsdlResources[0], unfilteredBuffer, false);
-
-        assertEquals(unfilteredBuffer.toString(), filteredBuffer.toString());
+        for (String wsdlResource : testWsdlResources) {
+            StringWriter filteredBuffer = new StringWriter();
+            StringWriter unfilteredBuffer = new StringWriter();
+            
+            readAndWriteWsdl(wsdlResource, filteredBuffer, true);
+            readAndWriteWsdl(wsdlResource + "_expected", unfilteredBuffer, false);
+            
+            System.out.println(filteredBuffer.toString());
+            assertEquals(unfilteredBuffer.toString(), filteredBuffer.toString());
+        }
     }
     
     private void readAndWriteWsdl(String wsdlName, StringWriter buffer, boolean filter) throws PolicyException, XMLStreamException {

@@ -206,7 +206,7 @@ public final class FilteringInvocationProcessor implements InvocationProcessor {
             }
             
             // choose invocation target and execute invocation
-            Object invocationTarget;
+            XMLStreamWriter invocationTarget;
             if (doFiltering) {
                 doFiltering = filteringCount > 0; // stop filtering for the next call if there are no more filtering requests active
                 invocationTarget = mirrorWriter;

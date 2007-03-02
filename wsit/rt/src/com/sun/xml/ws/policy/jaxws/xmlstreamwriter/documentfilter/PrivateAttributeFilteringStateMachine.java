@@ -49,8 +49,7 @@ public class PrivateAttributeFilteringStateMachine implements FilteringStateMach
         LOGGER.entering(invocation);
         InvocationProcessingState resultingState = NO_STATE_CHANGE;
         try {
-            final XmlStreamWriterMethodType methodType = XmlStreamWriterMethodType.getMethodType(invocation.getMethodName());
-            switch (methodType) {
+            switch (invocation.getMethodType()) {
                 case WRITE_START_ELEMENT:
                     if (filteringOn) {
                         depth++;

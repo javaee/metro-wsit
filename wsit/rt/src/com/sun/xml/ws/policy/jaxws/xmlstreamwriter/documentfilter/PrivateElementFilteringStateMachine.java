@@ -21,10 +21,8 @@
  */
 package com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter;
 
-import com.sun.xml.ws.policy.jaxws.privateutil.LocalizationMessages;
 import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.Invocation;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
-import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamWriter;
 
@@ -55,8 +53,7 @@ public class PrivateElementFilteringStateMachine implements FilteringStateMachin
         LOGGER.entering(invocation);
         InvocationProcessingState resultingState = NO_STATE_CHANGE;
         try {
-            final XmlStreamWriterMethodType methodType = XmlStreamWriterMethodType.getMethodType(invocation.getMethodName());
-            switch (methodType) {
+            switch (invocation.getMethodType()) {
                 case WRITE_START_ELEMENT:
                     if (filteringOn) {
                         depth++;
@@ -86,14 +83,14 @@ public class PrivateElementFilteringStateMachine implements FilteringStateMachin
                 default:
                     break;
             }
-
+            
             return resultingState;
             
         } finally {
             LOGGER.exiting(resultingState);
         }
     }
-
+    
     private boolean startFiltering(final Invocation invocation, final XMLStreamWriter writer) {
         final QName elementName = XmlFilteringUtils.getElementNameToWrite(invocation, XmlFilteringUtils.getDefaultNamespaceURI(writer));
         

@@ -20,7 +20,7 @@
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
-package com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter;
+package com.sun.xml.ws.policy.jaxws.xmlstreamwriter;
 
 /**
  *
@@ -42,7 +42,7 @@ public enum XmlStreamWriterMethodType {
         WRITE_CHARACTERS,
         CLOSE
     };
-    public static XmlStreamWriterMethodType getMethodType(final String methodName) {
+    static XmlStreamWriterMethodType getMethodType(final String methodName) {
         for (XmlStreamWriterMethodType type : types) {
             if (type.methodName.equals(methodName)) {
                 return type;
@@ -55,5 +55,9 @@ public enum XmlStreamWriterMethodType {
     
     private XmlStreamWriterMethodType(String methodName) {
         this.methodName = methodName;
+    }
+    
+    public String getMethodName() {
+        return methodName;
     }
 }

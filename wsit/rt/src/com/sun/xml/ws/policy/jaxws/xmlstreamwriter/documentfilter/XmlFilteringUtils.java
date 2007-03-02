@@ -23,6 +23,7 @@ package com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter;
 
 import com.sun.xml.ws.policy.jaxws.privateutil.LocalizationMessages;
 import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.Invocation;
+import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.XmlStreamWriterMethodType;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
@@ -68,7 +69,7 @@ public final class XmlFilteringUtils {
          * void writeStartElement(String namespaceURI, String localName)
          * void writeStartElement(String prefix, String localName, String namespaceURI)
          */
-        final int argumentsCount = invocation.getArgumentsLength();
+        final int argumentsCount = invocation.getArgumentsCount();
         final String namespaceURI;
         final String localName;
         
@@ -100,7 +101,7 @@ public final class XmlFilteringUtils {
          * void writeAttribute(String namespaceURI, String localName, String value)
          * void writeAttribute(String prefix, String namespaceURI, String localName, String value)
          */
-        final int argumentsCount = invocation.getArgumentsLength();
+        final int argumentsCount = invocation.getArgumentsCount();
         String namespaceURI, localName, value;
         
         switch (argumentsCount) {
@@ -130,9 +131,8 @@ public final class XmlFilteringUtils {
         if (invocation == null) {
             throw LOGGER.logSevereException(new NullPointerException(LocalizationMessages.WSP_1038_METHOD_PARAMETER_CANNOT_BE_NULL("Invocation parameter")));
         } else {
-            XmlStreamWriterMethodType methodType = XmlStreamWriterMethodType.getMethodType(invocation.getMethodName());
-            if (methodType != expectedType) {
-                throw LOGGER.logSevereException(new IllegalArgumentException(LocalizationMessages.WSP_1039_ILLEGAL_INVOCATION_METHOD_TYPE(methodType, expectedType)));
+            if (invocation.getMethodType() != expectedType) {
+                throw LOGGER.logSevereException(new IllegalArgumentException(LocalizationMessages.WSP_1039_ILLEGAL_INVOCATION_METHOD_TYPE(invocation.getMethodType(), expectedType)));
             }
         }
     }
