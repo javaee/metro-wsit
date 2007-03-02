@@ -251,6 +251,9 @@ public abstract class BaseSTSImpl implements BaseSTS {
                     while(serviceProviders.hasNext()){
                         final PolicyAssertion serviceProvider = serviceProviders.next();
                         endpointUri = serviceProvider.getAttributeValue(Q_EP);
+                        if (endpointUri == null){
+                             endpointUri = serviceProvider.getAttributeValue(new QName("", END_POINT.toLowerCase()));
+                        }
                         final DefaultTrustSPMetadata data = new DefaultTrustSPMetadata(endpointUri);
                         final Iterator<PolicyAssertion> spConfig = serviceProvider.getNestedAssertionsIterator();
                         while(spConfig.hasNext()){

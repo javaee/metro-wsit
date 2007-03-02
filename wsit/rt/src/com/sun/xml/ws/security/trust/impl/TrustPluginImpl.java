@@ -54,6 +54,7 @@ import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponse;
 import com.sun.xml.ws.security.trust.impl.bindings.ObjectFactory;
 import com.sun.xml.ws.security.trust.impl.bindings.RequestSecurityTokenResponseType;
 import com.sun.xml.ws.security.trust.impl.bindings.RequestSecurityTokenType;
+import com.sun.xml.ws.security.trust.impl.elements.ClaimsImpl;
 import com.sun.xml.ws.security.trust.util.WSTrustUtil;
 import java.net.URI;
 import java.net.URL;
@@ -64,6 +65,7 @@ import java.security.SecureRandom;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.xml.namespace.QName;
 import javax.xml.ws.Dispatch;
 import javax.xml.ws.RespectBindingFeature;
@@ -96,12 +98,12 @@ public class TrustPluginImpl implements TrustPlugin {
     private static final String PRE_CONFIGURED_STS = "PreconfiguredSTS";
     private static final String NAMESPACE = "namespace";
     private static final String CONFIG_NAMESPACE = "";
-    private static final String ENDPOINT = "endpoint";
+    private static final String ENDPOINT = "endPoint";
     private static final String METADATA = "metadata";
     private static final String WSDL_LOCATION = "wsdlLocation";
     private static final String SERVICE_NAME = "serviceName";
     private static final String PORT_NAME = "portName";
-    
+   
     /** Creates a new instance of TrustPluginImpl */
     public TrustPluginImpl(Configuration config) {
         this.config = config;
@@ -138,7 +140,10 @@ public class TrustPluginImpl implements TrustPlugin {
             if (PRE_CONFIGURED_STS.equals(localToken.getName().getLocalPart())) {
                 final Map<QName,String> attrs = localToken.getAttributes();
                 final String namespace = attrs.get(new QName(CONFIG_NAMESPACE,NAMESPACE));
-                final String stsEPStr = attrs.get(new QName(CONFIG_NAMESPACE,ENDPOINT));
+                String stsEPStr = attrs.get(new QName(CONFIG_NAMESPACE,ENDPOINT));
+                if (stsEPStr == null){
+                    stsEPStr = attrs.get(new QName(CONFIG_NAMESPACE,ENDPOINT.toLowerCase()));
+                }
                 if (stsEPStr != null){
                     stsURI = URI.create(stsEPStr);
                 }
@@ -178,6 +183,7 @@ public class TrustPluginImpl implements TrustPlugin {
         RequestSecurityTokenResponse result = null;
         try {
             final RequestSecurityToken request = createRequest(rstTemplate, appliesTo);
+           
             result = invokeRST(request, wsdlLocation, serviceName, portName, stsURI.toString());
             final IssuedTokenContext itc = new IssuedTokenContextImpl();
             final WSTrustClientContract contract = WSTrustFactory.createWSTrustClientContract(config);
@@ -487,17 +493,6 @@ public class TrustPluginImpl implements TrustPlugin {
         
         return null;
     }
-    
- /*   private Dispatch<Object> addAddressingHeaders(Dispatch<Object> provider) {
-        AddressingBuilder builder = AddressingBuilder.newInstance();
-        AddressingProperties ap = builder.newAddressingProperties();
-  
-        // Action
-        ap.setAction(builder.newURI(WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION));
-        provider.getRequestContext().put(JAXWSAConstants.CLIENT_ADDRESSING_PROPERTIES, ap);
-  
-        return provider;
-    }*/
     
     /**
      * Prints out the RST created as string.

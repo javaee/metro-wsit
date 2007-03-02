@@ -37,7 +37,7 @@ public class DefaultTrustSPMetadata implements TrustSPMetadata{
     private String tokenType;
     private String keyType;
     private String certAlias;
-    private Map otherOptions = new HashMap<String, Object>();
+    private Map<String, Object> otherOptions = new HashMap<String, Object>();
         
     /** Creates a new instance of DefaultTrustSPMetedata */
     public DefaultTrustSPMetadata(String endpoint) {
