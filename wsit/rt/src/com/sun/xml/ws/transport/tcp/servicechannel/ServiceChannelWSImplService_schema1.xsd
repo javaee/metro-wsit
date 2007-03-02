@@ -13,9 +13,7 @@
 <xs:sequence/>
 </xs:complexType>
 <xs:complexType name="initiateSessionResponse">
-<xs:sequence>
-<xs:element name="return" type="xs:int"/>
-</xs:sequence>
+<xs:sequence/>
 </xs:complexType>
 <xs:complexType name="serviceChannelExceptionBean">
 <xs:sequence>
@@ -29,17 +27,13 @@
 </xs:sequence>
 </xs:complexType>
 <xs:complexType name="closeChannelResponse">
-<xs:sequence>
-<xs:element name="return" type="xs:int"/>
-</xs:sequence>
+<xs:sequence/>
 </xs:complexType>
 <xs:complexType name="closeSession">
 <xs:sequence/>
 </xs:complexType>
 <xs:complexType name="closeSessionResponse">
-<xs:sequence>
-<xs:element name="return" type="xs:int"/>
-</xs:sequence>
+<xs:sequence/>
 </xs:complexType>
 <xs:complexType name="openChannel">
 <xs:sequence>

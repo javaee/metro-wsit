@@ -32,26 +32,4 @@ import javax.xml.bind.annotation.XmlType;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "closeSessionResponse", namespace = "http://servicechannel.tcp.transport.ws.xml.sun.com/")
 public class CloseSessionResponse {
-
-    @XmlElement(name = "return", namespace = "")
-    private int _return;
-
-    /**
-     * 
-     * @return
-     *     returns int
-     */
-    public int get_return() {
-        return this._return;
-    }
-
-    /**
-     * 
-     * @param _return
-     *     the value for the _return property
-     */
-    public void set_return(int _return) {
-        this._return = _return;
-    }
-
 }
