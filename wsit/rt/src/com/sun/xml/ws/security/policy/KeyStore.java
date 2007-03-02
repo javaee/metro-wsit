@@ -37,4 +37,6 @@ public interface KeyStore {
     
     public String getKeyPassword();
     
+    public String getCertSelectorClassName();
+    
 }

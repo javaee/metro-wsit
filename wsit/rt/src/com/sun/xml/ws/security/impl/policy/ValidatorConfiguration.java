@@ -44,6 +44,9 @@ public class ValidatorConfiguration extends PolicyAssertion implements com.sun.x
     private static QName ctimestampFreshnessLimit  =  new QName(Constants.SUN_WSS_SECURITY_CLIENT_POLICY_NS,"timestampFreshnessLimit");
     private static QName stimestampFreshnessLimit  =  new QName(Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS,"timestampFreshnessLimit"); 
     private static QName smaxNonceAge =  new QName(Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS,"maxNonceAge");
+   private static QName crevocationEnabled =  new QName(Constants.SUN_WSS_SECURITY_CLIENT_POLICY_NS,"revocationEnabled");
+    private static QName srevocationEnabled =  new QName(Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS,"revocationEnabled");
+    
     private AssertionFitness fitness = AssertionFitness.IS_VALID;
     /** Creates a new instance of ValidatorConfiguration */
     public ValidatorConfiguration() {
@@ -97,5 +100,14 @@ public class ValidatorConfiguration extends PolicyAssertion implements com.sun.x
             return this.getAttributeValue(smaxNonceAge);
         }
         return null;            
+    }
+
+    public String getRevocationEnabled() {
+        if(this.getAttributes().containsKey(crevocationEnabled)){
+            return this.getAttributeValue(crevocationEnabled);
+        }else if(this.getAttributes().containsKey(srevocationEnabled)){
+            return this.getAttributeValue(srevocationEnabled);
+        }
+        return null;
     }
 }

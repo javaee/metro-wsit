@@ -11,6 +11,7 @@ package com.sun.xml.wss.provider.wsit;
 
 import com.sun.xml.ws.api.model.wsdl.WSDLFault;
 import com.sun.xml.ws.security.impl.policyconv.XWSSPolicyGenerator;
+import com.sun.xml.ws.security.policy.CertStoreConfig;
 import com.sun.xml.ws.security.secconv.WSSCConstants;
 import com.sun.xml.wss.impl.policy.mls.EncryptionPolicy;
 import com.sun.xml.wss.impl.policy.mls.EncryptionTarget;
@@ -900,6 +901,8 @@ public abstract class WSITAuthContextBase  {
                 }
             } else if ("ValidatorConfiguration".equals(as.getName().getLocalPart())) {
                 populateValidatorProps(props, (ValidatorConfiguration)as);
+            } else if ("CertStore".equals(as.getName().getLocalPart())) {
+                populateCertStoreProps(props, (CertStoreConfig)as);
             }
         }
         return null;
@@ -937,6 +940,10 @@ public abstract class WSITAuthContextBase  {
         }
         if (store.getKeyPassword() != null) {
             props.put(DefaultCallbackHandler.KEY_PASSWORD, store.getKeyPassword());
+        }
+        
+        if (store.getCertSelectorClassName() != null) {
+            props.put(DefaultCallbackHandler.KEYSTORE_CERTSELECTOR, store.getCertSelectorClassName());
         }
     }
     
@@ -999,6 +1006,10 @@ public abstract class WSITAuthContextBase  {
         
         if (store.getServiceAlias() != null) {
             props.put(DefaultCallbackHandler.SERVICE_ALIAS, store.getServiceAlias());
+        }
+        
+        if (store.getCertSelectorClassName() != null) {
+            props.put(DefaultCallbackHandler.TRUSTSTORE_CERTSELECTOR, store.getCertSelectorClassName());
         }
     }
     
@@ -1073,6 +1084,10 @@ public abstract class WSITAuthContextBase  {
         if (conf.getMaxNonceAge() != null) {
             props.put(DefaultCallbackHandler.MAX_NONCE_AGE_PROPERTY, conf.getMaxNonceAge());
         }
+         
+        if (conf.getRevocationEnabled() != null) {
+            props.put(DefaultCallbackHandler.MAX_NONCE_AGE_PROPERTY, conf.getMaxNonceAge());
+        }
         
         Iterator it = conf.getValidators();
         for (; it.hasNext();) {
@@ -1101,6 +1116,17 @@ public abstract class WSITAuthContextBase  {
         }
     }
     
+    private void populateCertStoreProps(Properties props, CertStoreConfig certStoreConfig) {
+        if (certStoreConfig.getCallbackHandlerClassName() != null) {
+            props.put(DefaultCallbackHandler.CERTSTORE_CBH, certStoreConfig.getCallbackHandlerClassName());
+        }
+        if (certStoreConfig.getCertSelectorClassName() != null) {
+            props.put(DefaultCallbackHandler.CERTSTORE_CERTSELECTOR,certStoreConfig.getCertSelectorClassName());
+        }
+        if (certStoreConfig.getCRLSelectorClassName() != null) {
+            props.put(DefaultCallbackHandler.CERTSTORE_CRLSELECTOR,certStoreConfig.getCRLSelectorClassName());
+        }
+    }
     
     protected com.sun.xml.wss.impl.AlgorithmSuite getAlgoSuite(AlgorithmSuite suite) {
         if (suite == null) {

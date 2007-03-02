@@ -28,6 +28,7 @@ import com.sun.xml.ws.api.model.wsdl.WSDLFault;
 import com.sun.xml.ws.message.stream.LazyStreamBasedMessage;
 import com.sun.xml.ws.security.impl.policyconv.XWSSPolicyGenerator;
 import com.sun.xml.ws.security.opt.impl.JAXBFilterProcessingContext;
+import com.sun.xml.ws.security.policy.CertStoreConfig;
 import com.sun.xml.ws.security.secconv.WSSCConstants;
 import com.sun.xml.wss.impl.policy.mls.EncryptionPolicy;
 import com.sun.xml.wss.impl.policy.mls.EncryptionTarget;
@@ -1165,6 +1166,8 @@ public abstract class SecurityPipeBase implements Pipe {
                 }
             } else if ("ValidatorConfiguration".equals(as.getName().getLocalPart())) {
                 populateValidatorProps(props, (ValidatorConfiguration)as);
+            } else if ("CertStore".equals(as.getName().getLocalPart())) {
+                populateCertStoreProps(props, (CertStoreConfig)as);
             }
         }
         return null;
@@ -1204,6 +1207,10 @@ public abstract class SecurityPipeBase implements Pipe {
         if (store.getKeyPassword() != null) {
             props.put(DefaultCallbackHandler.KEY_PASSWORD, store.getKeyPassword());
         }
+        
+        if (store.getCertSelectorClassName() != null) {
+            props.put(DefaultCallbackHandler.KEYSTORE_CERTSELECTOR, store.getCertSelectorClassName());
+        }
     }
     
     private void populateTruststoreProps(Properties props, TrustStore store) {
@@ -1240,6 +1247,10 @@ public abstract class SecurityPipeBase implements Pipe {
         
         if (store.getServiceAlias() != null) {
             props.put(DefaultCallbackHandler.SERVICE_ALIAS, store.getServiceAlias());
+        }
+        
+        if (store.getCertSelectorClassName() != null) {
+            props.put(DefaultCallbackHandler.TRUSTSTORE_CERTSELECTOR, store.getCertSelectorClassName());
         }
     }
     
@@ -1314,6 +1325,9 @@ public abstract class SecurityPipeBase implements Pipe {
         if (conf.getMaxNonceAge() != null) {
             props.put(DefaultCallbackHandler.MAX_NONCE_AGE_PROPERTY, conf.getMaxNonceAge());
         }
+        if (conf.getRevocationEnabled() != null) {
+            props.put(DefaultCallbackHandler.MAX_NONCE_AGE_PROPERTY, conf.getMaxNonceAge());
+        }
         
         Iterator it = conf.getValidators();
         for (; it.hasNext();) {
@@ -1342,6 +1356,19 @@ public abstract class SecurityPipeBase implements Pipe {
             }
         }
     }
+    
+     private void populateCertStoreProps(Properties props, CertStoreConfig certStoreConfig) {
+        if (certStoreConfig.getCallbackHandlerClassName() != null) {
+            props.put(DefaultCallbackHandler.CERTSTORE_CBH, certStoreConfig.getCallbackHandlerClassName());
+        }
+        if (certStoreConfig.getCertSelectorClassName() != null) {
+            props.put(DefaultCallbackHandler.CERTSTORE_CERTSELECTOR,certStoreConfig.getCertSelectorClassName());
+        }
+        if (certStoreConfig.getCRLSelectorClassName() != null) {
+            props.put(DefaultCallbackHandler.CERTSTORE_CRLSELECTOR,certStoreConfig.getCRLSelectorClassName());
+        }
+    }
+    
     
     protected Class loadClass(String classname) throws Exception {
         if (classname == null) {
@@ -1418,4 +1445,6 @@ public abstract class SecurityPipeBase implements Pipe {
     protected abstract void addOutgoingProtocolPolicy(Policy effectivePolicy,String protocol)throws PolicyException;
     
     protected abstract String getAction(WSDLOperation operation, boolean isIncomming) ;
+
+   
 }

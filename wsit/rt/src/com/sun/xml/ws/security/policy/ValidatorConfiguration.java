@@ -36,4 +36,6 @@ public interface ValidatorConfiguration {
     public String getTimestampFreshnessLimit();
     
     public String getMaxNonceAge();
+    
+    public String getRevocationEnabled();
 }
