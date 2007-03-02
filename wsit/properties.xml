@@ -101,11 +101,11 @@
             <ruleset>clone</ruleset>
             <ruleset>codesize</ruleset>
             <ruleset>coupling</ruleset>
-            <ruleset>design</ruleset>
+            <ruleset>../wsit-design.xml</ruleset>
             <ruleset>finalizers</ruleset>
             <ruleset>imports</ruleset>
             <ruleset>logging-java</ruleset>
-            <ruleset>naming</ruleset>
+            <ruleset>../wsit-naming.xml</ruleset>
             <ruleset>optimizations</ruleset>
             <ruleset>strictexception</ruleset>
             <ruleset>strings</ruleset>
@@ -113,7 +113,9 @@
             <ruleset>unusedcode</ruleset>
             <formatter type="html" toFile="${build.dir}/pmd.html"/>
             <fileset dir="${src.dir}">
-                <include name="**/*.java"/>
+                <include name="**/*.java"/> <!-- include all classes -->
+                <!--include name="com/sun/xml/ws/policy/**/*.java"/--> <!-- include policy classes only -->
+                
                 <exclude name="**/tx/webservice/member/**/*.java"/> <!-- ignore generated tx code -->
             </fileset>
         </pmd>
