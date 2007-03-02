@@ -3,12 +3,12 @@
  * of the Common Development and Distribution License
  * (the License).  You may not use this file except in
  * compliance with the License.
- * 
+ *
  * You can obtain a copy of the license at
  * https://glassfish.dev.java.net/public/CDDLv1.0.html.
  * See the License for the specific language governing
  * permissions and limitations under the License.
- * 
+ *
  * When distributing Covered Code, include this CDDL
  * Header Notice in each file and include the License file
  * at https://glassfish.dev.java.net/public/CDDLv1.0.html.
@@ -16,7 +16,7 @@
  * with the fields enclosed by brackets [] replaced by
  * you own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * 
+ *
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
@@ -56,7 +56,7 @@ public final class AssertionSet implements Iterable<PolicyAssertion>, Comparable
      */
     private static final Comparator<PolicyAssertion> ASSERTION_COMPARATOR = new Comparator<PolicyAssertion>() {
         public int compare(final PolicyAssertion pa1, final PolicyAssertion pa2) {
-            if (pa1 == pa2 || pa1.equals(pa2)) {
+            if (pa1.equals(pa2)) {
                 return 0;
             }
             
@@ -86,9 +86,9 @@ public final class AssertionSet implements Iterable<PolicyAssertion>, Comparable
         }
     };
     
-    private List<PolicyAssertion> assertions;
-    private Set<QName> vocabulary = new TreeSet<QName>(PolicyUtils.Comparison.QNAME_COMPARATOR);
-    private Collection<QName> immutableVocabulary = Collections.unmodifiableCollection(vocabulary);
+    private final List<PolicyAssertion> assertions;
+    private final Set<QName> vocabulary = new TreeSet<QName>(PolicyUtils.Comparison.QNAME_COMPARATOR);
+    private final Collection<QName> immutableVocabulary = Collections.unmodifiableCollection(vocabulary);
     
     private AssertionSet(List<PolicyAssertion> list) {
         assert (list != null) : LocalizationMessages.WSP_0037_PRIVATE_CONSTRUCTOR_DOES_NOT_TAKE_NULL();
@@ -107,12 +107,12 @@ public final class AssertionSet implements Iterable<PolicyAssertion>, Comparable
             return false;
         }
         
-        if (!this.assertions.contains(assertion)) {
+        if (this.assertions.contains(assertion)) {
+            return false;
+        } else {
             this.assertions.add(assertion);
             this.vocabulary.add(assertion.getName());
             return true;
-        } else {
-            return false;
         }
     }
     
@@ -136,9 +136,9 @@ public final class AssertionSet implements Iterable<PolicyAssertion>, Comparable
     Collection<PolicyAssertion> getAssertions() {
         return assertions;
     }
-            
+    
     /**
-     * Retrieves the vocabulary of this policy expression. The vocabulary is represented by an immutable collection of 
+     * Retrieves the vocabulary of this policy expression. The vocabulary is represented by an immutable collection of
      * unique QName objects. Each of those objects represents single assertion type contained in the assertion set.
      *
      * @return immutable collection of assertion types contained in the assertion set (a policy vocabulary).
@@ -250,7 +250,7 @@ public final class AssertionSet implements Iterable<PolicyAssertion>, Comparable
     public boolean contains(final QName assertionName) {
         return vocabulary.contains(assertionName);
     }
-
+    
     /**
      * An {@code Comparable<T>.compareTo(T o)} interface method implementation.
      */
@@ -259,46 +259,44 @@ public final class AssertionSet implements Iterable<PolicyAssertion>, Comparable
             return 0;
         }
         
-        { // comparing vocabularies
-            final Iterator<QName> vIterator1 = this.getVocabulary().iterator();
-            final Iterator<QName> vIterator2 = that.getVocabulary().iterator();
-            while (vIterator1.hasNext()) {
-                final QName entry1 = vIterator1.next();
-                if (vIterator2.hasNext()) {
-                    final QName entry2 = vIterator2.next();
-                    final int result = PolicyUtils.Comparison.QNAME_COMPARATOR.compare(entry1, entry2);
-                    if (result != 0) {
-                        return result;
-                    }
-                } else {
-                    return 1; // we have more entries in this vocabulary
-                }
-            }
-            
+        // comparing vocabularies
+        final Iterator<QName> vIterator1 = this.getVocabulary().iterator();
+        final Iterator<QName> vIterator2 = that.getVocabulary().iterator();
+        while (vIterator1.hasNext()) {
+            final QName entry1 = vIterator1.next();
             if (vIterator2.hasNext()) {
-                return -1;  // we have more entries in that vocabulary
+                final QName entry2 = vIterator2.next();
+                final int result = PolicyUtils.Comparison.QNAME_COMPARATOR.compare(entry1, entry2);
+                if (result != 0) {
+                    return result;
+                }
+            } else {
+                return 1; // we have more entries in this vocabulary
             }
         }
         
-        { // vocabularies are equal => comparing assertions
-            final Iterator<PolicyAssertion> pIterator1 = this.getAssertions().iterator();
-            final Iterator<PolicyAssertion> pIterator2 = that.getAssertions().iterator();
-            while (pIterator1.hasNext()) {
-                final PolicyAssertion pa1 = pIterator1.next();
-                if (pIterator2.hasNext()) {
-                    final PolicyAssertion pa2 = pIterator2.next();
-                    final int result = ASSERTION_COMPARATOR.compare(pa1, pa2);
-                    if (result != 0) {
-                        return result;
-                    }
-                } else {
-                    return 1; // we have more entries in this assertion set
-                }
-            }
-            
+        if (vIterator2.hasNext()) {
+            return -1;  // we have more entries in that vocabulary
+        }
+        
+        // vocabularies are equal => comparing assertions
+        final Iterator<PolicyAssertion> pIterator1 = this.getAssertions().iterator();
+        final Iterator<PolicyAssertion> pIterator2 = that.getAssertions().iterator();
+        while (pIterator1.hasNext()) {
+            final PolicyAssertion pa1 = pIterator1.next();
             if (pIterator2.hasNext()) {
-                return -1;  // we have more entries in that assertion set
+                final PolicyAssertion pa2 = pIterator2.next();
+                final int result = ASSERTION_COMPARATOR.compare(pa1, pa2);
+                if (result != 0) {
+                    return result;
+                }
+            } else {
+                return 1; // we have more entries in this assertion set
             }
+        }
+        
+        if (pIterator2.hasNext()) {
+            return -1;  // we have more entries in that assertion set
         }
         
         // seems like objects are very simmilar although not equal => we must not return 0 otherwise the TreeSet
@@ -311,14 +309,15 @@ public final class AssertionSet implements Iterable<PolicyAssertion>, Comparable
      * An {@code Object.equals(Object obj)} method override.
      */
     public boolean equals(final Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
+        }
         
-        if (!(obj instanceof AssertionSet))
+        if (!(obj instanceof AssertionSet)) {
             return false;
+        }
         
-        final AssertionSet that = (AssertionSet) obj;
-        
+        final AssertionSet that = (AssertionSet) obj;        
         boolean result = true;
         
         result = result && this.vocabulary.equals(that.vocabulary);

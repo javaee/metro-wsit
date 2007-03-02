@@ -232,9 +232,7 @@ public final class PolicyUtils {
                 final int optionSize =  option.size();
                 
                 if (optionSize == 0) {
-                    if (ignoreEmptyOption) {
-                        // do nothing
-                    } else {
+                    if (!ignoreEmptyOption) {
                         return null;
                     }
                 } else if (optionSize == 1) {

@@ -36,8 +36,8 @@ import java.util.List;
 public final class PolicySubject {
     private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicySubject.class);
     
-    private List<Policy> policies = new LinkedList<Policy>();
-    private Object subject;
+    private final List<Policy> policies = new LinkedList<Policy>();
+    private final Object subject;
     
     /**
      * Constructs a policy subject instance.
@@ -45,11 +45,11 @@ public final class PolicySubject {
      * @param subject object to which the policies are attached. Must not be {@code null}.
      * @param policy first policy attached to the subject. Must not be {@code null}.
      *
-     * @throws NullPointerException in case any of the arguments is {@code null}.
+     * @throws IllegalArgumentException in case any of the arguments is {@code null}.
      */
-    public PolicySubject(Object subject, Policy policy) {
+    public PolicySubject(Object subject, Policy policy) throws IllegalArgumentException {
         if (subject == null || policy == null) {
-            throw LOGGER.logSevereException(new NullPointerException(LocalizationMessages.WSP_0021_SUBJECT_AND_POLICY_PARAM_MUST_NOT_BE_NULL(subject, policy)));
+            throw LOGGER.logSevereException(new IllegalArgumentException(LocalizationMessages.WSP_0021_SUBJECT_AND_POLICY_PARAM_MUST_NOT_BE_NULL(subject, policy)));
         }
         
         this.subject = subject;
@@ -62,12 +62,12 @@ public final class PolicySubject {
      * @param subject object to which the policies are attached. Must not be {@code null}.
      * @param policies first policy attached to the subject. Must not be {@code null}.
      *
-     * @throws NullPointerException in case any of the arguments is {@code null}.
-     * @throws IllegalArgumentException in case {@code policies} argument represents empty collection.
+     * @throws IllegalArgumentException in case any of the arguments is {@code null} or 
+     *         in case {@code policies} argument represents empty collection.
      */
-    public PolicySubject(Object subject, Collection<Policy> policies) {
+    public PolicySubject(Object subject, Collection<Policy> policies) throws IllegalArgumentException {
         if (subject == null || policies == null) {
-            throw LOGGER.logSevereException(new NullPointerException(LocalizationMessages.WSP_0062_INPUT_PARAMS_MUST_NOT_BE_NULL()));
+            throw LOGGER.logSevereException(new IllegalArgumentException(LocalizationMessages.WSP_0062_INPUT_PARAMS_MUST_NOT_BE_NULL()));
         }
         
         if (policies.isEmpty()) {
@@ -83,11 +83,11 @@ public final class PolicySubject {
      *
      * @param policy new policy instance to be attached to this subject
      *
-     * @throws NullPointerException in case {@code policy} argument is {@code null}.
+     * @throws IllegalArgumentException in case {@code policy} argument is {@code null}.
      */
     public void attach(final Policy policy) {
         if (policy == null) {
-            throw LOGGER.logSevereException(new NullPointerException(LocalizationMessages.WSP_0038_POLICY_TO_ATTACH_MUST_NOT_BE_NULL()));
+            throw LOGGER.logSevereException(new IllegalArgumentException(LocalizationMessages.WSP_0038_POLICY_TO_ATTACH_MUST_NOT_BE_NULL()));
         }
         this.policies.add(policy);
     }

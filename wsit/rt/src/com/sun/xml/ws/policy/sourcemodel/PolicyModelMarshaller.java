@@ -40,7 +40,8 @@ public abstract class PolicyModelMarshaller {
      * package will be able to extend this abstract class. This is to restrict attempts of extending the class from 
      * a client code.
      */
-    PolicyModelMarshaller() {        
+    PolicyModelMarshaller() {  
+        // nothing to instantiate
     }
     
     /**

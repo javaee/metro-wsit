@@ -57,9 +57,9 @@ public final class PolicyMap implements Iterable<Policy> {
     }
     
     private static final class ScopeMap implements Iterable<Policy> {
-        private Map<PolicyMapKey, PolicyScope> internalMap = new HashMap<PolicyMapKey, PolicyScope>();
-        private PolicyMapKeyHandler scopeKeyHandler;
-        private PolicyMerger merger;
+        private final Map<PolicyMapKey, PolicyScope> internalMap = new HashMap<PolicyMapKey, PolicyScope>();
+        private final PolicyMapKeyHandler scopeKeyHandler;
+        private final PolicyMerger merger;
         
         ScopeMap(final PolicyMerger merger, final PolicyMapKeyHandler scopeKeyHandler) {
             this.merger = merger;
@@ -68,12 +68,12 @@ public final class PolicyMap implements Iterable<Policy> {
         
         Policy getEffectivePolicy(final PolicyMapKey key, final Collection<String> namespaces) throws PolicyException {
             final PolicyScope scope = internalMap.get(createLocalCopy(key));
-            return (scope != null) ? scope.getEffectivePolicy(namespaces, merger) : null;
+            return (scope == null) ? null : scope.getEffectivePolicy(namespaces, merger);
         }
         
         Policy getEffectivePolicy(final PolicyMapKey key) throws PolicyException {
             final PolicyScope scope = internalMap.get(createLocalCopy(key));
-            return (scope != null) ? scope.getEffectivePolicy(merger) : null;
+            return (scope == null) ? null : scope.getEffectivePolicy(merger);
         }
         
         void putSubject(final PolicyMapKey key, final PolicySubject subject) {
@@ -115,7 +115,7 @@ public final class PolicyMap implements Iterable<Policy> {
         
         private PolicyMapKey createLocalCopy(final PolicyMapKey key) {
             if (key == null) {
-                throw LOGGER.logSevereException(new NullPointerException(LocalizationMessages.WSP_0045_POLICY_MAP_KEY_MUST_NOT_BE_NULL()));
+                throw LOGGER.logSevereException(new IllegalArgumentException(LocalizationMessages.WSP_0045_POLICY_MAP_KEY_MUST_NOT_BE_NULL()));
             }
             
             final PolicyMapKey localKeyCopy = new PolicyMapKey(key);
@@ -158,7 +158,7 @@ public final class PolicyMap implements Iterable<Policy> {
     
     private static final PolicyMerger merger = PolicyMerger.getMerger();
     
-    private ScopeMap serviceMap = new ScopeMap(merger, new PolicyMapKeyHandler() {
+    private final ScopeMap serviceMap = new ScopeMap(merger, new PolicyMapKeyHandler() {
         public boolean areEqual(final PolicyMapKey key1, final PolicyMapKey key2) {
             return key1.service.equals(key2.service);
         }
@@ -172,12 +172,12 @@ public final class PolicyMap implements Iterable<Policy> {
         }
     });
     
-    private ScopeMap endpointMap = new ScopeMap(merger, new PolicyMapKeyHandler() {
+    private final ScopeMap endpointMap = new ScopeMap(merger, new PolicyMapKeyHandler() {
         public boolean areEqual(final PolicyMapKey key1, final PolicyMapKey key2) {
             boolean retVal = true;
             
             retVal = retVal && key1.service.equals(key2.service);
-            retVal = retVal && ((key1.port != null) ? key1.port.equals(key2.port) : key2.port == null);
+            retVal = retVal && ((key1.port == null) ? key2.port == null : key1.port.equals(key2.port));
             
             return retVal;
         }
@@ -186,21 +186,21 @@ public final class PolicyMap implements Iterable<Policy> {
             int result = 17;
             
             result = 37 * result + key.service.hashCode();
-            result = 37 * result + ((key.port != null) ? key.port.hashCode() : 0);
+            result = 37 * result + ((key.port == null) ? 0 : key.port.hashCode());
             
             return result;
         }
     });
     
-    private PolicyMapKeyHandler operationAndInputOutputMessageKeyHandler = new PolicyMapKeyHandler() {
+    private final PolicyMapKeyHandler operationAndInputOutputMessageKeyHandler = new PolicyMapKeyHandler() {
         // we use the same algorithm to handle operation and input/output message keys
         
         public boolean areEqual(final PolicyMapKey key1, final PolicyMapKey key2) {
             boolean retVal = true;
             
             retVal = retVal && key1.service.equals(key2.service);
-            retVal = retVal && ((key1.port != null) ? key1.port.equals(key2.port) : key2.port == null);
-            retVal = retVal && ((key1.operation != null) ? key1.operation.equals(key2.operation) : key2.operation == null);
+            retVal = retVal && ((key1.port == null) ? key2.port == null : key1.port.equals(key2.port));
+            retVal = retVal && ((key1.operation == null) ? key2.operation == null : key1.operation.equals(key2.operation));
             
             return retVal;
         }
@@ -209,26 +209,26 @@ public final class PolicyMap implements Iterable<Policy> {
             int result = 17;
             
             result = 37 * result + key.service.hashCode();
-            result = 37 * result + ((key.port != null) ? key.port.hashCode() : 0);
-            result = 37 * result + ((key.operation != null) ? key.operation.hashCode() : 0);
+            result = 37 * result + ((key.port == null) ? 0 : key.port.hashCode());
+            result = 37 * result + ((key.operation == null) ? 0 : key.operation.hashCode());
             
             return result;
         }
     };
     
     
-    private ScopeMap operationMap = new ScopeMap(merger, operationAndInputOutputMessageKeyHandler);
-    private ScopeMap inputMessageMap = new ScopeMap(merger, operationAndInputOutputMessageKeyHandler);
-    private ScopeMap outputMessageMap = new ScopeMap(merger, operationAndInputOutputMessageKeyHandler);
+    private final ScopeMap operationMap = new ScopeMap(merger, operationAndInputOutputMessageKeyHandler);
+    private final ScopeMap inputMessageMap = new ScopeMap(merger, operationAndInputOutputMessageKeyHandler);
+    private final ScopeMap outputMessageMap = new ScopeMap(merger, operationAndInputOutputMessageKeyHandler);
     
-    private ScopeMap faultMessageMap = new ScopeMap(merger, new PolicyMapKeyHandler() {
+    private final ScopeMap faultMessageMap = new ScopeMap(merger, new PolicyMapKeyHandler() {
         public boolean areEqual(final PolicyMapKey key1, final PolicyMapKey key2) {
             boolean retVal = true;
             
             retVal = retVal && key1.service.equals(key2.service);
-            retVal = retVal && ((key1.port != null) ? key1.port.equals(key2.port) : key2.port == null);
-            retVal = retVal && ((key1.operation != null) ? key1.operation.equals(key2.operation) : key2.operation == null);
-            retVal = retVal && ((key1.faultMessage != null) ? key1.faultMessage.equals(key2.faultMessage) : key2.faultMessage == null);
+            retVal = retVal && ((key1.port == null) ? key2.port == null : key1.port.equals(key2.port));
+            retVal = retVal && ((key1.operation == null) ? key2.operation == null : key1.operation.equals(key2.operation));
+            retVal = retVal && ((key1.faultMessage == null) ? key2.faultMessage == null : key1.faultMessage.equals(key2.faultMessage));
             
             return retVal;
         }
@@ -237,15 +237,19 @@ public final class PolicyMap implements Iterable<Policy> {
             int result = 17;
             
             result = 37 * result + key.service.hashCode();
-            result = 37 * result + ((key.port != null) ? key.port.hashCode() : 0);
-            result = 37 * result + ((key.operation != null) ? key.operation.hashCode() : 0);
-            result = 37 * result + ((key.faultMessage != null) ? key.faultMessage.hashCode() : 0);
+            result = 37 * result + ((key.port == null) ? 0 : key.port.hashCode());
+            result = 37 * result + ((key.operation == null) ? 0 : key.operation.hashCode());
+            result = 37 * result + ((key.faultMessage == null) ? 0 : key.faultMessage.hashCode());
             
             return result;
         }
     });
     
+    /**
+     * This constructor is private to prevent direct instantiation from outside of the class
+     */
     private PolicyMap() {
+        // nothing to initialize
     }
     
     /**
@@ -417,13 +421,12 @@ public final class PolicyMap implements Iterable<Policy> {
      * @param key identifier of the scope the effective policy should be replaced with the new one. Must not be {@code null}.
      * @param newEffectivePolicy the new policy to replace the old effective policy of the scope. Must not be {@code null}.
      *
-     * @throw NullPointerException in case any of the input parameters is {@code null}.
-     * @throw IllegalArgumentException in case the scope type is not recognized.
+     * @throw IllegalArgumentException in case any of the input parameters is {@code null} 
+     *        or in case the scope type is not recognized.
      */
-    void setNewEffectivePolicyForScope(
-            final ScopeType scopeType, final PolicyMapKey key, final Policy newEffectivePolicy) {
+    void setNewEffectivePolicyForScope(final ScopeType scopeType, final PolicyMapKey key, final Policy newEffectivePolicy) throws IllegalArgumentException {
         if (scopeType == null || key == null || newEffectivePolicy == null) {
-            throw LOGGER.logSevereException(new NullPointerException(LocalizationMessages.WSP_0062_INPUT_PARAMS_MUST_NOT_BE_NULL()));
+            throw LOGGER.logSevereException(new IllegalArgumentException(LocalizationMessages.WSP_0062_INPUT_PARAMS_MUST_NOT_BE_NULL()));
         }
         
         switch (scopeType) {
@@ -523,11 +526,11 @@ public final class PolicyMap implements Iterable<Policy> {
      * a {@code PolicyMap} where actual service policy scope for given service can be retrieved.
      *
      * @param service qualified name of the service. Must not be {@code null}.
-     * @throws NullPointerException in case service, port or operation parameter is {@code null}.
+     * @throws IllegalArgumentException in case service, port or operation parameter is {@code null}.
      */
-    public static PolicyMapKey createWsdlServiceScopeKey(final QName service) throws NullPointerException {
+    public static PolicyMapKey createWsdlServiceScopeKey(final QName service) throws IllegalArgumentException {
         if (service == null) {
-            throw LOGGER.logSevereException(new NullPointerException(LocalizationMessages.WSP_0031_SERVICE_PARAM_MUST_NOT_BE_NULL()));
+            throw LOGGER.logSevereException(new IllegalArgumentException(LocalizationMessages.WSP_0031_SERVICE_PARAM_MUST_NOT_BE_NULL()));
         }
         return new PolicyMapKey(service, null, null);
     }
@@ -538,11 +541,11 @@ public final class PolicyMap implements Iterable<Policy> {
      *
      * @param service qualified name of the service. Must not be {@code null}.
      * @param port qualified name of the endpoint. Must not be {@code null}.
-     * @throws NullPointerException in case service, port or operation parameter is {@code null}.
+     * @throws IllegalArgumentException in case service, port or operation parameter is {@code null}.
      */
-    public static PolicyMapKey createWsdlEndpointScopeKey(final QName service, final QName port) throws NullPointerException {
+    public static PolicyMapKey createWsdlEndpointScopeKey(final QName service, final QName port) throws IllegalArgumentException {
         if (service == null || port == null) {
-            throw LOGGER.logSevereException(new NullPointerException(LocalizationMessages.WSP_0033_SERVICE_AND_PORT_PARAM_MUST_NOT_BE_NULL(service, port)));
+            throw LOGGER.logSevereException(new IllegalArgumentException(LocalizationMessages.WSP_0033_SERVICE_AND_PORT_PARAM_MUST_NOT_BE_NULL(service, port)));
         }
         return new PolicyMapKey(service, port, null);
     }
@@ -554,10 +557,9 @@ public final class PolicyMap implements Iterable<Policy> {
      * @param service qualified name of the service. Must not be {@code null}.
      * @param port qualified name of the endpoint. Must not be {@code null}.
      * @param operation qualified name of the operation. Must not be {@code null}.
-     * @throws NullPointerException in case service, port or operation parameter is {@code null}.
+     * @throws IllegalArgumentException in case service, port or operation parameter is {@code null}.
      */
-    public static PolicyMapKey createWsdlOperationScopeKey(
-            final QName service, final QName port, final QName operation) throws NullPointerException {
+    public static PolicyMapKey createWsdlOperationScopeKey(final QName service, final QName port, final QName operation) throws IllegalArgumentException {
         return createOperationOrInputOutputMessageKey(service, port, operation);
     }
     
@@ -572,11 +574,10 @@ public final class PolicyMap implements Iterable<Policy> {
      * @param service qualified name of the service. Must not be {@code null}.
      * @param port qualified name of the endpoint. Must not be {@code null}.
      * @param operation qualified name of the operation. Must not be {@code null}.
-     * @throws NullPointerException in case service, port or operation parameter is {@code null}.
+     * @throws IllegalArgumentException in case service, port or operation parameter is {@code null}.
      *
      */
-    public static PolicyMapKey createWsdlMessageScopeKey(
-            final QName service, final QName port, final QName operation) throws NullPointerException {
+    public static PolicyMapKey createWsdlMessageScopeKey(final QName service, final QName port, final QName operation) throws IllegalArgumentException {
         return createOperationOrInputOutputMessageKey(service, port, operation);
     }
     
@@ -592,13 +593,12 @@ public final class PolicyMap implements Iterable<Policy> {
      * @param port qualified name of the endpoint. Must not be {@code null}.
      * @param operation qualified name of the operation. Must not be {@code null}.
      * @param faultMessage qualified name of the fault message. Must not be {@code null}.
-     * @throws NullPointerException in case service, port or operation parameter is {@code null}.
+     * @throws IllegalArgumentException in case service, port or operation parameter is {@code null}.
      *
      */
-    public static PolicyMapKey createWsdlFaultMessageScopeKey(
-            final QName service, final QName port, final QName operation, final QName faultMessage) throws NullPointerException {
+    public static PolicyMapKey createWsdlFaultMessageScopeKey(final QName service, final QName port, final QName operation, final QName faultMessage) throws IllegalArgumentException {
         if (service == null || port == null || operation == null || faultMessage == null) {
-            throw LOGGER.logSevereException(new NullPointerException(LocalizationMessages.WSP_0030_SERVICE_PORT_OPERATION_FAULT_MSG_PARAM_MUST_NOT_BE_NULL(service, port, operation, faultMessage)));
+            throw LOGGER.logSevereException(new IllegalArgumentException(LocalizationMessages.WSP_0030_SERVICE_PORT_OPERATION_FAULT_MSG_PARAM_MUST_NOT_BE_NULL(service, port, operation, faultMessage)));
         }
         
         return new PolicyMapKey(service, port, operation, faultMessage);
@@ -606,7 +606,7 @@ public final class PolicyMap implements Iterable<Policy> {
     
     private static PolicyMapKey createOperationOrInputOutputMessageKey(final QName service, final QName port, final QName operation) {
         if (service == null || port == null || operation == null) {
-            throw LOGGER.logSevereException(new NullPointerException(LocalizationMessages.WSP_0029_SERVICE_PORT_OPERATION_PARAM_MUST_NOT_BE_NULL(service, port, operation)));
+            throw LOGGER.logSevereException(new IllegalArgumentException(LocalizationMessages.WSP_0029_SERVICE_PORT_OPERATION_PARAM_MUST_NOT_BE_NULL(service, port, operation)));
         }
         
         return new PolicyMapKey(service, port, operation);

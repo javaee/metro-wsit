@@ -29,8 +29,11 @@ package com.sun.xml.ws.policy;
  */
 public final class PolicyMapExtender extends PolicyMapMutator {
     
-    /** Creates a new instance of PolicyMapExtender */
+    /**
+     * This constructor is private to prevent direct instantiation from outside of the class
+     */
     private PolicyMapExtender() {
+        // nothing to initialize
     }
     
     public static PolicyMapExtender createPolicyMapExtender() {

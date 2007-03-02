@@ -38,7 +38,7 @@ import java.util.Map;
 public final class XmlPolicyModelMarshaller extends PolicyModelMarshaller {
     private static final PolicyLogger LOGGER = PolicyLogger.getLogger(XmlPolicyModelMarshaller.class);
     
-    private boolean marshallInvisible;
+    private final boolean marshallInvisible;
     
     XmlPolicyModelMarshaller(boolean marshallInvisible) {
         this.marshallInvisible = marshallInvisible;
@@ -82,15 +82,13 @@ public final class XmlPolicyModelMarshaller extends PolicyModelMarshaller {
         final StaxSerializer serializer = new StaxSerializer(writer);
         final TypedXmlWriter policy = TXW.create(PolicyConstants.POLICY, TypedXmlWriter.class, serializer);
         
-        Map<String, String> nsMap = model.getNamespaceToPrefixMapping();
+        final Map<String, String> nsMap = model.getNamespaceToPrefixMapping();
         
-        if (!marshallInvisible) {
-            if (nsMap.containsKey(PolicyConstants.SUN_POLICY_NAMESPACE_URI)) {
-                nsMap.remove(PolicyConstants.SUN_POLICY_NAMESPACE_URI);
-            }
+        if (!marshallInvisible && nsMap.containsKey(PolicyConstants.SUN_POLICY_NAMESPACE_URI)) {
+            nsMap.remove(PolicyConstants.SUN_POLICY_NAMESPACE_URI);
         }
         
-        for (Map.Entry<String, String> nsMappingEntry : nsMap.entrySet()) {            
+        for (Map.Entry<String, String> nsMappingEntry : nsMap.entrySet()) {
             policy._namespace(nsMappingEntry.getKey(), nsMappingEntry.getValue());
         }
         

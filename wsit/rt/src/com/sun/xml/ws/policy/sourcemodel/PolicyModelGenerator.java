@@ -29,13 +29,7 @@ import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.privateutil.LocalizationMessages;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-import javax.xml.namespace.QName;
 
 /**
  *
@@ -44,11 +38,19 @@ import javax.xml.namespace.QName;
 public final class PolicyModelGenerator {
     private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyModelTranslator.class);
     private static final PolicyModelGenerator generator = new PolicyModelGenerator();
-       
+    
+    /**
+     * This private constructor avoids direct instantiation from outside of the class
+     */
     private PolicyModelGenerator() {
-        
+        // nothing to initialize
     }
     
+    /**
+     * Factory method that returns {@link PolicyModelGenerator} instance.
+     *
+     * @return {@link PolicyModelGenerator} instance
+     */
     public static PolicyModelGenerator getGenerator() {
         return generator;
     }

@@ -51,10 +51,16 @@ import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 final class XmlPolicyModelUnmarshaller extends PolicyModelUnmarshaller {
     private static final PolicyLogger LOGGER = PolicyLogger.getLogger(XmlPolicyModelUnmarshaller.class);
     
-    /** Creates a new instance of WsdlPolicyModelUnmarshaller */
+    /** 
+     * Creates a new instance of XmlPolicyModelUnmarshaller 
+     */
     XmlPolicyModelUnmarshaller() {
+        // nothing to initialize
     }
     
+    /**
+     * See {@link PolicyModelUnmarshaller#unmarshalModel(Object) base method documentation}.
+     */
     public PolicySourceModel unmarshalModel(final Object storage) throws PolicyException {
         final XMLEventReader reader = createXMLEventReader(storage);
         PolicySourceModel model = null;
@@ -125,7 +131,9 @@ final class XmlPolicyModelUnmarshaller extends PolicyModelUnmarshaller {
                         final QName childElementName = childElement.getName();
                         
                         ModelNode childNode;
-                        if (lastNode.getType() != ModelNode.Type.ASSERTION_PARAMETER_NODE){
+                        if (lastNode.getType() == ModelNode.Type.ASSERTION_PARAMETER_NODE) {
+                            childNode = lastNode.createChildAssertionParameterNode();
+                        } else {
                             if (ModelNode.Type.POLICY.asQName().equals(childElementName)) {
                                 childNode = lastNode.createChildPolicyNode();
                             } else if (ModelNode.Type.ALL.asQName().equals(childElementName)) {
@@ -157,14 +165,12 @@ final class XmlPolicyModelUnmarshaller extends PolicyModelUnmarshaller {
                                     }
                                 }
                             } else {
-                                if (!lastNode.isAssertionRelatedNode()) {
-                                    childNode = lastNode.createChildAssertionNode();
-                                } else {
+                                if (lastNode.isAssertionRelatedNode()) {
                                     childNode = lastNode.createChildAssertionParameterNode();
+                                } else {
+                                    childNode = lastNode.createChildAssertionNode();
                                 }
                             }
-                        } else {
-                            childNode = lastNode.createChildAssertionParameterNode();
                         }
                         
                         unmarshalNodeContent(childNode, childElement, reader);
@@ -182,15 +188,15 @@ final class XmlPolicyModelUnmarshaller extends PolicyModelUnmarshaller {
             final Map<QName, String> attributeMap = new HashMap<QName, String>();
             final Iterator iterator = lastStartElement.getAttributes();
             while (iterator.hasNext()) {
-                final Attribute a = (Attribute) iterator.next();
-                final QName name = a.getName();
+                final Attribute nextAttribute = (Attribute) iterator.next();
+                final QName name = nextAttribute.getName();
                 if (attributeMap.containsKey(name)) {
-                    throw LOGGER.logSevereException(new PolicyException(LocalizationMessages.WSP_0059_MULTIPLE_ATTRS_WITH_SAME_NAME_DETECTED_FOR_ASSERTION(a.getName(), lastElementName)));
+                    throw LOGGER.logSevereException(new PolicyException(LocalizationMessages.WSP_0059_MULTIPLE_ATTRS_WITH_SAME_NAME_DETECTED_FOR_ASSERTION(nextAttribute.getName(), lastElementName)));
                 } else {
-                    attributeMap.put(name , a.getValue());
+                    attributeMap.put(name , nextAttribute.getValue());
                 }
             }
-            final AssertionData nodeData = new AssertionData(lastElementName, (valueBuffer != null) ? valueBuffer.toString() : null, attributeMap, lastNode.getType());
+            final AssertionData nodeData = new AssertionData(lastElementName, (valueBuffer == null) ? null : valueBuffer.toString(), attributeMap, lastNode.getType());
             
             // check visibility value syntax if present...
             if (nodeData.containsAttribute(PolicyConstants.VISIBILITY_ATTRIBUTE)) {
@@ -254,11 +260,11 @@ final class XmlPolicyModelUnmarshaller extends PolicyModelUnmarshaller {
             final String localAttributeName = attributeName.getLocalPart();
             final Iterator iterator = element.getAttributes();
             while (iterator.hasNext()) {
-                final Attribute a = (Attribute) iterator.next();
-                final QName aName = a.getName();
+                final Attribute nextAttribute = (Attribute) iterator.next();
+                final QName aName = nextAttribute.getName();
                 final boolean attributeFoundByWorkaround = aName.equals(attributeName) || (aName.getLocalPart().equals(localAttributeName) && (aName.getPrefix() == null || "".equals(aName.getPrefix())));
                 if (attributeFoundByWorkaround) {
-                    attribute = a;
+                    attribute = nextAttribute;
                     break;
                 }
             }

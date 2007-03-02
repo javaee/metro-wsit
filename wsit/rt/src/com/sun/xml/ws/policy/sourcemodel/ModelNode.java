@@ -151,7 +151,7 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
         this.referenceData = data;
     }
     
-    private void checkCreateChildOperationSupportForType(Type type) throws UnsupportedOperationException {
+    private void checkCreateChildOperationSupportForType(final Type type) throws UnsupportedOperationException {
         if (!this.type.isChildTypeSupported(type)) {
             throw LOGGER.logSevereException(new UnsupportedOperationException(LocalizationMessages.WSP_0073_CREATE_CHILD_NODE_OPERATION_NOT_SUPPORTED(type, this.type)));
         }
@@ -284,21 +284,21 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
     
 //    Collection<ModelNode> getAssertionParameterNodeChildren() {
 //        Collection<ModelNode> result = null;
-//        
+//
 //        if (isAssertionRelatedNode()) {
-//            
+//
 //            result = new LinkedList<ModelNode>();
-//            
+//
 //            for (ModelNode child : content) {
 //                if (child.type == Type.ASSERTION_PARAMETER_NODE) {
 //                    result.add(child);
 //                }
 //            }
 //        }
-//        
+//
 //        return result;
 //    }
-//    
+//
     /**
      * Sets the parent model reference on the node and its children. The method may be invoked only on the root node
      * of the policy source model (or - in general - on a model node that dose not reference a parent node). Otherwise an
@@ -481,11 +481,13 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
      * for specific model instances.
      */
     public boolean equals(final Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
+        }
         
-        if (!(obj instanceof ModelNode))
+        if (!(obj instanceof ModelNode)) {
             return false;
+        }
         
         boolean result = true;
         final ModelNode that = (ModelNode) obj;
@@ -505,8 +507,8 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
         int result = 17;
         
         result = 37 * result + this.type.hashCode();
-        result = 37 * result + ((this.parentNode != null) ? this.parentNode.hashCode() : 0);
-        result = 37 * result + ((this.nodeData != null) ? this.nodeData.hashCode() : 0);
+        result = 37 * result + ((this.parentNode == null) ? 0 : this.parentNode.hashCode());
+        result = 37 * result + ((this.nodeData == null) ? 0 : this.nodeData.hashCode());
         result = 37 * result + this.content.hashCode();
         
         return result;
@@ -535,17 +537,17 @@ public final class ModelNode implements Iterable<ModelNode>, Cloneable {
         
         buffer.append(indent).append(type).append(" {").append(PolicyUtils.Text.NEW_LINE);
         if (type == Type.ASSERTION) {
-            if (nodeData != null) {
-                nodeData.toString(indentLevel + 1, buffer);
-            } else {
+            if (nodeData == null) {
                 buffer.append(innerIndent).append("no assertion data set");
+            } else {
+                nodeData.toString(indentLevel + 1, buffer);
             }
             buffer.append(PolicyUtils.Text.NEW_LINE);
         } else if (type == Type.POLICY_REFERENCE) {
-            if (referenceData != null) {
-                referenceData.toString(indentLevel + 1, buffer);
-            } else {
+            if (referenceData == null) {
                 buffer.append(innerIndent).append("no policy reference data set");
+            } else {
+                referenceData.toString(indentLevel + 1, buffer);
             }
             buffer.append(PolicyUtils.Text.NEW_LINE);
         }

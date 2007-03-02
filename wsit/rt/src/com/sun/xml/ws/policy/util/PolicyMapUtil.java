@@ -25,10 +25,8 @@ package com.sun.xml.ws.policy.util;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
-import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.policy.privateutil.LocalizationMessages;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
-import java.util.Collection;
 
 /**
  * Utility methods for PolicyMap
@@ -48,47 +46,53 @@ public final class PolicyMapUtil {
      * with more than one policy alternative
      */
     public static void rejectAlternatives(final PolicyMap map) throws PolicyException {
-        Collection<PolicyMapKey> keys = map.getAllServiceScopeKeys();
-        for (PolicyMapKey key : keys) {
-            final Policy policy = map.getServiceEffectivePolicy(key);
+        for (Policy policy : map) {
             if (policy.getNumberOfAssertionSets() > 1) {
                 throw LOGGER.logSevereException(new PolicyException(LocalizationMessages.WSP_0035_RECONFIGURE_ALTERNATIVES(policy.getIdOrName())));
-            }
+            }            
         }
-        keys = map.getAllEndpointScopeKeys();
-        for (PolicyMapKey key : keys) {
-            final Policy policy = map.getEndpointEffectivePolicy(key);
-            if (policy.getNumberOfAssertionSets() > 1) {
-                throw LOGGER.logSevereException(new PolicyException(LocalizationMessages.WSP_0035_RECONFIGURE_ALTERNATIVES(policy.getIdOrName())));
-            }
-        }
-        keys = map.getAllOperationScopeKeys();
-        for (PolicyMapKey key : keys) {
-            final Policy policy = map.getOperationEffectivePolicy(key);
-            if (policy.getNumberOfAssertionSets() > 1) {
-                throw LOGGER.logSevereException(new PolicyException(LocalizationMessages.WSP_0035_RECONFIGURE_ALTERNATIVES(policy.getIdOrName())));
-            }
-        }
-        keys = map.getAllInputMessageScopeKeys();
-        for (PolicyMapKey key : keys) {
-            final Policy policy = map.getInputMessageEffectivePolicy(key);
-            if (policy.getNumberOfAssertionSets() > 1) {
-                throw LOGGER.logSevereException(new PolicyException(LocalizationMessages.WSP_0035_RECONFIGURE_ALTERNATIVES(policy.getIdOrName())));
-            }
-        }
-        keys = map.getAllOutputMessageScopeKeys();
-        for (PolicyMapKey key : keys) {
-            final Policy policy = map.getOutputMessageEffectivePolicy(key);
-            if (policy.getNumberOfAssertionSets() > 1) {
-                throw LOGGER.logSevereException(new PolicyException(LocalizationMessages.WSP_0035_RECONFIGURE_ALTERNATIVES(policy.getIdOrName())));
-            }
-        }
-        keys = map.getAllFaultMessageScopeKeys();
-        for (PolicyMapKey key : keys) {
-            final Policy policy = map.getFaultMessageEffectivePolicy(key);
-            if (policy.getNumberOfAssertionSets() > 1) {
-                throw LOGGER.logSevereException(new PolicyException(LocalizationMessages.WSP_0035_RECONFIGURE_ALTERNATIVES(policy.getIdOrName())));
-            }
-        }
+                
+//        Collection<PolicyMapKey> keys = map.getAllServiceScopeKeys();
+//        for (PolicyMapKey key : keys) {
+//            final Policy policy = map.getServiceEffectivePolicy(key);
+//            if (policy.getNumberOfAssertionSets() > 1) {
+//                throw LOGGER.logSevereException(new PolicyException(LocalizationMessages.WSP_0035_RECONFIGURE_ALTERNATIVES(policy.getIdOrName())));
+//            }
+//        }
+//        keys = map.getAllEndpointScopeKeys();
+//        for (PolicyMapKey key : keys) {
+//            final Policy policy = map.getEndpointEffectivePolicy(key);
+//            if (policy.getNumberOfAssertionSets() > 1) {
+//                throw LOGGER.logSevereException(new PolicyException(LocalizationMessages.WSP_0035_RECONFIGURE_ALTERNATIVES(policy.getIdOrName())));
+//            }
+//        }
+//        keys = map.getAllOperationScopeKeys();
+//        for (PolicyMapKey key : keys) {
+//            final Policy policy = map.getOperationEffectivePolicy(key);
+//            if (policy.getNumberOfAssertionSets() > 1) {
+//                throw LOGGER.logSevereException(new PolicyException(LocalizationMessages.WSP_0035_RECONFIGURE_ALTERNATIVES(policy.getIdOrName())));
+//            }
+//        }
+//        keys = map.getAllInputMessageScopeKeys();
+//        for (PolicyMapKey key : keys) {
+//            final Policy policy = map.getInputMessageEffectivePolicy(key);
+//            if (policy.getNumberOfAssertionSets() > 1) {
+//                throw LOGGER.logSevereException(new PolicyException(LocalizationMessages.WSP_0035_RECONFIGURE_ALTERNATIVES(policy.getIdOrName())));
+//            }
+//        }
+//        keys = map.getAllOutputMessageScopeKeys();
+//        for (PolicyMapKey key : keys) {
+//            final Policy policy = map.getOutputMessageEffectivePolicy(key);
+//            if (policy.getNumberOfAssertionSets() > 1) {
+//                throw LOGGER.logSevereException(new PolicyException(LocalizationMessages.WSP_0035_RECONFIGURE_ALTERNATIVES(policy.getIdOrName())));
+//            }
+//        }
+//        keys = map.getAllFaultMessageScopeKeys();
+//        for (PolicyMapKey key : keys) {
+//            final Policy policy = map.getFaultMessageEffectivePolicy(key);
+//            if (policy.getNumberOfAssertionSets() > 1) {
+//                throw LOGGER.logSevereException(new PolicyException(LocalizationMessages.WSP_0035_RECONFIGURE_ALTERNATIVES(policy.getIdOrName())));
+//            }
+//        }
     }
 }

@@ -36,9 +36,9 @@ import java.util.List;
 final class PolicyScope {
     private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyScope.class);
     
-    private List<PolicySubject> subjects = new LinkedList<PolicySubject>();
+    private final List<PolicySubject> subjects = new LinkedList<PolicySubject>();
     
-    PolicyScope(List<PolicySubject> initialSubjects) {
+    PolicyScope(final List<PolicySubject> initialSubjects) {
         if (initialSubjects != null && !initialSubjects.isEmpty()) {
             this.subjects.addAll(initialSubjects);
         }
@@ -46,7 +46,7 @@ final class PolicyScope {
     
     void attach(final PolicySubject subject) {
         if (subject == null) {
-            throw LOGGER.logSevereException(new NullPointerException(LocalizationMessages.WSP_0020_SUBJECT_PARAM_MUST_NOT_BE_NULL()));
+            throw LOGGER.logSevereException(new IllegalArgumentException(LocalizationMessages.WSP_0020_SUBJECT_PARAM_MUST_NOT_BE_NULL()));
         }
         
         subjects.add(subject);

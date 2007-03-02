@@ -108,7 +108,7 @@ public class EffectiveAlternativeSelector {
             AlternativeFitness combine(final Fitness assertionFitness) {
                 // will not localize - this exception may not occur if there is no programatic error in this class
                 throw new UnsupportedOperationException("Combine operation was called unexpectedly on 'SUPPORTED_EMPTY' alternative fitness enumeration state.");
-            }            
+            }
         },
         SUPPORTED {
             AlternativeFitness combine(final Fitness assertionFitness) {
@@ -138,30 +138,30 @@ public class EffectiveAlternativeSelector {
      */
     public static final void doSelection(final EffectivePolicyModifier modifier) throws PolicyException {
         final PolicyMap map = modifier.getMap();
-        AssertionValidationProcessor validationProcessor = AssertionValidationProcessor.getInstance();
+        final AssertionValidationProcessor validationProcessor = AssertionValidationProcessor.getInstance();
         
         for (PolicyMapKey mapKey : map.getAllServiceScopeKeys()) {
-            Policy oldPolicy = map.getServiceEffectivePolicy(mapKey);
+            final Policy oldPolicy = map.getServiceEffectivePolicy(mapKey);
             modifier.setNewEffectivePolicyForServiceScope(mapKey, selectBestAlternative(oldPolicy, validationProcessor));
         }
         for (PolicyMapKey mapKey : map.getAllEndpointScopeKeys()) {
-            Policy oldPolicy = map.getEndpointEffectivePolicy(mapKey);
+            final Policy oldPolicy = map.getEndpointEffectivePolicy(mapKey);
             modifier.setNewEffectivePolicyForEndpointScope(mapKey, selectBestAlternative(oldPolicy, validationProcessor));
         }
         for (PolicyMapKey mapKey : map.getAllOperationScopeKeys()) {
-            Policy oldPolicy = map.getOperationEffectivePolicy(mapKey);
+            final Policy oldPolicy = map.getOperationEffectivePolicy(mapKey);
             modifier.setNewEffectivePolicyForOperationScope(mapKey, selectBestAlternative(oldPolicy, validationProcessor));
         }
         for (PolicyMapKey mapKey : map.getAllInputMessageScopeKeys()) {
-            Policy oldPolicy = map.getInputMessageEffectivePolicy(mapKey);
+            final Policy oldPolicy = map.getInputMessageEffectivePolicy(mapKey);
             modifier.setNewEffectivePolicyForInputMessageScope(mapKey, selectBestAlternative(oldPolicy, validationProcessor));
         }
         for (PolicyMapKey mapKey : map.getAllOutputMessageScopeKeys()) {
-            Policy oldPolicy = map.getOutputMessageEffectivePolicy(mapKey);
+            final Policy oldPolicy = map.getOutputMessageEffectivePolicy(mapKey);
             modifier.setNewEffectivePolicyForOutputMessageScope(mapKey, selectBestAlternative(oldPolicy, validationProcessor));
         }
         for (PolicyMapKey mapKey : map.getAllFaultMessageScopeKeys()) {
-            Policy oldPolicy = map.getFaultMessageEffectivePolicy(mapKey);
+            final Policy oldPolicy = map.getFaultMessageEffectivePolicy(mapKey);
             modifier.setNewEffectivePolicyForFaultMessageScope(mapKey, selectBestAlternative(oldPolicy, validationProcessor));
         }
     }
@@ -169,7 +169,7 @@ public class EffectiveAlternativeSelector {
     private static Policy selectBestAlternative(final Policy policy, final AssertionValidationProcessor validationProcessor) throws PolicyException {
         AssertionSet bestAlternative = null;
         AlternativeFitness bestAlternativeFitness = AlternativeFitness.UNEVALUATED;
-        for (AssertionSet alternative : policy) {           
+        for (AssertionSet alternative : policy) {
             AlternativeFitness alternativeFitness = (alternative.isEmpty()) ? AlternativeFitness.SUPPORTED_EMPTY : AlternativeFitness.UNEVALUATED;
             for ( PolicyAssertion assertion : alternative ) {
                 
@@ -179,6 +179,8 @@ public class EffectiveAlternativeSelector {
                     case UNSUPPORTED:
                     case INVALID:
                         LOGGER.warning(LocalizationMessages.WSP_0075_PROBLEMATIC_ASSERTION_STATE(assertion.getName(), assertionFitness));
+                        break;
+                    default:
                         break;
                 }
                 
@@ -204,6 +206,9 @@ public class EffectiveAlternativeSelector {
             case UNSUPPORTED:
             case PARTIALLY_SUPPORTED:
                 LOGGER.warning(LocalizationMessages.WSP_0019_SUBOPTIMAL_ALTERNATIVE_SELECTED(bestAlternativeFitness));
+                break;
+            default:
+                break;
         }
         
         Collection<AssertionSet> alternativeSet = null;

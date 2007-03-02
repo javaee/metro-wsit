@@ -46,31 +46,31 @@ public class PolicySubjectTest extends TestCase {
     protected void tearDown() throws Exception {
     }           
     
-    public void testCreatePolicySubjectWithNullSubjectMustThrowNPE() throws Exception {
+    public void testCreatePolicySubjectWithNullSubjectMustThrowIAE() throws Exception {
         try {
             new PolicySubject(null, Policy.createNullPolicy());
-            fail ("PolicySubject creation must throw NullPointerException on 'null' subject");
-        } catch (NullPointerException e) {
+            fail ("PolicySubject creation must throw IllegalArgumentException on 'null' subject");
+        } catch (IllegalArgumentException e) {
             // ok.
         }
     }
     
-    public void testCreatePolicySubjectWithNullPolicyMustThrowNPE() throws Exception {
+    public void testCreatePolicySubjectWithNullPolicyMustThrowIAE() throws Exception {
         try {
             Policy p = null;
             new PolicySubject(subject, p);
-            fail ("PolicySubject creation must throw NullPointerException on 'null' policy");
-        } catch (NullPointerException e) {
+            fail ("PolicySubject creation must throw IllegalArgumentException on 'null' policy");
+        } catch (IllegalArgumentException e) {
             // ok.
         }        
     }
 
-    public void testCreatePolicySubjectWithNullPolicyCollcetionMustThrowNPE() throws Exception {
+    public void testCreatePolicySubjectWithNullPolicyCollcetionMustThrowIAE() throws Exception {
         try {
             Collection<Policy> c = null;
             new PolicySubject(subject, c);
-            fail ("PolicySubject creation must throw NullPointerException on 'null' policy collection");
-        } catch (NullPointerException e) {
+            fail ("PolicySubject creation must throw IllegalArgumentException on 'null' policy collection");
+        } catch (IllegalArgumentException e) {
             // ok.
         }        
     }
@@ -97,12 +97,12 @@ public class PolicySubjectTest extends TestCase {
         assertEquals("Subject used in constructor must equal to subject returned from getter.", subject, ps.getSubject());
     }
     
-    public void testAttachingNullPolicyThrowsNPE() throws Exception {
+    public void testAttachingNullPolicyThrowsIAE() throws Exception {
         PolicySubject ps = new PolicySubject(subject, Policy.createNullPolicy());        
         try {
         ps.attach(null);
-        fail("Attaching a 'null' policy to the policyt subject must throw NullPointerException");
-        } catch (NullPointerException e) {
+        fail("Attaching a 'null' policy to the policyt subject must throw IllegalArgumentException");
+        } catch (IllegalArgumentException e) {
             // ok.
         }
     }

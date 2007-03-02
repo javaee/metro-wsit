@@ -50,16 +50,16 @@ public final class PolicyLogger {
             Object loggingDomain = loggingDomainField.get(null);
             loggingSubsystemName = loggingDomain.toString().concat(".wspolicy");
         } catch (Exception e) {
-            // If we don't manage to extract the logging domain from JAX-WS, we
-            // fall back to a default.
+            // if we catch an exception, we fall back to default name
+            loggingSubsystemName = "wspolicy";
         } finally {
             LOGGING_SUBSYSTEM_NAME = loggingSubsystemName;
         }
     }
     
     
-    private String componentClassName;
-    private java.util.logging.Logger logger;
+    private final String componentClassName;
+    private final java.util.logging.Logger logger;
     
     /**
      * Prevents creation of a new instance of this PolicyLogger
@@ -198,11 +198,11 @@ public final class PolicyLogger {
         return this.logger.isLoggable(METHOD_CALL_LEVEL_VALUE);
     }
     
-    public boolean isLoggable(Level level) {
+    public boolean isLoggable(final Level level) {
         return this.logger.isLoggable(level);
     }
     
-    public void setLevel(Level level) {
+    public void setLevel(final Level level) {
         this.logger.setLevel(level);
     }
     
@@ -253,11 +253,11 @@ public final class PolicyLogger {
      */
     public <T extends Throwable> T logSevereException(final T exception, final Throwable cause) {
         if (this.logger.isLoggable(Level.SEVERE)) {
-            if (cause != null) {
+            if (cause == null) {
+                logger.logp(Level.SEVERE, componentClassName, getCallerMethodName(), exception.getMessage());
+            } else {
                 exception.initCause(cause);
                 logger.logp(Level.SEVERE, componentClassName, getCallerMethodName(), exception.getMessage(), cause);
-            } else {
-                logger.logp(Level.SEVERE, componentClassName, getCallerMethodName(), exception.getMessage());
             }
         }
         
@@ -299,10 +299,10 @@ public final class PolicyLogger {
      */
     public <T extends Throwable> T logSevereException(final T exception) {
         if (this.logger.isLoggable(Level.SEVERE)) {
-            if (exception.getCause() != null) {
-                logger.logp(Level.SEVERE, componentClassName, getCallerMethodName(), exception.getMessage(), exception.getCause());
-            } else {
+            if (exception.getCause() == null) {
                 logger.logp(Level.SEVERE, componentClassName, getCallerMethodName(), exception.getMessage());
+            } else {
+                logger.logp(Level.SEVERE, componentClassName, getCallerMethodName(), exception.getMessage(), exception.getCause());
             }
         }
         
@@ -327,11 +327,11 @@ public final class PolicyLogger {
      */
     public <T extends Throwable> T logException(final T exception, final Throwable cause, final Level level) {
         if (this.logger.isLoggable(level)) {
-            if (cause != null) {
+            if (cause == null) {
+                logger.logp(level, componentClassName, getCallerMethodName(), exception.getMessage());
+            } else {
                 exception.initCause(cause);
                 logger.logp(level, componentClassName, getCallerMethodName(), exception.getMessage(), cause);
-            } else {
-                logger.logp(level, componentClassName, getCallerMethodName(), exception.getMessage());
             }
         }
         
@@ -375,10 +375,10 @@ public final class PolicyLogger {
      */
     public <T extends Throwable> T logException(final T exception, final Level level) {
         if (this.logger.isLoggable(level)) {
-            if (exception.getCause() != null) {
-                logger.logp(level, componentClassName, getCallerMethodName(), exception.getMessage(), exception.getCause());
-            } else {
+            if (exception.getCause() == null) {
                 logger.logp(level, componentClassName, getCallerMethodName(), exception.getMessage());
+            } else {
+                logger.logp(level, componentClassName, getCallerMethodName(), exception.getMessage(), exception.getCause());
             }
         }
         

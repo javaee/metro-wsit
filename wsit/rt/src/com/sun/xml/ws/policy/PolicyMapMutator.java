@@ -40,6 +40,7 @@ public abstract class PolicyMapMutator {
      * Creates a new instance of PolicyMapMutator. This class cannot be extended from outside of this package.
      */
     PolicyMapMutator() {
+        // nothing to instantiate
     }
     
     /**

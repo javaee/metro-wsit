@@ -77,17 +77,17 @@ final class PolicyReferenceData {
         }
         
         this.referencedModelUri = referencedModelUri;
-        if (expectedDigest != null) {
-            this.digest = expectedDigest;
-            
-            if (usedDigestAlgorithm != null) {
-                this.digestAlgorithmUri = usedDigestAlgorithm;
-            } else {
-                this.digestAlgorithmUri = DEFAULT_DIGEST_ALGORITHM_URI;
-            }
-        } else {
+        if (expectedDigest == null) {
             this.digest = null;
             this.digestAlgorithmUri = null;
+        } else {
+            this.digest = expectedDigest;
+            
+            if (usedDigestAlgorithm == null) {
+                this.digestAlgorithmUri = DEFAULT_DIGEST_ALGORITHM_URI;
+            } else {
+                this.digestAlgorithmUri = usedDigestAlgorithm;
+            }
         }
     }
     
@@ -123,11 +123,11 @@ final class PolicyReferenceData {
         
         buffer.append(indent).append("reference data {").append(PolicyUtils.Text.NEW_LINE);
         buffer.append(innerIndent).append("referenced policy model URI = '").append(referencedModelUri).append('\'').append(PolicyUtils.Text.NEW_LINE);
-        if (digest != null) {
+        if (digest == null) {
+            buffer.append(innerIndent).append("no digest specified").append(PolicyUtils.Text.NEW_LINE);            
+        } else {
             buffer.append(innerIndent).append("digest algorith URI = '").append(digestAlgorithmUri).append('\'').append(PolicyUtils.Text.NEW_LINE);
             buffer.append(innerIndent).append("digest = '").append(digest).append('\'').append(PolicyUtils.Text.NEW_LINE);
-        } else {
-            buffer.append(innerIndent).append("no digest specified").append(PolicyUtils.Text.NEW_LINE);            
         }
         buffer.append(indent).append('}');
         

@@ -22,7 +22,6 @@
 
 package com.sun.xml.ws.policy.spi;
 
-import com.sun.xml.ws.policy.spi.AssertionCreationException;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;

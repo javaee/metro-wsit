@@ -30,6 +30,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import com.sun.xml.ws.policy.privateutil.LocalizationMessages;
+import java.util.ArrayList;
 
 /**
  * The instance of this class is intended to provide policy intersection mechanism.
@@ -41,9 +42,10 @@ public final class PolicyIntersector {
     private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyIntersector.class);
     
     /**
-     * Creates a new instance of PolicyIntersector
+     * Prevents direct instantiation of this class from outside
      */
     private PolicyIntersector() {
+        // nothing to initialize
     }
     
     /**
@@ -96,16 +98,23 @@ public final class PolicyIntersector {
         // simple tests didn't lead to final answer => let's performe some intersecting ;)
         final Iterator<Policy> policyIterator = policies.iterator();
         final List<AssertionSet> finalAlternatives = new LinkedList<AssertionSet>(policyIterator.next().getContent());
+        final Queue<AssertionSet> testedAlternatives = new LinkedList<AssertionSet>();
+        final List<AssertionSet> alternativesToMerge = new ArrayList<AssertionSet>(2);
         while (policyIterator.hasNext()) {
             final Collection<AssertionSet> currentAlternatives = policyIterator.next().getContent();
 
-            AssertionSet testedAlternative;
-            final Queue<AssertionSet> testedAlternatives = new LinkedList<AssertionSet>(finalAlternatives);
+            testedAlternatives.clear();
+            testedAlternatives.addAll(finalAlternatives);
             finalAlternatives.clear();
+            
+            AssertionSet testedAlternative;
             while ((testedAlternative = testedAlternatives.poll()) != null) {
                 for (AssertionSet currentAlternative : currentAlternatives) {
                     if (testedAlternative.isCompatibleWith(currentAlternative)) {
-                        finalAlternatives.add(AssertionSet.createMergedAssertionSet(Arrays.asList(new AssertionSet[] {testedAlternative, currentAlternative})));
+                        alternativesToMerge.add(testedAlternative);
+                        alternativesToMerge.add(currentAlternative);                        
+                        finalAlternatives.add(AssertionSet.createMergedAssertionSet(alternativesToMerge));
+                        alternativesToMerge.clear();
                     }
                 }
             }

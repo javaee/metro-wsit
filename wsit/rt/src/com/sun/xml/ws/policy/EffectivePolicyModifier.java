@@ -34,9 +34,10 @@ public final class EffectivePolicyModifier extends PolicyMapMutator {
     }
     
     /**
-     * Creates a new instance of PolicyMapModifier
+     * Ensures that direct instantiation is not possible from outside of the class
      */
     private EffectivePolicyModifier() {
+        // no initialization required
     }
             
     /**
@@ -47,9 +48,9 @@ public final class EffectivePolicyModifier extends PolicyMapMutator {
      * @param key identifier of the scope the effective policy should be replaced with the new one. Must not be {@code null}.
      * @param newEffectivePolicy the new policy to replace the old effective policy of the scope. Must not be {@code null}.
      *
-     * @throws NullPointerException in case any of the input parameters is {@code null}
+     * @throws IllegalArgumentException in case any of the input parameters is {@code null}
      */
-    public void setNewEffectivePolicyForServiceScope(
+    public void setNewEffectivePolicyForServiceScope( 
             final PolicyMapKey key, final Policy newEffectivePolicy) {
         getMap().setNewEffectivePolicyForScope(PolicyMap.ScopeType.SERVICE, key, newEffectivePolicy);
     }
@@ -61,7 +62,7 @@ public final class EffectivePolicyModifier extends PolicyMapMutator {
      * @param key identifier of the scope the effective policy should be replaced with the new one. Must not be {@code null}.
      * @param newEffectivePolicy the new policy to replace the old effective policy of the scope. Must not be {@code null}.
      *
-     * @throws NullPointerException in case any of the input parameters is {@code null}
+     * @throws IllegalArgumentException in case any of the input parameters is {@code null}
      */
     public void setNewEffectivePolicyForEndpointScope(
             final PolicyMapKey key, final Policy newEffectivePolicy) {
@@ -76,7 +77,7 @@ public final class EffectivePolicyModifier extends PolicyMapMutator {
      * @param key identifier of the scope the effective policy should be replaced with the new one. Must not be {@code null}.
      * @param newEffectivePolicy the new policy to replace the old effective policy of the scope. Must not be {@code null}.
      *
-     * @throws NullPointerException in case any of the input parameters is {@code null}
+     * @throws IllegalArgumentException in case any of the input parameters is {@code null}
      */
     public void setNewEffectivePolicyForOperationScope(
             final PolicyMapKey key, final Policy newEffectivePolicy) {
@@ -91,7 +92,7 @@ public final class EffectivePolicyModifier extends PolicyMapMutator {
      * @param key identifier of the scope the effective policy should be replaced with the new one. Must not be {@code null}.
      * @param newEffectivePolicy the new policy to replace the old effective policy of the scope. Must not be {@code null}.
      *
-     * @throws NullPointerException in case any of the input parameters is {@code null}
+     * @throws IllegalArgumentException in case any of the input parameters is {@code null}
      */
     public void setNewEffectivePolicyForInputMessageScope(
             final PolicyMapKey key, final Policy newEffectivePolicy) {
@@ -106,7 +107,7 @@ public final class EffectivePolicyModifier extends PolicyMapMutator {
      * @param key identifier of the scope the effective policy should be replaced with the new one. Must not be {@code null}.
      * @param newEffectivePolicy the new policy to replace the old effective policy of the scope. Must not be {@code null}.
      *
-     * @throws NullPointerException in case any of the input parameters is {@code null}
+     * @throws IllegalArgumentException in case any of the input parameters is {@code null}
      */
     public void setNewEffectivePolicyForOutputMessageScope(
             final PolicyMapKey key, final Policy newEffectivePolicy) {
@@ -121,7 +122,7 @@ public final class EffectivePolicyModifier extends PolicyMapMutator {
      * @param key identifier of the scope the effective policy should be replaced with the new one. Must not be {@code null}.
      * @param newEffectivePolicy the new policy to replace the old effective policy of the scope. Must not be {@code null}.
      *
-     * @throws NullPointerException in case any of the input parameters is {@code null}
+     * @throws IllegalArgumentException in case any of the input parameters is {@code null}
      */
     public void setNewEffectivePolicyForFaultMessageScope(
             final PolicyMapKey key, final Policy newEffectivePolicy) {

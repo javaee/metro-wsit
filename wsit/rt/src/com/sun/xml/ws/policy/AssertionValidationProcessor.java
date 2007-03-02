@@ -26,7 +26,9 @@ import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import com.sun.xml.ws.policy.spi.PolicyAssertionValidator;
 
 import static com.sun.xml.ws.policy.privateutil.LocalizationMessages.WSP_0076_NO_SERVICE_PROVIDERS_FOUND;
+
 /**
+ * Singleton class that provides method for assertion validation.
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
@@ -39,9 +41,18 @@ public final class AssertionValidationProcessor {
         validators = PolicyUtils.ServiceProvider.load(PolicyAssertionValidator.class);
     }
     
+    /**
+     * This private constructor prevents direct instantiation of this class.
+     */
     private AssertionValidationProcessor() {
+        // no instantiation outside the class.
     }
     
+    /**
+     * Factory method that returns singleton instance of the class.
+     * 
+     * @return singleton instance of the class.
+     */
     public static AssertionValidationProcessor getInstance() throws PolicyException {
         if (validators.length == 0) {
             throw LOGGER.logSevereException(new PolicyException(WSP_0076_NO_SERVICE_PROVIDERS_FOUND(PolicyAssertionValidator.class.getName())));
@@ -49,7 +60,12 @@ public final class AssertionValidationProcessor {
         return processor;
     }
     
-    public PolicyAssertionValidator.Fitness validateClientSide(PolicyAssertion assertion) throws PolicyException {
+    /**
+     * Validates fitness of the {@code assertion} on the client side.
+     *
+     * return client side {@code assertion} fitness 
+     */
+    public PolicyAssertionValidator.Fitness validateClientSide(final PolicyAssertion assertion) throws PolicyException {
         PolicyAssertionValidator.Fitness assertionFitness = PolicyAssertionValidator.Fitness.UNKNOWN;
         for ( PolicyAssertionValidator validator : validators ) {
             assertionFitness = assertionFitness.combine(validator.validateClientSide(assertion));
@@ -60,8 +76,13 @@ public final class AssertionValidationProcessor {
         
         return assertionFitness;
     }
-    
-    public PolicyAssertionValidator.Fitness validateServerSide(PolicyAssertion assertion) throws PolicyException {
+
+    /**
+     * Validates fitness of the {@code assertion} on the server side.
+     *
+     * return server side {@code assertion} fitness 
+     */    
+    public PolicyAssertionValidator.Fitness validateServerSide(final PolicyAssertion assertion) throws PolicyException {
         PolicyAssertionValidator.Fitness assertionFitness = PolicyAssertionValidator.Fitness.UNKNOWN;
         for (PolicyAssertionValidator validator : validators) {
             assertionFitness = assertionFitness.combine(validator.validateServerSide(assertion));

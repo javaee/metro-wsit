@@ -35,9 +35,8 @@ import java.util.Collection;
  * {@code getSupportedDomainNamespaceUri()} must not return empty String without causing PolicyAssertionCreator registration
  * fail.
  *
- * @author Marek Potociar
+ * @author Marek Potociar (marek.potociar at sun.com)
  */
-
 class DefaultPolicyAssertionCreator implements PolicyAssertionCreator {    
     private static final class DefaultPolicyAssertion extends PolicyAssertion {
         DefaultPolicyAssertion(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative) {
@@ -45,14 +44,23 @@ class DefaultPolicyAssertionCreator implements PolicyAssertionCreator {
         }
     }
     
-    /** Creates a new instance of DefaultPolicyAssertionCreator */
+    /** 
+     * Creates a new instance of DefaultPolicyAssertionCreator 
+     */
     DefaultPolicyAssertionCreator() {
+        // nothing to initialize
     }
 
+    /**
+     * See {@link PolicyAssertionCreator#getSupportedDomainNamespaceURIs() method documentation in interface}
+     */
     public String[] getSupportedDomainNamespaceURIs() {
         return null;
     }
 
+    /**
+     * See {@link PolicyAssertionCreator#createAssertion(AssertionData, Collection, AssertionSet, PolicyAssertionCreator) method documentation in interface}
+     */
     public PolicyAssertion createAssertion(final AssertionData data, final Collection<PolicyAssertion> assertionParameters, final AssertionSet nestedAlternative, final PolicyAssertionCreator defaultCreator) throws AssertionCreationException {
         return new DefaultPolicyAssertion(data, assertionParameters, nestedAlternative);
     }    

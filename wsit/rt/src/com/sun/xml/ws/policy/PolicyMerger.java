@@ -33,10 +33,13 @@ import java.util.LinkedList;
  * WS-PolicyAttachment defines a merge algorithm for WSDL 1.1 policy attachments.
  */
 public final class PolicyMerger {
-    private static final PolicyMerger policyMerger = new PolicyMerger();
+    private static final PolicyMerger merger = new PolicyMerger();
     
+    /**
+     * This private constructor is to avoid direct class instantiation from outsied of the package
+     */
     private PolicyMerger() {
-        
+        // nothing to instantiate
     }
     
     /**
@@ -45,7 +48,7 @@ public final class PolicyMerger {
      * @return policy merger instance.
      */
     public static PolicyMerger getMerger() {
-        return policyMerger;
+        return merger;
     }
     
     /**
@@ -57,9 +60,8 @@ public final class PolicyMerger {
      * @return merged policy containing combination of policy alternatives stored in all input policies.
      *         If provided collection of policies is {@code null} or empty, returns {@code null}. If provided
      *         collection of policies contains only single policy, the policy is returned.
-     * @throws NullPointerException if any element of input policies collection is {@code null}.
      */
-    public Policy merge(final Collection<Policy> policies) throws PolicyException {
+    public Policy merge(final Collection<Policy> policies) {
         if (policies == null || policies.isEmpty()) {
             return null;
         } else if (policies.size() == 1) {

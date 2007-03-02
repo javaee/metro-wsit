@@ -39,6 +39,7 @@ public abstract class PolicyModelUnmarshaller {
      * a client code.
      */
     PolicyModelUnmarshaller() {
+        // nothing to intitialize
     }
     
     /**
@@ -52,6 +53,12 @@ public abstract class PolicyModelUnmarshaller {
      */
     public abstract PolicySourceModel unmarshalModel(Object storage) throws PolicyException;
     
+    /**
+     * Factory method that returns policy model unmarshaller able to unmarshal 
+     * policy expressions from XML source.
+     *
+     * @return policy model unmarshaller able to unmarshal policy expressions from XML source.
+     */
     public static PolicyModelUnmarshaller getXmlUnmarshaller() {
         return xmlUnmarshaller;
     }

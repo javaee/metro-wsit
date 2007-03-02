@@ -89,7 +89,7 @@ public final class PolicySourceModel implements Cloneable {
     private String policyId;
     private String policyName;
     
-    private List<ModelNode> references = new LinkedList<ModelNode>(); // links to policy reference nodes
+    private final List<ModelNode> references = new LinkedList<ModelNode>(); // links to policy reference nodes
     private boolean expanded = false;
     
     /**
@@ -171,11 +171,11 @@ public final class PolicySourceModel implements Cloneable {
      *         this model.
      */
     Map<String, String> getNamespaceToPrefixMapping() {
-        Map<String, String> nsToPrefixMap = new HashMap<String, String>();
+        final Map<String, String> nsToPrefixMap = new HashMap<String, String>();
 
-        Collection<String> namespaces = getUsedNamespaces();
+        final Collection<String> namespaces = getUsedNamespaces();
         for (String namespace : namespaces) {
-            String prefix = getDefaultPrefix(namespace);
+            final String prefix = getDefaultPrefix(namespace);
             if (prefix != null) {
                 nsToPrefixMap.put(namespace, prefix);
             }
@@ -191,11 +191,13 @@ public final class PolicySourceModel implements Cloneable {
      * policy source models instances may be equal based on their node content.
      */
     public boolean equals(final Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
+        }
         
-        if (!(obj instanceof PolicySourceModel))
+        if (!(obj instanceof PolicySourceModel)) {            
             return false;
+        }
         
         boolean result = true;
         final PolicySourceModel that = (PolicySourceModel) obj;
@@ -214,10 +216,10 @@ public final class PolicySourceModel implements Cloneable {
     public int hashCode() {
         int result = 17;
         
-        result = 37 * result + ((this.policyId != null) ? this.policyId.hashCode() : 0);
-        result = 37 * result + ((this.policyName != null) ? this.policyName.hashCode() : 0);
+        result = 37 * result + ((this.policyId == null) ? 0 : this.policyId.hashCode());
+        result = 37 * result + ((this.policyName == null) ? 0 : this.policyName.hashCode());
         result = 37 * result + this.rootNode.hashCode();
-//        result = 37 * result + ((this.xxx != null) ? this.xxx.hashCode() : 0);
+//        result = 37 * result + ((this.xxx == null) ? 0 : this.xxx.hashCode());
         
         return result;
     }
@@ -230,9 +232,9 @@ public final class PolicySourceModel implements Cloneable {
      */
     public String toString() {
         final String innerIndent = PolicyUtils.Text.createIndent(1);
-        final StringBuffer buffer = new StringBuffer("Policy source model {");
+        final StringBuffer buffer = new StringBuffer(60);
         
-        buffer.append(PolicyUtils.Text.NEW_LINE);
+        buffer.append("Policy source model {").append(PolicyUtils.Text.NEW_LINE);
         buffer.append(innerIndent).append("policy id = '").append(policyId).append('\'').append(PolicyUtils.Text.NEW_LINE);
         buffer.append(innerIndent).append("policy name = '").append(policyName).append('\'').append(PolicyUtils.Text.NEW_LINE);
         rootNode.toString(1, buffer).append(PolicyUtils.Text.NEW_LINE).append('}');
@@ -337,14 +339,14 @@ public final class PolicySourceModel implements Cloneable {
      * @return collection of used namespaces within given policy instance
      */
     private Collection<String> getUsedNamespaces() {
-        Set<String> namespaces = new HashSet<String>();
+        final Set<String> namespaces = new HashSet<String>();
         namespaces.add(PolicyConstants.POLICY_NAMESPACE_URI);
         
         if (this.policyId != null) {
             namespaces.add(PolicyConstants.WSU_NAMESPACE_URI);            
         }
         
-        Queue<ModelNode> nodesToBeProcessed = new LinkedList<ModelNode>();
+        final Queue<ModelNode> nodesToBeProcessed = new LinkedList<ModelNode>();
         nodesToBeProcessed.add(rootNode);
         
         ModelNode processedNode;
@@ -355,7 +357,7 @@ public final class PolicySourceModel implements Cloneable {
                 }
                 
                 if (child.isAssertionRelatedNode()) {
-                    AssertionData nodeData = child.getNodeData();
+                    final AssertionData nodeData = child.getNodeData();
                     namespaces.add(nodeData.getName().getNamespaceURI());
                     if (nodeData.isPrivateAttributeSet()) {
                         namespaces.add(PolicyConstants.SUN_POLICY_NAMESPACE_URI);
@@ -379,7 +381,7 @@ public final class PolicySourceModel implements Cloneable {
      * @return default prefix for given namespace. May return {@code null} if the
      *         default prefix for given namespace is not defined.
      */
-    private String getDefaultPrefix(String namespace) {
+    private String getDefaultPrefix(final String namespace) {
         return defaultNamespaceToPrefixMap.get(namespace);
     }
 }

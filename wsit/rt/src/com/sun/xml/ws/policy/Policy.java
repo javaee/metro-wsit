@@ -80,7 +80,7 @@ public class Policy implements Iterable<AssertionSet> {
     /**
      * Policy ID holder
      */
-    private String id;
+    private String policyId;
     
     /**
      * Policy name holder
@@ -90,23 +90,23 @@ public class Policy implements Iterable<AssertionSet> {
     /**
      * internal collection of policy alternatives
      */
-    private List<AssertionSet> assertionSets;
+    private final List<AssertionSet> assertionSets;
     
     /**
      * internal collection of policy vocabulary entries (qualified names of all assertion types present in the policy expression)
      */
-    private Set<QName> vocabulary;
+    private final Set<QName> vocabulary;
     
     /**
      * immutable version of policy vocabulary that is made available to clients via getter method
      */
-    private Collection<QName> immutableVocabulary;
+    private final Collection<QName> immutableVocabulary;
     
     /**
      * policy object name used in a toString() method. This ensures that Policy class children can customize
      * (via package private Policy constructors) the toString() method without having to override it.
      */
-    private String toStringName;
+    private final String toStringName;
     
     /**
      * The factory method creates an <b>immutable</b> policy instance which represents a <emph>'nothing allowed'</emph>
@@ -134,14 +134,14 @@ public class Policy implements Iterable<AssertionSet> {
      * policy expression.
      *
      * @param name global URI of the policy. May be {@code null}.
-     * @param id local URI of the policy. May be {@code null}.
+     * @param policyId local URI of the policy. May be {@code null}.
      * @return policy instance which represents a <emph>'nothing allowed'</emph> (no policy alternatives).
      */
-    public static Policy createNullPolicy(final String name, final String id) {
-        if (name == null && id == null) {
+    public static Policy createNullPolicy(final String name, final String policyId) {
+        if (name == null && policyId == null) {
             return ANONYMOUS_NULL_POLICY;
         } else {
-            return new Policy(name, id, NULL_POLICY_ASSERTION_SETS, EMPTY_VOCABULARY);
+            return new Policy(name, policyId, NULL_POLICY_ASSERTION_SETS, EMPTY_VOCABULARY);
         }
     }
     
@@ -150,16 +150,16 @@ public class Policy implements Iterable<AssertionSet> {
      * policy expression.
      *
      * @param name global URI of the policy. May be {@code null}.
-     * @param id local URI of the policy. May be {@code null}.
+     * @param policyId local URI of the policy. May be {@code null}.
      *
      * @return policy instance which represents a <emph>'anything allowed'</emph> (empty policy alternative with no plicy
      * assertions prescribed).
      */
-    public static Policy createEmptyPolicy(final String name, final String id) {
-        if (name == null && id == null) {
+    public static Policy createEmptyPolicy(final String name, final String policyId) {
+        if (name == null && policyId == null) {
             return ANONYMOUS_EMPTY_POLICY;
         } else {
-            return new Policy(name, id, EMPTY_POLICY_ASSERTION_SETS, EMPTY_VOCABULARY);
+            return new Policy(name, policyId, EMPTY_POLICY_ASSERTION_SETS, EMPTY_VOCABULARY);
         }
     }
     
@@ -190,19 +190,18 @@ public class Policy implements Iterable<AssertionSet> {
      * {@link #createNullPolicy(String, String)} factory method directly.
      *
      * @param name global URI of the policy. May be {@code null}.
-     * @param id local URI of the policy. May be {@code null}.
+     * @param policyId local URI of the policy. May be {@code null}.
      * @param sets represents the collection of policy alternatives of the policy object created. During the creation of
      * the new policy object, the content of the alternatives collection is copied into an internal policy object structure,
      * thus any subsequent operations on the collection will have no impact on the newly constructed policy object.
      *
      * @return policy instance which represents the policy with given alternatives.
      */
-    public static Policy createPolicy(
-            final String name, final String id, final Collection<AssertionSet> sets) {
+    public static Policy createPolicy(final String name, final String policyId, final Collection<AssertionSet> sets) {
         if (sets == null || sets.isEmpty()) {
-            return createNullPolicy(name, id);
+            return createNullPolicy(name, policyId);
         } else {
-            return new Policy(POLICY_TOSTRING_NAME, name, id, sets);
+            return new Policy(POLICY_TOSTRING_NAME, name, policyId, sets);
         }
     }
     
@@ -211,90 +210,74 @@ public class Policy implements Iterable<AssertionSet> {
      * of all its attributes.
      *
      * @param name global URI of the policy. May be {@code null}.
-     * @param id local URI of the policy. May be {@code null}.
+     * @param policyId local URI of the policy. May be {@code null}.
      * @param sets represents the collection of policy alternatives of the policy object created. The list is directly
      * assigned to the policy object internal attribute. Subsequent manipulations on the collection must be handled with
      * care.
      * @param vocabulary represents the vocabulary of the policy object. Subsequent manipulations on the collection
      * must be handled with care.
      */
-    private Policy(
-            final String name, 
-            final String id, 
-            final List<AssertionSet> assertionSets, 
-            final Set<QName> vocabulary) {
+    private Policy(final String name, final String policyId, final List<AssertionSet> assertionSets, final Set<QName> vocabulary) {
         this.toStringName = POLICY_TOSTRING_NAME;
         this.name = name;
-        this.id = id;
+        this.policyId = policyId;
         this.assertionSets = assertionSets;
         this.vocabulary = vocabulary;
         this.immutableVocabulary = Collections.unmodifiableCollection(this.vocabulary);
     }
     
     /**
-     * Constructor that should be overridden by child implementation. The constructor allows for easy toString() output 
+     * Constructor that should be overridden by child implementation. The constructor allows for easy toString() output
      * customization.
      *
-     * @param toStringName a general name of the object (such as 'policy' or 'nested policy') that will be used in the 
+     * @param toStringName a general name of the object (such as 'policy' or 'nested policy') that will be used in the
      * toString() method to identify the object.
      * @param sets represents the collection of policy alternatives of the policy object created. During the creation of
      * the new policy object, the content of the alternatives collection is copied into an internal policy object structure,
-     * thus any subsequent operations on the collection will have no impact on the newly constructed policy object. The 
+     * thus any subsequent operations on the collection will have no impact on the newly constructed policy object. The
      * collection may be {@code null} or empty. In such case a 'NULL' policy object is constructed.
      */
     Policy(final String toStringName, final Collection<AssertionSet> sets) {
         this.toStringName = toStringName;
         
-        if (sets != null && !sets.isEmpty()) {
+        if (sets == null || sets.isEmpty()) {
+            this.assertionSets = NULL_POLICY_ASSERTION_SETS;
+            this.vocabulary = EMPTY_VOCABULARY;
+            this.immutableVocabulary = EMPTY_VOCABULARY;
+        } else {
             this.assertionSets = new LinkedList<AssertionSet>();
             this.vocabulary = new TreeSet<QName>(PolicyUtils.Comparison.QNAME_COMPARATOR);
             this.immutableVocabulary = Collections.unmodifiableCollection(this.vocabulary);
             
             addAll(sets);
-        } else {
-            this.assertionSets = NULL_POLICY_ASSERTION_SETS;
-            this.vocabulary = EMPTY_VOCABULARY;
-            this.immutableVocabulary = EMPTY_VOCABULARY;
-        }        
+        }
     }
     
     /**
-     * Constructor that should be overridden by child implementation. The constructor allows for easy toString() output 
+     * Constructor that should be overridden by child implementation. The constructor allows for easy toString() output
      * customization.
      *
-     * @param toStringName a general name of the object (such as 'policy' or 'nested policy') that will be used in the 
+     * @param toStringName a general name of the object (such as 'policy' or 'nested policy') that will be used in the
      * toString() method to identify the object.
      * @param name global URI of the policy. May be {@code null}.
-     * @param id local URI of the policy. May be {@code null}.
+     * @param policyId local URI of the policy. May be {@code null}.
      * @param sets represents the collection of policy alternatives of the policy object created. During the creation of
      * the new policy object, the content of the alternatives collection is copied into an internal policy object structure,
-     * thus any subsequent operations on the collection will have no impact on the newly constructed policy object. The 
+     * thus any subsequent operations on the collection will have no impact on the newly constructed policy object. The
      * collection may be {@code null} or empty. In such case a 'NULL' policy object is constructed.
      */
-    Policy(final String toStringName, final String name, final String id, final Collection<AssertionSet> sets) {
+    Policy(final String toStringName, final String name, final String policyId, final Collection<AssertionSet> sets) {
+        this(toStringName, sets);
         this.name = name;
-        this.id = id;
-        this.toStringName = toStringName;
-        
-        if (sets != null && !sets.isEmpty()) {
-            this.assertionSets = new LinkedList<AssertionSet>();
-            this.vocabulary = new TreeSet<QName>(PolicyUtils.Comparison.QNAME_COMPARATOR);
-            this.immutableVocabulary = Collections.unmodifiableCollection(this.vocabulary);
-            
-            addAll(sets);
-        } else {
-            this.assertionSets = NULL_POLICY_ASSERTION_SETS;
-            this.vocabulary = EMPTY_VOCABULARY;
-            this.immutableVocabulary = EMPTY_VOCABULARY;
-        }
+        this.policyId = policyId;
     }
     
     /**
      * Adds single alternative to the internal alternatives set of the policy object.
      *
-     * @param set assertion set (policy alternative) object to be added. May be {@code null}; in such case the method 
+     * @param set assertion set (policy alternative) object to be added. May be {@code null}; in such case the method
      * returns false.
-     * 
+     *
      * @return {@code true} or {@code false} depending on whether the new alternative was added to the policy object or not.
      */
     private boolean add(final AssertionSet set) {
@@ -302,32 +285,32 @@ public class Policy implements Iterable<AssertionSet> {
             return false;
         }
         
-        if (!this.assertionSets.contains(set)) {
+        if (this.assertionSets.contains(set)) {
+            return false;
+        } else {
             this.assertionSets.add(set);
             this.vocabulary.addAll(set.getVocabulary());
             return true;
-        } else {
-            return false;
         }
     }
     
     /**
-     * Adds all alternatives from the input collection of assertion sets to the policy object's internal set of alternatives. 
+     * Adds all alternatives from the input collection of assertion sets to the policy object's internal set of alternatives.
      * The policy object's vocabulary structure is updated as well.
      *
      * @param sets collection of new alternatives. Must NOT be {@code null} or empty. The check for null or empty input
      * parameter is performed with help of {@code assert} keyword, thus during the testing and development of this class
      * {@code -ea} switch should be turned on for this class.
      *
-     * @return {@code true} if all elements in the input collection were added to internal structure, {@code false} otherwise. 
+     * @return {@code true} if all elements in the input collection were added to internal structure, {@code false} otherwise.
      */
     private boolean addAll(final Collection<AssertionSet> sets) {
         assert (sets != null && !sets.isEmpty()) : LocalizationMessages.WSP_0036_PRIVATE_METHOD_DOES_NOT_ACCEPT_NULL_OR_EMPTY_COLLECTION();
         
-        boolean result = true;        
+        boolean result = true;
         for (AssertionSet set : sets) {
             result &= add(set); // this is here to ensure that vocabulary is built correctly as well
-        }        
+        }
         Collections.sort(this.assertionSets);
         
         return result;
@@ -343,7 +326,7 @@ public class Policy implements Iterable<AssertionSet> {
      * @return policy identifier - a local relative policy URI. If no policy identifier is set, returns {@code null}.
      */
     public String getId() {
-        return id;
+        return policyId;
     }
     
     /**
@@ -364,8 +347,8 @@ public class Policy implements Iterable<AssertionSet> {
      * @return The policy ID if it was set, or the name or null if no attribute was set.
      */
     public String getIdOrName() {
-        if (id != null) {
-            return id;
+        if (policyId != null) {
+            return policyId;
         }
         return name;
     }
@@ -449,11 +432,13 @@ public class Policy implements Iterable<AssertionSet> {
      * An {@code Object.equals(Object obj)} method override.
      */
     public boolean equals(final Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
+        }
         
-        if (!(obj instanceof Policy))
+        if (!(obj instanceof Policy)) {
             return false;
+        }
         
         final Policy that = (Policy) obj;
         
@@ -497,7 +482,7 @@ public class Policy implements Iterable<AssertionSet> {
         final String innerDoubleIndent = PolicyUtils.Text.createIndent(indentLevel + 2);
         
         buffer.append(indent).append(toStringName).append(" {").append(PolicyUtils.Text.NEW_LINE);
-        buffer.append(innerIndent).append("id = '").append(id).append('\'').append(PolicyUtils.Text.NEW_LINE);
+        buffer.append(innerIndent).append("id = '").append(policyId).append('\'').append(PolicyUtils.Text.NEW_LINE);
         buffer.append(innerIndent).append("name = '").append(name).append('\'').append(PolicyUtils.Text.NEW_LINE);
         
         buffer.append(innerIndent).append("vocabulary {").append(PolicyUtils.Text.NEW_LINE);

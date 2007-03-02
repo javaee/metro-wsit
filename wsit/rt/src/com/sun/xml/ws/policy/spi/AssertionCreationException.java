@@ -22,8 +22,7 @@
 
 package com.sun.xml.ws.policy.spi;
 
-import com.sun.xml.ws.policy.*;
-import com.sun.xml.ws.policy.sourcemodel.AssertionData;
+import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 
 /**
@@ -33,7 +32,7 @@ import com.sun.xml.ws.policy.sourcemodel.AssertionData;
  */
 public final class AssertionCreationException extends PolicyException {
     
-    private AssertionData assertionData; 
+    private final AssertionData assertionData; 
     
     /**
      * Constructs a new assertion creation exception with the specified detail message and cause.  
@@ -44,7 +43,7 @@ public final class AssertionCreationException extends PolicyException {
      * @param assertionData the data provided for assertion creation
      * @param  message the detail message.
      */
-    public AssertionCreationException(AssertionData assertionData, String message) {
+    public AssertionCreationException(final AssertionData assertionData, final String message) {
         super(message);
         this.assertionData = assertionData;
     }
@@ -59,7 +58,7 @@ public final class AssertionCreationException extends PolicyException {
      * @param  message the detail message.
      * @param  cause the cause.  (A {@code null} value is permitted, and indicates that the cause is nonexistent or unknown.)
      */
-    public AssertionCreationException(AssertionData assertionData, String message, Throwable cause) {
+    public AssertionCreationException(final AssertionData assertionData, final String message, final Throwable cause) {
         super(message, cause);
         this.assertionData = assertionData;
     }

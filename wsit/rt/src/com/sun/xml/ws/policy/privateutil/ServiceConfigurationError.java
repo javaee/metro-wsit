@@ -42,15 +42,15 @@ public class ServiceConfigurationError extends Error {
     /**
      * Constructs a new instance with the specified detail string.
      */
-    public ServiceConfigurationError(String msg) {
-        super(msg);
+    public ServiceConfigurationError(String message) {
+        super(message);
     }
 
     /**
      * Constructs a new instance that wraps the specified throwable.
      */
-    public ServiceConfigurationError(Throwable x) {
-        super(x);
+    public ServiceConfigurationError(Throwable throwable) {
+        super(throwable);
     }
 
 }

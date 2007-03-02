@@ -24,7 +24,6 @@ package com.sun.xml.ws.policy;
 
 import java.util.Arrays;
 import java.util.Iterator;
-import javax.xml.namespace.QName;
 
 /**
  * A special policy implementation that assures that only no or single policy alternative is possible within this type of policy.
@@ -38,16 +37,16 @@ public final class NestedPolicy extends Policy {
         super(NESTED_POLICY_TOSTRING_NAME, Arrays.asList(new AssertionSet[] { set }));
     }
     
-    private NestedPolicy(final String name, final String id, final AssertionSet set) {
-        super(NESTED_POLICY_TOSTRING_NAME, name, id, Arrays.asList(new AssertionSet[] { set }));
+    private NestedPolicy(final String name, final String policyId, final AssertionSet set) {
+        super(NESTED_POLICY_TOSTRING_NAME, name, policyId, Arrays.asList(new AssertionSet[] { set }));
     }
 
     static NestedPolicy createNestedPolicy(final AssertionSet set) {
         return new NestedPolicy(set);
     }
 
-    static NestedPolicy createNestedPolicy(final String name, final String id, final AssertionSet set) {
-        return new NestedPolicy(name, id, set);
+    static NestedPolicy createNestedPolicy(final String name, final String policyId, final AssertionSet set) {
+        return new NestedPolicy(name, policyId, set);
     }
     
     /**
@@ -70,23 +69,22 @@ public final class NestedPolicy extends Policy {
      * An {@code Object.equals(Object obj)} method override.
      */
     public boolean equals(final Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
+        }
         
-        if (!(obj instanceof NestedPolicy))
+        if (!(obj instanceof NestedPolicy)) {
             return false;
+        }
         
         final NestedPolicy that = (NestedPolicy) obj;
         
         return super.equals(that);
-    }
+    }    
     
-    /**
-     * An {@code Object.hashCode()} method override.
-     */
     public int hashCode() {
         return super.hashCode();
-    }
+    }    
     
     /**
      * An {@code Object.toString()} method override.
@@ -104,6 +102,5 @@ public final class NestedPolicy extends Policy {
      */
     StringBuffer toString(final int indentLevel, final StringBuffer buffer) {
         return super.toString(indentLevel, buffer);
-    }
-    
+    }    
 }

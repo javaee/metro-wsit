@@ -34,8 +34,11 @@ public final class PolicySourceModelContext {
     
     Map<URI,PolicySourceModel> policyModels;
     
-    /** Creates a new instance of ModelUnmarshallerContext */
+    /** 
+     * Private constructor prevents instantiation of the instance from outside of the class
+     */
     private PolicySourceModelContext() {
+        // nothing to initialize
     }
     
     private Map<URI,PolicySourceModel> getModels() {

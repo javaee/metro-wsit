@@ -31,15 +31,13 @@ import javax.xml.namespace.QName;
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.policy.sourcemodel.ModelNode;
-import java.util.Collections;
-import java.util.LinkedList;
 
 /**
  * Base class for any policy assertion implementations. It defines the common interface and provides some default
  * implentation of common policy assertion functionality.
  */
 public abstract class PolicyAssertion {
-    private AssertionData data;
+    private final AssertionData data;
     private AssertionSet parameters;
     private NestedPolicy nestedPolicy;         
     
@@ -248,7 +246,7 @@ public abstract class PolicyAssertion {
         
         result = result && this.data.equals(that.data);
         result = result && this.parameters.equals(that.parameters);
-        result = result && ((this.nestedPolicy != null) ? this.nestedPolicy.equals(that.nestedPolicy) : ((that.nestedPolicy == null) ? true : false));
+        result = result && ((this.nestedPolicy == null) ? ((that.nestedPolicy == null) ? true : false) : this.nestedPolicy.equals(that.nestedPolicy));
         
         return result;
     }

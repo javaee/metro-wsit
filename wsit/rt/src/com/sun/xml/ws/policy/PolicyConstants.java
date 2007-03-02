@@ -148,6 +148,6 @@ public final class PolicyConstants {
      * Prevent instantiation of this class.
      */
     private PolicyConstants() {
-        
+        // nothing to initialize
     }
 }

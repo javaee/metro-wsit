@@ -47,19 +47,19 @@ import java.io.Serializable;
 public final class AssertionData implements Cloneable, Serializable {
     private static final PolicyLogger LOGGER = PolicyLogger.getLogger(AssertionData.class);
     
-    private QName name;
-    private String value;
-    private HashMap<QName, String> attributes = new HashMap<QName, String>();
+    private final QName name;
+    private final String value;
+    private Map<QName, String> attributes = new HashMap<QName, String>();
     private ModelNode.Type type;
     
     /**
-     * Constructs assertion data wrapper instance for an assertion that does not 
+     * Constructs assertion data wrapper instance for an assertion that does not
      * contain any value nor any attributes.
      *
      * @param name the FQN of the assertion
      *
-     * @throws IllegalArgumentException in case the {@code type} parameter is not 
-     * {@link ModelNode.Type#ASSERTION ASSERTION} or 
+     * @throws IllegalArgumentException in case the {@code type} parameter is not
+     * {@link ModelNode.Type#ASSERTION ASSERTION} or
      * {@link ModelNode.Type#ASSERTION_PARAMETER_NODE ASSERTION_PARAMETER_NODE}
      */
     public static AssertionData createAssertionData(final QName name) throws IllegalArgumentException {
@@ -67,13 +67,13 @@ public final class AssertionData implements Cloneable, Serializable {
     }
     
     /**
-     * Constructs assertion data wrapper instance for an assertion parameter that 
+     * Constructs assertion data wrapper instance for an assertion parameter that
      * does not contain any value nor any attributes.
      *
      * @param name the FQN of the assertion parameter
      *
-     * @throws IllegalArgumentException in case the {@code type} parameter is not 
-     * {@link ModelNode.Type#ASSERTION ASSERTION} or 
+     * @throws IllegalArgumentException in case the {@code type} parameter is not
+     * {@link ModelNode.Type#ASSERTION ASSERTION} or
      * {@link ModelNode.Type#ASSERTION_PARAMETER_NODE ASSERTION_PARAMETER_NODE}
      */
     public static AssertionData createAssertionParameterData(final QName name) throws IllegalArgumentException {
@@ -81,15 +81,15 @@ public final class AssertionData implements Cloneable, Serializable {
     }
     
     /**
-     * Constructs assertion data wrapper instance for an assertion that does 
+     * Constructs assertion data wrapper instance for an assertion that does
      * contain a value or attributes.
      *
      * @param name the FQN of the assertion
      * @param value a {@link String} representation of model node value
      * @param attributes map of model node's &lt;attribute name, attribute value&gt; pairs
      *
-     * @throws IllegalArgumentException in case the {@code type} parameter is not 
-     * {@link ModelNode.Type#ASSERTION ASSERTION} or 
+     * @throws IllegalArgumentException in case the {@code type} parameter is not
+     * {@link ModelNode.Type#ASSERTION ASSERTION} or
      * {@link ModelNode.Type#ASSERTION_PARAMETER_NODE ASSERTION_PARAMETER_NODE}
      */
     public static AssertionData createAssertionData(final QName name, final String value, final Map<QName, String> attributes) throws IllegalArgumentException {
@@ -97,15 +97,15 @@ public final class AssertionData implements Cloneable, Serializable {
     }
     
     /**
-     * Constructs assertion data wrapper instance for an assertion parameter that 
+     * Constructs assertion data wrapper instance for an assertion parameter that
      * contains a value or attributes
      *
      * @param name the FQN of the assertion parameter
      * @param value a {@link String} representation of model node value
      * @param attributes map of model node's &lt;attribute name, attribute value&gt; pairs
      *
-     * @throws IllegalArgumentException in case the {@code type} parameter is not 
-     * {@link ModelNode.Type#ASSERTION ASSERTION} or 
+     * @throws IllegalArgumentException in case the {@code type} parameter is not
+     * {@link ModelNode.Type#ASSERTION ASSERTION} or
      * {@link ModelNode.Type#ASSERTION_PARAMETER_NODE ASSERTION_PARAMETER_NODE}
      */
     public static AssertionData createAssertionParameterData(final QName name, final String value, final Map<QName, String> attributes) throws IllegalArgumentException {
@@ -125,8 +125,8 @@ public final class AssertionData implements Cloneable, Serializable {
      *             a policy assertion instance factory without actualy having to touch the {@link PolicyAssertionCreator}
      *             interface and protected {@link PolicyAssertion} constructors.
      *
-     * @throws IllegalArgumentException in case the {@code type} parameter is not 
-     * {@link ModelNode.Type#ASSERTION ASSERTION} or 
+     * @throws IllegalArgumentException in case the {@code type} parameter is not
+     * {@link ModelNode.Type#ASSERTION ASSERTION} or
      * {@link ModelNode.Type#ASSERTION_PARAMETER_NODE ASSERTION_PARAMETER_NODE}
      */
     AssertionData(QName name, String value, Map<QName, String> attributes, ModelNode.Type type) throws IllegalArgumentException {
@@ -181,11 +181,13 @@ public final class AssertionData implements Cloneable, Serializable {
      * An {@code Object.equals(Object obj)} method override.
      */
     public boolean equals(final Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
+        }
         
-        if (!(obj instanceof AssertionData))
+        if (!(obj instanceof AssertionData)) {
             return false;
+        }
         
         boolean result = true;
         final AssertionData that = (AssertionData) obj;
@@ -270,9 +272,9 @@ public final class AssertionData implements Cloneable, Serializable {
         int result = 17;
         
         result = 37 * result + this.name.hashCode();
-        result = 37 * result + ((this.value != null) ? this.value.hashCode() : 0);
+        result = 37 * result + ((this.value == null) ? 0 : this.value.hashCode());
         synchronized (attributes) {
-            result = 37 * result + ((this.attributes != null) ? this.attributes.hashCode() : 0);
+            result = 37 * result + ((this.attributes == null) ? 0 : this.attributes.hashCode());
         }
         return result;
     }
