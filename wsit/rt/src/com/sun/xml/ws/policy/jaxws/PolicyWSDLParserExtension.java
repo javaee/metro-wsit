@@ -102,6 +102,7 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
         Set<String> unresolvedURIs;
         
         PolicyRecord() {
+            // nothing to initialize
         }
         
         PolicyRecord insert(final PolicyRecord insertedRec) {
@@ -171,8 +172,8 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
     final Set<String> urlsRead = new HashSet<String>();
     
     // structures for policies really needed to build a map
-    private LinkedList<String> urisNeeded = new LinkedList<String>();
-    private Map<String, PolicySourceModel> modelsNeeded = new HashMap<String, PolicySourceModel>();
+    private final LinkedList<String> urisNeeded = new LinkedList<String>();
+    private final Map<String, PolicySourceModel> modelsNeeded = new HashMap<String, PolicySourceModel>();
     
     // lookup tables for Policy attachments found
     private Map<WSDLObject, Collection<PolicyRecordHandler>> handlers4ServiceMap = null;
@@ -397,7 +398,7 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
         return (fragmentIdx == -1) ? policyUri : policyUri.substring(0, fragmentIdx);
     }
     
-    private String relativeToAbsoluteUrl(String relativeUri, String baseUri) {
+    private String relativeToAbsoluteUrl(final String relativeUri, final String baseUri) {
         if ('#' != relativeUri.charAt(0)) {  // TODO: escaped char could be an issue?
             return relativeUri; // absolute already
         }
@@ -719,12 +720,7 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
             for (String currentUri : urisToBeSolvedList) {
                 if (!isPolicyProcessed(currentUri)) {
                     final PolicyRecord prefetchedRecord = getPolicyRecordsPassedBy().get(currentUri);
-                    if (null != prefetchedRecord) {
-                        if (null != prefetchedRecord.unresolvedURIs) {
-                            getUnresolvedUris(false).addAll(prefetchedRecord.unresolvedURIs);
-                        } // end-if null != prefetchedRecord.unresolvedURIs
-                        addNewPolicyNeeded(currentUri, prefetchedRecord.policyModel);
-                    } else { // policy has not been yet passed by
+                    if (null == prefetchedRecord) {
                         if (urlsRead.contains(getBaseUrl(currentUri))) { // big problem --> unresolvable policy
                             LOGGER.logSevereException(new PolicyException(LocalizationMessages.WSP_1042_CAN_NOT_FIND_POLICY(currentUri)));
                         } else {
@@ -732,6 +728,11 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
                                 getUnresolvedUris(false).add(currentUri);
                             }
                         }
+                    } else { // policy has not been yet passed by
+                        if (null != prefetchedRecord.unresolvedURIs) {
+                            getUnresolvedUris(false).addAll(prefetchedRecord.unresolvedURIs);
+                        } // end-if null != prefetchedRecord.unresolvedURIs
+                        addNewPolicyNeeded(currentUri, prefetchedRecord.policyModel);
                     }
                 } // end-if policy already processed
             } // end-foreach unresolved uris
@@ -1023,7 +1024,7 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
         final String policyURIs = reader.getAttributeValue(
                 PolicyConstants.POLICY_URIs.getNamespaceURI(),
                 PolicyConstants.POLICY_URIs.getLocalPart());
-        return (null != policyURIs) ? policyURIs.split("[\\n ]+") : null;
+        return (null == policyURIs) ? null : policyURIs.split("[\\n ]+");
     }
     
     
@@ -1037,9 +1038,7 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
         final StringBuffer elementCode = new StringBuffer();
         final PolicyRecord policyRec = new PolicyRecord();
         final QName elementName = reader.getName();
-        String absoluteUri;
         boolean insidePolicyReferenceAttr;
-        String policyRefrenceURL;
         int depth = 0;
         try{
             do {
