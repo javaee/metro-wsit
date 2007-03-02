@@ -26,27 +26,10 @@ package com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter;
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public enum InvocationProcessingState {
-    START_BUFFERING((byte) 0x01),
-    RESTART_BUFFERING((byte) 0x01), // releases old buffer and starts new
-    STOP_BUFFERING((byte) 0x04),
-    START_FILTERING((byte) 0x08),
-    STOP_FILTERING((byte) 0x10),
-    NO_STATE_CHANGE((byte) 0x00);
-    
-    private final byte flag;
-    
-    /**
-     * Method combines this state with another state and returns the state that results from combination of these states;
-     */
-    private InvocationProcessingState(byte flag) {
-        this.flag = flag;
-    }
-    
-     public boolean isSet(final byte bitArray) {
-         return this.flag == 0x00 || (bitArray & this.flag) > 0;
-     }
-     
-     public byte setFlag(byte bitArray) {
-         return (byte) (bitArray | this.flag);
-     }
+    START_BUFFERING(),
+    RESTART_BUFFERING(), // releases old buffer and starts new
+    STOP_BUFFERING(),
+    START_FILTERING(),
+    STOP_FILTERING(),
+    NO_STATE_CHANGE();
 }

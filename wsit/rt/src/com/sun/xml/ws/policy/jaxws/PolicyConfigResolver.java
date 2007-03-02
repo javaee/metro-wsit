@@ -67,8 +67,8 @@ public class PolicyConfigResolver implements XMLEntityResolver {
         try {
             // TODO: think about using alg from http://www.w3.org/International/O-URL-code.html
             final URL systemUrl = new URL(PolicyUtils.Rfc2396.unquote(systemId));
-            InputStream is = systemUrl.openStream();
-            final XMLStreamReader reader = new TidyXMLStreamReader(xmlInputFactory.createXMLStreamReader(systemId, is), is);
+            final InputStream input = systemUrl.openStream();
+            final XMLStreamReader reader = new TidyXMLStreamReader(xmlInputFactory.createXMLStreamReader(systemId, input), input);
 
             parser = new Parser(systemUrl, reader);
             return parser;

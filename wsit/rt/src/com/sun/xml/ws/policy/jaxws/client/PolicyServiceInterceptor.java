@@ -62,7 +62,9 @@ public class PolicyServiceInterceptor extends ServiceInterceptor {
                 
                 if (clientModel != null) {
                     final WSDLPolicyMapWrapper policyMapWrapper = clientModel.getExtension(WSDLPolicyMapWrapper.class);
-                    if (policyMapWrapper != null) {
+                    if (policyMapWrapper == null) {
+                        LOGGER.config(LocalizationMessages.WSP_1022_POLICY_MAP_NOT_IN_MODEL());
+                    } else {
                         LOGGER.config(LocalizationMessages.WSP_1024_INVOKING_CLIENT_POLICY_ALTERNATIVE_SELECTION());
                         try {
                             policyMapWrapper.doAlternativeSelection();
@@ -83,8 +85,6 @@ public class PolicyServiceInterceptor extends ServiceInterceptor {
                         // case of dispatch that object may be null.
                         addFeatures(features, clientModel, port.getPortName());
                         features.add(new PolicyFeature(map, clientModel, port));
-                    } else {
-                        LOGGER.config(LocalizationMessages.WSP_1022_POLICY_MAP_NOT_IN_MODEL());
                     }
                 }
             }

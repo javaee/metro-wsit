@@ -49,12 +49,9 @@ public final class MexImportFilteringStateMachine implements FilteringStateMachi
     private int depth; // indicates the depth in which we are currently nested in the element that should be filtered out
     private StateMachineMode currentMode = StateMachineMode.INACTIVE; // indicates that current mode of the filtering state machine
     
-    private boolean filteringOn; // indicates that currently processed elements will be filtered out.
-    private boolean bufferingOn; // indicates whether the commands should be buffered or whether they can be directly executed on the underlying XML output stream
-    
-    
-    /** Creates a new instance of InvocationProcessor */
+    /** Creates a new instance of MexImportFilteringStateMachine */
     public MexImportFilteringStateMachine() {
+        // nothing to initialize
     }
     
     public InvocationProcessingState getState(final Invocation invocation, final XMLStreamWriter writer) {
@@ -63,13 +60,13 @@ public final class MexImportFilteringStateMachine implements FilteringStateMachi
         try {
             switch (invocation.getMethodType()) {
                 case WRITE_START_ELEMENT:
-                    if (currentMode != StateMachineMode.INACTIVE) {
-                        depth++;
-                    } else {
+                    if (currentMode == StateMachineMode.INACTIVE) {
                         if (startBuffering(invocation, writer)) {
                             resultingState = START_BUFFERING;
                             currentMode = StateMachineMode.BUFFERING;
                         }
+                    } else {
+                        depth++;
                     }
                     break;
                 case WRITE_END_ELEMENT:
@@ -91,9 +88,9 @@ public final class MexImportFilteringStateMachine implements FilteringStateMachi
                 case CLOSE:
                     switch (currentMode) {
                         case BUFFERING:
-                        resultingState = STOP_BUFFERING; break;
+                            resultingState = STOP_BUFFERING; break;
                         case FILTERING:
-                        resultingState = STOP_FILTERING; break;
+                            resultingState = STOP_FILTERING; break;
                     }
                     currentMode = StateMachineMode.INACTIVE;
                     break;

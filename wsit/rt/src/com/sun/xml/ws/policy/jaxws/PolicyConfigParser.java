@@ -24,10 +24,7 @@ package com.sun.xml.ws.policy.jaxws;
 
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
-
-import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 
 import org.xml.sax.SAXException;
@@ -51,9 +48,7 @@ import java.io.File;
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public final class PolicyConfigParser {
-    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyConfigParser.class);
-    private static final XMLInputFactory XML_INPUT_FACTORY = XMLInputFactory.newInstance();
-    
+    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyConfigParser.class);    
     
     private static final String SERVLET_CONTEXT_CLASSNAME = "javax.servlet.ServletContext";
     // Prefixing with META-INF/ instead of /META-INF/. /META-INF/ is working fine
@@ -130,7 +125,7 @@ public final class PolicyConfigParser {
      * @return {@link PolicyMap} instance retrieved from a given {@link WSDLModel}
      *         if successful, {@code null} otherwise.
      */
-    public static PolicyMap extractPolicyMap(WSDLModel model) {
+    public static PolicyMap extractPolicyMap(final WSDLModel model) {
         LOGGER.entering(model);
         PolicyMap result = null;
         try {
@@ -219,11 +214,11 @@ public final class PolicyConfigParser {
                 configFileUrl = PolicyUtils.ConfigFile.loadFromContext(examinedPath, context);
             }
             
-            if (configFileUrl != null) {
+            if (configFileUrl == null) {
+                LOGGER.config(LocalizationMessages.WSP_1035_COULD_NOT_LOCATE_WSIT_CFG_FILE(configFileIdentifier, examinedPath));
+            } else {
                 model = parseModel(configFileUrl, isClientConfig, mutators);
                 LOGGER.info(LocalizationMessages.WSP_1049_LOADED_WSIT_CFG_FILE(configFileUrl.toExternalForm()));
-            } else {
-                LOGGER.config(LocalizationMessages.WSP_1035_COULD_NOT_LOCATE_WSIT_CFG_FILE(configFileIdentifier, examinedPath));
             }
             
             return model;
@@ -253,7 +248,6 @@ public final class PolicyConfigParser {
     public static WSDLModel parseModel(final URL configFileUrl, final boolean isClient, final PolicyMapMutator... mutators) throws PolicyException, IllegalArgumentException {
         LOGGER.entering(configFileUrl, isClient, mutators);
         WSDLModel model = null;
-        InputStream configFileIS = null;
         try {
             if (null == configFileUrl) {
                 throw LOGGER.logSevereException(new IllegalArgumentException(LocalizationMessages.WSP_1028_FAILED_TO_READ_NULL_WSIT_CFG()));

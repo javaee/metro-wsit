@@ -37,7 +37,7 @@ import javax.xml.namespace.QName;
  * @author Jakub Podlesak (jakub.podlesak at sun.com)
  */
 final class BuilderHandlerServiceScope extends BuilderHandler{
-    QName service;
+    private final QName service;
     
     /**
      * Creates a new instance of BuilderHandlerServiceScope

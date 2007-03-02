@@ -41,7 +41,7 @@ public class WsdlDocumentFilter implements SDDocumentFilter {
     private static final PolicyLogger LOGGER = PolicyLogger.getLogger(WsdlDocumentFilter.class);
     
     private static final InvocationProcessorFactory FILTERING_FACOTRY = new InvocationProcessorFactory() {
-        public InvocationProcessor createInvocationProcessor(XMLStreamWriter writer) throws XMLStreamException {
+        public InvocationProcessor createInvocationProcessor(final XMLStreamWriter writer) throws XMLStreamException {
             return new FilteringInvocationProcessor(
                     writer,
                     new MexImportFilteringStateMachine(),

@@ -114,6 +114,7 @@ public class SunProprietaryPolicySelector implements PolicyAssertionValidator{
     
     /** Creates a new instance of SunProprietaryPolicySelector */
     public SunProprietaryPolicySelector() {
+        // nothing to initialize
     }
     
     public PolicyAssertionValidator.Fitness validateClientSide(final PolicyAssertion assertion) {

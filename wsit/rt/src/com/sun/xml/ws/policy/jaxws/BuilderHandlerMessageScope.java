@@ -27,8 +27,6 @@ import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapExtender;
 import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.policy.PolicySubject;
-import com.sun.xml.ws.policy.jaxws.privateutil.LocalizationMessages;
-import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
 import java.util.Collection;
 import java.util.Map;
@@ -39,14 +37,11 @@ import javax.xml.namespace.QName;
  * @author Jakub Podlesak (jakub.podlesak at sun.com)
  */
 final class BuilderHandlerMessageScope extends BuilderHandler{
-    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(BuilderHandlerMessageScope.class);
-    
-    QName service;
-    QName port;
-    QName operation;
-    QName message;
-    
-    private Scope scope;
+    private final QName service;
+    private final QName port;
+    private final QName operation;
+    private final QName message;    
+    private final Scope scope;
     
     enum Scope{
         InputMessageScope,

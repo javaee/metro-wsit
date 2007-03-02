@@ -36,7 +36,7 @@ import javax.xml.ws.WebServiceFeature;
  */
 public class PolicyFeature extends WebServiceFeature {
 
-    private static final String id = PolicyMap.class.getName();
+    private static final String featureId = PolicyMap.class.getName();
     private final PolicyMap policyMap;
     private final WSDLModel wsdlModel;
     private final WSPortInfo portInfo;
@@ -61,7 +61,7 @@ public class PolicyFeature extends WebServiceFeature {
      * @return The ID of this feature
      */
     public String getID() {
-        return this.id;
+        return this.featureId;
     }
 
     /**

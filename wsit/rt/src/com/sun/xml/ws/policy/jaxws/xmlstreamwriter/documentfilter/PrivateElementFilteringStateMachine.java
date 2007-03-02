@@ -38,7 +38,7 @@ public class PrivateElementFilteringStateMachine implements FilteringStateMachin
     private int depth; // indicates the depth in which we are currently nested in the element that should be filtered out
     private boolean filteringOn; // indicates that currently processed elements will be filtered out.
     
-    private QName[] filteredElements;
+    private final QName[] filteredElements;
     
     /** Creates a new instance of PrivateElementFilteringStateMachine */
     public PrivateElementFilteringStateMachine(final QName... filteredElements) {

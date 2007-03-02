@@ -58,12 +58,12 @@ public final class EnhancedXmlStreamWriterProxy implements InvocationHandler {
             equalsMethod = Object.class.getMethod("equals", new Class[] { Object.class });
             toStringMethod = Object.class.getMethod("toString");
         } catch (NoSuchMethodException e) {
-            throw LOGGER.logSevereException(new NoSuchMethodError(e.getMessage()));
+            throw LOGGER.logSevereException(new NoSuchMethodError(e.getMessage()), e);
         }
     }
     
     // invocation procesor that processes
-    private InvocationProcessor invocationProcessor;
+    private final InvocationProcessor invocationProcessor;
     
     /**
      * Creates a wrapper {@link XMLStreamWriter} proxy that adds enhanced feature

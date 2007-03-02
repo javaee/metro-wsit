@@ -37,9 +37,9 @@ import javax.xml.namespace.QName;
  * @author Jakub Podlesak (jakub.podlesak at sun.com)
  */
 final class BuilderHandlerOperationScope extends BuilderHandler{
-    QName service;
-    QName port;
-    QName operation;
+    private final QName service;
+    private final QName port;
+    private final QName operation;
     
     /** Creates a new instance of WSDLServiceScopeBuilderHandler */
     BuilderHandlerOperationScope(

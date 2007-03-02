@@ -75,10 +75,10 @@ abstract class BuilderHandler{
         
         for (String policyURI : policyURIs) {
             final PolicySourceModel sourceModel = policyStore.get(policyURI);
-            if (sourceModel != null) {
-                result.add(PolicyModelTranslator.getTranslator().translate(sourceModel));
-            } else {
+            if (sourceModel == null) {
                 throw LOGGER.logSevereException(new PolicyException(LocalizationMessages.WSP_1014_POLICY_REFERENCE_DOES_NOT_EXIST(policyURI)));
+            } else {
+                result.add(PolicyModelTranslator.getTranslator().translate(sourceModel));
             }
         }
         

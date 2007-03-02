@@ -53,22 +53,15 @@ public class WSDLPolicyMapWrapper implements WSDLExtension {
     private static final PolicyLogger LOGGER = PolicyLogger.getLogger(WSDLPolicyMapWrapper.class);
     private static final QName NAME = new QName(null, "WSDLPolicyMapWrapper");
     
-    private static ModelConfiguratorProvider[] configurators = null;
+    private static ModelConfiguratorProvider[] configurators = PolicyUtils.ServiceProvider.load(ModelConfiguratorProvider.class);
     
     private PolicyMap policyMap;
     private EffectivePolicyModifier mapModifier;
-    private PolicyMapExtender mapExtender;
-    
-    private static ModelConfiguratorProvider[] getModelConfiguratorProviders() {
-        if (configurators == null) {
-            configurators = PolicyUtils.ServiceProvider.load(ModelConfiguratorProvider.class);
-        }
-        return configurators;
-    }
+    private PolicyMapExtender mapExtender;    
     
     protected WSDLPolicyMapWrapper(PolicyMap policyMap) {
         if (policyMap == null) {
-            throw new NullPointerException(LocalizationMessages.WSP_1016_POLICY_MAP_CAN_NOT_BE_NULL());
+            throw new IllegalArgumentException(LocalizationMessages.WSP_1016_POLICY_MAP_CAN_NOT_BE_NULL());
         }
         
         this.policyMap = policyMap;
@@ -136,7 +129,7 @@ public class WSDLPolicyMapWrapper implements WSDLExtension {
     }
     
     void validateServerSidePolicies() throws PolicyException {
-        AssertionValidationProcessor validationProcessor = AssertionValidationProcessor.getInstance();
+        final AssertionValidationProcessor validationProcessor = AssertionValidationProcessor.getInstance();
         for (Policy policy : policyMap) {
             
             // TODO:  here is a good place to check if the actual policy has only one alternative...
@@ -156,7 +149,7 @@ public class WSDLPolicyMapWrapper implements WSDLExtension {
     
     void configureModel(final WSDLModel model) {
         try {
-            for (ModelConfiguratorProvider configurator : getModelConfiguratorProviders()) {
+            for (ModelConfiguratorProvider configurator : configurators) {
                 configurator.configure(model, policyMap);
             }
         } catch (PolicyException e) {

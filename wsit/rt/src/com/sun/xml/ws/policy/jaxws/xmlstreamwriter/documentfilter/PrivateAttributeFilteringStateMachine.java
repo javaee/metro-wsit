@@ -41,8 +41,9 @@ public class PrivateAttributeFilteringStateMachine implements FilteringStateMach
     private boolean cmdBufferingOn; // indicates whether the commands should be buffered or whether they can be directly executed on the underlying XML output stream
     
     
-    /** Creates a new instance of PrivateAssertionFilteringStateMachine */
+    /** Creates a new instance of PrivateAttributeFilteringStateMachine */
     public PrivateAttributeFilteringStateMachine() {
+        // nothing to initialize
     }
     
     public InvocationProcessingState getState(final Invocation invocation, final XMLStreamWriter writer) {

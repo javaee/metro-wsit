@@ -27,8 +27,6 @@ import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapExtender;
 import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.policy.PolicySubject;
-import com.sun.xml.ws.policy.jaxws.privateutil.LocalizationMessages;
-import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
 import java.util.Collection;
 import java.util.Map;
@@ -39,10 +37,8 @@ import javax.xml.namespace.QName;
  * @author Jakub Podlesak (jakub.podlesak at sun.com)
  */
 final class BuilderHandlerEndpointScope extends BuilderHandler{
-    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(BuilderHandlerEndpointScope.class);
-    
-    QName service;
-    QName port;
+    private final QName service;
+    private final QName port;
     
     /** Creates a new instance of WSDLServiceScopeBuilderHandler */
     BuilderHandlerEndpointScope(Collection<String> policyURIs, Map<String,PolicySourceModel> policyStore, Object policySubject, QName service, QName port) {

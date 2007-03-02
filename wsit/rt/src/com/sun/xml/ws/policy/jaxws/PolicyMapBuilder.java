@@ -48,6 +48,7 @@ class PolicyMapBuilder {
      * Creates a new instance of PolicyMapBuilder
      */
     PolicyMapBuilder() {
+        // nothing to initialize
     }
         
     /**

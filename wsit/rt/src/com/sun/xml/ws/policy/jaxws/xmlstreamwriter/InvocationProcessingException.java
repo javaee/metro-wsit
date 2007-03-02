@@ -22,8 +22,6 @@
 
 package com.sun.xml.ws.policy.jaxws.xmlstreamwriter;
 
-import java.util.ArrayList;
-import java.util.List;
 
 import com.sun.xml.ws.policy.jaxws.privateutil.LocalizationMessages;
 

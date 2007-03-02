@@ -35,10 +35,10 @@ import javax.xml.stream.XMLStreamWriter;
  */
 public final class XmlFilteringUtils {
     public static final class AttributeInfo {
-        private QName name;
-        private String value;
+        private final QName name;
+        private final String value;
         
-        private AttributeInfo(QName name, String value) {
+        AttributeInfo(QName name, String value) {
             this.name = name;
             this.value = value;
         }
@@ -53,8 +53,12 @@ public final class XmlFilteringUtils {
     }
     
     private static final PolicyLogger LOGGER = PolicyLogger.getLogger(XmlFilteringUtils.class);
-    /** Prevents creation of a new instance of XmlFilteringUtils */
+   
+    /** 
+     * Prevents creation of a new instance of XmlFilteringUtils 
+     */
     private XmlFilteringUtils() {
+        // nothing to initialize
     }
     
     public static String getDefaultNamespaceURI(final XMLStreamWriter writer) {
@@ -127,9 +131,9 @@ public final class XmlFilteringUtils {
         return new AttributeInfo(new QName(namespaceURI, localName), value);
     }
     
-    private static final void checkInvocationParameter(final Invocation invocation, XmlStreamWriterMethodType expectedType) {
+    private static void checkInvocationParameter(final Invocation invocation, final XmlStreamWriterMethodType expectedType) {
         if (invocation == null) {
-            throw LOGGER.logSevereException(new NullPointerException(LocalizationMessages.WSP_1038_METHOD_PARAMETER_CANNOT_BE_NULL("Invocation parameter")));
+            throw LOGGER.logSevereException(new IllegalArgumentException(LocalizationMessages.WSP_1038_METHOD_PARAMETER_CANNOT_BE_NULL("Invocation parameter")));
         } else {
             if (invocation.getMethodType() != expectedType) {
                 throw LOGGER.logSevereException(new IllegalArgumentException(LocalizationMessages.WSP_1039_ILLEGAL_INVOCATION_METHOD_TYPE(invocation.getMethodType(), expectedType)));

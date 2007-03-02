@@ -59,17 +59,17 @@ public final class FilteringInvocationProcessor implements InvocationProcessor {
         }
         
         public InvocationBuffer getBuffer() {
-            return (bufferRef != null) ? bufferRef.get() : null;
+            return (bufferRef == null) ? null : bufferRef.get();
         }
         
-        public void setBuffer(InvocationBuffer buffer) {
+        public void setBuffer(final InvocationBuffer buffer) {
             this.bufferRef = new WeakReference<InvocationBuffer>(buffer);
         }
         
     }
     
     private final class InvocationBuffer {
-        private Queue<Invocation> queue;
+        private final Queue<Invocation> queue;
         private int referenceCount;
         
         InvocationBuffer(int refCount) {
@@ -128,7 +128,7 @@ public final class FilteringInvocationProcessor implements InvocationProcessor {
             this.stopBufferingCandidates.clear();
             this.startFilteringCandidates.clear();
             for (StateMachineContext context : this.stateMachineContexts) {
-                InvocationProcessingState state = context.getStateMachine().getState(invocation, mirrorWriter);
+                final InvocationProcessingState state = context.getStateMachine().getState(invocation, mirrorWriter);
                 
                 switch (state) {
                     case START_BUFFERING:
@@ -159,7 +159,7 @@ public final class FilteringInvocationProcessor implements InvocationProcessor {
             // filtered buffers
             int firstFilteredBufferIndex = invocationBuffers.size();
             for (StateMachineContext context : startFilteringCandidates) {
-                InvocationBuffer buffer = context.getBuffer();
+                final InvocationBuffer buffer = context.getBuffer();
                 context.setBuffer(null);
                 int currentBufferIndex;
                 if ((currentBufferIndex = invocationBuffers.indexOf(buffer)) < firstFilteredBufferIndex) {
@@ -167,25 +167,27 @@ public final class FilteringInvocationProcessor implements InvocationProcessor {
                 }
             }
             while (invocationBuffers.size() > firstFilteredBufferIndex) {
-                InvocationBuffer filteredBuffer = invocationBuffers.removeLast();
+                final InvocationBuffer filteredBuffer = invocationBuffers.removeLast();
                 filteredBuffer.clear();
             }
             
             // stopped buffers
             for (StateMachineContext context : stopBufferingCandidates) {
-                InvocationBuffer buffer = context.getBuffer();
+                final InvocationBuffer buffer = context.getBuffer();
                 context.setBuffer(null);
-                if (buffer != null) {
-                    int newRefCount = buffer.removeReference();
-                    if (newRefCount == 0) {
-                        int bufferIndex;
-                        if ((bufferIndex = invocationBuffers.indexOf(buffer)) != -1) {
-                            invocationBuffers.remove(bufferIndex);
-                            if (bufferIndex == 0) {
-                                executeCommands(originalWriter, buffer);
-                            } else {
-                                invocationBuffers.get(bufferIndex - 1).getQueue().addAll(buffer.getQueue());
-                            }
+                if (buffer == null) {
+                    continue;
+                }
+                
+                final int newRefCount = buffer.removeReference();
+                if (newRefCount == 0) {
+                    int bufferIndex;
+                    if ((bufferIndex = invocationBuffers.indexOf(buffer)) != -1) {
+                        invocationBuffers.remove(bufferIndex);
+                        if (bufferIndex == 0) {
+                            executeCommands(originalWriter, buffer);
+                        } else {
+                            invocationBuffers.get(bufferIndex - 1).getQueue().addAll(buffer.getQueue());
                         }
                     }
                 }
@@ -193,7 +195,7 @@ public final class FilteringInvocationProcessor implements InvocationProcessor {
             
             //started buffers (must be placed after stopped buffers so that restart buffering works properly)
             if (filteringCount == 0 && startBufferingCandidates.size() > 0) {
-                InvocationBuffer buffer = new InvocationBuffer(startBufferingCandidates.size());
+                final InvocationBuffer buffer = new InvocationBuffer(startBufferingCandidates.size());
                 invocationBuffers.addLast(buffer);
                 for (StateMachineContext context : startBufferingCandidates) {
                     context.setBuffer(buffer);
@@ -211,12 +213,12 @@ public final class FilteringInvocationProcessor implements InvocationProcessor {
                 doFiltering = filteringCount > 0; // stop filtering for the next call if there are no more filtering requests active
                 invocationTarget = mirrorWriter;
             } else {
-                if (!invocationBuffers.isEmpty()) {
-                    invocationBuffers.getLast().getQueue().offer(invocation);
-                    invocationTarget = mirrorWriter;
-                } else {
+                if (invocationBuffers.isEmpty()) {
                     invocation.execute(mirrorWriter);
                     invocationTarget = originalWriter;
+                } else {
+                    invocationBuffers.getLast().getQueue().offer(invocation);
+                    invocationTarget = mirrorWriter;
                 }
             }
             
@@ -232,8 +234,8 @@ public final class FilteringInvocationProcessor implements InvocationProcessor {
         }
     }
     
-    private void executeCommands(final XMLStreamWriter writer, InvocationBuffer invocationBuffer) throws IllegalAccessException, InvocationProcessingException {
-        Queue<Invocation> invocationQueue = invocationBuffer.getQueue();
+    private void executeCommands(final XMLStreamWriter writer, final InvocationBuffer invocationBuffer) throws IllegalAccessException, InvocationProcessingException {
+        final Queue<Invocation> invocationQueue = invocationBuffer.getQueue();
         while (!invocationQueue.isEmpty()) {
             final Invocation command = invocationQueue.poll();
             try {

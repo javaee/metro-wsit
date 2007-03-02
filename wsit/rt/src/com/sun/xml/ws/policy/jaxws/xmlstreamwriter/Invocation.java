@@ -41,10 +41,10 @@ import static com.sun.xml.ws.policy.jaxws.privateutil.LocalizationMessages.WSP_1
 public final class Invocation {
     private static final PolicyLogger LOGGER = PolicyLogger.getLogger(Invocation.class);    
     
-    private Method method;
-    private Object[] arguments;
+    private final Method method;
+    private final Object[] arguments;
     private String argsString;
-    private XmlStreamWriterMethodType methodType;
+    private final XmlStreamWriterMethodType methodType;
     
     /**
      * Factory method that creates {@link Invocation} instance according to input 
@@ -58,8 +58,8 @@ public final class Invocation {
      *        defined by value of {@code method} argument.
      */
     public static Invocation createInvocation(final Method method, final Object[] args) {
-        Object[] arguments;
-        XmlStreamWriterMethodType methodType = XmlStreamWriterMethodType.getMethodType(method.getName());
+        final Object[] arguments;
+        final XmlStreamWriterMethodType methodType = XmlStreamWriterMethodType.getMethodType(method.getName());
         if (methodType == WRITE_CHARACTERS && args.length == 3) {
             final Integer start = (Integer) args[1];
             final Integer length = (Integer) args[2];
@@ -138,7 +138,7 @@ public final class Invocation {
      * @return number of arguments stored in this {@link Invocation} instance
      */
     public int getArgumentsCount() {
-        return (arguments != null) ? arguments.length : 0;
+        return (arguments == null) ? 0 : arguments.length;
     }
     
     /**
@@ -161,8 +161,8 @@ public final class Invocation {
      * @return {@link String} representation of the {@link Invocation} instance.
      */
     public String toString() {
-        final StringBuffer retValue = new StringBuffer("invocation {");
-        retValue.append("method='").append(method.getName()).append("', args=").append(argsToString());
+        final StringBuffer retValue = new StringBuffer(30);
+        retValue.append("invocation { method='").append(method.getName()).append("', args=").append(argsToString());
         retValue.append('}');
         
         return retValue.toString();
@@ -188,7 +188,7 @@ public final class Invocation {
                     argList = Arrays.asList(arguments);
                 }
             }
-            argsString = (argList != null) ? argList.toString() : "no arguments";
+            argsString = (argList == null) ? "no arguments" : argList.toString();
         }
         
         return argsString;
