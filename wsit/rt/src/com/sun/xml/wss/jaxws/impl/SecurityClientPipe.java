@@ -217,7 +217,10 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
                 msg = verifyInboundMessage(msg, ctx);
             }
         } catch (XWSSecurityException xwse) {
-            throw getSOAPFaultException(xwse);
+            log.log(Level.SEVERE, 
+                    LogStringsMessages.WSSPIPE_0025_ERROR_VERIFY_INBOUND_MSG(), xwse);
+            throw new WebServiceException(LogStringsMessages.WSSPIPE_0025_ERROR_VERIFY_INBOUND_MSG(), 
+                    getSOAPFaultException(xwse));            
         }catch(SOAPException se){
             log.log(Level.SEVERE, 
                     LogStringsMessages.WSSPIPE_0025_ERROR_VERIFY_INBOUND_MSG(), se);            
