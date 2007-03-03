@@ -34,16 +34,39 @@ import java.util.Map;
 import javax.security.auth.callback.CallbackHandler;
 
 /**
- *
- * @author Jiandong Guo
+ * <p>
+ * This interface captures metadata of a service provider. 
+ * </p>
+ @author Jiandong Guo
  */
 public interface TrustSPMetadata{
                 
+     /**
+     * Gets the alias for the certificate of the service provider.
+     * 
+     * @return the cert alias of the service provider
+     */
     String getCertAlias();
     
+    /**
+     * Gets the token type for the  service provider.
+     * 
+     * @return the token type of the service provider
+     */
     String getTokenType();
      
+    /**
+     * Gets the key type for the  service provider.
+     * 
+     * @return the key type of the service provider
+     */
     String getKeyType();
     
+      /**
+     * Gets a map that contains the other attributes for the service provider.
+     * 
+     * @return
+     *     always non-null
+     */
     Map<String, Object> getOtherOptions(); 
 }

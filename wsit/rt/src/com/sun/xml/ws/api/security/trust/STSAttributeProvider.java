@@ -32,7 +32,8 @@ import javax.xml.namespace.QName;
  * This interface is a plugin for attrinute services to a Security Token Service (STS).
  * An attribute service provides the attributes about a requestor. The attributes are 
  * included in the issued toekn for the requestor using with the target servicce for 
- * authentication and authorization purpose.
+ * authentication and authorization purpose. The usual services mechanism is used to find implementing class
+ * of <code>STSAttributeProvider</code>.
  * </p>
  @author Jiandong Guo
  */

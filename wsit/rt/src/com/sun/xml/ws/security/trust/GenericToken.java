@@ -59,10 +59,6 @@ public class GenericToken implements Token{
     private SecurityHeaderElement she = null;
     private String id;
     
-    public static final String OPAQUE_TYPE = "opaque";
-    public static final String SAML11_TYPE =
-            "urn:oasis:names:tc:SAML:1.1:assertion";
-    
     /** Creates a new instance of GenericToken */
     public GenericToken(Element token) {
         this.token = token;
@@ -96,7 +92,7 @@ public class GenericToken implements Token{
             }
             return tokenType;
         }
-        return OPAQUE_TYPE;
+        return WSTrustConstants.OPAQUE_TYPE;
     }
     
     public Object getTokenValue(){

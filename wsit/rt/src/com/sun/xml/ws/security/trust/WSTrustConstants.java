@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustConstants.java,v 1.7 2007-02-26 18:59:59 jdg6688 Exp $
+ * $Id: WSTrustConstants.java,v 1.8 2007-03-03 06:58:03 jdg6688 Exp $
  */
 
 /*
@@ -41,6 +41,10 @@ public class WSTrustConstants {
     public static final String SAML11_ASSERTION_TOKEN_TYPE = "http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV1.1";
     
     public static final String SAML20_ASSERTION_TOKEN_TYPE = "urn:oasis:names:tc:SAML:2.0:assertion";
+    
+    public static final String OPAQUE_TYPE = "opaque";
+   
+    public static final String SAML11_TYPE = "urn:oasis:names:tc:SAML:1.1:assertion";
     
     /** the Trust namespace URI */
     public static final String WST_NAMESPACE = "http://schemas.xmlsoap.org/ws/2005/02/trust";

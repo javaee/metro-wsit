@@ -195,8 +195,8 @@ public class SBIssuedSamlTokenContractImpl extends IssueSamlTokenContract{
                 samlToken = new SAMLToken(assertion,SAMLJAXBUtil.getJAXBContext(),soapVersion);
             } else{
                 log.log(Level.SEVERE,
-                        LogStringsMessages.WST_0031_UNSUPPORTED_TOKEN_TYPE(tokenType));
-                throw new WSTrustException(LogStringsMessages.WST_0031_UNSUPPORTED_TOKEN_TYPE(tokenType));
+                        LogStringsMessages.WST_0031_UNSUPPORTED_TOKEN_TYPE(tokenType, appliesTo));
+                throw new WSTrustException(LogStringsMessages.WST_0031_UNSUPPORTED_TOKEN_TYPE(tokenType, appliesTo));
             }
             
             // Get the STS's public and private key

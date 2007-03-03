@@ -118,9 +118,6 @@ public class TrustPluginImpl implements TrustPlugin {
         final IssuedToken issuedToken = (IssuedToken)token;
         final RequestSecurityTokenTemplate rstTemplate = issuedToken.getRequestSecurityTokenTemplate();
        
-        // get Claims in the the PolicyAssertion; 
-        // Note: should be obtained from RequestSecurityTokenTemplate
-        
         URI stsURI =  getSTSURI(issuedToken);
         URI wsdlLocation = null;
         QName serviceName = null;
@@ -176,8 +173,8 @@ public class TrustPluginImpl implements TrustPlugin {
         
         if(stsURI == null){
             log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0029_COULD_NOT_GET_STS_LOCATION());
-            throw new RuntimeException(LogStringsMessages.WST_0029_COULD_NOT_GET_STS_LOCATION());
+                    LogStringsMessages.WST_0029_COULD_NOT_GET_STS_LOCATION(appliesTo));
+            throw new RuntimeException(LogStringsMessages.WST_0029_COULD_NOT_GET_STS_LOCATION(appliesTo));
         }
         
         RequestSecurityTokenResponse result = null;
@@ -191,41 +188,18 @@ public class TrustPluginImpl implements TrustPlugin {
             return itc;
         } catch (RemoteException ex) {
             log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0016_PROBLEM_IT_CTX());
-            throw new RuntimeException(LogStringsMessages.WST_0016_PROBLEM_IT_CTX(), ex);
+                    LogStringsMessages.WST_0016_PROBLEM_IT_CTX(stsURI, appliesTo));
+            throw new RuntimeException(LogStringsMessages.WST_0016_PROBLEM_IT_CTX(stsURI, appliesTo), ex);
         } catch (URISyntaxException ex){
             log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0016_PROBLEM_IT_CTX(), ex);
-            throw new RuntimeException(LogStringsMessages.WST_0016_PROBLEM_IT_CTX());
+                    LogStringsMessages.WST_0016_PROBLEM_IT_CTX(stsURI, appliesTo), ex);
+            throw new RuntimeException(LogStringsMessages.WST_0016_PROBLEM_IT_CTX(stsURI, appliesTo));
         } catch (WSTrustException ex){
             log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0016_PROBLEM_IT_CTX(), ex);
-            throw new RuntimeException(LogStringsMessages.WST_0016_PROBLEM_IT_CTX());
+                    LogStringsMessages.WST_0016_PROBLEM_IT_CTX(stsURI, appliesTo), ex);
+            throw new RuntimeException(LogStringsMessages.WST_0016_PROBLEM_IT_CTX(stsURI, appliesTo));
         }
     }
-    
-    /*
-    private IssuedTokenContext createIssuedTokenContext(final RequestSecurityTokenResponse rstr) {
-        //final URI tokType = rstr.getTokenType();
-        //final long keySize = rstr.getKeySize();
-        //final URI keyType = rstr.getKeyType();
-        final RequestedSecurityToken securityToken = rstr.getRequestedSecurityToken();
-        final RequestedAttachedReference attachedRef = rstr.getRequestedAttachedReference();
-        final RequestedUnattachedReference unattachedRef = rstr.getRequestedUnattachedReference();
-        final RequestedProofToken proofToken = rstr.getRequestedProofToken();
-        final IssuedTokenContext itc = new IssuedTokenContextImpl();
-        itc.setSecurityToken(securityToken.getToken());
-        if(proofToken != null){
-            itc.setAssociatedProofToken(proofToken.getSecurityTokenReference());
-        }
-        if(attachedRef != null){
-            itc.setAttachedSecurityTokenReference(attachedRef.getSTR());
-        }else{
-            itc.setUnAttachedSecurityTokenReference(unattachedRef.getSTR());
-        }
-        return itc;
-    }
-     */
     
     private RequestSecurityToken createRequest(final RequestSecurityTokenTemplate rstTemplate, final String appliesTo) throws URISyntaxException, WSTrustException, NumberFormatException {
         final URI requestType = URI.create(WSTrustConstants.ISSUE_REQUEST);

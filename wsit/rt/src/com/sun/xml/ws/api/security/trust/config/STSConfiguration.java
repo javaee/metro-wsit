@@ -33,29 +33,64 @@ import javax.security.auth.callback.CallbackHandler;
 
 import java.util.Map;
 
-/**
+/** This interface contains the attributes for configuring an STS.
  *
  * @author Jiandong Guo
  */
 public interface STSConfiguration {
     
+    /**
+     * Gets the implementation class of <code>WSTrustContract</code> for this STS.
+     * 
+     * @return class name 
+     */
     String getType();
         
+    /**
+     *  Get the Issuer for the STS which is a unique string identifing the STS.
+     *
+     */
     String getIssuer();
         
+    /**
+     *  Retruns true if the issued tokens from this STS must be encrypted.
+     *
+     */
     boolean getEncryptIssuedToken();
         
+    /**
+     *  Retruns true if the issued keys from this STS must be encrypted.
+     *
+     */
     boolean getEncryptIssuedKey();
         
     long getIssuedTokenTimeout();
     
+    /**
+     *  Set <code>CallbackHandler</code> for handling certificates for the 
+     *  service provider and keys for the STS.
+     *
+     */
     void setCallbackHandler(CallbackHandler callbackHandler);
     
     Map<String, Object> getOtherOptions();
     
+    /**
+     *  Get <code>CallbackHandler</code> for handling certificates for the 
+     *  service provider and keys for the STS.
+     *
+     */
     CallbackHandler getCallbackHandler();
     
+    /**
+     *  Add <code>TrustMetadata</code> for the service provider as identified by the given 
+     *  end point.
+     */
     void addTrustSPMetadata(TrustSPMetadata data, String spEndpoint);
     
+    /**
+     *  Get <code>TrustMetadata</code> for the service provider as identified by the given 
+     *  end point.
+     */
     TrustSPMetadata getTrustSPMetadata(String spEndpoint);
 }

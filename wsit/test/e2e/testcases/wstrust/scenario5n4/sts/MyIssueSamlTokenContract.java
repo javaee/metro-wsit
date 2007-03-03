@@ -204,8 +204,8 @@ public abstract class MyIssueSamlTokenContract implements WSTrustContract<Reques
                 key = SecurityUtil.P_SHA1(clientEntr, key, keySize/8);
             } catch (Exception ex){
                 log.log(Level.SEVERE, 
-                        LogStringsMessages.WST_0013_ERROR_SECRET_KEY(), ex);
-                throw new WSTrustException(LogStringsMessages.WST_0013_ERROR_SECRET_KEY(), ex);
+                        LogStringsMessages.WST_0013_ERROR_SECRET_KEY(WSTrustConstants.CK_PSHA1, keySize), ex);
+                throw new WSTrustException(LogStringsMessages.WST_0013_ERROR_SECRET_KEY(WSTrustConstants.CK_PSHA1, keySize), ex);
             }
             
             context.setProofKey(key);

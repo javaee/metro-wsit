@@ -28,7 +28,8 @@ import javax.security.auth.Subject;
  * <p>
  * This interface is a plugin for authorization services to a Security Token Service (STS).
  * The authorization service determines if a requestor can be issued an token to access the target 
- * service. 
+ * service. The usual services mechanism is used to find implementing class
+ * of <code>STSAuthorizationProvider</code>.
  * </p>
  @author Jiandong Guo
  */

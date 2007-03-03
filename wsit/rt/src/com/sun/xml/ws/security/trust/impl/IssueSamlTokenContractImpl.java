@@ -133,8 +133,8 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
             } else if (WSTrustConstants.SAML20_ASSERTION_TOKEN_TYPE.equals(tokenType)){
                 assertion = createSAML20Assertion(assertionId, issuer, appliesTo, keyInfo, claimedAttrs);
             } else{
-                log.log(Level.SEVERE, LogStringsMessages.WST_0031_UNSUPPORTED_TOKEN_TYPE(tokenType));
-                throw new WSTrustException(LogStringsMessages.WST_0031_UNSUPPORTED_TOKEN_TYPE(tokenType));
+                log.log(Level.SEVERE, LogStringsMessages.WST_0031_UNSUPPORTED_TOKEN_TYPE(tokenType, appliesTo));
+                throw new WSTrustException(LogStringsMessages.WST_0031_UNSUPPORTED_TOKEN_TYPE(tokenType, appliesTo));
             }
             
             // Get the STS's certificate and private key

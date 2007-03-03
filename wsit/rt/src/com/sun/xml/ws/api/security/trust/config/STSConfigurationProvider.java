@@ -24,6 +24,9 @@
 package com.sun.xml.ws.api.security.trust.config;
 
 /**
+ * This interface is used to find the <code>STSConfiguration</code>.
+ * The usual services mechanism is used to find implementing class
+ * of <code>STSConfigurationProvider</code>.
  *
  * @author Jiandong Guo
  */

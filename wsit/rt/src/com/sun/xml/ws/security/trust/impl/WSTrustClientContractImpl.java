@@ -48,6 +48,7 @@ import com.sun.xml.ws.security.trust.elements.RequestedUnattachedReference;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponse;
 import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
+import com.sun.xml.ws.security.trust.util.WSTrustUtil;
 import com.sun.xml.ws.security.wsu10.AttributedDateTime;
 import com.sun.xml.wss.impl.misc.SecurityUtil;
 
@@ -94,7 +95,11 @@ public class WSTrustClientContractImpl implements WSTrustClientContract {
             final RequestSecurityToken rst, final RequestSecurityTokenResponse rstr, final IssuedTokenContext context) throws WSTrustException{
         if (rst.getRequestType().toString().equals(WSTrustConstants.ISSUE_REQUEST)){
             
-            //AppliesTo requestAppliesTo = rst.getAppliesTo();
+            String appliesTo = null;
+            AppliesTo requestAppliesTo = rst.getAppliesTo();
+            if (requestAppliesTo != null){
+                appliesTo = WSTrustUtil.getAppliesToURI(requestAppliesTo);
+            }
             //AppliesTo responseAppliesTo = rstr.getAppliesTo();
             
             final RequestedSecurityToken securityToken = rstr.getRequestedSecurityToken();
@@ -120,9 +125,9 @@ public class WSTrustClientContractImpl implements WSTrustClientContract {
             // throw exception
             if(securityToken == null && proofToken == null){
                 log.log(Level.SEVERE,
-                        LogStringsMessages.WST_0018_TOKENS_NULL());
+                        LogStringsMessages.WST_0018_TOKENS_NULL(appliesTo));
                 throw new WSTrustException(
-                        LogStringsMessages.WST_0018_TOKENS_NULL());
+                        LogStringsMessages.WST_0018_TOKENS_NULL(appliesTo));
             }
             
             if (securityToken != null){
