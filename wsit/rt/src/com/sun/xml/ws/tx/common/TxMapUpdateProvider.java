@@ -146,6 +146,10 @@ public class TxMapUpdateProvider implements PolicyMapUpdateProvider {
         static private AssertionData createAssertionData(final QName assertionQName, final boolean isOptional) {
             final AssertionData result = AssertionData.createAssertionData(assertionQName);
             result.setOptionalAttribute(isOptional);
+            if (isOptional) {
+                // patch for wsit 419
+                result.setAttribute(WSP2002Optional, "true");
+            }
             return result;
         }
 
@@ -153,11 +157,13 @@ public class TxMapUpdateProvider implements PolicyMapUpdateProvider {
             super(createAssertionData(wsatPolicyAssertionName, isOptional), null, null);
         }
     }
-
+    
+    static final private String WSP2002_NS = "http://schemas.xmlsoap.org/ws/2002/12/policy"; 
+    static final private QName WSP2002Optional = new QName(WSP2002_NS, "Optional");
     static final private WsatPolicyAssertion AT_ASSERTION_OPTIONAL = new WsatPolicyAssertion(AT_ASSERTION, true);
     static final private WsatPolicyAssertion AT_ASSERTION_REQUIRED = new WsatPolicyAssertion(AT_ASSERTION, false);
     static final private WsatPolicyAssertion AT_ALWAYS_CAPABILITY_PA = new WsatPolicyAssertion(AT_ALWAYS_CAPABILITY, false);
-
+    
     /**
      * Pass in what the effective transaction attribute for a given Container Manager Transaction EJB method and return the
      * semantically closest WS-AT policy assertion.
