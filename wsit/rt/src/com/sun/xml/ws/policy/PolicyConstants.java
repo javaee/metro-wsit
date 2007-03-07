@@ -32,7 +32,7 @@ public final class PolicyConstants {
     /**
      * Standard WS-Policy namespace URI
      */       
-    public static final String POLICY_NAMESPACE_URI = "http://schemas.xmlsoap.org/ws/2004/09/policy";
+    public static final String POLICY_NAMESPACE_URI = "http://www.w3.org/ns/ws-policy";
 
     /**
      * Sun proprietary policy namespace URI
