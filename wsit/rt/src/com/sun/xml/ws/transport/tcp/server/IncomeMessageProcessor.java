@@ -218,14 +218,17 @@ public final class IncomeMessageProcessor implements SessionCloseListener {
         
         final VersionController versionController = VersionController.getInstance();
         
-        final VersionController.VersionSupport successCode = versionController.checkVersionSupport(
+        final boolean isSupported = versionController.isVersionSupported(
                 clientFramingVersion, clientConnectionManagementVersion);
         
         final OutputStream outputStream = connection.openOutputStream();
-        final Version framingVersion = versionController.getFramingVersion();
-        final Version connectionManagementVersion = versionController.getConnectionManagementVersion();
+
+        final Version framingVersion = isSupported ? clientFramingVersion : 
+            versionController.getClosestSupportedFramingVersion(clientFramingVersion);
+        final Version connectionManagementVersion = isSupported ? clientConnectionManagementVersion : 
+            versionController.getClosestSupportedConnectionManagementVersion(clientConnectionManagementVersion);
         
-        DataInOutUtils.writeInts4(outputStream, successCode.ordinal(),
+        DataInOutUtils.writeInts4(outputStream,
                 framingVersion.getMajor(),
                 framingVersion.getMinor(),
                 connectionManagementVersion.getMajor(),
@@ -235,8 +238,8 @@ public final class IncomeMessageProcessor implements SessionCloseListener {
         
         connection.setDirectMode(false);
         
-        logger.log(Level.FINE, MessagesMessages.WSTCP_1083_INCOME_MSG_VERSION_CHECK_RESULT(clientFramingVersion, clientConnectionManagementVersion, framingVersion, connectionManagementVersion, successCode));
-        return successCode == VersionController.VersionSupport.FULLY_SUPPORTED;
+        logger.log(Level.FINE, MessagesMessages.WSTCP_1083_INCOME_MSG_VERSION_CHECK_RESULT(clientFramingVersion, clientConnectionManagementVersion, framingVersion, connectionManagementVersion, isSupported));
+        return isSupported;
     }
     
     /**

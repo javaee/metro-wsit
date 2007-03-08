@@ -161,11 +161,11 @@ public class WSConnectionManager implements ConnectionFinder<ConnectionSession>,
             connectionSession.notify();
         }
     }
-    
+
     public void abortConnection(@NotNull final ConnectionSession connectionSession) {
         connectionCache.close(connectionSession);
-    }
-    
+    }    
+
     /**
      * Open new tcp connection and establish service virtual connection
      */
@@ -267,20 +267,18 @@ public class WSConnectionManager implements ConnectionFinder<ConnectionSession>,
         }
         
         final InputStream inputStream = connection.openInputStream();
-        final int[] versionInfo = new int[5];
+        final int[] versionInfo = new int[4];
         
-        DataInOutUtils.readInts4(inputStream, versionInfo, 5);
-        final int success = versionInfo[0];
+        DataInOutUtils.readInts4(inputStream, versionInfo, 4);
         
-        if (logger.isLoggable(Level.FINE)) {
-            logger.log(Level.FINE, MessagesMessages.WSTCP_1042_CONNECTION_MANAGER_DO_CHECK_VERSION_RESULT(success));
-        }
-        final Version serverFramingVersion = new Version(versionInfo[1], versionInfo[2]);
-        final Version serverConnectionManagementVersion = new Version(versionInfo[3], versionInfo[4]);
+        final Version serverFramingVersion = new Version(versionInfo[0], versionInfo[1]);
+        final Version serverConnectionManagementVersion = new Version(versionInfo[2], versionInfo[3]);
         
         connection.setDirectMode(false);
         
-        if (success != VersionController.VersionSupport.FULLY_SUPPORTED.ordinal()) {
+        final boolean success = versionController.isVersionSupported(serverFramingVersion, serverConnectionManagementVersion);
+
+        if (!success) {
             throw new VersionMismatchException(MessagesMessages.WSTCP_0006_VERSION_MISMATCH(), serverFramingVersion,
                     serverConnectionManagementVersion);
         }

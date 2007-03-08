@@ -27,12 +27,6 @@ package com.sun.xml.ws.transport.tcp.util;
  */
 public final class VersionController {
     
-    public static enum VersionSupport {
-        FULLY_SUPPORTED,
-        PARTICULLARY_SUPPORTED,
-        NOT_SUPPORTED
-    };
-    
     private static final VersionController instance = new VersionController(
             new Version(1, 0), new Version(1, 0));
     
@@ -57,19 +51,27 @@ public final class VersionController {
         return connectionManagementVersion;
     }
     
-/**
- *  Method checks compatibility of server and client versions
- *  and returns FULLY_SUPPORTED in case of success, or other value, which could
- *  correspond to exact problem (not supported, particullary supported, etc)
- */
-    public VersionSupport checkVersionSupport(final Version clientFramingVersion,
-            final Version clientConnectionManagementVersion) {
+    /**
+    *  Method checks compatibility of server and client versions
+    */
+    public boolean isVersionSupported(final Version framingVersion,
+            final Version connectionManagementVersion) {
         
-        if (framingVersion.equals(clientFramingVersion) &&
-                connectionManagementVersion.equals(clientConnectionManagementVersion)) {
-                return VersionSupport.FULLY_SUPPORTED;
-        }
-        
-        return VersionSupport.NOT_SUPPORTED;
+        return this.framingVersion.equals(framingVersion) &&
+                this.connectionManagementVersion.equals(connectionManagementVersion);
+    }
+
+    /**
+    *  Method returns closest to given framing version, which current implementation supports
+    */
+    public Version getClosestSupportedFramingVersion(Version framingVersion) {
+        return this.framingVersion;
+    }
+
+    /**
+    *  Method returns closest to given connection management version, which current implementation supports
+    */
+    public Version getClosestSupportedConnectionManagementVersion(Version connectionManagementVersion) {
+        return this.connectionManagementVersion;
     }
 }
