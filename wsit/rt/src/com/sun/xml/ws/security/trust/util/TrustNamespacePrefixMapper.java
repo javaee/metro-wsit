@@ -32,7 +32,7 @@ public class TrustNamespacePrefixMapper extends NamespacePrefixMapper {
             return "wsse";
         }
         
-        if( "http://schemas.xmlsoap.org/ws/2004/09/policy".equals(namespaceUri) ) {
+        if( "http://www.w3.org/ns/ws-policy".equals(namespaceUri) ) {
             return "wsp";
         }
         

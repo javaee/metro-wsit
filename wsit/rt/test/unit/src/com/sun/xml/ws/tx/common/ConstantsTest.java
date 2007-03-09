@@ -40,12 +40,12 @@ public class ConstantsTest extends TestCase {
     
     public void testPolicyNS() throws Exception {
         assertEquals(PolicyConstants.POLICY_NAMESPACE_URI,
-                     "http://schemas.xmlsoap.org/ws/2004/09/policy");
+                     "http://www.w3.org/ns/ws-policy");
     }
     
     public void testPolicyOptional() throws Exception {
         assertEquals(PolicyConstants.OPTIONAL, 
-                     new QName("http://schemas.xmlsoap.org/ws/2004/09/policy", "Optional"));
+                     new QName("http://www.w3.org/ns/ws-policy", "Optional"));
     }
     
 }

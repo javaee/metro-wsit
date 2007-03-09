@@ -28,7 +28,7 @@ import javax.xml.namespace.QName;
  * This class contains useful namespace uri constants
  *
  * @author Ryan.Shoemaker@Sun.COM, Joeseph.Fialli@Sun.COM
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.6.4.1 $
  * @since 1.0
  */
 public class Constants {
@@ -77,7 +77,7 @@ public class Constants {
      */
     @Deprecated
     public static final String WSP_URI =
-            "http://schemas.xmlsoap.org/ws/2004/09/policy";
+            "http://www.w3.org/ns/ws-policy";
     @Deprecated
     public static final QName WSP_OPTIONAL =
             new QName(WSP_URI, "optional");
