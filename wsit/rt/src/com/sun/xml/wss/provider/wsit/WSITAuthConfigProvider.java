@@ -34,7 +34,7 @@ import javax.xml.ws.WebServiceException;
  */
 public class WSITAuthConfigProvider implements AuthConfigProvider {
     private static final String SECURITY_POLICY_NAMESPACE_URI = 
-                "http://schemas.xmlsoap.org/ws/2005/07/securitypolicy";
+                "http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200512";
     //Map properties = null;
     String id = null;
     String description = "WSIT AuthConfigProvider";

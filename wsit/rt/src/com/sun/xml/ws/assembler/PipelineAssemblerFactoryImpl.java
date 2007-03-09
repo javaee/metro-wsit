@@ -94,7 +94,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
     private static final String WSRM_SUFFIX = ".wsrm";
     private static final String WSTX_SUFFIX = ".wstx";
 
-    private static final String SECURITY_POLICY_NAMESPACE_URI = "http://schemas.xmlsoap.org/ws/2005/07/securitypolicy";
+    private static final String SECURITY_POLICY_NAMESPACE_URI = "http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200512";
     private static final String WSAT_SOAP_NSURI = "http://schemas.xmlsoap.org/ws/2004/10/wsat";
     private static final QName AT_ALWAYS_CAPABILITY = new QName(WSAT_SOAP_NSURI, "ATAlwaysCapability");
     private static final QName AT_ASSERTION = new QName(WSAT_SOAP_NSURI, "ATAssertion");

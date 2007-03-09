@@ -27,7 +27,7 @@ package com.sun.xml.ws.security.policy;
  * @author K.Venugopal@sun.com
  */
 public interface Constants {
-    public static final String SECURITY_POLICY_2005_07 = "http://schemas.xmlsoap.org/ws/2005/07/securitypolicy";
+    public static final String SECURITY_POLICY_2005_07 = "http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200512";
 //    public static final String BASIC256="Basic256";
 //    public static final String BASIC192="Basic192";
 //    public static final String BASIC128="Basic128";

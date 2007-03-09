@@ -44,9 +44,9 @@ public abstract class Constants {
     public static final String SC_ASSERTION = "SecureConversationAssertion".intern();
     public static final QName ACTION_HEADER = new QName(wsaURI,"Action");
     public final static QName _SecureConversationToken_QNAME =
-            new QName("http://schemas.xmlsoap.org/ws/2005/07/securitypolicy", "SecureConversationToken");
+            new QName("http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200512", "SecureConversationToken");
     public static final String SECURITY_POLICY_2005_07_NAMESPACE=
-            "http://schemas.xmlsoap.org/ws/2005/07/securitypolicy".intern();
+            "http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200512".intern();
     public static final String TRUST_2005_02_NAMESPACE ="http://schemas.xmlsoap.org/ws/2005/02/trust".intern();
     public static final String ADDRESSING_POLICY_NAMESPACE_URI =
             "http://schemas.xmlsoap.org/ws/2004/09/policy/addressing";

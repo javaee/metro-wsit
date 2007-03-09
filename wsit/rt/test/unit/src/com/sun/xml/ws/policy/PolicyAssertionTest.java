@@ -67,13 +67,13 @@ public class PolicyAssertionTest extends AbstractPolicyApiClassTestBase {
     }    
     
     public void testGetAttributesValueReturnsProperValue() throws Exception {
-        QName headerParameterName = new QName("http://schemas.xmlsoap.org/ws/2005/07/securitypolicy", "Header");
+        QName headerParameterName = new QName("http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200512", "Header");
         QName nameAttributeName = new QName("Name");
         QName namespaceAttributeName = new QName("Namespace");
         
         Policy policy = PolicyResourceLoader.loadPolicy("bug_reproduction/securityPolicy1.xml");
         AssertionSet alternative = policy.iterator().next();
-        PolicyAssertion signedParts = alternative.get(new QName("http://schemas.xmlsoap.org/ws/2005/07/securitypolicy", "SignedParts")).iterator().next();
+        PolicyAssertion signedParts = alternative.get(new QName("http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200512", "SignedParts")).iterator().next();
         Iterator<PolicyAssertion> iterator = signedParts.getNestedAssertionsIterator();
         while (iterator.hasNext()) {
             PolicyAssertion assertion = iterator.next();

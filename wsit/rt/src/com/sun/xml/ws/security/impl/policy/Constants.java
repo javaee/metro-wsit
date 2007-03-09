@@ -29,7 +29,7 @@ public class Constants {
     
     
     //Namespace constants
-    public final static String SECURITY_POLICY_NS = "http://schemas.xmlsoap.org/ws/2005/07/securitypolicy";
+    public final static String SECURITY_POLICY_NS = "http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200512";
     public final static String ADDRESSING_NS = "http://schemas.xmlsoap.org/ws/2004/08/addressing";
     public final static String XPATH_NS = "http://www.w3.org/TR/1999/REC-xpath-19991116";
     public final static String TRUST_NS = "http://schemas.xmlsoap.org/ws/2005/02/trust";
