@@ -178,6 +178,9 @@ public class SecurityPolicyValidator implements PolicyAssertionValidator{
         supportedAssertions.add(new QName(SUN_TRUST_CLIENT_SECURITY_POLICY_NS,"PreconfiguredSTS"));
         supportedAssertions.add(new QName(SUN_TRUST_SERVER_SECURITY_POLICY_NS,"STSConfiguration"));
         
+        supportedAssertions.add(new QName(SUN_WSS_SECURITY_CLIENT_POLICY_NS,Constants.CertStore));
+        supportedAssertions.add(new QName(SUN_WSS_SECURITY_SERVER_POLICY_NS,Constants.CertStore));
+        
     }
     
     /** Creates a new instance of SecurityPolicyValidator. To be used by appropriate service finder */
