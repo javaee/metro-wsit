@@ -13,7 +13,7 @@
 <!--
 Created       : 2007 Mar 01 (Tue) 11:32:31 by Harold Carr.
 -->
-<pre>Last Modified : $Date: 2007-03-01 19:57:22 $ by $Author: haroldcarr $<br><br></pre>
+<pre>Last Modified : $Date: 2007-03-12 14:12:50 $ by $Author: kumarjayanti $<br><br></pre>
 <h5>Date: March 1, 2007</h5>
 <h2>Introduction</h2>
 <p>This document provides the status of the interoperability testing
@@ -136,7 +136,7 @@ release
 <hr>
 <h2><a name="35385"></a>Security Status</h2>
 <p></p>
-<pre>Updated: March ??, 2007</pre>
+<pre>Updated: March 12, 2007</pre>
 <p></p>
 <h4>WCF Interoperability</h4>
 <pre>   WCF-&gt;WSIT :   26/26<br>  WSIT-&gt;WCF  :   25/26  (One Scenario fails due to WCF Issue# CSD 4051)<br>  WSIT-&gt;WSIT :   26/26<br></pre>
@@ -179,13 +179,6 @@ not detect this). Part of the problem arises from the fact that the
 actually used, the IncludeTokenPolicy on the Token overrides the
 &lt;sp:Require*&gt;. This will be fixed in future releases.<br>
   </li>
-  <li>The use of a Certstore to configure Trusted Non-CA Certificates
-is not supported in this release</li>
-  <li>SAML Security Mechanisms defined in Netbeans WSIT Plugin do not
-work for JSR 109 Applications</li>
-  <li>Use of ThumbprintReference type for X509 Tokens
-(&lt;sp:RequireThumbprintReference/&gt; under &lt;sp:X509Token&gt;) is
-not supported for JSR 109 Applications.</li>
   <li>The SAML 2.0 API's supported&nbsp; by WSIT security has only a
 placeholder for AuthnContextStatement implementation. This will be
 fixed by adding an appropriate Constructor which takes necessary
@@ -368,20 +361,6 @@ correctly yet (refer known <a
     </tr>
     <tr>
       <td>
-      <p>8.3</p>
-      </td>
-      <td>
-      <p>TransportBinding</p>
-      </td>
-      <td>
-      <p><span style="font-weight: bold;">Is Supported in principle,</span>
-but no policy verification is
-performed on the Server side to ensure that SSL was indeed used at the
-Transport Layer. This check will be added in a future release.</p>
-      </td>
-    </tr>
-    <tr>
-      <td>
       <p>9.2</p>
       </td>
       <td>
@@ -448,19 +427,6 @@ supported in this release.</p>
 </table>
 <h4>Known Issues</h4>
 <ul>
-  <li>Issue# 234 :&nbsp; NullPointerException when Dump is enabled on
-the server side by setting :&nbsp; <span
- style="font-family: monospace;"></span>com.sun.xml.ws.assembler.server.transport=true
-    <br>
-  </li>
-  <li>Issue# 318 :&nbsp; UnsupportedOperationException when message
-dumping is enabled&nbsp; <span style="font-family: monospace;">: </span>com.sun.xml.ws.assembler.client.action=true</li>
-  <li>Issue#360&nbsp; : When you use the NetBeans tooling to configure
-security&nbsp; mechanisms and you&nbsp; see&nbsp; the message&nbsp;
-"No security header found in message" on running a client that
-previously worked, you need to
-restart GlassFish. Although this issue is fixed in WSIT Trunk, the
-Milestone 3 bits do not have the fix in them.</li>
 </ul>
 <table border="1" cellpadding="2" cellspacing="3">
   <tbody>
@@ -515,24 +481,6 @@ on IssueTracker</p>
       </td>
       <td>
       <p>Will be supported in a future release.</p>
-      </td>
-    </tr>
-    <tr>
-      <td>
-      <p>SignedElements and EncryptedElements</p>
-      </td>
-      <td>
-      <p>sp:EncryptedElements/sp:XPath fails to encrypt the element
-specified in the XPath element<br>
-      </p>
-      <p><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=24">Issue
-#24 </a>on IssueTracker<br>
-      <br>
-      </p>
-      </td>
-      <td>
-      <p><font color="#000000">Feature implemented, but Fails due to a
-bug in the runtime.</font></p>
       </td>
     </tr>
     <tr>
@@ -609,7 +557,7 @@ release.<br>
       </td>
     </tr>
     <tr>
-      <td style="vertical-align: top;">amlToken as InitiatorToken in
+      <td style="vertical-align: top;">SamlToken as InitiatorToken in
 AsymmetricBinding, with ProtectTokens fails with :: Could not find
 Reference #5 under Signature with ID1<br>
       </td>
@@ -623,64 +571,6 @@ fails on the server side with the following exception trace :
       <a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=206">Issue#206</a><br>
       </td>
       <td style="vertical-align: top;">Will be fixed in a future release<br>
-      </td>
-    </tr>
-    <tr>
-      <td style="vertical-align: top;">java.lang.StackOverflowError on
-client side :AsymmetricBinding&nbsp; with ProtectTokens<br>
-      </td>
-      <td style="vertical-align: top;"> The test case has
-AsymmetricBinding with X509Token as the
-Initiator(IncludeToken=AlwaysToRecipient) and the
-RecipientToken(IncludeToken=Never) and ProtectTokens assertion. The
-test fails with the following on the client side:
-      <pre>Exception in thread "main" java.lang.StackOverflowError</pre>
-      <a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=211">Issue#
-211</a> </td>
-      <td style="vertical-align: top;">Will be fixed in a future release<br>
-      </td>
-    </tr>
-    <tr>
-      <td style="vertical-align: top;">GF/WSSecurity:
-&lt;DisableStreamingSecurity&gt; causing error "Unable to locate
-certificate for the alias ''"<br>
-      </td>
-      <td style="vertical-align: top;"> It has been observed that
-wssecurity on servlet based jaxws webservice with WS-Policy is not
-working when the StreamSecurity is disabled. The issue is server side
-certificate exception during the secureResponse from the WSIT
-provider.&lt;<a
- href="https://wsit.dev.java.net/issues/show_bug.cgi?id=336">Issue# 336</a><br>
-      </td>
-      <td style="vertical-align: top;">Will be fixed in a future
-release.<br>
-      </td>
-    </tr>
-    <tr>
-      <td style="vertical-align: top;">Only one secured WSIT
-service/client may run on GF when using 109 Deployments<br>
-      </td>
-      <td style="vertical-align: top;"><a
- href="https://wsit.dev.java.net/issues/show_bug.cgi?id=340">Issue# 340</a>,
-A partial fix has been made for this Issue where one can deploy
-services which differ in atleast one of&nbsp; ServiceName and/or
-PortName. When the ServiceName and PortName are identical there is an
-issue with the GlassFish Provider API's that does not allow the
-Security Module to disthinguish the two different Applications.<br>
-      </td>
-      <td style="vertical-align: top;">GlassFish development needs to
-make the Application Context Identifiers unique.<br>
-      </td>
-    </tr>
-    <tr>
-      <td style="vertical-align: top;">&lt;sp:RequireIssuerSerialReference/&gt;
-and &lt;sp:MustSupportIssuerSerialReference/&gt; for &lt;X509Token&gt;
-do not work because of a Bug.<br>
-      </td>
-      <td style="vertical-align: top;"><a
- href="https://wsit.dev.java.net/issues/show_bug.cgi?id=375">Issue#375</a><br>
-      </td>
-      <td style="vertical-align: top;"><br>
       </td>
     </tr>
   </tbody>
