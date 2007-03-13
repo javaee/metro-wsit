@@ -20,20 +20,31 @@
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
-package com.sun.xml.ws.transport.tcp.server;
+package com.sun.xml.ws.transport.tcp.util;
 
 /**
  * @author Alexey Stashok
  */
-public class WSTCPException extends RuntimeException {
-    public WSTCPException() {
+public class WSTCPException extends Exception {
+    private WSTCPError error;
+    
+    public WSTCPException(final WSTCPError error) {
+        this.error = error;
     }
     
-    public WSTCPException(String reason) {
-        super(reason);
+    public String getMessage() {
+        return toString();
     }
     
-    public WSTCPException(String reason, Throwable trace) {
-        super(reason, trace);
+    public WSTCPError getError() {
+        return error;
+    }
+    
+    public String toString() {
+        if (error != null) {
+            return error.toString();
+        }
+        
+        return "";
     }
 }

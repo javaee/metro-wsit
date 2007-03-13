@@ -31,13 +31,9 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetDecoder;
-import java.nio.charset.CoderResult;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -47,14 +43,8 @@ import java.util.logging.Logger;
  * Stream wrapper around a <code>ByteBuffer</code>
  */
 public final class FramedMessageInputStream extends InputStream implements LifeCycle {
-    private static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
-    private static final int MAX_PARAM_VALUE_LENGTH = 1024;
-    
     private static final Logger logger = Logger.getLogger(
             com.sun.xml.ws.transport.tcp.util.TCPConstants.LoggingDomain + ".streams");
-    
-    private final CharsetDecoder decoder = UTF8_CHARSET.newDecoder();
-    private final CharBuffer utf8TmpCharBuffer = CharBuffer.allocate(MAX_PARAM_VALUE_LENGTH);
     
     private ByteBuffer byteBuffer;
     
@@ -274,7 +264,9 @@ public final class FramedMessageInputStream extends InputStream implements LifeC
             DataInOutUtils.readInts4(this, headerTmpArray, 2);
             final int paramId = headerTmpArray[0];
             final int paramValueLen = headerTmpArray[1];
-            final String paramValue = readUTFWithoutLengthPrefix(paramValueLen);
+            byte[] paramValueBytes = new byte[paramValueLen];
+            DataInOutUtils.readFully(this, paramValueBytes);
+            final String paramValue = new String(paramValueBytes, TCPConstants.UTF8);
             contentProps.put(paramId, paramValue);
         }
     }
@@ -419,27 +411,6 @@ public final class FramedMessageInputStream extends InputStream implements LifeC
         }
         
         return Math.min(currentFrameDataSize - frameBytesRead, byteBuffer.remaining());
-    }
-    
-    public String readUTFWithoutLengthPrefix(int length) throws IOException {
-        decoder.reset();
-        utf8TmpCharBuffer.position(0);
-        utf8TmpCharBuffer.limit(length);
-        CoderResult result = null;
-        boolean isCompleted = false;
-        do {
-            result = decoder.decode(byteBuffer, utf8TmpCharBuffer, false);
-            isCompleted = !utf8TmpCharBuffer.hasRemaining();
-            if (!isCompleted && result.isUnderflow() && doRead() == -1) {
-                throw new EOFException();
-            }
-        } while (!isCompleted && !result.isError());
-        
-        if (!isCompleted && result.isError()) result.throwException();
-        decoder.decode(byteBuffer, utf8TmpCharBuffer, true);
-        decoder.flush(utf8TmpCharBuffer);
-        utf8TmpCharBuffer.flip();
-        return utf8TmpCharBuffer.toString();
     }
     
     public void reset() {

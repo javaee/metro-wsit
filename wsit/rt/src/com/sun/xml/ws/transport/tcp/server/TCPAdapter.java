@@ -29,11 +29,11 @@ import com.sun.xml.ws.api.server.Adapter;
 import com.sun.xml.ws.transport.http.DeploymentDescriptorParser.AdapterFactory;
 import com.sun.xml.ws.api.server.TransportBackChannel;
 import com.sun.xml.ws.api.server.WSEndpoint;
-import com.sun.xml.ws.transport.tcp.io.Connection;
 import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
 import com.sun.xml.ws.transport.tcp.util.ChannelContext;
-import com.sun.xml.ws.transport.tcp.util.MimeType;
 import com.sun.xml.ws.transport.tcp.util.TCPConstants;
+import com.sun.xml.ws.transport.tcp.util.WSTCPError;
+import com.sun.xml.ws.transport.tcp.util.WSTCPException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.logging.Level;
@@ -55,7 +55,7 @@ public class TCPAdapter extends Adapter<TCPAdapter.TCPToolkit> {
         this.urlPattern = urlPattern;
     }
     
-    public void handle(@NotNull final ChannelContext channelContext) throws IOException {
+    public void handle(@NotNull final ChannelContext channelContext) throws IOException, WSTCPException {
         final TCPConnectionImpl connection = new TCPConnectionImpl(channelContext);
         
         final TCPToolkit tk = pool.take();
@@ -85,33 +85,16 @@ public class TCPAdapter extends Adapter<TCPAdapter.TCPToolkit> {
     }
     
     public static void sendErrorResponse(@NotNull final ChannelContext channelContext,
-            final int errorCode,
-            @NotNull final String errorDescription) throws IOException {
+            final WSTCPError message) throws IOException, WSTCPException {
         final TCPConnectionImpl connection = new TCPConnectionImpl(channelContext);
-        try {
-            final StringBuffer contentType = new StringBuffer();
-            contentType.append(MimeType.ERROR.getMimeType());
-            contentType.append(';');
-            contentType.append(TCPConstants.ERROR_CODE_PROPERTY);
-            contentType.append('=');
-            contentType.append(errorCode);
-            contentType.append(';');
-            contentType.append(TCPConstants.ERROR_DESCRIPTION_PROPERTY);
-            contentType.append('=');
-            contentType.append(errorDescription);
-            connection.setContentType(contentType.toString());
-            connection.setStatus(TCPConstants.ERROR);
-            connection.flush();
-        } finally {
-            connection.close();
-        }
+        connection.sendErrorMessage(message);
     }
     
     public class TCPToolkit extends Adapter.Toolkit implements TransportBackChannel {
         protected TCPConnectionImpl connection;
         private boolean isClosed;
         
-        protected void handle(@NotNull final TCPConnectionImpl con) throws IOException {
+        protected void handle(@NotNull final TCPConnectionImpl con) throws IOException, WSTCPException {
             connection = con;
             isClosed = false;
             
@@ -129,16 +112,7 @@ public class TCPAdapter extends Adapter<TCPAdapter.TCPToolkit> {
                 logger.log(Level.FINE, MessagesMessages.WSTCP_1091_TCP_ADAPTER_DECODED());
             }
             addCustomPacketSattellites(packet);
-            try {
-                packet = head.process(packet, connection, this);
-            } catch(Exception e) {
-                final Connection connection = con.getChannelContext().getConnection();
-                logger.log(Level.WARNING, MessagesMessages.WSTCP_0022_ERROR_WS_EXECUTION(connection.getHost(), connection.getPort()), e);
-                if (!isClosed) {
-                    writeInternalServerError();
-                }
-                return;
-            }
+            packet = head.process(packet, connection, this);
             
             if (isClosed) {
                 return;
@@ -180,11 +154,6 @@ public class TCPAdapter extends Adapter<TCPAdapter.TCPToolkit> {
             }
             connection.setStatus(TCPConstants.ONE_WAY);
             isClosed = true;
-        }
-        
-        private void writeInternalServerError() {
-            logger.log(Level.FINE, MessagesMessages.WSTCP_1095_TCP_ADAPTER_WRITE_INTERNAL_SERVER_ERROR());
-            connection.setStatus(TCPConstants.INTERNAL_SERVER_ERROR);
         }
     };
     

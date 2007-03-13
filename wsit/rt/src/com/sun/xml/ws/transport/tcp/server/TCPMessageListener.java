@@ -23,6 +23,7 @@
 package com.sun.xml.ws.transport.tcp.server;
 
 import com.sun.xml.ws.transport.tcp.util.ChannelContext;
+import com.sun.xml.ws.transport.tcp.util.WSTCPError;
 import java.io.IOException;
 
 /**
@@ -30,4 +31,5 @@ import java.io.IOException;
  */
 public interface TCPMessageListener {
     public void onMessage(ChannelContext channelContext) throws IOException;
+    public void onError(ChannelContext channelContext, WSTCPError error) throws IOException;
 }

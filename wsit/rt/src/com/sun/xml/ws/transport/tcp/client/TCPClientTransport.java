@@ -26,9 +26,12 @@ import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.DistributedPropertySet;
 import com.sun.xml.ws.transport.tcp.io.Connection;
+import com.sun.xml.ws.transport.tcp.io.DataInOutUtils;
 import com.sun.xml.ws.transport.tcp.util.ChannelContext;
 import com.sun.xml.ws.transport.tcp.util.FrameType;
 import com.sun.xml.ws.transport.tcp.util.TCPConstants;
+import com.sun.xml.ws.transport.tcp.util.WSTCPError;
+import com.sun.xml.ws.transport.tcp.util.WSTCPException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -47,6 +50,8 @@ public class TCPClientTransport extends DistributedPropertySet {
     private int status;
     // Request/response content type
     private String contentType;
+    
+    private WSTCPError error;
     
     public TCPClientTransport() {
     }
@@ -74,7 +79,7 @@ public class TCPClientTransport extends DistributedPropertySet {
      * Getting output stream.
      * Making some stream preparation before
      */
-    public OutputStream openOutputStream() {
+    public @NotNull OutputStream openOutputStream() throws WSTCPException {
         connection.setChannelId(channelContext.getChannelId());
         connection.setMessageId(FrameType.MESSAGE);
         channelContext.setContentType(contentType);
@@ -87,13 +92,17 @@ public class TCPClientTransport extends DistributedPropertySet {
      * Getting input stream.
      * Making some stream preparation before
      */
-    public InputStream openInputStream() throws IOException {
+    public @NotNull InputStream openInputStream() throws IOException, WSTCPException {
         connection.prepareForReading();
         inputStream = connection.openInputStream();
         final int messageId = connection.getMessageId();
         status = convertToReplyStatus(messageId);
         if (FrameType.isFrameContainsParams(messageId)) {
             contentType = channelContext.getContentType();
+        }
+        
+        if (status == TCPConstants.ERROR) {
+            error = parseErrorMessagePayload();
         }
         
         return inputStream;
@@ -104,17 +113,36 @@ public class TCPClientTransport extends DistributedPropertySet {
     }
     
     public void close() {
+        error = null;
         // Perform some cleanings
     }
     
-    public void setContentType(final String contentType) {
+    public void setContentType(final @NotNull String contentType) {
         this.contentType = contentType;
     }
     
-    public String getContentType() {
+    public @Nullable String getContentType() {
         return contentType;
     }
     
+    public @Nullable WSTCPError getError() {
+        return error;
+    }
+
+    private @Nullable WSTCPError parseErrorMessagePayload() throws IOException {
+        final int[] params = new int[3];
+        DataInOutUtils.readInts4(inputStream, params, 3);
+        final int errorCode = params[0];
+        final int errorSubCode = params[1];
+        final int errorDescriptionBufferLength = params[2];
+        
+        final byte[] errorDescriptionBuffer = new byte[errorDescriptionBufferLength];
+        DataInOutUtils.readFully(inputStream, errorDescriptionBuffer);
+        
+        String errorDescription = new String(errorDescriptionBuffer, TCPConstants.UTF8);
+        return WSTCPError.createError(errorCode, errorSubCode, errorDescription);
+    }
+
     private int convertToReplyStatus(final int messageId) {
         if (messageId == FrameType.NULL) {
             return TCPConstants.ONE_WAY;

@@ -30,6 +30,7 @@ import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.transport.tcp.util.ChannelContext;
 import com.sun.xml.ws.transport.tcp.util.TCPConstants;
+import com.sun.xml.ws.transport.tcp.util.WSTCPException;
 import java.io.IOException;
 
 /**
@@ -65,7 +66,7 @@ public final class TCPServiceChannelWSAdapter extends TCPAdapter {
         }
         
         @Override
-        protected void handle(@NotNull final TCPConnectionImpl con) throws IOException {
+        protected void handle(@NotNull final TCPConnectionImpl con) throws IOException, WSTCPException {
             serviceChannelWSSatellite.setConnectionContext(con.getChannelContext());
             super.handle(con);
         }

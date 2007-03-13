@@ -30,6 +30,8 @@ import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
 import com.sun.xml.ws.transport.tcp.servicechannel.ServiceChannelCreator;
 import com.sun.xml.ws.transport.tcp.util.ChannelContext;
 import com.sun.xml.ws.transport.tcp.util.TCPConstants;
+import com.sun.xml.ws.transport.tcp.util.WSTCPError;
+import com.sun.xml.ws.transport.tcp.util.WSTCPException;
 import com.sun.xml.ws.transport.tcp.util.WSTCPURI;
 import com.sun.xml.ws.transport.tcp.servicechannel.ServiceChannelWSImpl;
 import com.sun.xml.ws.util.exception.JAXWSExceptionBase;
@@ -129,6 +131,15 @@ public final class WSTCPDelegate implements WSTCPAdapterRegistry, TCPMessageList
     }
     
     /**
+     * Implementation of TCPMessageListener.onError
+     * method is called if error occured during frame processing
+     * on upper level
+     */
+    public void onError(ChannelContext channelContext, WSTCPError error) throws IOException {
+        sendErrorResponse(channelContext, error);
+    }
+    
+    /**
      * Implementation of TCPMessageListener.onMessage
      * method is called once request message come
      */
@@ -150,29 +161,35 @@ public final class WSTCPDelegate implements WSTCPAdapterRegistry, TCPMessageList
             if (target != null) {
                 target.handle(channelContext);
             } else {
-                TCPAdapter.sendErrorResponse(channelContext, TCPConstants.WS_NOT_FOUND_ERROR, MessagesMessages.WSTCP_0003_TARGET_WS_NOT_FOUND(channelContext.getTargetWSURI()));
+                TCPAdapter.sendErrorResponse(channelContext,
+                        WSTCPError.createNonCriticalError(TCPConstants.UNKNOWN_CHANNEL_ID,
+                        MessagesMessages.WSTCP_0026_UNKNOWN_CHANNEL_ID(channelContext.getChannelId())));
             }
             
+        } catch (WSTCPException e) {
+            final Connection connection = channelContext.getConnection();
+            logger.log(Level.SEVERE, MessagesMessages.WSTCP_0023_TARGET_EXEC_ERROR(connection.getHost(), connection.getPort()), e);
+            
+            sendErrorResponse(channelContext, e.getError());
+            
+            if (e.getError().isCritical()) {
+                channelContext.getConnectionSession().close();
+            }
         } catch (JAXWSExceptionBase e) {
             final Connection connection = channelContext.getConnection();
             logger.log(Level.SEVERE, MessagesMessages.WSTCP_0023_TARGET_EXEC_ERROR(connection.getHost(), connection.getPort()), e);
-            
-            try {
-                TCPAdapter.sendErrorResponse(channelContext, TCPConstants.INTERNAL_SERVER_ERROR, MessagesMessages.WSTCP_0004_CHECK_SERVER_LOG());
-            } catch (Throwable ex) {
-                logger.log(Level.SEVERE, MessagesMessages.WSTCP_0002_SERVER_ERROR_MESSAGE_SENDING_FAILED(), ex);
-            }
+
+            sendErrorResponse(channelContext, WSTCPError.createNonCriticalError(TCPConstants.GENERAL_CHANNEL_ERROR,
+                    MessagesMessages.WSTCP_0025_GENERAL_CHANNEL_ERROR(MessagesMessages.WSTCP_0004_CHECK_SERVER_LOG())));
         } catch (IOException e) {
-            throw e;
-        } catch (Throwable e) {
             final Connection connection = channelContext.getConnection();
             logger.log(Level.SEVERE, MessagesMessages.WSTCP_0023_TARGET_EXEC_ERROR(connection.getHost(), connection.getPort()), e);
-            
-            try {
-                TCPAdapter.sendErrorResponse(channelContext, TCPConstants.INTERNAL_SERVER_ERROR, MessagesMessages.WSTCP_0004_CHECK_SERVER_LOG());
-            } catch (Throwable ex) {
-                logger.log(Level.SEVERE, MessagesMessages.WSTCP_0002_SERVER_ERROR_MESSAGE_SENDING_FAILED(), ex);
-            }
+            throw e;
+        } catch (Exception e) {
+            final Connection connection = channelContext.getConnection();
+            logger.log(Level.SEVERE, MessagesMessages.WSTCP_0023_TARGET_EXEC_ERROR(connection.getHost(), connection.getPort()), e);
+            sendErrorResponse(channelContext, WSTCPError.createNonCriticalError(TCPConstants.GENERAL_CHANNEL_ERROR,
+                    MessagesMessages.WSTCP_0025_GENERAL_CHANNEL_ERROR(MessagesMessages.WSTCP_0004_CHECK_SERVER_LOG())));
         } finally {
             if (logger.isLoggable(Level.FINE)) {
                 logger.log(Level.FINE, MessagesMessages.WSTCP_1104_WSTCP_DELEGATE_ON_MESSAGE_COMPLETED());
@@ -195,6 +212,15 @@ public final class WSTCPDelegate implements WSTCPAdapterRegistry, TCPMessageList
         }
         
         return serviceChannelWSAdapter;
+    }
+    
+    private void sendErrorResponse(ChannelContext channelContext, WSTCPError error) throws IOException {
+        try {
+            TCPAdapter.sendErrorResponse(channelContext, error);
+        } catch (Throwable e) {
+            logger.log(Level.SEVERE, MessagesMessages.WSTCP_0002_SERVER_ERROR_MESSAGE_SENDING_FAILED(), e);
+            throw new IOException(e.getClass().getName() + ": " + e.getMessage());
+        }
     }
     
     private synchronized void registerServiceChannelWSAdapter() throws Exception {

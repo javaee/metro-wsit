@@ -22,11 +22,13 @@
 
 package com.sun.xml.ws.transport.tcp.server;
 
+import java.io.IOException;
+
 /**
  * @author Alexey Stashok
  */
 public interface WSTCPConnector {
-    public void listen() throws Exception;
+    public void listen() throws IOException;
     public String getHost();
     public void setHost(String host);
     public int getPort();

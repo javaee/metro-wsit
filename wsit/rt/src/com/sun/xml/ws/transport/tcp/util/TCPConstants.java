@@ -28,21 +28,44 @@ import javax.xml.namespace.QName;
  * @author Alexey Stashok
  */
 public final class TCPConstants {
+    public static final String UTF8 = "UTF-8";
+    
     public static final String CHARSET_PROPERTY = "charset";
     public static final String CONTENT_TYPE_PROPERTY = "Content-Type";
     public static final String SOAP_ACTION_PROPERTY = "action";
     public static final String TRANSPORT_SOAP_ACTION_PROPERTY = "SOAPAction";
-    public static final String ERROR_CODE_PROPERTY = "ErrorCode";
-    public static final String ERROR_DESCRIPTION_PROPERTY = "ErrorDescription";
     
     public static final int OK = 0;
-    public static final int ONE_WAY = 202;
-    public static final int ERROR = 400;
+    public static final int ONE_WAY = 1;
+    public static final int ERROR = 2;
     
-    // Values should be synchronized with localized messages description file
+    // Max string length for SOAP/TCP content parameter value
+    public static final int MAX_PARAM_VALUE_LENGTH = 1024;
+    
+    // Error codes
+    public static final int CRITICAL_ERROR = 0;
+    public static final int NON_CRITICAL_ERROR = 1;
+
+    //Critical error sub-codes
+    public static final int MALFORMED_FRAME_ERROR = 0;
+    public static final int UNKNOWN_MESSAGE_ID = 1;
+    public static final int INCORRECT_MESSAGE_FRAME_SEQ = 2;
+    public static final int INTERLEAVED_MESSAGE_FRAME_SEQ = 3;
+    public static final int UNKNOWN_REQUEST_RESPONSE_PATTERN = 4;
+    
+    //Non-critical error sub-codes
+    public static final int GENERAL_CHANNEL_ERROR = 0;
+    public static final int UNKNOWN_CHANNEL_ID = 1;
+    public static final int UNKNOWN_CONTENT_ID = 2;
+    public static final int UNKNOWN_PARAMETER_ID = 3;
+
+    //ConnectionManagement Service error codes
     public static final int WS_NOT_FOUND_ERROR = 1;
-    public static final int INTERNAL_SERVER_ERROR = 2;
+    public static final int TOO_MANY_SESSIONS = 2;
+    public static final int TOO_MANY_CHANNELS = 3;
+    public static final int TOO_MANY_CHANNELS_FOR_SESSION = 4;
     
+
     /** ByteBuffer settings for FramedBufferInputStream and FramedBufferOutputStream */
     public static final int DEFAULT_FRAME_SIZE = 4096;
     public static final boolean DEFAULT_USE_DIRECT_BUFFER = false;
@@ -78,4 +101,5 @@ public final class TCPConstants {
     /** Service Channel web service: Service and Port names*/
     public static final QName SERVICE_CHANNEL_WS_NAME = new QName("http://servicechannel.tcp.transport.ws.xml.sun.com/", "ServiceChannelWSImplService");
     public static final QName SERVICE_CHANNEL_WS_PORT_NAME = new QName("http://servicechannel.tcp.transport.ws.xml.sun.com/", "ServiceChannelWSImplPort");
+
 }

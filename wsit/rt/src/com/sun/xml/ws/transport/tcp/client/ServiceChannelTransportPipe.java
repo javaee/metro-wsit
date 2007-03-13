@@ -117,11 +117,10 @@ public final class ServiceChannelTransportPipe extends TCPTransportPipe {
                 throw new WebServiceException(MessagesMessages.WSTCP_0016_ERROR_WS_EXECUTION_ON_SERVER(clientTransport.getContentType()));
             }
         } catch(WebServiceException wex) {
+            abortSession(channelContext);
             throw wex;
         } catch(Exception ex) {
-            if (channelContext != null) {
-                wsConnectionManager.abortConnection(channelContext.getConnectionSession());
-            }
+            abortSession(channelContext);
             clientTransport.setup(null);
             
             logger.log(Level.SEVERE, MessagesMessages.WSTCP_0017_ERROR_WS_EXECUTION_ON_CLIENT(), ex);

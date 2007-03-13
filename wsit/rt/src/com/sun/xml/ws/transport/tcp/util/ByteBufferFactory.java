@@ -91,5 +91,5 @@ public final class ByteBufferFactory{
     public synchronized static ByteBuffer allocateView(final boolean direct){
         return allocateView(defaultCapacity, direct);
     }
-     
+    
 }

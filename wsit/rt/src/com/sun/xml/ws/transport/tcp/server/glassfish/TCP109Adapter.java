@@ -28,6 +28,7 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.transport.tcp.util.ChannelContext;
 import com.sun.xml.ws.transport.tcp.server.TCPAdapter;
+import com.sun.xml.ws.transport.tcp.util.WSTCPException;
 import java.io.IOException;
 
 /**
@@ -58,7 +59,7 @@ public final class TCP109Adapter extends TCPAdapter {
     
     
     @Override
-    public void handle(@NotNull final ChannelContext channelContext) throws IOException {
+    public void handle(@NotNull final ChannelContext channelContext) throws IOException, WSTCPException {
         EjbRuntimeEndpointInfo ejbRuntimeEndpointInfo = null;
         
         if (isEJB) {

@@ -29,10 +29,7 @@ import com.sun.xml.ws.transport.tcp.util.TCPConstants;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
 import java.nio.channels.SocketChannel;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,14 +38,9 @@ import java.util.Map;
  */
 public final class FramedMessageOutputStream extends OutputStream implements LifeCycle {
     private static final int HEADER_BUFFER_SIZE = 10;
-    private static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
-    
     private boolean useDirectBuffer;
     
     private ByteBuffer outputBuffer;
-    
-    // Encoder for UTF-8 String serializing
-    private final CharsetEncoder encoder = UTF8_CHARSET.newEncoder();
     
     private SocketChannel socketChannel;
     private int frameNumber;
@@ -137,9 +129,7 @@ public final class FramedMessageOutputStream extends OutputStream implements Lif
     
     public void write(final int data) throws IOException {
         if (!outputBuffer.hasRemaining()) {
-            outputBuffer.flip();
-            flushBuffer();
-            outputBuffer.compact();
+            flushFrame();
         }
         
         outputBuffer.put((byte) data);
@@ -152,9 +142,7 @@ public final class FramedMessageOutputStream extends OutputStream implements Lif
             size -= bytesToWrite;
             offset += bytesToWrite;
             if (!outputBuffer.hasRemaining() && size > 0) {
-                outputBuffer.flip();
-                flushBuffer();
-                outputBuffer.compact();
+                flushFrame();
             }
         }
     }
@@ -241,8 +229,9 @@ public final class FramedMessageOutputStream extends OutputStream implements Lif
         //@TODO improve string serialization
         for(Map.Entry<Integer, String> entry : contentProps.entrySet()) {
             final String value = entry.getValue();
-            DataInOutUtils.writeInts4(headerParamsBuffer, entry.getKey(), value.length());
-            writeUTFWithoutLengthPrefix(headerParamsBuffer, value);
+            byte[] valueBytes = value.getBytes(TCPConstants.UTF8);
+            DataInOutUtils.writeInts4(headerParamsBuffer, entry.getKey(), valueBytes.length);
+            headerParamsBuffer.put(valueBytes);
         }
         
         headerParamsBuffer.flip();
@@ -255,11 +244,6 @@ public final class FramedMessageOutputStream extends OutputStream implements Lif
         frameWithParams[3] = frameWithoutParams[2] = outputBuffer;
     }
     
-    public void writeUTFWithoutLengthPrefix(ByteBuffer bb, String s) {
-        encoder.reset();
-        encoder.encode(CharBuffer.wrap(s), bb, true);
-        encoder.flush(bb);
-    }
     
     public void reset() {
         outputBuffer.clear();
@@ -282,5 +266,11 @@ public final class FramedMessageOutputStream extends OutputStream implements Lif
     }
     
     public void close() {
+    }
+    
+    private void flushFrame() throws IOException {
+        outputBuffer.flip();
+        flushBuffer();
+        outputBuffer.compact();
     }
 }

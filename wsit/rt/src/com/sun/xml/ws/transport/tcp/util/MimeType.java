@@ -57,8 +57,6 @@ public final class MimeType {
     public static final MimeType MTOM11 = new MimeType("multipart/related", new HashMap<String, String>());
     public static final MimeType MTOM12 = new MimeType("multipart/related", new HashMap<String, String>());
     
-    public static final MimeType ERROR = new MimeType("error/" + TCPConstants.PROTOCOL_SCHEMA, Collections.<String, String>emptyMap());
-    
     static {
         MTOM11.getEmbeddedParams().put("start-info", "\"text/xml\"");
         MTOM11.getEmbeddedParams().put("type", "\"application/xop+xml\"");
@@ -74,7 +72,6 @@ public final class MimeType {
         mimeName2mime.put(FAST_INFOSET_STATEFUL_SOAP11.getMimeType(), Collections.singletonList(FAST_INFOSET_STATEFUL_SOAP11));
         mimeName2mime.put(FAST_INFOSET_STATEFUL_SOAP12.getMimeType(), Collections.singletonList(FAST_INFOSET_STATEFUL_SOAP12));
         mimeName2mime.put(MTOM11.getMimeType(), Arrays.asList(MTOM11, MTOM12));
-        mimeName2mime.put(ERROR.getMimeType(), Collections.singletonList(ERROR));
     }
     
     private String mimeType;

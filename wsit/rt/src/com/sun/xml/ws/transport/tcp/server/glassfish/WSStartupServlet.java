@@ -29,15 +29,12 @@ import com.sun.xml.ws.transport.tcp.server.TCPAdapter;
 import com.sun.xml.ws.transport.tcp.server.TCPContext;
 import com.sun.xml.ws.transport.tcp.server.TCPResourceLoader;
 import com.sun.xml.ws.transport.tcp.server.TCPServletContext;
-import com.sun.xml.ws.transport.tcp.server.WSTCPException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.naming.InitialContext;
-import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextAttributeEvent;
 import javax.servlet.ServletContextAttributeListener;
@@ -86,7 +83,7 @@ public final class WSStartupServlet extends HttpServlet
             
             transportModule = (WSTCPLifeCycleModule) initialContext.lookup("TCPLifeCycle");
             if (transportModule == null) {
-                throw new WSTCPException(MessagesMessages.WSTCP_0007_TRANSPORT_MODULE_NOT_REGISTERED());
+                throw new IllegalStateException(MessagesMessages.WSTCP_0007_TRANSPORT_MODULE_NOT_REGISTERED());
             }
             
             final DeploymentDescriptorParser<TCPAdapter> parser = new DeploymentDescriptorParser<TCPAdapter>(
@@ -99,7 +96,7 @@ public final class WSStartupServlet extends HttpServlet
             transportModule.register(servletContext.getContextPath(), adapters);
         } catch (Exception e) {
             logger.log(Level.SEVERE, e.getMessage(), e);
-            throw new WSTCPException("listener.parsingFailed", e);
+            throw new IllegalStateException("listener.parsingFailed", e);
         }
     }
     

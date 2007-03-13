@@ -65,29 +65,23 @@ public final class WSTCP {
         return parser.parse(sunJaxWsXml.toExternalForm(), sunJaxWsXml.openStream());
     }
     
-    public @NotNull WSTCPConnector initialize() {
-        try {
-            final List<TCPAdapter> adapters = parseDeploymentDescriptor();
-            delegate = new WSTCPDelegate();
-            delegate.registerAdapters(contextPath, adapters);
-            
-            final TCPAdapter adapter = adapters.get(0);
-            final URI uri = adapter.getEndpoint().getPort().getAddress().getURI();
-
-            final WSTCPURI tcpURI = WSTCPURI.parse(uri);
-            
-            final WSTCPConnector connector = new GrizzlyTCPConnector(tcpURI.host,
-                    tcpURI.port, delegate);
-            connector.listen();
-            return connector;
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, e.getMessage(), e);
-            throw new WSTCPException("listener.parsingFailed", e);
-        }
+    public @NotNull WSTCPConnector initialize() throws IOException {
+        final List<TCPAdapter> adapters = parseDeploymentDescriptor();
+        delegate = new WSTCPDelegate();
+        delegate.registerAdapters(contextPath, adapters);
         
+        final TCPAdapter adapter = adapters.get(0);
+        final URI uri = adapter.getEndpoint().getPort().getAddress().getURI();
+        
+        final WSTCPURI tcpURI = WSTCPURI.parse(uri);
+        
+        final WSTCPConnector connector = new GrizzlyTCPConnector(tcpURI.host,
+                tcpURI.port, delegate);
+        connector.listen();
+        return connector;
     }
     
-    public void process() {
+    public void process() throws IOException {
         connector = initialize();
     }
     
@@ -109,9 +103,9 @@ public final class WSTCP {
         final TCPContext context = new TCPStandaloneContext(classloader);
         
         final WSTCP wsTCP = new WSTCP(context, classloader, contextPath);
-        wsTCP.process();
         
         try {
+            wsTCP.process();
             System.out.println(MessagesMessages.STANDALONE_EXIT());
             System.in.read();
         } catch (Exception e) {

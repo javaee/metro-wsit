@@ -24,12 +24,14 @@ package com.sun.xml.ws.transport.tcp.server;
 
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.transport.tcp.io.Connection;
+import com.sun.xml.ws.transport.tcp.io.DataInOutUtils;
 import com.sun.xml.ws.transport.tcp.util.ChannelContext;
-import com.sun.xml.ws.transport.tcp.util.ContentType;
 import com.sun.xml.ws.transport.tcp.util.FrameType;
 import com.sun.xml.ws.transport.tcp.util.TCPConstants;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.server.WebServiceContextDelegate;
+import com.sun.xml.ws.transport.tcp.util.WSTCPError;
+import com.sun.xml.ws.transport.tcp.util.WSTCPException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -56,13 +58,13 @@ public class TCPConnectionImpl implements WebServiceContextDelegate {
         this.connection = channelContext.getConnection();
     }
     
-    public InputStream openInput() throws IOException {
+    public InputStream openInput() throws IOException, WSTCPException {
         inputStream = connection.openInputStream();
         contentType = channelContext.getContentType();
         return inputStream;
     }
     
-    public OutputStream openOutput() {
+    public OutputStream openOutput() throws WSTCPException {
         try {
             setMessageHeaders();
         } catch (IOException ex) {
@@ -88,7 +90,7 @@ public class TCPConnectionImpl implements WebServiceContextDelegate {
         this.contentType = contentType;
     }
     
-    public void flush() throws IOException {
+    public void flush() throws IOException, WSTCPException {
         if (outputStream == null) {
             setMessageHeaders();
             outputStream = connection.openOutputStream();
@@ -113,13 +115,22 @@ public class TCPConnectionImpl implements WebServiceContextDelegate {
     public @NotNull String getEPRAddress(@NotNull final Packet request, @NotNull final WSEndpoint endpoint) {
         return channelContext.getTargetWSURI().toString();
     }
-
-    public String getWSDLAddress(@NotNull final Packet request, 
+    
+    public String getWSDLAddress(@NotNull final Packet request,
             @NotNull final WSEndpoint endpoint) {
         return null;
     }
     
-    private void setMessageHeaders() throws IOException {
+    public void sendErrorMessage(WSTCPError message) throws IOException, WSTCPException {
+        setStatus(TCPConstants.ERROR);
+        OutputStream output = openOutput();
+        String description = message.getDescription();
+        DataInOutUtils.writeInts4(output, message.getCode(), message.getSubCode(), description.length());
+        output.write(description.getBytes(TCPConstants.UTF8));
+        flush();
+    }
+
+    private void setMessageHeaders() throws IOException, WSTCPException {
         if (!isHeaderSerialized) {
             isHeaderSerialized = true;
             

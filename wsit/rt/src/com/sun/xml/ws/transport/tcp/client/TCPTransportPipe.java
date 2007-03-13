@@ -31,6 +31,7 @@ import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.client.ClientTransportException;
 import com.sun.xml.ws.transport.tcp.util.ChannelContext;
 import com.sun.xml.ws.transport.tcp.util.VersionMismatchException;
+import com.sun.xml.ws.transport.tcp.util.WSTCPException;
 import com.sun.xml.ws.transport.tcp.util.WSTCPURI;
 import com.sun.xml.ws.transport.tcp.servicechannel.ServiceChannelException;
 import java.io.IOException;
@@ -137,25 +138,37 @@ public class TCPTransportPipe implements Pipe {
                     return reply;
                 } else {
                     if (logger.isLoggable(Level.FINE)) {
-                        logger.log(Level.SEVERE, MessagesMessages.WSTCP_0016_ERROR_WS_EXECUTION_ON_SERVER(clientTransport.getContentType()));
+                        logger.log(Level.SEVERE, MessagesMessages.WSTCP_0016_ERROR_WS_EXECUTION_ON_SERVER(clientTransport.getError()));
                     }
-                    throw new WebServiceException(MessagesMessages.WSTCP_0016_ERROR_WS_EXECUTION_ON_SERVER(clientTransport.getContentType()));
+                    throw new WSTCPException(clientTransport.getError());
                 }
             } catch(ClientTransportException e) {
-                prepareRetry(channelContext, retryNum, e);
+                abortSession(channelContext);
                 failure = e;
+            } catch(WSTCPException e) {
+                if (e.getError().isCritical()) {
+                    abortSession(channelContext);
+                } else {
+                    releaseSession(channelContext);
+                }
+                failure = new WebServiceException(MessagesMessages.WSTCP_0016_ERROR_WS_EXECUTION_ON_SERVER(e.getError()), e);
             } catch(IOException e) {
-                prepareRetry(channelContext, retryNum, e);
+                abortSession(channelContext);
                 failure = new WebServiceException(MessagesMessages.WSTCP_0017_ERROR_WS_EXECUTION_ON_CLIENT(), e);
             } catch(ServiceChannelException e) {
+                releaseSession(channelContext);
                 retryNum = TCPConstants.CLIENT_MAX_FAIL_TRIES + 1;
                 failure = new WebServiceException(MessagesMessages.WSTCP_0016_ERROR_WS_EXECUTION_ON_SERVER(e.getFaultInfo().getId() + ":" + e.getMessage()), e);
             } catch(Exception e) {
+                abortSession(channelContext);
                 retryNum = TCPConstants.CLIENT_MAX_FAIL_TRIES + 1;
                 failure = new WebServiceException(MessagesMessages.WSTCP_0017_ERROR_WS_EXECUTION_ON_CLIENT(), e);
             }
             
-        } while (failure != null && ++retryNum <= TCPConstants.CLIENT_MAX_FAIL_TRIES);
+            if (logger.isLoggable(Level.FINE) && canRetry(retryNum + 1)) {
+                logger.log(Level.FINE, MessagesMessages.WSTCP_0012_SEND_RETRY(retryNum), failure);
+            }
+        } while (canRetry(++retryNum));
         
         assert failure != null;
         logger.log(Level.SEVERE, MessagesMessages.WSTCP_0001_MESSAGE_PROCESS_FAILED(), failure);
@@ -166,13 +179,18 @@ public class TCPTransportPipe implements Pipe {
         String soapActionTransportHeader = getSOAPAction(ct.getSOAPActionHeader(), packet);
         if (soapActionTransportHeader != null) {
             channelContext.getConnection().setContentProperty(ChannelContext.getStaticParameterId(TCPConstants.TRANSPORT_SOAP_ACTION_PROPERTY), soapActionTransportHeader);
-        }        
+        }
     }
-
-    private void prepareRetry(final ChannelContext channelContext, final int retryNum, final Exception e) {
-        logger.log(Level.FINE, MessagesMessages.WSTCP_0012_SEND_RETRY(retryNum), e);
+    
+    protected void abortSession(final ChannelContext channelContext) {
         if (channelContext != null) {
             WSConnectionManager.getInstance().abortConnection(channelContext.getConnectionSession());
+        }
+    }
+    
+    protected void releaseSession(final ChannelContext channelContext) {
+        if (channelContext != null) {
+            WSConnectionManager.getInstance().freeConnection(channelContext.getConnectionSession());
         }
     }
     
@@ -204,5 +222,9 @@ public class TCPTransportPipe implements Pipe {
         } else {
             return soapAction;
         }
-    }    
+    }
+    
+    private static boolean canRetry(int retryNum) {
+        return retryNum <= TCPConstants.CLIENT_MAX_FAIL_TRIES;
+    }
 }

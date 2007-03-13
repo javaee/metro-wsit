@@ -25,6 +25,8 @@ package com.sun.xml.ws.transport.tcp.server;
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.transport.tcp.io.Connection;
+import com.sun.xml.ws.transport.tcp.util.ChannelSettings;
+import com.sun.xml.ws.transport.tcp.util.MimeType;
 import com.sun.xml.ws.transport.tcp.util.SessionCloseListener;
 import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
 import com.sun.xml.ws.transport.tcp.util.ChannelContext;
@@ -33,6 +35,7 @@ import com.sun.xml.ws.transport.tcp.util.TCPConstants;
 import com.sun.xml.ws.transport.tcp.util.Version;
 import com.sun.xml.ws.transport.tcp.util.VersionController;
 import com.sun.xml.ws.transport.tcp.io.DataInOutUtils;
+import com.sun.xml.ws.transport.tcp.util.WSTCPError;
 import com.sun.xml.ws.transport.tcp.wsit.ConnectionManagementSettings;
 import com.sun.xml.ws.transport.tcp.connectioncache.spi.transport.InboundConnectionCache;
 import com.sun.xml.ws.transport.tcp.connectioncache.spi.transport.ConnectionCacheFactory;
@@ -41,6 +44,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -66,7 +70,7 @@ public final class IncomeMessageProcessor implements SessionCloseListener {
     
     // Cache for inbound connections (orb). Initialized on first SOAP/TCP request
     private volatile InboundConnectionCache<ServerConnectionSession> connectionCache;
-
+    
     private static Map<Integer, IncomeMessageProcessor> portMessageProcessors =
             new HashMap<Integer, IncomeMessageProcessor>(1);
     
@@ -135,7 +139,15 @@ public final class IncomeMessageProcessor implements SessionCloseListener {
                 final int channelId = connection.getChannelId();
                 final ChannelContext channelContext = connectionSession.findWSServiceContextByChannelId(channelId);
                 
-                listener.onMessage(channelContext);
+                if (channelContext != null) {
+                    listener.onMessage(channelContext);
+                } else {
+                    // Create fake channel context for received channel-id and session
+                    ChannelContext fakeChannelContext = createFakeChannelContext(channelId, connectionSession);
+                    // Notify error on channel context
+                    listener.onError(fakeChannelContext, WSTCPError.createNonCriticalError(TCPConstants.UNKNOWN_CHANNEL_ID,
+                            MessagesMessages.WSTCP_0026_UNKNOWN_CHANNEL_ID(channelId)));
+                }
             } while(messageBuffer.hasRemaining());
         } finally {
             offerConnectionSession(connectionSession);
@@ -222,10 +234,10 @@ public final class IncomeMessageProcessor implements SessionCloseListener {
                 clientFramingVersion, clientConnectionManagementVersion);
         
         final OutputStream outputStream = connection.openOutputStream();
-
-        final Version framingVersion = isSupported ? clientFramingVersion : 
+        
+        final Version framingVersion = isSupported ? clientFramingVersion :
             versionController.getClosestSupportedFramingVersion(clientFramingVersion);
-        final Version connectionManagementVersion = isSupported ? clientConnectionManagementVersion : 
+        final Version connectionManagementVersion = isSupported ? clientConnectionManagementVersion :
             versionController.getClosestSupportedConnectionManagementVersion(clientConnectionManagementVersion);
         
         DataInOutUtils.writeInts4(outputStream,
@@ -280,5 +292,12 @@ public final class IncomeMessageProcessor implements SessionCloseListener {
         }
     }
     
-    
+    /**
+     * Method creates fake channel context for defined channel-id and ConnectionSession
+     * Normally channel context should be created only by Connection Management service
+     */
+    private ChannelContext createFakeChannelContext(int channelId, @NotNull ConnectionSession connectionSession) {
+        return new ChannelContext(connectionSession, new ChannelSettings(Collections.<MimeType>emptyList(),
+                Collections.<String>emptyList(), channelId, null, null));
+    }
 }

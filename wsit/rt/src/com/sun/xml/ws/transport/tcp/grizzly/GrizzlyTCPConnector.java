@@ -28,6 +28,7 @@ import com.sun.xml.ws.transport.tcp.util.TCPConstants;
 import com.sun.xml.ws.transport.tcp.server.IncomeMessageProcessor;
 import com.sun.xml.ws.transport.tcp.server.TCPMessageListener;
 import com.sun.xml.ws.transport.tcp.server.WSTCPConnector;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Properties;
 
@@ -59,7 +60,7 @@ public class GrizzlyTCPConnector implements WSTCPConnector {
         this.properties = properties;
     }
     
-    public void listen() throws Exception {
+    public void listen() throws IOException {
         if (isPortUnificationMode) {
             listenOnUnifiedPort();
         } else {
@@ -67,7 +68,7 @@ public class GrizzlyTCPConnector implements WSTCPConnector {
         }
     }
     
-    public void listenOnNewPort() throws Exception {
+    public void listenOnNewPort() throws IOException {
         try {
             IncomeMessageProcessor.registerListener(port, listener, properties);
             
@@ -79,9 +80,12 @@ public class GrizzlyTCPConnector implements WSTCPConnector {
             selectorThread.setBufferSize(TCPConstants.DEFAULT_FRAME_SIZE);
             selectorThread.initEndpoint();
             selectorThread.start();
-        } catch (Exception ex) {
+        } catch (IOException e) {
             close();
-            throw ex;
+            throw e;
+        } catch (InstantiationException e) {
+            close();
+            throw new IOException(e.getClass().getName() + ": " + e.getMessage());
         }
     }
     

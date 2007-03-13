@@ -51,14 +51,11 @@ public final class ChannelContext implements WSTCPFastInfosetStreamReaderRecycla
         staticParamsEncodingMap.put(TCPConstants.CHARSET_PROPERTY, 0);
         staticParamsEncodingMap.put(TCPConstants.SOAP_ACTION_PROPERTY, 1);
         staticParamsEncodingMap.put(TCPConstants.TRANSPORT_SOAP_ACTION_PROPERTY, 2);
-        staticParamsEncodingMap.put(TCPConstants.ERROR_CODE_PROPERTY, 3);
-        staticParamsEncodingMap.put(TCPConstants.ERROR_DESCRIPTION_PROPERTY, 4);
         
         staticMimeTypeEncodingMap.put(MimeType.SOAP11, 0);   //default mime type for soap1.1
         staticMimeTypeEncodingMap.put(MimeType.SOAP12, 1);   //default mime type for soap1.2
         staticMimeTypeEncodingMap.put(MimeType.FAST_INFOSET_SOAP11, 2);   //default mime type for stateless FI 1.1
         staticMimeTypeEncodingMap.put(MimeType.FAST_INFOSET_SOAP12, 3);   //default mime type for stateless FI 1.2
-        staticMimeTypeEncodingMap.put(MimeType.ERROR, 4);    //mime type for error messages
         
         for(Map.Entry<MimeType, Integer> entry : staticMimeTypeEncodingMap.entrySet()) staticMimeTypeDecodingMap.put(entry.getValue(), entry.getKey());
         for(Map.Entry<String, Integer> entry : staticParamsEncodingMap.entrySet()) staticParamsDecodingMap.put(entry.getValue(), entry.getKey());
@@ -155,7 +152,7 @@ public final class ChannelContext implements WSTCPFastInfosetStreamReaderRecycla
     /**
      * Sets message's content type to TCP protocol specific representation
      */
-    public void setContentType(@NotNull final String contentTypeS) {
+    public void setContentType(@NotNull final String contentTypeS) throws WSTCPException {
         Connection connection = connectionSession.getConnection();
         if (logger.isLoggable(Level.FINEST)) {
             logger.log(Level.FINEST, MessagesMessages.WSTCP_1120_CHANNEL_CONTEXT_ENCODE_CT(contentTypeS));
@@ -169,7 +166,8 @@ public final class ChannelContext implements WSTCPFastInfosetStreamReaderRecycla
                 mt += staticMimeTypeEncodingMap.size();
         }
         
-        if (mt == null || mt == -1)  throw new IllegalStateException(MessagesMessages.WSTCP_0011_UNKNOWN_CONTENT_TYPE(contentTypeS));
+        if (mt == null || mt == -1)  throw new WSTCPException(WSTCPError.createNonCriticalError(TCPConstants.UNKNOWN_CONTENT_ID,
+                MessagesMessages.WSTCP_0011_UNKNOWN_CONTENT_TYPE(contentTypeS)));
         
         connection.setContentId(mt);
         final Map<String, String> parameters = contentType.getParameters();
@@ -186,7 +184,7 @@ public final class ChannelContext implements WSTCPFastInfosetStreamReaderRecycla
     /**
      * Gets message's content type from TCP protocol specific representation
      */
-    public @NotNull String getContentType() {
+    public @NotNull String getContentType() throws WSTCPException {
         Connection connection = connectionSession.getConnection();
         final int mimeId = connection.getContentId();
         Map<Integer, String> params = connection.getContentProperties();
@@ -199,7 +197,9 @@ public final class ChannelContext implements WSTCPFastInfosetStreamReaderRecycla
             mimeType = channelSettings.getNegotiatedMimeTypes().get(mimeId - staticMimeTypeDecodingMap.size());
         }
         
-        if (mimeType == null) throw new IllegalStateException(MessagesMessages.WSTCP_0011_UNKNOWN_CONTENT_TYPE(mimeId));
+        if (mimeType == null)
+            throw new WSTCPException(WSTCPError.createNonCriticalError(TCPConstants.UNKNOWN_CONTENT_ID,
+                    MessagesMessages.WSTCP_0011_UNKNOWN_CONTENT_TYPE(mimeId)));
         
         String contentTypeStr = mimeType.toString();
         if (params.size() > 0) {
@@ -221,7 +221,7 @@ public final class ChannelContext implements WSTCPFastInfosetStreamReaderRecycla
         return contentTypeStr;
     }
     
-    private int encodeParam(@NotNull final String paramStr) {
+    private int encodeParam(@NotNull final String paramStr) throws WSTCPException {
         Integer paramId = staticParamsEncodingMap.get(paramStr);
         if (paramId == null) {
             paramId = channelSettings.getNegotiatedParams().indexOf(paramStr);
@@ -231,10 +231,11 @@ public final class ChannelContext implements WSTCPFastInfosetStreamReaderRecycla
             return paramId;
         }
         
-        throw new IllegalStateException(MessagesMessages.WSTCP_0010_UNKNOWN_PARAMETER(paramStr));
+        throw new WSTCPException(WSTCPError.createNonCriticalError(TCPConstants.UNKNOWN_PARAMETER_ID,
+                MessagesMessages.WSTCP_0010_UNKNOWN_PARAMETER(paramStr)));
     }
     
-    private @NotNull String decodeParam(final int paramId) {
+    private @NotNull String decodeParam(final int paramId) throws WSTCPException {
         String paramStr = staticParamsDecodingMap.get(paramId);
         if (paramStr == null) {
             paramStr = channelSettings.getNegotiatedParams().get(paramId - staticParamsDecodingMap.size());
@@ -245,7 +246,8 @@ public final class ChannelContext implements WSTCPFastInfosetStreamReaderRecycla
             return paramStr;
         }
         
-        throw new IllegalStateException(MessagesMessages.WSTCP_0010_UNKNOWN_PARAMETER(paramId));
+        throw new WSTCPException(WSTCPError.createNonCriticalError(TCPConstants.UNKNOWN_PARAMETER_ID,
+                MessagesMessages.WSTCP_0010_UNKNOWN_PARAMETER(paramId)));
     }
     
     /**

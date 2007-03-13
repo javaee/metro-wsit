@@ -45,7 +45,7 @@ public final class ContentType {
         return parameters;
     }
     
-    public void parse(final String contentType) {
+    public void parse(final String contentType) throws WSTCPException {
         parameters.clear();
         
         final int mimeDelim = contentType.indexOf(';');
@@ -96,12 +96,13 @@ public final class ContentType {
                     this.mimeType = mime;
                     return;
                 }
-
+                
                 parameters.clear();
             }
         }
         
-        throw new IllegalStateException(MessagesMessages.WSTCP_0011_UNKNOWN_CONTENT_TYPE(contentType));
+        throw new WSTCPException(WSTCPError.createNonCriticalError(TCPConstants.UNKNOWN_CONTENT_ID,
+                MessagesMessages.WSTCP_0011_UNKNOWN_CONTENT_TYPE(contentType)));
     }
     
     public boolean equals(Object o) {

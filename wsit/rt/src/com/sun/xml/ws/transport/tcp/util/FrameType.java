@@ -43,7 +43,6 @@ public final class FrameType {
         typesContainParameters = new HashSet<Integer>();
         typesContainParameters.add(MESSAGE);
         typesContainParameters.add(MESSAGE_START_CHUNK);
-        typesContainParameters.add(ERROR);
     }
     
     public static boolean isFrameContainsParams(final int msgId) {

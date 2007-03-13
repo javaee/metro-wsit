@@ -219,7 +219,7 @@ public final class DataInOutUtils {
         writeInts4(out, values, 0, values.length);
     }
     
-    public static void writeInts4(final OutputStream out, final int[] array, 
+    public static void writeInts4(final OutputStream out, final int[] array,
             final int offset, final int count) throws IOException {
         int shiftValue = 0;
         for(int i=0; i<count - 1; i++) {
@@ -351,5 +351,5 @@ public final class DataInOutUtils {
             }
             bytesRead += count;
         }
-    }    
+    }
 }
