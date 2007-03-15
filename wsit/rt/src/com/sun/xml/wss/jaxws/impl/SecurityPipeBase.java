@@ -166,6 +166,10 @@ public abstract class SecurityPipeBase implements Pipe {
     private final QName optClientSecurity = new QName("http://schemas.sun.com/2006/03/wss/client","DisableStreamingSecurity");
     private final QName disableSPBuffering = new QName("http://schemas.sun.com/2006/03/wss/server","DisablePayloadBuffering");
     private final QName disableCPBuffering = new QName("http://schemas.sun.com/2006/03/wss/client","DisablePayloadBuffering");
+
+    protected boolean disableIncPrefix = false;
+    private final QName disableIncPrefixServer = new QName("http://schemas.sun.com/2006/03/wss/server","DisableInclusivePrefixList");
+    private final QName disableIncPrefixClient = new QName("http://schemas.sun.com/2006/03/wss/client","DisableInclusivePrefixList");
     
     protected static final ArrayList<String> securityPolicyNamespaces ;
     protected static final List<PolicyAssertion> EMPTY_LIST = Collections.emptyList();
@@ -276,6 +280,7 @@ public abstract class SecurityPipeBase implements Pipe {
         pipeConfig = that.pipeConfig;
         transportOptimization = that.transportOptimization;
         optimized = that.optimized;
+        disableIncPrefix = that.disableIncPrefix;
         issuedTokenContextMap = that.issuedTokenContextMap;
         secEnv = that.secEnv;
         isSOAP12 = that.isSOAP12;
@@ -341,7 +346,8 @@ public abstract class SecurityPipeBase implements Pipe {
             JAXBFilterProcessingContext  context = (JAXBFilterProcessingContext)ctx;
             context.setSOAPVersion(soapVersion);
             context.setJAXWSMessage(message, soapVersion);
-            context.isOneWayMessage(message.isOneWay(this.pipeConfig.getWSDLModel()));            
+            context.isOneWayMessage(message.isOneWay(this.pipeConfig.getWSDLModel()));   
+            context.setDisableIncPrefix(disableIncPrefix);
             SecurityAnnotator.secureMessage(context);            
             return context.getJAXWSMessage();
         } catch(XWSSecurityException xwse){
@@ -378,6 +384,7 @@ public abstract class SecurityPipeBase implements Pipe {
     protected Message verifyInboundMessage(Message message, ProcessingContext ctx) throws XWSSecurityException{
         JAXBFilterProcessingContext  context = (JAXBFilterProcessingContext)ctx;
         context.setDisablePayloadBuffering(disablePayloadBuffer);
+        context.setDisableIncPrefix(disableIncPrefix);
         //  context.setJAXWSMessage(message, soapVersion);
         if(debug){
             try {
@@ -624,7 +631,9 @@ public abstract class SecurityPipeBase implements Pipe {
                 if(endpointPolicy.contains(disableCPBuffering) || endpointPolicy.contains(disableSPBuffering)){
                     disablePayloadBuffer = true;
                 }    
-                
+                if(endpointPolicy.contains(disableIncPrefixServer) || endpointPolicy.contains(disableIncPrefixClient)){
+                    disableIncPrefix = true;
+                }
             }
             
             
