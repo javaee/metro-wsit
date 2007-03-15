@@ -52,13 +52,26 @@ public final class DataInOutUtils {
         return value;
     }
     
-    public static int[] readInts4(final InputStream is, final int[] array, final int count) throws IOException {
+    public static void readInts4(final InputStream is, final int[] array, 
+            final int count) throws IOException {
+        readInts4(is, array, count, 0);
+    }
+
+    public static int readInts4(final InputStream is, final int[] array, 
+            final int count, final int lowValue) throws IOException {
         int value = 0;
         int octet = 0;
         int readInts = 0;
         int shVal = 0;
         int neeble = 0;
-        for(int neebleNum = 0; readInts < count; neebleNum++) {
+        int neebleNum = 0;
+        
+        if (lowValue > 0) {
+            octet = lowValue & 0xF;
+            neebleNum = 1;
+        }
+        
+        for(; readInts < count; neebleNum++) {
             if (neebleNum % 2 == 0) {
                 octet = is.read();
                 if (octet == -1) {
@@ -79,7 +92,58 @@ public final class DataInOutUtils {
             }
         }
         
-        return array;
+        if (neebleNum % 2 != 0) {
+            return 0x80 | (octet & 0xF);
+        }
+
+        return 0;
+    }
+    
+    public static void readInts4(final ByteBuffer buffer, final int[] array, final int count) throws IOException {
+        readInts4(buffer, array, count, 0);
+    }
+    
+    public static int readInts4(final ByteBuffer buffer, final int[] array,
+            final int count, final int lowValue) throws IOException {
+        int value = 0;
+        int octet = 0;
+        int readInts = 0;
+        int shVal = 0;
+        int neeble = 0;
+        int neebleNum = 0;
+        
+        if (lowValue > 0) {
+            octet = lowValue & 0xF;
+            neebleNum = 1;
+        }
+        
+        for(; readInts < count; neebleNum++) {
+            if (neebleNum % 2 == 0) {
+                if (!buffer.hasRemaining()) {
+                    throw new EOFException();
+                }
+                octet = buffer.get();
+                
+                neeble = octet >> 4;
+            } else {
+                neeble = octet & 0xF;
+            }
+            
+            value |= ((neeble & 7) << shVal);
+            if ((neeble & 8) == 0) {
+                array[readInts++] = value;
+                shVal = 0;
+                value = 0;
+            } else {
+                shVal += 3;
+            }
+        }
+        
+        if (neebleNum % 2 != 0) {
+            return 0x80 | (octet & 0xF);
+        }
+
+        return 0;
     }
     
     public static void writeInt4(final OutputStream os, int value) throws IOException {
@@ -165,37 +229,6 @@ public final class DataInOutUtils {
         }
         
         return value;
-    }
-    
-    public static int[] readInts4(final ByteBuffer buffer, final int[] array, final int count) throws IOException {
-        int value = 0;
-        int octet = 0;
-        int readInts = 0;
-        int shVal = 0;
-        int neeble = 0;
-        for(int neebleNum = 0; readInts < count; neebleNum++) {
-            if (neebleNum % 2 == 0) {
-                if (!buffer.hasRemaining()) {
-                    throw new EOFException();
-                }
-                octet = buffer.get();
-                
-                neeble = octet >> 4;
-            } else {
-                neeble = octet & 0xF;
-            }
-            
-            value |= ((neeble & 7) << shVal);
-            if ((neeble & 8) == 0) {
-                array[readInts++] = value;
-                shVal = 0;
-                value = 0;
-            } else {
-                shVal += 3;
-            }
-        }
-        
-        return array;
     }
     
     public static void writeInts4(final ByteBuffer bb, final int ... values) throws IOException {

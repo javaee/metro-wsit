@@ -240,34 +240,37 @@ public final class FramedMessageInputStream extends InputStream implements LifeC
         }
         frameBytesRead = 0;
         isReadingHeader = true;
-        DataInOutUtils.readInts4(this, headerTmpArray, 2);
+        // Read channel-id and message-id
+        int lowNeebleValue = DataInOutUtils.readInts4(this, headerTmpArray, 2, 0);
         channelId = headerTmpArray[0];
         messageId = headerTmpArray[1];
+
         if (FrameType.isFrameContainsParams(messageId)) {  //message types have description
-            readHeaderContentDescription();
+            // Read content-id and number-of-parameters
+            lowNeebleValue = DataInOutUtils.readInts4(this, headerTmpArray, 2, lowNeebleValue);
+            contentId = headerTmpArray[0];
+            final int paramNumber = headerTmpArray[1];
+            for(int i=0; i<paramNumber; i++) {
+                // Read parameter-id and length of parameter-value buffer
+                DataInOutUtils.readInts4(this, headerTmpArray, 2, lowNeebleValue);
+                final int paramId = headerTmpArray[0];
+                final int paramValueLen = headerTmpArray[1];
+                byte[] paramValueBytes = new byte[paramValueLen];
+                // Read parameter-value
+                DataInOutUtils.readFully(this, paramValueBytes);
+                final String paramValue = new String(paramValueBytes, TCPConstants.UTF8);
+                contentProps.put(paramId, paramValue);
+                lowNeebleValue = 0;
+            }
         }
         
+        // Read payload-size
         currentFrameDataSize = DataInOutUtils.readInt8(this);
         isLastFrame = FrameType.isLastFrame(messageId);
         currentFrameDataSize += frameBytesRead;
         isReadingHeader = false;
         if (logger.isLoggable(Level.FINEST)) {
             logger.log(Level.FINEST, MessagesMessages.WSTCP_1061_FRAMED_MESSAGE_IS_READ_HEADER_DONE(channelId, messageId, contentId, contentProps, currentFrameDataSize, isLastFrame));
-        }
-    }
-    
-    private void readHeaderContentDescription() throws IOException {
-        DataInOutUtils.readInts4(this, headerTmpArray, 2);
-        contentId = headerTmpArray[0];
-        final int paramNumber = headerTmpArray[1];
-        for(int i=0; i<paramNumber; i++) {
-            DataInOutUtils.readInts4(this, headerTmpArray, 2);
-            final int paramId = headerTmpArray[0];
-            final int paramValueLen = headerTmpArray[1];
-            byte[] paramValueBytes = new byte[paramValueLen];
-            DataInOutUtils.readFully(this, paramValueBytes);
-            final String paramValue = new String(paramValueBytes, TCPConstants.UTF8);
-            contentProps.put(paramId, paramValue);
         }
     }
     

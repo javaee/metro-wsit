@@ -58,13 +58,8 @@ public final class FramedMessageOutputStream extends OutputStream implements Lif
     private boolean isDirectMode;
     // ByteBuffer for channel_id and message_id, which present in all messages
     private final ByteBuffer headerBuffer;
-    // ByteBuffer for content_id, parameters for first frames only
-    private final ByteBuffer headerParamsBuffer;
-    // ByteBuffer for payload_length
-    private ByteBuffer payloadLengthBuffer;
     
-    private final ByteBuffer[] frameWithParams = new ByteBuffer[4];
-    private final ByteBuffer[] frameWithoutParams = new ByteBuffer[3];
+    private final ByteBuffer[] frame = new ByteBuffer[2];
     
     /**
      * could be useful for debug reasons
@@ -81,17 +76,15 @@ public final class FramedMessageOutputStream extends OutputStream implements Lif
     
     public FramedMessageOutputStream(int frameSize, boolean useDirectBuffer) {
         this.useDirectBuffer = useDirectBuffer;
-        headerBuffer = ByteBufferFactory.allocateView(HEADER_BUFFER_SIZE, useDirectBuffer);
-        headerParamsBuffer = ByteBufferFactory.allocateView(frameSize, useDirectBuffer);
+        headerBuffer = ByteBufferFactory.allocateView(frameSize, useDirectBuffer);
         setFrameSize(frameSize);
     }
     
     public void setFrameSize(final int frameSize) {
         this.frameSize = frameSize;
         payloadlengthLength = (int) Math.ceil(Math.log(frameSize) / Math.log(2));
-        payloadLengthBuffer = ByteBufferFactory.allocateView(payloadlengthLength, useDirectBuffer);
         outputBuffer = ByteBufferFactory.allocateView(frameSize, useDirectBuffer);
-        formFrameBufferArrays();
+        formFrameBufferArray();
     }
     
     public boolean isDirectMode() {
@@ -160,27 +153,60 @@ public final class FramedMessageOutputStream extends OutputStream implements Lif
     }
     
     private void flushBuffer() throws IOException {
-        ByteBuffer[] frameBuffersArray = frameWithoutParams;
-        
         final int payloadLength = outputBuffer.remaining();
         if (!isDirectMode) {
-            int readyBytesToSend = 1 + payloadlengthLength + payloadLength;
-            if (FrameType.isFrameContainsParams(messageId) && frameNumber == 0) {
-                prepareHeaderParams();
-                readyBytesToSend += headerParamsBuffer.remaining();
-                frameBuffersArray = frameWithParams;
+            headerBuffer.clear();
+            // Write channel-id
+            int frameMessageIdHighValue = DataInOutUtils.writeInt4(headerBuffer, channelId, 0, false);
+            int frameMessageIdPosition = headerBuffer.position();
+            boolean isFrameWithParameters = FrameType.isFrameContainsParams(messageId) && frameNumber == 0;
+
+            // Write message-id without counting with possible chunking
+            int highValue = DataInOutUtils.writeInt4(headerBuffer, messageId, frameMessageIdHighValue, !isFrameWithParameters);
+            
+            if (isFrameWithParameters) {
+                // If required - serialize frame content-id, content-parameters
+                // Write content-id
+                highValue = DataInOutUtils.writeInt4(headerBuffer, contentId, highValue, false);
+                
+                final int propsCount = contentProps.size();
+                // Write number-of-parameters
+                highValue = DataInOutUtils.writeInt4(headerBuffer, propsCount, highValue, propsCount == 0);
+                
+                for(Map.Entry<Integer, String> entry : contentProps.entrySet()) {
+                    final String value = entry.getValue();
+                    byte[] valueBytes = value.getBytes(TCPConstants.UTF8);
+                    // Write parameter-id
+                    highValue = DataInOutUtils.writeInt4(headerBuffer, entry.getKey(), highValue, false);
+                    // Write parameter-value buffer length
+                    DataInOutUtils.writeInt4(headerBuffer, valueBytes.length, highValue, true);
+                    // Write parameter-value
+                    headerBuffer.put(valueBytes);
+                    highValue = 0;
+                }
             }
             
-            prepareHeader(isFlushLast && readyBytesToSend <= frameSize);
+            int readyBytesToSend = headerBuffer.position() + payloadlengthLength + payloadLength;
             
-            final int sendingPayloadLength = preparePayloadHeader(readyBytesToSend);
+            if (messageId == FrameType.MESSAGE) {
+                // If message will be chunked - update message-id
+                updateMessageIdIfRequired(frameMessageIdPosition, 
+                        frameMessageIdHighValue, 
+                        isFlushLast && readyBytesToSend <= frameSize);
+            }
+
+            final int sendingPayloadLength = calcPayloadSizeToSend(readyBytesToSend);
+
+            // Write payload-length
+            DataInOutUtils.writeInt8(headerBuffer, sendingPayloadLength);
+            headerBuffer.flip();
             final int payloadLimit = outputBuffer.limit();
             if (sendingPayloadLength < payloadLength) {
                 // check to change for outputBuffer.limit(sendingPayloadLength);
                 outputBuffer.limit(outputBuffer.limit() - (payloadLength - sendingPayloadLength));
             }
             
-            OutputWriter.flushChannel(socketChannel, frameBuffersArray);
+            OutputWriter.flushChannel(socketChannel, frame);
             outputBuffer.limit(payloadLimit);
             sentMessageLength += sendingPayloadLength;
             frameNumber++;
@@ -189,66 +215,52 @@ public final class FramedMessageOutputStream extends OutputStream implements Lif
         }
     }
     
-    private int preparePayloadHeader(final int readyBytesToSend) throws IOException {
+    private void updateMessageIdIfRequired(int frameMessageIdPosition,
+            int frameMessageIdHighValue, boolean isLastFrame) {
+        
+        int frameMessageId;
+        if (isLastFrame) {
+            if (frameNumber != 0) {
+                frameMessageId = FrameType.MESSAGE_END_CHUNK;
+            } else {
+                // Serialized message-id is correct
+                return;
+            }
+        } else if (frameNumber == 0) {
+            frameMessageId = FrameType.MESSAGE_START_CHUNK;
+        } else {
+            frameMessageId = FrameType.MESSAGE_CHUNK;
+        }
+        
+        // merge message-id Integer4 data with next value
+        if (frameMessageIdHighValue != 0) {
+            // merge message-id as lower octet nibble
+            headerBuffer.put(frameMessageIdPosition, (byte) ((frameMessageIdHighValue & 0x70) | frameMessageId));
+        } else {
+            // merge message-id as higher octet nibble
+            int value = headerBuffer.get(frameMessageIdPosition);
+            headerBuffer.put(frameMessageIdPosition, (byte) ((frameMessageId << 4) | (value & 0xF)));
+        }
+    }
+    
+    private int calcPayloadSizeToSend(final int readyBytesToSend) throws IOException {
         int payloadLength = outputBuffer.remaining();
         if (readyBytesToSend > frameSize) {
             payloadLength -= (readyBytesToSend - frameSize);
         }
         
-        payloadLengthBuffer.clear();
-        DataInOutUtils.writeInt8(payloadLengthBuffer, payloadLength);
-        payloadLengthBuffer.flip();
         return payloadLength;
     }
     
-    private void prepareHeader(final boolean isLastFrame) throws IOException {
-        headerBuffer.clear();
-        int frameMessageId = messageId;
-        if (messageId == FrameType.MESSAGE) {
-            frameMessageId = FrameType.MESSAGE;
-            if (isLastFrame) {
-                if (frameNumber != 0) {
-                    frameMessageId = FrameType.MESSAGE_END_CHUNK;
-                }
-            } else if (frameNumber == 0) {
-                frameMessageId = FrameType.MESSAGE_START_CHUNK;
-            } else {
-                frameMessageId = FrameType.MESSAGE_CHUNK;
-            }
-        }
-        
-        DataInOutUtils.writeInts4(headerBuffer, channelId, frameMessageId);
-        headerBuffer.flip();
-    }
-    
-    private void prepareHeaderParams() throws IOException {
-        headerParamsBuffer.clear();
-        final int propsCount = contentProps.size();
-        
-        DataInOutUtils.writeInts4(headerParamsBuffer, contentId, propsCount);
-        //@TODO improve string serialization
-        for(Map.Entry<Integer, String> entry : contentProps.entrySet()) {
-            final String value = entry.getValue();
-            byte[] valueBytes = value.getBytes(TCPConstants.UTF8);
-            DataInOutUtils.writeInts4(headerParamsBuffer, entry.getKey(), valueBytes.length);
-            headerParamsBuffer.put(valueBytes);
-        }
-        
-        headerParamsBuffer.flip();
-    }
-    
-    private void formFrameBufferArrays() {
-        frameWithParams[0] = frameWithoutParams[0] = headerBuffer;
-        frameWithParams[1] = headerParamsBuffer;
-        frameWithParams[2] = frameWithoutParams[1] = payloadLengthBuffer;
-        frameWithParams[3] = frameWithoutParams[2] = outputBuffer;
+    private void formFrameBufferArray() {
+        frame[0] = headerBuffer;
+        frame[1] = outputBuffer;
     }
     
     
     public void reset() {
         outputBuffer.clear();
         headerBuffer.clear();
-        headerParamsBuffer.clear();
         messageId = -1;
         contentId = -1;
         contentProps.clear();
@@ -273,4 +285,5 @@ public final class FramedMessageOutputStream extends OutputStream implements Lif
         flushBuffer();
         outputBuffer.compact();
     }
+    
 }
