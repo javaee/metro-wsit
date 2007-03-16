@@ -88,6 +88,7 @@ public class HttpPoster {
         }
     }
     
+    // This method is simply for debugging/error output
     private void outputErrorStream(final HttpURLConnection conn) {
         final InputStream error = conn.getErrorStream();
         if (error != null) {

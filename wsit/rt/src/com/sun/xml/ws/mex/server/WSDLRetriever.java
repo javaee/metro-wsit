@@ -119,7 +119,7 @@ public class WSDLRetriever {
         } catch (IOException ioe) {
             // this should be very rare
             String exceptionMessage =
-                MessagesMessages.MEX_0015_IOEXCEPTION_WHILE_WRITING_RESPONSE();
+                MessagesMessages.MEX_0015_IOEXCEPTION_WHILE_WRITING_RESPONSE(add);
             logger.log(Level.SEVERE, exceptionMessage, ioe);
             throw new WebServiceException(exceptionMessage, ioe);
         }

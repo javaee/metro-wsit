@@ -146,7 +146,7 @@ public class MetadataServerPipe extends AbstractFilterTubeImpl {
             return response;
         } catch (XMLStreamException streamE) {
             final String exceptionMessage =
-                MessagesMessages.MEX_0001_RESPONSE_WRITING_FAILURE();
+                MessagesMessages.MEX_0001_RESPONSE_WRITING_FAILURE(address);
             logger.log(Level.SEVERE, exceptionMessage, streamE);
             throw new WebServiceException(exceptionMessage, streamE);
         }

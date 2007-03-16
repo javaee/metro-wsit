@@ -116,16 +116,18 @@ public class MetadataClient {
                 } catch (IOException e) {
                     logger.log(ERROR_LOG_LEVEL,
                         MessagesMessages.MEX_0006_RETRIEVING_MDATA_FAILURE(
-                        p, newAddress));
+                            p, newAddress));
                     continue;
                 } catch (Exception e) {
                     logger.log(Level.WARNING,
-                        MessagesMessages.MEX_0008_PARSING_MDATA_FAILURE());
+                        MessagesMessages.MEX_0008_PARSING_MDATA_FAILURE(
+                            p, newAddress));
                     continue;
                 }
             }
         }
-        logger.warning(MessagesMessages.MEX_0007_RETURNING_NULL_MDATA());
+        logger.log(ERROR_LOG_LEVEL,
+            MessagesMessages.MEX_0007_RETURNING_NULL_MDATA());
         return null;
     }
     
