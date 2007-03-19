@@ -63,6 +63,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
+import javax.xml.ws.WebServiceException;
 
 /**
  * Atomic Transaction Coordinator
@@ -91,7 +92,7 @@ import java.util.logging.Level;
  *
  * @author Ryan.Shoemaker@Sun.COM
  * @author Joe.Fialli@Sun.COM
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  * @since 1.0
  */
 public class ATCoordinator extends Coordinator implements Synchronization, XAResource {
@@ -105,6 +106,7 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
     static private final long WAIT_SLEEP = 2000;
 
     static private TxLogger logger = TxLogger.getATLogger(ATCoordinator.class);
+    static final protected TransactionManagerImpl tm = TransactionManagerImpl.getInstance();
 
     enum ACTION { PREPARE, COMMIT, ROLLBACK };
     enum KIND { VOLATILE, DURABLE };
@@ -120,6 +122,9 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
     /* the completion registrant  - only allowed on root ATCoordinator
      */
     private ATCompletion completionRegistrant;
+    
+    private boolean guardTimeout = false;
+    private boolean forgotten = false;
 
 
     /**
@@ -167,28 +172,37 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
             return;
         }
         
-//        if (!isSubordinateCoordinator()) {
-            try {
-                registerWithDurableParent();
-            } catch (SystemException ex) {
-                if (logger.isLogging(Level.SEVERE)) {
-                    logger.severe("setTransaction", LocalizationMessages.XA_REGISTER_0004(ex.getLocalizedMessage()));
-                    // TODO: link and rethrow
-                }
-            } catch (IllegalStateException ex) {
-                if (logger.isLogging(Level.SEVERE)) {
-                    logger.severe("setTransaction", LocalizationMessages.XA_REGISTER_0004(ex.getLocalizedMessage()));
-                    // TODO: link and rethrow
-                }
-            } catch (RollbackException ex) {
-                if (logger.isLogging(Level.SEVERE)) {
-                    logger.severe("setTransaction", LocalizationMessages.XA_REGISTER_0004(ex.getLocalizedMessage()));
-                    // TODO: link and rethrow
-                }
+        try {
+            if (! this.isSubordinateCoordinator()) {
+                // see #beforeCompletion and #afterCompletion for what this does.
+                // NEVER to be used for subordinate coordiator.
+                registerSynchronization();
             }
-//        }
+            
+            // MUST register synchronization BEFORE next line that
+            // causes local transaction to upgrade to JTS txn in glassfish.
+            // (Otherwise registerSynchronization with local txn even though JTS transaction exists.
+            //  Bug appears as beforeCompletion and afterCompletion never get called due to 
+            //  mis-registration.)
+            registerWithDurableParent();
+        } catch (SystemException ex) {
+            
+            logger.severe("setTransaction", LocalizationMessages.XA_REGISTER_0004(ex.getLocalizedMessage()));
+            // TODO: link and rethrow
+        
+        } catch (IllegalStateException ex) {
+            if (logger.isLogging(Level.SEVERE)) {
+                logger.severe("setTransaction", LocalizationMessages.XA_REGISTER_0004(ex.getLocalizedMessage()));
+                // TODO: link and rethrow
+            }
+        } catch (RollbackException ex) {
+            if (logger.isLogging(Level.SEVERE)) {
+                logger.severe("setTransaction", LocalizationMessages.XA_REGISTER_0004(ex.getLocalizedMessage()));
+                // TODO: link and rethrow
+            }
+        }
     }
-
+    
 
     public Transaction getTransaction() {
         return transaction;
@@ -228,7 +242,7 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
     }
 
     protected void registerWithVolatileParent() {
-        registerInterposedSynchronization();
+        registerSynchronization();
     }
 
     /**
@@ -645,6 +659,7 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
                 logger.warning("durableVolatileCommit", LocalizationMessages.UNEXPECTED_STATE_0008(durableParticipantsState));
         }
         durableParticipantsState = COMMITTING;
+        guardTimeout = true;
         actionForAllParticipants(getDurableParticipantsSnapshot(), ACTION.COMMIT);
     }
 
@@ -689,13 +704,15 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
      * transaction system before 2PC Participants and XAResources are prepared.
      */
     public void beforeCompletion() {
-        initiateVolatilePrepare();
-        waitForVolatilePrepareResponse();
+        logger.finest("beforeCompletion", "beforeCompletion called for coordId=" + getIdValue());
+        if (volatileParticipants.size() != 0) {
+            initiateVolatilePrepare();
+            waitForVolatilePrepareResponse();
+        }
     }
 
     public void afterCompletion(final int i) {
-        waitForCommitOrRollbackResponse(Protocol.DURABLE);
-        waitForCommitOrRollbackResponse(Protocol.VOLATILE);
+        logger.finest("afterCompletion", "afterCompletion called for coordId=" + getIdValue());
         forget();
     }
 
@@ -749,6 +766,7 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
                 }
             }
             if (allProcessed) {
+                guardTimeout = false;
                 if (logger.isLogging(Level.FINER)) {
                     logger.exiting("waitForCommitRollback", "coordId=" + getIdValue());
                 }
@@ -774,13 +792,15 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
             logger.entering("XAResource_prepare(xid=" + xid + ")");
         }
         int result = 0;
+         
+        synchronized(this) {
+            initiateDurablePrepare();
 
-        initiateDurablePrepare();
-
-        // Map asynchonous WS-AT 2PC protocol to XAResource synchronous protocol.
-        // Wait for all possible pending responses to prepare message.
-        waitForDurablePrepareResponse();  // result in durableParticipantsState: PREPARED, COMMITTED, ABORTING
-
+            // Map asynchonous WS-AT 2PC protocol to XAResource synchronous protocol.
+            // Wait for all possible pending responses to prepare message.
+            waitForDurablePrepareResponse();  // result in durableParticipantsState: PREPARED, COMMITTED, ABORTING
+        }
+        
         // check if volatile or durable WS-AT participants aborted
         if (isAborting()) {
             // TODO:  be more specific on XAException error code for why rollback occurred. Using generic code now.
@@ -840,6 +860,7 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
         initiateRollback();
         waitForCommitOrRollbackResponse(Protocol.DURABLE);
         waitForCommitOrRollbackResponse(Protocol.VOLATILE);
+        guardTimeout = false;
         if (logger.isLogging(Level.FINER)) {
             logger.exiting("XAResource_rollback");
         }
@@ -882,9 +903,8 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
      * Recovers resources held by a transaction.  After a transaction is committed or aborted, it is forgotten.
      */
     public void forget(final Xid xid) throws XAException {
-        // TODO release resources held for xid.
-        // Comment out exception, no need to fail when forget is called.
-        // throw new UnsupportedOperationException("Not yet implemented");
+        logger.finest("forget", "XAResource.forget(XID) called for coordId=" + getIdValue());
+        forget();
     }
 
     public int getTransactionTimeout() throws XAException {
@@ -1016,19 +1036,19 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
         }
     }
 
-    volatile private boolean registeredInterposedSynchronization = false;
+    volatile private boolean registeredSynchronization = false;
 
     /**
      * Register interposed synchronization for this instance.
      * <p/>
      * Initial volatile participant registration triggers this registration.
      */
-    private void registerInterposedSynchronization() {
-        if (!registeredInterposedSynchronization) {
-            registeredInterposedSynchronization = true;
-            TransactionManagerImpl.getInstance().registerInterposedSynchronization(this);
+    private void registerSynchronization() {
+        if (!registeredSynchronization) {
+            registeredSynchronization = true;
+            TransactionManagerImpl.getInstance().registerSynchronization(this);
             if (logger.isLogging(Level.FINEST)) {
-                logger.finest("registerInterposedSynchronization", "for WS-AT coordinated activity " + this.getIdValue());
+                logger.finest("registerSynchronization", "Synchronization registered for WS-AT coordinated activity " + this.getIdValue());
             }
         }
     }
@@ -1104,40 +1124,60 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
      * Do not allow transaction expiration after Phase 2 begins.
      */
     public boolean expirationGuard() {
-        for (ATParticipant participant : getDurableParticipantsSnapshot()) {
-            if (isSecondPhase(participant)) {
-                return true;
-            }
+        synchronized (this) {
+            return guardTimeout;
         }
-        for (ATParticipant participant : getVolatileParticipantsSnapshot()) {
-            if (isSecondPhase(participant)) {
-                return true;
-            }
-        }
-        return false;
     }
     
-    private boolean isSecondPhase(final ATParticipant p) {
-        switch (p.state) {
-            case ABORTING:
-            case COMMITTING:
-            case ABORTED:
-            case COMMITTED:
-                // too late to abort 2PC, already committed or rolled back transaction.
-                return true;
-            default:
-                return false;
+    @Override 
+    public void expire() {
+        if (!expirationGuard()) {
+            setAborting();
         }
+        super.expire();
     }
 
     @Override
     public void forget() {
-        for (ATParticipant participant : getDurableParticipantsSnapshot()) {
-            participant.forget();
+        synchronized(this) {
+            if (forgotten) {
+                return;
+            } else {
+                forgotten = true;
+            }
+            for (ATParticipant participant : getDurableParticipantsSnapshot()) {
+                participant.forget();
+            }
+            for (ATParticipant participant : getVolatileParticipantsSnapshot()) {
+                participant.forget();
+            }
+            super.forget();
         }
-        for (ATParticipant participant : getVolatileParticipantsSnapshot()) {
-            participant.forget();
+    }
+    
+     public void resumeTransaction() throws WebServiceException {
+        if (transaction != null) {
+            try {
+                tm.resume(transaction);
+                logger.finest("resumeTransaction", "successfully resumed txn " + transaction);
+            } catch (Exception ex) {
+                String handlerMsg = LocalizationMessages.TXN_MGR_RESUME_FAILED_0032(transaction.toString());
+                logger.warning("resumeTransaction", handlerMsg, ex);
+                throw new WebServiceException(handlerMsg, ex);
+            }
         }
-        super.forget();
+    }
+    
+    public Transaction suspendTransaction() {
+        Transaction tx = null;
+        try {
+            tx = tm.suspend();
+            logger.finest("suspendTransation", tx == null ? "no txn to suspend" : "suspended txn " + tx.toString());
+            return tx;
+        } catch (SystemException ex) {
+            String handlerMsg = LocalizationMessages.TXN_MGR_OPERATION_FAILED_0031("suspend");
+            logger.warning("suspendTransaction", handlerMsg, ex);
+            return tx;
+        }
     }
 }    

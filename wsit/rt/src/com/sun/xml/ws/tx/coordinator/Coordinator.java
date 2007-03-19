@@ -42,7 +42,7 @@ import java.util.logging.Level;
  * is constructed and managed by this class.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  * @since 1.0
  */
 public abstract class Coordinator {
@@ -60,6 +60,7 @@ public abstract class Coordinator {
      * Timer to manage expiration of registrants
      */
     private final static Timer expirationTimer = new Timer("WS-TX Expiration Timer");
+    private ExpirationTask expirationTask = null;
     private boolean expired = false;
 
     static private TxLogger logger = TxLogger.getCoordLogger(Coordinator.class);
@@ -86,7 +87,8 @@ public abstract class Coordinator {
                 logger.finer("Coordinator constructor", "Starting expiration task for activity: "
                         + context.getIdentifier() + " will expire in " + context.getExpires() + "ms");
             }
-            expirationTimer.schedule(new ExpirationTask(this), context.getExpires());
+            expirationTask = new ExpirationTask(this);
+            expirationTimer.schedule(expirationTask, context.getExpires());
         }
     }
 
@@ -278,6 +280,10 @@ public abstract class Coordinator {
      * Release all resources associated with this coordinator
      */
     public void forget() {
+        if (expirationTask != null){
+            expirationTask.cancel();
+            expirationTask = null;
+        }
         CoordinationManager.getInstance().removeCoordinator(this.id.getValue());
     }
 

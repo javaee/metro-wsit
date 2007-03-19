@@ -21,6 +21,7 @@
  */
 package com.sun.xml.ws.tx.at;
 
+import com.sun.enterprise.transaction.TransactionImport;
 import com.sun.xml.ws.api.tx.Participant;
 import com.sun.xml.ws.api.tx.Protocol;
 import com.sun.xml.ws.api.tx.TXException;
@@ -31,12 +32,15 @@ import com.sun.xml.ws.tx.coordinator.Registrant;
 import com.sun.xml.ws.tx.webservice.member.coord.CreateCoordinationContextType;
 
 import javax.resource.spi.XATerminator;
+import javax.transaction.SystemException;
 import javax.transaction.Transaction;
+import javax.transaction.TransactionManager;
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
 import javax.xml.ws.WebServiceContext;
 import java.util.logging.Level;
+import javax.xml.ws.WebServiceException;
 
 /**
  * @author jf39279
@@ -49,7 +53,10 @@ public class ATSubCoordinator extends ATCoordinator {
     // This subordinate coordinator is also a durable participant of its parent coordinator.
     private ATParticipant rootDurableParticipant = null;
 
+    private boolean guardTimeout = false;
 
+    private boolean forgotten = false;
+    
     /**
      * Creates a new instance of ATSubCoordinator
      */
@@ -121,16 +128,19 @@ public class ATSubCoordinator extends ATCoordinator {
         }
 
         public Participant.STATE prepare() throws TXException {
-            initiateVolatilePrepare();
-            waitForVolatilePrepareResponse();
-            if (isAborting()) {
-                rootVolatileParticipant.aborted();
-                throw new TXException("VolatileParticipant.prepare aborted");
-            } else if (getVolatileParticipants().size() == 0) {
-                rootVolatileParticipant.readonly();
-                return Participant.STATE.P_READONLY;
-            } else {
-                rootVolatileParticipant.prepared();
+            synchronized(this) {
+                initiateVolatilePrepare();
+                waitForVolatilePrepareResponse();
+                if (isAborting()) {
+                    rootVolatileParticipant.aborted();
+                    throw new TXException("VolatileParticipant.prepare aborted");
+                } else if (getVolatileParticipants().size() == 0) {
+                    rootVolatileParticipant.readonly();
+                    return Participant.STATE.P_READONLY;
+                } else {
+                    rootVolatileParticipant.prepared();
+                    guardTimeout = true;
+                }
             }
             return Participant.STATE.P_OK;
         }
@@ -155,34 +165,50 @@ public class ATSubCoordinator extends ATCoordinator {
         }
 
         public Participant.STATE prepare() throws TXException {
+            final String METHOD = "durableParticipant";
             if (logger.isLogging(Level.FINER)) {
-                logger.entering("ATSubCoordinator.durableParticipant", getCoordIdPartId(rootDurableParticipant));
+                logger.entering(METHOD, getCoordIdPartId(rootDurableParticipant));
             }
-            initiateDurablePrepare();
-            if (getXATerminator() != null) {
-                try {
-                    if (logger.isLogging(Level.FINER)) {
-                        logger.entering("XATerminator.prepare()");
+            
+            // synchronize to avoid race conditions between Coordinator time out and potentially
+            // multiple WS-AT prepare messages. (Coordinator can resend prepare after some interval
+            // has passed with no reply.
+            synchronized (this) {
+                initiateDurablePrepare();
+                if (getXATerminator() != null) {
+                    try {
+                        if (logger.isLogging(Level.FINER)) {
+                            logger.entering("XATerminator.prepare()");
+                        }
+                        xaResult = getXATerminator().prepare(getCoordinationXid());
+                        if (logger.isLogging(Level.FINER)) {
+                            logger.exiting("XATerminator.prepare()", xaResult);
+                        }
+                    } catch (XAException ex) {
+                        setAborting();
+                        if (logger.isLogging(Level.FINEST)) {
+                            logger.finest(METHOD, LocalizationMessages.XATERM_THREW_0023(ex.getClass().getName()), ex);
+                        } else {
+                            logger.info(METHOD, LocalizationMessages.XATERM_THREW_0023(ex.getClass().getName()));
+                        }
+                        // TODO: set linked exception ex to TxException
+                        throw new TXException(ex.getClass().getName());
                     }
-                    xaResult = getXATerminator().prepare(getCoordinationXid());
-                    if (logger.isLogging(Level.FINER)) {
-                        logger.exiting("XATerminator.prepare()", xaResult);
+                    
+                    // Next line required to support remote participants in this coordinators durable participants.
+                    waitForDurablePrepareResponse();
+                    if (isAborting()) {
+                        abort();
+                    } else if (xaResult == XAResource.XA_RDONLY && getDurableParticipants().size() == 0) {
+                        rootDurableParticipant.readonly();
+                        forget();
+                    } else if (xaResult == XAResource.XA_OK) {  //implied no durable participants are aborting since isAborting() is false
+                        // Participant Subordinator coordinator must not timeout after sending 
+                        // prepared to superior coordinator.
+                        guardTimeout = true;
+                        rootDurableParticipant.prepared();
                     }
-                } catch (XAException ex) {
-                    setAborting();
-                    logger.info("DurableParticipant.prepare", LocalizationMessages.XATERM_THREW_0023(ex.getLocalizedMessage()));
-                    throw new TXException(ex.getClass().getName());
                 }
-            }
-            // Next line required to support remote participants in this coordinators durable participants.
-            waitForDurablePrepareResponse();
-            if (isAborting()) {
-                abort();
-            } else if (xaResult == XAResource.XA_RDONLY && getDurableParticipants().size() == 0) {
-                rootDurableParticipant.readonly();
-            } else if (xaResult == XAResource.XA_OK)
-            {  //implied no durable participants are aborting since isAborting() is false
-                rootDurableParticipant.prepared();
             }
             if (logger.isLogging(Level.FINER)) {
                 logger.exiting("ATSubCoordinator.durableParticipant", getCoordIdPartId(rootDurableParticipant));
@@ -191,44 +217,47 @@ public class ATSubCoordinator extends ATCoordinator {
         }
 
         public void commit() {
+            final String METHOD = "ATSubCoordinator.DurableParticipant.commit";
             boolean xaCommitFailed = false;
-            initiateDurableCommit();
-            if (getXATerminator() != null && xaResult == XA_OK) {
-                try {
-                    getXATerminator().commit(getCoordinationXid(), false);
-                } catch (XAException ex) {
-                    xaCommitFailed = true;
-                    
-                    logger.severe("ATSubCoordinator.DurableParticipant.commit", LocalizationMessages.XATERM_THREW_0023(ex.getLocalizedMessage()));
-                    
+            synchronized(this) {
+                initiateDurableCommit();
+                if (getXATerminator() != null && xaResult == XA_OK) {
+                    try {
+                        getXATerminator().commit(getCoordinationXid(), false);
+                    } catch (XAException ex) {
+                        xaCommitFailed = true;
+                        
+                        logger.severe(METHOD, LocalizationMessages.XATERM_THREW_0023(ex.getLocalizedMessage()));
+                        
+                    }
                 }
-            }
-            // TODO send fault when failure occur in commit
-            // waitForCommitOrRollbackResponse(Protocol.DURABLE);
-            if (xaCommitFailed || isAborting()) {
-                
-                logger.severe("ATSubCoordinator.DurableParticipant.commit", LocalizationMessages.ABORT_DURING_COMMIT_0024(getIdValue()));
-                
-                // TODO: check WS-AT CV state table if should send aborted to root coordinator here.
-                rootDurableParticipant.aborted();
-            } else {
-                logger.info("DurableParticipant.committed", LocalizationMessages.COMMITTED_SUB_COOR_0025(getIdValue()));
-                rootDurableParticipant.committed();
+                if (xaCommitFailed || isAborting()) {
+                    logger.severe(METHOD, LocalizationMessages.ABORT_DURING_COMMIT_0024(getIdValue()));
+                    rootDurableParticipant.aborted();
+                } else {
+                    logger.info(METHOD, LocalizationMessages.COMMITTED_SUB_COOR_0025(getIdValue()));
+                    rootDurableParticipant.committed();
+                }
+                forget();
             }
         }
 
         public void abort() {
-             if (getXATerminator() != null && xaResult == XA_OK) {
-                try {
-                    logger.severe("ATSubCoordinator.DurableParticipant.abort", LocalizationMessages.XATERM_ABORT_0026(getIdValue()));
-                    getXATerminator().rollback(getCoordinationXid());
-                } catch (XAException ex) {
-                    logger.severe("ATSubCoordinator.DurableParticipant.abort", LocalizationMessages.CAUGHT_XAEX_0027(ex.getMessage()));
+            final String METHOD = "ATSubCoordinator.DurableParticipant.abort";
+            synchronized(this) {
+                if (getXATerminator() != null && xaResult == XA_OK) {
+                    try {
+                        logger.severe(METHOD, LocalizationMessages.XATERM_ABORT_0026(getIdValue()));
+                        getXATerminator().rollback(getCoordinationXid());
+                    } catch (XAException ex) {
+                        logger.severe(METHOD, LocalizationMessages.CAUGHT_XAEX_0027(ex.getMessage()));
+                    }
                 }
+                initiateDurableRollback();
+                waitForCommitOrRollbackResponse(Protocol.DURABLE);
+                rootDurableParticipant.aborted();
+                forget();
             }
-            initiateDurableRollback();
-            waitForCommitOrRollbackResponse(Protocol.DURABLE);
-            rootDurableParticipant.aborted();
         }
     }
 
@@ -254,8 +283,7 @@ public class ATSubCoordinator extends ATCoordinator {
 
     public void afterCompletion(final int i) {
         // Ensure that afterCompletion disabled for subordinate coordinator    
-        //    waitForCommitOrRollbackResponse();
-        throw new UnsupportedOperationException("No beforeCompletion for subordinate coordinator");
+        throw new UnsupportedOperationException("No afterCompletion for subordinate coordinator");
     }
 
     // XAResource  Not implemented yet
@@ -333,11 +361,6 @@ public class ATSubCoordinator extends ATCoordinator {
         }
     }
 
-    @Override
-    public void expire() {
-        forget();
-    }
-
     /**
      * Get the registrant with the specified id or null if it does not exist.
      *
@@ -398,24 +421,83 @@ public class ATSubCoordinator extends ATCoordinator {
         super.forget(partId);
     }
 
+  
+    
     @Override
     public boolean expirationGuard() {
-        // TODO: implement
-        return true;
+        synchronized (this) {
+            return guardTimeout;
+        }
     }
 
     @Override
     public void forget() {
-        if (rootVolatileParticipant != null){
-            rootVolatileParticipant.forget();
-            rootVolatileParticipant = null;
+        synchronized(this) {
+            if (forgotten) {
+                return;
+            } else {
+                forgotten = true;
+            }
+            if (rootVolatileParticipant != null){
+                rootVolatileParticipant.forget();
+                rootVolatileParticipant = null;
+            }
+            if (rootDurableParticipant != null){
+                rootDurableParticipant.forget();
+                rootDurableParticipant = null;
+            }
+            CoordinationXid.forget(this.getIdValue());
+            super.forget();
         }
-        if (rootDurableParticipant != null){
-            rootDurableParticipant.forget();
-            rootDurableParticipant = null;
-        }
-        CoordinationXid.forget(this.getIdValue());
-        super.forget();
     }
+  
+     /**
+     * Import a transactional context from an external transaction manager via WS-AT Coordination Context
+     * that was propagated in a SOAP request message.
+     *
+     * @see #endImportTransaction()
+     */
+    public void beginImportTransaction() {
+        Transaction currentTxn = null;
+        
+        try {    
+            tm.recreate(getCoordinationXid(), getExpires());
+        } catch (IllegalStateException ex) {
+            String message = LocalizationMessages.IMPORT_TRANSACTION_FAILED_0028(getIdValue(),
+                                                                                 getCoordinationXid().toString());
+            logger.warning("beginImportTransaction", message, ex);
+            throw new WebServiceException(message, ex);
+        } 
+        try{  
+            currentTxn = tm.getTransaction();
+        } catch (SystemException ex) {
+            String message = LocalizationMessages.IMPORT_TXN_GET_TXN_FAILED_0030(getIdValue());
+            logger.warning("beginImportTransaction", message, ex);
+            throw new WebServiceException(message, ex);
+        }     
+        assert currentTxn != null;
+        setTransaction(currentTxn);
+        tm.setCoordinationContext(getContext());
+    }
+
+    /**
+     * Ends the importing of an external transaction.
+     * <p/>
+     * <p> Post-condition: terminates beginImportTransaction.
+     *
+     * @see #beginImportTransaction()
+     */
+    public void endImportTransaction() { 
+        if (transaction != null) {
+            try {
+                tm.release(getCoordinationXid());
+            } catch (Error e) {
+                logger.warning("endImportTransaction",
+                        LocalizationMessages.EXCEPTION_RELEASING_IMPORTED_TRANSACTION_0029(), e);
+            }
+            setTransaction(null);
+        }
+    }
+
     
 }

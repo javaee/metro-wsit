@@ -25,6 +25,9 @@ package com.sun.xml.ws.tx.common;
 import com.sun.enterprise.transaction.TransactionImport;
 import com.sun.xml.ws.tx.at.CoordinationXid;
 import com.sun.xml.ws.tx.coordinator.CoordinationContextInterface;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.logging.Level;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -46,7 +49,6 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
     final private static TransactionManagerImpl singleton = new TransactionManagerImpl();
     final private TransactionManager javaeeTM;
     final private TransactionSynchronizationRegistry javaeeSynchReg;
-    final private Map<Xid, ATTransactionImpl> jtaatTxnMap;
 
     final static private TxLogger logger = TxLogger.getATLogger(TransactionManagerImpl.class);
 
@@ -83,7 +85,6 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
     private TransactionManagerImpl() {
         javaeeTM = (TransactionManager) jndiLookup(AS_TXN_MGR_JNDI_NAME);
         javaeeSynchReg = (TransactionSynchronizationRegistry) jndiLookup(TXN_SYNC_REG_JNDI_NAME);
-        jtaatTxnMap = new HashMap<Xid, ATTransactionImpl>();
     }
 
     public void begin() throws NotSupportedException, SystemException {
@@ -95,7 +96,6 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
     }
 
     public int getStatus() throws SystemException {
-        // TODO do we want TM status or WSAT-Coordinator status
         return javaeeTM.getStatus();
     }
 
@@ -103,23 +103,9 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
         return javaeeTM.getTransaction();
     }
 
-    public Transaction getTransaction(final CoordinationContextInterface coordCtx) throws SystemException {
-        return getTransaction(coordCtx.getIdentifier());
-    }
-
-    public Transaction getTransaction(final String CoordinationCtxId) throws SystemException {
-        return jtaatTxnMap.get(CoordinationXid.get(CoordinationCtxId));
-
-    }
-
-    public long getDefaultTransactionTimeout() {
-        // TODO: get this default from application server's transaction default timeout property
-        return 120000L;
-    }
-
-
     public void resume(final Transaction transaction) throws InvalidTransactionException, IllegalStateException, SystemException {
         javaeeTM.resume(transaction);
+        servletPreInvokeTx();
     }
 
     public void rollback() throws IllegalStateException, SecurityException, SystemException {
@@ -135,6 +121,7 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
     }
 
     public Transaction suspend() throws SystemException {
+        servletPostInvokeTx(true);
         return javaeeTM.suspend();
     }
 
@@ -152,6 +139,32 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
 
     public void registerInterposedSynchronization(final Synchronization synchronization) {
         javaeeSynchReg.registerInterposedSynchronization(synchronization);
+    }
+    
+    public void registerSynchronization(final Synchronization sync) {
+        Transaction txn = null;
+        try {
+            txn = javaeeTM.getTransaction();
+        } catch (SystemException ex) {
+            logger.warning("registerSynchronization", "registerSynchronization failed with exception ",
+                    ex);
+        }
+        if (txn == null) {
+            logger.warning("registerSynchronization", "precondition violated. register synchronization called and there is no current transaction.");
+        } else {
+            try {
+                txn.registerSynchronization(sync);
+            } catch (IllegalStateException ex) {
+                  logger.warning("registerSynchronization", "registerSynchronization failed with exception ",
+                    ex);
+            } catch (RollbackException ex) {
+                  logger.warning("registerSynchronization", "registerSynchronization failed with exception ",
+                    ex);
+            } catch (SystemException ex) {
+                  logger.warning("registerSynchronization", "registerSynchronization failed with exception ",
+                    ex);
+            }
+        }
     }
 
     public int getTransactionStatus() {
@@ -211,5 +224,125 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
      */
     public void setCoordinationContext(final CoordinationContextInterface coordCtx) {
         putResource("WSCOOR-SUN", coordCtx);
+    }
+    
+    static private Method getMethod(Class theClass, String methodName, Class param) {
+        Method method = null;
+        try {
+            if (param == null) {
+                method = theClass.getMethod(methodName);
+            } else {
+                method = theClass.getMethod(methodName, param);
+            }
+            logger.finest("getMethod", "found Sun App Server 9.1 container specific method via reflection " + theClass.getName() + "."  + methodName);
+        } catch (Exception e) {
+            logger.finest("getMethod", "reflection lookup of  " + theClass.getName() + "." + methodName + "("
+                   + (param == null ? "" : param.getName()) 
+                   + ") failed with handled exception ", e);
+        }
+        return method;
+    }
+    
+    static private boolean initialized = false;
+    static private Method servletPreInvokeTxMethod = null;
+    static private Method servletPostInvokeTxMethod = null;
+    
+    private void initServletMethods() {
+         if (initialized == false) {
+            initialized = true;
+            servletPreInvokeTxMethod = getMethod(javaeeTM.getClass(), "servletPreInvokeTx", null);
+            servletPostInvokeTxMethod = getMethod(javaeeTM.getClass(), "servletPostInvokeTx", boolean.class);
+         }
+    }
+    
+     /**
+     * PreInvoke Transaction configuration for Servlet Container.
+     * BaseContainer.preInvokeTx() handles all this for CMT EJB.
+     *
+     * Compensate that J2EEInstanceListener.handleBeforeEvent(BEFORE_SERVICE_EVENT)
+     * gets called before WSIT WSTX Service pipe associates a JTA txn with incoming thread.
+     *
+     * Precondition: assumes JTA transaction already associated with current thread.
+     * 
+     * Note: this method is a no-op when invoked on an EJB.
+     */
+    public void servletPreInvokeTx() {
+       initServletMethods();
+       if (servletPreInvokeTxMethod != null) {
+            try {
+                servletPreInvokeTxMethod.invoke(javaeeTM);
+            } catch (Throwable ex) {
+                logger.info("servletPreInvokeTx", "servletPreInvokeTx failed with unexpected exception ", ex);
+            }
+       }
+    }
+    
+    /**
+     * PostInvoke Transaction configuration for Servlet Container.
+     * BaseContainer.preInvokeTx() handles all this for CMT EJB.
+     *
+     * Precondition: assumed called prior to current transcation being suspended or released.
+     *
+     * Note: this method is a no-op when invoked on an EJB. The J2EE method only has an effect
+     * on servlets.
+     * 
+     * @param suspend indicate whether the delisting is due to suspension or transaction completion(commmit/rollback)
+     */
+    public void servletPostInvokeTx(Boolean suspend) {
+       initServletMethods();
+       if (servletPostInvokeTxMethod != null) {
+            try {
+                servletPostInvokeTxMethod.invoke(javaeeTM, suspend);
+            } catch (Throwable ex) {
+                logger.info("servletPostInvokeTx", "servletPostInvokeTx failed with unexpected exception ", ex);
+            }
+       }
+    }
+ 
+    public int getTransactionRemainingTimeout() throws SystemException {
+        final String METHOD = "getRemainingTimeout";
+        int result = 0;
+        try {
+            result = getTxnImportTM().getTransactionRemainingTimeout();
+        } catch (IllegalStateException ise) {
+            if (logger.isLogging(Level.FINEST)) {
+                logger.finest(METHOD, "looking up remaining txn timeout, no current transaction", ise);
+            } else {
+                logger.info(METHOD, LocalizationMessages.TXN_MGR_OPERATION_FAILED_2008("getTransactionRemainingTimeout",
+                                                                                    ise.getLocalizedMessage()));
+            }
+        } catch (Throwable t) {
+            if (logger.isLogging(Level.FINEST)) {
+                logger.finest(METHOD, "ignoring exception " + t.getClass().getName() + " thrown calling" +
+                        "TM.getTransactionRemainingTimeout method" );
+            } else {
+                logger.info(METHOD, LocalizationMessages.TXN_MGR_OPERATION_FAILED_2008("getTransactionRemainingTimeout", 
+                        t.getLocalizedMessage()));
+         
+            }
+        }
+        return result;
+    }
+    
+    /**
+     * Returns in seconds duration till current transaction times out.
+     * Returns negative value if transaction has already timedout.
+     * Returns 0 if there is no timeout.
+     * Returns 0 if any exceptions occur looking up remaining transaction timeout.
+     */
+    public int getRemainingTimeout() {
+        final String METHOD="getRemainingTimeout";
+        try {
+            return getTransactionRemainingTimeout();
+        } catch (SystemException se) {
+            if (logger.isLogging(Level.FINEST)) {
+                logger.finest(METHOD, "getRemainingTimeout stack trace", se);
+            } else {
+                logger.info(METHOD, 
+                        LocalizationMessages.TXN_MGR_OPERATION_FAILED_2008("getTransactionRemainingTimeout",
+                                                                           se.getLocalizedMessage()));
+            }
+            return 0;
+        }
     }
 }

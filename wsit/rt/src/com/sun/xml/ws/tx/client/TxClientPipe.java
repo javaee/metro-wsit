@@ -42,10 +42,11 @@ import com.sun.xml.ws.tx.at.ATCoordinator;
 import com.sun.xml.ws.tx.common.ATAssertion;
 import static com.sun.xml.ws.tx.common.ATAssertion.NOT_ALLOWED;
 import static com.sun.xml.ws.tx.common.ATAssertion.ALLOWED;
-import static com.sun.xml.ws.tx.common.ATAssertion.REQUIRED;
+import static com.sun.xml.ws.tx.common.ATAssertion.MANDATORY;
 import static com.sun.xml.ws.tx.common.Constants.AT_ASSERTION;
 import static com.sun.xml.ws.tx.common.Constants.WSAT_2004_PROTOCOL;
 import com.sun.xml.ws.tx.common.TransactionManagerImpl;
+import com.sun.xml.ws.tx.common.TxBasePipe;
 import com.sun.xml.ws.tx.common.TxJAXBContext;
 import com.sun.xml.ws.tx.common.TxLogger;
 import com.sun.xml.ws.tx.coordinator.ContextFactory;
@@ -67,12 +68,12 @@ import java.util.Iterator;
  * This class process transactional context for client outgoing message.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @since 1.0
  */
 // suppress known deprecation warnings about using pipes.
 @SuppressWarnings("deprecation")
-public class TxClientPipe implements Pipe {
+public class TxClientPipe extends TxBasePipe {
 
     static private TxLogger logger = TxLogger.getCoordLogger(TxClientPipe.class);
 
@@ -90,11 +91,7 @@ public class TxClientPipe implements Pipe {
      */
     //private final SecurityPipeContext spctx;
 
-    /**
-     * next pipe in the chain
-     */
-    private final Pipe next;
-
+    
     /**
      * Marshaller
      */
@@ -110,11 +107,11 @@ public class TxClientPipe implements Pipe {
     public TxClientPipe(ClientPipeConfiguration pcfg,
                         Pipe next/*,
                         SecurityPipeContext spctx*/) {
+        super(next);
         this.pipeConfig = pcfg;
         this.soapVersion = pcfg.getBinding().getSOAPVersion();
 
         //this.spctx = spctx;
-        this.next = next;
         this.marshaller = TxJAXBContext.createMarshaller();
     }
 
@@ -122,8 +119,8 @@ public class TxClientPipe implements Pipe {
      * Constructor used by copy method
      */
     private TxClientPipe(TxClientPipe orig, PipeCloner cloner) {
+        super(cloner.copy(orig.next));
         cloner.add(orig, this);
-        this.next = cloner.copy(orig.next);
         this.pipeConfig = orig.pipeConfig;
         this.soapVersion = orig.soapVersion;
         this.marshaller = TxJAXBContext.createMarshaller();
@@ -136,14 +133,7 @@ public class TxClientPipe implements Pipe {
         return new TxClientPipe(this, cloner);
     }
 
-    /**
-     * Invoked before the last copy of the pipeline is about to be discarded,
-     * to give Pipes a chance to clean up any resources.
-     */
-    public void preDestroy() {
-        next.preDestroy();
-    }
-
+    
     /**
      * Process transactional context in outgoing message.
      *
@@ -181,7 +171,9 @@ public class TxClientPipe implements Pipe {
         // encryption through security pipe
     
         final WSDLBoundOperation wsdlBoundOp = msg.getOperation(wsdlModel);    
-        ATAssertion atAssertion = getOperationATPolicy(pipeConfig.getPolicyMap(), wsdlModel, wsdlBoundOp);
+        ATAssertion atAssertion = getOperationATPolicy(pipeConfig.getPolicyMap(), 
+                                                       wsdlModel, 
+                                                       wsdlBoundOp).atAssertion;
         if (atAssertion == NOT_ALLOWED ) {
                 // no ws-at policy assertion on the wsdl:binding/wsdl:operation, so no work to do here
                 if (logger.isLogging(Level.FINE)) {
@@ -194,7 +186,7 @@ public class TxClientPipe implements Pipe {
         CoordinationContextInterface context = lookupOrCreateCoordinationContext(atAssertion);
         CoordinationContext CC = (CoordinationContext) context.getValue(); // TODO: fix cast
         Header ccHeader;
-        if (atAssertion == REQUIRED || atAssertion == ALLOWED) {
+        if (atAssertion == MANDATORY || atAssertion == ALLOWED) {
             // flow current txn scope CC with msg
             // Generate <wst:IssuedToken> header.
             // The <wscoor:Identifier> is passed as <wsp:AppliesTo> in the
@@ -213,12 +205,12 @@ public class TxClientPipe implements Pipe {
             msg.getHeaders().add(ccHeader);
         }
 
-        // TODO: Only need the suspend and resume when the web service invocation of this client is to a web service
-        // in same application server.  Must figure out how to identify this case. For now, just hardcode assumption
-        // that it is in same app server and this is necessary.  It does not hurt to do this, it is probably inefficient.
-        
+        // Suspend transaction from current thread.
+        // If web service invocations is within same application server vm,
+        // then the same JTA transaction will be used and it must only be associated
+        // with one thread at any point in time. Will resume transaction when it returns.
         try {
-            currentTxn = TransactionManagerImpl.getInstance().suspend();
+            currentTxn = tm.suspend();
         } catch (SystemException ex) {
             throw new WebServiceException(ex.getMessage(), ex);
         }
@@ -230,7 +222,7 @@ public class TxClientPipe implements Pipe {
         } finally {
             try {
                 // flow of control is transfered back from caller, resume transaction.
-                TransactionManagerImpl.getInstance().resume(currentTxn);
+                tm.resume(currentTxn);
             } catch (Exception ex) {
                 rethrow.initCause(ex);
                 throw new WebServiceException(ex.getMessage(), rethrow);
@@ -242,28 +234,28 @@ public class TxClientPipe implements Pipe {
         return responsePacket;
     }
 
-    private CoordinationContextInterface lookupOrCreateCoordinationContext(ATAssertion required) {
+    private CoordinationContextInterface lookupOrCreateCoordinationContext(ATAssertion assertion) {
         Transaction currentTxn;
         CoordinationContextInterface result = null;
         try {
-            currentTxn = TransactionManagerImpl.getInstance().getTransaction();
+            currentTxn = tm.getTransaction();
         } catch (SystemException e) {
             throw new WebServiceException(e.getMessage(), e);
         }
 
         // wsat policy assertion validation when no current txn scope CC
-        if ((currentTxn == null) && (required == REQUIRED)) {
-            // txn scope required to invoke this operation, notify user
+        if ((currentTxn == null) && (assertion == MANDATORY)) {
+            // txn scope MANDATORY to invoke this operation, notify user
             throw new WebServiceException(LocalizationMessages.MISSING_TX_SCOPE_1000());
         }
 
         if (currentTxn != null) {
             // see if a coordination context is already associated with the current JTA transaction.
-            result = TransactionManagerImpl.getInstance().getCoordinationContext();
+            result = tm.getCoordinationContext();
             if (result == null) {
                 // create & associate a coordination context with current thread's transaction context
-                result = ContextFactory.createContext(WSAT_2004_PROTOCOL,
-                        TransactionManagerImpl.getInstance().getDefaultTransactionTimeout());
+                final long EXPIRES = tm.getRemainingTimeout() * 1000L;
+                result = ContextFactory.createContext(WSAT_2004_PROTOCOL, EXPIRES);
 
                 // create a new coordinator object for this context. Associate JTA transaction with ATCoordinator.
                 ATCoordinator coord = new ATCoordinator(result);
@@ -271,7 +263,7 @@ public class TxClientPipe implements Pipe {
                 CoordinationManager.getInstance().putCoordinator(coord);
 
                 // cache the resulting context in the transaction context
-                TransactionManagerImpl.getInstance().setCoordinationContext(result);
+                tm.setCoordinationContext(result);
             }
         }
         return result;
@@ -280,7 +272,7 @@ public class TxClientPipe implements Pipe {
     private Transaction checkCurrentJTATransaction(Message msg, WSDLPort wsdlModel) {
         Transaction currentTxn = null;
         try {
-            currentTxn = TransactionManagerImpl.getInstance().getTransaction();
+            currentTxn = tm.getTransaction();
         } catch (SystemException ex) {
             // ignore
         }
@@ -292,42 +284,5 @@ public class TxClientPipe implements Pipe {
             }
         }
         return currentTxn;
-    }
-    
-    /**
-     * Return the ws-at policy assertion associated with wsdlBoundOp.
-     */ 
-    private ATAssertion getOperationATPolicy(PolicyMap pmap, WSDLPort wsdlModel, WSDLBoundOperation wsdlBoundOp) 
-        throws WebServiceException 
-    {
-        // get the ws-at policy assertion wsat:ATAssertion (don't need wsat:ATAlwaysCapable on the client side).
-        ATAssertion atAssertion = NOT_ALLOWED;
-        try {
-            if (pmap != null) {
-                PolicyMapKey opKey =
-                        createWsdlOperationScopeKey(
-                        wsdlModel.getOwner().getName(), // service
-                        wsdlModel.getName(), // port
-                        wsdlBoundOp.getName() // operation
-                        );
-                Policy effectivePolicy =
-                        pmap.getOperationEffectivePolicy(opKey);
-                if (effectivePolicy != null) {
-                    Iterator<AssertionSet> assertionIter = effectivePolicy.iterator();
-                    AssertionSet assertionSet;
-                    while (assertionIter.hasNext()) {
-                        assertionSet = assertionIter.next();
-                        for (PolicyAssertion pa : assertionSet) {
-                            if (pa.getName().equals(AT_ASSERTION)) {
-                                atAssertion = pa.isOptional() ? ALLOWED : REQUIRED;
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (PolicyException pe) {
-            throw new WebServiceException(pe.getMessage(), pe);
-        }
-        return atAssertion;
     }
 }

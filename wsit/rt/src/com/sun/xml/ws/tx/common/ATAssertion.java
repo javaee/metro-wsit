@@ -25,12 +25,12 @@ package com.sun.xml.ws.tx.common;
  * Enum for ATAssertion values.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 1.0
  */
 
 public enum ATAssertion {
-    NOT_ALLOWED,
-    ALLOWED,
-    REQUIRED
+    NOT_ALLOWED,  // Absence of <wsat:ATAssertion/>
+    ALLOWED,      // <wsat:ATAssertion wsp:Optional="true"/> 
+    MANDATORY     // <wsat:ATAssertion/>
 }

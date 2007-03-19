@@ -39,6 +39,7 @@ import com.sun.xml.ws.policy.jaxws.spi.PolicyMapUpdateProvider;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import static com.sun.xml.ws.tx.common.Constants.AT_ALWAYS_CAPABILITY;
 import static com.sun.xml.ws.tx.common.Constants.AT_ASSERTION;
+import static com.sun.xml.ws.tx.common.Constants.WSP2002_OPTIONAL;
 import com.sun.xml.ws.tx.common.TransactionAnnotationProcessor.TransactionAttributeType;
 
 import javax.xml.namespace.QName;
@@ -148,7 +149,7 @@ public class TxMapUpdateProvider implements PolicyMapUpdateProvider {
             result.setOptionalAttribute(isOptional);
             if (isOptional) {
                 // patch for wsit 419
-                result.setAttribute(WSP2002Optional, "true");
+                result.setAttribute(WSP2002_OPTIONAL, "true");
             }
             return result;
         }
@@ -158,8 +159,6 @@ public class TxMapUpdateProvider implements PolicyMapUpdateProvider {
         }
     }
     
-    static final private String WSP2002_NS = "http://schemas.xmlsoap.org/ws/2002/12/policy"; 
-    static final private QName WSP2002Optional = new QName(WSP2002_NS, "Optional");
     static final private WsatPolicyAssertion AT_ASSERTION_OPTIONAL = new WsatPolicyAssertion(AT_ASSERTION, true);
     static final private WsatPolicyAssertion AT_ASSERTION_REQUIRED = new WsatPolicyAssertion(AT_ASSERTION, false);
     static final private WsatPolicyAssertion AT_ALWAYS_CAPABILITY_PA = new WsatPolicyAssertion(AT_ALWAYS_CAPABILITY, false);
