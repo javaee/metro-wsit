@@ -31,16 +31,15 @@ import javax.xml.ws.WebFault;
 @WebFault(name = "ServiceChannelException", targetNamespace = "http://servicechannel.tcp.transport.ws.xml.sun.com/",
 faultBean = "com.sun.xml.ws.transport.tcp.servicechannel.ServiceChannelException$ServiceChannelExceptionBean")
 public class ServiceChannelException extends Exception {
-    
     private ServiceChannelExceptionBean faultInfo;
     
     public ServiceChannelException() {
         faultInfo = new ServiceChannelExceptionBean();
     }
     
-    public ServiceChannelException(int id, @Nullable final String message) {
+    public ServiceChannelException(ServiceChannelErrorCode errorCode, @Nullable final String message) {
         super(message);
-        faultInfo = new ServiceChannelExceptionBean(id , message);
+        faultInfo = new ServiceChannelExceptionBean(errorCode , message);
     }
     
     public ServiceChannelException(final String message, final ServiceChannelExceptionBean faultInfo) {
@@ -63,22 +62,22 @@ public class ServiceChannelException extends Exception {
     
     public static class ServiceChannelExceptionBean {
         private String message;
-        private int id;
+        private ServiceChannelErrorCode errorCode;
         
         public ServiceChannelExceptionBean() {
         }
         
-        public ServiceChannelExceptionBean(final int id, final String message) {
-            this.id = id;
+        public ServiceChannelExceptionBean(final ServiceChannelErrorCode errorCode, final String message) {
+            this.errorCode = errorCode;
             this.message = message;
         }
 
-        public int getId() {
-            return id;
+        public ServiceChannelErrorCode getErrorCode() {
+            return errorCode;
         }
         
-        public void setId(int id)  {
-            this.id = id;
+        public void setErrorCode(ServiceChannelErrorCode errorCode)  {
+            this.errorCode = errorCode;
         }
         
         public String getMessage() {

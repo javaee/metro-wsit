@@ -158,7 +158,7 @@ public class TCPTransportPipe implements Pipe {
             } catch(ServiceChannelException e) {
                 releaseSession(channelContext);
                 retryNum = TCPConstants.CLIENT_MAX_FAIL_TRIES + 1;
-                failure = new WebServiceException(MessagesMessages.WSTCP_0016_ERROR_WS_EXECUTION_ON_SERVER(e.getFaultInfo().getId() + ":" + e.getMessage()), e);
+                failure = new WebServiceException(MessagesMessages.WSTCP_0016_ERROR_WS_EXECUTION_ON_SERVER(e.getFaultInfo().getErrorCode() + ":" + e.getMessage()), e);
             } catch(Exception e) {
                 abortSession(channelContext);
                 retryNum = TCPConstants.CLIENT_MAX_FAIL_TRIES + 1;

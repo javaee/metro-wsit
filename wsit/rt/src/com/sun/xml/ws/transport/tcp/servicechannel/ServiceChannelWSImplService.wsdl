@@ -14,12 +14,6 @@
 <message name="ServiceChannelException">
 <part name="fault" element="tns:ServiceChannelException"/>
 </message>
-<message name="closeSession">
-<part name="parameters" element="tns:closeSession"/>
-</message>
-<message name="closeSessionResponse">
-<part name="parameters" element="tns:closeSessionResponse"/>
-</message>
 <message name="openChannel">
 <part name="parameters" element="tns:openChannel"/>
 </message>
@@ -38,11 +32,6 @@
 <output message="tns:initiateSessionResponse"/>
 <fault message="tns:ServiceChannelException" name="ServiceChannelException"/>
 </operation>
-<operation name="closeSession">
-<input message="tns:closeSession"/>
-<output message="tns:closeSessionResponse"/>
-<fault message="tns:ServiceChannelException" name="ServiceChannelException"/>
-</operation>
 <operation name="openChannel">
 <input message="tns:openChannel"/>
 <output message="tns:openChannelResponse"/>
@@ -57,18 +46,6 @@
 <binding name="ServiceChannelWSImplPortBinding" type="tns:ServiceChannelWSImpl">
 <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
 <operation name="initiateSession">
-<soap:operation soapAction=""/>
-<input>
-<soap:body use="literal"/>
-</input>
-<output>
-<soap:body use="literal"/>
-</output>
-<fault name="ServiceChannelException">
-<soap:fault name="ServiceChannelException" use="literal"/>
-</fault>
-</operation>
-<operation name="closeSession">
 <soap:operation soapAction=""/>
 <input>
 <soap:body use="literal"/>

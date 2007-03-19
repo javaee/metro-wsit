@@ -116,7 +116,7 @@ public final class WSTCPURI implements com.sun.xml.ws.transport.tcp.connectionca
         } catch (VersionMismatchException e) {
             throw new IOException(e.getMessage());
         } catch (ServiceChannelException e) {
-            throw new IOException(MessagesMessages.WSTCP_0024_SERVICE_CHANNEL_EXCEPTION(e.getFaultInfo().getId(), e.getMessage()));
+            throw new IOException(MessagesMessages.WSTCP_0024_SERVICE_CHANNEL_EXCEPTION(e.getFaultInfo().getErrorCode(), e.getMessage()));
         }
     }
     

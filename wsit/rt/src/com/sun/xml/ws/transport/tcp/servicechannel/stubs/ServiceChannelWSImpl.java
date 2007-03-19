@@ -57,19 +57,6 @@ public interface ServiceChannelWSImpl {
 
     /**
      * 
-     * @return
-     *     returns int
-     */
-    @WebMethod
-    @WebResult(targetNamespace = "")
-    @RequestWrapper(localName = "closeSession", targetNamespace = "http://servicechannel.tcp.transport.ws.xml.sun.com/", className = "com.sun.xml.ws.transport.tcp.servicechannel.stubs.CloseSession")
-    @ResponseWrapper(localName = "closeSessionResponse", targetNamespace = "http://servicechannel.tcp.transport.ws.xml.sun.com/", className = "com.sun.xml.ws.transport.tcp.servicechannel.stubs.CloseSessionResponse")
-    public void closeSession()
-        throws ServiceChannelException
-    ;
-
-    /**
-     * 
      * @param channelSettings
      * @return
      *     returns com.sun.xml.ws.transport.tcp.servicechannel.stubs.ChannelSettings

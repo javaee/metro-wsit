@@ -60,12 +60,6 @@ public class ServiceChannelWSImpl {
         logger.log(Level.FINE, "Session: {0} opened!", connectionSession.hashCode());
     }
     
-    public void closeSession() throws ServiceChannelException {
-        final ChannelContext serviceChannelContext = getChannelContext();
-        final ConnectionSession connectionSession = serviceChannelContext.getConnectionSession();
-        logger.log(Level.FINE, "Session: {0} closed!", connectionSession.hashCode());
-    }
-    
     public ChannelSettings openChannel(
             @WebParam(name="channelSettings", mode=WebParam.Mode.IN) ChannelSettings channelSettings)
             throws ServiceChannelException {
@@ -77,7 +71,7 @@ public class ServiceChannelWSImpl {
         final WSTCPURI tcpURI = channelSettings.getTargetWSURI();
         
         final TCPAdapter adapter = adapterRegistry.getTarget(tcpURI);
-        if (adapter == null) throw new ServiceChannelException(TCPConstants.WS_NOT_FOUND_ERROR, "Service " + channelSettings.getWSServiceName() + "(" + tcpURI.toString() + ") not found!");
+        if (adapter == null) throw new ServiceChannelException(ServiceChannelErrorCode.UNKNOWN_ENDPOINT_ADDRESS, "Service " + channelSettings.getWSServiceName() + "(" + tcpURI.toString() + ") not found!");
         
         channelSettings.setChannelId(connectionSession.getNextAvailChannelId());
         final ChannelContext openedChannelContext = new ChannelContext(connectionSession, channelSettings);

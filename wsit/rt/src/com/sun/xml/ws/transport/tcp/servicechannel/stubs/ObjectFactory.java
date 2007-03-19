@@ -82,14 +82,6 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link CloseSessionResponse }
-     * 
-     */
-    public CloseSessionResponse createCloseSessionResponse() {
-        return new CloseSessionResponse();
-    }
-
-    /**
      * Create an instance of {@link CloseChannelResponse }
      * 
      */
@@ -103,13 +95,6 @@ public class ObjectFactory {
      */
     public InitiateSessionResponse createInitiateSessionResponse() {
         return new InitiateSessionResponse();
-    }
-
-    /**
-     * Create an instance of {@link CloseSession }
-     */
-    public CloseSession createCloseSession() {
-        return new CloseSession();
     }
 
     /**
@@ -159,15 +144,6 @@ public class ObjectFactory {
     @XmlElementDecl(namespace = "http://servicechannel.tcp.transport.ws.xml.sun.com/", name = "initiateSessionResponse")
     public JAXBElement<InitiateSessionResponse> createInitiateSessionResponse(InitiateSessionResponse value) {
         return new JAXBElement<InitiateSessionResponse>(_InitiateSessionResponse_QNAME, InitiateSessionResponse.class, null, value);
-    }
-
-    /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link CloseSession }{@code >}}
-     * 
-     */
-    @XmlElementDecl(namespace = "http://servicechannel.tcp.transport.ws.xml.sun.com/", name = "closeSession")
-    public JAXBElement<CloseSession> createCloseSession(CloseSession value) {
-        return new JAXBElement<CloseSession>(_CloseSession_QNAME, CloseSession.class, null, value);
     }
 
     /**
@@ -223,14 +199,4 @@ public class ObjectFactory {
     public JAXBElement<ServiceChannelException> createServiceChannelException(ServiceChannelException value) {
         return new JAXBElement<ServiceChannelException>(_ServiceChannelException_QNAME, ServiceChannelException.class, null, value);
     }
-
-    /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link CloseSessionResponse }{@code >}}
-     * 
-     */
-    @XmlElementDecl(namespace = "http://servicechannel.tcp.transport.ws.xml.sun.com/", name = "closeSessionResponse")
-    public JAXBElement<CloseSessionResponse> createCloseSessionResponse(CloseSessionResponse value) {
-        return new JAXBElement<CloseSessionResponse>(_CloseSessionResponse_QNAME, CloseSessionResponse.class, null, value);
-    }
-
 }

@@ -20,32 +20,13 @@
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
-package com.sun.xml.ws.transport.tcp.servicechannel.stubs;
-
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlType;
-
+package com.sun.xml.ws.transport.tcp.servicechannel;
 
 /**
- * <p>Java class for closeSession complex type.
- * 
- * <p>The following schema fragment specifies the expected content contained within this class.
- * 
- * <pre>
- * &lt;complexType name="closeSession">
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
- * </pre>
- * 
- * 
+ * @author Alexey Stashok
  */
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "closeSession")
-public class CloseSession {
-
-
+public enum ServiceChannelErrorCode {
+    TOO_MANY_OPEN_SESSIONS,
+    TOO_MANY_OPEN_CHANNELS_FOR_SESSION,
+    UNKNOWN_ENDPOINT_ADDRESS
 }

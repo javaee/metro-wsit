@@ -35,7 +35,7 @@ import javax.xml.ws.WebServiceClient;
  * Generated source version: 2.0
  *
  */
-@WebServiceClient(name = "ServiceChannelWSImplService", targetNamespace = "http://servicechannel.tcp.transport.ws.xml.sun.com/", wsdlLocation = "C:\\Projects\\TCPWSTransport/etc/ServiceChannelWSImplService.wsdl")
+@WebServiceClient(name = "ServiceChannelWSImplService", targetNamespace = "http://servicechannel.tcp.transport.ws.xml.sun.com/", wsdlLocation = "ServiceChannelWSImplService.wsdl")
 public class ServiceChannelWSImplService
         extends Service {
     

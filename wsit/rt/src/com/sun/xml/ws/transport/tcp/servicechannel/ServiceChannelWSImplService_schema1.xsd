@@ -3,8 +3,6 @@
 <xs:element name="ServiceChannelException" nillable="true" type="tns:serviceChannelExceptionBean"/>
 <xs:element name="closeChannel" type="tns:closeChannel"/>
 <xs:element name="closeChannelResponse" type="tns:closeChannelResponse"/>
-<xs:element name="closeSession" type="tns:closeSession"/>
-<xs:element name="closeSessionResponse" type="tns:closeSessionResponse"/>
 <xs:element name="initiateSession" type="tns:initiateSession"/>
 <xs:element name="initiateSessionResponse" type="tns:initiateSessionResponse"/>
 <xs:element name="openChannel" type="tns:openChannel"/>
@@ -17,7 +15,7 @@
 </xs:complexType>
 <xs:complexType name="serviceChannelExceptionBean">
 <xs:sequence>
-<xs:element name="id" type="xs:int"/>
+<xs:element name="errorCode" type="tns:serviceChannelErrorCode" minOccurs="0"/>
 <xs:element name="message" type="xs:string" minOccurs="0"/>
 </xs:sequence>
 </xs:complexType>
@@ -27,12 +25,6 @@
 </xs:sequence>
 </xs:complexType>
 <xs:complexType name="closeChannelResponse">
-<xs:sequence/>
-</xs:complexType>
-<xs:complexType name="closeSession">
-<xs:sequence/>
-</xs:complexType>
-<xs:complexType name="closeSessionResponse">
 <xs:sequence/>
 </xs:complexType>
 <xs:complexType name="openChannel">
@@ -73,4 +65,11 @@
 <xs:element name="return" type="tns:channelSettings" minOccurs="0"/>
 </xs:sequence>
 </xs:complexType>
+<xs:simpleType name="serviceChannelErrorCode">
+<xs:restriction base="xs:string">
+<xs:enumeration value="TOO_MANY_OPEN_SESSIONS"/>
+<xs:enumeration value="TOO_MANY_OPEN_CHANNELS_FOR_SESSION"/>
+<xs:enumeration value="UNKNOWN_ENDPOINT_ADDRESS"/>
+</xs:restriction>
+</xs:simpleType>
 </xs:schema>
