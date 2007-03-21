@@ -15,6 +15,7 @@
          </jaxb:schemaBindings>
          </bindings>
     -->
+<!--
     <jaxb:bindings xmlns:jaxb="http://java.sun.com/xml/ns/jaxb" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
         <jaxb:bindings node="/xsd:schema" schemaLocation="sts_schema.xsd">
             <jaxb:schemaBindings>
@@ -22,4 +23,5 @@
             </jaxb:schemaBindings>
         </jaxb:bindings>
     </jaxb:bindings>
+-->
 </bindings>
