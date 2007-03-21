@@ -62,8 +62,16 @@ public interface TrustSPMetadata{
      */
     String getKeyType();
     
-      /**
-     * Gets a map that contains the other attributes for the service provider.
+     /**
+     * Gets a map that contains attributes that aren't bound to any typed property on this class.
+     * 
+     * <p>
+     * the map is keyed by the name of the attribute and 
+     * the value is any object.
+     * 
+     * the map returned by this method is live, and you can add new attribute
+     * by updating the map directly. 
+     * 
      * 
      * @return
      *     always non-null
