@@ -64,8 +64,6 @@ public class TxJAXBContext {
             return marshaller;
         } catch (JAXBException e) {
             logger.severe("createMarshaller", LocalizationMessages.FAILED_TO_CREATE_MARSHALLER_2003(e));
-            
-            // TODO should this throw an exception also
             return null;
         }
     }
@@ -75,8 +73,6 @@ public class TxJAXBContext {
             return getJAXBContext().createUnmarshaller();
         } catch (JAXBException e) {
             logger.severe("createUnmarshaller", LocalizationMessages.FAILED_TO_CREATE_UNMARSHALLER_2004(e));
-      
-            // TODO: rethrow some exception.
             return null;
         }
     }

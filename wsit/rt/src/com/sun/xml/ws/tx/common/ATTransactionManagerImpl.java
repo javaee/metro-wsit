@@ -100,12 +100,6 @@ public class ATTransactionManagerImpl implements TransactionManager {
         return result;
     }
 
-    public long getDefaultTransactionTimeout() {
-        // TODO: should this be a WS-AT default transaction timeout
-        return 0;
-    }
-
-
     public void resume(final Transaction transaction) throws InvalidTransactionException, IllegalStateException, SystemException {
         javaeeTM.resume(transaction);
     }

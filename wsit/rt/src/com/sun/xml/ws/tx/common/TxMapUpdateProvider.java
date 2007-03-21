@@ -131,7 +131,7 @@ public class TxMapUpdateProvider implements PolicyMapUpdateProvider {
                                 LocalizationMessages.ADD_AT_POLICY_ASSERTION_2007(
                                 model.getPortName().toString(),
                                 method.getOperationName(),
-                                "WS-AT policy assertions for " + txnAttr.toString(), 
+                                policy.getName(),
                                 txnAttr.toString(),
                                 CMTEJB.getPackage() + "." + CMTEJB.getName(),
                                 method.getMethod().getName()));

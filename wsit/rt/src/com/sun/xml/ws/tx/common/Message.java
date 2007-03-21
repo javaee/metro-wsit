@@ -153,9 +153,7 @@ public class Message {
                 try {
                     cc = CoordinationContextBase.createCoordinationContext(ccHdr.readAsJAXB(unmarshaller));
                 } catch (JAXBException e) {
-                    if (logger.isLogging(Level.WARNING)) {
-                        logger.warning("getCoordinationContext", LocalizationMessages.CANNOT_UNMARSHAL_CONTEXT_2000(e.getLocalizedMessage()));
-                    }
+                    logger.warning("getCoordinationContext", LocalizationMessages.CANNOT_UNMARSHAL_CONTEXT_2000(e.getLocalizedMessage()));
                     throw e;
                 }
             }

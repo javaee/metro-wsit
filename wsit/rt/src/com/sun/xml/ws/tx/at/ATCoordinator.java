@@ -92,7 +92,7 @@ import javax.xml.ws.WebServiceException;
  *
  * @author Ryan.Shoemaker@Sun.COM
  * @author Joe.Fialli@Sun.COM
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  * @since 1.0
  */
 public class ATCoordinator extends Coordinator implements Synchronization, XAResource {
@@ -186,20 +186,14 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
             //  mis-registration.)
             registerWithDurableParent();
         } catch (SystemException ex) {
-            
             logger.severe("setTransaction", LocalizationMessages.XA_REGISTER_0004(ex.getLocalizedMessage()));
             // TODO: link and rethrow
-        
         } catch (IllegalStateException ex) {
-            if (logger.isLogging(Level.SEVERE)) {
                 logger.severe("setTransaction", LocalizationMessages.XA_REGISTER_0004(ex.getLocalizedMessage()));
                 // TODO: link and rethrow
-            }
         } catch (RollbackException ex) {
-            if (logger.isLogging(Level.SEVERE)) {
                 logger.severe("setTransaction", LocalizationMessages.XA_REGISTER_0004(ex.getLocalizedMessage()));
                 // TODO: link and rethrow
-            }
         }
     }
     
@@ -625,10 +619,7 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
         }
         // some participants not prepared still, timing out
         setAborting();
-        if (logger.isLogging(Level.WARNING)) {
-            logger.warning("waitForDurablePrepare", LocalizationMessages.TIMEOUT_0006(getIdValue(), durableParticipantsState));
-        }
-
+        logger.warning("waitForDurablePrepare", LocalizationMessages.TIMEOUT_0006(getIdValue(), durableParticipantsState));
     }
     
     private void dumpParticipantsState(final Collection<ATParticipant> lst, final KIND kind) {
@@ -656,7 +647,7 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
             return;
         }
         if (durableParticipantsState != PREPARED_SUCCESS) {
-                logger.warning("durableVolatileCommit", LocalizationMessages.UNEXPECTED_STATE_0008(durableParticipantsState));
+            logger.warning("durableVolatileCommit", LocalizationMessages.UNEXPECTED_STATE_0008(durableParticipantsState));
         }
         durableParticipantsState = COMMITTING;
         guardTimeout = true;
@@ -757,10 +748,8 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
                     if (participant.getState() != COMMITTED &&
                             participant.getState() != ABORTED ||
                             participant.getState() != READONLY) {
-                        if (logger.isLogging(Level.WARNING)) {
-                            logger.warning("waitForCommitOrRollbackResponse",
+                        logger.warning("waitForCommitOrRollbackResponse",
                                     LocalizationMessages.FORGETTING_0009(participant.getState(), getCoordIdPartId(participant)));
-                        }
                         participant.forget();
                     }
                 }
@@ -828,9 +817,7 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
             try {
                 result = prepare(xid);
             } catch (XAException e) {
-                if (logger.isLogging(Level.WARNING)) {
-                    logger.warning("commit(1PC)", LocalizationMessages.PREPARE_FAILED_0010(e.toString()));
-                }
+                logger.warning("commit(1PC)", LocalizationMessages.PREPARE_FAILED_0010(e.toString()));
                 initiateRollback();
                 waitForCommitOrRollbackResponse(Protocol.DURABLE);
                 if (logger.isLogging(Level.FINER)) {
@@ -1006,9 +993,7 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
                     participant.abort();
                 } else {  // participant.isVolatile()
                     // TODO: Invalid State. Send back an invalid state fault.
-                    if (logger.isLogging(Level.SEVERE)) {
-                        logger.severe(METHOD_NAME, LocalizationMessages.INVALID_STATE_0013(getCoordIdPartId(participantId)));
-                    }
+                    logger.severe(METHOD_NAME, LocalizationMessages.INVALID_STATE_0013(getCoordIdPartId(participantId)));
                 }
                 break;
                 
@@ -1022,9 +1007,7 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
                 try {
                     participant.commit();
                 } catch (TXException ex) {
-                    if (logger.isLogging(Level.WARNING)) {
-                        logger.warning(METHOD_NAME, ex.getLocalizedMessage());
-                    }
+                    logger.warning(METHOD_NAME, ex.getLocalizedMessage());
                 }
                 break;
             case PREPARED:

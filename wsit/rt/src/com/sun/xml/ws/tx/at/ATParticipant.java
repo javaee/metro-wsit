@@ -68,7 +68,7 @@ import java.util.logging.Level;
  * already decided to prepare.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  * @since 1.0
  */
 public class ATParticipant extends Registrant {
@@ -344,9 +344,7 @@ public class ATParticipant extends Registrant {
                     try {
                         getATCoordinatorWS(true).preparedOperation(null);
                     } catch (WebServiceException wse) {
-                        if (logger.isLogging(Level.WARNING)) {
-                            logger.warning(METHOD_NAME, LocalizationMessages.PREPARE_FAILED_0010(wse.getLocalizedMessage()));
-                        }
+                        logger.warning(METHOD_NAME, LocalizationMessages.PREPARE_FAILED_0010(wse.getLocalizedMessage()));
                         throw wse;
                     }
                 } else {
@@ -369,11 +367,9 @@ public class ATParticipant extends Registrant {
                     try {
                         getATCoordinatorWS(false).readOnlyOperation(null);
                     } catch (WebServiceException wse) {
-                        if (logger.isLogging(Level.WARNING)) {
-                            logger.warning(METHOD_NAME, "readonly to web service failed. "
-                                    + wse.getLocalizedMessage());
-                        }
-                        throw wse;
+                         logger.warning(METHOD_NAME, "readonly to web service failed. "
+                                        + wse.getLocalizedMessage());
+                         throw wse;
                     }
                 } else {
                     if (logger.isLogging(Level.FINEST)) {
@@ -431,9 +427,7 @@ public class ATParticipant extends Registrant {
                 // this case
                 break;
             case ABORTING:
-                if (logger.isLogging(Level.WARNING)) {
-                    logger.warning(METHOD_NAME, LocalizationMessages.INCONSISTENT_STATE_0020(getState(), getCoordIdPartId()));
-                }
+                logger.warning(METHOD_NAME, LocalizationMessages.INCONSISTENT_STATE_0020(getState(), getCoordIdPartId())); 
                 //fault wsat:InconsistentInternalState
                 abort();
 
@@ -441,9 +435,7 @@ public class ATParticipant extends Registrant {
             case ACTIVE:
             case PREPARING:
             case PREPARED:
-                if (logger.isLogging(Level.WARNING)) {
-                    logger.warning(METHOD_NAME, LocalizationMessages.INCONSISTENT_STATE_0020(getState(), getCoordIdPartId()));
-                }
+                logger.warning(METHOD_NAME, LocalizationMessages.INCONSISTENT_STATE_0020(getState(), getCoordIdPartId()));
                 // TODO throw fault coor:InvalidState
                 abort();
                 break;
@@ -452,14 +444,14 @@ public class ATParticipant extends Registrant {
                 state = STATE.COMMITTING;
                 participant.commit();
                 participant = null;   // no longer need to contact participant.
-                if (logger.isLogging(Level.INFO)) {
-                    logger.info(METHOD_NAME, "committed " + getCoordIdPartId());
+                if (logger.isLogging(Level.FINE)) {
+                    logger.fine(METHOD_NAME, "committed " + getCoordIdPartId());
                 }
                 if (isRemoteCPS()) {
                     try {
                         getATCoordinatorWS(false).committedOperation(null);
                     } catch (WebServiceException wse) {
-                       logger.warning(METHOD_NAME, LocalizationMessages.COMMITTED_FAILED_0021(wse.getLocalizedMessage()));
+                        logger.warning(METHOD_NAME, LocalizationMessages.COMMITTED_FAILED_0021(wse.getLocalizedMessage()));
                         throw wse;
                     }
                 } else {
@@ -512,9 +504,7 @@ public class ATParticipant extends Registrant {
             try {
                 getATCoordinatorWS(false).abortedOperation(null);
             } catch (WebServiceException wse) {
-                if (logger.isLogging(Level.WARNING)) {
-                    logger.warning("localRollback", LocalizationMessages.PREPARED_FAILED_0019(wse.getLocalizedMessage()));
-                }
+                logger.warning("localRollback", LocalizationMessages.PREPARED_FAILED_0019(wse.getLocalizedMessage()));
                 throw wse;
             }
         } else {

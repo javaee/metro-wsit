@@ -86,7 +86,7 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
         javaeeTM = (TransactionManager) jndiLookup(AS_TXN_MGR_JNDI_NAME);
         javaeeSynchReg = (TransactionSynchronizationRegistry) jndiLookup(TXN_SYNC_REG_JNDI_NAME);
     }
-
+    
     public void begin() throws NotSupportedException, SystemException {
         javaeeTM.begin();
     }
@@ -142,27 +142,29 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
     }
     
     public void registerSynchronization(final Synchronization sync) {
+        final String METHOD="registerSynchronization";
+        
+        if (sync == null) {
+            return;
+        }
+        
         Transaction txn = null;
         try {
             txn = javaeeTM.getTransaction();
         } catch (SystemException ex) {
-            logger.warning("registerSynchronization", "registerSynchronization failed with exception ",
-                    ex);
+             logger.info(METHOD, LocalizationMessages.OPERATION_FAILED_2010("getTransaction"), ex);
         }
         if (txn == null) {
-            logger.warning("registerSynchronization", "precondition violated. register synchronization called and there is no current transaction.");
+            logger.warning(METHOD, LocalizationMessages.REGISTER_SYNCH_NO_CURRENT_TXN_2011(sync.getClass().getName()));
         } else {
             try {
                 txn.registerSynchronization(sync);
             } catch (IllegalStateException ex) {
-                  logger.warning("registerSynchronization", "registerSynchronization failed with exception ",
-                    ex);
+                   logger.info(METHOD, LocalizationMessages.OPERATION_FAILED_2010(METHOD), ex);
             } catch (RollbackException ex) {
-                  logger.warning("registerSynchronization", "registerSynchronization failed with exception ",
-                    ex);
+                   logger.info(METHOD, LocalizationMessages.OPERATION_FAILED_2010(METHOD), ex);
             } catch (SystemException ex) {
-                  logger.warning("registerSynchronization", "registerSynchronization failed with exception ",
-                    ex);
+                  logger.info(METHOD, LocalizationMessages.OPERATION_FAILED_2010(METHOD), ex);
             }
         }
     }
@@ -267,12 +269,13 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
      * Note: this method is a no-op when invoked on an EJB.
      */
     public void servletPreInvokeTx() {
+       final String METHOD = "servletPreInvokeTx";
        initServletMethods();
        if (servletPreInvokeTxMethod != null) {
             try {
                 servletPreInvokeTxMethod.invoke(javaeeTM);
             } catch (Throwable ex) {
-                logger.info("servletPreInvokeTx", "servletPreInvokeTx failed with unexpected exception ", ex);
+                logger.info(METHOD, LocalizationMessages.OPERATION_FAILED_2010(METHOD), ex);
             }
        }
     }
@@ -289,12 +292,13 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
      * @param suspend indicate whether the delisting is due to suspension or transaction completion(commmit/rollback)
      */
     public void servletPostInvokeTx(Boolean suspend) {
+          final String METHOD = "servletPostInvokeTx";
        initServletMethods();
        if (servletPostInvokeTxMethod != null) {
             try {
                 servletPostInvokeTxMethod.invoke(javaeeTM, suspend);
             } catch (Throwable ex) {
-                logger.info("servletPostInvokeTx", "servletPostInvokeTx failed with unexpected exception ", ex);
+                 logger.info(METHOD, LocalizationMessages.OPERATION_FAILED_2010(METHOD), ex);
             }
        }
     }

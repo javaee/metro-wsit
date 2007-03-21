@@ -31,12 +31,13 @@ import java.net.UnknownHostException;
  * other modules.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @since 1.0
  */
 public class Util {
 
-
+    final static private TxLogger logger = TxLogger.getLogger(Util.class);
+    
     /**
      * Return the InetAddress of the system hosting the coordination services (AS)
      * <p/>
@@ -48,8 +49,8 @@ public class Util {
         try {
             return InetAddress.getLocalHost();
         } catch (UnknownHostException e) {
-            // TODO: this is bad, but we're going to replace this whole method when wsit issue 278 is fixed
-            e.printStackTrace();
+            // TODO:  replace this whole method when wsit issue 278 is fixed
+            logger.severe("getServiceAddress", LocalizationMessages.FQDN_LOOKUP_FAILURE_2012(), e);
         }
         return null;
     }
@@ -65,12 +66,12 @@ public class Util {
             // look for full name
             hostname = InetAddress.getLocalHost().getCanonicalHostName();
         } catch (UnknownHostException ex) {
-            ex.printStackTrace();
+            logger.severe("getServiceHostName", LocalizationMessages.FQDN_LOOKUP_FAILURE_2012(), ex);
             try {
                 // fallback to ip address
                 hostname = InetAddress.getLocalHost().getHostAddress();
             } catch (UnknownHostException e) {
-                e.printStackTrace();
+                logger.severe("getServiceHostName", LocalizationMessages.FQDN_LOOKUP_FAILURE_2012(), e);
             }
         }
 
@@ -126,7 +127,7 @@ public class Util {
                     null // fragment
             );
         } catch (URISyntaxException e) {
-            e.printStackTrace();
+            logger.severe("createURI", LocalizationMessages.URI_SYNTAX_FAILURE_2013(scheme, host, port, path), e );
         }
         return uri;
     }

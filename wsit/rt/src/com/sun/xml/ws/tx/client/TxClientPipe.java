@@ -68,7 +68,7 @@ import java.util.Iterator;
  * This class process transactional context for client outgoing message.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  * @since 1.0
  */
 // suppress known deprecation warnings about using pipes.
@@ -182,6 +182,20 @@ public class TxClientPipe extends TxBasePipe {
                 return next.process(pkt);
         }
 
+//        TODO: Issue a warning if can not flow a WS-AT transaction context due to following implementation limitations
+//        1. From an Application Container
+//        2. On an asynchronous web service invocation   (should be able to detect this statically)
+//        Recorded as wsit issue 471.
+//
+//        if ((atAssertion == MANDATORY || atAssertion == ALLOWED) ) {
+//        // TODO: Is it possible to find out if either of 2 situations mentioned above in this pipe??
+//            logger.info("TxClientPipe", 
+//                    LocalizationMessages.
+//                      WSAT_TXN_FLOW_NOT_SUPPORTED_FROM_CLIENT_1001(
+//                            msg.getOperation(wsdlModel).getName().toString()));
+//             return next.process(pkt);
+//        }
+        
         // get the coordination context from JTS ThreadLocal data
         CoordinationContextInterface context = lookupOrCreateCoordinationContext(atAssertion);
         CoordinationContext CC = (CoordinationContext) context.getValue(); // TODO: fix cast
