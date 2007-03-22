@@ -26,6 +26,8 @@ import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.pipe.Codec;
+import com.sun.xml.ws.api.pipe.SOAPBindingCodec;
+import com.sun.xml.ws.api.pipe.StreamSOAPCodec;
 import com.sun.xml.ws.transport.tcp.encoding.WSTCPFastInfosetStreamCodec;
 import com.sun.xml.ws.transport.tcp.encoding.WSTCPFastInfosetStreamReaderRecyclable;
 import com.sun.xml.ws.transport.tcp.io.Connection;
@@ -261,12 +263,16 @@ public final class ChannelContext implements WSTCPFastInfosetStreamReaderRecycla
             if (supportedMimeTypes.contains(MimeType.FAST_INFOSET_STATEFUL_SOAP11) ||
                     supportedMimeTypes.contains(MimeType.FAST_INFOSET_STATEFUL_SOAP12)) {
                 logger.log(Level.FINEST, "ChannelContext.configureCodec: FI Stateful");
-                channelContext.setCodec(WSTCPFastInfosetStreamCodec.create(soapVersion, channelContext, true));
+                StreamSOAPCodec streamSoapCodec = defaultCodec instanceof SOAPBindingCodec ? 
+                    ((SOAPBindingCodec) defaultCodec).getXMLCodec() : null;
+                channelContext.setCodec(WSTCPFastInfosetStreamCodec.create(streamSoapCodec, soapVersion, channelContext, true));
                 return;
             } else if (supportedMimeTypes.contains(MimeType.FAST_INFOSET_SOAP11) ||
                     supportedMimeTypes.contains(MimeType.FAST_INFOSET_SOAP12)) {
                 logger.log(Level.FINEST, "ChannelContext.configureCodec: FI Stateless");
-                channelContext.setCodec(WSTCPFastInfosetStreamCodec.create(soapVersion, channelContext, false));
+                StreamSOAPCodec streamSoapCodec = defaultCodec instanceof SOAPBindingCodec ? 
+                    ((SOAPBindingCodec) defaultCodec).getXMLCodec() : null;
+                channelContext.setCodec(WSTCPFastInfosetStreamCodec.create(streamSoapCodec, soapVersion, channelContext, false));
                 return;
             }
         }

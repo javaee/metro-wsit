@@ -26,6 +26,7 @@ package com.sun.xml.ws.transport.tcp.encoding;
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.api.pipe.ContentType;
+import com.sun.xml.ws.api.pipe.StreamSOAPCodec;
 import com.sun.xml.ws.encoding.ContentTypeImpl;
 import com.sun.xml.ws.message.stream.StreamHeader;
 import com.sun.xml.ws.message.stream.StreamHeader11;
@@ -38,8 +39,9 @@ import javax.xml.stream.XMLStreamReader;
  * @author Alexey Stashok
  */
 public class WSTCPFastInfosetStreamSOAP11Codec extends WSTCPFastInfosetStreamCodec{
-    /*package*/ WSTCPFastInfosetStreamSOAP11Codec(RecycleAwareListener readerRecycleListener, boolean retainState) {
-        super(SOAPVersion.SOAP_11, readerRecycleListener, retainState, 
+    /*package*/ WSTCPFastInfosetStreamSOAP11Codec(StreamSOAPCodec soapCodec, 
+            RecycleAwareListener readerRecycleListener, boolean retainState) {
+        super(soapCodec, SOAPVersion.SOAP_11, readerRecycleListener, retainState, 
                 (retainState) ? FastInfosetMIMETypes.STATEFUL_SOAP_11 : FastInfosetMIMETypes.SOAP_11);
     }
 

@@ -22,6 +22,10 @@
 
 package com.sun.xml.ws.transport.tcp.encoding;
 
+import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
+import com.sun.xml.ws.api.pipe.Codecs;
+import com.sun.xml.ws.api.pipe.StreamSOAPCodec;
 import com.sun.xml.ws.transport.tcp.encoding.WSTCPFastInfosetStreamReaderRecyclable.RecycleAwareListener;
 import com.sun.xml.fastinfoset.stax.StAXDocumentParser;
 import com.sun.xml.fastinfoset.stax.StAXDocumentSerializer;
@@ -33,7 +37,6 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.api.pipe.ContentType;
 import com.sun.xml.ws.encoding.ContentTypeImpl;
-import com.sun.xml.ws.encoding.StreamSOAPCodec;
 import com.sun.xml.ws.encoding.fastinfoset.FastInfosetStreamSOAPCodec;
 import com.sun.xml.ws.message.stream.StreamHeader;
 import java.io.IOException;
@@ -63,16 +66,16 @@ public abstract class WSTCPFastInfosetStreamCodec implements Codec {
     
     private final RecycleAwareListener _readerRecycleListener;
     
-    /* package */ WSTCPFastInfosetStreamCodec(SOAPVersion soapVersion,
-            RecycleAwareListener readerRecycleListener, boolean retainState, String mimeType) {
-        _soapCodec = StreamSOAPCodec.create(soapVersion);
+    /* package */ WSTCPFastInfosetStreamCodec(@Nullable StreamSOAPCodec soapCodec, @NotNull SOAPVersion soapVersion,
+            @NotNull RecycleAwareListener readerRecycleListener, boolean retainState, String mimeType) {
+        _soapCodec = soapCodec != null ? soapCodec : Codecs.createSOAPEnvelopeXmlCodec(soapVersion);
         _readerRecycleListener = readerRecycleListener;
         _retainState = retainState;
         _defaultContentType = new ContentTypeImpl(mimeType);
     }
     
     /* package */ WSTCPFastInfosetStreamCodec(WSTCPFastInfosetStreamCodec that) {
-        this._soapCodec = that._soapCodec.copy();
+        this._soapCodec = (StreamSOAPCodec) that._soapCodec.copy();
         this._readerRecycleListener = that._readerRecycleListener;
         this._retainState = that._retainState;
         this._defaultContentType = that._defaultContentType;
@@ -158,15 +161,16 @@ public abstract class WSTCPFastInfosetStreamCodec implements Codec {
      * @param version the SOAP version of the codec.
      * @return a new {@link WSTCPFastInfosetStreamCodec} instance.
      */
-    public static WSTCPFastInfosetStreamCodec create(SOAPVersion version, RecycleAwareListener readerRecycleListener, boolean retainState) {
+    public static WSTCPFastInfosetStreamCodec create(StreamSOAPCodec soapCodec, 
+            SOAPVersion version, RecycleAwareListener readerRecycleListener, boolean retainState) {
         if(version==null)
             // this decoder is for SOAP, not for XML/HTTP
             throw new IllegalArgumentException();
         switch(version) {
             case SOAP_11:
-                return new WSTCPFastInfosetStreamSOAP11Codec(readerRecycleListener, retainState);
+                return new WSTCPFastInfosetStreamSOAP11Codec(soapCodec, readerRecycleListener, retainState);
             case SOAP_12:
-                return new WSTCPFastInfosetStreamSOAP12Codec(readerRecycleListener, retainState);
+                return new WSTCPFastInfosetStreamSOAP12Codec(soapCodec, readerRecycleListener, retainState);
             default:
                 throw new AssertionError();
         }
