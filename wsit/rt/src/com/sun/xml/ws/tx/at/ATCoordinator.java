@@ -92,7 +92,7 @@ import javax.xml.ws.WebServiceException;
  *
  * @author Ryan.Shoemaker@Sun.COM
  * @author Joe.Fialli@Sun.COM
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  * @since 1.0
  */
 public class ATCoordinator extends Coordinator implements Synchronization, XAResource {
@@ -1095,7 +1095,7 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
         */
     }
 
-    static public EndpointReference localCoordinatorProtocolService;
+    static public final EndpointReference localCoordinatorProtocolService;
     
     static {
          MemberSubmissionEndpointReference epr = new MemberSubmissionEndpointReference();
