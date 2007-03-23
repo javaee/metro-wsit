@@ -9,7 +9,9 @@
                 <root id="src.dir"/>
                 <root id="src.gen-src.dir"/>
             </source-roots>
-            <test-roots/>
+            <test-roots>
+                <root id="test.src.dir" name="test/unit/src"/>
+            </test-roots>
         </data>
         <references xmlns="http://www.netbeans.org/ns/ant-project-references/1">
             <reference>

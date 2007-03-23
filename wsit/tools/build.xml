@@ -6,7 +6,7 @@
     <description>Builds, tests, and runs the project WSIT-Tools.</description>
     <import file="nbproject/build-impl.xml"/>
     <import file="../properties.xml"/>
-
+    
     <property name="build.dir" value="${basedir}/build"/>
     <property name="build.gen-src.dir" value="${build.dir}/gen-src"/>
     
@@ -19,7 +19,7 @@
                 <pathelement path="${basedir}/../${lib.tooltime.dir}/jaxws-tools.jar" />
             </classpath>
         </taskdef>
-
+        
         <mkdir dir="${build.gen-src.dir}"/>
         
         <resgen destdir="${build.gen-src.dir}">
@@ -27,16 +27,16 @@
         </resgen>
         
     </target>
-
+    
     <target name="-pre-compile" depends="resgen"
             description="Hook resgen target into compilation process"/>
-
+    
     <taskdef name="concatmanifest" classname="taskdefs.ConcatManifest">
         <classpath>
             <fileset dir="../${etc.lib.dir}" includes="wsit-taskdefs.jar"/>
         </classpath>
     </taskdef>
-
+    
     <macrodef name="expand-jars-macro">
         <attribute name="libdir"/>
         <element name="metainf" optional="true"/>
@@ -74,24 +74,37 @@
         <antcall target="expand-jars-tooltime"/>
         <antcall target="combine-jars-tooltime"/>
     </target>
-
+    
     <target name="expand-jars-tooltime" unless="tooltime.jars.expanded">
-        <expand-jars-macro libdir="../${lib.tooltime.dir}"/>
+        <expand-jars-macro libdir="../${lib.tooltime.dir}">
+            <metainf>
+                <copy todir="${tmpdir}/META-INF/services" overwrite="true">
+                    <fileset dir="../etc/META-INF/services">
+                        <include name="*.TWSDLExtensionHandler"/>
+                    </fileset>
+                </copy>
+            </metainf>
+        </expand-jars-macro>
     </target>
-
+    
     <target name="combine-jars-tooltime">
         <combine-jars-macro jarname="${name}-tools" classesdir="build/classes">
             <services>
-
                 <fileset dir="${tmpdir}">
                     <include name="**/*.*"/>
-                    <exclude name="**/*.TWSDL*"/>
-                    <exclude name="**/*.TJava*"/>
                 </fileset>
             </services>
         </combine-jars-macro>
     </target>
-
+    
+    <target name="test.resources.copy"
+            description="Copy test resources before running tests">
+        <copy todir="build/test/unit/data">
+            <fileset dir="test/unit/data" includes="*.wsdl"/>
+            <fileset dir="test/unit/data" includes="*.xml"/>
+        </copy>
+    </target>
+    
     <target name="src-zip">
         <delete dir="${tmpdir}"/>
         <mkdir dir="${tmpdir}"/>
@@ -106,19 +119,26 @@
             <fileset dir="${tmpdir}"/>
         </zip>
     </target>
-
+    
     <target name="wsit-jars-tools">
         <delete dir="${tmpdir}"/>
         <mkdir dir="${tmpdir}/META-INF"/>
         <property name="wsit.tools.dir" value="${tools.dir}/build"/>
         <property name="wsit.tools.jarname" value="wsit-tools"/>
         <mkdir dir="${wsit.tools.dir}"/>
-
+        
         <updateManifestWithVersion file="${tmpdir}/MANIFEST.MF"/>
         <jar destfile="${wsit.tools.dir}/${wsit.tools.jarname}.jar" manifest="${tmpdir}/MANIFEST.MF">
             <fileset dir="${tools.dir}/build/classes"/>
         </jar>
     </target>
 
+    <target name="-post-compile-test" depends="init,test.resources.copy">
+    </target>
+
+    <target name="-post-compile-test-single" depends="init,test.resources.copy">
+    </target>
+    
     <target name="create-wsit-tools-jar" depends="wsit-jars-tools"/>
+    
 </project>
