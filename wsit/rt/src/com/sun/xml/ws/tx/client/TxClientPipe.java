@@ -45,6 +45,7 @@ import static com.sun.xml.ws.tx.common.ATAssertion.ALLOWED;
 import static com.sun.xml.ws.tx.common.ATAssertion.MANDATORY;
 import static com.sun.xml.ws.tx.common.Constants.AT_ASSERTION;
 import static com.sun.xml.ws.tx.common.Constants.WSAT_2004_PROTOCOL;
+import com.sun.xml.ws.tx.common.StatefulWebserviceFactoryFactory;
 import com.sun.xml.ws.tx.common.TransactionManagerImpl;
 import com.sun.xml.ws.tx.common.TxBasePipe;
 import com.sun.xml.ws.tx.common.TxJAXBContext;
@@ -68,7 +69,7 @@ import java.util.Iterator;
  * This class process transactional context for client outgoing message.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  * @since 1.0
  */
 // suppress known deprecation warnings about using pipes.
@@ -186,15 +187,21 @@ public class TxClientPipe extends TxBasePipe {
 //        1. From an Application Container
 //        2. On an asynchronous web service invocation   (should be able to detect this statically)
 //        Recorded as wsit issue 471.
-//
-//        if ((atAssertion == MANDATORY || atAssertion == ALLOWED) ) {
-//        // TODO: Is it possible to find out if either of 2 situations mentioned above in this pipe??
-//            logger.info("TxClientPipe", 
-//                    LocalizationMessages.
-//                      WSAT_TXN_FLOW_NOT_SUPPORTED_FROM_CLIENT_1001(
-//                            msg.getOperation(wsdlModel).getName().toString()));
-//             return next.process(pkt);
-//        }
+        if ((atAssertion == MANDATORY || atAssertion == ALLOWED) ) {
+            // TODO: Is it possible to determine (2) in this pipe??
+          
+            // Following conditional is true in application client OR when 
+            // configuration of wstx service is invalid. 
+            // Possible misconfigurations are wrong port for wstx_service,
+            // improper security certificates.
+            if (! StatefulWebserviceFactoryFactory.getInstance().isWSTXServiceAvailable()) {
+                logger.warning("TxClientPipe",
+                        LocalizationMessages.
+                        WSAT_TXN_CONTEXT_NOT_FLOWED_1001(
+                        msg.getOperation(wsdlModel).getName().toString()));
+                return next.process(pkt);
+            }
+        }
         
         // get the coordination context from JTS ThreadLocal data
         CoordinationContextInterface context = lookupOrCreateCoordinationContext(atAssertion);

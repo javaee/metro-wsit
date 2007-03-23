@@ -165,6 +165,7 @@ public class ATSubCoordinator extends ATCoordinator {
         }
 
         public Participant.STATE prepare() throws TXException {
+            Participant.STATE result = Participant.STATE.P_OK;
             final String METHOD = "durableParticipant";
             if (logger.isLogging(Level.FINER)) {
                 logger.entering(METHOD, getCoordIdPartId(rootDurableParticipant));
@@ -200,8 +201,9 @@ public class ATSubCoordinator extends ATCoordinator {
                     if (isAborting()) {
                         abort();
                     } else if (xaResult == XAResource.XA_RDONLY && getDurableParticipants().size() == 0) {
+                        guardTimeout = true;
                         rootDurableParticipant.readonly();
-                        forget();
+                        result = Participant.STATE.P_READONLY;
                     } else if (xaResult == XAResource.XA_OK) {  //implied no durable participants are aborting since isAborting() is false
                         // Participant Subordinator coordinator must not timeout after sending 
                         // prepared to superior coordinator.
@@ -213,7 +215,8 @@ public class ATSubCoordinator extends ATCoordinator {
             if (logger.isLogging(Level.FINER)) {
                 logger.exiting("ATSubCoordinator.durableParticipant", getCoordIdPartId(rootDurableParticipant));
             }
-            return Participant.STATE.P_OK;
+            
+            return result;
         }
 
         public void commit() {
@@ -238,7 +241,6 @@ public class ATSubCoordinator extends ATCoordinator {
                     logger.info(METHOD, LocalizationMessages.COMMITTED_SUB_COOR_0025(getIdValue()));
                     rootDurableParticipant.committed();
                 }
-                forget();
             }
         }
 
@@ -256,7 +258,6 @@ public class ATSubCoordinator extends ATCoordinator {
                 initiateDurableRollback();
                 waitForCommitOrRollbackResponse(Protocol.DURABLE);
                 rootDurableParticipant.aborted();
-                forget();
             }
         }
     }
@@ -401,11 +402,19 @@ public class ATSubCoordinator extends ATCoordinator {
         }
     }
 
+    @Override
+    public boolean hasOutstandingParticipants() {
+        return rootDurableParticipant != null || rootVolatileParticipant != null || super.hasOutstandingParticipants();
+    }    
+    
     public void forget(final String partId) {
         if (rootVolatileParticipant != null && rootVolatileParticipant.getIdValue().equals(partId)) {
             rootVolatileParticipant = null;
             if (logger.isLogging(Level.FINE)) {
                 logger.fine("forget", "forgot volatile participant link to parent " + getCoordIdPartId(partId));
+            }
+            if (!hasOutstandingParticipants()) {
+                forget();
             }
             return;
         }
@@ -413,6 +422,9 @@ public class ATSubCoordinator extends ATCoordinator {
             rootDurableParticipant = null;
             if (logger.isLogging(Level.FINE)) {
                 logger.fine("forget", "forgot durable participant link to parent " + getCoordIdPartId(partId));
+            }
+            if (!hasOutstandingParticipants()) {
+                forget();
             }
             return;
         }

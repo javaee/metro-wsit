@@ -92,7 +92,7 @@ import javax.xml.ws.WebServiceException;
  *
  * @author Ryan.Shoemaker@Sun.COM
  * @author Joe.Fialli@Sun.COM
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  * @since 1.0
  */
 public class ATCoordinator extends Coordinator implements Synchronization, XAResource {
@@ -899,7 +899,7 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
     }
 
     public boolean isSameRM(final XAResource xAResource) throws XAException {
-        throw new UnsupportedOperationException("Not yet implemented");
+        return false;
     }
 
     public void prepared(final String participantId) {
@@ -1072,12 +1072,18 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
             if (logger.isLogging(Level.FINE)) {
                 logger.fine("forget", "forgot volatile participant " + getCoordIdPartId(partId));
             }
+            if (!hasOutstandingParticipants()) {
+                forget();
+            }
             return;
         }
         removed = durableParticipants.remove(partId);
         if (removed != null) {
             if (logger.isLogging(Level.FINE)) {
                 logger.fine("forget", "forgot durable participant " + getCoordIdPartId(partId));
+            } 
+            if (!hasOutstandingParticipants()) {
+                forget();
             }
             return;
         }
@@ -1163,4 +1169,8 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
             return tx;
         }
     }
+   
+    public boolean hasOutstandingParticipants() {
+        return getDurableParticipants().size() != 0 || getVolatileParticipants().size() != 0;
+    }    
 }    

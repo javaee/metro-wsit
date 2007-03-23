@@ -31,7 +31,7 @@ import java.net.URI;
  * This class ...
  *
  * @author Joe.Fialli@Sun.COM Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 1.0
  */
 public interface StatefulWebserviceFactory {
@@ -62,4 +62,5 @@ public interface StatefulWebserviceFactory {
                                            AddressingVersion addressingVersion,
                                            String activityId,
                                            String registrantId);
+    public boolean isWSTXServiceAvailable();
 }

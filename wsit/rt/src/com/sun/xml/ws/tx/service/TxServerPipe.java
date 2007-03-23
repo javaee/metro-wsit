@@ -24,6 +24,7 @@ package com.sun.xml.ws.tx.service;
 import com.sun.enterprise.transaction.TransactionImport;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
@@ -72,7 +73,7 @@ import java.util.logging.Level;
  * <p/>
  * Supports following WS-Coordination protocols: 2004 WS-Atomic Transaction protocol
  *
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  * @since 1.0
  */
 // suppress known deprecation warnings about using pipes.
@@ -153,16 +154,16 @@ public class TxServerPipe extends TxBasePipe {
         
         // Precondition check
         assertNoCurrentTransaction(
-           LocalizationMessages.INVALID_JTA_TRANSACTION_ENTERING_5002(bindingName, msgOperation.toString()));
+           LocalizationMessages.INVALID_JTA_TRANSACTION_ENTERING_5002(bindingName, msgOperation.getLocalPart()));
         
         try {
             coordTxnCtx = msg.getCoordinationContext(unmarshaller);
         } catch (JAXBException je) {
             String invalidMsg = 
                     LocalizationMessages.INVALID_COORDINATION_CONTEXT_5006(
-                                    msg.getMessageID().toString(), 
+                                    msg.getMessageID(), 
                                     bindingName, 
-                                    msgOperation.toString(), 
+                                    msgOperation.getLocalPart(), 
                                     je.getLocalizedMessage());
             logger.warning(METHOD_NAME, invalidMsg, je);
             
@@ -171,15 +172,18 @@ public class TxServerPipe extends TxBasePipe {
             // DO NOT LOCALIZE englishReason
             // 2004 WS-Coordination, S4. Coordination Faults "[Reason] The English language reason element""
             String englishReason = "WSTX-SERVICE-5006: Unable to read CoordinationContext in request message, msgId=" + 
-                                msg.getMessageID().toString() + ", sent to endpoint:operation " + bindingName + ":" + 
-                                msgOperation.toString() + " due to JAXException " + je.getMessage(); 
-            WsaHelper.sendFault(
-                    msg.getFaultTo(),
-                    msg.getReplyTo().toSpec(),
-                    SOAPVersion.SOAP_11,
-                    TxFault.InvalidParameters,
-                    englishReason,
-                    msg.getMessageID());
+                                msg.getMessageID() + ", sent to endpoint:operation " + bindingName + ":" + 
+                                msgOperation.getLocalPart() + " due to JAXException " + je.getMessage(); 
+            WSEndpointReference replyTo = msg.getReplyTo();
+            if (replyTo != null) {
+                WsaHelper.sendFault(
+                        msg.getFaultTo(),
+                        replyTo.toSpec(),
+                        SOAPVersion.SOAP_11,
+                        TxFault.InvalidParameters,
+                        englishReason,
+                        msg.getMessageID());
+            }
         }
         
         // verify coordination type protocol
@@ -201,7 +205,7 @@ public class TxServerPipe extends TxBasePipe {
                         coordTxnCtx.getCoordinationType(),
                         coordTxnCtx.getIdentifier().toString(),
                         bindingName,
-                        msgOperation.toString()));
+                        msgOperation.getLocalPart()));
                 coordTxnCtx = null;
             }
         }
@@ -210,7 +214,7 @@ public class TxServerPipe extends TxBasePipe {
         if (msgOpATPolicy.atAssertion == MANDATORY && coordTxnCtx == null) {
             String inconsistencyMsg = 
                     LocalizationMessages.MUST_FLOW_WSAT_COORDINATION_CONTEXT_5000(
-                                bindingName, msgOperation.toString(), msg.getMessageID().toString());
+                                bindingName, msgOperation.getLocalPart(), msg.getMessageID());
             logger.warning(METHOD_NAME, inconsistencyMsg);
             // TODO:  complete evaluation if desire to throw this as an exception or not.
             //        Since WS-AT specification does not require this, might be best not to throw exception.
@@ -227,7 +231,7 @@ public class TxServerPipe extends TxBasePipe {
             // Not an error just log this as occuring since it would be helpful to know about this.
             logger.info(METHOD_NAME, 
                     LocalizationMessages.UNEXPECTED_FLOWED_TXN_CONTEXT_5004(
-                                  bindingName, msgOperation.toString(), msg.getMessageID().toString(),
+                                  bindingName, msgOperation.getLocalPart(), msg.getMessageID(),
                                   coordTxnCtx.getIdentifier().toString()));
         }
 
@@ -313,7 +317,7 @@ public class TxServerPipe extends TxBasePipe {
         // Postcondition check
         assertNoCurrentTransaction(
                 LocalizationMessages.INVALID_JTA_TRANSACTION_RETURNING_5003(bindingName, 
-                                                                            msgOperation.toString()));
+                                                                            msgOperation.getLocalPart()));
         if (rethrow != null) {
             String exMsg = LocalizationMessages.WSTXRETHROW_5014(bindingName, 
                                                                  msgOperation.toString());

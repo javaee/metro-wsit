@@ -116,9 +116,6 @@ public class Coordinator
     public RegistrationCoordinatorPortType getRegistrationCoordinator(EndpointReference epr, WebServiceFeature... features) {
         RegistrationCoordinatorPortType result =
                 (RegistrationCoordinatorPortType) super.getPort(epr, RegistrationCoordinatorPortType.class, features);
-        BindingProvider bp = (BindingProvider) result;
-        Map<String, Object> requestCtx = bp.getRequestContext();
-        requestCtx.put("javax.xml.ws.service.endpoint.address", new WSEndpointReference(epr).getAddress());
         return result;
     }
 
@@ -139,9 +136,6 @@ public class Coordinator
     public RegistrationRequesterPortType getRegistrationRequester(EndpointReference epr, WebServiceFeature... features) {
         RegistrationRequesterPortType result =
                 (RegistrationRequesterPortType) super.getPort(epr, RegistrationRequesterPortType.class, features);
-        BindingProvider bp = (BindingProvider) result;
-        Map<String, Object> requestCtx = bp.getRequestContext();
-        requestCtx.put("javax.xml.ws.service.endpoint.address", new WSEndpointReference(epr).getAddress());
         return result;
     }
 

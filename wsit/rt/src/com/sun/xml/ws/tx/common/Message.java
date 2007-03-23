@@ -186,7 +186,7 @@ public class Message {
      */
     public String getMessageID() {
         String result = null;
-        if (hdrList != null) {
+        if (hdrList != null && ADDRESSING_VERSION != null && SOAP_VERSION != null) {
             result = hdrList.getMessageID(ADDRESSING_VERSION, SOAP_VERSION);
         }
         return result;
@@ -197,7 +197,7 @@ public class Message {
      */
     public String getTo() {
         String result = null;
-        if (hdrList != null) {
+        if (hdrList != null && ADDRESSING_VERSION != null && SOAP_VERSION != null) {
             result = hdrList.getTo(ADDRESSING_VERSION, SOAP_VERSION);
         }
         return result;
@@ -208,7 +208,7 @@ public class Message {
      */
     public String getAction() {
         String result = null;
-        if (hdrList != null) {
+        if (hdrList != null && ADDRESSING_VERSION != null && SOAP_VERSION != null) {
             result = hdrList.getAction(ADDRESSING_VERSION, SOAP_VERSION);
         }
         return result;
@@ -219,7 +219,7 @@ public class Message {
      */
     public WSEndpointReference getFaultTo() {
         WSEndpointReference result = null;
-        if (hdrList != null) {
+        if (hdrList != null && ADDRESSING_VERSION != null && SOAP_VERSION != null) {
             result = hdrList.getFaultTo(ADDRESSING_VERSION, SOAP_VERSION);
         }
         return result;
@@ -230,7 +230,7 @@ public class Message {
      */
     public WSEndpointReference getReplyTo() {
         WSEndpointReference result = null;
-        if (hdrList != null) {
+        if (hdrList != null&& ADDRESSING_VERSION != null && SOAP_VERSION != null) {
             result = hdrList.getReplyTo(ADDRESSING_VERSION, SOAP_VERSION);
         }
         return result;

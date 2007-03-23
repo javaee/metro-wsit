@@ -36,7 +36,7 @@ import java.util.Map;
  * This class encapsulates the genertated 2004/10 version of {@link com.sun.xml.ws.tx.webservice.member.coord.CoordinationContextType}
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @since 1.0
  */
 public class CoordinationContext200410 extends CoordinationContextBase {
@@ -75,8 +75,7 @@ public class CoordinationContext200410 extends CoordinationContextBase {
     }
 
     public void setExpires(final long expires) {
-        assert(!(expires < 0L));
-        if (expires == 0L) {
+        if (expires <= 0L) {
             context.setExpires(null);
         } else {
             final Expires exp = new Expires();
