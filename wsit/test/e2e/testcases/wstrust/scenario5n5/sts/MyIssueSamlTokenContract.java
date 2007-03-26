@@ -106,9 +106,6 @@ public abstract class MyIssueSamlTokenContract implements WSTrustContract<Reques
         
         TrustSPMetadata spMd = stsConfig.getTrustSPMetadata(appliesTo);
         if (spMd == null){
-            log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0004_UNKNOWN_SERVICEPROVIDER(appliesTo));
-            throw new WSTrustException(LogStringsMessages.WST_0004_UNKNOWN_SERVICEPROVIDER(appliesTo));
         }
 
         // Get TokenType
@@ -139,19 +136,12 @@ public abstract class MyIssueSamlTokenContract implements WSTrustContract<Reques
         // Get authenticaed client Subject
         final Subject subject = context.getRequestorSubject();
         if(subject == null){
-            log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0030_REQUESTOR_NULL());
-            throw new WSTrustException(LogStringsMessages.WST_0030_REQUESTOR_NULL());
         }
         
         // Check if the client is authorized to be issued the token
         final STSAuthorizationProvider authzProvider = WSTrustFactory.getSTSAuthorizationProvider();
         if (!authzProvider.isAuthorized(subject, appliesTo, tokenType, keyType)){
-            log.log(Level.SEVERE, 
-                    LogStringsMessages.WST_0015_CLIENT_NOT_AUTHORIZED(
-                    subject.toString(), tokenType, appliesTo));
-            throw new WSTrustException(LogStringsMessages.WST_0015_CLIENT_NOT_AUTHORIZED(
-                    subject.toString(), tokenType, appliesTo));
+            
         }
         
         // Get claimed attributes
@@ -203,18 +193,14 @@ public abstract class MyIssueSamlTokenContract implements WSTrustContract<Reques
                 proofToken.setComputedKey(URI.create(WSTrustConstants.CK_PSHA1));
                 key = SecurityUtil.P_SHA1(clientEntr, key, keySize/8);
             } catch (Exception ex){
-                log.log(Level.SEVERE, 
-                        LogStringsMessages.WST_0013_ERROR_SECRET_KEY(WSTrustConstants.CK_PSHA1, keySize), ex);
-                throw new WSTrustException(LogStringsMessages.WST_0013_ERROR_SECRET_KEY(WSTrustConstants.CK_PSHA1, keySize), ex);
+               
             }
             
             context.setProofKey(key);
         }else if(WSTrustConstants.PUBLIC_KEY.equals(keyType)){
             // Get client certificate and put it in the IssuedTokenContext
         }else{
-            log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0025_INVALID_KEY_TYPE(keyType));
-            throw new WSTrustException(LogStringsMessages.WST_0025_INVALID_KEY_TYPE(keyType));
+           
         }
         
         //==================
@@ -229,10 +215,7 @@ public abstract class MyIssueSamlTokenContract implements WSTrustContract<Reques
                 ctx = new URI(rst.getContext());
             }
         } catch (URISyntaxException ex) {
-            log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0014_URI_SYNTAX(), ex);
-            throw new WSTrustException(
-                    LogStringsMessages.WST_0014_URI_SYNTAX() ,ex);
+            
         }
         
         // Create RequestedSecurityToken with SAML assertion

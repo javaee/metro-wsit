@@ -31,7 +31,9 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.security.cert.X509Certificate;
 
 import javax.xml.namespace.QName;
 
@@ -106,6 +108,7 @@ public abstract class IssueSamlTokenContract implements com.sun.xml.ws.api.secur
         
         TrustSPMetadata spMd = stsConfig.getTrustSPMetadata(appliesTo);
         if (spMd == null){
+            // Only used for testing purpose; default should not documented
             spMd = stsConfig.getTrustSPMetadata("default");
         }
         if (spMd == null){
@@ -150,11 +153,12 @@ public abstract class IssueSamlTokenContract implements com.sun.xml.ws.api.secur
         // Check if the client is authorized to be issued the token
         final STSAuthorizationProvider authzProvider = WSTrustFactory.getSTSAuthorizationProvider();
         if (!authzProvider.isAuthorized(subject, appliesTo, tokenType, keyType)){
+            String user = subject.getPrincipals().iterator().next().getName();
             log.log(Level.SEVERE, 
                     LogStringsMessages.WST_0015_CLIENT_NOT_AUTHORIZED(
-                    subject.toString(), tokenType, appliesTo));
+                    user, tokenType, appliesTo));
             throw new WSTrustException(LogStringsMessages.WST_0015_CLIENT_NOT_AUTHORIZED(
-                    subject.toString(), tokenType, appliesTo));
+                    user, tokenType, appliesTo));
         }
         
         // Get claimed attributes
@@ -207,17 +211,36 @@ public abstract class IssueSamlTokenContract implements com.sun.xml.ws.api.secur
                 key = SecurityUtil.P_SHA1(clientEntr, key, keySize/8);
             } catch (Exception ex){
                 log.log(Level.SEVERE, 
-                        LogStringsMessages.WST_0013_ERROR_SECRET_KEY(WSTrustConstants.CK_PSHA1, keySize), ex);
-                throw new WSTrustException(LogStringsMessages.WST_0013_ERROR_SECRET_KEY(WSTrustConstants.CK_PSHA1, keySize), ex);
+                        LogStringsMessages.WST_0013_ERROR_SECRET_KEY(WSTrustConstants.CK_PSHA1, keySize, appliesTo), ex);
+                throw new WSTrustException(LogStringsMessages.WST_0013_ERROR_SECRET_KEY(WSTrustConstants.CK_PSHA1, keySize, appliesTo), ex);
             }
             
             context.setProofKey(key);
         }else if(WSTrustConstants.PUBLIC_KEY.equals(keyType)){
-            // Get client certificate and put it in the IssuedTokenContext
+            final Set certs = context.getRequestorSubject().getPublicCredentials();
+            if(certs == null){
+                log.log(Level.SEVERE,
+                        LogStringsMessages.WST_0034_UNABLE_GET_CLIENT_CERT());
+                throw new WSTrustException(
+                        LogStringsMessages.WST_0034_UNABLE_GET_CLIENT_CERT());
+            }
+            boolean addedClientCert = false;
+            for(Object o : certs){
+                if(o instanceof X509Certificate){
+                    final X509Certificate clientCert = (X509Certificate)o;
+                    context.setRequestorCertificate(clientCert);
+                    addedClientCert = true;
+                }
+            }
+            if(!addedClientCert){
+                log.log(Level.SEVERE,
+                        LogStringsMessages.WST_0034_UNABLE_GET_CLIENT_CERT());
+                throw new WSTrustException(LogStringsMessages.WST_0034_UNABLE_GET_CLIENT_CERT());
+            }
         }else{
             log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0025_INVALID_KEY_TYPE(keyType));
-            throw new WSTrustException(LogStringsMessages.WST_0025_INVALID_KEY_TYPE(keyType));
+                    LogStringsMessages.WST_0025_INVALID_KEY_TYPE(keyType, appliesTo));
+            throw new WSTrustException(LogStringsMessages.WST_0025_INVALID_KEY_TYPE(keyType, appliesTo));
         }
         
         //==================

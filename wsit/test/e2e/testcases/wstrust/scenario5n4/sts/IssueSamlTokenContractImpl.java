@@ -126,8 +126,7 @@ public  class IssueSamlTokenContractImpl extends MyIssueSamlTokenContract {
             } else if (WSTrustConstants.SAML20_ASSERTION_TOKEN_TYPE.equals(tokenType)){
                 assertion = createSAML20Assertion(assertionId, issuer, appliesTo, keyInfo, claimedAttrs);
             } else{
-                log.log(Level.SEVERE, LogStringsMessages.WST_0031_UNSUPPORTED_TOKEN_TYPE(tokenType, appliesTo));
-                throw new WSTrustException(LogStringsMessages.WST_0031_UNSUPPORTED_TOKEN_TYPE(tokenType, appliesTo));
+           
             }
             
             // Get the STS's public and private key
@@ -171,25 +170,13 @@ public  class IssueSamlTokenContractImpl extends MyIssueSamlTokenContract {
                 token = new GenericToken(signedAssertion);
             }
         } catch (XWSSecurityException ex){
-            log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0032_ERROR_CREATING_SAML_ASSERTION(), ex);
-            throw new WSTrustException(
-                    LogStringsMessages.WST_0032_ERROR_CREATING_SAML_ASSERTION(), ex);
+           
         }catch (XMLEncryptionException ex) {
-            log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0032_ERROR_CREATING_SAML_ASSERTION(), ex);
-            throw new WSTrustException(
-                    LogStringsMessages.WST_0032_ERROR_CREATING_SAML_ASSERTION(), ex);
+           
         }catch (JAXBException ex) {
-            log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0032_ERROR_CREATING_SAML_ASSERTION(), ex);
-            throw new WSTrustException(
-                    LogStringsMessages.WST_0032_ERROR_CREATING_SAML_ASSERTION(), ex);
+            
         }catch (Exception ex) {
-            log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0032_ERROR_CREATING_SAML_ASSERTION(), ex);
-            throw new WSTrustException(
-                    LogStringsMessages.WST_0032_ERROR_CREATING_SAML_ASSERTION(), ex);
+            
         }
         return token;
     }
@@ -251,15 +238,9 @@ public  class IssueSamlTokenContractImpl extends MyIssueSamlTokenContract {
         try{
             callbackHandler.handle(callbacks);
         }catch(IOException ex){
-            log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(), ex);
-            throw new WSTrustException(
-                    LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(), ex);            
+                 
         }catch(UnsupportedCallbackException ex){
-            log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(), ex);
-            throw new WSTrustException(
-                    LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(), ex);
+            
         }
         
         return req.getX509Certificate();
@@ -272,9 +253,7 @@ public  class IssueSamlTokenContractImpl extends MyIssueSamlTokenContract {
         try{
             doc = docFactory.newDocumentBuilder().newDocument();
         }catch(ParserConfigurationException ex){
-            log.log(Level.SEVERE, 
-                    LogStringsMessages.WST_0039_ERROR_CREATING_DOCFACTORY(), ex);
-            throw new WSTrustException(LogStringsMessages.WST_0039_ERROR_CREATING_DOCFACTORY(), ex);
+           
         }
         
         final KeyInfo keyInfo = new KeyInfo(doc);
@@ -285,9 +264,7 @@ public  class IssueSamlTokenContractImpl extends MyIssueSamlTokenContract {
                     final EncryptedKey encKey = encryptKey(doc, key, serCert);
                     keyInfo.add(encKey);
                 }catch(Exception ex){
-                    log.log(Level.SEVERE,
-                            LogStringsMessages.WST_0040_ERROR_ENCRYPT_PROOFKEY(), ex);
-                    throw new WSTrustException( LogStringsMessages.WST_0040_ERROR_ENCRYPT_PROOFKEY(), ex);
+                    
                 }
             }else{
                 final BinarySecret secret = eleFac.createBinarySecret(key, BinarySecret.SYMMETRIC_KEY_TYPE);
@@ -298,10 +275,7 @@ public  class IssueSamlTokenContractImpl extends MyIssueSamlTokenContract {
             final X509Data x509data = new X509Data(doc);
             final Set certs = ctx.getRequestorSubject().getPublicCredentials();
             if(certs == null){
-                log.log(Level.SEVERE,
-                        LogStringsMessages.WST_0034_UNABLE_GET_CLIENT_CERT());
-                throw new WSTrustException(
-                        LogStringsMessages.WST_0034_UNABLE_GET_CLIENT_CERT());
+               
             }
             boolean addedClientCert = false;
             for(Object o : certs){
@@ -311,17 +285,12 @@ public  class IssueSamlTokenContractImpl extends MyIssueSamlTokenContract {
                         x509data.addCertificate(clientCert);
                         addedClientCert = true;
                     }catch(com.sun.org.apache.xml.internal.security.exceptions.XMLSecurityException ex){
-                        log.log(Level.SEVERE,
-                                LogStringsMessages.WST_0034_UNABLE_GET_CLIENT_CERT(), ex);
-                        throw new WSTrustException(
-                                LogStringsMessages.WST_0034_UNABLE_GET_CLIENT_CERT(), ex);
+                       
                     }
                 }
             }
             if(!addedClientCert){
-                log.log(Level.SEVERE,
-                        LogStringsMessages.WST_0034_UNABLE_GET_CLIENT_CERT());
-                throw new WSTrustException(LogStringsMessages.WST_0034_UNABLE_GET_CLIENT_CERT());
+                
             }
             keyInfo.add(x509data);
         }
@@ -371,15 +340,9 @@ public  class IssueSamlTokenContractImpl extends MyIssueSamlTokenContract {
             assertion =
                     samlFac.createAssertion(assertionId, issuer, issuerInst, conditions, advice, statements);
         }catch(SAMLException ex){
-            log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0032_ERROR_CREATING_SAML_ASSERTION(), ex);
-            throw new WSTrustException(
-                    LogStringsMessages.WST_0032_ERROR_CREATING_SAML_ASSERTION(), ex);
+            
         }catch(XWSSecurityException ex){
-            log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0032_ERROR_CREATING_SAML_ASSERTION(), ex);
-            throw new WSTrustException(
-                    LogStringsMessages.WST_0032_ERROR_CREATING_SAML_ASSERTION(), ex);
+            
         }
         
         return assertion;
@@ -434,15 +397,9 @@ public  class IssueSamlTokenContractImpl extends MyIssueSamlTokenContract {
             assertion =
                     samlFac.createAssertion(assertionId, issuerID, issueInst, conditions, null, subj, statements);
         }catch(SAMLException ex){
-            log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0032_ERROR_CREATING_SAML_ASSERTION(), ex);
-            throw new WSTrustException(
-                    LogStringsMessages.WST_0032_ERROR_CREATING_SAML_ASSERTION(), ex);
+            
         }catch(XWSSecurityException ex){
-            log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0032_ERROR_CREATING_SAML_ASSERTION(), ex);
-            throw new WSTrustException(
-                    LogStringsMessages.WST_0032_ERROR_CREATING_SAML_ASSERTION(), ex);
+           
         }
         
         return assertion;

@@ -114,109 +114,126 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
     public Token createSAMLAssertion(final String appliesTo, final String tokenType, final String keyType, final String assertionId, final String issuer, final  Map<QName, List<String>> claimedAttrs, final IssuedTokenContext context) throws WSTrustException {
         Token token = null;
         
+        // Get the service certificate
+        TrustSPMetadata spMd = stsConfig.getTrustSPMetadata(appliesTo);
+        if (spMd == null){
+            spMd = stsConfig.getTrustSPMetadata("default");
+        }
+        final X509Certificate serCert = getServiceCertificate(spMd, appliesTo);
+            
+        // Create the KeyInfo for SubjectConfirmation
+        final KeyInfo keyInfo = createKeyInfo(keyType, serCert, context, appliesTo);
+            
+        // Create SAML assertion
+        Assertion assertion = null;
+        if (WSTrustConstants.SAML10_ASSERTION_TOKEN_TYPE.equals(tokenType)||
+            WSTrustConstants.SAML11_ASSERTION_TOKEN_TYPE.equals(tokenType)){
+            assertion = createSAML11Assertion(assertionId, issuer, appliesTo, keyInfo, claimedAttrs);
+        } else if (WSTrustConstants.SAML20_ASSERTION_TOKEN_TYPE.equals(tokenType)){
+            assertion = createSAML20Assertion(assertionId, issuer, appliesTo, keyInfo, claimedAttrs);
+        } else{
+            log.log(Level.SEVERE, LogStringsMessages.WST_0031_UNSUPPORTED_TOKEN_TYPE(tokenType, appliesTo));
+            throw new WSTrustException(LogStringsMessages.WST_0031_UNSUPPORTED_TOKEN_TYPE(tokenType, appliesTo));
+        }
+            
+        // Get the STS's certificate and private key
+        Object[] stsCertsAndPrikey = getSTSCertAndPrivateKey();
+        final X509Certificate stsCert = (X509Certificate)stsCertsAndPrikey[0];
+        final PrivateKey stsPrivKey = (PrivateKey)stsCertsAndPrikey[1];
+            
+        // Sign the assertion with STS's private key
+        Element signedAssertion = null;
         try{
-            // Get the service certificate
-            TrustSPMetadata spMd = stsConfig.getTrustSPMetadata(appliesTo);
-            if (spMd == null){
-                spMd = stsConfig.getTrustSPMetadata("default");
-            }
-            final X509Certificate serCert = getServiceCertificate(spMd);
-            
-            // Create the KeyInfo for SubjectConfirmation
-            final KeyInfo keyInfo = createKeyInfo(keyType, serCert, context);
-            
-            // Create SAML assertion
-            Assertion assertion = null;
-            if (WSTrustConstants.SAML10_ASSERTION_TOKEN_TYPE.equals(tokenType)||
-                    WSTrustConstants.SAML11_ASSERTION_TOKEN_TYPE.equals(tokenType)){
-                assertion = createSAML11Assertion(assertionId, issuer, appliesTo, keyInfo, claimedAttrs);
-            } else if (WSTrustConstants.SAML20_ASSERTION_TOKEN_TYPE.equals(tokenType)){
-                assertion = createSAML20Assertion(assertionId, issuer, appliesTo, keyInfo, claimedAttrs);
-            } else{
-                log.log(Level.SEVERE, LogStringsMessages.WST_0031_UNSUPPORTED_TOKEN_TYPE(tokenType, appliesTo));
-                throw new WSTrustException(LogStringsMessages.WST_0031_UNSUPPORTED_TOKEN_TYPE(tokenType, appliesTo));
-            }
-            
-            // Get the STS's certificate and private key
-            Object[] stsCertsAndPrikey = getSTSCertAndPrivateKey();
-            final X509Certificate stsCert = (X509Certificate)stsCertsAndPrikey[0];
-            final PrivateKey stsPrivKey = (PrivateKey)stsCertsAndPrikey[1];
-            
-            // Sign the assertion with STS's private key
-            final Element signedAssertion = assertion.sign(stsCert, stsPrivKey);
-            
-            //javax.xml.bind.Unmarshaller u = eleFac.getContext().createUnmarshaller();
-            //JAXBElement<AssertionType> aType = u.unmarshal(signedAssertion, AssertionType.class);
-            //assertion =  new com.sun.xml.wss.saml.assertion.saml11.jaxb20.Assertion(aType.getValue());
-            //token = new GenericToken(signedAssertion);
-            
-            if (stsConfig.getEncryptIssuedToken()){
-                // Create the encryption key
-                final XMLCipher cipher = XMLCipher.getInstance(XMLCipher.AES_256);
-                final int keysizeInBytes = 32;
-                final byte[] skey = WSTrustUtil.generateRandomSecret(keysizeInBytes);
-                cipher.init(XMLCipher.ENCRYPT_MODE, new SecretKeySpec(skey, "AES"));
-                
-                // Encrypt the assertion and return the Encrypteddata
-                final Document owner = signedAssertion.getOwnerDocument();
-                final EncryptedData encData = cipher.encryptData(owner, signedAssertion);
-                final String id = "uuid-" + UUID.randomUUID().toString();
-                encData.setId(id);
-                
-                final KeyInfo encKeyInfo = new KeyInfo(owner);
-                final EncryptedKey encKey = encryptKey(owner, skey, serCert);
-                encKeyInfo.add(encKey);
-                encData.setKeyInfo(encKeyInfo);
-                
-                token = new GenericToken(cipher.martial(encData));
-                //JAXBElement<EncryptedDataType> eEle = u.unmarshal(cipher.martial(encData), EncryptedDataType.class);
-                //return eEle.getValue();
-            }else{
-                token = new GenericToken(signedAssertion);
-            }
-        } catch (XWSSecurityException ex){
-            log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0032_ERROR_CREATING_SAML_ASSERTION(), ex);
-            throw new WSTrustException(
-                    LogStringsMessages.WST_0032_ERROR_CREATING_SAML_ASSERTION(), ex);
-        }catch (XMLEncryptionException ex) {
-            log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0032_ERROR_CREATING_SAML_ASSERTION(), ex);
-            throw new WSTrustException(
-                    LogStringsMessages.WST_0032_ERROR_CREATING_SAML_ASSERTION(), ex);
-        }catch (JAXBException ex) {
-            log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0032_ERROR_CREATING_SAML_ASSERTION(), ex);
-            throw new WSTrustException(
-                    LogStringsMessages.WST_0032_ERROR_CREATING_SAML_ASSERTION(), ex);
-        }catch (Exception ex) {
+            signedAssertion = assertion.sign(stsCert, stsPrivKey);
+        }catch (SAMLException ex){
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0032_ERROR_CREATING_SAML_ASSERTION(), ex);
             throw new WSTrustException(
                     LogStringsMessages.WST_0032_ERROR_CREATING_SAML_ASSERTION(), ex);
         }
+            
+        //javax.xml.bind.Unmarshaller u = eleFac.getContext().createUnmarshaller();
+        //JAXBElement<AssertionType> aType = u.unmarshal(signedAssertion, AssertionType.class);
+        //assertion =  new com.sun.xml.wss.saml.assertion.saml11.jaxb20.Assertion(aType.getValue());
+        //token = new GenericToken(signedAssertion);
+            
+        if (stsConfig.getEncryptIssuedToken()){
+            Element encData = encryptToken(signedAssertion, serCert, appliesTo);
+            token = new GenericToken(encData);
+                //JAXBElement<EncryptedDataType> eEle = u.unmarshal(cipher.martial(encData), EncryptedDataType.class);
+                //return eEle.getValue();
+        }else{
+                token = new GenericToken(signedAssertion);
+        }
+
         return token;
     }
     
-    private EncryptedKey encryptKey(final Document doc, final byte[] encryptedKey, final X509Certificate cert) throws XMLEncryptionException, XWSSecurityException{
-        final PublicKey pubKey = cert.getPublicKey();
-        final XMLCipher cipher = XMLCipher.getInstance(XMLCipher.RSA_OAEP);
-        cipher.init(XMLCipher.WRAP_MODE, pubKey);
-        
-        final EncryptedKey encKey = cipher.encryptKey(doc, new SecretKeySpec(encryptedKey, "AES"));
-        final KeyInfo keyinfo = new KeyInfo(doc);
-        //KeyIdentifier keyIdentifier = new KeyIdentifierImpl(MessageConstants.ThumbPrintIdentifier_NS,null);
-        //keyIdentifier.setValue(Base64.encode(X509ThumbPrintIdentifier.getThumbPrintIdentifier(serCert)));
-        final KeyIdentifier keyIdentifier = new KeyIdentifierImpl(MessageConstants.X509SubjectKeyIdentifier_NS,null);
-        keyIdentifier.setValue(Base64.encode(X509SubjectKeyIdentifier.getSubjectKeyIdentifier(cert)));
-        final SecurityTokenReference str = new SecurityTokenReferenceImpl(keyIdentifier);
-        keyinfo.addUnknownElement((Element)doc.importNode(WSTrustElementFactory.newInstance().toElement(str,null), true));
-        encKey.setKeyInfo(keyinfo);
+    private EncryptedKey encryptKey(final Document doc, final byte[] encryptedKey, final X509Certificate cert, final String appliesTo) throws WSTrustException{
+        EncryptedKey encKey = null;
+        try{
+            final PublicKey pubKey = cert.getPublicKey();
+            final XMLCipher cipher = XMLCipher.getInstance(XMLCipher.RSA_OAEP);
+            cipher.init(XMLCipher.WRAP_MODE, pubKey);
+
+            encKey = cipher.encryptKey(doc, new SecretKeySpec(encryptedKey, "AES"));
+            final KeyInfo keyinfo = new KeyInfo(doc);
+            //KeyIdentifier keyIdentifier = new KeyIdentifierImpl(MessageConstants.ThumbPrintIdentifier_NS,null);
+            //keyIdentifier.setValue(Base64.encode(X509ThumbPrintIdentifier.getThumbPrintIdentifier(serCert)));
+            final KeyIdentifier keyIdentifier = new KeyIdentifierImpl(MessageConstants.X509SubjectKeyIdentifier_NS,null);
+            keyIdentifier.setValue(Base64.encode(X509SubjectKeyIdentifier.getSubjectKeyIdentifier(cert)));
+            final SecurityTokenReference str = new SecurityTokenReferenceImpl(keyIdentifier);
+            keyinfo.addUnknownElement((Element)doc.importNode(WSTrustElementFactory.newInstance().toElement(str,null), true));
+            encKey.setKeyInfo(keyinfo);
+        } catch (XWSSecurityException ex){
+            log.log(Level.SEVERE,
+                            LogStringsMessages.WST_0040_ERROR_ENCRYPT_PROOFKEY(appliesTo), ex);
+            throw new WSTrustException( LogStringsMessages.WST_0040_ERROR_ENCRYPT_PROOFKEY(appliesTo), ex);
+        } catch (XMLEncryptionException ex) {
+            log.log(Level.SEVERE,
+                            LogStringsMessages.WST_0040_ERROR_ENCRYPT_PROOFKEY(appliesTo), ex);
+            throw new WSTrustException( LogStringsMessages.WST_0040_ERROR_ENCRYPT_PROOFKEY(appliesTo), ex);
+        }
         
         return encKey;
     }
     
-    private X509Certificate getServiceCertificate(TrustSPMetadata spMd)throws WSTrustException{
+    private Element encryptToken(final Element assertion,  final X509Certificate serCert, final String appliesTo) throws WSTrustException{
+        Element encDataEle = null;
+        // Create the encryption key
+        try{
+            final XMLCipher cipher = XMLCipher.getInstance(XMLCipher.AES_256);
+            final int keysizeInBytes = 32;
+            final byte[] skey = WSTrustUtil.generateRandomSecret(keysizeInBytes);
+            cipher.init(XMLCipher.ENCRYPT_MODE, new SecretKeySpec(skey, "AES"));
+                
+            // Encrypt the assertion and return the Encrypteddata
+            final Document owner = assertion.getOwnerDocument();
+            final EncryptedData encData = cipher.encryptData(owner, assertion);
+            final String id = "uuid-" + UUID.randomUUID().toString();
+            encData.setId(id);
+                
+            final KeyInfo encKeyInfo = new KeyInfo(owner);
+            final EncryptedKey encKey = encryptKey(owner, skey, serCert, appliesTo);
+            encKeyInfo.add(encKey);
+            encData.setKeyInfo(encKeyInfo);
+            
+            encDataEle = cipher.martial(encData);
+         } catch (XMLEncryptionException ex) {
+            log.log(Level.SEVERE,
+                            LogStringsMessages.WST_0044_ERROR_ENCRYPT_ISSUED_TOKEN(appliesTo), ex);
+            throw new WSTrustException( LogStringsMessages.WST_0040_ERROR_ENCRYPT_PROOFKEY(appliesTo), ex);
+        } catch (Exception ex) {
+            log.log(Level.SEVERE,
+                            LogStringsMessages.WST_0044_ERROR_ENCRYPT_ISSUED_TOKEN(appliesTo), ex);
+            throw new WSTrustException( LogStringsMessages.WST_0040_ERROR_ENCRYPT_PROOFKEY(appliesTo), ex);
+        }
+        
+        
+        return encDataEle;
+    }
+    
+    private X509Certificate getServiceCertificate(TrustSPMetadata spMd, String appliesTo)throws WSTrustException{
         String certAlias = spMd.getCertAlias();
         X509Certificate cert = null;
         CallbackHandler callbackHandler = stsConfig.getCallbackHandler();
@@ -229,14 +246,14 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
                 callbackHandler.handle(callbacks);
             }catch(IOException ex){
                 log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(), ex);
+                    LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(appliesTo), ex);
                 throw new WSTrustException(
-                    LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(), ex);            
+                    LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(appliesTo), ex);            
             }catch(UnsupportedCallbackException ex){
                 log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(), ex);
+                    LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(appliesTo), ex);
                 throw new WSTrustException(
-                    LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(), ex);
+                    LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(appliesTo), ex);
             }
         
             cert = req.getX509Certificate();
@@ -246,9 +263,9 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
                 cert = secEnv.getCertificate(new HashMap(), certAlias, false);
             }catch( XWSSecurityException ex){
                 log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(), ex);
+                    LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(appliesTo), ex);
                 throw new WSTrustException(
-                    LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(), ex);
+                    LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(appliesTo), ex);
             }
         }
         
@@ -269,14 +286,14 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
                 callbackHandler.handle(callbacks);
             }catch(IOException ex){
                 log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(), ex);
+                    LogStringsMessages.WST_0043_UNABLE_GET_STS_KEY(), ex);
                 throw new WSTrustException(
-                    LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(), ex);            
+                    LogStringsMessages.WST_0043_UNABLE_GET_STS_KEY(), ex);            
             }catch(UnsupportedCallbackException ex){
                 log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(), ex);
+                    LogStringsMessages.WST_0043_UNABLE_GET_STS_KEY(), ex);
                 throw new WSTrustException(
-                    LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(), ex);
+                    LogStringsMessages.WST_0043_UNABLE_GET_STS_KEY(), ex);
             }
                 
             stsPrivKey = request.getPrivateKey();
@@ -288,9 +305,9 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
                 stsPrivKey = secEnv.getPrivateKey(new HashMap(), stsCert);
             }catch( XWSSecurityException ex){
                 log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(), ex);
+                    LogStringsMessages.WST_0043_UNABLE_GET_STS_KEY(), ex);
                 throw new WSTrustException(
-                    LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(), ex);
+                    LogStringsMessages.WST_0043_UNABLE_GET_STS_KEY(), ex);
             }
         }
         
@@ -300,7 +317,7 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
         return results;
     }
     
-    private KeyInfo createKeyInfo(final String keyType, final X509Certificate serCert, final IssuedTokenContext ctx)throws WSTrustException{
+    private KeyInfo createKeyInfo(final String keyType, final X509Certificate serCert, final IssuedTokenContext ctx, String appliesTo)throws WSTrustException{
         final DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
         
         Document doc = null;
@@ -316,13 +333,13 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
         if (WSTrustConstants.SYMMETRIC_KEY.equals(keyType)){
             final byte[] key = ctx.getProofKey();
             if (!stsConfig.getEncryptIssuedToken() && stsConfig.getEncryptIssuedKey()){
+                final EncryptedKey encKey = encryptKey(doc, key, serCert, appliesTo);
                 try{
-                    final EncryptedKey encKey = encryptKey(doc, key, serCert);
                     keyInfo.add(encKey);
-                }catch(Exception ex){
+                } catch (XMLEncryptionException ex) {
                     log.log(Level.SEVERE,
-                            LogStringsMessages.WST_0040_ERROR_ENCRYPT_PROOFKEY(), ex);
-                    throw new WSTrustException( LogStringsMessages.WST_0040_ERROR_ENCRYPT_PROOFKEY(), ex);
+                            LogStringsMessages.WST_0040_ERROR_ENCRYPT_PROOFKEY(appliesTo), ex);
+                    throw new WSTrustException(LogStringsMessages.WST_0040_ERROR_ENCRYPT_PROOFKEY(appliesTo), ex);
                 }
             }else{
                 final BinarySecret secret = eleFac.createBinarySecret(key, BinarySecret.SYMMETRIC_KEY_TYPE);
@@ -331,32 +348,11 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
             }
         }else if(WSTrustConstants.PUBLIC_KEY.equals(keyType)){
             final X509Data x509data = new X509Data(doc);
-            final Set certs = ctx.getRequestorSubject().getPublicCredentials();
-            if(certs == null){
-                log.log(Level.SEVERE,
-                        LogStringsMessages.WST_0034_UNABLE_GET_CLIENT_CERT());
-                throw new WSTrustException(
-                        LogStringsMessages.WST_0034_UNABLE_GET_CLIENT_CERT());
-            }
-            boolean addedClientCert = false;
-            for(Object o : certs){
-                if(o instanceof X509Certificate){
-                    final X509Certificate clientCert = (X509Certificate)o;
-                    try{
-                        x509data.addCertificate(clientCert);
-                        addedClientCert = true;
-                    }catch(com.sun.org.apache.xml.internal.security.exceptions.XMLSecurityException ex){
-                        log.log(Level.SEVERE,
-                                LogStringsMessages.WST_0034_UNABLE_GET_CLIENT_CERT(), ex);
-                        throw new WSTrustException(
-                                LogStringsMessages.WST_0034_UNABLE_GET_CLIENT_CERT(), ex);
-                    }
-                }
-            }
-            if(!addedClientCert){
-                log.log(Level.SEVERE,
-                        LogStringsMessages.WST_0034_UNABLE_GET_CLIENT_CERT());
-                throw new WSTrustException(LogStringsMessages.WST_0034_UNABLE_GET_CLIENT_CERT());
+            try{
+                x509data.addCertificate(ctx.getRequestorCertificate());
+            }catch(com.sun.org.apache.xml.internal.security.exceptions.XMLSecurityException ex){
+                log.log(Level.SEVERE, LogStringsMessages.WST_0034_UNABLE_GET_CLIENT_CERT(), ex);
+                throw new WSTrustException(LogStringsMessages.WST_0034_UNABLE_GET_CLIENT_CERT(), ex);
             }
             keyInfo.add(x509data);
         }

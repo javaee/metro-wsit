@@ -112,7 +112,7 @@ public class WSTrustClientContractImpl implements WSTrustClientContract {
             final RequestedProofToken proofToken = rstr.getRequestedProofToken();
             
             // Obtain the secret key for the context
-            final byte[] key = getKey(rstr, proofToken, rst);
+            final byte[] key = getKey(rstr, proofToken, rst, appliesTo);
             
             if(key != null){
                 context.setProofKey(key);
@@ -198,7 +198,7 @@ public class WSTrustClientContractImpl implements WSTrustClientContract {
         }
     }
     
-    private byte[] getKey(final RequestSecurityTokenResponse rstr, final RequestedProofToken proofToken, final RequestSecurityToken rst)
+    private byte[] getKey(final RequestSecurityTokenResponse rstr, final RequestedProofToken proofToken, final RequestSecurityToken rst, final String appliesTo)
     throws WSTrustException {
         byte[] key = null;
         if (proofToken != null){
@@ -208,20 +208,20 @@ public class WSTrustClientContractImpl implements WSTrustClientContract {
             } else if (RequestedProofToken.TOKEN_REF_TYPE.equals(proofTokenType)){
                 //ToDo
                 log.log(Level.SEVERE,
-                        LogStringsMessages.WST_0001_UNSUPPORTED_PROOF_TOKEN_TYPE(proofTokenType));
-                throw new WSTrustException( LogStringsMessages.WST_0001_UNSUPPORTED_PROOF_TOKEN_TYPE(proofTokenType));
+                        LogStringsMessages.WST_0001_UNSUPPORTED_PROOF_TOKEN_TYPE(proofTokenType, appliesTo));
+                throw new WSTrustException( LogStringsMessages.WST_0001_UNSUPPORTED_PROOF_TOKEN_TYPE(proofTokenType, appliesTo));
             } else if (RequestedProofToken.ENCRYPTED_KEY_TYPE.equals(proofTokenType)){
                 // ToDo
                 log.log(Level.SEVERE,
-                        LogStringsMessages.WST_0001_UNSUPPORTED_PROOF_TOKEN_TYPE(proofTokenType));
-                throw new WSTrustException( LogStringsMessages.WST_0001_UNSUPPORTED_PROOF_TOKEN_TYPE(proofTokenType));
+                        LogStringsMessages.WST_0001_UNSUPPORTED_PROOF_TOKEN_TYPE(proofTokenType, appliesTo));
+                throw new WSTrustException( LogStringsMessages.WST_0001_UNSUPPORTED_PROOF_TOKEN_TYPE(proofTokenType, appliesTo));
             } else if (RequestedProofToken.BINARY_SECRET_TYPE.equals(proofTokenType)){
                 final BinarySecret binarySecret = proofToken.getBinarySecret();
                 key = binarySecret.getRawValue();
             } else{
                 log.log(Level.SEVERE,
-                        LogStringsMessages.WST_0019_INVALID_PROOF_TOKEN_TYPE(proofTokenType));
-                throw new WSTrustException( LogStringsMessages.WST_0001_UNSUPPORTED_PROOF_TOKEN_TYPE(proofTokenType));
+                        LogStringsMessages.WST_0019_INVALID_PROOF_TOKEN_TYPE(proofTokenType, appliesTo));
+                throw new WSTrustException( LogStringsMessages.WST_0019_INVALID_PROOF_TOKEN_TYPE(proofTokenType, appliesTo));
             }
         }
         return key;

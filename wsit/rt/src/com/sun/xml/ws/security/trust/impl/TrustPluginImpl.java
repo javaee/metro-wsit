@@ -70,6 +70,7 @@ import javax.xml.namespace.QName;
 import javax.xml.ws.Dispatch;
 import javax.xml.ws.RespectBindingFeature;
 import javax.xml.ws.Service;
+import javax.xml.ws.WebServiceException;
 import javax.xml.ws.WebServiceFeature;
 import javax.xml.bind.JAXBElement;
 
@@ -103,7 +104,7 @@ public class TrustPluginImpl implements TrustPlugin {
     private static final String WSDL_LOCATION = "wsdlLocation";
     private static final String SERVICE_NAME = "serviceName";
     private static final String PORT_NAME = "portName";
-   
+    
     /** Creates a new instance of TrustPluginImpl */
     public TrustPluginImpl(Configuration config) {
         this.config = config;
@@ -117,7 +118,7 @@ public class TrustPluginImpl implements TrustPlugin {
     public IssuedTokenContext process(final PolicyAssertion token, final PolicyAssertion localToken, final String appliesTo){
         final IssuedToken issuedToken = (IssuedToken)token;
         final RequestSecurityTokenTemplate rstTemplate = issuedToken.getRequestSecurityTokenTemplate();
-       
+        
         URI stsURI =  getSTSURI(issuedToken);
         URI wsdlLocation = null;
         QName serviceName = null;
@@ -174,13 +175,13 @@ public class TrustPluginImpl implements TrustPlugin {
         if(stsURI == null){
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0029_COULD_NOT_GET_STS_LOCATION(appliesTo));
-            throw new RuntimeException(LogStringsMessages.WST_0029_COULD_NOT_GET_STS_LOCATION(appliesTo));
+            throw new WebServiceException(LogStringsMessages.WST_0029_COULD_NOT_GET_STS_LOCATION(appliesTo));
         }
         
         RequestSecurityTokenResponse result = null;
         try {
             final RequestSecurityToken request = createRequest(rstTemplate, appliesTo);
-           
+            
             result = invokeRST(request, wsdlLocation, serviceName, portName, stsURI.toString());
             final IssuedTokenContext itc = new IssuedTokenContextImpl();
             final WSTrustClientContract contract = WSTrustFactory.createWSTrustClientContract(config);
@@ -188,16 +189,16 @@ public class TrustPluginImpl implements TrustPlugin {
             return itc;
         } catch (RemoteException ex) {
             log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0016_PROBLEM_IT_CTX(stsURI, appliesTo));
-            throw new RuntimeException(LogStringsMessages.WST_0016_PROBLEM_IT_CTX(stsURI, appliesTo), ex);
+                    LogStringsMessages.WST_0016_PROBLEM_IT_CTX(stsURI, appliesTo), ex);
+            throw new WebServiceException(LogStringsMessages.WST_0016_PROBLEM_IT_CTX(stsURI, appliesTo), ex);
         } catch (URISyntaxException ex){
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0016_PROBLEM_IT_CTX(stsURI, appliesTo), ex);
-            throw new RuntimeException(LogStringsMessages.WST_0016_PROBLEM_IT_CTX(stsURI, appliesTo));
+            throw new WebServiceException(LogStringsMessages.WST_0016_PROBLEM_IT_CTX(stsURI, appliesTo));
         } catch (WSTrustException ex){
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0016_PROBLEM_IT_CTX(stsURI, appliesTo), ex);
-            throw new RuntimeException(LogStringsMessages.WST_0016_PROBLEM_IT_CTX(stsURI, appliesTo));
+            throw new WebServiceException(LogStringsMessages.WST_0016_PROBLEM_IT_CTX(stsURI, appliesTo));
         }
     }
     
@@ -254,42 +255,25 @@ public class TrustPluginImpl implements TrustPlugin {
                 log.log(Level.FINE,
                         LogStringsMessages.WST_1012_SERVICE_PORTNAME_MEX(serviceName, portName));
             }
-            if(stsURI == null){
-                //could not get the STS location from the IssuedToken
-                //try to get it from client configuration
-                
-                stsURI = wsdlLocation.toString();
-                if (log.isLoggable(Level.FINE)) {
-                    log.log(Level.FINE,
-                            LogStringsMessages.WST_1013_STS_URI_CLIENT(stsURI));
-                }
-            }
-            //do the actual mex request
+            
             final QName[] names = doMexRequest(wsdlLocation.toString(), stsURI);
-            if(names!=null && names[0]!=null && names[1]!=null){
-                serviceName = names[0];
-                portName = names[1];
-            }else{
-                log.log(Level.SEVERE,
-                        LogStringsMessages.WST_0017_SERVICE_PORTNAME_ERROR(serviceName, portName, wsdlLocation.toString()));
-                throw new WSTrustException(
-                        LogStringsMessages.WST_0017_SERVICE_PORTNAME_ERROR(serviceName, portName, wsdlLocation.toString()));
-            }
+            serviceName = names[0];
+            portName = names[1];
         }
         
         Service service = null;
         try{
             // Work around for issue 338
             String url = wsdlLocation.toString();
-           // if (url.endsWith("/mex")){
-             //   int index = url.lastIndexOf("/mex");
-              //  url = url.substring(0, index);
+            // if (url.endsWith("/mex")){
+            //   int index = url.lastIndexOf("/mex");
+            //  url = url.substring(0, index);
             //}
             service = Service.create(new URL(url), serviceName);
         }catch (MalformedURLException ex){
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0041_SERVICE_NOT_CREATED(wsdlLocation.toString()), ex);
-            throw new RuntimeException(LogStringsMessages.WST_0041_SERVICE_NOT_CREATED(wsdlLocation.toString()), ex);
+            throw new WebServiceException(LogStringsMessages.WST_0041_SERVICE_NOT_CREATED(wsdlLocation.toString()), ex);
         }
         final Dispatch<Object> dispatch = service.createDispatch(portName, fact.getContext(), Service.Mode.PAYLOAD, new WebServiceFeature[]{new RespectBindingFeature(), new AddressingFeature(false)});
         //Dispatch<SOAPMessage> dispatch = service.createDispatch(portName, SOAPMessage.class, Service.Mode.MESSAGE, new WebServiceFeature[]{new AddressingFeature(false)});
@@ -342,7 +326,7 @@ public class TrustPluginImpl implements TrustPlugin {
      * @return List of 2 QName objects. The first one will be serviceName
      * and the second one will be portName.
      */
-    protected static QName[]  doMexRequest(final String wsdlLocation, final String stsURI) {
+    protected static QName[]  doMexRequest(final String wsdlLocation, final String stsURI) throws WSTrustException {
         
         final QName[] serviceInfo = new QName[2];
         final MetadataClient mexClient = new MetadataClient();
@@ -362,9 +346,24 @@ public class TrustPluginImpl implements TrustPlugin {
                 if(uri.equals(stsURI)){
                     serviceInfo[0]= port.getServiceName();
                     serviceInfo[1]= port.getPortName();
+                    break;
                 }
+                
             }
+            
+            if(serviceInfo[0]==null || serviceInfo[1]==null){
+                log.log(Level.SEVERE,
+                        LogStringsMessages.WST_0042_NO_MATCHING_SERVICE_MEX(stsURI));
+                throw new WSTrustException(
+                        LogStringsMessages.WST_0042_NO_MATCHING_SERVICE_MEX(stsURI));
+            }
+        }else{
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0017_SERVICE_PORTNAME_ERROR(wsdlLocation.toString()));
+            throw new WSTrustException(
+                    LogStringsMessages.WST_0017_SERVICE_PORTNAME_ERROR(wsdlLocation.toString()));
         }
+        
         return serviceInfo;
     }
     
@@ -481,11 +480,10 @@ public class TrustPluginImpl implements TrustPlugin {
             marshaller.marshal(rstElement, writer);
             return writer.toString();
         } catch (Exception e) {
-            if(log.isLoggable(Level.FINE)) {
-                log.log(Level.FINE,
-                        LogStringsMessages.WST_1004_ERROR_MARSHAL_TO_STRING(), e);
-            }
-            throw new RuntimeException(LogStringsMessages.WST_1004_ERROR_MARSHAL_TO_STRING(), e);
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_1004_ERROR_MARSHAL_TO_STRING("RST"), e);
+            
+            throw new WebServiceException(LogStringsMessages.WST_1004_ERROR_MARSHAL_TO_STRING("RST"), e);
         }
     }
     
@@ -498,11 +496,9 @@ public class TrustPluginImpl implements TrustPlugin {
             marshaller.marshal(rstrElement, writer);
             return writer.toString();
         } catch (Exception e) {
-            if (log.isLoggable(Level.FINE)) {
-                log.log(Level.FINE,
-                        LogStringsMessages.WST_1004_ERROR_MARSHAL_TO_STRING(), e);
-            }
-            throw new RuntimeException(LogStringsMessages.WST_1004_ERROR_MARSHAL_TO_STRING(), e);
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_1004_ERROR_MARSHAL_TO_STRING("RSTR"), e);
+            throw new WebServiceException(LogStringsMessages.WST_1004_ERROR_MARSHAL_TO_STRING("RSTR"), e);
         }
     }
     
