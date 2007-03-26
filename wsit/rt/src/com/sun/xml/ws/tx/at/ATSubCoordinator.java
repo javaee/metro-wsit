@@ -25,6 +25,7 @@ import com.sun.enterprise.transaction.TransactionImport;
 import com.sun.xml.ws.api.tx.Participant;
 import com.sun.xml.ws.api.tx.Protocol;
 import com.sun.xml.ws.api.tx.TXException;
+import com.sun.xml.ws.tx.common.TransactionImportManager;
 import com.sun.xml.ws.tx.common.TransactionManagerImpl;
 import com.sun.xml.ws.tx.common.TxLogger;
 import com.sun.xml.ws.tx.coordinator.CoordinationContextInterface;
@@ -47,6 +48,8 @@ import javax.xml.ws.WebServiceException;
  */
 public class ATSubCoordinator extends ATCoordinator {
     static private TxLogger logger = TxLogger.getATLogger(ATCoordinator.class);
+    
+    final TransactionImport importTm = TransactionImportManager.getInstance();
 
     // This Subordinate coordinator is a volatile participant of parent coordinator.
     private ATParticipant rootVolatileParticipant = null;
@@ -75,7 +78,7 @@ public class ATSubCoordinator extends ATCoordinator {
         if (txn == null) {
             xaTerminator = null;
         } else if (xaTerminator == null) {
-            xaTerminator = TransactionManagerImpl.getInstance().getXATerminator();
+            xaTerminator = importTm.getXATerminator();
         }
     }
 
@@ -266,7 +269,7 @@ public class ATSubCoordinator extends ATCoordinator {
 
     private XATerminator getXATerminator() {
         if (xaTerminator == null) {
-            xaTerminator = TransactionManagerImpl.getInstance().getXATerminator();
+            xaTerminator = importTm.getXATerminator();
         }
         return xaTerminator;
     }
@@ -473,7 +476,7 @@ public class ATSubCoordinator extends ATCoordinator {
         Transaction currentTxn = null;
         
         try {    
-            tm.recreate(getCoordinationXid(), getExpires());
+            importTm.recreate(getCoordinationXid(), getExpires());
         } catch (IllegalStateException ex) {
             String message = LocalizationMessages.IMPORT_TRANSACTION_FAILED_0028(getIdValue(),
                                                                                  getCoordinationXid().toString());
@@ -502,7 +505,7 @@ public class ATSubCoordinator extends ATCoordinator {
     public void endImportTransaction() { 
         if (transaction != null) {
             try {
-                tm.release(getCoordinationXid());
+                importTm.release(getCoordinationXid());
             } catch (Error e) {
                 logger.warning("endImportTransaction",
                         LocalizationMessages.EXCEPTION_RELEASING_IMPORTED_TRANSACTION_0029(), e);

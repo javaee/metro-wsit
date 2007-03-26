@@ -22,6 +22,7 @@
 
 package com.sun.xml.ws.assembler;
 
+import com.sun.xml.ws.tx.common.Util;
 import java.io.InputStream;
 import java.util.logging.Logger;
 
@@ -421,7 +422,8 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
          * @return true if Transactions is enabled, false otherwise
          */
         private boolean isTransactionsEnabled(PolicyMap policyMap, WSDLPort wsdlPort, boolean isServerSide) {
-            if (policyMap == null || wsdlPort == null) {
+            if (policyMap == null || wsdlPort == null || 
+                !Util.isJTAAvailable() ) {     // false for standalone WSIT client or WSIT Service in Tomcat
                 return false;
             }
             try {

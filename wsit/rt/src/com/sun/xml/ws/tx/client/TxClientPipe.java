@@ -69,7 +69,7 @@ import java.util.Iterator;
  * This class process transactional context for client outgoing message.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  * @since 1.0
  */
 // suppress known deprecation warnings about using pipes.
@@ -162,11 +162,6 @@ public class TxClientPipe extends TxBasePipe {
         if (currentTxn == null) {
             return next.process(pkt);
         }
-
-        // NOTE: if necessary, use AddressingContext, don't set the values directly.  The
-        //       context abstracts away WSA version differences.
-
-        // TODO: throw UnsupportedOperationException if this is an async call
 
         // get trust plugin from security pipe
         // encryption through security pipe
@@ -290,12 +285,27 @@ public class TxClientPipe extends TxBasePipe {
         return result;
     }
 
+    static private boolean reportCheckCurrentJTAStacktrace = true;
+    
     private Transaction checkCurrentJTATransaction(Message msg, WSDLPort wsdlModel) {
         Transaction currentTxn = null;
         try {
             currentTxn = tm.getTransaction();
-        } catch (SystemException ex) {
-            // ignore
+       
+// workaround for glassfksh issue 2659, catch throwable instead of just SystemException.
+//        } catch (SystemException se) {
+          } catch (Throwable t) {
+            if (logger.isLogging(Level.FINEST)) {
+                if (reportCheckCurrentJTAStacktrace) {
+                    reportCheckCurrentJTAStacktrace = false;
+                    logger.finest("checkCurrentJTATransaction",
+                            "handled exception thrown during checkCurrentJTATransaction",
+                             t);
+                } else {
+                     logger.finest("checkCurrentJTATransaction",
+                            "handled exception thrown during checkCurrentJTATransaction");
+                }
+            }
         }
         if (currentTxn == null) {
             // no current JTA transaction, so no work to do here

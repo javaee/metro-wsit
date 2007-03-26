@@ -31,7 +31,7 @@ import java.net.UnknownHostException;
  * other modules.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @since 1.0
  */
 public class Util {
@@ -136,5 +136,31 @@ public class Util {
 
     public static String getNextUniqueMessageId() {
         return "urn:uuid:msg-id-" + nextMsgId++;
+    }
+    
+    
+    static public boolean isClassAvailable(String classname) {
+        Class tmClass = null;
+        try {
+            tmClass = Class.forName(classname);
+        } catch (ClassNotFoundException ex) {
+        }
+        return tmClass != null;
+    }
+   
+    private static Boolean hasJTA = null;
+    
+    /**
+     * Identify if Java Transaction API available. 
+     * If not available, container is not capable of creating a JTA transaction.
+     */
+    static public boolean isJTAAvailable() {
+        if (hasJTA == null) {
+            hasJTA = isClassAvailable("javax.transaction.TransactionManager") ? Boolean.TRUE : Boolean.FALSE;
+            if (hasJTA && ! TransactionManagerImpl.getInstance().isTransactionManagerAvailable()) {
+                hasJTA = Boolean.FALSE;
+            }
+        }
+        return hasJTA.booleanValue();
     }
 }

@@ -22,7 +22,6 @@
 
 package com.sun.xml.ws.tx.common;
 
-import com.sun.enterprise.transaction.TransactionImport;
 import com.sun.xml.ws.tx.at.CoordinationXid;
 import com.sun.xml.ws.tx.coordinator.CoordinationContextInterface;
 import java.lang.reflect.InvocationTargetException;
@@ -32,7 +31,6 @@ import java.util.logging.Level;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import javax.resource.spi.XATerminator;
 import javax.transaction.*;
 import javax.transaction.xa.Xid;
 import java.util.HashMap;
@@ -45,13 +43,13 @@ import java.util.Map;
  *
  * @author jf39279
  */
-public class TransactionManagerImpl implements TransactionManager, TransactionSynchronizationRegistry, TransactionImport {
+public class TransactionManagerImpl implements TransactionManager, TransactionSynchronizationRegistry {
+    final static private TxLogger logger = TxLogger.getATLogger(TransactionManagerImpl.class);
     final private static TransactionManagerImpl singleton = new TransactionManagerImpl();
     final private TransactionManager javaeeTM;
     final private TransactionSynchronizationRegistry javaeeSynchReg;
 
-    final static private TxLogger logger = TxLogger.getATLogger(TransactionManagerImpl.class);
-
+   
     // no standardized JNDI name exists across as implementations for TM, this is Sun App Server specific.
     private static final String AS_TXN_MGR_JNDI_NAME = "java:appserver/TransactionManager";
 
@@ -62,6 +60,10 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
 
     static public TransactionManagerImpl getInstance() {
         return singleton;
+    }
+    
+    TransactionManager getTransactionManager() {
+        return javaeeTM;
     }
 
     static private Object jndiLookup(final String jndiName) {
@@ -79,6 +81,9 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
         return (UserTransaction)jndiLookup(USER_TRANSACTION_JNDI_NAME);
     }
     
+    public boolean isTransactionManagerAvailable() {
+        return javaeeTM != null;
+    }
     /**
      * Creates a new instance of TransactionManagerImpl
      */
@@ -177,41 +182,7 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
         return javaeeSynchReg.getRollbackOnly();
     }
 
-    // *****************************************************************************************
-    // Extensions needed to JTA TransactionManager contract.
-
-    private TransactionImport getTxnImportTM() {
-        return (com.sun.enterprise.transaction.TransactionImport) javaeeTM;
-    }
-
-    /**
-     * Recreate a transaction based on the Xid. This call causes the calling
-     * thread to be associated with the specified transaction.
-     * <p/>
-     *
-     * @param xid the Xid object representing a transaction.
-     */
-    public void recreate(final Xid xid, final long timeout) {
-        getTxnImportTM().recreate(xid, timeout);
-    }
-
-    /**
-     * Release a transaction. This call causes the calling thread to be
-     * dissociated from the specified transaction.
-     *
-     * @param xid the Xid object representing a transaction.
-     */
-    public void release(final Xid xid) {
-        getTxnImportTM().release(xid);
-    }
-
-    /**
-     * Used to import an external transaction into Java EE TM.
-     */
-    public XATerminator getXATerminator() {
-        return getTxnImportTM().getXATerminator();
-    }
-
+  
     /**
      * Get the coordination context associated with the current transaction.
      * <p/>
@@ -303,32 +274,7 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
        }
     }
  
-    public int getTransactionRemainingTimeout() throws SystemException {
-        final String METHOD = "getRemainingTimeout";
-        int result = 0;
-        try {
-            result = getTxnImportTM().getTransactionRemainingTimeout();
-        } catch (IllegalStateException ise) {
-            if (logger.isLogging(Level.FINEST)) {
-                logger.finest(METHOD, "looking up remaining txn timeout, no current transaction", ise);
-            } else {
-                logger.info(METHOD, LocalizationMessages.TXN_MGR_OPERATION_FAILED_2008("getTransactionRemainingTimeout",
-                                                                                    ise.getLocalizedMessage()));
-            }
-        } catch (Throwable t) {
-            if (logger.isLogging(Level.FINEST)) {
-                logger.finest(METHOD, "ignoring exception " + t.getClass().getName() + " thrown calling" +
-                        "TM.getTransactionRemainingTimeout method" );
-            } else {
-                logger.info(METHOD, LocalizationMessages.TXN_MGR_OPERATION_FAILED_2008("getTransactionRemainingTimeout", 
-                        t.getLocalizedMessage()));
-         
-            }
-        }
-        return result;
-    }
-    
-    /**
+     /**
      * Returns in seconds duration till current transaction times out.
      * Returns negative value if transaction has already timedout.
      * Returns 0 if there is no timeout.
@@ -337,7 +283,7 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
     public int getRemainingTimeout() {
         final String METHOD="getRemainingTimeout";
         try {
-            return getTransactionRemainingTimeout();
+            return TransactionImportManager.getInstance().getTransactionRemainingTimeout();
         } catch (SystemException se) {
             if (logger.isLogging(Level.FINEST)) {
                 logger.finest(METHOD, "getRemainingTimeout stack trace", se);
@@ -346,7 +292,15 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
                         LocalizationMessages.TXN_MGR_OPERATION_FAILED_2008("getTransactionRemainingTimeout",
                                                                            se.getLocalizedMessage()));
             }
-            return 0;
+        } catch (Throwable t) {
+             if (logger.isLogging(Level.FINEST)) {
+                logger.finest(METHOD, "getTransactionRemainingTimeout() failed, default to no timeout" );
+            } else {
+                logger.info(METHOD, LocalizationMessages.TXN_MGR_OPERATION_FAILED_2008("getTransactionRemainingTimeout", 
+                        t.getLocalizedMessage()));
+         
+            }
         }
+         return 0;
     }
 }
