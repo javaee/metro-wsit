@@ -4,6 +4,9 @@
  */
 package simple.client;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLSession;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Holder;
 
@@ -14,6 +17,11 @@ import simple.schema.client.Ping;
 public class PingServiceClient {
     
     public static void main (String[] args) {
+            HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
+                public boolean verify(String string, SSLSession sSLSession) {
+                    return true;
+                }
+            });
             
             PingService service = new PingService();
             IPingService stub = service.getCustomBindingIPingService(); 

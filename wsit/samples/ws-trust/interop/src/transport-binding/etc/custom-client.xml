@@ -13,7 +13,6 @@
          <jaxb:package name="simple.client"/>
          </jaxb:schemaBindings>
          </bindings>
-    -->
     <jxb:bindings version="1.0" xmlns:jxb="http://java.sun.com/xml/ns/jaxb" xmlns:xs="http://www.w3.org/2001/XMLSchema">
         <jxb:bindings node="/xs:schema" schemaLocation="http://localhost:8080/jaxws-trust-interop-transport-binding/simple?xsd=1">
             <jxb:schemaBindings>
@@ -21,4 +20,5 @@
             </jxb:schemaBindings>
         </jxb:bindings>
     </jxb:bindings>
+    -->
 </bindings>

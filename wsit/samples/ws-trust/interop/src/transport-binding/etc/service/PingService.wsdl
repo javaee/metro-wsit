@@ -36,12 +36,12 @@
                     <wsp:Policy>
                         <sp:IssuedToken sp:IncludeToken="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/AlwaysToRecipient">
                             <Issuer xmlns="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
-                                                        <Address xmlns="http://www.w3.org/2005/08/addressing">http://localhost:8080/jaxws-trust-interop-transport-binding-sts/sts</Address>
+                                                        <Address xmlns="http://www.w3.org/2005/08/addressing">https://localhost:8181/jaxws-trust-interop-transport-binding-sts/sts</Address>
                                                         <Metadata  xmlns="http://www.w3.org/2005/08/addressing">
                                                             <wsx:Metadata>
                                                                 <wsx:MetadataSection>
                                                                     <wsx:MetadataReference>
-                                                                        <Address xmlns="http://www.w3.org/2005/08/addressing">http://localhost:8080/jaxws-trust-interop-transport-binding-sts/sts</Address>
+                                                                        <Address xmlns="http://www.w3.org/2005/08/addressing">https://localhost:8181/jaxws-trust-interop-transport-binding-sts/sts</Address>
                                                                     </wsx:MetadataReference>
                                                                 </wsx:MetadataSection>
                                                             </wsx:Metadata>
