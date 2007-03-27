@@ -553,18 +553,18 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             return false;
         }
         
+        private static <P> P[] loadSPs(final Class<P> svcClass) {
+            return ServiceFinder.find(svcClass).toArray();
+        }
+        
         private Pipe dumpAction(String name, WSBinding binding, Pipe p) {
             if (Boolean.getBoolean(name)) {
-                ServiceFinder<ActionDumpPipe> pipes = ServiceFinder.find(ActionDumpPipe.class);
-                if (pipes != null) {
-                    if (pipes.toArray().length > 0) {
-                        return pipes.toArray()[0];
-                    }
+                ActionDumpPipe[] pipes = loadSPs(ActionDumpPipe.class);
+                if (pipes.length > 0) {
+                    return pipes[0];
                 }
-                
                 return new ActionDumpPipe(name, binding, p);
             }
-            
             return p;
         }
         
