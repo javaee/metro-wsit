@@ -73,7 +73,7 @@ import java.util.logging.Level;
  * <p/>
  * Supports following WS-Coordination protocols: 2004 WS-Atomic Transaction protocol
  *
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  * @since 1.0
  */
 // suppress known deprecation warnings about using pipes.
@@ -191,8 +191,8 @@ public class TxServerPipe extends TxBasePipe {
             if (coordTxnCtx.getCoordinationType().equals(WSAT_2004_PROTOCOL)) {
                 if (logger.isLogging(Level.FINEST)) {
                     logger.finest(METHOD_NAME, "Processing wscoor:CoordinationContext(protocol=" + coordTxnCtx.getCoordinationType() +
-                                  "coordId=" + coordTxnCtx.getIdentifier().toString() + ") for binding:" + bindingName + 
-                                  "operation:"  + msgOp.getName().toString());
+                                  "coordId=" + coordTxnCtx.getIdentifier() + ") for binding:" + bindingName + 
+                                  "operation:"  + msgOp.getName());
                 }
                 
                 //  let jax-ws runtime know that coordination context header was understood.
@@ -203,7 +203,7 @@ public class TxServerPipe extends TxBasePipe {
                 logger.info(METHOD_NAME, 
                         LocalizationMessages.IGNORING_UNRECOGNIZED_PROTOCOL_5005(
                         coordTxnCtx.getCoordinationType(),
-                        coordTxnCtx.getIdentifier().toString(),
+                        coordTxnCtx.getIdentifier(),
                         bindingName,
                         msgOperation.getLocalPart()));
                 coordTxnCtx = null;
@@ -232,7 +232,7 @@ public class TxServerPipe extends TxBasePipe {
             logger.info(METHOD_NAME, 
                     LocalizationMessages.UNEXPECTED_FLOWED_TXN_CONTEXT_5004(
                                   bindingName, msgOperation.getLocalPart(), msg.getMessageID(),
-                                  coordTxnCtx.getIdentifier().toString()));
+                                  coordTxnCtx.getIdentifier()));
         }
 
         boolean importedTxn = false;
@@ -256,7 +256,7 @@ public class TxServerPipe extends TxBasePipe {
                     responsePkt = next.process(pkt);
                 } catch (Exception e) {
                     logger.warning(METHOD_NAME,
-                                   LocalizationMessages.HANDLE_EXCEPTION_TO_COMPLETE_TRANSACTION_5012(coordTxnCtx.getIdentifier().toString(),
+                                   LocalizationMessages.HANDLE_EXCEPTION_TO_COMPLETE_TRANSACTION_5012(coordTxnCtx.getIdentifier(),
                                                                                                  jtaTxn.toString()), 
                                    e);
                     rethrow = e;
@@ -273,9 +273,11 @@ public class TxServerPipe extends TxBasePipe {
                 try {
                     responsePkt = next.process(pkt);
                 } catch (Exception e) {
+                    jtaTxn = coord.getTransaction();
+                    final String jtaTxnString = jtaTxn == null ? "" : jtaTxn.toString();
                     logger.warning(METHOD_NAME,
-                                   LocalizationMessages.HANDLE_EXCEPTION_TO_RELEASE_IMPORTED_TXN_5013(coordTxnCtx.getIdentifier().toString(),
-                                                                                                 jtaTxn.toString()), 
+                                   LocalizationMessages.HANDLE_EXCEPTION_TO_RELEASE_IMPORTED_TXN_5013(coordTxnCtx.getIdentifier(),
+                                                                                                 jtaTxnString), 
                                    e);
                     rethrow = e;
                     tm.setRollbackOnly();

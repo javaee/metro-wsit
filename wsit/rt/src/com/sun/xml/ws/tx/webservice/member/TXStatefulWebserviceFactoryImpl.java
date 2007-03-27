@@ -51,7 +51,7 @@ import java.util.logging.Level;
  * This class ...
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  * @since 1.0
  */
 // suppress known deprecation warnings about using short term workaround StatefulWebService.export(Class, String webServiceEndpoint, PortType)
@@ -66,18 +66,18 @@ final public class TXStatefulWebserviceFactoryImpl implements StatefulWebservice
         if (serviceName.equals(ParticipantPortTypeImpl.serviceName)) {
             // ParticipantPortTypeImpl && CoordinatorPortTypeImpl have the same serviceName
             if (portName.equals(ParticipantPortTypeImpl.portName)) {
-                return ParticipantPortTypeImpl.manager;
+                return ParticipantPortTypeImpl.getManager();
             } else if (portName.equals(CoordinatorPortTypeImpl.portName)) {
-                return CoordinatorPortTypeImpl.manager;
+                return CoordinatorPortTypeImpl.getManager();
             } else {
                 throw new IllegalStateException(
                         LocalizationMessages.WSTX_SERVICE_PORT_NOT_FOUND_5001(portName, serviceName));
             }
         } else if (serviceName.equals(RegistrationRequesterPortTypeImpl.serviceName)) {
             if (portName.equals(RegistrationRequesterPortTypeImpl.portName)) {
-                return RegistrationRequesterPortTypeImpl.manager;
+                return RegistrationRequesterPortTypeImpl.getManager();
             } else if (portName.equals(RegistrationCoordinatorPortTypeImpl.portName)) {
-                return RegistrationCoordinatorPortTypeImpl.manager;
+                return RegistrationCoordinatorPortTypeImpl.getManager();
             } else {
                 throw new IllegalStateException(LocalizationMessages.WSTX_SERVICE_PORT_NOT_FOUND_5001(portName, serviceName));
             }
@@ -96,12 +96,12 @@ final public class TXStatefulWebserviceFactoryImpl implements StatefulWebservice
             if (portName.equals(ParticipantPortTypeImpl.portName)) {
                 ParticipantPortTypeImpl participant =
                         new ParticipantPortTypeImpl(activityId, registrantId);
-                return ParticipantPortTypeImpl.manager.
+                return ParticipantPortTypeImpl.getManager().
                         export(addressingVersion.eprType.eprClass, address.toString(), participant);
             } else if (portName.equals(CoordinatorPortTypeImpl.portName)) {
                 CoordinatorPortTypeImpl coordinator =
                         new CoordinatorPortTypeImpl(activityId, registrantId);
-                return CoordinatorPortTypeImpl.manager.
+                return CoordinatorPortTypeImpl.getManager().
                         export(addressingVersion.eprType.eprClass, address.toString(), coordinator);
             } else {
                 throw new IllegalStateException( LocalizationMessages.WSTX_SERVICE_PORT_NOT_FOUND_5001(portName, serviceName));
@@ -110,12 +110,12 @@ final public class TXStatefulWebserviceFactoryImpl implements StatefulWebservice
             if (portName.equals(RegistrationRequesterPortTypeImpl.portName)) {
                 RegistrationRequesterPortTypeImpl registrationRequester =
                         new RegistrationRequesterPortTypeImpl(activityId, registrantId);
-                return RegistrationRequesterPortTypeImpl.manager.
+                return RegistrationRequesterPortTypeImpl.getManager().
                         export(addressingVersion.eprType.eprClass, address.toString(), registrationRequester);
             } else if (portName.equals(RegistrationCoordinatorPortTypeImpl.portName)) {
                 RegistrationCoordinatorPortTypeImpl registrationCoordinator =
                         new RegistrationCoordinatorPortTypeImpl(activityId);
-                return RegistrationCoordinatorPortTypeImpl.manager.
+                return RegistrationCoordinatorPortTypeImpl.getManager().
                         export(addressingVersion.eprType.eprClass, address.toString(), registrationCoordinator);
             } else {
                 throw new IllegalStateException( LocalizationMessages.WSTX_SERVICE_PORT_NOT_FOUND_5001(portName, serviceName));
@@ -155,16 +155,16 @@ final public class TXStatefulWebserviceFactoryImpl implements StatefulWebservice
             if (isWSTXServiceAvailable()) {
                 ParticipantPortTypeImpl participant =
                         new ParticipantPortTypeImpl(UNKNOWN_ID, UNKNOWN_ID);
-                if (ParticipantPortTypeImpl.manager != null) {
-                    ParticipantPortTypeImpl.manager.setFallbackInstance(participant);
+                if (ParticipantPortTypeImpl.getManager() != null) {
+                    ParticipantPortTypeImpl.getManager().setFallbackInstance(participant);
                 } else {
                     wstxServiceAvailable = false;
                 }
                 
                 CoordinatorPortTypeImpl coordinator =
                         new CoordinatorPortTypeImpl(UNKNOWN_ID, UNKNOWN_ID);
-                if (CoordinatorPortTypeImpl.manager != null) {
-                     CoordinatorPortTypeImpl.manager.setFallbackInstance(coordinator);
+                if (CoordinatorPortTypeImpl.getManager() != null) {
+                     CoordinatorPortTypeImpl.getManager().setFallbackInstance(coordinator);
                 } else {
                     wstxServiceAvailable = false;
                 }
@@ -172,16 +172,16 @@ final public class TXStatefulWebserviceFactoryImpl implements StatefulWebservice
                 
                 RegistrationRequesterPortTypeImpl registrationRequester =
                         new RegistrationRequesterPortTypeImpl(UNKNOWN_ID, UNKNOWN_ID);
-                 if (RegistrationRequesterPortTypeImpl.manager != null) {
-                    RegistrationRequesterPortTypeImpl.manager.setFallbackInstance(registrationRequester);
+                 if (RegistrationRequesterPortTypeImpl.getManager() != null) {
+                    RegistrationRequesterPortTypeImpl.getManager().setFallbackInstance(registrationRequester);
                 } else {
                     wstxServiceAvailable = false;
                 }
                
                 RegistrationCoordinatorPortTypeImpl registrationCoordinator =
                         new RegistrationCoordinatorPortTypeImpl(UNKNOWN_ID);
-                if (RegistrationCoordinatorPortTypeImpl.manager != null) {
-                    RegistrationCoordinatorPortTypeImpl.manager.setFallbackInstance(registrationCoordinator);
+                if (RegistrationCoordinatorPortTypeImpl.getManager() != null) {
+                    RegistrationCoordinatorPortTypeImpl.getManager().setFallbackInstance(registrationCoordinator);
                 } else {
                     wstxServiceAvailable = false;
                 }

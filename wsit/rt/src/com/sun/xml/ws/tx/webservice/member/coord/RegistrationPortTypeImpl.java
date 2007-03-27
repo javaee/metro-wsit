@@ -36,7 +36,7 @@ import java.util.logging.Level;
 /**
  * This class handles the synchronous register =
  *
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 1.0
  */
 @MemberSubmissionAddressing
@@ -53,7 +53,7 @@ public class RegistrationPortTypeImpl implements com.sun.xml.ws.tx.webservice.me
     private WebServiceContext wsContext;
 
     /* stateful fields */
-    public static StatefulWebServiceManager<RegistrationPortTypeImpl> manager;
+    private static StatefulWebServiceManager<RegistrationPortTypeImpl> manager;
 
     String activityId;
 
@@ -74,6 +74,14 @@ public class RegistrationPortTypeImpl implements com.sun.xml.ws.tx.webservice.me
             logger.exiting("wscoor:synchRegister", registerResponse);
         }
         return registerResponse;
+    }
+
+    public static StatefulWebServiceManager<RegistrationPortTypeImpl> getManager() {
+        return manager;
+    }
+
+    public static void setManager(StatefulWebServiceManager<RegistrationPortTypeImpl> aManager) {
+        manager = aManager;
     }
 
 }

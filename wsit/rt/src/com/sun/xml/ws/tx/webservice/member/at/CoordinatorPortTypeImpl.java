@@ -46,7 +46,7 @@ import java.util.logging.Level;
  * Proceses notificaions from participants in coordinated atomic transaction activity.
  *
  * @author Joe.Fialli@Sun.COM
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @since 1.0
  */
 @MemberSubmissionAddressing
@@ -62,7 +62,7 @@ public class CoordinatorPortTypeImpl implements CoordinatorPortType {
     public static final String portName = "Coordinator";
 
     /* stateful fields */
-    public static StatefulWebServiceManager<CoordinatorPortTypeImpl> manager;
+    private static StatefulWebServiceManager<CoordinatorPortTypeImpl> manager;
     private String activityId;
     private String participantId;
 
@@ -210,5 +210,13 @@ public class CoordinatorPortTypeImpl implements CoordinatorPortType {
 
     private String getCoordIdPartId() {
         return "CoorId=" + activityId + " PartId=" + participantId + " ";
+    }
+
+    public static StatefulWebServiceManager<CoordinatorPortTypeImpl> getManager() {
+        return manager;
+    }
+
+    public static void setManager(StatefulWebServiceManager<CoordinatorPortTypeImpl> aManager) {
+        manager = aManager;
     }
 }

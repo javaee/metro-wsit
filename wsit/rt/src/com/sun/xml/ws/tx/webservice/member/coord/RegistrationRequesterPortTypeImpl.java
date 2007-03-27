@@ -36,7 +36,7 @@ import java.util.logging.Level;
  * This class handles the registerResponce web service method
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 1.0
  */
 @MemberSubmissionAddressing
@@ -57,7 +57,7 @@ public class RegistrationRequesterPortTypeImpl implements RegistrationRequesterP
     private WebServiceContext wsContext;
 
     /* stateful fields */
-    public static StatefulWebServiceManager<RegistrationRequesterPortTypeImpl> manager;
+    private static StatefulWebServiceManager<RegistrationRequesterPortTypeImpl> manager;
     private String activityId;
     private String registrantId;
 
@@ -95,5 +95,13 @@ public class RegistrationRequesterPortTypeImpl implements RegistrationRequesterP
         if (logger.isLogging(Level.FINER)) {
             logger.exiting("wscoor:registerResponse");
         }
+    }
+
+    public static StatefulWebServiceManager<RegistrationRequesterPortTypeImpl> getManager() {
+        return manager;
+    }
+
+    public static void setManager(StatefulWebServiceManager<RegistrationRequesterPortTypeImpl> aManager) {
+        manager = aManager;
     }
 }

@@ -69,7 +69,7 @@ import java.util.Iterator;
  * This class process transactional context for client outgoing message.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  * @since 1.0
  */
 // suppress known deprecation warnings about using pipes.
@@ -240,8 +240,12 @@ public class TxClientPipe extends TxBasePipe {
                 // flow of control is transfered back from caller, resume transaction.
                 tm.resume(currentTxn);
             } catch (Exception ex) {
-                rethrow.initCause(ex);
-                throw new WebServiceException(ex.getMessage(), rethrow);
+                if (rethrow != null) {
+                    rethrow.initCause(ex);
+                    throw new WebServiceException(ex.getMessage(), rethrow);
+                } else {
+                    rethrow = ex;
+                }
             }
             if (rethrow != null) {
                 throw new WebServiceException(rethrow.getMessage(), rethrow);

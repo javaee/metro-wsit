@@ -47,7 +47,7 @@ import java.util.logging.Level;
  * WS-Atomic Transaction participant protocol service
  *
  * @author Joe.Fialli@Sun.COM
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @since 1.0
  */
 @MemberSubmissionAddressing
@@ -68,7 +68,7 @@ public class ParticipantPortTypeImpl implements ParticipantPortType {
     private WebServiceContext wsContext;
 
     // stateful web service
-    public static StatefulWebServiceManager<ParticipantPortTypeImpl> manager;
+    private static StatefulWebServiceManager<ParticipantPortTypeImpl> manager;
     private String activityId;
     private String participantId;
 
@@ -240,5 +240,13 @@ public class ParticipantPortTypeImpl implements ParticipantPortType {
     private String getCoordIdPartId
             () {
         return "CoorId=" + activityId + " PartId=" + participantId + " ";
+    }
+
+    public static StatefulWebServiceManager<ParticipantPortTypeImpl> getManager() {
+        return manager;
+    }
+
+    public static void setManager(StatefulWebServiceManager<ParticipantPortTypeImpl> aManager) {
+        manager = aManager;
     }
 }

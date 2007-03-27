@@ -45,7 +45,7 @@ import java.util.logging.Level;
  * add protocol specific functionality.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  * @since 1.0
  */
 public abstract class Registrant {
@@ -173,7 +173,7 @@ public abstract class Registrant {
     }
 
     @NotNull
-    public EndpointReference getCoordinatorProtocolService() {
+    synchronized public EndpointReference getCoordinatorProtocolService() {
         return coordinatorProtocolService;
     }
 

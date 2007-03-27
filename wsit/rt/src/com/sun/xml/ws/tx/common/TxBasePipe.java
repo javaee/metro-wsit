@@ -29,7 +29,7 @@ import static com.sun.xml.ws.tx.common.ATAssertion.*;
  */
 abstract public class TxBasePipe implements Pipe {
     
-    static protected TransactionManagerImpl tm = TransactionManagerImpl.getInstance();
+    static protected final TransactionManagerImpl tm = TransactionManagerImpl.getInstance();
 
     /**
      * next pipe in the chain

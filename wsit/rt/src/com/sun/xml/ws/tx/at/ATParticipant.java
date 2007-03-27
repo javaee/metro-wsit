@@ -68,7 +68,7 @@ import java.util.logging.Level;
  * already decided to prepare.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  * @since 1.0
  */
 public class ATParticipant extends Registrant {
@@ -149,18 +149,18 @@ public class ATParticipant extends Registrant {
     public void forget() {
         if (isRemoteCPS() && localParticipantProtocolService != null) {
             final ParticipantPortTypeImpl ppti = 
-                    ParticipantPortTypeImpl.manager.resolve(localParticipantProtocolService);
+                    ParticipantPortTypeImpl.getManager().resolve(localParticipantProtocolService);
             
             // could resolve to null if stateful webservice timeout already unexported automatically.
             if (ppti != null) {
-                ParticipantPortTypeImpl.manager.unexport(ppti);
+                ParticipantPortTypeImpl.getManager().unexport(ppti);
             } 
         }
         localParticipantProtocolService = null;
         if (remoteParticipant) {
-            final CoordinatorPortTypeImpl cpti = CoordinatorPortTypeImpl.manager.resolve(getCoordinatorProtocolService());
+            final CoordinatorPortTypeImpl cpti = CoordinatorPortTypeImpl.getManager().resolve(getCoordinatorProtocolService());
             if (cpti != null) {
-                CoordinatorPortTypeImpl.manager.unexport(cpti);
+                CoordinatorPortTypeImpl.getManager().unexport(cpti);
             }
         }
         

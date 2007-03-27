@@ -36,7 +36,7 @@ import java.util.logging.Level;
  * This class handles the register web service method
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 1.0
  */
 @MemberSubmissionAddressing
@@ -57,7 +57,7 @@ public class RegistrationCoordinatorPortTypeImpl implements RegistrationCoordina
     private WebServiceContext wsContext;
 
     /* stateful fields */
-    public static StatefulWebServiceManager<RegistrationCoordinatorPortTypeImpl> manager;
+    private static StatefulWebServiceManager<RegistrationCoordinatorPortTypeImpl> manager;
     private String activityId;
 
     public RegistrationCoordinatorPortTypeImpl() {
@@ -93,5 +93,13 @@ public class RegistrationCoordinatorPortTypeImpl implements RegistrationCoordina
         if (logger.isLogging(Level.FINER)) {
             logger.exiting("wscoor:register");
         }
+    }
+
+    public static StatefulWebServiceManager<RegistrationCoordinatorPortTypeImpl> getManager() {
+        return manager;
+    }
+
+    public static void setManager(StatefulWebServiceManager<RegistrationCoordinatorPortTypeImpl> aManager) {
+        manager = aManager;
     }
 }
