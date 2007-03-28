@@ -56,29 +56,52 @@ public final class WSTCPAdapterRegistryImpl implements WSTCPAdapterRegistry {
     }
     
     public TCPAdapter getTarget(@NotNull final WSTCPURI requestURI) {
-        // path should have format like "/context-root/url-pattern"
-        final int delim = requestURI.path.lastIndexOf('/');
-        final String contextRoot = requestURI.path.substring(0, delim);
-        final String urlPattern = requestURI.path.substring(delim, requestURI.path.length());
+        // path should have format like "/context-root/url-pattern", where context-root and url-pattern could be /xxxx/yyyy/zzzz
         
-        if (contextRoot != null && urlPattern != null) {
-            final WSEndpointDescriptor wsEndpointDescriptor = AppServWSRegistry.getInstance().get(contextRoot, urlPattern);
-            if (wsEndpointDescriptor != null) {
-                TCPAdapter adapter = registry.get(requestURI.path);
-                if (adapter == null) {
-                    try {
-                        adapter = createWSAdapter(wsEndpointDescriptor);
-                        registry.put(requestURI.path, adapter);
-                        logger.log(Level.FINE, "WSTCPAdapterRegistryImpl. Register adapter. Path: {0}", requestURI.path);
-                    } catch (Exception e) {
-                        // This common exception is thrown from ejbEndPtInfo.prepareInvocation(true)
-                        logger.log(Level.SEVERE, "WSTCPAdapterRegistryImpl. " + 
-                                MessagesMessages.WSTCP_0008_ERROR_TCP_ADAPTER_CREATE(
-                                wsEndpointDescriptor.getWSServiceName()), e);
-                    }
-                }
-                return adapter;
+        WSEndpointDescriptor wsEndpointDescriptor = null;
+        String contextRoot = "/";
+        String urlPattern = "/";
+        // check if URI path is not empty
+        if (requestURI.path.length() > 0 && !requestURI.path.equals("/")) {
+            
+            // Try to check for most common situation "/context-root/url-pattern"
+            int nextSlashIndex = requestURI.path.indexOf('/', 1);
+            if (nextSlashIndex != -1) {
+                contextRoot = requestURI.path.substring(0, nextSlashIndex);
+                urlPattern = requestURI.path.substring(nextSlashIndex, requestURI.path.length());
+                wsEndpointDescriptor = AppServWSRegistry.getInstance().get(contextRoot, urlPattern);
             }
+            
+            if (wsEndpointDescriptor == null) {
+                // Try to combine different context-root and url-pattern from given path
+                nextSlashIndex = -1;
+                do {
+                    nextSlashIndex = requestURI.path.indexOf('/', nextSlashIndex + 1);
+                    int delim = nextSlashIndex != -1 ? nextSlashIndex : requestURI.path.length();
+                    contextRoot = delim > 0 ? requestURI.path.substring(0, delim) : "/";
+                    urlPattern = delim < requestURI.path.length() ? requestURI.path.substring(delim, requestURI.path.length()) : "/";
+                    wsEndpointDescriptor = AppServWSRegistry.getInstance().get(contextRoot, urlPattern);
+                } while (nextSlashIndex != -1 && wsEndpointDescriptor == null);
+            }
+        } else {
+            wsEndpointDescriptor = AppServWSRegistry.getInstance().get(contextRoot, urlPattern);
+        }
+        
+        if (wsEndpointDescriptor != null) {
+            TCPAdapter adapter = registry.get(requestURI.path);
+            if (adapter == null) {
+                try {
+                    adapter = createWSAdapter(wsEndpointDescriptor);
+                    registry.put(requestURI.path, adapter);
+                    logger.log(Level.FINE, "WSTCPAdapterRegistryImpl. Register adapter. Path: {0}", requestURI.path);
+                } catch (Exception e) {
+                    // This common exception is thrown from ejbEndPtInfo.prepareInvocation(true)
+                    logger.log(Level.SEVERE, "WSTCPAdapterRegistryImpl. " +
+                            MessagesMessages.WSTCP_0008_ERROR_TCP_ADAPTER_CREATE(
+                            wsEndpointDescriptor.getWSServiceName()), e);
+                }
+            }
+            return adapter;
         }
         
         return null;

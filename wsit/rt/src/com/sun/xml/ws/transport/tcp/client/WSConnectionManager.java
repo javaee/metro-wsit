@@ -243,8 +243,39 @@ public class WSConnectionManager implements ConnectionFinder<ConnectionSession>,
     private @NotNull ServiceChannelWSImpl getSessionServiceChannel(@NotNull final ConnectionSession connectionSession) {
         return (ServiceChannelWSImpl) connectionSession.getAttribute(TCPConstants.SERVICE_PIPELINE_ATTR_NAME);
     }
+        
+    public ConnectionSession find(final ContactInfo<ConnectionSession> contactInfo,
+            final Collection<ConnectionSession> idleConnections,
+            final Collection<ConnectionSession> busyConnections) throws IOException {
+        final WSTCPURI wsTCPURI = (WSTCPURI) contactInfo;
+        ConnectionSession lru = null;
+        for(ConnectionSession connectionSession : idleConnections) {
+            if (connectionSession.findWSServiceContextByURI(wsTCPURI) != null) {
+                return connectionSession;
+            }
+            if (lru == null) lru = connectionSession;
+        }
+        
+        if (lru != null || connectionCache.canCreateNewConnection(contactInfo)) return lru;
+        
+        for(ConnectionSession connectionSession : busyConnections) {
+            if (connectionSession.findWSServiceContextByURI(wsTCPURI) != null) {
+                return connectionSession;
+            }
+            if (lru == null) lru = connectionSession;
+        }
+        
+        return lru;
+    }
     
-    private void doSendMagicAndCheckVersions(final Connection connection) throws IOException, VersionMismatchException {
+    public void notifySessionClose(ConnectionSession connectionSession) {
+        if (logger.isLoggable(Level.FINE)) {
+            logger.log(Level.FINE, MessagesMessages.WSTCP_1043_CONNECTION_MANAGER_NOTIFY_SESSION_CLOSE(connectionSession.getConnection()));
+        }
+        freeConnection(connectionSession);
+    }
+    
+    private static void doSendMagicAndCheckVersions(final Connection connection) throws IOException, VersionMismatchException {
         final VersionController versionController = VersionController.getInstance();
         final Version framingVersion = versionController.getFramingVersion();
         final Version connectionManagementVersion = versionController.getConnectionManagementVersion();
@@ -282,36 +313,5 @@ public class WSConnectionManager implements ConnectionFinder<ConnectionSession>,
             throw new VersionMismatchException(MessagesMessages.WSTCP_0006_VERSION_MISMATCH(), serverFramingVersion,
                     serverConnectionManagementVersion);
         }
-    }
-    
-    public ConnectionSession find(final ContactInfo<ConnectionSession> contactInfo,
-            final Collection<ConnectionSession> idleConnections,
-            final Collection<ConnectionSession> busyConnections) throws IOException {
-        final WSTCPURI wsTCPURI = (WSTCPURI) contactInfo;
-        ConnectionSession lru = null;
-        for(ConnectionSession connectionSession : idleConnections) {
-            if (connectionSession.findWSServiceContextByURI(wsTCPURI) != null) {
-                return connectionSession;
-            }
-            if (lru == null) lru = connectionSession;
-        }
-        
-        if (lru != null || connectionCache.canCreateNewConnection(contactInfo)) return lru;
-        
-        for(ConnectionSession connectionSession : busyConnections) {
-            if (connectionSession.findWSServiceContextByURI(wsTCPURI) != null) {
-                return connectionSession;
-            }
-            if (lru == null) lru = connectionSession;
-        }
-        
-        return lru;
-    }
-    
-    public void notifySessionClose(ConnectionSession connectionSession) {
-        if (logger.isLoggable(Level.FINE)) {
-            logger.log(Level.FINE, MessagesMessages.WSTCP_1043_CONNECTION_MANAGER_NOTIFY_SESSION_CLOSE(connectionSession.getConnection()));
-        }
-        freeConnection(connectionSession);
-    }
+    }    
 }

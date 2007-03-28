@@ -34,12 +34,18 @@ import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.policy.jaxws.WSDLPolicyMapWrapper;
 import com.sun.xml.ws.transport.tcp.servicechannel.ServiceChannelCreator;
 import com.sun.xml.ws.transport.tcp.servicechannel.ServiceChannelWSImpl;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
 import javax.xml.namespace.QName;
 
 /**
  * @author Alexey Stashok
  */
 public class ConnectionManagementSettings {
+    private static final Logger logger = Logger.getLogger(
+            com.sun.xml.ws.transport.tcp.util.TCPConstants.LoggingDomain);
+    
     private static final int DEFAULT_VALUE = -1;
     
     private int highWatermark = DEFAULT_VALUE;
@@ -97,7 +103,6 @@ public class ConnectionManagementSettings {
     
     static @NotNull ConnectionManagementSettings createSettingsInstance(final @NotNull WSDLPort port) {
         try {
-            Thread.currentThread().setContextClassLoader(ConnectionManagementSettings.class.getClassLoader());
             WSDLModel model = port.getBinding().getOwner();
             WSDLPolicyMapWrapper mapWrapper = model.getExtension(WSDLPolicyMapWrapper.class);
             if (mapWrapper != null) {
@@ -113,6 +118,13 @@ public class ConnectionManagementSettings {
                                 int maxParallelConnections = getAssertionAttrValue(assertion, TCPConstants.TCPTRANSPORT_CONNECTION_MANAGEMENT_MAX_PARALLEL_CONNECTIONS_ATTR);
                                 int numberToReclaim = getAssertionAttrValue(assertion, TCPConstants.TCPTRANSPORT_CONNECTION_MANAGEMENT_NUMBER_TO_RECLAIM_ATTR);
                                 
+                                if (logger.isLoggable(Level.FINE)) {
+                                    logger.log(Level.FINE, 
+                                            MessagesMessages.WSTCP_1130_CONNECTION_MNGMNT_SETTINGS_LOADED(
+                                            highWatermark, 
+                                            maxParallelConnections, 
+                                            numberToReclaim));
+                                }
                                 return new ConnectionManagementSettings(highWatermark, maxParallelConnections, numberToReclaim);
                             }
                         }
