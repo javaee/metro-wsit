@@ -37,8 +37,13 @@ import com.sun.xml.ws.addressing.policy.Address;
 import com.sun.xml.ws.mex.client.MetadataClient;
 import com.sun.xml.ws.mex.client.PortInfo;
 import com.sun.xml.ws.mex.client.schema.Metadata;
+import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.impl.bindings.AppliesTo;
+import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
+import com.sun.xml.ws.policy.sourcemodel.PolicyModelGenerator;
+import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
+import com.sun.xml.ws.policy.sourcemodel.XmlPolicyModelMarshaller;
 import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.impl.IssuedTokenContextImpl;
 import com.sun.xml.ws.security.impl.policy.PolicyUtil;
@@ -51,22 +56,34 @@ import com.sun.xml.ws.security.trust.elements.Entropy;
 import com.sun.xml.ws.security.trust.elements.Lifetime;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponse;
+import com.sun.xml.ws.security.trust.impl.bindings.ClaimsType;
 import com.sun.xml.ws.security.trust.impl.bindings.ObjectFactory;
 import com.sun.xml.ws.security.trust.impl.bindings.RequestSecurityTokenResponseType;
 import com.sun.xml.ws.security.trust.impl.bindings.RequestSecurityTokenType;
 import com.sun.xml.ws.security.trust.impl.elements.ClaimsImpl;
 import com.sun.xml.ws.security.trust.util.WSTrustUtil;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.net.URI;
 import java.net.URL;
 import java.net.URISyntaxException;
 import java.net.MalformedURLException;
 import java.rmi.RemoteException;
 import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.xml.bind.util.JAXBResult;
 import javax.xml.namespace.QName;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.transform.dom.DOMResult;
 import javax.xml.ws.Dispatch;
 import javax.xml.ws.RespectBindingFeature;
 import javax.xml.ws.Service;
@@ -81,6 +98,9 @@ import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
 import javax.xml.ws.soap.AddressingFeature;
 
 import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
+import org.w3c.dom.Document;
+
+import org.w3c.dom.Element;
 
 /**
  *
@@ -104,6 +124,11 @@ public class TrustPluginImpl implements TrustPlugin {
     private static final String WSDL_LOCATION = "wsdlLocation";
     private static final String SERVICE_NAME = "serviceName";
     private static final String PORT_NAME = "portName";
+    private static final String REQUEST_SECURITY_TOKEN_TEMPLATE = "RequestSecurityTokenTemplate";
+    private static final String CLAIMS = "Claims";
+    private static final String DIALECT = "Dialect";
+    
+
     
     /** Creates a new instance of TrustPluginImpl */
     public TrustPluginImpl(Configuration config) {
@@ -181,6 +206,14 @@ public class TrustPluginImpl implements TrustPlugin {
         RequestSecurityTokenResponse result = null;
         try {
             final RequestSecurityToken request = createRequest(rstTemplate, appliesTo);
+            
+            // handle Claims.
+            // Not: should be in the RequestSecurityTokenTemplate api. Workaround for now.
+            Claims claims = getClaims(token, appliesTo);
+            if (claims != null){
+                request.setClaims(claims);
+            }
+
             
             result = invokeRST(request, wsdlLocation, serviceName, portName, stsURI.toString());
             final IssuedTokenContext itc = new IssuedTokenContextImpl();
@@ -466,6 +499,50 @@ public class TrustPluginImpl implements TrustPlugin {
         
         return null;
     }
+    
+     private Claims getClaims(final PolicyAssertion token, String appliesTo)throws WSTrustException{
+        Claims claims = null;
+        final Iterator<PolicyAssertion> tokens =
+                    token.getNestedAssertionsIterator();
+        while(tokens.hasNext()){
+            final PolicyAssertion cToken = tokens.next();
+            if(REQUEST_SECURITY_TOKEN_TEMPLATE.equals(cToken.getName().getLocalPart())){
+                final Iterator<PolicyAssertion> cTokens =
+                            cToken.getNestedAssertionsIterator();
+                while (cTokens.hasNext()){
+                    final PolicyAssertion gToken = cTokens.next();
+                    if (CLAIMS.equals(gToken.getName().getLocalPart())){
+                        try{
+                            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                            XMLOutputFactory xof = XMLOutputFactory.newInstance();
+                            XMLStreamWriter writer = xof.createXMLStreamWriter(baos);
+                           
+                            AssertionSet set = AssertionSet.createAssertionSet(Arrays.asList(new PolicyAssertion[] {gToken}));
+                            Policy policy = Policy.createPolicy(Arrays.asList(new AssertionSet[] { set }));
+                            PolicySourceModel sourceModel = PolicyModelGenerator.getGenerator().translate(policy);
+                            XmlPolicyModelMarshaller pm = (XmlPolicyModelMarshaller) XmlPolicyModelMarshaller.getXmlMarshaller(true);
+                            pm.marshal(sourceModel, writer);
+                            
+                            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+                            dbf.setNamespaceAware(true);
+                            DocumentBuilder db = dbf.newDocumentBuilder();
+                            Document doc = db.parse(new ByteArrayInputStream(baos.toByteArray()));
+                            Element claimsEle = (Element)doc.getElementsByTagNameNS("*", "Claims").item(0);
+                            
+                            claims = new ClaimsImpl(ClaimsImpl.fromElement(claimsEle));
+                            writer.close();
+                        }catch (Exception e){
+                            log.log(Level.SEVERE,
+                            LogStringsMessages.WST_0045_ERROR_UNMARSHALL_CLAIMS(appliesTo), e);
+                            throw new WebServiceException(LogStringsMessages.WST_0045_ERROR_UNMARSHALL_CLAIMS(appliesTo), e);
+                        }
+                    }
+                }          
+            }
+        }
+        return claims;
+    }
+
     
     /**
      * Prints out the RST created as string.
