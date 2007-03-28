@@ -29,11 +29,11 @@ import com.sun.xml.ws.api.tx.Participant;
 import com.sun.xml.ws.api.tx.Protocol;
 import com.sun.xml.ws.api.tx.TXException;
 import com.sun.xml.ws.developer.MemberSubmissionEndpointReference;
-import static com.sun.xml.ws.tx.common.Constants.*;
+import com.sun.xml.ws.tx.common.AddressManager;
+import static com.sun.xml.ws.tx.common.Constants.WSAT_SOAP_NSURI;
 import com.sun.xml.ws.tx.common.StatefulWebserviceFactory;
 import com.sun.xml.ws.tx.common.StatefulWebserviceFactoryFactory;
 import com.sun.xml.ws.tx.common.TxLogger;
-import com.sun.xml.ws.tx.common.Util;
 import com.sun.xml.ws.tx.coordinator.Coordinator;
 import com.sun.xml.ws.tx.coordinator.Registrant;
 import com.sun.xml.ws.tx.webservice.member.at.CoordinatorPortType;
@@ -68,7 +68,7 @@ import java.util.logging.Level;
  * already decided to prepare.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  * @since 1.0
  */
 public class ATParticipant extends Registrant {
@@ -78,9 +78,8 @@ public class ATParticipant extends Registrant {
     }
 
     /* PPS */
-    // TODO: workaround until jaxws-ri stateful webservice can compute this URI 
     public  static final URI LOCAL_PPS_URI =
-            Util.createURI(WSTX_WS_SCHEME, null, WSTX_WS_PORT, WSTX_WS_CONTEXT + "/wsat/2pc");
+            AddressManager.getPreferredAddress(ParticipantPortType.class);
 
     protected STATE state = STATE.NONE;
     protected Xid xid;

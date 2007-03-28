@@ -31,16 +31,16 @@ import com.sun.xml.ws.developer.MemberSubmissionEndpointReference;
 import com.sun.xml.ws.developer.StatefulWebServiceManager;
 import com.sun.xml.ws.tx.at.ATParticipant;
 import com.sun.xml.ws.tx.common.ActivityIdentifier;
-import static com.sun.xml.ws.tx.common.Constants.*;
+import com.sun.xml.ws.tx.common.AddressManager;
 import com.sun.xml.ws.tx.common.StatefulWebserviceFactory;
 import com.sun.xml.ws.tx.common.StatefulWebserviceFactoryFactory;
 import com.sun.xml.ws.tx.common.TxFault;
 import com.sun.xml.ws.tx.common.TxLogger;
-import com.sun.xml.ws.tx.common.Util;
 import com.sun.xml.ws.tx.common.WsaHelper;
 import com.sun.xml.ws.tx.webservice.member.coord.RegisterResponseType;
 import com.sun.xml.ws.tx.webservice.member.coord.RegisterType;
 import com.sun.xml.ws.tx.webservice.member.coord.RegistrationCoordinatorPortType;
+import com.sun.xml.ws.tx.webservice.member.coord.RegistrationPortTypeRPC;
 import com.sun.xml.ws.tx.webservice.member.coord.RegistrationRequesterPortType;
 
 import javax.xml.ws.EndpointReference;
@@ -56,7 +56,7 @@ import java.util.logging.Level;
  * for register and registerResponse delegate to the methods in this class.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  * @since 1.0
  */
 public final class RegistrationManager {
@@ -66,13 +66,13 @@ public final class RegistrationManager {
 
 
     private static final URI localRegistrationURI =
-            Util.createURI(WSTX_WS_SCHEME, null, WSTX_WS_PORT, WSTX_WS_CONTEXT + "/wscoor/coordinator/synchRegister");
+            AddressManager.getPreferredAddress(RegistrationPortTypeRPC.class);
 
     private static final URI localAsynchronousRegistrationURI =
-            Util.createURI(WSTX_WS_SCHEME, null, WSTX_WS_PORT, WSTX_WS_CONTEXT + "/wscoor/coordinator/register");
+            AddressManager.getPreferredAddress(RegistrationCoordinatorPortType.class);
 
     private static final URI localRegistrationRequesterURI =
-            Util.createURI(WSTX_WS_SCHEME, null, WSTX_WS_PORT, WSTX_WS_CONTEXT + "/wscoor/coordinator/registerResponse");
+            AddressManager.getPreferredAddress(RegistrationRequesterPortType.class);
 
 //    public static EndpointReference newSynchronousRegistrationEPR(ActivityIdentifier activityId) {
 //        EndpointReference registrationEPR =

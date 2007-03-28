@@ -24,15 +24,17 @@ package com.sun.xml.ws.tx.webservice.member;
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.developer.StatefulWebServiceManager;
-import com.sun.xml.ws.tx.at.ATCoordinator;
-import com.sun.xml.ws.tx.at.ATParticipant;
+import com.sun.xml.ws.tx.common.AddressManager;
 import static com.sun.xml.ws.tx.common.Constants.UNKNOWN_ID;
 import com.sun.xml.ws.tx.common.StatefulWebserviceFactory;
 import com.sun.xml.ws.tx.common.TxLogger;
-import com.sun.xml.ws.tx.coordinator.RegistrationManager;
+import com.sun.xml.ws.tx.webservice.member.at.CoordinatorPortType;
 import com.sun.xml.ws.tx.webservice.member.at.CoordinatorPortTypeImpl;
+import com.sun.xml.ws.tx.webservice.member.at.ParticipantPortType;
 import com.sun.xml.ws.tx.webservice.member.at.ParticipantPortTypeImpl;
+import com.sun.xml.ws.tx.webservice.member.coord.RegistrationCoordinatorPortType;
 import com.sun.xml.ws.tx.webservice.member.coord.RegistrationCoordinatorPortTypeImpl;
+import com.sun.xml.ws.tx.webservice.member.coord.RegistrationRequesterPortType;
 import com.sun.xml.ws.tx.webservice.member.coord.RegistrationRequesterPortTypeImpl;
 
 import javax.net.ssl.HostnameVerifier;
@@ -51,7 +53,7 @@ import java.util.logging.Level;
  * This class ...
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  * @since 1.0
  */
 // suppress known deprecation warnings about using short term workaround StatefulWebService.export(Class, String webServiceEndpoint, PortType)
@@ -212,19 +214,23 @@ final public class TXStatefulWebserviceFactoryImpl implements StatefulWebservice
             if (logger.isLogging(Level.FINEST)) {
                 logger.finest("pingStatefulServices", "pinging register service...");
             }
-            pingService(RegistrationManager.getLocalAsyncRegistrationURI().toString() + "?wsdl", RegistrationCoordinatorPortTypeImpl.class);
+            pingService((AddressManager.getAddress(RegistrationCoordinatorPortType.class, false).toString() + "?wsdl"),
+                    RegistrationCoordinatorPortTypeImpl.class);
             if (logger.isLogging(Level.FINEST)) {
                 logger.finest("pingStatefulServices", "pinging registerResponse service...");
             }
-            pingService(RegistrationManager.getLocalRegistrationRequesterURI().toString() + "?wsdl", RegistrationRequesterPortTypeImpl.class);
+            pingService((AddressManager.getAddress(RegistrationRequesterPortType.class, false).toString() + "?wsdl"),
+                    RegistrationRequesterPortTypeImpl.class);
             if (logger.isLogging(Level.FINEST)) {
                 logger.finest("pingStatefulServices", "pinging ATCoordinator service...");
             }
-            pingService(ATCoordinator.localCoordinationProtocolServiceURI.toString() + "?wsdl", CoordinatorPortTypeImpl.class);
+            pingService((AddressManager.getAddress(CoordinatorPortType.class, false).toString() + "?wsdl"),
+                    CoordinatorPortTypeImpl.class);
             if (logger.isLogging(Level.FINEST)) {
                 logger.finest("pingStatefulServices", "pinging ATParticipant service...");
             }
-            pingService(ATParticipant.LOCAL_PPS_URI.toString() + "?wsdl", ParticipantPortTypeImpl.class);
+            pingService((AddressManager.getAddress(ParticipantPortType.class, false).toString() + "?wsdl"),
+                    ParticipantPortTypeImpl.class);
         }
     }
 

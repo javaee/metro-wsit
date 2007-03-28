@@ -32,19 +32,17 @@ import static com.sun.xml.ws.tx.common.AT_2PC_State.ACTIVE;
 import static com.sun.xml.ws.tx.common.AT_2PC_State.COMMITTING;
 import static com.sun.xml.ws.tx.common.AT_2PC_State.PREPARED_SUCCESS;
 import static com.sun.xml.ws.tx.common.AT_2PC_State.PREPARING;
-import static com.sun.xml.ws.tx.common.Constants.*;
+import com.sun.xml.ws.tx.common.AddressManager;
 import com.sun.xml.ws.tx.common.TransactionManagerImpl;
 import com.sun.xml.ws.tx.common.TxFault;
 import com.sun.xml.ws.tx.common.TxLogger;
-import com.sun.xml.ws.tx.common.Util;
 import com.sun.xml.ws.tx.common.WsaHelper;
 import com.sun.xml.ws.tx.coordinator.CoordinationContextInterface;
 import com.sun.xml.ws.tx.coordinator.Coordinator;
 import com.sun.xml.ws.tx.coordinator.Registrant;
+import com.sun.xml.ws.tx.webservice.member.at.CoordinatorPortType;
 import com.sun.xml.ws.tx.webservice.member.at.WSATCoordinator;
 import com.sun.xml.ws.tx.webservice.member.coord.CreateCoordinationContextType;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 import javax.transaction.RollbackException;
 import javax.transaction.Synchronization;
@@ -55,15 +53,16 @@ import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
 import javax.xml.ws.EndpointReference;
 import javax.xml.ws.WebServiceContext;
+import javax.xml.ws.WebServiceException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
-import javax.xml.ws.WebServiceException;
 
 /**
  * Atomic Transaction Coordinator
@@ -92,14 +91,13 @@ import javax.xml.ws.WebServiceException;
  *
  * @author Ryan.Shoemaker@Sun.COM
  * @author Joe.Fialli@Sun.COM
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  * @since 1.0
  */
 public class ATCoordinator extends Coordinator implements Synchronization, XAResource {
 
-    // TODO: workaround until jaxws-ri stateful webservice can compute this URI
     public static final URI localCoordinationProtocolServiceURI =
-            Util.createURI(WSTX_WS_SCHEME, null, WSTX_WS_PORT, WSTX_WS_CONTEXT + "/wsat/coordinator");
+            AddressManager.getPreferredAddress(CoordinatorPortType.class);
 
     // TODO: short term solution so waitFor* do not hang.  Remove when implement transaction timeout.
     static private final int MAX_WAIT_ITERATION = 300;
