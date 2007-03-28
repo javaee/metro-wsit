@@ -129,7 +129,7 @@ public class XWSSPolicyGenerator {
         if(binding == null){
             //log error.
             logger.log(Level.SEVERE,LogStringsMessages.SP_0105_ERROR_BINDING_ASSR_NOT_PRESENT());
-            throw new PolicyException("Effective SecurityPolicy does not have a Binding");
+            throw new PolicyException(LogStringsMessages.SP_0105_ERROR_BINDING_ASSR_NOT_PRESENT());
         }
         if(PolicyUtil.isTransportBinding(binding)){
             if(logger.isLoggable(Level.FINE)){
@@ -192,7 +192,7 @@ public class XWSSPolicyGenerator {
                 mp.setWSSAssertion(getWssAssertion((com.sun.xml.ws.security.policy.WSSAssertion) wssAssertion));
             } catch (PolicyGenerationException ex) {
                 logger.log(Level.SEVERE,LogStringsMessages.SP_0104_ERROR_SIGNATURE_CONFIRMATION_ELEMENT(ex.getMessage()),ex);
-                 throw new PolicyException("Unable to process WSSAssertion");
+                throw new PolicyException(LogStringsMessages.SP_0104_ERROR_SIGNATURE_CONFIRMATION_ELEMENT(ex.getMessage()));
             }
         }
         if(policyBinding.getAlgorithmSuite() != null){
@@ -208,7 +208,7 @@ public class XWSSPolicyGenerator {
                 rep.process();
             } catch (PolicyGenerationException ex) {
                 logger.log(Level.SEVERE,LogStringsMessages.SP_0103_ERROR_REQUIRED_ELEMENTS(ex.getMessage()),ex);
-                throw new PolicyException("Unable to process RequiredElements");
+                throw new PolicyException(LogStringsMessages.SP_0103_ERROR_REQUIRED_ELEMENTS(ex.getMessage()));
             }
         }
         if(transportBinding){
@@ -303,36 +303,36 @@ public class XWSSPolicyGenerator {
             com.sun.xml.ws.security.policy.MessageLayout layout) {
         
         switch(layout) {
-        case Strict :{
-            if(logger.isLoggable(Level.FINE)){
-                logger.log(Level.FINE,"MessageLayout has been configured to be  STRICT ");
+            case Strict :{
+                if(logger.isLoggable(Level.FINE)){
+                    logger.log(Level.FINE,"MessageLayout has been configured to be  STRICT ");
+                }
+                return com.sun.xml.wss.impl.MessageLayout.Strict;
             }
-            return com.sun.xml.wss.impl.MessageLayout.Strict;
+            case Lax :{
+                if(logger.isLoggable(Level.FINE)){
+                    logger.log(Level.FINE,"MessageLayout has been configured to be LAX ");
+                }
+                return com.sun.xml.wss.impl.MessageLayout.Lax;
+            }
+            case LaxTsFirst :{
+                if(logger.isLoggable(Level.FINE)){
+                    logger.log(Level.FINE,"MessageLayout has been configured to be LaxTimestampFirst ");
+                }
+                return com.sun.xml.wss.impl.MessageLayout.LaxTsFirst;
+            }
+            case LaxTsLast :{
+                if(logger.isLoggable(Level.FINE)){
+                    logger.log(Level.FINE,"MessageLayout has been configured tp be LaxTimestampLast ");
+                }
+                return com.sun.xml.wss.impl.MessageLayout.LaxTsLast;
+            }default :{
+                if(logger.isLoggable(Level.SEVERE)){
+                    logger.log(Level.SEVERE,LogStringsMessages.SP_0106_UNKNOWN_MESSAGE_LAYOUT(layout));
+                }
+                throw new RuntimeException(LogStringsMessages.SP_0106_UNKNOWN_MESSAGE_LAYOUT(layout));
+            }
         }
-        case Lax :{
-            if(logger.isLoggable(Level.FINE)){
-                logger.log(Level.FINE,"MessageLayout has been configured to be LAX ");
-            }
-            return com.sun.xml.wss.impl.MessageLayout.Lax;
-        }
-        case LaxTsFirst :{
-            if(logger.isLoggable(Level.FINE)){
-                logger.log(Level.FINE,"MessageLayout has been configured to be LaxTimestampFirst ");
-            }
-            return com.sun.xml.wss.impl.MessageLayout.LaxTsFirst;
-        }
-        case LaxTsLast :{
-            if(logger.isLoggable(Level.FINE)){
-                logger.log(Level.FINE,"MessageLayout has been configured tp be LaxTimestampLast ");
-            }
-            return com.sun.xml.wss.impl.MessageLayout.LaxTsLast;
-        }default :{
-            if(logger.isLoggable(Level.SEVERE)){
-                logger.log(Level.SEVERE,LogStringsMessages.SP_0106_UNKNOWN_MESSAGE_LAYOUT(layout));
-            }
-            throw new RuntimeException("Unkown MessageLayout Enum Value Encountered");
-        }
-        }        
     }
     
 }

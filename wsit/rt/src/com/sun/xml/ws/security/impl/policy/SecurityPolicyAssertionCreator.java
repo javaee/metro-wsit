@@ -33,6 +33,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.logging.Level;
 import static com.sun.xml.ws.security.impl.policy.Constants.logger;
+import static com.sun.xml.ws.security.impl.policy.Constants.SECURITY_POLICY_PACKAGE_DIR;
 /**
  *
  * @author K.Venugopal@sun.com
@@ -102,7 +103,7 @@ public class SecurityPolicyAssertionCreator implements PolicyAssertionCreator{
         implementedAssertions.add(Constants.CallbackHandlerConfiguration);
         implementedAssertions.add(Constants.Validator);
         implementedAssertions.add(Constants.ValidatorConfiguration);
-        implementedAssertions.add(Constants.CertStore);        
+        implementedAssertions.add(Constants.CertStore);
     };
     /** Creates a new instance of SecurityPolicyAssertionCreator */
     
@@ -125,8 +126,8 @@ public class SecurityPolicyAssertionCreator implements PolicyAssertionCreator{
             }
             return Class.forName("com.sun.xml.ws.security.impl.policy." + className);
         } catch (ClassNotFoundException ex) {
-            if(logger.isLoggable(Level.FINE)){
-                logger.log(Level.FINE,"Error occurred while location SecurityPolicy assertion creator class "+"com.sun.xml.ws.security.impl.policy." +className,ex);
+            if(logger.isLoggable(Level.SEVERE)){
+                logger.log(Level.SEVERE,LogStringsMessages.SP_0110_ERROR_LOCATING_CLASS(SECURITY_POLICY_PACKAGE_DIR +className),ex);
             }
             throw new AssertionCreationException(assertionData,ex);
         }
@@ -145,38 +146,40 @@ public class SecurityPolicyAssertionCreator implements PolicyAssertionCreator{
                 
                 //cl.getConstructor(javax.xml.stream.events.StartElement.class);
             } catch (NoSuchMethodException ex) {
-                if(logger.isLoggable(Level.FINE)){
-                    logger.log(Level.FINE,"Error occurred while obtaining the constructor for SecurityPolicy assertion"+assertionData.getName());
+                if(logger.isLoggable(Level.SEVERE)){
+                    logger.log(Level.SEVERE,LogStringsMessages.SP_0111_ERROR_OBTAINING_CONSTRUCTOR(assertionData.getName()),ex);
                 }
                 throw new AssertionCreationException(assertionData,ex);
             }catch (SecurityException ex) {
-                if(logger.isLoggable(Level.FINE)){
-                    logger.log(Level.FINE,"Error occurred while obtaining the constructor for SecurityPolicy assertion"+assertionData.getName());
+                if(logger.isLoggable(Level.SEVERE)){
+                    logger.log(Level.SEVERE,LogStringsMessages.SP_0111_ERROR_OBTAINING_CONSTRUCTOR(assertionData.getName()),ex);
                 }
+                
+                
                 throw new AssertionCreationException(assertionData,ex);
             }
             if(cons != null){
                 try {
                     return (PolicyAssertion)cons.newInstance(assertionData,nestedAssertions,nestedAlternative);
                 } catch (IllegalArgumentException ex) {
-                    if(logger.isLoggable(Level.FINE)){
-                        logger.log(Level.FINE,"Error occurred while instantiating  SecurityPolicy assertion"+assertionData.getName());
+                    if(logger.isLoggable(Level.SEVERE)){
+                        logger.log(Level.SEVERE,LogStringsMessages.SP_0112_ERROR_INSTANTIATING(assertionData.getName()));
                     }
                     
                     throw new AssertionCreationException(assertionData,ex);
                 } catch (InvocationTargetException ex) {
-                    if(logger.isLoggable(Level.FINE)){
-                        logger.log(Level.FINE,"Error occurred while instantiating  SecurityPolicy assertion"+assertionData.getName());
+                    if(logger.isLoggable(Level.SEVERE)){
+                        logger.log(Level.SEVERE,LogStringsMessages.SP_0112_ERROR_INSTANTIATING(assertionData.getName()));
                     }
                     throw new AssertionCreationException(assertionData,ex);
                 } catch (InstantiationException ex) {
-                    if(logger.isLoggable(Level.FINE)){
-                        logger.log(Level.FINE,"Error occurred while instantiating  SecurityPolicy assertion"+assertionData.getName());
+                    if(logger.isLoggable(Level.SEVERE)){
+                        logger.log(Level.SEVERE,LogStringsMessages.SP_0112_ERROR_INSTANTIATING(assertionData.getName()));
                     }
                     throw new AssertionCreationException(assertionData,ex);
                 } catch (IllegalAccessException ex) {
-                    if(logger.isLoggable(Level.FINE)){
-                        logger.log(Level.FINE,"Error occurred while instantiating  SecurityPolicy assertion"+assertionData.getName());
+                    if(logger.isLoggable(Level.SEVERE)){
+                        logger.log(Level.SEVERE,LogStringsMessages.SP_0112_ERROR_INSTANTIATING(assertionData.getName()));
                     }
                     throw new AssertionCreationException(assertionData,ex);
                 }
@@ -184,13 +187,13 @@ public class SecurityPolicyAssertionCreator implements PolicyAssertionCreator{
                 try{
                     return (PolicyAssertion)cl.newInstance();
                 } catch (InstantiationException ex) {
-                    if(logger.isLoggable(Level.FINE)){
-                        logger.log(Level.FINE,"Error occurred while instantiating  SecurityPolicy assertion"+assertionData.getName());
+                    if(logger.isLoggable(Level.SEVERE)){
+                        logger.log(Level.SEVERE,LogStringsMessages.SP_0112_ERROR_INSTANTIATING(assertionData.getName()));
                     }
                     throw new AssertionCreationException(assertionData,ex);
                 } catch (IllegalAccessException ex) {
-                    if(logger.isLoggable(Level.FINE)){
-                        logger.log(Level.FINE,"Error occurred while instantiating  SecurityPolicy assertion"+assertionData.getName());
+                    if(logger.isLoggable(Level.SEVERE)){
+                        logger.log(Level.SEVERE,LogStringsMessages.SP_0112_ERROR_INSTANTIATING(assertionData.getName()));
                     }
                     throw new AssertionCreationException(assertionData,ex);
                 }

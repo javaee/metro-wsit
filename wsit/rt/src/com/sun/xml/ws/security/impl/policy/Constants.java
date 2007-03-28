@@ -202,6 +202,7 @@ public class Constants {
     public final static String PortType ="PortType";
     public final static String ServiceName ="ServiceName";
     public final static String CertStore ="CertStore";
+    public final static String SECURITY_POLICY_PACKAGE_DIR = "com.sun.xml.ws.security.impl.policy";
     
     public static void log_invalid_assertion(PolicyAssertion assertion , boolean isServer,String parentAssertion){
         
