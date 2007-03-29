@@ -26,21 +26,18 @@ import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.transport.tcp.io.Connection;
 import java.io.IOException;
-import java.util.Collections;
 
 /**
  * @author Alexey Stashok
  */
 @SuppressWarnings({"unchecked"})
 public abstract class ConnectionSession implements com.sun.xml.ws.transport.tcp.connectioncache.spi.transport.Connection {
-    protected static final ChannelSettings zeroChannelSettings = new ChannelSettings(Collections.<MimeType>emptyList(), 
-            Collections.<String>emptyList(), 0, TCPConstants.SERVICE_CHANNEL_WS_NAME, null);
-    
+    /* package */ ChannelZeroContext channelZeroContext;
+
     private Connection connection;
     
     private boolean isClosed;
     
-    private ChannelContext zeroChannelContext;
     private final SessionCloseListener sessionCloseListener;
     
     public abstract void registerChannel(@NotNull final ChannelContext context);
@@ -55,8 +52,8 @@ public abstract class ConnectionSession implements com.sun.xml.ws.transport.tcp.
     }
     
     protected void init() {
-        zeroChannelContext = new ChannelContext(this, zeroChannelSettings);
-        registerChannel(zeroChannelContext);
+        channelZeroContext = new ChannelZeroContext(this);
+        registerChannel(channelZeroContext);
     }
     
     // Stub for getAttribute
@@ -73,7 +70,7 @@ public abstract class ConnectionSession implements com.sun.xml.ws.transport.tcp.
     public @Nullable ChannelContext findWSServiceContextByChannelId(final int channelId) {return null;}
     
     public @NotNull ChannelContext getServiceChannelContext() {
-        return zeroChannelContext;
+        return channelZeroContext;
     }
     
     public void close() {

@@ -26,11 +26,13 @@ import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.transport.tcp.server.ServerConnectionSession;
+import com.sun.xml.ws.transport.tcp.util.BindingUtils;
 import com.sun.xml.ws.transport.tcp.util.ChannelContext;
 import com.sun.xml.ws.transport.tcp.util.ChannelSettings;
 import com.sun.xml.ws.transport.tcp.util.ConnectionSession;
 import com.sun.xml.ws.transport.tcp.util.TCPConstants;
 import com.sun.xml.ws.transport.tcp.util.WSTCPURI;
+import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
 import com.sun.xml.ws.transport.tcp.server.TCPAdapter;
 import com.sun.xml.ws.transport.tcp.server.WSTCPAdapterRegistry;
 import java.util.logging.Level;
@@ -57,7 +59,7 @@ public class ServiceChannelWSImpl {
     public void initiateSession() throws ServiceChannelException {
         final ChannelContext serviceChannelContext = getChannelContext();
         final ConnectionSession connectionSession = serviceChannelContext.getConnectionSession();
-        logger.log(Level.FINE, "Session: {0} opened!", connectionSession.hashCode());
+        logger.log(Level.FINE, MessagesMessages.WSTCP_1140_SOAPTCP_SESSION_OPEN(connectionSession.hashCode()));
     }
     
     public ChannelSettings openChannel(
@@ -71,7 +73,17 @@ public class ServiceChannelWSImpl {
         final WSTCPURI tcpURI = channelSettings.getTargetWSURI();
         
         final TCPAdapter adapter = adapterRegistry.getTarget(tcpURI);
-        if (adapter == null) throw new ServiceChannelException(ServiceChannelErrorCode.UNKNOWN_ENDPOINT_ADDRESS, "Service " + channelSettings.getWSServiceName() + "(" + tcpURI.toString() + ") not found!");
+        if (adapter == null) throw new ServiceChannelException(ServiceChannelErrorCode.UNKNOWN_ENDPOINT_ADDRESS, MessagesMessages.WSTCP_0034_WS_ENDPOINT_NOT_FOUND(tcpURI));
+        
+        final BindingUtils.NegotiatedBindingContent serviceSupportedContent =
+                BindingUtils.getNegotiatedContentTypesAndParams(adapter.getEndpoint().getBinding());
+        
+        channelSettings.getNegotiatedMimeTypes().retainAll(serviceSupportedContent.negotiatedMimeTypes);
+        if (channelSettings.getNegotiatedMimeTypes().size() == 0) {
+            throw new ServiceChannelException(ServiceChannelErrorCode.CONTENT_NEGOTIATION_FAILED, MessagesMessages.WSTCP_0033_CONTENT_NEGOTIATION_FAILED(tcpURI, serviceSupportedContent.negotiatedMimeTypes));
+        }
+        
+        channelSettings.getNegotiatedParams().retainAll(serviceSupportedContent.negotiatedParams);
         
         channelSettings.setChannelId(connectionSession.getNextAvailChannelId());
         final ChannelContext openedChannelContext = new ChannelContext(connectionSession, channelSettings);
@@ -82,7 +94,7 @@ public class ServiceChannelWSImpl {
         connectionSession.registerChannel(openedChannelContext);
         
         if (logger.isLoggable(Level.FINE)) {
-            logger.log(Level.FINE, "Session: {0}. Channel #{1} was opened for WS: {2}",  new Object[] {connectionSession.hashCode(), openedChannelContext.getChannelId(), openedChannelContext.getWSServiceName()});
+            logger.log(Level.FINE, MessagesMessages.WSTCP_1141_SOAPTCP_CHANNEL_OPEN(connectionSession.hashCode(), openedChannelContext.getChannelId(), tcpURI));
         }
         return channelSettings;
     }
@@ -93,7 +105,7 @@ public class ServiceChannelWSImpl {
         
         connectionSession.deregisterChannel(channelId);
         if (logger.isLoggable(Level.FINE)) {
-            logger.log(Level.FINE, "Session: {0}. Channel #{1} was closed!", new Object[] {connectionSession.hashCode(), channelId});
+            logger.log(Level.FINE, MessagesMessages.WSTCP_1142_SOAPTCP_CHANNEL_CLOSE(connectionSession.hashCode(), channelId));
         }
     }
     

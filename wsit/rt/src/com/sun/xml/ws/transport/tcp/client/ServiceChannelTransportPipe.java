@@ -32,6 +32,7 @@ import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
 import com.sun.xml.ws.transport.tcp.util.ChannelContext;
 import com.sun.xml.ws.transport.tcp.util.ConnectionSession;
 import com.sun.xml.ws.transport.tcp.util.TCPConstants;
+import com.sun.xml.ws.transport.tcp.util.WSTCPException;
 import java.io.InputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -111,10 +112,8 @@ public final class ServiceChannelTransportPipe extends TCPTransportPipe {
                 reply.addSatellite(clientTransport);
                 return reply;
             } else {
-                if (logger.isLoggable(Level.FINE)) {
-                    logger.log(Level.SEVERE, MessagesMessages.WSTCP_0016_ERROR_WS_EXECUTION_ON_SERVER(clientTransport.getContentType()));
-                }
-                throw new WebServiceException(MessagesMessages.WSTCP_0016_ERROR_WS_EXECUTION_ON_SERVER(clientTransport.getContentType()));
+                logger.log(Level.SEVERE, MessagesMessages.WSTCP_0016_ERROR_WS_EXECUTION_ON_SERVER(clientTransport.getError()));
+                throw new WSTCPException(clientTransport.getError());
             }
         } catch(WebServiceException wex) {
             abortSession(channelContext);

@@ -20,19 +20,25 @@
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
-package com.sun.xml.ws.transport.tcp.servicechannel;
+package com.sun.xml.ws.transport.tcp.util;
 
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlType;
+import com.sun.istack.NotNull;
+import java.util.Arrays;
 
 /**
  * @author Alexey Stashok
  */
-@XmlType(name = "serviceChannelErrorCode")
-@XmlEnum
-public enum ServiceChannelErrorCode {
-    TOO_MANY_OPEN_SESSIONS,
-    TOO_MANY_OPEN_CHANNELS_FOR_SESSION,
-    UNKNOWN_ENDPOINT_ADDRESS,
-    CONTENT_NEGOTIATION_FAILED
+public class ChannelZeroContext extends ChannelContext {
+
+    static final ChannelSettings channelZeroSettings = new ChannelSettings(
+            Arrays.asList(MimeTypeConstants.SOAP11, MimeTypeConstants.FAST_INFOSET_SOAP11),
+            Arrays.asList(TCPConstants.CHARSET_PROPERTY, TCPConstants.TRANSPORT_SOAP_ACTION_PROPERTY),
+            0, TCPConstants.SERVICE_CHANNEL_WS_NAME, 
+            WSTCPURI.parse(TCPConstants.PROTOCOL_SCHEMA + "://somehost:8080/service"));
+    
+    
+    public ChannelZeroContext(@NotNull final ConnectionSession connectionSession) {
+        super(connectionSession, channelZeroSettings);
+    }
+    
 }

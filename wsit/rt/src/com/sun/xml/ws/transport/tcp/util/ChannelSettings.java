@@ -27,6 +27,7 @@ import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.xml.namespace.QName;
@@ -44,7 +45,8 @@ import javax.xml.namespace.QName;
 })
 public final class ChannelSettings {
     
-    private List<MimeType> negotiatedMimeTypes;
+    @XmlElement(required = true)
+    private List<String> negotiatedMimeTypes;
     
     private List<String> negotiatedParams;
     
@@ -52,13 +54,14 @@ public final class ChannelSettings {
     
     private QName wsServiceName;
     
+    @XmlElement(required = true)
     @XmlJavaTypeAdapter(WSTCPURI.WSTCPURI2StringJAXBAdapter.class)
     private WSTCPURI targetWSURI;
     
     public ChannelSettings() {
     }
 
-    public ChannelSettings(@NotNull final List<MimeType> negotiatedMimeTypes, 
+    public ChannelSettings(@NotNull final List<String> negotiatedMimeTypes, 
             @NotNull final List<String> negotiatedParams, 
             final int channelId, 
             final QName wsServiceName, 
@@ -70,11 +73,11 @@ public final class ChannelSettings {
         this.targetWSURI = targetWSURI;
     }
 
-    public @NotNull List<MimeType> getNegotiatedMimeTypes() {
+    public @NotNull List<String> getNegotiatedMimeTypes() {
         return negotiatedMimeTypes;
     }
 
-    public void setNegotiatedMimeTypes(@NotNull final List<MimeType> negotiatedMimeTypes) {
+    public void setNegotiatedMimeTypes(@NotNull final List<String> negotiatedMimeTypes) {
         this.negotiatedMimeTypes = negotiatedMimeTypes;
     }
 

@@ -54,7 +54,7 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class OpenChannelResponse {
 
-    @XmlElement(name = "return")
+    @XmlElement(name = "return", required = true)
     protected ChannelSettings _return;
 
     /**

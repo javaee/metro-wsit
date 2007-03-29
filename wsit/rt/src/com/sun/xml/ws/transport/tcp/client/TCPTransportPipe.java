@@ -137,9 +137,7 @@ public class TCPTransportPipe implements Pipe {
                     }
                     return reply;
                 } else {
-                    if (logger.isLoggable(Level.FINE)) {
-                        logger.log(Level.SEVERE, MessagesMessages.WSTCP_0016_ERROR_WS_EXECUTION_ON_SERVER(clientTransport.getError()));
-                    }
+                    logger.log(Level.SEVERE, MessagesMessages.WSTCP_0016_ERROR_WS_EXECUTION_ON_SERVER(clientTransport.getError()));
                     throw new WSTCPException(clientTransport.getError());
                 }
             } catch(ClientTransportException e) {
@@ -178,7 +176,12 @@ public class TCPTransportPipe implements Pipe {
     protected void writeTransportSOAPActionHeaderIfRequired(ChannelContext channelContext, ContentType ct, Packet packet) {
         String soapActionTransportHeader = getSOAPAction(ct.getSOAPActionHeader(), packet);
         if (soapActionTransportHeader != null) {
-            channelContext.getConnection().setContentProperty(ChannelContext.getStaticParameterId(TCPConstants.TRANSPORT_SOAP_ACTION_PROPERTY), soapActionTransportHeader);
+            try {
+                int transportSoapActionParamId = channelContext.encodeParam(TCPConstants.TRANSPORT_SOAP_ACTION_PROPERTY);
+                channelContext.getConnection().setContentProperty(transportSoapActionParamId, soapActionTransportHeader);
+            } catch (WSTCPException ex) {
+                logger.log(Level.WARNING, MessagesMessages.WSTCP_0032_UNEXPECTED_TRANSPORT_SOAP_ACTION(), ex);
+            }
         }
     }
     

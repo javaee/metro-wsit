@@ -25,6 +25,7 @@ package com.sun.xml.ws.transport.tcp.servicechannel.stubs;
 import com.sun.xml.ws.transport.tcp.util.ChannelSettings;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 
@@ -53,6 +54,7 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class OpenChannel {
 
+    @XmlElement(required = true)
     protected ChannelSettings channelSettings;
 
     /**

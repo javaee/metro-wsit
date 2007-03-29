@@ -32,7 +32,6 @@ import com.sun.xml.ws.transport.tcp.encoding.WSTCPFastInfosetStreamCodec;
 import com.sun.xml.ws.transport.tcp.encoding.WSTCPFastInfosetStreamReaderRecyclable;
 import com.sun.xml.ws.transport.tcp.io.Connection;
 import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -40,28 +39,9 @@ import java.util.logging.Logger;
 import javax.xml.namespace.QName;
 
 
-public final class ChannelContext implements WSTCPFastInfosetStreamReaderRecyclable.RecycleAwareListener {
+public class ChannelContext implements WSTCPFastInfosetStreamReaderRecyclable.RecycleAwareListener {
     private static final Logger logger = Logger.getLogger(
             com.sun.xml.ws.transport.tcp.util.TCPConstants.LoggingDomain);
-    
-    private static final Map<String, Integer> staticParamsEncodingMap = new HashMap<String, Integer>(8);
-    private static final Map<Integer, String> staticParamsDecodingMap = new HashMap<Integer, String> (8);
-    
-    private static final Map<MimeType, Integer> staticMimeTypeEncodingMap = new HashMap<MimeType, Integer>(8);
-    private static final Map<Integer, MimeType> staticMimeTypeDecodingMap = new HashMap<Integer, MimeType>(8);
-    static {
-        staticParamsEncodingMap.put(TCPConstants.CHARSET_PROPERTY, 0);
-        staticParamsEncodingMap.put(TCPConstants.SOAP_ACTION_PROPERTY, 1);
-        staticParamsEncodingMap.put(TCPConstants.TRANSPORT_SOAP_ACTION_PROPERTY, 2);
-        
-        staticMimeTypeEncodingMap.put(MimeType.SOAP11, 0);   //default mime type for soap1.1
-        staticMimeTypeEncodingMap.put(MimeType.SOAP12, 1);   //default mime type for soap1.2
-        staticMimeTypeEncodingMap.put(MimeType.FAST_INFOSET_SOAP11, 2);   //default mime type for stateless FI 1.1
-        staticMimeTypeEncodingMap.put(MimeType.FAST_INFOSET_SOAP12, 3);   //default mime type for stateless FI 1.2
-        
-        for(Map.Entry<MimeType, Integer> entry : staticMimeTypeEncodingMap.entrySet()) staticMimeTypeDecodingMap.put(entry.getValue(), entry.getKey());
-        for(Map.Entry<String, Integer> entry : staticParamsEncodingMap.entrySet()) staticParamsDecodingMap.put(entry.getValue(), entry.getKey());
-    }
     
     // tcp connection session this channel belongs to
     private final ConnectionSession connectionSession;
@@ -78,14 +58,6 @@ public final class ChannelContext implements WSTCPFastInfosetStreamReaderRecycla
     
     // Temp storage for decode content type from String representation
     private final ContentType contentType = new ContentType();
-    
-    public final static @Nullable Integer getStaticMimeTypeId(@NotNull String mimeType) {
-        return staticMimeTypeEncodingMap.get(mimeType);
-    }
-    
-    public final static @Nullable Integer getStaticParameterId(@NotNull String parameter) {
-        return staticParamsEncodingMap.get(parameter);
-    }
     
     public ChannelContext(@NotNull final ConnectionSession connectionSession,
             @NotNull final ChannelSettings channelSettings) {
@@ -161,15 +133,7 @@ public final class ChannelContext implements WSTCPFastInfosetStreamReaderRecycla
         }
         contentType.parse(contentTypeS);
         
-        Integer mt = staticMimeTypeEncodingMap.get(contentType.getMimeType());
-        if (mt == null) {
-            mt = channelSettings.getNegotiatedMimeTypes().indexOf(contentType.getMimeType());
-            if (mt != -1)
-                mt += staticMimeTypeEncodingMap.size();
-        }
-        
-        if (mt == null || mt == -1)  throw new WSTCPException(WSTCPError.createNonCriticalError(TCPConstants.UNKNOWN_CONTENT_ID,
-                MessagesMessages.WSTCP_0011_UNKNOWN_CONTENT_TYPE(contentTypeS)));
+        int mt = encodeMimeType(contentType.getMimeType());
         
         connection.setContentId(mt);
         final Map<String, String> parameters = contentType.getParameters();
@@ -194,16 +158,10 @@ public final class ChannelContext implements WSTCPFastInfosetStreamReaderRecycla
         if (logger.isLoggable(Level.FINEST)) {
             logger.log(Level.FINEST, MessagesMessages.WSTCP_1122_CHANNEL_CONTEXT_DECODE_CT(mimeId, params));
         }
-        MimeType mimeType = staticMimeTypeDecodingMap.get(mimeId);
-        if (mimeType == null) {
-            mimeType = channelSettings.getNegotiatedMimeTypes().get(mimeId - staticMimeTypeDecodingMap.size());
-        }
         
-        if (mimeType == null)
-            throw new WSTCPException(WSTCPError.createNonCriticalError(TCPConstants.UNKNOWN_CONTENT_ID,
-                    MessagesMessages.WSTCP_0011_UNKNOWN_CONTENT_TYPE(mimeId)));
+        String mimeType = decodeMimeType(mimeId);
         
-        String contentTypeStr = mimeType.toString();
+        String contentTypeStr = mimeType;
         if (params.size() > 0) {
             final StringBuffer ctBuf = new StringBuffer(contentTypeStr);
             for(Map.Entry<Integer, String> parameter : params.entrySet()) {
@@ -223,13 +181,29 @@ public final class ChannelContext implements WSTCPFastInfosetStreamReaderRecycla
         return contentTypeStr;
     }
     
-    private int encodeParam(@NotNull final String paramStr) throws WSTCPException {
-        Integer paramId = staticParamsEncodingMap.get(paramStr);
-        if (paramId == null) {
-            paramId = channelSettings.getNegotiatedParams().indexOf(paramStr);
-            if (paramId != -1)
-                return paramId + staticParamsEncodingMap.size();
-        } else {
+    public int encodeMimeType(@NotNull final String mimeType) throws WSTCPException {
+        int contentId = channelSettings.getNegotiatedMimeTypes().indexOf(mimeType);
+        if (contentId != -1) {
+            return contentId;
+        }
+        
+        throw new WSTCPException(WSTCPError.createNonCriticalError(TCPConstants.UNKNOWN_CONTENT_ID,
+                MessagesMessages.WSTCP_0011_UNKNOWN_CONTENT_TYPE(mimeType)));
+    }
+    
+    public @NotNull String decodeMimeType(final int contentId) throws WSTCPException {
+        String mimeType = channelSettings.getNegotiatedMimeTypes().get(contentId);
+        
+        if (mimeType != null) {
+            return mimeType;
+        }
+        throw new WSTCPException(WSTCPError.createNonCriticalError(TCPConstants.UNKNOWN_CONTENT_ID,
+                MessagesMessages.WSTCP_0011_UNKNOWN_CONTENT_TYPE(contentId)));
+    }
+
+    public int encodeParam(@NotNull final String paramStr) throws WSTCPException {
+        int paramId = channelSettings.getNegotiatedParams().indexOf(paramStr);
+        if (paramId != -1) {
             return paramId;
         }
         
@@ -237,17 +211,12 @@ public final class ChannelContext implements WSTCPFastInfosetStreamReaderRecycla
                 MessagesMessages.WSTCP_0010_UNKNOWN_PARAMETER(paramStr)));
     }
     
-    private @NotNull String decodeParam(final int paramId) throws WSTCPException {
-        String paramStr = staticParamsDecodingMap.get(paramId);
-        if (paramStr == null) {
-            paramStr = channelSettings.getNegotiatedParams().get(paramId - staticParamsDecodingMap.size());
-            if (paramStr != null) {
-                return paramStr;
-            }
-        } else {
+    public @NotNull String decodeParam(final int paramId) throws WSTCPException {
+        String paramStr = channelSettings.getNegotiatedParams().get(paramId);
+        
+        if (paramStr != null) {
             return paramStr;
         }
-        
         throw new WSTCPException(WSTCPError.createNonCriticalError(TCPConstants.UNKNOWN_PARAMETER_ID,
                 MessagesMessages.WSTCP_0010_UNKNOWN_PARAMETER(paramId)));
     }
@@ -258,19 +227,19 @@ public final class ChannelContext implements WSTCPFastInfosetStreamReaderRecycla
     public static void configureCodec(@NotNull final ChannelContext channelContext,
             @NotNull final SOAPVersion soapVersion,
     @NotNull final Codec defaultCodec) {
-        final List<MimeType> supportedMimeTypes = channelContext.getChannelSettings().getNegotiatedMimeTypes();
+        final List<String> supportedMimeTypes = channelContext.getChannelSettings().getNegotiatedMimeTypes();
         if (supportedMimeTypes != null) {
-            if (supportedMimeTypes.contains(MimeType.FAST_INFOSET_STATEFUL_SOAP11) ||
-                    supportedMimeTypes.contains(MimeType.FAST_INFOSET_STATEFUL_SOAP12)) {
+            if (supportedMimeTypes.contains(MimeTypeConstants.FAST_INFOSET_STATEFUL_SOAP11) ||
+                    supportedMimeTypes.contains(MimeTypeConstants.FAST_INFOSET_STATEFUL_SOAP12)) {
                 logger.log(Level.FINEST, "ChannelContext.configureCodec: FI Stateful");
-                StreamSOAPCodec streamSoapCodec = defaultCodec instanceof SOAPBindingCodec ? 
+                StreamSOAPCodec streamSoapCodec = defaultCodec instanceof SOAPBindingCodec ?
                     ((SOAPBindingCodec) defaultCodec).getXMLCodec() : null;
                 channelContext.setCodec(WSTCPFastInfosetStreamCodec.create(streamSoapCodec, soapVersion, channelContext, true));
                 return;
-            } else if (supportedMimeTypes.contains(MimeType.FAST_INFOSET_SOAP11) ||
-                    supportedMimeTypes.contains(MimeType.FAST_INFOSET_SOAP12)) {
+            } else if (supportedMimeTypes.contains(MimeTypeConstants.FAST_INFOSET_SOAP11) ||
+                    supportedMimeTypes.contains(MimeTypeConstants.FAST_INFOSET_SOAP12)) {
                 logger.log(Level.FINEST, "ChannelContext.configureCodec: FI Stateless");
-                StreamSOAPCodec streamSoapCodec = defaultCodec instanceof SOAPBindingCodec ? 
+                StreamSOAPCodec streamSoapCodec = defaultCodec instanceof SOAPBindingCodec ?
                     ((SOAPBindingCodec) defaultCodec).getXMLCodec() : null;
                 channelContext.setCodec(WSTCPFastInfosetStreamCodec.create(streamSoapCodec, soapVersion, channelContext, false));
                 return;

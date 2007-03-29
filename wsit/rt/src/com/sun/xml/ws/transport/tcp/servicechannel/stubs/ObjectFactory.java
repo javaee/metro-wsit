@@ -23,7 +23,6 @@
 package com.sun.xml.ws.transport.tcp.servicechannel.stubs;
 
 import com.sun.xml.ws.transport.tcp.util.ChannelSettings;
-import com.sun.xml.ws.transport.tcp.util.MimeType;
 import com.sun.xml.ws.transport.tcp.servicechannel.ServiceChannelException;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlElementDecl;
@@ -103,14 +102,6 @@ public class ObjectFactory {
      */
     public ChannelSettings createChannelSettings() {
         return new ChannelSettings();
-    }
-
-    /**
-     * Create an instance of {@link MimeType }
-     * 
-     */
-    public MimeType createMimeType() {
-        return new MimeType();
     }
 
     /**

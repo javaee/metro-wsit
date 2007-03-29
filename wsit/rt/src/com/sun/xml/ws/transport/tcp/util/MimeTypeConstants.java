@@ -20,19 +20,23 @@
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
-package com.sun.xml.ws.transport.tcp.servicechannel;
+package com.sun.xml.ws.transport.tcp.util;
 
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlType;
+import com.sun.xml.ws.encoding.fastinfoset.FastInfosetMIMETypes;
 
 /**
+ *
  * @author Alexey Stashok
  */
-@XmlType(name = "serviceChannelErrorCode")
-@XmlEnum
-public enum ServiceChannelErrorCode {
-    TOO_MANY_OPEN_SESSIONS,
-    TOO_MANY_OPEN_CHANNELS_FOR_SESSION,
-    UNKNOWN_ENDPOINT_ADDRESS,
-    CONTENT_NEGOTIATION_FAILED
+public final class MimeTypeConstants {
+    public static final String SOAP11 = "text/xml";
+    public static final String SOAP12 = "application/soap+xml";
+    
+    public static final String MTOM = "multipart/related";
+    
+    public static final String FAST_INFOSET_SOAP11 = FastInfosetMIMETypes.SOAP_11;
+    public static final String FAST_INFOSET_SOAP12 = FastInfosetMIMETypes.SOAP_12;
+    
+    public static final String FAST_INFOSET_STATEFUL_SOAP11 = FastInfosetMIMETypes.STATEFUL_SOAP_11;
+    public static final String FAST_INFOSET_STATEFUL_SOAP12 = FastInfosetMIMETypes.STATEFUL_SOAP_12;
 }

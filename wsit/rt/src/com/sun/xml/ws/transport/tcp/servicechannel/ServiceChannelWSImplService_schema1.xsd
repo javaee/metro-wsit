@@ -15,7 +15,7 @@
 </xs:complexType>
 <xs:complexType name="serviceChannelExceptionBean">
 <xs:sequence>
-<xs:element name="errorCode" type="tns:serviceChannelErrorCode" minOccurs="0"/>
+<xs:element name="errorCode" type="tns:serviceChannelErrorCode"/>
 <xs:element name="message" type="xs:string" minOccurs="0"/>
 </xs:sequence>
 </xs:complexType>
@@ -29,40 +29,21 @@
 </xs:complexType>
 <xs:complexType name="openChannel">
 <xs:sequence>
-<xs:element name="channelSettings" type="tns:channelSettings" minOccurs="0"/>
+<xs:element name="channelSettings" type="tns:channelSettings"/>
 </xs:sequence>
 </xs:complexType>
 <xs:complexType name="channelSettings" final="extension restriction">
 <xs:sequence>
-<xs:element name="negotiatedMimeTypes" type="tns:mimeType" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+<xs:element name="negotiatedMimeTypes" type="xs:string" maxOccurs="unbounded"/>
 <xs:element name="negotiatedParams" type="xs:string" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
-<xs:element name="targetWSURI" type="xs:string" minOccurs="0"/>
+<xs:element name="targetWSURI" type="xs:string"/>
 <xs:element name="channelId" type="xs:int"/>
 <xs:element name="wsServiceName" type="xs:QName" minOccurs="0"/>
 </xs:sequence>
 </xs:complexType>
-<xs:complexType name="mimeType" final="extension restriction">
-<xs:sequence>
-<xs:element name="embeddedParams">
-<xs:complexType>
-<xs:sequence>
-<xs:element name="entry" minOccurs="0" maxOccurs="unbounded">
-<xs:complexType>
-<xs:sequence>
-<xs:element name="key" minOccurs="0" type="xs:string"/>
-<xs:element name="value" minOccurs="0" type="xs:string"/>
-</xs:sequence>
-</xs:complexType>
-</xs:element>
-</xs:sequence>
-</xs:complexType>
-</xs:element>
-<xs:element name="mimeType" type="xs:string" minOccurs="0"/>
-</xs:sequence>
-</xs:complexType>
 <xs:complexType name="openChannelResponse">
 <xs:sequence>
-<xs:element name="return" type="tns:channelSettings" minOccurs="0"/>
+<xs:element name="return" type="tns:channelSettings"/>
 </xs:sequence>
 </xs:complexType>
 <xs:simpleType name="serviceChannelErrorCode">
@@ -70,6 +51,7 @@
 <xs:enumeration value="TOO_MANY_OPEN_SESSIONS"/>
 <xs:enumeration value="TOO_MANY_OPEN_CHANNELS_FOR_SESSION"/>
 <xs:enumeration value="UNKNOWN_ENDPOINT_ADDRESS"/>
+<xs:enumeration value="CONTENT_NEGOTIATION_FAILED"/>
 </xs:restriction>
 </xs:simpleType>
 </xs:schema>

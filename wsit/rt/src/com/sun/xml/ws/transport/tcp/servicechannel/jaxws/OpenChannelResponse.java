@@ -33,7 +33,7 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "openChannelResponse", namespace = "http://servicechannel.tcp.transport.ws.xml.sun.com/")
 public class OpenChannelResponse {
 
-    @XmlElement(name = "return", namespace = "")
+    @XmlElement(name = "return", namespace = "", required = true)
     private com.sun.xml.ws.transport.tcp.util.ChannelSettings _return;
 
     /**

@@ -23,6 +23,10 @@
 package com.sun.xml.ws.transport.tcp.servicechannel;
 
 import com.sun.istack.Nullable;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlType;
 import javax.xml.ws.WebFault;
 
 /**
@@ -46,23 +50,30 @@ public class ServiceChannelException extends Exception {
         super(message);
         this.faultInfo = faultInfo;
     }
-
+    
     public ServiceChannelException(final String message, final ServiceChannelExceptionBean faultInfo, final Throwable cause) {
         super(message, cause);
         this.faultInfo = faultInfo;
     }
-
+    
     public ServiceChannelExceptionBean getFaultInfo() {
         return faultInfo;
     }
-
+    
     public void setFaultInfo(final ServiceChannelExceptionBean faultInfo) {
         this.faultInfo = faultInfo;
     }
     
+    @XmlAccessorType(XmlAccessType.FIELD)
+    @XmlType(name = "serviceChannelExceptionBean", propOrder = {
+        "errorCode",
+        "message"
+    })
     public static class ServiceChannelExceptionBean {
-        private String message;
+        @XmlElement(required = true)
         private ServiceChannelErrorCode errorCode;
+        
+        private String message;
         
         public ServiceChannelExceptionBean() {
         }
@@ -71,7 +82,7 @@ public class ServiceChannelException extends Exception {
             this.errorCode = errorCode;
             this.message = message;
         }
-
+        
         public ServiceChannelErrorCode getErrorCode() {
             return errorCode;
         }
@@ -83,7 +94,7 @@ public class ServiceChannelException extends Exception {
         public String getMessage() {
             return this.message;
         }
-
+        
         public void setMessage(final String message) {
             this.message = message;
         }

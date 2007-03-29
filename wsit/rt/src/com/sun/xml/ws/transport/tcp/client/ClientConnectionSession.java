@@ -28,7 +28,6 @@ import com.sun.xml.ws.transport.tcp.io.Connection;
 import com.sun.xml.ws.transport.tcp.util.ChannelContext;
 import com.sun.xml.ws.transport.tcp.util.ConnectionSession;
 import com.sun.xml.ws.transport.tcp.util.SessionCloseListener;
-import com.sun.xml.ws.transport.tcp.util.TCPConstants;
 import com.sun.xml.ws.transport.tcp.util.WSTCPURI;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,11 +37,6 @@ import java.util.Map;
  */
 @SuppressWarnings({"unchecked"})
 public final class ClientConnectionSession extends ConnectionSession {
-    static {
-        // Set dumb URI for service WS channel
-        zeroChannelSettings.setTargetWSURI(WSTCPURI.parse(TCPConstants.PROTOCOL_SCHEMA + "://somehost:8080/service"));
-    }
-
     private Map<String, Object> attributes = new HashMap<String, Object>(2);
     private Map<String, ChannelContext> url2ChannelMap = new HashMap<String, ChannelContext>();
     

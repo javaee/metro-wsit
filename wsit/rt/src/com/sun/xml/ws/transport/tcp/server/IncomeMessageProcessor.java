@@ -26,7 +26,6 @@ import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.transport.tcp.io.Connection;
 import com.sun.xml.ws.transport.tcp.util.ChannelSettings;
-import com.sun.xml.ws.transport.tcp.util.MimeType;
 import com.sun.xml.ws.transport.tcp.util.SessionCloseListener;
 import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
 import com.sun.xml.ws.transport.tcp.util.ChannelContext;
@@ -297,7 +296,7 @@ public final class IncomeMessageProcessor implements SessionCloseListener {
      * Normally channel context should be created only by Connection Management service
      */
     private ChannelContext createFakeChannelContext(int channelId, @NotNull ConnectionSession connectionSession) {
-        return new ChannelContext(connectionSession, new ChannelSettings(Collections.<MimeType>emptyList(),
+        return new ChannelContext(connectionSession, new ChannelSettings(Collections.<String>emptyList(),
                 Collections.<String>emptyList(), channelId, null, null));
     }
 }
