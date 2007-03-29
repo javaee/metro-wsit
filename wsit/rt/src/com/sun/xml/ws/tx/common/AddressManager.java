@@ -38,7 +38,7 @@ import java.util.logging.Level;
  * This class handles all address calculations for the wstx-service enpoints
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 1.0
  */
 public class AddressManager {
@@ -79,8 +79,8 @@ public class AddressManager {
      * This method should be used most of the time unless you explicitly know which
      * scheme you want back.
      *
-     * @param portType
-     * @return
+     * @param portType the endpoint port type
+     * @return a URI representing the preferred endpoint address
      */
     public static URI getPreferredAddress(Class portType) {
         return "http".equals(preferredScheme) ? getAddress(portType, false) : getAddress(portType, true);
@@ -91,9 +91,9 @@ public class AddressManager {
      * the 'secure' flag is true, the address will begin with "https", otherwise it
      * will begin with "http".
      *
-     * @param portType
-     * @param secure
-     * @return
+     * @param portType the endpoint port type
+     * @param secure flag to control whether the address is secure or non-secure
+     * @return a URI representing the endpoint address with the specified secure or non-secure scheme
      */
     public static URI getAddress(Class portType, boolean secure) {
         StringBuilder addr = new StringBuilder();
@@ -117,7 +117,6 @@ public class AddressManager {
         } else if (portType == ParticipantPortType.class) {
             addr.append("/wsat/2pc");
         } else {
-            // TODO: ERROR.  Should we return null and let the caller handle it?
             return null;
         }
 
@@ -125,7 +124,6 @@ public class AddressManager {
         try {
             uri = new URI(addr.toString());
         } catch (URISyntaxException e) {
-            // TODO: ERROR
         }
 
         return uri;
@@ -163,9 +161,11 @@ public class AddressManager {
                 logger.finest("static initializer", "hostAndPort: " + hostAndPort);
                 logger.finest("static initializer", "secureHostAndPort: " + secureHostAndPort);
             }
-        } catch (Throwable t) {
+        } catch (Throwable t) {  // trap every possible failure calling the gf code
             fallback();
-            logger.warning("static initializer",
+            logger.info("static initializer",
+                    LocalizationMessages.HOST_AND_PORT_LOOKUP_FAILURE_2015(preferredScheme + "://" + secureHostAndPort));
+            logger.finest("static initializer",
                     LocalizationMessages.HOST_AND_PORT_LOOKUP_FAILURE_2015(preferredScheme + "://" + secureHostAndPort),
                     t);
         }
@@ -202,16 +202,24 @@ public class AddressManager {
         }
     }
 
+    /**
+     * Set the static fields to sane value that might work as a last-ditch effort.
+     */
     private static void fallback() {
-        // worst-case scenario: fall back to https://canonicalhostname:8181
+        // worst-case scenario: fall back to https://canonicalhostname:8181, but also set
+        // hostAndPort since it is used to ping the services.
         preferredScheme = "https";
-        secureHostAndPort = getServiceHostName() + ":8181";
+        final String hostName = getServiceHostName();
+        hostAndPort = hostName + ":8080";
+        secureHostAndPort = hostName + ":8181";
     }
 
     /**
      * This method returns the fully qualified name of the host.  If
      * the name can't be resolved (on windows if there isn't a domain specified), just
      * host name is returned
+     *
+     * @return the host name
      */
     private static String getServiceHostName() {
         String hostname = null;

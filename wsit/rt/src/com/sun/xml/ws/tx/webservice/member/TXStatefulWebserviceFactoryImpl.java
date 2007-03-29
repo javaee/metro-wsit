@@ -53,7 +53,7 @@ import java.util.logging.Level;
  * This class ...
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  * @since 1.0
  */
 // suppress known deprecation warnings about using short term workaround StatefulWebService.export(Class, String webServiceEndpoint, PortType)
@@ -216,6 +216,9 @@ final public class TXStatefulWebserviceFactoryImpl implements StatefulWebservice
             }
             pingService((AddressManager.getAddress(RegistrationCoordinatorPortType.class, false).toString() + "?wsdl"),
                     RegistrationCoordinatorPortTypeImpl.class);
+            if (!wstxServiceAvailable) {
+                return; // short-circuit if the first ping fails
+            }
             if (logger.isLogging(Level.FINEST)) {
                 logger.finest("pingStatefulServices", "pinging registerResponse service...");
             }
@@ -283,9 +286,10 @@ final public class TXStatefulWebserviceFactoryImpl implements StatefulWebservice
                 wstxServiceAvailable = false;
                 
                 // only print stacktrace for first endpoint ping failure.
-                logger.severe(METHOD, 
-                        LocalizationMessages.ENDPOINT_NOT_AVAILABLE_5002(urlAddr, sws.getName()),
-                        e);
+                logger.warning(METHOD,
+                        LocalizationMessages.ENDPOINT_NOT_AVAILABLE_5002(urlAddr, sws.getName()));
+                logger.fine(METHOD,
+                        LocalizationMessages.ENDPOINT_NOT_AVAILABLE_5002(urlAddr, sws.getName()), e);
             } else {
                 logger.severe(METHOD, 
                         LocalizationMessages.ENDPOINT_NOT_AVAILABLE_5002(urlAddr, sws.getName()));
