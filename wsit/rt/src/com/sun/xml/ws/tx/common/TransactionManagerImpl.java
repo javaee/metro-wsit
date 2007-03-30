@@ -72,7 +72,7 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
             final Context ctx = new InitialContext();
             result = ctx.lookup(jndiName);
         } catch (NamingException e) {
-            logger.warning("jndiLookup", LocalizationMessages.FAILED_JNDI_LOOKUP_2001(jndiName));
+            logger.fine("jndiLookup", LocalizationMessages.FAILED_JNDI_LOOKUP_2001(jndiName));
         }
         return result;
     }

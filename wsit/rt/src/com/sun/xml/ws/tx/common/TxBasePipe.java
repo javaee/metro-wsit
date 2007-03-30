@@ -28,8 +28,7 @@ import static com.sun.xml.ws.tx.common.ATAssertion.*;
  * @author jf39279
  */
 abstract public class TxBasePipe implements Pipe {
-    
-    static protected final TransactionManagerImpl tm = TransactionManagerImpl.getInstance();
+    protected final TransactionManagerImpl txnMgr;
 
     /**
      * next pipe in the chain
@@ -38,6 +37,7 @@ abstract public class TxBasePipe implements Pipe {
     
     public TxBasePipe(Pipe next) {
         this.next = next;
+        txnMgr = TransactionManagerImpl.getInstance();
     }
 
     /**

@@ -69,7 +69,7 @@ import java.util.Iterator;
  * This class process transactional context for client outgoing message.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  * @since 1.0
  */
 // suppress known deprecation warnings about using pipes.
@@ -195,7 +195,7 @@ public class TxClientPipe extends TxBasePipe {
                         WSAT_TXN_CONTEXT_NOT_FLOWED_1001(
                         msg.getOperation(wsdlModel).getName().toString()));
                 return next.process(pkt);
-            }
+            }  
         }
         
         // get the coordination context from JTS ThreadLocal data
@@ -226,7 +226,7 @@ public class TxClientPipe extends TxBasePipe {
         // then the same JTA transaction will be used and it must only be associated
         // with one thread at any point in time. Will resume transaction when it returns.
         try {
-            currentTxn = tm.suspend();
+            currentTxn = txnMgr.suspend();
         } catch (SystemException ex) {
             throw new WebServiceException(ex.getMessage(), ex);
         }
@@ -238,7 +238,7 @@ public class TxClientPipe extends TxBasePipe {
         } finally {
             try {
                 // flow of control is transfered back from caller, resume transaction.
-                tm.resume(currentTxn);
+                txnMgr.resume(currentTxn);
             } catch (Exception ex) {
                 if (rethrow != null) {
                     rethrow.initCause(ex);
@@ -258,7 +258,7 @@ public class TxClientPipe extends TxBasePipe {
         Transaction currentTxn;
         CoordinationContextInterface result = null;
         try {
-            currentTxn = tm.getTransaction();
+            currentTxn = txnMgr.getTransaction();
         } catch (SystemException e) {
             throw new WebServiceException(e.getMessage(), e);
         }
@@ -271,10 +271,10 @@ public class TxClientPipe extends TxBasePipe {
 
         if (currentTxn != null) {
             // see if a coordination context is already associated with the current JTA transaction.
-            result = tm.getCoordinationContext();
+            result = txnMgr.getCoordinationContext();
             if (result == null) {
                 // create & associate a coordination context with current thread's transaction context
-                final long EXPIRES = tm.getRemainingTimeout() * 1000L;
+                final long EXPIRES = txnMgr.getRemainingTimeout() * 1000L;
                 result = ContextFactory.createContext(WSAT_2004_PROTOCOL, EXPIRES);
 
                 // create a new coordinator object for this context. Associate JTA transaction with ATCoordinator.
@@ -283,7 +283,7 @@ public class TxClientPipe extends TxBasePipe {
                 CoordinationManager.getInstance().putCoordinator(coord);
 
                 // cache the resulting context in the transaction context
-                tm.setCoordinationContext(result);
+                txnMgr.setCoordinationContext(result);
             }
         }
         return result;
@@ -294,7 +294,7 @@ public class TxClientPipe extends TxBasePipe {
     private Transaction checkCurrentJTATransaction(Message msg, WSDLPort wsdlModel) {
         Transaction currentTxn = null;
         try {
-            currentTxn = tm.getTransaction();
+            currentTxn = txnMgr.getTransaction();
        
 // workaround for glassfksh issue 2659, catch throwable instead of just SystemException.
 //        } catch (SystemException se) {

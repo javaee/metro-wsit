@@ -73,7 +73,7 @@ import java.util.logging.Level;
  * <p/>
  * Supports following WS-Coordination protocols: 2004 WS-Atomic Transaction protocol
  *
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  * @since 1.0
  */
 // suppress known deprecation warnings about using pipes.
@@ -81,8 +81,7 @@ import java.util.logging.Level;
 public class TxServerPipe extends TxBasePipe {
 
     static private TxLogger logger = TxLogger.getLogger(TxServerPipe.class);
-    static private TransactionManagerImpl tm = TransactionManagerImpl.getInstance();
-
+   
     // unmarshalls supported WS-AT coordination context formats
     final private Unmarshaller unmarshaller;
     
@@ -260,7 +259,7 @@ public class TxServerPipe extends TxBasePipe {
                                                                                                  jtaTxn.toString()), 
                                    e);
                     rethrow = e;
-                    tm.setRollbackOnly();
+                    txnMgr.setRollbackOnly();
                 }
                 coord.suspendTransaction();
             } else if (coord.isSubordinateCoordinator()) {
@@ -280,7 +279,7 @@ public class TxServerPipe extends TxBasePipe {
                                                                                                  jtaTxnString), 
                                    e);
                     rethrow = e;
-                    tm.setRollbackOnly();
+                    txnMgr.setRollbackOnly();
                 }
                 // Sun App Server 9.1 does not support suspend/resume with TransactionInflow, so release imported txn here.
                 //coord.suspendTransaction();
@@ -306,7 +305,7 @@ public class TxServerPipe extends TxBasePipe {
                 rethrow = e;
                 logger.warning(METHOD_NAME, 
                                LocalizationMessages.HANDLE_EXCEPTION_TO_COMMIT_CREATED_TXN_5015(), e);
-                tm.setRollbackOnly();
+                txnMgr.setRollbackOnly();
             }
             if (isServlet(pkt)) {
                  commitTransaction();
@@ -403,7 +402,7 @@ public class TxServerPipe extends TxBasePipe {
      */
     private void beginTransaction() {
         try {
-           tm.getUserTransaction().begin();
+           txnMgr.getUserTransaction().begin();
         } catch (NotSupportedException ex) {
             String handlerMsg = LocalizationMessages.TXN_MGR_OPERATION_FAILED_5011("getUserTransaction().begin()");
             logger.warning("beginTransaction", handlerMsg, ex);
@@ -420,7 +419,7 @@ public class TxServerPipe extends TxBasePipe {
      */
     private void commitTransaction() {
         try {
-            tm.getUserTransaction().commit();
+            txnMgr.getUserTransaction().commit();
         } catch (Exception ex) {
             String commitExceptionMsg = LocalizationMessages.EXCEPTION_DURING_COMMIT_5008();
             logger.warning("commitTransaction", commitExceptionMsg, ex);
@@ -431,7 +430,7 @@ public class TxServerPipe extends TxBasePipe {
     private void assertNoCurrentTransaction(String message) {
         Transaction txn = null;
         try {
-            txn = tm.getTransaction();
+            txn = txnMgr.getTransaction();
         } catch (SystemException ex) {
             String handlerMsg = LocalizationMessages.TXN_MGR_OPERATION_FAILED_5011("getTransaction");
             logger.warning("assertNoCurrentTransaction", handlerMsg);
@@ -440,7 +439,7 @@ public class TxServerPipe extends TxBasePipe {
         if (txn != null) {
             logger.severe("TxServerPipe.process", message + " " + txn.toString());
             try {
-                tm.suspend();
+                txnMgr.suspend();
             } catch (SystemException ex) {
                 String handlerMsg = LocalizationMessages.TXN_MGR_OPERATION_FAILED_5011("suspend");
                 logger.warning("assertNoCurrentTransaction", handlerMsg);
