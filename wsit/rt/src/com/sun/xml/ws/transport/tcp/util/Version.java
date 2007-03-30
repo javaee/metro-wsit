@@ -51,6 +51,10 @@ public final class Version {
         return false;
     }
     
+    public int hashCode() {
+        return (major << 16) | minor;
+    }
+    
     public String toString() {
         return major + "." + minor;
     }

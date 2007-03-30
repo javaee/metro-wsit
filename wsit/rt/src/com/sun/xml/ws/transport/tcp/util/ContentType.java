@@ -79,4 +79,8 @@ public final class ContentType {
         
         return false;
     }
+
+    public int hashCode() {
+        return mimeType.hashCode() ^ parameters.hashCode();
+    }
 }
