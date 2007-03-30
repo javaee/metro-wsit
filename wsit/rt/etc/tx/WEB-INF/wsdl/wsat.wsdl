@@ -95,7 +95,7 @@
         </wsdl:operation>
         <wsdl:operation name="ReadOnlyOperation">
             <wsdl:input message="wsat:ReadOnly"
-                        wsa:Action="http://schemas.xmlsoap.org/ws/2004/10/wsatReadOnly"/>
+                        wsa:Action="http://schemas.xmlsoap.org/ws/2004/10/wsat/ReadOnly"/>
         </wsdl:operation>
         <wsdl:operation name="CommittedOperation">
             <wsdl:input message="wsat:Committed"
