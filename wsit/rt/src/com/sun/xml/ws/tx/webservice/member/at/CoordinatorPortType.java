@@ -68,7 +68,7 @@ public interface CoordinatorPortType {
      */
     @WebMethod(operationName = "ReadOnlyOperation", action = "http://schemas.xmlsoap.org/ws/2004/10/wsat/ReadOnly")
     @Oneway
-    @Action(input = "http://schemas.xmlsoap.org/ws/2004/10/wsatReadOnly")
+    @Action(input = "http://schemas.xmlsoap.org/ws/2004/10/wsat/ReadOnly")
     public void readOnlyOperation(
             @WebParam(name = "ReadOnly", targetNamespace = "http://schemas.xmlsoap.org/ws/2004/10/wsat", partName = "parameters") Notification parameters);
 
