@@ -401,6 +401,9 @@ public abstract class WSITAuthContextBase  {
                 //scopes merged.
                 
                 Policy omEP =  policyMerge.merge(policyList);
+                if(omPolicy != null){
+                   policyList.remove(omPolicy);
+                } 
                 inPH = addIncomingMP(operation,omEP);
             /*}*/
                 Iterator faults = operation.getOperation().getFaults().iterator();
