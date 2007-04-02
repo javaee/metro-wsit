@@ -701,6 +701,9 @@ public abstract class SecurityPipeBase implements Pipe {
                 //scopes merged.
                 
                 Policy omEP =  policyMerge.merge(policyList);
+                if(omPolicy != null){
+                    policyList.remove(omPolicy);
+                }
                 inPH = addIncomingMP(operation,omEP);
                 /*}*/
                 Iterator faults = operation.getOperation().getFaults().iterator();
