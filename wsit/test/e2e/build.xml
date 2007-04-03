@@ -23,7 +23,7 @@
 -->
 
 <!--
- $Id: build.xml,v 1.27 2007-04-03 06:27:29 hofsass Exp $
+ $Id: build.xml,v 1.28 2007-04-03 06:36:12 hofsass Exp $
 
  Copyright (c) 2005 Sun Microsystems, Inc.
  All rights reserved.
@@ -40,10 +40,10 @@
     <!-- BEGIN: Emma code coverage specific stuff -->        
     <path id="emma.lib" >
         <pathelement location="${emma.dir}/emma.jar" />
-        <!-- pathelement location="${emma.dir}/emma_ant.jar" /-->
+        <pathelement location="${emma.dir}/emma_ant.jar" />
     </path>
     
-    <taskdef resource="emma_ant.properties" classpathref="emma.lib" />    
+    <!--taskdef resource="emma_ant.properties" classpathref="emma.lib" /-->
     
     <target name="emma" description="turns on EMMA's on-the-fly instrumentation mode" >
         <property name="emma.enabled" value="true" />
