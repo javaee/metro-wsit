@@ -23,7 +23,7 @@
 -->
 
 <!--
- $Id: build.xml,v 1.29 2007-04-03 06:46:51 hofsass Exp $
+ $Id: build.xml,v 1.30 2007-04-04 16:13:44 hofsass Exp $
 
  Copyright (c) 2005 Sun Microsystems, Inc.
  All rights reserved.
@@ -37,7 +37,7 @@
         <fileset dir="${test.lib.dir}" includes="*.jar"/>
     </path>
     
-    <!-- BEGIN: Emma code coverage specific stuff -->        
+    <!-- BEGIN: Emma code coverage specific stuff 
     <path id="emma.lib" >
         <pathelement location="${emma.dir}/emma.jar" />
         <pathelement location="${emma.dir}/emma_ant.jar" />
@@ -53,7 +53,7 @@
             <path refid="emma.lib" />
         </path>
     </target>   
-        
+    -->    
     <!--
     <target name="emma_report" description="just creates a report from metadata files" >
             <emma>
@@ -146,7 +146,7 @@
         <sequential>
             <antcall target="prepare"/>
             
-        <!-- BEGIN: Emma code coverage specific stuff -->    
+        <!-- BEGIN: Emma code coverage specific stuff
             <emma enabled="${emma.enabled}" >
                 <instr 
                     destdir="${out.instr.dir}"	
@@ -174,7 +174,7 @@
                     <filter includes="com.sun.xml.wss.provider.*"/>
                 </instr>
             </emma>            
-            <!-- END: Emma code coverage specific stuff -->
+             END: Emma code coverage specific stuff -->
             
             <java jar="${test.lib.dir}/harness.jar" fork="true">
                 <sysproperty key="WSIT_HOME" value="${basedir}/misc"/>
@@ -186,12 +186,12 @@
                 <arg value="-report" />
                 <arg path="${logs.dir}" />
                 
-                <!-- BEGIN: Emma code coverage specific stuff -->
+                <!-- BEGIN: Emma code coverage specific stuff 
                 <arg value="-cp:override" />
                 <arg pathref="instr.override.path" />                
                 <jvmarg value="-Demma.coverage.out.file=${coverage.dir}/coverage.emma" />
                 <jvmarg value="-Demma.coverage.out.merge=true" />
-                <!-- END: Emma code coverage specific stuff -->    
+                 END: Emma code coverage specific stuff -->    
 
                 <arguments />
                 <arg line="${args}"/>
@@ -208,7 +208,7 @@
                 <report format="frames" todir="${logs.dir}/junit-reports"/>
             </junitreport>
             
-            <!-- BEGIN: Emma code coverage specific stuff -->            
+            <!-- BEGIN: Emma code coverage specific stuff           
             <emma enabled="${emma.enabled}" >
                 <report sourcepath="${wsit.dir}/rt/src" >
                     <fileset dir="${coverage.dir}" >
@@ -219,7 +219,7 @@
                     <html outfile="${coverage.dir}/coverage.html" />
                 </report>
             </emma>                        
-            <!-- END: Emma code coverage specific stuff -->
+             END: Emma code coverage specific stuff -->
             
         </sequential>                 
     </macrodef>
