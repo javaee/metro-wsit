@@ -69,7 +69,7 @@
         <sequential>
             <delete dir="${rtjar-tmpdir}"/>
             <mkdir dir="${rtjar-tmpdir}"/>
-            <copy file="../${etc.metainf.dir}/MANIFEST.MF" todir="${rtjar-tmpdir}"/>
+            <copy file="${basedir}/${etc.metainf.dir}/MANIFEST.MF" todir="${rtjar-tmpdir}"/>
             <updateManifestWithVersion file="${rtjar-tmpdir}/MANIFEST.MF"/>
             <concatmanifest tempdir="${rtjar-tmpdir}" manifest="${rtjar-tmpdir}/MANIFEST.MF">
                 <fileset dir="@{libdir}">
