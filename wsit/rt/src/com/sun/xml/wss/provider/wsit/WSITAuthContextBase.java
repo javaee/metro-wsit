@@ -278,19 +278,15 @@ public abstract class WSITAuthContextBase  {
 //            throw new RuntimeException(ex);
 //        }
         
-        try {
-            if(wsPolicyMap != null){
-                collectPolicies();
-            }
-            // check whether Service Port has RM
-            hasReliableMessaging = isReliableMessagingEnabled(wsPolicyMap, pipeConfig.getWSDLModel());
-            //opResolver = new OperationResolverImpl(inMessagePolicyMap,pipeConfig.getWSDLModel().getBinding());
-        }catch (Exception e) {
-            log.log(Level.SEVERE, 
-                    LogStringsMessages.WSITPVD_0012_PROBLEM_CHECKING_RELIABLE_MESSAGE_ENABLE(), e);  
-            throw new RuntimeException(LogStringsMessages.WSITPVD_0012_PROBLEM_CHECKING_RELIABLE_MESSAGE_ENABLE(), e);            
+        
+        if(wsPolicyMap != null){
+            collectPolicies();
         }
         
+        // check whether Service Port has RM
+        hasReliableMessaging = isReliableMessagingEnabled(wsPolicyMap, pipeConfig.getWSDLModel());
+        //opResolver = new OperationResolverImpl(inMessagePolicyMap,pipeConfig.getWSDLModel().getBinding());
+       
         //put properties for use by AuthModule init
         map.put("SOAP_VERSION", soapVersion);          
     }

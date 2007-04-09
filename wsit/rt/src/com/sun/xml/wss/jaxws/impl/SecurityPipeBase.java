@@ -259,20 +259,15 @@ public abstract class SecurityPipeBase implements Pipe {
             throw new RuntimeException(LogStringsMessages.WSSPIPE_0001_PROBLEM_MAR_UNMAR(), ex);
         }
         
-        try {
-            if(wsPolicyMap != null){
-                collectPolicies();
-            }
-            //unmarshaller = jaxbContext.createUnmarshaller();
-            // check whether Service Port has RM
-            hasReliableMessaging = isReliableMessagingEnabled(wsPolicyMap, pipeConfig.getWSDLModel());
-            //   opResolver = new OperationResolverImpl(inMessagePolicyMap,pipeConfig.getWSDLModel().getBinding());
-        }catch (Exception e) {
-            log.log(Level.SEVERE,
-                    LogStringsMessages.WSSPIPE_0012_PROBLEM_CHECKING_RELIABLE_MESSAGE_ENABLE(), e);
-            throw new RuntimeException(LogStringsMessages.WSSPIPE_0012_PROBLEM_CHECKING_RELIABLE_MESSAGE_ENABLE(), e);
+        if(wsPolicyMap != null){
+            collectPolicies();
         }
         
+        //unmarshaller = jaxbContext.createUnmarshaller();
+        // check whether Service Port has RM
+        hasReliableMessaging = isReliableMessagingEnabled(wsPolicyMap, pipeConfig.getWSDLModel());
+        //   opResolver = new OperationResolverImpl(inMessagePolicyMap,pipeConfig.getWSDLModel().getBinding());
+
     }
     
     protected SecurityPipeBase(SecurityPipeBase that) {
