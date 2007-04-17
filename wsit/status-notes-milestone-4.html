@@ -13,7 +13,7 @@
 <!--
 Created       : 2007 Mar 01 (Tue) 11:32:31 by Harold Carr.
 -->
-<pre>Last Modified : $Date: 2007-04-15 21:52:11 $ by $Author: mikeg $<br><br></pre>
+<pre>Last Modified : $Date: 2007-04-17 15:30:39 $ by $Author: snajper $<br><br></pre>
 <h5>Date: March 1, 2007</h5>
 <h2>Introduction</h2>
 <p>This document provides the status of the interoperability testing
@@ -643,14 +643,7 @@ fails on the server side with the following exception trace :
 <hr>
 <h2><a name="35087"></a>NetBeans WSIT Module Status</h2>
 <p></p>
-<pre>Updated: March ??, 2007</pre>
-<p></p>
-<h4>What is Not Implemented</h4>
-<ul>
-Module allows to specify several pieces of Key/Truststore configuration
-which are not required for specific security mechanisms. Please refer
-to WSIT security documentation.
-</ul>
+<pre>Updated: April 17th, 2007</pre>
 <h4>Known Issues</h4>
 <table border="1" cellpadding="2" cellspacing="2">
   <tbody>
@@ -663,12 +656,15 @@ to WSIT security documentation.
       </th>
     </tr>
     <tr>
-      <td>The dialog is empty, or an exception is thrown when you try
-to open it. <a
- href="http://www.netbeans.org/issues/show_bug.cgi?id=93192">See
-Issue# 93192</a> </td>
-      <td>Please wait until classpath scanning is finished, and try to
-open the dialog again.</td>
+      <td>To enable MS <-> Java interoperability, an 'action=operationName' attribute needs to be specified.</td>
+      <td>The sample code should look like this:<br/>
+ <code><pre>
+    @WebMethod(action=myOperation)
+    public String myOperation() {
+        return "";
+    )
+ </pre></code>
+</td>
     </tr>
   </tbody>
 </table>
