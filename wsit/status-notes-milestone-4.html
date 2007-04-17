@@ -13,7 +13,7 @@
 <!--
 Created       : 2007 Mar 01 (Tue) 11:32:31 by Harold Carr.
 -->
-<pre>Last Modified : $Date: 2007-04-17 15:34:10 $ by $Author: snajper $<br><br></pre>
+<pre>Last Modified : $Date: 2007-04-17 21:06:23 $ by $Author: jfialli $<br><br></pre>
 <h5>Date: March 1, 2007</h5>
 <h2>Introduction</h2>
 <p>This document provides the status of the interoperability testing
@@ -636,6 +636,16 @@ fails on the server side with the following exception trace :
 		</TD>
 		<TD WIDTH=495>
 			<P>Fixed in Glassfish v2 b42.</P>
+		</TD>
+	</TR>
+	<TR>
+		<TD WIDTH=621>
+			<P>WS-Coordination message register fails after security copyv3 script is run due to a ssl handshake failure. For details, see wsit issue 437, https://wsit.dev.java.net/issues/show_bug.cgi?id=437.
+		</TD>
+		<TD WIDTH=495>
+			<P>Should be Fixed in Glassfish v2 b42.</BR>
+Workaround for Glassfish v2 b41 or earlier:</BR> run following from commmand prompt:</BR>
+<I>	asadmin create-ssl --type http-listener --certname s1as http-listener-2</I></P>
 		</TD>
 	</TR>
 </TABLE>
