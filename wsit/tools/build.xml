@@ -43,7 +43,7 @@
         <sequential>
             <delete dir="${tmpdir}"/>
             <mkdir dir="${tmpdir}"/>
-            <copy file="../${etc.metainf.dir}/MANIFEST.MF" todir="${tmpdir}"/>
+            <copy file="${basedir}/${etc.metainf.dir}/MANIFEST.MF" todir="${tmpdir}"/>
             <updateManifestWithVersion file="${tmpdir}/MANIFEST.MF"/>
             <concatmanifest tempdir="${tmpdir}" manifest="${tmpdir}/MANIFEST.MF">
                 <fileset dir="@{libdir}">
