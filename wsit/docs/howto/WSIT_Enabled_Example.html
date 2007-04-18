@@ -6,7 +6,6 @@
   <title>Enabling WSIT Functionality in a Web Service Application</title>
 </head>
 <body>
-<pre>1. additional resources simplification/unification<br>2. update required versions<br><br></pre>
 <h1><a href="index.html">Getting Started with WSIT:</a></h1>
 <h1>Enabling WSIT Functionality in a Web Service Application</h1>
 <h2><span style="font-weight: bold;">Overview</span></h2>
@@ -134,7 +133,7 @@ from Java<br>
 <br>
 </span>When developing a web service from scratch or based on an
 existing Java class, WSIT features are enabled using a configuration
-file. That file, <span style="font-family: monospace;">wsit.xml</span>,
+file. That file, <span style="font-family: monospace;">wsit-fromjava.server.AddNumberImpl.xml</span>,
 is written in WSDL format.&nbsp; An example configuration file can be
 found in the accompanying samples:<br>
 <br>
@@ -209,19 +208,6 @@ Web Service
 Client</a> and <a href="WSIT_Not_Enabled_Example.html#Running">Running
 the Web Service Client</a>.<br>
 <br>
-When running the web service clients for this article's samples, you
-will see the following warning message:<br>
-<br>
-<div style="margin-left: 40px;"><span style="font-family: monospace;">WARNING:
-Optional client configuration file URL is missing. No client
-configuration is processed.</span><br>
-</div>
-<br>
-That message displays because there is no WSIT client configuration
-file included in these samples. No settings for WS-Reliable Messaging
-nor WS-Addressing need to be stored in a client configuration file. The
-WSDL document holds all of the settings required by the client for both
-WS-Reliable Messaging and WS-Addressing.<br>
 <h2><a name="Undeploying"></a>Undeploying a WSIT Web Service</h2>
 As described in <a href="WSIT_Not_Enabled_Example.html#Undeploying">Undeploying
 a JAX-WS Web Service</a>, to undeploy a web service means to both
