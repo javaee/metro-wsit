@@ -165,15 +165,23 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             p = dump(context, CLIENT_PREFIX + WSS_SUFFIX + AFTER_SUFFIX, p);
 
             // check for Security
-            //SecurityClientPipe securityClientPipe = null;
             SecureConversationInitiator scInit = null;
+            
+            //Look for pipe-creation hook exposed in contaner.
             ClientPipelineHook hook = context.getContainer().getSPI(ClientPipelineHook.class);
-            if (hook != null) {
-                // TODO: how SecurityClientPipe will be passed to RMClientPipe. Currently SC+RM
-                // TODO: will not work for JSR 109-based DD.
-                // TODO: Vijay will follow with Ron if 196 & Policy-based pipe can be separate
-
+            
+            //If not found, look for pipe-creation hook using services
+            if (hook == null) {
+                ClientPipelineHook[] hooks = loadSPs(ClientPipelineHook.class);
+                if (hooks != null && hooks.length > 0) {
+                    hook = hooks[0];
+                }
+            }
+            
+            //If either mechanism for finding a ClientPipelineHook has found one, use it.
+            if (hook != null ) {
                 p = hook.createSecurityPipe(policyMap, context, p);
+                
                 if (isSecurityEnabled) {
                     scInit = (SecureConversationInitiator) p;
                     /*
@@ -192,10 +200,14 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
 
             } else {
                 if (isSecurityEnabled) {
+                    
                    ClientPipeConfiguration config = new ClientPipeConfiguration(
                             policyMap, wsdlPort, context.getService(), context.getBinding());
+                          
+                    //Use the default WSIT Client Security Pipe
                     p = new SecurityClientPipe(config, p);
                     scInit = (SecureConversationInitiator) p;
+                   
 
                     /*
                    HashMap propBag = new HashMap();
