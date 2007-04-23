@@ -34,4 +34,6 @@ public interface UserNameToken extends Token{
      * @return 1.0 or 1.1
      */
     public String getType();
+    
+    public boolean hasPassword();
 }

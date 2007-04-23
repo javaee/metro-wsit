@@ -1325,4 +1325,16 @@ public class PolicyUtil {
         }
         return false;
     }
+    
+    
+    public static boolean hasPassword(PolicyAssertion assertion){
+        if(isSecurityPolicyNS(assertion)){
+            return false;
+        }
+        
+        if(assertion.getName().getLocalPart().equals(NoPassword)){
+            return true;
+        }
+        return false;
+    }
 }

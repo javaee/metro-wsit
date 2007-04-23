@@ -25,6 +25,7 @@ package com.sun.xml.ws.security.impl.policyconv;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.security.impl.policy.PolicyUtil;
+import com.sun.xml.ws.security.policy.UserNameToken;
 import com.sun.xml.ws.security.policy.AlgorithmSuite;
 import com.sun.xml.ws.security.policy.Binding;
 import com.sun.xml.ws.security.policy.EncryptedElements;
@@ -109,7 +110,7 @@ public class SupportingTokensProcessor {
             if ( policy.getUUID() != null ) {
                 
                 addToPrimarySignature(policy,token);
-                if(PolicyUtil.isUsernameToken((PolicyAssertion) token)){
+                if(PolicyUtil.isUsernameToken((PolicyAssertion) token) && ((UserNameToken)token).hasPassword()){
                     encryptToken(token);
                 }
                 if(PolicyUtil.isSamlToken((PolicyAssertion)token)){
