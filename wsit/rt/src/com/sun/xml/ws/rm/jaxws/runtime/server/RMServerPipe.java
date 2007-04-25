@@ -795,17 +795,9 @@ public class RMServerPipe extends PipeBase<RMDestination,
             //Fixed redundant null check bug found by Findbugs
             //seq.resetLastActivityTime();
 
-            if (seq == null) {
-                //we may be in the pipeline of a ProtocolMessageReceiver.  In
-                //that case, pass it on to ProtocolMessageReceiver who can hold
-                //onto it if the sequence creation is still pending
-                ProtocolMessageReceiver.handleAcknowledgement(el);
-
-            } else {
-                //reset inactivity timer
-                seq.resetLastActivityTime();
-                handleInboundMessage(inbound);
-            }
+            //reset inactivity timer
+            seq.resetLastActivityTime();
+            handleInboundMessage(inbound);
 
             inbound.transportBackChannel.close();
             Packet ret = new Packet(null);
