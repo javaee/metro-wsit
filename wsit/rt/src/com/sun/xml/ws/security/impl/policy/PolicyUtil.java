@@ -1328,7 +1328,7 @@ public class PolicyUtil {
     
     
     public static boolean hasPassword(PolicyAssertion assertion){
-        if(isSecurityPolicyNS(assertion)){
+        if(!isSecurityPolicyNS(assertion)){
             return false;
         }
         
