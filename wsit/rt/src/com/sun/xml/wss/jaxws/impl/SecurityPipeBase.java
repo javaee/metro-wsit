@@ -1215,8 +1215,8 @@ public abstract class SecurityPipeBase implements Pipe {
             props.put(DefaultCallbackHandler.KEY_PASSWORD, store.getKeyPassword());
         }
         
-        if (store.getCertSelectorClassName() != null) {
-            props.put(DefaultCallbackHandler.KEYSTORE_CERTSELECTOR, store.getCertSelectorClassName());
+        if (store.getAliasSelectorClassName() != null) {
+            props.put(DefaultCallbackHandler.KEYSTORE_CERTSELECTOR, store.getAliasSelectorClassName());
         }
     }
     

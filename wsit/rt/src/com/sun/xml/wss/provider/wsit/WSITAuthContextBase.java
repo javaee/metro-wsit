@@ -919,9 +919,11 @@ public abstract class WSITAuthContextBase  {
             props.put(DefaultCallbackHandler.KEYSTORE_URL, store.getLocation());
         } else {
             //throw RuntimeException for now
+            /**
             log.log(Level.SEVERE, 
                     LogStringsMessages.WSITPVD_0014_KEYSTORE_URL_NULL_CONFIG_ASSERTION());                        
             throw new RuntimeException(LogStringsMessages.WSITPVD_0014_KEYSTORE_URL_NULL_CONFIG_ASSERTION());            
+             */
         }
         
         if (store.getType() != null) {
@@ -933,9 +935,11 @@ public abstract class WSITAuthContextBase  {
         if (store.getPassword() != null) {
             props.put(DefaultCallbackHandler.KEYSTORE_PASSWORD, new String(store.getPassword()));
         } else {
+            /** do not complain if keystore password not supplied
             log.log(Level.SEVERE, 
                     LogStringsMessages.WSITPVD_0015_KEYSTORE_PASSWORD_NULL_CONFIG_ASSERTION());                        
             throw new RuntimeException(LogStringsMessages.WSITPVD_0015_KEYSTORE_PASSWORD_NULL_CONFIG_ASSERTION() );            
+             */
         }
         
         if (store.getAlias() != null) {
@@ -948,8 +952,8 @@ public abstract class WSITAuthContextBase  {
             props.put(DefaultCallbackHandler.KEY_PASSWORD, store.getKeyPassword());
         }
         
-        if (store.getCertSelectorClassName() != null) {
-            props.put(DefaultCallbackHandler.KEYSTORE_CERTSELECTOR, store.getCertSelectorClassName());
+        if (store.getAliasSelectorClassName() != null) {
+            props.put(DefaultCallbackHandler.KEYSTORE_CERTSELECTOR, store.getAliasSelectorClassName());
         }
     }
     
@@ -984,9 +988,11 @@ public abstract class WSITAuthContextBase  {
             props.put(DefaultCallbackHandler.TRUSTSTORE_URL, store.getLocation());
         } else {
             //throw RuntimeException for now
+            /**
             log.log(Level.SEVERE, 
                     LogStringsMessages.WSITPVD_0016_TRUSTSTORE_URL_NULL_CONFIG_ASSERTION());                        
             throw new RuntimeException(LogStringsMessages.WSITPVD_0016_TRUSTSTORE_URL_NULL_CONFIG_ASSERTION() );            
+             */
         }
         
         if (store.getType() != null) {
@@ -998,9 +1004,11 @@ public abstract class WSITAuthContextBase  {
         if (store.getPassword() != null) {
             props.put(DefaultCallbackHandler.TRUSTSTORE_PASSWORD, new String(store.getPassword()));
         } else {
+            /** do not complain if truststore password is not supplied
             log.log(Level.SEVERE, 
                     LogStringsMessages.WSITPVD_0017_TRUSTSTORE_PASSWORD_NULL_CONFIG_ASSERTION());                        
             throw new RuntimeException(LogStringsMessages.WSITPVD_0017_TRUSTSTORE_PASSWORD_NULL_CONFIG_ASSERTION() );             
+             */
         }
         
         if (store.getPeerAlias() != null) {
