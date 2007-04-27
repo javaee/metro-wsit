@@ -126,7 +126,7 @@
                     <exclude name="*javadocs*.jar"/>
                 </fileset>
             </concatmanifest>
-          <delete dir="${extrajar-tmpdir}/META-INF" includeemptydirs="true" excludes="services/**"/>
+          
             <metainf/>
         </sequential>
     </macrodef>
