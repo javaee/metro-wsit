@@ -22,8 +22,7 @@
 
 package com.sun.xml.ws.transport.tcp.servicechannel.stubs;
 
-import com.sun.xml.ws.transport.tcp.util.ChannelSettings;
-import com.sun.xml.ws.transport.tcp.servicechannel.ServiceChannelException;
+import com.sun.xml.ws.transport.tcp.servicechannel.ServiceChannelException.ServiceChannelExceptionBean;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlElementDecl;
 import javax.xml.bind.annotation.XmlRegistry;
@@ -76,8 +75,8 @@ public class ObjectFactory {
      * Create an instance of {@link ServiceChannelException }
      * 
      */
-    public ServiceChannelException createServiceChannelException() {
-        return new ServiceChannelException();
+    public ServiceChannelExceptionBean createServiceChannelExceptionBean() {
+        return new ServiceChannelExceptionBean();
     }
 
     /**
@@ -94,14 +93,6 @@ public class ObjectFactory {
      */
     public InitiateSessionResponse createInitiateSessionResponse() {
         return new InitiateSessionResponse();
-    }
-
-    /**
-     * Create an instance of {@link ChannelSettings }
-     * 
-     */
-    public ChannelSettings createChannelSettings() {
-        return new ChannelSettings();
     }
 
     /**
@@ -187,7 +178,7 @@ public class ObjectFactory {
      * 
      */
     @XmlElementDecl(namespace = "http://servicechannel.tcp.transport.ws.xml.sun.com/", name = "ServiceChannelException")
-    public JAXBElement<ServiceChannelException> createServiceChannelException(ServiceChannelException value) {
-        return new JAXBElement<ServiceChannelException>(_ServiceChannelException_QNAME, ServiceChannelException.class, null, value);
+    public JAXBElement<ServiceChannelExceptionBean> createServiceChannelExceptionBean(ServiceChannelExceptionBean value) {
+        return new JAXBElement<ServiceChannelExceptionBean>(_ServiceChannelException_QNAME, ServiceChannelExceptionBean.class, null, value);
     }
 }

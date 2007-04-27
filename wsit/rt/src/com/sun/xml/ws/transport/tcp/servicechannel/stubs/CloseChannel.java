@@ -19,7 +19,6 @@
  *
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
-
 package com.sun.xml.ws.transport.tcp.servicechannel.stubs;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -37,7 +36,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="arg0" type="{http://www.w3.org/2001/XMLSchema}int"/>
+ *         &lt;element name="channelId" type="{http://www.w3.org/2001/XMLSchema}int"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -48,26 +47,26 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "closeChannel", propOrder = {
-    "arg0"
+    "channelId"
 })
 public class CloseChannel {
 
-    protected int arg0;
+    protected int channelId;
 
     /**
-     * Gets the value of the arg0 property.
+     * Gets the value of the channelId property.
      * 
      */
-    public int getArg0() {
-        return arg0;
+    public int getChannelId() {
+        return channelId;
     }
 
     /**
-     * Sets the value of the arg0 property.
+     * Sets the value of the channelId property.
      * 
      */
-    public void setArg0(int value) {
-        this.arg0 = value;
+    public void setChannelId(int value) {
+        this.channelId = value;
     }
 
 }

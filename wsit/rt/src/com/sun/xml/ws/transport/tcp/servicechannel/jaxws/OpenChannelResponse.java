@@ -19,9 +19,9 @@
  *
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
-
 package com.sun.xml.ws.transport.tcp.servicechannel.jaxws;
 
+import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -30,19 +30,27 @@ import javax.xml.bind.annotation.XmlType;
 
 @XmlRootElement(name = "openChannelResponse", namespace = "http://servicechannel.tcp.transport.ws.xml.sun.com/")
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "openChannelResponse", namespace = "http://servicechannel.tcp.transport.ws.xml.sun.com/")
+@XmlType(name = "openChannelResponse", namespace = "http://servicechannel.tcp.transport.ws.xml.sun.com/", propOrder = {
+    "channelId",
+    "negotiatedMimeTypes",
+    "negotiatedParams"
+})
 public class OpenChannelResponse {
 
-    @XmlElement(name = "return", namespace = "", required = true)
-    private com.sun.xml.ws.transport.tcp.util.ChannelSettings _return;
+    @XmlElement(name = "channelId", namespace = "")
+    private int channelId;
+    @XmlElement(name = "negotiatedMimeTypes", namespace = "", required=true)
+    private List<String> negotiatedMimeTypes;
+    @XmlElement(name = "negotiatedParams", namespace = "")
+    private List<String> negotiatedParams;
 
     /**
      * 
      * @return
-     *     returns ChannelSettings
+     *     returns int
      */
-    public com.sun.xml.ws.transport.tcp.util.ChannelSettings get_return() {
-        return this._return;
+    public int getChannelId() {
+        return this.channelId;
     }
 
     /**
@@ -50,8 +58,44 @@ public class OpenChannelResponse {
      * @param _return
      *     the value for the _return property
      */
-    public void set_return(com.sun.xml.ws.transport.tcp.util.ChannelSettings _return) {
-        this._return = _return;
+    public void setChannelId(int channelId) {
+        this.channelId = channelId;
+    }
+
+    /**
+     * 
+     * @return
+     *     returns List<String>
+     */
+    public List<String> getNegotiatedMimeTypes() {
+        return this.negotiatedMimeTypes;
+    }
+
+    /**
+     * 
+     * @param negotiatedMimeTypes
+     *     the value for the negotiatedMimeTypes property
+     */
+    public void setNegotiatedMimeTypes(List<String> negotiatedMimeTypes) {
+        this.negotiatedMimeTypes = negotiatedMimeTypes;
+    }
+
+    /**
+     * 
+     * @return
+     *     returns List<String>
+     */
+    public List<String> getNegotiatedParams() {
+        return this.negotiatedParams;
+    }
+
+    /**
+     * 
+     * @param negotiatedParams
+     *     the value for the negotiatedParams property
+     */
+    public void setNegotiatedParams(List<String> negotiatedParams) {
+        this.negotiatedParams = negotiatedParams;
     }
 
 }
