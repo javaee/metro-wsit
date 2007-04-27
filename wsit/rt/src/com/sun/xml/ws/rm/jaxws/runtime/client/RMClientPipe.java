@@ -290,6 +290,11 @@ public class RMClientPipe
                                  securityPipe.startSecureConversation(packet);
                         
                         outboundSequence.setSecurityTokenReference(str);
+	                if (str == null) {
+				//Without this, no security configuration
+				//that does not include SC is allowed.
+				secureReliableMessaging = false;
+			}
                     } catch (Exception e) {
                         secureReliableMessaging = false;
                         outboundSequence.setSecurityTokenReference(null);
