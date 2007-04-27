@@ -68,7 +68,7 @@ public class OpenChannelResponse {
      * Gets the value of the return property.
      * 
      */
-    public int get—hannelId() {
+    public int getChannelId() {
         return channelId;
     }
 
@@ -76,7 +76,7 @@ public class OpenChannelResponse {
      * Sets the value of the return property.
      * 
      */
-    public void set—hannelId(int channelId) {
+    public void setChannelId(int channelId) {
         this.channelId = channelId;
     }
 
