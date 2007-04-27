@@ -19,10 +19,10 @@
  *
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
-
 package com.sun.xml.ws.transport.tcp.servicechannel.stubs;
 
-import com.sun.xml.ws.transport.tcp.util.ChannelSettings;
+import java.util.ArrayList;
+import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -39,7 +39,9 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="return" type="{http://servicechannel.tcp.transport.ws.xml.sun.com/}channelSettings" minOccurs="0"/>
+ *         &lt;element name="return" type="{http://www.w3.org/2001/XMLSchema}int"/>
+ *         &lt;element name="negotiatedMimeTypes" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded"/>
+ *         &lt;element name="negotiatedParams" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -50,35 +52,90 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "openChannelResponse", propOrder = {
-    "_return"
+    "channelId",
+    "negotiatedMimeTypes",
+    "negotiatedParams"
 })
 public class OpenChannelResponse {
 
-    @XmlElement(name = "return", required = true)
-    protected ChannelSettings _return;
+    @XmlElement(name = "channelId")
+    protected int channelId;
+    @XmlElement(required = true)
+    protected List<String> negotiatedMimeTypes;
+    protected List<String> negotiatedParams;
 
     /**
      * Gets the value of the return property.
      * 
-     * @return
-     *     possible object is
-     *     {@link ChannelSettings }
-     *     
      */
-    public ChannelSettings getReturn() {
-        return _return;
+    public int get—hannelId() {
+        return channelId;
     }
 
     /**
      * Sets the value of the return property.
      * 
-     * @param value
-     *     allowed object is
-     *     {@link ChannelSettings }
-     *     
      */
-    public void setReturn(ChannelSettings value) {
-        this._return = value;
+    public void set—hannelId(int channelId) {
+        this.channelId = channelId;
+    }
+
+    /**
+     * Gets the value of the negotiatedMimeTypes property.
+     * 
+     * <p>
+     * This accessor method returns a reference to the live list,
+     * not a snapshot. Therefore any modification you make to the
+     * returned list will be present inside the JAXB object.
+     * This is why there is not a <CODE>set</CODE> method for the negotiatedMimeTypes property.
+     * 
+     * <p>
+     * For example, to add a new item, do as follows:
+     * <pre>
+     *    getNegotiatedMimeTypes().add(newItem);
+     * </pre>
+     * 
+     * 
+     * <p>
+     * Objects of the following type(s) are allowed in the list
+     * {@link String }
+     * 
+     * 
+     */
+    public List<String> getNegotiatedMimeTypes() {
+        if (negotiatedMimeTypes == null) {
+            negotiatedMimeTypes = new ArrayList<String>();
+        }
+        return this.negotiatedMimeTypes;
+    }
+
+    /**
+     * Gets the value of the negotiatedParams property.
+     * 
+     * <p>
+     * This accessor method returns a reference to the live list,
+     * not a snapshot. Therefore any modification you make to the
+     * returned list will be present inside the JAXB object.
+     * This is why there is not a <CODE>set</CODE> method for the negotiatedParams property.
+     * 
+     * <p>
+     * For example, to add a new item, do as follows:
+     * <pre>
+     *    getNegotiatedParams().add(newItem);
+     * </pre>
+     * 
+     * 
+     * <p>
+     * Objects of the following type(s) are allowed in the list
+     * {@link String }
+     * 
+     * 
+     */
+    public List<String> getNegotiatedParams() {
+        if (negotiatedParams == null) {
+            negotiatedParams = new ArrayList<String>();
+        }
+        return this.negotiatedParams;
     }
 
 }

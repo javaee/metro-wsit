@@ -54,10 +54,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.ws.BindingProvider;
+import javax.xml.ws.Holder;
 
 /**
  * @author Alexey Stashok
@@ -216,17 +218,24 @@ public class WSConnectionManager implements ConnectionFinder<ConnectionSession>,
         
         // Send to server possible mime types and parameters
         final BindingUtils.NegotiatedBindingContent negotiatedContent = BindingUtils.getNegotiatedContentTypesAndParams(wsBinding);
-        final ChannelSettings clientSettings = new ChannelSettings(negotiatedContent.negotiatedMimeTypes, negotiatedContent.negotiatedParams,
-                0, wsService.getServiceName(), targetWSURI);
         
         if (logger.isLoggable(Level.FINEST)) {
-            logger.log(Level.FINEST, MessagesMessages.WSTCP_1037_CONNECTION_MANAGER_DO_OPEN_WS_CALL(clientSettings));
+            logger.log(Level.FINEST, MessagesMessages.WSTCP_1037_CONNECTION_MANAGER_DO_OPEN_WS_CALL(targetWSURI, negotiatedContent.negotiatedMimeTypes, negotiatedContent.negotiatedParams));
         }
-        final ChannelSettings serverSettings = serviceChannelWSImplPort.openChannel(clientSettings);
+
+        Holder<List<String>> negotiatedMimeTypesHolder = new Holder<List<String>>(negotiatedContent.negotiatedMimeTypes);
+        Holder<List<String>> negotiatedParamsHolder = new Holder<List<String>>(negotiatedContent.negotiatedParams);
+        final int channelId = serviceChannelWSImplPort.openChannel(targetWSURI.toString(),
+                negotiatedMimeTypesHolder,
+                negotiatedParamsHolder);
+        
+        ChannelSettings settings = new ChannelSettings(negotiatedMimeTypesHolder.value, 
+                negotiatedParamsHolder.value, channelId, wsService.getServiceName(), targetWSURI);
+        
         if (logger.isLoggable(Level.FINEST)) {
-            logger.log(Level.FINEST, MessagesMessages.WSTCP_1038_CONNECTION_MANAGER_DO_OPEN_PROCESS_SERVER_SETTINGS(serverSettings));
+            logger.log(Level.FINEST, MessagesMessages.WSTCP_1038_CONNECTION_MANAGER_DO_OPEN_PROCESS_SERVER_SETTINGS(settings));
         }
-        final ChannelContext channelContext = new ChannelContext(connectionSession, serverSettings);
+        final ChannelContext channelContext = new ChannelContext(connectionSession, settings);
         
         ChannelContext.configureCodec(channelContext, wsBinding.getSOAPVersion(), defaultCodec);
         

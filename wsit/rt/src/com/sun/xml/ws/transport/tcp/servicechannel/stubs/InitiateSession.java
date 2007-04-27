@@ -19,7 +19,6 @@
  *
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
-
 package com.sun.xml.ws.transport.tcp.servicechannel.stubs;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -36,6 +35,8 @@ import javax.xml.bind.annotation.XmlType;
  * &lt;complexType name="initiateSession">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
+ *       &lt;sequence>
+ *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>

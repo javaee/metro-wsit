@@ -32,8 +32,7 @@ import javax.xml.ws.WebFault;
 /**
  * @author Alexey Stashok
  */
-@WebFault(name = "ServiceChannelException", targetNamespace = "http://servicechannel.tcp.transport.ws.xml.sun.com/",
-faultBean = "com.sun.xml.ws.transport.tcp.servicechannel.ServiceChannelException$ServiceChannelExceptionBean")
+@WebFault(name = "ServiceChannelException", targetNamespace = "http://servicechannel.tcp.transport.ws.xml.sun.com/", faultBean = "com.sun.xml.ws.transport.tcp.servicechannel.ServiceChannelException$ServiceChannelExceptionBean")
 public class ServiceChannelException extends Exception {
     private ServiceChannelExceptionBean faultInfo;
     

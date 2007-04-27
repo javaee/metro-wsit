@@ -24,28 +24,13 @@ package com.sun.xml.ws.transport.tcp.util;
 
 import com.sun.istack.NotNull;
 import java.util.List;
-
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.xml.namespace.QName;
 
 /**
  * @author Alexey Stashok
  */
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "channelSettings", propOrder = {
-    "negotiatedMimeTypes",
-    "negotiatedParams",
-    "targetWSURI",
-    "channelId",
-    "wsServiceName"    
-})
 public final class ChannelSettings {
     
-    @XmlElement(required = true)
     private List<String> negotiatedMimeTypes;
     
     private List<String> negotiatedParams;
@@ -54,8 +39,6 @@ public final class ChannelSettings {
     
     private QName wsServiceName;
     
-    @XmlElement(required = true)
-    @XmlJavaTypeAdapter(WSTCPURI.WSTCPURI2StringJAXBAdapter.class)
     private WSTCPURI targetWSURI;
     
     public ChannelSettings() {

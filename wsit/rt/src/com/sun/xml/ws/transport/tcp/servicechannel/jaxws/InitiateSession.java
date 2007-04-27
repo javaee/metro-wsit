@@ -19,7 +19,6 @@
  *
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
-
 package com.sun.xml.ws.transport.tcp.servicechannel.jaxws;
 
 import javax.xml.bind.annotation.XmlAccessType;

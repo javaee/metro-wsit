@@ -1,57 +1,69 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Published by JAX-WS RI at http://jax-ws.dev.java.net. RI's version is JAX-WS RI 2.1.1-hudson-2088-RC1. -->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://servicechannel.tcp.transport.ws.xml.sun.com/" version="1.0" targetNamespace="http://servicechannel.tcp.transport.ws.xml.sun.com/">
+
 <xs:element name="ServiceChannelException" nillable="true" type="tns:serviceChannelExceptionBean"/>
+
 <xs:element name="closeChannel" type="tns:closeChannel"/>
+
 <xs:element name="closeChannelResponse" type="tns:closeChannelResponse"/>
+
 <xs:element name="initiateSession" type="tns:initiateSession"/>
+
 <xs:element name="initiateSessionResponse" type="tns:initiateSessionResponse"/>
+
 <xs:element name="openChannel" type="tns:openChannel"/>
+
 <xs:element name="openChannelResponse" type="tns:openChannelResponse"/>
+
 <xs:complexType name="initiateSession">
 <xs:sequence/>
 </xs:complexType>
+
 <xs:complexType name="initiateSessionResponse">
 <xs:sequence/>
 </xs:complexType>
+
 <xs:complexType name="serviceChannelExceptionBean">
 <xs:sequence>
 <xs:element name="errorCode" type="tns:serviceChannelErrorCode"/>
 <xs:element name="message" type="xs:string" minOccurs="0"/>
 </xs:sequence>
 </xs:complexType>
+
 <xs:complexType name="closeChannel">
 <xs:sequence>
-<xs:element name="arg0" type="xs:int"/>
+<xs:element name="channelId" type="xs:int"/>
 </xs:sequence>
 </xs:complexType>
+
 <xs:complexType name="closeChannelResponse">
 <xs:sequence/>
 </xs:complexType>
+
 <xs:complexType name="openChannel">
 <xs:sequence>
-<xs:element name="channelSettings" type="tns:channelSettings"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="channelSettings" final="extension restriction">
-<xs:sequence>
-<xs:element name="negotiatedMimeTypes" type="xs:string" maxOccurs="unbounded"/>
-<xs:element name="negotiatedParams" type="xs:string" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
 <xs:element name="targetWSURI" type="xs:string"/>
-<xs:element name="channelId" type="xs:int"/>
-<xs:element name="wsServiceName" type="xs:QName" minOccurs="0"/>
+<xs:element name="negotiatedMimeTypes" type="xs:string" maxOccurs="unbounded"/>
+<xs:element name="negotiatedParams" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
 </xs:sequence>
 </xs:complexType>
+
 <xs:complexType name="openChannelResponse">
 <xs:sequence>
-<xs:element name="return" type="tns:channelSettings"/>
+<xs:element name="channelId" type="xs:int"/>
+<xs:element name="negotiatedMimeTypes" type="xs:string" maxOccurs="unbounded"/>
+<xs:element name="negotiatedParams" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
 </xs:sequence>
 </xs:complexType>
+
 <xs:simpleType name="serviceChannelErrorCode">
 <xs:restriction base="xs:string">
 <xs:enumeration value="TOO_MANY_OPEN_SESSIONS"/>
 <xs:enumeration value="TOO_MANY_OPEN_CHANNELS_FOR_SESSION"/>
 <xs:enumeration value="UNKNOWN_ENDPOINT_ADDRESS"/>
 <xs:enumeration value="CONTENT_NEGOTIATION_FAILED"/>
+<xs:enumeration value="UNKNOWN_CHANNEL_ID"/>
 </xs:restriction>
 </xs:simpleType>
 </xs:schema>

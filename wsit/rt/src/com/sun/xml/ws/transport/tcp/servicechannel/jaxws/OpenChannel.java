@@ -19,9 +19,9 @@
  *
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
-
 package com.sun.xml.ws.transport.tcp.servicechannel.jaxws;
 
+import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -30,28 +30,72 @@ import javax.xml.bind.annotation.XmlType;
 
 @XmlRootElement(name = "openChannel", namespace = "http://servicechannel.tcp.transport.ws.xml.sun.com/")
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "openChannel", namespace = "http://servicechannel.tcp.transport.ws.xml.sun.com/")
+@XmlType(name = "openChannel", namespace = "http://servicechannel.tcp.transport.ws.xml.sun.com/", propOrder = {
+    "targetWSURI",
+    "negotiatedMimeTypes",
+    "negotiatedParams"
+})
 public class OpenChannel {
 
-    @XmlElement(name = "channelSettings", namespace = "", required = true)
-    private com.sun.xml.ws.transport.tcp.util.ChannelSettings channelSettings;
+    @XmlElement(name = "targetWSURI", namespace = "", required=true)
+    private String targetWSURI;
+    @XmlElement(name = "negotiatedMimeTypes", namespace = "", required=true)
+    private List<String> negotiatedMimeTypes;
+    @XmlElement(name = "negotiatedParams", namespace = "")
+    private List<String> negotiatedParams;
 
     /**
      * 
      * @return
-     *     returns ChannelSettings
+     *     returns String
      */
-    public com.sun.xml.ws.transport.tcp.util.ChannelSettings getChannelSettings() {
-        return this.channelSettings;
+    public String getTargetWSURI() {
+        return this.targetWSURI;
     }
 
     /**
      * 
-     * @param channelSettings
-     *     the value for the channelSettings property
+     * @param targetWSURI
+     *     the value for the targetWSURI property
      */
-    public void setChannelSettings(com.sun.xml.ws.transport.tcp.util.ChannelSettings channelSettings) {
-        this.channelSettings = channelSettings;
+    public void setTargetWSURI(String targetWSURI) {
+        this.targetWSURI = targetWSURI;
+    }
+
+    /**
+     * 
+     * @return
+     *     returns List<String>
+     */
+    public List<String> getNegotiatedMimeTypes() {
+        return this.negotiatedMimeTypes;
+    }
+
+    /**
+     * 
+     * @param negotiatedMimeTypes
+     *     the value for the negotiatedMimeTypes property
+     */
+    public void setNegotiatedMimeTypes(List<String> negotiatedMimeTypes) {
+        this.negotiatedMimeTypes = negotiatedMimeTypes;
+    }
+
+    /**
+     * 
+     * @return
+     *     returns List<String>
+     */
+    public List<String> getNegotiatedParams() {
+        return this.negotiatedParams;
+    }
+
+    /**
+     * 
+     * @param negotiatedParams
+     *     the value for the negotiatedParams property
+     */
+    public void setNegotiatedParams(List<String> negotiatedParams) {
+        this.negotiatedParams = negotiatedParams;
     }
 
 }

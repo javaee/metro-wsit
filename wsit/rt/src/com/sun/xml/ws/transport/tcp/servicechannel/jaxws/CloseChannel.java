@@ -19,7 +19,6 @@
  *
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
-
 package com.sun.xml.ws.transport.tcp.servicechannel.jaxws;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -33,25 +32,25 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "closeChannel", namespace = "http://servicechannel.tcp.transport.ws.xml.sun.com/")
 public class CloseChannel {
 
-    @XmlElement(name = "arg0", namespace = "")
-    private int arg0;
+    @XmlElement(name = "channelId", namespace = "")
+    private int channelId;
 
     /**
      * 
      * @return
      *     returns int
      */
-    public int getArg0() {
-        return this.arg0;
+    public int getChannelId() {
+        return this.channelId;
     }
 
     /**
      * 
-     * @param arg0
-     *     the value for the arg0 property
+     * @param channelId
+     *     the value for the channelId property
      */
-    public void setArg0(int arg0) {
-        this.arg0 = arg0;
+    public void setChannelId(int channelId) {
+        this.channelId = channelId;
     }
 
 }
