@@ -124,16 +124,16 @@ public class TxMapUpdateProvider implements PolicyMapUpdateProvider {
                                 method.getOperationName(),
                                 policy.toString(),
                                 txnAttr.toString(),
-                                CMTEJB.getPackage() + "." + CMTEJB.getName(),
+                                CMTEJB.getName(),
                                 method.getMethod().getName()));
                     } else {
                         logger.info(METHOD_NAME,
                                 LocalizationMessages.ADD_AT_POLICY_ASSERTION_2007(
                                 model.getPortName().toString(),
                                 method.getOperationName(),
-                                policy.getName(),
+                                policy.getId(),
                                 txnAttr.toString(),
-                                CMTEJB.getPackage() + "." + CMTEJB.getName(),
+                                CMTEJB.getName(),
                                 method.getMethod().getName()));
                     }
                     policyMapMutator.putOperationSubject(operationKey, generatedWsatPolicySubject);
