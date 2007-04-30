@@ -157,16 +157,6 @@ public class HttpPoster {
     private HttpURLConnection createConnection(final URL url)
         throws IOException {
         
-        final HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        if (conn instanceof HttpsURLConnection) {
-            ((HttpsURLConnection) conn).setHostnameVerifier(
-                new HostnameVerifier() {
-                public boolean verify(String string, SSLSession sSLSession) {
-                    return true;
-                }
-            });
-        }
-        return conn;
-    }
-    
+        return (HttpURLConnection) url.openConnection();
+    }    
 }
