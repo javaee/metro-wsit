@@ -17,7 +17,7 @@
  * you own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  *
- * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
+ * Copyright 2007 Sun Microsystems Inc. All Rights Reserved
  */
 package com.sun.xml.ws.policy.jcaps;
 
@@ -38,7 +38,7 @@ public class JCapsPolicyValidator extends AbstractQNameValidator {
     }
     
     /**
-     * Creates new instance of JbiPolicyValidator
+     * Creates new instance of JCapsPolicyValidator
      */
     public JCapsPolicyValidator() {
         super(supportedAssertions, supportedAssertions);
