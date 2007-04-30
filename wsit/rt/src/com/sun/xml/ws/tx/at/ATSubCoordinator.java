@@ -105,8 +105,11 @@ public class ATSubCoordinator extends ATCoordinator {
                 rootDurableParticipant.register();
                 result = true;
             } catch (Exception e) {
-                // TODO: ROBUSTNESS retry register when it fails 
                 logger.severe("registerWithDurableParent", LocalizationMessages.REG_WITH_DURABLE_FAILED_0022(getCoordIdPartId(rootDurableParticipant)));
+                throw new WebServiceException(
+                        LocalizationMessages.REG_WITH_DURABLE_FAILED_0022(getCoordIdPartId(rootDurableParticipant)),
+                        e);
+                
             }
         }
         return result;
