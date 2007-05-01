@@ -33,13 +33,16 @@ import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.naming.NamingException;
 
 /**
+ * GlassFish lifecycle module, which works as SOAP/TCP endpoints registry.
+ *
  * @author Alexey Stashok
  */
 
 public final class WSTCPLifeCycleModule implements LifecycleListener {
+    private static WSTCPLifeCycleModule instance;
+    
     private static final Logger logger = Logger.getLogger(
             com.sun.xml.ws.transport.tcp.util.TCPConstants.LoggingDomain + ".server");
     
@@ -47,20 +50,27 @@ public final class WSTCPLifeCycleModule implements LifecycleListener {
     private WSTCPDelegate delegate;
     private Properties properties;
     
+    /**
+     * Method returns initialized WSTCPLifeCycleModule instance
+     * @throws IllegalStateException if instance was not initialized
+     */
+    public static @NotNull WSTCPLifeCycleModule getInstance() {
+        if (instance == null) {
+            throw new IllegalStateException(MessagesMessages.WSTCP_0007_TRANSPORT_MODULE_NOT_INITIALIZED());
+        }
+        
+        return instance;
+    }
+    
     public void handleEvent(@NotNull final LifecycleEvent lifecycleEvent) throws ServerLifecycleException {
         final int eventType = lifecycleEvent.getEventType();
         if (eventType == LifecycleEvent.INIT_EVENT) {
+            instance = this;
             logger.log(Level.FINE, "WSTCPLifeCycleModule.INIT_EVENT");
             properties = (Properties) lifecycleEvent.getData();
         } else if (eventType == LifecycleEvent.STARTUP_EVENT) {
             logger.log(Level.FINE, "WSTCPLifeCycleModule.STARTUP_EVENT");
-            try {
-                delegate = new WSTCPDelegate();
-                
-                lifecycleEvent.getLifecycleEventContext().getInitialContext().bind("TCPLifeCycle", this);
-            } catch (NamingException e) {
-                logger.log(Level.SEVERE, e.getMessage(), e);
-            }
+            delegate = new WSTCPDelegate();
         } else if (eventType == LifecycleEvent.READY_EVENT) {
             logger.log(Level.FINE, "WSTCPLifeCycleModule.READY_EVENT");
             try {
@@ -74,11 +84,7 @@ public final class WSTCPLifeCycleModule implements LifecycleListener {
             }
         } else if (eventType == LifecycleEvent.SHUTDOWN_EVENT) {
             logger.log(Level.FINE, "WSTCPLifeCycleModule.SHUTDOWN_EVENT");
-            try {
-                lifecycleEvent.getLifecycleEventContext().getInitialContext().unbind("TCPLifeCycle");
-            } catch (NamingException ex) {
-                logger.log(Level.WARNING, MessagesMessages.WSTCP_0007_TRANSPORT_MODULE_NOT_REGISTERED(), ex);
-            }
+            instance = null;
             
             if (delegate != null) {
                 delegate.destroy();
@@ -96,7 +102,7 @@ public final class WSTCPLifeCycleModule implements LifecycleListener {
         delegate.registerAdapters(contextPath, adapters);
     }
     
-    public void free(@NotNull final String contextPath, 
+    public void free(@NotNull final String contextPath,
             @NotNull final List<TCPAdapter> adapters) {
         delegate.freeAdapters(contextPath, adapters);
     }
