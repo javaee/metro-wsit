@@ -34,7 +34,6 @@ import java.net.URL;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.naming.InitialContext;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextAttributeEvent;
 import javax.servlet.ServletContextAttributeListener;
@@ -79,13 +78,7 @@ public final class WSStartupServlet extends HttpServlet
         final ServletContainer container = new ServletContainer(servletContext);
         
         try {
-            final InitialContext initialContext = new InitialContext();
-            
-            transportModule = (WSTCPLifeCycleModule) initialContext.lookup("TCPLifeCycle");
-            if (transportModule == null) {
-                throw new IllegalStateException(MessagesMessages.WSTCP_0007_TRANSPORT_MODULE_NOT_REGISTERED());
-            }
-            
+            transportModule = WSTCPLifeCycleModule.getInstance();
             final DeploymentDescriptorParser<TCPAdapter> parser = new DeploymentDescriptorParser<TCPAdapter>(
                     classLoader, new TCPResourceLoader(context), container, TCPAdapter.FACTORY);
             final URL sunJaxWsXml = context.getResource(JAXWS_RI_RUNTIME);
