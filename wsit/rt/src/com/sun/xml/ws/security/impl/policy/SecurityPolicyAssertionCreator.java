@@ -102,8 +102,7 @@ public class SecurityPolicyAssertionCreator implements PolicyAssertionCreator{
         implementedAssertions.add(Constants.CallbackHandlerConfiguration);
         implementedAssertions.add(Constants.Validator);
         implementedAssertions.add(Constants.ValidatorConfiguration);
-        
-        
+        implementedAssertions.add(Constants.CertStore);        
     };
     /** Creates a new instance of SecurityPolicyAssertionCreator */
     
@@ -119,6 +118,11 @@ public class SecurityPolicyAssertionCreator implements PolicyAssertionCreator{
         String className ="";
         try {
             className = assertionData.getName().getLocalPart();
+            //made mistake here, we are now in SCF and cannot change the classname
+            //will make a change for WSIT 1.1
+            if (Constants.CertStore.equals(className)) {
+                className = "CertStoreConfig";
+            }
             return Class.forName("com.sun.xml.ws.security.impl.policy." + className);
         } catch (ClassNotFoundException ex) {
             if(logger.isLoggable(Level.FINE)){
