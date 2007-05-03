@@ -74,7 +74,7 @@ final class XmlPolicyModelUnmarshaller extends PolicyModelUnmarshaller {
                         reader.nextEvent();
                         break; // skipping the comments and start document events
                     case XMLStreamConstants.CHARACTERS:
-                        processCharacters(ModelNode.Type.POLICY, event.asCharacters(), null);
+                        processCharacters(ModelNode.Type.POLICY, reader.nextEvent().asCharacters(), null);
                         break;
                     case XMLStreamConstants.START_ELEMENT :
                         if (ModelNode.Type.POLICY.asQName().equals(event.asStartElement().getName())) {
