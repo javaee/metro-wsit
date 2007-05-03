@@ -263,13 +263,19 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         } catch (XWSSecurityException xwse) {
             thereWasAFault = true;            
             msg = Messages.create(xwse, pipeConfig.getBinding().getSOAPVersion());
+         
+        }  catch (WebServiceException xwse) {
+            thereWasAFault = true;            
+            msg = Messages.create(xwse, pipeConfig.getBinding().getSOAPVersion());
             
         } catch(SOAPException se){
             // internal error
             log.log(Level.SEVERE, 
                     LogStringsMessages.WSITPVD_0035_ERROR_VERIFY_INBOUND_MSG(), se);
-            throw new WebServiceException(
-                    LogStringsMessages.WSITPVD_0035_ERROR_VERIFY_INBOUND_MSG(), se);
+            thereWasAFault = true;            
+            msg = Messages.create(se, pipeConfig.getBinding().getSOAPVersion());
+            //throw new WebServiceException(
+            //        LogStringsMessages.WSITPVD_0035_ERROR_VERIFY_INBOUND_MSG(), se);
         }
         packet.setMessage(msg);
         

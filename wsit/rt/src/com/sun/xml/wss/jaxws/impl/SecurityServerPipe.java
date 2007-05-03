@@ -184,11 +184,18 @@ public class SecurityServerPipe extends SecurityPipeBase {
             thereWasAFault = true;            
             msg = Messages.create(xwse, pipeConfig.getBinding().getSOAPVersion());
             
+        } catch (WebServiceException xwse) {
+            thereWasAFault = true;            
+            msg = Messages.create(xwse, pipeConfig.getBinding().getSOAPVersion());
+          
         } catch(SOAPException se){
             // internal error
+            // Log here because this catch is an internal error not logger by the callee
             log.log(Level.SEVERE, 
-                    LogStringsMessages.WSSPIPE_0025_ERROR_VERIFY_INBOUND_MSG(), se);            
-            throw new WebServiceException(LogStringsMessages.WSSPIPE_0025_ERROR_VERIFY_INBOUND_MSG(), se);
+                    LogStringsMessages.WSSPIPE_0025_ERROR_VERIFY_INBOUND_MSG(), se);
+            thereWasAFault = true;            
+            msg = Messages.create(se, pipeConfig.getBinding().getSOAPVersion());
+            //throw new WebServiceException(LogStringsMessages.WSSPIPE_0025_ERROR_VERIFY_INBOUND_MSG(), se);
         }
         packet.setMessage(msg);
         

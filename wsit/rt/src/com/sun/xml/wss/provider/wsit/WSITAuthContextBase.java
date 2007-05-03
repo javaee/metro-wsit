@@ -171,6 +171,10 @@ public abstract class WSITAuthContextBase  {
     //        new QName("http://schemas.xmlsoap.org/ws/2005/02/trust","RequestSecurityToken");
     private final QName optServerSecurity = new QName("http://schemas.sun.com/2006/03/wss/server","DisableStreamingSecurity");
     private final QName optClientSecurity = new QName("http://schemas.sun.com/2006/03/wss/client","DisableStreamingSecurity");
+
+    protected boolean disableIncPrefix = false;
+    private final QName disableIncPrefixServer = new QName("http://schemas.sun.com/2006/03/wss/server","DisableInclusivePrefixList");
+    private final QName disableIncPrefixClient = new QName("http://schemas.sun.com/2006/03/wss/client","DisableInclusivePrefixList");
     
     //static JAXBContext used across the Pipe
     protected static final JAXBContext jaxbContext ;
@@ -327,6 +331,9 @@ public abstract class WSITAuthContextBase  {
                 }
                 if(endpointPolicy.contains(optServerSecurity) || endpointPolicy.contains(optClientSecurity)){
                     optimized = false;
+                }
+                if(endpointPolicy.contains(disableIncPrefixServer) || endpointPolicy.contains(disableIncPrefixClient)){
+                    disableIncPrefix = true;
                 }
             }
             
@@ -955,6 +962,7 @@ public abstract class WSITAuthContextBase  {
             ((JAXBFilterProcessingContext)ctx).setAddressingVersion(addVer);
             ((JAXBFilterProcessingContext)ctx).setSOAPVersion(soapVersion);
             ((JAXBFilterProcessingContext)ctx).setSecure(packet.wasTransportSecure);
+            ((JAXBFilterProcessingContext)ctx).setDisableIncPrefix(disableIncPrefix);
         }else{
             ctx = new ProcessingContextImpl( packet.invocationProperties);
         }
@@ -1220,6 +1228,7 @@ public abstract class WSITAuthContextBase  {
             ctx = new JAXBFilterProcessingContext(packet.invocationProperties);
             ((JAXBFilterProcessingContext)ctx).setAddressingVersion(addVer);
             ((JAXBFilterProcessingContext)ctx).setSOAPVersion(soapVersion);
+            ((JAXBFilterProcessingContext)ctx).setDisableIncPrefix(disableIncPrefix);
         }else{
             ctx = new ProcessingContextImpl( packet.invocationProperties);
         }
@@ -1349,6 +1358,7 @@ public abstract class WSITAuthContextBase  {
             context.setSOAPVersion(soapVersion);
             context.setJAXWSMessage(message, soapVersion);
             context.isOneWayMessage(message.isOneWay(this.pipeConfig.getWSDLModel()));
+            context.setDisableIncPrefix(disableIncPrefix);
             SecurityAnnotator.secureMessage(context);
             return context.getJAXWSMessage();
         } catch(XWSSecurityException xwse){            

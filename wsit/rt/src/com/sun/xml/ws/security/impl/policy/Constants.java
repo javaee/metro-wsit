@@ -201,6 +201,7 @@ public class Constants {
     public static final String ReferenceProperties = "ReferenceProperties";
     public final static String PortType ="PortType";
     public final static String ServiceName ="ServiceName";
+    public final static String CertStore ="CertStore";
     
     public static void log_invalid_assertion(PolicyAssertion assertion , boolean isServer,String parentAssertion){
         
