@@ -920,9 +920,11 @@ public abstract class WSITAuthContextBase  {
             props.put(DefaultCallbackHandler.KEYSTORE_URL, store.getLocation());
         } else {
             //throw RuntimeException for now
+            /**
             log.log(Level.SEVERE, 
                     LogStringsMessages.WSITPVD_0014_KEYSTORE_URL_NULL_CONFIG_ASSERTION());                        
             throw new RuntimeException(LogStringsMessages.WSITPVD_0014_KEYSTORE_URL_NULL_CONFIG_ASSERTION());            
+             */
         }
         
         if (store.getType() != null) {
@@ -934,9 +936,11 @@ public abstract class WSITAuthContextBase  {
         if (store.getPassword() != null) {
             props.put(DefaultCallbackHandler.KEYSTORE_PASSWORD, new String(store.getPassword()));
         } else {
+            /**
             log.log(Level.SEVERE, 
                     LogStringsMessages.WSITPVD_0015_KEYSTORE_PASSWORD_NULL_CONFIG_ASSERTION());                        
             throw new RuntimeException(LogStringsMessages.WSITPVD_0015_KEYSTORE_PASSWORD_NULL_CONFIG_ASSERTION() );            
+             */
         }
         
         if (store.getAlias() != null) {
@@ -985,9 +989,11 @@ public abstract class WSITAuthContextBase  {
             props.put(DefaultCallbackHandler.TRUSTSTORE_URL, store.getLocation());
         } else {
             //throw RuntimeException for now
+            /**
             log.log(Level.SEVERE, 
                     LogStringsMessages.WSITPVD_0016_TRUSTSTORE_URL_NULL_CONFIG_ASSERTION());                        
             throw new RuntimeException(LogStringsMessages.WSITPVD_0016_TRUSTSTORE_URL_NULL_CONFIG_ASSERTION() );            
+             */
         }
         
         if (store.getType() != null) {
@@ -999,9 +1005,11 @@ public abstract class WSITAuthContextBase  {
         if (store.getPassword() != null) {
             props.put(DefaultCallbackHandler.TRUSTSTORE_PASSWORD, new String(store.getPassword()));
         } else {
+            /**
             log.log(Level.SEVERE, 
                     LogStringsMessages.WSITPVD_0017_TRUSTSTORE_PASSWORD_NULL_CONFIG_ASSERTION());                        
             throw new RuntimeException(LogStringsMessages.WSITPVD_0017_TRUSTSTORE_PASSWORD_NULL_CONFIG_ASSERTION() );             
+             */
         }
         
         if (store.getPeerAlias() != null) {
