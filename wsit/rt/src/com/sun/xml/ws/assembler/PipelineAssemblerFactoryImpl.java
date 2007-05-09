@@ -51,6 +51,7 @@ import com.sun.xml.ws.api.pipe.PipelineAssembler;
 import com.sun.xml.ws.api.pipe.PipelineAssemblerFactory;
 import com.sun.xml.ws.api.pipe.ServerPipeAssemblerContext;
 import com.sun.xml.ws.api.pipe.StreamSOAPCodec;
+import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.server.ServiceDefinition;
 import com.sun.xml.ws.mex.server.MetadataServerPipe;
@@ -157,6 +158,12 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             } else {
                 p = context.createTransportPipe();
             }
+
+            MessageDumpingFeature msgDumper = context.getBinding().getFeature(MessageDumpingFeature.class);
+            if (msgDumper != null) {
+                p = PipeAdapter.adapt(msgDumper.createMessageDumpingTube(PipeAdapter.adapt(p)));
+            }
+            
             p = dump(context, CLIENT_PREFIX, p);
             p = dumpAction(CLIENT_PREFIX + ACTION_SUFFIX, context.getBinding(), p);
             p = dump(context, CLIENT_PREFIX + TRANSPORT_SUFFIX, p);
@@ -565,7 +572,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             
             return p;
         }
-        
+                
         /**
          * Initializes the {@link PolicyMap} on the client side.
          *
