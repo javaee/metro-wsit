@@ -127,9 +127,9 @@ public class SecurityServerPipe extends SecurityPipeBase {
             SecurityPolicyHolder holder = (SecurityPolicyHolder)it.next();
             Set configAssertions = holder.getConfigAssertions(SUN_WSS_SECURITY_SERVER_POLICY_NS);
             trustConfig = holder.getConfigAssertions(Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS);
-          
-            handler = configureServerHandler(configAssertions);
-            secEnv = new DefaultSecurityEnvironmentImpl(handler);
+            Properties props = new Properties();
+            handler = configureServerHandler(configAssertions, props);
+            secEnv = new DefaultSecurityEnvironmentImpl(handler, props);
         } catch (Exception e) {            
             log.log(Level.SEVERE, 
                     LogStringsMessages.WSSPIPE_0028_ERROR_CREATING_NEW_INSTANCE_SEC_SERVER_PIPE(), e);            
@@ -664,8 +664,8 @@ public class SecurityServerPipe extends SecurityPipeBase {
         return retPacket;
     }       
     
-    private CallbackHandler configureServerHandler(Set configAssertions) {
-        Properties props = new Properties();
+    private CallbackHandler configureServerHandler(Set configAssertions, Properties props) {
+        //Properties props = new Properties();
         String ret = populateConfigProperties(configAssertions, props);
         try {
             if (ret != null) {

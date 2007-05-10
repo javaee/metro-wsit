@@ -225,6 +225,9 @@ public abstract class WSITAuthContextBase  {
     AddressingVersion addVer = null;
     WSDLPort port = null;
     
+    //milliseconds
+    protected long timestampTimeOut = 0;
+    
     protected static final String REQ_PACKET = "REQ_PACKET";
     protected static final String RES_PACKET = "RES_PACKET";
     
@@ -1029,6 +1032,10 @@ public abstract class WSITAuthContextBase  {
     }
     
     private String  populateCallbackHandlerProps(Properties props, CallbackHandlerConfiguration conf) {
+        if (conf.getTimestampTimeout() != null) {
+            //milliseconds
+            this.timestampTimeOut = Long.parseLong(conf.getTimestampTimeout()) * 1000;
+        }
         Iterator it = conf.getCallbackHandlers();
         for (; it.hasNext();) {
             PolicyAssertion p = (PolicyAssertion)it.next();
@@ -1042,6 +1049,14 @@ public abstract class WSITAuthContextBase  {
                     log.log(Level.SEVERE, 
                             LogStringsMessages.WSITPVD_0018_NULL_OR_EMPTY_XWSS_CALLBACK_HANDLER_CLASSNAME());  
                     throw new RuntimeException(LogStringsMessages.WSITPVD_0018_NULL_OR_EMPTY_XWSS_CALLBACK_HANDLER_CLASSNAME());
+                }
+            } else if ("jmacCallbackHandler".equals(name)) {
+                if (ret != null && !"".equals(ret)) {
+                    props.put(DefaultCallbackHandler.JMAC_CALLBACK_HANDLER, ret);
+                } else {
+                    log.log(Level.SEVERE, 
+                            LogStringsMessages.WSITPVD_0051_NULL_OR_EMPTY_JMAC_CALLBACK_HANDLER_CLASSNAME());  
+                            throw new RuntimeException(LogStringsMessages.WSITPVD_0051_NULL_OR_EMPTY_JMAC_CALLBACK_HANDLER_CLASSNAME());
                 }
             } else if ("usernameHandler".equals(name)) {
                 if (ret != null && !"".equals(ret)) {
@@ -1239,6 +1254,7 @@ public abstract class WSITAuthContextBase  {
         }else{
             ctx = new ProcessingContextImpl( packet.invocationProperties);
         }
+        ctx.setTimestampTimeout(this.timestampTimeOut);
         // set the policy, issued-token-map, and extraneous properties
         ctx.setIssuedTokenContextMap(issuedTokenContextMap);
         ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
@@ -1396,9 +1412,11 @@ public abstract class WSITAuthContextBase  {
 
     
     
-    protected CallbackHandler loadGFHandler(boolean isClientAuthModule) {
+    protected CallbackHandler loadGFHandler(boolean isClientAuthModule, String jmacHandler) {
         String classname = "com.sun.enterprise.security.jmac.callback.ContainerCallbackHandler";
-        
+        if (jmacHandler != null) {
+            classname = jmacHandler;
+        }
         Class ret = null;
         try {
             

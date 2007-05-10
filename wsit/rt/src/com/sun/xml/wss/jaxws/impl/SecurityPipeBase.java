@@ -197,6 +197,9 @@ public abstract class SecurityPipeBase implements Pipe {
     public static final URI ISSUE_REQUEST_URI ;
     public static final URI CANCEL_REQUEST_URI;
     protected Policy bpMSP = null;
+    
+    //milliseconds
+    protected long timestampTimeOut = 0;
     /**
      * Constants for RM Security Processing
      */
@@ -292,6 +295,7 @@ public abstract class SecurityPipeBase implements Pipe {
         this.hasSecureConversation = that.hasSecureConversation;
         this.hasReliableMessaging = that.hasReliableMessaging;
         //this.opResolver = that.opResolver;
+        this.timestampTimeOut = that.timestampTimeOut;
         
         try {
             this.marshaller = jaxbContext.createMarshaller();
@@ -470,6 +474,7 @@ public abstract class SecurityPipeBase implements Pipe {
         }else{
             ctx = new ProcessingContextImpl( packet.invocationProperties);
         }
+        ctx.setTimestampTimeout(this.timestampTimeOut);
         ctx.setIssuedTokenContextMap(issuedTokenContextMap);
         ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
         
@@ -1262,6 +1267,11 @@ public abstract class SecurityPipeBase implements Pipe {
     }
     
     private String  populateCallbackHandlerProps(Properties props, CallbackHandlerConfiguration conf) {
+        //check if timestamp timeout has been set
+        if (conf.getTimestampTimeout() != null) {
+            //in milliseconds
+            this.timestampTimeOut = Long.parseLong(conf.getTimestampTimeout()) * 1000;
+        }
         Iterator it = conf.getCallbackHandlers();
         for (; it.hasNext();) {
             PolicyAssertion p = (PolicyAssertion)it.next();
