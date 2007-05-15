@@ -400,7 +400,10 @@ public abstract class WSITAuthContextBase  {
                 //ouput message effective policy to be used. Policy elements at various
                 //scopes merged.
                 
-                Policy omEP =  policyMerge.merge(policyList);
+                Policy omEP =  policyMerge.merge(policyList); 
+                if(omPolicy != null){
+                   policyList.remove(omPolicy);
+                } 
                 inPH = addIncomingMP(operation,omEP);
             /*}*/
                 Iterator faults = operation.getOperation().getFaults().iterator();
