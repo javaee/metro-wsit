@@ -360,7 +360,8 @@ public class RMServerPipe extends PipeBase<RMDestination,
             try {
                 ServerInboundSequence seq = (ServerInboundSequence)e.getSequence();
                 if (seq != null) {
-                    return generateAckMessage(packet, seq);
+                    return generateAckMessage(packet, seq, 
+                                    constants.getSequenceAcknowledgementAction());
                 } else {
                     //unreachable
                     return null;
@@ -407,7 +408,8 @@ public class RMServerPipe extends PipeBase<RMDestination,
 
                     ServerInboundSequence seq =
                             (ServerInboundSequence)original.getSequence();
-                    return generateAckMessage(packet, seq);
+                    return generateAckMessage(packet, seq, 
+                                                constants.getSequenceAcknowledgementAction());
 
                 } catch (RMException ee) {
                     throw new WebServiceException(ee);
@@ -762,7 +764,8 @@ public class RMServerPipe extends PipeBase<RMDestination,
             }
             seq.resetLastActivityTime();
 
-            return generateAckMessage(inbound, seq);
+            return generateAckMessage(inbound, seq, 
+                    constants.getSequenceAcknowledgementAction());
 
         } catch (JAXBException e) {
             logger.severe(Messages.ACK_REQUESTED_EXCEPTION.format());

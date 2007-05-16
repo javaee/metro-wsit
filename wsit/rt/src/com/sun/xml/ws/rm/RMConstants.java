@@ -173,6 +173,14 @@ public enum RMConstants {
     public String getLastAction() {
         return "http://schemas.xmlsoap.org/ws/2005/02/rm/LastMessage";
     }
+    
+    /**
+     * Returns the WS-Adressing Action property for stand-alone SequenceAcknowledgement
+     * messages.
+     */
+    public String getSequenceAcknowledgementAction() {
+        return "http://schemas.xmlsoap.org/ws/2005/02/rm/SequenceAcknowledgement";
+    }
 
     
 
