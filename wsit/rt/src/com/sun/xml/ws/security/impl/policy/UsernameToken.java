@@ -42,7 +42,7 @@ public class UsernameToken extends PolicyAssertion implements com.sun.xml.ws.sec
     
     private String tokenType;
     private String id;
-    private String includeToken;
+    private String includeToken = Token.INCLUDE_ALWAYS;
     private boolean populated;
     private QName itQname = new QName(Constants.SECURITY_POLICY_NS, Constants.IncludeToken);
     private AssertionFitness fitness = AssertionFitness.IS_VALID;
@@ -101,7 +101,9 @@ public class UsernameToken extends PolicyAssertion implements com.sun.xml.ws.sec
     }
     private synchronized AssertionFitness populate(boolean isServer) {
         if(!populated){
-            this.includeToken = this.getAttributeValue(itQname);
+            if(this.getAttributeValue(itQname) != null){
+                this.includeToken = this.getAttributeValue(itQname);
+            }
             NestedPolicy policy = this.getNestedPolicy();
             if(policy == null){
                 if(logger.getLevel() == Level.FINE){

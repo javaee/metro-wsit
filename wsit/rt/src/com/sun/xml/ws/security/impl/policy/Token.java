@@ -41,7 +41,7 @@ import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
 public class Token extends PolicyAssertion implements  com.sun.xml.ws.security.policy.Token, SecurityAssertionValidator{
     
     private static QName itQname = new QName(Constants.SECURITY_POLICY_NS, Constants.IncludeToken);
-    private String _includeToken;
+    private String _includeToken = Token.INCLUDE_ALWAYS;
     private String _id;
     private boolean populated= false;
     private com.sun.xml.ws.security.policy.Token _token;
@@ -98,7 +98,10 @@ public class Token extends PolicyAssertion implements  com.sun.xml.ws.security.p
     
     private synchronized AssertionFitness populate(boolean isServer) {
         if(!populated){
-            _includeToken = getAttributeValue(itQname);
+             String tValue = getAttributeValue(itQname);
+             if(tValue != null){
+                 _includeToken = tValue;
+             }
             NestedPolicy policy = this.getNestedPolicy();
             if(policy == null){
                 if(logger.getLevel() == Level.FINE){

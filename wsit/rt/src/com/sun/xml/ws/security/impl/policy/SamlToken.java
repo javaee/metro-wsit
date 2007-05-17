@@ -55,7 +55,7 @@ public class SamlToken extends PolicyAssertion implements com.sun.xml.ws.securit
     private List<String> tokenRefType;
     private String tokenType;
     private PolicyAssertion rdKey = null;
-    private String includeTokenType;
+    private String includeTokenType = Token.INCLUDE_ALWAYS;
     private boolean populated = false;
     private AssertionFitness fitness = AssertionFitness.IS_VALID;
     /** Creates a new instance of SamlToken */
@@ -109,7 +109,9 @@ public class SamlToken extends PolicyAssertion implements com.sun.xml.ws.securit
         
         if(!populated){
             NestedPolicy policy = this.getNestedPolicy();
-            includeTokenType = this.getAttributeValue(itQname);
+            if(this.getAttributeValue(itQname) != null){
+                includeTokenType = this.getAttributeValue(itQname);
+            }
             if(policy == null){
                 if(logger.getLevel() == Level.FINE){
                     logger.log(Level.FINE,"NestedPolicy is null");
