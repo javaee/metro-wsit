@@ -29,7 +29,49 @@
     <property name="tomcat.endorsed" value="${tomcat.home}/common/endorsed"/>
     <property name="java.home" value="${env.JAVA_HOME}"/>
 
-    <target name="install" depends="install-api-check">
+    <condition property="jdk6">
+        <equals arg1="${ant.java.version}" arg2="1.6"/>
+    </condition>
+
+    <condition property="endorsed-api-flagged">
+        <equals arg1="${install.api}" arg2="true"/>
+    </condition>
+ 
+    <!-- the jdk6-message is always printed along with the 'help' message
+         if JDK6 is being used.  it is also printed when installing with
+         JDK6 but only if -Dinstall.api='true' is not specified on the 
+         command-line (that conditional check is done by <jdk6-check>).
+    -->
+
+    <target name="jdk6-check" if="jdk6" unless="endorsed-api-flagged">
+        <antcall target="jdk6-message"/>
+        <echo message="IMPORTANT:"/>
+        <echo message="  After this install completes, run ant again invoking the 'install-api' target."/>
+        <echo/>
+    </target>
+
+    <target name="jdk6-message" if="jdk6">
+        <echo message="NOTE: WSIT is being installed using JDK6."/>
+        <echo/>
+        <echo message="  The file 'web-services-api.jar' must be installed"/>
+        <echo message="  into $JAVA_HOME/lib/endorsed for WSIT to prevent"/>
+        <echo message="  conflicts between the JAX-WS 2.0 classes"/>
+        <echo message="  bundled with JDK 6 and JAX-WS 2.1 bundled with WSIT."/>
+        <echo/>
+        <echo message="  You must have write-permissions on the JDK 6 directory."/>
+        <echo message="  This is a concern when using a system-wide JDK installation."/>
+        <echo/>
+        <echo message="  To install webservices-api.jar, choose one of the following:"/>
+        <echo/>
+        <echo message="  Invoke 'ant -Dinstall.api=true install' to copy it"/>
+        <echo message="  while doing a complete WSIT installation."/>
+        <echo/>
+        <echo message="  Invoke 'ant install-api' to install only"/>
+        <echo message="  webservices-api.jar into the 'endorsed' directory."/>
+        <echo/>
+    </target>
+    
+    <target name="install" depends="jdk6-check" description="Install latest WSIT jars">
         <echo message="Installing WSIT 1.0 EA on ${tomcat.home} ..."/>
 
         <!-- TODO: Identify placeholder for tools.jar -->
@@ -46,16 +88,17 @@
                 <include name="webservices-api.jar"/>
             </fileset>
         </copy>
-
+        <antcall target="install-api-check"/>
         <echo message="... installation complete."/>
     </target>
 
-    <target name="install-api-check" if="install.api">
+    <target name="install-api-check" if="endorsed-api-flagged ">
         <antcall target="install-api"/>
     </target>
 
-    <target name="install-api">
-        <copy toDir="${java.home}/lib/endorsed" overwrite="true">
+    <target name="install-api" description="Installs 'webservices-api.jar' into $JAVA_HOME/lib/endorsed">
+        <mkdir dir="${java.home}/lib/endorsed"/>
+        <copy toDir="${java.home}/lib/endorsed" overwrite="true" failonerror="false">
             <fileset dir="lib">
                 <include name="webservices-api.jar"/>
             </fileset>
@@ -78,20 +121,18 @@
         <echo message="install  :"/>
         <echo message="  Installs WSIT 1.0 EA on Tomcat"/>
         <echo/>
-        <echo message="  NOTE: If using JDK 6, adding -Dinstall.api='true' when invoking the 'install' target will copy"/>
-        <echo message="  webservices-api.jar into JAVA_HOME/lib/endorsed"/>
-        <echo message="  to prevent conflicts between the JAX-WS 2.0 implementation bundled with JDK 6 and JAX-WS 2.1 bundled with WSIT."/>
-        <echo message="  For JDK 5, it is unnecessary to copy 'webservices-api.jar' to the 'endorsed' directory but doing so will not cause problems."/>
-        <echo/>
         <echo message="install-api: "/>
-        <echo message="  Installs 'webservices-api.jar' into JAVA_HOME/lib/endorsed (and nothing else)"/>
-        <echo message="  Only needed for JDK 6 and only if -Dinstall.api='true' was not passed during WSIT installation"/>
+        <echo message="  Copies 'webservices-api.jar' into $JAVA_HOME/lib/endorsed"/>
+        <echo message="  Only needed for JDK 6 and only if -Dinstall.api='true'"/>
+        <echo message="  was not passed during WSIT installation"/>
         <echo/>
-        <echo message="uninstall:"/>
-        <echo message="  Uninstalls WSIT 1.0 EA from Tomcat"/>
+        <echo message="uninstall: "/>
+        <echo message="  Uninstalls WSIT 1.0 EA from GlassFish v2"/>
         <echo/>
-        <echo message="CATALINA_HOME must be set to the installation directory of Tomcat."/>
+        <echo message="$CATALINA_HOME must be set to the installation directory of Tomcat."/>
         <echo/>
-        <echo message="Usage: ANT_HOME/bin/ant -f wsit-on-tomcat.xml [-Dinstall.api='true'] {install,uninstall}"/>        
+        <echo message="Usage:"/>
+        <echo message="  ant -f wsit-on-tomcat.xml [-Dinstall.api='true'] {install,uninstall}"/>
+        <antcall target="jdk6-message"/>
     </target>
 </project>
