@@ -159,7 +159,8 @@ public class WSITClientAuthConfig implements ClientAuthConfig {
                 if (packet != null) {
                     if (clientAuthContext != null) {
                         ret =  ((WSITClientAuthContext)clientAuthContext).startSecureConversation(packet);
-                        map.put("SECURITY_TOKEN", ret);
+                        //map.put("SECURITY_TOKEN", ret);
+                        info.getMap().put("SECURITY_TOKEN", ret);
                     } else {
                         log.log(Level.SEVERE, 
                                 LogStringsMessages.WSITPVD_0024_NULL_CLIENT_AUTH_CONTEXT());                                

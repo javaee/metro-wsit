@@ -177,7 +177,7 @@ public class SBIssuedSamlTokenContractImpl extends IssueSamlTokenContract{
             nsContext.addSignatureNS();
             nsContext.addWSSNS();
             // Get the service certificate
-            final X509Certificate serCert = getServiceCertificate(callbackHandler, stsConfig.getTrustSPMetadata(appliesTo));
+            final X509Certificate serCert = getServiceCertificate(callbackHandler, stsConfig.getTrustSPMetadata(appliesTo), appliesTo);
             
             // Create the KeyInfo for SubjectConfirmation
             final KeyInfo keyInfo = createKeyInfo(keyType, serCert, context);
@@ -429,7 +429,7 @@ public class SBIssuedSamlTokenContractImpl extends IssueSamlTokenContract{
     
     
     //common method to be moved to Base Class
-    private X509Certificate getServiceCertificate(final CallbackHandler callbackHandler, TrustSPMetadata spMd)throws WSTrustException{
+    private X509Certificate getServiceCertificate(final CallbackHandler callbackHandler, TrustSPMetadata spMd, String appliesTo)throws WSTrustException{
         // Get the service certificate
         final EncryptionKeyCallback.AliasX509CertificateRequest req = new EncryptionKeyCallback.AliasX509CertificateRequest(spMd.getCertAlias());
         final EncryptionKeyCallback callback = new EncryptionKeyCallback(req);
@@ -438,12 +438,12 @@ public class SBIssuedSamlTokenContractImpl extends IssueSamlTokenContract{
             callbackHandler.handle(callbacks);
         }catch(IOException ex){
             log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(), ex);
-            throw new WSTrustException(LogStringsMessages.WST_0032_ERROR_CREATING_SAML_ASSERTION(), ex);
+                    LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(appliesTo), ex);
+            throw new WSTrustException(LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(appliesTo), ex);
         }catch(UnsupportedCallbackException ex){
             log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(), ex);
-            throw new WSTrustException(LogStringsMessages.WST_0032_ERROR_CREATING_SAML_ASSERTION(), ex);
+                    LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(appliesTo), ex);
+            throw new WSTrustException(LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(appliesTo), ex);
         }
         
         return req.getX509Certificate();

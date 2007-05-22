@@ -27,6 +27,7 @@ import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import java.util.Collection;
 import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
+import javax.xml.namespace.QName;
 
 /**
  *
@@ -34,6 +35,7 @@ import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
  */
 public class CallbackHandlerConfiguration extends PolicyAssertion implements com.sun.xml.ws.security.policy.CallbackHandlerConfiguration, SecurityAssertionValidator{
     
+    private static QName timestampTimeout  =  new QName("timestampTimeout");
     private boolean populated = false;
     
     private Iterator<PolicyAssertion> ast  = null;
@@ -65,5 +67,12 @@ public class CallbackHandlerConfiguration extends PolicyAssertion implements com
             
         }
         return fitness;
+    }
+
+    public String getTimestampTimeout() {
+        if(this.getAttributes().containsKey(timestampTimeout)){
+            return this.getAttributeValue(timestampTimeout);
+        }
+        return null;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: RequestedProofTokenImpl.java,v 1.11 2007-01-26 05:57:46 jdg6688 Exp $
+ * $Id: RequestedProofTokenImpl.java,v 1.11.4.1 2007-05-22 14:22:24 ritzmann Exp $
  */
 
 /*
@@ -88,8 +88,8 @@ public class RequestedProofTokenImpl extends RequestedProofTokenType implements 
             setBinarySecret(new BinarySecretImpl(bsType));
         } else{
             log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0019_INVALID_PROOF_TOKEN_TYPE(local));
-            throw new RuntimeException(LogStringsMessages.WST_0019_INVALID_PROOF_TOKEN_TYPE(local));
+                    LogStringsMessages.WST_0019_INVALID_PROOF_TOKEN_TYPE(local, null));
+            throw new RuntimeException(LogStringsMessages.WST_0019_INVALID_PROOF_TOKEN_TYPE(local, null));
         }
     }
     
@@ -105,8 +105,8 @@ public class RequestedProofTokenImpl extends RequestedProofTokenType implements 
         || proofTokenType.equalsIgnoreCase(RequestedProofToken.TOKEN_REF_TYPE)
         )) {
             log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0019_INVALID_PROOF_TOKEN_TYPE(proofTokenType));
-            throw new RuntimeException(LogStringsMessages.WST_0019_INVALID_PROOF_TOKEN_TYPE(proofTokenType));
+                    LogStringsMessages.WST_0019_INVALID_PROOF_TOKEN_TYPE(proofTokenType, null));
+            throw new RuntimeException(LogStringsMessages.WST_0019_INVALID_PROOF_TOKEN_TYPE(proofTokenType, null));
         }
         tokenType = proofTokenType;
     }

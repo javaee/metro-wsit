@@ -37,8 +37,13 @@ import com.sun.xml.ws.addressing.policy.Address;
 import com.sun.xml.ws.mex.client.MetadataClient;
 import com.sun.xml.ws.mex.client.PortInfo;
 import com.sun.xml.ws.mex.client.schema.Metadata;
+import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.impl.bindings.AppliesTo;
+import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
+import com.sun.xml.ws.policy.sourcemodel.PolicyModelGenerator;
+import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
+import com.sun.xml.ws.policy.sourcemodel.XmlPolicyModelMarshaller;
 import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.impl.IssuedTokenContextImpl;
 import com.sun.xml.ws.security.impl.policy.PolicyUtil;
@@ -51,25 +56,38 @@ import com.sun.xml.ws.security.trust.elements.Entropy;
 import com.sun.xml.ws.security.trust.elements.Lifetime;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponse;
+import com.sun.xml.ws.security.trust.impl.bindings.ClaimsType;
 import com.sun.xml.ws.security.trust.impl.bindings.ObjectFactory;
 import com.sun.xml.ws.security.trust.impl.bindings.RequestSecurityTokenResponseType;
 import com.sun.xml.ws.security.trust.impl.bindings.RequestSecurityTokenType;
 import com.sun.xml.ws.security.trust.impl.elements.ClaimsImpl;
 import com.sun.xml.ws.security.trust.util.WSTrustUtil;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.net.URI;
 import java.net.URL;
 import java.net.URISyntaxException;
 import java.net.MalformedURLException;
 import java.rmi.RemoteException;
 import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.xml.bind.util.JAXBResult;
 import javax.xml.namespace.QName;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.transform.dom.DOMResult;
 import javax.xml.ws.Dispatch;
 import javax.xml.ws.RespectBindingFeature;
 import javax.xml.ws.Service;
+import javax.xml.ws.WebServiceException;
 import javax.xml.ws.WebServiceFeature;
 import javax.xml.bind.JAXBElement;
 
@@ -80,6 +98,9 @@ import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
 import javax.xml.ws.soap.AddressingFeature;
 
 import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
+import org.w3c.dom.Document;
+
+import org.w3c.dom.Element;
 
 /**
  *
@@ -103,7 +124,12 @@ public class TrustPluginImpl implements TrustPlugin {
     private static final String WSDL_LOCATION = "wsdlLocation";
     private static final String SERVICE_NAME = "serviceName";
     private static final String PORT_NAME = "portName";
-   
+    private static final String REQUEST_SECURITY_TOKEN_TEMPLATE = "RequestSecurityTokenTemplate";
+    private static final String CLAIMS = "Claims";
+    private static final String DIALECT = "Dialect";
+    
+
+    
     /** Creates a new instance of TrustPluginImpl */
     public TrustPluginImpl(Configuration config) {
         this.config = config;
@@ -117,7 +143,7 @@ public class TrustPluginImpl implements TrustPlugin {
     public IssuedTokenContext process(final PolicyAssertion token, final PolicyAssertion localToken, final String appliesTo){
         final IssuedToken issuedToken = (IssuedToken)token;
         final RequestSecurityTokenTemplate rstTemplate = issuedToken.getRequestSecurityTokenTemplate();
-       
+        
         URI stsURI =  getSTSURI(issuedToken);
         URI wsdlLocation = null;
         QName serviceName = null;
@@ -174,13 +200,21 @@ public class TrustPluginImpl implements TrustPlugin {
         if(stsURI == null){
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0029_COULD_NOT_GET_STS_LOCATION(appliesTo));
-            throw new RuntimeException(LogStringsMessages.WST_0029_COULD_NOT_GET_STS_LOCATION(appliesTo));
+            throw new WebServiceException(LogStringsMessages.WST_0029_COULD_NOT_GET_STS_LOCATION(appliesTo));
         }
         
         RequestSecurityTokenResponse result = null;
         try {
             final RequestSecurityToken request = createRequest(rstTemplate, appliesTo);
-           
+            
+            // handle Claims.
+            // Not: should be in the RequestSecurityTokenTemplate api. Workaround for now.
+            Claims claims = getClaims(token, appliesTo);
+            if (claims != null){
+                request.setClaims(claims);
+            }
+
+            
             result = invokeRST(request, wsdlLocation, serviceName, portName, stsURI.toString());
             final IssuedTokenContext itc = new IssuedTokenContextImpl();
             final WSTrustClientContract contract = WSTrustFactory.createWSTrustClientContract(config);
@@ -188,16 +222,16 @@ public class TrustPluginImpl implements TrustPlugin {
             return itc;
         } catch (RemoteException ex) {
             log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0016_PROBLEM_IT_CTX(stsURI, appliesTo));
-            throw new RuntimeException(LogStringsMessages.WST_0016_PROBLEM_IT_CTX(stsURI, appliesTo), ex);
+                    LogStringsMessages.WST_0016_PROBLEM_IT_CTX(stsURI, appliesTo), ex);
+            throw new WebServiceException(LogStringsMessages.WST_0016_PROBLEM_IT_CTX(stsURI, appliesTo), ex);
         } catch (URISyntaxException ex){
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0016_PROBLEM_IT_CTX(stsURI, appliesTo), ex);
-            throw new RuntimeException(LogStringsMessages.WST_0016_PROBLEM_IT_CTX(stsURI, appliesTo));
+            throw new WebServiceException(LogStringsMessages.WST_0016_PROBLEM_IT_CTX(stsURI, appliesTo));
         } catch (WSTrustException ex){
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0016_PROBLEM_IT_CTX(stsURI, appliesTo), ex);
-            throw new RuntimeException(LogStringsMessages.WST_0016_PROBLEM_IT_CTX(stsURI, appliesTo));
+            throw new WebServiceException(LogStringsMessages.WST_0016_PROBLEM_IT_CTX(stsURI, appliesTo));
         }
     }
     
@@ -254,42 +288,25 @@ public class TrustPluginImpl implements TrustPlugin {
                 log.log(Level.FINE,
                         LogStringsMessages.WST_1012_SERVICE_PORTNAME_MEX(serviceName, portName));
             }
-            if(stsURI == null){
-                //could not get the STS location from the IssuedToken
-                //try to get it from client configuration
-                
-                stsURI = wsdlLocation.toString();
-                if (log.isLoggable(Level.FINE)) {
-                    log.log(Level.FINE,
-                            LogStringsMessages.WST_1013_STS_URI_CLIENT(stsURI));
-                }
-            }
-            //do the actual mex request
+            
             final QName[] names = doMexRequest(wsdlLocation.toString(), stsURI);
-            if(names!=null && names[0]!=null && names[1]!=null){
-                serviceName = names[0];
-                portName = names[1];
-            }else{
-                log.log(Level.SEVERE,
-                        LogStringsMessages.WST_0017_SERVICE_PORTNAME_ERROR(serviceName, portName, wsdlLocation.toString()));
-                throw new WSTrustException(
-                        LogStringsMessages.WST_0017_SERVICE_PORTNAME_ERROR(serviceName, portName, wsdlLocation.toString()));
-            }
+            serviceName = names[0];
+            portName = names[1];
         }
         
         Service service = null;
         try{
             // Work around for issue 338
             String url = wsdlLocation.toString();
-           // if (url.endsWith("/mex")){
-             //   int index = url.lastIndexOf("/mex");
-              //  url = url.substring(0, index);
+            // if (url.endsWith("/mex")){
+            //   int index = url.lastIndexOf("/mex");
+            //  url = url.substring(0, index);
             //}
             service = Service.create(new URL(url), serviceName);
         }catch (MalformedURLException ex){
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0041_SERVICE_NOT_CREATED(wsdlLocation.toString()), ex);
-            throw new RuntimeException(LogStringsMessages.WST_0041_SERVICE_NOT_CREATED(wsdlLocation.toString()), ex);
+            throw new WebServiceException(LogStringsMessages.WST_0041_SERVICE_NOT_CREATED(wsdlLocation.toString()), ex);
         }
         final Dispatch<Object> dispatch = service.createDispatch(portName, fact.getContext(), Service.Mode.PAYLOAD, new WebServiceFeature[]{new RespectBindingFeature(), new AddressingFeature(false)});
         //Dispatch<SOAPMessage> dispatch = service.createDispatch(portName, SOAPMessage.class, Service.Mode.MESSAGE, new WebServiceFeature[]{new AddressingFeature(false)});
@@ -342,7 +359,7 @@ public class TrustPluginImpl implements TrustPlugin {
      * @return List of 2 QName objects. The first one will be serviceName
      * and the second one will be portName.
      */
-    protected static QName[]  doMexRequest(final String wsdlLocation, final String stsURI) {
+    protected static QName[]  doMexRequest(final String wsdlLocation, final String stsURI) throws WSTrustException {
         
         final QName[] serviceInfo = new QName[2];
         final MetadataClient mexClient = new MetadataClient();
@@ -362,9 +379,24 @@ public class TrustPluginImpl implements TrustPlugin {
                 if(uri.equals(stsURI)){
                     serviceInfo[0]= port.getServiceName();
                     serviceInfo[1]= port.getPortName();
+                    break;
                 }
+                
             }
+            
+            if(serviceInfo[0]==null || serviceInfo[1]==null){
+                log.log(Level.SEVERE,
+                        LogStringsMessages.WST_0042_NO_MATCHING_SERVICE_MEX(stsURI));
+                throw new WSTrustException(
+                        LogStringsMessages.WST_0042_NO_MATCHING_SERVICE_MEX(stsURI));
+            }
+        }else{
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0017_SERVICE_PORTNAME_ERROR(wsdlLocation.toString()));
+            throw new WSTrustException(
+                    LogStringsMessages.WST_0017_SERVICE_PORTNAME_ERROR(wsdlLocation.toString()));
         }
+        
         return serviceInfo;
     }
     
@@ -468,6 +500,50 @@ public class TrustPluginImpl implements TrustPlugin {
         return null;
     }
     
+     private Claims getClaims(final PolicyAssertion token, String appliesTo)throws WSTrustException{
+        Claims claims = null;
+        final Iterator<PolicyAssertion> tokens =
+                    token.getNestedAssertionsIterator();
+        while(tokens.hasNext()){
+            final PolicyAssertion cToken = tokens.next();
+            if(REQUEST_SECURITY_TOKEN_TEMPLATE.equals(cToken.getName().getLocalPart())){
+                final Iterator<PolicyAssertion> cTokens =
+                            cToken.getNestedAssertionsIterator();
+                while (cTokens.hasNext()){
+                    final PolicyAssertion gToken = cTokens.next();
+                    if (CLAIMS.equals(gToken.getName().getLocalPart())){
+                        try{
+                            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                            XMLOutputFactory xof = XMLOutputFactory.newInstance();
+                            XMLStreamWriter writer = xof.createXMLStreamWriter(baos);
+                           
+                            AssertionSet set = AssertionSet.createAssertionSet(Arrays.asList(new PolicyAssertion[] {gToken}));
+                            Policy policy = Policy.createPolicy(Arrays.asList(new AssertionSet[] { set }));
+                            PolicySourceModel sourceModel = PolicyModelGenerator.getGenerator().translate(policy);
+                            XmlPolicyModelMarshaller pm = (XmlPolicyModelMarshaller) XmlPolicyModelMarshaller.getXmlMarshaller(true);
+                            pm.marshal(sourceModel, writer);
+                            
+                            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+                            dbf.setNamespaceAware(true);
+                            DocumentBuilder db = dbf.newDocumentBuilder();
+                            Document doc = db.parse(new ByteArrayInputStream(baos.toByteArray()));
+                            Element claimsEle = (Element)doc.getElementsByTagNameNS("*", "Claims").item(0);
+                            
+                            claims = new ClaimsImpl(ClaimsImpl.fromElement(claimsEle));
+                            writer.close();
+                        }catch (Exception e){
+                            log.log(Level.SEVERE,
+                            LogStringsMessages.WST_0045_ERROR_UNMARSHALL_CLAIMS(appliesTo), e);
+                            throw new WebServiceException(LogStringsMessages.WST_0045_ERROR_UNMARSHALL_CLAIMS(appliesTo), e);
+                        }
+                    }
+                }          
+            }
+        }
+        return claims;
+    }
+
+    
     /**
      * Prints out the RST created as string.
      * This method is primarily used for logging purposes.
@@ -481,11 +557,10 @@ public class TrustPluginImpl implements TrustPlugin {
             marshaller.marshal(rstElement, writer);
             return writer.toString();
         } catch (Exception e) {
-            if(log.isLoggable(Level.FINE)) {
-                log.log(Level.FINE,
-                        LogStringsMessages.WST_1004_ERROR_MARSHAL_TO_STRING(), e);
-            }
-            throw new RuntimeException(LogStringsMessages.WST_1004_ERROR_MARSHAL_TO_STRING(), e);
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_1004_ERROR_MARSHAL_TO_STRING("RST"), e);
+            
+            throw new WebServiceException(LogStringsMessages.WST_1004_ERROR_MARSHAL_TO_STRING("RST"), e);
         }
     }
     
@@ -498,11 +573,9 @@ public class TrustPluginImpl implements TrustPlugin {
             marshaller.marshal(rstrElement, writer);
             return writer.toString();
         } catch (Exception e) {
-            if (log.isLoggable(Level.FINE)) {
-                log.log(Level.FINE,
-                        LogStringsMessages.WST_1004_ERROR_MARSHAL_TO_STRING(), e);
-            }
-            throw new RuntimeException(LogStringsMessages.WST_1004_ERROR_MARSHAL_TO_STRING(), e);
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_1004_ERROR_MARSHAL_TO_STRING("RSTR"), e);
+            throw new WebServiceException(LogStringsMessages.WST_1004_ERROR_MARSHAL_TO_STRING("RSTR"), e);
         }
     }
     

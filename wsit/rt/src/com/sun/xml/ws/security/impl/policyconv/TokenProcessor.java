@@ -33,6 +33,7 @@ import com.sun.xml.ws.security.policy.IssuedToken;
 import com.sun.xml.ws.security.policy.SamlToken;
 import com.sun.xml.ws.security.policy.SecureConversationToken;
 import com.sun.xml.ws.security.policy.Token;
+import com.sun.xml.ws.security.policy.UserNameToken;
 import com.sun.xml.ws.security.policy.X509Token;
 import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.impl.policy.mls.AuthenticationTokenPolicy;
@@ -197,10 +198,14 @@ public class TokenProcessor {
         //TODO: IncludeToken
         
         if(PolicyUtil.isUsernameToken((PolicyAssertion) token)){
-            KeyBindingBase key = null;
+            AuthenticationTokenPolicy.UsernameTokenBinding key = null;
             key  =  new AuthenticationTokenPolicy.UsernameTokenBinding();
             key.setUUID(token.getTokenId());
             setTokenInclusion(key,token);
+            UserNameToken ut = (UserNameToken)token;
+            if(!ut.hasPassword()){
+                key.setNoPassword(true);
+            }
             //key.setPolicyToken(token);
             return key;
         }else if(PolicyUtil.isSamlToken((PolicyAssertion) token)){
@@ -254,7 +259,7 @@ public class TokenProcessor {
             }else if(policyAssertion.getName().getLocalPart().equals(Constants.WssX509V3Token10)||policyAssertion.getName().getLocalPart().equals(Constants.WssX509V3Token11)){
                 x509CB.setValueType(MessageConstants.X509v3_NS);
             }
-        }        
+        }
     }
     
 }

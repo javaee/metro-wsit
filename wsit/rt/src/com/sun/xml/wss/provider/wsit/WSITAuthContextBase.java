@@ -225,6 +225,9 @@ public abstract class WSITAuthContextBase  {
     AddressingVersion addVer = null;
     WSDLPort port = null;
     
+    //milliseconds
+    protected long timestampTimeOut = 0;
+    
     protected static final String REQ_PACKET = "REQ_PACKET";
     protected static final String RES_PACKET = "RES_PACKET";
     
@@ -278,19 +281,15 @@ public abstract class WSITAuthContextBase  {
 //            throw new RuntimeException(ex);
 //        }
         
-        try {
-            if(wsPolicyMap != null){
-                collectPolicies();
-            }
-            // check whether Service Port has RM
-            hasReliableMessaging = isReliableMessagingEnabled(wsPolicyMap, pipeConfig.getWSDLModel());
-            //opResolver = new OperationResolverImpl(inMessagePolicyMap,pipeConfig.getWSDLModel().getBinding());
-        }catch (Exception e) {
-            log.log(Level.SEVERE, 
-                    LogStringsMessages.WSITPVD_0012_PROBLEM_CHECKING_RELIABLE_MESSAGE_ENABLE(), e);  
-            throw new RuntimeException(LogStringsMessages.WSITPVD_0012_PROBLEM_CHECKING_RELIABLE_MESSAGE_ENABLE(), e);            
+        
+        if(wsPolicyMap != null){
+            collectPolicies();
         }
         
+        // check whether Service Port has RM
+        hasReliableMessaging = isReliableMessagingEnabled(wsPolicyMap, pipeConfig.getWSDLModel());
+        //opResolver = new OperationResolverImpl(inMessagePolicyMap,pipeConfig.getWSDLModel().getBinding());
+       
         //put properties for use by AuthModule init
         map.put("SOAP_VERSION", soapVersion);          
     }
@@ -401,6 +400,9 @@ public abstract class WSITAuthContextBase  {
                 //scopes merged.
                 
                 Policy omEP =  policyMerge.merge(policyList);
+                if(omPolicy != null){
+                   policyList.remove(omPolicy);
+                } 
                 inPH = addIncomingMP(operation,omEP);
             /*}*/
                 Iterator faults = operation.getOperation().getFaults().iterator();
@@ -920,9 +922,11 @@ public abstract class WSITAuthContextBase  {
             props.put(DefaultCallbackHandler.KEYSTORE_URL, store.getLocation());
         } else {
             //throw RuntimeException for now
+            /**
             log.log(Level.SEVERE, 
                     LogStringsMessages.WSITPVD_0014_KEYSTORE_URL_NULL_CONFIG_ASSERTION());                        
             throw new RuntimeException(LogStringsMessages.WSITPVD_0014_KEYSTORE_URL_NULL_CONFIG_ASSERTION());            
+             */
         }
         
         if (store.getType() != null) {
@@ -934,9 +938,11 @@ public abstract class WSITAuthContextBase  {
         if (store.getPassword() != null) {
             props.put(DefaultCallbackHandler.KEYSTORE_PASSWORD, new String(store.getPassword()));
         } else {
+            /** do not complain if keystore password not supplied
             log.log(Level.SEVERE, 
                     LogStringsMessages.WSITPVD_0015_KEYSTORE_PASSWORD_NULL_CONFIG_ASSERTION());                        
             throw new RuntimeException(LogStringsMessages.WSITPVD_0015_KEYSTORE_PASSWORD_NULL_CONFIG_ASSERTION() );            
+             */
         }
         
         if (store.getAlias() != null) {
@@ -949,8 +955,8 @@ public abstract class WSITAuthContextBase  {
             props.put(DefaultCallbackHandler.KEY_PASSWORD, store.getKeyPassword());
         }
         
-        if (store.getCertSelectorClassName() != null) {
-            props.put(DefaultCallbackHandler.KEYSTORE_CERTSELECTOR, store.getCertSelectorClassName());
+        if (store.getAliasSelectorClassName() != null) {
+            props.put(DefaultCallbackHandler.KEYSTORE_CERTSELECTOR, store.getAliasSelectorClassName());
         }
     }
     
@@ -985,9 +991,11 @@ public abstract class WSITAuthContextBase  {
             props.put(DefaultCallbackHandler.TRUSTSTORE_URL, store.getLocation());
         } else {
             //throw RuntimeException for now
+            /**
             log.log(Level.SEVERE, 
                     LogStringsMessages.WSITPVD_0016_TRUSTSTORE_URL_NULL_CONFIG_ASSERTION());                        
             throw new RuntimeException(LogStringsMessages.WSITPVD_0016_TRUSTSTORE_URL_NULL_CONFIG_ASSERTION() );            
+             */
         }
         
         if (store.getType() != null) {
@@ -999,9 +1007,11 @@ public abstract class WSITAuthContextBase  {
         if (store.getPassword() != null) {
             props.put(DefaultCallbackHandler.TRUSTSTORE_PASSWORD, new String(store.getPassword()));
         } else {
+            /** do not complain if truststore password is not supplied
             log.log(Level.SEVERE, 
                     LogStringsMessages.WSITPVD_0017_TRUSTSTORE_PASSWORD_NULL_CONFIG_ASSERTION());                        
             throw new RuntimeException(LogStringsMessages.WSITPVD_0017_TRUSTSTORE_PASSWORD_NULL_CONFIG_ASSERTION() );             
+             */
         }
         
         if (store.getPeerAlias() != null) {
@@ -1022,6 +1032,10 @@ public abstract class WSITAuthContextBase  {
     }
     
     private String  populateCallbackHandlerProps(Properties props, CallbackHandlerConfiguration conf) {
+        if (conf.getTimestampTimeout() != null) {
+            //milliseconds
+            this.timestampTimeOut = Long.parseLong(conf.getTimestampTimeout()) * 1000;
+        }
         Iterator it = conf.getCallbackHandlers();
         for (; it.hasNext();) {
             PolicyAssertion p = (PolicyAssertion)it.next();
@@ -1035,6 +1049,14 @@ public abstract class WSITAuthContextBase  {
                     log.log(Level.SEVERE, 
                             LogStringsMessages.WSITPVD_0018_NULL_OR_EMPTY_XWSS_CALLBACK_HANDLER_CLASSNAME());  
                     throw new RuntimeException(LogStringsMessages.WSITPVD_0018_NULL_OR_EMPTY_XWSS_CALLBACK_HANDLER_CLASSNAME());
+                }
+            } else if ("jmacCallbackHandler".equals(name)) {
+                if (ret != null && !"".equals(ret)) {
+                    props.put(DefaultCallbackHandler.JMAC_CALLBACK_HANDLER, ret);
+                } else {
+                    log.log(Level.SEVERE, 
+                            LogStringsMessages.WSITPVD_0051_NULL_OR_EMPTY_JMAC_CALLBACK_HANDLER_CLASSNAME());  
+                            throw new RuntimeException(LogStringsMessages.WSITPVD_0051_NULL_OR_EMPTY_JMAC_CALLBACK_HANDLER_CLASSNAME());
                 }
             } else if ("usernameHandler".equals(name)) {
                 if (ret != null && !"".equals(ret)) {
@@ -1232,6 +1254,7 @@ public abstract class WSITAuthContextBase  {
         }else{
             ctx = new ProcessingContextImpl( packet.invocationProperties);
         }
+        ctx.setTimestampTimeout(this.timestampTimeOut);
         // set the policy, issued-token-map, and extraneous properties
         ctx.setIssuedTokenContextMap(issuedTokenContextMap);
         ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
@@ -1389,9 +1412,11 @@ public abstract class WSITAuthContextBase  {
 
     
     
-    protected CallbackHandler loadGFHandler(boolean isClientAuthModule) {
+    protected CallbackHandler loadGFHandler(boolean isClientAuthModule, String jmacHandler) {
         String classname = "com.sun.enterprise.security.jmac.callback.ContainerCallbackHandler";
-        
+        if (jmacHandler != null) {
+            classname = jmacHandler;
+        }
         Class ret = null;
         try {
             

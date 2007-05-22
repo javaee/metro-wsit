@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityTokenResponseImpl.java,v 1.9 2007-01-26 05:57:46 jdg6688 Exp $
+ * $Id: RequestSecurityTokenResponseImpl.java,v 1.9.4.1 2007-05-22 14:22:24 ritzmann Exp $
  */
 
 /*
@@ -289,8 +289,8 @@ public class RequestSecurityTokenResponseImpl extends RequestSecurityTokenRespon
         if (! (keytype.toString().equalsIgnoreCase(RequestSecurityToken.PUBLIC_KEY_TYPE)
         || keytype.toString().equalsIgnoreCase(RequestSecurityToken.SYMMETRIC_KEY_TYPE) )){
             log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0025_INVALID_KEY_TYPE(keytype.toString()));
-            throw new WSTrustException(LogStringsMessages.WST_0025_INVALID_KEY_TYPE(keytype.toString()));
+                    LogStringsMessages.WST_0025_INVALID_KEY_TYPE(keytype.toString(), null));
+            throw new WSTrustException(LogStringsMessages.WST_0025_INVALID_KEY_TYPE(keytype.toString(), null));
         } else {
             this.keyType = keytype;
             final JAXBElement<String> ktElement =

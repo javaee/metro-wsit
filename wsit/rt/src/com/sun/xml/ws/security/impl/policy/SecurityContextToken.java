@@ -52,7 +52,7 @@ public class SecurityContextToken extends PolicyAssertion implements com.sun.xml
     private List<String> tokenRefType;
     private boolean populated = false;
     private String tokenType;
-    private String includeTokenType;
+    private String includeTokenType = Token.INCLUDE_ALWAYS;
     private PolicyAssertion rdKey = null;
     private Set<String> referenceType = null;
     private static QName itQname = new QName(Constants.SECURITY_POLICY_NS, Constants.IncludeToken);
@@ -106,7 +106,9 @@ public class SecurityContextToken extends PolicyAssertion implements com.sun.xml
     private synchronized AssertionFitness populate(boolean isServer) {
         if(!populated){
             NestedPolicy policy = this.getNestedPolicy();
-            includeTokenType = this.getAttributeValue(itQname);
+            if(this.getAttributeValue(itQname) != null){
+                includeTokenType = this.getAttributeValue(itQname);
+            }
             if(policy == null){
                 if(logger.getLevel() == Level.FINE){
                     logger.log(Level.FINE,"NestedPolicy is null");
