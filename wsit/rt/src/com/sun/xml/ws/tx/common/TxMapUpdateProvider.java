@@ -92,7 +92,9 @@ public class TxMapUpdateProvider implements PolicyMapUpdateProvider {
                     } catch (NoClassDefFoundError e) {
                         // running in a container that does not support EJBs; terminate processing of EJB annotations
                         nonJavaEEContainer = true;
-                        logger.info(METHOD_NAME, LocalizationMessages.NON_EE_CONTAINER_2005(e.getLocalizedMessage()));
+                        logger.fine(METHOD_NAME, 
+                                LocalizationMessages.NON_EE_CONTAINER_2005("NoClassDefFoundError: " + 
+                                                                           e.getLocalizedMessage()));
                         return;
                     }
                     if (isCMTEJB) {
