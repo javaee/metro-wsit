@@ -135,6 +135,7 @@ public final class AssertionData implements Cloneable, Serializable {
         if (attributes != null) {
             this.attributes.putAll(attributes);
         }
+        verifyNamespace(type, name);
         setModelNodeType(type);
     }
     
@@ -157,6 +158,25 @@ public final class AssertionData implements Cloneable, Serializable {
             this.attributes.putAll(data.attributes);
         }
         this.type = data.type;
+        verifyNamespace(this.type, this.name);
+    }
+    
+    /**
+     * Verify that an assertion does not use the WS-Policy namespace.
+     *
+     * @param type The type of the model node
+     * @param name The fully qualified name of the model node element
+     *
+     * @throws IllegalArgumentException If the model node type is assertion and the
+     * namespace equals the WS-Policy namespace
+     */
+    private void verifyNamespace(ModelNode.Type type, QName name) throws IllegalArgumentException {
+        if (type == ModelNode.Type.ASSERTION) {
+            if (PolicyConstants.POLICY_NAMESPACE_URI.equals(name.getNamespaceURI())) {
+                throw LOGGER.logSevereException(new IllegalArgumentException(
+                        LocalizationMessages.WSP_0080_ASSERTION_POLICY_NAMESPACE(name)));
+            }
+        }
     }
     
     protected AssertionData clone() throws CloneNotSupportedException {
