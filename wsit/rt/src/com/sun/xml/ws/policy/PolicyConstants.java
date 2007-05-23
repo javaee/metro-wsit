@@ -120,6 +120,11 @@ public final class PolicyConstants {
     public static final QName OPTIONAL = new QName(POLICY_NAMESPACE_URI, "Optional");
     
     /**
+     * Fully qualified name of the WS-Policy Optional XML attribute
+     */
+    public static final QName IGNORABLE = new QName(POLICY_NAMESPACE_URI, "Ignorable");
+    
+    /**
      * Fully qualified name of the WS-Policy URI XML attribute
      */
     public static final QName POLICY_URI = new QName(null, "URI");

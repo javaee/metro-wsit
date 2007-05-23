@@ -38,23 +38,41 @@ import java.util.ArrayList;
  * @author Marek Potociar (marek.potociar@sun.com)
  */
 public final class PolicyIntersector {
-    private static final PolicyIntersector INSTANCE = new PolicyIntersector();
+    static enum CompatibilityMode {
+        STRICT,
+        LAX
+    }
+
+    private static final PolicyIntersector STRICT_INTERSECTOR = new PolicyIntersector(CompatibilityMode.STRICT);
+    private static final PolicyIntersector LAX_INTERSECTOR = new PolicyIntersector(CompatibilityMode.LAX);
     private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyIntersector.class);
     
+    private CompatibilityMode mode;
+
     /**
      * Prevents direct instantiation of this class from outside
+     * @param intersectionMode intersection mode
      */
-    private PolicyIntersector() {
-        // nothing to initialize
+    private PolicyIntersector(CompatibilityMode intersectionMode) {
+        this.mode = intersectionMode;
     }
     
     /**
-     * Returns a policy intersector that can be used to intersect group of policies.
+     * Returns a strict policy intersector that can be used to intersect group of policies.
      *
      * @return policy intersector instance.
      */
-    public static PolicyIntersector createPolicyIntersector() {
-        return PolicyIntersector.INSTANCE;
+    public static PolicyIntersector createStrictPolicyIntersector() {
+        return PolicyIntersector.STRICT_INTERSECTOR;
+    }
+    
+    /**
+     * Returns a strict policy intersector that can be used to intersect group of policies.
+     *
+     * @return policy intersector instance.
+     */
+    public static PolicyIntersector createLaxPolicyIntersector() {
+        return PolicyIntersector.LAX_INTERSECTOR;
     }
     
     /**
@@ -74,7 +92,8 @@ public final class PolicyIntersector {
             return policies.iterator().next();
         }
         
-        // check for "null" and "empty" policy: if such policy is found return "null" policy, or if all policies are "empty", return "empty" policy
+        // check for "null" and "empty" policy: if such policy is found return "null" policy, 
+        // or if all policies are "empty", return "empty" policy
         boolean found = false;
         boolean allPoliciesEmpty = true;
         for (Policy tested : policies) {
@@ -110,7 +129,7 @@ public final class PolicyIntersector {
             AssertionSet testedAlternative;
             while ((testedAlternative = testedAlternatives.poll()) != null) {
                 for (AssertionSet currentAlternative : currentAlternatives) {
-                    if (testedAlternative.isCompatibleWith(currentAlternative)) {
+                    if (testedAlternative.isCompatibleWith(currentAlternative, this.mode)) {
                         alternativesToMerge.add(testedAlternative);
                         alternativesToMerge.add(currentAlternative);                        
                         finalAlternatives.add(AssertionSet.createMergedAssertionSet(alternativesToMerge));
