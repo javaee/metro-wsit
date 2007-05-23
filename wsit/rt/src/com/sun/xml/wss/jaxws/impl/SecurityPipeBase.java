@@ -309,6 +309,7 @@ public abstract class SecurityPipeBase implements Pipe {
     protected SOAPMessage secureOutboundMessage(SOAPMessage message, ProcessingContext ctx){
         try {
             ctx.setSOAPMessage(message);
+            ((ProcessingContextImpl)ctx).setDisableIncPrefix(disableIncPrefix);
             SecurityAnnotator.secureMessage(ctx);
             return ctx.getSOAPMessage();
         } catch (WssSoapFaultException soapFaultException) {
@@ -364,6 +365,7 @@ public abstract class SecurityPipeBase implements Pipe {
             throws WssSoapFaultException, XWSSecurityException {
         try {
             ctx.setSOAPMessage(message);
+            ((ProcessingContextImpl)ctx).setDisableIncPrefix(disableIncPrefix);
             if (debug) {
                 DumpFilter.process(ctx);
             }

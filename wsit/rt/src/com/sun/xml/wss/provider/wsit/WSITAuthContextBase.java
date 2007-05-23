@@ -971,6 +971,7 @@ public abstract class WSITAuthContextBase  {
             ((JAXBFilterProcessingContext)ctx).setDisableIncPrefix(disableIncPrefix);
         }else{
             ctx = new ProcessingContextImpl( packet.invocationProperties);
+            ((ProcessingContextImpl)ctx).setDisableIncPrefix(disableIncPrefix);
         }
         
         // set the policy, issued-token-map, and extraneous properties
@@ -1362,6 +1363,7 @@ public abstract class WSITAuthContextBase  {
     protected SOAPMessage secureOutboundMessage(SOAPMessage message, ProcessingContext ctx){
         try {
             ctx.setSOAPMessage(message);
+            ((ProcessingContextImpl)ctx).setDisableIncPrefix(disableIncPrefix);
             SecurityAnnotator.secureMessage(ctx);
             return ctx.getSOAPMessage();
         } catch (WssSoapFaultException soapFaultException) {            
