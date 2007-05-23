@@ -151,10 +151,30 @@ public final class AssertionSet implements Iterable<PolicyAssertion>, Comparable
      * Checks whether this policy alternative is compatible with the provided policy alternative.
      *
      * @param alternative policy alternative used for compatibility test
+     * @param mode compatibility mode to be used
      * @return {@code true} if the two policy alternatives are compatible, {@code false} otherwise
      */
-    boolean isCompatibleWith(final AssertionSet alternative) {
-        return this.vocabulary.equals(alternative.vocabulary);
+    boolean isCompatibleWith(final AssertionSet alternative, PolicyIntersector.CompatibilityMode mode) {        
+        boolean result = (mode == PolicyIntersector.CompatibilityMode.LAX) || this.vocabulary.equals(alternative.vocabulary);
+      
+        result = result && this.areAssertionsCompatible(alternative, mode);
+        result = result && alternative.areAssertionsCompatible(this, mode);
+                
+        return result;
+    }
+    
+    private boolean areAssertionsCompatible(final AssertionSet alternative, PolicyIntersector.CompatibilityMode mode) {
+        nextAssertion: for (PolicyAssertion thisAssertion : this.assertions) {
+            if ((mode == PolicyIntersector.CompatibilityMode.STRICT) || !thisAssertion.isIgnorable()) {
+                for (PolicyAssertion thatAssertion : alternative.assertions) {
+                    if (thisAssertion.isCompatibleWith(thatAssertion, mode)) {
+                        continue nextAssertion;
+                    }
+                }
+                return false;
+            }
+        }
+        return true;
     }
     
     /**
@@ -253,6 +273,7 @@ public final class AssertionSet implements Iterable<PolicyAssertion>, Comparable
     
     /**
      * An {@code Comparable<T>.compareTo(T o)} interface method implementation.
+     * @param that other alternative to compare with
      */
     public int compareTo(final AssertionSet that) {
         if (this.equals(that)) {
@@ -317,7 +338,7 @@ public final class AssertionSet implements Iterable<PolicyAssertion>, Comparable
             return false;
         }
         
-        final AssertionSet that = (AssertionSet) obj;        
+        final AssertionSet that = (AssertionSet) obj;
         boolean result = true;
         
         result = result && this.vocabulary.equals(that.vocabulary);

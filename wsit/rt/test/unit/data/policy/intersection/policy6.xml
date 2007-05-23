@@ -1,0 +1,60 @@
+<wsp:Policy 
+xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy"
+xmlns:foo="http://schemas.foo.com/foo">
+	<foo:FooAssertionA>
+		<wsp:Policy>
+			<foo:FooAssertionB>
+				<wsp:Policy>
+					<foo:FooAssertionC
+						foo:attribute1='value1'>
+						<wsp:Policy>
+							<foo:FooAssertionE />
+						</wsp:Policy>
+					</foo:FooAssertionC>
+				</wsp:Policy>
+			</foo:FooAssertionB>
+			<foo:FooAssertionD>
+				<wsp:Policy>
+					<foo:FooAssertionC
+						foo:attribute1='value2'>
+						<wsp:Policy>
+							<foo:FooAssertionE />
+						</wsp:Policy>
+					</foo:FooAssertionC>
+				</wsp:Policy>
+			</foo:FooAssertionD>
+			<foo:FooAssertionI />
+			<foo:FooAssertionF>
+				<wsp:Policy>
+					<foo:FooAssertionG />
+				</wsp:Policy>
+			</foo:FooAssertionF>
+			<wsp:ExactlyOne>
+				<wsp:All>
+					<foo:FooAssertionJ>
+						<wsp:Policy>
+							<foo:FooAssertionK />
+						</wsp:Policy>
+					</foo:FooAssertionJ>
+					<foo:FooAssertionM />
+					<foo:FooAssertionH />
+				</wsp:All>
+				<wsp:All>
+					<foo:FooAssertionJ>
+						<wsp:Policy>
+							<foo:FooAssertionL />
+						</wsp:Policy>
+					</foo:FooAssertionJ>
+					<foo:FooAssertionH />
+				</wsp:All>
+				<wsp:All>
+					<foo:FooAssertionJ>
+						<wsp:Policy>
+							<foo:FooAssertionK />
+						</wsp:Policy>
+					</foo:FooAssertionJ>
+				</wsp:All>
+			</wsp:ExactlyOne>
+		</wsp:Policy>
+	</foo:FooAssertionA>
+</wsp:Policy>

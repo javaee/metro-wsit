@@ -101,6 +101,41 @@ public abstract class PolicyAssertion {
     }
     
     /**
+     * Method specifies whether the assertion is ignorable or not.
+     * <p/>
+     * This is a default implementation that may be overriden. The method returns {@code true} if the {@code wsp:Ignorable} attribute
+     * is present on the assertion and its value is {@code 'true'}. Otherwise the method returns {@code false}.
+     *
+     * @return {@code 'true'} if the assertion is ignorable. Returns {@code false} otherwise.
+     */
+    public boolean isIgnorable() {
+        boolean result = false;
+        final String attributeValue = getAttributeValue(PolicyConstants.IGNORABLE);
+        if (attributeValue != null) {
+            result = Boolean.parseBoolean(attributeValue);
+        }
+        
+        return result;
+    }
+
+    /**
+     * Checks whether this policy alternative is compatible with the provided policy alternative.
+     *
+     * @param assertion policy alternative used for compatibility test
+     * @param mode compatibility mode to be used
+     * @return {@code true} if the two policy alternatives are compatible, {@code false} otherwise
+     */
+    boolean isCompatibleWith(final PolicyAssertion assertion, PolicyIntersector.CompatibilityMode mode) {
+        boolean result = this.data.getName().equals(assertion.data.getName()) && (this.hasNestedPolicy() == assertion.hasNestedPolicy());
+        
+        if (result && this.hasNestedPolicy()) {
+            result = this.nestedPolicy.getAssertionSet().isCompatibleWith(assertion.nestedPolicy.getAssertionSet(), mode);
+        }
+
+        return result;
+    }
+
+    /**
      * Method specifies whether the assertion is private or not. This is specified by our proprietary visibility element.
      *
      * @return {@code 'true'} if the assertion is marked as private (i.e. should not be marshalled int generated WSDL documents). Returns {@code false} otherwise.
