@@ -118,7 +118,12 @@ public class SymmetricBindingProcessor extends BindingProcessor{
         }else{
             container.insert(primaryEP);
             container.insert(primarySP);
-            
+            //Fix for splitting referenceList from EK
+            if(primaryEP != null){
+               EncryptionPolicy.FeatureBinding efp = 
+                       (EncryptionPolicy.FeatureBinding) primaryEP.getFeatureBinding();
+               efp.setUseStandAloneRefList(true);
+            }           
         }
         addPrimaryTargets();
         
