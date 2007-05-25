@@ -381,6 +381,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
             ctx = new JAXBFilterProcessingContext(packet.invocationProperties);
             ((JAXBFilterProcessingContext)ctx).setAddressingVersion(addVer);
             ((JAXBFilterProcessingContext)ctx).setSOAPVersion(soapVersion);
+            ((JAXBFilterProcessingContext)ctx).setBSP(bsp10);
         }else{
             ctx = new ProcessingContextImpl( packet.invocationProperties);
         }

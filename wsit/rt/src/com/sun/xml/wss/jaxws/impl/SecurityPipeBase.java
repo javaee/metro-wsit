@@ -175,6 +175,9 @@ public abstract class SecurityPipeBase implements Pipe {
     private final QName encHeaderContentServer = new QName("http://schemas.sun.com/2006/03/wss/server","EncryptHeaderContent");
     private final QName encHeaderContentClient = new QName("http://schemas.sun.com/2006/03/wss/client","EncryptHeaderContent");
     
+    private final QName bsp10Server = new QName("http://schemas.sun.com/2006/03/wss/server","BSP10");
+    private final QName bsp10Client = new QName("http://schemas.sun.com/2006/03/wss/client","BSP10");
+    protected boolean bsp10 = false;
     protected static final ArrayList<String> securityPolicyNamespaces ;
     protected static final List<PolicyAssertion> EMPTY_LIST = Collections.emptyList();
     
@@ -200,8 +203,7 @@ public abstract class SecurityPipeBase implements Pipe {
     protected HashMap<String,SecurityPolicyHolder> inProtocolPM = null;
     public static final URI ISSUE_REQUEST_URI ;
     public static final URI CANCEL_REQUEST_URI;
-    protected Policy bpMSP = null;
-    
+    protected Policy bpMSP = null;    
     //milliseconds
     protected long timestampTimeOut = 0;
     /**
@@ -353,6 +355,7 @@ public abstract class SecurityPipeBase implements Pipe {
             context.isOneWayMessage(message.isOneWay(this.pipeConfig.getWSDLModel()));
             context.setDisableIncPrefix(disableIncPrefix);
             context.setEncHeaderContent(encHeaderContent);
+            context.setBSP(bsp10);
             SecurityAnnotator.secureMessage(context);
             return context.getJAXWSMessage();
         } catch(XWSSecurityException xwse){
@@ -391,6 +394,7 @@ public abstract class SecurityPipeBase implements Pipe {
         context.setDisablePayloadBuffering(disablePayloadBuffer);
         context.setDisableIncPrefix(disableIncPrefix);
         context.setEncHeaderContent(encHeaderContent);
+        context.setBSP(bsp10);
         //  context.setJAXWSMessage(message, soapVersion);
         if(debug){
             try {
@@ -477,6 +481,7 @@ public abstract class SecurityPipeBase implements Pipe {
             ((JAXBFilterProcessingContext)ctx).setAddressingVersion(addVer);
             ((JAXBFilterProcessingContext)ctx).setSOAPVersion(soapVersion);
             ((JAXBFilterProcessingContext)ctx).setSecure(packet.wasTransportSecure);
+            ((JAXBFilterProcessingContext)ctx).setBSP(bsp10);
             
         }else{
             ctx = new ProcessingContextImpl( packet.invocationProperties);
@@ -512,6 +517,7 @@ public abstract class SecurityPipeBase implements Pipe {
             ctx = new JAXBFilterProcessingContext(packet.invocationProperties);
             ((JAXBFilterProcessingContext)ctx).setAddressingVersion(addVer);
             ((JAXBFilterProcessingContext)ctx).setSOAPVersion(soapVersion);
+            ((JAXBFilterProcessingContext)ctx).setBSP(bsp10);
         }else{
             ctx = new ProcessingContextImpl( packet.invocationProperties);
         }
@@ -643,6 +649,9 @@ public abstract class SecurityPipeBase implements Pipe {
                 }
                 if(endpointPolicy.contains(encHeaderContentServer) || endpointPolicy.contains(encHeaderContentClient)){
                     encHeaderContent = true;
+                }
+                if(endpointPolicy.contains(bsp10Client) || endpointPolicy.contains(bsp10Server)){
+                    bsp10 = true;
                 }
             }
             
