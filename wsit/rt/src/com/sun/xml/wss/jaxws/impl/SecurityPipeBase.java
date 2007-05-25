@@ -166,10 +166,14 @@ public abstract class SecurityPipeBase implements Pipe {
     private final QName optClientSecurity = new QName("http://schemas.sun.com/2006/03/wss/client","DisableStreamingSecurity");
     private final QName disableSPBuffering = new QName("http://schemas.sun.com/2006/03/wss/server","DisablePayloadBuffering");
     private final QName disableCPBuffering = new QName("http://schemas.sun.com/2006/03/wss/client","DisablePayloadBuffering");
-
+    
     protected boolean disableIncPrefix = false;
     private final QName disableIncPrefixServer = new QName("http://schemas.sun.com/2006/03/wss/server","DisableInclusivePrefixList");
     private final QName disableIncPrefixClient = new QName("http://schemas.sun.com/2006/03/wss/client","DisableInclusivePrefixList");
+    
+    protected boolean encHeaderContent = false;
+    private final QName encHeaderContentServer = new QName("http://schemas.sun.com/2006/03/wss/server","EncryptHeaderContent");
+    private final QName encHeaderContentClient = new QName("http://schemas.sun.com/2006/03/wss/client","EncryptHeaderContent");
     
     protected static final ArrayList<String> securityPolicyNamespaces ;
     protected static final List<PolicyAssertion> EMPTY_LIST = Collections.emptyList();
@@ -204,7 +208,7 @@ public abstract class SecurityPipeBase implements Pipe {
      * Constants for RM Security Processing
      */
     
-  
+    
     protected WSDLBoundOperation cachedOperation = null;
     
     protected Policy wsitConfig =null;
@@ -241,7 +245,7 @@ public abstract class SecurityPipeBase implements Pipe {
     }
     
     public SecurityPipeBase(PipeConfiguration config, Pipe nextPipe) {
-      
+        
         this.nextPipe= nextPipe;
         this.pipeConfig = config;
         this.inMessagePolicyMap = new HashMap<WSDLBoundOperation,SecurityPolicyHolder>();
@@ -270,7 +274,7 @@ public abstract class SecurityPipeBase implements Pipe {
         // check whether Service Port has RM
         hasReliableMessaging = isReliableMessagingEnabled(wsPolicyMap, pipeConfig.getWSDLModel());
         //   opResolver = new OperationResolverImpl(inMessagePolicyMap,pipeConfig.getWSDLModel().getBinding());
-
+        
     }
     
     protected SecurityPipeBase(SecurityPipeBase that) {
@@ -279,6 +283,7 @@ public abstract class SecurityPipeBase implements Pipe {
         transportOptimization = that.transportOptimization;
         optimized = that.optimized;
         disableIncPrefix = that.disableIncPrefix;
+        encHeaderContent = that.encHeaderContent;
         issuedTokenContextMap = that.issuedTokenContextMap;
         secEnv = that.secEnv;
         isSOAP12 = that.isSOAP12;
@@ -345,9 +350,10 @@ public abstract class SecurityPipeBase implements Pipe {
             JAXBFilterProcessingContext  context = (JAXBFilterProcessingContext)ctx;
             context.setSOAPVersion(soapVersion);
             context.setJAXWSMessage(message, soapVersion);
-            context.isOneWayMessage(message.isOneWay(this.pipeConfig.getWSDLModel()));   
+            context.isOneWayMessage(message.isOneWay(this.pipeConfig.getWSDLModel()));
             context.setDisableIncPrefix(disableIncPrefix);
-            SecurityAnnotator.secureMessage(context);            
+            context.setEncHeaderContent(encHeaderContent);
+            SecurityAnnotator.secureMessage(context);
             return context.getJAXWSMessage();
         } catch(XWSSecurityException xwse){
             WssSoapFaultException wsfe =
@@ -361,7 +367,7 @@ public abstract class SecurityPipeBase implements Pipe {
     
     
     protected SOAPMessage verifyInboundMessage(SOAPMessage message, ProcessingContext ctx)
-            throws WssSoapFaultException, XWSSecurityException {
+    throws WssSoapFaultException, XWSSecurityException {
         try {
             ctx.setSOAPMessage(message);
             if (debug) {
@@ -384,6 +390,7 @@ public abstract class SecurityPipeBase implements Pipe {
         JAXBFilterProcessingContext  context = (JAXBFilterProcessingContext)ctx;
         context.setDisablePayloadBuffering(disablePayloadBuffer);
         context.setDisableIncPrefix(disableIncPrefix);
+        context.setEncHeaderContent(encHeaderContent);
         //  context.setJAXWSMessage(message, soapVersion);
         if(debug){
             try {
@@ -630,9 +637,12 @@ public abstract class SecurityPipeBase implements Pipe {
                 }
                 if(endpointPolicy.contains(disableCPBuffering) || endpointPolicy.contains(disableSPBuffering)){
                     disablePayloadBuffer = true;
-                }    
+                }
                 if(endpointPolicy.contains(disableIncPrefixServer) || endpointPolicy.contains(disableIncPrefixClient)){
                     disableIncPrefix = true;
+                }
+                if(endpointPolicy.contains(encHeaderContentServer) || endpointPolicy.contains(encHeaderContentClient)){
+                    encHeaderContent = true;
                 }
             }
             
@@ -1026,8 +1036,8 @@ public abstract class SecurityPipeBase implements Pipe {
         }
         String action = getAction(packet);
         if (RM_CREATE_SEQ.equals(action) || RM_CREATE_SEQ_RESP.equals(action)
-                || RM_SEQ_ACK.equals(action) || RM_TERMINATE_SEQ.equals(action)
-                || RM_LAST_MESSAGE.equals(action)) {
+        || RM_SEQ_ACK.equals(action) || RM_TERMINATE_SEQ.equals(action)
+        || RM_LAST_MESSAGE.equals(action)) {
             return true;
         }
         
@@ -1374,7 +1384,7 @@ public abstract class SecurityPipeBase implements Pipe {
         }
     }
     
-     private void populateCertStoreProps(Properties props, CertStoreConfig certStoreConfig) {
+    private void populateCertStoreProps(Properties props, CertStoreConfig certStoreConfig) {
         if (certStoreConfig.getCallbackHandlerClassName() != null) {
             props.put(DefaultCallbackHandler.CERTSTORE_CBH, certStoreConfig.getCallbackHandlerClassName());
         }
@@ -1462,6 +1472,6 @@ public abstract class SecurityPipeBase implements Pipe {
     protected abstract void addOutgoingProtocolPolicy(Policy effectivePolicy,String protocol)throws PolicyException;
     
     protected abstract String getAction(WSDLOperation operation, boolean isIncomming) ;
-
-   
+    
+    
 }

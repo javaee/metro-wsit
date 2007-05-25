@@ -164,6 +164,9 @@ public class SecurityPolicySelector {
         supportedAssertions.add(new QName("http://schemas.sun.com/2006/03/wss/server","DisableInclusivePrefixList"));
         supportedAssertions.add(new QName("http://schemas.sun.com/2006/03/wss/client","DisableInclusivePrefixList"));
         
+        supportedAssertions.add(new QName("http://schemas.sun.com/2006/03/wss/server","EncryptHeaderContent"));
+        supportedAssertions.add(new QName("http://schemas.sun.com/2006/03/wss/client","EncryptHeaderContent"));
+        
         //supportedAssertions.add(new QName(SUN_WSS_SECURITY_CLIENT_POLICY_NS,CallbackHandler));
         //supportedAssertions.add(new QName(SUN_WSS_SECURITY_CLIENT_POLICY_NS,KeyStore));
         //supportedAssertions.add(new QName(SUN_WSS_SECURITY_CLIENT_POLICY_NS,TrustStore));
