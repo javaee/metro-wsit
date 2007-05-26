@@ -34,4 +34,9 @@ public interface UserNameToken extends Token{
      * @return 1.0 or 1.1
      */
     public String getType();
+    
+    /**
+     * returns true is password needs to be used in the UsernameToken Header sent in the message.
+     */
+    public boolean hasPassword();
 }

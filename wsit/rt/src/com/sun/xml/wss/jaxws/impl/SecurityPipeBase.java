@@ -170,7 +170,9 @@ public abstract class SecurityPipeBase implements Pipe {
     protected boolean disableIncPrefix = false;
     private final QName disableIncPrefixServer = new QName("http://schemas.sun.com/2006/03/wss/server","DisableInclusivePrefixList");
     private final QName disableIncPrefixClient = new QName("http://schemas.sun.com/2006/03/wss/client","DisableInclusivePrefixList");
-    
+    private final QName bsp10Server = new QName("http://schemas.sun.com/2006/03/wss/server","BSP10");
+    private final QName bsp10Client = new QName("http://schemas.sun.com/2006/03/wss/client","BSP10");
+    protected boolean bsp10 = false;
     protected static final ArrayList<String> securityPolicyNamespaces ;
     protected static final List<PolicyAssertion> EMPTY_LIST = Collections.emptyList();
     
@@ -386,6 +388,7 @@ public abstract class SecurityPipeBase implements Pipe {
         context.setDisablePayloadBuffering(disablePayloadBuffer);
         context.setDisableIncPrefix(disableIncPrefix);
         //  context.setJAXWSMessage(message, soapVersion);
+        context.setBSP(bsp10);
         if(debug){
             try {
                 ((LazyStreamBasedMessage)message).print();
@@ -471,7 +474,7 @@ public abstract class SecurityPipeBase implements Pipe {
             ((JAXBFilterProcessingContext)ctx).setAddressingVersion(addVer);
             ((JAXBFilterProcessingContext)ctx).setSOAPVersion(soapVersion);
             ((JAXBFilterProcessingContext)ctx).setSecure(packet.wasTransportSecure);
-            
+            ((JAXBFilterProcessingContext)ctx).setBSP(bsp10); 
         }else{
             ctx = new ProcessingContextImpl( packet.invocationProperties);
         }
@@ -507,6 +510,7 @@ public abstract class SecurityPipeBase implements Pipe {
             ((JAXBFilterProcessingContext)ctx).setSOAPVersion(soapVersion);
         }else{
             ctx = new ProcessingContextImpl( packet.invocationProperties);
+            ((JAXBFilterProcessingContext)ctx).setBSP(bsp10);
         }
         // set the policy, issued-token-map, and extraneous properties
         ctx.setIssuedTokenContextMap(issuedTokenContextMap);
@@ -635,7 +639,10 @@ public abstract class SecurityPipeBase implements Pipe {
                     disableIncPrefix = true;
                 }
             }
-            
+           
+	    if(endpointPolicy.contains(bsp10Client) || endpointPolicy.contains(bsp10Server)){
+		bsp10 = true;
+            } 
             
             buildProtocolPolicy(endpointPolicy);
             ArrayList<Policy> policyList = new ArrayList<Policy>();

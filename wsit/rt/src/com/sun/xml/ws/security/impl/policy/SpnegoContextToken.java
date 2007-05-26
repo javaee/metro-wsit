@@ -45,7 +45,7 @@ public class SpnegoContextToken extends PolicyAssertion implements com.sun.xml.w
     private boolean populated = false;
     private PolicyAssertion rdKey = null;
     Boolean requiredDerivedKeys = false;
-    private String includeTokenType;
+    private String includeTokenType = Token.INCLUDE_ALWAYS;
     private String id;
     private Issuer issuer = null;
     private static QName itQname = new QName(Constants.SECURITY_POLICY_NS, Constants.IncludeToken);
@@ -99,7 +99,9 @@ public class SpnegoContextToken extends PolicyAssertion implements com.sun.xml.w
     private synchronized AssertionFitness populate(boolean isServer) {
         if(!populated){
             NestedPolicy policy = this.getNestedPolicy();
-            includeTokenType = this.getAttributeValue(itQname);
+            if(this.getAttributeValue(itQname) != null){
+                includeTokenType = this.getAttributeValue(itQname);
+            }
             if(policy == null){
                 if(logger.getLevel() == Level.FINE){
                     logger.log(Level.FINE,"NestedPolicy is null");
@@ -133,7 +135,7 @@ public class SpnegoContextToken extends PolicyAssertion implements com.sun.xml.w
             }
             populated = true;
         }
-		return fitness;
+        return fitness;
     }
     
     

@@ -42,10 +42,11 @@ public class UsernameToken extends PolicyAssertion implements com.sun.xml.ws.sec
     
     private String tokenType;
     private String id;
-    private String includeToken;
+    private String includeToken = Token.INCLUDE_ALWAYS;
     private boolean populated;
     private QName itQname = new QName(Constants.SECURITY_POLICY_NS, Constants.IncludeToken);
     private AssertionFitness fitness = AssertionFitness.IS_VALID;
+    private boolean hasPassword = true;
     /**
      * Creates a new instance of UsernameToken
      */
@@ -95,11 +96,14 @@ public class UsernameToken extends PolicyAssertion implements com.sun.xml.ws.sec
     private void populate(){
         populate(false);
     }
-    
+    public boolean hasPassword(){
+        return hasPassword;
+    }
     private synchronized AssertionFitness populate(boolean isServer) {
-        
         if(!populated){
-            this.includeToken = this.getAttributeValue(itQname);
+            if(this.getAttributeValue(itQname) != null){
+                this.includeToken = this.getAttributeValue(itQname);
+            }
             NestedPolicy policy = this.getNestedPolicy();
             if(policy == null){
                 if(logger.getLevel() == Level.FINE){
@@ -112,6 +116,8 @@ public class UsernameToken extends PolicyAssertion implements com.sun.xml.ws.sec
             for(PolicyAssertion assertion: assertionSet){
                 if(PolicyUtil.isUsernameTokenType(assertion)){
                     tokenType = assertion.getName().getLocalPart();
+                }else if(PolicyUtil.hasPassword(assertion)){
+                    hasPassword = false;
                 }else{
                     if(!assertion.isOptional()){
                         log_invalid_assertion(assertion, isServer,"UsernameToken");
@@ -119,20 +125,12 @@ public class UsernameToken extends PolicyAssertion implements com.sun.xml.ws.sec
                     }
                 }
             }
-            
             populated = true;
         }
         return fitness;
     }
     
-    
     public Object clone() throws CloneNotSupportedException  {
         throw new UnsupportedOperationException();
-        //        UsernameToken ut = new UsernameToken();
-        //        ut.setIncludeToken(this.getIncludeToken());
-        //        ut.nestedPolicy = (WSPolicy) this.getPolicy();
-        //        ut.setTokenId(this.id);
-        //        return ut;
     }
-    
 }

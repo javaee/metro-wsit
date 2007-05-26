@@ -202,17 +202,16 @@ public class Constants {
     public final static String PortType ="PortType";
     public final static String ServiceName ="ServiceName";
     public final static String CertStore ="CertStore";
-    public final static String SECURITY_POLICY_PACKAGE_DIR = "com.sun.xml.ws.security.impl.policy";
-    
-    public static void log_invalid_assertion(PolicyAssertion assertion , boolean isServer,String parentAssertion){
-        
+    public final static String NoPassword = "NoPassword";
+    public final static String BSP10 = "BSP10";
+    public final static String SECURITY_POLICY_PACKAGE_DIR = "com.sun.xml.ws.security.impl.policy";    
+    public static void log_invalid_assertion(PolicyAssertion assertion , boolean isServer,String parentAssertion){        
         Level level = Level.SEVERE;
         if(!isServer){
             level = Level.WARNING;
         }
         if(logger.isLoggable(level)){
             logger.log(level,LogStringsMessages.SP_0100_INVALID_SECURITY_ASSERTION(assertion,parentAssertion));
-        }
-        
+        }        
     }
 }

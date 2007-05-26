@@ -55,8 +55,8 @@ public class SymmetricBindingProcessor extends BindingProcessor{
     private SymmetricBinding binding = null;
     /** Creates a new instance of SymmetricBindingProcessor */
     public SymmetricBindingProcessor(SymmetricBinding binding,XWSSPolicyContainer container,
-              boolean isServer,boolean isIncoming,Vector<SignedParts> signedParts,Vector<EncryptedParts> encryptedParts,
-              Vector<SignedElements> signedElements,Vector<EncryptedElements> encryptedElements) {
+            boolean isServer,boolean isIncoming,Vector<SignedParts> signedParts,Vector<EncryptedParts> encryptedParts,
+            Vector<SignedElements> signedElements,Vector<EncryptedElements> encryptedElements) {
         this.binding = binding;
         this.container = container;
         this.isServer = isServer;
@@ -93,7 +93,7 @@ public class SymmetricBindingProcessor extends BindingProcessor{
                 primarySP.setUUID(pid.generateID());
                 
                 SignaturePolicy.FeatureBinding spFB = (com.sun.xml.wss.impl.policy.mls.SignaturePolicy.FeatureBinding)
-                primarySP.getFeatureBinding();
+                        primarySP.getFeatureBinding();
                 spFB.setCanonicalizationAlgorithm(CanonicalizationMethod.EXCLUSIVE);
                 spFB.isPrimarySignature(true);
                 addSymmetricKeyBinding(primarySP,st);
@@ -107,7 +107,7 @@ public class SymmetricBindingProcessor extends BindingProcessor{
             addSymmetricKeyBinding(primaryEP,pt);
             
             SignaturePolicy.FeatureBinding spFB = (com.sun.xml.wss.impl.policy.mls.SignaturePolicy.FeatureBinding)
-            primarySP.getFeatureBinding();
+                    primarySP.getFeatureBinding();
             spFB.setCanonicalizationAlgorithm(CanonicalizationMethod.EXCLUSIVE);
             spFB.isPrimarySignature(true);
         }
@@ -118,12 +118,11 @@ public class SymmetricBindingProcessor extends BindingProcessor{
         }else{
             container.insert(primaryEP);
             container.insert(primarySP);
-            //Fix for splitting referenceList from EK
             if(primaryEP != null){
-               EncryptionPolicy.FeatureBinding efp = 
-                       (EncryptionPolicy.FeatureBinding) primaryEP.getFeatureBinding();
-               efp.setUseStandAloneRefList(true);
-            }           
+                EncryptionPolicy.FeatureBinding efp = (EncryptionPolicy.FeatureBinding) primaryEP.getFeatureBinding();
+                efp.setUseStandAloneRefList(true);
+            }
+            
         }
         addPrimaryTargets();
         
@@ -134,7 +133,7 @@ public class SymmetricBindingProcessor extends BindingProcessor{
         if(binding.isIncludeTimeStamp()){
             protectTimestamp();
         }
-        if(binding.getTokenProtection()){         
+        if(binding.getTokenProtection()){
             WSSPolicy policy = (WSSPolicy) primarySP.getKeyBinding();
             if(PolicyTypeUtil.derivedTokenKeyBinding(policy)){
                 protectToken(policy,true);
@@ -147,7 +146,7 @@ public class SymmetricBindingProcessor extends BindingProcessor{
     
     protected void addSymmetricKeyBinding(WSSPolicy policy, Token token) throws PolicyException{
         com.sun.xml.wss.impl.policy.mls.SymmetricKeyBinding skb =
-                  new com.sun.xml.wss.impl.policy.mls.SymmetricKeyBinding();
+                new com.sun.xml.wss.impl.policy.mls.SymmetricKeyBinding();
         //skb.setKeyAlgorithm(_binding.getAlgorithmSuite().getSymmetricKeyAlgorithm());
         // policy.setKeyBinding(skb);
         PolicyAssertion tokenAssertion = (PolicyAssertion)token;

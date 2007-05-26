@@ -53,7 +53,6 @@ public class SecurityPolicyValidator implements PolicyAssertionValidator{
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,Basic192Sha256));
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,TripleDesSha256));
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,Basic256Sha256Rsa15));
-        
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,Basic192Sha256Rsa15));
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,Basic128Sha256Rsa15));
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,TripleDesSha256Rsa15));
@@ -124,51 +123,42 @@ public class SecurityPolicyValidator implements PolicyAssertionValidator{
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,MustSupportRefIssuerSerial));
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,MustSupportRefExternalURI));
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,MustSupportRefEmbeddedToken));
-        
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,MustSupportRefKeyIdentifier));
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,MustSupportRefIssuerSerial));
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,MustSupportRefExternalURI));
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,MustSupportRefEmbeddedToken));
-        
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,MustSupportRefThumbprint));
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,MustSupportRefEncryptedKey));
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,MustSupportClientChallenge));
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,MustSupportServerChallenge));
-        
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,RequireClientEntropy));
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,RequireServerEntropy));
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,MustSupportIssuedTokens));
-        
+        supportedAssertions.add(new QName(SECURITY_POLICY_NS,NoPassword));
         supportedAssertions.add(new QName(TRUST_NS,RequestSecurityToken));
         supportedAssertions.add(new QName(TRUST_NS,RequestType));
         supportedAssertions.add(new QName(TRUST_NS,TokenType));
         supportedAssertions.add(new QName(TRUST_NS,AuthenticationType));
-        
         supportedAssertions.add(new QName(TRUST_NS,OnBehalfOf));
         supportedAssertions.add(new QName(TRUST_NS,KeyType));
         supportedAssertions.add(new QName(TRUST_NS,KeySize));
         supportedAssertions.add(new QName(TRUST_NS,SignatureAlgorithm));
-        
         supportedAssertions.add(new QName(TRUST_NS,EncryptionAlgorithm));
         supportedAssertions.add(new QName(TRUST_NS,CanonicalizationAlgorithm));
         supportedAssertions.add(new QName(TRUST_NS,ComputedKeyAlgorithm));
-        
         supportedAssertions.add(new QName(TRUST_NS,Encryption));
         supportedAssertions.add(new QName(TRUST_NS,ProofEncryption));
         supportedAssertions.add(new QName(TRUST_NS,UseKey));
         supportedAssertions.add(new QName(TRUST_NS,SignWith));
-        
         supportedAssertions.add(new QName(TRUST_NS,EncryptWith));
-        
         supportedAssertions.add(new QName(SUN_WSS_SECURITY_SERVER_POLICY_NS,"DisableStreamingSecurity"));
         supportedAssertions.add(new QName(SUN_WSS_SECURITY_CLIENT_POLICY_NS,"DisableStreamingSecurity"));
-
+        supportedAssertions.add(new QName(SUN_WSS_SECURITY_SERVER_POLICY_NS,"EncryptHeaderContent"));
+        supportedAssertions.add(new QName(SUN_WSS_SECURITY_CLIENT_POLICY_NS,"EncryptHeaderContent"));
         supportedAssertions.add(new QName(SUN_WSS_SECURITY_SERVER_POLICY_NS,"DisableInclusivePrefixList"));
         supportedAssertions.add(new QName(SUN_WSS_SECURITY_CLIENT_POLICY_NS,"DisableInclusivePrefixList"));
-        
         supportedAssertions.add(new QName(SUN_WSS_SECURITY_SERVER_POLICY_NS,"DisablePayloadBuffering"));
         supportedAssertions.add(new QName(SUN_WSS_SECURITY_CLIENT_POLICY_NS,"DisablePayloadBuffering"));
-        
         // newly added by M.P.
         supportedAssertions.add(new QName(SUN_WSS_SECURITY_SERVER_POLICY_NS,"KeyStore"));
         supportedAssertions.add(new QName(SUN_WSS_SECURITY_SERVER_POLICY_NS,"TrustStore"));
@@ -183,7 +173,8 @@ public class SecurityPolicyValidator implements PolicyAssertionValidator{
         
         supportedAssertions.add(new QName(SUN_WSS_SECURITY_CLIENT_POLICY_NS,Constants.CertStore));
         supportedAssertions.add(new QName(SUN_WSS_SECURITY_SERVER_POLICY_NS,Constants.CertStore));
-        
+        supportedAssertions.add(new QName(SUN_WSS_SECURITY_CLIENT_POLICY_NS,Constants.BSP10));
+        supportedAssertions.add(new QName(SUN_WSS_SECURITY_SERVER_POLICY_NS,Constants.BSP10));
     }
     
     /** Creates a new instance of SecurityPolicyValidator. To be used by appropriate service finder */
