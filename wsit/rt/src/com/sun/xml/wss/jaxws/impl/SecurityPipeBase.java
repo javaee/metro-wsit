@@ -170,6 +170,11 @@ public abstract class SecurityPipeBase implements Pipe {
     protected boolean disableIncPrefix = false;
     private final QName disableIncPrefixServer = new QName("http://schemas.sun.com/2006/03/wss/server","DisableInclusivePrefixList");
     private final QName disableIncPrefixClient = new QName("http://schemas.sun.com/2006/03/wss/client","DisableInclusivePrefixList");
+    
+    protected boolean encHeaderContent = false;
+    private final QName encHeaderContentServer = new QName("http://schemas.sun.com/2006/03/wss/server","EncryptHeaderContent");
+    private final QName encHeaderContentClient = new QName("http://schemas.sun.com/2006/03/wss/client","EncryptHeaderContent");
+    
     private final QName bsp10Server = new QName("http://schemas.sun.com/2006/03/wss/server","BSP10");
     private final QName bsp10Client = new QName("http://schemas.sun.com/2006/03/wss/client","BSP10");
     protected boolean bsp10 = false;
@@ -283,6 +288,7 @@ public abstract class SecurityPipeBase implements Pipe {
         transportOptimization = that.transportOptimization;
         optimized = that.optimized;
         disableIncPrefix = that.disableIncPrefix;
+        encHeaderContent = that.encHeaderContent;
         issuedTokenContextMap = that.issuedTokenContextMap;
         secEnv = that.secEnv;
         isSOAP12 = that.isSOAP12;
@@ -350,6 +356,7 @@ public abstract class SecurityPipeBase implements Pipe {
             context.setJAXWSMessage(message, soapVersion);
             context.isOneWayMessage(message.isOneWay(this.pipeConfig.getWSDLModel()));   
             context.setDisableIncPrefix(disableIncPrefix);
+            context.setEncHeaderContent(encHeaderContent);
             SecurityAnnotator.secureMessage(context);            
             return context.getJAXWSMessage();
         } catch(XWSSecurityException xwse){
@@ -387,6 +394,7 @@ public abstract class SecurityPipeBase implements Pipe {
         JAXBFilterProcessingContext  context = (JAXBFilterProcessingContext)ctx;
         context.setDisablePayloadBuffering(disablePayloadBuffer);
         context.setDisableIncPrefix(disableIncPrefix);
+        context.setEncHeaderContent(encHeaderContent);
         //  context.setJAXWSMessage(message, soapVersion);
         context.setBSP(bsp10);
         if(debug){
@@ -637,6 +645,9 @@ public abstract class SecurityPipeBase implements Pipe {
                 }    
                 if(endpointPolicy.contains(disableIncPrefixServer) || endpointPolicy.contains(disableIncPrefixClient)){
                     disableIncPrefix = true;
+                }
+                if(endpointPolicy.contains(encHeaderContentServer) || endpointPolicy.contains(encHeaderContentClient)){
+                    encHeaderContent = true;
                 }
             }
            
