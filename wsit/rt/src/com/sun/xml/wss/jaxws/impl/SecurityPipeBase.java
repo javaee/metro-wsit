@@ -516,9 +516,9 @@ public abstract class SecurityPipeBase implements Pipe {
             ctx = new JAXBFilterProcessingContext(packet.invocationProperties);
             ((JAXBFilterProcessingContext)ctx).setAddressingVersion(addVer);
             ((JAXBFilterProcessingContext)ctx).setSOAPVersion(soapVersion);
+            ((JAXBFilterProcessingContext)ctx).setBSP(bsp10);
         }else{
             ctx = new ProcessingContextImpl( packet.invocationProperties);
-            ((JAXBFilterProcessingContext)ctx).setBSP(bsp10);
         }
         // set the policy, issued-token-map, and extraneous properties
         ctx.setIssuedTokenContextMap(issuedTokenContextMap);
