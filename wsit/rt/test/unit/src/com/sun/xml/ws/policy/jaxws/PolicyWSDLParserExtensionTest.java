@@ -17,16 +17,7 @@
  * you own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  *
- * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
- */
-
-/*
- * PolicyWSDLParserExtensionTest.java
- *
- * Created on February 28, 2006, 4:25 PM
- *
- * To change this template, choose Tools | Template Manager
- * and open the template in the editor.
+ * Copyright 2006, 2007 Sun Microsystems Inc. All Rights Reserved
  */
 
 package com.sun.xml.ws.policy.jaxws;
@@ -546,6 +537,15 @@ public class PolicyWSDLParserExtensionTest extends TestCase{
                 ,new QName("http://example.org","DictFault"))));
     }
     
+    public void testBindingOpFaultExternalFromAnonymousPolicyAttachment() throws Exception {
+        PolicyMap policyMap = getPolicyMap("parser/testRuntimeWSExtExternalFromAnonBindingOpFault.wsdl");
+        assertNotNull(policyMap.getFaultMessageEffectivePolicy(policyMap.createWsdlFaultMessageScopeKey(
+                new QName("http://example.org","DictionaryService")
+                ,new QName("http://example.org","CzechToEnglish")
+                ,new QName("http://example.org","TranslateOperation")
+                ,new QName("http://example.org","DictFault"))));
+    }
+
     public void testInvalidAssertionShouldCauseException() throws Exception {
         try {
             PolicyMap policyMap = getPolicyMap("parser/testInvalidAssertionError.wsdl", false);
