@@ -1362,7 +1362,7 @@ public abstract class SecurityPipeBase implements Pipe {
             props.put(DefaultCallbackHandler.MAX_NONCE_AGE_PROPERTY, conf.getMaxNonceAge());
         }
         if (conf.getRevocationEnabled() != null) {
-            props.put(DefaultCallbackHandler.MAX_NONCE_AGE_PROPERTY, conf.getMaxNonceAge());
+            props.put(DefaultCallbackHandler.REVOCATION_ENABLED, conf.getRevocationEnabled());
         }
         
         Iterator it = conf.getValidators();
