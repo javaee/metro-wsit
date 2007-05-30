@@ -308,12 +308,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
                 p = new RMServerPipe(context.getWsdlModel(), context.getEndpoint(), p);
             }
             p = dump(context, SERVER_PREFIX + WSRM_SUFFIX + BEFORE_SUFFIX, p);
-            
-            p = dump(context, SERVER_PREFIX + WSMEX_SUFFIX + AFTER_SUFFIX, p);
-            // MEX pipe here
-            p = new MetadataServerPipe(context.getEndpoint(), p);
-            p = dump(context, SERVER_PREFIX + WSMEX_SUFFIX + BEFORE_SUFFIX, p);
-            
+                       
             p = dump(context, SERVER_PREFIX + WSA_SUFFIX + AFTER_SUFFIX, p);
             // check for WS-Addressing
             if (isAddressingEnabled(policyMap, context.getWsdlModel(), context.getEndpoint().getBinding())) {
