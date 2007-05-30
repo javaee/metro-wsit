@@ -13,7 +13,7 @@
 <!--
 Created       : 2007 Mar 01 (Tue) 11:32:31 by Harold Carr.
 -->
-<pre>Last Modified : $Date: 2007-05-24 20:44:05 $ by $Author: jfialli $<br><br></pre>
+<pre>Last Modified : $Date: 2007-05-30 17:26:44 $ by $Author: haroldcarr $<br><br></pre>
 <h5>Date: ??, 2007</h5>
 <h2>Introduction</h2>
 <p>This document provides the status of the interoperability testing
@@ -57,25 +57,31 @@ means testing a WSIT consumer using a WSIT provider.</li>
     <pre>non-secure / secure</pre>
 means tests with or without security turned on.</li>
 </ul>
+
 <!-- ================================================== -->
 <br>
 <hr>
 <h2><a name="91780"></a>Metadata Exchange Status</h2>
-<p></p>
-<pre>Updated: ??, 2007</pre>
-<p></p>
-<h4>WCF Interoperability</h4>
+
+<b>WCF Interoperability</b><code> Updated: ??, 2007</code>
+
 <pre>There are no MEX-specific interop tests at this time.</pre>
-<h4>What is Not Implemented</h4>
+
+<p><b>What is Not Implemented</b><code> Updated: ??, 2007</code></p>
+
 <p>Secure metadata exchange.</p>
+
+<p><b>Known Issues</b><code> Updated: ??, 2007</code></p>
+
+<p>??</p>
+
 <!-- ================================================== -->
 <br>
 <hr>
 <h2><a name="68668"></a>MTOM Status</h2>
-<p></p>
-<pre>Updated: ??, 2007</pre>
-<p></p>
-<h4>WCF Interoperability</h4>
+
+<p><b>WCF Interoperability</b><code> Updated: ??, 2007</code></p>
+
 <pre wrap="">Internal endpoint running Windows RTM and Vista. All the MTOM interoperability tests passes with success.</pre>
 <pre wrap=""><b>Non-Secure Scenarios <br></b>
  WCF -&gt; WSIT : 20/20 
@@ -84,36 +90,52 @@ WSIT -&gt; WSIT : 20/20
 
 <b>Secure Scenarios </b></pre>
 <pre wrap="">WSIT -&gt; WSIT : 18/18 <br>WSIT -&gt; WCF  : 18/18<br> WCF -&gt; WSIT :&nbsp; 18/18 <br></pre>
-<h4>What is Not Implemented</h4>
-<p>All MTOM functionality has been implemented.<br>
-</p>
+
+<p><b>What is Not Implemented</b><code> Updated: ??, 2007</code></p>
+
+<p>All MTOM functionality has been implemented.</p>
+
+<p><b>Known Issues</b><code> Updated: ??, 2007</code></p>
+
+<p>??</p>
+
+<!-- ================================================== -->
+<br>
 <hr>
 <h2><a name="49498"></a>Data Binding Status</h2>
-<p></p>
-<pre>Updated: ??, 2007</pre>
-<p></p>
-<h4>WCF Interoperability</h4>
+
+<p><b>WCF Interoperability</b><code> Updated: ??, 2007</code></p>
+
 <pre>non-secure:<br><br>WSIT-&gt;WCF  (Schema and WSDL Interop scenario 1):   827/852 (starting from WCF WSDL)<br> WCF-&gt;WSIT (Schema and WSDL Interop scenario 2):   851/851 (starting from WCF WSDL) <br> WCF-&gt;WSIT (Schema and WSDL Interop scenario 3):  1061/1091 (Starting from Java)<br>WSIT-&gt;WSIT  : 827/852<br><br>secure:<br><br>(not tested)<br></pre>
-<h4>What is Not Implemented</h4>
-<h4>Known Issues</h4>
+
+<p><b>What is Not Implemented</b><code> Updated: ??, 2007</code></p>
+
+<p>??</p>
+
+<p><b>Known Issues</b><code> Updated: ??, 2007</code></p>
+
 <ul>
   <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=341">WCF-RTM-BUG
 : Serializer bug with multi-dimemsional arrays </a> </li>
 </ul>
+
 <!-- ================================================== -->
 <br>
 <hr>
 <h2><a name="60313"></a>Reliable Messaging Status</h2>
-<p></p>
-<pre>Updated: ??, 2007</pre>
-<p></p>
-<h4>WCF Interoperability</h4>
+
+<p><b>WCF Interoperability</b><code> Updated: ??, 2007</code></p>
+
 <pre>non-secure:<br><br>  WCF-&gt;WSIT :  2/2 <br>  WSIT-&gt;WCF :  3/3<br><br>secure:<br><br>  WCF-&gt;WSIT :  2/2 <br>  WSIT-&gt;WCF :  2/2<br></pre>
 <p> NOTE: The interoperability tests do not include duplex binding
 tests.</p>
-<!-- h5>Known Issues</h4 -->
 
-<h4>Known Issues</h4>
+<p><b>What is Not Implemented</b><code> Updated: ??, 2007</code></p>
+
+<p>??</p>
+
+<p><b>Known Issues</b><code> Updated: ??, 2007</code></p>
+
 <ul>
   <li>
 <a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=507">issue 507</a> - WSIT RM Endpoints have not been tested to work with Axis clients. 
@@ -123,15 +145,17 @@ tests.</p>
   - client artifacts cannot be created by querying MEX on MS RM endpoints - wsimport cannot read/parse the response document 
   </li>
 </ul>
+
 <!-- ================================================== --><br>
 <hr>
 <h2><a name="35385"></a>Security Status</h2>
-<p></p>
-<pre>Updated: ??, 2007</pre>
-<p></p>
-<h4>WCF Interoperability</h4>
+
+<p><b>WCF Interoperability</b><code> Updated: ??, 2007</code></p>
+
 <pre>   WCF-&gt;WSIT :   26/26<br>  WSIT-&gt;WCF  :   25/26  (One Scenario fails due to WCF Issue# CSD 4051)<br>  WSIT-&gt;WSIT :   26/26<br></pre>
-<h4>What is Not Implemented</h4>
+
+<p><b>What is Not Implemented</b><code> Updated: ??, 2007</code></p>
+
 <p>The following features have&nbsp; not been implemented:</p>
 <ul>
   <li>Multiple secure conversation tokens per message is not
@@ -399,7 +423,9 @@ supported in this release.</p>
     </tr>
   </tbody>
 </table>
-<h4>Known Issues</h4>
+
+<p><b>Known Issues</b><code> Updated: ??, 2007</code></p>
+
 <ul>
 </ul>
 <table border="1" cellpadding="2" cellspacing="3">
@@ -559,36 +585,44 @@ fails on the server side with the following exception trace :
     </tr>
   </tbody>
 </table>
-<p style="margin-bottom: 0in;"><br>
-</p>
-<!-- ================================================== -->&nbsp;
-<p><br>
-</p>
+
+<!-- ================================================== -->
+<br>
 <hr>
 <h2><a name="44691"></a>Secure Conversation Status</h2>
-<p></p>
-<pre>Updated: ??, 2007</pre>
-<p></p>
-<h4>WCF Interoperability</h4>
+
+<p><b>WCF Interoperability</b><code> Updated: ??, 2007</code></p>
+
 <pre>  WCF-&gt;WSIT : 36/36 : (starting from WSDL)<br> WSIT-&gt;WCF  : 36/36 : (starting from WSDL)<br> WSIT-&gt;WSIT : 36/36 : (starting from WSDL)<br></pre>
+
 <p>NOTE: No test scenarios were executed that started from Java.</p>
-<h4>What is Not Implemented</h4>
+
+<p><b>What is Not Implemented</b><code> Updated: ??, 2007</code></p>
+
 <p>The following features have not been implemented:</p>
+
 <ul>
   <li>Renewing of Security Context </li>
   <li>Client initiated security context </li>
 </ul>
+
+<p><b>Known Issues</b><code> Updated: ??, 2007</code></p>
+
+<p>??</p>
+
 <!-- ================================================== -->
 <br>
 <hr>
 <h2><a name="96126"></a>Trust Status</h2>
-<p></p>
-<pre>Updated: ??, 2007</pre>
-<p></p>
-<h4>WCF Interoperability</h4>
+
+<p><b>WCF Interoperability</b><code> Updated: ??, 2007</code></p>
+
 <pre>   Client -&gt;   STS    -&gt;  Service<br>   --------------------------------------------------------------<br>     WCF  -&gt;  WSIT    -&gt;  WCF         :  4/4<br>     WCF  -&gt;   WCF    -&gt;  WSIT        :  4/4<br>     WCF  -&gt;  WSIT    -&gt;  WSIT        :  4/4 : (starting from WSDL)<br>    WSIT  -&gt;  WSIT    -&gt;  WSIT        :  5/5 : (starting from WSDL)<br>    WSIT  -&gt;  WSIT    -&gt;  WCF         :  5/5 : (starting from WSDL)<br>    WSIT  -&gt;   WCF    -&gt;  WCF         :  5/5 : (starting from WSDL)<br>    WSIT  -&gt;   WCF    -&gt;  WSIT        :  5/5 : (starting from WSDL)<br></pre>
+
 <p>NOTE: No test scenarios were executed that started from Java.</p>
-<h4>What is Not Implemented</h4>
+
+<p><b>What is Not Implemented</b><code> Updated: ??, 2007</code></p>
+
 <p>The following features have not been implemented:</p>
 <ul>
   <li>Token Validation protocol. </li>
@@ -598,26 +632,31 @@ fails on the server side with the following exception trace :
   <li>For issuing Public Key type, we assume that the client is authenticated to the STS with its certificate. We don't support KeyType attribute for now. </li>
   <li>Support for issuing SAML2.0 assertion of authentication type is imcomplete. We don't support for AuthnContext.</li>
 </ul>
+
+<p><b>Known Issues</b><code> Updated: ??, 2007</code></p>
+
+<p>??</p>
+
 <!-- ================================================== -->
 <br>
 <hr>
 <h2><a name="98261"></a>Coordination/Atomic Transactions Status</h2>
-<p></p>
-<pre>Updated: May 24, 2007</pre>
-<p></p>
-<h4>WCF Interoperability</h4>
+
+<p><b>WCF Interoperability</b><code> Updated: ??, 2007</code></p>
+
 (Test config: GF b41a, MS WCF RTM, WSIT M4(b14), JDK 5, JDK 6)
 <pre>non-secure (meaning http used for WS-TX protocol messages, no security on application messages):<br><br> WCF-&gt;WSIT : 0/0 (interop w/MS requires HTTPS)<br>WSIT-&gt;WCF  : 0/0 (interop w/MS requires HTTPS)<br>WSIT-&gt;WSIT : 3/3<br><br>secure (meaning https used for WS-TX protocol messages, no security on application messages):<br><br> WCF-&gt;WSIT : 3/3<br>WSIT-&gt;WCF  : 3/3<br>WSIT-&gt;WSIT : 3/3<br></pre>
-<p> </p>
-<h4>What is Not Implemented</h4>
-	<LI>Transaction recovery 
-	<LI>Processing Transaction Attributes in EJB deployment
-	descriptor
-	<LI>WS-Atomic Transaction capabilities are not available in
+
+<p><b>What is Not Implemented</b><code> Updated: ??, 2007</code></p>
+
+<ul>
+<LI>Transaction recovery 
+<LI>Processing Transaction Attributes in EJB deployment	descriptor
+<LI>WS-Atomic Transaction capabilities are not available in
 	Tomcat web server with WSIT 1.0 installed. WS-Atomic Transactions
 	context can only flow from Web and EJB tier of Glassfish v2
 	Application Server.
-	<LI>A JAX-WS 2.0/2.1, WSIT 1.0, Glassfish v2 Application client
+<LI>A JAX-WS 2.0/2.1, WSIT 1.0, Glassfish v2 Application client
 	or a Tomcat hosted web service can invoke a transacted web service
 	operation with policy assertion of &lt;wsat:ATAssertion
 	wsp:Optional=&rdquo;true&rdquo;/&gt; since it is optional to flow a
@@ -625,13 +664,15 @@ fails on the server side with the following exception trace :
 	a transacted web service operation with policy assertion of
 	&lt;wsat:ATAssertion&gt; from any of the listed containers that do
 	not support flowing a WS-Atomic Transaction context.
-	<LI>Optional protocol messages currently not implemented.<BR>
+<LI>Optional protocol messages currently not implemented.<BR>
 	[WSCOOR2004] Section 3.1 Activation Service and [WSAT2004]
 	Section 3.2 Completion Protocol<BR><BR><A HREF="http://specs.xmlsoap.org/ws/2004/10/wscoor/wscoor.pdf">[WSCOOR2004]
 	</A><A HREF="http://specs.xmlsoap.org/ws/2004/10/wscoor/wscoor.pdf">http://specs.xmlsoap.org/ws/2004/10/wscoor/wscoor.pdf</A><A HREF="http://specs.xmlsoap.org/ws/2004/10/wscoor/wscoor.pdf"><BR></A>[WSAT2004]
 	<A HREF="http://specs.xmlsoap.org/ws/2004/10/wsat/wsat.pdf">http://specs.xmlsoap.org/ws/2004/10/wsat/wsat.pdf</A>
-</UL>
-<H4>Known Issues</H4>
+</ul>
+
+<p><b>Known Issues</b><code> Updated: ??, 2007</code></p>
+
 <TABLE WIDTH=1135 BORDER=1 CELLPADDING=2 CELLSPACING=3>
 	<COL WIDTH=621>
 	<COL WIDTH=495>
@@ -665,12 +706,14 @@ Workaround for Glassfish v2:</BR> run following from commmand prompt:</BR>
 		</TD>
 	</TR>
 </TABLE>
-<!-- ================================================== --><br>
+
+<!-- ================================================== -->
+<br>
 <hr>
 <h2><a name="35087"></a>NetBeans WSIT Module Status</h2>
-<p></p>
-<pre>Updated: ??, 2007</pre>
-<h4>Known Issues</h4>
+
+<p><b>Known Issues</b><code> Updated: ??, 2007</code></p>
+
 <table border="1" cellpadding="2" cellspacing="2">
   <tbody>
     <tr>
@@ -694,15 +737,22 @@ Workaround for Glassfish v2:</BR> run following from commmand prompt:</BR>
     </tr>
   </tbody>
 </table>
-<!-- ================================================== --><br>
+
+<!-- ================================================== -->
+<br>
 <hr>
 <h2><a name="70368"></a>Web Services Addressing Status</h2>
-<p></p>
-<pre>Updated: ??, 2007</pre>
-<p></p>
-<h4>WCF Interoperability</h4>
+
+<p><b>WCF Interoperability</b><code> Updated: ??, 2007</code></p>
+
 <pre>non-secure:<br><br> WCF-&gt;WSIT : 70/70<br>WSIT-&gt;WCF  : 69/69<br>WSIT-&gt;WSIT : 86/86<br><br>secure:<br><br> WCF-&gt;WSIT : Not tested<br>WSIT-&gt;WCF  : Not tested<br>WSIT-&gt;WSIT : Not tested<br></pre>
-<h4>Known Issues</h4>
+
+<p><b>What is Not Implemented</b><code> Updated: ??, 2007</code></p>
+
+<p>??</p>
+
+<p><b>Known Issues</b><code> Updated: ??, 2007</code></p>
+
 <ul>
   <li>A WCF endpoint responds back with "HTTP 400 Bad Request" if an
 empty Metadata element is sent from the WSIT client.</li>
@@ -713,48 +763,55 @@ System.InvalidOperationException is thrown by the WCF runtime
 sets the value of wsa:FaultTo to none, which is not the default. Also
 this bug occurs both on WCF RTM bits as well as Vista.</li>
 </ul>
+
 <!-- ================================================== -->
 <br>
 <hr>
 <h2><a name="13158"></a>Policy Status</h2>
-<p></p>
-<pre>Updated: ??, 2007</pre>
-<p></p>
-<h4>WCF Interoperability</h4>
+
+<p><b>WCF Interoperability</b><code> Updated: ??, 2007</code></p>
+
 <p>n/a</p>
-<h4>What is Not Implemented</h4>
+
+<p><b>What is Not Implemented</b><code> Updated: ??, 2007</code></p>
+
 <p>The WS-Policy implementation is feature-complete.</p>
-<h4>Known Issues</h4>
+
+<p><b>Known Issues</b><code> Updated: ??, 2007</code></p>
+
 <p>None</p>
-<!-- ================================================== --><br>
+
+<!-- ================================================== -->
+<br>
 <hr>
 <h2><a name="jax-ws"></a>JAX-WS Status</h2>
-<p></p>
-<pre>Updated: ??, 2007</pre>
-<p></p>
-<h4>What is Not Implemented</h4>
+
+<p><b>What is Not Implemented</b><code> Updated: ??, 2007</code></p>
+
 <p>JAX-WS RI 2.1.1&nbsp; is integrated with the WSIT M4.&nbsp; The integrated 
 bits are almost same as the <a href="https://jax-ws.dev.java.net/2.1.1rc1/">
-JAX-WS RI 2.1.1 RC1</a> bits.&nbsp; JAX-WS 2.1.1 RI is scheduled to be released 
-on May 7th, pending JAX-WS 2.1 spec approval.</p>
-<h4>Known Issues</h4>
+JAX-WS RI 2.1.1 RC1</a> bits.&nbsp; JAX-WS 2.1.1 RI is scheduled to be released on May 7th, pending JAX-WS 2.1 spec approval.</p>
+
+<p><b>Known Issues</b><code> Updated: ??, 2007</code></p>
 <ul>
   <li>See the 
 	<a href="https://jax-ws.dev.java.net/issues/buglist.cgi?issue_type=DEFECT&component=jax-ws&issue_status=NEW&issue_status=STARTED&issue_status=REOPENED&target_milestone=2.1&target_milestone=2.1.1&email1=&emailtype1=exact&emailassigned_to1=1&email2=&emailtype2=exact&">open
 bugs</a>.</li>
 </ul>
-<p><br>
-</p>
+
+<!-- ================================================== -->
+<br>
 <hr>
 <h2><a name="55934"></a>Security Policy Status</h2>
-<p></p>
-<pre>Updated: ??, 2007</pre>
-<p></p>
-<h4>WCF Interoperability</h4>
+
+<p><b>WCF Interoperability</b><code> Updated: ??, 2007</code></p>
+
 <p>Interoperability test is based on use of SecurityPolicy in
 WS-Security,WS-SecureConversation,WS-Trust,WS Reliable Messaging,
 MTOM,WS-Addressing interop tests.</p>
-<h4>What is Not Implemented</h4>
+
+<p><b>What is Not Implemented</b> Updated: ??, 2007</code></p>
+
 <p>The Following assertions are not yet supported by Security Policy
 implementation.</p>
 <ul>
@@ -764,7 +821,9 @@ implementation.</p>
   <li>Use of https URL's for endpoints when TransportBinding assertion
 is present. </li>
 </ul>
-<h4>Known Issues</h4>
+
+<p><b>Known Issues</b> Updated: ??, 2007</code></p>
+
 <table border="1" cellpadding="2" cellspacing="3">
   <tbody>
     <tr>
@@ -813,21 +872,26 @@ SecurityPolicy:sp:AlgorithmSuite/wsp:Policy/sp:SoapNormalization10</p>
     </tr>
   </tbody>
 </table>
-<!-- ================================================== --><br>
+
+<!-- ================================================== -->
+<br>
 <hr>
 <h2><a name="soaptcp"></a>SOAP/TCP Status</h2>
-<p></p>
-<pre>Updated: ??, 2007</pre>
-<p></p>
-<h4>WCF Interoperability</h4>
+
+
+
+<p><b>WCF Interoperability</b><code> Updated: ??, 2007</code></p>
+
 <p>n/a</p>
-<h4>What is Not Implemented</h4>
+
+<p><b>What is Not Implemented</b><code> Updated: ??, 2007</code></p>
+
 <p>The SOAP/TCP implementation is feature-complete.</p>
-<h4>Known Issues</h4>
+
+<p><b>Known Issues</b><code> Updated: ??, 2007</code></p>
+
 <p>None</p>
+
 <!-- ================================================== -->
-<p><br>
-<br>
-</p>
 </body>
 </html>
