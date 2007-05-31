@@ -33,17 +33,7 @@
  and therefore, elected the GPL Version 2 license, then the option applies
  only if the new code is made subject to such option by the copyright
  holder.
--->
-<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="ht
-tp://tempuri.org/" xmlns:msc="http://schemas.microsoft.com/ws/2005/12/wsdl/contr
-act" xmlns:wsap10="http://www.w3.org/2006/05/addressing/wsdl" xmlns:soapenc="htt
-p://schemas.xmlsoap.org/soap/encoding/" xmlns:wsp="http://schemas.xmlsoap.org/ws
-/2004/09/policy" xmlns:ci="http://schemas.microsoft.com/ws/2005/01/WSDL/Extensio
-ns/ContractInheritance" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns
-:xsd="http://www.w3.org/2001/XMLSchema" xmlns:wsx="http://schemas.xmlsoap.org/ws
-/2004/09/mex" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss
--wssecurity-utility-1.0.xsd" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap1
-2/" targetNamespace="http://tempuri.org/">
+--><wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="http://tempuri.org/" xmlns:msc="http://schemas.microsoft.com/ws/2005/12/wsdl/contract" xmlns:wsap10="http://www.w3.org/2006/05/addressing/wsdl" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy" xmlns:ci="http://schemas.microsoft.com/ws/2005/01/WSDL/Extensions/ContractInheritance" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:wsx="http://schemas.xmlsoap.org/ws/2004/09/mex" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://tempuri.org/">
 
     <!-- begin :Keystore Info : latest method : referred from wsdl:service element -->
     <wsp:Policy xmlns:sc="http://schemas.sun.com/2006/03/wss/client" xmlns:wspp="http://java.sun.com/xml/ns/wsit/policy" xmlns:scc="http://schemas.sun.com/ws/2006/05/sc/client" wsu:Id="ClientKeystorePolicy">
@@ -63,7 +53,7 @@ ns/ContractInheritance" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns
                     <!--<sc:CallbackHandler  name="passwordHandler"  default="abcd!1234"/>-->
                 </sc:CallbackHandlerConfiguration>
                 
-                <tc:PreconfiguredSTS xmlns:tc="http://schemas.sun.com/ws/2006/05/trust/client" endpoint="local:///space/harsha/source/latest1/wsit/wsit/test/e2e/testcases/wstrust/scenario5/work/services/sts/war/" wsdlLocation="file:/space/harsha/source/latest1/wsit/wsit/test/e2e/testcases/wstrust/scenario5/./sts/sts.wsdl" serviceName="SecurityTokenService" portName="CustomBinding_ISecurityTokenService" namespace="http://tempuri.org/">
+                <tc:PreconfiguredSTS xmlns:tc="http://schemas.sun.com/ws/2006/05/trust/client" endpoint="local://C:/Tango/wsit/wsit/test/e2e/testcases/wstrust/scenario5/work/services/sts/war/" wsdlLocation="file:/C:/Tango/wsit/wsit/test/e2e/testcases/wstrust/scenario5/./sts/sts.wsdl" serviceName="SecurityTokenService" portName="CustomBinding_ISecurityTokenService" namespace="http://tempuri.org/">
                 </tc:PreconfiguredSTS>
 
                 <!--endpoint="http://localhost:8080/jaxws-s5-sts/sts?wsdl"-->
