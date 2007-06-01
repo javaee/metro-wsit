@@ -13,7 +13,7 @@
 <!--
 Created       : 2007 Mar 01 (Tue) 11:32:31 by Harold Carr.
 -->
-<pre>Last Modified : $Date: 2007-06-01 15:35:54 $ by $Author: shyam_rao $<br><br></pre>
+<pre>Last Modified : $Date: 2007-06-01 21:41:13 $ by $Author: jbenoit $<br><br></pre>
 <h5>Date: ??, 2007</h5>
 <h2>Introduction</h2>
 <p>This document provides the status of the interoperability testing
@@ -653,10 +653,11 @@ infrastructure in Glassfish even if the service client is an application client 
 <hr>
 <h2><a name="98261"></a>Coordination/Atomic Transactions Status</h2>
 
-<p><b>WCF Interoperability</b><code> Updated: ??, 2007</code></p>
-
-(Test config: GF b41a, MS WCF RTM, WSIT M4(b14), JDK 5, JDK 6)
-<pre>non-secure (meaning http used for WS-TX protocol messages, no security on application messages):<br><br> WCF-&gt;WSIT : 0/0 (interop w/MS requires HTTPS)<br>WSIT-&gt;WCF  : 0/0 (interop w/MS requires HTTPS)<br>WSIT-&gt;WSIT : 3/3<br><br>secure (meaning https used for WS-TX protocol messages, no security on application messages):<br><br> WCF-&gt;WSIT : 3/3<br>WSIT-&gt;WCF  : 3/3<br>WSIT-&gt;WSIT : 3/3<br></pre>
+<p><b>WCF Interoperability</b><code> Updated: June 1, 2007</code></p>
+Internal endpoint running Windows RTM, Vista<b>**</b>  - all the TX interoperability tests pass, with success.
+<br><b>**</b>Note- Vista testing needs to use workaround from <A HREF="https://glassfish.dev.java.net/issues/show_bug.cgi?id=3110">glassfish issue 3110</A>.
+<br>(Test config: GF b48, MS WCF RTM, MS WCF Vista, WSIT M5(b18), JDK 5, JDK 6)
+<br> <pre>non-secure (meaning http used for WS-TX protocol messages, no security on application messages):<br><br> WCF-&gt;WSIT : 0/0 (interop w/MS requires HTTPS)<br>WSIT-&gt;WCF  : 0/0 (interop w/MS requires HTTPS)<br>WSIT-&gt;WSIT : 3/3<br><br>secure (meaning https used for WS-TX protocol messages, no security on application messages):<br><br> WCF-&gt;WSIT : 3/3<br>WSIT-&gt;WCF  : 3/3<br>WSIT-&gt;WSIT : 3/3<br></pre>
 
 <p><b>What is Not Implemented</b><code> Updated: May 24, 2007</code></p>
 
@@ -675,38 +676,55 @@ infrastructure in Glassfish even if the service client is an application client 
 	a transacted web service operation with policy assertion of
 	&lt;wsat:ATAssertion&gt; from any of the listed containers that do
 	not support flowing a WS-Atomic Transaction context.
-<LI>Optional protocol messages currently not implemented.<BR>
-	[WSCOOR2004] Section 3.1 Activation Service and [WSAT2004]
-	Section 3.2 Completion Protocol<BR><BR><A HREF="http://specs.xmlsoap.org/ws/2004/10/wscoor/wscoor.pdf">[WSCOOR2004]
-	</A><A HREF="http://specs.xmlsoap.org/ws/2004/10/wscoor/wscoor.pdf">http://specs.xmlsoap.org/ws/2004/10/wscoor/wscoor.pdf</A><A HREF="http://specs.xmlsoap.org/ws/2004/10/wscoor/wscoor.pdf"><BR></A>[WSAT2004]
-	<A HREF="http://specs.xmlsoap.org/ws/2004/10/wsat/wsat.pdf">http://specs.xmlsoap.org/ws/2004/10/wsat/wsat.pdf</A>
-</ul>
-
-<p><b>Known Issues</b><code> Updated: May 24, 2007</code></p>
-
-<TABLE BORDER=1 CELLPADDING=2 CELLSPACING=3>
-	<COL>
-	<COL>
-	<TR>
-		<TH>
-			<P>Feature</P>
-		</TH>
-		<TH>
-			<P>Status/Workaround</P>
-		</TH>
+                                     <LI>Optional protocol messages currently not implemented.<BR>
+                                     [WSCOOR2004] Section 3.1 Activation Service and [WSAT2004]
+                                     Section 3.2 Completion Protocol<BR><BR><A HREF="http://specs.xmlsoap.org/ws/2004/10/wscoor/wscoor.pdf">[WSCOOR2004]
+                                     </A><A HREF="http://specs.xmlsoap.org/ws/2004/10/wscoor/wscoor.pdf">http://specs.xmlsoap.org/ws/2004/10/wscoor/wscoor.pdf</A><A HREF="http://specs.xmlsoap.org/ws/2004/10/wscoor/wscoor.pdf"><BR></A>[WSAT2004]
+                                     <A HREF="http://specs.xmlsoap.org/ws/2004/10/wsat/wsat.pdf">http://specs.xmlsoap.org/ws/2004/10/wsat/wsat.pdf</A>
+                                 </ul>
+                                 
+                                 <p><b>Known Issues</b><code> Updated: May 24, 2007</code></p>
+                                 
+                                 <TABLE BORDER=1 CELLPADDING=2 CELLSPACING=3>
+                                 <COL>
+                                 <COL>
+                                 <TR>
+                                     <TH>
+                                         <P>Feature</P>
+                                     </TH>
+                                     <TH>
+                                         <P>Status/Workaround</P>
+                                     </TH>
+                                 </TR>
+                                 <TR>
+                                 <TD>
+                                     <P>WS-Coordination message register fails after security copyv3 script is run due to a ssl handshake failure. 
+                                     <P>For latest updates and details, see <A HREF="https://wsit.dev.java.net/issues/show_bug.cgi?id=437">wsit issue 437</A> and 
+                                         <A HREF="https://glassfish.dev.java.net/issues/show_bug.cgi?id=2953">glassfish issue 2953</A>
+                                     </P>
+                                     
+                                 </TD>
+                                 <TD>
+                         Workaround for Glassfish v2 (b47 or earlier):</BR> Ensure Glassfish is running, then execute following from commmand prompt:</BR>
+                         <I>	asadmin create-ssl --type http-listener --certname s1as  --ssl3enabled=false http-listener-2</I>
+                     </br>This workaround is not needed in GFb50 and later releases
+                         </br><br>Workaround for Glassfish v2 (b48 or b49):</BR> Ensure Glassfish is not running and edit <I>&lt;GF&gt;/domains/domain&lt;n&gt;/config/domain.xml</I>, changing attribute </BR>
+                         <I>	ssl3-enabled="true"</I> to <I>	ssl3-enabled="false" </I> for <I>	&lt;ssl&gt;</I> element contained within <I> &lt;http-listener-2&gt;</I> element.
+                     </br>This workaround is not needed in GFb50 and later releases</P>
+		 </TD>
 	</TR>
-	<TR>
+        <TR>
 		<TD>
-			<P>WS-Coordination message register fails after security copyv3 script is run due to a ssl handshake failure. 
-<P>For latest updates and details, see <A HREF="https://wsit.dev.java.net/issues/show_bug.cgi?id=437">wsit issue 437</A> and 
-<A HREF="https://glassfish.dev.java.net/issues/show_bug.cgi?id=2953">glassfish issue 2953</A>
+			<P>WS-Coordination message register fails with Vista boxes due to a ssl handshake failure. 
+<P>For latest updates and details, see <A HREF="https://glassfish.dev.java.net/issues/show_bug.cgi?id=3110">glassfish issue 3110</A>
 </P>
 
 		</TD>
 		<TD>
-Workaround for Glassfish v2:</BR> run following from commmand prompt:</BR>
-<I>	asadmin create-ssl --type http-listener --certname s1as  --ssl3enabled false http-listener-2</I></P>
-		</TD>
+                    Workaround for Glassfish v2 (b48 or b49):</BR> Ensure Glassfish is not running and edit <I>&lt;GF&gt;/domains/domain&lt;n&gt;/config/domain.xml</I>, changing attribute</BR>
+                         <I>	ssl3-enabled="true"</I> to <I>	ssl3-enabled="false" </I> for <I>	&lt;ssl&gt;</I> element contained within <I> &lt;http-listener-2&gt;</I> element.
+                         <br>This workaround is not needed in GFb50 and later releases
+                </TD>
 	</TR>
 	<TR>
 		<TD>
