@@ -40,7 +40,7 @@ package com.sun.xml.ws.tx.common;
  * other modules.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  * @since 1.0
  */
 public class Util {
@@ -64,7 +64,10 @@ public class Util {
      */
     static public boolean isJTAAvailable() {
         if (hasJTA == null) {
-            hasJTA = isClassAvailable("javax.transaction.TransactionManager") ? Boolean.TRUE : Boolean.FALSE;
+            // Check for JTA 1.1 API availability.
+            hasJTA = isClassAvailable("javax.transaction.TransactionManager") && 
+                     isClassAvailable("javax.transaction.TransactionSynchronizationRegistry") ? Boolean.TRUE : Boolean.FALSE;
+	    
             if (hasJTA && ! TransactionManagerImpl.getInstance().isTransactionManagerAvailable()) {
                 hasJTA = Boolean.FALSE;
             }
