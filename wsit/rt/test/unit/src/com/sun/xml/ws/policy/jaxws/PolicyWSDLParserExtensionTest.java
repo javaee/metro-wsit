@@ -34,15 +34,6 @@
  * holder.
  */
 
-/*
- * PolicyWSDLParserExtensionTest.java
- *
- * Created on February 28, 2006, 4:25 PM
- *
- * To change this template, choose Tools | Template Manager
- * and open the template in the editor.
- */
-
 package com.sun.xml.ws.policy.jaxws;
 
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
@@ -560,6 +551,15 @@ public class PolicyWSDLParserExtensionTest extends TestCase{
                 ,new QName("http://example.org","DictFault"))));
     }
     
+    public void testBindingOpFaultExternalFromAnonymousPolicyAttachment() throws Exception {
+        PolicyMap policyMap = getPolicyMap("parser/testRuntimeWSExtExternalFromAnonBindingOpFault.wsdl");
+        assertNotNull(policyMap.getFaultMessageEffectivePolicy(policyMap.createWsdlFaultMessageScopeKey(
+                new QName("http://example.org","DictionaryService")
+                ,new QName("http://example.org","CzechToEnglish")
+                ,new QName("http://example.org","TranslateOperation")
+                ,new QName("http://example.org","DictFault"))));
+    }
+
     public void testInvalidAssertionShouldCauseException() throws Exception {
         try {
             PolicyMap policyMap = getPolicyMap("parser/testInvalidAssertionError.wsdl", false);

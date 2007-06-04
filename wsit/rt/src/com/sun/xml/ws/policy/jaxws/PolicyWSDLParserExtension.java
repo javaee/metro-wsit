@@ -386,7 +386,10 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
         } else if (inner) { // no id given to the policy --> keep as an annonymous policy model
             final String anonymousId = AnonymnousPolicyIdPrefix.append(anonymousPoliciesCount++).toString();
             handler = new PolicyRecordHandler(HandlerType.AnonymousPolicyId,anonymousId);
-            getAnonymousPolicyModels().put(anonymousId,policyRec.policyModel);
+            getAnonymousPolicyModels().put(anonymousId, policyRec.policyModel);
+            if (null != policyRec.unresolvedURIs) {
+                getUnresolvedUris(false).addAll(policyRec.unresolvedURIs);
+            }
         }
         return handler;
     }
