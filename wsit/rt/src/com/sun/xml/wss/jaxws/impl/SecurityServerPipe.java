@@ -211,6 +211,22 @@ public class SecurityServerPipe extends SecurityPipeBase {
             msg = Messages.create(se, pipeConfig.getBinding().getSOAPVersion());
             //throw new WebServiceException(LogStringsMessages.WSSPIPE_0025_ERROR_VERIFY_INBOUND_MSG(), se);
         }
+        
+        Packet retPacket = null;
+         if (thereWasAFault) {
+            //retPacket = packet;
+            if (this.isAddressingEnabled()) {
+                if (optimized) {
+                    packet.setMessage(((JAXBFilterProcessingContext)ctx).getPVMessage());
+                }
+                retPacket = packet.createServerResponse(
+                        msg, this.addVer, this.soapVersion, this.addVer.getDefaultFaultAction());
+            } else {
+                packet.setMessage(msg);
+                retPacket = packet;
+            }
+        }
+        
         packet.setMessage(msg);
         
         if (isAddressingEnabled()) {
@@ -249,17 +265,9 @@ public class SecurityServerPipe extends SecurityPipeBase {
             }
         }
         
-        Packet retPacket = null;
         
-        if (thereWasAFault) {
-            //retPacket = packet;
-            if (this.isAddressingEnabled()) {
-                retPacket = packet.createServerResponse(
-                        msg, this.addVer, this.soapVersion, this.addVer.getDefaultFaultAction());
-            } else {
-                retPacket = packet;
-            }
-        } else {
+        
+        if (!thereWasAFault) {
             
             if (isSCIssueMessage || isSCCancelMessage) {
                 //-------put application message on hold and invoke SC contract--------

@@ -218,6 +218,8 @@ public abstract class SecurityPipeBase implements Pipe {
     public static final URI ISSUE_REQUEST_URI ;
     public static final URI CANCEL_REQUEST_URI;
     protected Policy bpMSP = null;
+    //milliseconds
+    protected long timestampTimeOut = 0;
     /**
      * Constants for RM Security Processing
      */
@@ -280,19 +282,13 @@ public abstract class SecurityPipeBase implements Pipe {
             throw new RuntimeException(LogStringsMessages.WSSPIPE_0001_PROBLEM_MAR_UNMAR(), ex);
         }
         
-        try {
-            if(wsPolicyMap != null){
-                collectPolicies();
-            }
-            //unmarshaller = jaxbContext.createUnmarshaller();
-            // check whether Service Port has RM
-            hasReliableMessaging = isReliableMessagingEnabled(wsPolicyMap, pipeConfig.getWSDLModel());
-            //   opResolver = new OperationResolverImpl(inMessagePolicyMap,pipeConfig.getWSDLModel().getBinding());
-        }catch (Exception e) {
-            log.log(Level.SEVERE,
-                    LogStringsMessages.WSSPIPE_0012_PROBLEM_CHECKING_RELIABLE_MESSAGE_ENABLE(), e);
-            throw new RuntimeException(LogStringsMessages.WSSPIPE_0012_PROBLEM_CHECKING_RELIABLE_MESSAGE_ENABLE(), e);
+        if(wsPolicyMap != null){
+            collectPolicies();
         }
+        //unmarshaller = jaxbContext.createUnmarshaller();
+        // check whether Service Port has RM
+        hasReliableMessaging = isReliableMessagingEnabled(wsPolicyMap, pipeConfig.getWSDLModel());
+        //   opResolver = new OperationResolverImpl(inMessagePolicyMap,pipeConfig.getWSDLModel().getBinding());
         
     }
     
@@ -319,7 +315,8 @@ public abstract class SecurityPipeBase implements Pipe {
         this.hasSecureConversation = that.hasSecureConversation;
         this.hasReliableMessaging = that.hasReliableMessaging;
         //this.opResolver = that.opResolver;
-        
+        this.timestampTimeOut = that.timestampTimeOut;
+
         try {
             this.marshaller = jaxbContext.createMarshaller();
             this.unmarshaller = jaxbContext.createUnmarshaller();
@@ -371,6 +368,7 @@ public abstract class SecurityPipeBase implements Pipe {
             context.isOneWayMessage(message.isOneWay(this.pipeConfig.getWSDLModel()));   
             context.setDisableIncPrefix(disableIncPrefix);
             context.setEncHeaderContent(encHeaderContent);
+            context.setBSP(bsp10);
             SecurityAnnotator.secureMessage(context);            
             return context.getJAXWSMessage();
         } catch(XWSSecurityException xwse){
@@ -409,8 +407,8 @@ public abstract class SecurityPipeBase implements Pipe {
         context.setDisablePayloadBuffering(disablePayloadBuffer);
         context.setDisableIncPrefix(disableIncPrefix);
         context.setEncHeaderContent(encHeaderContent);
+         context.setBSP(bsp10);
         //  context.setJAXWSMessage(message, soapVersion);
-        context.setBSP(bsp10);
         if(debug){
             try {
                 ((LazyStreamBasedMessage)message).print();
@@ -500,6 +498,7 @@ public abstract class SecurityPipeBase implements Pipe {
         }else{
             ctx = new ProcessingContextImpl( packet.invocationProperties);
         }
+        ctx.setTimestampTimeout(this.timestampTimeOut);
         ctx.setIssuedTokenContextMap(issuedTokenContextMap);
         ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
         
@@ -1252,8 +1251,8 @@ public abstract class SecurityPipeBase implements Pipe {
             props.put(DefaultCallbackHandler.KEY_PASSWORD, store.getKeyPassword());
         }
         
-        if (store.getCertSelectorClassName() != null) {
-            props.put(DefaultCallbackHandler.KEYSTORE_CERTSELECTOR, store.getCertSelectorClassName());
+        if (store.getAliasSelectorClassName() != null) {
+            props.put(DefaultCallbackHandler.KEYSTORE_CERTSELECTOR, store.getAliasSelectorClassName());
         }
     }
     
@@ -1299,6 +1298,11 @@ public abstract class SecurityPipeBase implements Pipe {
     }
     
     private String  populateCallbackHandlerProps(Properties props, CallbackHandlerConfiguration conf) {
+         //check if timestamp timeout has been set
+        if (conf.getTimestampTimeout() != null) {
+            //in milliseconds
+            this.timestampTimeOut = Long.parseLong(conf.getTimestampTimeout()) * 1000;
+        }
         Iterator it = conf.getCallbackHandlers();
         for (; it.hasNext();) {
             PolicyAssertion p = (PolicyAssertion)it.next();
@@ -1370,7 +1374,7 @@ public abstract class SecurityPipeBase implements Pipe {
             props.put(DefaultCallbackHandler.MAX_NONCE_AGE_PROPERTY, conf.getMaxNonceAge());
         }
         if (conf.getRevocationEnabled() != null) {
-            props.put(DefaultCallbackHandler.MAX_NONCE_AGE_PROPERTY, conf.getMaxNonceAge());
+            props.put(DefaultCallbackHandler.REVOCATION_ENABLED, conf.getRevocationEnabled());
         }
         
         Iterator it = conf.getValidators();

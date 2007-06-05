@@ -164,10 +164,12 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         
         String isGF = System.getProperty("com.sun.aas.installRoot");
         if (isGF != null) {
-            handler = loadGFHandler(false);
+           
             try {
                 Properties props = new Properties();
                 populateConfigProperties(configAssertions, props);
+                String jmacHandler = props.getProperty(DefaultCallbackHandler.JMAC_CALLBACK_HANDLER);
+                handler = loadGFHandler(false, jmacHandler);
                 secEnv = new WSITProviderSecurityEnvironment(handler, map, props);
             }catch (XWSSecurityException ex) {
                 log.log(Level.SEVERE, 
@@ -179,8 +181,9 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
             //This will handle Non-GF containers where no config assertions
             // are required in the WSDL. Ex. UsernamePassword validatio
             // with Default Realm Authentication
-            handler = configureServerHandler(configAssertions);
-            secEnv = new DefaultSecurityEnvironmentImpl(handler);
+            Properties props = new Properties();
+            handler = configureServerHandler(configAssertions, props);
+            secEnv = new DefaultSecurityEnvironmentImpl(handler, props);
         }
         
         //initialize the AuthModules and keep references to them
@@ -313,18 +316,23 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
             //throw new WebServiceException(
             //        LogStringsMessages.WSITPVD_0035_ERROR_VERIFY_INBOUND_MSG(), se);
         }
-        packet.setMessage(msg);
         
         if (thereWasAFault) {
             sharedState.put("THERE_WAS_A_FAULT", Boolean.valueOf(thereWasAFault));
              if (this.isAddressingEnabled()) {
+                if (optimized) {
+                    packet.setMessage(((JAXBFilterProcessingContext)ctx).getPVMessage());
+                }
                 Packet ret = packet.createServerResponse(
                         msg, this.addVer, this.soapVersion, this.addVer.getDefaultFaultAction());
                 return ret;
              } else {
+                packet.setMessage(msg);
                 return packet;
              }
         }
+        
+        packet.setMessage(msg);
         
         if (isAddressingEnabled()) {
             action = getAction(packet);
@@ -391,6 +399,12 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         boolean isTrustMessage =(sharedState.get("IS_TRUST_MESSAGE") != null) ? true: false;
         
         Packet packet = (Packet)sharedState.get("VALIDATE_REQ_PACKET");
+        Boolean thereWasAFaultSTR = (Boolean)sharedState.get("THERE_WAS_A_FAULT");
+        boolean thereWasAFault =  (thereWasAFaultSTR != null) ? thereWasAFaultSTR.booleanValue(): false;
+        
+        if (thereWasAFault) {
+            return retPacket;
+        }
         
         /* TODO:this piece of code present since payload should be read once*/
         if (!optimized) {
@@ -468,6 +482,8 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         }else{
             ctx = new ProcessingContextImpl( packet.invocationProperties);
         }
+        //set timestamp timeout
+        ctx.setTimestampTimeout(this.timestampTimeOut);
         
         try {
             MessagePolicy policy = null;
@@ -494,6 +510,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
             if (policy != null) {
                 ctx.setSecurityPolicy(policy);
             }
+            
             // set the policy, issued-token-map, and extraneous properties
             ctx.setIssuedTokenContextMap(issuedTokenContextMap);
             ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
@@ -503,7 +520,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
             log.log(
                     Level.SEVERE, LogStringsMessages.WSITPVD_0006_PROBLEM_INIT_OUT_PROC_CONTEXT(), e);
             throw new RuntimeException(
-                    LogStringsMessages.WSITPVD_0006_PROBLEM_INIT_OUT_PROC_CONTEXT(), e);                        
+                    LogStringsMessages.WSITPVD_0006_PROBLEM_INIT_OUT_PROC_CONTEXT(), e);
         }
         return ctx;
     }
@@ -594,8 +611,8 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         }
 
     
-    private CallbackHandler configureServerHandler(Set configAssertions) {
-        Properties props = new Properties();
+    private CallbackHandler configureServerHandler(Set configAssertions, Properties props) {
+        //Properties props = new Properties();
         String ret = populateConfigProperties(configAssertions, props);
         try {
             if (ret != null) {

@@ -156,16 +156,16 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
         Set configAssertions = holder.getConfigAssertions(Constants.SUN_WSS_SECURITY_CLIENT_POLICY_NS);
         trustConfig = holder.getConfigAssertions(
                 com.sun.xml.ws.security.impl.policy.Constants.SUN_TRUST_CLIENT_SECURITY_POLICY_NS);
-        
 
         boolean isACC = isGFAppClient();
         String isGF = System.getProperty("com.sun.aas.installRoot");
         //this client is an ACC client or a WebClient
         if (isACC || (isGF != null) ) {
-            handler = loadGFHandler(true);
             try {
                 Properties props = new Properties();
                 populateConfigProperties(configAssertions, props);
+                String jmacHandler = props.getProperty(DefaultCallbackHandler.JMAC_CALLBACK_HANDLER);
+                handler = loadGFHandler(true, jmacHandler);
                 secEnv = new WSITProviderSecurityEnvironment(handler, map, props);
             }catch (XWSSecurityException ex) {
                 log.log(Level.SEVERE, 
@@ -174,8 +174,9 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
                         LogStringsMessages.WSITPVD_0027_ERROR_POPULATING_CLIENT_CONFIG_PROP(), ex);  
             }
         } else {
-            handler = configureClientHandler(configAssertions);
-            secEnv = new DefaultSecurityEnvironmentImpl(handler);
+            Properties props = new Properties();
+            handler = configureClientHandler(configAssertions, props);
+            secEnv = new DefaultSecurityEnvironmentImpl(handler, props);
         }
                 
         //initialize the AuthModules and keep references to them
@@ -440,8 +441,7 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
         
         return recipient.validateMessage(context);
     }
-    
-    
+        
     
      protected SecurityPolicyHolder addOutgoingMP(WSDLBoundOperation operation,Policy policy)throws PolicyException{
         
@@ -528,8 +528,8 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
         return WSTrustElementFactory.newInstance().toJAXBElement(str);
     }
     
-    private CallbackHandler configureClientHandler(Set configAssertions) {
-        Properties props = new Properties();
+    private CallbackHandler configureClientHandler(Set configAssertions, Properties props) {
+        //Properties props = new Properties();
         String ret = populateConfigProperties(configAssertions, props);
         try {
             if (ret != null) {

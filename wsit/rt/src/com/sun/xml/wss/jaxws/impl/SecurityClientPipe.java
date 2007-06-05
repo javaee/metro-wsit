@@ -115,8 +115,10 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
             Set configAssertions = holder.getConfigAssertions(SUN_WSS_SECURITY_CLIENT_POLICY_NS);
             trustConfig = holder.getConfigAssertions(Constants.SUN_TRUST_CLIENT_SECURITY_POLICY_NS);
          
-            handler = configureClientHandler(configAssertions);
-            secEnv = new DefaultSecurityEnvironmentImpl(handler);
+            Properties props = new Properties();
+            handler = configureClientHandler(configAssertions, props);
+            secEnv = new DefaultSecurityEnvironmentImpl(handler, props);
+
         } catch (Exception e) {            
             log.log(Level.SEVERE, 
                     LogStringsMessages.WSSPIPE_0023_ERROR_CREATING_NEW_INSTANCE_SEC_CLIENT_PIPE(), e);            
@@ -420,8 +422,8 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
     }
     
     //TODO use constants here
-    private CallbackHandler configureClientHandler(Set configAssertions) {
-        Properties props = new Properties();
+    private CallbackHandler configureClientHandler(Set configAssertions, Properties props) {
+        //Properties props = new Properties();
         String ret = populateConfigProperties(configAssertions, props);
         try {
             if (ret != null) {

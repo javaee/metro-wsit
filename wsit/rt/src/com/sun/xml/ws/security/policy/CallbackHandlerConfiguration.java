@@ -44,4 +44,5 @@ import java.util.Iterator;
  */
 public interface CallbackHandlerConfiguration {   
     public Iterator<? extends PolicyAssertion> getCallbackHandlers();
+    public String getTimestampTimeout();
 }
