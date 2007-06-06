@@ -103,17 +103,26 @@ HOME" >
         <isset property="bld.for.tomcat"/>
     </condition>
 
-    <condition property="deploy.dir" value="${catalina.home}/webapps" else="${as.home}/domains/${domain}/autodeploy">
+    <condition property="lib.endorsed" value="${catalina.home}/common/endorsed" else="${as.home}/lib/endorsed">
         <isset property="bld.for.tomcat"/>
     </condition>
-    
+
+    <condition property="deploy.dir" value="${catalina.home}/webapps" else="${as.home}/domains/${domain}/autodeploy">
+        <isset property="bld.for.tomcat"/>
+    </condition> 
+ 
     <path id="wsit.classpath">
         <pathelement location="${java.home}/../lib/tools.jar"/>
         <fileset dir="${lib.home}">
             <include name="webservices-rt.jar"/>
             <include name="webservices-tools.jar"/>
+            <include name="webservices-extra.jar"/>
+            <include name="webservices-extra-api.jar"/>
             <include name="javaee.jar"/>
             <include name="activation.jar"/>
+        </fileset>
+        <fileset dir="${lib.endorsed}">
+            <include name="webservices-api.jar"/>
         </fileset>
     </path>
 
