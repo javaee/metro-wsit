@@ -35,8 +35,6 @@
  */
 package rmdemo.server;
 
-//import com.sun.xml.ws.runtime.util.SessionManager;
-//import com.sun.xml.ws.rm.jaxws.runtime.Session;
 
 import javax.annotation.Resource;
 import javax.jws.WebMethod;
@@ -49,8 +47,6 @@ import java.util.Hashtable;
 @WebService(endpointInterface="rmdemo.server.RMDemo")
 public class RMDemoImpl {
 
-    /* Store a String for each session */
-    //private final SessionManager sessionManager = SessionManager.getSessionManager();
 
     /* JAX-WS initializes context for each request */
     @Resource
