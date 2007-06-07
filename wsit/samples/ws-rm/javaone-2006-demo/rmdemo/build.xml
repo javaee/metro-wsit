@@ -179,7 +179,6 @@
     <target name="server" depends="setup">
 
         <antcall target="clean"/>
-        <antcall target="install" />
 
         <antcall target="build-server-wsdl"/>
 
