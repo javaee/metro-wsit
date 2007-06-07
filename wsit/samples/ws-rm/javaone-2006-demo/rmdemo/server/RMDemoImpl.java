@@ -35,8 +35,8 @@
  */
 package rmdemo.server;
 
-import com.sun.xml.ws.runtime.util.SessionManager;
-import com.sun.xml.ws.rm.jaxws.runtime.Session;
+//import com.sun.xml.ws.runtime.util.SessionManager;
+//import com.sun.xml.ws.rm.jaxws.runtime.Session;
 
 import javax.annotation.Resource;
 import javax.jws.WebMethod;
@@ -50,35 +50,33 @@ import java.util.Hashtable;
 public class RMDemoImpl {
 
     /* Store a String for each session */
-    private final SessionManager sessionManager = SessionManager.getSessionManager();
+    //private final SessionManager sessionManager = SessionManager.getSessionManager();
 
     /* JAX-WS initializes context for each request */
     @Resource
     private WebServiceContext context;
 
-    /* Get SesssionId using well-known key in MessageContext */
-    private String getSessionId() {
-        return (String)context.getMessageContext()
-                .get("com.sun.xml.ws.sessionid");
+    /* Get Sesssion using well-known key in MessageContext */
+    private Hashtable getSession() {
+        return (Hashtable)context.getMessageContext()
+                .get("com.sun.xml.ws.session");
 
     }
 
     /* Get String associated with SessionID for current request */
 
     private String getSessionData() {
-        String id = getSessionId();
-        Hashtable userData = (Hashtable)sessionManager.getSession(id).getUserData();
-       String ret = (String)userData.get(id);
+        Hashtable sess = getSession();
+        String ret = (String)sess.get("request_record");
         return ret != null ? ret : "";
+
 
     }
 
     /* Store String associated with SessionID for current request */
     private void setSessionData(String data) {
-        String id = getSessionId();
-        com.sun.xml.ws.runtime.util.Session session = sessionManager.getSession(id);
-        Hashtable table = (Hashtable)session.getUserData()   ;
-        table.put(id,data);
+        Hashtable session = getSession();
+        session.put("request_record", data);
      
     }
 
