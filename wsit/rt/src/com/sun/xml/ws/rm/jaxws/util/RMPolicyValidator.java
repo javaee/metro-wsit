@@ -64,7 +64,8 @@ public class RMPolicyValidator implements PolicyAssertionValidator {
         serverSideSupportedAssertions.add(new QName(microsoftVersion, "RmFlowControl"));
 
         clientSideSupportedAssertions.add(new QName(sunClientVersion, "AckRequestInterval"));
-        clientSideSupportedAssertions.add(new QName(sunClientVersion, "ResendInterval"));        
+        clientSideSupportedAssertions.add(new QName(sunClientVersion, "ResendInterval"));
+	clientSideSupportedAssertions.add(new QName(sunClientVersion, "CloseTimeout"));        
         clientSideSupportedAssertions.addAll(serverSideSupportedAssertions);
     }
     
