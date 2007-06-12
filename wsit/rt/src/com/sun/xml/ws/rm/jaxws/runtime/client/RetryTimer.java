@@ -73,7 +73,7 @@ public class RetryTimer  {
         if (timer != null) {
             throw new IllegalStateException();
         }
-        timer = new Timer();
+        timer = new Timer(true);
         timer.schedule(new RetryTask(),
                 source.getRetryInterval(),
                 source.getRetryInterval());
@@ -94,6 +94,7 @@ public class RetryTimer  {
     
     
     private class RetryTask extends TimerTask {
+
         public void run() {
             try {
                 source.doMaintenanceTasks();
