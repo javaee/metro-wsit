@@ -254,6 +254,9 @@
                 <property key="IMPL_VERSION" value="${release.impl.version}"/>
                 <property key="IMPL_VERSION_SUFFIX" value="${release.impl.version.suffix}"/>
                 <property key="DATE" value="${DSTAMP}"/>
+                <!-- Product name so that we can switch between JAX-WS RI and Metro -->
+                <property key="PRODUCT_SHORT_NAME" value="Metro"/>
+                <property key="PRODUCT_NAME" value="Metro ${release.impl.version} ${release.impl.version.suffix}"/>
             </htmlmacro>
         </sequential>
     </macrodef>
