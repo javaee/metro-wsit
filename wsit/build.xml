@@ -72,6 +72,12 @@
         <replace dir="${dist.image.wsit.dir}/samples">
             <replacefilter token="env.JAXWS_HOME" value="env.METRO_HOME" />
         </replace>
+        <!-- copy over shell scripts -->
+        <unzip src="lib/jaxws-bin.zip" dest="${dist.image.wsit.dir}/bin" />
+        <replace dir="${dist.image.wsit.dir}/bin">
+            <replacefilter token="JAXWS_HOME" value="METRO_HOME" />
+            <replacefilter token="jaxws-tools.jar" value="webservices-tools.jar" />
+        </replace>
     </target>
 
     <target name="-javadoc-build" depends="init"/>
@@ -113,6 +119,9 @@
             <zip file="lib/jaxws-samples.zip">
               <fileset dir="${tmpdir}/jaxws-ri/samples" />
             </zip>
+          <zip file="lib/jaxws-bin.zip">
+            <fileset dir="${tmpdir}/jaxws-ri/bin" />
+          </zip>
 
             <!-- retrieve the JAX-WS source zips -->
             <get src="@{jaxws.base.url}/artifact/jax-ws-sources/jaxws-ri/dist/jaxws-ri/lib/jaxws-rt.src.zip"
