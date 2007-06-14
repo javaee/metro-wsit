@@ -66,6 +66,7 @@
             <fileset dir="${basedir}" includes="CDDL*.*"/>
             <fileset dir="${etc.dir}" includes="wsit-on-*.*"/>
         </copy>
+        <generate-release-notes target="${dist.image.wsit.dir}/docs"/>
     </target>
 
     <target name="-javadoc-build" depends="init"/>
@@ -104,6 +105,9 @@
                 <fileset dir="${tmpdir}/jaxws-ri/lib" includes="jaxb-xjc.*, *-tools.*"/>
                 <fileset dir="${tmpdir}" includes="jaxb-xjc.*, *-tools.*"/>
             </copy>
+            <zip file="lib/jaxws-samples.zip">
+              <fileset dir="${tmpdir}/jaxws-ri/samples" />
+            </zip>
 
             <!-- retrieve the JAX-WS source zips -->
             <get src="@{jaxws.base.url}/artifact/jax-ws-sources/jaxws-ri/dist/jaxws-ri/lib/jaxws-rt.src.zip"
@@ -170,8 +174,7 @@
         <mkdir dir="${dist.dir}/wsit-integration"/>
 
         <copy todir="${wsit.integration.dir}" >
-            <fileset dir="${dist.dir}/image/jax-ws-latest-wsit/lib">
-                <!-- include name="wstx-services.jar"/ -->
+            <fileset dir="${dist.image.wsit.dir}">
                 <include name="wstx-services.war"/>
             </fileset>
         </copy>
@@ -231,6 +234,7 @@
   <macrodef name="generate-release-notes">
         <attribute name="target" /><!-- where to put the generated docs? -->
         <sequential>
+            <mkdir dir="@{target}"/>
             <copy todir="@{target}">
                 <fileset dir="docs/releasenotes" includes="style/*, Copyright.txt" />
             </copy>
@@ -254,8 +258,8 @@
         </sequential>
     </macrodef>
     
-    <target name="docgentest">
-        <mkdir dir="build/releasenotes"/>
+    <target name="test-docs"
+            description="Generate documentation. Useful for checking the output during authoring">
         <generate-release-notes target="build/releasenotes"/>
     </target>
 
