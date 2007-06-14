@@ -188,6 +188,10 @@
         <antcall target="combine-jars-extra-api"/>
     </target>
 
+    <target name="-pre-jar">
+        <mkdir dir="../${dist.image.wsit.lib.dir}" />
+    </target>
+
     <target name="-post-jar" depends="create-wstx-war"/>
 
     <!-- include wsdl files for wstx resource lookups -->
