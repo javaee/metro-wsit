@@ -38,6 +38,30 @@ documentation/samples.  The majority of the documentation included with JAX-WS i
 valid with Java EE 5 as well. </p>
 -->
 
+<h2>Identifying Jar Files</h2>
+<p>
+	The distribution contains the following jar files:
+</p>
+<table border=1>
+	<tr>
+		<th>Jars</th>
+		<th>What?</th>
+		<th>Needed at runtime</th>
+	</tr><tr>
+		<td><tt>webservices-api.jar<br>webservices-extra-api.jar</tt></td>
+		<td>"javax.*" JCP APIs</td>
+		<td>Yes</td>
+	</tr><tr>
+		<td><tt>webservices-rt.jar<br>webservices-extra.jar</tt></td>
+		<td>Runtime code that implements the API</td>
+		<td>Yes</td>
+	</tr><tr>
+		<td><tt>webservices-tools.jar</tt></td>
+		<td>Development time tools</td>
+		<td>No</td>
+	</tr>
+</table>
+
 <h2>Software Licenses</h2>
 <ul>
   <li>Metro ${IMPL_VERSION} is covered by <a href="../CDDLv1.0.1.html">CDDL 1.0 License</a></li>
