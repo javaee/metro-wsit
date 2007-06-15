@@ -385,6 +385,9 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
          * @return true if OptimizedTransport is enabled, false otherwise
          */
         private boolean isOptimizedTransportEnabled(PolicyMap policyMap, WSDLPort port, WSPortInfo portInfo) {
+            if (policyMap == null || port == null)
+                return false;
+
             String schema = null;
             
             if (port != null) {
