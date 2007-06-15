@@ -47,9 +47,9 @@ package com.sun.xml.ws.rm.jaxws.runtime.client;
 
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.WSService;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
@@ -57,12 +57,14 @@ import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.client.ClientTransportException;
+import com.sun.xml.ws.rm.Constants;
 import com.sun.xml.ws.rm.RMException;
 import com.sun.xml.ws.rm.jaxws.runtime.InboundMessageProcessor;
 import com.sun.xml.ws.rm.jaxws.runtime.PipeBase;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
+import com.sun.xml.ws.rm.jaxws.util.LoggingHelper;
+import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
-import com.sun.xml.wss.jaxws.impl.SecurityClientPipe;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.soap.SOAPException;
@@ -72,11 +74,8 @@ import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import com.sun.xml.ws.rm.Constants;
-import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
-import java.util.logging.Logger;
 import java.util.logging.Level;
-import com.sun.xml.ws.rm.jaxws.util.LoggingHelper;
+import java.util.logging.Logger;
 
 
 
@@ -140,6 +139,9 @@ public class RMClientPipe
      * Pipeline.
      */
     private  ProcessorPool<RMClientPipe> processorPool;
+
+
+    private Boolean isOneWayMessage = false;
     
     
     /**
@@ -476,6 +478,9 @@ public class RMClientPipe
                     //reset last activity timer in sequence.
                     outboundSequence.resetLastActivityTime();
 
+                    //Store if it a oneway message
+                    this.isOneWayMessage = packet.getMessage().isOneWay(port);
+
                     //send down the pipe
                     ret = trySend(packet, message);
                    
@@ -513,7 +518,7 @@ public class RMClientPipe
                         //Perhaps check whether message has an SequenceAcknowledgement
                         //     not containing the id for the request?
 
-                        if (mess != null && !packet.getMessage().isOneWay(port) &&
+                        if (mess != null && !this.isOneWayMessage &&
                                 mess.getPayloadNamespaceURI() == null) {
                             //resend
                             logger.log(Level.FINE, 
