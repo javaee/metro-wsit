@@ -47,6 +47,7 @@ package com.sun.xml.ws.rm.jaxws.runtime.server;
 
 import com.sun.mail.imap.protocol.MessageSet;
 import com.sun.xml.ws.rm.BufferFullException;
+import com.sun.xml.ws.rm.DuplicateMessageException;
 import com.sun.xml.ws.rm.InvalidMessageNumberException;
 import com.sun.xml.ws.rm.Message;
 import com.sun.xml.ws.rm.RMException;
@@ -95,8 +96,11 @@ public class ServerInboundSequence extends InboundSequence
             setId(inboundId);
         }
         
-         //if flow control is enabled, set buffer size
-        if (config.flowControl) {
+        //if flow control is enabled, set buffer size.
+        //don't try to use flow control if ordered delivery
+        //is needed.  Even if the buffer is full, we
+        //would still need to accept messages that "fill in the gaps"
+        if (config.flowControl && !config.ordered) {
             maxMessages = config.bufferSize;
         } else {
             maxMessages = -1;
@@ -105,6 +109,7 @@ public class ServerInboundSequence extends InboundSequence
         allowDuplicates = config.allowDuplicates;
     }
     
+   
     /**
      *  Gets the original message in a the Sequence with a given message number.
      *  
@@ -245,6 +250,8 @@ public class ServerInboundSequence extends InboundSequence
         return System.currentTimeMillis() - this.getLastActivityTime()  >
                 config.getInactivityTimeout();
     }
+    
+    
 }
 
 
