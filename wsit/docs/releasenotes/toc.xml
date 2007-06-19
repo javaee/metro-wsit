@@ -11,6 +11,8 @@
   <chapter name="Metro">
     <document name="Overview"
               url="index.html"/>
+    <document name="Installation"
+              url="install.html"/>
   </chapter>
 
   <chapter name="Users Guide">
