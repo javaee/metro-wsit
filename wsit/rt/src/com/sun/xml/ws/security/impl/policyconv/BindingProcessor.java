@@ -101,13 +101,14 @@ public abstract class BindingProcessor {
      */
     
     protected void protectPrimarySignature()throws PolicyException{
+        boolean encryptSignConfirm = (isServer && !isIncoming) || (!isServer && isIncoming);
         if(protectionOrder == Binding.ENCRYPT_SIGN){
             EncryptionPolicy ep = getSecondaryEncryptionPolicy();
             EncryptionPolicy.FeatureBinding epFB  = (EncryptionPolicy.FeatureBinding) ep.getFeatureBinding();
             EncryptionTarget et = eAP.getTargetCreator().newURIEncryptionTarget(primarySP.getUUID());
             SecurityPolicyUtil.setName(et, primarySP);
             epFB.addTargetBinding(et);
-            if(foundEncryptTargets && (isWSS11() && requireSC() ) && isServer && !isIncoming && getBinding().getSignatureProtection()){
+            if(foundEncryptTargets && (isWSS11() && requireSC() ) && encryptSignConfirm && getBinding().getSignatureProtection()){
                 eAP.process(SIGNATURE_CONFIRMATION,epFB);
             }
         }else{
@@ -115,7 +116,7 @@ public abstract class BindingProcessor {
             EncryptionTarget et = eAP.getTargetCreator().newURIEncryptionTarget(primarySP.getUUID());
             SecurityPolicyUtil.setName(et, primarySP);
             epFB.addTargetBinding(et);
-            if(foundEncryptTargets && (isWSS11() && requireSC() ) && isServer && !isIncoming && getBinding().getSignatureProtection()){
+            if(foundEncryptTargets && (isWSS11() && requireSC() ) && encryptSignConfirm && getBinding().getSignatureProtection()){
                 eAP.process(SIGNATURE_CONFIRMATION,epFB);
             }
         }
