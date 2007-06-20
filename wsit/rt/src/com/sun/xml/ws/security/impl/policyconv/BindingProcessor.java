@@ -107,11 +107,17 @@ public abstract class BindingProcessor {
             EncryptionTarget et = eAP.getTargetCreator().newURIEncryptionTarget(primarySP.getUUID());
             SecurityPolicyUtil.setName(et, primarySP);
             epFB.addTargetBinding(et);
+            if(foundEncryptTargets && (isWSS11() && requireSC() ) && isServer && !isIncoming && getBinding().getSignatureProtection()){
+                eAP.process(SIGNATURE_CONFIRMATION,epFB);
+            }
         }else{
             EncryptionPolicy.FeatureBinding epFB  = (EncryptionPolicy.FeatureBinding) primaryEP.getFeatureBinding();
             EncryptionTarget et = eAP.getTargetCreator().newURIEncryptionTarget(primarySP.getUUID());
             SecurityPolicyUtil.setName(et, primarySP);
             epFB.addTargetBinding(et);
+            if(foundEncryptTargets && (isWSS11() && requireSC() ) && isServer && !isIncoming && getBinding().getSignatureProtection()){
+                eAP.process(SIGNATURE_CONFIRMATION,epFB);
+            }
         }
     }
     
@@ -213,9 +219,6 @@ public abstract class BindingProcessor {
         }
         if(isWSS11() && requireSC()){
             iAP.process(SIGNATURE_CONFIRMATION,spFB);
-        }
-        if(foundEncryptTargets && (isWSS11() && requireSC() ) && isServer && !isIncoming && getBinding().getSignatureProtection()){
-            eAP.process(SIGNATURE_CONFIRMATION,epFB);
         }
     }
     
