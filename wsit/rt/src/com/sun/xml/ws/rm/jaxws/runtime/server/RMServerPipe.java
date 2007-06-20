@@ -215,6 +215,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
                 soapFault = newUnknownSequenceFault(e);
             }
             
+            Packet retPacket = null;
             if (soapFault != null){
                 Message m = com.sun.xml.ws.api.message.Messages.create(soapFault);
 
@@ -225,8 +226,12 @@ public class RMServerPipe extends PipeBase<RMDestination,
                     m.getHeaders().add(header);
                 }
 
-                packet.setMessage(m);
-                return packet;
+                 retPacket = packet.createServerResponse(
+                         m,constants.getAddressingVersion() , 
+                         binding.getSOAPVersion(), 
+                         constants.getAddressingVersion().getDefaultFaultAction());
+                 retPacket.setMessage(m);
+                 return retPacket;
             }
 
             //allow diagnostic access to message if ProcessingFilter has been specified
