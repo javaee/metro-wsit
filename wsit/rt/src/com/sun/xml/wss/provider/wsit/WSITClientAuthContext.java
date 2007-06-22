@@ -381,6 +381,9 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
             JAXBFilterProcessingContext  context = (JAXBFilterProcessingContext)ctx;
             context.setSOAPVersion(soapVersion);
             context.setJAXWSMessage(message, soapVersion);
+            context.isOneWayMessage(message.isOneWay(this.pipeConfig.getWSDLModel()));
+            context.setDisableIncPrefix(disableIncPrefix);
+            context.setEncHeaderContent(encHeaderContent);
             SecurityAnnotator.secureMessage(context);
             return context.getJAXWSMessage();
         } catch(XWSSecurityException xwse){            
