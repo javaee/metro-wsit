@@ -26,8 +26,37 @@ To Install WSIT and run the sample:
 
 7. You will be prompted to enter the username/password. Two pairs alice/alice, bob/bob
    are preconfigured to use with this sample.
+--------------------------------------------------------------------------------------
+To run the sample with the sample customer STSAttributeProvider:
 
-------------------------------------------------------------------------------
+
+1. In etc/targets.xml, replace the existing create-sts-war target element with:
+
+    <target name="create-sts-war">
+        <war warfile="${build.war.home}/jaxws-sts.war"
+                webxml="../../etc/sts/web.xml">
+                <webinf dir="../../etc/sts" includes="sun-jaxws.xml"/>
+                <zipfileset
+                           dir="etc/sts"
+                           includes="sts.wsdl, *.xsd"
+                           prefix="WEB-INF/wsdl"/>
+                <zipfileset
+                           dir="../../etc/sts"
+                           includes="wsit-server.xml"
+                           prefix="WEB-INF/classes"/>
+                <zipfileset
+                            dir="../../etc/sts/services"
+                            includes="com.sun.*"
+                            prefix="WEB-INF/classes/META-INF/services"/>
+                <classes dir="${build.classes.home}" includes="**/sts/**,
+                        **/com/**, **/common/**"/>
+        </war>
+   </target>
+
+    This new target element places the additional jars and configuration files into
+    the jaxws-sts war.
+-------------------------------------------------------------------------------------
+
 This works with Sun Java System Access Manager 7.1 Beta which is available as part of 
 java_app_platform_sdk-5_01 release. 
 
