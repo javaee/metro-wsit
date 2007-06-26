@@ -134,13 +134,6 @@ public class RMClientPipe
      */
     private BindingProvider proxy;
     
-    /**
-     * Pool of pipes to be used for invoking the tail of the
-     * Pipeline.
-     */
-    private  ProcessorPool<RMClientPipe> processorPool;
-
-
     private Boolean isOneWayMessage = false;
     
     
@@ -174,11 +167,7 @@ public class RMClientPipe
         }
         this.unmarshaller = config.getRMConstants().createUnmarshaller();
         this.marshaller = config.getRMConstants().createMarshaller();
-        //RMConstants.setAddressingVersion(binding.getAddressingVersion());
         
-        //need to initialize a ProcessorPool here for use by createSequence.
-        //need to adjust capacity later.
-        processorPool = new ProcessorPool<RMClientPipe>(this);
     }
     
     /**
@@ -206,7 +195,7 @@ public class RMClientPipe
         port = toCopy.port;
         service = toCopy.service;
         binding = toCopy.binding;
-        processorPool = toCopy.processorPool;
+       
         
         
         config = toCopy.config;
@@ -352,11 +341,7 @@ public class RMClientPipe
                 packet.proxy.getRequestContext().put(Constants.sequenceProperty,
                         outboundSequence);
                 
-                //FIXME
-                //need to adjust size here rather than create a new one
-                processorPool =
-                    new ProcessorPool<RMClientPipe>(this,
-                    /*outboundSequence.getTransferWindowSize()*/ 8);
+                
             }
             
         }
@@ -473,6 +458,12 @@ public class RMClientPipe
 
                 //give debug/diagnostic filter access to the message and allow it
                 //to simulate dropped message
+                
+                //BUGBUG - It is possible for filter to be uninitialized here or have the wrong
+                //value.  The initialization should be done here rather than in the RMClientPipe
+                //ctor, and there is no reason for it to be a field (at least in the client pipe)
+                filter = this.provider.getProcessingFilter();
+                
                 if (filter == null || filter.handleClientRequestMessage(message)) {
                     
                     //reset last activity timer in sequence.
@@ -581,8 +572,7 @@ public class RMClientPipe
                             outboundSequence.acknowledgeResponse(
                                     message.getMessageNumber());
                  }
-            }
-            
+            }          
             throw e;
         }
     }
@@ -592,7 +582,6 @@ public class RMClientPipe
      */
     public Packet process(Packet packet) {
         com.sun.xml.ws.rm.Message message = null;
-        RMClientPipe poolPipe = null;
         
         try {
             //Initialize the RM Sequence if this is the first request through the Pipe.
@@ -628,15 +617,9 @@ public class RMClientPipe
                 packet.invocationProperties.put(Constants.messageNumberProperty, mn);
             }
             
-            
-            //Copy of this pipe used for processing this request.  Will initialize
-            //it with processorPool.checkOut() when it is needed.  Will check it back
-            //in to the pool in the finally handler.
-            poolPipe = processorPool.checkOut();
-            
             //Add to OutboundSequence and include RM headers according to the
             //state of the RMSource
-            message = poolPipe.handleOutboundMessage(outboundSequence,
+            message = handleOutboundMessage(outboundSequence,
                     packet);
             
             if (!packet.getMessage().isOneWay(port)) {
@@ -652,49 +635,8 @@ public class RMClientPipe
                 message.isTwoWayRequest = true;
             }
             
-            if (message.isTwoWayRequest) {
-                return poolPipe.doRetryLoop(packet, message);
-            } else {
-                //For a one-way message, the application thread does not need to wait.  It may
-                //be some time if messages are lost, or if the RMD has to withhold the request
-                //waiting for earlier ones to arrive. The spec requires the runtime to wait for
-                //the protocol response, and it will -- just not this thread.
-                
-                final Packet p = packet;
-                final com.sun.xml.ws.rm.Message m = message;
-                final RMClientPipe pp = poolPipe;
-                
-                Thread t = new Thread() {
-                    public void run() {
-                        try {
-                            pp.doRetryLoop(p,m);
-                        } catch (RMException e) {
-                            throw new WebServiceException(e);
-                        } finally {
-                            //this needs to wait for poolPipe.doRetryLoop to return.
-                            //otherwise, poolPipe might end up being used concurrently
-                            //by more than one one-way message.
-                            if (pp != null) {
-                                processorPool.checkIn(pp);
-                            }
-                        }
-                    }
-                };
-                
-                t.start();
-                //client is not expecting a response here.
-                Packet ret = new Packet(/*com.sun.xml.ws.api.message.Messages.createEmpty(binding.getSOAPVersion())*/);
-               	//The invocationProperties.putAll throws a 
-		//ConcurrentModificationException one out of a billion times.
-		//The copying of the invocation properties is probably 
-		//unnecessary, but this fix is more conservative.
-		try { 
-			ret.invocationProperties.putAll(packet.invocationProperties);
-		} catch (Exception e) {
-		}
-                return ret;
-                
-            }
+            return doRetryLoop(packet, message);
+            
         } catch (RMException e) {
             Message faultMessage = e.getFaultMessage();
             if (faultMessage != null){
@@ -715,13 +657,7 @@ public class RMClientPipe
                     ee);
             throw new WebServiceException(ee);
             
-        } finally {
-            if (message != null &&
-                    message.isTwoWayRequest &&
-                    poolPipe != null ){
-                processorPool.checkIn(poolPipe);
-            }
-        }
+        } 
     }
     
     /**
