@@ -192,17 +192,22 @@ public class WSSCContract {
             }
         }
         boolean reqServerEntr = true;
+        boolean reqClientEntr=false;
         if(trust10 != null){
-            final Set trustReqdProps = trust10.getRequiredProperties();
+            final Set trustReqdProps = trust10.getRequiredProperties();            
             reqServerEntr = trustReqdProps.contains(Constants.REQUIRE_SERVER_ENTROPY);
+            reqClientEntr = trustReqdProps.contains(Constants.REQUIRE_CLIENT_ENTROPY);
+            if(clientEntropy == null){
+                if(reqClientEntr){
+                    log.log(Level.SEVERE,
+                            LogStringsMessages.WSSC_0010_CLIENT_ENTROPY_CANNOT_NULL());
+                    throw new WSSecureConversationException(LogStringsMessages.WSSC_0010_CLIENT_ENTROPY_CANNOT_NULL());
+                }else{
+                    reqServerEntr = true;
+                }
+            }
         }
-        
-        if((!reqServerEntr) && (clientEntropy == null)){
-            log.log(Level.SEVERE,
-                    LogStringsMessages.WSSC_0010_CLIENT_ENTROPY_CANNOT_NULL());
-            throw new WSSecureConversationException(LogStringsMessages.WSSC_0010_CLIENT_ENTROPY_CANNOT_NULL());
-        }
-        
+                
         int keySize = (int)request.getKeySize();
         if (keySize < 1 && symBinding!=null ){
             final AlgorithmSuite algoSuite = symBinding.getAlgorithmSuite();
