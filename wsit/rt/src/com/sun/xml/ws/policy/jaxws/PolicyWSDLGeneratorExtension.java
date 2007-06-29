@@ -291,7 +291,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
     public void addBindingOperationFaultExtension(final TypedXmlWriter fault, final JavaMethod method, final CheckedException exception) {
         LOGGER.entering();
         final String messageName = (null == exception) ? null : exception.getMessageName();
-        selectAndProcessSubject(fault, WSDLFault.class, ScopeType.FAULT_MESSAGE, messageName);
+        selectAndProcessSubject(fault, WSDLBoundOperation.class, ScopeType.FAULT_MESSAGE, messageName);
         LOGGER.exiting();
     }
     
@@ -370,11 +370,13 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
     private static final boolean isCorrectType(final PolicyMap map, final PolicySubject subject, final ScopeType type) {
         switch (type) {
             case OPERATION :
-                return ! (map.isInputMessageSubject(subject) || map.isOutputMessageSubject(subject));
+                return ! (map.isInputMessageSubject(subject) || map.isOutputMessageSubject(subject) || map.isFaultMessageSubject(subject));
             case INPUT_MESSAGE :
                 return map.isInputMessageSubject(subject);
             case OUTPUT_MESSAGE :
                 return map.isOutputMessageSubject(subject);
+            case FAULT_MESSAGE :
+                return map.isFaultMessageSubject(subject);
             default:
                 return true;
         }

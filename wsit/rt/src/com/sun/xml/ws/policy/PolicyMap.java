@@ -484,7 +484,7 @@ public final class PolicyMap implements Iterable<Policy> {
     }
     
     /*
-     * TODO: reconsider this QUICK HACK FOR J1
+     * TODO: reconsider this QUICK HACK
      */
     public boolean isInputMessageSubject(final PolicySubject subject) {
         for (PolicyScope scope : inputMessageMap.getStoredScopes()) {
@@ -496,10 +496,23 @@ public final class PolicyMap implements Iterable<Policy> {
     }
     
     /*
-     * TODO: reconsider this QUICK HACK FOR J1
+     * TODO: reconsider this QUICK HACK
      */
     public boolean isOutputMessageSubject(final PolicySubject subject) {
         for (PolicyScope scope : outputMessageMap.getStoredScopes()) {
+            if (scope.getPolicySubjects().contains(subject)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    
+    /*
+     * TODO: reconsider this QUICK HACK
+     */
+    public boolean isFaultMessageSubject(final PolicySubject subject) {
+        for (PolicyScope scope : faultMessageMap.getStoredScopes()) {
             if (scope.getPolicySubjects().contains(subject)) {
                 return true;
             }
