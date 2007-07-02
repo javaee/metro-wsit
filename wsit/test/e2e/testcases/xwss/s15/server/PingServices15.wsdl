@@ -62,7 +62,7 @@
                     <sp:AlgorithmSuite>
                         <wsp:Policy>
                             <sp:Basic128 />
-                            <sp:InclusiveC14N />
+                            <!--<sp:InclusiveC14N />-->
                         </wsp:Policy>
                     </sp:AlgorithmSuite>
 
