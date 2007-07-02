@@ -37,13 +37,17 @@
 package com.sun.xml.ws.security.impl.policyconv;
 
 import com.sun.xml.wss.impl.PolicyTypeUtil;
+import com.sun.xml.wss.impl.policy.mls.SignaturePolicy;
 import com.sun.xml.wss.impl.policy.mls.Target;
 import com.sun.xml.wss.impl.policy.mls.WSSPolicy;
+import javax.xml.crypto.dsig.CanonicalizationMethod;
 import javax.xml.namespace.QName;
 import com.sun.xml.ws.security.policy.EncryptedParts;
 import com.sun.xml.ws.security.policy.SignedParts;
 import com.sun.xml.ws.security.policy.Token;
 import com.sun.xml.wss.impl.MessageConstants;
+import com.sun.xml.ws.security.impl.policy.Constants;
+import com.sun.xml.ws.security.policy.AlgorithmSuite;
 
 /**
  *
@@ -108,5 +112,19 @@ public class SecurityPolicyUtil {
             return MessageConstants.SCT_NAME;
         }
         return null;
+    }
+    
+    public static void setCanonicalizationMethod(SignaturePolicy.FeatureBinding spFB, AlgorithmSuite algorithmSuite){
+        if(algorithmSuite != null && algorithmSuite.getAdditionalProps().contains(Constants.InclusiveC14N)){
+            spFB.setCanonicalizationAlgorithm(CanonicalizationMethod.INCLUSIVE);
+        } else{
+            spFB.setCanonicalizationAlgorithm(CanonicalizationMethod.EXCLUSIVE);
+        }
+        
+        if(algorithmSuite != null && algorithmSuite.getAdditionalProps().contains(Constants.InclusiveC14NWithCommentsForCm)){
+            spFB.setCanonicalizationAlgorithm(CanonicalizationMethod.INCLUSIVE_WITH_COMMENTS);
+        } else if(algorithmSuite != null && algorithmSuite.getAdditionalProps().contains(Constants.ExclusiveC14NWithCommentsForCm)){
+            spFB.setCanonicalizationAlgorithm(CanonicalizationMethod.EXCLUSIVE_WITH_COMMENTS);
+        }
     }
 }

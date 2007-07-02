@@ -108,7 +108,8 @@ public class SymmetricBindingProcessor extends BindingProcessor{
                 
                 SignaturePolicy.FeatureBinding spFB = (com.sun.xml.wss.impl.policy.mls.SignaturePolicy.FeatureBinding)
                         primarySP.getFeatureBinding();
-                spFB.setCanonicalizationAlgorithm(CanonicalizationMethod.EXCLUSIVE);
+                //spFB.setCanonicalizationAlgorithm(CanonicalizationMethod.EXCLUSIVE);
+                SecurityPolicyUtil.setCanonicalizationMethod(spFB, binding.getAlgorithmSuite());
                 spFB.isPrimarySignature(true);
                 addSymmetricKeyBinding(primarySP,st);
             }
@@ -122,7 +123,8 @@ public class SymmetricBindingProcessor extends BindingProcessor{
             
             SignaturePolicy.FeatureBinding spFB = (com.sun.xml.wss.impl.policy.mls.SignaturePolicy.FeatureBinding)
                     primarySP.getFeatureBinding();
-            spFB.setCanonicalizationAlgorithm(CanonicalizationMethod.EXCLUSIVE);
+            //spFB.setCanonicalizationAlgorithm(CanonicalizationMethod.EXCLUSIVE);
+            SecurityPolicyUtil.setCanonicalizationMethod(spFB, binding.getAlgorithmSuite());
             spFB.isPrimarySignature(true);
         }
         

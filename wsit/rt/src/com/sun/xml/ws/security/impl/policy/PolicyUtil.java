@@ -57,6 +57,13 @@ public class PolicyUtil {
         return false;
     }
     
+    public static boolean isSunPolicyNS(PolicyAssertion pa) {
+        if ( Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS.equals(pa.getName().getNamespaceURI()) ) {
+            return true;
+        }
+        return false;
+    }
+    
     public static boolean isAddressingNS(PolicyAssertion pa) {
         if ( AddressingVersion.MEMBER.getNsUri().equals(pa.getName().getNamespaceURI()) ) {
             return true;
@@ -848,6 +855,73 @@ public class PolicyUtil {
         }
         return false;
         
+    }
+    
+    public static boolean isInclusiveC14NWithComments(PolicyAssertion assertion ) {
+        
+        if(!isSunPolicyNS(assertion)){
+            return false;
+        }
+        if ( assertion.getName().getLocalPart().equals(InclusiveC14NWithComments)) {
+            return true;
+        }
+        return false;
+    }
+    
+    public static boolean isInclusiveC14NWithCommentsForTransforms(PolicyAssertion assertion ) {
+        
+        if(!isSunPolicyNS(assertion)){
+            return false;
+        }
+        if ( assertion.getName().getLocalPart().equals(InclusiveC14NWithComments)) {
+            if("true".equals(assertion.getAttributeValue(new QName(SUN_WSS_SECURITY_SERVER_POLICY_NS, "forTransforms"))))
+                return true;
+        }
+        return false;
+    }
+    
+    public static boolean isInclusiveC14NWithCommentsForCm(PolicyAssertion assertion ) {
+        
+        if(!isSunPolicyNS(assertion)){
+            return false;
+        }
+        if ( assertion.getName().getLocalPart().equals(InclusiveC14NWithComments)) {
+            if("true".equals(assertion.getAttributeValue(new QName(SUN_WSS_SECURITY_SERVER_POLICY_NS, "forCm"))))
+                return true;
+        }
+        return false;
+    }
+    
+    public static boolean isExclusiveC14NWithComments(PolicyAssertion assertion ) {
+        if(!isSunPolicyNS(assertion)){
+            return false;
+        }
+        if ( assertion.getName().getLocalPart().equals(ExclusiveC14NWithComments)) {
+            return true;
+        }
+        return false;
+    }
+    
+    public static boolean isExclusiveC14NWithCommentsForTransforms(PolicyAssertion assertion ) {
+        if(!isSunPolicyNS(assertion)){
+            return false;
+        }
+        if ( assertion.getName().getLocalPart().equals(ExclusiveC14NWithComments)) {
+            if("true".equals(assertion.getAttributeValue(new QName(SUN_WSS_SECURITY_SERVER_POLICY_NS, "forTransforms"))))
+                return true;
+        }
+        return false;
+    }
+    
+    public static boolean isExclusiveC14NWithCommentsForCm(PolicyAssertion assertion ) {
+        if(!isSunPolicyNS(assertion)){
+            return false;
+        }
+        if ( assertion.getName().getLocalPart().equals(ExclusiveC14NWithComments)) {
+            if("true".equals(assertion.getAttributeValue(new QName(SUN_WSS_SECURITY_SERVER_POLICY_NS, "forCm"))))
+                return true;
+        }
+        return false;
     }
     
     public static boolean isSTRTransform10(PolicyAssertion assertion) {

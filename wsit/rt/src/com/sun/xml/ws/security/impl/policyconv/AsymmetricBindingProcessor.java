@@ -89,7 +89,8 @@ public class AsymmetricBindingProcessor extends BindingProcessor {
             tokenProcessor.addKeyBinding(primarySP,st,true);
             SignaturePolicy.FeatureBinding spFB = (com.sun.xml.wss.impl.policy.mls.SignaturePolicy.FeatureBinding)
                     primarySP.getFeatureBinding();
-            spFB.setCanonicalizationAlgorithm(CanonicalizationMethod.EXCLUSIVE);
+            //spFB.setCanonicalizationAlgorithm(CanonicalizationMethod.EXCLUSIVE);
+            SecurityPolicyUtil.setCanonicalizationMethod(spFB, binding.getAlgorithmSuite());
             spFB.isPrimarySignature(true);
         }
         if(et != null){
