@@ -93,7 +93,7 @@ public class MEXEndpoint implements Provider<Message> {
      * it, and uses it to create a response message.
      */
     private Message processGetRequest(final Message request,
-        final String address, final AddressingVersion wsaVersion,
+        String address, final AddressingVersion wsaVersion,
         final SOAPVersion soapVersion) {
         
         try {
@@ -137,6 +137,7 @@ public class MEXEndpoint implements Provider<Message> {
             // If the owner endpoint has been found, then
             // get its metadata and write it to the response message
             if (ownerEndpoint != null) {
+                address = address.substring(0 , address.length() - 4);
                 writeStartEnvelope(writer, wsaVersion, soapVersion);
                 WSDLRetriever wsdlRetriever = new WSDLRetriever(ownerEndpoint);
                 wsdlRetriever.addDocuments(writer, null, address);
