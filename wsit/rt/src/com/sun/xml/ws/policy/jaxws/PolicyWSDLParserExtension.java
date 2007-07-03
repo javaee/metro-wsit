@@ -35,6 +35,7 @@
  */
 package com.sun.xml.ws.policy.jaxws;
 
+import com.sun.xml.ws.api.model.wsdl.WSDLBoundFault;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLFault;
@@ -651,16 +652,16 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
         LOGGER.exiting();
     }
     
-    public boolean bindingOperationFaultElements(final WSDLBoundOperation operation, final XMLStreamReader reader) {
+    public boolean bindingOperationFaultElements(final WSDLBoundFault fault, final XMLStreamReader reader) {
         LOGGER.entering();
-        final boolean result = processSubelement(operation, reader, getHandlers4BindingFaultOpMap());
-        LOGGER.exiting();
+        final boolean result = processSubelement(fault, reader, getHandlers4BindingFaultOpMap());
+        LOGGER.exiting(result);
         return result;
     }
     
-    public void bindingOperationFaultAttributes(final WSDLBoundOperation operation, final XMLStreamReader reader) {
+    public void bindingOperationFaultAttributes(final WSDLBoundFault fault, final XMLStreamReader reader) {
         LOGGER.entering();
-        processAttributes(operation, reader, getHandlers4BindingFaultOpMap());
+        processAttributes(fault, reader, getHandlers4BindingFaultOpMap());
         LOGGER.exiting();
     }
     
@@ -875,23 +876,7 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
                                         ,port.getName()
                                         ,operation.getName()
                                         ,null));
-                            } // endif input msg scope -- by binding output op
-                            if ( // fault msg scope -- by binding fault op
-                                    getHandlers4BindingFaultOpMap().containsKey(boundOperation)) {
-                                for (WSDLFault fault : boundOperation.getOperation().getFaults()) {
-                                    getPolicyMapBuilder()
-                                    .registerHandler(
-                                            new BuilderHandlerMessageScope(
-                                            getPolicyURIs(getHandlers4BindingFaultOpMap().get(boundOperation),modelContext)
-                                            ,getPolicyModels()
-                                            ,boundOperation
-                                            ,BuilderHandlerMessageScope.Scope.FaultMessageScope
-                                            ,service.getName()
-                                            ,port.getName()
-                                            ,operation.getName()
-                                            ,fault.getMessage().getName()));
-                                }
-                            } // endif input msg scope -- by binding fault op
+                            } // endif output msg scope -- by binding output op
                             if ( null != inputMsg   // input msg scope -- by message
                                     && getHandlers4MessageMap().containsKey(inputMsg)) {
                                 getPolicyMapBuilder()
@@ -948,6 +933,23 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
                                         ,operation.getName()
                                         ,null));
                             } // endif output msg scope -- by output
+                            
+                            for (WSDLBoundFault fault : boundOperation.getFaults()) {
+                                if (getHandlers4BindingFaultOpMap().containsKey(fault)) {
+                                    getPolicyMapBuilder()
+                                    .registerHandler(
+                                            new BuilderHandlerMessageScope(
+                                            getPolicyURIs(getHandlers4BindingFaultOpMap().get(fault),modelContext)
+                                            ,getPolicyModels()
+                                            ,fault
+                                            ,BuilderHandlerMessageScope.Scope.FaultMessageScope
+                                            ,service.getName()
+                                            ,port.getName()
+                                            ,boundOperation.getName()
+                                            ,new QName(boundOperation.getName().getNamespaceURI(), fault.getName())));
+                                } // endif binding operation fault scope -- by binding operation
+                            } // end foreach binding operation fault in operation
+                            
                             for (WSDLFault fault : operation.getFaults()) {
                                 final WSDLMessage faultMsg = fault.getMessage();
                                 if ( null != faultMsg   // fault msg scope -- by message

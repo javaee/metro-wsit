@@ -41,6 +41,7 @@ import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.model.CheckedException;
 import com.sun.xml.ws.api.model.JavaMethod;
 import com.sun.xml.ws.api.model.SEIModel;
+import com.sun.xml.ws.api.model.wsdl.WSDLBoundFault;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLFault;
@@ -291,7 +292,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
     public void addBindingOperationFaultExtension(final TypedXmlWriter fault, final JavaMethod method, final CheckedException exception) {
         LOGGER.entering();
         final String messageName = (null == exception) ? null : exception.getMessageName();
-        selectAndProcessSubject(fault, WSDLBoundOperation.class, ScopeType.FAULT_MESSAGE, messageName);
+        selectAndProcessSubject(fault, WSDLBoundFault.class, ScopeType.FAULT_MESSAGE, messageName);
         LOGGER.exiting();
     }
     
