@@ -258,7 +258,7 @@ public class PolicyWSDLParserExtensionTest extends TestCase{
                 new QName("http://example.org","DictionaryService")
                 ,new QName("http://example.org","CzechToEnglish")
                 ,new QName("http://example.org","TranslateOperation")
-                ,new QName("http://example.org","DictFault"))));
+                ,new QName("http://example.org","Fault"))));
     }
     
     /**
@@ -409,7 +409,7 @@ public class PolicyWSDLParserExtensionTest extends TestCase{
                 new QName("http://example.org","DictionaryService")
                 ,new QName("http://example.org","CzechToEnglish")
                 ,new QName("http://example.org","TranslateOperation")
-                ,new QName("http://example.org","DictFault"))));
+                ,new QName("http://example.org","Fault"))));
     }
     
     public void testServiceHeredocAttachment() throws Exception {
@@ -539,7 +539,7 @@ public class PolicyWSDLParserExtensionTest extends TestCase{
                 new QName("http://example.org","DictionaryService")
                 ,new QName("http://example.org","CzechToEnglish")
                 ,new QName("http://example.org","TranslateOperation")
-                ,new QName("http://example.org","DictFault"))));
+                ,new QName("http://example.org","Fault"))));
     }
     
     public void testBindingOpFaultExternalPolicyAttachment() throws Exception {
@@ -548,7 +548,7 @@ public class PolicyWSDLParserExtensionTest extends TestCase{
                 new QName("http://example.org","DictionaryService")
                 ,new QName("http://example.org","CzechToEnglish")
                 ,new QName("http://example.org","TranslateOperation")
-                ,new QName("http://example.org","DictFault"))));
+                ,new QName("http://example.org","Fault"))));
     }
     
     public void testBindingOpFaultExternalFromAnonymousPolicyAttachment() throws Exception {
@@ -557,7 +557,7 @@ public class PolicyWSDLParserExtensionTest extends TestCase{
                 new QName("http://example.org","DictionaryService")
                 ,new QName("http://example.org","CzechToEnglish")
                 ,new QName("http://example.org","TranslateOperation")
-                ,new QName("http://example.org","DictFault"))));
+                ,new QName("http://example.org","Fault"))));
     }
 
     public void testInvalidAssertionShouldCauseException() throws Exception {
