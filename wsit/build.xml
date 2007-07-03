@@ -55,6 +55,10 @@
         <zip basedir="${dist.image.dir}" destfile="${dist.dir}/${install.name}.zip"/>
         <installerBuilder classFile="${dist.dir}/${install.name}-installer.jar" licenseFile="CDDLv1.0.1.txt" zipFile="${dist.dir}/${install.name}.zip"/>
     </target>
+    
+    <target name="installer">
+        <installerBuilder classFile="${dist.dir}/${install.name}-installer.jar" licenseFile="CDDLv1.0.1.txt" zipFile="${dist.dir}/${install.name}.zip"/>
+    </target>
 
     <target name="dist" depends="jar"/>
 

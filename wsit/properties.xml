@@ -81,11 +81,13 @@
     <macrodef name="updateManifestWithVersion"
               description="updates a jar manifest file with the version information">
         <attribute name="file" />
+        <attribute name="class-path" default="" />
         <sequential>
             <manifest mode="update" file="@{file}">
                 <attribute name="Build-Id" value="${build.id}" />
                 <attribute name="Build-Version" value="${build.version}" />
                 <attribute name="Major-Version" value="${release.impl.version}" />
+                <attribute name="Class-Path" value="@{class-path}" />
             </manifest>
         </sequential>
     </macrodef>
