@@ -80,6 +80,48 @@ final class BuilderHandlerMessageScope extends BuilderHandler{
         this.message = message;
     }
     
+    /**
+     * Multiple bound operations may refer to the same fault messages. This would result
+     * in multiple builder handlers referring to the same policies. This method allows
+     * to sort out these duplicate handlers.
+     */
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        
+        if (!(obj instanceof BuilderHandlerMessageScope)) {
+            return false;
+        }
+        
+        final BuilderHandlerMessageScope that = (BuilderHandlerMessageScope) obj;
+        boolean result = true;
+        
+        result = result && ((this.policySubject == null) ? ((that.policySubject == null) ? true : false) :this.policySubject.equals(that.policySubject));
+        result = result && ((this.scope == null) ? ((that.scope == null) ? true : false) :this.scope.equals(that.scope));
+        result = result && ((this.message == null) ? ((that.message == null) ? true : false) :this.message.equals(that.message));
+        if (this.scope != Scope.FaultMessageScope) {
+            result = result && ((this.service == null) ? ((that.service == null) ? true : false) :this.service.equals(that.service));
+            result = result && ((this.port == null) ? ((that.port == null) ? true : false) :this.port.equals(that.port));
+            result = result && ((this.operation == null) ? ((that.operation == null) ? true : false) :this.operation.equals(that.operation));
+        }
+        
+        return result;
+    }
+
+    public int hashCode() {
+        int hashCode = 19;
+        hashCode = 31 * hashCode + (policySubject == null ? 0 : policySubject.hashCode());
+        hashCode = 31 * hashCode + (message == null ? 0 : message.hashCode());
+        hashCode = 31 * hashCode + (scope == null ? 0 : scope.hashCode());
+        if (scope != Scope.FaultMessageScope) {
+            hashCode = 31 * hashCode + (service == null ? 0 : service.hashCode());
+            hashCode = 31 * hashCode + (port == null ? 0 : port.hashCode());
+            hashCode = 31 * hashCode + (operation == null ? 0 : operation.hashCode());
+        }
+        return hashCode;
+    }
+    
     protected void doPopulate(final PolicyMapExtender policyMapExtender) throws PolicyException{
         PolicyMapKey mapKey;
         

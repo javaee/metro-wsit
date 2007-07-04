@@ -771,6 +771,10 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
         // Start-preparation of policy map builder
         // iterating over all services and binding all the policies read before
         try {
+            // messageSet holds the handlers for all wsdl:message elements. There
+            // may otherwise be multiple entries for policies that are contained
+            // by fault messages.
+            HashSet<BuilderHandlerMessageScope> messageSet = new HashSet<BuilderHandlerMessageScope>();
             for (WSDLService service : context.getWSDLModel().getServices().values()) {
                 if (getHandlers4ServiceMap().containsKey(service)) {
                     getPolicyMapBuilder().registerHandler(new BuilderHandlerServiceScope(
@@ -814,17 +818,45 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
                                     ,port.getName()));
                         } // endif handler for port type
                         for (WSDLBoundOperation boundOperation : port.getBinding().getBindingOperations()) {
+
                             final WSDLOperation operation = boundOperation.getOperation();
                             final WSDLInput input = operation.getInput();
                             final WSDLOutput output = operation.getOutput();
-                            WSDLMessage inputMsg = null;
-                            WSDLMessage outputMsg = null;
+                            
                             if (null!=input) {
-                                inputMsg = input.getMessage();
+                                WSDLMessage inputMsg = input.getMessage();
+                                if (inputMsg != null && getHandlers4MessageMap().containsKey(inputMsg)) {
+                                    messageSet.add(new BuilderHandlerMessageScope(
+                                        getPolicyURIs(
+                                            getHandlers4MessageMap().get(inputMsg), modelContext)
+                                            ,getPolicyModels()
+                                            ,inputMsg
+                                            ,BuilderHandlerMessageScope.Scope.InputMessageScope
+                                            ,service.getName()
+                                            ,port.getName()
+                                            ,operation.getName()
+                                            ,null)
+                                    );
+                                }
                             }
+                            
                             if (null!=output) {
-                                outputMsg = output.getMessage();
+                                WSDLMessage outputMsg = output.getMessage();
+                                if (outputMsg != null && getHandlers4MessageMap().containsKey(outputMsg)) {
+                                    messageSet.add(new BuilderHandlerMessageScope(
+                                        getPolicyURIs(
+                                            getHandlers4MessageMap().get(outputMsg),modelContext)
+                                            ,getPolicyModels()
+                                            ,outputMsg
+                                            ,BuilderHandlerMessageScope.Scope.OutputMessageScope
+                                            ,service.getName()
+                                            ,port.getName()
+                                            ,operation.getName()
+                                            ,null)
+                                    );
+                                }
                             }
+                            
                             if ( // handler for operation scope -- by boundOperation
                                     getHandlers4BoundOperationMap().containsKey(boundOperation)) {
                                 getPolicyMapBuilder()
@@ -877,20 +909,6 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
                                         ,operation.getName()
                                         ,null));
                             } // endif output msg scope -- by binding output op
-                            if ( null != inputMsg   // input msg scope -- by message
-                                    && getHandlers4MessageMap().containsKey(inputMsg)) {
-                                getPolicyMapBuilder()
-                                .registerHandler(
-                                        new BuilderHandlerMessageScope(
-                                        getPolicyURIs(getHandlers4MessageMap().get(inputMsg),modelContext)
-                                        ,getPolicyModels()
-                                        ,inputMsg
-                                        ,BuilderHandlerMessageScope.Scope.InputMessageScope
-                                        ,service.getName()
-                                        ,port.getName()
-                                        ,operation.getName()
-                                        ,null));
-                            } // endif input msg scope -- by message
                             if ( null != input    // input msg scope -- by input
                                     && getHandlers4InputMap().containsKey(input)) {
                                 getPolicyMapBuilder()
@@ -905,20 +923,6 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
                                         ,operation.getName()
                                         ,null));
                             } // endif input msg scope -- by input
-                            if ( null != outputMsg  // output msg scope -- by message
-                                    && getHandlers4MessageMap().containsKey(outputMsg)) {
-                                getPolicyMapBuilder()
-                                .registerHandler(
-                                        new BuilderHandlerMessageScope(
-                                        getPolicyURIs(getHandlers4MessageMap().get(outputMsg),modelContext)
-                                        ,getPolicyModels()
-                                        ,outputMsg
-                                        ,BuilderHandlerMessageScope.Scope.OutputMessageScope
-                                        ,service.getName()
-                                        ,port.getName()
-                                        ,operation.getName()
-                                        ,null));
-                            } // endif output msg scope -- by message
                             if ( null != output // output msg scope -- by output
                                     && getHandlers4OutputMap().containsKey(output)) {
                                 getPolicyMapBuilder()
@@ -941,7 +945,7 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
                                             new BuilderHandlerMessageScope(
                                             getPolicyURIs(getHandlers4BindingFaultOpMap().get(fault),modelContext)
                                             ,getPolicyModels()
-                                            ,fault
+                                            ,new WSDLBoundFaultContainer(fault, boundOperation)
                                             ,BuilderHandlerMessageScope.Scope.FaultMessageScope
                                             ,service.getName()
                                             ,port.getName()
@@ -954,17 +958,16 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
                                 final WSDLMessage faultMsg = fault.getMessage();
                                 if ( null != faultMsg   // fault msg scope -- by message
                                         && getHandlers4MessageMap().containsKey(faultMsg)) {
-                                    getPolicyMapBuilder()
-                                    .registerHandler(
-                                            new BuilderHandlerMessageScope(
-                                            getPolicyURIs(getHandlers4MessageMap().get(faultMsg),modelContext)
+                                    messageSet.add(new BuilderHandlerMessageScope(
+                                            getPolicyURIs(getHandlers4MessageMap().get(faultMsg), modelContext)
                                             ,getPolicyModels()
                                             ,faultMsg
                                             ,BuilderHandlerMessageScope.Scope.FaultMessageScope
                                             ,service.getName()
                                             ,port.getName()
                                             ,operation.getName()
-                                            ,faultMsg.getName()));
+                                            ,faultMsg.getName())
+                                    );
                                 } // endif fault msg scope -- by message
                                 if ( // fault msg scope -- by fault
                                         getHandlers4FaultMap().containsKey(fault)) {
@@ -985,6 +988,10 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
                     } // endif port.getBinding() != null
                 } // end foreach port in service
             } // end foreach service in wsdl
+            // Add handlers for wsdl:message elements
+            for (BuilderHandlerMessageScope scopeHandler : messageSet) {
+                getPolicyMapBuilder().registerHandler(scopeHandler);
+            }
         } catch(PolicyException e) {
             LOGGER.logSevereException(e);
         }
