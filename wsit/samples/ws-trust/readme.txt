@@ -54,11 +54,15 @@ To run the sample with the sample customer STSAttributeProvider:
    </target>
 
     This new target element places the additional jars and configuration files into
-    the jaxws-sts war.
+    the jaxws-sts war. This customer STSAttributeProvider allows to plug-in user 
+    identities/attributes mappings to the STS so that the issued SAMl assertions contain
+    the required user information for the service.
 -------------------------------------------------------------------------------------
 
 This works with Sun Java System Access Manager 7.1 Beta which is available as part of 
-java_app_platform_sdk-5_01 release. 
+java_app_platform_sdk-5_01 release. This sample use AM for authentication and control 
+of issuing tokens with a customer STSAuthorizationProvider. One may also develop a 
+STSAttributeProvider on top of AM for user identity mappings.
 
 To set up and run the sample with AccessManager:
 
