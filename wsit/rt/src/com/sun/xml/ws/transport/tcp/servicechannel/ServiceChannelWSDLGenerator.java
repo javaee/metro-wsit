@@ -75,7 +75,7 @@ public final class ServiceChannelWSDLGenerator {
         
         final WSEndpoint<?> endpoint = WSEndpoint.create(
                 ServiceChannelWSImpl.class, true,
-                InstanceResolver.createSingleton(ServiceChannelWSImpl.class.newInstance()).createInvoker(),
+                null,
                 serviceName, portName, null, binding,
                 null, docs, (URL) null
                 );

@@ -51,23 +51,17 @@ public class ServiceChannelCreator {
     private static final WSEndpoint<ServiceChannelWSImpl> endpoint = createEndpoint();
     
     private static WSEndpoint<ServiceChannelWSImpl> createEndpoint() {
-        try {
-            final QName serviceName = WSEndpoint.getDefaultServiceName(ServiceChannelWSImpl.class);
-            final QName portName = WSEndpoint.getDefaultPortName(serviceName, ServiceChannelWSImpl.class);
-            final BindingID bindingId = BindingID.parse(ServiceChannelWSImpl.class);
-            final WSBinding binding = bindingId.createBinding();
+        final QName serviceName = WSEndpoint.getDefaultServiceName(ServiceChannelWSImpl.class);
+        final QName portName = WSEndpoint.getDefaultPortName(serviceName, ServiceChannelWSImpl.class);
+        final BindingID bindingId = BindingID.parse(ServiceChannelWSImpl.class);
+        final WSBinding binding = bindingId.createBinding();
             
-            return WSEndpoint.create(
+        return WSEndpoint.create(
                     ServiceChannelWSImpl.class, true,
-                    InstanceResolver.createSingleton(ServiceChannelWSImpl.class.newInstance()).createInvoker(),
+                    null,
                     serviceName, portName, null, binding,
                     null, null, (EntityResolver) null, true
                     );
-        } catch (InstantiationException ex) {
-        } catch (IllegalAccessException ex) {
-        }
-        
-        return null;
     }
     
     public static WSEndpoint<ServiceChannelWSImpl> getServiceChannelEndpointInstance() {
