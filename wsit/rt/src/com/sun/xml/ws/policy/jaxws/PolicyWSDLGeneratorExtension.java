@@ -170,7 +170,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
                         } catch (PolicyException e) {
                             throw LOGGER.logSevereException(new WebServiceException(LocalizationMessages.WSP_1029_FAILED_TO_RETRIEVE_EFFECTIVE_POLICY_FOR_SUBJECT(subject.toString()), e));
                         }
-                        if ((null == policy.getIdOrName()) || (!policyIDsOrNamesWritten.contains(policy.getIdOrName()))) {
+                        if ((null == policy.getIdOrName()) || (policyIDsOrNamesWritten.contains(policy.getIdOrName()))) {
                             LOGGER.fine(LocalizationMessages.WSP_1047_POLICY_ID_NULL_OR_DUPLICATE(policy));
                         } else {
                             try {
