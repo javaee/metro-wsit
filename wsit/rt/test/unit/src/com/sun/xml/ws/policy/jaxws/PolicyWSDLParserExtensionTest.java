@@ -41,9 +41,11 @@ import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.server.SDDocumentSource;
 import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
 import com.sun.xml.ws.api.wsdl.parser.XMLEntityResolver;
+import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
+import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import com.sun.xml.ws.policy.testutils.PolicyResourceLoader;
 import javax.xml.namespace.QName;
@@ -55,6 +57,7 @@ import junit.framework.TestSuite;
 import static com.sun.xml.ws.policy.testutils.PolicyResourceLoader.getPolicyMap;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Collection;
 import javax.xml.stream.XMLInputFactory;
 /**
  *
@@ -576,5 +579,195 @@ public class PolicyWSDLParserExtensionTest extends TestCase{
         } catch (WebServiceException e) {
             // ok - exception thrown as expected
         }
+    }
+
+    public void testComprehensive() throws PolicyException {
+        PolicyMap policyMap = getPolicyMap("parser/testComprehensive.wsdl");
+        
+        // Test service scope
+        
+        Collection<PolicyMapKey> keys = policyMap.getAllServiceScopeKeys();
+        assertEquals(1, keys.size());
+        
+        Policy policy = policyMap.getServiceEffectivePolicy(policyMap.createWsdlServiceScopeKey(
+                new QName("http://wsit.test/","FaultServiceService")));
+        assertEquals(1, policy.getNumberOfAssertionSets());
+        AssertionSet assertionSet = policy.iterator().next();
+        assertTrue(assertionSet.contains(new QName("http://wsit.test/", "ServiceMarker")));
+        
+        // Test endpoint scope
+
+        keys = policyMap.getAllEndpointScopeKeys();
+        assertEquals(1, keys.size());
+        
+        policy = policyMap.getEndpointEffectivePolicy(policyMap.createWsdlEndpointScopeKey(
+                new QName("http://wsit.test/","FaultServiceService"),
+                new QName("http://wsit.test/","FaultServicePort")));
+        assertEquals(1, policy.getNumberOfAssertionSets());
+        assertionSet = policy.iterator().next();
+        assertTrue(assertionSet.contains(new QName("http://wsit.test/", "BindingMarker")));
+        assertTrue(assertionSet.contains(new QName("http://wsit.test/", "PortMarker")));
+        
+        // Test operation scope
+
+        keys = policyMap.getAllOperationScopeKeys();
+        assertEquals(3, keys.size());
+        
+        policy = policyMap.getOperationEffectivePolicy(policyMap.createWsdlOperationScopeKey(
+                new QName("http://wsit.test/","FaultServiceService"),
+                new QName("http://wsit.test/","FaultServicePort"),
+                new QName("http://wsit.test/","echo")));
+        assertEquals(1, policy.getNumberOfAssertionSets());
+        assertionSet = policy.iterator().next();
+        assertTrue(assertionSet.contains(new QName("http://wsit.test/", "BindingOperationEcho")));
+        
+        policy = policyMap.getOperationEffectivePolicy(policyMap.createWsdlOperationScopeKey(
+                new QName("http://wsit.test/","FaultServiceService"),
+                new QName("http://wsit.test/","FaultServicePort"),
+                new QName("http://wsit.test/","hello")));
+        assertEquals(1, policy.getNumberOfAssertionSets());
+        assertionSet = policy.iterator().next();
+        assertTrue(assertionSet.contains(new QName("http://wsit.test/", "BindingOperationHello")));
+        
+        policy = policyMap.getOperationEffectivePolicy(policyMap.createWsdlOperationScopeKey(
+                new QName("http://wsit.test/","FaultServiceService"),
+                new QName("http://wsit.test/","FaultServicePort"),
+                new QName("http://wsit.test/","ping")));
+        assertEquals(1, policy.getNumberOfAssertionSets());
+        assertionSet = policy.iterator().next();
+        assertTrue(assertionSet.contains(new QName("http://wsit.test/", "BindingOperationPing")));
+
+        // Test input message scope
+
+        keys = policyMap.getAllInputMessageScopeKeys();
+        assertEquals(3, keys.size());
+        
+        policy = policyMap.getInputMessageEffectivePolicy(policyMap.createWsdlMessageScopeKey(
+                new QName("http://wsit.test/","FaultServiceService"),
+                new QName("http://wsit.test/","FaultServicePort"),
+                new QName("http://wsit.test/","echo")));
+        assertEquals(1, policy.getNumberOfAssertionSets());
+        assertionSet = policy.iterator().next();
+        assertTrue(assertionSet.contains(new QName("http://wsit.test/", "MessageEcho")));
+        assertTrue(assertionSet.contains(new QName("http://wsit.test/", "BindingEchoInput")));
+        
+        policy = policyMap.getInputMessageEffectivePolicy(policyMap.createWsdlMessageScopeKey(
+                new QName("http://wsit.test/","FaultServiceService"),
+                new QName("http://wsit.test/","FaultServicePort"),
+                new QName("http://wsit.test/","hello")));
+        assertEquals(1, policy.getNumberOfAssertionSets());
+        assertionSet = policy.iterator().next();
+        assertTrue(assertionSet.contains(new QName("http://wsit.test/", "MessageHello")));
+        assertTrue(assertionSet.contains(new QName("http://wsit.test/", "BindingHelloInput")));
+        
+        policy = policyMap.getInputMessageEffectivePolicy(policyMap.createWsdlMessageScopeKey(
+                new QName("http://wsit.test/","FaultServiceService"),
+                new QName("http://wsit.test/","FaultServicePort"),
+                new QName("http://wsit.test/","ping")));
+        assertEquals(1, policy.getNumberOfAssertionSets());
+        assertionSet = policy.iterator().next();
+        assertTrue(assertionSet.contains(new QName("http://wsit.test/", "MessagePing")));
+        assertTrue(assertionSet.contains(new QName("http://wsit.test/", "BindingPingInput")));
+        
+        // Test output message scope
+
+        keys = policyMap.getAllOutputMessageScopeKeys();
+        assertEquals(3, keys.size());
+        
+        policy = policyMap.getOutputMessageEffectivePolicy(policyMap.createWsdlMessageScopeKey(
+                new QName("http://wsit.test/","FaultServiceService"),
+                new QName("http://wsit.test/","FaultServicePort"),
+                new QName("http://wsit.test/","echo")));
+        assertEquals(1, policy.getNumberOfAssertionSets());
+        assertionSet = policy.iterator().next();
+        assertTrue(assertionSet.contains(new QName("http://wsit.test/", "MessageEchoResponse")));
+        assertTrue(assertionSet.contains(new QName("http://wsit.test/", "BindingEchoOutput")));
+        
+        policy = policyMap.getOutputMessageEffectivePolicy(policyMap.createWsdlMessageScopeKey(
+                new QName("http://wsit.test/","FaultServiceService"),
+                new QName("http://wsit.test/","FaultServicePort"),
+                new QName("http://wsit.test/","hello")));
+        assertEquals(1, policy.getNumberOfAssertionSets());
+        assertionSet = policy.iterator().next();
+        assertTrue(assertionSet.contains(new QName("http://wsit.test/", "MessageHelloResponse")));
+        assertTrue(assertionSet.contains(new QName("http://wsit.test/", "BindingHelloOutput")));
+        
+        policy = policyMap.getOutputMessageEffectivePolicy(policyMap.createWsdlMessageScopeKey(
+                new QName("http://wsit.test/","FaultServiceService"),
+                new QName("http://wsit.test/","FaultServicePort"),
+                new QName("http://wsit.test/","ping")));
+        assertEquals(1, policy.getNumberOfAssertionSets());
+        assertionSet = policy.iterator().next();
+        assertTrue(assertionSet.contains(new QName("http://wsit.test/", "BindingPingOutput")));
+        
+        // Test fault message scope
+
+        keys = policyMap.getAllFaultMessageScopeKeys();
+        assertEquals(6, keys.size());
+        
+        policy = policyMap.getFaultMessageEffectivePolicy(policyMap.createWsdlFaultMessageScopeKey(
+                new QName("http://wsit.test/", "FaultServiceService"),
+                new QName("http://wsit.test/", "FaultServicePort"),
+                new QName("http://wsit.test/", "echo"),
+                new QName("http://wsit.test/", "EchoException")));
+        assertEquals(1, policy.getNumberOfAssertionSets());
+        assertionSet = policy.iterator().next();
+        assertTrue(assertionSet.contains(new QName("http://wsit.test/", "BindingEchoException")));
+        assertTrue(assertionSet.contains(new QName("http://wsit.test/", "EchoException")));
+        
+        policy = policyMap.getFaultMessageEffectivePolicy(policyMap.createWsdlFaultMessageScopeKey(
+                new QName("http://wsit.test/", "FaultServiceService"),
+                new QName("http://wsit.test/", "FaultServicePort"),
+                new QName("http://wsit.test/", "echo"),
+                new QName("http://wsit.test/", "Echo2Exception")));
+        assertEquals(1, policy.getNumberOfAssertionSets());
+        assertionSet = policy.iterator().next();
+        assertTrue(assertionSet.contains(new QName("http://wsit.test/", "BindingEcho2Exception")));
+        assertTrue(assertionSet.contains(new QName("http://wsit.test/", "Echo2Exception")));
+        
+        policy = policyMap.getFaultMessageEffectivePolicy(policyMap.createWsdlFaultMessageScopeKey(
+                new QName("http://wsit.test/", "FaultServiceService"),
+                new QName("http://wsit.test/", "FaultServicePort"),
+                new QName("http://wsit.test/", "hello"),
+                new QName("http://wsit.test/", "HelloException")));
+        assertEquals(1, policy.getNumberOfAssertionSets());
+        assertionSet = policy.iterator().next();
+        assertTrue(assertionSet.contains(new QName("http://wsit.test/", "BindingHelloException")));
+        assertTrue(assertionSet.contains(new QName("http://wsit.test/", "HelloException")));
+        
+        policy = policyMap.getFaultMessageEffectivePolicy(policyMap.createWsdlFaultMessageScopeKey(
+                new QName("http://wsit.test/", "FaultServiceService"),
+                new QName("http://wsit.test/", "FaultServicePort"),
+                new QName("http://wsit.test/", "hello"),
+                new QName("http://wsit.test/", "Hello2Exception")));
+        assertEquals(1, policy.getNumberOfAssertionSets());
+        assertionSet = policy.iterator().next();
+        assertTrue(assertionSet.contains(new QName("http://wsit.test/", "BindingHello2Exception")));
+        assertTrue(assertionSet.contains(new QName("http://wsit.test/", "Hello2Exception")));
+        
+        policy = policyMap.getFaultMessageEffectivePolicy(policyMap.createWsdlFaultMessageScopeKey(
+                new QName("http://wsit.test/", "FaultServiceService"),
+                new QName("http://wsit.test/", "FaultServicePort"),
+                new QName("http://wsit.test/", "ping"),
+                new QName("http://wsit.test/", "EchoException")));
+        assertEquals(1, policy.getNumberOfAssertionSets());
+        assertionSet = policy.iterator().next();
+        assertTrue(assertionSet.contains(new QName("http://wsit.test/", "BindingPingException")));
+        assertTrue(assertionSet.contains(new QName("http://wsit.test/", "BindingEchoException")));
+        assertTrue(assertionSet.contains(new QName("http://wsit.test/", "BindingEcho2Exception")));
+        assertFalse(assertionSet.contains(new QName("http://wsit.test/", "EchoException")));
+        assertFalse(assertionSet.contains(new QName("http://wsit.test/", "Echo2Exception")));
+        
+        policy = policyMap.getFaultMessageEffectivePolicy(policyMap.createWsdlFaultMessageScopeKey(
+                new QName("http://wsit.test/", "FaultServiceService"),
+                new QName("http://wsit.test/", "FaultServicePort"),
+                new QName("http://wsit.test/", "ping"),
+                new QName("http://wsit.test/", "Echo2Exception")));
+        assertEquals(1, policy.getNumberOfAssertionSets());
+        assertionSet = policy.iterator().next();
+        assertTrue(assertionSet.contains(new QName("http://wsit.test/", "BindingPing2Exception")));
+        assertFalse(assertionSet.contains(new QName("http://wsit.test/", "EchoException")));
+        assertFalse(assertionSet.contains(new QName("http://wsit.test/", "Echo2Exception")));
+        
     }
 }
