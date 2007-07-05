@@ -122,12 +122,9 @@ public abstract class BindingProcessor {
         }
     }
     
-    protected void protectTimestamp(){
-        TimestampPolicy tp = new TimestampPolicy();
-        tp.setUUID(pid.generateID());
+    protected void protectTimestamp(TimestampPolicy tp){
         SignatureTarget target = iAP.getTargetCreator().newURISignatureTarget(tp.getUUID());
         SecurityPolicyUtil.setName(target, tp);
-        container.insert(tp);
         SignaturePolicy.FeatureBinding spFB = (SignaturePolicy.FeatureBinding)primarySP.getFeatureBinding();
         spFB.addTargetBinding(target);
     }

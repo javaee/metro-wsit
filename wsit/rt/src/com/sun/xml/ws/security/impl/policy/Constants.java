@@ -135,6 +135,7 @@ public class Constants {
     public final static String Basic128Rsa15 = "Basic128Rsa15";
     public final static String AsymmetricBinding = "AsymmetricBinding";
     public final static String IncludeTimestamp = "IncludeTimestamp";
+    public final static String DisableTimestampSigning = "DisableTimestampSigning";
     public final static String RequireEmbeddedTokenReference = "RequireEmbeddedTokenReference";
     public final static String MustSupportRefThumbprint = "MustSupportRefThumbprint";
     public final static String Basic192 = "Basic192";

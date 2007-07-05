@@ -58,7 +58,8 @@ public class PolicyUtil {
     }
     
     public static boolean isSunPolicyNS(PolicyAssertion pa) {
-        if ( Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS.equals(pa.getName().getNamespaceURI()) ) {
+        if ( Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS.equals(pa.getName().getNamespaceURI()) ||
+                Constants.SUN_WSS_SECURITY_CLIENT_POLICY_NS.equals(pa.getName().getNamespaceURI())) {
             return true;
         }
         return false;
@@ -342,6 +343,17 @@ public class PolicyUtil {
         }
         
         if(assertion.getName().getLocalPart().equals(IncludeTimestamp)) {
+            return true;
+        }
+        return false;
+    }
+    
+    public static boolean disableTimestampSigning(PolicyAssertion assertion) {
+        if ( !isSunPolicyNS(assertion )) {
+            return false;
+        }
+        
+        if(assertion.getName().getLocalPart().equals(DisableTimestampSigning)){
             return true;
         }
         return false;

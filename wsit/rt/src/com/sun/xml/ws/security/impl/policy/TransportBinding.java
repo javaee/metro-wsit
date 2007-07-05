@@ -175,4 +175,8 @@ public class TransportBinding extends PolicyAssertion implements com.sun.xml.ws.
         }
         return fitness;
     }
+
+    public boolean isDisableTimestampSigning() {
+        throw new UnsupportedOperationException();
+    }
 }

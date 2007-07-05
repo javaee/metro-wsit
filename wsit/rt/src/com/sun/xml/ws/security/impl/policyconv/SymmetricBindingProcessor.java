@@ -57,6 +57,7 @@ import com.sun.xml.wss.impl.policy.mls.EncryptionPolicy;
 import com.sun.xml.wss.impl.policy.mls.IssuedTokenKeyBinding;
 import com.sun.xml.wss.impl.policy.mls.SecureConversationTokenKeyBinding;
 import com.sun.xml.wss.impl.policy.mls.SignaturePolicy;
+import com.sun.xml.wss.impl.policy.mls.TimestampPolicy;
 import com.sun.xml.wss.impl.policy.mls.WSSPolicy;
 import java.util.Vector;
 import javax.xml.crypto.dsig.CanonicalizationMethod;
@@ -147,7 +148,13 @@ public class SymmetricBindingProcessor extends BindingProcessor{
             protectPrimarySignature();
         }
         if(binding.isIncludeTimeStamp()){
-            protectTimestamp();
+            TimestampPolicy tp = new TimestampPolicy();
+            tp.setUUID(pid.generateID());
+            container.insert(tp);
+            if(!binding.isDisableTimestampSigning()){
+                protectTimestamp(tp);
+            }
+            protectTimestamp(tp);
         }
         if(binding.getTokenProtection()){
             WSSPolicy policy = (WSSPolicy) primarySP.getKeyBinding();

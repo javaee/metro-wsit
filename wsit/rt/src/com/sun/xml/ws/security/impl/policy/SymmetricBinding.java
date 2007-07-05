@@ -66,7 +66,8 @@ public class SymmetricBinding extends PolicyAssertion implements com.sun.xml.ws.
     Token encryptionToken ; 
     MessageLayout layout = MessageLayout.Lax;   
     AlgorithmSuite algSuite;      
-    boolean includeTimestamp=false;    
+    boolean includeTimestamp=false;   
+    boolean disableTimestampSigning=false;
     boolean contentOnly = true;     
     String protectionOrder = SIGN_ENCRYPT;     
     boolean protectToken = false;      
@@ -122,7 +123,12 @@ public class SymmetricBinding extends PolicyAssertion implements com.sun.xml.ws.
     public boolean isIncludeTimeStamp() {      
         populate();           
         return includeTimestamp;      
-    }           
+    }   
+    
+    public boolean isDisableTimestampSigning(){
+        populate();
+        return disableTimestampSigning;
+    }
     
     public void setLayout(MessageLayout layout) {    
         this.layout = layout;          
@@ -224,7 +230,9 @@ public class SymmetricBinding extends PolicyAssertion implements com.sun.xml.ws.
                     this.protectToken = true;                            
                 }else if(PolicyUtil.isEncryptSignature(assertion)){      
                     this.protectSignature = true;                        
-                }else{                                    
+                } else if(PolicyUtil.disableTimestampSigning(assertion)){
+                    this.disableTimestampSigning = true;
+                } else{                                    
                     if(!assertion.isOptional()){         
                         log_invalid_assertion(assertion, isServer,SymmetricBinding);   
                         fitness = AssertionFitness.HAS_UNKNOWN_ASSERTION;    

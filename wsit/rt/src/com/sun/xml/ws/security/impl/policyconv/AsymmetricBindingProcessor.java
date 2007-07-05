@@ -1,8 +1,8 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
+ *
  * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
- * 
+ *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
@@ -10,7 +10,7 @@
  * a copy of the License at https://glassfish.dev.java.net/public/CDDL+GPL.html
  * or glassfish/bootstrap/legal/LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
- * 
+ *
  * When distributing the software, include this License Header Notice in each
  * file and include the License file at glassfish/bootstrap/legal/LICENSE.txt.
  * Sun designates this particular file as subject to the "Classpath" exception
@@ -19,9 +19,9 @@
  * Header, with the fields enclosed by brackets [] replaced by your own
  * identifying information: "Portions Copyrighted [year]
  * [name of copyright owner]"
- * 
+ *
  * Contributor(s):
- * 
+ *
  * If you wish your version of this file to be governed by only the CDDL or
  * only the GPL Version 2, indicate your decision by adding "[Contributor]
  * elects to include this software in this distribution under the [CDDL or GPL
@@ -46,6 +46,7 @@ import com.sun.xml.ws.security.policy.SignedParts;
 import com.sun.xml.ws.security.policy.Token;
 import com.sun.xml.wss.impl.policy.mls.EncryptionPolicy;
 import com.sun.xml.wss.impl.policy.mls.SignaturePolicy;
+import com.sun.xml.wss.impl.policy.mls.TimestampPolicy;
 import com.sun.xml.wss.impl.policy.mls.WSSPolicy;
 import java.util.Vector;
 import java.util.logging.Level;
@@ -88,7 +89,7 @@ public class AsymmetricBindingProcessor extends BindingProcessor {
             }
             tokenProcessor.addKeyBinding(primarySP,st,true);
             SignaturePolicy.FeatureBinding spFB = (com.sun.xml.wss.impl.policy.mls.SignaturePolicy.FeatureBinding)
-                    primarySP.getFeatureBinding();
+            primarySP.getFeatureBinding();
             //spFB.setCanonicalizationAlgorithm(CanonicalizationMethod.EXCLUSIVE);
             SecurityPolicyUtil.setCanonicalizationMethod(spFB, binding.getAlgorithmSuite());
             spFB.isPrimarySignature(true);
@@ -119,7 +120,12 @@ public class AsymmetricBindingProcessor extends BindingProcessor {
             if(logger.isLoggable(Level.FINEST)){
                 logger.log(Level.FINEST,"Timestamp header will be added to the message and will be Integrity protected ");
             }
-            protectTimestamp();
+            TimestampPolicy tp = new TimestampPolicy();
+            tp.setUUID(pid.generateID());
+            container.insert(tp);
+            if(!binding.isDisableTimestampSigning()){
+                protectTimestamp(tp);
+            }
         }
         if(binding.getTokenProtection()){
             if(logger.isLoggable(Level.FINEST)){

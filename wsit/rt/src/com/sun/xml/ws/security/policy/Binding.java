@@ -58,6 +58,9 @@ public interface Binding{
      * @return true or false
      */
     public boolean isIncludeTimeStamp();
+    
+    
+    public boolean isDisableTimestampSigning();
  
     /**
      * returns the Layout {@link MessageLayout }of  the SecurityHeader.

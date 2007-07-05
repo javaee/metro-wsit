@@ -176,6 +176,9 @@ public class SecurityPolicySelector {
         supportedAssertions.add(new QName(TRUST_NS,EncryptWith));
         supportedAssertions.add(new QName("http://schemas.sun.com/2006/03/wss/server","DisableStreamingSecurity"));
         supportedAssertions.add(new QName("http://schemas.sun.com/2006/03/wss/client","DisableStreamingSecurity"));
+        
+        supportedAssertions.add(new QName("http://schemas.sun.com/2006/03/wss/server","DisableTimestampSigning"));
+        supportedAssertions.add(new QName("http://schemas.sun.com/2006/03/wss/client","DisableTimestampSigning"));
 
         supportedAssertions.add(new QName("http://schemas.sun.com/2006/03/wss/server","DisableInclusivePrefixList"));
         supportedAssertions.add(new QName("http://schemas.sun.com/2006/03/wss/client","DisableInclusivePrefixList"));
