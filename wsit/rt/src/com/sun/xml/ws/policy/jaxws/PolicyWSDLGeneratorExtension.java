@@ -41,6 +41,7 @@ import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.model.CheckedException;
 import com.sun.xml.ws.api.model.JavaMethod;
 import com.sun.xml.ws.api.model.SEIModel;
+import com.sun.xml.ws.api.model.wsdl.WSDLBoundFault;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLFault;
@@ -169,7 +170,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
                         } catch (PolicyException e) {
                             throw LOGGER.logSevereException(new WebServiceException(LocalizationMessages.WSP_1029_FAILED_TO_RETRIEVE_EFFECTIVE_POLICY_FOR_SUBJECT(subject.toString()), e));
                         }
-                        if ((null == policy.getIdOrName()) && (!policyIDsOrNamesWritten.contains(policy.getIdOrName()))) {
+                        if ((null == policy.getIdOrName()) || (policyIDsOrNamesWritten.contains(policy.getIdOrName()))) {
                             LOGGER.fine(LocalizationMessages.WSP_1047_POLICY_ID_NULL_OR_DUPLICATE(policy));
                         } else {
                             try {
@@ -288,10 +289,29 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         LOGGER.exiting();
     }
     
-    public void addBindingOperationFaultExtension(final TypedXmlWriter fault, final JavaMethod method, final CheckedException exception) {
-        LOGGER.entering();
-        final String messageName = (null == exception) ? null : exception.getMessageName();
-        selectAndProcessSubject(fault, WSDLBoundOperation.class, ScopeType.FAULT_MESSAGE, messageName);
+    public void addBindingOperationFaultExtension(final TypedXmlWriter writer, final JavaMethod method, final CheckedException exception) {
+        LOGGER.entering(writer, method, exception);
+        if (subjects != null) {
+            for (PolicySubject subject : subjects) { // iterate over all subjects in policy map
+                if (this.policyMap.isFaultMessageSubject(subject)) {
+                    final Object concreteSubject = subject.getSubject();
+                    if (concreteSubject != null && WSDLBoundFaultContainer.class.isInstance(concreteSubject)) { // is it our class?
+                        String exceptionName = exception == null ? null : exception.getMessageName();
+                        if (exceptionName == null) { // no name provided to check
+                            writePolicyOrReferenceIt(subject, writer);
+                        } else {
+                            WSDLBoundFaultContainer faultContainer = (WSDLBoundFaultContainer) concreteSubject;
+                            WSDLBoundFault fault = faultContainer.getBoundFault();
+                            WSDLBoundOperation operation = faultContainer.getBoundOperation();
+                            if (exceptionName.equals(fault.getName()) &&
+                                operation.getName().getLocalPart().equals(method.getOperationName())) {
+                                writePolicyOrReferenceIt(subject, writer);
+                            }
+                        }
+                    }
+                }
+            }
+        }
         LOGGER.exiting();
     }
     
