@@ -154,7 +154,6 @@ public class SymmetricBindingProcessor extends BindingProcessor{
             if(!binding.isDisableTimestampSigning()){
                 protectTimestamp(tp);
             }
-            protectTimestamp(tp);
         }
         if(binding.getTokenProtection()){
             WSSPolicy policy = (WSSPolicy) primarySP.getKeyBinding();
