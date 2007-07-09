@@ -215,6 +215,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
                 soapFault = newUnknownSequenceFault(e);
             }
             
+            Packet retPacket = null;
             if (soapFault != null){
                 Message m = com.sun.xml.ws.api.message.Messages.create(soapFault);
 
@@ -225,8 +226,12 @@ public class RMServerPipe extends PipeBase<RMDestination,
                     m.getHeaders().add(header);
                 }
 
-                packet.setMessage(m);
-                return packet;
+                 retPacket = packet.createServerResponse(
+                         m,constants.getAddressingVersion() , 
+                         binding.getSOAPVersion(), 
+                         constants.getAddressingVersion().getDefaultFaultAction());
+                 retPacket.setMessage(m);
+                 return retPacket;
             }
 
             //allow diagnostic access to message if ProcessingFilter has been specified
@@ -374,8 +379,8 @@ public class RMServerPipe extends PipeBase<RMDestination,
             try {
                 ServerInboundSequence seq = (ServerInboundSequence)e.getSequence();
                 if (seq != null) {
-                    return generateAckMessage(packet, seq,
-                                   constants.getSequenceAcknowledgementAction());
+                    return generateAckMessage(packet, seq, 
+                                    constants.getSequenceAcknowledgementAction());
                 } else {
                     //unreachable
                     return null;
@@ -422,8 +427,8 @@ public class RMServerPipe extends PipeBase<RMDestination,
 
                     ServerInboundSequence seq =
                             (ServerInboundSequence)original.getSequence();
-                    return generateAckMessage(packet, seq,
-                                   constants.getSequenceAcknowledgementAction());
+                    return generateAckMessage(packet, seq, 
+                                                constants.getSequenceAcknowledgementAction());
 
                 } catch (RMException ee) {
                     throw new WebServiceException(ee);
@@ -778,8 +783,8 @@ public class RMServerPipe extends PipeBase<RMDestination,
             }
             seq.resetLastActivityTime();
 
-            return generateAckMessage(inbound, seq,
-                         constants.getSequenceAcknowledgementAction());
+            return generateAckMessage(inbound, seq, 
+                    constants.getSequenceAcknowledgementAction());
 
         } catch (JAXBException e) {
             logger.severe(Messages.ACK_REQUESTED_EXCEPTION.format());
@@ -811,7 +816,6 @@ public class RMServerPipe extends PipeBase<RMDestination,
             //reset inactivity timer
             //Fixed redundant null check bug found by Findbugs
             //seq.resetLastActivityTime();
-
 
             //reset inactivity timer
             seq.resetLastActivityTime();
