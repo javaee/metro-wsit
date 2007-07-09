@@ -1,4 +1,0 @@
-System.out.println("Ping" + pingPort);
-String response = pingPort.echo("Hello" + i);
-pingPort.close();
-assertNotNull(response);
