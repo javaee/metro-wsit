@@ -100,6 +100,9 @@ public class WSDLRetriever {
         final String address) throws XMLStreamException {
         
         final ServiceDefinition sDef = endpoint.getServiceDefinition();
+        if (sDef == null) {
+            return;
+        }
         final Iterator<SDDocument> docs = sDef.iterator();
         while (docs.hasNext()) {
             writeDoc(writer, docs.next(), address);
