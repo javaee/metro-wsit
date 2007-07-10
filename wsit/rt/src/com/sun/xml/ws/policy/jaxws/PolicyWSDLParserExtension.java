@@ -966,7 +966,7 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
                                             ,service.getName()
                                             ,port.getName()
                                             ,operation.getName()
-                                            ,faultMsg.getName())
+                                            ,new QName(boundOperation.getName().getNamespaceURI(), fault.getName()))
                                     );
                                 } // endif fault msg scope -- by message
                                 if ( // fault msg scope -- by fault
@@ -981,7 +981,7 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
                                             ,service.getName()
                                             ,port.getName()
                                             ,operation.getName()
-                                            ,faultMsg.getName()));
+                                            ,new QName(boundOperation.getName().getNamespaceURI(), fault.getName())));
                                 } // endif fault msg scope -- by fault
                             } // end foreach fault in operation
                         } // end foreach boundOperation in port
