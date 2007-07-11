@@ -35,15 +35,18 @@
  */
 package com.sun.xml.ws.policy;
 
+import com.sun.xml.ws.policy.jaxws.PolicyConfigParser;
 import java.util.Arrays;
 import java.util.LinkedList;
 import javax.xml.namespace.QName;
 import junit.framework.TestCase;
 import static com.sun.xml.ws.policy.testutils.PolicyResourceLoader.getPolicyMap;
+import static com.sun.xml.ws.policy.testutils.PolicyResourceLoader.loadPolicy;
+import static com.sun.xml.ws.policy.testutils.PolicyResourceLoader.getResourceUrl;
 
 /**
  *
- * @author Marek Potociar (marek.potociar@sun.com)
+ * @author Marek Potociar (marek.potociar at sun.com)
  */
 public class PolicyMapTest extends TestCase {
     
@@ -157,4 +160,29 @@ public class PolicyMapTest extends TestCase {
         String result = policyMap.toString();
         assertNotNull(result);
     }
+    
+    public void testGetOperationEffectivePolicy() throws Exception {
+        PolicyMap policyMap = PolicyConfigParser.parse(getResourceUrl("effective/all.wsdl"), false);
+        Policy expectedPolicy = loadPolicy("effective/resultOperation.xml");
+        PolicyMapKey policyMapKey = policyMap.createWsdlOperationScopeKey(new QName("http://example.org/","Service"),new QName("http://example.org/","Port"),new QName("http://example.org/","Operation"));
+        Policy policy = policyMap.getOperationEffectivePolicy(policyMapKey);
+        assertEquals(expectedPolicy, policy);
+    }
+    
+    public void testGetInputMessageEffectivePolicy() throws Exception {
+        PolicyMap policyMap = PolicyConfigParser.parse(getResourceUrl("effective/all.wsdl"), false);
+        Policy expectedPolicy = loadPolicy("effective/resultInput.xml");
+        PolicyMapKey policyMapKey = policyMap.createWsdlMessageScopeKey(new QName("http://example.org/","Service"),new QName("http://example.org/","Port"),new QName("http://example.org/","Operation"));
+        Policy policy = policyMap.getInputMessageEffectivePolicy(policyMapKey);
+        assertEquals(expectedPolicy, policy);
+    }
+    
+    public void testGetFaultMessageEffectivePolicy() throws Exception {
+        PolicyMap policyMap = PolicyConfigParser.parse(getResourceUrl("effective/all.wsdl"), false);
+        Policy expectedPolicy = loadPolicy("effective/resultFault.xml");
+        PolicyMapKey policyMapKey = policyMap.createWsdlFaultMessageScopeKey(new QName("http://example.org/","Service"),new QName("http://example.org/","Port"),new QName("http://example.org/","Operation"),new QName("http://example.org/","Fault"));
+        Policy policy = policyMap.getFaultMessageEffectivePolicy(policyMapKey);
+        assertEquals(expectedPolicy, policy);
+    }
+    
 }
