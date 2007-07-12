@@ -185,4 +185,12 @@ public class PolicyMapTest extends TestCase {
         assertEquals(expectedPolicy, policy);
     }
     
+    public void testGetFaultMessageWithTwoServicesEffectivePolicy() throws Exception {
+        PolicyMap policyMap = PolicyConfigParser.parse(getResourceUrl("effective/twoservices.wsdl"), false);
+        Policy expectedPolicy = loadPolicy("effective/resultFault.xml");
+        PolicyMapKey policyMapKey = policyMap.createWsdlFaultMessageScopeKey(new QName("http://example.org/","Service"),new QName("http://example.org/","Port"),new QName("http://example.org/","Operation"),new QName("http://example.org/","Fault"));
+        Policy policy = policyMap.getFaultMessageEffectivePolicy(policyMapKey);
+        assertEquals(expectedPolicy, policy);
+    }
+    
 }

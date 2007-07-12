@@ -783,6 +783,8 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
                             ,service
                             ,service.getName()));
                 }
+                // end service scope
+                
                 for (WSDLPort port : service.getPorts()) {
                     if (getHandlers4PortMap().containsKey(port)) {
                         getPolicyMapBuilder().registerHandler(
@@ -817,12 +819,38 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
                                     ,service.getName()
                                     ,port.getName()));
                         } // endif handler for port type
+                        // end endpoint scope
+                        
                         for (WSDLBoundOperation boundOperation : port.getBinding().getBindingOperations()) {
 
                             final WSDLOperation operation = boundOperation.getOperation();
+                            if ( // handler for operation scope -- by boundOperation
+                                    getHandlers4BoundOperationMap().containsKey(boundOperation)) {
+                                getPolicyMapBuilder()
+                                .registerHandler(
+                                        new BuilderHandlerOperationScope(
+                                        getPolicyURIs(getHandlers4BoundOperationMap().get(boundOperation),modelContext)
+                                        ,getPolicyModels()
+                                        ,boundOperation
+                                        ,service.getName()
+                                        ,port.getName()
+                                        ,operation.getName()));
+                            } // endif handler for binding:operation scope
+                            if ( // handler for operation scope -- by operation map
+                                    getHandlers4OperationMap().containsKey(operation)) {
+                                getPolicyMapBuilder()
+                                .registerHandler(
+                                        new BuilderHandlerOperationScope(
+                                        getPolicyURIs(getHandlers4OperationMap().get(operation),modelContext)
+                                        ,getPolicyModels()
+                                        ,operation
+                                        ,service.getName()
+                                        ,port.getName()
+                                        ,operation.getName()));
+                            } // endif for portType:operation scope
+                            // end operation scope
+
                             final WSDLInput input = operation.getInput();
-                            final WSDLOutput output = operation.getOutput();
-                            
                             if (null!=input) {
                                 WSDLMessage inputMsg = input.getMessage();
                                 if (inputMsg != null && getHandlers4MessageMap().containsKey(inputMsg)) {
@@ -839,7 +867,37 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
                                     );
                                 }
                             }
+                            if ( // binding op input msg
+                                    getHandlers4BindingInputOpMap().containsKey(boundOperation)) {
+                                getPolicyMapBuilder()
+                                .registerHandler(
+                                        new BuilderHandlerMessageScope(
+                                        getPolicyURIs(getHandlers4BindingInputOpMap().get(boundOperation),modelContext)
+                                        ,getPolicyModels()
+                                        ,boundOperation
+                                        ,BuilderHandlerMessageScope.Scope.InputMessageScope
+                                        ,service.getName()
+                                        ,port.getName()
+                                        ,operation.getName()
+                                        ,null));
+                            } // endif binding op input msg
+                            if ( null != input    // portType op input msg
+                                    && getHandlers4InputMap().containsKey(input)) {
+                                getPolicyMapBuilder()
+                                .registerHandler(
+                                        new BuilderHandlerMessageScope(
+                                        getPolicyURIs(getHandlers4InputMap().get(input),modelContext)
+                                        ,getPolicyModels()
+                                        ,input
+                                        ,BuilderHandlerMessageScope.Scope.InputMessageScope
+                                        ,service.getName()
+                                        ,port.getName()
+                                        ,operation.getName()
+                                        ,null));
+                            } // endif portType op input msg
+                            // end input message scope
                             
+                            final WSDLOutput output = operation.getOutput();
                             if (null!=output) {
                                 WSDLMessage outputMsg = output.getMessage();
                                 if (outputMsg != null && getHandlers4MessageMap().containsKey(outputMsg)) {
@@ -856,46 +914,7 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
                                     );
                                 }
                             }
-                            
-                            if ( // handler for operation scope -- by boundOperation
-                                    getHandlers4BoundOperationMap().containsKey(boundOperation)) {
-                                getPolicyMapBuilder()
-                                .registerHandler(
-                                        new BuilderHandlerOperationScope(
-                                        getPolicyURIs(getHandlers4BoundOperationMap().get(boundOperation),modelContext)
-                                        ,getPolicyModels()
-                                        ,boundOperation
-                                        ,service.getName()
-                                        ,port.getName()
-                                        ,operation.getName()));
-                            } // endif handler for operation scope -- boundOperation
-                            if ( // handler for operation scope -- by operation map
-                                    getHandlers4OperationMap().containsKey(operation)) {
-                                getPolicyMapBuilder()
-                                .registerHandler(
-                                        new BuilderHandlerOperationScope(
-                                        getPolicyURIs(getHandlers4OperationMap().get(operation),modelContext)
-                                        ,getPolicyModels()
-                                        ,operation
-                                        ,service.getName()
-                                        ,port.getName()
-                                        ,operation.getName()));
-                            } // endif for operation scope -- by operation map
-                            if ( // input msg scope -- by binding input op
-                                    getHandlers4BindingInputOpMap().containsKey(boundOperation)) {
-                                getPolicyMapBuilder()
-                                .registerHandler(
-                                        new BuilderHandlerMessageScope(
-                                        getPolicyURIs(getHandlers4BindingInputOpMap().get(boundOperation),modelContext)
-                                        ,getPolicyModels()
-                                        ,boundOperation
-                                        ,BuilderHandlerMessageScope.Scope.InputMessageScope
-                                        ,service.getName()
-                                        ,port.getName()
-                                        ,operation.getName()
-                                        ,null));
-                            } // endif input msg scope -- by binding input op
-                            if ( // output msg scope -- by binding output op
+                            if ( // binding op output msg
                                     getHandlers4BindingOutputOpMap().containsKey(boundOperation)) {
                                 getPolicyMapBuilder()
                                 .registerHandler(
@@ -908,22 +927,8 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
                                         ,port.getName()
                                         ,operation.getName()
                                         ,null));
-                            } // endif output msg scope -- by binding output op
-                            if ( null != input    // input msg scope -- by input
-                                    && getHandlers4InputMap().containsKey(input)) {
-                                getPolicyMapBuilder()
-                                .registerHandler(
-                                        new BuilderHandlerMessageScope(
-                                        getPolicyURIs(getHandlers4InputMap().get(input),modelContext)
-                                        ,getPolicyModels()
-                                        ,input
-                                        ,BuilderHandlerMessageScope.Scope.InputMessageScope
-                                        ,service.getName()
-                                        ,port.getName()
-                                        ,operation.getName()
-                                        ,null));
-                            } // endif input msg scope -- by input
-                            if ( null != output // output msg scope -- by output
+                            } // endif binding op output msg
+                            if ( null != output // portType op output msg
                                     && getHandlers4OutputMap().containsKey(output)) {
                                 getPolicyMapBuilder()
                                 .registerHandler(
@@ -936,54 +941,55 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
                                         ,port.getName()
                                         ,operation.getName()
                                         ,null));
-                            } // endif output msg scope -- by output
+                            } // endif portType op output msg
+                            // end output message scope
                             
-                            for (WSDLBoundFault fault : boundOperation.getFaults()) {
-                                if (getHandlers4BindingFaultOpMap().containsKey(fault)) {
-                                    getPolicyMapBuilder()
-                                    .registerHandler(
-                                            new BuilderHandlerMessageScope(
-                                            getPolicyURIs(getHandlers4BindingFaultOpMap().get(fault),modelContext)
+                            for (WSDLBoundFault boundFault : boundOperation.getFaults()) {
+                                final QName faultName = new QName(boundOperation.getName().getNamespaceURI(), boundFault.getName());
+                                final WSDLFault fault = boundFault.getFault();
+                                final WSDLMessage faultMessage = fault.getMessage();
+                                if (faultMessage != null && getHandlers4MessageMap().containsKey(faultMessage)) {
+                                    messageSet.add(
+                                        new BuilderHandlerMessageScope(
+                                            getPolicyURIs(getHandlers4MessageMap().get(faultMessage), modelContext)
                                             ,getPolicyModels()
-                                            ,new WSDLBoundFaultContainer(fault, boundOperation)
-                                            ,BuilderHandlerMessageScope.Scope.FaultMessageScope
-                                            ,service.getName()
-                                            ,port.getName()
-                                            ,boundOperation.getName()
-                                            ,new QName(boundOperation.getName().getNamespaceURI(), fault.getName())));
-                                } // endif binding operation fault scope -- by binding operation
-                            } // end foreach binding operation fault in operation
-                            
-                            for (WSDLFault fault : operation.getFaults()) {
-                                final WSDLMessage faultMsg = fault.getMessage();
-                                if ( null != faultMsg   // fault msg scope -- by message
-                                        && getHandlers4MessageMap().containsKey(faultMsg)) {
-                                    messageSet.add(new BuilderHandlerMessageScope(
-                                            getPolicyURIs(getHandlers4MessageMap().get(faultMsg), modelContext)
-                                            ,getPolicyModels()
-                                            ,faultMsg
+                                            ,new WSDLBoundFaultContainer(boundFault, boundOperation)
                                             ,BuilderHandlerMessageScope.Scope.FaultMessageScope
                                             ,service.getName()
                                             ,port.getName()
                                             ,operation.getName()
-                                            ,new QName(boundOperation.getName().getNamespaceURI(), fault.getName()))
-                                    );
-                                } // endif fault msg scope -- by message
-                                if ( // fault msg scope -- by fault
-                                        getHandlers4FaultMap().containsKey(fault)) {
-                                    getPolicyMapBuilder()
-                                    .registerHandler(
-                                            new BuilderHandlerMessageScope(
-                                            getPolicyURIs(getHandlers4FaultMap().get(fault),modelContext)
+                                            ,faultName)
+                                        );
+                                }
+                                if (fault != null && getHandlers4FaultMap().containsKey(fault)) {
+                                    messageSet.add(
+                                        new BuilderHandlerMessageScope(
+                                            getPolicyURIs(getHandlers4FaultMap().get(fault), modelContext)
                                             ,getPolicyModels()
-                                            ,fault
+                                            ,new WSDLBoundFaultContainer(boundFault, boundOperation)
                                             ,BuilderHandlerMessageScope.Scope.FaultMessageScope
                                             ,service.getName()
                                             ,port.getName()
                                             ,operation.getName()
-                                            ,new QName(boundOperation.getName().getNamespaceURI(), fault.getName())));
-                                } // endif fault msg scope -- by fault
-                            } // end foreach fault in operation
+                                            ,faultName)
+                                        );
+                                }
+                                if (getHandlers4BindingFaultOpMap().containsKey(boundFault)) {
+                                    messageSet.add(
+                                        new BuilderHandlerMessageScope(
+                                            getPolicyURIs(getHandlers4BindingFaultOpMap().get(boundFault), modelContext)
+                                            ,getPolicyModels()
+                                            ,new WSDLBoundFaultContainer(boundFault, boundOperation)
+                                            ,BuilderHandlerMessageScope.Scope.FaultMessageScope
+                                            ,service.getName()
+                                            ,port.getName()
+                                            ,operation.getName()
+                                            ,faultName)
+                                        );
+                                }
+                            } // end foreach binding operation fault msg
+                            // end fault message scope
+                            
                         } // end foreach boundOperation in port
                     } // endif port.getBinding() != null
                 } // end foreach port in service
