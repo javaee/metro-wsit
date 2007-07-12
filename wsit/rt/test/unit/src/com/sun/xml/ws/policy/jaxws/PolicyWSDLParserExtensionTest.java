@@ -755,7 +755,7 @@ public class PolicyWSDLParserExtensionTest extends TestCase{
         assertTrue(assertionSet.contains(new QName("http://wsit.test/", "BindingPingException")));
         assertTrue(assertionSet.contains(new QName("http://wsit.test/", "BindingEchoException")));
         assertTrue(assertionSet.contains(new QName("http://wsit.test/", "BindingEcho2Exception")));
-        assertFalse(assertionSet.contains(new QName("http://wsit.test/", "EchoException")));
+        assertTrue(assertionSet.contains(new QName("http://wsit.test/", "EchoException")));
         assertFalse(assertionSet.contains(new QName("http://wsit.test/", "Echo2Exception")));
         
         policy = policyMap.getFaultMessageEffectivePolicy(policyMap.createWsdlFaultMessageScopeKey(
@@ -767,7 +767,7 @@ public class PolicyWSDLParserExtensionTest extends TestCase{
         assertionSet = policy.iterator().next();
         assertTrue(assertionSet.contains(new QName("http://wsit.test/", "BindingPing2Exception")));
         assertFalse(assertionSet.contains(new QName("http://wsit.test/", "EchoException")));
-        assertFalse(assertionSet.contains(new QName("http://wsit.test/", "Echo2Exception")));
+        assertTrue(assertionSet.contains(new QName("http://wsit.test/", "Echo2Exception")));
         
     }
 }
