@@ -537,7 +537,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         protected MessagePolicy getOutgoingFaultPolicy(Packet packet) {
             WSDLBoundOperation cachedOp = cachedOperation(packet);
             
-            if(operation != null){
+            if(cachedOp != null){
                 WSDLOperation operation = cachedOp.getOperation();
                 try{
                     SOAPBody body = packet.getMessage().readAsSOAPMessage().getSOAPBody();
