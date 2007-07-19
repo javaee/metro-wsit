@@ -48,6 +48,7 @@
       xmlns:scc="http://schemas.sun.com/ws/2006/05/sc/client" >
         <wsp:ExactlyOne>
             <wsp:All>
+                <sunsp:DisableStreamingSecurity xmlns:sunsp="http://schemas.sun.com/2006/03/wss/client"/>
                 <sc:KeyStore wspp:visibility="private" location="$WSIT_HOME/xws-security/etc/client-keystore.jks" type="JKS" alias="alice" storepass="changeit"></sc:KeyStore>
                 <sc:TrustStore wspp:visibility="private" location="$WSIT_HOME/xws-security/etc/client-truststore.jks" type="JKS" storepass="changeit" peeralias="bob" stsalias="wssip"></sc:TrustStore>
                 
