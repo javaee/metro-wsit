@@ -172,6 +172,20 @@ public class AlgorithmSuite extends com.sun.xml.ws.policy.PolicyAssertion implem
                     this.props.add(Constants.XPathFilter20);
                 }else if(PolicyUtil.isSTRTransform10(assertion)){
                     this.props.add(Constants.STRTransform10);
+                }else if(PolicyUtil.isInclusiveC14NWithComments(assertion)){
+                    if(PolicyUtil.isInclusiveC14NWithCommentsForTransforms(assertion)){
+                        this.props.add(Constants.InclusiveC14NWithCommentsForTransforms);
+                    }
+                    if(PolicyUtil.isInclusiveC14NWithCommentsForCm(assertion)){
+                        this.props.add(Constants.InclusiveC14NWithCommentsForCm);
+                    }
+                }else if(PolicyUtil.isExclusiveC14NWithComments(assertion)){
+                    if(PolicyUtil.isExclusiveC14NWithCommentsForTransforms(assertion)){
+                        this.props.add(Constants.ExclusiveC14NWithCommentsForTransforms);
+                    } 
+                    if(PolicyUtil.isExclusiveC14NWithCommentsForCm(assertion)){
+                        this.props.add(Constants.ExclusiveC14NWithCommentsForCm);
+                    }                    
                 }else{
                     if(!assertion.isOptional()){
                         log_invalid_assertion(assertion, isServer,AlgorithmSuite);

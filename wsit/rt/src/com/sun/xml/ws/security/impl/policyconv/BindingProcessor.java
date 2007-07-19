@@ -187,7 +187,9 @@ public abstract class BindingProcessor {
     protected void addPrimaryTargets()throws PolicyException{
         SignaturePolicy.FeatureBinding spFB = (SignaturePolicy.FeatureBinding)primarySP.getFeatureBinding();
         EncryptionPolicy.FeatureBinding epFB = (EncryptionPolicy.FeatureBinding)primaryEP.getFeatureBinding();
-        spFB.setCanonicalizationAlgorithm(CanonicalizationMethod.EXCLUSIVE);
+        if(spFB.getCanonicalizationAlgorithm() == null || spFB.getCanonicalizationAlgorithm().equals("")){
+            spFB.setCanonicalizationAlgorithm(CanonicalizationMethod.EXCLUSIVE);
+        }
         
         //TODO:: Merge SignedElements.
         

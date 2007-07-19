@@ -1,8 +1,8 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
+ *
  * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
- * 
+ *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
@@ -10,7 +10,7 @@
  * a copy of the License at https://glassfish.dev.java.net/public/CDDL+GPL.html
  * or glassfish/bootstrap/legal/LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
- * 
+ *
  * When distributing the software, include this License Header Notice in each
  * file and include the License file at glassfish/bootstrap/legal/LICENSE.txt.
  * Sun designates this particular file as subject to the "Classpath" exception
@@ -19,9 +19,9 @@
  * Header, with the fields enclosed by brackets [] replaced by your own
  * identifying information: "Portions Copyrighted [year]
  * [name of copyright owner]"
- * 
+ *
  * Contributor(s):
- * 
+ *
  * If you wish your version of this file to be governed by only the CDDL or
  * only the GPL Version 2, indicate your decision by adding "[Contributor]
  * elects to include this software in this distribution under the [CDDL or GPL
@@ -52,6 +52,14 @@ public class PolicyUtil {
     
     public static boolean isSecurityPolicyNS(PolicyAssertion pa) {
         if ( Constants.SECURITY_POLICY_NS.equals(pa.getName().getNamespaceURI()) ) {
+            return true;
+        }
+        return false;
+    }
+    
+    public static boolean isSunPolicyNS(PolicyAssertion pa) {
+        if ( Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS.equals(pa.getName().getNamespaceURI()) ||
+                Constants.SUN_WSS_SECURITY_CLIENT_POLICY_NS.equals(pa.getName().getNamespaceURI())) {
             return true;
         }
         return false;
@@ -848,6 +856,72 @@ public class PolicyUtil {
         }
         return false;
         
+    }
+    
+    public static boolean isInclusiveC14NWithComments(PolicyAssertion assertion ) {
+        if(!isSunPolicyNS(assertion)){
+            return false;
+        }
+        if ( assertion.getName().getLocalPart().equals(InclusiveC14NWithComments)) {
+            return true;
+        }
+        return false;
+    }
+    
+    public static boolean isInclusiveC14NWithCommentsForTransforms(PolicyAssertion assertion ) {
+        
+        if(!isSunPolicyNS(assertion)){
+            return false;
+        }
+        if ( assertion.getName().getLocalPart().equals(InclusiveC14NWithComments)) {
+            if("true".equals(assertion.getAttributeValue(new QName(SUN_WSS_SECURITY_SERVER_POLICY_NS, "forTransforms"))))
+                return true;
+        }
+        return false;
+    }
+    
+    public static boolean isInclusiveC14NWithCommentsForCm(PolicyAssertion assertion ) {
+        
+        if(!isSunPolicyNS(assertion)){
+            return false;
+        }
+        if ( assertion.getName().getLocalPart().equals(InclusiveC14NWithComments)) {
+            if("true".equals(assertion.getAttributeValue(new QName(SUN_WSS_SECURITY_SERVER_POLICY_NS, "forCm"))))
+                return true;
+        }
+        return false;
+    } 
+    
+    public static boolean isExclusiveC14NWithComments(PolicyAssertion assertion ) {
+        if(!isSunPolicyNS(assertion)){
+            return false;
+        }
+        if ( assertion.getName().getLocalPart().equals(ExclusiveC14NWithComments)) {
+            return true;
+        }
+        return false;
+    }
+    
+    public static boolean isExclusiveC14NWithCommentsForTransforms(PolicyAssertion assertion ) {
+        if(!isSunPolicyNS(assertion)){
+            return false;
+        }
+        if ( assertion.getName().getLocalPart().equals(ExclusiveC14NWithComments)) {
+            if("true".equals(assertion.getAttributeValue(new QName(SUN_WSS_SECURITY_SERVER_POLICY_NS, "forTransforms"))))
+                return true;
+        }
+        return false;
+    }
+    
+    public static boolean isExclusiveC14NWithCommentsForCm(PolicyAssertion assertion ) {
+        if(!isSunPolicyNS(assertion)){
+            return false;
+        }
+        if ( assertion.getName().getLocalPart().equals(ExclusiveC14NWithComments)) {
+            if("true".equals(assertion.getAttributeValue(new QName(SUN_WSS_SECURITY_SERVER_POLICY_NS, "forCm"))))
+                return true;
+        }
+        return false;
     }
     
     public static boolean isSTRTransform10(PolicyAssertion assertion) {

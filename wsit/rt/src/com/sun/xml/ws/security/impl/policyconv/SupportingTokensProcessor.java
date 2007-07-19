@@ -162,7 +162,13 @@ public class SupportingTokensProcessor {
             protectToken((WSSPolicy) sp.getKeyBinding(), sp);
         }
         SignaturePolicy.FeatureBinding spFB = (com.sun.xml.wss.impl.policy.mls.SignaturePolicy.FeatureBinding)sp.getFeatureBinding();
-        spFB.setCanonicalizationAlgorithm(CanonicalizationMethod.EXCLUSIVE);
+        //spFB.setCanonicalizationAlgorithm(CanonicalizationMethod.EXCLUSIVE);
+        AlgorithmSuite as = null;
+        as = st.getAlgorithmSuite();
+        if( as == null){
+            as = binding.getAlgorithmSuite();
+        }
+        SecurityPolicyUtil.setCanonicalizationMethod(spFB, as);
         //   sp.setKeyBinding(policy);
         getSPList().add(sp);
         endorseSignature(sp);

@@ -42,6 +42,7 @@ import com.sun.xml.wss.impl.policy.mls.Parameter;
 import com.sun.xml.wss.impl.policy.mls.SignatureTarget;
 import javax.xml.crypto.dsig.CanonicalizationMethod;
 import javax.xml.namespace.QName;
+import com.sun.xml.ws.security.impl.policy.Constants;
 
 /**
  *
@@ -94,13 +95,26 @@ public class SignatureTargetCreator {
         return target;
     }
     
-    public static void addEXC14n(SignatureTarget target){
+    public void addEXC14n(SignatureTarget target){
         SignatureTarget.Transform tr = target.newSignatureTransform();
-        tr.setTransform(CanonicalizationMethod.EXCLUSIVE);
+        if(algorithmSuite != null && algorithmSuite.getAdditionalProps().contains(Constants.InclusiveC14N)){
+            tr.setTransform(CanonicalizationMethod.INCLUSIVE);
+        } else{
+            tr.setTransform(CanonicalizationMethod.EXCLUSIVE);
+        }
+        
+        if(algorithmSuite != null && 
+                algorithmSuite.getAdditionalProps().contains(Constants.InclusiveC14NWithCommentsForTransforms)){
+            tr.setTransform(CanonicalizationMethod.INCLUSIVE_WITH_COMMENTS);
+        } else if(algorithmSuite != null && 
+                algorithmSuite.getAdditionalProps().contains(Constants.ExclusiveC14NWithCommentsForTransforms)){
+            tr.setTransform(CanonicalizationMethod.EXCLUSIVE_WITH_COMMENTS);
+        }
+        
         target.addTransform(tr);
     }
     
-    public static void addSTRTransform(SignatureTarget target){
+    public void addSTRTransform(SignatureTarget target){
         SignatureTarget.Transform tr = target.newSignatureTransform();
         tr.setTransform(MessageConstants.STR_TRANSFORM_URI);
         target.addTransform(tr);

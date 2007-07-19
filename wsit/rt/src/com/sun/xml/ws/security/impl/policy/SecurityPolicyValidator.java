@@ -71,6 +71,10 @@ public class SecurityPolicyValidator implements PolicyAssertionValidator{
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,Basic128Sha256Rsa15));
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,TripleDesSha256Rsa15));
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,InclusiveC14N));
+        supportedAssertions.add(new QName(SUN_WSS_SECURITY_SERVER_POLICY_NS,InclusiveC14NWithComments));
+        supportedAssertions.add(new QName(SUN_WSS_SECURITY_SERVER_POLICY_NS,ExclusiveC14NWithComments));
+        supportedAssertions.add(new QName(SUN_WSS_SECURITY_CLIENT_POLICY_NS,InclusiveC14NWithComments));
+        supportedAssertions.add(new QName(SUN_WSS_SECURITY_CLIENT_POLICY_NS,ExclusiveC14NWithComments));
         //     supportedAssertions.add(new QName(SECURITY_POLICY_NS,SoapNormalization10));
         
         supportedAssertions.add(new QName(SECURITY_POLICY_NS,STRTransform10));

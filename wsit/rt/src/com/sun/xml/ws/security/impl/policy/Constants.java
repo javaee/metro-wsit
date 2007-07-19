@@ -50,6 +50,12 @@ public class Constants {
     public final static String UTILITY_NS = "http://docs.oasis-open.org/wss/2004/01/oasis- 200401-wss-wssecurity-utility-1.0.xsd";
     public final static String _XPATHVERSION = "XPathVersion";
     public final static String InclusiveC14N = "InclusiveC14N";
+    public final static String InclusiveC14NWithComments = "InclusiveC14NWithComments";
+    public final static String InclusiveC14NWithCommentsForTransforms = "InclusiveC14NWithCommentsForTransforms";
+    public final static String InclusiveC14NWithCommentsForCm = "InclusiveC14NWithCommentsForCm";
+    public final static String ExclusiveC14NWithComments = "ExclusiveC14NWithComments";
+    public final static String ExclusiveC14NWithCommentsForTransforms = "ExclusiveC14NWithCommentsForTransforms";
+    public final static String ExclusiveC14NWithCommentsForCm = "ExclusiveC14NWithCommentsForCm";
     public final static String MustSupportServerChallenge = "MustSupportServerChallenge";
     public final static String Basic192Sha256Rsa15 = "Basic192Sha256Rsa15";
     public final static String STRTransform10 = "STRTransform10";
