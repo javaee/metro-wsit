@@ -35,7 +35,7 @@
  holder.
 -->
 <!--
- $Id: web.xml,v 1.4 2007-05-29 22:12:26 ofung Exp $
+ $Id: web.xml,v 1.5 2007-07-20 11:11:23 shyam_rao Exp $
 -->
 
 <web-app xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -64,6 +64,10 @@
     <servlet-mapping>
       <servlet-name>sts</servlet-name>
       <url-pattern>/sts</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+      <servlet-name>sts</servlet-name>
+      <url-pattern>/sts/mex</url-pattern>
     </servlet-mapping>
 
     <session-config>
