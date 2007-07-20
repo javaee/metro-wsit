@@ -35,7 +35,7 @@
  holder.
 -->
 <!--
- $Id: sun-jaxws.xml,v 1.4.6.1 2007-05-29 23:57:48 ofung Exp $
+ $Id: sun-jaxws.xml,v 1.4.6.2 2007-07-20 11:08:02 shyam_rao Exp $
 -->
 
 <endpoints xmlns='http://java.sun.com/xml/ns/jax-ws/ri/runtime' version='2.0'>
@@ -54,5 +54,9 @@
         service='{http://tempuri.org/}SecurityTokenService'
         port='{http://tempuri.org/}CustomBinding_ISecurityTokenService'
         url-pattern="/sts"/>
+    <endpoint
+        name="sts_mex"
+        implementation="com.sun.xml.ws.mex.server.MEXEndpoint"
+        url-pattern="/sts/mex" />
 </endpoints>
 
