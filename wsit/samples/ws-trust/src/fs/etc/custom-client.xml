@@ -45,21 +45,5 @@
     <bindings node="wsdl:definitions">
         <package name="simple.client"/>
     </bindings>
-  <!--  <bindings node="wsdl:definitions/wsdl:types/xsd:schema[@targetNamespace='http://xmlsoap.org/Ping/Imports']">
-        <jaxb:schemaBindings>
-            <jaxb:package name="simple.client"/>
-        </jaxb:schemaBindings>
-    </bindings>    -->
-
-    <jxb:bindings version="1.0"
-              xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
-              xmlns:xs="http://www.w3.org/2001/XMLSchema">
-        <jxb:bindings schemaLocation="http://localhost:8080/jaxws-fs/simple?xsd=1" node="/xs:schema">
-            <jxb:schemaBindings>
-                <jxb:package name="server.provider.wsdl_hello_lit.client"/>
-            </jxb:schemaBindings>
-        </jxb:bindings>
-    </jxb:bindings> 
-
 </bindings>
 

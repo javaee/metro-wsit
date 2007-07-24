@@ -53,5 +53,8 @@
         For Indigo interop, set addressing=submission 
         binding="http://schemas.xmlsoap.org/wsdl/soap/http?addressing=1.0" -->
         <!-- how to configure multiple ports here port="{http://duke.org}Ping0" -->
-
+     <endpoint
+        name="sts_mex"
+        implementation="com.sun.xml.ws.mex.server.MEXEndpoint"
+        url-pattern="/sts/mex" />
 </endpoints>
