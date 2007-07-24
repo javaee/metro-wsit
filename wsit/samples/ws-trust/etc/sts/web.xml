@@ -53,6 +53,10 @@
     <servlet-name>sts</servlet-name>
     <url-pattern>/sts</url-pattern>
   </servlet-mapping>
+   <servlet-mapping>
+      <servlet-name>sts</servlet-name>
+      <url-pattern>/sts/mex</url-pattern>
+    </servlet-mapping>
   <session-config>
     <session-timeout>60</session-timeout>
   </session-config>
