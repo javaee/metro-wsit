@@ -36,7 +36,7 @@
  holder.
 -->
 
-<project name="WSIT 1.0 EA On GlassFish v2" default="help" basedir=".">
+<project name="WSIT 1.0 On GlassFish v2" default="help" basedir=".">
     <property file="../build.properties"/>
     <property environment="env"/>
     <property name="as.home" value="${env.AS_HOME}"/>
@@ -108,7 +108,7 @@
     </target>
     
     <target name="install" depends="jdk6-check,init" description="Install latest WSIT jars">
-        <echo message="Installing WSIT 1.0 EA on ${as.home} ..."/>
+        <echo message="Installing WSIT 1.0 on ${as.home} ..."/>
 
         <copy todir="${as.lib.home}" overwrite="true">
             <fileset dir="${basedir}/lib">
@@ -140,7 +140,7 @@
 
     <target name="uninstall" unless="notInstalled"
             description="Restore original WSIT jars and tool scripts">
-        <echo message="Uninstalling WSIT 1.0 EA from ${as.home} ..."/>
+        <echo message="Uninstalling WSIT 1.0 from ${as.home} ..."/>
 
         <copy todir="${as.lib.home}" overwrite="true">
             <fileset dir="${backup.dir}" includes="webservices-rt.jar, webservices-tools.jar"/>
@@ -161,7 +161,7 @@
 
     <target name="help">
         <echo message="install: "/>
-        <echo message="  Installs WSIT 1.0 EA on GlassFish v2"/>
+        <echo message="  Installs WSIT 1.0 on GlassFish v2"/>
         <echo/>
         <echo message="install-api: "/>
         <echo message="  Copies 'webservices-api.jar' into $JAVA_HOME/lib/endorsed"/>
@@ -169,7 +169,7 @@
         <echo message="  was not passed during WSIT installation"/>
         <echo/>
         <echo message="uninstall: "/>
-        <echo message="  Uninstalls WSIT 1.0 EA from GlassFish v2"/>
+        <echo message="  Uninstalls WSIT 1.0 from GlassFish v2"/>
         <echo/>
         <echo message="$AS_HOME must be set to the installation directory of GlassFish v2."/>
         <echo/>

@@ -36,7 +36,7 @@
  holder.
 -->
 
-<project name="WSIT 1.0 EA On Tomcat" default="help" basedir=".">
+<project name="WSIT 1.0 On Tomcat" default="help" basedir=".">
     <property environment="env"/>
     <property name="tomcat.home" value="${env.CATALINA_HOME}"/>
     <property name="tomcat.lib.home" value="${tomcat.home}/shared/lib"/>
@@ -86,7 +86,7 @@
     </target>
     
     <target name="install" depends="jdk6-check" description="Install latest WSIT jars">
-        <echo message="Installing WSIT 1.0 EA on ${tomcat.home} ..."/>
+        <echo message="Installing WSIT 1.0 on ${tomcat.home} ..."/>
 
         <!-- TODO: Identify placeholder for tools.jar -->
         <copy toDir="${tomcat.lib.home}" overwrite="true">
@@ -133,7 +133,7 @@
 
     <target name="help">
         <echo message="install  :"/>
-        <echo message="  Installs WSIT 1.0 EA on Tomcat"/>
+        <echo message="  Installs WSIT 1.0 on Tomcat"/>
         <echo/>
         <echo message="install-api: "/>
         <echo message="  Copies 'webservices-api.jar' into $JAVA_HOME/lib/endorsed"/>
@@ -141,7 +141,7 @@
         <echo message="  was not passed during WSIT installation"/>
         <echo/>
         <echo message="uninstall: "/>
-        <echo message="  Uninstalls WSIT 1.0 EA from GlassFish v2"/>
+        <echo message="  Uninstalls WSIT 1.0 from Tomcat"/>
         <echo/>
         <echo message="$CATALINA_HOME must be set to the installation directory of Tomcat."/>
         <echo/>
