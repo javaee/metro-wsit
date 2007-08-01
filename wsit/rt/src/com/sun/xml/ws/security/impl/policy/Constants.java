@@ -202,7 +202,7 @@ public class Constants {
     public static final String WS_SECURITY_POLICY_DOMAIN = "javax.enterprise.resource.xml.webservices.security.policy";
     public static final String WS_SECURITY_POLICY_PACKAGE_ROOT = "com.sun.xml.ws.security.impl.policy";
     public static final String WS_SECURITY_POLICY_DOMAIN_BUNDLE = WS_SECURITY_POLICY_PACKAGE_ROOT + ".LogStrings";
-    public static Logger logger = Logger.getLogger(Constants.WS_SECURITY_POLICY_DOMAIN,Constants.WS_SECURITY_POLICY_DOMAIN_BUNDLE);
+    public static final Logger logger = Logger.getLogger(Constants.WS_SECURITY_POLICY_DOMAIN,Constants.WS_SECURITY_POLICY_DOMAIN_BUNDLE);
     
     public static final String SUN_WSS_SECURITY_CLIENT_POLICY_NS="http://schemas.sun.com/2006/03/wss/client";
     public static final String SUN_WSS_SECURITY_SERVER_POLICY_NS="http://schemas.sun.com/2006/03/wss/server";

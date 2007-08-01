@@ -50,6 +50,7 @@ import com.sun.xml.ws.security.policy.Token;
 import com.sun.xml.ws.security.policy.UserNameToken;
 import com.sun.xml.ws.security.policy.X509Token;
 import com.sun.xml.wss.impl.MessageConstants;
+import com.sun.xml.wss.impl.policy.PolicyGenerationException;
 import com.sun.xml.wss.impl.policy.mls.AuthenticationTokenPolicy;
 import com.sun.xml.wss.impl.policy.mls.DerivedTokenKeyBinding;
 import com.sun.xml.wss.impl.policy.mls.IssuedTokenKeyBinding;
@@ -214,6 +215,11 @@ public class TokenProcessor {
         if(PolicyUtil.isUsernameToken((PolicyAssertion) token)){
             AuthenticationTokenPolicy.UsernameTokenBinding key = null;
             key  =  new AuthenticationTokenPolicy.UsernameTokenBinding();
+            try {
+                key.newTimestampFeatureBinding();
+            } catch (PolicyGenerationException ex) {
+                throw new PolicyException(ex);
+            }
             key.setUUID(token.getTokenId());
             setTokenInclusion(key,token);
             UserNameToken ut = (UserNameToken)token;
