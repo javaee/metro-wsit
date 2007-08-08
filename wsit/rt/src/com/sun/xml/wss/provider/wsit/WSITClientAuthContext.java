@@ -492,10 +492,14 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
         
         List toks =getOutBoundSCP(packet.getMessage());
         if (toks.isEmpty()) {
-            log.log(Level.SEVERE, 
-                    LogStringsMessages.WSITPVD_0030_NO_POLICY_FOUND_FOR_SC());
-            throw new WSSecureConversationException(
-                    LogStringsMessages.WSITPVD_0030_NO_POLICY_FOUND_FOR_SC());            
+            // we no longer throw exception here: Secure RM can work without SC
+            if (log.isLoggable(Level.FINE)) {
+                log.log(Level.FINE,
+                        LogStringsMessages.WSITPVD_0030_NO_POLICY_FOUND_FOR_SC());
+            }
+            //throw new WSSecureConversationException(
+              //      LogStringsMessages.WSITPVD_0030_NO_POLICY_FOUND_FOR_SC());            
+            return null;
         }
         //Note: Assuming only one SC assertion
         Token tok = (Token)toks.get(0);

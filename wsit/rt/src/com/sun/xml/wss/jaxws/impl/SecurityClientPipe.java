@@ -293,9 +293,12 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
         
         List toks =getOutBoundSCP(packet.getMessage());
         if (toks.isEmpty()) {
-            log.log(Level.SEVERE, 
-                    LogStringsMessages.WSSPIPE_0026_NO_POLICY_FOUND_FOR_SC());                        
-            throw new WSSecureConversationException(LogStringsMessages.WSSPIPE_0026_NO_POLICY_FOUND_FOR_SC());
+            if (log.isLoggable(Level.FINE)) {
+                log.log(Level.FINE,
+                        LogStringsMessages.WSSPIPE_0026_NO_POLICY_FOUND_FOR_SC());
+            }
+            //throw new WSSecureConversationException(LogStringsMessages.WSSPIPE_0026_NO_POLICY_FOUND_FOR_SC());
+            return null;
         }
         //Note: Assuming only one SC assertion
         Token tok = (Token)toks.get(0);
