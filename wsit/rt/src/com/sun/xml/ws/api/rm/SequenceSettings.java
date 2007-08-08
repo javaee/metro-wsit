@@ -44,9 +44,10 @@
  */
 
 package com.sun.xml.ws.api.rm;
-import java.io.Serializable;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.rm.RMConstants;
+
+import java.io.Serializable;
 
 /**
  * Initialization data for a sequence, which can be persisted
@@ -130,4 +131,10 @@ public class SequenceSettings implements Serializable {
      * to be populated in the (@link SequenceConfig} subclass.
      */
     public String companionSequenceId;
+
+
+    /**
+     * The RM version if it is WSRM 1.0 or WSRM 1.1
+     */
+    public Enum RMVersion;
 }
