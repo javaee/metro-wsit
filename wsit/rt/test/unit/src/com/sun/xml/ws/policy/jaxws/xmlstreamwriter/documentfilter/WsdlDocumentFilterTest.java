@@ -45,7 +45,6 @@ package com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter;
 
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.testutils.PolicyResourceLoader;
-import java.io.IOException;
 import java.io.StringWriter;
 import com.sun.xml.ws.api.server.SDDocumentFilter;
 import com.sun.xml.ws.util.xml.XMLStreamReaderToXMLStreamWriter;

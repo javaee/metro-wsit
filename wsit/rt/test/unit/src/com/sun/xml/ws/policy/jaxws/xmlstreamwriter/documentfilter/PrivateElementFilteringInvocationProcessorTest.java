@@ -43,16 +43,11 @@
 
 package com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter;
 
+import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.InvocationProcessor;
+import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.InvocationProcessorFactory;
 import junit.framework.*;
-import com.sun.xml.ws.policy.jaxws.privateutil.LocalizationMessages;
-import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.*;
-import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import java.io.StringWriter;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Queue;
-import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
-import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 

@@ -43,7 +43,8 @@
 
 package com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter;
 
-import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.*;
+import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.InvocationProcessor;
+import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.InvocationProcessorFactory;
 import java.io.StringWriter;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
