@@ -49,7 +49,7 @@ public class Constants {
     
    
 
-    public static final String WS_RM_NAMESPACE = "http://schemas.xmlsoap.org/ws/2005/02/rm";
+    public static final String WS_RM_NAMESPACE = RMVersion.WSRM10.namespaceUri;
 
     public static final QName MESSAGE_NUMBER_ROLLOVER_QNAME = new QName(WS_RM_NAMESPACE,"MessageNumberRollover");
 
@@ -81,7 +81,7 @@ public class Constants {
     /*
     * Policy namespaces.
     */
-    public  static final String version = "http://schemas.xmlsoap.org/ws/2005/02/rm/policy";
+    public  static final String version = RMVersion.WSRM10.policyNamespaceUri;
 
     public static final String microsoftVersion = "http://schemas.microsoft.com/net/2005/02/rm/policy";
 
