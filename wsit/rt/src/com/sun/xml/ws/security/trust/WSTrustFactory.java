@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustFactory.java,v 1.10 2007-05-29 22:11:29 ofung Exp $
+ * $Id: WSTrustFactory.java,v 1.11 2007-08-09 06:09:44 shyam_rao Exp $
  */
 
 /*
@@ -151,8 +151,9 @@ public class WSTrustFactory {
         STSAuthorizationProvider authzProvider = null;
         final ServiceFinder<STSAuthorizationProvider> finder = 
                          ServiceFinder.find(STSAuthorizationProvider.class);
-        if (finder != null && finder.toArray().length > 0) {
-            authzProvider = finder.toArray()[0];
+        java.util.Iterator it = finder.iterator();
+        if(it.hasNext()){
+            authzProvider = (STSAuthorizationProvider)it.next();
         } else {
             authzProvider = new DefaultSTSAuthorizationProvider();
         }
@@ -171,8 +172,9 @@ public class WSTrustFactory {
         STSAttributeProvider attrProvider = null;
         final ServiceFinder<STSAttributeProvider> finder = 
                 ServiceFinder.find(STSAttributeProvider.class);
-        if (finder != null && finder.toArray().length > 0) {
-            attrProvider = finder.toArray()[0];
+	java.util.Iterator it = finder.iterator();
+        if(it.hasNext()){
+            attrProvider = (STSAttributeProvider)it.next();
         } else {
             attrProvider = new DefaultSTSAttributeProvider();
         }
@@ -183,14 +185,15 @@ public class WSTrustFactory {
         STSConfigurationProvider configProvider = null;
         final ServiceFinder<STSConfigurationProvider> finder = 
                 ServiceFinder.find(STSConfigurationProvider.class);
-        if (finder != null && finder.toArray().length > 0) {
-            configProvider = finder.toArray()[0];
-        } 
+	java.util.Iterator it = finder.iterator();
+        if(it.hasNext()){
+            configProvider = (STSConfigurationProvider)it.next();
+        }
         
         if (configProvider != null){
             return configProvider.getSTSConfiguration();
         }
-        
+
         return null;
     }
 
