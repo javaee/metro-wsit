@@ -36,8 +36,11 @@
 
 package com.sun.xml.ws.assembler;
 
+import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.tx.common.Util;
+import com.sun.xml.wss.impl.misc.SecurityUtil;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletContext;
@@ -118,7 +121,8 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
     //default security pipe classes for XWSS 2.0 Style Security Configuration Support
     private static final String xwss20ClientPipe = "com.sun.xml.xwss.XWSSClientPipe";
     private static final String xwss20ServerPipe = "com.sun.xml.xwss.XWSSServerPipe";
-
+    private static final String SERVLET_CONTEXT_CLASSNAME = "javax.servlet.ServletContext";
+    
     private static final Logger logger = Logger.getLogger(PipelineAssemblerFactoryImpl.class.getName());
 
     private static class WsitPipelineAssembler implements PipelineAssembler {
@@ -724,31 +728,50 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
     private static boolean isSecurityConfigPresent(ServerPipeAssemblerContext context) {
         
         QName serviceQName = context.getEndpoint().getServiceName();
-        QName portQName = context.getEndpoint().getPortName();
         //TODO: not sure which of the two above will give the service name as specified in DD
         String serviceLocalName = serviceQName.getLocalPart();
+        Container container = context.getEndpoint().getContainer();
         
-        ServletContext ctxt = context.getEndpoint().getContainer().getSPI(ServletContext.class);
-        if (ctxt == null) {
-            return false;
+        Object ctxt = null;
+        if (container != null) {
+            try {
+                final Class<?> contextClass = Class.forName(SERVLET_CONTEXT_CLASSNAME);
+                ctxt = container.getSPI(contextClass);
+            } catch (ClassNotFoundException e) {
+                //log here that the ServletContext was not found
+            }
         }
-        
         String serverName = "server";
-        String serverConfig = "/WEB-INF/" + serverName + "_" + "security_config.xml";
-        InputStream in = ctxt.getResourceAsStream(serverConfig);
-        
-        if (in == null) {
-            serverConfig = "/WEB-INF/" + serviceLocalName + "_" + "security_config.xml";
-            in = ctxt.getResourceAsStream(serverConfig);
+        if (ctxt != null) {
+            
+            String serverConfig = "/WEB-INF/" + serverName + "_" + "security_config.xml";
+            URL url =  SecurityUtil.loadFromContext(serverConfig, ctxt);
+            
+            if (url == null) {
+                serverConfig = "/WEB-INF/" + serviceLocalName + "_" + "security_config.xml";
+                url = SecurityUtil.loadFromContext(serverConfig, ctxt);
+            }
+            
+            if (url != null) {
+                return true;
+            }
+        }  else {
+            //this could be an EJB or JDK6 endpoint
+            //so let us try to locate the config from META-INF classpath
+            String serverConfig = "META-INF/" + serverName + "_" + "security_config.xml";
+            URL url = SecurityUtil.loadFromClasspath(serverConfig);
+            if (url == null) {
+                serverConfig = "META-INF/" + serviceLocalName + "_" + "security_config.xml";
+                url = SecurityUtil.loadFromClasspath(serverConfig);
+            }
+            
+            if (url != null) {
+                return true;
+            }
         }
-        
-        if (in != null) {
-            return true;
-        }
-        
         return false;
     }
-    
+
     private static Pipe initializeXWSSClientPipe(WSDLPort prt, WSService svc, WSBinding bnd, Pipe nextP) {
         return new com.sun.xml.xwss.XWSSClientPipe(prt,svc, bnd, nextP);
     }
