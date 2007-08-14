@@ -44,8 +44,10 @@
  */
 
 package com.sun.xml.ws.api.rm;
+
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.rm.RMConstants;
+import com.sun.xml.ws.rm.RMVersion;
 
 import java.io.Serializable;
 
@@ -136,5 +138,5 @@ public class SequenceSettings implements Serializable {
     /**
      * The RM version if it is WSRM 1.0 or WSRM 1.1
      */
-    public Enum RMVersion;
+    public RMVersion rmVersion;
 }
