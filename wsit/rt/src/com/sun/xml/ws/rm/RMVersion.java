@@ -104,7 +104,7 @@ public enum RMVersion {
 
 
     public  String getCreateSequenceResponseAction() {
-        return namespaceUri + "CreateSequenceResponse";
+        return namespaceUri + "/CreateSequenceResponse";
     }
 
     public  String getSequenceAcknowledgementAction() {
