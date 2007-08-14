@@ -85,21 +85,21 @@ public enum RMVersion {
     public abstract String getPackageName();
 
     public  String getCreateSequenceAction() {
-        return namespaceUri +"CreateSequence";
+        return namespaceUri +"/CreateSequence";
     }
 
     public  String getTerminateSequenceAction() {
-        return namespaceUri + "TerminateSequence";
+        return namespaceUri + "/TerminateSequence";
     }
 
 
     public  String getAckRequestedAction() {
-        return namespaceUri +"AckRequested";
+        return namespaceUri +"/AckRequested";
     }
 
 
     public  String getLastMessageAction() {
-        return namespaceUri + "LastMessage";
+        return namespaceUri + "/LastMessage";
     }
 
 
@@ -108,7 +108,7 @@ public enum RMVersion {
     }
 
     public  String getSequenceAcknowledgementAction() {
-        return namespaceUri + "SequenceAcknowledgement";
+        return namespaceUri + "/SequenceAcknowledgement";
     }
 
     
