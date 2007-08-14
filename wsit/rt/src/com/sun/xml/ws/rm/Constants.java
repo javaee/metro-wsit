@@ -49,25 +49,18 @@ public class Constants {
     
    
 
-    public static final String WS_RM_NAMESPACE = RMVersion.WSRM10.namespaceUri;
-
-    public static final QName MESSAGE_NUMBER_ROLLOVER_QNAME = new QName(WS_RM_NAMESPACE,"MessageNumberRollover");
-
-    public static final QName UNKNOWN_SEQUENCE_QNAME = new QName(WS_RM_NAMESPACE,"UnknownSequence");
-
+    
     
     /**
      * Name of Sender fault defined by SOAP 1.2.
      */
     public static final QName SOAP12_SENDER_QNAME = SOAPConstants.SOAP_SENDER_FAULT;
 
-    public static final String PROTOCOL_PACKAGE_NAME="com.sun.xml.ws.rm.protocol";
+    /*public static final String PROTOCOL_PACKAGE_NAME="com.sun.xml.ws.rm.protocol";*/
 
-    public static final QName CREATE_SEQUENCE_REFUSED_QNAME = new QName(WS_RM_NAMESPACE,"CreateSequenceRefused");
 
-    public static final QName SEQUENCE_TERMINATED_QNAME = new QName(WS_RM_NAMESPACE,"SequenceTerminated");
 
-    public static final String CREATE_SEQUENCE_ACTION="http://schemas.xmlsoap.org/ws/2005/02/rm/CreateSequence";
+    /*public static final String CREATE_SEQUENCE_ACTION="http://schemas.xmlsoap.org/ws/2005/02/rm/CreateSequence";
 
     public static final String TERMINATE_SEQUENCE_ACTION="http://schemas.xmlsoap.org/ws/2005/02/rm/TerminateSequence";
 
@@ -77,7 +70,7 @@ public class Constants {
 
     public static final String CREATE_SEQUENCE_RESPONSE_ACTION="http://schemas.xmlsoap.org/ws/2005/02/rm/CreateSequenceResponse";
 
-    public static final String SEQUENCE_ACKNOWLEDGEMENT_ACTION="http://schemas.xmlsoap.org/ws/2005/02/rm/SequenceAcknowledgement";
+    public static final String SEQUENCE_ACKNOWLEDGEMENT_ACTION="http://schemas.xmlsoap.org/ws/2005/02/rm/SequenceAcknowledgement";*/
     /*
     * Policy namespaces.
     */
@@ -109,8 +102,8 @@ public class Constants {
     
     //INTERNATIONALIZE THESE
     
-     public static final String MESSAGE_NUMBER_ROLLOVER_TEXT = "The maximum value,  %s,  for {"+ WS_RM_NAMESPACE +
-            "}:MessageNumber has been exceeded";
+    public static final String MESSAGE_NUMBER_ROLLOVER_TEXT = "The maximum value, %s,  for MessageNumber has been exceeded";
+    
      
      public static final String UNKNOWN_SEQUENCE_TEXT = "The message contains an unknown sequence id,  %s ";
      

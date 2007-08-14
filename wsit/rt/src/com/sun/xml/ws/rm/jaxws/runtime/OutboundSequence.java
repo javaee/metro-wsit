@@ -89,11 +89,7 @@ public abstract class OutboundSequence extends Sequence  {
      */
     protected SequenceAcknowledgementElement sequenceAcknowledgement;
 
-   /**
-     * Configuration for this sequence.
-     */
-    protected SequenceConfig config /*= new SequenceConfig()*/;
-   
+     
    /**
      * Instance of helper class that processes SequnceAcknowledgement headers.
      */

@@ -167,7 +167,7 @@ public class ProtocolMessageSender {
             requestPacket.contentNegotiation = packet.contentNegotiation;
             requestPacket.setEndPointAddressString(destination.toString());
 
-            addAddressingHeaders (requestPacket, Constants.CREATE_SEQUENCE_ACTION,
+            addAddressingHeaders (requestPacket, config.getRMVersion().getCreateSequenceAction(),
                     destination , acksTo, false);
 
             String messageId = null ;/*= ADDRESSING_FIXME - initialize with mesageID
@@ -215,7 +215,7 @@ public class ProtocolMessageSender {
         Packet requestPacket = new Packet(request);
         requestPacket.proxy = packet.proxy;
         requestPacket.contentNegotiation = packet.contentNegotiation;
-        addAddressingHeaders (requestPacket,Constants.TERMINATE_SEQUENCE_ACTION,seq.getDestination(),seq.getAcksTo(),/*true*/ false);
+        addAddressingHeaders (requestPacket,config.getRMVersion().getTerminateSequenceAction(),seq.getDestination(),seq.getAcksTo(),/*true*/ false);
         requestPacket.setEndPointAddressString(seq.getDestination().toString());
         Packet responsePacket = nextPipe.process(requestPacket);
         Message response = responsePacket.getMessage();
@@ -253,7 +253,7 @@ public class ProtocolMessageSender {
         //requestPacket.proxy = new ProxyWrapper(packet.proxy);
         requestPacket.setEndPointAddressString(seq.getDestination().toString());
         requestPacket.contentNegotiation = packet.contentNegotiation;
-        addAddressingHeaders(requestPacket, constants.getLastAction(),seq.getDestination(),
+        addAddressingHeaders(requestPacket, config.getRMVersion().getLastAction(),seq.getDestination(),
                 seq.getAcksTo(), /*true*/ false);
 
        
@@ -291,7 +291,7 @@ public class ProtocolMessageSender {
             requestPacket.proxy = packet.proxy;
             requestPacket.contentNegotiation = packet.contentNegotiation;
 
-            addAddressingHeaders (requestPacket, Constants.ACK_REQUESTED_ACTION,
+            addAddressingHeaders (requestPacket, config.getRMVersion().getAckRequestedAction(),
                     seq.getDestination(),seq.getAcksTo(), /*true*/ false);
 
             requestPacket.setEndPointAddressString(seq.getDestination().toString());

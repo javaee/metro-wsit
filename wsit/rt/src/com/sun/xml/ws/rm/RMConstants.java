@@ -96,131 +96,9 @@ public enum RMConstants {
 
 
 
+   
 
-
-
-
-    /**
-     * Returns the namespace URI for the WS-RM spec.
-     *
-     * @return The URI (http://schemas.xmlsoap.org/ws/2005/02/rm)
-     */
-    public String getNamespaceURI() {
-        return Constants.WS_RM_NAMESPACE;
-    }
-
-
-
-    /**
-     * Returns the QName of the CreateSequence element defined by the WS-RM schema.
-     *
-     * @return The QName.
-     */
-    public  QName getCreateSequenceQName() {
-        return new QName(getNamespaceURI(), "CreateSequence");
-    }
-
-
-
-
-    /**
-     * Returns the QName of the TerminateSequence element defined by the WS-RM schema.
-     *
-     * @return The QName.
-     */
-    public  QName getTerminateSequenceQName() {
-        return new QName(getNamespaceURI(), "TerminateSequence");
-    }
-
-
-
-    /**
-     * Returns the QName of the AcksTo element defined by the WS-RM spec.
-     *
-     * @return The QName.
-     */
-    public  QName getAcksToQName() {
-        return new QName(getNamespaceURI(), "AcksTo");
-    }
-
-
-    /**
-     * Returns the value of the WS-Addressing Action property stand alone Sequence
-     * messages with Last child.
-     *
-     * @return The Action value (http://schemas.xmlsoap.org/ws/2005/02/rm/Last)
-     */
-    public String getLastAction() {
-        return "http://schemas.xmlsoap.org/ws/2005/02/rm/LastMessage";
-    }
-    
-    /**
-     * Returns the WS-Adressing Action property for stand-alone SequenceAcknowledgement
-     * messages.
-     */
-    public String getSequenceAcknowledgementAction() {
-        return "http://schemas.xmlsoap.org/ws/2005/02/rm/SequenceAcknowledgement";
-    }
-
-    
-
-    /**
-     * Returns the QName of the Address element defined by the WS-RM spec.
-     *
-     * @return The QName.
-     */
-    public  QName getAddressQName() {
-        return new QName(getNamespaceURI(), "Address");
-    }
-
-    /**
-     * Returns the QName of the Offer element defined by the WS-RM spec.
-     *
-     * @return The QName.
-     */
-    public QName getOfferQName() {
-        return new QName(getNamespaceURI(), "Offer");
-    }
-
-    /**
-     * Returns the QName of the Identifier element defined by the WS-RM spec.
-     *
-     * @return The QName.
-     */
-    public QName getIdentifierQName() {
-        return new QName(getNamespaceURI(), "Identifier");
-    }
-
-    /**
-     * Returns the QName of the AckRequested element defined by the WS-RM spec.
-     *
-     * @return The QName.
-     */
-    public QName getAckRequestedQName() {
-        return new QName(getNamespaceURI(), "AckRequested");
-    }
-
-
-    /**
-     * Returns the QName of the Seqence element defined by the WS-RM spec.
-     *
-     * @return The QName.
-     */
-    public  QName getSequenceQName() {
-        return new QName(getNamespaceURI(), "Sequence");
-    }
-
-    /**
-     * Returns the QName of the SequenceAcknowledgement element defined by the WS-RM spec.
-     *
-     * @return The QName.
-     */
-    public QName getSequenceAcknowledgementQName() {
-        return new QName(getNamespaceURI(),
-                "SequenceAcknowledgement");
-    }
-
-    //Policy Assertiion QNames
+   //Policy Assertiion QNames
     public QName getRMAssertionQName() {
         return new QName(Constants.version, "RMAssertion");
     }
@@ -265,11 +143,7 @@ public enum RMConstants {
         return new QName(Constants.microsoftVersion, "MaxReceiveBufferSize");
     }
 
-
-
-
-
-    
+  
 
 
     public abstract Class getAcksToClass();

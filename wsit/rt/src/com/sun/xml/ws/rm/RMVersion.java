@@ -5,6 +5,7 @@ import com.sun.xml.bind.api.JAXBRIContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -224,5 +225,56 @@ public enum RMVersion {
             return null;
         }
     }
+
+
+    public QName getMessageNumberRolloverQname() {
+        return new QName(namespaceUri,"MessageNumberRollover");
+
+    }
+
+    public QName getUnknownSequenceQname() {
+        return new QName(namespaceUri,"UnknownSequence");
+    }
+
+    public  QName getCreateSequenceRefusedQname() {
+        return new QName(namespaceUri,"CreateSequenceRefused");
+    }
+
+    public  QName getSequenceTerminatedQname() {
+        return new QName(namespaceUri,"SequenceTerminated");
+
+    }
+
+
+    
+
+
+
+    public  QName getSequenceQName() {
+        return new QName(getNamespaceURI(), "Sequence");
+    }
+
+    public QName getAckRequestedQName() {
+        return new QName(getNamespaceURI(), "AckRequested");
+    }
+
+    public QName getSequenceAcknowledgementQName() {
+        return new QName(getNamespaceURI(),
+                "SequenceAcknowledgement");
+    }
+
+     /**
+     * Returns the value of the WS-Addressing Action property stand alone Sequence
+     * messages with Last child.
+     *
+     * @return The Action value (http://schemas.xmlsoap.org/ws/2005/02/rm/Last)
+     */
+    public String getLastAction() {
+        return namespaceUri +"/LastMessage";
+    }
+
+    
+   
+    
 
 }

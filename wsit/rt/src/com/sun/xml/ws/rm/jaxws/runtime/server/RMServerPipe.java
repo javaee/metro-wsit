@@ -126,9 +126,9 @@ public class RMServerPipe extends PipeBase<RMDestination,
 
     //populate map if wsa:Action values for protocol messages to handlers used to process
     //messages with those headers
-    static {
+    /*static {
         initActionMap();
-    }
+    }*/
 
     /**
      * Constructor is passed everything available in PipelineAssembler.
@@ -151,6 +151,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
         this.constants = config.getRMConstants();
         this.unmarshaller = config.getRMVersion().createUnmarshaller();
         this.marshaller = config.getRMVersion().createMarshaller();
+        initActionMap();
         
     }
 
@@ -172,7 +173,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
         this.constants = RMConstants.getRMConstants(binding.getAddressingVersion());
         this.unmarshaller = config.getRMVersion().createUnmarshaller();
         this.marshaller = config.getRMVersion().createMarshaller();
-
+        initActionMap();
         //RMConstants.setAddressingVersion(binding.getAddressingVersion());
 
     }
@@ -353,7 +354,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
                         HeaderList headerList = ret.getMessage().getHeaders();
                         
                         headerList.add(Headers.create(constants.getAddressingVersion().actionTag,
-                                                        Constants.SEQUENCE_ACKNOWLEDGEMENT_ACTION));
+                                                        config.getRMVersion().getSequenceAcknowledgementAction()));
                          
                 }
             }
@@ -379,7 +380,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
                 ServerInboundSequence seq = (ServerInboundSequence)e.getSequence();
                 if (seq != null) {
                     return generateAckMessage(packet, seq, 
-                                    constants.getSequenceAcknowledgementAction());
+                                    config.getRMVersion().getSequenceAcknowledgementAction());
                 } else {
                     //unreachable
                     return null;
@@ -427,7 +428,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
                     ServerInboundSequence seq =
                             (ServerInboundSequence)original.getSequence();
                     return generateAckMessage(packet, seq, 
-                                                constants.getSequenceAcknowledgementAction());
+                                                config.getRMVersion().getSequenceAcknowledgementAction());
 
                 } catch (RMException ee) {
                     throw new WebServiceException(ee);
@@ -709,7 +710,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
             //ret = packet.createServerResponse(response, wsdlModel, binding);
              ret = packet.createServerResponse(response,
                     constants.getAddressingVersion(),
-                    config.getSoapVersion(), Constants.TERMINATE_SEQUENCE_ACTION);
+                    config.getSoapVersion(), config.getRMVersion().getTerminateSequenceAction());
              
             SequenceAcknowledgementElement element = seq.generateSequenceAcknowledgement(null, marshaller);
             //Header header = Headers.create(config.getSoapVersion(),marshaller,element);
@@ -732,7 +733,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
 
         try {
             Message message = inbound.getMessage();
-            Header header = message.getHeaders().get(constants.getSequenceQName(), true);
+            Header header = message.getHeaders().get(config.getRMVersion().getSequenceQName(), true);
             if (header == null) {
                 logger.severe(Messages.INVALID_LAST_MESSAGE.format());
                 throw new RMException(Messages.INVALID_LAST_MESSAGE.format());
@@ -752,7 +753,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
             int messageNumber = el.getNumber();
             seq.set(messageNumber, new com.sun.xml.ws.rm.Message(message));
 
-            return generateAckMessage(inbound, seq, constants.getLastAction());
+            return generateAckMessage(inbound, seq, config.getRMVersion().getLastAction());
 
         } catch (JAXBException e) {
             logger.severe(Messages.LAST_MESSAGE_EXCEPTION.format() +e);
@@ -765,7 +766,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
         try {
 
             Message message = inbound.getMessage();
-            Header header = message.getHeaders().get(constants.getAckRequestedQName(), true);
+            Header header = message.getHeaders().get(config.getRMVersion().getAckRequestedQName(), true);
             if (header == null) {
                 logger.severe(Messages.INVALID_ACK_REQUESTED.format());
                 throw new RMException(Messages.INVALID_ACK_REQUESTED.format());
@@ -784,7 +785,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
             seq.resetLastActivityTime();
 
             return generateAckMessage(inbound, seq, 
-                    constants.getSequenceAcknowledgementAction());
+                    config.getRMVersion().getSequenceAcknowledgementAction());
 
         } catch (JAXBException e) {
             logger.severe(Messages.ACK_REQUESTED_EXCEPTION.format());
@@ -800,7 +801,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
         try {
 
             Message message = inbound.getMessage();
-            Header header = message.getHeaders().get(constants.getSequenceAcknowledgementQName(),false);
+            Header header = message.getHeaders().get(config.getRMVersion().getSequenceAcknowledgementQName(),false);
             if (header == null) {
                 logger.severe(Messages.INVALID_SEQ_ACKNOWLEDGEMENT.format());
                 throw new RMException(Messages.INVALID_SEQ_ACKNOWLEDGEMENT.format());
@@ -890,8 +891,8 @@ public class RMServerPipe extends PipeBase<RMDestination,
         throws RMException ;
     }
 
-    private static void initActionMap(){
-        actionMap.put(Constants.CREATE_SEQUENCE_ACTION,
+    private  void initActionMap(){
+        actionMap.put(config.getRMVersion().getCreateSequenceAction(),
                 new ActionHandler() {
             public Packet process(RMServerPipe pipe, Packet packet)
             throws RMException   {
@@ -899,7 +900,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
             }
         });
 
-        actionMap.put(Constants.TERMINATE_SEQUENCE_ACTION,
+        actionMap.put(config.getRMVersion().getTerminateSequenceAction(),
                 new ActionHandler() {
             public Packet process(RMServerPipe pipe, Packet packet)
             throws RMException  {
@@ -907,7 +908,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
             }
         });
 
-        actionMap.put(Constants.ACK_REQUESTED_ACTION,
+        actionMap.put(config.getRMVersion().getAckRequestedAction(),
                 new ActionHandler() {
             public Packet process(RMServerPipe pipe, Packet packet)
             throws RMException  {
@@ -915,7 +916,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
             }
         });
 
-        actionMap.put(Constants.LAST_MESSAGE_ACTION,
+        actionMap.put(config.getRMVersion().getLastMessageAction(),
                 new ActionHandler() {
             public Packet process(RMServerPipe pipe, Packet packet)
             throws RMException {
@@ -923,7 +924,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
             }
         });
 
-        actionMap.put(Constants.CREATE_SEQUENCE_RESPONSE_ACTION,
+        actionMap.put(config.getRMVersion().getCreateSequenceResponseAction(),
                 new ActionHandler() {
             public Packet process(RMServerPipe pipe, Packet packet)
             throws RMException {
@@ -931,7 +932,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
             }
         });
 
-        actionMap.put(Constants.SEQUENCE_ACKNOWLEDGEMENT_ACTION,
+        actionMap.put(config.getRMVersion().getSequenceAcknowledgementAction(),
                 new ActionHandler() {
             public Packet process(RMServerPipe pipe, Packet packet)
             throws RMException {
@@ -1054,7 +1055,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
     }
 
     private SOAPFault newMessageNumberRolloverFault(MessageNumberRolloverException e) throws RMException {
-        QName subcode = Constants.MESSAGE_NUMBER_ROLLOVER_QNAME;
+        QName subcode = config.getRMVersion().getMessageNumberRolloverQname();
         String faultstring = String.format(Constants.MESSAGE_NUMBER_ROLLOVER_TEXT, e.getMessageNumber());
 
         try {
@@ -1082,7 +1083,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
     }
 
     private SOAPFault newUnknownSequenceFault(InvalidSequenceException e) throws RMException {
-        QName subcode = Constants.UNKNOWN_SEQUENCE_QNAME;
+        QName subcode = config.getRMVersion().getUnknownSequenceQname();
         String faultstring = String.format(Constants.UNKNOWN_SEQUENCE_TEXT,e.getSequenceId());
 
         try {
@@ -1110,7 +1111,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
     }
 
     private SOAPFault newSequenceTerminatedFault(TerminateSequenceException e) throws RMException {
-        QName subcode = Constants.SEQUENCE_TERMINATED_QNAME;
+        QName subcode = config.getRMVersion().getSequenceTerminatedQname();
         String faultstring = String.format(Constants.SEQUENCE_TERMINATED_TEXT,e.getMessage());
 
         try {
@@ -1138,7 +1139,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
     }
 
     private SOAPFault newCreateSequenceRefusedFault(CreateSequenceException e) throws RMException {
-        QName subcode = Constants.CREATE_SEQUENCE_REFUSED_QNAME;
+        QName subcode = config.getRMVersion().getCreateSequenceRefusedQname();
         String faultstring = String.format(Constants.CREATE_SEQUENCE_REFUSED_TEXT,e.getMessage());
 
         try {

@@ -1,5 +1,5 @@
 /*
- * $Id: Message.java,v 1.5 2007-05-29 22:11:19 ofung Exp $
+ * $Id: Message.java,v 1.6 2007-08-14 22:53:36 bhaktimehta Exp $
  */
 
 /*
@@ -119,13 +119,14 @@ public class Message {
     public boolean isOneWayResponse = false;
     
     
+    /**/
     /**
      * Namespace URI corresponding to RM version.
      */
-    public static final String namespaceURI = 
-            RMBuilder.getConstants().getNamespaceURI();
-    
-    
+    public static final String namespaceURI =
+            RMVersion.WSRM10.namespaceUri;
+
+
     /**
      * Public ctor takes wrapped JAX-WS message as its argument.
      */

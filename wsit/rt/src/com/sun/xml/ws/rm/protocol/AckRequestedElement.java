@@ -43,15 +43,10 @@
  */
 
 package com.sun.xml.ws.rm.protocol;
-import com.sun.xml.ws.rm.RMBuilder;
-
-
-
+import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.namespace.QName;
 import java.math.BigInteger;
 
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -68,9 +63,9 @@ public class AckRequestedElement  {
         
     }
     
-    public QName getQName() {
+    /*public QName getQName() {
         return  RMBuilder.getConstants().getAckRequestedQName();
-    }
+    }*/
 
     
 

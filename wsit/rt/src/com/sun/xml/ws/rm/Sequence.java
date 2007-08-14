@@ -1,5 +1,5 @@
 /*
- * $Id: Sequence.java,v 1.9 2007-05-29 22:11:19 ofung Exp $
+ * $Id: Sequence.java,v 1.10 2007-08-14 22:53:36 bhaktimehta Exp $
  */
 
 /*
@@ -40,6 +40,9 @@
 
 
 package com.sun.xml.ws.rm;
+
+import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
+
 import java.util.ArrayList;
 
 /**
@@ -100,6 +103,8 @@ public class Sequence {
      *
      */
     protected  RMConstants rmConstants;
+
+    protected SequenceConfig config = new SequenceConfig();
     
    
     protected int firstKnownGap;
