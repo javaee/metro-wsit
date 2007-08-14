@@ -34,7 +34,7 @@
  holder.
 -->
 
-<descriptor skip="true">
+<descriptor>
   <description>This is a roundtrip RM test </description>
   <client href ="test.bsh"/>
   <service basedir="./server">
