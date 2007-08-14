@@ -1,8 +1,4 @@
 /*
- * $Id: UseKeyImpl.java,v 1.9 2007-08-14 00:46:38 jdg6688 Exp $
- */
-
-/*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
  * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
@@ -38,70 +34,81 @@
  * holder.
  */
 
-package com.sun.xml.ws.security.trust.impl.elements;
-
-import com.sun.xml.ws.security.trust.GenericToken;
-import java.net.URI;
-
-import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
-import com.sun.xml.ws.security.trust.impl.elements.str.SecurityTokenReferenceImpl;
-import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
-import com.sun.xml.ws.security.Token;
-import com.sun.xml.ws.security.trust.WSTrustConstants;
-import com.sun.xml.ws.security.trust.elements.UseKey;
-import com.sun.xml.ws.security.trust.impl.bindings.UseKeyType;
-import java.net.URISyntaxException;
-import javax.xml.bind.JAXBElement;
-
-import com.sun.istack.NotNull;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
-
-import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
-import org.w3c.dom.Element;
-
+package com.sun.xml.ws.api.security.trust.client;
 
 /**
- * @author Manveen Kaur
+ *
+ * @author Jiandong Guo
  */
-public class UseKeyImpl extends UseKeyType implements UseKey {
+public abstract class STSIssuedTokenConfiguration implements IssuedTokenConfiguration{
     
-    private static final Logger log =
-            Logger.getLogger(
-            LogDomainConstants.TRUST_IMPL_DOMAIN,
-            LogDomainConstants.TRUST_IMPL_DOMAIN_BUNDLE);
+    public static final String PROTOCOL = "http://schemas.xmlsoap.org/ws/2005/02/trust";
     
-    public UseKeyImpl(Token token) {
-        setToken(token);
+    private String stsEndpoint;
+    
+    private String stsMEXAddress = null;
+    
+    private String stsWSDLLocation = null;;
+    
+    private String stsServiceName = null;
+    
+    private String stsPortName = null;
+    
+    private String stsNamespace = null;
+    
+    protected STSIssuedTokenConfiguration(String stsEndpoint, String stsMEXAddress){
+        this.stsEndpoint = stsEndpoint;
+        this.stsMEXAddress = stsMEXAddress;
     }
     
-    public UseKeyImpl (@NotNull final UseKeyType ukType){
-        setAny(ukType.getAny());
-        setSig(ukType.getSig());
+    protected STSIssuedTokenConfiguration(String stsEndpoint, 
+                          String stsWSDLLocation, String stsServiceName, String stsPortName, String stsNamespace){
+        this.stsEndpoint = stsEndpoint;
+        this.stsWSDLLocation = stsWSDLLocation;
+        this.stsServiceName = stsServiceName;
+        this.stsNamespace = stsPortName;
+        this.stsNamespace = stsNamespace;
     }
     
-    public void setToken(@NotNull final Token token) {
-        setAny(token.getTokenValue());
+    public final String getProtocol(){
+        return this.PROTOCOL;
+    }
+     
+    public String getSTSEndpoint(){
+        return this.stsEndpoint;
     }
     
-    public Token getToken() {
-        Object value = getAny();
-        if (value instanceof Element){
-            return new GenericToken((Element)value);
-        }
-        
-        //ToDo
-        return null;
+    public String getSTSMEXAddress(){
+        return this.stsMEXAddress;
     }
     
-    public void setSignatureID(@NotNull final URI sigID) {
-        setSig(sigID.toString());
+    public String getSTSWSDLLocation(){
+        return this.stsWSDLLocation;
     }
     
-    public URI getSignatureID() {
-        return URI.create(getSig());
+    public String getSTSServiceName(){
+        return this.stsServiceName;
     }
     
+    public String getSTSPortName(){
+        return this.stsPortName;
+    }
+    
+    public String getSTSNamespace(){
+        return this.stsNamespace;
+    }
+    
+    public abstract String getTokenType();
+    
+    public abstract String getKeyType();
+    
+    public abstract long getKeySize();
+    
+    public abstract String getSignatureAlgorithm();
+    
+    public abstract String getEncryptionAlgorithm();
+    
+    public abstract String getCanonicalizationAlgorithm();
+    
+    public abstract String getKeyWrapAlgorithm();
 }

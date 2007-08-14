@@ -116,6 +116,8 @@ import org.w3c.dom.Document;
 
 import org.w3c.dom.Element;
 
+import com.sun.xml.ws.api.security.trust.client.STSIssuedTokenConfiguration;
+
 /**
  *
  * @author hr124446
@@ -147,6 +149,60 @@ public class TrustPluginImpl implements TrustPlugin {
     /** Creates a new instance of TrustPluginImpl */
     public TrustPluginImpl(Configuration config) {
         this.config = config;
+    }
+    
+    public void process(IssuedTokenContext itc) throws WSTrustException{
+        String appliesTo = itc.getEndpointAddress();
+        STSIssuedTokenConfiguration stsConfig = (STSIssuedTokenConfiguration)itc.getSecurityPolicy().get(0);
+        String stsURI = stsConfig.getSTSEndpoint();
+        if(stsURI == null){
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0029_COULD_NOT_GET_STS_LOCATION(appliesTo));
+            throw new WebServiceException(LogStringsMessages.WST_0029_COULD_NOT_GET_STS_LOCATION(appliesTo));
+        }
+        
+        URI wsdlLocation = null;
+        QName serviceName = null;
+        QName portName = null;
+        
+        final String metadataStr = stsConfig.getSTSMEXAddress();
+        if (metadataStr != null){
+            wsdlLocation = URI.create(metadataStr);
+        }else{
+            final String namespace = stsConfig.getSTSNamespace();
+            String wsdlLocationStr = stsConfig.getSTSWSDLLocation();
+            if (wsdlLocationStr == null){
+                wsdlLocationStr = stsURI;
+            }else{
+                final String serviceNameStr = stsConfig.getSTSServiceName();
+                if (serviceNameStr != null && namespace != null){
+                      serviceName = new QName(namespace,serviceNameStr);
+                }
+
+                final String portNameStr = stsConfig.getSTSPortName();
+                if (portNameStr != null && namespace != null){
+                      portName = new QName(namespace, portNameStr);
+                }
+            }
+            wsdlLocation = URI.create(wsdlLocationStr);
+        }
+        
+        RequestSecurityTokenResponse result = null;
+        try {
+            final RequestSecurityToken request = createRequest(null, stsConfig, appliesTo);
+             
+            result = invokeRST(request, wsdlLocation, serviceName, portName, stsURI);
+            final WSTrustClientContract contract = WSTrustFactory.createWSTrustClientContract(config);
+            contract.handleRSTR(request, result, itc);
+        } catch (RemoteException ex) {
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0016_PROBLEM_IT_CTX(stsURI, appliesTo), ex);
+            throw new WSTrustException(LogStringsMessages.WST_0016_PROBLEM_IT_CTX(stsURI, appliesTo), ex);
+        } catch (URISyntaxException ex){
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0016_PROBLEM_IT_CTX(stsURI, appliesTo), ex);
+            throw new WSTrustException(LogStringsMessages.WST_0016_PROBLEM_IT_CTX(stsURI, appliesTo));
+        }
     }
     
     /**
@@ -219,7 +275,7 @@ public class TrustPluginImpl implements TrustPlugin {
         
         RequestSecurityTokenResponse result = null;
         try {
-            final RequestSecurityToken request = createRequest(rstTemplate, appliesTo);
+            final RequestSecurityToken request = createRequest(rstTemplate, null, appliesTo);
             
             // handle Claims.
             // Not: should be in the RequestSecurityTokenTemplate api. Workaround for now.
@@ -249,15 +305,27 @@ public class TrustPluginImpl implements TrustPlugin {
         }
     }
     
-    private RequestSecurityToken createRequest(final RequestSecurityTokenTemplate rstTemplate, final String appliesTo) throws URISyntaxException, WSTrustException, NumberFormatException {
+    private RequestSecurityToken createRequest(final RequestSecurityTokenTemplate rstTemplate, final STSIssuedTokenConfiguration stsConfig, final String appliesTo) throws URISyntaxException, WSTrustException, NumberFormatException {
         final URI requestType = URI.create(WSTrustConstants.ISSUE_REQUEST);
         AppliesTo applTo = null;
         if (appliesTo != null){
             applTo = WSTrustUtil.createAppliesTo(appliesTo);
         }
         
+        long keySize = -1;
+        String keyType = null;
+        String tokenTypeStr = null;
+        if (rstTemplate != null){
+            keySize = rstTemplate.getKeySize();
+            keyType = rstTemplate.getKeyType();
+            tokenTypeStr = rstTemplate.getTokenType();
+        }else if (stsConfig != null){
+            keySize = stsConfig.getKeySize();
+            keyType = stsConfig.getKeyType();
+            tokenTypeStr = stsConfig.getTokenType();
+        }
+        
         int len = 32;
-        final long keySize = rstTemplate.getKeySize();
         if (keySize > 0){
             len = (int)keySize/8;
         }
@@ -268,8 +336,8 @@ public class TrustPluginImpl implements TrustPlugin {
         final BinarySecret binarySecret = fact.createBinarySecret(nonce, BinarySecret.NONCE_KEY_TYPE);
         final Entropy entropy = fact.createEntropy(binarySecret);
         URI tokenType = URI.create(WSTrustConstants.SAML11_ASSERTION_TOKEN_TYPE);
-        if (rstTemplate.getTokenType() != null){
-            tokenType = new URI(rstTemplate.getTokenType().trim());
+        if (tokenTypeStr != null){
+            tokenType = new URI(tokenTypeStr.trim());
         }
         final URI context = null;
         final Claims claims = null;
@@ -280,7 +348,6 @@ public class TrustPluginImpl implements TrustPlugin {
             rst.setKeySize(keySize);
         }
         
-        final String keyType = rstTemplate.getKeyType();
         if (keyType != null){
             rst.setKeyType(new URI(keyType.trim()));
         }

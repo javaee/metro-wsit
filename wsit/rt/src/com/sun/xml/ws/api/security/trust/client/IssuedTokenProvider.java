@@ -1,8 +1,4 @@
 /*
- * $Id: UseKeyImpl.java,v 1.9 2007-08-14 00:46:38 jdg6688 Exp $
- */
-
-/*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
  * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
@@ -38,70 +34,22 @@
  * holder.
  */
 
-package com.sun.xml.ws.security.trust.impl.elements;
+package com.sun.xml.ws.api.security.trust.client;
 
-import com.sun.xml.ws.security.trust.GenericToken;
-import java.net.URI;
-
-import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
-import com.sun.xml.ws.security.trust.impl.elements.str.SecurityTokenReferenceImpl;
-import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
-import com.sun.xml.ws.security.Token;
-import com.sun.xml.ws.security.trust.WSTrustConstants;
-import com.sun.xml.ws.security.trust.elements.UseKey;
-import com.sun.xml.ws.security.trust.impl.bindings.UseKeyType;
-import java.net.URISyntaxException;
-import javax.xml.bind.JAXBElement;
-
-import com.sun.istack.NotNull;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
-
-import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
-import org.w3c.dom.Element;
-
+import com.sun.xml.ws.security.IssuedTokenContext;
+import com.sun.xml.ws.api.security.trust.WSTrustException;
 
 /**
- * @author Manveen Kaur
+ *
+ * @author Jiandong Guo
  */
-public class UseKeyImpl extends UseKeyType implements UseKey {
+public interface IssuedTokenProvider {
     
-    private static final Logger log =
-            Logger.getLogger(
-            LogDomainConstants.TRUST_IMPL_DOMAIN,
-            LogDomainConstants.TRUST_IMPL_DOMAIN_BUNDLE);
+    void issue(IssuedTokenContext ctx) throws WSTrustException; 
     
-    public UseKeyImpl(Token token) {
-        setToken(token);
-    }
+    void cancel(IssuedTokenContext ctx) throws WSTrustException;
     
-    public UseKeyImpl (@NotNull final UseKeyType ukType){
-        setAny(ukType.getAny());
-        setSig(ukType.getSig());
-    }
+    void renew(IssuedTokenContext ctx)throws WSTrustException;
     
-    public void setToken(@NotNull final Token token) {
-        setAny(token.getTokenValue());
-    }
-    
-    public Token getToken() {
-        Object value = getAny();
-        if (value instanceof Element){
-            return new GenericToken((Element)value);
-        }
-        
-        //ToDo
-        return null;
-    }
-    
-    public void setSignatureID(@NotNull final URI sigID) {
-        setSig(sigID.toString());
-    }
-    
-    public URI getSignatureID() {
-        return URI.create(getSig());
-    }
-    
+    void validate(IssuedTokenContext ctx)throws WSTrustException; 
 }

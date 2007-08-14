@@ -1,5 +1,5 @@
 /*
- * $Id: UseKey.java,v 1.2 2007-05-29 22:11:30 ofung Exp $
+ * $Id: UseKey.java,v 1.3 2007-08-14 00:46:37 jdg6688 Exp $
  */
 
 /*
@@ -50,48 +50,6 @@ import com.sun.xml.ws.security.Token;
  * @author WS-Trust Implementation Team
  */
 public interface UseKey {
-     
-    /**
-     * Get the type of the UseKey information item
-     */
-    String getTargetType();
-    
-    /**
-     * Set the type of the DelegateTo information item
-     *  @param targetType {@link String}
-     */
-    void setTargetType(String targetType);
-    
-    /**
-     * Gets the value of the any property.
-     *
-     *
-     * @return possible object is
-     *     {@link Element }
-     *     {@link Object }
-     */
-    Object getAny();
-    
-    /**
-     * Sets the value of the any property.
-     *
-     *
-     * @param value
-     *     allowed object is
-     *     {@link Element }
-     *     {@link Object }
-     */
-    void setAny(Object value);
-    
-    /**
-     * Set the STR for the Token as the contents of UseKey
-     */
-    void setSecurityTokenReference(SecurityTokenReference ref);
-    
-    /**
-     * Get the STR contained in this Element, null otherwise
-     */
-    SecurityTokenReference getSecurityTokenReference();
     
     /**
      * Set the Token as the contents of UseKey
