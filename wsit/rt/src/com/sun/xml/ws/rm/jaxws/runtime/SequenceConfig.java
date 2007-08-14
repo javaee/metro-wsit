@@ -47,18 +47,18 @@ package com.sun.xml.ws.rm.jaxws.runtime;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
-import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.rm.*;
-import com.sun.xml.ws.api.rm.SequenceSettings;
-
-import javax.xml.ws.WebServiceException;
-
-import com.sun.xml.ws.policy.*;
-import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
+import com.sun.xml.ws.api.model.wsdl.WSDLModel;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.api.rm.SequenceSettings;
+import com.sun.xml.ws.policy.*;
 import com.sun.xml.ws.policy.jaxws.WSDLPolicyMapWrapper;
+import com.sun.xml.ws.rm.RMConstants;
+import com.sun.xml.ws.rm.RMException;
+import com.sun.xml.ws.rm.RMVersion;
+
 import javax.xml.namespace.QName;
-import java.util.Map;
+import javax.xml.ws.WebServiceException;
 import java.util.Iterator;
 
 /**
@@ -95,6 +95,7 @@ public class SequenceConfig extends SequenceSettings {
         resendInterval = 0;
         
         closeTimeout = 0; //infinite
+        rmVersion = RMVersion.WSRM10;
     }
     
     public SequenceConfig(WSDLPort port, WSBinding wsbinding) {
@@ -416,5 +417,9 @@ public class SequenceConfig extends SequenceSettings {
     public boolean isAllowDuplicates() {
         return allowDuplicates;
     }
-        
+
+
+    public RMVersion getRMVersion(){
+        return RMVersion.WSRM10;
+    }
 }

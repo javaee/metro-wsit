@@ -43,16 +43,19 @@
  */
 
 package com.sun.xml.ws.rm.jaxws.runtime.client;
+
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.message.*;
-import com.sun.xml.ws.api.message.Messages;
+import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.Messages;
+import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.rm.*;
 import com.sun.xml.ws.rm.jaxws.runtime.InboundMessageProcessor;
 import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
+import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
 import com.sun.xml.ws.rm.protocol.*;
 
 import javax.xml.bind.JAXBException;
@@ -116,6 +119,8 @@ public class ProtocolMessageSender {
      */
     private WSBinding binding;
 
+    private SequenceConfig config;
+
     /**
      * Public ctor.  Initialize the fields
      */
@@ -135,6 +140,7 @@ public class ProtocolMessageSender {
         this.unmarshaller = unmarshaller;
         this.constants =  RMConstants.getRMConstants(binding.getAddressingVersion());
         this.packet = packet;
+        this.config = new SequenceConfig();
 
     }
 
@@ -150,7 +156,7 @@ public class ProtocolMessageSender {
 
         //1. Initialize  message adding CreateSequence to body
         if (cs != null) {
-            Message request = Messages.create(constants.getJAXBContext(),cs,version);
+            Message request = Messages.create(config.getRMVersion().getJAXBContext(),cs,version);
 
 
             //Addressing Headers are added by configuring the following property
@@ -201,7 +207,7 @@ public class ProtocolMessageSender {
         //Used from com.sun.xml.ws.jaxws.runtime.client.ClientOutboundSequence.disconnect, where the
         //TerminateSequence message is initialzied.
 
-        Message request = Messages.create(constants.getJAXBContext(),ts,version);
+        Message request = Messages.create(config.getRMVersion().getJAXBContext(),ts,version);
 
         //piggyback an acknowledgement if one is pending
         seq.processAcknowledgement(new com.sun.xml.ws.rm.Message(request), marshaller);
@@ -389,7 +395,7 @@ public class ProtocolMessageSender {
     }
     
     private com.sun.xml.ws.api.message.Header createHeader(Object obj) {
-        return com.sun.xml.ws.api.message.Headers.create(constants.getJAXBRIContextHeaders(), obj);
+        return com.sun.xml.ws.api.message.Headers.create(config.getRMVersion().getJAXBRIContextHeaders(), obj);
     }
 
     

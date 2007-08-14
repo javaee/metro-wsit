@@ -56,13 +56,11 @@ import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.api.server.WSEndpoint;
-import com.sun.xml.ws.api.message.Headers;
 import com.sun.xml.ws.rm.*;
 import com.sun.xml.ws.rm.jaxws.runtime.InboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.PipeBase;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
-import com.sun.xml.ws.rm.jaxws.runtime.client.ProtocolMessageReceiver;
 import com.sun.xml.ws.rm.jaxws.util.LoggingHelper;
 import com.sun.xml.ws.rm.protocol.*;
 import com.sun.xml.ws.runtime.util.Session;
@@ -80,13 +78,12 @@ import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPFactory;
 import javax.xml.soap.SOAPFault;
 import javax.xml.ws.WebServiceException;
-import javax.xml.ws.wsaddressing.W3CEndpointReference;
 import javax.xml.ws.soap.SOAPBinding;
+import javax.xml.ws.wsaddressing.W3CEndpointReference;
 import java.net.URI;
 import java.util.HashMap;
-import java.util.ResourceBundle;
-import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 //import com.sun.xml.ws.rm.jaxws.util.LoggingHelper;
 
 /**
@@ -120,6 +117,8 @@ public class RMServerPipe extends PipeBase<RMDestination,
 
     protected WSBinding binding;
 
+    //protected RMVersion rmversion;
+
 
 
     private SessionManager sessionManager =
@@ -150,9 +149,9 @@ public class RMServerPipe extends PipeBase<RMDestination,
         this.binding = this.owner.getBinding();
         this.config = getSequenceConfig();
         this.constants = config.getRMConstants();
-        this.unmarshaller = constants.createUnmarshaller();
-        this.marshaller = constants.createMarshaller();
-
+        this.unmarshaller = config.getRMVersion().createUnmarshaller();
+        this.marshaller = config.getRMVersion().createMarshaller();
+        
     }
 
     /**
@@ -171,8 +170,8 @@ public class RMServerPipe extends PipeBase<RMDestination,
         config = toCopy.config;
         binding = owner.getBinding();
         this.constants = RMConstants.getRMConstants(binding.getAddressingVersion());
-        this.unmarshaller = constants.createUnmarshaller();
-        this.marshaller = constants.createMarshaller();
+        this.unmarshaller = config.getRMVersion().createUnmarshaller();
+        this.marshaller = config.getRMVersion().createMarshaller();
 
         //RMConstants.setAddressingVersion(binding.getAddressingVersion());
 
@@ -222,7 +221,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
                 //SequenceFault is to be added for only SOAP 1.1
                 if (binding.getSOAPVersion() == SOAPVersion.SOAP_11) {
                     //FIXME - need JAXBRIContext that can marshall SequenceFaultElement
-                    Header header = Headers.create(constants.getJAXBContext(), new SequenceFaultElement());
+                    Header header = Headers.create(config.getRMVersion().getJAXBContext(), new SequenceFaultElement());
                     m.getHeaders().add(header);
                 }
 
@@ -624,7 +623,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
             crsElement.setAccept(accept);
         }
 
-        Message response = com.sun.xml.ws.api.message.Messages.create(constants.getJAXBContext(),
+        Message response = com.sun.xml.ws.api.message.Messages.create(config.getRMVersion().getJAXBContext(),
                             crsElement,
                             config.getSoapVersion());
 
@@ -634,9 +633,10 @@ public class RMServerPipe extends PipeBase<RMDestination,
          * This will probably be broken with MS client if they still send CS with
          * missing reply-to.
          */
+
         Packet ret = packet.createServerResponse(response, constants.getAddressingVersion(),
                                                 config.getSoapVersion(),
-                                                Constants.CREATE_SEQUENCE_RESPONSE_ACTION);
+                                                config.getRMVersion().getCreateSequenceResponseAction());
         /*
         ret.setEndPointAddressString(acksToString);
         ret.proxy = packet.proxy;
@@ -702,7 +702,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
             id2.setValue(outboundSequence.getId());
 
             terminateSeqResponse.setIdentifier(id2);
-            Message response = com.sun.xml.ws.api.message.Messages.create(constants.getJAXBContext(),
+            Message response = com.sun.xml.ws.api.message.Messages.create(config.getRMVersion().getJAXBContext(),
                     terminateSeqResponse,
                     config.getSoapVersion());
 
@@ -1167,7 +1167,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
     }
     
     private Header createHeader(Object obj) {
-        return Headers.create(constants.getJAXBRIContextHeaders(), obj);
+        return Headers.create(config.getRMVersion().getJAXBRIContextHeaders(), obj);
     }
 
     /**

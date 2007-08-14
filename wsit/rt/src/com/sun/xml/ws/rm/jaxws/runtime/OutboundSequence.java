@@ -51,10 +51,10 @@ import com.sun.xml.ws.rm.protocol.AckRequestedElement;
 import com.sun.xml.ws.rm.protocol.AcknowledgementHandler;
 import com.sun.xml.ws.rm.protocol.SequenceAcknowledgementElement;
 import com.sun.xml.ws.rm.protocol.SequenceElement;
-import java.util.logging.Logger;
 
 import javax.xml.bind.Marshaller;
 import java.net.URI;
+import java.util.logging.Logger;
 
 
 /**
@@ -398,7 +398,7 @@ public abstract class OutboundSequence extends Sequence  {
     
     protected com.sun.xml.ws.api.message.Header createHeader(Object obj) {
         return Headers.create(
-                config.getRMConstants().getJAXBRIContextHeaders(),
+                config.getRMVersion().getJAXBRIContextHeaders(),
                 obj);
     }
     

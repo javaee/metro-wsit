@@ -46,17 +46,9 @@ package com.sun.xml.ws.rm;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.developer.MemberSubmissionEndpointReference;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
-import com.sun.xml.bind.api.JAXBRIContext; 
 import javax.xml.namespace.QName;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 
 /**
@@ -85,14 +77,12 @@ public enum RMConstants {
     private final AddressingVersion addressingVersion ;
     // TODO FIX ME ADDRESSING_FIXME
     // private static final JAXBContext jc;
-    private JAXBRIContext jc;
-    
-    public JAXBRIContext jaxbricontext;
+
 
 
     private RMConstants(AddressingVersion addVersion) {
         this.addressingVersion = addVersion;
-        init();
+
 
     }
 
@@ -104,34 +94,10 @@ public enum RMConstants {
         }
     }
 
-    private void init(){
-        try {
-
-            List<Class> classes = getClassesToBeBound();
-            jc = JAXBRIContext.newInstance(classes.toArray(new Class[0]),null,null,null,false,null);
-            
-            Class[] clazzes = getHeaderClassesToBeBound().toArray(new Class[0]);
-            jaxbricontext = JAXBRIContext.newInstance(clazzes,
-                                                        null, 
-                                                        null, null,false, null);
-            
-        } catch (JAXBException e) {
-            throw new Error(e);
-        } catch(RMException e ) {
-            throw new Error(e);
-        }
-
-    }
 
 
-    /**
-     * Returns the package name for protocol classes.  Used to initialize a JAXBContext.
-     *
-     * @return the package name (com.sun.xml.ws.rm.protocol)
-     */
-    private  String getPackageName() {
-        return Constants.PROTOCOL_PACKAGE_NAME;
-    }
+
+
 
 
     /**
@@ -299,76 +265,12 @@ public enum RMConstants {
         return new QName(Constants.microsoftVersion, "MaxReceiveBufferSize");
     }
 
-    public  JAXBRIContext getJAXBContext() {
-        return jc;
-    }
+
+
+
+
     
-    public JAXBRIContext getJAXBRIContextHeaders() {
-        return jaxbricontext;
-    }
 
-    public  Marshaller createMarshaller() {
-        try {
-            Marshaller marshaller = jc.createMarshaller();
-            marshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.TRUE);
-            return marshaller;
-        } catch (JAXBException e) {
-            return null;
-        }
-    }
-
-    public Unmarshaller createUnmarshaller()  {
-        try {
-            return jc.createUnmarshaller();
-        } catch (JAXBException e) {
-            return null;
-        }
-    }
-
-
-    private  List<Class> getClassesToBeBound() throws RMException{
-        final Class[] classes;
-        final ArrayList<Class> classList;
-        try {
-            classes = new Class[]{
-                    Class.forName(getPackageName()+ ".AckRequestedElement"),
-                    Class.forName(getPackageName()+ ".SequenceElement"),
-                     Class.forName(getPackageName()+ ".SequenceAcknowledgementElement"),
-                    Class.forName(getPackageName()+ ".Identifier"),
-                    Class.forName(getPackageName()+ ".CreateSequenceElement"),
-                    Class.forName(getPackageName()+ ".CreateSequenceResponseElement"),                  
-                    Class.forName(getPackageName()+ ".SequenceFaultElement"),
-                    Class.forName(getPackageName()+ ".TerminateSequenceElement"),
-                    Class.forName(getPackageName()+ ".AcceptType"),                    
-                    Class.forName(getPackageName()+ ".OfferType"),
-                    Class.forName(getPackageName()+ ".Expires")
-            };
-            classList = new ArrayList<Class>(Arrays.asList(classes));
-            classList.add(getAcksToClass());
-            return classList;
-        } catch (ClassNotFoundException e) {
-            throw new RMException("Cannot bind the following class with JAXBContext" + e);
-        }
-    }
-    
-     private  List<Class> getHeaderClassesToBeBound() throws RMException{
-        final Class[] classes;
-        final ArrayList<Class> classList;
-        try {
-            classes = new Class[]{
-                    Class.forName(getPackageName()+ ".AckRequestedElement"),
-                    Class.forName(getPackageName()+ ".SequenceElement"),
-                     Class.forName(getPackageName()+ ".SequenceAcknowledgementElement"),
-                    Class.forName(getPackageName()+ ".Identifier"),
-                    
-            };
-            classList = new ArrayList<Class>(Arrays.asList(classes));
-            classList.add(getAcksToClass());
-            return classList;
-        } catch (ClassNotFoundException e) {
-            throw new RMException("Cannot bind the following class with JAXBContext" + e);
-        }
-    }
 
     public abstract Class getAcksToClass();
 

@@ -165,8 +165,8 @@ public class RMClientPipe
         }else {
             this.secureReliableMessaging = false;
         }
-        this.unmarshaller = config.getRMConstants().createUnmarshaller();
-        this.marshaller = config.getRMConstants().createMarshaller();
+        this.unmarshaller = config.getRMVersion().createUnmarshaller();
+        this.marshaller = config.getRMVersion().createMarshaller();
         
     }
     
@@ -204,8 +204,8 @@ public class RMClientPipe
         //these are be threadsafe
         this.outboundSequence = toCopy.outboundSequence;
         this.inboundSequence = toCopy.inboundSequence;
-        this.unmarshaller = config.getRMConstants().createUnmarshaller();
-        this.marshaller = config.getRMConstants().createMarshaller();
+        this.unmarshaller = config.getRMVersion().createUnmarshaller();
+        this.marshaller = config.getRMVersion().createMarshaller();
         // RMConstants.setAddressingVersion(binding.getAddressingVersion());
         
     }
