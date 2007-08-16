@@ -66,7 +66,7 @@ public abstract class STSIssuedTokenConfiguration implements IssuedTokenConfigur
         this.stsEndpoint = stsEndpoint;
         this.stsWSDLLocation = stsWSDLLocation;
         this.stsServiceName = stsServiceName;
-        this.stsNamespace = stsPortName;
+        this.stsPortName = stsPortName;
         this.stsNamespace = stsNamespace;
     }
     
