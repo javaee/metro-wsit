@@ -1,0 +1,342 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Takes Two to Tango: Java and .NET Interoperability Demo JavaOne 2007
+</title>
+</head>
+
+<body>
+
+<h1>Excel Client Sample</h1>
+<p>1.0 <a href="#Introduction">Introduction</a><br>
+2.0 <a href="#Software">Software Requirements</a><br>
+3.0 <a href="#Directory">Directory Structure</a><br>
+4.0 <a href="#Configuration">Configuration</a><br>
+5.0 <a href="#RunSample">Run Sample</a></p>
+<h2><a name="Introduction"></a>1.0 Introduction</h2>
+<p>This sample implements a real-world interoperability scenario between
+<a href="http://metro.dev.java.net">Metro</a> and .NET 3.0 using a subset of 
+Health Care System. A complete description of the scenario is available
+<a href="http://download.java.net/javaee5/screencasts/wsit-excel-demo/">here</a>.</p>
+<p>The source code for this sample is available in &quot;<code>wsit/wsit/samples/excelclient</code>&quot; 
+directory. It can be checked out using the command:</p>
+<p><code>cvs -d :pserver:yourid@cvs.dev.java.net:/cvs co wsit/wsit/samples/excelclient</code></p>
+<h2><a name="Software"></a>2.0 Software Requirements</h2>
+<h3>2.1 Java</h3>
+<ol>
+	<li><a href="http://java.sun.com/javase/downloads/index_jdk5.jsp">JDK 1.5.0 
+	U12 or later</a></li>
+	<li><a href="http://www.netbeans.info/downloads/index.php">NetBeans 
+	5.5.1</a></li>
+	<li>
+	<a href="https://glassfish.dev.java.net/public/alldownloads.html#Milestone_binary_builds">GlassFish 
+	v2</a></li>
+</ol>
+<h3>2.2 .NET</h3>
+<p>Install the software in the exact order listed below.</p>
+<ol>
+	<li>Windows Vista Ultimate (available via MSDN)
+            <ul>
+            <li>Not necessary if installing on Windows XP.</li>
+            </ul></li>
+	<li>Microsoft Office 2007 Professional (available via MSDN)</li>
+        <li>Only on Windows XP: 
+		<a href="http://www.microsoft.com/downloads/details.aspx?FamilyId=10CC340B-F857-4A14-83F5-25634C3BF043&displaylang=en">.NET 
+		Framework 3.0</a>. Note: .NET 3.0 is built into Windows Vista so no need for separate install.</li>
+	<li>Microsoft Visual Studio 2005 Professional Edition (available via MSDN)</li>
+	<li>
+	<a href="http://www.microsoft.com/downloads/details.aspx?familyid=BB4A75AB-E2D4-4C96-B39D-37BAF6B5B1DC&displaylang=en">
+	Microsoft Visual Studio 2005 Professional Edition SP1</a>
+            <ul>
+            <li>Not necessary if installing on Windows XP.</li>
+            </ul></li>
+	<li>
+	<a href="http://www.microsoft.com/downloads/details.aspx?familyid=90e2942d-3ad1-4873-a2ee-4acc0aace5b6&displaylang=en">
+	Microsoft Visual Studio 2005 Professional Edition SP1 Update</a>
+            <ul>
+            <li>Not necessary if installing on Windows XP.</li>
+            </ul></li>
+	<li>
+	<a href="http://www.microsoft.com/downloads/details.aspx?familyid=5e86cab3-6fd6-4955-b979-e1676db6b3cb&displaylang=en">
+	Microsoft Visual Studio Tools for Office 2007 Second Edition</a></li>
+	<li>
+	<a href="http://www.microsoft.com/downloads/details.aspx?familyid=F54F5537-CC86-4BF5-AE44-F5A1E805680D&displaylang=en">
+	Visual Studio 2005 Extensions for .NET 3.0 Framework (WCF &amp; WPF), Nov 2006 
+	CTP</a></li>
+</ol>
+<h2><a name="Directory"></a>3.0 Directory Structure</h2>
+<ul>
+	<li><b>WSITDemo</b>: WSIT/GlassFish endpoint + Visualization engine in a 
+	NetBeans project</li>
+	<li><b>WSITDemoAddIn</b>: .NET endpoint as Visual Studio Solution</li>
+	<li><b>WSITDemo.xlsm</b>: Excel spreadsheet</li>
+	<li><b>cert</b>: Certificates for MS side</li>
+</ul>
+<h2><a name="Configuration"></a>4.0 Configuration</h2>
+<h3>4.1.1 WSIT Endpoint</h3>
+<ol>
+	<li>Set JAVA_HOME to the installation directory of JDK.</li>
+	<li>Install <a href="https://glassfish.dev.java.net/">latest GlassFish v2</a> 
+	promoted build (tested with
+	<a href="https://glassfish.dev.java.net/downloads/v2-b58.html">RC1</a>), say 
+	in AS_HOME.</li>
+	<li>Download and run <a href="https://xwss.dev.java.net/servlets/ProjectDocumentList?folderID=6645&expandFolder=6645&folderID=6645">copyv3</a> script to update 
+	the Glassfish KeyStore and TrustStore.</li>
+	<li>Open WSITDemo project. You may get a window asking to resolve 
+	references. To fix this:<ol>
+		<li>Select the Project.</li>
+		<li>Right-click and select &quot;<code>Resolve Reference Problems ...</code>&quot;.</li>
+		<li>Select the <code>&quot;appserv-rt.jar&quot; file/folder could not be found</code> 
+		and click Resolve.</li>
+		<li>Select <code>AS_HOME/lib/appserv-rt.jar</code> in the dialog window.</li>
+	</ol>
+	</li>
+	<li>Set GlassFish as the Server<ol>
+		<li>Select the Project</li>
+		<li>Right-click and select Properties</li>
+		<li>Click on Run and verify &quot;Server:&quot; points to the installed GlassFish.</li>
+	</ol>
+	</li>
+        <li>Update KeyStore and TrustStore configuration in <tt>WSITDemo/web/WEB-INF/wsit-com.sun.xml.ws.wsitdemo.WSITDemo.xml</tt> 
+		(so that it points to your GlassFish TrustStore and KeyStore)</li>
+	<li>Add GlassFish as a server instance to NetBeans. Start GlassFish by going to 
+	the <code>Runtime</code> tab, select GlassFish 
+	server instance, right-click and then selecting &quot;<code>Start</code>&quot;. It's 
+	important to start GlassFish this way otherwise database instance needs to 
+	be explicitly started using <code>AS_HOME/bin/asadmin start-database</code>.</li>
+	<li>Configure Comet<ol>
+		<li><strike>If you are using GlassFish b43, then remove <code>&lt;property name=&quot;proxiedProtocols&quot; 
+		value=&quot;ws/tcp&quot;/&gt;</code> from <code>domain.xml</code> for the 
+		visualization to work correctly.</strike></li>
+		<li>Enable Comet<ol>
+			<li>Start GlassFish by invoking <code>AS_HOME/bin/asadmin 
+			start-domain</code>.</li>
+			<li>Invoke the following command:<br>
+			<br>
+			<code>AS_HOME/bin/asadmin set 
+			server.http-service.http-listener.http-listener-1.property.cometSupport=true</code></li>
+		</ol>
+		</li>
+	</ol>
+	</li>
+	<li>Add "wsit" User To Glassfish<ol>
+		<li><code>AS_HOME/bin/asadmin create-file-user wsit</code> (use "wsit" as 
+		a password)
+	</ol>
+	</li>
+	<li>Configure the Database<ol>
+		<li>Login to GlassFish admin console at: <a href="http://localhost:4848">
+		http://localhost:4848</a> (4848 is the default port).</li>
+		<li>Create the database connection pool<ol>
+			<li>In the admin console, expand &quot;Resources&quot;</li>
+			<li>Expand &quot;JDBC&quot;</li>
+			<li>Select &quot;Connection Pools&quot;</li>
+			<li>Click &quot;New&quot;</li>
+			<li>Enter the values as<ol>
+				<li>Name=&quot;wsitPool&quot;</li>
+				<li>Resource Type=&quot;javax.sql.DataSource&quot;</li>
+				<li>Database Vendor=&quot;JavaDB&quot;</li>
+			</ol>
+			</li>
+			<li>Click &quot;Next&quot;</li>
+			<li>Scroll to the bottom, enter the following values in Additional 
+			properties<ol>
+				<li>ConnectionAttributes=&quot;;create=true&quot;</li>
+				<li>DatabaseName=&quot;WsitDemoDB&quot;</li>
+				<li>User=&quot;WSIT&quot;</li>
+				<li>Password=&quot;WSIT&quot;</li>
+			</ol>
+			</li>
+			<li>Click &quot;Finish&quot;</li>
+		</ol>
+		</li>
+		<li>Create JDBC resource<ol>
+			<li>In &quot;JDBC Resources&quot; (right above Connection Pool&quot;)</li>
+			<li>Click &quot;New&quot;</li>
+			<li>Enter the following values<ol>
+				<li>JNDI Name=&quot;jdbc/wsitSample&quot;</li>
+				<li>PoolName=&quot;wsitPool&quot;</li>
+			</ol>
+			</li>
+			<li>Click &quot;OK&quot;</li>
+		</ol>
+		</li>
+	</ol>
+	</li>
+	<li>Deploy the project<ol>
+		<li>Select the Project, right-click and select &quot;Deploy Project&quot;.</li>
+	</ol>
+	</li>
+	<li>Initialize the Database<ol>
+		<li>In the Runtime tab, expand Databases, create a new connection using 
+		&quot;<code>Java DB (Network)</code>&quot; for &quot;<code>Name</code>&quot; and &quot;<code>jdbc:derby://localhost:1527/WsitDemoDB</code>&quot; 
+		for &quot;<code>Database URL</code>&quot;.</li>
+		<li>Enter &quot;WSIT&quot; 
+		as the username and password. </li>
+		<li>Select &quot;Execute Command ...&quot; and initialize the tables by giving the 
+		following queries one-by-one:<ol>
+			<li>insert into &quot;MAXID&quot; values ('PATIENTID',1)</li>
+			<li>insert into &quot;MAXID&quot; values ('DIAGID',1)</li>
+		</ol>
+		</li>
+	</ol>
+	</li>
+	<li>URLs for WSIT endpoint<ol>
+		<li><b>WSDL</b>:
+		<a href="http://localhost:8080/WSITDemo/WSITDemoService?wsdl">
+		http://localhost:8080/WSITDemo/WSITDemoService?wsdl</a></li>
+		<li><b>Visulization Window</b>:
+		<a href="http://localhost:8080/WSITDemo/vis?action=vis_window">
+		http://localhost:8080/WSITDemo/vis?action=vis_window</a></li>
+		<li><b>Database Client</b>: <a href="http://localhost:8080/WSITDemo/pls">
+		http://localhost:8080/WSITDemo/pls</a></li>
+	</ol>
+	</li>
+</ol>
+
+<h3>4.1.2 STS Service</h3>
+<ol>
+	<li>Open WSITSTS project.</li>
+	<li>Set GlassFish as the Server<ol>
+		<li>Right-click on the project and select Properties</li>
+		<li>Click on Run and verify &quot;Server&quot; points to the configured GlassFish.</li>
+	</ol>
+	<li>Deploy the project<ol>
+		<li>Right-click on the project and select &quot;Deploy Project&quot;.</li>
+	</ol>
+	</li>
+</ol>
+
+<h3>4.2 .NET client</h3>
+<ol>
+	<li>Start Visual Studio 2005 Professional Edition.</li>
+	<li>Open the Project/Solution in <code>WSITDemoAddIn</code> directory.</li>
+	<li>If you regenerate the Service Reference in Visual Studio then edit the 
+	following changes in the generated <code>app.config</code>:<ol>
+	<li>
+	<pre>Add the following fragment in <code>//configuration/system.serviceModel/client/endpoint</code>:
+
+&lt;identity&gt;
+    &lt;dns value=&quot;xwssecurityserver&quot;/&gt;
+&lt;/identity&gt;</pre>The updated fragment will look like:
+	<pre>&lt;client&gt;
+    &lt;endpoint address=&quot;http://localhost:8080/WSITDemo/WSITDemoService&quot;
+        binding=&quot;customBinding&quot; bindingConfiguration=&quot;WSITDemoPortBinding&quot;
+        contract=&quot;DemoSvc.WSITDemo&quot; name=&quot;WSITDemoPort&quot; &gt;
+        <font color="#FF0000">&lt;identity&gt;
+            &lt;dns value=&quot;xwssecurityserver&quot;/&gt;
+        &lt;/identity&gt;</font>
+    &lt;/endpoint&gt;
+&lt;/client&gt;</pre>
+	</li>
+<li>Similarly, add an explicit identity dns value to <code>&lt;secureConversationBootstrap/issuedTokenParameters/issuer&gt;</code>:
+<pre>
+&lt;secureConversationBootstrap defaultAlgorithmSuite="Basic128"
+  authenticationMode="IssuedTokenForCertificate" requireDerivedKeys="true"
+  securityHeaderLayout="Strict" includeTimestamp="true" keyEntropyMode="CombinedEntropy"
+  messageProtectionOrder="SignBeforeEncrypt" messageSecurityVersion="WSSecurity11WSTrustFebruary2005WSSecureConversationFebruary2005WSSecurityPolicy11BasicSecurityProfile10"
+  requireSignatureConfirmation="false"&gt;
+  &lt;issuedTokenParameters keySize="128" keyType="SymmetricKey" tokenType="http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV1.1"&gt;
+    &lt;issuer address="http://localhost:8080/WSITSTS/SecurityTokenService"
+      binding="customBinding" bindingConfiguration="http://localhost:8080/WSITSTS/SecurityTokenService"&gt;
+    <span style="color:red">  &lt;identity&gt;
+        &lt;dns value="WSSIP"/&gt;
+      &lt;/identity&gt;</span>
+    &lt;/issuer&gt;
+</pre>
+</li>
+	<li>Change the value of <code>//configuration/system.serviceModel/bindings/customBinding/binding/security/secureConversationBootstrap/localClientSettings/@maxCookieCachingTime</code> 
+	from &quot;<code>Infinite</code>&quot; to &quot;<code>00:20:00</code>&quot;.</li>
+</ol></li>
+	<li>Click on &quot;Build&quot;, &quot;Build Solution&quot;.</li>
+	<li>Register Certificates<ol>
+                <li>Export wssip cert out from GlassFish Trust store by invoking 
+				the following command:<br>
+				<br>
+				<code>cd %AS_HOME%\domains\domain1\config<br>
+				keytool -export -alias wssip -file wssip.cer -keystore cacerts.jks</code><br>
+				<br>
+				Enter &quot;<code>changeit</code>&quot; on the password prompt.</li>
+		<li>Go to &quot;<code>Start</code>&quot;, &quot;<code>Run</code>&quot;. Type "<code>mmc.exe</code>" and click the OK button. This will open Microsoft Management Console.</li>
+		<li>Go to &quot;<code>File</code>&quot;, &quot;<code>Add/Remove Snap-in...</code>&quot;.</li>
+		<li>Select the &quot;<code>Certificates</code>&quot; snap-in and click &quot;<code>Add 
+		&gt;</code>&quot; 
+		button.</li>
+		<li>Select "<code>Computer Account</code>",&nbsp; "<code>Local Computer</code>". 
+		Click &quot;<code>Finish</code>&quot; and then &quot;<code>OK</code>&quot;.</li>
+		<li>In the left pane, expand &quot;<code>Certificates (Local Computer)</code>&quot; 
+		and select "<code>Trusted Root Certification Authorities</code>" node. Right-click and select "<code>All Tasks</code>", "<code>Import 
+		...</code>".</li>
+		<li>Click on &quot;<code>Next</code>&quot;, &quot;<code>Browse</code>&quot;, and import the 
+		certificates mentioned below (all certificates are in &quot;<code>cert</code>&quot; 
+		directory). You may have to change the filter in bottom right corner to 
+		&quot;<code>Personal Information Exchange (*.pfx, *.p12)</code>&quot; to view
+		<code>.pfx</code> certificates.<ol>
+			<li><code>ca.pfx (</code>password is &quot;<code>password</code>&quot;)</li>
+			<li><code>root.pfx (</code>password is &quot;<code>password</code>&quot;)</li>
+			<li><code>xwss-server.cer</code></li>
+			<li><code>wssip.cer</code> exported from glassfish</li>
+		</ol></li>
+	</ol>
+	</li>
+	<li>Grant full trust permissions to Excel add-in<ol>
+	<li>Open Windows SDK command prompt</li>
+	<li>Give the following command:<br>
+	<br>
+	<code>caspol -u -ag All_Code -url C:\&lt;FolderName&gt;\* FullTrust -n &quot;&lt;Name&gt;&quot; -d 
+	&quot;&lt;Description&gt;&quot;<br>
+	</code><br>
+	where <code>&lt;FolderName&gt;</code> is full path to <code>WsitDemoAddIn</code> 
+	folder,<br>
+	&lt;Name&gt; is &quot;WSITDemo&quot;,<br>
+	&lt;Description&gt; is &quot;JavaOne 2007 WSIT Demo&quot;.<br>
+	<br>
+	An example usage is:<br>
+	<br>
+	<code>C:\Program Files\Microsoft SDKs\Windows\v6.0&gt;caspol -u -ag All_Code -url 
+	&quot;C:\workspaces\tango\website\events\javaone\2007\wsit-keynote-demo\WSITDemoAddIn\WSITDemoAddIn\*&quot; 
+	FullTrust -n &quot;WSITDemo&quot; -d &quot;JavaOne 2007 WSIT Demo&quot;<br>
+	Microsoft (R) .NET Framework CasPol 2.0.50727.312<br>
+	Copyright (c) Microsoft Corporation. All rights reserved.<br>
+	<br>
+	The operation you are performing will alter security policy.<br>
+	Are you sure you want to perform this operation? (yes/no)<br>
+	y<br>
+	Added union code group with &quot;-url&quot; membership condition to the User level.<br>
+	Success</code></li>
+</ol>
+	</li>
+</ol>
+<h2><a name="RunSample"></a>5.0 Run Sample</h2>
+<ol>
+	<li>Open Excel spreadsheet. If Macros are disabled then you'll see a 
+	security warning at the top of your spreadsheet. Click on &quot;Options ...&quot; and 
+	select &quot;Enable this content ...&quot;. You MUST see a window stating &quot;WSIT demo 
+	add-in activated successfully&quot;. If not, then one of the .NET components 
+	is not correctly installed.</li>
+	<li>Open the <a href="http://localhost:8080/WSITDemo/vis?action=vis_window">
+	visualization window</a> in a new browser window.</li>
+	<li>Open the <a href="http://localhost:8080/WSITDemo/pls">Database client 
+	window</a> in a new browser window.</li>
+	<li>Enter data in &quot;Firstname, &quot;Last name&quot;, &quot;Date of Birth&quot; and &quot;SSN&quot; and 
+	click on &quot;Save&quot;.</li>
+	<li>A window will pop up asking for username and password. <code>wsit</code>/<code>wsit</code> 
+	is the correct the username/password. Enter an incorrect username/password 
+	and then another window will pop up showing the error message. Click &quot;Retry&quot; 
+	and then enter correct username/password.</li>
+	<li>The visualization window will show control flow between Microsoft Office, 
+	STS, GlassFish, and Table (identifies the database) image.</li>
+	<li>Now refresh the Database client window, and enter Diagnostic Codes (any 
+	numeric value).</li>
+	<li>Then click on &quot;Load&quot;, provide correct username/password (<code>wsit</code>/<code>wsit</code>), click &quot;Ok&quot; and the values entered are now shown in the 
+	spreadsheet.</li>
+</ol>
+<p>&nbsp;</p>
+<p>Last Updated: <i>
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%B %d, %Y %I:%M %p" startspan -->August 15, 2007 06:31 PM<!--webbot bot="Timestamp" endspan i-checksum="43688" --></i></p>
+
+</body>
+
+</html>
