@@ -45,9 +45,9 @@
 package com.sun.xml.ws.rm.jaxws.runtime;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.rm.*;
-import com.sun.xml.ws.rm.protocol.AckRequestedElement;
-import com.sun.xml.ws.rm.protocol.SequenceAcknowledgementElement;
-import com.sun.xml.ws.rm.protocol.SequenceElement;
+import com.sun.xml.ws.rm.v200502.AckRequestedElement;
+import com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement;
+import com.sun.xml.ws.rm.v200502.SequenceElement;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;

@@ -56,7 +56,7 @@ import com.sun.xml.ws.rm.*;
 import com.sun.xml.ws.rm.jaxws.runtime.InboundMessageProcessor;
 import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
-import com.sun.xml.ws.rm.protocol.*;
+import com.sun.xml.ws.rm.v200502.*;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;

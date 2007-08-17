@@ -43,16 +43,14 @@
  */
 
 package com.sun.xml.ws.rm.jaxws.runtime.client;
-import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.rm.Constants;
 import com.sun.xml.ws.rm.InvalidSequenceException;
 import com.sun.xml.ws.rm.RMConstants;
 import com.sun.xml.ws.rm.RMException;
-import com.sun.xml.ws.rm.protocol.CreateSequenceResponseElement;
-import com.sun.xml.ws.rm.protocol.SequenceAcknowledgementElement;
+import com.sun.xml.ws.rm.v200502.CreateSequenceResponseElement;
+import com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement;
 //import com.sun.xml.ws.transport.http.server.EndpointImpl;
 
-import javax.xml.ws.soap.SOAPBinding;
 import java.util.HashMap;
 
 

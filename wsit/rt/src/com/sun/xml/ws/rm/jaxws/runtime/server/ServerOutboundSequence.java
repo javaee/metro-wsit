@@ -45,7 +45,7 @@
 package com.sun.xml.ws.rm.jaxws.runtime.server;
 import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
-import com.sun.xml.ws.rm.protocol.AcknowledgementHandler;
+import com.sun.xml.ws.rm.v200502.AcknowledgementHandler;
 
 /**
  * A <code>ServerOutboundSequence</code> represents all the response messages

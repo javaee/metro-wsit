@@ -18,7 +18,7 @@ public enum RMVersion {
 
     WSRM10("http://schemas.xmlsoap.org/ws/2005/02/rm",
             "http://schemas.xmlsoap.org/ws/2005/02/rm/policy",
-            "com.sun.xml.ws.rm.protocol"
+            "com.sun.xml.ws.rm.v200502"
 
     ) {
 

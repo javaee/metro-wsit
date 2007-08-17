@@ -62,7 +62,7 @@ import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.PipeBase;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
 import com.sun.xml.ws.rm.jaxws.util.LoggingHelper;
-import com.sun.xml.ws.rm.protocol.*;
+import com.sun.xml.ws.rm.v200502.*;
 import com.sun.xml.ws.runtime.util.Session;
 import com.sun.xml.ws.runtime.util.SessionManager;
 import com.sun.xml.ws.security.SecurityContextToken;

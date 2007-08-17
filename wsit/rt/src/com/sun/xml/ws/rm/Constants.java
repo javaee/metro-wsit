@@ -51,9 +51,6 @@ public class Constants {
      */
     public static final QName SOAP12_SENDER_QNAME = SOAPConstants.SOAP_SENDER_FAULT;
 
-   /*
-    * Policy namespaces.
-    */
     
     
     public  static final String version10 = RMVersion.WSRM10.policyNamespaceUri;

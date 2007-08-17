@@ -46,9 +46,9 @@ package com.sun.xml.ws.rm.jaxws.runtime;
 
 import com.sun.xml.ws.rm.InvalidMessageNumberException;
 import com.sun.xml.ws.rm.Sequence;
-import com.sun.xml.ws.rm.protocol.AckRequestedElement;
-import com.sun.xml.ws.rm.protocol.Identifier;
-import com.sun.xml.ws.rm.protocol.SequenceAcknowledgementElement;
+import com.sun.xml.ws.rm.v200502.AckRequestedElement;
+import com.sun.xml.ws.rm.v200502.Identifier;
+import com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement;
 import javax.xml.bind.Marshaller;
 import java.net.URI;
 

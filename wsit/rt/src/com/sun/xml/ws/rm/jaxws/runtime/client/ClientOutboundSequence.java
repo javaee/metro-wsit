@@ -49,7 +49,7 @@ import com.sun.xml.ws.rm.Message;
 import com.sun.xml.ws.rm.RMException;
 import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
-import com.sun.xml.ws.rm.protocol.*;
+import com.sun.xml.ws.rm.v200502.*;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
 
 import javax.xml.ws.Service;

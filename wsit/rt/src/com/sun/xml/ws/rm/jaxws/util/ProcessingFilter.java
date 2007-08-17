@@ -52,7 +52,7 @@ import com.sun.xml.ws.rm.Message;
  * <p>
  * Each method takes a com.sun.xml.ws.rm.Message argument.  The RM headers
  * can be accessed using the getSequenceElement, getAckRequestedElement and
- * getSequenceAcknowledgement methods, which return com.sun.xml.ws.rm.protocol
+ * getSequenceAcknowledgement methods, which return com.sun.xml.ws.rm.v200502
  * objects.
  * <p>
  * The return values of handleClientRequestMessage and 

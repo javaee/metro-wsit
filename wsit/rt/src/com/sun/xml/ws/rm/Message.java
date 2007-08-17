@@ -1,5 +1,5 @@
 /*
- * $Id: Message.java,v 1.7 2007-08-17 18:06:48 mikeg Exp $
+ * $Id: Message.java,v 1.8 2007-08-17 19:43:47 bhaktimehta Exp $
  */
 
 /*
@@ -39,9 +39,9 @@
  */
 
 package com.sun.xml.ws.rm;
-import com.sun.xml.ws.rm.protocol.AckRequestedElement;
-import com.sun.xml.ws.rm.protocol.SequenceAcknowledgementElement;
-import com.sun.xml.ws.rm.protocol.SequenceElement;
+import com.sun.xml.ws.rm.v200502.AckRequestedElement;
+import com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement;
+import com.sun.xml.ws.rm.v200502.SequenceElement;
 
 /**
  * Message is an abstraction of messages that can be added to WS-RM Sequences. 

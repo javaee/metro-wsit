@@ -43,10 +43,6 @@
  */
 
 package com.sun.xml.ws.rm.jaxws.runtime.client;
-import com.sun.xml.ws.rm.Sequence;
-import com.sun.xml.ws.rm.Header;
-import com.sun.xml.ws.rm.protocol.*;
-import java.util.List;
 import java.net.URI;
 import com.sun.xml.ws.rm.jaxws.runtime.InboundSequence;
 
