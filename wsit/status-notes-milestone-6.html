@@ -12,7 +12,7 @@
 <!--
 Created       : 2007 Mar 01 (Tue) 11:32:31 by Harold Carr.
 -->
-<pre>Last Modified : $Date: 2007-08-17 17:37:39 $ by $Author: haroldcarr $</pre>
+<pre>Last Modified : $Date: 2007-08-17 18:01:56 $ by $Author: hofsass $</pre>
 
 <h5>Date: July ??, 2007</h5>
 
@@ -84,17 +84,19 @@ Microsoft's WCF product and vice versa.</p>
 part of bootstrapping/build of other technologies' tests. Issues
 discussed below.  </p>
 
-<p><b>What is Not Implemented</b><code> Updated: July ??, 2007</code></p>
+<p><b>What is Not Implemented</b><code> Updated: August 16, 2007</code></p>
 
-<p>MEX is currently implemented at the same endpoint address as the
-primary service. However this leads to the issues below.  By FCS, MEX
-will reside at separate endpoint to alleviate those problems.</p>
-
-<p><b>Known Issues</b><code> Updated: July ??, 2007</code></p>
+<p>For this WSIT release, server-side support of MEX is only officially supported
+in scenarios involving WS-Trust STS (Secure Token Service) metadata retrieval.
+This restriction will addressed in an upcoming release.
+</p>
+<p>Only the WS-Transfer/Get request is supported not the
+WS-MEX/GetMetadata request. This is interoperable
+with MEX-enabled WCF services.
+</p>
+<p><b>Known Issues</b><code> Updated: August 16, 2007</code></p>
 
 <ul>
-<li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=486">486 - Member Submission Addressing version of endpoint is used by MEX. 'Svcutil.exe' uses W3C by default.</a>
-<li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=491">491 - MTOM encoding used by MEX response. Not understood by 'wsimport' and 'svcutil.exe'</a>
 <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=548">548 - Problem with URI scheme when using MEX for metadata retrieval with 'svcutil.exe'</a>
 </ul>
 
