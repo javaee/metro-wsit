@@ -1,19 +1,18 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html>
 <head>
-  <meta http-equiv="CONTENT-TYPE"
- content="text/html; charset=windows-1252">
+  <meta http-equiv="CONTENT-TYPE" content="text/html; charset=windows-1252">
   <title>WSIT Status Notes - milestone 6</title>
-  <meta name="CREATED" content="20060713;8550900">
-  <meta name="CHANGED" content="20060713;21281095">
-  <meta http-equiv="Content-Style-Type" content="text/css">
 </head>
+
 <body bgcolor="#ffffff" dir="ltr" lang="en-US">
+
 <h1>WSIT Status Notes --- milestone 6</h1>
+
 <!--
 Created       : 2007 Mar 01 (Tue) 11:32:31 by Harold Carr.
 -->
-<pre>Last Modified : $Date: 2007-08-17 08:22:31 $ by $Author: ashutoshshahi $</pre>
+<pre>Last Modified : $Date: 2007-08-17 17:23:10 $ by $Author: haroldcarr $</pre>
 
 <h5>Date: July ??, 2007</h5>
 
@@ -32,44 +31,52 @@ Microsoft's WCF product and vice versa.</p>
 <p>This document covers the following topics:</p>
 
 <ul>
-  <li><a href="#91780">Metadata Exchange Status</a></li>
-  <li><a href="#68668">MTOM Status</a></li>
-  <li><a href="#49498">Data Binding Status</a></li>
-  <li><a href="#60313">Reliable Messaging Status</a></li>
-  <li><a href="#35385">Security Status</a></li>
-  <li><a href="#44691">Secure Conversation Status</a></li>
-  <li><a href="#96126">Trust Status</a></li>
-  <li><a href="#98261">Coordination/Atomic Transactions Status</a></li>
-  <li><a href="#35087">NetBeans WSIT Module Status</a></li>
-  <li><a href="#70368">Web Services Addressing Status</a></li>
-  <li><a href="#13158">Policy Status</a></li>
-  <li><a href="#jax-ws">JAX-WS Status</a></li>
-  <li><a href="#55934">Security Policy Status</a></li>
-  <li><a href="#soaptcp">SOAP/TCP Status</a></li>
+  <li><a href="#mex">
+	 Metadata Exchange Status</a></li>
+  <li><a href="#mtom">
+	 MTOM Status</a></li>
+  <li><a href="#databinding">
+	 Data Binding Status</a></li>
+  <li><a href="#rm">
+	 Reliable Messaging Status</a></li>
+  <li><a href="#security">
+	 Security Status</a></li>
+  <li><a href="#sc">
+	 Secure Conversation Status</a></li>
+  <li><a href="#trust">
+	 Trust Status</a></li>
+  <li><a href="#at-coord">
+	 Coordination/Atomic Transactions Status</a></li>
+  <li><a href="#netbeans">
+	 NetBeans WSIT Module Status</a></li>
+  <li><a href="#addressing">
+	 Web Services Addressing Status</a></li>
+  <li><a href="#policy">
+	 Policy Status</a></li>
+  <li><a href="#securitypolicy">
+	 Security Policy Status</a></li>
+  <li><a href="#soaptcp">
+	 SOAP/TCP Status</a></li>
 </ul>
 
 <p>Legend:</p>
 
 <ul>
-  <li>
-    <pre>WCF-&gt;WSIT : N/M</pre>
-means testing a WCF consumer using a WSIT provider where N tests
-out of M total pass.</li>
-  <li>
-    <pre>WSIT-&gt;WCF</pre>
-means testing a WSIT consumer using a WCF provider.</li>
-  <li>
-    <pre>WSIT-&gt;WSIT</pre>
-means testing a WSIT consumer using a WSIT provider.</li>
-  <li>
-    <pre>non-secure / secure</pre>
-means tests with or without security turned on.</li>
+  <li> <pre>WCF-&gt;WSIT : N/M</pre>
+       means testing a WCF consumer using a WSIT provider where N tests
+       out of M total pass.</li>
+  <li> <pre>WSIT-&gt;WCF</pre>
+       means testing a WSIT consumer using a WCF provider.</li>
+  <li> <pre>WSIT-&gt;WSIT</pre>
+       means testing a WSIT consumer using a WSIT provider.</li>
+  <li> <pre>non-secure / secure</pre>
+       means tests with or without security turned on.</li>
 </ul>
 
 <!-- ================================================== -->
 <br>
 <hr>
-<h2><a name="91780"></a>Metadata Exchange Status</h2>
+<h2><a name="mex"></a>Metadata Exchange Status</h2>
 
 <p><b>WCF Interoperability</b><code> Updated: August 16, 2007</code></p>
 
@@ -94,19 +101,25 @@ will reside at separate endpoint to alleviate those problems.</p>
 <!-- ================================================== -->
 <br>
 <hr>
-<h2><a name="68668"></a>MTOM Status</h2>
+<h2><a name="mtom"></a>MTOM Status</h2>
 
 <p><b>WCF Interoperability</b><code> Updated: August 16, 2007</code></p>
 
-<pre wrap="">Internal endpoint running Windows RTM and Vista. All the MTOM interoperability tests passes with success.</pre>
-<pre wrap=""><b>Non-Secure Scenarios <br></b>
- 
+<b>Non-Secure Scenarios</b>
+
+<pre> 
  WCF -&gt; WSIT : 20/20 
 WSIT -&gt; WCF  : 20/20 
 WSIT -&gt; WSIT : 20/20 
+</pre>
 
-<b>Secure Scenarios </b></pre>
-<pre wrap="">WSIT -&gt; WSIT : 18/18 <br>WSIT -&gt; WCF  : 18/18<br> WCF -&gt; WSIT :&nbsp; 18/18 <br></pre>
+<b>Secure Scenarios</b>
+
+<pre>
+WSIT -&gt; WSIT : 18/18
+WSIT -&gt; WCF  : 18/18
+ WCF -&gt; WSIT : 18/18
+</pre>
 
 <p><b>What is Not Implemented</b><code> Updated: July ??, 2007</code></p>
 
@@ -119,7 +132,7 @@ WSIT -&gt; WSIT : 20/20
 <!-- ================================================== -->
 <br>
 <hr>
-<h2><a name="49498"></a>Data Binding Status</h2>
+<h2><a name="databinding"></a>Data Binding Status</h2>
 
 <p><b>WCF Interoperability</b><code> Updated: July ??, 2007</code></p>
 
@@ -139,7 +152,7 @@ WSIT -&gt; WSIT : 20/20
 <!-- ================================================== -->
 <br>
 <hr>
-<h2><a name="60313"></a>Reliable Messaging Status</h2>
+<h2><a name="rm"></a>Reliable Messaging Status</h2>
 
 <p><b>WCF Interoperability</b><code> Updated: August 16, 2007</code></p>
 
@@ -166,7 +179,7 @@ Everything is implemented.
 
 <!-- ================================================== --><br>
 <hr>
-<h2><a name="35385"></a>Security Status</h2>
+<h2><a name="security"></a>Security Status</h2>
 
 <p><b>WCF Interoperability</b><code> Updated: August 16, 2007</code></p>
 
@@ -606,7 +619,7 @@ fails on the server side with the following exception trace :
 <!-- ================================================== -->
 <br>
 <hr>
-<h2><a name="44691"></a>Secure Conversation Status</h2>
+<h2><a name="sc"></a>Secure Conversation Status</h2>
 
 <p><b>WCF Interoperability</b><code> Updated: August 16, 2007</code></p>
 
@@ -630,7 +643,7 @@ fails on the server side with the following exception trace :
 <!-- ================================================== -->
 <br>
 <hr>
-<h2><a name="96126"></a>Trust Status</h2>
+<h2><a name="trust"></a>Trust Status</h2>
 
 <p><b>WCF Interoperability</b><code> Updated: August 16, 2007</code></p>
 
@@ -659,7 +672,7 @@ fails on the server side with the following exception trace :
 <!-- ================================================== -->
 <br>
 <hr>
-<h2><a name="98261"></a>Coordination/Atomic Transactions Status</h2>
+<h2><a name="at-coord"></a>Coordination/Atomic Transactions Status</h2>
 
 <p><b>WCF Interoperability</b><code> Updated: July ??, 2007</code></p>
 Internal endpoint running Windows RTM, Vista<b>**</b>  - all the TX interoperability tests pass, with success.
@@ -747,7 +760,7 @@ Internal endpoint running Windows RTM, Vista<b>**</b>  - all the TX interoperabi
 <!-- ================================================== -->
 <br>
 <hr>
-<h2><a name="35087"></a>NetBeans WSIT Module Status</h2>
+<h2><a name="netbeans"></a>NetBeans WSIT Module Status</h2>
 
 <p><b>Known Issues</b><code> Updated: July ??, 2007</code></p>
 
@@ -814,7 +827,7 @@ node, which has options for RM. See NetBeans issue <a href="http://www.netbeans.
 <!-- ================================================== -->
 <br>
 <hr>
-<h2><a name="70368"></a>Web Services Addressing Status</h2>
+<h2><a name="addressing"></a>Web Services Addressing Status</h2>
 
 <p><b>WCF Interoperability</b><code> Updated: August 16, 2007</code></p>
 
@@ -840,7 +853,7 @@ this bug occurs both on WCF RTM bits as well as Vista.</li>
 <!-- ================================================== -->
 <br>
 <hr>
-<h2><a name="13158">
+<h2><a name="policy">
 </a>Policy Status</h2>
 <p><b>WCF Interoperability</b><code> Updated: August 17, 2007</code></p>
 
@@ -902,23 +915,11 @@ tab under <code>Web Pages/WEB-INF/wsit-com.sun.xml.ws.test.SimpleService.xml</co
 </ul>
 </ol>
 </p>
-<!-- ================================================== -->
-<br>
-<hr>
-<h2><a name="jax-ws"></a>JAX-WS Status</h2>
-
-<p><b>What is Not Implemented</b><code> Updated: July ??, 2007</code></p>
-<p>All the WSIT extensibility points implemented.</p>
-
-<p><b>Known Issues</b><code> </code></p>
-<ul>
-  <li>No known issues.</li>
-</ul>
 
 <!-- ================================================== -->
 <br>
 <hr>
-<h2><a name="55934"></a>Security Policy Status</h2>
+<h2><a name="securitypolicy"></a>Security Policy Status</h2>
 
 <p><b>WCF Interoperability</b><code> Updated: August 16, 2007</code></p>
 
