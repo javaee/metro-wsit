@@ -98,10 +98,7 @@ public enum RMConstants {
 
    
 
-   //Policy Assertiion QNames
-    public QName getRMAssertionQName() {
-        return new QName(Constants.version, "RMAssertion");
-    }
+   
 
     public QName getOrderedQName() {
         return new QName(Constants.sunVersion, "Ordered");
@@ -121,18 +118,6 @@ public enum RMConstants {
     
     public QName getCloseTimeoutQName() {
         return new QName(Constants.sunClientVersion, "CloseTimeout");
-    }
-
-    public QName getInactivityTimeoutQName() {
-        return new QName(Constants.version, "InactivityTimeout");
-    }
-
-    public QName getAcknowledgementIntervalQName() {
-        return new QName(Constants.version, "AcknowledgementInterval");
-    }
-
-    public QName getMillisecondsQName() {
-        return new QName(Constants.version, "Milliseconds");
     }
 
     public QName getRMFlowControlQName() {

@@ -46,35 +46,21 @@ import javax.xml.soap.SOAPConstants;
  */
 public class Constants {
     
-    
-   
-
-    
-    
     /**
      * Name of Sender fault defined by SOAP 1.2.
      */
     public static final QName SOAP12_SENDER_QNAME = SOAPConstants.SOAP_SENDER_FAULT;
 
-    /*public static final String PROTOCOL_PACKAGE_NAME="com.sun.xml.ws.rm.protocol";*/
-
-
-
-    /*public static final String CREATE_SEQUENCE_ACTION="http://schemas.xmlsoap.org/ws/2005/02/rm/CreateSequence";
-
-    public static final String TERMINATE_SEQUENCE_ACTION="http://schemas.xmlsoap.org/ws/2005/02/rm/TerminateSequence";
-
-    public static final String ACK_REQUESTED_ACTION="http://schemas.xmlsoap.org/ws/2005/02/rm/AckRequested";
-
-    public static final String LAST_MESSAGE_ACTION="http://schemas.xmlsoap.org/ws/2005/02/rm/LastMessage";
-
-    public static final String CREATE_SEQUENCE_RESPONSE_ACTION="http://schemas.xmlsoap.org/ws/2005/02/rm/CreateSequenceResponse";
-
-    public static final String SEQUENCE_ACKNOWLEDGEMENT_ACTION="http://schemas.xmlsoap.org/ws/2005/02/rm/SequenceAcknowledgement";*/
-    /*
+   /*
     * Policy namespaces.
     */
-    public  static final String version = RMVersion.WSRM10.policyNamespaceUri;
+    
+    
+    public  static final String version10 = RMVersion.WSRM10.policyNamespaceUri;
+    
+    public  static final String version11 = RMVersion.WSRM11.policyNamespaceUri;
+    
+    public  static final String version = version10;
 
     public static final String microsoftVersion = "http://schemas.microsoft.com/net/2005/02/rm/policy";
 

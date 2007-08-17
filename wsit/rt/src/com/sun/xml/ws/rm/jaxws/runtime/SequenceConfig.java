@@ -95,7 +95,9 @@ public class SequenceConfig extends SequenceSettings {
         resendInterval = 0;
         
         closeTimeout = 0; //infinite
-        rmVersion = RMVersion.WSRM10;
+        sequenceSTR = false;
+        sequenceTransportSecurity = false;
+        
     }
     
     public SequenceConfig(WSDLPort port, WSBinding wsbinding) {
@@ -131,6 +133,8 @@ public class SequenceConfig extends SequenceSettings {
         this.ordered = toCopy.ordered;
         this.resendInterval = toCopy.resendInterval;
         this.soapVersion = toCopy.soapVersion;
+        this.sequenceSTR = toCopy.sequenceSTR;
+        this.sequenceTransportSecurity = toCopy.sequenceTransportSecurity;
   
     }
     
@@ -325,7 +329,11 @@ public class SequenceConfig extends SequenceSettings {
                         for (PolicyAssertion assertion : policyAssertionSet) {
                             QName qname = assertion.getName();
                           
-                            if (qname.equals(constants.getRMAssertionQName())) {
+                            if (qname.equals(RMVersion.WSRM10.getRMPolicyAssertionQName())) {
+                                rmVersion = RMVersion.WSRM10;
+                                rmAssertion = assertion;
+                            } else if (qname.equals(RMVersion.WSRM11.getRMPolicyAssertionQName())) {
+                                rmVersion = RMVersion.WSRM11;
                                 rmAssertion = assertion;
                             } else if (qname.equals(constants.getRMFlowControlQName())) {
                                 flowAssertion = assertion;
@@ -348,7 +356,11 @@ public class SequenceConfig extends SequenceSettings {
                                 if (num != null) {
                                     closeTimeout = Long.parseLong(num);
                                 }
-                            }   else {
+                            }  else if (qname.equals(RMVersion.WSRM11.getSequenceSTRAssertionQName())) {
+                                sequenceSTR = true;
+                            } else if (qname.equals(RMVersion.WSRM11.getSequenceTransportSecurityAssertionQName())) {
+                                sequenceTransportSecurity = true;
+                            } else {
                                 //TODO handle error condition here
                             }
                         }
@@ -374,17 +386,16 @@ public class SequenceConfig extends SequenceSettings {
         
         while (it != null && it.hasNext()) {
             PolicyAssertion assertion = it.next();
-            if (assertion.getName().equals(constants.getInactivityTimeoutQName())) {
+            if (assertion.getName().equals(rmVersion.getInactivityTimeoutAssertionQName())) {
                 
                 String num = assertion.getAttributeValue(new QName("", "Milliseconds"));
                
                 if (num != null) {
                     inactivityTimeout = Long.parseLong(num);
                 }
-            } else if (assertion.getName().equals(constants.getAcknowledgementIntervalQName())) {
-                //don't have a member variable for it.  Do we need it?
-                 
-            }
+           //TODO - disregard other nested assertions for now.
+           //possibly revisit this later
+            }    
         }
     }
     
@@ -420,6 +431,6 @@ public class SequenceConfig extends SequenceSettings {
 
 
     public RMVersion getRMVersion(){
-        return RMVersion.WSRM10;
+        return rmVersion;
     }
 }

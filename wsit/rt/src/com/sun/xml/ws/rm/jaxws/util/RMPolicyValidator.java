@@ -54,11 +54,14 @@ import java.util.Iterator;
  */
 public class RMPolicyValidator implements PolicyAssertionValidator {
 
-    private static final ArrayList<QName> serverSideSupportedAssertions = new ArrayList<QName>(4);
+    private static final ArrayList<QName> serverSideSupportedAssertions = new ArrayList<QName>(7);
     private static final ArrayList<QName> clientSideSupportedAssertions = new ArrayList<QName>(6);
 
     static {
-        serverSideSupportedAssertions.add(new QName(version, "RMAssertion"));
+        serverSideSupportedAssertions.add(new QName(version10, "RMAssertion"));
+        serverSideSupportedAssertions.add(new QName(version11, "RMAssertion"));
+        serverSideSupportedAssertions.add(new QName(version11, "SequenceSTR"));
+        serverSideSupportedAssertions.add(new QName(version11, "SequenceTransportSecurity"));
         serverSideSupportedAssertions.add(new QName(sunVersion, "Ordered"));
         serverSideSupportedAssertions.add(new QName(sunVersion, "AllowDuplicates"));
         serverSideSupportedAssertions.add(new QName(microsoftVersion, "RmFlowControl"));
@@ -88,6 +91,6 @@ public class RMPolicyValidator implements PolicyAssertionValidator {
     }
     
     public String[] declareSupportedDomains() {
-        return new String[] {version, microsoftVersion, sunVersion, sunClientVersion};
+        return new String[] {version10, version11, microsoftVersion, sunVersion, sunClientVersion};
     }
 }

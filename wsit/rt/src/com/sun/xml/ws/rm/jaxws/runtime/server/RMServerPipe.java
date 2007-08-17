@@ -147,7 +147,9 @@ public class RMServerPipe extends PipeBase<RMDestination,
         this.owner = owner;
 
         this.binding = this.owner.getBinding();
+        
         this.config = getSequenceConfig();
+        this.version = config.rmVersion;
         this.constants = config.getRMConstants();
         this.unmarshaller = config.getRMVersion().createUnmarshaller();
         this.marshaller = config.getRMVersion().createMarshaller();
@@ -170,6 +172,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
         owner = toCopy.owner;
         config = toCopy.config;
         binding = owner.getBinding();
+        this.version = toCopy.version;
         this.constants = RMConstants.getRMConstants(binding.getAddressingVersion());
         this.unmarshaller = config.getRMVersion().createUnmarshaller();
         this.marshaller = config.getRMVersion().createMarshaller();
@@ -751,7 +754,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
             //add message to ClientInboundSequence so that this message
             //number appears in sequence acknowledgement
             int messageNumber = el.getNumber();
-            seq.set(messageNumber, new com.sun.xml.ws.rm.Message(message));
+            seq.set(messageNumber, new com.sun.xml.ws.rm.Message(message, version));
 
             return generateAckMessage(inbound, seq, config.getRMVersion().getLastAction());
 

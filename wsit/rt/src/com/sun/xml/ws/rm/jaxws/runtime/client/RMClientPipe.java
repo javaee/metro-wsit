@@ -165,9 +165,11 @@ public class RMClientPipe
         }else {
             this.secureReliableMessaging = false;
         }
-        this.unmarshaller = config.getRMVersion().createUnmarshaller();
-        this.marshaller = config.getRMVersion().createMarshaller();
         
+       
+        this.version = config.getRMVersion();
+        this.unmarshaller = version.createUnmarshaller();
+        this.marshaller = version.createMarshaller();
     }
     
     /**
@@ -199,6 +201,7 @@ public class RMClientPipe
         
         
         config = toCopy.config;
+        version = toCopy.version;
         messageProcessor = this.provider.getInboundMessageProcessor();
         
         //these are be threadsafe
@@ -310,6 +313,7 @@ public class RMClientPipe
                 
                 outboundSequence.registerProtocolMessageSender(
                         new ProtocolMessageSender(messageProcessor,
+                        config,
                         marshaller,
                         unmarshaller,
                         port, binding,

@@ -139,4 +139,14 @@ public class SequenceSettings implements Serializable {
      * The RM version if it is WSRM 1.0 or WSRM 1.1
      */
     public RMVersion rmVersion;
+    
+    /**
+     * SequenceSTR setting from Policy.
+     */
+    public boolean sequenceSTR;
+    
+    /**
+     * SequenceTransportSecurity setting from Policy.
+     */
+    public boolean sequenceTransportSecurity;
 }

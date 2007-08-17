@@ -111,7 +111,23 @@ public enum RMVersion {
     public  String getSequenceAcknowledgementAction() {
         return namespaceUri + "/SequenceAcknowledgement";
     }
-
+    
+    public QName getRMPolicyAssertionQName() {
+        return new QName(getPolicyNamespaceURI(), "RMAssertion");
+    }
+    
+    public QName getInactivityTimeoutAssertionQName() {
+        return new QName(getPolicyNamespaceURI(), "InactivityTimeout");
+    }
+    
+    
+    public QName getSequenceSTRAssertionQName() {
+        return new QName(getPolicyNamespaceURI(), "SequenceSTR");
+    }
+    
+    public QName getSequenceTransportSecurityAssertionQName() {
+        return new QName(getPolicyNamespaceURI(), "SequenceTransportSecurity");
+    }
     
 
     /**

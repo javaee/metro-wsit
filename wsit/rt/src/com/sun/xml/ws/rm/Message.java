@@ -1,5 +1,5 @@
 /*
- * $Id: Message.java,v 1.6 2007-08-14 22:53:36 bhaktimehta Exp $
+ * $Id: Message.java,v 1.7 2007-08-17 18:06:48 mikeg Exp $
  */
 
 /*
@@ -103,7 +103,12 @@ public class Message {
      * SequenceElement stored when the corresponding com.sun.xml.ws.api.message.Header
      * is added to the message.
      */
-    protected AckRequestedElement ackRequestedElement = null; 
+    protected AckRequestedElement ackRequestedElement = null;
+    
+    /**
+     * Version of RM spec being used.
+     */
+    protected RMVersion version;
     
     /**
      * When true, indicates that the message is a request message for
@@ -119,19 +124,15 @@ public class Message {
     public boolean isOneWayResponse = false;
     
     
-    /**/
-    /**
-     * Namespace URI corresponding to RM version.
-     */
-    public static final String namespaceURI =
-            RMVersion.WSRM10.namespaceUri;
-
+   
 
     /**
      * Public ctor takes wrapped JAX-WS message as its argument.
      */
-    public Message(com.sun.xml.ws.api.message.Message message) {
+    public Message(com.sun.xml.ws.api.message.Message message, 
+            RMVersion version) {
         this.message = message;
+        this.version = version;
     }
     
     /**
@@ -199,7 +200,7 @@ public class Message {
             return null;
         }
         
-        return message.getHeaders().get(namespaceURI, name, true);     
+        return message.getHeaders().get(version.getNamespaceURI(), name, true);     
     }
     
     /**

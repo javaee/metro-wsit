@@ -209,7 +209,7 @@ public class ServerInboundSequence extends InboundSequence
             boolean complete) {
         
         try {
-        com.sun.xml.ws.rm.Message mess = new com.sun.xml.ws.rm.Message(message);
+        com.sun.xml.ws.rm.Message mess = new com.sun.xml.ws.rm.Message(message, config.rmVersion);
         set(index, mess);
         
         if (complete) {

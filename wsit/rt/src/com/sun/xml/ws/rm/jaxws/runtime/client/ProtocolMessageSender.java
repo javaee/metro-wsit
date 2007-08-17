@@ -125,6 +125,7 @@ public class ProtocolMessageSender {
      * Public ctor.  Initialize the fields
      */
     public ProtocolMessageSender(InboundMessageProcessor processor,
+                                 SequenceConfig config,
                                  Marshaller marshaller,
                                  Unmarshaller unmarshaller,
                                  WSDLPort port,
@@ -140,7 +141,7 @@ public class ProtocolMessageSender {
         this.unmarshaller = unmarshaller;
         this.constants =  RMConstants.getRMConstants(binding.getAddressingVersion());
         this.packet = packet;
-        this.config = new SequenceConfig();
+        this.config = config;
 
     }
 
@@ -180,7 +181,7 @@ public class ProtocolMessageSender {
 
             if (acksTo.equals(constants.getAnonymousURI())) {
 
-                Message response = responsePacket.getMessage();
+               Message response = responsePacket.getMessage();
                if (response.isFault()){
                     throw new CreateSequenceException("CreateSequence was refused by the RMDestination \n ",response);
                 }
@@ -210,7 +211,7 @@ public class ProtocolMessageSender {
         Message request = Messages.create(config.getRMVersion().getJAXBContext(),ts,version);
 
         //piggyback an acknowledgement if one is pending
-        seq.processAcknowledgement(new com.sun.xml.ws.rm.Message(request), marshaller);
+        seq.processAcknowledgement(new com.sun.xml.ws.rm.Message(request, config.rmVersion), marshaller);
 
         Packet requestPacket = new Packet(request);
         requestPacket.proxy = packet.proxy;
@@ -261,7 +262,7 @@ public class ProtocolMessageSender {
         Packet responsePacket = nextPipe.process(requestPacket);
         Message response = responsePacket.getMessage();
 
-        com.sun.xml.ws.rm.Message msg = new com.sun.xml.ws.rm.Message(response);
+        com.sun.xml.ws.rm.Message msg = new com.sun.xml.ws.rm.Message(response, config.rmVersion);
         if (response != null && response.isFault()){
                 throw new RMException(response);
         }
@@ -304,7 +305,7 @@ public class ProtocolMessageSender {
                     throw new RMException(response);
             }
 
-            com.sun.xml.ws.rm.Message msg = new com.sun.xml.ws.rm.Message(response);
+            com.sun.xml.ws.rm.Message msg = new com.sun.xml.ws.rm.Message(response, config.rmVersion);
             processor.processMessage(msg, marshaller, unmarshaller);
         } finally {
             //Make sure that alarm is reset.

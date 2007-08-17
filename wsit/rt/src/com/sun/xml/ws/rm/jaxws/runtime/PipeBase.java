@@ -49,6 +49,7 @@ import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.rm.RMException;
 import com.sun.xml.ws.rm.Constants;
+import com.sun.xml.ws.rm.RMVersion;
 import com.sun.xml.ws.rm.jaxws.util.ProcessingFilter;
 
 import javax.xml.bind.Marshaller;
@@ -74,8 +75,8 @@ public abstract class PipeBase<PROVIDER extends RMProvider,
      */
     protected Pipe nextPipe;
 
-
-    protected  Marshaller marshaller;
+    protected RMVersion version;
+    protected Marshaller marshaller;
     protected Unmarshaller unmarshaller;
     
     protected ProcessingFilter filter;
@@ -85,9 +86,6 @@ public abstract class PipeBase<PROVIDER extends RMProvider,
         this.provider = provider;
         this.nextPipe = nextPipe;
         this.filter = provider.getProcessingFilter();
-
-       /* marshaller = RMConstants.createMarshaller();
-        unmarshaller = RMConstants.createUnmarshaller();*/
     }
 
 
@@ -104,7 +102,7 @@ public abstract class PipeBase<PROVIDER extends RMProvider,
              
         Message message = packet.getMessage();
         com.sun.xml.ws.rm.Message msg = 
-                new com.sun.xml.ws.rm.Message(message);
+                new com.sun.xml.ws.rm.Message(message, version);
         
         Object mn = packet.invocationProperties.get(Constants.messageNumberProperty);
         Object oneWayResponse = packet.invocationProperties.get("onewayresponse");
@@ -135,7 +133,7 @@ public abstract class PipeBase<PROVIDER extends RMProvider,
 
         Message message = packet.getMessage();
         com.sun.xml.ws.rm.Message msg =
-                new com.sun.xml.ws.rm.Message(message);
+                new com.sun.xml.ws.rm.Message(message, version);
 
         provider.processInboundMessage(msg, marshaller, unmarshaller);
         return msg;

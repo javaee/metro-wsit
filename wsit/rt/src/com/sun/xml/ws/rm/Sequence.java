@@ -1,5 +1,5 @@
 /*
- * $Id: Sequence.java,v 1.10 2007-08-14 22:53:36 bhaktimehta Exp $
+ * $Id: Sequence.java,v 1.11 2007-08-17 18:06:48 mikeg Exp $
  */
 
 /*
@@ -104,7 +104,7 @@ public class Sequence {
      */
     protected  RMConstants rmConstants;
 
-    protected SequenceConfig config = new SequenceConfig();
+    protected SequenceConfig config;
     
    
     protected int firstKnownGap;
@@ -136,6 +136,13 @@ public class Sequence {
 
 	resetLastActivityTime();
 
+    }
+    
+    /**
+     * Accessor for SequenceConfig field.
+     */
+    public SequenceConfig getSequenceConfig() {
+        return config;
     }
     
     /**
