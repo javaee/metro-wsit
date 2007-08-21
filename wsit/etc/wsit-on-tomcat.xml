@@ -36,7 +36,7 @@
  holder.
 -->
 
-<project name="WSIT 1.0 On Tomcat" default="help" basedir=".">
+<project name="WSIT 1.0 On Tomcat" default="help">
     <property environment="env"/>
     <property name="tomcat.home" value="${env.CATALINA_HOME}"/>
     <property name="tomcat.lib.home" value="${tomcat.home}/shared/lib"/>
@@ -44,26 +44,9 @@
     <property name="java.home" value="${env.JAVA_HOME}"/>
 
     <condition property="jdk6">
-        <equals arg1="${ant.java.version}" arg2="1.6"/>
-    </condition>
-
-    <condition property="endorsed-api-flagged">
-        <equals arg1="${install.api}" arg2="true"/>
+        <contains string="${java.version}" substring="1.6"/>
     </condition>
  
-    <!-- the jdk6-message is always printed along with the 'help' message
-         if JDK6 is being used.  it is also printed when installing with
-         JDK6 but only if -Dinstall.api='true' is not specified on the 
-         command-line (that conditional check is done by <jdk6-check>).
-    -->
-
-    <target name="jdk6-check" if="jdk6" unless="endorsed-api-flagged">
-        <antcall target="jdk6-message"/>
-        <echo message="IMPORTANT:"/>
-        <echo message="  After this install completes, run ant again invoking the 'install-api' target."/>
-        <echo/>
-    </target>
-
     <target name="jdk6-message" if="jdk6">
         <echo message="NOTE: WSIT is being installed using JDK6."/>
         <echo/>
@@ -75,20 +58,17 @@
         <echo message="  You must have write-permissions on the JDK 6 directory."/>
         <echo message="  This is a concern when using a system-wide JDK installation."/>
         <echo/>
-        <echo message="  To install webservices-api.jar, choose one of the following:"/>
-        <echo/>
-        <echo message="  Invoke 'ant -Dinstall.api=true install' to copy it"/>
-        <echo message="  while doing a complete WSIT installation."/>
+        <echo message="  To install (only) webservices-api.jar, do the following:"/>
         <echo/>
         <echo message="  Invoke 'ant install-api' to install only"/>
         <echo message="  webservices-api.jar into the 'endorsed' directory."/>
         <echo/>
     </target>
     
-    <target name="install" depends="jdk6-check" description="Install latest WSIT jars">
-        <echo message="Installing WSIT 1.0 on ${tomcat.home} ..."/>
+    <target name="install" depends="uninstall,update-catalina-props" description="Install latest WSIT jars">
+        <echo message="Installing WSIT 1.0 for ${tomcat.home} ..."/>
 
-        <!-- TODO: Identify placeholder for tools.jar -->
+        <mkdir dir="${tomcat.lib.home}"/>
         <copy toDir="${tomcat.lib.home}" overwrite="true">
             <fileset dir="lib">
                 <include name="webservices-rt.jar"/>
@@ -102,29 +82,48 @@
                 <include name="webservices-api.jar"/>
             </fileset>
         </copy>
-        <antcall target="install-api-check"/>
+        <antcall target="install-api"/>
         <echo message="... installation complete."/>
     </target>
 
-    <target name="install-api-check" if="endorsed-api-flagged ">
-        <antcall target="install-api"/>
-    </target>
+    <target name="install-api" description="Installs 'webservices-api.jar'" depends="install-api-jdk5,install-api-jdk6"/>
 
-    <target name="install-api" description="Installs 'webservices-api.jar' into $JAVA_HOME/lib/endorsed">
+    <target name="install-api-jdk5" description="Installs 'webservices-api.jar' into $CATALINA_HOME/shared/lib" unless="jdk6">
+        <copy toDir="${tomcat.lib.home}" overwrite="true">
+            <fileset dir="lib">
+                <include name="webservices-api.jar"/>
+            </fileset>
+        </copy>
+    </target>
+    
+    <target name="install-api-jdk6" description="Installs 'webservices-api.jar' into $JAVA_HOME/lib/endorsed" if="jdk6">
         <mkdir dir="${java.home}/lib/endorsed"/>
-        <copy toDir="${java.home}/lib/endorsed" overwrite="true" failonerror="false">
+        <copy toDir="${java.home}/lib/endorsed" overwrite="true">
             <fileset dir="lib">
                 <include name="webservices-api.jar"/>
             </fileset>
         </copy>
     </target>
 
+    <taskdef name="updatesharedloaderprop" classname="com.sun.xml.ws.installer.UpdateSharedLoaderProp">
+        <classpath>
+            <fileset dir="./lib" includes="webservices-rt.jar"/>
+        </classpath>
+    </taskdef>
+
+    <target name="update-catalina-props">
+        <updatesharedloaderprop catalinaprops="${tomcat.home}/conf/catalina.properties"/>
+    </target>
+
     <target name="uninstall">
-        <delete>
+        <delete quiet="true">
             <fileset dir="${tomcat.lib.home}" includes="webservices-rt.jar, webservices-tools.jar, webservices-extra.jar, webservices-extra-api.jar"/>
         </delete>
-        <delete>
+        <delete quiet="true">
             <fileset dir="${tomcat.endorsed}" includes="webservices-api.jar"/>
+        </delete>
+        <delete quiet="true"> 
+            <fileset dir="${tomcat.lib.home}" includes="webservices-api.jar"/>
         </delete>
         <delete quiet="true">
             <fileset dir="${java.home}/lib/endorsed" includes="webservices-api.jar"/>
@@ -132,21 +131,17 @@
     </target>
 
     <target name="help">
-        <echo message="install  :"/>
-        <echo message="  Installs WSIT 1.0 on Tomcat"/>
+        <echo message="Usage:"/>
+        <echo message="  ant -f wsit-on-tomcat.xml {install,uninstall}"/>
         <echo/>
-        <echo message="install-api: "/>
-        <echo message="  Copies 'webservices-api.jar' into $JAVA_HOME/lib/endorsed"/>
-        <echo message="  Only needed for JDK 6 and only if -Dinstall.api='true'"/>
-        <echo message="  was not passed during WSIT installation"/>
+        <echo message="$CATALINA_HOME must be set to the installation directory of Tomcat."/>
+        <echo/>
+        <echo message="install:"/>
+        <echo message="  Installs WSIT 1.0 on Tomcat"/>
         <echo/>
         <echo message="uninstall: "/>
         <echo message="  Uninstalls WSIT 1.0 from Tomcat"/>
         <echo/>
-        <echo message="$CATALINA_HOME must be set to the installation directory of Tomcat."/>
-        <echo/>
-        <echo message="Usage:"/>
-        <echo message="  ant -f wsit-on-tomcat.xml [-Dinstall.api='true'] {install,uninstall}"/>
         <antcall target="jdk6-message"/>
     </target>
 </project>
