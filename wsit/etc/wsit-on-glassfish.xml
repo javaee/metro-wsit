@@ -66,26 +66,13 @@
     </target>
 
     <condition property="jdk6">
-        <equals arg1="${ant.java.version}" arg2="1.6"/>
+        <equals arg1="${java.version}" arg2="1.6"/>
     </condition>
 
     <condition property="endorsed-api-flagged">
         <equals arg1="${install.api}" arg2="true"/>
     </condition>
  
-    <!-- the jdk6-message is always printed along with the 'help' message
-         if JDK6 is being used.  it is also printed when installing with
-         JDK6 but only if -Dinstall.api='true' is not specified on the 
-         command-line (that conditional check is done by <jdk6-check>).
-    -->
-
-    <target name="jdk6-check" if="jdk6" unless="endorsed-api-flagged">
-        <antcall target="jdk6-message"/>
-        <echo message="IMPORTANT:"/>
-        <echo message="  After this install completes, run ant again invoking the 'install-api' target."/>
-        <echo/>
-    </target>
-
     <target name="jdk6-message" if="jdk6">
         <echo message="NOTE: WSIT is being installed using JDK6."/>
         <echo/>
@@ -97,17 +84,14 @@
         <echo message="  You must have write-permissions on the JDK 6 directory."/>
         <echo message="  This is a concern when using a system-wide JDK installation."/>
         <echo/>
-        <echo message="  To install webservices-api.jar, choose one of the following:"/>
-        <echo/>
-        <echo message="  Invoke 'ant -Dinstall.api=true install' to copy it"/>
-        <echo message="  while doing a complete WSIT installation."/>
+        <echo message="  To install webservices-api.jar:"/>
         <echo/>
         <echo message="  Invoke 'ant install-api' to install only"/>
         <echo message="  webservices-api.jar into the 'endorsed' directory."/>
         <echo/>
     </target>
     
-    <target name="install" depends="jdk6-check,init" description="Install latest WSIT jars">
+    <target name="install" depends="init" description="Install latest WSIT jars">
         <echo message="Installing WSIT 1.0 on ${as.home} ..."/>
 
         <copy todir="${as.lib.home}" overwrite="true">
@@ -121,17 +105,13 @@
                 <include name="webservices-api.jar"/>
             </fileset>
         </copy>
-        <antcall target="install-api-check"/>
+        <antcall target="install-api"/>
         <echo message="... installation complete."/>
     </target>
 
-    <target name="install-api-check" if="endorsed-api-flagged" description="Internal-use, conditional target calls install-api">
-        <antcall target="install-api"/>
-    </target>
-
-    <target name="install-api" description="Installs 'webservices-api.jar' into $JAVA_HOME/lib/endorsed">
+    <target name="install-api" if="jdk6" description="Installs 'webservices-api.jar' into $JAVA_HOME/lib/endorsed">
         <mkdir dir="${java.home}/lib/endorsed"/>
-        <copy toDir="${java.home}/lib/endorsed" overwrite="true" failonerror="false">
+        <copy toDir="${java.home}/lib/endorsed" overwrite="true">
             <fileset dir="lib">
                 <include name="webservices-api.jar"/>
             </fileset>
@@ -163,18 +143,13 @@
         <echo message="install: "/>
         <echo message="  Installs WSIT 1.0 on GlassFish v2"/>
         <echo/>
-        <echo message="install-api: "/>
-        <echo message="  Copies 'webservices-api.jar' into $JAVA_HOME/lib/endorsed"/>
-        <echo message="  Only needed for JDK 6 and only if -Dinstall.api='true'"/>
-        <echo message="  was not passed during WSIT installation"/>
-        <echo/>
         <echo message="uninstall: "/>
         <echo message="  Uninstalls WSIT 1.0 from GlassFish v2"/>
         <echo/>
         <echo message="$AS_HOME must be set to the installation directory of GlassFish v2."/>
         <echo/>
         <echo message="Usage:"/>
-        <echo message="  ant -f wsit-on-glassfish.xml [-Dinstall.api='true'] {install,uninstall}"/>
+        <echo message="  ant -f wsit-on-glassfish.xml {install,uninstall}"/>
         <antcall target="jdk6-message"/>
     </target>
 </project>
