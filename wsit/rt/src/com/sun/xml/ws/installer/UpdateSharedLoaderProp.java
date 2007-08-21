@@ -36,12 +36,6 @@ public class UpdateSharedLoaderProp extends Task {
         }
         //log("tomcatLib = " + tomcatLib + " catalinaProps = " + catalinaProps, Project.MSG_WARN);
 
-        // Remove earlier instances of Metro/WSIT path modifications
-        CleanSharedLoaderProp cleanerTask = new CleanSharedLoaderProp();
-        cleanerTask.setCatalinaProps(catalinaProps);
-        cleanerTask.setProject(this.getProject());
-        cleanerTask.execute();
-
         //
         final String jarWildcard = new String("/*.jar");
         final String metroJars = new String(tomcatLib + jarWildcard);
