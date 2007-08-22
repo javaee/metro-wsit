@@ -39,8 +39,9 @@
 <project name="WSIT 1.0 On Tomcat" default="help">
     <property environment="env"/>
     <property name="tomcat.home" value="${env.CATALINA_HOME}"/>
-    <property name="tomcat.lib.home" value="${tomcat.home}/shared/lib"/>
-    <property name="tomcat.endorsed" value="${tomcat.home}/common/endorsed"/>
+    <property name="catalina.home" value="${tomcat.home}"/>
+    <property name="catalina.lib.home" value="${catalina.home}/shared/lib"/>
+    <property name="catalina.endorsed" value="${catalina.home}/common/endorsed"/>
     <property name="java.home" value="${env.JAVA_HOME}"/>
 
     <condition property="jdk6">
@@ -66,10 +67,10 @@
     </target>
     
     <target name="install" depends="uninstall,update-catalina-props" description="Install latest WSIT jars">
-        <echo message="Installing WSIT 1.0 for ${tomcat.home} ..."/>
+        <echo message="Installing WSIT 1.0 for ${catalina.home} ..."/>
 
-        <mkdir dir="${tomcat.lib.home}"/>
-        <copy toDir="${tomcat.lib.home}" overwrite="true">
+        <mkdir dir="${catalina.lib.home}"/>
+        <copy toDir="${catalina.lib.home}" overwrite="true">
             <fileset dir="lib">
                 <include name="webservices-rt.jar"/>
                 <include name="webservices-tools.jar"/>
@@ -77,7 +78,7 @@
                 <include name="webservices-extra-api.jar"/>
             </fileset>
         </copy>
-        <copy toDir="${tomcat.endorsed}" overwrite="true">
+        <copy toDir="${catalina.endorsed}" overwrite="true">
             <fileset dir="lib">
                 <include name="webservices-api.jar"/>
             </fileset>
@@ -89,7 +90,7 @@
     <target name="install-api" description="Installs 'webservices-api.jar'" depends="install-api-jdk5,install-api-jdk6"/>
 
     <target name="install-api-jdk5" description="Installs 'webservices-api.jar' into $CATALINA_HOME/shared/lib" unless="jdk6">
-        <copy toDir="${tomcat.lib.home}" overwrite="true">
+        <copy toDir="${catalina.lib.home}" overwrite="true">
             <fileset dir="lib">
                 <include name="webservices-api.jar"/>
             </fileset>
@@ -112,18 +113,18 @@
     </taskdef>
 
     <target name="update-catalina-props">
-        <updatesharedloaderprop catalinaprops="${tomcat.home}/conf/catalina.properties"/>
+        <updatesharedloaderprop catalinaprops="${catalina.home}/conf/catalina.properties"/>
     </target>
 
     <target name="uninstall">
         <delete quiet="true">
-            <fileset dir="${tomcat.lib.home}" includes="webservices-rt.jar, webservices-tools.jar, webservices-extra.jar, webservices-extra-api.jar"/>
+            <fileset dir="${catalina.lib.home}" includes="webservices-rt.jar, webservices-tools.jar, webservices-extra.jar, webservices-extra-api.jar"/>
         </delete>
         <delete quiet="true">
-            <fileset dir="${tomcat.endorsed}" includes="webservices-api.jar"/>
+            <fileset dir="${catalina.endorsed}" includes="webservices-api.jar"/>
         </delete>
         <delete quiet="true"> 
-            <fileset dir="${tomcat.lib.home}" includes="webservices-api.jar"/>
+            <fileset dir="${catalina.lib.home}" includes="webservices-api.jar"/>
         </delete>
         <delete quiet="true">
             <fileset dir="${java.home}/lib/endorsed" includes="webservices-api.jar"/>
