@@ -65,10 +65,12 @@ import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.model.wsdl.WSDLService;
 import com.sun.xml.ws.api.pipe.ClientPipeAssemblerContext;
 import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.PipelineAssembler;
 import com.sun.xml.ws.api.pipe.PipelineAssemblerFactory;
 import com.sun.xml.ws.api.pipe.ServerPipeAssemblerContext;
 import com.sun.xml.ws.api.pipe.StreamSOAPCodec;
+import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.server.ServiceDefinition;
 import com.sun.xml.ws.policy.Policy;
@@ -80,7 +82,7 @@ import com.sun.xml.ws.policy.jaxws.client.PolicyFeature;
 import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter.WsdlDocumentFilter;
 import com.sun.xml.ws.policy.util.PolicyMapUtil;
 import com.sun.xml.ws.rm.Constants;
-import com.sun.xml.ws.rm.jaxws.runtime.client.RMClientPipe;
+import com.sun.xml.ws.rm.jaxws.runtime.client.RMClientTube;
 import com.sun.xml.ws.rm.jaxws.runtime.server.RMServerPipe;
 import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
 import com.sun.xml.ws.transport.tcp.wsit.TCPTransportPipeFactory;
@@ -251,11 +253,14 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             p = dump(context, CLIENT_PREFIX + WSRM_SUFFIX + AFTER_SUFFIX, p);
             // check for WS-Reliable Messaging
             if (isReliableMessagingEnabled(policyMap, wsdlPort)) {
-                p = new RMClientPipe(wsdlPort,
-                        context.getService(),
-                        context.getBinding(),
-                        scInit,
-                        p);
+                Tube nextTube = PipeAdapter.adapt(p);
+                Tube rmClientTube = new RMClientTube(wsdlPort,
+                                        context.getService(),
+                                        context.getBinding(),
+                                        scInit,
+                                        nextTube);
+                
+                p = PipeAdapter.adapt(rmClientTube);
             }
             p = dump(context, CLIENT_PREFIX + WSRM_SUFFIX + BEFORE_SUFFIX, p);
 
@@ -499,7 +504,8 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
                         port.getName());
                 Policy policy = policyMap.getEndpointEffectivePolicy(endpointKey);
                 
-                return (policy != null) && policy.contains(Constants.version);
+                return (policy != null) && 
+                           (policy.contains(Constants.version10) || policy.contains(Constants.version11));
             } catch (PolicyException e) {
                 throw new WebServiceException(e);
             }

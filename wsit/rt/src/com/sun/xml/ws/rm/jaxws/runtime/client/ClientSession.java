@@ -53,19 +53,19 @@ import javax.xml.ws.BindingProvider;
  */
 public class ClientSession extends Session{
     
-    private RMClientPipe pipe;
+    private RMClientTube tube;
     /**
      */
-    public ClientSession(String id, RMClientPipe pipe) {
+    public ClientSession(String id, RMClientTube tube) {
         super(id);
-        this.pipe = pipe;
+        this.tube = tube;
     }
     
     public void close() {
-        if (pipe != null) {
-            pipe.preDestroy();
+        if (tube != null) {
+            tube.preDestroy();
         }
-        pipe = null;
+        tube = null;
     }
     
     public static ClientSession getSession(BindingProvider proxy) {

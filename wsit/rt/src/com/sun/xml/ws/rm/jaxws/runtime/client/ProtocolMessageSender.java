@@ -51,7 +51,7 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.rm.*;
 import com.sun.xml.ws.rm.jaxws.runtime.InboundMessageProcessor;
 import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
@@ -84,11 +84,7 @@ public class ProtocolMessageSender {
      */
     private InboundMessageProcessor processor;
 
-    /**
-     * The next client pipe in the pipeline.  Used to propogate the messages.
-     */
-    private Pipe nextPipe;
-
+    
     /**
      * The marshaller to write the messages
      */
@@ -120,6 +116,8 @@ public class ProtocolMessageSender {
     private WSBinding binding;
 
     private SequenceConfig config;
+    
+    private final ProtocolMessageHelper helper;
 
     /**
      * Public ctor.  Initialize the fields
@@ -130,11 +128,10 @@ public class ProtocolMessageSender {
                                  Unmarshaller unmarshaller,
                                  WSDLPort port,
                                  WSBinding binding,
-                                 Pipe nextPipe,
+                                 Tube nextTube,
                                  Packet packet) {
 
         this.processor = processor;
-        this.nextPipe = nextPipe;
         this.port = port;
         this.binding = binding;
         this.marshaller = marshaller;
@@ -142,6 +139,7 @@ public class ProtocolMessageSender {
         this.constants =  RMConstants.getRMConstants(binding.getAddressingVersion());
         this.packet = packet;
         this.config = config;
+        this.helper = new ProtocolMessageHelper(nextTube);
 
     }
 
@@ -177,7 +175,7 @@ public class ProtocolMessageSender {
 
 
 
-            Packet responsePacket = nextPipe.process(requestPacket);
+            Packet responsePacket = helper.process(requestPacket);
 
             if (acksTo.equals(constants.getAnonymousURI())) {
 
@@ -218,7 +216,7 @@ public class ProtocolMessageSender {
         requestPacket.contentNegotiation = packet.contentNegotiation;
         addAddressingHeaders (requestPacket,config.getRMVersion().getTerminateSequenceAction(),seq.getDestination(),seq.getAcksTo(),/*true*/ false);
         requestPacket.setEndPointAddressString(seq.getDestination().toString());
-        Packet responsePacket = nextPipe.process(requestPacket);
+        Packet responsePacket = helper.process(requestPacket);
         Message response = responsePacket.getMessage();
         if (response != null && response.isFault()){
                 throw new TerminateSequenceException("There was an error trying to terminate the sequence " ,response);
@@ -259,7 +257,7 @@ public class ProtocolMessageSender {
 
        
 
-        Packet responsePacket = nextPipe.process(requestPacket);
+        Packet responsePacket = helper.process(requestPacket);
         Message response = responsePacket.getMessage();
 
         com.sun.xml.ws.rm.Message msg = new com.sun.xml.ws.rm.Message(response, config.rmVersion);
@@ -297,7 +295,7 @@ public class ProtocolMessageSender {
 
             requestPacket.setEndPointAddressString(seq.getDestination().toString());
 
-            Packet responsePacket = nextPipe.process(requestPacket);
+            Packet responsePacket = helper.process(requestPacket);
             Message response = responsePacket.getMessage();
             if (response != null && response.isFault()){
                     //reset alarm

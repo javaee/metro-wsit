@@ -1,5 +1,5 @@
 /*
- * $Id: Message.java,v 1.8 2007-08-17 19:43:47 bhaktimehta Exp $
+ * $Id: Message.java,v 1.9 2007-08-24 17:04:01 mikeg Exp $
  */
 
 /*
@@ -42,6 +42,7 @@ package com.sun.xml.ws.rm;
 import com.sun.xml.ws.rm.v200502.AckRequestedElement;
 import com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement;
 import com.sun.xml.ws.rm.v200502.SequenceElement;
+
 
 /**
  * Message is an abstraction of messages that can be added to WS-RM Sequences. 
@@ -123,6 +124,11 @@ public class Message {
      */
     public boolean isOneWayResponse = false;
     
+    /**
+     * Instance of TublineHelper used to resend messages.
+     */
+    private MessageSender messageSender;
+    
     
    
 
@@ -170,6 +176,13 @@ public class Message {
     }
     
     /**
+     * For client message, sets the messageSender used to resend messages.
+     */
+    public void setMessageSender(MessageSender messageSender) {
+        this.messageSender = messageSender;
+    }
+    
+    /**
      * Accessor for the relatedMessage field.
      *
      * @return The response corresponding to a request and vice-versa.
@@ -188,6 +201,19 @@ public class Message {
         //since the original one will be consumed
         mess.copyContents();
         relatedMessage = mess;
+    }
+    
+    
+    /**
+     * Accessors for isWaiting field used with Tubeline implementation.
+     */
+    public boolean getIsWaiting() {
+        return isWaiting();
+    }
+    
+    
+    public void setIsWaiting(boolean value) {
+        isWaiting = value;
     }
     
     /**
@@ -254,8 +280,15 @@ public class Message {
      * Wake up the current thread which is waiting on this Message's monitor.
      */
     public synchronized  void resume() {
+        if (messageSender == null) {
+            //Pipe implementation..  Remove when switch to Tube is complete
             isWaiting = false;
             notify();
+        } else {
+            if (!isWaiting  && !isComplete) {
+                messageSender.send();
+            }
+        }
     }
     
     public synchronized boolean isWaiting() {
