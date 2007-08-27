@@ -38,6 +38,7 @@
 package com.sun.xml.ws.rm.v200502;
 
 
+import com.sun.xml.ws.rm.protocol.AbstractCreateSequence;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
 import org.w3c.dom.Element;
 
@@ -82,7 +83,7 @@ import java.util.Map;
 
         })
 @XmlRootElement(name="CreateSequence",namespace="http://schemas.xmlsoap.org/ws/2005/02/rm")
-public class CreateSequenceElement {
+public class CreateSequenceElement extends AbstractCreateSequence {
 
     @XmlElement(name="AcksTo", namespace="http://schemas.xmlsoap.org/ws/2005/02/rm")
     protected W3CEndpointReference acksTo;
@@ -153,7 +154,7 @@ public class CreateSequenceElement {
      *     
      */
     public void setExpires(Expires value) {
-        this.expires = value;
+        this.expires = (Expires)value;
     }
 
     /**
@@ -176,7 +177,8 @@ public class CreateSequenceElement {
      *     {@link OfferType }
      *     
      */
-    public void setOffer(OfferType value) {
+
+        public void setOffer(OfferType value) {
         this.offer = value;
     }
 

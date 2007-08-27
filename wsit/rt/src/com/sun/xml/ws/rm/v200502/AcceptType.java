@@ -38,6 +38,7 @@
 package com.sun.xml.ws.rm.v200502;
 
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
+import com.sun.xml.ws.rm.protocol.AbstractAcceptType;
 import org.w3c.dom.Element;
 
 import javax.xml.bind.annotation.*;
@@ -54,7 +55,7 @@ import java.util.Map;
     "acksTo",
     "any"
 })
-public class AcceptType {
+public class AcceptType extends AbstractAcceptType {
 
     @XmlElement(name="AcksTo", namespace="http://schemas.xmlsoap.org/ws/2005/02/rm")
     protected W3CEndpointReference acksTo;

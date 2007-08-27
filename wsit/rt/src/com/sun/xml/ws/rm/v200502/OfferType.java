@@ -37,6 +37,7 @@
 
 package com.sun.xml.ws.rm.v200502;
 
+
 import org.w3c.dom.Element;
 
 import javax.xml.bind.annotation.*;
@@ -47,14 +48,13 @@ import java.util.List;
 import java.util.Map;
 
 
-
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "OfferType", propOrder = {
     "identifier",
     "expires",
     "any"
 })
-public class OfferType {
+public class OfferType  {
 
     @XmlElement(name = "Identifier", namespace = "http://schemas.xmlsoap.org/ws/2005/02/rm")
     protected Identifier identifier;
@@ -110,7 +110,7 @@ public class OfferType {
      *     
      */
     public void setExpires(Expires value) {
-        this.expires = value;
+        this.expires = (Expires)value;
     }
 
     /**

@@ -50,7 +50,7 @@ import java.util.Map;
     "value"
 })
 @XmlRootElement(name = "Expires")
-public class Expires {
+public class Expires  {
 
     @XmlValue
     protected Duration value;

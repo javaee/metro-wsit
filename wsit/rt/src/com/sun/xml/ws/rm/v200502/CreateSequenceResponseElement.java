@@ -37,6 +37,8 @@
 
 package com.sun.xml.ws.rm.v200502;
 
+import com.sun.xml.ws.rm.protocol.AbstractAcceptType;
+import com.sun.xml.ws.rm.protocol.AbstractCreateSequenceResponse;
 import org.w3c.dom.Element;
 
 import javax.xml.bind.annotation.*;
@@ -77,7 +79,7 @@ import java.util.Map;
     "any"
 })
 @XmlRootElement(name="CreateSequenceResponse",namespace="http://schemas.xmlsoap.org/ws/2005/02/rm")
-public class CreateSequenceResponseElement {
+public class CreateSequenceResponseElement extends  AbstractCreateSequenceResponse{
 
     @XmlElement(name = "Identifier", namespace = "http://schemas.xmlsoap.org/ws/2005/02/rm")
     protected Identifier identifier;
@@ -158,8 +160,8 @@ public class CreateSequenceResponseElement {
      *     {@link AcceptType }
      *     
      */
-    public void setAccept(AcceptType value) {
-        this.accept = value;
+    public void setAccept(AbstractAcceptType value) {
+        this.accept = (AcceptType)value;
     }
 
     /**
