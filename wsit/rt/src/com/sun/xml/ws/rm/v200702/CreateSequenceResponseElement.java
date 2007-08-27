@@ -9,6 +9,7 @@
 package com.sun.xml.ws.rm.v200702;
 
 import org.w3c.dom.Element;
+import com.sun.xml.ws.rm.protocol.*;
 
 import javax.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
@@ -50,7 +51,7 @@ import java.util.Map;
     "any"
 })
 @XmlRootElement(name="CreateSequenceResponseElement",namespace="http://docs.oasis-open.org/ws-rx/wsrm/200702")
-public class CreateSequenceResponseElement {
+public class CreateSequenceResponseElement  extends AbstractCreateSequenceResponse{
 
     @XmlElement(name = "Identifier", required = true)
     protected Identifier identifier;
@@ -157,8 +158,8 @@ public class CreateSequenceResponseElement {
      *     {@link AcceptType }
      *     
      */
-    public void setAccept(AcceptType value) {
-        this.accept = value;
+    public void setAccept(AbstractAcceptType value) {
+        this.accept = (AcceptType)value;
     }
 
     /**

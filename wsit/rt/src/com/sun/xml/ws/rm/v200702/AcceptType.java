@@ -8,19 +8,16 @@
 
 package com.sun.xml.ws.rm.v200702;
 
+import com.sun.xml.ws.rm.protocol.AbstractAcceptType;
+import org.w3c.dom.Element;
+
+import javax.xml.bind.annotation.*;
+import javax.xml.namespace.QName;
+import javax.xml.ws.wsaddressing.W3CEndpointReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAnyAttribute;
-import javax.xml.bind.annotation.XmlAnyElement;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.namespace.QName;
-import org.w3c.dom.Element;
-import javax.xml.ws.EndpointReference;
 
 
 /**
@@ -48,10 +45,10 @@ import javax.xml.ws.EndpointReference;
     "acksTo",
     "any"
 })
-public class AcceptType {
+public class AcceptType  extends AbstractAcceptType {
 
     @XmlElement(name = "AcksTo", required = true)
-    protected EndpointReference acksTo;
+    protected W3CEndpointReference acksTo;
     @XmlAnyElement(lax = true)
     protected List<Object> any;
     @XmlAnyAttribute
@@ -65,21 +62,11 @@ public class AcceptType {
      *     {@link EndpointReferenceType }
      *     
      */
-    public EndpointReference getAcksTo() {
+    public W3CEndpointReference getAcksTo() {
         return acksTo;
     }
 
-    /**
-     * Sets the value of the acksTo property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link EndpointReferenceType }
-     *     
-     */
-    public void setAcksTo(EndpointReference value) {
-        this.acksTo = value;
-    }
+    
 
     /**
      * Gets the value of the any property.
@@ -127,6 +114,20 @@ public class AcceptType {
      */
     public Map<QName, String> getOtherAttributes() {
         return otherAttributes;
+    }
+
+
+    /**
+     * Sets the value of the acksTo property.
+     *
+     * @param value
+     *     allowed object is
+     *     {@link com.sun.xml.ws.api.addressing.WSEndpointReference }
+     *
+     */
+    public void setAcksTo(W3CEndpointReference value) {
+        //this.any.add(value);
+        this.acksTo = value;
     }
 
 }

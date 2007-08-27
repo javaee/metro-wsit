@@ -8,6 +8,8 @@
 
 package com.sun.xml.ws.rm.v200702;
 
+import com.sun.xml.ws.rm.protocol.AbstractCreateSequence;
+import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
 import org.w3c.dom.Element;
 
 import javax.xml.bind.annotation.*;
@@ -44,12 +46,13 @@ import java.util.Map;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "CreateSequenceType", propOrder = {
     "acksTo",
+    "any",
     "expires",
     "offer",
-    "any"
+    "securityTokenReference"
 })
 @XmlRootElement(name="CreateSequence",namespace="http://docs.oasis-open.org/ws-rx/wsrm/200702")
-public class CreateSequenceElement {
+public class CreateSequenceElement  extends AbstractCreateSequence{
 
     @XmlElement(name = "AcksTo", required = true, namespace="http://docs.oasis-open.org/ws-rx/wsrm/200702")
     protected W3CEndpointReference acksTo;
@@ -59,6 +62,8 @@ public class CreateSequenceElement {
     protected OfferType offer;
     @XmlAnyElement(lax = true)
     protected List<Object> any;
+    @XmlElement(name="SecurityTokenReference", namespace="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd")
+    private SecurityTokenReferenceType securityTokenReference;
     @XmlAnyAttribute
     private Map<QName, String> otherAttributes = new HashMap<QName, String>();
 
@@ -180,6 +185,14 @@ public class CreateSequenceElement {
      */
     public Map<QName, String> getOtherAttributes() {
         return otherAttributes;
+    }
+
+     public SecurityTokenReferenceType getSecurityTokenReference() {
+        return securityTokenReference;
+    }
+
+    public void setSecurityTokenReference(SecurityTokenReferenceType securityTokenReference) {
+        this.securityTokenReference = securityTokenReference;
     }
 
 }

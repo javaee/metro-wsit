@@ -8,16 +8,11 @@
 
 package com.sun.xml.ws.rm.v200702;
 
-import java.util.HashMap;
-import java.util.Map;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAnyAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.XmlValue;
+import javax.xml.bind.annotation.*;
 import javax.xml.datatype.Duration;
 import javax.xml.namespace.QName;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -41,7 +36,7 @@ import javax.xml.namespace.QName;
     "value"
 })
 @XmlRootElement(name = "Expires")
-public class Expires {
+public class Expires  {
 
     @XmlValue
     protected Duration value;
