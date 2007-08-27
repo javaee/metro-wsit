@@ -44,6 +44,7 @@
  */
 
 package com.sun.xml.ws.rm.jaxws.runtime.server;
+
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
@@ -62,6 +63,9 @@ import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.PipeBase;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
 import com.sun.xml.ws.rm.jaxws.util.LoggingHelper;
+import com.sun.xml.ws.rm.protocol.AbstractAcceptType;
+import com.sun.xml.ws.rm.protocol.AbstractCreateSequence;
+import com.sun.xml.ws.rm.protocol.AbstractCreateSequenceResponse;
 import com.sun.xml.ws.rm.v200502.*;
 import com.sun.xml.ws.runtime.util.Session;
 import com.sun.xml.ws.runtime.util.SessionManager;
@@ -504,8 +508,8 @@ public class RMServerPipe extends PipeBase<RMDestination,
 
     public Packet handleCreateSequenceAction(Packet packet) throws RMException{
 
-        CreateSequenceElement csrElement;
-        Identifier id ;
+        AbstractCreateSequence csrElement;
+
         String offeredId = null;
         Message message = packet.getMessage();
 
@@ -540,13 +544,32 @@ public class RMServerPipe extends PipeBase<RMDestination,
         }
         */
 
-        OfferType offer = csrElement.getOffer();
-        if (offer != null) {
-            id = offer.getIdentifier();
-            if (id != null) {
-                offeredId = id.getValue();
+        com.sun.xml.ws.security.secext10.SecurityTokenReferenceType strType = null;
+        if (csrElement instanceof com.sun.xml.ws.rm.v200502.CreateSequenceElement)      {
+            com.sun.xml.ws.rm.v200502.OfferType offer = ((com.sun.xml.ws.rm.v200502.CreateSequenceElement)csrElement).getOffer();
+            if (offer != null) {
+                com.sun.xml.ws.rm.v200502.Identifier id = offer.getIdentifier();
+                if (id != null) {
+                    offeredId = id.getValue();
+                }
             }
+            // Read STR element in csrElement if any
+            strType= ((com.sun.xml.ws.rm.v200502.CreateSequenceElement)csrElement).getSecurityTokenReference();
+            this.secureReliableMessaging = strType!=null?true:false;
+        }   else {
+             com.sun.xml.ws.rm.v200702.OfferType offer = ((com.sun.xml.ws.rm.v200702.CreateSequenceElement)csrElement).getOffer();
+            if (offer != null) {
+                com.sun.xml.ws.rm.v200702.Identifier id = offer.getIdentifier();
+                if (id != null) {
+                    offeredId = id.getValue();
+                }
+            }
+            // Read STR element in csrElement if any
+            strType= ((com.sun.xml.ws.rm.v200702.CreateSequenceElement)csrElement).getSecurityTokenReference();
+            this.secureReliableMessaging = strType!=null?true:false;
+
         }
+
 
         //create server-side data structures.
         ServerInboundSequence inboundSequence =
@@ -559,10 +582,9 @@ public class RMServerPipe extends PipeBase<RMDestination,
         inboundSequence.resetLastActivityTime();
 
 
-        //TODO.. Read STR element in csrElement if any
-        this.secureReliableMessaging = csrElement.getSecurityTokenReference()!=null?true:false;
+
         if (this.secureReliableMessaging) {
-            com.sun.xml.ws.security.secext10.SecurityTokenReferenceType strType= csrElement.getSecurityTokenReference();
+
             SecurityContextToken sct = (SecurityContextToken)packet.invocationProperties.get(MessageConstants.INCOMING_SCT);
             if (sct != null){
                 String strId = sct.getIdentifier().toString();
@@ -591,13 +613,27 @@ public class RMServerPipe extends PipeBase<RMDestination,
         }
 
         //initialize CreateSequenceResponseElement
-        CreateSequenceResponseElement crsElement = new CreateSequenceResponseElement();
+        AbstractAcceptType accept = null;
+        AbstractCreateSequenceResponse crsElement = null;
+        if (config.getRMVersion() == RMVersion.WSRM10)    {
+            crsElement = new com.sun.xml.ws.rm.v200502.CreateSequenceResponseElement();
 
-        AcceptType accept ;
 
-        Identifier id2 = new Identifier();
-        id2.setValue(inboundSequence.getId());
-        crsElement.setIdentifier(id2);
+            com.sun.xml.ws.rm.v200502.Identifier id2 = new com.sun.xml.ws.rm.v200502.Identifier();
+            id2.setValue(inboundSequence.getId());
+            ((com.sun.xml.ws.rm.v200502.CreateSequenceResponseElement)crsElement).setIdentifier(id2);
+            accept = new com.sun.xml.ws.rm.v200502.AcceptType();
+        } else {
+             crsElement = new com.sun.xml.ws.rm.v200702.CreateSequenceResponseElement();
+
+
+            com.sun.xml.ws.rm.v200702.Identifier id2 = new com.sun.xml.ws.rm.v200702.Identifier();
+            id2.setValue(inboundSequence.getId());
+            ((com.sun.xml.ws.rm.v200702.CreateSequenceResponseElement)crsElement).setIdentifier(id2);
+            accept = new com.sun.xml.ws.rm.v200702.AcceptType();
+
+        }
+
         URI dest;
         if (offeredId != null) {
 
@@ -613,7 +649,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
                         );
             }
             
-            accept = new AcceptType();
+
 
             W3CEndpointReference endpointReference ;
             WSEndpointReference wsepr = new WSEndpointReference(dest,constants.getAddressingVersion());

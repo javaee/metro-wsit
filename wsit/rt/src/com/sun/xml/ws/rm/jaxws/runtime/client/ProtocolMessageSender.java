@@ -56,7 +56,12 @@ import com.sun.xml.ws.rm.*;
 import com.sun.xml.ws.rm.jaxws.runtime.InboundMessageProcessor;
 import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
-import com.sun.xml.ws.rm.v200502.*;
+import com.sun.xml.ws.rm.protocol.AbstractCreateSequence;
+import com.sun.xml.ws.rm.protocol.AbstractCreateSequenceResponse;
+import com.sun.xml.ws.rm.v200502.AckRequestedElement;
+import com.sun.xml.ws.rm.v200502.CreateSequenceResponseElement;
+import com.sun.xml.ws.rm.v200502.SequenceElement;
+import com.sun.xml.ws.rm.v200502.TerminateSequenceElement;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -143,7 +148,7 @@ public class ProtocolMessageSender {
 
     }
 
-    public CreateSequenceResponseElement sendCreateSequence(CreateSequenceElement cs,
+    public AbstractCreateSequenceResponse sendCreateSequence(AbstractCreateSequence cs,
                                                             URI destination,
                                                             URI acksTo,
                                                             SOAPVersion version) throws RMException {
@@ -151,11 +156,17 @@ public class ProtocolMessageSender {
         //Used from com.sun.xml.ws.jaxws.runtime.client.ClientOutboundSequence.connect, where
         //CreateSequence object is constructed and resulting CreateSequenceResponse object is
         //processed.
-        CreateSequenceResponseElement csrElem = null;
+        AbstractCreateSequenceResponse csrElem = null;
 
         //1. Initialize  message adding CreateSequence to body
         if (cs != null) {
-            Message request = Messages.create(config.getRMVersion().getJAXBContext(),cs,version);
+            Message request = null;
+            if (config.getRMVersion() == RMVersion.WSRM10) {
+                 request = Messages.create(config.getRMVersion().getJAXBContext(),((com.sun.xml.ws.rm.v200502.CreateSequenceElement)cs),version);
+            } else {
+               request = Messages.create(config.getRMVersion().getJAXBContext(),((com.sun.xml.ws.rm.v200702.CreateSequenceElement)cs),version);
+            }
+
 
 
             //Addressing Headers are added by configuring the following property
@@ -351,7 +362,7 @@ public class ProtocolMessageSender {
 
 
 
-    private CreateSequenceResponseElement unmarshallCreateSequenceResponse(Message response) throws RMException{
+    private AbstractCreateSequenceResponse unmarshallCreateSequenceResponse(Message response) throws RMException{
         CreateSequenceResponseElement csrElement = null;
         try {
             csrElement = response.readPayloadAsJAXB(unmarshaller);

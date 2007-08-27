@@ -41,30 +41,37 @@
 // Created on October 15, 2005, 3:13 PM
 //
 package com.sun.xml.ws.rm.jaxws.runtime.client;
+
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
+import com.sun.xml.ws.api.rm.AcknowledgementListener;
+import com.sun.xml.ws.api.rm.SequenceSettings;
+import com.sun.xml.ws.api.rm.client.ClientSequence;
 import com.sun.xml.ws.rm.InvalidMessageNumberException;
 import com.sun.xml.ws.rm.Message;
 import com.sun.xml.ws.rm.RMException;
+import com.sun.xml.ws.rm.RMVersion;
+import com.sun.xml.ws.rm.jaxws.runtime.InboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
-import com.sun.xml.ws.rm.v200502.*;
+import com.sun.xml.ws.rm.jaxws.util.LoggingHelper;
+import com.sun.xml.ws.rm.protocol.AbstractAcceptType;
+import com.sun.xml.ws.rm.protocol.AbstractCreateSequence;
+import com.sun.xml.ws.rm.protocol.AbstractCreateSequenceResponse;
+import com.sun.xml.ws.rm.v200502.AcknowledgementHandler;
+import com.sun.xml.ws.rm.v200502.Identifier;
+import com.sun.xml.ws.rm.v200502.TerminateSequenceElement;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
 
-import javax.xml.ws.Service;
 import javax.xml.bind.JAXBElement;
 import javax.xml.transform.Source;
+import javax.xml.ws.Service;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
 import java.net.URI;
 import java.util.UUID;
-import java.util.logging.Logger;
 import java.util.logging.Level;
-import com.sun.xml.ws.rm.jaxws.util.LoggingHelper;
-import com.sun.xml.ws.api.rm.client.ClientSequence;
-import com.sun.xml.ws.api.rm.AcknowledgementListener;
-import com.sun.xml.ws.api.rm.SequenceSettings;
-import com.sun.xml.ws.rm.jaxws.runtime.InboundSequence;
+import java.util.logging.Logger;
 /**
  * ClientOutboundSequence represents the set of all messages from a single BindingProvider instance.
  * It includes methods that connect and disconnect to a remote RMDestination using
@@ -297,8 +304,14 @@ public class ClientOutboundSequence extends OutboundSequence
 
             this.isAnonymous = acksToString.equals(anonymous);
 
+             AbstractCreateSequence cs = null;
+            if (config.getRMVersion()== RMVersion.WSRM10) {
+                cs = new com.sun.xml.ws.rm.v200502.CreateSequenceElement( );
+            } else  {
+                cs = new com.sun.xml.ws.rm.v200702.CreateSequenceElement();
+            }
 
-            CreateSequenceElement cs = new CreateSequenceElement();
+//            CreateSequenceElement cs = new CreateSequenceElement();
 
             /**
              * ADDRESSING_FIXME
@@ -328,12 +341,22 @@ public class ClientOutboundSequence extends OutboundSequence
             String incomingID = "uuid:" + UUID.randomUUID();
 
             if (twoWay) {
-                Identifier id = new Identifier();
-                id.setValue(incomingID);
-                OfferType offer = new OfferType();
-                offer.setIdentifier(id);
 
-                cs.setOffer(offer);
+
+                if (config.getRMVersion() == RMVersion.WSRM10)   {
+                    com.sun.xml.ws.rm.v200502.Identifier id = new com.sun.xml.ws.rm.v200502.Identifier();
+                    com.sun.xml.ws.rm.v200502.OfferType offer = new  com.sun.xml.ws.rm.v200502.OfferType();
+                    id.setValue(incomingID);
+                    offer.setIdentifier(id);
+                    ((com.sun.xml.ws.rm.v200502.CreateSequenceElement)cs).setOffer(offer);
+                }  else {
+                    com.sun.xml.ws.rm.v200702.Identifier id = new com.sun.xml.ws.rm.v200702.Identifier();
+                    com.sun.xml.ws.rm.v200702.OfferType offer = new  com.sun.xml.ws.rm.v200702.OfferType();
+                    id.setValue(incomingID);
+                    offer.setIdentifier(id);
+                    ((com.sun.xml.ws.rm.v200702.CreateSequenceElement)cs).setOffer(offer);
+                }
+
             }
 
             if (secureReliableMessaging) {
@@ -345,15 +368,24 @@ public class ClientOutboundSequence extends OutboundSequence
                 }
             }
 
-            CreateSequenceResponseElement csr = protocolMessageSender.sendCreateSequence(cs,destination,
+            AbstractCreateSequenceResponse csr = protocolMessageSender.sendCreateSequence(cs,destination,
                     acksTo,version);
            
-            
+            AbstractAcceptType accept = null;
             if (csr != null ) {
-                Identifier idOutbound = csr.getIdentifier();
-                this.id = idOutbound.getValue();
-                
-                AcceptType accept = csr.getAccept();
+                if (csr instanceof com.sun.xml.ws.rm.v200502.CreateSequenceResponseElement ) {
+                    Identifier idOutbound = ((com.sun.xml.ws.rm.v200502.CreateSequenceResponseElement)csr).getIdentifier();
+                    this.id = idOutbound.getValue();
+
+                    accept = ((com.sun.xml.ws.rm.v200502.CreateSequenceResponseElement)csr).getAccept();
+                }   else {
+                    com.sun.xml.ws.rm.v200702.Identifier idOutbound = ((com.sun.xml.ws.rm.v200702.CreateSequenceResponseElement)csr).getIdentifier();
+                    this.id = idOutbound.getValue();
+
+                    accept = ((com.sun.xml.ws.rm.v200702.CreateSequenceResponseElement)csr).getAccept();
+
+                }
+
                 
                 if (accept != null) {
                     /**
