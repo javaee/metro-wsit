@@ -71,6 +71,12 @@ public final class PolicyConfigParser {
     private static final String WAR_PREFIX = "/WEB-INF/";
     
     /**
+     * Private constructor for the utility class to prevend class instantiation
+     */
+    private PolicyConfigParser() {
+    }    
+   
+    /**
      * This is a helper method that returns directly {@link PolicyMap} instance populated
      * from information in WSIT config file. For more details on the whole process see
      * {@link #parseModel(String, Container, PolicyMapMutator[]) parseModel}
