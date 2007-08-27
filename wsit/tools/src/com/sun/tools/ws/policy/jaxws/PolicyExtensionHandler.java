@@ -51,6 +51,7 @@ import org.w3c.dom.Element;
 public class PolicyExtensionHandler extends TWSDLExtensionHandler {
     
     
+    @Override
     public String getNamespaceURI() {
         return PolicyConstants.POLICY_NAMESPACE_URI;
     }
