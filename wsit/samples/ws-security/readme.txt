@@ -25,7 +25,7 @@ To Install WSIT and run the sample:
 5. Start tomcat or glassfish.
 
 6. To run the sample, go to 
-   /wsit/wsit/samples/ws-trust/src/<sample_name>, and run "ant run-sample".
+   /wsit/wsit/samples/ws-security/src/<sample_name>, and run "ant run-sample".
 
 Note : To run un_symmetric sample, you need to create glassfish user with name
 ("wsit") and password("wsit").
