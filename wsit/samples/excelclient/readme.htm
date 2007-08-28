@@ -71,35 +71,44 @@ directory. It can be checked out using the command:</p>
 	<li><b>service</b>: WSIT endpoint</li>
 	<li><b>ExcelAddIn</b>: Excel 2007 AddIn as Visual Studio Solution</li>
 	<li><b>ExcelClient.xlsm</b>: Excel spreadsheet</li>
-	<li><b>cert</b>: Certificates for MS side</li>
+	<li><b>cert</b>: Certificates for .NET client</li>
 </ul>
 <h2><a name="Configuration"></a>4.0 Configuration</h2>
 <h3>4.1.1 WSIT Endpoint</h3>
 <ol>
 	<li>Set JAVA_HOME to the installation directory of JDK.</li>
-	<li>Install <a href="https://glassfish.dev.java.net/">latest GlassFish v2</a> 
+	<li>Install the <a href="https://glassfish.dev.java.net/">latest GlassFish v2</a> 
 	promoted build (tested with
-	<a href="https://glassfish.dev.java.net/downloads/v2-b58.html">RC1</a>), say 
+	<a href="https://glassfish.dev.java.net/downloads/v2-b58c.html">RC4</a>), say 
 	in AS_HOME.</li>
 	<li>Download and run <a href="https://xwss.dev.java.net/servlets/ProjectDocumentList?folderID=6645&expandFolder=6645&folderID=6645">copyv3</a> script to update 
-	the Glassfish KeyStore and TrustStore.</li>
-	<li>Open WSITDemo project. You may get a window asking to resolve 
-	references. To fix this:<ol>
-		<li>Select the Project.</li>
-		<li>Right-click and select &quot;<code>Resolve Reference Problems ...</code>&quot;.</li>
-		<li>Select the <code>&quot;appserv-rt.jar&quot; file/folder could not be found</code> 
-		and click Resolve.</li>
-		<li>Select <code>AS_HOME/lib/appserv-rt.jar</code> in the dialog window.</li>
+	the Glassfish KeyStore and TrustStore.<ol>
+	<li>Set AS_HOME to GlassFish installation directory.</li>
+	<li>Invoke &quot;<code>ant</code>&quot; in the expanded &quot;<code>copyv3</code>&quot; 
+	directory.</li>
+</ol>
+
+	</li>
+	<li>In NetBeans IDE, add GlassFish as a &quot;<code>Server</code>&quot; in the &quot;<code>Runtime</code>&quot; 
+	tab.</li>
+	<li>Open the &quot;<code>service</code>&quot; project.<ol>
+		<li>Select the Project, Right-click and select &quot;<code>Properties</code>&quot;.</li>
+		<li>Click on &quot;<code>Run</code>&quot; and ensure that the recently added 
+		GlassFish is chosen as the Server.</li>
 	</ol>
 	</li>
-	<li>Set GlassFish as the Server<ol>
-		<li>Select the Project</li>
-		<li>Right-click and select Properties</li>
-		<li>Click on Run and verify &quot;Server:&quot; points to the installed GlassFish.</li>
-	</ol>
+        <li>Update KeyStore and TrustStore configuration<ol>
+	<li>Expand &quot;Web Pages&quot;, &quot;WEB-INF&quot; and open <tt><code>wsit-com.sun.xml.ws.wsitdemo.WSITDemo.xml</code></tt>
 	</li>
-        <li>Update KeyStore and TrustStore configuration in <tt>WSITDemo/web/WEB-INF/wsit-com.sun.xml.ws.wsitdemo.WSITDemo.xml</tt> 
-		(so that it points to your GlassFish TrustStore and KeyStore)</li>
+	<li>Search for &quot;sc:KeyStore&quot; string and change the value of &quot;location&quot; 
+	attribute such that it points to KeyStore location in your GlassFish 
+	installation directory.</li>
+	<li>Search for &quot;sc:TrustStore&quot; string and change the value of &quot;location&quot; 
+	attribute such that it points to TrustStore location in your GlassFish 
+	installation directory.</li>
+</ol>
+
+	</li>
 	<li>Add GlassFish as a server instance to NetBeans. Start GlassFish by going to 
 	the <code>Runtime</code> tab, select GlassFish 
 	server instance, right-click and then selecting &quot;<code>Start</code>&quot;. It's 
@@ -292,7 +301,7 @@ directory. It can be checked out using the command:</p>
 </ol>
 <p>&nbsp;</p>
 <p>Last Updated: <i>
-<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%B %d, %Y %I:%M %p" startspan -->August 28, 2007 10:55 AM<!--webbot bot="Timestamp" endspan i-checksum="42928" --></i></p>
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%B %d, %Y %I:%M %p" startspan -->August 28, 2007 02:08 PM<!--webbot bot="Timestamp" endspan i-checksum="43899" --></i></p>
 
 </body>
 
