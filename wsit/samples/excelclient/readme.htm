@@ -68,10 +68,9 @@ directory. It can be checked out using the command:</p>
 </ol>
 <h2><a name="Directory"></a>3.0 Directory Structure</h2>
 <ul>
-	<li><b>WSITDemo</b>: WSIT/GlassFish endpoint + Visualization engine in a 
-	NetBeans project</li>
-	<li><b>WSITDemoAddIn</b>: .NET endpoint as Visual Studio Solution</li>
-	<li><b>WSITDemo.xlsm</b>: Excel spreadsheet</li>
+	<li><b>service</b>: WSIT endpoint</li>
+	<li><b>ExcelAddIn</b>: Excel 2007 AddIn as Visual Studio Solution</li>
+	<li><b>ExcelClient.xlsm</b>: Excel spreadsheet</li>
 	<li><b>cert</b>: Certificates for MS side</li>
 </ul>
 <h2><a name="Configuration"></a>4.0 Configuration</h2>
@@ -168,17 +167,8 @@ directory. It can be checked out using the command:</p>
 		</li>
 	</ol>
 	</li>
-	<li>URLs for WSIT endpoint<ol>
-		<li><b>WSDL</b>:
-		<a href="http://localhost:8080/WSITDemo/WSITDemoService?wsdl">
-		http://localhost:8080/WSITDemo/WSITDemoService?wsdl</a></li>
-		<li><b>Visulization Window</b>:
-		<a href="http://localhost:8080/WSITDemo/vis?action=vis_window">
-		http://localhost:8080/WSITDemo/vis?action=vis_window</a></li>
-		<li><b>Database Client</b>: <a href="http://localhost:8080/WSITDemo/pls">
-		http://localhost:8080/WSITDemo/pls</a></li>
-	</ol>
-	</li>
+	<li>The endpoint is hosted at
+	<a href="http://localhost:8080/service/WSITEndpointService?wsdl">http://localhost:8080/service/WSITEndpointService?wsdl</a>.</li>
 </ol>
 
 <h3>4.1.2 STS Service</h3>
@@ -216,24 +206,6 @@ directory. It can be checked out using the command:</p>
     &lt;/endpoint&gt;
 &lt;/client&gt;</pre>
 	</li>
-<li>Similarly, add an explicit identity dns value to <code>&lt;secureConversationBootstrap/issuedTokenParameters/issuer&gt;</code>:
-<pre>
-&lt;secureConversationBootstrap defaultAlgorithmSuite="Basic128"
-  authenticationMode="IssuedTokenForCertificate" requireDerivedKeys="true"
-  securityHeaderLayout="Strict" includeTimestamp="true" keyEntropyMode="CombinedEntropy"
-  messageProtectionOrder="SignBeforeEncrypt" messageSecurityVersion="WSSecurity11WSTrustFebruary2005WSSecureConversationFebruary2005WSSecurityPolicy11BasicSecurityProfile10"
-  requireSignatureConfirmation="false"&gt;
-  &lt;issuedTokenParameters keySize="128" keyType="SymmetricKey" tokenType="http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV1.1"&gt;
-    &lt;issuer address="http://localhost:8080/WSITSTS/SecurityTokenService"
-      binding="customBinding" bindingConfiguration="http://localhost:8080/WSITSTS/SecurityTokenService"&gt;
-    <span style="color:red">  &lt;identity&gt;
-        &lt;dns value="WSSIP"/&gt;
-      &lt;/identity&gt;</span>
-    &lt;/issuer&gt;
-</pre>
-</li>
-	<li>Change the value of <code>//configuration/system.serviceModel/bindings/customBinding/binding/security/secureConversationBootstrap/localClientSettings/@maxCookieCachingTime</code> 
-	from &quot;<code>Infinite</code>&quot; to &quot;<code>00:20:00</code>&quot;.</li>
 </ol></li>
 	<li>Click on &quot;Build&quot;, &quot;Build Solution&quot;.</li>
 	<li>Register Certificates<ol>
