@@ -106,21 +106,6 @@ directory. It can be checked out using the command:</p>
 	server instance, right-click and then selecting &quot;<code>Start</code>&quot;. It's 
 	important to start GlassFish this way otherwise database instance needs to 
 	be explicitly started using <code>AS_HOME/bin/asadmin start-database</code>.</li>
-	<li>Configure Comet<ol>
-		<li><strike>If you are using GlassFish b43, then remove <code>&lt;property name=&quot;proxiedProtocols&quot; 
-		value=&quot;ws/tcp&quot;/&gt;</code> from <code>domain.xml</code> for the 
-		visualization to work correctly.</strike></li>
-		<li>Enable Comet<ol>
-			<li>Start GlassFish by invoking <code>AS_HOME/bin/asadmin 
-			start-domain</code>.</li>
-			<li>Invoke the following command:<br>
-			<br>
-			<code>AS_HOME/bin/asadmin set 
-			server.http-service.http-listener.http-listener-1.property.cometSupport=true</code></li>
-		</ol>
-		</li>
-	</ol>
-	</li>
 	<li>Add "wsit" User To Glassfish<ol>
 		<li><code>AS_HOME/bin/asadmin create-file-user wsit</code> (use "wsit" as 
 		a password)
@@ -145,8 +130,8 @@ directory. It can be checked out using the command:</p>
 			properties<ol>
 				<li>ConnectionAttributes=&quot;;create=true&quot;</li>
 				<li>DatabaseName=&quot;excelclient&quot;</li>
-				<li>User=&quot;abc&quot;</li>
-				<li>Password=&quot;123&quot;</li>
+				<li>User=&quot;WSIT&quot;</li>
+				<li>Password=&quot;WSIT&quot;</li>
 			</ol>
 			</li>
 			<li>Click &quot;Finish&quot;</li>
@@ -335,7 +320,7 @@ directory. It can be checked out using the command:</p>
 </ol>
 <p>&nbsp;</p>
 <p>Last Updated: <i>
-<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%B %d, %Y %I:%M %p" startspan -->August 27, 2007 03:11 PM<!--webbot bot="Timestamp" endspan i-checksum="43796" --></i></p>
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%B %d, %Y %I:%M %p" startspan -->August 28, 2007 10:55 AM<!--webbot bot="Timestamp" endspan i-checksum="42928" --></i></p>
 
 </body>
 
