@@ -25,7 +25,14 @@ Secure and Reliable Metro endpoint. A complete description of the scenario is av
 directory. It can be checked out using the command:</p>
 <p><code>cvs -d :pserver:yourid@cvs.dev.java.net:/cvs co wsit/wsit/samples/excelclient</code></p>
 <h2><a name="Software"></a>2.0 Software Requirements</h2>
-<h3>2.1 Java</h3>
+<h3>2.1 Platforms</h3>
+<p>This sample is tested on Windows Vista and Windows XP + SP2 by installing the 
+Metro endpoint and Excel 2007 client on the same machine. However the Metro 
+endpoint can be installed on any of the <a href="http://glassfish.java.net">
+GlassFish</a> supported platforms (Solaris Sparc, Solaris X86, Windows, Linux 
+and Mac OS). The .NET service reference needs to be regenerated in that case and 
+the instructions for the same are given below.</p>
+<h3>2.2 Java</h3>
 <ol>
 	<li><a href="http://java.sun.com/javase/downloads/index_jdk5.jsp">JDK 1.5.0 
 	U12 or later</a></li>
@@ -35,30 +42,28 @@ directory. It can be checked out using the command:</p>
 	<a href="https://glassfish.dev.java.net/public/alldownloads.html#Milestone_binary_builds">GlassFish 
 	v2</a></li>
 </ol>
-<h3>2.2 .NET</h3>
+<h3>2.3 .NET</h3>
 <p>Install the software in the exact order listed below.</p>
 <ol>
-	<li>Windows Vista Ultimate (available via MSDN)
-            <ul>
-            <li>Not necessary if installing on Windows XP.</li>
-            </ul></li>
+	<li>Windows Vista Ultimate or Windows XP + SP2</li>
 	<li>Microsoft Office 2007 Professional (available via MSDN)</li>
-        <li>Only on Windows XP: 
-		<a href="http://www.microsoft.com/downloads/details.aspx?FamilyId=10CC340B-F857-4A14-83F5-25634C3BF043&displaylang=en">.NET 
+        <li>Only on Windows XP<ol>
+	<li>
+	<a href="http://www.microsoft.com/downloads/details.aspx?FamilyId=10CC340B-F857-4A14-83F5-25634C3BF043&displaylang=en">.NET 
 		Framework 3.0</a>. Note: .NET 3.0 is built into Windows Vista so no need for separate install.</li>
+</ol>
+	</li>
 	<li>Microsoft Visual Studio 2005 Professional Edition (available via MSDN)</li>
 	<li>
-	<a href="http://www.microsoft.com/downloads/details.aspx?familyid=BB4A75AB-E2D4-4C96-B39D-37BAF6B5B1DC&displaylang=en">
-	Microsoft Visual Studio 2005 Professional Edition SP1</a>
-            <ul>
-            <li>Not necessary if installing on Windows XP.</li>
-            </ul></li>
+	Only on Windows Vista<ol>
 	<li>
-	<a href="http://www.microsoft.com/downloads/details.aspx?familyid=90e2942d-3ad1-4873-a2ee-4acc0aace5b6&displaylang=en">
-	Microsoft Visual Studio 2005 Professional Edition SP1 Update</a>
-            <ul>
-            <li>Not necessary if installing on Windows XP.</li>
-            </ul></li>
+	<a href="http://www.microsoft.com/downloads/details.aspx?familyid=BB4A75AB-E2D4-4C96-B39D-37BAF6B5B1DC&displaylang=en">Microsoft Visual Studio 2005 Professional Edition SP1</a>
+	</li>
+	<li>
+	<a href="http://www.microsoft.com/downloads/details.aspx?familyid=90e2942d-3ad1-4873-a2ee-4acc0aace5b6&displaylang=en">Microsoft Visual Studio 2005 Professional Edition SP1 Update</a>
+	</li>
+</ol>
+	</li>
 	<li>
 	<a href="http://www.microsoft.com/downloads/details.aspx?familyid=5e86cab3-6fd6-4955-b979-e1676db6b3cb&displaylang=en">
 	Microsoft Visual Studio Tools for Office 2007 Second Edition</a></li>
@@ -69,13 +74,13 @@ directory. It can be checked out using the command:</p>
 </ol>
 <h2><a name="Directory"></a>3.0 Directory Structure</h2>
 <ul>
-	<li><b>service</b>: WSIT endpoint</li>
+	<li><b>service</b>: Metro endpoint</li>
 	<li><b>ExcelAddIn</b>: Excel 2007 AddIn as Visual Studio Solution</li>
 	<li><b>ExcelClient.xlsm</b>: Excel spreadsheet</li>
 	<li><b>etc/certs</b>: Certificates for .NET client</li>
 </ul>
 <h2><a name="Configuration"></a>4.0 Configuration</h2>
-<h3>4.1.1 WSIT Endpoint</h3>
+<h3>4.1.1 Metro Endpoint</h3>
 <ol>
 	<li>Set JAVA_HOME to the installation directory of JDK.</li>
 	<li>Install the <a href="https://glassfish.dev.java.net/">latest GlassFish v2</a> 
@@ -185,7 +190,8 @@ directory. It can be checked out using the command:</p>
 <ol>
 	<li>Start Visual Studio 2005 Professional Edition.</li>
 	<li>Open the Solution in <code>ExcelAddIn</code> directory.</li>
-	<li>If you regenerate the Service Reference in Visual Studio then edit the 
+	<li>If you update the Service Reference (for example if the Metro endpoint 
+	is hosted on a different machine than localhost) in Visual Studio then edit the 
 	following changes in the generated <code>app.config</code>:<ol>
 	<li>
 	<pre>Add the following fragment in <code>//configuration/system.serviceModel/client/endpoint</code>:
@@ -279,11 +285,11 @@ directory. It can be checked out using the command:</p>
 	and then another window will pop up showing the error message. Click &quot;Retry&quot; 
 	and then enter correct username/password.</li>
 	<li>The output window in NetBeans IDE shows the message exchange flow 
-	between the Excel client and the WSIT endpoint.</li>
+	between the Excel client and the Metro endpoint.</li>
 </ol>
 <p>&nbsp;</p>
 <p>Last Updated: <i>
-<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%B %d, %Y %I:%M %p" startspan -->August 28, 2007 04:21 PM<!--webbot bot="Timestamp" endspan i-checksum="43807" --></i></p>
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%B %d, %Y %I:%M %p" startspan -->August 29, 2007 09:12 AM<!--webbot bot="Timestamp" endspan i-checksum="42866" --></i></p>
 
 </body>
 
