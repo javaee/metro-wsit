@@ -139,35 +139,7 @@ public class ServerInboundSequence extends InboundSequence
         session = s;
     }
     
-    /**
-     * If ordered delivery is required, resume processing the next Message
-     * in the Sequence if it is waiting for this message to be delivered.
-     * This method is called after ServerPipe.process returns for this message.
-     * while waiting for gaps in the sequence to fill that can now be processed.
-     *
-     * @param message The message to be processed
-     */
-    public  void releaseNextMessage(Message message) throws RMException {
-
-        /**
-         * Flow Control can be enabled without ordered delivery in which case
-         * we want the storedmessages to be decremented 
-         */
-       /* if (!config.ordered) {
-           return;
-       }*/
-        
-       message.complete();
-       --storedMessages;
-       
-       //notify immediate successor if it is waiting 
-       int num = message.getMessageNumber();
-    
-       if (num < nextIndex - 1 && get(num + 1) != null) {
-           get(num + 1).resume();
-        }
-    }
-    
+   
      /**
      * If ordered delivery is required, resume processing the next Message
      * in the Sequence if it is waiting for this message to be delivered.
@@ -176,6 +148,7 @@ public class ServerInboundSequence extends InboundSequence
      *
      *@param message The message to  be processed
      */
+    /*
     public  void holdIfUndeliverable(Message message) 
                         throws BufferFullException {
           if (!config.ordered) {
@@ -194,7 +167,7 @@ public class ServerInboundSequence extends InboundSequence
             }
         } catch (InvalidMessageNumberException e) {}
     }
-    
+    */
     /**
      * Used to re-populate a sequence with persisted messages
      * after a restart.  Do not use for other purposes.
@@ -249,6 +222,62 @@ public class ServerInboundSequence extends InboundSequence
         
         return System.currentTimeMillis() - this.getLastActivityTime()  >
                 config.getInactivityTimeout();
+    }
+    
+    /**
+     * Return value reports whether ordered delivery is configured for this
+     * sequence.
+     *
+     * @return true if sequence is ordered.
+     *         false otherwise.
+     */
+    public boolean isOrdered() {
+        return config.ordered;
+    }
+    
+    
+    /**
+     * When ordered delivery is required, this method is used to determine
+     * whether the messages with lower message numbers have already been 
+     * processed.
+     */
+    public boolean IsPredecessorComplete(Message message) {
+        try {
+            int num = message.getMessageNumber();
+       
+            //if immediate predecessor has not been processed, wait fcor it
+            if (num > 1) {
+                Message mess = get(num - 1);
+                if (mess == null || !mess.isComplete()) {
+                    return false;
+                }
+            }
+            
+        } catch (InvalidMessageNumberException e) {}
+        return true;
+    }
+    
+     /**
+     * If ordered delivery is required, resume processing the next Message
+     * in the Sequence if it is waiting for this message to be delivered.
+     * This method is called when RMServerTube.processResponse is called for this message.
+     * while waiting for gaps in the sequence to fill that can now be processed.
+     *
+     * @param message The message to be processed
+     */
+    public  void releaseNextMessage(Message message) throws RMException {
+
+        
+       message.complete();
+       --storedMessages;
+       
+       //notify immediate successor if it is waiting 
+       int num = message.getMessageNumber();
+    
+       if (num < nextIndex - 1 && get(num + 1) != null) {
+           System.out.println("resuming " + (num + 1));
+           get(num + 1).resume();
+        }
     }
     
     

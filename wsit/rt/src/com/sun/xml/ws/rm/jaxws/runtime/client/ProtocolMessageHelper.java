@@ -42,16 +42,15 @@ public class ProtocolMessageHelper {
     public Packet process(Packet request) throws RMException {
        
         try {
-        //we will use a fresh Fiber and Tube for each request.  We need to do this
-        //because there may be another request being procesed by the original tube.
-        //This can happen when this ProtocolMessageHelper is being used to resend
-        //messages or send AckRequested's from the maintenance thread.  These
-        //things might happen while other requests are being processe.'
-        Fiber fiber = engine.createFiber();
-        Tube tubeline = TubeCloner.clone(tube);
-        return fiber.runSync(tubeline, request);
+            //we will use a fresh Fiber and Tube for each request.  We need to do this
+            //because there may be another request being procesed by the original tube.
+            //This can happen when this ProtocolMessageHelper is being used to resend
+            //messages or send AckRequested's from the maintenance thread.  These
+            //things might happen while other requests are being processe.'
+            Fiber fiber = engine.createFiber();
+            Tube tubeline = TubeCloner.clone(tube);
+            return fiber.runSync(tubeline, request);
         } catch (RuntimeException e) {
-            e.printStackTrace();
             throw e;
         }
        

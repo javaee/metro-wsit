@@ -646,7 +646,7 @@ public class RMClientTube
         public void send() {
             
             
-            message.setIsWaiting(true);
+            message.setIsBusy(true);
            
             if (packet == null) {
                 throw new IllegalStateException("Request not set in TubelineHelper");
@@ -657,7 +657,7 @@ public class RMClientTube
             //use a copy of the original message
            com.sun.xml.ws.api.message.Message copy = message.getCopy();
            packet.setMessage(copy);
-           fiber.start(next, packet, callback);
+           fiber.start(TubeCloner.clone(next) , packet, callback);
            
         }
 
@@ -727,7 +727,7 @@ public class RMClientTube
                  } catch (Exception e) {
                      onCompletion(e);
                  } finally {
-                     message.setIsWaiting(false);
+                     message.setIsBusy(false);
                  }
 
             }
@@ -777,7 +777,7 @@ public class RMClientTube
                          parentFiber.resume(null);
                     }
                 } finally {
-                    message.setIsWaiting(false);
+                    message.setIsBusy(false);
                 }
             }     
         };

@@ -35,16 +35,15 @@
  */
 
 /*
- * RMServerPipe.java
+ * RMServerTube.java
  *
  * @author Mike Grogan
  * @author Bhakti Mehta
- * Created on February 7, 2006, 2:10 PM
+ * Created on August 25, 2007, 8:10 AM
  *
  */
 
 package com.sun.xml.ws.rm.jaxws.runtime.server;
-
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
@@ -54,18 +53,16 @@ import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.*;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.api.pipe.Pipe;
-import com.sun.xml.ws.api.pipe.PipeCloner;
+import com.sun.xml.ws.api.pipe.Tube;
+import com.sun.xml.ws.api.pipe.TubeCloner;
+import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.rm.*;
 import com.sun.xml.ws.rm.jaxws.runtime.InboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
-import com.sun.xml.ws.rm.jaxws.runtime.PipeBase;
+import com.sun.xml.ws.rm.jaxws.runtime.TubeBase;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
 import com.sun.xml.ws.rm.jaxws.util.LoggingHelper;
-import com.sun.xml.ws.rm.protocol.AbstractAcceptType;
-import com.sun.xml.ws.rm.protocol.AbstractCreateSequence;
-import com.sun.xml.ws.rm.protocol.AbstractCreateSequenceResponse;
 import com.sun.xml.ws.rm.v200502.*;
 import com.sun.xml.ws.runtime.util.Session;
 import com.sun.xml.ws.runtime.util.SessionManager;
@@ -88,19 +85,19 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-//import com.sun.xml.ws.rm.jaxws.util.LoggingHelper;
+
 
 /**
- * Server-side RM Pipe implementation
+ * Server-side RM Tube implementation
  */
-public class RMServerPipe extends PipeBase<RMDestination,
+public class RMServerTube extends TubeBase<RMDestination,
         ServerOutboundSequence,
         ServerInboundSequence> {
 
 
 
     public static final Logger logger =
-            Logger.getLogger(LoggingHelper.getLoggerName(RMServerPipe.class),
+            Logger.getLogger(LoggingHelper.getLoggerName(RMServerTube.class),
                     Messages.class.getName());
 
 
@@ -120,33 +117,27 @@ public class RMServerPipe extends PipeBase<RMDestination,
     private boolean secureReliableMessaging = false;
 
     protected WSBinding binding;
-
-    //protected RMVersion rmversion;
-
-
+    
+    private com.sun.xml.ws.rm.Message currentRequestMessage;
+   
 
     private SessionManager sessionManager =
             SessionManager.getSessionManager();
 
-    //populate map if wsa:Action values for protocol messages to handlers used to process
-    //messages with those headers
-    /*static {
-        initActionMap();
-    }*/
-
+    
     /**
      * Constructor is passed everything available in PipelineAssembler.
      *
      * @param wsdlModel The WSDLPort
      * @param owner The WSEndpoint.
-     * @param nextPipe The next Pipe in the pipeline.
+     * @param nextTube The next Tube in the pipeline.
      *
      */
-    public RMServerPipe(WSDLPort wsdlModel,
+    public RMServerTube(WSDLPort wsdlModel,
             WSEndpoint owner,
-            Pipe nextPipe) {
+            Tube nextTube) {
 
-        super(RMDestination.getRMDestination(), nextPipe);
+        super(RMDestination.getRMDestination(), nextTube);
         this.wsdlModel = wsdlModel;
         this.owner = owner;
 
@@ -167,30 +158,30 @@ public class RMServerPipe extends PipeBase<RMDestination,
      * @param toCopy to be copied.
      * @param cloner passed as an argument to copy.
      */
-    private RMServerPipe( RMServerPipe toCopy, PipeCloner cloner) {
+    private RMServerTube( RMServerTube toCopy, TubeCloner cloner) {
 
-        super(RMDestination.getRMDestination(), null);
-        cloner.add(toCopy, this);
-        nextPipe = cloner.copy(toCopy.nextPipe);
-        wsdlModel = toCopy.wsdlModel;
-        owner = toCopy.owner;
-        config = toCopy.config;
-        binding = owner.getBinding();
+        super(RMDestination.getRMDestination(), toCopy, cloner);
+        
+        this.wsdlModel = toCopy.wsdlModel;
+        this.owner = toCopy.owner;
+        this.config = toCopy.config;
+        this.binding = owner.getBinding();
         this.version = toCopy.version;
         this.constants = RMConstants.getRMConstants(binding.getAddressingVersion());
         this.unmarshaller = config.getRMVersion().createUnmarshaller();
         this.marshaller = config.getRMVersion().createMarshaller();
         initActionMap();
-        //RMConstants.setAddressingVersion(binding.getAddressingVersion());
+     
 
     }
 
+    @Override
+    public NextAction processRequest(Packet packet) {
 
-    public Packet process(Packet packet) {
-
-        com.sun.xml.ws.rm.Message message = null;
-        ServerInboundSequence inboundSequence ;
+        
         SOAPFault soapFault = null;
+        com.sun.xml.ws.rm.Message message = null;
+     
 
         try {
 
@@ -209,7 +200,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
             if (ret != null) {
                 //the contract of handleProtocolMessage is to return null if messager is non-protocol
                 //message or protocol message is piggybacked on an application message.
-                return ret;
+                return doReturnWith(ret);
             }
 
             //If we got here, this is an application message
@@ -229,7 +220,8 @@ public class RMServerPipe extends PipeBase<RMDestination,
                 //SequenceFault is to be added for only SOAP 1.1
                 if (binding.getSOAPVersion() == SOAPVersion.SOAP_11) {
                     //FIXME - need JAXBRIContext that can marshall SequenceFaultElement
-                    Header header = Headers.create(config.getRMVersion().getJAXBContext(), new SequenceFaultElement());
+                    Header header = Headers.create(config.getRMVersion().getJAXBContext(), 
+                                                    new SequenceFaultElement());
                     m.getHeaders().add(header);
                 }
 
@@ -238,7 +230,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
                          binding.getSOAPVersion(), 
                          constants.getAddressingVersion().getDefaultFaultAction());
                  retPacket.setMessage(m);
-                 return retPacket;
+                 doReturnWith(retPacket);
             }
 
             //allow diagnostic access to message if ProcessingFilter has been specified
@@ -252,7 +244,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
 
             //use sequence id to initialize inboundSequence and outboundSequence
             //local variables by doing a lookup in RMDestination
-            inboundSequence =
+            ServerInboundSequence inboundSequence =
                     (ServerInboundSequence)message.getSequence();
 
             if (inboundSequence == null ) {
@@ -280,9 +272,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
 
 
 
-            //If ordered deliver is configured,
-            //Block here if InboundSequence reports gaps before this message.
-            inboundSequence.holdIfUndeliverable(message);
+            
 
             //clear packet.transporBackChannel so downstream pipes do not prevent
             //empty one-way response bodies to be sent back when we need to use the
@@ -294,81 +284,29 @@ public class RMServerPipe extends PipeBase<RMDestination,
                                         inboundSequence);
             packet.invocationProperties.put(Constants.messageNumberProperty,
                                         message.getMessageNumber());
-            ret = nextPipe.process(packet);
             
-            // FIXME
-            // This shouldn't be necessary, but havint messageNumberProperty
-            // set has side-effects here due to the fact that RMClientPipe
-            // and RMServerPipe share an implementation of handleOutboundMessage
-            packet.invocationProperties.put(Constants.sequenceProperty,
-                                        null);
-            packet.invocationProperties.put(Constants.messageNumberProperty,
-                                        null);
-
-
-            Message responseMessage = ret.getMessage();
-            Message emptyMessage ;
-
-            if (responseMessage == null) {
-                //This a one-way response. handleOutboundMessage
-                //might need a message to write sequenceAcknowledgent headers to.
-                //Give it one.
-                emptyMessage = com.sun.xml.ws.api.message.Messages.createEmpty(config.getSoapVersion());
-                ret.setMessage(emptyMessage);
-                
-                //propogate this information so handleOutboundMessage will not
-                //add this to the outbound sequence, if any.
-                ret.invocationProperties.put("onewayresponse",true);
-            }
-
-            //If ordered delivery is configured, unblock the next message in the sequence
-            //if it is waiting for this one to be delivered.
-            inboundSequence.releaseNextMessage(message);
-
-            //Let Outbound sequence do its bookkeeping work, which consists of writing
-            //outbound RM headers.
-
-            //need to handle any error caused by
-            //handleOutboundMessage.. Request has already been processed
-            //by the endpoint.
-            com.sun.xml.ws.rm.Message om =
-                    handleOutboundMessage(outboundSequence, ret);
-
-            //allow diagnostic access to outbound message if ProcessingFilter is
-            //specified
-            if (filter != null) {
-                filter.handleEndpointResponseMessage(om);
-            }
-
-
-            //If we populated
-            //ret with an empty message to be used by RM protocol, and it
-            //was not used, get rid of the empty message.
-            if (responseMessage == null &&
-                    ret.getMessage() != null &&
-                    !ret.getMessage().hasHeaders()) {
-                        ret.setMessage(null);
-                    
+            //If ordered deliver is configured,
+            //Block here if InboundSequence reports gaps before this message.
+            //inboundSequence.holdIfUndeliverable(message);
+            
+            //send the message down the Tubeline
+             this.currentRequestMessage = message;
+             
+            if (!inboundSequence.isOrdered()) {
+                return doInvoke(next , packet);
             } else {
-
-                //Fill in relatedMessage field in request message for use in case request is resent.
-                //the com.sun.xml.ws.api.message.Message referenced will be a copy of the one
-                //contained in the returned packet.  See implementation of message.setRelatedMessage.
-                message.setRelatedMessage(om);
-
-                // MS client expects SequenceAcknowledgement action incase of oneway messages
-                if (responseMessage == null && ret.getMessage() != null) {
-                        HeaderList headerList = ret.getMessage().getHeaders();
-                        
-                        headerList.add(Headers.create(constants.getAddressingVersion().actionTag,
-                                                        config.getRMVersion().getSequenceAcknowledgementAction()));
-                         
-                }
+                MessageSender sender = new TubelineSender(this, packet,
+                                                    config.getSoapVersion(),
+                                                    constants.getAddressingVersion()
+                                                    );
+             
+                           
+                message.setMessageSender(sender);
+                sender.send();
+                return doSuspend();
+           
             }
-
-            return ret;
-
-        } catch (BufferFullException e) {
+        }   catch (BufferFullException e) {
 
             //need to return message with empty body and SequenceAcknowledgement
             //header for inboundSequence.  This is similar to handleAckRequestedAction, which
@@ -379,22 +317,23 @@ public class RMServerPipe extends PipeBase<RMDestination,
                 //refuse to process the request.  Client will retry
                 Packet ret = new Packet();
                 ret.invocationProperties.putAll(packet.invocationProperties);
-                return ret;
+                return doReturnWith(ret);
             }
 
             //handleInboundMessage shouldn't let inboundSequence be null.
             try {
                 ServerInboundSequence seq = (ServerInboundSequence)e.getSequence();
                 if (seq != null) {
-                    return generateAckMessage(packet, seq, 
+                    Packet ret = generateAckMessage(packet, seq, 
                                     config.getRMVersion().getSequenceAcknowledgementAction());
+                    return doReturnWith(ret);
                 } else {
                     //unreachable
                     return null;
                 }
             } catch (RMException ee) {
                 logger.severe(Messages.ACKNOWLEDGEMENT_MESSAGE_EXCEPTION.format() +e);
-                throw new WebServiceException(Messages.ACKNOWLEDGEMENT_MESSAGE_EXCEPTION.format() +e);
+                return doThrow(new WebServiceException(Messages.ACKNOWLEDGEMENT_MESSAGE_EXCEPTION.format() +e));
             }
 
         } catch (DuplicateMessageException e) {
@@ -410,7 +349,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
                 //ignore the message.
                 Packet ret = new Packet();
                 ret.invocationProperties.putAll(packet.invocationProperties);
-                return ret;
+                return doReturnWith(ret);
 
             } else {
                 //check whether original response is available.
@@ -424,7 +363,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
                         //original response is available, resend it.
                         Packet ret = new Packet(response);
                         ret.invocationProperties.putAll(packet.invocationProperties);
-                        return ret;
+                        return doReturnWith(ret);
                     }
                 }
 
@@ -434,27 +373,151 @@ public class RMServerPipe extends PipeBase<RMDestination,
 
                     ServerInboundSequence seq =
                             (ServerInboundSequence)original.getSequence();
-                    return generateAckMessage(packet, seq, 
+                    Packet ret = generateAckMessage(packet, seq, 
                                                 config.getRMVersion().getSequenceAcknowledgementAction());
+                    return doReturnWith(ret);
 
                 } catch (RMException ee) {
-                    throw new WebServiceException(ee);
+                    return doThrow(new WebServiceException(ee));
                 }
             }
-        }    catch (RMException e) {
+        } catch (RMException e) {
 
             //see if a RM Fault type has been assigned to this exception type.  If so, let
             //the exception generate a fault message.  Otherwise, wrap as WebServiceException and
             //rethrow.
             Message m = e.getFaultMessage();
             if (m != null) {
-                return new Packet(m);
+                return doReturnWith(new Packet(m));
             } else {
-                throw new WebServiceException(e);
+                return doThrow(new WebServiceException(e));
             }
 
         } catch (RuntimeException e) {
-            throw new WebServiceException(e);
+            return doThrow(new WebServiceException(e));
+        }
+    }
+    
+    
+    /** 
+     * 
+     */
+    @Override
+    public NextAction processResponse(Packet packet) {
+        
+        //on the non-ordered code path, we need to do post-processing.  On
+        //the ordered path, this has been one
+        ServerInboundSequence inboundSequence = 
+                (ServerInboundSequence)currentRequestMessage.getSequence();
+        if (!inboundSequence.isOrdered()) {
+           
+            postProcess(packet);
+        }
+        
+        return doReturnWith(packet);
+    }
+
+    @Override
+    public  NextAction processException(Throwable t) {
+        return doThrow(t);
+    }
+    
+
+    public void postProcess(Packet packet) {
+        
+        ServerInboundSequence inboundSequence = 
+                (ServerInboundSequence)currentRequestMessage.getSequence();
+        ServerOutboundSequence outboundSequence = 
+                (ServerOutboundSequence)inboundSequence.getOutboundSequence();
+        try {
+        
+            // This shouldn't be necessary, but having messageNumberProperty
+            // set has side-effects here due to the fact that RMClientPipe
+            // and RMServerPipe share an implementation of handleOutboundMessage
+            packet.invocationProperties.put(Constants.sequenceProperty,
+                                        null);
+            packet.invocationProperties.put(Constants.messageNumberProperty,
+                                        null);
+
+
+            Message responseMessage = packet.getMessage();
+            Message emptyMessage ;
+
+            if (responseMessage == null) {
+
+                //This a one-way response. handleOutboundMessage
+                //might need a message to write sequenceAcknowledgent headers to.
+                //Give it one.
+                emptyMessage = com.sun.xml.ws.api.message.Messages.createEmpty(config.getSoapVersion());
+                packet.setMessage(emptyMessage);
+
+                //propogate this information so handleOutboundMessage will not
+                //add this to the outbound sequence, if any.
+                packet.invocationProperties.put("onewayresponse",true);
+            }
+
+            //If ordered delivery is configured, unblock the next message in the sequence
+            //if it is waiting for this one to be delivered.
+            inboundSequence.releaseNextMessage(currentRequestMessage);
+            
+
+            //Let Outbound sequence do its bookkeeping work, which consists of writing
+            //outbound RM headers.
+
+            //need to handle any error caused by
+            //handleOutboundMessage.. Request has already been processed
+            //by the endpoint.
+            com.sun.xml.ws.rm.Message om =
+                    handleOutboundMessage(outboundSequence, packet);
+
+            //allow diagnostic access to outbound message if ProcessingFilter is
+            //specified
+            if (filter != null) {
+                filter.handleEndpointResponseMessage(om);
+            }
+
+
+            //If we populated
+            //ret with an empty message to be used by RM protocol, and it
+            //was not used, get rid of the empty message.
+            if (responseMessage == null &&
+                    packet.getMessage() != null &&
+                    !packet.getMessage().hasHeaders()) {
+                        packet.setMessage(null);
+
+            } else {
+
+                //Fill in relatedMessage field in request message for use in case request is resent.
+                //the com.sun.xml.ws.api.message.Message referenced will be a copy of the one
+                //contained in the returned packet.  See implementation of message.setRelatedMessage.
+                currentRequestMessage.setRelatedMessage(om);
+
+                // MS client expects SequenceAcknowledgement action incase of oneway messages
+                if (responseMessage == null && packet.getMessage() != null) {
+
+                        HeaderList headerList = packet.getMessage().getHeaders();
+
+                        headerList.add(Headers.create(constants.getAddressingVersion().actionTag,
+                                                        config.getRMVersion().getSequenceAcknowledgementAction()));
+
+                }
+            }
+
+
+        }  catch (RMException e) {
+
+            //see if a RM Fault type has been assigned to this exception type.  If so, let
+            //the exception generate a fault message.  Otherwise, wrap as WebServiceException and
+            //rethrow.
+            Message m = e.getFaultMessage();
+            if (m != null) {
+                doReturnWith(new Packet(m));
+            } else {
+                doThrow(new WebServiceException(e));
+            }
+
+        } catch (RuntimeException e) {
+            doThrow(new WebServiceException(e));
         }
     }
 
@@ -462,12 +525,16 @@ public class RMServerPipe extends PipeBase<RMDestination,
     public void preDestroy() {
 
         //nothing to do here so far
-        nextPipe.preDestroy();
+        next.preDestroy();
     }
 
-    public  Pipe copy(PipeCloner cloner) {
-        return new RMServerPipe(this, cloner);
+    public  RMServerTube copy(TubeCloner cloner) {
+        return new RMServerTube(this, cloner);
 
+    }
+    
+    public Tube nextTube() {
+        return next;
     }
 
     /**
@@ -508,8 +575,8 @@ public class RMServerPipe extends PipeBase<RMDestination,
 
     public Packet handleCreateSequenceAction(Packet packet) throws RMException{
 
-        AbstractCreateSequence csrElement;
-
+        CreateSequenceElement csrElement;
+        Identifier id ;
         String offeredId = null;
         Message message = packet.getMessage();
 
@@ -544,32 +611,13 @@ public class RMServerPipe extends PipeBase<RMDestination,
         }
         */
 
-        com.sun.xml.ws.security.secext10.SecurityTokenReferenceType strType = null;
-        if (csrElement instanceof com.sun.xml.ws.rm.v200502.CreateSequenceElement)      {
-            com.sun.xml.ws.rm.v200502.OfferType offer = ((com.sun.xml.ws.rm.v200502.CreateSequenceElement)csrElement).getOffer();
-            if (offer != null) {
-                com.sun.xml.ws.rm.v200502.Identifier id = offer.getIdentifier();
-                if (id != null) {
-                    offeredId = id.getValue();
-                }
+        OfferType offer = csrElement.getOffer();
+        if (offer != null) {
+            id = offer.getIdentifier();
+            if (id != null) {
+                offeredId = id.getValue();
             }
-            // Read STR element in csrElement if any
-            strType= ((com.sun.xml.ws.rm.v200502.CreateSequenceElement)csrElement).getSecurityTokenReference();
-            this.secureReliableMessaging = strType!=null?true:false;
-        }   else {
-             com.sun.xml.ws.rm.v200702.OfferType offer = ((com.sun.xml.ws.rm.v200702.CreateSequenceElement)csrElement).getOffer();
-            if (offer != null) {
-                com.sun.xml.ws.rm.v200702.Identifier id = offer.getIdentifier();
-                if (id != null) {
-                    offeredId = id.getValue();
-                }
-            }
-            // Read STR element in csrElement if any
-            strType= ((com.sun.xml.ws.rm.v200702.CreateSequenceElement)csrElement).getSecurityTokenReference();
-            this.secureReliableMessaging = strType!=null?true:false;
-
         }
-
 
         //create server-side data structures.
         ServerInboundSequence inboundSequence =
@@ -582,9 +630,10 @@ public class RMServerPipe extends PipeBase<RMDestination,
         inboundSequence.resetLastActivityTime();
 
 
-
+        //TODO.. Read STR element in csrElement if any
+        this.secureReliableMessaging = csrElement.getSecurityTokenReference()!=null?true:false;
         if (this.secureReliableMessaging) {
-
+            com.sun.xml.ws.security.secext10.SecurityTokenReferenceType strType= csrElement.getSecurityTokenReference();
             SecurityContextToken sct = (SecurityContextToken)packet.invocationProperties.get(MessageConstants.INCOMING_SCT);
             if (sct != null){
                 String strId = sct.getIdentifier().toString();
@@ -613,27 +662,13 @@ public class RMServerPipe extends PipeBase<RMDestination,
         }
 
         //initialize CreateSequenceResponseElement
-        AbstractAcceptType accept = null;
-        AbstractCreateSequenceResponse crsElement = null;
-        if (config.getRMVersion() == RMVersion.WSRM10)    {
-            crsElement = new com.sun.xml.ws.rm.v200502.CreateSequenceResponseElement();
+        CreateSequenceResponseElement crsElement = new CreateSequenceResponseElement();
 
+        AcceptType accept ;
 
-            com.sun.xml.ws.rm.v200502.Identifier id2 = new com.sun.xml.ws.rm.v200502.Identifier();
-            id2.setValue(inboundSequence.getId());
-            ((com.sun.xml.ws.rm.v200502.CreateSequenceResponseElement)crsElement).setIdentifier(id2);
-            accept = new com.sun.xml.ws.rm.v200502.AcceptType();
-        } else {
-             crsElement = new com.sun.xml.ws.rm.v200702.CreateSequenceResponseElement();
-
-
-            com.sun.xml.ws.rm.v200702.Identifier id2 = new com.sun.xml.ws.rm.v200702.Identifier();
-            id2.setValue(inboundSequence.getId());
-            ((com.sun.xml.ws.rm.v200702.CreateSequenceResponseElement)crsElement).setIdentifier(id2);
-            accept = new com.sun.xml.ws.rm.v200702.AcceptType();
-
-        }
-
+        Identifier id2 = new Identifier();
+        id2.setValue(inboundSequence.getId());
+        crsElement.setIdentifier(id2);
         URI dest;
         if (offeredId != null) {
 
@@ -649,7 +684,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
                         );
             }
             
-
+            accept = new AcceptType();
 
             W3CEndpointReference endpointReference ;
             WSEndpointReference wsepr = new WSEndpointReference(dest,constants.getAddressingVersion());
@@ -854,10 +889,6 @@ public class RMServerPipe extends PipeBase<RMDestination,
             ServerInboundSequence seq = provider.getInboundSequence(id);
 
             //reset inactivity timer
-            //Fixed redundant null check bug found by Findbugs
-            //seq.resetLastActivityTime();
-
-            //reset inactivity timer
             seq.resetLastActivityTime();
             handleInboundMessage(inbound);
 
@@ -873,52 +904,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
         }
     }
 
-    /**
-     * This part of a Plugfest hack.  We are trying to support "non-addressable client"
-     * scenarios wherein protocol responses are received on separate HTTP connections.
-     * A request containing a CreateSequenceElement has been sent to the endpoint and
-     * we are hosting an endpoint in ProtocolMessageReceiver and this handler will be
-     * called in the Pipeline for that endpoint.  ProtocolMessageReceiver will correlate
-     * the response culled from the message here, with the request.
-     */
-    public Packet handleCreateSequenceResponseAction(Packet inbound) throws RMException {
-
-        /*
-         * ADDRESSING_FIXME
-         * Fix this when we need to support non-anonymous acksTo
-         */
-        return null;
-        /*
-        CreateSequenceResponseElement csrElement ;
-
-        Message message = inbound.getMessage();
-
-        AddressingProperties inboundAddressingProperties =
-                (AddressingProperties)(inbound.invocationProperties
-                .get(JAXWSAConstants.SERVER_ADDRESSING_PROPERTIES_INBOUND));
-
-        try {
-            csrElement = message.readPayloadAsJAXB(unmarshaller);
-        } catch (JAXBException e) {
-            throw new RMException(Messages.INVALID_CREATE_SEQUENCE_RESPONSE.format() +e);
-        }
-
-        Relationship[] relatesTo = inboundAddressingProperties.getRelatesTo();
-        Relationship relationship ;
-        if (relatesTo == null || null == (relationship = relatesTo[0])){
-            throw new RMException(Messages.CREATE_SEQUENCE_CORRELATION_ERROR.format());
-        }
-        String messageId = relationship.getID().toString();
-        ProtocolMessageReceiver.setCreateSequenceResponse(messageId, csrElement);
-
-        inbound.transportBackChannel.close();
-        Packet ret = new Packet(null);
-        ret.invocationProperties.putAll(inbound.invocationProperties);
-        return ret;
-        */
-    }
-
-
+    
     /***********************************************************************************/
     /* Wiring for dispatch Map mapping wsa:Action values to handlers.  We are jumping  */
     /* through some hoops here to create a Map that only needs to be initialized once. */
@@ -926,56 +912,50 @@ public class RMServerPipe extends PipeBase<RMDestination,
 
 
     private interface ActionHandler {
-        public Packet process(RMServerPipe pipe, Packet packet)
+        public Packet process(RMServerTube tube, Packet packet)
         throws RMException ;
     }
 
     private  void initActionMap(){
         actionMap.put(config.getRMVersion().getCreateSequenceAction(),
                 new ActionHandler() {
-            public Packet process(RMServerPipe pipe, Packet packet)
+            public Packet process(RMServerTube tube, Packet packet)
             throws RMException   {
-                return pipe.handleCreateSequenceAction(packet);
+                return tube.handleCreateSequenceAction(packet);
             }
         });
 
         actionMap.put(config.getRMVersion().getTerminateSequenceAction(),
                 new ActionHandler() {
-            public Packet process(RMServerPipe pipe, Packet packet)
+            public Packet process(RMServerTube tube, Packet packet)
             throws RMException  {
-                return pipe.handleTerminateSequenceAction(packet);
+                return tube.handleTerminateSequenceAction(packet);
             }
         });
 
         actionMap.put(config.getRMVersion().getAckRequestedAction(),
                 new ActionHandler() {
-            public Packet process(RMServerPipe pipe, Packet packet)
+            public Packet process(RMServerTube tube, Packet packet)
             throws RMException  {
-                return pipe.handleAckRequestedAction(packet);
+                return tube.handleAckRequestedAction(packet);
             }
         });
 
         actionMap.put(config.getRMVersion().getLastMessageAction(),
                 new ActionHandler() {
-            public Packet process(RMServerPipe pipe, Packet packet)
+            public Packet process(RMServerTube tube, Packet packet)
             throws RMException {
-                return pipe.handleLastMessageAction(packet);
+                return tube.handleLastMessageAction(packet);
             }
         });
 
-        actionMap.put(config.getRMVersion().getCreateSequenceResponseAction(),
-                new ActionHandler() {
-            public Packet process(RMServerPipe pipe, Packet packet)
-            throws RMException {
-                return pipe.handleCreateSequenceResponseAction(packet);
-            }
-        });
+        
 
         actionMap.put(config.getRMVersion().getSequenceAcknowledgementAction(),
                 new ActionHandler() {
-            public Packet process(RMServerPipe pipe, Packet packet)
+            public Packet process(RMServerTube tube, Packet packet)
             throws RMException {
-                return pipe.handleSequenceAcknowledgementAction(packet);
+                return tube.handleSequenceAcknowledgementAction(packet);
             }
         });
 
@@ -1001,7 +981,7 @@ public class RMServerPipe extends PipeBase<RMDestination,
      * Initialize a <code>SequenceConfig</code> using the metadata passed in the
      * ctor.
      */
-    SequenceConfig getSequenceConfig() {
+    private SequenceConfig getSequenceConfig() {
 
         SequenceConfig ret;
         if (wsdlModel != null) {
@@ -1266,9 +1246,9 @@ public class RMServerPipe extends PipeBase<RMDestination,
                     .put(Session.SESSION_KEY, sess.getUserData());
 
         }
-        
        
     }
-
-
+    
+     
+    
 }

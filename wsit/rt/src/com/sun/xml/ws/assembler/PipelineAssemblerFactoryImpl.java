@@ -83,7 +83,7 @@ import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter.WsdlDocumentFi
 import com.sun.xml.ws.policy.util.PolicyMapUtil;
 import com.sun.xml.ws.rm.Constants;
 import com.sun.xml.ws.rm.jaxws.runtime.client.RMClientTube;
-import com.sun.xml.ws.rm.jaxws.runtime.server.RMServerPipe;
+import com.sun.xml.ws.rm.jaxws.runtime.server.RMServerTube;
 import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
 import com.sun.xml.ws.transport.tcp.wsit.TCPTransportPipeFactory;
 import com.sun.xml.ws.util.ServiceFinder;
@@ -313,7 +313,10 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             p = dump(context, SERVER_PREFIX + WSRM_SUFFIX + AFTER_SUFFIX, p);
             // check for WS-Reliable Messaging
             if (isReliableMessagingEnabled(policyMap, context.getWsdlModel())) {
-                p = new RMServerPipe(context.getWsdlModel(), context.getEndpoint(), p);
+                Tube nextTube = PipeAdapter.adapt(p);
+                Tube tube = new RMServerTube(context.getWsdlModel(), context.getEndpoint(), nextTube);
+                p = PipeAdapter.adapt(tube);
+                
             }
             p = dump(context, SERVER_PREFIX + WSRM_SUFFIX + BEFORE_SUFFIX, p);
                        

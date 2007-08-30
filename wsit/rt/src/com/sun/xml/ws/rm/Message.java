@@ -1,5 +1,5 @@
 /*
- * $Id: Message.java,v 1.9 2007-08-24 17:04:01 mikeg Exp $
+ * $Id: Message.java,v 1.10 2007-08-30 16:25:32 mikeg Exp $
  */
 
 /*
@@ -67,10 +67,9 @@ public class Message {
     
     
     /**
-     * Flag which is true if and only if the message is waiting for
-     * a notification.
+     * Flag which is true if and only if the message is being processed
      */ 
-    protected boolean isWaiting = false;
+    protected boolean isBusy = false;
     
     /**
      * Flag indicating whether message is delivered/acked.
@@ -205,15 +204,15 @@ public class Message {
     
     
     /**
-     * Accessors for isWaiting field used with Tubeline implementation.
+     * Accessors for isBusy field used with Tubeline implementation.
      */
-    public boolean getIsWaiting() {
-        return isWaiting();
+    public boolean getIsBusy() {
+        return isBusy();
     }
     
     
-    public void setIsWaiting(boolean value) {
-        isWaiting = value;
+    public void setIsBusy(boolean value) {
+        isBusy = value;
     }
     
     /**
@@ -263,36 +262,21 @@ public class Message {
         }
     }
     
-    /**
-     * Block the current thread using the monitor of this <code>Message</code>.
-     */
-     public synchronized void block() {
-     
-        isWaiting = true;
-        try {
-            while (!isComplete && isWaiting) {
-                wait();
-            }
-        } catch (InterruptedException e) {}
-    }
+   
     
     /**
-     * Wake up the current thread which is waiting on this Message's monitor.
+     * Resume processing of the message on this Message's monitor.
      */
     public synchronized  void resume() {
-        if (messageSender == null) {
-            //Pipe implementation..  Remove when switch to Tube is complete
-            isWaiting = false;
-            notify();
-        } else {
-            if (!isWaiting  && !isComplete) {
-                messageSender.send();
-            }
+        
+        if (!isBusy  && !isComplete) {
+            messageSender.send();
         }
+
     }
     
-    public synchronized boolean isWaiting() {
-        return isWaiting;
+    public synchronized boolean isBusy() {
+        return isBusy;
     }
     
     /**
