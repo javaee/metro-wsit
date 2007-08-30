@@ -80,6 +80,7 @@ the instructions for the same are given below.</p>
 	<li><b>ExcelAddIn</b>: Excel 2007 AddIn as Visual Studio Solution</li>
 	<li><b>ExcelClient.xlsm</b>: Excel spreadsheet</li>
 	<li><b>etc/certs</b>: Certificates for .NET client</li>
+	<li><b>sts</b>: Will be used in future to add STS functionality</li>
 </ul>
 <h2><a name="Configuration"></a>4.0 Configuration</h2>
 <h3>4.1.1 Metro Endpoint</h3>
@@ -97,23 +98,27 @@ the instructions for the same are given below.</p>
 </ol>
 
 	</li>
-	<li>In the NetBeans IDE, add GlassFish as a &quot;<code>Server</code>&quot; in the &quot;<code>Runtime</code>&quot; 
+	<li>In NetBeans IDE, add GlassFish as a &quot;<code>Server</code>&quot; in the &quot;<code>Runtime</code>&quot; 
 	tab.</li>
-	<li>Open the &quot;<code>service</code>&quot; NetBeans project.<ol>
+	<li>In NetBeans IDE, select &quot;<code>File</code>&quot; menu, &quot;<code>Open Project</code>&quot; 
+	and in the &quot;<code>Open Project Dialog</code>&quot; navigate to the &quot;<code>wsit/wsit/samples/excelclient</code>&quot; 
+	directory, select the &quot;<code>service</code>&quot; folder and click<br>
+	&quot;<code>Open Project Folder</code>&quot; button.<ol>
 		<li>Select the Project, Right-click and select &quot;<code>Properties</code>&quot;.</li>
-		<li>Click on &quot;<code>Run</code>&quot; and ensure that the recently added 
+		<li>Click on &quot;<code>Run</code>&quot; node and ensure that the recently added 
 		GlassFish is chosen as the Server.</li>
 	</ol>
 	</li>
         <li>Update key and trust store locations<ol>
-	<li>Expand &quot;Web Pages&quot;, &quot;WEB-INF&quot; and open <tt><code>wsit-com.sun.xml.ws.wsitdemo.WSITDemo.xml</code></tt>
+	<li>In NetBeans IDE, expand &quot;Web Services&quot; node, right-click on &quot;<code>WSITEndpoint</code>&quot; 
+	node, select &quot;<code>Edit Web Service Attributes</code>&quot;. 
 	</li>
-	<li>Search for &quot;sc:KeyStore&quot; string and change the value of &quot;<samp>location</samp>&quot; 
-	attribute to the location of &quot;<code>keystore.jks</code>&quot; file in your 
-	GlassFish installation directory.</li>
-	<li>Search for &quot;sc:TrustStore&quot; string and change the value of &quot;<code>location</code>&quot; 
-	attribute to the location of &quot;<code>truststore.jks</code>&quot; file in your 
-	GlassFish installation directory.</li>
+	<li>Click on &quot;Keystore...&quot; button and change the value of &quot;<samp>Location</samp>&quot; 
+	to the location of &quot;<code>keystore.jks</code>&quot; file in your 
+	GlassFish installation directory. Click on &quot;<code>OK</code>&quot; button.</li>
+	<li>Click on &quot;Truststore...&quot; button and change the value of &quot;<samp>Location</samp>&quot; 
+	to the location of &quot;<code>truststore.jks</code>&quot; file in your 
+	GlassFish installation directory. Click on &quot;<code>OK</code>&quot; button.</li>
 </ol>
 
 	</li>
@@ -130,7 +135,7 @@ the instructions for the same are given below.</p>
 	<li>Configure the Database<ol>
 		<li>Login to GlassFish admin console at: <a href="http://localhost:4848">
 		http://localhost:4848</a> (4848 is the default port).</li>
-		<li>Create the database connection pool<ol>
+		<li>In the admin console, create a database connection pool<ol>
 			<li>In the admin console, expand &quot;Resources&quot;, &quot;JDBC&quot;.</li>
 			<li>Select &quot;Connection Pools&quot; and click &quot;New&quot;.</li>
 			<li>Enter the values as<ol>
@@ -160,22 +165,24 @@ the instructions for the same are given below.</p>
 			</ol>
 			</li>
 			<li>Click &quot;OK&quot;</li>
+			<li>Click on &quot;Save&quot; button.</li>
 		</ol>
 		</li>
 	</ol>
 	</li>
 	<li>Deploy the project<ol>
-		<li>Select the Project, right-click and select &quot;Deploy Project&quot;.</li>
+		<li>In NetBeans IDE, select the Project, right-click and select &quot;Deploy Project&quot;.</li>
 	</ol>
 	</li>
 	<li>Initialize the Database<ol>
-		<li>In the Runtime tab, right-click on Databases and select &quot;New 
+		<li>In the Runtime tab of NetBeans IDE, right-click on Databases and select &quot;New 
 		Connection ...&quot;.</li>
-		<li>expand Databases, create a new connection using 
+		<li>Expand Databases, create a new connection using 
 		&quot;<code>Java DB (Network)</code>&quot; for &quot;<code>Name</code>&quot; and &quot;<code>jdbc:derby://localhost:1527/WsitDemoDB</code>&quot; 
 		for &quot;<code>Database URL</code>&quot;.</li>
 		<li>Enter &quot;WSIT&quot; 
 		as the value of &quot;User Name&quot; and &quot;Password&quot;.</li>
+		<li>Select &quot;OK&quot; to accept the changes.</li>
 		<li>Right-select on the newly created connection and select &quot;Execute Command ...&quot;. 
 		Initialize the tables by giving the 
 		following query:<br>
@@ -184,8 +191,24 @@ the instructions for the same are given below.</p>
 		insert into &quot;MAXID&quot; values ('DIAGID',1);</li>
 	</ol>
 	</li>
+	<li>Verify the deployment<ol>
 	<li>The endpoint is hosted at
-	<a href="http://localhost:8080/service/WSITEndpointService?wsdl">http://localhost:8080/service/WSITEndpointService?wsdl</a>.</li>
+	<a href="http://localhost:8080/service/WSITEndpointService?wsdl">http://localhost:8080/service/WSITEndpointService?wsdl</a>. 
+	Clicking on the endpoint URL should display the WSDL in your browser. </li>
+	<li>Running the project from NetBeans IDE shows the following welcome 
+	message in the browser window:<br>
+	<br>
+	<font size="+2">Welcome! <br>
+	<br>
+	This web application hosts
+	<a href="http://blogs.sun.com/arungupta/entry/excel_using_wsit_metro_and">
+	Metro and .NET interoperability</a> demo. If you are using the default host 
+	and port numbers of <a href="http://glassfish.java.net">GlassFish</a> then 
+	the endpoint WSDL can be viewed
+	<a href="http://localhost:8080/service/WSITEndpointService?wsdl">here</a>.</font></li>
+</ol>
+
+	</li>
 </ol>
 
 <h3>4.2 .NET client</h3>
@@ -291,7 +314,7 @@ the instructions for the same are given below.</p>
 </ol>
 <p>&nbsp;</p>
 <p>Last Updated: <i>
-<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%B %d, %Y %I:%M %p" startspan -->August 29, 2007 09:12 AM<!--webbot bot="Timestamp" endspan i-checksum="42866" --></i></p>
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%B %d, %Y %I:%M %p" startspan -->August 29, 2007 05:28 PM<!--webbot bot="Timestamp" endspan i-checksum="43922" --></i></p>
 
 </body>
 
