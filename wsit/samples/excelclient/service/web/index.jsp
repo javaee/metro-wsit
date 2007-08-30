@@ -45,7 +45,8 @@
     <head>
     </head>
     <body>
-        This web application hosts Excel/WSIT demo.
+        This web application hosts <a href="http://blogs.sun.com/arungupta/entry/excel_using_wsit_metro_and">Excel/WSIT demo</a>. If you are using default host and port numbers, 
+        then the endpoints are available <a href="http://localhost:8080/service/WSITEndpointService?wsdl">here</a>.
     </body>
 </html>
 
