@@ -59,7 +59,7 @@ import com.sun.xml.ws.rm.jaxws.util.LoggingHelper;
 import com.sun.xml.ws.rm.protocol.AbstractAcceptType;
 import com.sun.xml.ws.rm.protocol.AbstractCreateSequence;
 import com.sun.xml.ws.rm.protocol.AbstractCreateSequenceResponse;
-import com.sun.xml.ws.rm.v200502.AcknowledgementHandler;
+import com.sun.xml.ws.rm.protocol.AcknowledgementHandler;
 import com.sun.xml.ws.rm.v200502.Identifier;
 import com.sun.xml.ws.rm.v200502.TerminateSequenceElement;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;

@@ -49,8 +49,9 @@ import com.sun.xml.ws.api.message.Headers;
 import com.sun.xml.ws.rm.*;
 import com.sun.xml.ws.rm.jaxws.util.ProcessingFilter;
 import com.sun.xml.ws.rm.protocol.AbstractSequence;
+import com.sun.xml.ws.rm.protocol.AbstractSequenceAcknowledgement;
+import com.sun.xml.ws.rm.protocol.AcknowledgementHandler;
 import com.sun.xml.ws.rm.v200502.AckRequestedElement;
-import com.sun.xml.ws.rm.v200502.AcknowledgementHandler;
 import com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement;
 
 import javax.xml.bind.Marshaller;
@@ -88,13 +89,13 @@ public abstract class OutboundSequence extends Sequence  {
      * Sequence acknowledgement to be sent back to client on next
      * available message to the AcksTo endpoint.
      */
-    protected SequenceAcknowledgementElement sequenceAcknowledgement;
+    protected AbstractSequenceAcknowledgement sequenceAcknowledgement;
 
      
    /**
      * Instance of helper class that processes SequnceAcknowledgement headers.
      */
-    protected AcknowledgementHandler ackHandler; 
+    protected AcknowledgementHandler ackHandler;
     
     /**
      * Flag determines whether messages will be saved.  Will only be
@@ -223,8 +224,12 @@ public abstract class OutboundSequence extends Sequence  {
         //SequenceAcknowledgement header
         if (sequenceAcknowledgement != null) {
             //mess.addHeader(Headers.create(getVersion(), marshaller,sequenceAcknowledgement));
-            
-            mess.setSequenceAcknowledgementElement(sequenceAcknowledgement);
+            if (sequenceAcknowledgement instanceof com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement)  {
+                 mess.setSequenceAcknowledgementElement((com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement)sequenceAcknowledgement);
+            }   else {
+                mess.setSequenceAcknowledgementElement((com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement)sequenceAcknowledgement);
+            }
+
             
             sequenceAcknowledgement = null;
         }     
@@ -317,7 +322,7 @@ public abstract class OutboundSequence extends Sequence  {
      * @param element The <code>SequenceAcknowledgementElement</code> containing the
      *              ranges of messages to be removed.
      */
-    public void handleAckResponse(SequenceAcknowledgementElement element) 
+    public void handleAckResponse(AbstractSequenceAcknowledgement element)
             throws InvalidMessageNumberException {
 
         if (ackHandler == null) {

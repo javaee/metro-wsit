@@ -47,8 +47,8 @@ package com.sun.xml.ws.rm.jaxws.runtime;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.rm.*;
 import com.sun.xml.ws.rm.protocol.AbstractSequence;
+import com.sun.xml.ws.rm.protocol.AbstractSequenceAcknowledgement;
 import com.sun.xml.ws.rm.v200502.AckRequestedElement;
-import com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -152,13 +152,23 @@ public class InboundMessageProcessor {
                     
                     //determine OutboundSequence id from data in header and update
                     //state of that sequence according to the acks and nacks in the element 
-                    SequenceAcknowledgementElement ackHeader =
-                            (SequenceAcknowledgementElement)(header.readAsJAXB(unmarshaller));
+                    AbstractSequenceAcknowledgement ackHeader =
+                            (AbstractSequenceAcknowledgement)(header.readAsJAXB(unmarshaller));
+                    String ackHeaderId = null;
+
+                     if (ackHeader instanceof com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement) {
+                        ackHeaderId = ((com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement)ackHeader).getId();
+
+
+                    }   else {
+                        ackHeaderId = ((com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement)ackHeader).getId();
+
+                    }
                     
                     message.setSequenceAcknowledgementElement(ackHeader);
                     
                     OutboundSequence seq =
-                            provider.getOutboundSequence(ackHeader.getId());
+                            provider.getOutboundSequence(ackHeaderId);
 
                     if (seq != null) {
                         seq.handleAckResponse(ackHeader);

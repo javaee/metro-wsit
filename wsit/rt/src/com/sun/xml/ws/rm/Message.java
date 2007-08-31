@@ -1,5 +1,5 @@
 /*
- * $Id: Message.java,v 1.10.2.1 2007-08-31 20:39:43 bhaktimehta Exp $
+ * $Id: Message.java,v 1.10.2.2 2007-08-31 22:21:27 bhaktimehta Exp $
  */
 
 /*
@@ -41,8 +41,8 @@
 package com.sun.xml.ws.rm;
 
 import com.sun.xml.ws.rm.protocol.AbstractSequence;
+import com.sun.xml.ws.rm.protocol.AbstractSequenceAcknowledgement;
 import com.sun.xml.ws.rm.v200502.AckRequestedElement;
-import com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement;
 
 
 /**
@@ -95,10 +95,10 @@ public class Message {
     
     
     /**
-     * SequenceElement stored when the corresponding com.sun.xml.ws.api.message.Header
+     * SequenceAcknowledgmentElement stored when the corresponding com.sun.xml.ws.api.message.Header
      * is added to the message.
      */
-    protected SequenceAcknowledgementElement sequenceAcknowledgementElement = null; 
+    protected AbstractSequenceAcknowledgement sequenceAcknowledgementElement = null;
     
     /**
      * SequenceElement stored when the corresponding com.sun.xml.ws.api.message.Header
@@ -310,7 +310,7 @@ public class Message {
                                                 "null");
         
         AbstractSequence sel;
-        SequenceAcknowledgementElement sael;
+        AbstractSequenceAcknowledgement sael;
         AckRequestedElement ael;
         if ( null != (sel = getSequenceElement())) {
             ret += sel.toString();
@@ -334,11 +334,11 @@ public class Message {
      *      message
      */
     
-    public SequenceAcknowledgementElement getSequenceAcknowledgementElement() {
+    public AbstractSequenceAcknowledgement getSequenceAcknowledgementElement() {
         return sequenceAcknowledgementElement;
     }
     
-    public void setSequenceAcknowledgementElement(SequenceAcknowledgementElement el) {
+    public void setSequenceAcknowledgementElement(AbstractSequenceAcknowledgement el) {
         sequenceAcknowledgementElement = el;
     }
     
