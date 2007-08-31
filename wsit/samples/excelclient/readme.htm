@@ -83,7 +83,7 @@ the instructions for the same are given below.</p>
 	<li><b>sts</b>: Will be used in future to add STS functionality</li>
 </ul>
 <h2><a name="Configuration"></a>4.0 Configuration</h2>
-<h3>4.1.1 Metro Endpoint</h3>
+<h3>4.1 Metro Endpoint</h3>
 <ol>
 	<li>Set JAVA_HOME to the installation directory of JDK.</li>
 	<li>Install the <a href="https://glassfish.dev.java.net/">latest GlassFish v2</a> 
@@ -228,10 +228,8 @@ the instructions for the same are given below.</p>
 	<li>Click on &quot;<code>OK</code>&quot;.</li>
 </ol>
 	</li>
-	<li>If you regenerate the Service Reference (for example if the Metro endpoint 
-	is hosted on a different machine than localhost) in Visual Studio then edit the 
-	following changes in the generated <code>app.config</code>:<ol>
-	<li>Add the following fragment in <code>//configuration/system.serviceModel/client/endpoint</code>:<br>
+	<li>If you regenerate the Service Reference then add the 
+	following fragment in the generated <code>app.config</code> at <code>//configuration/system.serviceModel/client/endpoint</code>:<br>
 	<br>
 	<code>&lt;identity&gt;<br>
 &nbsp;&nbsp;&nbsp; &lt;dns value=&quot;xwssecurityserver&quot;/&gt;<br>
@@ -246,14 +244,6 @@ the instructions for the same are given below.</p>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/identity&gt;</font><br>
 &nbsp;&nbsp;&nbsp; &lt;/endpoint&gt;<br>
 	&lt;/client&gt;</code></li>
-	<li>The Service Reference can be regenerated using the following steps<ol>
-	<li>In the Visual Studio, delete &quot;app.config&quot; and &quot;localhost.map&quot; files from 
-	the &quot;ExcelAddIn1&quot; solution in the &quot;Solution Explorer&quot;</li>
-	<li>Right select on &quot;ExcelAddIn1&quot; and choose &quot;Add Service Reference...&quot;</li>
-	<li>Enter the URL of the WSDL in &quot;Service URI&quot; and take the default value of 
-	&quot;Service reference name&quot;.</li>
-</ol></li>
-</ol></li>
 	<li>Click on &quot;Build&quot;, &quot;Build Solution&quot;.</li>
 	<li>Register Certificates<ol>
                 <li>Export wssip cert out from GlassFish Trust store by invoking 
@@ -262,8 +252,11 @@ the instructions for the same are given below.</p>
 				<code>cd %AS_HOME%\domains\domain1\config<br>
 				keytool -export -alias wssip -file wssip.cer -keystore cacerts.jks</code><br>
 				<br>
-				Enter &quot;<code>changeit</code>&quot; on the password prompt.</li>
-		<li>Go to &quot;<code>Start</code>&quot;, &quot;<code>Run</code>&quot;. Type "<code>mmc.exe</code>" and click the OK button. This will open Microsoft Management Console.</li>
+				Enter &quot;<code>changeit</code>&quot; on the password prompt. 
+				If you get an error &quot;<code>Alias &lt;wssip&gt; does not exist</code>&quot; 
+				then you probably did not do step #3 in section 4.1.</li>
+		<li>Execute "<code>mmc.exe</code>" from a command shell with 
+		administrator privileges.. This will open Microsoft Management Console.</li>
 		<li>Go to &quot;<code>File</code>&quot;, &quot;<code>Add/Remove Snap-in...</code>&quot;.</li>
 		<li>Select the &quot;<code>Certificates</code>&quot; snap-in and click &quot;<code>Add 
 		&gt;</code>&quot; 
@@ -274,7 +267,7 @@ the instructions for the same are given below.</p>
 		and select "<code>Trusted Root Certification Authorities</code>" node. Right-click and select "<code>All Tasks</code>", "<code>Import 
 		...</code>".</li>
 		<li>Click on &quot;<code>Next</code>&quot;, &quot;<code>Browse</code>&quot;, and import the 
-		certificates mentioned below (all certificates are in &quot;<code>cert</code>&quot; 
+		certificates mentioned below (all certificates are in &quot;<code>wsit\wsit\samples\excelclient\etc\certs</code>&quot; 
 		directory). You may have to change the filter in bottom right corner to 
 		&quot;<code>Personal Information Exchange (*.pfx, *.p12)</code>&quot; to view
 		<code>.pfx</code> certificates.<ol>
@@ -325,7 +318,7 @@ the instructions for the same are given below.</p>
 	<li>Enter data in &quot;Firstname, &quot;Last name&quot;, &quot;Date of Birth&quot; and &quot;SSN&quot; and 
 	click on &quot;Save&quot;.</li>
 	<li>A window will pop up asking for username and password. <code>wsit</code>/<code>wsit</code> 
-	is the correct the username/password. Enter an incorrect username/password 
+	is the correct username/password. Enter an incorrect username/password 
 	and then another window will pop up showing the error message. Click &quot;Retry&quot; 
 	and then enter correct username/password.</li>
 	<li>The output window in NetBeans IDE shows the message exchange flow 
