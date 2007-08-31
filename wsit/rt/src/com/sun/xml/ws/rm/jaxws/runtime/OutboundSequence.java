@@ -43,14 +43,15 @@
  */
 
 package com.sun.xml.ws.rm.jaxws.runtime;
+
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Headers;
 import com.sun.xml.ws.rm.*;
 import com.sun.xml.ws.rm.jaxws.util.ProcessingFilter;
+import com.sun.xml.ws.rm.protocol.AbstractSequence;
 import com.sun.xml.ws.rm.v200502.AckRequestedElement;
 import com.sun.xml.ws.rm.v200502.AcknowledgementHandler;
 import com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement;
-import com.sun.xml.ws.rm.v200502.SequenceElement;
 
 import javax.xml.bind.Marshaller;
 import java.net.URI;
@@ -197,9 +198,14 @@ public abstract class OutboundSequence extends Sequence  {
                 set(messageNumber, mess);
             }
 
-            SequenceElement element = new SequenceElement();
-            element.setNumber(messageNumber);
-            element.setId(this.getId());
+            AbstractSequence element = null;
+            if (config.getRMVersion() == RMVersion.WSRM10)     {
+               element = new com.sun.xml.ws.rm.v200502.SequenceElement();            
+            }  else {
+                element = new com.sun.xml.ws.rm.v200702.SequenceElement();
+            }
+             element.setNumber(messageNumber);
+             element.setId(this.getId());
             
             //mess.addHeader(Headers.create(getVersion(),marshaller,element));
             

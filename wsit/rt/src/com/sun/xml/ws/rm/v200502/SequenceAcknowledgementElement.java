@@ -44,6 +44,8 @@
 
 package com.sun.xml.ws.rm.v200502;
 
+import com.sun.xml.ws.rm.protocol.AbstractSequenceAcknowledgement;
+
 import javax.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
 import java.math.BigInteger;
@@ -68,7 +70,7 @@ import java.util.Map;
         "any"
         })
 @XmlRootElement(name = "SequenceAcknowledgement",namespace="http://schemas.xmlsoap.org/ws/2005/02/rm")
-public class SequenceAcknowledgementElement   {
+public class SequenceAcknowledgementElement  extends AbstractSequenceAcknowledgement {
 
 
     @XmlElement(name = "Identifier", namespace = "http://schemas.xmlsoap.org/ws/2005/02/rm")

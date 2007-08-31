@@ -43,11 +43,12 @@
  */
 
 package com.sun.xml.ws.rm.jaxws.runtime;
+
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.rm.*;
+import com.sun.xml.ws.rm.protocol.AbstractSequence;
 import com.sun.xml.ws.rm.v200502.AckRequestedElement;
 import com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement;
-import com.sun.xml.ws.rm.v200502.SequenceElement;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -107,18 +108,30 @@ public class InboundMessageProcessor {
 
                 Header header = message.getHeader("Sequence");
                 if (header != null) {
+
                     //identify sequence and message number from data in header and add
                     //the message to the sequence at the specified index.
                     //TODO handle error condition seq == null
-                    SequenceElement el = 
-                                (SequenceElement)header.readAsJAXB(unmarshaller);
+                    AbstractSequence el =
+                                (AbstractSequence)header.readAsJAXB(unmarshaller);
                     
                     message.setSequenceElement(el);
-                    
-                    String seqid = el.getId();
+                    String seqid = null;
+                    int messageNumber ;
+                    if (el instanceof com.sun.xml.ws.rm.v200502.SequenceElement) {
+                        seqid = ((com.sun.xml.ws.rm.v200502.SequenceElement)el).getId();
 
-                    //add message to ClientInboundSequence
-                    int messageNumber = (int)el.getNumber();
+                        //add message to ClientInboundSequence
+                        messageNumber = ((com.sun.xml.ws.rm.v200502.SequenceElement)el).getNumber();
+                    }   else {
+                        seqid = ((com.sun.xml.ws.rm.v200702.SequenceElement)el).getId();
+
+                        //add message to ClientInboundSequence
+                        messageNumber = ((com.sun.xml.ws.rm.v200702.SequenceElement)el).getNumber();
+
+                    }
+
+                 
                     if (messageNumber == Integer.MAX_VALUE){
                         throw new MessageNumberRolloverException(String.format(Constants.MESSAGE_NUMBER_ROLLOVER_TEXT,messageNumber),messageNumber);
                     }

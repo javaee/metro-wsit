@@ -1,5 +1,5 @@
 /*
- * $Id: Message.java,v 1.10 2007-08-30 16:25:32 mikeg Exp $
+ * $Id: Message.java,v 1.10.2.1 2007-08-31 20:39:43 bhaktimehta Exp $
  */
 
 /*
@@ -39,9 +39,10 @@
  */
 
 package com.sun.xml.ws.rm;
+
+import com.sun.xml.ws.rm.protocol.AbstractSequence;
 import com.sun.xml.ws.rm.v200502.AckRequestedElement;
 import com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement;
-import com.sun.xml.ws.rm.v200502.SequenceElement;
 
 
 /**
@@ -90,7 +91,7 @@ public class Message {
      * Sequence stored when the corresponding com.sun.xml.ws.api.message.Header
      * is added to the message.
      */
-    protected SequenceElement sequenceElement = null; 
+    protected AbstractSequence sequenceElement = null;
     
     
     /**
@@ -308,7 +309,7 @@ public class Message {
                                                 getSequence().getId() :
                                                 "null");
         
-        SequenceElement sel;
+        AbstractSequence sel;
         SequenceAcknowledgementElement sael;
         AckRequestedElement ael;
         if ( null != (sel = getSequenceElement())) {
@@ -341,11 +342,11 @@ public class Message {
         sequenceAcknowledgementElement = el;
     }
     
-    public SequenceElement getSequenceElement() {
+    public AbstractSequence getSequenceElement() {
         return sequenceElement;
     }
     
-    public void setSequenceElement(SequenceElement el) {
+    public void setSequenceElement(AbstractSequence el) {
         sequenceElement = el;
     }
     

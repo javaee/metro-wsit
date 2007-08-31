@@ -45,6 +45,8 @@
 package com.sun.xml.ws.rm.v200502;
 
 
+import com.sun.xml.ws.rm.protocol.AbstractSequence;
+
 import javax.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
@@ -59,7 +61,7 @@ import java.util.Map;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "SequenceType")
 @XmlRootElement(name = "Sequence",namespace="http://schemas.xmlsoap.org/ws/2005/02/rm")
-public class SequenceElement   {
+public class SequenceElement extends AbstractSequence {
 
 
     @XmlElement(name = "Identifier", namespace = "http://schemas.xmlsoap.org/ws/2005/02/rm")
@@ -240,14 +242,7 @@ public class SequenceElement   {
     }
 
 
-    public String toString() {
-       
-        return Messages.SEQUENCE_TOSTRING_STRING
-                .format(getId(),
-                        getNumber(),
-                        getLast() ? "true" : "false");
-         }
-    
+   
     /**
      * <p>Java class for anonymous complex type.  That acts as a
      * placeholder in the <code>lastMessage</code> field.
