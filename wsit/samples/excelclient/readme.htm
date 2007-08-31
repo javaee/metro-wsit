@@ -215,25 +215,44 @@ the instructions for the same are given below.</p>
 <ol>
 	<li>Start Visual Studio 2005 Professional Edition.</li>
 	<li>Open the Solution in <code>ExcelAddIn</code> directory.</li>
-	<li>If you update the Service Reference (for example if the Metro endpoint 
+	<li>If the Metro endpoint is hosted on a machine different than localhost 
+	then you may need to regenerate the Service Reference. This can be achieved 
+	using the following steps:<ol>
+	<li>In the Visual Studio, delete &quot;<code>app.config</code>&quot; and &quot;<code>localhost.map</code>&quot; 
+	files from the &quot;<code>ExcelAddIn1</code>&quot; solution in the &quot;<code>Solution 
+	Explorer</code>&quot;.</li>
+	<li>Right select on &quot;<code>ExcelAddIn1</code>&quot; and choose &quot;<code>Add Service 
+	Reference...</code>&quot;.</li>
+	<li>Enter the URL of the WSDL in &quot;<code>Service URI</code>&quot; and take the 
+	default value of &quot;<code>Service reference name</code>&quot;.</li>
+	<li>Click on &quot;<code>OK</code>&quot;.</li>
+</ol>
+	</li>
+	<li>If you regenerate the Service Reference (for example if the Metro endpoint 
 	is hosted on a different machine than localhost) in Visual Studio then edit the 
 	following changes in the generated <code>app.config</code>:<ol>
-	<li>
-	<pre>Add the following fragment in <code>//configuration/system.serviceModel/client/endpoint</code>:
-
-&lt;identity&gt;
-    &lt;dns value=&quot;xwssecurityserver&quot;/&gt;
-&lt;/identity&gt;</pre>The updated fragment will look like:
-	<pre>&lt;client&gt;
-    &lt;endpoint address=&quot;http://localhost:8080/service/WSITEndpointService&quot;
-        binding=&quot;customBinding&quot; bindingConfiguration=&quot;WSITEndpointPortBinding&quot;
-        contract=&quot;localhost.WSITEndpoint&quot; name=&quot;WSITEndpointPort&quot; &gt;
-        <font color="#FF0000">&lt;identity&gt;
-            &lt;dns value=&quot;xwssecurityserver&quot;/&gt;
-        &lt;/identity&gt;</font>
-    &lt;/endpoint&gt;
-&lt;/client&gt;</pre>
-	</li>
+	<li>Add the following fragment in <code>//configuration/system.serviceModel/client/endpoint</code>:<br>
+	<br>
+	<code>&lt;identity&gt;<br>
+&nbsp;&nbsp;&nbsp; &lt;dns value=&quot;xwssecurityserver&quot;/&gt;<br>
+	&lt;/identity&gt;</code><p>The updated fragment will look like:
+	</p>
+	<p><code>&lt;client&gt;<br>
+&nbsp;&nbsp;&nbsp; &lt;endpoint address=&quot;http://localhost:8080/service/WSITEndpointService&quot;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; binding=&quot;customBinding&quot; bindingConfiguration=&quot;WSITEndpointPortBinding&quot;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; contract=&quot;localhost.WSITEndpoint&quot; name=&quot;WSITEndpointPort&quot; &gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font color="#FF0000">&lt;identity&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;dns value=&quot;xwssecurityserver&quot;/&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/identity&gt;</font><br>
+&nbsp;&nbsp;&nbsp; &lt;/endpoint&gt;<br>
+	&lt;/client&gt;</code></li>
+	<li>The Service Reference can be regenerated using the following steps<ol>
+	<li>In the Visual Studio, delete &quot;app.config&quot; and &quot;localhost.map&quot; files from 
+	the &quot;ExcelAddIn1&quot; solution in the &quot;Solution Explorer&quot;</li>
+	<li>Right select on &quot;ExcelAddIn1&quot; and choose &quot;Add Service Reference...&quot;</li>
+	<li>Enter the URL of the WSDL in &quot;Service URI&quot; and take the default value of 
+	&quot;Service reference name&quot;.</li>
+</ol></li>
 </ol></li>
 	<li>Click on &quot;Build&quot;, &quot;Build Solution&quot;.</li>
 	<li>Register Certificates<ol>
@@ -314,7 +333,7 @@ the instructions for the same are given below.</p>
 </ol>
 <p>&nbsp;</p>
 <p>Last Updated: <i>
-<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%B %d, %Y %I:%M %p" startspan -->August 29, 2007 05:28 PM<!--webbot bot="Timestamp" endspan i-checksum="43922" --></i></p>
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%B %d, %Y %I:%M %p" startspan -->August 30, 2007 04:06 PM<!--webbot bot="Timestamp" endspan i-checksum="43991" --></i></p>
 
 </body>
 
