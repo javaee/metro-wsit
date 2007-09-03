@@ -609,26 +609,27 @@ public final class PolicyMap implements Iterable<Policy> {
     }
     
     /**
-     * Creates an fault message policy scope <emph>locator</emph> object identified by a bound operation, that serves as a
-     * access key into {@code PolicyMap} where actual fault message policy scope for given input message of a bound operation
+     * Creates a fault message policy scope <emph>locator</emph> object identified by a bound operation, that serves as a
+     * access key into {@code PolicyMap} where the actual fault message policy scope for one of the faults of a bound operation
      * can be retrieved.
      * <p/>
-     * The method returns a key that is compliant with <emph>WSDL 1.1 Basic Profile Specification</emph>, according to which there
+     * The method returns a key that is compliant with the <emph>WSDL 1.1 Basic Profile Specification</emph>, according to which there
      * should be no two operations with the same name in a single port type definition.
      *
      * @param service qualified name of the service. Must not be {@code null}.
      * @param port qualified name of the endpoint. Must not be {@code null}.
      * @param operation qualified name of the operation. Must not be {@code null}.
-     * @param faultMessage qualified name of the fault message. Must not be {@code null}.
+     * @param fault qualified name of the fault. Do not confuse this with the name of the actual message. This parameter
+     * takes the wsdl:binding/wsdl:operation/wsdl:fault name and not the wsdl:message name. Must not be {@code null}.
      * @throws IllegalArgumentException in case service, port or operation parameter is {@code null}.
      *
      */
-    public static PolicyMapKey createWsdlFaultMessageScopeKey(final QName service, final QName port, final QName operation, final QName faultMessage) throws IllegalArgumentException {
-        if (service == null || port == null || operation == null || faultMessage == null) {
-            throw LOGGER.logSevereException(new IllegalArgumentException(LocalizationMessages.WSP_0030_SERVICE_PORT_OPERATION_FAULT_MSG_PARAM_MUST_NOT_BE_NULL(service, port, operation, faultMessage)));
+    public static PolicyMapKey createWsdlFaultMessageScopeKey(final QName service, final QName port, final QName operation, final QName fault) throws IllegalArgumentException {
+        if (service == null || port == null || operation == null || fault == null) {
+            throw LOGGER.logSevereException(new IllegalArgumentException(LocalizationMessages.WSP_0030_SERVICE_PORT_OPERATION_FAULT_MSG_PARAM_MUST_NOT_BE_NULL(service, port, operation, fault)));
         }
         
-        return new PolicyMapKey(service, port, operation, faultMessage);
+        return new PolicyMapKey(service, port, operation, fault);
     }
     
     private static PolicyMapKey createOperationOrInputOutputMessageKey(final QName service, final QName port, final QName operation) {
