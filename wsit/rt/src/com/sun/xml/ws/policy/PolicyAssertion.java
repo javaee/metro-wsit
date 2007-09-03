@@ -133,6 +133,23 @@ public abstract class PolicyAssertion {
     }
 
     /**
+     * Method determines whether the assertion may contain nested policies or not. This
+     * information is used when translating the assertion into a {@link com.sun.xml.ws.policy.sourcemodel.ModelNode model node}.
+     * By default, the method returns {@code false}.
+     * <p />
+     * <b>
+     * Note: every assertion that may contain nested policy expressions must override
+     * this method to return {@code true}!
+     * </b>
+     * 
+     * @return {@code true} if the assertion type may contain nested policy expression,
+     *         {@code false} otherwise.
+     */
+    public boolean isNestedPolicyAllowed() {
+        return false;
+    }
+
+    /**
      * Checks whether this policy alternative is compatible with the provided policy alternative.
      *
      * @param assertion policy alternative used for compatibility test
