@@ -255,6 +255,7 @@ public abstract class PolicyAssertion {
     /**
      * An {@code Object.toString()} method override.
      */
+    @Override
     public String toString() {
         return toString(0, new StringBuffer()).toString();
     }
@@ -298,6 +299,7 @@ public abstract class PolicyAssertion {
     /**
      * An {@code Object.equals(Object obj)} method override.
      */
+    @Override
     public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
@@ -320,6 +322,7 @@ public abstract class PolicyAssertion {
     /**
      * An {@code Object.hashCode()} method override.
      */
+    @Override
     public int hashCode() {
         int result = 17;
         
