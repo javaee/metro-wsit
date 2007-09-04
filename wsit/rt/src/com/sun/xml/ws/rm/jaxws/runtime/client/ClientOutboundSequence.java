@@ -397,10 +397,10 @@ public class ClientOutboundSequence extends OutboundSequence
 
                     inboundSequence = new ClientInboundSequence(this,
                             incomingID,
-                            uriAccept);
+                            uriAccept,config);
                 } else {
                     inboundSequence = new ClientInboundSequence(this,
-                            incomingID, null);
+                            incomingID, null,config);
                 }
                 
                 //start the inactivity clock

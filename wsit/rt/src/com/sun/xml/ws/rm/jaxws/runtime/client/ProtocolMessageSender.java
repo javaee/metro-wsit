@@ -59,7 +59,6 @@ import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
 import com.sun.xml.ws.rm.protocol.AbstractCreateSequence;
 import com.sun.xml.ws.rm.protocol.AbstractCreateSequenceResponse;
 import com.sun.xml.ws.rm.v200502.AckRequestedElement;
-import com.sun.xml.ws.rm.v200502.CreateSequenceResponseElement;
 import com.sun.xml.ws.rm.v200502.SequenceElement;
 import com.sun.xml.ws.rm.v200502.TerminateSequenceElement;
 
@@ -363,13 +362,11 @@ public class ProtocolMessageSender {
 
 
     private AbstractCreateSequenceResponse unmarshallCreateSequenceResponse(Message response) throws RMException{
-        CreateSequenceResponseElement csrElement = null;
         try {
-            csrElement = response.readPayloadAsJAXB(unmarshaller);
+            return response.readPayloadAsJAXB(unmarshaller);
         } catch (JAXBException e) {
-            throw new RMException (e);
+            throw new RMException(e);
         }
-        return csrElement;
     }
 
 

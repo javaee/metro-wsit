@@ -52,7 +52,6 @@ import com.sun.xml.ws.rm.protocol.AbstractSequence;
 import com.sun.xml.ws.rm.protocol.AbstractSequenceAcknowledgement;
 import com.sun.xml.ws.rm.protocol.AcknowledgementHandler;
 import com.sun.xml.ws.rm.v200502.AckRequestedElement;
-import com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement;
 
 import javax.xml.bind.Marshaller;
 import java.net.URI;
@@ -140,7 +139,7 @@ public abstract class OutboundSequence extends Sequence  {
      * Invoked by Incoming message processor to post Sequence Acknowledgement
      * from companion Incoming Sequence for transmission on next OutboundMessage.l
      */
-    public void setSequenceAcknowledgement(SequenceAcknowledgementElement element) {
+    public void setSequenceAcknowledgement(AbstractSequenceAcknowledgement element) {
         this.sequenceAcknowledgement = element;
     }
     

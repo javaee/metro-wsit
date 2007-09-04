@@ -44,6 +44,7 @@
  */
 
 package com.sun.xml.ws.rm.jaxws.runtime.server;
+
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
@@ -53,19 +54,20 @@ import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.*;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.TubeCloner;
-import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.rm.*;
-import com.sun.xml.ws.rm.protocol.AbstractCreateSequence;
-import com.sun.xml.ws.rm.protocol.AbstractAcceptType;
-import com.sun.xml.ws.rm.protocol.AbstractCreateSequenceResponse;
 import com.sun.xml.ws.rm.jaxws.runtime.InboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
-import com.sun.xml.ws.rm.jaxws.runtime.TubeBase;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
+import com.sun.xml.ws.rm.jaxws.runtime.TubeBase;
 import com.sun.xml.ws.rm.jaxws.util.LoggingHelper;
+import com.sun.xml.ws.rm.protocol.AbstractAcceptType;
+import com.sun.xml.ws.rm.protocol.AbstractCreateSequence;
+import com.sun.xml.ws.rm.protocol.AbstractCreateSequenceResponse;
+import com.sun.xml.ws.rm.protocol.AbstractSequenceAcknowledgement;
 import com.sun.xml.ws.rm.v200502.*;
 import com.sun.xml.ws.runtime.util.Session;
 import com.sun.xml.ws.runtime.util.SessionManager;
@@ -819,7 +821,7 @@ public class RMServerTube extends TubeBase<RMDestination,
                     constants.getAddressingVersion(),
                     config.getSoapVersion(), config.getRMVersion().getTerminateSequenceAction());
              
-            SequenceAcknowledgementElement element = seq.generateSequenceAcknowledgement(null, marshaller);
+            AbstractSequenceAcknowledgement element = seq.generateSequenceAcknowledgement(null, marshaller);
             //Header header = Headers.create(config.getSoapVersion(),marshaller,element);
             //Header actionHeader = Headers.create(constants.getAddressingVersion().actionTag,
             //                                       Constants.TERMINATE_SEQUENCE_ACTION);
@@ -914,11 +916,16 @@ public class RMServerTube extends TubeBase<RMDestination,
                 throw new RMException(Messages.INVALID_SEQ_ACKNOWLEDGEMENT.format());
             }
 
-            SequenceAcknowledgementElement el = (SequenceAcknowledgementElement)header
+            AbstractSequenceAcknowledgement el = (AbstractSequenceAcknowledgement)header
                     .readAsJAXB(unmarshaller);
 
+            String id;
+            if (el instanceof SequenceAcknowledgementElement) {
+                id = ((SequenceAcknowledgementElement)el).getId(); 
+            }   else {
+                id = ((com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement)el).getId();
+            }
 
-            String id = el.getId();
             ServerInboundSequence seq = provider.getInboundSequence(id);
 
             //reset inactivity timer
@@ -1093,7 +1100,7 @@ public class RMServerTube extends TubeBase<RMDestination,
         outbound.invocationProperties.putAll(inbound.invocationProperties);
 
         //construct the SequenceAcknowledgement header and  add it to thge message.
-        SequenceAcknowledgementElement element = seq.generateSequenceAcknowledgement(null, marshaller);
+        AbstractSequenceAcknowledgement element = seq.generateSequenceAcknowledgement(null, marshaller);
         //Header header = Headers.create(config.getSoapVersion(),marshaller,element);
         Header header = createHeader(element);
         message.getHeaders().add(header);

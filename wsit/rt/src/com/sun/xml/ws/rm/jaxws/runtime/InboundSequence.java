@@ -45,10 +45,13 @@
 package com.sun.xml.ws.rm.jaxws.runtime;
 
 import com.sun.xml.ws.rm.InvalidMessageNumberException;
+import com.sun.xml.ws.rm.RMVersion;
 import com.sun.xml.ws.rm.Sequence;
+import com.sun.xml.ws.rm.protocol.AbstractSequenceAcknowledgement;
 import com.sun.xml.ws.rm.v200502.AckRequestedElement;
 import com.sun.xml.ws.rm.v200502.Identifier;
 import com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement;
+
 import javax.xml.bind.Marshaller;
 import java.net.URI;
 
@@ -105,19 +108,28 @@ public abstract class InboundSequence extends Sequence {
      * need to be if concurrent modifications only cause messages that
      * have indeed arrived to be unacknowledged
      */
-    public synchronized SequenceAcknowledgementElement 
+    public synchronized AbstractSequenceAcknowledgement
             generateSequenceAcknowledgement(AckRequestedElement reqElement, 
                                             Marshaller marshaller) 
                 throws InvalidMessageNumberException {
         
-        
-        SequenceAcknowledgementElement ackElement= 
-                new SequenceAcknowledgementElement();
+
+        AbstractSequenceAcknowledgement ackElement = null;
+        if (config.getRMVersion() == RMVersion.WSRM10) {
+            ackElement = new SequenceAcknowledgementElement();
+            Identifier id = new Identifier();
+            id.setValue(getId());
+            ((SequenceAcknowledgementElement)ackElement).setIdentifier(id);
+        }  else {
+            ackElement = new com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement();
+            ackElement = new SequenceAcknowledgementElement();
+            com.sun.xml.ws.rm.v200702.Identifier id = new com.sun.xml.ws.rm.v200702.Identifier();
+            id.setValue(getId());
+            ((com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement)ackElement).setIdentifier(id);
+        }
+
        
- 	Identifier id = new Identifier();
-        id.setValue(getId());
-        ackElement.setIdentifier(id);
-        
+
         
         if (config != null && config.flowControl) {
             ackElement.setBufferRemaining(maxMessages - storedMessages);
@@ -177,7 +189,7 @@ public abstract class InboundSequence extends Sequence {
                                    Marshaller marshaller) 
                 throws InvalidMessageNumberException {
         
-        SequenceAcknowledgementElement ackElement = 
+        AbstractSequenceAcknowledgement ackElement =
                 generateSequenceAcknowledgement(reqElement,
                                                 marshaller);
         outboundSequence.setSequenceAcknowledgement(ackElement);
