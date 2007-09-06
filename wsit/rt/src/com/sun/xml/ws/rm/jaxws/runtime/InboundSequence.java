@@ -47,8 +47,8 @@ package com.sun.xml.ws.rm.jaxws.runtime;
 import com.sun.xml.ws.rm.InvalidMessageNumberException;
 import com.sun.xml.ws.rm.RMVersion;
 import com.sun.xml.ws.rm.Sequence;
+import com.sun.xml.ws.rm.protocol.AbstractAckRequested;
 import com.sun.xml.ws.rm.protocol.AbstractSequenceAcknowledgement;
-import com.sun.xml.ws.rm.v200502.AckRequestedElement;
 import com.sun.xml.ws.rm.v200502.Identifier;
 import com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement;
 
@@ -109,7 +109,7 @@ public abstract class InboundSequence extends Sequence {
      * have indeed arrived to be unacknowledged
      */
     public synchronized AbstractSequenceAcknowledgement
-            generateSequenceAcknowledgement(AckRequestedElement reqElement, 
+            generateSequenceAcknowledgement(AbstractAckRequested reqElement,
                                             Marshaller marshaller) 
                 throws InvalidMessageNumberException {
         
@@ -136,10 +136,13 @@ public abstract class InboundSequence extends Sequence {
         }
         
         int maxMessageNumber = 0;
+
+        //The new WSRM 1.1 spec has no element for MaxMessageNumber in AckRequested
+        //hence commenting this code we will just use the last index of the message
         
-        if (reqElement != null) {
+        /*if (reqElement != null) {
             maxMessageNumber = (int)(reqElement.getMaxMessageNumber());
-        }
+        }*/
         
         //if max message number element is not present, use the last
         //index we know of. 
@@ -182,10 +185,10 @@ public abstract class InboundSequence extends Sequence {
      * to different destination.
      *
      *   
-     * @param reqElement The <code>AckRequestedElement</code> to process.
+     * @param reqElement The <code>AbstractAckRequested</code> to process.
      *        marshaller The marshaller to be used for construction of the return value.
      */
-    public synchronized void  handleAckRequested(AckRequestedElement reqElement, 
+    public synchronized void  handleAckRequested(AbstractAckRequested reqElement,
                                    Marshaller marshaller) 
                 throws InvalidMessageNumberException {
         

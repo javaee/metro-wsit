@@ -1,5 +1,5 @@
 /*
- * $Id: Message.java,v 1.10.2.2 2007-08-31 22:21:27 bhaktimehta Exp $
+ * $Id: Message.java,v 1.10.2.3 2007-09-06 19:31:44 bhaktimehta Exp $
  */
 
 /*
@@ -40,9 +40,9 @@
 
 package com.sun.xml.ws.rm;
 
+import com.sun.xml.ws.rm.protocol.AbstractAckRequested;
 import com.sun.xml.ws.rm.protocol.AbstractSequence;
 import com.sun.xml.ws.rm.protocol.AbstractSequenceAcknowledgement;
-import com.sun.xml.ws.rm.v200502.AckRequestedElement;
 
 
 /**
@@ -104,7 +104,7 @@ public class Message {
      * SequenceElement stored when the corresponding com.sun.xml.ws.api.message.Header
      * is added to the message.
      */
-    protected AckRequestedElement ackRequestedElement = null;
+    protected AbstractAckRequested ackRequestedElement = null;
     
     /**
      * Version of RM spec being used.
@@ -311,7 +311,7 @@ public class Message {
         
         AbstractSequence sel;
         AbstractSequenceAcknowledgement sael;
-        AckRequestedElement ael;
+        AbstractAckRequested ael;
         if ( null != (sel = getSequenceElement())) {
             ret += sel.toString();
         }
@@ -350,11 +350,11 @@ public class Message {
         sequenceElement = el;
     }
     
-    public AckRequestedElement getAckRequestedElement() {
+    public AbstractAckRequested getAckRequestedElement() {
         return ackRequestedElement;
     }
     
-    public void setAckRequestedElement(AckRequestedElement el) {
+    public void setAckRequestedElement(AbstractAckRequested el) {
         ackRequestedElement = el;
     }
               

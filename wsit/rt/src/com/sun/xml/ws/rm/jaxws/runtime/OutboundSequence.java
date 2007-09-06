@@ -48,6 +48,7 @@ import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Headers;
 import com.sun.xml.ws.rm.*;
 import com.sun.xml.ws.rm.jaxws.util.ProcessingFilter;
+import com.sun.xml.ws.rm.protocol.AbstractAckRequested;
 import com.sun.xml.ws.rm.protocol.AbstractSequence;
 import com.sun.xml.ws.rm.protocol.AbstractSequenceAcknowledgement;
 import com.sun.xml.ws.rm.protocol.AcknowledgementHandler;
@@ -213,8 +214,15 @@ public abstract class OutboundSequence extends Sequence  {
             
              //if it is time to request an ack for this sequence, add AckRequestedHeader
             if (isAckRequested()) {
-                AckRequestedElement ack = new AckRequestedElement();
-                ack.setId(this.getId());      
+                AbstractAckRequested ack = null;
+                if (config.getRMVersion() == RMVersion.WSRM10)     {
+                    ack = new AckRequestedElement();
+                    ack.setId(this.getId());
+                }  else {
+                    ack = new com.sun.xml.ws.rm.v200702.AckRequestedElement();
+                    ack.setId(this.getId());
+                }
+                
                 mess.setAckRequestedElement(ack);
             }
         }
@@ -389,9 +397,16 @@ public abstract class OutboundSequence extends Sequence  {
      */
     public void ensureAckRequested(Message mess, Marshaller marshaller) {
         if (mess.getAckRequestedElement() == null) {
-            
-            AckRequestedElement ack = new AckRequestedElement();
-            ack.setId(this.getId());      
+
+            AbstractAckRequested ack = null;
+             if (config.getRMVersion() == RMVersion.WSRM10)     {
+                ack = new AckRequestedElement();
+                ack.setId(this.getId());
+            }  else {
+                 ack = new com.sun.xml.ws.rm.v200702.AckRequestedElement();
+                 ack.setId(this.getId());
+            }
+
             mess.setAckRequestedElement(ack);
            /*
             mess.addHeader(Headers.create(getVersion(), 

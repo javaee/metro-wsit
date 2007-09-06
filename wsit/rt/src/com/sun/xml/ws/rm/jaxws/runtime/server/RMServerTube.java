@@ -64,10 +64,7 @@ import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
 import com.sun.xml.ws.rm.jaxws.runtime.TubeBase;
 import com.sun.xml.ws.rm.jaxws.util.LoggingHelper;
-import com.sun.xml.ws.rm.protocol.AbstractAcceptType;
-import com.sun.xml.ws.rm.protocol.AbstractCreateSequence;
-import com.sun.xml.ws.rm.protocol.AbstractCreateSequenceResponse;
-import com.sun.xml.ws.rm.protocol.AbstractSequenceAcknowledgement;
+import com.sun.xml.ws.rm.protocol.*;
 import com.sun.xml.ws.rm.v200502.*;
 import com.sun.xml.ws.runtime.util.Session;
 import com.sun.xml.ws.runtime.util.SessionManager;
@@ -253,9 +250,9 @@ public class RMServerTube extends TubeBase<RMDestination,
                     (ServerInboundSequence)message.getSequence();
 
             if (inboundSequence == null ) {
-                logger.log(Level.SEVERE, Messages.NOT_RELIABLE_SEQ_OR_PROTOCOL_MESSAGE.format()
+                logger.log(Level.SEVERE, com.sun.xml.ws.rm.jaxws.runtime.server.Messages.NOT_RELIABLE_SEQ_OR_PROTOCOL_MESSAGE.format()
                     );
-                throw new RMException(Messages.NOT_RELIABLE_SEQ_OR_PROTOCOL_MESSAGE.format());
+                throw new RMException(com.sun.xml.ws.rm.jaxws.runtime.server.Messages.NOT_RELIABLE_SEQ_OR_PROTOCOL_MESSAGE.format());
 
             }
             //reset inactivity timer
@@ -559,8 +556,8 @@ public class RMServerTube extends TubeBase<RMDestination,
                     .getHeaders().getAction(constants.getAddressingVersion(),
                                             config.getSoapVersion());
         if (actionValue == null || actionValue.equals("")) {
-          logger.severe(Messages.NON_RM_REQUEST_OR_MISSING_WSA_ACTION_HEADER.format());
-          throw new RMException(Messages.NON_RM_REQUEST_OR_MISSING_WSA_ACTION_HEADER.format() )
+          logger.severe(com.sun.xml.ws.rm.jaxws.runtime.server.Messages.NON_RM_REQUEST_OR_MISSING_WSA_ACTION_HEADER.format());
+          throw new RMException(com.sun.xml.ws.rm.jaxws.runtime.server.Messages.NON_RM_REQUEST_OR_MISSING_WSA_ACTION_HEADER.format() )
                                         ;
         }
 
@@ -589,8 +586,8 @@ public class RMServerTube extends TubeBase<RMDestination,
         try {
             csrElement = message.readPayloadAsJAXB(unmarshaller);
         } catch (JAXBException e) {
-            logger.severe(Messages.CREATESEQUENCE_HEADER_PROBLEM.format() + e);
-            throw new RMException(Messages.CREATESEQUENCE_HEADER_PROBLEM.format() + e);
+            logger.severe(com.sun.xml.ws.rm.jaxws.runtime.server.Messages.CREATESEQUENCE_HEADER_PROBLEM.format() + e);
+            throw new RMException(com.sun.xml.ws.rm.jaxws.runtime.server.Messages.CREATESEQUENCE_HEADER_PROBLEM.format() + e);
         }
 
         /**ADDRESSING_FIXME
@@ -669,11 +666,11 @@ public class RMServerTube extends TubeBase<RMDestination,
                     if (gotId.equals(strId)){
                         inboundSequence.setStrId(strId);
                     } else {
-                        throw new RMSecurityException(Messages.SECURITY_TOKEN_AUTHORIZATION_ERROR.format(gotId ,strId ));
+                        throw new RMSecurityException(com.sun.xml.ws.rm.jaxws.runtime.server.Messages.SECURITY_TOKEN_AUTHORIZATION_ERROR.format(gotId ,strId ));
                     }
-                } else throw new RMSecurityException(Messages.SECURITY_REFERENCE_ERROR.format( ref.getClass().getName()));
+                } else throw new RMSecurityException(com.sun.xml.ws.rm.jaxws.runtime.server.Messages.SECURITY_REFERENCE_ERROR.format( ref.getClass().getName()));
 
-            } else throw new RMSecurityException(Messages.NULL_SECURITY_TOKEN.format());
+            } else throw new RMSecurityException(com.sun.xml.ws.rm.jaxws.runtime.server.Messages.NULL_SECURITY_TOKEN.format());
         }
 
         startSession(inboundSequence);
@@ -714,12 +711,12 @@ public class RMServerTube extends TubeBase<RMDestination,
             try {
                 dest = new URI(destString);
             } catch (Exception e) {
-                logger.severe(Messages.INVALID_OR_MISSING_TO_ON_CS_MESSAGE.format()) ;
-                throw new RMException(Messages.INVALID_OR_MISSING_TO_ON_CS_MESSAGE.format()
+                logger.severe(com.sun.xml.ws.rm.jaxws.runtime.server.Messages.INVALID_OR_MISSING_TO_ON_CS_MESSAGE.format()) ;
+                throw new RMException(com.sun.xml.ws.rm.jaxws.runtime.server.Messages.INVALID_OR_MISSING_TO_ON_CS_MESSAGE.format()
                         );
             }
             
-            accept = new AcceptType();
+
 
             W3CEndpointReference endpointReference ;
             WSEndpointReference wsepr = new WSEndpointReference(dest,constants.getAddressingVersion());
@@ -783,8 +780,8 @@ public class RMServerTube extends TubeBase<RMDestination,
         try {
             tsElement = message.readPayloadAsJAXB(unmarshaller);
         } catch (JAXBException e) {
-            logger.severe(Messages.TERMINATE_SEQUENCE_EXCEPTION.format() + e);
-            throw new TerminateSequenceException(Messages.TERMINATE_SEQUENCE_EXCEPTION.format() + e);
+            logger.severe(com.sun.xml.ws.rm.jaxws.runtime.server.Messages.TERMINATE_SEQUENCE_EXCEPTION.format() + e);
+            throw new TerminateSequenceException(com.sun.xml.ws.rm.jaxws.runtime.server.Messages.TERMINATE_SEQUENCE_EXCEPTION.format() + e);
         }
 
         String id = tsElement.getIdentifier().getValue();
@@ -877,11 +874,11 @@ public class RMServerTube extends TubeBase<RMDestination,
             Message message = inbound.getMessage();
             Header header = message.getHeaders().get(config.getRMVersion().getAckRequestedQName(), true);
             if (header == null) {
-                logger.severe(Messages.INVALID_ACK_REQUESTED.format());
-                throw new RMException(Messages.INVALID_ACK_REQUESTED.format());
+                logger.severe(com.sun.xml.ws.rm.jaxws.runtime.server.Messages.INVALID_ACK_REQUESTED.format());
+                throw new RMException(com.sun.xml.ws.rm.jaxws.runtime.server.Messages.INVALID_ACK_REQUESTED.format());
             }
 
-            AckRequestedElement el = (AckRequestedElement)header
+            AbstractAckRequested el = (AbstractAckRequested)header
                     .readAsJAXB(unmarshaller);
             String id = el.getId();
 
@@ -897,8 +894,8 @@ public class RMServerTube extends TubeBase<RMDestination,
                     config.getRMVersion().getSequenceAcknowledgementAction());
 
         } catch (JAXBException e) {
-            logger.severe(Messages.ACK_REQUESTED_EXCEPTION.format());
-            throw new RMException(Messages.ACK_REQUESTED_EXCEPTION.format() +e);
+            logger.severe(com.sun.xml.ws.rm.jaxws.runtime.server.Messages.ACK_REQUESTED_EXCEPTION.format());
+            throw new RMException(com.sun.xml.ws.rm.jaxws.runtime.server.Messages.ACK_REQUESTED_EXCEPTION.format() +e);
         }
 
     }

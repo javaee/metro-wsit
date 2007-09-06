@@ -8,6 +8,7 @@
 
 package com.sun.xml.ws.rm.v200702;
 
+import com.sun.xml.ws.rm.protocol.AbstractAckRequested;
 import org.w3c.dom.Element;
 
 import javax.xml.bind.annotation.*;
@@ -44,9 +45,9 @@ import java.util.Map;
     "any"
 })
 @XmlRootElement(name="AckRequested",namespace="http://docs.oasis-open.org/ws-rx/wsrm/200702")
-public class AckRequestedElement {
+public class AckRequestedElement extends AbstractAckRequested {
 
-    @XmlElement(name = "Identifier", required = true)
+    @XmlElement(name = "Identifier", required = true,namespace="http://docs.oasis-open.org/ws-rx/wsrm/200702")
     protected Identifier identifier;
     @XmlAnyElement(lax = true)
     protected List<Object> any;
@@ -124,5 +125,21 @@ public class AckRequestedElement {
     public Map<QName, String> getOtherAttributes() {
         return otherAttributes;
     }
+
+    public void setId(String id) {
+        com.sun.xml.ws.rm.v200702.Identifier idType = new  com.sun.xml.ws.rm.v200702.Identifier();
+        idType.setValue(id);
+        setIdentifier(idType);
+    }
+
+    public String getId() {
+        return getIdentifier().getValue();
+    }
+
+
+
+
+
+
 
 }

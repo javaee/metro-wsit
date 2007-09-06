@@ -46,6 +46,7 @@ package com.sun.xml.ws.rm.jaxws.runtime;
 
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.rm.*;
+import com.sun.xml.ws.rm.protocol.AbstractAckRequested;
 import com.sun.xml.ws.rm.protocol.AbstractSequence;
 import com.sun.xml.ws.rm.protocol.AbstractSequenceAcknowledgement;
 import com.sun.xml.ws.rm.v200502.AckRequestedElement;
@@ -181,19 +182,32 @@ public class InboundMessageProcessor {
  
                     //dispatch to InboundSequence to construct response.
                     //TODO handle error condition no such sequence
-                     AckRequestedElement el = 
-                             (AckRequestedElement)header.readAsJAXB(unmarshaller);
+                     AbstractAckRequested el =
+                             (AbstractAckRequested)header.readAsJAXB(unmarshaller);
                      
                      message.setAckRequestedElement(el);
-                     
-                     String id = el.getId();
+                     String id = null;
+                     InboundSequence seq = null;
+                     if (el instanceof com.sun.xml.ws.rm.v200502.AckRequestedElement) {
+                        id = ((com.sun.xml.ws.rm.v200502.AckRequestedElement)el).getId();
+                        seq = provider.getInboundSequence(id);
 
-                    InboundSequence seq =
-                            provider.getInboundSequence(id);
+                         if (seq != null) {
+                             seq.handleAckRequested((AckRequestedElement)el, marshaller);
+                         }
 
-                    if (seq != null) {
-                        seq.handleAckRequested((AckRequestedElement)el, marshaller);
-                    }
+
+                     }   else {
+                        id = ((com.sun.xml.ws.rm.v200702.AckRequestedElement)el).getId();
+                        seq = provider.getInboundSequence(id);
+
+                         if (seq != null) {
+                             seq.handleAckRequested((com.sun.xml.ws.rm.v200702.AckRequestedElement)el, marshaller);
+                         }
+
+                     };
+
+                   
 
                 } else {
                     //FIXME - We need to be checking whether this is a ServerInboundSequence

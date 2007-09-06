@@ -43,6 +43,9 @@
  */
 
 package com.sun.xml.ws.rm.v200502;
+
+import com.sun.xml.ws.rm.protocol.AbstractAckRequested;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -51,7 +54,7 @@ import java.math.BigInteger;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "AckRequested", namespace="http://schemas.xmlsoap.org/ws/2005/02/rm")
-public class AckRequestedElement  {
+public class AckRequestedElement extends AbstractAckRequested {
 
 
     @XmlElement(name = "Identifier", namespace = "http://schemas.xmlsoap.org/ws/2005/02/rm")
@@ -139,7 +142,7 @@ public class AckRequestedElement  {
     
     public String toString() {
         return Messages.ACKREQUESTED_TOSTRING_STRING.format(
-                getId(), getMaxMessageNumber());
+                getId());
     }
 
 

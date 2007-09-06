@@ -58,6 +58,7 @@ import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
 import com.sun.xml.ws.rm.protocol.AbstractCreateSequence;
 import com.sun.xml.ws.rm.protocol.AbstractCreateSequenceResponse;
+import com.sun.xml.ws.rm.protocol.AbstractAckRequested;
 import com.sun.xml.ws.rm.v200502.AckRequestedElement;
 import com.sun.xml.ws.rm.v200502.SequenceElement;
 import com.sun.xml.ws.rm.v200502.TerminateSequenceElement;
@@ -291,7 +292,7 @@ public class ProtocolMessageSender {
 
         try {
             Message request = createEmptyMessage(version);
-            AckRequestedElement el = createAckRequestedElement(seq);
+            AbstractAckRequested el = createAckRequestedElement(seq);
             //request.getHeaders().add(Headers.create(version,marshaller,el));
             request.getHeaders().add(createHeader(el));
 
@@ -389,11 +390,17 @@ public class ProtocolMessageSender {
      * highest <MessageNumber> sent within a Sequence
      * sequence.
      */
-    private AckRequestedElement createAckRequestedElement(OutboundSequence seq
+    private AbstractAckRequested createAckRequestedElement(OutboundSequence seq
                                                           ) {
-        AckRequestedElement ackRequestedElement = new AckRequestedElement();
-        ackRequestedElement.setId(seq.getId());
-        ackRequestedElement.setMaxMessageNumber(seq.getNextIndex()-1);
+        AbstractAckRequested ackRequestedElement = null;
+        if (config.getRMVersion() == RMVersion.WSRM10)     {
+            ackRequestedElement = new AckRequestedElement();
+            ackRequestedElement.setId(seq.getId());
+        }  else {
+            ackRequestedElement = new com.sun.xml.ws.rm.v200702.AckRequestedElement();
+            ackRequestedElement.setId(seq.getId());
+        }
+
         return ackRequestedElement;
     }
 
