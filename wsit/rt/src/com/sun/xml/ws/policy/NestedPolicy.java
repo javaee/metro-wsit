@@ -82,6 +82,7 @@ public final class NestedPolicy extends Policy {
     /**
      * An {@code Object.equals(Object obj)} method override.
      */
+    @Override
     public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
@@ -96,6 +97,7 @@ public final class NestedPolicy extends Policy {
         return super.equals(that);
     }    
     
+    @Override
     public int hashCode() {
         return super.hashCode();
     }    
@@ -103,6 +105,7 @@ public final class NestedPolicy extends Policy {
     /**
      * An {@code Object.toString()} method override.
      */
+    @Override
     public String toString() {
         return toString(0, new StringBuffer()).toString();
     }
@@ -114,6 +117,7 @@ public final class NestedPolicy extends Policy {
      * @param buffer buffer to be used for appending string representation of this instance
      * @return modified buffer containing new string representation of the instance
      */
+    @Override
     StringBuffer toString(final int indentLevel, final StringBuffer buffer) {
         return super.toString(indentLevel, buffer);
     }    
