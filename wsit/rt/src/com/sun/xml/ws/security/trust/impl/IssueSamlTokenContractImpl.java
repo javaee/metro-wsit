@@ -194,16 +194,26 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
             final KeyInfo keyinfo = new KeyInfo(doc);
             //KeyIdentifier keyIdentifier = new KeyIdentifierImpl(MessageConstants.ThumbPrintIdentifier_NS,null);
             //keyIdentifier.setValue(Base64.encode(X509ThumbPrintIdentifier.getThumbPrintIdentifier(serCert)));
-            final KeyIdentifier keyIdentifier = new KeyIdentifierImpl(MessageConstants.X509SubjectKeyIdentifier_NS,null);
-            keyIdentifier.setValue(Base64.encode(X509SubjectKeyIdentifier.getSubjectKeyIdentifier(cert)));
-            final SecurityTokenReference str = new SecurityTokenReferenceImpl(keyIdentifier);
-            keyinfo.addUnknownElement((Element)doc.importNode(WSTrustElementFactory.newInstance().toElement(str,null), true));
+            byte[] skid = X509SubjectKeyIdentifier.getSubjectKeyIdentifier(cert);
+            if (skid != null && skid.length > 0){
+                final KeyIdentifier keyIdentifier = new KeyIdentifierImpl(MessageConstants.X509SubjectKeyIdentifier_NS,null);
+                keyIdentifier.setValue(Base64.encode(skid));
+                final SecurityTokenReference str = new SecurityTokenReferenceImpl(keyIdentifier);
+                keyinfo.addUnknownElement((Element)doc.importNode(WSTrustElementFactory.newInstance().toElement(str,null), true));
+            }else{
+                final X509Data x509data = new X509Data(doc);
+                x509data.addCertificate(cert);
+            }
             encKey.setKeyInfo(keyinfo);
         } catch (XWSSecurityException ex){
             log.log(Level.SEVERE,
                             LogStringsMessages.WST_0040_ERROR_ENCRYPT_PROOFKEY(appliesTo), ex);
             throw new WSTrustException( LogStringsMessages.WST_0040_ERROR_ENCRYPT_PROOFKEY(appliesTo), ex);
         } catch (XMLEncryptionException ex) {
+            log.log(Level.SEVERE,
+                            LogStringsMessages.WST_0040_ERROR_ENCRYPT_PROOFKEY(appliesTo), ex);
+            throw new WSTrustException( LogStringsMessages.WST_0040_ERROR_ENCRYPT_PROOFKEY(appliesTo), ex);
+        }catch(com.sun.org.apache.xml.internal.security.exceptions.XMLSecurityException ex){
             log.log(Level.SEVERE,
                             LogStringsMessages.WST_0040_ERROR_ENCRYPT_PROOFKEY(appliesTo), ex);
             throw new WSTrustException( LogStringsMessages.WST_0040_ERROR_ENCRYPT_PROOFKEY(appliesTo), ex);
@@ -403,8 +413,7 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
                     if (STSAttributeProvider.NAME_IDENTIFIER.equals(attrKey.getLocalPart()) && subj == null){
                         final NameIdentifier nameId = samlFac.createNameIdentifier(values.get(0), attrKey.getNamespaceURI(), null);
                         subj = samlFac.createSubject(nameId, subjectConfirm);
-                    }
-                    else{
+                    }else{
                         final Attribute attr = samlFac.createAttribute(attrKey.getLocalPart(), attrKey.getNamespaceURI(), values);
                         attrs.add(attr);
                     }
