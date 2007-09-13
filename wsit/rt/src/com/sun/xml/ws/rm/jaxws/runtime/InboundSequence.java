@@ -122,7 +122,6 @@ public abstract class InboundSequence extends Sequence {
             ((SequenceAcknowledgementElement)ackElement).setIdentifier(id);
         }  else {
             ackElement = new com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement();
-            ackElement = new SequenceAcknowledgementElement();
             com.sun.xml.ws.rm.v200702.Identifier id = new com.sun.xml.ws.rm.v200702.Identifier();
             id.setValue(getId());
             ((com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement)ackElement).setIdentifier(id);
