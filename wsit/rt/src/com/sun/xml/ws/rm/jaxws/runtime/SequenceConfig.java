@@ -135,6 +135,7 @@ public class SequenceConfig extends SequenceSettings {
         this.soapVersion = toCopy.soapVersion;
         this.sequenceSTR = toCopy.sequenceSTR;
         this.sequenceTransportSecurity = toCopy.sequenceTransportSecurity;
+        this.rmVersion = toCopy.rmVersion;
   
     }
     
