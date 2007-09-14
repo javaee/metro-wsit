@@ -37,7 +37,7 @@
 -->
 
 <!--
- $Id: build.xml,v 1.31 2007-05-29 22:12:47 ofung Exp $
+ $Id: build.xml,v 1.32 2007-09-14 14:44:29 m_potociar Exp $
 
  Copyright (c) 2005 Sun Microsystems, Inc.
  All rights reserved.
@@ -51,7 +51,7 @@
         <fileset dir="${test.lib.dir}" includes="*.jar"/>
     </path>
     
-    <!-- BEGIN: Emma code coverage specific stuff 
+    <!-- BEGIN: Emma code coverage specific stuff -->
     <path id="emma.lib" >
         <pathelement location="${emma.dir}/emma.jar" />
         <pathelement location="${emma.dir}/emma_ant.jar" />
@@ -60,28 +60,30 @@
     <taskdef resource="emma_ant.properties" classpathref="emma.lib" />
     
     <target name="emma" description="turns on EMMA's on-the-fly instrumentation mode" >
-        <property name="emma.enabled" value="true" />
-        
+        <property name="emma.enabled" value="true" />        
         <path id="instr.override.path">
             <pathelement location="${out.instr.dir}" />
             <path refid="emma.lib" />
         </path>
     </target>   
-    -->    
-    <!--
-    <target name="emma_report" description="just creates a report from metadata files" >
-            <emma>
-                <report sourcepath="${wsit.dir}/rt/src" >
-                    <fileset dir="${coverage.dir}" >
-                        <include name="*.emma" />
-                    </fileset>
-                    
-                    <txt outfile="${coverage.dir}/coverage.txt" />
-                    <html outfile="${coverage.dir}/coverage.html" />
-                </report>
-            </emma>                    
-    </target>        
-    -->
+    
+    <target name="setup-emma-remote" description="internal: overrides local setup for emma">
+        <property name="wsit.image" value="${basedir}/wsit-image/jax-ws-latest-wsit"/>   
+        <property name="wsit.sources" value="${basedir}/wsit-image/webservices-src.zip"/>
+    </target>
+
+    <!--target name="emma_report" description="just creates a report from metadata files" >
+        <emma>
+            <report sourcepath="${wsit.sources}" >
+                <fileset dir="${coverage.dir}" >
+                    <include name="*.emma" />
+                </fileset>
+                
+                <txt outfile="${coverage.dir}/coverage.txt" />
+                <html outfile="${coverage.dir}/coverage.html" />
+            </report>
+        </emma>                    
+    </target-->        
     <!-- END: Emma code coverage specific stuff -->
     
     
@@ -90,8 +92,12 @@
         <mkdir dir="${logs.dir}/junit-reports" />
         <mkdir dir="${logs.dir}"/>
     </target>
-    
+        
     <target name="get-wsit-hudson" description="internal: retrieve last successful build of WSIT from hudson" unless="noget">
+        <!-- BEGIN: Emma code coverage specific stuff -->
+        <antcall target="setup-emma-remote" />
+        <!-- END: Emma code coverage specific stuff -->
+        
         <mkdir dir="wsit-image"/>
         <mkdir dir="wsit-image/runtime"/>
         
@@ -108,6 +114,10 @@
     </target>
     
     <target name="get-wsit-bleedingedge-hudson" description="internal: retrieve last successful build of WSIT from hudson" unless="noget">
+        <!-- BEGIN: Emma code coverage specific stuff -->
+        <antcall target="setup-emma-remote" />
+        <!-- END: Emma code coverage specific stuff -->
+
         <mkdir dir="wsit-image"/>
         <mkdir dir="wsit-image/runtime"/>
         
@@ -160,7 +170,7 @@
         <sequential>
             <antcall target="prepare"/>
             
-        <!-- BEGIN: Emma code coverage specific stuff
+            <!-- BEGIN: Emma code coverage specific stuff -->
             <emma enabled="${emma.enabled}" >
                 <instr 
                     destdir="${out.instr.dir}"	
@@ -188,7 +198,7 @@
                     <filter includes="com.sun.xml.wss.provider.*"/>
                 </instr>
             </emma>            
-             END: Emma code coverage specific stuff -->
+            <!-- END: Emma code coverage specific stuff -->
             
             <java jar="${test.lib.dir}/harness.jar" fork="true">
                 <sysproperty key="WSIT_HOME" value="${basedir}/misc"/>
@@ -200,16 +210,16 @@
                 <arg value="-report" />
                 <arg path="${logs.dir}" />
                 
-                <!-- BEGIN: Emma code coverage specific stuff 
+                <!-- BEGIN: Emma code coverage specific stuff -->
                 <arg value="-cp:override" />
                 <arg pathref="instr.override.path" />                
                 <jvmarg value="-Demma.coverage.out.file=${coverage.dir}/coverage.emma" />
                 <jvmarg value="-Demma.coverage.out.merge=true" />
-                 END: Emma code coverage specific stuff -->    
+                <!-- END: Emma code coverage specific stuff -->    
 
                 <arguments />
                 <arg line="${args}"/>
-
+                
                 <!--
                 <jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,address=8000" />
 		<jvmarg value="-Xdebug"/>
@@ -222,18 +232,19 @@
                 <report format="frames" todir="${logs.dir}/junit-reports"/>
             </junitreport>
             
-            <!-- BEGIN: Emma code coverage specific stuff           
+            <!-- BEGIN: Emma code coverage specific stuff -->
             <emma enabled="${emma.enabled}" >
-                <report sourcepath="${wsit.dir}/rt/src" >
+                <report sourcepath="${wsit.sources}" >
                     <fileset dir="${coverage.dir}" >
                         <include name="*.emma" />
                     </fileset>
                     
                     <txt outfile="${coverage.dir}/coverage.txt" />
                     <html outfile="${coverage.dir}/coverage.html" />
+                    <xml outfile="${coverage.dir}/coverage.xml" />
                 </report>
             </emma>                        
-             END: Emma code coverage specific stuff -->
+            <!-- END: Emma code coverage specific stuff -->
             
         </sequential>                 
     </macrodef>
