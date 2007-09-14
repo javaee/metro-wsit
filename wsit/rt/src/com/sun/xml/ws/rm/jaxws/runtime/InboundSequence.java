@@ -110,7 +110,8 @@ public abstract class InboundSequence extends Sequence {
      */
     public synchronized AbstractSequenceAcknowledgement
             generateSequenceAcknowledgement(AbstractAckRequested reqElement,
-                                            Marshaller marshaller) 
+                                            Marshaller marshaller,
+                                            boolean generateIsFinal)
                 throws InvalidMessageNumberException {
         
 
@@ -125,6 +126,13 @@ public abstract class InboundSequence extends Sequence {
             com.sun.xml.ws.rm.v200702.Identifier id = new com.sun.xml.ws.rm.v200702.Identifier();
             id.setValue(getId());
             ((com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement)ackElement).setIdentifier(id);
+            //If the RM version is 1.1 then the SequenceAcknowledgmenet.Final needs to be added
+            //when CloseSequence message is processed
+            if ( generateIsFinal) {
+
+                com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement.Final finalelem = new com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement.Final(); ;
+                ((com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement)ackElement).setFinal(finalelem);
+            }
         }
 
        
@@ -193,7 +201,7 @@ public abstract class InboundSequence extends Sequence {
         
         AbstractSequenceAcknowledgement ackElement =
                 generateSequenceAcknowledgement(reqElement,
-                                                marshaller);
+                                                marshaller,false);
         outboundSequence.setSequenceAcknowledgement(ackElement);
     }
     

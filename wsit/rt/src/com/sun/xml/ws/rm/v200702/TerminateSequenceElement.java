@@ -8,6 +8,7 @@
 
 package com.sun.xml.ws.rm.v200702;
 
+import com.sun.xml.ws.rm.protocol.AbstractTerminateSequence;
 import org.w3c.dom.Element;
 
 import javax.xml.bind.annotation.*;
@@ -46,7 +47,7 @@ import java.util.Map;
     "any"
 })
 @XmlRootElement(name="TerminateSequenceElement",namespace="http://docs.oasis-open.org/ws-rx/wsrm/200702")
-public class TerminateSequenceElement {
+public class TerminateSequenceElement extends AbstractTerminateSequence {
 
     @XmlElement(name = "Identifier", required = true,namespace="http://docs.oasis-open.org/ws-rx/wsrm/200702")
     protected Identifier identifier;

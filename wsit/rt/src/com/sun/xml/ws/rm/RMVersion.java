@@ -37,6 +37,34 @@ public enum RMVersion {
             return packageName;
         }
 
+        @Override
+        public  List<Class> getClassesToBeBound() throws RMException{
+            final Class[] classes;
+            final ArrayList<Class> classList;
+            try {
+                classes = new Class[]{
+                        Class.forName(getPackageName()+ ".AckRequestedElement"),
+                        Class.forName(getPackageName()+ ".SequenceElement"),
+                        Class.forName(getPackageName()+ ".SequenceAcknowledgementElement"),
+                        Class.forName(getPackageName()+ ".Identifier"),
+                        Class.forName(getPackageName()+ ".CreateSequenceElement"),
+                        Class.forName(getPackageName()+ ".CreateSequenceResponseElement"),
+                        Class.forName(getPackageName()+ ".SequenceFaultElement"),
+                        Class.forName(getPackageName()+ ".TerminateSequenceElement"),
+                        Class.forName(getPackageName()+ ".AcceptType"),
+                        Class.forName(getPackageName()+ ".OfferType"),
+                        Class.forName(getPackageName()+ ".Expires") ,
+
+                };
+                classList = new ArrayList<Class>(Arrays.asList(classes));
+                classList.add( RMConstants.W3C.getAcksToClass());
+              
+                return classList;
+            } catch (ClassNotFoundException e) {
+                throw new RMException("Cannot bind the following class with JAXBContext" + e);
+            }
+        }
+
 
     },
     WSRM11("http://docs.oasis-open.org/ws-rx/wsrm/200702",
@@ -56,6 +84,37 @@ public enum RMVersion {
         @Override
         public  String getPackageName() {
             return packageName;
+        }
+
+        public  List<Class> getClassesToBeBound() throws RMException{
+            final Class[] classes;
+            final ArrayList<Class> classList;
+            try {
+                classes = new Class[]{
+                        Class.forName(getPackageName()+ ".AckRequestedElement"),
+                        Class.forName(getPackageName()+ ".SequenceElement"),
+                        Class.forName(getPackageName()+ ".SequenceAcknowledgementElement"),
+                        Class.forName(getPackageName()+ ".Identifier"),
+                        Class.forName(getPackageName()+ ".CreateSequenceElement"),
+                        Class.forName(getPackageName()+ ".CreateSequenceResponseElement"),
+                        Class.forName(getPackageName()+ ".SequenceFaultElement"),
+                        Class.forName(getPackageName()+ ".TerminateSequenceElement"),
+                        Class.forName(getPackageName()+ ".TerminateSequenceResponseElement"),
+                        Class.forName(getPackageName()+ ".AcceptType"),
+                        Class.forName(getPackageName()+ ".OfferType"),
+                        Class.forName(getPackageName()+ ".Expires"),
+                        Class.forName(getPackageName()+ ".CloseSequenceResponseElement")    ,
+                        Class.forName(getPackageName()+ ".CloseSequenceElement")
+
+
+                };
+                classList = new ArrayList<Class>(Arrays.asList(classes));
+                classList.add( RMConstants.W3C.getAcksToClass());
+
+                return classList;
+            } catch (ClassNotFoundException e) {
+                throw new RMException("Cannot bind the following class with JAXBContext" + e);
+            }
         }
 
     };
@@ -99,9 +158,6 @@ public enum RMVersion {
     }
 
 
-    public  String getLastMessageAction() {
-        return namespaceUri + "/LastMessage";
-    }
 
 
     public  String getCreateSequenceResponseAction() {
@@ -171,30 +227,7 @@ public enum RMVersion {
         }
     }
 
-      private  List<Class> getClassesToBeBound() throws RMException{
-        final Class[] classes;
-        final ArrayList<Class> classList;
-        try {
-            classes = new Class[]{
-                    Class.forName(getPackageName()+ ".AckRequestedElement"),
-                    Class.forName(getPackageName()+ ".SequenceElement"),
-                     Class.forName(getPackageName()+ ".SequenceAcknowledgementElement"),
-                    Class.forName(getPackageName()+ ".Identifier"),
-                    Class.forName(getPackageName()+ ".CreateSequenceElement"),
-                    Class.forName(getPackageName()+ ".CreateSequenceResponseElement"),
-                    Class.forName(getPackageName()+ ".SequenceFaultElement"),
-                    Class.forName(getPackageName()+ ".TerminateSequenceElement"),
-                    Class.forName(getPackageName()+ ".AcceptType"),
-                    Class.forName(getPackageName()+ ".OfferType"),
-                    Class.forName(getPackageName()+ ".Expires")
-            };
-            classList = new ArrayList<Class>(Arrays.asList(classes));
-            classList.add( RMConstants.W3C.getAcksToClass());
-            return classList;
-        } catch (ClassNotFoundException e) {
-            throw new RMException("Cannot bind the following class with JAXBContext" + e);
-        }
-    }
+
 
      private void init(){
         try {
@@ -289,7 +322,20 @@ public enum RMVersion {
         return namespaceUri +"/LastMessage";
     }
 
-    
+    public  String getCloseSequenceAction() {
+        return namespaceUri + "/CloseSequence";
+    }
+
+     public  String getCloseSequenceResponseAction() {
+        return namespaceUri + "/CloseSequenceResponse";
+    }
+
+     public  String getTerminateSequenceResponseAction() {
+        return namespaceUri + "/TerminateSequenceResponse";
+    }
+
+
+    public abstract List<Class> getClassesToBeBound() throws RMException;
    
     
 

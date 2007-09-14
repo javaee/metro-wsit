@@ -66,6 +66,9 @@ import com.sun.xml.ws.rm.jaxws.runtime.TubeBase;
 import com.sun.xml.ws.rm.jaxws.util.LoggingHelper;
 import com.sun.xml.ws.rm.protocol.*;
 import com.sun.xml.ws.rm.v200502.*;
+import com.sun.xml.ws.rm.v200702.CloseSequenceElement;
+import com.sun.xml.ws.rm.v200702.CloseSequenceResponseElement;
+import com.sun.xml.ws.rm.v200702.TerminateSequenceResponseElement;
 import com.sun.xml.ws.runtime.util.Session;
 import com.sun.xml.ws.runtime.util.SessionManager;
 import com.sun.xml.ws.security.SecurityContextToken;
@@ -774,7 +777,7 @@ public class RMServerTube extends TubeBase<RMDestination,
     public Packet handleTerminateSequenceAction(Packet packet)
     throws RMException {
 
-        TerminateSequenceElement tsElement ;
+        AbstractTerminateSequence tsElement ;
         Message message = packet.getMessage();
 
         try {
@@ -783,8 +786,14 @@ public class RMServerTube extends TubeBase<RMDestination,
             logger.severe(com.sun.xml.ws.rm.jaxws.runtime.server.Messages.TERMINATE_SEQUENCE_EXCEPTION.format() + e);
             throw new TerminateSequenceException(com.sun.xml.ws.rm.jaxws.runtime.server.Messages.TERMINATE_SEQUENCE_EXCEPTION.format() + e);
         }
+        String id ;
+        if (tsElement instanceof com.sun.xml.ws.rm.v200502.TerminateSequenceElement){
+           id = ((com.sun.xml.ws.rm.v200502.TerminateSequenceElement)tsElement).getIdentifier().getValue();
+        }   else {
+           id = ((com.sun.xml.ws.rm.v200702.TerminateSequenceElement)tsElement).getIdentifier().getValue(); 
+        }
 
-        String id = tsElement.getIdentifier().getValue();
+
         ServerInboundSequence seq = provider.getInboundSequence(id);
         if (seq == null) {
             logger.severe(String.format(Constants.UNKNOWN_SEQUENCE_TEXT + id));
@@ -802,34 +811,60 @@ public class RMServerTube extends TubeBase<RMDestination,
         Packet ret ;
         OutboundSequence outboundSequence = seq.getOutboundSequence();
 
+        Message response = null;
+        String tsAction = null;
         //If there is an "real" outbound sequence, client expects us to terminate it.
-        if (outboundSequence.saveMessages) {
-            TerminateSequenceElement terminateSeqResponse = new TerminateSequenceElement();
-            Identifier id2 = new Identifier();
-            id2.setValue(outboundSequence.getId());
+        switch (config.getRMVersion()) {
+            case WSRM10: {
 
-            terminateSeqResponse.setIdentifier(id2);
-            Message response = com.sun.xml.ws.api.message.Messages.create(config.getRMVersion().getJAXBContext(),
-                    terminateSeqResponse,
-                    config.getSoapVersion());
+                tsAction =  RMVersion.WSRM10.getTerminateSequenceAction();
+                if (outboundSequence.saveMessages) {
+                    TerminateSequenceElement terminateSeqResponse = new TerminateSequenceElement();
+                    Identifier id2 = new Identifier();
+                    id2.setValue(outboundSequence.getId());
+
+                    terminateSeqResponse.setIdentifier(id2);
+                    response = com.sun.xml.ws.api.message.Messages.create(config.getRMVersion().getJAXBContext(),
+                            terminateSeqResponse,
+                            config.getSoapVersion());
+
+                }else {
+
+                    packet.transportBackChannel.close();
+                    ret = new Packet(null);
+                }
+                break;
+            }
+            case WSRM11:{
+                tsAction =  RMVersion.WSRM11.getTerminateSequenceResponseAction();
+                TerminateSequenceResponseElement terminateSeqResponse = new TerminateSequenceResponseElement();
+                com.sun.xml.ws.rm.v200702.Identifier id2 = new com.sun.xml.ws.rm.v200702.Identifier();
+                id2.setValue(outboundSequence.getId());
+
+                terminateSeqResponse.setIdentifier(id2);
+                response = com.sun.xml.ws.api.message.Messages.create(config.getRMVersion().getJAXBContext(),
+                        terminateSeqResponse,
+                        config.getSoapVersion());
+                response.assertOneWay(false);
+                break;
+            }
+
+    }
+
+
 
             //ret = packet.createServerResponse(response, wsdlModel, binding);
              ret = packet.createServerResponse(response,
                     constants.getAddressingVersion(),
-                    config.getSoapVersion(), config.getRMVersion().getTerminateSequenceAction());
+                    config.getSoapVersion(), tsAction);
              
-            AbstractSequenceAcknowledgement element = seq.generateSequenceAcknowledgement(null, marshaller);
-            //Header header = Headers.create(config.getSoapVersion(),marshaller,element);
-            //Header actionHeader = Headers.create(constants.getAddressingVersion().actionTag,
-            //                                       Constants.TERMINATE_SEQUENCE_ACTION);
+            AbstractSequenceAcknowledgement element = seq.generateSequenceAcknowledgement(null, marshaller,false);
+
             Header header = createHeader(element);
             response.getHeaders().add(header);
-            //response.getHeaders().add(actionHeader);
 
-        } else {
-            packet.transportBackChannel.close();
-            ret = new Packet(null);
-        }
+
+
 
         return ret;
 
@@ -866,6 +901,59 @@ public class RMServerTube extends TubeBase<RMDestination,
             throw new RMException(Messages.LAST_MESSAGE_EXCEPTION.format() +e);
         }
     }
+
+    public Packet handleCloseSequenceAction(Packet inbound) throws RMException {
+
+
+        CloseSequenceElement csElement;
+
+        String id = null;
+        Message message = inbound.getMessage();
+
+
+        try {
+            csElement = message.readPayloadAsJAXB(unmarshaller);
+        } catch (JAXBException e) {
+
+            throw new RMException(com.sun.xml.ws.rm.jaxws.runtime.server.Messages.CLOSESEQUENCE_HEADER_PROBLEM.format() + e);
+        }
+        id = csElement.getIdentifier().getValue();
+        ServerInboundSequence seq = provider.getInboundSequence(id);
+        if (seq == null) {
+            logger.severe(String.format(Constants.UNKNOWN_SEQUENCE_TEXT,id +id));
+            throw new InvalidSequenceException(String.format(Constants.UNKNOWN_SEQUENCE_TEXT,id),id);
+        }
+
+
+        int lastMessageNumber = csElement.getLastMsgNumber();
+
+
+
+        CloseSequenceResponseElement csrElement = new com.sun.xml.ws.rm.v200702.CloseSequenceResponseElement();
+        com.sun.xml.ws.rm.v200702.Identifier identifier = new com.sun.xml.ws.rm.v200702.Identifier();
+        identifier.setValue(seq.getId());
+        csrElement.setIdentifier(identifier);
+
+         Message response = com.sun.xml.ws.api.message.Messages.create(config.getRMVersion().getJAXBContext(),
+                            csrElement,
+                            config.getSoapVersion());
+
+        message.assertOneWay(false);
+
+        Packet returnPacket = inbound.createServerResponse(response,
+                    constants.getAddressingVersion(),
+                    config.getSoapVersion(), config.getRMVersion().getCloseSequenceResponseAction());
+
+        //Generate SequenceAcknowledgmenet with Final element
+        AbstractSequenceAcknowledgement element = seq.generateSequenceAcknowledgement(null, marshaller,true);
+        Header header = createHeader(element);
+        response.getHeaders().add(header);
+
+      
+        return returnPacket;
+
+    }
+
 
     public Packet handleAckRequestedAction(Packet inbound) throws RMException {
 
@@ -978,11 +1066,19 @@ public class RMServerTube extends TubeBase<RMDestination,
             }
         });
 
-        actionMap.put(config.getRMVersion().getLastMessageAction(),
+        actionMap.put(config.getRMVersion().getLastAction(),
                 new ActionHandler() {
             public Packet process(RMServerTube tube, Packet packet)
             throws RMException {
                 return tube.handleLastMessageAction(packet);
+            }
+        });
+
+        actionMap.put(RMVersion.WSRM11.getCloseSequenceAction(),
+                new ActionHandler() {
+            public Packet process(RMServerTube tube, Packet packet)
+            throws RMException {
+                return tube.handleCloseSequenceAction(packet);
             }
         });
 
@@ -1085,6 +1181,7 @@ public class RMServerTube extends TubeBase<RMDestination,
      *        to build a response.
      * @param seq The specified InboundSequence
      * @param action If null, add as value of wsa:Action
+     * @param isFinal Required when the version is RM 1.1 the SequenceAcknowledgement element should have a 
      * @throws RMException
      */
     private Packet generateAckMessage(Packet inbound, ServerInboundSequence seq, String action)
@@ -1097,7 +1194,7 @@ public class RMServerTube extends TubeBase<RMDestination,
         outbound.invocationProperties.putAll(inbound.invocationProperties);
 
         //construct the SequenceAcknowledgement header and  add it to thge message.
-        AbstractSequenceAcknowledgement element = seq.generateSequenceAcknowledgement(null, marshaller);
+        AbstractSequenceAcknowledgement element = seq.generateSequenceAcknowledgement(null, marshaller,false);
         //Header header = Headers.create(config.getSoapVersion(),marshaller,element);
         Header header = createHeader(element);
         message.getHeaders().add(header);
@@ -1109,6 +1206,8 @@ public class RMServerTube extends TubeBase<RMDestination,
 
         return outbound;
     }
+
+
 
     private SOAPFault newMessageNumberRolloverFault(MessageNumberRolloverException e) throws RMException {
         QName subcode = config.getRMVersion().getMessageNumberRolloverQname();
