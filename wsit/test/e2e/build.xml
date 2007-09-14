@@ -37,7 +37,7 @@
 -->
 
 <!--
- $Id: build.xml,v 1.32 2007-09-14 14:44:29 m_potociar Exp $
+ $Id: build.xml,v 1.33 2007-09-14 15:29:28 m_potociar Exp $
 
  Copyright (c) 2005 Sun Microsystems, Inc.
  All rights reserved.
@@ -72,6 +72,11 @@
         <property name="wsit.sources" value="${basedir}/wsit-image/webservices-src.zip"/>
     </target>
 
+    <target name="setup-emma-local" description="internal: overrides local setup for emma">
+        <property name="wsit.image" value="${wsit.dir}/dist/image/jax-ws-latest-wsit"/>
+        <property name="wsit.sources" value="${wsit.dir}/rt/src"/>
+    </target>
+
     <!--target name="emma_report" description="just creates a report from metadata files" >
         <emma>
             <report sourcepath="${wsit.sources}" >
@@ -93,11 +98,7 @@
         <mkdir dir="${logs.dir}"/>
     </target>
         
-    <target name="get-wsit-hudson" description="internal: retrieve last successful build of WSIT from hudson" unless="noget">
-        <!-- BEGIN: Emma code coverage specific stuff -->
-        <antcall target="setup-emma-remote" />
-        <!-- END: Emma code coverage specific stuff -->
-        
+    <target name="get-wsit-hudson" description="internal: retrieve last successful build of WSIT from hudson" unless="noget">        
         <mkdir dir="wsit-image"/>
         <mkdir dir="wsit-image/runtime"/>
         
@@ -114,10 +115,6 @@
     </target>
     
     <target name="get-wsit-bleedingedge-hudson" description="internal: retrieve last successful build of WSIT from hudson" unless="noget">
-        <!-- BEGIN: Emma code coverage specific stuff -->
-        <antcall target="setup-emma-remote" />
-        <!-- END: Emma code coverage specific stuff -->
-
         <mkdir dir="wsit-image"/>
         <mkdir dir="wsit-image/runtime"/>
         
@@ -256,7 +253,7 @@
     
     <target name="main-hudson"
             description="Invoke unit test from Hudson. This downloads WSIT from Hudson, as opposed to test the local one"
-            depends="get-wsit-hudson">
+            depends="setup-emma-remote, get-wsit-hudson">
         
         <run-tests>
             <arguments>
@@ -272,7 +269,7 @@
     
     <target name="main-bleedingedge-hudson"
             description="Invoke unit test from Hudson. This downloads WSIT (wsit-javanet-bleedingedge) from Hudson, as opposed to test the local one"
-            depends="get-wsit-bleedingedge-hudson">
+            depends="setup-emma-remote, get-wsit-bleedingedge-hudson">
         
         <run-tests>
             <arguments>
@@ -287,7 +284,8 @@
     </target>
     
     <target name="main"
-            description="Runs unit test on the entire workspace">
+            description="Runs unit test on the entire workspace"
+            depends="setup-emma-local">
         
         <run-tests>
             <arguments>
