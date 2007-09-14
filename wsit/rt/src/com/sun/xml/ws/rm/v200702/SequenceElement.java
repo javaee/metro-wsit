@@ -9,6 +9,7 @@
 package com.sun.xml.ws.rm.v200702;
 
 import com.sun.xml.ws.rm.protocol.AbstractSequence;
+import com.sun.xml.ws.rm.protocol.Messages;
 
 import org.w3c.dom.Element;
 
@@ -168,27 +169,10 @@ public class SequenceElement  extends AbstractSequence {
         return getIdentifier().getValue();
     }
 
-    /**
-     * Mutator for the Last property that maps to the LastMessage property in the
-     * underlying JAXB class
-     *
-     * @param last The value of the property.
-     */
-    public  void setLast(boolean  last) {
-        //TODO implement this for now
-        throw new UnsupportedOperationException("Need to fix setLast method of Sequence");
-    };
+    
 
 
-    /**
-     * Accessor for the Last property that maps to the LastMessage property in the
-     * underlying JAXB class
-     *
-     * @return The value of the property.
-     */
-    public  boolean getLast() {
-        throw new UnsupportedOperationException("Need to fix setLast method of Sequence");
-    }
+
 
     /**
      * Accessor for the Number property which maps to the MessageNumber property in
@@ -199,5 +183,14 @@ public class SequenceElement  extends AbstractSequence {
     public int getNumber() {
         return getMessageNumber();
     }
+
+    public String toString() {
+
+           return Messages.SEQUENCE_TOSTRING_STRING
+                   .format(getId(),
+                           getNumber()
+                           );
+            }
+
 
 }

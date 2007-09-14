@@ -45,7 +45,7 @@
 package com.sun.xml.ws.rm.v200502;
 
 
-import com.sun.xml.ws.rm.protocol.AbstractSequence;
+import com.sun.xml.ws.rm.protocol.*;
 
 import javax.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
@@ -253,5 +253,13 @@ public class SequenceElement extends AbstractSequence {
     public static class LastMessage {
     }
 
+    public String toString() {
+
+           return com.sun.xml.ws.rm.protocol.Messages.SEQUENCE_TOSTRING_STRING
+                   .format(getId(),
+                           getNumber(),
+                           getLast() ? "true" : "false");
+            }
+    
 }
 

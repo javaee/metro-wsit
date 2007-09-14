@@ -56,23 +56,9 @@ public abstract class AbstractSequence {
         return getMessageNumber();
     }
 
-    /**
-     * Mutator for the Last property that maps to the LastMessage property in the
-     * underlying JAXB class
-     *
-     * @param last The value of the property.
-     */
-    public abstract void setLast(boolean  last);
+   
 
-
-    /**
-     * Accessor for the Last property that maps to the LastMessage property in the
-     * underlying JAXB class
-     *
-     * @return The value of the property.
-     */
-    protected abstract boolean getLast();
-
+   
 
     /**
      * Gets the value of the messageNumber property.
@@ -111,13 +97,6 @@ public abstract class AbstractSequence {
     public abstract Map<QName, String> getOtherAttributes() ;
 
 
-    public String toString() {
-
-        return Messages.SEQUENCE_TOSTRING_STRING
-                .format(getId(),
-                        getNumber(),
-                        getLast() ? "true" : "false");
-         }
-
+   
    
 }
