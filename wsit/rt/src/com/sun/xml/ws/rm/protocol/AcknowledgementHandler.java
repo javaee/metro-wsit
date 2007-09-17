@@ -157,12 +157,7 @@ public class AcknowledgementHandler {
                             int lower = range.getLower().intValue();
                             int upper = range.getUpper().intValue();
 
-                            //if a SequenceHeader with Last elemet has been sent, we may
-                            //receive acks for that "Message" although one was never stored
-                            //at the index.
-                            if (sequence.isLast() && upper == sequence.getNextIndex()) {
-                                upper--;
-                            }
+                            
 
                             for (int i = lower; i <= upper; i++) {
                                 acknowledgeIfValid(sequence, i);

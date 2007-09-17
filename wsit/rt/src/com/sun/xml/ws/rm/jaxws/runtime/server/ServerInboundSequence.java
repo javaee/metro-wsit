@@ -45,24 +45,21 @@
 package com.sun.xml.ws.rm.jaxws.runtime.server;
 
 
-import com.sun.mail.imap.protocol.MessageSet;
-import com.sun.xml.ws.rm.BufferFullException;
-import com.sun.xml.ws.rm.DuplicateMessageException;
+import com.sun.xml.ws.api.rm.SequenceSettings;
+import com.sun.xml.ws.api.rm.server.ServerSequence;
 import com.sun.xml.ws.rm.InvalidMessageNumberException;
 import com.sun.xml.ws.rm.Message;
 import com.sun.xml.ws.rm.RMException;
 import com.sun.xml.ws.rm.jaxws.runtime.InboundSequence;
-import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
 import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
+import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
+import com.sun.xml.ws.rm.jaxws.util.LoggingHelper;
+import com.sun.xml.ws.runtime.util.Session;
 
 import java.net.URI;
 import java.util.UUID;
-import com.sun.xml.ws.runtime.util.Session;
-import com.sun.xml.ws.api.rm.server.ServerSequence;
-import com.sun.xml.ws.api.rm.SequenceSettings;
-import java.util.logging.Logger;
 import java.util.logging.Level;
-import com.sun.xml.ws.rm.jaxws.util.LoggingHelper;
+import java.util.logging.Logger;
 
 /**
  * An <code>ServerInboundSequence</code> represents a sequence of incoming messages.  For an 

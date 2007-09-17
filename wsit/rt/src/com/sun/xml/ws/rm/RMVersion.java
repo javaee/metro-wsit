@@ -285,6 +285,10 @@ public enum RMVersion {
         return new QName(namespaceUri,"UnknownSequence");
     }
 
+    public QName getClosedSequenceQname() {
+        return new QName(namespaceUri,"SequenceClosed");
+    }
+
     public  QName getCreateSequenceRefusedQname() {
         return new QName(namespaceUri,"CreateSequenceRefused");
     }

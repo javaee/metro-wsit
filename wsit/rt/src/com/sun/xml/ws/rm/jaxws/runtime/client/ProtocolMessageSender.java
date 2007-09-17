@@ -439,7 +439,7 @@ public class ProtocolMessageSender {
                                    assigned by addAddressingHeaders for use in
                                    correlating non-anonymous acksTo response*/
 
-
+        seq.setClosed();
 
         Packet responsePacket = helper.process(requestPacket);
 

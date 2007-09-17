@@ -216,6 +216,8 @@ public class RMServerTube extends TubeBase<RMDestination,
                 soapFault = newMessageNumberRolloverFault(e);
             } catch (InvalidSequenceException e){
                 soapFault = newUnknownSequenceFault(e);
+            } catch (CloseSequenceException e){
+                soapFault = newClosedSequenceFault(e);
             }
             
             Packet retPacket = null;
@@ -808,7 +810,7 @@ public class RMServerTube extends TubeBase<RMDestination,
         provider.terminateSequence(id);
 
         //formulate response if required
-        Packet ret ;
+        Packet ret = null;
         OutboundSequence outboundSequence = seq.getOutboundSequence();
 
         Message response = null;
@@ -827,6 +829,14 @@ public class RMServerTube extends TubeBase<RMDestination,
                     response = com.sun.xml.ws.api.message.Messages.create(config.getRMVersion().getJAXBContext(),
                             terminateSeqResponse,
                             config.getSoapVersion());
+                    ret = packet.createServerResponse(response,
+                            constants.getAddressingVersion(),
+                            config.getSoapVersion(), tsAction);
+
+                    AbstractSequenceAcknowledgement element = seq.generateSequenceAcknowledgement(null, marshaller,false);
+
+                    Header header = createHeader(element);
+                    response.getHeaders().add(header);
 
                 }else {
 
@@ -846,22 +856,19 @@ public class RMServerTube extends TubeBase<RMDestination,
                         terminateSeqResponse,
                         config.getSoapVersion());
                 response.assertOneWay(false);
+                ret = packet.createServerResponse(response,
+                        constants.getAddressingVersion(),
+                        config.getSoapVersion(), tsAction);
+
+                AbstractSequenceAcknowledgement element = seq.generateSequenceAcknowledgement(null, marshaller,false);
+
+                Header header = createHeader(element);
+                response.getHeaders().add(header);
                 break;
             }
 
     }
 
-
-
-            //ret = packet.createServerResponse(response, wsdlModel, binding);
-             ret = packet.createServerResponse(response,
-                    constants.getAddressingVersion(),
-                    config.getSoapVersion(), tsAction);
-             
-            AbstractSequenceAcknowledgement element = seq.generateSequenceAcknowledgement(null, marshaller,false);
-
-            Header header = createHeader(element);
-            response.getHeaders().add(header);
 
 
 
@@ -1264,6 +1271,35 @@ public class RMServerTube extends TubeBase<RMDestination,
             throw new RMException(se);
         }
     }
+
+    private SOAPFault newClosedSequenceFault(CloseSequenceException e) throws RMException {
+            QName subcode = config.getRMVersion().getClosedSequenceQname();
+            String faultstring = String.format(Constants.SEQUENCE_CLOSED_TEXT,e.getSequenceId());
+
+            try {
+                SOAPFactory factory;
+                SOAPFault fault;
+                if (binding.getSOAPVersion() == SOAPVersion.SOAP_12) {
+                    factory = SOAPVersion.SOAP_12.saajSoapFactory;
+                    fault = factory.createFault();
+                    fault.setFaultCode(Constants.SOAP12_SENDER_QNAME);
+                    fault.appendFaultSubcode(subcode);
+                    // not sure what more to put in detail element
+
+                } else {
+                    factory = SOAPVersion.SOAP_11.saajSoapFactory;
+                    fault = factory.createFault();
+                    fault.setFaultCode(subcode);
+                }
+
+                fault.setFaultString(faultstring);
+
+                return fault;
+            } catch (SOAPException se) {
+                throw new RMException(se);
+            }
+        }
+
 
     private SOAPFault newSequenceTerminatedFault(TerminateSequenceException e) throws RMException {
         QName subcode = config.getRMVersion().getSequenceTerminatedQname();
