@@ -56,6 +56,7 @@ import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.*;
+import com.sun.xml.ws.client.ClientTransportException;
 import com.sun.xml.ws.rm.Constants;
 import com.sun.xml.ws.rm.MessageSender;
 import com.sun.xml.ws.rm.RMException;
@@ -617,13 +618,14 @@ public class RMClientTube
         private  com.sun.xml.ws.rm.Message message;
 
         public Throwable throwable;
+        private boolean sent;
         
         
         public TubelineHelper(Packet packet, com.sun.xml.ws.rm.Message message) {
             
             this.message = message;
             this.packet = packet;
-           
+            this.sent = false;
             
             parentFiber = Fiber.current();
             if (parentFiber == null) {
@@ -647,13 +649,11 @@ public class RMClientTube
                 throw new IllegalStateException("Request not set in TubelineHelper");
             }
             
-           //TODO - Figure out whether it is necessary to copy
-           //fiber and/or next here.
-            //use a copy of the original message
+           //use a copy of the original message
            com.sun.xml.ws.api.message.Message copy = message.getCopy();
            packet.setMessage(copy);
            fiber.start(TubeCloner.clone(next) , packet, callback);
-           
+         
         }
 
         private class TubelineHelperCallback implements Fiber.CompletionCallback {
@@ -732,7 +732,16 @@ public class RMClientTube
                 throwable = t;
                 
                 try {
-                    if (t instanceof WebServiceException) {
+                    if (t instanceof ClientTransportException) {
+                        //resend in this case
+                        if (logger.isLoggable(Level.FINE)) {
+                            logger.log(Level.FINE,
+                                        //WSRM2000: Sending message caused {0}. Queuing for resend.
+                                        Messages.QUEUE_FOR_RESEND.format(t.toString()));
+                        }
+			return;
+                        
+                    } else if (t instanceof WebServiceException) {
 
                         //Unwrap exception and see if it makes sense to retry this
                         //request.
@@ -759,7 +768,7 @@ public class RMClientTube
                                      //WSRM2003: Unexpected exception  wrapped in WSException.//
                                        Messages.UNEXPECTED_WRAPPED_EXCEPTION.format(), t);
                             completeFaultedMessage(message);
-           
+          		    //TODO - need to propogate exception back to client here 
                             parentFiber.resume(null);
                         } 
                     } else  {
@@ -768,7 +777,8 @@ public class RMClientTube
                         logger.log(Level.SEVERE, 
                                    //  WSRM2001: Unexpected exception in trySend.//
                                    Messages.UNEXPECTED_TRY_SEND_EXCEPTION.format(), t);
-                       
+                      
+			 //TODO - need to propogate exception back to client 
                          parentFiber.resume(null);
                     }
                 } finally {

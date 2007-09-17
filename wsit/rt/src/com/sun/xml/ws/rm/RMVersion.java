@@ -168,6 +168,10 @@ public enum RMVersion {
         return namespaceUri + "/SequenceAcknowledgement";
     }
     
+    public String getMakeConnectionAction() {
+        return namespaceUri + "/MakeConnection";
+    }
+    
     public QName getRMPolicyAssertionQName() {
         return new QName(getPolicyNamespaceURI(), "RMAssertion");
     }

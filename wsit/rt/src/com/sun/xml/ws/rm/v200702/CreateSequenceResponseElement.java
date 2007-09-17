@@ -65,6 +65,10 @@ public class CreateSequenceResponseElement  extends AbstractCreateSequenceRespon
     protected List<Object> any;
     @XmlAnyAttribute
     private Map<QName, String> otherAttributes = new HashMap<QName, String>();
+    
+    public CreateSequenceResponseElement() {
+        incompleteSequenceBehavior = IncompleteSequenceBehaviorType.DISCARD_FOLLOWING_FIRST_GAP;
+    }
 
     /**
      * Gets the value of the identifier property.

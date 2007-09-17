@@ -66,6 +66,7 @@ import com.sun.xml.ws.rm.jaxws.runtime.TubeBase;
 import com.sun.xml.ws.rm.jaxws.util.LoggingHelper;
 import com.sun.xml.ws.rm.protocol.*;
 import com.sun.xml.ws.rm.v200502.*;
+import com.sun.xml.ws.rm.v200702.MakeConnectionElement;
 import com.sun.xml.ws.rm.v200702.CloseSequenceElement;
 import com.sun.xml.ws.rm.v200702.CloseSequenceResponseElement;
 import com.sun.xml.ws.rm.v200702.TerminateSequenceResponseElement;
@@ -1035,6 +1036,49 @@ public class RMServerTube extends TubeBase<RMDestination,
             throw new RMException(Messages.SEQ_ACKNOWLEDGEMENT_EXCEPTION.format() +e);
         }
     }
+    
+    
+    public Packet handleMakeConnectionAction(Packet packet) throws RMException {
+        
+        if (version == RMVersion.WSRM10) {
+            logger.severe("Unsupported MakeConnection message to WS-RM 1.0 Endpoint.");
+            throw new RMException("Unsupported MakeConnection message to WS-RM 1.0 Endpoint.");
+        }
+        
+        MakeConnectionElement element = null;
+        String sequenceId = null;
+        Message message = packet.getMessage();
+
+
+        try {
+            element = message.readPayloadAsJAXB(unmarshaller);
+        } catch (JAXBException e) {
+            logger.severe("Invalid MakeConnection message.");
+            throw new RMException("Invalid MakeConnection message.");
+        }
+        
+        sequenceId = element.getIdentifier().getValue();
+        OutboundSequence outboundSequence = provider.getOutboundSequence(sequenceId);
+        
+        if (outboundSequence == null) {
+            logger.severe("Invalid sequence id " + sequenceId + " in MakeConnection message.");
+            throw new RMException("Invalid sequence id " + sequenceId + " in MakeConnection message.");
+        }
+        
+        //see if we can find a message in the sequence that needs to be resent.
+        com.sun.xml.ws.rm.Message mess = outboundSequence.getUnacknowledgedMessage();
+        Message jaxwsMessage = null;
+        if (mess != null) {
+            jaxwsMessage = mess.getCopy();
+        } else {
+            jaxwsMessage = com.sun.xml.ws.api.message.Messages.createEmpty(config.getSoapVersion());
+        }
+        
+        Packet ret = new Packet();
+        ret.setMessage(jaxwsMessage);
+        ret.invocationProperties.putAll(packet.invocationProperties);
+        return ret;
+    }
 
     
     /***********************************************************************************/
@@ -1096,6 +1140,14 @@ public class RMServerTube extends TubeBase<RMDestination,
             public Packet process(RMServerTube tube, Packet packet)
             throws RMException {
                 return tube.handleSequenceAcknowledgementAction(packet);
+            }
+        });
+        
+        actionMap.put(config.getRMVersion().getMakeConnectionAction(),
+                new ActionHandler() {
+            public Packet process(RMServerTube tube, Packet packet)
+            throws RMException {
+                return tube.handleMakeConnectionAction(packet);
             }
         });
 

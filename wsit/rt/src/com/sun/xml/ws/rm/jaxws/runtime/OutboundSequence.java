@@ -423,5 +423,17 @@ public abstract class OutboundSequence extends Sequence  {
                 obj);
     }
     
+    public Message getUnacknowledgedMessage() {
+        for (int i = 0; i < nextIndex; i++) {
+            try {
+                Message mess = get(i);
+                if (mess != null && !mess.isComplete()) {
+                    return mess;
+                }
+            } catch (InvalidMessageNumberException e) {}
+        }
+        return null;
+    }
+    
   	
 }

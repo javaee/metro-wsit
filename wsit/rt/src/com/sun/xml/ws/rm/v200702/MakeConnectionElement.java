@@ -41,6 +41,7 @@ import java.util.Map;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "MakeConnectionType", namespace = "http://docs.oasis-open.org/ws-rx/wsmc/200702", propOrder = {
     "address",
+    "identifier",
     "any"
 })
 @XmlRootElement(name = "MakeConnection" ,namespace="http://docs.oasis-open.org/ws-rx/wsmc/200702")
@@ -48,6 +49,8 @@ public class MakeConnectionElement {
 
     @XmlElement(name = "Address",namespace="http://docs.oasis-open.org/ws-rx/wsmc/200702")
     protected Address address;
+    @XmlElement(name = "Identifier",namespace="http://docs.oasis-open.org/ws-rx/wsmc/200702")
+    protected Identifier identifier;
     @XmlAnyElement(lax = true)
     protected List<Object> any;
     @XmlAnyAttribute
@@ -76,7 +79,16 @@ public class MakeConnectionElement {
     public void setAddress(Address value) {
         this.address = value;
     }
-
+    
+    
+    public Identifier getIdentifier() {
+        return identifier;
+    }
+    
+    public void setIdentifier(Identifier id) {
+        this.identifier = id;
+    }
+    
     /**
      * Gets the value of the any property.
      * 
@@ -124,5 +136,7 @@ public class MakeConnectionElement {
     public Map<QName, String> getOtherAttributes() {
         return otherAttributes;
     }
-
+    
+    
+    
 }
