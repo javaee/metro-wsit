@@ -164,7 +164,28 @@ public class ServerInboundSequence extends InboundSequence
             }
         } catch (InvalidMessageNumberException e) {}
     }
+     *
     */
+    
+    
+    public boolean isDeliverable(Message message) {
+          if (!config.ordered) {
+             return true;
+         }
+          
+         try {
+            int num = message.getMessageNumber();
+       
+            //if immediate predecessor has not been processed, wait fcor it
+            if (num > 1) {
+                Message mess = get(num - 1);
+                if (mess == null || !mess.isComplete()) {
+                    return false;
+                }
+            }
+        } catch (Exception e) {}
+        return true;
+    }
     /**
      * Used to re-populate a sequence with persisted messages
      * after a restart.  Do not use for other purposes.

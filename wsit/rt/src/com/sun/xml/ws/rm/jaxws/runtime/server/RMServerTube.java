@@ -310,7 +310,14 @@ public class RMServerTube extends TubeBase<RMDestination,
              
                            
                 message.setMessageSender(sender);
-                sender.send();
+                
+                //send message down tubeline if predecesor has arrived.  Otherwise. 
+                //it will have to wait until releaseNextMessage is called during the
+                //processing of the predecessor in processResponse.
+                if (inboundSequence.isDeliverable(message)) {
+                    sender.send();
+                }
+                
                 return doSuspend();
            
             }
