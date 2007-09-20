@@ -1,2 +1,3 @@
 com.sun.xml.ws.encoding.policy.MtomMapUpdateProvider
 com.sun.xml.ws.tx.common.TxMapUpdateProvider
+com.sun.xml.ws.addressing.policy.AddressingMapUpdateProvider
