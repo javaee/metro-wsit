@@ -37,8 +37,8 @@
 
 package com.sun.xml.ws.rm.v200502;
 
+import com.sun.xml.ws.rm.protocol.AbstractTerminateSequence;
 import org.w3c.dom.Element;
-
 
 import javax.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
@@ -46,7 +46,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 
 
 /**
@@ -75,7 +74,7 @@ import java.util.Map;
     "any"
 })
 @XmlRootElement(name="TerminateSequence",namespace="http://schemas.xmlsoap.org/ws/2005/02/rm")
-public class TerminateSequenceElement {
+public class TerminateSequenceElement extends AbstractTerminateSequence {
 
     @XmlElement(name = "Identifier", namespace = "http://schemas.xmlsoap.org/ws/2005/02/rm")
     protected Identifier identifier;

@@ -56,12 +56,14 @@ import com.sun.xml.ws.rm.*;
 import com.sun.xml.ws.rm.jaxws.runtime.InboundMessageProcessor;
 import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
+import com.sun.xml.ws.rm.protocol.AbstractAckRequested;
 import com.sun.xml.ws.rm.protocol.AbstractCreateSequence;
 import com.sun.xml.ws.rm.protocol.AbstractCreateSequenceResponse;
+import com.sun.xml.ws.rm.protocol.AbstractTerminateSequence;
 import com.sun.xml.ws.rm.v200502.AckRequestedElement;
-import com.sun.xml.ws.rm.v200502.CreateSequenceResponseElement;
 import com.sun.xml.ws.rm.v200502.SequenceElement;
-import com.sun.xml.ws.rm.v200502.TerminateSequenceElement;
+import com.sun.xml.ws.rm.v200702.CloseSequenceElement;
+import com.sun.xml.ws.rm.v200702.CloseSequenceResponseElement;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -210,7 +212,7 @@ public class ProtocolMessageSender {
         return csrElem;
     }
 
-    public void sendTerminateSequence(TerminateSequenceElement ts,
+    public void sendTerminateSequence(AbstractTerminateSequence ts,
                                       OutboundSequence seq,
                                       SOAPVersion version) throws RMException {
 
@@ -292,7 +294,7 @@ public class ProtocolMessageSender {
 
         try {
             Message request = createEmptyMessage(version);
-            AckRequestedElement el = createAckRequestedElement(seq);
+            AbstractAckRequested el = createAckRequestedElement(seq);
             //request.getHeaders().add(Headers.create(version,marshaller,el));
             request.getHeaders().add(createHeader(el));
 
@@ -363,13 +365,11 @@ public class ProtocolMessageSender {
 
 
     private AbstractCreateSequenceResponse unmarshallCreateSequenceResponse(Message response) throws RMException{
-        CreateSequenceResponseElement csrElement = null;
         try {
-            csrElement = response.readPayloadAsJAXB(unmarshaller);
+            return response.readPayloadAsJAXB(unmarshaller);
         } catch (JAXBException e) {
-            throw new RMException (e);
+            throw new RMException(e);
         }
-        return csrElement;
     }
 
 
@@ -392,11 +392,17 @@ public class ProtocolMessageSender {
      * highest <MessageNumber> sent within a Sequence
      * sequence.
      */
-    private AckRequestedElement createAckRequestedElement(OutboundSequence seq
+    private AbstractAckRequested createAckRequestedElement(OutboundSequence seq
                                                           ) {
-        AckRequestedElement ackRequestedElement = new AckRequestedElement();
-        ackRequestedElement.setId(seq.getId());
-        ackRequestedElement.setMaxMessageNumber(seq.getNextIndex()-1);
+        AbstractAckRequested ackRequestedElement = null;
+        if (config.getRMVersion() == RMVersion.WSRM10)     {
+            ackRequestedElement = new AckRequestedElement();
+            ackRequestedElement.setId(seq.getId());
+        }  else {
+            ackRequestedElement = new com.sun.xml.ws.rm.v200702.AckRequestedElement();
+            ackRequestedElement.setId(seq.getId());
+        }
+
         return ackRequestedElement;
     }
 
@@ -408,5 +414,56 @@ public class ProtocolMessageSender {
         return com.sun.xml.ws.api.message.Headers.create(config.getRMVersion().getJAXBRIContextHeaders(), obj);
     }
 
-    
+    public void sendCloseSequence(OutboundSequence seq, SOAPVersion version) throws RMException{
+
+
+        Message request = null;
+
+        CloseSequenceElement cs = new CloseSequenceElement();
+        com.sun.xml.ws.rm.v200702.Identifier idClose  = new com.sun.xml.ws.rm.v200702.Identifier();
+        idClose.setValue(seq.getId());
+
+        cs.setIdentifier(idClose);
+        cs.setLastMsgNumber(seq.getNextIndex()-1);
+
+        request = Messages.create(config.getRMVersion().getJAXBContext(),cs,version);
+        Packet requestPacket = new Packet(request);
+        requestPacket.proxy = packet.proxy;
+        requestPacket.contentNegotiation = packet.contentNegotiation;
+        requestPacket.setEndPointAddressString(seq.getDestination().toString());
+
+        addAddressingHeaders (requestPacket, RMVersion.WSRM11.getCloseSequenceAction(),
+                seq.getDestination() , null, false);
+
+        String messageId = null ;/*= ADDRESSING_FIXME - initialize with mesageID
+                                   assigned by addAddressingHeaders for use in
+                                   correlating non-anonymous acksTo response*/
+
+        seq.setClosed();
+
+        Packet responsePacket = helper.process(requestPacket);
+
+
+        Message response = responsePacket.getMessage();
+        if (response.isFault()){
+            throw new CloseSequenceException("CloseSequence was refused by the RMDestination \n ",response);
+        }
+
+        //unmarshall CloseSequenceResponse object from body of response.
+
+
+        CloseSequenceResponseElement csrElem = unmarshallCloseSequenceResponse(response);
+
+
+    }
+
+    private CloseSequenceResponseElement unmarshallCloseSequenceResponse(Message response) throws RMException {
+       try {
+            return response.readPayloadAsJAXB(unmarshaller);
+        } catch (JAXBException e) {
+            throw new RMException(e);
+        }
+    }
+
+
 }

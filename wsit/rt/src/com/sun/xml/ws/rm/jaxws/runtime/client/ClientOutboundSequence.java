@@ -56,12 +56,8 @@ import com.sun.xml.ws.rm.jaxws.runtime.InboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
 import com.sun.xml.ws.rm.jaxws.util.LoggingHelper;
-import com.sun.xml.ws.rm.protocol.AbstractAcceptType;
-import com.sun.xml.ws.rm.protocol.AbstractCreateSequence;
-import com.sun.xml.ws.rm.protocol.AbstractCreateSequenceResponse;
-import com.sun.xml.ws.rm.v200502.AcknowledgementHandler;
+import com.sun.xml.ws.rm.protocol.*;
 import com.sun.xml.ws.rm.v200502.Identifier;
-import com.sun.xml.ws.rm.v200502.TerminateSequenceElement;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
 
 import javax.xml.bind.JAXBElement;
@@ -397,10 +393,10 @@ public class ClientOutboundSequence extends OutboundSequence
 
                     inboundSequence = new ClientInboundSequence(this,
                             incomingID,
-                            uriAccept);
+                            uriAccept,config);
                 } else {
                     inboundSequence = new ClientInboundSequence(this,
-                            incomingID, null);
+                            incomingID, null,config);
                 }
                 
                 //start the inactivity clock
@@ -454,21 +450,38 @@ public class ClientOutboundSequence extends OutboundSequence
         //Glassfish container with ordered delivery configured.  This will
         //probably no longer be the case when the Tube/Fibre architecture
         //is used.
-        sendLast();
+        if (config.getRMVersion() == RMVersion.WSRM10)   {
+            sendLast();
+        }   else {
+            sendCloseSequence();
+        }
          
         //this will block until all messages are complete
         waitForAcks();
-                 
-        TerminateSequenceElement ts = new TerminateSequenceElement();
-        Identifier idTerminate = new Identifier();
-        idTerminate.setValue(id);
-        ts.setIdentifier(idTerminate);
+        AbstractTerminateSequence ts =null;
+        if (config.getRMVersion() == RMVersion.WSRM10)   {
+            ts = new com.sun.xml.ws.rm.v200502.TerminateSequenceElement();
+            com.sun.xml.ws.rm.v200502.Identifier idTerminate = new com.sun.xml.ws.rm.v200502.Identifier();
+            idTerminate.setValue(id);
+            ((com.sun.xml.ws.rm.v200502.TerminateSequenceElement)ts).setIdentifier(idTerminate);
+        }   else {
+            ts = new com.sun.xml.ws.rm.v200702.TerminateSequenceElement();
+            com.sun.xml.ws.rm.v200702.Identifier idTerminate = new com.sun.xml.ws.rm.v200702.Identifier();
+            idTerminate.setValue(id);
+            ((com.sun.xml.ws.rm.v200702.TerminateSequenceElement)ts).setIdentifier(idTerminate);
+
+        }
+
         protocolMessageSender.sendTerminateSequence(ts,this,version);
 
     }
 
     private void sendLast() throws RMException{
         protocolMessageSender.sendLast(this,version);
+    }
+
+    private void sendCloseSequence() throws RMException{
+        protocolMessageSender.sendCloseSequence(this,version);
     }
 
     /**

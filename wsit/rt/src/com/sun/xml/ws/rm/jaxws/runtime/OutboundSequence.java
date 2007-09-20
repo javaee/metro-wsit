@@ -43,14 +43,16 @@
  */
 
 package com.sun.xml.ws.rm.jaxws.runtime;
+
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Headers;
 import com.sun.xml.ws.rm.*;
 import com.sun.xml.ws.rm.jaxws.util.ProcessingFilter;
+import com.sun.xml.ws.rm.protocol.AbstractAckRequested;
+import com.sun.xml.ws.rm.protocol.AbstractSequence;
+import com.sun.xml.ws.rm.protocol.AbstractSequenceAcknowledgement;
+import com.sun.xml.ws.rm.protocol.AcknowledgementHandler;
 import com.sun.xml.ws.rm.v200502.AckRequestedElement;
-import com.sun.xml.ws.rm.v200502.AcknowledgementHandler;
-import com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement;
-import com.sun.xml.ws.rm.v200502.SequenceElement;
 
 import javax.xml.bind.Marshaller;
 import java.net.URI;
@@ -87,13 +89,13 @@ public abstract class OutboundSequence extends Sequence  {
      * Sequence acknowledgement to be sent back to client on next
      * available message to the AcksTo endpoint.
      */
-    protected SequenceAcknowledgementElement sequenceAcknowledgement;
+    protected AbstractSequenceAcknowledgement sequenceAcknowledgement;
 
      
    /**
      * Instance of helper class that processes SequnceAcknowledgement headers.
      */
-    protected AcknowledgementHandler ackHandler; 
+    protected AcknowledgementHandler ackHandler;
     
     /**
      * Flag determines whether messages will be saved.  Will only be
@@ -138,7 +140,7 @@ public abstract class OutboundSequence extends Sequence  {
      * Invoked by Incoming message processor to post Sequence Acknowledgement
      * from companion Incoming Sequence for transmission on next OutboundMessage.l
      */
-    public void setSequenceAcknowledgement(SequenceAcknowledgementElement element) {
+    public void setSequenceAcknowledgement(AbstractSequenceAcknowledgement element) {
         this.sequenceAcknowledgement = element;
     }
     
@@ -197,9 +199,14 @@ public abstract class OutboundSequence extends Sequence  {
                 set(messageNumber, mess);
             }
 
-            SequenceElement element = new SequenceElement();
-            element.setNumber(messageNumber);
-            element.setId(this.getId());
+            AbstractSequence element = null;
+            if (config.getRMVersion() == RMVersion.WSRM10)     {
+               element = new com.sun.xml.ws.rm.v200502.SequenceElement();            
+            }  else {
+                element = new com.sun.xml.ws.rm.v200702.SequenceElement();
+            }
+             element.setNumber(messageNumber);
+             element.setId(this.getId());
             
             //mess.addHeader(Headers.create(getVersion(),marshaller,element));
             
@@ -207,8 +214,15 @@ public abstract class OutboundSequence extends Sequence  {
             
              //if it is time to request an ack for this sequence, add AckRequestedHeader
             if (isAckRequested()) {
-                AckRequestedElement ack = new AckRequestedElement();
-                ack.setId(this.getId());      
+                AbstractAckRequested ack = null;
+                if (config.getRMVersion() == RMVersion.WSRM10)     {
+                    ack = new AckRequestedElement();
+                    ack.setId(this.getId());
+                }  else {
+                    ack = new com.sun.xml.ws.rm.v200702.AckRequestedElement();
+                    ack.setId(this.getId());
+                }
+                
                 mess.setAckRequestedElement(ack);
             }
         }
@@ -217,8 +231,12 @@ public abstract class OutboundSequence extends Sequence  {
         //SequenceAcknowledgement header
         if (sequenceAcknowledgement != null) {
             //mess.addHeader(Headers.create(getVersion(), marshaller,sequenceAcknowledgement));
-            
-            mess.setSequenceAcknowledgementElement(sequenceAcknowledgement);
+            if (sequenceAcknowledgement instanceof com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement)  {
+                 mess.setSequenceAcknowledgementElement((com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement)sequenceAcknowledgement);
+            }   else {
+                mess.setSequenceAcknowledgementElement((com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement)sequenceAcknowledgement);
+            }
+
             
             sequenceAcknowledgement = null;
         }     
@@ -311,7 +329,7 @@ public abstract class OutboundSequence extends Sequence  {
      * @param element The <code>SequenceAcknowledgementElement</code> containing the
      *              ranges of messages to be removed.
      */
-    public void handleAckResponse(SequenceAcknowledgementElement element) 
+    public void handleAckResponse(AbstractSequenceAcknowledgement element)
             throws InvalidMessageNumberException {
 
         if (ackHandler == null) {
@@ -379,9 +397,16 @@ public abstract class OutboundSequence extends Sequence  {
      */
     public void ensureAckRequested(Message mess, Marshaller marshaller) {
         if (mess.getAckRequestedElement() == null) {
-            
-            AckRequestedElement ack = new AckRequestedElement();
-            ack.setId(this.getId());      
+
+            AbstractAckRequested ack = null;
+             if (config.getRMVersion() == RMVersion.WSRM10)     {
+                ack = new AckRequestedElement();
+                ack.setId(this.getId());
+            }  else {
+                 ack = new com.sun.xml.ws.rm.v200702.AckRequestedElement();
+                 ack.setId(this.getId());
+            }
+
             mess.setAckRequestedElement(ack);
            /*
             mess.addHeader(Headers.create(getVersion(), 
@@ -396,6 +421,18 @@ public abstract class OutboundSequence extends Sequence  {
         return Headers.create(
                 config.getRMVersion().getJAXBRIContextHeaders(),
                 obj);
+    }
+    
+    public Message getUnacknowledgedMessage() {
+        for (int i = 0; i < nextIndex; i++) {
+            try {
+                Message mess = get(i);
+                if (mess != null && !mess.isComplete()) {
+                    return mess;
+                }
+            } catch (InvalidMessageNumberException e) {}
+        }
+        return null;
     }
     
   	

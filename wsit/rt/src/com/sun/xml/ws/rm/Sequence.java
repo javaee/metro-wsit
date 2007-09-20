@@ -1,5 +1,5 @@
 /*
- * $Id: Sequence.java,v 1.11 2007-08-17 18:06:48 mikeg Exp $
+ * $Id: Sequence.java,v 1.12 2007-09-20 18:47:07 bhaktimehta Exp $
  */
 
 /*
@@ -75,6 +75,13 @@ public class Sequence {
      * message in the sequence.
      */
     protected boolean last = false;
+
+    /**
+     * Flag that indicates if the CloseSequence message has been sent/received
+     * If this is the case then the Sequence needs to be closed and no more messages
+     * with that Sequence Id should be accepted
+     */
+    protected boolean closed = false;
     
     /**
      * Maximum number of stored messages.  Used for server-side sequences
@@ -233,6 +240,13 @@ public class Sequence {
     public synchronized void setLast() {
         last = true;
     }
+
+    /**
+     * Sets the last flag.
+     */
+    public synchronized void setClosed() {
+        closed = true;
+    }
     
     /*
      * Gets the value of the last flag.
@@ -241,6 +255,15 @@ public class Sequence {
      */
     public synchronized boolean isLast() {
         return last;
+    }
+
+    /*
+     * Gets the value of the last flag.
+     *
+     * @return The value of the flag.
+     */
+    public synchronized boolean isClosed() {
+        return closed;
     }
      
     /////////////////////////////////////////////////////////////////////////////

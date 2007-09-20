@@ -8,6 +8,9 @@
 
 package com.sun.xml.ws.rm.v200702;
 
+import com.sun.xml.ws.rm.protocol.AbstractSequence;
+import com.sun.xml.ws.rm.protocol.Messages;
+
 import org.w3c.dom.Element;
 
 import javax.xml.bind.annotation.*;
@@ -46,12 +49,12 @@ import java.util.Map;
     "any"
 })
 @XmlRootElement(name="Sequence",namespace="http://docs.oasis-open.org/ws-rx/wsrm/200702")
-public class SequenceElement {
+public class SequenceElement  extends AbstractSequence {
 
-    @XmlElement(name = "Identifier", required = true)
+    @XmlElement(name = "Identifier", required = true, namespace="http://docs.oasis-open.org/ws-rx/wsrm/200702")
     protected Identifier identifier;
-    @XmlElement(name = "MessageNumber")
-    protected long messageNumber;
+    @XmlElement(name = "MessageNumber",namespace="http://docs.oasis-open.org/ws-rx/wsrm/200702")
+    protected Integer messageNumber;
     @XmlAnyElement(lax = true)
     protected List<Object> any;
     @XmlAnyAttribute
@@ -85,7 +88,7 @@ public class SequenceElement {
      * Gets the value of the messageNumber property.
      * 
      */
-    public long getMessageNumber() {
+    public Integer getMessageNumber() {
         return messageNumber;
     }
 
@@ -93,7 +96,7 @@ public class SequenceElement {
      * Sets the value of the messageNumber property.
      * 
      */
-    public void setMessageNumber(long value) {
+    public void setMessageNumber(Integer value) {
         this.messageNumber = value;
     }
 
@@ -144,5 +147,50 @@ public class SequenceElement {
     public Map<QName, String> getOtherAttributes() {
         return otherAttributes;
     }
+
+     /**
+     * Mutator for the Id property.  Maps to the Identifier property in the underlying
+     * JAXB class.
+     *
+     * @param id The new value.
+     */
+    public void setId(String id) {
+        Identifier identifier = new Identifier();
+        identifier.setValue(id);
+        setIdentifier(identifier);
+    }
+
+    /**
+     * Accessor for the Id property.  Maps to the Identifier property in the underlying
+     * JAXB class
+     * @return The sequence id
+     */
+    public String getId() {
+        return getIdentifier().getValue();
+    }
+
+    
+
+
+
+
+    /**
+     * Accessor for the Number property which maps to the MessageNumber property in
+     * the underlying JAXB class.
+     *
+     * @return The Message number.
+     */
+    public int getNumber() {
+        return getMessageNumber();
+    }
+
+    public String toString() {
+
+           return Messages.SEQUENCE_TOSTRING_STRING
+                   .format(getId(),
+                           getNumber()
+                           );
+            }
+
 
 }

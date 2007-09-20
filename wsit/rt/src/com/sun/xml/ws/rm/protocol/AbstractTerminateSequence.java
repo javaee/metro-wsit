@@ -34,47 +34,67 @@
  * holder.
  */
 
-package com.sun.xml.ws.rm.jaxws.runtime.server;
 
-import java.util.ResourceBundle;
-import java.text.MessageFormat;
+package com.sun.xml.ws.rm.protocol;
+
+
+import javax.xml.namespace.QName;
+import java.util.List;
+import java.util.Map;
+
 
 /**
+ * This is the base class for the implementations of <code> TerminateSequence </code> based on the
+ * two versions of the RM specification
+ *
  * @author Bhakti Mehta
+ * @author Mike Grogan
+ *
+ *
  */
-enum Messages {
-    INCORRECT_ADDRESSING_HEADERS, // 0 args
-    ACKNOWLEDGEMENT_MESSAGE_EXCEPTION, //0 args
-    CREATESEQUENCE_HEADER_PROBLEM ,//0 args
-    CLOSESEQUENCE_HEADER_PROBLEM ,//0 args
-    ACKSTO_NOT_EQUAL_REPLYTO ,//2 args
-    SECURITY_TOKEN_AUTHORIZATION_ERROR, // 2 args
-    SECURITY_REFERENCE_ERROR ,//1 arg
-    NULL_SECURITY_TOKEN ,//0 arg
-    TERMINATE_SEQUENCE_EXCEPTION, // 0 arg
-    INVALID_LAST_MESSAGE, //0 args
-    LAST_MESSAGE_EXCEPTION ,//0 args
-    INVALID_ACK_REQUESTED ,//0 args
-    ACK_REQUESTED_EXCEPTION, //0 args
-    INVALID_SEQ_ACKNOWLEDGEMENT, //0args
-    SEQ_ACKNOWLEDGEMENT_EXCEPTION , //0 args
-    INVALID_CREATE_SEQUENCE_RESPONSE , //0 args
-    CREATE_SEQUENCE_CORRELATION_ERROR , //0 args
-    SECURITY_TOKEN_MISMATCH, //0 args
-    NOT_RELIABLE_SEQ_OR_PROTOCOL_MESSAGE ,//0args
-    NON_RM_REQUEST_OR_MISSING_WSA_ACTION_HEADER, //0 args
-    INVALID_OR_MISSING_TO_ON_CS_MESSAGE, //0 args
-    COULD_NOT_RESET_MESSAGE //2 args
-    ;
 
-    private static final ResourceBundle rb = ResourceBundle.getBundle(Messages.class.getName());
+public abstract class AbstractTerminateSequence {
 
-    public String toString() {
-        return format();
-    }
 
-     /** Loads a string resource and formats it with specified arguments. */
-    public String format( Object... args ) {
-        return MessageFormat.format( rb.getString(name()), args );
-    }
+
+    /**
+     * Gets the value of the any property.
+     *
+     * <p>
+     * This accessor method returns a reference to the live list,
+     * not a snapshot. Therefore any modification you make to the
+     * returned list will be present inside the JAXB object.
+     * This is why there is not a <CODE>set</CODE> method for the any property.
+     *
+     * <p>
+     * For example, to add a new item, do as follows:
+     * <pre>
+     *    getAny().add(newItem);
+     * </pre>
+     *
+     *
+     * <p>
+     * Objects of the following type(s) are allowed in the list
+     * {@link Object }
+     * {@link org.w3c.dom.Element }
+     *
+     *
+     */
+    public abstract List<Object> getAny() ;
+
+    /**
+     * Gets a map that contains attributes that aren't bound to any typed property on this class.
+     *
+     * <p>
+     * the map is keyed by the name of the attribute and
+     * the value is the string value of the attribute.
+     *
+     * the map returned by this method is live, and you can add new attribute
+     * by updating the map directly. Because of this design, there's no setter.
+     *
+     *
+     * @return
+     *     always non-null
+     */
+    public abstract Map<QName, String> getOtherAttributes();
 }

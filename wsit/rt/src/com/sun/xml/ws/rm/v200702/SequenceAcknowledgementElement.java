@@ -8,22 +8,18 @@
 
 package com.sun.xml.ws.rm.v200702;
 
+import com.sun.xml.ws.rm.protocol.AbstractSequenceAcknowledgement;
+import com.sun.xml.ws.rm.protocol.Messages;
+
+import org.w3c.dom.Element;
+
+import javax.xml.bind.annotation.*;
+import javax.xml.namespace.QName;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAnyAttribute;
-import javax.xml.bind.annotation.XmlAnyElement;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlSchemaType;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.namespace.QName;
-import org.w3c.dom.Element;
 
 
 /**
@@ -91,21 +87,25 @@ import org.w3c.dom.Element;
     "acknowledgementRange",
     "none",
     "_final",
+    "bufferRemaining",
     "nack",
     "any"
 })
 @XmlRootElement(name = "SequenceAcknowledgement" ,namespace="http://docs.oasis-open.org/ws-rx/wsrm/200702")
-public class SequenceAcknowledgementElement {
+public class SequenceAcknowledgementElement  extends AbstractSequenceAcknowledgement {
 
-    @XmlElement(name = "Identifier", required = true)
+    @XmlElement(name = "Identifier", required = true,namespace="http://docs.oasis-open.org/ws-rx/wsrm/200702")
     protected Identifier identifier;
-    @XmlElement(name = "AcknowledgementRange")
+    @XmlElement(name = "AcknowledgementRange", namespace="http://docs.oasis-open.org/ws-rx/wsrm/200702")
     protected List<SequenceAcknowledgementElement.AcknowledgementRange> acknowledgementRange;
-    @XmlElement(name = "None")
+    @XmlElement(name = "None",namespace="http://docs.oasis-open.org/ws-rx/wsrm/200702")
     protected SequenceAcknowledgementElement.None none;
-    @XmlElement(name = "Final")
+    @XmlElement(name = "Final",namespace="http://docs.oasis-open.org/ws-rx/wsrm/200702")
     protected SequenceAcknowledgementElement.Final _final;
-    @XmlElement(name = "Nack")
+    @XmlElement(name="BufferRemaining", namespace="http://schemas.microsoft.com/ws/2006/05/rm")
+    public Integer bufferRemaining;
+
+    @XmlElement(name = "Nack", namespace="http://docs.oasis-open.org/ws-rx/wsrm/200702")
     @XmlSchemaType(name = "unsignedLong")
     protected List<BigInteger> nack;
     @XmlAnyElement(lax = true)
@@ -443,6 +443,53 @@ public class SequenceAcknowledgementElement {
     public static class None {
 
 
+    }
+
+     public void setId(String id) {
+        com.sun.xml.ws.rm.v200702.Identifier identifier = new Identifier();
+        identifier.setValue(id);
+        setIdentifier(identifier);
+    }
+
+    public String getId() {
+        return getIdentifier().getValue();
+    }
+
+      public int getBufferRemaining() {
+        if (bufferRemaining == null) {
+            return -1;
+        }
+        return bufferRemaining;
+    }
+
+    public void setBufferRemaining(int value) {
+        bufferRemaining = value;
+    }
+
+    public void addAckRange(long lower, long upper) {
+        if (nack != null) {
+            throw new IllegalArgumentException(Messages.BOTH_ACKS_AND_NACKS_MESSAGE.format());
+        }
+        //check validity of indices
+        if (lower > upper) {
+            throw new IllegalArgumentException(Messages.UPPERBOUND_LESSTHAN_LOWERBOUND_MESSAGE.format());
+        }
+
+        //TODO Further validity checking
+        SequenceAcknowledgementElement.AcknowledgementRange range
+                = new SequenceAcknowledgementElement.AcknowledgementRange();
+        range.setLower(BigInteger.valueOf(lower));
+        range.setUpper(BigInteger.valueOf(upper));
+        getAcknowledgementRange().add(range);
+
+    }
+
+     public void addNack(long index) {
+        if (acknowledgementRange != null) {
+            throw new IllegalArgumentException(Messages.BOTH_ACKS_AND_NACKS_MESSAGE.format());
+        }
+
+        getNack().add(BigInteger.valueOf(index));
     }
 
 }

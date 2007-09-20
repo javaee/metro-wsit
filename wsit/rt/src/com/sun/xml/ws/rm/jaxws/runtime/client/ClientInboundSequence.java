@@ -43,8 +43,11 @@
  */
 
 package com.sun.xml.ws.rm.jaxws.runtime.client;
-import java.net.URI;
+
 import com.sun.xml.ws.rm.jaxws.runtime.InboundSequence;
+import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
+
+import java.net.URI;
 
 
 /**
@@ -57,10 +60,11 @@ public class ClientInboundSequence extends InboundSequence {
           
     public ClientInboundSequence(ClientOutboundSequence outboundSequence , 
                             String identifier, 
-                            URI acksTo) {
+                            URI acksTo, SequenceConfig config) {
         
         this.acksTo = acksTo;
         this.outboundSequence = outboundSequence;
+        this.config = config;
         setId(identifier);
     }
     

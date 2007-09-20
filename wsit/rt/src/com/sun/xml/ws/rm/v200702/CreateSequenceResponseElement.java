@@ -50,7 +50,7 @@ import java.util.Map;
     "accept",
     "any"
 })
-@XmlRootElement(name="CreateSequenceResponseElement",namespace="http://docs.oasis-open.org/ws-rx/wsrm/200702")
+@XmlRootElement(name="CreateSequenceResponse",namespace="http://docs.oasis-open.org/ws-rx/wsrm/200702")
 public class CreateSequenceResponseElement  extends AbstractCreateSequenceResponse{
 
     @XmlElement(name = "Identifier", required = true)
@@ -65,6 +65,10 @@ public class CreateSequenceResponseElement  extends AbstractCreateSequenceRespon
     protected List<Object> any;
     @XmlAnyAttribute
     private Map<QName, String> otherAttributes = new HashMap<QName, String>();
+    
+    public CreateSequenceResponseElement() {
+        incompleteSequenceBehavior = IncompleteSequenceBehaviorType.DISCARD_FOLLOWING_FIRST_GAP;
+    }
 
     /**
      * Gets the value of the identifier property.

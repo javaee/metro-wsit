@@ -94,5 +94,7 @@ public class Constants {
 
      public static final String SEQUENCE_TERMINATED_TEXT = "The sequence has been terminated because of an unrecoverable error";
 
+    public static final String SEQUENCE_CLOSED_TEXT = "The sequence has been closed as CloseSequence Message was received";
+
 
 }

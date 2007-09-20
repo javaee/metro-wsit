@@ -45,13 +45,13 @@ import java.util.Map;
     "lastMsgNumber",
     "any"
 })
-@XmlRootElement(name="CloseSequenceElement",namespace="http://docs.oasis-open.org/ws-rx/wsrm/200702")
+@XmlRootElement(name="CloseSequence",namespace="http://docs.oasis-open.org/ws-rx/wsrm/200702")
 public class CloseSequenceElement {
 
     @XmlElement(name = "Identifier", required = true,namespace="http://docs.oasis-open.org/ws-rx/wsrm/200702")
     protected Identifier identifier;
     @XmlElement(name = "LastMsgNumber",namespace="http://docs.oasis-open.org/ws-rx/wsrm/200702")
-    protected Long lastMsgNumber;
+    protected int lastMsgNumber;
     @XmlAnyElement(lax = true)
     protected List<Object> any;
     @XmlAnyAttribute
@@ -89,7 +89,7 @@ public class CloseSequenceElement {
      *     {@link Long }
      *     
      */
-    public Long getLastMsgNumber() {
+    public int getLastMsgNumber() {
         return lastMsgNumber;
     }
 
@@ -101,7 +101,7 @@ public class CloseSequenceElement {
      *     {@link Long }
      *     
      */
-    public void setLastMsgNumber(Long value) {
+    public void setLastMsgNumber(int value) {
         this.lastMsgNumber = value;
     }
 

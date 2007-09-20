@@ -1,5 +1,5 @@
 /*
- * $Id: Message.java,v 1.10 2007-08-30 16:25:32 mikeg Exp $
+ * $Id: Message.java,v 1.11 2007-09-20 18:47:07 bhaktimehta Exp $
  */
 
 /*
@@ -39,9 +39,10 @@
  */
 
 package com.sun.xml.ws.rm;
-import com.sun.xml.ws.rm.v200502.AckRequestedElement;
-import com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement;
-import com.sun.xml.ws.rm.v200502.SequenceElement;
+
+import com.sun.xml.ws.rm.protocol.AbstractAckRequested;
+import com.sun.xml.ws.rm.protocol.AbstractSequence;
+import com.sun.xml.ws.rm.protocol.AbstractSequenceAcknowledgement;
 
 
 /**
@@ -90,20 +91,20 @@ public class Message {
      * Sequence stored when the corresponding com.sun.xml.ws.api.message.Header
      * is added to the message.
      */
-    protected SequenceElement sequenceElement = null; 
+    protected AbstractSequence sequenceElement = null;
     
+    
+    /**
+     * SequenceAcknowledgmentElement stored when the corresponding com.sun.xml.ws.api.message.Header
+     * is added to the message.
+     */
+    protected AbstractSequenceAcknowledgement sequenceAcknowledgementElement = null;
     
     /**
      * SequenceElement stored when the corresponding com.sun.xml.ws.api.message.Header
      * is added to the message.
      */
-    protected SequenceAcknowledgementElement sequenceAcknowledgementElement = null; 
-    
-    /**
-     * SequenceElement stored when the corresponding com.sun.xml.ws.api.message.Header
-     * is added to the message.
-     */
-    protected AckRequestedElement ackRequestedElement = null;
+    protected AbstractAckRequested ackRequestedElement = null;
     
     /**
      * Version of RM spec being used.
@@ -308,9 +309,9 @@ public class Message {
                                                 getSequence().getId() :
                                                 "null");
         
-        SequenceElement sel;
-        SequenceAcknowledgementElement sael;
-        AckRequestedElement ael;
+        AbstractSequence sel;
+        AbstractSequenceAcknowledgement sael;
+        AbstractAckRequested ael;
         if ( null != (sel = getSequenceElement())) {
             ret += sel.toString();
         }
@@ -333,27 +334,27 @@ public class Message {
      *      message
      */
     
-    public SequenceAcknowledgementElement getSequenceAcknowledgementElement() {
+    public AbstractSequenceAcknowledgement getSequenceAcknowledgementElement() {
         return sequenceAcknowledgementElement;
     }
     
-    public void setSequenceAcknowledgementElement(SequenceAcknowledgementElement el) {
+    public void setSequenceAcknowledgementElement(AbstractSequenceAcknowledgement el) {
         sequenceAcknowledgementElement = el;
     }
     
-    public SequenceElement getSequenceElement() {
+    public AbstractSequence getSequenceElement() {
         return sequenceElement;
     }
     
-    public void setSequenceElement(SequenceElement el) {
+    public void setSequenceElement(AbstractSequence el) {
         sequenceElement = el;
     }
     
-    public AckRequestedElement getAckRequestedElement() {
+    public AbstractAckRequested getAckRequestedElement() {
         return ackRequestedElement;
     }
     
-    public void setAckRequestedElement(AckRequestedElement el) {
+    public void setAckRequestedElement(AbstractAckRequested el) {
         ackRequestedElement = el;
     }
               

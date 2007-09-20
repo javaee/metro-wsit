@@ -43,11 +43,13 @@
  */
 
 package com.sun.xml.ws.rm.jaxws.runtime;
+
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.rm.*;
+import com.sun.xml.ws.rm.protocol.AbstractAckRequested;
+import com.sun.xml.ws.rm.protocol.AbstractSequence;
+import com.sun.xml.ws.rm.protocol.AbstractSequenceAcknowledgement;
 import com.sun.xml.ws.rm.v200502.AckRequestedElement;
-import com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement;
-import com.sun.xml.ws.rm.v200502.SequenceElement;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -107,23 +109,39 @@ public class InboundMessageProcessor {
 
                 Header header = message.getHeader("Sequence");
                 if (header != null) {
+
                     //identify sequence and message number from data in header and add
                     //the message to the sequence at the specified index.
                     //TODO handle error condition seq == null
-                    SequenceElement el = 
-                                (SequenceElement)header.readAsJAXB(unmarshaller);
+                    AbstractSequence el =
+                                (AbstractSequence)header.readAsJAXB(unmarshaller);
                     
                     message.setSequenceElement(el);
-                    
-                    String seqid = el.getId();
+                    String seqid = null;
+                    int messageNumber ;
+                    if (el instanceof com.sun.xml.ws.rm.v200502.SequenceElement) {
+                        seqid = ((com.sun.xml.ws.rm.v200502.SequenceElement)el).getId();
 
-                    //add message to ClientInboundSequence
-                    int messageNumber = (int)el.getNumber();
+                        //add message to ClientInboundSequence
+                        messageNumber = ((com.sun.xml.ws.rm.v200502.SequenceElement)el).getNumber();
+                    }   else {
+                        seqid = ((com.sun.xml.ws.rm.v200702.SequenceElement)el).getId();
+
+                        //add message to ClientInboundSequence
+                        messageNumber = ((com.sun.xml.ws.rm.v200702.SequenceElement)el).getNumber();
+
+                    }
+
+                 
                     if (messageNumber == Integer.MAX_VALUE){
                         throw new MessageNumberRolloverException(String.format(Constants.MESSAGE_NUMBER_ROLLOVER_TEXT,messageNumber),messageNumber);
                     }
                     
                     inseq =   provider.getInboundSequence(seqid);
+
+                    if (inseq.isClosed()) {
+                        throw new CloseSequenceException(String.format(Constants.SEQUENCE_CLOSED_TEXT),seqid);
+                    }
                     
                     if (inseq != null) {
                         inseq.set(messageNumber, message);
@@ -139,13 +157,23 @@ public class InboundMessageProcessor {
                     
                     //determine OutboundSequence id from data in header and update
                     //state of that sequence according to the acks and nacks in the element 
-                    SequenceAcknowledgementElement ackHeader =
-                            (SequenceAcknowledgementElement)(header.readAsJAXB(unmarshaller));
+                    AbstractSequenceAcknowledgement ackHeader =
+                            (AbstractSequenceAcknowledgement)(header.readAsJAXB(unmarshaller));
+                    String ackHeaderId = null;
+
+                     if (ackHeader instanceof com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement) {
+                        ackHeaderId = ((com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement)ackHeader).getId();
+
+
+                    }   else {
+                        ackHeaderId = ((com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement)ackHeader).getId();
+
+                    }
                     
                     message.setSequenceAcknowledgementElement(ackHeader);
                     
                     OutboundSequence seq =
-                            provider.getOutboundSequence(ackHeader.getId());
+                            provider.getOutboundSequence(ackHeaderId);
 
                     if (seq != null) {
                         seq.handleAckResponse(ackHeader);
@@ -158,19 +186,32 @@ public class InboundMessageProcessor {
  
                     //dispatch to InboundSequence to construct response.
                     //TODO handle error condition no such sequence
-                     AckRequestedElement el = 
-                             (AckRequestedElement)header.readAsJAXB(unmarshaller);
+                     AbstractAckRequested el =
+                             (AbstractAckRequested)header.readAsJAXB(unmarshaller);
                      
                      message.setAckRequestedElement(el);
-                     
-                     String id = el.getId();
+                     String id = null;
+                     InboundSequence seq = null;
+                     if (el instanceof com.sun.xml.ws.rm.v200502.AckRequestedElement) {
+                        id = ((com.sun.xml.ws.rm.v200502.AckRequestedElement)el).getId();
+                        seq = provider.getInboundSequence(id);
 
-                    InboundSequence seq =
-                            provider.getInboundSequence(id);
+                         if (seq != null) {
+                             seq.handleAckRequested((AckRequestedElement)el, marshaller);
+                         }
 
-                    if (seq != null) {
-                        seq.handleAckRequested((AckRequestedElement)el, marshaller);
-                    }
+
+                     }   else {
+                        id = ((com.sun.xml.ws.rm.v200702.AckRequestedElement)el).getId();
+                        seq = provider.getInboundSequence(id);
+
+                         if (seq != null) {
+                             seq.handleAckRequested((com.sun.xml.ws.rm.v200702.AckRequestedElement)el, marshaller);
+                         }
+
+                     };
+
+                   
 
                 } else {
                     //FIXME - We need to be checking whether this is a ServerInboundSequence
