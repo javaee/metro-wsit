@@ -49,6 +49,7 @@ import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.policy.jaxws.spi.ModelConfiguratorProvider;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import java.util.Iterator;
+import java.util.logging.Level;
 import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceFeature;
 
@@ -58,11 +59,11 @@ import javax.xml.ws.WebServiceFeature;
  */
 public class AddressingModelConfiguratorProvider implements ModelConfiguratorProvider{
 
-    private static final PolicyLogger logger = PolicyLogger.getLogger(AddressingModelConfiguratorProvider.class);
+    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(AddressingModelConfiguratorProvider.class);
 
-    private static final QName[] AddressingAssertions = {
-     new QName(AddressingVersion.MEMBER.policyNsUri,"UsingAddressing"),
-     new QName(AddressingVersion.W3C.policyNsUri,"UsingAddressing")};
+    private static final QName[] ADDRESSING_ASSERTIONS = {
+        new QName(AddressingVersion.MEMBER.policyNsUri, "UsingAddressing"),
+        new QName(AddressingVersion.W3C.policyNsUri, "UsingAddressing")};
 
     /**
      * Creates a new instance of AddressingModelConfiguratorProvider
@@ -77,28 +78,30 @@ public class AddressingModelConfiguratorProvider implements ModelConfiguratorPro
      * @param model must be non-null
      * @param policyMap must be non-null
      */
-    public void configure(WSDLModel model, PolicyMap policyMap) throws PolicyException {
-        logger.entering();
+    public void configure(final WSDLModel model, final PolicyMap policyMap) throws PolicyException {
+        LOGGER.entering(model, policyMap);
         if ((null==model) || (null==policyMap)) {
+            LOGGER.exiting();
             return;
         }
         for (WSDLService service:model.getServices().values()) {
             for (WSDLPort port : service.getPorts()) {
-                PolicyMapKey key = PolicyMap.createWsdlEndpointScopeKey(service.getName(),port.getName());
-                Policy policy = policyMap.getEndpointEffectivePolicy(key);
-                for (QName addressingAssertionQName : AddressingAssertions) {
+                final PolicyMapKey key = PolicyMap.createWsdlEndpointScopeKey(service.getName(),port.getName());
+                final Policy policy = policyMap.getEndpointEffectivePolicy(key);
+                for (QName addressingAssertionQName : ADDRESSING_ASSERTIONS) {
                     if (null!=policy && policy.contains(addressingAssertionQName)) {
-                        Iterator <AssertionSet> assertions = policy.iterator();
+                        final Iterator <AssertionSet> assertions = policy.iterator();
                         while(assertions.hasNext()){
-                            AssertionSet assertionSet = assertions.next();
-                            Iterator<PolicyAssertion> policyAssertion = assertionSet.iterator();
+                            final AssertionSet assertionSet = assertions.next();
+                            final Iterator<PolicyAssertion> policyAssertion = assertionSet.iterator();
                             while(policyAssertion.hasNext()){
-                                PolicyAssertion assertion = policyAssertion.next();
-                                if(assertion.getName().equals(addressingAssertionQName) && !assertion.isOptional()){
-                                    WebServiceFeature feature = AddressingVersion.getFeature(addressingAssertionQName.getNamespaceURI(), true, true);
-                                    // TODO: clean up logging
-                                    //logger.fine("configure", "calling port.addFeature " + feature);
+                                final PolicyAssertion assertion = policyAssertion.next();
+                                if(assertion.getName().equals(addressingAssertionQName)){
+                                    final WebServiceFeature feature = AddressingVersion.getFeature(addressingAssertionQName.getNamespaceURI(), true, !assertion.isOptional());
                                     port.addFeature(feature);
+                                    if (LOGGER.isLoggable(Level.FINE)) {
+                                        LOGGER.fine("Added addressing feature \"" + feature + "\" to port \"" + port + "\"");
+                                    }
                                 } // end-if non optional wsa assertion found
                             } // next assertion
                         } // next alternative
@@ -106,6 +109,6 @@ public class AddressingModelConfiguratorProvider implements ModelConfiguratorPro
                 } // end foreach port
             } //end foreach addr assertion
         } // end foreach service
-        logger.exiting();
+        LOGGER.exiting();
     }
 }

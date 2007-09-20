@@ -37,6 +37,7 @@
 package com.sun.xml.ws.addressing.impl.policy;
 
 import com.sun.xml.ws.api.addressing.AddressingVersion;
+import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.policy.spi.AssertionCreationException;
 import com.sun.xml.ws.security.impl.policy.SecurityPolicyAssertionCreator;
@@ -46,22 +47,30 @@ import com.sun.xml.ws.security.impl.policy.SecurityPolicyAssertionCreator;
  * @author K.Venugopal@sun.com
  */
 public class AddressingPolicyAssertionCreator extends SecurityPolicyAssertionCreator {
-    private String [] nsSupportedList= new String[] { AddressingVersion.MEMBER.getNsUri(),AddressingVersion.W3C.getNsUri()};
+    
+    private static final String [] NS_SUPPORTED_LIST = new String[] { AddressingVersion.MEMBER.nsUri,
+                                                                      AddressingVersion.W3C.nsUri };
+    
+    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(AddressingPolicyAssertionCreator.class);
+
     /** Creates a new instance of AddressingPolicyAssertionCreator */
     public AddressingPolicyAssertionCreator() {
     }
     
     
     public String[] getSupportedDomainNamespaceURIs() {
-        return nsSupportedList;
+        return NS_SUPPORTED_LIST;
     }
     
-    protected Class getClass(AssertionData assertionData) throws AssertionCreationException{
+    protected Class getClass(final AssertionData assertionData) throws AssertionCreationException {
+        LOGGER.entering(assertionData);
         try {
-            String className = assertionData.getName().getLocalPart();
-            return Class.forName("com.sun.xml.ws.addressing.impl.policy." + className);
+            final String className = assertionData.getName().getLocalPart();
+            final Class result = Class.forName("com.sun.xml.ws.addressing.impl.policy." + className);
+            LOGGER.exiting();
+            return result;
         } catch (ClassNotFoundException ex) {
-            ex.printStackTrace();
+            LOGGER.warning(LocalizationMessages.WSA_0001_UNKNOWN_ASSERTION(assertionData.toString()), ex);
             throw new AssertionCreationException(assertionData,ex);
         }
     }
