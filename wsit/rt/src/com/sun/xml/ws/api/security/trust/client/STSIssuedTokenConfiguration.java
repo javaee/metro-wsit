@@ -36,6 +36,8 @@
 
 package com.sun.xml.ws.api.security.trust.client;
 
+import com.sun.xml.ws.security.Token;
+
 /**
  *
  * @author Jiandong Guo
@@ -111,4 +113,6 @@ public abstract class STSIssuedTokenConfiguration implements IssuedTokenConfigur
     public abstract String getCanonicalizationAlgorithm();
     
     public abstract String getKeyWrapAlgorithm();
+    
+    public abstract Token getOBOToken();
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityTokenResponseImpl.java,v 1.11 2007-05-29 22:11:34 ofung Exp $
+ * $Id: RequestSecurityTokenResponseImpl.java,v 1.12 2007-09-24 17:48:45 jdg6688 Exp $
  */
 
 /*
@@ -572,93 +572,99 @@ public class RequestSecurityTokenResponseImpl extends RequestSecurityTokenRespon
                 continue;
             }
             
-            final JAXBElement obj = (JAXBElement)list.get(i);
-            
-            final String local = obj.getName().getLocalPart();
-            if (local.equalsIgnoreCase("KeySize")) {
-                setKeySize((Long)obj.getValue());
-            } else if (local.equalsIgnoreCase("KeyType")){
-                setKeyType(new URI((String)obj.getValue()));
-            } else if (local.equalsIgnoreCase("ComputedKeyAlgorithm")){
-                setComputedKeyAlgorithm(new URI((String)obj.getValue()));
-            } else if (local.equalsIgnoreCase("TokenType")){
-                setTokenType(new URI((String)obj.getValue()));
-            } else if (local.equalsIgnoreCase("AuthenticationType")){
-                setAuthenticationType(new URI((String)obj.getValue()));
-            } else if (local.equalsIgnoreCase("Lifetime")){
-                final LifetimeType ltType = (LifetimeType)obj.getValue();
-                setLifetime(new LifetimeImpl(ltType));
-            } else if (local.equalsIgnoreCase("Entropy")){
-                final EntropyType eType = (EntropyType)obj.getValue();
-                setEntropy(new EntropyImpl(eType));
-            } else if (local.equalsIgnoreCase("Forwardable")){
-                setForwardable((Boolean)obj.getValue());
-            } else if (local.equalsIgnoreCase("Delegatable")){
-                setDelegatable((Boolean)obj.getValue());
-            } else if (local.equalsIgnoreCase("SignWith")){
-                setSignWith(new URI((String)obj.getValue()));
-            } else if (local.equalsIgnoreCase("EncryptWith")){
-                setEncryptWith(new URI((String)obj.getValue()));
-            } else if (local.equalsIgnoreCase("SignatureAlgorithm")){
-                setSignatureAlgorithm(new URI((String)obj.getValue()));
-            } else if (local.equalsIgnoreCase("EncryptionAlgorithm")){
-                setEncryptionAlgorithm(new URI((String)obj.getValue()));
-            } else if (local.equalsIgnoreCase("CanonicalizationAlgorithm")){
-                setCanonicalizationAlgorithm(new URI((String)obj.getValue()));
-            } else if (local.equalsIgnoreCase("AllowPostdating")){
-                setAllowPostdating(new AllowPostdatingImpl());
-            } else if (local.equalsIgnoreCase("SignChallenge")){
-                setSignChallenge(new SignChallengeImpl());
-            } else if (local.equalsIgnoreCase("SignChallengeResponse")){
-                 setSignChallengeResponse(new SignChallengeResponseImpl());
-            } else if (local.equalsIgnoreCase("BinaryExchange")){
-                final BinaryExchangeType bcType = (BinaryExchangeType)obj.getValue();
-                setBinaryExchange(new BinaryExchangeImpl(bcType));
-            } else if (local.equalsIgnoreCase("Issuer")){
-                /* EndpointReferenceImpl isType = (EndpointReferenceImpl)obj.getValue();
-                setIssuer(new IssuerImpl(isType));*/
-            } else if (local.equalsIgnoreCase("Authenticator")){
-                final AuthenticatorType aType = (AuthenticatorType)obj.getValue();
-                setAuthenticator(new AuthenticatorImpl(aType));
-            } else if (local.equalsIgnoreCase("Renewing")){
-                setRenewable(new RenewingImpl());
-            } else if (local.equalsIgnoreCase("ProofEncryption")){
-                final ProofEncryptionType peType = (ProofEncryptionType)obj.getValue();
-                setProofEncryption(new ProofEncryptionImpl(peType));
-            } else if (local.equalsIgnoreCase("Policy")){
-                setPolicy((Policy)obj.getValue());
-            } else if (local.equalsIgnoreCase("PolicyReference")){
-                setPolicyReference((PolicyReference)obj.getValue());
-            } else if (local.equalsIgnoreCase("AppliesTo")){
-                setAppliesTo((AppliesTo)obj.getValue());
-            } else if (local.equalsIgnoreCase("OnBehalfOf")){
-                this.obo = (OnBehalfOf)obj.getValue();
-            } else if (local.equalsIgnoreCase("Encryption")){
-                final EncryptionType encType = (EncryptionType)obj.getValue();
-                setEncryption(new EncryptionImpl(encType));
-            } else if (local.equalsIgnoreCase("UseKey")){
-                final UseKeyType ukType = (UseKeyType)obj.getValue();
-                setUseKey(new UseKeyImpl(ukType));
-            } else if (local.equalsIgnoreCase("Status")){
-                setStatus((Status)obj.getValue());
-            } else if (local.equalsIgnoreCase("DelegateTo")){
-                final DelegateToType dtType  = (DelegateToType)obj.getValue();
-                setDelegateTo(new DelegateToImpl(dtType));
-            } else if (local.equalsIgnoreCase("RequestedProofToken")){
-                final RequestedProofTokenType rptType = (RequestedProofTokenType)obj.getValue();
-                setRequestedProofToken(new RequestedProofTokenImpl(rptType));
-            } else if (local.equalsIgnoreCase("RequestedSecurityToken")){
-                final RequestedSecurityTokenType rdstType = (RequestedSecurityTokenType)obj.getValue();
-                setRequestedSecurityToken(new RequestedSecurityTokenImpl(rdstType));
-            } else if (local.equalsIgnoreCase("RequestedAttachedReference")){
-                final RequestedReferenceType rarType = (RequestedReferenceType)obj.getValue();
-                setRequestedAttachedReference(new RequestedAttachedReferenceImpl(rarType));
-            } else if (local.equalsIgnoreCase("RequestedUnattachedReference")){
-                final RequestedReferenceType rarType = (RequestedReferenceType)obj.getValue();
-                setRequestedUnattachedReference(new RequestedUnattachedReferenceImpl(rarType));
-            } else if (local.equalsIgnoreCase("RequestedTokenCancelled")){
-                setRequestedTokenCancelled(new RequestedTokenCancelledImpl());
-            } 
+            Object object = list.get(i);
+            if (!(object instanceof JAXBElement)){
+                getAny().add(object);
+            } else {
+                JAXBElement obj = (JAXBElement)list.get(i);
+                final String local = obj.getName().getLocalPart();
+                if (local.equalsIgnoreCase("KeySize")) {
+                    setKeySize((Long)obj.getValue());
+                } else if (local.equalsIgnoreCase("KeyType")){
+                    setKeyType(new URI((String)obj.getValue()));
+                } else if (local.equalsIgnoreCase("ComputedKeyAlgorithm")){
+                    setComputedKeyAlgorithm(new URI((String)obj.getValue()));
+                } else if (local.equalsIgnoreCase("TokenType")){
+                    setTokenType(new URI((String)obj.getValue()));
+                } else if (local.equalsIgnoreCase("AuthenticationType")){
+                    setAuthenticationType(new URI((String)obj.getValue()));
+                } else if (local.equalsIgnoreCase("Lifetime")){
+                    final LifetimeType ltType = (LifetimeType)obj.getValue();
+                    setLifetime(new LifetimeImpl(ltType));
+                } else if (local.equalsIgnoreCase("Entropy")){
+                    final EntropyType eType = (EntropyType)obj.getValue();
+                    setEntropy(new EntropyImpl(eType));
+                } else if (local.equalsIgnoreCase("Forwardable")){
+                    setForwardable((Boolean)obj.getValue());
+                } else if (local.equalsIgnoreCase("Delegatable")){
+                    setDelegatable((Boolean)obj.getValue());
+                } else if (local.equalsIgnoreCase("SignWith")){
+                    setSignWith(new URI((String)obj.getValue()));
+                } else if (local.equalsIgnoreCase("EncryptWith")){
+                    setEncryptWith(new URI((String)obj.getValue()));
+                } else if (local.equalsIgnoreCase("SignatureAlgorithm")){
+                    setSignatureAlgorithm(new URI((String)obj.getValue()));
+                } else if (local.equalsIgnoreCase("EncryptionAlgorithm")){
+                    setEncryptionAlgorithm(new URI((String)obj.getValue()));
+                } else if (local.equalsIgnoreCase("CanonicalizationAlgorithm")){
+                    setCanonicalizationAlgorithm(new URI((String)obj.getValue()));
+                } else if (local.equalsIgnoreCase("AllowPostdating")){
+                    setAllowPostdating(new AllowPostdatingImpl());
+                } else if (local.equalsIgnoreCase("SignChallenge")){
+                    setSignChallenge(new SignChallengeImpl());
+                } else if (local.equalsIgnoreCase("SignChallengeResponse")){
+                     setSignChallengeResponse(new SignChallengeResponseImpl());
+                } else if (local.equalsIgnoreCase("BinaryExchange")){
+                    final BinaryExchangeType bcType = (BinaryExchangeType)obj.getValue();
+                    setBinaryExchange(new BinaryExchangeImpl(bcType));
+                } else if (local.equalsIgnoreCase("Issuer")){
+                    /* EndpointReferenceImpl isType = (EndpointReferenceImpl)obj.getValue();
+                    setIssuer(new IssuerImpl(isType));*/
+                } else if (local.equalsIgnoreCase("Authenticator")){
+                    final AuthenticatorType aType = (AuthenticatorType)obj.getValue();
+                    setAuthenticator(new AuthenticatorImpl(aType));
+                } else if (local.equalsIgnoreCase("Renewing")){
+                    setRenewable(new RenewingImpl());
+                } else if (local.equalsIgnoreCase("ProofEncryption")){
+                    final ProofEncryptionType peType = (ProofEncryptionType)obj.getValue();
+                    setProofEncryption(new ProofEncryptionImpl(peType));
+                } else if (local.equalsIgnoreCase("Policy")){
+                    setPolicy((Policy)obj.getValue());
+                } else if (local.equalsIgnoreCase("PolicyReference")){
+                    setPolicyReference((PolicyReference)obj.getValue());
+                } else if (local.equalsIgnoreCase("AppliesTo")){
+                    setAppliesTo((AppliesTo)obj.getValue());
+                } else if (local.equalsIgnoreCase("OnBehalfOf")){
+                    this.obo = (OnBehalfOf)obj.getValue();
+                } else if (local.equalsIgnoreCase("Encryption")){
+                    final EncryptionType encType = (EncryptionType)obj.getValue();
+                    setEncryption(new EncryptionImpl(encType));
+                } else if (local.equalsIgnoreCase("UseKey")){
+                    final UseKeyType ukType = (UseKeyType)obj.getValue();
+                    setUseKey(new UseKeyImpl(ukType));
+                } else if (local.equalsIgnoreCase("Status")){
+                    setStatus((Status)obj.getValue());
+                } else if (local.equalsIgnoreCase("DelegateTo")){
+                    final DelegateToType dtType  = (DelegateToType)obj.getValue();
+                    setDelegateTo(new DelegateToImpl(dtType));
+                } else if (local.equalsIgnoreCase("RequestedProofToken")){
+                    final RequestedProofTokenType rptType = (RequestedProofTokenType)obj.getValue();
+                    setRequestedProofToken(new RequestedProofTokenImpl(rptType));
+                } else if (local.equalsIgnoreCase("RequestedSecurityToken")){
+                    final RequestedSecurityTokenType rdstType = (RequestedSecurityTokenType)obj.getValue();
+                    setRequestedSecurityToken(new RequestedSecurityTokenImpl(rdstType));
+                } else if (local.equalsIgnoreCase("RequestedAttachedReference")){
+                    final RequestedReferenceType rarType = (RequestedReferenceType)obj.getValue();
+                    setRequestedAttachedReference(new RequestedAttachedReferenceImpl(rarType));
+                } else if (local.equalsIgnoreCase("RequestedUnattachedReference")){
+                    final RequestedReferenceType rarType = (RequestedReferenceType)obj.getValue();
+                    setRequestedUnattachedReference(new RequestedUnattachedReferenceImpl(rarType));
+                } else if (local.equalsIgnoreCase("RequestedTokenCancelled")){
+                    setRequestedTokenCancelled(new RequestedTokenCancelledImpl());
+                } else {
+                    getAny().add(obj.getValue());
+                }
+            }
         }
     }
     

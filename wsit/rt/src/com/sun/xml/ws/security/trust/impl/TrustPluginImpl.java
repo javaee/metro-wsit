@@ -59,6 +59,7 @@ import com.sun.xml.ws.policy.sourcemodel.PolicyModelGenerator;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
 import com.sun.xml.ws.policy.sourcemodel.XmlPolicyModelMarshaller;
 import com.sun.xml.ws.security.IssuedTokenContext;
+import com.sun.xml.ws.security.Token;
 import com.sun.xml.ws.security.impl.IssuedTokenContextImpl;
 import com.sun.xml.ws.security.impl.policy.PolicyUtil;
 import com.sun.xml.ws.security.policy.IssuedToken;
@@ -68,6 +69,7 @@ import com.sun.xml.ws.security.trust.*;
 import com.sun.xml.ws.security.trust.elements.BinarySecret;
 import com.sun.xml.ws.security.trust.elements.Entropy;
 import com.sun.xml.ws.security.trust.elements.Lifetime;
+import com.sun.xml.ws.security.trust.elements.OnBehalfOf;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponse;
 import com.sun.xml.ws.security.trust.impl.bindings.ClaimsType;
@@ -187,9 +189,11 @@ public class TrustPluginImpl implements TrustPlugin {
             wsdlLocation = URI.create(wsdlLocationStr);
         }
         
+        Token oboToken = stsConfig.getOBOToken();
+       
         RequestSecurityTokenResponse result = null;
         try {
-            final RequestSecurityToken request = createRequest(null, stsConfig, appliesTo);
+            final RequestSecurityToken request = createRequest(null, stsConfig, appliesTo, oboToken);
              
             result = invokeRST(request, wsdlLocation, serviceName, portName, stsURI);
             final WSTrustClientContract contract = WSTrustFactory.createWSTrustClientContract(config);
@@ -275,7 +279,7 @@ public class TrustPluginImpl implements TrustPlugin {
         
         RequestSecurityTokenResponse result = null;
         try {
-            final RequestSecurityToken request = createRequest(rstTemplate, null, appliesTo);
+            final RequestSecurityToken request = createRequest(rstTemplate, null, appliesTo, null);
             
             // handle Claims.
             // Not: should be in the RequestSecurityTokenTemplate api. Workaround for now.
@@ -305,7 +309,7 @@ public class TrustPluginImpl implements TrustPlugin {
         }
     }
     
-    private RequestSecurityToken createRequest(final RequestSecurityTokenTemplate rstTemplate, final STSIssuedTokenConfiguration stsConfig, final String appliesTo) throws URISyntaxException, WSTrustException, NumberFormatException {
+    private RequestSecurityToken createRequest(final RequestSecurityTokenTemplate rstTemplate, final STSIssuedTokenConfiguration stsConfig, final String appliesTo, final Token oboToken) throws URISyntaxException, WSTrustException, NumberFormatException {
         final URI requestType = URI.create(WSTrustConstants.ISSUE_REQUEST);
         AppliesTo applTo = null;
         if (appliesTo != null){
@@ -353,6 +357,11 @@ public class TrustPluginImpl implements TrustPlugin {
         }
         rst.setComputedKeyAlgorithm(URI.create(WSTrustConstants.CK_PSHA1));
         
+        if (oboToken != null){
+            OnBehalfOf obo = fact.createOnBehalfOf(oboToken);
+            rst.setOnBehalfOf(obo);
+        }
+       
         if (log.isLoggable(Level.FINE)) {
             log.log(Level.FINE,
                     LogStringsMessages.WST_1006_CREATED_RST_ISSUE(elemToString(rst)));

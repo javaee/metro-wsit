@@ -123,7 +123,8 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
             LogDomainConstants.TRUST_IMPL_DOMAIN,
             LogDomainConstants.TRUST_IMPL_DOMAIN_BUNDLE);
     
-    private static final String SAML_HOLDER_OF_KEY = "urn:oasis:names:tc:SAML:1.0:cm:holder-of-key";
+    private static final String SAML_HOLDER_OF_KEY_1_0 = "urn:oasis:names:tc:SAML:1.0:cm:holder-of-key";
+    private static final String SAML_HOLDER_OF_KEY_2_0 = "urn:oasis:names:tc:SAML:2.0:cm:holder-of-key";
     
     public Token createSAMLAssertion(final String appliesTo, final String tokenType, final String keyType, final String assertionId, final String issuer, final  Map<QName, List<String>> claimedAttrs, final IssuedTokenContext context) throws WSTrustException {
         Token token = null;
@@ -398,7 +399,7 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
             final Advice advice = samlFac.createAdvice(null, null, null);
             
             final List<String> confirmMethods = new ArrayList<String>();
-            confirmMethods.add(SAML_HOLDER_OF_KEY);
+            confirmMethods.add(SAML_HOLDER_OF_KEY_1_0);
             
             final SubjectConfirmation subjectConfirm = samlFac.createSubjectConfirmation(
                     confirmMethods, null, keyInfo.getElement());
@@ -465,7 +466,7 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
             final KeyInfoConfirmationData keyInfoConfData = samlFac.createKeyInfoConfirmationData(keyInfo.getElement());
             
             final SubjectConfirmation subjectConfirm = samlFac.createSubjectConfirmation(
-                    null, keyInfoConfData, SAML_HOLDER_OF_KEY);
+                    null, keyInfoConfData, SAML_HOLDER_OF_KEY_2_0);
             
             com.sun.xml.wss.saml.Subject subj = null;
             final List<Attribute> attrs = new ArrayList<Attribute>();

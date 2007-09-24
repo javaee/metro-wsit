@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustElementFactory.java,v 1.10 2007-05-29 22:11:29 ofung Exp $
+ * $Id: WSTrustElementFactory.java,v 1.11 2007-09-24 17:48:46 jdg6688 Exp $
  */
 
 /*
@@ -40,6 +40,7 @@
 
 package com.sun.xml.ws.security.trust;
 
+import com.sun.xml.ws.security.trust.elements.OnBehalfOf;
 import com.sun.xml.ws.security.trust.elements.str.DirectReference;
 import com.sun.xml.ws.security.trust.elements.str.KeyIdentifier;
 
@@ -109,6 +110,7 @@ import javax.xml.bind.JAXBException;
  * @author Kumar Jayanti
  */
 public abstract class WSTrustElementFactory {
+   
        
    // private static WSTrustElementFactory trustElemFactory 
      //       = new WSTrustElementFactoryImpl();
@@ -175,6 +177,7 @@ public abstract class WSTrustElementFactory {
      */
     public abstract BinarySecret createBinarySecret(Element elem) throws WSTrustException;
 
+    public abstract OnBehalfOf createOnBehalfOf(Token oboToken);
     /**
      * Create a Lifetime.
      */

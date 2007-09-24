@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustElementFactoryImpl.java,v 1.1 2007-08-23 12:40:56 shyam_rao Exp $
+ * $Id: WSTrustElementFactoryImpl.java,v 1.2 2007-09-24 17:48:45 jdg6688 Exp $
  */
 
 /*
@@ -35,6 +35,7 @@ import com.sun.xml.ws.api.security.trust.Claims;
 import com.sun.xml.ws.security.trust.elements.Entropy;
 import com.sun.xml.ws.security.trust.elements.IssuedTokens;
 import com.sun.xml.ws.security.trust.elements.Lifetime;
+import com.sun.xml.ws.security.trust.elements.OnBehalfOf;
 import com.sun.xml.ws.security.trust.elements.RenewTarget;
 import com.sun.xml.ws.security.trust.elements.Renewing;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponse;
@@ -179,6 +180,10 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
      */
     public Lifetime createLifetime(AttributedDateTime created,  AttributedDateTime expires) {
         return new LifetimeImpl(created, expires);
+    }
+    
+    public OnBehalfOf createOnBehalfOf(Token oboToken){
+        return null;
     }
     
     /**

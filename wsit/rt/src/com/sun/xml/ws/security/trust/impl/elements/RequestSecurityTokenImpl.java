@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityTokenImpl.java,v 1.13 2007-05-29 22:11:34 ofung Exp $
+ * $Id: RequestSecurityTokenImpl.java,v 1.14 2007-09-24 17:48:45 jdg6688 Exp $
  */
 
 /*
@@ -308,6 +308,10 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
     
     public final void setOnBehalfOf(final OnBehalfOf onBehalfOf) {
         obo = onBehalfOf;
+ 
+        final JAXBElement<OnBehalfOfType> oboElement =
+                (new ObjectFactory()).createOnBehalfOf((OnBehalfOfType)onBehalfOf);
+        getAny().add(oboElement);
     }
     
     public OnBehalfOf getOnBehalfOf() {

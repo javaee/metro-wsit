@@ -38,6 +38,8 @@ package com.sun.xml.ws.security.trust.impl;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.security.AccessControlContext;
+import java.security.AccessController;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -73,6 +75,7 @@ import com.sun.xml.ws.security.trust.WSTrustFactory;
 import com.sun.xml.ws.security.trust.elements.BinarySecret;
 import com.sun.xml.ws.security.trust.elements.Entropy;
 import com.sun.xml.ws.security.trust.elements.Lifetime;
+import com.sun.xml.ws.security.trust.elements.OnBehalfOf;
 import com.sun.xml.ws.security.trust.elements.RequestedProofToken;
 import com.sun.xml.ws.security.trust.elements.RequestedAttachedReference;
 import com.sun.xml.ws.security.trust.elements.RequestedUnattachedReference;
@@ -90,6 +93,7 @@ import java.util.logging.Logger;
 import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
 
 import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
+import org.w3c.dom.Element;
 
 public abstract class IssueSamlTokenContract implements com.sun.xml.ws.api.security.trust.IssueSamlTokenContract<RequestSecurityToken, RequestSecurityTokenResponse> {
     
@@ -156,12 +160,24 @@ public abstract class IssueSamlTokenContract implements com.sun.xml.ws.api.secur
         }
         
         
-        // Get authenticaed client Subject
-        final Subject subject = context.getRequestorSubject();
+        // Get authenticaed client Subject 
+        Subject subject = context.getRequestorSubject();
+        if (subject == null){
+            AccessControlContext acc = AccessController.getContext();
+            subject = Subject.getSubject(acc);
+        }
         if(subject == null){
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0030_REQUESTOR_NULL());
             throw new WSTrustException(LogStringsMessages.WST_0030_REQUESTOR_NULL());
+        }
+        
+        OnBehalfOf obo = rst.getOnBehalfOf();
+        if (obo != null){
+            Object oboToken = obo.getAny();
+            if (oboToken != null){
+                subject.getPublicCredentials().add((Element)oboToken);
+            }
         }
         
         // Check if the client is authorized to be issued the token

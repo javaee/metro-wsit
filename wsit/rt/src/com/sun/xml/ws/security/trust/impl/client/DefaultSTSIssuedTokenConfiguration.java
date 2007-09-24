@@ -37,7 +37,7 @@
 package com.sun.xml.ws.security.trust.impl.client;
 
 import com.sun.xml.ws.api.security.trust.client.STSIssuedTokenConfiguration;
-
+import com.sun.xml.ws.security.Token;
 /**
  *
  * @author Jiandong Guo
@@ -57,6 +57,8 @@ public class DefaultSTSIssuedTokenConfiguration extends STSIssuedTokenConfigurat
     private String canAlg = null;
     
     private String keyWrapAlg = null;
+    
+    private Token oboToken = null;
     
     public DefaultSTSIssuedTokenConfiguration(String stsEndpoint, String stsMEXAddress){
         super(stsEndpoint, stsMEXAddress);
@@ -95,6 +97,10 @@ public class DefaultSTSIssuedTokenConfiguration extends STSIssuedTokenConfigurat
         this.keyWrapAlg = keyWrapAlg;
     }
     
+    public void setOBOToken(Token token){
+        this.oboToken = token;
+    }
+    
     public String getTokenType(){
         return this.tokenType;
     }
@@ -121,5 +127,9 @@ public class DefaultSTSIssuedTokenConfiguration extends STSIssuedTokenConfigurat
     
     public String getKeyWrapAlgorithm(){
         return this.keyWrapAlg;
+    }
+    
+    public Token getOBOToken(){
+        return this.oboToken;
     }
 }

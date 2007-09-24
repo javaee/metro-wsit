@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustElementFactoryImpl.java,v 1.14 2007-05-29 22:11:33 ofung Exp $
+ * $Id: WSTrustElementFactoryImpl.java,v 1.15 2007-09-24 17:48:45 jdg6688 Exp $
  */
 
 /*
@@ -50,6 +50,7 @@ import com.sun.xml.ws.security.trust.elements.CancelTarget;
 import com.sun.xml.ws.security.trust.elements.Entropy;
 import com.sun.xml.ws.security.trust.elements.IssuedTokens;
 import com.sun.xml.ws.security.trust.elements.Lifetime;
+import com.sun.xml.ws.security.trust.elements.OnBehalfOf;
 import com.sun.xml.ws.security.trust.elements.RenewTarget;
 import com.sun.xml.ws.security.trust.elements.Renewing;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponse;
@@ -66,6 +67,7 @@ import com.sun.xml.ws.security.trust.impl.elements.CancelTargetImpl;
 import com.sun.xml.ws.security.trust.impl.elements.EntropyImpl;
 import com.sun.xml.ws.security.trust.impl.elements.IssuedTokensImpl;
 import com.sun.xml.ws.security.trust.impl.elements.LifetimeImpl;
+import com.sun.xml.ws.security.trust.impl.elements.OnBehalfOfImpl;
 import com.sun.xml.ws.security.trust.impl.elements.RequestSecurityTokenResponseImpl;
 import com.sun.xml.ws.security.trust.impl.elements.RequestSecurityTokenResponseCollectionImpl;
 import com.sun.xml.ws.security.trust.impl.elements.RequestedProofTokenImpl;
@@ -200,6 +202,9 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
         return new IssuedTokensImpl(issuedTokens);
     }
     
+    public OnBehalfOf createOnBehalfOf(Token oboToken){
+        return new OnBehalfOfImpl(oboToken);
+    }
     /**
      * Create an Entropy with a BinarySecret
      */

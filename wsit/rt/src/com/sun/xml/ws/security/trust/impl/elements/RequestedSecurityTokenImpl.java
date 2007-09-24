@@ -1,5 +1,5 @@
 /*
- * $Id: RequestedSecurityTokenImpl.java,v 1.8 2007-05-29 22:11:34 ofung Exp $
+ * $Id: RequestedSecurityTokenImpl.java,v 1.9 2007-09-24 17:48:45 jdg6688 Exp $
  */
 
 /*
@@ -99,7 +99,7 @@ public class RequestedSecurityTokenImpl extends RequestedSecurityTokenType imple
         final Object rdst = rdstType.getAny();
         if (rdst instanceof JAXBElement){
             final JAXBElement rdstEle = (JAXBElement)rdst; 
-           final QName name = rdstEle.getName();
+            final QName name = rdstEle.getName();
             if(SCT_QNAME.equals(name)){
                 final SecurityContextTokenType sctType = (SecurityContextTokenType)rdstEle.getValue();
                 setToken(new SecurityContextTokenImpl(sctType));
