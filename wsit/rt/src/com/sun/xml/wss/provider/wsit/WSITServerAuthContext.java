@@ -45,6 +45,7 @@ import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.impl.NewSecurityRecipient;
 import com.sun.xml.wss.impl.ProcessingContextImpl;
 import com.sun.xml.wss.impl.WssSoapFaultException;
+import com.sun.xml.wss.impl.XWSSecurityRuntimeException;
 import com.sun.xml.wss.impl.filter.DumpFilter;
 import com.sun.xml.wss.impl.misc.DefaultCallbackHandler;
 import com.sun.xml.wss.impl.misc.DefaultSecurityEnvironmentImpl;
@@ -267,6 +268,10 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
             thereWasAFault = true;            
             msg = Messages.create(xwse, pipeConfig.getBinding().getSOAPVersion());
          
+        } catch (XWSSecurityRuntimeException xwse) {
+            thereWasAFault = true;            
+            msg = Messages.create(xwse, pipeConfig.getBinding().getSOAPVersion());
+            
         }  catch (WebServiceException xwse) {
             thereWasAFault = true;            
             msg = Messages.create(xwse, pipeConfig.getBinding().getSOAPVersion());

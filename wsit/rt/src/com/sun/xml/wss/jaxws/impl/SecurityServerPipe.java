@@ -48,6 +48,7 @@ import com.sun.xml.ws.security.trust.WSTrustConstants;
 
 import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.impl.ProcessingContextImpl;
+import com.sun.xml.wss.impl.XWSSecurityRuntimeException;
 import com.sun.xml.wss.impl.policy.mls.MessagePolicy;
 import com.sun.xml.wss.ProcessingContext;
 import com.sun.xml.wss.XWSSecurityException;
@@ -181,6 +182,10 @@ public class SecurityServerPipe extends SecurityPipeBase {
             thereWasAFault = true;            
             msg = Messages.create(ex, pipeConfig.getBinding().getSOAPVersion());
         } catch (XWSSecurityException xwse) {
+            thereWasAFault = true;            
+            msg = Messages.create(xwse, pipeConfig.getBinding().getSOAPVersion());
+          
+        } catch (XWSSecurityRuntimeException xwse) {
             thereWasAFault = true;            
             msg = Messages.create(xwse, pipeConfig.getBinding().getSOAPVersion());
             
