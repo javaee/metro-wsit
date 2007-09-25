@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ Copyright (c) 2005 Sun Microsystems, Inc.
+ All rights reserved. 
+-->
+
+<endpoints
+    xmlns="http://java.sun.com/xml/ns/jax-ws/ri/runtime"
+    version="2.0">
+
+    <endpoint
+        name="simple"
+        interface="simple.server.IPingService"
+        implementation="simple.server.PingImpl"
+        wsdl="WEB-INF/wsdl/PingService.wsdl"    
+        service="{http://xmlsoap.org/Ping}PingService"
+        port="{http://xmlsoap.org/Ping}PingPort"
+        binding="http://www.w3.org/2003/05/soap/bindings/HTTP/" 
+        url-pattern="/simple" />
+</endpoints>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ Copyright (c) 2005 Sun Microsystems, Inc.
+ All rights reserved. 
+-->
+
+<!DOCTYPE project [
+	<!ENTITY glassfish SYSTEM "../etc/common-targets-glassfish.xml">
+        <!ENTITY tomcat SYSTEM "../etc/common-targets-tomcat.xml">
+        <!ENTITY targets SYSTEM "../etc/targets.xml">
+]>
+
+<project basedir="." default="help" name="sc">
+
+    <property file="build.properties" />
+	
+    &targets; 
+    
+    <target name="run-sample" depends="" >
+    	<echo>RUN SAMPLE</echo>
+    	<antcall target="server" />
+    	<sleep seconds="15"/>
+    	<antcall target="client" />
+    	<antcall target="run" />
+    </target>
+
+    
+</project>
