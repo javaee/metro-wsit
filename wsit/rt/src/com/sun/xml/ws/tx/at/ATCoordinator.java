@@ -105,7 +105,7 @@ import java.util.logging.Level;
  *
  * @author Ryan.Shoemaker@Sun.COM
  * @author Joe.Fialli@Sun.COM
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  * @since 1.0
  */
 public class ATCoordinator extends Coordinator implements Synchronization, XAResource {
@@ -1137,6 +1137,8 @@ public class ATCoordinator extends Coordinator implements Synchronization, XARes
         }
         super.expire();
     }
+
+    private void foo() {}
 
     @Override
     public void forget() {

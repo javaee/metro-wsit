@@ -67,7 +67,7 @@ import java.util.logging.Level;
  * This class ...
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  * @since 1.0
  */
 // suppress known deprecation warnings about using short term workaround StatefulWebService.export(Class, String webServiceEndpoint, PortType)
@@ -105,19 +105,28 @@ final public class TXStatefulWebserviceFactoryImpl implements StatefulWebservice
     @NotNull
     public EndpointReference createService(@NotNull String serviceName, @NotNull String portName,
                                            @NotNull URI address, @NotNull AddressingVersion addressingVersion,
-                                           @NotNull String activityId, @NotNull String registrantId) {
+                                           @NotNull String activityId, @NotNull String registrantId,
+                                           long timeoutInMillis) {
+
+        // scale the stateful ws timeout up by 25%
+        timeoutInMillis *= 1.25;
+
         registerFallback();
         if (serviceName.equals(ParticipantPortTypeImpl.serviceName)) {
             // ParticipantPortTypeImpl && CoordinatorPortTypeImpl have the same serviceName
             if (portName.equals(ParticipantPortTypeImpl.portName)) {
                 ParticipantPortTypeImpl participant =
                         new ParticipantPortTypeImpl(activityId, registrantId);
-                return ParticipantPortTypeImpl.getManager().
+                final StatefulWebServiceManager<ParticipantPortTypeImpl> statefulWebServiceManager = ParticipantPortTypeImpl.getManager();
+                statefulWebServiceManager.setTimeout(timeoutInMillis, null);
+                return statefulWebServiceManager.
                         export(addressingVersion.eprType.eprClass, address.toString(), participant);
             } else if (portName.equals(CoordinatorPortTypeImpl.portName)) {
                 CoordinatorPortTypeImpl coordinator =
                         new CoordinatorPortTypeImpl(activityId, registrantId);
-                return CoordinatorPortTypeImpl.getManager().
+                final StatefulWebServiceManager<CoordinatorPortTypeImpl> statefulWebServiceManager = CoordinatorPortTypeImpl.getManager();
+                statefulWebServiceManager.setTimeout(timeoutInMillis, null);
+                return statefulWebServiceManager.
                         export(addressingVersion.eprType.eprClass, address.toString(), coordinator);
             } else {
                 throw new IllegalStateException( LocalizationMessages.WSTX_SERVICE_PORT_NOT_FOUND_5001(portName, serviceName));
@@ -126,12 +135,16 @@ final public class TXStatefulWebserviceFactoryImpl implements StatefulWebservice
             if (portName.equals(RegistrationRequesterPortTypeImpl.portName)) {
                 RegistrationRequesterPortTypeImpl registrationRequester =
                         new RegistrationRequesterPortTypeImpl(activityId, registrantId);
-                return RegistrationRequesterPortTypeImpl.getManager().
+                final StatefulWebServiceManager<RegistrationRequesterPortTypeImpl> statefulWebServiceManager = RegistrationRequesterPortTypeImpl.getManager();
+                statefulWebServiceManager.setTimeout(timeoutInMillis, null);
+                return statefulWebServiceManager.
                         export(addressingVersion.eprType.eprClass, address.toString(), registrationRequester);
             } else if (portName.equals(RegistrationCoordinatorPortTypeImpl.portName)) {
                 RegistrationCoordinatorPortTypeImpl registrationCoordinator =
                         new RegistrationCoordinatorPortTypeImpl(activityId);
-                return RegistrationCoordinatorPortTypeImpl.getManager().
+                final StatefulWebServiceManager<RegistrationCoordinatorPortTypeImpl> statefulWebServiceManager = RegistrationCoordinatorPortTypeImpl.getManager();
+                statefulWebServiceManager.setTimeout(timeoutInMillis, null);
+                return statefulWebServiceManager.
                         export(addressingVersion.eprType.eprClass, address.toString(), registrationCoordinator);
             } else {
                 throw new IllegalStateException( LocalizationMessages.WSTX_SERVICE_PORT_NOT_FOUND_5001(portName, serviceName));

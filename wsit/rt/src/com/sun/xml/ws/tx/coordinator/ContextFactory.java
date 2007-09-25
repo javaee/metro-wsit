@@ -51,7 +51,7 @@ import java.util.logging.Level;
  * in WS-Coordination 2004/10 member submission and 2006/03 OASIS.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  * @since 1.0
  */
 public class ContextFactory {
@@ -91,7 +91,7 @@ public class ContextFactory {
             // identify the activity when the <register> requests come in.
             context.setRegistrationService(
                     RegistrationManager.newRegistrationEPR(
-                            new ActivityIdentifier(context.getIdentifier())));
+                            new ActivityIdentifier(context.getIdentifier()), expires));
         } else if (WSAT_OASIS_NSURI.equals(coordType)) {
             throw new UnsupportedOperationException(
                     LocalizationMessages.OASIS_UNSUPPORTED_3000()

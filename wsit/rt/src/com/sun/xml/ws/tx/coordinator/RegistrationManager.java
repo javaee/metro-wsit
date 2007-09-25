@@ -56,6 +56,7 @@ import com.sun.xml.ws.tx.webservice.member.coord.RegisterType;
 import com.sun.xml.ws.tx.webservice.member.coord.RegistrationCoordinatorPortType;
 import com.sun.xml.ws.tx.webservice.member.coord.RegistrationPortTypeRPC;
 import com.sun.xml.ws.tx.webservice.member.coord.RegistrationRequesterPortType;
+import com.sun.xml.ws.tx.webservice.member.coord.RegistrationRequesterPortTypeImpl;
 
 import javax.xml.ws.EndpointReference;
 import javax.xml.ws.WebServiceContext;
@@ -70,7 +71,7 @@ import java.util.logging.Level;
  * for register and registerResponse delegate to the methods in this class.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  * @since 1.0
  */
 public final class RegistrationManager {
@@ -115,13 +116,14 @@ public final class RegistrationManager {
      * code to point of use (ie during coordination context creation)?
      *
      * @param activityId the coordination id for this activity, maintained as state in the registration service
+     * @param timeoutInMillis the expiration value for this context
      * @return an EPR containing the address of our registration service
      */
-    public static EndpointReference newRegistrationEPR(ActivityIdentifier activityId) {
+    public static EndpointReference newRegistrationEPR(ActivityIdentifier activityId, long timeoutInMillis) {
         StatefulWebserviceFactory swf = StatefulWebserviceFactoryFactory.getInstance();
         return swf.createService("Coordinator", "RegistrationCoordinator",
                 localAsynchronousRegistrationURI, AddressingVersion.MEMBER,
-                activityId.getValue(), null);
+                activityId.getValue(), null, timeoutInMillis);
     }
 
     public static StatefulWebServiceManager getRegistrationCoordinatorStatefulWebServiceManager() {
@@ -321,7 +323,8 @@ public final class RegistrationManager {
             EndpointReference registrationRequesterEPR =
                     swf.createService("Coordinator", "RegistrationRequester",
                             localRegistrationRequesterURI, AddressingVersion.MEMBER,
-                            r.getCoordinator().getIdValue(), r.getIdValue());
+                            r.getCoordinator().getIdValue(), r.getIdValue(),
+                            r.getCoordinator().getExpires());
 
             // set replyTo for outgoing register message
             OneWayFeature owf = new OneWayFeature();
@@ -352,6 +355,10 @@ public final class RegistrationManager {
                         LocalizationMessages.REGISTER_FAILED_3006(
                                 registrationEPR, c.getIdValue(), wse.getLocalizedMessage()));
                 throw wse;
+            } finally {
+                // release resources
+                RegistrationRequesterPortTypeImpl rrpti = RegistrationRequesterPortTypeImpl.getManager().resolve(registrationRequesterEPR);
+                if (rrpti != null) RegistrationRequesterPortTypeImpl.getManager().unexport(rrpti);
             }
 
             if (r.isRegistrationCompleted()) {

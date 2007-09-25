@@ -41,6 +41,7 @@ import com.sun.xml.ws.tx.common.ActivityIdentifier;
 import com.sun.xml.ws.tx.common.Identifier;
 import com.sun.xml.ws.tx.common.TxLogger;
 import com.sun.xml.ws.tx.webservice.member.coord.CreateCoordinationContextType;
+import com.sun.xml.ws.tx.webservice.member.coord.RegistrationCoordinatorPortTypeImpl;
 
 import javax.xml.ws.EndpointReference;
 import javax.xml.ws.WebServiceContext;
@@ -56,7 +57,7 @@ import java.util.logging.Level;
  * is constructed and managed by this class.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  * @since 1.0
  */
 public abstract class Coordinator {
@@ -297,6 +298,10 @@ public abstract class Coordinator {
         if (expirationTask != null){
             expirationTask.cancel();
             expirationTask = null;
+        }
+        final RegistrationCoordinatorPortTypeImpl rpti = RegistrationCoordinatorPortTypeImpl.getManager().resolve(context.getRegistrationService());
+        if (rpti != null) {
+            RegistrationCoordinatorPortTypeImpl.getManager().unexport(rpti);
         }
         CoordinationManager.getInstance().removeCoordinator(this.id.getValue());
     }

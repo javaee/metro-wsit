@@ -45,7 +45,7 @@ import java.net.URI;
  * This class ...
  *
  * @author Joe.Fialli@Sun.COM Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @since 1.0
  */
 public interface StatefulWebserviceFactory {
@@ -68,6 +68,7 @@ public interface StatefulWebserviceFactory {
      * @param addressingVersion ws-addressing version
      * @param activityId activity id
      * @param registrantId registrant id
+     * @param timeoutInMillis timeout value from the coordination context
      * @return EndpointReference for the service
      */
     public EndpointReference createService(String serviceName,
@@ -75,6 +76,7 @@ public interface StatefulWebserviceFactory {
                                            URI address,
                                            AddressingVersion addressingVersion,
                                            String activityId,
-                                           String registrantId);
+                                           String registrantId,
+                                           long timeoutInMillis);
     public boolean isWSTXServiceAvailable();
 }
