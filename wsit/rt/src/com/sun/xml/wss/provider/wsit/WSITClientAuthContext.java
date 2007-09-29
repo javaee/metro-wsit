@@ -115,9 +115,8 @@ import javax.xml.ws.WebServiceException;
 import javax.xml.ws.soap.SOAPFaultException;
 
 import java.util.logging.Level;
-import java.util.logging.Logger;
-import com.sun.xml.wss.provider.wsit.logging.LogDomainConstants;
 import com.sun.xml.wss.provider.wsit.logging.LogStringsMessages;
+import javax.xml.ws.BindingProvider;
 
 /**
  *
@@ -575,7 +574,7 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
                         jaxbContext, packet.endpointAddress.toString(), packet);
                 
                 try {
-                    
+                    copyStandardSecurityProperties(packet,requestPacket);
                     Packet secureRequestPacket = secureRequest(requestPacket, null, true);
                     Packet responsePacket = nextPipe.process(secureRequestPacket);
                     Packet validatedResponsePacket = validateResponse(responsePacket, null, null);
@@ -677,6 +676,17 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
             return EMPTY_LIST;
         }
         return sph.getIssuedTokens();
+    }
+
+    private void copyStandardSecurityProperties(Packet packet, Packet requestPacket) {
+        String username = (String) packet.invocationProperties.get(BindingProvider.USERNAME_PROPERTY);
+        if (username != null) {
+            requestPacket.invocationProperties.put(BindingProvider.USERNAME_PROPERTY, username);
+        }
+        String password = (String) packet.invocationProperties.get(BindingProvider.PASSWORD_PROPERTY);
+        if (password != null) {
+            requestPacket.invocationProperties.put(BindingProvider.PASSWORD_PROPERTY, password);
+        }
     }
       
 }

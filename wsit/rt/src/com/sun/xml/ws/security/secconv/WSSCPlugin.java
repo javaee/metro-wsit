@@ -50,9 +50,7 @@ import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
-import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.policy.AssertionSet;
-import com.sun.xml.ws.policy.NestedPolicy;
 //import com.sun.xml.ws.fault.SOAPFaultBuilder;
 
 import com.sun.xml.ws.policy.PolicyAssertion;
@@ -94,6 +92,7 @@ import java.io.StringWriter;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
+import javax.xml.ws.BindingProvider;
 
 /**
  *
@@ -273,6 +272,8 @@ public class WSSCPlugin {
             reqPacket.contentNegotiation = packet.contentNegotiation;
         }
         
+        copyStandardSecurityProperties(packet,reqPacket);
+        
         // Send the message
         final Packet respPacket = securityPipe.process(reqPacket);
         
@@ -363,5 +364,16 @@ public class WSSCPlugin {
         list.fillRequestAddressingHeaders(packet, addVer,binding.getSOAPVersion(),false,action);
         
         return packet;
+    }
+    
+    private void copyStandardSecurityProperties(Packet packet, Packet requestPacket) {
+        String username = (String) packet.invocationProperties.get(BindingProvider.USERNAME_PROPERTY);
+        if (username != null) {
+            requestPacket.invocationProperties.put(BindingProvider.USERNAME_PROPERTY, username);
+        }
+        String password = (String) packet.invocationProperties.get(BindingProvider.PASSWORD_PROPERTY);
+        if (password != null) {
+            requestPacket.invocationProperties.put(BindingProvider.PASSWORD_PROPERTY, password);
+        }
     }
 }
