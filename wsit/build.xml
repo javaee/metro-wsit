@@ -56,6 +56,10 @@
         <zip basedir="${dist.image.dir}" destfile="${dist.dir}/${install.name}.zip"/>
         <installerBuilder classFile="${dist.dir}/${install.name}-installer.jar" licenseFile="CDDLv1.0.1.txt" zipFile="${dist.dir}/${install.name}.zip"/>
     </target>
+    
+    <target name="installer">
+        <installerBuilder classFile="${dist.dir}/${install.name}-installer.jar" licenseFile="CDDLv1.0.1.txt" zipFile="${dist.dir}/${install.name}.zip"/>
+    </target>
 
     <target name="dist" depends="jar"/>
 
@@ -67,6 +71,18 @@
             <fileset dir="${basedir}" includes="CDDL*.*"/>
             <fileset dir="${etc.dir}" includes="wsit-on-*.*"/>
         </copy>
+        <generate-release-notes target="${dist.image.wsit.dir}/docs"/>
+        <!-- generate samples -->
+        <unzip src="lib/jaxws-samples.zip" dest="${dist.image.wsit.dir}/samples" />
+        <replace dir="${dist.image.wsit.dir}/samples">
+            <replacefilter token="env.JAXWS_HOME" value="env.METRO_HOME" />
+        </replace>
+        <!-- copy over shell scripts -->
+        <unzip src="lib/jaxws-bin.zip" dest="${dist.image.wsit.dir}/bin" />
+        <replace dir="${dist.image.wsit.dir}/bin">
+            <replacefilter token="JAXWS_HOME" value="METRO_HOME" />
+            <replacefilter token="jaxws-tools.jar" value="webservices-tools.jar" />
+        </replace>
     </target>
 
     <target name="-javadoc-build" depends="init"/>
@@ -87,12 +103,12 @@
             <!-- Unzip the JARs -->
             <delete dir="${tmpdir}"/>
             <mkdir dir="${tmpdir}"/>
-            <get src="@{jaxws.base.url}/lastSuccessfulBuild/artifact/jax-ws-sources/jaxws-ri/build/jaxws-ri.zip"
+            <get src="@{jaxws.base.url}/artifact/jax-ws-sources/jaxws-ri/build/jaxws-ri.zip"
                     dest="${tmpdir}/jaxws-ri.zip"/>
             <unzip src="${tmpdir}/jaxws-ri.zip" dest="${tmpdir}"/>
 
             <!-- unzip the JAR source zips -->
-            <get src="@{jaxws.base.url}/lastSuccessfulBuild/artifact/jax-ws-sources/jaxws-ri/build/jaxws-libs.src.zip"
+            <get src="@{jaxws.base.url}/artifact/jax-ws-sources/jaxws-ri/build/jaxws-libs.src.zip"
                     dest="${tmpdir}/jaxws-libs.src.zip"/>
             <unzip src="${tmpdir}/jaxws-libs.src.zip" dest="${tmpdir}"/>
 
@@ -105,19 +121,28 @@
                 <fileset dir="${tmpdir}/jaxws-ri/lib" includes="jaxb-xjc.*, *-tools.*"/>
                 <fileset dir="${tmpdir}" includes="jaxb-xjc.*, *-tools.*"/>
             </copy>
+            <zip file="lib/jaxws-samples.zip">
+              <fileset dir="${tmpdir}/jaxws-ri/samples" />
+            </zip>
+          <zip file="lib/jaxws-bin.zip">
+            <fileset dir="${tmpdir}/jaxws-ri/bin" />
+          </zip>
 
             <!-- retrieve the JAX-WS source zips -->
-            <get src="@{jaxws.base.url}/lastSuccessfulBuild/artifact/jax-ws-sources/jaxws-ri/dist/jaxws-ri/lib/jaxws-rt.src.zip"
+            <get src="@{jaxws.base.url}/artifact/jax-ws-sources/jaxws-ri/dist/jaxws-ri/lib/jaxws-rt.src.zip"
                     dest="${lib.runtime.dir}/jaxws-rt.src.zip"/>
-            <get src="@{jaxws.base.url}/lastSuccessfulBuild/artifact/jax-ws-sources/jaxws-ri/dist/jaxws-ri/lib/jaxws-tools.src.zip"
+            <get src="@{jaxws.base.url}/artifact/jax-ws-sources/jaxws-ri/dist/jaxws-ri/lib/jaxws-tools.src.zip"
                     dest="${lib.tooltime.dir}/jaxws-tools.src.zip"/>
 
             <!-- Local transport JAR and Source -->
-            <get src="@{jaxws.base.url}/lastSuccessfulBuild/artifact/jax-ws-sources/jaxws-ri/transports/local/build/jaxws-local-transport.jar"
+            <get src="@{jaxws.base.url}/artifact/jax-ws-sources/jaxws-ri/transports/local/build/jaxws-local-transport.jar"
                     dest="${lib.runtime.dir}/jaxws-local-transport.jar"/>
-            <get src="@{jaxws.base.url}/lastSuccessfulBuild/artifact/jax-ws-sources/jaxws-ri/transports/local/build/jaxws-local-transport-src.zip"
+            <get src="@{jaxws.base.url}/artifact/jax-ws-sources/jaxws-ri/transports/local/build/jaxws-local-transport-src.zip"
                     dest="${lib.runtime.dir}/jaxws-local-transport-src.zip"/>
-                    
+            
+            <!-- release notes source -->
+            <get src="@{jaxws.base.url}/artifact/jax-ws-sources/jaxws-ri/build/release-notes-src.zip"
+                    dest="lib/releasenotes/release-notes-src.zip"/>
         </sequential>
         
     </macrodef>
@@ -168,8 +193,7 @@
         <mkdir dir="${dist.dir}/wsit-integration"/>
 
         <copy todir="${wsit.integration.dir}" >
-            <fileset dir="${dist.dir}/image/jax-ws-latest-wsit/lib">
-                <!-- include name="wstx-services.jar"/ -->
+            <fileset dir="${dist.image.wsit.dir}">
                 <include name="wstx-services.war"/>
             </fileset>
         </copy>
@@ -210,6 +234,57 @@
         <ant dir="${rt.dir}"
              target="test"
              inheritAll="false"/>
+    </target>
+
+    <target name="integrate-htmlmacro-hudson"
+            description="integrate the last successful htmlmacro Hudson build">
+      <get
+          src="http://kohsuke.sfbay.sun.com/hudson/job/htmlmacro/lastSuccessfulBuild/artifact/htmlmacro/build/htmlmacro.zip"
+          dest="${lib.releasenotes.dir}/htmlmacro.zip"/>
+      <mkdir dir="${lib.releasenotes.dir}/htmlmacro"/>
+      <unzip src="${lib.releasenotes.dir}/htmlmacro.zip" dest="${lib.releasenotes.dir}/htmlmacro"/>
+      <copy todir="${lib.releasenotes.dir}" overwrite="true">
+        <fileset dir="${lib.releasenotes.dir}/htmlmacro/" includes="*.zip,*.jar"/>
+      </copy>
+      <delete dir="${lib.releasenotes.dir}/htmlmacro"/>
+      <delete file="${lib.releasenotes.dir}/htmlmacro.zip"/>
+    </target>
+
+  <macrodef name="generate-release-notes">
+        <attribute name="target" /><!-- where to put the generated docs? -->
+        <sequential>
+            <mkdir dir="@{target}"/>
+            <copy todir="@{target}">
+                <fileset dir="docs/releasenotes" includes="style/*, Copyright.txt" />
+            </copy>
+            <taskdef name="htmlmacro" classname="com.sun.wts.tools.htmlmacro.HtmlMacroTask">
+                <classpath>
+                  <fileset dir="lib/releasenotes" />
+                </classpath>
+            </taskdef>
+            <mkdir dir="build/release-notes-src"/>
+            <unzip src="lib/releasenotes/release-notes-src.zip" dest="build/release-notes-src"/>
+            <copy todir="build/release-notes-src" overwrite="true">
+              <fileset dir="docs/releasenotes" />
+            </copy>
+            <htmlmacro destdir="@{target}">
+                <documents dir="build/release-notes-src" includes="*.html" />
+                <tags dir="docs/releasenotes/tags" includes="**/*.tag" />
+                <property key="IMPL_VERSION" value="${release.impl.version}"/>
+                <property key="IMPL_VERSION_SUFFIX" value="${release.impl.version.suffix}"/>
+                <property key="DATE" value="${DSTAMP}"/>
+                <!-- Product name so that we can switch between JAX-WS RI and Metro -->
+                <property key="PRODUCT_SHORT_NAME" value="Metro"/>
+                <property key="PRODUCT_NAME" value="Metro ${release.impl.version} ${release.impl.version.suffix}"/>
+                <!-- Used in various places to refer to installation dir -->
+                <property key="HOME" value="METRO_HOME" />
+            </htmlmacro>
+        </sequential>
+    </macrodef>
+    
+    <target name="test-docs"
+            description="Generate documentation. Useful for checking the output during authoring">
+        <generate-release-notes target="build/releasenotes"/>
     </target>
 
 </project>

@@ -81,7 +81,7 @@
             <delete dir="${tmpdir}"/>
             <mkdir dir="${tmpdir}"/>
             <copy file="${basedir}/${etc.metainf.dir}/MANIFEST.MF" todir="${tmpdir}"/>
-            <updateManifestWithVersion file="${tmpdir}/MANIFEST.MF"/>
+            <updateManifestWithVersion file="${tmpdir}/MANIFEST.MF" class-path="webservices-rt.jar"/>
             <concatmanifest tempdir="${tmpdir}" manifest="${tmpdir}/MANIFEST.MF">
                 <fileset dir="@{libdir}">
                     <include name="*.jar"/>
@@ -164,7 +164,7 @@
         <property name="wsit.tools.jarname" value="wsit-tools"/>
         <mkdir dir="${wsit.tools.dir}"/>
         
-        <updateManifestWithVersion file="${tmpdir}/MANIFEST.MF"/>
+        <updateManifestWithVersion file="${tmpdir}/MANIFEST.MF" class-path="webservices-rt.jar"/>
         <jar destfile="${wsit.tools.dir}/${wsit.tools.jarname}.jar" manifest="${tmpdir}/MANIFEST.MF">
             <fileset dir="${tools.dir}/build/classes"/>
         </jar>

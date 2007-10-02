@@ -84,7 +84,7 @@
             <delete dir="${rtjar-tmpdir}"/>
             <mkdir dir="${rtjar-tmpdir}"/>
             <copy file="${basedir}/${etc.metainf.dir}/MANIFEST.MF" todir="${rtjar-tmpdir}"/>
-            <updateManifestWithVersion file="${rtjar-tmpdir}/MANIFEST.MF"/>
+            <updateManifestWithVersion file="${rtjar-tmpdir}/MANIFEST.MF" class-path="webservices-api.jar webservices-extra.jar"/>
             <concatmanifest tempdir="${rtjar-tmpdir}" manifest="${rtjar-tmpdir}/MANIFEST.MF">
                 <fileset dir="@{libdir}">
                     <include name="*.jar"/>
@@ -109,7 +109,7 @@
             <delete dir="${apijar-tmpdir}"/>
             <mkdir dir="${apijar-tmpdir}"/>
             <copy file="../${etc.metainf.dir}/MANIFEST.MF" todir="${apijar-tmpdir}"/>
-            <updateManifestWithVersion file="${apijar-tmpdir}/MANIFEST.MF"/>
+            <updateManifestWithVersion file="${apijar-tmpdir}/MANIFEST.MF" class-path="webservices-extra-api.jar"/>
             <concatmanifest tempdir="${apijar-tmpdir}" manifest="${apijar-tmpdir}/MANIFEST.MF">
                 <fileset dir="@{libdir}" >
                     <include name="jaxb-api.jar"/>
@@ -133,7 +133,7 @@
             <delete dir="${extrajar-tmpdir}"/>
             <mkdir dir="${extrajar-tmpdir}"/>
             <copy file="../${etc.metainf.dir}/MANIFEST.MF" todir="${extrajar-tmpdir}"/>
-            <updateManifestWithVersion file="${extrajar-tmpdir}/MANIFEST.MF"/>
+            <updateManifestWithVersion file="${extrajar-tmpdir}/MANIFEST.MF" class-path="webservices-extra-api.jar"/>
             <concatmanifest tempdir="${extrajar-tmpdir}" manifest="${extrajar-tmpdir}/MANIFEST.MF">
                 <fileset dir="@{libdir}" includes="activation.jar,http.jar,jsr250-api.jar,mail-1.4.jar">
                     <!--<includesfile name="*.jar"/>-->
@@ -186,6 +186,10 @@
         <antcall target="combine-jars-extra"/>
         <antcall target="expand-jars-extra-api"/>
         <antcall target="combine-jars-extra-api"/>
+    </target>
+
+    <target name="-pre-jar">
+        <mkdir dir="../${dist.image.wsit.lib.dir}" />
     </target>
 
     <target name="-post-jar" depends="create-wstx-war"/>
@@ -328,7 +332,7 @@
         <property name="wsit.rt.dir" value="${rt.dir}/build"/>
         <property name="wsit.rt.jarname" value="wsit-rt"/>
         <mkdir dir="${wsit.rt.dir}"/>
-        <updateManifestWithVersion file="${tmpdir}/MANIFEST.MF"/>
+        <updateManifestWithVersion file="${tmpdir}/MANIFEST.MF" />
 
         <!-- include wsdl files for wstx resource lookups -->        
         <include-wstx-resources/>
