@@ -58,7 +58,7 @@ import java.util.logging.Level;
  * <p/>
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.6.6.1 $
+ * @version $Revision: 1.6.6.2 $
  * @since 1.0
  */
 public final class CoordinationManager {
@@ -270,7 +270,7 @@ public final class CoordinationManager {
 
             // delegate
             final Coordinator coord = createCoordinator(context, null);
-            context.setRegistrationService(RegistrationManager.newRegistrationEPR((ActivityIdentifier) coord.getId()));
+            context.setRegistrationService(RegistrationManager.newRegistrationEPR((ActivityIdentifier) coord.getId(), context.getExpires()));
             if (logger.isLogging(Level.FINER)) {
                 logger.exiting("CoordinationManager.createSubordinateCoordinator");
             }

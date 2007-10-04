@@ -82,7 +82,7 @@ import java.util.logging.Level;
  * already decided to prepare.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.15.2.1 $
+ * @version $Revision: 1.15.2.2 $
  * @since 1.0
  */
 public class ATParticipant extends Registrant {
@@ -108,7 +108,7 @@ public class ATParticipant extends Registrant {
     private EndpointReference exportCoordinatorProtocolServiceForATParticipant(final Coordinator coord) {
         return StatefulWebserviceFactoryFactory.getInstance().createService(WSAT_COORDINATOR, "Coordinator",
                 ATCoordinator.localCoordinationProtocolServiceURI, AddressingVersion.MEMBER,
-                coord.getIdValue(), this.getIdValue());
+                coord.getIdValue(), this.getIdValue(), coord.getExpires());
     }
 
     /**
@@ -639,7 +639,7 @@ public class ATParticipant extends Registrant {
                 localParticipantProtocolService =
                         swf.createService(WSAT_COORDINATOR, "Participant",
                                 LOCAL_PPS_URI, AddressingVersion.MEMBER,
-                                getATCoordinator().getIdValue(), this.getId().getValue());
+                                getATCoordinator().getIdValue(), this.getId().getValue(), getATCoordinator().getExpires());
             } else {
                 localParticipantProtocolService = getLocalParticipantProtocolServiceEPR();
             }
