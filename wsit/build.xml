@@ -290,7 +290,7 @@
 
     
 
-     <target name="generate-bundle-for-licensee" depends="init,clean">
+     <target name="generate-bundle-for-licensee" depends="init">
          <property name="wsit.ws.dir" value="${basedir}"/>
          <property name="source.drop.dir" value="build/source-bundle"/>
          <property name="source.dist.dir.name" value="wsit-sourcebundle-${BUILD_TAG}"/>
