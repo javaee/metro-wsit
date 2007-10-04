@@ -983,7 +983,13 @@ public class RMServerTube extends TubeBase<RMDestination,
 
             AbstractAckRequested el = (AbstractAckRequested)header
                     .readAsJAXB(unmarshaller);
-            String id = el.getId();
+            String id = null;
+            if (el instanceof com.sun.xml.ws.rm.v200502.AckRequestedElement) {
+                id = ((AckRequestedElement)el).getId();
+            } else {
+                id = ((com.sun.xml.ws.rm.v200702.AckRequestedElement)el).getId(); 
+            }
+
 
             ServerInboundSequence seq = provider.getInboundSequence(id);
 

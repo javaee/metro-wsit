@@ -55,7 +55,7 @@ public abstract class AbstractAckRequested {
     public abstract void setId(String id) ;
 
 
-    public abstract String getId() ;
+    protected abstract String getId() ;
 
 
 
