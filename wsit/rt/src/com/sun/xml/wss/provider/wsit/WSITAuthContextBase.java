@@ -459,7 +459,8 @@ public abstract class WSITAuthContextBase  {
                     
                     PolicyMapKey fKey = null;
                     fKey = wsPolicyMap.createWsdlFaultMessageScopeKey(
-                            serviceName,portName,operationName,fault.getMessage().getName());
+                            serviceName,portName,operationName,
+                            new QName(operationName.getNamespaceURI(), fault.getName()));
                     Policy fPolicy = wsPolicyMap.getFaultMessageEffectivePolicy(fKey);
                     
                     if(fPolicy != null){
