@@ -36,6 +36,15 @@ public class PingServiceClient {
                 put(javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY, serviceURL);  
             
             stub.ping(new Holder("1"), new Holder("sun"), new Holder("Passed!"));
+            
+            // Ping again
+            stub.ping(new Holder("1"), new Holder("sun"), new Holder("Passed again!"));
+            
+            
+             // Ping the third time
+            stub.ping(new Holder("1"), new Holder("sun"), new Holder("Passed again again!"));
+            
+            
         } catch (Exception ex) {
             System.out.println ("Caught Exception: " + ex.getMessage() );
             ex.printStackTrace();
