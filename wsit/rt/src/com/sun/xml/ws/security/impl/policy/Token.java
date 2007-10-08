@@ -65,20 +65,17 @@ public class Token extends PolicyAssertion implements  com.sun.xml.ws.security.p
      */
     
     public Token(){
-        UUID uid = UUID.randomUUID();
-        _id= uid.toString();
+         _id= PolicyUtil.randomUUID();
     }
     
     public Token(QName name) {
-        UUID uid = UUID.randomUUID();
-        _id= uid.toString();
+        _id= PolicyUtil.randomUUID();
     }
     
     public Token(AssertionData name,Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) {
         super(name,nestedAssertions,nestedAlternative);
         
-        UUID uid = UUID.randomUUID();
-        _id= uid.toString();
+         _id= PolicyUtil.randomUUID();
     }
     
     public com.sun.xml.ws.security.policy.Token getToken() {

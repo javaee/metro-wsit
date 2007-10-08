@@ -71,14 +71,12 @@ public class IssuedToken extends PolicyAssertion implements  com.sun.xml.ws.secu
      * Creates a new instance of IssuedToken
      */
     public IssuedToken() {
-        UUID uid = UUID.randomUUID();
-        id= uid.toString();
+        id= PolicyUtil.randomUUID();
     }
     
     public IssuedToken(AssertionData name,Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) {
         super(name,nestedAssertions,nestedAlternative);
-        UUID uid = UUID.randomUUID();
-        id= uid.toString();
+        id= PolicyUtil.randomUUID();
     }
     
     public RequestSecurityTokenTemplate getRequestSecurityTokenTemplate() {

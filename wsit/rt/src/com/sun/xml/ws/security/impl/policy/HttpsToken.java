@@ -43,9 +43,9 @@ import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import java.util.Collection;
 
 import java.util.Map;
-import java.util.UUID;
 import javax.xml.namespace.QName;
 import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
+import com.sun.xml.ws.security.policy.SecurityAssertionValidator.AssertionFitness;
 
 
 /**
@@ -62,14 +62,12 @@ public class HttpsToken extends PolicyAssertion implements com.sun.xml.ws.securi
      * Creates a new instance of HttpsToken
      */
     public HttpsToken() {
-        UUID uid = UUID.randomUUID();
-        id= uid.toString();
+        id= PolicyUtil.randomUUID();
     }
     
     public HttpsToken(AssertionData name,Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) {
         super(name,nestedAssertions,nestedAlternative);
-        UUID uid = UUID.randomUUID();
-        id= uid.toString();
+        id= PolicyUtil.randomUUID();
     }
     
     public void setRequireClientCertificate(boolean value) {

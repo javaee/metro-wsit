@@ -73,8 +73,7 @@ public class RelToken extends PolicyAssertion implements com.sun.xml.ws.security
     /** Creates a new instance of RelToken */
     public RelToken(AssertionData name,Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) {
         super(name,nestedAssertions,nestedAlternative);
-        UUID id = UUID.randomUUID();
-        this.id = id.toString();
+        id= PolicyUtil.randomUUID();
     }
     
     

@@ -82,16 +82,14 @@ public class X509Token extends PolicyAssertion implements com.sun.xml.ws.securit
     private boolean isServer = false;
     
     public X509Token() {
-        UUID uid = UUID.randomUUID();
-        id= uid.toString();
+        id= PolicyUtil.randomUUID();
         referenceType = new HashSet<String>();
     }
     
     public X509Token(AssertionData name,Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) {
         super(name,nestedAssertions,nestedAlternative);
         
-        UUID uid = UUID.randomUUID();
-        id= uid.toString();
+        id= PolicyUtil.randomUUID();
         referenceType = new HashSet<String>();
     }
     

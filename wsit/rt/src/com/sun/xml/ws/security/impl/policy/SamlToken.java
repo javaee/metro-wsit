@@ -76,8 +76,7 @@ public class SamlToken extends PolicyAssertion implements com.sun.xml.ws.securit
     
     public SamlToken(AssertionData name,Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) {
         super(name,nestedAssertions,nestedAlternative);
-        UUID id = UUID.randomUUID();
-        this.id = id.toString();
+        id= PolicyUtil.randomUUID();
     }
     
     public String getTokenType() {

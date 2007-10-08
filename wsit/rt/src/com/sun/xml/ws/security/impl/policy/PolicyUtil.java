@@ -39,6 +39,7 @@ import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.security.policy.AlgorithmSuiteValue;
 import static com.sun.xml.ws.security.impl.policy.Constants.*;
+import java.util.UUID;
 import javax.xml.namespace.QName;
 /**
  *
@@ -1436,5 +1437,11 @@ public class PolicyUtil {
             return true;
         }
         return false;
+    }
+    
+    public static String randomUUID() {
+         UUID uid = UUID.randomUUID();
+         String id= "uuid_" + uid.toString();
+         return id;
     }
 }

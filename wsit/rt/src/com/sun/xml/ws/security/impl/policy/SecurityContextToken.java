@@ -74,8 +74,7 @@ public class SecurityContextToken extends PolicyAssertion implements com.sun.xml
     /** Creates a new instance of SecurityContextToken */
     public SecurityContextToken(AssertionData name,Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) {
         super(name,nestedAssertions,nestedAlternative);
-        UUID id = UUID.randomUUID();
-        this.id = id.toString();
+        id= PolicyUtil.randomUUID();
     }
     
     public String getTokenType() {

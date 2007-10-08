@@ -65,14 +65,12 @@ public class UsernameToken extends PolicyAssertion implements com.sun.xml.ws.sec
      * Creates a new instance of UsernameToken
      */
     public UsernameToken() {
-        UUID uid = UUID.randomUUID();
-        id= uid.toString();
+         id= PolicyUtil.randomUUID();
     }
     
     public UsernameToken(AssertionData name,Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) {
         super(name,nestedAssertions,nestedAlternative);
-        UUID uid = UUID.randomUUID();
-        id= uid.toString();
+        id= PolicyUtil.randomUUID();
     }
     
     public void setType(String type) {

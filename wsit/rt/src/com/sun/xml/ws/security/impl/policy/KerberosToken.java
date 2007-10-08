@@ -54,10 +54,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.UUID;
 import java.util.logging.Level;
 import javax.xml.namespace.QName;
 import static com.sun.xml.ws.security.impl.policy.Constants.*;
+import com.sun.xml.ws.security.policy.SecurityAssertionValidator.AssertionFitness;
 
 /**
  *
@@ -77,8 +77,7 @@ public class KerberosToken extends PolicyAssertion implements com.sun.xml.ws.sec
     /** Creates a new instance of KerberosToken */
     public KerberosToken(AssertionData name,Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) {
         super(name,nestedAssertions,nestedAlternative);
-        UUID id = UUID.randomUUID();
-        this.id = id.toString();
+        id= PolicyUtil.randomUUID();
     }
     
     

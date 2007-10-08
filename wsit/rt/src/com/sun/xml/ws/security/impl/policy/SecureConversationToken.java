@@ -72,14 +72,12 @@ public class SecureConversationToken extends PolicyAssertion implements com.sun.
      * Creates a new instance of SecureConversationToken
      */
     public SecureConversationToken() {
-        UUID uid = UUID.randomUUID();
-        id= uid.toString();
+         id= PolicyUtil.randomUUID();
     }
     
     public SecureConversationToken(AssertionData name,Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) {
         super(name,nestedAssertions,nestedAlternative);
-        UUID uid = UUID.randomUUID();
-        id= uid.toString();
+        id= PolicyUtil.randomUUID();
     }
     
     

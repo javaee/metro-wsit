@@ -60,14 +60,12 @@ public class TransportToken extends Token implements com.sun.xml.ws.security.pol
      * Creates a new instance of TransportToken
      */
     public TransportToken() {
-        UUID uid = UUID.randomUUID();
-        id= uid.toString();
+         id= PolicyUtil.randomUUID();
     }
     
     public TransportToken(AssertionData name,Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) {
         super(name,nestedAssertions,nestedAlternative);
-        UUID uid = UUID.randomUUID();
-        id= uid.toString();
+        id= PolicyUtil.randomUUID();
     }
     
     public String getTokenId() {

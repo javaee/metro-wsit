@@ -68,14 +68,12 @@ public class SpnegoContextToken extends PolicyAssertion implements com.sun.xml.w
      * Creates a new instance of SpnegoContextToken
      */
     public SpnegoContextToken() {
-        UUID uid = UUID.randomUUID();
-        id= uid.toString();
+        id= PolicyUtil.randomUUID();
     }
     
     public SpnegoContextToken(AssertionData name,Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) {
         super(name,nestedAssertions,nestedAlternative);
-        UUID uid = UUID.randomUUID();
-        id= uid.toString();
+        id= PolicyUtil.randomUUID();
     }
     
     
