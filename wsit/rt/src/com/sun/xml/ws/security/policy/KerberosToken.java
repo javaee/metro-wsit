@@ -36,7 +36,7 @@
 
 package com.sun.xml.ws.security.policy;
 
-import java.util.Iterator;
+import java.util.Set;
 
 /**
  * This interface represents Kerberos Token
@@ -51,10 +51,10 @@ public interface KerberosToken extends Token{
      */
     public String getTokenType();
     /**
-     * returns a {@link java.util.Iterator } over the token reference types to be used.
+     * returns a {@link java.util.Set } over the token reference types to be used.
      * @return either REQUIRE_KEY_IDENTIFIER_REFERENCE
      */
-    public Iterator getTokenRefernceType();
+    public Set getTokenRefernceType();
     
     /**
      * returns true if RequiredDerivedKey element is present under Kerberos Token.

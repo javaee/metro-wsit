@@ -52,8 +52,10 @@ import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import javax.xml.namespace.QName;
 import static com.sun.xml.ws.security.impl.policy.Constants.*;
@@ -64,20 +66,22 @@ import com.sun.xml.ws.security.policy.SecurityAssertionValidator.AssertionFitnes
  * @author mayank.mishra@Sun.com
  */
 public class KerberosToken extends PolicyAssertion implements com.sun.xml.ws.security.policy.KerberosToken, SecurityAssertionValidator {
+    
+    private static QName itQname = new QName(Constants.SECURITY_POLICY_NS, Constants.IncludeToken);
+    private String includeToken = Token.INCLUDE_ALWAYS;
     private AssertionFitness fitness = AssertionFitness.IS_VALID;
-    private String id;
-    private List<String> tokenRefType;
     private boolean populated = false;
-    private QName itQname;
-    private String includeTokenType;
-    private PolicyAssertion rdKey = null;
-    private String tokenType;
+    private String tokenType = null;
+    private String id = null;
+    private boolean reqDK=false;
     private boolean isServer = false;
+    private HashSet<String> referenceType = null;
     
     /** Creates a new instance of KerberosToken */
     public KerberosToken(AssertionData name,Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) {
         super(name,nestedAssertions,nestedAlternative);
         id= PolicyUtil.randomUUID();
+        referenceType = new HashSet<String>();
     }
     
     
@@ -86,25 +90,31 @@ public class KerberosToken extends PolicyAssertion implements com.sun.xml.ws.sec
         return tokenType;
     }
     
-    public Iterator getTokenRefernceType() {
-        if ( tokenRefType != null ) {
-            return tokenRefType.iterator();
-        } else {
-            return Collections.emptyList().iterator();
-        }
+    public void setTokenType(String tokenType) {
+        this.tokenType = tokenType;
+    }
+    
+    public Set getTokenRefernceType() {
+        populate();
+        return referenceType;
+    }
+    
+    public void addTokenReferenceType(String tokenRefType) {
+        referenceType.add(tokenRefType);
     }
     
     public boolean isRequireDerivedKeys() {
         populate();
-        if (rdKey != null ) {
-            return true;
-        }
-        return false;
+        return reqDK;
     }
     
     public String getIncludeToken() {
         populate();
-        return includeTokenType;
+        return includeToken;
+    }
+    
+    public void setIncludeToken(String type) {
+        includeToken = type;
     }
     
     
@@ -122,8 +132,10 @@ public class KerberosToken extends PolicyAssertion implements com.sun.xml.ws.sec
     
     private synchronized AssertionFitness populate(boolean isServer) {
         if(!populated){
+            if(this.getAttributeValue(itQname)!=null){
+                this.includeToken = this.getAttributeValue(itQname);
+            }
             NestedPolicy policy = this.getNestedPolicy();
-            includeTokenType = this.getAttributeValue(itQname);
             if(policy == null){
                 if(logger.getLevel() == Level.FINE){
                     logger.log(Level.FINE,"NestedPolicy is null");
@@ -132,19 +144,14 @@ public class KerberosToken extends PolicyAssertion implements com.sun.xml.ws.sec
                 return fitness;
             }
             AssertionSet as = policy.getAssertionSet();
-            Iterator<PolicyAssertion> paItr = as.iterator();
             
-            while(paItr.hasNext()){
-                PolicyAssertion assertion  = paItr.next();
-                if(PolicyUtil.isKerberosTokenType(assertion)){
+            for(PolicyAssertion assertion: as){
+                if(PolicyUtil.isTokenReferenceType(assertion)){
+                    referenceType.add(assertion.getName().getLocalPart().intern());
+                }else if(PolicyUtil.isKerberosTokenType(assertion)){
                     tokenType = assertion.getName().getLocalPart().intern();
-                }else if(PolicyUtil.isRequireDerivedKeys(assertion)){
-                    rdKey = assertion;
-                }else if(PolicyUtil.isRequireKeyIR(assertion)){
-                    if(tokenRefType == null){
-                        tokenRefType = new ArrayList<String>();
-                    }
-                    tokenRefType.add(assertion.getName().getLocalPart().intern());
+                }else if (PolicyUtil.isRequireDerivedKeys(assertion)) {
+                    reqDK = true;
                 } else{
                     if(!assertion.isOptional()){
                         log_invalid_assertion(assertion, isServer,KerberosToken);
