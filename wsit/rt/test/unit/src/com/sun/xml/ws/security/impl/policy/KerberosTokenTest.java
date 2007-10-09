@@ -51,6 +51,7 @@ import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.util.Set;
 
 import junit.framework.*;
 import com.sun.xml.ws.policy.AssertionSet;
@@ -159,8 +160,9 @@ public class KerberosTokenTest extends TestCase {
             for(PolicyAssertion assertion : as) {
                 assertEquals("Invalid assertion","KerberosToken",assertion.getName().getLocalPart());
                 KerberosToken kt = (KerberosToken)assertion;
-                Iterator itrkt = kt.getTokenRefernceType();
-                if(itr.hasNext()) {
+                Set tokenRefType = kt.getTokenRefernceType();
+                Iterator itrkt = tokenRefType.iterator();
+                if(itrkt.hasNext()) {
                     assertTrue(((String)itrkt.next()).equals(com.sun.xml.ws.security.impl.policy.KerberosToken.REQUIRE_KEY_IDENTIFIER_REFERENCE));
                 }
             }
