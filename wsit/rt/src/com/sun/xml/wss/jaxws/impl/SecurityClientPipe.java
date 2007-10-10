@@ -81,6 +81,7 @@ import javax.xml.bind.JAXBElement;
 import com.sun.xml.wss.impl.misc.DefaultSecurityEnvironmentImpl;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
+import com.sun.xml.wss.impl.ProcessingContextImpl;
 import javax.xml.ws.soap.SOAPFaultException;
 import com.sun.xml.wss.impl.filter.DumpFilter;
 import com.sun.xml.wss.impl.misc.DefaultCallbackHandler;
@@ -159,7 +160,8 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
         invokeTrustPlugin(packet, isSCMessage);
         
         //---------------OUTBOUND SECURITY PROCESSING----------
-        ProcessingContext ctx = initializeOutgoingProcessingContext(packet, isSCMessage);
+        ProcessingContext ctx = initializeOutgoingProcessingContext(packet, isSCMessage);        
+        ((ProcessingContextImpl)ctx).setIssuedTokenContextMap(issuedTokenContextMap);
         
         try{
             if(!optimized) {
@@ -205,6 +207,8 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
         
      
         ctx = initializeInboundProcessingContext(ret);
+        ctx.isClient(true);
+        ((ProcessingContextImpl)ctx).setIssuedTokenContextMap(issuedTokenContextMap);
         ctx.setExtraneousProperty(ctx.OPERATION_RESOLVER, new PolicyResolverImpl(inMessagePolicyMap,inProtocolPM,cachedOperation,pipeConfig,addVer,true));
         
         try{

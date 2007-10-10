@@ -76,6 +76,7 @@ import com.sun.xml.wss.ProcessingContext;
 import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.impl.NewSecurityRecipient;
+import com.sun.xml.wss.impl.ProcessingContextImpl;
 import com.sun.xml.wss.impl.SecurableSoapMessage;
 import com.sun.xml.wss.impl.SecurityAnnotator;
 import com.sun.xml.wss.impl.WssSoapFaultException;
@@ -237,7 +238,7 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
         Message msg = packet.getMessage();
         invokeTrustPlugin(packet, isSCMessage);
         ProcessingContext ctx = initializeOutgoingProcessingContext(packet, isSCMessage);
-        
+        ((ProcessingContextImpl)ctx).setIssuedTokenContextMap(issuedTokenContextMap);
         //TODO: replace this code with calls to the Module now
          try{
             if(!optimized) {
@@ -311,6 +312,8 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
     public Packet validateResponse(Packet req, Subject clientSubject, Subject serviceSubject) 
         throws XWSSecurityException {
         ProcessingContext ctx = initializeInboundProcessingContext(req);
+        ctx.isClient(true);
+        ((ProcessingContextImpl)ctx).setIssuedTokenContextMap(issuedTokenContextMap);
         ctx.setExtraneousProperty(ctx.OPERATION_RESOLVER, 
                 new PolicyResolverImpl(inMessagePolicyMap,inProtocolPM,cachedOperation(req),pipeConfig,addVer,true));
         Message msg = req.getMessage();

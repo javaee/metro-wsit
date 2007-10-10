@@ -501,7 +501,7 @@ public abstract class SecurityPipeBase implements Pipe {
             ctx = new ProcessingContextImpl( packet.invocationProperties);
         }
         ctx.setTimestampTimeout(this.timestampTimeOut);
-        ctx.setIssuedTokenContextMap(issuedTokenContextMap);
+        //ctx.setIssuedTokenContextMap(issuedTokenContextMap);
         ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
         
         // setting a flag if issued tokens present
@@ -536,8 +536,9 @@ public abstract class SecurityPipeBase implements Pipe {
             ctx = new ProcessingContextImpl( packet.invocationProperties);
         }
         // set the policy, issued-token-map, and extraneous properties
-        ctx.setIssuedTokenContextMap(issuedTokenContextMap);
+        //ctx.setIssuedTokenContextMap(issuedTokenContextMap);
         ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
+        
         try {
             MessagePolicy policy = null;
             if (isRMMessage(packet)) {

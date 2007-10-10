@@ -481,7 +481,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
             }
             
             // set the policy, issued-token-map, and extraneous properties
-            ctx.setIssuedTokenContextMap(issuedTokenContextMap);
+            //ctx.setIssuedTokenContextMap(issuedTokenContextMap);
             ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
             ctx.setSecurityEnvironment(secEnv);
             ctx.isInboundMessage(false);
@@ -667,11 +667,11 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
                 IssuedTokenContext itctx = session.getSecurityInfo().getIssuedTokenContext();
                 //add the subject of requestor
                 itctx.setRequestorSubject(ictx.getRequestorSubject());
-                ((ProcessingContextImpl)ctx).getIssuedTokenContextMap().put(sctId, itctx);
+                //((ProcessingContextImpl)ctx).getIssuedTokenContextMap().put(sctId, itctx);                
                 
             } else if (requestType.toString().equals(WSTrustConstants.CANCEL_REQUEST)) {
                 retAction = WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_RESPONSE_ACTION;
-                rstr =  scContract.cancel(rst, ictx, issuedTokenContextMap);
+                rstr =  scContract.cancel(rst, ictx);
             } else {
                 log.log(Level.SEVERE, 
                         LogStringsMessages.WSITPVD_0045_UNSUPPORTED_OPERATION_EXCEPTION(requestType));                

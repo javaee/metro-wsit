@@ -286,6 +286,7 @@ public class WSSCContract {
                     LogStringsMessages.WSSC_1010_CREATING_SESSION(token.getIdentifier()));
         }
         populateITC(session, secret, token, attachedReference, context, unattachedRef);
+        SessionManager.getSessionManager().addSecurityContext(token.getIdentifier().toString(), context);
         return response;
     }
 
@@ -306,8 +307,7 @@ public class WSSCContract {
         sctinfo.addInstance(null, secret);
         
         sctinfo.setCreationTime(new Date(currentTime));
-        sctinfo.setExpirationTime(new Date(currentTime + TIMEOUT));
-        
+        sctinfo.setExpirationTime(new Date(currentTime + TIMEOUT));        
         session.setSecurityInfo(sctinfo);
     }
     
@@ -327,7 +327,7 @@ public class WSSCContract {
     
     /** Cancel a SecurityContextToken */
     public RequestSecurityTokenResponse cancel(
-            final RequestSecurityToken request, final IssuedTokenContext context, final Map issuedTokCtxMap)
+            final RequestSecurityToken request, final IssuedTokenContext context)
             throws WSSecureConversationException {
         final CancelTarget cancelTgt = request.getCancelTarget();
         final SecurityTokenReference str = cancelTgt.getSecurityTokenReference();
@@ -336,8 +336,8 @@ public class WSSCContract {
         if (ref.getType().equals("Reference")){
             id = ((DirectReference)ref).getURIAttr().toString();
         }
-        
-        final IssuedTokenContext cxt = (IssuedTokenContext)issuedTokCtxMap.get(id);
+                
+        final IssuedTokenContext cxt = SessionManager.getSessionManager().getSecurityContext(id);
         if (cxt == null || cxt.getSecurityToken() == null){
             log.log(Level.SEVERE,
                     LogStringsMessages.WSSC_0015_UNKNOWN_CONTEXT(id));

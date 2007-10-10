@@ -1022,7 +1022,7 @@ public abstract class WSITAuthContextBase  {
         // try { policy need not be set apriori after moving to new policverification code
         // setting a flag if issued tokens present
         ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
-        ctx.setIssuedTokenContextMap(issuedTokenContextMap);
+        //ctx.setIssuedTokenContextMap(issuedTokenContextMap);
 
         ctx.hasIssuedToken(bindingHasIssuedTokenPolicy());
         ctx.setSecurityEnvironment(secEnv);
@@ -1302,7 +1302,7 @@ public abstract class WSITAuthContextBase  {
         }
         ctx.setTimestampTimeout(this.timestampTimeOut);
         // set the policy, issued-token-map, and extraneous properties
-        ctx.setIssuedTokenContextMap(issuedTokenContextMap);
+        //ctx.setIssuedTokenContextMap(issuedTokenContextMap);
         ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
         try {
             MessagePolicy policy = null;

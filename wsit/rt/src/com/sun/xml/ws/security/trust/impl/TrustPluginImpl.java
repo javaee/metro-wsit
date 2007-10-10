@@ -218,7 +218,7 @@ public class TrustPluginImpl implements TrustPlugin {
         final IssuedToken issuedToken = (IssuedToken)token;
         final RequestSecurityTokenTemplate rstTemplate = issuedToken.getRequestSecurityTokenTemplate();
         
-        URI stsURI =  getSTSURI(issuedToken);
+            URI stsURI =  getSTSURI(issuedToken);
         URI wsdlLocation = null;
         QName serviceName = null;
         QName portName = null;

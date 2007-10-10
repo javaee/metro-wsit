@@ -37,6 +37,7 @@
 
 package com.sun.xml.ws.runtime.util;
 
+import com.sun.xml.ws.security.IssuedTokenContext;
 import java.util.Set;
 import com.sun.xml.ws.util.ServiceFinder;
 
@@ -124,6 +125,22 @@ public abstract class SessionManager {
      * @param key The key of the session to be saved
      */
     public abstract void saveSession(String key);
+    
+    /**
+     * Return the valid SecurityContext for matching key
+     *
+     * @param key The key of the security context to be looked
+     * @returns IssuedTokenContext for security context key
+     */
+    public abstract IssuedTokenContext getSecurityContext(String key);
+    
+    /**
+     * Add the SecurityContext with key in local cache
+     *
+     * @param key The key of the security context to be stored
+     * @param itctx The IssuedTokenContext to be stored
+     */
+    public abstract void addSecurityContext(String key, IssuedTokenContext itctx);
     
     /**
      * Returns the single instance of SessionManager

@@ -40,8 +40,15 @@
  */
 
 package com.sun.xml.ws.runtime.util;
+
+import com.sun.xml.ws.security.IssuedTokenContext;
+import com.sun.xml.ws.security.SecurityContextTokenInfo;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Set;
 import java.util.Hashtable;
+import javax.xml.ws.WebServiceException;
 
 /**
  * In memory implementation of <code>SessionManager</code>
@@ -55,8 +62,11 @@ public class SessionManagerImpl extends SessionManager {
      */
     private Hashtable<String, Session> sessionMap
             = new Hashtable<String, Session>();
-    
-    
+    /**
+     * Map of SecurityContextId --> IssuedTokenContext
+     */
+    private Hashtable<String, IssuedTokenContext> issuedTokenContextMap
+            = new Hashtable<String, IssuedTokenContext>();    
     /** Creates a new instance of SessionManagerImpl */
     public SessionManagerImpl() {
         
@@ -151,7 +161,60 @@ public class SessionManagerImpl extends SessionManager {
      *
      * @param key The key of the session to be saved
      */
-    public void saveSession(String key) {        
+    public void saveSession(String key) {
     }
 
+     /**
+     * Return the valid SecurityContext for matching key
+     *
+     * @param key The key of the security context to be looked
+     * @returns IssuedTokenContext for security context key
+     */
+    
+    public IssuedTokenContext getSecurityContext(String key){
+        IssuedTokenContext ctx = issuedTokenContextMap.get(key);        
+        if(ctx == null){
+            // recovery of security context in case of crash
+            Session session = this.getSessionManager().getSession(key);            
+            if (session != null) {
+                // recreate context info based on data stored in the session
+                SecurityContextTokenInfo sctInfo = session.getSecurityInfo();
+                ctx = sctInfo.getIssuedTokenContext();
+                // Add it to the Session Manager's local cache, after possible crash                
+                this.getSessionManager().addSecurityContext(key, ctx);               
+            } else {                
+                throw new WebServiceException("Could not locate SecureConversation session for Id:" + key);
+            }
+        }        
+
+        if (ctx != null){
+            // Expiry check of security context token
+            Calendar c = new GregorianCalendar();
+            long offset = c.get(Calendar.ZONE_OFFSET);
+            if (c.getTimeZone().inDaylightTime(c.getTime())) {
+                offset += c.getTimeZone().getDSTSavings();
+            }
+            long beforeTime = c.getTimeInMillis();
+            long currentTime = beforeTime - offset;
+            
+            c.setTimeInMillis(currentTime);
+            
+            Date currentTimeInDateFormat = c.getTime();
+            if(!(currentTimeInDateFormat.after(ctx.getCreationTime())
+                && currentTimeInDateFormat.before(ctx.getExpirationTime()))){
+                throw new WebServiceException("SecureConversation session for session Id:" + key +"has expired.");
+            }            
+        }        
+        return ctx;
+    }
+
+    /**
+     * Add the SecurityContext with key in local cache
+     *
+     * @param key The key of the security context to be stored
+     * @param itctx The IssuedTokenContext to be stored
+     */
+    public void addSecurityContext(String key, IssuedTokenContext itctx){
+        issuedTokenContextMap.put(key, itctx);
+    }
 }

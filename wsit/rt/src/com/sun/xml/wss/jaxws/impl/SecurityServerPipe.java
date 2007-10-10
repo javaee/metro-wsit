@@ -425,7 +425,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
                 ctx.setSecurityPolicy(policy);
             }
             // set the policy, issued-token-map, and extraneous properties
-            ctx.setIssuedTokenContextMap(issuedTokenContextMap);
+            //ctx.setIssuedTokenContextMap(issuedTokenContextMap);
             ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
             ctx.setSecurityEnvironment(secEnv);
             ctx.isInboundMessage(false);
@@ -558,11 +558,11 @@ public class SecurityServerPipe extends SecurityPipeBase {
                 packet.invocationProperties.put(
                         Session.SESSION_KEY, session.getUserData());
            
-                ((ProcessingContextImpl)ctx).getIssuedTokenContextMap().put(sctId, ictx);
+                //((ProcessingContextImpl)ctx).getIssuedTokenContextMap().put(sctId, ictx);                
                 
             } else if (requestType.toString().equals(WSTrustConstants.CANCEL_REQUEST)) {
                 retAction = WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_RESPONSE_ACTION;
-                rstr =  scContract.cancel(rst, ictx, issuedTokenContextMap);
+                rstr =  scContract.cancel(rst, ictx);
             } else {
                 log.log(Level.SEVERE, 
                         LogStringsMessages.WSSPIPE_0030_UNSUPPORTED_OPERATION_EXCEPTION(requestType));                
@@ -744,7 +744,8 @@ public class SecurityServerPipe extends SecurityPipeBase {
         if (sct != null) {
             //Session session = this.sessionManager.getSession(sct.getIdentifier().toString());
             //IssuedTokenContext ctx = session.getSecurityInfo().getIssuedTokenContext();
-            IssuedTokenContext itctx = (IssuedTokenContext)((ProcessingContextImpl)ctx).getIssuedTokenContextMap().get(sct.getIdentifier().toString());
+            //IssuedTokenContext itctx = (IssuedTokenContext)((ProcessingContextImpl)ctx).getIssuedTokenContextMap().get(sct.getIdentifier().toString());
+            IssuedTokenContext itctx = (IssuedTokenContext)sessionManager.getSecurityContext(sct.getIdentifier().toString());
             if (itctx != null) {
                 Subject from = itctx.getRequestorSubject();
                 Subject to = DefaultSecurityEnvironmentImpl.getSubject(packet.invocationProperties);
