@@ -213,8 +213,16 @@
     </macrodef>
 
     <target name="expand-jars-runtime" unless="runtime.jars.expanded">
-
-        <expand-jars-macro libdir="../${lib.runtime.dir}" >
+         <expand-jars-macro libdir="../${lib.runtime.dir}" >
+            <!--The wsit/etc/META-INF/services folder
+            has entries for
+            javax.xml.stream.XMLEventFactory
+            javax.xml.stream.XMLInputFactory
+            javax.xml.stream.XMLOutputFactory
+            which are currently pointing to sjsxp implementation classes
+            if we have to change these to woodstox this is the place where it
+            needs to be replaced
+            -->
             <metainf>
                 <copy todir="${rtjar-tmpdir}/META-INF/services" overwrite="true">
                     <fileset dir="../etc/META-INF/services">
@@ -270,7 +278,7 @@
             <services>
                 <fileset dir="${rtjar-tmpdir}">
                     <include name="**/*.*"/>
-                    <exclude name="**/version.properties"/>
+                    <include name="**/version.properties"/>
                     <exclude name="**/*.TWSDL*"/>
                     <exclude name="**/*.TJava*"/>
                 </fileset>
