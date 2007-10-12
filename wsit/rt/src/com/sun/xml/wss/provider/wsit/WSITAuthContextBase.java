@@ -46,6 +46,8 @@
 package com.sun.xml.wss.provider.wsit;
 
 import com.sun.xml.ws.api.model.wsdl.WSDLFault;
+import com.sun.xml.ws.security.impl.kerberos.KerberosContext;
+import com.sun.xml.ws.security.impl.kerberos.KerberosLogin;
 import com.sun.xml.ws.security.impl.policyconv.XWSSPolicyGenerator;
 import com.sun.xml.ws.security.policy.CertStoreConfig;
 import com.sun.xml.ws.security.secconv.WSSCConstants;
@@ -202,6 +204,8 @@ public abstract class WSITAuthContextBase  {
     // This map stores IssuedTokenContext against the Policy-Id
     protected Hashtable<String, IssuedTokenContext> issuedTokenContextMap = new Hashtable<String, IssuedTokenContext>();
     
+    protected Hashtable<String, KerberosContext> kerberosTokenContextMap = new Hashtable<String, KerberosContext>();
+    
     //*************STATIC(s)**************************************
     //protected static QName bsOperationName =
     //        new QName("http://schemas.xmlsoap.org/ws/2005/02/trust","RequestSecurityToken");
@@ -261,6 +265,7 @@ public abstract class WSITAuthContextBase  {
     boolean hasIssuedTokens = false;
     boolean hasSecureConversation = false;
     boolean hasReliableMessaging = false;
+    boolean hasKerberosToken = false;
     //boolean addressingEnabled = false;
     AddressingVersion addVer = null;
     WSDLPort port = null;
@@ -520,6 +525,27 @@ public abstract class WSITAuthContextBase  {
         return sph.getSecureConversationTokens();
     }
     
+     protected List<PolicyAssertion> getInBoundKTP(Message message){
+        if (inMessagePolicyMap == null) {
+            return Collections.emptyList();
+        }
+        SecurityPolicyHolder sph = null;
+        Collection coll = inMessagePolicyMap.values();
+        Iterator itr = coll.iterator();
+        
+        while(itr.hasNext()){
+            SecurityPolicyHolder ph = (SecurityPolicyHolder) itr.next();
+            if(ph != null){
+                sph = ph;
+                break;
+            }
+        }
+        if(sph == null){
+            return EMPTY_LIST;
+        }
+        return sph.getKerberosTokens();
+    }
+    
     
     protected List<PolicyAssertion> getOutBoundSCP(
             Message message) {
@@ -543,6 +569,27 @@ public abstract class WSITAuthContextBase  {
         }
         return sph.getSecureConversationTokens();
         
+    }
+    
+    protected List<PolicyAssertion> getOutBoundKTP(Message message){
+        if (outMessagePolicyMap == null) {
+            return Collections.emptyList();
+        }
+        SecurityPolicyHolder sph = null;
+        Collection coll = outMessagePolicyMap.values();
+        Iterator itr = coll.iterator();
+        
+        while(itr.hasNext()){
+            SecurityPolicyHolder ph = (SecurityPolicyHolder) itr.next();
+            if(ph != null){
+                sph = ph;
+                break;
+            }
+        }
+        if(sph == null){
+            return EMPTY_LIST;
+        }
+        return sph.getKerberosTokens();
     }
     
     
@@ -612,7 +659,8 @@ public abstract class WSITAuthContextBase  {
     }
     private void addToken(Token token,ArrayList<PolicyAssertion> list){
         if(PolicyUtil.isSecureConversationToken((PolicyAssertion)token) ||
-                PolicyUtil.isIssuedToken((PolicyAssertion)token)){
+                PolicyUtil.isIssuedToken((PolicyAssertion)token) || 
+                PolicyUtil.isKerberosToken((PolicyAssertion)token)){
             list.add((PolicyAssertion)token);
         }
     }
@@ -923,6 +971,9 @@ public abstract class WSITAuthContextBase  {
             }else if(PolicyUtil.isIssuedToken(token)){
                 sph.addIssuedToken(token);
                 hasIssuedTokens = true;
+            }else if(PolicyUtil.isKerberosToken(token)){
+                sph.addKerberosToken(token);
+                hasKerberosToken = true;
             }
         }
         return sph;
@@ -1017,6 +1068,8 @@ public abstract class WSITAuthContextBase  {
         }else{
             ctx = new ProcessingContextImpl( packet.invocationProperties);
         }
+        
+        ctx.setKerberosContextMap(kerberosTokenContextMap);
         
         // set the policy, issued-token-map, and extraneous properties
         // try { policy need not be set apriori after moving to new policverification code
@@ -1249,6 +1302,10 @@ public abstract class WSITAuthContextBase  {
         return hasSecureConversation;
     }
     
+    protected boolean hasKerberosTokenPolicy(){
+        return hasKerberosToken;
+    }
+    
     protected boolean bindingHasRMPolicy() {
         return hasReliableMessaging;
     }
@@ -1300,6 +1357,9 @@ public abstract class WSITAuthContextBase  {
         }else{
             ctx = new ProcessingContextImpl( packet.invocationProperties);
         }
+        
+        ctx.setKerberosContextMap(kerberosTokenContextMap);
+        
         ctx.setTimestampTimeout(this.timestampTimeOut);
         // set the policy, issued-token-map, and extraneous properties
         //ctx.setIssuedTokenContextMap(issuedTokenContextMap);

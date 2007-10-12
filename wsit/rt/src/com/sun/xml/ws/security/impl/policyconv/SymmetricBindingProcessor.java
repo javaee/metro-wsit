@@ -42,6 +42,7 @@ import com.sun.xml.ws.security.impl.policy.PolicyUtil;
 import com.sun.xml.ws.security.policy.Binding;
 import com.sun.xml.ws.security.policy.EncryptedElements;
 import com.sun.xml.ws.security.policy.EncryptedParts;
+import com.sun.xml.ws.security.policy.KerberosToken;
 import com.sun.xml.ws.security.policy.SamlToken;
 import com.sun.xml.ws.security.policy.SecureConversationToken;
 import com.sun.xml.ws.security.policy.SignedElements;
@@ -189,6 +190,24 @@ public class SymmetricBindingProcessor extends BindingProcessor{
                 dtKB.setUUID(pid.generateID());
             }else{
                 skb.setKeyBinding(x509CB);
+                policy.setKeyBinding(skb);
+            }
+        } else if(PolicyUtil.isKerberosToken(tokenAssertion)){
+            AuthenticationTokenPolicy.KerberosTokenBinding kerberosBinding = 
+                    new AuthenticationTokenPolicy.KerberosTokenBinding();
+            kerberosBinding.setUUID(token.getTokenId());
+            tokenProcessor.setTokenValueType(kerberosBinding, tokenAssertion);
+            tokenProcessor.setTokenInclusion(kerberosBinding,(Token) tokenAssertion);
+            tokenProcessor.setKerberosTokenRefType(kerberosBinding, (KerberosToken) token);
+            
+            if(((KerberosToken)token).isRequireDerivedKeys()){
+                DerivedTokenKeyBinding dtKB =  new DerivedTokenKeyBinding();
+                skb.setKeyBinding(kerberosBinding);
+                policy.setKeyBinding(dtKB);
+                dtKB.setOriginalKeyBinding(skb);
+                dtKB.setUUID(pid.generateID());
+            }else{
+                skb.setKeyBinding(kerberosBinding);
                 policy.setKeyBinding(skb);
             }
         }else if(PolicyUtil.isSamlToken(tokenAssertion)){

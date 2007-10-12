@@ -44,6 +44,7 @@ import com.sun.xml.ws.security.impl.policy.Constants;
 import com.sun.xml.ws.security.impl.policy.LogStringsMessages;
 import com.sun.xml.ws.security.impl.policy.PolicyUtil;
 import com.sun.xml.ws.security.policy.IssuedToken;
+import com.sun.xml.ws.security.policy.KerberosToken;
 import com.sun.xml.ws.security.policy.SamlToken;
 import com.sun.xml.ws.security.policy.SecureConversationToken;
 import com.sun.xml.ws.security.policy.Token;
@@ -105,6 +106,29 @@ public class TokenProcessor {
                 logger.log(Level.FINEST," ReferenceType set is REQUIRE_THUMBPRINT_REFERENCE");
             }
             x509CB.setReferenceType(MessageConstants.DIRECT_REFERENCE_TYPE);
+        }
+    }
+    
+    protected void setKerberosTokenRefType(AuthenticationTokenPolicy.KerberosTokenBinding kerberosBinding,
+            KerberosToken token){
+        Set tokenRefTypes = token.getTokenRefernceType();
+        if(!tokenRefTypes.isEmpty()){
+            if(tokenRefTypes.contains(Token.REQUIRE_KEY_IDENTIFIER_REFERENCE)){
+                if(logger.isLoggable(Level.FINEST)){
+                    logger.log(Level.FINEST," ReferenceType set to KeyBinding"+kerberosBinding+" is KeyIdentifier");
+                }
+                kerberosBinding.setReferenceType(SecurityPolicyUtil.convertToXWSSConstants(Token.REQUIRE_KEY_IDENTIFIER_REFERENCE));
+            } else{
+                if(logger.isLoggable(Level.FINEST)){
+                    logger.log(Level.FINEST," ReferenceType "+kerberosBinding+" set is DirectReference");
+                }
+                kerberosBinding.setReferenceType(MessageConstants.DIRECT_REFERENCE_TYPE);
+            }
+        } else{
+             if(logger.isLoggable(Level.FINEST)){
+                logger.log(Level.FINEST," ReferenceType set is DirectReference");
+            }
+            kerberosBinding.setReferenceType(MessageConstants.DIRECT_REFERENCE_TYPE);
         }
     }
     
@@ -278,6 +302,24 @@ public class TokenProcessor {
                 x509CB.setValueType(MessageConstants.X509v1_NS);
             }else if(policyAssertion.getName().getLocalPart().equals(Constants.WssX509V3Token10)||policyAssertion.getName().getLocalPart().equals(Constants.WssX509V3Token11)){
                 x509CB.setValueType(MessageConstants.X509v3_NS);
+            }
+        }
+    }
+    
+    public void setTokenValueType(AuthenticationTokenPolicy.KerberosTokenBinding kerberosBinding, PolicyAssertion tokenAssertion){
+        
+        NestedPolicy policy = tokenAssertion.getNestedPolicy();
+        if(policy==null){
+            return;
+        }
+        AssertionSet as = policy.getAssertionSet();
+        Iterator<PolicyAssertion> itr = as.iterator();
+        while(itr.hasNext()){
+            PolicyAssertion policyAssertion = (PolicyAssertion)itr.next();
+            if(policyAssertion.getName().getLocalPart().equals(Constants.WssKerberosV5ApReqToken11)){
+                kerberosBinding.setValueType(MessageConstants.KERBEROS_V5_APREQ);
+            } else if(policyAssertion.getName().getLocalPart().equals(Constants.WssGssKerberosV5ApReqToken11)){
+                kerberosBinding.setValueType(MessageConstants.KERBEROS_V5_GSS_APREQ_1510);
             }
         }
     }

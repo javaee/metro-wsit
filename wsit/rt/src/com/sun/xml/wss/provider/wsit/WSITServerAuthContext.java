@@ -25,6 +25,7 @@ import com.sun.xml.ws.runtime.util.SessionManager;
 import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.SecurityContextToken;
 import com.sun.xml.ws.security.impl.IssuedTokenContextImpl;
+import com.sun.xml.ws.security.impl.kerberos.KerberosContext;
 import com.sun.xml.ws.security.policy.Token;
 import com.sun.xml.ws.security.impl.policyconv.SecurityPolicyHolder;
 import com.sun.xml.ws.security.opt.impl.JAXBFilterProcessingContext;
@@ -247,6 +248,11 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         boolean thereWasAFault = false;
         
         //Do Security Processing for Incoming Message
+        
+        if(hasKerberosTokenPolicy()){
+            populateKerberosContext(packet);
+        }
+        
         //---------------INBOUND SECURITY VERIFICATION----------
         ProcessingContext ctx = initializeInboundProcessingContext(packet);
         //update the client subject passed to the AuthModule itself.
@@ -786,6 +792,17 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
             }
         }
         return null;
+    }
+
+    protected void populateKerberosContext(Packet packet) {
+        List toks = getOutBoundKTP(packet.getMessage());
+        if (toks.isEmpty()) {
+            return;
+        }
+        //Note: Assuming only one Kerberos token assertion
+        Token tok = (Token)toks.get(0);
+        KerberosContext krbContext = kerberosTokenContextMap.get(tok.getTokenId());
+        
     }
     
 }

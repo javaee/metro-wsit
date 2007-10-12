@@ -58,6 +58,7 @@ public class SecurityPolicyHolder {
     private MessagePolicy mp = null;
     private List<PolicyAssertion> scList = null;
     private List<PolicyAssertion> issuedTokenList = null;
+    private List<PolicyAssertion> kerberosTokenList = null;
     private static final List<PolicyAssertion> EMPTY_LIST = Collections.emptyList();
     private AlgorithmSuite suite  = null;
     private HashMap<WSDLFault,SecurityPolicyHolder> faultFPMap = null;
@@ -86,6 +87,17 @@ public class SecurityPolicyHolder {
     
     public List<PolicyAssertion> getSecureConversationTokens(){
         return ((scList==null)?EMPTY_LIST:scList);
+    }
+    
+    public void  addKerberosToken(PolicyAssertion pa){
+        if(kerberosTokenList == null){
+            kerberosTokenList = new ArrayList<PolicyAssertion> ();
+        }
+        kerberosTokenList.add(pa);
+    }
+    
+    public List<PolicyAssertion> getKerberosTokens(){
+        return ((kerberosTokenList==null)?EMPTY_LIST:kerberosTokenList);
     }
     
     public void addIssuedToken(PolicyAssertion pa){
