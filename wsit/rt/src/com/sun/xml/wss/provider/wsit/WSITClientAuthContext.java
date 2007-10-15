@@ -83,10 +83,13 @@ import com.sun.xml.wss.impl.SecurableSoapMessage;
 import com.sun.xml.wss.impl.SecurityAnnotator;
 import com.sun.xml.wss.impl.WssSoapFaultException;
 import com.sun.xml.wss.impl.filter.DumpFilter;
+import com.sun.xml.wss.impl.misc.Base64;
 import com.sun.xml.wss.impl.misc.DefaultCallbackHandler;
 import com.sun.xml.wss.impl.misc.DefaultSecurityEnvironmentImpl;
 import com.sun.xml.wss.impl.misc.WSITProviderSecurityEnvironment;
 import com.sun.xml.wss.jaxws.impl.Constants;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -240,12 +243,13 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
         Message msg = packet.getMessage();
         invokeTrustPlugin(packet, isSCMessage);
         
-        if(hasKerberosTokenPolicy()){
-            populateKerberosContext(packet);
-        }
-        
         ProcessingContext ctx = initializeOutgoingProcessingContext(packet, isSCMessage);
         ((ProcessingContextImpl)ctx).setIssuedTokenContextMap(issuedTokenContextMap);
+        
+        if(hasKerberosTokenPolicy()){
+            populateKerberosContext(packet, (ProcessingContextImpl)ctx);
+            ((ProcessingContextImpl)ctx).setKerberosContextMap(kerberosTokenContextMap);
+        }
         //TODO: replace this code with calls to the Module now
         try{
             if(!optimized) {
@@ -321,8 +325,11 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
     throws XWSSecurityException {
         ProcessingContext ctx = initializeInboundProcessingContext(req);
         ctx.isClient(true);
+        if(hasKerberosTokenPolicy()){
+            ((ProcessingContextImpl)ctx).setKerberosContextMap(kerberosTokenContextMap);
+        }
         ((ProcessingContextImpl)ctx).setIssuedTokenContextMap(issuedTokenContextMap);
-        ctx.setExtraneousProperty(ctx.OPERATION_RESOLVER, 
+        ctx.setExtraneousProperty(ctx.OPERATION_RESOLVER,
                 new PolicyResolverImpl(inMessagePolicyMap,inProtocolPM,cachedOperation(req),pipeConfig,addVer,true));
         Message msg = req.getMessage();
         
@@ -689,19 +696,29 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
         return sph.getIssuedTokens();
     }
     
-    protected void populateKerberosContext(Packet packet) throws XWSSecurityException{
+    protected void populateKerberosContext(Packet packet, ProcessingContextImpl ctx) throws XWSSecurityException{
         List toks =getOutBoundKTP(packet.getMessage());
         if (toks.isEmpty()) {
             return;
         }
         //Note: Assuming only one Kerberos token assertion
         Token tok = (Token)toks.get(0);
-        KerberosContext krbContext = kerberosTokenContextMap.get(tok.getTokenId());
+        String sha1KerbToken = (String)ctx.getExtraneousProperty(MessageConstants.KERBEROS_SHA1_VALUE);
+        KerberosContext krbContext = null;
+        if(sha1KerbToken != null)
+            krbContext = kerberosTokenContextMap.get(sha1KerbToken);
         
         if(krbContext == null){
             //TODO: Remove this hardcoding of kerberos client
             krbContext = new KerberosLogin().login("KerberosClient");
-            kerberosTokenContextMap.put(tok.getTokenId(), krbContext);
+            try {
+                byte[] krbSha1 = MessageDigest.getInstance("SHA-1").digest(krbContext.getKerberosToken());
+                String encKrbSha1 = Base64.encode(krbSha1);
+                ctx.setExtraneousProperty(MessageConstants.KERBEROS_SHA1_VALUE, encKrbSha1);
+                kerberosTokenContextMap.put(encKrbSha1, krbContext);
+            } catch (NoSuchAlgorithmException nsae) {
+                throw new XWSSecurityException(nsae);
+            }
         } else{
             krbContext.setOnce(false);
         }

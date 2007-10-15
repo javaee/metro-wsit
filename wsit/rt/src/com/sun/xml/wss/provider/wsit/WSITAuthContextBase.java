@@ -1069,8 +1069,6 @@ public abstract class WSITAuthContextBase  {
             ctx = new ProcessingContextImpl( packet.invocationProperties);
         }
         
-        ctx.setKerberosContextMap(kerberosTokenContextMap);
-        
         // set the policy, issued-token-map, and extraneous properties
         // try { policy need not be set apriori after moving to new policverification code
         // setting a flag if issued tokens present
@@ -1357,8 +1355,6 @@ public abstract class WSITAuthContextBase  {
         }else{
             ctx = new ProcessingContextImpl( packet.invocationProperties);
         }
-        
-        ctx.setKerberosContextMap(kerberosTokenContextMap);
         
         ctx.setTimestampTimeout(this.timestampTimeOut);
         // set the policy, issued-token-map, and extraneous properties
