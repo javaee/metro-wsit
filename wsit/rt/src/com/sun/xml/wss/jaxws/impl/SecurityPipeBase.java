@@ -40,6 +40,7 @@ package com.sun.xml.wss.jaxws.impl;
 
 import com.sun.xml.ws.api.model.wsdl.WSDLFault;
 import com.sun.xml.ws.message.stream.LazyStreamBasedMessage;
+import com.sun.xml.ws.security.impl.kerberos.KerberosContext;
 import com.sun.xml.ws.security.impl.policyconv.XWSSPolicyGenerator;
 import com.sun.xml.ws.security.opt.impl.JAXBFilterProcessingContext;
 import com.sun.xml.ws.security.policy.CertStoreConfig;
@@ -169,6 +170,8 @@ public abstract class SecurityPipeBase implements Pipe {
     // This map stores IssuedTokenContext against the Policy-Id
     protected Hashtable<String, IssuedTokenContext> issuedTokenContextMap = new Hashtable<String, IssuedTokenContext>();
     
+    protected Hashtable<String, KerberosContext> kerberosTokenContextMap = new Hashtable<String, KerberosContext>();
+    
     protected PipeConfiguration pipeConfig = null;
     
     //static JAXBContext used across the Pipe
@@ -238,6 +241,7 @@ public abstract class SecurityPipeBase implements Pipe {
     boolean hasIssuedTokens = false;
     boolean hasSecureConversation = false;
     boolean hasReliableMessaging = false;
+    boolean hasKerberosToken = false;
     //boolean addressingEnabled = false;
     
     AddressingVersion addVer = null;
@@ -301,6 +305,7 @@ public abstract class SecurityPipeBase implements Pipe {
         disableIncPrefix = that.disableIncPrefix;
         encHeaderContent = that.encHeaderContent;
         issuedTokenContextMap = that.issuedTokenContextMap;
+        kerberosTokenContextMap = that.kerberosTokenContextMap;
         secEnv = that.secEnv;
         isSOAP12 = that.isSOAP12;
         soapVersion = that.soapVersion;
@@ -313,6 +318,7 @@ public abstract class SecurityPipeBase implements Pipe {
         this.inProtocolPM = that.inProtocolPM;
         this.outProtocolPM = that.outProtocolPM;
         this.hasIssuedTokens = that.hasIssuedTokens;
+        this.hasKerberosToken = that.hasKerberosToken;
         this.hasSecureConversation = that.hasSecureConversation;
         this.hasReliableMessaging = that.hasReliableMessaging;
         //this.opResolver = that.opResolver;
@@ -522,6 +528,10 @@ public abstract class SecurityPipeBase implements Pipe {
     
     protected boolean bindingHasRMPolicy() {
         return hasReliableMessaging;
+    }
+    
+    protected boolean hasKerberosTokenPolicy(){
+        return hasKerberosToken;
     }
     
     protected ProcessingContext initializeOutgoingProcessingContext(
@@ -796,6 +806,26 @@ public abstract class SecurityPipeBase implements Pipe {
         return sph.getSecureConversationTokens();
     }
     
+    protected List<PolicyAssertion> getInBoundKTP(Message message){
+        if (inMessagePolicyMap == null) {
+            return Collections.emptyList();
+        }
+        SecurityPolicyHolder sph = null;
+        Collection coll = inMessagePolicyMap.values();
+        Iterator itr = coll.iterator();
+        
+        while(itr.hasNext()){
+            SecurityPolicyHolder ph = (SecurityPolicyHolder) itr.next();
+            if(ph != null){
+                sph = ph;
+                break;
+            }
+        }
+        if(sph == null){
+            return EMPTY_LIST;
+        }
+        return sph.getKerberosTokens();
+    }
     
     protected List<PolicyAssertion> getOutBoundSCP(
             Message message) {
@@ -821,6 +851,26 @@ public abstract class SecurityPipeBase implements Pipe {
         
     }
     
+    protected List<PolicyAssertion> getOutBoundKTP(Message message){
+        if (outMessagePolicyMap == null) {
+            return Collections.emptyList();
+        }
+        SecurityPolicyHolder sph = null;
+        Collection coll = outMessagePolicyMap.values();
+        Iterator itr = coll.iterator();
+        
+        while(itr.hasNext()){
+            SecurityPolicyHolder ph = (SecurityPolicyHolder) itr.next();
+            if(ph != null){
+                sph = ph;
+                break;
+            }
+        }
+        if(sph == null){
+            return EMPTY_LIST;
+        }
+        return sph.getKerberosTokens();
+    }    
     
     protected List<PolicyAssertion> getSecureConversationPolicies(
             Message message, String scope) {
@@ -888,7 +938,8 @@ public abstract class SecurityPipeBase implements Pipe {
     }
     private void addToken(Token token,ArrayList<PolicyAssertion> list){
         if(PolicyUtil.isSecureConversationToken((PolicyAssertion)token) ||
-                PolicyUtil.isIssuedToken((PolicyAssertion)token)){
+                PolicyUtil.isIssuedToken((PolicyAssertion)token) ||
+                PolicyUtil.isKerberosToken((PolicyAssertion)token)){
             list.add((PolicyAssertion)token);
         }
     }
@@ -1188,6 +1239,9 @@ public abstract class SecurityPipeBase implements Pipe {
             }else if(PolicyUtil.isIssuedToken(token)){
                 sph.addIssuedToken(token);
                 hasIssuedTokens = true;
+            }else if(PolicyUtil.isKerberosToken(token)){
+                sph.addKerberosToken(token);
+                hasKerberosToken = true;
             }
         }
         return sph;

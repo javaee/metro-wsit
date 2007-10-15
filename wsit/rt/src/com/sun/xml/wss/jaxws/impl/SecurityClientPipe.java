@@ -1,8 +1,8 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
+ *
  * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
- * 
+ *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
@@ -10,7 +10,7 @@
  * a copy of the License at https://glassfish.dev.java.net/public/CDDL+GPL.html
  * or glassfish/bootstrap/legal/LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
- * 
+ *
  * When distributing the software, include this License Header Notice in each
  * file and include the License file at glassfish/bootstrap/legal/LICENSE.txt.
  * Sun designates this particular file as subject to the "Classpath" exception
@@ -19,9 +19,9 @@
  * Header, with the fields enclosed by brackets [] replaced by your own
  * identifying information: "Portions Copyrighted [year]
  * [name of copyright owner]"
- * 
+ *
  * Contributor(s):
- * 
+ *
  * If you wish your version of this file to be governed by only the CDDL or
  * only the GPL Version 2, indicate your decision by adding "[Contributor]
  * elects to include this software in this distribution under the [CDDL or GPL
@@ -39,7 +39,13 @@ package com.sun.xml.wss.jaxws.impl;
 
 
 import com.sun.xml.ws.api.model.wsdl.WSDLFault;
+import com.sun.xml.ws.security.impl.kerberos.KerberosContext;
+import com.sun.xml.ws.security.impl.kerberos.KerberosLogin;
 import com.sun.xml.ws.security.impl.policy.Constants;
+import com.sun.xml.wss.impl.MessageConstants;
+import com.sun.xml.wss.impl.misc.Base64;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Enumeration;
@@ -118,14 +124,14 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
             Properties props = new Properties();
             handler = configureClientHandler(configAssertions, props);
             secEnv = new DefaultSecurityEnvironmentImpl(handler, props);
-        } catch (Exception e) {            
-            log.log(Level.SEVERE, 
-                    LogStringsMessages.WSSPIPE_0023_ERROR_CREATING_NEW_INSTANCE_SEC_CLIENT_PIPE(), e);            
+        } catch (Exception e) {
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSSPIPE_0023_ERROR_CREATING_NEW_INSTANCE_SEC_CLIENT_PIPE(), e);
             throw new RuntimeException(
                     LogStringsMessages.WSSPIPE_0023_ERROR_CREATING_NEW_INSTANCE_SEC_CLIENT_PIPE(), e);
         }
         
-     
+        
     }
     
     // copy constructor
@@ -160,8 +166,20 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
         invokeTrustPlugin(packet, isSCMessage);
         
         //---------------OUTBOUND SECURITY PROCESSING----------
-        ProcessingContext ctx = initializeOutgoingProcessingContext(packet, isSCMessage);        
+        ProcessingContext ctx = initializeOutgoingProcessingContext(packet, isSCMessage);
         ((ProcessingContextImpl)ctx).setIssuedTokenContextMap(issuedTokenContextMap);
+        
+        try{
+            if(hasKerberosTokenPolicy()){
+                populateKerberosContext(packet, (ProcessingContextImpl)ctx);
+                ((ProcessingContextImpl)ctx).setKerberosContextMap(kerberosTokenContextMap);
+            }
+        } catch(XWSSecurityException xwsse){
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSSPIPE_0024_ERROR_SECURING_OUTBOUND_MSG(), xwsse);
+            throw new WebServiceException(
+                    LogStringsMessages.WSSPIPE_0024_ERROR_SECURING_OUTBOUND_MSG(), xwsse);
+        }
         
         try{
             if(!optimized) {
@@ -175,8 +193,8 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
                 msg = secureOutboundMessage(msg, ctx);
             }
         } catch(SOAPException se){
-            log.log(Level.SEVERE, 
-                    LogStringsMessages.WSSPIPE_0024_ERROR_SECURING_OUTBOUND_MSG(), se);                        
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSSPIPE_0024_ERROR_SECURING_OUTBOUND_MSG(), se);
             throw new WebServiceException(
                     LogStringsMessages.WSSPIPE_0024_ERROR_SECURING_OUTBOUND_MSG(), se);
         }
@@ -197,17 +215,20 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
                 Message newMsg = Messages.create(sm);
                 ret.setMessage(newMsg);
             }catch(SOAPException ex){
-                log.log(Level.SEVERE, 
+                log.log(Level.SEVERE,
                         LogStringsMessages.WSSPIPE_0005_PROBLEM_PROC_SOAP_MESSAGE(), ex);
                 throw new WebServiceException(
-                        LogStringsMessages.WSSPIPE_0005_PROBLEM_PROC_SOAP_MESSAGE(), ex);                
+                        LogStringsMessages.WSSPIPE_0005_PROBLEM_PROC_SOAP_MESSAGE(), ex);
             }
         }
         //---------------INBOUND SECURITY VERIFICATION----------
         
-     
+        
         ctx = initializeInboundProcessingContext(ret);
         ctx.isClient(true);
+        if(hasKerberosTokenPolicy()){
+            ((ProcessingContextImpl)ctx).setKerberosContextMap(kerberosTokenContextMap);
+        }
         ((ProcessingContextImpl)ctx).setIssuedTokenContextMap(issuedTokenContextMap);
         ctx.setExtraneousProperty(ctx.OPERATION_RESOLVER, new PolicyResolverImpl(inMessagePolicyMap,inProtocolPM,cachedOperation,pipeConfig,addVer,true));
         
@@ -226,22 +247,22 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
                         DumpFilter.process(ctx);
                     }
                     SOAPFault fault = soapMessage.getSOAPBody().getFault();
-                    //log.log(Level.SEVERE, 
-                    //        LogStringsMessages.WSSPIPE_0034_FAULTY_RESPONSE_MSG(fault));                    
-                    throw new SOAPFaultException(fault);                    
+                    //log.log(Level.SEVERE,
+                    //        LogStringsMessages.WSSPIPE_0034_FAULTY_RESPONSE_MSG(fault));
+                    throw new SOAPFaultException(fault);
                 }
                 msg = Messages.create(soapMessage);
             }else{
                 msg = verifyInboundMessage(msg, ctx);
             }
         } catch (XWSSecurityException xwse) {
-            log.log(Level.SEVERE, 
+            log.log(Level.SEVERE,
                     LogStringsMessages.WSSPIPE_0025_ERROR_VERIFY_INBOUND_MSG(), xwse);
-            throw new WebServiceException(LogStringsMessages.WSSPIPE_0025_ERROR_VERIFY_INBOUND_MSG(), 
-                    getSOAPFaultException(xwse));            
+            throw new WebServiceException(LogStringsMessages.WSSPIPE_0025_ERROR_VERIFY_INBOUND_MSG(),
+                    getSOAPFaultException(xwse));
         }catch(SOAPException se){
-            log.log(Level.SEVERE, 
-                    LogStringsMessages.WSSPIPE_0025_ERROR_VERIFY_INBOUND_MSG(), se);            
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSSPIPE_0025_ERROR_VERIFY_INBOUND_MSG(), se);
             throw new WebServiceException(LogStringsMessages.WSSPIPE_0025_ERROR_VERIFY_INBOUND_MSG(), se);
         }
         resetCachedOperation();
@@ -343,6 +364,7 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
             nextPipe.preDestroy();
         }
         issuedTokenContextMap.clear();
+        kerberosTokenContextMap.clear();
     }
     
     public Pipe copy(PipeCloner cloner) {
@@ -426,6 +448,34 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
         }
     }
     
+    protected void populateKerberosContext(Packet packet, ProcessingContextImpl ctx) throws XWSSecurityException{
+        List toks =getOutBoundKTP(packet.getMessage());
+        if (toks.isEmpty()) {
+            return;
+        }
+        //Note: Assuming only one Kerberos token assertion
+        Token tok = (Token)toks.get(0);
+        String sha1KerbToken = (String)ctx.getExtraneousProperty(MessageConstants.KERBEROS_SHA1_VALUE);
+        KerberosContext krbContext = null;
+        if(sha1KerbToken != null)
+            krbContext = kerberosTokenContextMap.get(sha1KerbToken);
+        
+        if(krbContext == null){
+            //TODO: Remove this hardcoding of kerberos client
+            krbContext = new KerberosLogin().login("KerberosClient");
+            try {
+                byte[] krbSha1 = MessageDigest.getInstance("SHA-1").digest(krbContext.getKerberosToken());
+                String encKrbSha1 = Base64.encode(krbSha1);
+                ctx.setExtraneousProperty(MessageConstants.KERBEROS_SHA1_VALUE, encKrbSha1);
+                kerberosTokenContextMap.put(encKrbSha1, krbContext);
+            } catch (NoSuchAlgorithmException nsae) {
+                throw new XWSSecurityException(nsae);
+            }
+        } else{
+            krbContext.setOnce(false);
+        }
+    }
+    
     //TODO use constants here
     private CallbackHandler configureClientHandler(Set configAssertions, Properties props) {
         //Properties props = new Properties();
@@ -435,17 +485,17 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
                 Class handler = loadClass(ret);
                 Object obj = handler.newInstance();
                 if (!(obj instanceof CallbackHandler)) {
-                    log.log(Level.SEVERE, 
+                    log.log(Level.SEVERE,
                             LogStringsMessages.WSSPIPE_0033_INVALID_CALLBACK_HANDLER_CLASS(ret));
                     throw new RuntimeException(
-                            LogStringsMessages.WSSPIPE_0033_INVALID_CALLBACK_HANDLER_CLASS(ret));                    
+                            LogStringsMessages.WSSPIPE_0033_INVALID_CALLBACK_HANDLER_CLASS(ret));
                 }
                 return (CallbackHandler)obj;
             }
             return new DefaultCallbackHandler("client", props);
         } catch (Exception e) {
-            log.log(Level.SEVERE, 
-                    LogStringsMessages.WSSPIPE_0027_ERROR_CONFIGURE_CLIENT_HANDLER(), e);                                    
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSSPIPE_0027_ERROR_CONFIGURE_CLIENT_HANDLER(), e);
             throw new RuntimeException(LogStringsMessages.WSSPIPE_0027_ERROR_CONFIGURE_CLIENT_HANDLER(), e);
         }
     }

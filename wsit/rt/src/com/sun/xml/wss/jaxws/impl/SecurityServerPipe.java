@@ -169,6 +169,9 @@ public class SecurityServerPipe extends SecurityPipeBase {
         //Do Security Processing for Incoming Message
         //---------------INBOUND SECURITY VERIFICATION----------
         ProcessingContext ctx = initializeInboundProcessingContext(packet/*, isSCIssueMessage, isTrustMessage*/);
+        if(hasKerberosTokenPolicy()){
+            ((ProcessingContextImpl)ctx).setKerberosContextMap(kerberosTokenContextMap);
+        }
         ctx.setExtraneousProperty(ctx.OPERATION_RESOLVER, new PolicyResolverImpl(inMessagePolicyMap,inProtocolPM,cachedOperation,pipeConfig,addVer,false));
         try{
             if(!optimized) {
@@ -305,7 +308,9 @@ public class SecurityServerPipe extends SecurityPipeBase {
         
         //---------------OUTBOUND SECURITY PROCESSING----------
         ctx = initializeOutgoingProcessingContext(retPacket, isSCIssueMessage, isTrustMessage /*, thereWasAFault*/);
-        
+        if(hasKerberosTokenPolicy()){
+            ((ProcessingContextImpl)ctx).setKerberosContextMap(kerberosTokenContextMap);
+        }
         try{
             msg = retPacket.getMessage();
             if (ctx.getSecurityPolicy() != null && ((MessagePolicy)ctx.getSecurityPolicy()).size() >0) {
@@ -352,6 +357,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
             nextPipe.preDestroy();
         }
         issuedTokenContextMap.clear();
+        kerberosTokenContextMap.clear();
     }
     
     public Pipe copy(PipeCloner cloner) {

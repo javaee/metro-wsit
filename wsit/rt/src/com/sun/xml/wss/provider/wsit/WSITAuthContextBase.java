@@ -47,7 +47,6 @@ package com.sun.xml.wss.provider.wsit;
 
 import com.sun.xml.ws.api.model.wsdl.WSDLFault;
 import com.sun.xml.ws.security.impl.kerberos.KerberosContext;
-import com.sun.xml.ws.security.impl.kerberos.KerberosLogin;
 import com.sun.xml.ws.security.impl.policyconv.XWSSPolicyGenerator;
 import com.sun.xml.ws.security.policy.CertStoreConfig;
 import com.sun.xml.ws.security.secconv.WSSCConstants;
