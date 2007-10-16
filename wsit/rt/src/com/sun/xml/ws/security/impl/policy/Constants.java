@@ -212,6 +212,7 @@ public class Constants {
     public static final String SUN_SECURE_CLIENT_CONVERSATION_POLICY_NS="http://schemas.sun.com/ws/2006/05/sc/client";
     public static final String SUN_SECURE_SERVER_CONVERSATION_POLICY_NS="http://schemas.sun.com/ws/2006/05/sc/server";
     
+    public static final String KerberosConfig = "KerberosConfig";
     public static final String KeyStore = "KeyStore";
     public static final String TrustStore = "TrustStore";
     public static final String CallbackHandler = "CallbackHandler";

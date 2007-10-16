@@ -44,6 +44,7 @@ import com.sun.xml.ws.security.impl.kerberos.KerberosContext;
 import com.sun.xml.ws.security.impl.policyconv.XWSSPolicyGenerator;
 import com.sun.xml.ws.security.opt.impl.JAXBFilterProcessingContext;
 import com.sun.xml.ws.security.policy.CertStoreConfig;
+import com.sun.xml.ws.security.policy.KerberosConfig;
 import com.sun.xml.ws.security.secconv.WSSCConstants;
 import com.sun.xml.wss.impl.policy.mls.EncryptionPolicy;
 import com.sun.xml.wss.impl.policy.mls.EncryptionTarget;
@@ -195,6 +196,7 @@ public abstract class SecurityPipeBase implements Pipe {
     private final QName bsp10Server = new QName("http://schemas.sun.com/2006/03/wss/server","BSP10");
     private final QName bsp10Client = new QName("http://schemas.sun.com/2006/03/wss/client","BSP10");
     protected boolean bsp10 = false;
+    
     protected static final ArrayList<String> securityPolicyNamespaces ;
     protected static final List<PolicyAssertion> EMPTY_LIST = Collections.emptyList();
     
@@ -1269,9 +1271,17 @@ public abstract class SecurityPipeBase implements Pipe {
                 populateValidatorProps(props, (ValidatorConfiguration)as);
             } else if ("CertStore".equals(as.getName().getLocalPart())) {
                 populateCertStoreProps(props, (CertStoreConfig)as);
+            } else if("KerberosConfig".equals(as.getName().getLocalPart())){
+                populateKerberosProps(props, (KerberosConfig)as);
             }
         }
         return null;
+    }
+    
+    private void populateKerberosProps(Properties props, KerberosConfig kerbConfig){
+        if(kerbConfig.getLoginModule() != null){
+            props.put(DefaultCallbackHandler.KRB5_LOGIN_MODULE, kerbConfig.getLoginModule());
+        }
     }
     
     private void populateKeystoreProps(Properties props, KeyStore store) {

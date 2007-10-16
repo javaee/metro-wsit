@@ -118,6 +118,7 @@ public class SecurityPolicyAssertionCreator implements PolicyAssertionCreator{
         implementedAssertions.add(Constants.Validator);
         implementedAssertions.add(Constants.ValidatorConfiguration);
         implementedAssertions.add(Constants.CertStore);
+        implementedAssertions.add(Constants.KerberosConfig);
         
     };
     /** Creates a new instance of SecurityPolicyAssertionCreator */

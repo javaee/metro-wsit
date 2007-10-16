@@ -184,6 +184,10 @@ public class SecurityPolicyValidator implements PolicyAssertionValidator{
         supportedAssertions.add(new QName(SUN_WSS_SECURITY_CLIENT_POLICY_NS,"KeyStore"));
         supportedAssertions.add(new QName(SUN_WSS_SECURITY_CLIENT_POLICY_NS,"TrustStore"));
         
+        // Kerberos information from custom assertions
+        supportedAssertions.add(new QName(SUN_WSS_SECURITY_SERVER_POLICY_NS,"KerberosConfig"));       
+        supportedAssertions.add(new QName(SUN_WSS_SECURITY_CLIENT_POLICY_NS,"KerberosConfig"));
+        
         supportedAssertions.add(new QName(SUN_SECURE_CLIENT_CONVERSATION_POLICY_NS,"SCClientConfiguration"));
         
         supportedAssertions.add(new QName(SUN_TRUST_CLIENT_SECURITY_POLICY_NS,"PreconfiguredSTS"));

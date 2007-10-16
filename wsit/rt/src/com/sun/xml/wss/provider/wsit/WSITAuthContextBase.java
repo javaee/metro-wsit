@@ -49,6 +49,7 @@ import com.sun.xml.ws.api.model.wsdl.WSDLFault;
 import com.sun.xml.ws.security.impl.kerberos.KerberosContext;
 import com.sun.xml.ws.security.impl.policyconv.XWSSPolicyGenerator;
 import com.sun.xml.ws.security.policy.CertStoreConfig;
+import com.sun.xml.ws.security.policy.KerberosConfig;
 import com.sun.xml.ws.security.secconv.WSSCConstants;
 import com.sun.xml.wss.impl.policy.mls.EncryptionPolicy;
 import com.sun.xml.wss.impl.policy.mls.EncryptionTarget;
@@ -1006,9 +1007,17 @@ public abstract class WSITAuthContextBase  {
                 populateValidatorProps(props, (ValidatorConfiguration)as);
             } else if ("CertStore".equals(as.getName().getLocalPart())) {
                 populateCertStoreProps(props, (CertStoreConfig)as);
+            } else if("KerberosConfig".equals(as.getName().getLocalPart())){
+                populateKerberosProps(props, (KerberosConfig)as);
             }
         }
         return null;
+    }
+    
+    private void populateKerberosProps(Properties props, KerberosConfig kerbConfig){
+        if(kerbConfig.getLoginModule() != null){
+            props.put(DefaultCallbackHandler.KRB5_LOGIN_MODULE, kerbConfig.getLoginModule());
+        }
     }
     
     private void populateKeystoreProps(Properties props, KeyStore store) {

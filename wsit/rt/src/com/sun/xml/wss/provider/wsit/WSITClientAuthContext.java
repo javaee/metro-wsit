@@ -710,7 +710,7 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
         
         if(krbContext == null){
             //TODO: Remove this hardcoding of kerberos client
-            krbContext = new KerberosLogin().login("KerberosClient");
+            krbContext = ctx.getSecurityEnvironment().doKerberosLogin();
             try {
                 byte[] krbSha1 = MessageDigest.getInstance("SHA-1").digest(krbContext.getKerberosToken());
                 String encKrbSha1 = Base64.encode(krbSha1);
