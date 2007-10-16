@@ -60,6 +60,7 @@ import java.util.Iterator;
 import javax.xml.namespace.QName;
 
 import javax.security.auth.callback.CallbackHandler;
+import javax.xml.transform.dom.DOMSource;
 
 import javax.xml.ws.Provider;
 import javax.xml.ws.WebServiceException;
@@ -314,10 +315,10 @@ public abstract class BaseSTSImpl implements BaseSTS {
         samlEle = (Element)doc.importNode(samlEle, true);
         NodeList list = rstrEle.getElementsByTagNameNS("*", "RequestedSecurityToken");
         Element rdstEle = (Element)list.item(0);
-        rdstEle.appendChild(samlEle);
+        rdstEle.appendChild(samlEle); */
         
-        return new DOMSource(rstrEle);*/
-        return eleFac.toSource(rstr);
+        return new DOMSource(eleFac.toElement(rstr));
+        //return eleFac.toSource(rstr);
     }
 
     private Source cancel(final STSConfiguration config,

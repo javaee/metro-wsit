@@ -3,19 +3,21 @@ package com.sun.xml.ws.mex.server;
 import com.sun.xml.stream.buffer.MutableXMLStreamBuffer;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
+import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.HeaderList;
+import com.sun.xml.ws.api.message.Headers;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.server.BoundEndpoint;
-import com.sun.xml.ws.api.server.Module;
 import com.sun.xml.ws.api.server.WSEndpoint;
-import com.sun.xml.ws.api.server.WSWebServiceContext;
 import com.sun.xml.ws.developer.JAXWSProperties;
 import com.sun.xml.ws.transport.http.servlet.ServletModule;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Resource;
+import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.ws.BindingProvider;
@@ -41,7 +43,7 @@ import static com.sun.xml.ws.mex.MetadataConstants.WSA_PREFIX;
 
 @ServiceMode(value=Service.Mode.MESSAGE)
 @WebServiceProvider
-@Addressing(enabled=true,required=true)
+//@Addressing(enabled=true,required=true)
 public class MEXEndpoint implements Provider<Message> {
 
     @Resource
@@ -144,6 +146,13 @@ public class MEXEndpoint implements Provider<Message> {
                 writer.writeEndDocument();
                 writer.flush();
                 final Message responseMessage = Messages.create(buffer);
+                
+                HeaderList headers = responseMessage.getHeaders();
+                headers.add(Headers.create(new QName(wsaVersion.nsUri, "To"), "http://www.w3.org/2005/08/addressing/anonymous"));
+                headers.add(Headers.create(new QName(wsaVersion.nsUri, "Action"), GET_RESPONSE));
+                headers.add(Headers.create(new QName(wsaVersion.nsUri, "MessageID"), "uuid:" + UUID.randomUUID().toString()));
+                headers.add(Headers.create(new QName(wsaVersion.nsUri, "RelatedTo"), request.getHeaders().getMessageID(wsaVersion, soapVersion)));
+                 
                 wsContext.getMessageContext().put(BindingProvider.SOAPACTION_URI_PROPERTY, GET_RESPONSE);
                 return responseMessage;
             }
