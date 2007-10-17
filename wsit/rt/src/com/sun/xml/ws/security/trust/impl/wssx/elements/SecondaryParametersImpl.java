@@ -1,8 +1,4 @@
 /*
- * $Id: RequestSecurityTokenImpl.java,v 1.2 2007-10-17 20:58:29 jdg6688 Exp $
- */
-
-/*
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
  * (the License).  You may not use this file except in
@@ -21,7 +17,7 @@
  * you own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  * 
- * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
+ * Copyright 2007 Sun Microsystems Inc. All Rights Reserved
  */
 
 package com.sun.xml.ws.security.trust.impl.wssx.elements;
@@ -41,9 +37,6 @@ import com.sun.xml.ws.api.security.trust.WSTrustException;
 
 import com.sun.xml.ws.security.trust.elements.*;
 import com.sun.xml.ws.api.security.trust.Claims;
-import com.sun.xml.ws.security.trust.elements.Entropy;
-import com.sun.xml.ws.security.trust.elements.Lifetime;
-import com.sun.xml.ws.security.trust.elements.Participants;
 
 import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
 import com.sun.xml.ws.security.trust.impl.wssx.bindings.AllowPostdatingType;
@@ -66,12 +59,12 @@ import com.sun.xml.ws.security.trust.impl.wssx.bindings.SignChallengeType;
 import com.sun.xml.ws.security.trust.impl.wssx.bindings.UseKeyType;
 
 /**
- * Implementation of the RequestSecurityToken interface.
+ * Implementation of the SecondaryParameters interface.
  *
- * @author Manveen Kaur
+ * @author Jiandong Guo
  */
-public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
-        implements RequestSecurityToken {
+public class SecondaryParametersImpl  extends SecondaryParametersType
+        implements SecondaryParameters {
     
     private Claims claims = null;
     private Participants participants = null;
@@ -113,71 +106,10 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
     private Policy policy = null;
     private PolicyReference policyRef = null;
     
-    private SecondaryParameters sp = null;
-    
-    public RequestSecurityTokenImpl() {
-        setRequestType(URI.create(WSTrustConstants.ISSUE_REQUEST));
+    public SecondaryParametersImpl() {
+       
     }
-    
-    public RequestSecurityTokenImpl(URI tokenType, URI requestType) {
-        setTokenType(tokenType);
-        setRequestType(requestType);
-    }
-    
-    public RequestSecurityTokenImpl(URI tokenType, URI requestType,
-            URI context, AppliesTo scopes,
-            Claims claims, Entropy entropy,
-            Lifetime lt, URI algorithm) {
-        setTokenType(tokenType);
-        setRequestType(requestType);
-        if (context != null) {
-            setContext(context.toString());
-        }
-        if (scopes != null) {
-            setAppliesTo(scopes);
-        }
-        if (claims != null) {
-            setClaims(claims);
-        }
-        if (entropy !=null)
-            setEntropy(entropy);
-        if (lt!=null)
-            setLifetime(lt);
-        if (algorithm !=null)
-            setComputedKeyAlgorithm(algorithm);
-    }
-    
-    public RequestSecurityTokenImpl(URI tokenType, URI requestType, URI context,
-            RenewTarget target, AllowPostdating apd, Renewing renewingInfo) {
-        setTokenType(tokenType);
-        setRequestType(requestType);
-        if (context != null) {
-            setContext(context.toString());
-        }
-        if (context != null) {
-            setContext(context.toString());
-        }
-        if (target != null) {
-            setRenewTarget(target);
-        }
-        if (apd != null) {
-            setAllowPostdating(apd);
-        }
-        if (renewingInfo != null) {
-            setRenewable(renewingInfo);
-        }
-    }
-    
-    public RequestSecurityTokenImpl(URI tokenType, URI requestType, CancelTarget cancel) {
-        setTokenType(tokenType);
-        setRequestType(requestType);
-        setCancelTarget(cancel);
-    }
-    
-    public String getContext() {
-        return super.getContext();
-    }
-    
+        
     public void setClaims(Claims claims) {
         this.claims = claims;
         JAXBElement<ClaimsType> cElement =
@@ -187,39 +119,6 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
     
     public Claims getClaims() {
         return claims;
-    }
-    
-    public void setCancelTarget(CancelTarget cTarget) {
-        this.cancelTarget = cTarget;
-        JAXBElement<CancelTargetType> ctElement =
-                (new ObjectFactory()).createCancelTarget((CancelTargetType)cTarget);
-        getAny().add(ctElement);
-    }
-    
-    public CancelTarget getCancelTarget() {
-        return cancelTarget;
-    }
-    
-    public void setRenewTarget(RenewTarget target) {
-        this.renewTarget = target;
-        JAXBElement<RenewTargetType> rElement =
-                (new ObjectFactory()).createRenewTarget((RenewTargetType)target);
-        getAny().add(rElement);
-    }
-    
-    public RenewTarget getRenewTarget() {
-        return renewTarget;
-    }
-    
-    public void setParticipants(Participants participants) {
-        this.participants = participants;
-        JAXBElement<ParticipantsType> rElement =
-                (new ObjectFactory()).createParticipants((ParticipantsType)participants);
-        getAny().add(rElement);
-    }
-    
-    public Participants getParticipants() {
-        return participants;
     }
     
     public URI getTokenType() {
@@ -235,27 +134,6 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
         }
     }
     
-    public URI getRequestType() {
-        return requestType;
-    }
-    
-    public void setRequestType(URI requestType) {
-        if (requestType == null) {
-            throw new RuntimeException("RequestType cannot be null");
-        }
-        String rtString = requestType.toString();
-        if (!rtString.equalsIgnoreCase(WSTrustConstants.ISSUE_REQUEST)
-        && !rtString.equalsIgnoreCase(WSTrustConstants.CANCEL_REQUEST)
-        && !rtString.equalsIgnoreCase(WSTrustConstants.KEY_EXCHANGE_REQUEST)
-        && !rtString.equalsIgnoreCase(WSTrustConstants.RENEW_REQUEST)
-        && !rtString.equalsIgnoreCase(WSTrustConstants.VALIDATE_REQUEST)) {
-            throw new RuntimeException("Invalid Request Type specified");
-        }
-        this.requestType = requestType;
-        JAXBElement<String> rtElement =
-                (new ObjectFactory()).createRequestType(rtString);
-        getAny().add(rtElement);
-    }
     
     public Lifetime getLifetime() {
         return lifetime;
@@ -266,17 +144,6 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
         JAXBElement<LifetimeType> ltElement =
                 (new ObjectFactory()).createLifetime((LifetimeType)lifetime);
         getAny().add(ltElement);
-    }
-    
-     public SecondaryParameters getSecondaryParameters() {
-        return sp;
-    }
-    
-    public void setSecondaryParameters(SecondaryParameters sp) {
-        this.sp = sp;
-        JAXBElement<SecondaryParametersType> spElement =
-                (new ObjectFactory()).createSecondaryParameters((SecondaryParametersType)sp);
-        getAny().add(spElement);
     }
     
     public Entropy getEntropy() {
@@ -556,10 +423,9 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
         getAny().add(allowPd);
     }
     
-    public RequestSecurityTokenImpl(RequestSecurityTokenType rstType)
+    public SecondaryParametersImpl(SecondaryParametersType spType)
     throws Exception {
-        this.context = rstType.getContext();
-        List<Object> list = rstType.getAny();
+        List<Object> list = spType.getAny();
         for (int i = 0; i < list.size(); i++) {
             if(list.get(i) instanceof AppliesTo){
                 setAppliesTo((AppliesTo)list.get(i));
@@ -569,9 +435,7 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
                 JAXBElement obj = (JAXBElement)list.get(i);
 
                 String local = obj.getName().getLocalPart();
-                if (local.equalsIgnoreCase("RequestType")) {
-                    setRequestType(new URI((String)obj.getValue()));
-                } else if (local.equalsIgnoreCase("KeySize")) {
+               if (local.equalsIgnoreCase("KeySize")) {
                     setKeySize((Long)obj.getValue());
                 } else if (local.equalsIgnoreCase("KeyType")){
                     setKeyType(new URI((String)obj.getValue()));
@@ -608,15 +472,9 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
                 }else if (local.equalsIgnoreCase("BinaryExchange")){
                     BinaryExchangeType bcType = (BinaryExchangeType)obj.getValue();
                     setBinaryExchange(new BinaryExchangeImpl(bcType));
-                } else if (local.equalsIgnoreCase("Issuer")){
-//                    EndpointReferenceImpl isType = (EndpointReferenceImpl)obj.getValue();
-//                    setIssuer(new IssuerImpl(isType));
                 } else if (local.equalsIgnoreCase("Claims")){
                     ClaimsType cType = (ClaimsType)obj.getValue();
                     setClaims(new ClaimsImpl(cType));
-                } else if (local.equalsIgnoreCase("Participants")){
-                    ParticipantsType psType = (ParticipantsType)obj.getValue();
-                    setParticipants(new ParticipantsImpl(psType));
                 } else if (local.equalsIgnoreCase("Renewing")){
                     setRenewable(new RenewingImpl());
                 } else if (local.equalsIgnoreCase("ProofEncryption")){
@@ -640,16 +498,8 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
                 } else if (local.equalsIgnoreCase("DelegateTo")){
                     DelegateToType dtType  = (DelegateToType)obj.getValue();
                     setDelegateTo(new DelegateToImpl(dtType));
-                } else if (local.equalsIgnoreCase("RenewTarget")){
-                    RenewTargetType rtType = (RenewTargetType)obj.getValue();
-                    setRenewTarget(new RenewTargetImpl(rtType));
-                } else if (local.equalsIgnoreCase("CancelTarget")){
-                    CancelTargetType ctType = (CancelTargetType)obj.getValue();
-                    setCancelTarget(new CancelTargetImpl(ctType));
                 } else if (local.equalsIgnoreCase("AppliesTo")) {
                     setAppliesTo((AppliesTo)obj.getValue());
-                } else if (local.equalsIgnoreCase("SecondaryParameters")){
-                    setSecondaryParameters(new SecondaryParametersImpl((SecondaryParametersType)obj.getValue()));
                 }
             }
         }

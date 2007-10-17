@@ -1,8 +1,4 @@
 /*
- * $Id: RequestSecurityToken.java,v 1.4 2007-10-17 20:58:29 jdg6688 Exp $
- */
-
-/*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
  * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
@@ -41,27 +37,16 @@
 package com.sun.xml.ws.security.trust.elements;
 
 import java.util.List;
-import java.util.Map;
-import javax.xml.namespace.QName;
-
-import java.net.URI;
 
 import com.sun.xml.ws.api.security.trust.Claims;
-import com.sun.xml.ws.security.trust.WSTrustConstants;
 
 /**
- * @author Kumar Jayanti
+ *
+ * @author Jiandong Guo
  */
-public interface RequestSecurityToken extends WSTrustElementBase, BaseRequest {
+public interface SecondaryParameters extends WSTrustElementBase {
     
-    /**
-     * Predefined constants for the Type of Key desired in the Security Token
-     * Values for the wst:KeyType parameter
-     */
-    public static final String PUBLIC_KEY_TYPE = WSTrustConstants.WST_NAMESPACE + "/PublicKey";
-    public static final String SYMMETRIC_KEY_TYPE = WSTrustConstants.WST_NAMESPACE + "/SymmetricKey";
-   
-    /**
+     /**
      * Gets the value of the any property.
      * 
      * <p>
@@ -83,46 +68,8 @@ public interface RequestSecurityToken extends WSTrustElementBase, BaseRequest {
      * {@link Object }
      */
     List<Object> getAny();
-
-    /**
-     * Gets the value of the context property.
-     * 
-     * 
-     * @return {@link String }
-     */
-    String getContext();
-
-    /**
-     * Gets a map that contains attributes that aren't bound to any typed property on this class.
-     * 
-     * <p>
-     * the map is keyed by the name of the attribute and 
-     * the value is the string value of the attribute.
-     * 
-     * the map returned by this method is live, and you can add new attribute
-     * by updating the map directly. Because of this design, there's no setter.
-     * 
-     * 
-     * 
-     * @return always non-null
-     */
-    Map<QName, String> getOtherAttributes();
-
-   /**
-    * Get the type of request, specified as a URI.
-    * The URI indicates the class of function that is requested.
-    * @return {@link URI}
-    */
-    URI getRequestType();
-
-   /**
-     * Set the type of request, specified as a URI.
-     * @param requestType {@link URI}
-     */
-    void setRequestType(URI requestType);
-
-
-    /**
+    
+     /**
       * Set the desired claims settings for the requested token
       */
      void setClaims(Claims claims);
@@ -131,22 +78,4 @@ public interface RequestSecurityToken extends WSTrustElementBase, BaseRequest {
       * Get the desired claims settings for the token if specified, null otherwise
       */
      Claims getClaims();
-
-     /**
-      * Set the Participants Sharing the requested Token
-      */
-     void setParticipants(Participants participants);
-     
-     /**
-      * Get the participants sharing the token if specified, null otherwise 
-      */
-     Participants getParticipants();
-     
-     CancelTarget getCancelTarget();
-     
-     void setSecondaryParameters(SecondaryParameters sp);
-     
-     SecondaryParameters getSecondaryParameters(); 
-
 }
-

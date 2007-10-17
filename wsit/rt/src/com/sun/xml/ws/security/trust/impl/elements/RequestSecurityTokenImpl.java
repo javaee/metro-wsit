@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityTokenImpl.java,v 1.14 2007-09-24 17:48:45 jdg6688 Exp $
+ * $Id: RequestSecurityTokenImpl.java,v 1.15 2007-10-17 20:58:30 jdg6688 Exp $
  */
 
 /*
@@ -251,6 +251,14 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
                     (new ObjectFactory()).createTokenType(tokenType.toString());
             getAny().add(ttElement);
         }
+    }
+    
+    public void setSecondaryParameters(SecondaryParameters sp){
+         throw new UnsupportedOperationException("Unsupported operations!");
+    }
+    
+    public SecondaryParameters getSecondaryParameters(){
+         throw new UnsupportedOperationException("Unsupported operations!");
     }
     
     public URI getRequestType() {

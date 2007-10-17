@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustElementFactory.java,v 1.11 2007-09-24 17:48:46 jdg6688 Exp $
+ * $Id: WSTrustElementFactory.java,v 1.12 2007-10-17 20:58:31 jdg6688 Exp $
  */
 
 /*
@@ -61,6 +61,7 @@ import com.sun.xml.ws.security.trust.elements.RequestedProofToken;
 import com.sun.xml.ws.security.trust.elements.RequestedAttachedReference;
 import com.sun.xml.ws.security.trust.elements.RequestedUnattachedReference;
 import com.sun.xml.ws.security.trust.elements.RequestedSecurityToken;
+import com.sun.xml.ws.security.trust.elements.SecondaryParameters;
 import com.sun.xml.ws.security.trust.elements.Status;
 import com.sun.xml.ws.security.trust.impl.WSTrustElementFactoryImpl;
 import java.net.URI;
@@ -167,6 +168,11 @@ public abstract class WSTrustElementFactory {
      * Create an Entropy with an xenc:EncryptedKey
      */
     public abstract Entropy createEntropy(EncryptedKey key);
+    
+    /**
+     * Create SecondaryParameters
+     */
+    public abstract SecondaryParameters createSecondaryParameters();
 
     /**
      * Create a BinarySecret

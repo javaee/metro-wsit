@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustElementFactoryImpl.java,v 1.15 2007-09-24 17:48:45 jdg6688 Exp $
+ * $Id: WSTrustElementFactoryImpl.java,v 1.16 2007-10-17 20:58:31 jdg6688 Exp $
  */
 
 /*
@@ -60,6 +60,7 @@ import com.sun.xml.ws.security.trust.elements.RequestedAttachedReference;
 import com.sun.xml.ws.security.trust.elements.RequestedUnattachedReference;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
 import com.sun.xml.ws.security.trust.elements.RequestedSecurityToken;
+import com.sun.xml.ws.security.trust.elements.SecondaryParameters;
 import com.sun.xml.ws.security.trust.elements.Status;
 
 import com.sun.xml.ws.security.trust.impl.elements.BinarySecretImpl;
@@ -279,6 +280,14 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
     public RequestedProofToken createRequestedProofToken() {
         return new RequestedProofTokenImpl();
     }
+    
+    /**
+     * Create SecondaryParameters
+     */
+    public SecondaryParameters createSecondaryParameters(){
+        throw new UnsupportedOperationException("Unsupported operation: createSecondaryParameters");
+    }
+
     
     
     /**

@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityTokenResponse.java,v 1.2 2007-05-29 22:11:30 ofung Exp $
+ * $Id: RequestSecurityTokenResponse.java,v 1.3 2007-10-17 20:58:30 jdg6688 Exp $
  */
 
 /*
@@ -47,7 +47,7 @@ import javax.xml.namespace.QName;
 /**
  * @author Kumar Jayanti
  */
-public interface RequestSecurityTokenResponse extends WSTrustElementBase {
+public interface RequestSecurityTokenResponse extends WSTrustElementBase, BaseResponse {
     /**
      * Gets the value of the any property.
      * 
