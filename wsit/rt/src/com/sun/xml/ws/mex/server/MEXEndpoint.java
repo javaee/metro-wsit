@@ -43,7 +43,7 @@ import static com.sun.xml.ws.mex.MetadataConstants.WSA_PREFIX;
 
 @ServiceMode(value=Service.Mode.MESSAGE)
 @WebServiceProvider
-//@Addressing(enabled=true,required=true)
+@Addressing(enabled=true,required=true)
 public class MEXEndpoint implements Provider<Message> {
 
     @Resource
@@ -148,12 +148,12 @@ public class MEXEndpoint implements Provider<Message> {
                 final Message responseMessage = Messages.create(buffer);
                 
                 HeaderList headers = responseMessage.getHeaders();
-                headers.add(Headers.create(new QName(wsaVersion.nsUri, "To"), "http://www.w3.org/2005/08/addressing/anonymous"));
+                //headers.add(Headers.create(new QName(wsaVersion.nsUri, "To"), "http://www.w3.org/2005/08/addressing/anonymous"));
                 headers.add(Headers.create(new QName(wsaVersion.nsUri, "Action"), GET_RESPONSE));
-                headers.add(Headers.create(new QName(wsaVersion.nsUri, "MessageID"), "uuid:" + UUID.randomUUID().toString()));
-                headers.add(Headers.create(new QName(wsaVersion.nsUri, "RelatedTo"), request.getHeaders().getMessageID(wsaVersion, soapVersion)));
+                //headers.add(Headers.create(new QName(wsaVersion.nsUri, "MessageID"), "uuid:" + UUID.randomUUID().toString()));
+                //headers.add(Headers.create(new QName(wsaVersion.nsUri, "RelatedTo"), request.getHeaders().getMessageID(wsaVersion, soapVersion)));
                  
-                wsContext.getMessageContext().put(BindingProvider.SOAPACTION_URI_PROPERTY, GET_RESPONSE);
+                //wsContext.getMessageContext().put(BindingProvider.SOAPACTION_URI_PROPERTY, GET_RESPONSE);
                 return responseMessage;
             }
 
