@@ -49,6 +49,7 @@ import javax.xml.namespace.QName;
 public class KerberosConfig extends PolicyAssertion implements com.sun.xml.ws.security.policy.KerberosConfig {
 
     private static QName loginModule = new QName("loginModule");
+    private static QName servicePrincipal = new QName("servicePrincipal");
     
     /** Creates a new instance of KerberosConfig */
     public KerberosConfig() {
@@ -60,6 +61,10 @@ public class KerberosConfig extends PolicyAssertion implements com.sun.xml.ws.se
 
     public String getLoginModule() {
          return this.getAttributeValue(loginModule);
+    }
+
+    public String getServicePrincipal() {
+        return this.getAttributeValue(servicePrincipal);
     }
     
 }

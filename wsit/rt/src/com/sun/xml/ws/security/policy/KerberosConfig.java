@@ -44,4 +44,7 @@ public interface KerberosConfig {
 
     String getLoginModule();
     
+    // Only required for client
+    String getServicePrincipal();
+    
 }

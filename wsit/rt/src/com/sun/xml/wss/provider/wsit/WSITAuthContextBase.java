@@ -1018,6 +1018,9 @@ public abstract class WSITAuthContextBase  {
         if(kerbConfig.getLoginModule() != null){
             props.put(DefaultCallbackHandler.KRB5_LOGIN_MODULE, kerbConfig.getLoginModule());
         }
+        if(kerbConfig.getServicePrincipal() != null){
+            props.put(DefaultCallbackHandler.KRB5_SERVICE_PRINCIPAL, kerbConfig.getServicePrincipal());
+        }
     }
     
     private void populateKeystoreProps(Properties props, KeyStore store) {
