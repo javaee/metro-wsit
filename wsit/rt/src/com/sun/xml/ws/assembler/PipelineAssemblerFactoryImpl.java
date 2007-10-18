@@ -284,6 +284,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             }
             p = dump(context, CLIENT_PREFIX + WSA_SUFFIX + BEFORE_SUFFIX, p);
             p = context.createClientMUPipe(p);
+            p = context.createValidationPipe(p);
             p = context.createHandlerPipe(p);
 
             return p;
@@ -299,6 +300,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             PolicyMap policyMap = initPolicyMap(context);
 
             Pipe p = context.getTerminalPipe();
+            p = context.createValidationPipe(p);
             p = context.createHandlerPipe(p);
             p = context.createServerMUPipe(p);
             p = context.createMonitoringPipe(p);
