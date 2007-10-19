@@ -4,6 +4,7 @@ import com.sun.xml.stream.buffer.MutableXMLStreamBuffer;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.message.HeaderList;
+import com.sun.xml.ws.api.message.Headers;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.server.BoundEndpoint;
@@ -30,6 +31,7 @@ import javax.xml.ws.soap.Addressing;
 import com.sun.xml.ws.mex.MetadataConstants;
 import javax.servlet.http.HttpServletRequest;
 import com.sun.xml.ws.mex.MessagesMessages;
+import javax.xml.namespace.QName;
 
 import static com.sun.xml.ws.mex.MetadataConstants.GET_MDATA_REQUEST;
 import static com.sun.xml.ws.mex.MetadataConstants.GET_REQUEST;
@@ -144,7 +146,8 @@ public class MEXEndpoint implements Provider<Message> {
                 writer.writeEndDocument();
                 writer.flush();
                 final Message responseMessage = Messages.create(buffer);
-                wsContext.getMessageContext().put(BindingProvider.SOAPACTION_URI_PROPERTY, GET_RESPONSE);
+                HeaderList headers = responseMessage.getHeaders();
+                headers.add(Headers.create(new QName(wsaVersion.nsUri, "Action"), GET_RESPONSE));
                 return responseMessage;
             }
 
@@ -152,7 +155,8 @@ public class MEXEndpoint implements Provider<Message> {
             // TODO: This should probably be something other than unsupported action for clarity
             final Message faultMessage = Messages.create(GET_REQUEST,
                 wsaVersion, soapVersion);
-            wsContext.getMessageContext().put(BindingProvider.SOAPACTION_URI_PROPERTY, wsaVersion.getDefaultFaultAction());
+            HeaderList headers = faultMessage.getHeaders();
+            headers.add(Headers.create(new QName(wsaVersion.nsUri, "Action"), wsaVersion.getDefaultFaultAction()));
             return faultMessage;
         } catch (XMLStreamException streamE) {
             final String exceptionMessage = 
