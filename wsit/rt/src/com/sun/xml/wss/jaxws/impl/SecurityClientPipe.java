@@ -171,7 +171,7 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
         
         try{
             if(hasKerberosTokenPolicy()){
-                populateKerberosContext(packet, (ProcessingContextImpl)ctx);
+                populateKerberosContext(packet, (ProcessingContextImpl)ctx, isSCMessage);
                 ((ProcessingContextImpl)ctx).setKerberosContextMap(kerberosTokenContextMap);
             }
         } catch(XWSSecurityException xwsse){
@@ -448,26 +448,34 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
         }
     }
     
-    protected void populateKerberosContext(Packet packet, ProcessingContextImpl ctx) throws XWSSecurityException{
-        List toks =getOutBoundKTP(packet.getMessage());
+    protected void populateKerberosContext(Packet packet, ProcessingContextImpl ctx, boolean isSCMessage) throws XWSSecurityException{
+        List toks =getOutBoundKTP(packet, isSCMessage);
         if (toks.isEmpty()) {
             return;
         }
         //Note: Assuming only one Kerberos token assertion
         Token tok = (Token)toks.get(0);
+        String tokId = tok.getTokenId();
         String sha1KerbToken = (String)ctx.getExtraneousProperty(MessageConstants.KERBEROS_SHA1_VALUE);
+        if(sha1KerbToken == null){
+            sha1KerbToken = this.kerberosTokenIdMap.get(tokId);
+            if(sha1KerbToken != null){
+                ctx.setExtraneousProperty(MessageConstants.KERBEROS_SHA1_VALUE, sha1KerbToken);
+            }
+        }
         KerberosContext krbContext = null;
         if(sha1KerbToken != null)
             krbContext = kerberosTokenContextMap.get(sha1KerbToken);
         
         if(krbContext == null){
-            //TODO: Remove this hardcoding of kerberos client
+            
             krbContext = ctx.getSecurityEnvironment().doKerberosLogin();
             try {
                 byte[] krbSha1 = MessageDigest.getInstance("SHA-1").digest(krbContext.getKerberosToken());
                 String encKrbSha1 = Base64.encode(krbSha1);
                 ctx.setExtraneousProperty(MessageConstants.KERBEROS_SHA1_VALUE, encKrbSha1);
                 kerberosTokenContextMap.put(encKrbSha1, krbContext);
+                this.kerberosTokenIdMap.put(tokId, encKrbSha1);
             } catch (NoSuchAlgorithmException nsae) {
                 throw new XWSSecurityException(nsae);
             }

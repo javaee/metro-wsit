@@ -172,6 +172,7 @@ public abstract class SecurityPipeBase implements Pipe {
     protected Hashtable<String, IssuedTokenContext> issuedTokenContextMap = new Hashtable<String, IssuedTokenContext>();
     
     protected Hashtable<String, KerberosContext> kerberosTokenContextMap = new Hashtable<String, KerberosContext>();
+    protected Hashtable<String, String> kerberosTokenIdMap = new Hashtable<String, String>();
     
     protected PipeConfiguration pipeConfig = null;
     
@@ -308,6 +309,7 @@ public abstract class SecurityPipeBase implements Pipe {
         encHeaderContent = that.encHeaderContent;
         issuedTokenContextMap = that.issuedTokenContextMap;
         kerberosTokenContextMap = that.kerberosTokenContextMap;
+        kerberosTokenIdMap = that.kerberosTokenIdMap;
         secEnv = that.secEnv;
         isSOAP12 = that.isSOAP12;
         soapVersion = that.soapVersion;
@@ -441,6 +443,11 @@ public abstract class SecurityPipeBase implements Pipe {
             Token scAssertion) {
         SCTokenWrapper token = (SCTokenWrapper)scAssertion;
         return token.getIssuedTokens();
+    }
+    
+    protected List<PolicyAssertion> getKerberosTokenPoliciesFromBootstrapPolicy(Token scAssertion){
+        SCTokenWrapper token = (SCTokenWrapper)scAssertion;
+        return token.getKerberosTokens();
     }
     
     
@@ -808,27 +815,6 @@ public abstract class SecurityPipeBase implements Pipe {
         return sph.getSecureConversationTokens();
     }
     
-    protected List<PolicyAssertion> getInBoundKTP(Message message){
-        if (inMessagePolicyMap == null) {
-            return Collections.emptyList();
-        }
-        SecurityPolicyHolder sph = null;
-        Collection coll = inMessagePolicyMap.values();
-        Iterator itr = coll.iterator();
-        
-        while(itr.hasNext()){
-            SecurityPolicyHolder ph = (SecurityPolicyHolder) itr.next();
-            if(ph != null){
-                sph = ph;
-                break;
-            }
-        }
-        if(sph == null){
-            return EMPTY_LIST;
-        }
-        return sph.getKerberosTokens();
-    }
-    
     protected List<PolicyAssertion> getOutBoundSCP(
             Message message) {
         
@@ -853,10 +839,15 @@ public abstract class SecurityPipeBase implements Pipe {
         
     }
     
-    protected List<PolicyAssertion> getOutBoundKTP(Message message){
+    protected List<PolicyAssertion> getOutBoundKTP(Packet packet, boolean isSCMessage){
+        if(isSCMessage){
+            Token scToken = (Token)packet.invocationProperties.get(SC_ASSERTION);
+            return ((SCTokenWrapper)scToken).getKerberosTokens();
+        }
         if (outMessagePolicyMap == null) {
             return Collections.emptyList();
         }
+        Message message = packet.getMessage();
         SecurityPolicyHolder sph = null;
         Collection coll = outMessagePolicyMap.values();
         Iterator itr = coll.iterator();
@@ -1236,6 +1227,13 @@ public abstract class SecurityPipeBase implements Pipe {
                         this.getIssuedTokenPoliciesFromBootstrapPolicy((Token)sct);
                 if (!iList.isEmpty()) {
                     hasIssuedTokens = true;
+                }
+                
+                // if the bootstrap has kerberos tokens then set hasKerberosTokens=true
+                List<PolicyAssertion> kList =
+                        this.getKerberosTokenPoliciesFromBootstrapPolicy((Token)sct);
+                if(!kList.isEmpty()) {
+                    hasKerberosToken = true;
                 }
                 
             }else if(PolicyUtil.isIssuedToken(token)){

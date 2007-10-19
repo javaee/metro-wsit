@@ -63,7 +63,8 @@ public class SCTokenWrapper extends PolicyAssertion implements SecureConversatio
     
     private SecureConversationToken scToken = null;
     private MessagePolicy messagePolicy = null;
-    private List<PolicyAssertion> tokenList = null;
+    private List<PolicyAssertion> issuedTokenList = null;
+    private List<PolicyAssertion> kerberosTokenList = null;
     private boolean cached = false;
     /** Creates a new instance of SCTokenWrapper */
     public SCTokenWrapper(PolicyAssertion scToken,MessagePolicy mp) {
@@ -132,15 +133,26 @@ public class SCTokenWrapper extends PolicyAssertion implements SecureConversatio
     public List<PolicyAssertion> getIssuedTokens(){
         if(!cached){
             if(this.hasNestedPolicy()){
-                tokenList = getTokens(this.getNestedPolicy());
+                getTokens(this.getNestedPolicy());
                 cached = true;
             }
         }
-        return tokenList;
+        return issuedTokenList;
+    }
+
+    public List<PolicyAssertion> getKerberosTokens(){
+        if(!cached){
+            if(this.hasNestedPolicy()){
+                getTokens(this.getNestedPolicy());
+                cached = true;
+            }
+        }
+        return kerberosTokenList;
     }
     
-    private ArrayList<PolicyAssertion> getTokens(NestedPolicy policy){
-        ArrayList<PolicyAssertion> tokenList = new ArrayList<PolicyAssertion>();
+    private void getTokens(NestedPolicy policy){
+        issuedTokenList = new ArrayList<PolicyAssertion>();
+        kerberosTokenList = new ArrayList<PolicyAssertion>();
         AssertionSet assertionSet = policy.getAssertionSet();
         for(PolicyAssertion pa:assertionSet){
             if(PolicyUtil.isBootstrapPolicy(pa)){
@@ -149,34 +161,35 @@ public class SCTokenWrapper extends PolicyAssertion implements SecureConversatio
                 for(PolicyAssertion assertion:bpSet){
                     if(PolicyUtil.isAsymmetricBinding(assertion)){
                         AsymmetricBinding sb =  (AsymmetricBinding)assertion;
-                        addToken(sb.getInitiatorToken(),tokenList);
-                        addToken(sb.getRecipientToken(),tokenList);
+                        addToken(sb.getInitiatorToken());
+                        addToken(sb.getRecipientToken());
                     }else if(PolicyUtil.isSymmetricBinding(assertion)){
                         SymmetricBinding sb = (SymmetricBinding)assertion;
                         Token token = sb.getProtectionToken();
                         if(token != null){
-                            addToken(token,tokenList);
+                            addToken(token);
                         }else{
-                            addToken(sb.getEncryptionToken(),tokenList);
-                            addToken(sb.getSignatureToken(),tokenList);
+                            addToken(sb.getEncryptionToken());
+                            addToken(sb.getSignatureToken());
                         }
                     }else if(PolicyUtil.isSupportingTokens(assertion)){
                         SupportingTokens st = (SupportingTokens)assertion;
                         Iterator itr = st.getTokens();
                         while(itr.hasNext()){
-                            addToken((Token)itr.next(),tokenList);
+                            addToken((Token)itr.next());
                         }
                     }
                 }
             }
             
         }
-        return tokenList;
     }
     
-    private void addToken(Token token,ArrayList<PolicyAssertion> list){
+    private void addToken(Token token){
         if(PolicyUtil.isIssuedToken((PolicyAssertion)token)){
-            list.add((PolicyAssertion)token);
+            issuedTokenList.add((PolicyAssertion)token);
+        } else if(PolicyUtil.isKerberosToken((PolicyAssertion)token)){
+            kerberosTokenList.add((PolicyAssertion)token);
         }
     }
     

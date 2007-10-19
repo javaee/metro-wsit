@@ -1,8 +1,8 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
+ *
  * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
- * 
+ *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
@@ -10,7 +10,7 @@
  * a copy of the License at https://glassfish.dev.java.net/public/CDDL+GPL.html
  * or glassfish/bootstrap/legal/LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
- * 
+ *
  * When distributing the software, include this License Header Notice in each
  * file and include the License file at glassfish/bootstrap/legal/LICENSE.txt.
  * Sun designates this particular file as subject to the "Classpath" exception
@@ -19,9 +19,9 @@
  * Header, with the fields enclosed by brackets [] replaced by your own
  * identifying information: "Portions Copyrighted [year]
  * [name of copyright owner]"
- * 
+ *
  * Contributor(s):
- * 
+ *
  * If you wish your version of this file to be governed by only the CDDL or
  * only the GPL Version 2, indicate your decision by adding "[Contributor]
  * elects to include this software in this distribution under the [CDDL or GPL
@@ -205,13 +205,14 @@ public abstract class WSITAuthContextBase  {
     protected Hashtable<String, IssuedTokenContext> issuedTokenContextMap = new Hashtable<String, IssuedTokenContext>();
     
     protected Hashtable<String, KerberosContext> kerberosTokenContextMap = new Hashtable<String, KerberosContext>();
+    protected Hashtable<String, String> kerberosTokenIdMap = new Hashtable<String, String>();
     
     //*************STATIC(s)**************************************
     //protected static QName bsOperationName =
     //        new QName("http://schemas.xmlsoap.org/ws/2005/02/trust","RequestSecurityToken");
     private final QName optServerSecurity = new QName("http://schemas.sun.com/2006/03/wss/server","DisableStreamingSecurity");
     private final QName optClientSecurity = new QName("http://schemas.sun.com/2006/03/wss/client","DisableStreamingSecurity");
-
+    
     protected boolean disableIncPrefix = false;
     private final QName disableIncPrefixServer = new QName("http://schemas.sun.com/2006/03/wss/server","DisableInclusivePrefixList");
     private final QName disableIncPrefixClient = new QName("http://schemas.sun.com/2006/03/wss/client","DisableInclusivePrefixList");
@@ -250,13 +251,13 @@ public abstract class WSITAuthContextBase  {
     // SOAP Factory
     protected  SOAPFactory soapFactory = null;
     protected PolicyMap wsPolicyMap = null;
-   
+    
     protected HashMap<WSDLBoundOperation,SecurityPolicyHolder> outMessagePolicyMap = null;
     protected HashMap<WSDLBoundOperation,SecurityPolicyHolder> inMessagePolicyMap = null;
     protected HashMap<String,SecurityPolicyHolder> outProtocolPM = null;
     protected HashMap<String,SecurityPolicyHolder> inProtocolPM = null;
     
-    protected Policy bpMSP = null; 
+    protected Policy bpMSP = null;
     //protected WSDLBoundOperation cachedOperation = null;
     // store as instance variable
     //protected Marshaller marshaller =null;
@@ -299,15 +300,15 @@ public abstract class WSITAuthContextBase  {
         wsPolicyMap = (PolicyMap)map.get("POLICY");
         port =(WSDLPort)map.get("WSDL_MODEL");
         
-        if (this instanceof WSITClientAuthContext) {        
+        if (this instanceof WSITClientAuthContext) {
             WSService service = (WSService)map.get("SERVICE");
             WSBinding binding = (WSBinding)map.get("BINDING");
             pipeConfig = new ClientPipeConfiguration(
-                            wsPolicyMap, port, service, binding);
+                    wsPolicyMap, port, service, binding);
         } else {
             WSEndpoint endPoint = (WSEndpoint)map.get("ENDPOINT");
             pipeConfig = new ServerPipeConfiguration(
-                            wsPolicyMap, port, endPoint);
+                    wsPolicyMap, port, endPoint);
         }
         
         this.inMessagePolicyMap = new HashMap<WSDLBoundOperation,SecurityPolicyHolder>();
@@ -334,9 +335,9 @@ public abstract class WSITAuthContextBase  {
         // check whether Service Port has RM
         hasReliableMessaging = isReliableMessagingEnabled(wsPolicyMap, pipeConfig.getWSDLModel());
         //opResolver = new OperationResolverImpl(inMessagePolicyMap,pipeConfig.getWSDLModel().getBinding());
-       
+        
         //put properties for use by AuthModule init
-        map.put("SOAP_VERSION", soapVersion);          
+        map.put("SOAP_VERSION", soapVersion);
     }
     
     /**
@@ -449,10 +450,10 @@ public abstract class WSITAuthContextBase  {
                 
                 Policy omEP =  policyMerge.merge(policyList);
                 if(omPolicy != null){
-                   policyList.remove(omPolicy);
-                } 
+                    policyList.remove(omPolicy);
+                }
                 inPH = addIncomingMP(operation,omEP);
-            /*}*/
+                /*}*/
                 Iterator faults = operation.getOperation().getFaults().iterator();
                 ArrayList<Policy> faultPL = new ArrayList<Policy>();
                 faultPL.add(endpointPolicy);
@@ -464,7 +465,7 @@ public abstract class WSITAuthContextBase  {
                     
                     PolicyMapKey fKey = null;
                     fKey = wsPolicyMap.createWsdlFaultMessageScopeKey(
-                            serviceName,portName,operationName, 
+                            serviceName,portName,operationName,
                             new QName(operationName.getNamespaceURI(), fault.getName()));
                     Policy fPolicy = wsPolicyMap.getFaultMessageEffectivePolicy(fKey);
                     
@@ -487,8 +488,8 @@ public abstract class WSITAuthContextBase  {
             throw generateInternalError(pe);
         }
     }
-
-      protected RuntimeException generateInternalError(PolicyException ex){
+    
+    protected RuntimeException generateInternalError(PolicyException ex){
         SOAPFault fault = null;
         try {
             if (isSOAP12) {
@@ -499,11 +500,11 @@ public abstract class WSITAuthContextBase  {
             }
         } catch (Exception e) {
             log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0002_INTERNAL_SERVER_ERROR(), e);
-            throw new RuntimeException(LogStringsMessages.WSITPVD_0002_INTERNAL_SERVER_ERROR(), e);            
+            throw new RuntimeException(LogStringsMessages.WSITPVD_0002_INTERNAL_SERVER_ERROR(), e);
         }
         return new SOAPFaultException(fault);
     }
-  
+    
     protected List<PolicyAssertion> getInBoundSCP(Message message){
         if (inMessagePolicyMap == null) {
             return Collections.emptyList();
@@ -524,28 +525,6 @@ public abstract class WSITAuthContextBase  {
         }
         return sph.getSecureConversationTokens();
     }
-    
-     protected List<PolicyAssertion> getInBoundKTP(Message message){
-        if (inMessagePolicyMap == null) {
-            return Collections.emptyList();
-        }
-        SecurityPolicyHolder sph = null;
-        Collection coll = inMessagePolicyMap.values();
-        Iterator itr = coll.iterator();
-        
-        while(itr.hasNext()){
-            SecurityPolicyHolder ph = (SecurityPolicyHolder) itr.next();
-            if(ph != null){
-                sph = ph;
-                break;
-            }
-        }
-        if(sph == null){
-            return EMPTY_LIST;
-        }
-        return sph.getKerberosTokens();
-    }
-    
     
     protected List<PolicyAssertion> getOutBoundSCP(
             Message message) {
@@ -571,10 +550,15 @@ public abstract class WSITAuthContextBase  {
         
     }
     
-    protected List<PolicyAssertion> getOutBoundKTP(Message message){
+    protected List<PolicyAssertion> getOutBoundKTP(Packet packet, boolean isSCMessage){
+        if(isSCMessage){
+            Token scToken = (Token)packet.invocationProperties.get(SC_ASSERTION);
+            return ((SCTokenWrapper)scToken).getKerberosTokens();
+        }
         if (outMessagePolicyMap == null) {
             return Collections.emptyList();
         }
+        Message message = packet.getMessage();
         SecurityPolicyHolder sph = null;
         Collection coll = outMessagePolicyMap.values();
         Iterator itr = coll.iterator();
@@ -659,7 +643,7 @@ public abstract class WSITAuthContextBase  {
     }
     private void addToken(Token token,ArrayList<PolicyAssertion> list){
         if(PolicyUtil.isSecureConversationToken((PolicyAssertion)token) ||
-                PolicyUtil.isIssuedToken((PolicyAssertion)token) || 
+                PolicyUtil.isIssuedToken((PolicyAssertion)token) ||
                 PolicyUtil.isKerberosToken((PolicyAssertion)token)){
             list.add((PolicyAssertion)token);
         }
@@ -698,8 +682,8 @@ public abstract class WSITAuthContextBase  {
                 packet.setMessage(message);
             }catch(SOAPException se){
                 // internal error
-                log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0005_PROBLEM_PROC_SOAP_MESSAGE(), se);                
-                throw new WebServiceException(LogStringsMessages.WSITPVD_0005_PROBLEM_PROC_SOAP_MESSAGE(), se);                
+                log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0005_PROBLEM_PROC_SOAP_MESSAGE(), se);
+                throw new WebServiceException(LogStringsMessages.WSITPVD_0005_PROBLEM_PROC_SOAP_MESSAGE(), se);
             }
         }
     }
@@ -730,9 +714,9 @@ public abstract class WSITAuthContextBase  {
             PolicyMerger pm = PolicyMerger.getMerger();
             Policy ep = pm.merge(pl);
             return ep;
-        } catch (Exception e) {            
-            log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0007_PROBLEM_GETTING_EFF_BOOT_POLICY(), e);                            
-            throw new PolicyException(LogStringsMessages.WSITPVD_0007_PROBLEM_GETTING_EFF_BOOT_POLICY(), e);            
+        } catch (Exception e) {
+            log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0007_PROBLEM_GETTING_EFF_BOOT_POLICY(), e);
+            throw new PolicyException(LogStringsMessages.WSITPVD_0007_PROBLEM_GETTING_EFF_BOOT_POLICY(), e);
         }
         
     }
@@ -900,10 +884,10 @@ public abstract class WSITAuthContextBase  {
             addIncomingProtocolPolicy(ep,"SC");
             addOutgoingProtocolPolicy(ep,"SC");
         }catch(IOException ie){
-            log.log(Level.SEVERE, 
-                    LogStringsMessages.WSITPVD_0008_PROBLEM_BUILDING_PROTOCOL_POLICY(), ie);            
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSITPVD_0008_PROBLEM_BUILDING_PROTOCOL_POLICY(), ie);
             throw new PolicyException(
-                    LogStringsMessages.WSITPVD_0008_PROBLEM_BUILDING_PROTOCOL_POLICY(), ie);   
+                    LogStringsMessages.WSITPVD_0008_PROBLEM_BUILDING_PROTOCOL_POLICY(), ie);
         }
     }
     
@@ -968,6 +952,13 @@ public abstract class WSITAuthContextBase  {
                     hasIssuedTokens = true;
                 }
                 
+                // if the bootstrap has kerberos tokens then set hasKerberosTokens=true
+                List<PolicyAssertion> kList =
+                        this.getKerberosTokenPoliciesFromBootstrapPolicy((Token)sct);
+                if(!kList.isEmpty()) {
+                    hasKerberosToken = true;
+                }
+                
             }else if(PolicyUtil.isIssuedToken(token)){
                 sph.addIssuedToken(token);
                 hasIssuedTokens = true;
@@ -983,6 +974,11 @@ public abstract class WSITAuthContextBase  {
             Token scAssertion) {
         SCTokenWrapper token = (SCTokenWrapper)scAssertion;
         return token.getIssuedTokens();
+    }
+    
+    protected List<PolicyAssertion> getKerberosTokenPoliciesFromBootstrapPolicy(Token scAssertion){
+        SCTokenWrapper token = (SCTokenWrapper)scAssertion;
+        return token.getKerberosTokens();
     }
     
 // return the callbackhandler if the xwssCallbackHandler was set
@@ -1029,9 +1025,9 @@ public abstract class WSITAuthContextBase  {
         } else {
             //throw RuntimeException for now
             /**
-            log.log(Level.SEVERE, 
-                    LogStringsMessages.WSITPVD_0014_KEYSTORE_URL_NULL_CONFIG_ASSERTION());                        
-            throw new RuntimeException(LogStringsMessages.WSITPVD_0014_KEYSTORE_URL_NULL_CONFIG_ASSERTION());            
+             * log.log(Level.SEVERE,
+             * LogStringsMessages.WSITPVD_0014_KEYSTORE_URL_NULL_CONFIG_ASSERTION());
+             * throw new RuntimeException(LogStringsMessages.WSITPVD_0014_KEYSTORE_URL_NULL_CONFIG_ASSERTION());
              */
         }
         
@@ -1045,9 +1041,9 @@ public abstract class WSITAuthContextBase  {
             props.put(DefaultCallbackHandler.KEYSTORE_PASSWORD, new String(store.getPassword()));
         } else {
             /** do not complain if keystore password not supplied
-            log.log(Level.SEVERE, 
-                    LogStringsMessages.WSITPVD_0015_KEYSTORE_PASSWORD_NULL_CONFIG_ASSERTION());                        
-            throw new RuntimeException(LogStringsMessages.WSITPVD_0015_KEYSTORE_PASSWORD_NULL_CONFIG_ASSERTION() );            
+             * log.log(Level.SEVERE,
+             * LogStringsMessages.WSITPVD_0015_KEYSTORE_PASSWORD_NULL_CONFIG_ASSERTION());
+             * throw new RuntimeException(LogStringsMessages.WSITPVD_0015_KEYSTORE_PASSWORD_NULL_CONFIG_ASSERTION() );
              */
         }
         
@@ -1085,7 +1081,7 @@ public abstract class WSITAuthContextBase  {
         // setting a flag if issued tokens present
         ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
         //ctx.setIssuedTokenContextMap(issuedTokenContextMap);
-
+        
         ctx.hasIssuedToken(bindingHasIssuedTokenPolicy());
         ctx.setSecurityEnvironment(secEnv);
         ctx.isInboundMessage(true);
@@ -1099,9 +1095,9 @@ public abstract class WSITAuthContextBase  {
         } else {
             //throw RuntimeException for now
             /**
-            log.log(Level.SEVERE, 
-                    LogStringsMessages.WSITPVD_0016_TRUSTSTORE_URL_NULL_CONFIG_ASSERTION());                        
-            throw new RuntimeException(LogStringsMessages.WSITPVD_0016_TRUSTSTORE_URL_NULL_CONFIG_ASSERTION() );            
+             * log.log(Level.SEVERE,
+             * LogStringsMessages.WSITPVD_0016_TRUSTSTORE_URL_NULL_CONFIG_ASSERTION());
+             * throw new RuntimeException(LogStringsMessages.WSITPVD_0016_TRUSTSTORE_URL_NULL_CONFIG_ASSERTION() );
              */
         }
         
@@ -1115,9 +1111,9 @@ public abstract class WSITAuthContextBase  {
             props.put(DefaultCallbackHandler.TRUSTSTORE_PASSWORD, new String(store.getPassword()));
         } else {
             /** do not complain if truststore password is not supplied
-            log.log(Level.SEVERE, 
-                    LogStringsMessages.WSITPVD_0017_TRUSTSTORE_PASSWORD_NULL_CONFIG_ASSERTION());                        
-            throw new RuntimeException(LogStringsMessages.WSITPVD_0017_TRUSTSTORE_PASSWORD_NULL_CONFIG_ASSERTION() );             
+             * log.log(Level.SEVERE,
+             * LogStringsMessages.WSITPVD_0017_TRUSTSTORE_PASSWORD_NULL_CONFIG_ASSERTION());
+             * throw new RuntimeException(LogStringsMessages.WSITPVD_0017_TRUSTSTORE_PASSWORD_NULL_CONFIG_ASSERTION() );
              */
         }
         
@@ -1153,17 +1149,17 @@ public abstract class WSITAuthContextBase  {
                 if (ret != null && !"".equals(ret)) {
                     return ret;
                 } else {
-                    log.log(Level.SEVERE, 
-                            LogStringsMessages.WSITPVD_0018_NULL_OR_EMPTY_XWSS_CALLBACK_HANDLER_CLASSNAME());  
+                    log.log(Level.SEVERE,
+                            LogStringsMessages.WSITPVD_0018_NULL_OR_EMPTY_XWSS_CALLBACK_HANDLER_CLASSNAME());
                     throw new RuntimeException(LogStringsMessages.WSITPVD_0018_NULL_OR_EMPTY_XWSS_CALLBACK_HANDLER_CLASSNAME());
                 }
             } else if ("jmacCallbackHandler".equals(name)) {
                 if (ret != null && !"".equals(ret)) {
                     props.put(DefaultCallbackHandler.JMAC_CALLBACK_HANDLER, ret);
                 } else {
-                    log.log(Level.SEVERE, 
-                            LogStringsMessages.WSITPVD_0051_NULL_OR_EMPTY_JMAC_CALLBACK_HANDLER_CLASSNAME());  
-                            throw new RuntimeException(LogStringsMessages.WSITPVD_0051_NULL_OR_EMPTY_JMAC_CALLBACK_HANDLER_CLASSNAME());
+                    log.log(Level.SEVERE,
+                            LogStringsMessages.WSITPVD_0051_NULL_OR_EMPTY_JMAC_CALLBACK_HANDLER_CLASSNAME());
+                    throw new RuntimeException(LogStringsMessages.WSITPVD_0051_NULL_OR_EMPTY_JMAC_CALLBACK_HANDLER_CLASSNAME());
                 }
             } else if ("usernameHandler".equals(name)) {
                 if (ret != null && !"".equals(ret)) {
@@ -1174,8 +1170,8 @@ public abstract class WSITAuthContextBase  {
                     if (def != null && !"".equals(def)) {
                         props.put(DefaultCallbackHandler.MY_USERNAME, def);
                     } else {
-                        log.log(Level.SEVERE, 
-                            LogStringsMessages.WSITPVD_0019_NULL_OR_EMPTY_USERNAME_HANDLER_CLASSNAME());  
+                        log.log(Level.SEVERE,
+                                LogStringsMessages.WSITPVD_0019_NULL_OR_EMPTY_USERNAME_HANDLER_CLASSNAME());
                         throw new RuntimeException(LogStringsMessages.WSITPVD_0019_NULL_OR_EMPTY_USERNAME_HANDLER_CLASSNAME());
                     }
                 }
@@ -1188,21 +1184,21 @@ public abstract class WSITAuthContextBase  {
                     if (def != null && !"".equals(def)) {
                         props.put(DefaultCallbackHandler.MY_PASSWORD, def);
                     } else {
-                        log.log(Level.SEVERE, 
-                            LogStringsMessages.WSITPVD_0020_NULL_OR_EMPTY_PASSWORD_HANDLER_CLASSNAME());  
+                        log.log(Level.SEVERE,
+                                LogStringsMessages.WSITPVD_0020_NULL_OR_EMPTY_PASSWORD_HANDLER_CLASSNAME());
                         throw new RuntimeException(LogStringsMessages.WSITPVD_0020_NULL_OR_EMPTY_PASSWORD_HANDLER_CLASSNAME());
                     }
                 }
             } else if ("samlHandler".equals(name)) {
                 if (ret == null || "".equals(ret)) {
-                    log.log(Level.SEVERE, 
-                            LogStringsMessages.WSITPVD_0021_NULL_OR_EMPTY_SAML_HANDLER_CLASSNAME());  
-                        throw new RuntimeException(LogStringsMessages.WSITPVD_0021_NULL_OR_EMPTY_SAML_HANDLER_CLASSNAME());
+                    log.log(Level.SEVERE,
+                            LogStringsMessages.WSITPVD_0021_NULL_OR_EMPTY_SAML_HANDLER_CLASSNAME());
+                    throw new RuntimeException(LogStringsMessages.WSITPVD_0021_NULL_OR_EMPTY_SAML_HANDLER_CLASSNAME());
                 }
                 props.put(DefaultCallbackHandler.SAML_CBH, ret);
             } else {
-                log.log(Level.SEVERE, 
-                        LogStringsMessages.WSITPVD_0009_UNSUPPORTED_CALLBACK_TYPE_ENCOUNTERED(name));                            
+                log.log(Level.SEVERE,
+                        LogStringsMessages.WSITPVD_0009_UNSUPPORTED_CALLBACK_TYPE_ENCOUNTERED(name));
                 throw new RuntimeException(LogStringsMessages.WSITPVD_0009_UNSUPPORTED_CALLBACK_TYPE_ENCOUNTERED(name));
             }
         }
@@ -1221,7 +1217,7 @@ public abstract class WSITAuthContextBase  {
         if (conf.getMaxNonceAge() != null) {
             props.put(DefaultCallbackHandler.MAX_NONCE_AGE_PROPERTY, conf.getMaxNonceAge());
         }
-         
+        
         if (conf.getRevocationEnabled() != null) {
             props.put(DefaultCallbackHandler.REVOCATION_ENABLED, conf.getRevocationEnabled());
         }
@@ -1233,10 +1229,10 @@ public abstract class WSITAuthContextBase  {
             String name = v.getValidatorName();
             String validator = v.getValidator();
             if (validator == null || "".equals(validator)) {
-                log.log(Level.SEVERE, 
-                        LogStringsMessages.WSITPVD_0022_NULL_OR_EMPTY_VALIDATOR_CLASSNAME(name));                                            
+                log.log(Level.SEVERE,
+                        LogStringsMessages.WSITPVD_0022_NULL_OR_EMPTY_VALIDATOR_CLASSNAME(name));
                 throw new RuntimeException(LogStringsMessages.WSITPVD_0022_NULL_OR_EMPTY_VALIDATOR_CLASSNAME(name));
-            }            
+            }
             if ("usernameValidator".equals(name)) {
                 props.put(DefaultCallbackHandler.USERNAME_VALIDATOR, validator);
             } else if ("timestampValidator".equals(name)) {
@@ -1246,8 +1242,8 @@ public abstract class WSITAuthContextBase  {
             } else if ("samlAssertionValidator".equals(name)) {
                 props.put(DefaultCallbackHandler.SAML_VALIDATOR, validator);
             } else {
-                log.log(Level.SEVERE, 
-                    LogStringsMessages.WSITPVD_0010_UNKNOWN_VALIDATOR_TYPE_CONFIG(name));                
+                log.log(Level.SEVERE,
+                        LogStringsMessages.WSITPVD_0010_UNKNOWN_VALIDATOR_TYPE_CONFIG(name));
                 throw new RuntimeException(LogStringsMessages.WSITPVD_0010_UNKNOWN_VALIDATOR_TYPE_CONFIG(name));
             }
         }
@@ -1297,8 +1293,8 @@ public abstract class WSITAuthContextBase  {
             
             return (policy != null) && policy.contains(Constants.version);
         } catch (PolicyException e) {
-            log.log(Level.SEVERE, 
-                    LogStringsMessages.WSITPVD_0012_PROBLEM_CHECKING_RELIABLE_MESSAGE_ENABLE(), e);                    
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSITPVD_0012_PROBLEM_CHECKING_RELIABLE_MESSAGE_ENABLE(), e);
             throw new WebServiceException(LogStringsMessages.WSITPVD_0012_PROBLEM_CHECKING_RELIABLE_MESSAGE_ENABLE(), e);
         }
     }
@@ -1341,13 +1337,13 @@ public abstract class WSITAuthContextBase  {
         } catch (ClassNotFoundException e) {
             // ignore
         }
-        log.log(Level.FINE, 
-                LogStringsMessages.WSITPVD_0011_COULD_NOT_FIND_USER_CLASS(), classname);                
+        log.log(Level.FINE,
+                LogStringsMessages.WSITPVD_0011_COULD_NOT_FIND_USER_CLASS(), classname);
         throw new XWSSecurityException(LogStringsMessages.WSITPVD_0011_COULD_NOT_FIND_USER_CLASS() +" : " +classname);
     }
-
-     protected WSDLBoundOperation getOperation(Message message, Packet packet){
-         WSDLBoundOperation op = cachedOperation(packet);
+    
+    protected WSDLBoundOperation getOperation(Message message, Packet packet){
+        WSDLBoundOperation op = cachedOperation(packet);
         if(op == null){
             op = cacheOperation(message, packet);
         }
@@ -1395,7 +1391,7 @@ public abstract class WSITAuthContextBase  {
             ctx.isInboundMessage(false);
         } catch (XWSSecurityException e) {
             log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0006_PROBLEM_INIT_OUT_PROC_CONTEXT(), e);
-            throw new RuntimeException(LogStringsMessages.WSITPVD_0006_PROBLEM_INIT_OUT_PROC_CONTEXT(), e);            
+            throw new RuntimeException(LogStringsMessages.WSITPVD_0006_PROBLEM_INIT_OUT_PROC_CONTEXT(), e);
         }
         return ctx;
     }
@@ -1420,8 +1416,8 @@ public abstract class WSITAuthContextBase  {
         
         MessagePolicy mp = null;
         //if(operation == null){
-            //Body could be encrypted. Security will have to infer the
-            //policy from the message till the Body is decrypted.
+        //Body could be encrypted. Security will have to infer the
+        //policy from the message till the Body is decrypted.
         //    mp =  new MessagePolicy();
         //}
         if (outMessagePolicyMap == null) {
@@ -1477,9 +1473,9 @@ public abstract class WSITAuthContextBase  {
             ctx.setSOAPMessage(message);
             SecurityAnnotator.secureMessage(ctx);
             return ctx.getSOAPMessage();
-        } catch (WssSoapFaultException soapFaultException) {            
+        } catch (WssSoapFaultException soapFaultException) {
             throw getSOAPFaultException(soapFaultException);
-        } catch (XWSSecurityException xwse) {            
+        } catch (XWSSecurityException xwse) {
             WssSoapFaultException wsfe =
                     SecurableSoapMessage.newSOAPFaultException(
                     MessageConstants.WSSE_INTERNAL_SERVER_ERROR,
@@ -1498,7 +1494,7 @@ public abstract class WSITAuthContextBase  {
             context.setEncHeaderContent(encHeaderContent);
             SecurityAnnotator.secureMessage(context);
             return context.getJAXWSMessage();
-        } catch(XWSSecurityException xwse){            
+        } catch(XWSSecurityException xwse){
             WssSoapFaultException wsfe =
                     SecurableSoapMessage.newSOAPFaultException(
                     MessageConstants.WSSE_INTERNAL_SERVER_ERROR,
@@ -1523,7 +1519,7 @@ public abstract class WSITAuthContextBase  {
         }
         return fault;
     }
-
+    
     
     
     protected CallbackHandler loadGFHandler(boolean isClientAuthModule, String jmacHandler) {
@@ -1561,8 +1557,8 @@ public abstract class WSITAuthContextBase  {
         } catch(IllegalAccessException ex) {
             
         }
-        log.log(Level.SEVERE, 
-                LogStringsMessages.WSITPVD_0023_COULD_NOT_LOAD_CALLBACK_HANDLER_CLASS(classname));        
+        log.log(Level.SEVERE,
+                LogStringsMessages.WSITPVD_0023_COULD_NOT_LOAD_CALLBACK_HANDLER_CLASS(classname));
         throw new RuntimeException(
                 LogStringsMessages.WSITPVD_0023_COULD_NOT_LOAD_CALLBACK_HANDLER_CLASS(classname));
     }
@@ -1588,12 +1584,12 @@ public abstract class WSITAuthContextBase  {
     
     @SuppressWarnings("unchecked")
     protected void setRequestPacket(MessageInfo messageInfo, Packet ret) {
-        messageInfo.getMap().put(REQ_PACKET, ret);    
+        messageInfo.getMap().put(REQ_PACKET, ret);
     }
     
     @SuppressWarnings("unchecked")
     protected void setResponsePacket(MessageInfo messageInfo, Packet ret) {
-        messageInfo.getMap().put(RES_PACKET, ret);    
+        messageInfo.getMap().put(RES_PACKET, ret);
     }
     
     protected abstract void addIncomingFaultPolicy(Policy effectivePolicy,SecurityPolicyHolder sph,WSDLFault fault)throws PolicyException;
