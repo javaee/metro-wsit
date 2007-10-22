@@ -26,7 +26,11 @@ cd to the WSIT main directory and invoke "ant test".
 
 2b. Run e2e tests
 
-cd to the WSIT test subdirectory and invoke "ant e2e".
+cd to the WSIT test subdirectory and invoke "ant e2e". You may have to increase the
+memory available to Ant first by typing on the command line:
+export ANT_OPTS=-Xmx128m
+or (on Windows):
+set ANT_OPTS=-Xmx128m
 
 3. HOW TO GENERATE PMD REPORTS
 
