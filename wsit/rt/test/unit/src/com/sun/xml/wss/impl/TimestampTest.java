@@ -44,6 +44,7 @@
 
 package com.sun.xml.wss.impl;
 
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import java.util.*;
 import java.io.*;
 
@@ -121,7 +122,7 @@ public class TimestampTest extends TestCase {
             AuthenticationTokenPolicy.X509CertificateBinding x509bind =
                     (AuthenticationTokenPolicy.X509CertificateBinding)signaturePolicy.newX509CertificateKeyBinding();
             x509bind.setReferenceType(MessageConstants.DIRECT_REFERENCE_TYPE);
-            x509bind.setIncludeToken(Token.INCLUDE_ALWAYS);
+            x509bind.setIncludeToken(SecurityPolicyVersion.SECURITYPOLICY200507.includeTokenAlways);
 	    //x509bind.setPolicyToken(tok);
     	    x509bind.setUUID(new String("1008"));
             

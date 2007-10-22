@@ -47,6 +47,7 @@ import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelTranslator;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelUnmarshaller;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -135,7 +136,8 @@ public class EncryptedPartsTest extends TestCase {
                 boolean hasBody = false;
                 while(itrTargets.hasNext()){
                     PolicyAssertion assertTargets = (PolicyAssertion)itrTargets.next();
-                    if ( PolicyUtil.isBody(assertTargets)) {
+                    SecurityPolicyVersion spVersion = getSPVersion(assertTargets);
+                    if ( PolicyUtil.isBody(assertTargets, spVersion)) {
                         if(hasBody==true){
                             assertFalse(true);
                         }else{
@@ -145,6 +147,17 @@ public class EncryptedPartsTest extends TestCase {
                 }
             }
         }
+    }
+    
+    private SecurityPolicyVersion getSPVersion(PolicyAssertion pa){
+        String nsUri = pa.getName().getNamespaceURI();
+        // Default SPVersion
+        SecurityPolicyVersion spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
+        // If spec version, update
+        if(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(nsUri)){
+            spVersion = SecurityPolicyVersion.SECURITYPOLICY12NS;
+        }
+        return spVersion;
     }
     
 }

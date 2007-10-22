@@ -35,6 +35,7 @@
  */
 package com.sun.xml.wss.impl;
 
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import java.util.*;
 import java.io.*;
 
@@ -453,7 +454,7 @@ public class TrustDKTTest extends TestCase{
 
         	IssuedTokenKeyBinding isKB = 
             	(IssuedTokenKeyBinding)signaturePolicy.newIssuedTokenKeyBinding();
-                isKB.setIncludeToken(Token.INCLUDE_NEVER);
+                isKB.setIncludeToken(SecurityPolicyVersion.SECURITYPOLICY200507.includeTokenNever);
 
                  DerivedTokenKeyBinding dktSigKB = (DerivedTokenKeyBinding)signaturePolicy.newDerivedTokenKeyBinding();
                 dktSigKB.setOriginalKeyBinding(isKB);
@@ -467,7 +468,7 @@ public class TrustDKTTest extends TestCase{
         	((EncryptionPolicy.FeatureBinding)encryptPolicy.getFeatureBinding()).setDataEncryptionAlgorithm(MessageConstants.AES_BLOCK_ENCRYPTION_128);
 	        IssuedTokenKeyBinding ieKB = 
     	        (IssuedTokenKeyBinding)encryptPolicy.newIssuedTokenKeyBinding();
-                ieKB.setIncludeToken(Token.INCLUDE_NEVER);
+                ieKB.setIncludeToken(SecurityPolicyVersion.SECURITYPOLICY200507.includeTokenNever);
                 DerivedTokenKeyBinding dktEncKB = (DerivedTokenKeyBinding)encryptPolicy.newDerivedTokenKeyBinding();
                  dktEncKB.setOriginalKeyBinding(ieKB);
 

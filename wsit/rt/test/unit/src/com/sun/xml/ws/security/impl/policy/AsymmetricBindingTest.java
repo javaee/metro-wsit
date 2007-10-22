@@ -185,11 +185,11 @@ public class AsymmetricBindingTest extends TestCase {
                 AsymmetricBinding asb = (AsymmetricBinding)assertion;
                 
                 X509Token tkn1 = (X509Token)asb.getInitiatorToken();
-                assertTrue(tkn1.getIncludeToken().equals(Token.INCLUDE_ALWAYS));
+                assertTrue(tkn1.getIncludeToken().equals(tkn1.getSecurityPolicyVersion().includeTokenAlways));
                 assertTrue(tkn1.getTokenType().equals(com.sun.xml.ws.security.impl.policy.X509Token.WSSX509V3TOKEN10));
                 
                 X509Token tkn2 = (X509Token)asb.getRecipientToken();
-                assertTrue(tkn2.getIncludeToken().equals(Token.INCLUDE_ALWAYS));
+                assertTrue(tkn2.getIncludeToken().equals(tkn2.getSecurityPolicyVersion().includeTokenAlways));
                 assertTrue(tkn2.getTokenType().equals(com.sun.xml.ws.security.impl.policy.X509Token.WSSX509V3TOKEN10));
             }
         }

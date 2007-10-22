@@ -44,6 +44,7 @@
 
 package com.sun.xml.wss.impl;
 
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import java.util.*;
 import java.io.*;
 
@@ -125,9 +126,9 @@ public class EndorsingSignatureTest extends TestCase{
     	            (AuthenticationTokenPolicy.X509CertificateBinding)sigKb.newX509CertificateKeyBinding();
             x509bind.setReferenceType(MessageConstants.THUMB_PRINT_TYPE);
 	    //x509bind.setPolicyToken(tok);
-            x509bind.setIncludeToken(Token.INCLUDE_NEVER);
+            x509bind.setIncludeToken(SecurityPolicyVersion.SECURITYPOLICY200507.includeTokenNever);
     	    x509bind.setUUID(new String("1002"));
-            x509bind.setIncludeToken(Token.INCLUDE_NEVER);
+            x509bind.setIncludeToken(SecurityPolicyVersion.SECURITYPOLICY200507.includeTokenNever);
             
             SignaturePolicy signaturePolicy1 = new SignaturePolicy();
             SignatureTarget st1 = new SignatureTarget();
@@ -142,7 +143,7 @@ public class EndorsingSignatureTest extends TestCase{
             AuthenticationTokenPolicy.X509CertificateBinding x509bind1 =
                     (AuthenticationTokenPolicy.X509CertificateBinding)signaturePolicy1.newX509CertificateKeyBinding();
             x509bind1.setReferenceType(MessageConstants.DIRECT_REFERENCE_TYPE);
-            x509bind1.setIncludeToken(Token.INCLUDE_ALWAYS);
+            x509bind1.setIncludeToken(SecurityPolicyVersion.SECURITYPOLICY200507.includeTokenAlways);
 	    //x509bind1.setPolicyToken(tok);
     	    x509bind1.setUUID(new String("1003"));            
             

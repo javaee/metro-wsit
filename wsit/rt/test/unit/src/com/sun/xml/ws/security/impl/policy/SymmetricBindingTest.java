@@ -186,7 +186,7 @@ public class SymmetricBindingTest extends TestCase {
                 SymmetricBinding sb = (SymmetricBinding)assertion;
                 
                 IssuedToken tkn1 = (IssuedToken)sb.getProtectionToken();
-                assertTrue(tkn1.getIncludeToken().equals(Token.INCLUDE_ALWAYS));
+                assertTrue(tkn1.getIncludeToken().equals(tkn1.getSecurityPolicyVersion().includeTokenAlways));
             }
         }
     }
