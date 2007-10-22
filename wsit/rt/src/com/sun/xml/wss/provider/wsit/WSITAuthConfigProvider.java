@@ -51,6 +51,7 @@ import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -69,8 +70,7 @@ import javax.xml.ws.WebServiceException;
  * @author kumar.jayanti
  */
 public class WSITAuthConfigProvider implements AuthConfigProvider {
-    private static final String SECURITY_POLICY_NAMESPACE_URI = 
-                "http://schemas.xmlsoap.org/ws/2005/07/securitypolicy";
+
     //Map properties = null;
     String id = null;
     String description = "WSIT AuthConfigProvider";
@@ -171,7 +171,9 @@ public class WSITAuthConfigProvider implements AuthConfigProvider {
                     wsdlPort.getName());
             Policy policy = policyMap.getEndpointEffectivePolicy(endpointKey);
             
-            if ((policy != null) && policy.contains(SECURITY_POLICY_NAMESPACE_URI)) {
+            if ((policy != null) && 
+                    (policy.contains(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri) ||
+                        policy.contains(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri))) {
                 return true;
             }
             
@@ -180,19 +182,27 @@ public class WSITAuthConfigProvider implements AuthConfigProvider {
                         wsdlPort.getName(),
                         wbo.getName());
                 policy = policyMap.getOperationEffectivePolicy(operationKey);
-                if ((policy != null) && policy.contains(SECURITY_POLICY_NAMESPACE_URI))
+                if ((policy != null) && 
+                       (policy.contains(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri) ||
+                            policy.contains(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri)))
                     return true;
                 
                 policy = policyMap.getInputMessageEffectivePolicy(operationKey);
-                if ((policy != null) && policy.contains(SECURITY_POLICY_NAMESPACE_URI))
+                if ((policy != null) && 
+                        (policy.contains(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri) ||
+                            policy.contains(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri)))
                     return true;
                 
                 policy = policyMap.getOutputMessageEffectivePolicy(operationKey);
-                if ((policy != null) && policy.contains(SECURITY_POLICY_NAMESPACE_URI))
+                if ((policy != null) && 
+                        (policy.contains(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri) ||
+                            policy.contains(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri)))
                     return true;
                 
                 policy = policyMap.getFaultMessageEffectivePolicy(operationKey);
-                if ((policy != null) && policy.contains(SECURITY_POLICY_NAMESPACE_URI))
+                if ((policy != null) && 
+                        (policy.contains(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri) ||
+                            policy.contains(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri)))
                     return true;
             }
         } catch (PolicyException e) {

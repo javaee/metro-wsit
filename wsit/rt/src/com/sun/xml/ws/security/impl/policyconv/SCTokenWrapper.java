@@ -44,6 +44,7 @@ import com.sun.xml.ws.security.impl.policy.PolicyUtil;
 import com.sun.xml.ws.security.policy.AsymmetricBinding;
 import com.sun.xml.ws.security.policy.Issuer;
 import com.sun.xml.ws.security.policy.SecureConversationToken;
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import com.sun.xml.ws.security.policy.SupportingTokens;
 import com.sun.xml.ws.security.policy.SymmetricBinding;
 import com.sun.xml.ws.security.policy.Token;
@@ -66,12 +67,21 @@ public class SCTokenWrapper extends PolicyAssertion implements SecureConversatio
     private List<PolicyAssertion> issuedTokenList = null;
     private List<PolicyAssertion> kerberosTokenList = null;
     private boolean cached = false;
+    private SecurityPolicyVersion spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
+    
     /** Creates a new instance of SCTokenWrapper */
     public SCTokenWrapper(PolicyAssertion scToken,MessagePolicy mp) {
         super(AssertionData.createAssertionData(scToken.getName(),scToken.getValue(),scToken.getAttributes()),getNestedAssertions(scToken),
                 (scToken.getNestedPolicy()== null ? null : scToken.getNestedPolicy().getAssertionSet()));
         this.scToken = (SecureConversationToken)scToken;
         this.messagePolicy = mp;
+        
+        String nsUri = scToken.getName().getNamespaceURI();
+        if(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri.equals(nsUri)){
+            spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
+        } else if(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(nsUri)){
+            spVersion = SecurityPolicyVersion.SECURITYPOLICY12NS;
+        }
     }
     
     private static Collection<PolicyAssertion> getNestedAssertions(PolicyAssertion scToken){
@@ -155,15 +165,15 @@ public class SCTokenWrapper extends PolicyAssertion implements SecureConversatio
         kerberosTokenList = new ArrayList<PolicyAssertion>();
         AssertionSet assertionSet = policy.getAssertionSet();
         for(PolicyAssertion pa:assertionSet){
-            if(PolicyUtil.isBootstrapPolicy(pa)){
+            if(PolicyUtil.isBootstrapPolicy(pa, spVersion)){
                 NestedPolicy np = pa.getNestedPolicy();
                 AssertionSet bpSet = np.getAssertionSet();
                 for(PolicyAssertion assertion:bpSet){
-                    if(PolicyUtil.isAsymmetricBinding(assertion)){
+                    if(PolicyUtil.isAsymmetricBinding(assertion, spVersion)){
                         AsymmetricBinding sb =  (AsymmetricBinding)assertion;
                         addToken(sb.getInitiatorToken());
                         addToken(sb.getRecipientToken());
-                    }else if(PolicyUtil.isSymmetricBinding(assertion)){
+                    }else if(PolicyUtil.isSymmetricBinding(assertion, spVersion)){
                         SymmetricBinding sb = (SymmetricBinding)assertion;
                         Token token = sb.getProtectionToken();
                         if(token != null){
@@ -172,7 +182,7 @@ public class SCTokenWrapper extends PolicyAssertion implements SecureConversatio
                             addToken(sb.getEncryptionToken());
                             addToken(sb.getSignatureToken());
                         }
-                    }else if(PolicyUtil.isSupportingTokens(assertion)){
+                    }else if(PolicyUtil.isSupportingTokens(assertion, spVersion)){
                         SupportingTokens st = (SupportingTokens)assertion;
                         Iterator itr = st.getTokens();
                         while(itr.hasNext()){
@@ -186,9 +196,9 @@ public class SCTokenWrapper extends PolicyAssertion implements SecureConversatio
     }
     
     private void addToken(Token token){
-        if(PolicyUtil.isIssuedToken((PolicyAssertion)token)){
+        if(PolicyUtil.isIssuedToken((PolicyAssertion)token, spVersion)){
             issuedTokenList.add((PolicyAssertion)token);
-        } else if(PolicyUtil.isKerberosToken((PolicyAssertion)token)){
+        } else if(PolicyUtil.isKerberosToken((PolicyAssertion)token, spVersion)){
             kerberosTokenList.add((PolicyAssertion)token);
         }
     }
@@ -198,5 +208,9 @@ public class SCTokenWrapper extends PolicyAssertion implements SecureConversatio
     }
     
     public void addBootstrapPolicy(NestedPolicy policy) {
+    }
+
+    public SecurityPolicyVersion getSecurityPolicyVersion() {
+        return spVersion;
     }
 }

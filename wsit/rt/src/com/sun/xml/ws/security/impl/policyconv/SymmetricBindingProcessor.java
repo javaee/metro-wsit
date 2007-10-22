@@ -1,8 +1,8 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
+ *
  * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
- * 
+ *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
@@ -10,7 +10,7 @@
  * a copy of the License at https://glassfish.dev.java.net/public/CDDL+GPL.html
  * or glassfish/bootstrap/legal/LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
- * 
+ *
  * When distributing the software, include this License Header Notice in each
  * file and include the License file at glassfish/bootstrap/legal/LICENSE.txt.
  * Sun designates this particular file as subject to the "Classpath" exception
@@ -19,9 +19,9 @@
  * Header, with the fields enclosed by brackets [] replaced by your own
  * identifying information: "Portions Copyrighted [year]
  * [name of copyright owner]"
- * 
+ *
  * Contributor(s):
- * 
+ *
  * If you wish your version of this file to be governed by only the CDDL or
  * only the GPL Version 2, indicate your decision by adding "[Contributor]
  * elects to include this software in this distribution under the [CDDL or GPL
@@ -45,6 +45,7 @@ import com.sun.xml.ws.security.policy.EncryptedParts;
 import com.sun.xml.ws.security.policy.KerberosToken;
 import com.sun.xml.ws.security.policy.SamlToken;
 import com.sun.xml.ws.security.policy.SecureConversationToken;
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import com.sun.xml.ws.security.policy.SignedElements;
 import com.sun.xml.ws.security.policy.SignedParts;
 import com.sun.xml.ws.security.policy.SymmetricBinding;
@@ -109,7 +110,7 @@ public class SymmetricBindingProcessor extends BindingProcessor{
                 primarySP.setUUID(pid.generateID());
                 
                 SignaturePolicy.FeatureBinding spFB = (com.sun.xml.wss.impl.policy.mls.SignaturePolicy.FeatureBinding)
-                        primarySP.getFeatureBinding();
+                primarySP.getFeatureBinding();
                 //spFB.setCanonicalizationAlgorithm(CanonicalizationMethod.EXCLUSIVE);
                 SecurityPolicyUtil.setCanonicalizationMethod(spFB, binding.getAlgorithmSuite());
                 spFB.isPrimarySignature(true);
@@ -124,7 +125,7 @@ public class SymmetricBindingProcessor extends BindingProcessor{
             addSymmetricKeyBinding(primaryEP,pt);
             
             SignaturePolicy.FeatureBinding spFB = (com.sun.xml.wss.impl.policy.mls.SignaturePolicy.FeatureBinding)
-                    primarySP.getFeatureBinding();
+            primarySP.getFeatureBinding();
             //spFB.setCanonicalizationAlgorithm(CanonicalizationMethod.EXCLUSIVE);
             SecurityPolicyUtil.setCanonicalizationMethod(spFB, binding.getAlgorithmSuite());
             spFB.isPrimarySignature(true);
@@ -173,7 +174,8 @@ public class SymmetricBindingProcessor extends BindingProcessor{
         //skb.setKeyAlgorithm(_binding.getAlgorithmSuite().getSymmetricKeyAlgorithm());
         // policy.setKeyBinding(skb);
         PolicyAssertion tokenAssertion = (PolicyAssertion)token;
-        if(PolicyUtil.isX509Token(tokenAssertion)){
+        SecurityPolicyVersion spVersion = getSPVersion(tokenAssertion);
+        if(PolicyUtil.isX509Token(tokenAssertion, spVersion)){
             AuthenticationTokenPolicy.X509CertificateBinding x509CB =new AuthenticationTokenPolicy.X509CertificateBinding();
             //        (AuthenticationTokenPolicy.X509CertificateBinding)policy.newX509CertificateKeyBinding();
             x509CB.setUUID(token.getTokenId());
@@ -192,8 +194,8 @@ public class SymmetricBindingProcessor extends BindingProcessor{
                 skb.setKeyBinding(x509CB);
                 policy.setKeyBinding(skb);
             }
-        } else if(PolicyUtil.isKerberosToken(tokenAssertion)){
-            AuthenticationTokenPolicy.KerberosTokenBinding kerberosBinding = 
+        } else if(PolicyUtil.isKerberosToken(tokenAssertion, spVersion)){
+            AuthenticationTokenPolicy.KerberosTokenBinding kerberosBinding =
                     new AuthenticationTokenPolicy.KerberosTokenBinding();
             kerberosBinding.setUUID(token.getTokenId());
             tokenProcessor.setTokenValueType(kerberosBinding, tokenAssertion);
@@ -210,7 +212,7 @@ public class SymmetricBindingProcessor extends BindingProcessor{
                 skb.setKeyBinding(kerberosBinding);
                 policy.setKeyBinding(skb);
             }
-        }else if(PolicyUtil.isSamlToken(tokenAssertion)){
+        }else if(PolicyUtil.isSamlToken(tokenAssertion, spVersion)){
             AuthenticationTokenPolicy.SAMLAssertionBinding sab = new AuthenticationTokenPolicy.SAMLAssertionBinding();
             sab.setUUID(token.getTokenId());
             sab.setReferenceType(MessageConstants.DIRECT_REFERENCE_TYPE);
@@ -224,7 +226,7 @@ public class SymmetricBindingProcessor extends BindingProcessor{
             }else{
                 policy.setKeyBinding(sab);
             }
-        }else if(PolicyUtil.isIssuedToken(tokenAssertion)){
+        }else if(PolicyUtil.isIssuedToken(tokenAssertion, spVersion)){
             IssuedTokenKeyBinding itkb = new IssuedTokenKeyBinding();
             tokenProcessor.setTokenInclusion(itkb,(Token) tokenAssertion);
             //itkb.setPolicyToken((Token) tokenAssertion);
@@ -238,7 +240,7 @@ public class SymmetricBindingProcessor extends BindingProcessor{
             }else{
                 policy.setKeyBinding(itkb);
             }
-        }else if(PolicyUtil.isSecureConversationToken(tokenAssertion)){
+        }else if(PolicyUtil.isSecureConversationToken(tokenAssertion, spVersion)){
             SecureConversationTokenKeyBinding sct = new SecureConversationTokenKeyBinding();
             SecureConversationToken sctPolicy = (SecureConversationToken)tokenAssertion;
             if(sctPolicy.isRequireDerivedKeys()){
@@ -280,5 +282,16 @@ public class SymmetricBindingProcessor extends BindingProcessor{
         if(protectionOrder == Binding.SIGN_ENCRYPT){
             container.insert(primaryEP);
         }
+    }
+    
+    private SecurityPolicyVersion getSPVersion(PolicyAssertion pa){
+        String nsUri = pa.getName().getNamespaceURI();
+        // Default SPVersion
+        SecurityPolicyVersion spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
+        // If spec version, update
+        if(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(nsUri)){
+            spVersion = SecurityPolicyVersion.SECURITYPOLICY12NS;
+        }
+        return spVersion;
     }
 }

@@ -49,6 +49,7 @@ import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -69,12 +70,20 @@ public class RequiredElements extends PolicyAssertion implements com.sun.xml.ws.
     private boolean populated = false;
     private static QName XPathVersion = new QName("XPathVersion");
     private AssertionFitness fitness = AssertionFitness.IS_VALID;
+    private SecurityPolicyVersion spVersion;
     /** Creates a new instance of RequiredElements */
     public RequiredElements() {
+        spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
     }
     
     public RequiredElements(AssertionData name,Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) {
         super(name,nestedAssertions,nestedAlternative);
+        String nsUri = getName().getNamespaceURI();
+        if(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri.equals(nsUri)){
+            spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
+        } else if(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(nsUri)){
+            spVersion = SecurityPolicyVersion.SECURITYPOLICY12NS;
+        }
     }
     
     public String getXPathVersion() {
@@ -122,7 +131,7 @@ public class RequiredElements extends PolicyAssertion implements com.sun.xml.ws.
                 Iterator <PolicyAssertion> it = this.getNestedAssertionsIterator();
                 if ( it.hasNext() ) {
                     PolicyAssertion assertion = it.next();
-                    if ( PolicyUtil.isXPath(assertion)) {
+                    if ( PolicyUtil.isXPath(assertion, spVersion)) {
                         addTarget(assertion.getValue());
                     } else{
                         if(!assertion.isOptional()){

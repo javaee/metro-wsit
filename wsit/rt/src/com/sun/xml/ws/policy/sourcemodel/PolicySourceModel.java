@@ -73,7 +73,8 @@ public final class PolicySourceModel implements Cloneable {
         defaultNamespaceToPrefixMap.put(com.sun.xml.ws.encoding.policy.EncodingConstants.SUN_FI_SERVICE_NS, "fi");
         
         defaultNamespaceToPrefixMap.put(com.sun.xml.ws.security.impl.policy.Constants.TRUST_NS, "wst");
-        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.security.impl.policy.Constants.SECURITY_POLICY_NS, "sp");
+        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.security.policy.SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri, "sp");
+        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.security.policy.SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri, "sp");
         defaultNamespaceToPrefixMap.put(com.sun.xml.ws.security.impl.policy.Constants.UTILITY_NS, PolicyConstants.WSU_NAMESPACE_PREFIX);
         defaultNamespaceToPrefixMap.put(com.sun.xml.ws.security.impl.policy.Constants.SUN_WSS_SECURITY_CLIENT_POLICY_NS, "csp");
         defaultNamespaceToPrefixMap.put(com.sun.xml.ws.security.impl.policy.Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS, "ssp");

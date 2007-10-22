@@ -40,6 +40,7 @@ import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.NestedPolicy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -56,16 +57,24 @@ public class Trust10 extends PolicyAssertion implements com.sun.xml.ws.security.
     String version = "1.0";
     private boolean populated = false;
     private AssertionFitness fitness = AssertionFitness.IS_VALID;
+    private SecurityPolicyVersion spVersion;
     
     /**
      * Creates a new instance of Trust10
      */
     public Trust10() {
+        spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
     }
     
     
     public Trust10(AssertionData name,Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) {
         super(name,nestedAssertions,nestedAlternative);
+        String nsUri = getName().getNamespaceURI();
+        if(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri.equals(nsUri)){
+            spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
+        } else if(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(nsUri)){
+            spVersion = SecurityPolicyVersion.SECURITYPOLICY12NS;
+        }
     }
     
     public void addRequiredProperty(String requirement) {
@@ -103,15 +112,15 @@ public class Trust10 extends PolicyAssertion implements com.sun.xml.ws.security.
             }
             AssertionSet as = policy.getAssertionSet();
             for(PolicyAssertion assertion:as){
-                if(PolicyUtil.isSupportClientChallenge(assertion)){
+                if(PolicyUtil.isSupportClientChallenge(assertion, spVersion)){
                     addRequiredProperty(Constants.MUST_SUPPORT_CLIENT_CHALLENGE);
-                }else if(PolicyUtil.isSupportServerChallenge(assertion)){
+                }else if(PolicyUtil.isSupportServerChallenge(assertion, spVersion)){
                     addRequiredProperty(Constants.MUST_SUPPORT_SERVER_CHALLENGE);
-                }else if(PolicyUtil.isRequireClientEntropy(assertion)){
+                }else if(PolicyUtil.isRequireClientEntropy(assertion, spVersion)){
                     addRequiredProperty(Constants.REQUIRE_CLIENT_ENTROPY);
-                }else if(PolicyUtil.isRequireServerEntropy(assertion)){
+                }else if(PolicyUtil.isRequireServerEntropy(assertion, spVersion)){
                     addRequiredProperty(Constants.REQUIRE_SERVER_ENTROPY);
-                }else if(PolicyUtil.isSupportIssuedTokens(assertion)){
+                }else if(PolicyUtil.isSupportIssuedTokens(assertion, spVersion)){
                     addRequiredProperty(Constants.MUST_SUPPORT_ISSUED_TOKENS);
                 }else{
                     if(!assertion.isOptional()){

@@ -49,6 +49,7 @@ import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -68,12 +69,21 @@ public class SignedElements extends PolicyAssertion implements com.sun.xml.ws.se
     private static QName XPathVersion = new QName("XPathVersion");
     private static List<String> emptyList = Collections.emptyList();
     private AssertionFitness fitness = AssertionFitness.IS_VALID;
+    private SecurityPolicyVersion spVersion;
+    
     /** Creates a new instance of SignedElements */
     public SignedElements() {
+        spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
     }
     
     public SignedElements(AssertionData name,Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) {
         super(name,nestedAssertions,nestedAlternative);
+        String nsUri = getName().getNamespaceURI();
+        if(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri.equals(nsUri)){
+            spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
+        } else if(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(nsUri)){
+            spVersion = SecurityPolicyVersion.SECURITYPOLICY12NS;
+        }
     }
     
     public String getXPathVersion() {
@@ -122,7 +132,7 @@ public class SignedElements extends PolicyAssertion implements com.sun.xml.ws.se
                 Iterator <PolicyAssertion> it = this.getNestedAssertionsIterator();
                 while( it.hasNext() ) {
                     PolicyAssertion assertion = (PolicyAssertion) it.next();
-                    if ( PolicyUtil.isXPath(assertion )) {
+                    if ( PolicyUtil.isXPath(assertion, spVersion)) {
                         addTarget(assertion.getValue());
                     }else{
                         if(!assertion.isOptional()){

@@ -40,6 +40,7 @@ import com.sun.xml.ws.policy.NestedPolicy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.security.policy.MessageLayout;
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import java.util.Collection;
 import static com.sun.xml.ws.security.impl.policy.Constants.*;
 import com.sun.xml.ws.policy.AssertionSet;
@@ -55,14 +56,22 @@ public class Layout extends PolicyAssertion implements SecurityAssertionValidato
     MessageLayout ml;
     private AssertionFitness fitness = AssertionFitness.IS_VALID;
     private boolean populated = false;
+    private SecurityPolicyVersion spVersion;
     /**
      * Creates a new instance of Layout
      */
     public Layout() {
+        spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
     }
     
     public Layout(AssertionData name,Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) {
         super(name,nestedAssertions,nestedAlternative);
+        String nsUri = getName().getNamespaceURI();
+        if(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri.equals(nsUri)){
+            spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
+        } else if(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(nsUri)){
+            spVersion = SecurityPolicyVersion.SECURITYPOLICY12NS;
+        }
     }
     public MessageLayout getMessageLayout() {
         populate();
@@ -81,13 +90,13 @@ public class Layout extends PolicyAssertion implements SecurityAssertionValidato
             NestedPolicy policy = this.getNestedPolicy();
             AssertionSet assertionSet = policy.getAssertionSet();
             for(PolicyAssertion assertion : assertionSet){
-                if(PolicyUtil.isLax(assertion)){
+                if(PolicyUtil.isLax(assertion, spVersion)){
                     ml =  MessageLayout.Lax;
-                }else if(PolicyUtil.isLaxTsFirst(assertion)){
+                }else if(PolicyUtil.isLaxTsFirst(assertion, spVersion)){
                     ml = MessageLayout.LaxTsFirst;
-                }else if(PolicyUtil.isLaxTsLast(assertion)){
+                }else if(PolicyUtil.isLaxTsLast(assertion, spVersion)){
                     ml = MessageLayout.LaxTsLast;
-                }else if(PolicyUtil.isStrict(assertion)){
+                }else if(PolicyUtil.isStrict(assertion, spVersion)){
                     ml= MessageLayout.Strict;
                 } else{
                     if(!assertion.isOptional()){

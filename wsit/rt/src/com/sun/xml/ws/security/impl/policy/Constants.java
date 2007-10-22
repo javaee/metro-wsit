@@ -36,6 +36,7 @@
 package com.sun.xml.ws.security.impl.policy;
 
 import com.sun.xml.ws.policy.PolicyAssertion;
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -43,7 +44,7 @@ public class Constants {
     
     
     //Namespace constants
-    public final static String SECURITY_POLICY_NS = "http://schemas.xmlsoap.org/ws/2005/07/securitypolicy";
+    
     public final static String ADDRESSING_NS = "http://schemas.xmlsoap.org/ws/2004/08/addressing";
     public final static String XPATH_NS = "http://www.w3.org/TR/1999/REC-xpath-19991116";
     public final static String TRUST_NS = "http://schemas.xmlsoap.org/ws/2005/02/trust";
@@ -162,6 +163,15 @@ public class Constants {
     public final static String Lax = "Lax";
     public final static String Layout = "Layout";
     public final static String RequireIssuerSerialReference = "RequireIssuerSerialReference";
+    
+    // New Assertions from WS-SecurityPolicy 1.2
+    public final static String Trust13 = "Trust13";
+    public final static String RequireExplicitDerivedKeys = "RequireExplicitDerivedKeys";
+    public final static String RequireImpliedDerivedKeys = "RequireImpliedDerivedKeys";
+    public final static String SignedEncryptedSupportingTokens = "SignedEncryptedSupportingTokens";
+    public final static String EndorsingEncryptedSupportingTokens = "EndorsingEncryptedSupportingTokens";
+    public final static String SignedEndorsingEncryptedSupportingTokens = "SignedEndorsingEncryptedSupportingTokens";
+    // End of new assertions from WS-SecurityPolicy 1.2
     
     public final static String Body = "Body";
     

@@ -42,6 +42,7 @@ import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.security.policy.AlgorithmSuite;
 import com.sun.xml.ws.security.policy.MessageLayout;
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import com.sun.xml.ws.security.policy.Token;
 import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
 import java.util.Collection;
@@ -71,7 +72,8 @@ public class SymmetricBinding extends PolicyAssertion implements com.sun.xml.ws.
     boolean contentOnly = true;     
     String protectionOrder = SIGN_ENCRYPT;     
     boolean protectToken = false;      
-    boolean protectSignature = false;           
+    boolean protectSignature = false;
+    private SecurityPolicyVersion spVersion;
     
     /** 
      * 
@@ -80,11 +82,18 @@ public class SymmetricBinding extends PolicyAssertion implements com.sun.xml.ws.
      */     
     
     public SymmetricBinding() {  
+        spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
     }     
     
     public SymmetricBinding(AssertionData name,Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) {            
         
         super(name,nestedAssertions,nestedAlternative); 
+        String nsUri = getName().getNamespaceURI();
+        if(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri.equals(nsUri)){
+            spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
+        } else if(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(nsUri)){
+            spVersion = SecurityPolicyVersion.SECURITYPOLICY12NS;
+        }
     }            
     
     public Token getEncryptionToken() {    
@@ -208,27 +217,27 @@ public class SymmetricBinding extends PolicyAssertion implements com.sun.xml.ws.
             Iterator<PolicyAssertion> ast = as.iterator();       
             while(ast.hasNext()){                           
                 PolicyAssertion assertion = ast.next();     
-                if(PolicyUtil.isSignatureToken(assertion)){  
+                if(PolicyUtil.isSignatureToken(assertion, spVersion)){  
                     this.signatureToken = ((com.sun.xml.ws.security.impl.policy.Token)assertion).getToken();      
-                }else if(PolicyUtil.isEncryptionToken(assertion)){ 
+                }else if(PolicyUtil.isEncryptionToken(assertion, spVersion)){ 
                     this.encryptionToken =((com.sun.xml.ws.security.impl.policy.Token)assertion).getToken();   
-                }else if(PolicyUtil.isProtectionToken(assertion)){                   
+                }else if(PolicyUtil.isProtectionToken(assertion, spVersion)){                   
                     this.protectionToken = ((com.sun.xml.ws.security.impl.policy.Token)assertion).getToken(); 
-                }else if(PolicyUtil.isAlgorithmAssertion(assertion)){    
+                }else if(PolicyUtil.isAlgorithmAssertion(assertion, spVersion)){    
                     this.algSuite = (AlgorithmSuite) assertion;         
-                }else if(PolicyUtil.isIncludeTimestamp(assertion)){      
+                }else if(PolicyUtil.isIncludeTimestamp(assertion, spVersion)){      
                     this.includeTimestamp = true;                        
-                }else if(PolicyUtil.isEncryptBeforeSign(assertion)){       
+                }else if(PolicyUtil.isEncryptBeforeSign(assertion, spVersion)){       
                     this.protectionOrder = ENCRYPT_SIGN;                 
-                }else if (PolicyUtil.isSignBeforeEncrypt(assertion)){
+                }else if (PolicyUtil.isSignBeforeEncrypt(assertion, spVersion)){
                     this.protectionOrder = SIGN_ENCRYPT;
-                }else if(PolicyUtil.isContentOnlyAssertion(assertion)){  
+                }else if(PolicyUtil.isContentOnlyAssertion(assertion, spVersion)){  
                     this.contentOnly = false;                            
-                }else if(PolicyUtil.isMessageLayout(assertion)){         
+                }else if(PolicyUtil.isMessageLayout(assertion, spVersion)){         
                     layout = ((Layout)assertion).getMessageLayout();     
-                }else if(PolicyUtil.isProtectTokens(assertion)){         
+                }else if(PolicyUtil.isProtectTokens(assertion, spVersion)){         
                     this.protectToken = true;                            
-                }else if(PolicyUtil.isEncryptSignature(assertion)){      
+                }else if(PolicyUtil.isEncryptSignature(assertion, spVersion)){      
                     this.protectSignature = true;                        
                 } else if(PolicyUtil.disableTimestampSigning(assertion)){
                     this.disableTimestampSigning = true;
@@ -247,4 +256,8 @@ public class SymmetricBinding extends PolicyAssertion implements com.sun.xml.ws.
     public AssertionFitness validate(boolean isServer) {    
         return populate(isServer);       
     } 
+
+    public SecurityPolicyVersion getSecurityPolicyVersion() {
+        return spVersion;
+    }
 }

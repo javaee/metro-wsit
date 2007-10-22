@@ -50,6 +50,7 @@ import com.sun.xml.ws.security.impl.kerberos.KerberosContext;
 import com.sun.xml.ws.security.impl.policyconv.XWSSPolicyGenerator;
 import com.sun.xml.ws.security.policy.CertStoreConfig;
 import com.sun.xml.ws.security.policy.KerberosConfig;
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import com.sun.xml.ws.security.secconv.WSSCConstants;
 import com.sun.xml.wss.impl.policy.mls.EncryptionPolicy;
 import com.sun.xml.wss.impl.policy.mls.EncryptionTarget;
@@ -163,7 +164,6 @@ import static com.sun.xml.wss.jaxws.impl.Constants.wsaURI;
 import static com.sun.xml.wss.jaxws.impl.Constants.SC_ASSERTION;
 import static com.sun.xml.wss.jaxws.impl.Constants.bsOperationName;
 import static com.sun.xml.wss.jaxws.impl.Constants._SecureConversationToken_QNAME;
-import static com.sun.xml.wss.jaxws.impl.Constants.SECURITY_POLICY_2005_07_NAMESPACE;
 import static com.sun.xml.wss.jaxws.impl.Constants.XENC_NS;
 import static com.sun.xml.wss.jaxws.impl.Constants.ENCRYPTED_DATA_LNAME;
 import static com.sun.xml.wss.jaxws.impl.Constants.MESSAGE_ID_HEADER;
@@ -271,6 +271,9 @@ public abstract class WSITAuthContextBase  {
     AddressingVersion addVer = null;
     WSDLPort port = null;
     
+    // Security Policy version 
+    protected SecurityPolicyVersion spVersion = null;
+    
     //milliseconds
     protected long timestampTimeOut = 0;
     
@@ -285,7 +288,7 @@ public abstract class WSITAuthContextBase  {
             CANCEL_REQUEST_URI = new URI(WSTrustConstants.CANCEL_REQUEST);
             jaxbContext = WSTrustElementFactory.getContext();           ;
             securityPolicyNamespaces = new ArrayList<String>();
-            securityPolicyNamespaces.add(SECURITY_POLICY_2005_07_NAMESPACE);
+            securityPolicyNamespaces.add(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri);
             
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -382,6 +385,11 @@ public abstract class WSITAuthContextBase  {
                 }
                 if(endpointPolicy.contains(encHeaderContentServer) || endpointPolicy.contains(encHeaderContentClient)){
                     encHeaderContent = true;
+                }
+                if(endpointPolicy.contains(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri)){
+                    spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
+                } else if(endpointPolicy.contains(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri)){
+                    spVersion = SecurityPolicyVersion.SECURITYPOLICY12NS;
                 }
             }
             
@@ -606,11 +614,11 @@ public abstract class WSITAuthContextBase  {
         ArrayList<PolicyAssertion> tokenList = new ArrayList<PolicyAssertion>();
         for(AssertionSet assertionSet : policy){
             for(PolicyAssertion assertion:assertionSet){
-                if(PolicyUtil.isAsymmetricBinding(assertion)){
+                if(PolicyUtil.isAsymmetricBinding(assertion, spVersion)){
                     AsymmetricBinding sb =  (AsymmetricBinding)assertion;
                     addToken(sb.getInitiatorToken(),tokenList);
                     addToken(sb.getRecipientToken(),tokenList);
-                }else if(PolicyUtil.isSymmetricBinding(assertion)){
+                }else if(PolicyUtil.isSymmetricBinding(assertion, spVersion)){
                     SymmetricBinding sb = (SymmetricBinding)assertion;
                     Token token = sb.getProtectionToken();
                     if(token != null){
@@ -619,7 +627,7 @@ public abstract class WSITAuthContextBase  {
                         addToken(sb.getEncryptionToken(),tokenList);
                         addToken(sb.getSignatureToken(),tokenList);
                     }
-                }else if(PolicyUtil.isSupportingTokens(assertion)){
+                }else if(PolicyUtil.isSupportingTokens(assertion, spVersion)){
                     SupportingTokens st = (SupportingTokens)assertion;
                     Iterator itr = st.getTokens();
                     while(itr.hasNext()){
@@ -642,9 +650,9 @@ public abstract class WSITAuthContextBase  {
         }
     }
     private void addToken(Token token,ArrayList<PolicyAssertion> list){
-        if(PolicyUtil.isSecureConversationToken((PolicyAssertion)token) ||
-                PolicyUtil.isIssuedToken((PolicyAssertion)token) ||
-                PolicyUtil.isKerberosToken((PolicyAssertion)token)){
+        if(PolicyUtil.isSecureConversationToken((PolicyAssertion)token, spVersion) ||
+                PolicyUtil.isIssuedToken((PolicyAssertion)token, spVersion) ||
+                PolicyUtil.isKerberosToken((PolicyAssertion)token, spVersion)){
             list.add((PolicyAssertion)token);
         }
     }
@@ -693,7 +701,7 @@ public abstract class WSITAuthContextBase  {
         //Iterator<PolicyAssertion> paItr = as.iterator();
         boolean foundTargets = false;
         for(PolicyAssertion assertion : as){
-            if(PolicyUtil.isSignedParts(assertion) || PolicyUtil.isEncryptParts(assertion)){
+            if(PolicyUtil.isSignedParts(assertion, spVersion) || PolicyUtil.isEncryptParts(assertion, spVersion)){
                 foundTargets = true;
                 break;
             }
@@ -899,7 +907,7 @@ public abstract class WSITAuthContextBase  {
     protected SecurityPolicyHolder constructPolicyHolder(Policy effectivePolicy,
             boolean isServer,boolean isIncoming,boolean ignoreST)throws PolicyException{
         
-        XWSSPolicyGenerator xwssPolicyGenerator = new XWSSPolicyGenerator(effectivePolicy,isServer,isIncoming);
+        XWSSPolicyGenerator xwssPolicyGenerator = new XWSSPolicyGenerator(effectivePolicy,isServer,isIncoming, spVersion);
         xwssPolicyGenerator.process(ignoreST);
         this.bindingLevelAlgSuite = xwssPolicyGenerator.getBindingLevelAlgSuite();
         MessagePolicy messagePolicy = xwssPolicyGenerator.getXWSSPolicy();
@@ -911,7 +919,7 @@ public abstract class WSITAuthContextBase  {
         addConfigAssertions(effectivePolicy,sph);
         
         for(PolicyAssertion token:tokenList){
-            if(PolicyUtil.isSecureConversationToken(token)){
+            if(PolicyUtil.isSecureConversationToken(token, spVersion)){
                 NestedPolicy bootstrapPolicy = ((SecureConversationToken)token).getBootstrapPolicy();
                 Policy effectiveBP = null;
                 if(hasTargets(bootstrapPolicy)){
@@ -919,7 +927,7 @@ public abstract class WSITAuthContextBase  {
                 }else{
                     effectiveBP = getEffectiveBootstrapPolicy(bootstrapPolicy);
                 }
-                xwssPolicyGenerator = new XWSSPolicyGenerator(effectiveBP,isServer,isIncoming);
+                xwssPolicyGenerator = new XWSSPolicyGenerator(effectiveBP,isServer,isIncoming, spVersion);
                 xwssPolicyGenerator.process(ignoreST);
                 MessagePolicy bmp = xwssPolicyGenerator.getXWSSPolicy();
                 
@@ -959,10 +967,10 @@ public abstract class WSITAuthContextBase  {
                     hasKerberosToken = true;
                 }
                 
-            }else if(PolicyUtil.isIssuedToken(token)){
+            }else if(PolicyUtil.isIssuedToken(token, spVersion)){
                 sph.addIssuedToken(token);
                 hasIssuedTokens = true;
-            }else if(PolicyUtil.isKerberosToken(token)){
+            }else if(PolicyUtil.isKerberosToken(token, spVersion)){
                 sph.addKerberosToken(token);
                 hasKerberosToken = true;
             }

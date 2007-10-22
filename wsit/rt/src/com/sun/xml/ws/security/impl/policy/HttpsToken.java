@@ -40,6 +40,7 @@ package com.sun.xml.ws.security.impl.policy;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import java.util.Collection;
 
 import java.util.Map;
@@ -57,22 +58,31 @@ public class HttpsToken extends PolicyAssertion implements com.sun.xml.ws.securi
     private boolean populated = false;
     private boolean requireCC = false;
     private String id = "";
-    private static QName rccQname = new QName(Constants.SECURITY_POLICY_NS, Constants.RequireClientCertificate);
+    private SecurityPolicyVersion spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
+    private static QName rccQname;
     /**
      * Creates a new instance of HttpsToken
      */
     public HttpsToken() {
         id= PolicyUtil.randomUUID();
+        rccQname = new QName(spVersion.namespaceUri, Constants.RequireClientCertificate);
     }
     
     public HttpsToken(AssertionData name,Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) {
         super(name,nestedAssertions,nestedAlternative);
         id= PolicyUtil.randomUUID();
+        String nsUri = getName().getNamespaceURI();
+        if(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri.equals(nsUri)){
+            spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
+        } else if(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(nsUri)){
+            spVersion = SecurityPolicyVersion.SECURITYPOLICY12NS;
+        }
+        rccQname = new QName(spVersion.namespaceUri, Constants.RequireClientCertificate);
     }
     
     public void setRequireClientCertificate(boolean value) {
         Map<QName, String> attrs = this.getAttributes();
-        QName rccQname = new QName(Constants.SECURITY_POLICY_NS, Constants.RequireClientCertificate);
+        QName rccQname = new QName(spVersion.namespaceUri, Constants.RequireClientCertificate);
         attrs.put(rccQname,Boolean.toString(value));
         requireCC = value;
     }
@@ -111,5 +121,9 @@ public class HttpsToken extends PolicyAssertion implements com.sun.xml.ws.securi
         }
         return fitness;
         
+    }
+
+    public SecurityPolicyVersion getSecurityPolicyVersion() {
+        return spVersion;
     }
 }

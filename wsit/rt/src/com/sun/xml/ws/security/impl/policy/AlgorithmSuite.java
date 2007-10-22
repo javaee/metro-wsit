@@ -43,6 +43,7 @@ import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.security.policy.AlgorithmSuiteValue;
 import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -63,14 +64,22 @@ public class AlgorithmSuite extends com.sun.xml.ws.policy.PolicyAssertion implem
     private HashSet<String> props = new HashSet<String>();
     private boolean populated = false;
     private boolean isValid = true;
+    private SecurityPolicyVersion spVersion;
     /**
      * Creates a new instance of AlgorithmSuite
      */
     public AlgorithmSuite() {
+        spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
     }
     
     public AlgorithmSuite(AssertionData name,Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) {
         super(name,nestedAssertions,nestedAlternative);
+        String nsUri = getName().getNamespaceURI();
+        if(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri.equals(nsUri)){
+            spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
+        } else if(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(nsUri)){
+            spVersion = SecurityPolicyVersion.SECURITYPOLICY12NS;
+        }
     }
     
     public Set getAdditionalProps() {
@@ -158,19 +167,19 @@ public class AlgorithmSuite extends com.sun.xml.ws.policy.PolicyAssertion implem
             while(ast.hasNext()){
                 PolicyAssertion assertion = ast.next();
                 if(this.value == null){
-                    AlgorithmSuiteValue av = PolicyUtil.isValidAlgorithmSuiteValue(assertion);
+                    AlgorithmSuiteValue av = PolicyUtil.isValidAlgorithmSuiteValue(assertion, spVersion);
                     if(av != null){
                         this.value = av;
                         continue;
                     }
                 }
-                if(PolicyUtil.isInclusiveC14N(assertion)){
+                if(PolicyUtil.isInclusiveC14N(assertion, spVersion)){
                     this.props.add(Constants.InclusiveC14N);
-                }else if(PolicyUtil.isXPath(assertion)){
+                }else if(PolicyUtil.isXPath(assertion, spVersion)){
                     this.props.add(Constants.XPath);
                 }else if(PolicyUtil.isXPathFilter20(assertion)){
                     this.props.add(Constants.XPathFilter20);
-                }else if(PolicyUtil.isSTRTransform10(assertion)){
+                }else if(PolicyUtil.isSTRTransform10(assertion, spVersion)){
                     this.props.add(Constants.STRTransform10);
                 }else if(PolicyUtil.isInclusiveC14NWithComments(assertion)){
                     if(PolicyUtil.isInclusiveC14NWithCommentsForTransforms(assertion)){

@@ -49,6 +49,7 @@ import com.sun.xml.ws.policy.NestedPolicy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -67,8 +68,6 @@ import com.sun.xml.ws.security.policy.SecurityAssertionValidator.AssertionFitnes
  */
 public class KerberosToken extends PolicyAssertion implements com.sun.xml.ws.security.policy.KerberosToken, SecurityAssertionValidator {
     
-    private static QName itQname = new QName(Constants.SECURITY_POLICY_NS, Constants.IncludeToken);
-    private String includeToken = Token.INCLUDE_ALWAYS;
     private AssertionFitness fitness = AssertionFitness.IS_VALID;
     private boolean populated = false;
     private String tokenType = null;
@@ -76,12 +75,23 @@ public class KerberosToken extends PolicyAssertion implements com.sun.xml.ws.sec
     private boolean reqDK=false;
     private boolean isServer = false;
     private HashSet<String> referenceType = null;
+    private SecurityPolicyVersion spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
+    private static QName itQname;
+    private String includeToken;
     
     /** Creates a new instance of KerberosToken */
     public KerberosToken(AssertionData name,Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) {
         super(name,nestedAssertions,nestedAlternative);
         id= PolicyUtil.randomUUID();
         referenceType = new HashSet<String>();
+        String nsUri = getName().getNamespaceURI();
+        if(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri.equals(nsUri)){
+            spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
+        } else if(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(nsUri)){
+            spVersion = SecurityPolicyVersion.SECURITYPOLICY12NS;
+        }
+        itQname = new QName(spVersion.namespaceUri, Constants.IncludeToken);
+        includeToken = spVersion.includeTokenAlways;
     }
     
     
@@ -146,11 +156,11 @@ public class KerberosToken extends PolicyAssertion implements com.sun.xml.ws.sec
             AssertionSet as = policy.getAssertionSet();
             
             for(PolicyAssertion assertion: as){
-                if(PolicyUtil.isTokenReferenceType(assertion)){
+                if(PolicyUtil.isTokenReferenceType(assertion, spVersion)){
                     referenceType.add(assertion.getName().getLocalPart().intern());
-                }else if(PolicyUtil.isKerberosTokenType(assertion)){
+                }else if(PolicyUtil.isKerberosTokenType(assertion, spVersion)){
                     tokenType = assertion.getName().getLocalPart().intern();
-                }else if (PolicyUtil.isRequireDerivedKeys(assertion)) {
+                }else if (PolicyUtil.isRequireDerivedKeys(assertion, spVersion)) {
                     reqDK = true;
                 } else{
                     if(!assertion.isOptional()){
@@ -162,6 +172,10 @@ public class KerberosToken extends PolicyAssertion implements com.sun.xml.ws.sec
             populated = true;
         }
         return fitness;
+    }
+
+    public SecurityPolicyVersion getSecurityPolicyVersion() {
+        return spVersion;
     }
     
 }

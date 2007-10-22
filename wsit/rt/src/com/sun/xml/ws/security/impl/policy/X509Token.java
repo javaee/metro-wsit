@@ -50,6 +50,7 @@ import com.sun.xml.ws.policy.NestedPolicy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -66,12 +67,13 @@ import javax.xml.namespace.QName;
 
 public class X509Token extends PolicyAssertion implements com.sun.xml.ws.security.policy.X509Token,Cloneable, SecurityAssertionValidator{
     
-    private static QName itQname = new QName(Constants.SECURITY_POLICY_NS, Constants.IncludeToken);
-    private String includeToken = Token.INCLUDE_ALWAYS;
     private AssertionFitness fitness = AssertionFitness.IS_VALID;
     private boolean populated = false;
     private String tokenType = null;
     private HashSet<String> referenceType = null;
+    private SecurityPolicyVersion spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
+    private static QName itQname;
+    private String includeToken;
     
     /**
      * Creates a new instance of X509Token
@@ -83,6 +85,8 @@ public class X509Token extends PolicyAssertion implements com.sun.xml.ws.securit
     
     public X509Token() {
         id= PolicyUtil.randomUUID();
+        itQname = new QName(spVersion.namespaceUri, Constants.IncludeToken);
+        includeToken = spVersion.includeTokenAlways;
         referenceType = new HashSet<String>();
     }
     
@@ -91,6 +95,15 @@ public class X509Token extends PolicyAssertion implements com.sun.xml.ws.securit
         
         id= PolicyUtil.randomUUID();
         referenceType = new HashSet<String>();
+        
+        String nsUri = getName().getNamespaceURI();
+        if(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri.equals(nsUri)){
+            spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
+        } else if(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(nsUri)){
+            spVersion = SecurityPolicyVersion.SECURITYPOLICY12NS;
+        }
+        itQname = new QName(spVersion.namespaceUri, Constants.IncludeToken);
+        includeToken = spVersion.includeTokenAlways;
     }
     
     
@@ -154,11 +167,11 @@ public class X509Token extends PolicyAssertion implements com.sun.xml.ws.securit
             }
             AssertionSet assertionSet = policy.getAssertionSet();
             for(PolicyAssertion assertion: assertionSet){
-                if(PolicyUtil.isTokenReferenceType(assertion)){
+                if(PolicyUtil.isTokenReferenceType(assertion, spVersion)){
                     referenceType.add(assertion.getName().getLocalPart().intern());
-                }else if(PolicyUtil.isTokenType(assertion)) {
+                }else if(PolicyUtil.isTokenType(assertion, spVersion)) {
                     tokenType = assertion.getName().getLocalPart();
-                }else if (PolicyUtil.isRequireDerivedKeys(assertion)) {
+                }else if (PolicyUtil.isRequireDerivedKeys(assertion, spVersion)) {
                     reqDK = true;
                 }else{
                     if(!assertion.isOptional()){
@@ -176,5 +189,9 @@ public class X509Token extends PolicyAssertion implements com.sun.xml.ws.securit
     public Object clone()throws CloneNotSupportedException{
         throw new UnsupportedOperationException("Fix me");
         //return new X509Token(this.nestedPolicy,getAttributes(),id);
+    }
+
+    public SecurityPolicyVersion getSecurityPolicyVersion() {
+        return spVersion;
     }
 }

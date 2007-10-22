@@ -1,8 +1,8 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
+ *
  * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
- * 
+ *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
@@ -10,7 +10,7 @@
  * a copy of the License at https://glassfish.dev.java.net/public/CDDL+GPL.html
  * or glassfish/bootstrap/legal/LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
- * 
+ *
  * When distributing the software, include this License Header Notice in each
  * file and include the License file at glassfish/bootstrap/legal/LICENSE.txt.
  * Sun designates this particular file as subject to the "Classpath" exception
@@ -19,9 +19,9 @@
  * Header, with the fields enclosed by brackets [] replaced by your own
  * identifying information: "Portions Copyrighted [year]
  * [name of copyright owner]"
- * 
+ *
  * Contributor(s):
- * 
+ *
  * If you wish your version of this file to be governed by only the CDDL or
  * only the GPL Version 2, indicate your decision by adding "[Contributor]
  * elects to include this software in this distribution under the [CDDL or GPL
@@ -47,6 +47,7 @@ import com.sun.xml.ws.security.policy.IssuedToken;
 import com.sun.xml.ws.security.policy.KerberosToken;
 import com.sun.xml.ws.security.policy.SamlToken;
 import com.sun.xml.ws.security.policy.SecureConversationToken;
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import com.sun.xml.ws.security.policy.Token;
 import com.sun.xml.ws.security.policy.UserNameToken;
 import com.sun.xml.ws.security.policy.X509Token;
@@ -125,7 +126,7 @@ public class TokenProcessor {
                 kerberosBinding.setReferenceType(MessageConstants.DIRECT_REFERENCE_TYPE);
             }
         } else{
-             if(logger.isLoggable(Level.FINEST)){
+            if(logger.isLoggable(Level.FINEST)){
                 logger.log(Level.FINEST," ReferenceType set is DirectReference");
             }
             kerberosBinding.setReferenceType(MessageConstants.DIRECT_REFERENCE_TYPE);
@@ -134,7 +135,8 @@ public class TokenProcessor {
     
     public void addKeyBinding(WSSPolicy policy, Token token,boolean ignoreDK) throws PolicyException{
         PolicyAssertion tokenAssertion = (PolicyAssertion)token;
-        if(PolicyUtil.isX509Token(tokenAssertion)){
+        SecurityPolicyVersion spVersion = getSPVersion(tokenAssertion);
+        if(PolicyUtil.isX509Token(tokenAssertion, spVersion)){
             AuthenticationTokenPolicy.X509CertificateBinding x509CB =new AuthenticationTokenPolicy.X509CertificateBinding();
             //        (AuthenticationTokenPolicy.X509CertificateBinding)policy.newX509CertificateKeyBinding();
             x509CB.setUUID(token.getTokenId());
@@ -152,7 +154,7 @@ public class TokenProcessor {
                 policy.setKeyBinding(x509CB);
             }
             
-        }else if(PolicyUtil.isSamlToken(tokenAssertion)){
+        }else if(PolicyUtil.isSamlToken(tokenAssertion, spVersion)){
             AuthenticationTokenPolicy.SAMLAssertionBinding sab = new AuthenticationTokenPolicy.SAMLAssertionBinding();
             //(AuthenticationTokenPolicy.SAMLAssertionBinding)policy.newSAMLAssertionKeyBinding();
             sab.setUUID(token.getTokenId());
@@ -168,7 +170,7 @@ public class TokenProcessor {
             }else{
                 policy.setKeyBinding(sab);
             }
-        }else if(PolicyUtil.isIssuedToken(tokenAssertion)){
+        }else if(PolicyUtil.isIssuedToken(tokenAssertion, spVersion)){
             IssuedTokenKeyBinding itkb = new IssuedTokenKeyBinding();
             setTokenInclusion(itkb,(Token) tokenAssertion);
             //itkb.setPolicyToken((Token) tokenAssertion);
@@ -182,7 +184,7 @@ public class TokenProcessor {
             }else{
                 policy.setKeyBinding(itkb);
             }
-        }else if(PolicyUtil.isSecureConversationToken(tokenAssertion)){
+        }else if(PolicyUtil.isSecureConversationToken(tokenAssertion, spVersion)){
             SecureConversationTokenKeyBinding sct = new SecureConversationTokenKeyBinding();
             SecureConversationToken sctPolicy = (SecureConversationToken)tokenAssertion;
             if(sctPolicy.isRequireDerivedKeys()){
@@ -207,18 +209,19 @@ public class TokenProcessor {
     
     protected void setTokenInclusion(KeyBindingBase xwssToken , Token token) throws PolicyException  {
         boolean change = false;
+        SecurityPolicyVersion spVersion = token.getSecurityPolicyVersion();
         if(this.isServer && !isIncoming){
-            if(!Token.INCLUDE_ALWAYS.equals(token.getIncludeToken())){
-                xwssToken.setIncludeToken(Token.INCLUDE_NEVER);
+            if(!spVersion.includeTokenAlways.equals(token.getIncludeToken())){
+                xwssToken.setIncludeToken(SecurityPolicyVersion.SECURITYPOLICY200507.includeTokenNever);
                 if(logger.isLoggable(Level.FINEST)){
                     logger.log(Level.FINEST,"Token Inclusion value of INCLUDE NEVER has been set to Token"+ xwssToken);
                 }
                 return;
             }
         }else if(!this.isServer && isIncoming){
-            if(Token.INCLUDE_ALWAYS_TO_RECIPIENT.equals(token.getIncludeToken()) ||
-                    Token.INCLUDE_ONCE.equals(token.getIncludeToken())){
-                xwssToken.setIncludeToken(Token.INCLUDE_NEVER);
+            if(spVersion.includeTokenAlwaysToRecipient.equals(token.getIncludeToken()) ||
+                    spVersion.includeTokenOnce.equals(token.getIncludeToken())){
+                xwssToken.setIncludeToken(SecurityPolicyVersion.SECURITYPOLICY200507.includeTokenNever);
                 
                 if(logger.isLoggable(Level.FINEST)){
                     logger.log(Level.FINEST,"Token Inclusion value of INCLUDE NEVER has been set to Token"+ xwssToken);
@@ -230,13 +233,26 @@ public class TokenProcessor {
         if(logger.isLoggable(Level.FINEST)){
             logger.log(Level.FINEST,"Token Inclusion value of"+token.getIncludeToken()+" has been set to Token"+ xwssToken);
         }
-        xwssToken.setIncludeToken(token.getIncludeToken());
+        if(spVersion == SecurityPolicyVersion.SECURITYPOLICY200507){
+            xwssToken.setIncludeToken(token.getIncludeToken());
+        } else{
+            // SecurityPolicy 1.2
+            if(spVersion.includeTokenAlways.equals(token.getIncludeToken())){
+                xwssToken.setIncludeToken(SecurityPolicyVersion.SECURITYPOLICY200507.includeTokenAlways);
+            } else if(spVersion.includeTokenAlwaysToRecipient.equals(token.getIncludeToken())){
+                xwssToken.setIncludeToken(SecurityPolicyVersion.SECURITYPOLICY200507.includeTokenAlwaysToRecipient);
+            } else if(spVersion.includeTokenNever.equals(token.getIncludeToken())){
+                xwssToken.setIncludeToken(SecurityPolicyVersion.SECURITYPOLICY200507.includeTokenNever);
+            } else if(spVersion.includeTokenOnce.equals(token.getIncludeToken())){
+                xwssToken.setIncludeToken(SecurityPolicyVersion.SECURITYPOLICY200507.includeTokenOnce);
+            }
+        }
     }
     
     public WSSPolicy getWSSToken(Token token) throws PolicyException {
         //TODO: IncludeToken
-        
-        if(PolicyUtil.isUsernameToken((PolicyAssertion) token)){
+        SecurityPolicyVersion spVersion = getSPVersion((PolicyAssertion)token);
+        if(PolicyUtil.isUsernameToken((PolicyAssertion) token, spVersion)){
             AuthenticationTokenPolicy.UsernameTokenBinding key = null;
             key  =  new AuthenticationTokenPolicy.UsernameTokenBinding();
             try {
@@ -252,7 +268,7 @@ public class TokenProcessor {
             }
             //key.setPolicyToken(token);
             return key;
-        }else if(PolicyUtil.isSamlToken((PolicyAssertion) token)){
+        }else if(PolicyUtil.isSamlToken((PolicyAssertion) token, spVersion)){
             AuthenticationTokenPolicy.SAMLAssertionBinding  key = null;
             key  = new AuthenticationTokenPolicy.SAMLAssertionBinding();
             setTokenInclusion(key,token);
@@ -261,19 +277,19 @@ public class TokenProcessor {
             key.setUUID(token.getTokenId());
             key.setSTRID(token.getTokenId());
             return key;
-        }else if(PolicyUtil.isIssuedToken((PolicyAssertion) token)){
+        }else if(PolicyUtil.isIssuedToken((PolicyAssertion) token, spVersion)){
             IssuedTokenKeyBinding key = new IssuedTokenKeyBinding();
             setTokenInclusion(key,token);
             //key.setPolicyToken(token);
             key.setUUID(token.getTokenId());
             return key;
-        }else if(PolicyUtil.isSecureConversationToken((PolicyAssertion) token)){
+        }else if(PolicyUtil.isSecureConversationToken((PolicyAssertion) token, spVersion)){
             SecureConversationTokenKeyBinding key =  new SecureConversationTokenKeyBinding();
             setTokenInclusion(key,token);
             //key.setPolicyToken(token);
             key.setUUID(token.getTokenId());
             return key;
-        }else if(PolicyUtil.isX509Token((PolicyAssertion) token)){
+        }else if(PolicyUtil.isX509Token((PolicyAssertion) token, spVersion)){
             AuthenticationTokenPolicy.X509CertificateBinding  xt =  new AuthenticationTokenPolicy.X509CertificateBinding();
             xt.setUUID(token.getTokenId());
             //xt.setPolicyToken(token);
@@ -322,6 +338,17 @@ public class TokenProcessor {
                 kerberosBinding.setValueType(MessageConstants.KERBEROS_V5_GSS_APREQ_1510);
             }
         }
+    }
+    
+    private SecurityPolicyVersion getSPVersion(PolicyAssertion pa){
+        String nsUri = pa.getName().getNamespaceURI();
+        // Default SPVersion
+        SecurityPolicyVersion spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
+        // If spec version, update
+        if(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(nsUri)){
+            spVersion = SecurityPolicyVersion.SECURITYPOLICY12NS;
+        }
+        return spVersion;
     }
     
 }

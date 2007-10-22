@@ -46,6 +46,7 @@ import com.sun.xml.wss.impl.policy.mls.EncryptionPolicy;
 import com.sun.xml.wss.impl.policy.mls.SignaturePolicy;
 import com.sun.xml.wss.impl.policy.mls.SignatureTarget;
 import com.sun.xml.wss.impl.policy.mls.WSSPolicy;
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 /**
  *
  * @author K.Venugopal@sun.com
@@ -63,7 +64,8 @@ public class SignedEndorsingSupportingTokensProcessor extends EndorsingSupportin
     protected void addToPrimarySignature(WSSPolicy policy,Token token) throws PolicyException{
         SignatureTarget target = stc.newURISignatureTarget(policy.getUUID());
         SecurityPolicyUtil.setName(target, policy);
-        if(!PolicyUtil.isUsernameToken((PolicyAssertion) token) && !PolicyUtil.isSecureConversationToken((PolicyAssertion)token)){
+        SecurityPolicyVersion spVersion = getSPVersion((PolicyAssertion)token);
+        if(!PolicyUtil.isUsernameToken((PolicyAssertion) token, spVersion) && !PolicyUtil.isSecureConversationToken((PolicyAssertion)token, spVersion)){
             stc.addSTRTransform(target);
         }
         SignaturePolicy.FeatureBinding spFB = (SignaturePolicy.FeatureBinding)signaturePolicy.getFeatureBinding();

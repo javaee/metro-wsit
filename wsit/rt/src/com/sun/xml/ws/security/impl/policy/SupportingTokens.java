@@ -41,6 +41,7 @@ import com.sun.xml.ws.policy.NestedPolicy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.security.policy.AlgorithmSuite;
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import com.sun.xml.ws.security.policy.Token;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -64,6 +65,7 @@ public class SupportingTokens extends PolicyAssertion implements com.sun.xml.ws.
     private boolean isServer = false;
     private List<Token> _tokenList;
     private boolean populated;
+    private SecurityPolicyVersion spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
     
     /**
      * Creates a new instance of SupportingTokens
@@ -73,7 +75,12 @@ public class SupportingTokens extends PolicyAssertion implements com.sun.xml.ws.
     
     public SupportingTokens(AssertionData name,Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) {
         super(name,nestedAssertions,nestedAlternative);
-        
+        String nsUri = getName().getNamespaceURI();
+        if(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri.equals(nsUri)){
+            spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
+        } else if(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(nsUri)){
+            spVersion = SecurityPolicyVersion.SECURITYPOLICY12NS;
+        }
     }
     
     public void setAlgorithmSuite(AlgorithmSuite algSuite) {
@@ -119,18 +126,18 @@ public class SupportingTokens extends PolicyAssertion implements com.sun.xml.ws.
             Iterator<PolicyAssertion> ast = as.iterator();
             while(ast.hasNext()){
                 PolicyAssertion assertion = ast.next();
-                if(PolicyUtil.isAlgorithmAssertion(assertion)){
+                if(PolicyUtil.isAlgorithmAssertion(assertion, spVersion)){
                     this.algSuite = (AlgorithmSuite) assertion;
-                }else if(PolicyUtil.isToken(assertion)){
+                }else if(PolicyUtil.isToken(assertion, spVersion)){
                     addToken((Token)assertion);
                     //this._tokenList.add((Token)assertion);
-                }else if(PolicyUtil.isSignedParts(assertion)){
+                }else if(PolicyUtil.isSignedParts(assertion, spVersion)){
                     spList.add((SignedParts) assertion);
-                }else if(PolicyUtil.isSignedElements(assertion)){
+                }else if(PolicyUtil.isSignedElements(assertion, spVersion)){
                     seList.add((SignedElements)assertion);
-                }else if(PolicyUtil.isEncryptParts(assertion)){
+                }else if(PolicyUtil.isEncryptParts(assertion, spVersion)){
                     epList.add((EncryptedParts)assertion);
-                }else if(PolicyUtil.isEncryptedElements(assertion)){
+                }else if(PolicyUtil.isEncryptedElements(assertion, spVersion)){
                     eeList.add((EncryptedElements)assertion);
                 }else{
                     if(!assertion.isOptional()){
@@ -177,6 +184,10 @@ public class SupportingTokens extends PolicyAssertion implements com.sun.xml.ws.
     public Iterator<com.sun.xml.ws.security.policy.EncryptedElements> getEncryptedElements() {
         populate();
         return eeList.iterator();
+    }
+
+    public SecurityPolicyVersion getSecurityPolicyVersion() {
+        return spVersion;
     }
     
 }

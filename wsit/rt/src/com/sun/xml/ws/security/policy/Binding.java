@@ -92,4 +92,10 @@ public interface Binding{
      * @return true if signature has to be encrypted else false.
      */
     public boolean getSignatureProtection();
+    
+    /**
+     *
+     * @return the version of Security Policy
+     */
+    public SecurityPolicyVersion getSecurityPolicyVersion();
 }

@@ -42,10 +42,6 @@ package com.sun.xml.ws.security.policy;
  * @author K.Venugopal@sun.com
  */
 public interface Token{
-    public static final String INCLUDE_ONCE = "http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/Once".intern() ;
-    public static final String INCLUDE_NEVER = "http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/Never".intern();
-    public static final String INCLUDE_ALWAYS_TO_RECIPIENT = "http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/AlwaysToRecipient".intern();
-    public static final String INCLUDE_ALWAYS="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/Always".intern();
     public static final String WSS11 = "WSS11";
     public static final String WSS10 = "WSS10";
     public static final String REQUIRE_KEY_IDENTIFIER_REFERENCE="RequireKeyIdentifierReference";
@@ -91,4 +87,9 @@ public interface Token{
      * @return String representation of the token id.
      */
     public String getTokenId();
+    
+    /**
+     * @return version of SecurityPolicy being used
+     */
+    public SecurityPolicyVersion getSecurityPolicyVersion();
 }

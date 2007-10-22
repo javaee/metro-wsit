@@ -50,6 +50,7 @@ import com.sun.xml.ws.policy.NestedPolicy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -64,19 +65,28 @@ import static com.sun.xml.ws.security.impl.policy.Constants.*;
  * @author Abhijit Das,K.Venugopal@sun.com
  */
 public class SamlToken extends PolicyAssertion implements com.sun.xml.ws.security.policy.SamlToken, SecurityAssertionValidator{
-    private static QName itQname = new QName(Constants.SECURITY_POLICY_NS, Constants.IncludeToken);
     private String id;
     private List<String> tokenRefType;
     private String tokenType;
     private PolicyAssertion rdKey = null;
-    private String includeTokenType = Token.INCLUDE_ALWAYS;
     private boolean populated = false;
     private AssertionFitness fitness = AssertionFitness.IS_VALID;
+    private SecurityPolicyVersion spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
+    private static QName itQname;
+    private String includeTokenType;
     /** Creates a new instance of SamlToken */
     
     public SamlToken(AssertionData name,Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) {
         super(name,nestedAssertions,nestedAlternative);
         id= PolicyUtil.randomUUID();
+        String nsUri = getName().getNamespaceURI();
+        if(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri.equals(nsUri)){
+            spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
+        } else if(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(nsUri)){
+            spVersion = SecurityPolicyVersion.SECURITYPOLICY12NS;
+        }
+        itQname = new QName(spVersion.namespaceUri, Constants.IncludeToken);
+        includeTokenType = spVersion.includeTokenAlways;
     }
     
     public String getTokenType() {
@@ -137,11 +147,11 @@ public class SamlToken extends PolicyAssertion implements com.sun.xml.ws.securit
             
             while(paItr.hasNext()){
                 PolicyAssertion assertion  = paItr.next();
-                if(PolicyUtil.isSamlTokenType(assertion)){
+                if(PolicyUtil.isSamlTokenType(assertion, spVersion)){
                     tokenType = assertion.getName().getLocalPart().intern();
-                }else if(PolicyUtil.isRequireDerivedKeys(assertion)){
+                }else if(PolicyUtil.isRequireDerivedKeys(assertion, spVersion)){
                     rdKey = assertion;
-                }else if(PolicyUtil.isRequireKeyIR(assertion)){
+                }else if(PolicyUtil.isRequireKeyIR(assertion, spVersion)){
                     if(tokenRefType == null){
                         tokenRefType = new ArrayList<String>();
                     }
@@ -156,6 +166,10 @@ public class SamlToken extends PolicyAssertion implements com.sun.xml.ws.securit
             populated = true;
         }
         return fitness;
+    }
+
+    public SecurityPolicyVersion getSecurityPolicyVersion() {
+        return spVersion;
     }
     
     

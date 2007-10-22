@@ -35,6 +35,7 @@
  */
 package com.sun.xml.ws.security.impl.policy;
 
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -56,15 +57,23 @@ public class Wss11 extends PolicyAssertion implements com.sun.xml.ws.security.po
     String version = "1.1";
     QName name;
     boolean populated = false;
+    private SecurityPolicyVersion spVersion;
     
     /**
      * Creates a new instance of WSSAssertion
      */
     public Wss11() {
+        spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
     }
     
     public Wss11(AssertionData name,Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) {
         super(name,nestedAssertions,nestedAlternative);
+        String nsUri = getName().getNamespaceURI();
+        if(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri.equals(nsUri)){
+            spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
+        } else if(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(nsUri)){
+            spVersion = SecurityPolicyVersion.SECURITYPOLICY12NS;
+        }
     }
     
     public void addRequiredProperty(String requirement) {
@@ -104,7 +113,7 @@ public class Wss11 extends PolicyAssertion implements com.sun.xml.ws.security.po
             AssertionSet as = policy.getAssertionSet();
             
             for(PolicyAssertion pa : as){
-                if(PolicyUtil.isWSS11PolicyContent(pa)){
+                if(PolicyUtil.isWSS11PolicyContent(pa, spVersion)){
                     addRequiredProperty(pa.getName().getLocalPart().intern());
                 }else{
                     if(!pa.isOptional()){

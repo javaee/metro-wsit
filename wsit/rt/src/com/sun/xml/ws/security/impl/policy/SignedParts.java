@@ -40,6 +40,7 @@ import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
 import com.sun.xml.ws.security.policy.Header;
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -58,15 +59,23 @@ public class SignedParts extends PolicyAssertion implements com.sun.xml.ws.secur
     private boolean body;
     private boolean populated = false;
     private Set<PolicyAssertion> targets = new HashSet<PolicyAssertion>();
+    private SecurityPolicyVersion spVersion;
     
     /**
      * Creates a new instance of SignedParts
      */
     public SignedParts() {
+        spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
     }
     
     public SignedParts(AssertionData name,Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) {
         super(name,nestedAssertions,nestedAlternative);
+        String nsUri = getName().getNamespaceURI();
+        if(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri.equals(nsUri)){
+            spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
+        } else if(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(nsUri)){
+            spVersion = SecurityPolicyVersion.SECURITYPOLICY12NS;
+        }
     }
     
     public void addBody() {
@@ -91,7 +100,7 @@ public class SignedParts extends PolicyAssertion implements com.sun.xml.ws.secur
                 Iterator <PolicyAssertion> it = this.getNestedAssertionsIterator();
                 while( it.hasNext() ) {
                     PolicyAssertion as = (PolicyAssertion) it.next();
-                    if(PolicyUtil.isBody(as)){
+                    if(PolicyUtil.isBody(as, spVersion)){
                         // assertions.remove(as);
                         body = true;
                         // break;

@@ -42,6 +42,7 @@ import com.sun.xml.ws.policy.NestedPolicy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -58,26 +59,37 @@ import static com.sun.xml.ws.security.impl.policy.Constants.*;
  */
 
 public class SecureConversationToken extends PolicyAssertion implements com.sun.xml.ws.security.policy.SecureConversationToken, SecurityAssertionValidator{
-    private static QName itQname = new QName(Constants.SECURITY_POLICY_NS, Constants.IncludeToken);
     private NestedPolicy bootstrapPolicy = null;
     private String id = null;
-    protected String includeToken = Token.INCLUDE_ALWAYS;
     private boolean populated = false;
     private PolicyAssertion rdKey = null;
     private Set<String> referenceType = null;
     private Issuer issuer = null;
     private String tokenType = null;
     private AssertionFitness fitness = AssertionFitness.IS_VALID;
+    private SecurityPolicyVersion spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
+    private static QName itQname;
+    private String includeToken;
     /**
      * Creates a new instance of SecureConversationToken
      */
     public SecureConversationToken() {
          id= PolicyUtil.randomUUID();
+         itQname = new QName(spVersion.namespaceUri, Constants.IncludeToken);
+         includeToken = spVersion.includeTokenAlways;
     }
     
     public SecureConversationToken(AssertionData name,Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) {
         super(name,nestedAssertions,nestedAlternative);
         id= PolicyUtil.randomUUID();
+        String nsUri = getName().getNamespaceURI();
+        if(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri.equals(nsUri)){
+            spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
+        } else if(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(nsUri)){
+            spVersion = SecurityPolicyVersion.SECURITYPOLICY12NS;
+        }
+        itQname = new QName(spVersion.namespaceUri, Constants.IncludeToken);
+        includeToken = spVersion.includeTokenAlways;
     }
     
     
@@ -115,7 +127,7 @@ public class SecureConversationToken extends PolicyAssertion implements com.sun.
     
     public void setIncludeToken(String type) {
         Map<QName, String> attrs = this.getAttributes();
-        QName itQname = new QName(Constants.SECURITY_POLICY_NS, Constants.IncludeToken);
+        QName itQname = new QName(spVersion.namespaceUri, Constants.IncludeToken);
         attrs.put(itQname,type);
     }
     
@@ -155,16 +167,16 @@ public class SecureConversationToken extends PolicyAssertion implements com.sun.
             Iterator<PolicyAssertion> paItr = as.iterator();
             while(paItr.hasNext()){
                 PolicyAssertion assertion = paItr.next();
-                if(PolicyUtil.isBootstrapPolicy(assertion)){
+                if(PolicyUtil.isBootstrapPolicy(assertion, spVersion)){
                     bootstrapPolicy = assertion.getNestedPolicy();
-                }else if(PolicyUtil.isRequireDerivedKeys(assertion)){
+                }else if(PolicyUtil.isRequireDerivedKeys(assertion, spVersion)){
                     rdKey =  assertion;
-                }else if(PolicyUtil.isRequireExternalUriReference(assertion)){
+                }else if(PolicyUtil.isRequireExternalUriReference(assertion, spVersion)){
                     if(referenceType == null){
                         referenceType =new HashSet<String>();
                     }
                     referenceType.add(assertion.getName().getLocalPart().intern());
-                }else if(PolicyUtil.isSC10SecurityContextToken(assertion)){
+                }else if(PolicyUtil.isSC10SecurityContextToken(assertion, spVersion)){
                     tokenType = assertion.getName().getLocalPart();
                 }else{
                     if(!assertion.isOptional()){
@@ -178,7 +190,7 @@ public class SecureConversationToken extends PolicyAssertion implements com.sun.
                 Iterator <PolicyAssertion> it = this.getNestedAssertionsIterator();
                 while(it.hasNext()){
                     PolicyAssertion assertion = it.next();
-                    if(PolicyUtil.isIssuer(assertion)){
+                    if(PolicyUtil.isIssuer(assertion, spVersion)){
                         issuer = (Issuer)assertion;
                     }
                 }
@@ -186,6 +198,10 @@ public class SecureConversationToken extends PolicyAssertion implements com.sun.
             populated = true;
         }
         return fitness;
+    }
+
+    public SecurityPolicyVersion getSecurityPolicyVersion() {
+        return spVersion;
     }
 }
 

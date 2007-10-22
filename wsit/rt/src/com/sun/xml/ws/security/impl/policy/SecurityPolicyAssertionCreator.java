@@ -41,6 +41,7 @@ import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.policy.spi.AssertionCreationException;
 import com.sun.xml.ws.policy.spi.PolicyAssertionCreator;
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
@@ -56,7 +57,8 @@ public class SecurityPolicyAssertionCreator implements PolicyAssertionCreator{
     
     
     private static HashSet<String> implementedAssertions = new HashSet<String>();
-    private static final String [] nsSupportedList = new String[]{Constants.SECURITY_POLICY_NS};
+    private static final String [] nsSupportedList = new String[]{SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri,
+           SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri};
     //    Constants.SUN_WSS_SECURITY_CLIENT_POLICY_NS,
     //    Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS,
     //    Constants.SUN_SECURE_CLIENT_CONVERSATION_POLICY_NS,Constants.SUN_SECURE_SERVER_CONVERSATION_POLICY_NS

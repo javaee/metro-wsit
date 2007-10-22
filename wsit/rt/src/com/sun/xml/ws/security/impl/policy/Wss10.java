@@ -40,6 +40,7 @@ import com.sun.xml.ws.policy.NestedPolicy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -57,14 +58,23 @@ public class Wss10 extends PolicyAssertion implements com.sun.xml.ws.security.po
     QName name;
     boolean populated = false;
     private AssertionFitness fitness = AssertionFitness.IS_VALID;
+    private SecurityPolicyVersion spVersion;
+    
     /**
      * Creates a new instance of WSSAssertion
      */
     public Wss10() {
+        spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
     }
     
     public Wss10(AssertionData name,Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) {
         super(name,nestedAssertions,nestedAlternative);
+        String nsUri = getName().getNamespaceURI();
+        if(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri.equals(nsUri)){
+            spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
+        } else if(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(nsUri)){
+            spVersion = SecurityPolicyVersion.SECURITYPOLICY12NS;
+        }
     }
     
     
@@ -104,7 +114,7 @@ public class Wss10 extends PolicyAssertion implements com.sun.xml.ws.security.po
             }
             AssertionSet as = policy.getAssertionSet();
             for(PolicyAssertion pa:as){
-                if(PolicyUtil.isWSS10PolicyContent(pa)){
+                if(PolicyUtil.isWSS10PolicyContent(pa, spVersion)){
                     addRequiredProperty(pa.getName().getLocalPart().intern());
                 }else{
                     if(!pa.isOptional()){

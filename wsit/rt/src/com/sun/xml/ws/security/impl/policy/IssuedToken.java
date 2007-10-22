@@ -42,6 +42,7 @@ import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.security.policy.Issuer;
 import com.sun.xml.ws.security.policy.RequestSecurityTokenTemplate;
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -59,24 +60,36 @@ import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
 public class IssuedToken extends PolicyAssertion implements  com.sun.xml.ws.security.policy.IssuedToken, SecurityAssertionValidator{
     
     private boolean populated = false;
-    protected String includeToken = Token.INCLUDE_ALWAYS;
     private RequestSecurityTokenTemplate rstTemplate;
     private Issuer issuer = null;
-    private static QName itQname = new QName(Constants.SECURITY_POLICY_NS, Constants.IncludeToken);
     private ArrayList<String> referenceType;
     private String id;
     private AssertionFitness fitness = AssertionFitness.IS_VALID;
     private boolean reqDK=false;
+    private SecurityPolicyVersion spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
+    private static QName itQname;
+    private String includeToken;
+    
     /**
      * Creates a new instance of IssuedToken
      */
     public IssuedToken() {
         id= PolicyUtil.randomUUID();
+        itQname = new QName(spVersion.namespaceUri, Constants.IncludeToken);
+        includeToken = spVersion.includeTokenAlways;
     }
     
     public IssuedToken(AssertionData name,Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) {
         super(name,nestedAssertions,nestedAlternative);
         id= PolicyUtil.randomUUID();
+        String nsUri = getName().getNamespaceURI();
+        if(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri.equals(nsUri)){
+            spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
+        } else if(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(nsUri)){
+            spVersion = SecurityPolicyVersion.SECURITYPOLICY12NS;
+        }
+        itQname = new QName(spVersion.namespaceUri, Constants.IncludeToken);
+        includeToken = spVersion.includeTokenAlways;
     }
     
     public RequestSecurityTokenTemplate getRequestSecurityTokenTemplate() {
@@ -131,9 +144,9 @@ public class IssuedToken extends PolicyAssertion implements  com.sun.xml.ws.secu
                 Iterator <PolicyAssertion> it = this.getNestedAssertionsIterator();
                 while ( it.hasNext() ) {
                     PolicyAssertion assertion = it.next();
-                    if ( PolicyUtil.isIssuer(assertion) ) {
+                    if ( PolicyUtil.isIssuer(assertion, spVersion) ) {
                         this.issuer = (Issuer) assertion;
-                    } else if ( PolicyUtil.isRequestSecurityTokenTemplate(assertion)) {
+                    } else if ( PolicyUtil.isRequestSecurityTokenTemplate(assertion, spVersion)) {
                         this.rstTemplate = (RequestSecurityTokenTemplate) assertion;
                     }else{
                         if(!assertion.isOptional()){
@@ -166,11 +179,11 @@ public class IssuedToken extends PolicyAssertion implements  com.sun.xml.ws.secu
                 if(referenceType == null){
                     referenceType = new ArrayList<String>();
                 }
-                if ( PolicyUtil.isRequireDerivedKeys(assertion)) {
+                if ( PolicyUtil.isRequireDerivedKeys(assertion, spVersion)) {
                     reqDK = true;
-                } else if ( PolicyUtil.isRequireExternalReference(assertion)) {
+                } else if ( PolicyUtil.isRequireExternalReference(assertion, spVersion)) {
                     referenceType.add(assertion.getName().getLocalPart().intern());
-                } else if ( PolicyUtil.isRequireInternalReference(assertion)) {
+                } else if ( PolicyUtil.isRequireInternalReference(assertion, spVersion)) {
                     referenceType.add(assertion.getName().getLocalPart().intern());
                 } else{
                     if(!assertion.isOptional()){
@@ -182,5 +195,9 @@ public class IssuedToken extends PolicyAssertion implements  com.sun.xml.ws.secu
             populated = true;
         }
         return fitness;
+    }
+
+    public SecurityPolicyVersion getSecurityPolicyVersion() {
+        return spVersion;
     }
 }

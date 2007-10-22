@@ -39,6 +39,7 @@ import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.security.policy.AlgorithmSuiteValue;
 import static com.sun.xml.ws.security.impl.policy.Constants.*;
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import java.util.UUID;
 import javax.xml.namespace.QName;
 /**
@@ -51,8 +52,8 @@ public class PolicyUtil {
     public PolicyUtil() {
     }
     
-    public static boolean isSecurityPolicyNS(PolicyAssertion pa) {
-        if ( Constants.SECURITY_POLICY_NS.equals(pa.getName().getNamespaceURI()) ) {
+    public static boolean isSecurityPolicyNS(PolicyAssertion pa, SecurityPolicyVersion spVersion) {
+        if ( spVersion.namespaceUri.equals(pa.getName().getNamespaceURI()) ) {
             return true;
         }
         return false;
@@ -97,8 +98,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isAlgorithmAssertion(PolicyAssertion pa){
-        if ( isSecurityPolicyNS(pa) ) {
+    public static boolean isAlgorithmAssertion(PolicyAssertion pa, SecurityPolicyVersion spVersion){
+        if ( isSecurityPolicyNS(pa, spVersion) ) {
             if(pa.getName().getLocalPart().equals(AlgorithmSuite)) {
                 return true;
             }
@@ -106,8 +107,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isToken(PolicyAssertion pa){
-        if ( !isSecurityPolicyNS(pa) ) {
+    public static boolean isToken(PolicyAssertion pa, SecurityPolicyVersion spVersion){
+        if ( !isSecurityPolicyNS(pa, spVersion) ) {
             return false;
         }
         
@@ -145,8 +146,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isBootstrapPolicy(PolicyAssertion assertion){
-        if ( !isSecurityPolicyNS(assertion) ) {
+    public static boolean isBootstrapPolicy(PolicyAssertion assertion, SecurityPolicyVersion spVersion){
+        if ( !isSecurityPolicyNS(assertion, spVersion) ) {
             return false;
         }
         
@@ -156,8 +157,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isTarget(PolicyAssertion assertion) {
-        if ( !isSecurityPolicyNS(assertion) ) {
+    public static boolean isTarget(PolicyAssertion assertion, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(assertion, spVersion) ) {
             return false;
         }
         
@@ -171,8 +172,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isXPath(PolicyAssertion assertion ) {
-        if ( !isSecurityPolicyNS(assertion) ) {
+    public static boolean isXPath(PolicyAssertion assertion, SecurityPolicyVersion spVersion ) {
+        if ( !isSecurityPolicyNS(assertion, spVersion) ) {
             return false;
         }
         
@@ -182,7 +183,7 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isXPathFilter20(PolicyAssertion assertion ) {
+    public static boolean isXPathFilter20(PolicyAssertion assertion) {
         if ( !isXpathNS(assertion) ) {
             return false;
         }
@@ -197,9 +198,9 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isTokenType(PolicyAssertion assertion){
+    public static boolean isTokenType(PolicyAssertion assertion, SecurityPolicyVersion spVersion){
         
-        if ( !isSecurityPolicyNS(assertion)) {
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
         }
         
@@ -223,9 +224,9 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isTokenReferenceType(PolicyAssertion assertion) {
+    public static boolean isTokenReferenceType(PolicyAssertion assertion, SecurityPolicyVersion spVersion) {
         
-        if ( !isSecurityPolicyNS(assertion )) {
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
         }
         
@@ -241,8 +242,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isUsernameTokenType(PolicyAssertion assertion) {
-        if ( !isSecurityPolicyNS(assertion )) {
+    public static boolean isUsernameTokenType(PolicyAssertion assertion, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
         }
         
@@ -253,8 +254,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isHttpsToken(PolicyAssertion assertion) {
-        if ( !isSecurityPolicyNS(assertion )) {
+    public static boolean isHttpsToken(PolicyAssertion assertion, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
         }
         
@@ -264,8 +265,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isSecurityContextToken(PolicyAssertion token) {
-        if ( !isSecurityPolicyNS(token )) {
+    public static boolean isSecurityContextToken(PolicyAssertion token, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(token, spVersion)) {
             return false;
         }
         
@@ -275,8 +276,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isSecurityContextTokenType(PolicyAssertion token) {
-        if ( !isSecurityPolicyNS(token )) {
+    public static boolean isSecurityContextTokenType(PolicyAssertion token, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(token, spVersion)) {
             return false;
         }
         String localPart = token.getName().getLocalPart();
@@ -286,8 +287,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isKerberosToken(PolicyAssertion token) {
-        if ( !isSecurityPolicyNS(token )) {
+    public static boolean isKerberosToken(PolicyAssertion token, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(token, spVersion)) {
             return false;
         }
         
@@ -297,8 +298,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isKerberosTokenType(PolicyAssertion token) {
-        if ( !isSecurityPolicyNS(token )) {
+    public static boolean isKerberosTokenType(PolicyAssertion token, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(token, spVersion)) {
             return false;
         }
         String localPart = token.getName().getLocalPart();
@@ -310,8 +311,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isRelToken(PolicyAssertion token) {
-        if ( !isSecurityPolicyNS(token )) {
+    public static boolean isRelToken(PolicyAssertion token, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(token, spVersion)) {
             return false;
         }
         
@@ -321,8 +322,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isRelTokenType(PolicyAssertion token) {
-        if ( !isSecurityPolicyNS(token )) {
+    public static boolean isRelTokenType(PolicyAssertion token, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(token, spVersion)) {
             return false;
         }
         String localPart = token.getName().getLocalPart();
@@ -338,8 +339,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isIncludeTimestamp(PolicyAssertion assertion) {
-        if ( !isSecurityPolicyNS(assertion )) {
+    public static boolean isIncludeTimestamp(PolicyAssertion assertion, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
         }
         
@@ -360,8 +361,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isEncryptBeforeSign(PolicyAssertion assertion) {
-        if ( !isSecurityPolicyNS(assertion )) {
+    public static boolean isEncryptBeforeSign(PolicyAssertion assertion, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
         }
         
@@ -371,8 +372,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isSignBeforeEncrypt(PolicyAssertion assertion) {
-        if ( !isSecurityPolicyNS(assertion )) {
+    public static boolean isSignBeforeEncrypt(PolicyAssertion assertion, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
         }
         
@@ -382,8 +383,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isContentOnlyAssertion(PolicyAssertion assertion) {
-        if ( !isSecurityPolicyNS(assertion )) {
+    public static boolean isContentOnlyAssertion(PolicyAssertion assertion, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
         }
         
@@ -393,8 +394,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isMessageLayout(PolicyAssertion assertion) {
-        if ( !isSecurityPolicyNS(assertion )) {
+    public static boolean isMessageLayout(PolicyAssertion assertion, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
         }
         
@@ -404,8 +405,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isEncryptParts(PolicyAssertion assertion ){
-        if ( !isSecurityPolicyNS(assertion )) {
+    public static boolean isEncryptParts(PolicyAssertion assertion, SecurityPolicyVersion spVersion ){
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
         }
         
@@ -415,8 +416,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isEncryptedElements(PolicyAssertion assertion ){
-        if ( !isSecurityPolicyNS(assertion )) {
+    public static boolean isEncryptedElements(PolicyAssertion assertion, SecurityPolicyVersion spVersion ){
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
         }
         
@@ -426,8 +427,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isSignedParts(PolicyAssertion assertion){
-        if ( !isSecurityPolicyNS(assertion )) {
+    public static boolean isSignedParts(PolicyAssertion assertion, SecurityPolicyVersion spVersion){
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
         }
         
@@ -437,8 +438,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isSignedElements(PolicyAssertion assertion){
-        if ( !isSecurityPolicyNS(assertion )) {
+    public static boolean isSignedElements(PolicyAssertion assertion, SecurityPolicyVersion spVersion){
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
         }
         
@@ -449,8 +450,8 @@ public class PolicyUtil {
     }
     
     
-    public static boolean isSignedSupportingToken(PolicyAssertion policyAssertion) {
-        if ( !isSecurityPolicyNS(policyAssertion )) {
+    public static boolean isSignedSupportingToken(PolicyAssertion policyAssertion, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(policyAssertion, spVersion)) {
             return false;
         }
         
@@ -460,8 +461,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isEndorsedSupportingToken(PolicyAssertion policyAssertion) {
-        if ( !isSecurityPolicyNS(policyAssertion )) {
+    public static boolean isEndorsedSupportingToken(PolicyAssertion policyAssertion, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(policyAssertion, spVersion)) {
             return false;
         }
         
@@ -471,8 +472,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isSignedEndorsingSupportingToken(PolicyAssertion policyAssertion) {
-        if ( !isSecurityPolicyNS(policyAssertion )) {
+    public static boolean isSignedEndorsingSupportingToken(PolicyAssertion policyAssertion, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(policyAssertion, spVersion)) {
             return false;
         }
         
@@ -483,9 +484,9 @@ public class PolicyUtil {
     }
     
     
-    public static boolean isBinding(PolicyAssertion policyAssertion) {
+    public static boolean isBinding(PolicyAssertion policyAssertion, SecurityPolicyVersion spVersion) {
         
-        if ( !isSecurityPolicyNS(policyAssertion )) {
+        if ( !isSecurityPolicyNS(policyAssertion, spVersion)) {
             return false;
         }
         
@@ -499,8 +500,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isUsernameToken(PolicyAssertion token) {
-        if ( !isSecurityPolicyNS(token )) {
+    public static boolean isUsernameToken(PolicyAssertion token, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(token, spVersion)) {
             return false;
         }
         
@@ -510,8 +511,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isSamlToken(PolicyAssertion token) {
-        if ( !isSecurityPolicyNS(token )) {
+    public static boolean isSamlToken(PolicyAssertion token, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(token, spVersion)) {
             return false;
         }
         
@@ -521,8 +522,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isSamlTokenType(PolicyAssertion token) {
-        if ( !isSecurityPolicyNS(token )) {
+    public static boolean isSamlTokenType(PolicyAssertion token, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(token, spVersion)) {
             return false;
         }
         String localPart = token.getName().getLocalPart();
@@ -540,8 +541,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isIssuedToken(PolicyAssertion token) {
-        if ( !isSecurityPolicyNS(token )) {
+    public static boolean isIssuedToken(PolicyAssertion token, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(token, spVersion)) {
             return false;
         }
         
@@ -551,8 +552,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isSecureConversationToken(PolicyAssertion token) {
-        if ( !isSecurityPolicyNS(token )) {
+    public static boolean isSecureConversationToken(PolicyAssertion token, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(token, spVersion)) {
             return false;
         }
         
@@ -562,8 +563,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isX509Token(PolicyAssertion policyAssertion) {
-        if ( !isSecurityPolicyNS(policyAssertion )) {
+    public static boolean isX509Token(PolicyAssertion policyAssertion, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(policyAssertion, spVersion)) {
             return false;
         }
         
@@ -573,8 +574,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isAsymmetricBinding(PolicyAssertion assertion){
-        if ( !isSecurityPolicyNS(assertion )) {
+    public static boolean isAsymmetricBinding(PolicyAssertion assertion, SecurityPolicyVersion spVersion){
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
         }
         
@@ -584,16 +585,16 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isAsymmetricBinding(QName assertion){
+    public static boolean isAsymmetricBinding(QName assertion, SecurityPolicyVersion spVersion){
         if ( assertion.getLocalPart().equals(Constants.AsymmetricBinding) &&
-                assertion.getNamespaceURI().equals(Constants.SECURITY_POLICY_NS)) {
+                assertion.getNamespaceURI().equals(spVersion.namespaceUri)) {
             return true;
         }
         return false;
     }
     
-    public static boolean isTransportBinding(PolicyAssertion assertion){
-        if ( !isSecurityPolicyNS(assertion )) {
+    public static boolean isTransportBinding(PolicyAssertion assertion, SecurityPolicyVersion spVersion){
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
         }
         
@@ -603,16 +604,16 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isTransportBinding(QName assertion){
+    public static boolean isTransportBinding(QName assertion, SecurityPolicyVersion spVersion){
         if ( assertion.getLocalPart().equals(Constants.TransportBinding) &&
-                assertion.getNamespaceURI().equals(Constants.SECURITY_POLICY_NS)) {
+                assertion.getNamespaceURI().equals(spVersion.namespaceUri)) {
             return true;
         }
         return false;
     }
     
-    public static boolean isSymmetricBinding(PolicyAssertion assertion){
-        if ( !isSecurityPolicyNS(assertion )) {
+    public static boolean isSymmetricBinding(PolicyAssertion assertion, SecurityPolicyVersion spVersion){
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
         }
         
@@ -622,29 +623,29 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isSymmetricBinding(QName assertion){
+    public static boolean isSymmetricBinding(QName assertion, SecurityPolicyVersion spVersion){
         if ( assertion.getLocalPart().equals(Constants.SymmetricBinding) &&
-                assertion.getNamespaceURI().equals(Constants.SECURITY_POLICY_NS)) {
+                assertion.getNamespaceURI().equals(spVersion.namespaceUri)) {
             return true;
         }
         return false;
     }
     
-    public static boolean isSupportingTokens(PolicyAssertion assertion){
-        if ( !isSecurityPolicyNS(assertion )) {
+    public static boolean isSupportingTokens(PolicyAssertion assertion, SecurityPolicyVersion spVersion){
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
         }
         
-        if(isSignedSupportingToken(assertion) || isEndorsedSupportingToken(assertion)||
-                isSignedEndorsingSupportingToken(assertion) || isSupportingToken(assertion)){
+        if(isSignedSupportingToken(assertion, spVersion) || isEndorsedSupportingToken(assertion, spVersion)||
+                isSignedEndorsingSupportingToken(assertion, spVersion) || isSupportingToken(assertion, spVersion)){
             return true;
         }
         return false;
     }
     
     
-    public static boolean isSupportingToken(PolicyAssertion assertion){
-        if ( !isSecurityPolicyNS(assertion )) {
+    public static boolean isSupportingToken(PolicyAssertion assertion, SecurityPolicyVersion spVersion){
+        if ( !isSecurityPolicyNS(assertion, spVersion )) {
             return false;
         }
         
@@ -655,8 +656,8 @@ public class PolicyUtil {
     }
     
     
-    public static boolean isSupportClientChallenge(PolicyAssertion assertion) {
-        if ( !isSecurityPolicyNS(assertion )) {
+    public static boolean isSupportClientChallenge(PolicyAssertion assertion, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
         }
         
@@ -666,8 +667,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isSupportServerChallenge(PolicyAssertion assertion) {
-        if ( !isSecurityPolicyNS(assertion )) {
+    public static boolean isSupportServerChallenge(PolicyAssertion assertion, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
         }
         
@@ -677,8 +678,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isWSS10PolicyContent(PolicyAssertion assertion){
-        if ( !isSecurityPolicyNS(assertion )) {
+    public static boolean isWSS10PolicyContent(PolicyAssertion assertion, SecurityPolicyVersion spVersion){
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
         }
         
@@ -694,8 +695,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isWSS11PolicyContent(PolicyAssertion assertion){
-        if ( !isSecurityPolicyNS(assertion )) {
+    public static boolean isWSS11PolicyContent(PolicyAssertion assertion, SecurityPolicyVersion spVersion){
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
         }
         
@@ -718,8 +719,8 @@ public class PolicyUtil {
     }
     
     
-    public static boolean isRequireClientEntropy(PolicyAssertion assertion) {
-        if ( !isSecurityPolicyNS(assertion )) {
+    public static boolean isRequireClientEntropy(PolicyAssertion assertion, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
         }
         
@@ -729,8 +730,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isRequireServerEntropy(PolicyAssertion assertion) {
-        if ( !isSecurityPolicyNS(assertion )) {
+    public static boolean isRequireServerEntropy(PolicyAssertion assertion, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
         }
         
@@ -740,8 +741,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isSupportIssuedTokens(PolicyAssertion assertion) {
-        if ( !isSecurityPolicyNS(assertion )) {
+    public static boolean isSupportIssuedTokens(PolicyAssertion assertion, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
         }
         
@@ -751,8 +752,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isIssuer(PolicyAssertion assertion) {
-        if ( !isSecurityPolicyNS(assertion)) {
+    public static boolean isIssuer(PolicyAssertion assertion, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
         }
         
@@ -763,8 +764,8 @@ public class PolicyUtil {
     }
     
     
-    public static boolean isWSS10(PolicyAssertion assertion){
-        if ( !isSecurityPolicyNS(assertion)) {
+    public static boolean isWSS10(PolicyAssertion assertion, SecurityPolicyVersion spVersion){
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
         }
         if(assertion.getName().getLocalPart().equals(Wss10)) {
@@ -773,8 +774,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isWSS11(PolicyAssertion assertion){
-        if ( !isSecurityPolicyNS(assertion)) {
+    public static boolean isWSS11(PolicyAssertion assertion, SecurityPolicyVersion spVersion){
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
         }
         
@@ -784,19 +785,34 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isTrust10(PolicyAssertion assertion){
-        if ( !isSecurityPolicyNS(assertion)) {
+    public static boolean isTrust10(PolicyAssertion assertion, SecurityPolicyVersion spVersion){
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
         }
         
-        if(assertion.getName().getLocalPart().equals(Trust10)) {
+        // Trust10 assertion is allowed only in 2005/07 namespace     
+        if(assertion.getName().getLocalPart().equals(Trust10) &&
+                assertion.getName().getNamespaceURI().equals(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri)) {
             return true;
         }
         return false;
     }
     
-    public static boolean isBody(PolicyAssertion assertion){
-        if ( !isSecurityPolicyNS(assertion)) {
+    public static boolean isTrust13(PolicyAssertion assertion, SecurityPolicyVersion spVersion){
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
+            return false;
+        }
+        
+        // Trust13 assertion is allowed only in 1.2  namespace     
+        if(assertion.getName().getLocalPart().equals(Trust13) &&
+                assertion.getName().getNamespaceURI().equals(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri)) {
+            return true;
+        }
+        return false;
+    }
+    
+    public static boolean isBody(PolicyAssertion assertion, SecurityPolicyVersion spVersion){
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
         }
         
@@ -806,8 +822,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isRequireDerivedKeys(PolicyAssertion assertion ) {
-        if ( !isSecurityPolicyNS(assertion)) {
+    public static boolean isRequireDerivedKeys(PolicyAssertion assertion, SecurityPolicyVersion spVersion ) {
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
         }
         
@@ -817,8 +833,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static AlgorithmSuiteValue isValidAlgorithmSuiteValue(PolicyAssertion assertion) {
-        if ( !isSecurityPolicyNS(assertion)) {
+    public static AlgorithmSuiteValue isValidAlgorithmSuiteValue(PolicyAssertion assertion, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return null;
         }
         
@@ -858,8 +874,8 @@ public class PolicyUtil {
         return null;
     }
     
-    public static boolean isInclusiveC14N(PolicyAssertion assertion ) {
-        if ( !isSecurityPolicyNS(assertion)) {
+    public static boolean isInclusiveC14N(PolicyAssertion assertion, SecurityPolicyVersion spVersion ) {
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
         }
         
@@ -937,8 +953,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isSTRTransform10(PolicyAssertion assertion) {
-        if ( !isSecurityPolicyNS(assertion)) {
+    public static boolean isSTRTransform10(PolicyAssertion assertion, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
         }
         
@@ -948,8 +964,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isInitiatorToken(PolicyAssertion assertion) {
-        if ( !isSecurityPolicyNS(assertion)) {
+    public static boolean isInitiatorToken(PolicyAssertion assertion, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
         }
         
@@ -959,8 +975,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isRecipientToken(PolicyAssertion assertion) {
-        if ( !isSecurityPolicyNS(assertion)) {
+    public static boolean isRecipientToken(PolicyAssertion assertion, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
         }
         
@@ -970,8 +986,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isProtectTokens(PolicyAssertion assertion) {
-        if ( !isSecurityPolicyNS(assertion)) {
+    public static boolean isProtectTokens(PolicyAssertion assertion, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
         }
         
@@ -981,8 +997,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isEncryptSignature(PolicyAssertion assertion) {
-        if ( !isSecurityPolicyNS(assertion)) {
+    public static boolean isEncryptSignature(PolicyAssertion assertion, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
         }
         
@@ -1014,8 +1030,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isSignatureToken(PolicyAssertion assertion) {
-        if ( !isSecurityPolicyNS(assertion)) {
+    public static boolean isSignatureToken(PolicyAssertion assertion, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
         }
         
@@ -1026,8 +1042,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isEncryptionToken(PolicyAssertion assertion) {
-        if ( !isSecurityPolicyNS(assertion)) {
+    public static boolean isEncryptionToken(PolicyAssertion assertion, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
         }
         
@@ -1037,8 +1053,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isProtectionToken(PolicyAssertion assertion) {
-        if ( !isSecurityPolicyNS(assertion)) {
+    public static boolean isProtectionToken(PolicyAssertion assertion, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
         }
         
@@ -1060,8 +1076,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isRequestSecurityTokenTemplate(PolicyAssertion assertion) {
-        if ( !isSecurityPolicyNS(assertion)) {
+    public static boolean isRequestSecurityTokenTemplate(PolicyAssertion assertion, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
         }
         
@@ -1071,8 +1087,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isRequireExternalUriReference(PolicyAssertion assertion) {
-        if ( !isSecurityPolicyNS(assertion)) {
+    public static boolean isRequireExternalUriReference(PolicyAssertion assertion, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
         }
         
@@ -1083,8 +1099,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isRequireExternalReference(PolicyAssertion assertion) {
-        if ( !isSecurityPolicyNS(assertion)) {
+    public static boolean isRequireExternalReference(PolicyAssertion assertion, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
         }
         
@@ -1095,8 +1111,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isRequireInternalReference(PolicyAssertion assertion) {
-        if ( !isSecurityPolicyNS(assertion)) {
+    public static boolean isRequireInternalReference(PolicyAssertion assertion, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
         }
         
@@ -1118,8 +1134,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isLax(PolicyAssertion assertion) {
-        if ( !isSecurityPolicyNS(assertion)) {
+    public static boolean isLax(PolicyAssertion assertion, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
         }
         
@@ -1129,8 +1145,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isLaxTsFirst(PolicyAssertion assertion) {
-        if ( !isSecurityPolicyNS(assertion)) {
+    public static boolean isLaxTsFirst(PolicyAssertion assertion, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
         }
         
@@ -1140,8 +1156,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isLaxTsLast(PolicyAssertion assertion) {
-        if ( !isSecurityPolicyNS(assertion)) {
+    public static boolean isLaxTsLast(PolicyAssertion assertion, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
         }
         
@@ -1151,8 +1167,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isStrict(PolicyAssertion assertion) {
-        if ( !isSecurityPolicyNS(assertion)) {
+    public static boolean isStrict(PolicyAssertion assertion, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
         }
         
@@ -1231,8 +1247,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isHeader(PolicyAssertion assertion) {
-        if ( !isSecurityPolicyNS(assertion)) {
+    public static boolean isHeader(PolicyAssertion assertion, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
         }
         if ( assertion.getName().getLocalPart().equals(HEADER)) {
@@ -1241,8 +1257,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isRequireKeyIR(PolicyAssertion assertion) {
-        if (!isSecurityPolicyNS(assertion)) {
+    public static boolean isRequireKeyIR(PolicyAssertion assertion, SecurityPolicyVersion spVersion) {
+        if (!isSecurityPolicyNS(assertion, spVersion)) {
             return false;
         }
         if ( assertion.getName().getLocalPart().equals(RequireKeyIdentifierReference)) {
@@ -1321,8 +1337,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isSC10SecurityContextToken(PolicyAssertion assertion){
-        if ( !isSecurityPolicyNS(assertion)) {
+    public static boolean isSC10SecurityContextToken(PolicyAssertion assertion, SecurityPolicyVersion spVersion){
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
         }
         
@@ -1396,8 +1412,8 @@ public class PolicyUtil {
         return false;
     }
     
-    public static boolean isRequiredElements(PolicyAssertion assertion){
-        if(isSecurityPolicyNS(assertion)){
+    public static boolean isRequiredElements(PolicyAssertion assertion, SecurityPolicyVersion spVersion){
+        if(isSecurityPolicyNS(assertion, spVersion)){
             return false;
         }
         
@@ -1428,8 +1444,8 @@ public class PolicyUtil {
     }
     
     
-    public static boolean hasPassword(PolicyAssertion assertion){
-        if(!isSecurityPolicyNS(assertion)){
+    public static boolean hasPassword(PolicyAssertion assertion, SecurityPolicyVersion spVersion){
+        if(!isSecurityPolicyNS(assertion, spVersion)){
             return false;
         }
         

@@ -39,6 +39,7 @@ package com.sun.xml.ws.security.impl.policyconv;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.security.impl.policy.PolicyUtil;
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import com.sun.xml.ws.security.policy.UserNameToken;
 import com.sun.xml.ws.security.policy.AlgorithmSuite;
 import com.sun.xml.ws.security.policy.Binding;
@@ -120,14 +121,15 @@ public class SupportingTokensProcessor {
         
         while(tokens.hasNext()){
             Token token = (Token) tokens.next();
+            SecurityPolicyVersion spVersion = getSPVersion((PolicyAssertion)token);
             WSSPolicy policy = tokenProcessor.getWSSToken(token);
             if ( policy.getUUID() != null ) {
                 
                 addToPrimarySignature(policy,token);
-                if(PolicyUtil.isUsernameToken((PolicyAssertion) token) && ((UserNameToken)token).hasPassword()){
+                if(PolicyUtil.isUsernameToken((PolicyAssertion) token, spVersion) && ((UserNameToken)token).hasPassword()){
                     encryptToken(token);
                 }
-                if(PolicyUtil.isSamlToken((PolicyAssertion)token)){
+                if(PolicyUtil.isSamlToken((PolicyAssertion)token, spVersion)){
                     correctSAMLBinding(policy);
                 }
                 
@@ -207,7 +209,8 @@ public class SupportingTokensProcessor {
     protected SignedParts getEmptySignedParts(Iterator itr){
         while(itr.hasNext()){
             Target target = (Target)itr.next();
-            if(PolicyUtil.isSignedParts((PolicyAssertion)target)){
+            SecurityPolicyVersion spVersion = getSPVersion((PolicyAssertion)target);
+            if(PolicyUtil.isSignedParts((PolicyAssertion)target, spVersion)){
                 if(SecurityPolicyUtil.isSignedPartsEmpty((SignedParts) target)){
                     return (SignedParts) target;
                 }
@@ -282,6 +285,17 @@ public class SupportingTokensProcessor {
             SignaturePolicy.FeatureBinding fb = (com.sun.xml.wss.impl.policy.mls.SignaturePolicy.FeatureBinding) sp.getFeatureBinding();
             fb.addTargetBinding(st);
         }
+    }
+    
+    protected SecurityPolicyVersion getSPVersion(PolicyAssertion pa){
+        String nsUri = pa.getName().getNamespaceURI();
+        // Default SPVersion
+        SecurityPolicyVersion spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
+        // If spec version, update
+        if(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(nsUri)){
+            spVersion = SecurityPolicyVersion.SECURITYPOLICY12NS;
+        }
+        return spVersion;
     }
 
     protected void correctSAMLBinding(WSSPolicy policy) {

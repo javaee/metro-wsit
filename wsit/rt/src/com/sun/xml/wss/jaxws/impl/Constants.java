@@ -37,6 +37,7 @@
 package com.sun.xml.wss.jaxws.impl;
 
 import com.sun.xml.ws.policy.PolicyAssertion;
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import com.sun.xml.wss.impl.policy.mls.MessagePolicy;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -59,8 +60,6 @@ public abstract class Constants {
     public static final QName ACTION_HEADER = new QName(wsaURI,"Action");
     public final static QName _SecureConversationToken_QNAME =
             new QName("http://schemas.xmlsoap.org/ws/2005/07/securitypolicy", "SecureConversationToken");
-    public static final String SECURITY_POLICY_2005_07_NAMESPACE=
-            "http://schemas.xmlsoap.org/ws/2005/07/securitypolicy".intern();
     public static final String TRUST_2005_02_NAMESPACE ="http://schemas.xmlsoap.org/ws/2005/02/trust".intern();
     public static final String ADDRESSING_POLICY_NAMESPACE_URI =
             "http://schemas.xmlsoap.org/ws/2004/09/policy/addressing";

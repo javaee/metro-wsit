@@ -40,25 +40,7 @@ package com.sun.xml.ws.security.policy;
  *
  * @author K.Venugopal@sun.com
  */
-public interface Constants {
-    public static final String SECURITY_POLICY_2005_07 = "http://schemas.xmlsoap.org/ws/2005/07/securitypolicy";
-//    public static final String BASIC256="Basic256";
-//    public static final String BASIC192="Basic192";
-//    public static final String BASIC128="Basic128";
-//    public static final String TRIPLEDES="TripleDes";
-//    public static final String BASIC256_RSA15="Basic256Rsa15";
-//    public static final String BASIC192_RSA15="Basic192Rsa15";
-//    public static final String BASIC128_RSA15="Basic128Rsa15";
-//    public static final String TRIPLEDES_RSA15="TripleDesRsa15";
-//    public static final String BASIC256_SHA256="Basic256Sha256";
-//    public static final String BASIC192_SHA256="Basic192Sha256";
-//    public static final String BASIC128_SHA256="Basic128Sha256";
-//    public static final String TRIPLEDES_SHA256="TripleDesSha256";
-//    public static final String BASIC256_SHA256_RSA15="Basic256Sha256Rsa15";
-//    public static final String BASIC192_SHA256_RSA15="Basic192Sha256Rsa15";
-//    public static final String BASIC128_SHA256_RSA15="Basic128Sha256Rsa15";
-//    public static final String TRIPLEDES_SHA256_RSA15="TripleDesSha256Rsa15";
-  
+public interface Constants {  
     
     public static final String HMAC_SHA1 = "http://www.w3.org/2000/09/xmldsig#hmac-sha1";
     public static final String RSA_SHA1 = "http://www.w3.org/2000/09/xmldsig#rsa-sha1";

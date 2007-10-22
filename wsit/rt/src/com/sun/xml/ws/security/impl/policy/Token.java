@@ -1,8 +1,8 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
+ *
  * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
- * 
+ *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
@@ -10,7 +10,7 @@
  * a copy of the License at https://glassfish.dev.java.net/public/CDDL+GPL.html
  * or glassfish/bootstrap/legal/LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
- * 
+ *
  * When distributing the software, include this License Header Notice in each
  * file and include the License file at glassfish/bootstrap/legal/LICENSE.txt.
  * Sun designates this particular file as subject to the "Classpath" exception
@@ -19,9 +19,9 @@
  * Header, with the fields enclosed by brackets [] replaced by your own
  * identifying information: "Portions Copyrighted [year]
  * [name of copyright owner]"
- * 
+ *
  * Contributor(s):
- * 
+ *
  * If you wish your version of this file to be governed by only the CDDL or
  * only the GPL Version 2, indicate your decision by adding "[Contributor]
  * elects to include this software in this distribution under the [CDDL or GPL
@@ -39,6 +39,7 @@ import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.NestedPolicy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.UUID;
@@ -54,28 +55,40 @@ import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
 
 public class Token extends PolicyAssertion implements  com.sun.xml.ws.security.policy.Token, SecurityAssertionValidator{
     
-    private static QName itQname = new QName(Constants.SECURITY_POLICY_NS, Constants.IncludeToken);
-    private String _includeToken = Token.INCLUDE_ALWAYS;
     private String _id;
     private boolean populated= false;
     private com.sun.xml.ws.security.policy.Token _token;
     private AssertionFitness fitness = AssertionFitness.IS_VALID;
+    private SecurityPolicyVersion spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
+    private static QName itQname;
+    private String _includeToken;
     /**
      * Creates a new instance of Token
      */
     
     public Token(){
-         _id= PolicyUtil.randomUUID();
+        _id= PolicyUtil.randomUUID();
+        itQname = new QName(spVersion.namespaceUri, Constants.IncludeToken);
+        _includeToken = spVersion.includeTokenAlways;
     }
     
     public Token(QName name) {
         _id= PolicyUtil.randomUUID();
+        itQname = new QName(spVersion.namespaceUri, Constants.IncludeToken);
+        _includeToken = spVersion.includeTokenAlways;
     }
     
     public Token(AssertionData name,Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) {
         super(name,nestedAssertions,nestedAlternative);
-        
-         _id= PolicyUtil.randomUUID();
+        String nsUri = getName().getNamespaceURI();
+        if(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri.equals(nsUri)){
+            spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
+        } else if(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(nsUri)){
+            spVersion = SecurityPolicyVersion.SECURITYPOLICY12NS;
+        }
+        itQname = new QName(spVersion.namespaceUri, Constants.IncludeToken);
+        _includeToken = spVersion.includeTokenAlways;
+        _id= PolicyUtil.randomUUID();
     }
     
     public com.sun.xml.ws.security.policy.Token getToken() {
@@ -109,10 +122,10 @@ public class Token extends PolicyAssertion implements  com.sun.xml.ws.security.p
     
     private synchronized AssertionFitness populate(boolean isServer) {
         if(!populated){
-             String tValue = getAttributeValue(itQname);
-             if(tValue != null){
-                 _includeToken = tValue;
-             }
+            String tValue = getAttributeValue(itQname);
+            if(tValue != null){
+                _includeToken = tValue;
+            }
             NestedPolicy policy = this.getNestedPolicy();
             if(policy == null){
                 if(logger.getLevel() == Level.FINE){
@@ -125,7 +138,7 @@ public class Token extends PolicyAssertion implements  com.sun.xml.ws.security.p
             Iterator<PolicyAssertion> ast = as.iterator();
             while(ast.hasNext()){
                 PolicyAssertion assertion = ast.next();
-                if(PolicyUtil.isToken(assertion)){
+                if(PolicyUtil.isToken(assertion, spVersion)){
                     _token = (com.sun.xml.ws.security.policy.Token)assertion;
                 }else{
                     if(!assertion.isOptional()){
@@ -138,5 +151,9 @@ public class Token extends PolicyAssertion implements  com.sun.xml.ws.security.p
             populated = true;
         }
         return fitness;
+    }
+
+    public SecurityPolicyVersion getSecurityPolicyVersion() {
+        return spVersion;
     }
 }

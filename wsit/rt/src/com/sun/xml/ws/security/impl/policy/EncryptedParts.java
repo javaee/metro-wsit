@@ -41,6 +41,7 @@ import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 
 import com.sun.xml.ws.security.policy.Header;
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -59,11 +60,20 @@ public class EncryptedParts extends PolicyAssertion implements com.sun.xml.ws.se
     private List<Header> header;
     private boolean populated = false;
     private AssertionFitness fitness = AssertionFitness.IS_VALID;
+    private SecurityPolicyVersion spVersion;
+    
     /** Creates a new instance of EncryptedPartImpl */
     public EncryptedParts() {
+        spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
     }
     public EncryptedParts(AssertionData name,Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) {
         super(name,nestedAssertions,nestedAlternative);
+        String nsUri = getName().getNamespaceURI();
+        if(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri.equals(nsUri)){
+            spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
+        } else if(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(nsUri)){
+            spVersion = SecurityPolicyVersion.SECURITYPOLICY12NS;
+        }
     }
     
     public void addBody() {
@@ -105,13 +115,13 @@ public class EncryptedParts extends PolicyAssertion implements com.sun.xml.ws.se
                 Iterator <PolicyAssertion> it = this.getNestedAssertionsIterator();
                 while( it.hasNext() ) {
                     PolicyAssertion assertion = it.next();
-                    if ( PolicyUtil.isBody(assertion)) {
+                    if ( PolicyUtil.isBody(assertion, spVersion)) {
                         this._body = true;
                     } else {
                         if(header == null){
                             header = new ArrayList<Header>();
                         }
-                        if(PolicyUtil.isHeader(assertion)){
+                        if(PolicyUtil.isHeader(assertion, spVersion)){
                             this.header.add((Header)assertion);
                         }else{
                             if(!assertion.isOptional()){

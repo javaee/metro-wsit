@@ -53,6 +53,7 @@ import com.sun.xml.ws.security.policy.EncryptedElements;
 import com.sun.xml.ws.security.policy.EncryptedParts;
 import com.sun.xml.ws.security.policy.EndorsingSupportingTokens;
 import com.sun.xml.ws.security.policy.RequiredElements;
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import com.sun.xml.ws.security.policy.SignedElements;
 import com.sun.xml.ws.security.policy.SignedEndorsingSupportingTokens;
 import com.sun.xml.ws.security.policy.SignedParts;
@@ -117,13 +118,16 @@ public class XWSSPolicyGenerator {
     private EncryptionAssertionProcessor eAP = null;
     private Binding policyBinding = null;
     private List<RequiredElements> reqElements = new ArrayList<RequiredElements>();
+    private SecurityPolicyVersion spVersion;
     /** Creates a new instance of WSPolicyProcessorImpl */
     //public XWSSPolicyGenerator(AssertionSet assertionSet,boolean isServer,boolean isIncoming){
-    public XWSSPolicyGenerator(Policy effectivePolicy,boolean isServer,boolean isIncoming){
+    public XWSSPolicyGenerator(Policy effectivePolicy,boolean isServer,boolean isIncoming, 
+            SecurityPolicyVersion spVersion){
         this.effectivePolicy = effectivePolicy;
         this._policyContainer = new XWSSPolicyContainer(isServer,isIncoming);
         this.isServer = isServer;
         this.isIncoming = isIncoming;
+        this.spVersion = spVersion;
     }
     
     public AlgorithmSuite getBindingLevelAlgSuite(){
@@ -145,7 +149,7 @@ public class XWSSPolicyGenerator {
             logger.log(Level.SEVERE,LogStringsMessages.SP_0105_ERROR_BINDING_ASSR_NOT_PRESENT());
             throw new PolicyException(LogStringsMessages.SP_0105_ERROR_BINDING_ASSR_NOT_PRESENT());
         }
-        if(PolicyUtil.isTransportBinding(binding)){
+        if(PolicyUtil.isTransportBinding(binding, spVersion)){
             if(logger.isLoggable(Level.FINE)){
                 logger.log(Level.FINE, "TransportBinding was configured in the policy");
             }
@@ -159,7 +163,7 @@ public class XWSSPolicyGenerator {
             eAP = new EncryptionAssertionProcessor(_binding.getAlgorithmSuite(),false);
             
             _policyContainer.setPolicyContainerMode(_binding.getLayout());
-            if(PolicyUtil.isSymmetricBinding(binding.getName())) {
+            if(PolicyUtil.isSymmetricBinding(binding.getName(), spVersion)) {
                 
                 if(logger.isLoggable(Level.FINE)){
                     logger.log(Level.FINE, "SymmetricBinding was configured in the policy");
@@ -167,14 +171,14 @@ public class XWSSPolicyGenerator {
                 SymmetricBindingProcessor sbp =  new SymmetricBindingProcessor((SymmetricBinding) _binding, _policyContainer,
                         isServer, isIncoming,signedParts,encryptedParts,
                         signedElements,encryptedElements);
-                if(wssAssertion != null && PolicyUtil.isWSS11(wssAssertion)){
+                if(wssAssertion != null && PolicyUtil.isWSS11(wssAssertion, spVersion)){
                     sbp.setWSS11((WSSAssertion)wssAssertion);
                 }
                 sbp.process();
                 processNonBindingAssertions(sbp);
                 sbp.close();
                 
-            }else if(PolicyUtil.isAsymmetricBinding(binding.getName()) ){
+            }else if(PolicyUtil.isAsymmetricBinding(binding.getName(), spVersion) ){
                 
                 if(logger.isLoggable(Level.FINE)){
                     logger.log(Level.FINE, "AsymmetricBinding was configured in the policy");
@@ -182,7 +186,7 @@ public class XWSSPolicyGenerator {
                 AsymmetricBindingProcessor abp = new AsymmetricBindingProcessor((AsymmetricBinding) _binding, _policyContainer,
                         isServer, isIncoming,signedParts,encryptedParts,
                         signedElements,encryptedElements);
-                if( wssAssertion != null && PolicyUtil.isWSS11(wssAssertion)){
+                if( wssAssertion != null && PolicyUtil.isWSS11(wssAssertion, spVersion)){
                     abp.setWSS11((WSSAssertion)wssAssertion);
                 }
                 abp.process();
@@ -234,21 +238,21 @@ public class XWSSPolicyGenerator {
     private void processNonBindingAssertions(BindingProcessor bindingProcessor) throws PolicyException{
         for(AssertionSet assertionSet: effectivePolicy){
             for(PolicyAssertion assertion:assertionSet){
-                if(PolicyUtil.isBinding(assertion)){
+                if(PolicyUtil.isBinding(assertion, spVersion)){
                     continue;
-                }else if(!ignoreST && shouldAddST() && PolicyUtil.isSupportingToken(assertion)){
+                }else if(!ignoreST && shouldAddST() && PolicyUtil.isSupportingToken(assertion, spVersion)){
                     bindingProcessor.processSupportingTokens((SupportingTokens)assertion);
-                } else if(!ignoreST && shouldAddST() && PolicyUtil.isSignedSupportingToken(assertion)){
+                } else if(!ignoreST && shouldAddST() && PolicyUtil.isSignedSupportingToken(assertion, spVersion)){
                     bindingProcessor.processSupportingTokens((SignedSupportingTokens)assertion);
-                }else if(!ignoreST && shouldAddST() && PolicyUtil.isEndorsedSupportingToken(assertion)){
+                }else if(!ignoreST && shouldAddST() && PolicyUtil.isEndorsedSupportingToken(assertion, spVersion)){
                     bindingProcessor.processSupportingTokens((EndorsingSupportingTokens)assertion);
-                }else if(!ignoreST && shouldAddST() && PolicyUtil.isSignedEndorsingSupportingToken(assertion)){
+                }else if(!ignoreST && shouldAddST() && PolicyUtil.isSignedEndorsingSupportingToken(assertion, spVersion)){
                     bindingProcessor.processSupportingTokens((SignedEndorsingSupportingTokens)assertion);
-                }else if(PolicyUtil.isWSS10(assertion)){
+                }else if(PolicyUtil.isWSS10(assertion, spVersion)){
                     wssAssertion = assertion;
-                }else if(PolicyUtil.isWSS11(assertion)){
+                }else if(PolicyUtil.isWSS11(assertion, spVersion)){
                     wssAssertion = assertion;
-                }else if(PolicyUtil.isTrust10(assertion)){
+                }else if(PolicyUtil.isTrust10(assertion, spVersion)){
                     trust10 = (Trust10)assertion;
                 }
             }
@@ -262,23 +266,23 @@ public class XWSSPolicyGenerator {
     private void collectPolicies(){
         for(AssertionSet assertionSet: effectivePolicy){
             for(PolicyAssertion assertion:assertionSet){
-                if(PolicyUtil.isSignedParts(assertion)){
+                if(PolicyUtil.isSignedParts(assertion, spVersion)){
                     signedParts.add((SignedParts)assertion);
-                }else if(PolicyUtil.isEncryptParts(assertion)){
+                }else if(PolicyUtil.isEncryptParts(assertion, spVersion)){
                     encryptedParts.add((EncryptedParts)assertion);
-                }else if(PolicyUtil.isSignedElements(assertion)){
+                }else if(PolicyUtil.isSignedElements(assertion, spVersion)){
                     signedElements.add((SignedElements)assertion);
-                }else if(PolicyUtil.isEncryptedElements(assertion)){
+                }else if(PolicyUtil.isEncryptedElements(assertion, spVersion)){
                     encryptedElements.add((EncryptedElements)assertion);
-                }else if(PolicyUtil.isWSS10(assertion)){
+                }else if(PolicyUtil.isWSS10(assertion, spVersion)){
                     wssAssertion = assertion;
-                }else if(PolicyUtil.isWSS11(assertion)){
+                }else if(PolicyUtil.isWSS11(assertion, spVersion)){
                     wssAssertion = assertion;
-                }else if(PolicyUtil.isTrust10(assertion)){
+                }else if(PolicyUtil.isTrust10(assertion, spVersion)){
                     trust10 = (Trust10)assertion;
-                }else if(PolicyUtil.isBinding(assertion)){
+                }else if(PolicyUtil.isBinding(assertion, spVersion)){
                     _binding =(Binding) assertion;
-                }else if(PolicyUtil.isRequiredElements(assertion)){
+                }else if(PolicyUtil.isRequiredElements(assertion, spVersion)){
                     reqElements.add((RequiredElements)assertion);
                 }
             }

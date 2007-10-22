@@ -1,8 +1,8 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
+ *
  * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
- * 
+ *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
@@ -10,7 +10,7 @@
  * a copy of the License at https://glassfish.dev.java.net/public/CDDL+GPL.html
  * or glassfish/bootstrap/legal/LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
- * 
+ *
  * When distributing the software, include this License Header Notice in each
  * file and include the License file at glassfish/bootstrap/legal/LICENSE.txt.
  * Sun designates this particular file as subject to the "Classpath" exception
@@ -19,9 +19,9 @@
  * Header, with the fields enclosed by brackets [] replaced by your own
  * identifying information: "Portions Copyrighted [year]
  * [name of copyright owner]"
- * 
+ *
  * Contributor(s):
- * 
+ *
  * If you wish your version of this file to be governed by only the CDDL or
  * only the GPL Version 2, indicate your decision by adding "[Contributor]
  * elects to include this software in this distribution under the [CDDL or GPL
@@ -45,6 +45,7 @@ import com.sun.xml.ws.security.impl.policyconv.XWSSPolicyGenerator;
 import com.sun.xml.ws.security.opt.impl.JAXBFilterProcessingContext;
 import com.sun.xml.ws.security.policy.CertStoreConfig;
 import com.sun.xml.ws.security.policy.KerberosConfig;
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import com.sun.xml.ws.security.secconv.WSSCConstants;
 import com.sun.xml.wss.impl.policy.mls.EncryptionPolicy;
 import com.sun.xml.wss.impl.policy.mls.EncryptionTarget;
@@ -134,7 +135,6 @@ import static com.sun.xml.wss.jaxws.impl.Constants.BINDING_SCOPE;
 import static com.sun.xml.wss.jaxws.impl.Constants.rstSCTURI;
 import static com.sun.xml.wss.jaxws.impl.Constants.SC_ASSERTION;
 import static com.sun.xml.wss.jaxws.impl.Constants.bsOperationName;
-import static com.sun.xml.wss.jaxws.impl.Constants.SECURITY_POLICY_2005_07_NAMESPACE;
 import static com.sun.xml.wss.jaxws.impl.Constants.XENC_NS;
 import static com.sun.xml.wss.jaxws.impl.Constants.ENCRYPTED_DATA_LNAME;
 import static com.sun.xml.wss.jaxws.impl.Constants.EMPTY_LIST;
@@ -223,7 +223,7 @@ public abstract class SecurityPipeBase implements Pipe {
     protected HashMap<String,SecurityPolicyHolder> inProtocolPM = null;
     public static final URI ISSUE_REQUEST_URI ;
     public static final URI CANCEL_REQUEST_URI;
-    protected Policy bpMSP = null;    
+    protected Policy bpMSP = null;
     //milliseconds
     protected long timestampTimeOut = 0;
     /**
@@ -249,6 +249,9 @@ public abstract class SecurityPipeBase implements Pipe {
     
     AddressingVersion addVer = null;
     
+    // Security Policy version
+    protected SecurityPolicyVersion spVersion = null;
+    
     //flag used as temporary variable for each run
     //boolean isTrustOrSCMessage = false;
     
@@ -260,7 +263,7 @@ public abstract class SecurityPipeBase implements Pipe {
             CANCEL_REQUEST_URI = new URI(WSTrustConstants.CANCEL_REQUEST);
             jaxbContext = WSTrustElementFactory.getContext();           ;
             securityPolicyNamespaces = new ArrayList<String>();
-            securityPolicyNamespaces.add(SECURITY_POLICY_2005_07_NAMESPACE);
+            securityPolicyNamespaces.add(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri);
             
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -313,6 +316,7 @@ public abstract class SecurityPipeBase implements Pipe {
         secEnv = that.secEnv;
         isSOAP12 = that.isSOAP12;
         soapVersion = that.soapVersion;
+        this.spVersion = that.spVersion;
         this.soapFactory = that.soapFactory;
         this.addVer = that.addVer;
         wsPolicyMap = that.wsPolicyMap;
@@ -687,6 +691,11 @@ public abstract class SecurityPipeBase implements Pipe {
                 if(endpointPolicy.contains(bsp10Client) || endpointPolicy.contains(bsp10Server)){
                     bsp10 = true;
                 }
+                if(endpointPolicy.contains(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri)){
+                    spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
+                } else if(endpointPolicy.contains(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri)){
+                    spVersion = SecurityPolicyVersion.SECURITYPOLICY12NS;
+                }
             }
             
             
@@ -770,7 +779,7 @@ public abstract class SecurityPipeBase implements Pipe {
                     
                     PolicyMapKey fKey = null;
                     fKey = wsPolicyMap.createWsdlFaultMessageScopeKey(
-                            serviceName,portName,operationName, 
+                            serviceName,portName,operationName,
                             new QName(operationName.getNamespaceURI(), fault.getName()));
                     Policy fPolicy = wsPolicyMap.getFaultMessageEffectivePolicy(fKey);
                     
@@ -863,7 +872,7 @@ public abstract class SecurityPipeBase implements Pipe {
             return EMPTY_LIST;
         }
         return sph.getKerberosTokens();
-    }    
+    }
     
     protected List<PolicyAssertion> getSecureConversationPolicies(
             Message message, String scope) {
@@ -894,11 +903,11 @@ public abstract class SecurityPipeBase implements Pipe {
         ArrayList<PolicyAssertion> tokenList = new ArrayList<PolicyAssertion>();
         for(AssertionSet assertionSet : policy){
             for(PolicyAssertion assertion:assertionSet){
-                if(PolicyUtil.isAsymmetricBinding(assertion)){
+                if(PolicyUtil.isAsymmetricBinding(assertion, spVersion)){
                     AsymmetricBinding sb =  (AsymmetricBinding)assertion;
                     addToken(sb.getInitiatorToken(),tokenList);
                     addToken(sb.getRecipientToken(),tokenList);
-                }else if(PolicyUtil.isSymmetricBinding(assertion)){
+                }else if(PolicyUtil.isSymmetricBinding(assertion, spVersion)){
                     SymmetricBinding sb = (SymmetricBinding)assertion;
                     Token token = sb.getProtectionToken();
                     if(token != null){
@@ -907,7 +916,7 @@ public abstract class SecurityPipeBase implements Pipe {
                         addToken(sb.getEncryptionToken(),tokenList);
                         addToken(sb.getSignatureToken(),tokenList);
                     }
-                }else if(PolicyUtil.isSupportingTokens(assertion)){
+                }else if(PolicyUtil.isSupportingTokens(assertion, spVersion)){
                     SupportingTokens st = (SupportingTokens)assertion;
                     Iterator itr = st.getTokens();
                     while(itr.hasNext()){
@@ -930,9 +939,9 @@ public abstract class SecurityPipeBase implements Pipe {
         }
     }
     private void addToken(Token token,ArrayList<PolicyAssertion> list){
-        if(PolicyUtil.isSecureConversationToken((PolicyAssertion)token) ||
-                PolicyUtil.isIssuedToken((PolicyAssertion)token) ||
-                PolicyUtil.isKerberosToken((PolicyAssertion)token)){
+        if(PolicyUtil.isSecureConversationToken((PolicyAssertion)token, spVersion) ||
+                PolicyUtil.isIssuedToken((PolicyAssertion)token, spVersion) ||
+                PolicyUtil.isKerberosToken((PolicyAssertion)token, spVersion)){
             list.add((PolicyAssertion)token);
         }
     }
@@ -981,7 +990,7 @@ public abstract class SecurityPipeBase implements Pipe {
         //Iterator<PolicyAssertion> paItr = as.iterator();
         boolean foundTargets = false;
         for(PolicyAssertion assertion : as){
-            if(PolicyUtil.isSignedParts(assertion) || PolicyUtil.isEncryptParts(assertion)){
+            if(PolicyUtil.isSignedParts(assertion, spVersion) || PolicyUtil.isEncryptParts(assertion, spVersion)){
                 foundTargets = true;
                 break;
             }
@@ -1176,7 +1185,7 @@ public abstract class SecurityPipeBase implements Pipe {
     protected SecurityPolicyHolder constructPolicyHolder(Policy effectivePolicy,
             boolean isServer,boolean isIncoming,boolean ignoreST)throws PolicyException{
         
-        XWSSPolicyGenerator xwssPolicyGenerator = new XWSSPolicyGenerator(effectivePolicy,isServer,isIncoming);
+        XWSSPolicyGenerator xwssPolicyGenerator = new XWSSPolicyGenerator(effectivePolicy,isServer,isIncoming, spVersion);
         xwssPolicyGenerator.process(ignoreST);
         this.bindingLevelAlgSuite = xwssPolicyGenerator.getBindingLevelAlgSuite();
         MessagePolicy messagePolicy = xwssPolicyGenerator.getXWSSPolicy();
@@ -1188,7 +1197,7 @@ public abstract class SecurityPipeBase implements Pipe {
         addConfigAssertions(effectivePolicy,sph);
         
         for(PolicyAssertion token:tokenList){
-            if(PolicyUtil.isSecureConversationToken(token)){
+            if(PolicyUtil.isSecureConversationToken(token, spVersion)){
                 NestedPolicy bootstrapPolicy = ((SecureConversationToken)token).getBootstrapPolicy();
                 Policy effectiveBP = null;
                 if(hasTargets(bootstrapPolicy)){
@@ -1196,7 +1205,7 @@ public abstract class SecurityPipeBase implements Pipe {
                 }else{
                     effectiveBP = getEffectiveBootstrapPolicy(bootstrapPolicy);
                 }
-                xwssPolicyGenerator = new XWSSPolicyGenerator(effectiveBP,isServer,isIncoming);
+                xwssPolicyGenerator = new XWSSPolicyGenerator(effectiveBP,isServer,isIncoming, spVersion);
                 xwssPolicyGenerator.process(ignoreST);
                 MessagePolicy bmp = xwssPolicyGenerator.getXWSSPolicy();
                 
@@ -1236,10 +1245,10 @@ public abstract class SecurityPipeBase implements Pipe {
                     hasKerberosToken = true;
                 }
                 
-            }else if(PolicyUtil.isIssuedToken(token)){
+            }else if(PolicyUtil.isIssuedToken(token, spVersion)){
                 sph.addIssuedToken(token);
                 hasIssuedTokens = true;
-            }else if(PolicyUtil.isKerberosToken(token)){
+            }else if(PolicyUtil.isKerberosToken(token, spVersion)){
                 sph.addKerberosToken(token);
                 hasKerberosToken = true;
             }

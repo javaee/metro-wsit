@@ -51,6 +51,7 @@ import com.sun.xml.ws.security.impl.policy.PolicyUtil;
 import com.sun.xml.ws.security.impl.policy.Trust10;
 import com.sun.xml.ws.security.policy.AlgorithmSuite;
 import com.sun.xml.ws.security.policy.Constants;
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import com.sun.xml.ws.security.policy.SymmetricBinding;
 import com.sun.xml.ws.security.trust.impl.bindings.ObjectFactory;
 import com.sun.xml.ws.security.trust.Configuration;
@@ -185,9 +186,10 @@ public class WSSCContract {
         final NestedPolicy wsPolicy = scToken.getBootstrapPolicy();
         final AssertionSet assertionSet = wsPolicy.getAssertionSet();
         for(PolicyAssertion policyAssertion : assertionSet){
-            if(PolicyUtil.isTrust10(policyAssertion)){
+            SecurityPolicyVersion spVersion = getSPVersion(policyAssertion);
+            if(PolicyUtil.isTrust10(policyAssertion, spVersion)){
                 trust10 = (Trust10)policyAssertion;
-            }else if(PolicyUtil.isSymmetricBinding(policyAssertion)){
+            }else if(PolicyUtil.isSymmetricBinding(policyAssertion, spVersion)){
                 symBinding = (SymmetricBinding)policyAssertion;
             }
         }
@@ -440,6 +442,17 @@ public class WSSCContract {
                     LogStringsMessages.WSSC_0001_ERROR_MARSHAL_LOG());
             throw new RuntimeException(LogStringsMessages.WSSC_0001_ERROR_MARSHAL_LOG(), e);
         }
+    }
+    
+    private SecurityPolicyVersion getSPVersion(PolicyAssertion pa){
+        String nsUri = pa.getName().getNamespaceURI();
+        // Default SPVersion
+        SecurityPolicyVersion spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
+        // If spec version, update
+        if(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(nsUri)){
+            spVersion = SecurityPolicyVersion.SECURITYPOLICY12NS;
+        }
+        return spVersion;
     }
     
 }

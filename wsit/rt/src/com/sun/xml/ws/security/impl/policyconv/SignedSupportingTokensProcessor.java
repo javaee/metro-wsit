@@ -40,6 +40,7 @@ import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.security.impl.policy.PolicyUtil;
 import com.sun.xml.ws.security.policy.Binding;
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import com.sun.xml.ws.security.policy.SignedSupportingTokens;
 import com.sun.xml.ws.security.policy.Token;
 import com.sun.xml.wss.impl.policy.mls.EncryptionPolicy;
@@ -61,7 +62,10 @@ public class SignedSupportingTokensProcessor extends SupportingTokensProcessor {
     protected void addToPrimarySignature(WSSPolicy policy,Token token) throws PolicyException{
         SignatureTarget target = stc.newURISignatureTarget(policy.getUUID());
         SecurityPolicyUtil.setName(target, policy);
-        if(!PolicyUtil.isUsernameToken((PolicyAssertion) token)){
+
+        SecurityPolicyVersion spVersion = getSPVersion((PolicyAssertion)token);
+
+        if(!PolicyUtil.isUsernameToken((PolicyAssertion) token, spVersion)){
             stc.addSTRTransform(target);
         }
         SignaturePolicy.FeatureBinding spFB = (SignaturePolicy.FeatureBinding)signaturePolicy.getFeatureBinding();

@@ -40,6 +40,7 @@ import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.NestedPolicy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import java.util.Collection;
 import java.util.UUID;
 import javax.xml.namespace.QName;
@@ -50,22 +51,25 @@ import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
  * @author K.Venugopal@sun.com
  */
 public class TransportToken extends Token implements com.sun.xml.ws.security.policy.TransportToken, SecurityAssertionValidator  {
-    private QName itQname = new QName(Constants.SECURITY_POLICY_NS, Constants.IncludeToken);
     private String id;
-    private String includeToken = "";
     private HttpsToken token = null;
     private boolean populated;
     private AssertionFitness fitness = AssertionFitness.IS_VALID;
+    private static QName itQname;
+    private String includeToken;
     /**
      * Creates a new instance of TransportToken
      */
     public TransportToken() {
          id= PolicyUtil.randomUUID();
+         itQname = new QName(getSecurityPolicyVersion().namespaceUri, Constants.IncludeToken);
+         includeToken = "";
     }
     
     public TransportToken(AssertionData name,Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) {
         super(name,nestedAssertions,nestedAlternative);
         id= PolicyUtil.randomUUID();
+        itQname = new QName(getSecurityPolicyVersion().namespaceUri, Constants.IncludeToken);
     }
     
     public String getTokenId() {
@@ -101,7 +105,7 @@ public class TransportToken extends Token implements com.sun.xml.ws.security.pol
             NestedPolicy policy = this.getNestedPolicy();
             AssertionSet assertionSet = policy.getAssertionSet();
             for(PolicyAssertion assertion: assertionSet){
-                if(PolicyUtil.isHttpsToken(assertion)){
+                if(PolicyUtil.isHttpsToken(assertion, getSecurityPolicyVersion())){
                     token = (HttpsToken) assertion;
                 }else{
                     if(!assertion.isOptional()){

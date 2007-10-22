@@ -42,6 +42,7 @@ import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.security.policy.AlgorithmSuite;
 import com.sun.xml.ws.security.policy.HttpsToken;
 import com.sun.xml.ws.security.policy.MessageLayout;
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import com.sun.xml.ws.security.policy.Token;
 import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
 import java.util.Collection;
@@ -59,14 +60,22 @@ public class TransportBinding extends PolicyAssertion implements com.sun.xml.ws.
     MessageLayout layout = MessageLayout.Lax;
     boolean populated = false;
     private AssertionFitness fitness = AssertionFitness.IS_VALID;
+    private SecurityPolicyVersion spVersion;
     /**
      * Creates a new instance of TransportBinding
      */
     public TransportBinding() {
+        spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
     }
     
     public TransportBinding(AssertionData name,Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) {
         super(name,nestedAssertions,nestedAlternative);
+        String nsUri = getName().getNamespaceURI();
+        if(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri.equals(nsUri)){
+            spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
+        } else if(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(nsUri)){
+            spVersion = SecurityPolicyVersion.SECURITYPOLICY12NS;
+        }
     }
     
     public void addTransportToken(Token token) {
@@ -156,13 +165,13 @@ public class TransportBinding extends PolicyAssertion implements com.sun.xml.ws.
                 return fitness;
             }
             for(PolicyAssertion assertion : assertions){
-                if(PolicyUtil.isAlgorithmAssertion(assertion)){
+                if(PolicyUtil.isAlgorithmAssertion(assertion, spVersion)){
                     this.algSuite = (AlgorithmSuite) assertion;
-                }else if(PolicyUtil.isToken(assertion)){
+                }else if(PolicyUtil.isToken(assertion, spVersion)){
                     transportToken = (HttpsToken)((com.sun.xml.ws.security.impl.policy.Token)assertion).getToken();
-                }else if(PolicyUtil.isMessageLayout(assertion)){
+                }else if(PolicyUtil.isMessageLayout(assertion, spVersion)){
                     layout = ((Layout)assertion).getMessageLayout();
-                }else if(PolicyUtil.isIncludeTimestamp(assertion)){
+                }else if(PolicyUtil.isIncludeTimestamp(assertion, spVersion)){
                     includeTimeStamp=true;
                 } else{
                     if(!assertion.isOptional()){
@@ -178,5 +187,9 @@ public class TransportBinding extends PolicyAssertion implements com.sun.xml.ws.
 
     public boolean isDisableTimestampSigning() {
         throw new UnsupportedOperationException();
+    }
+
+    public SecurityPolicyVersion getSecurityPolicyVersion() {
+        return spVersion;
     }
 }

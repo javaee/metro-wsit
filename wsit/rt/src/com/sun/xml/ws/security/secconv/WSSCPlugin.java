@@ -61,6 +61,7 @@ import com.sun.xml.ws.security.impl.policy.Trust10;
 import com.sun.xml.ws.security.policy.AlgorithmSuite;
 import com.sun.xml.ws.security.policy.Constants;
 import com.sun.xml.ws.security.policy.SecureConversationToken;
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import com.sun.xml.ws.security.policy.SymmetricBinding;
 import com.sun.xml.ws.security.trust.Configuration;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
@@ -134,9 +135,10 @@ public class WSSCPlugin {
         Trust10 trust10 = null;
         SymmetricBinding symBinding = null;
         for(PolicyAssertion policyAssertion : assertions){
-            if(PolicyUtil.isTrust10(policyAssertion)){
+            SecurityPolicyVersion spVersion = getSPVersion(policyAssertion);
+            if(PolicyUtil.isTrust10(policyAssertion, spVersion)){
                 trust10 = (Trust10)policyAssertion;
-            }else if(PolicyUtil.isSymmetricBinding(policyAssertion)){
+            }else if(PolicyUtil.isSymmetricBinding(policyAssertion, spVersion)){
                 symBinding = (SymmetricBinding)policyAssertion;
             }
         }
@@ -375,5 +377,16 @@ public class WSSCPlugin {
         if (password != null) {
             requestPacket.invocationProperties.put(BindingProvider.PASSWORD_PROPERTY, password);
         }
+    }
+    
+    private SecurityPolicyVersion getSPVersion(PolicyAssertion pa){
+        String nsUri = pa.getName().getNamespaceURI();
+        // Default SPVersion
+        SecurityPolicyVersion spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
+        // If spec version, update
+        if(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(nsUri)){
+            spVersion = SecurityPolicyVersion.SECURITYPOLICY12NS;
+        }
+        return spVersion;
     }
 }
