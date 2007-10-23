@@ -122,6 +122,12 @@ public class SecurityPolicyAssertionCreator implements PolicyAssertionCreator{
         implementedAssertions.add(Constants.CertStore);
         implementedAssertions.add(Constants.KerberosConfig);
         
+        // WS-SecurityPolicy 1.2 assertions
+        implementedAssertions.add(Constants.EncryptedSupportingTokens);
+        implementedAssertions.add(Constants.SignedEncryptedSupportingTokens);
+        implementedAssertions.add(Constants.SignedEndorsingEncryptedSupportingTokens);
+        implementedAssertions.add(Constants.EndorsingEncryptedSupportingTokens);
+        
     };
     /** Creates a new instance of SecurityPolicyAssertionCreator */
     

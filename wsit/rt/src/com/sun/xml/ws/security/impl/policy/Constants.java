@@ -171,6 +171,7 @@ public class Constants {
     public final static String RequireExplicitDerivedKeys = "RequireExplicitDerivedKeys";
     public final static String RequireImpliedDerivedKeys = "RequireImpliedDerivedKeys";
     public final static String SignedEncryptedSupportingTokens = "SignedEncryptedSupportingTokens";
+    public final static String EncryptedSupportingTokens = "EncryptedSupportingTokens";
     public final static String EndorsingEncryptedSupportingTokens = "EndorsingEncryptedSupportingTokens";
     public final static String SignedEndorsingEncryptedSupportingTokens = "SignedEndorsingEncryptedSupportingTokens";
     // End of new assertions from WS-SecurityPolicy 1.2

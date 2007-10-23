@@ -40,8 +40,12 @@ import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.security.policy.Binding;
 import com.sun.xml.ws.security.policy.EncryptedElements;
 import com.sun.xml.ws.security.policy.EncryptedParts;
+import com.sun.xml.ws.security.policy.EncryptedSupportingTokens;
+import com.sun.xml.ws.security.policy.EndorsingEncryptedSupportingTokens;
 import com.sun.xml.ws.security.policy.EndorsingSupportingTokens;
 import com.sun.xml.ws.security.policy.SignedElements;
+import com.sun.xml.ws.security.policy.SignedEncryptedSupportingTokens;
+import com.sun.xml.ws.security.policy.SignedEndorsingEncryptedSupportingTokens;
 import com.sun.xml.ws.security.policy.SignedEndorsingSupportingTokens;
 import com.sun.xml.ws.security.policy.SignedParts;
 import com.sun.xml.ws.security.policy.SignedSupportingTokens;
@@ -259,6 +263,30 @@ public abstract class BindingProcessor {
                 tokenProcessor,getBinding(),container,primarySP,getEncryptionPolicy(),pid);
         stp.process();
         
+    }
+    
+    public void processSupportingTokens(SignedEncryptedSupportingTokens sest) throws PolicyException{
+        SignedEncryptedSupportingTokensProcessor setp = new SignedEncryptedSupportingTokensProcessor(sest,
+                tokenProcessor, getBinding(), container, primarySP, getEncryptionPolicy(), pid);
+        setp.process();
+    }
+    
+    public void processSupportingTokens(EncryptedSupportingTokens est) throws PolicyException{
+        EncryptedSupportingTokensProcessor etp = new EncryptedSupportingTokensProcessor(est,
+                tokenProcessor, getBinding(), container, primarySP, getEncryptionPolicy(), pid);
+        etp.process();
+    }
+    
+    public void processSupportingTokens(EndorsingEncryptedSupportingTokens est) throws PolicyException{
+        EndorsingEncryptedSupportingTokensProcessor etp = new EndorsingEncryptedSupportingTokensProcessor(est, 
+                tokenProcessor, getBinding(), container, primarySP, getEncryptionPolicy(), pid);
+        etp.process();
+    }
+    
+    public void processSupportingTokens(SignedEndorsingEncryptedSupportingTokens est) throws PolicyException{
+        SignedEndorsingEncryptedSupportingTokensProcessor etp = new SignedEndorsingEncryptedSupportingTokensProcessor(est, 
+                tokenProcessor, getBinding(), container, primarySP, getEncryptionPolicy(), pid);
+        etp.process();
     }
     
     protected SignaturePolicy getSignaturePolicy(){

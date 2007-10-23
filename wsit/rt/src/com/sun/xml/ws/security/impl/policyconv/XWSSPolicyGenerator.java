@@ -51,10 +51,14 @@ import com.sun.xml.ws.security.policy.AlgorithmSuite;
 import com.sun.xml.ws.security.policy.Binding;
 import com.sun.xml.ws.security.policy.EncryptedElements;
 import com.sun.xml.ws.security.policy.EncryptedParts;
+import com.sun.xml.ws.security.policy.EncryptedSupportingTokens;
+import com.sun.xml.ws.security.policy.EndorsingEncryptedSupportingTokens;
 import com.sun.xml.ws.security.policy.EndorsingSupportingTokens;
 import com.sun.xml.ws.security.policy.RequiredElements;
 import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import com.sun.xml.ws.security.policy.SignedElements;
+import com.sun.xml.ws.security.policy.SignedEncryptedSupportingTokens;
+import com.sun.xml.ws.security.policy.SignedEndorsingEncryptedSupportingTokens;
 import com.sun.xml.ws.security.policy.SignedEndorsingSupportingTokens;
 import com.sun.xml.ws.security.policy.SignedParts;
 import com.sun.xml.ws.security.policy.SignedSupportingTokens;
@@ -248,6 +252,14 @@ public class XWSSPolicyGenerator {
                     bindingProcessor.processSupportingTokens((EndorsingSupportingTokens)assertion);
                 }else if(!ignoreST && shouldAddST() && PolicyUtil.isSignedEndorsingSupportingToken(assertion, spVersion)){
                     bindingProcessor.processSupportingTokens((SignedEndorsingSupportingTokens)assertion);
+                }else if(!ignoreST && shouldAddST() && PolicyUtil.isSignedEncryptedSupportingToken(assertion, spVersion)){
+                    bindingProcessor.processSupportingTokens((SignedEncryptedSupportingTokens)assertion);
+                }else if(!ignoreST && shouldAddST() && PolicyUtil.isEncryptedSupportingToken(assertion, spVersion)){
+                    bindingProcessor.processSupportingTokens((EncryptedSupportingTokens)assertion);
+                }else if(!ignoreST && shouldAddST() && PolicyUtil.isEndorsingEncryptedSupportingToken(assertion, spVersion)){
+                    bindingProcessor.processSupportingTokens((EndorsingEncryptedSupportingTokens)assertion);
+                }else if(!ignoreST && shouldAddST() && PolicyUtil.isSignedEndorsingEncryptedSupportingToken(assertion, spVersion)){
+                    bindingProcessor.processSupportingTokens((SignedEndorsingEncryptedSupportingTokens)assertion);
                 }else if(PolicyUtil.isWSS10(assertion, spVersion)){
                     wssAssertion = assertion;
                 }else if(PolicyUtil.isWSS11(assertion, spVersion)){

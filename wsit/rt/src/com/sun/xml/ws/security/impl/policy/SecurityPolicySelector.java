@@ -72,8 +72,8 @@ public class SecurityPolicySelector {
         supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri,Basic128Sha256Rsa15));
         supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri,TripleDesSha256Rsa15));
         supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri,InclusiveC14N));
-        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri,InclusiveC14NWithComments));
-        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri,ExclusiveC14NWithComments));
+        supportedAssertions.add(new QName(SUN_WSS_SECURITY_SERVER_POLICY_NS,InclusiveC14NWithComments));
+        supportedAssertions.add(new QName(SUN_WSS_SECURITY_SERVER_POLICY_NS,ExclusiveC14NWithComments));
         //     supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri,SoapNormalization10));
         
         supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri,STRTransform10));
@@ -154,6 +154,120 @@ public class SecurityPolicySelector {
         supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri,RequireClientEntropy));
         supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri,RequireServerEntropy));
         supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri,MustSupportIssuedTokens));
+        
+        // SecurityPolicy 1.2 assertions
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,CanonicalizationAlgorithm));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,Basic256));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,Basic192));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,Basic128));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,TripleDes));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,Basic256Rsa15));
+        
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,Basic192Rsa15));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,Basic192Rsa15));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,TripleDesRsa15));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,Basic256Sha256));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,Basic256Rsa15));
+        
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,Basic192Sha256));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,Basic128Sha256));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,Basic192Sha256));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,TripleDesSha256));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,Basic256Sha256Rsa15));
+        
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,Basic192Sha256Rsa15));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,Basic128Sha256Rsa15));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,TripleDesSha256Rsa15));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,InclusiveC14N));
+        //     supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,SoapNormalization10));
+        
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,STRTransform10));
+        //      supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,XPath10));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,XPathFilter20));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,Strict));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,Lax));
+        
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,LaxTsFirst));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,LaxTsLast));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,IncludeTimestamp));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,EncryptBeforeSigning));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,EncryptSignature));
+        
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,ProtectTokens));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,OnlySignEntireHeadersAndBody));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,Body));
+        //     supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,Header));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,XPath));
+        
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,WssUsernameToken10));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,WssUsernameToken11));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,Issuer));
+        
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,RequestSecurityTokenTemplate));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,RequireDerivedKeys));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,RequireExternalReference));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,RequireInternalReference));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,RequireKeyIdentifierReference));
+        
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,RequireIssuerSerialReference));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,RequireEmbeddedTokenReference));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,RequireThumbprintReference));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,WssX509V1Token10));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,WssX509V3Token10));
+        
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,WssX509Pkcs7Token10));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,WssX509PkiPathV1Token10));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,WssX509V1Token11));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,WssX509V3Token11));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,WssX509Pkcs7Token11));
+        
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,WssX509PkiPathV1Token11));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,WssKerberosV5ApReqToken11));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,WssGssKerberosV5ApReqToken11));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,SC10SecurityContextToken));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,WssSamlV10Token10));
+        
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,WssSamlV11Token10));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,WssSamlV10Token11));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,WssSamlV11Token11));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,WssSamlV20Token11));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,WssRelV10Token10));
+        
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,WssRelV20Token10));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,WssRelV10Token11));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,WssRelV20Token11));
+        //     supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,X509V3Token));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,SupportingTokens));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,SignedSupportingTokens));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,EndorsingSupportingTokens));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,SignedEndorsingSupportingTokens));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,EncryptedSupportingTokens));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,SignedEncryptedSupportingTokens));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,EndorsingEncryptedSupportingTokens));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,SignedEndorsingEncryptedSupportingTokens));
+        
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,MustSupportRefKeyIdentifier));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,MustSupportRefIssuerSerial));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,MustSupportRefExternalURI));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,MustSupportRefEmbeddedToken));
+        
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,MustSupportRefKeyIdentifier));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,MustSupportRefIssuerSerial));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,MustSupportRefExternalURI));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,MustSupportRefEmbeddedToken));
+        
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,MustSupportRefThumbprint));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,MustSupportRefEncryptedKey));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,MustSupportClientChallenge));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,MustSupportServerChallenge));
+        
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,RequireClientEntropy));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,RequireServerEntropy));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,MustSupportIssuedTokens));
+        
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,RequireClientCertificate));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,HttpBasicAuthentication));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,HttpDigestAuthentication));
         
         supportedAssertions.add(new QName(TRUST_NS,RequestSecurityToken));
         supportedAssertions.add(new QName(TRUST_NS,RequestType));

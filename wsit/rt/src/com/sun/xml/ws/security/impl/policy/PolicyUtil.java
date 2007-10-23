@@ -483,6 +483,58 @@ public class PolicyUtil {
         return false;
     }
     
+    public static boolean isSignedEncryptedSupportingToken(PolicyAssertion policyAssertion, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(policyAssertion, spVersion)) {
+            return false;
+        }
+        
+        // SignedEncryptedSupportingTokens in only supported in SecurityPolicy 1.2 namespace
+        if(policyAssertion.getName().getLocalPart().equals(SignedEncryptedSupportingTokens) &&
+                policyAssertion.getName().getNamespaceURI().equals(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri)) {
+            return true;
+        }
+        return false;
+    }
+    
+    public static boolean isEncryptedSupportingToken(PolicyAssertion policyAssertion, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(policyAssertion, spVersion)) {
+            return false;
+        }
+        
+        // EncryptedSupportingTokens in only supported in SecurityPolicy 1.2 namespace
+        if(policyAssertion.getName().getLocalPart().equals(EncryptedSupportingTokens) &&
+                policyAssertion.getName().getNamespaceURI().equals(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri)) {
+            return true;
+        }
+        return false;
+    }
+    
+    public static boolean isEndorsingEncryptedSupportingToken(PolicyAssertion policyAssertion, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(policyAssertion, spVersion)) {
+            return false;
+        }
+        
+        // EndorsingEncryptedSupportingTokens in only supported in SecurityPolicy 1.2 namespace
+        if(policyAssertion.getName().getLocalPart().equals(EndorsingEncryptedSupportingTokens) &&
+                policyAssertion.getName().getNamespaceURI().equals(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri)) {
+            return true;
+        }
+        return false;
+    }
+    
+    public static boolean isSignedEndorsingEncryptedSupportingToken(PolicyAssertion policyAssertion, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(policyAssertion, spVersion)) {
+            return false;
+        }
+        
+        // SignedEndorsingEncryptedSupportingTokens in only supported in SecurityPolicy 1.2 namespace
+        if(policyAssertion.getName().getLocalPart().equals(SignedEndorsingEncryptedSupportingTokens) &&
+                policyAssertion.getName().getNamespaceURI().equals(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri)) {
+            return true;
+        }
+        return false;
+    }
+    
     
     public static boolean isBinding(PolicyAssertion policyAssertion, SecurityPolicyVersion spVersion) {
         
@@ -637,7 +689,9 @@ public class PolicyUtil {
         }
         
         if(isSignedSupportingToken(assertion, spVersion) || isEndorsedSupportingToken(assertion, spVersion)||
-                isSignedEndorsingSupportingToken(assertion, spVersion) || isSupportingToken(assertion, spVersion)){
+                isSignedEndorsingSupportingToken(assertion, spVersion) || isSupportingToken(assertion, spVersion) ||
+                isSignedEncryptedSupportingToken(assertion, spVersion) || isEncryptedSupportingToken(assertion, spVersion) ||
+                isEndorsingEncryptedSupportingToken(assertion, spVersion) || isSignedEndorsingEncryptedSupportingToken(assertion, spVersion)){
             return true;
         }
         return false;
