@@ -68,8 +68,10 @@ public class PolicySuite extends TestCase {
         TestSuite suite = new TestSuite("PolicySuite");
         suite.addTest(com.sun.xml.ws.security.impl.policy.AsymmetricBindingTest.suite());
         suite.addTest(com.sun.xml.ws.security.impl.policy.EncryptedPartsTest.suite());
+        suite.addTest(com.sun.xml.ws.security.impl.policy.EncryptedSupportingTokensTest.suite());
+        suite.addTest(com.sun.xml.ws.security.impl.policy.EndorsingEncryptedSupportingTokensTest.suite());
         suite.addTest(com.sun.xml.ws.security.impl.policy.EndorsingSupportingTokensTest.suite());   
-		suite.addTest(com.sun.xml.ws.security.impl.policy.HttpsTokenTest.suite());
+	suite.addTest(com.sun.xml.ws.security.impl.policy.HttpsTokenTest.suite());
         suite.addTest(com.sun.xml.ws.security.impl.policy.IssuedTokenTest.suite());     
         suite.addTest(com.sun.xml.ws.security.impl.policy.KerberosTokenTest.suite());     
         suite.addTest(com.sun.xml.ws.security.impl.policy.RelTokenTest.suite());      
@@ -78,6 +80,8 @@ public class PolicySuite extends TestCase {
         suite.addTest(com.sun.xml.ws.security.impl.policy.SecurityContextTokenTest.suite());
         suite.addTest(com.sun.xml.ws.security.impl.policy.SecurityPoliciesTest.suite());
         suite.addTest(com.sun.xml.ws.security.impl.policy.SignedElementsTest.suite());
+        suite.addTest(com.sun.xml.ws.security.impl.policy.SignedEncryptedSupportingTokensTest.suite());
+        suite.addTest(com.sun.xml.ws.security.impl.policy.SignedEndorsingEncryptedSupportingTokensTest.suite());
         suite.addTest(com.sun.xml.ws.security.impl.policy.SignedEndorsingSupportingTokensTest.suite());
         suite.addTest(com.sun.xml.ws.security.impl.policy.SignedPartsTest.suite());
         suite.addTest(com.sun.xml.ws.security.impl.policy.SignedSupportingTokensTest.suite());
