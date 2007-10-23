@@ -1,8 +1,8 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
+ *
  * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
- * 
+ *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
@@ -10,7 +10,7 @@
  * a copy of the License at https://glassfish.dev.java.net/public/CDDL+GPL.html
  * or glassfish/bootstrap/legal/LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
- * 
+ *
  * When distributing the software, include this License Header Notice in each
  * file and include the License file at glassfish/bootstrap/legal/LICENSE.txt.
  * Sun designates this particular file as subject to the "Classpath" exception
@@ -19,9 +19,9 @@
  * Header, with the fields enclosed by brackets [] replaced by your own
  * identifying information: "Portions Copyrighted [year]
  * [name of copyright owner]"
- * 
+ *
  * Contributor(s):
- * 
+ *
  * If you wish your version of this file to be governed by only the CDDL or
  * only the GPL Version 2, indicate your decision by adding "[Contributor]
  * elects to include this software in this distribution under the [CDDL or GPL
@@ -38,12 +38,15 @@ package com.sun.xml.ws.security.impl.policy;
 
 
 import com.sun.xml.ws.policy.AssertionSet;
+import com.sun.xml.ws.policy.NestedPolicy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
+import static com.sun.xml.ws.security.impl.policy.Constants.*;
 import java.util.Collection;
 
 import java.util.Map;
+import java.util.logging.Level;
 import javax.xml.namespace.QName;
 import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
 import com.sun.xml.ws.security.policy.SecurityAssertionValidator.AssertionFitness;
@@ -57,6 +60,8 @@ public class HttpsToken extends PolicyAssertion implements com.sun.xml.ws.securi
     private AssertionFitness fitness = AssertionFitness.IS_VALID;
     private boolean populated = false;
     private boolean requireCC = false;
+    private boolean httpBasicAuthentication = false;
+    private boolean httpDigestAuthentication = false;
     private String id = "";
     private SecurityPolicyVersion spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
     private static QName rccQname;
@@ -114,16 +119,62 @@ public class HttpsToken extends PolicyAssertion implements com.sun.xml.ws.securi
     private synchronized AssertionFitness populate(boolean isServer) {
         
         if(!populated){
-            String value = this.getAttributeValue(rccQname);
-            requireCC = Boolean.valueOf(value);
-            populated = true;
+            if(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri.equals(
+                    spVersion.namespaceUri)){
+                String value = this.getAttributeValue(rccQname);
+                requireCC = Boolean.valueOf(value);
+            }
+            NestedPolicy policy = this.getNestedPolicy();
+            if(policy == null){
+                if(logger.getLevel() == Level.FINE){
+                    logger.log(Level.FINE,"NestedPolicy is null");
+                }
+                populated = true;
+                return fitness;
+            }
+            AssertionSet assertionSet = policy.getAssertionSet();
+            for(PolicyAssertion assertion: assertionSet){
+               if(PolicyUtil.isRequireClientCertificate(assertion, spVersion)){
+                   requireCC = true;
+               } else if(PolicyUtil.isHttpBasicAuthentication(assertion, spVersion)){
+                   httpBasicAuthentication = true;
+               } else if(PolicyUtil.isHttpDigestAuthentication(assertion, spVersion)){
+                   httpDigestAuthentication = true;
+               }else{
+                    if(!assertion.isOptional()){
+                        log_invalid_assertion(assertion, isServer,"HttpsToken");
+                        fitness = AssertionFitness.HAS_UNKNOWN_ASSERTION;
+                    }
+                }
+            }
             
+            populated = true;
         }
         return fitness;
         
     }
-
+    
     public SecurityPolicyVersion getSecurityPolicyVersion() {
         return spVersion;
+    }
+
+    public boolean isHttpBasicAuthentication() {
+        populate();
+        if(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri.equals(
+                spVersion.namespaceUri)){
+            throw new UnsupportedOperationException("HttpBasicAuthentication is only supported for" +
+                    "SecurityPolicy 1.2 and later");
+        }
+        return httpBasicAuthentication;
+    }
+
+    public boolean isHttpDigestAuthentication() {
+        populate();
+        if(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri.equals(
+                spVersion.namespaceUri)){
+            throw new UnsupportedOperationException("HttpDigestAuthentication is only supported for" +
+                    "SecurityPolicy 1.2 and later");
+        }
+        return httpDigestAuthentication;
     }
 }

@@ -165,6 +165,8 @@ public class Constants {
     public final static String RequireIssuerSerialReference = "RequireIssuerSerialReference";
     
     // New Assertions from WS-SecurityPolicy 1.2
+    public final static String HttpBasicAuthentication = "HttpBasicAuthentication";
+    public final static String HttpDigestAuthentication = "HttpDigestAuthentication";
     public final static String Trust13 = "Trust13";
     public final static String RequireExplicitDerivedKeys = "RequireExplicitDerivedKeys";
     public final static String RequireImpliedDerivedKeys = "RequireImpliedDerivedKeys";

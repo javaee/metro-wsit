@@ -43,8 +43,23 @@ package com.sun.xml.ws.security.policy;
 public interface HttpsToken extends Token{
  
   /**
-   * returns value of RequireClientCertificate attribute.
+   * returns value of RequireClientCertificate attribute for 2005/07 SP version 
+   * or true if RequireClientCertificate assertion is present in SP 1.2 version 
    * @return true or false
    */
   public boolean isRequireClientCertificate();
+  
+  /**
+   * valid for SecurityPolicy 1.2 only
+   * returns true if HttpBasicAuthentication nested policy assertion is present 
+   * @return true or false
+   */
+  public boolean isHttpBasicAuthentication();
+  
+  /**
+   * valid for SecurityPolicy 1.2 only
+   * returns true if HttpDigestAuthentication nested policy assertion is present
+   * @return true or false
+   */
+  public boolean isHttpDigestAuthentication();
 }

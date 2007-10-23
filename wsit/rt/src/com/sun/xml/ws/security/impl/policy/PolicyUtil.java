@@ -718,6 +718,53 @@ public class PolicyUtil {
         return false;
     }
     
+    /**
+     * introduced for SecurityPolicy 1.2
+     */
+    public static boolean isRequireClientCertificate(PolicyAssertion assertion, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
+            return false;
+        }
+
+        // RequireClientCertificate as a policy assertion is only supported in SP 1.2 namespace
+        if(assertion.getName().getLocalPart().equals(RequireClientCertificate) &&
+                assertion.getName().getNamespaceURI().equals(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri)){
+            return true;
+        }
+        return false;
+    }
+    
+    /**
+     * introduced for SecurityPolicy 1.2
+     */
+    public static boolean isHttpBasicAuthentication(PolicyAssertion assertion, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
+            return false;
+        }
+        
+        // HttpBasicAuthentication as a policy assertion is only supported in SP 1.2 namespace
+        if(assertion.getName().getLocalPart().equals(HttpBasicAuthentication) &&
+                assertion.getName().getNamespaceURI().equals(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri)){
+            return true;
+        }
+        return false;
+    }
+    
+    /**
+     * introduced for SecurityPolicy 1.2
+     */
+    public static boolean isHttpDigestAuthentication(PolicyAssertion assertion, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
+            return false;
+        }
+        
+        // HttpDigestAuthentication as a policy assertion is only supported in SP 1.2 namespace
+        if(assertion.getName().getLocalPart().equals(HttpDigestAuthentication) &&
+                assertion.getName().getNamespaceURI().equals(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri)){
+            return true;
+        }
+        return false;
+    }
     
     public static boolean isRequireClientEntropy(PolicyAssertion assertion, SecurityPolicyVersion spVersion) {
         if ( !isSecurityPolicyNS(assertion, spVersion)) {
