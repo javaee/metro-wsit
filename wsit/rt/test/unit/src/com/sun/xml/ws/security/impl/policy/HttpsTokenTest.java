@@ -118,5 +118,22 @@ public class HttpsTokenTest extends TestCase {
             throw new Exception("No Assertions found!. Unmarshalling of "+fileName+" failed!");
         }
     }
+    
+    public void testHttpsTokenSP12() throws Exception {
+        String fileName = "security/HttpsTokenAssertionSP12.xml";
+        Policy policy = unmarshalPolicy(fileName);
+        Iterator <AssertionSet> itr = policy.iterator();
+        if(itr.hasNext()) {
+            AssertionSet as = itr.next();
+            for(PolicyAssertion assertion : as) {
+                assertEquals("Invalid assertion","HttpsToken",assertion.getName().getLocalPart());
+                HttpsToken ht = (HttpsToken)assertion;
+                assertTrue(ht.isRequireClientCertificate());
+                assertTrue(ht.isHttpBasicAuthentication());
+            }
+        } else {
+            throw new Exception("No Assertions found!. Unmarshalling of "+fileName+" failed!");
+        }
+    }
 
 }
