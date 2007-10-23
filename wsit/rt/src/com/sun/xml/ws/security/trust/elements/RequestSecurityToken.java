@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityToken.java,v 1.4 2007-10-17 20:58:29 jdg6688 Exp $
+ * $Id: RequestSecurityToken.java,v 1.5 2007-10-23 18:49:41 jdg6688 Exp $
  */
 
 /*
@@ -52,7 +52,7 @@ import com.sun.xml.ws.security.trust.WSTrustConstants;
 /**
  * @author Kumar Jayanti
  */
-public interface RequestSecurityToken extends WSTrustElementBase, BaseRequest {
+public interface RequestSecurityToken extends WSTrustElementBase, BaseSTSRequest {
     
     /**
      * Predefined constants for the Type of Key desired in the Security Token

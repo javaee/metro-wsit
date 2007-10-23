@@ -44,9 +44,12 @@ import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.impl.IssuedTokenContextImpl;
 import com.sun.xml.ws.security.impl.policy.Constants;
+import com.sun.xml.ws.security.trust.WSTrustVersion;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.security.trust.WSTrustFactory;
+import com.sun.xml.ws.security.trust.elements.BaseSTSRequest;
+import com.sun.xml.ws.security.trust.elements.BaseSTSResponse;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponse;
 import com.sun.xml.ws.security.trust.impl.DefaultSTSConfiguration;
@@ -60,7 +63,12 @@ import java.util.Iterator;
 import javax.xml.namespace.QName;
 
 import javax.security.auth.callback.CallbackHandler;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
 
 import javax.xml.ws.Provider;
 import javax.xml.ws.WebServiceException;
@@ -85,7 +93,7 @@ public abstract class BaseSTSImpl implements BaseSTS {
      */
     public static final int DEFAULT_TIMEOUT = 36000;
     
-     public static final String DEFAULT_ISSUER = "SampleSunSTS";
+    public static final String DEFAULT_ISSUER = "SampleSunSTS";
     /**
      * The xml element tag for STS Configuration
      */
@@ -152,8 +160,10 @@ public abstract class BaseSTSImpl implements BaseSTS {
     private static final QName Q_ET = new QName("",ENCRYPT_TOKEN);
     
     private static final QName Q_EP = new QName("",END_POINT);
-    
-    
+
+    protected WSTrustVersion wstVer = WSTrustVersion.WS_TRUST_10;
+
+
   /** Implementation of the invoke method of the Provider interface
    *
    *  @param  rstElement The message comprising of RequestSecurityToken.
@@ -168,9 +178,8 @@ public abstract class BaseSTSImpl implements BaseSTS {
         Source rstrEle = null;
         try{
             // Get RequestSecurityToken
-            final WSTrustElementFactory eleFac = WSTrustElementFactory.newInstance();
-            final RequestSecurityToken rst = eleFac.createRSTFrom(rstElement);
-            //String tokenType = null;            
+            final WSTrustElementFactory eleFac = WSTrustElementFactory.newInstance(wstVer);
+            final RequestSecurityToken rst = eleFac.createRSTFrom(rstElement);         
             
             String appliesTo = null;
             final AppliesTo applTo = rst.getAppliesTo();
@@ -182,9 +191,6 @@ public abstract class BaseSTSImpl implements BaseSTS {
                 appliesTo = DEFAULT_APPLIESTO;
             }
             
-//            if(rst.getTokenType()!=null){
-//                tokenType = rst.getTokenType().toString();
-//            }
             final STSConfiguration config = getConfiguration();
             if(rst.getRequestType().toString().equals(WSTrustConstants.ISSUE_REQUEST)){
                 rstrEle = issue(config, appliesTo, eleFac, rst);                
@@ -214,12 +220,23 @@ public abstract class BaseSTSImpl implements BaseSTS {
         final MessageContext msgCtx = getMessageContext();
         //final CallbackHandler handler = (CallbackHandler)msgCtx.get(WSTrustConstants.STS_CALL_BACK_HANDLER);
         final SecurityEnvironment secEnv = (SecurityEnvironment)msgCtx.get(WSTrustConstants.SECURITY_ENVIRONMENT);
-        
+        WSTrustVersion wstVersion = (WSTrustVersion)msgCtx.get(WSTrustConstants.WST_VERSION);
+        if (wstVersion != null){
+            wstVer = wstVersion;
+        }
         //Get Runtime STSConfiguration
         STSConfiguration rtConfig = WSTrustFactory.getRuntimeSTSConfiguration();
         if (rtConfig != null){
             if (rtConfig.getCallbackHandler() == null){
                 rtConfig.getOtherOptions().put(WSTrustConstants.SECURITY_ENVIRONMENT, secEnv);
+            }
+            if (wstVersion == null){
+                wstVersion = (WSTrustVersion)rtConfig.getOtherOptions().get(WSTrustConstants.WST_VERSION);
+            }
+            if (wstVersion == null){
+                rtConfig.getOtherOptions().put(WSTrustConstants.WST_VERSION, wstVer);
+            }else{
+                wstVer = wstVersion;
             }
             return rtConfig;
         }
@@ -287,16 +304,17 @@ public abstract class BaseSTSImpl implements BaseSTS {
                 }
             }
         }
+        config.getOtherOptions().put(WSTrustConstants.WST_VERSION, wstVer);
       
         return config;
     }
 
     private Source issue(final STSConfiguration config, final String appliesTo, 
-            final WSTrustElementFactory eleFac, final RequestSecurityToken rst) 
-            throws WSTrustException {
+            final WSTrustElementFactory eleFac, final BaseSTSRequest rst) 
+            throws WSTrustException, TransformerException {
         
         // Create the RequestSecurityTokenResponse message
-        final WSTrustContract<RequestSecurityToken, RequestSecurityTokenResponse> contract = WSTrustFactory.newWSTrustContract(config, 
+        final WSTrustContract<BaseSTSRequest, BaseSTSResponse> contract = WSTrustFactory.newWSTrustContract(config, 
                 appliesTo);
         final IssuedTokenContext context = new IssuedTokenContextImpl();
         try {
@@ -305,7 +323,7 @@ public abstract class BaseSTSImpl implements BaseSTS {
             throw new WSTrustException("error getting subject",ex);
         }
 
-        final RequestSecurityTokenResponse rstr = contract.issue(rst, context);
+        final BaseSTSResponse response = contract.issue(rst, context);
         
     /*    Token samlToken = rstr.getRequestedSecurityToken().getToken();
         rstr.getRequestedSecurityToken().setAny(null);
@@ -315,15 +333,15 @@ public abstract class BaseSTSImpl implements BaseSTS {
         samlEle = (Element)doc.importNode(samlEle, true);
         NodeList list = rstrEle.getElementsByTagNameNS("*", "RequestedSecurityToken");
         Element rdstEle = (Element)list.item(0);
-        rdstEle.appendChild(samlEle); */
+        rdstEle.appendChild(samlEle); 
         
-        return new DOMSource(eleFac.toElement(rstr));
-        //return eleFac.toSource(rstr);
+        return new DOMSource(eleFac.toElement(rstr)); */
+        return eleFac.toSource(response);
     }
 
     private Source cancel(final STSConfiguration config,
             final String appliesTo, final WSTrustElementFactory eleFac,
-            final RequestSecurityToken rst) {
+            final BaseSTSRequest rst) {
         return null;
     }
     
@@ -333,27 +351,27 @@ public abstract class BaseSTSImpl implements BaseSTS {
         Source rstrEle;
 
         // Create the RequestSecurityTokenResponse message
-        final WSTrustContract<RequestSecurityToken, RequestSecurityTokenResponse> contract = WSTrustFactory.newWSTrustContract(config, 
+        final WSTrustContract<BaseSTSRequest, BaseSTSResponse> contract = WSTrustFactory.newWSTrustContract(config, 
                 appliesTo);
         final IssuedTokenContext context = new IssuedTokenContextImpl();
         
-        final RequestSecurityTokenResponse rstr = contract.renew(rst, context);
+        final BaseSTSResponse rstr = contract.renew(rst, context);
 
         rstrEle = eleFac.toSource(rstr);
         return rstrEle;
     }
     
     private Source validate(final STSConfiguration config,final String appliesTo, 
-            final WSTrustElementFactory eleFac, final RequestSecurityToken rst) 
+            final WSTrustElementFactory eleFac, final BaseSTSRequest rst) 
             throws WSTrustException {
         Source rstrEle;
 
         // Create the RequestSecurityTokenResponse message
-        final WSTrustContract<RequestSecurityToken, RequestSecurityTokenResponse> contract = WSTrustFactory.newWSTrustContract(config, 
+        final WSTrustContract<BaseSTSRequest, BaseSTSResponse> contract = WSTrustFactory.newWSTrustContract(config, 
                 appliesTo);
         final IssuedTokenContext context = new IssuedTokenContextImpl();
         
-        final RequestSecurityTokenResponse rstr = contract.validate(rst, context);
+        final BaseSTSResponse rstr = contract.validate(rst, context);
 
         rstrEle = eleFac.toSource(rstr);
         return rstrEle;

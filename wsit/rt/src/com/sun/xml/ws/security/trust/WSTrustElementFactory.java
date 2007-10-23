@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustElementFactory.java,v 1.12 2007-10-17 20:58:31 jdg6688 Exp $
+ * $Id: WSTrustElementFactory.java,v 1.13 2007-10-23 18:49:42 jdg6688 Exp $
  */
 
 /*
@@ -48,6 +48,8 @@ import com.sun.xml.ws.api.security.trust.Claims;
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.security.trust.elements.AllowPostdating;
 import com.sun.xml.ws.security.trust.elements.BinarySecret;
+import com.sun.xml.ws.security.trust.elements.BaseSTSRequest;
+import com.sun.xml.ws.security.trust.elements.BaseSTSResponse;
 import com.sun.xml.ws.security.trust.elements.CancelTarget;
 import com.sun.xml.ws.security.trust.elements.Entropy;
 import com.sun.xml.ws.security.trust.elements.IssuedTokens;
@@ -73,6 +75,7 @@ import com.sun.xml.ws.security.trust.elements.str.Reference;
 import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
 import com.sun.xml.ws.security.Token;
 import com.sun.xml.ws.security.wsu10.AttributedDateTime;
+import java.util.List;
 
 import javax.xml.transform.Source;
 import org.w3c.dom.Document;
@@ -111,16 +114,14 @@ import javax.xml.bind.JAXBException;
  * @author Kumar Jayanti
  */
 public abstract class WSTrustElementFactory {
-   
-       
-   // private static WSTrustElementFactory trustElemFactory 
-     //       = new WSTrustElementFactoryImpl();
     
     private static JAXBContext jaxbContext = null;
+    private static JAXBContext jaxbContext13 = null;
     
     static {
         try {
             jaxbContext = JAXBContext.newInstance("com.sun.xml.ws.security.trust.impl.bindings:com.sun.xml.ws.security.secconv.impl.bindings:com.sun.xml.ws.security.secext10:com.sun.xml.ws.policy.impl.bindings");
+            jaxbContext13 = JAXBContext.newInstance("com.sun.xml.ws.security.trust.impl.wssx.bindings:com.sun.xml.ws.security.secconv.impl.wssx.bindings:com.sun.xml.ws.security.secext10:com.sun.xml.ws.policy.impl.bindings");
         } catch (JAXBException jbe) {
             throw new RuntimeException(jbe.getMessage(),jbe);
         }        
@@ -129,12 +130,33 @@ public abstract class WSTrustElementFactory {
     private static WSTrustElementFactory trustElemFactory 
             = new WSTrustElementFactoryImpl();
 
+    private static WSTrustElementFactory trustElemFactory13 
+            = new com.sun.xml.ws.security.trust.impl.wssx.WSTrustElementFactoryImpl();
+
     public static JAXBContext getContext() {
         return jaxbContext;
     }
-    
+
+    public static JAXBContext getContext(WSTrustVersion wstVer) {
+        if (wstVer instanceof com.sun.xml.ws.security.trust.impl.wssx.WSTrustVersion13){
+                return jaxbContext13;
+        }
+
+        return jaxbContext;
+    }
+
+
     public static WSTrustElementFactory newInstance() {
         return trustElemFactory;
+    }
+    
+    public static WSTrustElementFactory newInstance(WSTrustVersion wstVer) {
+        
+            if (wstVer instanceof com.sun.xml.ws.security.trust.impl.wssx.WSTrustVersion13){
+                return trustElemFactory13;
+            }
+            
+            return trustElemFactory;
     }
     
     /** 
@@ -248,6 +270,8 @@ public abstract class WSTrustElementFactory {
      */
     public abstract RequestSecurityTokenResponse createRSTRForValidate(URI tokenType, RequestedSecurityToken token, Status status);
 
+    public abstract RequestSecurityTokenResponseCollection createRSTRC(List<RequestSecurityTokenResponse> rstrs);
+
     /**
      * Create an Empty RST
      */
@@ -334,6 +358,9 @@ public abstract class WSTrustElementFactory {
     
     public abstract SecurityTokenReference createSecurityTokenReference(JAXBElement elem);
     
+    public abstract JAXBElement toJAXBElement(BaseSTSRequest request);
+
+    public abstract JAXBElement toJAXBElement(BaseSTSResponse response);
      /**
      * convert an SecurityTokenReference to a JAXBElement
      */
@@ -355,6 +382,9 @@ public abstract class WSTrustElementFactory {
      */
     public abstract JAXBElement toJAXBElement(RequestSecurityTokenResponseCollection rstrCollection);
     
+    public abstract Source toSource(BaseSTSRequest request);
+
+    public abstract Source toSource(BaseSTSResponse response);
     /**
      * Marshal an RST to a Source.
      * <p>
@@ -379,6 +409,9 @@ public abstract class WSTrustElementFactory {
      */
     public abstract Source toSource(RequestSecurityTokenResponseCollection rstrCollection);
     
+    public abstract Element toElement(BaseSTSRequest request);
+
+    public abstract Element toElement(BaseSTSResponse response);
     /**
      * Marshal an RST to a DOM Element.
      * <p>

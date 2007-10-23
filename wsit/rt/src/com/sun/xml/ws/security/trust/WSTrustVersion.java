@@ -1,8 +1,4 @@
 /*
- * $Id: RequestSecurityTokenResponseCollection.java,v 1.3 2007-10-23 18:49:41 jdg6688 Exp $
- */
-
-/*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
  * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
@@ -38,57 +34,58 @@
  * holder.
  */
 
-package com.sun.xml.ws.security.trust.elements;
-import java.util.List;
-import java.util.Map;
-import javax.xml.namespace.QName;
+package com.sun.xml.ws.security.trust;
+
+import com.sun.xml.ws.security.trust.impl.WSTrustVersion10;
+import com.sun.xml.ws.security.trust.impl.wssx.WSTrustVersion13;
 
 /**
- * Used to specify multiple RSTR responses, each of which has separate
- * key information.
  *
- * TODO: Add getter methods
- *
- * @author Kumar Jayanti
+ * @author Jiandong
  */
-public interface RequestSecurityTokenResponseCollection extends BaseSTSResponse{
-    /**
-     * Gets a map that contains attributes that aren't bound to any typed property on this class.
-     * 
-     * <p>
-     * the map is keyed by the name of the attribute and 
-     * the value is the string value of the attribute.
-     * 
-     * the map returned by this method is live, and you can add new attribute
-     * by updating the map directly. Because of this design, there's no setter.
-     * 
-     * 
-     * @return
-     *     always non-null
-     */
-    Map<QName, String> getOtherAttributes();
+public abstract class WSTrustVersion {
 
-    /**
-     * Gets the value of the RequestSecurityTokenResponse property.
-     * 
-     * <p>
-     * This accessor method returns a reference to the live list,
-     * not a snapshot. Therefore any modification you make to the
-     * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the requestSecurityTokenResponse property.
-     * 
-     * <p>
-     * For example, to add a new item, do as follows:
-     * <pre>
-     *    getRequestSecurityTokenResponse().add(newItem);
-     * </pre>
-     * 
-     * 
-     * <p>
-     * Objects of the following type(s) are allowed in the list
-     * {@link RequestSecurityTokenResponse }
-     * 
-     */
-    List<RequestSecurityTokenResponse> getRequestSecurityTokenResponses();
-    
+    public static final WSTrustVersion WS_TRUST_10 = new WSTrustVersion10();
+
+    public static final WSTrustVersion WS_TEUST_13 = new WSTrustVersion13();
+
+    public abstract String getNamespaceURI();
+
+    public abstract String getIssueRequestTypeURI();
+
+    public abstract String getRenewRequestTypeURI();
+
+    public abstract String getCancelRequestTypeURI();
+
+    public abstract String getValidateRequestTypeURI();
+
+    public abstract String getPublicKeyTypeURI();
+
+    public abstract String getSymmetricKeyTypeURI();
+
+    public abstract String getBearerKeyTypeURI();
+
+    public abstract String getIssueRequestAction();
+
+    public abstract String getIssueResponseAction();
+
+    public abstract String getIssueFinalResoponseAction();
+
+    public abstract String getRenewRequestAction();
+
+    public abstract String getRenewResponseAction();
+
+    public abstract String getRenewFinalResoponseAction();
+
+    public abstract String getCancelRequestAction();
+
+    public abstract String getCancelResponseAction();
+
+    public abstract String getCancelFinalResoponseAction();
+
+    public abstract String getCKPSHA1LagorithmURI();
+
+    public abstract String getAsymmetricKeyBinarySecretTypeURI();
+
+    public abstract String getNonceBinarySecretTypeURI();
 }

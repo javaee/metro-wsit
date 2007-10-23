@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustConstants.java,v 1.9 2007-05-29 22:11:29 ofung Exp $
+ * $Id: WSTrustConstants.java,v 1.10 2007-10-23 18:49:42 jdg6688 Exp $
  */
 
 /*
@@ -48,6 +48,8 @@ public class WSTrustConstants {
     
     public static final String STS_CALL_BACK_HANDLER = "stsCallbackHandler";
     
+    public static final String WST_VERSION = "WSTrustVersion";
+    
     public static final String SECURITY_ENVIRONMENT = "SecurityEnvironment";
     
     public static final String SAML10_ASSERTION_TOKEN_TYPE = "urn:oasis:names:tc:SAML:1.0:assertion";
@@ -78,6 +80,7 @@ public class WSTrustConstants {
      */
     public static final String PUBLIC_KEY = WST_NAMESPACE+ "/PublicKey";
     public static final String SYMMETRIC_KEY = WST_NAMESPACE + "/SymmetricKey";
+    public static final String NO_PROOF_KEY = "http://schemas.xmlsoap.org/ws/2005/05/identity/NoProofKey";
     
    /**
      * Constants denoting type of Elements

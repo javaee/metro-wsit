@@ -43,6 +43,7 @@
 
 package com.sun.xml.ws.api.security.trust.config;
 
+//import com.sun.xml.ws.api.security.trust.IssuedTokenGenerator;
 import javax.security.auth.callback.CallbackHandler;
 
 import java.util.Map;
@@ -109,6 +110,10 @@ public interface STSConfiguration {
      *
      */
     CallbackHandler getCallbackHandler();
+    
+   // void addTokenGenerator(IssuedTokenGenerator tokenGen, String tokenType);
+    
+    //IssuedTokenGenerator getTokenGenerator(String tokenType);
     
     /**
      *  Add <code>TrustMetadata</code> for the service provider as identified by the given 

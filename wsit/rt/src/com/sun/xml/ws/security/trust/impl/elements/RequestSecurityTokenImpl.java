@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityTokenImpl.java,v 1.15 2007-10-17 20:58:30 jdg6688 Exp $
+ * $Id: RequestSecurityTokenImpl.java,v 1.16 2007-10-23 18:50:34 jdg6688 Exp $
  */
 
 /*
@@ -383,17 +383,17 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
     
     public final void setKeyType(@NotNull final URI keytype) throws WSTrustException {
         
-        if (! (keytype.toString().equalsIgnoreCase(RequestSecurityToken.PUBLIC_KEY_TYPE)
-        || keytype.toString().equalsIgnoreCase(RequestSecurityToken.SYMMETRIC_KEY_TYPE) )){
-            log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0025_INVALID_KEY_TYPE(keytype.toString(), null));
-            throw new WSTrustException(LogStringsMessages.WST_0025_INVALID_KEY_TYPE(keytype.toString(), null));
-        } else {
+       // if (! (keytype.toString().equalsIgnoreCase(RequestSecurityToken.PUBLIC_KEY_TYPE)
+       // || keytype.toString().equalsIgnoreCase(RequestSecurityToken.SYMMETRIC_KEY_TYPE) )){
+          //  log.log(Level.SEVERE,
+                 //   LogStringsMessages.WST_0025_INVALID_KEY_TYPE(keytype.toString(), null));
+          //  throw new WSTrustException(LogStringsMessages.WST_0025_INVALID_KEY_TYPE(keytype.toString(), null));
+       // } else {
             this.keyType = keytype;
             final JAXBElement<String> ktElement =
                     (new ObjectFactory()).createKeyType(keyType.toString());
             getAny().add(ktElement);
-        }
+       // }
     }
     
     public URI getKeyType() {

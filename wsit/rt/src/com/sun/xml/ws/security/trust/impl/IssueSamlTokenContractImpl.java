@@ -125,6 +125,7 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
     
     private static final String SAML_HOLDER_OF_KEY_1_0 = "urn:oasis:names:tc:SAML:1.0:cm:holder-of-key";
     private static final String SAML_HOLDER_OF_KEY_2_0 = "urn:oasis:names:tc:SAML:2.0:cm:holder-of-key";
+    private static final String SAML_BEARER_1_0 = "urn:oasis:names:tc:SAML:1.0:cm:bearer";
     
     public Token createSAMLAssertion(final String appliesTo, final String tokenType, final String keyType, final String assertionId, final String issuer, final  Map<QName, List<String>> claimedAttrs, final IssuedTokenContext context) throws WSTrustException {
         Token token = null;
@@ -143,9 +144,9 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
         Assertion assertion = null;
         if (WSTrustConstants.SAML10_ASSERTION_TOKEN_TYPE.equals(tokenType)||
             WSTrustConstants.SAML11_ASSERTION_TOKEN_TYPE.equals(tokenType)){
-            assertion = createSAML11Assertion(assertionId, issuer, appliesTo, keyInfo, claimedAttrs);
+            assertion = createSAML11Assertion(assertionId, issuer, appliesTo, keyInfo, claimedAttrs, keyType);
         } else if (WSTrustConstants.SAML20_ASSERTION_TOKEN_TYPE.equals(tokenType)){
-            assertion = createSAML20Assertion(assertionId, issuer, appliesTo, keyInfo, claimedAttrs);
+            assertion = createSAML20Assertion(assertionId, issuer, appliesTo, keyInfo, claimedAttrs, keyType);
         } else{
             log.log(Level.SEVERE, LogStringsMessages.WST_0031_UNSUPPORTED_TOKEN_TYPE(tokenType, appliesTo));
             throw new WSTrustException(LogStringsMessages.WST_0031_UNSUPPORTED_TOKEN_TYPE(tokenType, appliesTo));
@@ -385,7 +386,7 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
         return keyInfo;
     }
     
-    private Assertion createSAML11Assertion(final String assertionId, final String issuer, final String appliesTo, final KeyInfo keyInfo, final Map<QName, List<String>> claimedAttrs) throws WSTrustException{
+    private Assertion createSAML11Assertion(final String assertionId, final String issuer, final String appliesTo, final KeyInfo keyInfo, final Map<QName, List<String>> claimedAttrs, String keyType) throws WSTrustException{
         Assertion assertion = null;
         try{
             final SAMLAssertionFactory samlFac = SAMLAssertionFactory.newInstance(SAMLAssertionFactory.SAML1_1);
@@ -394,15 +395,28 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
             final GregorianCalendar notOnOrAfter = new GregorianCalendar();
             notOnOrAfter.add(Calendar.MILLISECOND, (int)stsConfig.getIssuedTokenTimeout());
             
-            final Conditions conditions =
-                    samlFac.createConditions(issuerInst, notOnOrAfter, null, null, null);
-            final Advice advice = samlFac.createAdvice(null, null, null);
-            
+            List arc = null;
             final List<String> confirmMethods = new ArrayList<String>();
-            confirmMethods.add(SAML_HOLDER_OF_KEY_1_0);
+            Element keyInfoEle = null;
+            if (keyType.equals(WSTrustConstants.NO_PROOF_KEY)){
+                 confirmMethods.add(SAML_BEARER_1_0);
+                 if (appliesTo != null){
+                     arc = new ArrayList();
+                     List au = new ArrayList();
+                     au.add(appliesTo);
+                     arc.add(samlFac.createAudienceRestrictionCondition(au));
+                 }
+                 
+            }else{
+                confirmMethods.add(SAML_HOLDER_OF_KEY_1_0);
+                keyInfoEle = keyInfo.getElement();
+            }
             
             final SubjectConfirmation subjectConfirm = samlFac.createSubjectConfirmation(
-                    confirmMethods, null, keyInfo.getElement());
+                    confirmMethods, null, keyInfoEle);
+            final Conditions conditions =
+                    samlFac.createConditions(issuerInst, notOnOrAfter, null, arc, null);
+            final Advice advice = samlFac.createAdvice(null, null, null);
             
             com.sun.xml.wss.saml.Subject subj = null;
             final List<Attribute> attrs = new ArrayList<Attribute>();
@@ -446,7 +460,7 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
         return assertion;
     }
     
-    private Assertion createSAML20Assertion(final String assertionId, final String issuer, final String appliesTo, final KeyInfo keyInfo, final  Map<QName, List<String>> claimedAttrs) throws WSTrustException{
+    private Assertion createSAML20Assertion(final String assertionId, final String issuer, final String appliesTo, final KeyInfo keyInfo, final  Map<QName, List<String>> claimedAttrs, String keyType) throws WSTrustException{
         Assertion assertion = null;
         try{
             final SAMLAssertionFactory samlFac = SAMLAssertionFactory.newInstance(SAMLAssertionFactory.SAML2_0);

@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustElementFactoryImpl.java,v 1.3 2007-10-17 20:58:29 jdg6688 Exp $
+ * $Id: WSTrustElementFactoryImpl.java,v 1.4 2007-10-23 18:49:41 jdg6688 Exp $
  */
 
 /*
@@ -30,6 +30,8 @@ import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
 
 import com.sun.xml.ws.security.trust.elements.AllowPostdating;
 import com.sun.xml.ws.security.trust.elements.BinarySecret;
+import com.sun.xml.ws.security.trust.elements.BaseSTSRequest;
+import com.sun.xml.ws.security.trust.elements.BaseSTSResponse;
 import com.sun.xml.ws.security.trust.elements.CancelTarget;
 import com.sun.xml.ws.api.security.trust.Claims;
 import com.sun.xml.ws.security.trust.elements.Entropy;
@@ -299,6 +301,13 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
     public RequestSecurityTokenResponse createRSTR() {
         return new RequestSecurityTokenResponseImpl();
     }
+
+    public RequestSecurityTokenResponseCollection createRSTRC(List<RequestSecurityTokenResponse> rstrs){
+        RequestSecurityTokenResponseCollection rstrc = new RequestSecurityTokenResponseCollectionImpl();
+        rstrc.getRequestSecurityTokenResponses().addAll(rstrs);
+
+        return rstrc;
+    }
     
     
     /**
@@ -451,6 +460,26 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
             throw new RuntimeException("There was a problem while creating STR from JAXBElement", e);
         }
      }
+
+     public JAXBElement toJAXBElement(final BaseSTSRequest request) {
+        if (request instanceof RequestSecurityToken){
+            return toJAXBElement((RequestSecurityToken)request);
+        }
+
+        return null;
+    }
+
+    public JAXBElement toJAXBElement(final BaseSTSResponse response) {
+        if (response instanceof RequestSecurityTokenResponse){
+            return toJAXBElement((RequestSecurityTokenResponse)response);
+        }
+        
+        if (response instanceof RequestSecurityTokenResponseCollection){
+            return toJAXBElement((RequestSecurityTokenResponseCollection)response);
+        }
+
+        return null;
+    }
     
      /**
      * convert an SecurityTokenReference to a JAXBElement
@@ -497,6 +526,26 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
                 (new ObjectFactory()).createRequestSecurityTokenResponseCollection((RequestSecurityTokenResponseCollectionType)rstrCollection);
         return rstElement;
     }
+
+     public Source toSource(final BaseSTSRequest request) {
+        if (request instanceof RequestSecurityToken){
+            return toSource((RequestSecurityToken)request);
+        }
+
+        return null;
+    }
+
+    public Source toSource(final BaseSTSResponse response) {
+        if (response instanceof RequestSecurityTokenResponse){
+            return toSource((RequestSecurityTokenResponse)response);
+        }
+        
+        if (response instanceof RequestSecurityTokenResponseCollection){
+            return toSource((RequestSecurityTokenResponseCollection)response);
+        }
+
+        return null;
+    }
     
     /**
      * Marshal an RST to a Source.
@@ -526,6 +575,26 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
      */
     public  Source toSource(RequestSecurityTokenResponseCollection rstrCollection) {
          return new DOMSource(toElement(rstrCollection));
+    }
+
+     public Element toElement(final BaseSTSRequest request) {
+        if (request instanceof RequestSecurityToken){
+            return toElement((RequestSecurityToken)request);
+        }
+
+        return null;
+    }
+
+    public Element toElement(final BaseSTSResponse response) {
+        if (response instanceof RequestSecurityTokenResponse){
+            return toElement((RequestSecurityTokenResponse)response);
+        }
+        
+        if (response instanceof RequestSecurityTokenResponseCollection){
+            return toElement((RequestSecurityTokenResponseCollection)response);
+        }
+
+        return null;
     }
     
     /**

@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustFactory.java,v 1.11 2007-08-09 06:09:44 shyam_rao Exp $
+ * $Id: WSTrustFactory.java,v 1.12 2007-10-23 18:49:42 jdg6688 Exp $
  */
 
 /*
@@ -46,8 +46,8 @@ import com.sun.xml.ws.api.security.trust.WSTrustContract;
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.api.security.trust.config.STSConfiguration;
 import com.sun.xml.ws.api.security.trust.config.STSConfigurationProvider;
-import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
-import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponse;
+import com.sun.xml.ws.security.trust.elements.BaseSTSRequest;
+import com.sun.xml.ws.security.trust.elements.BaseSTSResponse;
 
 import com.sun.xml.ws.security.trust.impl.DefaultSTSAttributeProvider;
 import com.sun.xml.ws.security.trust.impl.DefaultSTSAuthorizationProvider;
@@ -86,7 +86,7 @@ public class WSTrustFactory {
      * </p>
      * @Exception UnsupportedOperationException if this factory does not support this contract
      */
-    public static WSTrustContract<RequestSecurityToken, RequestSecurityTokenResponse> newWSTrustContract(final STSConfiguration config, final String appliesTo) throws WSTrustException {
+    public static WSTrustContract<BaseSTSRequest, BaseSTSResponse> newWSTrustContract(final STSConfiguration config, final String appliesTo) throws WSTrustException {
         //final STSConfiguration stsConfig = (STSConfiguration)config;
         //TrustSPMetadata spMetadata = stsConfig.getTrustSPMetadata(appliesTo);
        // if(spMetadata == null){
@@ -102,7 +102,7 @@ public class WSTrustFactory {
             log.log(Level.FINE,
                     LogStringsMessages.WST_1002_PROVIDER_TYPE(type));
         }
-        WSTrustContract<RequestSecurityToken, RequestSecurityTokenResponse> contract = null;
+        WSTrustContract<BaseSTSRequest, BaseSTSResponse> contract = null;
         try {
             Class clazz = null;
             final ClassLoader loader = Thread.currentThread().getContextClassLoader();
@@ -114,7 +114,7 @@ public class WSTrustFactory {
             }
             
             if (clazz != null) {
-                contract = (WSTrustContract<RequestSecurityToken, RequestSecurityTokenResponse>) clazz.newInstance();
+                contract = (WSTrustContract<BaseSTSRequest, BaseSTSResponse>) clazz.newInstance();
                 contract.init(config);
             }
         } catch (ClassNotFoundException ex) {
