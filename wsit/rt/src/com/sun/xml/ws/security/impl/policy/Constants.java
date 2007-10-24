@@ -48,6 +48,7 @@ public class Constants {
     public final static String ADDRESSING_NS = "http://schemas.xmlsoap.org/ws/2004/08/addressing";
     public final static String XPATH_NS = "http://www.w3.org/TR/1999/REC-xpath-19991116";
     public final static String TRUST_NS = "http://schemas.xmlsoap.org/ws/2005/02/trust";
+    public final static String TRUST13_NS = "http://docs.oasis-open.org/ws-sx/ws-trust/200512";
     public final static String UTILITY_NS = "http://docs.oasis-open.org/wss/2004/01/oasis- 200401-wss-wssecurity-utility-1.0.xsd";
     public final static String _XPATHVERSION = "XPathVersion";
     public final static String InclusiveC14N = "InclusiveC14N";

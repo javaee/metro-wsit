@@ -78,7 +78,8 @@ public class PolicyUtil {
     }
     
     public static boolean isTrustNS(PolicyAssertion pa) {
-        if ( Constants.TRUST_NS.equals(pa.getName().getNamespaceURI()) ) {
+        if ( Constants.TRUST_NS.equals(pa.getName().getNamespaceURI()) ||
+                Constants.TRUST13_NS.equals(pa.getName().getNamespaceURI())) {
             return true;
         }
         return false;

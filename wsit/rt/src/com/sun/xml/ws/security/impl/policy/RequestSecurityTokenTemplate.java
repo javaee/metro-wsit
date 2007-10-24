@@ -210,8 +210,6 @@ public class RequestSecurityTokenTemplate extends PolicyAssertion implements com
                         this.tokenType = assertion.getValue();
                     }else if(PolicyUtil.isComputedKeyAlgorithm(assertion)){
                         this.tokenType = assertion.getValue();
-                    }else if(PolicyUtil.isProofEncryption(assertion)){
-                        isProofEncRequired = true;
                     }else if(PolicyUtil.isEncryption(assertion)){
                         isEncRequired = true;
                     }else if(PolicyUtil.isClaimsElement(assertion)) {

@@ -264,6 +264,7 @@ public class SecurityPolicyValidator implements PolicyAssertionValidator{
         supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,RequireRequestSecurityTokenCollection));
         supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,RequireAppliesTo));
         
+        // Trust10 Assertions
         supportedAssertions.add(new QName(TRUST_NS,RequestSecurityToken));
         supportedAssertions.add(new QName(TRUST_NS,RequestType));
         supportedAssertions.add(new QName(TRUST_NS,TokenType));
@@ -280,6 +281,25 @@ public class SecurityPolicyValidator implements PolicyAssertionValidator{
         supportedAssertions.add(new QName(TRUST_NS,UseKey));
         supportedAssertions.add(new QName(TRUST_NS,SignWith));
         supportedAssertions.add(new QName(TRUST_NS,EncryptWith));
+        
+        //Trust13 Assertions
+        supportedAssertions.add(new QName(TRUST13_NS,RequestSecurityToken));
+        supportedAssertions.add(new QName(TRUST13_NS,RequestType));
+        supportedAssertions.add(new QName(TRUST13_NS,TokenType));
+        supportedAssertions.add(new QName(TRUST13_NS,AuthenticationType));
+        supportedAssertions.add(new QName(TRUST13_NS,OnBehalfOf));
+        supportedAssertions.add(new QName(TRUST13_NS,KeyType));
+        supportedAssertions.add(new QName(TRUST13_NS,KeySize));
+        supportedAssertions.add(new QName(TRUST13_NS,SignatureAlgorithm));
+        supportedAssertions.add(new QName(TRUST13_NS,EncryptionAlgorithm));
+        supportedAssertions.add(new QName(TRUST13_NS,CanonicalizationAlgorithm));
+        supportedAssertions.add(new QName(TRUST13_NS,ComputedKeyAlgorithm));
+        supportedAssertions.add(new QName(TRUST13_NS,Encryption));
+        supportedAssertions.add(new QName(TRUST13_NS,ProofEncryption));
+        supportedAssertions.add(new QName(TRUST13_NS,UseKey));
+        supportedAssertions.add(new QName(TRUST13_NS,SignWith));
+        supportedAssertions.add(new QName(TRUST13_NS,EncryptWith));
+        
         supportedAssertions.add(new QName(SUN_WSS_SECURITY_SERVER_POLICY_NS,"DisableStreamingSecurity"));
         supportedAssertions.add(new QName(SUN_WSS_SECURITY_CLIENT_POLICY_NS,"DisableStreamingSecurity"));
         supportedAssertions.add(new QName(SUN_WSS_SECURITY_SERVER_POLICY_NS,"DisableTimestampSigning"));
