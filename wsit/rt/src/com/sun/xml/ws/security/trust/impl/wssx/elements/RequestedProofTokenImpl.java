@@ -1,5 +1,5 @@
 /*
- * $Id: RequestedProofTokenImpl.java,v 1.1 2007-08-23 12:40:56 shyam_rao Exp $
+ * $Id: RequestedProofTokenImpl.java,v 1.2 2007-10-24 15:30:52 shyam_rao Exp $
  */
 
 /*
@@ -26,11 +26,9 @@
 
 package com.sun.xml.ws.security.trust.impl.wssx.elements;
 
-import org.w3c.dom.Element;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
 
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 
@@ -38,8 +36,6 @@ import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-
-import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.ws.security.trust.impl.wssx.bindings.ObjectFactory;
 
 import com.sun.xml.ws.security.trust.elements.BinarySecret;
@@ -48,6 +44,7 @@ import com.sun.xml.ws.security.trust.impl.wssx.bindings.RequestedProofTokenType;
 import com.sun.xml.ws.security.trust.impl.wssx.bindings.BinarySecretType;
 
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
+import com.sun.xml.ws.security.trust.WSTrustVersion;
 
 /**
  * @author Manveen Kaur
@@ -117,7 +114,8 @@ public class RequestedProofTokenImpl extends RequestedProofTokenType implements 
     public void setComputedKey(URI computedKey) {
         if (computedKey != null) {
             String ckString = computedKey.toString();
-            if (!(ckString.equalsIgnoreCase(WSTrustConstants.CK_HASH) || (ckString.equalsIgnoreCase(WSTrustConstants.CK_PSHA1)))) {
+            if (!(ckString.equalsIgnoreCase(WSTrustVersion.WS_TRUST_13.getCKHASHalgorithmURI()) || 
+                    (ckString.equalsIgnoreCase(WSTrustVersion.WS_TRUST_10.getCKPSHA1algorithmURI())))) {
                 throw new RuntimeException("Invalid computedKeyURI");
             }
             this.computedKey = computedKey;         

@@ -130,6 +130,8 @@ import com.sun.xml.ws.security.policy.WSSAssertion;
 import java.util.Properties;
 import com.sun.xml.ws.api.addressing.*;
 import com.sun.xml.ws.rm.Constants;
+import com.sun.xml.ws.security.secconv.WSSCVersion;
+import com.sun.xml.ws.security.trust.WSTrustVersion;
 import com.sun.xml.wss.impl.filter.DumpFilter;
 import static com.sun.xml.wss.jaxws.impl.Constants.BINDING_SCOPE;
 import static com.sun.xml.wss.jaxws.impl.Constants.rstSCTURI;
@@ -177,7 +179,9 @@ public abstract class SecurityPipeBase implements Pipe {
     protected PipeConfiguration pipeConfig = null;
     
     //static JAXBContext used across the Pipe
-    protected static final JAXBContext jaxbContext;
+    protected static final JAXBContext jaxbContext;    
+    protected static WSSCVersion wsscVer;
+    protected static WSTrustVersion wsTrustVer;
     protected boolean disablePayloadBuffer = false;
     protected AlgorithmSuite bindingLevelAlgSuite = null;
     
@@ -261,7 +265,7 @@ public abstract class SecurityPipeBase implements Pipe {
             debug = Boolean.valueOf(System.getProperty("DebugSecurity"));
             ISSUE_REQUEST_URI = new URI(WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION);
             CANCEL_REQUEST_URI = new URI(WSTrustConstants.CANCEL_REQUEST);
-            jaxbContext = WSTrustElementFactory.getContext();           ;
+            jaxbContext = WSTrustElementFactory.getContext();            
             securityPolicyNamespaces = new ArrayList<String>();
             securityPolicyNamespaces.add(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri);
             
@@ -284,17 +288,18 @@ public abstract class SecurityPipeBase implements Pipe {
         this.inProtocolPM = new HashMap<String,SecurityPolicyHolder>();
         this.outProtocolPM = new HashMap<String,SecurityPolicyHolder>();
         //unmarshaller as instance variable of the pipe
-        try {
-            this.marshaller = jaxbContext.createMarshaller();
-            this.unmarshaller = jaxbContext.createUnmarshaller();
-        }catch (javax.xml.bind.JAXBException ex) {
-            log.log(Level.SEVERE, LogStringsMessages.WSSPIPE_0001_PROBLEM_MAR_UNMAR(), ex);
-            throw new RuntimeException(LogStringsMessages.WSSPIPE_0001_PROBLEM_MAR_UNMAR(), ex);
-        }
-        
+
         if(wsPolicyMap != null){
             collectPolicies();
         }
+        
+        try {
+            this.marshaller = WSTrustElementFactory.getContext(wsTrustVer).createMarshaller();
+            this.unmarshaller = WSTrustElementFactory.getContext(wsTrustVer).createUnmarshaller();            
+        }catch (javax.xml.bind.JAXBException ex) {
+            log.log(Level.SEVERE, LogStringsMessages.WSSPIPE_0001_PROBLEM_MAR_UNMAR(), ex);
+            throw new RuntimeException(LogStringsMessages.WSSPIPE_0001_PROBLEM_MAR_UNMAR(), ex);
+        }                
         
         //unmarshaller = jaxbContext.createUnmarshaller();
         // check whether Service Port has RM
@@ -332,9 +337,9 @@ public abstract class SecurityPipeBase implements Pipe {
         //this.opResolver = that.opResolver;
         this.timestampTimeOut = that.timestampTimeOut;
         
-        try {
-            this.marshaller = jaxbContext.createMarshaller();
-            this.unmarshaller = jaxbContext.createUnmarshaller();
+        try {            
+            this.marshaller = WSTrustElementFactory.getContext(wsTrustVer).createMarshaller();
+            this.unmarshaller = WSTrustElementFactory.getContext(wsTrustVer).createUnmarshaller();            
         }catch (javax.xml.bind.JAXBException ex) {
             log.log(Level.SEVERE, LogStringsMessages.WSSPIPE_0001_PROBLEM_MAR_UNMAR(), ex);
             throw new RuntimeException("Problem creating JAXB Marshaller/Unmarshaller", ex);
@@ -697,8 +702,12 @@ public abstract class SecurityPipeBase implements Pipe {
                 }
                 if(endpointPolicy.contains(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri)){
                     spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
+                    wsscVer = WSSCVersion.WSSC_10;
+                    wsTrustVer = WSTrustVersion.WS_TRUST_10;
                 } else if(endpointPolicy.contains(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri)){
                     spVersion = SecurityPolicyVersion.SECURITYPOLICY12NS;
+                    wsscVer = WSSCVersion.WSSC_13;
+                    wsTrustVer = WSTrustVersion.WS_TRUST_13;
                 }
             }
             
@@ -1101,8 +1110,8 @@ public abstract class SecurityPipeBase implements Pipe {
             return false;
         }
         String action = getAction(packet);
-        if(WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION.equals(action) ||
-                WSTrustConstants.REQUEST_SECURITY_TOKEN_RESPONSE_ISSUE_ACTION.equals(action)){
+        if(wsTrustVer.getIssueRequestAction().equals(action) ||
+                wsTrustVer.getIssueResponseAction().equals(action)){
             return true;
         }
         return false;

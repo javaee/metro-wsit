@@ -25,19 +25,21 @@ import com.sun.xml.ws.runtime.util.SessionManager;
 import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.SecurityContextToken;
 import com.sun.xml.ws.security.impl.IssuedTokenContextImpl;
-import com.sun.xml.ws.security.impl.kerberos.KerberosContext;
 import com.sun.xml.ws.security.policy.Token;
 import com.sun.xml.ws.security.impl.policyconv.SecurityPolicyHolder;
 import com.sun.xml.ws.security.opt.impl.JAXBFilterProcessingContext;
 import com.sun.xml.ws.security.policy.SecureConversationToken;
-import com.sun.xml.ws.security.secconv.WSSCConstants;
 import com.sun.xml.ws.security.secconv.WSSCContract;
 import com.sun.xml.ws.security.secconv.WSSCElementFactory;
+import com.sun.xml.ws.security.secconv.WSSCElementFactory13;
 import com.sun.xml.ws.security.secconv.WSSCFactory;
+import com.sun.xml.ws.security.secconv.WSSCVersion;
 import com.sun.xml.ws.security.secconv.WSSecureConversationException;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
+import com.sun.xml.ws.security.trust.WSTrustElementFactory;
+import com.sun.xml.ws.security.trust.elements.BaseSTSRequest;
+import com.sun.xml.ws.security.trust.elements.BaseSTSResponse;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
-import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponse;
 import com.sun.xml.wss.ProcessingContext;
 import com.sun.xml.wss.RealmAuthenticationAdapter;
 import com.sun.xml.wss.SubjectAccessor;
@@ -84,8 +86,6 @@ import java.net.URI;
 import javax.xml.bind.JAXBElement;
 
 import java.util.logging.Level;
-import java.util.logging.Logger;
-import com.sun.xml.wss.provider.wsit.logging.LogDomainConstants;
 import com.sun.xml.wss.provider.wsit.logging.LogStringsMessages;
 
 /**
@@ -210,7 +210,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         //TODO: replace this with call to packetMessageInfo.getResponsePacket
         Packet retPacket = getResponsePacket(messageInfo);
         if (isTrustMessage){
-            retPacket = addAddressingHeaders(packet, retPacket.getMessage(), WSTrustConstants.REQUEST_SECURITY_TOKEN_RESPONSE_ISSUE_ACTION);
+            retPacket = addAddressingHeaders(packet, retPacket.getMessage(), wsTrustVer.getIssueResponseAction());
         }
         Packet ret = null;
         try {
@@ -310,13 +310,33 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         
         if (isAddressingEnabled()) {
             action = getAction(packet);
-            if (WSSCConstants.REQUEST_SECURITY_CONTEXT_TOKEN_ACTION.equals(action)) {
+//            if (WSSCConstants.REQUEST_SECURITY_CONTEXT_TOKEN_ACTION.equals(action)) {
+//                isSCIssueMessage = true;
+//                sharedState.put("IS_SC_ISSUE", TRUE);
+//            } else if (WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_ACTION.equals(action)) {
+//                isSCCancelMessage = true;
+//                sharedState.put("IS_SC_CANCEL", TRUE);
+//            } else if (WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION.equals(action)) {
+//                isTrustMessage = true;
+//                sharedState.put("IS_TRUST_MESSAGE", TRUE);
+//                packet.getMessage().getHeaders().getTo(addVer, pipeConfig.getBinding().getSOAPVersion());
+//                
+//                if(trustConfig != null){
+//                    packet.invocationProperties.put(
+//                            com.sun.xml.ws.security.impl.policy.Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS,trustConfig.iterator());
+//                }
+//                
+//                //set the SecurityEnvironment
+//                packet.invocationProperties.put(WSTrustConstants.SECURITY_ENVIRONMENT, secEnv);
+//            }
+            
+            if (wsscVer.getSCTRequestAction().equals(action)) {
                 isSCIssueMessage = true;
                 sharedState.put("IS_SC_ISSUE", TRUE);
-            } else if (WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_ACTION.equals(action)) {
+            } else if (wsscVer.getSCTCancelRequestAction().equals(action)) {
                 isSCCancelMessage = true;
                 sharedState.put("IS_SC_CANCEL", TRUE);
-            } else if (WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION.equals(action)) {
+            } else if (wsTrustVer.getIssueRequestAction().equals(action)) {
                 isTrustMessage = true;
                 sharedState.put("IS_TRUST_MESSAGE", TRUE);
                 packet.getMessage().getHeaders().getTo(addVer, pipeConfig.getBinding().getSOAPVersion());
@@ -644,15 +664,24 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
             ictx.setRequestorSubject(subject);
             
             WSSCElementFactory eleFac = WSSCElementFactory.newInstance();
-            JAXBElement rstEle = msg.readPayloadAsJAXB(jaxbContext.createUnmarshaller());
-            RequestSecurityToken rst = eleFac.createRSTFrom(rstEle);
-            URI requestType = rst.getRequestType();
-            RequestSecurityTokenResponse rstr = null;
-            WSSCContract scContract = WSSCFactory.newWSSCContract(null);
-            if (requestType.toString().equals(WSTrustConstants.ISSUE_REQUEST)) {
+            WSSCElementFactory13 eleFac13 = WSSCElementFactory13.newInstance();
+            JAXBElement rstEle = msg.readPayloadAsJAXB(WSTrustElementFactory.getContext(wsTrustVer).createUnmarshaller());
+            BaseSTSRequest rst = null;
+            
+            if(wsscVer.getNamespaceURI().equals(WSSCVersion.WSSC_13.getNamespaceURI())){
+                rst = eleFac13.createRSTFrom(rstEle);
+            }else{                
+                rst = eleFac.createRSTFrom(rstEle);
+            }
+            
+            URI requestType = ((RequestSecurityToken)rst).getRequestType();
+            //RequestSecurityTokenResponse rstr = null;
+            BaseSTSResponse rstr = null;
+            WSSCContract scContract = WSSCFactory.newWSSCContract(null, wsscVer);
+            if (requestType.toString().equals(wsTrustVer.getIssueRequestTypeURI())) {
                 List<PolicyAssertion> policies = getOutBoundSCP(packet.getMessage());
                 rstr =  scContract.issue(rst, ictx, (SecureConversationToken)policies.get(0));
-                retAction = WSSCConstants.REQUEST_SECURITY_CONTEXT_TOKEN_RESPONSE_ACTION;
+                retAction = wsscVer.getSCTResponseAction();
                 SecurityContextToken sct = (SecurityContextToken)ictx.getSecurityToken();
                 String sctId = sct.getIdentifier().toString();
                 
@@ -676,8 +705,8 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
                 itctx.setRequestorSubject(ictx.getRequestorSubject());
                 //((ProcessingContextImpl)ctx).getIssuedTokenContextMap().put(sctId, itctx);
                 
-            } else if (requestType.toString().equals(WSTrustConstants.CANCEL_REQUEST)) {
-                retAction = WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_RESPONSE_ACTION;
+            } else if (requestType.toString().equals(wsTrustVer.getCancelRequestTypeURI())) {
+                retAction = wsscVer.getSCTCancelResponseAction();
                 rstr =  scContract.cancel(rst, ictx);
             } else {
                 log.log(Level.SEVERE,
@@ -687,8 +716,13 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
             }
             
             // construct the complete message here containing the RSTR and the
-            // correct Action headers if any and return the message.
-            retMsg = Messages.create(jaxbContext.createMarshaller(), eleFac.toJAXBElement(rstr), soapVersion);
+            // correct Action headers if any and return the message.     
+            if(wsscVer.getNamespaceURI().equals(WSSCVersion.WSSC_13.getNamespaceURI())){
+                retMsg = Messages.create(WSTrustElementFactory.getContext(wsTrustVer).createMarshaller(), eleFac13.toJAXBElement(rstr), soapVersion);
+            }else{
+                retMsg = Messages.create(WSTrustElementFactory.getContext(wsTrustVer).createMarshaller(), eleFac.toJAXBElement(rstr), soapVersion);
+            }
+            
         } catch (javax.xml.bind.JAXBException ex) {
             log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0001_PROBLEM_MAR_UNMAR(), ex);
             throw new RuntimeException(LogStringsMessages.WSITPVD_0001_PROBLEM_MAR_UNMAR(), ex);

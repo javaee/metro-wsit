@@ -53,6 +53,8 @@ public abstract class Constants {
     public static final String BINDING_SCOPE = "binding-policy-scope".intern();
     public static final String rstSCTURI = "http://schemas.xmlsoap.org/ws/2005/02/trust/RST/SCT".intern();
     public static final String rstrSCTURI = "http://schemas.xmlsoap.org/ws/2005/02/trust/RSTR/SCT".intern();
+    public static final String rstSCTURI_13NS = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/RST/SCT".intern();
+    public static final String rstrSCTURI_13NS = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/RSTR/SCT".intern();
     public static final String rstTrustURI = "http://schemas.xmlsoap.org/ws/2005/02/trust/RST/Issue".intern();
     public static final String rstrTrustURI = "http://schemas.xmlsoap.org/ws/2005/02/trust/RSTR/Issue".intern();
     public static final String wsaURI = "http://schemas.xmlsoap.org/ws/2004/08/addressing".intern();

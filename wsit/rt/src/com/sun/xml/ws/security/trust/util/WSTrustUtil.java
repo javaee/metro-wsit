@@ -60,19 +60,9 @@ import java.util.UUID;
 import javax.xml.soap.SOAPFault;
 import javax.xml.bind.JAXBElement;
 
-import javax.xml.soap.SOAPElement;
-import javax.xml.soap.SOAPHeader;
-import javax.xml.soap.SOAPMessage;
-
-import com.sun.xml.ws.api.message.Message;
-
 import com.sun.xml.ws.security.SecurityContextToken;
+import com.sun.xml.ws.security.secconv.WSSCElementFactory13;
 import com.sun.xml.ws.security.trust.WSTrustSOAPFaultException;
-import com.sun.xml.ws.security.secconv.WSSCConstants;
-
-import com.sun.xml.wss.core.SecurityContextTokenImpl;
-
-import org.w3c.dom.NodeList;
 
 /**
  *
@@ -135,6 +125,19 @@ public class WSTrustUtil {
     }
     
    public static SecurityContextToken createSecurityContextToken(final WSSCElementFactory eleFac) throws WSSecureConversationException{
+       final String identifier = "urn:uuid:" + UUID.randomUUID().toString();
+       URI idURI;
+       try{
+           idURI = new URI(identifier);
+       }catch (URISyntaxException ex){
+           throw new WSSecureConversationException(ex.getMessage(), ex);
+       }
+       final String wsuId = "uuid-" + UUID.randomUUID().toString();
+       
+       return eleFac.createSecurityContextToken(idURI, null, wsuId);
+   }
+   
+   public static SecurityContextToken createSecurityContextToken(final WSSCElementFactory13 eleFac) throws WSSecureConversationException{
        final String identifier = "urn:uuid:" + UUID.randomUUID().toString();
        URI idURI;
        try{

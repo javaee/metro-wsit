@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityTokenImpl.java,v 1.16 2007-10-23 18:50:34 jdg6688 Exp $
+ * $Id: RequestSecurityTokenImpl.java,v 1.17 2007-10-24 15:30:45 shyam_rao Exp $
  */
 
 /*
@@ -78,6 +78,7 @@ import java.util.logging.Logger;
 import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
 
 import com.sun.istack.NotNull;
+import com.sun.xml.ws.security.trust.WSTrustVersion;
 
 import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
 
@@ -135,7 +136,7 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
     private PolicyReference policyRef = null;
     
     public RequestSecurityTokenImpl() {
-        setRequestType(URI.create(WSTrustConstants.ISSUE_REQUEST));
+        setRequestType(URI.create(WSTrustVersion.WS_TRUST_10.getIssueRequestTypeURI()));
     }
     
     public RequestSecurityTokenImpl(URI tokenType, URI requestType) {
@@ -268,11 +269,11 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
     public final void setRequestType(@NotNull final URI requestType) {
         
         final String rtString = requestType.toString();
-        if (!rtString.equalsIgnoreCase(WSTrustConstants.ISSUE_REQUEST)
-        && !rtString.equalsIgnoreCase(WSTrustConstants.CANCEL_REQUEST)
-        && !rtString.equalsIgnoreCase(WSTrustConstants.KEY_EXCHANGE_REQUEST)
-        && !rtString.equalsIgnoreCase(WSTrustConstants.RENEW_REQUEST)
-        && !rtString.equalsIgnoreCase(WSTrustConstants.VALIDATE_REQUEST)) {
+        if (!rtString.equalsIgnoreCase(WSTrustVersion.WS_TRUST_10.getIssueRequestTypeURI())
+        && !rtString.equalsIgnoreCase(WSTrustVersion.WS_TRUST_10.getCancelRequestTypeURI())
+        && !rtString.equalsIgnoreCase(WSTrustVersion.WS_TRUST_10.getKeyExchangeRequestTypeURI())
+        && !rtString.equalsIgnoreCase(WSTrustVersion.WS_TRUST_10.getRenewRequestTypeURI())
+        && !rtString.equalsIgnoreCase(WSTrustVersion.WS_TRUST_10.getValidateRequestTypeURI())) {
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0024_INVALID_REQUEST_TYPE(rtString));
             throw new RuntimeException(LogStringsMessages.WST_0024_INVALID_REQUEST_TYPE(rtString));
@@ -469,8 +470,8 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
         
         if (algorithm != null) {
             final String ckaString = algorithm.toString();
-            if (!ckaString.equalsIgnoreCase(WSTrustConstants.CK_HASH)
-            && !ckaString.equalsIgnoreCase(WSTrustConstants.CK_PSHA1)) {
+            if (!ckaString.equalsIgnoreCase(WSTrustVersion.WS_TRUST_10.getCKHASHalgorithmURI())
+                && !ckaString.equalsIgnoreCase(WSTrustVersion.WS_TRUST_10.getCKPSHA1algorithmURI())) {
                 log.log(Level.SEVERE,
                         LogStringsMessages.WST_0026_INVALID_CK_ALGORITHM(ckaString));
                 throw new RuntimeException(LogStringsMessages.WST_0026_INVALID_CK_ALGORITHM(ckaString));

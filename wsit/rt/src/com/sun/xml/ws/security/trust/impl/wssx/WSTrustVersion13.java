@@ -67,6 +67,11 @@ public class WSTrustVersion13 extends WSTrustVersion{
     public  String getValidateRequestTypeURI(){
         return nsURI +"/Validate";
     }
+    
+    public String getKeyExchangeRequestTypeURI(){
+        return nsURI +"/KET";
+    }
+    
     public  String getPublicKeyTypeURI(){
         return nsURI +"/PublicKey";
     }
@@ -114,9 +119,12 @@ public class WSTrustVersion13 extends WSTrustVersion{
         return nsURI + "/RSTRC/CancelFinal";
     }
 
-    public  String getCKPSHA1LagorithmURI(){
-
+    public  String getCKPSHA1algorithmURI(){
         return nsURI + "/CK/PSHA1";
+    }
+    
+    public  String getCKHASHalgorithmURI(){
+        return nsURI + "/CK/HASH";
     }
 
     public  String getAsymmetricKeyBinarySecretTypeURI(){

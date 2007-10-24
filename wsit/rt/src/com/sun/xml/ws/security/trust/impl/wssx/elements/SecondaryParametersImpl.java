@@ -25,24 +25,18 @@ package com.sun.xml.ws.security.trust.impl.wssx.elements;
 import java.util.List;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 
 import com.sun.xml.ws.policy.impl.bindings.AppliesTo;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.impl.bindings.PolicyReference;
 import javax.xml.bind.JAXBElement;
-
-import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 
 import com.sun.xml.ws.security.trust.elements.*;
 import com.sun.xml.ws.api.security.trust.Claims;
-
-import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
+import com.sun.xml.ws.security.trust.WSTrustVersion;
 import com.sun.xml.ws.security.trust.impl.wssx.bindings.AllowPostdatingType;
 import com.sun.xml.ws.security.trust.impl.wssx.bindings.BinaryExchangeType;
-import com.sun.xml.ws.security.trust.impl.wssx.bindings.CancelTargetType;
-import com.sun.xml.ws.security.trust.impl.wssx.bindings.RequestSecurityTokenType;
 import com.sun.xml.ws.security.trust.impl.wssx.bindings.LifetimeType;
 import com.sun.xml.ws.security.trust.impl.wssx.bindings.EntropyType;
 import com.sun.xml.ws.security.trust.impl.wssx.bindings.ClaimsType;
@@ -50,9 +44,7 @@ import com.sun.xml.ws.security.trust.impl.wssx.bindings.DelegateToType;
 import com.sun.xml.ws.security.trust.impl.wssx.bindings.EncryptionType;
 import com.sun.xml.ws.security.trust.impl.wssx.bindings.OnBehalfOfType;
 import com.sun.xml.ws.security.trust.impl.wssx.bindings.ObjectFactory;
-import com.sun.xml.ws.security.trust.impl.wssx.bindings.ParticipantsType;
 import com.sun.xml.ws.security.trust.impl.wssx.bindings.ProofEncryptionType;
-import com.sun.xml.ws.security.trust.impl.wssx.bindings.RenewTargetType;
 import com.sun.xml.ws.security.trust.impl.wssx.bindings.RenewingType;
 import com.sun.xml.ws.security.trust.impl.wssx.bindings.SecondaryParametersType;
 import com.sun.xml.ws.security.trust.impl.wssx.bindings.SignChallengeType;
@@ -315,8 +307,8 @@ public class SecondaryParametersImpl  extends SecondaryParametersType
     public void setComputedKeyAlgorithm(URI algorithm) {
         if (algorithm != null) {
             String ckaString = algorithm.toString();
-            if (!ckaString.equalsIgnoreCase(WSTrustConstants.CK_HASH)
-            && !ckaString.equalsIgnoreCase(WSTrustConstants.CK_PSHA1)) {
+            if (!ckaString.equalsIgnoreCase(WSTrustVersion.WS_TRUST_10.getCKHASHalgorithmURI())
+            && !ckaString.equalsIgnoreCase(WSTrustVersion.WS_TRUST_10.getCKPSHA1algorithmURI())) {
                 throw new RuntimeException("Invalid Computed Key Algorithm specified");
             }
             computedKeyAlgorithm = algorithm;

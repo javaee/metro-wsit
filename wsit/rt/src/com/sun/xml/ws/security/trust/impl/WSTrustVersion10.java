@@ -48,7 +48,7 @@ public class WSTrustVersion10 extends WSTrustVersion{
 
     public WSTrustVersion10(){
            nsURI =  "http://schemas.xmlsoap.org/ws/2005/02/trust";
-}
+    }
     public String getNamespaceURI(){
         return nsURI;
     }
@@ -68,6 +68,11 @@ public class WSTrustVersion10 extends WSTrustVersion{
     public  String getValidateRequestTypeURI(){
         return nsURI +"/Validate";
     }
+    
+    public String getKeyExchangeRequestTypeURI(){
+        return nsURI +"/KET";
+    }    
+    
     public  String getPublicKeyTypeURI(){
         return nsURI +"/PublicKey";
     }
@@ -115,9 +120,12 @@ public class WSTrustVersion10 extends WSTrustVersion{
         return nsURI + "/RSTR/Cancel";
     }
 
-    public  String getCKPSHA1LagorithmURI(){
-
+    public  String getCKPSHA1algorithmURI(){
         return nsURI + "/CK/PSHA1";
+    }
+    
+    public  String getCKHASHalgorithmURI(){
+        return nsURI + "/CK/HASH";
     }
 
     public  String getAsymmetricKeyBinarySecretTypeURI(){

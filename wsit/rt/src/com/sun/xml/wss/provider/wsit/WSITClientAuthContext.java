@@ -60,7 +60,6 @@ import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.SecurityContextToken;
 import com.sun.xml.ws.security.impl.IssuedTokenContextImpl;
 import com.sun.xml.ws.security.impl.kerberos.KerberosContext;
-import com.sun.xml.ws.security.impl.kerberos.KerberosLogin;
 import com.sun.xml.ws.security.impl.policyconv.SecurityPolicyHolder;
 import com.sun.xml.ws.security.opt.impl.JAXBFilterProcessingContext;
 import com.sun.xml.ws.security.policy.Token;
@@ -71,8 +70,8 @@ import com.sun.xml.ws.security.trust.TrustPlugin;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.security.trust.WSTrustFactory;
-import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
-import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponse;
+import com.sun.xml.ws.security.trust.elements.BaseSTSRequest;
+import com.sun.xml.ws.security.trust.elements.BaseSTSResponse;
 import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
 import com.sun.xml.wss.ProcessingContext;
 import com.sun.xml.wss.XWSSecurityException;
@@ -133,8 +132,11 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
     
     //*****************STATIC****************
     // Plugin instances for Trust and SecureConversation invocation
-    private static TrustPlugin trustPlugin = WSTrustFactory.newTrustPlugin(null);
-    private static NewWSSCPlugin  scPlugin = WSSCFactory.newNewSCPlugin(null);
+//    private static TrustPlugin trustPlugin = WSTrustFactory.newTrustPlugin(null);
+//    private static NewWSSCPlugin  scPlugin = WSSCFactory.newNewSCPlugin(null, wsscVer);
+    
+      private static TrustPlugin trustPlugin;
+      private static NewWSSCPlugin  scPlugin;
     
     //******************INSTANCE VARIABLES*******
     // do not use this operation it will be null
@@ -154,7 +156,8 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
         //this.operation = operation;
         //this.subject = subject;
         //this.map = map;
-        
+        trustPlugin = WSTrustFactory.newTrustPlugin(null);
+        scPlugin = WSSCFactory.newNewSCPlugin(null, wsscVer);
         
         Iterator it = outMessagePolicyMap.values().iterator();
         SecurityPolicyHolder holder = (SecurityPolicyHolder)it.next();
@@ -205,7 +208,7 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
             boolean isTrustMsg = false;
             if ("true".equals(packet.invocationProperties.get(WSTrustConstants.IS_TRUST_MESSAGE))){
                 isTrustMsg = true;
-                String action = (String)packet.invocationProperties.get(WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION);
+                String action = (String)packet.invocationProperties.get(wsTrustVer.getIssueRequestAction());
                 HeaderList headers = packet.getMessage().getHeaders();
                 headers.fillRequestAddressingHeaders(packet, addVer, soapVersion,false, action);
             }
@@ -526,16 +529,19 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
         if (ctx == null) {
             
             //create RST for Issue
-            RequestSecurityToken rst = scPlugin.createIssueRequest((PolicyAssertion)tok);
+            //RequestSecurityToken rst = scPlugin.createIssueRequest((PolicyAssertion)tok);
+            BaseSTSRequest rst = scPlugin.createIssueRequest((PolicyAssertion)tok);
             Packet requestPacket = scPlugin.createIssuePacket((PolicyAssertion)tok, rst, pipeConfig.getWSDLModel(), pipeConfig.getBinding(),
-                    jaxbContext, packet.endpointAddress.toString(), packet);
+                                      WSTrustElementFactory.getContext(wsTrustVer), packet.endpointAddress.toString(), packet);            
             
             try {
                 Packet secureRequestPacket = secureRequest(requestPacket, null, true);
                 Packet responsePacket = nextPipe.process(secureRequestPacket);
                 Packet validatedResponsePacket = validateResponse(responsePacket, null, null);
                 
-                RequestSecurityTokenResponse  rstr = scPlugin.getRSTR(jaxbContext, validatedResponsePacket);
+                //RequestSecurityTokenResponse  rstr = scPlugin.getRSTR(jaxbContext, validatedResponsePacket);
+                BaseSTSResponse  rstr = scPlugin.getRSTR(WSTrustElementFactory.getContext(wsTrustVer), validatedResponsePacket);                    
+                
                 ctx = new IssuedTokenContextImpl();
                 ctx = scPlugin.processRSTR(ctx,rst, rstr,packet.endpointAddress.toString());
                 
@@ -586,10 +592,10 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
             Token scToken = (Token)scAssertion;
             if (issuedTokenContextMap.get(scToken.getTokenId()) == null) {
                 
-                //create RST for Issue
-                RequestSecurityToken rst = scPlugin.createIssueRequest((PolicyAssertion)scAssertion);
+                //create RST for Issue                
+                BaseSTSRequest rst = scPlugin.createIssueRequest((PolicyAssertion)scAssertion);
                 Packet requestPacket = scPlugin.createIssuePacket((PolicyAssertion)scAssertion, rst, pipeConfig.getWSDLModel(), pipeConfig.getBinding(),
-                        jaxbContext, packet.endpointAddress.toString(), packet);
+                                        WSTrustElementFactory.getContext(wsTrustVer), packet.endpointAddress.toString(), packet);                
                 
                 try {
                     copyStandardSecurityProperties(packet,requestPacket);
@@ -597,7 +603,9 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
                     Packet responsePacket = nextPipe.process(secureRequestPacket);
                     Packet validatedResponsePacket = validateResponse(responsePacket, null, null);
                     
-                    RequestSecurityTokenResponse  rstr = scPlugin.getRSTR(jaxbContext, validatedResponsePacket);
+                    //RequestSecurityTokenResponse  rstr = scPlugin.getRSTR(jaxbContext, validatedResponsePacket);
+                    BaseSTSResponse rstr = scPlugin.getRSTR(WSTrustElementFactory.getContext(wsTrustVer), validatedResponsePacket);
+                    
                     IssuedTokenContext ctx = new IssuedTokenContextImpl();
                     ctx = scPlugin.processRSTR(ctx,rst, rstr,packet.endpointAddress.toString());
                     issuedTokenContextMap.put(((Token)scAssertion).getTokenId(), ctx);
@@ -619,16 +627,20 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
                 
                 /*ctx = scPlugin.processCancellation(
                         ctx, pipeConfig.getWSDLModel(), pipeConfig.getBinding(), this, jaxbContext, ctx.getEndpointAddress());*/
-                try {
-                    RequestSecurityToken rst = scPlugin.createCancelRequest(ctx);
-                    Packet cancelPacket = scPlugin.createCancelPacket(
-                            rst,pipeConfig.getWSDLModel(), pipeConfig.getBinding(), jaxbContext, ctx.getEndpointAddress());
+                try {                    
+                    BaseSTSRequest rst = scPlugin.createCancelRequest(ctx);
+                    Packet cancelPacket = scPlugin.createCancelPacket(rst,pipeConfig.getWSDLModel(), pipeConfig.getBinding(), 
+                                                  WSTrustElementFactory.getContext(wsTrustVer), ctx.getEndpointAddress());
+                    
                     //only for issue we pass flag true
                     Packet secCancelPacket = this.secureRequest(cancelPacket, null,false);
                     
                     Packet response = nextPipe.process(secCancelPacket);
                     Packet cancelResponse = this.validateResponse(response, null,null);
-                    RequestSecurityTokenResponse rstr = scPlugin.getRSTR(jaxbContext, cancelResponse);
+                    //RequestSecurityTokenResponse rstr = scPlugin.getRSTR(jaxbContext, cancelResponse);
+                    
+                    BaseSTSResponse rstr = scPlugin.getRSTR(WSTrustElementFactory.getContext(wsTrustVer), cancelResponse);
+                    
                     ctx = scPlugin.processRSTR(ctx,rst,rstr,ctx.getEndpointAddress());
                     
                     issuedTokenContextMap.remove(id);

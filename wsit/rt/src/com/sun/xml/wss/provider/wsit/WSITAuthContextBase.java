@@ -181,6 +181,8 @@ import java.util.Map;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.message.MessageInfo;
 import javax.xml.soap.SOAPMessage;
+import com.sun.xml.ws.security.secconv.WSSCVersion;
+import com.sun.xml.ws.security.trust.WSTrustVersion;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -222,7 +224,9 @@ public abstract class WSITAuthContextBase  {
     private final QName encHeaderContentClient = new QName("http://schemas.sun.com/2006/03/wss/client","EncryptHeaderContent");
     
     //static JAXBContext used across the Pipe
-    protected static final JAXBContext jaxbContext ;
+    protected static final JAXBContext jaxbContext;    
+    protected static WSSCVersion wsscVer;
+    protected static WSTrustVersion wsTrustVer;
     protected static final ArrayList<String> securityPolicyNamespaces ;
     //TODO: not initialized anywhere and is being used at one place in server auth-ctx
     //protected static MessagePolicy emptyMessagePolicy;
@@ -286,7 +290,7 @@ public abstract class WSITAuthContextBase  {
             debug = Boolean.valueOf(System.getProperty("DebugSecurity"));
             ISSUE_REQUEST_URI = new URI(WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION);
             CANCEL_REQUEST_URI = new URI(WSTrustConstants.CANCEL_REQUEST);
-            jaxbContext = WSTrustElementFactory.getContext();           ;
+            jaxbContext = WSTrustElementFactory.getContext();            
             securityPolicyNamespaces = new ArrayList<String>();
             securityPolicyNamespaces.add(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri);
             
@@ -388,8 +392,12 @@ public abstract class WSITAuthContextBase  {
                 }
                 if(endpointPolicy.contains(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri)){
                     spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
+                    wsscVer = WSSCVersion.WSSC_10;
+                    wsTrustVer = WSTrustVersion.WS_TRUST_10;
                 } else if(endpointPolicy.contains(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri)){
                     spVersion = SecurityPolicyVersion.SECURITYPOLICY12NS;
+                    wsscVer = WSSCVersion.WSSC_13;
+                    wsTrustVer = WSTrustVersion.WS_TRUST_13;
                 }
             }
             
@@ -819,8 +827,8 @@ public abstract class WSITAuthContextBase  {
             return false;
         }
         String action = getAction(packet);
-        if(WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION.equals(action) ||
-                WSTrustConstants.REQUEST_SECURITY_TOKEN_RESPONSE_ISSUE_ACTION.equals(action)){
+        if(wsTrustVer.getIssueRequestAction().equals(action) ||
+                wsTrustVer.getIssueResponseAction().equals(action)){
             return true;
         }
         return false;

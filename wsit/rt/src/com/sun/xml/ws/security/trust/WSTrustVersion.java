@@ -47,7 +47,7 @@ public abstract class WSTrustVersion {
 
     public static final WSTrustVersion WS_TRUST_10 = new WSTrustVersion10();
 
-    public static final WSTrustVersion WS_TEUST_13 = new WSTrustVersion13();
+    public static final WSTrustVersion WS_TRUST_13 = new WSTrustVersion13();
 
     public abstract String getNamespaceURI();
 
@@ -57,9 +57,11 @@ public abstract class WSTrustVersion {
 
     public abstract String getCancelRequestTypeURI();
 
-    public abstract String getValidateRequestTypeURI();
+    public abstract String getValidateRequestTypeURI();        
 
-    public abstract String getPublicKeyTypeURI();
+    public abstract String getKeyExchangeRequestTypeURI();
+    
+    public abstract String getPublicKeyTypeURI();        
 
     public abstract String getSymmetricKeyTypeURI();
 
@@ -83,7 +85,9 @@ public abstract class WSTrustVersion {
 
     public abstract String getCancelFinalResoponseAction();
 
-    public abstract String getCKPSHA1LagorithmURI();
+    public abstract String getCKPSHA1algorithmURI();
+    
+    public abstract String getCKHASHalgorithmURI();
 
     public abstract String getAsymmetricKeyBinarySecretTypeURI();
 

@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityTokenImpl.java,v 1.2 2007-10-17 20:58:29 jdg6688 Exp $
+ * $Id: RequestSecurityTokenImpl.java,v 1.3 2007-10-24 15:30:52 shyam_rao Exp $
  */
 
 /*
@@ -29,7 +29,6 @@ package com.sun.xml.ws.security.trust.impl.wssx.elements;
 import java.util.List;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 
 import com.sun.xml.ws.policy.impl.bindings.AppliesTo;
 import com.sun.xml.ws.policy.Policy;
@@ -41,6 +40,7 @@ import com.sun.xml.ws.api.security.trust.WSTrustException;
 
 import com.sun.xml.ws.security.trust.elements.*;
 import com.sun.xml.ws.api.security.trust.Claims;
+import com.sun.xml.ws.security.trust.WSTrustVersion;
 import com.sun.xml.ws.security.trust.elements.Entropy;
 import com.sun.xml.ws.security.trust.elements.Lifetime;
 import com.sun.xml.ws.security.trust.elements.Participants;
@@ -116,7 +116,7 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
     private SecondaryParameters sp = null;
     
     public RequestSecurityTokenImpl() {
-        setRequestType(URI.create(WSTrustConstants.ISSUE_REQUEST));
+        setRequestType(URI.create(WSTrustVersion.WS_TRUST_13.getIssueRequestTypeURI()));
     }
     
     public RequestSecurityTokenImpl(URI tokenType, URI requestType) {
@@ -244,11 +244,11 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
             throw new RuntimeException("RequestType cannot be null");
         }
         String rtString = requestType.toString();
-        if (!rtString.equalsIgnoreCase(WSTrustConstants.ISSUE_REQUEST)
-        && !rtString.equalsIgnoreCase(WSTrustConstants.CANCEL_REQUEST)
-        && !rtString.equalsIgnoreCase(WSTrustConstants.KEY_EXCHANGE_REQUEST)
-        && !rtString.equalsIgnoreCase(WSTrustConstants.RENEW_REQUEST)
-        && !rtString.equalsIgnoreCase(WSTrustConstants.VALIDATE_REQUEST)) {
+        if (!rtString.equalsIgnoreCase(WSTrustVersion.WS_TRUST_13.getIssueRequestTypeURI())
+        && !rtString.equalsIgnoreCase(WSTrustVersion.WS_TRUST_13.getCancelRequestTypeURI())
+        && !rtString.equalsIgnoreCase(WSTrustVersion.WS_TRUST_13.getKeyExchangeRequestTypeURI())
+        && !rtString.equalsIgnoreCase(WSTrustVersion.WS_TRUST_13.getRenewRequestTypeURI())
+        && !rtString.equalsIgnoreCase(WSTrustVersion.WS_TRUST_13.getValidateRequestTypeURI())) {
             throw new RuntimeException("Invalid Request Type specified");
         }
         this.requestType = requestType;
@@ -448,8 +448,8 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
     public void setComputedKeyAlgorithm(URI algorithm) {
         if (algorithm != null) {
             String ckaString = algorithm.toString();
-            if (!ckaString.equalsIgnoreCase(WSTrustConstants.CK_HASH)
-            && !ckaString.equalsIgnoreCase(WSTrustConstants.CK_PSHA1)) {
+            if (!ckaString.equalsIgnoreCase(WSTrustVersion.WS_TRUST_13.getCKHASHalgorithmURI())
+            && !ckaString.equalsIgnoreCase(WSTrustVersion.WS_TRUST_13.getCKPSHA1algorithmURI())) {
                 throw new RuntimeException("Invalid Computed Key Algorithm specified");
             }
             computedKeyAlgorithm = algorithm;

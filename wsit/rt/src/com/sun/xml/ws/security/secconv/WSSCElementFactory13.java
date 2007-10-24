@@ -34,40 +34,38 @@
  * holder.
  */
 
+/*
+ * WSSCElementFactory.java
+ *
+ * Created on February 16, 2006, 12:11 PM
+ *
+ * To change this template, choose Tools | Options and locate the template under
+ * the Source Creation and Management node. Right-click the template and choose
+ * Open. You can then make changes to the template in the Source Editor.
+ */
 
 package com.sun.xml.ws.security.secconv;
 
-/**
- * Common Constants pertaining to WS-SecureConversation
- * @author WS-Trust Implementation Team
- */
-public class WSSCConstants {
-    
-    /** the SecureConversation namespace URI */
-    public static final String WSC_NAMESPACE = "http://schemas.xmlsoap.org/ws/2005/02/sc";        
-    
-    /** the prefix to use for WS-SecureConversation */
-    public static final String WSC_PREFIX = "wsc";
-    
-    /** URI for SCT token type */
-    public static final String SECURITY_CONTEXT_TOKEN_TYPE = WSC_NAMESPACE + "/sct";        
+import com.sun.xml.ws.security.SecurityContextToken;
+import com.sun.xml.ws.security.secconv.impl.wssx.elements.SecurityContextTokenImpl;
+import com.sun.xml.ws.security.trust.impl.wssx.WSTrustElementFactoryImpl;
 
-    /** URI for DerivedKey token type */
-    public static final String DERIVED_KEY_TOKEN_TYPE = WSC_NAMESPACE + "/dk";        
+import java.net.URI;
+
+/**
+ *
+ * @author Shyam Rao
+ */
+public class WSSCElementFactory13 extends WSTrustElementFactoryImpl{
     
-    /** SecurityContextToken Type String */
-    public static final String SECURITY_CONTEXT_TOKEN = "SecurityContextToken";
+    private static final WSSCElementFactory13 scElemFactory13 = new WSSCElementFactory13();
     
-    public static final String SECURITY_CONTEXT_ID = "Incomimg_SCT";
+    public static WSSCElementFactory13 newInstance() {
+        return scElemFactory13;
+    }
     
-    /** Action URIs */
-    public static final String REQUEST_SECURITY_CONTEXT_TOKEN_ACTION = "http://schemas.xmlsoap.org/ws/2005/02/trust/RST/SCT";    
-    public static final String REQUEST_SECURITY_CONTEXT_TOKEN_RESPONSE_ACTION = "http://schemas.xmlsoap.org/ws/2005/02/trust/RSTR/SCT";    
-    
-    public static final String RENEW_SECURITY_CONTEXT_TOKEN_ACTION = "http://schemas.xmlsoap.org/ws/2005/02/trust/RST/SCT/Renew";
-    public static final String RENEW_SECURITY_CONTEXT_TOKEN_RESPONSE_ACTION = "http://schemas.xmlsoap.org/ws/2005/02/trust/RSTR/SCT/Renew";
-    
-    public static final String CANCEL_SECURITY_CONTEXT_TOKEN_ACTION = "http://schemas.xmlsoap.org/ws/2005/02/trust/RST/SCT/Cancel";    
-    public static final String CANCEL_SECURITY_CONTEXT_TOKEN_RESPONSE_ACTION = "http://schemas.xmlsoap.org/ws/2005/02/trust/RSTR/SCT/Cancel";            
-    
+    public SecurityContextToken createSecurityContextToken(final URI identifier, final String instance, final String wsuId){
+        return new SecurityContextTokenImpl(identifier, instance, wsuId);
+    }
 }
+

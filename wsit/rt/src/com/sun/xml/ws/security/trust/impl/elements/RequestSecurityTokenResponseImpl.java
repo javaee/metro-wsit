@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityTokenResponseImpl.java,v 1.12 2007-09-24 17:48:45 jdg6688 Exp $
+ * $Id: RequestSecurityTokenResponseImpl.java,v 1.13 2007-10-24 15:30:46 shyam_rao Exp $
  */
 
 /*
@@ -51,7 +51,6 @@ import com.sun.xml.ws.policy.impl.bindings.PolicyReference;
 import javax.xml.bind.JAXBElement;
 
 import com.sun.xml.ws.api.security.trust.WSTrustException;
-import com.sun.xml.ws.security.trust.WSTrustConstants;
 
 import com.sun.xml.ws.security.trust.elements.*;
 
@@ -80,6 +79,7 @@ import java.util.logging.Logger;
 import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
 
 import com.sun.istack.NotNull;
+import com.sun.xml.ws.security.trust.WSTrustVersion;
 
 import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
 
@@ -385,8 +385,8 @@ public class RequestSecurityTokenResponseImpl extends RequestSecurityTokenRespon
     public final void setComputedKeyAlgorithm(@NotNull final URI algorithm) {
         if (algorithm != null) {
             final String ckaString = algorithm.toString();
-            if (!ckaString.equalsIgnoreCase(WSTrustConstants.CK_HASH)
-            && !ckaString.equalsIgnoreCase(WSTrustConstants.CK_PSHA1)) {
+            if (!ckaString.equalsIgnoreCase(WSTrustVersion.WS_TRUST_10.getCKHASHalgorithmURI())
+            && !ckaString.equalsIgnoreCase(WSTrustVersion.WS_TRUST_10.getCKPSHA1algorithmURI())) {
                 throw new RuntimeException("Invalid Computed Key Algorithm specified");
             }
             computedKeyAlgorithm = algorithm;

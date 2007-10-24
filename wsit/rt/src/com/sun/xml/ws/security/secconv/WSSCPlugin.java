@@ -89,6 +89,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.sun.xml.ws.security.secconv.logging.LogDomainConstants;
 import com.sun.xml.ws.security.secconv.logging.LogStringsMessages;
+import com.sun.xml.ws.security.trust.WSTrustVersion;
+import com.sun.xml.ws.security.trust.elements.BaseSTSRequest;
+import com.sun.xml.ws.security.trust.elements.BaseSTSResponse;
+import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponseCollection;
 import java.io.StringWriter;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -110,8 +114,10 @@ public class WSSCPlugin {
             LogDomainConstants.WSSC_IMPL_DOMAIN,
             LogDomainConstants.WSSC_IMPL_DOMAIN_BUNDLE);
     
-    private static WSTrustElementFactory eleFac = WSTrustElementFactory.newInstance();
+    private WSTrustElementFactory eleFac = WSTrustElementFactory.newInstance();    
     
+    private WSSCVersion wsscVer = WSSCVersion.WSSC_10;
+    private WSTrustVersion wsTrustVer = WSTrustVersion.WS_TRUST_10;
     private static final int DEFAULT_KEY_SIZE = 256;
     private static final String SC_ASSERTION = "SecureConversationAssertion";
     private static final String FOR_CANCEL = "For Cancel";
@@ -119,8 +125,13 @@ public class WSSCPlugin {
     private Packet packet = null;
     
     /** Creates a new instance of WSSCPlugin */
-    public WSSCPlugin(Configuration config) {
-        this.config = config;
+    public WSSCPlugin(Configuration config, final WSSCVersion wsscVer) {
+        this.config = config;        
+        if(wsscVer instanceof com.sun.xml.ws.security.secconv.impl.wssx.WSSCVersion13){
+            this.wsscVer = wsscVer;
+            this.wsTrustVer = WSTrustVersion.WS_TRUST_13;
+            this.eleFac = WSTrustElementFactory.newInstance(wsTrustVer);
+        }
     }
     
     public IssuedTokenContext process(final PolicyAssertion token, final WSDLPort wsdlPort, final WSBinding binding, final Pipe securityPipe, final Marshaller marshaller, final Unmarshaller unmarshaller, final String endPointAddress, final Packet packet, final AddressingVersion addVer){
@@ -164,7 +175,7 @@ public class WSSCPlugin {
         //==============================
         // Create RequestSecurityToken
         //==============================
-        RequestSecurityToken rst = null;
+        BaseSTSRequest rst = null;
         try{
             rst = createRequestSecurityToken(reqClientEntropy,skl);
         } catch (WSSecureConversationException ex){
@@ -177,7 +188,7 @@ public class WSSCPlugin {
             throw new RuntimeException(LogStringsMessages.WSSC_0021_PROBLEM_CREATING_RST_TRUST(), ex);
         }*/
         
-        final RequestSecurityTokenResponse rstr = sendRequest(token, wsdlPort, binding, securityPipe, marshaller, unmarshaller, rst, WSSCConstants.REQUEST_SECURITY_CONTEXT_TOKEN_ACTION, endPointAddress, addVer);
+        final BaseSTSResponse rstr = sendRequest(token, wsdlPort, binding, securityPipe, marshaller, unmarshaller, rst, wsscVer.getSCTRequestAction(), endPointAddress, addVer);
         
         // Handle the RequestSecurityTokenResponse
         final IssuedTokenContext context = new IssuedTokenContextImpl();
@@ -200,7 +211,7 @@ public class WSSCPlugin {
         //==============================
         // Create RequestSecurityToken
         //==============================
-        RequestSecurityToken rst = null;
+        BaseSTSRequest rst = null;
         try{
             rst = createRequestSecurityTokenForCancel(ctx);
         } catch (WSSecureConversationException ex){
@@ -209,7 +220,7 @@ public class WSSCPlugin {
             throw new RuntimeException(LogStringsMessages.WSSC_0024_ERROR_CREATING_RST(FOR_CANCEL), ex);
         }
         
-        final RequestSecurityTokenResponse rstr = sendRequest(null, wsdlPort, binding, securityPipe, marshaller, unmarshaller, rst, WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_ACTION, endPointAddress, addVer);
+        final BaseSTSResponse rstr = sendRequest(null, wsdlPort, binding, securityPipe, marshaller, unmarshaller, rst, WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_ACTION, endPointAddress, addVer);
         
         // Handle the RequestSecurityTokenResponse
         try {
@@ -223,7 +234,7 @@ public class WSSCPlugin {
         return ctx;
     }
     
-    private RequestSecurityTokenResponse sendRequest(final PolicyAssertion issuedToken, final WSDLPort wsdlPort, final WSBinding binding, final Pipe securityPipe, final Marshaller marshaller, final Unmarshaller unmarshaller, final RequestSecurityToken rst, final String action, final String endPointAddress, final AddressingVersion addVer) {
+    private BaseSTSResponse sendRequest(final PolicyAssertion issuedToken, final WSDLPort wsdlPort, final WSBinding binding, final Pipe securityPipe, final Marshaller marshaller, final Unmarshaller unmarshaller, final BaseSTSRequest rst, final String action, final String endPointAddress, final AddressingVersion addVer) {
         // Marshaller marshaller;
         //Unmarshaller unmarshaller;
         
@@ -235,7 +246,7 @@ public class WSSCPlugin {
         //  throw new RuntimeException("Problem creating JAXB Marshaller/Unmarshaller", ex);
         //}
         
-        final Message request = Messages.create(marshaller, eleFac.toJAXBElement(rst), binding.getSOAPVersion());
+        final Message request = Messages.create(marshaller, eleFac.toJAXBElement(rst), binding.getSOAPVersion());    
         
         // Log Request created
         if (log.isLoggable(Level.FINE)) {
@@ -281,7 +292,7 @@ public class WSSCPlugin {
         
         // Obtain the RequestSecurtyTokenResponse
         final Message response = respPacket.getMessage();
-        RequestSecurityTokenResponse rstr = null;
+        BaseSTSResponse rstr = null;
         if (!response.isFault()){
             JAXBElement rstrEle = null;
             try {
@@ -291,7 +302,11 @@ public class WSSCPlugin {
                         LogStringsMessages.WSSC_0018_ERR_JAXB_RSTR(), ex);
                 throw new RuntimeException(LogStringsMessages.WSSC_0018_ERR_JAXB_RSTR(), ex);
             }
-            rstr = eleFac.createRSTRFrom(rstrEle);
+            if(wsscVer.getNamespaceURI().equals(WSSCVersion.WSSC_13.getNamespaceURI())){
+                rstr = eleFac.createRSTRCollectionFrom(rstrEle);    
+            }else{
+                rstr = eleFac.createRSTRFrom(rstrEle);
+            }
         } else {
             try{
                 // SOAPFaultBuilder builder = SOAPFaultBuilder.create(response);
@@ -310,7 +325,7 @@ public class WSSCPlugin {
     private RequestSecurityToken createRequestSecurityToken(final boolean reqClientEntropy,final int skl) throws WSSecureConversationException{
         
         final URI tokenType = URI.create(WSSCConstants.SECURITY_CONTEXT_TOKEN_TYPE);
-        final URI requestType = URI.create(WSTrustConstants.ISSUE_REQUEST);
+        final URI requestType = URI.create(wsTrustVer.getIssueRequestTypeURI());
         final SecureRandom random = new SecureRandom();
         final byte[] rawValue = new byte[skl/8];
         random.nextBytes(rawValue);
@@ -321,8 +336,8 @@ public class WSSCPlugin {
         try {
             rst = eleFac.createRSTForIssue(tokenType, requestType, null, null, null, entropy, null);
             rst.setKeySize(skl);
-            rst.setKeyType(URI.create(WSTrustConstants.SYMMETRIC_KEY));
-            rst.setComputedKeyAlgorithm(URI.create(WSTrustConstants.CK_PSHA1));
+            rst.setKeyType(URI.create(wsTrustVer.getSymmetricKeyTypeURI()));
+            rst.setComputedKeyAlgorithm(URI.create(wsTrustVer.getCKPSHA1algorithmURI()));
         } catch (WSTrustException ex){
             throw new WSSecureConversationException(ex);
         }
@@ -332,7 +347,7 @@ public class WSSCPlugin {
     
     private RequestSecurityToken createRequestSecurityTokenForCancel(final IssuedTokenContext ctx) throws WSSecureConversationException{
         URI requestType = null;
-        requestType = URI.create(WSTrustConstants.CANCEL_REQUEST);
+        requestType = URI.create(wsTrustVer.getCancelRequestTypeURI());
         
         final CancelTarget target = eleFac.createCancelTarget((SecurityTokenReference)ctx.getUnAttachedSecurityTokenReference());
         final RequestSecurityToken rst = eleFac.createRSTForCancel(requestType, target);
@@ -340,10 +355,14 @@ public class WSSCPlugin {
         return rst;
     }
     
-    private void processRequestSecurityTokenResponse(final RequestSecurityToken rst, final RequestSecurityTokenResponse rstr, final IssuedTokenContext context)
+    private void processRequestSecurityTokenResponse(final BaseSTSRequest rst, final BaseSTSResponse rstr, final IssuedTokenContext context)
     throws WSSecureConversationException {
-        final WSSCClientContract contract = WSSCFactory.newWSSCClientContract(config);
-        contract.handleRSTR(rst, rstr, context);
+        final WSSCClientContract contract = WSSCFactory.newWSSCClientContract(config, wsscVer);
+        if(wsscVer.getNamespaceURI().equals(WSSCVersion.WSSC_13.getNamespaceURI())){
+            contract.handleRSTRC((RequestSecurityToken)rst, (RequestSecurityTokenResponseCollection)rstr, context);    
+        }else{
+            contract.handleRSTR((RequestSecurityToken)rst, (RequestSecurityTokenResponse)rstr, context);
+        }
     }
     
     private String printMessageAsString(final Message message) {

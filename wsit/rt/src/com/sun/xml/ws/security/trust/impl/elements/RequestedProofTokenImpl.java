@@ -1,5 +1,5 @@
 /*
- * $Id: RequestedProofTokenImpl.java,v 1.13 2007-05-29 22:11:34 ofung Exp $
+ * $Id: RequestedProofTokenImpl.java,v 1.14 2007-10-24 15:30:46 shyam_rao Exp $
  */
 
 /*
@@ -49,9 +49,6 @@ import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
 
 import java.net.URI;
-import java.net.URISyntaxException;
-
-import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.ws.security.trust.impl.bindings.ObjectFactory;
 
 import com.sun.xml.ws.security.trust.elements.BinarySecret;
@@ -66,6 +63,7 @@ import java.util.logging.Logger;
 import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
 
 import com.sun.istack.NotNull;
+import com.sun.xml.ws.security.trust.WSTrustVersion;
 
 import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
 
@@ -143,7 +141,8 @@ public class RequestedProofTokenImpl extends RequestedProofTokenType implements 
         
         if (computedKey != null) {
             final String ckString = computedKey.toString();
-            if (!(ckString.equalsIgnoreCase(WSTrustConstants.CK_HASH) || (ckString.equalsIgnoreCase(WSTrustConstants.CK_PSHA1)))) {
+            if (!(ckString.equalsIgnoreCase(WSTrustVersion.WS_TRUST_10.getCKHASHalgorithmURI()) || 
+                    (ckString.equalsIgnoreCase(WSTrustVersion.WS_TRUST_10.getCKPSHA1algorithmURI())))) {
                 log.log(Level.SEVERE,
                         LogStringsMessages.WST_0028_INVALID_CK(ckString));
                 throw new RuntimeException(LogStringsMessages.WST_0028_INVALID_CK(ckString));

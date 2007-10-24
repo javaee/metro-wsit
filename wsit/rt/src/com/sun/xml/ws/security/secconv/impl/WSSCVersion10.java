@@ -34,40 +34,57 @@
  * holder.
  */
 
+package com.sun.xml.ws.security.secconv.impl;
 
-package com.sun.xml.ws.security.secconv;
+import com.sun.xml.ws.security.secconv.WSSCVersion;
 
 /**
- * Common Constants pertaining to WS-SecureConversation
- * @author WS-Trust Implementation Team
+ *
+ * @author Shyam Rao
  */
-public class WSSCConstants {
-    
-    /** the SecureConversation namespace URI */
-    public static final String WSC_NAMESPACE = "http://schemas.xmlsoap.org/ws/2005/02/sc";        
-    
-    /** the prefix to use for WS-SecureConversation */
-    public static final String WSC_PREFIX = "wsc";
-    
-    /** URI for SCT token type */
-    public static final String SECURITY_CONTEXT_TOKEN_TYPE = WSC_NAMESPACE + "/sct";        
+public class WSSCVersion10 extends WSSCVersion{
 
-    /** URI for DerivedKey token type */
-    public static final String DERIVED_KEY_TOKEN_TYPE = WSC_NAMESPACE + "/dk";        
+   private String nsURI;
+   private String trustNSURI;
+
+   public WSSCVersion10(){
+        nsURI = "http://schemas.xmlsoap.org/ws/2005/02/sc";
+        trustNSURI = "http://schemas.xmlsoap.org/ws/2005/02/trust";
+   }
+    public String getNamespaceURI(){
+        return nsURI;
+    }
     
-    /** SecurityContextToken Type String */
-    public static final String SECURITY_CONTEXT_TOKEN = "SecurityContextToken";
+    public String getSCTTokenTypeURI(){
+        return nsURI + "/sct";
+    }
     
-    public static final String SECURITY_CONTEXT_ID = "Incomimg_SCT";
+    public String getDKTokenTypeURI(){
+        return nsURI + "/dk";
+    }
+
+    public String getSCTRequestAction(){
+        return trustNSURI + "/RST/SCT";
+    }
+
+    public String getSCTResponseAction(){
+        return trustNSURI + "/RSTR/SCT";
+    }    
+
+    public String getSCTRenewRequestAction(){
+        return trustNSURI + "/RST/SCT/Renew";
+    }
     
-    /** Action URIs */
-    public static final String REQUEST_SECURITY_CONTEXT_TOKEN_ACTION = "http://schemas.xmlsoap.org/ws/2005/02/trust/RST/SCT";    
-    public static final String REQUEST_SECURITY_CONTEXT_TOKEN_RESPONSE_ACTION = "http://schemas.xmlsoap.org/ws/2005/02/trust/RSTR/SCT";    
-    
-    public static final String RENEW_SECURITY_CONTEXT_TOKEN_ACTION = "http://schemas.xmlsoap.org/ws/2005/02/trust/RST/SCT/Renew";
-    public static final String RENEW_SECURITY_CONTEXT_TOKEN_RESPONSE_ACTION = "http://schemas.xmlsoap.org/ws/2005/02/trust/RSTR/SCT/Renew";
-    
-    public static final String CANCEL_SECURITY_CONTEXT_TOKEN_ACTION = "http://schemas.xmlsoap.org/ws/2005/02/trust/RST/SCT/Cancel";    
-    public static final String CANCEL_SECURITY_CONTEXT_TOKEN_RESPONSE_ACTION = "http://schemas.xmlsoap.org/ws/2005/02/trust/RSTR/SCT/Cancel";            
-    
+    public String getSCTRenewResponseAction(){
+        return trustNSURI + "/RSTR/SCT/Renew";
+    }
+
+    public String getSCTCancelRequestAction(){
+        return trustNSURI + "/RST/SCT/Cancel";
+    }
+
+    public String getSCTCancelResponseAction(){
+        return trustNSURI + "/RSTR/SCT/Cancel";
+    }
+                   
 }

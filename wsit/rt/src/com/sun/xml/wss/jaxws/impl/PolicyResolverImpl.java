@@ -43,7 +43,6 @@ import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLFault;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
-import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.assembler.PipeConfiguration;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.security.impl.policyconv.SCTokenWrapper;
@@ -52,11 +51,9 @@ import com.sun.xml.ws.security.secconv.WSSCConstants;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.wss.impl.PolicyResolver;
 import com.sun.xml.wss.impl.policy.mls.MessagePolicy;
-import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.security.impl.policyconv.SecurityPolicyHolder;
 import com.sun.xml.wss.ProcessingContext;
-import com.sun.xml.wss.impl.MessageConstants;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -68,7 +65,6 @@ import org.w3c.dom.Node;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.soap.SOAPException;
 import java.util.HashMap;
-import com.sun.xml.wss.impl.misc.PolicyAttributes;
 import org.w3c.dom.NodeList;
 import com.sun.xml.ws.security.policy.Token;
 import com.sun.xml.ws.api.addressing.*;
@@ -83,6 +79,8 @@ import static com.sun.xml.wss.jaxws.impl.Constants.RM_LAST_MESSAGE;
 import static com.sun.xml.wss.jaxws.impl.Constants.SC_ASSERTION;
 import static com.sun.xml.wss.jaxws.impl.Constants.rstSCTURI;
 import static com.sun.xml.wss.jaxws.impl.Constants.rstrSCTURI;
+import static com.sun.xml.wss.jaxws.impl.Constants.rstSCTURI_13NS;
+import static com.sun.xml.wss.jaxws.impl.Constants.rstrSCTURI_13NS;
 import static com.sun.xml.wss.jaxws.impl.Constants.JAXWS_21_MESSAGE;
 
 /**
@@ -291,7 +289,8 @@ public class PolicyResolverImpl implements PolicyResolver{
     }
     
     private boolean isSCMessage(){
-        if (rstSCTURI.equals(action) || rstrSCTURI.equals(action)){
+        if (rstSCTURI.equals(action) || rstrSCTURI.equals(action) ||
+                rstSCTURI_13NS.equals(action) || rstrSCTURI_13NS.equals(action)){
             return true;
         }
         return false;

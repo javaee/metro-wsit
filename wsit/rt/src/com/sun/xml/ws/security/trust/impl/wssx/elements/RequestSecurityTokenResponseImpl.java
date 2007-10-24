@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityTokenResponseImpl.java,v 1.1 2007-08-23 12:40:56 shyam_rao Exp $
+ * $Id: RequestSecurityTokenResponseImpl.java,v 1.2 2007-10-24 15:30:53 shyam_rao Exp $
  */
 
 /*
@@ -38,7 +38,7 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 
 import com.sun.xml.ws.api.security.trust.WSTrustException;
-import com.sun.xml.ws.security.trust.WSTrustConstants;
+import com.sun.xml.ws.security.trust.WSTrustVersion;
 
 import com.sun.xml.ws.security.trust.elements.*;
 import com.sun.xml.ws.security.trust.elements.Entropy;
@@ -59,7 +59,6 @@ import com.sun.xml.ws.security.trust.impl.wssx.bindings.RequestedSecurityTokenTy
 import com.sun.xml.ws.security.trust.impl.wssx.bindings.RequestedTokenCancelledType;
 
 import com.sun.xml.ws.security.trust.impl.wssx.bindings.ObjectFactory;
-import com.sun.xml.ws.security.trust.impl.wssx.bindings.OnBehalfOfType;
 import com.sun.xml.ws.security.trust.impl.wssx.bindings.ProofEncryptionType;
 import com.sun.xml.ws.security.trust.impl.wssx.bindings.RenewingType;
 import com.sun.xml.ws.security.trust.impl.wssx.bindings.SignChallengeType;
@@ -372,8 +371,8 @@ public class RequestSecurityTokenResponseImpl extends RequestSecurityTokenRespon
     public void setComputedKeyAlgorithm(URI algorithm) {
         if (algorithm != null) {
             String ckaString = algorithm.toString();
-            if (!ckaString.equalsIgnoreCase(WSTrustConstants.CK_HASH)
-            && !ckaString.equalsIgnoreCase(WSTrustConstants.CK_PSHA1)) {
+            if (!ckaString.equalsIgnoreCase(WSTrustVersion.WS_TRUST_13.getCKHASHalgorithmURI())
+            && !ckaString.equalsIgnoreCase(WSTrustVersion.WS_TRUST_13.getCKPSHA1algorithmURI())) {
                 throw new RuntimeException("Invalid Computed Key Algorithm specified");
             }
             computedKeyAlgorithm = algorithm;

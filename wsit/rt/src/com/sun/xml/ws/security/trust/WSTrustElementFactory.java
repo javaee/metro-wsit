@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustElementFactory.java,v 1.13 2007-10-23 18:49:42 jdg6688 Exp $
+ * $Id: WSTrustElementFactory.java,v 1.14 2007-10-24 15:30:48 shyam_rao Exp $
  */
 
 /*
@@ -129,7 +129,6 @@ public abstract class WSTrustElementFactory {
     
     private static WSTrustElementFactory trustElemFactory 
             = new WSTrustElementFactoryImpl();
-
     private static WSTrustElementFactory trustElemFactory13 
             = new com.sun.xml.ws.security.trust.impl.wssx.WSTrustElementFactoryImpl();
 
@@ -144,7 +143,6 @@ public abstract class WSTrustElementFactory {
 
         return jaxbContext;
     }
-
 
     public static WSTrustElementFactory newInstance() {
         return trustElemFactory;

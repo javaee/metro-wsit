@@ -42,7 +42,6 @@ import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.SecurityContextToken;
 import com.sun.xml.ws.security.trust.Configuration;
 import com.sun.xml.ws.security.trust.WSTrustClientContract;
-import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.ws.security.trust.elements.BinarySecret;
 import com.sun.xml.ws.security.trust.elements.Entropy;
 import com.sun.xml.ws.security.trust.elements.Lifetime;
@@ -67,6 +66,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.sun.xml.ws.security.secconv.logging.LogDomainConstants;
 import com.sun.xml.ws.security.secconv.logging.LogStringsMessages;
+import com.sun.xml.ws.security.trust.WSTrustVersion;
+import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponseCollection;
+import java.util.Iterator;
+import java.util.List;
 
 public class WSSCClientContract implements WSTrustClientContract{
     
@@ -80,9 +83,15 @@ public class WSSCClientContract implements WSTrustClientContract{
             = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'sss'Z'",Locale.getDefault());
     
     private static final int DEFAULT_KEY_SIZE = 256;
+    private WSSCVersion wsscVer = WSSCVersion.WSSC_10;
+    private WSTrustVersion wsTrustVer = WSTrustVersion.WS_TRUST_10;
     
-    public WSSCClientContract(Configuration config) {
-        //this.config = config;
+    public WSSCClientContract(Configuration config, final WSSCVersion wsscVer) {
+        //this.config = config;        
+        if(wsscVer instanceof com.sun.xml.ws.security.secconv.impl.wssx.WSSCVersion13){
+            this.wsscVer = wsscVer;
+            this.wsTrustVer = WSTrustVersion.WS_TRUST_13;            
+        }        
     }
     
     /**
@@ -91,7 +100,7 @@ public class WSSCClientContract implements WSTrustClientContract{
      */
     public void handleRSTR(
             final RequestSecurityToken rst, final RequestSecurityTokenResponse rstr, final IssuedTokenContext context) throws WSSecureConversationException {
-        if (rst.getRequestType().toString().equals(WSTrustConstants.ISSUE_REQUEST)){
+        if (rst.getRequestType().toString().equals(wsTrustVer.getIssueRequestTypeURI())){
             // ToDo
             //final AppliesTo requestAppliesTo = rst.getAppliesTo();
             //final AppliesTo responseAppliesTo = rstr.getAppliesTo();
@@ -134,7 +143,7 @@ public class WSSCClientContract implements WSTrustClientContract{
             }
             
             
-        }else if (rst.getRequestType().toString().equals(WSTrustConstants.CANCEL_REQUEST)){
+        }else if (rst.getRequestType().toString().equals(wsTrustVer.getCancelRequestTypeURI())){
             
             // Check if the rstr contains the RequestTedTokenCancelled element
             // if yes cleanup the IssuedTokenContext accordingly
@@ -145,6 +154,21 @@ public class WSSCClientContract implements WSTrustClientContract{
             }
         }
         
+    }
+
+   /**
+     * Handle an RSTRC returned by the Issuer and update Token information into the
+     * IssuedTokenContext.
+     */
+    public void handleRSTRC(
+            final RequestSecurityToken rst, final RequestSecurityTokenResponseCollection rstrc, final IssuedTokenContext context) throws WSSecureConversationException {
+        List<RequestSecurityTokenResponse> rstrList = rstrc.getRequestSecurityTokenResponses();
+        Iterator rstrIterator = rstrList.iterator();
+        RequestSecurityTokenResponse rstr;
+        while(rstrIterator.hasNext()){
+            rstr = (RequestSecurityTokenResponse)rstrIterator.next();
+            this.handleRSTR(rst, rstr, context);
+        }
     }
     
     private byte[] getKey(final RequestSecurityTokenResponse rstr, final RequestedProofToken proofToken, final RequestSecurityToken rst) throws UnsupportedOperationException, WSSecureConversationException, WSSecureConversationException, UnsupportedOperationException {
@@ -221,7 +245,7 @@ public class WSSCClientContract implements WSTrustClientContract{
             log.log(Level.FINE,
                     LogStringsMessages.WSSC_0005_COMPUTED_KEYSIZE(keySize, DEFAULT_KEY_SIZE));
         }
-        if(computedKey.toString().equals(WSTrustConstants.CK_PSHA1)){
+        if(computedKey.toString().equals(wsTrustVer.getCKPSHA1algorithmURI())){
             try {
                 key = SecurityUtil.P_SHA1(clientEntr,serverEntr, keySize/8);
             } catch (Exception ex) {

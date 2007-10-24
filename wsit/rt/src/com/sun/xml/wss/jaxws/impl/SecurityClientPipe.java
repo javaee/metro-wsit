@@ -108,7 +108,7 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
     
     // Plugin instances for Trust and SecureConversation invocation
     private static TrustPlugin trustPlugin = WSTrustFactory.newTrustPlugin(null);
-    private static WSSCPlugin  scPlugin = WSSCFactory.newSCPlugin(null);
+    private static WSSCPlugin  scPlugin = WSSCFactory.newSCPlugin(null, wsscVer);
     private Set trustConfig = null;
     
     // Creates a new instance of SecurityClientPipe
@@ -146,7 +146,7 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
         boolean isTrustMsg = false;
         if ("true".equals(packet.invocationProperties.get(WSTrustConstants.IS_TRUST_MESSAGE))){
             isTrustMsg = true;
-            String action = (String)packet.invocationProperties.get(WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION);
+            String action = (String)packet.invocationProperties.get(wsTrustVer.getIssueRequestAction());
             HeaderList headers = packet.getMessage().getHeaders();
             headers.fillRequestAddressingHeaders(packet, addVer, soapVersion,false, action);
         }

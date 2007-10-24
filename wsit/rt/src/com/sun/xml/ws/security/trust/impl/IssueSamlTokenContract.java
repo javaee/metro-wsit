@@ -245,7 +245,7 @@ public abstract class IssueSamlTokenContract implements com.sun.xml.ws.api.secur
             
             // compute the secret key
             try {
-                proofToken.setComputedKey(URI.create(wstVer.getCKPSHA1LagorithmURI()));
+                proofToken.setComputedKey(URI.create(wstVer.getCKPSHA1algorithmURI()));
                 key = SecurityUtil.P_SHA1(clientEntr, key, keySize/8);
             } catch (Exception ex){
                 log.log(Level.SEVERE, 
@@ -334,7 +334,7 @@ public abstract class IssueSamlTokenContract implements com.sun.xml.ws.api.secur
         context.setCreationTime(new Date(currentTime));
         context.setExpirationTime(new Date(currentTime + stsConfig.getIssuedTokenTimeout()));
         
-        if (wstVer.getNamespaceURI().equals(WSTrustVersion.WS_TEUST_13.getNamespaceURI())){
+        if (wstVer.getNamespaceURI().equals(WSTrustVersion.WS_TRUST_13.getNamespaceURI())){
             List<RequestSecurityTokenResponse> list = new ArrayList<RequestSecurityTokenResponse>();
             list.add(rstr);
             RequestSecurityTokenResponseCollection rstrc = eleFac.createRSTRC(list);
