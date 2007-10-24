@@ -44,6 +44,7 @@ import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.security.impl.policy.LogStringsMessages;
 import com.sun.xml.ws.security.impl.policy.Trust10;
+import com.sun.xml.ws.security.impl.policy.Trust13;
 import com.sun.xml.ws.security.impl.policyconv.IntegrityAssertionProcessor;
 import com.sun.xml.ws.security.impl.policyconv.XWSSPolicyContainer;
 import com.sun.xml.ws.security.policy.AsymmetricBinding;
@@ -104,6 +105,7 @@ public class XWSSPolicyGenerator {
     private PolicyAssertion wssAssertion = null;
     private WSSAssertion wss11 = null;
     private Trust10 trust10 = null;
+    private Trust13 trust13 = null;
     private AlgorithmSuite algSuite = null;
     //true if signed by primary signature
     private boolean signBody = false;
@@ -266,6 +268,8 @@ public class XWSSPolicyGenerator {
                     wssAssertion = assertion;
                 }else if(PolicyUtil.isTrust10(assertion, spVersion)){
                     trust10 = (Trust10)assertion;
+                }else if(PolicyUtil.isTrust13(assertion, spVersion)){
+                    trust13 = (Trust13)assertion;
                 }
             }
         }
@@ -292,6 +296,8 @@ public class XWSSPolicyGenerator {
                     wssAssertion = assertion;
                 }else if(PolicyUtil.isTrust10(assertion, spVersion)){
                     trust10 = (Trust10)assertion;
+                }else if(PolicyUtil.isTrust13(assertion, spVersion)){
+                    trust13 = (Trust13)assertion;
                 }else if(PolicyUtil.isBinding(assertion, spVersion)){
                     _binding =(Binding) assertion;
                 }else if(PolicyUtil.isRequiredElements(assertion, spVersion)){

@@ -261,6 +261,8 @@ public class SecurityPolicyValidator implements PolicyAssertionValidator{
         supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,RequireClientCertificate));
         supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,HttpBasicAuthentication));
         supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,HttpDigestAuthentication));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,RequireRequestSecurityTokenCollection));
+        supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,RequireAppliesTo));
         
         supportedAssertions.add(new QName(TRUST_NS,RequestSecurityToken));
         supportedAssertions.add(new QName(TRUST_NS,RequestType));

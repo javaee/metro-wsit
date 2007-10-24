@@ -79,4 +79,7 @@ public interface Constants {
     public static final String REQUIRE_CLIENT_ENTROPY = "RequireClientEntropy";
     public static final String REQUIRE_SERVER_ENTROPY= "RequireServerEntropy";
     public static final String MUST_SUPPORT_ISSUED_TOKENS = "MustSupportIssuedTokens";
+    
+    public static final String REQUIRE_REQUEST_SECURITY_TOKEN_COLLECTION = "RequireRequestSecurityTokenCollection";
+    public static final String REQUIRE_APPLIES_TO = "RequireAppliesTo";
 }

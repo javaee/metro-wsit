@@ -174,6 +174,8 @@ public class Constants {
     public final static String EncryptedSupportingTokens = "EncryptedSupportingTokens";
     public final static String EndorsingEncryptedSupportingTokens = "EndorsingEncryptedSupportingTokens";
     public final static String SignedEndorsingEncryptedSupportingTokens = "SignedEndorsingEncryptedSupportingTokens";
+    public final static String RequireRequestSecurityTokenCollection = "RequireRequestSecurityTokenCollection";
+    public final static String RequireAppliesTo = "RequireAppliesTo";
     // End of new assertions from WS-SecurityPolicy 1.2
     
     public final static String Body = "Body";

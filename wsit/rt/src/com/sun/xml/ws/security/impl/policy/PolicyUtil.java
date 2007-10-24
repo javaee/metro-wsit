@@ -853,6 +853,30 @@ public class PolicyUtil {
         return false;
     }
     
+    public static boolean isRequestSecurityTokenCollection(PolicyAssertion assertion, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
+            return false;
+        }
+        
+        if(assertion.getName().getLocalPart().equals(RequireRequestSecurityTokenCollection) &&
+                assertion.getName().getNamespaceURI().equals(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri)) {
+            return true;
+        }
+        return false;
+    }
+    
+    public static boolean isAppliesTo(PolicyAssertion assertion, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
+            return false;
+        }
+        
+        if(assertion.getName().getLocalPart().equals(RequireAppliesTo) &&
+                assertion.getName().getNamespaceURI().equals(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri)) {
+            return true;
+        }
+        return false;
+    }
+    
     public static boolean isIssuer(PolicyAssertion assertion, SecurityPolicyVersion spVersion) {
         if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
