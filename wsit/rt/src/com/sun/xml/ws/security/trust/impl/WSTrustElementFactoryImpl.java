@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustElementFactoryImpl.java,v 1.17 2007-10-23 18:49:42 jdg6688 Exp $
+ * $Id: WSTrustElementFactoryImpl.java,v 1.18 2007-10-24 06:34:38 jdg6688 Exp $
  */
 
 /*
@@ -433,14 +433,28 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
      * Create RSTR Collection from Source
      */
     public  RequestSecurityTokenResponseCollection createRSTRCollectionFrom(final Source src) {
-        throw new UnsupportedOperationException("Not yet implemented!");
+        try {
+            javax.xml.bind.Unmarshaller u = getContext().createUnmarshaller();
+            JAXBElement<RequestSecurityTokenResponseCollectionType> rstrcType = u.unmarshal(src, RequestSecurityTokenResponseCollectionType.class);
+            RequestSecurityTokenResponseCollectionType type = rstrcType.getValue();
+            return new RequestSecurityTokenResponseCollectionImpl(type);
+        } catch ( Exception ex) {
+            throw new RuntimeException(ex.getMessage(), ex);
+        }
     }
     
     /**
      * Create RSTR Collection from Element
      */
     public  RequestSecurityTokenResponseCollection createRSTRCollectionFrom(final Element elem) {
-        throw new UnsupportedOperationException("Not yet implemented!");
+        try {
+            javax.xml.bind.Unmarshaller u = getContext().createUnmarshaller();
+            JAXBElement<RequestSecurityTokenResponseCollectionType> rstrcType = u.unmarshal(elem, RequestSecurityTokenResponseCollectionType.class);
+            RequestSecurityTokenResponseCollectionType type = rstrcType.getValue();
+            return new RequestSecurityTokenResponseCollectionImpl(type);
+        } catch ( Exception ex) {
+            throw new RuntimeException(ex.getMessage(), ex);
+        }
     }
     
     

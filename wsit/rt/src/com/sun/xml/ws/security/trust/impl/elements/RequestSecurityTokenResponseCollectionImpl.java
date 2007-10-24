@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityTokenResponseCollectionImpl.java,v 1.5 2007-05-29 22:11:34 ofung Exp $
+ * $Id: RequestSecurityTokenResponseCollectionImpl.java,v 1.6 2007-10-24 06:34:38 jdg6688 Exp $
  */
 
 /*
@@ -81,7 +81,7 @@ public class RequestSecurityTokenResponseCollectionImpl extends RequestSecurityT
     throws URISyntaxException,WSTrustException{
         final List<RequestSecurityTokenResponseType> list = rstrcType.getRequestSecurityTokenResponse();
         for (int i = 0; i < list.size(); i++) {
-            addRequestSecurityTokenResponse(new RequestSecurityTokenResponseImpl((RequestSecurityTokenResponseType)list.get(i)));
+            addRequestSecurityTokenResponse(new RequestSecurityTokenResponseImpl(list.get(i)));
         }
     }
     

@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityTokenResponseCollectionImpl.java,v 1.1 2007-08-23 12:40:56 shyam_rao Exp $
+ * $Id: RequestSecurityTokenResponseCollectionImpl.java,v 1.2 2007-10-24 06:35:43 jdg6688 Exp $
  */
 
 /*
@@ -69,7 +69,6 @@ public class RequestSecurityTokenResponseCollectionImpl extends RequestSecurityT
     public RequestSecurityTokenResponseCollectionImpl(RequestSecurityTokenResponseCollectionType rstrcType)
     throws Exception {
         List<Object> list = rstrcType.getRequestSecurityTokenResponse();
-        System.out.println("******* response size *****" + list.size());
         for (int i = 0; i < list.size(); i++) {
 
             RequestSecurityTokenResponseType rst = null;
