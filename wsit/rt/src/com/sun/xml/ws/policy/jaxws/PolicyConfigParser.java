@@ -235,8 +235,10 @@ public final class PolicyConfigParser {
                 }
             }
             
-            if (configFileUrl == null && LOGGER.isLoggable(Level.CONFIG)) {
-                LOGGER.config(LocalizationMessages.WSP_1035_COULD_NOT_LOCATE_WSIT_CFG_FILE(configFileIdentifier, examinedPath));
+            if (configFileUrl == null) {
+                if (LOGGER.isLoggable(Level.CONFIG)) {
+                    LOGGER.config(LocalizationMessages.WSP_1035_COULD_NOT_LOCATE_WSIT_CFG_FILE(configFileIdentifier, examinedPath));
+                }
             } else {
                 model = parseModel(configFileUrl, isClientConfig, mutators);
                 LOGGER.info(LocalizationMessages.WSP_1049_LOADED_WSIT_CFG_FILE(configFileUrl.toExternalForm()));
