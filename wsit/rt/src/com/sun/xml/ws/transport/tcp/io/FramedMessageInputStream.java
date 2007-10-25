@@ -64,7 +64,6 @@ public final class FramedMessageInputStream extends InputStream implements LifeC
     
     private SocketChannel socketChannel;
     
-    private int bufferClearLimit;  // clear buffer before read from socket if its size already more than this value
     /**
      * The time to wait before timing out when reading bytes
      */
@@ -145,15 +144,13 @@ public final class FramedMessageInputStream extends InputStream implements LifeC
     
     public void setByteBuffer(final ByteBuffer byteBuffer) {
         this.byteBuffer = byteBuffer;
-        if (byteBuffer != null) {
-            bufferClearLimit = byteBuffer.capacity() * 3 / 4;
-        }
     }
     
     /**
      * Return the available bytes
      * @return the wrapped byteBuffer.remaining()
      */
+    @Override
     public int available() {
         return remaining();
     }
@@ -162,12 +159,14 @@ public final class FramedMessageInputStream extends InputStream implements LifeC
     /**
      * Close this stream.
      */
+    @Override
     public void close() {
     }
     
     /**
      * Return true if mark is supported.
      */
+    @Override
     public boolean markSupported() {
         return false;
     }
@@ -176,28 +175,47 @@ public final class FramedMessageInputStream extends InputStream implements LifeC
      * Read the first byte from the wrapped <code>ByteBuffer</code>.
      */
     public int read() {
-        int eof = 0;
-        if (!byteBuffer.hasRemaining()){
-            eof = readFromChannel();
-        } else if (remaining() == 0 && isLastFrame) {   // if in buffer there is last frame's tale only
-            return -1;
-        }
-        
-        if (eof == -1 || readFrameHeaderIfRequired() == -1) return -1;
-        
-        if (byteBuffer.hasRemaining()) {
-            frameBytesRead++;
-            receivedMessageLength ++;
+        if (!isDirectMode) {
+            if (isLastFrame && frameBytesRead >= currentFrameDataSize) {
+                // check if last frame and there is no data
+                return -1;
+            }
+
+            int eof = 0;
+            if (!byteBuffer.hasRemaining()) {
+                eof = readFromChannel();
+            }
+
+            if (eof == -1 || readFrameHeaderIfRequired() == -1) {
+                return -1;
+            }
+
+            if (byteBuffer.hasRemaining()) {
+                frameBytesRead++;
+                if (!isReadingHeader && frameBytesRead > currentFrameDataSize) {
+                }
+                receivedMessageLength++;
+                return byteBuffer.get() & 0xff;
+            }
+
+            return read();
+        } else {
+            if (!byteBuffer.hasRemaining()) {
+                int eof = readFromChannel();
+                if (eof == -1) {
+                    return -1;
+                }
+            }
+            
             return byteBuffer.get() & 0xff;
         }
-        
-        return read();
     }
     
     
     /**
      * Read the bytes from the wrapped <code>ByteBuffer</code>.
      */
+    @Override
     public int read(final byte[] b) {
         return (read(b, 0, b.length));
     }
@@ -206,29 +224,55 @@ public final class FramedMessageInputStream extends InputStream implements LifeC
     /**
      * Read the first byte of the wrapped <code>ByteBuffer</code>.
      */
+    @Override
     public int read(final byte[] b, final int offset, int length) {
-        if (!byteBuffer.hasRemaining()) {
-            final int eof = readFromChannel();
-            if (eof <= 0){
+        if (!isDirectMode) {
+            if (isLastFrame && frameBytesRead >= currentFrameDataSize) {
+                // check if last frame and there is no data
                 return -1;
             }
-        } else if (remaining() == 0 && isLastFrame) {   // if in buffer there is last frame's tale only
-            return -1;
+
+            int eof = 0;
+            if (!byteBuffer.hasRemaining()) {
+                eof = readFromChannel();
+            }
+
+            if (eof == -1 || readFrameHeaderIfRequired() == -1) {
+                return -1;
+            }
+
+            //@TODO add logic for reading from several frames if required
+            int remaining = remaining();
+            if (remaining == 0) {
+                // if header was read, but payload is empty - read it
+                return read(b, offset, length);
+            }
+
+            if (length > remaining) {
+                length = remaining;
+            }
+
+            byteBuffer.get(b, offset, length);
+            frameBytesRead += length;
+            if (!isReadingHeader && frameBytesRead > currentFrameDataSize) {
+            }
+            receivedMessageLength += length;
+
+            return length;
+        } else {
+            if (!byteBuffer.hasRemaining()) {
+                int eof = readFromChannel();
+                if (eof == -1) {
+                    return -1;
+                }
+            }
+            int remaining = remaining();
+            if (length > remaining) {
+                length = remaining;
+            }
+            byteBuffer.get(b, offset, length);
+            return length;
         }
-        
-        if (readFrameHeaderIfRequired() == -1) return -1;
-        
-        //@TODO add logic for reading from several frames if required
-        final int remaining = remaining();
-        if (length > remaining) {
-            length = remaining;
-        }
-        
-        byteBuffer.get(b, offset, length);
-        frameBytesRead += length;
-        receivedMessageLength += length;
-        
-        return length;
     }
     
     
@@ -283,6 +327,7 @@ public final class FramedMessageInputStream extends InputStream implements LifeC
         isLastFrame = FrameType.isLastFrame(messageId);
         currentFrameDataSize += frameBytesRead;
         isReadingHeader = false;
+        
         if (logger.isLoggable(Level.FINEST)) {
             logger.log(Level.FINEST, MessagesMessages.WSTCP_1061_FRAMED_MESSAGE_IS_READ_HEADER_DONE(channelId, messageId, contentId, contentProps, currentFrameDataSize, isLastFrame));
         }
@@ -347,12 +392,7 @@ public final class FramedMessageInputStream extends InputStream implements LifeC
             return -1;
         }
         
-        if (!byteBuffer.hasRemaining() && byteBuffer.position() >= bufferClearLimit) {
-            byteBuffer.clear();
-        }
-        
-        final int bbPosition = byteBuffer.position();
-        byteBuffer.limit(byteBuffer.capacity());
+        byteBuffer.clear();
         
         int count;
         int byteRead = 0;
@@ -406,7 +446,6 @@ public final class FramedMessageInputStream extends InputStream implements LifeC
             }
             
             byteBuffer.flip();
-            byteBuffer.position(bbPosition);
         }
         
         return byteRead;
@@ -419,7 +458,7 @@ public final class FramedMessageInputStream extends InputStream implements LifeC
     }
     
     private boolean isEOF() {
-        return isLastFrame && frameBytesRead >= currentFrameDataSize - 1;
+        return isLastFrame && frameBytesRead >= currentFrameDataSize;
     }
     
     private int remaining() {
@@ -430,6 +469,7 @@ public final class FramedMessageInputStream extends InputStream implements LifeC
         return Math.min(currentFrameDataSize - frameBytesRead, byteBuffer.remaining());
     }
     
+    @Override
     public void reset() {
         frameBytesRead = 0;
         currentFrameDataSize = 0;
@@ -450,6 +490,7 @@ public final class FramedMessageInputStream extends InputStream implements LifeC
         setByteBuffer(null);
     }
     
+    @Override
     public String toString() {
         final StringBuffer buffer = new StringBuffer(100);
         buffer.append("ByteBuffer: ");

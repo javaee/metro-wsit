@@ -93,7 +93,7 @@ public class TCPClientTransport extends DistributedPropertySet {
      * Getting output stream.
      * Making some stream preparation before
      */
-    public @NotNull OutputStream openOutputStream() throws WSTCPException {
+    public @NotNull OutputStream openOutputStream() throws IOException, WSTCPException {
         connection.setChannelId(channelContext.getChannelId());
         connection.setMessageId(FrameType.MESSAGE);
         channelContext.setContentType(contentType);

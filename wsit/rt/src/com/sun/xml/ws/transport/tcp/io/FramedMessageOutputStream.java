@@ -40,6 +40,7 @@ import com.sun.xml.ws.transport.tcp.pool.LifeCycle;
 import com.sun.xml.ws.transport.tcp.util.ByteBufferFactory;
 import com.sun.xml.ws.transport.tcp.util.FrameType;
 import com.sun.xml.ws.transport.tcp.util.TCPConstants;
+import com.sun.xml.ws.transport.tcp.util.TCPSettings;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
@@ -51,7 +52,10 @@ import java.util.Map;
  * @author Alexey Stashok
  */
 public final class FramedMessageOutputStream extends OutputStream implements LifeCycle {
-    private static final int HEADER_BUFFER_SIZE = 10;
+    private static final int MAX_GROW_SIZE = TCPSettings.getInstance().getOutputBufferGrowLimit();
+    private static final int MAX_PAYLOAD_LENGTH_LENTGTH = calculatePayloadLengthLength(MAX_GROW_SIZE);
+    private static final boolean IS_GROWABLE = TCPSettings.getInstance().isOutputBufferGrow();
+    
     private boolean useDirectBuffer;
     
     private ByteBuffer outputBuffer;
@@ -73,7 +77,8 @@ public final class FramedMessageOutputStream extends OutputStream implements Lif
     // ByteBuffer for channel_id and message_id, which present in all messages
     private final ByteBuffer headerBuffer;
     
-    private final ByteBuffer[] frame = new ByteBuffer[2];
+    private int frameMessageIdHighValue;
+    private int frameMessageIdPosition;
     
     /**
      * could be useful for debug reasons
@@ -96,9 +101,8 @@ public final class FramedMessageOutputStream extends OutputStream implements Lif
     
     public void setFrameSize(final int frameSize) {
         this.frameSize = frameSize;
-        payloadlengthLength = (int) Math.ceil(Math.log(frameSize) / Math.log(2));
+        payloadlengthLength = calculatePayloadLengthLength(frameSize);
         outputBuffer = ByteBufferFactory.allocateView(frameSize, useDirectBuffer);
-        formFrameBufferArray();
     }
     
     public boolean isDirectMode() {
@@ -108,6 +112,11 @@ public final class FramedMessageOutputStream extends OutputStream implements Lif
     public void setDirectMode(final boolean isDirectMode) {
         reset();
         this.isDirectMode = isDirectMode;
+        try {
+            buildHeader();
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
     }
     
     public void setSocketChannel(final SocketChannel socketChannel) {
@@ -142,6 +151,7 @@ public final class FramedMessageOutputStream extends OutputStream implements Lif
         outputBuffer.put((byte) data);
     }
     
+    @Override
     public void write(final byte[] data, int offset, int size) throws IOException {
         while(size > 0) {
             final int bytesToWrite = Math.min(size, outputBuffer.remaining());
@@ -159,20 +169,17 @@ public final class FramedMessageOutputStream extends OutputStream implements Lif
             outputBuffer.flip();
             isFlushLast = true;
             
-            do {
-                flushBuffer();
-            } while(outputBuffer.hasRemaining());
+            flushBuffer();
             outputBuffer.clear();
         }
     }
-    
-    private void flushBuffer() throws IOException {
-        final int payloadLength = outputBuffer.remaining();
+
+    public void buildHeader() throws IOException {
+        headerBuffer.clear();
         if (!isDirectMode) {
-            headerBuffer.clear();
             // Write channel-id
-            int frameMessageIdHighValue = DataInOutUtils.writeInt4(headerBuffer, channelId, 0, false);
-            int frameMessageIdPosition = headerBuffer.position();
+            frameMessageIdHighValue = DataInOutUtils.writeInt4(headerBuffer, channelId, 0, false);
+            frameMessageIdPosition = headerBuffer.position();
             boolean isFrameWithParameters = FrameType.isFrameContainsParams(messageId) && frameNumber == 0;
 
             // Write message-id without counting with possible chunking
@@ -200,35 +207,39 @@ public final class FramedMessageOutputStream extends OutputStream implements Lif
                 }
             }
             
-            int readyBytesToSend = headerBuffer.position() + payloadlengthLength + payloadLength;
+            initOutputBuffer();
+        }
+    }
+    
+    private void flushBuffer() throws IOException {
+        if (!isDirectMode) {
+            int approxHeaderSize = headerBuffer.position() + predictPayloadLengthLength();
+            final int payloadLength = outputBuffer.remaining() - approxHeaderSize;
             
             if (messageId == FrameType.MESSAGE) {
                 // If message will be chunked - update message-id
                 updateMessageIdIfRequired(frameMessageIdPosition, 
                         frameMessageIdHighValue, 
-                        isFlushLast && readyBytesToSend <= frameSize);
+                        isFlushLast);
             }
-
-            final int sendingPayloadLength = calcPayloadSizeToSend(readyBytesToSend);
 
             // Write payload-length
-            DataInOutUtils.writeInt8(headerBuffer, sendingPayloadLength);
+            DataInOutUtils.writeInt8(headerBuffer, payloadLength);
             headerBuffer.flip();
-            final int payloadLimit = outputBuffer.limit();
-            if (sendingPayloadLength < payloadLength) {
-                // check to change for outputBuffer.limit(sendingPayloadLength);
-                outputBuffer.limit(outputBuffer.limit() - (payloadLength - sendingPayloadLength));
-            }
-            
-            OutputWriter.flushChannel(socketChannel, frame);
-            outputBuffer.limit(payloadLimit);
-            sentMessageLength += sendingPayloadLength;
+            // if read header is less, than expected (because of sendingPayloadLength length)
+            int diff = approxHeaderSize - headerBuffer.remaining();
+            outputBuffer.position(diff);
+            outputBuffer.put(headerBuffer);
+            outputBuffer.position(diff);
+
+            OutputWriter.flushChannel(socketChannel, outputBuffer);
+            sentMessageLength += payloadLength;
             frameNumber++;
         } else {
             OutputWriter.flushChannel(socketChannel, outputBuffer);
         }
     }
-    
+
     private void updateMessageIdIfRequired(int frameMessageIdPosition,
             int frameMessageIdHighValue, boolean isLastFrame) {
         
@@ -257,21 +268,6 @@ public final class FramedMessageOutputStream extends OutputStream implements Lif
         }
     }
     
-    private int calcPayloadSizeToSend(final int readyBytesToSend) throws IOException {
-        int payloadLength = outputBuffer.remaining();
-        if (readyBytesToSend > frameSize) {
-            payloadLength -= (readyBytesToSend - frameSize);
-        }
-        
-        return payloadLength;
-    }
-    
-    private void formFrameBufferArray() {
-        frame[0] = headerBuffer;
-        frame[1] = outputBuffer;
-    }
-    
-    
     public void reset() {
         outputBuffer.clear();
         headerBuffer.clear();
@@ -291,13 +287,34 @@ public final class FramedMessageOutputStream extends OutputStream implements Lif
         socketChannel = null;
     }
     
+    @Override
     public void close() {
     }
     
     private void flushFrame() throws IOException {
         outputBuffer.flip();
-        flushBuffer();
-        outputBuffer.compact();
+        if (IS_GROWABLE && outputBuffer.capacity() < MAX_GROW_SIZE) {
+            ByteBuffer newOutputByteBuffer = ByteBufferFactory.allocateView(
+                    Math.min(outputBuffer.capacity() * 2, MAX_GROW_SIZE), 
+                    useDirectBuffer);
+            newOutputByteBuffer.put(outputBuffer);
+            outputBuffer = newOutputByteBuffer;
+        } else {
+            flushBuffer();
+            buildHeader();
+        }
     }
     
+    private void initOutputBuffer() {
+        outputBuffer.clear();
+        outputBuffer.position(headerBuffer.position() + predictPayloadLengthLength());
+    }
+    
+    private int predictPayloadLengthLength() {
+        return IS_GROWABLE ? MAX_PAYLOAD_LENGTH_LENTGTH : payloadlengthLength;
+    }
+    
+    private static int calculatePayloadLengthLength(int frameSize) {
+        return (int) Math.ceil(Math.log(frameSize) / Math.log(2) / 7);
+    }
 }

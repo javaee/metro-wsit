@@ -42,8 +42,14 @@ package com.sun.xml.ws.transport.tcp.util;
 public final class TCPSettings {
     private static final TCPSettings instance = new TCPSettings();
     private static final String ENCODING_MODE_PROPERTY = "com.sun.xml.ws.transport.tcp.encodingMode";
+    private static final String OUTPUT_BUFFER_GROWING_PROPERTY = "com.sun.xml.ws.transport.tcp.output.bufferGrow";
+    private static final String OUTPUT_BUFFER_GROWING_LIMIT_PROPERTY = "com.sun.xml.ws.transport.tcp.output.bufferGrowLimit";
     
     private EncodingMode encodingMode;
+    
+    // Output buffer growing settings
+    private boolean isOutputBufferGrow;
+    private int outputBufferGrowLimit;
     
     public enum EncodingMode {
         XML,
@@ -63,6 +69,14 @@ public final class TCPSettings {
         return encodingMode;
     }
     
+    public boolean isOutputBufferGrow() {
+        return isOutputBufferGrow;
+    }
+    
+    public int getOutputBufferGrowLimit() {
+        return outputBufferGrowLimit;
+    }
+    
     private void gatherSettings() {
         if (System.getProperty(ENCODING_MODE_PROPERTY) != null){
             final String encodingModeS = System.getProperty(ENCODING_MODE_PROPERTY);
@@ -76,5 +90,13 @@ public final class TCPSettings {
         } else {
             encodingMode = EncodingMode.FI_STATEFUL;
         }
+        
+        // True, if property does not exist or set to true
+        isOutputBufferGrow =
+                System.getProperty(OUTPUT_BUFFER_GROWING_PROPERTY) == null ||
+                    Boolean.getBoolean(OUTPUT_BUFFER_GROWING_PROPERTY);
+        
+        outputBufferGrowLimit = Integer.getInteger(
+                OUTPUT_BUFFER_GROWING_LIMIT_PROPERTY, 65536);
     }
 }

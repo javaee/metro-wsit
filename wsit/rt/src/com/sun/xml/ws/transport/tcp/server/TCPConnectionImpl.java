@@ -78,7 +78,7 @@ public class TCPConnectionImpl implements WebServiceContextDelegate {
         return inputStream;
     }
     
-    public OutputStream openOutput() throws WSTCPException {
+    public OutputStream openOutput() throws IOException, WSTCPException {
         try {
             setMessageHeaders();
         } catch (IOException ex) {

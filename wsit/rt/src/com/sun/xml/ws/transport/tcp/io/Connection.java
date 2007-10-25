@@ -136,11 +136,12 @@ public final class Connection {
         return is;
     }
     
-    public OutputStream openOutputStream() {
+    public OutputStream openOutputStream() throws IOException {
         outputStream.setChannelId(channelId);
         outputStream.setMessageId(messageId);
         outputStream.setContentId(contentId);
         
+        outputStream.buildHeader();
         return outputStream;
     }
     
@@ -255,6 +256,7 @@ public final class Connection {
         return connection;
     }
     
+    @Override
     protected void finalize() throws Throwable {
         close();
         super.finalize();
@@ -276,6 +278,7 @@ public final class Connection {
         return getLocalPort(socketChannel);
     }
     
+    @Override
     public String toString() {
         return "host: " + getHost() + " port: " + getPort();
     }

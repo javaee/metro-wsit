@@ -129,7 +129,11 @@ public class WSConnectionManager implements ConnectionFinder<ConnectionSession>,
         final ConnectionSession session = connectionCache.get(uri, this);
         ChannelContext channelContext = session.findWSServiceContextByURI(uri);
         if (channelContext == null) {
-            channelContext = doOpenChannel(session, uri, wsService, wsBinding, defaultCodec);
+            lockConnection(session);
+            channelContext = session.findWSServiceContextByURI(uri);
+            if (channelContext == null) {
+                channelContext = doOpenChannel(session, uri, wsService, wsBinding, defaultCodec);
+            }
         }
         
         if (logger.isLoggable(Level.FINE)) {
