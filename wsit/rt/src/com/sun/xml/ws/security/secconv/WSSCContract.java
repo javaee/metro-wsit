@@ -240,7 +240,7 @@ public class WSSCContract {
         
         byte[] secret = WSTrustUtil.generateRandomSecret(keySize/8);
         final String proofTokenType = (clientEntr == null ||clientEntr.length ==0)
-        ? BinarySecret.SYMMETRIC_KEY_TYPE :BinarySecret.NONCE_KEY_TYPE;
+        ? wsTrustVer.getSymmetricKeyTypeURI() :wsTrustVer.getNonceBinarySecretTypeURI();
         Entropy serverEntropy = null;
         if(reqServerEntr){
             final BinarySecret serverBS;
@@ -249,7 +249,7 @@ public class WSSCContract {
             }else{
                 serverBS = eleFac.createBinarySecret(secret, proofTokenType);
             }
-            if (proofTokenType.equals(BinarySecret.NONCE_KEY_TYPE)){
+            if (proofTokenType.equals(wsTrustVer.getNonceBinarySecretTypeURI())){
                 if(wsscVer.getNamespaceURI().equals(WSSCVersion.WSSC_13.getNamespaceURI())){
                     serverEntropy = eleFac13.createEntropy(serverBS);
                 }else{

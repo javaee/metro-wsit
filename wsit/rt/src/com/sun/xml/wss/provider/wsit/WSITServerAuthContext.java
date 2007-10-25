@@ -480,7 +480,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         }
         //set timestamp timeout
         ctx.setTimestampTimeout(this.timestampTimeOut);
-        
+        ctx.setSecurityPolicyVersion(spVersion.namespaceUri);
         try {
             MessagePolicy policy = null;
             if (packet.getMessage().isFault()) {

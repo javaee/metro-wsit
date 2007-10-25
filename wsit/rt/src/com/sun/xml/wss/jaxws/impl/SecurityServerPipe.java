@@ -410,7 +410,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
         }else{
             ctx = new ProcessingContextImpl( packet.invocationProperties);
         }
-        
+        ctx.setSecurityPolicyVersion(spVersion.namespaceUri);
         try {
             MessagePolicy policy = null;
             if (packet.getMessage().isFault()) {
