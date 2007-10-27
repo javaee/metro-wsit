@@ -1208,7 +1208,7 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
         if (mapWrapper != null) {
             if (context.isClientSide() && (!isForConfigFile)) {
                 try {
-                    final PolicyMap clientPolicyMap = PolicyConfigParser.parse(PolicyConstants.CLIENT_CONFIGURATION_IDENTIFIER, null);
+                    final PolicyMap clientPolicyMap = PolicyConfigParser.parse(PolicyConstants.CLIENT_CONFIGURATION_IDENTIFIER, context.getContainer());
                     if (clientPolicyMap != null) {
                         mapWrapper.addClientConfigToMap(PolicyConstants.CLIENT_CONFIGURATION_IDENTIFIER, clientPolicyMap);
                     } else {
