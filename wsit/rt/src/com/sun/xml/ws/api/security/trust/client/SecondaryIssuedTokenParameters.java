@@ -34,70 +34,33 @@
  * holder.
  */
 
-package com.sun.xml.ws.security.trust;
+package com.sun.xml.ws.api.security.trust.client;
 
-import com.sun.xml.ws.security.trust.impl.WSTrustVersion10;
-import com.sun.xml.ws.security.trust.impl.wssx.WSTrustVersion13;
+import com.sun.xml.ws.api.security.trust.Claims;
 
 /**
  *
- * @author Jiandong
+ * @author Jiandong Guo
  */
-public abstract class WSTrustVersion {
-
-    public static final WSTrustVersion WS_TRUST_10 = new WSTrustVersion10();
-
-    public static final WSTrustVersion WS_TRUST_13 = new WSTrustVersion13();
-
-    public static WSTrustVersion getInstance(String nsURI){
-        if (nsURI.equals(WS_TRUST_13.getNamespaceURI())){
-            return WS_TRUST_13;
-        }
-        
-        return WS_TRUST_10;
-    }
+public interface SecondaryIssuedTokenParameters {
     
-    public abstract String getNamespaceURI();
-
-    public abstract String getIssueRequestTypeURI();
-
-    public abstract String getRenewRequestTypeURI();
-
-    public abstract String getCancelRequestTypeURI();
-
-    public abstract String getValidateRequestTypeURI();        
-
-    public abstract String getKeyExchangeRequestTypeURI();
+    String getTokenType();
     
-    public abstract String getPublicKeyTypeURI();        
-
-    public abstract String getSymmetricKeyTypeURI();
-
-    public abstract String getBearerKeyTypeURI();
-
-    public abstract String getIssueRequestAction();
-
-    public abstract String getIssueResponseAction();
-
-    public abstract String getIssueFinalResoponseAction();
-
-    public abstract String getRenewRequestAction();
-
-    public abstract String getRenewResponseAction();
-
-    public abstract String getRenewFinalResoponseAction();
-
-    public abstract String getCancelRequestAction();
-
-    public abstract String getCancelResponseAction();
-
-    public abstract String getCancelFinalResoponseAction();
-
-    public abstract String getCKPSHA1algorithmURI();
+    String getKeyType();
     
-    public abstract String getCKHASHalgorithmURI();
-
-    public abstract String getAsymmetricKeyBinarySecretTypeURI();
-
-    public abstract String getNonceBinarySecretTypeURI();
+    long getKeySize();
+    
+    String getSignatureAlgorithm();
+    
+    String getEncryptionAlgorithm();
+    
+    String getCanonicalizationAlgorithm();
+    
+    String getKeyWrapAlgorithm();
+    
+    String getSignWith();
+    
+    String getEncryptWith();
+    
+    Claims getClaims();
 }

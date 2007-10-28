@@ -57,7 +57,8 @@ public class IssuedTokenManager {
     
     /** Creates a new instance of IssuedTokenManager */
     private IssuedTokenManager() {
-        itpMap.put(STSIssuedTokenConfiguration.PROTOCOL, new STSIssuedTokenProviderImpl());
+        itpMap.put(STSIssuedTokenConfiguration.PROTOCOL_10, new STSIssuedTokenProviderImpl());
+        itpMap.put(STSIssuedTokenConfiguration.PROTOCOL_13, new STSIssuedTokenProviderImpl());
     }
     
     public static IssuedTokenManager getInstance(){
@@ -76,25 +77,25 @@ public class IssuedTokenManager {
     
     public void getIssuedToken(IssuedTokenContext ctx)throws WSTrustException {
         IssuedTokenConfiguration config = (IssuedTokenConfiguration)ctx.getSecurityPolicy().get(0);
-        IssuedTokenProvider provider = (IssuedTokenProvider)itpMap.get(config.getProtocol());
+        IssuedTokenProvider provider = itpMap.get(config.getProtocol());
         provider.issue(ctx);
     }
     
     public void renewIssuedToken(IssuedTokenContext ctx)throws WSTrustException {
         IssuedTokenConfiguration config = (IssuedTokenConfiguration)ctx.getSecurityPolicy().get(0);
-        IssuedTokenProvider provider = (IssuedTokenProvider)itpMap.get(config.getProtocol());
+        IssuedTokenProvider provider = itpMap.get(config.getProtocol());
         provider.renew(ctx);
     }
     
     public void cancelIssuedToken(IssuedTokenContext ctx)throws WSTrustException {
         IssuedTokenConfiguration config = (IssuedTokenConfiguration)ctx.getSecurityPolicy().get(0);
-        IssuedTokenProvider provider = (IssuedTokenProvider)itpMap.get(config.getProtocol());
+        IssuedTokenProvider provider = itpMap.get(config.getProtocol());
         provider.cancel(ctx);
     }
     
     public void validateIssuedToken(IssuedTokenContext ctx)throws WSTrustException {
         IssuedTokenConfiguration config = (IssuedTokenConfiguration)ctx.getSecurityPolicy().get(0);
-        IssuedTokenProvider provider = (IssuedTokenProvider)itpMap.get(config.getProtocol());
+        IssuedTokenProvider provider = itpMap.get(config.getProtocol());
         provider.validate(ctx);
     }
 }

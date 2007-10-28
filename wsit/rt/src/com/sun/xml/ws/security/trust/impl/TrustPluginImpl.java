@@ -47,59 +47,29 @@ package com.sun.xml.ws.security.trust.impl;
 
 import com.sun.xml.ws.api.security.trust.Claims;
 import com.sun.xml.ws.api.security.trust.WSTrustException;
-import com.sun.xml.ws.addressing.policy.Address;
+import com.sun.xml.ws.api.security.trust.client.SecondaryIssuedTokenParameters;
 import com.sun.xml.ws.mex.client.MetadataClient;
 import com.sun.xml.ws.mex.client.PortInfo;
 import com.sun.xml.ws.mex.client.schema.Metadata;
-import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.impl.bindings.AppliesTo;
-import com.sun.xml.ws.policy.Policy;
-import com.sun.xml.ws.policy.PolicyAssertion;
-import com.sun.xml.ws.policy.sourcemodel.PolicyModelGenerator;
-import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
-import com.sun.xml.ws.policy.sourcemodel.XmlPolicyModelMarshaller;
 import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.Token;
-import com.sun.xml.ws.security.impl.IssuedTokenContextImpl;
-import com.sun.xml.ws.security.impl.policy.PolicyUtil;
-import com.sun.xml.ws.security.policy.IssuedToken;
-import com.sun.xml.ws.security.policy.Issuer;
-import com.sun.xml.ws.security.policy.RequestSecurityTokenTemplate;
 import com.sun.xml.ws.security.trust.*;
 import com.sun.xml.ws.security.trust.elements.BinarySecret;
 import com.sun.xml.ws.security.trust.elements.Entropy;
-import com.sun.xml.ws.security.trust.elements.Lifetime;
 import com.sun.xml.ws.security.trust.elements.OnBehalfOf;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponse;
-import com.sun.xml.ws.security.trust.impl.bindings.ClaimsType;
-import com.sun.xml.ws.security.trust.impl.bindings.ObjectFactory;
-import com.sun.xml.ws.security.trust.impl.bindings.RequestSecurityTokenResponseType;
-import com.sun.xml.ws.security.trust.impl.bindings.RequestSecurityTokenType;
-import com.sun.xml.ws.security.trust.impl.elements.ClaimsImpl;
+import com.sun.xml.ws.security.trust.elements.SecondaryParameters;
 import com.sun.xml.ws.security.trust.util.WSTrustUtil;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.net.URI;
 import java.net.URL;
 import java.net.URISyntaxException;
 import java.net.MalformedURLException;
 import java.rmi.RemoteException;
 import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import javax.xml.bind.util.JAXBResult;
 import javax.xml.namespace.QName;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamWriter;
-import javax.xml.transform.dom.DOMResult;
 import javax.xml.ws.Dispatch;
 import javax.xml.ws.RespectBindingFeature;
 import javax.xml.ws.Service;
@@ -114,11 +84,10 @@ import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
 import javax.xml.ws.soap.AddressingFeature;
 
 import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
-import org.w3c.dom.Document;
 
-import org.w3c.dom.Element;
 
 import com.sun.xml.ws.api.security.trust.client.STSIssuedTokenConfiguration;
+import com.sun.xml.ws.security.trust.elements.BaseSTSResponse;
 
 /**
  *
@@ -132,7 +101,6 @@ public class TrustPluginImpl implements TrustPlugin {
             LogDomainConstants.TRUST_IMPL_DOMAIN_BUNDLE);
     
     private final Configuration config;
-    private static WSTrustElementFactory fact = WSTrustElementFactory.newInstance();
     
     private static final String PRE_CONFIGURED_STS = "PreconfiguredSTS";
     private static final String NAMESPACE = "namespace";
@@ -191,11 +159,11 @@ public class TrustPluginImpl implements TrustPlugin {
         
         Token oboToken = stsConfig.getOBOToken();
        
-        RequestSecurityTokenResponse result = null;
+        BaseSTSResponse result = null;
         try {
-            final RequestSecurityToken request = createRequest(null, stsConfig, appliesTo, oboToken);
+            final RequestSecurityToken request = createRequest(stsConfig, appliesTo, oboToken);
              
-            result = invokeRST(request, wsdlLocation, serviceName, portName, stsURI);
+            result = invokeRST(request, wsdlLocation, serviceName, portName, stsURI, WSTrustVersion.getInstance(stsConfig.getProtocol()));
             final WSTrustClientContract contract = WSTrustFactory.createWSTrustClientContract(config);
             contract.handleRSTR(request, result, itc);
         } catch (RemoteException ex) {
@@ -208,159 +176,151 @@ public class TrustPluginImpl implements TrustPlugin {
             throw new WSTrustException(LogStringsMessages.WST_0016_PROBLEM_IT_CTX(stsURI, appliesTo));
         }
     }
-    
-    /**
-     * Obtain the Token by using WS-Trust or WS-SecureConversation.
-     * @param issuedToken, an instance of <sp:IssuedToken> or <sp:SecureConversation> assertion
-     * @return issuedTokenContext, a context containing the issued Token and related information
-     */
-    public IssuedTokenContext process(final PolicyAssertion token, final PolicyAssertion localToken, final String appliesTo){
-        final IssuedToken issuedToken = (IssuedToken)token;
-        final RequestSecurityTokenTemplate rstTemplate = issuedToken.getRequestSecurityTokenTemplate();
-        
-            URI stsURI =  getSTSURI(issuedToken);
-        URI wsdlLocation = null;
-        QName serviceName = null;
-        QName portName = null;
-        
-        // Get STS information from IssuedToken
-        if (stsURI != null){
-            URI metadataAddress = getAddressFromMetadata(issuedToken);
-            
-            if(metadataAddress != null){
-                wsdlLocation = metadataAddress;
-            }else{
-                wsdlLocation = stsURI;
-            }
-        }else if (localToken != null){
-            // Get STS information from local configuration
-            if (PRE_CONFIGURED_STS.equals(localToken.getName().getLocalPart())) {
-                final Map<QName,String> attrs = localToken.getAttributes();
-                final String namespace = attrs.get(new QName(CONFIG_NAMESPACE,NAMESPACE));
-                String stsEPStr = attrs.get(new QName(CONFIG_NAMESPACE,ENDPOINT));
-                if (stsEPStr == null){
-                    stsEPStr = attrs.get(new QName(CONFIG_NAMESPACE,ENDPOINT.toLowerCase()));
-                }
-                if (stsEPStr != null){
-                    stsURI = URI.create(stsEPStr);
-                }
-                
-                final String metadataStr = attrs.get(new QName(CONFIG_NAMESPACE, METADATA));
-                if (metadataStr != null){
-                    wsdlLocation = URI.create(metadataStr);
-                }
-                
-                final String wsdlLocationStr = attrs.get(new QName(CONFIG_NAMESPACE,WSDL_LOCATION));
-                if (wsdlLocationStr != null){
-                    wsdlLocation = URI.create(wsdlLocationStr);
-                }
-                
-                final String serviceNameStr = attrs.get(new QName(CONFIG_NAMESPACE,SERVICE_NAME));
-                if (serviceNameStr != null && namespace != null){
-                    serviceName = new QName(namespace,serviceNameStr);
-                }
-                
-                if (wsdlLocation == null){
-                    wsdlLocation = stsURI;
-                }
-                
-                final String portNameStr = attrs.get(new QName(CONFIG_NAMESPACE,PORT_NAME));
-                if (portNameStr != null && namespace != null){
-                    portName = new QName(namespace, portNameStr);
-                }
-            }
-        }
-        
-        if(stsURI == null){
-            log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0029_COULD_NOT_GET_STS_LOCATION(appliesTo));
-            throw new WebServiceException(LogStringsMessages.WST_0029_COULD_NOT_GET_STS_LOCATION(appliesTo));
-        }
-        
-        RequestSecurityTokenResponse result = null;
-        try {
-            final RequestSecurityToken request = createRequest(rstTemplate, null, appliesTo, null);
-            
-            // handle Claims.
-            // Not: should be in the RequestSecurityTokenTemplate api. Workaround for now.
-            Claims claims = getClaims(token, appliesTo);
-            if (claims != null){
-                request.setClaims(claims);
-            }
-
-            
-            result = invokeRST(request, wsdlLocation, serviceName, portName, stsURI.toString());
-            final IssuedTokenContext itc = new IssuedTokenContextImpl();
-            final WSTrustClientContract contract = WSTrustFactory.createWSTrustClientContract(config);
-            contract.handleRSTR(request, result, itc);
-            return itc;
-        } catch (RemoteException ex) {
-            log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0016_PROBLEM_IT_CTX(stsURI, appliesTo), ex);
-            throw new WebServiceException(LogStringsMessages.WST_0016_PROBLEM_IT_CTX(stsURI, appliesTo), ex);
-        } catch (URISyntaxException ex){
-            log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0016_PROBLEM_IT_CTX(stsURI, appliesTo), ex);
-            throw new WebServiceException(LogStringsMessages.WST_0016_PROBLEM_IT_CTX(stsURI, appliesTo));
-        } catch (WSTrustException ex){
-            log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0016_PROBLEM_IT_CTX(stsURI, appliesTo), ex);
-            throw new WebServiceException(LogStringsMessages.WST_0016_PROBLEM_IT_CTX(stsURI, appliesTo));
-        }
-    }
-    
-    private RequestSecurityToken createRequest(final RequestSecurityTokenTemplate rstTemplate, final STSIssuedTokenConfiguration stsConfig, final String appliesTo, final Token oboToken) throws URISyntaxException, WSTrustException, NumberFormatException {
-        final URI requestType = URI.create(WSTrustConstants.ISSUE_REQUEST);
+     
+    private RequestSecurityToken createRequest(final STSIssuedTokenConfiguration stsConfig, final String appliesTo, final Token oboToken) throws URISyntaxException, WSTrustException, NumberFormatException {
+        WSTrustVersion wstVer = WSTrustVersion.getInstance(stsConfig.getProtocol());
+        WSTrustElementFactory fact = WSTrustElementFactory.newInstance(wstVer);
+        final URI requestType = URI.create(wstVer.getIssueRequestTypeURI());
         AppliesTo applTo = null;
         if (appliesTo != null){
             applTo = WSTrustUtil.createAppliesTo(appliesTo);
         }
-        
-        long keySize = -1;
-        String keyType = null;
-        String tokenTypeStr = null;
-        if (rstTemplate != null){
-            keySize = rstTemplate.getKeySize();
-            keyType = rstTemplate.getKeyType();
-            tokenTypeStr = rstTemplate.getTokenType();
-        }else if (stsConfig != null){
-            keySize = stsConfig.getKeySize();
-            keyType = stsConfig.getKeyType();
-            tokenTypeStr = stsConfig.getTokenType();
-        }
-        
-        int len = 32;
-        if (keySize > 0){
-            len = (int)keySize/8;
-        }
-        
-        final SecureRandom secRandom = new SecureRandom();
-        final byte[] nonce = new byte[len];
-        secRandom.nextBytes(nonce);
-        final BinarySecret binarySecret = fact.createBinarySecret(nonce, BinarySecret.NONCE_KEY_TYPE);
-        final Entropy entropy = fact.createEntropy(binarySecret);
-        URI tokenType = URI.create(WSTrustConstants.SAML11_ASSERTION_TOKEN_TYPE);
-        if (tokenTypeStr != null){
-            tokenType = new URI(tokenTypeStr.trim());
-        }
-        final URI context = null;
-        final Claims claims = null;
-        final Lifetime lifetime = null;
-        final RequestSecurityToken rst= fact.createRSTForIssue(tokenType,requestType,context,applTo,claims,entropy,lifetime);
-        
-        if (keySize > 0){
-            rst.setKeySize(keySize);
-        }
-        
-        if (keyType != null){
-            rst.setKeyType(new URI(keyType.trim()));
-        }
-        rst.setComputedKeyAlgorithm(URI.create(WSTrustConstants.CK_PSHA1));
-        
+
+        final RequestSecurityToken rst= fact.createRSTForIssue(null,requestType, null,applTo,null,null,null);
         if (oboToken != null){
             OnBehalfOf obo = fact.createOnBehalfOf(oboToken);
             rst.setOnBehalfOf(obo);
         }
+ 
+        String tokenType = null;
+        String keyType = null;
+        long keySize = -1;
+        String signWith = null;
+        String encryptWith = null;
+        String signatureAlgorithm = null;
+        String encryptionAlgorithm = null;
+        String canonicalizationAlgorithm = null;
+        Claims claims = null;
+        if (wstVer.getNamespaceURI().equals(WSTrustVersion.WS_TRUST_13.getNamespaceURI())){
+            SecondaryIssuedTokenParameters sitp = stsConfig.getSecondaryIssuedTokenParameters();
+            if (sitp != null){
+                SecondaryParameters sp = fact.createSecondaryParameters();
+                tokenType = sitp.getTokenType();
+                if (tokenType != null){
+                    sp.setTokenType(URI.create(tokenType));
+                }
+                keyType = sitp.getKeyType();
+                if (keyType != null){
+                    sp.setKeyType(URI.create(keyType));
+                }
+                keySize = sitp.getKeySize();
+                if (keySize > 0){
+                    sp.setKeySize(keySize);
+                }
+                encryptWith = sitp.getEncryptWith();
+                if (encryptWith != null){
+                    sp.setEncryptWith(URI.create(encryptWith));
+                }
+                signWith = sitp.getSignWith();
+                if (signWith != null){
+                    sp.setSignWith(URI.create(signWith));
+                }
+                signatureAlgorithm = sitp.getSignatureAlgorithm();
+                if (signatureAlgorithm != null){
+                    sp.setSignatureAlgorithm(URI.create(signatureAlgorithm));
+                }
+                encryptionAlgorithm = sitp.getEncryptionAlgorithm();
+                if (encryptionAlgorithm != null){
+                    sp.setEncryptionAlgorithm(URI.create(encryptionAlgorithm));
+                }
+
+                canonicalizationAlgorithm = sitp.getCanonicalizationAlgorithm();
+                if (canonicalizationAlgorithm != null){
+                    sp.setCanonicalizationAlgorithm(URI.create(canonicalizationAlgorithm));
+                }
+
+                claims = sitp.getClaims();
+                if (claims != null){
+                    sp.setClaims(claims);
+                }
+                rst.setSecondaryParameters(sp);
+            }
+        }
+                
+        if (tokenType == null){
+            tokenType = stsConfig.getTokenType();
+            if (tokenType != null){
+                rst.setTokenType(URI.create(tokenType));
+            }
+         }
+  
+         if (keyType == null){
+            keyType = stsConfig.getKeyType();
+            if (keyType != null){
+                rst.setKeyType(URI.create(keyType));
+            }
+         }
+
+         if (keySize < 1){
+            keySize = stsConfig.getKeySize();
+            if (keySize > 0){
+                rst.setKeySize(keySize);
+            }
+         }
+         
+         if (encryptWith == null){
+            encryptWith = stsConfig.getEncryptWith();
+            if (encryptWith != null){
+                rst.setEncryptWith(URI.create(encryptWith));
+            }
+         }
+         
+         if (signWith == null){
+            signWith = stsConfig.getSignWith();
+            if (signWith != null){
+                rst.setSignWith(URI.create(signWith));
+            }
+         }  
+
+         if (signatureAlgorithm == null){
+            signatureAlgorithm = stsConfig.getSignatureAlgorithm();
+            if (signatureAlgorithm != null){
+                rst.setSignWith(URI.create(signWith));
+            }
+          }  
+
+          if (encryptionAlgorithm == null){
+            encryptionAlgorithm = stsConfig.getEncryptionAlgorithm();
+            if (encryptionAlgorithm != null){
+                rst.setEncryptionAlgorithm(URI.create(encryptionAlgorithm));
+            }
+          }  
+
+          if (canonicalizationAlgorithm == null){
+            canonicalizationAlgorithm = stsConfig.getCanonicalizationAlgorithm();
+            if (canonicalizationAlgorithm != null){
+                rst.setCanonicalizationAlgorithm(URI.create(canonicalizationAlgorithm));
+            }
+          }  
+
+          if (claims == null){
+            claims = stsConfig.getClaims();
+            if (claims != null){
+                rst.setClaims(claims);
+            }
+          }  
+
+        int len = 32;
+        if (keySize > 0){
+            len = (int)keySize/8;
+        }
+        final SecureRandom secRandom = new SecureRandom();
+        final byte[] nonce = new byte[len];
+        secRandom.nextBytes(nonce);
+        final BinarySecret binarySecret = fact.createBinarySecret(nonce, wstVer.getNonceBinarySecretTypeURI());
+        final Entropy entropy = fact.createEntropy(binarySecret);
+        rst.setEntropy(entropy);
+        rst.setComputedKeyAlgorithm(URI.create(wstVer.getCKPSHA1algorithmURI()));
        
         if (log.isLoggable(Level.FINE)) {
             log.log(Level.FINE,
@@ -370,8 +330,8 @@ public class TrustPluginImpl implements TrustPlugin {
         return rst;
     }
     
-    private RequestSecurityTokenResponse invokeRST(final RequestSecurityToken request, final URI wsdlLocation, QName serviceName, QName portName, String stsURI) throws RemoteException, WSTrustException {
-        
+    private BaseSTSResponse invokeRST(final RequestSecurityToken request, final URI wsdlLocation, QName serviceName, QName portName, String stsURI, WSTrustVersion wstVer) throws RemoteException, WSTrustException {
+        WSTrustElementFactory fact = WSTrustElementFactory.newInstance(wstVer);
         if(serviceName == null || portName==null){
             //we have to get the serviceName and portName through MEX
             if (log.isLoggable(Level.FINE)) {
@@ -398,7 +358,7 @@ public class TrustPluginImpl implements TrustPlugin {
                     LogStringsMessages.WST_0041_SERVICE_NOT_CREATED(wsdlLocation.toString()), ex);
             throw new WebServiceException(LogStringsMessages.WST_0041_SERVICE_NOT_CREATED(wsdlLocation.toString()), ex);
         }
-        final Dispatch<Object> dispatch = service.createDispatch(portName, fact.getContext(), Service.Mode.PAYLOAD, new WebServiceFeature[]{new RespectBindingFeature(), new AddressingFeature(false)});
+        final Dispatch<Object> dispatch = service.createDispatch(portName, WSTrustElementFactory.getContext(wstVer), Service.Mode.PAYLOAD, new WebServiceFeature[]{new RespectBindingFeature(), new AddressingFeature(false)});
         //Dispatch<SOAPMessage> dispatch = service.createDispatch(portName, SOAPMessage.class, Service.Mode.MESSAGE, new WebServiceFeature[]{new AddressingFeature(false)});
         //WSBinding wsbinding = (WSBinding) dispatch.getBinding();
         //AddressingVersion addVer = wsbinding.getAddressingVersion();
@@ -489,184 +449,14 @@ public class TrustPluginImpl implements TrustPlugin {
         
         return serviceInfo;
     }
-    
-    /**
-     * method to examine the IssuedToken assertion and return the URI of the Issuer
-     * endpoint reference.
-     * @param issuedToken The issuedToken assertion
-     * @return The URI of the Issuer in IssuedToken, which is nothing but the URI of STS.
-     */
-    private URI getSTSURI(final IssuedToken issuedToken) {
-        final Issuer issuer = issuedToken.getIssuer();
-        if(issuer != null){
-            final Address address = issuer.getAddress();
-            if (address != null){
-                return address.getURI();
-            }
-        }
-        return null;
-    }
-    
-    private URI getAddressFromMetadata(final IssuedToken issuedToken)  {
-        final PolicyAssertion issuer = (PolicyAssertion)issuedToken.getIssuer();
-        PolicyAssertion addressingMetadata = null;
-        PolicyAssertion metadata = null;
-        PolicyAssertion metadataSection = null;
-        PolicyAssertion metadataReference = null;
-        Address address = null;
-        if(issuer != null){
-            address = ((Issuer)issuer).getAddress();
-            
-            if ( issuer.hasNestedAssertions() ) {
-                final Iterator <PolicyAssertion> iterator = issuer.getNestedAssertionsIterator();
-                while ( iterator.hasNext() ) {
-                    final PolicyAssertion assertion = iterator.next();
-                    if ( WSTrustUtil.isAddressingMetadata(assertion)) {
-                        addressingMetadata = assertion;
-                        break;
-                    }
-                }
-            }
-        }
-        
-        if(addressingMetadata != null){
-            if ( addressingMetadata.hasNestedAssertions() ) {
-                final Iterator <PolicyAssertion> iterator = addressingMetadata.getNestedAssertionsIterator();
-                while ( iterator.hasNext() ) {
-                    final PolicyAssertion assertion = iterator.next();
-                    if ( WSTrustUtil.isMetadata(assertion)) {
-                        metadata = assertion;
-                        break;
-                    }
-                }
-            }
-        }
-        
-        if(metadata != null){
-            if ( metadata.hasNestedAssertions() ) {
-                final Iterator <PolicyAssertion> iterator = metadata.getNestedAssertionsIterator();
-                while ( iterator.hasNext() ) {
-                    final PolicyAssertion assertion = iterator.next();
-                    if ( WSTrustUtil.isMetadataSection(assertion)) {
-                        metadataSection = assertion;
-                        break;
-                    }
-                }
-            }
-            
-        }
-        
-        if(metadataSection != null){
-            if ( metadataSection.hasNestedAssertions() ) {
-                final Iterator <PolicyAssertion> iterator = metadataSection.getNestedAssertionsIterator();
-                while ( iterator.hasNext() ) {
-                    final PolicyAssertion assertion = iterator.next();
-                    if ( WSTrustUtil.isMetadataReference(assertion)) {
-                        metadataReference = assertion;
-                        break;
-                    }
-                }
-            }
-            
-        }
-        if(metadataReference != null){
-            if ( metadataReference.hasNestedAssertions() ) {
-                final Iterator <PolicyAssertion> iterator = metadataReference.getNestedAssertionsIterator();
-                while ( iterator.hasNext() ) {
-                    final PolicyAssertion assertion = iterator.next();
-                    if ( PolicyUtil.isAddress(assertion)) {
-                        address = (Address)assertion;
-                        // return address.getURI();
-                    }
-                }
-            }
-            
-        }
-        
-        if (address != null){
-            return address.getURI();
-        }
-        
-        return null;
-    }
-    
-     private Claims getClaims(final PolicyAssertion token, String appliesTo)throws WSTrustException{
-        Claims claims = null;
-        final Iterator<PolicyAssertion> tokens =
-                    token.getNestedAssertionsIterator();
-        while(tokens.hasNext()){
-            final PolicyAssertion cToken = tokens.next();
-            if(REQUEST_SECURITY_TOKEN_TEMPLATE.equals(cToken.getName().getLocalPart())){
-                final Iterator<PolicyAssertion> cTokens =
-                            cToken.getNestedAssertionsIterator();
-                while (cTokens.hasNext()){
-                    final PolicyAssertion gToken = cTokens.next();
-                    if (CLAIMS.equals(gToken.getName().getLocalPart())){
-                        try{
-                            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                            XMLOutputFactory xof = XMLOutputFactory.newInstance();
-                            XMLStreamWriter writer = xof.createXMLStreamWriter(baos);
-                           
-                            AssertionSet set = AssertionSet.createAssertionSet(Arrays.asList(new PolicyAssertion[] {gToken}));
-                            Policy policy = Policy.createPolicy(Arrays.asList(new AssertionSet[] { set }));
-                            PolicySourceModel sourceModel = PolicyModelGenerator.getGenerator().translate(policy);
-                            XmlPolicyModelMarshaller pm = (XmlPolicyModelMarshaller) XmlPolicyModelMarshaller.getXmlMarshaller(true);
-                            pm.marshal(sourceModel, writer);
-                            
-                            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-                            dbf.setNamespaceAware(true);
-                            DocumentBuilder db = dbf.newDocumentBuilder();
-                            Document doc = db.parse(new ByteArrayInputStream(baos.toByteArray()));
-                            Element claimsEle = (Element)doc.getElementsByTagNameNS("*", "Claims").item(0);
-                            
-                            claims = new ClaimsImpl(ClaimsImpl.fromElement(claimsEle));
-                            writer.close();
-                        }catch (Exception e){
-                            log.log(Level.SEVERE,
-                            LogStringsMessages.WST_0045_ERROR_UNMARSHALL_CLAIMS(appliesTo), e);
-                            throw new WebServiceException(LogStringsMessages.WST_0045_ERROR_UNMARSHALL_CLAIMS(appliesTo), e);
-                        }
-                    }
-                }          
-            }
-        }
-        return claims;
+ 
+    private String elemToString(final RequestSecurityTokenResponse rstr){
+        //ToDo
+        return rstr.toString();
     }
 
-    
-    /**
-     * Prints out the RST created as string.
-     * This method is primarily used for logging purposes.
-     */
-    private String elemToString(final RequestSecurityToken rst) {
-        try {
-            final javax.xml.bind.Marshaller marshaller = fact.getContext().createMarshaller();
-            final JAXBElement<RequestSecurityTokenType> rstElement =  (new ObjectFactory()).createRequestSecurityToken((RequestSecurityTokenType)rst);
-            marshaller.setProperty(javax.xml.bind.Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-            final java.io.StringWriter writer = new java.io.StringWriter();
-            marshaller.marshal(rstElement, writer);
-            return writer.toString();
-        } catch (Exception e) {
-            log.log(Level.SEVERE,
-                    LogStringsMessages.WST_1004_ERROR_MARSHAL_TO_STRING("RST"), e);
-            
-            throw new WebServiceException(LogStringsMessages.WST_1004_ERROR_MARSHAL_TO_STRING("RST"), e);
-        }
+    private String elemToString(final RequestSecurityToken rst){
+      //ToDo
+      return  rst.toString();
     }
-    
-    private String elemToString(final RequestSecurityTokenResponse rstr){
-        try {
-            final javax.xml.bind.Marshaller marshaller = fact.getContext().createMarshaller();
-            final JAXBElement<RequestSecurityTokenResponseType> rstrElement =  (new ObjectFactory()).createRequestSecurityTokenResponse((RequestSecurityTokenResponseType)rstr);
-            marshaller.setProperty(javax.xml.bind.Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-            final java.io.StringWriter writer = new java.io.StringWriter();
-            marshaller.marshal(rstrElement, writer);
-            return writer.toString();
-        } catch (Exception e) {
-            log.log(Level.SEVERE,
-                    LogStringsMessages.WST_1004_ERROR_MARSHAL_TO_STRING("RSTR"), e);
-            throw new WebServiceException(LogStringsMessages.WST_1004_ERROR_MARSHAL_TO_STRING("RSTR"), e);
-        }
-    }
-    
 }

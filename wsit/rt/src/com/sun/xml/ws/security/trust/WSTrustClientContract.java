@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustClientContract.java,v 1.3 2007-05-29 22:11:29 ofung Exp $
+ * $Id: WSTrustClientContract.java,v 1.4 2007-10-28 17:44:42 jdg6688 Exp $
  */
 
 /*
@@ -43,7 +43,8 @@ package com.sun.xml.ws.security.trust;
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.policy.impl.bindings.AppliesTo;
 import com.sun.xml.ws.security.IssuedTokenContext;
-import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
+import com.sun.xml.ws.security.trust.elements.BaseSTSRequest;
+import com.sun.xml.ws.security.trust.elements.BaseSTSResponse;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponse;
 
 import java.net.URI;
@@ -60,21 +61,21 @@ public interface WSTrustClientContract {
     * IssuedTokenContext.
     */
    public void handleRSTR(
-           RequestSecurityToken rst, RequestSecurityTokenResponse rstr, IssuedTokenContext context) throws WSTrustException;
+           BaseSTSRequest request, BaseSTSResponse response, IssuedTokenContext context) throws WSTrustException;
    
    /**
     * Handle an RSTR returned by the Issuer and Respond to the Challenge
     * 
     */
-   public RequestSecurityTokenResponse handleRSTRForNegotiatedExchange(
-           RequestSecurityToken rst, RequestSecurityTokenResponse rstr, IssuedTokenContext context) throws WSTrustException;
+   public BaseSTSResponse handleRSTRForNegotiatedExchange(
+           BaseSTSRequest rst, BaseSTSResponse rstr, IssuedTokenContext context) throws WSTrustException;
    
    /**
     * Create an RSTR for a client initiated IssuedTokenContext establishment, 
     * for example a Client Initiated WS-SecureConversation context.
     * 
     */
-   public RequestSecurityTokenResponse createRSTRForClientInitiatedIssuedTokenContext(AppliesTo scopes,IssuedTokenContext context) throws WSTrustException;
+   public BaseSTSResponse createRSTRForClientInitiatedIssuedTokenContext(AppliesTo scopes,IssuedTokenContext context) throws WSTrustException;
     
    /**
     * Contains Challenge

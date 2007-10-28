@@ -47,11 +47,15 @@
 package com.sun.xml.ws.security.trust.impl;
 
 import com.sun.xml.ws.api.security.trust.WSTrustException;
+import com.sun.xml.ws.api.security.trust.client.STSIssuedTokenConfiguration;
 import com.sun.xml.ws.policy.impl.bindings.AppliesTo;
 import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.trust.Configuration;
 import com.sun.xml.ws.security.trust.WSTrustClientContract;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
+import com.sun.xml.ws.security.trust.WSTrustVersion;
+import com.sun.xml.ws.security.trust.elements.BaseSTSRequest;
+import com.sun.xml.ws.security.trust.elements.BaseSTSResponse;
 import com.sun.xml.ws.security.trust.elements.BinarySecret;
 import com.sun.xml.ws.security.trust.elements.Entropy;
 import com.sun.xml.ws.security.trust.elements.Lifetime;
@@ -61,6 +65,7 @@ import com.sun.xml.ws.security.trust.elements.RequestedProofToken;
 import com.sun.xml.ws.security.trust.elements.RequestedUnattachedReference;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponse;
+import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponseCollection;
 import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
 import com.sun.xml.ws.security.trust.util.WSTrustUtil;
 import com.sun.xml.ws.security.wsu10.AttributedDateTime;
@@ -106,8 +111,16 @@ public class WSTrustClientContractImpl implements WSTrustClientContract {
      * IssuedTokenContext.
      */
     public void handleRSTR(
-            final RequestSecurityToken rst, final RequestSecurityTokenResponse rstr, final IssuedTokenContext context) throws WSTrustException{
-        if (rst.getRequestType().toString().equals(WSTrustConstants.ISSUE_REQUEST)){
+            final BaseSTSRequest request, final BaseSTSResponse response, final IssuedTokenContext context) throws WSTrustException{
+        WSTrustVersion wstVer = WSTrustVersion.getInstance(((STSIssuedTokenConfiguration)context.getSecurityPolicy().get(0)).getProtocol());
+        RequestSecurityToken rst = (RequestSecurityToken)request;  
+        RequestSecurityTokenResponse rstr = null;
+        if (response instanceof RequestSecurityTokenResponse){
+            rstr = (RequestSecurityTokenResponse)response;
+        }else if (response instanceof RequestSecurityTokenResponseCollection){
+            rstr = ((RequestSecurityTokenResponseCollection)response).getRequestSecurityTokenResponses().get(0);
+        }
+        if (rst.getRequestType().toString().equals(wstVer.getIssueRequestTypeURI())){
             
             String appliesTo = null;
             AppliesTo requestAppliesTo = rst.getAppliesTo();
@@ -126,7 +139,7 @@ public class WSTrustClientContractImpl implements WSTrustClientContract {
             final RequestedProofToken proofToken = rstr.getRequestedProofToken();
             
             // Obtain the secret key for the context
-            final byte[] key = getKey(rstr, proofToken, rst, appliesTo);
+            final byte[] key = getKey(wstVer, rstr, proofToken, rst, appliesTo);
             
             if(key != null){
                 context.setProofKey(key);
@@ -162,8 +175,8 @@ public class WSTrustClientContractImpl implements WSTrustClientContract {
      * Handle an RSTR returned by the Issuer and Respond to the Challenge
      *
      */
-    public RequestSecurityTokenResponse handleRSTRForNegotiatedExchange(
-            final RequestSecurityToken rst, final RequestSecurityTokenResponse rstr, final IssuedTokenContext context) throws WSTrustException{
+    public BaseSTSResponse handleRSTRForNegotiatedExchange(
+            final BaseSTSRequest request, final BaseSTSResponse response, final IssuedTokenContext context) throws WSTrustException{
         throw new UnsupportedOperationException("Unsupported operation: handleRSTRForNegotiatedExchange");
     }
     
@@ -172,7 +185,7 @@ public class WSTrustClientContractImpl implements WSTrustClientContract {
      * for example a Client Initiated WS-SecureConversation context.
      *
      */
-    public RequestSecurityTokenResponse createRSTRForClientInitiatedIssuedTokenContext(final AppliesTo scopes,final IssuedTokenContext context) throws WSTrustException {
+    public BaseSTSResponse createRSTRForClientInitiatedIssuedTokenContext(final AppliesTo scopes,final IssuedTokenContext context) throws WSTrustException {
         throw new UnsupportedOperationException("Unsupported operation: createRSTRForClientInitiatedIssuedTokenContext");
     }
     
@@ -212,13 +225,13 @@ public class WSTrustClientContractImpl implements WSTrustClientContract {
         }
     }
     
-    private byte[] getKey(final RequestSecurityTokenResponse rstr, final RequestedProofToken proofToken, final RequestSecurityToken rst, final String appliesTo)
+    private byte[] getKey(final WSTrustVersion wstVer, final RequestSecurityTokenResponse rstr, final RequestedProofToken proofToken, final RequestSecurityToken rst, final String appliesTo)
     throws WSTrustException {
         byte[] key = null;
         if (proofToken != null){
             final String proofTokenType = proofToken.getProofTokenType();
             if (RequestedProofToken.COMPUTED_KEY_TYPE.equals(proofTokenType)){
-                key = computeKey(rstr, proofToken, rst);
+                key = computeKey(wstVer, rstr, proofToken, rst);
             } else if (RequestedProofToken.TOKEN_REF_TYPE.equals(proofTokenType)){
                 //ToDo
                 log.log(Level.SEVERE,
@@ -241,7 +254,7 @@ public class WSTrustClientContractImpl implements WSTrustClientContract {
         return key;
     }
     
-    private byte[] computeKey(final RequestSecurityTokenResponse rstr, final RequestedProofToken proofToken, final RequestSecurityToken rst) throws WSTrustException, UnsupportedOperationException {
+    private byte[] computeKey(WSTrustVersion wstVer, final RequestSecurityTokenResponse rstr, final RequestedProofToken proofToken, final RequestSecurityToken rst) throws WSTrustException, UnsupportedOperationException {
         // get ComputeKey algorithm URI, client entropy, server entropy and compute
         // the SecretKey
         final URI computedKey = proofToken.getComputedKey();
@@ -260,7 +273,7 @@ public class WSTrustClientContractImpl implements WSTrustClientContract {
         
         final int keySize = (int)rstr.getKeySize()/8;
         byte[] key = null;
-        if(computedKey.toString().equals(WSTrustConstants.CK_PSHA1)){
+        if(computedKey.toString().equals(wstVer.getCKPSHA1algorithmURI())){
             try {
                 key = SecurityUtil.P_SHA1(clientEntropyBytes,serverEntropyBytes, keySize);
             } catch (Exception ex) {

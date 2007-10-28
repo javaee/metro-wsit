@@ -1,5 +1,5 @@
 /*
- * $Id: TrustPlugin.java,v 1.6 2007-08-14 00:46:37 jdg6688 Exp $
+ * $Id: TrustPlugin.java,v 1.7 2007-10-28 17:44:42 jdg6688 Exp $
  */
 
 /*
@@ -47,13 +47,5 @@ import com.sun.xml.ws.api.security.trust.WSTrustException;
 
 
 public interface TrustPlugin {
-
-    /**
-     * Obtain the Token by using WS-Trust or WS-SecureConversation.
-     * @param issuedToken, an instance of <sp:IssuedToken> or <sp:SecureConversation> assertion
-     * @return issuedTokenContext, a context containing the issued Token and related information
-     */
-    public IssuedTokenContext process(PolicyAssertion issuedToken, PolicyAssertion preSetSTS, String appliesTo);
-
     public void process(IssuedTokenContext ctx) throws WSTrustException;
 }

@@ -36,6 +36,7 @@
 
 package com.sun.xml.ws.api.security.trust.client;
 
+import com.sun.xml.ws.api.security.trust.Claims;
 import com.sun.xml.ws.security.Token;
 
 /**
@@ -44,27 +45,45 @@ import com.sun.xml.ws.security.Token;
  */
 public abstract class STSIssuedTokenConfiguration implements IssuedTokenConfiguration{
     
-    public static final String PROTOCOL = "http://schemas.xmlsoap.org/ws/2005/02/trust";
+    public static final String PROTOCOL_10 = "http://schemas.xmlsoap.org/ws/2005/02/trust";
+    public static final String PROTOCOL_13 = "http://docs.oasis-open.org/ws-sx/ws-trust/200512";
     
-    private String stsEndpoint;
+    protected String protocol;
     
-    private String stsMEXAddress = null;
+    protected String stsEndpoint;
     
-    private String stsWSDLLocation = null;;
+    protected String stsMEXAddress = null;
     
-    private String stsServiceName = null;
+    protected String stsWSDLLocation = null;;
     
-    private String stsPortName = null;
+    protected String stsServiceName = null;
     
-    private String stsNamespace = null;
+    protected String stsPortName = null;
     
+    protected String stsNamespace = null;
+
+    protected SecondaryIssuedTokenParameters sisPara = null;
+    
+    protected STSIssuedTokenConfiguration(){
+
+    }
     protected STSIssuedTokenConfiguration(String stsEndpoint, String stsMEXAddress){
+        this(PROTOCOL_10, stsEndpoint, stsMEXAddress);
+    }
+    protected STSIssuedTokenConfiguration(String protocol, String stsEndpoint, String stsMEXAddress){
+        this.protocol = protocol;
         this.stsEndpoint = stsEndpoint;
         this.stsMEXAddress = stsMEXAddress;
     }
     
     protected STSIssuedTokenConfiguration(String stsEndpoint, 
                           String stsWSDLLocation, String stsServiceName, String stsPortName, String stsNamespace){
+        this(PROTOCOL_10, stsEndpoint, stsWSDLLocation, stsServiceName, stsPortName, stsNamespace);
+    }
+    
+    protected STSIssuedTokenConfiguration(String protocol, String stsEndpoint, 
+                          String stsWSDLLocation, String stsServiceName, String stsPortName, String stsNamespace){
+        this.protocol = protocol;
         this.stsEndpoint = stsEndpoint;
         this.stsWSDLLocation = stsWSDLLocation;
         this.stsServiceName = stsServiceName;
@@ -72,8 +91,8 @@ public abstract class STSIssuedTokenConfiguration implements IssuedTokenConfigur
         this.stsNamespace = stsNamespace;
     }
     
-    public final String getProtocol(){
-        return this.PROTOCOL;
+    public String getProtocol(){
+        return protocol;
     }
      
     public String getSTSEndpoint(){
@@ -99,6 +118,10 @@ public abstract class STSIssuedTokenConfiguration implements IssuedTokenConfigur
     public String getSTSNamespace(){
         return this.stsNamespace;
     }
+
+    public SecondaryIssuedTokenParameters getSecondaryIssuedTokenParameters(){
+        return this.sisPara;
+    }
     
     public abstract String getTokenType();
     
@@ -113,6 +136,12 @@ public abstract class STSIssuedTokenConfiguration implements IssuedTokenConfigur
     public abstract String getCanonicalizationAlgorithm();
     
     public abstract String getKeyWrapAlgorithm();
+    
+    public abstract String getSignWith();
+    
+    public abstract String getEncryptWith();
+    
+    public abstract Claims getClaims();
     
     public abstract Token getOBOToken();
 }

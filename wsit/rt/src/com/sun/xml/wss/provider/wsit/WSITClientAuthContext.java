@@ -52,6 +52,9 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLFault;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
+import com.sun.xml.ws.api.security.trust.WSTrustException;
+import com.sun.xml.ws.api.security.trust.client.IssuedTokenManager;
+import com.sun.xml.ws.api.security.trust.client.STSIssuedTokenConfiguration;
 import com.sun.xml.ws.message.stream.LazyStreamBasedMessage;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
@@ -63,16 +66,16 @@ import com.sun.xml.ws.security.impl.kerberos.KerberosContext;
 import com.sun.xml.ws.security.impl.policyconv.SecurityPolicyHolder;
 import com.sun.xml.ws.security.opt.impl.JAXBFilterProcessingContext;
 import com.sun.xml.ws.security.policy.Token;
+import com.sun.xml.ws.security.policy.IssuedToken;
 import com.sun.xml.ws.security.secconv.NewWSSCPlugin;
 import com.sun.xml.ws.security.secconv.WSSCFactory;
 import com.sun.xml.ws.security.secconv.WSSecureConversationException;
-import com.sun.xml.ws.security.trust.TrustPlugin;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
-import com.sun.xml.ws.security.trust.WSTrustFactory;
 import com.sun.xml.ws.security.trust.elements.BaseSTSRequest;
 import com.sun.xml.ws.security.trust.elements.BaseSTSResponse;
 import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
+import com.sun.xml.ws.security.trust.impl.client.DefaultSTSIssuedTokenConfiguration;
 import com.sun.xml.wss.ProcessingContext;
 import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.impl.MessageConstants;
@@ -110,8 +113,6 @@ import static com.sun.xml.wss.jaxws.impl.Constants.EMPTY_LIST;
 import static com.sun.xml.wss.jaxws.impl.Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS;
 import static com.sun.xml.wss.jaxws.impl.Constants.SUN_WSS_SECURITY_CLIENT_POLICY_NS;
 import com.sun.xml.wss.jaxws.impl.PolicyResolverImpl;
-import java.net.URI;
-import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPFault;
 import javax.xml.soap.SOAPMessage;
@@ -135,7 +136,8 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
 //    private static TrustPlugin trustPlugin = WSTrustFactory.newTrustPlugin(null);
 //    private static NewWSSCPlugin  scPlugin = WSSCFactory.newNewSCPlugin(null, wsscVer);
     
-      private static TrustPlugin trustPlugin;
+      private IssuedTokenManager itm;
+      //private static TrustPlugin trustPlugin;
       private static NewWSSCPlugin  scPlugin;
     
     //******************INSTANCE VARIABLES*******
@@ -156,7 +158,8 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
         //this.operation = operation;
         //this.subject = subject;
         //this.map = map;
-        trustPlugin = WSTrustFactory.newTrustPlugin(null);
+        //trustPlugin = WSTrustFactory.newTrustPlugin(null);
+        itm = IssuedTokenManager.getInstance();
         scPlugin = WSSCFactory.newNewSCPlugin(null, wsscVer);
         
         Iterator it = outMessagePolicyMap.values().iterator();
@@ -667,10 +670,6 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
         }
         
         PolicyAssertion preSetSTSAssertion = null;
-        URI stsEP = null;
-        URI wsdlLocation = null;
-        QName serviceName = null;
-        QName portName = null;
         if(trustConfig != null){
             Iterator it = trustConfig.iterator();
             while(it!=null && it.hasNext()) {
@@ -681,9 +680,17 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
         }
         
         for (PolicyAssertion issuedTokenAssertion : policies) {
-            IssuedTokenContext ctx = trustPlugin.process(issuedTokenAssertion, preSetSTSAssertion, packet.endpointAddress.toString());
-            issuedTokenContextMap.put(
+            //IssuedTokenContext ctx = trustPlugin.process(issuedTokenAssertion, preSetSTSAssertion, packet.endpointAddress.toString());
+            //ToDo: Handling mixed trust versions??
+            try {
+                STSIssuedTokenConfiguration config = new DefaultSTSIssuedTokenConfiguration(wsTrustVer.getNamespaceURI(), (IssuedToken)issuedTokenAssertion, preSetSTSAssertion); 
+                IssuedTokenContext ctx =itm.createIssuedTokenContext(config, packet.endpointAddress.toString());
+                itm.getIssuedToken(ctx);
+                issuedTokenContextMap.put(
                     ((Token)issuedTokenAssertion).getTokenId(), ctx);
+            }catch(WSTrustException se){
+                throw new WebServiceException("ERROR_ISSUED_TOKEN_CREATION", se);
+            }
         }
     }
     

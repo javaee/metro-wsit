@@ -61,6 +61,9 @@ import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
+import com.sun.xml.ws.api.security.trust.WSTrustException;
+import com.sun.xml.ws.api.security.trust.client.IssuedTokenManager;
+import com.sun.xml.ws.api.security.trust.client.STSIssuedTokenConfiguration;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.assembler.ClientPipeConfiguration;
@@ -86,7 +89,10 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.xml.bind.JAXBElement;
 import com.sun.xml.wss.impl.misc.DefaultSecurityEnvironmentImpl;
 import com.sun.xml.ws.policy.PolicyAssertion;
+import com.sun.xml.ws.security.policy.IssuedToken;
+
 import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
+import com.sun.xml.ws.security.trust.impl.client.DefaultSTSIssuedTokenConfiguration;
 import com.sun.xml.wss.impl.ProcessingContextImpl;
 import javax.xml.ws.soap.SOAPFaultException;
 import com.sun.xml.wss.impl.filter.DumpFilter;
@@ -107,7 +113,8 @@ import com.sun.xml.wss.jaxws.impl.logging.LogStringsMessages;
 public class SecurityClientPipe extends SecurityPipeBase implements SecureConversationInitiator {
     
     // Plugin instances for Trust and SecureConversation invocation
-    private static TrustPlugin trustPlugin = WSTrustFactory.newTrustPlugin(null);
+    //private static TrustPlugin trustPlugin = WSTrustFactory.newTrustPlugin(null);
+    private IssuedTokenManager itm = IssuedTokenManager.getInstance();
     private static WSSCPlugin  scPlugin = WSSCFactory.newSCPlugin(null, wsscVer);
     private Set trustConfig = null;
     
@@ -387,10 +394,10 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
         }
         
         PolicyAssertion preSetSTSAssertion = null;
-        URI stsEP = null;
-        URI wsdlLocation = null;
-        QName serviceName = null;
-        QName portName = null;
+        //URI stsEP = null;
+        //URI wsdlLocation = null;
+        //QName serviceName = null;
+        //QName portName = null;
         if(trustConfig != null){
             Iterator it = trustConfig.iterator();
             while(it!=null && it.hasNext()) {
@@ -401,9 +408,18 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
         }
         
         for (PolicyAssertion issuedTokenAssertion : policies) {
-            IssuedTokenContext ctx = trustPlugin.process(issuedTokenAssertion, preSetSTSAssertion, packet.endpointAddress.toString());
-            issuedTokenContextMap.put(
+            //IssuedTokenContext ctx = trustPlugin.process(issuedTokenAssertion, preSetSTSAssertion, packet.endpointAddress.toString());
+            //ToDo: Handling mixed trust versions??
+            try {
+                STSIssuedTokenConfiguration config = new DefaultSTSIssuedTokenConfiguration(wsTrustVer.getNamespaceURI(), (IssuedToken)issuedTokenAssertion, preSetSTSAssertion); 
+                IssuedTokenContext ctx =itm.createIssuedTokenContext(config, packet.endpointAddress.toString());
+                itm.getIssuedToken(ctx);
+                issuedTokenContextMap.put(
                     ((Token)issuedTokenAssertion).getTokenId(), ctx);
+            }catch(WSTrustException se){
+                //ToDo
+                throw new WebServiceException("ERROR_ISSUED_TOKEN_CREATION", se);
+            }
         }
     }
     
@@ -507,5 +523,4 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
             throw new RuntimeException(LogStringsMessages.WSSPIPE_0027_ERROR_CONFIGURE_CLIENT_HANDLER(), e);
         }
     }
-    
 }
