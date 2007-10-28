@@ -71,7 +71,7 @@ import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponseCollec
 import java.util.Iterator;
 import java.util.List;
 
-public class WSSCClientContract implements WSTrustClientContract{
+public class WSSCClientContract {
     
     private static final Logger log =
             Logger.getLogger(
