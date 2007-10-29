@@ -76,6 +76,7 @@ import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.WebServiceFeature;
 import javax.xml.bind.JAXBElement;
+import javax.xml.ws.BindingProvider;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -165,7 +166,7 @@ public class TrustPluginImpl implements TrustPlugin {
         try {
             final RequestSecurityToken request = createRequest(stsConfig, appliesTo, oboToken);
              
-            result = invokeRST(request, wsdlLocation, serviceName, portName, stsURI, WSTrustVersion.getInstance(stsConfig.getProtocol()));
+            result = invokeRST(request, wsdlLocation, serviceName, portName, stsURI, stsConfig);
             final WSTrustClientContract contract = WSTrustFactory.createWSTrustClientContract(config);
             contract.handleRSTR(request, result, itc);
         } catch (RemoteException ex) {
@@ -332,7 +333,8 @@ public class TrustPluginImpl implements TrustPlugin {
         return rst;
     }
     
-    private BaseSTSResponse invokeRST(final RequestSecurityToken request, final URI wsdlLocation, QName serviceName, QName portName, String stsURI, WSTrustVersion wstVer) throws RemoteException, WSTrustException {
+    private BaseSTSResponse invokeRST(final RequestSecurityToken request, final URI wsdlLocation, QName serviceName, QName portName, String stsURI, STSIssuedTokenConfiguration stsConfig) throws RemoteException, WSTrustException {
+        WSTrustVersion wstVer = WSTrustVersion.getInstance(stsConfig.getProtocol());
         WSTrustElementFactory fact = WSTrustElementFactory.newInstance(wstVer);
         if(serviceName == null || portName==null){
             //we have to get the serviceName and portName through MEX
@@ -368,10 +370,18 @@ public class TrustPluginImpl implements TrustPlugin {
         
         //dispatch = addAddressingHeaders(dispatch);
         if (stsURI != null){
-            dispatch.getRequestContext().put(javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY, stsURI);
+            dispatch.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, stsURI);
         }
         dispatch.getRequestContext().put(WSTrustConstants.IS_TRUST_MESSAGE, "true");
         dispatch.getRequestContext().put(wstVer.getIssueRequestAction(), wstVer.getIssueRequestAction());
+        String userName = (String) stsConfig.getOtherOptions().get(BindingProvider.USERNAME_PROPERTY);
+        String password = (String) stsConfig.getOtherOptions().get(BindingProvider.PASSWORD_PROPERTY);
+        if (userName != null){
+            dispatch.getRequestContext().put(BindingProvider.USERNAME_PROPERTY, userName);
+        }
+        if (password != null){
+            dispatch.getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, password);
+        }
         
         //RequestSecurityTokenResponse rstr = null;
         // try{

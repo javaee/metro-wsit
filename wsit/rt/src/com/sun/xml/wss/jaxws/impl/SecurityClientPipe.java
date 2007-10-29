@@ -40,7 +40,6 @@ package com.sun.xml.wss.jaxws.impl;
 
 import com.sun.xml.ws.api.model.wsdl.WSDLFault;
 import com.sun.xml.ws.security.impl.kerberos.KerberosContext;
-import com.sun.xml.ws.security.impl.kerberos.KerberosLogin;
 import com.sun.xml.ws.security.impl.policy.Constants;
 import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.impl.misc.Base64;
@@ -49,10 +48,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Enumeration;
-import java.net.URI;
 import java.util.List;
 import java.util.Set;
-import javax.xml.namespace.QName;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
@@ -79,14 +76,13 @@ import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.ProcessingContext;
 import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
 import com.sun.xml.ws.security.secconv.WSSecureConversationException;
-import com.sun.xml.ws.security.trust.WSTrustFactory;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
-import com.sun.xml.ws.security.trust.TrustPlugin;
 import com.sun.xml.ws.security.secconv.WSSCFactory;
 import com.sun.xml.ws.security.secconv.WSSCPlugin;
 import com.sun.xml.ws.security.policy.Token;
 import javax.security.auth.callback.CallbackHandler;
 import javax.xml.bind.JAXBElement;
+import javax.xml.ws.BindingProvider;
 import com.sun.xml.wss.impl.misc.DefaultSecurityEnvironmentImpl;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.security.policy.IssuedToken;
@@ -412,6 +408,14 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
             //ToDo: Handling mixed trust versions??
             try {
                 STSIssuedTokenConfiguration config = new DefaultSTSIssuedTokenConfiguration(wsTrustVer.getNamespaceURI(), (IssuedToken)issuedTokenAssertion, preSetSTSAssertion); 
+                String userName = (String) packet.invocationProperties.get(BindingProvider.USERNAME_PROPERTY);
+                String password = (String) packet.invocationProperties.get(BindingProvider.PASSWORD_PROPERTY);
+                if (userName != null){
+                    config.getOtherOptions().put(BindingProvider.USERNAME_PROPERTY, userName);
+                }
+                if (password != null){
+                    config.getOtherOptions().put(BindingProvider.PASSWORD_PROPERTY, password);
+                }
                 IssuedTokenContext ctx =itm.createIssuedTokenContext(config, packet.endpointAddress.toString());
                 itm.getIssuedToken(ctx);
                 issuedTokenContextMap.put(

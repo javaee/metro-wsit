@@ -684,6 +684,14 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
             //ToDo: Handling mixed trust versions??
             try {
                 STSIssuedTokenConfiguration config = new DefaultSTSIssuedTokenConfiguration(wsTrustVer.getNamespaceURI(), (IssuedToken)issuedTokenAssertion, preSetSTSAssertion); 
+                String userName = (String) packet.invocationProperties.get(BindingProvider.USERNAME_PROPERTY);
+                String password = (String) packet.invocationProperties.get(BindingProvider.PASSWORD_PROPERTY);
+                if (userName != null){
+                    config.getOtherOptions().put(BindingProvider.USERNAME_PROPERTY, userName);
+                }
+                if (password != null){
+                    config.getOtherOptions().put(BindingProvider.PASSWORD_PROPERTY, password);
+                }
                 IssuedTokenContext ctx =itm.createIssuedTokenContext(config, packet.endpointAddress.toString());
                 itm.getIssuedToken(ctx);
                 issuedTokenContextMap.put(
