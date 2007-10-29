@@ -36,47 +36,22 @@
 
 package com.sun.xml.ws.policy;
 
+import com.sun.xml.ws.policy.sourcemodel.wspolicy.NamespaceVersion;
 import javax.xml.namespace.QName;
 
 /**
  * Commonly used constants by the policy implementations
  */
-public final class PolicyConstants {
-    
-    /**
-     * Standard WS-Policy namespace URI
-     */       
-    public static final String POLICY_NAMESPACE_URI = "http://schemas.xmlsoap.org/ws/2004/09/policy";
-
+public final class PolicyConstants {    
     /**
      * Sun proprietary policy namespace URI
      */       
     public static final String SUN_POLICY_NAMESPACE_URI = "http://java.sun.com/xml/ns/wsit/policy";
 
     /**
-     * Default WS-Policy namespace prefix
-     */       
-    public static final String POLICY_NAMESPACE_PREFIX = "wsp";
-
-    /**
      * Sun proprietary policy namespace prefix
      */       
     public static final String SUN_POLICY_NAMESPACE_PREFIX = "sunwsp";
-
-    /**
-     * Standard WS-Security Utility namespace URI, used in Policy Id
-     */
-    public static final String WSU_NAMESPACE_URI = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd";
-    
-    /**
-     * Standard WS-Security Utility namespace prefix, used in Policy Id
-     */
-    public static final String WSU_NAMESPACE_PREFIX = "wsu";
-
-    /**
-     * Standard XML namespace URI
-     */       
-    public static final String XML_NAMESPACE_URI = "http://www.w3.org/XML/1998/namespace";
 
     /**
      * Fully qualified name of the SUN's proprietary policy assertion visibility attribute
@@ -89,9 +64,14 @@ public final class PolicyConstants {
     public static final String VISIBILITY_VALUE_PRIVATE = "private";
     
     /**
-     * Fully qualified name of the WS-Policy Policy XML element
-     */       
-    public static final QName POLICY = new QName(POLICY_NAMESPACE_URI, "Policy");
+     * Standard WS-Security Utility namespace URI, used in Policy Id
+     */
+    public static final String WSU_NAMESPACE_URI = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd";
+    
+    /**
+     * Standard WS-Security Utility namespace prefix, used in Policy Id
+     */
+    public static final String WSU_NAMESPACE_PREFIX = "wsu";
 
     /**
      * Fully qualified name of the Policy wsu:Id XML attribute
@@ -99,65 +79,15 @@ public final class PolicyConstants {
     public static final QName WSU_ID = new QName(WSU_NAMESPACE_URI, "Id");
 
     /**
+     * Standard XML namespace URI
+     */       
+    public static final String XML_NAMESPACE_URI = "http://www.w3.org/XML/1998/namespace";
+
+    /**
      * Fully qualified name of the xml:id policy attribute
      */       
     public static final QName XML_ID = new QName(XML_NAMESPACE_URI, "id");
-
-    /**
-     * Fully qualified name of the WS-Policy Policy Id XML attribute
-     */       
-    public static final QName POLICY_NAME = new QName(POLICY_NAMESPACE_URI, "Name");
-
-    /**
-     * Fully qualified name of the WS-Policy Policy XML element
-     */       
-    public static final QName POLICY_REFERENCE = new QName(POLICY_NAMESPACE_URI, "PolicyReference");
-
-    /**
-     * Fully qualified name of the WS-Policy ExactlyOne XML element
-     */       
-    public static final QName EXACTLY_ONE = new QName(POLICY_NAMESPACE_URI, "ExactlyOne");
-
-    /**
-     * Fully qualified name of the WS-Policy All XML element
-     */       
-    public static final QName ALL = new QName(POLICY_NAMESPACE_URI, "All");
-
-    /**
-     * Fully qualified name of the WS-PolicyAttachment UsingPolicy XML element
-     */
-    public static final QName USING_POLICY = new QName(POLICY_NAMESPACE_URI, "UsingPolicy");
-    
-    /**
-     * Fully qualified name of the WS-Policy Optional XML attribute
-     */
-    public static final QName OPTIONAL = new QName(POLICY_NAMESPACE_URI, "Optional");
-    
-    /**
-     * Fully qualified name of the WS-Policy Optional XML attribute
-     */
-    public static final QName IGNORABLE = new QName(POLICY_NAMESPACE_URI, "Ignorable");
-
-    /**
-     * Fully qualified name of the WS-Policy URI XML attribute
-     */
-    public static final QName POLICY_URI = new QName(null, "URI");
-    
-    /**
-     * Fully qualified name of the WS-Policy PolicyURIs XML attribute
-     */
-    public static final QName POLICY_URIs = new QName(POLICY_NAMESPACE_URI, "PolicyURIs");
-    
-    /**
-     * Name under which we look up a default factory implementation
-     */       
-    public static final String POLICY_FACTORY_PROPERTY = "com.sun.xml.ws.policy.PolicyFactory";
-
-    /**
-     * Class name of the default factory implementation
-     */       
-    public static final String DEFAULT_POLICY_FACTORY_IMPLEMENTATION = "com.sun.xml.ws.policy.wspol.WSPolicyFactory";
-    
+   
     /**
      * Identifier of the client-side configuration file 
      */

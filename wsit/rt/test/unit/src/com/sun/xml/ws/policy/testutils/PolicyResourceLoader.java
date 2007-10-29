@@ -37,7 +37,6 @@
 package com.sun.xml.ws.policy.testutils;
 
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
-import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.server.SDDocumentSource;
 import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;

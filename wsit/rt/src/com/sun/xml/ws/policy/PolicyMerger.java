@@ -37,6 +37,7 @@
 package com.sun.xml.ws.policy;
 
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
+import com.sun.xml.ws.policy.sourcemodel.wspolicy.NamespaceVersion;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -83,20 +84,24 @@ public final class PolicyMerger {
         }
         
         final Collection<Collection<AssertionSet>> alternativeSets = new LinkedList<Collection<AssertionSet>>();
+        NamespaceVersion mergedVersion = policies.iterator().next().getNamespaceVersion();
         for (Policy policy : policies) {
             alternativeSets.add(policy.getContent());
+            if (mergedVersion.compareTo(policy.getNamespaceVersion()) < 0) {
+                mergedVersion = policy.getNamespaceVersion();
+            }
         }
         
         final Collection<Collection<AssertionSet>> combinedAlternatives = PolicyUtils.Collections.combine(null, alternativeSets, false);
         
         if (combinedAlternatives == null || combinedAlternatives.isEmpty()) {
-            return Policy.createNullPolicy();
+            return Policy.createNullPolicy(mergedVersion, null, null);
         } else {
             final Collection<AssertionSet> mergedSetList = new ArrayList<AssertionSet>(combinedAlternatives.size());
             for (Collection<AssertionSet> toBeMerged : combinedAlternatives) {
                 mergedSetList.add(AssertionSet.createMergedAssertionSet(toBeMerged));
             }
-            return Policy.createPolicy(mergedSetList);
+            return Policy.createPolicy(mergedVersion, null, null, mergedSetList);
         }
     }
 }

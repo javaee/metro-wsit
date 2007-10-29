@@ -36,6 +36,7 @@
 
 package com.sun.xml.ws.policy;
 
+import com.sun.xml.ws.policy.sourcemodel.wspolicy.NamespaceVersion;
 import java.util.Collection;
 import java.util.LinkedList;
 import junit.framework.TestCase;
@@ -53,9 +54,11 @@ public class PolicyMergerTest extends TestCase {
         super(testName);
     }
     
+    @Override
     protected void setUp() throws Exception {
     }
     
+    @Override
     protected void tearDown() throws Exception {
     }
     
@@ -93,4 +96,35 @@ public class PolicyMergerTest extends TestCase {
         assertEquals(expected, result);
     }
     
+    public void testMergeNamespaces() throws Exception {
+        Collection<Policy> policies = new LinkedList<Policy>();
+        policies.add(PolicyResourceLoader.loadPolicy("namespaces/policy-v1.2.xml"));
+        policies.add(PolicyResourceLoader.loadPolicy("namespaces/policy-v1.2.xml"));
+        Policy result = merger.merge(policies);
+        assertEquals(
+                "When merging policies with same original namespace, the namespace should be preserved during merge operation", 
+                NamespaceVersion.v1_2, 
+                result.getNamespaceVersion()
+                );        
+
+        policies.clear();
+        policies.add(PolicyResourceLoader.loadPolicy("namespaces/policy-v1.5.xml"));
+        policies.add(PolicyResourceLoader.loadPolicy("namespaces/policy-v1.5.xml"));
+        result = merger.merge(policies);
+        assertEquals(
+                "When merging policies with same original namespace, the namespace should be preserved during merge operation", 
+                NamespaceVersion.v1_5, 
+                result.getNamespaceVersion()
+                );        
+    
+        policies.clear();
+        policies.add(PolicyResourceLoader.loadPolicy("namespaces/policy-v1.2.xml"));
+        policies.add(PolicyResourceLoader.loadPolicy("namespaces/policy-v1.5.xml"));
+        result = merger.merge(policies);
+        assertEquals(
+                "When merging policies with different original namespace, the latest namespace should be preserved during merge operation", 
+                NamespaceVersion.v1_5, 
+                result.getNamespaceVersion()
+                );            
+    }   
 }

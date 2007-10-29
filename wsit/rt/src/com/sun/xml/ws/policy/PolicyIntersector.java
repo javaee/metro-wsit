@@ -42,6 +42,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import com.sun.xml.ws.policy.privateutil.LocalizationMessages;
+import com.sun.xml.ws.policy.sourcemodel.wspolicy.NamespaceVersion;
 import java.util.ArrayList;
 
 /**
@@ -108,6 +109,7 @@ public final class PolicyIntersector {
         // or if all policies are "empty", return "empty" policy
         boolean found = false;
         boolean allPoliciesEmpty = true;
+        NamespaceVersion latestVersion = null;
         for (Policy tested : policies) {
             if (tested.isEmpty()) {
                 found = true;
@@ -117,13 +119,19 @@ public final class PolicyIntersector {
                 }
                 allPoliciesEmpty = false;
             }
+            if (latestVersion == null) {
+                latestVersion = tested.getNamespaceVersion();
+            } else if (latestVersion.compareTo(tested.getNamespaceVersion()) < 0) {
+                latestVersion = tested.getNamespaceVersion();
+            }
             
             if (found && !allPoliciesEmpty) {
-                return Policy.createNullPolicy();
+                return Policy.createNullPolicy(latestVersion, null, null);
             }
         }
+        latestVersion = (latestVersion != null) ? latestVersion : NamespaceVersion.getLatestVersion();
         if (allPoliciesEmpty) {
-            return Policy.createEmptyPolicy();
+            return Policy.createEmptyPolicy(latestVersion, null, null);
         }
         
         // simple tests didn't lead to final answer => let's performe some intersecting ;)       
@@ -150,6 +158,6 @@ public final class PolicyIntersector {
             }
         }
         
-        return Policy.createPolicy(finalAlternatives);
+        return Policy.createPolicy(latestVersion, null, null, finalAlternatives);
     }    
 }

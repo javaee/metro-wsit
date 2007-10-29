@@ -44,24 +44,26 @@
 package com.sun.xml.ws.policy.privateutil;
 
 import com.sun.xml.ws.policy.spi.PolicyAssertionCreator;
-import junit.framework.*;
 import java.io.Closeable;
 import javax.xml.stream.XMLStreamReader;
+import junit.framework.TestCase;
 
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public class PolicyUtilsTest extends TestCase {
-   private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyUtilsTest.class);
+ //   private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyUtilsTest.class);
     
     public PolicyUtilsTest(String testName) {
         super(testName);
     }
     
+    @Override
     protected void setUp() throws Exception {
     }
     
+    @Override
     protected void tearDown() throws Exception {
     }
         
@@ -102,7 +104,7 @@ public class PolicyUtilsTest extends TestCase {
                 result = PolicyUtils.Commons.getCallerMethodName();
                 assertEquals(expResult, result);                
             }
-        };
+        }
         
         TestCall tc = new TestCall();
         tc.testCall();

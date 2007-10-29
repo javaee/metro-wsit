@@ -36,13 +36,11 @@
 
 package com.sun.xml.ws.policy.sourcemodel;
 
-import com.sun.xml.ws.policy.PolicyConstants;
 import com.sun.xml.ws.policy.privateutil.LocalizationMessages;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import java.net.URI;
 import java.net.URISyntaxException;
-import javax.xml.namespace.QName;
 
 /**
  *
@@ -50,10 +48,6 @@ import javax.xml.namespace.QName;
  */
 final class PolicyReferenceData {
     private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyReferenceData.class);
-    
-    public static final QName ATTRIBUTE_URI = new QName(PolicyConstants.POLICY_NAMESPACE_URI, "URI");
-    public static final QName ATTRIBUTE_DIGEST = new QName(PolicyConstants.POLICY_NAMESPACE_URI, "Digest");
-    public static final QName ATTRIBUTE_DIGEST_ALGORITHM = new QName(PolicyConstants.POLICY_NAMESPACE_URI, "DigestAlgorithm");
     
     private static final URI DEFAULT_DIGEST_ALGORITHM_URI;
     private static final URISyntaxException CLASS_INITIALIZATION_EXCEPTION;
@@ -120,6 +114,7 @@ final class PolicyReferenceData {
     /**
      * An {@code Object.toString()} method override.
      */
+    @Override
     public String toString() {
         return toString(0, new StringBuffer()).toString();
     }

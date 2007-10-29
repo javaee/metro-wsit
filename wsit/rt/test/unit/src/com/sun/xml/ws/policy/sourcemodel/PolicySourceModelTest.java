@@ -37,8 +37,6 @@
 package com.sun.xml.ws.policy.sourcemodel;
 
 import com.sun.xml.ws.policy.testutils.PolicyResourceLoader;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import junit.framework.TestCase;
 
 /**
@@ -50,9 +48,11 @@ public class PolicySourceModelTest extends TestCase {
         super(testName);
     }
     
+    @Override
     protected void setUp() throws Exception {
     }
     
+    @Override
     protected void tearDown() throws Exception {
     }
     

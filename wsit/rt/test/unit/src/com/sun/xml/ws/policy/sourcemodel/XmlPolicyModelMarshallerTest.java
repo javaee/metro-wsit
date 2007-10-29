@@ -37,24 +37,29 @@
 package com.sun.xml.ws.policy.sourcemodel;
 
 import com.sun.xml.ws.policy.PolicyException;
+import com.sun.xml.ws.policy.sourcemodel.wspolicy.NamespaceVersion;
 import com.sun.xml.ws.policy.testutils.PolicyResourceLoader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import javax.xml.stream.XMLOutputFactory;
-import junit.framework.*;
+import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
+import junit.framework.TestCase;
 
 public class XmlPolicyModelMarshallerTest extends TestCase {
     private PolicyModelMarshaller marshaller = PolicyModelMarshaller.getXmlMarshaller(false);
     private PolicyModelUnmarshaller unmarshaller = PolicyModelUnmarshaller.getXmlUnmarshaller();
+    private XMLOutputFactory xmlOutputFactory = XMLOutputFactory.newInstance();
     
     public XmlPolicyModelMarshallerTest(String testName) {
         super(testName);
     }
     
+    @Override
     protected void setUp() throws Exception {
     }
     
+    @Override
     protected void tearDown() throws Exception {
     }
     
@@ -112,20 +117,30 @@ public class XmlPolicyModelMarshallerTest extends TestCase {
             "policy_1_visible",
             "policy_2_visible"
         };
-        
-        XMLOutputFactory factory = XMLOutputFactory.newInstance();
+                
         for (String modelFileName : modelFileNames) {
             PolicySourceModel model = PolicyResourceLoader.unmarshallModel("visibility/" + modelFileName + ".xml");
-            StringWriter writer = new StringWriter();
-            XMLStreamWriter streamWriter = factory.createXMLStreamWriter(writer);
-            marshaller.marshal(model, streamWriter);
-            
-            StringReader reader = new StringReader(writer.toString());
-            PolicySourceModel resultModel = unmarshaller.unmarshalModel(reader);        
+            PolicySourceModel resultModel = marshalAndUnmarshalModel(model);        
             PolicySourceModel expectedModel = PolicyResourceLoader.unmarshallModel("visibility/" + modelFileName + "_expected.xml");            
             assertEquals(modelFileName, expectedModel, resultModel);            
-            System.out.println(writer.toString());
         }
     }
-    
+
+    public void testMarshallModelWithProperPolicyNamespaceVersion() throws Exception {
+        PolicySourceModel model = marshalAndUnmarshalModel(PolicyResourceLoader.unmarshallModel("namespaces/policy-v1.2.xml"));
+        assertEquals("Namespace version does not match after marshalling.", NamespaceVersion.v1_2, model.getNamespaceVersion());
+
+        model = marshalAndUnmarshalModel(PolicyResourceLoader.unmarshallModel("namespaces/policy-v1.5.xml"));
+        assertEquals("Namespace version does not match after marshalling.", NamespaceVersion.v1_5, model.getNamespaceVersion());
+    }
+
+    private PolicySourceModel marshalAndUnmarshalModel(PolicySourceModel model) throws PolicyException, XMLStreamException {
+        StringWriter writer = new StringWriter();
+        XMLStreamWriter streamWriter = xmlOutputFactory.createXMLStreamWriter(writer);
+        marshaller.marshal(model, streamWriter);
+
+        StringReader reader = new StringReader(writer.toString());
+        PolicySourceModel resultModel = unmarshaller.unmarshalModel(reader);
+        return resultModel;
+    }
 }

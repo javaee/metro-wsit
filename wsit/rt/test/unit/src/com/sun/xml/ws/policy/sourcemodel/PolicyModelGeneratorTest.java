@@ -36,12 +36,13 @@
 
 package com.sun.xml.ws.policy.sourcemodel;
 
-import com.sun.xml.ws.policy.*;
+import com.sun.xml.ws.policy.Policy;
+import com.sun.xml.ws.policy.sourcemodel.wspolicy.NamespaceVersion;
 import com.sun.xml.ws.policy.testutils.PolicyResourceLoader;
-import junit.framework.*;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import junit.framework.TestCase;
 
 public class PolicyModelGeneratorTest extends TestCase {
     private static final String COMPACT_MODEL_SUFFIX = ".xml";
@@ -67,11 +68,13 @@ public class PolicyModelGeneratorTest extends TestCase {
         super(testName);
     }
     
+    @Override
     protected void setUp() throws Exception {
         translator = PolicyModelTranslator.getTranslator();
         generator = PolicyModelGenerator.getGenerator();
     }
     
+    @Override
     protected void tearDown() throws Exception {
     }
     
@@ -108,4 +111,12 @@ public class PolicyModelGeneratorTest extends TestCase {
             // TODO: somehow compare models, because now the test only checks if the translation does not end in some exception...
         }
     }
+    
+    public void testPreserveOriginalNamespaceInformation() throws Exception {
+        PolicySourceModel model = generator.translate(PolicyResourceLoader.loadPolicy("namespaces/policy-v1.2.xml"));
+        assertEquals("Namespace does not match original", NamespaceVersion.v1_2, model.getNamespaceVersion());
+        model = generator.translate(PolicyResourceLoader.loadPolicy("namespaces/policy-v1.5.xml"));
+        assertEquals("Namespace does not match original", NamespaceVersion.v1_5, model.getNamespaceVersion());
+    }            
+
 }

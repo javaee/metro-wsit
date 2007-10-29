@@ -46,7 +46,7 @@ import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import java.io.IOException;
 import java.net.URL;
 import javax.xml.stream.XMLStreamException;
-import junit.framework.*;
+import junit.framework.TestCase;
 import org.xml.sax.SAXException;
 
 /**
@@ -58,9 +58,11 @@ public class JCapsPolicyValidatorTest extends TestCase {
         super(testName);
     }
     
+    @Override
     protected void setUp() throws Exception {
     }
     
+    @Override
     protected void tearDown() throws Exception {
     }
     

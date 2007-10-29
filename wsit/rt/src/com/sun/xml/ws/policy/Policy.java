@@ -36,6 +36,7 @@
 
 package com.sun.xml.ws.policy;
 
+import com.sun.xml.ws.policy.sourcemodel.wspolicy.NamespaceVersion;
 import com.sun.xml.ws.policy.privateutil.LocalizationMessages;
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import java.util.Arrays;
@@ -102,6 +103,11 @@ public class Policy implements Iterable<AssertionSet> {
     private String name;
     
     /**
+     * Namespace version holder
+     */
+    private NamespaceVersion nsVersion;
+    
+    /**
      * internal collection of policy alternatives
      */
     private final List<AssertionSet> assertionSets;
@@ -124,7 +130,7 @@ public class Policy implements Iterable<AssertionSet> {
     
     /**
      * The factory method creates an <b>immutable</b> policy instance which represents a <emph>'nothing allowed'</emph>
-     * policy expression.
+     * policy expression. The policy is created using the latest namespace version supported.
      *
      * @return policy instance which represents a <emph>'nothing allowed'</emph> (no policy alternatives).
      */
@@ -134,7 +140,7 @@ public class Policy implements Iterable<AssertionSet> {
     
     /**
      * The factory method creates an <b>immutable</b> policy instance which represents a <emph>'anything allowed'</emph>
-     * policy expression.
+     * policy expression. The policy is created using the latest namespace version supported.
      *
      * @return policy instance which represents a <emph>'anything allowed'</emph> (empty policy alternative with no plicy
      * assertions prescribed).
@@ -145,7 +151,7 @@ public class Policy implements Iterable<AssertionSet> {
     
     /**
      * The factory method creates an <b>immutable</b> policy instance which represents a <emph>'nothing allowed'</emph>
-     * policy expression.
+     * policy expression. The policy is created using the latest namespace version supported.
      *
      * @param name global URI of the policy. May be {@code null}.
      * @param policyId local URI of the policy. May be {@code null}.
@@ -160,8 +166,25 @@ public class Policy implements Iterable<AssertionSet> {
     }
     
     /**
+     * The factory method creates an <b>immutable</b> policy instance which represents a <emph>'nothing allowed'</emph>
+     * policy expression. The policy is created using the latest namespace version supported.
+     *
+     * @param nsVersion Policy namespace version to be used when marshalling the policy expression
+     * @param name global URI of the policy. May be {@code null}.
+     * @param policyId local URI of the policy. May be {@code null}.
+     * @return policy instance which represents a <emph>'nothing allowed'</emph> (no policy alternatives).
+     */
+    public static Policy createNullPolicy(final NamespaceVersion nsVersion, final String name, final String policyId) {
+        if ((nsVersion == null || nsVersion == NamespaceVersion.getLatestVersion()) && name == null && policyId == null) {
+            return ANONYMOUS_NULL_POLICY;
+        } else {
+            return new Policy(nsVersion, name, policyId, NULL_POLICY_ASSERTION_SETS, EMPTY_VOCABULARY);
+        }
+    }
+    
+    /**
      * The factory method creates an <b>immutable</b> policy instance which represents a <emph>'anything allowed'</emph>
-     * policy expression.
+     * policy expression. The policy is created using the latest namespace version supported.
      *
      * @param name global URI of the policy. May be {@code null}.
      * @param policyId local URI of the policy. May be {@code null}.
@@ -178,10 +201,29 @@ public class Policy implements Iterable<AssertionSet> {
     }
     
     /**
+     * The factory method creates an <b>immutable</b> policy instance which represents a <emph>'anything allowed'</emph>
+     * policy expression. The policy is created using the latest namespace version supported.
+     *
+     * @param nsVersion Policy namespace version to be used when marshalling the policy expression
+     * @param name global URI of the policy. May be {@code null}.
+     * @param policyId local URI of the policy. May be {@code null}.
+     *
+     * @return policy instance which represents a <emph>'anything allowed'</emph> (empty policy alternative with no plicy
+     * assertions prescribed).
+     */
+    public static Policy createEmptyPolicy(final NamespaceVersion nsVersion, final String name, final String policyId) {
+        if ((nsVersion == null || nsVersion == NamespaceVersion.getLatestVersion()) && name == null && policyId == null) {
+            return ANONYMOUS_EMPTY_POLICY;
+        } else {
+            return new Policy(nsVersion, name, policyId, EMPTY_POLICY_ASSERTION_SETS, EMPTY_VOCABULARY);
+        }
+    }
+    
+    /**
      * The factory method creates an <b>immutable</b> policy instance which represents a policy expression with
      * alternatives specified by {@code sets} input parameter. If the collection of policy alternatives is null or empty
      * an object representing a 'NULL' policy expression is returned. However, in such case it is better to use
-     * {@link #createNullPolicy()} factory method directly.
+     * {@link #createNullPolicy()} factory method directly. The policy is created using the latest namespace version supported.
      *
      * @param sets represents the collection of policy alternatives of the policy object created. During the creation of
      * the new policy object, the content of the alternatives collection is copied into an internal policy object structure,
@@ -201,7 +243,7 @@ public class Policy implements Iterable<AssertionSet> {
      * The factory method creates an <b>immutable</b> policy instance which represents a policy expression with
      * alternatives specified by {@code sets} input parameter. If the collection of policy alternatives is null or empty
      * an object representing a 'NULL' policy expression is returned. However, in such case it is better to use
-     * {@link #createNullPolicy(String, String)} factory method directly.
+     * {@link #createNullPolicy(String, String)} factory method directly. The policy is created using the latest namespace version supported.
      *
      * @param name global URI of the policy. May be {@code null}.
      * @param policyId local URI of the policy. May be {@code null}.
@@ -218,6 +260,29 @@ public class Policy implements Iterable<AssertionSet> {
             return new Policy(POLICY_TOSTRING_NAME, name, policyId, sets);
         }
     }
+
+    /**
+     * The factory method creates an <b>immutable</b> policy instance which represents a policy expression with
+     * alternatives specified by {@code sets} input parameter. If the collection of policy alternatives is null or empty
+     * an object representing a 'NULL' policy expression is returned. However, in such case it is better to use
+     * {@link #createNullPolicy(String, String)} factory method directly. The policy is created using the latest namespace version supported.
+     *
+     * @param nsVersion Policy namespace version to be used when marshalling the policy expression
+     * @param name global URI of the policy. May be {@code null}.
+     * @param policyId local URI of the policy. May be {@code null}.
+     * @param sets represents the collection of policy alternatives of the policy object created. During the creation of
+     * the new policy object, the content of the alternatives collection is copied into an internal policy object structure,
+     * thus any subsequent operations on the collection will have no impact on the newly constructed policy object.
+     *
+     * @return policy instance which represents the policy with given alternatives.
+     */
+    public static Policy createPolicy(NamespaceVersion nsVersion, final String name, final String policyId, final Collection<AssertionSet> sets) {
+        if (sets == null || sets.isEmpty()) {
+            return createNullPolicy(nsVersion, name, policyId);
+        } else {
+            return new Policy(nsVersion, POLICY_TOSTRING_NAME, name, policyId, sets);
+        }
+    }
     
     /**
      * A most flexible policy object constructor that allows private creation of policy objects and direct setting
@@ -232,6 +297,7 @@ public class Policy implements Iterable<AssertionSet> {
      * must be handled with care.
      */
     private Policy(final String name, final String policyId, final List<AssertionSet> assertionSets, final Set<QName> vocabulary) {
+        this.nsVersion = NamespaceVersion.getLatestVersion();
         this.toStringName = POLICY_TOSTRING_NAME;
         this.name = name;
         this.policyId = policyId;
@@ -252,6 +318,7 @@ public class Policy implements Iterable<AssertionSet> {
      * collection may be {@code null} or empty. In such case a 'NULL' policy object is constructed.
      */
     Policy(final String toStringName, final Collection<AssertionSet> sets) {
+        this.nsVersion = NamespaceVersion.getLatestVersion();
         this.toStringName = toStringName;
         
         if (sets == null || sets.isEmpty()) {
@@ -286,6 +353,78 @@ public class Policy implements Iterable<AssertionSet> {
         this.policyId = policyId;
     }
     
+    /**
+     * A most flexible policy object constructor that allows private creation of policy objects and direct setting
+     * of all its attributes.
+     *
+     * @param nsVersion Policy namespace version to be used when marshalling the policy expression
+     * @param name global URI of the policy. May be {@code null}.
+     * @param policyId local URI of the policy. May be {@code null}.
+     * @param sets represents the collection of policy alternatives of the policy object created. The list is directly
+     * assigned to the policy object internal attribute. Subsequent manipulations on the collection must be handled with
+     * care.
+     * @param vocabulary represents the vocabulary of the policy object. Subsequent manipulations on the collection
+     * must be handled with care.
+     */
+    private Policy(final NamespaceVersion nsVersion, final String name, final String policyId, final List<AssertionSet> assertionSets, final Set<QName> vocabulary) {
+        this.nsVersion = nsVersion;
+        this.toStringName = POLICY_TOSTRING_NAME;
+        this.name = name;
+        this.policyId = policyId;
+        this.assertionSets = assertionSets;
+        this.vocabulary = vocabulary;
+        this.immutableVocabulary = Collections.unmodifiableCollection(this.vocabulary);
+    }
+    
+    /**
+     * Constructor that should be overridden by child implementation. The constructor allows for easy toString() output
+     * customization.
+     *
+     * @param nsVersion Policy namespace version to be used when marshalling the policy expression
+     * @param toStringName a general name of the object (such as 'policy' or 'nested policy') that will be used in the
+     * toString() method to identify the object.
+     * @param sets represents the collection of policy alternatives of the policy object created. During the creation of
+     * the new policy object, the content of the alternatives collection is copied into an internal policy object structure,
+     * thus any subsequent operations on the collection will have no impact on the newly constructed policy object. The
+     * collection may be {@code null} or empty. In such case a 'NULL' policy object is constructed.
+     */
+    Policy(final NamespaceVersion nsVersion, final String toStringName, final Collection<AssertionSet> sets) {
+        this.nsVersion = nsVersion;
+        this.toStringName = toStringName;
+        
+        if (sets == null || sets.isEmpty()) {
+            this.assertionSets = NULL_POLICY_ASSERTION_SETS;
+            this.vocabulary = EMPTY_VOCABULARY;
+            this.immutableVocabulary = EMPTY_VOCABULARY;
+        } else {
+            this.assertionSets = new LinkedList<AssertionSet>();
+            this.vocabulary = new TreeSet<QName>(PolicyUtils.Comparison.QNAME_COMPARATOR);
+            this.immutableVocabulary = Collections.unmodifiableCollection(this.vocabulary);
+            
+            addAll(sets);
+        }
+    }
+    
+    /**
+     * Constructor that should be overridden by child implementation. The constructor allows for easy toString() output
+     * customization.
+     *
+     * @param nsVersion Policy namespace version to be used when marshalling the policy expression
+     * @param toStringName a general name of the object (such as 'policy' or 'nested policy') that will be used in the
+     * toString() method to identify the object.
+     * @param name global URI of the policy. May be {@code null}.
+     * @param policyId local URI of the policy. May be {@code null}.
+     * @param sets represents the collection of policy alternatives of the policy object created. During the creation of
+     * the new policy object, the content of the alternatives collection is copied into an internal policy object structure,
+     * thus any subsequent operations on the collection will have no impact on the newly constructed policy object. The
+     * collection may be {@code null} or empty. In such case a 'NULL' policy object is constructed.
+     */
+    Policy(final NamespaceVersion nsVersion, final String toStringName, final String name, final String policyId, final Collection<AssertionSet> sets) {
+        this(nsVersion, toStringName, sets);
+        this.name = name;
+        this.policyId = policyId;
+    }
+
     /**
      * Adds single alternative to the internal alternatives set of the policy object.
      *
@@ -350,6 +489,10 @@ public class Policy implements Iterable<AssertionSet> {
      */
     public String getName() {
         return name;
+    }
+    
+    public NamespaceVersion getNamespaceVersion() {
+        return nsVersion;
     }
     
     /**
@@ -445,6 +588,7 @@ public class Policy implements Iterable<AssertionSet> {
     /**
      * An {@code Object.equals(Object obj)} method override.
      */
+    @Override
     public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
@@ -467,6 +611,7 @@ public class Policy implements Iterable<AssertionSet> {
     /**
      * An {@code Object.hashCode()} method override.
      */
+    @Override
     public int hashCode() {
         int result = 17;
         
@@ -479,6 +624,7 @@ public class Policy implements Iterable<AssertionSet> {
     /**
      * An {@code Object.toString()} method override.
      */
+    @Override
     public String toString() {
         return toString(0, new StringBuffer()).toString();
     }
@@ -496,6 +642,7 @@ public class Policy implements Iterable<AssertionSet> {
         final String innerDoubleIndent = PolicyUtils.Text.createIndent(indentLevel + 2);
         
         buffer.append(indent).append(toStringName).append(" {").append(PolicyUtils.Text.NEW_LINE);
+        buffer.append(innerIndent).append("namespace version = '").append(nsVersion.name()).append('\'').append(PolicyUtils.Text.NEW_LINE);
         buffer.append(innerIndent).append("id = '").append(policyId).append('\'').append(PolicyUtils.Text.NEW_LINE);
         buffer.append(innerIndent).append("name = '").append(name).append('\'').append(PolicyUtils.Text.NEW_LINE);
         

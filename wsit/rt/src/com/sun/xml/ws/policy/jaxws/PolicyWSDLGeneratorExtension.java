@@ -69,6 +69,7 @@ import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelGenerator;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelMarshaller;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
+import com.sun.xml.ws.policy.sourcemodel.wspolicy.XmlToken;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -105,6 +106,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
     private final PolicyModelMarshaller marshaller = PolicyModelMarshaller.getXmlMarshaller(true);
     private final PolicyMerger merger = PolicyMerger.getMerger();
     
+    @Override
     public void start(final WSDLGenExtnContext context) {
         LOGGER.entering();
         try {
@@ -128,7 +130,8 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
             }
             
             final TypedXmlWriter root = context.getRoot();
-            root._namespace(PolicyConstants.POLICY_NAMESPACE_URI, PolicyConstants.POLICY_NAMESPACE_PREFIX);
+// TODO: resolve policy version and add default policy namespace
+//             root._namespace(PolicyConstants.POLICY_V1_2_NAMESPACE_URI, PolicyConstants.POLICY_NAMESPACE_PREFIX);
             root._namespace(PolicyConstants.WSU_NAMESPACE_URI, PolicyConstants.WSU_NAMESPACE_PREFIX);
             final WSBinding binding = context.getBinding();
             
@@ -145,6 +148,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         }
     }
     
+    @Override
     public void addDefinitionsExtension(final TypedXmlWriter definitions) {
         try {
             LOGGER.entering();
@@ -152,18 +156,12 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
                 LOGGER.fine(LocalizationMessages.WSP_1020_NOT_MARSHALLING_ANY_POLICIES_POLICY_MAP_IS_NULL());
             } else {
                 subjects.addAll(policyMap.getPolicySubjects());
-                boolean usingPolicy = false;
                 final PolicyModelGenerator generator = PolicyModelGenerator.getGenerator();
-                Set<String> policyIDsOrNamesWritten = null;
+                Set<String> policyIDsOrNamesWritten = new HashSet<String>();
                 for (PolicySubject subject : subjects) {
                     if (subject.getSubject() == null) {
                         LOGGER.fine(LocalizationMessages.WSP_1019_NOT_MARSHALLING_WSDL_SUBJ_NULL(subject));
                     } else {
-                        if (!usingPolicy) {
-                            definitions._element(PolicyConstants.USING_POLICY, TypedXmlWriter.class);
-                            usingPolicy = true;
-                            policyIDsOrNamesWritten = new HashSet<String>();
-                        }
                         final Policy policy;
                         try {
                             policy = subject.getEffectivePolicy(merger);
@@ -189,6 +187,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         }
     }
     
+    @Override
     public void addServiceExtension(final TypedXmlWriter service) {
         LOGGER.entering();
         final String serviceName = ((null == seiModel) || (null == endpointClass)) ?
@@ -198,6 +197,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         LOGGER.exiting();
     }
     
+    @Override
     public void addPortExtension(final TypedXmlWriter port) {
         LOGGER.entering();
         final String portName = ((null == seiModel) || (null == endpointClass)) ?
@@ -207,6 +207,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         LOGGER.exiting();
     }
     
+    @Override
     public void addPortTypeExtension(final TypedXmlWriter portType) {
         LOGGER.entering();
         final String portTypeName = (null == seiModel) ? null : seiModel.getPortTypeName().getLocalPart();
@@ -214,6 +215,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         LOGGER.exiting();
     }
     
+    @Override
     public void addBindingExtension(final TypedXmlWriter binding) {
         LOGGER.entering();
         final QName bindingName = (null == seiModel) ? null : seiModel.getBoundPortTypeName();
@@ -221,18 +223,21 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         LOGGER.exiting();
     }
     
+    @Override
     public void addOperationExtension(final TypedXmlWriter operation, final JavaMethod method) {
         LOGGER.entering();
         selectAndProcessSubject(operation, WSDLOperation.class, ScopeType.OPERATION, method);
         LOGGER.exiting();
     }
     
+    @Override
     public void addBindingOperationExtension(final TypedXmlWriter operation, final JavaMethod method) {
         LOGGER.entering();
         selectAndProcessSubject(operation, WSDLBoundOperation.class, ScopeType.OPERATION, method);
         LOGGER.exiting();
     }
     
+    @Override
     public void addInputMessageExtension(final TypedXmlWriter message, final JavaMethod method) {
         LOGGER.entering();
         final String messageName = (null == method) ? null : method.getRequestMessageName();
@@ -240,6 +245,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         LOGGER.exiting();
     }
     
+    @Override
     public void addOutputMessageExtension(final TypedXmlWriter message, final JavaMethod method) {
         LOGGER.entering();
         final String messageName = (null == method) ? null : method.getResponseMessageName();
@@ -247,6 +253,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         LOGGER.exiting();
     }
     
+    @Override
     public void addFaultMessageExtension(final TypedXmlWriter message, final JavaMethod method, final CheckedException exception) {
         LOGGER.entering();
         final String messageName = (null == exception) ? null : exception.getMessageName();
@@ -254,6 +261,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         LOGGER.exiting();
     }
     
+    @Override
     public void addOperationInputExtension(final TypedXmlWriter input, final JavaMethod method) {
         LOGGER.entering();
         final String messageName = (null == method) ? null : method.getRequestMessageName();
@@ -261,6 +269,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         LOGGER.exiting();
     }
     
+    @Override
     public void addOperationOutputExtension(final TypedXmlWriter output, final JavaMethod method) {
         LOGGER.entering();
         final String messageName = (null == method) ? null : method.getResponseMessageName();
@@ -268,6 +277,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         LOGGER.exiting();
     }
     
+    @Override
     public void addOperationFaultExtension(final TypedXmlWriter fault, final JavaMethod method, final CheckedException exception) {
         LOGGER.entering();
         final String messageName = (null == exception) ? null : exception.getMessageName();
@@ -275,6 +285,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         LOGGER.exiting();
     }
     
+    @Override
     public void addBindingOperationInputExtension(final TypedXmlWriter input, final JavaMethod method) {
         LOGGER.entering();
         final String messageName = (null == method) ? null : method.getOperationName();
@@ -282,6 +293,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         LOGGER.exiting();
     }
     
+    @Override
     public void addBindingOperationOutputExtension(final TypedXmlWriter output, final JavaMethod method) {
         LOGGER.entering();
         final String messageName = (null == method) ? null : method.getOperationName();
@@ -289,6 +301,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         LOGGER.exiting();
     }
     
+    @Override
     public void addBindingOperationFaultExtension(final TypedXmlWriter writer, final JavaMethod method, final CheckedException exception) {
         LOGGER.entering(writer, method, exception);
         if (subjects != null) {
@@ -430,8 +443,8 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
                     throw LOGGER.logSevereException(new WebServiceException(LocalizationMessages.WSP_1010_UNABLE_TO_MARSHALL_POLICY_OR_POLICY_REFERENCE(), pe));
                 }
             } else {
-                final TypedXmlWriter policyReference = writer._element(PolicyConstants.POLICY_REFERENCE, TypedXmlWriter.class);
-                policyReference._attribute(PolicyConstants.POLICY_URI.getLocalPart(), '#' + policy.getIdOrName());
+                final TypedXmlWriter policyReference = writer._element(policy.getNamespaceVersion().asQName(XmlToken.PolicyReference), TypedXmlWriter.class);
+                policyReference._attribute(XmlToken.Uri.toString(), '#' + policy.getIdOrName());
             }
         }
     }

@@ -97,7 +97,7 @@ public final class PolicyModelTranslator {
                 RawAssertion assertion = new RawAssertion(node, new LinkedList<ModelNode>());
                 nestedAssertions.add(assertion);
                 
-                for (ModelNode assertionNodeChild : assertion.originalNode.getContent()) {
+                for (ModelNode assertionNodeChild : assertion.originalNode.getChildren()) {
                     switch (assertionNodeChild.getType()) {
                         case ASSERTION_PARAMETER_NODE:
                             assertion.parameters.add(assertionNodeChild);
@@ -131,7 +131,7 @@ public final class PolicyModelTranslator {
         final Collection<RawAlternative> alternatives;
         
         RawPolicy(ModelNode policyNode, Collection<RawAlternative> alternatives) {
-            originalContent = policyNode.getContent();
+            originalContent = policyNode.getChildren();
             this.alternatives = alternatives;
         }
     }
@@ -234,13 +234,13 @@ public final class PolicyModelTranslator {
         
         Policy policy = null;
         if (alternatives.size() == 0) {
-            policy = Policy.createNullPolicy(policyName, policyId);
+            policy = Policy.createNullPolicy(model.getNamespaceVersion(), policyName, policyId);
             LOGGER.finest(LocalizationMessages.WSP_0055_NO_ALTERNATIVE_COMBINATIONS_CREATED());
         } else if (alternatives.size() == 1 && alternatives.iterator().next().isEmpty()) {
-            policy = Policy.createEmptyPolicy(policyName, policyId);
+            policy = Policy.createEmptyPolicy(model.getNamespaceVersion(), policyName, policyId);
             LOGGER.finest(LocalizationMessages.WSP_0026_SINGLE_EMPTY_ALTERNATIVE_COMBINATION_CREATED());
         } else {
-            policy = Policy.createPolicy(policyName, policyId, alternatives);
+            policy = Policy.createPolicy(model.getNamespaceVersion(), policyName, policyId, alternatives);
             LOGGER.finest(LocalizationMessages.WSP_0057_N_ALTERNATIVE_COMBINATIONS_M_POLICY_ALTERNATIVES_CREATED(alternatives.size(), policy.getNumberOfAssertionSets()));
         }
         
@@ -311,13 +311,13 @@ public final class PolicyModelTranslator {
             switch (node.getType()) {
                 case POLICY :
                 case ALL :
-                    allContentQueue.addAll(node.getContent());
+                    allContentQueue.addAll(node.getChildren());
                     break;
                 case POLICY_REFERENCE :
-                    allContentQueue.addAll(getReferencedModelRootNode(node).getContent());
+                    allContentQueue.addAll(getReferencedModelRootNode(node).getChildren());
                     break;
                 case EXACTLY_ONE :
-                    decomposition.exactlyOneContents.add(expandsExactlyOneContent(node.getContent()));
+                    decomposition.exactlyOneContents.add(expandsExactlyOneContent(node.getChildren()));
                     break;
                 case ASSERTION :
                     decomposition.assertions.add(node);
@@ -362,7 +362,7 @@ public final class PolicyModelTranslator {
                     result.add(getReferencedModelRootNode(node));
                     break;
                 case EXACTLY_ONE :
-                    eoContentQueue.addAll(node.getContent());
+                    eoContentQueue.addAll(node.getChildren());
                     break;
                 default :
                     throw LOGGER.logSevereException(new PolicyException(LocalizationMessages.WSP_0001_UNSUPPORTED_MODEL_NODE_TYPE(node.getType())));

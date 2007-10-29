@@ -39,9 +39,7 @@ package com.sun.xml.ws.policy;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelUnmarshaller;
 import java.util.HashSet;
 import javax.xml.namespace.QName;
-import junit.framework.Test;
 import junit.framework.TestCase;
-import junit.framework.TestSuite;
 
 import static com.sun.xml.ws.policy.testutils.PolicyResourceLoader.loadPolicy;
 
@@ -56,13 +54,7 @@ public class EffectiveAlternativeSelectorTest extends TestCase {
     public EffectiveAlternativeSelectorTest(String testName) {
         super(testName);
     }
-    
-    public static Test suite() {
-        TestSuite suite = new TestSuite(EffectiveAlternativeSelectorTest.class);
-        
-        return suite;
-    }
-    
+       
     /**
      * Test of doSelection method, of class com.sun.xml.ws.policy.EffectiveAlternativeSelector.
      */
@@ -87,7 +79,7 @@ public class EffectiveAlternativeSelectorTest extends TestCase {
         
         if(2>myExtender.getMap().getEndpointEffectivePolicy(aKey).getNumberOfAssertionSets()) {
             fail("Insufficient number of alternatives found. At least 2 of them needed.");
-        };
+        }
         
         EffectiveAlternativeSelector.doSelection(myModifier);
         
@@ -117,7 +109,7 @@ public class EffectiveAlternativeSelectorTest extends TestCase {
         
         if(2>myExtender.getMap().getEndpointEffectivePolicy(aKey).getNumberOfAssertionSets()) {
             fail("Insufficient number of alternatives found. At least 2 of them needed.");
-        };
+        }
         
         EffectiveAlternativeSelector.doSelection(myModifier);
         

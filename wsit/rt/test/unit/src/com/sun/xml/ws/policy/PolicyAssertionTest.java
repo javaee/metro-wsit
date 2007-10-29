@@ -208,8 +208,9 @@ public class PolicyAssertionTest extends AbstractPolicyApiClassTestBase {
         assertFalse(a4.isOptional());
         assertFalse(a5.isOptional());
 
-        attributes.put(PolicyConstants.OPTIONAL, "true");
-        PolicyAssertion assertion = new PolicyAssertion(AssertionData.createAssertionData(assertionName, "test", attributes), null) {
+        final AssertionData assertionData = AssertionData.createAssertionData(assertionName, "test", attributes);
+        assertionData.setOptionalAttribute(true);
+        PolicyAssertion assertion = new PolicyAssertion(assertionData, null) {
         };
         assertTrue(assertion.isOptional());
     }
@@ -221,8 +222,9 @@ public class PolicyAssertionTest extends AbstractPolicyApiClassTestBase {
         assertFalse(a4.isIgnorable());
         assertFalse(a5.isIgnorable());
 
-        attributes.put(PolicyConstants.IGNORABLE, "true");
-        PolicyAssertion assertion = new PolicyAssertion(AssertionData.createAssertionData(assertionName, "test", attributes), null) {
+        final AssertionData assertionData = AssertionData.createAssertionData(assertionName, "test", attributes);
+        assertionData.setIgnorableAttribute(true);
+        PolicyAssertion assertion = new PolicyAssertion(assertionData, null) {
         };
         assertTrue(assertion.isIgnorable());
     }

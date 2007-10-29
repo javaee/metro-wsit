@@ -36,6 +36,7 @@
 
 package com.sun.xml.ws.policy.sourcemodel;
 
+import com.sun.xml.ws.policy.sourcemodel.wspolicy.NamespaceVersion;
 import com.sun.xml.ws.policy.PolicyConstants;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.privateutil.LocalizationMessages;
@@ -61,10 +62,12 @@ import javax.xml.namespace.QName;
 public final class PolicySourceModel implements Cloneable {
     private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicySourceModel.class);
     
-    // TODO: move responisbility for default namespacing to the domain SPI implementation
+    // TODO: move responsbility for default namespacing to the domain SPI implementation
     private static final Map<String, String> defaultNamespaceToPrefixMap = new HashMap<String, String>();
     static {
-        defaultNamespaceToPrefixMap.put(PolicyConstants.POLICY_NAMESPACE_URI, PolicyConstants.POLICY_NAMESPACE_PREFIX);
+        for (NamespaceVersion version : NamespaceVersion.values()) {
+            defaultNamespaceToPrefixMap.put(version.toString(), version.getDefaultNamespacePrefix());
+        }
         defaultNamespaceToPrefixMap.put(PolicyConstants.SUN_POLICY_NAMESPACE_URI, PolicyConstants.SUN_POLICY_NAMESPACE_PREFIX);
         
 //        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.encoding.policy.EncodingConstants.OPTIMIZED_MIME_NS, "");
@@ -103,17 +106,40 @@ public final class PolicySourceModel implements Cloneable {
     private ModelNode rootNode;
     private String policyId;
     private String policyName;
+    private NamespaceVersion nsVersion;
     
     private final List<ModelNode> references = new LinkedList<ModelNode>(); // links to policy reference nodes
     private boolean expanded = false;
+    
+//    /**
+//     * Factory method that creates new policy source model instance.
+//     *
+//     * @return newly created policy source model instance
+//     */
+//    @Deprecated
+//    public static PolicySourceModel createPolicySourceModel() {
+//        return new PolicySourceModel(NamespaceVersion.getLatestVersion());
+//    }
+    
+//    /**
+//     * Factory method that creates new policy source model instance and initializes it according to parameters provided.
+//     *
+//     * @param policyId local policy identifier - relative URI. May be {@code null}.
+//     * @param policyName global policy identifier - absolute policy expression URI. May be {@code null}.
+//     * @return newly created policy source model instance with its name and id properly set
+//     */
+//    @Deprecated
+//    public static PolicySourceModel createPolicySourceModel(final String policyId, final String policyName) {
+//        return new PolicySourceModel(NamespaceVersion.getLatestVersion(), policyId, policyName);
+//    }
     
     /**
      * Factory method that creates new policy source model instance.
      *
      * @return newly created policy source model instance
      */
-    public static PolicySourceModel createPolicySourceModel() {
-        return new PolicySourceModel();
+    public static PolicySourceModel createPolicySourceModel(final NamespaceVersion nsVersion) {
+        return new PolicySourceModel(nsVersion);
     }
     
     /**
@@ -123,18 +149,19 @@ public final class PolicySourceModel implements Cloneable {
      * @param policyName global policy identifier - absolute policy expression URI. May be {@code null}.
      * @return newly created policy source model instance with its name and id properly set
      */
-    public static PolicySourceModel createPolicySourceModel(final String policyId, final String policyName) {
-        return new PolicySourceModel(policyId, policyName);
+    public static PolicySourceModel createPolicySourceModel(final NamespaceVersion nsVersion, final String policyId, final String policyName) {
+        return new PolicySourceModel(nsVersion, policyId, policyName);
     }
-    
+
     /**
      * Private constructor that creats new policy source model instance without any
      * id or name identifier. The namespace-to-prefix map is initialized with mapping
      * of policy namespace to the default value set by
      * {@link PolicyConstants#POLICY_NAMESPACE_PREFIX POLICY_NAMESPACE_PREFIX constant}
      */
-    private PolicySourceModel() {
+    private PolicySourceModel(NamespaceVersion nsVersion) {
         this.rootNode = ModelNode.createRootPolicyNode(this);
+        this.nsVersion = nsVersion;
     }
     
     /**
@@ -144,8 +171,8 @@ public final class PolicySourceModel implements Cloneable {
      * @param policyId relative policy reference within an XML document. May be {@code null}.
      * @param policyName absloute IRI of policy expression. May be {@code null}.
      */
-    private PolicySourceModel(String policyId, String policyName) {
-        this();
+    private PolicySourceModel(NamespaceVersion nsVersion, String policyId, String policyName) {
+        this(nsVersion);
         this.policyId = policyId;
         this.policyName = policyName;
     }
@@ -176,6 +203,15 @@ public final class PolicySourceModel implements Cloneable {
     public String getPolicyId() {
         return policyId;
     }
+
+    /**
+     * Returns an original namespace version of this policy source model.
+     *
+     * @return namespace version.
+     */
+    public NamespaceVersion getNamespaceVersion() {
+        return nsVersion;
+    }   
     
     /**
      * Provides information about how namespaces used in this {@link PolicySourceModel}
@@ -205,6 +241,7 @@ public final class PolicySourceModel implements Cloneable {
      * When child nodes are tested for equality, the parent policy source model is not considered. Thus two different
      * policy source models instances may be equal based on their node content.
      */
+    @Override
     public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
@@ -228,6 +265,7 @@ public final class PolicySourceModel implements Cloneable {
     /**
      * An {@code Object.hashCode()} method override.
      */
+    @Override
     public int hashCode() {
         int result = 17;
         
@@ -245,6 +283,7 @@ public final class PolicySourceModel implements Cloneable {
      *
      * @return  a string representation of the object.
      */
+    @Override
     public String toString() {
         final String innerIndent = PolicyUtils.Text.createIndent(1);
         final StringBuffer buffer = new StringBuffer(60);
@@ -257,12 +296,13 @@ public final class PolicySourceModel implements Cloneable {
         return buffer.toString();
     }
     
+    @Override
     protected PolicySourceModel clone() throws CloneNotSupportedException {
         final PolicySourceModel clone = (PolicySourceModel) super.clone();
         
         clone.rootNode = this.rootNode.clone();
         try {
-            clone.rootNode.setParentModel(this);
+            clone.rootNode.setParentModel(clone);
         } catch (IllegalAccessException e) {
             throw LOGGER.logSevereException(new CloneNotSupportedException(LocalizationMessages.WSP_0013_UNABLE_TO_SET_PARENT_MODEL_ON_ROOT()), e);
         }
@@ -355,7 +395,7 @@ public final class PolicySourceModel implements Cloneable {
      */
     private Collection<String> getUsedNamespaces() {
         final Set<String> namespaces = new HashSet<String>();
-        namespaces.add(PolicyConstants.POLICY_NAMESPACE_URI);
+        namespaces.add(getNamespaceVersion().toString());
         
         if (this.policyId != null) {
             namespaces.add(PolicyConstants.WSU_NAMESPACE_URI);            
@@ -366,12 +406,12 @@ public final class PolicySourceModel implements Cloneable {
         
         ModelNode processedNode;
         while ((processedNode = nodesToBeProcessed.poll()) != null) {
-            for (ModelNode child : processedNode.getContent()) {
+            for (ModelNode child : processedNode.getChildren()) {
                 if (child.hasChildren()) {
                     nodesToBeProcessed.offer(child);
                 }
                 
-                if (child.isAssertionRelatedNode()) {
+                if (child.isDomainSpecific()) {
                     final AssertionData nodeData = child.getNodeData();
                     namespaces.add(nodeData.getName().getNamespaceURI());
                     if (nodeData.isPrivateAttributeSet()) {
@@ -396,7 +436,7 @@ public final class PolicySourceModel implements Cloneable {
      * @return default prefix for given namespace. May return {@code null} if the
      *         default prefix for given namespace is not defined.
      */
-    private String getDefaultPrefix(final String namespace) {
+    private static String getDefaultPrefix(final String namespace) {
         return defaultNamespaceToPrefixMap.get(namespace);
     }
 }

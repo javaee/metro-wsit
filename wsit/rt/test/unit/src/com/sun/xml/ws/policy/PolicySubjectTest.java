@@ -36,10 +36,8 @@
 
 package com.sun.xml.ws.policy;
 
-import com.sun.xml.ws.policy.testutils.PolicyResourceLoader;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 import junit.framework.TestCase;
 
 /**
@@ -54,9 +52,11 @@ public class PolicySubjectTest extends TestCase {
         super(testName);
     }
     
+    @Override
     protected void setUp() throws Exception {
     }
     
+    @Override
     protected void tearDown() throws Exception {
     }           
     

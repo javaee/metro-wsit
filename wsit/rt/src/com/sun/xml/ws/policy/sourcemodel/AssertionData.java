@@ -66,6 +66,9 @@ public final class AssertionData implements Cloneable, Serializable {
     private Map<QName, String> attributes = new HashMap<QName, String>();
     private ModelNode.Type type;
     
+    private boolean optional;
+    private boolean ignorable;
+    
     /**
      * Constructs assertion data wrapper instance for an assertion that does not
      * contain any value nor any attributes.
@@ -77,7 +80,7 @@ public final class AssertionData implements Cloneable, Serializable {
      * {@link ModelNode.Type#ASSERTION_PARAMETER_NODE ASSERTION_PARAMETER_NODE}
      */
     public static AssertionData createAssertionData(final QName name) throws IllegalArgumentException {
-        return new AssertionData(name, null, null, ModelNode.Type.ASSERTION);
+        return new AssertionData(name, null, null, ModelNode.Type.ASSERTION, false, false);
     }
     
     /**
@@ -91,7 +94,7 @@ public final class AssertionData implements Cloneable, Serializable {
      * {@link ModelNode.Type#ASSERTION_PARAMETER_NODE ASSERTION_PARAMETER_NODE}
      */
     public static AssertionData createAssertionParameterData(final QName name) throws IllegalArgumentException {
-        return new AssertionData(name, null, null, ModelNode.Type.ASSERTION_PARAMETER_NODE);
+        return new AssertionData(name, null, null, ModelNode.Type.ASSERTION_PARAMETER_NODE, false, false);
     }
     
     /**
@@ -107,7 +110,7 @@ public final class AssertionData implements Cloneable, Serializable {
      * {@link ModelNode.Type#ASSERTION_PARAMETER_NODE ASSERTION_PARAMETER_NODE}
      */
     public static AssertionData createAssertionData(final QName name, final String value, final Map<QName, String> attributes) throws IllegalArgumentException {
-        return new AssertionData(name, value, attributes, ModelNode.Type.ASSERTION);
+        return new AssertionData(name, value, attributes, ModelNode.Type.ASSERTION, false, false);
     }
     
     /**
@@ -123,7 +126,7 @@ public final class AssertionData implements Cloneable, Serializable {
      * {@link ModelNode.Type#ASSERTION_PARAMETER_NODE ASSERTION_PARAMETER_NODE}
      */
     public static AssertionData createAssertionParameterData(final QName name, final String value, final Map<QName, String> attributes) throws IllegalArgumentException {
-        return new AssertionData(name, value, attributes, ModelNode.Type.ASSERTION_PARAMETER_NODE);
+        return new AssertionData(name, value, attributes, ModelNode.Type.ASSERTION_PARAMETER_NODE, false, false);
     }
     
     /**
@@ -143,9 +146,11 @@ public final class AssertionData implements Cloneable, Serializable {
      * {@link ModelNode.Type#ASSERTION ASSERTION} or
      * {@link ModelNode.Type#ASSERTION_PARAMETER_NODE ASSERTION_PARAMETER_NODE}
      */
-    AssertionData(QName name, String value, Map<QName, String> attributes, ModelNode.Type type) throws IllegalArgumentException {
+    AssertionData(QName name, String value, Map<QName, String> attributes, ModelNode.Type type, boolean optional, boolean ignorable) throws IllegalArgumentException {
         this.name = name;
         this.value = value;
+        this.optional = optional;
+        this.ignorable = ignorable;
         if (attributes != null) {
             this.attributes.putAll(attributes);
         }
@@ -173,6 +178,7 @@ public final class AssertionData implements Cloneable, Serializable {
         this.type = data.type;
     }
     
+    @Override
     protected AssertionData clone() throws CloneNotSupportedException {
         final AssertionData clone = (AssertionData) super.clone();
         
@@ -194,6 +200,7 @@ public final class AssertionData implements Cloneable, Serializable {
     /**
      * An {@code Object.equals(Object obj)} method override.
      */
+    @Override
     public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
@@ -282,6 +289,7 @@ public final class AssertionData implements Cloneable, Serializable {
     /**
      * An {@code Object.hashCode()} method override.
      */
+    @Override
     public int hashCode() {
         int result = 17;
         
@@ -326,12 +334,36 @@ public final class AssertionData implements Cloneable, Serializable {
      * TODO: javadoc
      */
     public void setOptionalAttribute(final boolean value) {
-        setAttribute(PolicyConstants.OPTIONAL, Boolean.toString(value));
+        optional = value;
+        // setAttribute(PolicyConstants.OPTIONAL, Boolean.toString(value));
+    }
+    
+    /**
+     * TODO: javadoc
+     */
+    public boolean isOptionalAttributeSet() {
+        return optional;
+    }
+    
+    /**
+     * TODO: javadoc
+     */
+    public void setIgnorableAttribute(final boolean value) {
+        ignorable = value;
+        // setAttribute(PolicyConstants.OPTIONAL, Boolean.toString(value));
+    }
+    
+    /**
+     * TODO: javadoc
+     */
+    public boolean isIgnorableAttributeSet() {
+        return ignorable;
     }
     
     /**
      * An {@code Object.toString()} method override.
      */
+    @Override
     public String toString() {
         return toString(0, new StringBuffer()).toString();
     }
@@ -360,6 +392,8 @@ public final class AssertionData implements Cloneable, Serializable {
         buffer.append(innerIndent).append("prefix = '").append(name.getPrefix()).append('\'').append(PolicyUtils.Text.NEW_LINE);
         buffer.append(innerIndent).append("local name = '").append(name.getLocalPart()).append('\'').append(PolicyUtils.Text.NEW_LINE);
         buffer.append(innerIndent).append("value = '").append(value).append('\'').append(PolicyUtils.Text.NEW_LINE);
+        buffer.append(innerIndent).append("optional = '").append(optional).append('\'').append(PolicyUtils.Text.NEW_LINE);
+        buffer.append(innerIndent).append("ignorable = '").append(ignorable).append('\'').append(PolicyUtils.Text.NEW_LINE);
         synchronized (attributes) {
             if (attributes.isEmpty()) {
                 buffer.append(innerIndent).append("no attributes");

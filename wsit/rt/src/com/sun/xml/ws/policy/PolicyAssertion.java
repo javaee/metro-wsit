@@ -72,6 +72,11 @@ public abstract class PolicyAssertion {
      * @param assertionData assertion creation data specifying the details of newly created assertion. May be {@code null}.
      * @param assertionParameters collection of assertions parameters of this policy assertion. May be {@code null}.
      * @param nestedAlternative assertion set specifying nested policy alternative. May be {@code null}.
+     * 
+     * @deprecated Non-abstract assertion types should derive from {@link SimpleAssertion} 
+     * or {@link ComplexAssertion} instead. {@link Policy} class will not provide support for
+     * nested policy alternatives in the future. This responsibility is delegated to
+     * {@link ComplexAssertion} class instead.
      */
     @Deprecated
     protected PolicyAssertion(final AssertionData assertionData, final Collection<? extends PolicyAssertion> assertionParameters, final AssertionSet nestedAlternative) {
@@ -125,13 +130,7 @@ public abstract class PolicyAssertion {
      * @return {@code 'true'} if the assertion is optional. Returns {@code false} otherwise.
      */
     public boolean isOptional() {
-        boolean result = false;
-        final String attributeValue = getAttributeValue(PolicyConstants.OPTIONAL);
-        if (attributeValue != null) {
-            result = Boolean.parseBoolean(attributeValue);
-        }
-
-        return result;
+        return data.isOptionalAttributeSet();
     }
 
     /**
@@ -143,13 +142,7 @@ public abstract class PolicyAssertion {
      * @return {@code 'true'} if the assertion is ignorable. Returns {@code false} otherwise.
      */
     public boolean isIgnorable() {
-        boolean result = false;
-        final String attributeValue = getAttributeValue(PolicyConstants.IGNORABLE);
-        if (attributeValue != null) {
-            result = Boolean.parseBoolean(attributeValue);
-        }
-
-        return result;
+        return data.isIgnorableAttributeSet();
     }
 
     /**

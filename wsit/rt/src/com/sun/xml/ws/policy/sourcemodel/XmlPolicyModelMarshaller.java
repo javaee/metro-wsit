@@ -36,6 +36,8 @@
 
 package com.sun.xml.ws.policy.sourcemodel;
 
+import com.sun.xml.ws.policy.sourcemodel.wspolicy.XmlToken;
+import com.sun.xml.ws.policy.sourcemodel.wspolicy.NamespaceVersion;
 import java.util.Collection;
 import java.util.Map.Entry;
 import javax.xml.namespace.QName;
@@ -81,9 +83,9 @@ public final class XmlPolicyModelMarshaller extends PolicyModelMarshaller {
      * @param writer A typed XML writer.
      */
     private void marshal(final PolicySourceModel model, final TypedXmlWriter writer) throws PolicyException {
-        final TypedXmlWriter policy = writer._element(PolicyConstants.POLICY, TypedXmlWriter.class);
+        final TypedXmlWriter policy = writer._element(model.getNamespaceVersion().asQName(XmlToken.Policy), TypedXmlWriter.class);
         marshalPolicyAttributes(model, policy);
-        marshal(model.getRootNode(), policy);
+        marshal(model.getNamespaceVersion(), model.getRootNode(), policy);
     }
     
     /**
@@ -94,7 +96,7 @@ public final class XmlPolicyModelMarshaller extends PolicyModelMarshaller {
      */
     private void marshal(final PolicySourceModel model, final XMLStreamWriter writer) throws PolicyException {
         final StaxSerializer serializer = new StaxSerializer(writer);
-        final TypedXmlWriter policy = TXW.create(PolicyConstants.POLICY, TypedXmlWriter.class, serializer);
+        final TypedXmlWriter policy = TXW.create(model.getNamespaceVersion().asQName(XmlToken.Policy), TypedXmlWriter.class, serializer);
         
         final Map<String, String> nsMap = model.getNamespaceToPrefixMapping();
         
@@ -107,7 +109,7 @@ public final class XmlPolicyModelMarshaller extends PolicyModelMarshaller {
         }
         
         marshalPolicyAttributes(model, policy);
-        marshal(model.getRootNode(), policy);
+        marshal(model.getNamespaceVersion(), model.getRootNode(), policy);
         policy.commit();
         serializer.flush();
     }
@@ -126,7 +128,7 @@ public final class XmlPolicyModelMarshaller extends PolicyModelMarshaller {
         
         final String policyName = model.getPolicyName();
         if (policyName != null) {
-            writer._attribute(PolicyConstants.POLICY_NAME, policyName);
+            writer._attribute(model.getNamespaceVersion().asQName(XmlToken.Name), policyName);
         }
     }
     
@@ -136,24 +138,30 @@ public final class XmlPolicyModelMarshaller extends PolicyModelMarshaller {
      * @param rootNode The ModelNode that is marshalled.
      * @param writer The TypedXmlWriter onto which the content of the rootNode is marshalled.
      */
-    private void marshal(final ModelNode rootNode, final TypedXmlWriter writer) {
+    private void marshal(final NamespaceVersion nsVersion, final ModelNode rootNode, final TypedXmlWriter writer) {
         for (ModelNode node : rootNode) {
             final AssertionData data = node.getNodeData();
             if (marshallInvisible || data == null || !data.isPrivateAttributeSet()) {
                 TypedXmlWriter child = null;
                 if (data == null) {
-                    child = writer._element(node.getType().asQName(), TypedXmlWriter.class);
+                    child = writer._element(nsVersion.asQName(node.getType().getXmlToken()), TypedXmlWriter.class);
                 } else {
                     child = writer._element(data.getName(), TypedXmlWriter.class);
                     final String value = data.getValue();
                     if (value != null) {
                         child._pcdata(value);
                     }
+                    if (data.isOptionalAttributeSet()) {
+                        child._attribute(nsVersion.asQName(XmlToken.Optional), Boolean.TRUE);                        
+                    }
+                    if (data.isIgnorableAttributeSet()) {
+                        child._attribute(nsVersion.asQName(XmlToken.Ignorable), Boolean.TRUE);                        
+                    }
                     for (Entry<QName, String> entry : data.getAttributesSet()) {
                         child._attribute(entry.getKey(), entry.getValue());
                     }
                 }
-                marshal(node, child);
+                marshal(nsVersion, node, child);
             }
         }
     }

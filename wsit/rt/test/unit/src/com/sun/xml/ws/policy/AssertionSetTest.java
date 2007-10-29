@@ -50,9 +50,11 @@ public class AssertionSetTest extends AbstractPolicyApiClassTestBase {
         super(testName);
     }
 
+    @Override
     protected void setUp() throws Exception {
     }
 
+    @Override
     protected void tearDown() throws Exception {
     }
 

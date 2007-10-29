@@ -45,7 +45,6 @@ package com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter;
 
 import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.InvocationProcessor;
 import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.InvocationProcessorFactory;
-import junit.framework.*;
 import java.io.StringWriter;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;

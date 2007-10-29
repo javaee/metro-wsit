@@ -36,10 +36,6 @@
 
 package com.sun.xml.ws.policy;
 
-import com.sun.xml.ws.policy.sourcemodel.PolicyModelTranslator;
-import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
-import com.sun.xml.ws.policy.testutils.PolicyResourceLoader;
-import java.io.IOException;
 import junit.framework.TestCase;
 
 /**
@@ -51,9 +47,11 @@ public class PolicyTest extends TestCase {
         super(testName);
     }
     
+    @Override
     protected void setUp() throws Exception {
     }
     
+    @Override
     protected void tearDown() throws Exception {
     }
     
@@ -96,5 +94,5 @@ public class PolicyTest extends TestCase {
         
         assertEquals("The name is not initialized as expected", tested.getName(), "aaa");
         assertEquals("The ID is not initialized as expected", tested.getId(), "bbb");
-    }    
+    }       
 }

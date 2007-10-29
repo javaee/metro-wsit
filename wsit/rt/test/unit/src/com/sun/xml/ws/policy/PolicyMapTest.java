@@ -54,9 +54,11 @@ public class PolicyMapTest extends TestCase {
         super(testName);
     }
 
+    @Override
     protected void setUp() throws Exception {
     }
 
+    @Override
     protected void tearDown() throws Exception {
     }
     
@@ -78,25 +80,25 @@ public class PolicyMapTest extends TestCase {
 
         PolicySubject subject = new PolicySubject("dummy", Policy.createEmptyPolicy());
         
-        PolicyMapKey key = map.createWsdlServiceScopeKey(new QName("1"));
+        PolicyMapKey key = PolicyMap.createWsdlServiceScopeKey(new QName("1"));
         extender.putServiceSubject(key, subject);
-        key = map.createWsdlServiceScopeKey(new QName("2"));
+        key = PolicyMap.createWsdlServiceScopeKey(new QName("2"));
         extender.putServiceSubject(key, subject);
         
-        key = map.createWsdlEndpointScopeKey(new QName("3"), new QName("port"));
+        key = PolicyMap.createWsdlEndpointScopeKey(new QName("3"), new QName("port"));
         extender.putEndpointSubject(key, subject);
-        key = map.createWsdlEndpointScopeKey(new QName("4"), new QName("port"));
+        key = PolicyMap.createWsdlEndpointScopeKey(new QName("4"), new QName("port"));
         extender.putEndpointSubject(key, subject);
-        key = map.createWsdlEndpointScopeKey(new QName("5"), new QName("port"));
+        key = PolicyMap.createWsdlEndpointScopeKey(new QName("5"), new QName("port"));
         extender.putEndpointSubject(key, subject);
 
-        key = map.createWsdlMessageScopeKey(new QName("6"), new QName("port"), new QName("operation"));
+        key = PolicyMap.createWsdlMessageScopeKey(new QName("6"), new QName("port"), new QName("operation"));
         extender.putInputMessageSubject(key, subject);
 
-        key = map.createWsdlMessageScopeKey(new QName("7"), new QName("port"), new QName("operation"));
+        key = PolicyMap.createWsdlMessageScopeKey(new QName("7"), new QName("port"), new QName("operation"));
         extender.putOutputMessageSubject(key, subject);
         
-        key = map.createWsdlMessageScopeKey(new QName("8"), new QName("port"), new QName("operation"));
+        key = PolicyMap.createWsdlMessageScopeKey(new QName("8"), new QName("port"), new QName("operation"));
         extender.putFaultMessageSubject(key, subject);
         
         int counter = 0;
@@ -119,37 +121,37 @@ public class PolicyMapTest extends TestCase {
         
         PolicyMapExtender extender = PolicyMapExtender.createPolicyMapExtender();
         PolicyMapMutator[] mutators = new PolicyMapMutator[] {extender};
-        PolicyMapKey key = map.createWsdlServiceScopeKey(new QName("service"));
+        PolicyMapKey key = PolicyMap.createWsdlServiceScopeKey(new QName("service"));
         map = PolicyMap.createPolicyMap(Arrays.asList(mutators));
         extender.putServiceSubject(key, null);
         assertFalse(map.isEmpty());
 
         mutators[0].disconnect();
-        key = map.createWsdlEndpointScopeKey(new QName("service"), new QName("port"));
+        key = PolicyMap.createWsdlEndpointScopeKey(new QName("service"), new QName("port"));
         map = PolicyMap.createPolicyMap(Arrays.asList(new PolicyMapMutator[] {extender}));
         extender.putEndpointSubject(key, null);
         assertFalse(map.isEmpty());
 
         mutators[0].disconnect();
-        key = map.createWsdlOperationScopeKey(new QName("service"), new QName("port"), new QName("operation"));
+        key = PolicyMap.createWsdlOperationScopeKey(new QName("service"), new QName("port"), new QName("operation"));
         map = PolicyMap.createPolicyMap(Arrays.asList(new PolicyMapMutator[] {extender}));
         extender.putOperationSubject(key, null);
         assertFalse(map.isEmpty());
 
         mutators[0].disconnect();
-        key = map.createWsdlMessageScopeKey(new QName("service"), new QName("port"), new QName("operation"));
+        key = PolicyMap.createWsdlMessageScopeKey(new QName("service"), new QName("port"), new QName("operation"));
         map = PolicyMap.createPolicyMap(Arrays.asList(new PolicyMapMutator[] {extender}));
         extender.putInputMessageSubject(key, null);
         assertFalse(map.isEmpty());
 
         mutators[0].disconnect();
-        key = map.createWsdlMessageScopeKey(new QName("service"), new QName("port"), new QName("operation"));
+        key = PolicyMap.createWsdlMessageScopeKey(new QName("service"), new QName("port"), new QName("operation"));
         map = PolicyMap.createPolicyMap(Arrays.asList(new PolicyMapMutator[] {extender}));
         extender.putOutputMessageSubject(key, null);
         assertFalse(map.isEmpty());
 
         mutators[0].disconnect();
-        key = map.createWsdlMessageScopeKey(new QName("service"), new QName("port"), new QName("operation"));
+        key = PolicyMap.createWsdlMessageScopeKey(new QName("service"), new QName("port"), new QName("operation"));
         map = PolicyMap.createPolicyMap(Arrays.asList(new PolicyMapMutator[] {extender}));
         extender.putFaultMessageSubject(key, null);
         assertFalse(map.isEmpty());
@@ -164,7 +166,7 @@ public class PolicyMapTest extends TestCase {
     public void testGetOperationEffectivePolicy() throws Exception {
         PolicyMap policyMap = PolicyConfigParser.parse(getResourceUrl("effective/all.wsdl"), false);
         Policy expectedPolicy = loadPolicy("effective/resultOperation.xml");
-        PolicyMapKey policyMapKey = policyMap.createWsdlOperationScopeKey(new QName("http://example.org/","Service"),new QName("http://example.org/","Port"),new QName("http://example.org/","Operation"));
+        PolicyMapKey policyMapKey = PolicyMap.createWsdlOperationScopeKey(new QName("http://example.org/","Service"),new QName("http://example.org/","Port"),new QName("http://example.org/","Operation"));
         Policy policy = policyMap.getOperationEffectivePolicy(policyMapKey);
         assertEquals(expectedPolicy, policy);
     }
@@ -172,7 +174,7 @@ public class PolicyMapTest extends TestCase {
     public void testGetInputMessageEffectivePolicy() throws Exception {
         PolicyMap policyMap = PolicyConfigParser.parse(getResourceUrl("effective/all.wsdl"), false);
         Policy expectedPolicy = loadPolicy("effective/resultInput.xml");
-        PolicyMapKey policyMapKey = policyMap.createWsdlMessageScopeKey(new QName("http://example.org/","Service"),new QName("http://example.org/","Port"),new QName("http://example.org/","Operation"));
+        PolicyMapKey policyMapKey = PolicyMap.createWsdlMessageScopeKey(new QName("http://example.org/","Service"),new QName("http://example.org/","Port"),new QName("http://example.org/","Operation"));
         Policy policy = policyMap.getInputMessageEffectivePolicy(policyMapKey);
         assertEquals(expectedPolicy, policy);
     }
@@ -180,7 +182,7 @@ public class PolicyMapTest extends TestCase {
     public void testGetFaultMessageEffectivePolicy() throws Exception {
         PolicyMap policyMap = PolicyConfigParser.parse(getResourceUrl("effective/all.wsdl"), false);
         Policy expectedPolicy = loadPolicy("effective/resultFault.xml");
-        PolicyMapKey policyMapKey = policyMap.createWsdlFaultMessageScopeKey(new QName("http://example.org/","Service"),new QName("http://example.org/","Port"),new QName("http://example.org/","Operation"),new QName("http://example.org/","Fault"));
+        PolicyMapKey policyMapKey = PolicyMap.createWsdlFaultMessageScopeKey(new QName("http://example.org/","Service"),new QName("http://example.org/","Port"),new QName("http://example.org/","Operation"),new QName("http://example.org/","Fault"));
         Policy policy = policyMap.getFaultMessageEffectivePolicy(policyMapKey);
         assertEquals(expectedPolicy, policy);
     }
@@ -188,7 +190,7 @@ public class PolicyMapTest extends TestCase {
     public void testGetFaultMessageWithTwoServicesEffectivePolicy() throws Exception {
         PolicyMap policyMap = PolicyConfigParser.parse(getResourceUrl("effective/twoservices.wsdl"), false);
         Policy expectedPolicy = loadPolicy("effective/resultFault.xml");
-        PolicyMapKey policyMapKey = policyMap.createWsdlFaultMessageScopeKey(new QName("http://example.org/","Service"),new QName("http://example.org/","Port"),new QName("http://example.org/","Operation"),new QName("http://example.org/","Fault"));
+        PolicyMapKey policyMapKey = PolicyMap.createWsdlFaultMessageScopeKey(new QName("http://example.org/","Service"),new QName("http://example.org/","Port"),new QName("http://example.org/","Operation"),new QName("http://example.org/","Fault"));
         Policy policy = policyMap.getFaultMessageEffectivePolicy(policyMapKey);
         assertEquals(expectedPolicy, policy);
     }

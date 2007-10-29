@@ -42,7 +42,7 @@ import javax.xml.namespace.QName;
  * This class contains useful namespace uri constants
  *
  * @author Ryan.Shoemaker@Sun.COM, Joeseph.Fialli@Sun.COM
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  * @since 1.0
  */
 public class Constants {
@@ -83,24 +83,11 @@ public class Constants {
      */
     public static final String WSCOOR_SUN_URI =
             "http://java.sun.com/xml/ns/wsit/coord";
-
-    /**
-     * WS-Policy namespace uri and wsp:optional
-     * <p/>
-     * Note: both of these are defined in PolicyConstants, hence the deprecation
-     */
-    @Deprecated
-    public static final String WSP_URI =
-            "http://schemas.xmlsoap.org/ws/2004/09/policy";
     
     // patch for wsit 419
     public static final QName WSP2002_OPTIONAL = 
             new QName("http://schemas.xmlsoap.org/ws/2002/12/policy", "Optional");
     
-    @Deprecated
-    public static final QName WSP_OPTIONAL =
-            new QName(WSP_URI, "optional");
-
     // Currently supported standard.
     public static final String WSAT_NS = WSAT_SOAP_NSURI;
 

@@ -40,11 +40,6 @@ import junit.framework.TestCase;
 import com.sun.xml.ws.api.wsdl.parser.XMLEntityResolver;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
-import javax.xml.stream.FactoryConfigurationError;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
 
 /**
  *
@@ -55,9 +50,11 @@ public class PolicyConfigResolverTest extends TestCase {
         super(testName);
     }
 
+    @Override
     protected void setUp() throws Exception {
     }
 
+    @Override
     protected void tearDown() throws Exception {
     }
 

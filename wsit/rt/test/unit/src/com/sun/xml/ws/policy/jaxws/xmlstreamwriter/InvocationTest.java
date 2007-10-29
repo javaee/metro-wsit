@@ -44,12 +44,8 @@
 package com.sun.xml.ws.policy.jaxws.xmlstreamwriter;
 
 import javax.xml.stream.XMLStreamWriter;
-import junit.framework.*;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import junit.framework.TestCase;
 import static com.sun.xml.ws.policy.jaxws.xmlstreamwriter.XmlStreamWriterMethodType.WRITE_CHARACTERS;
 
 /**
@@ -62,9 +58,11 @@ public class InvocationTest extends TestCase {
         super(testName);
     }
     
+    @Override
     protected void setUp() throws Exception {
     }
     
+    @Override
     protected void tearDown() throws Exception {
     }
     

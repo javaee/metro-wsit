@@ -88,7 +88,7 @@ public final class PolicyModelGenerator {
         if (policy == null) {
             LOGGER.fine(LocalizationMessages.WSP_0047_POLICY_IS_NULL_RETURNING());
         } else {
-            model = PolicySourceModel.createPolicySourceModel(policy.getId(), policy.getName());
+            model = PolicySourceModel.createPolicySourceModel(policy.getNamespaceVersion(), policy.getId(), policy.getName());
             
             final ModelNode rootNode = model.getRootNode();
             final ModelNode exactlyOneNode = rootNode.createChildExactlyOneNode();
@@ -100,8 +100,8 @@ public final class PolicyModelGenerator {
                     if (assertion.hasNestedPolicy()) {
                         translate(assertionNode, assertion.getNestedPolicy());
                     }
-                    if (assertion.hasNestedAssertions()) {
-                        translate(assertion.getNestedAssertionsIterator(), assertionNode);
+                    if (assertion.hasParameters()) {
+                        translate(assertion.getParametersIterator(), assertionNode);
                     }
                 }
             }

@@ -69,9 +69,11 @@ public class PolicyConfigParserTest extends TestCase {
         super(testName);
     }
     
+    @Override
     protected void setUp() throws Exception {
     }
     
+    @Override
     protected void tearDown() throws Exception {
     }
     
@@ -159,7 +161,7 @@ public class PolicyConfigParserTest extends TestCase {
     
     public void testParseBufferMex() throws Exception {
         PolicyMap map = parseConfigFile("mex/mex.xml");
-        PolicyMapKey key = map.createWsdlEndpointScopeKey(new QName("http://schemas.xmlsoap.org/ws/2004/09/mex", "MetadataExchangeService"), new QName("http://schemas.xmlsoap.org/ws/2004/09/mex", "MetadataExchangePort"));
+        PolicyMapKey key = PolicyMap.createWsdlEndpointScopeKey(new QName("http://schemas.xmlsoap.org/ws/2004/09/mex", "MetadataExchangeService"), new QName("http://schemas.xmlsoap.org/ws/2004/09/mex", "MetadataExchangePort"));
         Policy policy = map.getEndpointEffectivePolicy(key);
         assertNotNull(policy);
         assertEquals("MEXPolicy", policy.getId());
@@ -168,7 +170,7 @@ public class PolicyConfigParserTest extends TestCase {
     
     public void testParseBufferSimple() throws Exception {
         PolicyMap map = parseConfigFile("config/simple.wsdl");
-        PolicyMapKey key = map.createWsdlEndpointScopeKey(new QName("http://example.org/", "AddNumbersService"), new QName("http://example.org/", "AddNumbersPort"));
+        PolicyMapKey key = PolicyMap.createWsdlEndpointScopeKey(new QName("http://example.org/", "AddNumbersService"), new QName("http://example.org/", "AddNumbersPort"));
         Policy policy = map.getEndpointEffectivePolicy(key);
         assertNotNull(policy);
         assertEquals("MutualCertificate10Sign_IPingService_policy", policy.getId());
@@ -180,13 +182,13 @@ public class PolicyConfigParserTest extends TestCase {
         PolicyMap map = parseConfigFile("config/single-import.wsdl");
         assertNotNull(map);
         
-        PolicyMapKey key1 = map.createWsdlEndpointScopeKey(new QName("http://example.org/", "AddNumbersService"),
+        PolicyMapKey key1 = PolicyMap.createWsdlEndpointScopeKey(new QName("http://example.org/", "AddNumbersService"),
                 new QName("http://example.org/", "AddNumbersPort"));
         Policy policy1 = map.getEndpointEffectivePolicy(key1);
         assertNotNull(policy1);
         assertEquals("MutualCertificate10Sign_IPingService_policy", policy1.getId());
         
-        PolicyMapKey key2 = map.createWsdlEndpointScopeKey(new QName("http://example.net/", "AddNumbersService"),
+        PolicyMapKey key2 = PolicyMap.createWsdlEndpointScopeKey(new QName("http://example.net/", "AddNumbersService"),
                 new QName("http://example.net/", "AddNumbersPort"));
         Policy policy2 = map.getEndpointEffectivePolicy(key2);
         assertNotNull(policy2);
@@ -198,25 +200,25 @@ public class PolicyConfigParserTest extends TestCase {
         
         assertNotNull(map);
         
-        PolicyMapKey key1 = map.createWsdlEndpointScopeKey(new QName("http://example.org/", "AddNumbersService"),
+        PolicyMapKey key1 = PolicyMap.createWsdlEndpointScopeKey(new QName("http://example.org/", "AddNumbersService"),
                 new QName("http://example.org/", "AddNumbersPort"));
         Policy policy1 = map.getEndpointEffectivePolicy(key1);
         assertNotNull(policy1);
         assertEquals("MutualCertificate10Sign_IPingService_policy", policy1.getId());
         
-        PolicyMapKey key2 = map.createWsdlEndpointScopeKey(new QName("http://example.net/", "AddNumbersService"),
+        PolicyMapKey key2 = PolicyMap.createWsdlEndpointScopeKey(new QName("http://example.net/", "AddNumbersService"),
                 new QName("http://example.net/", "AddNumbersPort"));
         Policy policy2 = map.getEndpointEffectivePolicy(key2);
         assertNotNull(policy2);
         assertEquals("MutualCertificate10Sign_IPingService_policy", policy2.getId());
         
-        PolicyMapKey key3 = map.createWsdlEndpointScopeKey(new QName("http://example.com/", "AddNumbersService"),
+        PolicyMapKey key3 = PolicyMap.createWsdlEndpointScopeKey(new QName("http://example.com/", "AddNumbersService"),
                 new QName("http://example.com/", "AddNumbersPort"));
         Policy policy3 = map.getEndpointEffectivePolicy(key3);
         assertNotNull(policy3);
         assertEquals("MutualCertificate10Sign_IPingService_policy", policy3.getId());
         
-        PolicyMapKey key4 = map.createWsdlEndpointScopeKey(new QName("http://example.com/import3/", "AddNumbersService"),
+        PolicyMapKey key4 = PolicyMap.createWsdlEndpointScopeKey(new QName("http://example.com/import3/", "AddNumbersService"),
                 new QName("http://example.com/import3/", "AddNumbersPort"));
         Policy policy4 = map.getEndpointEffectivePolicy(key4);
         assertNotNull(policy4);
@@ -225,16 +227,15 @@ public class PolicyConfigParserTest extends TestCase {
     
     public void testParseBufferCyclicImport() throws Exception {
         PolicyMap map = parseConfigFile("config/cyclic.wsdl");
-        PolicyMapKey key = map.createWsdlEndpointScopeKey(new QName("http://example.org/", "AddNumbersService"), new QName("http://example.org/", "AddNumbersPort"));
+        PolicyMapKey key = PolicyMap.createWsdlEndpointScopeKey(new QName("http://example.org/", "AddNumbersService"), new QName("http://example.org/", "AddNumbersPort"));
         Policy policy = map.getEndpointEffectivePolicy(key);
         assertNotNull(policy);
         assertEquals("MutualCertificate10Sign_IPingService_policy", policy.getId());
     }
     
     public void testParseBufferExternalReference() throws Exception {
-        PolicyMap map = null;
         try {
-            map = parseConfigFile("config/service.wsdl");
+            parseConfigFile("config/service.wsdl");
             assert false; // should throw "failed to find policy" exception
         } catch (WebServiceException wse) {
         }
@@ -242,7 +243,7 @@ public class PolicyConfigParserTest extends TestCase {
     
     public void testParseBufferExternalReferenceName() throws Exception {
         PolicyMap map = parseConfigFile("config/service-name.wsdl");
-        PolicyMapKey key = map.createWsdlEndpointScopeKey(new QName("http://example.org/AddNumbers/service", "AddNumbersService"), new QName("http://example.org/AddNumbers/service", "AddNumbersPort"));
+        PolicyMapKey key = PolicyMap.createWsdlEndpointScopeKey(new QName("http://example.org/AddNumbers/service", "AddNumbersService"), new QName("http://example.org/AddNumbers/service", "AddNumbersPort"));
         Policy policy = map.getEndpointEffectivePolicy(key);
         assertNotNull(policy);
         assertEquals("http://example.org/AddNumbers/porttype#AddNumbersServicePolicy", policy.getName());
@@ -314,7 +315,7 @@ public class PolicyConfigParserTest extends TestCase {
         
         public <T> T getSPI(Class<T> spiType) {
             if (spiType.isInstance(this.spi)) {
-                return (T) this.spi;
+                return spiType.cast(this.spi);
             } else {
                 return null;
             }

@@ -58,9 +58,11 @@ public class PolicyMapUtilTest extends TestCase {
         super(testName);
     }
 
+    @Override
     protected void setUp() throws Exception {
     }
 
+    @Override
     protected void tearDown() throws Exception {
     }
 
@@ -77,7 +79,7 @@ public class PolicyMapUtilTest extends TestCase {
 
         PolicyMapExtender extender = PolicyMapExtender.createPolicyMapExtender();
         PolicyMapMutator[] mutators = new PolicyMapMutator[] {extender};
-        PolicyMapKey key = map.createWsdlServiceScopeKey(new QName("service"));
+        PolicyMapKey key = PolicyMap.createWsdlServiceScopeKey(new QName("service"));
         map = PolicyMap.createPolicyMap(Arrays.asList(mutators));
         Policy policy = Policy.createEmptyPolicy();
         PolicySubject subject = new PolicySubject(new Object(), policy);
@@ -85,7 +87,7 @@ public class PolicyMapUtilTest extends TestCase {
         PolicyMapUtil.rejectAlternatives(map);
         
         mutators[0].disconnect();
-        key = map.createWsdlEndpointScopeKey(new QName("service"), new QName("port"));
+        key = PolicyMap.createWsdlEndpointScopeKey(new QName("service"), new QName("port"));
         map = PolicyMap.createPolicyMap(Arrays.asList(mutators));
         policy = PolicyResourceLoader.loadPolicy("merge/policy2.xml");
         subject = new PolicySubject(new Object(), policy);

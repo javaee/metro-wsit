@@ -37,6 +37,7 @@
 package com.sun.xml.ws.policy.sourcemodel;
 
 import com.sun.xml.ws.policy.Policy;
+import com.sun.xml.ws.policy.sourcemodel.wspolicy.NamespaceVersion;
 import com.sun.xml.ws.policy.testutils.PolicyResourceLoader;
 import java.util.Collections;
 import java.util.HashMap;
@@ -69,10 +70,12 @@ public class PolicyModelTranslatorTest extends TestCase {
         super(testName);
     }
     
+    @Override
     protected void setUp() throws Exception {
         translator = PolicyModelTranslator.getTranslator();
     }
     
+    @Override
     protected void tearDown() throws Exception {
     }
     
@@ -114,7 +117,13 @@ public class PolicyModelTranslatorTest extends TestCase {
 //            System.out.println(index + ". normalized model policy: " + normalizedModelPolicy);
             
             index++;
-        }
-        
+        }        
     }
+    
+    public void testPreserveOriginalNamespaceInformation() throws Exception {
+        Policy policy = translator.translate(PolicyResourceLoader.unmarshallModel("namespaces/policy-v1.2.xml"));
+        assertEquals("Namespace does not match original", NamespaceVersion.v1_2, policy.getNamespaceVersion());
+        policy = translator.translate(PolicyResourceLoader.unmarshallModel("namespaces/policy-v1.5.xml"));
+        assertEquals("Namespace does not match original", NamespaceVersion.v1_5, policy.getNamespaceVersion());
+    }            
 }

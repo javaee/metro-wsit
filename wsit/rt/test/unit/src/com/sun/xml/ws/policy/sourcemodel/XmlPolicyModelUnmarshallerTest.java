@@ -37,9 +37,8 @@
 package com.sun.xml.ws.policy.sourcemodel;
 
 import com.sun.xml.ws.policy.PolicyException;
+import com.sun.xml.ws.policy.sourcemodel.wspolicy.NamespaceVersion;
 import com.sun.xml.ws.policy.testutils.PolicyResourceLoader;
-import java.io.FileReader;
-import java.io.InputStreamReader;
 import java.io.Reader;
 import junit.framework.TestCase;
 
@@ -54,30 +53,32 @@ public class XmlPolicyModelUnmarshallerTest extends TestCase {
         super(testName);
     }
     
+    @Override
     protected void setUp() throws Exception {
     }
     
+    @Override
     protected void tearDown() throws Exception {
     }
     
     public void testUnmarshallSingleSimplePolicyModel() throws Exception {
-        PolicySourceModel model = unmarshallModel("single_alternative_policy/policy5.xml");
+        unmarshallModel("single_alternative_policy/policy5.xml");
     }
     
     public void testUnmarshallSingleComplexPolicyModel() throws Exception {
-        PolicySourceModel model = unmarshallModel("complex_policy/nested_assertions_with_alternatives.xml");
+        unmarshallModel("complex_policy/nested_assertions_with_alternatives.xml");
     }
     
     public void testUnmarshallComplexPolicyModelWithAssertionParameters() throws Exception {
-        PolicySourceModel model = unmarshallModel("complex_policy/assertion_parameters1.xml");
+        unmarshallModel("complex_policy/assertion_parameters1.xml");
     }
     
     public void testUnmarshallComplexPolicyModelWithAssertionParametersWithValues() throws Exception {
-        PolicySourceModel model = unmarshallModel("bug_reproduction/assertion_parameter_value_unmarshalling.xml");
+        unmarshallModel("bug_reproduction/assertion_parameter_value_unmarshalling.xml");
     }
     
     public void testUnmarshallPolicyModelWithPolicyReference() throws Exception {
-        PolicySourceModel model = unmarshallModel("bug_reproduction/policy_reference1.xml");
+        unmarshallModel("bug_reproduction/policy_reference1.xml");
     }
     
     public void testUnmarshallPolicyModelWithXmlId() throws Exception {
@@ -92,13 +93,21 @@ public class XmlPolicyModelUnmarshallerTest extends TestCase {
     
     public void testUnmarshallPolicyModelWithXmlIdAndWsuId() throws Exception {
         try {
-            PolicySourceModel model = unmarshallModel("complex_policy/policy_with_xmlid_and_wsuid.xml");
+            unmarshallModel("complex_policy/policy_with_xmlid_and_wsuid.xml");
             fail("Should throw an exception");
-        } catch (PolicyException e) {
+        } catch (PolicyException ignored) {
             // ok.
         } catch (Exception e) {
             fail("Should throw PolicyException instead: " + e);
         }
+    }
+    
+    public void testUnmarshallModelWithProperPolicyNamespaceVersion() throws Exception {
+        PolicySourceModel model = unmarshallModel("namespaces/policy-v1.2.xml");
+        assertEquals("Unmarshalled policy namespace version does not match with original.", NamespaceVersion.v1_2, model.getNamespaceVersion());
+
+        model = unmarshallModel("namespaces/policy-v1.5.xml");
+        assertEquals("Unmarshalled policy namespace version does not match with original.", NamespaceVersion.v1_5, model.getNamespaceVersion());
     }
     
     private PolicySourceModel unmarshallModel(String resource) throws Exception {

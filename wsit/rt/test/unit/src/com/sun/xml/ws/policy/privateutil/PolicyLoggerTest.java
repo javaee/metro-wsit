@@ -44,8 +44,8 @@
 package com.sun.xml.ws.policy.privateutil;
 
 import com.sun.xml.ws.policy.PolicyException;
-import junit.framework.*;
 import java.util.logging.Level;
+import junit.framework.TestCase;
 import static com.sun.xml.ws.policy.privateutil.PolicyUtils.Commons.getCallerMethodName;
 
 /**
@@ -59,10 +59,12 @@ public class PolicyLoggerTest extends TestCase {
         super(testName);
     }
     
+    @Override
     protected void setUp() throws Exception {
         instance = PolicyLogger.getLogger(PolicyLoggerTest.class);
     }
     
+    @Override
     protected void tearDown() throws Exception {
     }
     
