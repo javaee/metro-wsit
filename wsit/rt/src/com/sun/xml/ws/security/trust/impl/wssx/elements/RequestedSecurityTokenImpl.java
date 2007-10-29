@@ -1,5 +1,5 @@
 /*
- * $Id: RequestedSecurityTokenImpl.java,v 1.1 2007-08-23 12:40:55 shyam_rao Exp $
+ * $Id: RequestedSecurityTokenImpl.java,v 1.2 2007-10-29 23:04:29 jdg6688 Exp $
  */
 
 /*
@@ -44,6 +44,7 @@ import com.sun.xml.ws.security.trust.impl.wssx.bindings.RequestedSecurityTokenTy
 import com.sun.xml.ws.security.secconv.WSSCConstants;
 import com.sun.xml.ws.security.secconv.impl.wssx.elements.SecurityContextTokenImpl;
 import com.sun.xml.ws.security.secconv.impl.wssx.bindings.SecurityContextTokenType;
+import com.sun.xml.ws.security.trust.WSTrustVersion;
 
 import com.sun.xml.wss.saml.assertion.saml11.jaxb20.Assertion;
 import com.sun.xml.wss.saml.internal.saml11.jaxb20.AssertionType;
@@ -74,8 +75,8 @@ public class RequestedSecurityTokenImpl extends RequestedSecurityTokenType imple
     public RequestedSecurityTokenImpl(RequestedSecurityTokenType rdstType){
         Object rdst = rdstType.getAny();
         if (rdst instanceof JAXBElement){
-            JAXBElement<Object> rdstEle = (JAXBElement)rdst; 
-           QName name = rdstEle.getName();
+            JAXBElement rdstEle = (JAXBElement)rdst; 
+            QName name = rdstEle.getName();
             if(SecurityContextToken_QNAME.equals(name)){
                 SecurityContextTokenType sctType = (SecurityContextTokenType)rdstEle.getValue();
                 setToken(new SecurityContextTokenImpl(sctType));
@@ -114,10 +115,11 @@ public class RequestedSecurityTokenImpl extends RequestedSecurityTokenType imple
     public static RequestedSecurityTokenType fromElement(org.w3c.dom.Element element)
         throws WSTrustException {
         try {
-            JAXBContext jc =
-                WSTrustElementFactory.getContext();
-            javax.xml.bind.Unmarshaller u = jc.createUnmarshaller();
-            return (RequestedSecurityTokenType)(((JAXBElement<RequestedSecurityTokenType>)u.unmarshal(element)).getValue());
+            final JAXBContext context =
+                WSTrustElementFactory.getContext(WSTrustVersion.WS_TRUST_13);
+            final javax.xml.bind.Unmarshaller unmarshaller = context.createUnmarshaller();
+            
+            return unmarshaller.unmarshal(element, RequestedSecurityTokenType.class).getValue();
         } catch ( Exception ex) {
             throw new WSTrustException(ex.getMessage(), ex);
         }

@@ -89,6 +89,7 @@ import com.sun.xml.wss.saml.Advice;
 import com.sun.xml.wss.saml.Assertion;
 import com.sun.xml.wss.saml.Attribute;
 import com.sun.xml.wss.saml.AttributeStatement;
+import com.sun.xml.wss.saml.AudienceRestrictionCondition;
 import com.sun.xml.wss.saml.AuthenticationStatement;
 import com.sun.xml.wss.saml.AuthnContext;
 import com.sun.xml.wss.saml.AuthnStatement;
@@ -395,14 +396,14 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
             final GregorianCalendar notOnOrAfter = new GregorianCalendar();
             notOnOrAfter.add(Calendar.MILLISECOND, (int)stsConfig.getIssuedTokenTimeout());
             
-            List arc = null;
+            List<AudienceRestrictionCondition> arc = null;
             final List<String> confirmMethods = new ArrayList<String>();
             Element keyInfoEle = null;
             if (keyType.equals(wstVer.getBearerKeyTypeURI())){
                  confirmMethods.add(SAML_BEARER_1_0);
                  if (appliesTo != null){
-                     arc = new ArrayList();
-                     List au = new ArrayList();
+                     arc = new ArrayList<AudienceRestrictionCondition>();
+                     List<String> au = new ArrayList<String>();
                      au.add(appliesTo);
                      arc.add(samlFac.createAudienceRestrictionCondition(au));
                  }
@@ -422,8 +423,8 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
             final List<Attribute> attrs = new ArrayList<Attribute>();
             final Set<Map.Entry<QName, List<String>>> entries = claimedAttrs.entrySet();
             for(Map.Entry<QName, List<String>> entry : entries){
-                final QName attrKey = (QName)entry.getKey();
-                final List<String> values = (List<String>)entry.getValue();
+                final QName attrKey = entry.getKey();
+                final List<String> values = entry.getValue();
                 if (values != null && values.size() > 0){
                     if (STSAttributeProvider.NAME_IDENTIFIER.equals(attrKey.getLocalPart()) && subj == null){
                         final NameIdentifier nameId = samlFac.createNameIdentifier(values.get(0), attrKey.getNamespaceURI(), null);
