@@ -40,7 +40,8 @@ import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
 import com.sun.tools.ws.api.wsdl.TWSDLExtensionHandler;
 import com.sun.tools.ws.api.wsdl.TWSDLParserContext;
 import com.sun.tools.ws.util.xml.XmlUtil;
-import com.sun.xml.ws.policy.PolicyConstants;
+import com.sun.xml.ws.policy.sourcemodel.wspolicy.NamespaceVersion;
+import com.sun.xml.ws.policy.sourcemodel.wspolicy.XmlToken;
 import org.w3c.dom.Element;
 
 /**
@@ -53,7 +54,7 @@ public class PolicyExtensionHandler extends TWSDLExtensionHandler {
     
     @Override
     public String getNamespaceURI() {
-        return PolicyConstants.POLICY_NAMESPACE_URI;
+        return NamespaceVersion.v1_2.toString();
     }
     
     /*  we need default constructor, so that our service provider could be looked up and instantiated  */
@@ -62,8 +63,8 @@ public class PolicyExtensionHandler extends TWSDLExtensionHandler {
 
     /* only skip the element if it is either <wsp:Policy/> or <wsp:PolicyReference/> element */
     private boolean handleExtension(TWSDLParserContext context, TWSDLExtensible parent, Element e) {
-        return XmlUtil.matchesTagNS(e, PolicyConstants.POLICY) 
-                    || XmlUtil.matchesTagNS(e, PolicyConstants.POLICY_REFERENCE);
+        return XmlUtil.matchesTagNS(e, NamespaceVersion.v1_2.asQName(XmlToken.Policy)) 
+                    || XmlUtil.matchesTagNS(e,NamespaceVersion.v1_2.asQName(XmlToken.PolicyReference));
     }
     
     @Override
