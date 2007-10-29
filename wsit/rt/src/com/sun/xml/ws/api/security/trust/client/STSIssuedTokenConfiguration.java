@@ -38,6 +38,8 @@ package com.sun.xml.ws.api.security.trust.client;
 
 import com.sun.xml.ws.api.security.trust.Claims;
 import com.sun.xml.ws.security.Token;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
@@ -63,6 +65,8 @@ public abstract class STSIssuedTokenConfiguration implements IssuedTokenConfigur
     protected String stsNamespace = null;
 
     protected SecondaryIssuedTokenParameters sisPara = null;
+
+    private Map<String, Object> otherOptions = new HashMap<String, Object>();
     
     protected STSIssuedTokenConfiguration(){
 
@@ -121,6 +125,10 @@ public abstract class STSIssuedTokenConfiguration implements IssuedTokenConfigur
 
     public SecondaryIssuedTokenParameters getSecondaryIssuedTokenParameters(){
         return this.sisPara;
+    }
+
+    public Map<String, Object> getOtherOptions(){
+        return this.otherOptions;
     }
     
     public abstract String getTokenType();
