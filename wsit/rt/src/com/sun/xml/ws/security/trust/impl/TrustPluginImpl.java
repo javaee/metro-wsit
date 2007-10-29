@@ -87,7 +87,9 @@ import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
 
 
 import com.sun.xml.ws.api.security.trust.client.STSIssuedTokenConfiguration;
+import com.sun.xml.ws.security.trust.elements.BaseSTSRequest;
 import com.sun.xml.ws.security.trust.elements.BaseSTSResponse;
+import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponseCollection;
 
 /**
  *
@@ -369,7 +371,7 @@ public class TrustPluginImpl implements TrustPlugin {
             dispatch.getRequestContext().put(javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY, stsURI);
         }
         dispatch.getRequestContext().put(WSTrustConstants.IS_TRUST_MESSAGE, "true");
-        dispatch.getRequestContext().put(WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION, WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION);
+        dispatch.getRequestContext().put(wstVer.getIssueRequestAction(), wstVer.getIssueRequestAction());
         
         //RequestSecurityTokenResponse rstr = null;
         // try{
@@ -394,7 +396,12 @@ public class TrustPluginImpl implements TrustPlugin {
         // ex.printStackTrace();
         // }
         
-        final RequestSecurityTokenResponse rstr =  fact.createRSTRFrom((JAXBElement)dispatch.invoke(fact.toJAXBElement(request)));
+        final BaseSTSResponse rstr;
+        if(wstVer.getNamespaceURI().equals(WSTrustVersion.WS_TRUST_13.getNamespaceURI())){
+            rstr = fact.createRSTRCollectionFrom(((JAXBElement)dispatch.invoke(fact.toJAXBElement(request))));
+        }else{
+            rstr = fact.createRSTRFrom((JAXBElement)dispatch.invoke(fact.toJAXBElement(request)));
+        }
         if (log.isLoggable(Level.FINE)) {
             log.log(Level.FINE,
                     LogStringsMessages.WST_1014_RESPONSE_INVOKING_RST(elemToString(rstr)));
@@ -458,5 +465,19 @@ public class TrustPluginImpl implements TrustPlugin {
     private String elemToString(final RequestSecurityToken rst){
       //ToDo
       return  rst.toString();
+    }
+    private String elemToString(final BaseSTSRequest rst){
+        //ToDo        
+        return elemToString((RequestSecurityToken)rst);
+    }
+
+    private String elemToString(final BaseSTSResponse rstr){
+      //ToDo
+      if(rstr instanceof RequestSecurityTokenResponse){
+          return elemToString((RequestSecurityTokenResponse)rstr);
+      }else if (rstr instanceof RequestSecurityTokenResponseCollection){
+          return elemToString((RequestSecurityTokenResponseCollection)rstr);
+      }
+      return null;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: RequestedProofTokenImpl.java,v 1.2 2007-10-24 15:30:52 shyam_rao Exp $
+ * $Id: RequestedProofTokenImpl.java,v 1.3 2007-10-29 10:52:17 shyam_rao Exp $
  */
 
 /*
@@ -115,7 +115,7 @@ public class RequestedProofTokenImpl extends RequestedProofTokenType implements 
         if (computedKey != null) {
             String ckString = computedKey.toString();
             if (!(ckString.equalsIgnoreCase(WSTrustVersion.WS_TRUST_13.getCKHASHalgorithmURI()) || 
-                    (ckString.equalsIgnoreCase(WSTrustVersion.WS_TRUST_10.getCKPSHA1algorithmURI())))) {
+                    (ckString.equalsIgnoreCase(WSTrustVersion.WS_TRUST_13.getCKPSHA1algorithmURI())))) {
                 throw new RuntimeException("Invalid computedKeyURI");
             }
             this.computedKey = computedKey;         

@@ -47,8 +47,6 @@ import com.sun.xml.ws.assembler.PipeConfiguration;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.security.impl.policyconv.SCTokenWrapper;
 import com.sun.xml.ws.security.opt.impl.JAXBFilterProcessingContext;
-import com.sun.xml.ws.security.secconv.WSSCConstants;
-import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.wss.impl.PolicyResolver;
 import com.sun.xml.wss.impl.policy.mls.MessagePolicy;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
@@ -68,6 +66,10 @@ import java.util.HashMap;
 import org.w3c.dom.NodeList;
 import com.sun.xml.ws.security.policy.Token;
 import com.sun.xml.ws.api.addressing.*;
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
+import com.sun.xml.ws.security.secconv.WSSCVersion;
+import com.sun.xml.ws.security.trust.WSTrustVersion;
+import com.sun.xml.wss.impl.ProcessingContextImpl;
 
 import static com.sun.xml.wss.jaxws.impl.Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS;
 import static com.sun.xml.wss.jaxws.impl.Constants.SUN_WSS_SECURITY_CLIENT_POLICY_NS;
@@ -101,6 +103,8 @@ public class PolicyResolverImpl implements PolicyResolver{
     private boolean isSCMessage = false;
     //private boolean isTrustOrSCMessage = false;
     private String action =  "";
+    private WSTrustVersion wstVer = WSTrustVersion.WS_TRUST_10;
+    private WSSCVersion wsscVer = WSSCVersion.WSSC_10;
     /**
      * Creates a new instance of OperationResolverImpl
      */
@@ -116,6 +120,11 @@ public class PolicyResolverImpl implements PolicyResolver{
     
     public MessagePolicy resolvePolicy(ProcessingContext ctx){
         Message msg = (Message)ctx.getExtraneousProperty(JAXWS_21_MESSAGE);
+        if(((ProcessingContextImpl)ctx).getSecurityPolicyVersion().equals(
+                SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri)){
+            wstVer = WSTrustVersion.WS_TRUST_13;
+            wsscVer = WSSCVersion.WSSC_13;
+        }
         Packet packet = null;
         MessagePolicy mp = null;
         SOAPMessage soapMsg = null;
@@ -257,8 +266,8 @@ public class PolicyResolverImpl implements PolicyResolver{
     }
     
     private boolean isTrustMessage(){
-        if(WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION.equals(action) ||
-                WSTrustConstants.REQUEST_SECURITY_TOKEN_RESPONSE_ISSUE_ACTION.equals(action)){
+        if(wstVer.getIssueRequestAction().equals(action) ||
+                wstVer.getIssueResponseAction().equals(action)){
             return true;
         }
         return false;
@@ -289,8 +298,8 @@ public class PolicyResolverImpl implements PolicyResolver{
     }
     
     private boolean isSCMessage(){
-        if (rstSCTURI.equals(action) || rstrSCTURI.equals(action) ||
-                rstSCTURI_13NS.equals(action) || rstrSCTURI_13NS.equals(action)){
+        if (wsscVer.getSCTRequestAction().equals(action) || 
+                wsscVer.getSCTResponseAction().equals(action)){
             return true;
         }
         return false;
@@ -298,8 +307,8 @@ public class PolicyResolverImpl implements PolicyResolver{
     
     private boolean isSCCancel(){
         
-        if(WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_RESPONSE_ACTION.equals(action) ||
-                WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_ACTION .equals(action)) {
+        if(wsscVer.getSCTCancelResponseAction().equals(action) ||
+                wsscVer.getSCTCancelRequestAction().equals(action)) {
             return true;
         }
         return false;

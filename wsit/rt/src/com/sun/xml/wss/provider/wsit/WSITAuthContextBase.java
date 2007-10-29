@@ -225,16 +225,16 @@ public abstract class WSITAuthContextBase  {
     
     //static JAXBContext used across the Pipe
     protected static final JAXBContext jaxbContext;    
-    protected static WSSCVersion wsscVer;
-    protected static WSTrustVersion wsTrustVer;
+    protected WSSCVersion wsscVer = null;
+    protected WSTrustVersion wsTrustVer = null;
     protected static final ArrayList<String> securityPolicyNamespaces ;
     //TODO: not initialized anywhere and is being used at one place in server auth-ctx
     //protected static MessagePolicy emptyMessagePolicy;
     protected static final List<PolicyAssertion> EMPTY_LIST = Collections.emptyList();
     // debug the Secure SOAP Messages (enable dumping)
     protected static final boolean debug ;
-    public static final URI ISSUE_REQUEST_URI ;
-    public static final URI CANCEL_REQUEST_URI ;
+    //public static final URI ISSUE_REQUEST_URI ;
+    //public static final URI CANCEL_REQUEST_URI ;
     
     
     //***********CTOR initialized Instance Variables**************
@@ -288,8 +288,8 @@ public abstract class WSITAuthContextBase  {
         try {
             //TODO: system property maynot be appropriate for server side.
             debug = Boolean.valueOf(System.getProperty("DebugSecurity"));
-            ISSUE_REQUEST_URI = new URI(WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION);
-            CANCEL_REQUEST_URI = new URI(WSTrustConstants.CANCEL_REQUEST);
+            //ISSUE_REQUEST_URI = new URI(WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION);
+            //CANCEL_REQUEST_URI = new URI(WSTrustConstants.CANCEL_REQUEST);
             jaxbContext = WSTrustElementFactory.getContext();            
             securityPolicyNamespaces = new ArrayList<String>();
             securityPolicyNamespaces.add(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri);
@@ -811,8 +811,8 @@ public abstract class WSITAuthContextBase  {
         }
         
         String action = getAction(packet);
-        if(WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_RESPONSE_ACTION.equals(action) ||
-                WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_ACTION .equals(action)) {
+        if(wsscVer.getSCTCancelResponseAction().equals(action) ||
+                wsscVer.getSCTCancelRequestAction().equals(action)) {
             return true;
         }
         return false;

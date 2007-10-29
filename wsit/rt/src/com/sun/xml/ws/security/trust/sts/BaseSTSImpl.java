@@ -192,13 +192,13 @@ public abstract class BaseSTSImpl implements BaseSTS {
             }
             
             final STSConfiguration config = getConfiguration();
-            if(rst.getRequestType().toString().equals(WSTrustConstants.ISSUE_REQUEST)){
+            if(rst.getRequestType().toString().equals(wstVer.getIssueRequestTypeURI())){
                 rstrEle = issue(config, appliesTo, eleFac, rst);                
-            }else if(rst.getRequestType().toString().equals(WSTrustConstants.CANCEL_REQUEST)){
+            }else if(rst.getRequestType().toString().equals(wstVer.getCancelRequestTypeURI())){
                 rstrEle = cancel(config, appliesTo, eleFac, rst);
-            }else if(rst.getRequestType().toString().equals(WSTrustConstants.RENEW_REQUEST)){
+            }else if(rst.getRequestType().toString().equals(wstVer.getRenewRequestTypeURI())){
                 rstrEle = renew(config, appliesTo, eleFac, rst);
-            }else if(rst.getRequestType().toString().equals(WSTrustConstants.VALIDATE_REQUEST)){
+            }else if(rst.getRequestType().toString().equals(wstVer.getValidateRequestTypeURI())){
                 rstrEle = validate(config, appliesTo, eleFac, rst);
             }            
         } catch (Exception ex){

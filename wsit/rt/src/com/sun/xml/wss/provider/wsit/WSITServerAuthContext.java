@@ -310,26 +310,6 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         
         if (isAddressingEnabled()) {
             action = getAction(packet);
-//            if (WSSCConstants.REQUEST_SECURITY_CONTEXT_TOKEN_ACTION.equals(action)) {
-//                isSCIssueMessage = true;
-//                sharedState.put("IS_SC_ISSUE", TRUE);
-//            } else if (WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_ACTION.equals(action)) {
-//                isSCCancelMessage = true;
-//                sharedState.put("IS_SC_CANCEL", TRUE);
-//            } else if (WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION.equals(action)) {
-//                isTrustMessage = true;
-//                sharedState.put("IS_TRUST_MESSAGE", TRUE);
-//                packet.getMessage().getHeaders().getTo(addVer, pipeConfig.getBinding().getSOAPVersion());
-//                
-//                if(trustConfig != null){
-//                    packet.invocationProperties.put(
-//                            com.sun.xml.ws.security.impl.policy.Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS,trustConfig.iterator());
-//                }
-//                
-//                //set the SecurityEnvironment
-//                packet.invocationProperties.put(WSTrustConstants.SECURITY_ENVIRONMENT, secEnv);
-//            }
-            
             if (wsscVer.getSCTRequestAction().equals(action)) {
                 isSCIssueMessage = true;
                 sharedState.put("IS_SC_ISSUE", TRUE);

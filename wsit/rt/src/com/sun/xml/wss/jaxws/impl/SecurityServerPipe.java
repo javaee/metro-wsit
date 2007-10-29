@@ -558,10 +558,10 @@ public class SecurityServerPipe extends SecurityPipeBase {
             //RequestSecurityTokenResponse rstr = null;
             BaseSTSResponse rstr = null;
             WSSCContract scContract = WSSCFactory.newWSSCContract(null, wsscVer);
-            if (requestType.toString().equals(WSTrustConstants.ISSUE_REQUEST)) {
+            if (requestType.toString().equals(wsTrustVer.getIssueRequestTypeURI())) {
                 List<PolicyAssertion> policies = getOutBoundSCP(packet.getMessage());
                 rstr =  scContract.issue(rst, ictx, (SecureConversationToken)policies.get(0));
-                retAction = WSSCConstants.REQUEST_SECURITY_CONTEXT_TOKEN_RESPONSE_ACTION;
+                retAction = wsscVer.getSCTResponseAction();
                 SecurityContextToken sct = (SecurityContextToken)ictx.getSecurityToken();
                 String sctId = sct.getIdentifier().toString();
                 
@@ -581,7 +581,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
            
                 //((ProcessingContextImpl)ctx).getIssuedTokenContextMap().put(sctId, ictx);                
                 
-            } else if (requestType.toString().equals(WSTrustConstants.CANCEL_REQUEST)) {
+            } else if (requestType.toString().equals(wsTrustVer.getCancelRequestTypeURI())) {
                 retAction = wsscVer.getSCTCancelResponseAction();
                 rstr =  scContract.cancel(rst, ictx);
             } else {

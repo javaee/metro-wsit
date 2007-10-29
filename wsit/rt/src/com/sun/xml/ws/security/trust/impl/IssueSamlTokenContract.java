@@ -107,8 +107,8 @@ public abstract class IssueSamlTokenContract implements com.sun.xml.ws.api.secur
             LogDomainConstants.TRUST_IMPL_DOMAIN_BUNDLE);
     
     protected STSConfiguration stsConfig;
-    
-    protected static final WSTrustElementFactory eleFac = WSTrustElementFactory.newInstance();
+    protected WSTrustVersion wstVer;
+    protected static WSTrustElementFactory eleFac;
     protected static final SimpleDateFormat calendarFormatter
             = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'sss'Z'", Locale.getDefault());
     
@@ -117,13 +117,15 @@ public abstract class IssueSamlTokenContract implements com.sun.xml.ws.api.secur
     
     public void init(final STSConfiguration stsConfig) {
         this.stsConfig = stsConfig;
+        this.wstVer = (WSTrustVersion)stsConfig.getOtherOptions().get(WSTrustConstants.WST_VERSION);
+        eleFac = WSTrustElementFactory.newInstance(wstVer);
     }
     
     /** Issue a Token */
     public BaseSTSResponse issue(final BaseSTSRequest request, final IssuedTokenContext context)throws WSTrustException {
         
         RequestSecurityToken rst = (RequestSecurityToken)request;
-        WSTrustVersion wstVer = (WSTrustVersion)stsConfig.getOtherOptions().get(WSTrustConstants.WST_VERSION);
+        //WSTrustVersion wstVer = (WSTrustVersion)stsConfig.getOtherOptions().get(WSTrustConstants.WST_VERSION);
 
         // Get AppliesTo
         final AppliesTo applies = rst.getAppliesTo();
@@ -164,7 +166,7 @@ public abstract class IssueSamlTokenContract implements com.sun.xml.ws.api.secur
             keyType = spMd.getKeyType();
         }
         if (keyType == null){
-            keyType = WSTrustConstants.SYMMETRIC_KEY;
+            keyType = wstVer.getSymmetricKeyTypeURI();
         }
         
         
@@ -249,8 +251,8 @@ public abstract class IssueSamlTokenContract implements com.sun.xml.ws.api.secur
                 key = SecurityUtil.P_SHA1(clientEntr, key, keySize/8);
             } catch (Exception ex){
                 log.log(Level.SEVERE, 
-                        LogStringsMessages.WST_0013_ERROR_SECRET_KEY(WSTrustConstants.CK_PSHA1, keySize, appliesTo), ex);
-                throw new WSTrustException(LogStringsMessages.WST_0013_ERROR_SECRET_KEY(WSTrustConstants.CK_PSHA1, keySize, appliesTo), ex);
+                        LogStringsMessages.WST_0013_ERROR_SECRET_KEY(wstVer.getCKPSHA1algorithmURI(), keySize, appliesTo), ex);
+                throw new WSTrustException(LogStringsMessages.WST_0013_ERROR_SECRET_KEY(wstVer.getCKPSHA1algorithmURI(), keySize, appliesTo), ex);
             }
             
             context.setProofKey(key);

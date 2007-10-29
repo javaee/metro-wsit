@@ -356,7 +356,7 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
         }
         
         final KeyInfo keyInfo = new KeyInfo(doc);
-        if (WSTrustConstants.SYMMETRIC_KEY.equals(keyType)){
+        if (wstVer.getSymmetricKeyTypeURI().equals(keyType)){
             final byte[] key = ctx.getProofKey();
             if (!stsConfig.getEncryptIssuedToken() && stsConfig.getEncryptIssuedKey()){
                 final EncryptedKey encKey = encryptKey(doc, key, serCert, appliesTo);
@@ -372,7 +372,7 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
                 final Element bsEle= eleFac.toElement(secret,doc);
                 keyInfo.addUnknownElement(bsEle);
             }
-        }else if(WSTrustConstants.PUBLIC_KEY.equals(keyType)){
+        }else if(wstVer.getPublicKeyTypeURI().equals(keyType)){
             final X509Data x509data = new X509Data(doc);
             try{
                 x509data.addCertificate(ctx.getRequestorCertificate());
@@ -398,7 +398,7 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
             List arc = null;
             final List<String> confirmMethods = new ArrayList<String>();
             Element keyInfoEle = null;
-            if (keyType.equals(WSTrustConstants.NO_PROOF_KEY)){
+            if (keyType.equals(wstVer.getBearerKeyTypeURI())){
                  confirmMethods.add(SAML_BEARER_1_0);
                  if (appliesTo != null){
                      arc = new ArrayList();

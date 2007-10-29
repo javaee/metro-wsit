@@ -220,7 +220,7 @@ public class WSSCPlugin {
             throw new RuntimeException(LogStringsMessages.WSSC_0024_ERROR_CREATING_RST(FOR_CANCEL), ex);
         }
         
-        final BaseSTSResponse rstr = sendRequest(null, wsdlPort, binding, securityPipe, marshaller, unmarshaller, rst, WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_ACTION, endPointAddress, addVer);
+        final BaseSTSResponse rstr = sendRequest(null, wsdlPort, binding, securityPipe, marshaller, unmarshaller, rst, wsscVer.getSCTCancelRequestAction(), endPointAddress, addVer);
         
         // Handle the RequestSecurityTokenResponse
         try {
@@ -324,12 +324,12 @@ public class WSSCPlugin {
     
     private RequestSecurityToken createRequestSecurityToken(final boolean reqClientEntropy,final int skl) throws WSSecureConversationException{
         
-        final URI tokenType = URI.create(WSSCConstants.SECURITY_CONTEXT_TOKEN_TYPE);
+        final URI tokenType = URI.create(wsscVer.getSCTTokenTypeURI());
         final URI requestType = URI.create(wsTrustVer.getIssueRequestTypeURI());
         final SecureRandom random = new SecureRandom();
         final byte[] rawValue = new byte[skl/8];
         random.nextBytes(rawValue);
-        final BinarySecret secret = eleFac.createBinarySecret(rawValue, BinarySecret.NONCE_KEY_TYPE);
+        final BinarySecret secret = eleFac.createBinarySecret(rawValue, wsTrustVer.getNonceBinarySecretTypeURI());
         final Entropy entropy = reqClientEntropy?eleFac.createEntropy(secret):null;
         
         RequestSecurityToken rst = null;

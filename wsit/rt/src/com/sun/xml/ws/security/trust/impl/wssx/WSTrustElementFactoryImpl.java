@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustElementFactoryImpl.java,v 1.6 2007-10-24 15:30:51 shyam_rao Exp $
+ * $Id: WSTrustElementFactoryImpl.java,v 1.7 2007-10-29 10:52:17 shyam_rao Exp $
  */
 
 /*
@@ -305,8 +305,11 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
 
     public RequestSecurityTokenResponseCollection createRSTRC(List<RequestSecurityTokenResponse> rstrs){
         RequestSecurityTokenResponseCollection rstrc = new RequestSecurityTokenResponseCollectionImpl();
-        rstrc.getRequestSecurityTokenResponses().addAll(rstrs);
-
+        //rstrc.getRequestSecurityTokenResponses().addAll(rstrs);        
+        
+        for (int i = 0; i < rstrs.size(); i++) {
+            ((RequestSecurityTokenResponseCollectionImpl)rstrc).addRequestSecurityTokenResponse((RequestSecurityTokenResponse)rstrs.get(i));
+        }
         return rstrc;
     }
     

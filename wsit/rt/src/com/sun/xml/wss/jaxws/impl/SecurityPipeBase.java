@@ -225,8 +225,8 @@ public abstract class SecurityPipeBase implements Pipe {
     protected HashMap<WSDLBoundOperation,SecurityPolicyHolder> inMessagePolicyMap = null;
     protected HashMap<String,SecurityPolicyHolder> outProtocolPM = null;
     protected HashMap<String,SecurityPolicyHolder> inProtocolPM = null;
-    public static final URI ISSUE_REQUEST_URI ;
-    public static final URI CANCEL_REQUEST_URI;
+    //public static final URI ISSUE_REQUEST_URI ;
+    //public static final URI CANCEL_REQUEST_URI;
     protected Policy bpMSP = null;
     //milliseconds
     protected long timestampTimeOut = 0;
@@ -263,8 +263,8 @@ public abstract class SecurityPipeBase implements Pipe {
         try {
             //TODO: system property maynot be appropriate for server side.
             debug = Boolean.valueOf(System.getProperty("DebugSecurity"));
-            ISSUE_REQUEST_URI = new URI(WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION);
-            CANCEL_REQUEST_URI = new URI(WSTrustConstants.CANCEL_REQUEST);
+            //ISSUE_REQUEST_URI = new URI(WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION);
+            //CANCEL_REQUEST_URI = new URI(WSTrustConstants.CANCEL_REQUEST);
             jaxbContext = WSTrustElementFactory.getContext();            
             securityPolicyNamespaces = new ArrayList<String>();
             securityPolicyNamespaces.add(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri);
@@ -1094,8 +1094,8 @@ public abstract class SecurityPipeBase implements Pipe {
         }
         
         String action = getAction(packet);
-        if(WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_RESPONSE_ACTION.equals(action) ||
-                WSSCConstants.CANCEL_SECURITY_CONTEXT_TOKEN_ACTION .equals(action)) {
+        if(wsscVer.getSCTCancelResponseAction().equals(action) ||
+                wsscVer.getSCTCancelRequestAction().equals(action)) {
             return true;
         }
         return false;
