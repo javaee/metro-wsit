@@ -39,8 +39,6 @@ package com.sun.xml.ws.tx.common;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.model.JavaMethod;
 import com.sun.xml.ws.api.model.SEIModel;
-import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
-import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
@@ -49,6 +47,7 @@ import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapExtender;
 import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.policy.PolicySubject;
+import com.sun.xml.ws.policy.SimpleAssertion;
 import com.sun.xml.ws.policy.jaxws.spi.PolicyMapUpdateProvider;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import static com.sun.xml.ws.tx.common.Constants.AT_ALWAYS_CAPABILITY;
@@ -158,7 +157,7 @@ public class TxMapUpdateProvider implements PolicyMapUpdateProvider {
         }
     }
     
-    static class WsatPolicyAssertion extends PolicyAssertion {
+    static class WsatPolicyAssertion extends SimpleAssertion {
 
         static private AssertionData createAssertionData(final QName assertionQName, final boolean isOptional) {
             final AssertionData result = AssertionData.createAssertionData(assertionQName);
@@ -171,7 +170,7 @@ public class TxMapUpdateProvider implements PolicyMapUpdateProvider {
         }
 
         WsatPolicyAssertion(final QName wsatPolicyAssertionName, final boolean isOptional) {
-            super(createAssertionData(wsatPolicyAssertionName, isOptional), null, null);
+            super(createAssertionData(wsatPolicyAssertionName, isOptional), null);
         }
     }
     
