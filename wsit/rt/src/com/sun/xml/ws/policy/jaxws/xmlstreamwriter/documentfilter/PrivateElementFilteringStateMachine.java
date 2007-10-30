@@ -59,7 +59,8 @@ public class PrivateElementFilteringStateMachine implements FilteringStateMachin
         if (filteredElements == null) {
             this.filteredElements = new QName[]{};
         } else {
-            this.filteredElements = filteredElements;
+            this.filteredElements = new QName[filteredElements.length];
+            System.arraycopy(filteredElements, 0, this.filteredElements, 0, filteredElements.length);
         }
     }
     

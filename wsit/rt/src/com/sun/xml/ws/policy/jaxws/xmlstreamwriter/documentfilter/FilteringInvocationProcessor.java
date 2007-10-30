@@ -59,7 +59,7 @@ public final class FilteringInvocationProcessor implements InvocationProcessor {
     private static final PolicyLogger LOGGER = PolicyLogger.getLogger(FilteringInvocationProcessor.class);
     private static final XMLOutputFactory XML_OUTPUT_FACTORY = XMLOutputFactory.newInstance();
     
-    private final class StateMachineContext {
+    private static final class StateMachineContext {
         private final FilteringStateMachine stateMachine;
         private WeakReference<InvocationBuffer> bufferRef;
         
@@ -82,7 +82,7 @@ public final class FilteringInvocationProcessor implements InvocationProcessor {
         
     }
     
-    private final class InvocationBuffer {
+    private static final class InvocationBuffer {
         private final Queue<Invocation> queue;
         private int referenceCount;
         
