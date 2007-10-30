@@ -43,7 +43,6 @@
  */
 package com.sun.xml.ws.rm.jaxws.runtime;
 
-import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Headers;
 import com.sun.xml.ws.rm.*;
 import com.sun.xml.ws.rm.jaxws.util.ProcessingFilter;
@@ -284,9 +283,7 @@ public abstract class OutboundSequence extends Sequence {
      * 
      * @param i Index to set.
      */
-    public synchronized void acknowledge(int i)
-            throws InvalidMessageNumberException {
-
+    public synchronized void acknowledge(int i) throws InvalidMessageNumberException {
         Message mess;
         if (i >= nextIndex || (null == (mess = get(i)))) {
             throw new InvalidMessageNumberException();
@@ -294,11 +291,11 @@ public abstract class OutboundSequence extends Sequence {
 
         if (!mess.isComplete()) {
 
-            --storedMessages;
+            storedMessages--;
             if (storedMessages == 0) {
                 //A thread on which waitForAcks() has been called
                 //may be waiting for all the acks to arrive.
-                notifyAll();
+                notifyAll();                
             }
 
             mess.complete();
@@ -359,10 +356,6 @@ public abstract class OutboundSequence extends Sequence {
 
     protected boolean isResendDue() {
         return true;
-    }
-
-    private SOAPVersion getVersion() {
-        return config.getSoapVersion();
     }
 
     public void setProcessingFilter(ProcessingFilter filter) {
