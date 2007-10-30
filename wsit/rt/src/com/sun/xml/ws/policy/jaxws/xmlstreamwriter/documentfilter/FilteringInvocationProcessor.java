@@ -146,11 +146,14 @@ public final class FilteringInvocationProcessor implements InvocationProcessor {
                 
                 switch (state) {
                     case START_BUFFERING:
+                        this.startBufferingCandidates.add(context);
+                            break;
                     case RESTART_BUFFERING:
                         this.startBufferingCandidates.add(context);
-                        if (state == START_BUFFERING) {
-                            break;
+                        if (context.getBuffer() != null) {
+                            this.stopBufferingCandidates.add(context);
                         }
+                        break;
                     case STOP_BUFFERING:
                         if (context.getBuffer() != null) {
                             this.stopBufferingCandidates.add(context);
