@@ -388,7 +388,7 @@ public class SBIssuedSamlTokenContractImpl extends IssueSamlTokenContract{
                     throw new WSTrustException(ex.getMessage(), ex);
                 }
             }else{
-                final BinarySecret secret = eleFac.createBinarySecret(key, BinarySecret.SYMMETRIC_KEY_TYPE);
+                final BinarySecret secret = eleFac.createBinarySecret(key, wstVer.getSymmetricKeyTypeURI());
                 keyInfo.getContent().add(secret);
             }
         }else if(WSTrustConstants.PUBLIC_KEY.equals(keyType)){

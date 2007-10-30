@@ -49,6 +49,7 @@ import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.security.trust.WSTrustFactory;
+import com.sun.xml.ws.security.trust.WSTrustVersion;
 import com.sun.xml.ws.security.trust.elements.BaseSTSRequest;
 import com.sun.xml.ws.security.trust.elements.BaseSTSResponse;
 import com.sun.xml.ws.security.trust.elements.BinarySecret;
@@ -108,6 +109,7 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
     }
 
     public BaseSTSResponse issue(BaseSTSRequest request, IssuedTokenContext context) throws WSTrustException {
+        WSTrustVersion wstVer = (WSTrustVersion)stsConfig.getOtherOptions().get(WSTrustConstants.WST_VERSION);
         RequestSecurityToken rst = (RequestSecurityToken)request;
         
         // Get AppliesTo
@@ -232,7 +234,7 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
             }
             
             byte[] key = WSTrustUtil.generateRandomSecret(keySize/8);
-            final BinarySecret serverBS = eleFac.createBinarySecret(key, BinarySecret.NONCE_KEY_TYPE);
+            final BinarySecret serverBS = eleFac.createBinarySecret(key, wstVer.getNonceBinarySecretTypeURI());
             serverEntropy = eleFac.createEntropy(serverBS);
             proofToken.setProofTokenType(RequestedProofToken.COMPUTED_KEY_TYPE);
             

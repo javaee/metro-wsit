@@ -369,7 +369,7 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
                     throw new WSTrustException(LogStringsMessages.WST_0040_ERROR_ENCRYPT_PROOFKEY(appliesTo), ex);
                 }
             }else{
-                final BinarySecret secret = eleFac.createBinarySecret(key, BinarySecret.SYMMETRIC_KEY_TYPE);
+                final BinarySecret secret = eleFac.createBinarySecret(key, wstVer.getSymmetricKeyTypeURI());
                 final Element bsEle= eleFac.toElement(secret,doc);
                 keyInfo.addUnknownElement(bsEle);
             }

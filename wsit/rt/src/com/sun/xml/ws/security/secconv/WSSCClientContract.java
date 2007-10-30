@@ -279,7 +279,7 @@ public class WSSCClientContract {
         final WSSCElementFactory eleFac = WSSCElementFactory.newInstance();
         
         final byte[] secret = WSTrustUtil.generateRandomSecret(DEFAULT_KEY_SIZE);
-        final BinarySecret binarySecret = eleFac.createBinarySecret(secret, BinarySecret.SYMMETRIC_KEY_TYPE);
+        final BinarySecret binarySecret = eleFac.createBinarySecret(secret, this.wsTrustVer.getSymmetricKeyTypeURI());
         
         final RequestedProofToken proofToken = eleFac.createRequestedProofToken();
         proofToken.setProofTokenType(RequestedProofToken.BINARY_SECRET_TYPE);

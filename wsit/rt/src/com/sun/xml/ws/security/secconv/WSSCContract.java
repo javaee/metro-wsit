@@ -445,7 +445,7 @@ public class WSSCContract {
         final String proofTokenType = rqProofToken.getProofTokenType();
         if(proofTokenType.equals(RequestedProofToken.BINARY_SECRET_TYPE)){
             final BinarySecret binarySecret = rqProofToken.getBinarySecret();
-            if(binarySecret.getType().equals(BinarySecret.SYMMETRIC_KEY_TYPE)){
+            if(binarySecret.getType().equals(this.wsTrustVer.getSymmetricKeyTypeURI())){
                 final byte [] secret = binarySecret.getRawValue();
                 context.setProofKey(secret);
             }
