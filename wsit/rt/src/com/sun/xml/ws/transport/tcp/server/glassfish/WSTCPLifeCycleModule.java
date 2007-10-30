@@ -76,10 +76,14 @@ public final class WSTCPLifeCycleModule implements LifecycleListener {
         return instance;
     }
     
+    private static void setInstance(WSTCPLifeCycleModule instance) {
+        WSTCPLifeCycleModule.instance = instance;
+    }
+    
     public void handleEvent(@NotNull final LifecycleEvent lifecycleEvent) throws ServerLifecycleException {
         final int eventType = lifecycleEvent.getEventType();
         if (eventType == LifecycleEvent.INIT_EVENT) {
-            instance = this;
+            WSTCPLifeCycleModule.setInstance(this);
             logger.log(Level.FINE, "WSTCPLifeCycleModule.INIT_EVENT");
             properties = (Properties) lifecycleEvent.getData();
         } else if (eventType == LifecycleEvent.STARTUP_EVENT) {
@@ -98,7 +102,7 @@ public final class WSTCPLifeCycleModule implements LifecycleListener {
             }
         } else if (eventType == LifecycleEvent.SHUTDOWN_EVENT) {
             logger.log(Level.FINE, "WSTCPLifeCycleModule.SHUTDOWN_EVENT");
-            instance = null;
+            WSTCPLifeCycleModule.setInstance(null);
             
             if (delegate != null) {
                 delegate.destroy();

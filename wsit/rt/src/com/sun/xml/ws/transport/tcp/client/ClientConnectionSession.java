@@ -54,8 +54,6 @@ public final class ClientConnectionSession extends ConnectionSession {
     private Map<String, Object> attributes = new HashMap<String, Object>(2);
     private Map<String, ChannelContext> url2ChannelMap = new HashMap<String, ChannelContext>();
     
-    private boolean isClosed;
-    
     public ClientConnectionSession(final Connection connection, final SessionCloseListener sessionCloseListener) {
         super(connection, sessionCloseListener);
         init();

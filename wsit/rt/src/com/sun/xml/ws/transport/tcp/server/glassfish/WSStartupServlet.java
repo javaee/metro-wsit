@@ -71,7 +71,7 @@ public final class WSStartupServlet extends HttpServlet
     
     private static final String JAXWS_RI_RUNTIME = "/WEB-INF/sun-jaxws.xml";
     
-    private WSTCPLifeCycleModule transportModule;
+    private transient WSTCPLifeCycleModule transportModule;
     
     private List<TCPAdapter> adapters;
     

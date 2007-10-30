@@ -192,8 +192,6 @@ public final class FramedMessageInputStream extends InputStream implements LifeC
 
             if (byteBuffer.hasRemaining()) {
                 frameBytesRead++;
-                if (!isReadingHeader && frameBytesRead > currentFrameDataSize) {
-                }
                 receivedMessageLength++;
                 return byteBuffer.get() & 0xff;
             }
@@ -254,8 +252,6 @@ public final class FramedMessageInputStream extends InputStream implements LifeC
 
             byteBuffer.get(b, offset, length);
             frameBytesRead += length;
-            if (!isReadingHeader && frameBytesRead > currentFrameDataSize) {
-            }
             receivedMessageLength += length;
 
             return length;

@@ -54,7 +54,8 @@ public final class TCPSettings {
     public enum EncodingMode {
         XML,
         FI_STATELESS,
-        FI_STATEFUL
+        FI_STATEFUL,
+        FI_ALL
     }
     
     private TCPSettings() {
