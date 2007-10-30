@@ -330,6 +330,9 @@ public class SecurityPolicyValidator implements PolicyAssertionValidator{
         supportedAssertions.add(new QName(SUN_WSS_SECURITY_SERVER_POLICY_NS,Constants.CertStore));
         supportedAssertions.add(new QName(SUN_WSS_SECURITY_CLIENT_POLICY_NS,Constants.BSP10));
         supportedAssertions.add(new QName(SUN_WSS_SECURITY_SERVER_POLICY_NS,Constants.BSP10));
+
+        // Identity Selector Interoproperability Profile
+        supportedAssertions.add(new QName("http://schemas.xmlsoap.org/ws/2005/05/identity", "RequireFederatedIdentityProvisioning"));
     }
     
     /** Creates a new instance of SecurityPolicyValidator. To be used by appropriate service finder */
