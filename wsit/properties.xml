@@ -138,8 +138,8 @@
         </pmd>
     </target>
     
-    <target name="findbugs" depends="init, maven-tasks, compile"
-            description="Run findbugs on all code">
+    <target name="findbugs.base" depends="init, maven-tasks, compile"
+            description="Check out the findbugs task and define base properties">
         <!-- Download findbugs from Maven repository -->
         <dependencies pathId="findbugs.classpath"
                       useScope="runtime">
@@ -159,6 +159,10 @@
         <pathconvert property="findbugs.classpath">
             <path refid="findbugs.classpath"/>
         </pathconvert>
+    </target>
+
+    <target name="findbugs.html" depends="findbugs.base"
+            description="Run findbugs and produce a HTML formatted result">
         <findbugs output="html" outputFile="${build.dir}/findbugs.html"
                   stylesheet="fancy.xsl"
                   classpath="${findbugs.classpath}"
@@ -170,5 +174,20 @@
             <sourcePath path="${src.dir}"/>
         </findbugs>
     </target>
+
+    <target name="findbugs.xml" depends="findbugs.base"
+            description="Run findbugs and produce a XML formatted result">
+        <findbugs output="xml" outputFile="${build.dir}/findbugs.xml"
+                  classpath="${findbugs.classpath}"
+                  pluginList="${user.home}/.m2/repository/net/sourceforge/findbugs/coreplugin/1.0.0/coreplugin-1.0.0.jar">
+            <class location="${build.classes.dir}"/>
+            <auxClasspath>
+                <path path="${run.classpath}"/>
+            </auxClasspath>
+            <sourcePath path="${src.dir}"/>
+        </findbugs>
+    </target>
+
+    <target name="findbugs" depends="findbugs.html"/>
 
 </project>
