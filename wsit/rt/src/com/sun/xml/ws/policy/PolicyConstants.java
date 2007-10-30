@@ -36,7 +36,6 @@
 
 package com.sun.xml.ws.policy;
 
-import com.sun.xml.ws.policy.sourcemodel.wspolicy.NamespaceVersion;
 import javax.xml.namespace.QName;
 
 /**
