@@ -136,6 +136,14 @@ public class XWSSPolicyGenerator {
         this.spVersion = spVersion;
     }
     
+    public XWSSPolicyGenerator(Policy effectivePolicy,boolean isServer,boolean isIncoming){
+        this.effectivePolicy = effectivePolicy;
+        this._policyContainer = new XWSSPolicyContainer(isServer,isIncoming);
+        this.isServer = isServer;
+        this.isIncoming = isIncoming;
+        this.spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
+    }
+    
     public AlgorithmSuite getBindingLevelAlgSuite(){
         return _binding.getAlgorithmSuite();
     }
