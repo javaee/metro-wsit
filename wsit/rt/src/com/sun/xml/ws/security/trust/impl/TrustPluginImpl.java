@@ -459,9 +459,9 @@ public class TrustPluginImpl implements TrustPlugin {
             }
         }else{
             log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0017_SERVICE_PORTNAME_ERROR(wsdlLocation.toString()));
+                    LogStringsMessages.WST_0017_SERVICE_PORTNAME_ERROR(wsdlLocation));
             throw new WSTrustException(
-                    LogStringsMessages.WST_0017_SERVICE_PORTNAME_ERROR(wsdlLocation.toString()));
+                    LogStringsMessages.WST_0017_SERVICE_PORTNAME_ERROR(wsdlLocation));
         }
         
         return serviceInfo;
@@ -475,11 +475,7 @@ public class TrustPluginImpl implements TrustPlugin {
     private String elemToString(final RequestSecurityToken rst){
       //ToDo
       return  rst.toString();
-    }
-    private String elemToString(final BaseSTSRequest rst){
-        //ToDo        
-        return elemToString((RequestSecurityToken)rst);
-    }
+    }        
 
     private String elemToString(final BaseSTSResponse rstr){
       //ToDo

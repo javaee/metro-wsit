@@ -59,10 +59,10 @@ public class SecondaryParametersImpl  extends SecondaryParametersType
         implements SecondaryParameters {
     
     private Claims claims = null;
-    private Participants participants = null;
+    //private Participants participants = null;
     private URI tokenType = null;
     
-    private URI requestType = null;
+    //private URI requestType = null;
     
     private long keySize = 0;
     private URI keyType = null;
@@ -83,8 +83,8 @@ public class SecondaryParametersImpl  extends SecondaryParametersType
     private Encryption encryption = null;
     private UseKey useKey = null;
     private DelegateTo delegateTo = null;
-    private RenewTarget renewTarget = null;
-    private CancelTarget cancelTarget = null;
+    //private RenewTarget renewTarget = null;
+    //private CancelTarget cancelTarget = null;
     
     private AllowPostdating apd = null;
     private BinaryExchange binaryExchange = null;

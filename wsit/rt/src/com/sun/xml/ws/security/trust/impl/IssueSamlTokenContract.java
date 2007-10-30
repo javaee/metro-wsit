@@ -108,7 +108,8 @@ public abstract class IssueSamlTokenContract implements com.sun.xml.ws.api.secur
     
     protected STSConfiguration stsConfig;
     protected WSTrustVersion wstVer;
-    protected static WSTrustElementFactory eleFac;
+    protected WSTrustElementFactory eleFac = 
+            WSTrustElementFactory.newInstance(WSTrustVersion.WS_TRUST_10);
     protected static final SimpleDateFormat calendarFormatter
             = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'sss'Z'", Locale.getDefault());
     

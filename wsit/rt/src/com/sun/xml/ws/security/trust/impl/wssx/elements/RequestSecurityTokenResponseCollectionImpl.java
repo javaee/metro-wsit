@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityTokenResponseCollectionImpl.java,v 1.2 2007-10-24 06:35:43 jdg6688 Exp $
+ * $Id: RequestSecurityTokenResponseCollectionImpl.java,v 1.3 2007-10-30 13:13:37 shyam_rao Exp $
  */
 
 /*
@@ -49,7 +49,7 @@ import javax.xml.bind.JAXBElement;
 public class RequestSecurityTokenResponseCollectionImpl extends RequestSecurityTokenResponseCollectionType
         implements RequestSecurityTokenResponseCollection {
     
-    protected List<RequestSecurityTokenResponse> requestSecurityTokenResponse;
+    protected List<RequestSecurityTokenResponse> requestSecurityTokenResponseList;
     
     public RequestSecurityTokenResponseCollectionImpl() {
         // empty ctor
@@ -88,10 +88,10 @@ public class RequestSecurityTokenResponseCollectionImpl extends RequestSecurityT
     }
     
     public List<RequestSecurityTokenResponse> getRequestSecurityTokenResponses() {
-        if (requestSecurityTokenResponse == null) {
-            requestSecurityTokenResponse = new ArrayList<RequestSecurityTokenResponse>();
+        if (requestSecurityTokenResponseList == null) {
+            requestSecurityTokenResponseList = new ArrayList<RequestSecurityTokenResponse>();
         }
-        return this.requestSecurityTokenResponse;
+        return this.requestSecurityTokenResponseList;
     }
     
     public void addRequestSecurityTokenResponse(RequestSecurityTokenResponse rstr){

@@ -251,8 +251,7 @@ public class DefaultSTSIssuedTokenConfiguration extends STSIssuedTokenConfigurat
         this.sisPara = sisPara;
     }
 
-    private void parseAssertions(IssuedToken issuedToken, PolicyAssertion localToken){
-        final RequestSecurityTokenTemplate rstTemplate = issuedToken.getRequestSecurityTokenTemplate();
+    private void parseAssertions(IssuedToken issuedToken, PolicyAssertion localToken){        
         
         Issuer issuer = issuedToken.getIssuer();
         URI stsURI = null;

@@ -47,7 +47,7 @@ import java.util.Map;
  */
 public class DefaultTrustSPMetadata implements TrustSPMetadata{
     
-    private String endpoint;
+    //private String endpoint;
     private String tokenType;
     private String keyType;
     private String certAlias;
@@ -55,7 +55,7 @@ public class DefaultTrustSPMetadata implements TrustSPMetadata{
         
     /** Creates a new instance of DefaultTrustSPMetedata */
     public DefaultTrustSPMetadata(String endpoint) {
-        this.endpoint = endpoint;
+        //this.endpoint = endpoint;
     }
         
     public void setCertAlias(final String certAlias){

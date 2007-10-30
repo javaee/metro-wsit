@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustFactory.java,v 1.12 2007-10-23 18:49:42 jdg6688 Exp $
+ * $Id: WSTrustFactory.java,v 1.13 2007-10-30 13:13:36 shyam_rao Exp $
  */
 
 /*
@@ -114,7 +114,7 @@ public class WSTrustFactory {
             }
             
             if (clazz != null) {
-                contract = (WSTrustContract<BaseSTSRequest, BaseSTSResponse>) clazz.newInstance();
+                contract = (WSTrustContract<BaseSTSRequest, BaseSTSResponse>)clazz.newInstance();
                 contract.init(config);
             }
         } catch (ClassNotFoundException ex) {
