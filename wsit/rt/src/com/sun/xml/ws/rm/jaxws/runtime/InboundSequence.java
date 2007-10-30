@@ -64,10 +64,6 @@ import java.net.URI;
 public abstract class InboundSequence extends Sequence {
 
     /**
-     * Configuration for this sequence.
-     */
-    protected SequenceConfig config;
-    /**
      * AcksTo URI.  Assigned by ctor.
      */
     protected URI acksTo;
@@ -111,20 +107,19 @@ public abstract class InboundSequence extends Sequence {
         AbstractSequenceAcknowledgement ackElement = null;
         if (config.getRMVersion() == RMVersion.WSRM10) {
             ackElement = new SequenceAcknowledgementElement();
-            Identifier id = new Identifier();
-            id.setValue(getId());
-            ((SequenceAcknowledgementElement) ackElement).setIdentifier(id);
+            Identifier identifier = new Identifier();
+            identifier.setValue(getId());
+            ((SequenceAcknowledgementElement) ackElement).setIdentifier(identifier);
         } else {
             ackElement = new com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement();
-            com.sun.xml.ws.rm.v200702.Identifier id = new com.sun.xml.ws.rm.v200702.Identifier();
-            id.setValue(getId());
-            ((com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement) ackElement).setIdentifier(id);
+            com.sun.xml.ws.rm.v200702.Identifier identifier = new com.sun.xml.ws.rm.v200702.Identifier();
+            identifier.setValue(getId());
+            ((com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement) ackElement).setIdentifier(identifier);
             //If the RM version is 1.1 then the SequenceAcknowledgmenet.Final needs to be added
             //when CloseSequence message is processed
             if (generateIsFinal) {
 
                 com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement.Final finalelem = new com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement.Final();
-                ;
                 ((com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement) ackElement).setFinal(finalelem);
             }
         }
@@ -216,6 +211,7 @@ public abstract class InboundSequence extends Sequence {
         this.strId = strId;
     }
 
+    @Override
     public SequenceConfig getSequenceConfig() {
         return config;
     }

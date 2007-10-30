@@ -42,31 +42,27 @@
  * Created on January 8, 2007, 1:50 PM
  *
  */
-
 package com.sun.xml.ws.rm.jaxws.util;
+
+import java.lang.reflect.InvocationTargetException;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 import java.lang.reflect.Constructor;
-
-
 
 /**
  * Helper methods for logging.
  */
 public class LoggingHelper {
-    
+    private static final Logger LOGGER = Logger.getLogger(LoggingHelper.class.getName());
+
     private final Logger logger;
-    
     public static final String logRoot = "javax.enterprise.xml.webservices";
-    
     public static final String packageRoot = "com\\.sun\\.xml\\.ws";
-    
-    
+
     public LoggingHelper(Logger logger) {
         this.logger = logger;
     }
-    
-    
+
     /**
      * Throws an Exception of a given type with a given message.  A log
      * entry logged at the specified level with the same message is also
@@ -81,15 +77,15 @@ public class LoggingHelper {
      */
     @SuppressWarnings("unchecked")
     public <T extends Throwable> void throwAndLog(Class<T> exceptionClass,
-                                  Level level,
-                                  String message,
-                                  boolean stackTrace) throws T {
-        
+            Level level,
+            String message,
+            boolean stackTrace) throws T {
+
         //look for exceptionClass ctors of the form Exception() and Exception(String)
         Constructor oneArg = null;
         Constructor zeroArg = null;
         Constructor[] ctors = exceptionClass.getConstructors();
-        
+
         for (Constructor ctor : ctors) {
             Class[] params = ctor.getParameterTypes();
             if (params.length == 0) {
@@ -98,21 +94,28 @@ public class LoggingHelper {
                 oneArg = ctor;
             }
         }
-        
+
         //Construct the exception
         T exception = null;
-        
+
         try {
             if (oneArg != null) {
                 //use the 1-arg ctor if possible
-                exception = (T)oneArg.newInstance(message);
-            } else if (zeroArg == null) {
-                exception = (T)zeroArg.newInstance();
-            } 
-        } catch (Throwable e) {
-        } 
+                exception = (T) oneArg.newInstance(message);
+            } else if (zeroArg != null) {
+                exception = (T) zeroArg.newInstance();
+            }
+        } catch (InstantiationException ex) {
+            LOGGER.log(Level.WARNING, "Unable to instantiate exception for class " + exceptionClass.getName(), ex);
+        } catch (IllegalAccessException ex) {
+            LOGGER.log(Level.WARNING, "Unable to instantiate exception for class " + exceptionClass.getName(), ex);
+        } catch (IllegalArgumentException ex) {
+            LOGGER.log(Level.WARNING, "Unable to instantiate exception for class " + exceptionClass.getName(), ex);
+        } catch (InvocationTargetException ex) {
+            LOGGER.log(Level.WARNING, "Unable to instantiate exception for class " + exceptionClass.getName(), ex.getTargetException());
+        }
 
-         //write the log entry
+        //write the log entry
         if (logger.isLoggable(level)) {
             if (stackTrace && exception != null) {
                 logger.log(level, message, exception);
@@ -120,25 +123,25 @@ public class LoggingHelper {
                 logger.log(level, message);
             }
         }
-        
+
         //throw the exception
         if (exception != null) {
             throw exception;
         }
-            
+
     }
-    
+
     /**
      * Same as throwAndLog(Class, Level, String, boolean) with last argument
      * set to true.
      */
-     public <T extends Throwable> void throwAndLog(Class<T> exceptionClass,
-                                  Level level,
-                                  String message) throws T {
-         
-         throwAndLog(exceptionClass, level, message, true);
-     }
-    
+    public <T extends Throwable> void throwAndLog(Class<T> exceptionClass,
+            Level level,
+            String message) throws T {
+
+        throwAndLog(exceptionClass, level, message, true);
+    }
+
     /**
      * Forms a logger name by replacing "com.sun.xml.ws" in the name
      * of the specified class by "javax.enterprise.xml.webservices"
@@ -146,8 +149,7 @@ public class LoggingHelper {
      * @param clasz The Class to use for forming the logger name
      * @return The logger name
      */
-     public static String getLoggerName(Class clasz) {
-        return clasz.getName().replaceFirst( packageRoot, logRoot);
+    public static String getLoggerName(Class clasz) {
+        return clasz.getName().replaceFirst(packageRoot, logRoot);
     }
-    
 }

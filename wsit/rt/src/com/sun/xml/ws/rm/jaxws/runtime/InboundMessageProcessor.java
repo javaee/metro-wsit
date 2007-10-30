@@ -133,11 +133,10 @@ public class InboundMessageProcessor {
 
                 inseq = provider.getInboundSequence(seqid);
 
-                if (inseq.isClosed()) {
-                    throw new CloseSequenceException(String.format(Constants.SEQUENCE_CLOSED_TEXT), seqid);
-                }
-
                 if (inseq != null) {
+                    if (inseq.isClosed()) {
+                        throw new CloseSequenceException(String.format(Constants.SEQUENCE_CLOSED_TEXT), seqid);
+                    }
                     inseq.set(messageNumber, message);
                 } else {
                     throw new InvalidSequenceException(String.format(Constants.UNKNOWN_SEQUENCE_TEXT, seqid), seqid);
