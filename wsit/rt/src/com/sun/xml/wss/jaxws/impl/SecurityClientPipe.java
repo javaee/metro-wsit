@@ -111,7 +111,7 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
     // Plugin instances for Trust and SecureConversation invocation
     //private static TrustPlugin trustPlugin = WSTrustFactory.newTrustPlugin(null);
     private IssuedTokenManager itm = IssuedTokenManager.getInstance();
-    private static WSSCPlugin  scPlugin = WSSCFactory.newSCPlugin(null, wsscVer);
+    private WSSCPlugin  scPlugin = WSSCFactory.newSCPlugin(null, wsscVer);
     private Set trustConfig = null;
     
     // Creates a new instance of SecurityClientPipe

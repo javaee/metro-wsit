@@ -120,7 +120,6 @@ import com.sun.xml.wss.ProcessingContext;
 import com.sun.xml.wss.impl.SecurableSoapMessage;
 import com.sun.xml.wss.impl.WssSoapFaultException;
 import com.sun.xml.wss.impl.misc.DefaultCallbackHandler;
-import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.ws.security.policy.KeyStore;
 import com.sun.xml.ws.security.policy.TrustStore;
 import com.sun.xml.ws.security.policy.CallbackHandlerConfiguration;
@@ -179,9 +178,9 @@ public abstract class SecurityPipeBase implements Pipe {
     protected PipeConfiguration pipeConfig = null;
     
     //static JAXBContext used across the Pipe
-    protected static final JAXBContext jaxbContext;    
-    protected static WSSCVersion wsscVer;
-    protected static WSTrustVersion wsTrustVer;
+    protected static JAXBContext jaxbContext;    
+    protected WSSCVersion wsscVer;
+    protected WSTrustVersion wsTrustVer;
     protected boolean disablePayloadBuffer = false;
     protected AlgorithmSuite bindingLevelAlgSuite = null;
     
@@ -265,7 +264,7 @@ public abstract class SecurityPipeBase implements Pipe {
             debug = Boolean.valueOf(System.getProperty("DebugSecurity"));
             //ISSUE_REQUEST_URI = new URI(WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION);
             //CANCEL_REQUEST_URI = new URI(WSTrustConstants.CANCEL_REQUEST);
-            jaxbContext = WSTrustElementFactory.getContext();            
+            //jaxbContext = WSTrustElementFactory.getContext();            
             securityPolicyNamespaces = new ArrayList<String>();
             securityPolicyNamespaces.add(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri);
             
@@ -294,8 +293,9 @@ public abstract class SecurityPipeBase implements Pipe {
         }
         
         try {
-            this.marshaller = WSTrustElementFactory.getContext(wsTrustVer).createMarshaller();
-            this.unmarshaller = WSTrustElementFactory.getContext(wsTrustVer).createUnmarshaller();            
+            jaxbContext = WSTrustElementFactory.getContext(wsTrustVer);  
+            this.marshaller = jaxbContext.createMarshaller();
+            this.unmarshaller = jaxbContext.createUnmarshaller();            
         }catch (javax.xml.bind.JAXBException ex) {
             log.log(Level.SEVERE, LogStringsMessages.WSSPIPE_0001_PROBLEM_MAR_UNMAR(), ex);
             throw new RuntimeException(LogStringsMessages.WSSPIPE_0001_PROBLEM_MAR_UNMAR(), ex);
@@ -324,6 +324,8 @@ public abstract class SecurityPipeBase implements Pipe {
         this.spVersion = that.spVersion;
         this.soapFactory = that.soapFactory;
         this.addVer = that.addVer;
+        this.wsTrustVer = that.wsTrustVer;
+        this.wsscVer = that.wsscVer;
         wsPolicyMap = that.wsPolicyMap;
         outMessagePolicyMap = that.outMessagePolicyMap;
         inMessagePolicyMap = that.inMessagePolicyMap;
@@ -338,8 +340,8 @@ public abstract class SecurityPipeBase implements Pipe {
         this.timestampTimeOut = that.timestampTimeOut;
         
         try {            
-            this.marshaller = WSTrustElementFactory.getContext(wsTrustVer).createMarshaller();
-            this.unmarshaller = WSTrustElementFactory.getContext(wsTrustVer).createUnmarshaller();            
+            this.marshaller = WSTrustElementFactory.getContext(this.wsTrustVer).createMarshaller();
+            this.unmarshaller = WSTrustElementFactory.getContext(this.wsTrustVer).createUnmarshaller();            
         }catch (javax.xml.bind.JAXBException ex) {
             log.log(Level.SEVERE, LogStringsMessages.WSSPIPE_0001_PROBLEM_MAR_UNMAR(), ex);
             throw new RuntimeException("Problem creating JAXB Marshaller/Unmarshaller", ex);
