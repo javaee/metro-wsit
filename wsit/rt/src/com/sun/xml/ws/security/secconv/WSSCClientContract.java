@@ -86,6 +86,10 @@ public class WSSCClientContract {
     private WSSCVersion wsscVer = WSSCVersion.WSSC_10;
     private WSTrustVersion wsTrustVer = WSTrustVersion.WS_TRUST_10;
     
+    public WSSCClientContract(Configuration config) {
+        //this.config = config;                
+    }
+    
     public WSSCClientContract(Configuration config, final WSSCVersion wsscVer) {
         //this.config = config;        
         if(wsscVer instanceof com.sun.xml.ws.security.secconv.impl.wssx.WSSCVersion13){
