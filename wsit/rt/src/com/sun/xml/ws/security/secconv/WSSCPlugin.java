@@ -51,8 +51,6 @@ import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.policy.AssertionSet;
-//import com.sun.xml.ws.fault.SOAPFaultBuilder;
-
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.impl.IssuedTokenContextImpl;
@@ -67,6 +65,7 @@ import com.sun.xml.ws.security.trust.Configuration;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.api.security.trust.WSTrustException;
+import com.sun.xml.ws.security.impl.policy.Trust13;
 import com.sun.xml.ws.security.trust.elements.BinarySecret;
 import com.sun.xml.ws.security.trust.elements.CancelTarget;
 import com.sun.xml.ws.security.trust.elements.Entropy;
@@ -144,11 +143,14 @@ public class WSSCPlugin {
         final SecureConversationToken scToken = (SecureConversationToken)token;
         final AssertionSet assertions = getAssertions(scToken);
         Trust10 trust10 = null;
+        Trust13 trust13 = null;
         SymmetricBinding symBinding = null;
         for(PolicyAssertion policyAssertion : assertions){
             SecurityPolicyVersion spVersion = getSPVersion(policyAssertion);
-            if(PolicyUtil.isTrust10(policyAssertion, spVersion)){
-                trust10 = (Trust10)policyAssertion;
+            if(PolicyUtil.isTrust13(policyAssertion, spVersion)){
+                trust13 = (Trust13)policyAssertion;
+            }else if(PolicyUtil.isTrust10(policyAssertion, spVersion)){
+                trust10 = (Trust10)policyAssertion;                
             }else if(PolicyUtil.isSymmetricBinding(policyAssertion, spVersion)){
                 symBinding = (SymmetricBinding)policyAssertion;
             }
@@ -167,8 +169,13 @@ public class WSSCPlugin {
                         LogStringsMessages.WSSC_1006_SYM_BIN_KEYSIZE(skl, this.DEFAULT_KEY_SIZE));
             }
         }
+        
         if(trust10 != null){
             final Set trustReqdProps = trust10.getRequiredProperties();
+            reqClientEntropy = trustReqdProps.contains(Constants.REQUIRE_CLIENT_ENTROPY);
+        }
+        if(trust13 != null){
+            final Set trustReqdProps = trust13.getRequiredProperties();
             reqClientEntropy = trustReqdProps.contains(Constants.REQUIRE_CLIENT_ENTROPY);
         }
         

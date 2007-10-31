@@ -49,13 +49,13 @@ import com.sun.xml.ws.security.SecurityContextTokenInfo;
 import com.sun.xml.ws.security.Token;
 import com.sun.xml.ws.security.impl.policy.PolicyUtil;
 import com.sun.xml.ws.security.impl.policy.Trust10;
+import com.sun.xml.ws.security.impl.policy.Trust13;
 import com.sun.xml.ws.security.policy.AlgorithmSuite;
 import com.sun.xml.ws.security.policy.Constants;
 import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import com.sun.xml.ws.security.policy.SymmetricBinding;
 import com.sun.xml.ws.security.trust.impl.bindings.ObjectFactory;
 import com.sun.xml.ws.security.trust.Configuration;
-import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.ws.security.trust.elements.BinarySecret;
 import com.sun.xml.ws.security.trust.elements.CancelTarget;
 import com.sun.xml.ws.security.trust.elements.Entropy;
@@ -90,7 +90,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.sun.xml.ws.security.secconv.logging.LogDomainConstants;
 import com.sun.xml.ws.security.secconv.logging.LogStringsMessages;
-import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.security.trust.WSTrustVersion;
 import com.sun.xml.ws.security.trust.elements.BaseSTSRequest;
 import com.sun.xml.ws.security.trust.elements.BaseSTSResponse;
@@ -196,13 +195,16 @@ public class WSSCContract {
     private BaseSTSResponse createRSTR(final URI computeKeyAlgo, final SecureConversationToken scToken, final BaseSTSRequest request, final AppliesTo scopes, final byte[] clientEntr, final RequestedProofToken proofToken, final URI tokenType, final Entropy clientEntropy, final IssuedTokenContext context, final URI con) throws WSSecureConversationException, WSSecureConversationException {
         
         Trust10 trust10 = null;
+        Trust13 trust13 = null;
         SymmetricBinding symBinding = null;
         
         final NestedPolicy wsPolicy = scToken.getBootstrapPolicy();
         final AssertionSet assertionSet = wsPolicy.getAssertionSet();
         for(PolicyAssertion policyAssertion : assertionSet){
             SecurityPolicyVersion spVersion = getSPVersion(policyAssertion);
-            if(PolicyUtil.isTrust10(policyAssertion, spVersion)){
+            if(PolicyUtil.isTrust13(policyAssertion, spVersion)){
+                trust13 = (Trust13)policyAssertion;
+            }else if(PolicyUtil.isTrust10(policyAssertion, spVersion)){
                 trust10 = (Trust10)policyAssertion;
             }else if(PolicyUtil.isSymmetricBinding(policyAssertion, spVersion)){
                 symBinding = (SymmetricBinding)policyAssertion;
@@ -213,15 +215,20 @@ public class WSSCContract {
         if(trust10 != null){
             final Set trustReqdProps = trust10.getRequiredProperties();
             reqServerEntr = trustReqdProps.contains(Constants.REQUIRE_SERVER_ENTROPY);
-            reqClientEntr = trustReqdProps.contains(Constants.REQUIRE_CLIENT_ENTROPY);
-            if(clientEntropy == null){
-                if(reqClientEntr){
-                    log.log(Level.SEVERE,
-                       LogStringsMessages.WSSC_0010_CLIENT_ENTROPY_CANNOT_NULL());
-                   throw new WSSecureConversationException(LogStringsMessages.WSSC_0010_CLIENT_ENTROPY_CANNOT_NULL());
-                }else{
-                    reqServerEntr = true;
-                }
+            reqClientEntr = trustReqdProps.contains(Constants.REQUIRE_CLIENT_ENTROPY);            
+        }
+        if(trust13 != null){
+            final Set trustReqdProps = trust13.getRequiredProperties();
+            reqServerEntr = trustReqdProps.contains(Constants.REQUIRE_SERVER_ENTROPY);
+            reqClientEntr = trustReqdProps.contains(Constants.REQUIRE_CLIENT_ENTROPY);            
+        }
+        if(clientEntropy == null){
+            if(reqClientEntr){
+                log.log(Level.SEVERE,
+                        LogStringsMessages.WSSC_0010_CLIENT_ENTROPY_CANNOT_NULL());
+                throw new WSSecureConversationException(LogStringsMessages.WSSC_0010_CLIENT_ENTROPY_CANNOT_NULL());
+            }else{
+                reqServerEntr = true;
             }
         }
                
