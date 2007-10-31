@@ -61,12 +61,14 @@ import com.sun.xml.ws.security.trust.elements.OnBehalfOf;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponse;
 import com.sun.xml.ws.security.trust.elements.SecondaryParameters;
+import com.sun.xml.ws.security.trust.elements.UseKey;
 import com.sun.xml.ws.security.trust.util.WSTrustUtil;
 import java.net.URI;
 import java.net.URL;
 import java.net.URISyntaxException;
 import java.net.MalformedURLException;
 import java.rmi.RemoteException;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.List;
 import javax.xml.namespace.QName;
@@ -91,7 +93,20 @@ import com.sun.xml.ws.api.security.trust.client.STSIssuedTokenConfiguration;
 import com.sun.xml.ws.security.trust.elements.BaseSTSRequest;
 import com.sun.xml.ws.security.trust.elements.BaseSTSResponse;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponseCollection;
-
+import java.security.KeyException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.PublicKey;
+import java.util.ArrayList;
+import java.util.UUID;
+import javax.xml.crypto.MarshalException;
+import javax.xml.crypto.dom.DOMStructure;
+import javax.xml.crypto.dsig.keyinfo.KeyInfo;
+import javax.xml.crypto.dsig.keyinfo.KeyInfoFactory; 
+import javax.xml.crypto.dsig.keyinfo.KeyValue;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import org.w3c.dom.Document;
 /**
  *
  * @author hr124446
@@ -169,6 +184,10 @@ public class TrustPluginImpl implements TrustPlugin {
             result = invokeRST(request, wsdlLocation, serviceName, portName, stsURI, stsConfig);
             final WSTrustClientContract contract = WSTrustFactory.createWSTrustClientContract(config);
             contract.handleRSTR(request, result, itc);
+            KeyPair keyPair = (KeyPair)stsConfig.getOtherOptions().get(WSTrustConstants.USE_KEY_RSA_KEY_PAIR);
+           if (keyPair != null){
+                itc.setProofKeyPair(keyPair);   
+           }
         } catch (RemoteException ex) {
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0016_PROBLEM_IT_CTX(stsURI, appliesTo), ex);
@@ -180,7 +199,7 @@ public class TrustPluginImpl implements TrustPlugin {
         }
     }
      
-    private RequestSecurityToken createRequest(final STSIssuedTokenConfiguration stsConfig, final String appliesTo, final Token oboToken) throws URISyntaxException, WSTrustException, NumberFormatException {
+    private RequestSecurityToken createRequest(final STSIssuedTokenConfiguration stsConfig, final String appliesTo, final Token oboToken) throws URISyntaxException, WSTrustException, NumberFormatException{
         WSTrustVersion wstVer = WSTrustVersion.getInstance(stsConfig.getProtocol());
         WSTrustElementFactory fact = WSTrustElementFactory.newInstance(wstVer);
         final URI requestType = URI.create(wstVer.getIssueRequestTypeURI());
@@ -317,13 +336,53 @@ public class TrustPluginImpl implements TrustPlugin {
         if (keySize > 0){
             len = (int)keySize/8;
         }
-        final SecureRandom secRandom = new SecureRandom();
-        final byte[] nonce = new byte[len];
-        secRandom.nextBytes(nonce);
-        final BinarySecret binarySecret = fact.createBinarySecret(nonce, wstVer.getNonceBinarySecretTypeURI());
-        final Entropy entropy = fact.createEntropy(binarySecret);
-        rst.setEntropy(entropy);
-        rst.setComputedKeyAlgorithm(URI.create(wstVer.getCKPSHA1algorithmURI()));
+        
+        if (keyType.equals(wstVer.getSymmetricKeyTypeURI())){
+            final SecureRandom secRandom = new SecureRandom();
+            final byte[] nonce = new byte[len];
+            secRandom.nextBytes(nonce);
+            final BinarySecret binarySecret = fact.createBinarySecret(nonce, wstVer.getNonceBinarySecretTypeURI());
+            final Entropy entropy = fact.createEntropy(binarySecret);
+            rst.setEntropy(entropy);
+            rst.setComputedKeyAlgorithm(URI.create(wstVer.getCKPSHA1algorithmURI()));
+        }else if (keyType.equals(wstVer.getPublicKeyTypeURI()) && keySize > 1 ){
+            // Create a RSA key pairs for use with UseKey
+            KeyPairGenerator kpg;
+            try{
+                kpg = KeyPairGenerator.getInstance("SHA1withRSA");
+            }catch (NoSuchAlgorithmException ex){
+                throw new WSTrustException("Unable to create key pairs for UseKey", ex);
+            }
+            kpg.initialize((int)keySize);
+            KeyPair keyPair = kpg.generateKeyPair();
+            
+            // Create the Sig attribute Value for UseKey
+            String sig = "uuid-" + UUID.randomUUID().toString();
+            
+            // Create the UseKey element in RST
+            KeyInfo keyInfo = createKeyInfo(keyPair.getPublic());
+             final DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+            Document doc = null;
+            try{
+                doc = docFactory.newDocumentBuilder().newDocument();
+                keyInfo.marshal(new DOMStructure(doc), null);
+            }catch(ParserConfigurationException ex){
+                log.log(Level.SEVERE, 
+                    LogStringsMessages.WST_0039_ERROR_CREATING_DOCFACTORY(), ex);
+                throw new WSTrustException(LogStringsMessages.WST_0039_ERROR_CREATING_DOCFACTORY(), ex);
+            }catch(MarshalException ex){
+                log.log(Level.SEVERE, 
+                    LogStringsMessages.WST_0039_ERROR_CREATING_DOCFACTORY(), ex);
+                throw new WSTrustException(LogStringsMessages.WST_0039_ERROR_CREATING_DOCFACTORY(), ex);
+            }
+            Token token = new GenericToken(doc.getDocumentElement());
+            UseKey useKey = fact.createUseKey(token, sig);
+            rst.setUseKey(useKey);
+
+            // Put the key pair and the sig in the STSConfiguration
+            stsConfig.getOtherOptions().put(WSTrustConstants.USE_KEY_RSA_KEY_PAIR, keyPair);
+            stsConfig.getOtherOptions().put(WSTrustConstants.USE_KEY_SIGNATURE_ID, sig);
+        }
        
         if (log.isLoggable(Level.FINE)) {
             log.log(Level.FINE,
@@ -374,6 +433,8 @@ public class TrustPluginImpl implements TrustPlugin {
         }
         dispatch.getRequestContext().put(WSTrustConstants.IS_TRUST_MESSAGE, "true");
         dispatch.getRequestContext().put(wstVer.getIssueRequestAction(), wstVer.getIssueRequestAction());
+        
+        // Pass the keys and/or username, password to the message context
         String userName = (String) stsConfig.getOtherOptions().get(BindingProvider.USERNAME_PROPERTY);
         String password = (String) stsConfig.getOtherOptions().get(BindingProvider.PASSWORD_PROPERTY);
         if (userName != null){
@@ -382,7 +443,14 @@ public class TrustPluginImpl implements TrustPlugin {
         if (password != null){
             dispatch.getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, password);
         }
-        
+        KeyPair keyPair = (KeyPair)stsConfig.getOtherOptions().get(WSTrustConstants.USE_KEY_RSA_KEY_PAIR);
+        String id = (String)stsConfig.getOtherOptions().get(WSTrustConstants.USE_KEY_SIGNATURE_ID);
+        if (keyPair != null){
+            dispatch.getRequestContext().put(WSTrustConstants.USE_KEY_RSA_KEY_PAIR, keyPair);
+        }
+        if (id != null){
+            dispatch.getRequestContext().put(WSTrustConstants.USE_KEY_SIGNATURE_ID, id);
+        }
         //RequestSecurityTokenResponse rstr = null;
         // try{
         //  MessageFactory factory = sv.saajMessageFactory;
@@ -465,6 +533,20 @@ public class TrustPluginImpl implements TrustPlugin {
         }
         
         return serviceInfo;
+    }
+
+    private KeyInfo createKeyInfo(final PublicKey pubKey)throws WSTrustException{
+        KeyInfoFactory kif = KeyInfoFactory.getInstance("DOM");
+        KeyValue kv = null;
+        try{
+            kv = kif.newKeyValue(pubKey);
+        }catch (KeyException ex){
+            throw new WSTrustException("Unable to create key value", ex);
+        }
+        List<KeyValue> kvs = new ArrayList<KeyValue>();
+        kvs.add(kv);
+        KeyInfo ki = kif.newKeyInfo(kvs);
+        return ki;
     }
  
     private String elemToString(final RequestSecurityTokenResponse rstr){

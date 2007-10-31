@@ -1,5 +1,5 @@
 /*
- * $Id: UseKeyImpl.java,v 1.9 2007-08-14 00:46:38 jdg6688 Exp $
+ * $Id: UseKeyImpl.java,v 1.10 2007-10-31 05:55:00 jdg6688 Exp $
  */
 
 /*
@@ -60,6 +60,7 @@ import java.util.logging.Logger;
 import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
 
 import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
+import java.security.PublicKey;
 import org.w3c.dom.Element;
 
 

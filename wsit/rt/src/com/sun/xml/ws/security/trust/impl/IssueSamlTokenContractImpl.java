@@ -345,8 +345,16 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
     }
     
     private KeyInfo createKeyInfo(final String keyType, final X509Certificate serCert, final IssuedTokenContext ctx, String appliesTo)throws WSTrustException{
+        Element kiEle = (Element)stsConfig.getOtherOptions().get("ConfirmationKeyInfo");
+        if (kiEle != null){
+            try{
+                return new KeyInfo(kiEle, null);
+            }catch(com.sun.org.apache.xml.internal.security.exceptions.XMLSecurityException ex){
+                log.log(Level.SEVERE, LogStringsMessages.WST_0034_UNABLE_GET_CLIENT_CERT(), ex);
+                throw new WSTrustException(LogStringsMessages.WST_0034_UNABLE_GET_CLIENT_CERT(), ex);
+            }
+        }
         final DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-        
         Document doc = null;
         try{
             doc = docFactory.newDocumentBuilder().newDocument();

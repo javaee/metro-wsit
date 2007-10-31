@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustElementFactoryImpl.java,v 1.18 2007-10-24 06:34:38 jdg6688 Exp $
+ * $Id: WSTrustElementFactoryImpl.java,v 1.19 2007-10-31 05:54:59 jdg6688 Exp $
  */
 
 /*
@@ -64,6 +64,7 @@ import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
 import com.sun.xml.ws.security.trust.elements.RequestedSecurityToken;
 import com.sun.xml.ws.security.trust.elements.SecondaryParameters;
 import com.sun.xml.ws.security.trust.elements.Status;
+import com.sun.xml.ws.security.trust.elements.UseKey;
 
 import com.sun.xml.ws.security.trust.impl.elements.BinarySecretImpl;
 import com.sun.xml.ws.security.trust.impl.elements.CancelTargetImpl;
@@ -79,6 +80,7 @@ import com.sun.xml.ws.security.trust.impl.elements.RequestedUnattachedReferenceI
 import com.sun.xml.ws.security.trust.impl.elements.RequestSecurityTokenImpl;
 import com.sun.xml.ws.security.trust.impl.elements.RequestedSecurityTokenImpl;
 import com.sun.xml.ws.security.trust.impl.elements.RequestedTokenCancelledImpl;
+import com.sun.xml.ws.security.trust.impl.elements.UseKeyImpl;
 import com.sun.xml.ws.security.trust.impl.elements.str.DirectReferenceImpl;
 import com.sun.xml.ws.security.trust.impl.elements.str.SecurityTokenReferenceImpl;
 import com.sun.xml.ws.security.trust.impl.elements.str.KeyIdentifierImpl;
@@ -126,6 +128,7 @@ import javax.xml.bind.util.JAXBSource;
 import javax.xml.bind.Marshaller;
 
 import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
+import java.security.PublicKey;
 import java.util.List;
 
 /**
@@ -290,9 +293,16 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
     public SecondaryParameters createSecondaryParameters(){
         throw new UnsupportedOperationException("Unsupported operation: createSecondaryParameters");
     }
+    
+    public UseKey createUseKey(Token token, String sig){
+        UseKey useKey = new UseKeyImpl(token);
+        if (sig != null){
+            useKey.setSignatureID(URI.create(sig));
+        }
+        
+        return useKey;
+    }
 
-    
-    
     /**
      *Create an RST for a Renewal Request
      */

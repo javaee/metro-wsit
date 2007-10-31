@@ -86,6 +86,7 @@ import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponse;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponseCollection;
 import com.sun.xml.ws.security.trust.elements.RequestedSecurityToken;
+import com.sun.xml.ws.security.trust.elements.UseKey;
 import com.sun.xml.ws.security.trust.util.WSTrustUtil;
 import com.sun.xml.ws.security.wsu10.AttributedDateTime;
 import com.sun.xml.wss.impl.MessageConstants;
@@ -258,6 +259,12 @@ public abstract class IssueSamlTokenContract implements com.sun.xml.ws.api.secur
             
             context.setProofKey(key);
         }else if(wstVer.getPublicKeyTypeURI().equals(keyType)){
+            // Get UseKey
+            UseKey useKey = rst.getUseKey();
+            if (useKey != null){
+                Element keyInfo = (Element)useKey.getToken().getTokenValue();
+                stsConfig.getOtherOptions().put("ConfirmationKeyInfo", keyInfo);
+            }
             final Set certs = context.getRequestorSubject().getPublicCredentials();
             if(certs == null){
                 log.log(Level.SEVERE,
@@ -273,7 +280,7 @@ public abstract class IssueSamlTokenContract implements com.sun.xml.ws.api.secur
                     addedClientCert = true;
                 }
             }
-            if(!addedClientCert){
+            if(!addedClientCert && useKey == null){
                 log.log(Level.SEVERE,
                         LogStringsMessages.WST_0034_UNABLE_GET_CLIENT_CERT());
                 throw new WSTrustException(LogStringsMessages.WST_0034_UNABLE_GET_CLIENT_CERT());

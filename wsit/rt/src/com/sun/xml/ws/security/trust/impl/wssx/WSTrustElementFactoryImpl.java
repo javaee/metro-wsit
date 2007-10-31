@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustElementFactoryImpl.java,v 1.7 2007-10-29 10:52:17 shyam_rao Exp $
+ * $Id: WSTrustElementFactoryImpl.java,v 1.8 2007-10-31 05:54:59 jdg6688 Exp $
  */
 
 /*
@@ -50,6 +50,7 @@ import com.sun.xml.ws.security.trust.elements.RequestedSecurityToken;
 import com.sun.xml.ws.security.trust.elements.RequestedTokenCancelled;
 import com.sun.xml.ws.security.trust.elements.SecondaryParameters;
 import com.sun.xml.ws.security.trust.elements.Status;
+import com.sun.xml.ws.security.trust.elements.UseKey;
 import com.sun.xml.ws.security.trust.elements.WSTrustElementBase;
 
 import com.sun.xml.ws.security.trust.impl.elements.str.DirectReferenceImpl;
@@ -75,6 +76,7 @@ import com.sun.xml.ws.security.trust.impl.wssx.elements.RequestedSecurityTokenIm
 import com.sun.xml.ws.security.trust.impl.wssx.elements.RequestedTokenCancelledImpl;
 import com.sun.xml.ws.security.trust.impl.wssx.elements.SecondaryParametersImpl;
 import com.sun.xml.ws.security.trust.impl.wssx.elements.StatusImpl;
+import com.sun.xml.ws.security.trust.impl.wssx.elements.UseKeyImpl;
 import com.sun.xml.ws.security.trust.impl.wssx.bindings.BinarySecretType;
 import com.sun.xml.ws.security.trust.impl.wssx.bindings.EntropyType;
 import com.sun.xml.ws.security.trust.impl.wssx.bindings.RequestSecurityTokenType;
@@ -110,6 +112,7 @@ import javax.xml.bind.JAXBContext;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.security.trust.WSTrustVersion;
+import java.security.PublicKey;
 
 
 public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
@@ -251,6 +254,15 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
     
     public SecondaryParameters createSecondaryParameters(){
         return new SecondaryParametersImpl();
+    }
+    
+    public UseKey createUseKey(Token token, String sig){
+        UseKey useKey = new UseKeyImpl(token);
+        if (sig != null){
+            useKey.setSignatureID(URI.create(sig));
+        }
+        
+        return useKey;
     }
     
     /**

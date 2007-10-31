@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustConstants.java,v 1.10 2007-10-23 18:49:42 jdg6688 Exp $
+ * $Id: WSTrustConstants.java,v 1.11 2007-10-31 05:55:00 jdg6688 Exp $
  */
 
 /*
@@ -46,6 +46,10 @@ package com.sun.xml.ws.security.trust;
  */
 public class WSTrustConstants {
     
+    public static final String USE_KEY_RSA_KEY_PAIR = "UseKey-RSAKeyPair";
+
+    public static final String USE_KEY_SIGNATURE_ID = "UseKey-SignatureID";
+
     public static final String STS_CALL_BACK_HANDLER = "stsCallbackHandler";
     
     public static final String WST_VERSION = "WSTrustVersion";

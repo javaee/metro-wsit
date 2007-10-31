@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustElementFactory.java,v 1.14 2007-10-24 15:30:48 shyam_rao Exp $
+ * $Id: WSTrustElementFactory.java,v 1.15 2007-10-31 05:55:00 jdg6688 Exp $
  */
 
 /*
@@ -65,6 +65,7 @@ import com.sun.xml.ws.security.trust.elements.RequestedUnattachedReference;
 import com.sun.xml.ws.security.trust.elements.RequestedSecurityToken;
 import com.sun.xml.ws.security.trust.elements.SecondaryParameters;
 import com.sun.xml.ws.security.trust.elements.Status;
+import com.sun.xml.ws.security.trust.elements.UseKey;
 import com.sun.xml.ws.security.trust.impl.WSTrustElementFactoryImpl;
 import java.net.URI;
 
@@ -75,6 +76,7 @@ import com.sun.xml.ws.security.trust.elements.str.Reference;
 import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
 import com.sun.xml.ws.security.Token;
 import com.sun.xml.ws.security.wsu10.AttributedDateTime;
+import java.security.PublicKey;
 import java.util.List;
 
 import javax.xml.transform.Source;
@@ -202,6 +204,8 @@ public abstract class WSTrustElementFactory {
      * Create a BinarySecret
      */
     public abstract BinarySecret createBinarySecret(Element elem) throws WSTrustException;
+    
+    public abstract UseKey createUseKey(Token token, String sig);
 
     public abstract OnBehalfOf createOnBehalfOf(Token oboToken);
     /**

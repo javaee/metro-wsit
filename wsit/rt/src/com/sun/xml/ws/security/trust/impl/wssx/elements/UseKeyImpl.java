@@ -1,5 +1,5 @@
 /*
- * $Id: UseKeyImpl.java,v 1.1 2007-08-23 12:40:56 shyam_rao Exp $
+ * $Id: UseKeyImpl.java,v 1.2 2007-10-31 05:54:59 jdg6688 Exp $
  */
 
 /*
@@ -36,6 +36,7 @@ import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.ws.security.trust.elements.UseKey;
 import com.sun.xml.ws.security.trust.impl.wssx.bindings.UseKeyType;
 import java.net.URISyntaxException;
+import java.security.PublicKey;
 import javax.xml.bind.JAXBElement;
 
 /**
@@ -47,6 +48,10 @@ public class UseKeyImpl extends UseKeyType implements UseKey {
     
     private SecurityTokenReference str = null;
     private Token token = null;
+    
+    public UseKeyImpl(Token token) {
+        setToken(token);
+    }
     
     public UseKeyImpl(SecurityTokenReference str) {
         setSecurityTokenReference(str);
@@ -92,7 +97,7 @@ public class UseKeyImpl extends UseKeyType implements UseKey {
     public void setToken(Token token) {
         if (token != null) {
             this.token = token;
-            setAny(token);
+            setAny(token.getTokenValue());
         }
         setTargetType(WSTrustConstants.TOKEN_TYPE);
         str = null;
