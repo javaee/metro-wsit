@@ -42,6 +42,7 @@ import com.sun.xml.ws.policy.PolicyMerger;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelTranslator;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelUnmarshaller;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -53,14 +54,25 @@ import java.util.ArrayList;
  */
 public class RMPolicyResolver {
     
+    SecurityPolicyVersion spVersion;
+    
     /** Creates a new instance of RMPolicyResolver */
     public RMPolicyResolver() {
+        spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
+    }
+    
+    public RMPolicyResolver(SecurityPolicyVersion spVersion) {
+        this.spVersion = spVersion;
     }
     
     public Policy getOperationLevelPolicy() throws PolicyException{
         PolicySourceModel model;
         try {
-            model = unmarshalPolicy("com/sun/xml/ws/security/impl/policyconv/" + "rm-msglevel-policy.xml");
+            String rmMessagePolicy = "rm-msglevel-policy.xml";
+            if(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(spVersion.namespaceUri)){
+                rmMessagePolicy = "rm-msglevel-policy.xml-sx";
+            }
+            model = unmarshalPolicy("com/sun/xml/ws/security/impl/policyconv/" + rmMessagePolicy);
         }catch (IOException ex) {
             throw new PolicyException(ex);
         }

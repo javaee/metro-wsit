@@ -37,14 +37,15 @@
 package com.sun.xml.ws.security.policy;
 
 /**
- * Encrypted supporting tokens are supporting tokens that are included in
- * the security header and MUST be encrypted when they appear in the security header.
- * Element encryption SHOULD be used for encrypting these tokens. The encrypted 
- * supporting tokens can be added to any SOAP message and do not require the 
- * message signature being present before the encrypted supporting tokens are added.
- *
- * @author Ashutosh.Shahi@sun.com
+ * 
+ * @author ashutosh.shahi@sun.com
  */
-public interface EncryptedSupportingTokens extends SupportingTokens{
+public interface KeyValueToken extends Token{
+    
+    /**
+     * returns the type of the token.
+     * @return RsaKeyValue if RSA cryptographic algoroithm should be used
+     */
+    public String getTokenType();
     
 }

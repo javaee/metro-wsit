@@ -58,7 +58,8 @@ public class SecurityPolicyAssertionCreator implements PolicyAssertionCreator{
     
     private static HashSet<String> implementedAssertions = new HashSet<String>();
     private static final String [] nsSupportedList = new String[]{SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri,
-           SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri};
+           SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri,
+           "http://schemas.microsoft.com/ws/2005/07/securitypolicy"};
     //    Constants.SUN_WSS_SECURITY_CLIENT_POLICY_NS,
     //    Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS,
     //    Constants.SUN_SECURE_CLIENT_CONVERSATION_POLICY_NS,Constants.SUN_SECURE_SERVER_CONVERSATION_POLICY_NS
@@ -121,8 +122,10 @@ public class SecurityPolicyAssertionCreator implements PolicyAssertionCreator{
         implementedAssertions.add(Constants.ValidatorConfiguration);
         implementedAssertions.add(Constants.CertStore);
         implementedAssertions.add(Constants.KerberosConfig);
+        implementedAssertions.add(Constants.RsaToken);
         
         // WS-SecurityPolicy 1.2 assertions
+        implementedAssertions.add(Constants.KeyValueToken);
         implementedAssertions.add(Constants.EncryptedSupportingTokens);
         implementedAssertions.add(Constants.SignedEncryptedSupportingTokens);
         implementedAssertions.add(Constants.SignedEndorsingEncryptedSupportingTokens);

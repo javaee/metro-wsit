@@ -74,6 +74,7 @@ public interface Token{
     public static final String WSS_REL_V20_TOKEN11="WssRelV20Token11";
     public static final String WSS_USERNAME_TOKEN_10 ="WssUsernameToken10";
     public static final String WSS_USERNAME_TOKEN_11 ="WssUsernameToken11";
+    public static final String RSA_KEYVALUE_TOKEN = "RsaKeyValue";
     
     /**
      * returns the token inclusion value

@@ -1033,8 +1033,12 @@ public abstract class SecurityPipeBase implements Pipe {
     
     private Policy getMessageBootstrapPolicy()throws PolicyException ,IOException{
         if(bpMSP == null){
+            String bootstrapMessagePolicy = "boot-msglevel-policy.xml";
+            if(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(spVersion.namespaceUri)){
+                bootstrapMessagePolicy = "boot-msglevel-policy-sx.xml";
+            }
             PolicySourceModel model =  unmarshalPolicy(
-                    "com/sun/xml/ws/security/impl/policyconv/"+"boot-msglevel-policy.xml");
+                    "com/sun/xml/ws/security/impl/policyconv/"+ bootstrapMessagePolicy);
             bpMSP = PolicyModelTranslator.getTranslator().translate(model);
         }
         return bpMSP;
@@ -1165,7 +1169,7 @@ public abstract class SecurityPipeBase implements Pipe {
             return;
         }
         try{
-            RMPolicyResolver rr = new RMPolicyResolver();
+            RMPolicyResolver rr = new RMPolicyResolver(spVersion);
             Policy msgLevelPolicy = rr.getOperationLevelPolicy();
             PolicyMerger merger = PolicyMerger.getMerger();
             ArrayList<Policy> pList = new ArrayList<Policy>(2);

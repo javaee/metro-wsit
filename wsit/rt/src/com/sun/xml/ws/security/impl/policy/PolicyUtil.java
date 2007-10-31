@@ -312,6 +312,18 @@ public class PolicyUtil {
         return false;
     }
     
+    public static boolean isKeyValueTokenType(PolicyAssertion token, SecurityPolicyVersion spVersion){
+        if ( !isSecurityPolicyNS(token, spVersion)) {
+            return false;
+        }
+        String localPart = token.getName().getLocalPart();
+        if(localPart.equals(RsaKeyValue) && SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(
+                spVersion.namespaceUri)){
+            return true;
+        }
+        return false;
+    }
+    
     public static boolean isRelToken(PolicyAssertion token, SecurityPolicyVersion spVersion) {
         if ( !isSecurityPolicyNS(token, spVersion)) {
             return false;
@@ -622,6 +634,17 @@ public class PolicyUtil {
         }
         
         if(policyAssertion.getName().getLocalPart().equals(X509Token)) {
+            return true;
+        }
+        return false;
+    }
+    
+    public static boolean isKeyValueToken(PolicyAssertion policyAssertion, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(policyAssertion, spVersion)) {
+            return false;
+        }
+        if(policyAssertion.getName().getLocalPart().equals(KeyValueToken) && SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(
+                spVersion.namespaceUri)) {
             return true;
         }
         return false;

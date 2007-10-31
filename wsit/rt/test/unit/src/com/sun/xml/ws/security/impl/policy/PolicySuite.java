@@ -73,7 +73,8 @@ public class PolicySuite extends TestCase {
         suite.addTest(com.sun.xml.ws.security.impl.policy.EndorsingSupportingTokensTest.suite());   
 	suite.addTest(com.sun.xml.ws.security.impl.policy.HttpsTokenTest.suite());
         suite.addTest(com.sun.xml.ws.security.impl.policy.IssuedTokenTest.suite());     
-        suite.addTest(com.sun.xml.ws.security.impl.policy.KerberosTokenTest.suite());     
+        suite.addTest(com.sun.xml.ws.security.impl.policy.KerberosTokenTest.suite()); 
+        suite.addTest(com.sun.xml.ws.security.impl.policy.KeyValueTokenTest.suite()); 
         suite.addTest(com.sun.xml.ws.security.impl.policy.RelTokenTest.suite());      
         suite.addTest(com.sun.xml.ws.security.impl.policy.SamlTokenTest.suite());
         suite.addTest(com.sun.xml.ws.security.impl.policy.SecureConversationTokenTest.suite());

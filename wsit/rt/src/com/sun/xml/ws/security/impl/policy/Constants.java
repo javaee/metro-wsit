@@ -164,8 +164,11 @@ public class Constants {
     public final static String Lax = "Lax";
     public final static String Layout = "Layout";
     public final static String RequireIssuerSerialReference = "RequireIssuerSerialReference";
+    public final static String RsaToken = "RsaToken";
     
     // New Assertions from WS-SecurityPolicy 1.2
+    public final static String KeyValueToken = "KeyValueToken";
+    public final static String RsaKeyValue = "RsaKeyValue";
     public final static String HttpBasicAuthentication = "HttpBasicAuthentication";
     public final static String HttpDigestAuthentication = "HttpDigestAuthentication";
     public final static String Trust13 = "Trust13";
@@ -227,6 +230,8 @@ public class Constants {
     public static final String SUN_TRUST_SERVER_SECURITY_POLICY_NS="http://schemas.sun.com/ws/2006/05/trust/server";
     public static final String SUN_SECURE_CLIENT_CONVERSATION_POLICY_NS="http://schemas.sun.com/ws/2006/05/sc/client";
     public static final String SUN_SECURE_SERVER_CONVERSATION_POLICY_NS="http://schemas.sun.com/ws/2006/05/sc/server";
+    
+    public static final String MS_SP_NS = "http://schemas.microsoft.com/ws/2005/07/securitypolicy";
     
     public static final String KerberosConfig = "KerberosConfig";
     public static final String KeyStore = "KeyStore";
