@@ -174,7 +174,7 @@ public abstract class BaseSTSImpl implements BaseSTS {
    *          representation of the exception.
   **/
     public Source invoke(final Source rstElement){
-        
+        final STSConfiguration config = getConfiguration();
         Source rstrEle = null;
         try{
             // Get RequestSecurityToken
@@ -191,7 +191,6 @@ public abstract class BaseSTSImpl implements BaseSTS {
                 appliesTo = DEFAULT_APPLIESTO;
             }
             
-            final STSConfiguration config = getConfiguration();
             if(rst.getRequestType().toString().equals(wstVer.getIssueRequestTypeURI())){
                 rstrEle = issue(config, appliesTo, eleFac, rst);                
             }else if(rst.getRequestType().toString().equals(wstVer.getCancelRequestTypeURI())){
