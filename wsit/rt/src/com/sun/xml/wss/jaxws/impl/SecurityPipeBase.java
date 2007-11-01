@@ -1083,7 +1083,7 @@ public abstract class SecurityPipeBase implements Pipe {
         }
         
         String action = getAction(packet);
-        if (rstSCTURI.equals(action)){
+        if (wsscVer.getSCTRequestAction().equals(action)){
             return true;
         }
         return false;

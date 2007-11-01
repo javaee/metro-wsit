@@ -111,13 +111,13 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
     // Plugin instances for Trust and SecureConversation invocation
     //private static TrustPlugin trustPlugin = WSTrustFactory.newTrustPlugin(null);
     private IssuedTokenManager itm = IssuedTokenManager.getInstance();
-    private WSSCPlugin  scPlugin = WSSCFactory.newSCPlugin(null, wsscVer);
+    private WSSCPlugin  scPlugin;
     private Set trustConfig = null;
     
     // Creates a new instance of SecurityClientPipe
     public SecurityClientPipe(ClientPipeConfiguration config,Pipe nextPipe) {
         super(config,nextPipe);
-        
+        scPlugin = new WSSCPlugin(null, wsscVer);
         CallbackHandler handler = null;
         try {
             Iterator it = outMessagePolicyMap.values().iterator();
@@ -141,6 +141,7 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
     protected SecurityClientPipe(SecurityClientPipe that) {
         super(that);
         trustConfig = that.trustConfig;
+        scPlugin = that.scPlugin;
     }
     
     public Packet process(Packet packet) {
@@ -151,7 +152,6 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
             isTrustMsg = true;
             String action = (String)packet.invocationProperties.get(wsTrustVer.getIssueRequestAction());
             HeaderList headers = packet.getMessage().getHeaders();
-            headers.fillRequestAddressingHeaders(packet, addVer, soapVersion,false, action);
         }
         
         // keep the message
