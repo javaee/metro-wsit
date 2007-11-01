@@ -70,7 +70,7 @@ public class RMPolicyResolver {
         try {
             String rmMessagePolicy = "rm-msglevel-policy.xml";
             if(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(spVersion.namespaceUri)){
-                rmMessagePolicy = "rm-msglevel-policy.xml-sx";
+                rmMessagePolicy = "rm-msglevel-policy-sx.xml";
             }
             model = unmarshalPolicy("com/sun/xml/ws/security/impl/policyconv/" + rmMessagePolicy);
         }catch (IOException ex) {
