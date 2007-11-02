@@ -33,7 +33,6 @@ import javax.xml.ws.WebServiceFeature;
 public final class MessageDumpingFeature extends WebServiceFeature {
     private static final String featureId = MessageDumpingFeature.class.getName();
     
-    private Tube tube;
     private Queue<String> messageQueue = new LinkedList<String>();
     
     /** Creates a new instance of MessageDumpingFeature */
