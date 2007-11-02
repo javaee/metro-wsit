@@ -152,6 +152,7 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
             isTrustMsg = true;
             String action = (String)packet.invocationProperties.get(wsTrustVer.getIssueRequestAction());
             HeaderList headers = packet.getMessage().getHeaders();
+            headers.fillRequestAddressingHeaders(packet, addVer, soapVersion,false, action);
         }
         
         // keep the message
