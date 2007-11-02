@@ -54,6 +54,7 @@ import java.util.Iterator;
 import java.util.logging.Level;
 import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceFeature;
+import javax.xml.ws.soap.AddressingFeature;
 
 /**
  *
@@ -115,6 +116,8 @@ public class AddressingModelConfiguratorProvider implements ModelConfiguratorPro
                     for (AssertionSet assertions : policy) {
                         for (PolicyAssertion assertion : assertions) {
                             if (assertion.getName().equals(new QName("http://www.w3.org/2007/05/addressing/metadata", "Addressing"))) {
+                                //TODO take care of nested assertions later.
+                                /*
                                 NestedPolicy nestedPolicy = assertion.getNestedPolicy();
                                 boolean requiresAnonymousResponses = false;
                                 boolean requiresNonAnonymousResponses = false;
@@ -123,8 +126,14 @@ public class AddressingModelConfiguratorProvider implements ModelConfiguratorPro
                                     requiresNonAnonymousResponses = nestedPolicy.contains(new QName("http://www.w3.org/2007/05/addressing/metadata", "NonAnonymousResponses"));
                                 }
                                 WSDLBoundPortTypeImpl binding = (WSDLBoundPortTypeImpl) port.getBinding();
+                                */
                                 // Set addressing properties here:
                                 // binding.set...
+                                final WebServiceFeature feature = new AddressingFeature(true, !assertion.isOptional());
+                                port.addFeature(feature);
+                                if (LOGGER.isLoggable(Level.FINE)) {
+                                    LOGGER.fine("Added addressing feature \"" + feature + "\" to port \"" + port + "\"");
+                                }
                             }
                         }
                     }
