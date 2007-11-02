@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustElementFactoryImpl.java,v 1.19 2007-10-31 05:54:59 jdg6688 Exp $
+ * $Id: WSTrustElementFactoryImpl.java,v 1.20 2007-11-02 19:12:25 jdg6688 Exp $
  */
 
 /*
@@ -128,7 +128,6 @@ import javax.xml.bind.util.JAXBSource;
 import javax.xml.bind.Marshaller;
 
 import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
-import java.security.PublicKey;
 import java.util.List;
 
 /**

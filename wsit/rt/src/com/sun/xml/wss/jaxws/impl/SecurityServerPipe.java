@@ -246,7 +246,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
                 
                 //set the callbackhandler
                 packet.invocationProperties.put(WSTrustConstants.SECURITY_ENVIRONMENT, secEnv);
-
+                packet.invocationProperties.put(WSTrustConstants.WST_VERSION, this.wsTrustVer);
             }
             
             if (isSCIssueMessage){
@@ -285,7 +285,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
                     
                     // Add addrsssing headers to trust message
                     if (isTrustMessage){
-                        retPacket = addAddressingHeaders(packet, retPacket.getMessage(), wsTrustVer.getIssueResponseAction());
+                        retPacket = addAddressingHeaders(packet, retPacket.getMessage(), wsTrustVer.getIssueFinalResoponseAction());
                     }
                 }else {
                     retPacket = packet;

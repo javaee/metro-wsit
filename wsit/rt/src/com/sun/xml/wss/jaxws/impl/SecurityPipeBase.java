@@ -682,7 +682,7 @@ public abstract class SecurityPipeBase implements Pipe {
             Policy endpointPolicy = wsPolicyMap.getEndpointEffectivePolicy(endpointKey);
             
             if (endpointPolicy != null){
-                if (endpointPolicy.contains(AddressingVersion.W3C.policyNsUri)){
+                if (endpointPolicy.contains(AddressingVersion.W3C.policyNsUri) ||endpointPolicy.contains("http://www.w3.org/2007/05/addressing/metadata")){
                     addVer = AddressingVersion.W3C;
                 } else if (endpointPolicy.contains(AddressingVersion.MEMBER.policyNsUri)){
                     addVer = AddressingVersion.MEMBER;

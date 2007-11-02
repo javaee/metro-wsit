@@ -81,7 +81,7 @@ public class WSTrustVersion13 extends WSTrustVersion{
     }
 
     public  String getBearerKeyTypeURI(){
-        return "http://schemas.xmlsoap.org/ws/2005/05/identity/NoProofKey";
+        return nsURI+"Bearer";
     }
 
     public  String getIssueRequestAction(){
@@ -93,7 +93,7 @@ public class WSTrustVersion13 extends WSTrustVersion{
     }
 
     public  String getIssueFinalResoponseAction(){
-        return nsURI + "RSTRC/IssueFinal";
+        return nsURI + "/RSTRC/IssueFinal";
     }
 
     public  String getRenewRequestAction(){

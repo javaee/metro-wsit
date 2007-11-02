@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustElementFactoryImpl.java,v 1.8 2007-10-31 05:54:59 jdg6688 Exp $
+ * $Id: WSTrustElementFactoryImpl.java,v 1.9 2007-11-02 19:12:23 jdg6688 Exp $
  */
 
 /*
@@ -47,25 +47,19 @@ import com.sun.xml.ws.security.trust.elements.RequestedAttachedReference;
 import com.sun.xml.ws.security.trust.elements.RequestedUnattachedReference;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
 import com.sun.xml.ws.security.trust.elements.RequestedSecurityToken;
-import com.sun.xml.ws.security.trust.elements.RequestedTokenCancelled;
 import com.sun.xml.ws.security.trust.elements.SecondaryParameters;
 import com.sun.xml.ws.security.trust.elements.Status;
 import com.sun.xml.ws.security.trust.elements.UseKey;
-import com.sun.xml.ws.security.trust.elements.WSTrustElementBase;
 
 import com.sun.xml.ws.security.trust.impl.elements.str.DirectReferenceImpl;
 import com.sun.xml.ws.security.trust.impl.elements.str.SecurityTokenReferenceImpl;
 import com.sun.xml.ws.security.trust.impl.elements.str.KeyIdentifierImpl;
 
-import com.sun.xml.ws.security.trust.impl.wssx.elements.AllowPostdatingImpl;
 import com.sun.xml.ws.security.trust.impl.wssx.elements.BinarySecretImpl;
 import com.sun.xml.ws.security.trust.impl.wssx.elements.CancelTargetImpl;
-import com.sun.xml.ws.security.trust.impl.wssx.elements.ClaimsImpl;
 import com.sun.xml.ws.security.trust.impl.wssx.elements.EntropyImpl;
 import com.sun.xml.ws.security.trust.impl.wssx.elements.IssuedTokensImpl;
 import com.sun.xml.ws.security.trust.impl.wssx.elements.LifetimeImpl;
-import com.sun.xml.ws.security.trust.impl.wssx.elements.RenewTargetImpl;
-import com.sun.xml.ws.security.trust.impl.wssx.elements.RenewingImpl;
 import com.sun.xml.ws.security.trust.impl.wssx.elements.RequestSecurityTokenResponseImpl;
 import com.sun.xml.ws.security.trust.impl.wssx.elements.RequestSecurityTokenResponseCollectionImpl;
 import com.sun.xml.ws.security.trust.impl.wssx.elements.RequestedProofTokenImpl;
@@ -75,7 +69,6 @@ import com.sun.xml.ws.security.trust.impl.wssx.elements.RequestSecurityTokenImpl
 import com.sun.xml.ws.security.trust.impl.wssx.elements.RequestedSecurityTokenImpl;
 import com.sun.xml.ws.security.trust.impl.wssx.elements.RequestedTokenCancelledImpl;
 import com.sun.xml.ws.security.trust.impl.wssx.elements.SecondaryParametersImpl;
-import com.sun.xml.ws.security.trust.impl.wssx.elements.StatusImpl;
 import com.sun.xml.ws.security.trust.impl.wssx.elements.UseKeyImpl;
 import com.sun.xml.ws.security.trust.impl.wssx.bindings.BinarySecretType;
 import com.sun.xml.ws.security.trust.impl.wssx.bindings.EntropyType;
@@ -106,13 +99,10 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.JAXBContext;
 
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.security.trust.WSTrustVersion;
-import java.security.PublicKey;
 
 
 public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
@@ -320,7 +310,7 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
         //rstrc.getRequestSecurityTokenResponses().addAll(rstrs);        
         
         for (int i = 0; i < rstrs.size(); i++) {
-            ((RequestSecurityTokenResponseCollectionImpl)rstrc).addRequestSecurityTokenResponse((RequestSecurityTokenResponse)rstrs.get(i));
+            ((RequestSecurityTokenResponseCollectionImpl)rstrc).addRequestSecurityTokenResponse(rstrs.get(i));
         }
         return rstrc;
     }

@@ -94,7 +94,7 @@ public class WSTrustVersion10 extends WSTrustVersion{
     }
 
     public  String getIssueFinalResoponseAction(){
-        return nsURI + "RSTR/Issue";
+        return nsURI + "/RSTR/Issue";
     }
 
     public  String getRenewRequestAction(){

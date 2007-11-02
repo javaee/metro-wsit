@@ -210,7 +210,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         //TODO: replace this with call to packetMessageInfo.getResponsePacket
         Packet retPacket = getResponsePacket(messageInfo);
         if (isTrustMessage){
-            retPacket = addAddressingHeaders(packet, retPacket.getMessage(), wsTrustVer.getIssueResponseAction());
+            retPacket = addAddressingHeaders(packet, retPacket.getMessage(), wsTrustVer.getIssueFinalResoponseAction());
         }
         Packet ret = null;
         try {
