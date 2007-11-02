@@ -40,7 +40,9 @@ import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.model.wsdl.WSDLService;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
+import com.sun.xml.ws.model.wsdl.WSDLBoundPortTypeImpl;
 import com.sun.xml.ws.policy.AssertionSet;
+import com.sun.xml.ws.policy.NestedPolicy;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyException;
@@ -106,8 +108,29 @@ public class AddressingModelConfiguratorProvider implements ModelConfiguratorPro
                             } // next assertion
                         } // next alternative
                     } // end-if policy contains wsa assertion
-                } // end foreach port
-            } //end foreach addr assertion
+                } //end foreach addr assertion
+                
+                // Deal with WS-Addressing 1.0 Metadata assertions
+                if (policy != null && policy.contains(new QName("http://www.w3.org/2007/05/addressing/metadata", "Addressing"))) {
+                    for (AssertionSet assertions : policy) {
+                        for (PolicyAssertion assertion : assertions) {
+                            if (assertion.getName().equals(new QName("http://www.w3.org/2007/05/addressing/metadata", "Addressing"))) {
+                                NestedPolicy nestedPolicy = assertion.getNestedPolicy();
+                                boolean requiresAnonymousResponses = false;
+                                boolean requiresNonAnonymousResponses = false;
+                                if (nestedPolicy != null) {
+                                    requiresAnonymousResponses = nestedPolicy.contains(new QName("http://www.w3.org/2007/05/addressing/metadata", "AnonymousResponses"));
+                                    requiresNonAnonymousResponses = nestedPolicy.contains(new QName("http://www.w3.org/2007/05/addressing/metadata", "NonAnonymousResponses"));
+                                }
+                                WSDLBoundPortTypeImpl binding = (WSDLBoundPortTypeImpl) port.getBinding();
+                                // Set addressing properties here:
+                                // binding.set...
+                            }
+                        }
+                    }
+                }
+                
+            } // end foreach port
         } // end foreach service
         LOGGER.exiting();
     }
