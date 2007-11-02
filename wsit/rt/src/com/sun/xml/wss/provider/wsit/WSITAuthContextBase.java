@@ -832,7 +832,7 @@ public abstract class WSITAuthContextBase  {
         }
         String action = getAction(packet);
         if(wsTrustVer.getIssueRequestAction().equals(action) ||
-                wsTrustVer.getIssueResponseAction().equals(action)){
+                wsTrustVer.getIssueFinalResoponseAction().equals(action)){
             return true;
         }
         return false;
