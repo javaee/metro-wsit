@@ -17,7 +17,7 @@
  * you own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  *
- * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
+ * Copyright 2006, 2007 Sun Microsystems Inc. All Rights Reserved
  */
 package com.sun.xml.ws.assembler;
 
@@ -30,6 +30,7 @@ import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import java.io.StringWriter;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Queue;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -78,11 +79,13 @@ class MessageDumpingTube extends AbstractFilterTubeImpl {
         return new MessageDumpingTube(this, cloner);
     }
     
+    @Override
     public NextAction processRequest(Packet request) {
         dump(request);
         return super.processRequest(request);
     }
     
+    @Override
     public NextAction processResponse(Packet response) {
         dump(response);
         return super.processResponse(response);
@@ -123,12 +126,54 @@ class MessageDumpingTube extends AbstractFilterTubeImpl {
             Class clazz = getClass().getClassLoader().loadClass("javanet.staxutils.IndentingXMLStreamWriter");
             Constructor c = clazz.getConstructor(XMLStreamWriter.class);
             writer = (XMLStreamWriter)c.newInstance(writer);
-        } catch (Exception e) {
+        } catch (InstantiationException ex) {
             // if stax-utils.jar is not in the classpath, this will fail
             // so, we'll just have to do without indentation
             if(!warnStaxUtils) {
                 warnStaxUtils = true;
-                LOGGER.warning("Put stax-utils.jar to the classpath to indent the dump output");
+                LOGGER.warning("Put stax-utils.jar to the classpath to indent the dump output", ex);
+            }
+        } catch (IllegalAccessException ex) {
+            // if stax-utils.jar is not in the classpath, this will fail
+            // so, we'll just have to do without indentation
+            if(!warnStaxUtils) {
+                warnStaxUtils = true;
+                LOGGER.warning("Put stax-utils.jar to the classpath to indent the dump output", ex);
+            }
+        } catch (IllegalArgumentException ex) {
+            // if stax-utils.jar is not in the classpath, this will fail
+            // so, we'll just have to do without indentation
+            if(!warnStaxUtils) {
+                warnStaxUtils = true;
+                LOGGER.warning("Put stax-utils.jar to the classpath to indent the dump output", ex);
+            }
+        } catch (InvocationTargetException ex) {
+            // if stax-utils.jar is not in the classpath, this will fail
+            // so, we'll just have to do without indentation
+            if(!warnStaxUtils) {
+                warnStaxUtils = true;
+                LOGGER.warning("Put stax-utils.jar to the classpath to indent the dump output", ex);
+            }
+        } catch (NoSuchMethodException ex) {
+            // if stax-utils.jar is not in the classpath, this will fail
+            // so, we'll just have to do without indentation
+            if(!warnStaxUtils) {
+                warnStaxUtils = true;
+                LOGGER.warning("Put stax-utils.jar to the classpath to indent the dump output", ex);
+            }
+        } catch (SecurityException ex) {
+            // if stax-utils.jar is not in the classpath, this will fail
+            // so, we'll just have to do without indentation
+            if(!warnStaxUtils) {
+                warnStaxUtils = true;
+                LOGGER.warning("Put stax-utils.jar to the classpath to indent the dump output", ex);
+            }
+        } catch (ClassNotFoundException ex) {
+            // if stax-utils.jar is not in the classpath, this will fail
+            // so, we'll just have to do without indentation
+            if(!warnStaxUtils) {
+                warnStaxUtils = true;
+                LOGGER.warning("Put stax-utils.jar to the classpath to indent the dump output", ex);
             }
         }
         return writer;
