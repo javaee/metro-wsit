@@ -49,6 +49,8 @@ public abstract class WSTrustVersion {
 
     public static final WSTrustVersion WS_TRUST_13 = new WSTrustVersion13();
 
+    public static final String WS_TRUST_10_NS_URI = "http://schemas.xmlsoap.org/ws/2005/02/trust";
+    public static final String WS_TRUST_13_NS_URI = "http://docs.oasis-open.org/ws-sx/ws-trust/200512";
     public static WSTrustVersion getInstance(String nsURI){
         if (nsURI.equals(WS_TRUST_13.getNamespaceURI())){
             return WS_TRUST_13;

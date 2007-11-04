@@ -86,6 +86,7 @@ import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponse;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponseCollection;
 import com.sun.xml.ws.security.trust.elements.RequestedSecurityToken;
+import com.sun.xml.ws.security.trust.elements.SecondaryParameters;
 import com.sun.xml.ws.security.trust.elements.UseKey;
 import com.sun.xml.ws.security.trust.util.WSTrustUtil;
 import com.sun.xml.ws.security.wsu10.AttributedDateTime;
@@ -127,6 +128,10 @@ public abstract class IssueSamlTokenContract implements com.sun.xml.ws.api.secur
     public BaseSTSResponse issue(final BaseSTSRequest request, final IssuedTokenContext context)throws WSTrustException {
         
         RequestSecurityToken rst = (RequestSecurityToken)request;
+        SecondaryParameters secParas = null;
+        if (wstVer.getNamespaceURI().equals(WSTrustVersion.WS_TRUST_13_NS_URI)){
+            secParas = rst.getSecondaryParameters();
+        }
         //WSTrustVersion wstVer = (WSTrustVersion)stsConfig.getOtherOptions().get(WSTrustConstants.WST_VERSION);
 
         // Get AppliesTo
@@ -149,7 +154,10 @@ public abstract class IssueSamlTokenContract implements com.sun.xml.ws.api.secur
 
         // Get TokenType
         String tokenType = null;
-        final URI tokenTypeURI = rst.getTokenType();
+        URI tokenTypeURI = rst.getTokenType();
+        if (tokenTypeURI == null && secParas != null){
+            tokenTypeURI = secParas.getTokenType();
+        }
         if (tokenTypeURI != null){
             tokenType = tokenTypeURI.toString();
         }else{
@@ -161,7 +169,10 @@ public abstract class IssueSamlTokenContract implements com.sun.xml.ws.api.secur
         
         // Get KeyType
         String keyType = null;
-        final URI keyTypeURI = rst.getKeyType();
+        URI keyTypeURI = rst.getKeyType();
+        if (keyTypeURI == null && secParas != null){
+            keyTypeURI = secParas.getKeyType();
+        }
         if (keyTypeURI != null){
             keyType = keyTypeURI.toString();
         }else{
@@ -204,7 +215,10 @@ public abstract class IssueSamlTokenContract implements com.sun.xml.ws.api.secur
         }
         
         // Get claimed attributes
-        final Claims claims = rst.getClaims();
+        Claims claims = rst.getClaims();
+        if (claims == null && secParas != null){
+            claims = secParas.getClaims();
+        }
         final STSAttributeProvider attrProvider = WSTrustFactory.getSTSAttributeProvider();
         final Map<QName, List<String>> claimedAttrs = attrProvider.getClaimedAttributes(subject, appliesTo, tokenType, claims);
         
@@ -234,6 +248,9 @@ public abstract class IssueSamlTokenContract implements com.sun.xml.ws.api.secur
             }
             
             keySize = (int)rst.getKeySize();
+            if (keySize < 1 && secParas != null){
+                keySize = (int) secParas.getKeySize();
+            }
             if (keySize < 1){
                 keySize = DEFAULT_KEY_SIZE;
             }

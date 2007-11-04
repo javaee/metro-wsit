@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustElementFactory.java,v 1.15 2007-10-31 05:55:00 jdg6688 Exp $
+ * $Id: WSTrustElementFactory.java,v 1.16 2007-11-04 17:07:00 jdg6688 Exp $
  */
 
 /*
@@ -128,7 +128,6 @@ public abstract class WSTrustElementFactory {
             throw new RuntimeException(jbe.getMessage(),jbe);
         }        
     }
-    
     private static WSTrustElementFactory trustElemFactory 
             = new WSTrustElementFactoryImpl();
     private static WSTrustElementFactory trustElemFactory13 
@@ -152,7 +151,7 @@ public abstract class WSTrustElementFactory {
     
     public static WSTrustElementFactory newInstance(WSTrustVersion wstVer) {
         
-            if (wstVer instanceof com.sun.xml.ws.security.trust.impl.wssx.WSTrustVersion13){
+            if (wstVer.getNamespaceURI().equals(WSTrustVersion.WS_TRUST_13_NS_URI)){
                 return trustElemFactory13;
             }
             

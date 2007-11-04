@@ -81,7 +81,7 @@ public class WSTrustVersion13 extends WSTrustVersion{
     }
 
     public  String getBearerKeyTypeURI(){
-        return nsURI+"Bearer";
+        return nsURI+"/Bearer";
     }
 
     public  String getIssueRequestAction(){
