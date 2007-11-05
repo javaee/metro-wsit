@@ -34,45 +34,36 @@
  * holder.
  */
 
-package com.sun.xml.ws.security.impl.policyconv;
+package com.sun.xml.ws.security.impl.policy;
 
 import com.sun.xml.ws.policy.PolicyAssertion;
-import com.sun.xml.ws.policy.PolicyException;
-import com.sun.xml.ws.security.impl.policy.PolicyUtil;
-import com.sun.xml.ws.security.policy.Binding;
-import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
-import com.sun.xml.ws.security.policy.SignedSupportingTokens;
-import com.sun.xml.ws.security.policy.Token;
-import com.sun.xml.wss.impl.policy.mls.EncryptionPolicy;
-import com.sun.xml.wss.impl.policy.mls.SignaturePolicy;
-import com.sun.xml.wss.impl.policy.mls.SignatureTarget;
-import com.sun.xml.wss.impl.policy.mls.WSSPolicy;
+import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
+import java.util.Iterator;
+
 /**
  *
- * @author K.Venugopal@sun.com
+ * @author sk112103
  */
-public class SignedSupportingTokensProcessor extends SupportingTokensProcessor {
+public class JMACAuthModuleConfiguration extends PolicyAssertion implements com.sun.xml.ws.security.policy.JMACAuthModuleConfiguration, SecurityAssertionValidator {
     
-    /** Creates a new instance of SignedSupportingTokensProcessor */
-    public SignedSupportingTokensProcessor(SignedSupportingTokens st,TokenProcessor tokenProcessor,Binding binding,
-            XWSSPolicyContainer container,SignaturePolicy sp,EncryptionPolicy ep,PolicyID pid) {
-        super(st,tokenProcessor,binding,container,sp,ep,pid);
+    /** Creates a new instance of JMACAuthModuleConfiguration */
+    public JMACAuthModuleConfiguration() {
+    }
+
+    public SecurityAssertionValidator.AssertionFitness validate(boolean isServer) {
+        return null;
+    }
+
+    public Iterator<? extends PolicyAssertion> getAuthModules() {
+        return null;
+    }
+
+    public String getOverrideDefaultTokenValidation() {
+        return null;
+    }
+
+    public String getOverrideDefaultAuthModules() {
+        return null;
     }
     
-    protected void addToPrimarySignature(WSSPolicy policy,Token token) throws PolicyException{
-        SignatureTarget target = stc.newURISignatureTarget(policy.getUUID());
-        SecurityPolicyUtil.setName(target, policy);
-
-        SecurityPolicyVersion spVersion = SecurityPolicyUtil.getSPVersion((PolicyAssertion)token);
-
-        if(!PolicyUtil.isUsernameToken((PolicyAssertion) token, spVersion)){
-            stc.addSTRTransform(target);
-        }
-        SignaturePolicy.FeatureBinding spFB = (SignaturePolicy.FeatureBinding)signaturePolicy.getFeatureBinding();
-        spFB.addTargetBinding(target);
-    }
-    
-//    protected void collectSignaturePolicies(Token token) throws PolicyException{
-//        createSupportingSignature(token);
-//    }
 }

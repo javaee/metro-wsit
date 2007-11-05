@@ -34,45 +34,15 @@
  * holder.
  */
 
-package com.sun.xml.ws.security.impl.policyconv;
+package com.sun.xml.ws.security.policy;
 
 import com.sun.xml.ws.policy.PolicyAssertion;
-import com.sun.xml.ws.policy.PolicyException;
-import com.sun.xml.ws.security.impl.policy.PolicyUtil;
-import com.sun.xml.ws.security.policy.Binding;
-import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
-import com.sun.xml.ws.security.policy.SignedSupportingTokens;
-import com.sun.xml.ws.security.policy.Token;
-import com.sun.xml.wss.impl.policy.mls.EncryptionPolicy;
-import com.sun.xml.wss.impl.policy.mls.SignaturePolicy;
-import com.sun.xml.wss.impl.policy.mls.SignatureTarget;
-import com.sun.xml.wss.impl.policy.mls.WSSPolicy;
-/**
- *
- * @author K.Venugopal@sun.com
- */
-public class SignedSupportingTokensProcessor extends SupportingTokensProcessor {
-    
-    /** Creates a new instance of SignedSupportingTokensProcessor */
-    public SignedSupportingTokensProcessor(SignedSupportingTokens st,TokenProcessor tokenProcessor,Binding binding,
-            XWSSPolicyContainer container,SignaturePolicy sp,EncryptionPolicy ep,PolicyID pid) {
-        super(st,tokenProcessor,binding,container,sp,ep,pid);
-    }
-    
-    protected void addToPrimarySignature(WSSPolicy policy,Token token) throws PolicyException{
-        SignatureTarget target = stc.newURISignatureTarget(policy.getUUID());
-        SecurityPolicyUtil.setName(target, policy);
+import java.util.Iterator;
 
-        SecurityPolicyVersion spVersion = SecurityPolicyUtil.getSPVersion((PolicyAssertion)token);
-
-        if(!PolicyUtil.isUsernameToken((PolicyAssertion) token, spVersion)){
-            stc.addSTRTransform(target);
-        }
-        SignaturePolicy.FeatureBinding spFB = (SignaturePolicy.FeatureBinding)signaturePolicy.getFeatureBinding();
-        spFB.addTargetBinding(target);
-    }
+public interface JMACAuthModuleConfiguration {
+   
+     public Iterator<? extends PolicyAssertion>  getAuthModules();
+     public String getOverrideDefaultTokenValidation();
+     public String getOverrideDefaultAuthModules();
     
-//    protected void collectSignaturePolicies(Token token) throws PolicyException{
-//        createSupportingSignature(token);
-//    }
 }

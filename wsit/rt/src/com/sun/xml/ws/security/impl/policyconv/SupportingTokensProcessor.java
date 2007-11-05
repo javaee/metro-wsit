@@ -121,7 +121,7 @@ public class SupportingTokensProcessor {
         
         while(tokens.hasNext()){
             Token token = (Token) tokens.next();
-            SecurityPolicyVersion spVersion = getSPVersion((PolicyAssertion)token);
+            SecurityPolicyVersion spVersion = SecurityPolicyUtil.getSPVersion((PolicyAssertion)token);
             WSSPolicy policy = tokenProcessor.getWSSToken(token);
             if ( policy.getUUID() != null ) {
                 
@@ -211,7 +211,7 @@ public class SupportingTokensProcessor {
     protected SignedParts getEmptySignedParts(Iterator itr){
         while(itr.hasNext()){
             Target target = (Target)itr.next();
-            SecurityPolicyVersion spVersion = getSPVersion((PolicyAssertion)target);
+            SecurityPolicyVersion spVersion = SecurityPolicyUtil.getSPVersion((PolicyAssertion)target);
             if(PolicyUtil.isSignedParts((PolicyAssertion)target, spVersion)){
                 if(SecurityPolicyUtil.isSignedPartsEmpty((SignedParts) target)){
                     return (SignedParts) target;
@@ -287,17 +287,6 @@ public class SupportingTokensProcessor {
             SignaturePolicy.FeatureBinding fb = (com.sun.xml.wss.impl.policy.mls.SignaturePolicy.FeatureBinding) sp.getFeatureBinding();
             fb.addTargetBinding(st);
         }
-    }
-    
-    protected SecurityPolicyVersion getSPVersion(PolicyAssertion pa){
-        String nsUri = pa.getName().getNamespaceURI();
-        // Default SPVersion
-        SecurityPolicyVersion spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
-        // If spec version, update
-        if(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(nsUri)){
-            spVersion = SecurityPolicyVersion.SECURITYPOLICY12NS;
-        }
-        return spVersion;
     }
     
     protected void correctSAMLBinding(WSSPolicy policy) {

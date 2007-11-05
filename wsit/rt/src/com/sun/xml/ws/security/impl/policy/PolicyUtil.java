@@ -1609,4 +1609,16 @@ public class PolicyUtil {
          String id= "uuid_" + uid.toString();
          return id;
     }
+    
+    public static SecurityPolicyVersion getSecurityPolicyVersion(String nsUri) {
+        SecurityPolicyVersion spVersion= null;
+         if(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri.equals(nsUri)){
+            spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
+        } else if(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(nsUri)){
+            spVersion = SecurityPolicyVersion.SECURITYPOLICY12NS;
+        } else if (SecurityPolicyVersion.SECURITYPOLICY200512.namespaceUri.equals(nsUri)) {
+            spVersion = SecurityPolicyVersion.SECURITYPOLICY200512;
+        }
+        return spVersion;
+    }
 }

@@ -83,11 +83,7 @@ public class SecureConversationToken extends PolicyAssertion implements com.sun.
         super(name,nestedAssertions,nestedAlternative);
         id= PolicyUtil.randomUUID();
         String nsUri = getName().getNamespaceURI();
-        if(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri.equals(nsUri)){
-            spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
-        } else if(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(nsUri)){
-            spVersion = SecurityPolicyVersion.SECURITYPOLICY12NS;
-        }
+        spVersion = PolicyUtil.getSecurityPolicyVersion(nsUri);
         itQname = new QName(spVersion.namespaceUri, Constants.IncludeToken);
         includeToken = spVersion.includeTokenAlways;
     }

@@ -64,7 +64,7 @@ public class SignedEndorsingSupportingTokensProcessor extends EndorsingSupportin
     protected void addToPrimarySignature(WSSPolicy policy,Token token) throws PolicyException{
         SignatureTarget target = stc.newURISignatureTarget(policy.getUUID());
         SecurityPolicyUtil.setName(target, policy);
-        SecurityPolicyVersion spVersion = getSPVersion((PolicyAssertion)token);
+        SecurityPolicyVersion spVersion = SecurityPolicyUtil.getSPVersion((PolicyAssertion)token);
         if(!PolicyUtil.isUsernameToken((PolicyAssertion) token, spVersion) && !PolicyUtil.isSecureConversationToken((PolicyAssertion)token, spVersion)){
             stc.addSTRTransform(target);
         }

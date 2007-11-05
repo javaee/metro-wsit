@@ -135,7 +135,7 @@ public class TokenProcessor {
     
     public void addKeyBinding(WSSPolicy policy, Token token,boolean ignoreDK) throws PolicyException{
         PolicyAssertion tokenAssertion = (PolicyAssertion)token;
-        SecurityPolicyVersion spVersion = getSPVersion(tokenAssertion);
+        SecurityPolicyVersion spVersion = SecurityPolicyUtil.getSPVersion(tokenAssertion);
         if(PolicyUtil.isX509Token(tokenAssertion, spVersion)){
             AuthenticationTokenPolicy.X509CertificateBinding x509CB =new AuthenticationTokenPolicy.X509CertificateBinding();
             //        (AuthenticationTokenPolicy.X509CertificateBinding)policy.newX509CertificateKeyBinding();
@@ -251,7 +251,7 @@ public class TokenProcessor {
     
     public WSSPolicy getWSSToken(Token token) throws PolicyException {
         //TODO: IncludeToken
-        SecurityPolicyVersion spVersion = getSPVersion((PolicyAssertion)token);
+        SecurityPolicyVersion spVersion = SecurityPolicyUtil.getSPVersion((PolicyAssertion)token);
         if(PolicyUtil.isUsernameToken((PolicyAssertion) token, spVersion)){
             AuthenticationTokenPolicy.UsernameTokenBinding key = null;
             key  =  new AuthenticationTokenPolicy.UsernameTokenBinding();
@@ -340,15 +340,5 @@ public class TokenProcessor {
         }
     }
     
-    private SecurityPolicyVersion getSPVersion(PolicyAssertion pa){
-        String nsUri = pa.getName().getNamespaceURI();
-        // Default SPVersion
-        SecurityPolicyVersion spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
-        // If spec version, update
-        if(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(nsUri)){
-            spVersion = SecurityPolicyVersion.SECURITYPOLICY12NS;
-        }
-        return spVersion;
-    }
     
 }

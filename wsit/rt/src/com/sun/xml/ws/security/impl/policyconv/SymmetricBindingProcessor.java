@@ -174,7 +174,7 @@ public class SymmetricBindingProcessor extends BindingProcessor{
         //skb.setKeyAlgorithm(_binding.getAlgorithmSuite().getSymmetricKeyAlgorithm());
         // policy.setKeyBinding(skb);
         PolicyAssertion tokenAssertion = (PolicyAssertion)token;
-        SecurityPolicyVersion spVersion = getSPVersion(tokenAssertion);
+        SecurityPolicyVersion spVersion = SecurityPolicyUtil.getSPVersion(tokenAssertion);
         if(PolicyUtil.isX509Token(tokenAssertion, spVersion)){
             AuthenticationTokenPolicy.X509CertificateBinding x509CB =new AuthenticationTokenPolicy.X509CertificateBinding();
             //        (AuthenticationTokenPolicy.X509CertificateBinding)policy.newX509CertificateKeyBinding();
@@ -284,14 +284,5 @@ public class SymmetricBindingProcessor extends BindingProcessor{
         }
     }
     
-    private SecurityPolicyVersion getSPVersion(PolicyAssertion pa){
-        String nsUri = pa.getName().getNamespaceURI();
-        // Default SPVersion
-        SecurityPolicyVersion spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
-        // If spec version, update
-        if(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(nsUri)){
-            spVersion = SecurityPolicyVersion.SECURITYPOLICY12NS;
-        }
-        return spVersion;
-    }
+    
 }

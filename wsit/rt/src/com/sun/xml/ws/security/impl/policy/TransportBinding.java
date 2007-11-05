@@ -71,11 +71,7 @@ public class TransportBinding extends PolicyAssertion implements com.sun.xml.ws.
     public TransportBinding(AssertionData name,Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) {
         super(name,nestedAssertions,nestedAlternative);
         String nsUri = getName().getNamespaceURI();
-        if(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri.equals(nsUri)){
-            spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
-        } else if(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(nsUri)){
-            spVersion = SecurityPolicyVersion.SECURITYPOLICY12NS;
-        }
+        spVersion = PolicyUtil.getSecurityPolicyVersion(nsUri);
     }
     
     public void addTransportToken(Token token) {

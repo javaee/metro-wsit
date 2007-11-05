@@ -173,7 +173,8 @@ public class WSITAuthConfigProvider implements AuthConfigProvider {
             
             if ((policy != null) && 
                     (policy.contains(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri) ||
-                        policy.contains(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri))) {
+                        policy.contains(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri)||
+                        policy.contains(SecurityPolicyVersion.SECURITYPOLICY200512.namespaceUri))) {
                 return true;
             }
             

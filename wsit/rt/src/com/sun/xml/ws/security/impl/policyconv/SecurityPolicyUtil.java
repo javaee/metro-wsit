@@ -36,6 +36,7 @@
 
 package com.sun.xml.ws.security.impl.policyconv;
 
+import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.wss.impl.PolicyTypeUtil;
 import com.sun.xml.wss.impl.policy.mls.SignaturePolicy;
 import com.sun.xml.wss.impl.policy.mls.Target;
@@ -47,7 +48,9 @@ import com.sun.xml.ws.security.policy.SignedParts;
 import com.sun.xml.ws.security.policy.Token;
 import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.ws.security.impl.policy.Constants;
+import com.sun.xml.ws.security.impl.policy.PolicyUtil;
 import com.sun.xml.ws.security.policy.AlgorithmSuite;
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 
 /**
  *
@@ -126,5 +129,11 @@ public class SecurityPolicyUtil {
         } else if(algorithmSuite != null && algorithmSuite.getAdditionalProps().contains(Constants.ExclusiveC14NWithCommentsForCm)){
             spFB.setCanonicalizationAlgorithm(CanonicalizationMethod.EXCLUSIVE_WITH_COMMENTS);
         }
+    }
+    
+    public static SecurityPolicyVersion getSPVersion(PolicyAssertion pa){
+        String nsUri = pa.getName().getNamespaceURI();
+        SecurityPolicyVersion spVersion = PolicyUtil.getSecurityPolicyVersion(nsUri);
+        return spVersion;
     }
 }

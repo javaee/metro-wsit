@@ -561,7 +561,8 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
                 
                 if ((policy != null) &&
                         (policy.contains(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri) ||
-                        policy.contains(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri))) {
+                        policy.contains(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri)||
+                        policy.contains(SecurityPolicyVersion.SECURITYPOLICY200512.namespaceUri))) {
                     return true;
                 }
                 

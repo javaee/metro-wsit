@@ -77,11 +77,7 @@ public class HttpsToken extends PolicyAssertion implements com.sun.xml.ws.securi
         super(name,nestedAssertions,nestedAlternative);
         id= PolicyUtil.randomUUID();
         String nsUri = getName().getNamespaceURI();
-        if(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri.equals(nsUri)){
-            spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
-        } else if(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(nsUri)){
-            spVersion = SecurityPolicyVersion.SECURITYPOLICY12NS;
-        }
+        spVersion = PolicyUtil.getSecurityPolicyVersion(nsUri);
         rccQname = new QName(spVersion.namespaceUri, Constants.RequireClientCertificate);
     }
     

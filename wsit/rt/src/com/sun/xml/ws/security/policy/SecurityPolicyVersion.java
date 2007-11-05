@@ -42,6 +42,7 @@ package com.sun.xml.ws.security.policy;
  */
 public enum SecurityPolicyVersion {
     
+    
     SECURITYPOLICY200507("http://schemas.xmlsoap.org/ws/2005/07/securitypolicy",
                          "http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/Once",
                          "http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/Never",
@@ -104,7 +105,40 @@ public enum SecurityPolicyVersion {
         public String getIncludeTokenAlways() {
             return includeTokenAlways;
         }
+    },
+    
+    SECURITYPOLICY200512("http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200512",
+                       "http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200512/IncludeToken/Once",
+                       "http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200512/IncludeToken/Never",
+                       "http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200512/IncludeToken/AlwaysToRecipient",
+                       "http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200512/IncludeToken/Always"){
+        
+        @Override
+        public String getNamespaceURI() {
+            return namespaceUri;
+        }
+
+        @Override
+        public String getIncludeTokenOnce() {
+            return includeTokenOnce;
+        }
+
+        @Override
+        public String getIncludeTokenNever() {
+            return includeTokenNever;
+        }
+
+        @Override
+        public String getIncludeTokenAlwaysToRecipient() {
+            return includeTokenAlwaysToRecipient;
+        }
+
+        @Override
+        public String getIncludeTokenAlways() {
+            return includeTokenAlways;
+        }
     };
+    
     
     public final String namespaceUri;
     
