@@ -177,6 +177,12 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             } else {
                 p = context.createTransportPipe();
             }
+            
+            MessageDumpingFeature msgDumper = context.getBinding().getFeature(MessageDumpingFeature.class);
+            if (msgDumper != null) {
+                p = PipeAdapter.adapt(msgDumper.createMessageDumpingTube(PipeAdapter.adapt(p)));
+            }
+            
             p = dump(context, CLIENT_PREFIX, p);
             p = dumpAction(CLIENT_PREFIX + ACTION_SUFFIX, context.getBinding(), p);
             p = dump(context, CLIENT_PREFIX + TRANSPORT_SUFFIX, p);
