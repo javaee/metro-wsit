@@ -39,7 +39,9 @@ package com.sun.xml.ws.security.impl.policyconv;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.security.policy.Binding;
 import com.sun.xml.ws.security.policy.EndorsingSupportingTokens;
+import com.sun.xml.ws.security.policy.SignedElements;
 import com.sun.xml.ws.security.policy.SignedEndorsingSupportingTokens;
+import com.sun.xml.ws.security.policy.SignedParts;
 import com.sun.xml.ws.security.policy.SignedSupportingTokens;
 import com.sun.xml.ws.security.policy.SupportingTokens;
 import com.sun.xml.ws.security.policy.Token;
@@ -51,7 +53,6 @@ import com.sun.xml.wss.impl.policy.mls.SignatureTarget;
 import com.sun.xml.wss.impl.policy.mls.TimestampPolicy;
 import com.sun.xml.wss.impl.policy.mls.WSSPolicy;
 import java.util.Iterator;
-import javax.xml.crypto.dsig.CanonicalizationMethod;
 
 /**
  *
@@ -60,6 +61,9 @@ import javax.xml.crypto.dsig.CanonicalizationMethod;
 public class TransportBindingProcessor extends BindingProcessor {
     private TransportBinding binding = null;
     private TimestampPolicy tp = null;
+    private boolean buildSP = false;
+    private boolean buildEP = false;    
+    
     /** Creates a new instance of TransportBindingProcessor */
     public TransportBindingProcessor(TransportBinding binding,boolean isServer,boolean isIncoming,XWSSPolicyContainer container){
         this.binding = binding;
@@ -67,8 +71,8 @@ public class TransportBindingProcessor extends BindingProcessor {
         this.isIncoming = isIncoming;
         this.isServer = isServer;
         iAP = new IntegrityAssertionProcessor(binding.getAlgorithmSuite(),false);
-        eAP = new EncryptionAssertionProcessor(binding.getAlgorithmSuite(),false);
-        this.tokenProcessor  = new TokenProcessor(isServer,isIncoming,pid);
+        eAP = new EncryptionAssertionProcessor(binding.getAlgorithmSuite(),false);        
+        this.tokenProcessor  = new TokenProcessor(isServer,isIncoming,pid);        
     }
     
     public void process() throws PolicyException{
@@ -103,28 +107,41 @@ public class TransportBindingProcessor extends BindingProcessor {
     }
     
     public void processSupportingTokens(EndorsingSupportingTokens est) throws PolicyException{
-        Iterator itr = est.getTokens();
+        Iterator itr = est.getTokens();        
+        if(est.getSignedElements().hasNext() || est.getSignedParts().hasNext()){
+            buildSP = true;
+        }
         while(itr.hasNext()){
             Token token = (Token) itr.next();
-            SignaturePolicy sp = new SignaturePolicy();
+            SignaturePolicy sp = new SignaturePolicy();            
             SignaturePolicy.FeatureBinding spFB = (com.sun.xml.wss.impl.policy.mls.SignaturePolicy.FeatureBinding)sp.getFeatureBinding();
             //spFB.setCanonicalizationAlgorithm(CanonicalizationMethod.EXCLUSIVE);
             SecurityPolicyUtil.setCanonicalizationMethod(spFB, binding.getAlgorithmSuite());
             sp.setUUID(pid.generateID());
-            tokenProcessor.addKeyBinding(sp, token,false);
+            tokenProcessor.addKeyBinding(sp, token,false);            
            // container.insert(sp.getKeyBinding());
-
+            
             if(tp != null ){
                 SignatureTarget target = iAP.getTargetCreator().newURISignatureTarget(tp.getUUID());
                 SecurityPolicyUtil.setName(target, tp);
                 // there is no primary signature in Transport Binding
                 //spFB.isEndorsingSignature(true);
-                spFB.addTargetBinding(target);
-                
-                container.insert(sp);
+                spFB.addTargetBinding(target);                                
             }
-           
-        }
+            if(buildSP){                
+                Iterator<SignedParts>itr_sp = est.getSignedParts();
+                while(itr_sp.hasNext()){
+                    SignedParts target = itr_sp.next();
+                    iAP.process(target,spFB);
+                }
+                Iterator<SignedElements> itr_se = est.getSignedElements();
+                while(itr_se.hasNext()){
+                    SignedElements target = itr_se.next();
+                    iAP.process(target,spFB);
+                }                
+            }            
+            container.insert(sp);            
+        }                
     }
     
     public void processSupportingTokens(SignedEndorsingSupportingTokens set) throws PolicyException{
@@ -157,9 +174,9 @@ public class TransportBindingProcessor extends BindingProcessor {
     
     protected Binding getBinding() {
         return binding;
-    }
+    }        
     
     protected void close(){
       
-    }
+    }         
 }

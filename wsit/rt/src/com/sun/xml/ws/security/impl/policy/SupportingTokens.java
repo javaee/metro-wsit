@@ -147,6 +147,29 @@ public class SupportingTokens extends PolicyAssertion implements com.sun.xml.ws.
                     }
                 }
             }
+            Iterator<PolicyAssertion> parameterAssertion = this.getParametersIterator();
+            while(parameterAssertion.hasNext()){
+                PolicyAssertion assertion = parameterAssertion.next();
+                if(PolicyUtil.isSignedParts(assertion, spVersion)){
+                    spList.add((SignedParts) assertion);
+                }else if(PolicyUtil.isSignedElements(assertion, spVersion)){
+                    seList.add((SignedElements)assertion);
+                }else if(PolicyUtil.isEncryptParts(assertion, spVersion)){
+                    epList.add((EncryptedParts)assertion);
+                }else if(PolicyUtil.isEncryptedElements(assertion, spVersion)){
+                    eeList.add((EncryptedElements)assertion);
+                }else{
+                    if(!assertion.isOptional()){
+                        if(logger.getLevel() == Level.SEVERE){
+                            logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"SupportingTokens"});
+                        }
+                        if(isServer){
+                            throw new UnsupportedPolicyAssertion("Policy assertion "+
+                                    assertion+" is not supported under SupportingTokens assertion");
+                        }
+                    }
+                }
+            }
             populated = true;
         }
     }
