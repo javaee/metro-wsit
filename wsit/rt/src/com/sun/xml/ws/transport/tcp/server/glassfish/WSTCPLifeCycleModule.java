@@ -92,6 +92,7 @@ public final class WSTCPLifeCycleModule implements LifecycleListener {
         } else if (eventType == LifecycleEvent.READY_EVENT) {
             logger.log(Level.FINE, "WSTCPLifeCycleModule.READY_EVENT");
             try {
+                AppServWSRegistry.getInstance();
                 delegate.setCustomWSRegistry(WSTCPAdapterRegistryImpl.getInstance());
                 connector = new GrizzlyTCPConnector(delegate, properties);
                 connector.listen();

@@ -56,17 +56,14 @@ public final class TCP109Adapter extends TCPAdapter {
      */
     private final ServletFakeArtifactSet servletFakeArtifactSet;
     private final boolean isEJB;
-    private final String contextRoot;
     
     public TCP109Adapter(
             @NotNull final String name,
-    @NotNull final String contextRoot,
     @NotNull final String urlPattern,
     @NotNull final WSEndpoint endpoint,
     @NotNull final ServletFakeArtifactSet servletFakeArtifactSet,
     final boolean isEJB) {
         super(name, urlPattern, endpoint);
-        this.contextRoot = contextRoot;
         this.servletFakeArtifactSet = servletFakeArtifactSet;
         this.isEJB = isEJB;
     }
@@ -78,7 +75,7 @@ public final class TCP109Adapter extends TCPAdapter {
         
         if (isEJB) {
             ejbRuntimeEndpointInfo = AppServWSRegistry.getInstance().
-                    getEjbRuntimeEndpointInfo(contextRoot, getValidPath());
+                    getEjbRuntimeEndpointInfo(getValidPath());
             try {
                 ejbRuntimeEndpointInfo.prepareInvocation(true);
             } catch (Exception e) {

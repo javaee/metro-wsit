@@ -45,9 +45,7 @@ import com.sun.enterprise.webservice.monitoring.WebServiceEngine;
 import com.sun.enterprise.webservice.monitoring.Endpoint;
 import com.sun.enterprise.deployment.WebServiceEndpoint;
 import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -60,14 +58,11 @@ public final class AppServWSRegistry {
     
     private static final AppServWSRegistry instance = new AppServWSRegistry();
     
-    private final Map<String, Map<String, WSEndpointDescriptor>> registry;
-    
     public static AppServWSRegistry getInstance() {
         return instance;
     }
     
     private AppServWSRegistry() {
-        registry = new HashMap<String, Map<String, WSEndpointDescriptor>>();
         final WSEndpointLifeCycleListener lifecycleListener = new WSEndpointLifeCycleListener();
         
         final WebServiceEngine engine = WebServiceEngineFactory.getInstance().getEngine();
@@ -87,24 +82,12 @@ public final class AppServWSRegistry {
     }
     
     /**
-     * Lookup endpoint's decriptor in registry
-     */
-    public @Nullable WSEndpointDescriptor get(@NotNull final String wsServiceName, @NotNull final String endpointName) {
-        final Map<String, WSEndpointDescriptor> endpointMap = registry.get(wsServiceName);
-        if (endpointMap != null) {
-            return endpointMap.get(endpointName);
-        }
-        
-        return null;
-    }
-    
-    /**
      * Method is used by WS invoker to clear some EJB invoker state ???
      */
-    public @NotNull EjbRuntimeEndpointInfo getEjbRuntimeEndpointInfo(@NotNull final String service,
-            @NotNull final String endpointName) {
+    public @NotNull EjbRuntimeEndpointInfo getEjbRuntimeEndpointInfo(@NotNull final String wsPath) {
         
-        final WSEndpointDescriptor wsEndpointDescriptor = get(service, endpointName);
+        final WSEndpointDescriptor wsEndpointDescriptor = 
+                WSTCPAdapterRegistryImpl.getInstance().lookupEndpoint(wsPath);
         EjbRuntimeEndpointInfo endpointInfo = null;
         
         if (wsEndpointDescriptor.isEJB()) {
@@ -124,22 +107,17 @@ public final class AppServWSRegistry {
         if(wsServiceDescriptor != null && isTCPEnabled(wsServiceDescriptor)) {
             final String contextRoot = getEndpointContextRoot(wsServiceDescriptor);
             final String urlPattern = getEndpointUrlPattern(wsServiceDescriptor);
+            final String wsPath = getWebServiceEndpointPath(wsServiceDescriptor);
             
-            // ContextRoot could be represented as leading slash or without (GF API changes from time to time)
-            // So we use slashed version for registries
-            final String slashedContextRoot = ensureSlash(contextRoot);
-            final String slashedUrlPattern = ensureSlash(urlPattern);
-            
-            final String path = slashedContextRoot + slashedUrlPattern;
             if (logger.isLoggable(Level.FINE)) {
                 logger.log(Level.FINE, MessagesMessages.WSTCP_1110_APP_SERV_REG_REGISTER_ENDPOINT(
-                        wsServiceDescriptor.getServiceName(), path, wsServiceDescriptor.implementedByEjbComponent()));
+                        wsServiceDescriptor.getServiceName(), wsPath, wsServiceDescriptor.implementedByEjbComponent()));
             }
             final WSEndpointDescriptor descriptor = new WSEndpointDescriptor(wsServiceDescriptor,
                     contextRoot,
                     urlPattern,
                     endpoint.getEndpointSelector());
-            addToRegistry(slashedContextRoot, slashedUrlPattern, descriptor);
+            WSTCPAdapterRegistryImpl.getInstance().registerEndpoint(wsPath, descriptor);
         }
     }
     
@@ -148,50 +126,32 @@ public final class AppServWSRegistry {
      */
     protected void deregisterEndpoint(@NotNull final Endpoint endpoint) {
         final WebServiceEndpoint wsServiceDescriptor = endpoint.getDescriptor();
-        final String contextRoot = getEndpointContextRoot(wsServiceDescriptor);
-        final String urlPattern = getEndpointUrlPattern(wsServiceDescriptor);
-        
-        // ContextRoot could be represented as leading slash or without (GF API changes from time to time)
-        // So we use slashed version for registries
-        final String slashedContextRoot = ensureSlash(contextRoot);
-        final String slashedUrlPattern = ensureSlash(urlPattern);
-
-        final String path = slashedContextRoot + slashedUrlPattern;
+        final String wsPath = getWebServiceEndpointPath(wsServiceDescriptor);
         
         if (logger.isLoggable(Level.FINE)) {
             logger.log(Level.FINE, MessagesMessages.WSTCP_1111_APP_SERV_REG_DEREGISTER_ENDPOINT(
                     wsServiceDescriptor.getWebService().getName(),
-                    path, wsServiceDescriptor.implementedByEjbComponent()));
+                    wsPath, wsServiceDescriptor.implementedByEjbComponent()));
         }
-        removeFromRegistry(slashedContextRoot, slashedUrlPattern);
-        WSTCPAdapterRegistryImpl.getInstance().deleteTargetFor(path);
+        WSTCPAdapterRegistryImpl.getInstance().deregisterEndpoint(wsPath);
     }
     
-    private void addToRegistry(@NotNull String contextRoot,
-            @NotNull String urlPattern,
-    @NotNull final WSEndpointDescriptor wsDescriptor) {
-        
-        contextRoot = ensureSlash(contextRoot);
-        urlPattern = ensureSlash(urlPattern);
-        Map<String, WSEndpointDescriptor> endpointMap = registry.get(contextRoot);
-        if (endpointMap == null) {
-            endpointMap = new HashMap<String, WSEndpointDescriptor>();
-            registry.put(contextRoot, endpointMap);
+    private @NotNull String getWebServiceEndpointPath(@NotNull final WebServiceEndpoint wsServiceDescriptor) {
+        String wsPath;
+        if(!wsServiceDescriptor.implementedByEjbComponent()) {
+            String contextRoot = wsServiceDescriptor.getWebComponentImpl().
+                    getWebBundleDescriptor().getContextRoot();
+            String urlPattern = wsServiceDescriptor.getEndpointAddressUri();
+            wsPath = contextRoot + ensureSlash(urlPattern);
+            logger.log(Level.FINE, MessagesMessages.WSTCP_1116_APP_SERV_REG_GET_WS_ENDP_PATH_NON_EJB(wsPath));
+        } else {
+            wsPath = wsServiceDescriptor.getEndpointAddressUri();
+            logger.log(Level.FINE, MessagesMessages.WSTCP_1117_APP_SERV_REG_GET_WS_ENDP_PATH_EJB(wsPath));
         }
         
-        endpointMap.put(urlPattern, wsDescriptor);
+        return ensureSlash(wsPath);
     }
-    
-    private WSEndpointDescriptor removeFromRegistry(@NotNull final String wsServiceName,
-            @NotNull final String endpointName) {
-        final Map<String, WSEndpointDescriptor> endpointMap = registry.get(wsServiceName);
-        if (endpointMap != null) {
-            return endpointMap.remove(endpointName);
-        }
-        
-        return null;
-    }
-        
+
     private @NotNull String getEndpointContextRoot(@NotNull final WebServiceEndpoint wsServiceDescriptor) {
         String contextRoot;
         if(!wsServiceDescriptor.implementedByEjbComponent()) {

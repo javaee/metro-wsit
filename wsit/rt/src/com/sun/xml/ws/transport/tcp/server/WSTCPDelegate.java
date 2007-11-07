@@ -137,7 +137,10 @@ public final class WSTCPDelegate implements WSTCPAdapterRegistry, TCPMessageList
         }
         
         if (result ==  null && customWSRegistry != null) {
-            logger.log(Level.FINE, MessagesMessages.WSTCP_1102_WSTCP_DELEGATE_GOING_TO_CUSTOM_REG(tcpURI));
+            if (logger.isLoggable(Level.FINE)) {
+                logger.log(Level.FINE, MessagesMessages.WSTCP_1102_WSTCP_DELEGATE_GOING_TO_CUSTOM_REG(tcpURI));
+            }
+            
             return customWSRegistry.getTarget(tcpURI);
         }
         
