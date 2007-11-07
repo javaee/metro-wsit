@@ -4,12 +4,7 @@
 // Any modifications to this file will be lost upon recompilation of the source schema. 
 // Generated on: 2007.07.10 at 02:10:42 PM PDT 
 //
-
-
 package com.sun.xml.ws.rm.v200702;
-
-
-import org.w3c.dom.Element;
 
 import javax.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
@@ -18,7 +13,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 
 /**
  * <p>Java class for OfferType complex type.
@@ -45,13 +39,13 @@ import java.util.Map;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "OfferType", propOrder = {
-    "identifier",
-    "endpoint",
-    "expires",
-    "incompleteSequenceBehavior",
-    "any"
+"identifier",
+"endpoint",
+"expires",
+"incompleteSequenceBehavior",
+"any"
 })
-public class OfferType  {
+public class OfferType {
 
     @XmlElement(name = "Identifier", required = true)
     protected Identifier identifier;
@@ -135,7 +129,7 @@ public class OfferType  {
      *     
      */
     public void setExpires(Expires value) {
-        this.expires = (Expires)value;
+        this.expires = (Expires) value;
     }
 
     /**
@@ -209,5 +203,4 @@ public class OfferType  {
     public Map<QName, String> getOtherAttributes() {
         return otherAttributes;
     }
-
 }

@@ -68,25 +68,21 @@ import java.net.URI;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 /**
  * ClientOutboundSequence represents the set of all messages from a single BindingProvider instance.
  * It includes methods that connect and disconnect to a remote RMDestination using
  * a client for a WebService that uses CreateSequence and TerminateSequence as its request messages.
  */
-
-public class ClientOutboundSequence extends OutboundSequence
-                                    implements ClientSequence {
+public class ClientOutboundSequence extends OutboundSequence implements ClientSequence {
 
     private static final Logger logger =
-        Logger.getLogger(LoggingHelper.getLoggerName(ClientOutboundSequence.class));
-
+            Logger.getLogger(LoggingHelper.getLoggerName(ClientOutboundSequence.class));
     /**
      * Current value of receive buffer read from incoming SequenceAcknowledgement
      * messages if RM Destination implements properietary Indigo Flow Control feature.
      */
     protected int receiveBufferSize;
-
-
     /**
      * The helper class used to send protocol messages
      * <code>CreateSequenceElement</code>
@@ -95,58 +91,42 @@ public class ClientOutboundSequence extends OutboundSequence
      * <code>AckRequestedElement</code>
      *
      */
-    protected ProtocolMessageSender protocolMessageSender ;
-
-
-    private SOAPVersion version ;
-
+    protected ProtocolMessageSender protocolMessageSender;
+    private SOAPVersion version;
     /**
      * Flag to indicate if secureReliableMessaging is on
      */
     private boolean secureReliableMessaging;
-
-
-
     /**
      * The SecurityTokenReference to pass to CreateSequence
      */
     private JAXBElement<SecurityTokenReferenceType> str = null;
-
-
     /**
      * Indicates whether the sequence uses anonymous acksTo
      */
     private boolean isAnonymous = false;
-
-
     /*
      * Flag which indicates whether sequence is active (disconnect() has not
      * been called.
      */
     private boolean isActive = true;
-
     /**
      * Time after which resend of messages in sequences is attempted at
      * next opportunity.
      */
     private long resendDeadline;
-
     /**
      * Time after which Ack is requested at next opportunity.
      */
     private long ackRequestDeadline;
-    
     /**
      * Can be registered to listen for sequence acknowledgements.
      */
     private AcknowledgementListener ackListener;
-    
     /**
      * Service using this sequence (if known)
      */
     private Service service;
-
-
     /**
      * This field is used only as a hack to test Server-side
      * timeout functionality.  It is not intended to be used
@@ -154,7 +134,6 @@ public class ClientOutboundSequence extends OutboundSequence
      */
     private static boolean sendHeartbeats = true;
 
-    
     public ClientOutboundSequence(SequenceConfig config) {
         this.config = config;
 
@@ -171,6 +150,7 @@ public class ClientOutboundSequence extends OutboundSequence
      *
      * @return The value of the field.
      */
+    @Override
     public SequenceConfig getSequenceConfig() {
         return config;
     }
@@ -203,23 +183,21 @@ public class ClientOutboundSequence extends OutboundSequence
      * the limit, resends and ackRequests occur more frequently.
      */
     public int getTransferWindowSize() {
-       //Use server size receive buffer size for now.  Might
-       //want to make this configurable.
-       return config.getBufferSize();
+        //Use server size receive buffer size for now.  Might
+        //want to make this configurable.
+        return config.getBufferSize();
     }
-    
+
     /**
      * Registers a <code>AcknowledgementListener</code> for this
      * sequence
      *
      * @param listener The <code>AcknowledgementListener</code>
      */
-  
     public void setAcknowledgementListener(AcknowledgementListener listener) {
         this.ackListener = listener;
     }
-    
-   
+
     /**
      * Implementation of the getSequenceSettings method in
      * com.sun.xml.ws.rm.api.client.ClientSequence.  Need
@@ -228,18 +206,16 @@ public class ClientOutboundSequence extends OutboundSequence
      * SequenceConfig object.
      */
     public SequenceSettings getSequenceSettings() {
-        
+
         SequenceSettings settings = getSequenceConfig();
         settings.sequenceId = getId();
-        
+
         InboundSequence iseq = getInboundSequence();
-        
-        settings.companionSequenceId = (iseq != null) ?
-                                       iseq.getId() :
-                                       null;
+
+        settings.companionSequenceId = (iseq != null) ? iseq.getId() : null;
         return settings;
     }
-    
+
     /**
      * Accessor for the AcknowledgementListener field.
      *
@@ -252,7 +228,7 @@ public class ClientOutboundSequence extends OutboundSequence
     public void setSecureReliableMessaging(boolean secureReliableMessaging) {
         this.secureReliableMessaging = secureReliableMessaging;
     }
-    
+
     /**
      * Accessor for the service field.
      *
@@ -261,7 +237,7 @@ public class ClientOutboundSequence extends OutboundSequence
     public Service getService() {
         return service;
     }
-    
+
     /**
      * Sets the value of the service field.
      *
@@ -280,11 +256,8 @@ public class ClientOutboundSequence extends OutboundSequence
      *          use of the WS-Addressing anonymous EPR
      * @throws RMException wrapper for all exceptions thrown during execution of method.
      */
-    public void connect(URI destination,
-                        URI acksTo,
-                        boolean twoWay) throws RMException {
+    public void connect(URI destination, URI acksTo, boolean twoWay) throws RMException {
         try {
-
             this.destination = destination;
             this.acksTo = acksTo;
 
@@ -295,16 +268,15 @@ public class ClientOutboundSequence extends OutboundSequence
                 acksToString = anonymous;
             } else {
                 acksToString = acksTo.toString();
-
             }
 
             this.isAnonymous = acksToString.equals(anonymous);
 
-             AbstractCreateSequence cs = null;
-            if (config.getRMVersion()== RMVersion.WSRM10) {
-                cs = new com.sun.xml.ws.rm.v200502.CreateSequenceElement( );
-            } else  {
-                cs = new com.sun.xml.ws.rm.v200702.CreateSequenceElement();
+            AbstractCreateSequence createSequence = null;
+            if (config.getRMVersion() == RMVersion.WSRM10) {
+                createSequence = new com.sun.xml.ws.rm.v200502.CreateSequenceElement();
+            } else {
+                createSequence = new com.sun.xml.ws.rm.v200702.CreateSequenceElement();
             }
 
 //            CreateSequenceElement cs = new CreateSequenceElement();
@@ -315,103 +287,95 @@ public class ClientOutboundSequence extends OutboundSequence
              * problems fixed
              */
             /*if (RMConstants.getAddressingVersion() == AddressingVersion.W3C){
-                cs.setAcksTo(new W3CAcksToImpl(new URI(acksToString)));
+            cs.setAcksTo(new W3CAcksToImpl(new URI(acksToString)));
             }    else {
-                cs.setAcksTo(new MemberSubmissionAcksToImpl(new URI(acksToString)));
-                
+            cs.setAcksTo(new MemberSubmissionAcksToImpl(new URI(acksToString)));
             }*/
-            W3CEndpointReference endpointReference = null;
+            W3CEndpointReference sourceEndpointReference = null;
             AddressingVersion addressingVersion = rmConstants.getAddressingVersion();
-            if ( addressingVersion == AddressingVersion.W3C){
-                  //WSEndpointReference wsepr = new WSEndpointReference(getClass().getResourceAsStream("w3c-anonymous-acksTo.xml"), addressingVersion);
-                  WSEndpointReference epr = AddressingVersion.W3C.anonymousEpr;
-                  Source s = epr.asSource("AcksTo");
-                  endpointReference = new W3CEndpointReference(s);
+            if (addressingVersion == AddressingVersion.W3C) {
+                //WSEndpointReference wsepr = new WSEndpointReference(getClass().getResourceAsStream("w3c-anonymous-acksTo.xml"), addressingVersion);
+                WSEndpointReference epr = AddressingVersion.W3C.anonymousEpr;
+                Source source = epr.asSource("AcksTo");
+                sourceEndpointReference = new W3CEndpointReference(source);
             }/*else {
-                  WSEndpointReference wsepr = new WSEndpointReference(getClass().getResourceAsStream("member-anonymous-acksTo.xml"), addressingVersion);
-                  Source s = wsepr.asSource("AcksTo");
-                  endpointReference = new MemberSubmissionEndpointReference(s);
+            WSEndpointReference wsepr = new WSEndpointReference(getClass().getResourceAsStream("member-anonymous-acksTo.xml"), addressingVersion);
+            Source s = wsepr.asSource("AcksTo");
+            endpointReference = new MemberSubmissionEndpointReference(s);
             }*/
-            cs.setAcksTo(endpointReference);
+            createSequence.setAcksTo(sourceEndpointReference);
 
             String incomingID = "uuid:" + UUID.randomUUID();
-
             if (twoWay) {
+                if (config.getRMVersion() == RMVersion.WSRM10) {
+                    com.sun.xml.ws.rm.v200502.Identifier offerIdentifier = new com.sun.xml.ws.rm.v200502.Identifier();
+                    com.sun.xml.ws.rm.v200502.OfferType offer = new com.sun.xml.ws.rm.v200502.OfferType();
+                    offerIdentifier.setValue(incomingID);
+                    offer.setIdentifier(offerIdentifier);
+                    ((com.sun.xml.ws.rm.v200502.CreateSequenceElement) createSequence).setOffer(offer);
+                } else {
+                    com.sun.xml.ws.rm.v200702.Identifier offerIdentifier = new com.sun.xml.ws.rm.v200702.Identifier();
+                    offerIdentifier.setValue(incomingID);
 
-
-                if (config.getRMVersion() == RMVersion.WSRM10)   {
-                    com.sun.xml.ws.rm.v200502.Identifier id = new com.sun.xml.ws.rm.v200502.Identifier();
-                    com.sun.xml.ws.rm.v200502.OfferType offer = new  com.sun.xml.ws.rm.v200502.OfferType();
-                    id.setValue(incomingID);
-                    offer.setIdentifier(id);
-                    ((com.sun.xml.ws.rm.v200502.CreateSequenceElement)cs).setOffer(offer);
-                }  else {
-                    com.sun.xml.ws.rm.v200702.Identifier id = new com.sun.xml.ws.rm.v200702.Identifier();
-                    com.sun.xml.ws.rm.v200702.OfferType offer = new  com.sun.xml.ws.rm.v200702.OfferType();
-                    id.setValue(incomingID);
-                    offer.setIdentifier(id);
-                    ((com.sun.xml.ws.rm.v200702.CreateSequenceElement)cs).setOffer(offer);
+                    com.sun.xml.ws.rm.v200702.OfferType offer = new com.sun.xml.ws.rm.v200702.OfferType();
+                    offer.setIdentifier(offerIdentifier);
+                    // Microsoft does not accept CreateSequence messages if AcksTo and Offer/Endpoint are not the same
+//                    WSEndpointReference destinationEPR = new WSEndpointReference(destination, addressingVersion);
+//                    offer.setEndpoint(destinationEPR.toSpec());
+                    offer.setEndpoint(sourceEndpointReference);
+                    ((com.sun.xml.ws.rm.v200702.CreateSequenceElement) createSequence).setOffer(offer);
                 }
-
             }
 
             if (secureReliableMessaging) {
-                JAXBElement<SecurityTokenReferenceType> str = getSecurityTokenReference();
-                if (str != null) {
-                    cs.setSecurityTokenReference(str.getValue());
-                }   else {
+                JAXBElement<SecurityTokenReferenceType> securityTokenReference = getSecurityTokenReference();
+                if (securityTokenReference != null) {
+                    createSequence.setSecurityTokenReference(securityTokenReference.getValue());
+                } else {
                     throw new RMException("SecurityTokenReference is null");
                 }
             }
 
-            AbstractCreateSequenceResponse csr = protocolMessageSender.sendCreateSequence(cs,destination,
-                    acksTo,version);
-           
+            AbstractCreateSequenceResponse csr = protocolMessageSender.sendCreateSequence(createSequence, destination, acksTo, version);
+
             AbstractAcceptType accept = null;
-            if (csr != null ) {
-                if (csr instanceof com.sun.xml.ws.rm.v200502.CreateSequenceResponseElement ) {
-                    Identifier idOutbound = ((com.sun.xml.ws.rm.v200502.CreateSequenceResponseElement)csr).getIdentifier();
+            if (csr != null) {
+                if (csr instanceof com.sun.xml.ws.rm.v200502.CreateSequenceResponseElement) {
+                    Identifier idOutbound = ((com.sun.xml.ws.rm.v200502.CreateSequenceResponseElement) csr).getIdentifier();
                     this.id = idOutbound.getValue();
 
-                    accept = ((com.sun.xml.ws.rm.v200502.CreateSequenceResponseElement)csr).getAccept();
-                }   else {
-                    com.sun.xml.ws.rm.v200702.Identifier idOutbound = ((com.sun.xml.ws.rm.v200702.CreateSequenceResponseElement)csr).getIdentifier();
+                    accept = ((com.sun.xml.ws.rm.v200502.CreateSequenceResponseElement) csr).getAccept();
+                } else {
+                    com.sun.xml.ws.rm.v200702.Identifier idOutbound = ((com.sun.xml.ws.rm.v200702.CreateSequenceResponseElement) csr).getIdentifier();
                     this.id = idOutbound.getValue();
 
-                    accept = ((com.sun.xml.ws.rm.v200702.CreateSequenceResponseElement)csr).getAccept();
-
+                    accept = ((com.sun.xml.ws.rm.v200702.CreateSequenceResponseElement) csr).getAccept();
                 }
 
-                
                 if (accept != null) {
                     /**
                      * ADDRESSING_FIXME Needs to be fixes once
                      * AcksTO issue is resolved
                      */
-                   /* URI uriAccept = accept.getAcksTo();*/
-                   URI uriAccept = null;
+                    /* URI uriAccept = accept.getAcksTo();*/
+                    URI uriAccept = null;
 
-                    inboundSequence = new ClientInboundSequence(this,
-                            incomingID,
-                            uriAccept,config);
+                    inboundSequence = new ClientInboundSequence(this, incomingID, uriAccept, config);
                 } else {
-                    inboundSequence = new ClientInboundSequence(this,
-                            incomingID, null,config);
+                    inboundSequence = new ClientInboundSequence(this, incomingID, null, config);
                 }
-                
+
                 //start the inactivity clock
                 resetLastActivityTime();
-
             } else {
-                //maybe a non-anonymous AcksTo
-                //Handle CreateSequenceRefused fault
+            //maybe a non-anonymous AcksTo
+            //Handle CreateSequenceRefused fault
             }
         } catch (Exception e) {
             throw new RMException(e);
         }
     }
 
-   
     /**
      * Disconnect from the RMDestination by invoking <code>TerminateSequence</code> on
      * the proxy stored in the <code>port</code> field. State of 
@@ -422,7 +386,6 @@ public class ClientOutboundSequence extends OutboundSequence
     public void disconnect() throws RMException {
         disconnect(false);
     }
-
 
     /**
      * Disconnect from the RMDestination by invoking <code>TerminateSequence</code> on
@@ -440,9 +403,9 @@ public class ClientOutboundSequence extends OutboundSequence
         if (inboundSequence == null) {
             throw new IllegalStateException("Not connected.");
         }
-        
+
         isActive = keepAlive;
- 
+
         //TODO 
         //Move this after waitForAcks to obviate  problems caused by
         //the LastMessage Protocol message being processed concurrently with
@@ -450,38 +413,38 @@ public class ClientOutboundSequence extends OutboundSequence
         //Glassfish container with ordered delivery configured.  This will
         //probably no longer be the case when the Tube/Fibre architecture
         //is used.
-        if (config.getRMVersion() == RMVersion.WSRM10)   {
+        if (config.getRMVersion() == RMVersion.WSRM10) {
             sendLast();
-        }   else {
+        } else {
             sendCloseSequence();
         }
-         
+
         //this will block until all messages are complete
         waitForAcks();
-        AbstractTerminateSequence ts =null;
-        if (config.getRMVersion() == RMVersion.WSRM10)   {
+        AbstractTerminateSequence ts = null;
+        if (config.getRMVersion() == RMVersion.WSRM10) {
             ts = new com.sun.xml.ws.rm.v200502.TerminateSequenceElement();
             com.sun.xml.ws.rm.v200502.Identifier idTerminate = new com.sun.xml.ws.rm.v200502.Identifier();
             idTerminate.setValue(id);
-            ((com.sun.xml.ws.rm.v200502.TerminateSequenceElement)ts).setIdentifier(idTerminate);
-        }   else {
+            ((com.sun.xml.ws.rm.v200502.TerminateSequenceElement) ts).setIdentifier(idTerminate);
+        } else {
             ts = new com.sun.xml.ws.rm.v200702.TerminateSequenceElement();
             com.sun.xml.ws.rm.v200702.Identifier idTerminate = new com.sun.xml.ws.rm.v200702.Identifier();
             idTerminate.setValue(id);
-            ((com.sun.xml.ws.rm.v200702.TerminateSequenceElement)ts).setIdentifier(idTerminate);
+            ((com.sun.xml.ws.rm.v200702.TerminateSequenceElement) ts).setIdentifier(idTerminate);
 
         }
 
-        protocolMessageSender.sendTerminateSequence(ts,this,version);
+        protocolMessageSender.sendTerminateSequence(ts, this, version);
 
     }
 
-    private void sendLast() throws RMException{
-        protocolMessageSender.sendLast(this,version);
+    private void sendLast() throws RMException {
+        protocolMessageSender.sendLast(this, version);
     }
 
-    private void sendCloseSequence() throws RMException{
-        protocolMessageSender.sendCloseSequence(this,version);
+    private void sendCloseSequence() throws RMException {
+        protocolMessageSender.sendCloseSequence(this, version);
     }
 
     /**
@@ -501,7 +464,6 @@ public class ClientOutboundSequence extends OutboundSequence
         ackRequestDeadline = System.currentTimeMillis();
     }
 
-    
     /**
      * Checks whether an ack should be requested.  Currently checks whether the
      * The algorithm checks whether the ackRequest deadline has elapsed.  
@@ -509,8 +471,9 @@ public class ClientOutboundSequence extends OutboundSequence
      * SequenceConfig member for this sequence.
      *
      */
-    protected synchronized boolean isAckRequested(){
-      
+    @Override
+    protected synchronized boolean isAckRequested() {
+
         long time = System.currentTimeMillis();
         if (time > ackRequestDeadline) {
             //reset the clock
@@ -520,7 +483,7 @@ public class ClientOutboundSequence extends OutboundSequence
             return false;
         }
     }
-    
+
     /**
      * Checks whether a resend should happen.  The algorithm checks whether 
      * the resendDeadline has elapsed.  
@@ -528,6 +491,7 @@ public class ClientOutboundSequence extends OutboundSequence
      * SequenceConfig member for this sequence.
      *
      */
+    @Override
     public synchronized boolean isResendDue() {
         long time = System.currentTimeMillis();
         if (time > resendDeadline) {
@@ -538,20 +502,20 @@ public class ClientOutboundSequence extends OutboundSequence
             return false;
         }
     }
-    
+
     private long getResendInterval() {
-        
+
         //do a resend at every opportunity under these conditions
         //1. Sequence has been terminated
         //2. Number of stored messages exceeds 1/2 available space.
-        
-        if (!isActive || 
-            storedMessages > (getTransferWindowSize() / 2) ) {
+
+        if (!isActive ||
+                storedMessages > (getTransferWindowSize() / 2)) {
             return 0;
         }
         return config.getResendInterval();
     }
-    
+
     /**
      * Returns true if TransferWindow is full.  In this case, we 
      * hold off on sending messages.
@@ -559,21 +523,21 @@ public class ClientOutboundSequence extends OutboundSequence
     public boolean isTransferWindowFull() {
         return getTransferWindowSize() == storedMessages;
     }
-    
+
     private long getAckRequestInterval() {
         //send an ackRequest at every opportunity under these conditions
         //1. Sequence has been terminated
         //2. Number of stored messages exceeds 1/2 available space.
         //3. Number of stored messages at endpoint exceeds 1/2
         //   available space.
-        if (!isActive || 
-            storedMessages > (getTransferWindowSize() / 2) ||
-            getReceiveBufferSize() > (config.getBufferSize() / 2)) {
+        if (!isActive ||
+                storedMessages > (getTransferWindowSize() / 2) ||
+                getReceiveBufferSize() > (config.getBufferSize() / 2)) {
             return 0;
         }
         return config.getAckRequestInterval();
     }
-    
+
     /**
      * Implementation of acknowledge defers discarding stored messages when
      * the AcksTo endpoint is anonymous and the message is a two-way request.
@@ -584,15 +548,16 @@ public class ClientOutboundSequence extends OutboundSequence
      * @param i The index to acknowledge
      * @throws InvalidMessageNumberException
      */
-    public synchronized void acknowledge(int i) 
+    @Override
+    public synchronized void acknowledge(int i)
             throws InvalidMessageNumberException {
-        
+
         Message mess = get(i);
         if (isAnonymous() && mess.isTwoWayRequest) {
             return;
         } else {
             super.acknowledge(i);
-                    
+
             if (ackListener != null) {
                 ackListener.notify(this, i);
             }
@@ -603,7 +568,7 @@ public class ClientOutboundSequence extends OutboundSequence
             mess.resume();
         }
     }
-    
+
     /**
      * Acknowledges that a response to a two-way operation has been
      * received. See Javadoc for <code>acknowledge</code>
@@ -611,15 +576,15 @@ public class ClientOutboundSequence extends OutboundSequence
      * @param i The index to acknowledge
      * @throws InvalidMessageNumberException
      */
-    public synchronized void acknowledgeResponse(int i) 
+    public synchronized void acknowledgeResponse(int i)
             throws InvalidMessageNumberException {
-            
+
         super.acknowledge(i);
         if (ackListener != null) {
-                ackListener.notify(this, i);
+            ackListener.notify(this, i);
         }
     }
-    
+
     /**
      * Return value is determined by whether the destination endpoint is the
      * anonymous URI.
@@ -630,7 +595,6 @@ public class ClientOutboundSequence extends OutboundSequence
     public boolean isAnonymous() {
         return isAnonymous;
     }
-
 
     public void registerProtocolMessageSender(ProtocolMessageSender pms) {
         this.protocolMessageSender = pms;
@@ -644,7 +608,7 @@ public class ClientOutboundSequence extends OutboundSequence
     public void setSecurityTokenReference(JAXBElement<SecurityTokenReferenceType> str) {
         this.str = str;
     }
-    
+
     /**
      * Handler periodically invoked by RMSource.MaintenanceThread.
      * Has two duties:<p>
@@ -656,20 +620,20 @@ public class ClientOutboundSequence extends OutboundSequence
      * @throws RMException 
      */
     public synchronized void doMaintenanceTasks() throws RMException {
-         
+
         if (storedMessages > 0 && isResendDue()) {
             int top = getNextIndex();
             for (int i = 1; i < top; i++) {
                 Message mess = get(i);
                 if (mess != null && !mess.isComplete()) {
-                    logger.fine("resending "  + getId() + ":" + i);
+                    logger.fine("resending " + getId() + ":" + i);
                     resend(i);
                 }
             }
         } else {
             //check whether we need to prime the pump
             if (isGettingClose(System.currentTimeMillis() - getLastActivityTime(),
-                                config.getInactivityTimeout())) { 
+                    config.getInactivityTimeout())) {
                 //send an AckRequested down the pipe.  Need to use a background
                 //Thread.  This is being called by the RMSource maintenance thread
                 //whose health we have to be very careful with.  If the heartbeat
@@ -679,28 +643,27 @@ public class ClientOutboundSequence extends OutboundSequence
             }
         }
     }
-    
-    
-  
+
     private class AckRequestedSender extends Thread {
-        
+
         private ClientOutboundSequence sequence;
-        
+
         AckRequestedSender(ClientOutboundSequence sequence) {
             this.sequence = sequence;
         }
+
+        @Override
         public void run() {
             try {
-               
+
                 if (sendHeartbeats) {
-                    
-                    logger.fine(Messages.HEARTBEAT_MESSAGE_MESSAGE
-                            .format(sequence.getId(), System.currentTimeMillis()));
-                    
-                    protocolMessageSender.sendAckRequested(sequence, 
-                                                       version);
+
+                    logger.fine(Messages.HEARTBEAT_MESSAGE_MESSAGE.format(sequence.getId(), System.currentTimeMillis()));
+
+                    protocolMessageSender.sendAckRequested(sequence,
+                            version);
                 }
-                
+
             } catch (Exception e) {
                 //We get here in at least two cases.
                 //1. Client running in Webapp that is undeployed, 
@@ -708,15 +671,14 @@ public class ClientOutboundSequence extends OutboundSequence
                 //
                 //In both cases the sequence is of no further use.  We
                 //will assume for now that this is already the case.
-                logger.log(Level.FINE, 
-                           Messages.HEARTBEAT_MESSAGE_EXCEPTION.format() + " " +
-                           sequence.getId(), e);
+                logger.log(Level.FINE,
+                        Messages.HEARTBEAT_MESSAGE_EXCEPTION.format() + " " +
+                        sequence.getId(), e);
                 try {
                     RMSource.getRMSource().removeOutboundSequence(sequence);
-                } catch (Exception ex){
-                }         
+                } catch (Exception ex) {
+                }
             }
         }
     }
-
 }

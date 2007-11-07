@@ -109,7 +109,6 @@ public abstract class OutboundSequence extends Sequence {
      * @return The destination URI.
      */
     public URI getDestination() {
-
         return destination;
     }
 
@@ -119,7 +118,6 @@ public abstract class OutboundSequence extends Sequence {
      * @return The destination String.
      */
     public URI getAcksTo() {
-
         return acksTo;
     }
 
