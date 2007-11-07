@@ -400,7 +400,8 @@ public abstract class WSITAuthContextBase  {
                     spVersion = SecurityPolicyVersion.SECURITYPOLICY200512;
                     wsscVer = WSSCVersion.WSSC_10;
                     wsTrustVer = WSTrustVersion.WS_TRUST_10;
-                } else if (endpointPolicy.contains(RMVersion.WSRM11.namespaceUri) ||
+                } 
+                if (endpointPolicy.contains(RMVersion.WSRM11.namespaceUri) ||
                         endpointPolicy.contains(RMVersion.WSRM11.policyNamespaceUri)) {
                     rmVer = RMVersion.WSRM11;                    
                 } else if (endpointPolicy.contains(RMVersion.WSRM10.namespaceUri) ||
