@@ -40,6 +40,7 @@ import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.security.policy.Binding;
 import com.sun.xml.ws.security.policy.EndorsingSupportingTokens;
 import com.sun.xml.ws.security.policy.SignedElements;
+import com.sun.xml.ws.security.policy.SignedEncryptedSupportingTokens;
 import com.sun.xml.ws.security.policy.SignedEndorsingSupportingTokens;
 import com.sun.xml.ws.security.policy.SignedParts;
 import com.sun.xml.ws.security.policy.SignedSupportingTokens;
@@ -167,6 +168,17 @@ public class TransportBindingProcessor extends BindingProcessor {
             }           
         }
     }
+    
+    public void processSupportingTokens(SignedEncryptedSupportingTokens sest) throws PolicyException{
+        Iterator itr = sest.getTokens();
+        while(itr.hasNext()){
+            Token token = (Token) itr.next();
+            WSSPolicy policy = tokenProcessor.getWSSToken(token);
+            AuthenticationTokenPolicy atp = new AuthenticationTokenPolicy();
+            atp.setFeatureBinding(policy);
+            container.insert(atp);
+        }
+    }        
     
     protected EncryptionPolicy getSecondaryEncryptionPolicy() throws PolicyException {
         throw new UnsupportedOperationException();
