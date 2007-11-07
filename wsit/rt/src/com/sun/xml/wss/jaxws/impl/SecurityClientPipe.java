@@ -77,7 +77,6 @@ import com.sun.xml.wss.ProcessingContext;
 import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
 import com.sun.xml.ws.security.secconv.WSSecureConversationException;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
-import com.sun.xml.ws.security.secconv.WSSCFactory;
 import com.sun.xml.ws.security.secconv.WSSCPlugin;
 import com.sun.xml.ws.security.policy.Token;
 import javax.security.auth.callback.CallbackHandler;

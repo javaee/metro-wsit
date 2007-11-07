@@ -46,7 +46,6 @@ import com.sun.xml.ws.security.opt.impl.JAXBFilterProcessingContext;
 import com.sun.xml.ws.security.policy.CertStoreConfig;
 import com.sun.xml.ws.security.policy.KerberosConfig;
 import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
-import com.sun.xml.ws.security.secconv.WSSCConstants;
 import com.sun.xml.wss.impl.policy.mls.EncryptionPolicy;
 import com.sun.xml.wss.impl.policy.mls.EncryptionTarget;
 import java.io.IOException;
@@ -61,7 +60,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Hashtable;
 import javax.xml.namespace.QName;
-import java.net.URI;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.ws.WebServiceException;
 import java.util.Set;
@@ -129,6 +127,7 @@ import com.sun.xml.ws.security.policy.WSSAssertion;
 import java.util.Properties;
 import com.sun.xml.ws.api.addressing.*;
 import com.sun.xml.ws.rm.Constants;
+import com.sun.xml.ws.rm.RMVersion;
 import com.sun.xml.ws.security.secconv.WSSCVersion;
 import com.sun.xml.ws.security.trust.WSTrustVersion;
 import com.sun.xml.wss.impl.filter.DumpFilter;
@@ -181,6 +180,7 @@ public abstract class SecurityPipeBase implements Pipe {
     protected static JAXBContext jaxbContext;    
     protected WSSCVersion wsscVer;
     protected WSTrustVersion wsTrustVer;
+    protected RMVersion rmVer;
     protected boolean disablePayloadBuffer = false;
     protected AlgorithmSuite bindingLevelAlgSuite = null;
     
@@ -326,6 +326,7 @@ public abstract class SecurityPipeBase implements Pipe {
         this.addVer = that.addVer;
         this.wsTrustVer = that.wsTrustVer;
         this.wsscVer = that.wsscVer;
+        this.rmVer = that.rmVer;
         wsPolicyMap = that.wsPolicyMap;
         outMessagePolicyMap = that.outMessagePolicyMap;
         inMessagePolicyMap = that.inMessagePolicyMap;
@@ -714,7 +715,13 @@ public abstract class SecurityPipeBase implements Pipe {
                     spVersion = SecurityPolicyVersion.SECURITYPOLICY200512;
                     wsscVer = WSSCVersion.WSSC_10;
                     wsTrustVer = WSTrustVersion.WS_TRUST_10;
-                }
+                } else if (endpointPolicy.contains(RMVersion.WSRM11.namespaceUri) || 
+                        endpointPolicy.contains(RMVersion.WSRM11.policyNamespaceUri)) {
+                    rmVer = RMVersion.WSRM11;                    
+                } else if (endpointPolicy.contains(RMVersion.WSRM10.namespaceUri) ||
+                        endpointPolicy.contains(RMVersion.WSRM10.policyNamespaceUri)) {
+                    rmVer = RMVersion.WSRM10;
+                }                
             }
             
             
@@ -1136,11 +1143,11 @@ public abstract class SecurityPipeBase implements Pipe {
             return false;
         }
         String action = getAction(packet);
-        if (RM_CREATE_SEQ.equals(action) || RM_CREATE_SEQ_RESP.equals(action)
-        || RM_SEQ_ACK.equals(action) || RM_TERMINATE_SEQ.equals(action)
-        || RM_LAST_MESSAGE.equals(action)) {
+        if(rmVer.getCreateSequenceAction().equals(action) || rmVer.getCreateSequenceResponseAction().equals(action)
+            || rmVer.getSequenceAcknowledgementAction().equals(action) || rmVer.getTerminateSequenceAction().equals(action)
+            || rmVer.getLastAction().equals(action)){
             return true;
-        }
+        }               
         
         return false;
     }

@@ -82,7 +82,6 @@ import java.net.URI;
 import com.sun.xml.ws.security.policy.Token;
 
 import com.sun.xml.ws.security.secconv.WSSCContract;
-import com.sun.xml.ws.security.secconv.WSSCConstants;
 import com.sun.xml.ws.security.secconv.WSSCElementFactory;
 import com.sun.xml.ws.security.secconv.WSSCElementFactory13;
 import com.sun.xml.ws.security.secconv.WSSCFactory;
@@ -91,8 +90,6 @@ import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.security.trust.elements.BaseSTSRequest;
 import com.sun.xml.ws.security.trust.elements.BaseSTSResponse;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
-import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponse;
-import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponseCollection;
 import com.sun.xml.wss.SubjectAccessor;
 import com.sun.xml.wss.RealmAuthenticationAdapter;
 import com.sun.xml.wss.impl.NewSecurityRecipient;

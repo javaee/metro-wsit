@@ -51,7 +51,6 @@ import com.sun.xml.ws.security.impl.policyconv.XWSSPolicyGenerator;
 import com.sun.xml.ws.security.policy.CertStoreConfig;
 import com.sun.xml.ws.security.policy.KerberosConfig;
 import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
-import com.sun.xml.ws.security.secconv.WSSCConstants;
 import com.sun.xml.wss.impl.policy.mls.EncryptionPolicy;
 import com.sun.xml.wss.impl.policy.mls.EncryptionTarget;
 import java.io.IOException;
@@ -66,7 +65,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Hashtable;
 import javax.xml.namespace.QName;
-import java.net.URI;
 import javax.xml.ws.WebServiceException;
 import java.util.Set;
 
@@ -128,8 +126,6 @@ import javax.xml.bind.JAXBContext;
 import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.impl.misc.DefaultCallbackHandler;
 
-import com.sun.xml.ws.security.trust.WSTrustConstants;
-
 import com.sun.xml.ws.security.policy.KeyStore;
 import com.sun.xml.ws.security.policy.TrustStore;
 import com.sun.xml.ws.security.policy.CallbackHandlerConfiguration;
@@ -145,6 +141,7 @@ import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.assembler.ClientPipeConfiguration;
 import com.sun.xml.ws.assembler.ServerPipeConfiguration;
 import com.sun.xml.ws.rm.Constants;
+import com.sun.xml.ws.rm.RMVersion;
 import com.sun.xml.ws.security.opt.impl.JAXBFilterProcessingContext;
 import com.sun.xml.wss.ProcessingContext;
 import com.sun.xml.wss.impl.PolicyViolationException;
@@ -227,6 +224,7 @@ public abstract class WSITAuthContextBase  {
     protected static final JAXBContext jaxbContext;    
     protected WSSCVersion wsscVer = null;
     protected WSTrustVersion wsTrustVer = null;
+    protected RMVersion rmVer = null;
     protected static final ArrayList<String> securityPolicyNamespaces ;
     //TODO: not initialized anywhere and is being used at one place in server auth-ctx
     //protected static MessagePolicy emptyMessagePolicy;
@@ -402,7 +400,13 @@ public abstract class WSITAuthContextBase  {
                     spVersion = SecurityPolicyVersion.SECURITYPOLICY200512;
                     wsscVer = WSSCVersion.WSSC_10;
                     wsTrustVer = WSTrustVersion.WS_TRUST_10;
-                }
+                } else if (endpointPolicy.contains(RMVersion.WSRM11.namespaceUri) ||
+                        endpointPolicy.contains(RMVersion.WSRM11.policyNamespaceUri)) {
+                    rmVer = RMVersion.WSRM11;                    
+                } else if (endpointPolicy.contains(RMVersion.WSRM10.namespaceUri) ||
+                        endpointPolicy.contains(RMVersion.WSRM10.policyNamespaceUri)) {
+                    rmVer = RMVersion.WSRM10;
+                }   
             }
             
             buildProtocolPolicy(endpointPolicy);
@@ -851,9 +855,9 @@ public abstract class WSITAuthContextBase  {
             return false;
         }
         String action = getAction(packet);
-        if (RM_CREATE_SEQ.equals(action) || RM_CREATE_SEQ_RESP.equals(action)
-        || RM_SEQ_ACK.equals(action) || RM_TERMINATE_SEQ.equals(action)
-        || RM_LAST_MESSAGE.equals(action)) {
+        if(rmVer.getCreateSequenceAction().equals(action) || rmVer.getCreateSequenceResponseAction().equals(action)
+            || rmVer.getSequenceAcknowledgementAction().equals(action) || rmVer.getTerminateSequenceAction().equals(action)
+            || rmVer.getLastAction().equals(action)){
             return true;
         }
         
