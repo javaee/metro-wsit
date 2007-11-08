@@ -1322,8 +1322,8 @@ public abstract class WSITAuthContextBase  {
             PolicyMapKey endpointKey = policyMap.createWsdlEndpointScopeKey(port.getOwner().getName(),
                     port.getName());
             Policy policy = policyMap.getEndpointEffectivePolicy(endpointKey);
-            
-            return (policy != null) && policy.contains(Constants.version);
+                        
+            return (policy != null) && policy.contains(rmVer.getPolicyNamespaceURI());
         } catch (PolicyException e) {
             log.log(Level.SEVERE,
                     LogStringsMessages.WSITPVD_0012_PROBLEM_CHECKING_RELIABLE_MESSAGE_ENABLE(), e);
