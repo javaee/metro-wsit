@@ -180,7 +180,7 @@ public abstract class SecurityPipeBase implements Pipe {
     protected static JAXBContext jaxbContext;    
     protected WSSCVersion wsscVer;
     protected WSTrustVersion wsTrustVer;
-    protected RMVersion rmVer;
+    protected RMVersion rmVer = RMVersion.WSRM10;
     protected boolean disablePayloadBuffer = false;
     protected AlgorithmSuite bindingLevelAlgSuite = null;
     

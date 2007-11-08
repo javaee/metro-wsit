@@ -224,7 +224,7 @@ public abstract class WSITAuthContextBase  {
     protected static final JAXBContext jaxbContext;    
     protected WSSCVersion wsscVer = null;
     protected WSTrustVersion wsTrustVer = null;
-    protected RMVersion rmVer = null;
+    protected RMVersion rmVer = RMVersion.WSRM10;
     protected static final ArrayList<String> securityPolicyNamespaces ;
     //TODO: not initialized anywhere and is being used at one place in server auth-ctx
     //protected static MessagePolicy emptyMessagePolicy;
