@@ -159,11 +159,11 @@ public final class Invocation {
      * Executes the method on {@code target} {@code XMLStreamWriter} instance.
      * 
      * @return execution result.
-     * @exception IllegalAccessException see {@link java.lang.reflect.Method.invoke(Object, Object[]) Method.invoke()}.
-     * @exception IllegalArgumentException see {@link java.lang.reflect.Method.invoke(Object, Object[]) Method.invoke()}.
-     * @exception InvocationTargetException see {@link java.lang.reflect.Method.invoke(Object, Object[]) Method.invoke()}.
-     * @exception NullPointerException see {@link java.lang.reflect.Method.invoke(Object, Object[]) Method.invoke()}.
-     * @exception ExceptionInInitializerError see {@link java.lang.reflect.Method.invoke(Object, Object[]) Method.invoke()}.
+     * @exception IllegalAccessException see {@link java.lang.reflect.Method#invoke(Object, Object[]) Method.invoke()}.
+     * @exception IllegalArgumentException see {@link java.lang.reflect.Method#invoke(Object, Object[]) Method.invoke()}.
+     * @exception InvocationTargetException see {@link java.lang.reflect.Method#invoke(Object, Object[]) Method.invoke()}.
+     * @exception NullPointerException see {@link java.lang.reflect.Method#invoke(Object, Object[]) Method.invoke()}.
+     * @exception ExceptionInInitializerError see {@link java.lang.reflect.Method#invoke(Object, Object[]) Method.invoke()}.
      */
     public Object execute(final XMLStreamWriter target) throws IllegalAccessException, InvocationTargetException, IllegalArgumentException {
         return method.invoke(target, arguments);
