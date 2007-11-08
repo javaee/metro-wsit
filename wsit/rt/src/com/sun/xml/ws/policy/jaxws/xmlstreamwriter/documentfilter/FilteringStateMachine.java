@@ -43,5 +43,19 @@ import javax.xml.stream.XMLStreamWriter;
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public interface FilteringStateMachine {
-    InvocationProcessingState getState(final Invocation invocation, final XMLStreamWriter writer);        
+    
+    /**
+     * Based on the current invocation decides whether a processing state change 
+     * is required and returns the result of this decision.
+     * 
+     * @param invocation current invocation executed on the XML stream writer
+     * @param writer mirror writer that records all calls (even the ones filtered out)
+     *        and thus represents the "unfiltered" status of the XML stream. The 
+     *        parameter may be used to query the status. Implementations of the 
+     *        {@link FilteringStateMachine} SHOULD NOT call any methods that may result
+     *        in a modification of the XML stream represented by this {@code writer}
+     *        parameter.
+     * @return processing state change as required.
+     */
+    ProcessingStateChange getStateChange(final Invocation invocation, final XMLStreamWriter writer);        
 }

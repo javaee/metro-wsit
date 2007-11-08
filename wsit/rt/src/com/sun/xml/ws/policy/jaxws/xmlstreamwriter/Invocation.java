@@ -174,6 +174,7 @@ public final class Invocation {
      * 
      * @return {@link String} representation of the {@link Invocation} instance.
      */
+    @Override
     public String toString() {
         final StringBuffer retValue = new StringBuffer(30);
         retValue.append("invocation { method='").append(method.getName()).append("', args=").append(argsToString());

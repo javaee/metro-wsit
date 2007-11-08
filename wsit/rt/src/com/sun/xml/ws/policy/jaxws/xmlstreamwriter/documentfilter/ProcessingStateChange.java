@@ -39,11 +39,11 @@ package com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter;
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public enum InvocationProcessingState {
+public enum ProcessingStateChange {
     START_BUFFERING(),
     RESTART_BUFFERING(), // releases old buffer and starts new
     STOP_BUFFERING(),
     START_FILTERING(),
     STOP_FILTERING(),
-    NO_STATE_CHANGE();
+    NO_CHANGE();
 }

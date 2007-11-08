@@ -41,7 +41,7 @@ import javax.xml.stream.XMLStreamWriter;
 
 import static com.sun.xml.ws.policy.PolicyConstants.VISIBILITY_ATTRIBUTE;
 import static com.sun.xml.ws.policy.PolicyConstants.VISIBILITY_VALUE_PRIVATE;
-import static com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter.InvocationProcessingState.*;
+import static com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter.ProcessingStateChange.*;
 
 /**
  *
@@ -60,9 +60,9 @@ public class PrivateAttributeFilteringStateMachine implements FilteringStateMach
         // nothing to initialize
     }
     
-    public InvocationProcessingState getState(final Invocation invocation, final XMLStreamWriter writer) {
+    public ProcessingStateChange getStateChange(final Invocation invocation, final XMLStreamWriter writer) {
         LOGGER.entering(invocation);
-        InvocationProcessingState resultingState = NO_STATE_CHANGE;
+        ProcessingStateChange resultingState = NO_CHANGE;
         try {
             switch (invocation.getMethodType()) {
                 case WRITE_START_ELEMENT:
