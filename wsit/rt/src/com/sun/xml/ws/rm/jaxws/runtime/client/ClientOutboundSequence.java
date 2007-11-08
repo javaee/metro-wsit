@@ -42,7 +42,6 @@
 //
 package com.sun.xml.ws.rm.jaxws.runtime.client;
 
-import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.rm.AcknowledgementListener;
@@ -91,8 +90,7 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
      * <code>AckRequestedElement</code>
      *
      */
-    protected ProtocolMessageSender protocolMessageSender;
-    private SOAPVersion version;
+    private ProtocolMessageSender protocolMessageSender;
     /**
      * Flag to indicate if secureReliableMessaging is on
      */
@@ -138,10 +136,9 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
         this.config = config;
 
         //for now
-        this.version = config.getSoapVersion();
         this.ackHandler = new AcknowledgementHandler(config);
         this.rmConstants = config.getRMConstants();
-        this.bufferRemaining = config.getBufferSize();
+        super.setBufferRemaining(config.getBufferSize());
 
     }
 
@@ -336,7 +333,7 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
                 }
             }
 
-            AbstractCreateSequenceResponse csr = protocolMessageSender.sendCreateSequence(createSequence, destination, acksTo, version);
+            AbstractCreateSequenceResponse csr = protocolMessageSender.sendCreateSequence(createSequence, destination, acksTo, secureReliableMessaging);
 
             AbstractAcceptType accept = null;
             if (csr != null) {
@@ -435,16 +432,16 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
 
         }
 
-        protocolMessageSender.sendTerminateSequence(ts, this, version);
+        protocolMessageSender.sendTerminateSequence(ts, this);
 
     }
 
     private void sendLast() throws RMException {
-        protocolMessageSender.sendLast(this, version);
+        protocolMessageSender.sendLast(this);
     }
 
     private void sendCloseSequence() throws RMException {
-        protocolMessageSender.sendCloseSequence(this, version);
+        protocolMessageSender.sendCloseSequence(this);
     }
 
     /**
@@ -655,13 +652,9 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
         @Override
         public void run() {
             try {
-
                 if (sendHeartbeats) {
-
                     logger.fine(Messages.HEARTBEAT_MESSAGE_MESSAGE.format(sequence.getId(), System.currentTimeMillis()));
-
-                    protocolMessageSender.sendAckRequested(sequence,
-                            version);
+                    protocolMessageSender.sendAckRequested(sequence, config.getSoapVersion());
                 }
 
             } catch (Exception e) {
@@ -672,8 +665,7 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
                 //In both cases the sequence is of no further use.  We
                 //will assume for now that this is already the case.
                 logger.log(Level.FINE,
-                        Messages.HEARTBEAT_MESSAGE_EXCEPTION.format() + " " +
-                        sequence.getId(), e);
+                        Messages.HEARTBEAT_MESSAGE_EXCEPTION.format() + " " + sequence.getId(), e);
                 try {
                     RMSource.getRMSource().removeOutboundSequence(sequence);
                 } catch (Exception ex) {

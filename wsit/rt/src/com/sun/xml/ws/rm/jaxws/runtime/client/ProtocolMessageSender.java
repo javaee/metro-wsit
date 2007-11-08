@@ -45,13 +45,20 @@ package com.sun.xml.ws.rm.jaxws.runtime.client;
 
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.HeaderList;
+import com.sun.xml.ws.api.message.Headers;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Tube;
-import com.sun.xml.ws.rm.*;
+import com.sun.xml.ws.rm.CloseSequenceException;
+import com.sun.xml.ws.rm.CreateSequenceException;
+import com.sun.xml.ws.rm.RMConstants;
+import com.sun.xml.ws.rm.RMException;
+import com.sun.xml.ws.rm.RMVersion;
+import com.sun.xml.ws.rm.TerminateSequenceException;
 import com.sun.xml.ws.rm.jaxws.runtime.InboundMessageProcessor;
 import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
@@ -63,11 +70,12 @@ import com.sun.xml.ws.rm.v200502.AckRequestedElement;
 import com.sun.xml.ws.rm.v200502.SequenceElement;
 import com.sun.xml.ws.rm.v200702.CloseSequenceElement;
 import com.sun.xml.ws.rm.v200702.CloseSequenceResponseElement;
-
+import com.sun.xml.ws.rm.v200702.UsesSequenceSTR;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import java.net.URI;
+import javax.xml.namespace.QName;
 
 /**
  * Helper class used to send protocol message addressed to the endpoint.
@@ -144,7 +152,7 @@ public class ProtocolMessageSender {
             AbstractCreateSequence cs,
             URI destination,
             URI acksTo,
-            SOAPVersion version) throws RMException {
+            boolean secureReliableMessaging) throws RMException {
 
         //Used from com.sun.xml.ws.jaxws.runtime.client.ClientOutboundSequence.connect, where
         //CreateSequence object is constructed and resulting CreateSequenceResponse object is
@@ -155,9 +163,9 @@ public class ProtocolMessageSender {
         if (cs != null) {
             Message request = null;
             if (config.getRMVersion() == RMVersion.WSRM10) {
-                request = Messages.create(config.getRMVersion().getJAXBContext(), ((com.sun.xml.ws.rm.v200502.CreateSequenceElement) cs), version);
+                request = Messages.create(config.getRMVersion().getJAXBContext(), ((com.sun.xml.ws.rm.v200502.CreateSequenceElement) cs), config.getSoapVersion());
             } else {
-                request = Messages.create(config.getRMVersion().getJAXBContext(), ((com.sun.xml.ws.rm.v200702.CreateSequenceElement) cs), version);
+                request = Messages.create(config.getRMVersion().getJAXBContext(), ((com.sun.xml.ws.rm.v200702.CreateSequenceElement) cs), config.getSoapVersion());
             }
 
             //Addressing Headers are added by configuring the following property
@@ -167,7 +175,10 @@ public class ProtocolMessageSender {
             requestPacket.contentNegotiation = packet.contentNegotiation;
             requestPacket.setEndPointAddressString(destination.toString());
 
-            addAddressingHeaders(requestPacket, config.getRMVersion().getCreateSequenceAction(), destination, acksTo, false);
+            addAddressingHeaders(requestPacket, config.getRMVersion().getCreateSequenceAction(), destination, false);
+            if (secureReliableMessaging) {
+                addSecurityHeaders(requestPacket);
+            }
 
             String messageId = null;/*= ADDRESSING_FIXME - initialize with mesageID
             assigned by addAddressingHeaders for use in
@@ -195,29 +206,28 @@ public class ProtocolMessageSender {
 
     public void sendTerminateSequence(
             AbstractTerminateSequence ts,
-            OutboundSequence seq,
-            SOAPVersion version) throws RMException {
+            OutboundSequence seq) throws RMException {
 
         //Used from com.sun.xml.ws.jaxws.runtime.client.ClientOutboundSequence.disconnect, where the
         //TerminateSequence message is initialzied.
-        Message request = Messages.create(config.getRMVersion().getJAXBContext(), ts, version);
+        Message request = Messages.create(config.getRMVersion().getJAXBContext(), ts, config.getSoapVersion());
 
         //piggyback an acknowledgement if one is pending
-        seq.processAcknowledgement(new com.sun.xml.ws.rm.Message(request, config.rmVersion), marshaller);
+        seq.processAcknowledgement(new com.sun.xml.ws.rm.Message(request, config.getRMVersion()), marshaller);
 
         Packet requestPacket = new Packet(request);
         requestPacket.proxy = packet.proxy;
         requestPacket.contentNegotiation = packet.contentNegotiation;
-        addAddressingHeaders(requestPacket, config.getRMVersion().getTerminateSequenceAction(), seq.getDestination(), seq.getAcksTo(),/*true*/ false);
+        addAddressingHeaders(requestPacket, config.getRMVersion().getTerminateSequenceAction(), seq.getDestination(),/*true*/ false);
         requestPacket.setEndPointAddressString(seq.getDestination().toString());
         Packet responsePacket = helper.process(requestPacket);
         Message response = responsePacket.getMessage();
         if (response != null && response.isFault()) {
             throw new TerminateSequenceException("There was an error trying to terminate the sequence ", response);
         }
-        //TODO What to do with response?
-        //It may have a TerminateSequence for reverse sequence on it as well as ack headers
-        //Process these.
+    //TODO What to do with response?
+    //It may have a TerminateSequence for reverse sequence on it as well as ack headers
+    //Process these.
     }
 
     /**
@@ -227,8 +237,8 @@ public class ProtocolMessageSender {
      * @param seq Outbound sequence to which SequenceHeaderElement will belong.
      *
      */
-    public void sendLast(OutboundSequence seq, SOAPVersion version) throws RMException {
-        Message request = createEmptyMessage(version);
+    public void sendLast(OutboundSequence seq) throws RMException {
+        Message request = createEmptyMessage(config.getSoapVersion());
         SequenceElement el = createLastHeader(seq);
         //request.getHeaders().add(Headers.create(version,marshaller,el));
         request.getHeaders().add(createHeader(el));
@@ -240,7 +250,7 @@ public class ProtocolMessageSender {
         //requestPacket.proxy = new ProxyWrapper(packet.proxy);
         requestPacket.setEndPointAddressString(seq.getDestination().toString());
         requestPacket.contentNegotiation = packet.contentNegotiation;
-        addAddressingHeaders(requestPacket, config.getRMVersion().getLastAction(), seq.getDestination(), seq.getAcksTo(), /*true*/ false);
+        addAddressingHeaders(requestPacket, config.getRMVersion().getLastAction(), seq.getDestination(), /*true*/ false);
 
         Packet responsePacket = helper.process(requestPacket);
         Message response = responsePacket.getMessage();
@@ -272,8 +282,7 @@ public class ProtocolMessageSender {
             requestPacket.proxy = packet.proxy;
             requestPacket.contentNegotiation = packet.contentNegotiation;
 
-            addAddressingHeaders(requestPacket, config.getRMVersion().getAckRequestedAction(),
-                    seq.getDestination(), seq.getAcksTo(), /*true*/ false);
+            addAddressingHeaders(requestPacket, config.getRMVersion().getAckRequestedAction(), seq.getDestination(), /*true*/ false);
 
             requestPacket.setEndPointAddressString(seq.getDestination().toString());
 
@@ -301,24 +310,37 @@ public class ProtocolMessageSender {
             Packet requestPacket,
             String action,
             URI destination,
-            URI acksTo,
             boolean oneWay) throws RMException {
 
         /*ADDRESSING FIX_ME
         Current API does not allow assignment of non-anon reply to, if we
         need to support non-anon acksTo.
          */
-        Message message = requestPacket.getMessage();
-        HeaderList list = message.getHeaders();
         if (oneWay) {
-            message.assertOneWay(true);
+            requestPacket.getMessage().assertOneWay(true);
         } else {
-            message.assertOneWay(false);
+            requestPacket.getMessage().assertOneWay(false);
         }
         //list.fillRequestAddressingHeaders(port, binding, requestPacket, action);
         requestPacket.setEndPointAddressString(destination.toString());
-        list.fillRequestAddressingHeaders(requestPacket, constants.getAddressingVersion(), binding.getSOAPVersion(), oneWay, action);
+        requestPacket.getMessage().getHeaders().fillRequestAddressingHeaders(
+                requestPacket,
+                constants.getAddressingVersion(),
+                binding.getSOAPVersion(),
+                oneWay,
+                action);
         return requestPacket;
+    }
+
+    private void addSecurityHeaders(Packet requestPacket) {
+        if (config.getRMVersion() == RMVersion.WSRM11) {
+            HeaderList headerList = requestPacket.getMessage().getHeaders();
+
+            UsesSequenceSTR securityHeader = new UsesSequenceSTR();
+            securityHeader.getOtherAttributes().put(new QName(config.getSoapVersion().nsUri, "mustUnderstand"), "true");
+            Header header = Headers.create(config.getRMVersion().getJAXBContext(), securityHeader);
+            headerList.add(header);
+        }
     }
 
     /**
@@ -374,7 +396,7 @@ public class ProtocolMessageSender {
         return com.sun.xml.ws.api.message.Headers.create(config.getRMVersion().getJAXBRIContextHeaders(), obj);
     }
 
-    public void sendCloseSequence(OutboundSequence seq, SOAPVersion version) throws RMException {
+    public void sendCloseSequence(OutboundSequence seq) throws RMException {
         Message request = null;
 
         CloseSequenceElement cs = new CloseSequenceElement();
@@ -384,14 +406,13 @@ public class ProtocolMessageSender {
         cs.setIdentifier(idClose);
         cs.setLastMsgNumber(seq.getNextIndex() - 1);
 
-        request = Messages.create(config.getRMVersion().getJAXBContext(), cs, version);
+        request = Messages.create(config.getRMVersion().getJAXBContext(), cs, config.getSoapVersion());
         Packet requestPacket = new Packet(request);
         requestPacket.proxy = packet.proxy;
         requestPacket.contentNegotiation = packet.contentNegotiation;
         requestPacket.setEndPointAddressString(seq.getDestination().toString());
 
-        addAddressingHeaders(requestPacket, RMVersion.WSRM11.getCloseSequenceAction(),
-                seq.getDestination(), null, false);
+        addAddressingHeaders(requestPacket, RMVersion.WSRM11.getCloseSequenceAction(), seq.getDestination(), false);
 
         String messageId = null;/*= ADDRESSING_FIXME - initialize with mesageID
         assigned by addAddressingHeaders for use in
@@ -406,7 +427,7 @@ public class ProtocolMessageSender {
         }
 
         //unmarshall CloseSequenceResponse object from body of response.
-        CloseSequenceResponseElement csrElem = unmarshallCloseSequenceResponse(response);
+        unmarshallCloseSequenceResponse(response);
     }
 
     private CloseSequenceResponseElement unmarshallCloseSequenceResponse(Message response) throws RMException {

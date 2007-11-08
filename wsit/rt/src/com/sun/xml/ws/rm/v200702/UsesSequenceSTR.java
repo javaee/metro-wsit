@@ -4,8 +4,6 @@
 // Any modifications to this file will be lost upon recompilation of the source schema. 
 // Generated on: 2007.07.10 at 02:10:42 PM PDT 
 //
-
-
 package com.sun.xml.ws.rm.v200702;
 
 import java.util.HashMap;
@@ -16,7 +14,6 @@ import javax.xml.bind.annotation.XmlAnyAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.namespace.QName;
-
 
 /**
  * <p>Java class for anonymous complex type.
@@ -38,9 +35,8 @@ import javax.xml.namespace.QName;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "")
-@XmlRootElement(name = "UsesSequenceSTR")
-public class UsesSequenceSTR {
-
+@XmlRootElement(name = "UsesSequenceSTR", namespace="http://docs.oasis-open.org/ws-rx/wsrm/200702")
+public class UsesSequenceSTR {    
     @XmlAnyAttribute
     private Map<QName, String> otherAttributes = new HashMap<QName, String>();
 
@@ -61,5 +57,4 @@ public class UsesSequenceSTR {
     public Map<QName, String> getOtherAttributes() {
         return otherAttributes;
     }
-
 }

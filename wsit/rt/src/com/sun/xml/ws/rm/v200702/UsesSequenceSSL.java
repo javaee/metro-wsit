@@ -38,7 +38,7 @@ import javax.xml.namespace.QName;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "")
-@XmlRootElement(name = "UsesSequenceSSL")
+@XmlRootElement(name = "UsesSequenceSSL", namespace="http://docs.oasis-open.org/ws-rx/wsrm/200702")
 public class UsesSequenceSSL {
 
     @XmlAnyAttribute
