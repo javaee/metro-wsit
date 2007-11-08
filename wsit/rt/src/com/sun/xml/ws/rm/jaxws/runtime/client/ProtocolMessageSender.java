@@ -336,10 +336,9 @@ public class ProtocolMessageSender {
         if (config.getRMVersion() == RMVersion.WSRM11) {
             HeaderList headerList = requestPacket.getMessage().getHeaders();
 
-            UsesSequenceSTR securityHeader = new UsesSequenceSTR();
-            securityHeader.getOtherAttributes().put(new QName(config.getSoapVersion().nsUri, "mustUnderstand"), "true");
-            Header header = Headers.create(config.getRMVersion().getJAXBContext(), securityHeader);
-            headerList.add(header);
+            UsesSequenceSTR usesSequenceSTR = new UsesSequenceSTR();
+            usesSequenceSTR.getOtherAttributes().put(new QName(config.getSoapVersion().nsUri, "mustUnderstand"), "true");
+            headerList.add(createHeader(usesSequenceSTR));
         }
     }
 
@@ -392,8 +391,8 @@ public class ProtocolMessageSender {
         return constants;
     }
 
-    private com.sun.xml.ws.api.message.Header createHeader(Object obj) {
-        return com.sun.xml.ws.api.message.Headers.create(config.getRMVersion().getJAXBRIContextHeaders(), obj);
+    private Header createHeader(Object obj) {
+        return Headers.create(config.getRMVersion().getJAXBContext(), obj);
     }
 
     public void sendCloseSequence(OutboundSequence seq) throws RMException {

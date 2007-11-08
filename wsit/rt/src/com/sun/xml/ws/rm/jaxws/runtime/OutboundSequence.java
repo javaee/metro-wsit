@@ -391,9 +391,7 @@ public abstract class OutboundSequence extends Sequence {
     }
 
     protected com.sun.xml.ws.api.message.Header createHeader(Object obj) {
-        return Headers.create(
-                config.getRMVersion().getJAXBRIContextHeaders(),
-                obj);
+        return Headers.create(config.getRMVersion().getJAXBContext(), obj);
     }
 
     public Message getUnacknowledgedMessage() {

@@ -1424,7 +1424,7 @@ public class RMServerTube extends TubeBase<RMDestination,
     }
     
     private Header createHeader(Object obj) {
-        return Headers.create(config.getRMVersion().getJAXBRIContextHeaders(), obj);
+        return Headers.create(config.getRMVersion().getJAXBContext(), obj);
     }
 
     /**
