@@ -233,7 +233,7 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
             ((ProcessingContextImpl)ctx).setKerberosContextMap(kerberosTokenContextMap);
         }
         ((ProcessingContextImpl)ctx).setIssuedTokenContextMap(issuedTokenContextMap);
-        ctx.setExtraneousProperty(ctx.OPERATION_RESOLVER, new PolicyResolverImpl(inMessagePolicyMap,inProtocolPM,cachedOperation,pipeConfig,addVer,true));
+        ctx.setExtraneousProperty(ctx.OPERATION_RESOLVER, new PolicyResolverImpl(inMessagePolicyMap,inProtocolPM,cachedOperation,pipeConfig,addVer,true, rmVer));
         
         try{
             msg = ret.getMessage();

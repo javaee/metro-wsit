@@ -36,27 +36,25 @@
  holder.
 -->
 
-<!--
-    Document   : rm-msglevel-policy-sx.xml
-    Created on : 30 October, 2007, 7:15 PM
-    Author     : ashutosh
-    Description:
-        Purpose of the document follows.
--->
 
+<!--
+    Document   : rm-msglevel-policy-sp12.xml
+    Created on : 11 November, 2007, 2:15 PM
+    Author     : Shyam Rao
+    Description:
+        Operation level policies for RM protocol messages.
+-->
 <wsp:Policy wsu:Id="RMOperationLevelPolicy" xmlns:sp="http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsap10="http://www.w3.org/2005/08/addressing" xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing" xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy" xmlns:i0="http://xmlsoap.org/Ping" xmlns:wsap="http://schemas.xmlsoap.org/ws/2004/09/policy/addressing" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msc="http://schemas.microsoft.com/ws/2005/12/wsdl/contract" xmlns:tns="http://tempuri.org/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:wsx="http://schemas.xmlsoap.org/ws/2004/09/mex" xmlns:wsa10="http://www.w3.org/2005/08/addressing">
     <wsp:ExactlyOne>
         <wsp:All>
             <sp:SignedParts xmlns:sp="http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702">
                 <sp:Body/>
                 <sp:Header Name="SequenceAcknowledgement" 
-                Namespace="http://docs.oasis-open.org/ws-rx/wsrm/200702"/>
+                Namespace="http://schemas.xmlsoap.org/ws/2005/02/rm"/>
                 <sp:Header Name="AckRequested" 
-                Namespace="http://docs.oasis-open.org/ws-rx/wsrm/200702"/>
+                Namespace="http://schemas.xmlsoap.org/ws/2005/02/rm"/>
                 <sp:Header Name="Sequence" 
-                Namespace="http://docs.oasis-open.org/ws-rx/wsrm/200702"/>
-                <sp:Header Name="UsesSequenceSTR" 
-                Namespace="http://docs.oasis-open.org/ws-rx/wsrm/200702"/>
+                Namespace="http://schemas.xmlsoap.org/ws/2005/02/rm"/>
                 <sp:Header Name="To"
                 Namespace="http://www.w3.org/2005/08/addressing"/>
                 <sp:Header Name="From"
@@ -75,4 +73,3 @@
         </wsp:All>
     </wsp:ExactlyOne>
 </wsp:Policy>
-

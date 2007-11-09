@@ -140,7 +140,6 @@ import com.sun.xml.ws.api.addressing.*;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.assembler.ClientPipeConfiguration;
 import com.sun.xml.ws.assembler.ServerPipeConfiguration;
-import com.sun.xml.ws.rm.Constants;
 import com.sun.xml.ws.rm.RMVersion;
 import com.sun.xml.ws.security.opt.impl.JAXBFilterProcessingContext;
 import com.sun.xml.wss.ProcessingContext;
@@ -858,7 +857,8 @@ public abstract class WSITAuthContextBase  {
         String action = getAction(packet);
         if(rmVer.getCreateSequenceAction().equals(action) || rmVer.getCreateSequenceResponseAction().equals(action)
             || rmVer.getSequenceAcknowledgementAction().equals(action) || rmVer.getTerminateSequenceAction().equals(action)
-            || rmVer.getLastAction().equals(action)){
+            || rmVer.getLastAction().equals(action)|| rmVer.getCloseSequenceAction().equals(action) || 
+                rmVer.getCloseSequenceResponseAction().equals(action)){
             return true;
         }
         
@@ -895,7 +895,7 @@ public abstract class WSITAuthContextBase  {
             return;
         }
         try{
-            RMPolicyResolver rr = new RMPolicyResolver(spVersion);
+            RMPolicyResolver rr = new RMPolicyResolver(spVersion, rmVer);
             Policy msgLevelPolicy = rr.getOperationLevelPolicy();
             PolicyMerger merger = PolicyMerger.getMerger();
             ArrayList<Policy> pList = new ArrayList<Policy>(2);

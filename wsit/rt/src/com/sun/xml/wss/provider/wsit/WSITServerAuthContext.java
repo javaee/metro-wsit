@@ -257,7 +257,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         //update the client subject passed to the AuthModule itself.
         ctx.setExtraneousProperty(MessageConstants.AUTH_SUBJECT, clientSubject);
         ctx.setExtraneousProperty(ctx.OPERATION_RESOLVER,
-                new PolicyResolverImpl(inMessagePolicyMap,inProtocolPM,cachedOperation(packet),pipeConfig,addVer,false));
+                new PolicyResolverImpl(inMessagePolicyMap,inProtocolPM,cachedOperation(packet),pipeConfig,addVer,false, rmVer));
         try{
             if(!optimized) {
                 SOAPMessage soapMessage = msg.readAsSOAPMessage();

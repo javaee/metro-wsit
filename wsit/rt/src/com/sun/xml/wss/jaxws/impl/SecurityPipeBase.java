@@ -126,7 +126,6 @@ import com.sun.xml.ws.security.policy.ValidatorConfiguration;
 import com.sun.xml.ws.security.policy.WSSAssertion;
 import java.util.Properties;
 import com.sun.xml.ws.api.addressing.*;
-import com.sun.xml.ws.rm.Constants;
 import com.sun.xml.ws.rm.RMVersion;
 import com.sun.xml.ws.security.secconv.WSSCVersion;
 import com.sun.xml.ws.security.trust.WSTrustVersion;
@@ -1146,7 +1145,8 @@ public abstract class SecurityPipeBase implements Pipe {
         String action = getAction(packet);
         if(rmVer.getCreateSequenceAction().equals(action) || rmVer.getCreateSequenceResponseAction().equals(action)
             || rmVer.getSequenceAcknowledgementAction().equals(action) || rmVer.getTerminateSequenceAction().equals(action)
-            || rmVer.getLastAction().equals(action)){
+            || rmVer.getLastAction().equals(action) || rmVer.getCloseSequenceAction().equals(action) || 
+                rmVer.getCloseSequenceResponseAction().equals(action)){
             return true;
         }               
         
@@ -1183,7 +1183,7 @@ public abstract class SecurityPipeBase implements Pipe {
             return;
         }
         try{
-            RMPolicyResolver rr = new RMPolicyResolver(spVersion);
+            RMPolicyResolver rr = new RMPolicyResolver(spVersion, rmVer);
             Policy msgLevelPolicy = rr.getOperationLevelPolicy();
             PolicyMerger merger = PolicyMerger.getMerger();
             ArrayList<Policy> pList = new ArrayList<Policy>(2);

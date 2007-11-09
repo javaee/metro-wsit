@@ -175,7 +175,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
         if(hasKerberosTokenPolicy()){
             ((ProcessingContextImpl)ctx).setKerberosContextMap(kerberosTokenContextMap);
         }
-        ctx.setExtraneousProperty(ctx.OPERATION_RESOLVER, new PolicyResolverImpl(inMessagePolicyMap,inProtocolPM,cachedOperation,pipeConfig,addVer,false));
+        ctx.setExtraneousProperty(ctx.OPERATION_RESOLVER, new PolicyResolverImpl(inMessagePolicyMap,inProtocolPM,cachedOperation,pipeConfig,addVer,false, rmVer));
         try{
             if(!optimized) {
                 SOAPMessage soapMessage = msg.readAsSOAPMessage();

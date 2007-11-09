@@ -66,6 +66,7 @@ import java.util.HashMap;
 import org.w3c.dom.NodeList;
 import com.sun.xml.ws.security.policy.Token;
 import com.sun.xml.ws.api.addressing.*;
+import com.sun.xml.ws.rm.RMVersion;
 import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import com.sun.xml.ws.security.secconv.WSSCVersion;
 import com.sun.xml.ws.security.trust.WSTrustVersion;
@@ -98,24 +99,26 @@ public class PolicyResolverImpl implements PolicyResolver{
     
     //private PolicyAttributes pa = null;
     private AddressingVersion addVer = null;
+    private RMVersion rmVer = null;
     private PipeConfiguration pipeConfig = null;
     private boolean isClient = false;
     private boolean isSCMessage = false;
     //private boolean isTrustOrSCMessage = false;
     private String action =  "";
     private WSTrustVersion wstVer = WSTrustVersion.WS_TRUST_10;
-    private WSSCVersion wsscVer = WSSCVersion.WSSC_10;
+    private WSSCVersion wsscVer = WSSCVersion.WSSC_10;    
     /**
      * Creates a new instance of OperationResolverImpl
      */
     
-    public PolicyResolverImpl(HashMap<WSDLBoundOperation,SecurityPolicyHolder> inMessagePolicyMap,HashMap<String,SecurityPolicyHolder> ip ,WSDLBoundOperation cachedOperation,PipeConfiguration pipeConfig,AddressingVersion addVer,boolean isClient) {
+    public PolicyResolverImpl(HashMap<WSDLBoundOperation,SecurityPolicyHolder> inMessagePolicyMap,HashMap<String,SecurityPolicyHolder> ip ,WSDLBoundOperation cachedOperation,PipeConfiguration pipeConfig,AddressingVersion addVer,boolean isClient, RMVersion rmVer) {
         this.inMessagePolicyMap = inMessagePolicyMap;
         this.inProtocolPM = ip;
         this.cachedOperation = cachedOperation;
         this.pipeConfig = pipeConfig;
         this.addVer = addVer;
         this.isClient = isClient;
+        this.rmVer = rmVer;
     }
     
     public MessagePolicy resolvePolicy(ProcessingContext ctx){
@@ -140,8 +143,7 @@ public class PolicyResolverImpl implements PolicyResolver{
         action = getAction(msg);
         if (isRMMessage()) {
             SecurityPolicyHolder holder = inProtocolPM.get("RM");
-            return holder.getMessagePolicy();
-            
+            return holder.getMessagePolicy();            
         }
         
         if(isSCCancel()){
@@ -275,11 +277,13 @@ public class PolicyResolverImpl implements PolicyResolver{
     }
     
     private boolean isRMMessage(){
-        if (RM_CREATE_SEQ.equals(action) || RM_CREATE_SEQ_RESP.equals(action)
-        || RM_SEQ_ACK.equals(action) || RM_TERMINATE_SEQ.equals(action)
-        || RM_LAST_MESSAGE.equals(action)) {
+        
+        if(rmVer.getCreateSequenceAction().equals(action) || rmVer.getCreateSequenceResponseAction().equals(action)
+            || rmVer.getSequenceAcknowledgementAction().equals(action) || rmVer.getTerminateSequenceAction().equals(action)
+            || rmVer.getLastAction().equals(action) || rmVer.getCloseSequenceAction().equals(action) || 
+                rmVer.getCloseSequenceResponseAction().equals(action)){
             return true;
-        }
+        }               
         return false;
     }
     

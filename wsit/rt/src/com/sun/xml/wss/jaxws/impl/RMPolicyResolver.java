@@ -38,15 +38,14 @@ package com.sun.xml.wss.jaxws.impl;
 
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
-import com.sun.xml.ws.policy.PolicyMerger;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelTranslator;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelUnmarshaller;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
+import com.sun.xml.ws.rm.RMVersion;
 import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.util.ArrayList;
 
 /**
  * TODO: Make this configurable
@@ -55,23 +54,34 @@ import java.util.ArrayList;
 public class RMPolicyResolver {
     
     SecurityPolicyVersion spVersion;
+    RMVersion rmVersion;
     
     /** Creates a new instance of RMPolicyResolver */
     public RMPolicyResolver() {
         spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
+        rmVersion = RMVersion.WSRM10;
     }
     
-    public RMPolicyResolver(SecurityPolicyVersion spVersion) {
+    public RMPolicyResolver(SecurityPolicyVersion spVersion, RMVersion rmVersion) {
         this.spVersion = spVersion;
+        this.rmVersion = rmVersion;
     }
     
     public Policy getOperationLevelPolicy() throws PolicyException{
         PolicySourceModel model;
         try {
-            String rmMessagePolicy = "rm-msglevel-policy.xml";
-            if(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(spVersion.namespaceUri)){
+            String rmMessagePolicy = "rm-msglevel-policy.xml";            
+            if(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(spVersion.namespaceUri) &&
+                    RMVersion.WSRM10.namespaceUri.equals(rmVersion.namespaceUri)){
+                rmMessagePolicy = "rm-msglevel-policy-sp12.xml";
+            }else if(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(spVersion.namespaceUri) &&
+                    RMVersion.WSRM11.namespaceUri.equals(rmVersion.namespaceUri)){
                 rmMessagePolicy = "rm-msglevel-policy-sx.xml";
+            }else if(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri.equals(spVersion.namespaceUri) &&
+                    RMVersion.WSRM11.namespaceUri.equals(rmVersion.namespaceUri)){
+                rmMessagePolicy = "rm-msglevel-policy-sx-sp10.xml";
             }
+            
             model = unmarshalPolicy("com/sun/xml/ws/security/impl/policyconv/" + rmMessagePolicy);
         }catch (IOException ex) {
             throw new PolicyException(ex);
