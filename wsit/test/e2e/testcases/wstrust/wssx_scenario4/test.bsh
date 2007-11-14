@@ -1,0 +1,5 @@
+
+
+            oasisScenario4Binding_IPingServiceContract.ping("Hello from SUN for wssx scenario4!");
+         //   stub.ping(new Ping());
+            assertTrue(true);
