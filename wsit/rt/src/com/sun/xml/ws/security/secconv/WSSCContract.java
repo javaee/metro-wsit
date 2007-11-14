@@ -93,6 +93,8 @@ import com.sun.xml.ws.security.secconv.logging.LogStringsMessages;
 import com.sun.xml.ws.security.trust.WSTrustVersion;
 import com.sun.xml.ws.security.trust.elements.BaseSTSRequest;
 import com.sun.xml.ws.security.trust.elements.BaseSTSResponse;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.bind.JAXBElement;
 
@@ -402,7 +404,7 @@ public class WSSCContract {
     /** Cancel a SecurityContextToken */
     public BaseSTSResponse cancel(
             final BaseSTSRequest request, final IssuedTokenContext context)
-            throws WSSecureConversationException {
+            throws WSSecureConversationException{
         final CancelTarget cancelTgt = ((RequestSecurityToken)request).getCancelTarget();
         final SecurityTokenReference str = cancelTgt.getSecurityTokenReference();
         String id = null;
@@ -420,7 +422,14 @@ public class WSSCContract {
         
         final BaseSTSResponse rstr;
         if(wsscVer.getNamespaceURI().equals(WSSCVersion.WSSC_13.getNamespaceURI())){
-            rstr = eleFac13.createRSTRForCancel();    
+            RequestSecurityTokenResponse resp = eleFac13.createRSTRForCancel(); 
+            List<RequestSecurityTokenResponse> list = new ArrayList<RequestSecurityTokenResponse>();
+            list.add(resp);
+            try{
+                rstr = eleFac13.createRSTRCollectionForIssue(list);
+            }catch(WSTrustException ex){
+                throw new WSSecureConversationException(ex);
+            }
         }else{        
             rstr = eleFac.createRSTRForCancel();
         }
