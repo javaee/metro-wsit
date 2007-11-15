@@ -12,7 +12,7 @@
 <!--
 Created       : 2007 Mar 01 (Tue) 11:32:31 by Harold Carr.
 -->
-<pre>Last Modified : $Date: 2007-11-13 14:34:56 $ by $Author: shyam_rao $</pre>
+<pre>Last Modified : $Date: 2007-11-15 12:39:11 $ by $Author: oleksiys $</pre>
 
 <h5>Date: November ??, 2007</h5>
 
@@ -1062,15 +1062,15 @@ SecurityPolicy:sp:AlgorithmSuite/wsp:Policy/sp:SoapNormalization10</p>
 
 
 
-<p><b>WCF Interoperability</b><code> Updated: November ??, 2007</code></p>
+<p><b>WCF Interoperability</b><code> Updated: November 15, 2007</code></p>
 
 <p>n/a</p>
 
-<p><b>What is Not Implemented</b><code> Updated: November ??, 2007</code></p>
+<p><b>What is Not Implemented</b><code> Updated: November 15, 2007</code></p>
 
 <p>The SOAP/TCP implementation is feature-complete.</p>
 
-<p><b>Known Issues</b><code> Updated: November ??, 2007</code></p>
+<p><b>Known Issues</b><code> Updated: November 15, 2007</code></p>
 
 <table border="1" cellpadding="2" cellspacing="3">
   <tbody>
@@ -1084,11 +1084,11 @@ SecurityPolicy:sp:AlgorithmSuite/wsp:Policy/sp:SoapNormalization10</p>
     </tr>
     <tr>
       <td>
-      <p>On AS 9.1 SOAP/TCP connection is getting closed after serving 250 requests</p>
+      <p>On AS 9.1 release, SOAP/TCP connection is getting closed after serving 250 requests</p>
       <p>Glassfish issue number <a href="https://glassfish.dev.java.net/issues/show_bug.cgi?id=3615">3615</a></p>
       </td>
       <td>
-      <p>In AS 9.1 domain.xml file attribute "/domain/configs/config/http-service/keep-alive/@max-connections" 
+      <p>Issue is fixed starting from AS 9.1 UR1. Workaround for AS 9.1 release: domain.xml file attribute "/domain/configs/config/http-service/keep-alive/@max-connections" 
          value should be changed to -1</p>
       </td>
     </tr>
