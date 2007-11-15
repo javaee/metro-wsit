@@ -104,7 +104,6 @@ import javax.security.auth.callback.UnsupportedCallbackException;
 
 import com.sun.xml.wss.impl.misc.Base64;
 
-import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -116,6 +115,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
 import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
+import java.util.TimeZone;
 
 public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
     
@@ -400,8 +400,9 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
         try{
             final SAMLAssertionFactory samlFac = SAMLAssertionFactory.newInstance(SAMLAssertionFactory.SAML1_1);
             
-            final GregorianCalendar issuerInst = new GregorianCalendar();
-            final GregorianCalendar notOnOrAfter = new GregorianCalendar();
+            final TimeZone utcTimeZone = TimeZone.getTimeZone("UTC");
+            final GregorianCalendar issuerInst = new GregorianCalendar(utcTimeZone);
+            final GregorianCalendar notOnOrAfter = new GregorianCalendar(utcTimeZone);
             notOnOrAfter.add(Calendar.MILLISECOND, (int)stsConfig.getIssuedTokenTimeout());
             
             List<AudienceRestrictionCondition> arc = null;
@@ -475,8 +476,9 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
             final SAMLAssertionFactory samlFac = SAMLAssertionFactory.newInstance(SAMLAssertionFactory.SAML2_0);
             
             // Create Conditions
-            final GregorianCalendar issueInst = new GregorianCalendar();
-            final GregorianCalendar notOnOrAfter = new GregorianCalendar();
+            final TimeZone utcTimeZone = TimeZone.getTimeZone("UTC");
+            final GregorianCalendar issueInst = new GregorianCalendar(utcTimeZone);
+            final GregorianCalendar notOnOrAfter = new GregorianCalendar(utcTimeZone);
             notOnOrAfter.add(Calendar.MILLISECOND, (int)stsConfig.getIssuedTokenTimeout());
             
             final Conditions conditions = samlFac.createConditions(issueInst, notOnOrAfter, null, null, null, null);
@@ -495,8 +497,8 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
             final List<Attribute> attrs = new ArrayList<Attribute>();
             final Set<Map.Entry<QName, List<String>>> entries = claimedAttrs.entrySet();
             for(Map.Entry<QName, List<String>> entry : entries){
-                final QName attrKey = (QName)entry.getKey();
-                final List<String> values = (List<String>)entry.getValue();
+                final QName attrKey = entry.getKey();
+                final List<String> values = entry.getValue();
                 if (values != null && values.size() > 0){
                     if (STSAttributeProvider.NAME_IDENTIFIER.equals(attrKey.getLocalPart()) && subj == null){
                         final NameID nameId = samlFac.createNameID(values.get(0), attrKey.getNamespaceURI(), null);

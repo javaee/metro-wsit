@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustElementFactoryImpl.java,v 1.9 2007-11-02 19:12:23 jdg6688 Exp $
+ * $Id: WSTrustElementFactoryImpl.java,v 1.10 2007-11-15 21:54:23 jdg6688 Exp $
  */
 
 /*
@@ -103,9 +103,42 @@ import javax.xml.bind.JAXBElement;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.security.trust.WSTrustVersion;
+import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
+import java.util.logging.Level;
+
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.JAXBException;
+
+import javax.xml.bind.PropertyException;
+
+import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
+import java.util.logging.Logger;
+
 
 
 public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
+     private static final Logger log =
+            Logger.getLogger(
+            LogDomainConstants.TRUST_IMPL_DOMAIN,
+            LogDomainConstants.TRUST_IMPL_DOMAIN_BUNDLE);
+     
+    private Marshaller marshaller = null; 
+    public WSTrustElementFactoryImpl(){
+        try {
+            marshaller = getContext(WSTrustVersion.WS_TRUST_13).createMarshaller();
+            marshaller.setProperty("com.sun.xml.bind.namespacePrefixMapper", new com.sun.xml.ws.security.trust.util.TrustNamespacePrefixMapper());
+        } catch( PropertyException e ) {
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0003_ERROR_CREATING_WSTRUSTFACT(), e);
+            throw new RuntimeException(
+                    LogStringsMessages.WST_0003_ERROR_CREATING_WSTRUSTFACT(), e);
+        } catch (JAXBException jbe) {
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0003_ERROR_CREATING_WSTRUSTFACT(), jbe);
+            throw new RuntimeException(
+                    LogStringsMessages.WST_0003_ERROR_CREATING_WSTRUSTFACT(), jbe);
+        }
+    }
     
     /**
      * Create an RST for Issue from the given arguments
@@ -630,7 +663,7 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
             DocumentBuilder db = dbf.newDocumentBuilder();
             Document doc = db.newDocument();
             
-            javax.xml.bind.Marshaller marshaller = getContext(WSTrustVersion.WS_TRUST_13).createMarshaller();
+            //javax.xml.bind.Marshaller marshaller = getContext(WSTrustVersion.WS_TRUST_13).createMarshaller();
             JAXBElement<RequestSecurityTokenType> rstElement =  (new ObjectFactory()).createRequestSecurityToken((RequestSecurityTokenType)rst);
             marshaller.marshal(rstElement, doc);
             return doc.getDocumentElement();
@@ -655,7 +688,7 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
             DocumentBuilder db = dbf.newDocumentBuilder();
             Document doc = db.newDocument();
             
-            javax.xml.bind.Marshaller marshaller = getContext(WSTrustVersion.WS_TRUST_13).createMarshaller();
+            //javax.xml.bind.Marshaller marshaller = getContext(WSTrustVersion.WS_TRUST_13).createMarshaller();
             JAXBElement<RequestSecurityTokenResponseType> rstrElement =  (new ObjectFactory()).createRequestSecurityTokenResponse((RequestSecurityTokenResponseType)rstr);
             marshaller.marshal(rstrElement, doc);
             return doc.getDocumentElement();
@@ -667,7 +700,7 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
     
      public Element toElement(RequestSecurityTokenResponse rstr, Document doc) {
         try { 
-            javax.xml.bind.Marshaller marshaller = getContext(WSTrustVersion.WS_TRUST_13).createMarshaller();
+           // javax.xml.bind.Marshaller marshaller = getContext(WSTrustVersion.WS_TRUST_13).createMarshaller();
             JAXBElement<RequestSecurityTokenResponseType> rstrElement =  (new ObjectFactory()).createRequestSecurityTokenResponse((RequestSecurityTokenResponseType)rstr);
             marshaller.marshal(rstrElement, doc);
             return doc.getDocumentElement();
@@ -689,7 +722,7 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
             dbf.setNamespaceAware(true);            
             DocumentBuilder db = dbf.newDocumentBuilder();
             Document doc = db.newDocument();                               
-            javax.xml.bind.Marshaller marshaller = getContext(WSTrustVersion.WS_TRUST_13).createMarshaller();            
+           // javax.xml.bind.Marshaller marshaller = getContext(WSTrustVersion.WS_TRUST_13).createMarshaller();            
             JAXBElement<RequestSecurityTokenResponseCollectionType> rstrElement =
                     (new ObjectFactory()).createRequestSecurityTokenResponseCollection((RequestSecurityTokenResponseCollectionType)rstrCollection);                                    
             marshaller.marshal(rstrElement, doc);   
@@ -707,7 +740,7 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
             DocumentBuilder db = dbf.newDocumentBuilder();
             Document doc = db.newDocument();
             
-            javax.xml.bind.Marshaller marshaller = getContext(WSTrustVersion.WS_TRUST_13).createMarshaller();
+            //javax.xml.bind.Marshaller marshaller = getContext(WSTrustVersion.WS_TRUST_13).createMarshaller();
             JAXBElement<BinarySecretType> bsElement =
                     (new ObjectFactory()).createBinarySecret((BinarySecretType)bs);
             marshaller.marshal(bsElement, doc);
@@ -732,7 +765,7 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
                 doc = db.newDocument();
             }
             
-            javax.xml.bind.Marshaller marshaller = getContext(WSTrustVersion.WS_TRUST_13).createMarshaller();
+            //javax.xml.bind.Marshaller marshaller = getContext(WSTrustVersion.WS_TRUST_13).createMarshaller();
             JAXBElement<SecurityTokenReferenceType> strElement =  (new com.sun.xml.ws.security.secext10.ObjectFactory()).createSecurityTokenReference((SecurityTokenReferenceType)str);
             marshaller.marshal(strElement, doc);
             return doc.getDocumentElement();
@@ -757,7 +790,7 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
                 doc = db.newDocument();
             }
             
-            javax.xml.bind.Marshaller marshaller = getContext(WSTrustVersion.WS_TRUST_13).createMarshaller();
+            //javax.xml.bind.Marshaller marshaller = getContext(WSTrustVersion.WS_TRUST_13).createMarshaller();
             JAXBElement<BinarySecretType> bsElement =
                     (new ObjectFactory()).createBinarySecret((BinarySecretType)bs);
             marshaller.marshal(bsElement, doc);

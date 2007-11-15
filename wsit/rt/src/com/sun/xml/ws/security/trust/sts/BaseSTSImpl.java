@@ -231,12 +231,13 @@ public abstract class BaseSTSImpl implements BaseSTS {
             }
             if (wstVersion == null){
                 wstVersion = (WSTrustVersion)rtConfig.getOtherOptions().get(WSTrustConstants.WST_VERSION);
+                if (wstVersion != null){
+                    wstVer = wstVersion;
+                }
             }
-            if (wstVersion == null){
-                rtConfig.getOtherOptions().put(WSTrustConstants.WST_VERSION, wstVer);
-            }else{
-                wstVer = wstVersion;
-            }
+           
+            rtConfig.getOtherOptions().put(WSTrustConstants.WST_VERSION, wstVer);
+            
             return rtConfig;
         }
         

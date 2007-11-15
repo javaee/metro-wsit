@@ -51,6 +51,10 @@ public class TrustNamespacePrefixMapper extends NamespacePrefixMapper {
         if( "http://schemas.xmlsoap.org/ws/2005/02/trust".equals(namespaceUri) ) {
             return "wst";
         }
+        
+        if( "http://docs.oasis-open.org/ws-sx/ws-trust/200512".equals(namespaceUri) ) {
+            return "trust";
+        }
 
         if( "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd".equals(namespaceUri) ) {
             return "wsu";
@@ -62,6 +66,10 @@ public class TrustNamespacePrefixMapper extends NamespacePrefixMapper {
        
         if( "http://schemas.xmlsoap.org/ws/2005/02/sc".equals(namespaceUri) ) {
             return "wssc";
+        }
+        
+        if( "http://docs.oasis-open.org/ws-sx/ws-secureconversation/200512".equals(namespaceUri) ) {
+            return "sc";
         }
         
         if( "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd".equals(namespaceUri) ) {

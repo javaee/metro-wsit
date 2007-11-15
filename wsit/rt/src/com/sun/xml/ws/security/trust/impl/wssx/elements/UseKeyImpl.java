@@ -1,5 +1,5 @@
 /*
- * $Id: UseKeyImpl.java,v 1.2 2007-10-31 05:54:59 jdg6688 Exp $
+ * $Id: UseKeyImpl.java,v 1.3 2007-11-15 21:55:13 jdg6688 Exp $
  */
 
 /*
@@ -32,12 +32,14 @@ import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
 import com.sun.xml.ws.security.trust.impl.elements.str.SecurityTokenReferenceImpl;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
 import com.sun.xml.ws.security.Token;
+import com.sun.xml.ws.security.trust.GenericToken;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.ws.security.trust.elements.UseKey;
 import com.sun.xml.ws.security.trust.impl.wssx.bindings.UseKeyType;
 import java.net.URISyntaxException;
 import java.security.PublicKey;
 import javax.xml.bind.JAXBElement;
+import org.w3c.dom.Element;
 
 /**
  * @author Manveen Kaur
@@ -59,16 +61,12 @@ public class UseKeyImpl extends UseKeyType implements UseKey {
     }
     
     public UseKeyImpl (UseKeyType ukType)throws Exception{
-        JAXBElement obj = (JAXBElement)ukType.getAny();
-        String local = obj.getName().getLocalPart();
-        if ("SecurityTokenReference".equals(local)) {
-            SecurityTokenReference str = 
-                        new SecurityTokenReferenceImpl((SecurityTokenReferenceType)obj.getValue());
-            setSecurityTokenReference(str);
-            setTargetType(WSTrustConstants.STR_TYPE);
-        } else {
-            //ToDo
-        } 
+        Object obj = ukType.getAny();
+        if (obj instanceof JAXBElement){
+           //Todo
+        }else{
+            token = new GenericToken((Element)obj);
+        }
     }
     
     public String getTargetType() {
