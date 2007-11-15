@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ The contents of this file are subject to the terms
+ of the Common Development and Distribution License
+ (the "License").  You may not use this file except
+ in compliance with the License.
+
+ You can obtain a copy of the license at
+ https://jwsdp.dev.java.net/CDDLv1.0.html
+ See the License for the specific language governing
+ permissions and limitations under the License.
+
+ When distributing Covered Code, include this CDDL
+ HEADER in each file and include the License file at
+ https://jwsdp.dev.java.net/CDDLv1.0.html  If applicable,
+ add the following below this CDDL HEADER, with the
+ fields enclosed by brackets "[]" replaced with your
+ own identifying information: Portions Copyright [yyyy]
+ [name of copyright owner]
+--><!--
+ Copyright (c) 2006 Sun Microsystems, Inc.
+ All rights reserved. 
+--><wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="http://tempuri.org/" xmlns:wsa10="http://www.w3.org/2005/08/addressing" xmlns:wsap10="http://www.w3.org/2006/05/addressing/wsdl" xmlns:wsap="http://schemas.xmlsoap.org/ws/2004/09/policy/addressing" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsp-old="http://schemas.xmlsoap.org/ws/2004/09/policy" xmlns:wsp="http://www.w3.org/ns/ws-policy" xmlns:wsam="http://www.w3.org/2007/05/addressing/metadata" xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing" xmlns:ci="http://schemas.microsoft.com/ws/2005/01/WSDL/Extensions/ContractInheritance" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:wsx="http://schemas.xmlsoap.org/ws/2004/09/mex" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://tempuri.org/">
+    
+    <!-- begin :Keystore Info : latest method : referred from wsdl:service element -->
+<wsdl:import location="sts-client.wsdl" namespace="http://tempuri.org/"/>
+    <wsp:Policy xmlns:sc="http://schemas.sun.com/2006/03/wss/client" xmlns:wspp="http://java.sun.com/xml/ns/wsit/policy" xmlns:scc="http://schemas.sun.com/ws/2006/05/sc/client" wsu:Id="ClientPolicy">
+        <wsp:ExactlyOne>
+            <wsp:All>
+                <sc:KeyStore wspp:visibility="private" location="$WSIT_HOME/xws-security/etc/client-keystore.jks" type="JKS" alias="alice" storepass="changeit"/>
+                <sc:TrustStore wspp:visibility="private" location="$WSIT_HOME/xws-security/etc/client-truststore.jks" type="JKS" storepass="changeit" peeralias="bob"/>
+            <tc:PreconfiguredSTS xmlns:tc="http://schemas.sun.com/ws/2006/05/trust/client" endpoint="local:///space/workspace/WSIT/wsit/wsit/test/e2e/testcases/wstrust/wssx_scenario10/work/services/sts/war/" wsdlLocation="file:/space/workspace/WSIT/wsit/wsit/test/e2e/testcases/wstrust/wssx_scenario10/./sts/sts.wsdl" serviceName="SecurityTokenService" portName="CustomBinding_ISecurityTokenService1" namespace="http://tempuri.org/">
+               </tc:PreconfiguredSTS>
+    
+            </wsp:All>
+        </wsp:ExactlyOne>
+    </wsp:Policy>
+    <!-- end :Keystore Info : latest method : referred from wsdl:service element -->
+
+  <wsdl:message name="PingRequest">
+       <wsdl:part xmlns:q="http://example.org/Ping" name="Ping" element="q:Ping"></wsdl:part>
+   </wsdl:message>
+   <wsdl:message name="PingResponse">
+       <wsdl:part xmlns:q="http://example.org/Ping" name="PingResponse" element="q:PingResponse"></wsdl:part>
+   </wsdl:message>
+  
+    <wsdl:portType name="IPingServiceContract">
+            <wsdl:operation name="Ping">
+                <wsdl:input wsam:Action="http://example.org/Ping" name="PingRequest" message="tns:PingRequest"/>
+                <wsdl:output wsam:Action="http://example.org/Ping" name="PingResponse" message="tns:PingResponse"/>
+            </wsdl:operation>
+    </wsdl:portType>
+ 
+    <wsdl:binding name="CustomBinding_IPingServiceContract5" type="tns:IPingServiceContract"> 
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/> 
+        <wsp:PolicyReference URI="#ClientPolicy"/>
+        <wsdl:operation name="Ping"> 
+            <soap:operation soapAction="http://example.org/Ping" style="document"/> 
+            <wsdl:input> 
+                <soap:body use="literal"/> 
+            </wsdl:input> 
+            <wsdl:output> 
+                <soap:body use="literal"/> 
+            </wsdl:output> 
+        </wsdl:operation>         
+    </wsdl:binding>     
+
+    <!-- **** NOTE : SERVICE HAS POLICYREFERENCE TO CLIENTKEYSTOREPOLICY DEFINED ABOVE **** -->
+    <wsdl:service name="PingService"> 
+        <wsdl:port name="CustomBinding_IPingServiceContract5" binding="tns:CustomBinding_IPingServiceContract5"> 
+            <soap:address location="REPLACE_WITH_ACTUAL_URL"/> 
+        </wsdl:port>
+    </wsdl:service> 
+    <!-- **** NOTE : SERVICE HAS POLICYREFERENCE TO CLIENTKEYSTOREPOLICY DEFINED ABOVE **** -->
+</wsdl:definitions>
