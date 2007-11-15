@@ -697,7 +697,8 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
                 issuedTokenContextMap.put(
                     ((Token)issuedTokenAssertion).getTokenId(), ctx);
             }catch(WSTrustException se){
-                throw new WebServiceException("ERROR_ISSUED_TOKEN_CREATION", se);
+                log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0052_ERROR_ISSUEDTOKEN_CREATION(), se);
+                throw new WebServiceException(LogStringsMessages.WSITPVD_0052_ERROR_ISSUEDTOKEN_CREATION(), se);
             }
         }
     }

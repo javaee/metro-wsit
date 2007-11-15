@@ -421,8 +421,9 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
                 issuedTokenContextMap.put(
                     ((Token)issuedTokenAssertion).getTokenId(), ctx);
             }catch(WSTrustException se){
-                //ToDo
-                throw new WebServiceException("ERROR_ISSUED_TOKEN_CREATION", se);
+                log.log(Level.SEVERE,
+                    LogStringsMessages.WSSPIPE_0035_ERROR_ISSUEDTOKEN_CREATION(), se);
+                throw new WebServiceException(LogStringsMessages.WSSPIPE_0035_ERROR_ISSUEDTOKEN_CREATION(), se);
             }
         }
     }
