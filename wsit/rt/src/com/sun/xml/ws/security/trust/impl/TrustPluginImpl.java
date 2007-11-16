@@ -63,11 +63,13 @@ import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponse;
 import com.sun.xml.ws.security.trust.elements.SecondaryParameters;
 import com.sun.xml.ws.security.trust.elements.UseKey;
 import com.sun.xml.ws.security.trust.util.WSTrustUtil;
+import com.sun.xml.wss.impl.dsig.WSSPolicyConsumerImpl;
 import java.net.URI;
 import java.net.URL;
 import java.net.URISyntaxException;
 import java.net.MalformedURLException;
 import java.rmi.RemoteException;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.List;
@@ -97,6 +99,7 @@ import java.security.KeyException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PublicKey;
+import java.security.spec.RSAKeyGenParameterSpec;
 import java.util.ArrayList;
 import java.util.UUID;
 import javax.xml.crypto.MarshalException;
@@ -337,7 +340,7 @@ public class TrustPluginImpl implements TrustPlugin {
             len = (int)keySize/8;
         }
         
-        if (keyType.equals(wstVer.getSymmetricKeyTypeURI())){
+        if (wstVer.getSymmetricKeyTypeURI().equals(keyType)){
             final SecureRandom secRandom = new SecureRandom();
             final byte[] nonce = new byte[len];
             secRandom.nextBytes(nonce);
@@ -345,23 +348,27 @@ public class TrustPluginImpl implements TrustPlugin {
             final Entropy entropy = fact.createEntropy(binarySecret);
             rst.setEntropy(entropy);
             rst.setComputedKeyAlgorithm(URI.create(wstVer.getCKPSHA1algorithmURI()));
-        }else if (keyType.equals(wstVer.getPublicKeyTypeURI()) && keySize > 1 ){
+        }else if (wstVer.getPublicKeyTypeURI().equals(keyType) && keySize > 1 ){
             // Create a RSA key pairs for use with UseKey
-            KeyPairGenerator kpg;
+         /*   KeyPairGenerator kpg;
             try{
-                kpg = KeyPairGenerator.getInstance("SHA1withRSA");
+                kpg = KeyPairGenerator.getInstance("RSA");
+                RSAKeyGenParameterSpec rsaSpec = new RSAKeyGenParameterSpec((int)keySize, RSAKeyGenParameterSpec.F0);
+                kpg.initialize(rsaSpec);
             }catch (NoSuchAlgorithmException ex){
+                throw new WSTrustException("Unable to create key pairs for UseKey", ex);
+            }catch (InvalidAlgorithmParameterException ex){
                 throw new WSTrustException("Unable to create key pairs for UseKey", ex);
             }
             kpg.initialize((int)keySize);
             KeyPair keyPair = kpg.generateKeyPair();
             
             // Create the Sig attribute Value for UseKey
-            String sig = "uuid-" + UUID.randomUUID().toString();
+            // String sig = "uuid-" + UUID.randomUUID().toString();
             
             // Create the UseKey element in RST
             KeyInfo keyInfo = createKeyInfo(keyPair.getPublic());
-             final DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+            final DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             Document doc = null;
             try{
                 doc = docFactory.newDocumentBuilder().newDocument();
@@ -376,12 +383,12 @@ public class TrustPluginImpl implements TrustPlugin {
                 throw new WSTrustException(LogStringsMessages.WST_0039_ERROR_CREATING_DOCFACTORY(), ex);
             }
             Token token = new GenericToken(doc.getDocumentElement());
-            UseKey useKey = fact.createUseKey(token, sig);
+            UseKey useKey = fact.createUseKey(token, null);
             rst.setUseKey(useKey);
 
             // Put the key pair and the sig in the STSConfiguration
             stsConfig.getOtherOptions().put(WSTrustConstants.USE_KEY_RSA_KEY_PAIR, keyPair);
-            stsConfig.getOtherOptions().put(WSTrustConstants.USE_KEY_SIGNATURE_ID, sig);
+            //stsConfig.getOtherOptions().put(WSTrustConstants.USE_KEY_SIGNATURE_ID, sig); */
         }
        
         if (log.isLoggable(Level.FINE)) {
@@ -536,7 +543,7 @@ public class TrustPluginImpl implements TrustPlugin {
     }
 
     private KeyInfo createKeyInfo(final PublicKey pubKey)throws WSTrustException{
-        KeyInfoFactory kif = KeyInfoFactory.getInstance("DOM");
+        KeyInfoFactory kif = WSSPolicyConsumerImpl.getInstance().getKeyInfoFactory();
         KeyValue kv = null;
         try{
             kv = kif.newKeyValue(pubKey);
