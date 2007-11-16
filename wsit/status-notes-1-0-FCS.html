@@ -12,7 +12,7 @@
 <!--
 Created       : 2007 Mar 01 (Tue) 11:32:31 by Harold Carr.
 -->
-<pre>Last Modified : $Date: 2007-11-16 08:55:03 $ by $Author: daveronge $</pre>
+<pre>Last Modified : $Date: 2007-11-16 17:12:00 $ by $Author: kumarjayanti $</pre>
 
 <h5>Date: September 17, 2007</h5>
 
@@ -235,7 +235,7 @@ WSIT-&gt;WCF  :   25/26  (One Scenario fails due to WCF Issue# CSD 4051)
 WSIT-&gt;WSIT :   26/26
 </pre>
 
-<p><b>What is Not Implemented</b><code> Updated: August 16, 2007</code></p>
+<p><b>What is Not Implemented</b><code> Updated: November 16, 2007</code></p>
 
 <p>The following features have&nbsp; not been implemented:</p>
 <ul>
@@ -246,8 +246,6 @@ values for AlgorithmSuite assertion in the BootstrapPolicy and the
 Application Policy. That means both the BootstrapPolicy and
 ApplicationPolicy should use the same AlgorithmSuite.<br>
   </li>
-  <li>Session timeout handling for secure conversation sessions and
-LifeTime handling for IssuedTokens </li>
   <li>MaxNonceAge information item specified in NetBeans IDE user
 interface and configuration&nbsp; WSDL will not be honored, default
 values will be used instead. </li>
@@ -316,7 +314,7 @@ Section</p>
       </td>
       <td>
       <p><span style="font-weight: bold;">&nbsp;includeTokenPolicy=Once</span>&nbsp;
-is NOT supported,&nbsp;
+is only supported for Kerberos Tokens but not for other tokens,&nbsp;
 Always, AlwaysToRecipient and Never are supported (refer known <a
  href="https://wsit.dev.java.net/issues/show_bug.cgi?id=19">Issue# 19</a>)<br>
       </p>
@@ -352,17 +350,6 @@ The rest&nbsp; (&lt;sp:WssX509V3Token11&gt;,
 &lt;sp:WssX509PkiPathV1Token11&gt;, &lt;sp:WssX509V1Token10&gt;,
 &lt;sp:WssX509V1Token11&gt;) will be supported in a future release
 based on real-world usecases and customer preferences.</p>
-      </td>
-    </tr>
-    <tr>
-      <td>
-      <p>6.3.4</p>
-      </td>
-      <td>
-      <p>KerberosToken</p>
-      </td>
-      <td>
-      <p>Will be supported in a future release</p>
       </td>
     </tr>
     <tr>
@@ -504,7 +491,7 @@ supported in this release.</p>
   </tbody>
 </table>
 
-<p><b>Known Issues</b><code> Updated: August 16, 2007</code></p>
+<p><b>Known Issues</b><code> Updated: November 16, 2007</code></p>
 
 <ul>
 </ul>
@@ -545,7 +532,7 @@ includeToken Policy ONCE is not Supported</font></p>
 on IssueTracker</p>
       </td>
       <td>
-      <p><font color="#000000">Will be supported in a future release</font></p>
+      <p><font color="#000000">Is only supported for Kerberos Tokens and will be supported for other Tokens in Future Release</font></p>
       </td>
     </tr>
     <tr>
@@ -637,16 +624,6 @@ generate the request soap message and the exception thrown is:
       </td>
     </tr>
     <tr>
-      <td style="vertical-align: top;">SAMLValidator Not called even after being configured<br>
-      </td>
-      <td style="vertical-align: top;"> SAMLValidator not called even though it was instantiated
-      <a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=524">Issue#524</a>
-      </td>
-      <td style="vertical-align: top;">Will be fixed in a future
-release.<br>
-      </td>
-    </tr>
-    <tr>
       <td style="vertical-align: top;">SamlToken as InitiatorToken in
 AsymmetricBinding, with ProtectTokens fails with :: Could not find
 Reference #5 under Signature with ID1<br>
@@ -665,6 +642,14 @@ fails on the server side with the following exception trace :
     </tr>
   </tbody>
 </table>
+
+<h3>What is New in Metro 1.1&nbsp; : updated November 16 2007<br>
+</h3>
+<br>
+1.&nbsp; Support for Kerberos Token Profile 1.1<br>
+2.&nbsp; Fix for Issues&nbsp; 524<br>
+3.&nbsp; Support for&nbsp; IBM AIX<br>
+
 
 <!-- ================================================== -->
 <br>
