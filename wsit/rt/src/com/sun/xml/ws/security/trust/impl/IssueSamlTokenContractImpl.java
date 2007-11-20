@@ -89,6 +89,7 @@ import com.sun.xml.wss.saml.Advice;
 import com.sun.xml.wss.saml.Assertion;
 import com.sun.xml.wss.saml.Attribute;
 import com.sun.xml.wss.saml.AttributeStatement;
+import com.sun.xml.wss.saml.AudienceRestriction;
 import com.sun.xml.wss.saml.AudienceRestrictionCondition;
 import com.sun.xml.wss.saml.AuthenticationStatement;
 import com.sun.xml.wss.saml.AuthnContext;
@@ -123,10 +124,6 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
             Logger.getLogger(
             LogDomainConstants.TRUST_IMPL_DOMAIN,
             LogDomainConstants.TRUST_IMPL_DOMAIN_BUNDLE);
-    
-    private static final String SAML_HOLDER_OF_KEY_1_0 = "urn:oasis:names:tc:SAML:1.0:cm:holder-of-key";
-    private static final String SAML_HOLDER_OF_KEY_2_0 = "urn:oasis:names:tc:SAML:2.0:cm:holder-of-key";
-    private static final String SAML_BEARER_1_0 = "urn:oasis:names:tc:SAML:1.0:cm:bearer";
     
     public Token createSAMLAssertion(final String appliesTo, final String tokenType, final String keyType, final String assertionId, final String issuer, final  Map<QName, List<String>> claimedAttrs, final IssuedTokenContext context) throws WSTrustException {
         Token token = null;
@@ -407,20 +404,26 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
             
             List<AudienceRestrictionCondition> arc = null;
             final List<String> confirmMethods = new ArrayList<String>();
+            String confirMethod = (String)stsConfig.getOtherOptions().get(WSTrustConstants.SAML_CONFIRMATION_METHOD);
+            if (confirMethod == null){
+                if (keyType.equals(wstVer.getBearerKeyTypeURI())){
+                     confirMethod = SAML_BEARER_1_0;
+                     if (appliesTo != null){
+                         arc = new ArrayList<AudienceRestrictionCondition>();
+                         List<String> au = new ArrayList<String>();
+                         au.add(appliesTo);
+                         arc.add(samlFac.createAudienceRestrictionCondition(au));
+                     }
+                }else{
+                    confirMethod = SAML_HOLDER_OF_KEY_1_0;
+                }
+            }
+            
             Element keyInfoEle = null;
-            if (keyType.equals(wstVer.getBearerKeyTypeURI())){
-                 confirmMethods.add(SAML_BEARER_1_0);
-                 if (appliesTo != null){
-                     arc = new ArrayList<AudienceRestrictionCondition>();
-                     List<String> au = new ArrayList<String>();
-                     au.add(appliesTo);
-                     arc.add(samlFac.createAudienceRestrictionCondition(au));
-                 }
-                 
-            }else{
-                confirmMethods.add(SAML_HOLDER_OF_KEY_1_0);
+            if (keyInfo != null && !wstVer.getBearerKeyTypeURI().equals(confirMethod)){
                 keyInfoEle = keyInfo.getElement();
             }
+            confirmMethods.add(confirMethod);
             
             final SubjectConfirmation subjectConfirm = samlFac.createSubjectConfirmation(
                     confirmMethods, null, keyInfoEle);
@@ -481,17 +484,38 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
             final GregorianCalendar notOnOrAfter = new GregorianCalendar(utcTimeZone);
             notOnOrAfter.add(Calendar.MILLISECOND, (int)stsConfig.getIssuedTokenTimeout());
             
-            final Conditions conditions = samlFac.createConditions(issueInst, notOnOrAfter, null, null, null, null);
+            List<AudienceRestriction> arc = null;
+            KeyInfoConfirmationData keyInfoConfData = null;
+            String confirMethod = (String)stsConfig.getOtherOptions().get(WSTrustConstants.SAML_CONFIRMATION_METHOD);
+            if (confirMethod == null){
+                if (keyType.equals(wstVer.getBearerKeyTypeURI())){
+                     confirMethod = SAML_BEARER_2_0;
+                     if (appliesTo != null){
+                         arc = new ArrayList<AudienceRestriction>();
+                         List<String> au = new ArrayList<String>();
+                         au.add(appliesTo);
+                         arc.add(samlFac.createAudienceRestriction(au));
+                     }
+
+                }else{
+                    confirMethod = SAML_HOLDER_OF_KEY_2_0;
+                }
+            }
+            if (keyInfo != null && wstVer.getBearerKeyTypeURI().equals(confirMethod)){
+                keyInfoConfData = samlFac.createKeyInfoConfirmationData(keyInfo.getElement());
+            }
+  
+            
+            final Conditions conditions = samlFac.createConditions(issueInst, notOnOrAfter, null, arc, null, null);
             
             // Create Subject
             
             // SubjectConfirmationData subjComfData = samlFac.createSubjectConfirmationData(
             // null, null, null, null, appliesTo, keyInfo.getElement());
-            
-            final KeyInfoConfirmationData keyInfoConfData = samlFac.createKeyInfoConfirmationData(keyInfo.getElement());
+           
             
             final SubjectConfirmation subjectConfirm = samlFac.createSubjectConfirmation(
-                    null, keyInfoConfData, SAML_HOLDER_OF_KEY_2_0);
+                    null, keyInfoConfData, confirMethod);
             
             com.sun.xml.wss.saml.Subject subj = null;
             final List<Attribute> attrs = new ArrayList<Attribute>();

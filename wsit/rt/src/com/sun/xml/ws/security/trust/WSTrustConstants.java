@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustConstants.java,v 1.11 2007-10-31 05:55:00 jdg6688 Exp $
+ * $Id: WSTrustConstants.java,v 1.12 2007-11-20 00:10:46 jdg6688 Exp $
  */
 
 /*
@@ -45,6 +45,8 @@ package com.sun.xml.ws.security.trust;
  * @author WS-Trust Implementation Team
  */
 public class WSTrustConstants {
+    
+    public static final String SAML_CONFIRMATION_METHOD = "Saml-Confirmation-Method";
     
     public static final String USE_KEY_RSA_KEY_PAIR = "UseKey-RSAKeyPair";
 

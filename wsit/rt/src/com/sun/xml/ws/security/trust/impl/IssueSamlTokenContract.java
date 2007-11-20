@@ -105,6 +105,13 @@ public abstract class IssueSamlTokenContract implements com.sun.xml.ws.api.secur
             LogDomainConstants.TRUST_IMPL_DOMAIN,
             LogDomainConstants.TRUST_IMPL_DOMAIN_BUNDLE);
     
+    protected static final String SAML_HOLDER_OF_KEY_1_0 = "urn:oasis:names:tc:SAML:1.0:cm:holder-of-key";
+    protected static final String SAML_HOLDER_OF_KEY_2_0 = "urn:oasis:names:tc:SAML:2.0:cm:holder-of-key";
+    protected static final String SAML_BEARER_1_0 = "urn:oasis:names:tc:SAML:1.0:cm:bearer";
+    protected static final String SAML_BEARER_2_0 = "urn:oasis:names:tc:SAML:2.0:cm:bearer";
+    protected static final String SAML_SENDER_VOUCHES_1_0 = "urn:oasis:names:tc:SAML:1.0:cm::sender-vouches";
+    protected static final String SAML_SENDER_VOUCHES_2_0 = "urn:oasis:names:tc:SAML:2.0:cm:sender-vouches";
+    
     protected STSConfiguration stsConfig;
     protected WSTrustVersion wstVer;
     protected WSTrustElementFactory eleFac = 
@@ -197,6 +204,15 @@ public abstract class IssueSamlTokenContract implements com.sun.xml.ws.api.secur
             Object oboToken = obo.getAny();
             if (oboToken != null){
                 subject.getPublicCredentials().add((Element)oboToken);
+                String confirMethod = null;
+                if (tokenType.equals(WSTrustConstants.SAML10_ASSERTION_TOKEN_TYPE)){
+                    confirMethod = SAML_SENDER_VOUCHES_1_0;
+                } else if (tokenType.equals(WSTrustConstants.SAML20_ASSERTION_TOKEN_TYPE)){
+                    confirMethod = SAML_SENDER_VOUCHES_2_0;
+                }
+                if (confirMethod != null){
+                    stsConfig.getOtherOptions().put(WSTrustConstants.SAML_CONFIRMATION_METHOD, confirMethod);
+                }
             }
         }
         
