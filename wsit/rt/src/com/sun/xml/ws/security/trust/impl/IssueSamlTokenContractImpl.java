@@ -395,7 +395,7 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
     protected Assertion createSAML11Assertion(final String assertionId, final String issuer, final String appliesTo, final KeyInfo keyInfo, final Map<QName, List<String>> claimedAttrs, String keyType) throws WSTrustException{
         Assertion assertion = null;
         try{
-            final SAMLAssertionFactory samlFac = SAMLAssertionFactory.newInstance(SAMLAssertionFactory.SAML1_1);
+                final SAMLAssertionFactory samlFac = SAMLAssertionFactory.newInstance(SAMLAssertionFactory.SAML1_1);
             
             final TimeZone utcTimeZone = TimeZone.getTimeZone("UTC");
             final GregorianCalendar issuerInst = new GregorianCalendar(utcTimeZone);
@@ -501,7 +501,7 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
                     confirMethod = SAML_HOLDER_OF_KEY_2_0;
                 }
             }
-            if (keyInfo != null && wstVer.getBearerKeyTypeURI().equals(confirMethod)){
+            if (keyInfo != null && !wstVer.getBearerKeyTypeURI().equals(confirMethod)){
                 keyInfoConfData = samlFac.createKeyInfoConfirmationData(keyInfo.getElement());
             }
   
