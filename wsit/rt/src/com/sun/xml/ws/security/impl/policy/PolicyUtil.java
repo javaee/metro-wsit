@@ -1426,6 +1426,16 @@ public class PolicyUtil {
         return false;
     }
     
+    public static boolean isEncryptWith(PolicyAssertion assertion) {
+        if(!isTrustNS(assertion)){
+            return false;
+        }
+        if(EncryptWith.equals(assertion.getName().getLocalPart())){
+            return true;
+        }
+        return false;
+    }
+    
     public static boolean isRequestType(PolicyAssertion assertion) {
         if(!isTrustNS(assertion)){
             return false;

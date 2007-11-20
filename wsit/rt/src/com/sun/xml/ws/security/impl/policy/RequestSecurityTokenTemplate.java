@@ -196,6 +196,8 @@ public class RequestSecurityTokenTemplate extends PolicyAssertion implements com
                         this.lifeTime = (Lifetime) assertion;
                     }else if(PolicyUtil.isSignWith(assertion)){
                         this.signWith = assertion.getValue();
+                    }else if(PolicyUtil.isEncryptWith(assertion)){
+                        this.encryptWith = assertion.getValue();
                     }else if(PolicyUtil.isTrustTokenType(assertion)){
                         this.tokenType = assertion.getValue();
                     }else if(PolicyUtil.isRequestType(assertion)){
