@@ -392,7 +392,7 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
         return keyInfo;
     }
     
-    private Assertion createSAML11Assertion(final String assertionId, final String issuer, final String appliesTo, final KeyInfo keyInfo, final Map<QName, List<String>> claimedAttrs, String keyType) throws WSTrustException{
+    protected Assertion createSAML11Assertion(final String assertionId, final String issuer, final String appliesTo, final KeyInfo keyInfo, final Map<QName, List<String>> claimedAttrs, String keyType) throws WSTrustException{
         Assertion assertion = null;
         try{
             final SAMLAssertionFactory samlFac = SAMLAssertionFactory.newInstance(SAMLAssertionFactory.SAML1_1);
@@ -473,7 +473,7 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
         return assertion;
     }
     
-    private Assertion createSAML20Assertion(final String assertionId, final String issuer, final String appliesTo, final KeyInfo keyInfo, final  Map<QName, List<String>> claimedAttrs, String keyType) throws WSTrustException{
+    protected Assertion createSAML20Assertion(final String assertionId, final String issuer, final String appliesTo, final KeyInfo keyInfo, final  Map<QName, List<String>> claimedAttrs, String keyType) throws WSTrustException{
         Assertion assertion = null;
         try{
             final SAMLAssertionFactory samlFac = SAMLAssertionFactory.newInstance(SAMLAssertionFactory.SAML2_0);
