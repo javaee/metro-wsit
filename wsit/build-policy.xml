@@ -53,6 +53,7 @@
                 <include name="com/sun/xml/ws/policy/*.class"/>
                 <include name="com/sun/xml/ws/policy/jcaps/**/*.class"/>
                 <include name="com/sun/xml/ws/policy/privateutil/**/*.class"/>
+                <include name="com/sun/xml/ws/policy/privateutil/**/*.properties"/>
                 <include name="com/sun/xml/ws/policy/sourcemodel/**/*.class"/>
                 <include name="com/sun/xml/ws/policy/spi/**/*.class"/>
                 <include name="com/sun/xml/ws/policy/util/**/*.class"/>
