@@ -38,8 +38,7 @@
     <description>Builds the policy core library. This build file is only temporary
         until the policy code can be moved to a separate project.
     </description>
-    <!--import file="nbproject/build-impl.xml"/>
-    <import file="properties.xml"/-->
+
     <target name="all" depends="jar"/>
 
     <target name="compile">
