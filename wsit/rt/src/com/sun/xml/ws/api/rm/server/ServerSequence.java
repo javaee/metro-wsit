@@ -42,8 +42,8 @@
  * Created on January 19, 2007, 11:57 AM
  *
  */
-
 package com.sun.xml.ws.api.rm.server;
+
 import com.sun.xml.ws.api.rm.Sequence;
 
 /**
@@ -52,8 +52,8 @@ import com.sun.xml.ws.api.rm.Sequence;
  * to reinitialize sequences using persisted data after a restart.
  */
 public interface ServerSequence extends Sequence {
-        
-     /**
+
+    /**
      * Used to re-populate a sequence with persisted messages
      * after a restart.
      *
@@ -62,7 +62,7 @@ public interface ServerSequence extends Sequence {
      * @param complete Indicates whether to mark the message
      *          as complete.
      */
-    public void resetMessage(int index, 
-            com.sun.xml.ws.api.message.Message message, 
+    public void resetMessage(int index,
+            com.sun.xml.ws.api.message.Message message,
             boolean complete);
 }

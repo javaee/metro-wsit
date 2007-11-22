@@ -42,8 +42,8 @@
  * Created on January 19, 2007, 11:58 AM
  *
  */
-
 package com.sun.xml.ws.api.rm.server;
+
 import com.sun.xml.ws.api.rm.SequenceSettings;
 import java.util.logging.Logger;
 import java.util.logging.Level;
@@ -53,18 +53,18 @@ import com.sun.xml.ws.rm.RMException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
+
 /**
  * Factory class contains a method that can be used to re-initialize a server-side
  * sequence using persisted data after a system failure.
  */
 public class ServerSequenceFactory {
-    
-    private static Logger logger = 
-            Logger.getLogger(LoggingHelper.getLoggerName(ServerSequenceFactory.class));
-    
+
+    private static Logger logger = Logger.getLogger(LoggingHelper.getLoggerName(ServerSequenceFactory.class));
+
     private ServerSequenceFactory() {
     }
-    
+
     /**
      * Factory method initializes a server-side sequence using saved data.  This
      * is necessary after a restart in order for the system to recognize incoming
@@ -79,22 +79,18 @@ public class ServerSequenceFactory {
     public static ServerSequence createSequence(SequenceSettings settings) {
         try {
             return RMDestination.getRMDestination().createSequence(
-                                          new URI(settings.acksTo), 
-                                          settings.sequenceId,
-                                          settings.companionSequenceId,
-                                          new SequenceConfig(settings));
+                    new URI(settings.acksTo),
+                    settings.sequenceId,
+                    settings.companionSequenceId,
+                    new SequenceConfig(settings));
         } catch (RMException e) {
             //TODO I18
-            logger.log(Level.SEVERE, 
-                    "ServerSequenceFactory.createSequence failed", e);
+            logger.log(Level.SEVERE, "ServerSequenceFactory.createSequence failed", e);
             return null;
-        } catch (URISyntaxException ee) {
+        } catch (URISyntaxException e) {
             //TODO I18
-            logger.log(Level.SEVERE, 
-                    "ServerSequenceFactory.createSequence failed", ee);
+            logger.log(Level.SEVERE, "ServerSequenceFactory.createSequence failed", e);
             return null;
         }
-        
     }
-    
 }

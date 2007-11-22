@@ -42,12 +42,12 @@
  * Created on January 19, 2007, 10:16 AM
  *
  */
-
 package com.sun.xml.ws.api.rm.client;
+
 import com.sun.xml.ws.api.rm.SequenceSettings;
 import javax.xml.namespace.QName;
-import javax.xml.ws.Service;
 import com.sun.xml.ws.rm.jaxws.runtime.client.RMSource;
+
 /**
  * Factory used by clients who need to provide their own
  * sequences for use by the RMClient runtime.  Typically, the
@@ -55,10 +55,10 @@ import com.sun.xml.ws.rm.jaxws.runtime.client.RMSource;
  * of sent messages and needs to monitor their acknowledgements.
  */
 public class ClientSequenceFactory {
-    
-    private  ClientSequenceFactory() {
+
+    private ClientSequenceFactory() {
     }
-    
+
     /**
      * Establishes a new session with the endpoint.  The returned (@link ClientSequence}
      * can be specified for use by one or more client instances connected to the endpoint
@@ -70,13 +70,10 @@ public class ClientSequenceFactory {
      *         to the endpoint.  Returns <code>null</code> if the
      *         sequence creation fails.
      */
-    public static ClientSequence createSequence(javax.xml.ws.Service service, 
-                                                QName portName) {
-        return RMSource.getRMSource()
-            .createSequence(service, portName);
+    public static ClientSequence createSequence(javax.xml.ws.Service service, QName portName) {
+        return RMSource.getRMSource().createSequence(service, portName);
     }
-    
-    
+
     /**
      * Re-establishes a session using persisted data from an existing session.
      * 
@@ -87,15 +84,7 @@ public class ClientSequenceFactory {
      *         previously from another session with the same endpoint. Returns
      *         <code>null</code> is sequence creation fails.
      */
-    public static ClientSequence createSequence(javax.xml.ws.Service service, 
-                                                QName portName, SequenceSettings settings)  {
-        return RMSource.getRMSource()
-            .createSequence(service, portName, 
-                settings.sequenceId, settings.companionSequenceId);
+    public static ClientSequence createSequence(javax.xml.ws.Service service, QName portName, SequenceSettings settings) {
+        return RMSource.getRMSource().createSequence(service, portName, settings.sequenceId, settings.companionSequenceId);
     }
-       
-  
-    
-    
-    
 }

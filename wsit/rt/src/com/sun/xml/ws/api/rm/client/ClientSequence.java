@@ -42,8 +42,8 @@
  * Created on January 19, 2007, 10:07 AM
  *
  */
-
 package com.sun.xml.ws.api.rm.client;
+
 import com.sun.xml.ws.api.rm.Sequence;
 import com.sun.xml.ws.api.rm.AcknowledgementListener;
 
@@ -52,7 +52,7 @@ import com.sun.xml.ws.api.rm.AcknowledgementListener;
  * methods of {@link ClientSequenceFactory}
  */
 public interface ClientSequence extends Sequence {
-       
+
     /**
      * Registers an {@link AcknowledgementListener} to receive callbacks when 
      * acknowledgements of messages are received.
@@ -60,5 +60,4 @@ public interface ClientSequence extends Sequence {
      * @param listener The listener instance provided by the caller.
      */
     public void setAcknowledgementListener(AcknowledgementListener listener);
- 
 }
