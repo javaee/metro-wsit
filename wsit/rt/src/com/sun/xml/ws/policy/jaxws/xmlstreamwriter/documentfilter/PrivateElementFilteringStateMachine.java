@@ -84,7 +84,7 @@ public class PrivateElementFilteringStateMachine implements FilteringStateMachin
                         if (depth == 0) {
                             filteringOn = false;
                             resultingState = STOP_FILTERING;
-//                            return invocation.execute(mirrorWriter);
+//                            return invocation.executeBatch(mirrorWriter);
                         } else {
                             depth--;
                         }

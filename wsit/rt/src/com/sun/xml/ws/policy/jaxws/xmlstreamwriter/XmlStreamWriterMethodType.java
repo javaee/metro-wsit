@@ -33,7 +33,6 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.policy.jaxws.xmlstreamwriter;
 
 /**
@@ -42,36 +41,58 @@ package com.sun.xml.ws.policy.jaxws.xmlstreamwriter;
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public enum XmlStreamWriterMethodType {
-    WRITE_START_ELEMENT("writeStartElement"),
-    WRITE_END_ELEMENT("writeEndElement"),
-    WRITE_ATTRIBUTE("writeAttribute"),
-    WRITE_CHARACTERS("writeCharacters"),
-    CLOSE("close"),
-    OTHER(null);
-    
-    private static final XmlStreamWriterMethodType[] types = new XmlStreamWriterMethodType[] {
-        WRITE_START_ELEMENT,
-        WRITE_END_ELEMENT,
-        WRITE_ATTRIBUTE,
-        WRITE_CHARACTERS,
-        CLOSE
-    };
+
+    WRITE_START_DOCUMENT("writeStartDocument", true),
+    WRITE_END_DOCUMENT("writeEndDocument", true),
+    WRITE_START_ELEMENT("writeStartElement", true),
+    WRITE_END_ELEMENT("writeEndElement", true),
+    WRITE_EMPTY_ELEMENT("writeEmptyElement", true),
+    WRITE_ATTRIBUTE("writeAttribute", true),
+    WRITE_CHARACTERS("writeCharacters", true),
+    WRITE_PROCESSING_INSTRUCTION("writeProcessingInstruction", true),
+    WRITE_ENTITY_REFERENCE("writeEntityRef", true),
+    WRITE_CDATA("writeCData", true),
+    WRITE_COMMENT("writeComment", true),
+    WRITE_DTD("writeDTD", true),
+    WRITE_DEFAULT_NAMESPACE("writeDefaultNamespace", true),
+    WRITE_NAMESPACE("writeNamespace", true),
+    //
+    GET_NAMESPACE_CONTEXT("getNamespaceContext", false),
+    GET_PREFIX("getPrefix", false),
+    GET_PROPERTY("getProperty", false),
+    //
+    SET_DEFAULT_NAMESPACE("setDefaultNamespace", true),
+    SET_NAMESPACE_CONTEXT("setNamespaceContext", true),
+    SET_PREFIX("setPrefix", true),
+    //
+    CLOSE("close", false),
+    FLUSH("flush", true),
+    //
+    UNKNOWN("", true);
+
     static XmlStreamWriterMethodType getMethodType(final String methodName) {
-        for (XmlStreamWriterMethodType type : types) {
-            if (type.methodName.equals(methodName)) {
-                return type;
+        if (methodName != null && methodName.length() > 0) {
+            for (XmlStreamWriterMethodType type : values()) {
+                if (type.methodName.equals(methodName)) {
+                    return type;
+                }
             }
         }
-        return OTHER;
+        return UNKNOWN;
     }
-    
     private String methodName;
-    
-    private XmlStreamWriterMethodType(String methodName) {
+    private boolean filterable;
+
+    private XmlStreamWriterMethodType(String methodName, boolean isFilterable) {
         this.methodName = methodName;
+        this.filterable = isFilterable;
     }
-    
+
     public String getMethodName() {
         return methodName;
+    }
+
+    public boolean isFilterable() {
+        return filterable;
     }
 }

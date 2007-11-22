@@ -41,7 +41,6 @@ import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.InvocationProcessor;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import java.io.StringWriter;
 import java.lang.ref.WeakReference;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -143,21 +142,35 @@ public final class FilteringInvocationProcessor implements InvocationProcessor {
     }
 
     public Object process(final Invocation invocation) throws InvocationProcessingException {
-        if (invocationTransformer != null) {
-            Collection<Invocation> transformedInvocations = invocationTransformer.transform(invocation);
-            
-            Object returnValue = null;
-            for (Invocation transformedInvocation : transformedInvocations) {
-                if (transformedInvocation == invocation) {
-                    returnValue = filter(transformedInvocation);
-                } else {
-                    filter(transformedInvocation);
+        if (invocation.getMethodType().isFilterable()) {
+            if (invocationTransformer != null) {
+                Collection<Invocation> transformedInvocations = invocationTransformer.transform(invocation);
+
+                Object returnValue = null;
+                for (Invocation transformedInvocation : transformedInvocations) {
+                    if (transformedInvocation == invocation) {
+                        returnValue = filter(transformedInvocation);
+                    } else {
+                        filter(transformedInvocation);
+                    }
                 }
+                return returnValue;
             }
-            return returnValue;
+
+            return filter(invocation);
+        } else {
+            switch (invocation.getMethodType()) {
+                case FLUSH:
+                    invocation.execute(originalWriter);
+                    return invocation.execute(mirrorWriter);
+                case CLOSE:
+                    executeAllBufferedInvocations(originalWriter);
+                    invocation.execute(originalWriter);
+                    return invocation.execute(mirrorWriter);
+                default:
+                    return invocation.execute(mirrorWriter);
+            }
         }
-        
-        return filter(invocation);
     }
 
     private Object filter(final Invocation invocation) throws InvocationProcessingException {
@@ -170,7 +183,7 @@ public final class FilteringInvocationProcessor implements InvocationProcessor {
             processStartBufferingCandidates();
             updateFilteringStatus();
 
-            // choose invocation target and execute invocation
+            // choose invocation target and executeBatch invocation
             XMLStreamWriter invocationTarget;
             if (filtering) {
                 filtering = filteringCount > 0; // stop filtering for the next call if there are no more filtering requests active
@@ -186,19 +199,12 @@ public final class FilteringInvocationProcessor implements InvocationProcessor {
             }
 
             return invocation.execute(invocationTarget);
-        } catch (IllegalArgumentException e) {
-            throw LOGGER.logSevereException(new InvocationProcessingException(invocation, e));
-        } catch (InvocationTargetException e) {
-            throw LOGGER.logSevereException(new InvocationProcessingException(invocation, e.getCause()));
-        } catch (IllegalAccessException e) {
-            throw LOGGER.logSevereException(new InvocationProcessingException(invocation, e));
         } finally {
             LOGGER.exiting();
         }
     }
 
     private void processStartBufferingCandidates() {
-
         //started buffers (must be placed after stopped buffers so that restart buffering works properly)
         if (filteringCount == 0 && startBufferingCandidates.size() > 0) {
             final InvocationBuffer buffer = new InvocationBuffer(startBufferingCandidates.size());
@@ -210,7 +216,6 @@ public final class FilteringInvocationProcessor implements InvocationProcessor {
     }
 
     private void processStartFilteringCandidates() {
-
         // filtered buffers
         int firstFilteredBufferIndex = invocationBuffers.size();
         for (StateMachineContext context : startFilteringCandidates) {
@@ -227,8 +232,7 @@ public final class FilteringInvocationProcessor implements InvocationProcessor {
         }
     }
 
-    private void processStopBufferingCandidates() throws IllegalAccessException, InvocationProcessingException {
-
+    private void processStopBufferingCandidates() throws InvocationProcessingException {
         // stopped buffers
         for (StateMachineContext context : stopBufferingCandidates) {
             final InvocationBuffer buffer = context.getBuffer();
@@ -237,13 +241,12 @@ public final class FilteringInvocationProcessor implements InvocationProcessor {
                 continue;
             }
 
-            final int newRefCount = buffer.removeReference();
-            if (newRefCount == 0) {
+            if (buffer.removeReference() == 0) {
                 int bufferIndex;
                 if ((bufferIndex = invocationBuffers.indexOf(buffer)) != -1) {
                     invocationBuffers.remove(bufferIndex);
                     if (bufferIndex == 0) {
-                        executeCommands(originalWriter, buffer);
+                        Invocation.executeBatch(originalWriter, buffer.getQueue());
                     } else {
                         invocationBuffers.get(bufferIndex - 1).getQueue().addAll(buffer.getQueue());
                     }
@@ -287,23 +290,18 @@ public final class FilteringInvocationProcessor implements InvocationProcessor {
         }
     }
 
-    private void executeCommands(final XMLStreamWriter writer, final InvocationBuffer invocationBuffer) throws IllegalAccessException, InvocationProcessingException {
-        final Queue<Invocation> invocationQueue = invocationBuffer.getQueue();
-        while (!invocationQueue.isEmpty()) {
-            final Invocation command = invocationQueue.poll();
-            try {
-                command.execute(writer);
-            } catch (InvocationTargetException e) {
-                throw LOGGER.logSevereException(new InvocationProcessingException(command, e));
-            }
-        }
-    }
-
     private void updateFilteringStatus() {
-
         // start filtering if it is not active and should be
         if (!filtering) {
             filtering = filteringCount > 0;
+        }
+    }
+
+    private void executeAllBufferedInvocations(XMLStreamWriter target) {
+        while (!invocationBuffers.isEmpty()) {
+            InvocationBuffer buffer = invocationBuffers.removeFirst();
+            Invocation.executeBatch(target, buffer.getQueue());
+            buffer.clear();
         }
     }
 }
