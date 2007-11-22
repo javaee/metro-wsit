@@ -130,7 +130,7 @@ public class InvocationTest extends TestCase {
         result = Invocation.createInvocation(method, args);
         assertEquals(methodName, result.getMethodName());
         
-        methodName = "flush";
+        methodName = XmlStreamWriterMethodType.FLUSH.getMethodName();
         method = XMLStreamWriter.class.getMethod(methodName);
         args = null;
         result = Invocation.createInvocation(method, args);
@@ -197,7 +197,7 @@ public class InvocationTest extends TestCase {
         assertEquals(methodType, result.getMethodType());
         
         methodName = "flush";
-        methodType = XmlStreamWriterMethodType.OTHER;
+        methodType = XmlStreamWriterMethodType.FLUSH;
         method = XMLStreamWriter.class.getMethod(methodName);
         args = null;
         result = Invocation.createInvocation(method, args);
