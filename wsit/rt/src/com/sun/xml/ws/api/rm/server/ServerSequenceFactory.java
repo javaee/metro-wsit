@@ -79,9 +79,9 @@ public class ServerSequenceFactory {
     public static ServerSequence createSequence(SequenceSettings settings) {
         try {
             return RMDestination.getRMDestination().createSequence(
-                    new URI(settings.acksTo),
-                    settings.sequenceId,
-                    settings.companionSequenceId,
+                    new URI(settings.getAcksTo()),
+                    settings.getSequenceId(),
+                    settings.getCompanionSequenceId(),
                     new SequenceConfig(settings));
         } catch (RMException e) {
             //TODO I18

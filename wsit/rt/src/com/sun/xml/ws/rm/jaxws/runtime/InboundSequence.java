@@ -84,7 +84,7 @@ public abstract class InboundSequence extends Sequence {
 
         this.acksTo = acksTo;
         this.config = config;
-        this.rmConstants = config.getRMConstants();
+        this.rmConstants = config.getConstants();
     }
 
     /** Construct a <code>SequenceAcknowlegementElement</code> based on the contents of this sequence.
@@ -124,10 +124,7 @@ public abstract class InboundSequence extends Sequence {
             }
         }
 
-
-
-
-        if (config != null && config.flowControl) {
+        if (config != null && config.isFlowControlRequired()) {
             ackElement.setBufferRemaining(maxMessages - storedMessages);
         }
 

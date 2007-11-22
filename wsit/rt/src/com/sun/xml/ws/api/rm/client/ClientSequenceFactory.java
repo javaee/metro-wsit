@@ -85,6 +85,6 @@ public class ClientSequenceFactory {
      *         <code>null</code> is sequence creation fails.
      */
     public static ClientSequence createSequence(javax.xml.ws.Service service, QName portName, SequenceSettings settings) {
-        return RMSource.getRMSource().createSequence(service, portName, settings.sequenceId, settings.companionSequenceId);
+        return RMSource.getRMSource().createSequence(service, portName, settings.getSequenceId(), settings.getCompanionSequenceId());
     }
 }

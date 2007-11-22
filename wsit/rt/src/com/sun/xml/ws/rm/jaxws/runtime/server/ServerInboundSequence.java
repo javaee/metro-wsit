@@ -41,9 +41,7 @@
  * Created on November 21, 2005, 2:50 PM
  *
  */
-
 package com.sun.xml.ws.rm.jaxws.runtime.server;
-
 
 import com.sun.xml.ws.api.rm.SequenceSettings;
 import com.sun.xml.ws.api.rm.server.ServerSequence;
@@ -66,60 +64,49 @@ import java.util.logging.Logger;
  * <code>RMDestination</code>, an <code>InboundSequnce</code> consists of all
  * the requests to a service from a particular proxy.
  */
-public class ServerInboundSequence extends InboundSequence
-                                   implements ServerSequence {
+public class ServerInboundSequence extends InboundSequence implements ServerSequence {
 
+    private static final Logger logger = Logger.getLogger(LoggingHelper.getLoggerName(ServerInboundSequence.class));
     /**
      * Session associated with this sequence.
      */
-    
-    private static final Logger logger = Logger.getLogger(
-                                    LoggingHelper.getLoggerName(ServerInboundSequence.class));
-    
     private Session session;
-    
-    public ServerInboundSequence(URI acksTo,
-                            String inboundId,
-                            String outboundId,
-                            SequenceConfig config) {
-        
+
+    public ServerInboundSequence(URI acksTo, String inboundId, String outboundId, SequenceConfig config) {
         super(acksTo, config);
+
         this.outboundSequence = new ServerOutboundSequence(this, outboundId, config);
-        
         if (inboundId == null) {
             String newid = "uuid:" + UUID.randomUUID();
             setId(newid);
         } else {
             setId(inboundId);
         }
-        
+
         //if flow control is enabled, set buffer size.
         //don't try to use flow control if ordered delivery
         //is needed.  Even if the buffer is full, we
         //would still need to accept messages that "fill in the gaps"
-        if (config.flowControl && !config.ordered) {
-            maxMessages = config.bufferSize;
+        if (config.isFlowControlRequired() && !config.isOrdered()) {
+            maxMessages = config.getBufferSize();
         } else {
             maxMessages = -1;
         }
-        
-        allowDuplicates = config.allowDuplicates;
+
+        allowDuplicates = config.isAllowDuplicatesEnabled();
     }
-    
-   
+
     /**
      *  Gets the original message in a the Sequence with a given message number.
      *  
      *  @param duplicate Subsequent message with same number.
      *  @return the original message.
      */
-    public com.sun.xml.ws.rm.Message getOriginalMessage(com.sun.xml.ws.rm.Message duplicate)
-            throws InvalidMessageNumberException {
-        
+    public Message getOriginalMessage(Message duplicate) throws InvalidMessageNumberException {
         int number = duplicate.getMessageNumber();
-        return get(number);       
+        return get(number);
     }
-    
+
     /**
      * Accessor for the <code>session</code> field.
      *
@@ -132,12 +119,11 @@ public class ServerInboundSequence extends InboundSequence
     /**
      * Mutator for the <code>session</code> field.
      */
-    public void  setSession(Session s) {
+    public void setSession(Session s) {
         session = s;
     }
-    
-   
-     /**
+
+    /**
      * If ordered delivery is required, resume processing the next Message
      * in the Sequence if it is waiting for this message to be delivered.
      * This method is called after ServerPipe.process returns for this message.
@@ -147,35 +133,31 @@ public class ServerInboundSequence extends InboundSequence
      */
     /*
     public  void holdIfUndeliverable(Message message) 
-                        throws BufferFullException {
-          if (!config.ordered) {
-             return;
-         }
-          
-         try {
-            int num = message.getMessageNumber();
-       
-            //if immediate predecessor has not been processed, wait fcor it
-            if (num > 1) {
-                Message mess = get(num - 1);
-                if (mess == null || !mess.isComplete()) {
-                    message.block();
-                }
-            }
-        } catch (InvalidMessageNumberException e) {}
+    throws BufferFullException {
+    if (!config.ordered) {
+    return;
+    }
+    try {
+    int num = message.getMessageNumber();
+    //if immediate predecessor has not been processed, wait fcor it
+    if (num > 1) {
+    Message mess = get(num - 1);
+    if (mess == null || !mess.isComplete()) {
+    message.block();
+    }
+    }
+    } catch (InvalidMessageNumberException e) {}
     }
      *
-    */
-    
-    
+     */
     public boolean isDeliverable(Message message) {
-          if (!config.ordered) {
-             return true;
-         }
-          
-         try {
+        if (!config.isOrdered()) {
+            return true;
+        }
+
+        try {
             int num = message.getMessageNumber();
-       
+
             //if immediate predecessor has not been processed, wait fcor it
             if (num > 1) {
                 Message mess = get(num - 1);
@@ -183,9 +165,12 @@ public class ServerInboundSequence extends InboundSequence
                     return false;
                 }
             }
-        } catch (Exception e) {}
+        } catch (Exception e) {
+        // TODO: exception handling
+        }
         return true;
     }
+
     /**
      * Used to re-populate a sequence with persisted messages
      * after a restart.  Do not use for other purposes.
@@ -195,40 +180,34 @@ public class ServerInboundSequence extends InboundSequence
      * @param complete Indicates whether to mark the message
      *          as complete.
      */
-    public void resetMessage(int index, 
-            com.sun.xml.ws.api.message.Message message, 
-            boolean complete) {
-        
+    public void resetMessage(int index, com.sun.xml.ws.api.message.Message message, boolean complete) {
         try {
-        com.sun.xml.ws.rm.Message mess = new com.sun.xml.ws.rm.Message(message, config.rmVersion);
-        set(index, mess);
-        
-        if (complete) {
-            mess.complete();
-        }
-        
+            Message mess = new Message(message, config.getRMVersion());
+            set(index, mess);
+
+            if (complete) {
+                mess.complete();
+            }
         } catch (RMException e) {
             String m = Messages.COULD_NOT_RESET_MESSAGE.format(index, getId());
             logger.log(Level.SEVERE, m, e);
         }
-        
+
     }
-    
+
     /**
      * Implementation of ServerSequence.getSequenceSettings..
      */
     public SequenceSettings getSequenceSettings() {
-        SequenceSettings settings = getSequenceConfig();
-        settings.sequenceId = getId();
-        
+        SequenceConfig settings = getSequenceConfig();
+        settings.setSequenceId(getId());
+
         OutboundSequence oseq = getOutboundSequence();
-        
-        settings.companionSequenceId = (oseq != null) ?
-                                       oseq.getId() :
-                                       null;
+
+        settings.setCompanionSequenceId((oseq != null) ? oseq.getId() : null);
         return settings;
     }
-    
+
     /**
      * Return value determines whether the interval since last activity
      * exceeds the inactivity timeout setting.
@@ -237,11 +216,9 @@ public class ServerInboundSequence extends InboundSequence
      *         false otherwise.
      */
     public boolean isExpired() {
-        
-        return System.currentTimeMillis() - this.getLastActivityTime()  >
-                config.getInactivityTimeout();
+        return System.currentTimeMillis() - this.getLastActivityTime() > config.getInactivityTimeout();
     }
-    
+
     /**
      * Return value reports whether ordered delivery is configured for this
      * sequence.
@@ -250,10 +227,9 @@ public class ServerInboundSequence extends InboundSequence
      *         false otherwise.
      */
     public boolean isOrdered() {
-        return config.ordered;
+        return config.isOrdered();
     }
-    
-    
+
     /**
      * When ordered delivery is required, this method is used to determine
      * whether the messages with lower message numbers have already been 
@@ -262,7 +238,7 @@ public class ServerInboundSequence extends InboundSequence
     public boolean IsPredecessorComplete(Message message) {
         try {
             int num = message.getMessageNumber();
-       
+
             //if immediate predecessor has not been processed, wait fcor it
             if (num > 1) {
                 Message mess = get(num - 1);
@@ -270,12 +246,14 @@ public class ServerInboundSequence extends InboundSequence
                     return false;
                 }
             }
-            
-        } catch (InvalidMessageNumberException e) {}
+        } catch (InvalidMessageNumberException e) {
+        // TODO: exception handling
+        }
+
         return true;
     }
-    
-     /**
+
+    /**
      * If ordered delivery is required, resume processing the next Message
      * in the Sequence if it is waiting for this message to be delivered.
      * This method is called when RMServerTube.processResponse is called for this message.
@@ -283,22 +261,18 @@ public class ServerInboundSequence extends InboundSequence
      *
      * @param message The message to be processed
      */
-    public  void releaseNextMessage(Message message) throws RMException {
+    public void releaseNextMessage(Message message) throws RMException {
+        message.complete();
+        storedMessages--;
 
-        
-       message.complete();
-       --storedMessages;
-       
-       //notify immediate successor if it is waiting 
-       int num = message.getMessageNumber();
-    
-       if (num < nextIndex - 1 && get(num + 1) != null) {
-           System.out.println("resuming " + (num + 1));
-           get(num + 1).resume();
+        //notify immediate successor if it is waiting 
+        int num = message.getMessageNumber();
+
+        if (num < nextIndex - 1 && get(num + 1) != null) {
+            System.out.println("resuming " + (num + 1));
+            get(num + 1).resume();
         }
     }
-    
-    
 }
 
 

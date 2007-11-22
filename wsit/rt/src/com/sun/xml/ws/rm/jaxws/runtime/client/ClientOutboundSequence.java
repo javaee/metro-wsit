@@ -137,7 +137,7 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
 
         //for now
         this.ackHandler = new AcknowledgementHandler(config);
-        this.rmConstants = config.getRMConstants();
+        this.rmConstants = config.getConstants();
         super.setBufferRemaining(config.getBufferSize());
 
     }
@@ -204,12 +204,12 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
      */
     public SequenceSettings getSequenceSettings() {
 
-        SequenceSettings settings = getSequenceConfig();
-        settings.sequenceId = getId();
+        SequenceConfig settings = getSequenceConfig();
+        settings.setSequenceId(getId());
 
         InboundSequence iseq = getInboundSequence();
 
-        settings.companionSequenceId = (iseq != null) ? iseq.getId() : null;
+        settings.setCompanionSequenceId((iseq != null) ? iseq.getId() : null);
         return settings;
     }
 

@@ -41,7 +41,6 @@
  * Created on October 16, 2005, 1:23 PM
  *
  */
-
 package com.sun.xml.ws.rm.jaxws.runtime;
 
 import com.sun.xml.ws.api.SOAPVersion;
@@ -51,7 +50,12 @@ import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.rm.SequenceSettings;
-import com.sun.xml.ws.policy.*;
+import com.sun.xml.ws.policy.AssertionSet;
+import com.sun.xml.ws.policy.Policy;
+import com.sun.xml.ws.policy.PolicyAssertion;
+import com.sun.xml.ws.policy.PolicyException;
+import com.sun.xml.ws.policy.PolicyMap;
+import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.policy.jaxws.WSDLPolicyMapWrapper;
 import com.sun.xml.ws.rm.RMConstants;
 import com.sun.xml.ws.rm.RMException;
@@ -67,78 +71,93 @@ import java.util.Iterator;
  * to which the policy assertion is attached.  (Placeholder for now pending WS-Policy
  * implementation)
  */
-public class SequenceConfig extends SequenceSettings {
+public class SequenceConfig implements SequenceSettings {
 
-   
+    private String acksTo;
+    private long ackRequestInterval;
+    private boolean allowDuplicatesEnabled;
+    private int bufferSize;
+    private long closeTimeout;
+    private String companionSequenceId;
+    private RMConstants constants;
+    private boolean flowControlRequired;
+    private boolean ordered;
+    private long inactivityTimeout;
+    private long resendInterval;
+    private RMVersion rmVersion;
+    private String sequenceId;
+    private boolean sequenceSTRRequired;
+    private boolean sequenceTransportSecurityRequired;
+    private SOAPVersion soapVersion;
+
     /**
      * Constructor initializes with default values.
      */
     public SequenceConfig() {
-        
         //Use anonymous URI for acksTo.  Its value depends on 
         //WS-Addressing version being used
-
         if (constants == null) {
             //hardcoding W3C as default
             constants = RMConstants.getRMConstants(AddressingVersion.W3C);
         }
         acksTo = constants.getAnonymousURI().toString();
-        
+
         ordered = false;
-        allowDuplicates = false;
+        allowDuplicatesEnabled = false;
         inactivityTimeout = 600000;
-        flowControl = false;
+        flowControlRequired = false;
         bufferSize = 32;
         soapVersion = SOAPVersion.SOAP_12;
-             
+
         ackRequestInterval = 0;
         resendInterval = 0;
-        
+
         closeTimeout = 0; //infinite
-        sequenceSTR = false;
-        sequenceTransportSecurity = false;
-        
+        sequenceSTRRequired = false;
+        sequenceTransportSecurityRequired = false;
+
     }
-    
+
     public SequenceConfig(WSDLPort port, WSBinding wsbinding) {
-        
+
         this();
         if (port != null) {
             WSDLBoundPortType binding = port.getBinding();
             WSDLModel model = binding.getOwner();
-            PolicyMap policyMap = model.getExtension(WSDLPolicyMapWrapper.class)
-                                            .getPolicyMap();
+            PolicyMap policyMap = model.getExtension(WSDLPolicyMapWrapper.class).getPolicyMap();
             this.constants = RMConstants.getRMConstants(wsbinding.getAddressingVersion());
             try {
                 init(port, policyMap);
             } catch (RMException e) {
                 throw new WebServiceException(e);
             }
-        } 
+        }
     }
-    
+
     /**
      * Copies the members of a specified SequenceSettings
      */
     public SequenceConfig(SequenceSettings toCopy) {
-        
-        this.ackRequestInterval = toCopy.ackRequestInterval;
-        this.acksTo = toCopy.acksTo;
-        this.allowDuplicates = toCopy.allowDuplicates;
-        this.bufferSize = toCopy.bufferSize;
-        this.closeTimeout = toCopy.closeTimeout;
-        this.constants = toCopy.constants;
-        this.flowControl = toCopy.flowControl;
-        this.inactivityTimeout = toCopy.inactivityTimeout;
-        this.ordered = toCopy.ordered;
-        this.resendInterval = toCopy.resendInterval;
-        this.soapVersion = toCopy.soapVersion;
-        this.sequenceSTR = toCopy.sequenceSTR;
-        this.sequenceTransportSecurity = toCopy.sequenceTransportSecurity;
-        this.rmVersion = toCopy.rmVersion;
-  
+        // TODO: should we also copy these?:
+        // this.sequenceId;
+        // this.companionSequenceId;
+
+        this.ackRequestInterval = toCopy.getAckRequestInterval();
+        this.acksTo = toCopy.getAcksTo();
+        this.allowDuplicatesEnabled = toCopy.isAllowDuplicatesEnabled();
+        this.bufferSize = toCopy.getBufferSize();
+        this.closeTimeout = toCopy.getCloseTimeout();
+        this.constants = toCopy.getConstants();
+        this.flowControlRequired = toCopy.isFlowControlRequired();
+        this.inactivityTimeout = toCopy.getInactivityTimeout();
+        this.ordered = toCopy.isOrdered();
+        this.resendInterval = toCopy.getResendInterval();
+        this.rmVersion = toCopy.getRMVersion();
+        this.soapVersion = toCopy.getSoapVersion();
+        this.sequenceSTRRequired = toCopy.isSequenceSTRRequired();
+        this.sequenceTransportSecurityRequired = toCopy.isSequenceTransportSecurityRequired();
     }
-    
+
     /**
      * Accessor for the <code>acksTo</code> property.
      *
@@ -149,30 +168,12 @@ public class SequenceConfig extends SequenceSettings {
     }
 
     /**
-     * Mutator for the <code>AcksTo</code> property.
-     *
-     * @param acksTo The new value of the property.
-     */
-    public void setAcksTo(String acksTo) {
-        this.acksTo = acksTo;
-    }
-
-    /**
      * Accessor for <code>ordered</code> property.
      *
      * @return The value of the property.
      */
-    public boolean getOrdered() {
+    public boolean isOrdered() {
         return ordered;
-    }
-
-    /**
-     * Mutator for the <code>ordered</code> property.
-     *
-     * @param ordered The new value of the property.
-     */
-    public void setOrdered(boolean ordered) {
-        this.ordered = ordered;
     }
 
     /**
@@ -185,15 +186,6 @@ public class SequenceConfig extends SequenceSettings {
     }
 
     /**
-     * Mutator for the <code>inactivityTimeout</code> property.
-     *
-     * @param inactivityTimeout The new value of the property.
-     */
-    public void setInactivityTimeout(long inactivityTimeout) {
-        this.inactivityTimeout = inactivityTimeout;
-    }
-
-    /**
      * Accessor for <code>bufferSize</code> property.
      *
      * @return The value of the property.
@@ -203,30 +195,12 @@ public class SequenceConfig extends SequenceSettings {
     }
 
     /**
-     * Mutator for the <code>bufferSize</code> property.
-     *
-     * @param bufferSize The new value of the property.
-     */
-    public void setBufferSize(int bufferSize) {
-        this.bufferSize = bufferSize;
-    }
-    
-    /**
      * Accessor for the closeTimeout property.
      *
      * @return The value of the property.
      */
     public long getCloseTimeout() {
         return closeTimeout;
-    }
-    
-    /**
-     * Mutator for the closeTimeout property.
-     *
-     * @param The new value.
-     */
-    public void setCloseTimeout(long timeout) {
-        closeTimeout = timeout;
     }
 
     /**
@@ -236,35 +210,28 @@ public class SequenceConfig extends SequenceSettings {
      * @return SOAPVersion should not be null
      */
     public SOAPVersion getSoapVersion() {
-        if (soapVersion != null)
+        if (soapVersion != null) {
             return soapVersion;
-        //TODO check if this defaulting is ok
-        else return SOAPVersion.SOAP_12;
+        } //TODO check if this defaulting is ok
+        else {
+            return SOAPVersion.SOAP_12;
+        }
     }
 
     public void setSoapVersion(SOAPVersion soapVersion) {
         this.soapVersion = soapVersion;
     }
-    
+
     /**
      * Accessor for flow control field
      *
      * @return The value of the field.
      */
-    public boolean getFlowControl() {
-        return flowControl;
+    public boolean isFlowControlRequired() {
+        return flowControlRequired;
     }
-    
+
     /**
-     * Mutator for the flow control field
-     *
-     * @param The new value
-     */
-    public void setFlowControl(boolean use) {
-        flowControl = use;
-    }
-    
-     /**
      * Accessor for resendIterval field
      *
      * @return The value of the field.
@@ -272,17 +239,8 @@ public class SequenceConfig extends SequenceSettings {
     public long getResendInterval() {
         return resendInterval;
     }
-    
+
     /**
-     * Mutator for the flow control field
-     *
-     * @param The new value
-     */
-    public void setResendInterval(long interval) {
-        resendInterval = interval;
-    }
-    
-     /**
      * Accessor for ackRequestIterval field
      *
      * @return The value of the field.
@@ -290,46 +248,74 @@ public class SequenceConfig extends SequenceSettings {
     public long getAckRequestInterval() {
         return ackRequestInterval;
     }
-    
+
     /**
-     * Mutator for the ackRequestInterval field
-     *
-     * @param The new value
+     * Returns the RMConstants based on the AddressingVersion
+     * @return RMConstants
      */
-    public void setAckRequestInterval(long interval) {
-        ackRequestInterval = interval;
+    public RMConstants getConstants() {
+        return constants;
     }
-    
-    public void init(WSDLPort port, PolicyMap policyMap) throws RMException {
-       
+
+    public boolean isAllowDuplicatesEnabled() {
+        return allowDuplicatesEnabled;
+    }
+
+    public String getSequenceId() {
+        return sequenceId;
+    }
+
+    public void setSequenceId(String id) {
+        this.sequenceId = id;
+    }
+
+    public String getCompanionSequenceId() {
+        return companionSequenceId;
+    }
+
+    public void setCompanionSequenceId(String id) {
+        this.companionSequenceId = id;
+    }
+
+    public RMVersion getRMVersion() {
+        return rmVersion;
+    }
+
+    public boolean isSequenceSTRRequired() {
+        return sequenceSTRRequired;
+    }
+
+    public boolean isSequenceTransportSecurityRequired() {
+        return sequenceTransportSecurityRequired;
+    }
+
+    private void init(WSDLPort port, PolicyMap policyMap) throws RMException {
         try {
-            
             if (policyMap != null) {
-                PolicyMapKey endpointScopeKey = 
-                        policyMap.
-                            createWsdlEndpointScopeKey(port.getOwner().getName(), 
-                                                       port.getName());
+                PolicyMapKey endpointScopeKey =
+                        PolicyMap.createWsdlEndpointScopeKey(port.getOwner().getName(),
+                        port.getName());
 
                 if (endpointScopeKey != null) {
-                    
+
                     AssertionSet policyAssertionSet = null;
-                    
+
                     Policy policy = policyMap.getEndpointEffectivePolicy(endpointScopeKey);
                     if (policy != null) {
-                        for (AssertionSet set: policy) {
+                        for (AssertionSet set : policy) {
                             policyAssertionSet = set;
                             break;
                         }
                     }
-                    
+
                     if (policyAssertionSet != null) {
-                        
+
                         PolicyAssertion rmAssertion = null;
                         PolicyAssertion flowAssertion = null;
-                        
+
                         for (PolicyAssertion assertion : policyAssertionSet) {
                             QName qname = assertion.getName();
-                          
+
                             if (qname.equals(RMVersion.WSRM10.getRMPolicyAssertionQName())) {
                                 rmVersion = RMVersion.WSRM10;
                                 rmAssertion = assertion;
@@ -340,8 +326,8 @@ public class SequenceConfig extends SequenceSettings {
                                 flowAssertion = assertion;
                             } else if (qname.equals(constants.getOrderedQName())) {
                                 ordered = true;
-                            } else if (qname.equals (constants.getAllowDuplicatesQName())) {
-                                allowDuplicates = true;
+                            } else if (qname.equals(constants.getAllowDuplicatesQName())) {
+                                allowDuplicatesEnabled = true;
                             } else if (qname.equals(constants.getAckRequestIntervalQName())) {
                                 String num = assertion.getAttributeValue(new QName("", "Milliseconds"));
                                 if (num != null) {
@@ -357,81 +343,60 @@ public class SequenceConfig extends SequenceSettings {
                                 if (num != null) {
                                     closeTimeout = Long.parseLong(num);
                                 }
-                            }  else if (qname.equals(RMVersion.WSRM11.getSequenceSTRAssertionQName())) {
-                                sequenceSTR = true;
+                            } else if (qname.equals(RMVersion.WSRM11.getSequenceSTRAssertionQName())) {
+                                sequenceSTRRequired = true;
                             } else if (qname.equals(RMVersion.WSRM11.getSequenceTransportSecurityAssertionQName())) {
-                                sequenceTransportSecurity = true;
+                                sequenceTransportSecurityRequired = true;
                             } else {
-                                //TODO handle error condition here
+                            //TODO handle error condition here
                             }
                         }
-                        
-                        if (rmAssertion != null) {
-                           handleRMAssertion(rmAssertion);
-                        } 
 
-                        if (flowAssertion != null)
-                           handleFlowAssertion(flowAssertion);
+                        if (rmAssertion != null) {
+                            handleRMAssertion(rmAssertion);
+                        }
+
+                        if (flowAssertion != null) {
+                            handleFlowAssertion(flowAssertion);
+                        }
                     }
                 }
             }
-            
         } catch (PolicyException e) {
             e.printStackTrace();
         }
     }
-    
+
     private void handleRMAssertion(PolicyAssertion rmAssertion) {
-        
+
         Iterator<PolicyAssertion> it = rmAssertion.getNestedAssertionsIterator();
-        
+
         while (it != null && it.hasNext()) {
             PolicyAssertion assertion = it.next();
             if (assertion.getName().equals(rmVersion.getInactivityTimeoutAssertionQName())) {
-                
+
                 String num = assertion.getAttributeValue(new QName("", "Milliseconds"));
-               
+
                 if (num != null) {
                     inactivityTimeout = Long.parseLong(num);
                 }
-           //TODO - disregard other nested assertions for now.
-           //possibly revisit this later
-            }    
+            //TODO - disregard other nested assertions for now.
+            //possibly revisit this later
+            }
         }
     }
-    
+
     private void handleFlowAssertion(PolicyAssertion flowAssertion) {
-       
-        flowControl = true;
-        
+
+        flowControlRequired = true;
+
         Iterator<PolicyAssertion> it = flowAssertion.getNestedAssertionsIterator();
-        while (it != null && it.hasNext()) { 
-             PolicyAssertion assertion = it.next();
+        while (it != null && it.hasNext()) {
+            PolicyAssertion assertion = it.next();
             if (assertion.getName().equals(constants.getMaxReceiveBufferSizeQName())) {
-                bufferSize = Integer.parseInt(assertion.getValue());            
+                bufferSize = Integer.parseInt(assertion.getValue());
                 break;
             }
-       }
-    }
-
-    /**
-     *  Returns the RMConstants based on the AddressingVersion
-     * @return RMConstants
-     */
-    public RMConstants getRMConstants() {
-        return constants;
-    }
-
-    public RMConstants getConstants() {
-        return constants;
-    }
-
-    public boolean isAllowDuplicates() {
-        return allowDuplicates;
-    }
-
-
-    public RMVersion getRMVersion(){
-        return rmVersion;
+        }
     }
 }

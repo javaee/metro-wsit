@@ -47,83 +47,95 @@ package com.sun.xml.ws.api.rm;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.rm.RMConstants;
 import com.sun.xml.ws.rm.RMVersion;
-
 import java.io.Serializable;
 
 /**
  * Initialization data for a sequence, which can be persisted
  * and used to reinitialize a sequence.
  */
-public class SequenceSettings implements Serializable {
+public interface SequenceSettings extends Serializable {
 
-    public SequenceSettings() {
-    }
     /**
      * AcksTo URI for the sequence
      */
-    public String acksTo;
+    public abstract String getAcksTo();
+
     /**
      * For OutboundSequences, determines whether destination guarantees ordered delivery.
      */
-    public boolean ordered;
+    public abstract boolean isOrdered();
+
     /**
      * Number of milliseconds after which destination may terminate sequence.
      */
-    public long inactivityTimeout;
+    public abstract long getInactivityTimeout();
+
     /**
      * Indicates whether flow control is enabled.
      */
-    public boolean flowControl;
+    public abstract boolean isFlowControlRequired();
+
     /**
      * Number of messages that destination will buffer pending delivery.
      */
-    public int bufferSize;
+    public abstract int getBufferSize();
+
     /**
      * The SOAPVersion which will be passed on to the protocol elements
      * populated from the Pipe
      */
-    public SOAPVersion soapVersion;
+    public abstract SOAPVersion getSoapVersion();
+
     /**
      * Length of time between resends
      */
-    public long resendInterval;
+    public abstract long getResendInterval();
+
     /**
      * Length of time between ackRequests.
      */
-    public long ackRequestInterval;
+    public abstract long getAckRequestInterval();
+
     /**
      * Lenth of time that RMClientPipe.preDestroy will block while
      * waiting for unacknowledged messages to arrive.
      */
-    public long closeTimeout;
+    public abstract long getCloseTimeout();
+
     /**
      * Do we suppress duplicates at the endpoint?
      */
-    public boolean allowDuplicates;
+    public abstract boolean isAllowDuplicatesEnabled();
+
     /**
      * RMConstants enum value using correct addressing version.
      */
-    public RMConstants constants;
+    public abstract RMConstants getConstants();
+
     /**
      * SequenceId for the sequence.  This field is not assumed to be populated
      * in the (@link SequenceConfig} subclass.
      */
-    public String sequenceId;
+    public abstract String getSequenceId();
+
     /**
      * SequenceId for the companion sequence, if any.  This field is not assumed 
      * to be populated in the (@link SequenceConfig} subclass.
      */
-    public String companionSequenceId;
+    public abstract String getCompanionSequenceId();
+
     /**
      * The RM version if it is WSRM 1.0 or WSRM 1.1
      */
-    public RMVersion rmVersion;
+    public abstract RMVersion getRMVersion();
+
     /**
      * SequenceSTR setting from Policy.
      */
-    public boolean sequenceSTR;
+    public abstract boolean isSequenceSTRRequired();
+
     /**
      * SequenceTransportSecurity setting from Policy.
      */
-    public boolean sequenceTransportSecurity;
+    public abstract boolean isSequenceTransportSecurityRequired();
 }

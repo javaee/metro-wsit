@@ -255,7 +255,7 @@ public class ProtocolMessageSender {
         Packet responsePacket = helper.process(requestPacket);
         Message response = responsePacket.getMessage();
 
-        com.sun.xml.ws.rm.Message msg = new com.sun.xml.ws.rm.Message(response, config.rmVersion);
+        com.sun.xml.ws.rm.Message msg = new com.sun.xml.ws.rm.Message(response, config.getRMVersion());
         if (response != null && response.isFault()) {
             throw new RMException(response);
         }
@@ -294,7 +294,7 @@ public class ProtocolMessageSender {
                 throw new RMException(response);
             }
 
-            com.sun.xml.ws.rm.Message msg = new com.sun.xml.ws.rm.Message(response, config.rmVersion);
+            com.sun.xml.ws.rm.Message msg = new com.sun.xml.ws.rm.Message(response, config.getRMVersion());
             processor.processMessage(msg, marshaller, unmarshaller);
         } finally {
             //Make sure that alarm is reset.
