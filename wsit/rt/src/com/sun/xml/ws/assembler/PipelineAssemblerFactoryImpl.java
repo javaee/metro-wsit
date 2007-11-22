@@ -40,11 +40,9 @@ import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import com.sun.xml.ws.tx.common.Util;
 import com.sun.xml.wss.impl.misc.SecurityUtil;
-import java.io.InputStream;
 import java.net.URL;
 import java.util.logging.Logger;
 
-import javax.servlet.ServletContext;
 import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceException;
 
