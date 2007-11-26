@@ -41,12 +41,10 @@
  * @author Mike Grogan
  * Created on October 15, 2005, 6:24 PM
  */
-
 package com.sun.xml.ws.rm.jaxws.runtime.client;
-import com.sun.xml.ws.rm.Message;
+
 import com.sun.xml.ws.rm.RMException;
 import com.sun.xml.ws.rm.jaxws.runtime.RMProvider;
-import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
 import javax.xml.namespace.QName;
 import javax.xml.ws.Dispatch;
 import javax.xml.ws.Service;
@@ -61,60 +59,55 @@ import java.util.logging.Level;
  * An RMSource represents a Collection of RMSequences with a
  * common acksTo endpoint.
  */
-public class RMSource  extends RMProvider<ClientInboundSequence,
-        ClientOutboundSequence> {
-    
-    private  static final Logger logger = 
-            Logger.getLogger(RMSource.class.getName());
-    
+public class RMSource extends RMProvider<ClientInboundSequence, ClientOutboundSequence> {
+
+    private static final Logger logger = Logger.getLogger(RMSource.class.getName());
     private static RMSource rmSource = new RMSource();
+    private static final byte[] CREATE_SEQUENCE_PAYLOAD = "<sun:createSequence xmlns:sun=\"http://com.sun/createSequence\"/>".getBytes();
     
-   
     public static RMSource getRMSource() {
         return rmSource;
     }
-    
     private long retryInterval;
     private RetryTimer retryTimer;
-    
+
     public RMSource() {
-        
+
         retryInterval = 2000;
-        
+
         retryTimer = new RetryTimer(this);
-        
+
     }
-    
+
     public void setRetryInterval(long retryInterval) {
         this.retryInterval = retryInterval;
     }
-    
+
     public long getRetryInterval() {
         return retryInterval;
     }
-    
-    
-    public synchronized void terminateSequence(ClientOutboundSequence seq) 
+
+    public synchronized void terminateSequence(ClientOutboundSequence seq)
             throws RMException {
-        
+
         String id = seq.getId();
         if (seq != null && outboundMap.keySet().contains(id)) {
             seq.disconnect();
             removeOutboundSequence(id);
-        }   
+        }
     }
-    
+
     public synchronized void addOutboundSequence(ClientOutboundSequence seq) {
         logger.fine(Messages.ADDING_SEQUENCE_MESSAGE.format(seq.getId()));
-        
+
         boolean firstSequence = outboundMap.isEmpty();
         outboundMap.put(seq.getId(), seq);
-        
-        ClientInboundSequence iseq = 
-                    (ClientInboundSequence)seq.getInboundSequence();
-            
+
+        ClientInboundSequence iseq =
+                (ClientInboundSequence) seq.getInboundSequence();
+
         String iseqid = null;
-       
+
         if (iseq != null && null != (iseqid = iseq.getId())) {
             inboundMap.put(iseqid, iseq);
         }
@@ -122,43 +115,41 @@ public class RMSource  extends RMProvider<ClientInboundSequence,
             retryTimer.start();
         }
     }
-    
+
     public synchronized void removeOutboundSequence(ClientOutboundSequence seq) {
-        
-         logger.fine(Messages.REMOVING_SEQUENCE_MESSAGE.format( seq.getId()));
-         
-         String id = seq.getId();
-         
-        ClientInboundSequence iseq = 
-                    (ClientInboundSequence)seq.getInboundSequence();
-            
+
+        logger.fine(Messages.REMOVING_SEQUENCE_MESSAGE.format(seq.getId()));
+
+        String id = seq.getId();
+
+        ClientInboundSequence iseq =
+                (ClientInboundSequence) seq.getInboundSequence();
+
         String iseqid = null;
         if (iseq != null && null != (iseqid = iseq.getId())) {
             inboundMap.remove(iseqid);
         }
         outboundMap.remove(id);
-        
+
         if (outboundMap.isEmpty()) {
             retryTimer.stop();
         }
     }
-    
+
     private void removeOutboundSequence(String id) {
-        
-         ClientOutboundSequence seq = outboundMap.get(id);
-         
-         if (seq != null) {
+
+        ClientOutboundSequence seq = outboundMap.get(id);
+
+        if (seq != null) {
             removeOutboundSequence(seq);
-         } else {
-             String message = Messages.NO_SUCH_OUTBOUND_SEQUENCE.format(id);
-             IllegalArgumentException e = new IllegalArgumentException(message);
-             logger.log(Level.FINE, message, e);
-             throw e;
-         }
+        } else {
+            String message = Messages.NO_SUCH_OUTBOUND_SEQUENCE.format(id);
+            IllegalArgumentException e = new IllegalArgumentException(message);
+            logger.log(Level.FINE, message, e);
+            throw e;
+        }
     }
-    
-    
-    
+
     /**
      * Do the necessary maintenance tasks for each <code>ClientInboundSequence</code>
      * managed by this RMSource.  This is done by calling the <code>doMaintenanceTasks</code>
@@ -167,25 +158,24 @@ public class RMSource  extends RMProvider<ClientInboundSequence,
      * @throws RMException Propogates <code>RMException</code> thrown by any of the managed
      * sequences.
      */
-
     public void doMaintenanceTasks() throws RMException {
-        
+
         for (String key : outboundMap.keySet()) {
-            
+
             ClientOutboundSequence seq =
                     getOutboundSequence(key);
-            
-            synchronized(seq) {
+
+            synchronized (seq) {
                 //1. resend all incomplete messages
                 //2. send ackRequested messages in any sequences
                 //   in danger of timing out.
                 seq.doMaintenanceTasks();
             }
         }
-        
+
     }
-    
-     /**
+
+    /**
      * Initialize a sequence using a CreateSequence handshake.  The
      * returned Sequence can be set in BindingProvider properies which will
      * result in the Sequence being used for the BindingProvider's request messages.
@@ -195,40 +185,34 @@ public class RMSource  extends RMProvider<ClientInboundSequence,
      * @return The ClientOutboundSequence.  null if the sequence could not be created
      *  
      */
-    public ClientOutboundSequence createSequence(javax.xml.ws.Service service, 
-                                                QName portName) 
-    {
-   
-        Dispatch<Source> disp = service.createDispatch(portName, 
-                                                        Source.class, 
-                                                        Service.Mode.PAYLOAD,
-                                                        new javax.xml.ws.RespectBindingFeature());
-        
-        byte[] bytes = Constants.createSequencePayload.getBytes();
-        ByteArrayInputStream stream = new ByteArrayInputStream(bytes);
+    public ClientOutboundSequence createSequence(javax.xml.ws.Service service, QName portName) {
+        Dispatch<Source> disp = service.createDispatch(
+                portName,
+                Source.class,
+                Service.Mode.PAYLOAD,
+                new javax.xml.ws.RespectBindingFeature());
+
+        ByteArrayInputStream stream = new ByteArrayInputStream(CREATE_SEQUENCE_PAYLOAD);
         StreamSource source = new StreamSource(stream);
-        
+
         try {
             disp.invoke(source);
         } catch (Exception e) {
-            
-            //dont care what happened processing the response message.  We are only
-            //interested in the sequence that has been stored in the request context
-            //
-            //TODO - At the same time, it would be prettier to get something other than
-            //a fault
+
+        //dont care what happened processing the response message.  We are only
+        //interested in the sequence that has been stored in the request context
+        //
+        //TODO - At the same time, it would be prettier to get something other than
+        //a fault
         }
-        
-        ClientOutboundSequence seq =  (ClientOutboundSequence)disp.getRequestContext()
-                    .get(Constants.sequenceProperty);
+
+        ClientOutboundSequence seq = (ClientOutboundSequence) disp.getRequestContext().get(Constants.sequenceProperty);
         seq.setService(service);
         return seq;
-       
+
     }
 
- 
-
-/**
+    /**
      * Initialize a sequence using an existing seuence id known to an RM endpoint.
      * The method is designed to be used after a startup to reinitialize a
      * sequence from persisted data.
@@ -240,72 +224,70 @@ public class RMSource  extends RMProvider<ClientInboundSequence,
      *              if any
      * @return The ClientOutboundSequence.  null if the sequence could not be created
      */
-    public ClientOutboundSequence createSequence(javax.xml.ws.Service service, 
-                                                QName portName, String sequenceID,
-                                                String companionSequenceID){
-        
-   
+    public ClientOutboundSequence createSequence(javax.xml.ws.Service service,
+            QName portName, String sequenceID,
+            String companionSequenceID) {
+
+
         //this will throw and exception if the specified sequence does not exist.
         //removeOutboundSequence(sequenceID);
-        
+
         ClientOutboundSequence seq = createSequence(service, portName);
-        if (seq == null ) {
+        if (seq == null) {
             return null;
         }
-         
+
         try {
             seq.disconnect(false);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        
+
         seq.setId(sequenceID);
-        
-        ClientInboundSequence iseq = 
-                    (ClientInboundSequence)seq.getInboundSequence();
-        
+
+        ClientInboundSequence iseq =
+                (ClientInboundSequence) seq.getInboundSequence();
+
         if (companionSequenceID != null) {
-           
+
             if (iseq == null || iseq.getId() == null) {
-                
+
                 String message = Messages.NO_TWO_WAY_OPERATION.format();
                 IllegalArgumentException e = new IllegalArgumentException(message);
                 logger.log(Level.FINE, message, e);
                 throw e;
-            }     
+            }
             iseq.setId(companionSequenceID);
-            
+
         } else if (iseq != null && iseq.getId() != null) {
-            
+
             String message = Messages.NO_INBOUND_SEQUENCE_ID_SPECIFIED.format();
             IllegalArgumentException e = new IllegalArgumentException(message);
-            logger.log(Level.FINE, message,e);
+            logger.log(Level.FINE, message, e);
             throw e;
         }
-        
+
         if (outboundMap.get(sequenceID) != null) {
-            
+
             String message = Messages.SEQUENCE_ALREADY_EXISTS.format(sequenceID);
             IllegalArgumentException e = new IllegalArgumentException(message);
             logger.log(Level.FINE, message, e);
             throw e;
-           
+
         }
-        
+
         if (companionSequenceID != null &&
                 inboundMap.get(companionSequenceID) != null) {
-            
+
             String message = Messages.SEQUENCE_ALREADY_EXISTS.format(companionSequenceID);
             IllegalArgumentException e = new IllegalArgumentException(message);
             logger.log(Level.FINE, message, e);
             throw e;
-           
+
         }
-               
+
         addOutboundSequence(seq);
-        
+
         return seq;
     }
-        
-    
 }

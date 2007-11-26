@@ -35,50 +35,41 @@
  */
 package com.sun.xml.ws.rm.jaxws.util;
 
-
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.spi.PolicyAssertionValidator;
 import com.sun.xml.ws.policy.spi.PolicyAssertionValidator.Fitness;
+import com.sun.xml.ws.rm.RMVersion;
 import static com.sun.xml.ws.rm.Constants.*;
 
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
-import java.util.Iterator;
-
-/*
- * RMPolicyValidator.java
- *
- * @author Mike Grogan
- * Created on April 13, 2006, 11:40 AM
- *
- */
 public class RMPolicyValidator implements PolicyAssertionValidator {
 
     private static final ArrayList<QName> serverSideSupportedAssertions = new ArrayList<QName>(7);
     private static final ArrayList<QName> clientSideSupportedAssertions = new ArrayList<QName>(6);
 
     static {
-        serverSideSupportedAssertions.add(new QName(version10, "RMAssertion"));
-        serverSideSupportedAssertions.add(new QName(version11, "RMAssertion"));
-        serverSideSupportedAssertions.add(new QName(version11, "SequenceSTR"));
-        serverSideSupportedAssertions.add(new QName(version11, "SequenceTransportSecurity"));
+        serverSideSupportedAssertions.add(new QName(RMVersion.WSRM10.policyNamespaceUri, "RMAssertion"));
+        serverSideSupportedAssertions.add(new QName(RMVersion.WSRM11.policyNamespaceUri, "RMAssertion"));
+        serverSideSupportedAssertions.add(new QName(RMVersion.WSRM11.policyNamespaceUri, "SequenceSTR"));
+        serverSideSupportedAssertions.add(new QName(RMVersion.WSRM11.policyNamespaceUri, "SequenceTransportSecurity"));
         serverSideSupportedAssertions.add(new QName(sunVersion, "Ordered"));
         serverSideSupportedAssertions.add(new QName(sunVersion, "AllowDuplicates"));
         serverSideSupportedAssertions.add(new QName(microsoftVersion, "RmFlowControl"));
 
         clientSideSupportedAssertions.add(new QName(sunClientVersion, "AckRequestInterval"));
         clientSideSupportedAssertions.add(new QName(sunClientVersion, "ResendInterval"));
-	clientSideSupportedAssertions.add(new QName(sunClientVersion, "CloseTimeout"));        
+        clientSideSupportedAssertions.add(new QName(sunClientVersion, "CloseTimeout"));
         clientSideSupportedAssertions.addAll(serverSideSupportedAssertions);
     }
-    
+
     public RMPolicyValidator() {
     }
-        
+
     public Fitness validateClientSide(PolicyAssertion assertion) {
         return clientSideSupportedAssertions.contains(assertion.getName()) ? Fitness.SUPPORTED : Fitness.UNKNOWN;
     }
-    
+
     public Fitness validateServerSide(PolicyAssertion assertion) {
         QName assertionName = assertion.getName();
         if (serverSideSupportedAssertions.contains(assertionName)) {
@@ -86,11 +77,11 @@ public class RMPolicyValidator implements PolicyAssertionValidator {
         } else if (clientSideSupportedAssertions.contains(assertionName)) {
             return Fitness.UNSUPPORTED;
         } else {
-            return Fitness.UNKNOWN;                    
+            return Fitness.UNKNOWN;
         }
     }
-    
+
     public String[] declareSupportedDomains() {
-        return new String[] {version10, version11, microsoftVersion, sunVersion, sunClientVersion};
+        return new String[]{RMVersion.WSRM10.policyNamespaceUri, RMVersion.WSRM11.policyNamespaceUri, microsoftVersion, sunVersion, sunClientVersion};
     }
 }

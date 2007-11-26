@@ -33,11 +33,7 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.rm;
-
-import javax.xml.namespace.QName;
-import javax.xml.soap.SOAPConstants;
 
 /**
  * Class contains  constants for faults defined by the 02/2005 version of the
@@ -46,55 +42,20 @@ import javax.xml.soap.SOAPConstants;
  */
 public class Constants {
     
-    /**
-     * Name of Sender fault defined by SOAP 1.2.
-     */
-    public static final QName SOAP12_SENDER_QNAME = SOAPConstants.SOAP_SENDER_FAULT;
-
-    
-    
-    public  static final String version10 = RMVersion.WSRM10.policyNamespaceUri;
-    
-    public  static final String version11 = RMVersion.WSRM11.policyNamespaceUri;
-    
-    public  static final String version = version10;
-
     public static final String microsoftVersion = "http://schemas.microsoft.com/net/2005/02/rm/policy";
-
-    public  static final String sunVersion = "http://sun.com/2006/03/rm";
-    
-    public  static final String sunClientVersion = "http://sun.com/2006/03/rm/client";
-    
-     /*
+    public static final String sunVersion = "http://sun.com/2006/03/rm";
+    public static final String sunClientVersion = "http://sun.com/2006/03/rm/client";
+    /*
      * RequestContext / MessageContext property names
      */
     public static final String sequenceProperty = "com.sun.xml.ws.sequence";
-    
     public static final String messageNumberProperty = "com.sun.xml.ws.messagenumber";
-    
     public static final String createSequenceProperty = "com.sun.xml.ws.createsequence";
-    /**
-     * Constants used by RMSource.createSequence
-     */
-    public static final String createSequencePayload = 
-            "<sun:createSequence xmlns:sun=\"http://com.sun/createSequence\"/>";
     
-    public static final String createSequenceNamespace = 
-            "http://com.sun/createSequence";
-    
-    
-    //INTERNATIONALIZE THESE
-    
+    //TODO: INTERNATIONALIZE THESE
     public static final String MESSAGE_NUMBER_ROLLOVER_TEXT = "The maximum value, %s,  for MessageNumber has been exceeded";
-    
-     
-     public static final String UNKNOWN_SEQUENCE_TEXT = "The message contains an unknown sequence id,  %s ";
-     
-     public static final String CREATE_SEQUENCE_REFUSED_TEXT = "The create sequence request has been refused by RM Destination -- %s ";
-
-     public static final String SEQUENCE_TERMINATED_TEXT = "The sequence has been terminated because of an unrecoverable error";
-
+    public static final String UNKNOWN_SEQUENCE_TEXT = "The message contains an unknown sequence id,  %s ";
+    public static final String CREATE_SEQUENCE_REFUSED_TEXT = "The create sequence request has been refused by RM Destination -- %s ";
+    public static final String SEQUENCE_TERMINATED_TEXT = "The sequence has been terminated because of an unrecoverable error";
     public static final String SEQUENCE_CLOSED_TEXT = "The sequence has been closed as CloseSequence Message was received";
-
-
 }

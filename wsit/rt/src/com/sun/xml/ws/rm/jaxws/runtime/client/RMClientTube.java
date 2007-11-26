@@ -82,8 +82,9 @@ import java.util.logging.Logger;
  */
 public class RMClientTube extends TubeBase<RMSource, ClientOutboundSequence, ClientInboundSequence> {
 
-    public static final Logger logger = Logger.getLogger(LoggingHelper.getLoggerName(RMClientTube.class));
-    public static final LoggingHelper logHelper = new LoggingHelper(logger);
+    private static final Logger LOGGER = Logger.getLogger(LoggingHelper.getLoggerName(RMClientTube.class));
+    private static final String CREATE_SEQUENCE_URI = "http://com.sun/createSequence";    
+    
     /*
      * Metadata from ctor.
      */
@@ -278,8 +279,8 @@ public class RMClientTube extends TubeBase<RMSource, ClientOutboundSequence, Cli
                 }
 
                 outboundSequence.setSecureReliableMessaging(secureReliableMessaging);
-                outboundSequence.registerProtocolMessageSender(
-                        new ProtocolMessageSender(messageProcessor,
+                outboundSequence.registerProtocolMessageSender(new ProtocolMessageSender(
+                        messageProcessor,
                         config,
                         marshaller,
                         unmarshaller,
@@ -299,7 +300,7 @@ public class RMClientTube extends TubeBase<RMSource, ClientOutboundSequence, Cli
                 //put the sequence in a packet property.  The process method, that
                 //called us will find it there and return it to the caller.
                 String reqUri = packet.getMessage().getPayloadNamespaceURI();
-                if (reqUri.equals(Constants.createSequenceNamespace)) {
+                if (CREATE_SEQUENCE_URI.equals(reqUri)) {
                     packet.invocationProperties.put(Constants.createSequenceProperty, outboundSequence);
                 }
 
@@ -401,7 +402,7 @@ public class RMClientTube extends TubeBase<RMSource, ClientOutboundSequence, Cli
             //Faulted TerminateSequence message of bug downstream.  We are
             //done with the sequence anyway.  Log and go about our business
             //WSRM2007: RMClientPipe threw Exception in preDestroy//
-            logger.log(Level.FINE, Messages.UNEXPECTED_PREDESTROY_EXCEPTION.format(), e);
+            LOGGER.log(Level.FINE, Messages.UNEXPECTED_PREDESTROY_EXCEPTION.format(), e);
         }
     }
 
@@ -476,7 +477,7 @@ public class RMClientTube extends TubeBase<RMSource, ClientOutboundSequence, Cli
             }
         } catch ( Throwable ee) {
             //WSRM2006: Unexpected  Exception in RMClientPipe.process.
-            logger.log(Level.SEVERE, Messages.UNEXPECTED_PROCESS_EXCEPTION.format(), ee);
+            LOGGER.log(Level.SEVERE, Messages.UNEXPECTED_PROCESS_EXCEPTION.format(), ee);
             return processException(new WebServiceException(ee));
         }
 
@@ -591,7 +592,7 @@ public class RMClientTube extends TubeBase<RMSource, ClientOutboundSequence, Cli
                         if (mess != null && mess.isFault()) {
                             //don't want to resend
                             //WSRM2004: Marking faulted message {0} as acked.
-                            logger.log(Level.FINE, Messages.ACKING_FAULTED_MESSAGE.format(message.getMessageNumber()));
+                            LOGGER.log(Level.FINE, Messages.ACKING_FAULTED_MESSAGE.format(message.getMessageNumber()));
                             outboundSequence.acknowledge(message.getMessageNumber());
                         }
 
@@ -600,7 +601,7 @@ public class RMClientTube extends TubeBase<RMSource, ClientOutboundSequence, Cli
                         if (mess != null && !isOneWayMessage && mess.getPayloadNamespaceURI() == null) {
                             //resend
                             //WSRM2005: Queuing dropped message for resend.
-                            logger.log(Level.FINE, Messages.RESENDING_DROPPED_MESSAGE.format());
+                            LOGGER.log(Level.FINE, Messages.RESENDING_DROPPED_MESSAGE.format());
                             return;
                         }
 
@@ -629,9 +630,9 @@ public class RMClientTube extends TubeBase<RMSource, ClientOutboundSequence, Cli
                 try {
                     if (t instanceof ClientTransportException) {
                         //resend in this case
-                        if (logger.isLoggable(Level.FINE)) {
+                        if (LOGGER.isLoggable(Level.FINE)) {
                             //WSRM2000: Sending message caused {0}. Queuing for resend.
-                            logger.log(Level.FINE, Messages.QUEUE_FOR_RESEND.format(t.toString()));
+                            LOGGER.log(Level.FINE, Messages.QUEUE_FOR_RESEND.format(t.toString()));
                         }
                         return;
                     } else if (t instanceof WebServiceException) {
@@ -639,10 +640,10 @@ public class RMClientTube extends TubeBase<RMSource, ClientOutboundSequence, Cli
                         //request.
                         Throwable cause = t.getCause();
                         if (cause != null && (cause instanceof IOException || cause instanceof SocketTimeoutException)) {
-                            if (logger.isLoggable(Level.FINE)) {
+                            if (LOGGER.isLoggable(Level.FINE)) {
                                 //Sending message caused {0}. Queuing for resend.//
                                 //WSRM2000: Sending message caused {0}. Queuing for resend.//
-                                logger.log(Level.FINE, Messages.QUEUE_FOR_RESEND.format(t.toString()), t);
+                                LOGGER.log(Level.FINE, Messages.QUEUE_FOR_RESEND.format(t.toString()), t);
                             }
                             //Simply return. Maintenance thread will invoke send() until
                             //we get a normal
@@ -650,7 +651,7 @@ public class RMClientTube extends TubeBase<RMSource, ClientOutboundSequence, Cli
                         } else {
                             //non-transport-related Exception;
                             //WSRM2003: Unexpected exception  wrapped in WSException.//
-                            logger.log(Level.SEVERE, Messages.UNEXPECTED_WRAPPED_EXCEPTION.format(), t);
+                            LOGGER.log(Level.SEVERE, Messages.UNEXPECTED_WRAPPED_EXCEPTION.format(), t);
                             completeFaultedMessage(message);
                             //TODO - need to propogate exception back to client here 
                             parentFiber.resume(null);
@@ -659,7 +660,7 @@ public class RMClientTube extends TubeBase<RMSource, ClientOutboundSequence, Cli
                         //Bug in software somewhere..  Any RuntimeException here must be a 
                         //WebServiceException
                         // WSRM2001: Unexpected exception in trySend.//
-                        logger.log(Level.SEVERE, Messages.UNEXPECTED_TRY_SEND_EXCEPTION.format(), t);
+                        LOGGER.log(Level.SEVERE, Messages.UNEXPECTED_TRY_SEND_EXCEPTION.format(), t);
                         //TODO - need to propogate exception back to client 
                         parentFiber.resume(null);
                     }

@@ -33,7 +33,6 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.policy.sourcemodel;
 
 import com.sun.xml.ws.policy.sourcemodel.wspolicy.NamespaceVersion;
@@ -42,6 +41,7 @@ import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.privateutil.LocalizationMessages;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
+import com.sun.xml.ws.rm.RMVersion;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -60,21 +60,22 @@ import javax.xml.namespace.QName;
  * @author Marek Potociar
  */
 public final class PolicySourceModel implements Cloneable {
+
     private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicySourceModel.class);
-    
     // TODO: move responsbility for default namespacing to the domain SPI implementation
     private static final Map<String, String> defaultNamespaceToPrefixMap = new HashMap<String, String>();
+
     static {
         for (NamespaceVersion version : NamespaceVersion.values()) {
             defaultNamespaceToPrefixMap.put(version.toString(), version.getDefaultNamespacePrefix());
         }
         defaultNamespaceToPrefixMap.put(PolicyConstants.SUN_POLICY_NAMESPACE_URI, PolicyConstants.SUN_POLICY_NAMESPACE_PREFIX);
-        
+
 //        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.encoding.policy.EncodingConstants.OPTIMIZED_MIME_NS, "");
 //        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.encoding.policy.EncodingConstants.ENCODING_NS, "");
         defaultNamespaceToPrefixMap.put(com.sun.xml.ws.encoding.policy.EncodingConstants.SUN_ENCODING_CLIENT_NS, "cenc");
         defaultNamespaceToPrefixMap.put(com.sun.xml.ws.encoding.policy.EncodingConstants.SUN_FI_SERVICE_NS, "fi");
-        
+
         defaultNamespaceToPrefixMap.put(com.sun.xml.ws.security.impl.policy.Constants.TRUST_NS, "wst");
         defaultNamespaceToPrefixMap.put(com.sun.xml.ws.security.policy.SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri, "sp");
         defaultNamespaceToPrefixMap.put(com.sun.xml.ws.security.policy.SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri, "sp");
@@ -86,7 +87,8 @@ public final class PolicySourceModel implements Cloneable {
         defaultNamespaceToPrefixMap.put(com.sun.xml.ws.security.impl.policy.Constants.SUN_SECURE_CLIENT_CONVERSATION_POLICY_NS, "cscp");
         defaultNamespaceToPrefixMap.put(com.sun.xml.ws.security.impl.policy.Constants.SUN_SECURE_SERVER_CONVERSATION_POLICY_NS, "sscp");
 
-        defaultNamespaceToPrefixMap.put(com.sun.xml.ws.rm.Constants.version, "wsrmp");
+        defaultNamespaceToPrefixMap.put(RMVersion.WSRM10.policyNamespaceUri, "wsrmp10");
+        defaultNamespaceToPrefixMap.put(RMVersion.WSRM11.policyNamespaceUri, "wsrmp");
         defaultNamespaceToPrefixMap.put(com.sun.xml.ws.rm.Constants.microsoftVersion, "msrmp");
         defaultNamespaceToPrefixMap.put(com.sun.xml.ws.rm.Constants.sunVersion, "sunrmp");
         defaultNamespaceToPrefixMap.put(com.sun.xml.ws.rm.Constants.sunClientVersion, "sunrmcp");
@@ -102,15 +104,13 @@ public final class PolicySourceModel implements Cloneable {
 
         defaultNamespaceToPrefixMap.put(com.sun.xml.ws.tx.common.Constants.WSAT_SOAP_NSURI, "wsat");
     }
-    
     private ModelNode rootNode;
     private String policyId;
     private String policyName;
     private NamespaceVersion nsVersion;
-    
     private final List<ModelNode> references = new LinkedList<ModelNode>(); // links to policy reference nodes
     private boolean expanded = false;
-    
+
 //    /**
 //     * Factory method that creates new policy source model instance.
 //     *
@@ -120,7 +120,6 @@ public final class PolicySourceModel implements Cloneable {
 //    public static PolicySourceModel createPolicySourceModel() {
 //        return new PolicySourceModel(NamespaceVersion.getLatestVersion());
 //    }
-    
 //    /**
 //     * Factory method that creates new policy source model instance and initializes it according to parameters provided.
 //     *
@@ -132,7 +131,6 @@ public final class PolicySourceModel implements Cloneable {
 //    public static PolicySourceModel createPolicySourceModel(final String policyId, final String policyName) {
 //        return new PolicySourceModel(NamespaceVersion.getLatestVersion(), policyId, policyName);
 //    }
-    
     /**
      * Factory method that creates new policy source model instance.
      *
@@ -141,7 +139,7 @@ public final class PolicySourceModel implements Cloneable {
     public static PolicySourceModel createPolicySourceModel(final NamespaceVersion nsVersion) {
         return new PolicySourceModel(nsVersion);
     }
-    
+
     /**
      * Factory method that creates new policy source model instance and initializes it according to parameters provided.
      *
@@ -163,7 +161,7 @@ public final class PolicySourceModel implements Cloneable {
         this.rootNode = ModelNode.createRootPolicyNode(this);
         this.nsVersion = nsVersion;
     }
-    
+
     /**
      * Private constructor that creats new policy source model instance with given
      * id or name identifier.
@@ -176,7 +174,7 @@ public final class PolicySourceModel implements Cloneable {
         this.policyId = policyId;
         this.policyName = policyName;
     }
-    
+
     /**
      * Returns a root node of this policy source model. It is allways of POLICY type.
      *
@@ -185,7 +183,7 @@ public final class PolicySourceModel implements Cloneable {
     public ModelNode getRootNode() {
         return rootNode;
     }
-    
+
     /**
      * Returns a policy name of this policy source model.
      *
@@ -194,7 +192,7 @@ public final class PolicySourceModel implements Cloneable {
     public String getPolicyName() {
         return policyName;
     }
-    
+
     /**
      * Returns a policy ID of this policy source model.
      *
@@ -211,8 +209,8 @@ public final class PolicySourceModel implements Cloneable {
      */
     public NamespaceVersion getNamespaceVersion() {
         return nsVersion;
-    }   
-    
+    }
+
     /**
      * Provides information about how namespaces used in this {@link PolicySourceModel}
      * instance should be mapped to thier default prefixes when marshalled.
@@ -230,11 +228,11 @@ public final class PolicySourceModel implements Cloneable {
             if (prefix != null) {
                 nsToPrefixMap.put(namespace, prefix);
             }
-        }        
-        
+        }
+
         return nsToPrefixMap;
     }
-    
+
     /**
      * An {@code Object.equals(Object obj)} method override.
      * <p/>
@@ -246,37 +244,37 @@ public final class PolicySourceModel implements Cloneable {
         if (this == obj) {
             return true;
         }
-        
-        if (!(obj instanceof PolicySourceModel)) {            
+
+        if (!(obj instanceof PolicySourceModel)) {
             return false;
         }
-        
+
         boolean result = true;
         final PolicySourceModel that = (PolicySourceModel) obj;
-        
+
         result = result && ((this.policyId == null) ? that.policyId == null : this.policyId.equals(that.policyId));
         result = result && ((this.policyName == null) ? that.policyName == null : this.policyName.equals(that.policyName));
         result = result && this.rootNode.equals(that.rootNode);
 //        result = result && ((this.xxx == null) ? that.xxx == null : this.xxx.equals(that.xxx));
-        
+
         return result;
     }
-    
+
     /**
      * An {@code Object.hashCode()} method override.
      */
     @Override
     public int hashCode() {
         int result = 17;
-        
+
         result = 37 * result + ((this.policyId == null) ? 0 : this.policyId.hashCode());
         result = 37 * result + ((this.policyName == null) ? 0 : this.policyName.hashCode());
         result = 37 * result + this.rootNode.hashCode();
 //        result = 37 * result + ((this.xxx == null) ? 0 : this.xxx.hashCode());
-        
+
         return result;
     }
-    
+
     /**
      * Returns a string representation of the object. In general, the <code>toString</code> method
      * returns a string that "textually represents" this object.
@@ -287,29 +285,29 @@ public final class PolicySourceModel implements Cloneable {
     public String toString() {
         final String innerIndent = PolicyUtils.Text.createIndent(1);
         final StringBuffer buffer = new StringBuffer(60);
-        
+
         buffer.append("Policy source model {").append(PolicyUtils.Text.NEW_LINE);
         buffer.append(innerIndent).append("policy id = '").append(policyId).append('\'').append(PolicyUtils.Text.NEW_LINE);
         buffer.append(innerIndent).append("policy name = '").append(policyName).append('\'').append(PolicyUtils.Text.NEW_LINE);
         rootNode.toString(1, buffer).append(PolicyUtils.Text.NEW_LINE).append('}');
-        
+
         return buffer.toString();
     }
-    
+
     @Override
     protected PolicySourceModel clone() throws CloneNotSupportedException {
         final PolicySourceModel clone = (PolicySourceModel) super.clone();
-        
+
         clone.rootNode = this.rootNode.clone();
         try {
             clone.rootNode.setParentModel(clone);
         } catch (IllegalAccessException e) {
             throw LOGGER.logSevereException(new CloneNotSupportedException(LocalizationMessages.WSP_0013_UNABLE_TO_SET_PARENT_MODEL_ON_ROOT()), e);
         }
-        
+
         return clone;
     }
-    
+
     /**
      * Returns a boolean value indicating whether this policy source model contains references to another policy source models.
      * <p/>
@@ -321,7 +319,7 @@ public final class PolicySourceModel implements Cloneable {
     public boolean containsPolicyReferences() {
         return !references.isEmpty();
     }
-    
+
     /**
      * Returns a boolean value indicating whether this policy source model contains is already expanded (i.e. contains no unexpanded
      * policy references) or not. This means that if model does not originally contain any policy references, it is considered as expanded,
@@ -338,7 +336,7 @@ public final class PolicySourceModel implements Cloneable {
     private boolean isExpanded() {
         return references.isEmpty() || expanded;
     }
-    
+
     /**
      * Expands current policy model. This means, that if this model contains any (unexpanded) policy references, then the method expands those
      * references by placing the content of the referneced policy source models under the policy reference nodes. This operation merely creates
@@ -363,13 +361,13 @@ public final class PolicySourceModel implements Cloneable {
                 } else {
                     referencedModel = context.retrieveModel(refData.getReferencedModelUri(), refData.getDigestAlgorithmUri(), digest);
                 }
-                
+
                 reference.setReferencedModel(referencedModel);
             }
             expanded = true;
         }
     }
-    
+
     /**
      * Adds new policy reference to the policy source model. The method is used by
      * the ModelNode instances of type POLICY_REFERENCE that need to register themselves
@@ -382,10 +380,10 @@ public final class PolicySourceModel implements Cloneable {
         if (node.getType() != ModelNode.Type.POLICY_REFERENCE) {
             throw new IllegalArgumentException(LocalizationMessages.WSP_0042_POLICY_REFERENCE_NODE_EXPECTED_INSTEAD_OF(node.getType()));
         }
-        
+
         references.add(node);
     }
-    
+
     /**
      * Iterates through policy vocabulary and extracts set of namespaces used in
      * the policy expression.
@@ -396,38 +394,38 @@ public final class PolicySourceModel implements Cloneable {
     private Collection<String> getUsedNamespaces() {
         final Set<String> namespaces = new HashSet<String>();
         namespaces.add(getNamespaceVersion().toString());
-        
+
         if (this.policyId != null) {
-            namespaces.add(PolicyConstants.WSU_NAMESPACE_URI);            
+            namespaces.add(PolicyConstants.WSU_NAMESPACE_URI);
         }
-        
+
         final Queue<ModelNode> nodesToBeProcessed = new LinkedList<ModelNode>();
         nodesToBeProcessed.add(rootNode);
-        
+
         ModelNode processedNode;
         while ((processedNode = nodesToBeProcessed.poll()) != null) {
             for (ModelNode child : processedNode.getChildren()) {
                 if (child.hasChildren()) {
                     nodesToBeProcessed.offer(child);
                 }
-                
+
                 if (child.isDomainSpecific()) {
                     final AssertionData nodeData = child.getNodeData();
                     namespaces.add(nodeData.getName().getNamespaceURI());
                     if (nodeData.isPrivateAttributeSet()) {
                         namespaces.add(PolicyConstants.SUN_POLICY_NAMESPACE_URI);
                     }
-                    
+
                     for (Entry<QName, String> attribute : nodeData.getAttributesSet()) {
                         namespaces.add(attribute.getKey().getNamespaceURI());
-                    }                    
+                    }
                 }
             }
         }
-        
+
         return namespaces;
     }
-    
+
     /**
      * Method retrieves default prefix for given namespace. Method returns null if
      * no default prefix is defined..
