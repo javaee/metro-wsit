@@ -1,8 +1,8 @@
-   import com.sun.xml.ws.rm.Message;
+   import com.sun.xml.ws.rm.RMMessage;
    try {
        myfilter = new com.sun.xml.ws.rm.jaxws.util.ProcessingFilter(){
              boolean hasDroppedNumber2 = false;
-             public boolean handleClientRequestMessage(com.sun.xml.ws.rm.Message mess) {
+             public boolean handleClientRequestMessage(RMMessage mess) {
 
             //System.out.println(mess);
 
@@ -17,14 +17,14 @@
             return true;
         }
 
-         public boolean handleClientResponseMessage(Message mess) {
+         public boolean handleClientResponseMessage(RMMessage mess) {
             System.out.println("In handleClientResponse"+mess);
             return true;
         }
 
-        public void handleEndpointRequestMessage(Message mess){}
-        public boolean handleEndpointResponseMessage(Message mess){return true;}
-        public void handleOutboundHeaders(Message mess){}
+        public void handleEndpointRequestMessage(RMMessage mess){}
+        public boolean handleEndpointResponseMessage(RMMessage mess){return true;}
+        public void handleOutboundHeaders(RMMessage mess){}
 
 
             };
