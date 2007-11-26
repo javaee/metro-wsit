@@ -54,11 +54,16 @@ import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.api.pipe.*;
+import com.sun.xml.ws.api.pipe.Engine;
+import com.sun.xml.ws.api.pipe.Fiber;
+import com.sun.xml.ws.api.pipe.NextAction;
+import com.sun.xml.ws.api.pipe.Tube;
+import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.client.ClientTransportException;
 import com.sun.xml.ws.rm.Constants;
 import com.sun.xml.ws.rm.MessageSender;
 import com.sun.xml.ws.rm.RMException;
+import com.sun.xml.ws.rm.RMMessage;
 import com.sun.xml.ws.rm.jaxws.runtime.InboundMessageProcessor;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
 import com.sun.xml.ws.rm.jaxws.runtime.TubeBase;
@@ -83,8 +88,7 @@ import java.util.logging.Logger;
 public class RMClientTube extends TubeBase<RMSource, ClientOutboundSequence, ClientInboundSequence> {
 
     private static final Logger LOGGER = Logger.getLogger(LoggingHelper.getLoggerName(RMClientTube.class));
-    private static final String CREATE_SEQUENCE_URI = "http://com.sun/createSequence";    
-    
+    private static final String CREATE_SEQUENCE_URI = "http://com.sun/createSequence";
     /*
      * Metadata from ctor.
      */
@@ -145,9 +149,8 @@ public class RMClientTube extends TubeBase<RMSource, ClientOutboundSequence, Cli
         this.service = service;
         this.binding = binding;
         this.securityPipe = securityPipe;
-
         this.config = new SequenceConfig(port, binding);
-        config.setSoapVersion(binding.getSOAPVersion());
+        // TODO remove line config.setSoapVersion(binding.getSOAPVersion());
 
         this.messageProcessor = this.provider.getInboundMessageProcessor();
 
@@ -333,8 +336,8 @@ public class RMClientTube extends TubeBase<RMSource, ClientOutboundSequence, Cli
         return false;
     }
 
-    private com.sun.xml.ws.rm.Message prepareRequestMessage(Packet request) throws RMException {
-        com.sun.xml.ws.rm.Message message = null;
+    private RMMessage prepareRequestMessage(Packet request) throws RMException {
+        RMMessage message = null;
 
         //FIXME - Need a better way for client to pass a message number.
         Object mn = request.proxy.getRequestContext().get(Constants.messageNumberProperty);
@@ -381,7 +384,7 @@ public class RMClientTube extends TubeBase<RMSource, ClientOutboundSequence, Cli
      * Set state of message to "complete" when its processing results in an
      * unrecoverable failure.
      */
-    private void completeFaultedMessage(com.sun.xml.ws.rm.Message message) {
+    private void completeFaultedMessage(RMMessage message) {
         try {
             outboundSequence.acknowledge(message.getMessageNumber());
         } catch (RMException e) {
@@ -423,7 +426,7 @@ public class RMClientTube extends TubeBase<RMSource, ClientOutboundSequence, Cli
     @NotNull
     @Override
     NextAction processRequest( Packet request) {
-        com.sun.xml.ws.rm.Message message = null;
+        RMMessage rmMessage = null;
         try {
             if (tubelineHelper == null) {
                 //First time through here
@@ -441,20 +444,20 @@ public class RMClientTube extends TubeBase<RMSource, ClientOutboundSequence, Cli
                     //to throw an exception here.  Other than that, we don't care about the
                     //response message.  We are only interested in the sequence that has been
                     //stored in the requestcontext.
-                    com.sun.xml.ws.api.message.Message mess = com.sun.xml.ws.api.message.Messages.createEmpty(binding.getSOAPVersion());
+                    Message mess = com.sun.xml.ws.api.message.Messages.createEmpty(binding.getSOAPVersion());
                     request.setMessage(mess);
                     doReturnWith(request);
                 }
             }
 
-            message = prepareRequestMessage(request);
+            rmMessage = prepareRequestMessage(request);
 
             //BUGBUG - It is possible for filter to be uninitialized here or have the wrong
             //value.  The initialization should be done here rather than in the RMClientPipe
             //ctor, and there is no reason for it to be a field (at least in the client pipe)
             filter = this.provider.getProcessingFilter();
 
-            if (filter == null || filter.handleClientRequestMessage(message)) {
+            if (filter == null || filter.handleClientRequestMessage(rmMessage)) {
                 //reset last activity timer in sequence.
                 outboundSequence.resetLastActivityTime();
                 tubelineHelper.send();
@@ -531,11 +534,11 @@ public class RMClientTube extends TubeBase<RMSource, ClientOutboundSequence, Cli
         private final TubelineHelperCallback callback;
         //Store the request packet and message for this helper.
         private Packet packet;
-        private com.sun.xml.ws.rm.Message message;
+        private RMMessage message;
         public Throwable throwable;
         private boolean sent;
 
-        public TubelineHelper(Packet packet, com.sun.xml.ws.rm.Message message) {
+        public TubelineHelper(Packet packet, RMMessage message) {
             this.message = message;
             this.packet = packet;
             this.sent = false;
@@ -559,7 +562,7 @@ public class RMClientTube extends TubeBase<RMSource, ClientOutboundSequence, Cli
             }
 
             //use a copy of the original message
-            com.sun.xml.ws.api.message.Message copy = message.getCopy();
+            Message copy = message.getCopy();
             packet.setMessage(copy);
             fiber.start(TubeCloner.clone(next), packet, callback);
         }
@@ -576,10 +579,10 @@ public class RMClientTube extends TubeBase<RMSource, ClientOutboundSequence, Cli
                     if (response != null) {
                         //Perform operations in the RMSource according to the contents of
                         //the RM Headers on the incoming message.
-                        Message mess = response.getMessage();
-                        com.sun.xml.ws.rm.Message rmMessage = null;
+                        Message responseMessage = response.getMessage();
 
-                        if (mess != null) {
+                        RMMessage rmMessage = null;
+                        if (responseMessage != null) {
                             rmMessage = handleInboundMessage(response);
                         }
 
@@ -589,7 +592,7 @@ public class RMClientTube extends TubeBase<RMSource, ClientOutboundSequence, Cli
                             filter.handleClientResponseMessage(rmMessage);
                         }
 
-                        if (mess != null && mess.isFault()) {
+                        if (responseMessage != null && responseMessage.isFault()) {
                             //don't want to resend
                             //WSRM2004: Marking faulted message {0} as acked.
                             LOGGER.log(Level.FINE, Messages.ACKING_FAULTED_MESSAGE.format(message.getMessageNumber()));
@@ -598,7 +601,7 @@ public class RMClientTube extends TubeBase<RMSource, ClientOutboundSequence, Cli
 
                         //check for empty body response to two-way message.  WCF will return
                         //one when it drops the request message.  In this case we also need to retry.
-                        if (mess != null && !isOneWayMessage && mess.getPayloadNamespaceURI() == null) {
+                        if (responseMessage != null && !isOneWayMessage && responseMessage.getPayloadNamespaceURI() == null) {
                             //resend
                             //WSRM2005: Queuing dropped message for resend.
                             LOGGER.log(Level.FINE, Messages.RESENDING_DROPPED_MESSAGE.format());

@@ -44,11 +44,15 @@
 package com.sun.xml.ws.rm.jaxws.runtime;
 
 import com.sun.xml.ws.api.message.Header;
-import com.sun.xml.ws.rm.*;
+import com.sun.xml.ws.rm.CloseSequenceException;
+import com.sun.xml.ws.rm.Constants;
+import com.sun.xml.ws.rm.InvalidSequenceException;
+import com.sun.xml.ws.rm.MessageNumberRolloverException;
+import com.sun.xml.ws.rm.RMException;
+import com.sun.xml.ws.rm.RMMessage;
 import com.sun.xml.ws.rm.protocol.AbstractAckRequested;
 import com.sun.xml.ws.rm.protocol.AbstractSequence;
 import com.sun.xml.ws.rm.protocol.AbstractSequenceAcknowledgement;
-import com.sun.xml.ws.rm.v200502.AckRequestedElement;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -66,7 +70,6 @@ public class InboundMessageProcessor {
     private RMProvider provider;
 
     public InboundMessageProcessor(RMProvider provider) {
-
         this.provider = provider;
     }
 
@@ -86,30 +89,19 @@ public class InboundMessageProcessor {
      * <br>
      * @param message The inbound <code>Message</code>.
      */
-    public void processMessage(Message message,
-            Marshaller marshaller,
-            Unmarshaller unmarshaller)
-            throws RMException {
-
-
+    public void processMessage(RMMessage message, Marshaller marshaller, Unmarshaller unmarshaller) throws RMException {
         try {
-
             /*
              * Check for each RM header type and do the right thing in RMProvider
              * depending on the type.
              */
-
             InboundSequence inseq = null;
-
             Header header = message.getHeader("Sequence");
             if (header != null) {
-
                 //identify sequence and message number from data in header and add
-                    //the message to the sequence at the specified index.
-                    //TODO handle error condition seq == null
-                AbstractSequence el =
-                        (AbstractSequence) header.readAsJAXB(unmarshaller);
-
+                //the message to the sequence at the specified index.
+                //TODO handle error condition seq == null
+                AbstractSequence el = (AbstractSequence) header.readAsJAXB(unmarshaller);
                 message.setSequenceElement(el);
                 String seqid = null;
                 int messageNumber;
@@ -123,16 +115,13 @@ public class InboundMessageProcessor {
 
                     //add message to ClientInboundSequence
                     messageNumber = ((com.sun.xml.ws.rm.v200702.SequenceElement) el).getNumber();
-
                 }
-
 
                 if (messageNumber == Integer.MAX_VALUE) {
                     throw new MessageNumberRolloverException(String.format(Constants.MESSAGE_NUMBER_ROLLOVER_TEXT, messageNumber), messageNumber);
                 }
 
                 inseq = provider.getInboundSequence(seqid);
-
                 if (inseq != null) {
                     if (inseq.isClosed()) {
                         throw new CloseSequenceException(String.format(Constants.SEQUENCE_CLOSED_TEXT), seqid);
@@ -141,47 +130,32 @@ public class InboundMessageProcessor {
                 } else {
                     throw new InvalidSequenceException(String.format(Constants.UNKNOWN_SEQUENCE_TEXT, seqid), seqid);
                 }
-
             }
-
 
             header = message.getHeader("SequenceAcknowledgement");
             if (header != null) {
-
                 //determine OutboundSequence id from data in header and update
-                    //state of that sequence according to the acks and nacks in the element 
-                AbstractSequenceAcknowledgement ackHeader =
-                        (AbstractSequenceAcknowledgement) (header.readAsJAXB(unmarshaller));
+                //state of that sequence according to the acks and nacks in the element 
+                AbstractSequenceAcknowledgement ackHeader = (AbstractSequenceAcknowledgement) (header.readAsJAXB(unmarshaller));
                 String ackHeaderId = null;
-
                 if (ackHeader instanceof com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement) {
                     ackHeaderId = ((com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement) ackHeader).getId();
-
-
                 } else {
                     ackHeaderId = ((com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement) ackHeader).getId();
-
                 }
 
                 message.setSequenceAcknowledgementElement(ackHeader);
-
-                OutboundSequence seq =
-                        provider.getOutboundSequence(ackHeaderId);
-
+                OutboundSequence seq = provider.getOutboundSequence(ackHeaderId);
                 if (seq != null) {
                     seq.handleAckResponse(ackHeader);
                 }
             }
 
-
             header = message.getHeader("AckRequested");
             if (header != null) {
-
                 //dispatch to InboundSequence to construct response.
-                    //TODO handle error condition no such sequence
-                AbstractAckRequested el =
-                        (AbstractAckRequested) header.readAsJAXB(unmarshaller);
-
+                //TODO handle error condition no such sequence
+                AbstractAckRequested el = (AbstractAckRequested) header.readAsJAXB(unmarshaller);
                 message.setAckRequestedElement(el);
                 String id = null;
                 InboundSequence seq = null;
@@ -190,45 +164,32 @@ public class InboundMessageProcessor {
                     seq = provider.getInboundSequence(id);
 
                     if (seq != null) {
-                        seq.handleAckRequested((AckRequestedElement) el, marshaller);
+                        seq.handleAckRequested((com.sun.xml.ws.rm.v200502.AckRequestedElement) el, marshaller);
                     }
-
-
                 } else {
                     id = ((com.sun.xml.ws.rm.v200702.AckRequestedElement) el).getId();
                     seq = provider.getInboundSequence(id);
-
+                    
                     if (seq != null) {
                         seq.handleAckRequested((com.sun.xml.ws.rm.v200702.AckRequestedElement) el, marshaller);
                     }
-
                 }
-                ;
-
-
-
             } else {
                 //FIXME - We need to be checking whether this is a ServerInboundSequence
-                    //in a port with a two-way operation.  This is the case where MS
-                    //puts a SequenceAcknowledgement on every message.
-
+                //in a port with a two-way operation.  This is the case where MS
+                //puts a SequenceAcknowledgement on every message.
                 //Need to check this with the latest CTP
-                    //Currently with Dec CTP the client message
-                    //does not have AckRequested element
-                    // but they are expecting a SequenceAcknowledgement
-                    //Hack for now
-
+                //Currently with Dec CTP the client message
+                //does not have AckRequested element
+                // but they are expecting a SequenceAcknowledgement
+                //Hack for now
                 if (inseq != null) {
-
                     inseq.handleAckRequested(null, marshaller);
                 } else {
-                //we can get here if there is no sequence header.  Perhaps this
-                        //is a ClientInboundSequence where the OutboundSequence has no two-ways
+                    //we can get here if there is no sequence header.  Perhaps this
+                    //is a ClientInboundSequence where the OutboundSequence has no two-ways
                 }
-
             }
-
-
         } catch (JAXBException e) {
             throw new RMException(e);
         }

@@ -41,7 +41,6 @@
  * Created on February 14, 2006, 10:10 AM
  *
  */
-
 package com.sun.xml.ws.rm;
 
 /**
@@ -49,37 +48,22 @@ package com.sun.xml.ws.rm;
  * to a sequence
  */
 public class DuplicateMessageException extends RMException {
-    
+
     /**
      * Store original of Duplicate message if passed using the ctor
      * taking a Message parameter.
      */
-    private Message message = null;
-    
+    private final RMMessage message;
+
+    public DuplicateMessageException(RMMessage message) {
+        this.message = message;
+    }
+
     /**
      * Accessor for the message field.
      * @return The value of the field.
      */
-    public Message getRMMessage() {
+    public RMMessage getRMMessage() {
         return message;
     }
-    
-    /**
-     */
-    /*
-    public DuplicateMessageException() {
-    }
-    
-    public DuplicateMessageException(String mess) {
-        super(mess);
-    }
-    
-    public DuplicateMessageException(Throwable e) {
-        super(e);
-    }
-    */
-    public DuplicateMessageException(Message mess) {
-        this.message = mess;
-    }
-   
 }

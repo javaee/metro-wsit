@@ -1,5 +1,5 @@
 /*
- * $Id: Sequence.java,v 1.13 2007-10-30 18:00:48 m_potociar Exp $
+ * $Id: Sequence.java,v 1.14 2007-11-26 16:03:30 m_potociar Exp $
  */
 
 /*
@@ -42,6 +42,7 @@ package com.sun.xml.ws.rm;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  *  A Sequence is a sparse array of messages corresponding to an RM Sequence.  It
@@ -56,7 +57,7 @@ public class Sequence {
     /**
      * The underlying list of messages
      */
-    protected ArrayList<Message> list;
+    protected List<RMMessage> rmMessages;
     /**
      * The smallest unfilled index.
      */
@@ -118,17 +119,14 @@ public class Sequence {
     }
 
     public Sequence() {
-
-        list = new ArrayList<Message>();
+        rmMessages = new ArrayList<RMMessage>();
         //fill in 0-th index that will never be used since
         //messageNumbers are 1-based and we will be keeping
         //messageNumbers in-sync with indices.
-        list.add(null);
+        rmMessages.add(null);
         allowDuplicates = false;
         firstKnownGap = 1;
-
         resetLastActivityTime();
-
     }
 
     /**
@@ -153,14 +151,12 @@ public class Sequence {
      * @throws InvalidMessageNumberException If the index is larger than the largest
      * index used.
      */
-    public synchronized Message get(int index)
-            throws InvalidMessageNumberException {
-
+    public synchronized RMMessage get(int index) throws InvalidMessageNumberException {
         if (index >= nextIndex) {
             throw new InvalidMessageNumberException(
                     Messages.INVALID_INDEX_MESSAGE.format(index));
         }
-        return list.get(index);
+        return rmMessages.get(index);
     }
 
     /**
@@ -173,16 +169,12 @@ public class Sequence {
      *
      * @return The new value of nextIndex.
      */
-    public synchronized int set(int i, Message m)
-            throws InvalidMessageNumberException,
-            BufferFullException,
-            DuplicateMessageException {
-
+    public synchronized int set(int index, RMMessage rmMessage) throws InvalidMessageNumberException, BufferFullException, DuplicateMessageException {
         //record the index and sequence in the message
-        m.setMessageNumber(i);
-        m.setSequence(this);
+        rmMessage.setMessageNumber(index);
+        rmMessage.setSequence(this);
 
-        if (i <= 0) {
+        if (index <= 0) {
             throw new InvalidMessageNumberException();
         }
 
@@ -190,30 +182,29 @@ public class Sequence {
             throw new BufferFullException(this);
         }
 
-        if (i < nextIndex) {
-            Message mess = null;
-            if (null != (mess = list.get(i)) && !allowDuplicates) {
+        if (index < nextIndex) {
+            RMMessage mess = null;
+            if (null != (mess = rmMessages.get(index)) && !allowDuplicates) {
                 //Store the original message in the exception so
                 //that exception handling can use it.
                 throw new DuplicateMessageException(mess);
             }
-
-            list.set(i, m);
-        } else if (i == nextIndex) {
-            list.add(m);
+            rmMessages.set(index, rmMessage);
+        } else if (index == nextIndex) {
+            rmMessages.add(rmMessage);
             nextIndex++;
         } else {
             //fill in nulls between nextIndex an new nextIndex.
-            for (int j = nextIndex; j < i; j++) {
-                list.add(null);
+            for (int j = nextIndex; j < index; j++) {
+                rmMessages.add(null);
             }
-            list.add(m);
-            nextIndex = i + 1;
+            rmMessages.add(rmMessage);
+            nextIndex = index + 1;
         }
 
         storedMessages++;
 
-        return i;
+        return index;
     }
 
     /**

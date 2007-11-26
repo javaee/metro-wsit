@@ -50,6 +50,7 @@ import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.rm.RMException;
 import com.sun.xml.ws.rm.Constants;
+import com.sun.xml.ws.rm.RMMessage;
 import com.sun.xml.ws.rm.RMVersion;
 import com.sun.xml.ws.rm.jaxws.util.ProcessingFilter;
 
@@ -61,37 +62,30 @@ import javax.xml.bind.Unmarshaller;
  * methods are implemented in the subclasses.  The base class contains common code used
  *  by the JAX-WS runtime to communicate with the RM Providers.
  */
-public abstract class TubeBase<PROVIDER extends RMProvider, 
-                            OUTBOUND extends OutboundSequence, 
-                            INBOUND extends InboundSequence>
-        
-        extends AbstractFilterTubeImpl {
+public abstract class TubeBase<PROVIDER extends RMProvider, OUTBOUND extends OutboundSequence, INBOUND extends InboundSequence> extends AbstractFilterTubeImpl {
 
     /**
      * Either RMSource or RMDestination
      */
     public PROVIDER provider;
-   
     protected RMVersion version;
     protected Marshaller marshaller;
     protected Unmarshaller unmarshaller;
-    
     protected ProcessingFilter filter;
-    
-    protected TubeBase(PROVIDER provider, Tube nextTube)  {
-        
+
+    protected TubeBase(PROVIDER provider, Tube nextTube) {
+
         super(nextTube);
         this.provider = provider;
         this.filter = provider.getProcessingFilter();
     }
-    
+
     protected TubeBase(PROVIDER provider, TubeBase that, TubeCloner cloner) {
-        
+
         super(that, cloner);
         this.provider = provider;
         this.filter = provider.getProcessingFilter();
     }
-
 
     /**
      * Use methods of <code>OutboundSequence</code> field to store and write headers to
@@ -100,47 +94,38 @@ public abstract class TubeBase<PROVIDER extends RMProvider,
      * @param packet Packet containing Outbound message
      * @return The wrapped message
      */
-    protected com.sun.xml.ws.rm.Message handleOutboundMessage(OUTBOUND outboundSequence,
-                                                                Packet packet) 
-            throws RMException {
-             
+    protected RMMessage handleOutboundMessage(OUTBOUND outboundSequence, Packet packet) throws RMException {
         Message message = packet.getMessage();
-        com.sun.xml.ws.rm.Message msg = 
-                new com.sun.xml.ws.rm.Message(message, version);
-        
+        RMMessage rmMessage = new RMMessage(message, version);
         Object mn = packet.invocationProperties.get(Constants.messageNumberProperty);
         Object oneWayResponse = packet.invocationProperties.get("onewayresponse");
-        
+
         if (oneWayResponse != null) {
             //don't want to add this message to a sequence.
-            msg.isOneWayResponse = true;
+            rmMessage.isOneWayResponse = true;
         }
-        
+
         if (mn instanceof Integer) {
-            msg.setMessageNumber((Integer)mn);
+            rmMessage.setMessageNumber((Integer) mn);
         }
-        
-        outboundSequence.processOutboundMessage(msg, marshaller);
-      
-        return msg;
+
+        outboundSequence.processOutboundMessage(rmMessage, marshaller);
+
+        return rmMessage;
     }
 
-     /**
+    /**
      * Use methods of <code>RMProvider</code> field to store and write headers to
      * inbound message.
      *
      * @param packet Packet containing Outbound message
      * @return The wrapped message
      */
-    protected  com.sun.xml.ws.rm.Message handleInboundMessage(Packet packet)
-            throws RMException {
-
+    protected RMMessage handleInboundMessage(Packet packet) throws RMException {
         Message message = packet.getMessage();
-        com.sun.xml.ws.rm.Message msg =
-                new com.sun.xml.ws.rm.Message(message, version);
+        RMMessage msg = new RMMessage(message, version);
 
         provider.processInboundMessage(msg, marshaller, unmarshaller);
         return msg;
     }
-
 }

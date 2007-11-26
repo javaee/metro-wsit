@@ -41,9 +41,9 @@
  *
  * @author Mike Grogan
  */
-
 package com.sun.xml.ws.rm.jaxws.util;
-import com.sun.xml.ws.rm.Message;
+
+import com.sun.xml.ws.rm.RMMessage;
 
 /**
  * Implementing classes provide access to all RM headers on Inbound and
@@ -72,7 +72,7 @@ import com.sun.xml.ws.rm.Message;
  * 
  */
 public interface ProcessingFilter {
-    
+
     /**
      * Use to inspect the RM headers on a client request message.  
      * The return value determines whether the message is processed normally 
@@ -81,19 +81,18 @@ public interface ProcessingFilter {
      * @param mess The request message.
      * @return true if processing should continue, 
      *         false if message should be "lost"
-     */                              
-    public boolean handleClientRequestMessage(Message mess);
-    
-     /**
+     */
+    public boolean handleClientRequestMessage(RMMessage mess);
+
+    /**
      * Use to inspect the RM headers on a client response message.  
      *
      * @param mess The response message.
      * @return true if processing should continue, 
      *         false if message should be "lost"
-     */   
-    public boolean handleClientResponseMessage(Message mess);
-    
-    
+     */
+    public boolean handleClientResponseMessage(RMMessage mess);
+
     /**
      * Use to inspect the RM headers on an Endpoint request message.  
      * The return value determines whether the message is processed normally 
@@ -101,16 +100,16 @@ public interface ProcessingFilter {
      *
      * @param mess The request message.
      *   
-     */                              
-    public void handleEndpointRequestMessage(Message mess);
-    
-     /**
+     */
+    public void handleEndpointRequestMessage(RMMessage mess);
+
+    /**
      * Use to inspect the RM headers on an Endpoint response message.  
      *
      * @param mess The response message.
-     */   
-    public boolean handleEndpointResponseMessage(Message mess);
-    
+     */
+    public boolean handleEndpointResponseMessage(RMMessage mess);
+
     /**
      * Use to inspect or modify headers of outgoing message just before they are
      * marshalled.  Use message.getSequenceElement(), 
@@ -119,6 +118,5 @@ public interface ProcessingFilter {
      *
      * @param The message to be modified.
      */
-    public void handleOutboundHeaders(Message mess);
- 
+    public void handleOutboundHeaders(RMMessage mess);
 }

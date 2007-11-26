@@ -126,6 +126,7 @@ public class SequenceConfig implements SequenceSettings {
             WSDLModel model = binding.getOwner();
             PolicyMap policyMap = model.getExtension(WSDLPolicyMapWrapper.class).getPolicyMap();
             this.constants = RMConstants.getRMConstants(wsbinding.getAddressingVersion());
+            this.soapVersion = binding.getBindingId().getSOAPVersion();
             try {
                 init(port, policyMap);
             } catch (RMException e) {
@@ -218,9 +219,10 @@ public class SequenceConfig implements SequenceSettings {
         }
     }
 
-    public void setSoapVersion(SOAPVersion soapVersion) {
-        this.soapVersion = soapVersion;
-    }
+// TODO remove unused method    
+//    public void setSoapVersion(SOAPVersion soapVersion) {
+//        this.soapVersion = soapVersion;
+//    }
 
     /**
      * Accessor for flow control field

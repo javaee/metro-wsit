@@ -41,17 +41,14 @@
  * Created on November 25, 2005, 9:50 AM
  *
  */
-
 package com.sun.xml.ws.rm.jaxws.runtime;
+
 import java.util.Hashtable;
-import com.sun.xml.ws.rm.Message;
+import com.sun.xml.ws.rm.RMMessage;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import com.sun.xml.ws.rm.RMException;
 import com.sun.xml.ws.rm.jaxws.util.ProcessingFilter;
-import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
-import com.sun.xml.ws.rm.jaxws.runtime.InboundSequence;
-
 
 /**
  * RMProvider is a base class for <code>RMSource</code> and 
@@ -60,16 +57,36 @@ import com.sun.xml.ws.rm.jaxws.runtime.InboundSequence;
  * handles the processing of messages coming from the network.
  *
  */
-public abstract class RMProvider<INBOUNDSEQUENCE extends InboundSequence,
-                                 OUTBOUNDSEQUENCE extends OutboundSequence> {
+public abstract class RMProvider<INBOUNDSEQUENCE extends InboundSequence, OUTBOUNDSEQUENCE extends OutboundSequence> {
 
     protected ProcessingFilter filter = null;
-    
+
+    /*
+     * Contains all the <code>OutboundSequences</code> managed
+     * by this <code>RMProvider</code>.  For an <code>RMSource</code>
+     * these are the "primary" sequences and <code>inboundMap</code> 
+     * represents their "companion" sequences.
+     */
+    protected Hashtable<String, OUTBOUNDSEQUENCE> outboundMap = new Hashtable<String, OUTBOUNDSEQUENCE>();
+    /*
+     * Contains all the <code>InboundSequences</code> managed
+     * by this <code>RMProvider</code>.  For an <code>RMDestination</code>
+     * these are the "primary" sequences and <code>inboundMap</code> 
+     * represents their "companion" sequences.
+     */
+    protected Hashtable<String, INBOUNDSEQUENCE> inboundMap = new Hashtable<String, INBOUNDSEQUENCE>();
+    /*
+     * Instance of a Helper class to handle inbound messages based 
+     * on their WS-RM protocol headers
+     */
+    protected InboundMessageProcessor messageProcessor = new InboundMessageProcessor(this);
+
     /**
+     * Constructor
      */
     public RMProvider() {
     }
-    
+
     /**
      * Sets and instance of ProcessingFilter to be used for diagnostic/debugging
      * purposes.  
@@ -79,7 +96,7 @@ public abstract class RMProvider<INBOUNDSEQUENCE extends InboundSequence,
     public void setProcessingFilter(ProcessingFilter filter) {
         this.filter = filter;
     }
-    
+
     /**
      * Returns the ProcessingFilter instance that has been designated for use for
      * diagnostic/debugging purposes.
@@ -90,24 +107,7 @@ public abstract class RMProvider<INBOUNDSEQUENCE extends InboundSequence,
     public ProcessingFilter getProcessingFilter() {
         return filter;
     }
-    /*
-     * Contains all the <code>OutboundSequences</code> managed
-     * by this <code>RMProvider</code>.  For an <code>RMSource</code>
-     * these are the "primary" sequences and <code>inboundMap</code> 
-     * represents their "companion" sequences.
-     */
-    protected Hashtable<String, OUTBOUNDSEQUENCE> outboundMap =
-            new Hashtable<String, OUTBOUNDSEQUENCE>();
-    
-    /*
-     * Contains all the <code>InboundSequences</code> managed
-     * by this <code>RMProvider</code>.  For an <code>RMDestination</code>
-     * these are the "primary" sequences and <code>inboundMap</code> 
-     * represents their "companion" sequences.
-     */
-    protected Hashtable<String, INBOUNDSEQUENCE> inboundMap = 
-            new Hashtable<String, INBOUNDSEQUENCE>();
-    
+
     /**
      * Look up <code>OutboundSequence</code> with given id.
      *
@@ -116,7 +116,7 @@ public abstract class RMProvider<INBOUNDSEQUENCE extends InboundSequence,
     public OUTBOUNDSEQUENCE getOutboundSequence(String id) {
         return outboundMap.get(id);
     }
-    
+
     /**
      * Look up <code>OutboundSequence</code> with given id.
      *
@@ -125,30 +125,19 @@ public abstract class RMProvider<INBOUNDSEQUENCE extends InboundSequence,
     public INBOUNDSEQUENCE getInboundSequence(String id) {
         return inboundMap.get(id);
     }
-    /*
-     * Instance of a Helper class to handle inbound messages based 
-     * on their WS-RM protocol headers
-     */
-    protected InboundMessageProcessor messageProcessor = 
-            new InboundMessageProcessor(this);
-    
+
     /*
      * Process normal application message using <code>InboundMessageProcessor</code>
      * field.
      *
      * @param mess The inbound message.
      *
-    */
-    public void processInboundMessage(Message mess, 
-                                    Marshaller marshaller,
-                                    Unmarshaller unmarshaller) throws RMException{
+     */
+    public void processInboundMessage(RMMessage mess, Marshaller marshaller, Unmarshaller unmarshaller) throws RMException {
         messageProcessor.processMessage(mess, marshaller, unmarshaller);
     }
 
-    
-    public InboundMessageProcessor getInboundMessageProcessor(){
+    public InboundMessageProcessor getInboundMessageProcessor() {
         return messageProcessor;
     }
-    
-    
 }

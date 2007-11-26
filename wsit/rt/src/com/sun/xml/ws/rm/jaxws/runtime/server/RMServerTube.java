@@ -44,7 +44,6 @@
  */
 package com.sun.xml.ws.rm.jaxws.runtime.server;
 
-import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
@@ -83,16 +82,6 @@ import com.sun.xml.ws.rm.protocol.AbstractCreateSequence;
 import com.sun.xml.ws.rm.protocol.AbstractCreateSequenceResponse;
 import com.sun.xml.ws.rm.protocol.AbstractSequenceAcknowledgement;
 import com.sun.xml.ws.rm.protocol.AbstractTerminateSequence;
-import com.sun.xml.ws.rm.v200502.AckRequestedElement;
-import com.sun.xml.ws.rm.v200502.Identifier;
-import com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement;
-import com.sun.xml.ws.rm.v200502.SequenceElement;
-import com.sun.xml.ws.rm.v200502.SequenceFaultElement;
-import com.sun.xml.ws.rm.v200502.TerminateSequenceElement;
-import com.sun.xml.ws.rm.v200702.MakeConnectionElement;
-import com.sun.xml.ws.rm.v200702.CloseSequenceElement;
-import com.sun.xml.ws.rm.v200702.CloseSequenceResponseElement;
-import com.sun.xml.ws.rm.v200702.TerminateSequenceResponseElement;
 import com.sun.xml.ws.runtime.util.Session;
 import com.sun.xml.ws.runtime.util.SessionManager;
 import com.sun.xml.ws.security.SecurityContextToken;
@@ -108,7 +97,6 @@ import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPFactory;
 import javax.xml.soap.SOAPFault;
 import javax.xml.ws.WebServiceException;
-import javax.xml.ws.soap.SOAPBinding;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
 import java.net.URI;
 import java.util.HashMap;
@@ -129,7 +117,7 @@ public class RMServerTube extends TubeBase<RMDestination, ServerOutboundSequence
     protected SequenceConfig config;
     private boolean secureReliableMessaging = false;
     protected WSBinding binding;
-    private com.sun.xml.ws.rm.Message currentRequestMessage;
+    private com.sun.xml.ws.rm.RMMessage currentRequestMessage;
     private SessionManager sessionManager = SessionManager.getSessionManager();
 
     /**
@@ -146,7 +134,14 @@ public class RMServerTube extends TubeBase<RMDestination, ServerOutboundSequence
         this.wsdlModel = wsdlModel;
         this.owner = owner;
         this.binding = this.owner.getBinding();
-        this.config = getSequenceConfig();
+        // TODO remove line this.config = getSequenceConfig();
+
+        if (wsdlModel != null) {
+            this.config = new SequenceConfig(wsdlModel, owner.getBinding());
+        } else {
+            this.config = new SequenceConfig();
+        }
+
         this.version = config.getRMVersion();
         this.constants = config.getConstants();
         this.unmarshaller = config.getRMVersion().createUnmarshaller();
@@ -179,7 +174,7 @@ public class RMServerTube extends TubeBase<RMDestination, ServerOutboundSequence
     @Override
     public NextAction processRequest(Packet packet) {
         SOAPFault soapFault = null;
-        com.sun.xml.ws.rm.Message message = null;
+        com.sun.xml.ws.rm.RMMessage message = null;
 
         try {
             //handle special protocol messages
@@ -231,7 +226,7 @@ public class RMServerTube extends TubeBase<RMDestination, ServerOutboundSequence
                 //SequenceFault is to be added for only SOAP 1.1
                 if (binding.getSOAPVersion() == SOAPVersion.SOAP_11) {
                     //FIXME - need JAXBRIContext that can marshall SequenceFaultElement
-                    Header header = Headers.create(config.getRMVersion().getJAXBContext(), new SequenceFaultElement());
+                    Header header = Headers.create(config.getRMVersion().getJAXBContext(), new com.sun.xml.ws.rm.v200502.SequenceFaultElement());
                     soapFaultMessage.getHeaders().add(header);
                 }
 
@@ -350,8 +345,8 @@ public class RMServerTube extends TubeBase<RMDestination, ServerOutboundSequence
                 return doReturnWith(ret);
             } else {
                 //check whether original response is available.
-                com.sun.xml.ws.rm.Message original = e.getRMMessage();
-                com.sun.xml.ws.rm.Message origresp = original.getRelatedMessage();
+                com.sun.xml.ws.rm.RMMessage original = e.getRMMessage();
+                com.sun.xml.ws.rm.RMMessage origresp = original.getRelatedMessage();
 
                 if (origresp != null) {
                     Message response = origresp.getCopy();
@@ -441,7 +436,7 @@ public class RMServerTube extends TubeBase<RMDestination, ServerOutboundSequence
             //need to handle any error caused by
             //handleOutboundMessage.. Request has already been processed
             //by the endpoint.
-            com.sun.xml.ws.rm.Message om = handleOutboundMessage(outboundSequence, packet);
+            com.sun.xml.ws.rm.RMMessage om = handleOutboundMessage(outboundSequence, packet);
 
             //allow diagnostic access to outbound message if ProcessingFilter is
             //specified
@@ -739,8 +734,8 @@ public class RMServerTube extends TubeBase<RMDestination, ServerOutboundSequence
             case WSRM10:
                 tsAction = RMVersion.WSRM10.getTerminateSequenceAction();
                 if (outboundSequence.saveMessages) {
-                    TerminateSequenceElement terminateSeqResponse = new TerminateSequenceElement();
-                    Identifier id2 = new Identifier();
+                    com.sun.xml.ws.rm.v200502.TerminateSequenceElement terminateSeqResponse = new com.sun.xml.ws.rm.v200502.TerminateSequenceElement();
+                    com.sun.xml.ws.rm.v200502.Identifier id2 = new com.sun.xml.ws.rm.v200502.Identifier();
                     id2.setValue(outboundSequence.getId());
 
                     terminateSeqResponse.setIdentifier(id2);
@@ -765,7 +760,7 @@ public class RMServerTube extends TubeBase<RMDestination, ServerOutboundSequence
 
             case WSRM11:
                 tsAction = RMVersion.WSRM11.getTerminateSequenceResponseAction();
-                TerminateSequenceResponseElement terminateSeqResponse = new TerminateSequenceResponseElement();
+                com.sun.xml.ws.rm.v200702.TerminateSequenceResponseElement terminateSeqResponse = new com.sun.xml.ws.rm.v200702.TerminateSequenceResponseElement();
                 com.sun.xml.ws.rm.v200702.Identifier id2 = new com.sun.xml.ws.rm.v200702.Identifier();
                 id2.setValue(outboundSequence.getId());
 
@@ -796,7 +791,7 @@ public class RMServerTube extends TubeBase<RMDestination, ServerOutboundSequence
                 throw new RMException(Messages.INVALID_LAST_MESSAGE.format());
             }
 
-            SequenceElement el = (SequenceElement) header.readAsJAXB(unmarshaller);
+            com.sun.xml.ws.rm.v200502.SequenceElement el = (com.sun.xml.ws.rm.v200502.SequenceElement) header.readAsJAXB(unmarshaller);
             String id = el.getId();
             ServerInboundSequence seq = provider.getInboundSequence(id);
             if (seq == null) {
@@ -807,7 +802,7 @@ public class RMServerTube extends TubeBase<RMDestination, ServerOutboundSequence
             //add message to ClientInboundSequence so that this message
             //number appears in sequence acknowledgement
             int messageNumber = el.getNumber();
-            seq.set(messageNumber, new com.sun.xml.ws.rm.Message(message, version));
+            seq.set(messageNumber, new com.sun.xml.ws.rm.RMMessage(message, version));
             return generateAckMessage(inbound, seq, config.getRMVersion().getLastAction());
         } catch (JAXBException e) {
             LOGGER.severe(Messages.LAST_MESSAGE_EXCEPTION.format() + e);
@@ -816,7 +811,7 @@ public class RMServerTube extends TubeBase<RMDestination, ServerOutboundSequence
     }
 
     public Packet handleCloseSequenceAction(Packet inbound) throws RMException {
-        CloseSequenceElement csElement;
+        com.sun.xml.ws.rm.v200702.CloseSequenceElement csElement;
         String id = null;
         Message message = inbound.getMessage();
 
@@ -833,7 +828,7 @@ public class RMServerTube extends TubeBase<RMDestination, ServerOutboundSequence
         }
 
         int lastMessageNumber = csElement.getLastMsgNumber();
-        CloseSequenceResponseElement csrElement = new com.sun.xml.ws.rm.v200702.CloseSequenceResponseElement();
+        com.sun.xml.ws.rm.v200702.CloseSequenceResponseElement csrElement = new com.sun.xml.ws.rm.v200702.CloseSequenceResponseElement();
         com.sun.xml.ws.rm.v200702.Identifier identifier = new com.sun.xml.ws.rm.v200702.Identifier();
         identifier.setValue(seq.getId());
         csrElement.setIdentifier(identifier);
@@ -871,7 +866,7 @@ public class RMServerTube extends TubeBase<RMDestination, ServerOutboundSequence
             AbstractAckRequested el = (AbstractAckRequested) header.readAsJAXB(unmarshaller);
             String id = null;
             if (el instanceof com.sun.xml.ws.rm.v200502.AckRequestedElement) {
-                id = ((AckRequestedElement) el).getId();
+                id = ((com.sun.xml.ws.rm.v200502.AckRequestedElement) el).getId();
             } else {
                 id = ((com.sun.xml.ws.rm.v200702.AckRequestedElement) el).getId();
             }
@@ -903,8 +898,8 @@ public class RMServerTube extends TubeBase<RMDestination, ServerOutboundSequence
 
             AbstractSequenceAcknowledgement el = (AbstractSequenceAcknowledgement) header.readAsJAXB(unmarshaller);
             String id;
-            if (el instanceof SequenceAcknowledgementElement) {
-                id = ((SequenceAcknowledgementElement) el).getId();
+            if (el instanceof com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement) {
+                id = ((com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement) el).getId();
             } else {
                 id = ((com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement) el).getId();
             }
@@ -929,7 +924,7 @@ public class RMServerTube extends TubeBase<RMDestination, ServerOutboundSequence
             throw new RMException("Unsupported MakeConnection message to WS-RM 1.0 Endpoint.");
         }
 
-        MakeConnectionElement element = null;
+        com.sun.xml.ws.rm.v200702.MakeConnectionElement element = null;
         String sequenceId = null;
         Message message = packet.getMessage();
         try {
@@ -947,7 +942,7 @@ public class RMServerTube extends TubeBase<RMDestination, ServerOutboundSequence
         }
 
         //see if we can find a message in the sequence that needs to be resent.
-        com.sun.xml.ws.rm.Message mess = outboundSequence.getUnacknowledgedMessage();
+        com.sun.xml.ws.rm.RMMessage mess = outboundSequence.getUnacknowledgedMessage();
         Message jaxwsMessage = null;
         if (mess != null) {
             jaxwsMessage = mess.getCopy();
@@ -1028,44 +1023,33 @@ public class RMServerTube extends TubeBase<RMDestination, ServerOutboundSequence
                 });
     }
 
-    /**
-     * Returns a message containing a fault defined by the WS-RM spec.
-     *
-     * @param
-     *      e An Exception mapped to a WS-RM defined fault.
-     * @return
-     *      The mapped fault
-     * @throws
-     *      Exception - Exceptions not mapped to well-known fault types are
-     *      rethrown.
-     */
-    /**
-     * Initialize a <code>SequenceConfig</code> using the metadata passed in the
-     * ctor.
-     */
-    private SequenceConfig getSequenceConfig() {
-        SequenceConfig ret;
-        if (wsdlModel != null) {
-            /*
-            If there is a WSDL, use the SequenceConfig ctor taking a WSDLPort and
-            initialize SOAPVersion according to the value obtained from the binding.
-             */
-            ret = new SequenceConfig(wsdlModel, this.binding);
-            BindingID bindingid = wsdlModel.getBinding().getBindingId();
-            if (bindingid.equals(BindingID.parse(SOAPBinding.SOAP11HTTP_BINDING))) {
-                ret.setSoapVersion(SOAPVersion.SOAP_11);
-            } else {
-                ret.setSoapVersion(SOAPVersion.SOAP_12);
-            }
-        } else {
-            /*
-            Use SequenceConfig initialized with default values.
-             */
-            ret = new SequenceConfig();
-        }
-        return ret;
-    }
-
+// TODO remove
+//    /**
+//     * Initialize a <code>SequenceConfig</code> using the metadata passed in the
+//     * ctor.
+//     */
+//    private SequenceConfig getSequenceConfig() {
+//        SequenceConfig ret;
+//        if (wsdlModel != null) {
+//            /*
+//            If there is a WSDL, use the SequenceConfig ctor taking a WSDLPort and
+//            initialize SOAPVersion according to the value obtained from the binding.
+//             */
+//            ret = new SequenceConfig(wsdlModel, this.binding);
+//            BindingID bindingid = wsdlModel.getBinding().getBindingId();
+//            if (bindingid.equals(BindingID.parse(SOAPBinding.SOAP11HTTP_BINDING))) {
+//                ret.setSoapVersion(SOAPVersion.SOAP_11);
+//            } else {
+//                ret.setSoapVersion(SOAPVersion.SOAP_12);
+//            }
+//        } else {
+//            /*
+//            Use SequenceConfig initialized with default values.
+//             */
+//            ret = new SequenceConfig();
+//        }
+//        return ret;
+//    }
     /**
      * Determine whether the STR used to secure request message is the one passed in
      * the CreateSequence message for the sequence.

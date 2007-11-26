@@ -41,21 +41,17 @@
  * Created on October 30, 2005, 9:08 AM
  *
  */
-
 package com.sun.xml.ws.rm.protocol;
 
 import com.sun.xml.ws.rm.InvalidMessageNumberException;
-import com.sun.xml.ws.rm.Message;
 import com.sun.xml.ws.rm.RMVersion;
 import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
-import com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
-
 
 /**
  * Utility class that manages the acknowledgement of sequence messages.  Methods
@@ -65,74 +61,61 @@ import java.util.logging.Logger;
  */
 public class AcknowledgementHandler {
 
-    private static final Logger logger = 
-            Logger.getLogger(AcknowledgementHandler.class.getName());
-    
+    private static final Logger logger = Logger.getLogger(AcknowledgementHandler.class.getName());
     /**
      * Configuration for this sequence.
      */
     protected SequenceConfig config;
 
-
     public AcknowledgementHandler(SequenceConfig seqConfig) {
         this.config = seqConfig;
     }
 
-    
     /**
      * Mark the messages in the sequence delivered according to the contents
      * of the specified <code>SequenceAcknowledgement</code> element.
      *
      * @param element The <code>SequenceAcknowledgementElement</code>
      */
-    public void handleAcknowledgement(OutboundSequence sequence, 
-                        AbstractSequenceAcknowledgement element)
-                     throws InvalidMessageNumberException {
-        
+    public void handleAcknowledgement(OutboundSequence sequence,
+            AbstractSequenceAcknowledgement element)
+            throws InvalidMessageNumberException {
+
         synchronized (sequence) {
-
             List<BigInteger> nacks = null;
-            
-            if (config.getRMVersion() == RMVersion.WSRM10)    {
-                sequence.setBufferRemaining(((com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement)element).getBufferRemaining());
-                nacks = ((com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement)element).getNack();
-            }   else {
-                sequence.setBufferRemaining(((com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement)element).getBufferRemaining());
-                nacks = ((com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement)element).getNack();
-
+            if (config.getRMVersion() == RMVersion.WSRM10) {
+                sequence.setBufferRemaining(((com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement) element).getBufferRemaining());
+                nacks = ((com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement) element).getNack();
+            } else {
+                sequence.setBufferRemaining(((com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement) element).getBufferRemaining());
+                nacks = ((com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement) element).getNack();
             }
-
-
 
             //TODO - error checking
             //either nacks or ranges must be null or protocol element is malformed.
             if (nacks != null && !nacks.isEmpty()) {
-
-                int size = sequence.getNextIndex() + 1;
                 ArrayList<Boolean> list = new ArrayList<Boolean>();
                 for (int i = 1; i < sequence.getNextIndex(); i++) {
                     list.set(i, true);
                 }
 
                 for (BigInteger big : nacks) {
-                    int index = (int)big.longValue();
+                    int index = (int) big.longValue();
                     list.set(index, false);
                 }
 
-                for (int i = 1; i < sequence.getNextIndex();i++) {
-                    Message mess = sequence.get(i);
+                for (int i = 1; i < sequence.getNextIndex(); i++) {
                     if (list.get(i)) {
                         acknowledgeIfValid(sequence, i);
                     }
-                }     
+                }
             } else {
 
                 switch (config.getRMVersion()) {
-                    case WSRM10:
-                        List <SequenceAcknowledgementElement.AcknowledgementRange> ranges =
-                          ((com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement)element).getAcknowledgementRange();
-                        for (SequenceAcknowledgementElement.AcknowledgementRange range : ranges) {
-
+                    case WSRM10: {
+                        List<com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement.AcknowledgementRange> ranges =
+                                ((com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement) element).getAcknowledgementRange();
+                        for (com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement.AcknowledgementRange range : ranges) {
                             int lower = range.getLower().intValue();
                             int upper = range.getUpper().intValue();
 
@@ -146,31 +129,26 @@ public class AcknowledgementHandler {
                             for (int i = lower; i <= upper; i++) {
                                 acknowledgeIfValid(sequence, i);
                             }
-
-                     }
-                    break;
-                    case WSRM11:
-                        List <com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement.AcknowledgementRange> ranges1 =
-                          ((com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement)element).getAcknowledgementRange();
-                        for (com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement.AcknowledgementRange range : ranges1) {
-
-                            int lower = range.getLower().intValue();
-                            int upper = range.getUpper().intValue();
-
-                            
-
-                            for (int i = lower; i <= upper; i++) {
-                                acknowledgeIfValid(sequence, i);
+                        }
+                        break;
+                    }
+                    case WSRM11: {
+                            List<com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement.AcknowledgementRange> ranges =
+                                    ((com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement) element).getAcknowledgementRange();
+                            for (com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement.AcknowledgementRange range : ranges) {
+                                int lower = range.getLower().intValue();
+                                int upper = range.getUpper().intValue();
+                                for (int i = lower; i <= upper; i++) {
+                                    acknowledgeIfValid(sequence, i);
+                                }
                             }
-                     }
-                     break;   
-
+                        }
+                        break;
                 }
-
-            } 
+            }
         }
     }
-    
+
     /**
      * We may receive an ack for an unknown message if we are restarting
      * after a crash or if the RMD is broken. Allow processing to continue
@@ -179,16 +157,13 @@ public class AcknowledgementHandler {
      */
     private void acknowledgeIfValid(OutboundSequence seq, int i) {
         try {
-            Message mess = seq.get(i);
-            if (mess != null) {
+            if (seq.get(i) != null) {
                 seq.acknowledge(i);
             }
         } catch (InvalidMessageNumberException e) {
             //this can happen if the sequence has been resurrected
             //after a restart.
             logger.fine(com.sun.xml.ws.rm.protocol.Messages.ACKNOWLEDGEMENT_MESSAGE.format(seq.getId(), i));
-            
         }
     }
-    
 }

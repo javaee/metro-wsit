@@ -1,5 +1,5 @@
 /*
- * $Id: Message.java,v 1.11 2007-09-20 18:47:07 bhaktimehta Exp $
+ * $Id: RMMessage.java,v 1.1 2007-11-26 16:03:30 m_potociar Exp $
  */
 
 /*
@@ -37,41 +37,36 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.rm;
 
+import com.sun.xml.ws.api.message.Header;
+import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.rm.protocol.AbstractAckRequested;
 import com.sun.xml.ws.rm.protocol.AbstractSequence;
 import com.sun.xml.ws.rm.protocol.AbstractSequenceAcknowledgement;
-
 
 /**
  * Message is an abstraction of messages that can be added to WS-RM Sequences. 
  * Each instance wraps a JAX-WS message.
  */
-public class Message {
-    
+public final class RMMessage {
+
     /**
      * The JAX-WS Message wrapped by this instance.
      */
-    protected com.sun.xml.ws.api.message.Message message;
-    
+    private Message message;
     /**
      * The Sequence to which the message belongs.
      */
-    protected Sequence sequence = null;
-    
+    private Sequence sequence = null;
     /**
      * The messageNumber of the Message in its Sequence.
      */
-    protected int messageNumber = 0;
-    
-    
+    private int messageNumber = 0;
     /**
      * Flag which is true if and only if the message is being processed
-     */ 
-    protected boolean isBusy = false;
-    
+     */
+    private boolean isBusy = false;
     /**
      * Flag indicating whether message is delivered/acked.
      * The meaning differs according to the type of sequence
@@ -79,68 +74,54 @@ public class Message {
      * changed using the complete() method, which should only
      * be invoked by the Sequence containing the message.
      */
-    protected boolean isComplete = false;
-    
-    
+    private boolean isComplete = false;
     /**
      * For messages belonging to 2-way MEPS, the corresponding message.
      */
-    protected com.sun.xml.ws.rm.Message relatedMessage = null;
-    
+    private RMMessage relatedMessage = null;
     /**
      * Sequence stored when the corresponding com.sun.xml.ws.api.message.Header
      * is added to the message.
      */
-    protected AbstractSequence sequenceElement = null;
-    
-    
+    private AbstractSequence sequenceElement = null;
     /**
      * SequenceAcknowledgmentElement stored when the corresponding com.sun.xml.ws.api.message.Header
      * is added to the message.
      */
-    protected AbstractSequenceAcknowledgement sequenceAcknowledgementElement = null;
-    
+    private AbstractSequenceAcknowledgement sequenceAcknowledgementElement = null;
     /**
      * SequenceElement stored when the corresponding com.sun.xml.ws.api.message.Header
      * is added to the message.
      */
-    protected AbstractAckRequested ackRequestedElement = null;
-    
+    private AbstractAckRequested ackRequestedElement = null;
     /**
      * Version of RM spec being used.
      */
-    protected RMVersion version;
-    
+    private RMVersion version;
     /**
      * When true, indicates that the message is a request message for
      * a two-way operation.  ClientOutboundSequence with anonymous
      * AcksTo has to handle Acknowledgements differently in this case.
      */
     public boolean isTwoWayRequest = false;
-    
     /**
      * Set in empty message used to piggyback response 
      * headers on a one-way response.
      */
     public boolean isOneWayResponse = false;
-    
     /**
      * Instance of TublineHelper used to resend messages.
      */
     private MessageSender messageSender;
-    
-    
-   
 
     /**
      * Public ctor takes wrapped JAX-WS message as its argument.
      */
-    public Message(com.sun.xml.ws.api.message.Message message, 
-            RMVersion version) {
+    public RMMessage(Message message, RMVersion version) {
         this.message = message;
         this.version = version;
     }
-    
+
     /**
      * Sets  the value of the sequence field.  Used by Sequence methods when
      * adding message to the sequence.
@@ -149,7 +130,7 @@ public class Message {
     public void setSequence(Sequence sequence) {
         this.sequence = sequence;
     }
-    
+
     /**
      * Gets the Sequence to which the Message belongs.
      * @return The sequence.
@@ -157,8 +138,8 @@ public class Message {
     public Sequence getSequence() {
         return sequence;
     }
-    
-     /**
+
+    /**
      * Sets  the value of the messageNumber field.  Used by Sequence methods when
      * adding message to the sequence.
      * @param messageNumber The message number.
@@ -166,7 +147,7 @@ public class Message {
     public void setMessageNumber(int messageNumber) {
         this.messageNumber = messageNumber;
     }
-    
+
     /**
      * Returns the value of the messageNumber field
      * @return The message number.
@@ -174,71 +155,69 @@ public class Message {
     public int getMessageNumber() {
         return messageNumber;
     }
-    
+
     /**
      * For client message, sets the messageSender used to resend messages.
      */
     public void setMessageSender(MessageSender messageSender) {
         this.messageSender = messageSender;
     }
-    
+
     /**
      * Accessor for the relatedMessage field.
      *
      * @return The response corresponding to a request and vice-versa.
      */
-    public com.sun.xml.ws.rm.Message getRelatedMessage() {
+    public RMMessage getRelatedMessage() {
         return relatedMessage;
     }
-    
+
     /**
      * Mutator for the relatedMessage field.
      *
      * @param mess
      */
-    public void setRelatedMessage(com.sun.xml.ws.rm.Message mess) {
+    public void setRelatedMessage(RMMessage mess) {
         //store the message with a copy of the "inner" com.sun.xml.ws.api.message.Message
         //since the original one will be consumed
         mess.copyContents();
         relatedMessage = mess;
     }
-    
-    
+
     /**
      * Accessors for isBusy field used with Tubeline implementation.
      */
     public boolean getIsBusy() {
         return isBusy();
     }
-    
-    
+
     public void setIsBusy(boolean value) {
         isBusy = value;
     }
-    
+
     /**
      * Get the RM Header Element with the specified name from the underlying
      * JAX-WS message's HeaderList
      * @param name The name of the Header to find.
      */
-    public com.sun.xml.ws.api.message.Header getHeader(String name) {
+    public Header getHeader(String name) {
         if (message == null || !message.hasHeaders()) {
             return null;
         }
-        
-        return message.getHeaders().get(version.getNamespaceURI(), name, true);     
+
+        return message.getHeaders().get(version.getNamespaceURI(), name, true);
     }
-    
+
     /**
      * Add the specified RM Header element to the underlying JAX-WS message's
      * <code>HeaderList</code>.
      *
      * @param header The <code>Header</code> to add to the <code>HeaderList</code>.
      */
-    public void addHeader(com.sun.xml.ws.api.message.Header header) {
+    public void addHeader(Header header) {
         message.getHeaders().add(header);
     }
-    
+
     /**
      * Determines whether this message is delivered/acked
      *
@@ -246,47 +225,45 @@ public class Message {
      */
     public boolean isComplete() {
         //synchronized block is redundant.
-        synchronized(sequence) {
+        synchronized (sequence) {
             return isComplete;
         }
     }
-    
+
     /**
      * Sets the isComplete field to true, indicating that the message has been acked. Also
      * discards the stored com.sun.xml.api.message.Message.
      */
     public void complete() {
         //release reference to JAX-WS message.
-        synchronized(sequence) {
+        synchronized (sequence) {
             message = null;
             isComplete = true;
         }
     }
-    
-   
-    
+
     /**
      * Resume processing of the message on this Message's monitor.
      */
-    public synchronized  void resume() {
-        
-        if (!isBusy  && !isComplete) {
+    public synchronized void resume() {
+
+        if (!isBusy && !isComplete) {
             messageSender.send();
         }
 
     }
-    
+
     public synchronized boolean isBusy() {
         return isBusy;
     }
-    
+
     /**
      * Returns a copy of the wrapped com.sun.xml.ws.api.message.Message.
      */
-    public com.sun.xml.ws.api.message.Message getCopy() {
+    public Message getCopy() {
         return message == null ? null : message.copy();
     }
-    
+
     /**
      * Returns a com.sun.ws.rm.Message whose inner com.sun.xml.ws.api.message.Message is replaced by
      * a copy of the original one.  This message is stored in the relatedMessage field of ClientInboundSequence
@@ -296,66 +273,61 @@ public class Message {
      */
     public void copyContents() {
         if (message != null) {
-            com.sun.xml.ws.api.message.Message newmessage = message.copy();
-            message = newmessage;
+            Message newMessage = message.copy();
+            message = newMessage;
         }
     }
-    
+
+    @Override
     public String toString() {
-        
-         
         String ret = Messages.MESSAGE_NUMBER_STRING.format(messageNumber);
-        ret += Messages.SEQUENCE_STRING.format(getSequence() != null ?
-                                                getSequence().getId() :
-                                                "null");
-        
+        ret += Messages.SEQUENCE_STRING.format(getSequence() != null ? getSequence().getId() : "null");
+
         AbstractSequence sel;
         AbstractSequenceAcknowledgement sael;
         AbstractAckRequested ael;
-        if ( null != (sel = getSequenceElement())) {
+        if (null != (sel = getSequenceElement())) {
             ret += sel.toString();
         }
-        
-        if ( null != (sael = getSequenceAcknowledgementElement())) {
+
+        if (null != (sael = getSequenceAcknowledgementElement())) {
             ret += sael.toString();
         }
-        
-        if ( null != (ael = getAckRequestedElement())) {
+
+        if (null != (ael = getAckRequestedElement())) {
             ret += ael.toString();
         }
-        
+
         return ret;
-        
-        
+
+
     }
-    
+
     /*      Diagnostic methods store com.sun.xml.ws.protocol.* elements when
      *      corresponding com.sun.xml.ws.api.message.Headers are added to the 
      *      message
      */
-    
     public AbstractSequenceAcknowledgement getSequenceAcknowledgementElement() {
         return sequenceAcknowledgementElement;
     }
-    
+
     public void setSequenceAcknowledgementElement(AbstractSequenceAcknowledgement el) {
         sequenceAcknowledgementElement = el;
     }
-    
+
     public AbstractSequence getSequenceElement() {
         return sequenceElement;
     }
-    
+
     public void setSequenceElement(AbstractSequence el) {
         sequenceElement = el;
     }
-    
+
     public AbstractAckRequested getAckRequestedElement() {
         return ackRequestedElement;
     }
-    
+
     public void setAckRequestedElement(AbstractAckRequested el) {
         ackRequestedElement = el;
     }
-              
 }

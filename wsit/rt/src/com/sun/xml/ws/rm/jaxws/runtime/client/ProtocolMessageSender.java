@@ -57,6 +57,7 @@ import com.sun.xml.ws.rm.CloseSequenceException;
 import com.sun.xml.ws.rm.CreateSequenceException;
 import com.sun.xml.ws.rm.RMConstants;
 import com.sun.xml.ws.rm.RMException;
+import com.sun.xml.ws.rm.RMMessage;
 import com.sun.xml.ws.rm.RMVersion;
 import com.sun.xml.ws.rm.TerminateSequenceException;
 import com.sun.xml.ws.rm.jaxws.runtime.InboundMessageProcessor;
@@ -163,9 +164,15 @@ public class ProtocolMessageSender {
         if (cs != null) {
             Message request = null;
             if (config.getRMVersion() == RMVersion.WSRM10) {
-                request = Messages.create(config.getRMVersion().getJAXBContext(), ((com.sun.xml.ws.rm.v200502.CreateSequenceElement) cs), config.getSoapVersion());
+                request = Messages.create(
+                        config.getRMVersion().getJAXBContext(), 
+                        ((com.sun.xml.ws.rm.v200502.CreateSequenceElement) cs), 
+                        config.getSoapVersion());
             } else {
-                request = Messages.create(config.getRMVersion().getJAXBContext(), ((com.sun.xml.ws.rm.v200702.CreateSequenceElement) cs), config.getSoapVersion());
+                request = Messages.create(
+                        config.getRMVersion().getJAXBContext(), 
+                        ((com.sun.xml.ws.rm.v200702.CreateSequenceElement) cs), 
+                        config.getSoapVersion());
             }
 
             //Addressing Headers are added by configuring the following property
@@ -213,7 +220,7 @@ public class ProtocolMessageSender {
         Message request = Messages.create(config.getRMVersion().getJAXBContext(), ts, config.getSoapVersion());
 
         //piggyback an acknowledgement if one is pending
-        seq.processAcknowledgement(new com.sun.xml.ws.rm.Message(request, config.getRMVersion()), marshaller);
+        seq.processAcknowledgement(new RMMessage(request, config.getRMVersion()), marshaller);
 
         Packet requestPacket = new Packet(request);
         requestPacket.proxy = packet.proxy;
@@ -255,7 +262,7 @@ public class ProtocolMessageSender {
         Packet responsePacket = helper.process(requestPacket);
         Message response = responsePacket.getMessage();
 
-        com.sun.xml.ws.rm.Message msg = new com.sun.xml.ws.rm.Message(response, config.getRMVersion());
+        RMMessage msg = new RMMessage(response, config.getRMVersion());
         if (response != null && response.isFault()) {
             throw new RMException(response);
         }
@@ -294,8 +301,7 @@ public class ProtocolMessageSender {
                 throw new RMException(response);
             }
 
-            com.sun.xml.ws.rm.Message msg = new com.sun.xml.ws.rm.Message(response, config.getRMVersion());
-            processor.processMessage(msg, marshaller, unmarshaller);
+            processor.processMessage(new RMMessage(response, config.getRMVersion()), marshaller, unmarshaller);
         } finally {
             //Make sure that alarm is reset.
             ((ClientOutboundSequence) seq).resetLastActivityTime();
@@ -422,6 +428,7 @@ public class ProtocolMessageSender {
         Packet responsePacket = helper.process(requestPacket);
         Message response = responsePacket.getMessage();
         if (response.isFault()) {
+            // TODO internationalize
             throw new CloseSequenceException("CloseSequence was refused by the RMDestination \n ", response);
         }
 

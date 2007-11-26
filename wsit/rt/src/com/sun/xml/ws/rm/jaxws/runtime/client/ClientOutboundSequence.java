@@ -48,15 +48,18 @@ import com.sun.xml.ws.api.rm.AcknowledgementListener;
 import com.sun.xml.ws.api.rm.SequenceSettings;
 import com.sun.xml.ws.api.rm.client.ClientSequence;
 import com.sun.xml.ws.rm.InvalidMessageNumberException;
-import com.sun.xml.ws.rm.Message;
+import com.sun.xml.ws.rm.RMMessage;
 import com.sun.xml.ws.rm.RMException;
 import com.sun.xml.ws.rm.RMVersion;
 import com.sun.xml.ws.rm.jaxws.runtime.InboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
 import com.sun.xml.ws.rm.jaxws.util.LoggingHelper;
-import com.sun.xml.ws.rm.protocol.*;
-import com.sun.xml.ws.rm.v200502.Identifier;
+import com.sun.xml.ws.rm.protocol.AbstractAcceptType;
+import com.sun.xml.ws.rm.protocol.AbstractCreateSequence;
+import com.sun.xml.ws.rm.protocol.AbstractCreateSequenceResponse;
+import com.sun.xml.ws.rm.protocol.AbstractTerminateSequence;
+import com.sun.xml.ws.rm.protocol.AcknowledgementHandler;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
 
 import javax.xml.bind.JAXBElement;
@@ -75,8 +78,7 @@ import java.util.logging.Logger;
  */
 public class ClientOutboundSequence extends OutboundSequence implements ClientSequence {
 
-    private static final Logger logger =
-            Logger.getLogger(LoggingHelper.getLoggerName(ClientOutboundSequence.class));
+    private static final Logger logger = Logger.getLogger(LoggingHelper.getLoggerName(ClientOutboundSequence.class));
     /**
      * Current value of receive buffer read from incoming SequenceAcknowledgement
      * messages if RM Destination implements properietary Indigo Flow Control feature.
@@ -203,7 +205,6 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
      * SequenceConfig object.
      */
     public SequenceSettings getSequenceSettings() {
-
         SequenceConfig settings = getSequenceConfig();
         settings.setSequenceId(getId());
 
@@ -257,7 +258,6 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
         try {
             this.destination = destination;
             this.acksTo = acksTo;
-
             String anonymous = rmConstants.getAnonymousURI().toString();
             String acksToString;
 
@@ -338,7 +338,7 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
             AbstractAcceptType accept = null;
             if (csr != null) {
                 if (csr instanceof com.sun.xml.ws.rm.v200502.CreateSequenceResponseElement) {
-                    Identifier idOutbound = ((com.sun.xml.ws.rm.v200502.CreateSequenceResponseElement) csr).getIdentifier();
+                    com.sun.xml.ws.rm.v200502.Identifier idOutbound = ((com.sun.xml.ws.rm.v200502.CreateSequenceResponseElement) csr).getIdentifier();
                     this.id = idOutbound.getValue();
 
                     accept = ((com.sun.xml.ws.rm.v200502.CreateSequenceResponseElement) csr).getAccept();
@@ -450,7 +450,7 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
      * @param messageNumber The message number to resend
      */
     public void resend(int messageNumber) throws RMException {
-        Message mess = get(messageNumber);
+        RMMessage mess = get(messageNumber);
         mess.resume();
     }
 
@@ -470,7 +470,6 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
      */
     @Override
     protected synchronized boolean isAckRequested() {
-
         long time = System.currentTimeMillis();
         if (time > ackRequestDeadline) {
             //reset the clock
@@ -501,11 +500,9 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
     }
 
     private long getResendInterval() {
-
         //do a resend at every opportunity under these conditions
         //1. Sequence has been terminated
         //2. Number of stored messages exceeds 1/2 available space.
-
         if (!isActive ||
                 storedMessages > (getTransferWindowSize() / 2)) {
             return 0;
@@ -546,10 +543,9 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
      * @throws InvalidMessageNumberException
      */
     @Override
-    public synchronized void acknowledge(int i)
-            throws InvalidMessageNumberException {
+    public synchronized void acknowledge(int i) throws InvalidMessageNumberException {
 
-        Message mess = get(i);
+        RMMessage mess = get(i);
         if (isAnonymous() && mess.isTwoWayRequest) {
             return;
         } else {
@@ -573,9 +569,7 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
      * @param i The index to acknowledge
      * @throws InvalidMessageNumberException
      */
-    public synchronized void acknowledgeResponse(int i)
-            throws InvalidMessageNumberException {
-
+    public synchronized void acknowledgeResponse(int i) throws InvalidMessageNumberException {
         super.acknowledge(i);
         if (ackListener != null) {
             ackListener.notify(this, i);
@@ -617,11 +611,10 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
      * @throws RMException 
      */
     public synchronized void doMaintenanceTasks() throws RMException {
-
         if (storedMessages > 0 && isResendDue()) {
             int top = getNextIndex();
             for (int i = 1; i < top; i++) {
-                Message mess = get(i);
+                RMMessage mess = get(i);
                 if (mess != null && !mess.isComplete()) {
                     logger.fine("resending " + getId() + ":" + i);
                     resend(i);
@@ -656,7 +649,6 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
                     logger.fine(Messages.HEARTBEAT_MESSAGE_MESSAGE.format(sequence.getId(), System.currentTimeMillis()));
                     protocolMessageSender.sendAckRequested(sequence, config.getSoapVersion());
                 }
-
             } catch (Exception e) {
                 //We get here in at least two cases.
                 //1. Client running in Webapp that is undeployed, 
@@ -669,6 +661,7 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
                 try {
                     RMSource.getRMSource().removeOutboundSequence(sequence);
                 } catch (Exception ex) {
+                    //TODO handle exception
                 }
             }
         }

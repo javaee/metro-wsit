@@ -46,7 +46,7 @@ package com.sun.xml.ws.rm.jaxws.runtime.server;
 import com.sun.xml.ws.api.rm.SequenceSettings;
 import com.sun.xml.ws.api.rm.server.ServerSequence;
 import com.sun.xml.ws.rm.InvalidMessageNumberException;
-import com.sun.xml.ws.rm.Message;
+import com.sun.xml.ws.rm.RMMessage;
 import com.sun.xml.ws.rm.RMException;
 import com.sun.xml.ws.rm.jaxws.runtime.InboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
@@ -102,7 +102,7 @@ public class ServerInboundSequence extends InboundSequence implements ServerSequ
      *  @param duplicate Subsequent message with same number.
      *  @return the original message.
      */
-    public Message getOriginalMessage(Message duplicate) throws InvalidMessageNumberException {
+    public RMMessage getOriginalMessage(RMMessage duplicate) throws InvalidMessageNumberException {
         int number = duplicate.getMessageNumber();
         return get(number);
     }
@@ -131,26 +131,7 @@ public class ServerInboundSequence extends InboundSequence implements ServerSequ
      *
      *@param message The message to  be processed
      */
-    /*
-    public  void holdIfUndeliverable(Message message) 
-    throws BufferFullException {
-    if (!config.ordered) {
-    return;
-    }
-    try {
-    int num = message.getMessageNumber();
-    //if immediate predecessor has not been processed, wait fcor it
-    if (num > 1) {
-    Message mess = get(num - 1);
-    if (mess == null || !mess.isComplete()) {
-    message.block();
-    }
-    }
-    } catch (InvalidMessageNumberException e) {}
-    }
-     *
-     */
-    public boolean isDeliverable(Message message) {
+    public boolean isDeliverable(RMMessage message) {
         if (!config.isOrdered()) {
             return true;
         }
@@ -160,7 +141,7 @@ public class ServerInboundSequence extends InboundSequence implements ServerSequ
 
             //if immediate predecessor has not been processed, wait fcor it
             if (num > 1) {
-                Message mess = get(num - 1);
+                RMMessage mess = get(num - 1);
                 if (mess == null || !mess.isComplete()) {
                     return false;
                 }
@@ -182,7 +163,7 @@ public class ServerInboundSequence extends InboundSequence implements ServerSequ
      */
     public void resetMessage(int index, com.sun.xml.ws.api.message.Message message, boolean complete) {
         try {
-            Message mess = new Message(message, config.getRMVersion());
+            RMMessage mess = new RMMessage(message, config.getRMVersion());
             set(index, mess);
 
             if (complete) {
@@ -192,7 +173,6 @@ public class ServerInboundSequence extends InboundSequence implements ServerSequ
             String m = Messages.COULD_NOT_RESET_MESSAGE.format(index, getId());
             logger.log(Level.SEVERE, m, e);
         }
-
     }
 
     /**
@@ -235,13 +215,13 @@ public class ServerInboundSequence extends InboundSequence implements ServerSequ
      * whether the messages with lower message numbers have already been 
      * processed.
      */
-    public boolean IsPredecessorComplete(Message message) {
+    public boolean IsPredecessorComplete(RMMessage message) {
         try {
             int num = message.getMessageNumber();
 
             //if immediate predecessor has not been processed, wait fcor it
             if (num > 1) {
-                Message mess = get(num - 1);
+                RMMessage mess = get(num - 1);
                 if (mess == null || !mess.isComplete()) {
                     return false;
                 }
@@ -261,7 +241,7 @@ public class ServerInboundSequence extends InboundSequence implements ServerSequ
      *
      * @param message The message to be processed
      */
-    public void releaseNextMessage(Message message) throws RMException {
+    public void releaseNextMessage(RMMessage message) throws RMException {
         message.complete();
         storedMessages--;
 
