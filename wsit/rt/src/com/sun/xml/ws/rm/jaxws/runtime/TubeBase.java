@@ -43,16 +43,16 @@
  */
 package com.sun.xml.ws.rm.jaxws.runtime;
 
+import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.rm.RMException;
 import com.sun.xml.ws.rm.Constants;
 import com.sun.xml.ws.rm.RMMessage;
-import com.sun.xml.ws.rm.RMVersion;
-import com.sun.xml.ws.rm.jaxws.util.ProcessingFilter;
 
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
@@ -62,29 +62,36 @@ import javax.xml.bind.Unmarshaller;
  * methods are implemented in the subclasses.  The base class contains common code used
  *  by the JAX-WS runtime to communicate with the RM Providers.
  */
-public abstract class TubeBase<PROVIDER extends RMProvider, OUTBOUND extends OutboundSequence, INBOUND extends InboundSequence> extends AbstractFilterTubeImpl {
+public abstract class TubeBase extends AbstractFilterTubeImpl {
 
     /**
      * Either RMSource or RMDestination
      */
-    public PROVIDER provider;
-    protected RMVersion version;
-    protected Marshaller marshaller;
-    protected Unmarshaller unmarshaller;
-    protected ProcessingFilter filter;
+    private WSDLPort wsdlPort;
+    private WSBinding wsBinding;
+    private SequenceConfig config;
+    private Marshaller marshaller;
+    private Unmarshaller unmarshaller;
 
-    protected TubeBase(PROVIDER provider, Tube nextTube) {
+    protected TubeBase(WSDLPort wsdlPort, WSBinding binding, Tube nextTube) {
+        super(nextTube);        
 
-        super(nextTube);
-        this.provider = provider;
-        this.filter = provider.getProcessingFilter();
+        this.wsdlPort = wsdlPort;
+        this.wsBinding = binding;
+        this.config = new SequenceConfig(wsdlPort, binding);
+        this.marshaller = config.getRMVersion().createMarshaller();
+        this.unmarshaller = config.getRMVersion().createUnmarshaller();
     }
 
-    protected TubeBase(PROVIDER provider, TubeBase that, TubeCloner cloner) {
-
+    protected TubeBase(TubeBase that, TubeCloner cloner) {
         super(that, cloner);
-        this.provider = provider;
-        this.filter = provider.getProcessingFilter();
+
+        this.wsdlPort = that.wsdlPort;
+        this.config = that.config;
+        this.wsBinding = that.wsBinding;
+        this.unmarshaller = config.getRMVersion().createUnmarshaller();
+        this.marshaller = config.getRMVersion().createMarshaller();
+    
     }
 
     /**
@@ -94,11 +101,11 @@ public abstract class TubeBase<PROVIDER extends RMProvider, OUTBOUND extends Out
      * @param packet Packet containing Outbound message
      * @return The wrapped message
      */
-    protected RMMessage handleOutboundMessage(OUTBOUND outboundSequence, Packet packet) throws RMException {
+    protected RMMessage handleOutboundMessage(OutboundSequence outboundSequence, Packet packet) throws RMException {
         Message message = packet.getMessage();
-        RMMessage rmMessage = new RMMessage(message, version);
+        RMMessage rmMessage = new RMMessage(message, config.getRMVersion());
         Object mn = packet.invocationProperties.get(Constants.messageNumberProperty);
-        Object oneWayResponse = packet.invocationProperties.get("onewayresponse");
+        Object oneWayResponse = packet.invocationProperties.get(Constants.oneWayResponseProperty);
 
         if (oneWayResponse != null) {
             //don't want to add this message to a sequence.
@@ -109,7 +116,7 @@ public abstract class TubeBase<PROVIDER extends RMProvider, OUTBOUND extends Out
             rmMessage.setMessageNumber((Integer) mn);
         }
 
-        outboundSequence.processOutboundMessage(rmMessage, marshaller);
+        outboundSequence.processOutboundMessage(rmMessage, getMarshaller());
 
         return rmMessage;
     }
@@ -123,9 +130,27 @@ public abstract class TubeBase<PROVIDER extends RMProvider, OUTBOUND extends Out
      */
     protected RMMessage handleInboundMessage(Packet packet) throws RMException {
         Message message = packet.getMessage();
-        RMMessage msg = new RMMessage(message, version);
+        RMMessage rmMessage = new RMMessage(message, config.getRMVersion());
 
-        provider.processInboundMessage(msg, marshaller, unmarshaller);
-        return msg;
+        getMessageProcessor().processMessage(rmMessage, getMarshaller(), getUnmarshaller());
+        return rmMessage;
+    }
+    
+    protected abstract InboundMessageProcessor getMessageProcessor();
+    
+    protected final Marshaller getMarshaller() {
+        return this.marshaller;
+    }
+    
+    protected final Unmarshaller getUnmarshaller(){
+        return this.unmarshaller;
+    }
+    
+    protected final WSDLPort getWsdlPort() {
+        return this.wsdlPort;
+    }
+    
+    protected final SequenceConfig getConfig() {
+        return this.config;
     }
 }

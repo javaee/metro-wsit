@@ -46,7 +46,6 @@ package com.sun.xml.ws.rm.jaxws.runtime.client;
 
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
@@ -65,7 +64,6 @@ import com.sun.xml.ws.rm.MessageSender;
 import com.sun.xml.ws.rm.RMException;
 import com.sun.xml.ws.rm.RMMessage;
 import com.sun.xml.ws.rm.jaxws.runtime.InboundMessageProcessor;
-import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
 import com.sun.xml.ws.rm.jaxws.runtime.TubeBase;
 import com.sun.xml.ws.rm.jaxws.util.LoggingHelper;
 import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
@@ -85,21 +83,14 @@ import java.util.logging.Logger;
 /**
  * Client-side Pipe implementation.
  */
-public class RMClientTube extends TubeBase<RMSource, ClientOutboundSequence, ClientInboundSequence> {
+public final class RMClientTube extends TubeBase {
 
     private static final Logger LOGGER = Logger.getLogger(LoggingHelper.getLoggerName(RMClientTube.class));
     private static final String CREATE_SEQUENCE_URI = "http://com.sun/createSequence";
     /*
      * Metadata from ctor.
      */
-    private WSDLPort port;
-    private WSService service;
-    private WSBinding binding;
     private SecureConversationInitiator securityPipe;
-    /*
-     * SequenceConfig from policy
-     */
-    private SequenceConfig config;
     /**
      * RM OutboundSequence handled by this Pipe.
      */
@@ -108,10 +99,6 @@ public class RMClientTube extends TubeBase<RMSource, ClientOutboundSequence, Cli
      * RM InboundSequence handled by this Pipe.
      */
     private ClientInboundSequence inboundSequence;
-    /**
-     * Message processor to handle inbound messages
-     */
-    private InboundMessageProcessor messageProcessor;
     /**
      * Flag to indicate if security pipe is our next pipe
      * then we need to create CreateSequenceRequest with
@@ -138,31 +125,15 @@ public class RMClientTube extends TubeBase<RMSource, ClientOutboundSequence, Cli
      * <code>PipelineAssembler.createClient</code>.  It may not need all of them.
      * TODO It also needs a way to access the Security Pipe.
      */
-    public RMClientTube(WSDLPort port,
-            WSService service,
-            WSBinding binding,
-            SecureConversationInitiator securityPipe,
-            Tube nextTube) {
-        super(RMSource.getRMSource(), nextTube);
+    public RMClientTube(WSDLPort wsdlPort, WSBinding binding, SecureConversationInitiator securityPipe, Tube nextTube) {
+        super(wsdlPort, binding, nextTube);
 
-        this.port = port;
-        this.service = service;
-        this.binding = binding;
         this.securityPipe = securityPipe;
-        this.config = new SequenceConfig(port, binding);
-        // TODO remove line config.setSoapVersion(binding.getSOAPVersion());
-
-        this.messageProcessor = this.provider.getInboundMessageProcessor();
-
         if (securityPipe != null) {
             this.secureReliableMessaging = true;
         } else {
             this.secureReliableMessaging = false;
         }
-
-        this.version = config.getRMVersion();
-        this.unmarshaller = version.createUnmarshaller();
-        this.marshaller = version.createMarshaller();
     }
 
     /**
@@ -172,28 +143,12 @@ public class RMClientTube extends TubeBase<RMSource, ClientOutboundSequence, Cli
      * @param cloner passed as an argument to copy.
      */
     private RMClientTube(RMClientTube toCopy, TubeCloner cloner) {
-        super(RMSource.getRMSource(), toCopy, cloner);
+        super(toCopy, cloner);
 
-        if (securityPipe != null) {
-            securityPipe = toCopy.securityPipe;
-            this.secureReliableMessaging = true;
-        } else {
-            securityPipe = null;
-            this.secureReliableMessaging = false;
-        }
-
-        this.port = toCopy.port;
-        this.service = toCopy.service;
-        this.binding = toCopy.binding;
-
-        this.config = toCopy.config;
-        this.version = toCopy.version;
-        this.messageProcessor = this.provider.getInboundMessageProcessor();
-
+        this.securityPipe = toCopy.securityPipe;
+        this.secureReliableMessaging = toCopy.secureReliableMessaging;
         this.outboundSequence = toCopy.outboundSequence;
         this.inboundSequence = toCopy.inboundSequence;
-        this.unmarshaller = config.getRMVersion().createUnmarshaller();
-        this.marshaller = config.getRMVersion().createMarshaller();
     }
 
     /**
@@ -223,7 +178,7 @@ public class RMClientTube extends TubeBase<RMSource, ClientOutboundSequence, Cli
                 throw new RMException(Messages.UNCHANGEABLE_ENDPOINT_ADDRESS.format());
             }
         } else {
-            if (binding.getAddressingVersion() == AddressingVersion.MEMBER) {
+            if (getConfig().getConstants().getAddressingVersion() == AddressingVersion.MEMBER) {
                 //WSRM2008: The Reliable Messaging Client does not support the Member submission addressing version, which is used by the endpoint.//
                 throw new RMException(Messages.UNSUPPORTED_ADDRESSING_VERSION.format());
             }
@@ -232,7 +187,7 @@ public class RMClientTube extends TubeBase<RMSource, ClientOutboundSequence, Cli
 
             //make sure we have a destination
             if (dest == null) {
-                dest = port.getAddress().toString();
+                dest = getWsdlPort().getAddress().toString();
             }
 
             String acksTo = ProtocolMessageReceiver.getAcksTo();
@@ -264,7 +219,7 @@ public class RMClientTube extends TubeBase<RMSource, ClientOutboundSequence, Cli
                 outboundSequence = specifiedOutboundSequence;
             } else {
                 //we need to connect to the back end.
-                outboundSequence = new ClientOutboundSequence(config);
+                outboundSequence = new ClientOutboundSequence(getConfig());
 
                 if (secureReliableMessaging) {
                     try {
@@ -283,12 +238,13 @@ public class RMClientTube extends TubeBase<RMSource, ClientOutboundSequence, Cli
 
                 outboundSequence.setSecureReliableMessaging(secureReliableMessaging);
                 outboundSequence.registerProtocolMessageSender(new ProtocolMessageSender(
-                        messageProcessor,
-                        config,
-                        marshaller,
-                        unmarshaller,
-                        port, binding,
-                        next, packet));
+                        RMSource.getRMSource().getInboundMessageProcessor(),
+                        getConfig(),
+                        getMarshaller(),
+                        getUnmarshaller(),
+                        getWsdlPort(),
+                        next,
+                        packet));
 
                 outboundSequence.connect(destURI, acksToURI, twoWay);
                 inboundSequence = (ClientInboundSequence) outboundSequence.getInboundSequence();
@@ -297,7 +253,7 @@ public class RMClientTube extends TubeBase<RMSource, ClientOutboundSequence, Cli
                 //the sequence
                 ClientSession.setSession(this.proxy, new ClientSession(outboundSequence.getId(), this));
 
-                provider.addOutboundSequence(outboundSequence);
+                RMSource.getRMSource().addOutboundSequence(outboundSequence);
 
                 //if the message in the packet was sent by RMSource.createSequence,
                 //put the sequence in a packet property.  The process method, that
@@ -319,7 +275,7 @@ public class RMClientTube extends TubeBase<RMSource, ClientOutboundSequence, Cli
      */
     private boolean checkForTwoWayOperation() {
         WSDLBoundPortType portType;
-        if (port == null || null == (portType = port.getBinding())) {
+        if (getWsdlPort() == null || null == (portType = getWsdlPort().getBinding())) {
             //no WSDL perhaps? Returning false here means that will be no
             //reverse sequence.  That is the correct behavior.
             return false;
@@ -349,7 +305,7 @@ public class RMClientTube extends TubeBase<RMSource, ClientOutboundSequence, Cli
         //state of the RMSource
         message = handleOutboundMessage(outboundSequence, request);
 
-        if (!request.getMessage().isOneWay(port)) {
+        if (!request.getMessage().isOneWay(getWsdlPort())) {
             //ClientOutboundSequence needs to know this.  If this flag is true,
             //messages stored in the sequence cannot be discarded when they are acked.
             //They may need to be resent to provide a vehicle or resends of lost responses.
@@ -399,7 +355,7 @@ public class RMClientTube extends TubeBase<RMSource, ClientOutboundSequence, Cli
     @Override
     public synchronized void preDestroy() {
         try {
-            provider.terminateSequence(outboundSequence);
+            RMSource.getRMSource().terminateSequence(outboundSequence);
             next.preDestroy();
         } catch (Exception e) {
             //Faulted TerminateSequence message of bug downstream.  We are
@@ -444,7 +400,7 @@ public class RMClientTube extends TubeBase<RMSource, ClientOutboundSequence, Cli
                     //to throw an exception here.  Other than that, we don't care about the
                     //response message.  We are only interested in the sequence that has been
                     //stored in the requestcontext.
-                    Message mess = com.sun.xml.ws.api.message.Messages.createEmpty(binding.getSOAPVersion());
+                    Message mess = com.sun.xml.ws.api.message.Messages.createEmpty(getConfig().getSoapVersion());
                     request.setMessage(mess);
                     doReturnWith(request);
                 }
@@ -452,12 +408,8 @@ public class RMClientTube extends TubeBase<RMSource, ClientOutboundSequence, Cli
 
             rmMessage = prepareRequestMessage(request);
 
-            //BUGBUG - It is possible for filter to be uninitialized here or have the wrong
-            //value.  The initialization should be done here rather than in the RMClientPipe
-            //ctor, and there is no reason for it to be a field (at least in the client pipe)
-            filter = this.provider.getProcessingFilter();
-
-            if (filter == null || filter.handleClientRequestMessage(rmMessage)) {
+            if (RMSource.getRMSource().getProcessingFilter() == null ||
+                    RMSource.getRMSource().getProcessingFilter().handleClientRequestMessage(rmMessage)) {
                 //reset last activity timer in sequence.
                 outboundSequence.resetLastActivityTime();
                 tubelineHelper.send();
@@ -588,8 +540,8 @@ public class RMClientTube extends TubeBase<RMSource, ClientOutboundSequence, Cli
 
                         //if a diagnostic / debugging filter has been set, allow it to inspect
                         //the response message.
-                        if (filter != null) {
-                            filter.handleClientResponseMessage(rmMessage);
+                        if (RMSource.getRMSource().getProcessingFilter() != null) {
+                            RMSource.getRMSource().getProcessingFilter().handleClientResponseMessage(rmMessage);
                         }
 
                         if (responseMessage != null && responseMessage.isFault()) {
@@ -672,5 +624,10 @@ public class RMClientTube extends TubeBase<RMSource, ClientOutboundSequence, Cli
                 }
             }
         }
+    }
+
+    @Override
+    protected InboundMessageProcessor getMessageProcessor() {
+        return RMSource.getRMSource().getInboundMessageProcessor();
     }
 }

@@ -43,11 +43,6 @@
  */
 package com.sun.xml.ws.rm.jaxws.runtime;
 
-import java.util.Hashtable;
-import com.sun.xml.ws.rm.RMMessage;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
-import com.sun.xml.ws.rm.RMException;
 import com.sun.xml.ws.rm.jaxws.util.ProcessingFilter;
 
 /**
@@ -57,34 +52,20 @@ import com.sun.xml.ws.rm.jaxws.util.ProcessingFilter;
  * handles the processing of messages coming from the network.
  *
  */
-public abstract class RMProvider<INBOUNDSEQUENCE extends InboundSequence, OUTBOUNDSEQUENCE extends OutboundSequence> {
+public abstract class RMProvider {
 
-    protected ProcessingFilter filter = null;
-
-    /*
-     * Contains all the <code>OutboundSequences</code> managed
-     * by this <code>RMProvider</code>.  For an <code>RMSource</code>
-     * these are the "primary" sequences and <code>inboundMap</code> 
-     * represents their "companion" sequences.
-     */
-    protected Hashtable<String, OUTBOUNDSEQUENCE> outboundMap = new Hashtable<String, OUTBOUNDSEQUENCE>();
-    /*
-     * Contains all the <code>InboundSequences</code> managed
-     * by this <code>RMProvider</code>.  For an <code>RMDestination</code>
-     * these are the "primary" sequences and <code>inboundMap</code> 
-     * represents their "companion" sequences.
-     */
-    protected Hashtable<String, INBOUNDSEQUENCE> inboundMap = new Hashtable<String, INBOUNDSEQUENCE>();
     /*
      * Instance of a Helper class to handle inbound messages based 
      * on their WS-RM protocol headers
      */
-    protected InboundMessageProcessor messageProcessor = new InboundMessageProcessor(this);
+    private InboundMessageProcessor messageProcessor;
+    private ProcessingFilter filter;
 
     /**
      * Constructor
      */
     public RMProvider() {
+        this.messageProcessor = new InboundMessageProcessor(this);
     }
 
     /**
@@ -113,31 +94,16 @@ public abstract class RMProvider<INBOUNDSEQUENCE extends InboundSequence, OUTBOU
      *
      * @param The sequence id
      */
-    public OUTBOUNDSEQUENCE getOutboundSequence(String id) {
-        return outboundMap.get(id);
-    }
+    public abstract OutboundSequence getOutboundSequence(String id);
 
     /**
      * Look up <code>OutboundSequence</code> with given id.
      *
      * @param The sequence id
      */
-    public INBOUNDSEQUENCE getInboundSequence(String id) {
-        return inboundMap.get(id);
-    }
+    public abstract InboundSequence getInboundSequence(String id);
 
-    /*
-     * Process normal application message using <code>InboundMessageProcessor</code>
-     * field.
-     *
-     * @param mess The inbound message.
-     *
-     */
-    public void processInboundMessage(RMMessage mess, Marshaller marshaller, Unmarshaller unmarshaller) throws RMException {
-        messageProcessor.processMessage(mess, marshaller, unmarshaller);
-    }
-
-    public InboundMessageProcessor getInboundMessageProcessor() {
+    public final InboundMessageProcessor getInboundMessageProcessor() {
         return messageProcessor;
     }
 }

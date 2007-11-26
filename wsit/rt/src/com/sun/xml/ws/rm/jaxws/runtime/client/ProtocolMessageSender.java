@@ -44,7 +44,6 @@
 package com.sun.xml.ws.rm.jaxws.runtime.client;
 
 import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Headers;
@@ -55,7 +54,6 @@ import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.rm.CloseSequenceException;
 import com.sun.xml.ws.rm.CreateSequenceException;
-import com.sun.xml.ws.rm.RMConstants;
 import com.sun.xml.ws.rm.RMException;
 import com.sun.xml.ws.rm.RMMessage;
 import com.sun.xml.ws.rm.RMVersion;
@@ -106,7 +104,6 @@ public class ProtocolMessageSender {
      * The unmarshaller to read the messages
      */
     private Unmarshaller unmarshaller;
-    private RMConstants constants;
     /**
      * Properties like the BindingProvider to associate with the
      * request and response context
@@ -121,7 +118,6 @@ public class ProtocolMessageSender {
     /*
      * WSBinding for use by addressing module when assigning headers.
      */
-    private WSBinding binding;
     private SequenceConfig config;
     private final ProtocolMessageHelper helper;
 
@@ -134,16 +130,13 @@ public class ProtocolMessageSender {
             Marshaller marshaller,
             Unmarshaller unmarshaller,
             WSDLPort port,
-            WSBinding binding,
             Tube nextTube,
             Packet packet) {
 
         this.processor = processor;
         this.port = port;
-        this.binding = binding;
         this.marshaller = marshaller;
         this.unmarshaller = unmarshaller;
-        this.constants = RMConstants.getRMConstants(binding.getAddressingVersion());
         this.packet = packet;
         this.config = config;
         this.helper = new ProtocolMessageHelper(nextTube);
@@ -192,7 +185,7 @@ public class ProtocolMessageSender {
             correlating non-anonymous acksTo response*/
 
             Packet responsePacket = helper.process(requestPacket);
-            if (acksTo.equals(constants.getAnonymousURI())) {
+            if (acksTo.equals(config.getConstants().getAnonymousURI())) {
                 Message response = responsePacket.getMessage();
                 if (response.isFault()) {
                     throw new CreateSequenceException("CreateSequence was refused by the RMDestination \n ", response);
@@ -331,8 +324,8 @@ public class ProtocolMessageSender {
         requestPacket.setEndPointAddressString(destination.toString());
         requestPacket.getMessage().getHeaders().fillRequestAddressingHeaders(
                 requestPacket,
-                constants.getAddressingVersion(),
-                binding.getSOAPVersion(),
+                config.getConstants().getAddressingVersion(),
+                config.getSoapVersion(),
                 oneWay,
                 action);
         return requestPacket;
@@ -391,10 +384,6 @@ public class ProtocolMessageSender {
         }
 
         return ackRequestedElement;
-    }
-
-    public RMConstants getConstants() {
-        return constants;
     }
 
     private Header createHeader(Object obj) {

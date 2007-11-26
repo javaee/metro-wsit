@@ -51,6 +51,7 @@ public class Constants {
     public static final String sequenceProperty = "com.sun.xml.ws.sequence";
     public static final String messageNumberProperty = "com.sun.xml.ws.messagenumber";
     public static final String createSequenceProperty = "com.sun.xml.ws.createsequence";
+    public static final String oneWayResponseProperty = "com.sun.xml.ws.onewayresponse";
     
     //TODO: INTERNATIONALIZE THESE
     public static final String MESSAGE_NUMBER_ROLLOVER_TEXT = "The maximum value, %s,  for MessageNumber has been exceeded";

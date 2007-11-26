@@ -40,11 +40,13 @@
  * @author Mike Grogan
  * Created on October 15, 2005, 6:24 PM
  */
-
 package com.sun.xml.ws.rm.jaxws.runtime.server;
+
 import com.sun.xml.ws.rm.InvalidSequenceException;
 import com.sun.xml.ws.rm.RMException;
 import com.sun.xml.ws.rm.Constants;
+import com.sun.xml.ws.rm.jaxws.runtime.InboundSequence;
+import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.RMProvider;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
 import java.net.URI;
@@ -53,35 +55,41 @@ import java.util.*;
 /**
  * An RMDestination represents a Collection of Inbound RMSequences.
  */
-public class RMDestination extends RMProvider<ServerInboundSequence,
-                                              ServerOutboundSequence>{
-   
-    private static RMDestination rmDestination = new RMDestination();
-  
-    
-    public static RMDestination getRMDestination() {
-        return rmDestination;
-    }
-    
+public class RMDestination extends RMProvider {
+
+    private static final RMDestination RM_DESTINATION_INSTANCE = new RMDestination();
+
+    /*
+     * Contains all the <code>OutboundSequences</code> managed
+     * by this <code>RMProvider</code>.
+     */
+    private Hashtable<String, ServerOutboundSequence> outboundMap = new Hashtable<String, ServerOutboundSequence>();
+    /*
+     * Contains all the <code>InboundSequences</code> managed
+     * by this <code>RMProvider</code>.  For an <code>RMDestination</code>
+     * these are the "primary" sequences and <code>outboundMap</code> 
+     * represents their "companion" sequences.
+     */
+    private Hashtable<String, ServerInboundSequence> inboundMap = new Hashtable<String, ServerInboundSequence>();
     //TODO - make an intelligent choice for  wake-up interval.
     private SequenceReaper reaper = new SequenceReaper(5000, inboundMap);
     
-    private RMDestination() {   
+    public static RMDestination getRMDestination() {
+        return RM_DESTINATION_INSTANCE;
     }
-    
-   
-    public void terminateSequence(String id) 
-                throws InvalidSequenceException {
-        ServerInboundSequence seq = getInboundSequence(id);
-        
+
+    private RMDestination() {
+    }
+
+    public void terminateSequence(String id) throws InvalidSequenceException {
+        InboundSequence seq = inboundMap.get(id);
+
         if (seq == null) {
-            throw new InvalidSequenceException(String.format(Constants.UNKNOWN_SEQUENCE_TEXT,id),id);
+            throw new InvalidSequenceException(String.format(Constants.UNKNOWN_SEQUENCE_TEXT, id), id);
         }
-        
-        ServerOutboundSequence out = 
-                (ServerOutboundSequence)seq.getOutboundSequence();
-        
-        synchronized(this) {
+
+        OutboundSequence out = seq.getOutboundSequence();
+        synchronized (this) {
             if (seq != null) {
                 inboundMap.remove(id);
             }
@@ -90,7 +98,7 @@ public class RMDestination extends RMProvider<ServerInboundSequence,
                 reaper.stop();
             }
         }
-        
+
         if (out != null) {
             String outid = out.getId();
             if (outid != null) {
@@ -98,16 +106,17 @@ public class RMDestination extends RMProvider<ServerInboundSequence,
             }
         }
     }
-    
+
     //TODO add endpoint address argument to this method and corresponding
     //member in ServerInboundSequence
-    public ServerInboundSequence createSequence(URI acksTo, 
-                                          String inboundId,
-                                          String outboundId,
-                                          SequenceConfig config) throws RMException {
-        
+    public ServerInboundSequence createSequence(
+            URI acksTo,
+            String inboundId,
+            String outboundId,
+            SequenceConfig config) throws RMException {
+
         ServerInboundSequence seq = new ServerInboundSequence(acksTo, inboundId, outboundId, config);
-        
+
         synchronized (this) {
             inboundMap.put(seq.getId(), seq);
 
@@ -115,77 +124,87 @@ public class RMDestination extends RMProvider<ServerInboundSequence,
                 reaper.start();
             }
         }
-        
-        ServerOutboundSequence outbound = 
-                (ServerOutboundSequence)seq.getOutboundSequence();
+
+        ServerOutboundSequence outbound = (ServerOutboundSequence) seq.getOutboundSequence();
         String id = outbound.getId();
-        
         if (id != null) {
-            outboundMap.put(id ,  outbound);
+            outboundMap.put(id, outbound);
         }
-        
-        
-        
+
         return seq;
     }
-    
+
     /**
      * SequenceReaper is a timer with a single task that periodically checks the map
      * of active ServerInboundSequences for expired ones an peremptorily terminates them.
      */
     private class SequenceReaper extends Timer {
-        
+
         private long frequency;
-        private Map<String, 
-                ServerInboundSequence> map;
-        
+        private Map<String, ServerInboundSequence> map;
         private TimerTask timerTask;
-        
+
         public void start() {
             timerTask = new TimerTask() {
+
                 public void run() {
-                //go though all the sequences and shut down any that
-                //are expired.
-                HashSet<String> keysToRemove = new HashSet<String>();
-                for (String key : map.keySet()) {
-                    
-                    ServerInboundSequence sis= map.get(key);
-                    synchronized (sis) {
-                        if (sis.isExpired()) {
-                            System.out.println("Terminating expired sequence " +
-                                    sis.getId());
-                                    keysToRemove.add(key);
+                    //go though all the sequences and shut down any that
+                    //are expired.
+                    HashSet<String> keysToRemove = new HashSet<String>();
+                    for (String key : map.keySet()) {
+
+                        ServerInboundSequence sis = map.get(key);
+                        synchronized (sis) {
+                            if (sis.isExpired()) {
+                                System.out.println("Terminating expired sequence " +
+                                        sis.getId());
+                                keysToRemove.add(key);
+                            }
                         }
-                   }
-                }
-                
-                for (String str : keysToRemove) {                           
-                    try {
-                        terminateSequence(str);
-                    } catch (Exception e) {
-                        e.printStackTrace();
                     }
-                 }
-                   
+
+                    for (String str : keysToRemove) {
+                        try {
+                            terminateSequence(str);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+
                 }
             };
-        
-            schedule(timerTask, 
-                     new Date(System.currentTimeMillis() + frequency),
-                     frequency);
+
+            schedule(timerTask, new Date(System.currentTimeMillis() + frequency), frequency);
         }
-        
+
         public void stop() {
             timerTask.cancel();
         }
-        
-        public SequenceReaper(long frequency, Map<String, 
-                ServerInboundSequence> map) {
+
+        public SequenceReaper(long frequency, Map<String, ServerInboundSequence> map) {
             //make the Timer Thread a daemon.
             super(true);
             this.map = map;
             this.frequency = frequency;
-            
+
         }
+    }
+    
+    /**
+     * Look up <code>OutboundSequence</code> with given id.
+     *
+     * @param The sequence id
+     */
+    public ServerOutboundSequence getOutboundSequence(String id) {
+        return outboundMap.get(id);
+    }
+
+    /**
+     * Look up <code>OutboundSequence</code> with given id.
+     *
+     * @param The sequence id
+     */
+    public ServerInboundSequence getInboundSequence(String id) {
+        return inboundMap.get(id);
     }
 }

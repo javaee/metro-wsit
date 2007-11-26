@@ -52,6 +52,7 @@ import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import java.io.ByteArrayInputStream;
 import com.sun.xml.ws.rm.Constants;
+import java.util.Hashtable;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
@@ -59,37 +60,35 @@ import java.util.logging.Level;
  * An RMSource represents a Collection of RMSequences with a
  * common acksTo endpoint.
  */
-public class RMSource extends RMProvider<ClientInboundSequence, ClientOutboundSequence> {
+public class RMSource extends RMProvider {
 
     private static final Logger logger = Logger.getLogger(RMSource.class.getName());
-    private static RMSource rmSource = new RMSource();
+    private static final RMSource RM_SOURCE_INSTANCE = new RMSource();
     private static final byte[] CREATE_SEQUENCE_PAYLOAD = "<sun:createSequence xmlns:sun=\"http://com.sun/createSequence\"/>".getBytes();
-    
-    public static RMSource getRMSource() {
-        return rmSource;
-    }
-    private long retryInterval;
     private RetryTimer retryTimer;
 
-    public RMSource() {
+    /*
+     * Contains all the <code>OutboundSequences</code> managed
+     * by this <code>RMProvider</code>.  For an <code>RMSource</code>
+     * these are the "primary" sequences and <code>inboundMap</code> 
+     * represents their "companion" sequences.
+     */
+    private Hashtable<String, ClientOutboundSequence> outboundMap = new Hashtable<String, ClientOutboundSequence>();
+    /*
+     * Contains all the <code>InboundSequences</code> managed
+     * by this <code>RMProvider</code>.
+     */
+    private Hashtable<String, ClientInboundSequence> inboundMap = new Hashtable<String, ClientInboundSequence>();
 
-        retryInterval = 2000;
+    public static RMSource getRMSource() {
+        return RM_SOURCE_INSTANCE;
+    }
 
+    private RMSource() {
         retryTimer = new RetryTimer(this);
-
     }
 
-    public void setRetryInterval(long retryInterval) {
-        this.retryInterval = retryInterval;
-    }
-
-    public long getRetryInterval() {
-        return retryInterval;
-    }
-
-    public synchronized void terminateSequence(ClientOutboundSequence seq)
-            throws RMException {
-
+    public synchronized void terminateSequence(ClientOutboundSequence seq) throws RMException {
         String id = seq.getId();
         if (seq != null && outboundMap.keySet().contains(id)) {
             seq.disconnect();
@@ -159,12 +158,8 @@ public class RMSource extends RMProvider<ClientInboundSequence, ClientOutboundSe
      * sequences.
      */
     public void doMaintenanceTasks() throws RMException {
-
         for (String key : outboundMap.keySet()) {
-
-            ClientOutboundSequence seq =
-                    getOutboundSequence(key);
-
+            ClientOutboundSequence seq = outboundMap.get(key);
             synchronized (seq) {
                 //1. resend all incomplete messages
                 //2. send ackRequested messages in any sequences
@@ -172,7 +167,6 @@ public class RMSource extends RMProvider<ClientInboundSequence, ClientOutboundSe
                 seq.doMaintenanceTasks();
             }
         }
-
     }
 
     /**
@@ -186,7 +180,7 @@ public class RMSource extends RMProvider<ClientInboundSequence, ClientOutboundSe
      *  
      */
     public ClientOutboundSequence createSequence(javax.xml.ws.Service service, QName portName) {
-        Dispatch<Source> disp = service.createDispatch(
+        Dispatch<Source> dispatch = service.createDispatch(
                 portName,
                 Source.class,
                 Service.Mode.PAYLOAD,
@@ -196,7 +190,7 @@ public class RMSource extends RMProvider<ClientInboundSequence, ClientOutboundSe
         StreamSource source = new StreamSource(stream);
 
         try {
-            disp.invoke(source);
+            dispatch.invoke(source);
         } catch (Exception e) {
 
         //dont care what happened processing the response message.  We are only
@@ -204,9 +198,10 @@ public class RMSource extends RMProvider<ClientInboundSequence, ClientOutboundSe
         //
         //TODO - At the same time, it would be prettier to get something other than
         //a fault
+        //TODO exception handling
         }
 
-        ClientOutboundSequence seq = (ClientOutboundSequence) disp.getRequestContext().get(Constants.sequenceProperty);
+        ClientOutboundSequence seq = (ClientOutboundSequence) dispatch.getRequestContext().get(Constants.sequenceProperty);
         seq.setService(service);
         return seq;
 
@@ -224,8 +219,10 @@ public class RMSource extends RMProvider<ClientInboundSequence, ClientOutboundSe
      *              if any
      * @return The ClientOutboundSequence.  null if the sequence could not be created
      */
-    public ClientOutboundSequence createSequence(javax.xml.ws.Service service,
-            QName portName, String sequenceID,
+    public ClientOutboundSequence createSequence(
+            Service service,
+            QName portName,
+            String sequenceID,
             String companionSequenceID) {
 
 
@@ -289,5 +286,23 @@ public class RMSource extends RMProvider<ClientInboundSequence, ClientOutboundSe
         addOutboundSequence(seq);
 
         return seq;
+    }
+
+    /**
+     * Look up <code>OutboundSequence</code> with given id.
+     *
+     * @param The sequence id
+     */
+    public ClientOutboundSequence getOutboundSequence(String id) {
+        return outboundMap.get(id);
+    }
+
+    /**
+     * Look up <code>OutboundSequence</code> with given id.
+     *
+     * @param The sequence id
+     */
+    public ClientInboundSequence getInboundSequence(String id) {
+        return inboundMap.get(id);
     }
 }

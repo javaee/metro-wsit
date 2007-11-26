@@ -119,8 +119,8 @@ public class SequenceConfig implements SequenceSettings {
     }
 
     public SequenceConfig(WSDLPort port, WSBinding wsbinding) {
-
         this();
+        
         if (port != null) {
             WSDLBoundPortType binding = port.getBinding();
             WSDLModel model = binding.getOwner();

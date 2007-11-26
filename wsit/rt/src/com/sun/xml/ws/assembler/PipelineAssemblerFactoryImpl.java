@@ -258,7 +258,6 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             if (isReliableMessagingEnabled(policyMap, wsdlPort)) {
                 Tube nextTube = PipeAdapter.adapt(p);
                 Tube rmClientTube = new RMClientTube(wsdlPort,
-                        context.getService(),
                         context.getBinding(),
                         scInit,
                         nextTube);
@@ -319,7 +318,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             // check for WS-Reliable Messaging
             if (isReliableMessagingEnabled(policyMap, context.getWsdlModel())) {
                 Tube nextTube = PipeAdapter.adapt(p);
-                Tube tube = new RMServerTube(context.getWsdlModel(), context.getEndpoint(), nextTube);
+                Tube tube = new RMServerTube(context.getWsdlModel(), context.getEndpoint().getBinding(), nextTube);
                 p = PipeAdapter.adapt(tube);
 
             }
