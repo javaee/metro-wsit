@@ -56,6 +56,7 @@ import com.sun.xml.ws.rm.protocol.AbstractAckRequested;
 import com.sun.xml.ws.rm.protocol.AbstractSequence;
 import com.sun.xml.ws.rm.protocol.AbstractSequenceAcknowledgement;
 import com.sun.xml.ws.rm.protocol.AcknowledgementHandler;
+import com.sun.xml.ws.rm.localization.LocalizationMessages;
 
 import javax.xml.bind.Marshaller;
 import java.net.URI;
@@ -332,7 +333,7 @@ public abstract class OutboundSequence extends Sequence {
                 wait(timeout);
 
                 if (storedMessages > 0) {
-                    logger.severe(Messages.TIMEOUT_IN_WAITFORACKS_STRING.format(timeout / 1000, storedMessages));
+                    logger.severe(LocalizationMessages.WSRM_5000_TIMEOUT_IN_WAITFORACKS_STRING(timeout / 1000, storedMessages));
                     break;
                 }
             } catch (InterruptedException e) {
@@ -401,7 +402,7 @@ public abstract class OutboundSequence extends Sequence {
                     return mess;
                 }
             } catch (InvalidMessageNumberException e) {
-                //TODO handle exception
+            //TODO handle exception
             }
         }
         return null;
