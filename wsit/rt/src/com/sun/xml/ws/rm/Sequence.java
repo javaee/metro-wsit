@@ -1,5 +1,5 @@
 /*
- * $Id: Sequence.java,v 1.14 2007-11-26 16:03:30 m_potociar Exp $
+ * $Id: Sequence.java,v 1.15 2007-11-27 15:40:58 m_potociar Exp $
  */
 
 /*
@@ -40,6 +40,7 @@
 package com.sun.xml.ws.rm;
 
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
+import com.sun.xml.ws.rm.localization.LocalizationMessages;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -153,8 +154,7 @@ public class Sequence {
      */
     public synchronized RMMessage get(int index) throws InvalidMessageNumberException {
         if (index >= nextIndex) {
-            throw new InvalidMessageNumberException(
-                    Messages.INVALID_INDEX_MESSAGE.format(index));
+            throw new InvalidMessageNumberException(LocalizationMessages.WSRM_1000_INVALID_INDEX_MESSAGE(index));
         }
         return rmMessages.get(index);
     }

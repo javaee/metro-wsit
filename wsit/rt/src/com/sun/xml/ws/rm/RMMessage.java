@@ -1,5 +1,5 @@
 /*
- * $Id: RMMessage.java,v 1.1 2007-11-26 16:03:30 m_potociar Exp $
+ * $Id: RMMessage.java,v 1.2 2007-11-27 15:40:58 m_potociar Exp $
  */
 
 /*
@@ -44,6 +44,7 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.rm.protocol.AbstractAckRequested;
 import com.sun.xml.ws.rm.protocol.AbstractSequence;
 import com.sun.xml.ws.rm.protocol.AbstractSequenceAcknowledgement;
+import com.sun.xml.ws.rm.localization.LocalizationMessages;
 
 /**
  * Message is an abstraction of messages that can be added to WS-RM Sequences. 
@@ -280,8 +281,8 @@ public final class RMMessage {
 
     @Override
     public String toString() {
-        String ret = Messages.MESSAGE_NUMBER_STRING.format(messageNumber);
-        ret += Messages.SEQUENCE_STRING.format(getSequence() != null ? getSequence().getId() : "null");
+        String ret = LocalizationMessages.MESSAGE_NUMBER_STRING(messageNumber);
+        ret += LocalizationMessages.SEQUENCE_STRING(getSequence() != null ? getSequence().getId() : "null");
 
         AbstractSequence sel;
         AbstractSequenceAcknowledgement sael;
