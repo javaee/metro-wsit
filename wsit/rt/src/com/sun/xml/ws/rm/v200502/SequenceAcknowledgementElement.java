@@ -41,7 +41,6 @@
  * Created on October 23, 2005, 9:51 AM
  *
  */
-
 package com.sun.xml.ws.rm.v200502;
 
 import com.sun.xml.ws.rm.protocol.AbstractSequenceAcknowledgement;
@@ -63,38 +62,32 @@ import java.util.Map;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
-        "identifier",
-        "acknowledgementRange",
-        "bufferRemaining",
-        "nack",
-        "any"
-        })
-@XmlRootElement(name = "SequenceAcknowledgement",namespace="http://schemas.xmlsoap.org/ws/2005/02/rm")
-public class SequenceAcknowledgementElement  extends AbstractSequenceAcknowledgement {
-
+"identifier",
+"acknowledgementRange",
+"bufferRemaining",
+"nack",
+"any"
+})
+@XmlRootElement(name = "SequenceAcknowledgement", namespace = "http://schemas.xmlsoap.org/ws/2005/02/rm")
+public class SequenceAcknowledgementElement extends AbstractSequenceAcknowledgement {
 
     @XmlElement(name = "Identifier", namespace = "http://schemas.xmlsoap.org/ws/2005/02/rm")
     protected Identifier identifier;
-
     @XmlElement(name = "AcknowledgementRange", namespace = "http://schemas.xmlsoap.org/ws/2005/02/rm")
     protected List<SequenceAcknowledgementElement.AcknowledgementRange> acknowledgementRange;
-
     @XmlElement(name = "Nack", namespace = "http://schemas.xmlsoap.org/ws/2005/02/rm")
     protected List<BigInteger> nack;
-
-    @XmlElement(name="BufferRemaining", namespace="http://schemas.microsoft.com/ws/2006/05/rm")
+    @XmlElement(name = "BufferRemaining", namespace = "http://schemas.microsoft.com/ws/2006/05/rm")
     public Integer bufferRemaining;
-
     @XmlAnyElement(lax = true)
     protected List<Object> any;
-
     @XmlAnyAttribute
     private Map<QName, String> otherAttributes = new HashMap<QName, String>();
 
-
-    public SequenceAcknowledgementElement(){
+    public SequenceAcknowledgementElement() {
 
     }
+
     /**
      * Gets the value of the identifier property. 
      * @return The value of the property.
@@ -161,13 +154,10 @@ public class SequenceAcknowledgementElement  extends AbstractSequenceAcknowledge
         return otherAttributes;
     }
 
-
-    
-
-    public void setId(String id) {
-        Identifier identifier = new Identifier();
-        identifier.setValue(id);
-        setIdentifier(identifier);
+    public void setId(String idString) {
+        Identifier newId = new Identifier();
+        newId.setValue(idString);
+        setIdentifier(newId);
     }
 
     public String getId() {
@@ -195,8 +185,7 @@ public class SequenceAcknowledgementElement  extends AbstractSequenceAcknowledge
         }
 
         //TODO Further validity checking
-        SequenceAcknowledgementElement.AcknowledgementRange range
-                = new SequenceAcknowledgementElement.AcknowledgementRange();
+        SequenceAcknowledgementElement.AcknowledgementRange range = new SequenceAcknowledgementElement.AcknowledgementRange();
         range.setLower(BigInteger.valueOf(lower));
         range.setUpper(BigInteger.valueOf(upper));
         getAcknowledgementRange().add(range);
@@ -210,17 +199,18 @@ public class SequenceAcknowledgementElement  extends AbstractSequenceAcknowledge
 
         getNack().add(BigInteger.valueOf(index));
     }
-    
+
+    @Override
     public String toString() {
-       
-        String ret = Messages.SEQUENCE_ACKNOWLEDGEMENT_TOSTRING_STRING.format(getId(), getBufferRemaining());
+        StringBuffer buffer = new StringBuffer();
+        buffer.append(Messages.SEQUENCE_ACKNOWLEDGEMENT_TOSTRING_STRING.format(getId(), getBufferRemaining()));
         List<AcknowledgementRange> ranges = getAcknowledgementRange();
         if (ranges != null) {
-            for (AcknowledgementRange range: ranges) {
-                ret += "\t\t" + range.toString() + "\n";
+            for (AcknowledgementRange range : ranges) {
+                buffer.append("\t\t").append(range.toString()).append('\n');
             }
         }
-        return ret;
+        return buffer.toString();
     }
 
     @XmlAccessorType(XmlAccessType.FIELD)
@@ -299,10 +289,10 @@ public class SequenceAcknowledgementElement  extends AbstractSequenceAcknowledge
         public Map<QName, String> getOtherAttributes() {
             return otherAttributes;
         }
-        
+
+        @Override
         public String toString() {
-            return "AcknowledgementRange (" + lower.intValue() + "," + 
-                    upper.intValue() + ")";
+            return "AcknowledgementRange (" + lower.intValue() + "," + upper.intValue() + ")";
         }
     }
 }

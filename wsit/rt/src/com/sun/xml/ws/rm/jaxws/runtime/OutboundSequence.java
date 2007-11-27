@@ -58,56 +58,56 @@ import com.sun.xml.ws.rm.protocol.AbstractSequenceAcknowledgement;
 import com.sun.xml.ws.rm.protocol.AcknowledgementHandler;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 
+import com.sun.xml.ws.rm.localization.RmLogger;
 import javax.xml.bind.Marshaller;
 import java.net.URI;
-import java.util.logging.Logger;
 
 /**
  *
  */
 public abstract class OutboundSequence extends Sequence {
 
-    private static final Logger logger = Logger.getLogger(OutboundSequence.class.getName());
-    /**
-     * Common destination for all application messages in the sequence.
-     */
-    protected URI destination;
-    /**
-     * Endpoint for protocol responses.  May be the WS-Addressing anonymous endpoint.
-     * There are several variations depending on whether this EPR is the same as 
-     * the one used by application messages in the companion <code>InboundSequence</code>
-     */
-    protected URI acksTo;
-    /**
-     *  Companion <code>InboundSequence</code>
-     */
-    protected InboundSequence inboundSequence;
-    /**
-     * Sequence acknowledgement to be sent back to client on next
-     * available message to the AcksTo endpoint.
-     */
-    protected AbstractSequenceAcknowledgement sequenceAcknowledgement;
+    private static final RmLogger LOGGER = RmLogger.getLogger(OutboundSequence.class);
     /**
      * Instance of helper class that processes SequnceAcknowledgement headers.
      */
-    protected AcknowledgementHandler ackHandler;
+    private AcknowledgementHandler ackHandler;
     /**
-     * Flag determines whether messages will be saved.  Will only be
-     * false in the case of companions to ServerInboundSequences for
-     * endpoints with no two-way operations.
+     * Space available in receiving buffer at destination, if
+     * this can be determined.
      */
-    public boolean saveMessages = true;
+    private int bufferRemaining;
+    /**
+     * Common destination for all application messages in the sequence.
+     */
+    private URI destination;
     /**
      * Processing filter whose handleRequestHeaders method
      * can access headers before they are marshalled.
      */
     private ProcessingFilter filter = null;
     /**
-     * Space available in receiving buffer at destination, if
-     * this can be determined.
+     *  Companion <code>InboundSequence</code>
      */
-    protected int bufferRemaining;
+    private InboundSequence companionInboundSequence;
+    /**
+     * Flag determines whether messages will be saved. Will only be
+     * false in the case of companions to ServerInboundSequences for
+     * endpoints with no two-way operations.
+     */
+    private boolean saveMessages = true;
+    /**
+     * Sequence acknowledgement to be sent back to client on next
+     * available message to the AcksTo endpoint.
+     */
+    private AbstractSequenceAcknowledgement sequenceAcknowledgement;
 
+    protected OutboundSequence(SequenceConfig config) {
+        super(config);
+
+        this.ackHandler = new AcknowledgementHandler(config);
+    }
+    
     /**
      * Accessor for the value of the Destination URI.
      *
@@ -117,15 +117,10 @@ public abstract class OutboundSequence extends Sequence {
         return destination;
     }
 
-    /**
-     * Accessor for the value of the Destination URI.
-     *
-     * @return The destination String.
-     */
-    public URI getAcksTo() {
-        return acksTo;
+    public void setDestination(URI destination) {
+        this.destination = destination;
     }
-
+        
     /**
      * Invoked by Incoming message processor to post Sequence Acknowledgement
      * from companion Incoming Sequence for transmission on next OutboundMessage.l
@@ -140,9 +135,14 @@ public abstract class OutboundSequence extends Sequence {
      * @return The <code>inboundSequence</code> field.
      */
     public InboundSequence getInboundSequence() {
-        return inboundSequence;
+        return companionInboundSequence;
     }
-
+    
+    protected void setCompanionSequence(InboundSequence companionSequence) {
+        // TODO: remove this method if possible
+        this.companionInboundSequence = companionSequence;        
+    }
+    
     /**
      * Accessor for bufferRemaining field.
      */
@@ -172,7 +172,7 @@ public abstract class OutboundSequence extends Sequence {
      *  @param mess The OutboundMessage.
      *  @param marshaller The Marshaller to use 
      */
-    public void processOutboundMessage(RMMessage mess, Marshaller marshaller)
+    public void processOutboundMessage(RMMessage mess)
             throws InvalidMessageNumberException,
             BufferFullException,
             DuplicateMessageException {
@@ -188,7 +188,7 @@ public abstract class OutboundSequence extends Sequence {
             }
 
             AbstractSequence element = null;
-            if (config.getRMVersion() == RMVersion.WSRM10) {
+            if (getConfig().getRMVersion() == RMVersion.WSRM10) {
                 element = new com.sun.xml.ws.rm.v200502.SequenceElement();
             } else {
                 element = new com.sun.xml.ws.rm.v200702.SequenceElement();
@@ -203,7 +203,7 @@ public abstract class OutboundSequence extends Sequence {
             //if it is time to request an ack for this sequence, add AckRequestedHeader
             if (isAckRequested()) {
                 AbstractAckRequested ack = null;
-                if (config.getRMVersion() == RMVersion.WSRM10) {
+                if (getConfig().getRMVersion() == RMVersion.WSRM10) {
                     ack = new com.sun.xml.ws.rm.v200502.AckRequestedElement();
                     ack.setId(this.getId());
                 } else {
@@ -286,14 +286,14 @@ public abstract class OutboundSequence extends Sequence {
      */
     public synchronized void acknowledge(int i) throws InvalidMessageNumberException {
         RMMessage mess;
-        if (i >= nextIndex || (null == (mess = get(i)))) {
+        if (i >= getNextIndex() || (null == (mess = get(i)))) {
             throw new InvalidMessageNumberException();
         }
 
         if (!mess.isComplete()) {
 
-            storedMessages--;
-            if (storedMessages == 0) {
+            decreaseStoredMessages();
+            if (getStoredMessages() == 0) {
                 //A thread on which waitForAcks() has been called
                 //may be waiting for all the acks to arrive.
                 notifyAll();
@@ -312,9 +312,6 @@ public abstract class OutboundSequence extends Sequence {
      *              ranges of messages to be removed.
      */
     public void handleAckResponse(AbstractSequenceAcknowledgement element) throws InvalidMessageNumberException {
-        if (ackHandler == null) {
-            ackHandler = new AcknowledgementHandler(config);
-        }
         ackHandler.handleAcknowledgement(this, element);
     }
 
@@ -325,15 +322,15 @@ public abstract class OutboundSequence extends Sequence {
      * stored message count reaches 0.
      */
     public synchronized void waitForAcks() {
-        while (storedMessages != 0) {
+        while (getStoredMessages() != 0) {
             try {
                 //wait for the specified timeout or a notify(), which is called
                 //whenever a message is acked.
-                long timeout = config.getCloseTimeout();
+                long timeout = getConfig().getCloseTimeout();
                 wait(timeout);
 
-                if (storedMessages > 0) {
-                    logger.severe(LocalizationMessages.WSRM_5000_TIMEOUT_IN_WAITFORACKS_STRING(timeout / 1000, storedMessages));
+                if (getStoredMessages() > 0) {
+                    LOGGER.severe(LocalizationMessages.WSRM_5000_TIMEOUT_IN_WAITFORACKS_STRING(timeout / 1000, getStoredMessages()));
                     break;
                 }
             } catch (InterruptedException e) {
@@ -344,14 +341,23 @@ public abstract class OutboundSequence extends Sequence {
     }
 
     protected boolean isAckRequested() {
-        //For oneway messages it does not make sense to send
+        // For oneway messages it does not make sense to send
         // AckRequestedElement on the ServerOutbound messages
-        //saveMessages will be true in case of two way messages
+        // saveMessages will be true in case of two way messages
         // for AckRequestedElement will be generated then
-        //otherwise it will return false
+        // otherwise it will return false
         return saveMessages;
     }
 
+    public boolean isSaveMessages() {
+        // FIXME this is a real mess as there are two getters, one overriden (above)
+        return saveMessages;
+    }
+    
+    public void setSaveMessages(boolean value) {
+        this.saveMessages = value;
+    }
+    
     protected boolean isResendDue() {
         return true;
     }
@@ -372,7 +378,7 @@ public abstract class OutboundSequence extends Sequence {
         if (mess.getAckRequestedElement() == null) {
 
             AbstractAckRequested ack = null;
-            if (config.getRMVersion() == RMVersion.WSRM10) {
+            if (getConfig().getRMVersion() == RMVersion.WSRM10) {
                 ack = new com.sun.xml.ws.rm.v200502.AckRequestedElement();
                 ack.setId(this.getId());
             } else {
@@ -391,11 +397,11 @@ public abstract class OutboundSequence extends Sequence {
     }
 
     protected com.sun.xml.ws.api.message.Header createHeader(Object obj) {
-        return Headers.create(config.getRMVersion().getJAXBContext(), obj);
+        return Headers.create(getConfig().getRMVersion().getJAXBContext(), obj);
     }
 
     public RMMessage getUnacknowledgedMessage() {
-        for (int i = 0; i < nextIndex; i++) {
+        for (int i = 0; i < getNextIndex(); i++) {
             try {
                 RMMessage mess = get(i);
                 if (mess != null && !mess.isComplete()) {

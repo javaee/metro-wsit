@@ -260,7 +260,7 @@ public class ProtocolMessageSender {
             throw new RMException(response);
         }
 
-        processor.processMessage(msg, marshaller, unmarshaller);
+        processor.processMessage(msg, unmarshaller);
     }
 
     /**
@@ -294,7 +294,7 @@ public class ProtocolMessageSender {
                 throw new RMException(response);
             }
 
-            processor.processMessage(new RMMessage(response, config.getRMVersion()), marshaller, unmarshaller);
+            processor.processMessage(new RMMessage(response, config.getRMVersion()), unmarshaller);
         } finally {
             //Make sure that alarm is reset.
             ((ClientOutboundSequence) seq).resetLastActivityTime();

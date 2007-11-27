@@ -94,12 +94,9 @@ public class SequenceConfig implements SequenceSettings {
      * Constructor initializes with default values.
      */
     public SequenceConfig() {
-        //Use anonymous URI for acksTo.  Its value depends on 
         //WS-Addressing version being used
-        if (constants == null) {
-            //hardcoding W3C as default
-            constants = RMConstants.getRMConstants(AddressingVersion.W3C);
-        }
+        constants = RMConstants.getRMConstants(AddressingVersion.W3C);
+        //Use anonymous URI for acksTo.  Its value depends on 
         acksTo = constants.getAnonymousURI().toString();
 
         ordered = false;
@@ -115,12 +112,11 @@ public class SequenceConfig implements SequenceSettings {
         closeTimeout = 0; //infinite
         sequenceSTRRequired = false;
         sequenceTransportSecurityRequired = false;
-
     }
 
     public SequenceConfig(WSDLPort port, WSBinding wsbinding) {
         this();
-        
+
         if (port != null) {
             WSDLBoundPortType binding = port.getBinding();
             WSDLModel model = binding.getOwner();
@@ -223,7 +219,6 @@ public class SequenceConfig implements SequenceSettings {
 //    public void setSoapVersion(SOAPVersion soapVersion) {
 //        this.soapVersion = soapVersion;
 //    }
-
     /**
      * Accessor for flow control field
      *
@@ -267,6 +262,7 @@ public class SequenceConfig implements SequenceSettings {
         return sequenceId;
     }
 
+    // TODO: remove if possible
     public void setSequenceId(String id) {
         this.sequenceId = id;
     }
@@ -275,6 +271,7 @@ public class SequenceConfig implements SequenceSettings {
         return companionSequenceId;
     }
 
+    // TODO: remove if possible
     public void setCompanionSequenceId(String id) {
         this.companionSequenceId = id;
     }

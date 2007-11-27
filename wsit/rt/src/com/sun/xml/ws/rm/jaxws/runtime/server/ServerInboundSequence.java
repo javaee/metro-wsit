@@ -73,28 +73,16 @@ public class ServerInboundSequence extends InboundSequence implements ServerSequ
      */
     private Session session;
 
-    public ServerInboundSequence(URI acksTo, String inboundId, String outboundId, SequenceConfig config) {
-        super(acksTo, config);
+    public ServerInboundSequence(URI acksTo, String inboundId, String outboundId, SequenceConfig config) {      
+        super(acksTo, config, true);
 
-        this.outboundSequence = new ServerOutboundSequence(this, outboundId, config);
+        setCompanionSequence(new ServerOutboundSequence(this, outboundId, config));
         if (inboundId == null) {
             String newid = "uuid:" + UUID.randomUUID();
             setId(newid);
         } else {
             setId(inboundId);
         }
-
-        //if flow control is enabled, set buffer size.
-        //don't try to use flow control if ordered delivery
-        //is needed.  Even if the buffer is full, we
-        //would still need to accept messages that "fill in the gaps"
-        if (config.isFlowControlRequired() && !config.isOrdered()) {
-            maxMessages = config.getBufferSize();
-        } else {
-            maxMessages = -1;
-        }
-
-        allowDuplicates = config.isAllowDuplicatesEnabled();
     }
 
     /**
@@ -133,7 +121,7 @@ public class ServerInboundSequence extends InboundSequence implements ServerSequ
      *@param message The message to  be processed
      */
     public boolean isDeliverable(RMMessage message) {
-        if (!config.isOrdered()) {
+        if (!getConfig().isOrdered()) {
             return true;
         }
 
@@ -164,7 +152,7 @@ public class ServerInboundSequence extends InboundSequence implements ServerSequ
      */
     public void resetMessage(int index, com.sun.xml.ws.api.message.Message message, boolean complete) {
         try {
-            RMMessage mess = new RMMessage(message, config.getRMVersion());
+            RMMessage mess = new RMMessage(message, getConfig().getRMVersion());
             set(index, mess);
 
             if (complete) {
@@ -179,7 +167,7 @@ public class ServerInboundSequence extends InboundSequence implements ServerSequ
      * Implementation of ServerSequence.getSequenceSettings..
      */
     public SequenceSettings getSequenceSettings() {
-        SequenceConfig settings = getSequenceConfig();
+        SequenceConfig settings = getConfig();
         settings.setSequenceId(getId());
 
         OutboundSequence oseq = getOutboundSequence();
@@ -196,7 +184,7 @@ public class ServerInboundSequence extends InboundSequence implements ServerSequ
      *         false otherwise.
      */
     public boolean isExpired() {
-        return System.currentTimeMillis() - this.getLastActivityTime() > config.getInactivityTimeout();
+        return System.currentTimeMillis() - this.getLastActivityTime() > getConfig().getInactivityTimeout();
     }
 
     /**
@@ -207,7 +195,7 @@ public class ServerInboundSequence extends InboundSequence implements ServerSequ
      *         false otherwise.
      */
     public boolean isOrdered() {
-        return config.isOrdered();
+        return getConfig().isOrdered();
     }
 
     /**
@@ -215,23 +203,24 @@ public class ServerInboundSequence extends InboundSequence implements ServerSequ
      * whether the messages with lower message numbers have already been 
      * processed.
      */
-    public boolean IsPredecessorComplete(RMMessage message) {
-        try {
-            int num = message.getMessageNumber();
-
-            //if immediate predecessor has not been processed, wait fcor it
-            if (num > 1) {
-                RMMessage mess = get(num - 1);
-                if (mess == null || !mess.isComplete()) {
-                    return false;
-                }
-            }
-        } catch (InvalidMessageNumberException e) {
-        // TODO: exception handling
-        }
-
-        return true;
-    }
+// TODO remove method as it seems to be unused
+//    public boolean isPredecessorComplete(RMMessage message) {
+//        try {
+//            int num = message.getMessageNumber();
+//
+//            //if immediate predecessor has not been processed, wait fcor it
+//            if (num > 1) {
+//                RMMessage mess = get(num - 1);
+//                if (mess == null || !mess.isComplete()) {
+//                    return false;
+//                }
+//            }
+//        } catch (InvalidMessageNumberException e) {
+//        // TODO: exception handling
+//        }
+//
+//        return true;
+//    }
 
     /**
      * If ordered delivery is required, resume processing the next Message
@@ -243,12 +232,13 @@ public class ServerInboundSequence extends InboundSequence implements ServerSequ
      */
     public void releaseNextMessage(RMMessage message) throws RMException {
         message.complete();
-        storedMessages--;
+        decreaseStoredMessages();
 
         //notify immediate successor if it is waiting 
         int num = message.getMessageNumber();
 
-        if (num < nextIndex - 1 && get(num + 1) != null) {
+        if (num < getNextIndex() - 1 && get(num + 1) != null) {
+            // TODO logging
             System.out.println("resuming " + (num + 1));
             get(num + 1).resume();
         }

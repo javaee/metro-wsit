@@ -41,32 +41,27 @@
  * Created on November 21, 2005, 3:02 PM
  *
  */
-
 package com.sun.xml.ws.rm.jaxws.runtime.server;
+
 import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
-import com.sun.xml.ws.rm.protocol.AcknowledgementHandler;
 
 /**
  * A <code>ServerOutboundSequence</code> represents all the response messages
  * to requests belonging to a companion <code>ServerInboundSequence</code>.
  */
 public class ServerOutboundSequence extends OutboundSequence {
-     
+
     /**
      * Public ctor stores companion inbound sequence as well as
      * sequence id from an Offer element in the CreateSequence
      * message from the client.  If the id is null then no messages
      * are stored in this ServerOutboundSequence.
      */
-    public ServerOutboundSequence(ServerInboundSequence seq, 
-                                    String id, 
-                                    SequenceConfig config) {
-        inboundSequence = seq;
-        this.config = config;
+    public ServerOutboundSequence(ServerInboundSequence seq, String id, SequenceConfig config) {
+        super(config);
         setId(id);
-        saveMessages = true;
-        ackHandler = new AcknowledgementHandler(config);
+        setCompanionSequence(seq);        
+        setSaveMessages(true);
     }
-    
 }

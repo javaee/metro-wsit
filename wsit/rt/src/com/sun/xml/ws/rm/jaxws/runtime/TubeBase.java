@@ -116,7 +116,7 @@ public abstract class TubeBase extends AbstractFilterTubeImpl {
             rmMessage.setMessageNumber((Integer) mn);
         }
 
-        outboundSequence.processOutboundMessage(rmMessage, getMarshaller());
+        outboundSequence.processOutboundMessage(rmMessage);
 
         return rmMessage;
     }
@@ -132,7 +132,7 @@ public abstract class TubeBase extends AbstractFilterTubeImpl {
         Message message = packet.getMessage();
         RMMessage rmMessage = new RMMessage(message, config.getRMVersion());
 
-        getMessageProcessor().processMessage(rmMessage, getMarshaller(), getUnmarshaller());
+        getMessageProcessor().processMessage(rmMessage, getUnmarshaller());
         return rmMessage;
     }
     

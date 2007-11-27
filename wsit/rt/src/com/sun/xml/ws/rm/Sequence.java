@@ -1,5 +1,5 @@
 /*
- * $Id: Sequence.java,v 1.15 2007-11-27 15:40:58 m_potociar Exp $
+ * $Id: Sequence.java,v 1.16 2007-11-27 23:45:43 m_potociar Exp $
  */
 
 /*
@@ -42,6 +42,7 @@ package com.sun.xml.ws.rm;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,20 +50,31 @@ import java.util.List;
  *  A Sequence is a sparse array of messages corresponding to an RM Sequence.  It
  *  is implemented as an ArrayList with nulls at unfilled indices.
  */
+// TODO check if synchronization is needed on all methods
 public class Sequence {
 
     /**
+     * Endpoint for protocol responses.  May be the WS-Addressing anonymous endpoint.
+     * There are several variations depending on whether this EPR is the same as 
+     * the one used by application messages in the companion <code>InboundSequence</code>
+     *  
+     * INFO: This field is currently not used by RM runtime.
+     */
+    private URI acksTo;
+    /**
+     * Flag that indicates if the CloseSequence message has been sent/received
+     * If this is the case then the Sequence needs to be closed and no more messages
+     * with that Sequence Id should be accepted
+     */
+    private boolean closed;
+    /**
+     * Current sequence configuration
+     */
+    private SequenceConfig config;
+    /**
      * The sequence identifier.
      */
-    protected String id;
-    /**
-     * The underlying list of messages
-     */
-    protected List<RMMessage> rmMessages;
-    /**
-     * The smallest unfilled index.
-     */
-    protected int nextIndex = 1;
+    private String id;
     /**
      * Flag indicates that message with Sequence header containing
      * Last element has been sent/received.  If this is the case,
@@ -70,38 +82,68 @@ public class Sequence {
      * for a message is one greater than the index for the last
      * message in the sequence.
      */
-    protected boolean last = false;
+    private boolean last = false;
     /**
-     * Flag that indicates if the CloseSequence message has been sent/received
-     * If this is the case then the Sequence needs to be closed and no more messages
-     * with that Sequence Id should be accepted
+     * Last accesse time.
      */
-    protected boolean closed = false;
+    private long lastActivityTime;
     /**
      * Maximum number of stored messages.  Used for server-side sequences
      * for which flow control is enabled.  The value -1 indicates that
      * there is no limit.
      */
-    protected int maxMessages = -1;
+    private int maxMessages = -1;
+    /**
+     * The smallest unfilled index.
+     */
+    private int nextIndex = 1;
+    /**
+     * The underlying list of messages
+     */
+    private List<RMMessage> rmMessages;
     /**
      * Number of messages currently being stored awaiting completion.
      */
-    protected int storedMessages = 0;
-    /**
-     * Last accesse time.
-     */
-    protected long lastActivityTime;
-    protected boolean allowDuplicates;
-    /**
-     * RMConstants associated with each Sequence which
-     * will give information regarding addressing version, JAXBContext etc
-     *
-     */
-    protected RMConstants rmConstants;
+    private int storedMessages = 0;
 
-    // TODO: replace protected access with getter + constructor setter
-    protected SequenceConfig config;
-    protected int firstKnownGap;
+    public Sequence(SequenceConfig config) {
+        this.config = config;
+
+        rmMessages = new ArrayList<RMMessage>();
+        //fill in 0-th index that will never be used since
+        //messageNumbers are 1-based and we will be keeping
+        //messageNumbers in-sync with indices.
+        rmMessages.add(null);
+        resetLastActivityTime();
+    }
+
+    public Sequence(URI acksToUri, SequenceConfig config) {
+        this(config);
+
+        this.acksTo = acksToUri;
+    }
+
+    public Sequence(URI acksToUri, SequenceConfig config, boolean flag) {        
+        this(acksToUri, config);
+
+        // FIXME: provide generally working solution for maxMessages setup:
+        // the next few lines of code that setup maxMessages work only when
+        // called from ServerInboundSequence. Trying to call these from other 
+        // Sequence classes results in a BufferFullException being thrown in 
+        // roundtrip scenario from set() method (when processing a response 
+        // on the client side).
+        if (flag) {
+            //if flow control is enabled, set buffer size.
+            //don't try to use flow control if ordered delivery
+            //is needed.  Even if the buffer is full, we
+            //would still need to accept messages that "fill in the gaps"
+            if (config.isFlowControlRequired() && !config.isOrdered()) {
+                this.maxMessages = config.getBufferSize();
+            } else {
+                this.maxMessages = -1;
+            }
+        }
+    }
 
     /**
      * Gets the sequence identifier
@@ -117,24 +159,6 @@ public class Sequence {
      */
     public void setId(String id) {
         this.id = id;
-    }
-
-    public Sequence() {
-        rmMessages = new ArrayList<RMMessage>();
-        //fill in 0-th index that will never be used since
-        //messageNumbers are 1-based and we will be keeping
-        //messageNumbers in-sync with indices.
-        rmMessages.add(null);
-        allowDuplicates = false;
-        firstKnownGap = 1;
-        resetLastActivityTime();
-    }
-
-    /**
-     * Accessor for SequenceConfig field.
-     */
-    public SequenceConfig getSequenceConfig() {
-        return config;
     }
 
     /**
@@ -184,7 +208,7 @@ public class Sequence {
 
         if (index < nextIndex) {
             RMMessage mess = null;
-            if (null != (mess = rmMessages.get(index)) && !allowDuplicates) {
+            if (null != (mess = rmMessages.get(index)) && !config.isAllowDuplicatesEnabled()) {
                 //Store the original message in the exception so
                 //that exception handling can use it.
                 throw new DuplicateMessageException(mess);
@@ -270,7 +294,36 @@ public class Sequence {
      * @param timeLimit Maximum time to wait
      */
     protected boolean isGettingClose(long elapsedTime, long timeLimit) {
-        //for now
+        //FIXME for now it's here
         return elapsedTime > timeLimit / 2;
+    }
+
+    protected SequenceConfig getConfig() {
+        return config;
+    }
+
+    protected int getMaxMessages() {
+        return maxMessages;
+    }
+
+    protected int getStoredMessages() {
+        return storedMessages;
+    }
+
+    protected void decreaseStoredMessages() {
+        storedMessages--;
+    }
+
+    /**
+     * Accessor for the value of the Destination URI.
+     *
+     * @return The destination String.
+     */
+    public URI getAcksTo() {
+        return acksTo;
+    }
+
+    public void setAcksTo(URI uri) {
+        this.acksTo = uri;
     }
 }

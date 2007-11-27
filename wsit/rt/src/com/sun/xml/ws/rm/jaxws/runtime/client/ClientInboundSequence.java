@@ -58,14 +58,10 @@ import java.net.URI;
 
 public class ClientInboundSequence extends InboundSequence {
           
-    public ClientInboundSequence(ClientOutboundSequence outboundSequence , 
-                            String identifier, 
-                            URI acksTo, SequenceConfig config) {
-        
-        this.acksTo = acksTo;
-        this.outboundSequence = outboundSequence;
-        this.config = config;
+    public ClientInboundSequence(ClientOutboundSequence companionSequence, String identifier, URI acksTo, SequenceConfig config) {
+        super(acksTo, config);
         setId(identifier);
+        setCompanionSequence(companionSequence);
     }
     
    

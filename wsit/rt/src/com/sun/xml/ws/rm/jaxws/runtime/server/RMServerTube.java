@@ -140,7 +140,7 @@ public final class RMServerTube extends TubeBase {
     }
 
     @Override
-    public NextAction processRequest(Packet packet) {
+    public NextAction processRequest(Packet requestPacket) {
         SOAPFault soapFault = null;
         RMMessage message = null;
 
@@ -148,7 +148,7 @@ public final class RMServerTube extends TubeBase {
             //handle special protocol messages
             Packet ret = null;
             try {
-                ret = handleProtocolMessage(packet);
+                ret = handleProtocolMessage(requestPacket);
             } catch (CreateSequenceException e) {
                 soapFault = createSoapFault(
                         getConfig().getRMVersion().getCreateSequenceRefusedQname(),
@@ -172,7 +172,7 @@ public final class RMServerTube extends TubeBase {
             //If we got here, this is an application message
             //do inbound bookkeeping
             try {
-                message = handleInboundMessage(packet);
+                message = handleInboundMessage(requestPacket);
             } catch (MessageNumberRolloverException e) {
                 soapFault = createSoapFault(
                         getConfig().getRMVersion().getMessageNumberRolloverQname(),
@@ -198,7 +198,7 @@ public final class RMServerTube extends TubeBase {
                     soapFaultMessage.getHeaders().add(header);
                 }
 
-                retPacket = packet.createServerResponse(
+                retPacket = requestPacket.createServerResponse(
                         soapFaultMessage,
                         getConfig().getConstants().getAddressingVersion(),
                         getConfig().getSoapVersion(),
@@ -228,22 +228,22 @@ public final class RMServerTube extends TubeBase {
 
             //determine whether the correct STR has been used to sign message
             if (secureReliableMessaging) {
-                checkSTR(packet, inboundSequence);
+                checkSTR(requestPacket, inboundSequence);
             }
 
             //set com.sun.xml.ws.session and com.sun.xml.ws.sessionid
             //invocationProperties if they have not already been set
             //by SC pipe.
-            setSessionData(packet, inboundSequence);
+            setSessionData(requestPacket, inboundSequence);
 
             //clear packet.transporBackChannel so downstream pipes do not prevent
             //empty one-way response bodies to be sent back when we need to use the
             //bodies for RM SequenceAcknowledgemnts.
-            packet.transportBackChannel = null;
+            requestPacket.transportBackChannel = null;
 
             //make these available in an injected WebServiceContext
-            packet.invocationProperties.put(Constants.sequenceProperty, inboundSequence);
-            packet.invocationProperties.put(Constants.messageNumberProperty, message.getMessageNumber());
+            requestPacket.invocationProperties.put(Constants.sequenceProperty, inboundSequence);
+            requestPacket.invocationProperties.put(Constants.messageNumberProperty, message.getMessageNumber());
 
             //If ordered deliver is configured,
             //Block here if InboundSequence reports gaps before this message.
@@ -253,11 +253,11 @@ public final class RMServerTube extends TubeBase {
             this.currentRequestMessage = message;
 
             if (!inboundSequence.isOrdered()) {
-                return doInvoke(next, packet);
+                return doInvoke(next, requestPacket);
             } else {
                 MessageSender sender = new TubelineSender(
                         this,
-                        packet,
+                        requestPacket,
                         getConfig().getSoapVersion(),
                         getConfig().getConstants().getAddressingVersion());
                 message.setMessageSender(sender);
@@ -277,10 +277,10 @@ public final class RMServerTube extends TubeBase {
             //should do much the same thing.  The only difference is that handleAckRequestedAction
             //must also have logic to get the inboundSequence from the AckRequested header in the
             //packet
-            if (packet.getMessage().isOneWay(getWsdlPort())) {
+            if (requestPacket.getMessage().isOneWay(getWsdlPort())) {
                 //refuse to process the request.  Client will retry
                 Packet ret = new Packet();
-                ret.invocationProperties.putAll(packet.invocationProperties);
+                ret.invocationProperties.putAll(requestPacket.invocationProperties);
                 return doReturnWith(ret);
             }
 
@@ -288,7 +288,7 @@ public final class RMServerTube extends TubeBase {
             try {
                 ServerInboundSequence seq = (ServerInboundSequence) e.getSequence();
                 if (seq != null) {
-                    Packet ret = generateAckMessage(packet, seq, getConfig().getRMVersion().getSequenceAcknowledgementAction());
+                    Packet ret = generateAckMessage(requestPacket, seq, getConfig().getRMVersion().getSequenceAcknowledgementAction());
                     return doReturnWith(ret);
                 } else {
                     //unreachable
@@ -307,10 +307,10 @@ public final class RMServerTube extends TubeBase {
             //              return it again.
             //          b. Otherwise (original not yet processed or response already discarded, return
             //             ack message.
-            if (packet.getMessage().isOneWay(getWsdlPort())) {
+            if (requestPacket.getMessage().isOneWay(getWsdlPort())) {
                 //ignore the message.
                 Packet ret = new Packet();
-                ret.invocationProperties.putAll(packet.invocationProperties);
+                ret.invocationProperties.putAll(requestPacket.invocationProperties);
                 return doReturnWith(ret);
             } else {
                 //check whether original response is available.
@@ -322,7 +322,7 @@ public final class RMServerTube extends TubeBase {
                     if (response != null) {
                         //original response is available, resend it.
                         Packet ret = new Packet(response);
-                        ret.invocationProperties.putAll(packet.invocationProperties);
+                        ret.invocationProperties.putAll(requestPacket.invocationProperties);
                         return doReturnWith(ret);
                     }
                 }
@@ -331,7 +331,7 @@ public final class RMServerTube extends TubeBase {
                 //acked and thrown away.  All we can do is return a SequenceAcknowledgement.
                 try {
                     ServerInboundSequence seq = (ServerInboundSequence) original.getSequence();
-                    Packet ret = generateAckMessage(packet, seq, getConfig().getRMVersion().getSequenceAcknowledgementAction());
+                    Packet ret = generateAckMessage(requestPacket, seq, getConfig().getRMVersion().getSequenceAcknowledgementAction());
                     return doReturnWith(ret);
                 } catch (RMException ee) {
                     return doThrow(new WebServiceException(ee));
@@ -501,8 +501,9 @@ public final class RMServerTube extends TubeBase {
             throw LOGGER.logSevereException(new RMException(LocalizationMessages.WSRM_3002_CREATESEQUENCE_HEADER_PROBLEM(), e));
         }
 
-        /**ADDRESSING_FIXME
-         *  Assume for now that AcksTo is anonymous.
+        /**
+         * FIXME
+         * ADDRESSING_FIXME:  Assume for now that AcksTo is anonymous.
          */
         URI acksTo = getConfig().getConstants().getAnonymousURI();
         /*String acksToString = acksTo.toString();*/
@@ -559,7 +560,7 @@ public final class RMServerTube extends TubeBase {
         if (this.secureReliableMessaging) {
             SecurityContextToken sct = (SecurityContextToken) packet.invocationProperties.get(MessageConstants.INCOMING_SCT);
             if (sct != null) {
-                String strId = sct.getIdentifier().toString();
+                String securityContextTokenId = sct.getIdentifier().toString();
                 WSTrustElementFactory wsTrustElemFactory = WSTrustElementFactory.newInstance();
                 JAXBElement jaxbElem = new com.sun.xml.ws.security.secext10.ObjectFactory().createSecurityTokenReference(strType);
                 SecurityTokenReference str = wsTrustElemFactory.createSecurityTokenReference(jaxbElem);
@@ -568,11 +569,11 @@ public final class RMServerTube extends TubeBase {
                 if (ref instanceof com.sun.xml.ws.security.trust.elements.str.DirectReference) {
                     DirectReference directRef = (DirectReference) ref;
                     String gotId = directRef.getURIAttr().toString();
-                    if (gotId.equals(strId)) {
-                        inboundSequence.setStrId(strId);
+                    if (gotId.equals(securityContextTokenId)) {
+                        inboundSequence.setSecurityTokenReferenceId(securityContextTokenId);
                     } else {
                         // TODO: log?
-                        throw new RMSecurityException(LocalizationMessages.WSRM_3004_SECURITY_TOKEN_AUTHORIZATION_ERROR(gotId, strId));
+                        throw new RMSecurityException(LocalizationMessages.WSRM_3004_SECURITY_TOKEN_AUTHORIZATION_ERROR(gotId, securityContextTokenId));
                     }
                 } else {
                     // TODO: log?
@@ -587,7 +588,7 @@ public final class RMServerTube extends TubeBase {
         startSession(inboundSequence);
 
         if (offeredId == null) {
-            inboundSequence.getOutboundSequence().saveMessages = false;
+            inboundSequence.getOutboundSequence().setSaveMessages(false);
         }
 
         //initialize CreateSequenceResponseElement
@@ -701,7 +702,7 @@ public final class RMServerTube extends TubeBase {
         switch (getConfig().getRMVersion()) {
             case WSRM10:
                 tsAction = RMVersion.WSRM10.getTerminateSequenceAction();
-                if (outboundSequence.saveMessages) {
+                if (outboundSequence.isSaveMessages()) {
                     com.sun.xml.ws.rm.v200502.TerminateSequenceElement terminateSeqResponse = new com.sun.xml.ws.rm.v200502.TerminateSequenceElement();
                     com.sun.xml.ws.rm.v200502.Identifier id2 = new com.sun.xml.ws.rm.v200502.Identifier();
                     id2.setValue(outboundSequence.getId());
@@ -716,7 +717,7 @@ public final class RMServerTube extends TubeBase {
                             getConfig().getConstants().getAddressingVersion(),
                             getConfig().getSoapVersion(), tsAction);
 
-                    AbstractSequenceAcknowledgement element = seq.generateSequenceAcknowledgement(null, getMarshaller(), false);
+                    AbstractSequenceAcknowledgement element = seq.generateSequenceAcknowledgement(false);
 
                     Header header = Headers.create(getConfig().getRMVersion().getJAXBContext(), element);
                     response.getHeaders().add(header);
@@ -743,7 +744,7 @@ public final class RMServerTube extends TubeBase {
                         getConfig().getConstants().getAddressingVersion(),
                         getConfig().getSoapVersion(), tsAction);
 
-                AbstractSequenceAcknowledgement element = seq.generateSequenceAcknowledgement(null, getMarshaller(), false);
+                AbstractSequenceAcknowledgement element = seq.generateSequenceAcknowledgement(false);
 
                 Header header = Headers.create(getConfig().getRMVersion().getJAXBContext(), element);
                 response.getHeaders().add(header);
@@ -813,7 +814,7 @@ public final class RMServerTube extends TubeBase {
                 getConfig().getRMVersion().getCloseSequenceResponseAction());
 
         //Generate SequenceAcknowledgmenet with Final element
-        AbstractSequenceAcknowledgement element = seq.generateSequenceAcknowledgement(null, getMarshaller(), true);
+        AbstractSequenceAcknowledgement element = seq.generateSequenceAcknowledgement(true);
         Header header = Headers.create(getConfig().getRMVersion().getJAXBContext(), element);
         response.getHeaders().add(header);
 
@@ -993,7 +994,7 @@ public final class RMServerTube extends TubeBase {
     private void checkSTR(Packet packet, InboundSequence seq) throws RMSecurityException {
         SecurityContextToken sct = (SecurityContextToken) packet.invocationProperties.get(MessageConstants.INCOMING_SCT);
         URI uri = sct.getIdentifier();
-        if (!uri.toString().equals(seq.getStrId())) {
+        if (!uri.toString().equals(seq.getSecurityTokenReferenceId())) {
             throw LOGGER.logSevereException(new RMSecurityException(LocalizationMessages.WSRM_3016_SECURITY_TOKEN_MISMATCH()));
         }
     }
@@ -1018,7 +1019,7 @@ public final class RMServerTube extends TubeBase {
         outbound.invocationProperties.putAll(inbound.invocationProperties);
 
         //construct the SequenceAcknowledgement header and  add it to thge message.
-        AbstractSequenceAcknowledgement element = seq.generateSequenceAcknowledgement(null, getMarshaller(), false);
+        AbstractSequenceAcknowledgement element = seq.generateSequenceAcknowledgement(false);
         //Header header = Headers.create(getConfig().getSoapVersion(),getMarshaller(),element);
         Header header = Headers.create(getConfig().getRMVersion().getJAXBContext(), element);
         message.getHeaders().add(header);

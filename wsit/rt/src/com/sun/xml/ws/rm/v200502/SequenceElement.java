@@ -84,7 +84,7 @@ public class SequenceElement extends AbstractSequence {
 
     @Override
     public String getLocalPart() {
-        return new String("Sequence");
+        return "Sequence";
     }
 
     /**

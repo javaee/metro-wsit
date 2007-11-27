@@ -60,7 +60,6 @@ import com.sun.xml.ws.rm.protocol.AbstractAcceptType;
 import com.sun.xml.ws.rm.protocol.AbstractCreateSequence;
 import com.sun.xml.ws.rm.protocol.AbstractCreateSequenceResponse;
 import com.sun.xml.ws.rm.protocol.AbstractTerminateSequence;
-import com.sun.xml.ws.rm.protocol.AcknowledgementHandler;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
 
 import javax.xml.bind.JAXBElement;
@@ -136,23 +135,10 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
     private static boolean sendHeartbeats = true;
 
     public ClientOutboundSequence(SequenceConfig config) {
-        this.config = config;
+        super(config);
 
-        //for now
-        this.ackHandler = new AcknowledgementHandler(config);
-        this.rmConstants = config.getConstants();
+        //FIXME for now
         super.setBufferRemaining(config.getBufferSize());
-
-    }
-
-    /**
-     * Accessor for the sequenceConfig field
-     *
-     * @return The value of the field.
-     */
-    @Override
-    public SequenceConfig getSequenceConfig() {
-        return config;
     }
 
     /**
@@ -185,7 +171,7 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
     public int getTransferWindowSize() {
         //Use server size receive buffer size for now.  Might
         //want to make this configurable.
-        return config.getBufferSize();
+        return getConfig().getBufferSize();
     }
 
     /**
@@ -206,7 +192,7 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
      * SequenceConfig object.
      */
     public SequenceSettings getSequenceSettings() {
-        SequenceConfig settings = getSequenceConfig();
+        SequenceConfig settings = getConfig();
         settings.setSequenceId(getId());
 
         InboundSequence iseq = getInboundSequence();
@@ -257,9 +243,9 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
      */
     public void connect(URI destination, URI acksTo, boolean twoWay) throws RMException {
         try {
-            this.destination = destination;
-            this.acksTo = acksTo;
-            String anonymous = rmConstants.getAnonymousURI().toString();
+            this.setDestination(destination);
+            this.setAcksTo(acksTo);
+            String anonymous = getConfig().getConstants().getAnonymousURI().toString();
             String acksToString;
 
             if (acksTo == null) {
@@ -271,7 +257,7 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
             this.isAnonymous = acksToString.equals(anonymous);
 
             AbstractCreateSequence createSequence = null;
-            if (config.getRMVersion() == RMVersion.WSRM10) {
+            if (getConfig().getRMVersion() == RMVersion.WSRM10) {
                 createSequence = new com.sun.xml.ws.rm.v200502.CreateSequenceElement();
             } else {
                 createSequence = new com.sun.xml.ws.rm.v200702.CreateSequenceElement();
@@ -290,7 +276,7 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
             cs.setAcksTo(new MemberSubmissionAcksToImpl(new URI(acksToString)));
             }*/
             W3CEndpointReference sourceEndpointReference = null;
-            AddressingVersion addressingVersion = rmConstants.getAddressingVersion();
+            AddressingVersion addressingVersion = getConfig().getConstants().getAddressingVersion();
             if (addressingVersion == AddressingVersion.W3C) {
                 //WSEndpointReference wsepr = new WSEndpointReference(getClass().getResourceAsStream("w3c-anonymous-acksTo.xml"), addressingVersion);
                 WSEndpointReference epr = AddressingVersion.W3C.anonymousEpr;
@@ -305,7 +291,7 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
 
             String incomingID = "uuid:" + UUID.randomUUID();
             if (twoWay) {
-                if (config.getRMVersion() == RMVersion.WSRM10) {
+                if (getConfig().getRMVersion() == RMVersion.WSRM10) {
                     com.sun.xml.ws.rm.v200502.Identifier offerIdentifier = new com.sun.xml.ws.rm.v200502.Identifier();
                     com.sun.xml.ws.rm.v200502.OfferType offer = new com.sun.xml.ws.rm.v200502.OfferType();
                     offerIdentifier.setValue(incomingID);
@@ -340,12 +326,12 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
             if (csr != null) {
                 if (csr instanceof com.sun.xml.ws.rm.v200502.CreateSequenceResponseElement) {
                     com.sun.xml.ws.rm.v200502.Identifier idOutbound = ((com.sun.xml.ws.rm.v200502.CreateSequenceResponseElement) csr).getIdentifier();
-                    this.id = idOutbound.getValue();
+                    this.setId(idOutbound.getValue());
 
                     accept = ((com.sun.xml.ws.rm.v200502.CreateSequenceResponseElement) csr).getAccept();
                 } else {
                     com.sun.xml.ws.rm.v200702.Identifier idOutbound = ((com.sun.xml.ws.rm.v200702.CreateSequenceResponseElement) csr).getIdentifier();
-                    this.id = idOutbound.getValue();
+                    this.setId(idOutbound.getValue());
 
                     accept = ((com.sun.xml.ws.rm.v200702.CreateSequenceResponseElement) csr).getAccept();
                 }
@@ -358,9 +344,9 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
                     /* URI uriAccept = accept.getAcksTo();*/
                     URI uriAccept = null;
 
-                    inboundSequence = new ClientInboundSequence(this, incomingID, uriAccept, config);
+                    setCompanionSequence(new ClientInboundSequence(this, incomingID, uriAccept, getConfig()));
                 } else {
-                    inboundSequence = new ClientInboundSequence(this, incomingID, null, config);
+                    setCompanionSequence(new ClientInboundSequence(this, incomingID, null, getConfig()));
                 }
 
                 //start the inactivity clock
@@ -398,7 +384,7 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
 
         //FIXME - find another check for connectiveness.. want to get rid of
         //unnecessary InboundSequences.
-        if (inboundSequence == null) {
+        if (getInboundSequence() == null) {
             throw new IllegalStateException("Not connected.");
         }
 
@@ -411,7 +397,7 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
         //Glassfish container with ordered delivery configured.  This will
         //probably no longer be the case when the Tube/Fibre architecture
         //is used.
-        if (config.getRMVersion() == RMVersion.WSRM10) {
+        if (getConfig().getRMVersion() == RMVersion.WSRM10) {
             sendLast();
         } else {
             sendCloseSequence();
@@ -420,15 +406,15 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
         //this will block until all messages are complete
         waitForAcks();
         AbstractTerminateSequence ts = null;
-        if (config.getRMVersion() == RMVersion.WSRM10) {
+        if (getConfig().getRMVersion() == RMVersion.WSRM10) {
             ts = new com.sun.xml.ws.rm.v200502.TerminateSequenceElement();
             com.sun.xml.ws.rm.v200502.Identifier idTerminate = new com.sun.xml.ws.rm.v200502.Identifier();
-            idTerminate.setValue(id);
+            idTerminate.setValue(getId());
             ((com.sun.xml.ws.rm.v200502.TerminateSequenceElement) ts).setIdentifier(idTerminate);
         } else {
             ts = new com.sun.xml.ws.rm.v200702.TerminateSequenceElement();
             com.sun.xml.ws.rm.v200702.Identifier idTerminate = new com.sun.xml.ws.rm.v200702.Identifier();
-            idTerminate.setValue(id);
+            idTerminate.setValue(getId());
             ((com.sun.xml.ws.rm.v200702.TerminateSequenceElement) ts).setIdentifier(idTerminate);
 
         }
@@ -505,10 +491,10 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
         //1. Sequence has been terminated
         //2. Number of stored messages exceeds 1/2 available space.
         if (!isActive ||
-                storedMessages > (getTransferWindowSize() / 2)) {
+                getStoredMessages() > (getTransferWindowSize() / 2)) {
             return 0;
         }
-        return config.getResendInterval();
+        return getConfig().getResendInterval();
     }
 
     /**
@@ -516,7 +502,7 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
      * hold off on sending messages.
      */
     public boolean isTransferWindowFull() {
-        return getTransferWindowSize() == storedMessages;
+        return getTransferWindowSize() == getStoredMessages();
     }
 
     private long getAckRequestInterval() {
@@ -526,11 +512,11 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
         //3. Number of stored messages at endpoint exceeds 1/2
         //   available space.
         if (!isActive ||
-                storedMessages > (getTransferWindowSize() / 2) ||
-                getReceiveBufferSize() > (config.getBufferSize() / 2)) {
+                getStoredMessages() > (getTransferWindowSize() / 2) ||
+                getReceiveBufferSize() > (getConfig().getBufferSize() / 2)) {
             return 0;
         }
-        return config.getAckRequestInterval();
+        return getConfig().getAckRequestInterval();
     }
 
     /**
@@ -612,7 +598,7 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
      * @throws RMException 
      */
     public synchronized void doMaintenanceTasks() throws RMException {
-        if (storedMessages > 0 && isResendDue()) {
+        if (getStoredMessages() > 0 && isResendDue()) {
             int top = getNextIndex();
             for (int i = 1; i < top; i++) {
                 RMMessage mess = get(i);
@@ -623,8 +609,7 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
             }
         } else {
             //check whether we need to prime the pump
-            if (isGettingClose(System.currentTimeMillis() - getLastActivityTime(),
-                    config.getInactivityTimeout())) {
+            if (isGettingClose(System.currentTimeMillis() - getLastActivityTime(), getConfig().getInactivityTimeout())) {
                 //send an AckRequested down the pipe.  Need to use a background
                 //Thread.  This is being called by the RMSource maintenance thread
                 //whose health we have to be very careful with.  If the heartbeat
@@ -648,7 +633,7 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
             try {
                 if (sendHeartbeats) {
                     logger.fine(LocalizationMessages.WSRM_2010_HEARTBEAT_MESSAGE_MESSAGE(sequence.getId(), System.currentTimeMillis()));
-                    protocolMessageSender.sendAckRequested(sequence, config.getSoapVersion());
+                    protocolMessageSender.sendAckRequested(sequence, getConfig().getSoapVersion());
                 }
             } catch (Exception e) {
                 //We get here in at least two cases.

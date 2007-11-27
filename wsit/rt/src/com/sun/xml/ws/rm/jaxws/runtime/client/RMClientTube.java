@@ -295,20 +295,20 @@ public final class RMClientTube extends TubeBase {
         return false;
     }
 
-    private RMMessage prepareRequestMessage(Packet request) throws RMException {
+    private RMMessage prepareRequestMessage(Packet requestPacket) throws RMException {
         RMMessage message = null;
 
         //FIXME - Need a better way for client to pass a message number.
-        Object mn = request.proxy.getRequestContext().get(Constants.messageNumberProperty);
+        Object mn = requestPacket.proxy.getRequestContext().get(Constants.messageNumberProperty);
         if (mn != null) {
-            request.invocationProperties.put(Constants.messageNumberProperty, mn);
+            requestPacket.invocationProperties.put(Constants.messageNumberProperty, mn);
         }
 
         //Add to OutboundSequence and include RM headers according to the
         //state of the RMSource
-        message = handleOutboundMessage(outboundSequence, request);
+        message = handleOutboundMessage(outboundSequence, requestPacket);
 
-        if (!request.getMessage().isOneWay(getWsdlPort())) {
+        if (!requestPacket.getMessage().isOneWay(getWsdlPort())) {
             //ClientOutboundSequence needs to know this.  If this flag is true,
             //messages stored in the sequence cannot be discarded when they are acked.
             //They may need to be resent to provide a vehicle or resends of lost responses.
@@ -329,10 +329,10 @@ public final class RMClientTube extends TubeBase {
         //RM would always want expectReply to the true.  We need to look at
         //protocol responses for all messages, since they might contain RM
         //headers
-        request.expectReply = true;
+        requestPacket.expectReply = true;
 
         //initialize TubelineHelper
-        tubelineHelper = new TubelineHelper(request, message);
+        tubelineHelper = new TubelineHelper(requestPacket, message);
 
         //Make the helper available in the message, so it can be used to resend the message, if necessary
         message.setMessageSender(tubelineHelper);
@@ -428,6 +428,7 @@ public final class RMClientTube extends TubeBase {
 
                     return doReturnWith(ret);
                 } catch ( SOAPException e1) {
+                    // TODO handle exception
                     return doThrow(new WebServiceException(e));
                 }
             } else {
@@ -527,9 +528,7 @@ public final class RMClientTube extends TubeBase {
             TubelineHelperCallback() {
             }
 
-            public void onCompletion(
-                    
-                    @NotNull Packet response) {
+            public void onCompletion(@NotNull Packet response) {
                 try {
                     if (response != null) {
                         //Perform operations in the RMSource according to the contents of

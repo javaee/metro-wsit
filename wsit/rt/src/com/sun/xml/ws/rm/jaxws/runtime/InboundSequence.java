@@ -46,12 +46,10 @@ package com.sun.xml.ws.rm.jaxws.runtime;
 import com.sun.xml.ws.rm.InvalidMessageNumberException;
 import com.sun.xml.ws.rm.RMVersion;
 import com.sun.xml.ws.rm.Sequence;
-import com.sun.xml.ws.rm.protocol.AbstractAckRequested;
 import com.sun.xml.ws.rm.protocol.AbstractSequenceAcknowledgement;
 import com.sun.xml.ws.rm.v200502.Identifier;
 import com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement;
 
-import javax.xml.bind.Marshaller;
 import java.net.URI;
 
 /**
@@ -64,27 +62,26 @@ import java.net.URI;
 public abstract class InboundSequence extends Sequence {
 
     /**
-     * AcksTo URI.  Assigned by ctor.
-     */
-    protected URI acksTo;
-    /**
      * Companion OutboundSequence
      */
-    protected OutboundSequence outboundSequence;
+    private OutboundSequence companionOutboundSequence;
     /**
      * The SecurityTokenReference obtained from the CreateSequence
      */
-    private String strId;
+    private String securityTokenReferenceId;
 
-    public InboundSequence() {
+    protected InboundSequence(URI acksTo, SequenceConfig config) {
+        super(acksTo, config);
+    }
+    
+    protected InboundSequence(URI acksTo, SequenceConfig config, boolean flag) {
+        // TODO: remove
+        super(acksTo, config, flag);
     }
 
-    public InboundSequence(URI acksTo,
-            SequenceConfig config) {
-
-        this.acksTo = acksTo;
-        this.config = config;
-        this.rmConstants = config.getConstants();
+    protected void setCompanionSequence(OutboundSequence companionSequence) {
+        // TODO: remove this method if possible
+        this.companionOutboundSequence = companionSequence;        
     }
 
     /** Construct a <code>SequenceAcknowlegementElement</code> based on the contents of this sequence.
@@ -98,14 +95,9 @@ public abstract class InboundSequence extends Sequence {
      * need to be if concurrent modifications only cause messages that
      * have indeed arrived to be unacknowledged
      */
-    public synchronized AbstractSequenceAcknowledgement generateSequenceAcknowledgement(AbstractAckRequested reqElement,
-            Marshaller marshaller,
-            boolean generateIsFinal)
-            throws InvalidMessageNumberException {
-
-
+    public synchronized AbstractSequenceAcknowledgement generateSequenceAcknowledgement(boolean generateIsFinal) throws InvalidMessageNumberException {
         AbstractSequenceAcknowledgement ackElement = null;
-        if (config.getRMVersion() == RMVersion.WSRM10) {
+        if (getConfig().getRMVersion() == RMVersion.WSRM10) {
             ackElement = new SequenceAcknowledgementElement();
             Identifier identifier = new Identifier();
             identifier.setValue(getId());
@@ -118,18 +110,18 @@ public abstract class InboundSequence extends Sequence {
             //If the RM version is 1.1 then the SequenceAcknowledgmenet.Final needs to be added
             //when CloseSequence message is processed
             if (generateIsFinal) {
-
-                com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement.Final finalelem = new com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement.Final();
-                ((com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement) ackElement).setFinal(finalelem);
+                com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement.Final finalElement = new com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement.Final();
+                ((com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement) ackElement).setFinal(finalElement);
             }
         }
 
-        if (config != null && config.isFlowControlRequired()) {
-            ackElement.setBufferRemaining(maxMessages - storedMessages);
+        if (getConfig().isFlowControlRequired()) {
+            ackElement.setBufferRemaining(getMaxMessages() - getStoredMessages());
         }
 
         int maxMessageNumber = 0;
 
+        //FIXME
         //The new WSRM 1.1 spec has no element for MaxMessageNumber in AckRequested
         //hence commenting this code we will just use the last index of the message
 
@@ -140,7 +132,7 @@ public abstract class InboundSequence extends Sequence {
         //if max message number element is not present, use the last
         //index we know of. 
         if (maxMessageNumber == 0) {
-            maxMessageNumber = nextIndex - 1;
+            maxMessageNumber = getNextIndex() - 1;
         }
 
         int lower = 1;
@@ -172,22 +164,17 @@ public abstract class InboundSequence extends Sequence {
     /**
      * Queue up a <code>SequenceAcknowledgement</code> element on companion <code>OutboundSequence</code>
      * for delivery on next outbound application message.
-     * TODO
-     * Currently only works for replyTo = AcksTo scenarios.  Expand functionality to allow AcksTo
+     * TODO Currently only works for replyTo = AcksTo scenarios.  Expand functionality to allow AcksTo
      * to different destination.
      *
      *   
      * @param reqElement The <code>AbstractAckRequested</code> to process.
      *        marshaller The marshaller to be used for construction of the return value.
      */
-    public synchronized void handleAckRequested(AbstractAckRequested reqElement,
-            Marshaller marshaller)
-            throws InvalidMessageNumberException {
-
-        AbstractSequenceAcknowledgement ackElement =
-                generateSequenceAcknowledgement(reqElement,
-                marshaller, false);
-        outboundSequence.setSequenceAcknowledgement(ackElement);
+    public synchronized void handleAckRequested() throws InvalidMessageNumberException {
+        // TODO rename method to better suit the meaning
+        AbstractSequenceAcknowledgement ackElement = generateSequenceAcknowledgement(false);
+        companionOutboundSequence.setSequenceAcknowledgement(ackElement);
     }
 
     /**
@@ -196,25 +183,20 @@ public abstract class InboundSequence extends Sequence {
      * @return The OutboundSequence.
      */
     public OutboundSequence getOutboundSequence() {
-        return outboundSequence;
+        return companionOutboundSequence;
 
     }
 
-    public String getStrId() {
-        return strId;
+    public String getSecurityTokenReferenceId() {
+        return securityTokenReferenceId;
     }
 
-    public void setStrId(String strId) {
-        this.strId = strId;
-    }
-
-    @Override
-    public SequenceConfig getSequenceConfig() {
-        return config;
+    public void setSecurityTokenReferenceId(String strId) {
+        this.securityTokenReferenceId = strId;
     }
 
     public String getSessionId() {
-        return strId != null ? strId : getId();
+        return securityTokenReferenceId != null ? securityTokenReferenceId : getId();
     }
 }
 

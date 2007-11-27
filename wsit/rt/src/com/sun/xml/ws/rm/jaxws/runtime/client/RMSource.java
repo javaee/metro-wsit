@@ -90,10 +90,9 @@ public class RMSource extends RMProvider {
     }
 
     public synchronized void terminateSequence(ClientOutboundSequence seq) throws RMException {
-        String id = seq.getId();
-        if (seq != null && outboundMap.keySet().contains(id)) {
+        if (seq != null && outboundMap.keySet().contains(seq.getId())) {
             seq.disconnect();
-            removeOutboundSequence(id);
+            removeOutboundSequence(seq.getId());
         }
     }
 
