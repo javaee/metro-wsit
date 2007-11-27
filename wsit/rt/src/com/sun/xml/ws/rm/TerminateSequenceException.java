@@ -33,8 +33,9 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.rm;
+
+import com.sun.xml.ws.api.message.Message;
 
 /**
  * Subclass of <code>RMException</code> thrown from errors resulting
@@ -46,7 +47,8 @@ package com.sun.xml.ws.rm;
  */
 public class TerminateSequenceException extends RMException {
 
-    private  String sequenceId;
+    private String sequenceId;
+
     /**
      */
     public TerminateSequenceException() {
@@ -57,17 +59,21 @@ public class TerminateSequenceException extends RMException {
         super(message);
     }
 
-    public TerminateSequenceException(String message,String id){
+    public TerminateSequenceException(String message, String id) {
         super(message);
         this.sequenceId = id;
     }
 
-    public TerminateSequenceException (String s, com.sun.xml.ws.api.message.Message message) {
-        super (s,message);
+    public TerminateSequenceException(String info, Message faultMessage) {
+        super(info, faultMessage);
     }
 
-     public TerminateSequenceException(Throwable e) {
-         super(e);
+    public TerminateSequenceException(String message, Throwable cause) {
+        super(message, cause);
+    }      
+
+    public TerminateSequenceException(Throwable e) {
+        super(e);
     }
 
     public String getSequenceId() {

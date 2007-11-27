@@ -43,11 +43,11 @@
  */
 package com.sun.xml.ws.rm.jaxws.runtime.client;
 
-import com.sun.xml.ws.rm.Constants;
 import com.sun.xml.ws.rm.InvalidSequenceException;
 import com.sun.xml.ws.rm.RMConstants;
 import com.sun.xml.ws.rm.RMException;
 import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
+import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.v200502.CreateSequenceResponseElement;
 import com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement;
 //import com.sun.xml.ws.transport.http.server.EndpointImpl;
@@ -140,7 +140,7 @@ public class ProtocolMessageReceiver {
                 try {
                     knownIds.wait();
                 } catch (InterruptedException e) {
-                    // TODO handle exception
+                // TODO handle exception
                 }
             }
         }
@@ -154,7 +154,7 @@ public class ProtocolMessageReceiver {
         String id = el.getId();
         OutboundSequence seq = RMSource.getRMSource().getOutboundSequence(id);
         if (id == null) {
-            throw new InvalidSequenceException(String.format(Constants.UNKNOWN_SEQUENCE_TEXT, id), id);
+            throw new InvalidSequenceException(LocalizationMessages.WSRM_3022_UNKNOWN_SEQUENCE_ID_IN_MESSAGE(id), id);
         }
 
         seq.handleAckResponse(el);

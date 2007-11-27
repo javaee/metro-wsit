@@ -41,7 +41,7 @@ package com.sun.xml.ws.rm;
  * @author Bhakti Mehta
  */
 public class Constants {
-    
+
     public static final String microsoftVersion = "http://schemas.microsoft.com/net/2005/02/rm/policy";
     public static final String sunVersion = "http://sun.com/2006/03/rm";
     public static final String sunClientVersion = "http://sun.com/2006/03/rm/client";
@@ -52,11 +52,4 @@ public class Constants {
     public static final String messageNumberProperty = "com.sun.xml.ws.messagenumber";
     public static final String createSequenceProperty = "com.sun.xml.ws.createsequence";
     public static final String oneWayResponseProperty = "com.sun.xml.ws.onewayresponse";
-    
-    //TODO: INTERNATIONALIZE THESE
-    public static final String MESSAGE_NUMBER_ROLLOVER_TEXT = "The maximum value, %s,  for MessageNumber has been exceeded";
-    public static final String UNKNOWN_SEQUENCE_TEXT = "The message contains an unknown sequence id,  %s ";
-    public static final String CREATE_SEQUENCE_REFUSED_TEXT = "The create sequence request has been refused by RM Destination -- %s ";
-    public static final String SEQUENCE_TERMINATED_TEXT = "The sequence has been terminated because of an unrecoverable error";
-    public static final String SEQUENCE_CLOSED_TEXT = "The sequence has been closed as CloseSequence Message was received";
 }

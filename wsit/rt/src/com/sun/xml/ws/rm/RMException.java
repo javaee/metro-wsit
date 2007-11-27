@@ -1,5 +1,5 @@
 /*
- * $Id: RMException.java,v 1.3 2007-05-29 22:11:19 ofung Exp $
+ * $Id: RMException.java,v 1.4 2007-11-27 17:13:55 m_potociar Exp $
  */
 
 /*
@@ -37,8 +37,10 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.rm;
+
+import com.sun.xml.ws.api.message.Message;
+
 /**
  * Wrapper class for exceptions thrown by RM Methods.
  */
@@ -47,23 +49,36 @@ public class RMException extends Exception {
     private final com.sun.xml.ws.api.message.Message faultMessage;
 
     public RMException() {
+        // TODO: we should not throw exception without providing textual info
         this.faultMessage = null;
     }
 
-    public RMException(String str) {
-        super(str);
+    public RMException(String message) {
+        super(message);
         this.faultMessage = null;
     }
 
-    public RMException(Throwable t) {
-        super(t);
+    public RMException(Throwable cause) {
+        // TODO: we should not throw exception without providing textual info
+        super(cause);
         this.faultMessage = null;
     }
 
+    public RMException(String message, Throwable cause) {
+        super(message, cause);
+        this.faultMessage = null;
+    }
 
-     public RMException(com.sun.xml.ws.api.message.Message e) {
-         this.faultMessage= e;
-     }
+    public RMException(Message faultMessage) {
+        // TODO: we should not throw exception without providing textual info
+        this.faultMessage = faultMessage;
+    }
+
+    public RMException(String info, com.sun.xml.ws.api.message.Message faultMessage) {
+        super(info);
+        this.faultMessage = faultMessage;
+    }
+    
     /**
      * Returns a Message containign a Fault defined by WS-RM.
      *
@@ -72,14 +87,5 @@ public class RMException extends Exception {
      */
     public com.sun.xml.ws.api.message.Message getFaultMessage() {
         return faultMessage;
-
     }
-
-    public RMException (String s , com.sun.xml.ws.api.message.Message message) {
-        super(s);
-        this.faultMessage = message;
-    }
-
-
-
 }

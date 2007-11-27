@@ -44,11 +44,11 @@ package com.sun.xml.ws.rm.jaxws.runtime.server;
 
 import com.sun.xml.ws.rm.InvalidSequenceException;
 import com.sun.xml.ws.rm.RMException;
-import com.sun.xml.ws.rm.Constants;
 import com.sun.xml.ws.rm.jaxws.runtime.InboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.RMProvider;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
+import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import java.net.URI;
 import java.util.*;
 
@@ -85,7 +85,7 @@ public class RMDestination extends RMProvider {
         InboundSequence seq = inboundMap.get(id);
 
         if (seq == null) {
-            throw new InvalidSequenceException(String.format(Constants.UNKNOWN_SEQUENCE_TEXT, id), id);
+            throw new InvalidSequenceException(LocalizationMessages.WSRM_3022_UNKNOWN_SEQUENCE_ID_IN_MESSAGE(id), id);
         }
 
         OutboundSequence out = seq.getOutboundSequence();

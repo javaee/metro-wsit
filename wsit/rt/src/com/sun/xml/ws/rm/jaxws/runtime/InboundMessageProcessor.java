@@ -45,11 +45,11 @@ package com.sun.xml.ws.rm.jaxws.runtime;
 
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.rm.CloseSequenceException;
-import com.sun.xml.ws.rm.Constants;
 import com.sun.xml.ws.rm.InvalidSequenceException;
 import com.sun.xml.ws.rm.MessageNumberRolloverException;
 import com.sun.xml.ws.rm.RMException;
 import com.sun.xml.ws.rm.RMMessage;
+import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.protocol.AbstractAckRequested;
 import com.sun.xml.ws.rm.protocol.AbstractSequence;
 import com.sun.xml.ws.rm.protocol.AbstractSequenceAcknowledgement;
@@ -118,17 +118,17 @@ public class InboundMessageProcessor {
                 }
 
                 if (messageNumber == Integer.MAX_VALUE) {
-                    throw new MessageNumberRolloverException(String.format(Constants.MESSAGE_NUMBER_ROLLOVER_TEXT, messageNumber), messageNumber);
+                    throw new MessageNumberRolloverException(LocalizationMessages.WSRM_3026_MESSAGE_NUMBER_ROLLOVER(messageNumber), messageNumber);
                 }
 
                 inseq = provider.getInboundSequence(seqid);
                 if (inseq != null) {
                     if (inseq.isClosed()) {
-                        throw new CloseSequenceException(String.format(Constants.SEQUENCE_CLOSED_TEXT), seqid);
+                        throw new CloseSequenceException(LocalizationMessages.WSRM_3029_SEQUENCE_CLOSED(seqid), seqid);
                     }
                     inseq.set(messageNumber, message);
                 } else {
-                    throw new InvalidSequenceException(String.format(Constants.UNKNOWN_SEQUENCE_TEXT, seqid), seqid);
+                    throw new InvalidSequenceException(LocalizationMessages.WSRM_3022_UNKNOWN_SEQUENCE_ID_IN_MESSAGE(seqid), seqid);
                 }
             }
 

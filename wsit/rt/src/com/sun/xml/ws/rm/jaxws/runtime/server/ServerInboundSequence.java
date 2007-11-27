@@ -52,6 +52,7 @@ import com.sun.xml.ws.rm.jaxws.runtime.InboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
 import com.sun.xml.ws.rm.jaxws.util.LoggingHelper;
+import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.runtime.util.Session;
 
 import java.net.URI;
@@ -170,8 +171,7 @@ public class ServerInboundSequence extends InboundSequence implements ServerSequ
                 mess.complete();
             }
         } catch (RMException e) {
-            String m = Messages.COULD_NOT_RESET_MESSAGE.format(index, getId());
-            logger.log(Level.SEVERE, m, e);
+            logger.log(Level.SEVERE, LocalizationMessages.WSRM_3020_COULD_NOT_RESET_MESSAGE(index, getId()), e);
         }
     }
 
