@@ -62,9 +62,7 @@ import javax.xml.stream.XMLStreamReader;
 public final class PolicyUtils {
     private PolicyUtils() { }
     
-    public static class Commons {
-        private static final LinkedList<StackTraceElement> stackTraceElements= new LinkedList<StackTraceElement>();
-                        
+    public static class Commons {                        
         /**
          * Method returns the name of the method that is on the {@code methodIndexInStack}
          * position in the call stack of the current {@link Thread}.
