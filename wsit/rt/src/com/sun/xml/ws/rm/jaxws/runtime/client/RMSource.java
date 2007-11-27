@@ -52,6 +52,7 @@ import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import java.io.ByteArrayInputStream;
 import com.sun.xml.ws.rm.Constants;
+import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import java.util.Hashtable;
 import java.util.logging.Logger;
 import java.util.logging.Level;
@@ -97,7 +98,7 @@ public class RMSource extends RMProvider {
     }
 
     public synchronized void addOutboundSequence(ClientOutboundSequence seq) {
-        logger.fine(Messages.ADDING_SEQUENCE_MESSAGE.format(seq.getId()));
+        logger.fine(LocalizationMessages.WSRM_2011_ADDING_SEQUENCE_MESSAGE(seq.getId()));
 
         boolean firstSequence = outboundMap.isEmpty();
         outboundMap.put(seq.getId(), seq);
@@ -116,14 +117,10 @@ public class RMSource extends RMProvider {
     }
 
     public synchronized void removeOutboundSequence(ClientOutboundSequence seq) {
-
-        logger.fine(Messages.REMOVING_SEQUENCE_MESSAGE.format(seq.getId()));
+        logger.fine(LocalizationMessages.WSRM_2012_REMOVING_SEQUENCE_MESSAGE(seq.getId()));
 
         String id = seq.getId();
-
-        ClientInboundSequence iseq =
-                (ClientInboundSequence) seq.getInboundSequence();
-
+        ClientInboundSequence iseq = (ClientInboundSequence) seq.getInboundSequence();
         String iseqid = null;
         if (iseq != null && null != (iseqid = iseq.getId())) {
             inboundMap.remove(iseqid);
@@ -142,7 +139,7 @@ public class RMSource extends RMProvider {
         if (seq != null) {
             removeOutboundSequence(seq);
         } else {
-            String message = Messages.NO_SUCH_OUTBOUND_SEQUENCE.format(id);
+            String message = LocalizationMessages.WSRM_2013_NO_SUCH_OUTBOUND_SEQUENCE(id);
             IllegalArgumentException e = new IllegalArgumentException(message);
             logger.log(Level.FINE, message, e);
             throw e;
@@ -228,7 +225,6 @@ public class RMSource extends RMProvider {
 
         //this will throw and exception if the specified sequence does not exist.
         //removeOutboundSequence(sequenceID);
-
         ClientOutboundSequence seq = createSequence(service, portName);
         if (seq == null) {
             return null;
@@ -237,50 +233,40 @@ public class RMSource extends RMProvider {
         try {
             seq.disconnect(false);
         } catch (Exception e) {
+            // TODO exception handling
             e.printStackTrace();
         }
 
         seq.setId(sequenceID);
-
-        ClientInboundSequence iseq =
-                (ClientInboundSequence) seq.getInboundSequence();
+        ClientInboundSequence iseq =(ClientInboundSequence) seq.getInboundSequence();
 
         if (companionSequenceID != null) {
-
             if (iseq == null || iseq.getId() == null) {
-
-                String message = Messages.NO_TWO_WAY_OPERATION.format();
+                String message = LocalizationMessages.WSRM_2014_NO_TWOWAY_OPERATION();
                 IllegalArgumentException e = new IllegalArgumentException(message);
                 logger.log(Level.FINE, message, e);
                 throw e;
             }
             iseq.setId(companionSequenceID);
-
         } else if (iseq != null && iseq.getId() != null) {
-
-            String message = Messages.NO_INBOUND_SEQUENCE_ID_SPECIFIED.format();
+            String message = LocalizationMessages.WSRM_2015_NO_INBOUND_SEQUENCE_ID_SPECIFIED();
             IllegalArgumentException e = new IllegalArgumentException(message);
             logger.log(Level.FINE, message, e);
             throw e;
         }
 
         if (outboundMap.get(sequenceID) != null) {
-
-            String message = Messages.SEQUENCE_ALREADY_EXISTS.format(sequenceID);
+            String message = LocalizationMessages.WSRM_2016_SEQUENCE_ALREADY_EXISTS(sequenceID);
             IllegalArgumentException e = new IllegalArgumentException(message);
             logger.log(Level.FINE, message, e);
             throw e;
-
         }
 
-        if (companionSequenceID != null &&
-                inboundMap.get(companionSequenceID) != null) {
-
-            String message = Messages.SEQUENCE_ALREADY_EXISTS.format(companionSequenceID);
+        if (companionSequenceID != null && inboundMap.get(companionSequenceID) != null) {
+            String message = LocalizationMessages.WSRM_2016_SEQUENCE_ALREADY_EXISTS(companionSequenceID);
             IllegalArgumentException e = new IllegalArgumentException(message);
             logger.log(Level.FINE, message, e);
             throw e;
-
         }
 
         addOutboundSequence(seq);

@@ -55,6 +55,7 @@ import com.sun.xml.ws.rm.jaxws.runtime.InboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
 import com.sun.xml.ws.rm.jaxws.util.LoggingHelper;
+import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.protocol.AbstractAcceptType;
 import com.sun.xml.ws.rm.protocol.AbstractCreateSequence;
 import com.sun.xml.ws.rm.protocol.AbstractCreateSequenceResponse;
@@ -646,7 +647,7 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
         public void run() {
             try {
                 if (sendHeartbeats) {
-                    logger.fine(Messages.HEARTBEAT_MESSAGE_MESSAGE.format(sequence.getId(), System.currentTimeMillis()));
+                    logger.fine(LocalizationMessages.WSRM_2010_HEARTBEAT_MESSAGE_MESSAGE(sequence.getId(), System.currentTimeMillis()));
                     protocolMessageSender.sendAckRequested(sequence, config.getSoapVersion());
                 }
             } catch (Exception e) {
@@ -656,8 +657,7 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
                 //
                 //In both cases the sequence is of no further use.  We
                 //will assume for now that this is already the case.
-                logger.log(Level.FINE,
-                        Messages.HEARTBEAT_MESSAGE_EXCEPTION.format() + " " + sequence.getId(), e);
+                logger.log(Level.FINE, LocalizationMessages.WSRM_2009_HEARTBEAT_MESSAGE_EXCEPTION(sequence.getId()), e);
                 try {
                     RMSource.getRMSource().removeOutboundSequence(sequence);
                 } catch (Exception ex) {
