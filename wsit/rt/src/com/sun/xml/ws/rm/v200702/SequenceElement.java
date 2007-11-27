@@ -4,22 +4,23 @@
 // Any modifications to this file will be lost upon recompilation of the source schema. 
 // Generated on: 2007.07.10 at 02:10:42 PM PDT 
 //
-
-
 package com.sun.xml.ws.rm.v200702;
 
+import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.protocol.AbstractSequence;
-import com.sun.xml.ws.rm.protocol.Messages;
 
-import org.w3c.dom.Element;
-
-import javax.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAnyAttribute;
+import javax.xml.bind.annotation.XmlAnyElement;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java class for SequenceType complex type.
@@ -44,16 +45,16 @@ import java.util.Map;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "SequenceType", propOrder = {
-    "identifier",
-    "messageNumber",
-    "any"
+"identifier",
+"messageNumber",
+"any"
 })
-@XmlRootElement(name="Sequence",namespace="http://docs.oasis-open.org/ws-rx/wsrm/200702")
-public class SequenceElement  extends AbstractSequence {
+@XmlRootElement(name = "Sequence", namespace = "http://docs.oasis-open.org/ws-rx/wsrm/200702")
+public class SequenceElement extends AbstractSequence {
 
-    @XmlElement(name = "Identifier", required = true, namespace="http://docs.oasis-open.org/ws-rx/wsrm/200702")
+    @XmlElement(name = "Identifier", required = true, namespace = "http://docs.oasis-open.org/ws-rx/wsrm/200702")
     protected Identifier identifier;
-    @XmlElement(name = "MessageNumber",namespace="http://docs.oasis-open.org/ws-rx/wsrm/200702")
+    @XmlElement(name = "MessageNumber", namespace = "http://docs.oasis-open.org/ws-rx/wsrm/200702")
     protected Integer messageNumber;
     @XmlAnyElement(lax = true)
     protected List<Object> any;
@@ -148,16 +149,16 @@ public class SequenceElement  extends AbstractSequence {
         return otherAttributes;
     }
 
-     /**
+    /**
      * Mutator for the Id property.  Maps to the Identifier property in the underlying
      * JAXB class.
      *
      * @param id The new value.
      */
-    public void setId(String id) {
-        Identifier identifier = new Identifier();
-        identifier.setValue(id);
-        setIdentifier(identifier);
+    public void setId(String idString) {
+        Identifier newId = new Identifier();
+        newId.setValue(idString);
+        setIdentifier(newId);
     }
 
     /**
@@ -169,28 +170,19 @@ public class SequenceElement  extends AbstractSequence {
         return getIdentifier().getValue();
     }
 
-    
-
-
-
-
     /**
      * Accessor for the Number property which maps to the MessageNumber property in
      * the underlying JAXB class.
      *
      * @return The Message number.
      */
+    @Override
     public int getNumber() {
         return getMessageNumber();
     }
 
+    @Override
     public String toString() {
-
-           return Messages.SEQUENCE_TOSTRING_STRING
-                   .format(getId(),
-                           getNumber()
-                           );
-            }
-
-
+        return LocalizationMessages.WSRM_4005_SEQUENCE_TOSTRING_STRING(getId(), getNumber(), "N/A");
+    }
 }

@@ -4,14 +4,11 @@
 // Any modifications to this file will be lost upon recompilation of the source schema. 
 // Generated on: 2007.07.10 at 02:10:42 PM PDT 
 //
-
-
 package com.sun.xml.ws.rm.v200702;
 
+import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.protocol.AbstractSequenceAcknowledgement;
-import com.sun.xml.ws.rm.protocol.Messages;
 
-import org.w3c.dom.Element;
 
 import javax.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
@@ -20,7 +17,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 
 /**
  * <p>Java class for anonymous complex type.
@@ -83,29 +79,28 @@ import java.util.Map;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
-    "identifier",
-    "acknowledgementRange",
-    "none",
-    "_final",
-    "bufferRemaining",
-    "nack",
-    "any"
+"identifier",
+"acknowledgementRange",
+"none",
+"_final",
+"bufferRemaining",
+"nack",
+"any"
 })
-@XmlRootElement(name = "SequenceAcknowledgement" ,namespace="http://docs.oasis-open.org/ws-rx/wsrm/200702")
-public class SequenceAcknowledgementElement  extends AbstractSequenceAcknowledgement {
+@XmlRootElement(name = "SequenceAcknowledgement", namespace = "http://docs.oasis-open.org/ws-rx/wsrm/200702")
+public class SequenceAcknowledgementElement extends AbstractSequenceAcknowledgement {
 
-    @XmlElement(name = "Identifier", required = true,namespace="http://docs.oasis-open.org/ws-rx/wsrm/200702")
+    @XmlElement(name = "Identifier", required = true, namespace = "http://docs.oasis-open.org/ws-rx/wsrm/200702")
     protected Identifier identifier;
-    @XmlElement(name = "AcknowledgementRange", namespace="http://docs.oasis-open.org/ws-rx/wsrm/200702")
+    @XmlElement(name = "AcknowledgementRange", namespace = "http://docs.oasis-open.org/ws-rx/wsrm/200702")
     protected List<SequenceAcknowledgementElement.AcknowledgementRange> acknowledgementRange;
-    @XmlElement(name = "None",namespace="http://docs.oasis-open.org/ws-rx/wsrm/200702")
+    @XmlElement(name = "None", namespace = "http://docs.oasis-open.org/ws-rx/wsrm/200702")
     protected SequenceAcknowledgementElement.None none;
-    @XmlElement(name = "Final",namespace="http://docs.oasis-open.org/ws-rx/wsrm/200702")
+    @XmlElement(name = "Final", namespace = "http://docs.oasis-open.org/ws-rx/wsrm/200702")
     protected SequenceAcknowledgementElement.Final _final;
-    @XmlElement(name="BufferRemaining", namespace="http://schemas.microsoft.com/ws/2006/05/rm")
+    @XmlElement(name = "BufferRemaining", namespace = "http://schemas.microsoft.com/ws/2006/05/rm")
     public Integer bufferRemaining;
-
-    @XmlElement(name = "Nack", namespace="http://docs.oasis-open.org/ws-rx/wsrm/200702")
+    @XmlElement(name = "Nack", namespace = "http://docs.oasis-open.org/ws-rx/wsrm/200702")
     @XmlSchemaType(name = "unsignedLong")
     protected List<BigInteger> nack;
     @XmlAnyElement(lax = true)
@@ -291,7 +286,6 @@ public class SequenceAcknowledgementElement  extends AbstractSequenceAcknowledge
         return otherAttributes;
     }
 
-
     /**
      * <p>Java class for anonymous complex type.
      * 
@@ -390,9 +384,7 @@ public class SequenceAcknowledgementElement  extends AbstractSequenceAcknowledge
         public Map<QName, String> getOtherAttributes() {
             return otherAttributes;
         }
-
     }
-
 
     /**
      * <p>Java class for anonymous complex type.
@@ -415,10 +407,7 @@ public class SequenceAcknowledgementElement  extends AbstractSequenceAcknowledge
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "")
     public static class Final {
-
-
     }
-
 
     /**
      * <p>Java class for anonymous complex type.
@@ -441,21 +430,19 @@ public class SequenceAcknowledgementElement  extends AbstractSequenceAcknowledge
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "")
     public static class None {
-
-
     }
 
-     public void setId(String id) {
-        com.sun.xml.ws.rm.v200702.Identifier identifier = new Identifier();
-        identifier.setValue(id);
-        setIdentifier(identifier);
+    public void setId(String idString) {
+        com.sun.xml.ws.rm.v200702.Identifier newId = new Identifier();
+        newId.setValue(idString);
+        setIdentifier(newId);
     }
 
     public String getId() {
         return getIdentifier().getValue();
     }
 
-      public int getBufferRemaining() {
+    public int getBufferRemaining() {
         if (bufferRemaining == null) {
             return -1;
         }
@@ -468,28 +455,25 @@ public class SequenceAcknowledgementElement  extends AbstractSequenceAcknowledge
 
     public void addAckRange(long lower, long upper) {
         if (nack != null) {
-            throw new IllegalArgumentException(Messages.BOTH_ACKS_AND_NACKS_MESSAGE.format());
+            throw new IllegalArgumentException(LocalizationMessages.WSRM_4002_BOTH_ACKS_AND_NACKS_MESSAGE());
         }
         //check validity of indices
         if (lower > upper) {
-            throw new IllegalArgumentException(Messages.UPPERBOUND_LESSTHAN_LOWERBOUND_MESSAGE.format());
+            throw new IllegalArgumentException(LocalizationMessages.WSRM_4003_UPPERBOUND_LESSTHAN_LOWERBOUND_MESSAGE());
         }
 
         //TODO Further validity checking
-        SequenceAcknowledgementElement.AcknowledgementRange range
-                = new SequenceAcknowledgementElement.AcknowledgementRange();
+        SequenceAcknowledgementElement.AcknowledgementRange range = new SequenceAcknowledgementElement.AcknowledgementRange();
         range.setLower(BigInteger.valueOf(lower));
         range.setUpper(BigInteger.valueOf(upper));
         getAcknowledgementRange().add(range);
-
     }
 
-     public void addNack(long index) {
+    public void addNack(long index) {
         if (acknowledgementRange != null) {
-            throw new IllegalArgumentException(Messages.BOTH_ACKS_AND_NACKS_MESSAGE.format());
+            throw new IllegalArgumentException(LocalizationMessages.WSRM_4002_BOTH_ACKS_AND_NACKS_MESSAGE());
         }
 
         getNack().add(BigInteger.valueOf(index));
     }
-
 }

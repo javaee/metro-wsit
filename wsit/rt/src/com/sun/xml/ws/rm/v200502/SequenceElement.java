@@ -41,18 +41,23 @@
  * Created on October 23, 2005, 9:34 AM
  *
  */
-
 package com.sun.xml.ws.rm.v200502;
 
+import com.sun.xml.ws.rm.localization.LocalizationMessages;
 
-import com.sun.xml.ws.rm.protocol.*;
-
-import javax.xml.bind.annotation.*;
+import com.sun.xml.ws.rm.protocol.AbstractSequence;
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAnyAttribute;
+import javax.xml.bind.annotation.XmlAnyElement;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
 /**
  * SequenceElement is based on a JAXB Schema Compiler generated class that serializes
@@ -60,35 +65,27 @@ import java.util.Map;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "SequenceType")
-@XmlRootElement(name = "Sequence",namespace="http://schemas.xmlsoap.org/ws/2005/02/rm")
+@XmlRootElement(name = "Sequence", namespace = "http://schemas.xmlsoap.org/ws/2005/02/rm")
 public class SequenceElement extends AbstractSequence {
-
 
     @XmlElement(name = "Identifier", namespace = "http://schemas.xmlsoap.org/ws/2005/02/rm")
     protected Identifier identifier;
-
     @XmlElement(name = "MessageNumber", namespace = "http://schemas.xmlsoap.org/ws/2005/02/rm")
     protected Integer messageNumber;
-
     @XmlElement(name = "LastMessage", namespace = "http://schemas.xmlsoap.org/ws/2005/02/rm")
     protected LastMessage lastMessage;
-
     @XmlAnyElement(lax = true)
     protected List<Object> any;
-
     @XmlAnyAttribute
     private Map<QName, String> otherAttributes = new HashMap<QName, String>();
 
-
-    public SequenceElement(){
-        
+    public SequenceElement() {
     }
 
-
-    public String getLocalPart(){
-        return new String ( "Sequence");
+    @Override
+    public String getLocalPart() {
+        return new String("Sequence");
     }
-
 
     /**
      * Mutator for the Id property.  Maps to the Identifier property in the underlying
@@ -96,10 +93,10 @@ public class SequenceElement extends AbstractSequence {
      * 
      * @param id The new value.
      */
-    public void setId(String id) {
-        Identifier identifier = new Identifier();
-        identifier.setValue(id);
-        setIdentifier(identifier);
+    public void setId(String idString) {
+        Identifier newId = new Identifier();
+        newId.setValue(idString);
+        setIdentifier(newId);
     }
 
     /**
@@ -117,6 +114,7 @@ public class SequenceElement extends AbstractSequence {
      * 
      * @param l The Message number.
      */
+    @Override
     public void setNumber(int l) {
         setMessageNumber(l);
     }
@@ -127,6 +125,7 @@ public class SequenceElement extends AbstractSequence {
      * 
      * @return The Message number.
      */
+    @Override
     public int getNumber() {
         return getMessageNumber();
     }
@@ -137,14 +136,13 @@ public class SequenceElement extends AbstractSequence {
      *
      * @param last The value of the property.
      */
-    public void setLast(boolean  last) {
+    public void setLast(boolean last) {
         if (last) {
             setLastMessage(new LastMessage());
         } else {
             setLastMessage(null);
         }
     }
-
 
     /**
      * Accessor for the Last property that maps to the LastMessage property in the
@@ -241,8 +239,6 @@ public class SequenceElement extends AbstractSequence {
         return otherAttributes;
     }
 
-
-   
     /**
      * <p>Java class for anonymous complex type.  That acts as a
      * placeholder in the <code>lastMessage</code> field.
@@ -253,13 +249,9 @@ public class SequenceElement extends AbstractSequence {
     public static class LastMessage {
     }
 
+    @Override
     public String toString() {
-
-           return com.sun.xml.ws.rm.protocol.Messages.SEQUENCE_TOSTRING_STRING
-                   .format(getId(),
-                           getNumber(),
-                           getLast() ? "true" : "false");
-            }
-    
+        return LocalizationMessages.WSRM_4005_SEQUENCE_TOSTRING_STRING(getId(), getNumber(), getLast() ? "true" : "false");
+    }
 }
 

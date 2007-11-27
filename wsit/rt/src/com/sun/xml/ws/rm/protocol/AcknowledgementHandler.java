@@ -48,6 +48,7 @@ import com.sun.xml.ws.rm.RMVersion;
 import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
 
+import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -163,7 +164,7 @@ public class AcknowledgementHandler {
         } catch (InvalidMessageNumberException e) {
             //this can happen if the sequence has been resurrected
             //after a restart.
-            logger.fine(com.sun.xml.ws.rm.protocol.Messages.ACKNOWLEDGEMENT_MESSAGE.format(seq.getId(), i));
+            logger.fine(LocalizationMessages.WSRM_4001_ACKNOWLEDGEMENT_MESSAGE(seq.getId(), i));
         }
     }
 }
