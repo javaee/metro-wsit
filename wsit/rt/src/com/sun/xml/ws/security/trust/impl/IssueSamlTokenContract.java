@@ -275,12 +275,17 @@ public abstract class IssueSamlTokenContract implements com.sun.xml.ws.api.secur
             byte[] key = WSTrustUtil.generateRandomSecret(keySize/8);
             final BinarySecret serverBS = eleFac.createBinarySecret(key, wstVer.getNonceBinarySecretTypeURI());
             serverEntropy = eleFac.createEntropy(serverBS);
-            proofToken.setProofTokenType(RequestedProofToken.COMPUTED_KEY_TYPE);
             
             // compute the secret key
             try {
-                proofToken.setComputedKey(URI.create(wstVer.getCKPSHA1algorithmURI()));
-                key = SecurityUtil.P_SHA1(clientEntr, key, keySize/8);
+                if (clientEntr != null && clientEntr.length > 0){
+                    proofToken.setComputedKey(URI.create(wstVer.getCKPSHA1algorithmURI()));
+                    proofToken.setProofTokenType(RequestedProofToken.COMPUTED_KEY_TYPE);
+                    key = SecurityUtil.P_SHA1(clientEntr, key, keySize/8);
+                }else{
+                    proofToken.setProofTokenType(RequestedProofToken.BINARY_SECRET_TYPE);
+                    proofToken.setBinarySecret(serverBS);
+                }
             } catch (Exception ex){
                 log.log(Level.SEVERE, 
                         LogStringsMessages.WST_0013_ERROR_SECRET_KEY(wstVer.getCKPSHA1algorithmURI(), keySize, appliesTo), ex);
