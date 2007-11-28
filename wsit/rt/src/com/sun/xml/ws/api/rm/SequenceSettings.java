@@ -45,9 +45,10 @@
 package com.sun.xml.ws.api.rm;
 
 import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.rm.RMConstants;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.rm.RMVersion;
 import java.io.Serializable;
+import java.net.URI;
 
 /**
  * Initialization data for a sequence, which can be persisted
@@ -58,84 +59,89 @@ public interface SequenceSettings extends Serializable {
     /**
      * AcksTo URI for the sequence
      */
-    public abstract String getAcksTo();
+    public String getAcksTo();
+
+    /**
+     * Addressing version for the sequence
+     */
+    public AddressingVersion getAddressingVersion();
+
+    /**
+     * Accessor for <code>annonymousAddressingUri</code> property.
+     */
+    public URI getAnonymousAddressingUri();
 
     /**
      * For OutboundSequences, determines whether destination guarantees ordered delivery.
      */
-    public abstract boolean isOrdered();
+    public boolean isOrdered();
 
     /**
      * Number of milliseconds after which destination may terminate sequence.
      */
-    public abstract long getInactivityTimeout();
+    public long getInactivityTimeout();
 
     /**
      * Indicates whether flow control is enabled.
      */
-    public abstract boolean isFlowControlRequired();
+    public boolean isFlowControlRequired();
 
     /**
      * Number of messages that destination will buffer pending delivery.
      */
-    public abstract int getBufferSize();
+    public int getBufferSize();
 
     /**
      * The SOAPVersion which will be passed on to the protocol elements
      * populated from the Pipe
      */
-    public abstract SOAPVersion getSoapVersion();
+    public SOAPVersion getSoapVersion();
 
     /**
      * Length of time between resends
      */
-    public abstract long getResendInterval();
+    public long getResendInterval();
 
     /**
      * Length of time between ackRequests.
      */
-    public abstract long getAckRequestInterval();
+    public long getAckRequestInterval();
 
     /**
      * Lenth of time that RMClientPipe.preDestroy will block while
      * waiting for unacknowledged messages to arrive.
      */
-    public abstract long getCloseTimeout();
+    public long getCloseTimeout();
 
     /**
      * Do we suppress duplicates at the endpoint?
      */
-    public abstract boolean isAllowDuplicatesEnabled();
-
-    /**
-     * RMConstants enum value using correct addressing version.
-     */
-    public abstract RMConstants getConstants();
+    public boolean isAllowDuplicatesEnabled();
 
     /**
      * SequenceId for the sequence.  This field is not assumed to be populated
      * in the (@link SequenceConfig} subclass.
      */
-    public abstract String getSequenceId();
+    public String getSequenceId();
 
     /**
      * SequenceId for the companion sequence, if any.  This field is not assumed 
      * to be populated in the (@link SequenceConfig} subclass.
      */
-    public abstract String getCompanionSequenceId();
+    public String getCompanionSequenceId();
 
     /**
      * The RM version if it is WSRM 1.0 or WSRM 1.1
      */
-    public abstract RMVersion getRMVersion();
+    public RMVersion getRMVersion();
 
     /**
      * SequenceSTR setting from Policy.
      */
-    public abstract boolean isSequenceSTRRequired();
+    public boolean isSequenceSTRRequired();
 
     /**
      * SequenceTransportSecurity setting from Policy.
      */
-    public abstract boolean isSequenceTransportSecurityRequired();
+    public boolean isSequenceTransportSecurityRequired();
 }

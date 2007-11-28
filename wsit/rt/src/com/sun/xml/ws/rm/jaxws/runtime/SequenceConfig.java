@@ -44,10 +44,7 @@
 package com.sun.xml.ws.rm.jaxws.runtime;
 
 import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
-import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
-import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.rm.SequenceSettings;
 import com.sun.xml.ws.policy.AssertionSet;
@@ -57,10 +54,11 @@ import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.policy.jaxws.WSDLPolicyMapWrapper;
-import com.sun.xml.ws.rm.RMConstants;
+import com.sun.xml.ws.rm.Constants;
 import com.sun.xml.ws.rm.RMException;
 import com.sun.xml.ws.rm.RMVersion;
 
+import java.net.URI;
 import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceException;
 import java.util.Iterator;
@@ -73,13 +71,25 @@ import java.util.Iterator;
  */
 public class SequenceConfig implements SequenceSettings {
 
+    private static final QName ORDERED_QNAME = new QName(Constants.sunVersion, "Ordered");
+    private static final QName ALLOW_DUPLICATES_QNAME = new QName(Constants.sunVersion, "AllowDuplicates");
+    private static final QName RESEND_INTERVAL_QNAME = new QName(Constants.sunClientVersion, "ResendInterval");
+    private static final QName ACK_REQUEST_INTERVAL_QNAME = new QName(Constants.sunClientVersion, "AckRequestInterval");
+    private static final QName CLOSE_TIMEOUT_QNAME = new QName(Constants.sunClientVersion, "CloseTimeout");
+    private static final QName RM_FLOW_CONTROL_QNAME = new QName(Constants.microsoftVersion, "RmFlowControl");
+    private static final QName MAX_RECEIVE_BUFFER_SIZE_QNAME = new QName(Constants.microsoftVersion, "MaxReceiveBufferSize");
+    private static final QName MILLISECONDS_ATTRIBUTE_QNAME = new QName("", "Milliseconds");
+    /**
+     * Instance variables
+     */
     private String acksTo;
     private long ackRequestInterval;
+    private AddressingVersion addressingVersion;
+    private URI anonymousAddressingUri;
     private boolean allowDuplicatesEnabled;
     private int bufferSize;
     private long closeTimeout;
     private String companionSequenceId;
-    private RMConstants constants;
     private boolean flowControlRequired;
     private boolean ordered;
     private long inactivityTimeout;
@@ -94,38 +104,38 @@ public class SequenceConfig implements SequenceSettings {
      * Constructor initializes with default values.
      */
     public SequenceConfig() {
-        //WS-Addressing version being used
-        constants = RMConstants.getRMConstants(AddressingVersion.W3C);
-        //Use anonymous URI for acksTo.  Its value depends on 
-        acksTo = constants.getAnonymousURI().toString();
-
-        ordered = false;
-        allowDuplicatesEnabled = false;
-        inactivityTimeout = 600000;
-        flowControlRequired = false;
-        bufferSize = 32;
-        soapVersion = SOAPVersion.SOAP_12;
-
-        ackRequestInterval = 0;
-        resendInterval = 0;
-
-        closeTimeout = 0; //infinite
-        sequenceSTRRequired = false;
-        sequenceTransportSecurityRequired = false;
+        this(null, null, null);
     }
 
-    public SequenceConfig(WSDLPort port, WSBinding wsbinding) {
-        this();
+    public SequenceConfig(WSDLPort port, AddressingVersion addressing, SOAPVersion soap) {
+        this.ackRequestInterval = 0;
+        this.addressingVersion = (addressing != null)? addressing : AddressingVersion.W3C;
+        this.acksTo = this.addressingVersion.anonymousUri;
+        
+        try {
+            this.anonymousAddressingUri = new URI(this.addressingVersion.anonymousUri);
+        } catch (Throwable e) {
+            // TODO axception logging
+            throw new WebServiceException(e);
+        }
+
+        this.allowDuplicatesEnabled = false;
+        this.bufferSize = 32;
+        this.closeTimeout = 0; //infinite
+        this.flowControlRequired = false;
+        this.inactivityTimeout = 600000;
+        this.ordered = false;
+        this.resendInterval = 0;
+        this.sequenceSTRRequired = false;
+        this.sequenceTransportSecurityRequired = false;
+        this.soapVersion = (soap != null) ? soap : SOAPVersion.SOAP_12;
 
         if (port != null) {
-            WSDLBoundPortType binding = port.getBinding();
-            WSDLModel model = binding.getOwner();
-            PolicyMap policyMap = model.getExtension(WSDLPolicyMapWrapper.class).getPolicyMap();
-            this.constants = RMConstants.getRMConstants(wsbinding.getAddressingVersion());
-            this.soapVersion = binding.getBindingId().getSOAPVersion();
+            PolicyMap policyMap = port.getBinding().getOwner().getExtension(WSDLPolicyMapWrapper.class).getPolicyMap();
             try {
                 init(port, policyMap);
             } catch (RMException e) {
+                // TODO axception logging
                 throw new WebServiceException(e);
             }
         }
@@ -134,25 +144,26 @@ public class SequenceConfig implements SequenceSettings {
     /**
      * Copies the members of a specified SequenceSettings
      */
-    public SequenceConfig(SequenceSettings toCopy) {
+    public SequenceConfig(SequenceSettings settings) {
         // TODO: should we also copy these?:
         // this.sequenceId;
         // this.companionSequenceId;
 
-        this.ackRequestInterval = toCopy.getAckRequestInterval();
-        this.acksTo = toCopy.getAcksTo();
-        this.allowDuplicatesEnabled = toCopy.isAllowDuplicatesEnabled();
-        this.bufferSize = toCopy.getBufferSize();
-        this.closeTimeout = toCopy.getCloseTimeout();
-        this.constants = toCopy.getConstants();
-        this.flowControlRequired = toCopy.isFlowControlRequired();
-        this.inactivityTimeout = toCopy.getInactivityTimeout();
-        this.ordered = toCopy.isOrdered();
-        this.resendInterval = toCopy.getResendInterval();
-        this.rmVersion = toCopy.getRMVersion();
-        this.soapVersion = toCopy.getSoapVersion();
-        this.sequenceSTRRequired = toCopy.isSequenceSTRRequired();
-        this.sequenceTransportSecurityRequired = toCopy.isSequenceTransportSecurityRequired();
+        this.ackRequestInterval = settings.getAckRequestInterval();
+        this.acksTo = settings.getAcksTo();
+        this.addressingVersion = settings.getAddressingVersion();        
+        this.allowDuplicatesEnabled = settings.isAllowDuplicatesEnabled();
+        this.anonymousAddressingUri = settings.getAnonymousAddressingUri();
+        this.bufferSize = settings.getBufferSize();
+        this.closeTimeout = settings.getCloseTimeout();
+        this.flowControlRequired = settings.isFlowControlRequired();
+        this.inactivityTimeout = settings.getInactivityTimeout();
+        this.ordered = settings.isOrdered();
+        this.resendInterval = settings.getResendInterval();
+        this.rmVersion = settings.getRMVersion();
+        this.soapVersion = settings.getSoapVersion();
+        this.sequenceSTRRequired = settings.isSequenceSTRRequired();
+        this.sequenceTransportSecurityRequired = settings.isSequenceTransportSecurityRequired();
     }
 
     /**
@@ -162,6 +173,24 @@ public class SequenceConfig implements SequenceSettings {
      */
     public String getAcksTo() {
         return acksTo;
+    }
+
+    /**
+     * Accessor for <code>addressingVersion</code> property.
+     *
+     * @return The value of the property.
+     */
+    public AddressingVersion getAddressingVersion() {
+        return addressingVersion;
+    }
+
+    /**
+     * Accessor for <code>annonymousAddressingUri</code> property.
+     *
+     * @return The value of the property.
+     */
+    public URI getAnonymousAddressingUri() {
+        return anonymousAddressingUri;
     }
 
     /**
@@ -213,12 +242,9 @@ public class SequenceConfig implements SequenceSettings {
         else {
             return SOAPVersion.SOAP_12;
         }
+
     }
 
-// TODO remove unused method    
-//    public void setSoapVersion(SOAPVersion soapVersion) {
-//        this.soapVersion = soapVersion;
-//    }
     /**
      * Accessor for flow control field
      *
@@ -246,14 +272,6 @@ public class SequenceConfig implements SequenceSettings {
         return ackRequestInterval;
     }
 
-    /**
-     * Returns the RMConstants based on the AddressingVersion
-     * @return RMConstants
-     */
-    public RMConstants getConstants() {
-        return constants;
-    }
-
     public boolean isAllowDuplicatesEnabled() {
         return allowDuplicatesEnabled;
     }
@@ -262,7 +280,7 @@ public class SequenceConfig implements SequenceSettings {
         return sequenceId;
     }
 
-    // TODO: remove if possible
+// TODO: remove if possible
     public void setSequenceId(String id) {
         this.sequenceId = id;
     }
@@ -271,7 +289,7 @@ public class SequenceConfig implements SequenceSettings {
         return companionSequenceId;
     }
 
-    // TODO: remove if possible
+// TODO: remove if possible
     public void setCompanionSequenceId(String id) {
         this.companionSequenceId = id;
     }
@@ -298,65 +316,56 @@ public class SequenceConfig implements SequenceSettings {
                 if (endpointScopeKey != null) {
 
                     AssertionSet policyAssertionSet = null;
-
                     Policy policy = policyMap.getEndpointEffectivePolicy(endpointScopeKey);
                     if (policy != null) {
                         for (AssertionSet set : policy) {
                             policyAssertionSet = set;
                             break;
                         }
+
                     }
 
                     if (policyAssertionSet != null) {
-
-                        PolicyAssertion rmAssertion = null;
-                        PolicyAssertion flowAssertion = null;
-
                         for (PolicyAssertion assertion : policyAssertionSet) {
                             QName qname = assertion.getName();
 
-                            if (qname.equals(RMVersion.WSRM10.getRMPolicyAssertionQName())) {
+                            if (RMVersion.WSRM10.getRMPolicyAssertionQName().equals(qname)) {
                                 rmVersion = RMVersion.WSRM10;
-                                rmAssertion = assertion;
-                            } else if (qname.equals(RMVersion.WSRM11.getRMPolicyAssertionQName())) {
+                                handleRMAssertion(assertion);
+                            } else if (RMVersion.WSRM11.getRMPolicyAssertionQName().equals(qname)) {
                                 rmVersion = RMVersion.WSRM11;
-                                rmAssertion = assertion;
-                            } else if (qname.equals(constants.getRMFlowControlQName())) {
-                                flowAssertion = assertion;
-                            } else if (qname.equals(constants.getOrderedQName())) {
+                                handleRMAssertion(assertion);
+                            } else if (RM_FLOW_CONTROL_QNAME.equals(qname)) {
+                                handleFlowAssertion(assertion);
+                            } else if (ORDERED_QNAME.equals(qname)) {
                                 ordered = true;
-                            } else if (qname.equals(constants.getAllowDuplicatesQName())) {
+                            } else if (ALLOW_DUPLICATES_QNAME.equals(qname)) {
                                 allowDuplicatesEnabled = true;
-                            } else if (qname.equals(constants.getAckRequestIntervalQName())) {
-                                String num = assertion.getAttributeValue(new QName("", "Milliseconds"));
+                            } else if (ACK_REQUEST_INTERVAL_QNAME.equals(qname)) {
+                                String num = assertion.getAttributeValue(MILLISECONDS_ATTRIBUTE_QNAME);
                                 if (num != null) {
                                     ackRequestInterval = Long.parseLong(num);
                                 }
-                            } else if (qname.equals(constants.getResendIntervalQName())) {
-                                String num = assertion.getAttributeValue(new QName("", "Milliseconds"));
+
+                            } else if (RESEND_INTERVAL_QNAME.equals(qname)) {
+                                String num = assertion.getAttributeValue(MILLISECONDS_ATTRIBUTE_QNAME);
                                 if (num != null) {
                                     resendInterval = Long.parseLong(num);
                                 }
-                            } else if (qname.equals(constants.getCloseTimeoutQName())) {
-                                String num = assertion.getAttributeValue(new QName("", "Milliseconds"));
+
+                            } else if (CLOSE_TIMEOUT_QNAME.equals(qname)) {
+                                String num = assertion.getAttributeValue(MILLISECONDS_ATTRIBUTE_QNAME);
                                 if (num != null) {
                                     closeTimeout = Long.parseLong(num);
                                 }
-                            } else if (qname.equals(RMVersion.WSRM11.getSequenceSTRAssertionQName())) {
+
+                            } else if (RMVersion.WSRM11.getSequenceSTRAssertionQName().equals(qname)) {
                                 sequenceSTRRequired = true;
-                            } else if (qname.equals(RMVersion.WSRM11.getSequenceTransportSecurityAssertionQName())) {
+                            } else if (RMVersion.WSRM11.getSequenceTransportSecurityAssertionQName().equals(qname)) {
                                 sequenceTransportSecurityRequired = true;
                             } else {
                             //TODO handle error condition here
                             }
-                        }
-
-                        if (rmAssertion != null) {
-                            handleRMAssertion(rmAssertion);
-                        }
-
-                        if (flowAssertion != null) {
-                            handleFlowAssertion(flowAssertion);
                         }
                     }
                 }
@@ -364,10 +373,10 @@ public class SequenceConfig implements SequenceSettings {
         } catch (PolicyException e) {
             e.printStackTrace();
         }
+
     }
 
     private void handleRMAssertion(PolicyAssertion rmAssertion) {
-
         Iterator<PolicyAssertion> it = rmAssertion.getNestedAssertionsIterator();
 
         while (it != null && it.hasNext()) {
@@ -379,20 +388,19 @@ public class SequenceConfig implements SequenceSettings {
                 if (num != null) {
                     inactivityTimeout = Long.parseLong(num);
                 }
-            //TODO - disregard other nested assertions for now.
-            //possibly revisit this later
+//TODO - disregard other nested assertions for now.
+//possibly revisit this later
             }
         }
     }
 
     private void handleFlowAssertion(PolicyAssertion flowAssertion) {
-
         flowControlRequired = true;
 
         Iterator<PolicyAssertion> it = flowAssertion.getNestedAssertionsIterator();
         while (it != null && it.hasNext()) {
             PolicyAssertion assertion = it.next();
-            if (assertion.getName().equals(constants.getMaxReceiveBufferSizeQName())) {
+            if (MAX_RECEIVE_BUFFER_SIZE_QNAME.equals(assertion.getName())) {
                 bufferSize = Integer.parseInt(assertion.getValue());
                 break;
             }

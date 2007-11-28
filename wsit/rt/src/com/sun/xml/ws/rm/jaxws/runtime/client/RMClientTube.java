@@ -48,6 +48,7 @@ import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
@@ -63,7 +64,6 @@ import com.sun.xml.ws.rm.Constants;
 import com.sun.xml.ws.rm.MessageSender;
 import com.sun.xml.ws.rm.RMException;
 import com.sun.xml.ws.rm.RMMessage;
-import com.sun.xml.ws.rm.jaxws.runtime.InboundMessageProcessor;
 import com.sun.xml.ws.rm.jaxws.runtime.TubeBase;
 import com.sun.xml.ws.rm.jaxws.util.LoggingHelper;
 import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
@@ -117,7 +117,7 @@ public final class RMClientTube extends TubeBase {
      * by the clone operation.
      */
     /*Store the MEP of the current exchange*/
-    private Boolean isOneWayMessage = false;
+    private boolean isOneWayMessage = false;
     /* TubelineHelper to assist in resending of messages */
     private TubelineHelper tubelineHelper;
 
@@ -179,7 +179,7 @@ public final class RMClientTube extends TubeBase {
                 throw new RMException(LocalizationMessages.WSRM_2017_UNCHANGEABLE_ENDPOINT_ADDRESS());
             }
         } else {
-            if (getConfig().getConstants().getAddressingVersion() == AddressingVersion.MEMBER) {
+            if (getConfig().getAddressingVersion() == AddressingVersion.MEMBER) {
                 //WSRM2008: The Reliable Messaging Client does not support the Member submission addressing version, which is used by the endpoint.//
                 throw new RMException(LocalizationMessages.WSRM_2008_UNSUPPORTED_ADDRESSING_VERSION());
             }
@@ -191,84 +191,55 @@ public final class RMClientTube extends TubeBase {
                 dest = getWsdlPort().getAddress().toString();
             }
 
-            String acksTo = ProtocolMessageReceiver.getAcksTo();
-
-            //use helper function to speilunk the metadata and find out if the port
-            //has a two-way operation.
-            boolean twoWay = checkForTwoWayOperation();
-
             URI destURI;
-            URI acksToURI;
-
             try {
                 destURI = new URI(dest);
             } catch (URISyntaxException e) {
-                // TODO nest exception?
-                //Invalid destination URI   {0}//
-                throw new RMException(LocalizationMessages.WSRM_2018_INVALID_DEST_URI(dest));
+                throw new RMException(LocalizationMessages.WSRM_2018_INVALID_DEST_URI(dest), e);
             }
 
-            try {
-                acksToURI = new URI(acksTo);
-            } catch (URISyntaxException e) {
-                // TODO nest exception?
-                //Invalid acksTo URI   {0}//
-                throw new RMException(LocalizationMessages.WSRM_2019_INVALID_ACKS_TO_URI(acksTo));
-            }
-
-            ClientOutboundSequence specifiedOutboundSequence =
-                    (ClientOutboundSequence) packet.proxy.getRequestContext().get(Constants.sequenceProperty);
+            ClientOutboundSequence specifiedOutboundSequence = (ClientOutboundSequence) packet.proxy.getRequestContext().get(Constants.sequenceProperty);
             if (specifiedOutboundSequence != null) {
                 outboundSequence = specifiedOutboundSequence;
             } else {
                 //we need to connect to the back end.
-                outboundSequence = new ClientOutboundSequence(getConfig());
-
+                JAXBElement<SecurityTokenReferenceType> str = null;
                 if (secureReliableMessaging) {
                     try {
-                        JAXBElement<SecurityTokenReferenceType> str = securityPipe.startSecureConversation(packet);
-                        outboundSequence.setSecurityTokenReference(str);
-                        if (str == null) {
-                            //Without this, no security configuration
-                            //that does not include SC is allowed.
-                            secureReliableMessaging = false;
-                        }
+                        str = securityPipe.startSecureConversation(packet);
                     } catch (Exception e) {
+                    // TODO: handle exception
+                    }
+                    if (str == null) {
+                        // Without this or if there was exception, no security configuration that does not include SC is allowed.
                         secureReliableMessaging = false;
-                        outboundSequence.setSecurityTokenReference(null);
                     }
                 }
 
-                outboundSequence.setSecureReliableMessaging(secureReliableMessaging);
-                outboundSequence.registerProtocolMessageSender(new ProtocolMessageSender(
+                outboundSequence = new ClientOutboundSequence(
+                        getConfig(), 
+                        str, 
+                        destURI, 
+                        getConfig().getAnonymousAddressingUri(), 
+                        checkForTwoWayOperation(),
+                        new ProtocolMessageSender(
                         RMSource.getRMSource().getInboundMessageProcessor(),
                         getConfig(),
                         getMarshaller(),
                         getUnmarshaller(),
-                        getWsdlPort(),
                         next,
                         packet));
 
-                outboundSequence.connect(destURI, acksToURI, twoWay);
-                inboundSequence = (ClientInboundSequence) outboundSequence.getInboundSequence();
-
-                //set a Session object in BindingProvider property allowing user to close
-                //the sequence
-                ClientSession.setSession(this.proxy, new ClientSession(outboundSequence.getId(), this));
-
                 RMSource.getRMSource().addOutboundSequence(outboundSequence);
-
-                //if the message in the packet was sent by RMSource.createSequence,
-                //put the sequence in a packet property.  The process method, that
-                //called us will find it there and return it to the caller.
-                String reqUri = packet.getMessage().getPayloadNamespaceURI();
-                if (CREATE_SEQUENCE_URI.equals(reqUri)) {
-                    packet.invocationProperties.put(Constants.createSequenceProperty, outboundSequence);
-                }
-
                 //make this available to the client
                 //FIXME - Can this work?
                 packet.proxy.getRequestContext().put(Constants.sequenceProperty, outboundSequence);
+
+                inboundSequence = (ClientInboundSequence) outboundSequence.getInboundSequence();
+                //set a Session object in BindingProvider property allowing user to close
+                //the sequence
+                ClientSession.setSession(proxy, new ClientSession(outboundSequence.getId(), this));
+
             }
         }
     }
@@ -306,8 +277,6 @@ public final class RMClientTube extends TubeBase {
 
         //Add to OutboundSequence and include RM headers according to the
         //state of the RMSource
-        message = handleOutboundMessage(outboundSequence, requestPacket);
-
         if (!requestPacket.getMessage().isOneWay(getWsdlPort())) {
             //ClientOutboundSequence needs to know this.  If this flag is true,
             //messages stored in the sequence cannot be discarded when they are acked.
@@ -318,11 +287,11 @@ public final class RMClientTube extends TubeBase {
             //The behavior of the retry loop also varies according to whether the message
             //is one-way.  If it is, the retry loop needs wait for acks.  If not, the loop
             //can exit if an application response has been received.
-            message.isTwoWayRequest = true;
+            message = handleOutboundMessage(outboundSequence, requestPacket, true, false);
             this.isOneWayMessage = false;
         } else {
             //TODO eliminate one of these flags
-            message.isTwoWayRequest = false;
+            message = handleOutboundMessage(outboundSequence, requestPacket, false, false);
             this.isOneWayMessage = true;
         }
 
@@ -381,10 +350,9 @@ public final class RMClientTube extends TubeBase {
         }
     }
 
-    public 
-    @NotNull
     @Override
-    NextAction processRequest( Packet request) {
+    @NotNull
+    public NextAction processRequest(Packet request) {
         RMMessage rmMessage = null;
         try {
             if (tubelineHelper == null) {
@@ -394,16 +362,13 @@ public final class RMClientTube extends TubeBase {
                 initialize(request);
 
                 //If the request is being sent by RMSource.createSequence, we are done.
-                Object seq = request.invocationProperties.get(Constants.createSequenceProperty);
-
-                if (seq != null) {
-                    request.invocationProperties.put(Constants.createSequenceProperty, null);
-                    request.proxy.getRequestContext().put(Constants.sequenceProperty, seq);
+                if (CREATE_SEQUENCE_URI.equals(request.getMessage().getPayloadNamespaceURI())) {
+                    request.proxy.getRequestContext().put(Constants.sequenceProperty, outboundSequence);
                     //TODO..return something reasonable that will not cause disp.invoke
                     //to throw an exception here.  Other than that, we don't care about the
                     //response message.  We are only interested in the sequence that has been
                     //stored in the requestcontext.
-                    Message mess = com.sun.xml.ws.api.message.Messages.createEmpty(getConfig().getSoapVersion());
+                    Message mess = Messages.createEmpty(getConfig().getSoapVersion());
                     request.setMessage(mess);
                     doReturnWith(request);
                 }
@@ -419,38 +384,35 @@ public final class RMClientTube extends TubeBase {
             }
 
             return doSuspend();
-        } catch ( RMException e) {
+        } catch (RMException e) {
             Message faultMessage = e.getFaultMessage();
             if (faultMessage != null) {
                 try {
-                    Packet ret = new Packet(com.sun.xml.ws.api.message.Messages.create(faultMessage.readAsSOAPMessage()));
+                    Packet ret = new Packet(Messages.create(faultMessage.readAsSOAPMessage()));
                     ret.invocationProperties.putAll(request.invocationProperties);
 
                     return doReturnWith(ret);
-                } catch ( SOAPException e1) {
+                } catch (SOAPException e1) {
                     // TODO handle exception
                     return doThrow(new WebServiceException(e));
                 }
             } else {
                 return processException(e);
             }
-        } catch ( Throwable ee) {
+        } catch (Throwable ee) {
             //WSRM2006: Unexpected  Exception in RMClientPipe.process.
             LOGGER.log(Level.SEVERE, LocalizationMessages.WSRM_2006_UNEXPECTED_PROCESS_EXCEPTION(), ee);
             return processException(new WebServiceException(ee));
         }
-
-
     }
 
     /**
      * Use the default implementation of processReponse.  This will be invoked
      * by CompletionCallback in TubelineHelper.
      */
-    public 
     @NotNull
     @Override
-    NextAction processResponse( Packet response) {
+    public NextAction processResponse(Packet response) {
         if (response != null) {
             return doReturnWith(response);
         } else if (tubelineHelper != null) {
@@ -467,10 +429,9 @@ public final class RMClientTube extends TubeBase {
      * in the event that the Exception is on that needs to be returned to application
      * 2. Exceptions caught in initialize() and prepareRequest()
      */
-    public 
     @NotNull
     @Override
-    NextAction processException( Throwable t) {
+    public NextAction processException(Throwable t) {
         if (!(t instanceof WebServiceException)) {
             t = new WebServiceException(t);
         }
@@ -491,13 +452,11 @@ public final class RMClientTube extends TubeBase {
         //Store the request packet and message for this helper.
         private Packet packet;
         private RMMessage message;
-        public Throwable throwable;
-        private boolean sent;
+        private Throwable throwable;
 
         public TubelineHelper(Packet packet, RMMessage message) {
             this.message = message;
             this.packet = packet;
-            this.sent = false;
 
             parentFiber = Fiber.current();
             if (parentFiber == null) {
@@ -528,7 +487,9 @@ public final class RMClientTube extends TubeBase {
             TubelineHelperCallback() {
             }
 
-            public void onCompletion(@NotNull Packet response) {
+            public void onCompletion(
+                    
+                    @NotNull Packet response) {
                 try {
                     if (response != null) {
                         //Perform operations in the RMSource according to the contents of
@@ -537,7 +498,7 @@ public final class RMClientTube extends TubeBase {
 
                         RMMessage rmMessage = null;
                         if (responseMessage != null) {
-                            rmMessage = handleInboundMessage(response);
+                            rmMessage = handleInboundMessage(response, RMSource.getRMSource());
                         }
 
                         //if a diagnostic / debugging filter has been set, allow it to inspect
@@ -566,7 +527,7 @@ public final class RMClientTube extends TubeBase {
                         //time to release the request being retained on the OutboundSequence.
                         //This will also result in the state of the message being set to
                         //"complete" so the retry loop will exit.
-                        if (message.isTwoWayRequest) {
+                        if (message.isTwoWayRequest()) {
                             outboundSequence.acknowledgeResponse(message.getMessageNumber());
                         }
                     }
@@ -626,10 +587,5 @@ public final class RMClientTube extends TubeBase {
                 }
             }
         }
-    }
-
-    @Override
-    protected InboundMessageProcessor getMessageProcessor() {
-        return RMSource.getRMSource().getInboundMessageProcessor();
     }
 }

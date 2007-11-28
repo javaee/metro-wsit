@@ -1,5 +1,5 @@
 /*
- * $Id: RMMessage.java,v 1.2 2007-11-27 15:40:58 m_potociar Exp $
+ * $Id: RMMessage.java,v 1.3 2007-11-28 19:36:13 m_potociar Exp $
  */
 
 /*
@@ -104,12 +104,12 @@ public final class RMMessage {
      * a two-way operation.  ClientOutboundSequence with anonymous
      * AcksTo has to handle Acknowledgements differently in this case.
      */
-    public boolean isTwoWayRequest = false;
+    private boolean twoWayRequest = false;
     /**
      * Set in empty message used to piggyback response 
      * headers on a one-way response.
      */
-    public boolean isOneWayResponse = false;
+    private boolean oneWayResponse = false;
     /**
      * Instance of TublineHelper used to resend messages.
      */
@@ -123,6 +123,12 @@ public final class RMMessage {
         this.version = version;
     }
 
+    public RMMessage(Message message, RMVersion version, boolean isOneWayResponse, boolean isTwoWayRequest) {
+        this(message, version);
+        this.oneWayResponse = isOneWayResponse;
+        this.twoWayRequest = isTwoWayRequest;
+    }
+    
     /**
      * Sets  the value of the sequence field.  Used by Sequence methods when
      * adding message to the sequence.
@@ -138,6 +144,14 @@ public final class RMMessage {
      */
     public Sequence getSequence() {
         return sequence;
+    }
+
+    public boolean isOneWayResponse() {
+        return oneWayResponse;
+    }
+
+    public boolean isTwoWayRequest() {
+        return twoWayRequest;
     }
 
     /**
@@ -206,7 +220,7 @@ public final class RMMessage {
             return null;
         }
 
-        return message.getHeaders().get(version.getNamespaceURI(), name, true);
+        return message.getHeaders().get(version.namespaceUri, name, true);
     }
 
     /**

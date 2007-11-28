@@ -50,7 +50,6 @@ import com.sun.xml.ws.api.message.Headers;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.rm.CloseSequenceException;
 import com.sun.xml.ws.rm.CreateSequenceException;
@@ -93,33 +92,29 @@ import javax.xml.namespace.QName;
 public class ProtocolMessageSender {
 
     /**
-     * Helper to process InboundMessages.
+     * TODO javadoc
      */
-    private InboundMessageProcessor processor;
+    private SequenceConfig config;
+    /**
+     * TODO javadoc
+     */
+    private final ProtocolMessageHelper helper;
     /**
      * The marshaller to write the messages
      */
     private Marshaller marshaller;
     /**
+     * TODO javadoc
+     */
+    private Packet packet;
+    /**
+     * Helper to process InboundMessages.
+     */
+    private InboundMessageProcessor processor;
+    /**
      * The unmarshaller to read the messages
      */
     private Unmarshaller unmarshaller;
-    /**
-     * Properties like the BindingProvider to associate with the
-     * request and response context
-     * contentNegotiation etc can be obtained from
-     * the packet
-     */
-    private Packet packet;
-    /*
-     * WSDLPort for use by addressing module when assigning headers.
-     */
-    private WSDLPort port;
-    /*
-     * WSBinding for use by addressing module when assigning headers.
-     */
-    private SequenceConfig config;
-    private final ProtocolMessageHelper helper;
 
     /**
      * Public constructor.  Initialize the fields
@@ -129,12 +124,10 @@ public class ProtocolMessageSender {
             SequenceConfig config,
             Marshaller marshaller,
             Unmarshaller unmarshaller,
-            WSDLPort port,
             Tube nextTube,
             Packet packet) {
 
         this.processor = processor;
-        this.port = port;
         this.marshaller = marshaller;
         this.unmarshaller = unmarshaller;
         this.packet = packet;
@@ -158,13 +151,13 @@ public class ProtocolMessageSender {
             Message request = null;
             if (config.getRMVersion() == RMVersion.WSRM10) {
                 request = Messages.create(
-                        config.getRMVersion().getJAXBContext(), 
-                        ((com.sun.xml.ws.rm.v200502.CreateSequenceElement) cs), 
+                        config.getRMVersion().jaxbContext,
+                        ((com.sun.xml.ws.rm.v200502.CreateSequenceElement) cs),
                         config.getSoapVersion());
             } else {
                 request = Messages.create(
-                        config.getRMVersion().getJAXBContext(), 
-                        ((com.sun.xml.ws.rm.v200702.CreateSequenceElement) cs), 
+                        config.getRMVersion().jaxbContext,
+                        ((com.sun.xml.ws.rm.v200702.CreateSequenceElement) cs),
                         config.getSoapVersion());
             }
 
@@ -175,30 +168,26 @@ public class ProtocolMessageSender {
             requestPacket.contentNegotiation = packet.contentNegotiation;
             requestPacket.setEndPointAddressString(destination.toString());
 
-            addAddressingHeaders(requestPacket, config.getRMVersion().getCreateSequenceAction(), destination, false);
+            addAddressingHeaders(requestPacket, config.getRMVersion().createSequenceAction, destination, false);
             if (secureReliableMessaging) {
                 addSecurityHeaders(requestPacket);
             }
 
-            String messageId = null;/*= ADDRESSING_FIXME - initialize with mesageID
-            assigned by addAddressingHeaders for use in
-            correlating non-anonymous acksTo response*/
-
             Packet responsePacket = helper.process(requestPacket);
-            if (acksTo.equals(config.getConstants().getAnonymousURI())) {
+            if (acksTo.equals(config.getAnonymousAddressingUri())) {
                 Message response = responsePacket.getMessage();
-                if (response.isFault()) {
-                    throw new CreateSequenceException("CreateSequence was refused by the RMDestination \n ", response);
-                }
-
-                //unmarshall CreateSequenceResponse object from body of response.
                 //need the null check because this might be a non-anonymous ackto and
                 //CSR will be processed on another connection.
                 if (response != null) {
+                    if (response.isFault()) {
+                        throw new CreateSequenceException("CreateSequence was refused by the RMDestination \n ", response);
+                    }
+
+                    //unmarshall CreateSequenceResponse object from body of response.
                     csrElem = unmarshallCreateSequenceResponse(response);
                 }
             } else {
-                csrElem = ProtocolMessageReceiver.getCreateSequenceResponse(messageId);
+                // TODO: throw exception as we don't support addressable endpoints
             }
         }
         return csrElem;
@@ -210,7 +199,7 @@ public class ProtocolMessageSender {
 
         //Used from com.sun.xml.ws.jaxws.runtime.client.ClientOutboundSequence.disconnect, where the
         //TerminateSequence message is initialzied.
-        Message request = Messages.create(config.getRMVersion().getJAXBContext(), ts, config.getSoapVersion());
+        Message request = Messages.create(config.getRMVersion().jaxbContext, ts, config.getSoapVersion());
 
         //piggyback an acknowledgement if one is pending
         seq.processAcknowledgement(new RMMessage(request, config.getRMVersion()), marshaller);
@@ -218,7 +207,7 @@ public class ProtocolMessageSender {
         Packet requestPacket = new Packet(request);
         requestPacket.proxy = packet.proxy;
         requestPacket.contentNegotiation = packet.contentNegotiation;
-        addAddressingHeaders(requestPacket, config.getRMVersion().getTerminateSequenceAction(), seq.getDestination(),/*true*/ false);
+        addAddressingHeaders(requestPacket, config.getRMVersion().terminateSequenceAction, seq.getDestination(),/*true*/ false);
         requestPacket.setEndPointAddressString(seq.getDestination().toString());
         Packet responsePacket = helper.process(requestPacket);
         Message response = responsePacket.getMessage();
@@ -250,7 +239,7 @@ public class ProtocolMessageSender {
         //requestPacket.proxy = new ProxyWrapper(packet.proxy);
         requestPacket.setEndPointAddressString(seq.getDestination().toString());
         requestPacket.contentNegotiation = packet.contentNegotiation;
-        addAddressingHeaders(requestPacket, config.getRMVersion().getLastAction(), seq.getDestination(), /*true*/ false);
+        addAddressingHeaders(requestPacket, config.getRMVersion().lastAction, seq.getDestination(), /*true*/ false);
 
         Packet responsePacket = helper.process(requestPacket);
         Message response = responsePacket.getMessage();
@@ -282,7 +271,7 @@ public class ProtocolMessageSender {
             requestPacket.proxy = packet.proxy;
             requestPacket.contentNegotiation = packet.contentNegotiation;
 
-            addAddressingHeaders(requestPacket, config.getRMVersion().getAckRequestedAction(), seq.getDestination(), /*true*/ false);
+            addAddressingHeaders(requestPacket, config.getRMVersion().ackRequestedAction, seq.getDestination(), /*true*/ false);
 
             requestPacket.setEndPointAddressString(seq.getDestination().toString());
 
@@ -324,7 +313,7 @@ public class ProtocolMessageSender {
         requestPacket.setEndPointAddressString(destination.toString());
         requestPacket.getMessage().getHeaders().fillRequestAddressingHeaders(
                 requestPacket,
-                config.getConstants().getAddressingVersion(),
+                config.getAddressingVersion(),
                 config.getSoapVersion(),
                 oneWay,
                 action);
@@ -387,7 +376,7 @@ public class ProtocolMessageSender {
     }
 
     private Header createHeader(Object obj) {
-        return Headers.create(config.getRMVersion().getJAXBContext(), obj);
+        return Headers.create(config.getRMVersion().jaxbContext, obj);
     }
 
     public void sendCloseSequence(OutboundSequence seq) throws RMException {
@@ -400,13 +389,14 @@ public class ProtocolMessageSender {
         cs.setIdentifier(idClose);
         cs.setLastMsgNumber(seq.getNextIndex() - 1);
 
-        request = Messages.create(config.getRMVersion().getJAXBContext(), cs, config.getSoapVersion());
+        request = Messages.create(config.getRMVersion().jaxbContext, cs, config.getSoapVersion());
         Packet requestPacket = new Packet(request);
         requestPacket.proxy = packet.proxy;
         requestPacket.contentNegotiation = packet.contentNegotiation;
         requestPacket.setEndPointAddressString(seq.getDestination().toString());
 
-        addAddressingHeaders(requestPacket, RMVersion.WSRM11.getCloseSequenceAction(), seq.getDestination(), false);
+        // TODO: check why only WS-RM1.1 ???
+        addAddressingHeaders(requestPacket, RMVersion.WSRM11.closeSequenceAction, seq.getDestination(), false);
 
         String messageId = null;/*= ADDRESSING_FIXME - initialize with mesageID
         assigned by addAddressingHeaders for use in

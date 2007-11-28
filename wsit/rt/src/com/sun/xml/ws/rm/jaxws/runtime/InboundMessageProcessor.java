@@ -100,7 +100,7 @@ public class InboundMessageProcessor {
                 //identify sequence and message number from data in header and add
                 //the message to the sequence at the specified index.
                 //TODO handle error condition seq == null
-                AbstractSequence el = (AbstractSequence) header.readAsJAXB(unmarshaller);
+                AbstractSequence el = header.readAsJAXB(unmarshaller);
                 message.setSequenceElement(el);
 
                 String seqid = null;
@@ -133,7 +133,7 @@ public class InboundMessageProcessor {
             if (header != null) {
                 //determine OutboundSequence id from data in header and update
                 //state of that sequence according to the acks and nacks in the element 
-                AbstractSequenceAcknowledgement ackHeader = (AbstractSequenceAcknowledgement) (header.readAsJAXB(unmarshaller));
+                AbstractSequenceAcknowledgement ackHeader = header.readAsJAXB(unmarshaller);
                
                 String ackHeaderId = null;
                 if (ackHeader instanceof com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement) {
@@ -153,7 +153,7 @@ public class InboundMessageProcessor {
             if (header != null) {
                 //dispatch to InboundSequence to construct response.
                 //TODO handle error condition no such sequence
-                AbstractAckRequested el = (AbstractAckRequested) header.readAsJAXB(unmarshaller);
+                AbstractAckRequested el = header.readAsJAXB(unmarshaller);
                 message.setAckRequestedElement(el);
 
                 String id = null;

@@ -54,6 +54,8 @@ import com.sun.xml.ws.rm.RMException;
 import com.sun.xml.ws.rm.Constants;
 import com.sun.xml.ws.rm.RMMessage;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
@@ -68,19 +70,17 @@ public abstract class TubeBase extends AbstractFilterTubeImpl {
      * Either RMSource or RMDestination
      */
     private WSDLPort wsdlPort;
-    private WSBinding wsBinding;
     private SequenceConfig config;
     private Marshaller marshaller;
     private Unmarshaller unmarshaller;
 
     protected TubeBase(WSDLPort wsdlPort, WSBinding binding, Tube nextTube) {
-        super(nextTube);        
+        super(nextTube);
 
         this.wsdlPort = wsdlPort;
-        this.wsBinding = binding;
-        this.config = new SequenceConfig(wsdlPort, binding);
-        this.marshaller = config.getRMVersion().createMarshaller();
-        this.unmarshaller = config.getRMVersion().createUnmarshaller();
+        this.config = new SequenceConfig(wsdlPort, binding.getAddressingVersion(), binding.getSOAPVersion());
+        this.marshaller = createMarshaller(config.getRMVersion().jaxbContext);
+        this.unmarshaller = createUnmarshaller(config.getRMVersion().jaxbContext);
     }
 
     protected TubeBase(TubeBase that, TubeCloner cloner) {
@@ -88,10 +88,8 @@ public abstract class TubeBase extends AbstractFilterTubeImpl {
 
         this.wsdlPort = that.wsdlPort;
         this.config = that.config;
-        this.wsBinding = that.wsBinding;
-        this.unmarshaller = config.getRMVersion().createUnmarshaller();
-        this.marshaller = config.getRMVersion().createMarshaller();
-    
+        this.marshaller = createMarshaller(config.getRMVersion().jaxbContext);
+        this.unmarshaller = createUnmarshaller(config.getRMVersion().jaxbContext);
     }
 
     /**
@@ -101,19 +99,13 @@ public abstract class TubeBase extends AbstractFilterTubeImpl {
      * @param packet Packet containing Outbound message
      * @return The wrapped message
      */
-    protected RMMessage handleOutboundMessage(OutboundSequence outboundSequence, Packet packet) throws RMException {
-        Message message = packet.getMessage();
-        RMMessage rmMessage = new RMMessage(message, config.getRMVersion());
-        Object mn = packet.invocationProperties.get(Constants.messageNumberProperty);
-        Object oneWayResponse = packet.invocationProperties.get(Constants.oneWayResponseProperty);
+    protected RMMessage handleOutboundMessage(OutboundSequence outboundSequence, Packet packet, boolean isTwoWayRequest, boolean isOneWayResponse) throws RMException {
+        //don't want to add this message to a sequence if one way response.
+        RMMessage rmMessage = new RMMessage(packet.getMessage(), config.getRMVersion(), isOneWayResponse, isTwoWayRequest);
 
-        if (oneWayResponse != null) {
-            //don't want to add this message to a sequence.
-            rmMessage.isOneWayResponse = true;
-        }
-
-        if (mn instanceof Integer) {
-            rmMessage.setMessageNumber((Integer) mn);
+        Object messageNumberProperty = packet.invocationProperties.get(Constants.messageNumberProperty);
+        if (messageNumberProperty instanceof Integer) {
+            rmMessage.setMessageNumber((Integer) messageNumberProperty);
         }
 
         outboundSequence.processOutboundMessage(rmMessage);
@@ -128,29 +120,48 @@ public abstract class TubeBase extends AbstractFilterTubeImpl {
      * @param packet Packet containing Outbound message
      * @return The wrapped message
      */
-    protected RMMessage handleInboundMessage(Packet packet) throws RMException {
+    protected RMMessage handleInboundMessage(Packet packet, RMProvider provider) throws RMException {
         Message message = packet.getMessage();
         RMMessage rmMessage = new RMMessage(message, config.getRMVersion());
 
-        getMessageProcessor().processMessage(rmMessage, getUnmarshaller());
+        provider.getInboundMessageProcessor().processMessage(rmMessage, getUnmarshaller());
         return rmMessage;
     }
-    
-    protected abstract InboundMessageProcessor getMessageProcessor();
-    
+
     protected final Marshaller getMarshaller() {
         return this.marshaller;
     }
-    
-    protected final Unmarshaller getUnmarshaller(){
+
+    protected final Unmarshaller getUnmarshaller() {
         return this.unmarshaller;
     }
-    
+
     protected final WSDLPort getWsdlPort() {
         return this.wsdlPort;
     }
-    
+
     protected final SequenceConfig getConfig() {
         return this.config;
     }
+    
+    private static Marshaller createMarshaller(JAXBContext jaxbContext) {
+        try {
+            Marshaller marshaller = jaxbContext.createMarshaller();
+            marshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.TRUE);
+            return marshaller;
+        } catch (JAXBException e) {
+            // TODO handle exception
+            return null;
+        }
+
+    }
+
+    private Unmarshaller createUnmarshaller(JAXBContext jaxbContext) {
+        try {
+            return jaxbContext.createUnmarshaller();
+        } catch (JAXBException e) {
+            // TODO handle exception
+            return null;
+        }
+    }    
 }

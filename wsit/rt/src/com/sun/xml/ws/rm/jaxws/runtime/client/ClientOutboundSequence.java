@@ -94,13 +94,9 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
      */
     private ProtocolMessageSender protocolMessageSender;
     /**
-     * Flag to indicate if secureReliableMessaging is on
-     */
-    private boolean secureReliableMessaging;
-    /**
      * The SecurityTokenReference to pass to CreateSequence
      */
-    private JAXBElement<SecurityTokenReferenceType> str = null;
+    private JAXBElement<SecurityTokenReferenceType> securityTokenReference = null;
     /**
      * Indicates whether the sequence uses anonymous acksTo
      */
@@ -134,11 +130,25 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
      */
     private static boolean sendHeartbeats = true;
 
-    public ClientOutboundSequence(SequenceConfig config) {
+    /**
+     * Creates new sequence and onnects it to the remote RM Destination by sending 
+     * an request through the proxy stored in the <code>port</code> field.
+     */
+    public ClientOutboundSequence(
+            SequenceConfig config,
+            JAXBElement<SecurityTokenReferenceType> str,
+            URI destination,
+            URI acksTo,
+            boolean twoWay,
+            ProtocolMessageSender protocolMessageSender) throws RMException {
         super(config);
-
         //FIXME for now
         super.setBufferRemaining(config.getBufferSize());
+
+        this.securityTokenReference = str;
+        this.protocolMessageSender = protocolMessageSender;
+
+        this.connect(destination, acksTo, twoWay);
     }
 
     /**
@@ -157,10 +167,6 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
      */
     public int getReceiveBufferSize() {
         return receiveBufferSize;
-    }
-
-    public boolean isSecureReliableMessaging() {
-        return secureReliableMessaging;
     }
 
     /**
@@ -210,10 +216,6 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
         return ackListener;
     }
 
-    public void setSecureReliableMessaging(boolean secureReliableMessaging) {
-        this.secureReliableMessaging = secureReliableMessaging;
-    }
-
     /**
      * Accessor for the service field.
      *
@@ -241,20 +243,19 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
      *          use of the WS-Addressing anonymous EPR
      * @throws RMException wrapper for all exceptions thrown during execution of method.
      */
-    public void connect(URI destination, URI acksTo, boolean twoWay) throws RMException {
+    private void connect(URI destination, URI acksTo, boolean twoWay) throws RMException {
         try {
             this.setDestination(destination);
             this.setAcksTo(acksTo);
-            String anonymous = getConfig().getConstants().getAnonymousURI().toString();
-            String acksToString;
 
+            String acksToString;
             if (acksTo == null) {
-                acksToString = anonymous;
+                acksToString = getConfig().getAddressingVersion().anonymousUri;
             } else {
                 acksToString = acksTo.toString();
             }
 
-            this.isAnonymous = acksToString.equals(anonymous);
+            this.isAnonymous = acksToString.equals(getConfig().getAddressingVersion().anonymousUri);
 
             AbstractCreateSequence createSequence = null;
             if (getConfig().getRMVersion() == RMVersion.WSRM10) {
@@ -276,7 +277,7 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
             cs.setAcksTo(new MemberSubmissionAcksToImpl(new URI(acksToString)));
             }*/
             W3CEndpointReference sourceEndpointReference = null;
-            AddressingVersion addressingVersion = getConfig().getConstants().getAddressingVersion();
+            AddressingVersion addressingVersion = getConfig().getAddressingVersion();
             if (addressingVersion == AddressingVersion.W3C) {
                 //WSEndpointReference wsepr = new WSEndpointReference(getClass().getResourceAsStream("w3c-anonymous-acksTo.xml"), addressingVersion);
                 WSEndpointReference epr = AddressingVersion.W3C.anonymousEpr;
@@ -311,16 +312,15 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
                 }
             }
 
-            if (secureReliableMessaging) {
-                JAXBElement<SecurityTokenReferenceType> securityTokenReference = getSecurityTokenReference();
-                if (securityTokenReference != null) {
-                    createSequence.setSecurityTokenReference(securityTokenReference.getValue());
-                } else {
-                    throw new RMException("SecurityTokenReference is null");
-                }
+            AbstractCreateSequenceResponse csr;
+            if (securityTokenReference != null) {
+                createSequence.setSecurityTokenReference(securityTokenReference.getValue());
+                csr = protocolMessageSender.sendCreateSequence(createSequence, destination, acksTo, true);
+            } else {
+                // TODO check if the security flag is needed
+                csr = protocolMessageSender.sendCreateSequence(createSequence, destination, acksTo, false);
             }
 
-            AbstractCreateSequenceResponse csr = protocolMessageSender.sendCreateSequence(createSequence, destination, acksTo, secureReliableMessaging);
 
             AbstractAcceptType accept = null;
             if (csr != null) {
@@ -533,7 +533,7 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
     public synchronized void acknowledge(int i) throws InvalidMessageNumberException {
 
         RMMessage mess = get(i);
-        if (isAnonymous() && mess.isTwoWayRequest) {
+        if (isAnonymous && mess.isTwoWayRequest()) {
             return;
         } else {
             super.acknowledge(i);
@@ -561,30 +561,6 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
         if (ackListener != null) {
             ackListener.notify(this, i);
         }
-    }
-
-    /**
-     * Return value is determined by whether the destination endpoint is the
-     * anonymous URI.
-     * 
-     * @return <code>true</code> if the destination is the anonymous URI.
-     *         <code>false</code> otherwise.
-     */
-    public boolean isAnonymous() {
-        return isAnonymous;
-    }
-
-    public void registerProtocolMessageSender(ProtocolMessageSender pms) {
-        this.protocolMessageSender = pms;
-
-    }
-
-    public JAXBElement<SecurityTokenReferenceType> getSecurityTokenReference() {
-        return str;
-    }
-
-    public void setSecurityTokenReference(JAXBElement<SecurityTokenReferenceType> str) {
-        this.str = str;
     }
 
     /**
@@ -646,7 +622,7 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
                 try {
                     RMSource.getRMSource().removeOutboundSequence(sequence);
                 } catch (Exception ex) {
-                    //TODO handle exception
+                //TODO handle exception
                 }
             }
         }

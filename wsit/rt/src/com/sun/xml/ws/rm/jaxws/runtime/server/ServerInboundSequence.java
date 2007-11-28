@@ -43,6 +43,7 @@
  */
 package com.sun.xml.ws.rm.jaxws.runtime.server;
 
+import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.rm.SequenceSettings;
 import com.sun.xml.ws.api.rm.server.ServerSequence;
 import com.sun.xml.ws.rm.InvalidMessageNumberException;
@@ -147,16 +148,15 @@ public class ServerInboundSequence extends InboundSequence implements ServerSequ
      *
      * @param index The index to add message at.
      * @param message The JAX-WS message to add
-     * @param complete Indicates whether to mark the message
-     *          as complete.
+     * @param complete Indicates whether to mark the message as complete.
      */
-    public void resetMessage(int index, com.sun.xml.ws.api.message.Message message, boolean complete) {
+    public void resetMessage(int index, Message message, boolean complete) {
         try {
-            RMMessage mess = new RMMessage(message, getConfig().getRMVersion());
-            set(index, mess);
+            RMMessage rmMessage = new RMMessage(message, getConfig().getRMVersion());
+            set(index, rmMessage);
 
             if (complete) {
-                mess.complete();
+                rmMessage.complete();
             }
         } catch (RMException e) {
             logger.log(Level.SEVERE, LocalizationMessages.WSRM_3020_COULD_NOT_RESET_MESSAGE(index, getId()), e);

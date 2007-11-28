@@ -280,21 +280,14 @@ public class PolicyResolverImpl implements PolicyResolver{
     }
     
     private boolean isRMMessage(){
-        
-        if(rmVer.getCreateSequenceAction().equals(action) || rmVer.getCreateSequenceResponseAction().equals(action)
-            || rmVer.getSequenceAcknowledgementAction().equals(action) || rmVer.getTerminateSequenceAction().equals(action)
-            || rmVer.getLastAction().equals(action) || rmVer.getCloseSequenceAction().equals(action) || 
-                rmVer.getCloseSequenceResponseAction().equals(action)){
-            return true;
-        }               
-        return false;
+        return rmVer.isRMAction(action);
     }
     
     private String getAction(Message msg){
         if(addVer != null){
             HeaderList hl = msg.getHeaders();
-            String action =  hl.getAction(addVer, pipeConfig.getBinding().getSOAPVersion());
-            return action;
+            String retVal =  hl.getAction(addVer, pipeConfig.getBinding().getSOAPVersion());
+            return retVal;
         }
         return "";
         

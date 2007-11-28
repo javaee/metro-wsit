@@ -643,10 +643,11 @@ public abstract class SecurityPipeBase implements Pipe {
     
     protected SOAPFaultException getSOAPFaultException(XWSSecurityException xwse) {
         QName qname = null;
-        if (xwse.getCause() instanceof PolicyViolationException)
+        if (xwse.getCause() instanceof PolicyViolationException) {
             qname = MessageConstants.WSSE_RECEIVER_POLICY_VIOLATION;
-        else
+        } else {
             qname = MessageConstants.WSSE_FAILED_AUTHENTICATION;
+        }
         
         com.sun.xml.wss.impl.WssSoapFaultException wsfe =
                 SecurableSoapMessage.newSOAPFaultException(
@@ -679,7 +680,7 @@ public abstract class SecurityPipeBase implements Pipe {
             QName portName = pipeConfig.getWSDLModel().getName();
             //Review: will this take care of EndpointPolicySubject
             PolicyMerger policyMerge = PolicyMerger.getMerger();
-            PolicyMapKey endpointKey =wsPolicyMap.createWsdlEndpointScopeKey(serviceName,portName);
+            PolicyMapKey endpointKey =PolicyMap.createWsdlEndpointScopeKey(serviceName,portName);
             //createWsdlEndpointScopeKey(serviceName,portName);
             //Review:Will getEffectivePolicy return null or empty policy ?.
             Policy endpointPolicy = wsPolicyMap.getEndpointEffectivePolicy(endpointKey);
@@ -745,11 +746,11 @@ public abstract class SecurityPipeBase implements Pipe {
                     outputMessageName = output.getMessage().getName();
                 }
                 
-                PolicyMapKey messageKey =  wsPolicyMap.createWsdlMessageScopeKey(
+                PolicyMapKey messageKey =  PolicyMap.createWsdlMessageScopeKey(
                         serviceName,portName,operationName);
                 
                 
-                PolicyMapKey operationKey = wsPolicyMap.createWsdlOperationScopeKey(serviceName,portName,operationName);
+                PolicyMapKey operationKey = PolicyMap.createWsdlOperationScopeKey(serviceName,portName,operationName);
                 
                 //Review:Not sure if this is need and what is the
                 //difference between operation and message level key.
@@ -807,7 +808,7 @@ public abstract class SecurityPipeBase implements Pipe {
                     WSDLFault fault = (WSDLFault) faults.next();
                     
                     PolicyMapKey fKey = null;
-                    fKey = wsPolicyMap.createWsdlFaultMessageScopeKey(
+                    fKey = PolicyMap.createWsdlFaultMessageScopeKey(
                             serviceName,portName,operationName,
                             new QName(operationName.getNamespaceURI(), fault.getName()));
                     Policy fPolicy = wsPolicyMap.getFaultMessageEffectivePolicy(fKey);
@@ -985,7 +986,7 @@ public abstract class SecurityPipeBase implements Pipe {
         //WSDLOutput output = wsdlOperation.getOutput();
         //QName inputMessageName = input.getMessage().getName();
         //QName outputMessageName = output.getMessage().getName();
-        PolicyMapKey messageKey =  wsPolicyMap.createWsdlMessageScopeKey(
+        PolicyMapKey messageKey = PolicyMap.createWsdlMessageScopeKey(
                 serviceName,portName,wsdlOperation.getName());
         return messageKey;
         
@@ -1063,7 +1064,7 @@ public abstract class SecurityPipeBase implements Pipe {
     private Policy getMessageLevelBSP() throws PolicyException {
         QName serviceName = pipeConfig.getWSDLModel().getOwner().getName();
         QName portName = pipeConfig.getWSDLModel().getName();
-        PolicyMapKey operationKey = wsPolicyMap.createWsdlOperationScopeKey(serviceName, portName, bsOperationName);
+        PolicyMapKey operationKey = PolicyMap.createWsdlOperationScopeKey(serviceName, portName, bsOperationName);
         
         Policy operationLevelEP =  wsPolicyMap.getOperationEffectivePolicy(operationKey);
         return operationLevelEP;
@@ -1071,7 +1072,9 @@ public abstract class SecurityPipeBase implements Pipe {
     
     protected PolicySourceModel unmarshalPolicy(String resource) throws PolicyException, IOException {
         InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(resource);
-        if (is == null) return null;
+        if (is == null) {
+            return null;
+        }
         Reader reader =  new InputStreamReader(is);
         PolicySourceModel model = PolicyModelUnmarshaller.getXmlUnmarshaller().unmarshalModel(reader);
         reader.close();
@@ -1145,15 +1148,8 @@ public abstract class SecurityPipeBase implements Pipe {
         if (!bindingHasRMPolicy()) {
             return false;
         }
-        String action = getAction(packet);
-        if(rmVer.getCreateSequenceAction().equals(action) || rmVer.getCreateSequenceResponseAction().equals(action)
-            || rmVer.getSequenceAcknowledgementAction().equals(action) || rmVer.getTerminateSequenceAction().equals(action)
-            || rmVer.getLastAction().equals(action) || rmVer.getCloseSequenceAction().equals(action) || 
-                rmVer.getCloseSequenceResponseAction().equals(action)){
-            return true;
-        }               
         
-        return false;
+        return rmVer.isRMAction(getAction(packet));
     }
     
     protected String getAction(Packet packet){
@@ -1580,15 +1576,16 @@ public abstract class SecurityPipeBase implements Pipe {
     
     //TODO: Duplicate information copied from Pipeline Assembler
     private boolean isReliableMessagingEnabled(PolicyMap policyMap, WSDLPort port) {
-        if (policyMap == null)
+        if (policyMap == null) {
             return false;
+        }
         
         try {
-            PolicyMapKey endpointKey = policyMap.createWsdlEndpointScopeKey(port.getOwner().getName(),
+            PolicyMapKey endpointKey = PolicyMap.createWsdlEndpointScopeKey(port.getOwner().getName(),
                     port.getName());
             Policy policy = policyMap.getEndpointEffectivePolicy(endpointKey);
                         
-            return (policy != null) && policy.contains(rmVer.getPolicyNamespaceURI());
+            return (policy != null) && policy.contains(rmVer.policyNamespaceUri);
         } catch (PolicyException e) {
             log.log(Level.SEVERE,
                     LogStringsMessages.WSSPIPE_0012_PROBLEM_CHECKING_RELIABLE_MESSAGE_ENABLE(), e);

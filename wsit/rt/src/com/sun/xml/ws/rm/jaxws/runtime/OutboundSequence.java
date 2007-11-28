@@ -172,19 +172,19 @@ public abstract class OutboundSequence extends Sequence {
      *  @param mess The OutboundMessage.
      *  @param marshaller The Marshaller to use 
      */
-    public void processOutboundMessage(RMMessage mess)
+    public void processOutboundMessage(RMMessage outboundMessage)
             throws InvalidMessageNumberException,
             BufferFullException,
             DuplicateMessageException {
 
-        if (saveMessages && !mess.isOneWayResponse) {
+        if (saveMessages && !outboundMessage.isOneWayResponse()) {
             //Add the message to the sequence unless this has been done previously
-            int messageNumber = mess.getMessageNumber();
+            int messageNumber = outboundMessage.getMessageNumber();
 
             if (messageNumber == 0) {
-                messageNumber = set(getNextIndex(), mess);
+                messageNumber = set(getNextIndex(), outboundMessage);
             } else {
-                set(messageNumber, mess);
+                set(messageNumber, outboundMessage);
             }
 
             AbstractSequence element = null;
@@ -198,7 +198,7 @@ public abstract class OutboundSequence extends Sequence {
 
             //mess.addHeader(Headers.create(getVersion(),marshaller,element));
 
-            mess.setSequenceElement(element);
+            outboundMessage.setSequenceElement(element);
 
             //if it is time to request an ack for this sequence, add AckRequestedHeader
             if (isAckRequested()) {
@@ -211,7 +211,7 @@ public abstract class OutboundSequence extends Sequence {
                     ack.setId(this.getId());
                 }
 
-                mess.setAckRequestedElement(ack);
+                outboundMessage.setAckRequestedElement(ack);
             }
         }
 
@@ -220,9 +220,9 @@ public abstract class OutboundSequence extends Sequence {
         if (sequenceAcknowledgement != null) {
             //mess.addHeader(Headers.create(getVersion(), marshaller,sequenceAcknowledgement));
             if (sequenceAcknowledgement instanceof com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement) {
-                mess.setSequenceAcknowledgementElement((com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement) sequenceAcknowledgement);
+                outboundMessage.setSequenceAcknowledgementElement((com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement) sequenceAcknowledgement);
             } else {
-                mess.setSequenceAcknowledgementElement((com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement) sequenceAcknowledgement);
+                outboundMessage.setSequenceAcknowledgementElement((com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement) sequenceAcknowledgement);
             }
 
 
@@ -230,34 +230,34 @@ public abstract class OutboundSequence extends Sequence {
         }
 
         if (filter != null) {
-            filter.handleOutboundHeaders(mess);
+            filter.handleOutboundHeaders(outboundMessage);
         }
 
-        if (mess.getSequenceElement() != null) {
+        if (outboundMessage.getSequenceElement() != null) {
             /*
             mess.addHeader(Headers.create(getVersion(),
             marshaller,
             mess.getSequenceElement()));
              */
-            mess.addHeader(createHeader(mess.getSequenceElement()));
+            outboundMessage.addHeader(createHeader(outboundMessage.getSequenceElement()));
         }
 
-        if (mess.getAckRequestedElement() != null) {
+        if (outboundMessage.getAckRequestedElement() != null) {
             /*
             mess.addHeader(Headers.create(getVersion(), 
             marshaller,
             mess.getAckRequestedElement()));
              */
-            mess.addHeader(createHeader(mess.getAckRequestedElement()));
+            outboundMessage.addHeader(createHeader(outboundMessage.getAckRequestedElement()));
         }
 
-        if (mess.getSequenceAcknowledgementElement() != null) {
+        if (outboundMessage.getSequenceAcknowledgementElement() != null) {
             /*
             mess.addHeader(Headers.create(getVersion(), 
             marshaller,
             mess.getSequenceAcknowledgementElement()));
              */
-            mess.addHeader(createHeader(mess.getSequenceAcknowledgementElement()));
+            outboundMessage.addHeader(createHeader(outboundMessage.getSequenceAcknowledgementElement()));
         }
     }
 
@@ -397,7 +397,7 @@ public abstract class OutboundSequence extends Sequence {
     }
 
     protected com.sun.xml.ws.api.message.Header createHeader(Object obj) {
-        return Headers.create(getConfig().getRMVersion().getJAXBContext(), obj);
+        return Headers.create(getConfig().getRMVersion().jaxbContext, obj);
     }
 
     public RMMessage getUnacknowledgedMessage() {
