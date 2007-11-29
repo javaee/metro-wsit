@@ -145,15 +145,15 @@ public final class RMServerTube extends TubeBase {
                 protocolResponsePacket = handleProtocolMessage(requestPacket);
             } catch (CreateSequenceException e) {
                 soapFault = createSoapFault(
-                        getConfig().getRMVersion().getCreateSequenceRefusedQname(),
+                        getConfig().getRMVersion().createSequenceRefusedQname,
                         LocalizationMessages.WSRM_3027_CREATE_SEQUENCE_REFUSED(e.getMessage()));
             } catch (TerminateSequenceException e) {
                 soapFault = createSoapFault(
-                        getConfig().getRMVersion().getSequenceTerminatedQname(),
+                        getConfig().getRMVersion().sequenceTerminatedQname,
                         LocalizationMessages.WSRM_3028_SEQUENCE_TERMINATED_ON_ERROR(e.getMessage()));
             } catch (InvalidSequenceException e) {
                 soapFault = createSoapFault(
-                        getConfig().getRMVersion().getUnknownSequenceQname(),
+                        getConfig().getRMVersion().unknownSequenceQname,
                         LocalizationMessages.WSRM_3022_UNKNOWN_SEQUENCE_ID_IN_MESSAGE(e.getSequenceId()));
             }
 
@@ -169,15 +169,15 @@ public final class RMServerTube extends TubeBase {
                 message = handleInboundMessage(requestPacket, RMDestination.getRMDestination());
             } catch (MessageNumberRolloverException e) {
                 soapFault = createSoapFault(
-                        getConfig().getRMVersion().getMessageNumberRolloverQname(),
+                        getConfig().getRMVersion().messageNumberRolloverQname,
                         LocalizationMessages.WSRM_3026_MESSAGE_NUMBER_ROLLOVER(e.getMessageNumber()));
             } catch (InvalidSequenceException e) {
                 soapFault = createSoapFault(
-                        getConfig().getRMVersion().getUnknownSequenceQname(),
+                        getConfig().getRMVersion().unknownSequenceQname,
                         LocalizationMessages.WSRM_3022_UNKNOWN_SEQUENCE_ID_IN_MESSAGE(e.getSequenceId()));
             } catch (CloseSequenceException e) {
                 soapFault = createSoapFault(
-                        getConfig().getRMVersion().getClosedSequenceQname(),
+                        getConfig().getRMVersion().closedSequenceQname,
                         LocalizationMessages.WSRM_3029_SEQUENCE_CLOSED(e.getSequenceId()));
             }
 
@@ -285,6 +285,7 @@ public final class RMServerTube extends TubeBase {
                     return doReturnWith(ret);
                 } else {
                     //unreachable
+                    // TODO: log here at least...
                     return null;
                 }
             } catch (RMException ee) {
@@ -756,7 +757,7 @@ public final class RMServerTube extends TubeBase {
     public Packet handleLastMessageAction(Packet inbound) throws RMException {
         try {
             Message message = inbound.getMessage();
-            Header header = message.getHeaders().get(getConfig().getRMVersion().getSequenceQName(), true);
+            Header header = message.getHeaders().get(getConfig().getRMVersion().sequenceQName, true);
             if (header == null) {
                 throw LOGGER.logSevereException(new RMException(LocalizationMessages.WSRM_3008_INVALID_LAST_MESSAGE()));
             }
@@ -824,7 +825,7 @@ public final class RMServerTube extends TubeBase {
     public Packet handleAckRequestedAction(Packet inbound) throws RMException {
         try {
             Message message = inbound.getMessage();
-            Header header = message.getHeaders().get(getConfig().getRMVersion().getAckRequestedQName(), true);
+            Header header = message.getHeaders().get(getConfig().getRMVersion().ackRequestedQName, true);
             if (header == null) {
                 throw LOGGER.logSevereException(new RMException(LocalizationMessages.WSRM_3010_INVALID_ACK_REQUESTED()));
             }
@@ -854,7 +855,7 @@ public final class RMServerTube extends TubeBase {
     public Packet handleSequenceAcknowledgementAction(Packet inbound) throws RMException {
         try {
             Message message = inbound.getMessage();
-            Header header = message.getHeaders().get(getConfig().getRMVersion().getSequenceAcknowledgementQName(), false);
+            Header header = message.getHeaders().get(getConfig().getRMVersion().sequenceAcknowledgementQName, false);
             if (header == null) {
                 throw LOGGER.logSevereException(new RMException(LocalizationMessages.WSRM_3012_INVALID_SEQ_ACKNOWLEDGEMENT()));
             }

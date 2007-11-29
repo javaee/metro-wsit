@@ -329,10 +329,10 @@ public class SequenceConfig implements SequenceSettings {
                         for (PolicyAssertion assertion : policyAssertionSet) {
                             QName qname = assertion.getName();
 
-                            if (RMVersion.WSRM10.getRMPolicyAssertionQName().equals(qname)) {
+                            if (RMVersion.WSRM10.rmPolicyAssertionQName.equals(qname)) {
                                 rmVersion = RMVersion.WSRM10;
                                 handleRMAssertion(assertion);
-                            } else if (RMVersion.WSRM11.getRMPolicyAssertionQName().equals(qname)) {
+                            } else if (RMVersion.WSRM11.rmPolicyAssertionQName.equals(qname)) {
                                 rmVersion = RMVersion.WSRM11;
                                 handleRMAssertion(assertion);
                             } else if (RM_FLOW_CONTROL_QNAME.equals(qname)) {
@@ -359,9 +359,9 @@ public class SequenceConfig implements SequenceSettings {
                                     closeTimeout = Long.parseLong(num);
                                 }
 
-                            } else if (RMVersion.WSRM11.getSequenceSTRAssertionQName().equals(qname)) {
+                            } else if (RMVersion.WSRM11.sequenceSTRAssertionQName.equals(qname)) {
                                 sequenceSTRRequired = true;
-                            } else if (RMVersion.WSRM11.getSequenceTransportSecurityAssertionQName().equals(qname)) {
+                            } else if (RMVersion.WSRM11.sequenceTransportSecurityAssertionQName.equals(qname)) {
                                 sequenceTransportSecurityRequired = true;
                             } else {
                             //TODO handle error condition here
@@ -381,7 +381,7 @@ public class SequenceConfig implements SequenceSettings {
 
         while (it != null && it.hasNext()) {
             PolicyAssertion assertion = it.next();
-            if (assertion.getName().equals(rmVersion.getInactivityTimeoutAssertionQName())) {
+            if (assertion.getName().equals(rmVersion.inactivityTimeoutAssertionQName)) {
 
                 String num = assertion.getAttributeValue(new QName("", "Milliseconds"));
 

@@ -51,22 +51,9 @@ public enum RMVersion {
     com.sun.xml.ws.rm.v200702.UsesSequenceSSL.class,
     com.sun.xml.ws.rm.v200702.UsesSequenceSTR.class,
     javax.xml.ws.wsaddressing.W3CEndpointReference.class);
-
-//    /**
-//     * Returns {@link RMVersion} whose {@link #nsUri} equals to
-//     * the given string.
-//     *
-//     * @param nsUri must not be null.
-//     * @return always non-null.
-//     */
-//    public static RMVersion fromNsUri(String nsUri) {
-//        if (nsUri.equals(WSRM10.namespaceUri)) {
-//            return WSRM10;
-//        } else {
-//            //return WSRM 1.1 by default
-//            return WSRM11;
-//        }
-//    }
+    /**
+     * General constants
+     */
     public final String namespaceUri;
     public final String policyNamespaceUri;
     public final JAXBRIContext jaxbContext;
@@ -83,6 +70,21 @@ public enum RMVersion {
     public final String sequenceAcknowledgementAction;
     public final String terminateSequenceAction;
     public final String terminateSequenceResponseAction;
+    /**
+     * QName constants
+     */
+    public final QName ackRequestedQName;
+    public final QName closedSequenceQname;
+    public final QName createSequenceRefusedQname;
+    public final QName inactivityTimeoutAssertionQName;
+    public final QName messageNumberRolloverQname;
+    public final QName rmPolicyAssertionQName;
+    public final QName sequenceAcknowledgementQName;
+    public final QName sequenceQName;
+    public final QName sequenceSTRAssertionQName;
+    public final QName sequenceTerminatedQname;
+    public final QName sequenceTransportSecurityAssertionQName;
+    public final QName unknownSequenceQname;
 
     private RMVersion(String nsUri, String policynsuri, Class<?>... classes) {
         this.namespaceUri = nsUri;
@@ -99,60 +101,24 @@ public enum RMVersion {
         this.terminateSequenceAction = namespaceUri + "/TerminateSequence";
         this.terminateSequenceResponseAction = namespaceUri + "/TerminateSequenceResponse";
 
+        this.ackRequestedQName = new QName(namespaceUri, "AckRequested");
+        this.closedSequenceQname = new QName(namespaceUri, "SequenceClosed");
+        this.createSequenceRefusedQname = new QName(namespaceUri, "CreateSequenceRefused");
+        this.inactivityTimeoutAssertionQName = new QName(policyNamespaceUri, "InactivityTimeout");
+        this.messageNumberRolloverQname = new QName(namespaceUri, "MessageNumberRollover");
+        this.rmPolicyAssertionQName = new QName(policyNamespaceUri, "RMAssertion");
+        this.sequenceAcknowledgementQName = new QName(namespaceUri, "SequenceAcknowledgement");
+        this.sequenceQName = new QName(namespaceUri, "Sequence");
+        this.sequenceSTRAssertionQName = new QName(policyNamespaceUri, "SequenceSTR");
+        this.sequenceTerminatedQname = new QName(namespaceUri, "SequenceTerminated");
+        this.sequenceTransportSecurityAssertionQName = new QName(policyNamespaceUri, "SequenceTransportSecurity");
+        this.unknownSequenceQname = new QName(namespaceUri, "UnknownSequence");
+
         try {
             this.jaxbContext = JAXBRIContext.newInstance(classes, null, null, null, false, null);
         } catch (JAXBException e) {
             throw new Error(e);
         }
-    }
-
-    // TODO: replace with public final fields
-    public QName getRMPolicyAssertionQName() {
-        return new QName(policyNamespaceUri, "RMAssertion");
-    }
-
-    public QName getInactivityTimeoutAssertionQName() {
-        return new QName(policyNamespaceUri, "InactivityTimeout");
-    }
-
-    public QName getSequenceSTRAssertionQName() {
-        return new QName(policyNamespaceUri, "SequenceSTR");
-    }
-
-    public QName getSequenceTransportSecurityAssertionQName() {
-        return new QName(policyNamespaceUri, "SequenceTransportSecurity");
-    }
-
-    public QName getMessageNumberRolloverQname() {
-        return new QName(namespaceUri, "MessageNumberRollover");
-    }
-
-    public QName getUnknownSequenceQname() {
-        return new QName(namespaceUri, "UnknownSequence");
-    }
-
-    public QName getClosedSequenceQname() {
-        return new QName(namespaceUri, "SequenceClosed");
-    }
-
-    public QName getCreateSequenceRefusedQname() {
-        return new QName(namespaceUri, "CreateSequenceRefused");
-    }
-
-    public QName getSequenceTerminatedQname() {
-        return new QName(namespaceUri, "SequenceTerminated");
-    }
-
-    public QName getSequenceQName() {
-        return new QName(namespaceUri, "Sequence");
-    }
-
-    public QName getAckRequestedQName() {
-        return new QName(namespaceUri, "AckRequested");
-    }
-
-    public QName getSequenceAcknowledgementQName() {
-        return new QName(namespaceUri, "SequenceAcknowledgement");
     }
 
     public boolean isRMAction(String action) {

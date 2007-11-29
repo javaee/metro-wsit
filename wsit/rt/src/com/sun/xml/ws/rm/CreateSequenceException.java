@@ -43,7 +43,8 @@ package com.sun.xml.ws.rm;
  */
 public class CreateSequenceException extends RMException {
 
-    private  String sequenceId;
+    private String sequenceId;
+
     /**
      */
     public CreateSequenceException() {
@@ -54,17 +55,17 @@ public class CreateSequenceException extends RMException {
         super(message);
     }
 
-    public CreateSequenceException(String message,String id){
+    public CreateSequenceException(String message, String id) {
         super(message);
         this.sequenceId = id;
     }
 
-    public CreateSequenceException (String s, com.sun.xml.ws.api.message.Message message) {
-        super (s,message);
+    public CreateSequenceException(String s, com.sun.xml.ws.api.message.Message message) {
+        super(s, message);
     }
 
-     public CreateSequenceException(Throwable e) {
-         super(e);
+    public CreateSequenceException(Throwable e) {
+        super(e);
     }
 
     public String getSequenceId() {

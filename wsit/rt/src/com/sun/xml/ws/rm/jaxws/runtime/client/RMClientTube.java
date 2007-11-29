@@ -65,11 +65,11 @@ import com.sun.xml.ws.rm.MessageSender;
 import com.sun.xml.ws.rm.RMException;
 import com.sun.xml.ws.rm.RMMessage;
 import com.sun.xml.ws.rm.jaxws.runtime.TubeBase;
-import com.sun.xml.ws.rm.jaxws.util.LoggingHelper;
 import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 
+import com.sun.xml.ws.rm.localization.RmLogger;
 import javax.xml.bind.JAXBElement;
 import javax.xml.soap.SOAPException;
 import javax.xml.ws.BindingProvider;
@@ -78,15 +78,13 @@ import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Client-side Pipe implementation.
  */
 public final class RMClientTube extends TubeBase {
 
-    private static final Logger LOGGER = Logger.getLogger(LoggingHelper.getLoggerName(RMClientTube.class));
+    private static final RmLogger LOGGER = RmLogger.getLogger(RMClientTube.class);
     private static final String CREATE_SEQUENCE_URI = "http://com.sun/createSequence";
     /*
      * Metadata from ctor.
@@ -217,10 +215,10 @@ public final class RMClientTube extends TubeBase {
                 }
 
                 outboundSequence = new ClientOutboundSequence(
-                        getConfig(), 
-                        str, 
-                        destURI, 
-                        getConfig().getAnonymousAddressingUri(), 
+                        getConfig(),
+                        str,
+                        destURI,
+                        getConfig().getAnonymousAddressingUri(),
                         checkForTwoWayOperation(),
                         new ProtocolMessageSender(
                         RMSource.getRMSource().getInboundMessageProcessor(),
@@ -333,7 +331,7 @@ public final class RMClientTube extends TubeBase {
             //Faulted TerminateSequence message of bug downstream.  We are
             //done with the sequence anyway.  Log and go about our business
             //WSRM2007: RMClientPipe threw Exception in preDestroy//
-            LOGGER.log(Level.FINE, LocalizationMessages.WSRM_2007_UNEXPECTED_PREDESTROY_EXCEPTION(), e);
+            LOGGER.fine(LocalizationMessages.WSRM_2007_UNEXPECTED_PREDESTROY_EXCEPTION(), e);
         }
     }
 
@@ -401,7 +399,7 @@ public final class RMClientTube extends TubeBase {
             }
         } catch (Throwable ee) {
             //WSRM2006: Unexpected  Exception in RMClientPipe.process.
-            LOGGER.log(Level.SEVERE, LocalizationMessages.WSRM_2006_UNEXPECTED_PROCESS_EXCEPTION(), ee);
+            LOGGER.severe(LocalizationMessages.WSRM_2006_UNEXPECTED_PROCESS_EXCEPTION(), ee);
             return processException(new WebServiceException(ee));
         }
     }
@@ -510,7 +508,7 @@ public final class RMClientTube extends TubeBase {
                         if (responseMessage != null && responseMessage.isFault()) {
                             //don't want to resend
                             //WSRM2004: Marking faulted message {0} as acked.
-                            LOGGER.log(Level.FINE, LocalizationMessages.WSRM_2004_ACKING_FAULTED_MESSAGE(message.getMessageNumber()));
+                            LOGGER.fine(LocalizationMessages.WSRM_2004_ACKING_FAULTED_MESSAGE(message.getMessageNumber()));
                             outboundSequence.acknowledge(message.getMessageNumber());
                         }
 
@@ -519,7 +517,7 @@ public final class RMClientTube extends TubeBase {
                         if (responseMessage != null && !isOneWayMessage && responseMessage.getPayloadNamespaceURI() == null) {
                             //resend
                             //WSRM2005: Queuing dropped message for resend.
-                            LOGGER.log(Level.FINE, LocalizationMessages.WSRM_2005_RESENDING_DROPPED_MESSAGE());
+                            LOGGER.fine(LocalizationMessages.WSRM_2005_RESENDING_DROPPED_MESSAGE());
                             return;
                         }
 
@@ -548,28 +546,24 @@ public final class RMClientTube extends TubeBase {
                 try {
                     if (t instanceof ClientTransportException) {
                         //resend in this case
-                        if (LOGGER.isLoggable(Level.FINE)) {
-                            //WSRM2000: Sending message caused {0}. Queuing for resend.
-                            LOGGER.log(Level.FINE, LocalizationMessages.WSRM_2000_QUEUE_FOR_RESEND(t.toString()));
-                        }
+                        //WSRM2000: Sending message caused {0}. Queuing for resend.
+                        LOGGER.fine(LocalizationMessages.WSRM_2000_QUEUE_FOR_RESEND(t.getMessage()), t);
                         return;
                     } else if (t instanceof WebServiceException) {
                         //Unwrap exception and see if it makes sense to retry this
                         //request.
                         Throwable cause = t.getCause();
                         if (cause != null && (cause instanceof IOException || cause instanceof SocketTimeoutException)) {
-                            if (LOGGER.isLoggable(Level.FINE)) {
-                                //Sending message caused {0}. Queuing for resend.//
-                                //WSRM2000: Sending message caused {0}. Queuing for resend.//
-                                LOGGER.log(Level.FINE, LocalizationMessages.WSRM_2000_QUEUE_FOR_RESEND(t.toString()), t);
-                            }
+                            //Sending message caused {0}. Queuing for resend.//
+                            //WSRM2000: Sending message caused {0}. Queuing for resend.//
+                            LOGGER.fine(LocalizationMessages.WSRM_2000_QUEUE_FOR_RESEND(t.getMessage()), t);
                             //Simply return. Maintenance thread will invoke send() until
                             //we get a normal
                             return;
                         } else {
                             //non-transport-related Exception;
                             //WSRM2003: Unexpected exception  wrapped in WSException.//
-                            LOGGER.log(Level.SEVERE, LocalizationMessages.WSRM_2003_UNEXPECTED_WRAPPED_EXCEPTION(), t);
+                            LOGGER.severe(LocalizationMessages.WSRM_2003_UNEXPECTED_WRAPPED_EXCEPTION(), t);
                             completeFaultedMessage(message);
                             //TODO - need to propogate exception back to client here 
                             parentFiber.resume(null);
@@ -578,7 +572,7 @@ public final class RMClientTube extends TubeBase {
                         //Bug in software somewhere..  Any RuntimeException here must be a 
                         //WebServiceException
                         // WSRM2001: Unexpected exception in trySend.//
-                        LOGGER.log(Level.SEVERE, LocalizationMessages.WSRM_2001_UNEXPECTED_TRY_SEND_EXCEPTION(), t);
+                        LOGGER.severe(LocalizationMessages.WSRM_2001_UNEXPECTED_TRY_SEND_EXCEPTION(), t);
                         //TODO - need to propogate exception back to client 
                         parentFiber.resume(null);
                     }

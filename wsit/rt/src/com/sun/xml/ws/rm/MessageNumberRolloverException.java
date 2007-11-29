@@ -33,7 +33,6 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.rm;
 
 /**
@@ -57,14 +56,13 @@ public class MessageNumberRolloverException extends RMException {
     public MessageNumberRolloverException(String message) {
         super(message);
     }
+
     public MessageNumberRolloverException(String message, long messageNumber) {
         super(message);
         this.messageNumber = messageNumber;
     }
 
-     public MessageNumberRolloverException(Throwable e) {
-         super(e);
+    public MessageNumberRolloverException(Throwable e) {
+        super(e);
     }
-
-    
 }

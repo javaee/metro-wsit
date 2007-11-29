@@ -41,8 +41,6 @@
  * Created on February 11, 2006, 10:03 AM
  *
  */
-
-
 package com.sun.xml.ws.rm;
 
 /**
@@ -52,27 +50,27 @@ package com.sun.xml.ws.rm;
  */
 public class InvalidSequenceException extends RMException {
 
-    private  String sequenceId;
+    private String sequenceId;
+
     /**
      */
     public InvalidSequenceException() {
         super();
     }
-    
-    public InvalidSequenceException(String message) { 
+
+    public InvalidSequenceException(String message) {
         super(message);
     }
 
-    public InvalidSequenceException(String message,String id){
+    public InvalidSequenceException(String message, String id) {
         super(message);
         this.sequenceId = id;
     }
-    
-     public InvalidSequenceException(Throwable e) {
-         super(e);
+
+    public InvalidSequenceException(Throwable e) {
+        super(e);
     }
-     
-    
+
     public String getSequenceId() {
         return sequenceId;
     }

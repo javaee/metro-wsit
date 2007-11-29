@@ -1,5 +1,5 @@
 /*
- * $Id: Sequence.java,v 1.16 2007-11-27 23:45:43 m_potociar Exp $
+ * $Id: Sequence.java,v 1.17 2007-11-29 14:05:07 m_potociar Exp $
  */
 
 /*
@@ -123,7 +123,7 @@ public class Sequence {
         this.acksTo = acksToUri;
     }
 
-    public Sequence(URI acksToUri, SequenceConfig config, boolean flag) {        
+    public Sequence(URI acksToUri, SequenceConfig config, boolean flag) {
         this(acksToUri, config);
 
         // FIXME: provide generally working solution for maxMessages setup:

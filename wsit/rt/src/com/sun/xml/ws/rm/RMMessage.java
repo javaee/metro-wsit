@@ -1,5 +1,5 @@
 /*
- * $Id: RMMessage.java,v 1.3 2007-11-28 19:36:13 m_potociar Exp $
+ * $Id: RMMessage.java,v 1.4 2007-11-29 14:05:07 m_potociar Exp $
  */
 
 /*
@@ -128,7 +128,7 @@ public final class RMMessage {
         this.oneWayResponse = isOneWayResponse;
         this.twoWayRequest = isTwoWayRequest;
     }
-    
+
     /**
      * Sets  the value of the sequence field.  Used by Sequence methods when
      * adding message to the sequence.

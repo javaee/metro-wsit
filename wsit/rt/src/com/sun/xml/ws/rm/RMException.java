@@ -1,5 +1,5 @@
 /*
- * $Id: RMException.java,v 1.4 2007-11-27 17:13:55 m_potociar Exp $
+ * $Id: RMException.java,v 1.5 2007-11-29 14:05:07 m_potociar Exp $
  */
 
 /*
@@ -46,7 +46,7 @@ import com.sun.xml.ws.api.message.Message;
  */
 public class RMException extends Exception {
 
-    private final com.sun.xml.ws.api.message.Message faultMessage;
+    private final Message faultMessage;
 
     public RMException() {
         // TODO: we should not throw exception without providing textual info
@@ -74,18 +74,17 @@ public class RMException extends Exception {
         this.faultMessage = faultMessage;
     }
 
-    public RMException(String info, com.sun.xml.ws.api.message.Message faultMessage) {
+    public RMException(String info, Message faultMessage) {
         super(info);
         this.faultMessage = faultMessage;
     }
-    
+
     /**
      * Returns a Message containign a Fault defined by WS-RM.
      *
-     * @return The Fault message
-     *          null if there is no mapped Fault message
+     * @return The Fault message or null if there is no mapped Fault message
      */
-    public com.sun.xml.ws.api.message.Message getFaultMessage() {
+    public Message getFaultMessage() {
         return faultMessage;
     }
 }

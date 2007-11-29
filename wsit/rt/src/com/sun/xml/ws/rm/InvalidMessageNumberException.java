@@ -41,7 +41,6 @@
  * Created on February 11, 2006, 9:45 AM
  *
  */
-
 package com.sun.xml.ws.rm;
 
 /**
@@ -50,19 +49,18 @@ package com.sun.xml.ws.rm;
  *
  */
 public class InvalidMessageNumberException extends RMException {
-    
+
     /**
      */
     public InvalidMessageNumberException() {
         super();
     }
-    
-    public InvalidMessageNumberException(String message) { 
+
+    public InvalidMessageNumberException(String message) {
         super(message);
     }
-    
-     public InvalidMessageNumberException(Throwable e) {
-         super(e);
+
+    public InvalidMessageNumberException(Throwable e) {
+        super(e);
     }
-     
-    }
+}

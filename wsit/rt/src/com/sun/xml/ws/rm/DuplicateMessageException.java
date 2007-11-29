@@ -53,10 +53,10 @@ public class DuplicateMessageException extends RMException {
      * Store original of Duplicate message if passed using the ctor
      * taking a Message parameter.
      */
-    private final RMMessage message;
+    private final RMMessage rmMessage;
 
     public DuplicateMessageException(RMMessage message) {
-        this.message = message;
+        this.rmMessage = message;
     }
 
     /**
@@ -64,6 +64,6 @@ public class DuplicateMessageException extends RMException {
      * @return The value of the field.
      */
     public RMMessage getRMMessage() {
-        return message;
+        return rmMessage;
     }
 }

@@ -70,7 +70,7 @@ public class TerminateSequenceException extends RMException {
 
     public TerminateSequenceException(String message, Throwable cause) {
         super(message, cause);
-    }      
+    }
 
     public TerminateSequenceException(Throwable e) {
         super(e);

@@ -41,7 +41,6 @@
  * Created on February 13, 2006, 3:23 PM
  *
  */
-
 package com.sun.xml.ws.rm;
 
 /**
@@ -49,19 +48,18 @@ package com.sun.xml.ws.rm;
  * attempt is made to add a message.
  */
 public class BufferFullException extends RMException {
-    
-   /**
-    * Sequence whose buffer is full.
-    */
-   private final Sequence seq;
-   
-   public BufferFullException(Sequence seq) {
+
+    /**
+     * Sequence whose buffer is full.
+     */
+    private final Sequence seq;
+
+    public BufferFullException(Sequence seq) {
         super();
         this.seq = seq;
-   }
-   
-   public Sequence getSequence() {
-       return seq;
-   }
-    
+    }
+
+    public Sequence getSequence() {
+        return seq;
+    }
 }
