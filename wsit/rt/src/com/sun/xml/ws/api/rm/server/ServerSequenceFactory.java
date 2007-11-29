@@ -45,14 +45,13 @@
 package com.sun.xml.ws.api.rm.server;
 
 import com.sun.xml.ws.api.rm.SequenceSettings;
-import java.util.logging.Logger;
-import java.util.logging.Level;
-import com.sun.xml.ws.rm.jaxws.util.LoggingHelper;
 import com.sun.xml.ws.rm.jaxws.runtime.server.RMDestination;
 import com.sun.xml.ws.rm.RMException;
+import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
+import com.sun.xml.ws.rm.localization.RmLogger;
+
 import java.net.URI;
 import java.net.URISyntaxException;
-import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
 
 /**
  * Factory class contains a method that can be used to re-initialize a server-side
@@ -60,7 +59,7 @@ import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
  */
 public class ServerSequenceFactory {
 
-    private static Logger logger = Logger.getLogger(LoggingHelper.getLoggerName(ServerSequenceFactory.class));
+    private static RmLogger logger = RmLogger.getLogger(ServerSequenceFactory.class);
 
     private ServerSequenceFactory() {
     }
@@ -84,12 +83,12 @@ public class ServerSequenceFactory {
                     settings.getCompanionSequenceId(),
                     new SequenceConfig(settings));
         } catch (RMException e) {
-            //TODO I18
-            logger.log(Level.SEVERE, "ServerSequenceFactory.createSequence failed", e);
+            //TODO L10N
+            logger.severe("ServerSequenceFactory.createSequence failed", e);
             return null;
         } catch (URISyntaxException e) {
-            //TODO I18
-            logger.log(Level.SEVERE, "ServerSequenceFactory.createSequence failed", e);
+            //TODO L10N
+            logger.severe("ServerSequenceFactory.createSequence failed", e);
             return null;
         }
     }
