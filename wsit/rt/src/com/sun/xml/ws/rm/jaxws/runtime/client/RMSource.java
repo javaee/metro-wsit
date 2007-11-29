@@ -34,28 +34,22 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
-/*
- * RMSource.java
- *
- * @author Mike Grogan
- * Created on October 15, 2005, 6:24 PM
- */
 package com.sun.xml.ws.rm.jaxws.runtime.client;
 
+import com.sun.xml.ws.rm.Constants;
 import com.sun.xml.ws.rm.RMException;
 import com.sun.xml.ws.rm.jaxws.runtime.RMProvider;
+import com.sun.xml.ws.rm.localization.LocalizationMessages;
+import com.sun.xml.ws.rm.localization.RmLogger;
+
+import java.io.ByteArrayInputStream;
+import java.util.Hashtable;
+import java.util.logging.Level;
 import javax.xml.namespace.QName;
 import javax.xml.ws.Dispatch;
 import javax.xml.ws.Service;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
-import java.io.ByteArrayInputStream;
-import com.sun.xml.ws.rm.Constants;
-import com.sun.xml.ws.rm.localization.LocalizationMessages;
-import java.util.Hashtable;
-import java.util.logging.Logger;
-import java.util.logging.Level;
 
 /**
  * An RMSource represents a Collection of RMSequences with a
@@ -63,7 +57,7 @@ import java.util.logging.Level;
  */
 public class RMSource extends RMProvider {
 
-    private static final Logger logger = Logger.getLogger(RMSource.class.getName());
+    private static final RmLogger LOGGER = RmLogger.getLogger(RMSource.class);
     private static final RMSource RM_SOURCE_INSTANCE = new RMSource();
     private static final byte[] CREATE_SEQUENCE_PAYLOAD = "<sun:createSequence xmlns:sun=\"http://com.sun/createSequence\"/>".getBytes();
     private RetryTimer retryTimer;
@@ -97,7 +91,7 @@ public class RMSource extends RMProvider {
     }
 
     public synchronized void addOutboundSequence(ClientOutboundSequence seq) {
-        logger.fine(LocalizationMessages.WSRM_2011_ADDING_SEQUENCE_MESSAGE(seq.getId()));
+        LOGGER.fine(LocalizationMessages.WSRM_2011_ADDING_SEQUENCE_MESSAGE(seq.getId()));
 
         boolean firstSequence = outboundMap.isEmpty();
         outboundMap.put(seq.getId(), seq);
@@ -116,7 +110,7 @@ public class RMSource extends RMProvider {
     }
 
     public synchronized void removeOutboundSequence(ClientOutboundSequence seq) {
-        logger.fine(LocalizationMessages.WSRM_2012_REMOVING_SEQUENCE_MESSAGE(seq.getId()));
+        LOGGER.fine(LocalizationMessages.WSRM_2012_REMOVING_SEQUENCE_MESSAGE(seq.getId()));
 
         String id = seq.getId();
         ClientInboundSequence iseq = (ClientInboundSequence) seq.getInboundSequence();
@@ -138,10 +132,7 @@ public class RMSource extends RMProvider {
         if (seq != null) {
             removeOutboundSequence(seq);
         } else {
-            String message = LocalizationMessages.WSRM_2013_NO_SUCH_OUTBOUND_SEQUENCE(id);
-            IllegalArgumentException e = new IllegalArgumentException(message);
-            logger.log(Level.FINE, message, e);
-            throw e;
+            throw LOGGER.logException(new IllegalArgumentException(LocalizationMessages.WSRM_2013_NO_SUCH_OUTBOUND_SEQUENCE(id)), Level.FINE);
         }
     }
 
@@ -188,13 +179,11 @@ public class RMSource extends RMProvider {
         try {
             dispatch.invoke(source);
         } catch (Exception e) {
-
-        //dont care what happened processing the response message.  We are only
-        //interested in the sequence that has been stored in the request context
-        //
-        //TODO - At the same time, it would be prettier to get something other than
-        //a fault
-        //TODO exception handling
+            //dont care what happened processing the response message.  We are only
+            //interested in the sequence that has been stored in the request context
+            //TODO - At the same time, it would be prettier to get something other than a fault
+            // TODO L10N + exception handling
+            LOGGER.warning("Sending CreateSequence failed", e);
         }
 
         ClientOutboundSequence seq = (ClientOutboundSequence) dispatch.getRequestContext().get(Constants.sequenceProperty);
@@ -232,40 +221,28 @@ public class RMSource extends RMProvider {
         try {
             seq.disconnect(false);
         } catch (Exception e) {
-            // TODO exception handling
-            e.printStackTrace();
+            // TODO L10N + exception handling
+            LOGGER.warning("Attempt to disconnect sequence [" + seq.getId() + "] failed with exception.", e);
         }
 
         seq.setId(sequenceID);
-        ClientInboundSequence iseq =(ClientInboundSequence) seq.getInboundSequence();
+        ClientInboundSequence iseq = (ClientInboundSequence) seq.getInboundSequence();
 
         if (companionSequenceID != null) {
             if (iseq == null || iseq.getId() == null) {
-                String message = LocalizationMessages.WSRM_2014_NO_TWOWAY_OPERATION();
-                IllegalArgumentException e = new IllegalArgumentException(message);
-                logger.log(Level.FINE, message, e);
-                throw e;
+                throw LOGGER.logException(new IllegalArgumentException(LocalizationMessages.WSRM_2014_NO_TWOWAY_OPERATION()), Level.FINE);
             }
             iseq.setId(companionSequenceID);
         } else if (iseq != null && iseq.getId() != null) {
-            String message = LocalizationMessages.WSRM_2015_NO_INBOUND_SEQUENCE_ID_SPECIFIED();
-            IllegalArgumentException e = new IllegalArgumentException(message);
-            logger.log(Level.FINE, message, e);
-            throw e;
+            throw LOGGER.logException(new IllegalArgumentException(LocalizationMessages.WSRM_2015_NO_INBOUND_SEQUENCE_ID_SPECIFIED()), Level.FINE);
         }
 
         if (outboundMap.get(sequenceID) != null) {
-            String message = LocalizationMessages.WSRM_2016_SEQUENCE_ALREADY_EXISTS(sequenceID);
-            IllegalArgumentException e = new IllegalArgumentException(message);
-            logger.log(Level.FINE, message, e);
-            throw e;
+            throw LOGGER.logException(new IllegalArgumentException(LocalizationMessages.WSRM_2016_SEQUENCE_ALREADY_EXISTS(sequenceID)), Level.FINE);
         }
 
         if (companionSequenceID != null && inboundMap.get(companionSequenceID) != null) {
-            String message = LocalizationMessages.WSRM_2016_SEQUENCE_ALREADY_EXISTS(companionSequenceID);
-            IllegalArgumentException e = new IllegalArgumentException(message);
-            logger.log(Level.FINE, message, e);
-            throw e;
+            throw LOGGER.logException(new IllegalArgumentException(LocalizationMessages.WSRM_2016_SEQUENCE_ALREADY_EXISTS(companionSequenceID)), Level.FINE);
         }
 
         addOutboundSequence(seq);

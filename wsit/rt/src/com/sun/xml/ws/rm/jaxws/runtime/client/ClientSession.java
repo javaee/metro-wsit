@@ -33,17 +33,10 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
-/*
- * ClientSession.java
- *
- * @author Mike Grogan
- * Created on February 26, 2006, 4:35 PM
- *
- */
-
 package com.sun.xml.ws.rm.jaxws.runtime.client;
+
 import com.sun.xml.ws.rm.jaxws.runtime.Session;
+
 import javax.xml.ws.BindingProvider;
 
 /**
@@ -51,29 +44,35 @@ import javax.xml.ws.BindingProvider;
  * In addition to SessionID, ability to Terminate the underlying 
  * ClientOutboundSequence is exposed in the close method.
  */
-public class ClientSession extends Session{
-    
-    private RMClientTube tube;
+public class ClientSession extends Session {
+
+    public static final String SESSION_PROPERTY_KEY = "rmsession";
     /**
+     * Client RM tube associated with the session 
+     */
+    private RMClientTube tube;
+    private String id;
+    
+    /**
+     * Constructor of the client session
      */
     public ClientSession(String id, RMClientTube tube) {
-        super(id);
+        this.id = id;
         this.tube = tube;
     }
-    
+
     public void close() {
         if (tube != null) {
             tube.preDestroy();
         }
         tube = null;
     }
+
+    public String getId() {
+        return id;
+    }
     
     public static ClientSession getSession(BindingProvider proxy) {
-        return (ClientSession)proxy.getRequestContext().get("rmsession");
+        return (ClientSession) proxy.getRequestContext().get(SESSION_PROPERTY_KEY);
     }
-    
-    public static void setSession(BindingProvider proxy, ClientSession session) {
-        proxy.getRequestContext().put("rmsession", session);
-    }
-    
 }

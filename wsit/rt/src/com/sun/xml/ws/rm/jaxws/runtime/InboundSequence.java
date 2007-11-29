@@ -33,14 +33,6 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
-/*
- * InboundSequence.java
- *
- * @author Mike Grogan
- * Created on November 24, 2005, 9:29 AM
- *
- */
 package com.sun.xml.ws.rm.jaxws.runtime;
 
 import com.sun.xml.ws.rm.InvalidMessageNumberException;
@@ -73,7 +65,7 @@ public abstract class InboundSequence extends Sequence {
     protected InboundSequence(URI acksTo, SequenceConfig config) {
         super(acksTo, config);
     }
-    
+
     protected InboundSequence(URI acksTo, SequenceConfig config, boolean flag) {
         // TODO: remove
         super(acksTo, config, flag);
@@ -81,7 +73,7 @@ public abstract class InboundSequence extends Sequence {
 
     protected void setCompanionSequence(OutboundSequence companionSequence) {
         // TODO: remove this method if possible
-        this.companionOutboundSequence = companionSequence;        
+        this.companionOutboundSequence = companionSequence;
     }
 
     /** Construct a <code>SequenceAcknowlegementElement</code> based on the contents of this sequence.
@@ -121,10 +113,7 @@ public abstract class InboundSequence extends Sequence {
 
         int maxMessageNumber = 0;
 
-        //FIXME
-        //The new WSRM 1.1 spec has no element for MaxMessageNumber in AckRequested
-        //hence commenting this code we will just use the last index of the message
-
+        //FIXME The new WSRM 1.1 spec has no element for MaxMessageNumber in AckRequested hence commenting this code we will just use the last index of the message
         /*if (reqElement != null) {
         maxMessageNumber = (int)(reqElement.getMaxMessageNumber());
         }*/
@@ -166,7 +155,6 @@ public abstract class InboundSequence extends Sequence {
      * for delivery on next outbound application message.
      * TODO Currently only works for replyTo = AcksTo scenarios.  Expand functionality to allow AcksTo
      * to different destination.
-     *
      *   
      * @param reqElement The <code>AbstractAckRequested</code> to process.
      *        marshaller The marshaller to be used for construction of the return value.

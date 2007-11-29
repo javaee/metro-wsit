@@ -33,14 +33,6 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
-/*
- * SequenceConfig.java
- *
- * @author Mike Grogan
- * Created on October 16, 2005, 1:23 PM
- *
- */
 package com.sun.xml.ws.rm.jaxws.runtime;
 
 import com.sun.xml.ws.api.SOAPVersion;
@@ -55,9 +47,9 @@ import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.policy.jaxws.WSDLPolicyMapWrapper;
 import com.sun.xml.ws.rm.Constants;
-import com.sun.xml.ws.rm.RMException;
 import com.sun.xml.ws.rm.RMVersion;
 
+import com.sun.xml.ws.rm.localization.RmLogger;
 import java.net.URI;
 import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceException;
@@ -71,6 +63,7 @@ import java.util.Iterator;
  */
 public class SequenceConfig implements SequenceSettings {
 
+    private static final RmLogger LOGGER = RmLogger.getLogger(SequenceConfig.class);
     private static final QName ORDERED_QNAME = new QName(Constants.sunVersion, "Ordered");
     private static final QName ALLOW_DUPLICATES_QNAME = new QName(Constants.sunVersion, "AllowDuplicates");
     private static final QName RESEND_INTERVAL_QNAME = new QName(Constants.sunClientVersion, "ResendInterval");
@@ -109,14 +102,14 @@ public class SequenceConfig implements SequenceSettings {
 
     public SequenceConfig(WSDLPort port, AddressingVersion addressing, SOAPVersion soap) {
         this.ackRequestInterval = 0;
-        this.addressingVersion = (addressing != null)? addressing : AddressingVersion.W3C;
+        this.addressingVersion = (addressing != null) ? addressing : AddressingVersion.W3C;
         this.acksTo = this.addressingVersion.anonymousUri;
-        
+
         try {
             this.anonymousAddressingUri = new URI(this.addressingVersion.anonymousUri);
         } catch (Throwable e) {
-            // TODO axception logging
-            throw new WebServiceException(e);
+            // TODO L10N
+            throw LOGGER.logSevereException(new WebServiceException("Unable to initialize sequence configuration due to an unexpected exception", e));
         }
 
         this.allowDuplicatesEnabled = false;
@@ -134,9 +127,9 @@ public class SequenceConfig implements SequenceSettings {
             PolicyMap policyMap = port.getBinding().getOwner().getExtension(WSDLPolicyMapWrapper.class).getPolicyMap();
             try {
                 init(port, policyMap);
-            } catch (RMException e) {
-                // TODO axception logging
-                throw new WebServiceException(e);
+            } catch (PolicyException e) {
+                // TODO L10N (same as above)
+                throw LOGGER.logSevereException(new WebServiceException("Unable to initialize sequence configuration due to an unexpected exception", e));
             }
         }
     }
@@ -151,7 +144,7 @@ public class SequenceConfig implements SequenceSettings {
 
         this.ackRequestInterval = settings.getAckRequestInterval();
         this.acksTo = settings.getAcksTo();
-        this.addressingVersion = settings.getAddressingVersion();        
+        this.addressingVersion = settings.getAddressingVersion();
         this.allowDuplicatesEnabled = settings.isAllowDuplicatesEnabled();
         this.anonymousAddressingUri = settings.getAnonymousAddressingUri();
         this.bufferSize = settings.getBufferSize();
@@ -306,74 +299,70 @@ public class SequenceConfig implements SequenceSettings {
         return sequenceTransportSecurityRequired;
     }
 
-    private void init(WSDLPort port, PolicyMap policyMap) throws RMException {
-        try {
-            if (policyMap != null) {
-                PolicyMapKey endpointScopeKey =
-                        PolicyMap.createWsdlEndpointScopeKey(port.getOwner().getName(),
-                        port.getName());
+    private void init(WSDLPort port, PolicyMap policyMap) throws PolicyException {
+        if (policyMap != null) {
+            PolicyMapKey endpointScopeKey =
+                    PolicyMap.createWsdlEndpointScopeKey(port.getOwner().getName(),
+                    port.getName());
 
-                if (endpointScopeKey != null) {
+            if (endpointScopeKey != null) {
 
-                    AssertionSet policyAssertionSet = null;
-                    Policy policy = policyMap.getEndpointEffectivePolicy(endpointScopeKey);
-                    if (policy != null) {
-                        for (AssertionSet set : policy) {
-                            policyAssertionSet = set;
-                            break;
-                        }
-
+                AssertionSet policyAssertionSet = null;
+                Policy policy = null;
+                policy = policyMap.getEndpointEffectivePolicy(endpointScopeKey);
+                if (policy != null) {
+                    for (AssertionSet set : policy) {
+                        policyAssertionSet = set;
+                        break;
                     }
 
-                    if (policyAssertionSet != null) {
-                        for (PolicyAssertion assertion : policyAssertionSet) {
-                            QName qname = assertion.getName();
+                }
 
-                            if (RMVersion.WSRM10.rmPolicyAssertionQName.equals(qname)) {
-                                rmVersion = RMVersion.WSRM10;
-                                handleRMAssertion(assertion);
-                            } else if (RMVersion.WSRM11.rmPolicyAssertionQName.equals(qname)) {
-                                rmVersion = RMVersion.WSRM11;
-                                handleRMAssertion(assertion);
-                            } else if (RM_FLOW_CONTROL_QNAME.equals(qname)) {
-                                handleFlowAssertion(assertion);
-                            } else if (ORDERED_QNAME.equals(qname)) {
-                                ordered = true;
-                            } else if (ALLOW_DUPLICATES_QNAME.equals(qname)) {
-                                allowDuplicatesEnabled = true;
-                            } else if (ACK_REQUEST_INTERVAL_QNAME.equals(qname)) {
-                                String num = assertion.getAttributeValue(MILLISECONDS_ATTRIBUTE_QNAME);
-                                if (num != null) {
-                                    ackRequestInterval = Long.parseLong(num);
-                                }
+                if (policyAssertionSet != null) {
+                    for (PolicyAssertion assertion : policyAssertionSet) {
+                        QName qname = assertion.getName();
 
-                            } else if (RESEND_INTERVAL_QNAME.equals(qname)) {
-                                String num = assertion.getAttributeValue(MILLISECONDS_ATTRIBUTE_QNAME);
-                                if (num != null) {
-                                    resendInterval = Long.parseLong(num);
-                                }
-
-                            } else if (CLOSE_TIMEOUT_QNAME.equals(qname)) {
-                                String num = assertion.getAttributeValue(MILLISECONDS_ATTRIBUTE_QNAME);
-                                if (num != null) {
-                                    closeTimeout = Long.parseLong(num);
-                                }
-
-                            } else if (RMVersion.WSRM11.sequenceSTRAssertionQName.equals(qname)) {
-                                sequenceSTRRequired = true;
-                            } else if (RMVersion.WSRM11.sequenceTransportSecurityAssertionQName.equals(qname)) {
-                                sequenceTransportSecurityRequired = true;
-                            } else {
-                            //TODO handle error condition here
+                        if (RMVersion.WSRM10.rmPolicyAssertionQName.equals(qname)) {
+                            rmVersion = RMVersion.WSRM10;
+                            handleRMAssertion(assertion);
+                        } else if (RMVersion.WSRM11.rmPolicyAssertionQName.equals(qname)) {
+                            rmVersion = RMVersion.WSRM11;
+                            handleRMAssertion(assertion);
+                        } else if (RM_FLOW_CONTROL_QNAME.equals(qname)) {
+                            handleFlowAssertion(assertion);
+                        } else if (ORDERED_QNAME.equals(qname)) {
+                            ordered = true;
+                        } else if (ALLOW_DUPLICATES_QNAME.equals(qname)) {
+                            allowDuplicatesEnabled = true;
+                        } else if (ACK_REQUEST_INTERVAL_QNAME.equals(qname)) {
+                            String num = assertion.getAttributeValue(MILLISECONDS_ATTRIBUTE_QNAME);
+                            if (num != null) {
+                                ackRequestInterval = Long.parseLong(num);
                             }
+
+                        } else if (RESEND_INTERVAL_QNAME.equals(qname)) {
+                            String num = assertion.getAttributeValue(MILLISECONDS_ATTRIBUTE_QNAME);
+                            if (num != null) {
+                                resendInterval = Long.parseLong(num);
+                            }
+
+                        } else if (CLOSE_TIMEOUT_QNAME.equals(qname)) {
+                            String num = assertion.getAttributeValue(MILLISECONDS_ATTRIBUTE_QNAME);
+                            if (num != null) {
+                                closeTimeout = Long.parseLong(num);
+                            }
+
+                        } else if (RMVersion.WSRM11.sequenceSTRAssertionQName.equals(qname)) {
+                            sequenceSTRRequired = true;
+                        } else if (RMVersion.WSRM11.sequenceTransportSecurityAssertionQName.equals(qname)) {
+                            sequenceTransportSecurityRequired = true;
+                        } else {
+                        //TODO handle error condition here
                         }
                     }
                 }
             }
-        } catch (PolicyException e) {
-            e.printStackTrace();
         }
-
     }
 
     private void handleRMAssertion(PolicyAssertion rmAssertion) {

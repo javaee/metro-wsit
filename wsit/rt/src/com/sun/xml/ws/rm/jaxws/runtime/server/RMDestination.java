@@ -33,13 +33,6 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
-/*
- * RMDestination.java
- *
- * @author Mike Grogan
- * Created on October 15, 2005, 6:24 PM
- */
 package com.sun.xml.ws.rm.jaxws.runtime.server;
 
 import com.sun.xml.ws.rm.InvalidSequenceException;
@@ -49,8 +42,15 @@ import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.RMProvider;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
+
+import com.sun.xml.ws.rm.localization.RmLogger;
 import java.net.URI;
-import java.util.*;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * An RMDestination represents a Collection of Inbound RMSequences.
@@ -58,6 +58,7 @@ import java.util.*;
 public class RMDestination extends RMProvider {
 
     private static final RMDestination RM_DESTINATION_INSTANCE = new RMDestination();
+    private static final RmLogger LOGGER = RmLogger.getLogger(RMDestination.class);
 
     /*
      * Contains all the <code>OutboundSequences</code> managed
@@ -73,7 +74,7 @@ public class RMDestination extends RMProvider {
     private Hashtable<String, ServerInboundSequence> inboundMap = new Hashtable<String, ServerInboundSequence>();
     //TODO - make an intelligent choice for  wake-up interval.
     private SequenceReaper reaper = new SequenceReaper(5000, inboundMap);
-    
+
     public static RMDestination getRMDestination() {
         return RM_DESTINATION_INSTANCE;
     }
@@ -152,12 +153,11 @@ public class RMDestination extends RMProvider {
                     //are expired.
                     HashSet<String> keysToRemove = new HashSet<String>();
                     for (String key : map.keySet()) {
-
                         ServerInboundSequence sis = map.get(key);
                         synchronized (sis) {
                             if (sis.isExpired()) {
-                                System.out.println("Terminating expired sequence " +
-                                        sis.getId());
+                                // TODO: L10N                                
+                                LOGGER.fine("Terminating expired sequence: " + sis.getId());
                                 keysToRemove.add(key);
                             }
                         }
@@ -167,10 +167,10 @@ public class RMDestination extends RMProvider {
                         try {
                             terminateSequence(str);
                         } catch (Exception e) {
-                            e.printStackTrace();
+                            // TODO: L10N
+                            LOGGER.warning("Exception occured when terminating sequence: " + str, e);
                         }
                     }
-
                 }
             };
 
@@ -186,10 +186,9 @@ public class RMDestination extends RMProvider {
             super(true);
             this.map = map;
             this.frequency = frequency;
-
         }
     }
-    
+
     /**
      * Look up <code>OutboundSequence</code> with given id.
      *

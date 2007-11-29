@@ -33,11 +33,11 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.rm.jaxws.runtime.client;
-import javax.xml.ws.WebServiceProvider;
-import javax.xml.ws.Provider;
+
 import javax.xml.transform.Source;
+import javax.xml.ws.Provider;
+import javax.xml.ws.WebServiceProvider;
 
 /*
  * DummyProvider.java
@@ -46,10 +46,11 @@ import javax.xml.transform.Source;
  * Created on February 16, 2006, 12:07 PM
  *
  */
+// TODO unused class: remove?
+@WebServiceProvider
+public class DummyProvider implements Provider<Source> {
 
- @WebServiceProvider
- public class DummyProvider implements Provider<Source> {
-       public Source invoke(Source s) {
-           return null;
-       }
-  }
+    public Source invoke(Source s) {
+        return null;
+    }
+}

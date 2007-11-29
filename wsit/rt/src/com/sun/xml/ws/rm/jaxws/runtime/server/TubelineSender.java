@@ -17,9 +17,11 @@ import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.rm.MessageSender;
+import com.sun.xml.ws.rm.localization.RmLogger;
 
 public class TubelineSender implements MessageSender, Fiber.CompletionCallback {
 
+    private static final RmLogger LOGGER = RmLogger.getLogger(TubelineSender.class);
     private Fiber fiber;
     private Fiber parentFiber;
     private Packet requestPacket;
@@ -27,7 +29,8 @@ public class TubelineSender implements MessageSender, Fiber.CompletionCallback {
     private AddressingVersion addressingVersion;
     private RMServerTube tube;
 
-    public TubelineSender(RMServerTube tube,
+    public TubelineSender(
+            RMServerTube tube,
             Packet packet,
             SOAPVersion soapVersion,
             AddressingVersion addressingVersion) {
@@ -44,23 +47,22 @@ public class TubelineSender implements MessageSender, Fiber.CompletionCallback {
         try {
             tube.postProcess(packet);
             parentFiber.resume(packet);
-        } catch ( Throwable t) {
+        } catch (Throwable t) {
+            // TODO L10N
+            LOGGER.severe("Unexcpected error occured, proceeding with handling the exception", t);
             onCompletion(t);
         }
     }
 
     public void onCompletion(@NotNull Throwable throwable) {
-        try {
-            Message mess = Messages.create(throwable, soapVersion);
-            Packet packet = requestPacket.createServerResponse(
-                    mess,
-                    addressingVersion,
-                    soapVersion,
-                    addressingVersion.getDefaultFaultAction());
-            parentFiber.resume(packet);
-        } catch ( Throwable t) {
-        //TODO - exception handling
-        }
+        Message mess = Messages.create(throwable, soapVersion);
+        Packet packet = requestPacket.createServerResponse(
+                mess,
+                addressingVersion,
+                soapVersion,
+                addressingVersion.getDefaultFaultAction());
+        parentFiber.resume(packet);
+        // TODO: Should I really catch another Throwable here and just log & discard it?
     }
 
     public void send() {

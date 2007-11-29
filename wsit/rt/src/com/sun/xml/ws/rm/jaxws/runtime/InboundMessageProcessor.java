@@ -33,14 +33,6 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
-/*
- * InboundMessageProcessor.java
- *
- * @author Mike Grogan
- * Created on October 31, 2005, 8:21 AM
- *
- */
 package com.sun.xml.ws.rm.jaxws.runtime;
 
 import com.sun.xml.ws.api.message.Header;
@@ -50,6 +42,7 @@ import com.sun.xml.ws.rm.MessageNumberRolloverException;
 import com.sun.xml.ws.rm.RMException;
 import com.sun.xml.ws.rm.RMMessage;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
+import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.protocol.AbstractAckRequested;
 import com.sun.xml.ws.rm.protocol.AbstractSequence;
 import com.sun.xml.ws.rm.protocol.AbstractSequenceAcknowledgement;
@@ -66,6 +59,7 @@ import javax.xml.bind.Unmarshaller;
  */
 public class InboundMessageProcessor {
 
+    private static final RmLogger LOGGER = RmLogger.getLogger(InboundMessageProcessor.class);
     private RMProvider provider;
 
     public InboundMessageProcessor(RMProvider provider) {
@@ -89,14 +83,14 @@ public class InboundMessageProcessor {
      * @param message The inbound <code>Message</code>.
      */
     public void processMessage(RMMessage message, Unmarshaller unmarshaller) throws RMException {
-        try {
-            /*
-             * Check for each RM header type and do the right thing in RMProvider
-             * depending on the type.
-             */
-            InboundSequence inseq = null;
-            Header header = message.getHeader("Sequence");
-            if (header != null) {
+        /*
+         * Check for each RM header type and do the right thing in RMProvider
+         * depending on the type.
+         */
+        InboundSequence inseq = null;
+        Header header = message.getHeader("Sequence");
+        if (header != null) {
+            try {
                 //identify sequence and message number from data in header and add
                 //the message to the sequence at the specified index.
                 //TODO handle error condition seq == null
@@ -114,27 +108,29 @@ public class InboundMessageProcessor {
                 }
 
                 if (messageNumber == Integer.MAX_VALUE) {
-                    throw new MessageNumberRolloverException(LocalizationMessages.WSRM_3026_MESSAGE_NUMBER_ROLLOVER(messageNumber), messageNumber);
+                    throw LOGGER.logSevereException(new MessageNumberRolloverException(LocalizationMessages.WSRM_3026_MESSAGE_NUMBER_ROLLOVER(messageNumber), messageNumber));
                 }
 
                 inseq = provider.getInboundSequence(seqid);
                 if (inseq != null) {
                     if (inseq.isClosed()) {
-                        throw new CloseSequenceException(LocalizationMessages.WSRM_3029_SEQUENCE_CLOSED(seqid), seqid);
+                        throw LOGGER.logSevereException(new CloseSequenceException(LocalizationMessages.WSRM_3029_SEQUENCE_CLOSED(seqid), seqid));
                     }
                     //add message to ClientInboundSequence
                     inseq.set(messageNumber, message);
                 } else {
-                    throw new InvalidSequenceException(LocalizationMessages.WSRM_3022_UNKNOWN_SEQUENCE_ID_IN_MESSAGE(seqid), seqid);
+                    throw LOGGER.logSevereException(new InvalidSequenceException(LocalizationMessages.WSRM_3022_UNKNOWN_SEQUENCE_ID_IN_MESSAGE(seqid), seqid));
                 }
+            } catch (JAXBException e) {
+                throw LOGGER.logSevereException(new RMException("Unable to unmarshall Sequence RM header", e));
             }
+        }
 
-            header = message.getHeader("SequenceAcknowledgement");
-            if (header != null) {
-                //determine OutboundSequence id from data in header and update
-                //state of that sequence according to the acks and nacks in the element 
+        header = message.getHeader("SequenceAcknowledgement");
+        if (header != null) {
+            try {
                 AbstractSequenceAcknowledgement ackHeader = header.readAsJAXB(unmarshaller);
-               
+
                 String ackHeaderId = null;
                 if (ackHeader instanceof com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement) {
                     ackHeaderId = ((com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement) ackHeader).getId();
@@ -147,10 +143,14 @@ public class InboundMessageProcessor {
                 if (seq != null) {
                     seq.handleAckResponse(ackHeader);
                 }
+            } catch (JAXBException e) {
+                throw LOGGER.logSevereException(new RMException("Unable to unmarshall SequenceAcknowledgement RM header", e));
             }
+        }
 
-            header = message.getHeader("AckRequested");
-            if (header != null) {
+        header = message.getHeader("AckRequested");
+        if (header != null) {
+            try {
                 //dispatch to InboundSequence to construct response.
                 //TODO handle error condition no such sequence
                 AbstractAckRequested el = header.readAsJAXB(unmarshaller);
@@ -167,24 +167,25 @@ public class InboundMessageProcessor {
                 if (seq != null) {
                     seq.handleAckRequested();
                 }
-            } else {
-                // FIXME - We need to be checking whether this is a ServerInboundSequence
-                // in a port with a two-way operation.  This is the case where MS
-                // puts a SequenceAcknowledgement on every message.
-                // Need to check this with the latest CTP
-                // Currently with Dec CTP the client message
-                // does not have AckRequested element
-                // but they are expecting a SequenceAcknowledgement
-                // Hack for now
-                if (inseq != null) {
-                    inseq.handleAckRequested();
-                } else {
-                //we can get here if there is no sequence header.  Perhaps this
-                //is a ClientInboundSequence where the OutboundSequence has no two-ways
-                }
+            } catch (JAXBException e) {
+                throw LOGGER.logSevereException(new RMException("Unable to unmarshall AckRequested RM header", e));
             }
-        } catch (JAXBException e) {
-            throw new RMException(e);
+        } else {
+            // FIXME - We need to be checking whether this is a ServerInboundSequence
+            // in a port with a two-way operation.  This is the case where MS
+            // puts a SequenceAcknowledgement on every message.
+            // Need to check this with the latest CTP
+            // Currently with Dec CTP the client message
+            // does not have AckRequested element
+            // but they are expecting a SequenceAcknowledgement
+            // Hack for now
+            if (inseq != null) {
+                inseq.handleAckRequested();
+            } else {
+            //we can get here if there is no sequence header.  Perhaps this
+            //is a ClientInboundSequence where the OutboundSequence has no two-ways
+            }
         }
+
     }
 }

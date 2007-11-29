@@ -33,14 +33,6 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
-/*
- * RMProvider.java
- *
- * @author Mike Grogan
- * Created on November 25, 2005, 9:50 AM
- *
- */
 package com.sun.xml.ws.rm.jaxws.runtime;
 
 import com.sun.xml.ws.rm.jaxws.util.ProcessingFilter;

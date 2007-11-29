@@ -39,10 +39,14 @@ import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.spi.PolicyAssertionValidator;
 import com.sun.xml.ws.policy.spi.PolicyAssertionValidator.Fitness;
 import com.sun.xml.ws.rm.RMVersion;
-import static com.sun.xml.ws.rm.Constants.*;
+
+import static com.sun.xml.ws.rm.Constants.microsoftVersion;
+import static com.sun.xml.ws.rm.Constants.sunVersion;
+import static com.sun.xml.ws.rm.Constants.sunClientVersion;
 
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
+
 public class RMPolicyValidator implements PolicyAssertionValidator {
 
     private static final ArrayList<QName> serverSideSupportedAssertions = new ArrayList<QName>(7);

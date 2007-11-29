@@ -33,15 +33,6 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
-/*
- * RMClientTube.java
- *
- * @author Mike Grogan
- * @author Bhakti Mehta
- * Created on February 4, 2006, 2:58 PM
- *
- */
 package com.sun.xml.ws.rm.jaxws.runtime.client;
 
 import com.sun.istack.NotNull;
@@ -161,6 +152,7 @@ public final class RMClientTube extends TubeBase {
      *      Destination EndpointAddress URI from the request context.  Default to EndpointAddress
      *      from WSDLPort if it is missing
      */
+    // TODO remove suppress warnings annotation
     @SuppressWarnings("unchecked")
     private synchronized void initialize(Packet packet) throws RMException {
         String dest = packet.endpointAddress.toString();
@@ -174,12 +166,12 @@ public final class RMClientTube extends TubeBase {
             //single client instances and endpoints.
             if (dest != null && !dest.equals("") && !dest.equals(outboundSequence.getDestination().toString())) {
                 //WSRM2017: The Endpoint Address cannot be changed by a client of an RM-enabled endpoint//
-                throw new RMException(LocalizationMessages.WSRM_2017_UNCHANGEABLE_ENDPOINT_ADDRESS());
+                throw LOGGER.logSevereException(new RMException(LocalizationMessages.WSRM_2017_UNCHANGEABLE_ENDPOINT_ADDRESS()));
             }
         } else {
             if (getConfig().getAddressingVersion() == AddressingVersion.MEMBER) {
                 //WSRM2008: The Reliable Messaging Client does not support the Member submission addressing version, which is used by the endpoint.//
-                throw new RMException(LocalizationMessages.WSRM_2008_UNSUPPORTED_ADDRESSING_VERSION());
+                throw LOGGER.logSevereException(new RMException(LocalizationMessages.WSRM_2008_UNSUPPORTED_ADDRESSING_VERSION()));
             }
             //store this in field
             this.proxy = packet.proxy;
@@ -193,7 +185,7 @@ public final class RMClientTube extends TubeBase {
             try {
                 destURI = new URI(dest);
             } catch (URISyntaxException e) {
-                throw new RMException(LocalizationMessages.WSRM_2018_INVALID_DEST_URI(dest), e);
+                throw LOGGER.logSevereException(new RMException(LocalizationMessages.WSRM_2018_INVALID_DEST_URI(dest), e));
             }
 
             ClientOutboundSequence specifiedOutboundSequence = (ClientOutboundSequence) packet.proxy.getRequestContext().get(Constants.sequenceProperty);
@@ -206,7 +198,8 @@ public final class RMClientTube extends TubeBase {
                     try {
                         str = securityPipe.startSecureConversation(packet);
                     } catch (Exception e) {
-                    // TODO: handle exception
+                        // TODO: L10N (+ handle exception + chatch only the particular subclass of Exception?)
+                        LOGGER.severe("Starting secure conversation failed", e);
                     }
                     if (str == null) {
                         // Without this or if there was exception, no security configuration that does not include SC is allowed.
@@ -223,7 +216,6 @@ public final class RMClientTube extends TubeBase {
                         new ProtocolMessageSender(
                         RMSource.getRMSource().getInboundMessageProcessor(),
                         getConfig(),
-                        getMarshaller(),
                         getUnmarshaller(),
                         next,
                         packet));
@@ -234,10 +226,9 @@ public final class RMClientTube extends TubeBase {
                 packet.proxy.getRequestContext().put(Constants.sequenceProperty, outboundSequence);
 
                 inboundSequence = (ClientInboundSequence) outboundSequence.getInboundSequence();
-                //set a Session object in BindingProvider property allowing user to close
-                //the sequence
-                ClientSession.setSession(proxy, new ClientSession(outboundSequence.getId(), this));
-
+                //set a Session object in BindingProvider property allowing user to close the sequence
+                // TODO do we need this? remove?
+                proxy.getRequestContext().put(ClientSession.SESSION_PROPERTY_KEY, new ClientSession(outboundSequence.getId(), this));
             }
         }
     }
@@ -314,7 +305,8 @@ public final class RMClientTube extends TubeBase {
         try {
             outboundSequence.acknowledge(message.getMessageNumber());
         } catch (RMException e) {
-        //TODO log entry
+            //TODO L10N
+            LOGGER.warning("Error acknowledging message [" + message.getMessageNumber() + "] in sequence [" + message.getSequence().getId() + "]", e);
         }
     }
 
@@ -331,7 +323,7 @@ public final class RMClientTube extends TubeBase {
             //Faulted TerminateSequence message of bug downstream.  We are
             //done with the sequence anyway.  Log and go about our business
             //WSRM2007: RMClientPipe threw Exception in preDestroy//
-            LOGGER.fine(LocalizationMessages.WSRM_2007_UNEXPECTED_PREDESTROY_EXCEPTION(), e);
+            LOGGER.warning(LocalizationMessages.WSRM_2007_UNEXPECTED_PREDESTROY_EXCEPTION(), e);
         }
     }
 
@@ -416,7 +408,8 @@ public final class RMClientTube extends TubeBase {
         } else if (tubelineHelper != null) {
             return doThrow(tubelineHelper.throwable);
         } else {
-            throw new IllegalStateException("null Packet in response.");
+            // TODO L10N
+            throw LOGGER.logSevereException(new IllegalStateException("'null' Packet in processResponse()"));
         }
     }
 
@@ -458,7 +451,8 @@ public final class RMClientTube extends TubeBase {
 
             parentFiber = Fiber.current();
             if (parentFiber == null) {
-                throw new IllegalStateException("No current fiber.");
+                // TODO L10N
+                throw LOGGER.logSevereException(new IllegalStateException("No current fiber."));
             }
 
             Engine engine = parentFiber.owner;
@@ -471,7 +465,8 @@ public final class RMClientTube extends TubeBase {
         public void send() {
             message.setIsBusy(true);
             if (packet == null) {
-                throw new IllegalStateException("Request not set in TubelineHelper");
+                // TODO L10N
+                throw LOGGER.logSevereException(new IllegalStateException("Request not set in TubelineHelper"));
             }
 
             //use a copy of the original message
@@ -486,7 +481,6 @@ public final class RMClientTube extends TubeBase {
             }
 
             public void onCompletion(
-                    
                     @NotNull Packet response) {
                 try {
                     if (response != null) {
@@ -532,7 +526,7 @@ public final class RMClientTube extends TubeBase {
 
                     //invoke the rest of the pipeline
                     parentFiber.resume(response);
-                } catch ( Exception e) {
+                } catch (Exception e) {
                     onCompletion(e);
                 } finally {
                     message.setIsBusy(false);
@@ -540,7 +534,6 @@ public final class RMClientTube extends TubeBase {
             }
 
             public void onCompletion(
-                    
                     @NotNull Throwable t) {
                 throwable = t;
                 try {

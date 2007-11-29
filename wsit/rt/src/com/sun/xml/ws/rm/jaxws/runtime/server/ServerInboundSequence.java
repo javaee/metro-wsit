@@ -52,14 +52,12 @@ import com.sun.xml.ws.rm.RMException;
 import com.sun.xml.ws.rm.jaxws.runtime.InboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
-import com.sun.xml.ws.rm.jaxws.util.LoggingHelper;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
+import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.runtime.util.Session;
 
 import java.net.URI;
 import java.util.UUID;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * An <code>ServerInboundSequence</code> represents a sequence of incoming messages.  For an 
@@ -68,13 +66,13 @@ import java.util.logging.Logger;
  */
 public class ServerInboundSequence extends InboundSequence implements ServerSequence {
 
-    private static final Logger logger = Logger.getLogger(LoggingHelper.getLoggerName(ServerInboundSequence.class));
+    private static final RmLogger LOGGER = RmLogger.getLogger(ServerInboundSequence.class);
     /**
      * Session associated with this sequence.
      */
     private Session session;
 
-    public ServerInboundSequence(URI acksTo, String inboundId, String outboundId, SequenceConfig config) {      
+    public ServerInboundSequence(URI acksTo, String inboundId, String outboundId, SequenceConfig config) {
         super(acksTo, config, true);
 
         setCompanionSequence(new ServerOutboundSequence(this, outboundId, config));
@@ -126,18 +124,18 @@ public class ServerInboundSequence extends InboundSequence implements ServerSequ
             return true;
         }
 
-        try {
-            int num = message.getMessageNumber();
-
-            //if immediate predecessor has not been processed, wait fcor it
-            if (num > 1) {
-                RMMessage mess = get(num - 1);
-                if (mess == null || !mess.isComplete()) {
-                    return false;
-                }
+        //if immediate predecessor has not been processed, wait for it
+        if (message.getMessageNumber() > 1) {
+            RMMessage mess = null;
+            try {
+                mess = get(message.getMessageNumber() - 1);
+            } catch (InvalidMessageNumberException e) {
+                // TODO L10N (and throw exception?)
+                LOGGER.severe("Error retrieving the message with number [" + message.getMessageNumber() + "]", e);
             }
-        } catch (Exception e) {
-        // TODO: exception handling
+            if (mess == null || !mess.isComplete()) {
+                return false;
+            }
         }
         return true;
     }
@@ -159,7 +157,8 @@ public class ServerInboundSequence extends InboundSequence implements ServerSequ
                 rmMessage.complete();
             }
         } catch (RMException e) {
-            logger.log(Level.SEVERE, LocalizationMessages.WSRM_3020_COULD_NOT_RESET_MESSAGE(index, getId()), e);
+            // TODO: throw the exception?
+            LOGGER.severe(LocalizationMessages.WSRM_3020_COULD_NOT_RESET_MESSAGE(index, getId()), e);
         }
     }
 
@@ -199,30 +198,6 @@ public class ServerInboundSequence extends InboundSequence implements ServerSequ
     }
 
     /**
-     * When ordered delivery is required, this method is used to determine
-     * whether the messages with lower message numbers have already been 
-     * processed.
-     */
-// TODO remove method as it seems to be unused
-//    public boolean isPredecessorComplete(RMMessage message) {
-//        try {
-//            int num = message.getMessageNumber();
-//
-//            //if immediate predecessor has not been processed, wait fcor it
-//            if (num > 1) {
-//                RMMessage mess = get(num - 1);
-//                if (mess == null || !mess.isComplete()) {
-//                    return false;
-//                }
-//            }
-//        } catch (InvalidMessageNumberException e) {
-//        // TODO: exception handling
-//        }
-//
-//        return true;
-//    }
-
-    /**
      * If ordered delivery is required, resume processing the next Message
      * in the Sequence if it is waiting for this message to be delivered.
      * This method is called when RMServerTube.processResponse is called for this message.
@@ -235,12 +210,12 @@ public class ServerInboundSequence extends InboundSequence implements ServerSequ
         decreaseStoredMessages();
 
         //notify immediate successor if it is waiting 
-        int num = message.getMessageNumber();
+        int num = message.getMessageNumber() + 1;
 
-        if (num < getNextIndex() - 1 && get(num + 1) != null) {
-            // TODO logging
-            System.out.println("resuming " + (num + 1));
-            get(num + 1).resume();
+        if (num < getNextIndex() && get(num) != null) {
+            // TODO L10N
+            LOGGER.finest("Resuming " + num + " message");
+            get(num).resume();
         }
     }
 }

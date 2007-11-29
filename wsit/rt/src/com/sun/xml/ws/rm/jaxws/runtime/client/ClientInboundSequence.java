@@ -33,15 +33,6 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
-/*
- * ClientInboundSequence.java
- *
- * @author Mike Grogan
- * Created on October 15, 2005, 3:11 PM
- *
- */
-
 package com.sun.xml.ws.rm.jaxws.runtime.client;
 
 import com.sun.xml.ws.rm.jaxws.runtime.InboundSequence;
@@ -49,20 +40,16 @@ import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
 
 import java.net.URI;
 
-
 /**
  * An <code>ClientInboundSequence</code> represents a sequence of incoming messages.  
  * For an <code>RMSource</code>, a <code>ClientInboundSequence</code> is comprised 
  * of all the messages containing responses to a companion <code>ClientOutboundSequence</code>.  
  */
-
 public class ClientInboundSequence extends InboundSequence {
-          
+
     public ClientInboundSequence(ClientOutboundSequence companionSequence, String identifier, URI acksTo, SequenceConfig config) {
         super(acksTo, config);
         setId(identifier);
         setCompanionSequence(companionSequence);
     }
-    
-   
 }

@@ -285,11 +285,12 @@ public final class RMServerTube extends TubeBase {
                     return doReturnWith(ret);
                 } else {
                     //unreachable
-                    // TODO: log here at least...
+                    // TODO: L10N
+                    LOGGER.severe("!!!!!!!!!!!!!!!!!!!!!!! This code branch should not be reached !!!!!!!!!!!!!!!!!!!!!!!");
                     return null;
                 }
             } catch (RMException ee) {
-                // TODO hanlde expcetion ?
+                // TODO handle expcetion ?
 
                 LOGGER.severe(LocalizationMessages.WSRM_3001_ACKNOWLEDGEMENT_MESSAGE_EXCEPTION(), e);
                 return doThrow(new WebServiceException(LocalizationMessages.WSRM_3001_ACKNOWLEDGEMENT_MESSAGE_EXCEPTION(), e));
@@ -502,25 +503,9 @@ public final class RMServerTube extends TubeBase {
         }
 
         /**
-         * FIXME
-         * ADDRESSING_FIXME:  Assume for now that AcksTo is anonymous.
+         * FIXME Assume for now that AcksTo is anonymous.
          */
         URI acksTo = getConfig().getAnonymousAddressingUri();
-        /*String acksToString = acksTo.toString();*/
-        /*String replyToString = acksToString;*/
-        /*
-        EndpointReference replyTo = inboundAddressingProperties.getReplyTo();
-        if (replyTo == null) {
-        replyTo = addressingBuilder.newEndpointReference( ac.getAnonymousURI());
-        inboundAddressingProperties.setReplyTo(replyTo);
-        }
-        EndpointReference acksTo = csrElement.getAcksTo();
-        String ackstoUri = acksTo.getAddress().getURI().toString();
-        String replytoUri = replyTo.getAddress().getURI().toString();
-        if (!ackstoUri.equals(replytoUri)){
-        throw new CreateSequenceException(Messages.ACKSTO_NOT_EQUAL_REPLYTO.format(ackstoUri,replytoUri)  );
-        }
-         */
 
         com.sun.xml.ws.security.secext10.SecurityTokenReferenceType strType = null;
         if (csrElement instanceof com.sun.xml.ws.rm.v200502.CreateSequenceElement) {
@@ -572,16 +557,13 @@ public final class RMServerTube extends TubeBase {
                     if (gotId.equals(securityContextTokenId)) {
                         inboundSequence.setSecurityTokenReferenceId(securityContextTokenId);
                     } else {
-                        // TODO: log?
-                        throw new RMSecurityException(LocalizationMessages.WSRM_3004_SECURITY_TOKEN_AUTHORIZATION_ERROR(gotId, securityContextTokenId));
+                        throw LOGGER.logSevereException(new RMSecurityException(LocalizationMessages.WSRM_3004_SECURITY_TOKEN_AUTHORIZATION_ERROR(gotId, securityContextTokenId)));
                     }
                 } else {
-                    // TODO: log?
-                    throw new RMSecurityException(LocalizationMessages.WSRM_3005_SECURITY_REFERENCE_ERROR(ref.getClass().getName()));
+                    throw LOGGER.logSevereException(new RMSecurityException(LocalizationMessages.WSRM_3005_SECURITY_REFERENCE_ERROR(ref.getClass().getName())));
                 }
             } else {
-                // TODO: log?
-                throw new RMSecurityException(LocalizationMessages.WSRM_3006_NULL_SECURITY_TOKEN());
+                throw LOGGER.logSevereException(new RMSecurityException(LocalizationMessages.WSRM_3006_NULL_SECURITY_TOKEN()));
             }
         }
 
@@ -623,10 +605,7 @@ public final class RMServerTube extends TubeBase {
             if (getConfig().getAddressingVersion() == AddressingVersion.W3C) {
                 endpointReference = (W3CEndpointReference) wsepr.toSpec();
                 accept.setAcksTo(endpointReference);
-            }    /*else {
-            //TODO support MemberSubmissionEndpointReference when issue 131 of JAXB is resolved
-            //endpointReference = (MemberSubmissionEndpointReference)wsepr.toSpec() ;
-            }*/
+            }
             crsElement.setAccept(accept);
         }
 
@@ -646,23 +625,7 @@ public final class RMServerTube extends TubeBase {
                 getConfig().getAddressingVersion(),
                 getConfig().getSoapVersion(),
                 getConfig().getRMVersion().createSequenceResponseAction);
-        /*
-        ret.setEndPointAddressString(acksToString);
-        ret.proxy = packet.proxy;
-        //there are some invocation properties.  Outgoing addressing headers at least
-        ret.invocationProperties.putAll(packet.invocationProperties);
-        //Set addressing headers
-        AddressingProperties outboundAddressingProperties =
-        addressingBuilder.newAddressingProperties();
-        //outboundAddressingProperties.initializeAsReply(inboundAddressingProperties, false);
-        outboundAddressingProperties.initializeAsReply(inboundAddressingProperties);
-        //AddressingProperties.initializeAsResponse does not know how to set outbound Action
-        //property.
-        outboundAddressingProperties.setAction(addressingBuilder.newURI(
-        getConfig().getConstants().getCreateSequenceResponseAction()));
-        ret.invocationProperties.put(JAXWSAConstants.SERVER_ADDRESSING_PROPERTIES_OUTBOUND,
-        outboundAddressingProperties);
-         */
+
         return ret;
     }
 
@@ -902,16 +865,15 @@ public final class RMServerTube extends TubeBase {
         }
 
         //see if we can find a message in the sequence that needs to be resent.
-        RMMessage mess = outboundSequence.getUnacknowledgedMessage();
-        Message jaxwsMessage = null;
-        if (mess != null) {
-            jaxwsMessage = mess.getCopy();
+        Packet ret = new Packet();
+
+        RMMessage unacknowledgedMessage = outboundSequence.getUnacknowledgedMessage();
+        if (unacknowledgedMessage != null) {
+            ret.setMessage(unacknowledgedMessage.getCopy());
         } else {
-            jaxwsMessage = Messages.createEmpty(getConfig().getSoapVersion());
+            ret.setMessage(Messages.createEmpty(getConfig().getSoapVersion()));
         }
 
-        Packet ret = new Packet();
-        ret.setMessage(jaxwsMessage);
         ret.invocationProperties.putAll(packet.invocationProperties);
         return ret;
     }

@@ -33,16 +33,11 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
-/*
- * RetryTimer.java
- *
- * Created on September 20, 2006, 12:12 PM
- * @author Mike Grogan
- */
 package com.sun.xml.ws.rm.jaxws.runtime.client;
 
 import com.sun.xml.ws.rm.RMException;
+import com.sun.xml.ws.rm.localization.RmLogger;
+
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -52,11 +47,12 @@ import java.util.TimerTask;
  *  ClientOutboundSequence.
  */
 public class RetryTimer {
+
+    private static final RmLogger LOGGER = RmLogger.getLogger(RetryTimer.class);
     private static final long DELAY = 2000;
     private static final long PERIOD = 2000;
-
     private final RMSource source;
-    private Timer timer = null;
+    private Timer timer;
 
     /**
      *
@@ -70,21 +66,24 @@ public class RetryTimer {
      * they are only called from inside the bodies of RMSource.start and
      * RMSource.stop
      */
-    public /*synchronized*/ void start() {
+    public void start() {
         if (timer != null) {
-            throw new IllegalStateException();
+            // TODO L10N
+            throw LOGGER.logSevereException(new IllegalStateException("RetryTimer is already running!"));
         }
         timer = new Timer(true);
         timer.schedule(new RetryTask(), DELAY, PERIOD);
     }
 
     /**
-     *
+     * No need to synchronize stop and start because
+     * they are only called from inside the bodies of RMSource.start and
+     * RMSource.stop
      */
-    public /*synchronized*/ void stop() {
-
+    public void stop() {
         if (timer == null) {
-            throw new IllegalStateException();
+            // TODO L10N
+            throw LOGGER.logSevereException(new IllegalStateException("RetryTimer is not running currently!"));
         }
         timer.cancel();
         timer = null;
@@ -96,7 +95,8 @@ public class RetryTimer {
             try {
                 source.doMaintenanceTasks();
             } catch (RMException e) {
-            //TODO Log with FINE granularity
+                //TODO L10N
+                LOGGER.finer("Unexpected exception occured while performing maintenance tasks on RMSource instance", e);
             }
         }
     }

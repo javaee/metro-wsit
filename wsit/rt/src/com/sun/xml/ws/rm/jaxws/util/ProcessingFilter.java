@@ -33,14 +33,6 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
-/*
- * ProcessingFilter.java
- *
- * Created on March 13, 2006, 4:15 PM
- *
- * @author Mike Grogan
- */
 package com.sun.xml.ws.rm.jaxws.util;
 
 import com.sun.xml.ws.rm.RMMessage;

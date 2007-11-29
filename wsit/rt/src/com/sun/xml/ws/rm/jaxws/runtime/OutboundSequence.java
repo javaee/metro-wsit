@@ -33,16 +33,9 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
-/*
- * OutboundSequence.java
- *
- * @author Mike Grogan
- * Created on November 24, 2005, 9:40 AM
- *
- */
 package com.sun.xml.ws.rm.jaxws.runtime;
 
+import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.Headers;
 import com.sun.xml.ws.rm.Sequence;
 import com.sun.xml.ws.rm.BufferFullException;
@@ -59,7 +52,6 @@ import com.sun.xml.ws.rm.protocol.AcknowledgementHandler;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 
 import com.sun.xml.ws.rm.localization.RmLogger;
-import javax.xml.bind.Marshaller;
 import java.net.URI;
 
 /**
@@ -107,7 +99,7 @@ public abstract class OutboundSequence extends Sequence {
 
         this.ackHandler = new AcknowledgementHandler(config);
     }
-    
+
     /**
      * Accessor for the value of the Destination URI.
      *
@@ -120,7 +112,7 @@ public abstract class OutboundSequence extends Sequence {
     public void setDestination(URI destination) {
         this.destination = destination;
     }
-        
+
     /**
      * Invoked by Incoming message processor to post Sequence Acknowledgement
      * from companion Incoming Sequence for transmission on next OutboundMessage.l
@@ -137,12 +129,12 @@ public abstract class OutboundSequence extends Sequence {
     public InboundSequence getInboundSequence() {
         return companionInboundSequence;
     }
-    
+
     protected void setCompanionSequence(InboundSequence companionSequence) {
         // TODO: remove this method if possible
-        this.companionInboundSequence = companionSequence;        
+        this.companionInboundSequence = companionSequence;
     }
-    
+
     /**
      * Accessor for bufferRemaining field.
      */
@@ -172,15 +164,10 @@ public abstract class OutboundSequence extends Sequence {
      *  @param mess The OutboundMessage.
      *  @param marshaller The Marshaller to use 
      */
-    public void processOutboundMessage(RMMessage outboundMessage)
-            throws InvalidMessageNumberException,
-            BufferFullException,
-            DuplicateMessageException {
-
+    public void processOutboundMessage(RMMessage outboundMessage) throws InvalidMessageNumberException, BufferFullException, DuplicateMessageException {
         if (saveMessages && !outboundMessage.isOneWayResponse()) {
             //Add the message to the sequence unless this has been done previously
             int messageNumber = outboundMessage.getMessageNumber();
-
             if (messageNumber == 0) {
                 messageNumber = set(getNextIndex(), outboundMessage);
             } else {
@@ -195,9 +182,6 @@ public abstract class OutboundSequence extends Sequence {
             }
             element.setNumber(messageNumber);
             element.setId(this.getId());
-
-            //mess.addHeader(Headers.create(getVersion(),marshaller,element));
-
             outboundMessage.setSequenceElement(element);
 
             //if it is time to request an ack for this sequence, add AckRequestedHeader
@@ -210,7 +194,6 @@ public abstract class OutboundSequence extends Sequence {
                     ack = new com.sun.xml.ws.rm.v200702.AckRequestedElement();
                     ack.setId(this.getId());
                 }
-
                 outboundMessage.setAckRequestedElement(ack);
             }
         }
@@ -224,8 +207,6 @@ public abstract class OutboundSequence extends Sequence {
             } else {
                 outboundMessage.setSequenceAcknowledgementElement((com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement) sequenceAcknowledgement);
             }
-
-
             sequenceAcknowledgement = null;
         }
 
@@ -234,29 +215,14 @@ public abstract class OutboundSequence extends Sequence {
         }
 
         if (outboundMessage.getSequenceElement() != null) {
-            /*
-            mess.addHeader(Headers.create(getVersion(),
-            marshaller,
-            mess.getSequenceElement()));
-             */
             outboundMessage.addHeader(createHeader(outboundMessage.getSequenceElement()));
         }
 
         if (outboundMessage.getAckRequestedElement() != null) {
-            /*
-            mess.addHeader(Headers.create(getVersion(), 
-            marshaller,
-            mess.getAckRequestedElement()));
-             */
             outboundMessage.addHeader(createHeader(outboundMessage.getAckRequestedElement()));
         }
 
         if (outboundMessage.getSequenceAcknowledgementElement() != null) {
-            /*
-            mess.addHeader(Headers.create(getVersion(), 
-            marshaller,
-            mess.getSequenceAcknowledgementElement()));
-             */
             outboundMessage.addHeader(createHeader(outboundMessage.getSequenceAcknowledgementElement()));
         }
     }
@@ -266,9 +232,8 @@ public abstract class OutboundSequence extends Sequence {
      * for sending final ack on a TerminateSequence message if necessary.
      *
      *  @param mess The OutboundMessage.
-     *  @param marshaller The Marshaller to use 
      */
-    public synchronized void processAcknowledgement(RMMessage mess, Marshaller marshaller) throws RMException {
+    public synchronized void processAcknowledgement(RMMessage mess) throws RMException {
         //if companion Inbound sequence is returning an acknowledgement, add the
         //SequenceAcknowledgement header
         if (sequenceAcknowledgement != null) {
@@ -284,22 +249,21 @@ public abstract class OutboundSequence extends Sequence {
      * 
      * @param i Index to set.
      */
-    public synchronized void acknowledge(int i) throws InvalidMessageNumberException {
-        RMMessage mess;
-        if (i >= getNextIndex() || (null == (mess = get(i)))) {
-            throw new InvalidMessageNumberException();
+    public synchronized void acknowledge(int messageIndex) throws InvalidMessageNumberException {
+        RMMessage rmMessage;
+        if (messageIndex >= getNextIndex() || (null == (rmMessage = get(messageIndex)))) {
+            // TODO L10N
+            throw LOGGER.logSevereException(new InvalidMessageNumberException("No RM message stored under index " + messageIndex));
         }
 
-        if (!mess.isComplete()) {
-
+        if (!rmMessage.isComplete()) {
             decreaseStoredMessages();
             if (getStoredMessages() == 0) {
                 //A thread on which waitForAcks() has been called
                 //may be waiting for all the acks to arrive.
                 notifyAll();
             }
-
-            mess.complete();
+            rmMessage.complete();
         }
     }
 
@@ -335,6 +299,8 @@ public abstract class OutboundSequence extends Sequence {
                 }
             } catch (InterruptedException e) {
                 //allow preDestroy to continue
+                //TODO L10N
+                LOGGER.finest("Waiting for acknowledgement interrupted, resuming processing", e);
                 break;
             }
         }
@@ -353,11 +319,11 @@ public abstract class OutboundSequence extends Sequence {
         // FIXME this is a real mess as there are two getters, one overriden (above)
         return saveMessages;
     }
-    
+
     public void setSaveMessages(boolean value) {
         this.saveMessages = value;
     }
-    
+
     protected boolean isResendDue() {
         return true;
     }
@@ -372,11 +338,10 @@ public abstract class OutboundSequence extends Sequence {
      * on every resend.
      *
      * @param mess The message
-     * @param marshaller
      */
-    public void ensureAckRequested(RMMessage mess, Marshaller marshaller) {
-        if (mess.getAckRequestedElement() == null) {
-
+    public void ensureAckRequested(RMMessage rmMessage) {
+        // TODO use this method or remove it?
+        if (rmMessage.getAckRequestedElement() == null) {
             AbstractAckRequested ack = null;
             if (getConfig().getRMVersion() == RMVersion.WSRM10) {
                 ack = new com.sun.xml.ws.rm.v200502.AckRequestedElement();
@@ -386,17 +351,12 @@ public abstract class OutboundSequence extends Sequence {
                 ack.setId(this.getId());
             }
 
-            mess.setAckRequestedElement(ack);
-            /*
-            mess.addHeader(Headers.create(getVersion(), 
-            marshaller,
-            mess.getAckRequestedElement()));
-             */
-            mess.addHeader(createHeader(mess.getAckRequestedElement()));
+            rmMessage.setAckRequestedElement(ack);
+            rmMessage.addHeader(createHeader(rmMessage.getAckRequestedElement()));
         }
     }
 
-    protected com.sun.xml.ws.api.message.Header createHeader(Object obj) {
+    protected Header createHeader(Object obj) {
         return Headers.create(getConfig().getRMVersion().jaxbContext, obj);
     }
 
@@ -408,7 +368,8 @@ public abstract class OutboundSequence extends Sequence {
                     return mess;
                 }
             } catch (InvalidMessageNumberException e) {
-            //TODO handle exception
+                //TODO L10N + handle exception
+                LOGGER.fine("Attemted to access message with an invalid index [" + i + "]", e);
             }
         }
         return null;

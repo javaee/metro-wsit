@@ -33,33 +33,14 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
-/*
- * Session.java
- *
- * @author Mike Grogan
- * Created on February 26, 2006, 4:31 PM
- *
- */
-
 package com.sun.xml.ws.rm.jaxws.runtime;
 
 /**
- * Base class for ClientSession and ServerSession, which 
- * expose RM Sequences in proxies and endpoints, respectively.
+ * Base class for ClientSession, which 
+ * expose RM Sequences in proxies respectively.
+ * 
+ * TODO: remove?
  */
 public abstract class Session {
-    
-    protected String id;
-    /**
-     * 
-     */
-    protected Session(String id) {
-        this.id = id;
-    }
-    
-    public String getId() {
-        return id;
-    }
-    
+    public abstract String getId();
 }

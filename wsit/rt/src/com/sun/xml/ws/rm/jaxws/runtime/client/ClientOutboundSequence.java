@@ -33,13 +33,6 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
-// ClientOutboundSequence.java
-//
-//
-// @author Mike Grogan
-// Created on October 15, 2005, 3:13 PM
-//
 package com.sun.xml.ws.rm.jaxws.runtime.client;
 
 import com.sun.xml.ws.api.addressing.AddressingVersion;
@@ -54,8 +47,8 @@ import com.sun.xml.ws.rm.RMVersion;
 import com.sun.xml.ws.rm.jaxws.runtime.InboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
-import com.sun.xml.ws.rm.jaxws.util.LoggingHelper;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
+import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.protocol.AbstractAcceptType;
 import com.sun.xml.ws.rm.protocol.AbstractCreateSequence;
 import com.sun.xml.ws.rm.protocol.AbstractCreateSequenceResponse;
@@ -68,8 +61,6 @@ import javax.xml.ws.Service;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
 import java.net.URI;
 import java.util.UUID;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * ClientOutboundSequence represents the set of all messages from a single BindingProvider instance.
@@ -78,7 +69,7 @@ import java.util.logging.Logger;
  */
 public class ClientOutboundSequence extends OutboundSequence implements ClientSequence {
 
-    private static final Logger logger = Logger.getLogger(LoggingHelper.getLoggerName(ClientOutboundSequence.class));
+    private static final RmLogger LOGGER = RmLogger.getLogger(ClientOutboundSequence.class);
     /**
      * Current value of receive buffer read from incoming SequenceAcknowledgement
      * messages if RM Destination implements properietary Indigo Flow Control feature.
@@ -390,8 +381,7 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
 
         isActive = keepAlive;
 
-        //TODO 
-        //Move this after waitForAcks to obviate  problems caused by
+        //TODO Move this after waitForAcks to obviate  problems caused by
         //the LastMessage Protocol message being processed concurrently with
         //application messages.  At the moment, this may cause problems in
         //Glassfish container with ordered delivery configured.  This will
@@ -579,7 +569,8 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
             for (int i = 1; i < top; i++) {
                 RMMessage mess = get(i);
                 if (mess != null && !mess.isComplete()) {
-                    logger.fine("resending " + getId() + ":" + i);
+                    // TODO L10N
+                    LOGGER.fine("Resending message with id [" + getId() + "]: " + i);
                     resend(i);
                 }
             }
@@ -596,6 +587,7 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
         }
     }
 
+    // TODO: use runnable instead of thread.
     private class AckRequestedSender extends Thread {
 
         private ClientOutboundSequence sequence;
@@ -608,7 +600,7 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
         public void run() {
             try {
                 if (sendHeartbeats) {
-                    logger.fine(LocalizationMessages.WSRM_2010_HEARTBEAT_MESSAGE_MESSAGE(sequence.getId(), System.currentTimeMillis()));
+                    LOGGER.fine(LocalizationMessages.WSRM_2010_HEARTBEAT_MESSAGE_MESSAGE(sequence.getId(), System.currentTimeMillis()));
                     protocolMessageSender.sendAckRequested(sequence, getConfig().getSoapVersion());
                 }
             } catch (Exception e) {
@@ -618,11 +610,12 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
                 //
                 //In both cases the sequence is of no further use.  We
                 //will assume for now that this is already the case.
-                logger.log(Level.FINE, LocalizationMessages.WSRM_2009_HEARTBEAT_MESSAGE_EXCEPTION(sequence.getId()), e);
+                LOGGER.fine(LocalizationMessages.WSRM_2009_HEARTBEAT_MESSAGE_EXCEPTION(sequence.getId()), e);
                 try {
                     RMSource.getRMSource().removeOutboundSequence(sequence);
                 } catch (Exception ex) {
-                //TODO handle exception
+                    //TODO L10N + handle exception; or remove the exception catching
+                    LOGGER.severe("Exception occured while removing the outbound sequence [" + sequence.getId() + "]", ex);
                 }
             }
         }

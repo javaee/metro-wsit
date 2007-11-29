@@ -54,9 +54,9 @@ import com.sun.xml.ws.rm.RMException;
 import com.sun.xml.ws.rm.Constants;
 import com.sun.xml.ws.rm.RMMessage;
 
+import com.sun.xml.ws.rm.localization.RmLogger;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
 /**
@@ -66,12 +66,12 @@ import javax.xml.bind.Unmarshaller;
  */
 public abstract class TubeBase extends AbstractFilterTubeImpl {
 
+    private static final RmLogger LOGGER = RmLogger.getLogger(TubeBase.class);
     /**
      * Either RMSource or RMDestination
      */
     private WSDLPort wsdlPort;
     private SequenceConfig config;
-    private Marshaller marshaller;
     private Unmarshaller unmarshaller;
 
     protected TubeBase(WSDLPort wsdlPort, WSBinding binding, Tube nextTube) {
@@ -79,7 +79,6 @@ public abstract class TubeBase extends AbstractFilterTubeImpl {
 
         this.wsdlPort = wsdlPort;
         this.config = new SequenceConfig(wsdlPort, binding.getAddressingVersion(), binding.getSOAPVersion());
-        this.marshaller = createMarshaller(config.getRMVersion().jaxbContext);
         this.unmarshaller = createUnmarshaller(config.getRMVersion().jaxbContext);
     }
 
@@ -88,7 +87,6 @@ public abstract class TubeBase extends AbstractFilterTubeImpl {
 
         this.wsdlPort = that.wsdlPort;
         this.config = that.config;
-        this.marshaller = createMarshaller(config.getRMVersion().jaxbContext);
         this.unmarshaller = createUnmarshaller(config.getRMVersion().jaxbContext);
     }
 
@@ -124,12 +122,8 @@ public abstract class TubeBase extends AbstractFilterTubeImpl {
         Message message = packet.getMessage();
         RMMessage rmMessage = new RMMessage(message, config.getRMVersion());
 
-        provider.getInboundMessageProcessor().processMessage(rmMessage, getUnmarshaller());
+        provider.getInboundMessageProcessor().processMessage(rmMessage, unmarshaller);
         return rmMessage;
-    }
-
-    protected final Marshaller getMarshaller() {
-        return this.marshaller;
     }
 
     protected final Unmarshaller getUnmarshaller() {
@@ -143,25 +137,24 @@ public abstract class TubeBase extends AbstractFilterTubeImpl {
     protected final SequenceConfig getConfig() {
         return this.config;
     }
-    
-    private static Marshaller createMarshaller(JAXBContext jaxbContext) {
-        try {
-            Marshaller marshaller = jaxbContext.createMarshaller();
-            marshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.TRUE);
-            return marshaller;
-        } catch (JAXBException e) {
-            // TODO handle exception
-            return null;
-        }
-
-    }
 
     private Unmarshaller createUnmarshaller(JAXBContext jaxbContext) {
         try {
             return jaxbContext.createUnmarshaller();
         } catch (JAXBException e) {
-            // TODO handle exception
-            return null;
+            // TODO L10N            
+            throw LOGGER.logSevereException(new IllegalStateException("Unable to create JAXB unmarshaller", e));
         }
-    }    
+    }
+//    private static Marshaller createMarshaller(JAXBContext jaxbContext) {
+//        try {
+//            Marshaller marshaller = jaxbContext.createMarshaller();
+//            marshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.TRUE);
+//            return marshaller;
+//        } catch (JAXBException e) {
+//            // TODO L10N            
+//            throw LOGGER.logSevereException(new IllegalStateException("Unable to create JAXB marshaller", e));
+//        }
+//
+//    }
 }
