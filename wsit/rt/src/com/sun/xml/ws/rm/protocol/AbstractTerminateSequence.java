@@ -33,15 +33,11 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
-
 package com.sun.xml.ws.rm.protocol;
-
 
 import javax.xml.namespace.QName;
 import java.util.List;
 import java.util.Map;
-
 
 /**
  * This is the base class for the implementations of <code> TerminateSequence </code> based on the
@@ -52,10 +48,7 @@ import java.util.Map;
  *
  *
  */
-
 public abstract class AbstractTerminateSequence {
-
-
 
     /**
      * Gets the value of the any property.
@@ -80,7 +73,7 @@ public abstract class AbstractTerminateSequence {
      *
      *
      */
-    public abstract List<Object> getAny() ;
+    public abstract List<Object> getAny();
 
     /**
      * Gets a map that contains attributes that aren't bound to any typed property on this class.

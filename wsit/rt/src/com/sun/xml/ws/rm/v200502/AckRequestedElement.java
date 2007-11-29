@@ -33,17 +33,9 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
-/*
- * AckRequestedElement.java
- *
- * @author Mike Grogan
- * Created on October 23, 2005, 9:03 AM
- *
- */
-
 package com.sun.xml.ws.rm.v200502;
 
+import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.protocol.AbstractAckRequested;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -53,25 +45,21 @@ import javax.xml.bind.annotation.XmlRootElement;
 import java.math.BigInteger;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(name = "AckRequested", namespace="http://schemas.xmlsoap.org/ws/2005/02/rm")
+@XmlRootElement(name = "AckRequested", namespace = "http://schemas.xmlsoap.org/ws/2005/02/rm")
 public class AckRequestedElement extends AbstractAckRequested {
-
 
     @XmlElement(name = "Identifier", namespace = "http://schemas.xmlsoap.org/ws/2005/02/rm")
     protected Identifier identifier;
     @XmlElement(name = "MaxMessageNumberUsed", namespace = "http://schemas.xmlsoap.org/ws/2005/02/rm")
     protected BigInteger maxMessageNumberUsed;
 
-    public AckRequestedElement(){
-        
+    public AckRequestedElement() {
+
     }
-    
+
     /*public QName getQName() {
-        return  RMBuilder.getConstants().getAckRequestedQName();
+    return  RMBuilder.getConstants().getAckRequestedQName();
     }*/
-
-    
-
     //Introduce accessors using simple types rather than BigInteger and
     //Identifier
     public void setId(String id) {
@@ -89,7 +77,7 @@ public class AckRequestedElement extends AbstractAckRequested {
     }
 
     public long getMaxMessageNumber() {
-        
+
         BigInteger big;
         if (null == (big = getMaxMessageNumberUsed())) {
             return 0;
@@ -103,7 +91,6 @@ public class AckRequestedElement extends AbstractAckRequested {
      * @return The value of the property
      *     
      */
-
     public Identifier getIdentifier() {
         return identifier;
     }
@@ -114,11 +101,9 @@ public class AckRequestedElement extends AbstractAckRequested {
      * @param value The new value.
      *     
      */
-
     public void setIdentifier(Identifier value) {
         this.identifier = value;
     }
-
 
     /**
      * Gets the value of the maxMessageNumberUsed property.
@@ -126,7 +111,6 @@ public class AckRequestedElement extends AbstractAckRequested {
      * @return The value of the property.
      *     
      */
-
     public BigInteger getMaxMessageNumberUsed() {
         return maxMessageNumberUsed;
     }
@@ -139,13 +123,10 @@ public class AckRequestedElement extends AbstractAckRequested {
     public void setMaxMessageNumberUsed(BigInteger value) {
         this.maxMessageNumberUsed = value;
     }
-    
+
+    @Override
     public String toString() {
-        return Messages.ACKREQUESTED_TOSTRING_STRING.format(
-                getId());
+        return LocalizationMessages.WSRM_4000_ACKREQUESTED_TOSTRING_STRING(getId(), getMaxMessageNumber());
     }
-
-
-
 }
 

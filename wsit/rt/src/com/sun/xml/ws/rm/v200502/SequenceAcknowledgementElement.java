@@ -33,16 +33,9 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
-/*
- * SequenceAcknowledgementElement.java
- *
- * @author Mike Grogan
- * Created on October 23, 2005, 9:51 AM
- *
- */
 package com.sun.xml.ws.rm.v200502;
 
+import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.protocol.AbstractSequenceAcknowledgement;
 
 import javax.xml.bind.annotation.*;
@@ -177,11 +170,11 @@ public class SequenceAcknowledgementElement extends AbstractSequenceAcknowledgem
 
     public void addAckRange(long lower, long upper) {
         if (nack != null) {
-            throw new IllegalArgumentException(Messages.BOTH_ACKS_AND_NACKS_MESSAGE.format());
+            throw new IllegalArgumentException(LocalizationMessages.WSRM_4002_BOTH_ACKS_AND_NACKS_MESSAGE());
         }
         //check validity of indices
         if (lower > upper) {
-            throw new IllegalArgumentException(Messages.UPPERBOUND_LESSTHAN_LOWERBOUND_MESSAGE.format());
+            throw new IllegalArgumentException(LocalizationMessages.WSRM_4003_UPPERBOUND_LESSTHAN_LOWERBOUND_MESSAGE());
         }
 
         //TODO Further validity checking
@@ -194,7 +187,7 @@ public class SequenceAcknowledgementElement extends AbstractSequenceAcknowledgem
 
     public void addNack(long index) {
         if (acknowledgementRange != null) {
-            throw new IllegalArgumentException(Messages.BOTH_ACKS_AND_NACKS_MESSAGE.format());
+            throw new IllegalArgumentException(LocalizationMessages.WSRM_4002_BOTH_ACKS_AND_NACKS_MESSAGE());
         }
 
         getNack().add(BigInteger.valueOf(index));
@@ -203,7 +196,7 @@ public class SequenceAcknowledgementElement extends AbstractSequenceAcknowledgem
     @Override
     public String toString() {
         StringBuffer buffer = new StringBuffer();
-        buffer.append(Messages.SEQUENCE_ACKNOWLEDGEMENT_TOSTRING_STRING.format(getId(), getBufferRemaining()));
+        buffer.append(LocalizationMessages.WSRM_4004_SEQUENCE_ACKNOWLEDGEMENT_TOSTRING_STRING(getId(), getBufferRemaining()));
         List<AcknowledgementRange> ranges = getAcknowledgementRange();
         if (ranges != null) {
             for (AcknowledgementRange range : ranges) {

@@ -49,10 +49,10 @@ import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
 
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
+import com.sun.xml.ws.rm.localization.RmLogger;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
 /**
  * Utility class that manages the acknowledgement of sequence messages.  Methods
@@ -62,7 +62,7 @@ import java.util.logging.Logger;
  */
 public class AcknowledgementHandler {
 
-    private static final Logger logger = Logger.getLogger(AcknowledgementHandler.class.getName());
+    private static final RmLogger LOGGER = RmLogger.getLogger(AcknowledgementHandler.class);
     /**
      * Configuration for this sequence.
      */
@@ -133,7 +133,8 @@ public class AcknowledgementHandler {
                         }
                         break;
                     }
-                    case WSRM11: {
+                    case WSRM11:
+                         {
                             List<com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement.AcknowledgementRange> ranges =
                                     ((com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement) element).getAcknowledgementRange();
                             for (com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement.AcknowledgementRange range : ranges) {
@@ -164,7 +165,7 @@ public class AcknowledgementHandler {
         } catch (InvalidMessageNumberException e) {
             //this can happen if the sequence has been resurrected
             //after a restart.
-            logger.fine(LocalizationMessages.WSRM_4001_ACKNOWLEDGEMENT_MESSAGE(seq.getId(), i));
+            LOGGER.fine(LocalizationMessages.WSRM_4001_ACKNOWLEDGEMENT_MESSAGE(seq.getId(), i));
         }
     }
 }

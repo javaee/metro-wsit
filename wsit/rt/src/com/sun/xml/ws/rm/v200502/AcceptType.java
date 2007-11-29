@@ -33,31 +33,31 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
-
 package com.sun.xml.ws.rm.v200502;
 
-import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.rm.protocol.AbstractAcceptType;
-import org.w3c.dom.Element;
 
-import javax.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAnyAttribute;
+import javax.xml.bind.annotation.XmlAnyElement;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlType;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "AcceptType", propOrder = {
-    "acksTo",
-    "any"
+"acksTo",
+"any"
 })
 public class AcceptType extends AbstractAcceptType {
 
-    @XmlElement(name="AcksTo", namespace="http://schemas.xmlsoap.org/ws/2005/02/rm")
+    @XmlElement(name = "AcksTo", namespace = "http://schemas.xmlsoap.org/ws/2005/02/rm")
     protected W3CEndpointReference acksTo;
     @XmlAnyElement(lax = true)
     protected List<Object> any = new ArrayList<Object>();
@@ -73,11 +73,11 @@ public class AcceptType extends AbstractAcceptType {
      *
      */
     public W3CEndpointReference getAcksTo() {
-       /*   for (int i = 0 ; i < any.size(); i++) {
-
-            if (any.get(i) instanceof WSEndpointReference) {
-                return (WSEndpointReference)any.get(i);
-            }
+        /*   for (int i = 0 ; i < any.size(); i++) {
+        
+        if (any.get(i) instanceof WSEndpointReference) {
+        return (WSEndpointReference)any.get(i);
+        }
         }
         return null;*/
         return acksTo;
@@ -143,5 +143,4 @@ public class AcceptType extends AbstractAcceptType {
     public Map<QName, String> getOtherAttributes() {
         return otherAttributes;
     }
-
 }

@@ -33,20 +33,21 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
-
 package com.sun.xml.ws.rm.v200502;
 
-import javax.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
 import java.util.HashMap;
 import java.util.Map;
-
-
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAnyAttribute;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.XmlValue;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
-    "value"
+"value"
 })
 @XmlRootElement(name = "Identifier")
 public class Identifier {
@@ -97,5 +98,4 @@ public class Identifier {
     public Map<QName, String> getOtherAttributes() {
         return otherAttributes;
     }
-
 }

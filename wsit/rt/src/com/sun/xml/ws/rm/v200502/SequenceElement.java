@@ -33,14 +33,6 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
-/*
- * SequenceElement.java
- *
- * @author Mike Grogan
- * Created on October 23, 2005, 9:34 AM
- *
- */
 package com.sun.xml.ws.rm.v200502;
 
 import com.sun.xml.ws.rm.localization.LocalizationMessages;

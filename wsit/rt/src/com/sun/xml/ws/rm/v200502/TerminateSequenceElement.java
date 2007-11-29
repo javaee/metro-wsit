@@ -33,20 +33,22 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
-
 package com.sun.xml.ws.rm.v200502;
 
 import com.sun.xml.ws.rm.protocol.AbstractTerminateSequence;
-import org.w3c.dom.Element;
 
-import javax.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAnyAttribute;
+import javax.xml.bind.annotation.XmlAnyElement;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java class for TerminateSequenceType complex type.
@@ -70,10 +72,10 @@ import java.util.Map;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "TerminateSequenceType", propOrder = {
-    "identifier",
-    "any"
+"identifier",
+"any"
 })
-@XmlRootElement(name="TerminateSequence",namespace="http://schemas.xmlsoap.org/ws/2005/02/rm")
+@XmlRootElement(name = "TerminateSequence", namespace = "http://schemas.xmlsoap.org/ws/2005/02/rm")
 public class TerminateSequenceElement extends AbstractTerminateSequence {
 
     @XmlElement(name = "Identifier", namespace = "http://schemas.xmlsoap.org/ws/2005/02/rm")
@@ -154,5 +156,4 @@ public class TerminateSequenceElement extends AbstractTerminateSequence {
     public Map<QName, String> getOtherAttributes() {
         return otherAttributes;
     }
-
 }

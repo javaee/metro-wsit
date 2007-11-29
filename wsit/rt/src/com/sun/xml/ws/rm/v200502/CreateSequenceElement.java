@@ -33,23 +33,24 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
-
 package com.sun.xml.ws.rm.v200502;
-
 
 import com.sun.xml.ws.rm.protocol.AbstractCreateSequence;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
-import org.w3c.dom.Element;
 
-import javax.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAnyAttribute;
+import javax.xml.bind.annotation.XmlAnyElement;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java class for CreateSequenceType complex type.
@@ -75,17 +76,16 @@ import java.util.Map;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "CreateSequenceType", propOrder = {
-        "acksTo",
-        "any",
-        "expires",
-        "offer",
-        "securityTokenReference"
-
-        })
-@XmlRootElement(name="CreateSequence",namespace="http://schemas.xmlsoap.org/ws/2005/02/rm")
+"acksTo",
+"any",
+"expires",
+"offer",
+"securityTokenReference"
+})
+@XmlRootElement(name = "CreateSequence", namespace = "http://schemas.xmlsoap.org/ws/2005/02/rm")
 public class CreateSequenceElement extends AbstractCreateSequence {
 
-    @XmlElement(name="AcksTo", namespace="http://schemas.xmlsoap.org/ws/2005/02/rm")
+    @XmlElement(name = "AcksTo", namespace = "http://schemas.xmlsoap.org/ws/2005/02/rm")
     protected W3CEndpointReference acksTo;
     @XmlAnyElement(lax = true)
     protected List<Object> any = new ArrayList<Object>();
@@ -93,7 +93,7 @@ public class CreateSequenceElement extends AbstractCreateSequence {
     protected Expires expires;
     @XmlElement(name = "Offer", namespace = "http://schemas.xmlsoap.org/ws/2005/02/rm")
     protected OfferType offer;
-    @XmlElement(name="SecurityTokenReference", namespace="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd")
+    @XmlElement(name = "SecurityTokenReference", namespace = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd")
     private SecurityTokenReferenceType securityTokenReference;
     @XmlAnyAttribute
     private Map<QName, String> otherAttributes = new HashMap<QName, String>();
@@ -110,9 +110,9 @@ public class CreateSequenceElement extends AbstractCreateSequence {
     //is fixed
     public W3CEndpointReference getAcksTo() {
         /*for (int i = 0 ; i < any.size(); i++) {
-            if (any.get(i) instanceof WSEndpointReference) {
-                return (W3CEndpointReference)any.get(i);
-            }
+        if (any.get(i) instanceof WSEndpointReference) {
+        return (W3CEndpointReference)any.get(i);
+        }
         }
         return null;*/
         return acksTo;
@@ -154,7 +154,7 @@ public class CreateSequenceElement extends AbstractCreateSequence {
      *     
      */
     public void setExpires(Expires value) {
-        this.expires = (Expires)value;
+        this.expires = (Expires) value;
     }
 
     /**
@@ -177,8 +177,7 @@ public class CreateSequenceElement extends AbstractCreateSequence {
      *     {@link OfferType }
      *     
      */
-
-        public void setOffer(OfferType value) {
+    public void setOffer(OfferType value) {
         this.offer = value;
     }
 
@@ -237,5 +236,4 @@ public class CreateSequenceElement extends AbstractCreateSequence {
     public void setSecurityTokenReference(SecurityTokenReferenceType securityTokenReference) {
         this.securityTokenReference = securityTokenReference;
     }
-
 }

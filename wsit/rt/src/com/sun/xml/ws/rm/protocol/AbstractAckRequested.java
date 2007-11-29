@@ -33,10 +33,8 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
-
-
 package com.sun.xml.ws.rm.protocol;
+
 /*
  * This is the abstract class for <code>AckRequestedElement</code> to support two implementations of WSRM
  * AbstractAckRequested.java
@@ -45,25 +43,12 @@ package com.sun.xml.ws.rm.protocol;
  * @author Mike Grogan
  *
  */
-
-
 public abstract class AbstractAckRequested {
 
+    /**
+     *Introduce accessors using simple types rather than BigInteger and Identifier
+     */
+    public abstract void setId(String id);
 
-    //Introduce accessors using simple types rather than BigInteger and
-    //Identifier
-    public abstract void setId(String id) ;
-
-
-    protected abstract String getId() ;
-
-
-
-
-
-  
-
-
-
-
+    protected abstract String getId();
 }
