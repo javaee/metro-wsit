@@ -49,7 +49,7 @@ import com.sun.xml.ws.transport.tcp.util.Version;
 import com.sun.xml.ws.transport.tcp.util.VersionController;
 import com.sun.xml.ws.transport.tcp.io.DataInOutUtils;
 import com.sun.xml.ws.transport.tcp.util.WSTCPError;
-import com.sun.xml.ws.transport.tcp.wsit.ConnectionManagementSettings;
+import com.sun.xml.ws.transport.tcp.util.ConnectionManagementSettings;
 import com.sun.xml.ws.transport.tcp.connectioncache.spi.transport.InboundConnectionCache;
 import com.sun.xml.ws.transport.tcp.connectioncache.spi.transport.ConnectionCacheFactory;
 import java.io.IOException;
@@ -70,9 +70,6 @@ import java.util.logging.Logger;
  */
 @SuppressWarnings({"unchecked"})
 public final class IncomeMessageProcessor implements SessionCloseListener {
-    private static final int HIGH_WATER_MARK = 1500;
-    private static final int NUMBER_TO_RECLAIM = 1;
-    
     private static final Logger logger = Logger.getLogger(
             com.sun.xml.ws.transport.tcp.util.TCPConstants.LoggingDomain + ".server");
     
@@ -286,22 +283,20 @@ public final class IncomeMessageProcessor implements SessionCloseListener {
     
     private synchronized void setupInboundConnectionCache() {
         if (connectionCache == null) {
-            int highWatermark = HIGH_WATER_MARK;
-            int numberToReclaim = NUMBER_TO_RECLAIM;
+            ConnectionManagementSettings settings = 
+                    ConnectionManagementSettings.getSettingsHolder().getServerSettings();
             
-            ConnectionManagementSettings policySettings = ConnectionManagementSettings.getServerSettingsInstance();
-            if (policySettings != null) {
-                highWatermark = policySettings.getHighWatermark(HIGH_WATER_MARK);
-                numberToReclaim = policySettings.getNumberToReclaim(NUMBER_TO_RECLAIM);
-            } else if (properties != null) {
-                String highWaterMarkStr = properties.getProperty(TCPConstants.HIGH_WATER_MARK, Integer.toString(HIGH_WATER_MARK));
-                String numberToReclaimStr = properties.getProperty(TCPConstants.NUMBER_TO_RECLAIM, Integer.toString(NUMBER_TO_RECLAIM));
-                highWatermark = Integer.parseInt(highWaterMarkStr);
-                numberToReclaim = Integer.parseInt(numberToReclaimStr);
-            }
+            int highWatermark = settings.getHighWatermark();
+            int numberToReclaim = settings.getNumberToReclaim();
             
             connectionCache = ConnectionCacheFactory.<ServerConnectionSession>makeBlockingInboundConnectionCache("SOAP/TCP server side cache",
                     highWatermark, numberToReclaim, logger);
+            
+            if (logger.isLoggable(Level.FINE)) {
+                logger.log(Level.FINE, 
+                        MessagesMessages.WSTCP_1084_INCOME_MSG_SERVER_SIDE_CONNECTION_CACHE(
+                        highWatermark, numberToReclaim));
+            }
         }
     }
     

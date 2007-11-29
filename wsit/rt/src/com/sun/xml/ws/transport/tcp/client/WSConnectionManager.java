@@ -58,7 +58,7 @@ import com.sun.xml.ws.transport.tcp.servicechannel.stubs.ServiceChannelWSImpl;
 import com.sun.xml.ws.transport.tcp.servicechannel.stubs.ServiceChannelWSImplService;
 import com.sun.xml.ws.transport.tcp.util.BindingUtils;
 import com.sun.xml.ws.transport.tcp.io.DataInOutUtils;
-import com.sun.xml.ws.transport.tcp.wsit.ConnectionManagementSettings;
+import com.sun.xml.ws.transport.tcp.util.ConnectionManagementSettings;
 import com.sun.xml.ws.transport.tcp.connectioncache.spi.transport.ConnectionFinder;
 import com.sun.xml.ws.transport.tcp.connectioncache.spi.transport.OutboundConnectionCache;
 import com.sun.xml.ws.transport.tcp.connectioncache.spi.transport.ConnectionCacheFactory;
@@ -84,10 +84,6 @@ public class WSConnectionManager implements ConnectionFinder<ConnectionSession>,
     private static final Logger logger = Logger.getLogger(
             com.sun.xml.ws.transport.tcp.util.TCPConstants.LoggingDomain + ".client");
     
-    private static final int HIGH_WATER_MARK = 1500;
-    private static final int NUMBER_TO_RECLAIM = 1;
-    private static final int MAX_PARALLEL_CONNECTIONS = 5;
-    
     private static final WSConnectionManager instance = new WSConnectionManager();
     
     // set of locked connections, which are in use
@@ -101,26 +97,25 @@ public class WSConnectionManager implements ConnectionFinder<ConnectionSession>,
     private volatile OutboundConnectionCache<ConnectionSession> connectionCache;
     
     private WSConnectionManager() {
-        int highWatermark = HIGH_WATER_MARK;
-        int numberToReclaim = NUMBER_TO_RECLAIM;
-        int maxParallelConnections = MAX_PARALLEL_CONNECTIONS;
-        
-        ConnectionManagementSettings policySettings = ConnectionManagementSettings.getClientSettingsInstance();
-        if (policySettings != null) {
-            highWatermark = policySettings.getHighWatermark(HIGH_WATER_MARK);
-            numberToReclaim = policySettings.getNumberToReclaim(NUMBER_TO_RECLAIM);
-            maxParallelConnections = policySettings.getMaxParallelConnections(MAX_PARALLEL_CONNECTIONS);
-        }
+        ConnectionManagementSettings settings = 
+                ConnectionManagementSettings.getSettingsHolder().getClientSettings();
+        int highWatermark = settings.getHighWatermark();
+        int numberToReclaim = settings.getNumberToReclaim();
+        int maxParallelConnections = settings.getMaxParallelConnections();
         
         connectionCache = ConnectionCacheFactory.<ConnectionSession>makeBlockingOutboundConnectionCache("SOAP/TCP client side cache",
                 highWatermark, numberToReclaim, maxParallelConnections, logger);
+
+        if (logger.isLoggable(Level.FINE)) {
+            logger.log(Level.FINE, 
+                    MessagesMessages.WSTCP_1044_CONNECTION_MANAGER_CLIENT_SIDE_CONNECTION_CACHE(
+                    highWatermark, maxParallelConnections, numberToReclaim));
+        }
     }
     
     public @NotNull ChannelContext openChannel(@NotNull final WSTCPURI uri,
             @NotNull final WSService wsService, @NotNull final WSBinding wsBinding, final @NotNull Codec defaultCodec) throws InterruptedException, IOException,
     ServiceChannelException, VersionMismatchException {
-        final int uriHashKey = uri.hashCode();
-        
         if (logger.isLoggable(Level.FINE)) {
             logger.log(Level.FINE, MessagesMessages.WSTCP_1030_CONNECTION_MANAGER_ENTER(uri, wsService.getServiceName(), wsBinding.getBindingID(), defaultCodec.getClass().getName()));
         }

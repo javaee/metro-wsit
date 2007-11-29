@@ -74,10 +74,14 @@ public class TCPTransportPipeFactory extends com.sun.xml.ws.transport.tcp.client
      * side policies for ServiceChannelWS
      */
     private static void setClientSettingsIfRequired(WSDLPort port) {
-        if (ConnectionManagementSettings.clientSettings == null) {
-            synchronized(ConnectionManagementSettings.class) {
-                if (ConnectionManagementSettings.clientSettings == null) {
-                    ConnectionManagementSettings.clientSettings = ConnectionManagementSettings.createSettingsInstance(port);
+        PolicyConnectionManagementSettingsHolder instance = 
+                PolicyConnectionManagementSettingsHolder.getInstance();
+        
+        if (instance.clientSettings == null) {
+            synchronized(instance) {
+                if (instance.clientSettings == null) {
+                    instance.clientSettings = 
+                            PolicyConnectionManagementSettingsHolder.createSettingsInstance(port);
                 }
             }
         }

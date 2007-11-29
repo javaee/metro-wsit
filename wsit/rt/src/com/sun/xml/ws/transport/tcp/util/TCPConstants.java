@@ -108,10 +108,19 @@ public final class TCPConstants {
     /** SOAP/TCP logging domain root */
     public static final String LoggingDomain = "com.sun.xml.ws.transport.tcp";
     
-    /** Lifecycle module paratemer names*/
+    /** Connection management property names*/
     public static final String HIGH_WATER_MARK = "high-water-mark";
+    public static final String MAX_PARALLEL_CONNECTIONS = "max-parallel-connections";
     public static final String NUMBER_TO_RECLAIM = "number-to-reclaim";
-    
+
+    /** Connection management settings default values */
+    public static final int HIGH_WATER_MARK_SERVER = 1500;
+    public static final int NUMBER_TO_RECLAIM_SERVER = 1;
+
+    public static final int HIGH_WATER_MARK_CLIENT = 1500;
+    public static final int NUMBER_TO_RECLAIM_CLIENT = 1;
+    public static final int MAX_PARALLEL_CONNECTIONS_CLIENT = 5;
+
     /** Service Channel web service: Service and Port names*/
     public static final QName SERVICE_CHANNEL_WS_NAME = new QName("http://servicechannel.tcp.transport.ws.xml.sun.com/", "ServiceChannelWSImplService");
     public static final QName SERVICE_CHANNEL_WS_PORT_NAME = new QName("http://servicechannel.tcp.transport.ws.xml.sun.com/", "ServiceChannelWSImplPort");

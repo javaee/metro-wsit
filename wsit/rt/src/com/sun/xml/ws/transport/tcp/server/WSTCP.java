@@ -110,7 +110,7 @@ public final class WSTCP {
             if (isProtocolCheck && 
                     !TCPConstants.PROTOCOL_SCHEMA.equals(uri.getScheme())) {
                 logger.log(Level.INFO, 
-                        MessagesMessages.STANDALONE_ADAPTER_NOT_REGISTERED(
+                        MessagesMessages.WSTCP_2002_STANDALONE_ADAPTER_NOT_REGISTERED(
                         adapter.name, adapter.urlPattern));
                 it.remove();
                 continue;
@@ -121,7 +121,7 @@ public final class WSTCP {
             connector.listen();
             connectors.add(connector);
             logger.log(Level.FINE,
-                    MessagesMessages.STANDALONE_ADAPTER_REGISTERED(
+                    MessagesMessages.WSTCP_2001_STANDALONE_ADAPTER_REGISTERED(
                     adapter.name, adapter.urlPattern));
         }
     
@@ -165,7 +165,7 @@ public final class WSTCP {
             System.out.println(MessagesMessages.STANDALONE_EXIT());
             System.in.read();
         } catch (Exception e) {
-            logger.log(Level.SEVERE, MessagesMessages.STANDALONE_EXCEPTION(), e);
+            logger.log(Level.SEVERE, MessagesMessages.WSTCP_2000_STANDALONE_EXCEPTION(), e);
         } finally {
             wsTCP.close();
         }
