@@ -1,5 +1,5 @@
 /*
- * $Id: Sequence.java,v 1.17 2007-11-29 14:05:07 m_potociar Exp $
+ * $Id: Sequence.java,v 1.18 2007-11-30 21:00:31 m_potociar Exp $
  */
 
 /*
@@ -42,7 +42,6 @@ package com.sun.xml.ws.rm;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,15 +51,6 @@ import java.util.List;
  */
 // TODO check if synchronization is needed on all methods
 public class Sequence {
-
-    /**
-     * Endpoint for protocol responses.  May be the WS-Addressing anonymous endpoint.
-     * There are several variations depending on whether this EPR is the same as 
-     * the one used by application messages in the companion <code>InboundSequence</code>
-     *  
-     * INFO: This field is currently not used by RM runtime.
-     */
-    private URI acksTo;
     /**
      * Flag that indicates if the CloseSequence message has been sent/received
      * If this is the case then the Sequence needs to be closed and no more messages
@@ -117,14 +107,8 @@ public class Sequence {
         resetLastActivityTime();
     }
 
-    public Sequence(URI acksToUri, SequenceConfig config) {
+    public Sequence(SequenceConfig config, boolean setMaxMessages) {
         this(config);
-
-        this.acksTo = acksToUri;
-    }
-
-    public Sequence(URI acksToUri, SequenceConfig config, boolean flag) {
-        this(acksToUri, config);
 
         // FIXME: provide generally working solution for maxMessages setup:
         // the next few lines of code that setup maxMessages work only when
@@ -132,15 +116,13 @@ public class Sequence {
         // Sequence classes results in a BufferFullException being thrown in 
         // roundtrip scenario from set() method (when processing a response 
         // on the client side).
-        if (flag) {
+        if (setMaxMessages) {
             //if flow control is enabled, set buffer size.
             //don't try to use flow control if ordered delivery
             //is needed.  Even if the buffer is full, we
             //would still need to accept messages that "fill in the gaps"
             if (config.isFlowControlRequired() && !config.isOrdered()) {
                 this.maxMessages = config.getBufferSize();
-            } else {
-                this.maxMessages = -1;
             }
         }
     }
@@ -312,18 +294,5 @@ public class Sequence {
 
     protected void decreaseStoredMessages() {
         storedMessages--;
-    }
-
-    /**
-     * Accessor for the value of the Destination URI.
-     *
-     * @return The destination String.
-     */
-    public URI getAcksTo() {
-        return acksTo;
-    }
-
-    public void setAcksTo(URI uri) {
-        this.acksTo = uri;
     }
 }

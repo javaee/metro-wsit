@@ -502,11 +502,6 @@ public final class RMServerTube extends TubeBase {
             throw LOGGER.logSevereException(new RMException(LocalizationMessages.WSRM_3002_CREATESEQUENCE_HEADER_PROBLEM(), e));
         }
 
-        /**
-         * FIXME Assume for now that AcksTo is anonymous.
-         */
-        URI acksTo = getConfig().getAnonymousAddressingUri();
-
         com.sun.xml.ws.security.secext10.SecurityTokenReferenceType strType = null;
         if (csrElement instanceof com.sun.xml.ws.rm.v200502.CreateSequenceElement) {
             com.sun.xml.ws.rm.v200502.OfferType offer = ((com.sun.xml.ws.rm.v200502.CreateSequenceElement) csrElement).getOffer();
@@ -533,7 +528,6 @@ public final class RMServerTube extends TubeBase {
         }
         //create server-side data structures.
         InboundSequence inboundSequence = RMDestination.getRMDestination().createSequence(
-                acksTo,
                 null, //assign random id
                 offeredId,
                 getConfig());
@@ -997,8 +991,8 @@ public final class RMServerTube extends TubeBase {
         }
 
         if (null == packet.invocationProperties.get(Session.SESSION_KEY)) {
-            Session sess = sessionManager.getSession(seq.getSessionId());
-            packet.invocationProperties.put(Session.SESSION_KEY, sess.getUserData());
+            Session session = sessionManager.getSession(seq.getSessionId());
+            packet.invocationProperties.put(Session.SESSION_KEY, session.getUserData());
         }
     }
 }

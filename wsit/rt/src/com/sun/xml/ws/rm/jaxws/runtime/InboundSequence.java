@@ -42,7 +42,6 @@ import com.sun.xml.ws.rm.protocol.AbstractSequenceAcknowledgement;
 import com.sun.xml.ws.rm.v200502.Identifier;
 import com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement;
 
-import java.net.URI;
 
 /**
  * An <code>InboundSequence</code> represents a sequence of incoming messages.  For an 
@@ -62,13 +61,13 @@ public abstract class InboundSequence extends Sequence {
      */
     private String securityTokenReferenceId;
 
-    protected InboundSequence(URI acksTo, SequenceConfig config) {
-        super(acksTo, config);
+    protected InboundSequence(SequenceConfig config) {
+        super(config);
     }
 
-    protected InboundSequence(URI acksTo, SequenceConfig config, boolean flag) {
+    protected InboundSequence(SequenceConfig config, boolean setMaxMessages) {
         // TODO: remove
-        super(acksTo, config, flag);
+        super(config, setMaxMessages);
     }
 
     protected void setCompanionSequence(OutboundSequence companionSequence) {

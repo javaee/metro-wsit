@@ -96,11 +96,8 @@ public class RMSource extends RMProvider {
         boolean firstSequence = outboundMap.isEmpty();
         outboundMap.put(seq.getId(), seq);
 
-        ClientInboundSequence iseq =
-                (ClientInboundSequence) seq.getInboundSequence();
-
+        ClientInboundSequence iseq = (ClientInboundSequence) seq.getInboundSequence();
         String iseqid = null;
-
         if (iseq != null && null != (iseqid = iseq.getId())) {
             inboundMap.put(iseqid, iseq);
         }

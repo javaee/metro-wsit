@@ -1,5 +1,5 @@
 /*
- * $Id: RMMessage.java,v 1.4 2007-11-29 14:05:07 m_potociar Exp $
+ * $Id: RMMessage.java,v 1.5 2007-11-30 21:00:31 m_potociar Exp $
  */
 
 /*
@@ -59,15 +59,15 @@ public final class RMMessage {
     /**
      * The Sequence to which the message belongs.
      */
-    private Sequence sequence = null;
+    private Sequence sequence;
     /**
      * The messageNumber of the Message in its Sequence.
      */
-    private int messageNumber = 0;
+    private int messageNumber;
     /**
      * Flag which is true if and only if the message is being processed
      */
-    private boolean isBusy = false;
+    private boolean isBusy;
     /**
      * Flag indicating whether message is delivered/acked.
      * The meaning differs according to the type of sequence
@@ -75,26 +75,26 @@ public final class RMMessage {
      * changed using the complete() method, which should only
      * be invoked by the Sequence containing the message.
      */
-    private boolean isComplete = false;
+    private boolean isComplete;
     /**
      * For messages belonging to 2-way MEPS, the corresponding message.
      */
-    private RMMessage relatedMessage = null;
+    private RMMessage relatedMessage;
     /**
      * Sequence stored when the corresponding com.sun.xml.ws.api.message.Header
      * is added to the message.
      */
-    private AbstractSequence sequenceElement = null;
+    private AbstractSequence sequenceElement;
     /**
      * SequenceAcknowledgmentElement stored when the corresponding com.sun.xml.ws.api.message.Header
      * is added to the message.
      */
-    private AbstractSequenceAcknowledgement sequenceAcknowledgementElement = null;
+    private AbstractSequenceAcknowledgement sequenceAcknowledgementElement;
     /**
      * SequenceElement stored when the corresponding com.sun.xml.ws.api.message.Header
      * is added to the message.
      */
-    private AbstractAckRequested ackRequestedElement = null;
+    private AbstractAckRequested ackRequestedElement;
     /**
      * Version of RM spec being used.
      */
@@ -104,12 +104,12 @@ public final class RMMessage {
      * a two-way operation.  ClientOutboundSequence with anonymous
      * AcksTo has to handle Acknowledgements differently in this case.
      */
-    private boolean twoWayRequest = false;
+    private boolean twoWayRequest;
     /**
      * Set in empty message used to piggyback response 
      * headers on a one-way response.
      */
-    private boolean oneWayResponse = false;
+    private boolean oneWayResponse;
     /**
      * Instance of TublineHelper used to resend messages.
      */
@@ -261,11 +261,9 @@ public final class RMMessage {
      * Resume processing of the message on this Message's monitor.
      */
     public synchronized void resume() {
-
         if (!isBusy && !isComplete) {
             messageSender.send();
         }
-
     }
 
     public synchronized boolean isBusy() {

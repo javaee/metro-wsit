@@ -111,12 +111,11 @@ public class RMDestination extends RMProvider {
     //TODO add endpoint address argument to this method and corresponding
     //member in ServerInboundSequence
     public ServerInboundSequence createSequence(
-            URI acksTo,
             String inboundId,
             String outboundId,
             SequenceConfig config) throws RMException {
 
-        ServerInboundSequence seq = new ServerInboundSequence(acksTo, inboundId, outboundId, config);
+        ServerInboundSequence seq = new ServerInboundSequence(inboundId, outboundId, config);
 
         synchronized (this) {
             inboundMap.put(seq.getId(), seq);

@@ -56,7 +56,6 @@ import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.runtime.util.Session;
 
-import java.net.URI;
 import java.util.UUID;
 
 /**
@@ -68,13 +67,13 @@ public class ServerInboundSequence extends InboundSequence implements ServerSequ
 
     private static final RmLogger LOGGER = RmLogger.getLogger(ServerInboundSequence.class);
     /**
-     * Session associated with this sequence.
+     * Session associated with this sequence. Part of undocumented API, don't remove.
      */
     private Session session;
 
-    public ServerInboundSequence(URI acksTo, String inboundId, String outboundId, SequenceConfig config) {
-        super(acksTo, config, true);
-
+    public ServerInboundSequence(String inboundId, String outboundId, SequenceConfig config) {
+        super(config, true);
+        
         setCompanionSequence(new ServerOutboundSequence(this, outboundId, config));
         if (inboundId == null) {
             String newid = "uuid:" + UUID.randomUUID();
@@ -211,7 +210,6 @@ public class ServerInboundSequence extends InboundSequence implements ServerSequ
 
         //notify immediate successor if it is waiting 
         int num = message.getMessageNumber() + 1;
-
         if (num < getNextIndex() && get(num) != null) {
             // TODO L10N
             LOGGER.finest("Resuming " + num + " message");

@@ -115,7 +115,7 @@ public abstract class OutboundSequence extends Sequence {
 
     /**
      * Invoked by Incoming message processor to post Sequence Acknowledgement
-     * from companion Incoming Sequence for transmission on next OutboundMessage.l
+     * from companion Incoming Sequence for transmission on next OutboundMessage.
      */
     public void setSequenceAcknowledgement(AbstractSequenceAcknowledgement element) {
         this.sequenceAcknowledgement = element;

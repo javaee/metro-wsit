@@ -50,8 +50,6 @@ import com.sun.xml.ws.rm.RMException;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
 import com.sun.xml.ws.rm.localization.RmLogger;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 
 /**
  * Factory class contains a method that can be used to re-initialize a server-side
@@ -78,15 +76,10 @@ public class ServerSequenceFactory {
     public static ServerSequence createSequence(SequenceSettings settings) {
         try {
             return RMDestination.getRMDestination().createSequence(
-                    new URI(settings.getAcksTo()),
                     settings.getSequenceId(),
                     settings.getCompanionSequenceId(),
                     new SequenceConfig(settings));
         } catch (RMException e) {
-            //TODO L10N
-            logger.severe("ServerSequenceFactory.createSequence failed", e);
-            return null;
-        } catch (URISyntaxException e) {
             //TODO L10N
             logger.severe("ServerSequenceFactory.createSequence failed", e);
             return null;

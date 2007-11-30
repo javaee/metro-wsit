@@ -38,8 +38,6 @@ package com.sun.xml.ws.rm.jaxws.runtime.client;
 import com.sun.xml.ws.rm.jaxws.runtime.InboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
 
-import java.net.URI;
-
 /**
  * An <code>ClientInboundSequence</code> represents a sequence of incoming messages.  
  * For an <code>RMSource</code>, a <code>ClientInboundSequence</code> is comprised 
@@ -47,8 +45,8 @@ import java.net.URI;
  */
 public class ClientInboundSequence extends InboundSequence {
 
-    public ClientInboundSequence(ClientOutboundSequence companionSequence, String identifier, URI acksTo, SequenceConfig config) {
-        super(acksTo, config);
+    public ClientInboundSequence(ClientOutboundSequence companionSequence, String identifier, SequenceConfig config) {
+        super(config);
         setId(identifier);
         setCompanionSequence(companionSequence);
     }

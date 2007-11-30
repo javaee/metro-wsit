@@ -86,10 +86,6 @@ public final class RMClientTube extends TubeBase {
      */
     private ClientOutboundSequence outboundSequence;
     /**
-     * RM InboundSequence handled by this Pipe.
-     */
-    private ClientInboundSequence inboundSequence;
-    /**
      * Flag to indicate if security pipe is our next pipe
      * then we need to create CreateSequenceRequest with
      * STR
@@ -138,7 +134,6 @@ public final class RMClientTube extends TubeBase {
         this.securityPipe = toCopy.securityPipe;
         this.secureReliableMessaging = toCopy.secureReliableMessaging;
         this.outboundSequence = toCopy.outboundSequence;
-        this.inboundSequence = toCopy.inboundSequence;
     }
 
     /**
@@ -188,10 +183,9 @@ public final class RMClientTube extends TubeBase {
                 throw LOGGER.logSevereException(new RMException(LocalizationMessages.WSRM_2018_INVALID_DEST_URI(dest), e));
             }
 
-            ClientOutboundSequence specifiedOutboundSequence = (ClientOutboundSequence) packet.proxy.getRequestContext().get(Constants.sequenceProperty);
-            if (specifiedOutboundSequence != null) {
-                outboundSequence = specifiedOutboundSequence;
-            } else {
+            // try to get outbound sequence from the request context
+            outboundSequence = (ClientOutboundSequence) packet.proxy.getRequestContext().get(Constants.sequenceProperty);
+            if (outboundSequence == null) {
                 //we need to connect to the back end.
                 JAXBElement<SecurityTokenReferenceType> str = null;
                 if (secureReliableMessaging) {
@@ -225,7 +219,6 @@ public final class RMClientTube extends TubeBase {
                 //FIXME - Can this work?
                 packet.proxy.getRequestContext().put(Constants.sequenceProperty, outboundSequence);
 
-                inboundSequence = (ClientInboundSequence) outboundSequence.getInboundSequence();
                 //set a Session object in BindingProvider property allowing user to close the sequence
                 // TODO do we need this? remove?
                 proxy.getRequestContext().put(ClientSession.SESSION_PROPERTY_KEY, new ClientSession(outboundSequence.getId(), this));

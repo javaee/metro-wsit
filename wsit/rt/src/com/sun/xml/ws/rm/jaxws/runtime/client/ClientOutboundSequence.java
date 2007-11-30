@@ -49,7 +49,6 @@ import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;
-import com.sun.xml.ws.rm.protocol.AbstractAcceptType;
 import com.sun.xml.ws.rm.protocol.AbstractCreateSequence;
 import com.sun.xml.ws.rm.protocol.AbstractCreateSequenceResponse;
 import com.sun.xml.ws.rm.protocol.AbstractTerminateSequence;
@@ -235,18 +234,10 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
      * @throws RMException wrapper for all exceptions thrown during execution of method.
      */
     private void connect(URI destination, URI acksTo, boolean twoWay) throws RMException {
+        LOGGER.entering(destination, acksTo, twoWay);
         try {
             this.setDestination(destination);
-            this.setAcksTo(acksTo);
-
-            String acksToString;
-            if (acksTo == null) {
-                acksToString = getConfig().getAddressingVersion().anonymousUri;
-            } else {
-                acksToString = acksTo.toString();
-            }
-
-            this.isAnonymous = acksToString.equals(getConfig().getAddressingVersion().anonymousUri);
+            this.isAnonymous = (acksTo != null) ? getConfig().getAddressingVersion().anonymousUri.equals(acksTo.toString()) : true;
 
             AbstractCreateSequence createSequence = null;
             if (getConfig().getRMVersion() == RMVersion.WSRM10) {
@@ -255,18 +246,6 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
                 createSequence = new com.sun.xml.ws.rm.v200702.CreateSequenceElement();
             }
 
-//            CreateSequenceElement cs = new CreateSequenceElement();
-
-            /**
-             * ADDRESSING_FIXME
-             * This needs to be fixed commenting temporarily to get the compilation
-             * problems fixed
-             */
-            /*if (RMConstants.getAddressingVersion() == AddressingVersion.W3C){
-            cs.setAcksTo(new W3CAcksToImpl(new URI(acksToString)));
-            }    else {
-            cs.setAcksTo(new MemberSubmissionAcksToImpl(new URI(acksToString)));
-            }*/
             W3CEndpointReference sourceEndpointReference = null;
             AddressingVersion addressingVersion = getConfig().getAddressingVersion();
             if (addressingVersion == AddressingVersion.W3C) {
@@ -274,20 +253,21 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
                 WSEndpointReference epr = AddressingVersion.W3C.anonymousEpr;
                 Source source = epr.asSource("AcksTo");
                 sourceEndpointReference = new W3CEndpointReference(source);
-            }/*else {
-            WSEndpointReference wsepr = new WSEndpointReference(getClass().getResourceAsStream("member-anonymous-acksTo.xml"), addressingVersion);
-            Source s = wsepr.asSource("AcksTo");
-            endpointReference = new MemberSubmissionEndpointReference(s);
-            }*/
+            } else {
+                // TODO L10N
+                throw LOGGER.logSevereException(new RMException("Unsupported addressing version"));
+            }
             createSequence.setAcksTo(sourceEndpointReference);
 
             String incomingID = "uuid:" + UUID.randomUUID();
             if (twoWay) {
                 if (getConfig().getRMVersion() == RMVersion.WSRM10) {
                     com.sun.xml.ws.rm.v200502.Identifier offerIdentifier = new com.sun.xml.ws.rm.v200502.Identifier();
-                    com.sun.xml.ws.rm.v200502.OfferType offer = new com.sun.xml.ws.rm.v200502.OfferType();
                     offerIdentifier.setValue(incomingID);
+
+                    com.sun.xml.ws.rm.v200502.OfferType offer = new com.sun.xml.ws.rm.v200502.OfferType();
                     offer.setIdentifier(offerIdentifier);
+
                     ((com.sun.xml.ws.rm.v200502.CreateSequenceElement) createSequence).setOffer(offer);
                 } else {
                     com.sun.xml.ws.rm.v200702.Identifier offerIdentifier = new com.sun.xml.ws.rm.v200702.Identifier();
@@ -296,8 +276,6 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
                     com.sun.xml.ws.rm.v200702.OfferType offer = new com.sun.xml.ws.rm.v200702.OfferType();
                     offer.setIdentifier(offerIdentifier);
                     // Microsoft does not accept CreateSequence messages if AcksTo and Offer/Endpoint are not the same
-//                    WSEndpointReference destinationEPR = new WSEndpointReference(destination, addressingVersion);
-//                    offer.setEndpoint(destinationEPR.toSpec());
                     offer.setEndpoint(sourceEndpointReference);
                     ((com.sun.xml.ws.rm.v200702.CreateSequenceElement) createSequence).setOffer(offer);
                 }
@@ -313,32 +291,21 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
             }
 
 
-            AbstractAcceptType accept = null;
+            // AbstractAcceptType accept = null;
             if (csr != null) {
                 if (csr instanceof com.sun.xml.ws.rm.v200502.CreateSequenceResponseElement) {
                     com.sun.xml.ws.rm.v200502.Identifier idOutbound = ((com.sun.xml.ws.rm.v200502.CreateSequenceResponseElement) csr).getIdentifier();
                     this.setId(idOutbound.getValue());
 
-                    accept = ((com.sun.xml.ws.rm.v200502.CreateSequenceResponseElement) csr).getAccept();
+                    // accept = ((com.sun.xml.ws.rm.v200502.CreateSequenceResponseElement) csr).getAccept();
                 } else {
                     com.sun.xml.ws.rm.v200702.Identifier idOutbound = ((com.sun.xml.ws.rm.v200702.CreateSequenceResponseElement) csr).getIdentifier();
                     this.setId(idOutbound.getValue());
 
-                    accept = ((com.sun.xml.ws.rm.v200702.CreateSequenceResponseElement) csr).getAccept();
+                    // accept = ((com.sun.xml.ws.rm.v200702.CreateSequenceResponseElement) csr).getAccept();
                 }
 
-                if (accept != null) {
-                    /**
-                     * ADDRESSING_FIXME Needs to be fixes once
-                     * AcksTO issue is resolved
-                     */
-                    /* URI uriAccept = accept.getAcksTo();*/
-                    URI uriAccept = null;
-
-                    setCompanionSequence(new ClientInboundSequence(this, incomingID, uriAccept, getConfig()));
-                } else {
-                    setCompanionSequence(new ClientInboundSequence(this, incomingID, null, getConfig()));
-                }
+                setCompanionSequence(new ClientInboundSequence(this, incomingID, getConfig()));
 
                 //start the inactivity clock
                 resetLastActivityTime();
@@ -346,8 +313,8 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
             //maybe a non-anonymous AcksTo
             //Handle CreateSequenceRefused fault
             }
-        } catch (Exception e) {
-            throw new RMException(e);
+        } finally {
+            LOGGER.exiting();
         }
     }
 
@@ -372,7 +339,6 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
      * @throws RMException wrapper for all exceptions thrown during execution of method.
      */
     public void disconnect(boolean keepAlive) throws RMException {
-
         //FIXME - find another check for connectiveness.. want to get rid of
         //unnecessary InboundSequences.
         if (getInboundSequence() == null) {
