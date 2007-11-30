@@ -129,7 +129,10 @@ public class TransportBindingProcessor extends BindingProcessor {
                 //spFB.isEndorsingSignature(true);
                 spFB.addTargetBinding(target);                                
             }
-            if(buildSP){                
+            /* A feature is commented here due to bug in WCF side. 
+             * Feature is : SignedParts/SignedElement support under EndorsingSuppotingToken for TransportBinding
+             * Uncomment this feature, once WCF fixes this bug on their side
+            if(buildSP){
                 Iterator<SignedParts>itr_sp = est.getSignedParts();
                 while(itr_sp.hasNext()){
                     SignedParts target = itr_sp.next();
@@ -140,7 +143,8 @@ public class TransportBindingProcessor extends BindingProcessor {
                     SignedElements target = itr_se.next();
                     iAP.process(target,spFB);
                 }                
-            }            
+            }
+             */            
             container.insert(sp);            
         }                
     }
