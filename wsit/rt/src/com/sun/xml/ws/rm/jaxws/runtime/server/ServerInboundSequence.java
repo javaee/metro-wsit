@@ -43,7 +43,6 @@
  */
 package com.sun.xml.ws.rm.jaxws.runtime.server;
 
-import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.rm.SequenceSettings;
 import com.sun.xml.ws.api.rm.server.ServerSequence;
 import com.sun.xml.ws.rm.InvalidMessageNumberException;
@@ -52,7 +51,6 @@ import com.sun.xml.ws.rm.RMException;
 import com.sun.xml.ws.rm.jaxws.runtime.InboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
-import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.runtime.util.Session;
 
@@ -133,28 +131,28 @@ public class ServerInboundSequence extends InboundSequence implements ServerSequ
         }
         return true;
     }
-
-    /**
-     * Used to re-populate a sequence with persisted messages
-     * after a restart.  Do not use for other purposes.
-     *
-     * @param index The index to add message at.
-     * @param message The JAX-WS message to add
-     * @param complete Indicates whether to mark the message as complete.
-     */
-    public void resetMessage(int index, Message message, boolean complete) {
-        try {
-            RMMessage rmMessage = new RMMessage(message);
-            set(index, rmMessage);
-
-            if (complete) {
-                rmMessage.complete();
-            }
-        } catch (RMException e) {
-            // TODO: throw the exception?
-            LOGGER.severe(LocalizationMessages.WSRM_3020_COULD_NOT_RESET_MESSAGE(index, getId()), e);
-        }
-    }
+//
+//    /**
+//     * Used to re-populate a sequence with persisted messages
+//     * after a restart.  Do not use for other purposes.
+//     *
+//     * @param index The index to add message at.
+//     * @param message The JAX-WS message to add
+//     * @param complete Indicates whether to mark the message as complete.
+//     */
+//    public void resetMessage(int index, Message message, boolean complete) {
+//        try {
+//            RMMessage rmMessage = new RMMessage(message);
+//            set(index, rmMessage);
+//
+//            if (complete) {
+//                rmMessage.complete();
+//            }
+//        } catch (RMException e) {
+//            // TODO: throw the exception?
+//            LOGGER.severe(LocalizationMessages.WSRM_3020_COULD_NOT_RESET_MESSAGE(index, getId()), e);
+//        }
+//    }
 
     /**
      * Implementation of ServerSequence.getSequenceSettings..

@@ -48,11 +48,13 @@ import com.sun.xml.ws.rm.jaxws.util.ProcessingFilter;
 import com.sun.xml.ws.rm.protocol.AbstractAckRequested;
 import com.sun.xml.ws.rm.protocol.AbstractSequence;
 import com.sun.xml.ws.rm.protocol.AbstractSequenceAcknowledgement;
-import com.sun.xml.ws.rm.protocol.AcknowledgementHandler;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 
 import com.sun.xml.ws.rm.localization.RmLogger;
+import java.math.BigInteger;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -60,10 +62,6 @@ import java.net.URI;
 public abstract class OutboundSequence extends Sequence {
 
     private static final RmLogger LOGGER = RmLogger.getLogger(OutboundSequence.class);
-    /**
-     * Instance of helper class that processes SequnceAcknowledgement headers.
-     */
-    private AcknowledgementHandler ackHandler;
     /**
      * Space available in receiving buffer at destination, if
      * this can be determined.
@@ -96,8 +94,6 @@ public abstract class OutboundSequence extends Sequence {
 
     protected OutboundSequence(SequenceConfig config) {
         super(config);
-
-        this.ackHandler = new AcknowledgementHandler(config);
     }
 
     /**
@@ -268,18 +264,6 @@ public abstract class OutboundSequence extends Sequence {
     }
 
     /**
-     * Removes acked messages from list. 
-     *(For anonymous client, need to widen definition of acked to include the 
-     * requirement that responses have arrived.)
-     *
-     * @param element The <code>SequenceAcknowledgementElement</code> containing the
-     *              ranges of messages to be removed.
-     */
-    public void handleAckResponse(AbstractSequenceAcknowledgement element) throws InvalidMessageNumberException {
-        ackHandler.handleAcknowledgement(this, element);
-    }
-
-    /**
      *
      * Called by disconnect before sending Last and Terminate sequence.  Blocks until all messages
      * have been acked.  The notifyAll method is called by OutboundSequence.acknowledge when
@@ -374,4 +358,102 @@ public abstract class OutboundSequence extends Sequence {
         }
         return null;
     }
+    
+    /**
+     * Removes acked messages from list. Mark the messages in the sequence delivered according to the contents
+     * of the specified <code>SequenceAcknowledgement</code> element.
+     *(For anonymous client, need to widen definition of acked to include the 
+     * requirement that responses have arrived.)
+     *
+     * @param element The <code>SequenceAcknowledgementElement</code> containing the
+     *              ranges of messages to be removed.
+     */
+    public void handleAckResponse(AbstractSequenceAcknowledgement element) throws InvalidMessageNumberException {
+
+        synchronized (this) {
+            List<BigInteger> nacks = null;
+            if (getConfig().getRMVersion() == RMVersion.WSRM10) {
+                this.setBufferRemaining(((com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement) element).getBufferRemaining());
+                nacks = ((com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement) element).getNack();
+            } else {
+                this.setBufferRemaining(((com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement) element).getBufferRemaining());
+                nacks = ((com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement) element).getNack();
+            }
+
+            //TODO - error checking
+            //either nacks or ranges must be null or protocol element is malformed.
+            if (nacks != null && !nacks.isEmpty()) {
+                ArrayList<Boolean> list = new ArrayList<Boolean>();
+                for (int i = 1; i < this.getNextIndex(); i++) {
+                    list.set(i, true);
+                }
+
+                for (BigInteger big : nacks) {
+                    int index = (int) big.longValue();
+                    list.set(index, false);
+                }
+
+                for (int i = 1; i < this.getNextIndex(); i++) {
+                    if (list.get(i)) {
+                        acknowledgeIfValid(i);
+                    }
+                }
+            } else {
+
+                switch (getConfig().getRMVersion()) {
+                    case WSRM10: {
+                        List<com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement.AcknowledgementRange> ranges =
+                                ((com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement) element).getAcknowledgementRange();
+                        for (com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement.AcknowledgementRange range : ranges) {
+                            int lower = range.getLower().intValue();
+                            int upper = range.getUpper().intValue();
+
+                            //if a SequenceHeader with Last elemet has been sent, we may
+                            //receive acks for that "Message" although one was never stored
+                            //at the index.
+                            if (this.isLast() && upper == this.getNextIndex()) {
+                                upper--;
+                            }
+
+                            for (int i = lower; i <= upper; i++) {
+                                acknowledgeIfValid(i);
+                            }
+                        }
+                        break;
+                    }
+                    case WSRM11:
+                         {
+                            List<com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement.AcknowledgementRange> ranges =
+                                    ((com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement) element).getAcknowledgementRange();
+                            for (com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement.AcknowledgementRange range : ranges) {
+                                int lower = range.getLower().intValue();
+                                int upper = range.getUpper().intValue();
+                                for (int i = lower; i <= upper; i++) {
+                                    acknowledgeIfValid(i);
+                                }
+                            }
+                        }
+                        break;
+                }
+            }
+        }
+    }
+
+    /**
+     * We may receive an ack for an unknown message if we are restarting
+     * after a crash or if the RMD is broken. Allow processing to continue
+     * after logging.
+     * 
+     */
+    private void acknowledgeIfValid(int i) {
+        try {
+            if (this.get(i) != null) {
+                this.acknowledge(i);
+            }
+        } catch (InvalidMessageNumberException e) {
+            //this can happen if the sequence has been resurrected
+            //after a restart.
+            LOGGER.fine(LocalizationMessages.WSRM_4001_ACKNOWLEDGEMENT_MESSAGE(this.getId(), i));
+        }
+    }    
 }

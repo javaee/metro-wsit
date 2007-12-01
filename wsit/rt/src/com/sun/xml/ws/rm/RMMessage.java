@@ -1,5 +1,5 @@
 /*
- * $Id: RMMessage.java,v 1.6 2007-12-01 13:52:41 m_potociar Exp $
+ * $Id: RMMessage.java,v 1.7 2007-12-01 20:01:20 m_potociar Exp $
  */
 
 /*
@@ -234,6 +234,7 @@ public final class RMMessage {
     public void complete() {
         //release reference to JAX-WS message.
         synchronized (sequence) {
+            messageSender = null;
             message = null;
             isComplete = true;
         }
