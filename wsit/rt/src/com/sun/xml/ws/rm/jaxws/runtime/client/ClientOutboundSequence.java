@@ -37,9 +37,11 @@ package com.sun.xml.ws.rm.jaxws.runtime.client;
 
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
+import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.rm.AcknowledgementListener;
 import com.sun.xml.ws.api.rm.SequenceSettings;
 import com.sun.xml.ws.api.rm.client.ClientSequence;
+import com.sun.xml.ws.client.ContentNegotiation;
 import com.sun.xml.ws.rm.InvalidMessageNumberException;
 import com.sun.xml.ws.rm.RMMessage;
 import com.sun.xml.ws.rm.RMException;
@@ -60,6 +62,8 @@ import javax.xml.ws.Service;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
 import java.net.URI;
 import java.util.UUID;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.ws.BindingProvider;
 
 /**
  * ClientOutboundSequence represents the set of all messages from a single BindingProvider instance.
@@ -130,13 +134,16 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
             URI destination,
             URI acksTo,
             boolean twoWay,
-            ProtocolMessageSender protocolMessageSender) throws RMException {
+            Unmarshaller unmarshaller,
+            Tube nextTube,
+            BindingProvider proxy,
+            ContentNegotiation contentNegotiation) throws RMException {
         super(config);
         //FIXME for now
         super.setBufferRemaining(config.getBufferSize());
 
         this.securityTokenReference = str;
-        this.protocolMessageSender = protocolMessageSender;
+        this.protocolMessageSender = new ProtocolMessageSender(config, unmarshaller, nextTube, proxy, contentNegotiation);
 
         this.connect(destination, acksTo, twoWay);
     }

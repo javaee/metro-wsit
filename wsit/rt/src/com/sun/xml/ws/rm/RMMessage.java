@@ -1,5 +1,5 @@
 /*
- * $Id: RMMessage.java,v 1.5 2007-11-30 21:00:31 m_potociar Exp $
+ * $Id: RMMessage.java,v 1.6 2007-12-01 13:52:41 m_potociar Exp $
  */
 
 /*
@@ -40,11 +40,11 @@
 package com.sun.xml.ws.rm;
 
 import com.sun.xml.ws.api.message.Header;
+import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.rm.protocol.AbstractAckRequested;
 import com.sun.xml.ws.rm.protocol.AbstractSequence;
 import com.sun.xml.ws.rm.protocol.AbstractSequenceAcknowledgement;
-import com.sun.xml.ws.rm.localization.LocalizationMessages;
 
 /**
  * Message is an abstraction of messages that can be added to WS-RM Sequences. 
@@ -96,10 +96,6 @@ public final class RMMessage {
      */
     private AbstractAckRequested ackRequestedElement;
     /**
-     * Version of RM spec being used.
-     */
-    private RMVersion version;
-    /**
      * When true, indicates that the message is a request message for
      * a two-way operation.  ClientOutboundSequence with anonymous
      * AcksTo has to handle Acknowledgements differently in this case.
@@ -118,13 +114,12 @@ public final class RMMessage {
     /**
      * Public ctor takes wrapped JAX-WS message as its argument.
      */
-    public RMMessage(Message message, RMVersion version) {
+    public RMMessage(Message message) {
         this.message = message;
-        this.version = version;
     }
 
-    public RMMessage(Message message, RMVersion version, boolean isOneWayResponse, boolean isTwoWayRequest) {
-        this(message, version);
+    public RMMessage(Message message, boolean isOneWayResponse, boolean isTwoWayRequest) {
+        this(message);
         this.oneWayResponse = isOneWayResponse;
         this.twoWayRequest = isTwoWayRequest;
     }
@@ -199,30 +194,17 @@ public final class RMMessage {
         relatedMessage = mess;
     }
 
-    /**
-     * Accessors for isBusy field used with Tubeline implementation.
-     */
-    public boolean getIsBusy() {
-        return isBusy();
-    }
-
-    public void setIsBusy(boolean value) {
+    public void setBusy(boolean value) {
         isBusy = value;
     }
 
     /**
-     * Get the RM Header Element with the specified name from the underlying
-     * JAX-WS message's HeaderList
-     * @param name The name of the Header to find.
+     * Get the underlying JAX-WS message's HeaderList
      */
-    public Header getHeader(String name) {
-        if (message == null || !message.hasHeaders()) {
-            return null;
-        }
-
-        return message.getHeaders().get(version.namespaceUri, name, true);
+    public HeaderList getHeaders() {
+        return (message == null || !message.hasHeaders()) ? null : message.getHeaders();
     }
-
+    
     /**
      * Add the specified RM Header element to the underlying JAX-WS message's
      * <code>HeaderList</code>.
@@ -261,13 +243,9 @@ public final class RMMessage {
      * Resume processing of the message on this Message's monitor.
      */
     public synchronized void resume() {
-        if (!isBusy && !isComplete) {
+        if (!isBusy && !isComplete()) {
             messageSender.send();
         }
-    }
-
-    public synchronized boolean isBusy() {
-        return isBusy;
     }
 
     /**
@@ -293,27 +271,20 @@ public final class RMMessage {
 
     @Override
     public String toString() {
-        String ret = LocalizationMessages.MESSAGE_NUMBER_STRING(messageNumber);
-        ret += LocalizationMessages.SEQUENCE_STRING(getSequence() != null ? getSequence().getId() : "null");
+        StringBuffer buffer = new StringBuffer("Message:\n\tmessageNumber = ").append(messageNumber).append('\n');
+        buffer.append("\tSequence = ").append((sequence != null) ? sequence.getId() : "null").append('\n');
 
-        AbstractSequence sel;
-        AbstractSequenceAcknowledgement sael;
-        AbstractAckRequested ael;
-        if (null != (sel = getSequenceElement())) {
-            ret += sel.toString();
+        if (null != sequenceElement) {
+            buffer.append(sequenceElement.toString());
+        }
+        if (null != sequenceAcknowledgementElement) {
+            buffer.append(sequenceAcknowledgementElement.toString());
+        }
+        if (null != ackRequestedElement) {
+            buffer.append(ackRequestedElement.toString());
         }
 
-        if (null != (sael = getSequenceAcknowledgementElement())) {
-            ret += sael.toString();
-        }
-
-        if (null != (ael = getAckRequestedElement())) {
-            ret += ael.toString();
-        }
-
-        return ret;
-
-
+        return buffer.toString();
     }
 
     /*      Diagnostic methods store com.sun.xml.ws.protocol.* elements when

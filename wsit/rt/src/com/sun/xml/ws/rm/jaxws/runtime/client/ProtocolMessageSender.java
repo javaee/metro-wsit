@@ -54,6 +54,7 @@ import com.sun.xml.ws.api.pipe.Engine;
 import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.TubeCloner;
+import com.sun.xml.ws.client.ContentNegotiation;
 import com.sun.xml.ws.rm.CloseSequenceException;
 import com.sun.xml.ws.rm.CreateSequenceException;
 import com.sun.xml.ws.rm.RMException;
@@ -68,16 +69,12 @@ import com.sun.xml.ws.rm.protocol.AbstractAckRequested;
 import com.sun.xml.ws.rm.protocol.AbstractCreateSequence;
 import com.sun.xml.ws.rm.protocol.AbstractCreateSequenceResponse;
 import com.sun.xml.ws.rm.protocol.AbstractTerminateSequence;
-import com.sun.xml.ws.rm.v200502.AckRequestedElement;
-import com.sun.xml.ws.rm.v200502.SequenceElement;
-import com.sun.xml.ws.rm.v200702.CloseSequenceElement;
-import com.sun.xml.ws.rm.v200702.CloseSequenceResponseElement;
-import com.sun.xml.ws.rm.v200702.UsesSequenceSTR;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.net.URI;
 import java.util.logging.Level;
 import javax.xml.namespace.QName;
+import javax.xml.ws.BindingProvider;
 
 /**
  * Helper class used to send protocol message addressed to the endpoint.
@@ -108,11 +105,8 @@ public class ProtocolMessageSender {
     /**
      * TODO javadoc
      */
-    private Packet packet;
-    /**
-     * Helper to process InboundMessages.
-     */
-    private InboundMessageProcessor processor;
+    private BindingProvider proxy;
+    private ContentNegotiation contentNegotiation;
     /**
      * The unmarshaller to read the messages
      */
@@ -122,16 +116,16 @@ public class ProtocolMessageSender {
      * Public constructor.  Initialize the fields
      */
     public ProtocolMessageSender(
-            InboundMessageProcessor processor,
             SequenceConfig config,
             Unmarshaller unmarshaller,
             Tube nextTube,
-            Packet packet) {
+            BindingProvider proxy,
+            ContentNegotiation contentNegotiation) {
 
-        this.processor = processor;
         this.unmarshaller = unmarshaller;
-        this.packet = packet;
-        this.config = config;
+        this.config = config;        
+        this.proxy = proxy;
+        this.contentNegotiation = contentNegotiation;
 
         this.nextTube = nextTube;
         Fiber currentFiber = Fiber.current();
@@ -155,24 +149,13 @@ public class ProtocolMessageSender {
 
         //1. Initialize  message adding CreateSequence to body
         if (cs != null) {
-            Message request = null;
-            if (config.getRMVersion() == RMVersion.WSRM10) {
-                request = Messages.create(
-                        config.getRMVersion().jaxbContext,
-                        ((com.sun.xml.ws.rm.v200502.CreateSequenceElement) cs),
-                        config.getSoapVersion());
-            } else {
-                request = Messages.create(
-                        config.getRMVersion().jaxbContext,
-                        ((com.sun.xml.ws.rm.v200702.CreateSequenceElement) cs),
-                        config.getSoapVersion());
-            }
+            Message request = Messages.create(config.getRMVersion().jaxbContext, cs, config.getSoapVersion());
 
             //Addressing Headers are added by configuring the following property
             //on the packet
             Packet requestPacket = new Packet(request);
-            requestPacket.proxy = packet.proxy;
-            requestPacket.contentNegotiation = packet.contentNegotiation;
+            requestPacket.proxy = this.proxy;
+            requestPacket.contentNegotiation = this.contentNegotiation;
             requestPacket.setEndPointAddressString(destination.toString());
 
             addAddressingHeaders(requestPacket, config.getRMVersion().createSequenceAction, destination, false);
@@ -211,11 +194,11 @@ public class ProtocolMessageSender {
         Message request = Messages.create(config.getRMVersion().jaxbContext, ts, config.getSoapVersion());
 
         //piggyback an acknowledgement if one is pending
-        seq.processAcknowledgement(new RMMessage(request, config.getRMVersion()));
+        seq.processAcknowledgement(new RMMessage(request));
 
         Packet requestPacket = new Packet(request);
-        requestPacket.proxy = packet.proxy;
-        requestPacket.contentNegotiation = packet.contentNegotiation;
+        requestPacket.proxy = this.proxy;
+        requestPacket.contentNegotiation = this.contentNegotiation;
         addAddressingHeaders(requestPacket, config.getRMVersion().terminateSequenceAction, seq.getDestination(),/*true*/ false);
         requestPacket.setEndPointAddressString(seq.getDestination().toString());
         Packet responsePacket = process(requestPacket);
@@ -237,27 +220,27 @@ public class ProtocolMessageSender {
      */
     public void sendLast(OutboundSequence seq) throws RMException {
         Message request = createEmptyMessage(config.getSoapVersion());
-        SequenceElement el = createLastHeader(seq);
+        com.sun.xml.ws.rm.v200502.SequenceElement el = createLastHeader(seq);
         request.getHeaders().add(createHeader(el));
 
         seq.setLast();
 
         Packet requestPacket = new Packet(request);
-        requestPacket.proxy = packet.proxy;
+        requestPacket.proxy = this.proxy;
         requestPacket.setEndPointAddressString(seq.getDestination().toString());
-        requestPacket.contentNegotiation = packet.contentNegotiation;
+        requestPacket.contentNegotiation = this.contentNegotiation;
         addAddressingHeaders(requestPacket, config.getRMVersion().lastAction, seq.getDestination(), /*true*/ false);
 
         Packet responsePacket = process(requestPacket);
         Message response = responsePacket.getMessage();
 
-        RMMessage msg = new RMMessage(response, config.getRMVersion());
+        RMMessage msg = new RMMessage(response);
         if (response != null && response.isFault()) {
             // TODO L10N
             throw LOGGER.logException(new RMException("Error sending Last message", response), Level.WARNING);
         }
 
-        processor.processMessage(msg, unmarshaller);
+        InboundMessageProcessor.processMessage(msg, unmarshaller, RMSource.getRMSource(), config.getRMVersion());
     }
 
     /**
@@ -276,8 +259,8 @@ public class ProtocolMessageSender {
 
 
             Packet requestPacket = new Packet(request);
-            requestPacket.proxy = packet.proxy;
-            requestPacket.contentNegotiation = packet.contentNegotiation;
+            requestPacket.proxy = this.proxy;
+            requestPacket.contentNegotiation = this.contentNegotiation;
 
             addAddressingHeaders(requestPacket, config.getRMVersion().ackRequestedAction, seq.getDestination(), /*true*/ false);
 
@@ -292,7 +275,7 @@ public class ProtocolMessageSender {
                 throw LOGGER.logException(new RMException("Error sending AckRequestedElement", response), Level.WARNING);
             }
 
-            processor.processMessage(new RMMessage(response, config.getRMVersion()), unmarshaller);
+            InboundMessageProcessor.processMessage(new RMMessage(response), unmarshaller, RMSource.getRMSource(), config.getRMVersion());
         } finally {
             //Make sure that alarm is reset.
             ((ClientOutboundSequence) seq).resetLastActivityTime();
@@ -333,7 +316,7 @@ public class ProtocolMessageSender {
         if (config.getRMVersion() == RMVersion.WSRM11) {
             HeaderList headerList = requestPacket.getMessage().getHeaders();
 
-            UsesSequenceSTR usesSequenceSTR = new UsesSequenceSTR();
+            com.sun.xml.ws.rm.v200702.UsesSequenceSTR usesSequenceSTR = new com.sun.xml.ws.rm.v200702.UsesSequenceSTR();
             usesSequenceSTR.getOtherAttributes().put(new QName(config.getSoapVersion().nsUri, "mustUnderstand"), "true");
             headerList.add(createHeader(usesSequenceSTR));
         }
@@ -358,11 +341,11 @@ public class ProtocolMessageSender {
     /**
      * Return a <code>SequenceElement.LastMessage</code>
      */
-    private SequenceElement createLastHeader(OutboundSequence seq) {
-        SequenceElement sequenceElement = new SequenceElement();
+    private com.sun.xml.ws.rm.v200502.SequenceElement createLastHeader(OutboundSequence seq) {
+        com.sun.xml.ws.rm.v200502.SequenceElement sequenceElement = new com.sun.xml.ws.rm.v200502.SequenceElement();
         sequenceElement.setId(seq.getId());
         sequenceElement.setNumber(seq.getNextIndex());
-        sequenceElement.setLastMessage(new SequenceElement.LastMessage());
+        sequenceElement.setLastMessage(new com.sun.xml.ws.rm.v200502.SequenceElement.LastMessage());
         return sequenceElement;
     }
 
@@ -375,7 +358,7 @@ public class ProtocolMessageSender {
     private AbstractAckRequested createAckRequestedElement(OutboundSequence seq) {
         AbstractAckRequested ackRequestedElement = null;
         if (config.getRMVersion() == RMVersion.WSRM10) {
-            ackRequestedElement = new AckRequestedElement();
+            ackRequestedElement = new com.sun.xml.ws.rm.v200502.AckRequestedElement();
             ackRequestedElement.setId(seq.getId());
         } else {
             ackRequestedElement = new com.sun.xml.ws.rm.v200702.AckRequestedElement();
@@ -394,13 +377,13 @@ public class ProtocolMessageSender {
         com.sun.xml.ws.rm.v200702.Identifier idClose = new com.sun.xml.ws.rm.v200702.Identifier();
         idClose.setValue(seq.getId());
 
-        CloseSequenceElement cs = new CloseSequenceElement();
+        com.sun.xml.ws.rm.v200702.CloseSequenceElement cs = new com.sun.xml.ws.rm.v200702.CloseSequenceElement();
         cs.setIdentifier(idClose);
         cs.setLastMsgNumber(seq.getNextIndex() - 1);
 
         Packet requestPacket = new Packet(Messages.create(config.getRMVersion().jaxbContext, cs, config.getSoapVersion()));
-        requestPacket.proxy = packet.proxy;
-        requestPacket.contentNegotiation = packet.contentNegotiation;
+        requestPacket.proxy = this.proxy;
+        requestPacket.contentNegotiation = this.contentNegotiation;
         requestPacket.setEndPointAddressString(seq.getDestination().toString());
 
         // TODO: check why only WS-RM1.1 ???
@@ -417,7 +400,7 @@ public class ProtocolMessageSender {
         unmarshallCloseSequenceResponse(response);
     }
 
-    private CloseSequenceResponseElement unmarshallCloseSequenceResponse(Message response) throws RMException {
+    private com.sun.xml.ws.rm.v200702.CloseSequenceResponseElement unmarshallCloseSequenceResponse(Message response) throws RMException {
         try {
             return response.readPayloadAsJAXB(unmarshaller);
         } catch (JAXBException e) {

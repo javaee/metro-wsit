@@ -50,14 +50,12 @@ public abstract class RMProvider {
      * Instance of a Helper class to handle inbound messages based 
      * on their WS-RM protocol headers
      */
-    private InboundMessageProcessor messageProcessor;
     private ProcessingFilter filter;
 
     /**
      * Constructor
      */
     public RMProvider() {
-        this.messageProcessor = new InboundMessageProcessor(this);
     }
 
     /**
@@ -94,8 +92,4 @@ public abstract class RMProvider {
      * @param The sequence id
      */
     public abstract InboundSequence getInboundSequence(String id);
-
-    public final InboundMessageProcessor getInboundMessageProcessor() {
-        return messageProcessor;
-    }
 }

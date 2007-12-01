@@ -207,12 +207,10 @@ public final class RMClientTube extends TubeBase {
                         destURI,
                         getConfig().getAnonymousAddressingUri(),
                         checkForTwoWayOperation(),
-                        new ProtocolMessageSender(
-                        RMSource.getRMSource().getInboundMessageProcessor(),
-                        getConfig(),
                         getUnmarshaller(),
                         next,
-                        packet));
+                        packet.proxy,
+                        packet.contentNegotiation);
 
                 RMSource.getRMSource().addOutboundSequence(outboundSequence);
                 //make this available to the client
@@ -456,7 +454,7 @@ public final class RMClientTube extends TubeBase {
         }
 
         public void send() {
-            message.setIsBusy(true);
+            message.setBusy(true);
             if (packet == null) {
                 // TODO L10N
                 throw LOGGER.logSevereException(new IllegalStateException("Request not set in TubelineHelper"));
@@ -522,7 +520,7 @@ public final class RMClientTube extends TubeBase {
                 } catch (Exception e) {
                     onCompletion(e);
                 } finally {
-                    message.setIsBusy(false);
+                    message.setBusy(false);
                 }
             }
 
@@ -563,7 +561,7 @@ public final class RMClientTube extends TubeBase {
                         parentFiber.resume(null);
                     }
                 } finally {
-                    message.setIsBusy(false);
+                    message.setBusy(false);
                 }
             }
         }

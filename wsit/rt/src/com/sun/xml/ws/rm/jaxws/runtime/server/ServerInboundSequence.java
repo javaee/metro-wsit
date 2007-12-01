@@ -74,13 +74,8 @@ public class ServerInboundSequence extends InboundSequence implements ServerSequ
     public ServerInboundSequence(String inboundId, String outboundId, SequenceConfig config) {
         super(config, true);
         
+        setId((inboundId != null) ? inboundId : "uuid:" + UUID.randomUUID());
         setCompanionSequence(new ServerOutboundSequence(this, outboundId, config));
-        if (inboundId == null) {
-            String newid = "uuid:" + UUID.randomUUID();
-            setId(newid);
-        } else {
-            setId(inboundId);
-        }
     }
 
     /**
@@ -149,7 +144,7 @@ public class ServerInboundSequence extends InboundSequence implements ServerSequ
      */
     public void resetMessage(int index, Message message, boolean complete) {
         try {
-            RMMessage rmMessage = new RMMessage(message, getConfig().getRMVersion());
+            RMMessage rmMessage = new RMMessage(message);
             set(index, rmMessage);
 
             if (complete) {

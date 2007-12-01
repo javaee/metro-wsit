@@ -42,9 +42,8 @@ import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.RMProvider;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
-
 import com.sun.xml.ws.rm.localization.RmLogger;
-import java.net.URI;
+
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Hashtable;

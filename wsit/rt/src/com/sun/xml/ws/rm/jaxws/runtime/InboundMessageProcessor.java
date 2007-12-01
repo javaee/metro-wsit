@@ -36,11 +36,14 @@
 package com.sun.xml.ws.rm.jaxws.runtime;
 
 import com.sun.xml.ws.api.message.Header;
+import com.sun.xml.ws.api.message.HeaderList;
+import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.rm.CloseSequenceException;
 import com.sun.xml.ws.rm.InvalidSequenceException;
 import com.sun.xml.ws.rm.MessageNumberRolloverException;
 import com.sun.xml.ws.rm.RMException;
 import com.sun.xml.ws.rm.RMMessage;
+import com.sun.xml.ws.rm.RMVersion;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.protocol.AbstractAckRequested;
@@ -60,10 +63,8 @@ import javax.xml.bind.Unmarshaller;
 public class InboundMessageProcessor {
 
     private static final RmLogger LOGGER = RmLogger.getLogger(InboundMessageProcessor.class);
-    private RMProvider provider;
 
-    public InboundMessageProcessor(RMProvider provider) {
-        this.provider = provider;
+    private InboundMessageProcessor() {
     }
 
     /**
@@ -82,13 +83,13 @@ public class InboundMessageProcessor {
      * <br>
      * @param message The inbound <code>Message</code>.
      */
-    public void processMessage(RMMessage message, Unmarshaller unmarshaller) throws RMException {
+    public static void processMessage(RMMessage message, Unmarshaller unmarshaller, RMProvider provider, RMVersion rmVersion) throws RMException {
         /*
          * Check for each RM header type and do the right thing in RMProvider
          * depending on the type.
          */
         InboundSequence inseq = null;
-        Header header = message.getHeader("Sequence");
+        Header header = getHeader(message.getHeaders(), "Sequence", rmVersion);
         if (header != null) {
             try {
                 //identify sequence and message number from data in header and add
@@ -126,7 +127,7 @@ public class InboundMessageProcessor {
             }
         }
 
-        header = message.getHeader("SequenceAcknowledgement");
+        header = getHeader(message.getHeaders(), "SequenceAcknowledgement", rmVersion);
         if (header != null) {
             try {
                 AbstractSequenceAcknowledgement ackHeader = header.readAsJAXB(unmarshaller);
@@ -148,7 +149,7 @@ public class InboundMessageProcessor {
             }
         }
 
-        header = message.getHeader("AckRequested");
+        header = getHeader(message.getHeaders(), "AckRequested", rmVersion);
         if (header != null) {
             try {
                 //dispatch to InboundSequence to construct response.
@@ -186,6 +187,14 @@ public class InboundMessageProcessor {
             //is a ClientInboundSequence where the OutboundSequence has no two-ways
             }
         }
-
+    }
+    
+    /**
+     * Get the RM Header Element with the specified name from the underlying
+     * JAX-WS message's HeaderList
+     * @param name The name of the Header to find.
+     */
+    private static Header getHeader(HeaderList headers, String name, RMVersion rmVersion) {
+        return (headers != null) ? headers.get(rmVersion.namespaceUri, name, true) : null;
     }
 }
