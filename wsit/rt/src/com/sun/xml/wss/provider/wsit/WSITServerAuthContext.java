@@ -28,6 +28,7 @@ import com.sun.xml.ws.security.impl.IssuedTokenContextImpl;
 import com.sun.xml.ws.security.policy.Token;
 import com.sun.xml.ws.security.impl.policyconv.SecurityPolicyHolder;
 import com.sun.xml.ws.security.opt.impl.JAXBFilterProcessingContext;
+import com.sun.xml.ws.security.opt.impl.util.SOAPUtil;
 import com.sun.xml.ws.security.policy.SecureConversationToken;
 import com.sun.xml.ws.security.secconv.WSSCContract;
 import com.sun.xml.ws.security.secconv.WSSCElementFactory;
@@ -87,6 +88,7 @@ import javax.xml.bind.JAXBElement;
 
 import java.util.logging.Level;
 import com.sun.xml.wss.provider.wsit.logging.LogStringsMessages;
+import javax.xml.ws.soap.SOAPFaultException;
 
 /**
  *
@@ -268,27 +270,30 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
             }
         } catch (WssSoapFaultException ex) {
             thereWasAFault = true;
-            msg = Messages.create(ex, pipeConfig.getBinding().getSOAPVersion());
+            SOAPFaultException sfe = SOAPUtil.getSOAPFaultException(ex, soapFactory, soapVersion);
+            msg = Messages.create(sfe, soapVersion);
         } catch (XWSSecurityException xwse) {
             thereWasAFault = true;
-            msg = Messages.create(xwse, pipeConfig.getBinding().getSOAPVersion());
+            SOAPFaultException sfe = SOAPUtil.getSOAPFaultException(xwse, soapFactory, soapVersion);
+            msg = Messages.create(sfe, soapVersion);
             
         } catch (XWSSecurityRuntimeException xwse) {
             thereWasAFault = true;
-            msg = Messages.create(xwse, pipeConfig.getBinding().getSOAPVersion());
+              SOAPFaultException sfe = SOAPUtil.getSOAPFaultException(xwse, soapFactory, soapVersion);
+            msg = Messages.create(sfe, soapVersion);
             
         }  catch (WebServiceException xwse) {
             thereWasAFault = true;
-            msg = Messages.create(xwse, pipeConfig.getBinding().getSOAPVersion());
+            SOAPFaultException sfe = SOAPUtil.getSOAPFaultException(xwse, soapFactory, soapVersion);
+            msg = Messages.create(sfe, soapVersion);
             
         } catch(SOAPException se){
             // internal error
             log.log(Level.SEVERE,
                     LogStringsMessages.WSITPVD_0035_ERROR_VERIFY_INBOUND_MSG(), se);
             thereWasAFault = true;
-            msg = Messages.create(se, pipeConfig.getBinding().getSOAPVersion());
-            //throw new WebServiceException(
-            //        LogStringsMessages.WSITPVD_0035_ERROR_VERIFY_INBOUND_MSG(), se);
+            SOAPFaultException sfe = SOAPUtil.getSOAPFaultException(se, soapFactory, soapVersion);
+            msg = Messages.create(sfe, soapVersion);
         }
         
         if (thereWasAFault) {
