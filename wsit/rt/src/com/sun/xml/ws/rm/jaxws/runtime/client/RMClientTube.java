@@ -247,7 +247,7 @@ public final class RMClientTube extends TubeBase {
     }
 
     private RMMessage prepareRequestMessage(Packet requestPacket) throws RMException {
-        RMMessage message = null;
+        RMMessage outboundMessage = null;
 
         //FIXME - Need a better way for client to pass a message number.
         Object mn = requestPacket.proxy.getRequestContext().get(Constants.messageNumberProperty);
@@ -267,11 +267,11 @@ public final class RMClientTube extends TubeBase {
             //The behavior of the retry loop also varies according to whether the message
             //is one-way.  If it is, the retry loop needs wait for acks.  If not, the loop
             //can exit if an application response has been received.
-            message = handleOutboundMessage(outboundSequence, requestPacket, true, false);
+            outboundMessage = handleOutboundMessage(outboundSequence, requestPacket, true, false);
             this.isOneWayMessage = false;
         } else {
             //TODO eliminate one of these flags
-            message = handleOutboundMessage(outboundSequence, requestPacket, false, false);
+            outboundMessage = handleOutboundMessage(outboundSequence, requestPacket, false, false);
             this.isOneWayMessage = true;
         }
 
@@ -281,11 +281,11 @@ public final class RMClientTube extends TubeBase {
         requestPacket.expectReply = true;
 
         //initialize TubelineHelper
-        tubelineHelper = new TubelineHelper(requestPacket, message);
+        tubelineHelper = new TubelineHelper(requestPacket, outboundMessage);
 
         //Make the helper available in the message, so it can be used to resend the message, if necessary
-        message.setMessageSender(tubelineHelper);
-        return message;
+        outboundMessage.setMessageSender(tubelineHelper);
+        return outboundMessage;
     }
 
     /*
@@ -433,11 +433,11 @@ public final class RMClientTube extends TubeBase {
         private final TubelineHelperCallback callback;
         //Store the request packet and message for this helper.
         private Packet packet;
-        private RMMessage message;
+        private RMMessage requestMessage;
         private Throwable throwable;
 
         public TubelineHelper(Packet packet, RMMessage message) {
-            this.message = message;
+            this.requestMessage = message;
             this.packet = packet;
 
             parentFiber = Fiber.current();
@@ -450,18 +450,17 @@ public final class RMClientTube extends TubeBase {
 
             fiber = engine.createFiber();
             callback = new TubelineHelperCallback();
-            throwable = null;
         }
 
         public void send() {
-            message.setBusy(true);
+            requestMessage.setBusy(true);
             if (packet == null) {
                 // TODO L10N
                 throw LOGGER.logSevereException(new IllegalStateException("Request not set in TubelineHelper"));
             }
 
             //use a copy of the original message
-            Message copy = message.getCopy();
+            Message copy = requestMessage.getCopy();
             packet.setMessage(copy);
             fiber.start(TubeCloner.clone(next), packet, callback);
         }
@@ -472,37 +471,40 @@ public final class RMClientTube extends TubeBase {
             }
 
             public void onCompletion(
-                    @NotNull Packet response) {
+                    @NotNull Packet responsePacket) {
                 try {
-                    if (response != null) {
+                    if (responsePacket != null) {
                         //Perform operations in the RMSource according to the contents of
                         //the RM Headers on the incoming message.
-                        Message responseMessage = response.getMessage();
+                        Message responseMessage = responsePacket.getMessage();
 
-                        RMMessage rmMessage = null;
+                        RMMessage rmResponseMessage = null;
                         if (responseMessage != null) {
-                            rmMessage = handleInboundMessage(response, RMSource.getRMSource());
+                            rmResponseMessage = handleInboundMessage(responsePacket, RMSource.getRMSource());
                         }
-
                         //if a diagnostic / debugging filter has been set, allow it to inspect
                         //the response message.
                         if (RMSource.getRMSource().getProcessingFilter() != null) {
-                            RMSource.getRMSource().getProcessingFilter().handleClientResponseMessage(rmMessage);
+                            RMSource.getRMSource().getProcessingFilter().handleClientResponseMessage(rmResponseMessage);
+                        }
+                        // rmResponseMessage is not needed anymore - if it was added to a sequence, 
+                        // then marking it as complete and releasing its payload 
+                        if (rmResponseMessage != null && rmResponseMessage.getSequence() != null) {
+                            rmResponseMessage.complete();
                         }
 
                         if (responseMessage != null && responseMessage.isFault()) {
                             //don't want to resend
                             //WSRM2004: Marking faulted message {0} as acked.
-                            LOGGER.fine(LocalizationMessages.WSRM_2004_ACKING_FAULTED_MESSAGE(message.getMessageNumber()));
-                            outboundSequence.acknowledge(message.getMessageNumber());
+                            LOGGER.fine(LocalizationMessages.WSRM_2004_ACKING_FAULTED_MESSAGE(requestMessage.getMessageNumber()));
+                            outboundSequence.acknowledge(requestMessage.getMessageNumber());
                         }
 
                         //check for empty body response to two-way message.  WCF will return
                         //one when it drops the request message.  In this case we also need to retry.
                         if (responseMessage != null && !isOneWayMessage && responseMessage.getPayloadNamespaceURI() == null) {
-                            //resend
-                            //WSRM2005: Queuing dropped message for resend.
                             LOGGER.fine(LocalizationMessages.WSRM_2005_RESENDING_DROPPED_MESSAGE());
+                            //resend
                             return;
                         }
 
@@ -510,17 +512,17 @@ public final class RMClientTube extends TubeBase {
                         //time to release the request being retained on the OutboundSequence.
                         //This will also result in the state of the message being set to
                         //"complete" so the retry loop will exit.
-                        if (message.isTwoWayRequest()) {
-                            outboundSequence.acknowledgeResponse(message.getMessageNumber());
+                        if (requestMessage.isTwoWayRequest()) {
+                            outboundSequence.acknowledgeResponse(requestMessage.getMessageNumber());
                         }
                     }
 
-                    //invoke the rest of the pipeline
-                    parentFiber.resume(response);
+                    // invoke the rest of the pipeline
+                    parentFiber.resume(responsePacket);
                 } catch (Exception e) {
                     onCompletion(e);
                 } finally {
-                    message.setBusy(false);
+                    requestMessage.setBusy(false);
                 }
             }
 
@@ -548,7 +550,7 @@ public final class RMClientTube extends TubeBase {
                             //non-transport-related Exception;
                             //WSRM2003: Unexpected exception  wrapped in WSException.//
                             LOGGER.severe(LocalizationMessages.WSRM_2003_UNEXPECTED_WRAPPED_EXCEPTION(), t);
-                            completeFaultedMessage(message);
+                            completeFaultedMessage(requestMessage);
                             //TODO - need to propogate exception back to client here 
                             parentFiber.resume(null);
                         }
@@ -561,7 +563,7 @@ public final class RMClientTube extends TubeBase {
                         parentFiber.resume(null);
                     }
                 } finally {
-                    message.setBusy(false);
+                    requestMessage.setBusy(false);
                 }
             }
         }

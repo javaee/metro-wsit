@@ -1,5 +1,5 @@
 /*
- * $Id: RMMessage.java,v 1.7 2007-12-01 20:01:20 m_potociar Exp $
+ * $Id: RMMessage.java,v 1.8 2007-12-03 20:44:41 m_potociar Exp $
  */
 
 /*
@@ -204,7 +204,7 @@ public final class RMMessage {
     public HeaderList getHeaders() {
         return (message == null || !message.hasHeaders()) ? null : message.getHeaders();
     }
-    
+
     /**
      * Add the specified RM Header element to the underlying JAX-WS message's
      * <code>HeaderList</code>.
@@ -244,7 +244,7 @@ public final class RMMessage {
      * Resume processing of the message on this Message's monitor.
      */
     public synchronized void resume() {
-        if (!isBusy && !isComplete()) {
+        if (!isBusy && !isComplete() && messageSender != null) {
             messageSender.send();
         }
     }

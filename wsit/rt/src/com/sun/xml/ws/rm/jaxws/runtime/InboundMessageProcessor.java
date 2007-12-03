@@ -37,7 +37,6 @@ package com.sun.xml.ws.rm.jaxws.runtime;
 
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.HeaderList;
-import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.rm.CloseSequenceException;
 import com.sun.xml.ws.rm.InvalidSequenceException;
 import com.sun.xml.ws.rm.MessageNumberRolloverException;
