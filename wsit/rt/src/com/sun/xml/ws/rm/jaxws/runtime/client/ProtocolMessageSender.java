@@ -234,13 +234,13 @@ public class ProtocolMessageSender {
         Packet responsePacket = process(requestPacket);
         Message response = responsePacket.getMessage();
 
-        RMMessage msg = new RMMessage(response);
+        RMMessage rmResponse = new RMMessage(response);
         if (response != null && response.isFault()) {
             // TODO L10N
             throw LOGGER.logException(new RMException("Error sending Last message", response), Level.WARNING);
         }
 
-        InboundMessageProcessor.processMessage(msg, unmarshaller, RMSource.getRMSource(), config.getRMVersion());
+        InboundMessageProcessor.processMessage(rmResponse, unmarshaller, RMSource.getRMSource(), config.getRMVersion());
     }
 
     /**

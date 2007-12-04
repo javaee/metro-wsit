@@ -316,29 +316,30 @@ public abstract class OutboundSequence extends Sequence {
         this.filter = filter;
     }
 
-    /**
-     * Add AckRequested element to an existing message if one is not already 
-     * present.  This is used to ensure that an AckRequested header is included
-     * on every resend.
-     *
-     * @param mess The message
-     */
-    public void ensureAckRequested(RMMessage rmMessage) {
-        // TODO use this method or remove it?
-        if (rmMessage.getAckRequestedElement() == null) {
-            AbstractAckRequested ack = null;
-            if (getConfig().getRMVersion() == RMVersion.WSRM10) {
-                ack = new com.sun.xml.ws.rm.v200502.AckRequestedElement();
-                ack.setId(this.getId());
-            } else {
-                ack = new com.sun.xml.ws.rm.v200702.AckRequestedElement();
-                ack.setId(this.getId());
-            }
-
-            rmMessage.setAckRequestedElement(ack);
-            rmMessage.addHeader(createHeader(rmMessage.getAckRequestedElement()));
-        }
-    }
+// TODO: this method is not used - remove 
+//    /**
+//     * Add AckRequested element to an existing message if one is not already 
+//     * present.  This is used to ensure that an AckRequested header is included
+//     * on every resend.
+//     *
+//     * @param mess The message
+//     */
+//    public void ensureAckRequested(RMMessage rmMessage) {
+//        // TODO use this method or remove it?
+//        if (rmMessage.getAckRequestedElement() == null) {
+//            AbstractAckRequested ack = null;
+//            if (getConfig().getRMVersion() == RMVersion.WSRM10) {
+//                ack = new com.sun.xml.ws.rm.v200502.AckRequestedElement();
+//                ack.setId(this.getId());
+//            } else {
+//                ack = new com.sun.xml.ws.rm.v200702.AckRequestedElement();
+//                ack.setId(this.getId());
+//            }
+//
+//            rmMessage.setAckRequestedElement(ack);
+//            rmMessage.addHeader(createHeader(rmMessage.getAckRequestedElement()));
+//        }
+//    }
 
     protected Header createHeader(Object obj) {
         return Headers.create(getConfig().getRMVersion().jaxbContext, obj);

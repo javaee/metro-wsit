@@ -1,5 +1,5 @@
 /*
- * $Id: RMMessage.java,v 1.8 2007-12-03 20:44:41 m_potociar Exp $
+ * $Id: RMMessage.java,v 1.9 2007-12-04 15:44:00 m_potociar Exp $
  */
 
 /*
@@ -237,6 +237,9 @@ public final class RMMessage {
             messageSender = null;
             message = null;
             isComplete = true;
+            sequenceElement = null;
+            sequenceAcknowledgementElement = null;
+            ackRequestedElement = null;
         }
     }
 
