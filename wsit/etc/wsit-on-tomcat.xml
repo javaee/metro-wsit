@@ -45,7 +45,7 @@
     <property name="java.home" value="${env.JAVA_HOME}"/>
 
     <condition property="jdk6">
-        <contains string="${java.version}" substring="1.6"/>
+        <contains string="${java.version}" substring="1.6.0"/>
     </condition>
  
     <target name="jdk6-message" if="jdk6">
