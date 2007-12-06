@@ -251,10 +251,14 @@ public class PolicyAssertionTest extends AbstractPolicyApiClassTestBase {
                 
         QName atAssertionName = new QName("http://schemas.xmlsoap.org/ws/2004/10/wsat", "ATAssertion");
         AssertionSet alternative = policy.iterator().next();
+        boolean atAssertionFound = false;
         for (PolicyAssertion assertion : alternative) {
             if (atAssertionName.equals(assertion.getName())) {
-                assertTrue(assertion.isOptional());
+                assertTrue("ATAssertion is supposed to be optional.", assertion.isOptional());
+                atAssertionFound = true;
             }
         }
+        
+        assertTrue("ATAssertion should be available in the policy.", atAssertionFound);
     }
 }
