@@ -241,4 +241,20 @@ public class PolicyAssertionTest extends AbstractPolicyApiClassTestBase {
         };
         assertTrue(assertion.isPrivate());
     }
+    
+    public void testIsOptionalInIssue723() throws Exception {
+        PolicyMap map = PolicyResourceLoader.getPolicyMap("bug_reproduction/SimpleService.wsdl");
+        PolicyMapKey operationScopeKey = PolicyMap.createWsdlOperationScopeKey(new QName("http://tempuri.org/", "SimpleService"), new QName("http://tempuri.org/", "SimpleServiceBinding"), new QName("http://tempuri.org/", "init"));
+        
+        Policy policy = map.getOperationEffectivePolicy(operationScopeKey);
+        assertEquals("There should be only one alternative in this policy.", 1, policy.getNumberOfAssertionSets());
+                
+        QName atAssertionName = new QName("http://schemas.xmlsoap.org/ws/2004/10/wsat", "ATAssertion");
+        AssertionSet alternative = policy.iterator().next();
+        for (PolicyAssertion assertion : alternative) {
+            if (atAssertionName.equals(assertion.getName())) {
+                assertTrue(assertion.isOptional());
+            }
+        }
+    }
 }
