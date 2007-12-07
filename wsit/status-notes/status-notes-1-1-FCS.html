@@ -12,7 +12,7 @@
 <!--
 Created       : 2007 Mar 01 (Tue) 11:32:31 by Harold Carr.
 -->
-<pre>Last Modified : $Date: 2007-12-06 18:24:18 $ by $Author: m_potociar $</pre>
+<pre>Last Modified : $Date: 2007-12-07 09:30:28 $ by $Author: ritzmann $</pre>
 
 <h5>Date: November ??, 2007</h5>
 
@@ -1090,65 +1090,19 @@ WSIT-&gt;WSIT : Not tested
 <hr>
 <h2><a name="policy">
 </a>Policy Status</h2>
-<p><b>WCF Interoperability</b><code> Updated: November ??, 2007</code></p>
+<p><b>WCF Interoperability</b><code> Updated: December 7, 2007</code></p>
 
 <p>N/A</p>
 
-<p><b>What is Not Implemented</b><code> Updated: November ??, 2007</code></p>
+<p><b>What is Not Implemented</b><code> Updated: December 7, 2007</code></p>
 
 <p>The WS-Policy implementation is feature-complete.</p>
 
-<p><b>Known Issues</b><code> Updated: November ??, 2007</code></p>
+<p><b>Known Issues</b><code> Updated: December 7, 2007</code></p>
 
 <p>
-    <dt><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=654">@Addressing annotation does not generate WS-Addressing policy assertions</a><br><br>
-    <dd>We do not generate any addressing policy for a Web Service that is annotated with @Addressing. This issue can be worked around by creating a WSIT configuration file that contains the missing policy. Instructions how to generate such a configuration file:
-    
-    <ol>
-        <li>Create a web service with NetBeans:
-        <pre>
-package com.sun.xml.ws.test;
-
-@WebService
-@Addressing
-public class SimpleService {
-    /**
-     * Web service operation
-     */
-    @WebMethod
-    public String operation1(@WebParam(name = "p") String p) {
-        return p;
-    }
-    
-    /**
-     * Web service operation
-     */
-    @WebMethod
-    public String operation2(@WebParam(name = "p") String p) {
-        return p;
-    }    
-        }</pre>
-        <li>In NetBeans, select Edit WS attributes.<br><br>
-        <ul>
-            <li>Enable Reliable Message Delivery.<br><br>
-            <li>You can now open the WSIT configuration files from the NetBeans Projects or Files
-            tab under <code>Web Pages/WEB-INF/wsit-com.sun.xml.ws.test.SimpleService.xml</code>. If your application is not a web application, you will find the file under <code>META-INF/wsit-com.sun.xml.ws.test.SimpleService.xml</code>.<br><br>
-            <li>Search for a policy that looks like this:
-            <pre>
-    &lt;wsp:Policy wsu:Id="SimpleServicePortBindingPolicy"&gt;
-        &lt;wsp:ExactlyOne&gt;
-            &lt;wsp:All&gt;
-                &lt;wsaws:UsingAddressing xmlns:wsaws="http://www.w3.org/2006/05/addressing/wsdl"/&gt;
-                &lt;wsrm:RMAssertion/&gt;
-            &lt;/wsp:All&gt;
-        &lt;/wsp:ExactlyOne&gt;
-            &lt;/wsp:Policy&gt;</pre>
-            <li>Remove this line:
-            <pre>
-            &lt;wsrm:RMAssertion/&gt;</pre>
-            <li>Save the file.
-        </ul>
-    </ol>
+    <dt><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=693">use correct methods to determine service and port names in PolicyWSDLGeneratorExtension</a><br><br></dt>
+    <dd>This issue has no practical repercussions and does not require any work-arounds.</dd>
 </p>
 
 <!-- ================================================== -->
