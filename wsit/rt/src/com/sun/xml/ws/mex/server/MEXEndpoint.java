@@ -191,9 +191,8 @@ public class MEXEndpoint implements Provider<Message> {
             }
 
             // If we get here there was no metadata for the owner endpoint
-            // TODO: This should probably be something other than unsupported action for clarity
-            final Message faultMessage = Messages.create(GET_REQUEST,
-                wsaVersion, soapVersion);
+            WebServiceException exception = new WebServiceException(MessagesMessages.MEX_0016_NO_METADATA());
+            final Message faultMessage = Messages.create(exception, soapVersion);
             wsContext.getMessageContext().put(BindingProvider.SOAPACTION_URI_PROPERTY, wsaVersion.getDefaultFaultAction());
             return faultMessage;
         } catch (XMLStreamException streamE) {
