@@ -91,7 +91,7 @@ public class TCPTransportPipe implements Pipe {
     }
     
     public void preDestroy() {
-        if (clientTransport != null) {
+        if (clientTransport != null && clientTransport.getConnectionContext() != null) {
             WSConnectionManager.getInstance().closeChannel(clientTransport.getConnectionContext());
         }
     }
