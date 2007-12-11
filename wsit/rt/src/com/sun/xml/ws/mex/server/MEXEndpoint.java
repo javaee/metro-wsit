@@ -132,46 +132,14 @@ public class MEXEndpoint implements Provider<Message> {
         final SOAPVersion soapVersion) {
         
         try {
-            final MutableXMLStreamBuffer buffer = new MutableXMLStreamBuffer();
-            final XMLStreamWriter writer = buffer.createFromXMLStreamWriter();
-
-            WSEndpoint wsEndpoint = (WSEndpoint) wsContext.getMessageContext().get(JAXWSProperties.WSENDPOINT);
-            HttpServletRequest servletRequest = (HttpServletRequest)wsContext.getMessageContext().get(MessageContext.SERVLET_REQUEST);
-            if (servletRequest == null) {
-                // TODO: better error message
-                throw new WebServiceException("MEX: no ServletRequest can be found");
-            }
+            WSEndpoint ownerEndpoint = findEndpoint();
             
-            // Derive the address of the owner endpoint.
-            // e.g. http://localhost/foo/mex --> http://localhost/foo
-            WSEndpoint ownerEndpoint = null;
-            ServletModule module = (ServletModule) wsEndpoint.getContainer().getSPI(ServletModule.class);
-            String baseAddress = module.getContextPath(servletRequest);
-            String ownerEndpointAddress = null;
-            List<BoundEndpoint> boundEndpoints = module.getBoundEndpoints();
-            for (BoundEndpoint endpoint : boundEndpoints) {
-                if (wsEndpoint == endpoint.getEndpoint()) {
-                    ownerEndpointAddress = endpoint.getAddress(baseAddress).toString();                
-                    break;
-                }
-            }
-            ownerEndpointAddress = ownerEndpointAddress.substring(0,ownerEndpointAddress.length() - "/mex".length());
-
-            boundEndpoints = module.getBoundEndpoints();
-            for (BoundEndpoint endpoint : boundEndpoints) {
-                //compare ownerEndpointAddress with this endpoints address
-                //   if matches, set ownerEndpoint to the corresponding WSEndpoint
-                String endpointAddress = endpoint.getAddress(baseAddress).toString();
-                if (endpointAddress.equals(ownerEndpointAddress)) {
-                    ownerEndpoint = endpoint.getEndpoint();
-                    break;
-                }
-            }
-            
-
             // If the owner endpoint has been found, then
             // get its metadata and write it to the response message
             if (ownerEndpoint != null) {
+                final MutableXMLStreamBuffer buffer = new MutableXMLStreamBuffer();
+                final XMLStreamWriter writer = buffer.createFromXMLStreamWriter();
+
                 address = address.substring(0 , address.length() - 4);
                 writeStartEnvelope(writer, wsaVersion, soapVersion);
                 WSDLRetriever wsdlRetriever = new WSDLRetriever(ownerEndpoint);
@@ -201,6 +169,53 @@ public class MEXEndpoint implements Provider<Message> {
             logger.log(Level.SEVERE, exceptionMessage, streamE);
             throw new WebServiceException(exceptionMessage, streamE);
         }
+    }
+
+    /**
+     * Find the endpoint that this MEX endpoint is serving.
+     * 
+     * This method is searching for an endpoint that has the same address as the MEX endpoint
+     * with the suffix "/mex" removed. If the MEX endpoint has an HTTPS address,
+     * it will first look for an endpoint on HTTP and then HTTPS.
+     * 
+     * @return The endpoint that owns the actual service or null.
+     */
+    private WSEndpoint findEndpoint() {
+
+        WSEndpoint wsEndpoint = (WSEndpoint) wsContext.getMessageContext().get(JAXWSProperties.WSENDPOINT);
+        HttpServletRequest servletRequest = (HttpServletRequest)wsContext.getMessageContext().get(MessageContext.SERVLET_REQUEST);
+        if (servletRequest == null) {
+            // TODO: better error message
+            throw new WebServiceException("MEX: no ServletRequest can be found");
+        }
+
+        // Derive the address of the owner endpoint.
+        // e.g. http://localhost/foo/mex --> http://localhost/foo
+        WSEndpoint ownerEndpoint = null;
+        ServletModule module = (ServletModule) wsEndpoint.getContainer().getSPI(ServletModule.class);
+        String baseAddress = module.getContextPath(servletRequest);
+        String ownerEndpointAddress = null;
+        List<BoundEndpoint> boundEndpoints = module.getBoundEndpoints();
+        for (BoundEndpoint endpoint : boundEndpoints) {
+            if (wsEndpoint == endpoint.getEndpoint()) {
+                ownerEndpointAddress = endpoint.getAddress(baseAddress).toString();
+                break;
+            }
+        }
+        ownerEndpointAddress = ownerEndpointAddress.substring(0, ownerEndpointAddress.length() - "/mex".length());
+
+        boundEndpoints = module.getBoundEndpoints();
+        for (BoundEndpoint endpoint : boundEndpoints) {
+            //compare ownerEndpointAddress with this endpoints address
+            //   if matches, set ownerEndpoint to the corresponding WSEndpoint
+            String endpointAddress = endpoint.getAddress(baseAddress).toString();
+            if (endpointAddress.equals(ownerEndpointAddress)) {
+                ownerEndpoint = endpoint.getEndpoint();
+                break;
+            }
+        }
+
+        return ownerEndpoint;
     }
 
     private void writeStartEnvelope(final XMLStreamWriter writer,
