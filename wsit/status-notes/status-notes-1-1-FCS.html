@@ -12,7 +12,7 @@
 <!--
 Created       : 2007 Mar 01 (Tue) 11:32:31 by Harold Carr.
 -->
-<pre>Last Modified : $Date: 2007-12-07 11:08:06 $ by $Author: m_potociar $</pre>
+<pre>Last Modified : $Date: 2007-12-11 07:40:11 $ by $Author: ashutoshshahi $</pre>
 
 <h5>Date: November ??, 2007</h5>
 
@@ -791,14 +791,15 @@ release. Note that WCF RTM does not support sp:ProtectTokens assertion<br>
 </tr>
 </tbody>
 </table>
-<p><b>Fixed in this release</b><code> Updated:December 06, 2007<br>
+<p><b>Fixed in this release</b><code> Updated:December 11, 2007<br>
 </code></p>
 <ul>
 <li>Session timeout handling for secure conversation sessions and
 LifeTime handling for IssuedTokens</li>
 <li>Preliminary Support for <a
 href="http://www.oasis-open.org/committees/download.php/16788/wss-v1.1-spec-os-KerberosTokenProfile.pdf">Kerberos
-Token Profile 1.1</a></li>
+Token Profile 1.1</a>. The Kerberos Token Profile is supported only for Sun JDK 1.6. This is because support 
+for AES in Kerberos is available for Java SE 6 onwards.</li>
 <li>Fixed : SAMLValidator not called even though it was instantiated <a
 href="https://wsit.dev.java.net/issues/show_bug.cgi?id=524">Issue#524</a></li>
 <li>Made Standalone XWSS 3.0 Independent of SessionManager&nbsp;
@@ -1107,13 +1108,13 @@ WSIT-&gt;WSIT : Not tested
 <hr>
 <h2><a name="securitypolicy"></a>Security Policy Status</h2>
 
-<p><b>WCF Interoperability</b><code> Updated: November ??, 2007</code></p>
+<p><b>WCF Interoperability</b><code> Updated: November 11, 2007</code></p>
 
 <p>Interoperability test is based on use of SecurityPolicy in
 WS-Security,WS-SecureConversation,WS-Trust,WS Reliable Messaging,
 MTOM,WS-Addressing interop tests.</p>
 
-<p><b>What is Not Implemented</b> Updated: November ??, 2007</code></p>
+<p><b>What is Not Implemented</b> Updated: November 11, 2007</code></p>
 
 <p>The Following assertions are not yet supported by Security Policy
 implementation.</p>
@@ -1125,7 +1126,7 @@ implementation.</p>
 is present. </li>
 </ul>
 
-<p><b>Known Issues</b> Updated: November ??, 2007</code></p>
+<p><b>Known Issues</b> Updated: November 11, 2007</code></p>
 
 <table border="1" cellpadding="2" cellspacing="3">
   <tbody>
@@ -1165,6 +1166,14 @@ SecurityPolicy:sp:AlgorithmSuite/wsp:Policy/sp:SoapNormalization10</p>
     </tr>
   </tbody>
 </table>
+<p><b>Fixed in this release</b><code> Updated:December 11, 2007<br>
+</code></p>
+<ul>
+<li>Early Access support for <a 
+href="http://docs.oasis-open.org/ws-sx/ws-securitypolicy/v1.2/ws-securitypolicy.pdf">
+    Security Policy 1.2</a>.</li>
+</ul>
+
 
 <!-- ================================================== -->
 <br>
