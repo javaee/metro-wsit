@@ -46,10 +46,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.logging.Logger;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLSession;
-
 import com.sun.xml.ws.mex.MessagesMessages;
 
 import static com.sun.xml.ws.mex.MetadataConstants.ERROR_LOG_LEVEL;
