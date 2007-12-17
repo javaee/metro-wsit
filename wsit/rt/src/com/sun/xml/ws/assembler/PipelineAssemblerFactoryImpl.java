@@ -310,6 +310,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             p = dump(context, SERVER_PREFIX + WSTX_SUFFIX + AFTER_SUFFIX, p);
             // check for WS-Atomic Transactions
             if (isTransactionsEnabled(policyMap, context.getWsdlModel(), true)) {
+                Logger.getLogger("policy.map.for.tx.pipe").finest("CONFIGURATION FOR THE TX SERVER PIPE:\n" + ((policyMap != null) ? policyMap.toString() : "Policy map is null!"));
                 p = new TxServerPipe(context.getWsdlModel(), context.getEndpoint().getBinding(), policyMap, p);
             }
             p = dump(context, SERVER_PREFIX + WSTX_SUFFIX + BEFORE_SUFFIX, p);
