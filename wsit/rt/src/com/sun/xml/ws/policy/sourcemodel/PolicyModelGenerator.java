@@ -95,7 +95,7 @@ public final class PolicyModelGenerator {
             for (AssertionSet set : policy) {
                 final ModelNode alternativeNode = exactlyOneNode.createChildAllNode();
                 for (PolicyAssertion assertion : set) {
-                    final AssertionData data = AssertionData.createAssertionData(assertion.getName(), assertion.getValue(), assertion.getAttributes());
+                    final AssertionData data = AssertionData.createAssertionData(assertion.getName(), assertion.getValue(), assertion.getAttributes(), assertion.isOptional(), assertion.isIgnorable());
                     final ModelNode assertionNode = alternativeNode.createChildAssertionNode(data);
                     if (assertion.hasNestedPolicy()) {
                         translate(assertionNode, assertion.getNestedPolicy());
@@ -123,13 +123,13 @@ public final class PolicyModelGenerator {
         final AssertionSet set = policy.getAssertionSet();
         final ModelNode alternativeNode = exactlyOneNode.createChildAllNode();
         for (PolicyAssertion assertion : set) {
-            final AssertionData data = AssertionData.createAssertionData(assertion.getName(), assertion.getValue(), assertion.getAttributes());
+            final AssertionData data = AssertionData.createAssertionData(assertion.getName(), assertion.getValue(), assertion.getAttributes(), assertion.isOptional(), assertion.isIgnorable());
             final ModelNode assertionNode = alternativeNode.createChildAssertionNode(data);
             if (assertion.hasNestedPolicy()) {
                 translate(assertionNode, assertion.getNestedPolicy());
             }
-            if (assertion.hasNestedAssertions()) {
-                translate(assertion.getNestedAssertionsIterator(), assertionNode);
+            if (assertion.hasParameters()) {
+                translate(assertion.getParametersIterator(), assertionNode);
             }
         }
         return nestedPolicyRoot;

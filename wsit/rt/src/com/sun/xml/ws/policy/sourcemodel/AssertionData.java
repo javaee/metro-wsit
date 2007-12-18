@@ -95,7 +95,7 @@ public final class AssertionData implements Cloneable, Serializable {
      */
     public static AssertionData createAssertionParameterData(final QName name) throws IllegalArgumentException {
         return new AssertionData(name, null, null, ModelNode.Type.ASSERTION_PARAMETER_NODE, false, false);
-    }
+    }    
     
     /**
      * Constructs assertion data wrapper instance for an assertion that does
@@ -104,13 +104,15 @@ public final class AssertionData implements Cloneable, Serializable {
      * @param name the FQN of the assertion
      * @param value a {@link String} representation of model node value
      * @param attributes map of model node's &lt;attribute name, attribute value&gt; pairs
+     * @param optional flag indicating whether the assertion is optional or not
+     * @param ignorable flag indicating whether the assertion is ignorable or not
      *
      * @throws IllegalArgumentException in case the {@code type} parameter is not
      * {@link ModelNode.Type#ASSERTION ASSERTION} or
      * {@link ModelNode.Type#ASSERTION_PARAMETER_NODE ASSERTION_PARAMETER_NODE}
      */
-    public static AssertionData createAssertionData(final QName name, final String value, final Map<QName, String> attributes) throws IllegalArgumentException {
-        return new AssertionData(name, value, attributes, ModelNode.Type.ASSERTION, false, false);
+    public static AssertionData createAssertionData(final QName name, final String value, final Map<QName, String> attributes, boolean optional, boolean ignorable) throws IllegalArgumentException {
+        return new AssertionData(name, value, attributes, ModelNode.Type.ASSERTION, optional, ignorable);
     }
     
     /**

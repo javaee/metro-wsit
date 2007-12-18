@@ -33,7 +33,6 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.policy;
 
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
@@ -57,9 +56,7 @@ public class PolicyAssertionTest extends AbstractPolicyApiClassTestBase {
     private static final String attribValue = "avalue";
     private static final QName assertionName = new QName("http://foo.com", "assertion");
     private static final AssertionData data = AssertionData.createAssertionData(assertionName);
-
     private Map<QName, String> attributes;
-    
     private PolicyAssertion a1;
     private PolicyAssertion a2;
     private PolicyAssertion a3;
@@ -86,7 +83,7 @@ public class PolicyAssertionTest extends AbstractPolicyApiClassTestBase {
         };
         attributes = new HashMap<QName, String>();
         attributes.put(attribName, attribValue);
-        assertionWithAttributes = new PolicyAssertion(AssertionData.createAssertionData(assertionName, "test", attributes), null) {
+        assertionWithAttributes = new PolicyAssertion(AssertionData.createAssertionData(assertionName, "test", attributes, false, false), null) {
         };
     }
 
@@ -166,7 +163,7 @@ public class PolicyAssertionTest extends AbstractPolicyApiClassTestBase {
         assertNull(a5.getValue());
 
         String expValue = "test";
-        PolicyAssertion assertionWithValue = new PolicyAssertion(AssertionData.createAssertionData(assertionName, expValue, null), null) {
+        PolicyAssertion assertionWithValue = new PolicyAssertion(AssertionData.createAssertionData(assertionName, expValue, null, false, false), null) {
         };
         assertEquals(assertionWithValue.getValue(), expValue);
     }
@@ -208,9 +205,14 @@ public class PolicyAssertionTest extends AbstractPolicyApiClassTestBase {
         assertFalse(a4.isOptional());
         assertFalse(a5.isOptional());
 
-        final AssertionData assertionData = AssertionData.createAssertionData(assertionName, "test", attributes);
-        assertionData.setOptionalAttribute(true);
+        AssertionData assertionData = AssertionData.createAssertionData(assertionName, "test", attributes, true, false);
         PolicyAssertion assertion = new PolicyAssertion(assertionData, null) {
+        };
+        assertTrue(assertion.isOptional());
+
+        assertionData = AssertionData.createAssertionData(assertionName, "test", attributes, false, false);
+        assertionData.setOptionalAttribute(true);
+        assertion = new PolicyAssertion(assertionData, null) {
         };
         assertTrue(assertion.isOptional());
     }
@@ -222,9 +224,14 @@ public class PolicyAssertionTest extends AbstractPolicyApiClassTestBase {
         assertFalse(a4.isIgnorable());
         assertFalse(a5.isIgnorable());
 
-        final AssertionData assertionData = AssertionData.createAssertionData(assertionName, "test", attributes);
-        assertionData.setIgnorableAttribute(true);
+        AssertionData assertionData = AssertionData.createAssertionData(assertionName, "test", attributes, false, true);
         PolicyAssertion assertion = new PolicyAssertion(assertionData, null) {
+        };
+        assertTrue(assertion.isIgnorable());
+
+        assertionData = AssertionData.createAssertionData(assertionName, "test", attributes, false, false);
+        assertionData.setIgnorableAttribute(true);
+        assertion = new PolicyAssertion(assertionData, null) {
         };
         assertTrue(assertion.isIgnorable());
     }
@@ -237,18 +244,18 @@ public class PolicyAssertionTest extends AbstractPolicyApiClassTestBase {
         assertFalse(a5.isPrivate());
 
         attributes.put(PolicyConstants.VISIBILITY_ATTRIBUTE, PolicyConstants.VISIBILITY_VALUE_PRIVATE);
-        PolicyAssertion assertion = new PolicyAssertion(AssertionData.createAssertionData(assertionName, "test", attributes), null) {
+        PolicyAssertion assertion = new PolicyAssertion(AssertionData.createAssertionData(assertionName, "test", attributes, false, false), null) {
         };
         assertTrue(assertion.isPrivate());
     }
-    
+
     public void testIsOptionalInIssue723() throws Exception {
         PolicyMap map = PolicyResourceLoader.getPolicyMap("bug_reproduction/SimpleService.wsdl");
         PolicyMapKey operationScopeKey = PolicyMap.createWsdlOperationScopeKey(new QName("http://tempuri.org/", "SimpleService"), new QName("http://tempuri.org/", "SimpleServiceBinding"), new QName("http://tempuri.org/", "init"));
-        
+
         Policy policy = map.getOperationEffectivePolicy(operationScopeKey);
         assertEquals("There should be only one alternative in this policy.", 1, policy.getNumberOfAssertionSets());
-                
+
         QName atAssertionName = new QName("http://schemas.xmlsoap.org/ws/2004/10/wsat", "ATAssertion");
         AssertionSet alternative = policy.iterator().next();
         boolean atAssertionFound = false;
@@ -258,7 +265,7 @@ public class PolicyAssertionTest extends AbstractPolicyApiClassTestBase {
                 atAssertionFound = true;
             }
         }
-        
+
         assertTrue("ATAssertion should be available in the policy.", atAssertionFound);
     }
 }

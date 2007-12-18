@@ -33,7 +33,6 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.policy.jaxws;
 
 import com.sun.xml.txw2.TypedXmlWriter;
@@ -77,6 +76,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
+import java.util.logging.Level;
 import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceException;
 
@@ -86,8 +86,9 @@ import javax.xml.ws.WebServiceException;
  * @author Jakub Podlesak (jakub.podlesak at sun.com)
  */
 public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
-    
+
     static enum ScopeType {
+
         SERVICE,
         ENDPOINT,
         OPERATION,
@@ -95,32 +96,32 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         OUTPUT_MESSAGE,
         FAULT_MESSAGE
     }
-    
     private final static PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyWSDLGeneratorExtension.class);
-    
     private PolicyMap policyMap;
     private SEIModel seiModel;
     private Class endpointClass;
     private final Collection<PolicySubject> subjects = new LinkedList<PolicySubject>();
-    
     private final PolicyModelMarshaller marshaller = PolicyModelMarshaller.getXmlMarshaller(true);
     private final PolicyMerger merger = PolicyMerger.getMerger();
-    
+
     @Override
     public void start(final WSDLGenExtnContext context) {
         LOGGER.entering();
         try {
             this.seiModel = context.getModel();
             this.endpointClass = context.getEndpointClass();
-            
+
             final PolicyMapUpdateProvider[] policyMapUpdateProviders = PolicyUtils.ServiceProvider.load(PolicyMapUpdateProvider.class);
             final PolicyMapExtender[] extenders = new PolicyMapExtender[policyMapUpdateProviders.length];
-            for (int i=0; i < policyMapUpdateProviders.length; i++) {
+            for (int i = 0; i < policyMapUpdateProviders.length; i++) {
                 extenders[i] = PolicyMapExtender.createPolicyMapExtender();
             }
             final String configId = context.getEndpointClass().getName();
             try {
                 policyMap = PolicyConfigParser.parse(configId, context.getContainer(), extenders);
+                if (LOGGER.isLoggable(Level.FINEST)) {
+                    LOGGER.finest(LocalizationMessages.WSP_1056_POLICY_MAP_FROM_WSIT_CONFIG(policyMap));
+                }
             } catch (PolicyException e) {
                 LOGGER.fine(LocalizationMessages.WSP_1027_FAILED_TO_READ_WSIT_CONFIG_FOR_ID(configId), e);
             }
@@ -128,13 +129,13 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
                 LOGGER.fine(LocalizationMessages.WSP_1034_CREATE_POLICY_MAP_FOR_CONFIG(configId));
                 policyMap = PolicyMap.createPolicyMap(Arrays.asList(extenders));
             }
-            
+
             final TypedXmlWriter root = context.getRoot();
 // TODO: resolve policy version and add default policy namespace
 //             root._namespace(PolicyConstants.POLICY_V1_2_NAMESPACE_URI, PolicyConstants.POLICY_NAMESPACE_PREFIX);
             root._namespace(PolicyConstants.WSU_NAMESPACE_URI, PolicyConstants.WSU_NAMESPACE_PREFIX);
             final WSBinding binding = context.getBinding();
-            
+
             try {
                 for (int i = 0; i < policyMapUpdateProviders.length; i++) {
                     policyMapUpdateProviders[i].update(extenders[i], policyMap, seiModel, binding);
@@ -147,7 +148,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
             LOGGER.exiting();
         }
     }
-    
+
     @Override
     public void addDefinitionsExtension(final TypedXmlWriter definitions) {
         try {
@@ -186,27 +187,23 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
             LOGGER.exiting();
         }
     }
-    
+
     @Override
     public void addServiceExtension(final TypedXmlWriter service) {
         LOGGER.entering();
-        final String serviceName = ((null == seiModel) || (null == endpointClass)) ?
-            null :
-            WSEndpoint.getDefaultServiceName(endpointClass).getLocalPart();
+        final String serviceName = ((null == seiModel) || (null == endpointClass)) ? null : WSEndpoint.getDefaultServiceName(endpointClass).getLocalPart();
         selectAndProcessSubject(service, WSDLService.class, ScopeType.SERVICE, serviceName);
         LOGGER.exiting();
     }
-    
+
     @Override
     public void addPortExtension(final TypedXmlWriter port) {
         LOGGER.entering();
-        final String portName = ((null == seiModel) || (null == endpointClass)) ?
-            null :
-            WSEndpoint.getDefaultPortName(seiModel.getServiceQName(), endpointClass).getLocalPart();
+        final String portName = ((null == seiModel) || (null == endpointClass)) ? null : WSEndpoint.getDefaultPortName(seiModel.getServiceQName(), endpointClass).getLocalPart();
         selectAndProcessSubject(port, WSDLPort.class, ScopeType.ENDPOINT, portName);
         LOGGER.exiting();
     }
-    
+
     @Override
     public void addPortTypeExtension(final TypedXmlWriter portType) {
         LOGGER.entering();
@@ -214,7 +211,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         selectAndProcessSubject(portType, WSDLPortType.class, ScopeType.ENDPOINT, portTypeName);
         LOGGER.exiting();
     }
-    
+
     @Override
     public void addBindingExtension(final TypedXmlWriter binding) {
         LOGGER.entering();
@@ -222,21 +219,21 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         selectAndProcessSubject(binding, WSDLBoundPortType.class, ScopeType.ENDPOINT, bindingName);
         LOGGER.exiting();
     }
-    
+
     @Override
     public void addOperationExtension(final TypedXmlWriter operation, final JavaMethod method) {
         LOGGER.entering();
         selectAndProcessSubject(operation, WSDLOperation.class, ScopeType.OPERATION, method);
         LOGGER.exiting();
     }
-    
+
     @Override
     public void addBindingOperationExtension(final TypedXmlWriter operation, final JavaMethod method) {
         LOGGER.entering();
         selectAndProcessSubject(operation, WSDLBoundOperation.class, ScopeType.OPERATION, method);
         LOGGER.exiting();
     }
-    
+
     @Override
     public void addInputMessageExtension(final TypedXmlWriter message, final JavaMethod method) {
         LOGGER.entering();
@@ -244,7 +241,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         selectAndProcessSubject(message, WSDLMessage.class, ScopeType.INPUT_MESSAGE, messageName);
         LOGGER.exiting();
     }
-    
+
     @Override
     public void addOutputMessageExtension(final TypedXmlWriter message, final JavaMethod method) {
         LOGGER.entering();
@@ -252,7 +249,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         selectAndProcessSubject(message, WSDLMessage.class, ScopeType.OUTPUT_MESSAGE, messageName);
         LOGGER.exiting();
     }
-    
+
     @Override
     public void addFaultMessageExtension(final TypedXmlWriter message, final JavaMethod method, final CheckedException exception) {
         LOGGER.entering();
@@ -260,7 +257,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         selectAndProcessSubject(message, WSDLMessage.class, ScopeType.FAULT_MESSAGE, messageName);
         LOGGER.exiting();
     }
-    
+
     @Override
     public void addOperationInputExtension(final TypedXmlWriter input, final JavaMethod method) {
         LOGGER.entering();
@@ -268,7 +265,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         selectAndProcessSubject(input, WSDLInput.class, ScopeType.INPUT_MESSAGE, messageName);
         LOGGER.exiting();
     }
-    
+
     @Override
     public void addOperationOutputExtension(final TypedXmlWriter output, final JavaMethod method) {
         LOGGER.entering();
@@ -276,7 +273,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         selectAndProcessSubject(output, WSDLOutput.class, ScopeType.OUTPUT_MESSAGE, messageName);
         LOGGER.exiting();
     }
-    
+
     @Override
     public void addOperationFaultExtension(final TypedXmlWriter fault, final JavaMethod method, final CheckedException exception) {
         LOGGER.entering();
@@ -284,7 +281,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         selectAndProcessSubject(fault, WSDLFault.class, ScopeType.FAULT_MESSAGE, messageName);
         LOGGER.exiting();
     }
-    
+
     @Override
     public void addBindingOperationInputExtension(final TypedXmlWriter input, final JavaMethod method) {
         LOGGER.entering();
@@ -292,7 +289,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         selectAndProcessSubject(input, WSDLBoundOperation.class, ScopeType.INPUT_MESSAGE, messageName);
         LOGGER.exiting();
     }
-    
+
     @Override
     public void addBindingOperationOutputExtension(final TypedXmlWriter output, final JavaMethod method) {
         LOGGER.entering();
@@ -300,7 +297,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         selectAndProcessSubject(output, WSDLBoundOperation.class, ScopeType.OUTPUT_MESSAGE, messageName);
         LOGGER.exiting();
     }
-    
+
     @Override
     public void addBindingOperationFaultExtension(final TypedXmlWriter writer, final JavaMethod method, final CheckedException exception) {
         LOGGER.entering(writer, method, exception);
@@ -317,7 +314,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
                             WSDLBoundFault fault = faultContainer.getBoundFault();
                             WSDLBoundOperation operation = faultContainer.getBoundOperation();
                             if (exceptionName.equals(fault.getName()) &&
-                                operation.getName().getLocalPart().equals(method.getOperationName())) {
+                                    operation.getName().getLocalPart().equals(method.getOperationName())) {
                                 writePolicyOrReferenceIt(subject, writer);
                             }
                         }
@@ -327,7 +324,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         }
         LOGGER.exiting();
     }
-    
+
     /**
      * This method should only be invoked by interface methods that deal with operations because they
      * may use JavaMethod as PolicySubject instead of a WSDL object.
@@ -348,7 +345,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         }
         LOGGER.exiting();
     }
-    
+
     /**
      * This method should only be invoked by interface methods that deal with WSDL binding because they
      * may use the QName of the WSDL binding element as PolicySubject instead of a WSDL object.
@@ -369,7 +366,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         }
         LOGGER.exiting();
     }
-    
+
     private void selectAndProcessSubject(final TypedXmlWriter xmlWriter, final Class clazz, final ScopeType scopeType, final String wsdlName) {
         LOGGER.entering();
         if (subjects != null) {
@@ -399,26 +396,26 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         }
         LOGGER.exiting();
     }
-    
+
     private static final boolean isCorrectType(final PolicyMap map, final PolicySubject subject, final ScopeType type) {
         switch (type) {
-            case OPERATION :
-                return ! (map.isInputMessageSubject(subject) || map.isOutputMessageSubject(subject) || map.isFaultMessageSubject(subject));
-            case INPUT_MESSAGE :
+            case OPERATION:
+                return !(map.isInputMessageSubject(subject) || map.isOutputMessageSubject(subject) || map.isFaultMessageSubject(subject));
+            case INPUT_MESSAGE:
                 return map.isInputMessageSubject(subject);
-            case OUTPUT_MESSAGE :
+            case OUTPUT_MESSAGE:
                 return map.isOutputMessageSubject(subject);
-            case FAULT_MESSAGE :
+            case FAULT_MESSAGE:
                 return map.isFaultMessageSubject(subject);
             default:
                 return true;
         }
     }
-    
+
     private boolean stringEqualsToStringOrQName(final String first, final Object second) {
-        return (second instanceof QName) ? first.equals(((QName)second).getLocalPart()) : first.equals(second) ;
+        return (second instanceof QName) ? first.equals(((QName) second).getLocalPart()) : first.equals(second);
     }
-    
+
     /**
      * Adds a PolicyReference element that points to the policy of the element,
      * if the policy does not have any id or name. Writes policy inside the element otherwise.

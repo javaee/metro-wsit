@@ -71,7 +71,14 @@ public class SCTokenWrapper extends PolicyAssertion implements SecureConversatio
     
     /** Creates a new instance of SCTokenWrapper */
     public SCTokenWrapper(PolicyAssertion scToken,MessagePolicy mp) {
-        super(AssertionData.createAssertionData(scToken.getName(),scToken.getValue(),scToken.getAttributes()),getNestedAssertions(scToken),
+        super(AssertionData.createAssertionData(
+                                scToken.getName(),
+                                scToken.getValue(),
+                                scToken.getAttributes(),
+                                scToken.isOptional(),
+                                scToken.isIgnorable()
+                            ),
+                getAssertionParameters(scToken),
                 (scToken.getNestedPolicy()== null ? null : scToken.getNestedPolicy().getAssertionSet()));
         this.scToken = (SecureConversationToken)scToken;
         this.messagePolicy = mp;
@@ -84,9 +91,9 @@ public class SCTokenWrapper extends PolicyAssertion implements SecureConversatio
         }
     }
     
-    private static Collection<PolicyAssertion> getNestedAssertions(PolicyAssertion scToken){
-        if(scToken.hasNestedAssertions()){
-            Iterator<PolicyAssertion> itr = scToken.getNestedAssertionsIterator();
+    private static Collection<PolicyAssertion> getAssertionParameters(PolicyAssertion scToken){
+        if(scToken.hasParameters()){
+            Iterator<PolicyAssertion> itr = scToken.getParametersIterator();
             if(itr.hasNext()){// will have only one assertion set. TODO:Cross check with marek.
                 return Collections.singletonList(itr.next());
             }
