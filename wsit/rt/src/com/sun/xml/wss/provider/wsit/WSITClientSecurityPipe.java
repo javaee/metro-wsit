@@ -92,6 +92,8 @@ public class WSITClientSecurityPipe implements Pipe {
         this.properties = properties;
         this.nextPipe = nextPipe;
         properties.put("NEXT_PIPE", nextPipe);
+        properties.put("WSIT_GENERIC_CALLBACK_HANDLER", "true");
+         
         //TODO: Load the Class by reflection.
         //Hack for now
         AuthConfigProvider provider = new WSITAuthConfigProvider(properties, null);

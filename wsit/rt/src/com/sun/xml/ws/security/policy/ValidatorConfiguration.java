@@ -52,4 +52,6 @@ public interface ValidatorConfiguration {
     public String getMaxNonceAge();
     
     public String getRevocationEnabled();
+    
+    public String getEnforceKeyUsage();
 }
