@@ -38,7 +38,6 @@ package com.sun.xml.ws.transport.tcp.encoding;
 
 import com.sun.xml.fastinfoset.stax.StAXDocumentParser;
 import com.sun.xml.ws.api.streaming.XMLStreamReaderFactory;
-import com.sun.xml.ws.encoding.fastinfoset.FastInfosetStreamReaderFactory;
 import java.io.InputStream;
 
 /**
