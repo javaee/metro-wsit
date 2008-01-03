@@ -123,7 +123,7 @@ public class ProtocolMessageSender {
             ContentNegotiation contentNegotiation) {
 
         this.unmarshaller = unmarshaller;
-        this.config = config;        
+        this.config = config;
         this.proxy = proxy;
         this.contentNegotiation = contentNegotiation;
 
@@ -201,14 +201,21 @@ public class ProtocolMessageSender {
         requestPacket.contentNegotiation = this.contentNegotiation;
         addAddressingHeaders(requestPacket, config.getRMVersion().terminateSequenceAction, seq.getDestination(),/*true*/ false);
         requestPacket.setEndPointAddressString(seq.getDestination().toString());
-        Packet responsePacket = process(requestPacket);
-        Message response = responsePacket.getMessage();
-        if (response != null && response.isFault()) {
-            throw LOGGER.logException(new TerminateSequenceException("There was an error trying to terminate the sequence ", response), Level.WARNING);
+        Message response = null;
+        try {
+            Packet responsePacket = process(requestPacket);
+            response = responsePacket.getMessage();
+            if (response != null && response.isFault()) {
+                throw LOGGER.logException(new TerminateSequenceException("There was an error trying to terminate the sequence ", response), Level.WARNING);
+            }
+        //TODO What to do with response?
+        //It may have a TerminateSequence for reverse sequence on it as well as ack headers
+        //Process these.
+        } finally {
+            if (response != null) {
+                response.consume();
+            }
         }
-    //TODO What to do with response?
-    //It may have a TerminateSequence for reverse sequence on it as well as ack headers
-    //Process these.
     }
 
     /**
@@ -231,16 +238,20 @@ public class ProtocolMessageSender {
         requestPacket.contentNegotiation = this.contentNegotiation;
         addAddressingHeaders(requestPacket, config.getRMVersion().lastAction, seq.getDestination(), /*true*/ false);
 
-        Packet responsePacket = process(requestPacket);
-        Message response = responsePacket.getMessage();
-
-        RMMessage rmResponse = new RMMessage(response);
-        if (response != null && response.isFault()) {
-            // TODO L10N
-            throw LOGGER.logException(new RMException("Error sending Last message", response), Level.WARNING);
+        Message response = null;
+        try {
+            Packet responsePacket = process(requestPacket);
+            response = responsePacket.getMessage();
+            if (response != null && response.isFault()) {
+                // TODO L10N
+                throw LOGGER.logException(new RMException("Error sending Last message", response), Level.WARNING);
+            }
+            InboundMessageProcessor.processMessage(new RMMessage(response), unmarshaller, RMSource.getRMSource(), config.getRMVersion());
+        } finally {
+            if (response != null) {
+                response.consume();
+            }
         }
-
-        InboundMessageProcessor.processMessage(rmResponse, unmarshaller, RMSource.getRMSource(), config.getRMVersion());
     }
 
     /**
@@ -266,16 +277,23 @@ public class ProtocolMessageSender {
 
             requestPacket.setEndPointAddressString(seq.getDestination().toString());
 
-            Packet responsePacket = process(requestPacket);
-            Message response = responsePacket.getMessage();
-            if (response != null && response.isFault()) {
-                //reset alarm
-                ((ClientOutboundSequence) seq).resetLastActivityTime();
-                // TODO L10N
-                throw LOGGER.logException(new RMException("Error sending AckRequestedElement", response), Level.WARNING);
-            }
+            Message response = null;
+            try {
+                Packet responsePacket = process(requestPacket);
+                response = responsePacket.getMessage();
+                if (response != null && response.isFault()) {
+                    //reset alarm
+                    ((ClientOutboundSequence) seq).resetLastActivityTime();
+                    // TODO L10N
+                    throw LOGGER.logException(new RMException("Error sending AckRequestedElement", response), Level.WARNING);
+                }
 
-            InboundMessageProcessor.processMessage(new RMMessage(response), unmarshaller, RMSource.getRMSource(), config.getRMVersion());
+                InboundMessageProcessor.processMessage(new RMMessage(response), unmarshaller, RMSource.getRMSource(), config.getRMVersion());
+            } finally {
+                if (response != null) {
+                    response.consume();
+                }
+            }
         } finally {
             //Make sure that alarm is reset.
             ((ClientOutboundSequence) seq).resetLastActivityTime();

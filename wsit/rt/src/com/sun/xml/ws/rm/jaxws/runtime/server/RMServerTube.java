@@ -658,7 +658,8 @@ public final class RMServerTube extends TubeBase {
         //If there is an "real" outbound sequence, client expects us to terminate it.
         switch (getConfig().getRMVersion()) {
             case WSRM10:
-                // TODO: check why here is TSaction and in the case bellow there is TSRaction
+            {
+                // There is no TSR. We just close client-side sequence if it is a two-way communication
                 tsAction = RMVersion.WSRM10.terminateSequenceAction;
                 if (outboundSequence.isSaveMessages()) {
                     com.sun.xml.ws.rm.v200502.TerminateSequenceElement terminateSeqResponse = new com.sun.xml.ws.rm.v200502.TerminateSequenceElement();
@@ -684,8 +685,9 @@ public final class RMServerTube extends TubeBase {
                     ret = new Packet(null);
                 }
                 break;
-
+            }
             case WSRM11:
+            {
                 tsAction = RMVersion.WSRM11.terminateSequenceResponseAction;
                 com.sun.xml.ws.rm.v200702.TerminateSequenceResponseElement terminateSeqResponse = new com.sun.xml.ws.rm.v200702.TerminateSequenceResponseElement();
                 com.sun.xml.ws.rm.v200702.Identifier id2 = new com.sun.xml.ws.rm.v200702.Identifier();
@@ -707,6 +709,7 @@ public final class RMServerTube extends TubeBase {
                 Header header = Headers.create(getConfig().getRMVersion().jaxbContext, element);
                 response.getHeaders().add(header);
                 break;
+            }
         }
         return ret;
     }

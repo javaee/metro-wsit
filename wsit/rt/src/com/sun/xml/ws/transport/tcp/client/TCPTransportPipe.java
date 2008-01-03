@@ -148,6 +148,8 @@ public class TCPTransportPipe implements Pipe {
                     if (clientTransport.getStatus() != TCPConstants.ONE_WAY && !Boolean.FALSE.equals(packet.expectReply)) {
                         final String contentTypeStr = clientTransport.getContentType();
                         codec.decode(replyInputStream, contentTypeStr, reply);
+                    } else {
+                        releaseSession(channelContext);
                     }
                     return reply;
                 } else {

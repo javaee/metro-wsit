@@ -67,6 +67,7 @@ public final class ServiceChannelTransportPipe extends TCPTransportPipe {
         super(that, cloner);
     }
     
+    @Override
     public Packet process(final Packet packet) {
         if (logger.isLoggable(Level.FINE)) {
             logger.log(Level.FINE, MessagesMessages.WSTCP_1001_TCP_SERVICE_TP_PROCESS_ENTER(packet.endpointAddress));
@@ -141,6 +142,7 @@ public final class ServiceChannelTransportPipe extends TCPTransportPipe {
         }
     }
     
+    @Override
     public Pipe copy(final PipeCloner cloner) {
         return new ServiceChannelTransportPipe(this, cloner);
     }
