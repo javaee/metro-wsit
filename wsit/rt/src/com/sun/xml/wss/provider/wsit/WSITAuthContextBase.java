@@ -281,6 +281,8 @@ public abstract class WSITAuthContextBase  {
     protected static final String REQ_PACKET = "REQ_PACKET";
     protected static final String RES_PACKET = "RES_PACKET";
     
+    protected static final String DEFAULT_JMAC_HANDLER = "com.sun.enterprise.security.jmac.callback.ContainerCallbackHandler";
+    
     static {
         try {
             //TODO: system property maynot be appropriate for server side.
@@ -1556,7 +1558,8 @@ public abstract class WSITAuthContextBase  {
     
     
     protected CallbackHandler loadGFHandler(boolean isClientAuthModule, String jmacHandler) {
-        String classname = "com.sun.enterprise.security.jmac.callback.ContainerCallbackHandler";
+        
+        String classname =  DEFAULT_JMAC_HANDLER;
         if (jmacHandler != null) {
             classname = jmacHandler;
         }

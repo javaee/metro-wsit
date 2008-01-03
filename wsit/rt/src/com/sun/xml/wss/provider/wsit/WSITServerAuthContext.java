@@ -57,6 +57,7 @@ import com.sun.xml.wss.impl.misc.WSITProviderSecurityEnvironment;
 import com.sun.xml.wss.impl.policy.mls.MessagePolicy;
 import com.sun.xml.wss.jaxws.impl.Constants;
 import com.sun.xml.wss.jaxws.impl.PolicyResolverImpl;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -88,6 +89,7 @@ import javax.xml.bind.JAXBElement;
 
 import java.util.logging.Level;
 import com.sun.xml.wss.provider.wsit.logging.LogStringsMessages;
+import java.lang.reflect.Method;
 import javax.xml.ws.soap.SOAPFaultException;
 
 /**
@@ -97,6 +99,7 @@ import javax.xml.ws.soap.SOAPFaultException;
 public class WSITServerAuthContext extends WSITAuthContextBase implements ServerAuthContext {
     
     protected static final String TRUE="true";
+    static final String SERVICE_ENDPOINT = "SERVICE_ENDPOINT";
     //****************Class Variables***************
     private SessionManager sessionManager=
             SessionManager.getSessionManager();
@@ -115,6 +118,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
     //***************AuthModule Instance**********
     WSITServerAuthModule  authModule = null;
     
+    static final String PIPE_HELPER = "PIPE_HELPER";
     
     /** Creates a new instance of WSITServerAuthContext */
     public WSITServerAuthContext(String operation, Subject subject, Map map) {
@@ -138,6 +142,9 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
                 populateConfigProperties(configAssertions, props);
                 String jmacHandler = props.getProperty(DefaultCallbackHandler.JMAC_CALLBACK_HANDLER);
                 handler = loadGFHandler(false, jmacHandler);
+                if (DEFAULT_JMAC_HANDLER.equals(handler.getClass().getName())) {
+                    setRealm(handler, getRealmFromPipeHelper(map));
+                }
                 secEnv = new WSITProviderSecurityEnvironment(handler, map, props);
             }catch (XWSSecurityException ex) {
                 log.log(Level.SEVERE,
@@ -810,6 +817,43 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
             if (obj != null) {
                 return RealmAuthenticationAdapter.newInstance(obj);
             }
+        }
+        return null;
+    }
+
+    private void setRealm(CallbackHandler handler, String realm) {
+        try {
+            Method method = handler.getClass().getMethod("setHandlerContext", String.class);
+            method.invoke(handler, realm);
+        } catch (IllegalAccessException ex) {
+            //ignore
+        } catch (IllegalArgumentException ex) {
+            //ignore
+        } catch (InvocationTargetException ex) {
+            //ignore
+        } catch (NoSuchMethodException ex) {
+            //ignore
+        } catch (SecurityException ex) {
+           //ignore 
+        }
+    }
+    
+    private String getRealmFromPipeHelper(Map map) {
+        try {
+            Object pipehelper = map.get(PIPE_HELPER);
+            Method getRealm = pipehelper.getClass().getMethod("getRealm", Map.class);
+            String ret = (String)getRealm.invoke(pipehelper, map);
+            return ret;
+        } catch (IllegalAccessException ex) {
+            //ignore
+        } catch (IllegalArgumentException ex) {
+            //ignore
+        } catch (InvocationTargetException ex) {
+            //ignore
+        } catch (NoSuchMethodException ex) {
+            //ignore
+        } catch (SecurityException ex) {
+            //ignore
         }
         return null;
     }
