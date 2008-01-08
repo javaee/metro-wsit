@@ -1044,6 +1044,9 @@ public abstract class WSITAuthContextBase  {
         if(kerbConfig.getServicePrincipal() != null){
             props.put(DefaultCallbackHandler.KRB5_SERVICE_PRINCIPAL, kerbConfig.getServicePrincipal());
         }
+        if(kerbConfig.getCredentialDelegation() != null){
+            props.put(DefaultCallbackHandler.KRB5_CREDENTIAL_DELEGATION, kerbConfig.getCredentialDelegation());
+        }
     }
     
     private void populateKeystoreProps(Properties props, KeyStore store) {
