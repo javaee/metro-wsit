@@ -841,6 +841,9 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
     private String getRealmFromPipeHelper(Map map) {
         try {
             Object pipehelper = map.get(PIPE_HELPER);
+            if( pipehelper == null){
+                return null;
+            }
             Method getRealm = pipehelper.getClass().getMethod("getRealm", Map.class);
             String ret = (String)getRealm.invoke(pipehelper, map);
             return ret;
