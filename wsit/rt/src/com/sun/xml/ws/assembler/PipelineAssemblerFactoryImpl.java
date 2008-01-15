@@ -39,6 +39,7 @@ import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import com.sun.xml.ws.tx.common.Util;
 import com.sun.xml.wss.impl.misc.SecurityUtil;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.logging.Logger;
 
@@ -57,6 +58,7 @@ import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.client.WSPortInfo;
+import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
@@ -87,8 +89,12 @@ import com.sun.xml.ws.transport.tcp.wsit.TCPTransportPipeFactory;
 import com.sun.xml.ws.util.ServiceFinder;
 import com.sun.xml.ws.tx.client.TxClientPipe;
 import com.sun.xml.ws.tx.service.TxServerPipe;
+import com.sun.xml.ws.util.ServiceConfigurationError;
 import com.sun.xml.wss.jaxws.impl.SecurityClientPipe;
 import com.sun.xml.wss.jaxws.impl.SecurityServerPipe;
+import java.lang.reflect.Constructor;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * WSIT PipelineAssembler.
@@ -120,6 +126,16 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
     private static final String xwss20ServerPipe = "com.sun.xml.xwss.XWSSServerPipe";
     private static final String SERVLET_CONTEXT_CLASSNAME = "javax.servlet.ServletContext";
     private static final Logger logger = Logger.getLogger(PipelineAssemblerFactoryImpl.class.getName());
+    
+    //Added for Security Pipe Unification with JSR 196 on GlassFish
+    static final String ENDPOINT = "ENDPOINT";
+    static final String NEXT_PIPE = "NEXT_PIPE";
+    static final String POLICY = "POLICY";
+    static final String SEI_MODEL = "SEI_MODEL";
+    static final String SERVICE_ENDPOINT = "SERVICE_ENDPOINT";
+    static final String WSDL_MODEL = "WSDL_MODEL";
+    static final String GF_SERVER_SEC_PIPE = "com.sun.enterprise.webservice.CommonServerSecurityPipe";
+    //----------------
 
     private static class WsitPipelineAssembler implements PipelineAssembler {
 
@@ -191,7 +207,6 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
 
             //Look for pipe-creation hook exposed in contaner.
             ClientPipelineHook hook = context.getContainer().getSPI(ClientPipelineHook.class);
-
             //If not found, look for pipe-creation hook using services
             if (hook == null) {
                 ClientPipelineHook[] hooks = loadSPs(ClientPipelineHook.class);
@@ -199,25 +214,11 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
                     hook = hooks[0];
                 }
             }
-
             //If either mechanism for finding a ClientPipelineHook has found one, use it.
             if (hook != null) {
                 p = hook.createSecurityPipe(policyMap, context, p);
-
                 if (isSecurityEnabled) {
                     scInit = (SecureConversationInitiator) p;
-                /*
-                AuthConfigFactory factory = AuthConfigFactory.getFactory();
-                if (factory != null) {
-                AuthConfigProvider provider = factory.getConfigProvider("SOAP", null,null);
-                try {
-                WSITClientAuthConfig authConfig =
-                (WSITClientAuthConfig)provider.getClientAuthConfig("SOAP", null, null);
-                scInit = (SecureConversationInitiator)authConfig;
-                }catch (AuthException e) {
-                throw new RuntimeException(e);
-                }
-                }*/
                 }
 
             } else {
@@ -229,17 +230,16 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
                     //Use the default WSIT Client Security Pipe
                     p = new SecurityClientPipe(config, p);
                     scInit = (SecureConversationInitiator) p;
-
-
-                /*
-                HashMap propBag = new HashMap();
-                propBag.put("POLICY", policyMap);
-                propBag.put("WSDL_MODEL", wsdlPort);
-                propBag.put("SERVICE",context.getService());
-                propBag.put("BINDING", context.getBinding());
-                System.out.println("<<<<<<<<<Creating WSITClientSecurityPipe>>>>>>>>>");
-                p = new WSITClientSecurityPipe(propBag, p);
-                scInit = (SecureConversationInitiator)propBag.get("SC_INITIATOR");*/
+                    
+                    /*
+                    HashMap propBag = new HashMap();
+                    propBag.put("POLICY", policyMap);
+                    propBag.put("WSDL_MODEL", wsdlPort);
+                    propBag.put("SERVICE",context.getService());
+                    propBag.put("BINDING", context.getBinding());
+                    System.out.println("<<<<<<<<<Creating WSITClientSecurityPipe>>>>>>>>>");
+                    p = new WSITClientSecurityPipe(propBag, p);
+                    scInit = (SecureConversationInitiator)propBag.get("SC_INITIATOR");*/
 
                 } else {
                     //look for XWSS 2.0 Style Security
@@ -336,6 +336,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             // check for Security
             boolean securityIsEnabled = isSecurityEnabled(policyMap, context.getWsdlModel());
             ServerPipelineHook hook = context.getEndpoint().getContainer().getSPI(ServerPipelineHook.class);
+           
             if (hook != null) {
                 if (securityIsEnabled) {
                     setSecurityCodec(context);
@@ -344,17 +345,24 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             } else {
                 if (securityIsEnabled) {
                     setSecurityCodec(context);
-                    ServerPipeConfiguration config = new ServerPipeConfiguration(
-                            policyMap, context.getWsdlModel(), context.getEndpoint());
-                    p = new SecurityServerPipe(config, p);
-                /*
-                HashMap propBag = new HashMap();
-                propBag.put("POLICY", policyMap);
-                propBag.put("WSDL_MODEL", context.getWsdlModel());
-                propBag.put("SEI_MODEL", context.getSEIModel());
-                propBag.put("ENDPOINT", context.getEndpoint());
-                System.out.println("<<<<<<<<<Creating WSITServerSecurityPipe>>>>>>>>>");
-                p = new WSITServerSecurityPipe(propBag, p);*/
+                    
+                    if (serverPipeLineHookExists()) {
+                        p = createSecurityPipe(policyMap, context.getSEIModel(), context.getWsdlModel(), context.getEndpoint(), p);
+                    } else {
+                        //Log a FINE message indicating could not use Unified Pipe.
+                        ServerPipeConfiguration config = new ServerPipeConfiguration(
+                                policyMap, context.getWsdlModel(), context.getEndpoint());
+                        p = new SecurityServerPipe(config, p);
+           
+                        /*
+                        HashMap propBag = new HashMap();
+                        propBag.put("POLICY", policyMap);
+                        propBag.put("WSDL_MODEL", context.getWsdlModel());
+                        propBag.put("SEI_MODEL", context.getSEIModel());
+                        propBag.put("ENDPOINT", context.getEndpoint());
+                        System.out.println("<<<<<<<<<Creating WSITServerSecurityPipe>>>>>>>>>");
+                        p = new WSITServerSecurityPipe(propBag, p);*/
+                    }
 
                 } else {
                     try {
@@ -363,7 +371,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
                             p = initializeXWSSServerPipe(context.getEndpoint(), context.getWsdlModel(), p);
                         }
                     } catch (NoClassDefFoundError err) {
-                    // do nothing
+                        // do nothing
                     }
                 }
             }
@@ -714,7 +722,27 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             return map;
         }
 
-        private void setSecurityCodec(ServerPipeAssemblerContext context) {
+
+        private boolean serverPipeLineHookExists() {
+            // The ServerPipeline Hook in GF fails to create the Pipe because GF ServerPipeCreator does not have a
+            // Default CTOR.
+            //TODO: change this method impl later.
+            try {
+                ServerPipelineHook[] hooks = loadSPs(ServerPipelineHook.class);
+                if (hooks != null && hooks.length > 0) {
+                    return true;
+                }
+            } catch (ServiceConfigurationError ex) {
+                //workaround since GF ServerPipeCreator has no Default CTOR.
+                if (ex.getCause() instanceof InstantiationException) {
+                    return true;
+                }
+                return false;
+            }
+            return false;
+        }
+        
+        private void setSecurityCodec(ServerPipeAssemblerContext context){
             StreamSOAPCodec primaryCodec = Codecs.createSOAPEnvelopeXmlCodec(context.getEndpoint().getBinding().getSOAPVersion());
             LazyStreamCodec lsc = new LazyStreamCodec(primaryCodec);
             Codec fullCodec = Codecs.createSOAPBindingCodec(context.getEndpoint().getBinding(), lsc);
@@ -814,5 +842,65 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
 
     private static Pipe initializeXWSSServerPipe(WSEndpoint epoint, WSDLPort prt, Pipe nextP) {
         return new com.sun.xml.xwss.XWSSServerPipe(epoint, prt, nextP);
+    }
+    
+    @SuppressWarnings("unchecked")
+    private static  Pipe createSecurityPipe(PolicyMap map, SEIModel sei,
+            WSDLPort port, WSEndpoint owner, Pipe tail) {
+
+	HashMap props = new HashMap();
+	props.put(POLICY,map);
+	props.put(SEI_MODEL,sei);
+	props.put(WSDL_MODEL,port);
+	props.put(ENDPOINT,owner);
+	//props.put(SERVICE_ENDPOINT,endpoint);
+	props.put(NEXT_PIPE,tail);
+        //TODO: set it based on  owner.getBinding() but it is not clear
+        // how SOAP/TCP is disthinguished.
+        boolean isHttpBinding = false;
+        return getGFServerSecurityPipe(props, tail, isHttpBinding);
+    }
+
+    private static  Pipe getGFServerSecurityPipe(HashMap props, Pipe tail, boolean httpBinding) {
+        Pipe ret = null;
+        try {
+            ClassLoader loader = Thread.currentThread().getContextClassLoader();
+            Class gfServerPipeClass = null;
+            if (loader != null) {
+                gfServerPipeClass = loader.loadClass(GF_SERVER_SEC_PIPE);
+            } else {
+                gfServerPipeClass = Class.forName(GF_SERVER_SEC_PIPE);
+            }
+            if (gfServerPipeClass != null) {
+                //now instantiate the class
+                Constructor[] ctors = gfServerPipeClass.getDeclaredConstructors();
+                Constructor ctor = null;
+                for (int i=0; i < ctors.length; i++) {
+                    ctor = ctors[i];
+                    Class[] paramTypes = ctor.getParameterTypes();
+                    if (paramTypes[0].equals(Map.class)) {
+                        break;
+                    }
+                }
+                //Constructor ctor = gfServerPipeClass.getConstructor(Map.class, Pipe.class, Boolean.class);
+                if (ctor != null) {
+                    ret = (Pipe)ctor.newInstance(props, tail, httpBinding);
+                } 
+            }
+        } catch (InstantiationException ex) {
+            throw new WebServiceException(ex);
+        } catch (IllegalAccessException ex) {
+            throw new WebServiceException(ex);
+        } catch (IllegalArgumentException ex) {
+           throw new WebServiceException(ex);
+        } catch (InvocationTargetException ex) {
+            throw new WebServiceException(ex);
+        } catch (SecurityException ex) {
+            throw new WebServiceException(ex);
+        } catch (ClassNotFoundException ex) {
+           throw new WebServiceException(ex);
+        }
+        
+        return ret;
     }
 }
