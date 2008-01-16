@@ -41,8 +41,6 @@ import com.sun.xml.ws.security.impl.IssuedTokenContextImpl;
 
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 
-import com.sun.xml.ws.security.trust.impl.client.STSIssuedTokenProviderImpl;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -52,13 +50,12 @@ import java.util.Map;
  */
 public class IssuedTokenManager {
     private Map<String, IssuedTokenProvider> itpMap = new HashMap<String, IssuedTokenProvider>();
-   
+    private Map<String, Class<?>> itpClassMap = new HashMap<String, Class<?>>();
     private static IssuedTokenManager manager = new IssuedTokenManager();
     
     /** Creates a new instance of IssuedTokenManager */
     private IssuedTokenManager() {
-        itpMap.put(STSIssuedTokenConfiguration.PROTOCOL_10, new STSIssuedTokenProviderImpl());
-        itpMap.put(STSIssuedTokenConfiguration.PROTOCOL_13, new STSIssuedTokenProviderImpl());
+        addDefaultProviders();
     }
     
     public static IssuedTokenManager getInstance(){
@@ -77,25 +74,51 @@ public class IssuedTokenManager {
     
     public void getIssuedToken(IssuedTokenContext ctx)throws WSTrustException {
         IssuedTokenConfiguration config = (IssuedTokenConfiguration)ctx.getSecurityPolicy().get(0);
-        IssuedTokenProvider provider = itpMap.get(config.getProtocol());
+        IssuedTokenProvider provider = getIssuedTokenProvider(config.getProtocol());
         provider.issue(ctx);
     }
     
     public void renewIssuedToken(IssuedTokenContext ctx)throws WSTrustException {
         IssuedTokenConfiguration config = (IssuedTokenConfiguration)ctx.getSecurityPolicy().get(0);
-        IssuedTokenProvider provider = itpMap.get(config.getProtocol());
+        IssuedTokenProvider provider = getIssuedTokenProvider(config.getProtocol());
         provider.renew(ctx);
     }
     
     public void cancelIssuedToken(IssuedTokenContext ctx)throws WSTrustException {
         IssuedTokenConfiguration config = (IssuedTokenConfiguration)ctx.getSecurityPolicy().get(0);
-        IssuedTokenProvider provider = itpMap.get(config.getProtocol());
+        IssuedTokenProvider provider = getIssuedTokenProvider(config.getProtocol());
         provider.cancel(ctx);
     }
     
     public void validateIssuedToken(IssuedTokenContext ctx)throws WSTrustException {
         IssuedTokenConfiguration config = (IssuedTokenConfiguration)ctx.getSecurityPolicy().get(0);
-        IssuedTokenProvider provider = itpMap.get(config.getProtocol());
+        IssuedTokenProvider provider = getIssuedTokenProvider(config.getProtocol());
         provider.validate(ctx);
+    }
+    
+    private void addDefaultProviders(){
+        itpClassMap.put(STSIssuedTokenConfiguration.PROTOCOL_10, com.sun.xml.ws.security.trust.impl.client.STSIssuedTokenProviderImpl.class);
+        itpClassMap.put(STSIssuedTokenConfiguration.PROTOCOL_13, com.sun.xml.ws.security.trust.impl.client.STSIssuedTokenProviderImpl.class);
+    }
+
+    private IssuedTokenProvider getIssuedTokenProvider(String protocol) throws WSTrustException {
+        IssuedTokenProvider itp = (IssuedTokenProvider)itpMap.get(protocol);
+        if (itp == null){
+            Class itpClass = itpClassMap.get(protocol);
+            if (itpClass != null){
+                try {
+                    itp = (IssuedTokenProvider) itpClass.newInstance();
+                    itpMap.put(protocol, itp);
+                } catch (InstantiationException e) {
+                    throw new WSTrustException("IssueTokenProvider for the protocol: "+protocol+ "is not supported");
+                } catch (IllegalAccessException ee) {
+                    throw new WSTrustException("IssueTokenProvider for the protocol: "+protocol+ "is not supported");
+                }
+            }else{
+                throw new WSTrustException("IssueTokenProvider for the protocol: "+protocol+ "is not supported");
+            }
+        }
+        
+        return itp;
     }
 }
