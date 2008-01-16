@@ -44,14 +44,9 @@ import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
-import com.sun.xml.ws.assembler.ClientPipeConfiguration;
-import com.sun.xml.ws.policy.AssertionSet;
-import com.sun.xml.ws.policy.Policy;
-import com.sun.xml.ws.policy.PolicyAssertion;
-import com.sun.xml.ws.policy.PolicyException;
+import com.sun.xml.ws.assembler.WsitClientTubeAssemblyContext;
 import com.sun.xml.ws.policy.PolicyMap;
 import static com.sun.xml.ws.policy.PolicyMap.createWsdlOperationScopeKey;
-import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.tx.at.ATCoordinator;
 import com.sun.xml.ws.tx.common.ATAssertion;
 import static com.sun.xml.ws.tx.common.ATAssertion.NOT_ALLOWED;
@@ -60,7 +55,6 @@ import static com.sun.xml.ws.tx.common.ATAssertion.MANDATORY;
 import static com.sun.xml.ws.tx.common.Constants.AT_ASSERTION;
 import static com.sun.xml.ws.tx.common.Constants.WSAT_2004_PROTOCOL;
 import com.sun.xml.ws.tx.common.StatefulWebserviceFactoryFactory;
-import com.sun.xml.ws.tx.common.TransactionManagerImpl;
 import com.sun.xml.ws.tx.common.TxBasePipe;
 import com.sun.xml.ws.tx.common.TxJAXBContext;
 import com.sun.xml.ws.tx.common.TxLogger;
@@ -76,14 +70,12 @@ import javax.transaction.Transaction;
 import javax.xml.bind.Marshaller;
 import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceException;
-import java.util.Iterator;
-
 
 /**
  * This class process transactional context for client outgoing message.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  * @since 1.0
  */
 // suppress known deprecation warnings about using pipes.
@@ -97,7 +89,8 @@ public class TxClientPipe extends TxBasePipe {
     /**
      * Contains policy assertions
      */
-    private final ClientPipeConfiguration pipeConfig;
+    private final PolicyMap policyMap;
+    private final WSDLPort wsdlPort;
 
     private final SOAPVersion soapVersion;
 
@@ -117,14 +110,12 @@ public class TxClientPipe extends TxBasePipe {
      *
      * @param pcfg ws-policy configuration
      * @param next the next pipe in the chain
-     *             param spctx security context
      */
-    public TxClientPipe(ClientPipeConfiguration pcfg,
-                        Pipe next/*,
-                        SecurityPipeContext spctx*/) {
+    public TxClientPipe(WsitClientTubeAssemblyContext context, Pipe next) {
         super(next);
-        this.pipeConfig = pcfg;
-        this.soapVersion = pcfg.getBinding().getSOAPVersion();
+        this.policyMap = context.getPolicyMap();
+        this.wsdlPort = context.getWsdlPort();
+        this.soapVersion = context.getBinding().getSOAPVersion();
 
         //this.spctx = spctx;
         this.marshaller = TxJAXBContext.createMarshaller();
@@ -136,7 +127,8 @@ public class TxClientPipe extends TxBasePipe {
     private TxClientPipe(TxClientPipe orig, PipeCloner cloner) {
         super(cloner.copy(orig.next));
         cloner.add(orig, this);
-        this.pipeConfig = orig.pipeConfig;
+        this.policyMap = orig.policyMap;
+        this.wsdlPort = orig.wsdlPort;
         this.soapVersion = orig.soapVersion;
         this.marshaller = TxJAXBContext.createMarshaller();
     }
@@ -163,7 +155,6 @@ public class TxClientPipe extends TxBasePipe {
      */
     public Packet process(Packet pkt) {
         final Message msg = pkt.getMessage();
-        final WSDLPort wsdlModel = pipeConfig.getWSDLModel();
         Packet responsePacket = null;
         
         // TODO:  minimizing process overhead for cases that do not flow a transaction.
@@ -172,7 +163,7 @@ public class TxClientPipe extends TxBasePipe {
         //        If that assumption is incorrect, exchange this check with one checking for
         //        existence of wsat policy assertion.
         //        
-        Transaction currentTxn = checkCurrentJTATransaction(msg, wsdlModel);
+        Transaction currentTxn = checkCurrentJTATransaction(msg, wsdlPort);
         if (currentTxn == null) {
             return next.process(pkt);
         }
@@ -180,10 +171,8 @@ public class TxClientPipe extends TxBasePipe {
         // get trust plugin from security pipe
         // encryption through security pipe
     
-        final WSDLBoundOperation wsdlBoundOp = msg.getOperation(wsdlModel);    
-        ATAssertion atAssertion = getOperationATPolicy(pipeConfig.getPolicyMap(), 
-                                                       wsdlModel, 
-                                                       wsdlBoundOp).atAssertion;
+        final WSDLBoundOperation wsdlBoundOp = msg.getOperation(wsdlPort);    
+        ATAssertion atAssertion = getOperationATPolicy(policyMap, wsdlPort, wsdlBoundOp).atAssertion;
         if (atAssertion == NOT_ALLOWED ) {
                 // no ws-at policy assertion on the wsdl:binding/wsdl:operation, so no work to do here
                 if (logger.isLogging(Level.FINE)) {
@@ -207,7 +196,7 @@ public class TxClientPipe extends TxBasePipe {
                 logger.warning("TxClientPipe",
                         LocalizationMessages.
                         WSAT_TXN_CONTEXT_NOT_FLOWED_1001(
-                        msg.getOperation(wsdlModel).getName().toString()));
+                        msg.getOperation(wsdlPort).getName().toString()));
                 return next.process(pkt);
             }  
         }

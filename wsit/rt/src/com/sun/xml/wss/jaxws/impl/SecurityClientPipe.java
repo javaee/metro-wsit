@@ -63,7 +63,7 @@ import com.sun.xml.ws.api.security.trust.client.IssuedTokenManager;
 import com.sun.xml.ws.api.security.trust.client.STSIssuedTokenConfiguration;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
-import com.sun.xml.ws.assembler.ClientPipeConfiguration;
+import com.sun.xml.ws.assembler.WsitClientTubeAssemblyContext;
 import com.sun.xml.ws.security.impl.policyconv.SecurityPolicyHolder;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
 import javax.xml.soap.SOAPException;
@@ -114,8 +114,8 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
     private Set trustConfig = null;
     
     // Creates a new instance of SecurityClientPipe
-    public SecurityClientPipe(ClientPipeConfiguration config,Pipe nextPipe) {
-        super(config,nextPipe);
+    public SecurityClientPipe(WsitClientTubeAssemblyContext wsitContext, Pipe nextPipe) {
+        super(new ClientPipeConfiguration(wsitContext.getPolicyMap(), wsitContext.getWsdlPort(), wsitContext.getBinding()), nextPipe);
         scPlugin = new WSSCPlugin(null, wsscVer);
         CallbackHandler handler = null;
         try {
@@ -233,7 +233,7 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
             ((ProcessingContextImpl)ctx).setKerberosContextMap(kerberosTokenContextMap);
         }
         ((ProcessingContextImpl)ctx).setIssuedTokenContextMap(issuedTokenContextMap);
-        ctx.setExtraneousProperty(ctx.OPERATION_RESOLVER, new PolicyResolverImpl(inMessagePolicyMap,inProtocolPM,cachedOperation,pipeConfig,addVer,true, rmVer));
+        ctx.setExtraneousProperty(ProcessingContext.OPERATION_RESOLVER, new PolicyResolverImpl(inMessagePolicyMap,inProtocolPM,cachedOperation,pipeConfig,addVer,true, rmVer));
         
         try{
             msg = ret.getMessage();
@@ -289,7 +289,7 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
             if (issuedTokenContextMap.get(scToken.getTokenId()) == null) {
                 
                 IssuedTokenContext ctx = scPlugin.process(
-                        scAssertion, pipeConfig.getWSDLModel(), pipeConfig.getBinding(), this, marshaller, unmarshaller, packet.endpointAddress.toString(), packet, addVer);
+                        scAssertion, pipeConfig.getWSDLPort(), pipeConfig.getBinding(), this, marshaller, unmarshaller, packet.endpointAddress.toString(), packet, addVer);
                 issuedTokenContextMap.put(((Token)scAssertion).getTokenId(), ctx);
             }
         }
@@ -335,7 +335,7 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
         
         if (ctx == null) {
             ctx = scPlugin.process(
-                    (PolicyAssertion)tok, pipeConfig.getWSDLModel(), pipeConfig.getBinding(),
+                    (PolicyAssertion)tok, pipeConfig.getWSDLPort(), pipeConfig.getBinding(),
                     this, marshaller, unmarshaller, packet.endpointAddress.toString(), packet, addVer);
             ctx.setEndpointAddress(packet.endpointAddress.toString());
             issuedTokenContextMap.put(((Token)tok).getTokenId(), ctx);
@@ -355,7 +355,7 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
             
             if (ctx.getSecurityToken() instanceof SecurityContextToken){
                 ctx = scPlugin.processCancellation(
-                        ctx, pipeConfig.getWSDLModel(), pipeConfig.getBinding(), this, marshaller, unmarshaller, ctx.getEndpointAddress(),addVer);
+                        ctx, pipeConfig.getWSDLPort(), pipeConfig.getBinding(), this, marshaller, unmarshaller, ctx.getEndpointAddress(),addVer);
                 issuedTokenContextMap.remove(id);
             }
         }

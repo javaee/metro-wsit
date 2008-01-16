@@ -90,7 +90,7 @@ import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.policy.PolicyMerger;
-import com.sun.xml.ws.assembler.PipeConfiguration;
+import com.sun.xml.wss.jaxws.impl.PipeConfiguration;
 import com.sun.xml.ws.security.policy.AsymmetricBinding;
 import com.sun.xml.ws.security.policy.AlgorithmSuite;
 import com.sun.xml.ws.security.policy.SecureConversationToken;
@@ -138,8 +138,8 @@ import java.util.Properties;
 
 import com.sun.xml.ws.api.addressing.*;
 import com.sun.xml.ws.api.server.WSEndpoint;
-import com.sun.xml.ws.assembler.ClientPipeConfiguration;
-import com.sun.xml.ws.assembler.ServerPipeConfiguration;
+import com.sun.xml.wss.jaxws.impl.ClientPipeConfiguration;
+import com.sun.xml.wss.jaxws.impl.ServerPipeConfiguration;
 import com.sun.xml.ws.rm.RMVersion;
 import com.sun.xml.ws.security.opt.impl.JAXBFilterProcessingContext;
 import com.sun.xml.wss.ProcessingContext;
@@ -307,10 +307,10 @@ public abstract class WSITAuthContextBase  {
         port =(WSDLPort)map.get("WSDL_MODEL");
         
         if (this instanceof WSITClientAuthContext) {
-            WSService service = (WSService)map.get("SERVICE");
+//            WSService service = (WSService)map.get("SERVICE");
             WSBinding binding = (WSBinding)map.get("BINDING");
             pipeConfig = new ClientPipeConfiguration(
-                    wsPolicyMap, port, service, binding);
+                    wsPolicyMap, port, binding);
         } else {
             WSEndpoint endPoint = (WSEndpoint)map.get("ENDPOINT");
             pipeConfig = new ServerPipeConfiguration(
@@ -339,7 +339,7 @@ public abstract class WSITAuthContextBase  {
         }
         
         // check whether Service Port has RM
-        hasReliableMessaging = isReliableMessagingEnabled(wsPolicyMap, pipeConfig.getWSDLModel());
+        hasReliableMessaging = isReliableMessagingEnabled(wsPolicyMap, pipeConfig.getWSDLPort());
         //opResolver = new OperationResolverImpl(inMessagePolicyMap,pipeConfig.getWSDLModel().getBinding());
         
         //put properties for use by AuthModule init
@@ -365,8 +365,8 @@ public abstract class WSITAuthContextBase  {
                 return;
             }
             //To check: Is this sufficient, any edge cases I need to take care
-            QName serviceName = pipeConfig.getWSDLModel().getOwner().getName();
-            QName portName = pipeConfig.getWSDLModel().getName();
+            QName serviceName = pipeConfig.getWSDLPort().getOwner().getName();
+            QName portName = pipeConfig.getWSDLPort().getName();
             //Review: will this take care of EndpointPolicySubject
             PolicyMerger policyMerge = PolicyMerger.getMerger();
             PolicyMapKey endpointKey =PolicyMap.createWsdlEndpointScopeKey(serviceName,portName);
@@ -416,7 +416,7 @@ public abstract class WSITAuthContextBase  {
             if(endpointPolicy != null){
                 policyList.add(endpointPolicy);
             }
-            for( WSDLBoundOperation operation: pipeConfig.getWSDLModel().getBinding().getBindingOperations()){
+            for( WSDLBoundOperation operation: pipeConfig.getWSDLPort().getBinding().getBindingOperations()){
                 QName operationName = operation.getName();
                 WSDLOperation wsdlOperation = operation.getOperation();
                 WSDLInput input = wsdlOperation.getInput();
@@ -677,10 +677,10 @@ public abstract class WSITAuthContextBase  {
     
     
     protected PolicyMapKey getOperationKey(Message message){
-        WSDLBoundOperation operation = message.getOperation(pipeConfig.getWSDLModel());
+        WSDLBoundOperation operation = message.getOperation(pipeConfig.getWSDLPort());
         WSDLOperation wsdlOperation = operation.getOperation();
-        QName serviceName = pipeConfig.getWSDLModel().getOwner().getName();
-        QName portName = pipeConfig.getWSDLModel().getName();
+        QName serviceName = pipeConfig.getWSDLPort().getOwner().getName();
+        QName portName = pipeConfig.getWSDLPort().getName();
         //WSDLInput input = wsdlOperation.getInput();
         //WSDLOutput output = wsdlOperation.getOutput();
         //QName inputMessageName = input.getMessage().getName();
@@ -782,7 +782,7 @@ public abstract class WSITAuthContextBase  {
     }
     
     protected final WSDLBoundOperation cacheOperation(Message msg, Packet packet){
-        WSDLBoundOperation cachedOperation = msg.getOperation(pipeConfig.getWSDLModel());
+        WSDLBoundOperation cachedOperation = msg.getOperation(pipeConfig.getWSDLPort());
         packet.invocationProperties.put("WSDL_BOUND_OPERATION", cachedOperation);
         return cachedOperation;
     }
@@ -1446,7 +1446,7 @@ public abstract class WSITAuthContextBase  {
         if(isTrustMessage(packet)){
             operation = getWSDLOpFromAction(packet,false);
         }else{
-            operation =message.getOperation(pipeConfig.getWSDLModel());
+            operation =message.getOperation(pipeConfig.getWSDLPort());
         }
         
         //Review : Will this return operation name in all cases , doclit,rpclit, wrap / non wrap ?
@@ -1527,7 +1527,7 @@ public abstract class WSITAuthContextBase  {
             JAXBFilterProcessingContext  context = (JAXBFilterProcessingContext)ctx;
             context.setSOAPVersion(soapVersion);
             context.setJAXWSMessage(message, soapVersion);
-            context.isOneWayMessage(message.isOneWay(this.pipeConfig.getWSDLModel()));
+            context.isOneWayMessage(message.isOneWay(this.pipeConfig.getWSDLPort()));
             context.setDisableIncPrefix(disableIncPrefix);
             context.setEncHeaderContent(encHeaderContent);
             SecurityAnnotator.secureMessage(context);

@@ -83,7 +83,6 @@ import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.policy.PolicyMerger;
-import com.sun.xml.ws.assembler.PipeConfiguration;
 import com.sun.xml.ws.security.policy.AsymmetricBinding;
 import com.sun.xml.ws.security.policy.AlgorithmSuite;
 import com.sun.xml.ws.security.policy.SecureConversationToken;
@@ -302,7 +301,7 @@ public abstract class SecurityPipeBase implements Pipe {
         
         //unmarshaller = jaxbContext.createUnmarshaller();
         // check whether Service Port has RM
-        hasReliableMessaging = isReliableMessagingEnabled(wsPolicyMap, pipeConfig.getWSDLModel());
+        hasReliableMessaging = isReliableMessagingEnabled(wsPolicyMap, pipeConfig.getWSDLPort());
         //   opResolver = new OperationResolverImpl(inMessagePolicyMap,pipeConfig.getWSDLModel().getBinding());
         
     }
@@ -387,7 +386,7 @@ public abstract class SecurityPipeBase implements Pipe {
             JAXBFilterProcessingContext  context = (JAXBFilterProcessingContext)ctx;
             context.setSOAPVersion(soapVersion);
             context.setJAXWSMessage(message, soapVersion);
-            context.isOneWayMessage(message.isOneWay(this.pipeConfig.getWSDLModel()));
+            context.isOneWayMessage(message.isOneWay(this.pipeConfig.getWSDLPort()));
             context.setDisableIncPrefix(disableIncPrefix);
             context.setEncHeaderContent(encHeaderContent);
             context.setBSP(bsp10);
@@ -475,7 +474,7 @@ public abstract class SecurityPipeBase implements Pipe {
         if(isTrustMessage(packet)){
             operation = getWSDLOpFromAction(packet,false);
         }else{
-            operation =message.getOperation(pipeConfig.getWSDLModel());
+            operation =message.getOperation(pipeConfig.getWSDLPort());
         }
         
         //Review : Will this return operation name in all cases , doclit,rpclit, wrap / non wrap ?
@@ -500,7 +499,7 @@ public abstract class SecurityPipeBase implements Pipe {
     
     protected WSDLBoundOperation getOperation(Message message){
         if(cachedOperation == null){
-            cachedOperation = message.getOperation(pipeConfig.getWSDLModel());
+            cachedOperation = message.getOperation(pipeConfig.getWSDLPort());
         }
         return cachedOperation;
     }
@@ -676,8 +675,8 @@ public abstract class SecurityPipeBase implements Pipe {
                 return;
             }
             //To check: Is this sufficient, any edge cases I need to take care
-            QName serviceName = pipeConfig.getWSDLModel().getOwner().getName();
-            QName portName = pipeConfig.getWSDLModel().getName();
+            QName serviceName = pipeConfig.getWSDLPort().getOwner().getName();
+            QName portName = pipeConfig.getWSDLPort().getName();
             //Review: will this take care of EndpointPolicySubject
             PolicyMerger policyMerge = PolicyMerger.getMerger();
             PolicyMapKey endpointKey =PolicyMap.createWsdlEndpointScopeKey(serviceName,portName);
@@ -734,7 +733,7 @@ public abstract class SecurityPipeBase implements Pipe {
             if(endpointPolicy != null){
                 policyList.add(endpointPolicy);
             }
-            for( WSDLBoundOperation operation: pipeConfig.getWSDLModel().getBinding().getBindingOperations()){
+            for( WSDLBoundOperation operation: pipeConfig.getWSDLPort().getBinding().getBindingOperations()){
                 QName operationName = operation.getName();
                 WSDLOperation wsdlOperation = operation.getOperation();
                 WSDLInput input = wsdlOperation.getInput();
@@ -978,10 +977,10 @@ public abstract class SecurityPipeBase implements Pipe {
     
     
     protected PolicyMapKey getOperationKey(Message message){
-        WSDLBoundOperation operation = message.getOperation(pipeConfig.getWSDLModel());
+        WSDLBoundOperation operation = message.getOperation(pipeConfig.getWSDLPort());
         WSDLOperation wsdlOperation = operation.getOperation();
-        QName serviceName = pipeConfig.getWSDLModel().getOwner().getName();
-        QName portName = pipeConfig.getWSDLModel().getName();
+        QName serviceName = pipeConfig.getWSDLPort().getOwner().getName();
+        QName portName = pipeConfig.getWSDLPort().getName();
         //WSDLInput input = wsdlOperation.getInput();
         //WSDLOutput output = wsdlOperation.getOutput();
         //QName inputMessageName = input.getMessage().getName();
@@ -1062,8 +1061,8 @@ public abstract class SecurityPipeBase implements Pipe {
     }
     
     private Policy getMessageLevelBSP() throws PolicyException {
-        QName serviceName = pipeConfig.getWSDLModel().getOwner().getName();
-        QName portName = pipeConfig.getWSDLModel().getName();
+        QName serviceName = pipeConfig.getWSDLPort().getOwner().getName();
+        QName portName = pipeConfig.getWSDLPort().getName();
         PolicyMapKey operationKey = PolicyMap.createWsdlOperationScopeKey(serviceName, portName, bsOperationName);
         
         Policy operationLevelEP =  wsPolicyMap.getOperationEffectivePolicy(operationKey);
@@ -1082,7 +1081,7 @@ public abstract class SecurityPipeBase implements Pipe {
     }
     
     protected final void cacheOperation(Message msg){
-        cachedOperation = msg.getOperation(pipeConfig.getWSDLModel());
+        cachedOperation = msg.getOperation(pipeConfig.getWSDLPort());
     }
     
     protected final void resetCachedOperation(){

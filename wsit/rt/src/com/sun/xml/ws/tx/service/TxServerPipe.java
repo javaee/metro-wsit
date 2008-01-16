@@ -35,31 +35,22 @@
  */
 package com.sun.xml.ws.tx.service;
 
-import com.sun.enterprise.transaction.TransactionImport;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
-import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
-import com.sun.xml.ws.policy.AssertionSet;
-import com.sun.xml.ws.policy.Policy;
-import com.sun.xml.ws.policy.PolicyAssertion;
-import com.sun.xml.ws.policy.PolicyException;
+import com.sun.xml.ws.assembler.WsitServerTubeAssemblyContext;
 import com.sun.xml.ws.policy.PolicyMap;
-import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.tx.at.ATCoordinator;
 import com.sun.xml.ws.tx.at.ATSubCoordinator;
-import com.sun.xml.ws.tx.at.CoordinationXid;
-import com.sun.xml.ws.tx.common.ATAssertion;
 import static com.sun.xml.ws.tx.common.ATAssertion.*;
 import static com.sun.xml.ws.tx.common.Constants.*;
 import com.sun.xml.ws.tx.common.Message;
-import com.sun.xml.ws.tx.common.TransactionManagerImpl;
 import com.sun.xml.ws.tx.common.TxBasePipe;
 import com.sun.xml.ws.tx.common.TxFault;
 import com.sun.xml.ws.tx.common.TxJAXBContext;
@@ -72,13 +63,11 @@ import javax.servlet.ServletContext;
 import javax.transaction.NotSupportedException;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
-import javax.transaction.xa.Xid;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.logging.Level;
 
@@ -87,7 +76,7 @@ import java.util.logging.Level;
  * <p/>
  * Supports following WS-Coordination protocols: 2004 WS-Atomic Transaction protocol
  *
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  * @since 1.0
  */
 // suppress known deprecation warnings about using pipes.
@@ -113,15 +102,12 @@ public class TxServerPipe extends TxBasePipe {
      * @param map  PolicyMap
      * @param next Next pipe to be executed.
      */
-    public TxServerPipe(WSDLPort port,
-                        WSBinding wsbinding,
-                        PolicyMap map,
-                        Pipe next) {
+    public TxServerPipe(WsitServerTubeAssemblyContext context, Pipe next) {
         super(next);
         unmarshaller = TxJAXBContext.createUnmarshaller();
-        this.port = port;
-        this.wsbinding = wsbinding;
-        cacheOperationToPolicyMappings(map, port.getBinding());
+        this.port = context.getWsdlPort();
+        this.wsbinding = context.getEndpoint().getBinding();
+        cacheOperationToPolicyMappings(context.getPolicyMap(), context.getWsdlPort().getBinding());
     }
 
     private TxServerPipe(TxServerPipe from, PipeCloner cloner) {

@@ -34,15 +34,11 @@
  * holder.
  */
 
-package com.sun.xml.ws.assembler;
+package com.sun.xml.wss.jaxws.impl;
 
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.api.pipe.Pipe;
-import com.sun.xml.ws.api.pipe.PipelineAssembler;
 import com.sun.xml.ws.policy.PolicyMap;
-
-import javax.xml.ws.Dispatch;
 
 /**
  * Entry point to the various configuration information
@@ -57,11 +53,11 @@ import javax.xml.ws.Dispatch;
  */
 public abstract class PipeConfiguration {
     private final PolicyMap policy;
-    private final WSDLPort wsdlModel;
+    private final WSDLPort wsdlPort;
 
-    PipeConfiguration(PolicyMap policy, WSDLPort wsdlModel) {
+    PipeConfiguration(PolicyMap policy, WSDLPort wsdlPort) {
         this.policy = policy;
-        this.wsdlModel = wsdlModel;
+        this.wsdlPort = wsdlPort;
     }
 
     /**
@@ -92,8 +88,8 @@ public abstract class PipeConfiguration {
      * @return null if this model is not present.
      *         If non-null, it's always the same object.
      */
-    public WSDLPort getWSDLModel() {
-        return wsdlModel;
+    public WSDLPort getWSDLPort() {
+        return wsdlPort;
     }
 
     /**

@@ -404,7 +404,7 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
             JAXBFilterProcessingContext  context = (JAXBFilterProcessingContext)ctx;
             context.setSOAPVersion(soapVersion);
             context.setJAXWSMessage(message, soapVersion);
-            context.isOneWayMessage(message.isOneWay(this.pipeConfig.getWSDLModel()));
+            context.isOneWayMessage(message.isOneWay(this.pipeConfig.getWSDLPort()));
             context.setDisableIncPrefix(disableIncPrefix);
             context.setEncHeaderContent(encHeaderContent);
             SecurityAnnotator.secureMessage(context);
@@ -534,7 +534,7 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
             //create RST for Issue
             //RequestSecurityToken rst = scPlugin.createIssueRequest((PolicyAssertion)tok);
             BaseSTSRequest rst = scPlugin.createIssueRequest((PolicyAssertion)tok);
-            Packet requestPacket = scPlugin.createIssuePacket((PolicyAssertion)tok, rst, pipeConfig.getWSDLModel(), pipeConfig.getBinding(),
+            Packet requestPacket = scPlugin.createIssuePacket((PolicyAssertion)tok, rst, pipeConfig.getWSDLPort(), pipeConfig.getBinding(),
                                       WSTrustElementFactory.getContext(wsTrustVer), packet.endpointAddress.toString(), packet);            
             
             try {
@@ -597,7 +597,7 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
                 
                 //create RST for Issue                
                 BaseSTSRequest rst = scPlugin.createIssueRequest((PolicyAssertion)scAssertion);
-                Packet requestPacket = scPlugin.createIssuePacket((PolicyAssertion)scAssertion, rst, pipeConfig.getWSDLModel(), pipeConfig.getBinding(),
+                Packet requestPacket = scPlugin.createIssuePacket((PolicyAssertion)scAssertion, rst, pipeConfig.getWSDLPort(), pipeConfig.getBinding(),
                                         WSTrustElementFactory.getContext(wsTrustVer), packet.endpointAddress.toString(), packet);                
                 
                 try {
@@ -632,7 +632,7 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
                         ctx, pipeConfig.getWSDLModel(), pipeConfig.getBinding(), this, jaxbContext, ctx.getEndpointAddress());*/
                 try {                    
                     BaseSTSRequest rst = scPlugin.createCancelRequest(ctx);
-                    Packet cancelPacket = scPlugin.createCancelPacket(rst,pipeConfig.getWSDLModel(), pipeConfig.getBinding(), 
+                    Packet cancelPacket = scPlugin.createCancelPacket(rst,pipeConfig.getWSDLPort(), pipeConfig.getBinding(), 
                                                   WSTrustElementFactory.getContext(wsTrustVer), ctx.getEndpointAddress());
                     
                     //only for issue we pass flag true

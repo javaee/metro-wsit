@@ -41,8 +41,6 @@ import com.sun.xml.ws.tx.common.Util;
 import com.sun.xml.wss.impl.misc.SecurityUtil;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
-import java.util.logging.Logger;
-
 import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceException;
 
@@ -55,14 +53,10 @@ import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.api.pipe.Codecs;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.client.WSPortInfo;
-import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
-import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.api.model.wsdl.WSDLService;
 import com.sun.xml.ws.api.pipe.ClientPipeAssemblerContext;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.Tube;
@@ -71,16 +65,12 @@ import com.sun.xml.ws.api.pipe.PipelineAssemblerFactory;
 import com.sun.xml.ws.api.pipe.ServerPipeAssemblerContext;
 import com.sun.xml.ws.api.pipe.StreamSOAPCodec;
 import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
-import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.server.ServiceDefinition;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
-import com.sun.xml.ws.policy.jaxws.WSDLPolicyMapWrapper;
-import com.sun.xml.ws.policy.jaxws.client.PolicyFeature;
 import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter.WsdlDocumentFilter;
-import com.sun.xml.ws.policy.util.PolicyMapUtil;
 import com.sun.xml.ws.rm.RMVersion;
 import com.sun.xml.ws.rm.jaxws.runtime.client.RMClientTube;
 import com.sun.xml.ws.rm.jaxws.runtime.server.RMServerTube;
@@ -121,12 +111,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
     private static final QName AT_ASSERTION = new QName(WSAT_SOAP_NSURI, "ATAssertion");
     private static final String AUTO_OPTIMIZED_TRANSPORT_POLICY_NAMESPACE_URI = "http://java.sun.com/xml/ns/wsit/2006/09/policy/transport/client";
     private static final QName AUTO_OPTIMIZED_TRANSPORT_POLICY_ASSERTION = new QName(AUTO_OPTIMIZED_TRANSPORT_POLICY_NAMESPACE_URI, "AutomaticallySelectOptimalTransport");
-    //default security pipe classes for XWSS 2.0 Style Security Configuration Support
-    private static final String xwss20ClientPipe = "com.sun.xml.xwss.XWSSClientPipe";
-    private static final String xwss20ServerPipe = "com.sun.xml.xwss.XWSSServerPipe";
     private static final String SERVLET_CONTEXT_CLASSNAME = "javax.servlet.ServletContext";
-    private static final Logger logger = Logger.getLogger(PipelineAssemblerFactoryImpl.class.getName());
-    
     //Added for Security Pipe Unification with JSR 196 on GlassFish
     static final String ENDPOINT = "ENDPOINT";
     static final String NEXT_PIPE = "NEXT_PIPE";
@@ -136,7 +121,6 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
     static final String WSDL_MODEL = "WSDL_MODEL";
     static final String GF_SERVER_SEC_PIPE = "com.sun.enterprise.webservice.CommonServerSecurityPipe";
     //----------------
-
     private static class WsitPipelineAssembler implements PipelineAssembler {
 
         private BindingID bindingId;
@@ -148,67 +132,39 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
         @NotNull
         @SuppressWarnings("unchecked")
         public Pipe createClient(
-                
                 @NotNull ClientPipeAssemblerContext context) {
-            // For dispatch client, this variable may be null
-            WSDLPort wsdlPort = context.getWsdlModel();
-            // This variable may be null if there was no client configuration file
-            PolicyFeature feature = initPolicyMap(context);
-            // For dispatch client, this variable may be null
-            WSDLModel wsdlModel = null;
-            // For dispatch client, this variable may be null
-            PolicyMap policyMap = null;
-            // This variable is only set if WSDL port is null and there is a
-            // client configuration file
-            WSPortInfo portInfo = null;
 
-            if (feature != null) {
-                wsdlModel = feature.getWsdlModel();
-                policyMap = feature.getPolicyMap();
-                portInfo = feature.getPortInfo();
-            }
+            WsitClientTubeAssemblyContext wsitContext = new WsitClientTubeAssemblyContext(context);
 
-            // No WSDL port -> we must have a dispatch client. Extract WSDLPort
-            // from client config instead (if we have one).
-            if (wsdlPort == null && portInfo != null && wsdlModel != null) {
-                QName serviceName = portInfo.getServiceName();
-                QName portName = portInfo.getPortName();
-                WSDLService service = wsdlModel.getService(serviceName);
-                if (service != null) {
-                    wsdlPort = service.get(portName);
-                }
-            }
-
-            boolean isSecurityEnabled = isSecurityEnabled(policyMap, wsdlPort);
+            boolean isSecurityEnabled = isSecurityEnabled(wsitContext.getPolicyMap(), wsitContext.getWsdlPort());
             if (isSecurityEnabled) {
-                setSecurityCodec(context);
+                setSecurityCodec(wsitContext);
             }
             // Transport pipe ALWAYS exist
-            Pipe p;
-            if (isOptimizedTransportEnabled(policyMap, wsdlPort, portInfo)) {
-                p = TCPTransportPipeFactory.doCreate(context, false);
+            Pipe tail;
+            if (isOptimizedTransportEnabled(wsitContext.getPolicyMap(), wsitContext.getWsdlPort(), wsitContext.getPortInfo())) {
+                tail = TCPTransportPipeFactory.doCreate(context, false);
             } else {
-                p = context.createTransportPipe();
+                tail = context.createTransportPipe();
             }
 
-            MessageDumpingFeature msgDumper = context.getBinding().getFeature(MessageDumpingFeature.class);
+            MessageDumpingFeature msgDumper = wsitContext.getBinding().getFeature(MessageDumpingFeature.class);
             if (msgDumper != null) {
-                p = PipeAdapter.adapt(msgDumper.createMessageDumpingTube(PipeAdapter.adapt(p)));
+                tail = PipeAdapter.adapt(msgDumper.createMessageDumpingTube(PipeAdapter.adapt(tail)));
             }
 
-            p = dump(context, CLIENT_PREFIX, p);
-            p = dumpAction(CLIENT_PREFIX + ACTION_SUFFIX, context.getBinding(), p);
-            p = dump(context, CLIENT_PREFIX + TRANSPORT_SUFFIX, p);
+            tail = dump(context, CLIENT_PREFIX, tail);
+            tail = dumpAction(CLIENT_PREFIX + ACTION_SUFFIX, context.getBinding(), tail);
+            tail = dump(context, CLIENT_PREFIX + TRANSPORT_SUFFIX, tail);
 
-            p = dump(context, CLIENT_PREFIX + WSS_SUFFIX + AFTER_SUFFIX, p);
+            tail = dump(context, CLIENT_PREFIX + WSS_SUFFIX + AFTER_SUFFIX, tail);
 
             // check for Security
             SecureConversationInitiator scInit = null;
-
             //Look for pipe-creation hook exposed in contaner.
-            ClientPipelineHook hook = context.getContainer().getSPI(ClientPipelineHook.class);
-            //If not found, look for pipe-creation hook using services
+            ClientPipelineHook hook = wsitContext.getContainer().getSPI(ClientPipelineHook.class);
             if (hook == null) {
+                //If not found, look for pipe-creation hook using services
                 ClientPipelineHook[] hooks = loadSPs(ClientPipelineHook.class);
                 if (hooks != null && hooks.length > 0) {
                     hook = hooks[0];
@@ -216,173 +172,123 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             }
             //If either mechanism for finding a ClientPipelineHook has found one, use it.
             if (hook != null) {
-                p = hook.createSecurityPipe(policyMap, context, p);
+                tail = hook.createSecurityPipe(wsitContext.getPolicyMap(), context, tail);
                 if (isSecurityEnabled) {
-                    scInit = (SecureConversationInitiator) p;
+                    scInit = (SecureConversationInitiator) tail;
                 }
-
             } else {
                 if (isSecurityEnabled) {
-
-                    ClientPipeConfiguration config = new ClientPipeConfiguration(
-                            policyMap, wsdlPort, context.getService(), context.getBinding());
-
                     //Use the default WSIT Client Security Pipe
-                    p = new SecurityClientPipe(config, p);
-                    scInit = (SecureConversationInitiator) p;
-                    
-                    /*
-                    HashMap propBag = new HashMap();
-                    propBag.put("POLICY", policyMap);
-                    propBag.put("WSDL_MODEL", wsdlPort);
-                    propBag.put("SERVICE",context.getService());
-                    propBag.put("BINDING", context.getBinding());
-                    System.out.println("<<<<<<<<<Creating WSITClientSecurityPipe>>>>>>>>>");
-                    p = new WSITClientSecurityPipe(propBag, p);
-                    scInit = (SecureConversationInitiator)propBag.get("SC_INITIATOR");*/
-
+                    tail = new SecurityClientPipe(wsitContext, tail);
+                    scInit = (SecureConversationInitiator) tail;
                 } else {
                     //look for XWSS 2.0 Style Security
                     // policyMap may be null in case of client dispatch without a client config file
-                    if ((policyMap == null || policyMap.isEmpty()) && isSecurityConfigPresent(context)) {
-                        p = initializeXWSSClientPipe(wsdlPort, context.getService(), context.getBinding(), p);
+                    if (!wsitContext.isPolicyAvailable() && isSecurityConfigPresent(wsitContext)) {
+                        tail = initializeXWSSClientPipe(wsitContext, tail);
                     }
                 }
             }
-            p = dump(context, CLIENT_PREFIX + WSS_SUFFIX + BEFORE_SUFFIX, p);
+            tail = dump(context, CLIENT_PREFIX + WSS_SUFFIX + BEFORE_SUFFIX, tail);
 
             // MEX pipe here
 
-            p = dump(context, CLIENT_PREFIX + WSRM_SUFFIX + AFTER_SUFFIX, p);
+            tail = dump(context, CLIENT_PREFIX + WSRM_SUFFIX + AFTER_SUFFIX, tail);
             // check for WS-Reliable Messaging
-            if (isReliableMessagingEnabled(policyMap, wsdlPort)) {
-                Tube nextTube = PipeAdapter.adapt(p);
-                Tube rmClientTube = new RMClientTube(wsdlPort,
-                        context.getBinding(),
-                        scInit,
-                        nextTube);
+            tail = appendReliableMessagingTube(wsitContext, tail, scInit);
+            tail = dump(context, CLIENT_PREFIX + WSRM_SUFFIX + BEFORE_SUFFIX, tail);
 
-                p = PipeAdapter.adapt(rmClientTube);
-            }
-            p = dump(context, CLIENT_PREFIX + WSRM_SUFFIX + BEFORE_SUFFIX, p);
-
-            p = dump(context, CLIENT_PREFIX + WSTX_SUFFIX + AFTER_SUFFIX, p);
+            tail = dump(context, CLIENT_PREFIX + WSTX_SUFFIX + AFTER_SUFFIX, tail);
             // check for WS-Atomic Transactions
-            if (isTransactionsEnabled(policyMap, wsdlPort, false)) {
-                p = new TxClientPipe(
-                        new ClientPipeConfiguration(
-                        policyMap,
-                        wsdlPort,
-                        context.getService(),
-                        context.getBinding()),
-                        p);
-            }
-            p = dump(context, CLIENT_PREFIX + WSTX_SUFFIX + BEFORE_SUFFIX, p);
+            tail = appendTxPipe(wsitContext, tail);
+            tail = dump(context, CLIENT_PREFIX + WSTX_SUFFIX + BEFORE_SUFFIX, tail);
 
-            p = dump(context, CLIENT_PREFIX + WSA_SUFFIX + AFTER_SUFFIX, p);
+            tail = dump(context, CLIENT_PREFIX + WSA_SUFFIX + AFTER_SUFFIX, tail);
             // check for WS-Addressing
-            if (isAddressingEnabled(policyMap, wsdlPort, context.getBinding())) {
-                p = context.createWsaPipe(p);
+            if (isAddressingEnabled(wsitContext.getPolicyMap(), wsitContext.getWsdlPort(), wsitContext.getBinding())) {
+                tail = context.createWsaPipe(tail);
             }
-            p = dump(context, CLIENT_PREFIX + WSA_SUFFIX + BEFORE_SUFFIX, p);
-            p = context.createClientMUPipe(p);
-            p = context.createValidationPipe(p);
-            p = context.createHandlerPipe(p);
+            tail = dump(context, CLIENT_PREFIX + WSA_SUFFIX + BEFORE_SUFFIX, tail);
+            tail = context.createClientMUPipe(tail);
+            tail = context.createValidationPipe(tail);
+            tail = context.createHandlerPipe(tail);
 
-            return p;
+            return tail;
         }
 
         @NotNull
         @SuppressWarnings("unchecked")
-        public Pipe createServer(ServerPipeAssemblerContext context) {
-            ServiceDefinition sd = context.getEndpoint().getServiceDefinition();
+        public Pipe createServer(
+                @NotNull ServerPipeAssemblerContext context) {
+            WsitServerTubeAssemblyContext wsitContext = new WsitServerTubeAssemblyContext(context);
+            ServiceDefinition sd = wsitContext.getEndpoint().getServiceDefinition();
             if (sd != null) {
                 sd.addFilter(new WsdlDocumentFilter());
             }
-            PolicyMap policyMap = initPolicyMap(context);
 
-            Pipe p = context.getTerminalPipe();
-            p = context.createValidationPipe(p);
-            p = context.createHandlerPipe(p);
-            p = context.createServerMUPipe(p);
-            p = context.createMonitoringPipe(p);
+            Pipe head = context.getTerminalPipe();
+            head = context.createValidationPipe(head);
+            head = context.createHandlerPipe(head);
+            head = context.createServerMUPipe(head);
+            head = context.createMonitoringPipe(head);
 
-            p = dump(context, SERVER_PREFIX + WSTX_SUFFIX + AFTER_SUFFIX, p);
+            head = dump(context, SERVER_PREFIX + WSTX_SUFFIX + AFTER_SUFFIX, head);
             // check for WS-Atomic Transactions
-            if (isTransactionsEnabled(policyMap, context.getWsdlModel(), true)) {
-                Logger.getLogger("policy.map.for.tx.pipe").finest("CONFIGURATION FOR THE TX SERVER PIPE:\n" + ((policyMap != null) ? policyMap.toString() : "Policy map is null!"));
-                p = new TxServerPipe(context.getWsdlModel(), context.getEndpoint().getBinding(), policyMap, p);
-            }
-            p = dump(context, SERVER_PREFIX + WSTX_SUFFIX + BEFORE_SUFFIX, p);
+            head = appendTxPipe(wsitContext, head);
+            head = dump(context, SERVER_PREFIX + WSTX_SUFFIX + BEFORE_SUFFIX, head);
 
-            p = dump(context, SERVER_PREFIX + WSRM_SUFFIX + AFTER_SUFFIX, p);
+            head = dump(context, SERVER_PREFIX + WSRM_SUFFIX + AFTER_SUFFIX, head);
             // check for WS-Reliable Messaging
-            if (isReliableMessagingEnabled(policyMap, context.getWsdlModel())) {
-                Tube nextTube = PipeAdapter.adapt(p);
-                Tube tube = new RMServerTube(context.getWsdlModel(), context.getEndpoint().getBinding(), nextTube);
-                p = PipeAdapter.adapt(tube);
+            head = appendReliableMessagingTube(wsitContext, head);
+            head = dump(context, SERVER_PREFIX + WSRM_SUFFIX + BEFORE_SUFFIX, head);
 
-            }
-            p = dump(context, SERVER_PREFIX + WSRM_SUFFIX + BEFORE_SUFFIX, p);
-
-            p = dump(context, SERVER_PREFIX + WSA_SUFFIX + AFTER_SUFFIX, p);
+            head = dump(context, SERVER_PREFIX + WSA_SUFFIX + AFTER_SUFFIX, head);
             // check for WS-Addressing
-            if (isAddressingEnabled(policyMap, context.getWsdlModel(), context.getEndpoint().getBinding())) {
-                p = context.createWsaPipe(p);
+            if (isAddressingEnabled(wsitContext.getPolicyMap(), wsitContext.getWsdlPort(), wsitContext.getEndpoint().getBinding())) {
+                head = context.createWsaPipe(head);
             }
-            p = dump(context, SERVER_PREFIX + WSA_SUFFIX + BEFORE_SUFFIX, p);
+            head = dump(context, SERVER_PREFIX + WSA_SUFFIX + BEFORE_SUFFIX, head);
 
-            p = dump(context, SERVER_PREFIX + WSS_SUFFIX + AFTER_SUFFIX, p);
+            head = dump(context, SERVER_PREFIX + WSS_SUFFIX + AFTER_SUFFIX, head);
 
             // check for Security
-            boolean securityIsEnabled = isSecurityEnabled(policyMap, context.getWsdlModel());
-            ServerPipelineHook hook = context.getEndpoint().getContainer().getSPI(ServerPipelineHook.class);
-           
+            boolean securityIsEnabled = isSecurityEnabled(wsitContext.getPolicyMap(), wsitContext.getWsdlPort());
+            ServerPipelineHook hook = wsitContext.getEndpoint().getContainer().getSPI(ServerPipelineHook.class);
+
             if (hook != null) {
                 if (securityIsEnabled) {
-                    setSecurityCodec(context);
+                    setSecurityCodec(wsitContext);
                 }
-                p = hook.createSecurityPipe(policyMap, context.getSEIModel(), context.getWsdlModel(), context.getEndpoint(), p);
+                head = hook.createSecurityPipe(wsitContext.getPolicyMap(), wsitContext.getSEIModel(), wsitContext.getWsdlPort(), wsitContext.getEndpoint(), head);
             } else {
                 if (securityIsEnabled) {
-                    setSecurityCodec(context);
-                    
+                    setSecurityCodec(wsitContext);
+
                     if (serverPipeLineHookExists()) {
-                        p = createSecurityPipe(policyMap, context.getSEIModel(), context.getWsdlModel(), context.getEndpoint(), p);
+                        head = createSecurityPipe(wsitContext, head);
                     } else {
-                        //Log a FINE message indicating could not use Unified Pipe.
-                        ServerPipeConfiguration config = new ServerPipeConfiguration(
-                                policyMap, context.getWsdlModel(), context.getEndpoint());
-                        p = new SecurityServerPipe(config, p);
-           
-                        /*
-                        HashMap propBag = new HashMap();
-                        propBag.put("POLICY", policyMap);
-                        propBag.put("WSDL_MODEL", context.getWsdlModel());
-                        propBag.put("SEI_MODEL", context.getSEIModel());
-                        propBag.put("ENDPOINT", context.getEndpoint());
-                        System.out.println("<<<<<<<<<Creating WSITServerSecurityPipe>>>>>>>>>");
-                        p = new WSITServerSecurityPipe(propBag, p);*/
+                        //TODO: Log a FINE message indicating could not use Unified Pipe.
+                        head = new SecurityServerPipe(wsitContext, head);
                     }
 
                 } else {
                     try {
                         //look for XWSS 2.0 Style Security
-                        if (((null == policyMap) || policyMap.isEmpty()) && isSecurityConfigPresent(context)) {
-                            p = initializeXWSSServerPipe(context.getEndpoint(), context.getWsdlModel(), p);
+                        if (!wsitContext.isPolicyAvailable() && isSecurityConfigPresent(wsitContext)) {
+                            head = initializeXWSSServerPipe(wsitContext, head);
                         }
                     } catch (NoClassDefFoundError err) {
                         // do nothing
                     }
                 }
             }
-            p = dump(context, SERVER_PREFIX + WSS_SUFFIX + BEFORE_SUFFIX, p);
+            head = dump(context, SERVER_PREFIX + WSS_SUFFIX + BEFORE_SUFFIX, head);
 
-            p = dump(context, SERVER_PREFIX + TRANSPORT_SUFFIX, p);
-            p = dumpAction(SERVER_PREFIX + ACTION_SUFFIX, context.getEndpoint().getBinding(), p);
-            p = dump(context, SERVER_PREFIX, p);
+            head = dump(context, SERVER_PREFIX + TRANSPORT_SUFFIX, head);
+            head = dumpAction(SERVER_PREFIX + ACTION_SUFFIX, wsitContext.getEndpoint().getBinding(), head);
+            head = dump(context, SERVER_PREFIX, head);
 
-            return p;
+            return head;
         }
 
         private Pipe dump(ClientPipeAssemblerContext context, String name, Pipe p) {
@@ -415,29 +321,18 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             }
 
             String schema = null;
-
             if (port != null) {
                 schema = port.getAddress().getURI().getScheme();
             } else if (portInfo != null) {
                 schema = portInfo.getEndpointAddress().getURI().getScheme();
             }
-
-            if (schema == null) {
-                return false;
-            }
-
-            // if target endpoint URI starts with TCP schema - dont check policies, just return true
             if (com.sun.xml.ws.transport.tcp.util.TCPConstants.PROTOCOL_SCHEMA.equals(schema)) {
+                // if target endpoint URI starts with TCP schema - dont check policies, just return true
                 return true;
             }
 
-            if (policyMap == null) {
-                return false;
-            }
-
             try {
-                PolicyMapKey endpointKey = PolicyMap.createWsdlEndpointScopeKey(port.getOwner().getName(),
-                        port.getName());
+                PolicyMapKey endpointKey = PolicyMap.createWsdlEndpointScopeKey(port.getOwner().getName(), port.getName());
                 Policy policy = policyMap.getEndpointEffectivePolicy(endpointKey);
 
                 if (policy != null && policy.contains(TCPConstants.TCPTRANSPORT_POLICY_ASSERTION) &&
@@ -465,6 +360,36 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             }
         }
 
+        /**
+         * Adds TX tube to the client-side tubeline, depending on whether TX is enabled or not.
+         * 
+         * @param context wsit client tubeline assembler context
+         * @param tubelineTail tail of the client-side tubeline being constructed
+         * @return new tail of the client-side tubeline
+         */
+        private Pipe appendTxPipe(WsitClientTubeAssemblyContext context, Pipe next) {
+            if (isTransactionsEnabled(context.getPolicyMap(), context.getWsdlPort(), false)) {
+                return new TxClientPipe(context, next);
+             } else {
+                return next;
+            }
+        }
+
+        /**
+         * Adds TX tube to the service-side tubeline, depending on whether TX is enabled or not.
+         * 
+         * @param context wsit service tubeline assembler context
+         * @param tubelineTail tail of the service-side tubeline being constructed
+         * @return new head of the service-side tubeline
+         */
+        private Pipe appendTxPipe(WsitServerTubeAssemblyContext context, Pipe next) {
+            if (isTransactionsEnabled(context.getPolicyMap(), context.getWsdlPort(), true)) {
+                return new TxServerPipe(context, next);
+            } else {
+                return next;
+            }
+        }
+        
         /**
          * Checks to see whether WS-Atomic Transactions are enabled or not.
          *
@@ -506,6 +431,43 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             }
 
             return false;
+        }
+
+        /**
+         * Adds RM tube to the client-side tubeline, depending on whether RM is enabled or not.
+         * 
+         * @param context wsit client tubeline assembler context
+         * @param tubelineTail tail of the client-side tubeline being constructed
+         * @return new tail of the client-side tubeline
+         */
+        private Pipe appendReliableMessagingTube(WsitClientTubeAssemblyContext context, Pipe next, SecureConversationInitiator scInitiator) {
+            if (isReliableMessagingEnabled(context.getPolicyMap(), context.getWsdlPort())) {
+                return PipeAdapter.adapt((Tube) new RMClientTube(
+                        context.getWsdlPort(),
+                        context.getBinding(),
+                        scInitiator,
+                        PipeAdapter.adapt(next)));
+            } else {
+                return next;
+            }
+        }
+
+        /**
+         * Adds RM tube to the service-side tubeline, depending on whether RM is enabled or not.
+         * 
+         * @param context wsit service tubeline assembler context
+         * @param tubelineTail tail of the service-side tubeline being constructed
+         * @return new head of the service-side tubeline
+         */
+        private Pipe appendReliableMessagingTube(WsitServerTubeAssemblyContext context, Pipe next) {
+            if (isReliableMessagingEnabled(context.getPolicyMap(), context.getWsdlPort())) {
+                return PipeAdapter.adapt((Tube) new RMServerTube(
+                        context.getWsdlPort(),
+                        context.getEndpoint().getBinding(),
+                        PipeAdapter.adapt(next)));
+            } else {
+                return next;
+            }
         }
 
         /**
@@ -641,89 +603,6 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             return p;
         }
 
-        /**
-         * Initializes the {@link PolicyMap} on the client side.
-         *
-         * If the server WSDL is known, this method returns:
-         * <ul>
-         * <li>PolicyMap that contains the policies for the client and server
-         * <li>WSDLModel of the server
-         * <li>PortInfo is null
-         * </ul>
-         *
-         * If this is a dispatch client that does not know the server WSDL, this
-         * method returns:
-         * <ul>
-         * <li>PolicyMap with the policies for the client
-         * <li>WSDLModel of the client configuration
-         * <li>PortInfo for the client
-         * </ul>
-         *
-         * If there is no server WSDL and no client configuration, this method
-         * returns null.
-         *
-         * @param context client assembler context
-         * @return policy feature
-         */
-        private PolicyFeature initPolicyMap(ClientPipeAssemblerContext context) {
-            logger.entering(this.getClass().getName(), "initPolicyMap", new Object[]{context});
-            PolicyFeature feature = null;
-            PolicyMap map = null;
-            WSDLModel model = null;
-
-            WSDLPort wsdlPort = context.getWsdlModel();
-            if (wsdlPort != null) {
-                // Usually, the WSDL model holds the server and client policy maps
-                // merged into one
-                model = wsdlPort.getBinding().getOwner();
-                WSDLPolicyMapWrapper mapWrapper = model.getExtension(WSDLPolicyMapWrapper.class);
-                if (mapWrapper != null) {
-                    map = mapWrapper.getPolicyMap();
-                }
-                feature = new PolicyFeature(map, model, null);
-
-            } // In dispatch mode, wsdlPort is null
-            else {
-                WSBinding binding = context.getBinding();
-                // In this mode, we don't have a server policy map, so we read the
-                // client policy map only
-                feature = binding.getFeature(PolicyFeature.class);
-            }
-
-            logger.exiting(this.getClass().getName(), "initPolicyMap", feature);
-            return feature;
-        }
-
-        /**
-         * Initializes the {@link PolicyMap} on the server side.
-         *
-         * @param context server assembler context
-         * @return initialized policy map
-         */
-        private PolicyMap initPolicyMap(ServerPipeAssemblerContext context) throws WebServiceException {
-            PolicyMap map = null;
-
-            WSDLPort wsdlPort = context.getWsdlModel();
-            if (wsdlPort != null) {
-                WSDLModel model = wsdlPort.getBinding().getOwner();
-                WSDLPolicyMapWrapper mapWrapper = model.getExtension(WSDLPolicyMapWrapper.class);
-                if (mapWrapper != null) {
-                    map = mapWrapper.getPolicyMap();
-                }
-
-                if (map != null) {
-                    try {
-                        PolicyMapUtil.rejectAlternatives(map);
-                    } catch (PolicyException e) {
-                        throw new WebServiceException(e);
-                    }
-                }
-            }
-
-            return map;
-        }
-
-
         private boolean serverPipeLineHookExists() {
             // The ServerPipeline Hook in GF fails to create the Pipe because GF ServerPipeCreator does not have a
             // Default CTOR.
@@ -742,41 +621,19 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             }
             return false;
         }
-        
-        private void setSecurityCodec(ServerPipeAssemblerContext context){
+
+        private void setSecurityCodec(WsitServerTubeAssemblyContext context) {
             StreamSOAPCodec primaryCodec = Codecs.createSOAPEnvelopeXmlCodec(context.getEndpoint().getBinding().getSOAPVersion());
             LazyStreamCodec lsc = new LazyStreamCodec(primaryCodec);
             Codec fullCodec = Codecs.createSOAPBindingCodec(context.getEndpoint().getBinding(), lsc);
             context.setCodec(fullCodec);
         }
 
-        private void setSecurityCodec(ClientPipeAssemblerContext context) {
+        private void setSecurityCodec(WsitClientTubeAssemblyContext context) {
             StreamSOAPCodec primaryCodec = Codecs.createSOAPEnvelopeXmlCodec(context.getBinding().getSOAPVersion());
             LazyStreamCodec lsc = new LazyStreamCodec(primaryCodec);
             Codec fullCodec = Codecs.createSOAPBindingCodec(context.getBinding(), lsc);
             context.setCodec(fullCodec);
-        }
-
-        /**
-         * Helper class to return both PolicyMap and WSDLModel
-         */
-        private static class MapModelRecord {
-
-            private final PolicyMap policyMap;
-            private final WSDLModel wsdlModel;
-
-            MapModelRecord(PolicyMap map, WSDLModel model) {
-                this.policyMap = map;
-                this.wsdlModel = model;
-            }
-
-            public PolicyMap getPolicyMap() {
-                return this.policyMap;
-            }
-
-            public WSDLModel getWsdlModel() {
-                return this.wsdlModel;
-            }
         }
     }
 
@@ -784,13 +641,13 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
         return new WsitPipelineAssembler(bindingId);
     }
 
-    private static boolean isSecurityConfigPresent(ClientPipeAssemblerContext context) {
-        //returning true by default for now, because the Client Side Security Config is
-        //only accessible as a Runtime Property on BindingProvider.RequestContext
+    private static boolean isSecurityConfigPresent(WsitClientTubeAssemblyContext context) {
+        // returning true for empty policy map by default for now, because the Client Side Security Config is only 
+        // accessible as a Runtime Property on BindingProvider.RequestContext
         return true;
     }
 
-    private static boolean isSecurityConfigPresent(ServerPipeAssemblerContext context) {
+    private static boolean isSecurityConfigPresent(WsitServerTubeAssemblyContext context) {
 
         QName serviceQName = context.getEndpoint().getServiceName();
         //TODO: not sure which of the two above will give the service name as specified in DD
@@ -803,7 +660,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
                 final Class<?> contextClass = Class.forName(SERVLET_CONTEXT_CLASSNAME);
                 ctxt = container.getSPI(contextClass);
             } catch (ClassNotFoundException e) {
-            //log here that the ServletContext was not found
+                //log here that the ServletContext was not found
             }
         }
         String serverName = "server";
@@ -837,33 +694,25 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
         return false;
     }
 
-    private static Pipe initializeXWSSClientPipe(WSDLPort prt, WSService svc, WSBinding bnd, Pipe nextP) {
-        return new com.sun.xml.xwss.XWSSClientPipe(prt, svc, bnd, nextP);
+    private static Pipe initializeXWSSClientPipe(WsitClientTubeAssemblyContext context, Pipe next) {
+        return new com.sun.xml.xwss.XWSSClientPipe(context.getWsdlPort(), context.getService(), context.getBinding(), next);
     }
 
-    private static Pipe initializeXWSSServerPipe(WSEndpoint epoint, WSDLPort prt, Pipe nextP) {
-        return new com.sun.xml.xwss.XWSSServerPipe(epoint, prt, nextP);
+    private static Pipe initializeXWSSServerPipe(WsitServerTubeAssemblyContext context, Pipe next) {
+        return new com.sun.xml.xwss.XWSSServerPipe(context.getEndpoint(), context.getWsdlPort(), next);
     }
-    
+
     @SuppressWarnings("unchecked")
-    private static  Pipe createSecurityPipe(PolicyMap map, SEIModel sei,
-            WSDLPort port, WSEndpoint owner, Pipe tail) {
-
-	HashMap props = new HashMap();
-	props.put(POLICY,map);
-	props.put(SEI_MODEL,sei);
-	props.put(WSDL_MODEL,port);
-	props.put(ENDPOINT,owner);
-	//props.put(SERVICE_ENDPOINT,endpoint);
-	props.put(NEXT_PIPE,tail);
+    private static Pipe createSecurityPipe(WsitServerTubeAssemblyContext context, Pipe next) {
+        HashMap props = new HashMap();
+        props.put(POLICY, context.getPolicyMap());
+        props.put(SEI_MODEL, context.getSEIModel());
+        props.put(WSDL_MODEL, context.getWsdlPort());
+        props.put(ENDPOINT, context.getEndpoint());
+        props.put(NEXT_PIPE, next);
         //TODO: set it based on  owner.getBinding() but it is not clear
         // how SOAP/TCP is disthinguished.
-        boolean isHttpBinding = false;
-        return getGFServerSecurityPipe(props, tail, isHttpBinding);
-    }
 
-    private static  Pipe getGFServerSecurityPipe(HashMap props, Pipe tail, boolean httpBinding) {
-        Pipe ret = null;
         try {
             ClassLoader loader = Thread.currentThread().getContextClassLoader();
             Class gfServerPipeClass = null;
@@ -876,7 +725,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
                 //now instantiate the class
                 Constructor[] ctors = gfServerPipeClass.getDeclaredConstructors();
                 Constructor ctor = null;
-                for (int i=0; i < ctors.length; i++) {
+                for (int i = 0; i < ctors.length; i++) {
                     ctor = ctors[i];
                     Class[] paramTypes = ctor.getParameterTypes();
                     if (paramTypes[0].equals(Map.class)) {
@@ -885,23 +734,23 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
                 }
                 //Constructor ctor = gfServerPipeClass.getConstructor(Map.class, Pipe.class, Boolean.class);
                 if (ctor != null) {
-                    ret = (Pipe)ctor.newInstance(props, tail, httpBinding);
-                } 
+                    return (Pipe) ctor.newInstance(props, next, false);
+                }
             }
+            
+            return next;
         } catch (InstantiationException ex) {
             throw new WebServiceException(ex);
         } catch (IllegalAccessException ex) {
             throw new WebServiceException(ex);
         } catch (IllegalArgumentException ex) {
-           throw new WebServiceException(ex);
+            throw new WebServiceException(ex);
         } catch (InvocationTargetException ex) {
             throw new WebServiceException(ex);
         } catch (SecurityException ex) {
             throw new WebServiceException(ex);
         } catch (ClassNotFoundException ex) {
-           throw new WebServiceException(ex);
+            throw new WebServiceException(ex);
         }
-        
-        return ret;
     }
 }

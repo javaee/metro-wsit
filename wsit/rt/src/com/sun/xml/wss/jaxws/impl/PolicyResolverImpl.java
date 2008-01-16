@@ -43,7 +43,6 @@ import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLFault;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
-import com.sun.xml.ws.assembler.PipeConfiguration;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.security.impl.policyconv.SCTokenWrapper;
 import com.sun.xml.ws.security.opt.impl.JAXBFilterProcessingContext;
@@ -212,7 +211,7 @@ public class PolicyResolverImpl implements PolicyResolver{
         if(cachedOperation != null){
             operation = cachedOperation;
         }else{
-            operation = msg.getOperation(pipeConfig.getWSDLModel());
+            operation = msg.getOperation(pipeConfig.getWSDLPort());
             if(operation == null)
                 operation = getWSDLOpFromAction();
         }

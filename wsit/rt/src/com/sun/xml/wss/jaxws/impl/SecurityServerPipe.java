@@ -38,7 +38,7 @@ import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyException;
-import com.sun.xml.ws.assembler.ServerPipeConfiguration;
+import com.sun.xml.ws.assembler.WsitServerTubeAssemblyContext;
 import com.sun.xml.ws.runtime.util.Session;
 import com.sun.xml.ws.runtime.util.SessionManager;
 import com.sun.xml.ws.security.impl.policyconv.SecurityPolicyHolder;
@@ -125,8 +125,8 @@ public class SecurityServerPipe extends SecurityPipeBase {
     private CallbackHandler handler = null;
     
     // Creates a new instance of SecurityServerPipe
-    public SecurityServerPipe(ServerPipeConfiguration config,Pipe nextPipe) {
-        super(config,nextPipe);
+    public SecurityServerPipe(WsitServerTubeAssemblyContext context,Pipe nextPipe) {
+        super(new ServerPipeConfiguration(context.getPolicyMap(), context.getWsdlPort(), context.getEndpoint()), nextPipe);
         
         try {
             Iterator it = inMessagePolicyMap.values().iterator();
@@ -177,7 +177,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
         if(hasKerberosTokenPolicy()){
             ((ProcessingContextImpl)ctx).setKerberosContextMap(kerberosTokenContextMap);
         }
-        ctx.setExtraneousProperty(ctx.OPERATION_RESOLVER, new PolicyResolverImpl(inMessagePolicyMap,inProtocolPM,cachedOperation,pipeConfig,addVer,false, rmVer));
+        ctx.setExtraneousProperty(ProcessingContext.OPERATION_RESOLVER, new PolicyResolverImpl(inMessagePolicyMap,inProtocolPM,cachedOperation,pipeConfig,addVer,false, rmVer));
         try{
             if(!optimized) {
                 SOAPMessage soapMessage = msg.readAsSOAPMessage();
@@ -261,7 +261,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
         }
         
         if(!isSCIssueMessage ){
-            cachedOperation = msg.getOperation(pipeConfig.getWSDLModel());
+            cachedOperation = msg.getOperation(pipeConfig.getWSDLPort());
             if(cachedOperation == null){
                 if(addVer != null)
                     cachedOperation = getWSDLOpFromAction(packet, true);
@@ -401,6 +401,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
         return ctx;
     }
     
+    @Override
     protected ProcessingContext initializeOutgoingProcessingContext(
             Packet packet, boolean isSCMessage /*, boolean thereWasAFault*/) {
         
@@ -456,6 +457,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
         return ctx;
     }
     
+    @Override
     protected MessagePolicy getOutgoingXWSSecurityPolicy(
             Packet packet, boolean isSCMessage) {
         if (isSCMessage) {
@@ -524,6 +526,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
     
     
     
+    @Override
     protected SOAPMessage verifyInboundMessage(SOAPMessage message, ProcessingContext ctx)
     throws WssSoapFaultException, XWSSecurityException {
         ctx.setSOAPMessage(message);
@@ -714,8 +717,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
         String ret = populateConfigProperties(configAssertions, props);
         try {
             if (ret != null) {
-                Class handler = loadClass(ret);
-                Object obj = handler.newInstance();
+                Object obj = loadClass(ret).newInstance();
                 if (!(obj instanceof CallbackHandler)) {
                     log.log(Level.SEVERE, 
                             LogStringsMessages.WSSPIPE_0033_INVALID_CALLBACK_HANDLER_CLASS(ret));

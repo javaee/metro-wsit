@@ -34,43 +34,40 @@
  * holder.
  */
 
-package com.sun.xml.ws.assembler;
+package com.sun.xml.wss.jaxws.impl;
 
 import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.policy.PolicyMap;
 
 /**
- * {@link PipeConfiguration} for client.
+ * {@link PipeConfiguration} for servers.
  *
  * @author Kohsuke Kawaguchi
  */
-public final class ClientPipeConfiguration extends PipeConfiguration {
-    private final WSService service;
-    private final WSBinding binding;
+public final class ServerPipeConfiguration extends PipeConfiguration {
+    private final WSEndpoint endpoint;
 
-    public ClientPipeConfiguration(PolicyMap policy, WSDLPort wsdlModel, WSService service, WSBinding binding) {
+    public ServerPipeConfiguration(PolicyMap policy, WSDLPort wsdlModel, WSEndpoint endpoint) {
         super(policy, wsdlModel);
-        this.service = service;
-        this.binding = binding;
+        this.endpoint = endpoint;
     }
 
     /**
-     * Returns the {@link WSService} object that owns the port,
-     * which in turn owns the pipeline to be created.
+     * Gets the {@link WSEndpoint} for which the pipeline is being created.
      *
      * <p>
-     * {@link WSService} provides an access to various service-level
-     * information.
+     * {@link WSEndpoint} provides information about the surrounding environment,
+     * such as access to the application server.
      *
-     * @return always non-null.
+     * @return always non-null same object.
      */
-    public WSService getService() {
-        return service;
+    public WSEndpoint getEndpoint() {
+        return endpoint;
     }
 
     public WSBinding getBinding() {
-        return binding;
+        return endpoint.getBinding();
     }
 }
