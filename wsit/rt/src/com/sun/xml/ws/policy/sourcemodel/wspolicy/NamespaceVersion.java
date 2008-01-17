@@ -18,7 +18,7 @@ import javax.xml.namespace.QName;
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public enum NamespaceVersion {
-    v1_2("http://schemas.xmlsoap.org/ws/2004/09/policy", "wsp1_2", new XmlToken[] {
+    v1_2("http://schemas.xmlsoap.org/ws/2004/09/policy", "wsp12", new XmlToken[] {
     XmlToken.Policy,
     XmlToken.ExactlyOne,
     XmlToken.All,
