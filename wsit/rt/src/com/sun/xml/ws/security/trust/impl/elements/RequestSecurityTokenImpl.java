@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityTokenImpl.java,v 1.17 2007-10-24 15:30:45 shyam_rao Exp $
+ * $Id: RequestSecurityTokenImpl.java,v 1.18 2008-01-17 20:01:13 jdg6688 Exp $
  */
 
 /*
@@ -81,6 +81,7 @@ import com.sun.istack.NotNull;
 import com.sun.xml.ws.security.trust.WSTrustVersion;
 
 import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
+import java.util.ArrayList;
 
 /**
  * Implementation of the RequestSecurityToken interface.
@@ -134,6 +135,8 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
     
     private Policy policy = null;
     private PolicyReference policyRef = null;
+    
+    List<Object> extendedElements = new ArrayList<Object>();
     
     public RequestSecurityTokenImpl() {
         setRequestType(URI.create(WSTrustVersion.WS_TRUST_10.getIssueRequestTypeURI()));
@@ -672,8 +675,18 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
                     setCancelTarget(new CancelTargetImpl(ctType));
                 } else if (local.equalsIgnoreCase("AppliesTo")) {
                     setAppliesTo((AppliesTo)obj.getValue());
+                }else{
+                    getAny().add(list.get(i));
+                    extendedElements.add(list.get(i));
                 }
+            }else{
+                getAny().add(list.get(i));
+                extendedElements.add(list.get(i));
             }
         }
+    }
+
+    public List<Object> getExtendedElements() {
+        return extendedElements;
     }
 }

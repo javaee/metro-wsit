@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityTokenResponseImpl.java,v 1.3 2007-10-30 13:13:37 shyam_rao Exp $
+ * $Id: RequestSecurityTokenResponseImpl.java,v 1.4 2008-01-17 20:01:13 jdg6688 Exp $
  */
 
 /*
@@ -647,6 +647,8 @@ public class RequestSecurityTokenResponseImpl extends RequestSecurityTokenRespon
                 } else if (local.equalsIgnoreCase("RequestedTokenCancelled")){
                     setRequestedTokenCancelled(new RequestedTokenCancelledImpl());
                 } 
+            }else{
+                getAny().add(list.get(i));
             }
         }
     }

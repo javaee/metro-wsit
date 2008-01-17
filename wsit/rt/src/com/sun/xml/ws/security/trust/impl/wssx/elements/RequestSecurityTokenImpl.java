@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityTokenImpl.java,v 1.3 2007-10-24 15:30:52 shyam_rao Exp $
+ * $Id: RequestSecurityTokenImpl.java,v 1.4 2008-01-17 20:01:13 jdg6688 Exp $
  */
 
 /*
@@ -64,6 +64,7 @@ import com.sun.xml.ws.security.trust.impl.wssx.bindings.RenewingType;
 import com.sun.xml.ws.security.trust.impl.wssx.bindings.SecondaryParametersType;
 import com.sun.xml.ws.security.trust.impl.wssx.bindings.SignChallengeType;
 import com.sun.xml.ws.security.trust.impl.wssx.bindings.UseKeyType;
+import java.util.ArrayList;
 
 /**
  * Implementation of the RequestSecurityToken interface.
@@ -114,6 +115,7 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
     private PolicyReference policyRef = null;
     
     private SecondaryParameters sp = null;
+    private List<Object> extendedElements = new ArrayList<Object>();
     
     public RequestSecurityTokenImpl() {
         setRequestType(URI.create(WSTrustVersion.WS_TRUST_13.getIssueRequestTypeURI()));
@@ -650,8 +652,18 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
                     setAppliesTo((AppliesTo)obj.getValue());
                 } else if (local.equalsIgnoreCase("SecondaryParameters")){
                     setSecondaryParameters(new SecondaryParametersImpl((SecondaryParametersType)obj.getValue()));
+                }else{
+                    getAny().add(list.get(i));
+                    extendedElements.add(list.get(i));
                 }
+            }else{
+                getAny().add(list.get(i));
+                extendedElements.add(list.get(i));
             }
         }
+    }
+
+    public List<Object> getExtendedElements() {
+        return extendedElements;
     }
 }
