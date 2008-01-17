@@ -311,6 +311,13 @@
         </copy>
     </target>
 
+    <target name="test.services.copy" depends="init"
+            description="Copy META-INF/services into class path before running tests">
+        <copy todir="${build.classes.dir}">
+            <fileset dir="${basedir}/../etc" includes="META-INF/services/**"/>
+        </copy>
+    </target>
+
     <target name="src-zip">
         <delete dir="${tmpdir}"/>
         <mkdir dir="${tmpdir}"/>
@@ -326,10 +333,10 @@
         </zip>
     </target>
 
-    <target name="-post-compile-test" depends="init,test.resources.copy">
+    <target name="-post-compile-test" depends="init,test.resources.copy,test.services.copy">
     </target>
 
-    <target name="-post-compile-test-single" depends="init,test.resources.copy">
+    <target name="-post-compile-test-single" depends="init,test.resources.copy,test.services.copy">
     </target>
 
     <target name="create-wsit-runtime-jar" depends="wsit-jars-runtime, create-wstx-war"/>

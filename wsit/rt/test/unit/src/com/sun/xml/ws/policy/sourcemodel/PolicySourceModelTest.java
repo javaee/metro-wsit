@@ -36,7 +36,12 @@
 
 package com.sun.xml.ws.policy.sourcemodel;
 
+import com.sun.xml.ws.policy.sourcemodel.wspolicy.NamespaceVersion;
 import com.sun.xml.ws.policy.testutils.PolicyResourceLoader;
+import java.io.StringWriter;
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamWriter;
 import junit.framework.TestCase;
 
 /**
@@ -66,5 +71,23 @@ public class PolicySourceModelTest extends TestCase {
         model.toString();
         clone.toString();
         assertEquals(model, clone);
+    }
+
+    /**
+     * This method will only run properly if META-INF/services/com.sun.xml.ws.policy.spi.PrefixMapper
+     * is on the class path.
+     */
+    public void testPrefixMapping() throws Exception {
+        PolicySourceModel model = PolicySourceModel.createPolicySourceModel(NamespaceVersion.v1_5, "testid", null);
+        ModelNode rootNode = model.getRootNode();
+        ModelNode allNode = rootNode.createChildAllNode();
+        AssertionData assertion = AssertionData.createAssertionData(new QName("http://docs.oasis-open.org/ws-rx/wsrmp/200702", "RMAssertion"));
+        allNode.createChildAssertionNode(assertion);
+        StringWriter stream = new StringWriter();
+        XMLStreamWriter writer = XMLOutputFactory.newInstance().createXMLStreamWriter(stream);
+        PolicyModelMarshaller marshaller = PolicyModelMarshaller.getXmlMarshaller(true);
+        marshaller.marshal(model, writer);
+        String result = stream.toString();
+        assertTrue(result.contains("wsrmp:RMAssertion"));
     }
  }
