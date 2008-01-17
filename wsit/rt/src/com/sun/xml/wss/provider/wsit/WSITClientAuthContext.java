@@ -682,23 +682,26 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
         for (PolicyAssertion issuedTokenAssertion : policies) {
             //IssuedTokenContext ctx = trustPlugin.process(issuedTokenAssertion, preSetSTSAssertion, packet.endpointAddress.toString());
             //ToDo: Handling mixed trust versions??
-            try {
-                STSIssuedTokenConfiguration config = new DefaultSTSIssuedTokenConfiguration(wsTrustVer.getNamespaceURI(), (IssuedToken)issuedTokenAssertion, preSetSTSAssertion); 
-                String userName = (String) packet.invocationProperties.get(BindingProvider.USERNAME_PROPERTY);
-                String password = (String) packet.invocationProperties.get(BindingProvider.PASSWORD_PROPERTY);
-                if (userName != null){
-                    config.getOtherOptions().put(BindingProvider.USERNAME_PROPERTY, userName);
+            if (issuedTokenContextMap.get(
+                    ((Token)issuedTokenAssertion).getTokenId()) == null){
+                try {
+                    STSIssuedTokenConfiguration config = new DefaultSTSIssuedTokenConfiguration(wsTrustVer.getNamespaceURI(), (IssuedToken)issuedTokenAssertion, preSetSTSAssertion); 
+                    String userName = (String) packet.invocationProperties.get(BindingProvider.USERNAME_PROPERTY);
+                    String password = (String) packet.invocationProperties.get(BindingProvider.PASSWORD_PROPERTY);
+                    if (userName != null){
+                        config.getOtherOptions().put(BindingProvider.USERNAME_PROPERTY, userName);
+                    }
+                    if (password != null){
+                        config.getOtherOptions().put(BindingProvider.PASSWORD_PROPERTY, password);
+                    }
+                    IssuedTokenContext ctx =itm.createIssuedTokenContext(config, packet.endpointAddress.toString());
+                    itm.getIssuedToken(ctx);
+                    issuedTokenContextMap.put(
+                        ((Token)issuedTokenAssertion).getTokenId(), ctx);
+                }catch(WSTrustException se){
+                    log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0052_ERROR_ISSUEDTOKEN_CREATION(), se);
+                    throw new WebServiceException(LogStringsMessages.WSITPVD_0052_ERROR_ISSUEDTOKEN_CREATION(), se);
                 }
-                if (password != null){
-                    config.getOtherOptions().put(BindingProvider.PASSWORD_PROPERTY, password);
-                }
-                IssuedTokenContext ctx =itm.createIssuedTokenContext(config, packet.endpointAddress.toString());
-                itm.getIssuedToken(ctx);
-                issuedTokenContextMap.put(
-                    ((Token)issuedTokenAssertion).getTokenId(), ctx);
-            }catch(WSTrustException se){
-                log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0052_ERROR_ISSUEDTOKEN_CREATION(), se);
-                throw new WebServiceException(LogStringsMessages.WSITPVD_0052_ERROR_ISSUEDTOKEN_CREATION(), se);
             }
         }
     }
