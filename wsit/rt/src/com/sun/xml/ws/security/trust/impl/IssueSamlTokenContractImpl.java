@@ -50,7 +50,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -158,6 +157,7 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
         // Sign the assertion with STS's private key
         Element signedAssertion = null;
         try{
+           // signedAssertion = assertion.sign(stsCert, stsPrivKey, true);
             signedAssertion = assertion.sign(stsCert, stsPrivKey);
         }catch (SAMLException ex){
             log.log(Level.SEVERE,
@@ -420,7 +420,7 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
             }
             
             Element keyInfoEle = null;
-            if (keyInfo != null && !wstVer.getBearerKeyTypeURI().equals(confirMethod)){
+            if (keyInfo != null && !wstVer.getBearerKeyTypeURI().equals(keyType)){
                 keyInfoEle = keyInfo.getElement();
             }
             confirmMethods.add(confirMethod);
@@ -499,12 +499,11 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
 
                 }else{
                     confirMethod = SAML_HOLDER_OF_KEY_2_0;
+                    if (keyInfo != null){
+                        keyInfoConfData = samlFac.createKeyInfoConfirmationData(keyInfo.getElement());
+                    }
                 }
             }
-            if (keyInfo != null && !wstVer.getBearerKeyTypeURI().equals(confirMethod)){
-                keyInfoConfData = samlFac.createKeyInfoConfirmationData(keyInfo.getElement());
-            }
-  
             
             final Conditions conditions = samlFac.createConditions(issueInst, notOnOrAfter, null, arc, null, null);
             
