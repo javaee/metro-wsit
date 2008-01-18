@@ -157,8 +157,8 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
         // Sign the assertion with STS's private key
         Element signedAssertion = null;
         try{
-           // signedAssertion = assertion.sign(stsCert, stsPrivKey, true);
-            signedAssertion = assertion.sign(stsCert, stsPrivKey);
+            signedAssertion = assertion.sign(stsCert, stsPrivKey, true);
+            //signedAssertion = assertion.sign(stsCert, stsPrivKey);
         }catch (SAMLException ex){
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0032_ERROR_CREATING_SAML_ASSERTION(), ex);
