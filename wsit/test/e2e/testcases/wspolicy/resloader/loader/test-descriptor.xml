@@ -33,7 +33,7 @@
  only if the new code is made subject to such option by the copyright
  holder.
 -->
-<descriptor>
+<descriptor skip="true">
   <description>Test a basic dispatch client without WSIT extensions</description>
   <service basedir="./server"/>
 </descriptor>
