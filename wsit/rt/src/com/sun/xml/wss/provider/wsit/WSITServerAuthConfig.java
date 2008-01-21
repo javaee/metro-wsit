@@ -64,7 +64,7 @@ public class WSITServerAuthConfig implements ServerAuthConfig {
     
     private String layer = null;
     private String appContext = null;
-    //CallbackHandler cbh = null;
+    private CallbackHandler callbackHandler = null;
     
     private WSITServerAuthContext serverAuthContext = null;
     private PolicyMap policyMap = null;
@@ -81,7 +81,7 @@ public class WSITServerAuthConfig implements ServerAuthConfig {
     public WSITServerAuthConfig(String layer, String appContext, CallbackHandler callbackHandler) {
         this.layer = layer;
         this.appContext = appContext;
-        //this.cbh = callbackHandler;
+        this.callbackHandler = callbackHandler;
         this.rwLock = new ReentrantReadWriteLock(true);
         this.rLock = rwLock.readLock();
         this.wLock = rwLock.writeLock();
@@ -135,7 +135,7 @@ public class WSITServerAuthConfig implements ServerAuthConfig {
              this.wLock.lock();
              // recheck the precondition, since the rlock was released.
              if ((serverAuthContext == null) || (policyMap != pMap)) {
-                 serverAuthContext = new WSITServerAuthContext(operation, subject, map);
+                 serverAuthContext = new WSITServerAuthContext(operation, subject, map, callbackHandler);
                  policyMap = pMap;
              }
              return serverAuthContext;

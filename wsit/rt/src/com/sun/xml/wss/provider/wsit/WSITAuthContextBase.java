@@ -1602,17 +1602,6 @@ public abstract class WSITAuthContextBase  {
                 LogStringsMessages.WSITPVD_0023_COULD_NOT_LOAD_CALLBACK_HANDLER_CLASS(classname));
     }
     
-    protected boolean isGFAppClient() {
-        //TODO
-        String isGF = System.getProperty("com.sun.aas.installRoot");
-        if (isGF != null) {
-            //this will work for servlet clients
-            return true;
-        }
-        //TODO: for ACC we need a different check
-        return false;
-    }
-    
     protected Packet getRequestPacket(MessageInfo messageInfo) {
         return (Packet)messageInfo.getMap().get(REQ_PACKET);
     }

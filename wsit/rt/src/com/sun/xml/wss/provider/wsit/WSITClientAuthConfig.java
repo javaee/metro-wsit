@@ -77,8 +77,7 @@ public class WSITClientAuthConfig implements ClientAuthConfig {
     
     private String layer = null;
     private String appContext = null;
-    //ignore the CBH here
-    //CallbackHandler cbh = null;
+    private CallbackHandler callbackHandler = null;
     private WSITClientAuthContext clientAuthContext = null;
     private PolicyMap policyMap = null;
     
@@ -93,7 +92,7 @@ public class WSITClientAuthConfig implements ClientAuthConfig {
     public WSITClientAuthConfig(String layer, String appContext, CallbackHandler callbackHandler) {
         this.layer = layer;
         this.appContext = appContext;
-        //this.cbh = callbackHandler;
+        this.callbackHandler = callbackHandler;
         this.rwLock = new ReentrantReadWriteLock(true);
         this.rLock = rwLock.readLock();
         this.wLock = rwLock.writeLock(); 
@@ -149,7 +148,7 @@ public class WSITClientAuthConfig implements ClientAuthConfig {
                 this.wLock.lock();
                 // recheck the precondition, since the rlock was released.
                 if (clientAuthContext == null || (policyMap != pMap)) {
-                    clientAuthContext = new WSITClientAuthContext(operation, subject, map);
+                    clientAuthContext = new WSITClientAuthContext(operation, subject, map, callbackHandler);
                     policyMap = pMap;
                 }
             } finally {

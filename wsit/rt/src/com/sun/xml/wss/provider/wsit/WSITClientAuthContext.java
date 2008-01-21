@@ -153,7 +153,7 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
     WSITClientAuthModule  authModule = null;
     
     /** Creates a new instance of WSITClientAuthContext */
-    public WSITClientAuthContext(String operation, Subject subject, Map map) {
+    public WSITClientAuthContext(String operation, Subject subject, Map map, CallbackHandler callbackHandler) {
         super(map);
         //this.operation = operation;
         //this.subject = subject;
@@ -168,15 +168,16 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
         trustConfig = holder.getConfigAssertions(
                 com.sun.xml.ws.security.impl.policy.Constants.SUN_TRUST_CLIENT_SECURITY_POLICY_NS);
         
-        boolean isACC = isGFAppClient();
-        String isGF = System.getProperty("com.sun.aas.installRoot");
-        //this client is an ACC client or a WebClient
-        if (isACC || (isGF != null) ) {
+        if (callbackHandler != null) {
             try {
                 Properties props = new Properties();
                 populateConfigProperties(configAssertions, props);
                 String jmacHandler = props.getProperty(DefaultCallbackHandler.JMAC_CALLBACK_HANDLER);
-                handler = loadGFHandler(true, jmacHandler);
+                if (jmacHandler != null) {
+                    handler = loadGFHandler(true, jmacHandler);
+                } else {
+                    handler = callbackHandler;
+                }
                 secEnv = new WSITProviderSecurityEnvironment(handler, map, props);
             }catch (XWSSecurityException ex) {
                 log.log(Level.SEVERE,

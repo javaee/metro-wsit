@@ -121,7 +121,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
     static final String PIPE_HELPER = "PIPE_HELPER";
     
     /** Creates a new instance of WSITServerAuthContext */
-    public WSITServerAuthContext(String operation, Subject subject, Map map) {
+    public WSITServerAuthContext(String operation, Subject subject, Map map, CallbackHandler callbackHandler) {
         super(map);
         this.operation = operation;
         //this.subject = subject;
@@ -141,10 +141,15 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
                 Properties props = new Properties();
                 populateConfigProperties(configAssertions, props);
                 String jmacHandler = props.getProperty(DefaultCallbackHandler.JMAC_CALLBACK_HANDLER);
-                handler = loadGFHandler(false, jmacHandler);
-                if (DEFAULT_JMAC_HANDLER.equals(handler.getClass().getName())) {
-                    setRealm(handler, getRealmFromPipeHelper(map));
+                if (jmacHandler != null) {
+                    handler = loadGFHandler(false, jmacHandler);
+                } else if (callbackHandler != null) {
+                    handler = callbackHandler;
                 }
+                if (handler == null) {
+                   handler = loadGFHandler(false, jmacHandler); 
+                }
+                
                 secEnv = new WSITProviderSecurityEnvironment(handler, map, props);
             }catch (XWSSecurityException ex) {
                 log.log(Level.SEVERE,
@@ -819,46 +824,6 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
             }
         }
         return null;
-    }
-
-    private void setRealm(CallbackHandler handler, String realm) {
-        try {
-            Method method = handler.getClass().getMethod("setHandlerContext", String.class);
-            method.invoke(handler, realm);
-        } catch (IllegalAccessException ex) {
-            //ignore
-        } catch (IllegalArgumentException ex) {
-            //ignore
-        } catch (InvocationTargetException ex) {
-            //ignore
-        } catch (NoSuchMethodException ex) {
-            //ignore
-        } catch (SecurityException ex) {
-           //ignore 
-        }
-    }
-    
-    private String getRealmFromPipeHelper(Map map) {
-        try {
-            Object pipehelper = map.get(PIPE_HELPER);
-            if( pipehelper == null){
-                return null;
-            }
-            Method getRealm = pipehelper.getClass().getMethod("getRealm", Map.class);
-            String ret = (String)getRealm.invoke(pipehelper, map);
-            return ret;
-        } catch (IllegalAccessException ex) {
-            //ignore
-        } catch (IllegalArgumentException ex) {
-            //ignore
-        } catch (InvocationTargetException ex) {
-            //ignore
-        } catch (NoSuchMethodException ex) {
-            //ignore
-        } catch (SecurityException ex) {
-            //ignore
-        }
-        return null;
-    }
+    }    
     
 }
