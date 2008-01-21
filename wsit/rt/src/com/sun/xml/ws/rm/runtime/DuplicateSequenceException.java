@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -33,32 +33,41 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rm.jaxws.util;
 
-import com.sun.xml.ws.policy.spi.PrefixMapper;
-import com.sun.xml.ws.rm.Constants;
-import com.sun.xml.ws.rm.RMVersion;
-import java.util.HashMap;
-import java.util.Map;
+package com.sun.xml.ws.rm.runtime;
 
 /**
- *
- * @author Fabian Ritzmann
+ * Inicates that the sequence with given sequence identifier already exists in a given environment.
+ * 
+ * This exceptions is used under the following conditions:
+ *  <ul>
+ *      <li>sequence with such {@code sequenceId} is already registered and managed by a given sequence manager</li>
+ *  </ul>
+ * 
+ * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class RMPrefixMapper implements PrefixMapper {
-
-    private static final Map<String, String> prefixMap = new HashMap<String, String>();
-
-    static {
-        prefixMap.put(RMVersion.WSRM10.policyNamespaceUri, "wsrmp10");
-        prefixMap.put(RMVersion.WSRM11.policyNamespaceUri, "wsrmp");
-        prefixMap.put(Constants.microsoftVersion, "msrmp");
-        prefixMap.put(Constants.sunVersion, "sunrmp");
-        prefixMap.put(Constants.sunClientVersion, "sunrmcp");
-    }
-        
-    public Map<String, String> getPrefixMap() {
-        return prefixMap;
-    }
+public class DuplicateSequenceException extends Exception {
+    private final String sequenceId;
     
+    /**
+     * Constructs an instance of <code>DuplicateSequenceException</code> for the sequence with {@code sequenceId} identifier.
+     * @param sequenceId the identifier of the duplicate sequence.
+     */
+    public DuplicateSequenceException(String sequenceId) {
+        super(DuplicateSequenceException.createErrorMessage(sequenceId));
+        this.sequenceId = sequenceId;
+    }
+
+    /**
+     * Returns the identifier of the unknown sequence
+     * @return the unknown sequence identifier
+     */
+    public String getSequenceId() {
+        return sequenceId;
+    }        
+    
+    private static String createErrorMessage(String sequenceId) {
+        // TODO: L10N
+        return "No sequence registered with id [" + sequenceId + "]";
+    } 
 }

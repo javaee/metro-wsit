@@ -291,7 +291,7 @@ public class PolicyUtilsTest extends TestCase {
         System.out.println("load");
         
         PolicyAssertionCreator[] result = PolicyUtils.ServiceProvider.load(PolicyAssertionCreator.class, this.getClass().getClassLoader());
-        assertEquals(9, result.length);
+        assertEquals(10, result.length);
     }
     
     public void testRtf2396Unquote() {

@@ -1,11 +1,7 @@
 /*
- * $Id: RMException.java,v 1.6 2008-01-21 19:37:39 m_potociar Exp $
- */
-
-/*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -37,54 +33,49 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rm;
+package com.sun.xml.ws.assembler;
 
-import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.api.pipe.Tube;
+import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
- * Wrapper class for exceptions thrown by RM Methods.
+ *
+ * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class RMException extends Exception {
-    // TODO: remove & replace calls with RmException for consistency reasons
-    private final Message faultMessage;
+public class WsitTubeAssemblyContext {
 
-    public RMException() {
-        // TODO: we should not throw exception without providing textual info
-        this.faultMessage = null;
+    private Tube head;
+    private Pipe adaptedHead;
+    private List<Tube> tubes = new LinkedList<Tube>();
+
+    public Tube getTubelineHead() {
+        return head;
     }
 
-    public RMException(String message) {
-        super(message);
-        this.faultMessage = null;
+    public Pipe getAdaptedTubelineHead() {
+        if (adaptedHead == null) {
+            adaptedHead = PipeAdapter.adapt(head);
+        }
+        return adaptedHead;
     }
 
-    public RMException(Throwable cause) {
-        // TODO: we should not throw exception without providing textual info
-        super(cause);
-        this.faultMessage = null;
+    public void add(Tube newHead) {
+        if (newHead != head || newHead != adaptedHead) {
+            head = newHead;
+            tubes.add(head);
+            adaptedHead = null;
+        }
     }
 
-    public RMException(String message, Throwable cause) {
-        super(message, cause);
-        this.faultMessage = null;
-    }
-
-    public RMException(Message faultMessage) {
-        // TODO: we should not throw exception without providing textual info
-        this.faultMessage = faultMessage;
-    }
-
-    public RMException(String info, Message faultMessage) {
-        super(info);
-        this.faultMessage = faultMessage;
-    }
-
-    /**
-     * Returns a Message containign a Fault defined by WS-RM.
-     *
-     * @return The Fault message or null if there is no mapped Fault message
-     */
-    public Message getFaultMessage() {
-        return faultMessage;
+    public <T> T getImplementation(Class<T> type) {
+        for (Tube tube : tubes) {
+            if (type.isInstance(tube)) {
+                return type.cast(tube);
+            }
+        }
+        return null;
     }
 }

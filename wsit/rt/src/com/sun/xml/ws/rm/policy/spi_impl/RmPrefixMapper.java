@@ -1,8 +1,4 @@
 /*
- * $Id: RMException.java,v 1.6 2008-01-21 19:37:39 m_potociar Exp $
- */
-
-/*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
  * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
@@ -37,54 +33,33 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rm;
+package com.sun.xml.ws.rm.policy.spi_impl;
 
-import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.policy.spi.PrefixMapper;
+import com.sun.xml.ws.rm.Constants;
+import com.sun.xml.ws.rm.RMVersion;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * Wrapper class for exceptions thrown by RM Methods.
+ *
+ * @author Fabian Ritzmann
+ * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class RMException extends Exception {
-    // TODO: remove & replace calls with RmException for consistency reasons
-    private final Message faultMessage;
+public class RmPrefixMapper implements PrefixMapper {
 
-    public RMException() {
-        // TODO: we should not throw exception without providing textual info
-        this.faultMessage = null;
-    }
+    private static final Map<String, String> prefixMap = new HashMap<String, String>();
 
-    public RMException(String message) {
-        super(message);
-        this.faultMessage = null;
+    static {
+        prefixMap.put(RMVersion.WSRM10.policyNamespaceUri, "wsrmp10");
+        prefixMap.put(RMVersion.WSRM11.policyNamespaceUri, "wsrmp");
+        prefixMap.put(Constants.microsoftVersion, "msrmp");
+        prefixMap.put(Constants.sunVersion, "sunrmp");
+        prefixMap.put(Constants.sunClientVersion, "sunrmcp");
     }
-
-    public RMException(Throwable cause) {
-        // TODO: we should not throw exception without providing textual info
-        super(cause);
-        this.faultMessage = null;
+        
+    public Map<String, String> getPrefixMap() {
+        return prefixMap;
     }
-
-    public RMException(String message, Throwable cause) {
-        super(message, cause);
-        this.faultMessage = null;
-    }
-
-    public RMException(Message faultMessage) {
-        // TODO: we should not throw exception without providing textual info
-        this.faultMessage = faultMessage;
-    }
-
-    public RMException(String info, Message faultMessage) {
-        super(info);
-        this.faultMessage = faultMessage;
-    }
-
-    /**
-     * Returns a Message containign a Fault defined by WS-RM.
-     *
-     * @return The Fault message or null if there is no mapped Fault message
-     */
-    public Message getFaultMessage() {
-        return faultMessage;
-    }
+    
 }

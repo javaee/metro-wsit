@@ -232,6 +232,8 @@ public final class RMServerTube extends TubeBase {
             //clear packet.transporBackChannel so downstream pipes do not prevent
             //empty one-way response bodies to be sent back when we need to use the
             //bodies for RM SequenceAcknowledgemnts.
+            // MP: seems that this must be done because HandlerTube tries to close
+            //     the TBC in case of one-way messages under certain conditions...
             requestPacket.transportBackChannel = null;
 
             //make these available in an injected WebServiceContext

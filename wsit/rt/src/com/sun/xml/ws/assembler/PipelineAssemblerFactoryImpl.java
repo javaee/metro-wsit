@@ -59,7 +59,6 @@ import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.ClientPipeAssemblerContext;
 import com.sun.xml.ws.api.pipe.Pipe;
-import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.PipelineAssembler;
 import com.sun.xml.ws.api.pipe.PipelineAssemblerFactory;
 import com.sun.xml.ws.api.pipe.ServerPipeAssemblerContext;
@@ -71,9 +70,7 @@ import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter.WsdlDocumentFilter;
-import com.sun.xml.ws.rm.RMVersion;
-import com.sun.xml.ws.rm.jaxws.runtime.client.RMClientTube;
-import com.sun.xml.ws.rm.jaxws.runtime.server.RMServerTube;
+import com.sun.xml.ws.rm.policy.RmTubeAppender;
 import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
 import com.sun.xml.ws.transport.tcp.wsit.TCPTransportPipeFactory;
 import com.sun.xml.ws.util.ServiceFinder;
@@ -131,8 +128,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
 
         @NotNull
         @SuppressWarnings("unchecked")
-        public Pipe createClient(
-                @NotNull ClientPipeAssemblerContext context) {
+        public Pipe createClient(@NotNull ClientPipeAssemblerContext context) {
 
             WsitClientTubeAssemblyContext wsitContext = new WsitClientTubeAssemblyContext(context);
 
@@ -160,7 +156,6 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             tail = dump(context, CLIENT_PREFIX + WSS_SUFFIX + AFTER_SUFFIX, tail);
 
             // check for Security
-            SecureConversationInitiator scInit = null;
             //Look for pipe-creation hook exposed in contaner.
             ClientPipelineHook hook = wsitContext.getContainer().getSPI(ClientPipelineHook.class);
             if (hook == null) {
@@ -174,13 +169,13 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             if (hook != null) {
                 tail = hook.createSecurityPipe(wsitContext.getPolicyMap(), context, tail);
                 if (isSecurityEnabled) {
-                    scInit = (SecureConversationInitiator) tail;
+                    wsitContext.setScInitiator((SecureConversationInitiator) tail);
                 }
             } else {
                 if (isSecurityEnabled) {
                     //Use the default WSIT Client Security Pipe
                     tail = new SecurityClientPipe(wsitContext, tail);
-                    scInit = (SecureConversationInitiator) tail;
+                    wsitContext.setScInitiator((SecureConversationInitiator) tail);
                 } else {
                     //look for XWSS 2.0 Style Security
                     // policyMap may be null in case of client dispatch without a client config file
@@ -194,8 +189,11 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             // MEX pipe here
 
             tail = dump(context, CLIENT_PREFIX + WSRM_SUFFIX + AFTER_SUFFIX, tail);
+            
             // check for WS-Reliable Messaging
-            tail = appendReliableMessagingTube(wsitContext, tail, scInit);
+            tail = new RmTubeAppender().appendPipe(wsitContext, tail);            
+            // tail = PipeAdapter.adapt(new RmTubeAppender().appendTube(wsitContext, PipeAdapter.adapt(tail)));
+            
             tail = dump(context, CLIENT_PREFIX + WSRM_SUFFIX + BEFORE_SUFFIX, tail);
 
             tail = dump(context, CLIENT_PREFIX + WSTX_SUFFIX + AFTER_SUFFIX, tail);
@@ -218,8 +216,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
 
         @NotNull
         @SuppressWarnings("unchecked")
-        public Pipe createServer(
-                @NotNull ServerPipeAssemblerContext context) {
+        public Pipe createServer(@NotNull ServerPipeAssemblerContext context) {
             WsitServerTubeAssemblyContext wsitContext = new WsitServerTubeAssemblyContext(context);
             ServiceDefinition sd = wsitContext.getEndpoint().getServiceDefinition();
             if (sd != null) {
@@ -238,8 +235,11 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             head = dump(context, SERVER_PREFIX + WSTX_SUFFIX + BEFORE_SUFFIX, head);
 
             head = dump(context, SERVER_PREFIX + WSRM_SUFFIX + AFTER_SUFFIX, head);
-            // check for WS-Reliable Messaging
-            head = appendReliableMessagingTube(wsitContext, head);
+            
+            // check for WS-Reliable Messaging            
+            head = new RmTubeAppender().appendPipe(wsitContext, head);
+            // head = PipeAdapter.adapt(new RmTubeAppender().appendTube(wsitContext, PipeAdapter.adapt(head)));
+            
             head = dump(context, SERVER_PREFIX + WSRM_SUFFIX + BEFORE_SUFFIX, head);
 
             head = dump(context, SERVER_PREFIX + WSA_SUFFIX + AFTER_SUFFIX, head);
@@ -431,68 +431,6 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             }
 
             return false;
-        }
-
-        /**
-         * Adds RM tube to the client-side tubeline, depending on whether RM is enabled or not.
-         * 
-         * @param context wsit client tubeline assembler context
-         * @param tubelineTail tail of the client-side tubeline being constructed
-         * @return new tail of the client-side tubeline
-         */
-        private Pipe appendReliableMessagingTube(WsitClientTubeAssemblyContext context, Pipe next, SecureConversationInitiator scInitiator) {
-            if (isReliableMessagingEnabled(context.getPolicyMap(), context.getWsdlPort())) {
-                return PipeAdapter.adapt((Tube) new RMClientTube(
-                        context.getWsdlPort(),
-                        context.getBinding(),
-                        scInitiator,
-                        PipeAdapter.adapt(next)));
-            } else {
-                return next;
-            }
-        }
-
-        /**
-         * Adds RM tube to the service-side tubeline, depending on whether RM is enabled or not.
-         * 
-         * @param context wsit service tubeline assembler context
-         * @param tubelineTail tail of the service-side tubeline being constructed
-         * @return new head of the service-side tubeline
-         */
-        private Pipe appendReliableMessagingTube(WsitServerTubeAssemblyContext context, Pipe next) {
-            if (isReliableMessagingEnabled(context.getPolicyMap(), context.getWsdlPort())) {
-                return PipeAdapter.adapt((Tube) new RMServerTube(
-                        context.getWsdlPort(),
-                        context.getEndpoint().getBinding(),
-                        PipeAdapter.adapt(next)));
-            } else {
-                return next;
-            }
-        }
-
-        /**
-         * Checks to see whether WS-ReliableMessaging is enabled or not.
-         *
-         * @param policyMap policy map for {@link this} assembler
-         * @param port wsdl:port
-         * @return true if ReliableMessaging is enabled, false otherwise
-         */
-        private boolean isReliableMessagingEnabled(PolicyMap policyMap, WSDLPort port) {
-            if (policyMap == null || port == null) {
-                return false;
-            }
-
-            try {
-                PolicyMapKey endpointKey = PolicyMap.createWsdlEndpointScopeKey(port.getOwner().getName(), port.getName());
-                Policy policy = policyMap.getEndpointEffectivePolicy(endpointKey);
-                if (policy == null) {
-                    return false;
-                } else {
-                    return policy.contains(RMVersion.WSRM10.policyNamespaceUri) || policy.contains(RMVersion.WSRM11.policyNamespaceUri);
-                }
-            } catch (PolicyException e) {
-                throw new WebServiceException(e);
-            }
         }
 
         /**

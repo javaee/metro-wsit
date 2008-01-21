@@ -23,7 +23,7 @@ import javax.xml.ws.WebServiceException;
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class WsitServerTubeAssemblyContext {
+public class WsitServerTubeAssemblyContext extends WsitTubeAssemblyContext  {
 
     private final @NotNull ServerTubeAssemblerContext wrappedContext;
     private final PolicyMap policyMap;

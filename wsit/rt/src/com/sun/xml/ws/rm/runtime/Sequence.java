@@ -1,11 +1,7 @@
 /*
- * $Id: RMException.java,v 1.6 2008-01-21 19:37:39 m_potociar Exp $
- */
-
-/*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -37,54 +33,46 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rm;
-
-import com.sun.xml.ws.api.message.Message;
+package com.sun.xml.ws.rm.runtime;
 
 /**
- * Wrapper class for exceptions thrown by RM Methods.
+ *
+ * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class RMException extends Exception {
-    // TODO: remove & replace calls with RmException for consistency reasons
-    private final Message faultMessage;
-
-    public RMException() {
-        // TODO: we should not throw exception without providing textual info
-        this.faultMessage = null;
-    }
-
-    public RMException(String message) {
-        super(message);
-        this.faultMessage = null;
-    }
-
-    public RMException(Throwable cause) {
-        // TODO: we should not throw exception without providing textual info
-        super(cause);
-        this.faultMessage = null;
-    }
-
-    public RMException(String message, Throwable cause) {
-        super(message, cause);
-        this.faultMessage = null;
-    }
-
-    public RMException(Message faultMessage) {
-        // TODO: we should not throw exception without providing textual info
-        this.faultMessage = faultMessage;
-    }
-
-    public RMException(String info, Message faultMessage) {
-        super(info);
-        this.faultMessage = faultMessage;
-    }
-
-    /**
-     * Returns a Message containign a Fault defined by WS-RM.
-     *
-     * @return The Fault message or null if there is no mapped Fault message
-     */
-    public Message getFaultMessage() {
-        return faultMessage;
-    }
+public interface Sequence {
+/*
+ * create sequence:
+ * 1. assign new unique sequence id
+ * 
+ * process outgoing application message:
+ * 1. add sequence id + message id headers
+ * 2. add inbound message acknowledgement headers
+ * 3. send message
+ * 
+ * process incomming application message:
+ * 1. get inbound sequence
+ * 2. check if duplicate (yes => stop processing)
+ * 3. send back acknowledgement
+ * 
+ * 
+ * RM session:
+ * - create/close sequence
+ * - hold incomming & outgoing sequences
+ * - start timer tasks
+ * 
+ * RM outgoing sequence:
+ * - hold sequence id
+ * - hold next message id
+ * - hold unacked messages
+ * 
+ * RM incomming sequence:
+ * - hold sequence id
+ * - hold acked message ranges
+ * - buffer messages if ordered delivery si required
+ * - filter duplicate messages
+ */
+    
+    
+    public String getId();
+    public long nextMessageId();
 }

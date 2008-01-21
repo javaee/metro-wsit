@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -33,13 +33,21 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rm.jaxws.util;
+package com.sun.xml.ws.rm.policy.spi_impl;
 
+import com.sun.xml.ws.rm.policy.assertion.Rm10Assertion;
+import com.sun.xml.ws.rm.policy.assertion.Rm11Assertion;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.spi.PolicyAssertionValidator;
 import com.sun.xml.ws.policy.spi.PolicyAssertionValidator.Fitness;
 import com.sun.xml.ws.rm.RMVersion;
 
+import com.sun.xml.ws.rm.policy.assertion.RmFlowControlAssertion;
+import com.sun.xml.ws.rm.policy.assertion.AckRequestIntervalClientAssertion;
+import com.sun.xml.ws.rm.policy.assertion.AllowDuplicatesAssertion;
+import com.sun.xml.ws.rm.policy.assertion.CloseTimeoutClientAssertion;
+import com.sun.xml.ws.rm.policy.assertion.OrderedDeliveryAssertion;
+import com.sun.xml.ws.rm.policy.assertion.ResendIntervalClientAssertion;
 import static com.sun.xml.ws.rm.Constants.microsoftVersion;
 import static com.sun.xml.ws.rm.Constants.sunVersion;
 import static com.sun.xml.ws.rm.Constants.sunClientVersion;
@@ -47,27 +55,27 @@ import static com.sun.xml.ws.rm.Constants.sunClientVersion;
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
 
-public class RMPolicyValidator implements PolicyAssertionValidator {
+public class RmAssertionValidator implements PolicyAssertionValidator {
 
-    private static final ArrayList<QName> serverSideSupportedAssertions = new ArrayList<QName>(7);
-    private static final ArrayList<QName> clientSideSupportedAssertions = new ArrayList<QName>(6);
+    private static final ArrayList<QName> serverSideSupportedAssertions = new ArrayList<QName>(5);
+    private static final ArrayList<QName> clientSideSupportedAssertions = new ArrayList<QName>(8);
 
     static {
-        serverSideSupportedAssertions.add(new QName(RMVersion.WSRM10.policyNamespaceUri, "RMAssertion"));
-        serverSideSupportedAssertions.add(new QName(RMVersion.WSRM11.policyNamespaceUri, "RMAssertion"));
-        serverSideSupportedAssertions.add(new QName(RMVersion.WSRM11.policyNamespaceUri, "SequenceSTR"));
-        serverSideSupportedAssertions.add(new QName(RMVersion.WSRM11.policyNamespaceUri, "SequenceTransportSecurity"));
-        serverSideSupportedAssertions.add(new QName(sunVersion, "Ordered"));
-        serverSideSupportedAssertions.add(new QName(sunVersion, "AllowDuplicates"));
-        serverSideSupportedAssertions.add(new QName(microsoftVersion, "RmFlowControl"));
+        serverSideSupportedAssertions.add(Rm10Assertion.NAME);
+        serverSideSupportedAssertions.add(Rm11Assertion.NAME);
+//        serverSideSupportedAssertions.add(new QName(RMVersion.WSRM11.policyNamespaceUri, "SequenceSTR"));
+//        serverSideSupportedAssertions.add(new QName(RMVersion.WSRM11.policyNamespaceUri, "SequenceTransportSecurity"));
+        serverSideSupportedAssertions.add(OrderedDeliveryAssertion.NAME);
+        serverSideSupportedAssertions.add(AllowDuplicatesAssertion.NAME);
+        serverSideSupportedAssertions.add(RmFlowControlAssertion.NAME);
 
-        clientSideSupportedAssertions.add(new QName(sunClientVersion, "AckRequestInterval"));
-        clientSideSupportedAssertions.add(new QName(sunClientVersion, "ResendInterval"));
-        clientSideSupportedAssertions.add(new QName(sunClientVersion, "CloseTimeout"));
+        clientSideSupportedAssertions.add(AckRequestIntervalClientAssertion.NAME);
+        clientSideSupportedAssertions.add(ResendIntervalClientAssertion.NAME);
+        clientSideSupportedAssertions.add(CloseTimeoutClientAssertion.NAME);
         clientSideSupportedAssertions.addAll(serverSideSupportedAssertions);
     }
 
-    public RMPolicyValidator() {
+    public RmAssertionValidator() {
     }
 
     public Fitness validateClientSide(PolicyAssertion assertion) {

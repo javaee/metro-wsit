@@ -1,11 +1,7 @@
 /*
- * $Id: RMException.java,v 1.6 2008-01-21 19:37:39 m_potociar Exp $
- */
-
-/*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -37,54 +33,39 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rm;
 
-import com.sun.xml.ws.api.message.Message;
+package com.sun.xml.ws.rm.policy.assertion;
+
+import com.sun.xml.ws.policy.AssertionSet;
+import com.sun.xml.ws.policy.PolicyAssertion;
+import com.sun.xml.ws.policy.SimpleAssertion;
+import com.sun.xml.ws.policy.sourcemodel.AssertionData;
+import com.sun.xml.ws.rm.Constants;
+import java.util.Collection;
+import javax.xml.namespace.QName;
 
 /**
- * Wrapper class for exceptions thrown by RM Methods.
+ * <sunc:AllowDuplicates />
  */
-public class RMException extends Exception {
-    // TODO: remove & replace calls with RmException for consistency reasons
-    private final Message faultMessage;
-
-    public RMException() {
-        // TODO: we should not throw exception without providing textual info
-        this.faultMessage = null;
+/**
+ * TODO: is this assertion used?
+ * 
+ * @author Marek Potociar (marek.potociar at sun.com)
+ */
+public class AllowDuplicatesAssertion extends SimpleAssertion {
+    public static final QName NAME = new QName(Constants.sunVersion, "AllowDuplicates");
+    
+    private static RmAssertionInstantiator instantiator = new RmAssertionInstantiator() {
+        public PolicyAssertion newInstance(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative) {
+            return new AllowDuplicatesAssertion(data, assertionParameters);
+        }
+    };
+    
+    public static RmAssertionInstantiator getInstantiator() {
+        return instantiator;
     }
-
-    public RMException(String message) {
-        super(message);
-        this.faultMessage = null;
-    }
-
-    public RMException(Throwable cause) {
-        // TODO: we should not throw exception without providing textual info
-        super(cause);
-        this.faultMessage = null;
-    }
-
-    public RMException(String message, Throwable cause) {
-        super(message, cause);
-        this.faultMessage = null;
-    }
-
-    public RMException(Message faultMessage) {
-        // TODO: we should not throw exception without providing textual info
-        this.faultMessage = faultMessage;
-    }
-
-    public RMException(String info, Message faultMessage) {
-        super(info);
-        this.faultMessage = faultMessage;
-    }
-
-    /**
-     * Returns a Message containign a Fault defined by WS-RM.
-     *
-     * @return The Fault message or null if there is no mapped Fault message
-     */
-    public Message getFaultMessage() {
-        return faultMessage;
-    }
+    
+    public AllowDuplicatesAssertion(AssertionData data, Collection<? extends PolicyAssertion> assertionParameters) {
+        super(data, assertionParameters);
+    }   
 }

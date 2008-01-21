@@ -1,11 +1,7 @@
 /*
- * $Id: RMException.java,v 1.6 2008-01-21 19:37:39 m_potociar Exp $
- */
-
-/*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -37,54 +33,44 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rm;
+package com.sun.xml.ws.rm.runtime;
 
-import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.rm.policy.Configuration;
 
 /**
- * Wrapper class for exceptions thrown by RM Methods.
+ *
+ * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class RMException extends Exception {
-    // TODO: remove & replace calls with RmException for consistency reasons
-    private final Message faultMessage;
-
-    public RMException() {
-        // TODO: we should not throw exception without providing textual info
-        this.faultMessage = null;
-    }
-
-    public RMException(String message) {
-        super(message);
-        this.faultMessage = null;
-    }
-
-    public RMException(Throwable cause) {
-        // TODO: we should not throw exception without providing textual info
-        super(cause);
-        this.faultMessage = null;
-    }
-
-    public RMException(String message, Throwable cause) {
-        super(message, cause);
-        this.faultMessage = null;
-    }
-
-    public RMException(Message faultMessage) {
-        // TODO: we should not throw exception without providing textual info
-        this.faultMessage = faultMessage;
-    }
-
-    public RMException(String info, Message faultMessage) {
-        super(info);
-        this.faultMessage = faultMessage;
-    }
+public interface SequenceManager {
 
     /**
-     * Returns a Message containign a Fault defined by WS-RM.
-     *
-     * @return The Fault message or null if there is no mapped Fault message
+     * Creates a new outbound sequence object
+     * 
+     * TODO: shall we move this function into a differnet interface?
+     * @param configuration RM configuration for the created sequence
      */
-    public Message getFaultMessage() {
-        return faultMessage;
-    }
+    public Sequence createOutboudSequence(Configuration configuration);
+
+    /**
+     * Creates a new inbound sequence object
+     * 
+     * TODO: shall we move this function into a differnet interface?
+     * @param configuration RM configuration for the created sequence
+     */
+    public Sequence createInboundSequence(Configuration configuration);
+
+    /**
+     * Retrieves an existing sequence from the internal sequence storage
+     * 
+     * @param sequenceId the unique sequence identifier
+     * @return sequence identified with the {@code sequenceId} identifier
+     */
+    public Sequence getSequence(String sequenceId) throws UnknownSequenceException;
+
+    /**
+     * Registers a new sequence in the internal sequence storage
+     * 
+     * @param sequence sequence object to be registered within the internal sequence storage
+     */
+    public void registerSequence(Sequence sequence);
 }

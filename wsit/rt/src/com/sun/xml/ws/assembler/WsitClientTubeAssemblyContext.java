@@ -19,18 +19,20 @@ import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.jaxws.WSDLPolicyMapWrapper;
 import com.sun.xml.ws.policy.jaxws.client.PolicyFeature;
+import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
 
 /**
  * The context is a wrapper around the existing JAX-WS {@link ClientTubeAssemblerContext} with additional features
  * 
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class WsitClientTubeAssemblyContext {
+public class WsitClientTubeAssemblyContext extends WsitTubeAssemblyContext {
 
     private final @NotNull ClientTubeAssemblerContext wrappedContext;
     private final PolicyMap policyMap;
     private final WSPortInfo portInfo; // TODO: is this really needed?
     private final WSDLPort wsdlPort;
+    private SecureConversationInitiator scInitiator;
     // TODO: add next tube getter/package-private setter
     // TODO: replace the PipeConfiguration
 
@@ -158,5 +160,17 @@ public class WsitClientTubeAssemblyContext {
      */
     public void setCodec(@NotNull Codec codec) {
         wrappedContext.setCodec(codec);
+    }
+    
+    /*
+     * TODO: remove following methods; this is just a hack until all pipes get converted to tubes
+     */ 
+    
+    public SecureConversationInitiator getScInitiator() {
+        return scInitiator;
+    }
+    
+    public void setScInitiator(SecureConversationInitiator initiator) {
+        this.scInitiator = initiator;
     }
 }
