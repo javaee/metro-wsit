@@ -35,34 +35,47 @@
  */
 package com.sun.xml.ws.rm.runtime;
 
-import com.sun.xml.ws.rm.policy.Configuration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public class InMemorySequenceManager implements SequenceManager {
+
     private final Map<String, Sequence> sequences = new HashMap<String, Sequence>();
 
-    public Sequence createOutboudSequence(Configuration configuration) {
-        // TODO: implement
-        throw new UnsupportedOperationException("Not supported yet.");
+    public Sequence getSequence(String sequenceId) throws UnknownSequenceException {
+        synchronized (sequences) {
+            if (sequences.containsKey(sequenceId)) {
+                return sequences.get(sequenceId);
+            } else {
+                throw new UnknownSequenceException(sequenceId);
+            }
+        }
     }
 
-    public Sequence createInboundSequence(Configuration configuration) {
-        // TODO: implement
-        throw new UnsupportedOperationException("Not supported yet.");
+    public void registerSequence(Sequence sequence) throws DuplicateSequenceException {
+        synchronized (sequences) {
+            if (sequences.containsKey(sequence.getId())) {
+                throw new DuplicateSequenceException(sequence.getId());
+            } else {
+                sequences.put(sequence.getId(), sequence);
+            }
+        }
     }
 
-    public Sequence getSequence(String sequenceId) {
-        // TODO: implement
-        throw new UnsupportedOperationException("Not supported yet.");
+    public Sequence createOutboudSequence(String sequenceId) {
+        return new OutboundSequence(sequenceId);
     }
 
-    public void registerSequence(Sequence sequence) {
-        // TODO: implement
-        throw new UnsupportedOperationException("Not supported yet.");
+    public Sequence createInboundSequence(String sequenceId) {
+        return new InboundSequence(sequenceId);
+    }
+
+    public String generateSequenceUID() {
+        return "uuid:" + UUID.randomUUID();
     }
 }

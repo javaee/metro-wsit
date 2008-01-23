@@ -35,47 +35,59 @@
  */
 package com.sun.xml.ws.rm.runtime;
 
+import com.sun.xml.ws.rm.localization.RmLogger;
+
+import java.util.Timer;
+import java.util.TimerTask;
+
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public interface SequenceManager {
+public class ResendTimer {
+
+    private static final RmLogger LOGGER = RmLogger.getLogger(ResendTimer.class);
+    private static final long DELAY = 2000;
+    private static final long PERIOD = 2000;
+    private Timer timer;
+    private final ClientRmSession session;
 
     /**
-     * Creates a new outbound sequence object
-     * 
-     * TODO: shall we move this function into a differnet interface?
-     * @param configuration RM configuration for the created sequence
+     *
      */
-    public Sequence createOutboudSequence(String sequenceId);
+    public ResendTimer(ClientRmSession session) {
+        this.session = session;
+    }
 
     /**
-     * Creates a new inbound sequence object
-     * 
-     * TODO: shall we move this function into a differnet interface?
-     * @param configuration RM configuration for the created sequence
+     * Starts the resend timer
      */
-    public Sequence createInboundSequence(String sequenceId);
+    public synchronized void start() {
+        if (timer != null) {
+            // TODO L10N
+            throw LOGGER.logSevereException(new IllegalStateException("ResendTimer is already running!"));
+        }
+        timer = new Timer(true);
+        timer.schedule(
+                new TimerTask() {
+
+                    public void run() {
+                        session.resend();
+                    }
+                },
+                DELAY,
+                PERIOD);
+    }
 
     /**
-     * Retrieves an existing sequence from the internal sequence storage
-     * 
-     * @param sequenceId the unique sequence identifier
-     * @return sequence identified with the {@code sequenceId} identifier
+     * Stops the resend timer
      */
-    public Sequence getSequence(String sequenceId) throws UnknownSequenceException;
-
-    /**
-     * Registers a new sequence in the internal sequence storage
-     * 
-     * @param sequence sequence object to be registered within the internal sequence storage
-     */
-    public void registerSequence(Sequence sequence) throws DuplicateSequenceException;
-    
-    /**
-     * Generates a unique identifier of a sequence
-     * 
-     * @return new unique sequence identifier which can be used to construct a new sequence.
-     */
-    public String generateSequenceUID();
+    public synchronized void stop() {
+        if (timer == null) {
+            // TODO L10N
+            throw LOGGER.logSevereException(new IllegalStateException("RetryTimer is not running currently!"));
+        }
+        timer.cancel();
+        timer = null;
+    }
 }

@@ -33,82 +33,39 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
+
 package com.sun.xml.ws.rm.runtime;
 
-import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.pipe.NextAction;
-import com.sun.xml.ws.api.pipe.Tube;
-import com.sun.xml.ws.api.pipe.TubeCloner;
-import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
-import com.sun.xml.ws.assembler.WsitServerTubeAssemblyContext;
-import com.sun.xml.ws.rm.localization.RmLogger;
+import com.sun.xml.ws.api.message.Message;
 
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class RmServerTube extends AbstractFilterTubeImpl {
-    private static final RmLogger LOGGER = RmLogger.getLogger(RmServerTube.class);
+public class InboundSequence extends AbstractSequence {
 
-    public RmServerTube(RmServerTube original, TubeCloner cloner) {
-        super(original, cloner);
-        
-        // TODO: initialize all instance variables
+    public InboundSequence(String id) {
+        super(id);
     }
 
-    public RmServerTube(WsitServerTubeAssemblyContext context, Tube next) {
-        super(next);
-        
-        // TODO initialize all instance variables
+    public void initialize() {
+        // TODO
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    @Override
-    public RmServerTube copy(TubeCloner cloner) {
-        LOGGER.entering();
-        try {
-            return new RmServerTube(this, cloner);
-        } finally {
-            LOGGER.exiting();
-        }
+    public void close() {
+        // TODO
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    @Override
-    public NextAction processException(Throwable arg0) {
-        LOGGER.entering();
-        try {
-            return super.processException(arg0);
-        } finally {
-            LOGGER.exiting();
-        }
+    public Message processOutgoingMessage(Message message) {
+        // TODO: add sequence acknowledgement header if possible        
+        return message;
     }
 
-    @Override
-    public NextAction processRequest(Packet arg0) {
-        LOGGER.entering();
-        try {
-            return super.processRequest(arg0);
-        } finally {
-            LOGGER.exiting();
-        }
+    public Message processIncommingMessage(Message message) {
+        // TODO: get message id and mark it as acknowledged
+        return message;
     }
 
-    @Override
-    public NextAction processResponse(Packet arg0) {
-        LOGGER.entering();
-        try {
-            return super.processResponse(arg0);
-        } finally {
-            LOGGER.exiting();
-        }
-    }
-
-    @Override
-    public void preDestroy() {
-        LOGGER.entering();
-        try {
-            super.preDestroy();
-        } finally {
-            LOGGER.exiting();
-        }
-    }
 }

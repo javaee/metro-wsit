@@ -19,9 +19,9 @@ import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.rm.MessageSender;
 import com.sun.xml.ws.rm.localization.RmLogger;
 
-public class TubelineSender implements MessageSender, Fiber.CompletionCallback {
+public class ServerMessageSender implements MessageSender, Fiber.CompletionCallback {
 
-    private static final RmLogger LOGGER = RmLogger.getLogger(TubelineSender.class);
+    private static final RmLogger LOGGER = RmLogger.getLogger(ServerMessageSender.class);
     private Fiber fiber;
     private Fiber parentFiber;
     private Packet requestPacket;
@@ -29,7 +29,7 @@ public class TubelineSender implements MessageSender, Fiber.CompletionCallback {
     private AddressingVersion addressingVersion;
     private RMServerTube tube;
 
-    public TubelineSender(
+    public ServerMessageSender(
             RMServerTube tube,
             Packet packet,
             SOAPVersion soapVersion,

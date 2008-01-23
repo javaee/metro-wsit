@@ -33,49 +33,44 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
+
 package com.sun.xml.ws.rm.runtime;
+
+import com.sun.xml.ws.api.message.Message;
 
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public interface SequenceManager {
+public class OutboundSequence extends AbstractSequence {
 
-    /**
-     * Creates a new outbound sequence object
-     * 
-     * TODO: shall we move this function into a differnet interface?
-     * @param configuration RM configuration for the created sequence
-     */
-    public Sequence createOutboudSequence(String sequenceId);
+    public OutboundSequence(String id) {
+        super(id);
+    }
 
-    /**
-     * Creates a new inbound sequence object
-     * 
-     * TODO: shall we move this function into a differnet interface?
-     * @param configuration RM configuration for the created sequence
-     */
-    public Sequence createInboundSequence(String sequenceId);
+    public void initialize() {
+        // TODO
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 
-    /**
-     * Retrieves an existing sequence from the internal sequence storage
-     * 
-     * @param sequenceId the unique sequence identifier
-     * @return sequence identified with the {@code sequenceId} identifier
-     */
-    public Sequence getSequence(String sequenceId) throws UnknownSequenceException;
+    public void close() {
+        // TODO
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 
-    /**
-     * Registers a new sequence in the internal sequence storage
-     * 
-     * @param sequence sequence object to be registered within the internal sequence storage
-     */
-    public void registerSequence(Sequence sequence) throws DuplicateSequenceException;
-    
-    /**
-     * Generates a unique identifier of a sequence
-     * 
-     * @return new unique sequence identifier which can be used to construct a new sequence.
-     */
-    public String generateSequenceUID();
+    public Message processOutgoingMessage(Message message) {
+        /*
+         * TODO (new messages):
+         * - add sequence+message id headers
+         * - add ack request header 
+         * - register message as unacknowledged
+         */        
+        return message;
+    }
+
+    public Message processIncommingMessage(Message message) {
+        // TODO: process sequence acknowledgement header if present
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
 }

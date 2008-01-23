@@ -35,47 +35,36 @@
  */
 package com.sun.xml.ws.rm.runtime;
 
+import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.pipe.Fiber;
+import com.sun.xml.ws.api.pipe.Tube;
+
 /**
- *
+ * Transmits standalone protocol messages over the wire.
+ * 
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public interface SequenceManager {
+public class ProtocolCommunicator {
+
+    private final Tube tubeline;
+
+    public ProtocolCommunicator(Tube tubeline) {
+        this.tubeline = tubeline;
+    }
 
     /**
-     * Creates a new outbound sequence object
+     * Sends protocol request message and returns the corresponding response message.
      * 
-     * TODO: shall we move this function into a differnet interface?
-     * @param configuration RM configuration for the created sequence
+     * @param request message to send.
+     * @return response received on the sent message.
      */
-    public Sequence createOutboudSequence(String sequenceId);
-
-    /**
-     * Creates a new inbound sequence object
-     * 
-     * TODO: shall we move this function into a differnet interface?
-     * @param configuration RM configuration for the created sequence
-     */
-    public Sequence createInboundSequence(String sequenceId);
-
-    /**
-     * Retrieves an existing sequence from the internal sequence storage
-     * 
-     * @param sequenceId the unique sequence identifier
-     * @return sequence identified with the {@code sequenceId} identifier
-     */
-    public Sequence getSequence(String sequenceId) throws UnknownSequenceException;
-
-    /**
-     * Registers a new sequence in the internal sequence storage
-     * 
-     * @param sequence sequence object to be registered within the internal sequence storage
-     */
-    public void registerSequence(Sequence sequence) throws DuplicateSequenceException;
-    
-    /**
-     * Generates a unique identifier of a sequence
-     * 
-     * @return new unique sequence identifier which can be used to construct a new sequence.
-     */
-    public String generateSequenceUID();
+    public Message send(Message request) {
+        Packet requestPacket = new Packet(request);
+        //TODO set proxy if needed requestPacket.proxy = this.proxy;
+        //TODO set content negotiation if needed requestPacket.contentNegotiation = this.contentNegotiation;        
+        Fiber fiber = Fiber.current().owner.createFiber(); // TODO: could we possibly reuse the same fiber?
+        Packet responsePacket = fiber.runSync(tubeline, requestPacket);
+        return responsePacket.getMessage();
+    }
 }

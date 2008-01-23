@@ -40,72 +40,63 @@ import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
-import com.sun.xml.ws.assembler.WsitClientTubeAssemblyContext;
-import com.sun.xml.ws.rm.RmWsException;
+import com.sun.xml.ws.assembler.WsitServerTubeAssemblyContext;
 import com.sun.xml.ws.rm.localization.RmLogger;
-import com.sun.xml.ws.rm.policy.Configuration;
-import com.sun.xml.ws.rm.policy.ConfigurationManager;
 
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class RmClientTube extends AbstractFilterTubeImpl {
+public class ServerRmTube extends AbstractFilterTubeImpl {
+    private static final RmLogger LOGGER = RmLogger.getLogger(ServerRmTube.class);
 
-    private static final RmLogger LOGGER = RmLogger.getLogger(RmClientTube.class);
-
-    private final ConfigurationManager configurationManager;
-    
-    public RmClientTube(RmClientTube original, TubeCloner cloner) {
+    public ServerRmTube(ServerRmTube original, TubeCloner cloner) {
         super(original, cloner);
-
-        this.configurationManager = original.configurationManager;
+        
         // TODO: initialize all instance variables
     }
 
-    public RmClientTube(WsitClientTubeAssemblyContext context, Tube next) throws RmWsException {
+    public ServerRmTube(WsitServerTubeAssemblyContext context, Tube next) {
         super(next);
         
-        this.configurationManager = ConfigurationManager.createClientConfigurationManager(context.getWsdlPort(), context.getBinding());
         // TODO initialize all instance variables
     }
 
     @Override
-    public RmClientTube copy(TubeCloner cloner) {
+    public ServerRmTube copy(TubeCloner cloner) {
         LOGGER.entering();
         try {
-            return new RmClientTube(this, cloner);
+            return new ServerRmTube(this, cloner);
         } finally {
             LOGGER.exiting();
         }
     }
 
     @Override
-    public NextAction processException(Throwable throwable) {
+    public NextAction processException(Throwable arg0) {
         LOGGER.entering();
         try {
-            return super.processException(throwable);
+            return super.processException(arg0);
         } finally {
             LOGGER.exiting();
         }
     }
 
     @Override
-    public NextAction processRequest(Packet requestPacket) {
+    public NextAction processRequest(Packet arg0) {
         LOGGER.entering();
         try {
-            Configuration[] configurations = configurationManager.getConfigurationAlternatives();
-            return super.processRequest(requestPacket);
+            return super.processRequest(arg0);
         } finally {
             LOGGER.exiting();
         }
     }
 
     @Override
-    public NextAction processResponse(Packet responsePacket) {
+    public NextAction processResponse(Packet arg0) {
         LOGGER.entering();
         try {
-            return super.processResponse(responsePacket);
+            return super.processResponse(arg0);
         } finally {
             LOGGER.exiting();
         }

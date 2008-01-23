@@ -39,13 +39,22 @@ package com.sun.xml.ws.rm.runtime;
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public final class SequenceManagerFactory {
-    private static SequenceManager INSTANCE;
-    
-    private SequenceManagerFactory() {        
+public abstract class SequenceManagerFactory {
+
+    private static SequenceManagerFactory INSTANCE;
+
+    public static SequenceManagerFactory getInstance() {
+        // TODO: load from external configuration and revert to default if not present
+        return new SequenceManagerFactory() {
+            @Override
+            public SequenceManager getSequenceManager() {
+                return new InMemorySequenceManager();
+            }
+        };
     }
-    
-    public static SequenceManager getSequenceManager() {
-        return SequenceManagerFactory.INSTANCE;
+
+    protected SequenceManagerFactory() {
     }
+
+    public abstract SequenceManager getSequenceManager();
 }

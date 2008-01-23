@@ -35,6 +35,8 @@
  */
 package com.sun.xml.ws.rm.runtime;
 
+import com.sun.xml.ws.api.message.Message;
+
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
@@ -73,6 +75,44 @@ public interface Sequence {
  */
     
     
+
+    /**
+     * Initializes a sequence and allocates all necessary resources
+     */
+    public void initialize();
+    
+    /**
+     * Releases all resources associated with the sequence and closes the sequence
+     */
+    public void close();
+
+    /**
+     * Returns unique identifier of the sequence
+     * 
+     * @return unique sequence identifier
+     */
     public String getId();
-    public long nextMessageId();
+    
+    /**
+     * Provides the next message identifier within the sequence
+     * 
+     * @return the next message identifier that should be used for the next message sent on the sequence.
+     */
+    public long getNextMessageId();
+
+    /**
+     * Processes the outgoing message according to the type of the sequence (inbound/outbound)
+     * 
+     * @param message message to process
+     * @return processed message
+     */
+    public Message processOutgoingMessage(Message message);
+
+    /**
+     * Processes the incomming message according to the type of the sequence (inbound/outbound)
+     * 
+     * @param message message to process
+     * @return processed message
+     */
+    public Message processIncommingMessage(Message message);
 }

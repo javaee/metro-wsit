@@ -48,8 +48,8 @@ import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.rm.RMVersion;
 import com.sun.xml.ws.rm.jaxws.runtime.client.RMClientTube;
 import com.sun.xml.ws.rm.jaxws.runtime.server.RMServerTube;
-import com.sun.xml.ws.rm.runtime.RmClientTube;
-import com.sun.xml.ws.rm.runtime.RmServerTube;
+import com.sun.xml.ws.rm.runtime.ClientRmTube;
+import com.sun.xml.ws.rm.runtime.ServerRmTube;
 import javax.xml.ws.WebServiceException;
 
 /**
@@ -68,7 +68,7 @@ public class RmTubeAppender {
      */
     public Tube appendTube(WsitClientTubeAssemblyContext context, Tube tail) throws WebServiceException {
         if (isReliableMessagingEnabled(context.getPolicyMap(), context.getWsdlPort())) {
-            return new RmClientTube(context, tail);
+            return new ClientRmTube(context, tail);
         } else {
             return tail;
         }
@@ -83,7 +83,7 @@ public class RmTubeAppender {
      */
     public Tube appendTube(WsitServerTubeAssemblyContext context, Tube head) throws WebServiceException {
         if (isReliableMessagingEnabled(context.getPolicyMap(), context.getWsdlPort())) {
-            return new RmServerTube(context, head);
+            return new ServerRmTube(context, head);
         } else {
             return head;
         }

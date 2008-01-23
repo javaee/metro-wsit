@@ -250,7 +250,7 @@ public final class RMServerTube extends TubeBase {
             if (!inboundSequence.isOrdered()) {
                 return doInvoke(next, requestPacket);
             } else {
-                MessageSender sender = new TubelineSender(
+                MessageSender sender = new ServerMessageSender(
                         this,
                         requestPacket,
                         getConfig().getSoapVersion(),

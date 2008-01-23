@@ -33,49 +33,31 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
+
 package com.sun.xml.ws.rm.runtime;
+
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public interface SequenceManager {
+public abstract class AbstractSequence implements Sequence {
+    private final String id; 
+    private final AtomicLong nextMessageId;
+//    private final ProtocolCommunicator communicator;
 
-    /**
-     * Creates a new outbound sequence object
-     * 
-     * TODO: shall we move this function into a differnet interface?
-     * @param configuration RM configuration for the created sequence
-     */
-    public Sequence createOutboudSequence(String sequenceId);
-
-    /**
-     * Creates a new inbound sequence object
-     * 
-     * TODO: shall we move this function into a differnet interface?
-     * @param configuration RM configuration for the created sequence
-     */
-    public Sequence createInboundSequence(String sequenceId);
-
-    /**
-     * Retrieves an existing sequence from the internal sequence storage
-     * 
-     * @param sequenceId the unique sequence identifier
-     * @return sequence identified with the {@code sequenceId} identifier
-     */
-    public Sequence getSequence(String sequenceId) throws UnknownSequenceException;
-
-    /**
-     * Registers a new sequence in the internal sequence storage
-     * 
-     * @param sequence sequence object to be registered within the internal sequence storage
-     */
-    public void registerSequence(Sequence sequence) throws DuplicateSequenceException;
+    AbstractSequence(String id/*, ProtocolCommunicator communicator*/) {        
+        this.id = id;
+        this.nextMessageId = new AtomicLong(1);
+//        this.communicator = communicator;
+    }
     
-    /**
-     * Generates a unique identifier of a sequence
-     * 
-     * @return new unique sequence identifier which can be used to construct a new sequence.
-     */
-    public String generateSequenceUID();
+    public String getId() {
+        return id;
+    }
+
+    public long getNextMessageId() {
+        return nextMessageId.getAndIncrement();
+    }
 }

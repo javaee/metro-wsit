@@ -104,7 +104,7 @@ public final class RMClientTube extends TubeBase {
     /*Store the MEP of the current exchange*/
     private boolean isOneWayMessage = false;
     /* TubelineHelper to assist in resending of messages */
-    private TubelineHelper tubelineHelper;
+    private ClientMessageSender tubelineHelper;
 
     /**
      * Constructor accepts all possible arguments available in
@@ -255,25 +255,20 @@ public final class RMClientTube extends TubeBase {
             requestPacket.invocationProperties.put(Constants.messageNumberProperty, mn);
         }
 
+        //ClientOutboundSequence needs to know this.  If this flag is true,
+        //messages stored in the sequence cannot be discarded when they are acked.
+        //They may need to be resent to provide a vehicle or resends of lost responses.
+        //Instead, they are discarded when ClientOutboundSequence.acknowledgeResponse
+        //is called by the in RMClientPipe.process when a response is received.
+        //
+        //The behavior of the retry loop also varies according to whether the message
+        //is one-way.  If it is, the retry loop needs wait for acks.  If not, the loop
+        //can exit if an application response has been received.
+        this.isOneWayMessage = requestPacket.getMessage().isOneWay(getWsdlPort());
         //Add to OutboundSequence and include RM headers according to the
         //state of the RMSource
-        if (!requestPacket.getMessage().isOneWay(getWsdlPort())) {
-            //ClientOutboundSequence needs to know this.  If this flag is true,
-            //messages stored in the sequence cannot be discarded when they are acked.
-            //They may need to be resent to provide a vehicle or resends of lost responses.
-            //Instead, they are discarded when ClientOutboundSequence.acknowledgeResponse
-            //is called by the in RMClientPipe.process when a response is received.
-
-            //The behavior of the retry loop also varies according to whether the message
-            //is one-way.  If it is, the retry loop needs wait for acks.  If not, the loop
-            //can exit if an application response has been received.
-            outboundMessage = handleOutboundMessage(outboundSequence, requestPacket, true, false);
-            this.isOneWayMessage = false;
-        } else {
-            //TODO eliminate one of these flags
-            outboundMessage = handleOutboundMessage(outboundSequence, requestPacket, false, false);
-            this.isOneWayMessage = true;
-        }
+        //TODO eliminate one of these flags
+        outboundMessage = handleOutboundMessage(outboundSequence, requestPacket, !this.isOneWayMessage, false);
 
         //RM would always want expectReply to the true.  We need to look at
         //protocol responses for all messages, since they might contain RM
@@ -281,7 +276,7 @@ public final class RMClientTube extends TubeBase {
         requestPacket.expectReply = true;
 
         //initialize TubelineHelper
-        tubelineHelper = new TubelineHelper(requestPacket, outboundMessage);
+        tubelineHelper = new ClientMessageSender(requestPacket, outboundMessage);
 
         //Make the helper available in the message, so it can be used to resend the message, if necessary
         outboundMessage.setMessageSender(tubelineHelper);
@@ -426,17 +421,17 @@ public final class RMClientTube extends TubeBase {
      * ApplicationMessageHelper is used to execute a single request in the tail of the
      * Tubeline.  
      */
-    public class TubelineHelper implements MessageSender {
+    public class ClientMessageSender implements MessageSender {
 
         private final Fiber fiber;
         private final Fiber parentFiber;
-        private final TubelineHelperCallback callback;
+        private final ClientMessageSenderCompletionCallback callback;
         //Store the request packet and message for this helper.
         private Packet packet;
         private RMMessage requestMessage;
         private Throwable throwable;
 
-        public TubelineHelper(Packet packet, RMMessage message) {
+        public ClientMessageSender(Packet packet, RMMessage message) {
             this.requestMessage = message;
             this.packet = packet;
 
@@ -449,7 +444,7 @@ public final class RMClientTube extends TubeBase {
             Engine engine = parentFiber.owner;
 
             fiber = engine.createFiber();
-            callback = new TubelineHelperCallback();
+            callback = new ClientMessageSenderCompletionCallback();
         }
 
         public void send() {
@@ -465,9 +460,9 @@ public final class RMClientTube extends TubeBase {
             fiber.start(TubeCloner.clone(next), packet, callback);
         }
 
-        private class TubelineHelperCallback implements Fiber.CompletionCallback {
+        private class ClientMessageSenderCompletionCallback implements Fiber.CompletionCallback {
 
-            TubelineHelperCallback() {
+            ClientMessageSenderCompletionCallback() {
             }
 
             public void onCompletion(
