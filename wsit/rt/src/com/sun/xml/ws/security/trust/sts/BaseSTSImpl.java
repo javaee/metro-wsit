@@ -51,7 +51,6 @@ import com.sun.xml.ws.security.trust.WSTrustFactory;
 import com.sun.xml.ws.security.trust.elements.BaseSTSRequest;
 import com.sun.xml.ws.security.trust.elements.BaseSTSResponse;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
-import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponse;
 import com.sun.xml.ws.security.trust.impl.DefaultSTSConfiguration;
 import com.sun.xml.ws.security.trust.impl.DefaultTrustSPMetadata;
 import com.sun.xml.ws.security.trust.util.WSTrustUtil;
@@ -62,15 +61,8 @@ import com.sun.xml.wss.XWSSecurityException;
 import java.util.Iterator;
 import javax.xml.namespace.QName;
 
-import javax.security.auth.callback.CallbackHandler;
-import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
 
-import javax.xml.ws.Provider;
 import javax.xml.ws.WebServiceException;
 import javax.xml.transform.Source;
 import javax.xml.ws.handler.MessageContext;

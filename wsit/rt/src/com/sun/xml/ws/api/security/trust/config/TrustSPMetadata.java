@@ -45,7 +45,6 @@
 package com.sun.xml.ws.api.security.trust.config;
 
 import java.util.Map;
-import javax.security.auth.callback.CallbackHandler;
 
 /**
  * <p>
