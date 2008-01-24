@@ -198,9 +198,6 @@
 		</wsdl:operation>
 	</wsdl:binding>
 	<wsdl:service name="PingService">
-		<wsdl:port name="PingPort" binding="tns:PingBinding">
-            		<soap12:address location="http://localhost:8080/jaxws-sc2/simple"/> 
-		</wsdl:port>
         	<wsdl:port binding="tns:XC_IPingService" name="XC_IPingService">
             		<soap12:address location="http://131.107.72.15/Security_WsSecurity_Service_Indigo/WSSecureConversation.svc/XC"/>
 		</wsdl:port>

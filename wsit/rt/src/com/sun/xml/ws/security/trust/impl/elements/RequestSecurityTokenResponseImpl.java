@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityTokenResponseImpl.java,v 1.13 2007-10-24 15:30:46 shyam_rao Exp $
+ * $Id: RequestSecurityTokenResponseImpl.java,v 1.14 2008-01-24 01:51:12 jdg6688 Exp $
  */
 
 /*
@@ -81,6 +81,7 @@ import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.security.trust.WSTrustVersion;
 
+import com.sun.xml.ws.security.trust.impl.WSTrustVersion10;
 import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
 
 /**
@@ -299,9 +300,11 @@ public class RequestSecurityTokenResponseImpl extends RequestSecurityTokenRespon
     }
     
     public final void setKeyType(@NotNull final URI keytype) throws WSTrustException {
-                
-        if (! (keytype.toString().equalsIgnoreCase(RequestSecurityToken.PUBLIC_KEY_TYPE)
-        || keytype.toString().equalsIgnoreCase(RequestSecurityToken.SYMMETRIC_KEY_TYPE) )){
+        
+        WSTrustVersion wstVer = new WSTrustVersion10();
+        if (! (keytype.toString().equalsIgnoreCase(wstVer.getSymmetricKeyTypeURI())
+               || keytype.toString().equalsIgnoreCase(wstVer.getPublicKeyTypeURI())
+               || keytype.toString().equalsIgnoreCase(wstVer.getBearerKeyTypeURI()) )){
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0025_INVALID_KEY_TYPE(keytype.toString(), null));
             throw new WSTrustException(LogStringsMessages.WST_0025_INVALID_KEY_TYPE(keytype.toString(), null));

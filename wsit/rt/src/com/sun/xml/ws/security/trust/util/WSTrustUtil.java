@@ -47,6 +47,7 @@ import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.security.impl.policy.PolicyUtil;
 import com.sun.xml.ws.security.secconv.WSSCElementFactory;
 import com.sun.xml.ws.security.secconv.WSSecureConversationException;
+import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.policy.impl.bindings.AppliesTo;
 import com.sun.xml.ws.security.trust.impl.bindings.AttributedURI;
 import com.sun.xml.ws.security.trust.impl.bindings.EndpointReference;
@@ -55,7 +56,9 @@ import com.sun.xml.ws.security.trust.impl.bindings.EndpointReference;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import javax.xml.soap.SOAPFault;
 import javax.xml.bind.JAXBElement;
@@ -63,6 +66,21 @@ import javax.xml.bind.JAXBElement;
 import com.sun.xml.ws.security.SecurityContextToken;
 import com.sun.xml.ws.security.secconv.WSSCElementFactory13;
 import com.sun.xml.ws.security.trust.WSTrustSOAPFaultException;
+import com.sun.xml.ws.security.trust.WSTrustVersion;
+import com.sun.xml.ws.security.trust.elements.Lifetime;
+import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
+import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponse;
+import com.sun.xml.ws.security.wsu10.AttributedDateTime;
+import java.io.StringWriter;
+import java.security.MessageDigest;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.stream.StreamResult;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 /**
  *
@@ -161,6 +179,46 @@ public class WSTrustUtil {
        return applTo;
    }
    
+   public static List<Object> parseAppliesTo(final AppliesTo appliesTo){
+       final List<Object> list = appliesTo.getAny();
+       EndpointReference epr = null;
+       if (!list.isEmpty()){
+            for (int i = 0; i < list.size(); i++) {
+                final Object obj = list.get(i);
+                if (obj instanceof EndpointReference){
+                    epr = (EndpointReference)obj;
+                } else if (obj instanceof JAXBElement){
+                    final JAXBElement ele = (JAXBElement)obj;    
+                    final String local = ele.getName().getLocalPart();
+                    if (local.equalsIgnoreCase("EndpointReference")) {
+                        epr = (EndpointReference)ele.getValue();
+                    }
+                }
+                
+                List<Object> result = new ArrayList<Object>();
+                if (epr != null){
+                    final AttributedURI uri = epr.getAddress();
+                    if (uri != null){
+                        result.add(uri.getValue());
+                    }
+                    final List<Object> content = epr.getAny();
+                    for (int j = 0; j < content.size(); j++) {
+                        final Object obj2 = content.get(j);
+                        if (obj2 instanceof Element){
+                            Element ele = (Element)obj2;
+                            NodeList nodeList = ele.getElementsByTagName("Identity");
+                            if (nodeList.getLength() > 0){
+                                Element identity = (Element)nodeList.item(0);
+                                result.add(identity); 
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+   }
+   
    public static String getAppliesToURI(final AppliesTo appliesTo){
        final List list = appliesTo.getAny();
        EndpointReference epr = null;
@@ -247,5 +305,74 @@ public class WSTrustUtil {
         return false;
     }
     
-   
+    public static String createFriendlyPPID(String displayValue){
+        try{
+            MessageDigest md = MessageDigest.getInstance("SHA1");
+            byte[] hashId = md.digest(com.sun.xml.wss.impl.misc.Base64.decode(displayValue));
+            StringBuffer sb = new StringBuffer();
+            
+        }catch(Exception ex){
+            return displayValue;
+        }
+        return displayValue;
+    }
+    
+    public static String elemToString(final RequestSecurityTokenResponse rstr, final WSTrustVersion wstVer){
+        StringWriter writer = new StringWriter();
+        try{
+            Transformer trans = TransformerFactory.newInstance().newTransformer();
+            trans.transform(WSTrustElementFactory.newInstance(wstVer).toSource(rstr), new StreamResult(writer));
+        }catch(Exception ex){
+            ex.printStackTrace();
+        }
+        
+        return writer.toString();
+    }
+
+    public static String elemToString(final RequestSecurityToken rst, final WSTrustVersion wstVer){
+        StringWriter writer = new StringWriter();
+        try{
+            Transformer trans = TransformerFactory.newInstance().newTransformer();
+            trans.transform(WSTrustElementFactory.newInstance(wstVer).toSource(rst), new StreamResult(writer));
+        }catch(Exception ex){
+            ex.printStackTrace();
+        }
+        
+        return writer.toString();
+    }      
+    
+    private static final SimpleDateFormat calendarFormatter
+            = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'sss'Z'", Locale.getDefault());
+    
+    public static long getCurrentTimeWithOffset(){
+        final Calendar cal = new GregorianCalendar();
+        int offset = cal.get(Calendar.ZONE_OFFSET);
+        if (cal.getTimeZone().inDaylightTime(cal.getTime())) {
+            offset += cal.getTimeZone().getDSTSavings();
+        }
+        
+         // always send UTC/GMT time
+         final long beforeTime = cal.getTimeInMillis();
+         
+         return beforeTime - offset;
+    }
+    
+    public static Lifetime createLifetime(long currentTime, long lifespan, WSTrustVersion wstVer) {
+        final Calendar cal = new GregorianCalendar();
+        synchronized (calendarFormatter) {
+            calendarFormatter.setTimeZone(cal.getTimeZone());
+            cal.setTimeInMillis(currentTime);
+            
+            final AttributedDateTime created = new AttributedDateTime();
+            created.setValue(calendarFormatter.format(cal.getTime()));
+            
+            final AttributedDateTime expires = new AttributedDateTime();
+            cal.setTimeInMillis(currentTime + lifespan);
+            expires.setValue(calendarFormatter.format(cal.getTime()));
+            
+            final Lifetime lifetime = WSTrustElementFactory.newInstance(wstVer).createLifetime(created, expires);
+            
+            return lifetime;
+        }
+    }
 }

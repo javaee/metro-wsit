@@ -95,8 +95,16 @@ import java.util.logging.Logger;
 import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
 
 import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
+import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.Element;
+import org.w3c.dom.Document;
 
 public abstract class IssueSamlTokenContract implements com.sun.xml.ws.api.security.trust.IssueSamlTokenContract<BaseSTSRequest, BaseSTSResponse> {
     
@@ -116,8 +124,6 @@ public abstract class IssueSamlTokenContract implements com.sun.xml.ws.api.secur
     protected WSTrustVersion wstVer;
     protected WSTrustElementFactory eleFac = 
             WSTrustElementFactory.newInstance(WSTrustVersion.WS_TRUST_10);
-    protected static final SimpleDateFormat calendarFormatter
-            = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'sss'Z'", Locale.getDefault());
     
     private static final int DEFAULT_KEY_SIZE = 256;
 
@@ -138,13 +144,14 @@ public abstract class IssueSamlTokenContract implements com.sun.xml.ws.api.secur
         }
         //WSTrustVersion wstVer = (WSTrustVersion)stsConfig.getOtherOptions().get(WSTrustConstants.WST_VERSION);
 
-        // Get AppliesTo
+        // Get token scope
         final AppliesTo applies = rst.getAppliesTo();
         String appliesTo = null;
         if(applies != null){
             appliesTo = WSTrustUtil.getAppliesToURI(applies);
         }
         
+        // Get the metadata for the SP as identified by the AppliesTo
         TrustSPMetadata spMd = stsConfig.getTrustSPMetadata(appliesTo);
         if (spMd == null){
             // Only used for testing purpose; default should not documented
@@ -186,12 +193,12 @@ public abstract class IssueSamlTokenContract implements com.sun.xml.ws.api.secur
             keyType = wstVer.getSymmetricKeyTypeURI();
         }
         
-        
-        // Get authenticaed client Subject 
+        // Get authenticated client Subject 
         Subject subject = context.getRequestorSubject();
         if (subject == null){
             AccessControlContext acc = AccessController.getContext();
             subject = Subject.getSubject(acc);
+            context.setRequestorSubject(subject);
         }
         if(subject == null){
             log.log(Level.SEVERE,
@@ -232,6 +239,7 @@ public abstract class IssueSamlTokenContract implements com.sun.xml.ws.api.secur
         if (claims == null && secParas != null){
             claims = secParas.getClaims();
         }
+        
         final STSAttributeProvider attrProvider = WSTrustFactory.getSTSAttributeProvider();
         final Map<QName, List<String>> claimedAttrs = attrProvider.getClaimedAttributes(subject, appliesTo, tokenType, claims);
         
@@ -334,17 +342,10 @@ public abstract class IssueSamlTokenContract implements com.sun.xml.ws.api.secur
         
         // get Context
         URI ctx = null;
-        try {
-            final String rstCtx = rst.getContext();
-            if (rstCtx != null){
-                ctx = new URI(rst.getContext());
-            }
-        } catch (URISyntaxException ex) {
-            log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0014_URI_SYNTAX(), ex);
-            throw new WSTrustException(
-                    LogStringsMessages.WST_0014_URI_SYNTAX() ,ex);
-        }
+        final String rstCtx = rst.getContext();
+        if (rstCtx != null){
+            ctx = URI.create(rstCtx);
+         }
         
         // Create RequestedSecurityToken with SAML assertion
         final String assertionId = "uuid-" + UUID.randomUUID().toString();
@@ -358,19 +359,22 @@ public abstract class IssueSamlTokenContract implements com.sun.xml.ws.api.secur
         final RequestedUnattachedReference ruRef =  eleFac.createRequestedUnattachedReference(samlReference);
         
         // Create Lifetime
-        final Lifetime lifetime = createLifetime();
+        long currentTime = WSTrustUtil.getCurrentTimeWithOffset();
+        final Lifetime lifetime = WSTrustUtil.createLifetime(currentTime, stsConfig.getIssuedTokenTimeout(), wstVer);
         
         final RequestSecurityTokenResponse rstr =
-                eleFac.createRSTRForIssue(rst.getTokenType(), ctx, reqSecTok, applies, raRef, ruRef, proofToken, serverEntropy, lifetime);
+                eleFac.createRSTRForIssue(URI.create(tokenType), ctx, reqSecTok, applies, raRef, ruRef, proofToken, serverEntropy, lifetime);
         
         if (keySize > 0){
             rstr.setKeySize(keySize);
         }
         
-       //String issuer = config.getIssuer();
-        
-      // Token samlToken = createSAMLAssertion(appliesTo, tokenType, keyType, assertionId, issuer, claimedAttrs, context);
-       //rstr.getRequestedSecurityToken().setToken(samlToken);
+        if(log.isLoggable(Level.FINE)) {
+                log.log(Level.FINE, 
+                        LogStringsMessages.WST_1006_CREATED_RST_ISSUE(WSTrustUtil.elemToString(rst, wstVer)));
+                log.log(Level.FINE, 
+                        LogStringsMessages.WST_1007_CREATED_RSTR_ISSUE(WSTrustUtil.elemToString(rstr, wstVer)));
+         }
         
         // Populate IssuedTokenContext
         context.setSecurityToken(samlToken);
@@ -387,6 +391,62 @@ public abstract class IssueSamlTokenContract implements com.sun.xml.ws.api.secur
             return rstrc;
         }
         return rstr;
+    }
+ 
+    private void handleDisplayToken(RequestSecurityToken rst, RequestSecurityTokenResponse rstr, Map<QName, List<String>> claimedAttrs){
+        List<Object> list = rst.getExtendedElements();
+        boolean displayToken = false;
+        for (int i =0; i < list.size(); i++){
+            Object ele = list.get(i);
+            if ((ele instanceof Element)){
+                String localName = ((Element)ele).getLocalName();
+                if ("RequestDisplayToken".equals(localName)){
+                    displayToken = true;
+                    break;
+                }
+            }
+        }
+        if (displayToken){
+            // Create RequestedDisplayToken
+            try {
+                final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+                dbf.setNamespaceAware(true);
+                final DocumentBuilder builder = dbf.newDocumentBuilder();
+                Document doc = builder.newDocument();
+                Element rdt = doc.createElementNS("http://schemas.xmlsoap.org/ws/2005/05/identity", "RequestedDisplayToken");
+                rdt.setAttribute("xmlns", "http://schemas.xmlsoap.org/ws/2005/05/identity");
+                Element dt = doc.createElementNS("http://schemas.xmlsoap.org/ws/2005/05/identity", "DisplayToken");
+                dt.setAttribute("xml:lang", "en-us");
+                rdt.appendChild(dt);
+                final Set<Map.Entry<QName, List<String>>> entries = claimedAttrs.entrySet();
+                for(Map.Entry<QName, List<String>> entry : entries){
+                    final QName attrKey = entry.getKey();
+                    final List<String> values = entry.getValue();
+                    if (values != null && values.size() > 0){
+                        if (!STSAttributeProvider.NAME_IDENTIFIER.equals(attrKey.getLocalPart())){
+                            Element dc = doc.createElementNS("http://schemas.xmlsoap.org/ws/2005/05/identity", "DisplayClaim");
+                            String uri = attrKey.getNamespaceURI()+"/" + attrKey.getLocalPart();
+                            dc.setAttribute("Uri", uri);
+                            dt.appendChild(dc);
+                            Element dtg = doc.createElementNS("http://schemas.xmlsoap.org/ws/2005/05/identity", "DisplayTag");
+                            dtg.appendChild(doc.createTextNode(attrKey.getLocalPart()));
+                            dc.appendChild(dtg);
+                            
+                            String displayValue = values.get(0);
+                            Element dtv = doc.createElementNS("http://schemas.xmlsoap.org/ws/2005/05/identity", "DisplayValue");
+                           // if ("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/privatepersonalidentifier".equals(uri)){
+                              //  displayValue = WSTrustUtils.createFriendlyPPID(displayValue);
+                           // }
+                            dtv.appendChild(doc.createTextNode(displayValue));
+                            dc.appendChild(dtv);
+                        }
+                    }
+                }
+                rstr.getAny().add(rdt);
+            }catch (Exception ex){
+                ex.printStackTrace();
+            }   
+        }
     }
     
     /** Issue a Collection of Token(s) possibly for different scopes */
@@ -428,70 +488,7 @@ public abstract class IssueSamlTokenContract implements com.sun.xml.ws.api.secur
     }
     
     public abstract Token createSAMLAssertion(String appliesTo, String tokenType, String keyType, String assertionId, String issuer, Map<QName, List<String>> claimedAttrs, IssuedTokenContext context) throws WSTrustException;
-    
-  /*protected abstract boolean isAuthorized(Subject subject, String appliesTo, String tokenType, String keyType);
-    
-    protected abstract Map getClaimedAttributes(Subject subject, String appliesTo, String tokenType);
-    
-    protected byte[] createSecretKey(RequestSecurityToken rst)throws WSTrustException
-    {
-        // get key information
-        int keySize = (int)rst.getKeySize();
-        if (keySize < 1){
-            keySize = DEFAULT_KEY_SIZE;
-        }
-        URI keyType = rst.getKeyType();
-        URI alg = rst.getComputedKeyAlgorithm();
-  
-        Entropy entropy = rst.getEntropy();
-        BinarySecret bs = entropy.getBinarySecret();
-        byte[] nonce = bs.getRawValue();
-  
-        byte[] key = null;
-  
-        if (alg == null){
-            key = nonce;
-        } else if(alg.toString().equals(WSTrustConstants.CK_PSHA1)){
-            try {
-                  key = SecurityUtil.P_SHA1(nonce,null, keySize/8 );
-                } catch (Exception ex) {
-                      throw new WSTrustException(ex.getMessage(), ex);
-                }
-        } else {
-            throw new WSTrustException("Unsupported key computation algorithm: " + alg.toString());
-        }
-  
-        return key;
-    }*/
-    
-    private long currentTime;
-    private Lifetime createLifetime() {
-        final Calendar cal = new GregorianCalendar();
-        int offset = cal.get(Calendar.ZONE_OFFSET);
-        if (cal.getTimeZone().inDaylightTime(cal.getTime())) {
-            offset += cal.getTimeZone().getDSTSavings();
-        }
-        synchronized (calendarFormatter) {
-            calendarFormatter.setTimeZone(cal.getTimeZone());
-            
-            // always send UTC/GMT time
-            final long beforeTime = cal.getTimeInMillis();
-            currentTime = beforeTime - offset;
-            cal.setTimeInMillis(currentTime);
-            
-            final AttributedDateTime created = new AttributedDateTime();
-            created.setValue(calendarFormatter.format(cal.getTime()));
-            
-            final AttributedDateTime expires = new AttributedDateTime();
-            cal.setTimeInMillis(currentTime + stsConfig.getIssuedTokenTimeout());
-            expires.setValue(calendarFormatter.format(cal.getTime()));
-            
-            final Lifetime lifetime = eleFac.createLifetime(created, expires);
-            
-            return lifetime;
-        }
-    }
-    
+     
     private SecurityTokenReference createSecurityTokenReference(final String id, final String tokenType){
         String valueType = null;
          if (WSTrustConstants.SAML10_ASSERTION_TOKEN_TYPE.equals(tokenType)||

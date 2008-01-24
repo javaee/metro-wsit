@@ -106,8 +106,6 @@ public class WSSCContract {
             LogDomainConstants.WSSC_IMPL_DOMAIN_BUNDLE);
     
     //private Configuration config;
-    
-    private long currentTime;
     private WSSCVersion wsscVer = WSSCVersion.WSSC_10;
     private WSTrustVersion wsTrustVer = WSTrustVersion.WS_TRUST_10;
     private static WSSCElementFactory eleFac = WSSCElementFactory.newInstance();
@@ -117,8 +115,6 @@ public class WSSCContract {
     
     // ToDo: Should read from the configuration
     private static final long TIMEOUT = 36000000;
-    private static final SimpleDateFormat calendarFormatter
-            = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'sss'Z'",Locale.getDefault());
     
     public WSSCContract(){
         //Empty default constructor
@@ -189,7 +185,7 @@ public class WSSCContract {
         
         if (log.isLoggable(Level.FINE)) {
             log.log(Level.FINE,
-                    LogStringsMessages.WSSC_0014_RSTR_RESPONSE(elemToString((RequestSecurityTokenResponse)response)));
+                    LogStringsMessages.WSSC_0014_RSTR_RESPONSE(WSTrustUtil.elemToString((RequestSecurityTokenResponse)response, wsTrustVer)));
         }
         return response;
     }
@@ -244,7 +240,7 @@ public class WSSCContract {
         }
         if (log.isLoggable(Level.FINE)) {
         log.log(Level.FINE,
-                LogStringsMessages.WSSC_0011_KEY_SIZE_VALUE(keySize, this.DEFAULT_KEY_SIZE));
+                LogStringsMessages.WSSC_0011_KEY_SIZE_VALUE(keySize, DEFAULT_KEY_SIZE));
         }
         
         byte[] secret = WSTrustUtil.generateRandomSecret(keySize/8);
@@ -306,7 +302,8 @@ public class WSSCContract {
         final RequestedUnattachedReference rur = eleFac.createRequestedUnattachedReference(unattachedRef);
         
         // Create Lifetime
-        final Lifetime lifetime = createLifetime();
+        long currentTime = WSTrustUtil.getCurrentTimeWithOffset();
+        final Lifetime lifetime = WSTrustUtil.createLifetime(currentTime, TIMEOUT, wsTrustVer);
         
         BaseSTSResponse response = null;
         try {
@@ -324,7 +321,7 @@ public class WSSCContract {
             log.log(Level.FINE,
                     LogStringsMessages.WSSC_1010_CREATING_SESSION(token.getIdentifier()));
         }
-        populateITC(session, secret, token, attachedReference, context, unattachedRef);
+        populateITC(currentTime, session, secret, token, attachedReference, context, unattachedRef);
         SessionManager.getSessionManager().addSecurityContext(token.getIdentifier().toString(), context);
         return response;
     }
@@ -342,7 +339,8 @@ public class WSSCContract {
         final RequestedUnattachedReference rur = eleFac13.createRequestedUnattachedReference(unattachedRef);
         
         // Create Lifetime
-        final Lifetime lifetime = createLifetime();
+        long currentTime = WSTrustUtil.getCurrentTimeWithOffset();
+        final Lifetime lifetime = WSTrustUtil.createLifetime(currentTime, TIMEOUT, wsTrustVer);
         
         BaseSTSResponse response = null;
         try {
@@ -360,13 +358,13 @@ public class WSSCContract {
             log.log(Level.FINE,
                     LogStringsMessages.WSSC_1010_CREATING_SESSION(token.getIdentifier()));
         }
-        populateITC(session, secret, token, attachedReference, context, unattachedRef);
+        populateITC(currentTime, session, secret, token, attachedReference, context, unattachedRef);
         SessionManager.getSessionManager().addSecurityContext(token.getIdentifier().toString(), context);
         return response;
     }
     
 
-    private void populateITC(final Session session, final byte[] secret, final SecurityContextToken token, final SecurityTokenReference attachedReference, final IssuedTokenContext context, final SecurityTokenReference unattachedRef) {
+    private void populateITC(final long currentTime, final Session session, final byte[] secret, final SecurityContextToken token, final SecurityTokenReference attachedReference, final IssuedTokenContext context, final SecurityTokenReference unattachedRef) {
         
         // Populate the IssuedTokenContext
         context.setSecurityToken(token);
@@ -433,9 +431,9 @@ public class WSSCContract {
         }else{        
             rstr = eleFac.createRSTRForCancel();
         }
-        if (log.isLoggable(Level.FINE)) {
+         if (log.isLoggable(Level.FINE)) {
             log.log(Level.FINE,
-                    LogStringsMessages.WSSC_0014_RSTR_RESPONSE(elemToString(((RequestSecurityTokenResponse)rstr))));
+                    LogStringsMessages.WSSC_0014_RSTR_RESPONSE(WSTrustUtil.elemToString((RequestSecurityTokenResponse)rstr, wsTrustVer)));
         }
         return rstr;
     }
@@ -490,59 +488,6 @@ public class WSSCContract {
         }else{
             ref = eleFac.createDirectReference(wsscVer.getSCTTokenTypeURI(), uri);
             return eleFac.createSecurityTokenReference(ref);
-        }
-    }
-    
-    
-    private Lifetime createLifetime() {
-        final Calendar cal = new GregorianCalendar();
-        int offset = cal.get(Calendar.ZONE_OFFSET);
-        if (cal.getTimeZone().inDaylightTime(cal.getTime())) {
-            offset += cal.getTimeZone().getDSTSavings();
-        }
-        synchronized (calendarFormatter) {
-            calendarFormatter.setTimeZone(cal.getTimeZone());
-            
-            // always send UTC/GMT time
-            final long beforeTime = cal.getTimeInMillis();
-            currentTime = beforeTime - offset;
-            cal.setTimeInMillis(currentTime);
-            
-            final AttributedDateTime created = new AttributedDateTime();
-            created.setValue(calendarFormatter.format(cal.getTime()));
-            
-            final AttributedDateTime expires = new AttributedDateTime();
-            cal.setTimeInMillis(currentTime + TIMEOUT);
-            expires.setValue(calendarFormatter.format(cal.getTime()));
-            
-            final Lifetime lifetime;
-            if(wsscVer.getNamespaceURI().equals(WSSCVersion.WSSC_13.getNamespaceURI())){
-                lifetime = eleFac13.createLifetime(created, expires);
-            }else{
-                lifetime = eleFac.createLifetime(created, expires);
-            }
-            
-            return lifetime;
-        }
-    }
-    
-    private String elemToString(final RequestSecurityTokenResponse rstr){
-        try {
-            final javax.xml.bind.Marshaller marshaller;
-            if(wsscVer.getNamespaceURI().equals(WSSCVersion.WSSC_13.getNamespaceURI())){
-                marshaller = eleFac13.getContext().createMarshaller();
-            }else{
-                marshaller = eleFac.getContext().createMarshaller();
-            }
-            final JAXBElement<RequestSecurityTokenResponseType> rstrElement =  (new ObjectFactory()).createRequestSecurityTokenResponse((RequestSecurityTokenResponseType)rstr);
-            marshaller.setProperty(javax.xml.bind.Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-            final java.io.StringWriter writer = new java.io.StringWriter();
-            marshaller.marshal(rstrElement, writer);
-            return writer.toString();
-        } catch (Exception e) {
-            log.log(Level.SEVERE,
-                    LogStringsMessages.WSSC_0001_ERROR_MARSHAL_LOG());
-            throw new RuntimeException(LogStringsMessages.WSSC_0001_ERROR_MARSHAL_LOG(), e);
         }
     }
     

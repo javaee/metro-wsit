@@ -185,12 +185,13 @@ public class TrustPluginImpl implements TrustPlugin {
             final RequestSecurityToken request = createRequest(stsConfig, appliesTo, oboToken);
              
             result = invokeRST(request, wsdlLocation, serviceName, portName, stsURI, stsConfig);
+       
             final WSTrustClientContract contract = WSTrustFactory.createWSTrustClientContract(config);
             contract.handleRSTR(request, result, itc);
             KeyPair keyPair = (KeyPair)stsConfig.getOtherOptions().get(WSTrustConstants.USE_KEY_RSA_KEY_PAIR);
-           if (keyPair != null){
+            if (keyPair != null){
                 itc.setProofKeyPair(keyPair);   
-           }
+            }
         } catch (RemoteException ex) {
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0016_PROBLEM_IT_CTX(stsURI, appliesTo), ex);
@@ -391,9 +392,9 @@ public class TrustPluginImpl implements TrustPlugin {
             //stsConfig.getOtherOptions().put(WSTrustConstants.USE_KEY_SIGNATURE_ID, sig); */
         }
        
-        if (log.isLoggable(Level.FINE)) {
-            log.log(Level.FINE,
-                    LogStringsMessages.WST_1006_CREATED_RST_ISSUE(elemToString(rst)));
+        if(log.isLoggable(Level.FINE)) {
+            log.log(Level.FINE, 
+                   LogStringsMessages.WST_1006_CREATED_RST_ISSUE(WSTrustUtil.elemToString(rst, wstVer)));
         }
         
         return rst;
@@ -487,10 +488,12 @@ public class TrustPluginImpl implements TrustPlugin {
         }else{
             rstr = fact.createRSTRFrom((JAXBElement)dispatch.invoke(fact.toJAXBElement(request)));
         }
-        if (log.isLoggable(Level.FINE)) {
-            log.log(Level.FINE,
-                    LogStringsMessages.WST_1014_RESPONSE_INVOKING_RST(elemToString(rstr)));
+        
+        if(log.isLoggable(Level.FINE)) {
+            log.log(Level.FINE, 
+                    LogStringsMessages.WST_1007_CREATED_RSTR_ISSUE(WSTrustUtil.elemToString((RequestSecurityTokenResponse)rstr, wstVer)));
         }
+        
         return rstr;
     }
     
@@ -554,25 +557,5 @@ public class TrustPluginImpl implements TrustPlugin {
         kvs.add(kv);
         KeyInfo ki = kif.newKeyInfo(kvs);
         return ki;
-    }
- 
-    private String elemToString(final RequestSecurityTokenResponse rstr){
-        //ToDo
-        return rstr.toString();
-    }
-
-    private String elemToString(final RequestSecurityToken rst){
-      //ToDo
-      return  rst.toString();
-    }        
-
-    private String elemToString(final BaseSTSResponse rstr){
-      //ToDo
-      if(rstr instanceof RequestSecurityTokenResponse){
-          return elemToString((RequestSecurityTokenResponse)rstr);
-      }else if (rstr instanceof RequestSecurityTokenResponseCollection){
-          return elemToString((RequestSecurityTokenResponseCollection)rstr);
-      }
-      return null;
     }
 }

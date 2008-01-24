@@ -46,6 +46,7 @@ import com.sun.xml.ws.api.security.trust.config.STSConfiguration;
 import com.sun.xml.ws.api.security.trust.config.TrustSPMetadata;
 import com.sun.xml.ws.policy.impl.bindings.AppliesTo;
 import com.sun.xml.ws.security.IssuedTokenContext;
+import com.sun.xml.ws.security.Token;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.security.trust.WSTrustFactory;
@@ -58,23 +59,24 @@ import com.sun.xml.ws.security.trust.elements.Lifetime;
 import com.sun.xml.ws.security.trust.elements.OnBehalfOf;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponse;
+import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponseCollection;
 import com.sun.xml.ws.security.trust.elements.RequestedAttachedReference;
 import com.sun.xml.ws.security.trust.elements.RequestedProofToken;
 import com.sun.xml.ws.security.trust.elements.RequestedSecurityToken;
 import com.sun.xml.ws.security.trust.elements.RequestedUnattachedReference;
+import com.sun.xml.ws.security.trust.elements.SecondaryParameters;
+import com.sun.xml.ws.security.trust.elements.UseKey;
 import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
 import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
 import com.sun.xml.ws.security.trust.util.WSTrustUtil;
 import com.sun.xml.ws.security.wsu10.AttributedDateTime;
 import com.sun.xml.wss.impl.misc.SecurityUtil;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.security.AccessControlContext;
 import java.security.AccessController;
 import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
@@ -97,22 +99,25 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
             LogDomainConstants.TRUST_IMPL_DOMAIN_BUNDLE);
     
     protected STSConfiguration stsConfig;
-    
-    protected static final WSTrustElementFactory eleFac = WSTrustElementFactory.newInstance();
-    protected static final SimpleDateFormat calendarFormatter
-            = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'sss'Z'", Locale.getDefault());
+    protected WSTrustVersion wstVer;
+    protected WSTrustElementFactory eleFac;
     
     private static final int DEFAULT_KEY_SIZE = 256;
     
-    public void init(STSConfiguration config) {
-        this.stsConfig = config;
+    public void init(final STSConfiguration stsConfig) {
+        this.stsConfig = stsConfig;
+        this.wstVer = (WSTrustVersion)stsConfig.getOtherOptions().get(WSTrustConstants.WST_VERSION);
+        eleFac = WSTrustElementFactory.newInstance(wstVer);
     }
 
     public BaseSTSResponse issue(BaseSTSRequest request, IssuedTokenContext context) throws WSTrustException {
-        WSTrustVersion wstVer = (WSTrustVersion)stsConfig.getOtherOptions().get(WSTrustConstants.WST_VERSION);
         RequestSecurityToken rst = (RequestSecurityToken)request;
+        SecondaryParameters secParas = null;
+        if (wstVer.getNamespaceURI().equals(WSTrustVersion.WS_TRUST_13_NS_URI)){
+            secParas = rst.getSecondaryParameters();
+        }
         
-        // Get AppliesTo
+       // Get token scope
         final AppliesTo applies = rst.getAppliesTo();
         String appliesTo = null;
         if(applies != null){
@@ -189,8 +194,13 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
                     user, tokenType, appliesTo));
         }
         
+         // Get claimed attributes
+        Claims claims = rst.getClaims();
+        if (claims == null && secParas != null){
+            claims = secParas.getClaims();
+        }
+        
         // Get claimed attributes from the STSAttributeProvider
-        final Claims claims = rst.getClaims();
         final STSAttributeProvider attrProvider = WSTrustFactory.getSTSAttributeProvider();
         final Map<QName, List<String>> claimedAttrs = attrProvider.getClaimedAttributes(subject, appliesTo, tokenType, claims);
         
@@ -202,14 +212,8 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
         RequestedProofToken proofToken = null;
         Entropy serverEntropy = null;
         int keySize = 0;
-        if (WSTrustConstants.SYMMETRIC_KEY.equals(keyType)){
-            //============================
-            // Create required secret key
-            //============================
-            
-            proofToken = eleFac.createRequestedProofToken();
-            
-            // Get client entropy
+        if (wstVer.getSymmetricKeyTypeURI().equals(keyType)){
+             // Get client entropy
             byte[] clientEntr = null;
             final Entropy clientEntropy = rst.getEntropy();
             if (clientEntropy != null){
@@ -225,6 +229,9 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
             }
             
             keySize = (int)rst.getKeySize();
+            if (keySize < 1 && secParas != null){
+                keySize = (int) secParas.getKeySize();
+            }
             if (keySize < 1){
                 keySize = DEFAULT_KEY_SIZE;
             }
@@ -236,20 +243,31 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
             byte[] key = WSTrustUtil.generateRandomSecret(keySize/8);
             final BinarySecret serverBS = eleFac.createBinarySecret(key, wstVer.getNonceBinarySecretTypeURI());
             serverEntropy = eleFac.createEntropy(serverBS);
-            proofToken.setProofTokenType(RequestedProofToken.COMPUTED_KEY_TYPE);
             
             // compute the secret key
             try {
-                proofToken.setComputedKey(URI.create(WSTrustConstants.CK_PSHA1));
-                key = SecurityUtil.P_SHA1(clientEntr, key, keySize/8);
+                if (clientEntr != null && clientEntr.length > 0){
+                    proofToken.setComputedKey(URI.create(wstVer.getCKPSHA1algorithmURI()));
+                    proofToken.setProofTokenType(RequestedProofToken.COMPUTED_KEY_TYPE);
+                    key = SecurityUtil.P_SHA1(clientEntr, key, keySize/8);
+                }else{
+                    proofToken.setProofTokenType(RequestedProofToken.BINARY_SECRET_TYPE);
+                    proofToken.setBinarySecret(serverBS);
+                }
             } catch (Exception ex){
                 log.log(Level.SEVERE, 
-                        LogStringsMessages.WST_0013_ERROR_SECRET_KEY(WSTrustConstants.CK_PSHA1, keySize, appliesTo), ex);
-                throw new WSTrustException(LogStringsMessages.WST_0013_ERROR_SECRET_KEY(WSTrustConstants.CK_PSHA1, keySize, appliesTo), ex);
+                        LogStringsMessages.WST_0013_ERROR_SECRET_KEY(wstVer.getCKPSHA1algorithmURI(), keySize, appliesTo), ex);
+                throw new WSTrustException(LogStringsMessages.WST_0013_ERROR_SECRET_KEY(wstVer.getCKPSHA1algorithmURI(), keySize, appliesTo), ex);
             }
             
             context.setProofKey(key);
-        }else if(WSTrustConstants.PUBLIC_KEY.equals(keyType)){
+        }else if(wstVer.getPublicKeyTypeURI().equals(keyType)){
+            // Get UseKey
+            UseKey useKey = rst.getUseKey();
+            if (useKey != null){
+                Element keyInfo = (Element)useKey.getToken().getTokenValue();
+                stsConfig.getOtherOptions().put("ConfirmationKeyInfo", keyInfo);
+            }
             final Set certs = context.getRequestorSubject().getPublicCredentials();
             if(certs == null){
                 log.log(Level.SEVERE,
@@ -265,54 +283,60 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
                     addedClientCert = true;
                 }
             }
-            if(!addedClientCert){
+            if(!addedClientCert && useKey == null){
                 log.log(Level.SEVERE,
                         LogStringsMessages.WST_0034_UNABLE_GET_CLIENT_CERT());
                 throw new WSTrustException(LogStringsMessages.WST_0034_UNABLE_GET_CLIENT_CERT());
             }
+        }else if(wstVer.getBearerKeyTypeURI().equals(keyType)){
+            //No proof key required 
         }else{
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0025_INVALID_KEY_TYPE(keyType, appliesTo));
             throw new WSTrustException(LogStringsMessages.WST_0025_INVALID_KEY_TYPE(keyType, appliesTo));
         }
         
-        //================================
+        //========================================
+        // Create RequestedSecurityToken
+        //========================================
         // Create RequestedSecurityToken 
-        //================================
-        
-        //ToDo
-        
-        // Create RequestedSecurityToken 
-        final RequestedSecurityToken reqSecTok = null;
+        final RequestedSecurityToken reqSecTok = eleFac.createRequestedSecurityToken();
+        final Token issuedToken = null; //ToDo
+        reqSecTok.setToken(issuedToken);
         
         // Create RequestedAttachedReference and RequestedUnattachedReference
         final RequestedAttachedReference raRef =  null;
         final RequestedUnattachedReference ruRef = null;
         
+        //======================================
+        // Create RequestSecurityTokenResponse
+        //======================================
+        
         // get Context
         URI ctx = null;
-        try {
-            final String rstCtx = rst.getContext();
-            if (rstCtx != null){
-                ctx = new URI(rst.getContext());
-            }
-        } catch (URISyntaxException ex) {
-            log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0014_URI_SYNTAX(), ex);
-            throw new WSTrustException(
-                    LogStringsMessages.WST_0014_URI_SYNTAX() ,ex);
+        final String rstCtx = rst.getContext();
+        if (rstCtx != null){
+            ctx = URI.create(rstCtx);
         }
-        
+   
         // Create Lifetime
-        final Lifetime lifetime = createLifetime();
+        long currentTime = WSTrustUtil.getCurrentTimeWithOffset();
+        final Lifetime lifetime = WSTrustUtil.createLifetime(currentTime, stsConfig.getIssuedTokenTimeout(), wstVer);
         
         // Create RequestSecurityTokenResponse
         final RequestSecurityTokenResponse rstr =
-                eleFac.createRSTRForIssue(rst.getTokenType(), ctx, reqSecTok, applies, raRef, ruRef, proofToken, serverEntropy, lifetime);
+                eleFac.createRSTRForIssue(URI.create(tokenType), ctx, reqSecTok, applies, raRef, ruRef, proofToken, serverEntropy, lifetime);
         
         if (keySize > 0){
             rstr.setKeySize(keySize);
         }
+        
+         if(log.isLoggable(Level.FINE)) {
+                log.log(Level.FINE, 
+                        LogStringsMessages.WST_1006_CREATED_RST_ISSUE(WSTrustUtil.elemToString(rst, wstVer)));
+                log.log(Level.FINE, 
+                        LogStringsMessages.WST_1007_CREATED_RSTR_ISSUE(WSTrustUtil.elemToString(rstr, wstVer)));
+         }
         
         // Populate IssuedTokenContext
         //ToDo
@@ -339,33 +363,5 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
 
     public void handleUnsolicited(BaseSTSResponse rstr, IssuedTokenContext context) throws WSTrustException {
         throw new UnsupportedOperationException("Unsupported operation: handleUnsolicited");
-    }
-    
-    private long currentTime;
-    private Lifetime createLifetime() {
-        final Calendar cal = new GregorianCalendar();
-        int offset = cal.get(Calendar.ZONE_OFFSET);
-        if (cal.getTimeZone().inDaylightTime(cal.getTime())) {
-            offset += cal.getTimeZone().getDSTSavings();
-        }
-        synchronized (calendarFormatter) {
-            calendarFormatter.setTimeZone(cal.getTimeZone());
-            
-            // always send UTC/GMT time
-            final long beforeTime = cal.getTimeInMillis();
-            currentTime = beforeTime - offset;
-            cal.setTimeInMillis(currentTime);
-            
-            final AttributedDateTime created = new AttributedDateTime();
-            created.setValue(calendarFormatter.format(cal.getTime()));
-            
-            final AttributedDateTime expires = new AttributedDateTime();
-            cal.setTimeInMillis(currentTime + stsConfig.getIssuedTokenTimeout());
-            expires.setValue(calendarFormatter.format(cal.getTime()));
-            
-            final Lifetime lifetime = eleFac.createLifetime(created, expires);
-            
-            return lifetime;
-        }
     }
 }

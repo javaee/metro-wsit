@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityTokenResponseImpl.java,v 1.4 2008-01-17 20:01:13 jdg6688 Exp $
+ * $Id: RequestSecurityTokenResponseImpl.java,v 1.5 2008-01-24 01:51:13 jdg6688 Exp $
  */
 
 /*
@@ -45,6 +45,7 @@ import com.sun.xml.ws.security.trust.elements.Entropy;
 import com.sun.xml.ws.security.trust.elements.Lifetime;
 
 import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponse;
+import com.sun.xml.ws.security.trust.impl.wssx.WSTrustVersion13;
 import com.sun.xml.ws.security.trust.impl.wssx.bindings.AllowPostdatingType;
 import com.sun.xml.ws.security.trust.impl.wssx.bindings.AuthenticatorType;
 import com.sun.xml.ws.security.trust.impl.wssx.bindings.BinaryExchangeType;
@@ -64,14 +65,21 @@ import com.sun.xml.ws.security.trust.impl.wssx.bindings.RenewingType;
 import com.sun.xml.ws.security.trust.impl.wssx.bindings.SignChallengeType;
 import com.sun.xml.ws.security.trust.impl.wssx.bindings.StatusType;
 import com.sun.xml.ws.security.trust.impl.wssx.bindings.UseKeyType;
-
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
+import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
 /**
  * Implementation of a RequestSecurityTokenResponse.
  *
  * @author Manveen Kaur
  */
 public class RequestSecurityTokenResponseImpl extends RequestSecurityTokenResponseType implements RequestSecurityTokenResponse {
-    
+    private static final Logger log =
+            Logger.getLogger(
+            LogDomainConstants.TRUST_IMPL_DOMAIN,
+            LogDomainConstants.TRUST_IMPL_DOMAIN_BUNDLE);
+
     private URI tokenType = null;
     
     private long keySize = 0;
@@ -288,10 +296,14 @@ public class RequestSecurityTokenResponseImpl extends RequestSecurityTokenRespon
     }
     
     public void setKeyType(URI keytype) throws WSTrustException {
-        if (keytype == null || ! (keytype.toString().equalsIgnoreCase(RequestSecurityToken.PUBLIC_KEY_TYPE)
-        || keytype.toString().equalsIgnoreCase(RequestSecurityToken.SYMMETRIC_KEY_TYPE) ))
-            throw new WSTrustException("Invalid KeyType");
-        else {
+        WSTrustVersion wstVer = new WSTrustVersion13();
+        if (! (keytype.toString().equalsIgnoreCase(wstVer.getSymmetricKeyTypeURI())
+               || keytype.toString().equalsIgnoreCase(wstVer.getPublicKeyTypeURI())
+               || keytype.toString().equalsIgnoreCase(wstVer.getBearerKeyTypeURI()) )){
+             log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0025_INVALID_KEY_TYPE(keytype.toString(), null));
+            throw new WSTrustException(LogStringsMessages.WST_0025_INVALID_KEY_TYPE(keytype.toString(), null));
+        } else {
             this.keyType = keytype;
             JAXBElement<String> ktElement =
                     (new ObjectFactory()).createKeyType(keyType.toString());
