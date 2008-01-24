@@ -67,8 +67,6 @@ import javax.xml.ws.BindingProvider;
 import javax.xml.ws.WebServiceException;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
-import java.net.URI;
-import java.net.URISyntaxException;
 
 /**
  * Client-side Pipe implementation.
@@ -150,7 +148,7 @@ public final class RMClientTube extends TubeBase {
     // TODO remove suppress warnings annotation
     @SuppressWarnings("unchecked")
     private synchronized void initialize(Packet packet) throws RMException {
-        String dest = packet.endpointAddress.toString();
+        String destinationUriString = packet.endpointAddress.toString();
         if (outboundSequence != null) {
             //sequence has already been initialized. We need to
             //make sure that application programmer has not changed
@@ -159,7 +157,7 @@ public final class RMClientTube extends TubeBase {
             //allowable from the JAX-WS POV, but breaks the RM assumption
             //that sequences exactly correspond to connections between
             //single client instances and endpoints.
-            if (dest != null && !dest.equals("") && !dest.equals(outboundSequence.getDestination().toString())) {
+            if (destinationUriString != null && !destinationUriString.equals("") && !destinationUriString.equals(outboundSequence.getDestination().toString())) {
                 //WSRM2017: The Endpoint Address cannot be changed by a client of an RM-enabled endpoint//
                 throw LOGGER.logSevereException(new RMException(LocalizationMessages.WSRM_2017_UNCHANGEABLE_ENDPOINT_ADDRESS()));
             }
@@ -172,30 +170,26 @@ public final class RMClientTube extends TubeBase {
             this.proxy = packet.proxy;
 
             //make sure we have a destination
-            if (dest == null) {
-                dest = getWsdlPort().getAddress().toString();
-            }
-
-            URI destURI;
-            try {
-                destURI = new URI(dest);
-            } catch (URISyntaxException e) {
-                throw LOGGER.logSevereException(new RMException(LocalizationMessages.WSRM_2018_INVALID_DEST_URI(dest), e));
+            if (destinationUriString == null) {
+                destinationUriString = getWsdlPort().getAddress().toString();
             }
 
             // try to get outbound sequence from the request context
             outboundSequence = (ClientOutboundSequence) packet.proxy.getRequestContext().get(Constants.sequenceProperty);
             if (outboundSequence == null) {
                 //we need to connect to the back end.
-                JAXBElement<SecurityTokenReferenceType> str = null;
+                SecurityTokenReferenceType strType = null;
                 if (secureReliableMessaging) {
                     try {
-                        str = securityPipe.startSecureConversation(packet);
+                        JAXBElement<SecurityTokenReferenceType> strElement = securityPipe.startSecureConversation(packet);
+                        if (strElement != null) {
+                            strType = strElement.getValue();
+                        }
                     } catch (Exception e) {
-                        // TODO: L10N (+ handle exception + chatch only the particular subclass of Exception?)
+                        // TODO: L10N (+ handle exception + catch only the particular subclass of Exception?)
                         LOGGER.severe("Starting secure conversation failed", e);
                     }
-                    if (str == null) {
+                    if (strType == null) {
                         // Without this or if there was exception, no security configuration that does not include SC is allowed.
                         secureReliableMessaging = false;
                     }
@@ -203,8 +197,8 @@ public final class RMClientTube extends TubeBase {
 
                 outboundSequence = new ClientOutboundSequence(
                         getConfig(),
-                        str,
-                        destURI,
+                        strType,
+                        destinationUriString,
                         getConfig().getAnonymousAddressingUri(),
                         checkForTwoWayOperation(),
                         getUnmarshaller(),

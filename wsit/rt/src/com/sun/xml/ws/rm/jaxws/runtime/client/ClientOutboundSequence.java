@@ -56,11 +56,9 @@ import com.sun.xml.ws.rm.protocol.AbstractCreateSequenceResponse;
 import com.sun.xml.ws.rm.protocol.AbstractTerminateSequence;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
 
-import javax.xml.bind.JAXBElement;
 import javax.xml.transform.Source;
 import javax.xml.ws.Service;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
-import java.net.URI;
 import java.util.UUID;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.ws.BindingProvider;
@@ -87,10 +85,6 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
      *
      */
     private ProtocolMessageSender protocolMessageSender;
-    /**
-     * The SecurityTokenReference to pass to CreateSequence
-     */
-    private JAXBElement<SecurityTokenReferenceType> securityTokenReference = null;
     /**
      * Indicates whether the sequence uses anonymous acksTo
      */
@@ -130,9 +124,9 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
      */
     public ClientOutboundSequence(
             SequenceConfig config,
-            JAXBElement<SecurityTokenReferenceType> str,
-            URI destination,
-            URI acksTo,
+            SecurityTokenReferenceType str,
+            String destination,
+            String acksToUri,
             boolean twoWay,
             Unmarshaller unmarshaller,
             Tube nextTube,
@@ -142,10 +136,9 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
         //FIXME for now
         super.setBufferRemaining(config.getBufferSize());
 
-        this.securityTokenReference = str;
         this.protocolMessageSender = new ProtocolMessageSender(config, unmarshaller, nextTube, proxy, contentNegotiation);
 
-        this.connect(destination, acksTo, twoWay);
+        this.connect(destination, acksToUri, str, twoWay);
     }
 
     /**
@@ -231,21 +224,7 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
         this.service = service;
     }
 
-    /**
-     * Connects to remote RM Destination by sending request through the proxy
-     * stored in the <code>port</code> field.
-     *
-     * @param destination Destination URI for RM Destination
-     * @param acksTo reply to EPR for protocol responses.  The null value indicates
-     *          use of the WS-Addressing anonymous EPR
-     * @throws RMException wrapper for all exceptions thrown during execution of method.
-     */
-    private void connect(URI destination, URI acksTo, boolean twoWay) throws RMException {
-        LOGGER.entering(destination, acksTo, twoWay);
-        try {
-            this.setDestination(destination);
-            this.isAnonymous = (acksTo != null) ? getConfig().getAddressingVersion().anonymousUri.equals(acksTo.toString()) : true;
-
+    private AbstractCreateSequence prepareCreateSequenceMessage(String incomingId, boolean twoWay, SecurityTokenReferenceType strType) throws RMException {
             AbstractCreateSequence createSequence = null;
             if (getConfig().getRMVersion() == RMVersion.WSRM10) {
                 createSequence = new com.sun.xml.ws.rm.v200502.CreateSequenceElement();
@@ -266,11 +245,10 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
             }
             createSequence.setAcksTo(sourceEndpointReference);
 
-            String incomingID = "uuid:" + UUID.randomUUID();
             if (twoWay) {
                 if (getConfig().getRMVersion() == RMVersion.WSRM10) {
                     com.sun.xml.ws.rm.v200502.Identifier offerIdentifier = new com.sun.xml.ws.rm.v200502.Identifier();
-                    offerIdentifier.setValue(incomingID);
+                    offerIdentifier.setValue(incomingId);
 
                     com.sun.xml.ws.rm.v200502.OfferType offer = new com.sun.xml.ws.rm.v200502.OfferType();
                     offer.setIdentifier(offerIdentifier);
@@ -278,7 +256,7 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
                     ((com.sun.xml.ws.rm.v200502.CreateSequenceElement) createSequence).setOffer(offer);
                 } else {
                     com.sun.xml.ws.rm.v200702.Identifier offerIdentifier = new com.sun.xml.ws.rm.v200702.Identifier();
-                    offerIdentifier.setValue(incomingID);
+                    offerIdentifier.setValue(incomingId);
 
                     com.sun.xml.ws.rm.v200702.OfferType offer = new com.sun.xml.ws.rm.v200702.OfferType();
                     offer.setIdentifier(offerIdentifier);
@@ -288,15 +266,32 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
                 }
             }
 
-            AbstractCreateSequenceResponse csr;
-            if (securityTokenReference != null) {
-                createSequence.setSecurityTokenReference(securityTokenReference.getValue());
-                csr = protocolMessageSender.sendCreateSequence(createSequence, destination, acksTo, true);
-            } else {
-                // TODO check if the security flag is needed
-                csr = protocolMessageSender.sendCreateSequence(createSequence, destination, acksTo, false);
-            }
+            if (strType != null) {
+                createSequence.setSecurityTokenReference(strType);
+            }        
+            
+            return createSequence;
+    }
+    
+    /**
+     * Connects to remote RM Destination by sending request through the proxy
+     * stored in the <code>port</code> field.
+     *
+     * @param destination Destination URI for RM Destination
+     * @param acksTo reply to EPR for protocol responses.  The null value indicates
+     *          use of the WS-Addressing anonymous EPR
+     * @throws RMException wrapper for all exceptions thrown during execution of method.
+     */
+    private void connect(String destination, String acksToUri, SecurityTokenReferenceType strType, boolean twoWay) throws RMException {
+        LOGGER.entering(destination, acksToUri, twoWay);
+        try {
+            this.setDestination(destination);
+            this.isAnonymous = (acksToUri != null) ? getConfig().getAddressingVersion().anonymousUri.equals(acksToUri.toString()) : true;
 
+            String incomingID = "uuid:" + UUID.randomUUID();
+            AbstractCreateSequence createSequence = prepareCreateSequenceMessage(incomingID, twoWay, strType);           
+            // TODO check if the security flag is needed
+            AbstractCreateSequenceResponse csr = protocolMessageSender.sendCreateSequence(createSequence, destination, acksToUri, strType != null);
 
             // AbstractAcceptType accept = null;
             if (csr != null) {

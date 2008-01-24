@@ -52,7 +52,6 @@ import com.sun.xml.ws.rm.localization.LocalizationMessages;
 
 import com.sun.xml.ws.rm.localization.RmLogger;
 import java.math.BigInteger;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -70,7 +69,7 @@ public abstract class OutboundSequence extends Sequence {
     /**
      * Common destination for all application messages in the sequence.
      */
-    private URI destination;
+    private String destination;
     /**
      * Processing filter whose handleRequestHeaders method
      * can access headers before they are marshalled.
@@ -101,11 +100,11 @@ public abstract class OutboundSequence extends Sequence {
      *
      * @return The destination URI.
      */
-    public URI getDestination() {
+    public String getDestination() {
         return destination;
     }
 
-    public void setDestination(URI destination) {
+    public void setDestination(String destination) {
         this.destination = destination;
     }
 

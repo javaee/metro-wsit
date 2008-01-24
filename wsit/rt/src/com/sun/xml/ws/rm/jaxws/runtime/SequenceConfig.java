@@ -50,7 +50,6 @@ import com.sun.xml.ws.rm.Constants;
 import com.sun.xml.ws.rm.RMVersion;
 
 import com.sun.xml.ws.rm.localization.RmLogger;
-import java.net.URI;
 import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceException;
 import java.util.Iterator;
@@ -78,7 +77,7 @@ public class SequenceConfig implements SequenceSettings {
     private String acksTo;
     private long ackRequestInterval;
     private AddressingVersion addressingVersion;
-    private URI anonymousAddressingUri;
+    private String anonymousAddressingUri;
     private boolean allowDuplicatesEnabled;
     private int bufferSize;
     private long closeTimeout;
@@ -104,14 +103,7 @@ public class SequenceConfig implements SequenceSettings {
         this.ackRequestInterval = 0;
         this.addressingVersion = (addressing != null) ? addressing : AddressingVersion.W3C;
         this.acksTo = this.addressingVersion.anonymousUri;
-
-        try {
-            this.anonymousAddressingUri = new URI(this.addressingVersion.anonymousUri);
-        } catch (Throwable e) {
-            // TODO L10N
-            throw LOGGER.logSevereException(new WebServiceException("Unable to initialize sequence configuration due to an unexpected exception", e));
-        }
-
+        this.anonymousAddressingUri = this.addressingVersion.anonymousUri;
         this.allowDuplicatesEnabled = false;
         this.bufferSize = 32;
         this.closeTimeout = 0; //infinite
@@ -182,7 +174,7 @@ public class SequenceConfig implements SequenceSettings {
      *
      * @return The value of the property.
      */
-    public URI getAnonymousAddressingUri() {
+    public String getAnonymousAddressingUri() {
         return anonymousAddressingUri;
     }
 
@@ -357,7 +349,7 @@ public class SequenceConfig implements SequenceSettings {
                         } else if (RMVersion.WSRM11.sequenceTransportSecurityAssertionQName.equals(qname)) {
                             sequenceTransportSecurityRequired = true;
                         } else {
-                        //TODO handle error condition here
+                            //TODO handle error condition here
                         }
                     }
                 }

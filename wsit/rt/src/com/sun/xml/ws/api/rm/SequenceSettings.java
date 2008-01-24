@@ -48,7 +48,6 @@ import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.rm.RMVersion;
 import java.io.Serializable;
-import java.net.URI;
 
 /**
  * Initialization data for a sequence, which can be persisted
@@ -69,7 +68,7 @@ public interface SequenceSettings extends Serializable {
     /**
      * Accessor for <code>annonymousAddressingUri</code> property.
      */
-    public URI getAnonymousAddressingUri();
+    public String getAnonymousAddressingUri();
 
     /**
      * For OutboundSequences, determines whether destination guarantees ordered delivery.
