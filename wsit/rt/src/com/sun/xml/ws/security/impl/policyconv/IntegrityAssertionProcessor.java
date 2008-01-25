@@ -39,6 +39,7 @@ import com.sun.xml.ws.security.policy.SignedParts;
 import com.sun.xml.ws.security.policy.AlgorithmSuite;
 import com.sun.xml.ws.security.policy.Header;
 import com.sun.xml.ws.security.policy.SignedElements;
+import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.impl.policy.mls.SignaturePolicy;
 import com.sun.xml.wss.impl.policy.mls.SignatureTarget;
 import com.sun.xml.wss.impl.policy.mls.Target;
@@ -57,6 +58,7 @@ public class IntegrityAssertionProcessor {
     
     
     private boolean seenBody = false;
+    private boolean seenAttachments = false;
     private HashSet<Header> signParts  = new HashSet<Header>();
     private boolean allHeaders = false;
     private boolean ENFORCE = false;
@@ -107,6 +109,14 @@ public class IntegrityAssertionProcessor {
                     target.setContentOnly(contentOnly);
                     binding.addTargetBinding(target);
                     seenBody = true;
+                }
+            }
+            if(signedParts.hasAttachments()){
+                if(!seenAttachments){
+                    SignatureTarget target = targetCreator.newURISignatureTarget("");
+                    target.setValue(MessageConstants.PROCESS_ALL_ATTACHMENTS);
+                    binding.addTargetBinding(target);
+                    seenAttachments = true;
                 }
             }
         }

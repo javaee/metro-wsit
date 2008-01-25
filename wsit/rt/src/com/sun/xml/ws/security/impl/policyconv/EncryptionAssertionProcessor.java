@@ -40,6 +40,7 @@ import com.sun.xml.ws.security.policy.AlgorithmSuite;
 import com.sun.xml.ws.security.policy.EncryptedElements;
 import com.sun.xml.ws.security.policy.EncryptedParts;
 import com.sun.xml.ws.security.policy.Header;
+import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.impl.policy.mls.EncryptionPolicy;
 import com.sun.xml.wss.impl.policy.mls.EncryptionTarget;
 import java.util.HashSet;
@@ -54,6 +55,7 @@ import static com.sun.xml.ws.security.impl.policy.Constants.logger;
 public class EncryptionAssertionProcessor {
     private AlgorithmSuite algorithmSuite = null;
     private boolean bodyEncrypted = false;
+    private boolean encryptAttachments = false;
     private boolean enforce = false;
     private HashSet<Header> encryptedParts = new HashSet<Header>();
     //  private EncryptionTargetCreator etc =null;
@@ -93,6 +95,12 @@ public class EncryptionAssertionProcessor {
             target.setContentOnly(true);
             binding.addTargetBinding(target);         
             bodyEncrypted = true;
+        }
+        
+        if(encryptParts.hasAttachments() && !encryptAttachments){
+            EncryptionTarget target = etCreator.newURIEncryptionTarget(MessageConstants.PROCESS_ALL_ATTACHMENTS);
+            binding.addTargetBinding(target);
+            encryptAttachments = true;
         }
     }
     

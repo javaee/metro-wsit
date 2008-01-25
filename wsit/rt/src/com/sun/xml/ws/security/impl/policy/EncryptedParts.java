@@ -57,6 +57,7 @@ import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
 
 public class EncryptedParts extends PolicyAssertion implements com.sun.xml.ws.security.policy.EncryptedParts, SecurityAssertionValidator {
     private boolean _body;
+    private boolean _attachments;
     private List<Header> header;
     private boolean populated = false;
     private AssertionFitness fitness = AssertionFitness.IS_VALID;
@@ -79,6 +80,11 @@ public class EncryptedParts extends PolicyAssertion implements com.sun.xml.ws.se
     public boolean hasBody(){
         populate();
         return this._body;
+    }
+    
+    public boolean hasAttachments(){
+        populate();
+        return this._attachments;
     }
     
     public void addTarget(QName targetName) {
@@ -113,6 +119,8 @@ public class EncryptedParts extends PolicyAssertion implements com.sun.xml.ws.se
                     PolicyAssertion assertion = it.next();
                     if ( PolicyUtil.isBody(assertion, spVersion)) {
                         this._body = true;
+                    } else if(PolicyUtil.isAttachments(assertion, spVersion)){
+                        this._attachments = true;
                     } else {
                         if(header == null){
                             header = new ArrayList<Header>();

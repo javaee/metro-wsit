@@ -68,7 +68,7 @@ public class SecurityPolicyUtil {
     }
     
     public static boolean isSignedPartsEmpty(SignedParts sp){
-        if(!sp.hasBody()){
+        if(!(sp.hasBody() || sp.hasAttachments())){
             if(!sp.getHeaders().hasNext()){
                 return true;
             }
@@ -77,7 +77,7 @@ public class SecurityPolicyUtil {
     }
     
     public static boolean isEncryptedPartsEmpty(EncryptedParts ep){
-        if(!ep.hasBody()){
+        if(!(ep.hasBody() || ep.hasAttachments())){
             if(!ep.getTargets().hasNext()){
                 return true;
             }

@@ -65,7 +65,11 @@ public interface SignedParts extends Target {
      */
     public boolean hasBody();
     
-  
+    /**
+     * 
+     *  @return true if the attachments are to be integrity protected
+     */
+    public boolean hasAttachments();
     
     /**
      * {@link java.util.Iterator } over list of Headers that identify targets in the SOAP header

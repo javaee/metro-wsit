@@ -858,6 +858,7 @@ public class PolicyUtil {
     public static boolean isRequireServerEntropy(PolicyAssertion assertion, SecurityPolicyVersion spVersion) {
         if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
+
         }
         
         if(assertion.getName().getLocalPart().equals(RequireServerEntropy)) {
@@ -966,6 +967,18 @@ public class PolicyUtil {
         }
         
         if(assertion.getName().getLocalPart().equals(Constants.Body)){
+            return true;
+        }
+        return false;
+    }
+    
+    public static boolean isAttachments(PolicyAssertion assertion, SecurityPolicyVersion spVersion){
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
+            return false;
+        }
+        // sp:Attachments assertion is allowed only in 1.2  namespace
+        if(assertion.getName().getLocalPart().equals(Attachments) &&
+                assertion.getName().getNamespaceURI().equals(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri)) {
             return true;
         }
         return false;

@@ -57,6 +57,7 @@ import java.util.Set;
 public class SignedParts extends PolicyAssertion implements com.sun.xml.ws.security.policy.SignedParts, SecurityAssertionValidator {
     private AssertionFitness fitness = AssertionFitness.IS_VALID;
     private boolean body;
+    private boolean attachments;
     private boolean populated = false;
     private Set<PolicyAssertion> targets = new HashSet<PolicyAssertion>();
     private SecurityPolicyVersion spVersion;
@@ -83,6 +84,11 @@ public class SignedParts extends PolicyAssertion implements com.sun.xml.ws.secur
         return body;
     }
     
+    public boolean hasAttachments() {
+        populate();
+        return attachments;
+    }
+    
     public AssertionFitness validate(boolean isServer) {
         return populate(isServer);
     }
@@ -100,7 +106,9 @@ public class SignedParts extends PolicyAssertion implements com.sun.xml.ws.secur
                         // assertions.remove(as);
                         body = true;
                         // break;
-                    }else{
+                    } else if(PolicyUtil.isAttachments(as, spVersion)){
+                        attachments = true;
+                    } else{
                         targets.add(as);
                     }
                 }

@@ -57,6 +57,12 @@ public interface EncryptedParts extends Target {
      * @return true if the body is part of the target list.
      */
     public boolean hasBody();
+    
+    /**
+     * 
+     * @return true if attachments are part of the target list.
+     */
+    public boolean hasAttachments();
    
     /**
      * returns list of SOAP Headers that need to protected.
