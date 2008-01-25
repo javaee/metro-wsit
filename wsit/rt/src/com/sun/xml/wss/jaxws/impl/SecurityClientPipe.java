@@ -33,10 +33,7 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
-
 package com.sun.xml.wss.jaxws.impl;
-
 
 import com.sun.xml.ws.api.model.wsdl.WSDLFault;
 import com.sun.xml.ws.security.impl.kerberos.KerberosContext;
@@ -106,13 +103,13 @@ import com.sun.xml.wss.jaxws.impl.logging.LogStringsMessages;
  *  @author Vbkumar.Jayanti@Sun.COM, K.Venugopal@sun.com
  */
 public class SecurityClientPipe extends SecurityPipeBase implements SecureConversationInitiator {
-    
+
     // Plugin instances for Trust and SecureConversation invocation
     //private static TrustPlugin trustPlugin = WSTrustFactory.newTrustPlugin(null);
     private IssuedTokenManager itm = IssuedTokenManager.getInstance();
-    private WSSCPlugin  scPlugin;
+    private WSSCPlugin scPlugin;
     private Set trustConfig = null;
-    
+
     // Creates a new instance of SecurityClientPipe
     public SecurityClientPipe(WsitClientTubeAssemblyContext wsitContext, Pipe nextPipe) {
         super(new ClientPipeConfiguration(wsitContext.getPolicyMap(), wsitContext.getWsdlPort(), wsitContext.getBinding()), nextPipe);
@@ -120,7 +117,7 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
         CallbackHandler handler = null;
         try {
             Iterator it = outMessagePolicyMap.values().iterator();
-            SecurityPolicyHolder holder = (SecurityPolicyHolder)it.next();
+            SecurityPolicyHolder holder = (SecurityPolicyHolder) it.next();
             Set configAssertions = holder.getConfigAssertions(SUN_WSS_SECURITY_CLIENT_POLICY_NS);
             trustConfig = holder.getConfigAssertions(Constants.SUN_TRUST_CLIENT_SECURITY_POLICY_NS);
             Properties props = new Properties();
@@ -132,92 +129,91 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
             throw new RuntimeException(
                     LogStringsMessages.WSSPIPE_0023_ERROR_CREATING_NEW_INSTANCE_SEC_CLIENT_PIPE(), e);
         }
-        
-        
+
+
     }
-    
+
     // copy constructor
     protected SecurityClientPipe(SecurityClientPipe that) {
         super(that);
         trustConfig = that.trustConfig;
         scPlugin = that.scPlugin;
     }
-    
+
     public Packet process(Packet packet) {
-        
+
         // Add Action header to trust message
         boolean isTrustMsg = false;
-        if ("true".equals(packet.invocationProperties.get(WSTrustConstants.IS_TRUST_MESSAGE))){
+        if ("true".equals(packet.invocationProperties.get(WSTrustConstants.IS_TRUST_MESSAGE))) {
             isTrustMsg = true;
-            String action = (String)packet.invocationProperties.get(wsTrustVer.getIssueRequestAction());
+            String action = (String) packet.invocationProperties.get(wsTrustVer.getIssueRequestAction());
             HeaderList headers = packet.getMessage().getHeaders();
-            headers.fillRequestAddressingHeaders(packet, addVer, soapVersion,false, action);
+            headers.fillRequestAddressingHeaders(packet, addVer, soapVersion, false, action);
         }
-        
+
         // keep the message
         Message msg = packet.getMessage();
-        
+
         boolean isSCMessage = isSCMessage(packet);
-        
-        if (!isSCMessage && !isSCCancel(packet)){
+
+        if (!isSCMessage && !isSCCancel(packet)) {
             // this is an application message
             // initialize any secure-conversation sessions for this message
             invokeSCPlugin(packet);
         }
-        
+
         // invoke the Trust Plugin if necessary
         invokeTrustPlugin(packet, isSCMessage);
-        
+
         //---------------OUTBOUND SECURITY PROCESSING----------
         ProcessingContext ctx = initializeOutgoingProcessingContext(packet, isSCMessage);
-        ((ProcessingContextImpl)ctx).setIssuedTokenContextMap(issuedTokenContextMap);
-        
-        try{
-            if(hasKerberosTokenPolicy()){
-                populateKerberosContext(packet, (ProcessingContextImpl)ctx, isSCMessage);
-                ((ProcessingContextImpl)ctx).setKerberosContextMap(kerberosTokenContextMap);
+        ((ProcessingContextImpl) ctx).setIssuedTokenContextMap(issuedTokenContextMap);
+
+        try {
+            if (hasKerberosTokenPolicy()) {
+                populateKerberosContext(packet, (ProcessingContextImpl) ctx, isSCMessage);
             }
-        } catch(XWSSecurityException xwsse){
+        } catch (XWSSecurityException xwsse) {
             log.log(Level.SEVERE,
                     LogStringsMessages.WSSPIPE_0024_ERROR_SECURING_OUTBOUND_MSG(), xwsse);
             throw new WebServiceException(
                     LogStringsMessages.WSSPIPE_0024_ERROR_SECURING_OUTBOUND_MSG(), xwsse);
         }
-        
-        try{
-            if(!optimized) {
-                if(!isSCMessage){
+
+        try {
+            if (!optimized) {
+                if (!isSCMessage) {
                     cacheOperation(msg);
                 }
                 SOAPMessage soapMessage = msg.readAsSOAPMessage();
                 soapMessage = secureOutboundMessage(soapMessage, ctx);
                 msg = Messages.create(soapMessage);
-            }else{
+            } else {
                 msg = secureOutboundMessage(msg, ctx);
             }
-        } catch(SOAPException se){
+        } catch (SOAPException se) {
             log.log(Level.SEVERE,
                     LogStringsMessages.WSSPIPE_0024_ERROR_SECURING_OUTBOUND_MSG(), se);
             throw new WebServiceException(
                     LogStringsMessages.WSSPIPE_0024_ERROR_SECURING_OUTBOUND_MSG(), se);
         }
-        
+
         packet.setMessage(msg);
-        
+
         //--------INVOKE NEXT PIPE------------
         Packet ret = nextPipe.process(packet);
         // Could be OneWay
         if (ret == null || ret.getMessage() == null) {
             return ret;
         }
-        
+
         /* TODO:this piece of code present since payload should be read once*/
         if (!optimized) {
-            try{
+            try {
                 SOAPMessage sm = ret.getMessage().readAsSOAPMessage();
                 Message newMsg = Messages.create(sm);
                 ret.setMessage(newMsg);
-            }catch(SOAPException ex){
+            } catch (SOAPException ex) {
                 log.log(Level.SEVERE,
                         LogStringsMessages.WSSPIPE_0005_PROBLEM_PROC_SOAP_MESSAGE(), ex);
                 throw new WebServiceException(
@@ -225,24 +221,22 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
             }
         }
         //---------------INBOUND SECURITY VERIFICATION----------
-        
-        
+
+
         ctx = initializeInboundProcessingContext(ret);
         ctx.isClient(true);
-        if(hasKerberosTokenPolicy()){
-            ((ProcessingContextImpl)ctx).setKerberosContextMap(kerberosTokenContextMap);
-        }
-        ((ProcessingContextImpl)ctx).setIssuedTokenContextMap(issuedTokenContextMap);
-        ctx.setExtraneousProperty(ProcessingContext.OPERATION_RESOLVER, new PolicyResolverImpl(inMessagePolicyMap,inProtocolPM,cachedOperation,pipeConfig,addVer,true, rmVer));
-        
-        try{
+
+        ((ProcessingContextImpl) ctx).setIssuedTokenContextMap(issuedTokenContextMap);
+        ctx.setExtraneousProperty(ProcessingContext.OPERATION_RESOLVER, new PolicyResolverImpl(inMessagePolicyMap, inProtocolPM, cachedOperation, pipeConfig, addVer, true, rmVer));
+
+        try {
             msg = ret.getMessage();
             // Could be OneWay
             if (msg == null) {
                 return ret;
             }
-            
-            if(!optimized) {
+
+            if (!optimized) {
                 SOAPMessage soapMessage = msg.readAsSOAPMessage();
                 soapMessage = verifyInboundMessage(soapMessage, ctx);
                 if (msg.isFault()) {
@@ -255,7 +249,7 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
                     throw new SOAPFaultException(fault);
                 }
                 msg = Messages.create(soapMessage);
-            }else{
+            } else {
                 msg = verifyInboundMessage(msg, ctx);
             }
         } catch (XWSSecurityException xwse) {
@@ -263,63 +257,63 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
                     LogStringsMessages.WSSPIPE_0025_ERROR_VERIFY_INBOUND_MSG(), xwse);
             throw new WebServiceException(LogStringsMessages.WSSPIPE_0025_ERROR_VERIFY_INBOUND_MSG(),
                     getSOAPFaultException(xwse));
-        }catch(SOAPException se){
+        } catch (SOAPException se) {
             log.log(Level.SEVERE,
                     LogStringsMessages.WSSPIPE_0025_ERROR_VERIFY_INBOUND_MSG(), se);
             throw new WebServiceException(LogStringsMessages.WSSPIPE_0025_ERROR_VERIFY_INBOUND_MSG(), se);
         }
         resetCachedOperation();
         ret.setMessage(msg);
-        
-        if (isTrustMsg){
+
+        if (isTrustMsg) {
             //String action = getAction(ret);
             getAction(ret);
         }
-        
+
         return ret;
     }
-    
+
     private void invokeSCPlugin(Packet packet) {
-        
+
         // get the secure conversation policies pertaining to this operation
         List<PolicyAssertion> policies = getOutBoundSCP(packet.getMessage());
-        
+
         for (PolicyAssertion scAssertion : policies) {
-            Token scToken = (Token)scAssertion;
+            Token scToken = (Token) scAssertion;
             if (issuedTokenContextMap.get(scToken.getTokenId()) == null) {
-                
+
                 IssuedTokenContext ctx = scPlugin.process(
                         scAssertion, pipeConfig.getWSDLPort(), pipeConfig.getBinding(), this, marshaller, unmarshaller, packet.endpointAddress.toString(), packet, addVer);
-                issuedTokenContextMap.put(((Token)scAssertion).getTokenId(), ctx);
+                issuedTokenContextMap.put(((Token) scAssertion).getTokenId(), ctx);
             }
         }
     }
-    
+
     // returns a list of IssuedTokenPolicy Assertions contained in the
     // service policy
     protected List<PolicyAssertion> getIssuedTokenPolicies(Packet packet, String scope) {
         if (outMessagePolicyMap == null) {
             return new ArrayList<PolicyAssertion>();
         }
-        
+
         WSDLBoundOperation operation = null;
-        if(isTrustMessage(packet)){
-            operation = getWSDLOpFromAction(packet,false);
-        }else{
-            operation =getOperation(packet.getMessage());
+        if (isTrustMessage(packet)) {
+            operation = getWSDLOpFromAction(packet, false);
+        } else {
+            operation = getOperation(packet.getMessage());
         }
-        
-        SecurityPolicyHolder sph =(SecurityPolicyHolder) outMessagePolicyMap.get(operation);
-        if(sph == null){
+
+        SecurityPolicyHolder sph = (SecurityPolicyHolder) outMessagePolicyMap.get(operation);
+        if (sph == null) {
             return EMPTY_LIST;
         }
         return sph.getIssuedTokens();
     }
-    
+
     public JAXBElement startSecureConversation(Packet packet)
-    throws WSSecureConversationException {
-        
-        List toks =getOutBoundSCP(packet.getMessage());
+            throws WSSecureConversationException {
+
+        List toks = getOutBoundSCP(packet.getMessage());
         if (toks.isEmpty()) {
             if (log.isLoggable(Level.FINE)) {
                 log.log(Level.FINE,
@@ -329,185 +323,169 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
             return null;
         }
         //Note: Assuming only one SC assertion
-        Token tok = (Token)toks.get(0);
+        Token tok = (Token) toks.get(0);
         IssuedTokenContext ctx =
-                (IssuedTokenContext)issuedTokenContextMap.get(tok.getTokenId());
-        
+                (IssuedTokenContext) issuedTokenContextMap.get(tok.getTokenId());
+
         if (ctx == null) {
             ctx = scPlugin.process(
-                    (PolicyAssertion)tok, pipeConfig.getWSDLPort(), pipeConfig.getBinding(),
+                    (PolicyAssertion) tok, pipeConfig.getWSDLPort(), pipeConfig.getBinding(),
                     this, marshaller, unmarshaller, packet.endpointAddress.toString(), packet, addVer);
             ctx.setEndpointAddress(packet.endpointAddress.toString());
-            issuedTokenContextMap.put(((Token)tok).getTokenId(), ctx);
+            issuedTokenContextMap.put(((Token) tok).getTokenId(), ctx);
         }
-        
-        SecurityTokenReference str = (SecurityTokenReference)ctx.getUnAttachedSecurityTokenReference();
-        
+
+        SecurityTokenReference str = (SecurityTokenReference) ctx.getUnAttachedSecurityTokenReference();
+
         return WSTrustElementFactory.newInstance().toJAXBElement(str);
     }
-    
-    private void cancelSecurityContextToken(){
+
+    private void cancelSecurityContextToken() {
         Enumeration keys = issuedTokenContextMap.keys();
-        while (keys.hasMoreElements()){
-            String id = (String)keys.nextElement();
+        while (keys.hasMoreElements()) {
+            String id = (String) keys.nextElement();
             IssuedTokenContext ctx =
-                    (IssuedTokenContext)issuedTokenContextMap.get(id);
-            
-            if (ctx.getSecurityToken() instanceof SecurityContextToken){
+                    (IssuedTokenContext) issuedTokenContextMap.get(id);
+
+            if (ctx.getSecurityToken() instanceof SecurityContextToken) {
                 ctx = scPlugin.processCancellation(
-                        ctx, pipeConfig.getWSDLPort(), pipeConfig.getBinding(), this, marshaller, unmarshaller, ctx.getEndpointAddress(),addVer);
+                        ctx, pipeConfig.getWSDLPort(), pipeConfig.getBinding(), this, marshaller, unmarshaller, ctx.getEndpointAddress(), addVer);
                 issuedTokenContextMap.remove(id);
             }
         }
     }
-    
+
     public void preDestroy() {
         cancelSecurityContextToken();
         if (nextPipe != null) {
             nextPipe.preDestroy();
         }
         issuedTokenContextMap.clear();
-        kerberosTokenContextMap.clear();
     }
-    
+
     public Pipe copy(PipeCloner cloner) {
         Pipe clonedNextPipe = cloner.copy(nextPipe);
         Pipe copied = new SecurityClientPipe(this);
-        ((SecurityClientPipe)copied).setNextPipe(clonedNextPipe);
+        ((SecurityClientPipe) copied).setNextPipe(clonedNextPipe);
         cloner.add(this, copied);
         return copied;
     }
-    
+
     private void invokeTrustPlugin(Packet packet, boolean isSCMessage) {
-        
+
         List<PolicyAssertion> policies = null;
-        
+
         if (isSCMessage) {
-            Token scToken = (Token)packet.invocationProperties.get(SC_ASSERTION);
-            policies =  getIssuedTokenPoliciesFromBootstrapPolicy(scToken);
+            Token scToken = (Token) packet.invocationProperties.get(SC_ASSERTION);
+            policies = getIssuedTokenPoliciesFromBootstrapPolicy(scToken);
         } else {
             policies = getIssuedTokenPolicies(packet, OPERATION_SCOPE);
         }
-        
+
         PolicyAssertion preSetSTSAssertion = null;
         //URI stsEP = null;
         //URI wsdlLocation = null;
         //QName serviceName = null;
         //QName portName = null;
-        if(trustConfig != null){
+        if (trustConfig != null) {
             Iterator it = trustConfig.iterator();
-            while(it!=null && it.hasNext()) {
-                preSetSTSAssertion = (PolicyAssertion)it.next();
+            while (it != null && it.hasNext()) {
+                preSetSTSAssertion = (PolicyAssertion) it.next();
             }
-            //serviceName = (QName)packet.invocationProperties.get(WSTrustConstants.PROPERTY_SERVICE_NAME);
-            //portName = (QName)packet.invocationProperties.get(WSTrustConstants.PROPERTY_PORT_NAME);
+        //serviceName = (QName)packet.invocationProperties.get(WSTrustConstants.PROPERTY_SERVICE_NAME);
+        //portName = (QName)packet.invocationProperties.get(WSTrustConstants.PROPERTY_PORT_NAME);
         }
-        
+
         for (PolicyAssertion issuedTokenAssertion : policies) {
             //IssuedTokenContext ctx = trustPlugin.process(issuedTokenAssertion, preSetSTSAssertion, packet.endpointAddress.toString());
             //ToDo: Handling mixed trust versions??
             if (issuedTokenContextMap.get(
-                    ((Token)issuedTokenAssertion).getTokenId()) == null){
+                    ((Token) issuedTokenAssertion).getTokenId()) == null) {
                 try {
-                    STSIssuedTokenConfiguration config = new DefaultSTSIssuedTokenConfiguration(wsTrustVer.getNamespaceURI(), (IssuedToken)issuedTokenAssertion, preSetSTSAssertion); 
+                    STSIssuedTokenConfiguration config = new DefaultSTSIssuedTokenConfiguration(wsTrustVer.getNamespaceURI(), (IssuedToken) issuedTokenAssertion, preSetSTSAssertion);
                     String userName = (String) packet.invocationProperties.get(BindingProvider.USERNAME_PROPERTY);
                     String password = (String) packet.invocationProperties.get(BindingProvider.PASSWORD_PROPERTY);
-                    if (userName != null){
+                    if (userName != null) {
                         config.getOtherOptions().put(BindingProvider.USERNAME_PROPERTY, userName);
                     }
-                    if (password != null){
+                    if (password != null) {
                         config.getOtherOptions().put(BindingProvider.PASSWORD_PROPERTY, password);
                     }
-                    IssuedTokenContext ctx =itm.createIssuedTokenContext(config, packet.endpointAddress.toString());
+                    IssuedTokenContext ctx = itm.createIssuedTokenContext(config, packet.endpointAddress.toString());
                     itm.getIssuedToken(ctx);
                     issuedTokenContextMap.put(
-                        ((Token)issuedTokenAssertion).getTokenId(), ctx);
-                }catch(WSTrustException se){
+                            ((Token) issuedTokenAssertion).getTokenId(), ctx);
+                } catch (WSTrustException se) {
                     log.log(Level.SEVERE,
-                        LogStringsMessages.WSSPIPE_0035_ERROR_ISSUEDTOKEN_CREATION(), se);
+                            LogStringsMessages.WSSPIPE_0035_ERROR_ISSUEDTOKEN_CREATION(), se);
                     throw new WebServiceException(LogStringsMessages.WSSPIPE_0035_ERROR_ISSUEDTOKEN_CREATION(), se);
                 }
             }
         }
     }
-    
-    protected SecurityPolicyHolder addOutgoingMP(WSDLBoundOperation operation,Policy policy)throws PolicyException{
-        
-        
-        SecurityPolicyHolder sph = constructPolicyHolder(policy,false,false);
-        outMessagePolicyMap.put(operation,sph);
+
+    protected SecurityPolicyHolder addOutgoingMP(WSDLBoundOperation operation, Policy policy) throws PolicyException {
+
+
+        SecurityPolicyHolder sph = constructPolicyHolder(policy, false, false);
+        outMessagePolicyMap.put(operation, sph);
         return sph;
     }
-    
-    protected SecurityPolicyHolder addIncomingMP(WSDLBoundOperation operation,Policy policy)throws PolicyException{
-        
-        SecurityPolicyHolder sph = constructPolicyHolder(policy,false,true);
-        inMessagePolicyMap.put(operation,sph);
+
+    protected SecurityPolicyHolder addIncomingMP(WSDLBoundOperation operation, Policy policy) throws PolicyException {
+
+        SecurityPolicyHolder sph = constructPolicyHolder(policy, false, true);
+        inMessagePolicyMap.put(operation, sph);
         return sph;
     }
-    
-    protected void addIncomingProtocolPolicy(Policy effectivePolicy,String protocol)throws PolicyException{
-        inProtocolPM.put(protocol,constructPolicyHolder(effectivePolicy,false,true,true));
+
+    protected void addIncomingProtocolPolicy(Policy effectivePolicy, String protocol) throws PolicyException {
+        inProtocolPM.put(protocol, constructPolicyHolder(effectivePolicy, false, true, true));
     }
-    
-    protected void addOutgoingProtocolPolicy(Policy effectivePolicy,String protocol)throws PolicyException{
-        outProtocolPM.put(protocol,constructPolicyHolder(effectivePolicy,false,false,true));
+
+    protected void addOutgoingProtocolPolicy(Policy effectivePolicy, String protocol) throws PolicyException {
+        outProtocolPM.put(protocol, constructPolicyHolder(effectivePolicy, false, false, true));
     }
-    
-    protected void addIncomingFaultPolicy(Policy effectivePolicy,SecurityPolicyHolder sph,WSDLFault fault)throws PolicyException{
-        SecurityPolicyHolder faultPH = constructPolicyHolder(effectivePolicy,false,true);
-        sph.addFaultPolicy(fault,faultPH);
+
+    protected void addIncomingFaultPolicy(Policy effectivePolicy, SecurityPolicyHolder sph, WSDLFault fault) throws PolicyException {
+        SecurityPolicyHolder faultPH = constructPolicyHolder(effectivePolicy, false, true);
+        sph.addFaultPolicy(fault, faultPH);
     }
-    
-    protected void addOutgoingFaultPolicy(Policy effectivePolicy,SecurityPolicyHolder sph,WSDLFault fault)throws PolicyException{
-        SecurityPolicyHolder faultPH = constructPolicyHolder(effectivePolicy,false,false);
-        sph.addFaultPolicy(fault,faultPH);
+
+    protected void addOutgoingFaultPolicy(Policy effectivePolicy, SecurityPolicyHolder sph, WSDLFault fault) throws PolicyException {
+        SecurityPolicyHolder faultPH = constructPolicyHolder(effectivePolicy, false, false);
+        sph.addFaultPolicy(fault, faultPH);
     }
-    
-    protected String getAction(WSDLOperation operation,boolean inComming){
-        if(!inComming){
+
+    protected String getAction(WSDLOperation operation, boolean inComming) {
+        if (!inComming) {
             return operation.getInput().getAction();
-        }else{
+        } else {
             return operation.getOutput().getAction();
         }
     }
-    
-    protected void populateKerberosContext(Packet packet, ProcessingContextImpl ctx, boolean isSCMessage) throws XWSSecurityException{
-        List toks =getOutBoundKTP(packet, isSCMessage);
+
+    protected void populateKerberosContext(Packet packet, ProcessingContextImpl ctx, boolean isSCMessage) throws XWSSecurityException {
+        List toks = getOutBoundKTP(packet, isSCMessage);
         if (toks.isEmpty()) {
             return;
         }
         //Note: Assuming only one Kerberos token assertion
-        Token tok = (Token)toks.get(0);
+        Token tok = (Token) toks.get(0);
         String tokId = tok.getTokenId();
-        String sha1KerbToken = (String)ctx.getExtraneousProperty(MessageConstants.KERBEROS_SHA1_VALUE);
-        if(sha1KerbToken == null){
-            sha1KerbToken = this.kerberosTokenIdMap.get(tokId);
-            if(sha1KerbToken != null){
-                ctx.setExtraneousProperty(MessageConstants.KERBEROS_SHA1_VALUE, sha1KerbToken);
-            }
+        KerberosContext krbContext = ctx.getSecurityEnvironment().doKerberosLogin();
+
+        try {
+            byte[] krbSha1 = MessageDigest.getInstance("SHA-1").digest(krbContext.getKerberosToken());
+            String encKrbSha1 = Base64.encode(krbSha1);
+            ctx.setExtraneousProperty(MessageConstants.KERBEROS_SHA1_VALUE, encKrbSha1);
+            ctx.setKerberosContext(krbContext);
+        } catch (NoSuchAlgorithmException nsae) {
+            throw new XWSSecurityException(nsae);
         }
-        KerberosContext krbContext = null;
-        if(sha1KerbToken != null)
-            krbContext = kerberosTokenContextMap.get(sha1KerbToken);
-        
-        if(krbContext == null){
-            
-            krbContext = ctx.getSecurityEnvironment().doKerberosLogin();
-            try {
-                byte[] krbSha1 = MessageDigest.getInstance("SHA-1").digest(krbContext.getKerberosToken());
-                String encKrbSha1 = Base64.encode(krbSha1);
-                ctx.setExtraneousProperty(MessageConstants.KERBEROS_SHA1_VALUE, encKrbSha1);
-                kerberosTokenContextMap.put(encKrbSha1, krbContext);
-                this.kerberosTokenIdMap.put(tokId, encKrbSha1);
-            } catch (NoSuchAlgorithmException nsae) {
-                throw new XWSSecurityException(nsae);
-            }
-        } else{
-            krbContext.setOnce(false);
-        }
+
     }
-    
+
     //TODO use constants here
     private CallbackHandler configureClientHandler(Set configAssertions, Properties props) {
         //Properties props = new Properties();
@@ -522,7 +500,7 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
                     throw new RuntimeException(
                             LogStringsMessages.WSSPIPE_0033_INVALID_CALLBACK_HANDLER_CLASS(ret));
                 }
-                return (CallbackHandler)obj;
+                return (CallbackHandler) obj;
             }
             return new DefaultCallbackHandler("client", props);
         } catch (Exception e) {

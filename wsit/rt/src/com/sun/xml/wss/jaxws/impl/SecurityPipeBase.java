@@ -169,8 +169,6 @@ public abstract class SecurityPipeBase implements Pipe {
     // This map stores IssuedTokenContext against the Policy-Id
     protected Hashtable<String, IssuedTokenContext> issuedTokenContextMap = new Hashtable<String, IssuedTokenContext>();
     
-    protected Hashtable<String, KerberosContext> kerberosTokenContextMap = new Hashtable<String, KerberosContext>();
-    protected Hashtable<String, String> kerberosTokenIdMap = new Hashtable<String, String>();
     
     protected PipeConfiguration pipeConfig = null;
     
@@ -314,8 +312,6 @@ public abstract class SecurityPipeBase implements Pipe {
         disableIncPrefix = that.disableIncPrefix;
         encHeaderContent = that.encHeaderContent;
         issuedTokenContextMap = that.issuedTokenContextMap;
-        kerberosTokenContextMap = that.kerberosTokenContextMap;
-        kerberosTokenIdMap = that.kerberosTokenIdMap;
         secEnv = that.secEnv;
         isSOAP12 = that.isSOAP12;
         soapVersion = that.soapVersion;
