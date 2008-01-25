@@ -202,9 +202,6 @@ public abstract class WSITAuthContextBase  {
     // This map stores IssuedTokenContext against the Policy-Id
     protected Hashtable<String, IssuedTokenContext> issuedTokenContextMap = new Hashtable<String, IssuedTokenContext>();
     
-    protected Hashtable<String, KerberosContext> kerberosTokenContextMap = new Hashtable<String, KerberosContext>();
-    protected Hashtable<String, String> kerberosTokenIdMap = new Hashtable<String, String>();
-    
     //*************STATIC(s)**************************************
     //protected static QName bsOperationName =
     //        new QName("http://schemas.xmlsoap.org/ws/2005/02/trust","RequestSecurityToken");

@@ -265,9 +265,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         
         //---------------INBOUND SECURITY VERIFICATION----------
         ProcessingContext ctx = initializeInboundProcessingContext(packet);
-        if(hasKerberosTokenPolicy()){
-            ((ProcessingContextImpl)ctx).setKerberosContextMap(kerberosTokenContextMap);
-        }
+        
         //update the client subject passed to the AuthModule itself.
         ctx.setExtraneousProperty(MessageConstants.AUTH_SUBJECT, clientSubject);
         ctx.setExtraneousProperty(ctx.OPERATION_RESOLVER,
@@ -411,9 +409,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         //---------------OUTBOUND SECURITY PROCESSING----------
         ProcessingContext ctx = initializeOutgoingProcessingContext(retPacket, isSCIssueMessage);
         Message msg = retPacket.getMessage();
-        if(hasKerberosTokenPolicy()){
-            ((ProcessingContextImpl)ctx).setKerberosContextMap(kerberosTokenContextMap);
-        }
+        
         try{
             
             if (ctx.getSecurityPolicy() != null && ((MessagePolicy)ctx.getSecurityPolicy()).size() >0) {
