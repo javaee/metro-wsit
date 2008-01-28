@@ -94,7 +94,7 @@ public class RmTubeAppender {
      * Adds RM tube to the client-side tubeline, depending on whether RM is enabled or not.
      * 
      * @param context wsit client tubeline assembler context
-     * @param tubelineTail tail of the client-side tubeline being constructed
+     * @param next tail of the client-side tubeline being constructed
      * @return new tail of the client-side tubeline
      */
     public Pipe appendPipe(WsitClientTubeAssemblyContext context, Pipe next) throws WebServiceException {
@@ -114,7 +114,7 @@ public class RmTubeAppender {
      * Adds RM tube to the service-side tubeline, depending on whether RM is enabled or not.
      * 
      * @param context wsit service tubeline assembler context
-     * @param tubelineTail tail of the service-side tubeline being constructed
+     * @param next tail of the service-side tubeline being constructed
      * @return new head of the service-side tubeline
      */
     public Pipe appendPipe(WsitServerTubeAssemblyContext context, Pipe next) throws WebServiceException {
