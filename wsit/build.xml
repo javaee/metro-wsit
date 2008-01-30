@@ -171,6 +171,16 @@
              dest="lib/runtime/xws-security.src.zip" />
     </target>
     
+    <target name="integrate-policy-hudson"
+            description="integrates the last successful policy Hudson build">
+                
+        <get src="http://kohsuke.sfbay.sun.com/hudson/job/policy-core/lastSuccessfulBuild/artifact/target/policy.jar"
+             dest="${basedir}/lib/runtime/policy.jar" />
+        <get src="http://kohsuke.sfbay.sun.com/hudson/job/policy-core/lastSuccessfulBuild/artifact/target/policy-src.zip"
+             dest="${basedir}/lib/runtime/policy-src.zip" />
+        
+    </target>
+
     <target name="runtests">
       <ant antfile="run-ql-tests.xml"/>
     </target>
