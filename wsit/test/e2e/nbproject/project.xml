@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <!--
  DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  
@@ -35,7 +34,6 @@
  only if the new code is made subject to such option by the copyright
  holder.
 -->
-
 <project xmlns="http://www.netbeans.org/ns/project/1">
     <type>org.netbeans.modules.ant.freeform</type>
     <configuration>
@@ -78,7 +76,7 @@
         <java-data xmlns="http://www.netbeans.org/ns/freeform-project-java/1">
             <compilation-unit>
                 <package-root>testcases</package-root>
-                <classpath mode="compile">lib/harness-lib.jar;lib/harness.jar</classpath>
+                <classpath mode="compile">lib/harness-lib.jar:lib/harness.jar:../../lib/runtime/jaxws-api.jar:../../lib/runtime/jaxws-rt.jar</classpath>
                 <source-level>1.5</source-level>
             </compilation-unit>
         </java-data>
