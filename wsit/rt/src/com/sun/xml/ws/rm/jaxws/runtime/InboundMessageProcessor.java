@@ -36,8 +36,10 @@
 package com.sun.xml.ws.rm.jaxws.runtime;
 
 import com.sun.xml.ws.api.message.Header;
-import com.sun.xml.ws.api.message.HeaderList;
+import com.sun.xml.ws.rm.BufferFullException;
 import com.sun.xml.ws.rm.CloseSequenceException;
+import com.sun.xml.ws.rm.DuplicateMessageException;
+import com.sun.xml.ws.rm.InvalidMessageNumberException;
 import com.sun.xml.ws.rm.InvalidSequenceException;
 import com.sun.xml.ws.rm.MessageNumberRolloverException;
 import com.sun.xml.ws.rm.RMException;
@@ -65,6 +67,88 @@ public class InboundMessageProcessor {
 
     private InboundMessageProcessor() {
     }
+    
+    private static void processAckRequestHeader(Header header, Unmarshaller unmarshaller, RMMessage message, RMProvider provider) throws RMException, InvalidMessageNumberException {
+        try {
+            //dispatch to InboundSequence to construct response.
+            //TODO handle error condition no such sequence
+            AbstractAckRequested el = header.readAsJAXB(unmarshaller);
+            message.setAckRequestedElement(el);
+
+            String id = null;
+            if (el instanceof com.sun.xml.ws.rm.v200502.AckRequestedElement) {
+                id = ((com.sun.xml.ws.rm.v200502.AckRequestedElement) el).getId();
+            } else {
+                id = ((com.sun.xml.ws.rm.v200702.AckRequestedElement) el).getId();
+            }
+
+            InboundSequence seq = provider.getInboundSequence(id);
+            if (seq != null) {
+                seq.handleAckRequested();
+            }
+        } catch (JAXBException e) {
+            throw LOGGER.logSevereException(new RMException("Unable to unmarshall AckRequested RM header", e));
+        }
+    }
+
+    private static void processAckHeader(Header header, Unmarshaller unmarshaller, RMMessage message, RMProvider provider) throws InvalidMessageNumberException, RMException {
+        try {
+            AbstractSequenceAcknowledgement ackHeader = header.readAsJAXB(unmarshaller);
+
+            String ackHeaderId = null;
+            if (ackHeader instanceof com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement) {
+                ackHeaderId = ((com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement) ackHeader).getId();
+            } else {
+                ackHeaderId = ((com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement) ackHeader).getId();
+            }
+
+            message.setSequenceAcknowledgementElement(ackHeader);
+            OutboundSequence seq = provider.getOutboundSequence(ackHeaderId);
+            if (seq != null) {
+                seq.handleAckResponse(ackHeader);
+            }
+        } catch (JAXBException e) {
+            throw LOGGER.logSevereException(new RMException("Unable to unmarshall SequenceAcknowledgement RM header", e));
+        }
+    }
+
+    private static InboundSequence processSequenceHeader(Header header, Unmarshaller unmarshaller, RMMessage message, RMProvider provider, InboundSequence inseq) throws DuplicateMessageException, InvalidSequenceException, InvalidMessageNumberException, BufferFullException, CloseSequenceException, MessageNumberRolloverException, RMException {
+        try {
+            //identify sequence and message number from data in header and add
+            //the message to the sequence at the specified index.
+            //TODO handle error condition seq == null
+            AbstractSequence el = header.readAsJAXB(unmarshaller);
+            message.setSequenceElement(el);
+
+            String seqid = null;
+            int messageNumber;
+            if (el instanceof com.sun.xml.ws.rm.v200502.SequenceElement) {
+                seqid = ((com.sun.xml.ws.rm.v200502.SequenceElement) el).getId();
+                messageNumber = ((com.sun.xml.ws.rm.v200502.SequenceElement) el).getNumber();
+            } else {
+                seqid = ((com.sun.xml.ws.rm.v200702.SequenceElement) el).getId();
+                messageNumber = ((com.sun.xml.ws.rm.v200702.SequenceElement) el).getNumber();
+            }
+
+            if (messageNumber == Integer.MAX_VALUE) {
+                throw LOGGER.logSevereException(new MessageNumberRolloverException(LocalizationMessages.WSRM_3026_MESSAGE_NUMBER_ROLLOVER(messageNumber), messageNumber));
+            }
+
+            inseq = provider.getInboundSequence(seqid);
+            if (inseq != null) {
+                if (inseq.isClosed()) {
+                    throw LOGGER.logSevereException(new CloseSequenceException(LocalizationMessages.WSRM_3029_SEQUENCE_CLOSED(seqid), seqid));
+                }
+                //add message to ClientInboundSequence
+                inseq.set(messageNumber, message);
+            } else {
+                throw LOGGER.logSevereException(new InvalidSequenceException(LocalizationMessages.WSRM_3022_UNKNOWN_SEQUENCE_ID_IN_MESSAGE(seqid), seqid));
+            }
+        } catch (JAXBException e) {
+            throw LOGGER.logSevereException(new RMException("Unable to unmarshall Sequence RM header", e));
+        }
+        return inseq;
+    }
 
     /**
      * For each inbound <code>Message</code>, invokes protocol logic dictated by the contents of the
@@ -88,88 +172,19 @@ public class InboundMessageProcessor {
          * depending on the type.
          */
         InboundSequence inseq = null;
-        Header header = getHeader(message.getHeaders(), "Sequence", rmVersion);
+        Header header = getHeader(message, "Sequence", rmVersion);
         if (header != null) {
-            try {
-                //identify sequence and message number from data in header and add
-                //the message to the sequence at the specified index.
-                //TODO handle error condition seq == null
-                AbstractSequence el = header.readAsJAXB(unmarshaller);
-                message.setSequenceElement(el);
-
-                String seqid = null;
-                int messageNumber;
-                if (el instanceof com.sun.xml.ws.rm.v200502.SequenceElement) {
-                    seqid = ((com.sun.xml.ws.rm.v200502.SequenceElement) el).getId();
-                    messageNumber = ((com.sun.xml.ws.rm.v200502.SequenceElement) el).getNumber();
-                } else {
-                    seqid = ((com.sun.xml.ws.rm.v200702.SequenceElement) el).getId();
-                    messageNumber = ((com.sun.xml.ws.rm.v200702.SequenceElement) el).getNumber();
-                }
-
-                if (messageNumber == Integer.MAX_VALUE) {
-                    throw LOGGER.logSevereException(new MessageNumberRolloverException(LocalizationMessages.WSRM_3026_MESSAGE_NUMBER_ROLLOVER(messageNumber), messageNumber));
-                }
-
-                inseq = provider.getInboundSequence(seqid);
-                if (inseq != null) {
-                    if (inseq.isClosed()) {
-                        throw LOGGER.logSevereException(new CloseSequenceException(LocalizationMessages.WSRM_3029_SEQUENCE_CLOSED(seqid), seqid));
-                    }
-                    //add message to ClientInboundSequence
-                    inseq.set(messageNumber, message);
-                } else {
-                    throw LOGGER.logSevereException(new InvalidSequenceException(LocalizationMessages.WSRM_3022_UNKNOWN_SEQUENCE_ID_IN_MESSAGE(seqid), seqid));
-                }
-            } catch (JAXBException e) {
-                throw LOGGER.logSevereException(new RMException("Unable to unmarshall Sequence RM header", e));
-            }
+            inseq = processSequenceHeader(header, unmarshaller, message, provider, inseq);
         }
 
-        header = getHeader(message.getHeaders(), "SequenceAcknowledgement", rmVersion);
+        header = getHeader(message, "SequenceAcknowledgement", rmVersion);
         if (header != null) {
-            try {
-                AbstractSequenceAcknowledgement ackHeader = header.readAsJAXB(unmarshaller);
-
-                String ackHeaderId = null;
-                if (ackHeader instanceof com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement) {
-                    ackHeaderId = ((com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement) ackHeader).getId();
-                } else {
-                    ackHeaderId = ((com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement) ackHeader).getId();
-                }
-
-                message.setSequenceAcknowledgementElement(ackHeader);
-                OutboundSequence seq = provider.getOutboundSequence(ackHeaderId);
-                if (seq != null) {
-                    seq.handleAckResponse(ackHeader);
-                }
-            } catch (JAXBException e) {
-                throw LOGGER.logSevereException(new RMException("Unable to unmarshall SequenceAcknowledgement RM header", e));
-            }
+            processAckHeader(header, unmarshaller, message, provider);
         }
 
-        header = getHeader(message.getHeaders(), "AckRequested", rmVersion);
+        header = getHeader(message, "AckRequested", rmVersion);
         if (header != null) {
-            try {
-                //dispatch to InboundSequence to construct response.
-                //TODO handle error condition no such sequence
-                AbstractAckRequested el = header.readAsJAXB(unmarshaller);
-                message.setAckRequestedElement(el);
-
-                String id = null;
-                if (el instanceof com.sun.xml.ws.rm.v200502.AckRequestedElement) {
-                    id = ((com.sun.xml.ws.rm.v200502.AckRequestedElement) el).getId();
-                } else {
-                    id = ((com.sun.xml.ws.rm.v200702.AckRequestedElement) el).getId();
-                }
-
-                InboundSequence seq = provider.getInboundSequence(id);
-                if (seq != null) {
-                    seq.handleAckRequested();
-                }
-            } catch (JAXBException e) {
-                throw LOGGER.logSevereException(new RMException("Unable to unmarshall AckRequested RM header", e));
-            }
+            processAckRequestHeader(header, unmarshaller, message, provider);
         } else {
             // FIXME - We need to be checking whether this is a ServerInboundSequence
             // in a port with a two-way operation.  This is the case where MS
@@ -193,7 +208,7 @@ public class InboundMessageProcessor {
      * JAX-WS message's HeaderList
      * @param name The name of the Header to find.
      */
-    private static Header getHeader(HeaderList headers, String name, RMVersion rmVersion) {
-        return (headers != null) ? headers.get(rmVersion.namespaceUri, name, true) : null;
+    private static Header getHeader(RMMessage message, String name, RMVersion rmVersion) {
+        return (message.getHeaders() != null) ? message.getHeaders().get(rmVersion.namespaceUri, name, true) : null;
     }
 }

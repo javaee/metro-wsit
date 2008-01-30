@@ -42,7 +42,8 @@ package com.sun.xml.ws.rm.runtime;
 public interface SequenceManager {
 
     /**
-     * Creates a new outbound sequence object
+     * Creates a new outbound sequence object with a given Id. It is assumed that RM handshake has been alrady established,
+     * thus no RM handshake is performed.
      * 
      * TODO: shall we move this function into a differnet interface?
      * @param configuration RM configuration for the created sequence

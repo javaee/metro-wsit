@@ -79,7 +79,7 @@ public interface Configuration {
      * TODO: probably should not be here...
      * @return the SOAP protocol version used on the RM-enabled endpoint
      */
-    public SOAPVersion getSOAPVersion();
+    public SOAPVersion getSoapVersion();
 
     /**
      * Provides information about the WS-Addressing protocol version used on the RM-enabled endpoint.

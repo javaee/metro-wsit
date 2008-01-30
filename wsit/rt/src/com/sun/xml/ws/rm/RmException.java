@@ -36,18 +36,36 @@
 
 package com.sun.xml.ws.rm;
 
+import com.sun.xml.ws.api.message.Message;
+
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public class RmException extends Exception {
-
+    private final Message fault;
+    
     public RmException(String message, Throwable cause) {
         super(message, cause);
+        fault = null;
     }
 
     public RmException(String message) {
         super(message);
+        fault = null;
     }
     
+    public RmException(String message, Message fault) {
+        super(message);
+        this.fault = fault;
+    }
+
+    /**
+     * Returns a Message containign a Fault defined by WS-RM.
+     *
+     * @return The Fault message or null if there is no mapped Fault message
+     */
+    public Message getFault() {
+        return fault;
+    }
 }

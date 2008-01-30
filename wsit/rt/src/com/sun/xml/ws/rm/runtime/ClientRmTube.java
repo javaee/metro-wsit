@@ -43,6 +43,8 @@ import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.assembler.WsitClientTubeAssemblyContext;
 import com.sun.xml.ws.client.ClientTransportException;
+import com.sun.xml.ws.rm.CreateSequenceException;
+import com.sun.xml.ws.rm.RmException;
 import com.sun.xml.ws.rm.RmWsException;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import java.io.IOException;
@@ -60,22 +62,21 @@ public class ClientRmTube extends AbstractFilterTubeImpl {
 
     private static final RmLogger LOGGER = RmLogger.getLogger(ClientRmTube.class);
     private final ClientRmSession session;
-    private boolean resend;
-    private Packet currentRequestPacket;
+    private Packet originalPacketCopy;
+    private Packet processedPacketCopy;
 
     public ClientRmTube(ClientRmTube original, TubeCloner cloner) {
         super(original, cloner);
 
         this.session = original.session;
-        this.resend = false; // this is a single request processing-bound variable, setting to default in the tube copy
-        this.currentRequestPacket = null;
+        this.originalPacketCopy = null;
+        this.processedPacketCopy = null;
     }
 
     public ClientRmTube(WsitClientTubeAssemblyContext context, Tube next) throws RmWsException {
         super(next);
-        this.session = new ClientRmSession(context.getWsdlPort(), context.getBinding(), new ProtocolCommunicator(super.next));
-        this.resend = false;
-        this.currentRequestPacket = null;
+        this.session = new ClientRmSession(context.getWsdlPort(), context.getBinding(), new ProtocolCommunicator(super.next, context.getScInitiator()));
+        this.processedPacketCopy = null;
     }
 
     @Override
@@ -92,13 +93,25 @@ public class ClientRmTube extends AbstractFilterTubeImpl {
     public NextAction processRequest(Packet requestPacket) {
         LOGGER.entering();
         try {
-//            if (resend) { // this is a resend
-                // TODO (resending message): register with resend notifier and suspend, else send to next tube
-//            } else {
-                currentRequestPacket = session.processOutgoingPacket(requestPacket);
-                return super.processRequest(currentRequestPacket);
-//            }
+            if (isResend()) {
+                session.registerForResend(Fiber.current(), requestPacket);
+                return doSuspend(next);
+            } else { // this is a first-time processing
+                // we do not modify original packet in case we wanted to reuse it later                
+                originalPacketCopy = requestPacket.copy(true);
+                requestPacket = session.processOutgoingPacket(requestPacket);
+                processedPacketCopy = requestPacket.copy(true);
+                return super.processRequest(requestPacket);
+            }
         } catch (UnknownSequenceException ex) {
+            LOGGER.logSevereException(ex);
+            return doThrow(ex);
+        } catch (CreateSequenceException ex) {
+            // TODO: replace with general exception
+            LOGGER.logSevereException(ex);
+            return doThrow(ex);
+        } catch (RmException ex) {
+            // TODO: check if the processing is ok
             LOGGER.logSevereException(ex);
             return doThrow(ex);
         } finally {
@@ -110,17 +123,12 @@ public class ClientRmTube extends AbstractFilterTubeImpl {
     public NextAction processResponse(Packet responsePacket) {
         LOGGER.entering();
         try {
-            if (resend) {
-                // FIXME this is a hack because suspend can return only to processResponse for now; this should normally happen in processRequest()
-                resend = false;
-                return super.doInvoke(super.next, responsePacket);
-            } else {                
-                return super.processResponse(session.processIncommingPacket(responsePacket));
-            }
+            return super.processResponse(session.processIncommingPacket(responsePacket));
         } catch (UnknownSequenceException ex) {
             LOGGER.logSevereException(ex);
             return doThrow(ex);
         } finally {
+            clearResendFlag();
             LOGGER.exiting();
         }
     }
@@ -129,12 +137,9 @@ public class ClientRmTube extends AbstractFilterTubeImpl {
     public NextAction processException(Throwable throwable) {
         LOGGER.entering();
         try {
-            resend = checkResendPossibility(throwable);
-            if (resend) {
+            if (checkResendPossibility(throwable)) {
                 // eat exception and forward processing to this.processRequest() (INVOKE_AND_FORGET) for request message resend
-                // FIXME this is a hack because suspend can return only to processResponse for now...
-                session.registerForResend(Fiber.current(), currentRequestPacket);
-                return super.doSuspend();
+                return super.doInvokeAndForget(this, processedPacketCopy.copy(true));
             } else {
                 return super.processException(throwable);
             }
@@ -164,5 +169,14 @@ public class ClientRmTube extends AbstractFilterTubeImpl {
             }
         }
         return false;
+    }
+
+    private boolean isResend() {
+        return processedPacketCopy != null;
+    }
+
+    private void clearResendFlag() {
+        originalPacketCopy = null;
+        processedPacketCopy = null;
     }
 }

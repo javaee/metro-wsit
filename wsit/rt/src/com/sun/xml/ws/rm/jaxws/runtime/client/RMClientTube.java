@@ -177,27 +177,9 @@ public final class RMClientTube extends TubeBase {
             // try to get outbound sequence from the request context
             outboundSequence = (ClientOutboundSequence) packet.proxy.getRequestContext().get(Constants.sequenceProperty);
             if (outboundSequence == null) {
-                //we need to connect to the back end.
-                SecurityTokenReferenceType strType = null;
-                if (secureReliableMessaging) {
-                    try {
-                        JAXBElement<SecurityTokenReferenceType> strElement = securityPipe.startSecureConversation(packet);
-                        if (strElement != null) {
-                            strType = strElement.getValue();
-                        }
-                    } catch (Exception e) {
-                        // TODO: L10N (+ handle exception + catch only the particular subclass of Exception?)
-                        LOGGER.severe("Starting secure conversation failed", e);
-                    }
-                    if (strType == null) {
-                        // Without this or if there was exception, no security configuration that does not include SC is allowed.
-                        secureReliableMessaging = false;
-                    }
-                }
-
                 outboundSequence = new ClientOutboundSequence(
                         getConfig(),
-                        strType,
+                        tryObtainSecurityTokenReference(packet),
                         destinationUriString,
                         getConfig().getAnonymousAddressingUri(),
                         checkForTwoWayOperation(),
@@ -408,6 +390,34 @@ public final class RMClientTube extends TubeBase {
         }
 
         return doThrow(t);
+    }
+
+    /**
+     * If security is enabled, tries to initate secured conversatin and obtain the security token reference.
+     * 
+     * @param packet 
+     * @return security token reference of the initiated secured conversation, or {@code null} if there is no SC configured
+     */
+    private SecurityTokenReferenceType tryObtainSecurityTokenReference(Packet packet) {
+        //we need to connect to the back end.
+        SecurityTokenReferenceType strType = null;
+        if (secureReliableMessaging) {
+            try {
+                JAXBElement<SecurityTokenReferenceType> strElement = securityPipe.startSecureConversation(packet);
+                if (strElement != null) {
+                    strType = strElement.getValue();
+                }
+            } catch (Exception e) {
+                // TODO: L10N (+ handle exception + catch only the particular subclass of Exception?)
+                LOGGER.severe("Starting secure conversation failed", e);
+            }
+            if (strType == null) {
+                // Without this or if there was exception, no security configuration that does not include SC is allowed.
+                secureReliableMessaging = false;
+            }
+        }
+
+        return strType;
     }
 
     /* Inner classes */

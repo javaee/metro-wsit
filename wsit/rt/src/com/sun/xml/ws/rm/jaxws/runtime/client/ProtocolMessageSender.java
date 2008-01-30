@@ -44,7 +44,6 @@
 package com.sun.xml.ws.rm.jaxws.runtime.client;
 
 import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Headers;
 import com.sun.xml.ws.api.message.Message;
@@ -223,9 +222,9 @@ public class ProtocolMessageSender {
      *
      */
     public void sendLast(OutboundSequence seq) throws RMException {
-        Message request = createEmptyMessage(config.getSoapVersion());
+        Message request = Messages.createEmpty(config.getSoapVersion());
         com.sun.xml.ws.rm.v200502.SequenceElement el = createLastHeader(seq);
-        request.getHeaders().add(createHeader(el));
+        request.getHeaders().add(Headers.create(config.getRMVersion().jaxbContext, el));
 
         seq.setLast();
 
@@ -259,10 +258,10 @@ public class ProtocolMessageSender {
      */
     public void sendAckRequested(OutboundSequence seq, SOAPVersion version) throws RMException {
         try {
-            Message request = createEmptyMessage(version);
+            Message request = Messages.createEmpty(version);
             AbstractAckRequested el = createAckRequestedElement(seq);
             //request.getHeaders().add(Headers.create(version,marshaller,el));
-            request.getHeaders().add(createHeader(el));
+            request.getHeaders().add(Headers.create(config.getRMVersion().jaxbContext, el));
 
             Packet requestPacket = new Packet(request);
             requestPacket.proxy = this.proxy;
@@ -306,11 +305,7 @@ public class ProtocolMessageSender {
         Current API does not allow assignment of non-anon reply to, if we
         need to support non-anon acksTo.
          */
-        if (oneWay) {
-            requestPacket.getMessage().assertOneWay(true);
-        } else {
-            requestPacket.getMessage().assertOneWay(false);
-        }
+        requestPacket.getMessage().assertOneWay(oneWay);
         //list.fillRequestAddressingHeaders(port, binding, requestPacket, action);
         requestPacket.setEndPointAddressString(destination);
         requestPacket.getMessage().getHeaders().fillRequestAddressingHeaders(
@@ -328,15 +323,8 @@ public class ProtocolMessageSender {
 
             com.sun.xml.ws.rm.v200702.UsesSequenceSTR usesSequenceSTR = new com.sun.xml.ws.rm.v200702.UsesSequenceSTR();
             usesSequenceSTR.getOtherAttributes().put(new QName(config.getSoapVersion().nsUri, "mustUnderstand"), "true");
-            headerList.add(createHeader(usesSequenceSTR));
+            headerList.add(Headers.create(config.getRMVersion().jaxbContext, usesSequenceSTR));
         }
-    }
-
-    /**
-     * Create an empty message using correct SOAPVersion
-     */
-    private Message createEmptyMessage(SOAPVersion version) {
-        return Messages.createEmpty(version);
     }
 
     private AbstractCreateSequenceResponse unmarshallCreateSequenceResponse(Message response) throws RMException {
@@ -376,10 +364,6 @@ public class ProtocolMessageSender {
         }
 
         return ackRequestedElement;
-    }
-
-    private Header createHeader(Object obj) {
-        return Headers.create(config.getRMVersion().jaxbContext, obj);
     }
 
     public void sendCloseSequence(OutboundSequence seq) throws RMException {

@@ -68,4 +68,8 @@ public class InboundSequence extends AbstractSequence {
         return message;
     }
 
+    public int getLastMessageId() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
 }

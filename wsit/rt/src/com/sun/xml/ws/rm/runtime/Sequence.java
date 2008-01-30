@@ -101,6 +101,13 @@ public interface Sequence {
     public long getNextMessageId();
 
     /**
+     * Provides information on the last message id sent on this sequence
+     * 
+     * @return last message identifier registered on this sequence
+     */
+    public int getLastMessageId();
+
+    /**
      * Processes the outgoing message according to the type of the sequence (inbound/outbound)
      * 
      * @param message message to process

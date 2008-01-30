@@ -91,8 +91,8 @@ class Rm11ClientConfiguration implements Configuration {
         return destinationConfig.getRMVersion();
     }
 
-    public SOAPVersion getSOAPVersion() {
-        return destinationConfig.getSOAPVersion();
+    public SOAPVersion getSoapVersion() {
+        return destinationConfig.getSoapVersion();
     }
 
     public AddressingVersion getAddressingVersion() {

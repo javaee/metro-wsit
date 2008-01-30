@@ -35,10 +35,17 @@
  */
 package com.sun.xml.ws.rm.runtime;
 
+import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.api.pipe.Tube;
+import com.sun.xml.ws.rm.localization.RmLogger;
+import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
+import com.sun.xml.ws.security.secconv.WSSecureConversationException;
+import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
+import javax.xml.bind.JAXBElement;
 
 /**
  * Transmits standalone protocol messages over the wire.
@@ -47,24 +54,79 @@ import com.sun.xml.ws.api.pipe.Tube;
  */
 public class ProtocolCommunicator {
 
+    private static final RmLogger LOGGER = RmLogger.getLogger(ProtocolCommunicator.class);
     private final Tube tubeline;
+    private Packet musterRequestPacket;
+    private AddressingVersion addressingVersion;
+    private SOAPVersion soapVersion;
+    private final SecureConversationInitiator scInitiator;
 
-    public ProtocolCommunicator(Tube tubeline) {
+    public ProtocolCommunicator(Tube tubeline, SecureConversationInitiator scInitiator) {
         this.tubeline = tubeline;
+        this.scInitiator = scInitiator;
+    }
+
+    /**
+     * This method must be called before the {@link ProtocolCommunicator} is used for the first time to send a message.
+     * 
+     * @param muster a packet that will be used as a muster for creating new request packets used to carry the messages.
+     */
+    public void registerMusterRequestPacket(Packet muster) {
+        musterRequestPacket = muster;
+    }
+
+    /**
+     * Creates a new request packet and wraps a {@link Message} instance into it
+     * 
+     * @param message nullable, {@link Message} instance to be wrapped into the packet
+     * @return a new request packet that wraps given {@link Message} instance
+     */
+    private Packet createPacket(Message message, String action) {
+        Packet newPacket = musterRequestPacket.copy(false);
+        newPacket.setMessage(message);
+
+        /*ADDRESSING FIX_ME
+        Current API does not allow assignment of non-anon reply to, if we
+        need to support non-anon acksTo.
+         */
+        message.assertOneWay(false); // TODO do we really need to call this assert here?
+        message.getHeaders().fillRequestAddressingHeaders(
+                newPacket,
+                addressingVersion,
+                soapVersion,
+                false,
+                action);
+
+        return newPacket;
+    }
+
+    /**
+     * If security is enabled, tries to initate secured conversation and obtain the security token reference.
+     * 
+     * @return security token reference of the initiated secured conversation, or {@code null} if there is no SC configured
+     */
+    public SecurityTokenReferenceType tryStartSecureConversation() {
+        JAXBElement<SecurityTokenReferenceType> strElement = null;
+        if (scInitiator != null) {
+            try {
+                strElement = scInitiator.startSecureConversation(musterRequestPacket.copy(false));
+            } catch (WSSecureConversationException ex) {
+                // TODO L10N
+                LOGGER.severe("Unable to start secure conversation", ex);
+            }
+        }
+        return (strElement != null) ? strElement.getValue() : null;
     }
 
     /**
      * Sends protocol request message and returns the corresponding response message.
      * 
-     * @param request message to send.
-     * @return response received on the sent message.
+     * @param requestMessage message to send
+     * @return response message received
      */
-    public Message send(Message request) {
-        Packet requestPacket = new Packet(request);
-        //TODO set proxy if needed requestPacket.proxy = this.proxy;
-        //TODO set content negotiation if needed requestPacket.contentNegotiation = this.contentNegotiation;        
+    public Message send(Message requestMessage, String action) {
         Fiber fiber = Fiber.current().owner.createFiber(); // TODO: could we possibly reuse the same fiber?
-        Packet responsePacket = fiber.runSync(tubeline, requestPacket);
+        Packet responsePacket = fiber.runSync(tubeline, createPacket(requestMessage, action));
         return responsePacket.getMessage();
     }
 }
