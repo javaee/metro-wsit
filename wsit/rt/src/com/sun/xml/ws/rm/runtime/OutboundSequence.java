@@ -72,9 +72,4 @@ public class OutboundSequence extends AbstractSequence {
         // TODO: process sequence acknowledgement header if present
         throw new UnsupportedOperationException("Not supported yet.");
     }
-
-    public int getLastMessageId() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
 }

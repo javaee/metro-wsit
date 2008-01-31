@@ -733,7 +733,7 @@ public final class RMServerTube extends TubeBase {
 
             //add message to ClientInboundSequence so that this message
             //number appears in sequence acknowledgement
-            int messageNumber = el.getNumber();
+            int messageNumber = (int) el.getNumber();
             seq.set(messageNumber, new RMMessage(message));
             return generateAckMessage(inbound, seq, getConfig().getRMVersion().lastAction);
         } catch (JAXBException e) {

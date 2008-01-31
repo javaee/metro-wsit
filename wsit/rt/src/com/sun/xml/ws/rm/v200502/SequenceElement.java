@@ -63,7 +63,7 @@ public class SequenceElement extends AbstractSequence {
     @XmlElement(name = "Identifier", namespace = "http://schemas.xmlsoap.org/ws/2005/02/rm")
     protected Identifier identifier;
     @XmlElement(name = "MessageNumber", namespace = "http://schemas.xmlsoap.org/ws/2005/02/rm")
-    protected Integer messageNumber;
+    protected Long messageNumber;
     @XmlElement(name = "LastMessage", namespace = "http://schemas.xmlsoap.org/ws/2005/02/rm")
     protected LastMessage lastMessage;
     @XmlAnyElement(lax = true)
@@ -98,28 +98,6 @@ public class SequenceElement extends AbstractSequence {
      */
     public String getId() {
         return getIdentifier().getValue();
-    }
-
-    /**
-     * Mutator for the Number property which maps to the MessageNumber property in
-     * the underlying JAXB class.
-     * 
-     * @param l The Message number.
-     */
-    @Override
-    public void setNumber(int l) {
-        setMessageNumber(l);
-    }
-
-    /**
-     * Accessor for the Number property which maps to the MessageNumber property in
-     * the underlying JAXB class.
-     * 
-     * @return The Message number.
-     */
-    @Override
-    public int getNumber() {
-        return getMessageNumber();
     }
 
     /**
@@ -170,7 +148,7 @@ public class SequenceElement extends AbstractSequence {
      * @return The value of the property.
      *     
      */
-    public Integer getMessageNumber() {
+    public Long getMessageNumber() {
         return messageNumber;
     }
 
@@ -180,7 +158,7 @@ public class SequenceElement extends AbstractSequence {
      * @param value The new value.
      *     
      */
-    public void setMessageNumber(Integer value) {
+    public void setMessageNumber(Long value) {
         this.messageNumber = value;
     }
 

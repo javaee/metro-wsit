@@ -73,7 +73,7 @@ public abstract class AbstractSequence {
      *
      * @param l The Message number.
      */
-    public void setNumber(int l) {
+    public void setNumber(long l) {
         setMessageNumber(l);
     }
 
@@ -83,7 +83,7 @@ public abstract class AbstractSequence {
      *
      * @return The Message number.
      */
-    protected int getNumber() {
+    public long getNumber() {
         return getMessageNumber();
     }
 
@@ -93,7 +93,7 @@ public abstract class AbstractSequence {
      * @return The value of the property.
      *
      */
-    protected abstract Integer getMessageNumber();
+    protected abstract Long getMessageNumber();
 
     /**
      * Sets the value of the messageNumber property.
@@ -101,7 +101,7 @@ public abstract class AbstractSequence {
      * @param value The new value.
      *
      */
-    public abstract void setMessageNumber(Integer value);
+    public abstract void setMessageNumber(Long value);
 
     /**
      * Gets the value of the any property.

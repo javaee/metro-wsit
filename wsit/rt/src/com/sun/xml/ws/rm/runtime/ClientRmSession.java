@@ -423,14 +423,14 @@ public class ClientRmSession {
         }
     }
 
-    public void sendCloseSequence(String outboundSequenceId, int lastMessageNumber) throws RmException, CloseSequenceException {
+    public void sendCloseSequence(String outboundSequenceId, long lastMessageNumber) throws RmException, CloseSequenceException {
 
         com.sun.xml.ws.rm.v200702.Identifier idClose = new com.sun.xml.ws.rm.v200702.Identifier();
         idClose.setValue(outboundSequenceId);
 
         com.sun.xml.ws.rm.v200702.CloseSequenceElement cs = new com.sun.xml.ws.rm.v200702.CloseSequenceElement();
         cs.setIdentifier(idClose);
-        cs.setLastMsgNumber(lastMessageNumber);
+        cs.setLastMsgNumber(lastMessageNumber); // TODO: modify the JAXB object to long
 
         Message closeSequenceRequest = Messages.create(configuration.getRMVersion().jaxbContext, cs, configuration.getSoapVersion());
 

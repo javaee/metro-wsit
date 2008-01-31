@@ -84,7 +84,7 @@ public class SequenceElement extends AbstractSequence {
     @XmlElement(name = "Identifier", required = true, namespace = "http://docs.oasis-open.org/ws-rx/wsrm/200702")
     protected Identifier identifier;
     @XmlElement(name = "MessageNumber", namespace = "http://docs.oasis-open.org/ws-rx/wsrm/200702")
-    protected Integer messageNumber;
+    protected Long messageNumber;
     @XmlAnyElement(lax = true)
     protected List<Object> any;
     @XmlAnyAttribute
@@ -118,7 +118,7 @@ public class SequenceElement extends AbstractSequence {
      * Gets the value of the messageNumber property.
      * 
      */
-    public Integer getMessageNumber() {
+    public Long getMessageNumber() {
         return messageNumber;
     }
 
@@ -126,7 +126,7 @@ public class SequenceElement extends AbstractSequence {
      * Sets the value of the messageNumber property.
      * 
      */
-    public void setMessageNumber(Integer value) {
+    public void setMessageNumber(Long value) {
         this.messageNumber = value;
     }
 
@@ -197,17 +197,6 @@ public class SequenceElement extends AbstractSequence {
      */
     public String getId() {
         return getIdentifier().getValue();
-    }
-
-    /**
-     * Accessor for the Number property which maps to the MessageNumber property in
-     * the underlying JAXB class.
-     *
-     * @return The Message number.
-     */
-    @Override
-    public int getNumber() {
-        return getMessageNumber();
     }
 
     @Override

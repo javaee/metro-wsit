@@ -67,9 +67,4 @@ public class InboundSequence extends AbstractSequence {
         // TODO: get message id and mark it as acknowledged
         return message;
     }
-
-    public int getLastMessageId() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
 }

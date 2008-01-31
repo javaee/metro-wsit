@@ -121,7 +121,7 @@ public class InboundMessageProcessor {
             message.setSequenceElement(el);
 
             String seqid = null;
-            int messageNumber;
+            long messageNumber;
             if (el instanceof com.sun.xml.ws.rm.v200502.SequenceElement) {
                 seqid = ((com.sun.xml.ws.rm.v200502.SequenceElement) el).getId();
                 messageNumber = ((com.sun.xml.ws.rm.v200502.SequenceElement) el).getNumber();
@@ -140,7 +140,7 @@ public class InboundMessageProcessor {
                     throw LOGGER.logSevereException(new CloseSequenceException(LocalizationMessages.WSRM_3029_SEQUENCE_CLOSED(seqid), seqid));
                 }
                 //add message to ClientInboundSequence
-                inseq.set(messageNumber, message);
+                inseq.set((int) messageNumber, message);
             } else {
                 throw LOGGER.logSevereException(new InvalidSequenceException(LocalizationMessages.WSRM_3022_UNKNOWN_SEQUENCE_ID_IN_MESSAGE(seqid), seqid));
             }

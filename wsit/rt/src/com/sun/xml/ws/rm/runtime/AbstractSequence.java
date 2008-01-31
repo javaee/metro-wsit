@@ -42,15 +42,15 @@ import java.util.concurrent.atomic.AtomicLong;
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public abstract class AbstractSequence implements Sequence {
+public abstract class AbstractSequence implements Sequence {    
+    private static final long MIN_MESSAGE_ID = 1;
+    private static final long MAX_MESSAGE_ID = 9223372036854775807L;
     private final String id; 
     private final AtomicLong nextMessageId;
-//    private final ProtocolCommunicator communicator;
 
-    AbstractSequence(String id/*, ProtocolCommunicator communicator*/) {        
+    AbstractSequence(String id) {        
         this.id = id;
-        this.nextMessageId = new AtomicLong(1);
-//        this.communicator = communicator;
+        this.nextMessageId = new AtomicLong(MIN_MESSAGE_ID);
     }
     
     public String getId() {
@@ -58,6 +58,16 @@ public abstract class AbstractSequence implements Sequence {
     }
 
     public long getNextMessageId() {
-        return nextMessageId.getAndIncrement();
+        long nextId = nextMessageId.getAndIncrement();
+        if (nextId > MAX_MESSAGE_ID) {
+            // TODO L10N
+            throw new IndexOutOfBoundsException("Maximum number of messages on sequence [" + id + "] was reached");
+        }
+        
+        return nextId;
+    }
+
+    public long getLastMessageId() {
+        return nextMessageId.longValue();
     }
 }

@@ -105,7 +105,7 @@ public interface Sequence {
      * 
      * @return last message identifier registered on this sequence
      */
-    public int getLastMessageId();
+    public long getLastMessageId();
 
     /**
      * Processes the outgoing message according to the type of the sequence (inbound/outbound)

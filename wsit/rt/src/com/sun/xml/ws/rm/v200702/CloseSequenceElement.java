@@ -81,7 +81,7 @@ public class CloseSequenceElement {
     @XmlElement(name = "Identifier", required = true, namespace = "http://docs.oasis-open.org/ws-rx/wsrm/200702")
     protected Identifier identifier;
     @XmlElement(name = "LastMsgNumber", namespace = "http://docs.oasis-open.org/ws-rx/wsrm/200702")
-    protected int lastMsgNumber;
+    protected long lastMsgNumber;
     @XmlAnyElement(lax = true)
     protected List<Object> any;
     @XmlAnyAttribute
@@ -119,7 +119,7 @@ public class CloseSequenceElement {
      *     {@link Long }
      *     
      */
-    public int getLastMsgNumber() {
+    public long getLastMsgNumber() {
         return lastMsgNumber;
     }
 
@@ -131,7 +131,7 @@ public class CloseSequenceElement {
      *     {@link Long }
      *     
      */
-    public void setLastMsgNumber(int value) {
+    public void setLastMsgNumber(long value) {
         this.lastMsgNumber = value;
     }
 
