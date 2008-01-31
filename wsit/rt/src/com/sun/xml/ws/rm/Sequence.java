@@ -1,5 +1,5 @@
 /*
- * $Id: Sequence.java,v 1.18 2007-11-30 21:00:31 m_potociar Exp $
+ * $Id: Sequence.java,v 1.19 2008-01-31 10:56:07 m_potociar Exp $
  */
 
 /*
@@ -181,7 +181,8 @@ public class Sequence {
         rmMessage.setSequence(this);
 
         if (index <= 0) {
-            throw new InvalidMessageNumberException();
+            // TODO L10N
+            throw new InvalidMessageNumberException("Invalid message index [" + index + "]");
         }
 
         if (storedMessages == maxMessages) {
@@ -193,7 +194,8 @@ public class Sequence {
             if (null != (mess = rmMessages.get(index)) && !config.isAllowDuplicatesEnabled()) {
                 //Store the original message in the exception so
                 //that exception handling can use it.
-                throw new DuplicateMessageException(mess);
+                // TODO L10N
+                throw new DuplicateMessageException("Duplicate message detected in sequence [" + getId() + "] at message index [" + index + "]", mess);
             }
             rmMessages.set(index, rmMessage);
         } else if (index == nextIndex) {

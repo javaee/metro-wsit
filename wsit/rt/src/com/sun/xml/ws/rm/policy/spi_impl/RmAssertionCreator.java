@@ -42,7 +42,7 @@ import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.policy.spi.AssertionCreationException;
 import com.sun.xml.ws.policy.spi.PolicyAssertionCreator;
 import com.sun.xml.ws.rm.Constants;
-import com.sun.xml.ws.rm.RMVersion;
+import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.policy.assertion.RmFlowControlAssertion;
 import com.sun.xml.ws.rm.policy.assertion.Rm10Assertion;
 import com.sun.xml.ws.rm.policy.assertion.DeliveryAssuranceAssertion;
@@ -78,8 +78,8 @@ public final class RmAssertionCreator implements PolicyAssertionCreator {
     }    
     
     private static final String[] SUPPORTED_DOMAINS = new String[]{
-        RMVersion.WSRM10.policyNamespaceUri,
-        RMVersion.WSRM11.policyNamespaceUri,
+        RmVersion.WSRM10.policyNamespaceUri,
+        RmVersion.WSRM11.policyNamespaceUri,
         Constants.sunVersion,
         Constants.sunClientVersion,
         Constants.microsoftVersion

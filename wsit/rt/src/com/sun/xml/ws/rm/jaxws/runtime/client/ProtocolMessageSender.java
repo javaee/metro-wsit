@@ -56,9 +56,9 @@ import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.client.ContentNegotiation;
 import com.sun.xml.ws.rm.CloseSequenceException;
 import com.sun.xml.ws.rm.CreateSequenceException;
-import com.sun.xml.ws.rm.RMException;
+import com.sun.xml.ws.rm.RmException;
 import com.sun.xml.ws.rm.RMMessage;
-import com.sun.xml.ws.rm.RMVersion;
+import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.TerminateSequenceException;
 import com.sun.xml.ws.rm.jaxws.runtime.InboundMessageProcessor;
 import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
@@ -138,7 +138,7 @@ public class ProtocolMessageSender {
             AbstractCreateSequence cs,
             String destinationUri,
             String acksToUri,
-            boolean secureReliableMessaging) throws RMException {
+            boolean secureReliableMessaging) throws RmException {
 
         //Used from com.sun.xml.ws.jaxws.runtime.client.ClientOutboundSequence.connect, where
         //CreateSequence object is constructed and resulting CreateSequenceResponse object is
@@ -176,7 +176,7 @@ public class ProtocolMessageSender {
                 }
             } else {
                 // TODO: L10N
-                throw LOGGER.logSevereException(new RMException("Addressable endpoints are currently not supported"));
+                throw LOGGER.logSevereException(new RmException("Addressable endpoints are currently not supported"));
             }
         }
         return csrElem;
@@ -184,7 +184,7 @@ public class ProtocolMessageSender {
 
     public void sendTerminateSequence(
             AbstractTerminateSequence ts,
-            OutboundSequence seq) throws RMException {
+            OutboundSequence seq) throws RmException {
 
         //Used from com.sun.xml.ws.jaxws.runtime.client.ClientOutboundSequence.disconnect, where the
         //TerminateSequence message is initialzied.
@@ -221,7 +221,7 @@ public class ProtocolMessageSender {
      * @param seq Outbound sequence to which SequenceHeaderElement will belong.
      *
      */
-    public void sendLast(OutboundSequence seq) throws RMException {
+    public void sendLast(OutboundSequence seq) throws RmException {
         Message request = Messages.createEmpty(config.getSoapVersion());
         com.sun.xml.ws.rm.v200502.SequenceElement el = createLastHeader(seq);
         request.getHeaders().add(Headers.create(config.getRMVersion().jaxbContext, el));
@@ -239,7 +239,7 @@ public class ProtocolMessageSender {
             response = responsePacket.getMessage();
             if (response != null && response.isFault()) {
                 // TODO L10N
-                throw LOGGER.logException(new RMException("Error sending Last message", response), Level.WARNING);
+                throw LOGGER.logException(new RmException("Error sending Last message", response), Level.WARNING);
             }
             InboundMessageProcessor.processMessage(new RMMessage(response), unmarshaller, RMSource.getRMSource(), config.getRMVersion());
         } finally {
@@ -256,7 +256,7 @@ public class ProtocolMessageSender {
      * @param seq Outbound sequence to which SequenceHeaderElement will belong.
      *
      */
-    public void sendAckRequested(OutboundSequence seq, SOAPVersion version) throws RMException {
+    public void sendAckRequested(OutboundSequence seq, SOAPVersion version) throws RmException {
         try {
             Message request = Messages.createEmpty(version);
             AbstractAckRequested el = createAckRequestedElement(seq);
@@ -276,7 +276,7 @@ public class ProtocolMessageSender {
                     //reset alarm
                     ((ClientOutboundSequence) seq).resetLastActivityTime();
                     // TODO L10N
-                    throw LOGGER.logException(new RMException("Error sending AckRequestedElement", response), Level.WARNING);
+                    throw LOGGER.logException(new RmException("Error sending AckRequestedElement", response), Level.WARNING);
                 }
 
                 InboundMessageProcessor.processMessage(new RMMessage(response), unmarshaller, RMSource.getRMSource(), config.getRMVersion());
@@ -299,7 +299,7 @@ public class ProtocolMessageSender {
             Packet requestPacket,
             String action,
             String destination,
-            boolean oneWay) throws RMException {
+            boolean oneWay) throws RmException {
 
         /*ADDRESSING FIX_ME
         Current API does not allow assignment of non-anon reply to, if we
@@ -318,7 +318,7 @@ public class ProtocolMessageSender {
     }
 
     private void addSecurityHeaders(Packet requestPacket) {
-        if (config.getRMVersion() == RMVersion.WSRM11) {
+        if (config.getRMVersion() == RmVersion.WSRM11) {
             HeaderList headerList = requestPacket.getMessage().getHeaders();
 
             com.sun.xml.ws.rm.v200702.UsesSequenceSTR usesSequenceSTR = new com.sun.xml.ws.rm.v200702.UsesSequenceSTR();
@@ -327,12 +327,12 @@ public class ProtocolMessageSender {
         }
     }
 
-    private AbstractCreateSequenceResponse unmarshallCreateSequenceResponse(Message response) throws RMException {
+    private AbstractCreateSequenceResponse unmarshallCreateSequenceResponse(Message response) throws RmException {
         try {
             return response.readPayloadAsJAXB(unmarshaller);
         } catch (JAXBException e) {
             // TODO L10N
-            throw LOGGER.logSevereException(new RMException("Unable to unmarshall CreateSequenceResponse", e));
+            throw LOGGER.logSevereException(new RmException("Unable to unmarshall CreateSequenceResponse", e));
         }
     }
 
@@ -355,7 +355,7 @@ public class ProtocolMessageSender {
      */
     private AbstractAckRequested createAckRequestedElement(OutboundSequence seq) {
         AbstractAckRequested ackRequestedElement = null;
-        if (config.getRMVersion() == RMVersion.WSRM10) {
+        if (config.getRMVersion() == RmVersion.WSRM10) {
             ackRequestedElement = new com.sun.xml.ws.rm.v200502.AckRequestedElement();
             ackRequestedElement.setId(seq.getId());
         } else {
@@ -366,7 +366,7 @@ public class ProtocolMessageSender {
         return ackRequestedElement;
     }
 
-    public void sendCloseSequence(OutboundSequence seq) throws RMException {
+    public void sendCloseSequence(OutboundSequence seq) throws RmException {
 
         com.sun.xml.ws.rm.v200702.Identifier idClose = new com.sun.xml.ws.rm.v200702.Identifier();
         idClose.setValue(seq.getId());
@@ -380,7 +380,7 @@ public class ProtocolMessageSender {
         requestPacket.contentNegotiation = this.contentNegotiation;
 
         // TODO: check why only WS-RM1.1 ???
-        addAddressingHeaders(requestPacket, RMVersion.WSRM11.closeSequenceAction, seq.getDestination(), false);
+        addAddressingHeaders(requestPacket, RmVersion.WSRM11.closeSequenceAction, seq.getDestination(), false);
 
         seq.setClosed();
 
@@ -393,12 +393,12 @@ public class ProtocolMessageSender {
         unmarshallCloseSequenceResponse(response);
     }
 
-    private com.sun.xml.ws.rm.v200702.CloseSequenceResponseElement unmarshallCloseSequenceResponse(Message response) throws RMException {
+    private com.sun.xml.ws.rm.v200702.CloseSequenceResponseElement unmarshallCloseSequenceResponse(Message response) throws RmException {
         try {
             return response.readPayloadAsJAXB(unmarshaller);
         } catch (JAXBException e) {
             // TODO L10N
-            throw LOGGER.logSevereException(new RMException("Unable to unmarshall CloseSequenceResponse", e));
+            throw LOGGER.logSevereException(new RmException("Unable to unmarshall CloseSequenceResponse", e));
         }
     }
 
@@ -407,7 +407,7 @@ public class ProtocolMessageSender {
      * the request through a clone of the stored Tubeline and blocks until a
      * response is received.
      */
-    private Packet process(Packet request) throws RMException {
+    private Packet process(Packet request) throws RmException {
         //we will use a fresh Fiber and Tube for each request.  We need to do this
         //because there may be another request being procesed by the original tube.
         //This can happen when this ProtocolMessageHelper is being used to resend

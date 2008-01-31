@@ -48,19 +48,9 @@ package com.sun.xml.ws.rm;
  * from erroneous sequence identifiers.
  *
  */
-public class InvalidMessageNumberException extends RMException {
-
-    /**
-     */
-    public InvalidMessageNumberException() {
-        super();
-    }
+public class InvalidMessageNumberException extends RmException {
 
     public InvalidMessageNumberException(String message) {
         super(message);
-    }
-
-    public InvalidMessageNumberException(Throwable e) {
-        super(e);
     }
 }

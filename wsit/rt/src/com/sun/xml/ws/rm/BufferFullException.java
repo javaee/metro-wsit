@@ -47,7 +47,7 @@ package com.sun.xml.ws.rm;
  * Exception thrown for flow-control enabled sequences when an
  * attempt is made to add a message.
  */
-public class BufferFullException extends RMException {
+public class BufferFullException extends RmException {
 
     /**
      * Sequence whose buffer is full.
@@ -55,7 +55,8 @@ public class BufferFullException extends RMException {
     private final Sequence seq;
 
     public BufferFullException(Sequence seq) {
-        super();
+        // TODO: L10N
+        super("Buffer overflow on the sequence [" + seq.getId() + "]");
         this.seq = seq;
     }
 

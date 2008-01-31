@@ -46,7 +46,7 @@ package com.sun.xml.ws.api.rm.server;
 
 import com.sun.xml.ws.api.rm.SequenceSettings;
 import com.sun.xml.ws.rm.jaxws.runtime.server.RMDestination;
-import com.sun.xml.ws.rm.RMException;
+import com.sun.xml.ws.rm.RmException;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
 import com.sun.xml.ws.rm.localization.RmLogger;
 
@@ -79,7 +79,7 @@ public class ServerSequenceFactory {
                     settings.getSequenceId(),
                     settings.getCompanionSequenceId(),
                     new SequenceConfig(settings));
-        } catch (RMException e) {
+        } catch (RmException e) {
             //TODO L10N
             logger.severe("ServerSequenceFactory.createSequence failed", e);
             return null;

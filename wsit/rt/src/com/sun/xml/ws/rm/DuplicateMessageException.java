@@ -47,7 +47,7 @@ package com.sun.xml.ws.rm;
  * RMException subclasss caused by attempt to add a duplicate
  * to a sequence
  */
-public class DuplicateMessageException extends RMException {
+public class DuplicateMessageException extends RmException {
 
     /**
      * Store original of Duplicate message if passed using the ctor
@@ -55,7 +55,8 @@ public class DuplicateMessageException extends RMException {
      */
     private final RMMessage rmMessage;
 
-    public DuplicateMessageException(RMMessage message) {
+    public DuplicateMessageException(String info, RMMessage message) {
+        super(info);
         this.rmMessage = message;
     }
 

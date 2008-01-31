@@ -43,7 +43,7 @@ import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.SimpleAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 
-import com.sun.xml.ws.rm.RMVersion;
+import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.policy.Configuration;
 
 /**
@@ -61,11 +61,11 @@ import com.sun.xml.ws.rm.policy.Configuration;
  */
 public final class Rm10Assertion extends SimpleAssertion {
 
-    public static final QName NAME = new QName(RMVersion.WSRM10.policyNamespaceUri, "RMAssertion");
-    private static final QName INACTIVITY_TIMEOUT_QNAME = new QName(RMVersion.WSRM10.policyNamespaceUri, "InactivityTimeout");
-    private static final QName RETRANSMITTION_INTERVAL_QNAME = new QName(RMVersion.WSRM10.policyNamespaceUri, "BaseRetransmissionInterval");
-    private static final QName EXPONENTIAL_BACKOFF_QNAME = new QName(RMVersion.WSRM10.policyNamespaceUri, "ExponentialBackoff");
-    private static final QName ACKNOWLEDGEMENT_INTERVAL_QNAME = new QName(RMVersion.WSRM10.policyNamespaceUri, "AcknowledgementInterval");
+    public static final QName NAME = new QName(RmVersion.WSRM10.policyNamespaceUri, "RMAssertion");
+    private static final QName INACTIVITY_TIMEOUT_QNAME = new QName(RmVersion.WSRM10.policyNamespaceUri, "InactivityTimeout");
+    private static final QName RETRANSMITTION_INTERVAL_QNAME = new QName(RmVersion.WSRM10.policyNamespaceUri, "BaseRetransmissionInterval");
+    private static final QName EXPONENTIAL_BACKOFF_QNAME = new QName(RmVersion.WSRM10.policyNamespaceUri, "ExponentialBackoff");
+    private static final QName ACKNOWLEDGEMENT_INTERVAL_QNAME = new QName(RmVersion.WSRM10.policyNamespaceUri, "AcknowledgementInterval");
     private static final QName MILISECONDS_ATTRIBUTE_QNAME = new QName("", "Milliseconds");
     private static RmAssertionInstantiator instantiator = new RmAssertionInstantiator() {
 

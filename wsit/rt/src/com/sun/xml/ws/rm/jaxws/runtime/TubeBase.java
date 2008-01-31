@@ -49,7 +49,7 @@ import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
-import com.sun.xml.ws.rm.RMException;
+import com.sun.xml.ws.rm.RmException;
 import com.sun.xml.ws.rm.Constants;
 import com.sun.xml.ws.rm.RMMessage;
 
@@ -96,7 +96,7 @@ public abstract class TubeBase extends AbstractFilterTubeImpl {
      * @param packet Packet containing Outbound message
      * @return The wrapped message
      */
-    protected RMMessage handleOutboundMessage(OutboundSequence outboundSequence, Packet packet, boolean isTwoWayRequest, boolean isOneWayResponse) throws RMException {
+    protected RMMessage handleOutboundMessage(OutboundSequence outboundSequence, Packet packet, boolean isTwoWayRequest, boolean isOneWayResponse) throws RmException {
         //don't want to add this message to a sequence if one way response.
         RMMessage rmMessage = new RMMessage(packet.getMessage(), isOneWayResponse, isTwoWayRequest);
 
@@ -117,7 +117,7 @@ public abstract class TubeBase extends AbstractFilterTubeImpl {
      * @param packet Packet containing Outbound message
      * @return The wrapped message
      */
-    protected RMMessage handleInboundMessage(Packet packet, RMProvider provider) throws RMException {
+    protected RMMessage handleInboundMessage(Packet packet, RMProvider provider) throws RmException {
         RMMessage rmMessage = new RMMessage(packet.getMessage());
 
         InboundMessageProcessor.processMessage(rmMessage, unmarshaller, provider, config.getRMVersion());

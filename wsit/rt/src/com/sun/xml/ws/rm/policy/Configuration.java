@@ -37,7 +37,7 @@ package com.sun.xml.ws.rm.policy;
 
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
-import com.sun.xml.ws.rm.RMVersion;
+import com.sun.xml.ws.rm.RmVersion;
 
 /**
  *
@@ -72,7 +72,7 @@ public interface Configuration {
      * 
      * @return the RM protocol version that will be used for the sequence.
      */
-    public RMVersion getRMVersion();
+    public RmVersion getRMVersion();
 
     /**
      * Provides information about the SOAP protocol version used on the RM-enabled endpoint.

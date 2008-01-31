@@ -48,15 +48,9 @@ package com.sun.xml.ws.rm;
  * from erroneous sequence identifiers.
  *
  */
-public class InvalidSequenceException extends RMException {
+public class InvalidSequenceException extends RmException {
 
     private String sequenceId;
-
-    /**
-     */
-    public InvalidSequenceException() {
-        super();
-    }
 
     public InvalidSequenceException(String message) {
         super(message);
@@ -65,10 +59,6 @@ public class InvalidSequenceException extends RMException {
     public InvalidSequenceException(String message, String id) {
         super(message);
         this.sequenceId = id;
-    }
-
-    public InvalidSequenceException(Throwable e) {
-        super(e);
     }
 
     public String getSequenceId() {

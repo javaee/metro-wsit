@@ -40,7 +40,7 @@ import com.sun.xml.ws.rm.policy.assertion.Rm11Assertion;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.spi.PolicyAssertionValidator;
 import com.sun.xml.ws.policy.spi.PolicyAssertionValidator.Fitness;
-import com.sun.xml.ws.rm.RMVersion;
+import com.sun.xml.ws.rm.RmVersion;
 
 import com.sun.xml.ws.rm.policy.assertion.RmFlowControlAssertion;
 import com.sun.xml.ws.rm.policy.assertion.AckRequestIntervalClientAssertion;
@@ -94,6 +94,6 @@ public class RmAssertionValidator implements PolicyAssertionValidator {
     }
 
     public String[] declareSupportedDomains() {
-        return new String[]{RMVersion.WSRM10.policyNamespaceUri, RMVersion.WSRM11.policyNamespaceUri, microsoftVersion, sunVersion, sunClientVersion};
+        return new String[]{RmVersion.WSRM10.policyNamespaceUri, RmVersion.WSRM11.policyNamespaceUri, microsoftVersion, sunVersion, sunClientVersion};
     }
 }

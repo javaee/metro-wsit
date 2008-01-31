@@ -41,16 +41,12 @@ package com.sun.xml.ws.rm;
  * @author Bhakti Mehta
  *
  */
-public class MessageNumberRolloverException extends RMException {
+public class MessageNumberRolloverException extends RmException {
 
     private long messageNumber;
 
     public String getMessageNumber() {
         return new Long(messageNumber).toString();
-    }
-
-    public MessageNumberRolloverException() {
-        super();
     }
 
     public MessageNumberRolloverException(String message) {
@@ -60,9 +56,5 @@ public class MessageNumberRolloverException extends RMException {
     public MessageNumberRolloverException(String message, long messageNumber) {
         super(message);
         this.messageNumber = messageNumber;
-    }
-
-    public MessageNumberRolloverException(Throwable e) {
-        super(e);
     }
 }

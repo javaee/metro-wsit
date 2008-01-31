@@ -47,17 +47,9 @@ package com.sun.xml.ws.rm;
  * Subclass of RMException thrown when an incorrect STR is
  * used to secure an inbound message.
  */
-public class RMSecurityException extends RMException {
+public class RmSecurityException extends RmException {
 
-    public RMSecurityException() {
-        super();
-    }
-
-    public RMSecurityException(String s) {
-        super(s);
-    }
-
-    public RMSecurityException(Throwable e) {
-        super(e);
+    public RmSecurityException(String message) {
+        super(message);
     }
 }

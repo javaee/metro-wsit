@@ -43,7 +43,7 @@ import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.policy.spi.AssertionCreationException;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.ComplexAssertion;
-import com.sun.xml.ws.rm.RMVersion;
+import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.policy.Configuration.DeliveryAssurance;
 import com.sun.xml.ws.rm.policy.Configuration.SecurityBinding;
@@ -71,10 +71,10 @@ import com.sun.xml.ws.rm.policy.Configuration.SecurityBinding;
  */
 public final class Rm11Assertion extends ComplexAssertion {
 
-    public static final QName NAME = new QName(RMVersion.WSRM11.policyNamespaceUri, "RMAssertion");
+    public static final QName NAME = new QName(RmVersion.WSRM11.policyNamespaceUri, "RMAssertion");
     private static final RmLogger LOGGER = RmLogger.getLogger(Rm11Assertion.class);
-    private static final QName SEQUENCE_STR_QNAME = new QName(RMVersion.WSRM11.policyNamespaceUri, "SequenceSTR");
-    private static final QName SEQUENCE_TRANSPORT_SECURITY_QNAME = new QName(RMVersion.WSRM11.policyNamespaceUri, "SequenceTransportSecurity");
+    private static final QName SEQUENCE_STR_QNAME = new QName(RmVersion.WSRM11.policyNamespaceUri, "SequenceSTR");
+    private static final QName SEQUENCE_TRANSPORT_SECURITY_QNAME = new QName(RmVersion.WSRM11.policyNamespaceUri, "SequenceTransportSecurity");
     private static RmAssertionInstantiator instantiator = new RmAssertionInstantiator() {
 
         public PolicyAssertion newInstance(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative) throws AssertionCreationException {

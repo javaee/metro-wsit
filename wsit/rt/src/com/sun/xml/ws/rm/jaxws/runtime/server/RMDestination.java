@@ -36,7 +36,7 @@
 package com.sun.xml.ws.rm.jaxws.runtime.server;
 
 import com.sun.xml.ws.rm.InvalidSequenceException;
-import com.sun.xml.ws.rm.RMException;
+import com.sun.xml.ws.rm.RmException;
 import com.sun.xml.ws.rm.jaxws.runtime.InboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.RMProvider;
@@ -112,7 +112,7 @@ public class RMDestination extends RMProvider {
     public ServerInboundSequence createSequence(
             String inboundId,
             String outboundId,
-            SequenceConfig config) throws RMException {
+            SequenceConfig config) throws RmException {
 
         ServerInboundSequence seq = new ServerInboundSequence(inboundId, outboundId, config);
 

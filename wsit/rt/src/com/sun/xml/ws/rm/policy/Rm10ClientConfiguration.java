@@ -38,7 +38,7 @@ package com.sun.xml.ws.rm.policy;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.policy.AssertionSet;
-import com.sun.xml.ws.rm.RMVersion;
+import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.policy.Configuration.DeliveryAssurance;
 import com.sun.xml.ws.rm.policy.Configuration.SecurityBinding;
 import com.sun.xml.ws.rm.policy.assertion.AckRequestIntervalClientAssertion;
@@ -91,7 +91,7 @@ class Rm10ClientConfiguration implements Configuration {
         return closeSequenceOperationTimeout;
     }
 
-    public RMVersion getRMVersion() {
+    public RmVersion getRMVersion() {
         return destinationConfig.getRMVersion();
     }
 

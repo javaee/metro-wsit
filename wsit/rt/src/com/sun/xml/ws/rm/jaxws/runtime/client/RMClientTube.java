@@ -53,7 +53,7 @@ import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.client.ClientTransportException;
 import com.sun.xml.ws.rm.Constants;
 import com.sun.xml.ws.rm.MessageSender;
-import com.sun.xml.ws.rm.RMException;
+import com.sun.xml.ws.rm.RmException;
 import com.sun.xml.ws.rm.RMMessage;
 import com.sun.xml.ws.rm.jaxws.runtime.TubeBase;
 import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
@@ -147,7 +147,7 @@ public final class RMClientTube extends TubeBase {
      */
     // TODO remove suppress warnings annotation
     @SuppressWarnings("unchecked")
-    private synchronized void initialize(Packet packet) throws RMException {
+    private synchronized void initialize(Packet packet) throws RmException {
         String destinationUriString = packet.endpointAddress.toString();
         if (outboundSequence != null) {
             //sequence has already been initialized. We need to
@@ -159,12 +159,12 @@ public final class RMClientTube extends TubeBase {
             //single client instances and endpoints.
             if (destinationUriString != null && !destinationUriString.equals("") && !destinationUriString.equals(outboundSequence.getDestination().toString())) {
                 //WSRM2017: The Endpoint Address cannot be changed by a client of an RM-enabled endpoint//
-                throw LOGGER.logSevereException(new RMException(LocalizationMessages.WSRM_2017_UNCHANGEABLE_ENDPOINT_ADDRESS()));
+                throw LOGGER.logSevereException(new RmException(LocalizationMessages.WSRM_2017_UNCHANGEABLE_ENDPOINT_ADDRESS()));
             }
         } else {
             if (getConfig().getAddressingVersion() == AddressingVersion.MEMBER) {
                 //WSRM2008: The Reliable Messaging Client does not support the Member submission addressing version, which is used by the endpoint.//
-                throw LOGGER.logSevereException(new RMException(LocalizationMessages.WSRM_2008_UNSUPPORTED_ADDRESSING_VERSION()));
+                throw LOGGER.logSevereException(new RmException(LocalizationMessages.WSRM_2008_UNSUPPORTED_ADDRESSING_VERSION()));
             }
             //store this in field
             this.proxy = packet.proxy;
@@ -222,7 +222,7 @@ public final class RMClientTube extends TubeBase {
         return false;
     }
 
-    private RMMessage prepareRequestMessage(Packet requestPacket) throws RMException {
+    private RMMessage prepareRequestMessage(Packet requestPacket) throws RmException {
         RMMessage outboundMessage = null;
 
         //FIXME - Need a better way for client to pass a message number.
@@ -266,7 +266,7 @@ public final class RMClientTube extends TubeBase {
     private void completeFaultedMessage(RMMessage message) {
         try {
             outboundSequence.acknowledge(message.getMessageNumber());
-        } catch (RMException e) {
+        } catch (RmException e) {
             //TODO L10N
             LOGGER.warning("Error acknowledging message [" + message.getMessageNumber() + "] in sequence [" + message.getSequence().getId() + "]", e);
         }
@@ -336,11 +336,11 @@ public final class RMClientTube extends TubeBase {
             }
 
             return doSuspend();
-        } catch (RMException e) {
-            Message faultMessage = e.getFaultMessage();
-            if (faultMessage != null) {
+        } catch (RmException e) {
+            Message fault = e.getFault();
+            if (fault != null) {
                 try {
-                    Packet ret = new Packet(Messages.create(faultMessage.readAsSOAPMessage()));
+                    Packet ret = new Packet(Messages.create(fault.readAsSOAPMessage()));
                     ret.invocationProperties.putAll(request.invocationProperties);
 
                     return doReturnWith(ret);

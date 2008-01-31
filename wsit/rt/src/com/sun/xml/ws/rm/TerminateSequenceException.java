@@ -45,15 +45,9 @@ import com.sun.xml.ws.api.message.Message;
  * @author Bhakti Mehta
  *
  */
-public class TerminateSequenceException extends RMException {
+public class TerminateSequenceException extends RmException {
 
     private String sequenceId;
-
-    /**
-     */
-    public TerminateSequenceException() {
-        super();
-    }
 
     public TerminateSequenceException(String message) {
         super(message);
@@ -70,10 +64,6 @@ public class TerminateSequenceException extends RMException {
 
     public TerminateSequenceException(String message, Throwable cause) {
         super(message, cause);
-    }
-
-    public TerminateSequenceException(Throwable e) {
-        super(e);
     }
 
     public String getSequenceId() {

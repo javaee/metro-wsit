@@ -36,7 +36,7 @@
 package com.sun.xml.ws.rm.jaxws.runtime;
 
 import com.sun.xml.ws.rm.InvalidMessageNumberException;
-import com.sun.xml.ws.rm.RMVersion;
+import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.Sequence;
 import com.sun.xml.ws.rm.protocol.AbstractSequenceAcknowledgement;
 import com.sun.xml.ws.rm.v200502.Identifier;
@@ -88,7 +88,7 @@ public abstract class InboundSequence extends Sequence {
      */
     public synchronized AbstractSequenceAcknowledgement generateSequenceAcknowledgement(boolean generateIsFinal) throws InvalidMessageNumberException {
         AbstractSequenceAcknowledgement ackElement = null;
-        if (getConfig().getRMVersion() == RMVersion.WSRM10) {
+        if (getConfig().getRMVersion() == RmVersion.WSRM10) {
             ackElement = new SequenceAcknowledgementElement();
             Identifier identifier = new Identifier();
             identifier.setValue(getId());

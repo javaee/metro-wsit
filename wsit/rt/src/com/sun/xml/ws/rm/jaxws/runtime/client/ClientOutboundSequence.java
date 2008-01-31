@@ -44,8 +44,8 @@ import com.sun.xml.ws.api.rm.client.ClientSequence;
 import com.sun.xml.ws.client.ContentNegotiation;
 import com.sun.xml.ws.rm.InvalidMessageNumberException;
 import com.sun.xml.ws.rm.RMMessage;
-import com.sun.xml.ws.rm.RMException;
-import com.sun.xml.ws.rm.RMVersion;
+import com.sun.xml.ws.rm.RmException;
+import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.jaxws.runtime.InboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
@@ -131,7 +131,7 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
             Unmarshaller unmarshaller,
             Tube nextTube,
             BindingProvider proxy,
-            ContentNegotiation contentNegotiation) throws RMException {
+            ContentNegotiation contentNegotiation) throws RmException {
         super(config);
         //FIXME for now
         super.setBufferRemaining(config.getBufferSize());
@@ -224,9 +224,9 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
         this.service = service;
     }
 
-    private AbstractCreateSequence prepareCreateSequenceMessage(String incomingId, boolean twoWay, SecurityTokenReferenceType strType) throws RMException {
+    private AbstractCreateSequence prepareCreateSequenceMessage(String incomingId, boolean twoWay, SecurityTokenReferenceType strType) throws RmException {
             AbstractCreateSequence createSequence = null;
-            if (getConfig().getRMVersion() == RMVersion.WSRM10) {
+            if (getConfig().getRMVersion() == RmVersion.WSRM10) {
                 createSequence = new com.sun.xml.ws.rm.v200502.CreateSequenceElement();
             } else {
                 createSequence = new com.sun.xml.ws.rm.v200702.CreateSequenceElement();
@@ -241,12 +241,12 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
                 sourceEndpointReference = new W3CEndpointReference(source);
             } else {
                 // TODO L10N
-                throw LOGGER.logSevereException(new RMException("Unsupported addressing version"));
+                throw LOGGER.logSevereException(new RmException("Unsupported addressing version"));
             }
             createSequence.setAcksTo(sourceEndpointReference);
 
             if (twoWay) {
-                if (getConfig().getRMVersion() == RMVersion.WSRM10) {
+                if (getConfig().getRMVersion() == RmVersion.WSRM10) {
                     com.sun.xml.ws.rm.v200502.Identifier offerIdentifier = new com.sun.xml.ws.rm.v200502.Identifier();
                     offerIdentifier.setValue(incomingId);
 
@@ -282,7 +282,7 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
      *          use of the WS-Addressing anonymous EPR
      * @throws RMException wrapper for all exceptions thrown during execution of method.
      */
-    private void connect(String destination, String acksToUri, SecurityTokenReferenceType strType, boolean twoWay) throws RMException {
+    private void connect(String destination, String acksToUri, SecurityTokenReferenceType strType, boolean twoWay) throws RmException {
         LOGGER.entering(destination, acksToUri, twoWay);
         try {
             this.setDestination(destination);
@@ -327,7 +327,7 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
      *
      * @throws RMException wrapper for all exceptions thrown during execution of method.
      */
-    public void disconnect() throws RMException {
+    public void disconnect() throws RmException {
         disconnect(false);
     }
 
@@ -340,7 +340,7 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
      *
      * @throws RMException wrapper for all exceptions thrown during execution of method.
      */
-    public void disconnect(boolean keepAlive) throws RMException {
+    public void disconnect(boolean keepAlive) throws RmException {
         //FIXME - find another check for connectiveness.. want to get rid of
         //unnecessary InboundSequences.
         if (getInboundSequence() == null) {
@@ -355,7 +355,7 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
         //Glassfish container with ordered delivery configured.  This will
         //probably no longer be the case when the Tube/Fibre architecture
         //is used.
-        if (getConfig().getRMVersion() == RMVersion.WSRM10) {
+        if (getConfig().getRMVersion() == RmVersion.WSRM10) {
             sendLast();
         } else {
             sendCloseSequence();
@@ -364,7 +364,7 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
         //this will block until all messages are complete
         waitForAcks();
         AbstractTerminateSequence ts = null;
-        if (getConfig().getRMVersion() == RMVersion.WSRM10) {
+        if (getConfig().getRMVersion() == RmVersion.WSRM10) {
             ts = new com.sun.xml.ws.rm.v200502.TerminateSequenceElement();
             com.sun.xml.ws.rm.v200502.Identifier idTerminate = new com.sun.xml.ws.rm.v200502.Identifier();
             idTerminate.setValue(getId());
@@ -381,11 +381,11 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
 
     }
 
-    private void sendLast() throws RMException {
+    private void sendLast() throws RmException {
         protocolMessageSender.sendLast(this);
     }
 
-    private void sendCloseSequence() throws RMException {
+    private void sendCloseSequence() throws RmException {
         protocolMessageSender.sendCloseSequence(this);
     }
 
@@ -394,7 +394,7 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
      *
      * @param messageNumber The message number to resend
      */
-    public void resend(int messageNumber) throws RMException {
+    public void resend(int messageNumber) throws RmException {
         RMMessage mess = get(messageNumber);
         mess.resume();
     }
@@ -531,7 +531,7 @@ public class ClientOutboundSequence extends OutboundSequence implements ClientSe
      *
      * @throws RMException 
      */
-    public synchronized void doMaintenanceTasks() throws RMException {
+    public synchronized void doMaintenanceTasks() throws RmException {
         if (getStoredMessages() > 0 && isResendDue()) {
             int top = getNextIndex();
             for (int i = 1; i < top; i++) {

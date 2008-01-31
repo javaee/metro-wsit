@@ -37,7 +37,7 @@
 package com.sun.xml.ws.rm.jaxws.runtime.client;
 
 import com.sun.xml.ws.rm.Constants;
-import com.sun.xml.ws.rm.RMException;
+import com.sun.xml.ws.rm.RmException;
 import com.sun.xml.ws.rm.jaxws.runtime.RMProvider;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;
@@ -83,7 +83,7 @@ public class RMSource extends RMProvider {
         retryTimer = new RetryTimer(this);
     }
 
-    public synchronized void terminateSequence(ClientOutboundSequence seq) throws RMException {
+    public synchronized void terminateSequence(ClientOutboundSequence seq) throws RmException {
         if (seq != null && outboundMap.keySet().contains(seq.getId())) {
             seq.disconnect();
             removeOutboundSequence(seq.getId());
@@ -141,7 +141,7 @@ public class RMSource extends RMProvider {
      * @throws RMException Propogates <code>RMException</code> thrown by any of the managed
      * sequences.
      */
-    public void doMaintenanceTasks() throws RMException {
+    public void doMaintenanceTasks() throws RmException {
         for (String key : outboundMap.keySet()) {
             ClientOutboundSequence seq = outboundMap.get(key);
             synchronized (seq) {

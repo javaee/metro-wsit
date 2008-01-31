@@ -42,9 +42,9 @@ import com.sun.xml.ws.rm.DuplicateMessageException;
 import com.sun.xml.ws.rm.InvalidMessageNumberException;
 import com.sun.xml.ws.rm.InvalidSequenceException;
 import com.sun.xml.ws.rm.MessageNumberRolloverException;
-import com.sun.xml.ws.rm.RMException;
+import com.sun.xml.ws.rm.RmException;
 import com.sun.xml.ws.rm.RMMessage;
-import com.sun.xml.ws.rm.RMVersion;
+import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.protocol.AbstractAckRequested;
@@ -68,7 +68,7 @@ public class InboundMessageProcessor {
     private InboundMessageProcessor() {
     }
     
-    private static void processAckRequestHeader(Header header, Unmarshaller unmarshaller, RMMessage message, RMProvider provider) throws RMException, InvalidMessageNumberException {
+    private static void processAckRequestHeader(Header header, Unmarshaller unmarshaller, RMMessage message, RMProvider provider) throws RmException, InvalidMessageNumberException {
         try {
             //dispatch to InboundSequence to construct response.
             //TODO handle error condition no such sequence
@@ -87,11 +87,11 @@ public class InboundMessageProcessor {
                 seq.handleAckRequested();
             }
         } catch (JAXBException e) {
-            throw LOGGER.logSevereException(new RMException("Unable to unmarshall AckRequested RM header", e));
+            throw LOGGER.logSevereException(new RmException("Unable to unmarshall AckRequested RM header", e));
         }
     }
 
-    private static void processAckHeader(Header header, Unmarshaller unmarshaller, RMMessage message, RMProvider provider) throws InvalidMessageNumberException, RMException {
+    private static void processAckHeader(Header header, Unmarshaller unmarshaller, RMMessage message, RMProvider provider) throws InvalidMessageNumberException, RmException {
         try {
             AbstractSequenceAcknowledgement ackHeader = header.readAsJAXB(unmarshaller);
 
@@ -108,11 +108,11 @@ public class InboundMessageProcessor {
                 seq.handleAckResponse(ackHeader);
             }
         } catch (JAXBException e) {
-            throw LOGGER.logSevereException(new RMException("Unable to unmarshall SequenceAcknowledgement RM header", e));
+            throw LOGGER.logSevereException(new RmException("Unable to unmarshall SequenceAcknowledgement RM header", e));
         }
     }
 
-    private static InboundSequence processSequenceHeader(Header header, Unmarshaller unmarshaller, RMMessage message, RMProvider provider, InboundSequence inseq) throws DuplicateMessageException, InvalidSequenceException, InvalidMessageNumberException, BufferFullException, CloseSequenceException, MessageNumberRolloverException, RMException {
+    private static InboundSequence processSequenceHeader(Header header, Unmarshaller unmarshaller, RMMessage message, RMProvider provider, InboundSequence inseq) throws DuplicateMessageException, InvalidSequenceException, InvalidMessageNumberException, BufferFullException, CloseSequenceException, MessageNumberRolloverException, RmException {
         try {
             //identify sequence and message number from data in header and add
             //the message to the sequence at the specified index.
@@ -145,7 +145,7 @@ public class InboundMessageProcessor {
                 throw LOGGER.logSevereException(new InvalidSequenceException(LocalizationMessages.WSRM_3022_UNKNOWN_SEQUENCE_ID_IN_MESSAGE(seqid), seqid));
             }
         } catch (JAXBException e) {
-            throw LOGGER.logSevereException(new RMException("Unable to unmarshall Sequence RM header", e));
+            throw LOGGER.logSevereException(new RmException("Unable to unmarshall Sequence RM header", e));
         }
         return inseq;
     }
@@ -166,7 +166,7 @@ public class InboundMessageProcessor {
      * <br>
      * @param message The inbound <code>Message</code>.
      */
-    public static void processMessage(RMMessage message, Unmarshaller unmarshaller, RMProvider provider, RMVersion rmVersion) throws RMException {
+    public static void processMessage(RMMessage message, Unmarshaller unmarshaller, RMProvider provider, RmVersion rmVersion) throws RmException {
         /*
          * Check for each RM header type and do the right thing in RMProvider
          * depending on the type.
@@ -208,7 +208,7 @@ public class InboundMessageProcessor {
      * JAX-WS message's HeaderList
      * @param name The name of the Header to find.
      */
-    private static Header getHeader(RMMessage message, String name, RMVersion rmVersion) {
+    private static Header getHeader(RMMessage message, String name, RmVersion rmVersion) {
         return (message.getHeaders() != null) ? message.getHeaders().get(rmVersion.namespaceUri, name, true) : null;
     }
 }

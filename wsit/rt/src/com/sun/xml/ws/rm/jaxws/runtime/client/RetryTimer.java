@@ -35,7 +35,7 @@
  */
 package com.sun.xml.ws.rm.jaxws.runtime.client;
 
-import com.sun.xml.ws.rm.RMException;
+import com.sun.xml.ws.rm.RmException;
 import com.sun.xml.ws.rm.localization.RmLogger;
 
 import java.util.Timer;
@@ -94,7 +94,7 @@ public class RetryTimer {
         public void run() {
             try {
                 source.doMaintenanceTasks();
-            } catch (RMException e) {
+            } catch (RmException e) {
                 //TODO L10N
                 LOGGER.finer("Unexpected exception occured while performing maintenance tasks on RMSource instance", e);
             }

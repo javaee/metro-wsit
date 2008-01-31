@@ -45,7 +45,7 @@ import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
-import com.sun.xml.ws.rm.RMVersion;
+import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.jaxws.runtime.client.RMClientTube;
 import com.sun.xml.ws.rm.jaxws.runtime.server.RMServerTube;
 import com.sun.xml.ws.rm.runtime.ClientRmTube;
@@ -146,7 +146,7 @@ public class RmTubeAppender {
             if (policy == null) {
                 return false;
             } else {
-                return policy.contains(RMVersion.WSRM10.policyNamespaceUri) || policy.contains(RMVersion.WSRM11.policyNamespaceUri);
+                return policy.contains(RmVersion.WSRM10.policyNamespaceUri) || policy.contains(RmVersion.WSRM11.policyNamespaceUri);
             }
         } catch (PolicyException e) {
             throw new WebServiceException(e);

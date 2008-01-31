@@ -47,7 +47,7 @@ import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.policy.jaxws.WSDLPolicyMapWrapper;
 import com.sun.xml.ws.rm.Constants;
-import com.sun.xml.ws.rm.RMVersion;
+import com.sun.xml.ws.rm.RmVersion;
 
 import com.sun.xml.ws.rm.localization.RmLogger;
 import javax.xml.namespace.QName;
@@ -86,7 +86,7 @@ public class SequenceConfig implements SequenceSettings {
     private boolean ordered;
     private long inactivityTimeout;
     private long resendInterval;
-    private RMVersion rmVersion;
+    private RmVersion rmVersion;
     private String sequenceId;
     private boolean sequenceSTRRequired;
     private boolean sequenceTransportSecurityRequired;
@@ -279,7 +279,7 @@ public class SequenceConfig implements SequenceSettings {
         this.companionSequenceId = id;
     }
 
-    public RMVersion getRMVersion() {
+    public RmVersion getRMVersion() {
         return rmVersion;
     }
 
@@ -314,11 +314,11 @@ public class SequenceConfig implements SequenceSettings {
                     for (PolicyAssertion assertion : policyAssertionSet) {
                         QName qname = assertion.getName();
 
-                        if (RMVersion.WSRM10.rmPolicyAssertionQName.equals(qname)) {
-                            rmVersion = RMVersion.WSRM10;
+                        if (RmVersion.WSRM10.rmPolicyAssertionQName.equals(qname)) {
+                            rmVersion = RmVersion.WSRM10;
                             handleRMAssertion(assertion);
-                        } else if (RMVersion.WSRM11.rmPolicyAssertionQName.equals(qname)) {
-                            rmVersion = RMVersion.WSRM11;
+                        } else if (RmVersion.WSRM11.rmPolicyAssertionQName.equals(qname)) {
+                            rmVersion = RmVersion.WSRM11;
                             handleRMAssertion(assertion);
                         } else if (RM_FLOW_CONTROL_QNAME.equals(qname)) {
                             handleFlowAssertion(assertion);
@@ -344,9 +344,9 @@ public class SequenceConfig implements SequenceSettings {
                                 closeTimeout = Long.parseLong(num);
                             }
 
-                        } else if (RMVersion.WSRM11.sequenceSTRAssertionQName.equals(qname)) {
+                        } else if (RmVersion.WSRM11.sequenceSTRAssertionQName.equals(qname)) {
                             sequenceSTRRequired = true;
-                        } else if (RMVersion.WSRM11.sequenceTransportSecurityAssertionQName.equals(qname)) {
+                        } else if (RmVersion.WSRM11.sequenceTransportSecurityAssertionQName.equals(qname)) {
                             sequenceTransportSecurityRequired = true;
                         } else {
                             //TODO handle error condition here

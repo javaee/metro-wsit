@@ -1,7 +1,11 @@
 /*
+ * $Id: RmException.java,v 1.3 2008-01-31 10:56:07 m_potociar Exp $
+ */
+
+/*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -33,14 +37,12 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.rm;
 
 import com.sun.xml.ws.api.message.Message;
 
 /**
- *
- * @author Marek Potociar (marek.potociar at sun.com)
+ * Wrapper class for exceptions thrown by RM Methods.
  */
 public class RmException extends Exception {
     private final Message fault;
@@ -67,5 +69,5 @@ public class RmException extends Exception {
      */
     public Message getFault() {
         return fault;
-    }
+    }    
 }

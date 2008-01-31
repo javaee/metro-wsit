@@ -41,9 +41,9 @@ import com.sun.xml.ws.rm.Sequence;
 import com.sun.xml.ws.rm.BufferFullException;
 import com.sun.xml.ws.rm.DuplicateMessageException;
 import com.sun.xml.ws.rm.InvalidMessageNumberException;
-import com.sun.xml.ws.rm.RMException;
+import com.sun.xml.ws.rm.RmException;
 import com.sun.xml.ws.rm.RMMessage;
-import com.sun.xml.ws.rm.RMVersion;
+import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.jaxws.util.ProcessingFilter;
 import com.sun.xml.ws.rm.protocol.AbstractAckRequested;
 import com.sun.xml.ws.rm.protocol.AbstractSequence;
@@ -170,7 +170,7 @@ public abstract class OutboundSequence extends Sequence {
             }
 
             AbstractSequence element = null;
-            if (getConfig().getRMVersion() == RMVersion.WSRM10) {
+            if (getConfig().getRMVersion() == RmVersion.WSRM10) {
                 element = new com.sun.xml.ws.rm.v200502.SequenceElement();
             } else {
                 element = new com.sun.xml.ws.rm.v200702.SequenceElement();
@@ -182,7 +182,7 @@ public abstract class OutboundSequence extends Sequence {
             //if it is time to request an ack for this sequence, add AckRequestedHeader
             if (isAckRequested()) {
                 AbstractAckRequested ack = null;
-                if (getConfig().getRMVersion() == RMVersion.WSRM10) {
+                if (getConfig().getRMVersion() == RmVersion.WSRM10) {
                     ack = new com.sun.xml.ws.rm.v200502.AckRequestedElement();
                     ack.setId(this.getId());
                 } else {
@@ -228,7 +228,7 @@ public abstract class OutboundSequence extends Sequence {
      *
      *  @param mess The OutboundMessage.
      */
-    public synchronized void processAcknowledgement(RMMessage mess) throws RMException {
+    public synchronized void processAcknowledgement(RMMessage mess) throws RmException {
         //if companion Inbound sequence is returning an acknowledgement, add the
         //SequenceAcknowledgement header
         if (sequenceAcknowledgement != null) {
@@ -372,7 +372,7 @@ public abstract class OutboundSequence extends Sequence {
 
         synchronized (this) {
             List<BigInteger> nacks = null;
-            if (getConfig().getRMVersion() == RMVersion.WSRM10) {
+            if (getConfig().getRMVersion() == RmVersion.WSRM10) {
                 this.setBufferRemaining(((com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement) element).getBufferRemaining());
                 nacks = ((com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement) element).getNack();
             } else {

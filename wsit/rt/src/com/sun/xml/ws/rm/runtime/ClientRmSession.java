@@ -48,7 +48,7 @@ import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.rm.CloseSequenceException;
 import com.sun.xml.ws.rm.CreateSequenceException;
-import com.sun.xml.ws.rm.RMVersion;
+import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.RmException;
 import com.sun.xml.ws.rm.TerminateSequenceException;
 import com.sun.xml.ws.rm.localization.RmLogger;
@@ -140,13 +140,13 @@ public class ClientRmSession {
         try {
             sendCloseSequence(outboundSequenceId, sequenceManager.getSequence(outboundSequenceId).getLastMessageId());
             sequenceManager.getSequence(outboundSequenceId).close();
-        } catch (RmException ex) {
-            // TODO: is the exception handled correctly?
-            LOGGER.logException(ex, Level.WARNING);
         } catch (CloseSequenceException ex) {
             // TODO: is the exception handled correctly?
             LOGGER.logException(ex, Level.WARNING);
         } catch (UnknownSequenceException ex) {
+            // TODO: is the exception handled correctly?
+            LOGGER.logException(ex, Level.WARNING);
+        } catch (RmException ex) {
             // TODO: is the exception handled correctly?
             LOGGER.logException(ex, Level.WARNING);
         }
@@ -321,7 +321,7 @@ public class ClientRmSession {
      */
     private String sendHandshakeMessage(String offerInboundSequenceId) throws CreateSequenceException, RmException {
         Message handshakeRequestMessage;
-        if (configuration.getRMVersion() == RMVersion.WSRM10) {
+        if (configuration.getRMVersion() == RmVersion.WSRM10) {
             handshakeRequestMessage = prepareRm10HandshakeRequest(offerInboundSequenceId, communicator.tryStartSecureConversation());
         } else {
             handshakeRequestMessage = prepareRm11HandshakeRequest(offerInboundSequenceId, communicator.tryStartSecureConversation());
@@ -330,7 +330,7 @@ public class ClientRmSession {
         Message handshakeResponseMessage = communicator.send(handshakeRequestMessage, configuration.getRMVersion().createSequenceAction);
 
         if (handshakeResponseMessage != null) {
-            if (configuration.getRMVersion() == RMVersion.WSRM10) {
+            if (configuration.getRMVersion() == RmVersion.WSRM10) {
                 // TODO
                 return processRm10HandshakeResponseMessage(handshakeResponseMessage);
             } else {
@@ -363,7 +363,7 @@ public class ClientRmSession {
         try {
             Message ackRequestMessage = Messages.createEmpty(configuration.getSoapVersion());
             AbstractAckRequested ackRequestedElement = null;
-            if (configuration.getRMVersion() == RMVersion.WSRM10) {
+            if (configuration.getRMVersion() == RmVersion.WSRM10) {
                 ackRequestedElement = new com.sun.xml.ws.rm.v200502.AckRequestedElement();
                 ackRequestedElement.setId(outboundSequenceId);
             } else {
@@ -435,7 +435,7 @@ public class ClientRmSession {
         Message closeSequenceRequest = Messages.create(configuration.getRMVersion().jaxbContext, cs, configuration.getSoapVersion());
 
         // TODO: check why only WS-RM1.1 ???
-        Message response = communicator.send(closeSequenceRequest, RMVersion.WSRM11.closeSequenceAction);
+        Message response = communicator.send(closeSequenceRequest, RmVersion.WSRM11.closeSequenceAction);
         if (response != null && response.isFault()) {
             // TODO L10N
             throw LOGGER.logException(new CloseSequenceException("CloseSequence was refused by the RMDestination", response), Level.WARNING);

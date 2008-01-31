@@ -46,7 +46,7 @@ package com.sun.xml.ws.api.rm;
 
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
-import com.sun.xml.ws.rm.RMVersion;
+import com.sun.xml.ws.rm.RmVersion;
 import java.io.Serializable;
 
 /**
@@ -132,7 +132,7 @@ public interface SequenceSettings extends Serializable {
     /**
      * The RM version if it is WSRM 1.0 or WSRM 1.1
      */
-    public RMVersion getRMVersion();
+    public RmVersion getRMVersion();
 
     /**
      * SequenceSTR setting from Policy.

@@ -43,7 +43,7 @@ import com.sun.xml.ws.policy.ComplexAssertion;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.policy.spi.AssertionCreationException;
-import com.sun.xml.ws.rm.RMVersion;
+import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.policy.Configuration.DeliveryAssurance;
 
@@ -64,11 +64,11 @@ import com.sun.xml.ws.rm.policy.Configuration.DeliveryAssurance;
 public class DeliveryAssuranceAssertion extends ComplexAssertion {
 
     private static final RmLogger LOGGER = RmLogger.getLogger(DeliveryAssuranceAssertion.class);
-    private static final QName EXACTLY_ONCE_QNAME = new QName(RMVersion.WSRM11.policyNamespaceUri, "ExactlyOnce");
-    private static final QName AT_LEAST_ONCE_QNAME = new QName(RMVersion.WSRM11.policyNamespaceUri, "AtLeastOnce");
-    private static final QName AT_MOST_ONCE_QNAME = new QName(RMVersion.WSRM11.policyNamespaceUri, "AtMostOnce");
-    private static final QName IN_ORDER_QNAME = new QName(RMVersion.WSRM11.policyNamespaceUri, "InOrder");
-    public static final QName NAME = new QName(RMVersion.WSRM11.policyNamespaceUri, "DeliveryAssurance");
+    private static final QName EXACTLY_ONCE_QNAME = new QName(RmVersion.WSRM11.policyNamespaceUri, "ExactlyOnce");
+    private static final QName AT_LEAST_ONCE_QNAME = new QName(RmVersion.WSRM11.policyNamespaceUri, "AtLeastOnce");
+    private static final QName AT_MOST_ONCE_QNAME = new QName(RmVersion.WSRM11.policyNamespaceUri, "AtMostOnce");
+    private static final QName IN_ORDER_QNAME = new QName(RmVersion.WSRM11.policyNamespaceUri, "InOrder");
+    public static final QName NAME = new QName(RmVersion.WSRM11.policyNamespaceUri, "DeliveryAssurance");
     private static RmAssertionInstantiator instantiator = new RmAssertionInstantiator() {
 
         public PolicyAssertion newInstance(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative) throws AssertionCreationException {

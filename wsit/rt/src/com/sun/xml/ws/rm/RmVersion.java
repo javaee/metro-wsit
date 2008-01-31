@@ -9,7 +9,7 @@ import javax.xml.namespace.QName;
  * This is the class which will determine which RM version we are dealing with
  * WSRM 1.0 or WSRM 1.1
  */
-public enum RMVersion {
+public enum RmVersion {
 
     WSRM10(
     "http://schemas.xmlsoap.org/ws/2005/02/rm",
@@ -86,7 +86,7 @@ public enum RMVersion {
     public final QName sequenceTransportSecurityAssertionQName;
     public final QName unknownSequenceQname;
 
-    private RMVersion(String nsUri, String policynsuri, Class<?>... classes) {
+    private RmVersion(String nsUri, String policynsuri, Class<?>... classes) {
         this.namespaceUri = nsUri;
         this.policyNamespaceUri = policynsuri;
 

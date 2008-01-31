@@ -38,7 +38,7 @@ package com.sun.xml.ws.rm.policy;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.policy.AssertionSet;
-import com.sun.xml.ws.rm.RMVersion;
+import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.policy.assertion.AllowDuplicatesAssertion;
 import com.sun.xml.ws.rm.policy.assertion.OrderedDeliveryAssertion;
 import com.sun.xml.ws.rm.policy.assertion.Rm10Assertion;
@@ -72,8 +72,8 @@ class Rm10ServiceConfiguration implements Configuration {
         orderedDelivery = orderedDeliveryAssertion != null;
     }
 
-    public RMVersion getRMVersion() {
-        return RMVersion.WSRM10;
+    public RmVersion getRMVersion() {
+        return RmVersion.WSRM10;
     }
 
     public SOAPVersion getSoapVersion() {

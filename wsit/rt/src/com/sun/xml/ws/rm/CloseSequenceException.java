@@ -41,15 +41,9 @@ package com.sun.xml.ws.rm;
  * @author Bhakti Mehta
  *
  */
-public class CloseSequenceException extends RMException {
+public class CloseSequenceException extends RmException {
 
     private String sequenceId;
-
-    /**
-     */
-    public CloseSequenceException() {
-        super();
-    }
 
     public CloseSequenceException(String message) {
         super(message);
@@ -60,12 +54,8 @@ public class CloseSequenceException extends RMException {
         this.sequenceId = id;
     }
 
-    public CloseSequenceException(String s, com.sun.xml.ws.api.message.Message message) {
-        super(s, message);
-    }
-
-    public CloseSequenceException(Throwable e) {
-        super(e);
+    public CloseSequenceException(String info, com.sun.xml.ws.api.message.Message message) {
+        super(info, message);
     }
 
     public String getSequenceId() {
