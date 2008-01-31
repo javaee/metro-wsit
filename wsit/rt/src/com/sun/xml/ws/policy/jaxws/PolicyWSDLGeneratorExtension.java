@@ -51,7 +51,6 @@ import com.sun.xml.ws.api.model.wsdl.WSDLOutput;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.model.wsdl.WSDLPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLService;
-import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.wsdl.writer.WSDLGeneratorExtension;
 import com.sun.xml.ws.api.wsdl.writer.WSDLGenExtnContext;
 import com.sun.xml.ws.policy.Policy;
@@ -84,6 +83,7 @@ import javax.xml.ws.WebServiceException;
  * Marshals the contents of a policy map to WSDL.
  *
  * @author Jakub Podlesak (jakub.podlesak at sun.com)
+ * @author Fabian Ritzmann
  */
 public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
 
@@ -191,7 +191,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
     @Override
     public void addServiceExtension(final TypedXmlWriter service) {
         LOGGER.entering();
-        final String serviceName = ((null == seiModel) || (null == endpointClass)) ? null : WSEndpoint.getDefaultServiceName(endpointClass).getLocalPart();
+        final String serviceName = (null == seiModel) ? null : seiModel.getServiceQName().getLocalPart();
         selectAndProcessSubject(service, WSDLService.class, ScopeType.SERVICE, serviceName);
         LOGGER.exiting();
     }
@@ -199,7 +199,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
     @Override
     public void addPortExtension(final TypedXmlWriter port) {
         LOGGER.entering();
-        final String portName = ((null == seiModel) || (null == endpointClass)) ? null : WSEndpoint.getDefaultPortName(seiModel.getServiceQName(), endpointClass).getLocalPart();
+        final String portName = (null == seiModel) ? null : seiModel.getPortName().getLocalPart();
         selectAndProcessSubject(port, WSDLPort.class, ScopeType.ENDPOINT, portName);
         LOGGER.exiting();
     }
