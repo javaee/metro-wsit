@@ -92,6 +92,7 @@ public abstract class BindingProcessor {
     protected IntegrityAssertionProcessor iAP = null;
     protected EncryptionAssertionProcessor eAP = null;
     private WSSAssertion wss11  = null;
+    private boolean isIssuedTokenAsSignedSupportingToken = false;
     
     protected boolean foundEncryptTargets = false;
     /** Creates a new instance of BindingProcessor */
@@ -250,6 +251,7 @@ public abstract class BindingProcessor {
         SignedSupportingTokensProcessor stp = new SignedSupportingTokensProcessor(st,
                 tokenProcessor,getBinding(),container,primarySP,getEncryptionPolicy(),pid);
         stp.process();
+        isIssuedTokenAsSignedSupportingToken(stp.isIssuedTokenAsSignedSupportingToken());
     }
     public void processSupportingTokens(EndorsingSupportingTokens est) throws PolicyException{
         
@@ -316,5 +318,13 @@ public abstract class BindingProcessor {
     
     public void setWSS11(WSSAssertion wss11) {
         this.wss11 = wss11;
+    }
+    
+    public boolean isIssuedTokenAsSignedSupportingToken(){
+        return this.isIssuedTokenAsSignedSupportingToken;
+    }
+    
+    private void isIssuedTokenAsSignedSupportingToken(boolean value){
+        this.isIssuedTokenAsSignedSupportingToken = value;
     }
 }

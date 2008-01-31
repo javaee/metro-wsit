@@ -69,6 +69,7 @@ import com.sun.xml.ws.security.policy.IssuedToken;
 import com.sun.xml.ws.security.secconv.NewWSSCPlugin;
 import com.sun.xml.ws.security.secconv.WSSCFactory;
 import com.sun.xml.ws.security.secconv.WSSecureConversationException;
+import com.sun.xml.ws.security.trust.GenericToken;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.security.trust.elements.BaseSTSRequest;
@@ -79,6 +80,7 @@ import com.sun.xml.wss.ProcessingContext;
 import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.impl.NewSecurityRecipient;
+import com.sun.xml.wss.impl.PolicyTypeUtil;
 import com.sun.xml.wss.impl.ProcessingContextImpl;
 import com.sun.xml.wss.impl.SecurableSoapMessage;
 import com.sun.xml.wss.impl.SecurityAnnotator;
@@ -88,6 +90,10 @@ import com.sun.xml.wss.impl.misc.Base64;
 import com.sun.xml.wss.impl.misc.DefaultCallbackHandler;
 import com.sun.xml.wss.impl.misc.DefaultSecurityEnvironmentImpl;
 import com.sun.xml.wss.impl.misc.WSITProviderSecurityEnvironment;
+import com.sun.xml.wss.impl.policy.SecurityPolicy;
+import com.sun.xml.wss.impl.policy.mls.MessagePolicy;
+import com.sun.xml.wss.impl.policy.mls.SignaturePolicy;
+import com.sun.xml.wss.impl.policy.mls.SignatureTarget;
 import com.sun.xml.wss.jaxws.impl.Constants;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -121,6 +127,7 @@ import javax.xml.ws.soap.SOAPFaultException;
 
 import java.util.logging.Level;
 import com.sun.xml.wss.provider.wsit.logging.LogStringsMessages;
+import java.util.ListIterator;
 import javax.xml.ws.BindingProvider;
 
 /**
@@ -247,7 +254,7 @@ public class WSITClientAuthContext extends WSITAuthContextBase
 
         ProcessingContext ctx = initializeOutgoingProcessingContext(packet, isSCMessage);
         ((ProcessingContextImpl) ctx).setIssuedTokenContextMap(issuedTokenContextMap);
-
+        ctx.isClient(true);
         if (hasKerberosTokenPolicy()) {
             populateKerberosContext(packet, (ProcessingContextImpl) ctx, isSCMessage);
         }
@@ -684,6 +691,9 @@ public class WSITClientAuthContext extends WSITAuthContextBase
                     itm.getIssuedToken(ctx);
                     issuedTokenContextMap.put(
                             ((Token) issuedTokenAssertion).getTokenId(), ctx);
+                    
+                    updateMPForIssuedTokenAsSignedSupportingToken(packet, ctx, ((Token) issuedTokenAssertion).getTokenId());
+                    
                 } catch (WSTrustException se) {
                     log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0052_ERROR_ISSUEDTOKEN_CREATION(), se);
                     throw new WebServiceException(LogStringsMessages.WSITPVD_0052_ERROR_ISSUEDTOKEN_CREATION(), se);
@@ -731,6 +741,49 @@ public class WSITClientAuthContext extends WSITAuthContextBase
             ctx.setKerberosContext(krbContext);
         } catch (NoSuchAlgorithmException nsae) {
             throw new XWSSecurityException(nsae);
+        }
+    }
+    
+    private void updateMPForIssuedTokenAsSignedSupportingToken(Packet packet, final IssuedTokenContext ctx, final String issuedTokenPolicyId){
+        /*
+         * If IssuedToken is present as SignedSupprotingToken in the wsdl, then the
+         * primary signature must have IssuedToken's id for the signature target instead
+         * of policyId of issuedTokenAssertion
+         */        
+        Message message = packet.getMessage();
+        WSDLBoundOperation operation = message.getOperation(pipeConfig.getWSDLPort());
+        SecurityPolicyHolder sph = (SecurityPolicyHolder) outMessagePolicyMap.get(operation);
+        if(sph != null && sph.isIssuedTokenAsSignedSupportingToken()){
+            MessagePolicy policy = sph.getMessagePolicy();
+            ArrayList list = policy.getPrimaryPolicies();
+            Iterator i = list.iterator();
+            boolean breakOuterLoop = false;
+            while (i.hasNext()) {
+                SecurityPolicy primaryPolicy = (SecurityPolicy) i.next();
+                if(PolicyTypeUtil.signaturePolicy(primaryPolicy)){
+                    SignaturePolicy sigPolicy = (SignaturePolicy)primaryPolicy;
+                    SignaturePolicy.FeatureBinding featureBinding = (SignaturePolicy.FeatureBinding)sigPolicy.getFeatureBinding();
+                    ArrayList targetList = featureBinding.getTargetBindings();
+                    ListIterator iterator = targetList.listIterator();
+                    while(iterator.hasNext()) {
+                        SignatureTarget signatureTarget = (SignatureTarget)iterator.next();
+                        String targetURI = signatureTarget.getValue();
+                        if(targetURI.equals("#"+issuedTokenPolicyId)){
+                            if (ctx != null) {
+                                GenericToken issuedToken = (GenericToken)ctx.getSecurityToken();
+                                signatureTarget.setValue("#"+issuedToken.getId());
+                                sph.setMessagePolicy(policy);
+                                outMessagePolicyMap.put(operation, sph);
+                                breakOuterLoop = true;
+                                break;
+                            }
+                        }
+                    }
+                    if(breakOuterLoop){
+                        break;
+                    }
+                }
+            }
         }
     }
 

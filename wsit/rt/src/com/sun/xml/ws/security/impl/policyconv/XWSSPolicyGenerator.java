@@ -125,6 +125,7 @@ public class XWSSPolicyGenerator {
     private Binding policyBinding = null;
     private List<RequiredElements> reqElements = new ArrayList<RequiredElements>();
     private SecurityPolicyVersion spVersion;
+    private boolean isIssuedTokenAsSignedSupportingToken = false;
     /** Creates a new instance of WSPolicyProcessorImpl */
     //public XWSSPolicyGenerator(AssertionSet assertionSet,boolean isServer,boolean isIncoming){
     public XWSSPolicyGenerator(Policy effectivePolicy,boolean isServer,boolean isIncoming, 
@@ -258,6 +259,7 @@ public class XWSSPolicyGenerator {
                     bindingProcessor.processSupportingTokens((SupportingTokens)assertion);
                 } else if(!ignoreST && shouldAddST() && PolicyUtil.isSignedSupportingToken(assertion, spVersion)){
                     bindingProcessor.processSupportingTokens((SignedSupportingTokens)assertion);
+                    isIssuedTokenAsSignedSupportingToken(bindingProcessor.isIssuedTokenAsSignedSupportingToken());
                 }else if(!ignoreST && shouldAddST() && PolicyUtil.isEndorsedSupportingToken(assertion, spVersion)){
                     bindingProcessor.processSupportingTokens((EndorsingSupportingTokens)assertion);
                 }else if(!ignoreST && shouldAddST() && PolicyUtil.isSignedEndorsingSupportingToken(assertion, spVersion)){
@@ -377,6 +379,14 @@ public class XWSSPolicyGenerator {
                 throw new RuntimeException(LogStringsMessages.SP_0106_UNKNOWN_MESSAGE_LAYOUT(layout));
             }
         }
+    }
+    
+    public boolean isIssuedTokenAsSignedSupportingToken(){
+        return this.isIssuedTokenAsSignedSupportingToken;
+    }
+    
+    private void isIssuedTokenAsSignedSupportingToken(boolean value){
+        this.isIssuedTokenAsSignedSupportingToken = value;
     }
     
 }

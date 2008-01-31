@@ -52,7 +52,7 @@ import com.sun.xml.wss.impl.policy.mls.WSSPolicy;
  * @author K.Venugopal@sun.com
  */
 public class SignedSupportingTokensProcessor extends SupportingTokensProcessor {
-    
+    private boolean isIssuedTokenAsSignedSupportingToken = false;
     /** Creates a new instance of SignedSupportingTokensProcessor */
     public SignedSupportingTokensProcessor(SignedSupportingTokens st,TokenProcessor tokenProcessor,Binding binding,
             XWSSPolicyContainer container,SignaturePolicy sp,EncryptionPolicy ep,PolicyID pid) {
@@ -68,6 +68,9 @@ public class SignedSupportingTokensProcessor extends SupportingTokensProcessor {
         if(!PolicyUtil.isUsernameToken((PolicyAssertion) token, spVersion)){
             stc.addSTRTransform(target);
         }
+        if(PolicyUtil.isIssuedToken((PolicyAssertion) token, spVersion)){
+            isIssuedTokenAsSignedSupportingToken = true;
+        }
         SignaturePolicy.FeatureBinding spFB = (SignaturePolicy.FeatureBinding)signaturePolicy.getFeatureBinding();
         spFB.addTargetBinding(target);
     }
@@ -75,4 +78,7 @@ public class SignedSupportingTokensProcessor extends SupportingTokensProcessor {
 //    protected void collectSignaturePolicies(Token token) throws PolicyException{
 //        createSupportingSignature(token);
 //    }
+    protected boolean isIssuedTokenAsSignedSupportingToken(){
+        return this.isIssuedTokenAsSignedSupportingToken;
+    }
 }

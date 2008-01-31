@@ -237,7 +237,7 @@ public abstract class WSITAuthContextBase  {
     // TODO: Optimized flag to be set based on some conditions (no SignedElements/EncryptedElements)
     protected boolean optimized = true;
     protected PipeConfiguration pipeConfig = null;
-    protected AlgorithmSuite bindingLevelAlgSuite = null;
+    protected AlgorithmSuite bindingLevelAlgSuite = null;    
     
     // Security Environment reference initialized with a JAAS CallbackHandler
     //TODO: not initialized yet
@@ -925,12 +925,13 @@ public abstract class WSITAuthContextBase  {
         
         XWSSPolicyGenerator xwssPolicyGenerator = new XWSSPolicyGenerator(effectivePolicy,isServer,isIncoming, spVersion);
         xwssPolicyGenerator.process(ignoreST);
-        this.bindingLevelAlgSuite = xwssPolicyGenerator.getBindingLevelAlgSuite();
+        this.bindingLevelAlgSuite = xwssPolicyGenerator.getBindingLevelAlgSuite();        
         MessagePolicy messagePolicy = xwssPolicyGenerator.getXWSSPolicy();
         
         SecurityPolicyHolder sph = new SecurityPolicyHolder();
         sph.setMessagePolicy(messagePolicy);
         sph.setBindingLevelAlgSuite(xwssPolicyGenerator.getBindingLevelAlgSuite());
+        sph.isIssuedTokenAsSignedSupportingToken(xwssPolicyGenerator.isIssuedTokenAsSignedSupportingToken());
         List<PolicyAssertion> tokenList = getTokens(effectivePolicy);
         addConfigAssertions(effectivePolicy,sph);
         

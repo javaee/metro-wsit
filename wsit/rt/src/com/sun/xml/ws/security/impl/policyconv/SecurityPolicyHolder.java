@@ -63,6 +63,7 @@ public class SecurityPolicyHolder {
     private AlgorithmSuite suite  = null;
     private HashMap<WSDLFault,SecurityPolicyHolder> faultFPMap = null;
     private HashMap<String,Set<PolicyAssertion>> configAssertions;
+    private boolean isIssuedTokenAsSignedSupportingToken = false;
     
     /**
      * Creates a new instance of SecurityPolicyHolder
@@ -125,6 +126,14 @@ public class SecurityPolicyHolder {
     
     public void setBindingLevelAlgSuite(AlgorithmSuite suite){
         this.suite = suite;
+    }
+    
+   public boolean isIssuedTokenAsSignedSupportingToken(){
+        return this.isIssuedTokenAsSignedSupportingToken;
+    }
+    
+    public void isIssuedTokenAsSignedSupportingToken(boolean isIssuedTokenAsSignedSupportingToken){
+        this.isIssuedTokenAsSignedSupportingToken = isIssuedTokenAsSignedSupportingToken;
     }
     
     public void addFaultPolicy(WSDLFault fault , SecurityPolicyHolder policy){

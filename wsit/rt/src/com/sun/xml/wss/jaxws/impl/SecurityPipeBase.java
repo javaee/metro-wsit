@@ -178,7 +178,7 @@ public abstract class SecurityPipeBase implements Pipe {
     protected WSTrustVersion wsTrustVer;
     protected RmVersion rmVer = RmVersion.WSRM10;
     protected boolean disablePayloadBuffer = false;
-    protected AlgorithmSuite bindingLevelAlgSuite = null;
+    protected AlgorithmSuite bindingLevelAlgSuite = null;    
     
     private final QName optServerSecurity = new QName("http://schemas.sun.com/2006/03/wss/server","DisableStreamingSecurity");
     private final QName optClientSecurity = new QName("http://schemas.sun.com/2006/03/wss/client","DisableStreamingSecurity");
@@ -1212,12 +1212,13 @@ public abstract class SecurityPipeBase implements Pipe {
         
         XWSSPolicyGenerator xwssPolicyGenerator = new XWSSPolicyGenerator(effectivePolicy,isServer,isIncoming, spVersion);
         xwssPolicyGenerator.process(ignoreST);
-        this.bindingLevelAlgSuite = xwssPolicyGenerator.getBindingLevelAlgSuite();
+        this.bindingLevelAlgSuite = xwssPolicyGenerator.getBindingLevelAlgSuite();        
         MessagePolicy messagePolicy = xwssPolicyGenerator.getXWSSPolicy();
         
         SecurityPolicyHolder sph = new SecurityPolicyHolder();
         sph.setMessagePolicy(messagePolicy);
         sph.setBindingLevelAlgSuite(xwssPolicyGenerator.getBindingLevelAlgSuite());
+        sph.isIssuedTokenAsSignedSupportingToken(xwssPolicyGenerator.isIssuedTokenAsSignedSupportingToken());
         List<PolicyAssertion> tokenList = getTokens(effectivePolicy);
         addConfigAssertions(effectivePolicy,sph);
         

@@ -84,11 +84,17 @@ import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.security.policy.IssuedToken;
 
 import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
+import com.sun.xml.ws.security.trust.GenericToken;
 import com.sun.xml.ws.security.trust.impl.client.DefaultSTSIssuedTokenConfiguration;
+import com.sun.xml.wss.impl.PolicyTypeUtil;
 import com.sun.xml.wss.impl.ProcessingContextImpl;
 import javax.xml.ws.soap.SOAPFaultException;
 import com.sun.xml.wss.impl.filter.DumpFilter;
 import com.sun.xml.wss.impl.misc.DefaultCallbackHandler;
+import com.sun.xml.wss.impl.policy.SecurityPolicy;
+import com.sun.xml.wss.impl.policy.mls.MessagePolicy;
+import com.sun.xml.wss.impl.policy.mls.SignaturePolicy;
+import com.sun.xml.wss.impl.policy.mls.SignatureTarget;
 import java.util.Properties;
 import static com.sun.xml.wss.jaxws.impl.Constants.SC_ASSERTION;
 import static com.sun.xml.wss.jaxws.impl.Constants.OPERATION_SCOPE;
@@ -97,6 +103,7 @@ import static com.sun.xml.wss.jaxws.impl.Constants.SUN_WSS_SECURITY_CLIENT_POLIC
 
 import java.util.logging.Level;
 import com.sun.xml.wss.jaxws.impl.logging.LogStringsMessages;
+import java.util.ListIterator;
 
 /**
  *
@@ -168,7 +175,7 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
         //---------------OUTBOUND SECURITY PROCESSING----------
         ProcessingContext ctx = initializeOutgoingProcessingContext(packet, isSCMessage);
         ((ProcessingContextImpl) ctx).setIssuedTokenContextMap(issuedTokenContextMap);
-
+        ctx.isClient(true);
         try {
             if (hasKerberosTokenPolicy()) {
                 populateKerberosContext(packet, (ProcessingContextImpl) ctx, isSCMessage);
@@ -415,6 +422,9 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
                     itm.getIssuedToken(ctx);
                     issuedTokenContextMap.put(
                             ((Token) issuedTokenAssertion).getTokenId(), ctx);
+                    
+                    updateMPForIssuedTokenAsSignedSupportingToken(packet, ctx, ((Token) issuedTokenAssertion).getTokenId());                    
+
                 } catch (WSTrustException se) {
                     log.log(Level.SEVERE,
                             LogStringsMessages.WSSPIPE_0035_ERROR_ISSUEDTOKEN_CREATION(), se);
@@ -483,7 +493,49 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
         } catch (NoSuchAlgorithmException nsae) {
             throw new XWSSecurityException(nsae);
         }
-
+    }
+    
+    private void updateMPForIssuedTokenAsSignedSupportingToken(Packet packet, final IssuedTokenContext ctx, final String issuedTokenPolicyId){
+        /*
+         * If IssuedToken is present as SignedSupprotingToken in the wsdl, then the
+         * primary signature must have IssuedToken's id for the signature target instead
+         * of policyId of issuedTokenAssertion
+         */        
+        Message message = packet.getMessage();
+        WSDLBoundOperation operation = message.getOperation(pipeConfig.getWSDLPort());
+        SecurityPolicyHolder sph = (SecurityPolicyHolder) outMessagePolicyMap.get(operation);
+        if(sph != null && sph.isIssuedTokenAsSignedSupportingToken()){
+            MessagePolicy policy = sph.getMessagePolicy();
+            ArrayList list = policy.getPrimaryPolicies();
+            Iterator i = list.iterator();
+            boolean breakOuterLoop = false;
+            while (i.hasNext()) {
+                SecurityPolicy primaryPolicy = (SecurityPolicy) i.next();
+                if(PolicyTypeUtil.signaturePolicy(primaryPolicy)){
+                    SignaturePolicy sigPolicy = (SignaturePolicy)primaryPolicy;
+                    SignaturePolicy.FeatureBinding featureBinding = (SignaturePolicy.FeatureBinding)sigPolicy.getFeatureBinding();
+                    ArrayList targetList = featureBinding.getTargetBindings();
+                    ListIterator iterator = targetList.listIterator();
+                    while(iterator.hasNext()) {
+                        SignatureTarget signatureTarget = (SignatureTarget)iterator.next();
+                        String targetURI = signatureTarget.getValue();
+                        if(targetURI.equals("#"+issuedTokenPolicyId)){
+                            if (ctx != null) {
+                                GenericToken issuedToken = (GenericToken)ctx.getSecurityToken();
+                                signatureTarget.setValue("#"+issuedToken.getId());
+                                sph.setMessagePolicy(policy);
+                                outMessagePolicyMap.put(operation, sph);
+                                breakOuterLoop = true;
+                                break;
+                            }
+                        }
+                    }
+                    if(breakOuterLoop){
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     //TODO use constants here
