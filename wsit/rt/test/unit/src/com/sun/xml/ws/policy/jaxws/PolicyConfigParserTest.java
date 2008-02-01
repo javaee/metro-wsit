@@ -56,7 +56,7 @@ import javax.xml.ws.WebServiceException;
 import junit.framework.TestCase;
 
 /**
- *
+ * @author Fabian Ritzmann
  */
 public class PolicyConfigParserTest extends TestCase {
     private static final String TEST_FILE_PATH = "test/unit/data/policy/config/wsit.xml";
@@ -77,15 +77,23 @@ public class PolicyConfigParserTest extends TestCase {
     protected void tearDown() throws Exception {
     }
     
-    public void testParseContainerNullWithoutConfig() throws Exception {
-        PolicyMap result = PolicyConfigParser.parse((String) null, null);
-        assertNull(result);
+    public void testParseContainerNullWithoutConfig() {
+        try {
+            PolicyMap result = PolicyConfigParser.parse((String) null, null);
+            fail("Expected PolicyException, got result = " + result);
+        } catch (PolicyException e) {
+            // Expected exception
+        }
     }
     
-    public void testParseContainerWithoutContextWithoutConfig() throws Exception {
-        Container container = new MockContainer(null);        
-        PolicyMap result = PolicyConfigParser.parse((String) null, container);
-        assertNull(result);
+    public void testParseContainerWithoutContextWithoutConfig() {
+        try {
+            Container container = new MockContainer(null);        
+            PolicyMap result = PolicyConfigParser.parse((String) null, container);
+            fail("Expected PolicyException, got result = " + result);
+        } catch (PolicyException e) {
+            // Expected exception
+        }
     }
     
     public void testParseContainerNullWithConfig() throws Exception {        
