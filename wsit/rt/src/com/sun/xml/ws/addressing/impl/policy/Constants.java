@@ -34,66 +34,19 @@
  * holder.
  */
 
-/*
- * Address.java
- *
- * Created on February 17, 2006, 12:48 PM
- *
- * To change this template, choose Tools | Template Manager
- * and open the template in the editor.
- */
-
 package com.sun.xml.ws.addressing.impl.policy;
 
-import com.sun.xml.ws.policy.AssertionSet;
-import com.sun.xml.ws.policy.PolicyAssertion;
-import com.sun.xml.ws.policy.sourcemodel.AssertionData;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Collection;
-import java.util.logging.Level;
-import static com.sun.xml.ws.addressing.impl.policy.Constants.logger;
+import java.util.logging.Logger;
+
 /**
  *
- * @author Abhijit Das
+ * @author ashutosh.shahi@sun.com
  */
-public class Address extends com.sun.xml.ws.policy.PolicyAssertion implements com.sun.xml.ws.addressing.policy.Address {
+public class Constants {
     
-    private boolean populated = false;
-    private URI address;
-    
-    /**
-     * Creates a new instance of Address
-     */
-    public Address() {
-    }
-    
-    public Address(AssertionData name,Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) {
-        super(name,nestedAssertions,nestedAlternative);
-    }
-    private void populate() {
-        if ( !populated ) {
-            try {
-                if(this.getValue() != null){
-                    this.address = new URI(this.getValue().trim());
-                }
-                populated = true;
-            } catch (URISyntaxException ex) {
-                if(logger.getLevel() == Level.SEVERE){
-                    logger.log(Level.SEVERE,LocalizationMessages.WSA_0004_INVALID_EPR_ADDRESS(),ex);
-                }
-            }
-        }
-    }
-    
-    public URI getURI() {
-        populate();
-        return address;
-    }
-    
-    
-    public String getNamespaceURI() {
-        throw new UnsupportedOperationException();
-    }
-    
+    public static final String ADDRESSING_POLICY_DOMAIN = "javax.enterprise.resource.xml.webservices.addressing.policy";
+    public static final String ADDRESSING_POLICY_PACKAGE_ROOT = "com.sun.xml.ws.addressing.impl.policy";
+    public static final String ADDRESSING_POLICY_DOMAIN_BUNDLE = ADDRESSING_POLICY_PACKAGE_ROOT + ".Localization";
+    public static final Logger logger = Logger.getLogger(Constants.ADDRESSING_POLICY_DOMAIN,Constants.ADDRESSING_POLICY_DOMAIN_BUNDLE);
+
 }
