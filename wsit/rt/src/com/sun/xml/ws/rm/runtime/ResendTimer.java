@@ -37,6 +37,7 @@ package com.sun.xml.ws.rm.runtime;
 
 import com.sun.xml.ws.rm.localization.RmLogger;
 
+import java.lang.ref.WeakReference;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -44,19 +45,19 @@ import java.util.TimerTask;
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class ResendTimer {
+class ResendTimer {
 
     private static final RmLogger LOGGER = RmLogger.getLogger(ResendTimer.class);
     private static final long DELAY = 2000;
     private static final long PERIOD = 2000;
     private Timer timer;
-    private final ClientRmSession session;
+    private final WeakReference<ClientSession> sessionReference;
 
     /**
      *
      */
-    public ResendTimer(ClientRmSession session) {
-        this.session = session;
+    public ResendTimer(ClientSession session) {
+        this.sessionReference = new WeakReference<ClientSession>(session);
     }
 
     /**
@@ -68,15 +69,17 @@ public class ResendTimer {
             throw LOGGER.logSevereException(new IllegalStateException("ResendTimer is already running!"));
         }
         timer = new Timer(true);
-        timer.schedule(
-                new TimerTask() {
+        timer.schedule(new TimerTask() {
 
-                    public void run() {
-                        session.resend();
-                    }
-                },
-                DELAY,
-                PERIOD);
+            public void run() {
+                ClientSession cs = sessionReference.get();
+                if (cs != null) {
+                    cs.resend();
+                } else {
+                    stop();
+                }
+            }
+        }, DELAY, PERIOD);
     }
 
     /**

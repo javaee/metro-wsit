@@ -43,7 +43,6 @@ import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.assembler.WsitClientTubeAssemblyContext;
 import com.sun.xml.ws.client.ClientTransportException;
-import com.sun.xml.ws.rm.CreateSequenceException;
 import com.sun.xml.ws.rm.RmException;
 import com.sun.xml.ws.rm.RmWsException;
 import com.sun.xml.ws.rm.localization.RmLogger;
@@ -61,7 +60,7 @@ import javax.xml.ws.WebServiceException;
 public class ClientRmTube extends AbstractFilterTubeImpl {
 
     private static final RmLogger LOGGER = RmLogger.getLogger(ClientRmTube.class);
-    private final ClientRmSession session;
+    private final ClientSession session;
     private Packet originalPacketCopy;
     private Packet processedPacketCopy;
 
@@ -75,7 +74,7 @@ public class ClientRmTube extends AbstractFilterTubeImpl {
 
     public ClientRmTube(WsitClientTubeAssemblyContext context, Tube next) throws RmWsException {
         super(next);
-        this.session = new ClientRmSession(context.getWsdlPort(), context.getBinding(), new ProtocolCommunicator(super.next, context.getScInitiator()));
+        this.session = ClientSession.create(context.getWsdlPort(), context.getBinding(), new ProtocolCommunicator(super.next, context.getScInitiator()));
         this.processedPacketCopy = null;
     }
 
@@ -103,13 +102,6 @@ public class ClientRmTube extends AbstractFilterTubeImpl {
                 processedPacketCopy = requestPacket.copy(true);
                 return super.processRequest(requestPacket);
             }
-        } catch (UnknownSequenceException ex) {
-            LOGGER.logSevereException(ex);
-            return doThrow(ex);
-        } catch (CreateSequenceException ex) {
-            // TODO: replace with general exception
-            LOGGER.logSevereException(ex);
-            return doThrow(ex);
         } catch (RmException ex) {
             // TODO: check if the processing is ok
             LOGGER.logSevereException(ex);
@@ -124,7 +116,7 @@ public class ClientRmTube extends AbstractFilterTubeImpl {
         LOGGER.entering();
         try {
             return super.processResponse(session.processIncommingPacket(responsePacket));
-        } catch (UnknownSequenceException ex) {
+        } catch (RmException ex) {
             LOGGER.logSevereException(ex);
             return doThrow(ex);
         } finally {

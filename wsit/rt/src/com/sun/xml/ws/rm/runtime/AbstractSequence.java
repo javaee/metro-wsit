@@ -47,6 +47,7 @@ public abstract class AbstractSequence implements Sequence {
     private static final long MAX_MESSAGE_ID = 9223372036854775807L;
     private final String id; 
     private final AtomicLong nextMessageId;
+    private Status status;
 
     AbstractSequence(String id) {        
         this.id = id;
@@ -70,4 +71,17 @@ public abstract class AbstractSequence implements Sequence {
     public long getLastMessageId() {
         return nextMessageId.longValue();
     }
+    
+    public Status getStatus() {
+        return status;
+    }
+    
+    protected void setStatus(Status newStatus) {
+        status = newStatus;
+    }
+
+    public boolean isClosed() {
+        return status == Status.CLOSING || status == Status.CLOSED || status == Status.TERMINATING;
+    }
+
 }

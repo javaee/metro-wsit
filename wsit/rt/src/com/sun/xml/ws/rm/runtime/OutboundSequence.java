@@ -36,7 +36,8 @@
 
 package com.sun.xml.ws.rm.runtime;
 
-import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.rm.runtime.Sequence.AckRange;
+import java.util.Collection;
 
 /**
  *
@@ -58,18 +59,7 @@ public class OutboundSequence extends AbstractSequence {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    public Message processOutgoingMessage(Message message) {
-        /*
-         * TODO (new messages):
-         * - add sequence+message id headers
-         * - add ack request header 
-         * - register message as unacknowledged
-         */        
-        return message;
-    }
-
-    public Message processIncommingMessage(Message message) {
-        // TODO: process sequence acknowledgement header if present
+    public Collection<AckRange> getAcknowledgedIndexes() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 }

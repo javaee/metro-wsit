@@ -36,6 +36,8 @@
 
 package com.sun.xml.ws.rm.runtime;
 
+import com.sun.xml.ws.rm.RmException;
+
 /**
  * Inicates that the sequence with given sequence identifier is not available.
  * 
@@ -46,7 +48,7 @@ package com.sun.xml.ws.rm.runtime;
  * 
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class UnknownSequenceException extends Exception {
+public class UnknownSequenceException extends RmException {
     private final String sequenceId;
     
     /**

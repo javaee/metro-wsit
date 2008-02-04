@@ -216,7 +216,7 @@ public class RMSource extends RMProvider {
         }
 
         try {
-            seq.disconnect(false);
+            seq.disconnect();
         } catch (Exception e) {
             // TODO L10N + exception handling
             LOGGER.warning("Attempt to disconnect sequence [" + seq.getId() + "] failed with exception.", e);

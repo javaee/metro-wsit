@@ -117,7 +117,7 @@ public abstract class ConfigurationManager {
     }
 
     static <T extends PolicyAssertion> T extractAssertion(AssertionSet alternative, QName assertionName, Class<T> assertionClass) {
-        List<PolicyAssertion> assertions = new ArrayList(alternative.get(assertionName));
+        List<PolicyAssertion> assertions = new ArrayList<PolicyAssertion>(alternative.get(assertionName));
         switch (assertions.size()) {
             case 0:
                 return null;

@@ -35,13 +35,30 @@
  */
 package com.sun.xml.ws.rm.runtime;
 
-import com.sun.xml.ws.api.message.Message;
+import java.util.Collection;
 
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public interface Sequence {
+    public enum Status {
+        CREATING,
+        CREATED,
+        CLOSING,
+        CLOSED,
+        TERMINATING
+    }
+    
+    public class AckRange {
+        public final long lower;
+        public final long upper;
+        
+        public AckRange(long lower, long upper) {
+            this.lower = lower;
+            this.upper = upper;
+        }
+    }
 /*
  * create sequence:
  * 1. assign new unique sequence id
@@ -106,20 +123,23 @@ public interface Sequence {
      * @return last message identifier registered on this sequence
      */
     public long getLastMessageId();
-
+    
     /**
-     * Processes the outgoing message according to the type of the sequence (inbound/outbound)
-     * 
-     * @param message message to process
-     * @return processed message
+     * TODO javadoc
+     * @return
      */
-    public Message processOutgoingMessage(Message message);
-
+    public Collection<AckRange> getAcknowledgedIndexes();
+    
     /**
-     * Processes the incomming message according to the type of the sequence (inbound/outbound)
-     * 
-     * @param message message to process
-     * @return processed message
+     * TODO javadoc
+     * @return
      */
-    public Message processIncommingMessage(Message message);
+    public Status getStatus();
+    
+    /**
+     * TODO javadoc
+     * @return
+     */
+    public boolean isClosed();
+    
 }
