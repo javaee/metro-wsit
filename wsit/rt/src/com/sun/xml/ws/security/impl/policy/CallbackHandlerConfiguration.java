@@ -49,9 +49,9 @@ import javax.xml.namespace.QName;
  */
 public class CallbackHandlerConfiguration extends PolicyAssertion implements com.sun.xml.ws.security.policy.CallbackHandlerConfiguration, SecurityAssertionValidator{
     
-    private static QName timestampTimeout  =  new QName("timestampTimeout");
+    private static final QName timestampTimeout  =  new QName("timestampTimeout");
     private boolean populated = false;
-    
+    private static final QName useXWSSCallbacks = new QName("useXWSSCallbacks");
     private Iterator<PolicyAssertion> ast  = null;
     private AssertionFitness fitness = AssertionFitness.IS_VALID;
     /** Creates a new instance of CallbackHandlerConfiguration */
@@ -88,5 +88,8 @@ public class CallbackHandlerConfiguration extends PolicyAssertion implements com
             return this.getAttributeValue(timestampTimeout);
         }
         return null;
+    }
+    public String getUseXWSSCallbacks() {
+        return this.getAttributeValue(useXWSSCallbacks);
     }
 }

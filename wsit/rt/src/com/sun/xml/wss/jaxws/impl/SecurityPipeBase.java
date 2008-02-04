@@ -1410,6 +1410,9 @@ public abstract class SecurityPipeBase implements Pipe {
             //in milliseconds
             this.timestampTimeOut = Long.parseLong(conf.getTimestampTimeout()) * 1000;
         }
+        if (conf.getUseXWSSCallbacks() != null) {
+            props.put(DefaultCallbackHandler.USE_XWSS_CALLBACKS, conf.getUseXWSSCallbacks());
+        }
         Iterator it = conf.getCallbackHandlers();
         for (; it.hasNext();) {
             PolicyAssertion p = (PolicyAssertion)it.next();
