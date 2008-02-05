@@ -48,13 +48,19 @@ import java.util.Map;
 import java.util.Set;
 import javax.security.auth.Subject;
 import javax.xml.namespace.QName;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+
+import javax.xml.stream.XMLStreamReader;
+import com.sun.xml.wss.saml.util.SAMLUtil;
 
 /**
  *
  * @author Jiandong Guo
  */
 public class DefaultSTSAttributeProvider implements STSAttributeProvider{
-    
+    private static final String SAML_1_0_NS = "urn:ossis:names:tc:SAML:1.0:assertion";
+    private static final String SAML_2_0_NS = "urn:ossis:names:tc:SAML:2.0:assertion";
     public Map<QName, List<String>> getClaimedAttributes(final Subject subject, final String appliesTo, final String tokenType, final Claims claims){
         final Set<Principal> principals = subject.getPrincipals();
         final Map<QName, List<String>> attrs = new HashMap<QName, List<String>>();
@@ -69,6 +75,39 @@ public class DefaultSTSAttributeProvider implements STSAttributeProvider{
                     break;
                 }
             }       
+        }else {
+            //handle the case that the authentication token is SAML assertion
+            Set<Object> set = subject.getPublicCredentials();
+            Element samlAssertion = null;
+            try {
+                for (Object obj : set) {
+                    if (obj instanceof XMLStreamReader) {
+                        XMLStreamReader reader = (XMLStreamReader) obj;
+                        //To create a DOM Element representing the Assertion :
+                        samlAssertion = SAMLUtil.createSAMLAssertion(reader);
+                    }
+                }
+            } catch (Exception ex){
+                samlAssertion = null;
+            }
+            
+            if (samlAssertion != null){
+                String uri = samlAssertion.getNamespaceURI();
+                List<String> nameIds = new ArrayList<String>();  
+                NodeList nl = null;
+                if (SAML_1_0_NS.equals(uri)){
+                    nl = samlAssertion.getElementsByTagNameNS(SAML_1_0_NS, "NameIdentifier");
+                }else if (SAML_2_0_NS.equals(uri)){
+                    nl = samlAssertion.getElementsByTagNameNS(SAML_2_0_NS, "NameID");
+                }
+                
+                if (nl != null && nl.getLength() > 0){
+                    Element nameId = (Element) nl.item(0);
+                    nameIds.add(nameId.getFirstChild().getNodeValue());
+                }
+                
+                attrs.put(new QName("http://sun.com", NAME_IDENTIFIER), nameIds);
+            }
         }
        
         // Set up a dumy attribute value
