@@ -35,6 +35,7 @@
  */
 package com.sun.xml.ws.mex.server;
 
+import com.sun.istack.NotNull;
 import com.sun.xml.stream.buffer.MutableXMLStreamBuffer;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
@@ -45,12 +46,22 @@ import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.server.BoundEndpoint;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.developer.JAXWSProperties;
+import com.sun.xml.ws.fault.SOAPFaultBuilder;
+import com.sun.xml.ws.message.ProblemActionHeader;
+import com.sun.xml.ws.mex.MetadataConstants;
+import com.sun.xml.ws.mex.MessagesMessages;
 import com.sun.xml.ws.transport.http.servlet.ServletModule;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import javax.xml.namespace.QName;
+import javax.xml.soap.Detail;
+import javax.xml.soap.SOAPConstants;
+import javax.xml.soap.SOAPElement;
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPFault;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.ws.BindingProvider;
@@ -62,9 +73,6 @@ import javax.xml.ws.Service;
 import javax.xml.ws.ServiceMode;
 import javax.xml.ws.WebServiceProvider;
 import javax.xml.ws.soap.Addressing;
-import com.sun.xml.ws.mex.MetadataConstants;
-import javax.servlet.http.HttpServletRequest;
-import com.sun.xml.ws.mex.MessagesMessages;
 
 import static com.sun.xml.ws.mex.MetadataConstants.GET_MDATA_REQUEST;
 import static com.sun.xml.ws.mex.MetadataConstants.GET_REQUEST;
@@ -113,7 +121,9 @@ public class MEXEndpoint implements Provider<Message> {
             return processGetRequest(requestMsg, toAddress, wsaVersion, soapVersion);
         }
         else if (action.equals(GET_MDATA_REQUEST)) {
-            final Message faultMessage = Messages.create(GET_MDATA_REQUEST,
+            String faultText = MessagesMessages.MEX_0017_GET_METADATA_NOT_IMPLEMENTED(GET_MDATA_REQUEST, GET_REQUEST);
+            logger.warning(faultText);
+            final Message faultMessage = createFaultMessage(faultText, GET_MDATA_REQUEST,
                 wsaVersion, soapVersion);
             wsContext.getMessageContext().put(BindingProvider.SOAPACTION_URI_PROPERTY, wsaVersion.getDefaultFaultAction());
             return faultMessage;
@@ -237,5 +247,36 @@ public class MEXEndpoint implements Provider<Message> {
         writer.writeStartElement(MetadataConstants.MEX_PREFIX, "Metadata", MetadataConstants.MEX_NAMESPACE);
     }
     
+    private Message createFaultMessage(@NotNull final String faultText, @NotNull final String unsupportedAction,
+            @NotNull final AddressingVersion av, @NotNull final SOAPVersion sv) {
+        final QName subcode = av.actionNotSupportedTag;
+        Message faultMessage;
+        SOAPFault fault;
+        try {
+            if (sv == SOAPVersion.SOAP_12) {
+                fault = SOAPVersion.SOAP_12.saajSoapFactory.createFault();
+                fault.setFaultCode(SOAPConstants.SOAP_SENDER_FAULT);
+                fault.appendFaultSubcode(subcode);
+                Detail detail = fault.addDetail();
+                SOAPElement se = detail.addChildElement(av.problemActionTag);
+                se = se.addChildElement(av.actionTag);
+                se.addTextNode(unsupportedAction);
+            } else {
+                fault = SOAPVersion.SOAP_11.saajSoapFactory.createFault();
+                fault.setFaultCode(subcode);
+            }
+            fault.setFaultString(faultText);
+
+            faultMessage = SOAPFaultBuilder.createSOAPFaultMessage(sv, fault);
+            if (sv == SOAPVersion.SOAP_11) {
+                faultMessage.getHeaders().add(new ProblemActionHeader(unsupportedAction, av));
+            }
+        } catch (SOAPException e) {
+            throw new WebServiceException(e);
+        }
+
+        return faultMessage;
+    }
+
 }
 
