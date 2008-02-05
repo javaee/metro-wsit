@@ -78,4 +78,12 @@ public class InMemorySequenceManager implements SequenceManager {
     public String generateSequenceUID() {
         return "uuid:" + UUID.randomUUID();
     }
+
+    public void closeSequence(String sequenceId) throws UnknownSequenceException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void terminateSequence(String sequenceId) throws UnknownSequenceException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }

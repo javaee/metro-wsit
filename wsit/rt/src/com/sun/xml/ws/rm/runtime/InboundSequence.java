@@ -36,9 +36,6 @@
 
 package com.sun.xml.ws.rm.runtime;
 
-import com.sun.xml.ws.rm.runtime.Sequence.AckRange;
-import java.util.Collection;
-
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
@@ -56,10 +53,6 @@ public class InboundSequence extends AbstractSequence {
 
     public void close() {
         // TODO
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public Collection<AckRange> getAcknowledgedIndexes() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 }

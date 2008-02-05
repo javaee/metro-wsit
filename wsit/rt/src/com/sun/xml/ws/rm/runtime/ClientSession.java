@@ -45,27 +45,19 @@ import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Fiber;
-import com.sun.xml.ws.rm.BufferFullException;
 import com.sun.xml.ws.rm.CloseSequenceException;
 import com.sun.xml.ws.rm.CreateSequenceException;
-import com.sun.xml.ws.rm.DuplicateMessageException;
-import com.sun.xml.ws.rm.InvalidMessageNumberException;
-import com.sun.xml.ws.rm.InvalidSequenceException;
-import com.sun.xml.ws.rm.MessageNumberRolloverException;
-import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.RmException;
-import com.sun.xml.ws.rm.TerminateSequenceException;
-import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.policy.Configuration;
 import com.sun.xml.ws.rm.policy.ConfigurationManager;
-import com.sun.xml.ws.rm.protocol.AbstractAckRequested;
-import com.sun.xml.ws.rm.protocol.AbstractSequenceAcknowledgement;
-import com.sun.xml.ws.rm.protocol.AbstractTerminateSequence;
-import com.sun.xml.ws.rm.v200702.CloseSequenceResponseElement;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
@@ -118,23 +110,27 @@ abstract class ClientSession {
             return System.currentTimeMillis() - timestamp >= period;
         }
     }
+    protected String inboundSequenceId;
+    protected String outboundSequenceId;
     protected final Configuration configuration;
     protected final SequenceManager sequenceManager;
-    private final ProtocolCommunicator communicator;
+    protected final ProtocolCommunicator communicator;
+    private final Lock initLock;
     private final boolean isRequestResponseSession;
-    private final Lock initLock = new ReentrantLock();
-    protected String inboundSequenceId = null;
-    protected String outboundSequenceId = null;
-    private final Queue<FiberRegistration> fibersToResend = new LinkedList<FiberRegistration>();
-    private final ResendTimer resendTimer;
     private final Unmarshaller jaxbUnmarshaller;
+    private final ScheduledTaskManager scheduledTaskManager;
+    private final Queue<FiberRegistration> fibersToResend = new LinkedList<FiberRegistration>();
+    private final AtomicLong lastAckRequestedTime = new AtomicLong(0);
 
     protected ClientSession(WSDLPort wsdlPort, WSBinding binding, ProtocolCommunicator communicator, Configuration configuration) {
+        this.inboundSequenceId = null;
+        this.outboundSequenceId = null;
+        this.initLock = new ReentrantLock();
         this.configuration = configuration;
         this.sequenceManager = SequenceManagerFactory.getInstance().getSequenceManager();
         this.communicator = communicator;
         this.isRequestResponseSession = checkForRequestResponseOperations(wsdlPort);
-        this.resendTimer = new ResendTimer(this);
+        this.scheduledTaskManager = new ScheduledTaskManager();
         this.jaxbUnmarshaller = createUnmarshaller(configuration.getRMVersion().jaxbContext);
     }
 
@@ -143,65 +139,65 @@ abstract class ClientSession {
     protected abstract String processHandshakeResponseMessage(Message handshakeResponseMessage) throws RmException;
 
     protected abstract void appendSequenceHeader(Message outboundMessage) throws RmException;
-    
+
     protected abstract void appendAckRequestedHeader(Message outboundMessage) throws RmException;
-    
+
     protected abstract void appendSequenceAcknowledgementHeader(Message outboundMessage) throws RmException;
-    
+
     protected abstract void processInboundMessageHeaders(Message inboundMessage) throws RmException;
 
-    protected abstract void disconnect() throws RmException;
+    protected abstract void closeOutboundSequence() throws RmException;
 
-    private Unmarshaller createUnmarshaller(JAXBContext jaxbContext) {
-        try {
-            return jaxbContext.createUnmarshaller();
-        } catch (JAXBException e) {
-            // TODO L10N            
-            throw LOGGER.logSevereException(new IllegalStateException("Unable to create JAXB unmarshaller", e));
-        }
-    }
+    protected abstract void terminateOutboundSequence() throws RmException;
 
     /**
-     * Closes and terminates associated sequences and releases other resources associated with this RM session
+     * Sends handshake message (CreateSequence) in order to establish the RM session.
+     * 
+     * @param offerInboundSequenceId nullable, if not {@code null} the value will be used as an offered response messages sequence identifier
+     * @return identifier of the outgoing messages sequence.
      */
-    void close() {
-        try {            
-            disconnect();
-            sequenceManager.getSequence(outboundSequenceId).close();
-        } catch (CloseSequenceException ex) {
-            // TODO: is the exception handled correctly?
-            LOGGER.logException(ex, Level.WARNING);
-        } catch (UnknownSequenceException ex) {
-            // TODO: is the exception handled correctly?
-            LOGGER.logException(ex, Level.WARNING);
-        } catch (RmException ex) {
-            // TODO: is the exception handled correctly?
-            LOGGER.logException(ex, Level.WARNING);
+    protected String connect(String offerInboundSequenceId) throws CreateSequenceException, RmException {
+        Message handshakeRequestMessage = prepareHandshakeRequest(offerInboundSequenceId, communicator.tryStartSecureConversation());
+        Message handshakeResponseMessage = communicator.send(handshakeRequestMessage, configuration.getRMVersion().createSequenceAction);
+        if (handshakeResponseMessage != null) {
+            return processHandshakeResponseMessage(handshakeResponseMessage);
+        } else {
+            // TODO: create sequence response was null... throw an exception or handle CreateSequenceRefused fault?
+            // TODO L10N
+            throw LOGGER.logSevereException(new CreateSequenceException("CreateSequenceResponse was null"));
         }
-        try {
-            sequenceManager.getSequence(inboundSequenceId).close();
-        } catch (UnknownSequenceException ex) {
-            LOGGER.logException(ex, Level.WARNING);
-        }
-        resendTimer.stop();
     }
 
-    Packet processOutgoingPacket(Packet requestPacket) throws RmException {
+    protected final Header createHeader(Object headerContent) {
+        return Headers.create(configuration.getRMVersion().jaxbContext, headerContent);
+    }
+
+    protected final <T> T unmarshallResponse(Message response) throws RmException {
+        try {
+            return (T) response.readPayloadAsJAXB(jaxbUnmarshaller);
+        } catch (JAXBException e) {
+            // TODO L10N
+            throw LOGGER.logSevereException(new RmException("Unable to unmarshall response", e));
+        }
+    }
+
+    final Packet processOutgoingPacket(Packet requestPacket) throws RmException {
         initializeIfNecessary(requestPacket);
 
         appendSequenceHeader(requestPacket.getMessage());
-        if (true) { // TODO method to determine if ackRequested header should be added
+        if (checkPendingAckRequest()) {
             appendAckRequestedHeader(requestPacket.getMessage());
+            lastAckRequestedTime.set(System.currentTimeMillis());
         }
         if (inboundSequenceId != null) {
+            // we are always sending acknowledgements if there is an inbound sequence
             appendSequenceAcknowledgementHeader(requestPacket.getMessage());
         }
-        
+
         return requestPacket;
     }
 
-    Packet processIncommingPacket(Packet responsePacket) throws RmException {
-
+    final Packet processIncommingPacket(Packet responsePacket) throws RmException {
         processInboundMessageHeaders(responsePacket.getMessage());
 
         return responsePacket;
@@ -213,23 +209,42 @@ abstract class ClientSession {
      * @param fiber a fiber to be resumed after resend interval has passed
      * @return {@code true} if the fiber was successfully registered; {@code false} otherwise.
      */
-    boolean registerForResend(Fiber fiber, Packet packet) {
+    final boolean registerForResend(Fiber fiber, Packet packet) {
         synchronized (fibersToResend) {
             return fibersToResend.offer(new FiberRegistration(fiber, packet));
         }
     }
 
     /**
-     * Resumes all suspended fibers registered for a resend which have an expired retransmission inteval.
+     * Closes and terminates associated sequences and releases other resources associated with this RM session
      */
-    void resend() {
-        while (!fibersToResend.isEmpty() && fibersToResend.peek().expired(configuration.getMessageRetransmissionInterval())) {
-            FiberRegistration registration;
-            synchronized (fibersToResend) {
-                registration = fibersToResend.poll();
+    final void close() {
+        try {
+            try {
+                closeOutboundSequence();
+                sequenceManager.closeSequence(outboundSequenceId);
+            } finally {
+                waitUntilAllRequestsAckedOrTimeout();
+                terminateOutboundSequence();
+                sequenceManager.terminateSequence(outboundSequenceId);
             }
-            registration.fiber.resume(registration.packet);
+        } catch (CloseSequenceException ex) {
+            // TODO: is the exception handled correctly?
+            LOGGER.logException(ex, Level.WARNING);
+        } catch (UnknownSequenceException ex) {
+            // TODO: is the exception handled correctly?
+            LOGGER.logException(ex, Level.WARNING);
+        } catch (RmException ex) {
+            // TODO: is the exception handled correctly?
+            LOGGER.logException(ex, Level.WARNING);
         }
+        try {
+            // TODO wait for an external event?
+            sequenceManager.closeSequence(inboundSequenceId);
+        } catch (UnknownSequenceException ex) {
+            LOGGER.logException(ex, Level.WARNING);
+        }
+        scheduledTaskManager.stopAll();
     }
 
     /**
@@ -250,7 +265,19 @@ abstract class ClientSession {
                 sequenceManager.createInboundSequence(inboundSequenceId);
                 sequenceManager.createOutboudSequence(outboundSequenceId);
 
-                resendTimer.start();
+                scheduledTaskManager.startTasks(
+                        new Runnable() {
+
+                            public void run() {
+                                resend();
+                            }
+                        },
+                        new Runnable() {
+
+                            public void run() {
+                                sendAckRequested();
+                            }
+                        });
             }
         } finally {
             initLock.unlock();
@@ -262,29 +289,24 @@ abstract class ClientSession {
     }
 
     /**
-     * Sends handshake message (CreateSequence) in order to establish the RM session.
-     * 
-     * @param offerInboundSequenceId nullable, if not {@code null} the value will be used as an offered response messages sequence identifier
-     * @return identifier of the outgoing messages sequence.
+     * Resumes all suspended fibers registered for a resend which have an expired retransmission inteval.
      */
-    protected String connect(String offerInboundSequenceId) throws CreateSequenceException, RmException {
-        Message handshakeRequestMessage = prepareHandshakeRequest(offerInboundSequenceId, communicator.tryStartSecureConversation());
-        Message handshakeResponseMessage = communicator.send(handshakeRequestMessage, configuration.getRMVersion().createSequenceAction);
-        if (handshakeResponseMessage != null) {
-            return processHandshakeResponseMessage(handshakeResponseMessage);
-        } else {
-            // TODO: create sequence response was null... throw an exception or handle CreateSequenceRefused fault?
-            // TODO L10N
-            throw LOGGER.logSevereException(new CreateSequenceException("CreateSequenceResponse was null"));
+    private void resend() {
+        while (!fibersToResend.isEmpty() && fibersToResend.peek().expired(configuration.getMessageRetransmissionInterval())) {
+            FiberRegistration registration;
+            synchronized (fibersToResend) {
+                registration = fibersToResend.poll();
+            }
+            registration.fiber.resume(registration.packet);
         }
     }
 
-    protected final <T> T unmarshallResponse(Message response) throws RmException {
+    private Unmarshaller createUnmarshaller(JAXBContext jaxbContext) {
         try {
-            return (T) response.readPayloadAsJAXB(jaxbUnmarshaller);
+            return jaxbContext.createUnmarshaller();
         } catch (JAXBException e) {
-            // TODO L10N
-            throw LOGGER.logSevereException(new RmException("Unable to unmarshall response", e));
+            // TODO L10N            
+            throw LOGGER.logSevereException(new IllegalStateException("Unable to create JAXB unmarshaller", e));
         }
     }
 
@@ -295,13 +317,14 @@ abstract class ClientSession {
      * @param seq Outbound sequence to which SequenceHeaderElement will belong.
      *
      */
-    private void sendAckRequested() throws RmException {
+    private void sendAckRequested() {
+        Message ackResponse = null;
         try {
-            Message ackRequestMessage = Messages.createEmpty(configuration.getSoapVersion());
-            appendAckRequestedHeader(ackRequestMessage);
+            if (checkPendingAckRequest()) {
+                Message ackRequestMessage = Messages.createEmpty(configuration.getSoapVersion());
+                appendAckRequestedHeader(ackRequestMessage);
+                lastAckRequestedTime.set(System.currentTimeMillis());
 
-            Message ackResponse = null;
-            try {
                 ackResponse = communicator.send(ackRequestMessage, configuration.getRMVersion().ackRequestedAction);
                 if (ackResponse != null && ackResponse.isFault()) {
                     // TODO L10N
@@ -309,107 +332,15 @@ abstract class ClientSession {
                 }
 
                 processInboundMessageHeaders(ackResponse);
-            } finally {
-                if (ackResponse != null) {
-                    ackResponse.consume();
-                }
             }
-        } finally {
-            // TODO Make sure that inactivity timeout is reset.
-        }
-    }
-
-    /**
-     * Send Message with empty body and a single SequenceElement (with Last child) down the pipe.  Process the response,
-     * which may contain a SequenceAcknowledgementElement.
-     *
-     * @param seq Outbound sequence to which SequenceHeaderElement will belong.
-     *
-     */
-    private void sendLast(OutboundSequence seq) throws RmException {
-        com.sun.xml.ws.rm.v200502.SequenceElement sequenceElement = new com.sun.xml.ws.rm.v200502.SequenceElement();
-        sequenceElement.setId(outboundSequenceId);
-        sequenceElement.setNumber(sequenceManager.getSequence(outboundSequenceId).getLastMessageId());
-        sequenceElement.setLastMessage(new com.sun.xml.ws.rm.v200502.SequenceElement.LastMessage());
-
-        Message lastMessage = Messages.createEmpty(configuration.getSoapVersion());
-        lastMessage.getHeaders().add(Headers.create(configuration.getRMVersion().jaxbContext, sequenceElement));
-        Message response = null;
-        try {
-            response = communicator.send(lastMessage, configuration.getRMVersion().lastAction);
-            if (response != null && response.isFault()) {
-                // TODO L10N
-                throw LOGGER.logException(new RmException("Error sending Last message", response), Level.WARNING);
-            }
-            processInboundMessageHeaders(response);
-        } finally {
-            if (response != null) {
-                response.consume();
-            }
-        }
-    }
-    
-    private void sendCloseSequence() throws RmException {
-        com.sun.xml.ws.rm.v200702.Identifier idClose = new com.sun.xml.ws.rm.v200702.Identifier();
-        idClose.setValue(outboundSequenceId);
-
-        com.sun.xml.ws.rm.v200702.CloseSequenceElement cs = new com.sun.xml.ws.rm.v200702.CloseSequenceElement();
-        cs.setIdentifier(idClose);        
-        cs.setLastMsgNumber(sequenceManager.getSequence(outboundSequenceId).getLastMessageId());
-
-        Message closeSequenceRequest = Messages.create(configuration.getRMVersion().jaxbContext, cs, configuration.getSoapVersion());
-
-        // TODO: check why only WS-RM1.1 ???
-        Message response = communicator.send(closeSequenceRequest, RmVersion.WSRM11.closeSequenceAction);
-        if (response != null && response.isFault()) {
+        } catch (RmException ex) {
             // TODO L10N
-            throw LOGGER.logException(new CloseSequenceException("CloseSequence was refused by the RMDestination", response), Level.WARNING);
-        }
-
-        CloseSequenceResponseElement csr = unmarshallResponse(response);
-        // TODO process CloseSequenceRespose element...
-    }
-
-    private void sendTerminateSequence(AbstractTerminateSequence ts, OutboundSequence seq) throws RmException {
-        //TODO piggyback an acknowledgement if one is pending
-        //seq.processAcknowledgement(new RMMessage(request));
-
-        Message terminateSequenceRequest = Messages.create(configuration.getRMVersion().jaxbContext, ts, configuration.getSoapVersion());
-        Message response = null;
-        try {
-            response = communicator.send(terminateSequenceRequest, configuration.getRMVersion().terminateSequenceAction);
-            if (response != null && response.isFault()) {
-                throw LOGGER.logException(new TerminateSequenceException("There was an error trying to terminate the sequence ", response), Level.WARNING);
-            }
-        //TODO What to do with response?
-        //It may have a TerminateSequence for reverse sequence on it as well as ack headers
-        //Process these.
+            LOGGER.warning("Acknowledgement request failed", ex);
         } finally {
-            if (response != null) {
-                response.consume();
+            if (ackResponse != null) {
+                ackResponse.consume();
             }
         }
-    }
-
-    /**
-     * Determine whether wsdl port contains any two-way operations.
-     * 
-     * @param port WSDL port to check
-     * @return {@code true} if there are request/response present on the port; returns {@code false} otherwise
-     */
-    private boolean checkForRequestResponseOperations(WSDLPort port) {
-        WSDLBoundPortType portType;
-        if (port == null || null == (portType = port.getBinding())) {
-            //no WSDL perhaps? Returning false here means that will be no reverse sequence. That is the correct behavior.
-            return false;
-        }
-
-        for (WSDLBoundOperation boundOperation : portType.getBindingOperations()) {
-            if (!boundOperation.getOperation().isOneWay()) {
-                return true;
-            }
-        }
-        return false;
     }
 
 //    private void processAckRequestHeader(Header header, Message message) throws RmException, InvalidMessageNumberException {
@@ -555,7 +486,59 @@ abstract class ClientSession {
 //    private Header getHeader(Message message, String name) {
 //        return (message.getHeaders() != null) ? message.getHeaders().get(configuration.getRMVersion().namespaceUri, name, true) : null;
 //    }    
-    protected Header createHeader(Object headerContent) {
-        return Headers.create(configuration.getRMVersion().jaxbContext, headerContent);
+    private boolean checkPendingAckRequest() throws UnknownSequenceException {
+        return lastAckRequestedTime.get() - System.currentTimeMillis() > configuration.getAcknowledgementRequestInterval() &&
+                sequenceManager.getSequence(outboundSequenceId).hasPendingAcknowledgements();
+    }
+
+    /**
+     * Determine whether wsdl port contains any two-way operations.
+     * 
+     * @param port WSDL port to check
+     * @return {@code true} if there are request/response present on the port; returns {@code false} otherwise
+     */
+    private boolean checkForRequestResponseOperations(WSDLPort port) {
+        WSDLBoundPortType portType;
+        if (port == null || null == (portType = port.getBinding())) {
+            //no WSDL perhaps? Returning false here means that will be no reverse sequence. That is the correct behavior.
+            return false;
+        }
+
+        for (WSDLBoundOperation boundOperation : portType.getBindingOperations()) {
+            if (!boundOperation.getOperation().isOneWay()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void waitUntilAllRequestsAckedOrTimeout() {
+        final CountDownLatch doneSignal = new CountDownLatch(1);
+        ScheduledFuture<?> taskHandle = scheduledTaskManager.startTask(new Runnable() {
+
+            public void run() {
+                try {
+                    if (!sequenceManager.getSequence(outboundSequenceId).hasPendingAcknowledgements()) {
+                        doneSignal.countDown();
+                    }
+                } catch (UnknownSequenceException ex) {
+                    // TODO L10N
+                    LOGGER.severe("Unexpected exception occured while waiting for sequence acknowledgements", ex);
+                    doneSignal.countDown();
+                }
+            }
+        });
+        try {
+            boolean waitResult = doneSignal.await(configuration.getCloseSequenceOperationTimeout(), TimeUnit.MILLISECONDS);
+            if (!waitResult) {
+                // TODO L10N
+                LOGGER.info("Close sequence operation timed out for outbound sequence [" + outboundSequenceId + "]");
+            }
+        } catch (InterruptedException ex) {
+            // TODO L10N
+            LOGGER.fine("Got interrupted while waiting for close sequence operation", ex);
+        } finally {
+            taskHandle.cancel(true);
+        }
     }
 }

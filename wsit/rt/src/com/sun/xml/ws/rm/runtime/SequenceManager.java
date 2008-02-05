@@ -63,6 +63,7 @@ public interface SequenceManager {
      * 
      * @param sequenceId the unique sequence identifier
      * @return sequence identified with the {@code sequenceId} identifier
+     * @exception UnknownSequenceExceptio in case no such sequence is registered within the sequence manager
      */
     public Sequence getSequence(String sequenceId) throws UnknownSequenceException;
 
@@ -71,7 +72,11 @@ public interface SequenceManager {
      * 
      * @param sequence sequence object to be registered within the internal sequence storage
      */
-    public void registerSequence(Sequence sequence) throws DuplicateSequenceException;
+    //public void registerSequence(Sequence sequence) throws DuplicateSequenceException;
+
+    public void closeSequence(String sequenceId) throws UnknownSequenceException;
+    
+    public void terminateSequence(String sequenceId) throws UnknownSequenceException;
     
     /**
      * Generates a unique identifier of a sequence

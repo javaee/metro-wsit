@@ -42,19 +42,25 @@ import com.sun.xml.ws.api.message.Headers;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.rm.CloseSequenceException;
 import com.sun.xml.ws.rm.CreateSequenceException;
 import com.sun.xml.ws.rm.RmException;
+import com.sun.xml.ws.rm.TerminateSequenceException;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.policy.Configuration;
 import com.sun.xml.ws.rm.v200702.AckRequestedElement;
+import com.sun.xml.ws.rm.v200702.CloseSequenceElement;
+import com.sun.xml.ws.rm.v200702.CloseSequenceResponseElement;
 import com.sun.xml.ws.rm.v200702.CreateSequenceElement;
 import com.sun.xml.ws.rm.v200702.CreateSequenceResponseElement;
 import com.sun.xml.ws.rm.v200702.Identifier;
 import com.sun.xml.ws.rm.v200702.OfferType;
 import com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement;
 import com.sun.xml.ws.rm.v200702.SequenceElement;
+import com.sun.xml.ws.rm.v200702.TerminateSequenceElement;
 import com.sun.xml.ws.rm.v200702.UsesSequenceSTR;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
+import java.util.logging.Level;
 import javax.xml.namespace.QName;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
 
@@ -124,17 +130,19 @@ final class Rm11ClientSession extends ClientSession {
         SequenceElement sequenceHeaderElement = new SequenceElement();
         sequenceHeaderElement.setNumber(messageNumber);
         sequenceHeaderElement.setId(outboundSequenceId);
-        
+
         outboundMessage.getHeaders().add(createHeader(sequenceHeaderElement));
     }
 
+    @Override
     protected void appendAckRequestedHeader(Message outboundMessage) {
         AckRequestedElement ackRequestedElement = new AckRequestedElement();
         ackRequestedElement.setId(outboundSequenceId);
-        
+
         outboundMessage.getHeaders().add(createHeader(ackRequestedElement));
     }
 
+    @Override
     protected void appendSequenceAcknowledgementHeader(Message outboundMessage) throws UnknownSequenceException {
         SequenceAcknowledgementElement ackElement = new SequenceAcknowledgementElement();
         Identifier identifier = new Identifier();
@@ -163,7 +171,47 @@ final class Rm11ClientSession extends ClientSession {
     }
 
     @Override
-    protected void disconnect() throws RmException {
-        throw new UnsupportedOperationException("Not supported yet.");
+    protected void closeOutboundSequence() throws RmException {
+        Identifier idClose = new Identifier();
+        idClose.setValue(outboundSequenceId);
+
+        CloseSequenceElement cs = new CloseSequenceElement();
+        cs.setIdentifier(idClose);
+        cs.setLastMsgNumber(sequenceManager.getSequence(outboundSequenceId).getLastMessageId());
+
+        Message closeSequenceRequest = Messages.create(configuration.getRMVersion().jaxbContext, cs, configuration.getSoapVersion());
+
+        Message response = communicator.send(closeSequenceRequest, configuration.getRMVersion().closeSequenceAction);
+        if (response != null && response.isFault()) {
+            // TODO L10N
+            throw LOGGER.logException(new CloseSequenceException("CloseSequence was refused by the RMDestination", response), Level.WARNING);
+        }
+
+        CloseSequenceResponseElement csr = unmarshallResponse(response);
+        // TODO process CloseSequenceRespose element...
+    }
+
+    @Override
+    protected void terminateOutboundSequence() throws RmException {
+        //TODO piggyback an acknowledgement if one is pending
+        //seq.processAcknowledgement(new RMMessage(request));
+        TerminateSequenceElement ts = new TerminateSequenceElement();
+        Identifier idTerminate = new Identifier();
+        idTerminate.setValue(outboundSequenceId);
+        ts.setIdentifier(idTerminate);
+
+        Message terminateSequenceRequest = Messages.create(configuration.getRMVersion().jaxbContext, ts, configuration.getSoapVersion());
+        Message response = null;
+        try {
+            response = communicator.send(terminateSequenceRequest, configuration.getRMVersion().terminateSequenceAction);
+            if (response != null && response.isFault()) {
+                throw LOGGER.logException(new TerminateSequenceException("There was an error trying to terminate the sequence ", response), Level.WARNING);
+            }
+            //TODO process TerminateSequenceResponse element? It may have a TerminateSequence for reverse sequence on it as well as ack headers
+        } finally {
+            if (response != null) {
+                response.consume();
+            }
+        }
     }
 }

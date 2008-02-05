@@ -90,18 +90,6 @@ public interface Sequence {
  * - buffer messages if ordered delivery si required
  * - filter duplicate messages
  */
-    
-    
-
-    /**
-     * Initializes a sequence and allocates all necessary resources
-     */
-    public void initialize();
-    
-    /**
-     * Releases all resources associated with the sequence and closes the sequence
-     */
-    public void close();
 
     /**
      * Returns unique identifier of the sequence
@@ -135,6 +123,12 @@ public interface Sequence {
      * @return
      */
     public Status getStatus();
+
+    /**
+     * TODO javadoc
+     * @return
+     */
+    public boolean hasPendingAcknowledgements();
     
     /**
      * TODO javadoc

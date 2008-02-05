@@ -36,6 +36,7 @@
 
 package com.sun.xml.ws.rm.runtime;
 
+import java.util.Collection;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -84,4 +85,11 @@ public abstract class AbstractSequence implements Sequence {
         return status == Status.CLOSING || status == Status.CLOSED || status == Status.TERMINATING;
     }
 
+    public Collection<AckRange> getAcknowledgedIndexes() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public boolean hasPendingAcknowledgements() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }

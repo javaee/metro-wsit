@@ -35,62 +35,64 @@
  */
 package com.sun.xml.ws.rm.runtime;
 
-import com.sun.xml.ws.rm.localization.RmLogger;
-
-import java.lang.ref.WeakReference;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-class ResendTimer {
+class ScheduledTaskManager {
 
-    private static final RmLogger LOGGER = RmLogger.getLogger(ResendTimer.class);
     private static final long DELAY = 2000;
     private static final long PERIOD = 2000;
-    private Timer timer;
-    private final WeakReference<ClientSession> sessionReference;
+    private final ScheduledExecutorService scheduler;
+    private final Queue<ScheduledFuture<?>> scheduledTaskHandles;
 
     /**
-     *
+     * TODO javadoc
      */
-    public ResendTimer(ClientSession session) {
-        this.sessionReference = new WeakReference<ClientSession>(session);
+    public ScheduledTaskManager() {
+        scheduler = Executors.newScheduledThreadPool(0);
+        scheduledTaskHandles = new ConcurrentLinkedQueue<ScheduledFuture<?>>();
     }
 
     /**
-     * Starts the resend timer
+     * Starts the scheduled task executor
      */
-    public synchronized void start() {
-        if (timer != null) {
-            // TODO L10N
-            throw LOGGER.logSevereException(new IllegalStateException("ResendTimer is already running!"));
+    public List<ScheduledFuture<?>> startTasks(Runnable... tasks) {
+        List<ScheduledFuture<?>> handles = new ArrayList<ScheduledFuture<?>>(tasks.length);
+        for (Runnable task : tasks) {
+            handles.add(startTask(task));
         }
-        timer = new Timer(true);
-        timer.schedule(new TimerTask() {
-
-            public void run() {
-                ClientSession cs = sessionReference.get();
-                if (cs != null) {
-                    cs.resend();
-                } else {
-                    stop();
-                }
-            }
-        }, DELAY, PERIOD);
+        
+        return handles;
     }
 
     /**
-     * Stops the resend timer
+     * Stops the  scheduled task executor
      */
-    public synchronized void stop() {
-        if (timer == null) {
-            // TODO L10N
-            throw LOGGER.logSevereException(new IllegalStateException("RetryTimer is not running currently!"));
+    public void stopAll() {
+        ScheduledFuture<?> handle;
+        while ((handle = scheduledTaskHandles.poll()) != null) {
+            handle.cancel(false);
         }
-        timer.cancel();
-        timer = null;
+    }
+
+    /**
+     * Adds a new task for scheduled execution.
+     * 
+     * @param task new task to be executed regularly
+     */
+    public ScheduledFuture<?> startTask(Runnable task) {
+        final ScheduledFuture<?> taskHandle = scheduler.scheduleAtFixedRate(task, DELAY, PERIOD, TimeUnit.MILLISECONDS);
+        scheduledTaskHandles.offer(taskHandle);
+        return taskHandle;
     }
 }
