@@ -24,7 +24,10 @@ To Install WSIT and run the sample:
 6. To run the sample, go to 
    /wsit/wsit/samples/ws-trust/src/fs, and run "ant run-sample".
 
-7. You will be prompted to enter the username/password. Two pairs alice/alice, bob/bob
+7. To run the ws-sx version of the sample, go to 
+   /wsit/wsit/samples/ws-trust/src/fs-wssx, and run "ant run-sample".
+
+8. You will be prompted to enter the username/password. Two pairs alice/alice, bob/bob
    are preconfigured to use with this sample.
 --------------------------------------------------------------------------------------
 To run the sample with the sample customer STSAttributeProvider:

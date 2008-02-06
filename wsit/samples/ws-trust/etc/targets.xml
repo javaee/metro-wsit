@@ -237,7 +237,7 @@
 </target>
 
 <target name="create-sts-war">
-    <war warfile="${build.war.home}/jaxws-sts.war" webxml="../../etc/sts/web.xml">
+    <war warfile="${build.war.home}/jaxws-${ant.project.name}-sts.war" webxml="../../etc/sts/web.xml">
 	<webinf dir="../../etc/sts" includes="sun-jaxws.xml"/>
 	<zipfileset
             dir="etc/sts"
@@ -297,7 +297,7 @@
 
 <!--deploy-catalina url="http://localhost:8080/manager" username="${username}" password="${password}"
             path="/${path}" war="file:${build.war.home}/jaxws-${ant.project.name}.war"/-->
-     <copy file="${build.war.home}/jaxws-sts.war" todir="${tomcat.home}/webapps"/>
+     <copy file="${build.war.home}/jaxws-${ant.project.name}-sts.war" todir="${tomcat.home}/webapps"/>
 </target>
 
  <target name="check-if-sts-deployed-tom" if="tomcat.home">

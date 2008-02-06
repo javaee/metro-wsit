@@ -38,7 +38,7 @@
                   xmlns:tns="http://tempuri.org/" 
                   xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"  
                   xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" 
-                  xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy" 
+                  xmlns:wsp="http://www.w3.org/ns/ws-policy" 
                   xmlns:wsap="http://www.w3.org/2006/05/addressing/wsdl" 
                   xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
                   xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" 
@@ -61,8 +61,8 @@
                 </scc:SCClientConfiguration>
                 
                 <tc:PreconfiguredSTS xmlns:tc="http://schemas.sun.com/ws/2006/05/trust/client" 
-                    endpoint="http://localhost:8080/jaxws-fs-sts/sts"
-                    wsdlLocation="http://localhost:8080/jaxws-fs-sts/sts?wsdl"
+                    endpoint="http://localhost:8080/jaxws-sts/sts"
+                    wsdlLocation="http://localhost:8080/jaxws-sts/sts?wsdl"
                     serviceName="SecurityTokenService"
                     portName="ISecurityTokenService_Port"
                     namespace="http://tempuri.org/">
