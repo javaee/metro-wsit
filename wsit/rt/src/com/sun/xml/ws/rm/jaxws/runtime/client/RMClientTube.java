@@ -368,7 +368,11 @@ public final class RMClientTube extends TubeBase {
         if (response != null) {
             return doReturnWith(response);
         } else if (tubelineHelper != null) {
-            return doThrow(tubelineHelper.throwable);
+            if (tubelineHelper.throwable instanceof RuntimeException) {
+                return doThrow(tubelineHelper.throwable);
+            } else {
+                return doThrow(new WebServiceException(tubelineHelper.throwable));
+            }
         } else {
             // TODO L10N
             throw LOGGER.logSevereException(new IllegalStateException("'null' Packet in processResponse()"));

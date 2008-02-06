@@ -33,49 +33,29 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
+
 package com.sun.xml.ws.assembler;
 
-import com.sun.xml.ws.api.pipe.Pipe;
-import com.sun.xml.ws.api.pipe.Tube;
-import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
-import java.util.LinkedList;
-import java.util.List;
+import javax.xml.ws.WebServiceException;
 
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class WsitTubeAssemblyContext {
-
-    private Tube head;
-    private Pipe adaptedHead;
-    private List<Tube> tubes = new LinkedList<Tube>();
-
-    public Tube getTubelineHead() {
-        return head;
-    }
-
-    public Pipe getAdaptedTubelineHead() {
-        if (adaptedHead == null) {
-            adaptedHead = PipeAdapter.adapt(head);
-        }
-        return adaptedHead;
-    }
-
-    void setTubelineHead(Tube newHead) {
-        if (newHead != head || newHead != adaptedHead) {
-            head = newHead;
-            tubes.add(head);
-            adaptedHead = null;
-        }
-    }
-
-    public <T> T getImplementation(Class<T> type) {
-        for (Tube tube : tubes) {
-            if (type.isInstance(tube)) {
-                return type.cast(tube);
-            }
-        }
-        return null;
-    }
+public interface TubelineAssemblyContextUpdater {
+    /**
+     * TODO javadoc
+     * 
+     * @param context
+     * @throws javax.xml.ws.WebServiceException
+     */
+    void prepareContext(WsitClientTubeAssemblyContext context) throws WebServiceException;
+    
+    /**
+     * TODO javadoc
+     * 
+     * @param context
+     * @throws javax.xml.ws.WebServiceException
+     */
+    void prepareContext(WsitServerTubeAssemblyContext context) throws WebServiceException;
 }

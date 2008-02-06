@@ -150,4 +150,8 @@ public class WsitServerTubeAssemblyContext extends WsitTubeAssemblyContext  {
     public void setCodec(@NotNull Codec codec) {
         wrappedContext.setCodec(codec);
     }
+        
+    public ServerTubeAssemblerContext getWrappedContext() {
+        return wrappedContext;
+    }    
 }

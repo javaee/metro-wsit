@@ -35,6 +35,7 @@
  */
 package com.sun.xml.ws.rm.policy;
 
+import com.sun.xml.ws.assembler.TubeAppender;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.Tube;
@@ -48,29 +49,31 @@ import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.jaxws.runtime.client.RMClientTube;
 import com.sun.xml.ws.rm.jaxws.runtime.server.RMServerTube;
-import com.sun.xml.ws.rm.runtime.ClientRmTube;
-import com.sun.xml.ws.rm.runtime.ServerRmTube;
 import javax.xml.ws.WebServiceException;
 
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class RmTubeAppender {
+public class RmTubeAppender implements TubeAppender {
 
     // TODO: this is a draft class that should serve later as a model for extracting the WSIT/Metro TubeCreator interface
     /**
      * Adds RM tube to the client-side tubeline, depending on whether RM is enabled or not.
      * 
      * @param context wsit client tubeline assembler context
-     * @param tail tail of the client-side tubeline being constructed
      * @return new tail of the client-side tubeline
      */
-    public Tube appendTube(WsitClientTubeAssemblyContext context, Tube tail) throws WebServiceException {
+    public Tube appendTube(WsitClientTubeAssemblyContext context) throws WebServiceException {
         if (isReliableMessagingEnabled(context.getPolicyMap(), context.getWsdlPort())) {
-            return new ClientRmTube(context, tail);
+            return new RMClientTube(
+                    context.getWsdlPort(),
+                    context.getBinding(),
+                    context.getScInitiator(),
+                    context.getTubelineHead());
+            // return new ClientRmTube(context, context.getTubelineHead());
         } else {
-            return tail;
+            return context.getTubelineHead();
         }
     }
 
@@ -78,14 +81,18 @@ public class RmTubeAppender {
      * Adds RM tube to the service-side tubeline, depending on whether RM is enabled or not.
      * 
      * @param context wsit service tubeline assembler context
-     * @param head head of the service-side tubeline being constructed
      * @return new head of the service-side tubeline
      */
-    public Tube appendTube(WsitServerTubeAssemblyContext context, Tube head) throws WebServiceException {
+    public Tube appendTube(WsitServerTubeAssemblyContext context) throws WebServiceException {
         if (isReliableMessagingEnabled(context.getPolicyMap(), context.getWsdlPort())) {
-            return new ServerRmTube(context, head);
+            return new RMServerTube(
+                    context.getWsdlPort(),
+                    context.getEndpoint().getBinding(),
+                    context.getTubelineHead());
+            // TODO uncomment new tube creation
+            // return new ServerRmTube(context, context.getTubelineHead());
         } else {
-            return head;
+            return context.getTubelineHead();
         }
     }
 

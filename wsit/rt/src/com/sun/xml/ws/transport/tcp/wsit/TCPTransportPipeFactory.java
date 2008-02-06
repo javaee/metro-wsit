@@ -40,6 +40,9 @@ import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.ClientPipeAssemblerContext;
 import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.api.pipe.Tube;
+import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
+import com.sun.xml.ws.assembler.WsitClientTubeAssemblyContext;
 import com.sun.xml.ws.transport.tcp.client.*;
 import com.sun.xml.ws.transport.tcp.util.TCPConstants;
 import com.sun.xml.ws.transport.tcp.servicechannel.stubs.ServiceChannelWSImplService;
@@ -67,6 +70,19 @@ public class TCPTransportPipeFactory extends com.sun.xml.ws.transport.tcp.client
         }
         
         return new TCPTransportPipe(context);
+    }
+    
+    public static Tube doCreate(@NotNull final WsitClientTubeAssemblyContext context, final boolean checkSchema) {
+        if (checkSchema && !TCPConstants.PROTOCOL_SCHEMA.equalsIgnoreCase(context.getAddress().getURI().getScheme())) {
+            return null;
+        }
+        
+        setClientSettingsIfRequired(context.getWsdlPort());
+        if (context.getService().getServiceName().equals(serviceChannelServiceName)) {
+            return PipeAdapter.adapt(new ServiceChannelTransportPipe(context));
+        }
+        
+        return PipeAdapter.adapt(new TCPTransportPipe(context));
     }
     
     /**

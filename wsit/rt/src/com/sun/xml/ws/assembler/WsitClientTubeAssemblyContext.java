@@ -33,7 +33,6 @@ public class WsitClientTubeAssemblyContext extends WsitTubeAssemblyContext {
     private final WSPortInfo portInfo; // TODO: is this really needed?
     private final WSDLPort wsdlPort;
     private SecureConversationInitiator scInitiator;
-    // TODO: add next tube getter/package-private setter
     // TODO: replace the PipeConfiguration
 
     public WsitClientTubeAssemblyContext(@NotNull ClientTubeAssemblerContext context) {
@@ -172,5 +171,9 @@ public class WsitClientTubeAssemblyContext extends WsitTubeAssemblyContext {
     
     public void setScInitiator(SecureConversationInitiator initiator) {
         this.scInitiator = initiator;
+    }
+    
+    public ClientTubeAssemblerContext getWrappedContext() {
+        return wrappedContext;
     }
 }

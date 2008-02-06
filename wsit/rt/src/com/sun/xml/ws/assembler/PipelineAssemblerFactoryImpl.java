@@ -136,6 +136,7 @@ public final class PipelineAssemblerFactoryImpl extends PipelineAssemblerFactory
             if (isSecurityEnabled) {
                 setSecurityCodec(wsitContext);
             }
+            
             // Transport pipe ALWAYS exist
             Pipe tail;
             if (isOptimizedTransportEnabled(wsitContext.getPolicyMap(), wsitContext.getWsdlPort(), wsitContext.getPortInfo())) {

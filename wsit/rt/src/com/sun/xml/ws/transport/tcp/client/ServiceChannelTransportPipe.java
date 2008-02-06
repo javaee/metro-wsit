@@ -42,6 +42,7 @@ import com.sun.xml.ws.api.pipe.ClientPipeAssemblerContext;
 import com.sun.xml.ws.api.pipe.ContentType;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
+import com.sun.xml.ws.assembler.WsitClientTubeAssemblyContext;
 import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
 import com.sun.xml.ws.transport.tcp.util.ChannelContext;
 import com.sun.xml.ws.transport.tcp.util.ConnectionSession;
@@ -60,6 +61,10 @@ public final class ServiceChannelTransportPipe extends TCPTransportPipe {
             com.sun.xml.ws.transport.tcp.util.TCPConstants.LoggingDomain + ".client");
     
     public ServiceChannelTransportPipe(@NotNull final ClientPipeAssemblerContext context) {
+        super(context);
+    }
+
+    public ServiceChannelTransportPipe(@NotNull final WsitClientTubeAssemblyContext context) {
         super(context);
     }
     

@@ -41,6 +41,7 @@ import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.policy.PolicyMap;
 
@@ -73,4 +74,28 @@ public class ServerPipelineHook extends com.sun.xml.ws.api.server.ServerPipeline
     public @NotNull Pipe createSecurityPipe(@Nullable PolicyMap policyMap, @Nullable SEIModel seiModel, @Nullable WSDLPort wsdlModel, @NotNull WSEndpoint owner, @NotNull Pipe tail) {
         return tail;
     }
+
+    /**
+     * Called during the server-side tubeline construction process once to allow a
+     * container to register a tube for security on the service endpoint.
+     *
+     * This tube will be injected to a point very close to the transport, allowing
+     * it to do some security operations.
+     * <p>
+     * If the implementation wishes to add new tubes, it should do so by extending
+     * {@link com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl} and making sure that this {@link Tube}
+     * eventually processes messages.
+     *
+     * @param context
+     *      Represents abstraction of policy map, tubeline head, SEI, WSDL abstraction etc. Context can be used
+     *      whether add a new tube to the head or not.     
+     *
+     * @return
+     *      The default implementation just returns <tt>tail</tt>, which means
+     *      no additional tube is inserted. If the implementation adds
+     *      new tubes, return the new head tube.
+     */
+    public @NotNull Tube createSecurityTube(WsitServerTubeAssemblyContext context) {
+        return context.getTubelineHead();
+    }    
 }
