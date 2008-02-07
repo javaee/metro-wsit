@@ -135,7 +135,7 @@ public class SequenceAcknowledgementElement extends AbstractSequenceAcknowledgem
     @XmlElement(name = "Final", namespace = "http://docs.oasis-open.org/ws-rx/wsrm/200702")
     protected SequenceAcknowledgementElement.Final _final;
     @XmlElement(name = "BufferRemaining", namespace = "http://schemas.microsoft.com/ws/2006/05/rm")
-    public Integer bufferRemaining;
+    protected Integer bufferRemaining;
     @XmlElement(name = "Nack", namespace = "http://docs.oasis-open.org/ws-rx/wsrm/200702")
     @XmlSchemaType(name = "unsignedLong")
     protected List<BigInteger> nack;
