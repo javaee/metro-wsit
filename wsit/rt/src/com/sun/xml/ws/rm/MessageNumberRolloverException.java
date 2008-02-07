@@ -46,13 +46,19 @@ import com.sun.xml.ws.rm.localization.LocalizationMessages;
 public class MessageNumberRolloverException extends RmException {
 
     private long messageNumber;
+    private String sequenceId;
 
-    public String getMessageNumber() {
-        return new Long(messageNumber).toString();
+    public long getMessageNumber() {
+        return messageNumber;
     }
+
+    public String getSequenceId() {
+        return sequenceId;
+    }    
     
-    public MessageNumberRolloverException(long messageNumber) {
-        super(LocalizationMessages.WSRM_3026_MESSAGE_NUMBER_ROLLOVER(messageNumber));
+    public MessageNumberRolloverException(String sequenceId, long messageNumber) {
+        super(LocalizationMessages.WSRM_3026_MESSAGE_NUMBER_ROLLOVER(sequenceId, messageNumber));
         this.messageNumber = messageNumber;
+        this.sequenceId = sequenceId;
     }
 }

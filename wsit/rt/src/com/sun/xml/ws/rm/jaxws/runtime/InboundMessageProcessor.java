@@ -131,7 +131,7 @@ public class InboundMessageProcessor {
             }
 
             if (messageNumber == Integer.MAX_VALUE) {
-                throw LOGGER.logSevereException(new MessageNumberRolloverException(messageNumber));
+                throw LOGGER.logSevereException(new MessageNumberRolloverException(seqid, messageNumber));
             }
 
             inseq = provider.getInboundSequence(seqid);

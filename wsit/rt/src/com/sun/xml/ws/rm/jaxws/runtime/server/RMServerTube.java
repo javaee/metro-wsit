@@ -170,7 +170,7 @@ public final class RMServerTube extends TubeBase {
             } catch (MessageNumberRolloverException e) {
                 soapFault = createSoapFault(
                         getConfig().getRMVersion().messageNumberRolloverQname,
-                        LocalizationMessages.WSRM_3026_MESSAGE_NUMBER_ROLLOVER(e.getMessageNumber()));
+                        LocalizationMessages.WSRM_3026_MESSAGE_NUMBER_ROLLOVER(e.getSequenceId(), e.getMessageNumber()));
             } catch (InvalidSequenceException e) {
                 soapFault = createSoapFault(
                         getConfig().getRMVersion().unknownSequenceQname,
