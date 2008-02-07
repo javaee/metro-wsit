@@ -35,6 +35,8 @@
  */
 package com.sun.xml.ws.rm;
 
+import com.sun.xml.ws.rm.localization.LocalizationMessages;
+
 /**
  * Subclass of <code>RMException</code> thrown from errors resulting
  * when number of messages for a sequence are exhausted
@@ -48,13 +50,9 @@ public class MessageNumberRolloverException extends RmException {
     public String getMessageNumber() {
         return new Long(messageNumber).toString();
     }
-
-    public MessageNumberRolloverException(String message) {
-        super(message);
-    }
-
-    public MessageNumberRolloverException(String message, long messageNumber) {
-        super(message);
+    
+    public MessageNumberRolloverException(long messageNumber) {
+        super(LocalizationMessages.WSRM_3026_MESSAGE_NUMBER_ROLLOVER(messageNumber));
         this.messageNumber = messageNumber;
     }
 }

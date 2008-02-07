@@ -131,7 +131,7 @@ public class InboundMessageProcessor {
             }
 
             if (messageNumber == Integer.MAX_VALUE) {
-                throw LOGGER.logSevereException(new MessageNumberRolloverException(LocalizationMessages.WSRM_3026_MESSAGE_NUMBER_ROLLOVER(messageNumber), messageNumber));
+                throw LOGGER.logSevereException(new MessageNumberRolloverException(messageNumber));
             }
 
             inseq = provider.getInboundSequence(seqid);
