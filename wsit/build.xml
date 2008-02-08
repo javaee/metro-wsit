@@ -67,7 +67,9 @@
         description="Create the wsit tool and runtime jars and installers."/>
     
     <target name="image" description="Create the wsit tool and runtime jars.">
-        <copy todir="${dist.image.wsit.dir}">
+        <filter token="release.impl.version" value="${release.impl.version}"/>
+        <filter token="release.impl.version.suffix" value="${release.impl.version.suffix}"/>
+        <copy todir="${dist.image.wsit.dir}" filtering="true">
             <fileset dir="${basedir}" includes="CDDL*.*"/>
             <fileset dir="${etc.dir}" includes="wsit-on-*.*"/>
         </copy>
