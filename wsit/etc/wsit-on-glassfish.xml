@@ -36,12 +36,12 @@
  holder.
 -->
 
-<project name="WSIT 1.0 On GlassFish v2" default="help" basedir=".">
+<project name="Metro on GlassFish" default="help" basedir=".">
     <property file="../build.properties"/>
     <property environment="env"/>
     <property name="as.home" value="${env.AS_HOME}"/>
     <property name="as.lib.home" value="${as.home}/lib"/>
-    <property name="backup.dir" value="${as.home}/.wsit-1.0"/>
+    <property name="backup.dir" value="${as.home}/.wsit-@release.impl.version@"/>
 
     <condition property="notInstalled">
         <not>
@@ -92,7 +92,7 @@
     </target>
     
     <target name="install" depends="init" description="Install latest WSIT jars">
-        <echo message="Installing WSIT 1.0 on ${as.home} ..."/>
+        <echo message="Installing WSIT @release.impl.version@ @release.impl.version.suffix@ on ${as.home} ..."/>
 
         <copy todir="${as.lib.home}" overwrite="true">
             <fileset dir="${basedir}/lib">
@@ -120,7 +120,7 @@
 
     <target name="uninstall" unless="notInstalled"
             description="Restore original WSIT jars and tool scripts">
-        <echo message="Uninstalling WSIT 1.0 from ${as.home} ..."/>
+        <echo message="Uninstalling WSIT @release.impl.version@ @release.impl.version.suffix@ from ${as.home} ..."/>
 
         <copy todir="${as.lib.home}" overwrite="true">
             <fileset dir="${backup.dir}" includes="webservices-rt.jar, webservices-tools.jar"/>
@@ -141,10 +141,10 @@
 
     <target name="help">
         <echo message="install: "/>
-        <echo message="  Installs WSIT 1.0 on GlassFish v2"/>
+        <echo message="  Installs WSIT @release.impl.version@ @release.impl.version.suffix@ on GlassFish v2"/>
         <echo/>
         <echo message="uninstall: "/>
-        <echo message="  Uninstalls WSIT 1.0 from GlassFish v2"/>
+        <echo message="  Uninstalls WSIT @release.impl.version@ @release.impl.version.suffix@ from GlassFish v2"/>
         <echo/>
         <echo message="$AS_HOME must be set to the installation directory of GlassFish v2."/>
         <echo/>
