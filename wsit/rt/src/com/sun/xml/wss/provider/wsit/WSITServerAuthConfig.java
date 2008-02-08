@@ -98,8 +98,8 @@ public class WSITServerAuthConfig implements ServerAuthConfig {
          //check if security is enabled
          //if policy has changed due to redeploy, check if security is enabled
          if (this.secDisabled == null || (policyMap != pMap)) {
+             this.wLock.lock();
              try {
-                 this.wLock.lock();
                  if (this.secDisabled == null || (policyMap != pMap)) {
                      if (!WSITAuthConfigProvider.isSecurityEnabled(pMap,port)) {
                          this.secDisabled = TRUE;
@@ -116,9 +116,8 @@ public class WSITServerAuthConfig implements ServerAuthConfig {
          if (this.secDisabled == TRUE) {
              return null;
          }
-         
+         this.rLock.lock();
          try {
-             this.rLock.lock();
              if (serverAuthContext != null) {
                  //return the cached one only if the same policyMap was passed in
                  if (policyMap == pMap) {
@@ -130,9 +129,8 @@ public class WSITServerAuthConfig implements ServerAuthConfig {
          }
         // make sure you don't hold the rlock when you request the wlock
         // or you will encounter dealock
-         
+         this.wLock.lock();
          try {
-             this.wLock.lock();
              // recheck the precondition, since the rlock was released.
              if ((serverAuthContext == null) || (policyMap != pMap)) {
                  serverAuthContext = new WSITServerAuthContext(operation, subject, map, callbackHandler);

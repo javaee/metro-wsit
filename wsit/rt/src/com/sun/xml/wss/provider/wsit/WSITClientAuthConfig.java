@@ -108,8 +108,8 @@ public class WSITClientAuthConfig implements ClientAuthConfig {
         //now check if security is enabled
         //if the policy has changed due to redeploy recheck if security is enabled
         if (this.secDisabled == null || (policyMap != pMap)) {
+            this.wLock.lock();
             try {
-                this.wLock.lock();
                 if (this.secDisabled == null || (policyMap != pMap)) {
                     if (!WSITAuthConfigProvider.isSecurityEnabled(pMap,port)) {
                         this.secDisabled = TRUE;
@@ -129,9 +129,8 @@ public class WSITClientAuthConfig implements ClientAuthConfig {
 
         
         boolean authContextInitialized = false;
-        
+        this.rLock.lock();
         try {
-            this.rLock.lock();
             if (clientAuthContext != null) {
                //probably the app was redeployed
                //if so reacquire the AuthContext
@@ -144,8 +143,8 @@ public class WSITClientAuthConfig implements ClientAuthConfig {
         }
         
         if (!authContextInitialized) {
+            this.wLock.lock();
             try {
-                this.wLock.lock();
                 // recheck the precondition, since the rlock was released.
                 if (clientAuthContext == null || (policyMap != pMap)) {
                     clientAuthContext = new WSITClientAuthContext(operation, subject, map, callbackHandler);

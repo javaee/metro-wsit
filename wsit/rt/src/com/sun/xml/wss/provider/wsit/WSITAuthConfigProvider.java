@@ -99,8 +99,8 @@ public class WSITAuthConfigProvider implements AuthConfigProvider {
     public  ClientAuthConfig getClientAuthConfig(String layer, String appContext, CallbackHandler callbackHandler) throws AuthException {
         
         ClientAuthConfig clientConfig = null;
+        this.rLock.lock();
         try {
-            this.rLock.lock();
             clientConfig = (ClientAuthConfig)this.clientConfigMap.get(appContext);
             if (clientConfig != null) {
                     return clientConfig;
@@ -110,9 +110,8 @@ public class WSITAuthConfigProvider implements AuthConfigProvider {
         }
         // make sure you don't hold the rlock when you request the wlock
         // or you will encounter dealock
-        
+        this.wLock.lock();
         try {
-            this.wLock.lock();
             // recheck the precondition, since the rlock was released.
             if (clientConfig == null) {
                 clientConfig = new WSITClientAuthConfig(layer, appContext, callbackHandler);
@@ -126,8 +125,8 @@ public class WSITAuthConfigProvider implements AuthConfigProvider {
     
     public  ServerAuthConfig getServerAuthConfig(String layer, String appContext, CallbackHandler callbackHandler) throws AuthException {
         ServerAuthConfig serverConfig = null;
+        this.rLock.lock();
          try {
-             this.rLock.lock();
              serverConfig = (ServerAuthConfig)this.serverConfigMap.get(appContext);
              if (serverConfig != null) {
                  return serverConfig;
@@ -137,9 +136,8 @@ public class WSITAuthConfigProvider implements AuthConfigProvider {
          }
         // make sure you don't hold the rlock when you request the wlock
         // or you will encounter dealock
-         
+         this.wLock.lock();
          try {
-             this.wLock.lock();
              // recheck the precondition, since the rlock was released.
              if (serverConfig == null) {
                  serverConfig = new WSITServerAuthConfig(layer, appContext, callbackHandler);
