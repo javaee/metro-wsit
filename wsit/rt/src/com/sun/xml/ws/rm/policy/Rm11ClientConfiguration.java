@@ -87,8 +87,8 @@ class Rm11ClientConfiguration implements Configuration {
         return closeSequenceOperationTimeout;
     }
 
-    public RmVersion getRMVersion() {
-        return destinationConfig.getRMVersion();
+    public RmVersion getRmVersion() {
+        return destinationConfig.getRmVersion();
     }
 
     public SOAPVersion getSoapVersion() {

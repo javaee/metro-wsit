@@ -84,7 +84,7 @@ public class Rm11ServiceConfiguration implements Configuration {
         acknowledgementInterval = DEFAULT_SEQUENCE_ACKNOWLEDGEMENT_INTERVAL;        
     }
 
-    public RmVersion getRMVersion() {
+    public RmVersion getRmVersion() {
         return RmVersion.WSRM10;
     }
 

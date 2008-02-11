@@ -35,6 +35,7 @@
  */
 package com.sun.xml.ws.rm.runtime;
 
+import com.sun.xml.ws.rm.MessageNumberRolloverException;
 import java.util.Collection;
 
 /**
@@ -42,54 +43,28 @@ import java.util.Collection;
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public interface Sequence {
+    public static final long MIN_MESSAGE_ID = 1;
+    public static final long MAX_MESSAGE_ID = 9223372036854775807L;
+
     public enum Status {
+
         CREATING,
         CREATED,
         CLOSING,
         CLOSED,
         TERMINATING
     }
-    
+
     public class AckRange {
+
         public final long lower;
         public final long upper;
-        
+
         public AckRange(long lower, long upper) {
             this.lower = lower;
             this.upper = upper;
         }
     }
-/*
- * create sequence:
- * 1. assign new unique sequence id
- * 
- * process outgoing application message:
- * 1. add sequence id + message id headers
- * 2. add inbound message acknowledgement headers
- * 3. send message
- * 
- * process incomming application message:
- * 1. get inbound sequence
- * 2. check if duplicate (yes => stop processing)
- * 3. send back acknowledgement
- * 
- * 
- * RM session:
- * - create/close sequence
- * - hold incomming & outgoing sequences
- * - start timer tasks
- * 
- * RM outgoing sequence:
- * - hold sequence id
- * - hold next message id
- * - hold unacked messages
- * 
- * RM incomming sequence:
- * - hold sequence id
- * - hold acked message ranges
- * - buffer messages if ordered delivery si required
- * - filter duplicate messages
- */
 
     /**
      * Returns unique identifier of the sequence
@@ -97,13 +72,20 @@ public interface Sequence {
      * @return unique sequence identifier
      */
     public String getId();
-    
+
     /**
-     * Provides the next message identifier within the sequence
+     * Generates a new message identifier and registers it within the sequence
      * 
      * @return the next message identifier that should be used for the next message sent on the sequence.
      */
-    public long getNextMessageId();
+    public long getNextMessageId() throws MessageNumberRolloverException;
+
+    /**
+     * Registers given message identifier with the sequence as aknowledged
+     * 
+     * @param messageId message identifier to be acknowledged
+     */
+    public void acknowledgeMessageId(long messageId) throws IllegalMessageIdentifierException;
 
     /**
      * Provides information on the last message id sent on this sequence
@@ -111,29 +93,67 @@ public interface Sequence {
      * @return last message identifier registered on this sequence
      */
     public long getLastMessageId();
-    
+
     /**
-     * TODO javadoc
-     * @return
+     * Provides a collection of ranges of messages identifier acknowledged with the sequence
+     * 
+     * @return collection of ranges of messages identifier registered with the sequence
      */
-    public Collection<AckRange> getAcknowledgedIndexes();
-    
+    public Collection<AckRange> getAcknowledgedMessageIds();
+
     /**
-     * TODO javadoc
-     * @return
+     * The method may be called to determine whether the sequence has some unacknowledged messages or not
+     * 
+     * @return {@code true} if the sequence has any unacknowledged message identifiers, {@code false} otherwise
+     */
+    public boolean hasPendingAcknowledgements();
+
+    /**
+     * Provides information on the status of the message sequence
+     * 
+     * @return current status of the message sequence
      */
     public Status getStatus();
 
     /**
-     * TODO javadoc
-     * @return
+     * This method should be called to set the AckRequested flag, which indicates a pending request for acknowledgement of all
+     * message identifiers registered with this sequence. The flag is automatically cleared once {@link #getAcknowledgedMessageIds()}
+     * method is called.
      */
-    public boolean hasPendingAcknowledgements();
+    public void setAckRequestedFlag();
+
+    /**
+     * Provides information on the actual AckRequested flag status
+     * 
+     * @return {@code true} if the AckRequested flag is set, {@code false} otherwise
+     */
+    public boolean isAckRequested();
     
     /**
-     * TODO javadoc
-     * @return
+     * Closes the session. Subsequent calls to this method have no effect.
+     * <p>
+     * Once this method is called, any subsequent calls to the {@link #getNextMessageId()} method will
+     * result in a {@link IllegalStateException} being raised. It is however still possible to accept message identifier 
+     * acknowledgements, as well as retrieve any other information on the sequence.
+     */
+    public void close();
+
+    /**
+     * Provides information on the session closed status.
+     * 
+     * @return {@code true} if the session has been closed, {@code false} otherwise
      */
     public boolean isClosed();
-    
+
+    /**
+     * Provides information on the session expiration status.
+     * 
+     * @return {@code true} if the session has already expired, {@code false} otherwise
+     */
+    public boolean isExpired();
+
+    /**
+     * The method is called during the sequence termination to allow sequence object to release its allocated resources
+     */
+    public void preDestroy();
 }

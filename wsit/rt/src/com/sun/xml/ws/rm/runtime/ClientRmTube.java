@@ -103,9 +103,8 @@ public class ClientRmTube extends AbstractFilterTubeImpl {
                 return super.processRequest(requestPacket);
             }
         } catch (RmException ex) {
-            // TODO: check if the processing is ok
             LOGGER.logSevereException(ex);
-            return doThrow(ex);
+            return doThrow(new WebServiceException(ex)); // the input argument has to be a runtime exception
         } finally {
             LOGGER.exiting();
         }

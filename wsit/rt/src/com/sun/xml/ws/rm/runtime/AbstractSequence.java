@@ -33,9 +33,11 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.rm.runtime;
 
+import com.sun.xml.ws.rm.MessageNumberRolloverException;
+import com.sun.xml.ws.rm.localization.RmLogger;
+import com.sun.xml.ws.rm.policy.Configuration;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -43,53 +45,56 @@ import java.util.concurrent.atomic.AtomicLong;
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public abstract class AbstractSequence implements Sequence {    
-    private static final long MIN_MESSAGE_ID = 1;
-    private static final long MAX_MESSAGE_ID = 9223372036854775807L;
-    private final String id; 
-    private final AtomicLong nextMessageId;
+public abstract class AbstractSequence implements Sequence {
+    private static final RmLogger LOGGER = RmLogger.getLogger(AbstractSequence.class);
+    private final String id;
+    private final long expirationTime;
     private Status status;
+    private boolean ackRequestedFlag;
 
-    AbstractSequence(String id) {        
+    AbstractSequence(String id, long expirationTime) {
         this.id = id;
-        this.nextMessageId = new AtomicLong(MIN_MESSAGE_ID);
+        this.expirationTime = expirationTime;
     }
-    
+
     public String getId() {
         return id;
     }
 
-    public long getNextMessageId() {
-        long nextId = nextMessageId.getAndIncrement();
-        if (nextId > MAX_MESSAGE_ID) {
-            // TODO L10N
-            throw new IndexOutOfBoundsException("Maximum number of messages on sequence [" + id + "] was reached");
-        }
-        
-        return nextId;
-    }
-
-    public long getLastMessageId() {
-        return nextMessageId.longValue();
-    }
-    
     public Status getStatus() {
         return status;
     }
-    
+
     protected void setStatus(Status newStatus) {
         status = newStatus;
+    }
+
+    public final void setAckRequestedFlag() {
+        ackRequestedFlag = true;
+    }
+
+    protected final void clearAckRequestedFlag() {
+        ackRequestedFlag = false;        
+    }
+    
+    public boolean isAckRequested() {
+        return ackRequestedFlag;
+    }
+
+    public void close() {
+        setStatus(Status.CLOSED);
     }
 
     public boolean isClosed() {
         return status == Status.CLOSING || status == Status.CLOSED || status == Status.TERMINATING;
     }
 
-    public Collection<AckRange> getAcknowledgedIndexes() {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public boolean isExpired() {
+        return (expirationTime == Configuration.UNSPECIFIED) ? false : System.currentTimeMillis() < expirationTime;
     }
 
-    public boolean hasPendingAcknowledgements() {
+    public void preDestroy() {
+        // TODO implement
         throw new UnsupportedOperationException("Not supported yet.");
     }
 }

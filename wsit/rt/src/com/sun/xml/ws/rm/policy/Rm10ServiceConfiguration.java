@@ -72,7 +72,7 @@ class Rm10ServiceConfiguration implements Configuration {
         orderedDelivery = orderedDeliveryAssertion != null;
     }
 
-    public RmVersion getRMVersion() {
+    public RmVersion getRmVersion() {
         return RmVersion.WSRM10;
     }
 

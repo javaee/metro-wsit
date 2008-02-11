@@ -36,23 +36,51 @@
 
 package com.sun.xml.ws.rm.runtime;
 
+import com.sun.xml.ws.rm.MessageNumberRolloverException;
+import com.sun.xml.ws.rm.localization.RmLogger;
+import java.util.Collection;
+import java.util.concurrent.atomic.AtomicLong;
+
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public class OutboundSequence extends AbstractSequence {
+    private static final RmLogger LOGGER = RmLogger.getLogger(OutboundSequence.class);
+    
+    private final AtomicLong nextMessageId;
 
-    public OutboundSequence(String id) {
-        super(id);
+    public OutboundSequence(String id, long expirationTime) {
+        super(id, expirationTime);
+        this.nextMessageId = new AtomicLong(MIN_MESSAGE_ID);
     }
 
-    public void initialize() {
-        // TODO
+    public long getNextMessageId() throws MessageNumberRolloverException {
+        long nextId = nextMessageId.getAndIncrement();
+        if (nextId > MAX_MESSAGE_ID) {
+            // TODO L10N
+            throw LOGGER.logSevereException(new MessageNumberRolloverException(this.getId(), nextId));
+        }
+
+        return nextId;
+    }
+
+    public long getLastMessageId() {
+        return nextMessageId.longValue();
+    }
+
+    public Collection<AckRange> getAcknowledgedMessageIds() {
+        // TODO implement
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    public void close() {
-        // TODO
+    public boolean hasPendingAcknowledgements() {
+        // TODO implement
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void acknowledgeMessageId(long messageNumber) {
+        // TODO implement
         throw new UnsupportedOperationException("Not supported yet.");
     }
 }

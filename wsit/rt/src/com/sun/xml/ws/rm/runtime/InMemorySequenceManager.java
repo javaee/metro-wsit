@@ -38,6 +38,8 @@ package com.sun.xml.ws.rm.runtime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  *
@@ -46,33 +48,27 @@ import java.util.UUID;
 public class InMemorySequenceManager implements SequenceManager {
 
     private final Map<String, Sequence> sequences = new HashMap<String, Sequence>();
+    private final ReadWriteLock sequenceLock = new ReentrantReadWriteLock();
 
     public Sequence getSequence(String sequenceId) throws UnknownSequenceException {
-        synchronized (sequences) {
+        try {
+            sequenceLock.readLock().lock();
             if (sequences.containsKey(sequenceId)) {
                 return sequences.get(sequenceId);
             } else {
                 throw new UnknownSequenceException(sequenceId);
             }
+        } finally {
+            sequenceLock.readLock().unlock();
         }
     }
 
-    public void registerSequence(Sequence sequence) throws DuplicateSequenceException {
-        synchronized (sequences) {
-            if (sequences.containsKey(sequence.getId())) {
-                throw new DuplicateSequenceException(sequence.getId());
-            } else {
-                sequences.put(sequence.getId(), sequence);
-            }
-        }
+    public Sequence createOutboudSequence(String sequenceId, long expirationTime) throws DuplicateSequenceException {
+        return registerSequence(new OutboundSequence(sequenceId, expirationTime));
     }
 
-    public Sequence createOutboudSequence(String sequenceId) {
-        return new OutboundSequence(sequenceId);
-    }
-
-    public Sequence createInboundSequence(String sequenceId) {
-        return new InboundSequence(sequenceId);
+    public Sequence createInboundSequence(String sequenceId, long expirationTime) throws DuplicateSequenceException {
+        return registerSequence(new InboundSequence(sequenceId, expirationTime));
     }
 
     public String generateSequenceUID() {
@@ -80,10 +76,43 @@ public class InMemorySequenceManager implements SequenceManager {
     }
 
     public void closeSequence(String sequenceId) throws UnknownSequenceException {
+        Sequence sequence = getSequence(sequenceId);
+        sequence.close();
+    }
+
+    public void terminateSequence(String sequenceId) throws UnknownSequenceException {        
+        try {
+            sequenceLock.writeLock().lock();
+            if (sequences.containsKey(sequenceId)) {
+                Sequence sequence = sequences.remove(sequenceId);
+                sequence.preDestroy();
+            } else {
+                throw new UnknownSequenceException(sequenceId);
+            }
+        } finally {
+            sequenceLock.writeLock().unlock();
+        }
+        
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    public void terminateSequence(String sequenceId) throws UnknownSequenceException {
-        throw new UnsupportedOperationException("Not supported yet.");
+    /**
+     * Registers a new sequence in the internal sequence storage
+     * 
+     * @param sequence sequence object to be registered within the internal sequence storage
+     */
+    private Sequence registerSequence(Sequence sequence) throws DuplicateSequenceException {
+        try {
+            sequenceLock.writeLock().lock();
+            if (sequences.containsKey(sequence.getId())) {
+                throw new DuplicateSequenceException(sequence.getId());
+            } else {
+                sequences.put(sequence.getId(), sequence);
+            }
+            
+            return sequence;
+        } finally {
+            sequenceLock.writeLock().unlock();
+        }
     }
 }

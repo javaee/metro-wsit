@@ -72,7 +72,7 @@ public interface Configuration {
      * 
      * @return the RM protocol version that will be used for the sequence.
      */
-    public RmVersion getRMVersion();
+    public RmVersion getRmVersion();
 
     /**
      * Provides information about the SOAP protocol version used on the RM-enabled endpoint.

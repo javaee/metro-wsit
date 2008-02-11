@@ -44,10 +44,13 @@ import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.rm.CloseSequenceException;
 import com.sun.xml.ws.rm.CreateSequenceException;
+import com.sun.xml.ws.rm.MessageNumberRolloverException;
 import com.sun.xml.ws.rm.RmException;
 import com.sun.xml.ws.rm.TerminateSequenceException;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.policy.Configuration;
+import com.sun.xml.ws.rm.runtime.Sequence.AckRange;
+import com.sun.xml.ws.rm.v200702.AcceptType;
 import com.sun.xml.ws.rm.v200702.AckRequestedElement;
 import com.sun.xml.ws.rm.v200702.CloseSequenceElement;
 import com.sun.xml.ws.rm.v200702.CloseSequenceResponseElement;
@@ -58,9 +61,16 @@ import com.sun.xml.ws.rm.v200702.OfferType;
 import com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement;
 import com.sun.xml.ws.rm.v200702.SequenceElement;
 import com.sun.xml.ws.rm.v200702.TerminateSequenceElement;
+import com.sun.xml.ws.rm.v200702.TerminateSequenceResponseElement;
 import com.sun.xml.ws.rm.v200702.UsesSequenceSTR;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
-import java.util.logging.Level;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import javax.xml.namespace.QName;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
 
@@ -77,8 +87,8 @@ final class Rm11ClientSession extends ClientSession {
     }
 
     @Override
-    protected Message prepareHandshakeRequest(String offerInboundSequenceId, SecurityTokenReferenceType strType) {
-        CreateSequenceElement csElement = new com.sun.xml.ws.rm.v200702.CreateSequenceElement();
+    protected void openRmSession(String offerInboundSequenceId, SecurityTokenReferenceType strType) throws RmException {
+        CreateSequenceElement csElement = new CreateSequenceElement();
         if (configuration.getAddressingVersion() == AddressingVersion.W3C) {
             csElement.setAcksTo(new W3CEndpointReference(AddressingVersion.W3C.anonymousEpr.asSource("AcksTo")));
         } else {
@@ -100,31 +110,47 @@ final class Rm11ClientSession extends ClientSession {
             csElement.setSecurityTokenReference(strType);
         }
 
-        Message csMessage = Messages.create(configuration.getRMVersion().jaxbContext, csElement, configuration.getSoapVersion());
+        Message csMessage = Messages.create(configuration.getRmVersion().jaxbContext, csElement, configuration.getSoapVersion());
         if (strType != null) {
             HeaderList headerList = csMessage.getHeaders();
             UsesSequenceSTR usesSequenceSTR = new UsesSequenceSTR();
             usesSequenceSTR.getOtherAttributes().put(new QName(configuration.getSoapVersion().nsUri, "mustUnderstand"), "true");
-            headerList.add(Headers.create(configuration.getRMVersion().jaxbContext, usesSequenceSTR));
+            headerList.add(Headers.create(configuration.getRmVersion().jaxbContext, usesSequenceSTR));
         }
-        return csMessage;
-    }
 
-    @Override
-    protected String processHandshakeResponseMessage(Message handshakeResponseMessage) throws CreateSequenceException, RmException {
-        if (handshakeResponseMessage.isFault()) {
+        Message csResponseMessage = communicator.send(csMessage, configuration.getRmVersion().createSequenceAction);
+        if (csResponseMessage == null) {
             // TODO L10N
-            throw LOGGER.logSevereException(new CreateSequenceException("CreateSequence was refused by the RMDestination", handshakeResponseMessage));
+            throw LOGGER.logSevereException(new CreateSequenceException("CreateSequenceResponse was 'null'"));
+        }
+        if (csResponseMessage.isFault()) {
+            // TODO L10N
+            throw LOGGER.logSevereException(new CreateSequenceException("CreateSequence was refused by the RMDestination", csResponseMessage));
         }
 
-        CreateSequenceResponseElement csrMessage = unmarshallResponse(handshakeResponseMessage);
-        Identifier idOutbound = csrMessage.getIdentifier();
-        // TODO accept = ((com.sun.xml.ws.rm.v200702.CreateSequenceResponseElement) csr).getAccept();
-        return idOutbound.getValue();
+        CreateSequenceResponseElement csrElement = unmarshallResponse(csResponseMessage);
+        outboundSequenceId = csrElement.getIdentifier().getValue();
+
+        long expirationTime = Configuration.UNSPECIFIED;
+        if (csrElement.getExpires() != null && !"PT0S".equals(csrElement.getExpires().getValue().toString())) {
+            expirationTime = csrElement.getExpires().getValue().getTimeInMillis(Calendar.getInstance()) + System.currentTimeMillis();
+        }
+        sequenceManager.createOutboudSequence(outboundSequenceId, expirationTime);
+
+
+        if (offerInboundSequenceId != null) {
+            AcceptType accept = csrElement.getAccept();
+            if (!configuration.getAddressingVersion().anonymousEpr.equals(accept.getAcksTo())) {
+                // TODO L10N
+                throw new CreateSequenceException("Addressable \"AcksTo\" endpoint not supported for inbound sequence", inboundSequenceId);
+            }
+            inboundSequenceId = offerInboundSequenceId;
+            sequenceManager.createInboundSequence(inboundSequenceId, Configuration.UNSPECIFIED);
+        }
     }
 
     @Override
-    protected void appendSequenceHeader(Message outboundMessage) throws UnknownSequenceException {
+    protected void appendSequenceHeader(Message outboundMessage) throws UnknownSequenceException, MessageNumberRolloverException {
         long messageNumber = sequenceManager.getSequence(outboundSequenceId).getNextMessageId();
 
         SequenceElement sequenceHeaderElement = new SequenceElement();
@@ -148,70 +174,154 @@ final class Rm11ClientSession extends ClientSession {
         Identifier identifier = new Identifier();
         identifier.setValue(inboundSequenceId);
         ackElement.setIdentifier(identifier);
-        // In RM v1.1 the SequenceAcknowledgmenet.Final needs to be added when CloseSequence message is processed
+
+        final Collection<AckRange> acknowledgedIndexes = sequenceManager.getSequence(inboundSequenceId).getAcknowledgedMessageIds();
+        if (acknowledgedIndexes != null && !acknowledgedIndexes.isEmpty()) {
+            for (Sequence.AckRange range : acknowledgedIndexes) {
+                ackElement.addAckRange(range.lower, range.upper);
+            }
+        } else {
+            ackElement.setNone(new SequenceAcknowledgementElement.None());
+        }
+
         if (sequenceManager.getSequence(inboundSequenceId).isClosed()) {
-            com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement.Final finalElement = new com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement.Final();
-            ((com.sun.xml.ws.rm.v200702.SequenceAcknowledgementElement) ackElement).setFinal(finalElement);
+            SequenceAcknowledgementElement.Final finalElement = new SequenceAcknowledgementElement.Final();
+            ackElement.setFinal(finalElement);
         }
 
-        if (configuration.getDestinationBufferQuota() != Configuration.UNSPECIFIED) {
-            ackElement.setBufferRemaining(-1); // TODO
-        }
-
-        for (Sequence.AckRange range : sequenceManager.getSequence(outboundSequenceId).getAcknowledgedIndexes()) {
-            ackElement.addAckRange(range.lower, range.upper);
-        }
+// TODO move this to server side - we don't have a buffer support on the client side
+//        if (configuration.getDestinationBufferQuota() != Configuration.UNSPECIFIED) {
+//            ackElement.setBufferRemaining(-1/*calculate remaining quota*/);
+//        }
 
         outboundMessage.getHeaders().add(createHeader(ackElement));
     }
 
     @Override
-    protected void processInboundMessageHeaders(Message inboundMessage) throws RmException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
     protected void closeOutboundSequence() throws RmException {
-        Identifier idClose = new Identifier();
-        idClose.setValue(outboundSequenceId);
+        Message response = null;
+        try {
+            final Message request = Messages.create(
+                    configuration.getRmVersion().jaxbContext,
+                    new CloseSequenceElement(outboundSequenceId, sequenceManager.getSequence(outboundSequenceId).getLastMessageId()),
+                    configuration.getSoapVersion());
+            response = communicator.send(request, configuration.getRmVersion().closeSequenceAction);
+            if (response == null) {
+                // TODO L10N
+                throw new CloseSequenceException("CloseSequenceResponse was 'null'");
+            }
+            
+            processInboundMessageHeaders(response.getHeaders());
+            
+            if (response.isFault()) {
+                // TODO L10N
+                throw new CloseSequenceException("CloseSequence was refused by the RMDestination", response);
+            }
 
-        CloseSequenceElement cs = new CloseSequenceElement();
-        cs.setIdentifier(idClose);
-        cs.setLastMsgNumber(sequenceManager.getSequence(outboundSequenceId).getLastMessageId());
-
-        Message closeSequenceRequest = Messages.create(configuration.getRMVersion().jaxbContext, cs, configuration.getSoapVersion());
-
-        Message response = communicator.send(closeSequenceRequest, configuration.getRMVersion().closeSequenceAction);
-        if (response != null && response.isFault()) {
-            // TODO L10N
-            throw LOGGER.logException(new CloseSequenceException("CloseSequence was refused by the RMDestination", response), Level.WARNING);
+            CloseSequenceResponseElement csrElement = unmarshallResponse(response);
+            if (!outboundSequenceId.equals(csrElement.getIdentifier().getValue())) {
+                // TODO L10N
+                throw new CloseSequenceException("The sequence identifier in the close sequence response message [" + csrElement.getIdentifier().getValue() + "]" +
+                        " does not correspond to the closing outbound sequence identifier [" + outboundSequenceId + "]");
+            }
+        } finally {
+            if (response != null) {
+                response.consume();
+            }
         }
-
-        CloseSequenceResponseElement csr = unmarshallResponse(response);
-        // TODO process CloseSequenceRespose element...
     }
 
     @Override
     protected void terminateOutboundSequence() throws RmException {
         //TODO piggyback an acknowledgement if one is pending
         //seq.processAcknowledgement(new RMMessage(request));
-        TerminateSequenceElement ts = new TerminateSequenceElement();
-        Identifier idTerminate = new Identifier();
-        idTerminate.setValue(outboundSequenceId);
-        ts.setIdentifier(idTerminate);
-
-        Message terminateSequenceRequest = Messages.create(configuration.getRMVersion().jaxbContext, ts, configuration.getSoapVersion());
         Message response = null;
         try {
-            response = communicator.send(terminateSequenceRequest, configuration.getRMVersion().terminateSequenceAction);
-            if (response != null && response.isFault()) {
-                throw LOGGER.logException(new TerminateSequenceException("There was an error trying to terminate the sequence ", response), Level.WARNING);
+            final Message request = Messages.create(
+                    configuration.getRmVersion().jaxbContext,
+                    new TerminateSequenceElement(outboundSequenceId, sequenceManager.getSequence(outboundSequenceId).getLastMessageId()),
+                    configuration.getSoapVersion());
+
+            response = communicator.send(request, configuration.getRmVersion().terminateSequenceAction);
+
+            if (response == null) {
+                // TODO L10N
+                throw new TerminateSequenceException("TerminateSequenceResponse was 'null'");
             }
-            //TODO process TerminateSequenceResponse element? It may have a TerminateSequence for reverse sequence on it as well as ack headers
+            
+            processInboundMessageHeaders(response.getHeaders());
+            
+            if (response.isFault()) {
+                // TODO L10N
+                throw new TerminateSequenceException("There was an error during the sequence termination", response);
+            }
+
+            TerminateSequenceResponseElement tsrElement = unmarshallResponse(response);
+            if (!outboundSequenceId.equals(tsrElement.getIdentifier().getValue())) {
+                // TODO L10N
+                throw new TerminateSequenceException("The sequence identifier in the terminate sequence response message [" + tsrElement.getIdentifier().getValue() + "]" +
+                        " does not correspond to the terminating outbound sequence identifier [" + outboundSequenceId + "]");
+            }
         } finally {
             if (response != null) {
                 response.consume();
             }
         }
+    }
+
+    @Override
+    protected void processSequenceHeader(HeaderList inboundMessageHeaders) throws RmException {
+        SequenceElement sequenceElement = readHeaderAsUnderstood(inboundMessageHeaders, "Sequence");
+        assertSequenceIdInInboundHeader(inboundSequenceId, sequenceElement.getId());
+        sequenceManager.getSequence(sequenceElement.getId()).acknowledgeMessageId(sequenceElement.getMessageNumber());
+    }
+
+    @Override
+    protected void processAcknowledgementHeader(HeaderList inboundMessageHeaders) throws RmException {
+        SequenceAcknowledgementElement ackElement = readHeaderAsUnderstood(inboundMessageHeaders, "SequenceAcknowledgement");
+
+        if (ackElement != null) {
+            assertSequenceIdInInboundHeader(outboundSequenceId, ackElement.getId());
+
+            List<Sequence.AckRange> ranges = new LinkedList<Sequence.AckRange>();
+            if (ackElement.getNone() == null) {
+                if (!ackElement.getNack().isEmpty()) {
+                    List<BigInteger> nacks = new ArrayList<BigInteger>(ackElement.getNack());
+                    Collections.sort(nacks);
+                    long lastLowerBound = 1;
+                    for (BigInteger nackId : nacks) {
+                        if (lastLowerBound == nackId.longValue()) {
+                            lastLowerBound++;
+                        } else {
+                            ranges.add(new Sequence.AckRange(lastLowerBound, nackId.longValue() - 1));
+                            lastLowerBound = nackId.longValue() + 1;
+                        }
+                    }
+
+                    long lastMessageId = sequenceManager.getSequence(outboundSequenceId).getLastMessageId();
+                    if (lastLowerBound <= lastMessageId) {
+                        ranges.add(new Sequence.AckRange(lastLowerBound, lastMessageId));
+                    }
+                } else if (ackElement.getAcknowledgementRange() != null && !ackElement.getAcknowledgementRange().isEmpty()) {
+                    for (SequenceAcknowledgementElement.AcknowledgementRange rangeElement : ackElement.getAcknowledgementRange()) {
+                        ranges.add(new Sequence.AckRange(rangeElement.getLower().longValue(), rangeElement.getUpper().longValue()));
+                    }
+                }
+            }
+
+        // TODO handle other stuff in the header
+        // ackElement.getBufferRemaining();
+        // ackElement.getFinal();
+        }
+    }
+
+    @Override
+    protected void processAckRequestedHeader(HeaderList inboundMessageHeaders) throws RmException {
+        //dispatch to InboundSequence to construct response.
+        //TODO handle error condition no such sequence
+        AckRequestedElement ackRequestedElement = readHeaderAsUnderstood(inboundMessageHeaders, "AckRequested");
+        String sequenceId = ackRequestedElement.getId();
+        assertSequenceIdInInboundHeader(inboundSequenceId, sequenceId);
+        sequenceManager.getSequence(sequenceId).setAckRequestedFlag();
     }
 }

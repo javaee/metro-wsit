@@ -87,6 +87,15 @@ public class CloseSequenceElement {
     @XmlAnyAttribute
     private Map<QName, String> otherAttributes = new HashMap<QName, String>();
 
+    public CloseSequenceElement() {
+        // empty
+    }
+    
+    public CloseSequenceElement(String sequenceId, long lastMessageNumber) {
+        this.identifier = new Identifier(sequenceId);
+        this.lastMsgNumber = lastMessageNumber;
+    }
+
     /**
      * Gets the value of the identifier property.
      * 

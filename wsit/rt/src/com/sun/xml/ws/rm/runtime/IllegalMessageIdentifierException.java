@@ -39,37 +39,19 @@ package com.sun.xml.ws.rm.runtime;
 import com.sun.xml.ws.rm.RmException;
 
 /**
- * Inicates that the sequence with given sequence identifier already exists in a given environment.
- * 
- * This exceptions is used under the following conditions:
- *  <ul>
- *      <li>sequence with such {@code sequenceId} is already registered and managed by a given sequence manager</li>
- *  </ul>
- * 
+ *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class DuplicateSequenceException extends RmException {
-    private final String sequenceId;
+class IllegalMessageIdentifierException extends RmException {
+    private final long messageId;
     
-    /**
-     * Constructs an instance of <code>DuplicateSequenceException</code> for the sequence with {@code sequenceId} identifier.
-     * @param sequenceId the identifier of the duplicate sequence.
-     */
-    public DuplicateSequenceException(String sequenceId) {
-        super(DuplicateSequenceException.createErrorMessage(sequenceId));
-        this.sequenceId = sequenceId;
+    public IllegalMessageIdentifierException(long messageIdentifier) {
+        // TODO L10N
+        super("Illegally used message identifier [" + messageIdentifier + "]");
+        this.messageId = messageIdentifier;
     }
 
-    /**
-     * Returns the identifier of the unknown sequence
-     * @return the unknown sequence identifier
-     */
-    public String getSequenceId() {
-        return sequenceId;
-    }        
-    
-    private static String createErrorMessage(String sequenceId) {
-        // TODO: L10N
-        return "No sequence registered with id [" + sequenceId + "]";
-    } 
+    public long getMessageId() {
+        return messageId;
+    }
 }

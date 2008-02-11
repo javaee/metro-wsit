@@ -45,37 +45,47 @@ public interface SequenceManager {
      * Creates a new outbound sequence object with a given Id. It is assumed that RM handshake has been alrady established,
      * thus no RM handshake is performed.
      * 
-     * TODO: shall we move this function into a differnet interface?
-     * @param configuration RM configuration for the created sequence
+     * @param sequenceId identifier of the new sequence
+     * 
+     * @param expirationTime expiration time of the sequence in milliseconds; value of {@link com.sun.xml.ws.rm.policy.Configuration#UNSPECIFIED}
+     * means that this sequence never expires.
      */
-    public Sequence createOutboudSequence(String sequenceId);
+    public Sequence createOutboudSequence(String sequenceId, long expirationTime) throws DuplicateSequenceException;
 
     /**
      * Creates a new inbound sequence object
      * 
-     * TODO: shall we move this function into a differnet interface?
-     * @param configuration RM configuration for the created sequence
+     * @param sequenceId identifier of the new sequence
+     * 
+     * @param expirationTime expiration time of the sequence in milliseconds; value of {@link com.sun.xml.ws.rm.policy.Configuration#UNSPECIFIED}
+     * means that this sequence never expires.
      */
-    public Sequence createInboundSequence(String sequenceId);
+    public Sequence createInboundSequence(String sequenceId, long expirationTime) throws DuplicateSequenceException;
 
     /**
      * Retrieves an existing sequence from the internal sequence storage
      * 
      * @param sequenceId the unique sequence identifier
+     * 
      * @return sequence identified with the {@code sequenceId} identifier
+     * 
      * @exception UnknownSequenceExceptio in case no such sequence is registered within the sequence manager
      */
     public Sequence getSequence(String sequenceId) throws UnknownSequenceException;
 
     /**
-     * Registers a new sequence in the internal sequence storage
+     * Closes an existing sequence. The closed sequence is still kept in the internal sequence storage
      * 
-     * @param sequence sequence object to be registered within the internal sequence storage
+     * @param sequenceId the unique sequence identifier
      */
-    //public void registerSequence(Sequence sequence) throws DuplicateSequenceException;
-
     public void closeSequence(String sequenceId) throws UnknownSequenceException;
     
+    /**
+     * Terminates an existing sequence by calling the {@link Sequence#preDestroy()} method. In addition to this, the terminated
+     * sequence is removed from the internal sequence storage
+     * 
+     * @param sequenceId the unique sequence identifier
+     */
     public void terminateSequence(String sequenceId) throws UnknownSequenceException;
     
     /**

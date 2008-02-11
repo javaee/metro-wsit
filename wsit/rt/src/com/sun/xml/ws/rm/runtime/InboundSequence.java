@@ -33,26 +33,79 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.rm.runtime;
+
+import com.sun.xml.ws.rm.MessageNumberRolloverException;
+import com.sun.xml.ws.rm.localization.RmLogger;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public class InboundSequence extends AbstractSequence {
+    private static final RmLogger LOGGER = RmLogger.getLogger(InboundSequence.class);
+    
+    private final Set<Long> ackedIndexes;
 
-    public InboundSequence(String id) {
-        super(id);
+    public InboundSequence(String id, long expirationTime) {
+        super(id, expirationTime);
+        this.ackedIndexes = new TreeSet<Long>();
     }
 
-    public void initialize() {
-        // TODO
+    public long getNextMessageId() throws MessageNumberRolloverException {
+        // TODO L10N
+        throw new UnsupportedOperationException("This operation is not supported in this Sequence implementation.");
+    }
+
+    public long getLastMessageId() {
+        // TODO L10N
+        throw new UnsupportedOperationException("This operation is not supported in this Sequence implementation.");
+    }
+
+    public Collection<AckRange> getAcknowledgedMessageIds() {
+        if (ackedIndexes.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        Collection<AckRange> result = new LinkedList<Sequence.AckRange>();
+
+        long lower = ackedIndexes.iterator().next();
+        long lastIndex = lower;
+        for (long index : ackedIndexes) {
+            if (index > lastIndex + 1) {
+                result.add(new AckRange(lower, lastIndex));
+                lower = index;
+            }
+            lastIndex = index;
+        }
+        result.add(new AckRange(lower, lastIndex));
+
+        return result;
+    }
+
+    public boolean hasPendingAcknowledgements() {
+        // TODO implement
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    public void close() {
-        // TODO
-        throw new UnsupportedOperationException("Not supported yet.");
+    // TODO decide if e need two methods or one is enough: 
+    //   1. we need to track received messages on the inbound sequence and throw exception if duplicate message number occurs. 
+    //      we need to be able to send acknowledgements for the received messages
+    //   2. we need to track sent messages on the outbound sequence and resend any unacked message
+    //      we need to be able to mark messages as acknowledged
+    public void acknowledgeMessageId(long messageIdentifier) throws IllegalMessageIdentifierException {
+        // TODO implement
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
+    
+    public void registerMessageId(long messageIdentifier) throws IllegalMessageIdentifierException {
+        if (!ackedIndexes.add(messageIdentifier)) {
+            throw LOGGER.logSevereException(new IllegalMessageIdentifierException(messageIdentifier));
+        }
     }
 }

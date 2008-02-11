@@ -85,6 +85,15 @@ public class TerminateSequenceElement extends AbstractTerminateSequence {
     @XmlAnyAttribute
     private Map<QName, String> otherAttributes = new HashMap<QName, String>();
 
+
+    public TerminateSequenceElement() {
+        // empty
+    }
+    
+    public TerminateSequenceElement(String sequenceId) {
+        this.identifier = new Identifier(sequenceId);
+    }
+    
     /**
      * Gets the value of the identifier property.
      * 
