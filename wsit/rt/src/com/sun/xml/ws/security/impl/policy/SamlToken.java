@@ -74,6 +74,9 @@ public class SamlToken extends PolicyAssertion implements com.sun.xml.ws.securit
     private SecurityPolicyVersion spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
     private static QName itQname;
     private String includeTokenType;
+    private Issuer issuer = null;
+    private IssuerName issuerName = null;
+    
     /** Creates a new instance of SamlToken */
     
     public SamlToken(AssertionData name,Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) {
@@ -116,6 +119,15 @@ public class SamlToken extends PolicyAssertion implements com.sun.xml.ws.securit
         return id;
     }
     
+     public Issuer getIssuer() {
+        populate();
+        return issuer;
+    }
+    
+    public IssuerName getIssuerName() {
+        populate();
+        return issuerName;
+    }
     
     public AssertionFitness validate(boolean isServer) {
         return populate(isServer);
@@ -158,6 +170,21 @@ public class SamlToken extends PolicyAssertion implements com.sun.xml.ws.securit
                         fitness = AssertionFitness.HAS_UNKNOWN_ASSERTION;
                     }
                 }
+            }
+            if ( this.hasParameters() ) {
+                Iterator <PolicyAssertion> it = this.getParametersIterator();
+                while(it.hasNext()){
+                    PolicyAssertion assertion = it.next();
+                    if(PolicyUtil.isIssuer(assertion, spVersion)){
+                        issuer = (Issuer)assertion;
+                    } else if(PolicyUtil.isIssuerName(assertion, spVersion)){
+                        issuerName = (IssuerName)assertion;
+                    }
+                }
+            }
+            if(issuer != null && issuerName != null){
+                log_invalid_assertion(issuerName, isServer,SecureConversationToken);
+                fitness = AssertionFitness.HAS_INVALID_VALUE;
             }
             populated = true;
         }

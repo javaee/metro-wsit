@@ -65,6 +65,7 @@ public class SecureConversationToken extends PolicyAssertion implements com.sun.
     private PolicyAssertion rdKey = null;
     private Set<String> referenceType = null;
     private Issuer issuer = null;
+    private IssuerName issuerName = null;
     private String tokenType = null;
     private AssertionFitness fitness = AssertionFitness.IS_VALID;
     private SecurityPolicyVersion spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
@@ -113,6 +114,11 @@ public class SecureConversationToken extends PolicyAssertion implements com.sun.
     public Issuer getIssuer() {
         populate();
         return issuer;
+    }
+    
+    public IssuerName getIssuerName() {
+        populate();
+        return issuerName;
     }
     
     
@@ -188,8 +194,14 @@ public class SecureConversationToken extends PolicyAssertion implements com.sun.
                     PolicyAssertion assertion = it.next();
                     if(PolicyUtil.isIssuer(assertion, spVersion)){
                         issuer = (Issuer)assertion;
+                    } else if(PolicyUtil.isIssuerName(assertion, spVersion)){
+                        issuerName = (IssuerName)assertion;
                     }
                 }
+            }
+            if(issuer != null && issuerName != null){
+                log_invalid_assertion(issuerName, isServer,SecureConversationToken);
+                fitness = AssertionFitness.HAS_INVALID_VALUE;
             }
             populated = true;
         }

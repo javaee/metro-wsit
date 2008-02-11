@@ -62,6 +62,7 @@ public class IssuedToken extends PolicyAssertion implements  com.sun.xml.ws.secu
     private boolean populated = false;
     private RequestSecurityTokenTemplate rstTemplate;
     private Issuer issuer = null;
+    private IssuerName issuerName = null;
     private ArrayList<String> referenceType;
     private String id;
     private AssertionFitness fitness = AssertionFitness.IS_VALID;
@@ -117,6 +118,10 @@ public class IssuedToken extends PolicyAssertion implements  com.sun.xml.ws.secu
         return issuer;
     }
     
+    public IssuerName getIssuerName() {
+        populate();
+        return issuerName;
+    }  
     
     public boolean isRequireDerivedKeys() {
         populate();
@@ -144,13 +149,19 @@ public class IssuedToken extends PolicyAssertion implements  com.sun.xml.ws.secu
                         this.issuer = (Issuer) assertion;
                     } else if ( PolicyUtil.isRequestSecurityTokenTemplate(assertion, spVersion)) {
                         this.rstTemplate = (RequestSecurityTokenTemplate) assertion;
-                    }else{
+                    } else if(PolicyUtil.isIssuerName(assertion, spVersion)){
+                        issuerName = (IssuerName)assertion;
+                    } else{
                         if(!assertion.isOptional()){
                             log_invalid_assertion(assertion, isServer,IssuedToken);
                             fitness = AssertionFitness.HAS_UNKNOWN_ASSERTION;
                         }
                     }
                 }
+            }
+            if(issuer != null && issuerName != null){
+                log_invalid_assertion(issuerName, isServer,SecureConversationToken);
+                fitness = AssertionFitness.HAS_INVALID_VALUE;
             }
             NestedPolicy policy = this.getNestedPolicy();
             if(policy == null){

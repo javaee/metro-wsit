@@ -53,4 +53,17 @@ public interface UserNameToken extends Token{
      * returns true is password needs to be used in the UsernameToken Header sent in the message.
      */
     public boolean hasPassword();
+    
+    /**
+     * returns the issuer for the Username token.
+     * @return returns the issuer
+     */
+    public Issuer getIssuer();
+    
+    /**
+     * 
+     * @return the issuer name for Username token
+     */
+    public IssuerName getIssuerName();
+    
 }

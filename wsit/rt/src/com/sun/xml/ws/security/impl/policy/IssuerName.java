@@ -34,44 +34,53 @@
  * holder.
  */
 
-package com.sun.xml.ws.security.policy;
+package com.sun.xml.ws.security.impl.policy;
 
-import java.util.Set;
+import com.sun.xml.ws.policy.AssertionSet;
+import com.sun.xml.ws.policy.PolicyAssertion;
+import com.sun.xml.ws.policy.sourcemodel.AssertionData;
+import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
+import java.util.Collection;
 
 /**
- * This interface represents Kerberos Token
- * @author K.Venugopal@sun.com
+ *
+ * @author ashutosh.shahi@sun.com
  */
-public interface KerberosToken extends Token{
-    
- 
-    /**
-     * returns the type of the token.
-     * @return one of WSSKERBEROS_V5_AP_REQ_TOKEN11,WSSKERBEROS_GSS_V5_AP_REQ_TOKEN11
-     */
-    public String getTokenType();
-    /**
-     * returns a {@link java.util.Set } over the token reference types to be used.
-     * @return either REQUIRE_KEY_IDENTIFIER_REFERENCE
-     */
-    public Set getTokenRefernceType();
+public class IssuerName extends PolicyAssertion implements com.sun.xml.ws.security.policy.IssuerName, SecurityAssertionValidator{
+
+    private AssertionFitness fitness = AssertionFitness.IS_VALID;
+    private boolean populated = false;
+    String issuerName = null;
     
     /**
-     * returns true if RequiredDerivedKey element is present under Kerberos Token.
-     * @return true if RequireDerviedKeys element is present under Kerbeors Token or false.
+     * Creates a new instance of Issuer
      */
-    public boolean isRequireDerivedKeys();
+    public IssuerName() {
+    }
     
-    /**
-     * returns the issuer for the Kerberos token.
-     * @return returns the issuer
-     */
-    public Issuer getIssuer();
+    public IssuerName(AssertionData name,Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) {
+        super(name,nestedAssertions,nestedAlternative);
+    }
     
-    /**
-     * 
-     * @return the issuer name for Kerberos token
-     */
-    public IssuerName getIssuerName();
-  
+    public String getIssuerName() {
+        populate();
+        return issuerName;
+    }
+
+    public AssertionFitness validate(boolean isServer) {
+        return populate(isServer);
+    }
+    
+    private void populate(){
+        populate(false);
+    }
+    
+    private synchronized AssertionFitness populate(boolean isServer) {
+        if(!populated){
+            issuerName = this.getValue();
+            populated = true;
+        }
+        return fitness;
+    }
+
 }

@@ -61,5 +61,17 @@ public interface X509Token extends Token{
      * @return true if RequireDerviedKeys element is present under X509 Token or false.
      */
     public boolean isRequireDerivedKeys();
+    
+    /**
+     * returns the issuer for the X509 token.
+     * @return returns the issuer
+     */
+    public Issuer getIssuer();
+    
+    /**
+     * 
+     * @return the issuer name for X509 token
+     */
+    public IssuerName getIssuerName();
  
 }

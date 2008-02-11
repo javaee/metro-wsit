@@ -50,6 +50,7 @@ import java.util.logging.Level;
 import javax.xml.namespace.QName;
 import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
 import com.sun.xml.ws.security.policy.SecurityAssertionValidator.AssertionFitness;
+import java.util.Iterator;
 
 
 /**
@@ -65,6 +66,8 @@ public class HttpsToken extends PolicyAssertion implements com.sun.xml.ws.securi
     private String id = "";
     private SecurityPolicyVersion spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
     private static QName rccQname;
+    private Issuer issuer = null;
+    private IssuerName issuerName = null;
     /**
      * Creates a new instance of HttpsToken
      */
@@ -105,6 +108,16 @@ public class HttpsToken extends PolicyAssertion implements com.sun.xml.ws.securi
         return id;
     }
     
+    public Issuer getIssuer() {
+        populate();
+        return issuer;
+    }
+    
+    public IssuerName getIssuerName() {
+        populate();
+        return issuerName;
+    }
+    
     public AssertionFitness validate(boolean isServer) {
         return populate(isServer);
     }
@@ -143,7 +156,21 @@ public class HttpsToken extends PolicyAssertion implements com.sun.xml.ws.securi
                     }
                 }
             }
-            
+            if ( this.hasParameters() ) {
+                Iterator <PolicyAssertion> it = this.getParametersIterator();
+                while(it.hasNext()){
+                    PolicyAssertion assertion = it.next();
+                    if(PolicyUtil.isIssuer(assertion, spVersion)){
+                        issuer = (Issuer)assertion;
+                    } else if(PolicyUtil.isIssuerName(assertion, spVersion)){
+                        issuerName = (IssuerName)assertion;
+                    }
+                }
+            }
+            if(issuer != null && issuerName != null){
+                log_invalid_assertion(issuerName, isServer,SecureConversationToken);
+                fitness = AssertionFitness.HAS_INVALID_VALUE;
+            }
             populated = true;
         }
         return fitness;

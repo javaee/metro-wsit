@@ -913,6 +913,18 @@ public class PolicyUtil {
         return false;
     }
     
+    public static boolean isIssuerName(PolicyAssertion assertion, SecurityPolicyVersion spVersion) {
+       if ( !isSecurityPolicyNS(assertion, spVersion)) {
+            return false;
+        }
+        
+       // Issuer Name only supported for 1.2 namespace
+        if(assertion.getName().getLocalPart().equals(IssuerName) &&
+                assertion.getName().getNamespaceURI().equals(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri)) {
+            return true;
+        }
+        return false; 
+    }  
     
     public static boolean isWSS10(PolicyAssertion assertion, SecurityPolicyVersion spVersion){
         if ( !isSecurityPolicyNS(assertion, spVersion)) {

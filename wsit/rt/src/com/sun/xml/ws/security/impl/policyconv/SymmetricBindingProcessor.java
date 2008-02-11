@@ -36,6 +36,7 @@
 
 package com.sun.xml.ws.security.impl.policyconv;
 
+import com.sun.xml.ws.addressing.policy.Address;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.security.impl.policy.PolicyUtil;
@@ -178,13 +179,22 @@ public class SymmetricBindingProcessor extends BindingProcessor{
         if(PolicyUtil.isX509Token(tokenAssertion, spVersion)){
             AuthenticationTokenPolicy.X509CertificateBinding x509CB =new AuthenticationTokenPolicy.X509CertificateBinding();
             //        (AuthenticationTokenPolicy.X509CertificateBinding)policy.newX509CertificateKeyBinding();
+            X509Token x509Token = (X509Token)tokenAssertion;
             x509CB.setUUID(token.getTokenId());
             tokenProcessor.setTokenValueType(x509CB, tokenAssertion);
             tokenProcessor.setTokenInclusion(x509CB,(Token) tokenAssertion);
             //x509CB.setPolicyToken((Token) tokenAssertion);
-            tokenProcessor.setX509TokenRefType(x509CB, (X509Token) token);
+            tokenProcessor.setX509TokenRefType(x509CB, x509Token);
             
-            if(((X509Token)token).isRequireDerivedKeys()){
+             if(x509Token.getIssuer() != null){
+                Address addr = x509Token.getIssuer().getAddress();
+                if(addr != null)
+                    x509CB.setIssuer(addr.getURI().toString());
+            } else if(x509Token.getIssuerName() != null){
+                x509CB.setIssuer(x509Token.getIssuerName().getIssuerName());
+            }
+            
+            if(x509Token.isRequireDerivedKeys()){
                 DerivedTokenKeyBinding dtKB =  new DerivedTokenKeyBinding();
                 skb.setKeyBinding(x509CB);
                 policy.setKeyBinding(dtKB);
@@ -198,11 +208,20 @@ public class SymmetricBindingProcessor extends BindingProcessor{
             AuthenticationTokenPolicy.KerberosTokenBinding kerberosBinding =
                     new AuthenticationTokenPolicy.KerberosTokenBinding();
             kerberosBinding.setUUID(token.getTokenId());
+            KerberosToken kerberosToken = (KerberosToken)tokenAssertion;
             tokenProcessor.setTokenValueType(kerberosBinding, tokenAssertion);
             tokenProcessor.setTokenInclusion(kerberosBinding,(Token) tokenAssertion);
-            tokenProcessor.setKerberosTokenRefType(kerberosBinding, (KerberosToken) token);
+            tokenProcessor.setKerberosTokenRefType(kerberosBinding, kerberosToken);
             
-            if(((KerberosToken)token).isRequireDerivedKeys()){
+            if(kerberosToken.getIssuer() != null){
+                Address addr = kerberosToken.getIssuer().getAddress();
+                if(addr != null)
+                    kerberosBinding.setIssuer(addr.getURI().toString());
+            } else if(kerberosToken.getIssuerName() != null){
+                kerberosBinding.setIssuer(kerberosToken.getIssuerName().getIssuerName());
+            }
+            
+            if(kerberosToken.isRequireDerivedKeys()){
                 DerivedTokenKeyBinding dtKB =  new DerivedTokenKeyBinding();
                 skb.setKeyBinding(kerberosBinding);
                 policy.setKeyBinding(dtKB);
@@ -214,11 +233,21 @@ public class SymmetricBindingProcessor extends BindingProcessor{
             }
         }else if(PolicyUtil.isSamlToken(tokenAssertion, spVersion)){
             AuthenticationTokenPolicy.SAMLAssertionBinding sab = new AuthenticationTokenPolicy.SAMLAssertionBinding();
+            SamlToken samlToken = (SamlToken)tokenAssertion;
             sab.setUUID(token.getTokenId());
             sab.setReferenceType(MessageConstants.DIRECT_REFERENCE_TYPE);
             tokenProcessor.setTokenInclusion(sab,(Token) tokenAssertion);
             //sab.setPolicyToken((Token) tokenAssertion);
-            if(((SamlToken)token).isRequireDerivedKeys()){
+            
+             if(samlToken.getIssuer() != null){
+                Address addr = samlToken.getIssuer().getAddress();
+                if(addr != null)
+                    sab.setIssuer(addr.getURI().toString());
+            } else if(samlToken.getIssuerName() != null){
+                sab.setIssuer(samlToken.getIssuerName().getIssuerName());
+            }
+            
+            if(samlToken.isRequireDerivedKeys()){
                 DerivedTokenKeyBinding dtKB =  new DerivedTokenKeyBinding();
                 dtKB.setOriginalKeyBinding(sab);
                 policy.setKeyBinding(dtKB);
@@ -232,6 +261,15 @@ public class SymmetricBindingProcessor extends BindingProcessor{
             //itkb.setPolicyToken((Token) tokenAssertion);
             itkb.setUUID(((Token)tokenAssertion).getTokenId());
             IssuedToken it = (IssuedToken)tokenAssertion;
+            
+            if(it.getIssuer() != null){
+                Address addr = it.getIssuer().getAddress();
+                if(addr != null)
+                    itkb.setIssuer(addr.getURI().toString());
+            } else if(it.getIssuerName() != null){
+                itkb.setIssuer(it.getIssuerName().getIssuerName());
+            }
+            
             if(it.isRequireDerivedKeys()){
                 DerivedTokenKeyBinding dtKB =  new DerivedTokenKeyBinding();
                 dtKB.setOriginalKeyBinding(itkb);
@@ -243,6 +281,15 @@ public class SymmetricBindingProcessor extends BindingProcessor{
         }else if(PolicyUtil.isSecureConversationToken(tokenAssertion, spVersion)){
             SecureConversationTokenKeyBinding sct = new SecureConversationTokenKeyBinding();
             SecureConversationToken sctPolicy = (SecureConversationToken)tokenAssertion;
+            
+            if(sctPolicy.getIssuer() != null){
+                Address addr = sctPolicy.getIssuer().getAddress();
+                if(addr != null)
+                    sct.setIssuer(addr.getURI().toString());
+            } else if(sctPolicy.getIssuerName() != null){
+                sct.setIssuer(sctPolicy.getIssuerName().getIssuerName());
+            }
+            
             if(sctPolicy.isRequireDerivedKeys()){
                 DerivedTokenKeyBinding dtKB =  new DerivedTokenKeyBinding();
                 dtKB.setOriginalKeyBinding(sct);

@@ -53,6 +53,7 @@ import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
 import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -74,6 +75,8 @@ public class X509Token extends PolicyAssertion implements com.sun.xml.ws.securit
     private SecurityPolicyVersion spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
     private static QName itQname;
     private String includeToken;
+    private Issuer issuer = null;
+    private IssuerName issuerName = null;
     
     /**
      * Creates a new instance of X509Token
@@ -141,6 +144,16 @@ public class X509Token extends PolicyAssertion implements com.sun.xml.ws.securit
         return reqDK;
     }
     
+    public Issuer getIssuer() {
+        populate();
+        return issuer;
+    }
+    
+    public IssuerName getIssuerName() {
+        populate();
+        return issuerName;
+    }
+    
     public AssertionFitness validate(boolean isServer) {
         return populate(isServer);
     }
@@ -176,7 +189,21 @@ public class X509Token extends PolicyAssertion implements com.sun.xml.ws.securit
                     }
                 }
             }
-            
+            if ( this.hasParameters() ) {
+                Iterator <PolicyAssertion> it = this.getParametersIterator();
+                while(it.hasNext()){
+                    PolicyAssertion assertion = it.next();
+                    if(PolicyUtil.isIssuer(assertion, spVersion)){
+                        issuer = (Issuer)assertion;
+                    } else if(PolicyUtil.isIssuerName(assertion, spVersion)){
+                        issuerName = (IssuerName)assertion;
+                    }
+                }
+            }
+            if(issuer != null && issuerName != null){
+                log_invalid_assertion(issuerName, isServer,SecureConversationToken);
+                fitness = AssertionFitness.HAS_INVALID_VALUE;
+            }
             populated = true;
         }
         return fitness;

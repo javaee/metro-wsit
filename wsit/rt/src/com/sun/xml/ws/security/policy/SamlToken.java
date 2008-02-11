@@ -61,5 +61,17 @@ public interface SamlToken extends Token {
      * @return true if RequireDerviedKeys element is present under SAML Token or false.
      */
     public boolean isRequireDerivedKeys();
+    
+     /**
+     * returns the issuer for the SAML token.
+     * @return returns the issuer
+     */
+    public Issuer getIssuer();
+    
+    /**
+     * 
+     * @return the issuer name for SAML token
+     */
+    public IssuerName getIssuerName();
  
 }

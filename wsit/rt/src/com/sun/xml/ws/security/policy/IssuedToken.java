@@ -52,6 +52,12 @@ public interface IssuedToken extends Token{
      * @return {@link com.sun.xml.ws.security.policy.Issuer} or null
      */
     public Issuer getIssuer();
+    
+    /**
+     * returns {@link com.sun.xml.ws.security.policy.IssuerName } which is the issuer for the issued token.
+     * @return the issuer name for Issued token
+     */
+    public IssuerName getIssuerName();
    
     /**
      * returns {@link RequestSecurityTokenTemplate }

@@ -201,6 +201,7 @@ public class Constants {
     public final static String ProofEncryption = "ProofEncryption";
     public final static String Lifetime = "Lifetime";
     public final static String Issuer = "Issuer";
+    public final static String IssuerName = "IssuerName";
     
     //Addressing constants
     public final static String Address = "Address";

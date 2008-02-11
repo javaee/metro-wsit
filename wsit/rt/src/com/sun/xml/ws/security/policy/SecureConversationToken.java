@@ -68,10 +68,16 @@ public interface SecureConversationToken extends Token {
     public String getTokenType();
     
     /**
-     * returns the issuer for the SpnegoContext token.
+     * returns the issuer for the SecureConversation token.
      * @return returns the issuer
      */
     public Issuer getIssuer();
+    
+    /**
+     * 
+     * @return the issuer name for SecureConversation token
+     */
+    public IssuerName getIssuerName();
   
     /**
      * returns {@link com.sun.xml.ws.policy.Policy } which represents Bootstrap Policy
