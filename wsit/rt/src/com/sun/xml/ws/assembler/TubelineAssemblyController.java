@@ -65,7 +65,8 @@ import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
-import com.sun.xml.ws.rm.policy.RmTubeAppender;
+import com.sun.xml.ws.rm.runtime.RmTubeAppender;
+import com.sun.xml.ws.rm.runtime.testing.PacketFilteringTubeAppender;
 import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
 import com.sun.xml.ws.transport.tcp.wsit.TCPTransportPipeFactory;
 import com.sun.xml.ws.util.ServiceFinder;
@@ -710,6 +711,7 @@ public class TubelineAssemblyController {
     
     private static final TubeAppender transportAppender = new TransportTubeAppender();
     private static final TubeAppender messageDumpingAppender = new MessageDumpingTubeAppender();
+    private static final TubeAppender packetFilteringAppender = new PacketFilteringTubeAppender();    
     private static final TubeAppender actionDumpAppender = new ActionDumpTubeAppender();
     private static final TubeAppender securityAppender = new SecurityTubeAppender();
     private static final TubeAppender reliableMessagingAppender = new RmTubeAppender();
@@ -724,6 +726,7 @@ public class TubelineAssemblyController {
     private static final TubeAppender[] clientAppenders = new TubeAppender[]{
         transportAppender,
         messageDumpingAppender,
+        packetFilteringAppender,
         new DumpTubeAppender(""),
         actionDumpAppender,
         new DumpTubeAppender(TRANSPORT_SUFFIX),
@@ -769,6 +772,7 @@ public class TubelineAssemblyController {
         new DumpTubeAppender(TRANSPORT_SUFFIX),
         actionDumpAppender,
         new DumpTubeAppender(""),
+        packetFilteringAppender,
         messageDumpingAppender /*,
         transportAppender*/
     };

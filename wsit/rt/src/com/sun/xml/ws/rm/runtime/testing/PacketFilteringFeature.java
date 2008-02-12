@@ -33,81 +33,31 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rm.runtime;
+package com.sun.xml.ws.rm.runtime.testing;
 
-import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.pipe.NextAction;
-import com.sun.xml.ws.api.pipe.TubeCloner;
-import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
-import com.sun.xml.ws.assembler.WsitServerTubeAssemblyContext;
-import com.sun.xml.ws.rm.localization.RmLogger;
+import javax.xml.ws.WebServiceFeature;
 
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class ServerRmTube extends AbstractFilterTubeImpl {
-    private static final RmLogger LOGGER = RmLogger.getLogger(ServerRmTube.class);
+public final class PacketFilteringFeature extends WebServiceFeature {
 
-    public ServerRmTube(ServerRmTube original, TubeCloner cloner) {
-        super(original, cloner);
-        
-        // TODO: initialize all instance variables
-    }
+    private final PacketFilter[] filters;
 
-    public ServerRmTube(WsitServerTubeAssemblyContext context) {
-        super(context.getTubelineHead());
-        
-        // TODO initialize all instance variables
-    }
-
-    @Override
-    public ServerRmTube copy(TubeCloner cloner) {
-        LOGGER.entering();
-        try {
-            return new ServerRmTube(this, cloner);
-        } finally {
-            LOGGER.exiting();
+    public PacketFilteringFeature(PacketFilter... filters) {
+        this.filters = filters;
+        if (filters != null && filters.length > 0) {
+            this.enabled = true;
         }
     }
 
     @Override
-    public NextAction processException(Throwable arg0) {
-        LOGGER.entering();
-        try {
-            return super.processException(arg0);
-        } finally {
-            LOGGER.exiting();
-        }
+    public String getID() {
+        return PacketFilteringFeature.class.getName();
     }
 
-    @Override
-    public NextAction processRequest(Packet arg0) {
-        LOGGER.entering();
-        try {
-            return super.processRequest(arg0);
-        } finally {
-            LOGGER.exiting();
-        }
-    }
-
-    @Override
-    public NextAction processResponse(Packet arg0) {
-        LOGGER.entering();
-        try {
-            return super.processResponse(arg0);
-        } finally {
-            LOGGER.exiting();
-        }
-    }
-
-    @Override
-    public void preDestroy() {
-        LOGGER.entering();
-        try {
-            super.preDestroy();
-        } finally {
-            LOGGER.exiting();
-        }
+    public PacketFilter[] getFilters() {
+        return filters;
     }
 }

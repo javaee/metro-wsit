@@ -38,7 +38,6 @@ package com.sun.xml.ws.rm.runtime;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.api.pipe.NextAction;
-import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.assembler.WsitClientTubeAssemblyContext;
@@ -46,6 +45,7 @@ import com.sun.xml.ws.client.ClientTransportException;
 import com.sun.xml.ws.rm.RmException;
 import com.sun.xml.ws.rm.RmWsException;
 import com.sun.xml.ws.rm.localization.RmLogger;
+import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import javax.xml.ws.WebServiceException;
@@ -72,9 +72,14 @@ public class ClientRmTube extends AbstractFilterTubeImpl {
         this.processedPacketCopy = null;
     }
 
-    public ClientRmTube(WsitClientTubeAssemblyContext context, Tube next) throws RmWsException {
-        super(next);
-        this.session = ClientSession.create(context.getWsdlPort(), context.getBinding(), new ProtocolCommunicator(super.next, context.getScInitiator()));
+    public ClientRmTube(WsitClientTubeAssemblyContext context) throws RmWsException {
+        super(context.getTubelineHead());
+        SecureConversationInitiator scInitiator = context.getImplementation(SecureConversationInitiator.class);
+        if (scInitiator == null) {
+            // TODO remove this condition and remove context.getScInitiator() method
+            scInitiator = context.getScInitiator();
+        }
+        this.session = ClientSession.create(context.getWsdlPort(), context.getBinding(), new ProtocolCommunicator(super.next, scInitiator));
         this.processedPacketCopy = null;
     }
 

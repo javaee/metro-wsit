@@ -54,6 +54,7 @@ public class InboundSequence extends AbstractSequence {
 
     private static final RmLogger LOGGER = RmLogger.getLogger(InboundSequence.class);
     private static final long UNSPECIFIED = 0;
+    
     private long highestIdIndex = UNSPECIFIED;
     private final Set<Long> unackedIndexes;
 

@@ -33,81 +33,38 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rm.runtime;
+package com.sun.xml.ws.rm.runtime.testing;
 
-import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.pipe.NextAction;
-import com.sun.xml.ws.api.pipe.TubeCloner;
-import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
+import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.pipe.Tube;
+import com.sun.xml.ws.assembler.TubeAppender;
+import com.sun.xml.ws.assembler.WsitClientTubeAssemblyContext;
 import com.sun.xml.ws.assembler.WsitServerTubeAssemblyContext;
-import com.sun.xml.ws.rm.localization.RmLogger;
+import javax.xml.ws.WebServiceException;
 
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class ServerRmTube extends AbstractFilterTubeImpl {
-    private static final RmLogger LOGGER = RmLogger.getLogger(ServerRmTube.class);
+public final class PacketFilteringTubeAppender implements TubeAppender {
 
-    public ServerRmTube(ServerRmTube original, TubeCloner cloner) {
-        super(original, cloner);
-        
-        // TODO: initialize all instance variables
-    }
-
-    public ServerRmTube(WsitServerTubeAssemblyContext context) {
-        super(context.getTubelineHead());
-        
-        // TODO initialize all instance variables
-    }
-
-    @Override
-    public ServerRmTube copy(TubeCloner cloner) {
-        LOGGER.entering();
-        try {
-            return new ServerRmTube(this, cloner);
-        } finally {
-            LOGGER.exiting();
+    public Tube appendTube(WsitClientTubeAssemblyContext context) throws WebServiceException {
+        if (isPacketFilteringEnabled(context.getBinding())) {
+            return new PacketFilteringTube(context);
+        } else {
+            return context.getTubelineHead();
         }
     }
 
-    @Override
-    public NextAction processException(Throwable arg0) {
-        LOGGER.entering();
-        try {
-            return super.processException(arg0);
-        } finally {
-            LOGGER.exiting();
+    public Tube appendTube(WsitServerTubeAssemblyContext context) throws WebServiceException {
+        if (isPacketFilteringEnabled(context.getEndpoint().getBinding())) {
+            return new PacketFilteringTube(context);
+        } else {
+            return context.getTubelineHead();
         }
     }
 
-    @Override
-    public NextAction processRequest(Packet arg0) {
-        LOGGER.entering();
-        try {
-            return super.processRequest(arg0);
-        } finally {
-            LOGGER.exiting();
-        }
-    }
-
-    @Override
-    public NextAction processResponse(Packet arg0) {
-        LOGGER.entering();
-        try {
-            return super.processResponse(arg0);
-        } finally {
-            LOGGER.exiting();
-        }
-    }
-
-    @Override
-    public void preDestroy() {
-        LOGGER.entering();
-        try {
-            super.preDestroy();
-        } finally {
-            LOGGER.exiting();
-        }
+    private boolean isPacketFilteringEnabled(WSBinding binding) {
+        return binding.isFeatureEnabled(PacketFilteringFeature.class);
     }
 }

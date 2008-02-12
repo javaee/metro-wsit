@@ -33,13 +33,11 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rm.policy;
+package com.sun.xml.ws.rm.runtime;
 
 import com.sun.xml.ws.assembler.TubeAppender;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.Tube;
-import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
 import com.sun.xml.ws.assembler.WsitClientTubeAssemblyContext;
 import com.sun.xml.ws.assembler.WsitServerTubeAssemblyContext;
 import com.sun.xml.ws.policy.Policy;
@@ -71,7 +69,8 @@ public class RmTubeAppender implements TubeAppender {
                     context.getBinding(),
                     context.getScInitiator(),
                     context.getTubelineHead());
-            // return new ClientRmTube(context, context.getTubelineHead());
+            // TODO uncomment new tube creation
+            // return new ClientRmTube(context);
         } else {
             return context.getTubelineHead();
         }
@@ -90,48 +89,9 @@ public class RmTubeAppender implements TubeAppender {
                     context.getEndpoint().getBinding(),
                     context.getTubelineHead());
             // TODO uncomment new tube creation
-            // return new ServerRmTube(context, context.getTubelineHead());
+            // return new ServerRmTube(context);
         } else {
             return context.getTubelineHead();
-        }
-    }
-
-    /**
-     * TODO: remove and replace with the new implementation once itis ready
-     * Adds RM tube to the client-side tubeline, depending on whether RM is enabled or not.
-     * 
-     * @param context wsit client tubeline assembler context
-     * @param next tail of the client-side tubeline being constructed
-     * @return new tail of the client-side tubeline
-     */
-    public Pipe appendPipe(WsitClientTubeAssemblyContext context, Pipe next) throws WebServiceException {
-        if (isReliableMessagingEnabled(context.getPolicyMap(), context.getWsdlPort())) {
-            return PipeAdapter.adapt((Tube) new RMClientTube(
-                    context.getWsdlPort(),
-                    context.getBinding(),
-                    context.getScInitiator(),
-                    PipeAdapter.adapt(next)));
-        } else {
-            return next;
-        }
-    }
-
-    /**
-     * TODO: remove and replace with the new implementation once itis ready
-     * Adds RM tube to the service-side tubeline, depending on whether RM is enabled or not.
-     * 
-     * @param context wsit service tubeline assembler context
-     * @param next tail of the service-side tubeline being constructed
-     * @return new head of the service-side tubeline
-     */
-    public Pipe appendPipe(WsitServerTubeAssemblyContext context, Pipe next) throws WebServiceException {
-        if (isReliableMessagingEnabled(context.getPolicyMap(), context.getWsdlPort())) {
-            return PipeAdapter.adapt((Tube) new RMServerTube(
-                    context.getWsdlPort(),
-                    context.getEndpoint().getBinding(),
-                    PipeAdapter.adapt(next)));
-        } else {
-            return next;
         }
     }
 
