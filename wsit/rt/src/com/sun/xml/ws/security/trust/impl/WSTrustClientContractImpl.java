@@ -252,6 +252,14 @@ public class WSTrustClientContractImpl implements WSTrustClientContract {
                         LogStringsMessages.WST_0019_INVALID_PROOF_TOKEN_TYPE(proofTokenType, appliesTo));
                 throw new WSTrustException( LogStringsMessages.WST_0019_INVALID_PROOF_TOKEN_TYPE(proofTokenType, appliesTo));
             }
+        }else{
+            Entropy clientEntropy = rst.getEntropy();
+            if (clientEntropy != null){
+                BinarySecret bs = clientEntropy.getBinarySecret();
+                if (bs != null){
+                    key = bs.getRawValue();
+                }
+            }
         }
         return key;
     }
