@@ -43,8 +43,22 @@ import javax.xml.ws.WebServiceFeature;
  */
 public final class PacketFilteringFeature extends WebServiceFeature {
 
+    public static final String ID = PacketFilteringFeature.class.getName();
+
     private final PacketFilter[] filters;
 
+    public PacketFilteringFeature() {
+        // this constructor is here just to satisfy JAX-WS specification requirements
+        this.filters = null;
+        this.enabled = true;        
+    }
+    
+    public PacketFilteringFeature(boolean enabled) {
+        // this constructor is here just to satisfy JAX-WS specification requirements
+        this.filters = null;
+        this.enabled = enabled;                
+    }
+    
     public PacketFilteringFeature(PacketFilter... filters) {
         this.filters = filters;
         if (filters != null && filters.length > 0) {
@@ -54,7 +68,7 @@ public final class PacketFilteringFeature extends WebServiceFeature {
 
     @Override
     public String getID() {
-        return PacketFilteringFeature.class.getName();
+        return ID;
     }
 
     public PacketFilter[] getFilters() {

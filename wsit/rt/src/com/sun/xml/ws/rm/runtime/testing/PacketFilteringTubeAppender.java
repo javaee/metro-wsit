@@ -65,6 +65,7 @@ public final class PacketFilteringTubeAppender implements TubeAppender {
     }
 
     private boolean isPacketFilteringEnabled(WSBinding binding) {
-        return binding.isFeatureEnabled(PacketFilteringFeature.class);
+        PacketFilteringFeature pfFeature = binding.getFeature(PacketFilteringFeature.class);
+        return pfFeature != null && pfFeature.isEnabled() && pfFeature.getFilters() != null && pfFeature.getFilters().length > 0;
     }
 }
