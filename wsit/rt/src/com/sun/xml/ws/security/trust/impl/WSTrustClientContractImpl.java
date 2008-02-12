@@ -210,15 +210,17 @@ public class WSTrustClientContractImpl implements WSTrustClientContract {
         // Get Created and Expires from Lifetime
         try{
             final Lifetime lifetime = rstr.getLifetime();
-            final AttributedDateTime created = lifetime.getCreated();
-            final AttributedDateTime expires = lifetime.getExpires();
-            synchronized (calendarFormatter){
-                final Date dateCreated = calendarFormatter.parse(created.getValue());
-                final Date dateExpires = calendarFormatter.parse(expires.getValue());
+            if (lifetime != null){
+                final AttributedDateTime created = lifetime.getCreated();
+                final AttributedDateTime expires = lifetime.getExpires();
+                synchronized (calendarFormatter){
+                    final Date dateCreated = calendarFormatter.parse(created.getValue());
+                    final Date dateExpires = calendarFormatter.parse(expires.getValue());
                 
-                // populate the IssuedTokenContext
-                context.setCreationTime(dateCreated);
-                context.setExpirationTime(dateExpires);
+                    // populate the IssuedTokenContext
+                    context.setCreationTime(dateCreated);
+                    context.setExpirationTime(dateExpires);
+                }
             }
         }catch(ParseException ex){
             throw new WSTrustException(ex.getMessage(), ex);
