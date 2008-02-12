@@ -3,6 +3,7 @@ package com.sun.xml.ws.rm;
 import com.sun.xml.bind.api.JAXBRIContext;
 
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
 
 /**
@@ -57,6 +58,7 @@ public enum RmVersion {
     public final String namespaceUri;
     public final String policyNamespaceUri;
     public final JAXBRIContext jaxbContext;
+    public final Unmarshaller jaxbUnmarshaller;
     /**
      * Action constants
      */
@@ -116,6 +118,7 @@ public enum RmVersion {
 
         try {
             this.jaxbContext = JAXBRIContext.newInstance(classes, null, null, null, false, null);
+            this.jaxbUnmarshaller = jaxbContext.createUnmarshaller();
         } catch (JAXBException e) {
             throw new Error(e);
         }
