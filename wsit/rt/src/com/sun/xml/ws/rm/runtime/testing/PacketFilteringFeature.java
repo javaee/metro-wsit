@@ -35,6 +35,8 @@
  */
 package com.sun.xml.ws.rm.runtime.testing;
 
+import com.sun.xml.ws.api.FeatureConstructor;
+import com.sun.xml.ws.rm.localization.RmLogger;
 import javax.xml.ws.WebServiceFeature;
 
 /**
@@ -43,26 +45,45 @@ import javax.xml.ws.WebServiceFeature;
  */
 public final class PacketFilteringFeature extends WebServiceFeature {
 
-    public static final String ID = PacketFilteringFeature.class.getName();
-
+    private static final RmLogger LOGGER = RmLogger.getLogger(PacketFilteringFeature.class);
+    public static final String ID = "com.sun.xml.ws.rm.runtime.testing.PacketFilteringFeature";
     private final PacketFilter[] filters;
 
     public PacketFilteringFeature() {
         // this constructor is here just to satisfy JAX-WS specification requirements
         this.filters = null;
-        this.enabled = true;        
+        this.enabled = true;
     }
-    
+
     public PacketFilteringFeature(boolean enabled) {
         // this constructor is here just to satisfy JAX-WS specification requirements
         this.filters = null;
-        this.enabled = enabled;                
+        this.enabled = enabled;
     }
-    
-    public PacketFilteringFeature(PacketFilter... filters) {
-        this.filters = filters;
-        if (filters != null && filters.length > 0) {
-            this.enabled = true;
+
+    public PacketFilteringFeature(Class<? extends PacketFilter>... filterClasses) {
+        this(true, filterClasses);
+    }
+
+    @FeatureConstructor({"enabled", "filters"})
+    public PacketFilteringFeature(boolean enabled, Class<? extends PacketFilter>... filterClasses) {
+        this.enabled = enabled;
+        if (filterClasses != null && filterClasses.length > 0) {
+            this.filters = new PacketFilter[filterClasses.length];
+            int i = 0;
+            for (Class<? extends PacketFilter> filterClass : filterClasses) {
+                try {
+                    this.filters[i] = filterClass.newInstance();
+                } catch (InstantiationException ex) {
+                    LOGGER.warning("Error instantiating packet filter of class [" + filterClass.getName() + "]", ex);
+                } catch (IllegalAccessException ex) {
+                    LOGGER.warning("Error instantiating packet filter of class [" + filterClass.getName() + "]", ex);
+                } finally {
+                    i++;
+                }
+            }
+        } else {
+            this.filters = null;
         }
     }
 
