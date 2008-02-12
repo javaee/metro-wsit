@@ -77,6 +77,8 @@ public interface Sequence {
      * Generates a new message identifier and registers it within the sequence
      * 
      * @return the next message identifier that should be used for the next message sent on the sequence.
+     * 
+     * @exception MessageNumberRolloverException in case the message identifier counter overflows
      */
     public long getNextMessageId() throws MessageNumberRolloverException;
 
@@ -84,6 +86,9 @@ public interface Sequence {
      * Registers given message identifier with the sequence as aknowledged
      * 
      * @param messageId message identifier to be acknowledged
+     * 
+     * @exception IllegalMessageIdentifierException in case this is an {@link InboundSequence} instance and a message 
+     * with the given identifier has been already registered
      */
     public void acknowledgeMessageId(long messageId) throws IllegalMessageIdentifierException;
 
