@@ -31,7 +31,7 @@ import javax.xml.ws.WebServiceFeature;
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public final class MessageDumpingFeature extends WebServiceFeature {
-    private static final String featureId = MessageDumpingFeature.class.getName();
+    public static final String ID = MessageDumpingFeature.class.getName();
     
     private Queue<String> messageQueue = new LinkedList<String>();
     
@@ -40,7 +40,7 @@ public final class MessageDumpingFeature extends WebServiceFeature {
     }
     
     public String getID() {
-        return featureId;
+        return ID;
     }
     
     public Tube createMessageDumpingTube(Tube next) {
