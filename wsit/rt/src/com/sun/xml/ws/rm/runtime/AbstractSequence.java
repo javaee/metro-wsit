@@ -38,27 +38,85 @@ package com.sun.xml.ws.rm.runtime;
 import com.sun.xml.ws.rm.MessageNumberRolloverException;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.policy.Configuration;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
- *
+ * TODO javadoc
+ * 
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public abstract class AbstractSequence implements Sequence {
     private static final RmLogger LOGGER = RmLogger.getLogger(AbstractSequence.class);
+    
+    protected static final long UNSPECIFIED_MESSAGE_ID = 0; // this MUST be 0 in order for AbstractSequence.createAckRanges() method to work properly
+    protected static final long MIN_MESSAGE_ID = 1;
+    protected static final long MAX_MESSAGE_ID = 9223372036854775807L;
+    
+    protected final Collection<Long> unackedIndexes;
     private final String id;
     private final long expirationTime;
     private Status status;
     private boolean ackRequestedFlag;
-
-    AbstractSequence(String id, long expirationTime) {
+    
+    /**
+     * Initializes instance fields.
+     * 
+     * @param id sequence identifier
+     * 
+     * @param expirationTime sequence expiration time
+     * 
+     * @param unackedMessageIdentifiersStorage instance of a collection imlementation that should be used as a storage 
+     *        for unacknowledged message identifiers on the sequence. <b>Note that the child implementation is responsible 
+     *        for keeping the storage sorted! Otherwise a call to {@link #getAcknowledgedMessageIds()} may return undefined
+     *        results.</b>
+     */
+    protected AbstractSequence(String id, long expirationTime, Collection<Long> unackedMessageIdentifiersStorage) {
         this.id = id;
         this.expirationTime = expirationTime;
+        this.unackedIndexes = unackedMessageIdentifiersStorage;
     }
 
     public String getId() {
         return id;
+    }
+
+    public long getNextMessageId() throws MessageNumberRolloverException {
+        // TODO L10N
+        throw new UnsupportedOperationException("This operation is not supported in this Sequence implementation.");
+    }
+
+    public List<AckRange> getAcknowledgedMessageIds() {
+         if (getLastMessageId() == UNSPECIFIED_MESSAGE_ID) {
+            // nothing acknowledged yet
+            return Collections.emptyList();
+        } else if (unackedIndexes.isEmpty()) {
+            // no unacked indexes - we have a single acked range
+            return Arrays.asList(new AckRange(MIN_MESSAGE_ID, getLastMessageId()));
+        } else {
+            // need to calculate ranges from the unacked indexes
+            List<AckRange> result = new LinkedList<Sequence.AckRange>();
+
+            long lastUnacked = unackedIndexes.iterator().next();
+            if (lastUnacked > MIN_MESSAGE_ID) {
+                result.add(new AckRange(MIN_MESSAGE_ID, lastUnacked - 1));
+            }
+            for (long unackedIndex : unackedIndexes) {
+                if (unackedIndex > lastUnacked + 1) {
+                    result.add(new AckRange(lastUnacked + 1, unackedIndex - 1));
+                }
+                lastUnacked = unackedIndex;
+            }
+
+            return result;
+        }       
+    }
+
+    public boolean hasPendingAcknowledgements() {
+        return !unackedIndexes.isEmpty();
     }
 
     public Status getStatus() {
@@ -94,7 +152,6 @@ public abstract class AbstractSequence implements Sequence {
     }
 
     public void preDestroy() {
-        // TODO implement
-        throw new UnsupportedOperationException("Not supported yet.");
+        // nothing to do...
     }
 }

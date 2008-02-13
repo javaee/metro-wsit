@@ -33,54 +33,84 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.rm.runtime;
 
 import com.sun.xml.ws.rm.MessageNumberRolloverException;
 import com.sun.xml.ws.rm.localization.RmLogger;
-import java.util.Collection;
+import com.sun.xml.ws.rm.runtime.Sequence.AckRange;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- *
+ * TODO javadoc
+ * TODO make class thread-safe
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public class OutboundSequence extends AbstractSequence {
+
     private static final RmLogger LOGGER = RmLogger.getLogger(OutboundSequence.class);
-    
-    private final AtomicLong nextMessageId;
+    private final AtomicLong lastMessageId;
 
     public OutboundSequence(String id, long expirationTime) {
-        super(id, expirationTime);
-        this.nextMessageId = new AtomicLong(MIN_MESSAGE_ID);
+        super(id, expirationTime, new LinkedList<Long>());
+        this.lastMessageId = new AtomicLong(AbstractSequence.MIN_MESSAGE_ID);
     }
 
+    @Override
     public long getNextMessageId() throws MessageNumberRolloverException {
-        long nextId = nextMessageId.getAndIncrement();
+        long nextId = lastMessageId.getAndIncrement();
         if (nextId > MAX_MESSAGE_ID) {
             // TODO L10N
             throw LOGGER.logSevereException(new MessageNumberRolloverException(this.getId(), nextId));
         }
 
+        unackedIndexes.add(nextId);
         return nextId;
     }
 
     public long getLastMessageId() {
-        return nextMessageId.longValue();
+        return lastMessageId.longValue();
     }
 
-    public Collection<AckRange> getAcknowledgedMessageIds() {
-        // TODO implement
-        throw new UnsupportedOperationException("Not supported yet.");
+    public void acknowledgeMessageId(long messageId) {
+        // NOTE: This method will most likely not be used in our implementation as we expect range-based 
+        //       acknowledgements on outbound sequence. Thus we are not trying to optimize the implementation
+        unackedIndexes.remove(messageId);
     }
 
-    public boolean hasPendingAcknowledgements() {
-        // TODO implement
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+    public void acknowledgeMessageIds(List<AckRange> ranges) throws IllegalMessageIdentifierException {
+        if (ranges == null || ranges.isEmpty() || unackedIndexes.isEmpty()) {
+            return;
+        }
 
-    public void acknowledgeMessageId(long messageNumber) {
-        // TODO implement
-        throw new UnsupportedOperationException("Not supported yet.");
+        if (ranges.size() > 1) {
+            Collections.sort(ranges, new Comparator<AckRange>() {
+
+                public int compare(AckRange range1, AckRange range2) {
+                    if (range1.lower <= range2.lower) {
+                        return -1;
+                    } else {
+                        return 1;
+                    }
+                }
+            });
+        }
+        Iterator<Long> unackedIterator = unackedIndexes.iterator();
+        Iterator<AckRange> rangeIterator = ranges.iterator();
+        AckRange currentRange = rangeIterator.next();
+        while (unackedIterator.hasNext()) {
+            long unackedIndex = unackedIterator.next();
+            if (unackedIndex >= currentRange.lower && unackedIndex <= currentRange.upper) {
+                unackedIterator.remove();
+            } else if (rangeIterator.hasNext()) {
+                currentRange = rangeIterator.next();
+            } else {
+                break; // no more acked ranges
+            }           
+        }
     }
 }

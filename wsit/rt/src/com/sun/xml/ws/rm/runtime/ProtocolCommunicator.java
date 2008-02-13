@@ -39,12 +39,15 @@ import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.pipe.Engine;
 import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
 import com.sun.xml.ws.security.secconv.WSSecureConversationException;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.xml.bind.JAXBElement;
 
 /**
@@ -56,14 +59,18 @@ public class ProtocolCommunicator {
 
     private static final RmLogger LOGGER = RmLogger.getLogger(ProtocolCommunicator.class);
     private final Tube tubeline;
+    private final AddressingVersion addressingVersion;
+    private final SOAPVersion soapVersion;
     private Packet musterRequestPacket;
-    private AddressingVersion addressingVersion;
-    private SOAPVersion soapVersion;
     private final SecureConversationInitiator scInitiator;
+    private volatile Engine fiberEngine;
+    private final ReadWriteLock fiberEngineLock = new ReentrantReadWriteLock();
 
-    public ProtocolCommunicator(Tube tubeline, SecureConversationInitiator scInitiator) {
+    public ProtocolCommunicator(Tube tubeline, SecureConversationInitiator scInitiator, SOAPVersion soapVersion, AddressingVersion addressingVersion) {
         this.tubeline = tubeline;
         this.scInitiator = scInitiator;
+        this.soapVersion = soapVersion;
+        this.addressingVersion = addressingVersion;
     }
 
     /**
@@ -125,8 +132,29 @@ public class ProtocolCommunicator {
      * @return response message received
      */
     public Message send(Message requestMessage, String action) {
-        Fiber fiber = Fiber.current().owner.createFiber(); // TODO: could we possibly reuse the same fiber?
+        Fiber fiber = getFiberEngine().createFiber(); // TODO: could we possibly reuse the same fiber?
         Packet responsePacket = fiber.runSync(tubeline, createPacket(requestMessage, action));
         return responsePacket.getMessage();
+    }
+
+    private Engine getFiberEngine() {
+        try {
+            fiberEngineLock.readLock().lock();
+            if (fiberEngine == null) {
+                fiberEngineLock.readLock().unlock();
+                try {
+                    fiberEngineLock.writeLock().lock();
+                    if (fiberEngine == null) {
+                        fiberEngine = Fiber.current().owner;
+                    }
+                } finally {
+                    fiberEngineLock.readLock().lock();
+                    fiberEngineLock.writeLock().unlock();
+                }
+            }
+            return fiberEngine;
+        } finally {
+            fiberEngineLock.readLock().unlock();
+        }
     }
 }

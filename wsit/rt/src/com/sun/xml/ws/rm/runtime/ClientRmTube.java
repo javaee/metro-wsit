@@ -35,7 +35,9 @@
  */
 package com.sun.xml.ws.rm.runtime;
 
+import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.pipe.TubeCloner;
@@ -61,15 +63,16 @@ public class ClientRmTube extends AbstractFilterTubeImpl {
 
     private static final RmLogger LOGGER = RmLogger.getLogger(ClientRmTube.class);
     private final ClientSession session;
-    private Packet originalPacketCopy;
-    private Packet processedPacketCopy;
+    private final WSDLPort wsdlPort;
+    private Packet requestPacketCopy;
 
     public ClientRmTube(ClientRmTube original, TubeCloner cloner) {
         super(original, cloner);
 
         this.session = original.session;
-        this.originalPacketCopy = null;
-        this.processedPacketCopy = null;
+        this.wsdlPort = original.wsdlPort;
+
+        this.requestPacketCopy = null;
     }
 
     public ClientRmTube(WsitClientTubeAssemblyContext context) throws RmWsException {
@@ -79,8 +82,14 @@ public class ClientRmTube extends AbstractFilterTubeImpl {
             // TODO remove this condition and remove context.getScInitiator() method
             scInitiator = context.getScInitiator();
         }
-        this.session = ClientSession.create(context.getWsdlPort(), context.getBinding(), new ProtocolCommunicator(super.next, scInitiator));
-        this.processedPacketCopy = null;
+        this.session = ClientSession.create(
+                context.getWsdlPort(),
+                context.getBinding(),
+                new ProtocolCommunicator(super.next, scInitiator, context.getBinding().getSOAPVersion(), context.getBinding().getAddressingVersion()));
+        this.wsdlPort = context.getWsdlPort();
+
+        this.requestPacketCopy = null;
+
     }
 
     @Override
@@ -102,9 +111,8 @@ public class ClientRmTube extends AbstractFilterTubeImpl {
                 return doSuspend(next);
             } else { // this is a first-time processing
                 // we do not modify original packet in case we wanted to reuse it later                
-                originalPacketCopy = requestPacket.copy(true);
                 requestPacket = session.processOutgoingPacket(requestPacket);
-                processedPacketCopy = requestPacket.copy(true);
+                requestPacketCopy = requestPacket.copy(true);
                 return super.processRequest(requestPacket);
             }
         } catch (RmException ex) {
@@ -119,7 +127,20 @@ public class ClientRmTube extends AbstractFilterTubeImpl {
     public NextAction processResponse(Packet responsePacket) {
         LOGGER.entering();
         try {
-            return super.processResponse(session.processIncommingPacket(responsePacket));
+            boolean responseToOneWayRequest = requestPacketCopy.getMessage().isOneWay(wsdlPort);
+            responsePacket = session.processIncommingPacket(responsePacket, responseToOneWayRequest);
+            
+            //check for empty body response to two-way message.  WCF will return
+            //one when it drops the request message.  In this case we also need to retry.
+            Message responseMessage = responsePacket.getMessage();
+            if (responseMessage != null && !responseToOneWayRequest && responseMessage.getPayloadNamespaceURI() == null) {
+                // TODO L10N
+                LOGGER.fine("Resending dropped message");
+                return doResend();
+            } else {
+                return super.processResponse(responsePacket);           
+            }
+
         } catch (RmException ex) {
             LOGGER.logSevereException(ex);
             return doThrow(ex);
@@ -135,7 +156,7 @@ public class ClientRmTube extends AbstractFilterTubeImpl {
         try {
             if (checkResendPossibility(throwable)) {
                 // eat exception and forward processing to this.processRequest() (INVOKE_AND_FORGET) for request message resend
-                return super.doInvokeAndForget(this, processedPacketCopy.copy(true));
+                return doResend();
             } else {
                 return super.processException(throwable);
             }
@@ -167,12 +188,15 @@ public class ClientRmTube extends AbstractFilterTubeImpl {
         return false;
     }
 
+    private NextAction doResend() {
+        return super.doInvokeAndForget(this, requestPacketCopy.copy(true));
+    }
+
     private boolean isResend() {
-        return processedPacketCopy != null;
+        return requestPacketCopy != null;
     }
 
     private void clearResendFlag() {
-        originalPacketCopy = null;
-        processedPacketCopy = null;
+        requestPacketCopy = null;
     }
 }

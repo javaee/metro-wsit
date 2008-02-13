@@ -6,8 +6,13 @@ boolean foundError = false;
  
 try {
 	port.addString("hello");
-}
-catch (Exception e) {
+} catch (IllegalStateException e) {
+   if (e.getMessage().contains("MEMBER")) {
+	foundError = true;
+   }
+
+   print(e);
+} catch (Exception e) {
    if (e.getMessage().contains("Member")) {
 	foundError = true;
    }

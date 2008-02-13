@@ -57,7 +57,7 @@ public class CloseTimeoutClientAssertion extends SimpleAssertion {
 
     private static RmAssertionInstantiator instantiator = new RmAssertionInstantiator() {
         public PolicyAssertion newInstance(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative){
-            return new AllowDuplicatesAssertion(data, assertionParameters);
+            return new CloseTimeoutClientAssertion(data, assertionParameters);
         }
     };
     

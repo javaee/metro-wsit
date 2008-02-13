@@ -76,7 +76,6 @@ import javax.xml.bind.Unmarshaller;
  * 
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-//TODO: decide - is this going to be considered as a key element of a RM failover implementation?
 abstract class ClientSession {
 
     private static final RmLogger LOGGER = RmLogger.getLogger(ClientSession.class);
@@ -86,11 +85,13 @@ abstract class ClientSession {
         Configuration configuration = ConfigurationManager.createClientConfigurationManager(wsdlPort, binding).getConfigurationAlternatives()[0];
         switch (configuration.getRmVersion()) {
             case WSRM10:
-                return new Rm10ClientSession(wsdlPort, binding, communicator, configuration);
+                return new Rm10ClientSession(wsdlPort, communicator, configuration);
             case WSRM11:
-                return new Rm11ClientSession(wsdlPort, binding, communicator, configuration);
+                return new Rm11ClientSession(wsdlPort, communicator, configuration);
+            default:
+                // TODO L10N
+                throw new IllegalStateException("Unsupported WS-ReliableMessaging version [ " + configuration.getRmVersion().namespaceUri + "]");
         }
-        return null; // TODO throw exception here?
     }
 
     private static class FiberRegistration {
@@ -121,7 +122,7 @@ abstract class ClientSession {
     private final Queue<FiberRegistration> fibersToResend = new LinkedList<FiberRegistration>();
     private final AtomicLong lastAckRequestedTime = new AtomicLong(0);
 
-    protected ClientSession(WSDLPort wsdlPort, WSBinding binding, ProtocolCommunicator communicator, Configuration configuration) {
+    protected ClientSession(WSDLPort wsdlPort, ProtocolCommunicator communicator, Configuration configuration) {
         this.inboundSequenceId = null;
         this.outboundSequenceId = null;
         this.initLock = new ReentrantLock();
@@ -164,9 +165,11 @@ abstract class ClientSession {
         }
     }
 
-    protected void processInboundMessageHeaders(HeaderList responseHeaders) throws RmException {
+    protected void processInboundMessageHeaders(HeaderList responseHeaders, boolean expectSequenceHeader) throws RmException {
         if (responseHeaders != null) {
-            processSequenceHeader(responseHeaders);
+            if (expectSequenceHeader) {
+                processSequenceHeader(responseHeaders);
+            }
             processAcknowledgementHeader(responseHeaders);
             processAckRequestedHeader(responseHeaders);
         }
@@ -188,9 +191,18 @@ abstract class ClientSession {
         return requestPacket;
     }
 
-    final Packet processIncommingPacket(Packet responsePacket) throws RmException {
-        processInboundMessageHeaders(responsePacket.getMessage().getHeaders());
+    final Packet processIncommingPacket(Packet responsePacket, boolean responseToOneWayRequest) throws RmException {
+        Message responseMessage = responsePacket.getMessage();
+        processInboundMessageHeaders(responseMessage.getHeaders(), !responseToOneWayRequest);
 
+// WE DON'T NEED TO TAKE CARE OF SOAP FAULTS HERE... (?)
+//                        if (responseMessage != null && responseMessage.isFault()) {
+//                            //don't want to resend
+//                            //WSRM2004: Marking faulted message {0} as acked.
+//                            LOGGER.fine(LocalizationMessages.WSRM_2004_ACKING_FAULTED_MESSAGE(requestMessage.getMessageNumber()));
+//                            outboundSequence.acknowledge(requestMessage.getMessageNumber());
+//                        }
+//
         return responsePacket;
     }
 
@@ -213,7 +225,6 @@ abstract class ClientSession {
         try {
             closeOutboundSequence();
         } catch (RmException ex) {
-            // TODO: is the exception handled correctly?
             LOGGER.logException(ex, Level.WARNING);
         } finally {
             try {
@@ -227,7 +238,6 @@ abstract class ClientSession {
             waitUntilAllRequestsAckedOrTimeout();
             terminateOutboundSequence();
         } catch (RmException ex) {
-            // TODO: is the exception handled correctly?
             LOGGER.logException(ex, Level.WARNING);
         } finally {
             try {
@@ -333,9 +343,9 @@ abstract class ClientSession {
                     // TODO L10N
                     throw new RmException("Response for the acknowledgement request is 'null'");
                 }
-                
-                processInboundMessageHeaders(ackResponse.getHeaders());
-                
+
+                processInboundMessageHeaders(ackResponse.getHeaders(), false);
+
                 if (ackResponse.isFault()) {
                     // TODO L10N
                     throw new RmException("Acknowledgement request ended in a SOAP fault", ackResponse);
@@ -377,7 +387,7 @@ abstract class ClientSession {
     }
 
     protected final void assertSequenceIdInInboundHeader(String expected, String actual) {
-        if (expected != null && expected.equals(actual)) {
+        if (expected != null && !expected.equals(actual)) {
             // TODO L10N
             throw LOGGER.logSevereException(new IllegalStateException(
                     "Sequence id in the inbound message header [" + actual + " ] " +

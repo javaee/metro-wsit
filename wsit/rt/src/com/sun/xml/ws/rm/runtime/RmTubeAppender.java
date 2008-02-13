@@ -54,8 +54,6 @@ import javax.xml.ws.WebServiceException;
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public class RmTubeAppender implements TubeAppender {
-
-    // TODO: this is a draft class that should serve later as a model for extracting the WSIT/Metro TubeCreator interface
     /**
      * Adds RM tube to the client-side tubeline, depending on whether RM is enabled or not.
      * 
@@ -69,7 +67,6 @@ public class RmTubeAppender implements TubeAppender {
                     context.getBinding(),
                     context.getScInitiator(),
                     context.getTubelineHead());
-            // TODO uncomment new tube creation
             // return new ClientRmTube(context);
         } else {
             return context.getTubelineHead();
@@ -88,8 +85,7 @@ public class RmTubeAppender implements TubeAppender {
                     context.getWsdlPort(),
                     context.getEndpoint().getBinding(),
                     context.getTubelineHead());
-            // TODO uncomment new tube creation
-            // return new ServerRmTube(context);
+//             return new ServerRmTube(context);
         } else {
             return context.getTubelineHead();
         }

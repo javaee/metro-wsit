@@ -91,9 +91,7 @@ public class InMemorySequenceManager implements SequenceManager {
             }
         } finally {
             sequenceLock.writeLock().unlock();
-        }
-        
-        throw new UnsupportedOperationException("Not supported yet.");
+        }        
     }
 
     /**

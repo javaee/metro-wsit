@@ -35,7 +35,6 @@
  */
 package com.sun.xml.ws.rm.runtime;
 
-import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Headers;
@@ -64,7 +63,6 @@ import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -78,8 +76,8 @@ final class Rm10ClientSession extends ClientSession {
 
     private static final RmLogger LOGGER = RmLogger.getLogger(Rm10ClientSession.class);
 
-    public Rm10ClientSession(WSDLPort wsdlPort, WSBinding binding, ProtocolCommunicator communicator, Configuration configuration) {
-        super(wsdlPort, binding, communicator, configuration);
+    public Rm10ClientSession(WSDLPort wsdlPort, ProtocolCommunicator communicator, Configuration configuration) {
+        super(wsdlPort, communicator, configuration);
     }
 
     @Override
@@ -90,7 +88,7 @@ final class Rm10ClientSession extends ClientSession {
             csElement.setAcksTo(new W3CEndpointReference(AddressingVersion.W3C.anonymousEpr.asSource("AcksTo")));
         } else {
             // TODO L10N
-            throw LOGGER.logSevereException(new IllegalStateException("Unsupported addressing version"));
+            throw LOGGER.logSevereException(new IllegalStateException("Unsupported addressing version [" + configuration.getAddressingVersion() + "]"));
         }
 
         if (offerInboundSequenceId != null) {
@@ -129,10 +127,11 @@ final class Rm10ClientSession extends ClientSession {
 
         if (offerInboundSequenceId != null) {
             AcceptType accept = csrElement.getAccept();
-            if (!configuration.getAddressingVersion().anonymousEpr.equals(accept.getAcksTo())) {
-                // TODO L10N
-                throw new CreateSequenceException("Addressable \"AcksTo\" endpoint not supported for inbound sequence", inboundSequenceId);
-            }
+            // TODO : make sure we are sending acknowledgements to the proper acksTo endpoint
+//            if (!configuration.getAddressingVersion().anonymousEpr.equals(accept.getAcksTo())) {
+//                // TODO L10N
+//                throw new CreateSequenceException("Addressable \"AcksTo\" endpoint not supported for inbound sequence", inboundSequenceId);
+//            }
             inboundSequenceId = offerInboundSequenceId;
             sequenceManager.createInboundSequence(inboundSequenceId, Configuration.UNSPECIFIED);
         }
@@ -164,7 +163,7 @@ final class Rm10ClientSession extends ClientSession {
         identifier.setValue(inboundSequenceId);
         ackElement.setIdentifier(identifier);
 
-        final Collection<AckRange> acknowledgedIndexes = sequenceManager.getSequence(inboundSequenceId).getAcknowledgedMessageIds();
+        final List<AckRange> acknowledgedIndexes = sequenceManager.getSequence(inboundSequenceId).getAcknowledgedMessageIds();
         if (acknowledgedIndexes != null && !acknowledgedIndexes.isEmpty()) {
             for (Sequence.AckRange range : acknowledgedIndexes) {
                 ackElement.addAckRange(range.lower, range.upper);
@@ -194,7 +193,7 @@ final class Rm10ClientSession extends ClientSession {
         try {
             response = communicator.send(lastMessage, configuration.getRmVersion().lastAction);
             if (response != null) {
-                processInboundMessageHeaders(response.getHeaders());
+                processInboundMessageHeaders(response.getHeaders(), false);
                 if (response.isFault()) {
                     // TODO L10N
                     throw new RmException("Error sending Last message", response);
@@ -225,7 +224,7 @@ final class Rm10ClientSession extends ClientSession {
                 throw new TerminateSequenceException("TerminateSequenceResponse was 'null'");
             }
 
-            processInboundMessageHeaders(response.getHeaders());
+            processInboundMessageHeaders(response.getHeaders(), false);
 
             if (response.isFault()) {
                 // TODO L10N
@@ -248,8 +247,13 @@ final class Rm10ClientSession extends ClientSession {
     @Override
     protected void processSequenceHeader(HeaderList inboundMessageHeaders) throws RmException {
         SequenceElement sequenceElement = readHeaderAsUnderstood(inboundMessageHeaders, "Sequence");
-        assertSequenceIdInInboundHeader(inboundSequenceId, sequenceElement.getId());
-        sequenceManager.getSequence(sequenceElement.getId()).acknowledgeMessageId(sequenceElement.getMessageNumber());
+        if (sequenceElement != null) {
+            assertSequenceIdInInboundHeader(inboundSequenceId, sequenceElement.getId());
+            sequenceManager.getSequence(sequenceElement.getId()).acknowledgeMessageId(sequenceElement.getMessageNumber());
+        } else {
+            // TODO L10N
+            throw new RmException("Mandatory <Sequence ... /> header not present on the response message");
+        }
     }
 
     @Override
@@ -269,23 +273,30 @@ final class Rm10ClientSession extends ClientSession {
                         lastLowerBound++;
                     } else {
                         ranges.add(new Sequence.AckRange(lastLowerBound, nackId.longValue() - 1));
-                        lastLowerBound = nackId.longValue() + 1;
+                        lastLowerBound =
+                                nackId.longValue() + 1;
                     }
+
                 }
 
                 long lastMessageId = sequenceManager.getSequence(outboundSequenceId).getLastMessageId();
                 if (lastLowerBound <= lastMessageId) {
                     ranges.add(new Sequence.AckRange(lastLowerBound, lastMessageId));
                 }
+
             } else if (ackElement.getAcknowledgementRange() != null && !ackElement.getAcknowledgementRange().isEmpty()) {
                 for (SequenceAcknowledgementElement.AcknowledgementRange rangeElement : ackElement.getAcknowledgementRange()) {
                     ranges.add(new Sequence.AckRange(rangeElement.getLower().longValue(), rangeElement.getUpper().longValue()));
                 }
+
             }
+
+            sequenceManager.getSequence(outboundSequenceId).acknowledgeMessageIds(ranges);
 
         // TODO handle other stuff in the header
         // ackElement.getBufferRemaining();
         }
+
     }
 
     @Override
@@ -293,8 +304,10 @@ final class Rm10ClientSession extends ClientSession {
         //dispatch to InboundSequence to construct response.
         //TODO handle error condition no such sequence
         AckRequestedElement ackRequestedElement = readHeaderAsUnderstood(inboundMessageHeaders, "AckRequested");
-        String sequenceId = ackRequestedElement.getId();
-        assertSequenceIdInInboundHeader(inboundSequenceId, sequenceId);
-        sequenceManager.getSequence(sequenceId).setAckRequestedFlag();
+        if (ackRequestedElement != null) {
+            String sequenceId = ackRequestedElement.getId();
+            assertSequenceIdInInboundHeader(inboundSequenceId, sequenceId);
+            sequenceManager.getSequence(sequenceId).setAckRequestedFlag();
+        }
     }
 }

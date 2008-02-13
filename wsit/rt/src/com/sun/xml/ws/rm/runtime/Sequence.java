@@ -36,15 +36,13 @@
 package com.sun.xml.ws.rm.runtime;
 
 import com.sun.xml.ws.rm.MessageNumberRolloverException;
-import java.util.Collection;
+import java.util.List;
 
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public interface Sequence {
-    public static final long MIN_MESSAGE_ID = 1;
-    public static final long MAX_MESSAGE_ID = 9223372036854775807L;
 
     public enum Status {
 
@@ -83,6 +81,16 @@ public interface Sequence {
     public long getNextMessageId() throws MessageNumberRolloverException;
 
     /**
+     * Registers given message identifiers with the sequence as aknowledged
+     * 
+     * @param ranges message identifier ranges to be acknowledged
+     * 
+     * @exception IllegalMessageIdentifierException in case this is an {@link InboundSequence} instance and a messages 
+     * with the given identifiers have been already registered
+     */
+    public void acknowledgeMessageIds(List<AckRange> ranges) throws IllegalMessageIdentifierException;
+
+    /**
      * Registers given message identifier with the sequence as aknowledged
      * 
      * @param messageId message identifier to be acknowledged
@@ -104,7 +112,7 @@ public interface Sequence {
      * 
      * @return collection of ranges of messages identifier registered with the sequence
      */
-    public Collection<AckRange> getAcknowledgedMessageIds();
+    public List<AckRange> getAcknowledgedMessageIds();
 
     /**
      * The method may be called to determine whether the sequence has some unacknowledged messages or not

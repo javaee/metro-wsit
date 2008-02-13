@@ -35,92 +35,59 @@
  */
 package com.sun.xml.ws.rm.runtime;
 
-import com.sun.xml.ws.rm.MessageNumberRolloverException;
 import com.sun.xml.ws.rm.localization.RmLogger;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.Set;
+import java.util.List;
 import java.util.TreeSet;
 
 /**
  * Inbound sequence optimized for low memory footprint, fast message acknowledgement and ack range calculation optimized 
  * for standard scenario (no lost messages). This class is not reentrant.
  * 
+ * TODO make class thread-safe
+ * 
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public class InboundSequence extends AbstractSequence {
 
     private static final RmLogger LOGGER = RmLogger.getLogger(InboundSequence.class);
-    private static final long UNSPECIFIED = 0;
-    
-    private long highestIdIndex = UNSPECIFIED;
-    private final Set<Long> unackedIndexes;
+    private long lastAckedIndex = AbstractSequence.UNSPECIFIED_MESSAGE_ID;
 
     public InboundSequence(String id, long expirationTime) {
-        super(id, expirationTime);
-        this.unackedIndexes = new TreeSet<Long>();
-    }
-
-    public long getNextMessageId() throws MessageNumberRolloverException {
-        // TODO L10N
-        throw new UnsupportedOperationException("This operation is not supported in this Sequence implementation.");
+        super(id, expirationTime, new TreeSet<Long>());
     }
 
     public long getLastMessageId() {
-        // TODO L10N
-        throw new UnsupportedOperationException("This operation is not supported in this Sequence implementation.");
+        return lastAckedIndex;
     }
 
-    public Collection<AckRange> getAcknowledgedMessageIds() {
-        if (highestIdIndex == UNSPECIFIED) {
-            // nothing acknowledged yet
-            return Collections.emptyList();
-        } else if (unackedIndexes.isEmpty()) {
-            // no unacked indexes - we have a single acked range
-            return Arrays.asList(new AckRange(Sequence.MIN_MESSAGE_ID, highestIdIndex));
-        } else {
-            // need to calculate ranges from the unacked indexes
-            Collection<AckRange> result = new LinkedList<Sequence.AckRange>();
-
-            long lastUnacked = unackedIndexes.iterator().next();
-            if (lastUnacked > Sequence.MIN_MESSAGE_ID) {
-                result.add(new AckRange(Sequence.MIN_MESSAGE_ID, lastUnacked - 1));
+    public void acknowledgeMessageIds(List<AckRange> ranges) throws IllegalMessageIdentifierException {
+        // NOTE: This method is not meant to be used on inbound sequence in our implementation right now as we recieve 
+        //       only one message at a time. Thus we don't bother optimizing it.
+        for (AckRange range : ranges) {
+            for (long index = range.lower; index <= range.upper; index++) {
+                acknowledgeMessageId(index);
             }
-            for (long unackedIndex : unackedIndexes) {
-                if (unackedIndex > lastUnacked + 1) {
-                    result.add(new AckRange(lastUnacked + 1, unackedIndex - 1));
-                }
-                lastUnacked = unackedIndex;
-            }
-
-            return result;
         }
     }
 
-    public boolean hasPendingAcknowledgements() {
-        return !unackedIndexes.isEmpty();
-    }
-
-    public void acknowledgeMessageId(long messageIdentifier) throws IllegalMessageIdentifierException {
-        if (messageIdentifier > highestIdIndex) {
+    public void acknowledgeMessageId(long messageId) throws IllegalMessageIdentifierException {
+        if (messageId > lastAckedIndex) {
             // new message - note that this will work even for the first message that arrives
-            if (highestIdIndex + 1 != messageIdentifier) {
+            if (lastAckedIndex + 1 != messageId) {
                 // some message(s) got lost...
-                for (long lostIndex = highestIdIndex + 1; lostIndex < messageIdentifier; lostIndex++) {
+                for (long lostIndex = lastAckedIndex + 1; lostIndex < messageId; lostIndex++) {
                     unackedIndexes.add(lostIndex);
                 }
             }
-            highestIdIndex = messageIdentifier;
-        } else if (highestIdIndex == messageIdentifier) {
+            lastAckedIndex = messageId;
+        } else if (lastAckedIndex == messageId) {
             // resent message
-            if (unackedIndexes.contains(messageIdentifier)) {
+            if (unackedIndexes.contains(messageId)) {
                 // lost message arrived
-                unackedIndexes.remove(messageIdentifier);
+                unackedIndexes.remove(messageId);
             } else {
                 // duplicate message
-                throw LOGGER.logSevereException(new IllegalMessageIdentifierException(messageIdentifier));
+                throw LOGGER.logSevereException(new IllegalMessageIdentifierException(messageId));
             }
         }
     }
