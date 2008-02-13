@@ -52,7 +52,6 @@ public class CallbackHandlerConfiguration extends PolicyAssertion implements com
     private static final QName timestampTimeout  =  new QName("timestampTimeout");
     private boolean populated = false;
     private static final QName useXWSSCallbacks = new QName("useXWSSCallbacks");
-    private Iterator<PolicyAssertion> ast  = null;
     private AssertionFitness fitness = AssertionFitness.IS_VALID;
     /** Creates a new instance of CallbackHandlerConfiguration */
     public CallbackHandlerConfiguration() {
@@ -63,8 +62,7 @@ public class CallbackHandlerConfiguration extends PolicyAssertion implements com
     }
     
     public Iterator<? extends PolicyAssertion> getCallbackHandlers() {
-        populate();
-        return ast;
+        return this.getParametersIterator();
     }
     
     public AssertionFitness validate(boolean isServer) {
@@ -76,9 +74,7 @@ public class CallbackHandlerConfiguration extends PolicyAssertion implements com
     
     private synchronized AssertionFitness populate(boolean isServer) {
         if(!populated){
-            this.ast  = this.getNestedAssertionsIterator();
             populated  = true;
-            
         }
         return fitness;
     }
