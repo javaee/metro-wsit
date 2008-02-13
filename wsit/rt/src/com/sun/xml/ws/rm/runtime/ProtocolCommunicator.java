@@ -137,6 +137,16 @@ public class ProtocolCommunicator {
         return responsePacket.getMessage();
     }
 
+    /**
+     * Provides information about value of the addressing {@code Action} header of the message
+     * 
+     * @param message to be inspected
+     * @return addressing {@code Action} header of the message
+     */
+    public String getAction(Message message) {
+        return message.getHeaders().getAction(addressingVersion, soapVersion);
+    }
+    
     private Engine getFiberEngine() {
         try {
             fiberEngineLock.readLock().lock();

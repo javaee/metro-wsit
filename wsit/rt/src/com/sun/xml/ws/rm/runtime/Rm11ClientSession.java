@@ -198,35 +198,31 @@ final class Rm11ClientSession extends ClientSession {
 
     @Override
     protected void closeOutboundSequence() throws RmException {
-        Message response = null;
-        try {
-            final Message request = Messages.create(
-                    configuration.getRmVersion().jaxbContext,
-                    new CloseSequenceElement(outboundSequenceId, sequenceManager.getSequence(outboundSequenceId).getLastMessageId()),
-                    configuration.getSoapVersion());
-            response = communicator.send(request, configuration.getRmVersion().closeSequenceAction);
-            if (response == null) {
-                // TODO L10N
-                throw new CloseSequenceException("CloseSequenceResponse was 'null'");
-            }
+        final Message request = Messages.create(
+                configuration.getRmVersion().jaxbContext,
+                new CloseSequenceElement(outboundSequenceId, sequenceManager.getSequence(outboundSequenceId).getLastMessageId()),
+                configuration.getSoapVersion());
 
-            processInboundMessageHeaders(response.getHeaders(), false);
+        appendSequenceAcknowledgementHeader(request);
 
-            if (response.isFault()) {
-                // TODO L10N
-                throw new CloseSequenceException("CloseSequence was refused by the RMDestination", response);
-            }
+        Message response = communicator.send(request, configuration.getRmVersion().closeSequenceAction);
+        if (response == null) {
+            // TODO L10N
+            throw new CloseSequenceException("CloseSequenceResponse was 'null'");
+        }
 
-            CloseSequenceResponseElement csrElement = unmarshallResponse(response);
-            if (!outboundSequenceId.equals(csrElement.getIdentifier().getValue())) {
-                // TODO L10N
-                throw new CloseSequenceException("The sequence identifier in the close sequence response message [" + csrElement.getIdentifier().getValue() + "]" +
-                        " does not correspond to the closing outbound sequence identifier [" + outboundSequenceId + "]");
-            }
-        } finally {
-            if (response != null) {
-                response.consume();
-            }
+        processInboundMessageHeaders(response.getHeaders(), false);
+
+        if (response.isFault()) {
+            // TODO L10N
+            throw new CloseSequenceException("CloseSequence was refused by the RMDestination", response);
+        }
+
+        CloseSequenceResponseElement csrElement = unmarshallResponse(response); // consuming message here
+        if (!outboundSequenceId.equals(csrElement.getIdentifier().getValue())) {
+            // TODO L10N
+            throw new CloseSequenceException("The sequence identifier in the close sequence response message [" + csrElement.getIdentifier().getValue() + "]" +
+                    " does not correspond to the closing outbound sequence identifier [" + outboundSequenceId + "]");
         }
     }
 
@@ -234,37 +230,37 @@ final class Rm11ClientSession extends ClientSession {
     protected void terminateOutboundSequence() throws RmException {
         //TODO piggyback an acknowledgement if one is pending
         //seq.processAcknowledgement(new RMMessage(request));
-        Message response = null;
-        try {
-            final Message request = Messages.create(
-                    configuration.getRmVersion().jaxbContext,
-                    new TerminateSequenceElement(outboundSequenceId, sequenceManager.getSequence(outboundSequenceId).getLastMessageId()),
-                    configuration.getSoapVersion());
+        final Message request = Messages.create(
+                configuration.getRmVersion().jaxbContext,
+                new TerminateSequenceElement(outboundSequenceId, sequenceManager.getSequence(outboundSequenceId).getLastMessageId()),
+                configuration.getSoapVersion());
 
-            response = communicator.send(request, configuration.getRmVersion().terminateSequenceAction);
+        Message response = communicator.send(request, configuration.getRmVersion().terminateSequenceAction);
+        if (response == null) {
+            // TODO L10N
+            throw new TerminateSequenceException("TerminateSequenceResponse was 'null'");
+        }
 
-            if (response == null) {
-                // TODO L10N
-                throw new TerminateSequenceException("TerminateSequenceResponse was 'null'");
-            }
+        processInboundMessageHeaders(response.getHeaders(), false);
 
-            processInboundMessageHeaders(response.getHeaders(), false);
+        if (response.isFault()) {
+            // TODO L10N
+            throw new TerminateSequenceException("There was an error during the sequence termination", response);
+        }
 
-            if (response.isFault()) {
-                // TODO L10N
-                throw new TerminateSequenceException("There was an error during the sequence termination", response);
-            }
-
-            TerminateSequenceResponseElement tsrElement = unmarshallResponse(response);
+        String responseAction = communicator.getAction(response);
+        if (configuration.getRmVersion().terminateSequenceAction.equals(responseAction)) {
+            TerminateSequenceElement tsElement = unmarshallResponse(response);
+            sequenceManager.terminateSequence(tsElement.getIdentifier().toString());
+        } else if (configuration.getRmVersion().terminateSequenceResponseAction.equals(responseAction)) {
+            TerminateSequenceResponseElement tsrElement = unmarshallResponse(response); // consuming message here
             if (!outboundSequenceId.equals(tsrElement.getIdentifier().getValue())) {
                 // TODO L10N
                 throw new TerminateSequenceException("The sequence identifier in the terminate sequence response message [" + tsrElement.getIdentifier().getValue() + "]" +
                         " does not correspond to the terminating outbound sequence identifier [" + outboundSequenceId + "]");
             }
-        } finally {
-            if (response != null) {
-                response.consume();
-            }
+        } else {
+            response.consume(); // TODO consume even if exception thrown...
         }
     }
 

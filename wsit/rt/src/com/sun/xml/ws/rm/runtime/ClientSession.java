@@ -222,6 +222,8 @@ abstract class ClientSession {
      * Closes and terminates associated sequences and releases other resources associated with this RM session
      */
     final void close() {
+        // TODO rewrite closing and terminating inbound sequence
+        // TODO refactor protocol message response handling: base it on action (or check action at least)
         try {
             closeOutboundSequence();
         } catch (RmException ex) {
@@ -394,7 +396,7 @@ abstract class ClientSession {
                     "does not match the sequence id bound to this session [" + expected + "]"));
         }
     }
-
+    
     private boolean checkPendingAckRequest() throws UnknownSequenceException {
         return lastAckRequestedTime.get() - System.currentTimeMillis() > configuration.getAcknowledgementRequestInterval() &&
                 sequenceManager.getSequence(outboundSequenceId).hasPendingAcknowledgements();
