@@ -154,6 +154,10 @@ public class TokenProcessor {
                 x509CB.setIssuer(x509Token.getIssuerName().getIssuerName());
             }
             
+            if(x509Token.getClaims() != null){
+                x509CB.setClaims(x509Token.getClaims().getClaimsAsBytes());
+            }
+            
             //x509CB.setPolicyToken(token);
             if(!ignoreDK && x509Token.isRequireDerivedKeys()){
                 DerivedTokenKeyBinding dtKB =  new DerivedTokenKeyBinding();

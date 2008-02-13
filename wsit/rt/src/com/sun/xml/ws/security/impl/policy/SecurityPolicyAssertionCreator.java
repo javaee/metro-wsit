@@ -133,6 +133,7 @@ public class SecurityPolicyAssertionCreator implements PolicyAssertionCreator{
         implementedAssertions.add(Constants.EndorsingEncryptedSupportingTokens);
         implementedAssertions.add(Constants.Trust13);
         implementedAssertions.add(Constants.IssuerName);
+        implementedAssertions.add(Constants.Claims);
         
     };
     /** Creates a new instance of SecurityPolicyAssertionCreator */

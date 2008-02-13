@@ -34,27 +34,13 @@
  * holder.
  */
 
-package com.sun.xml.ws.security.impl.policy;
-
-import java.util.HashSet;
+package com.sun.xml.ws.security.policy;
 
 /**
  *
- * @author K.Venugopal@sun.com
+ * @author ashutosh.shahi@sun.com
  */
-public class TrustPolicyAssertionCreator extends SecurityPolicyAssertionCreator{
+public interface Claims {
     
-    
-    private String [] nsSupportedList= new String[] { Constants.TRUST_NS,
-                  Constants.TRUST13_NS};
-    /**
-     * Creates a new instance of TrustPolicyAssertionCreator
-     */
-    public TrustPolicyAssertionCreator() {
-    }
-    
-    public String[] getSupportedDomainNamespaceURIs() {
-        return nsSupportedList;
-    }
-       
+    byte[] getClaimsAsBytes();
 }
