@@ -98,11 +98,11 @@ public abstract class PacketFilter {
             HeaderList headers = packet.getMessage().getHeaders();
             switch (rmVersion) {
                 case WSRM10: {
-                    com.sun.xml.ws.rm.v200502.SequenceElement se = readHeaderAsUnderstood(headers, "Sequence");
+                    com.sun.xml.ws.rm.v200502.SequenceElement se = readHeader(headers, "Sequence");
                     return (se != null) ? se.getIdentifier().toString() : null;// TODO ???
                 }
                 case WSRM11: {
-                    com.sun.xml.ws.rm.v200702.SequenceElement se = readHeaderAsUnderstood(headers, "Sequence");
+                    com.sun.xml.ws.rm.v200702.SequenceElement se = readHeader(headers, "Sequence");
                     return (se != null) ? se.getId() : null;
                 }
                 default:
@@ -132,11 +132,11 @@ public abstract class PacketFilter {
             HeaderList headers = packet.getMessage().getHeaders();
             switch (rmVersion) {
                 case WSRM10: {
-                    com.sun.xml.ws.rm.v200502.SequenceElement se = readHeaderAsUnderstood(headers, "Sequence");
+                    com.sun.xml.ws.rm.v200502.SequenceElement se = readHeader(headers, "Sequence");
                     return (se != null) ? se.getMessageNumber() : UNSPECIFIED;
                 }
                 case WSRM11: {
-                    com.sun.xml.ws.rm.v200702.SequenceElement se = readHeaderAsUnderstood(headers, "Sequence");
+                    com.sun.xml.ws.rm.v200702.SequenceElement se = readHeader(headers, "Sequence");
                     return (se != null) ? se.getMessageNumber() : UNSPECIFIED;
                 }
                 default:
@@ -159,7 +159,7 @@ public abstract class PacketFilter {
      * 
      * @return RM header with the specified name in the form of JAXB element or {@code null} in case no such header was found
      */
-    private <T> T readHeaderAsUnderstood(HeaderList headers, String name) throws JAXBException, XMLStreamException {
+    private <T> T readHeader(HeaderList headers, String name) throws JAXBException, XMLStreamException {
         Header header = headers.get(rmVersion.namespaceUri, name, false);
         if (header == null) {
             return (T) null;
