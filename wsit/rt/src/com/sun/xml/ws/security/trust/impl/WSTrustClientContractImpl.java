@@ -205,20 +205,22 @@ public class WSTrustClientContractImpl implements WSTrustClientContract {
         throw new UnsupportedOperationException("Unsupported operation: getComputedKeyAlgorithmFromProofToken");
     }
     
-    private void setLifetime(final RequestSecurityTokenResponse rstr, final IssuedTokenContext context) throws WSTrustException {
+   private void setLifetime(final RequestSecurityTokenResponse rstr, final IssuedTokenContext context) throws WSTrustException {
         
         // Get Created and Expires from Lifetime
         try{
             final Lifetime lifetime = rstr.getLifetime();
-            final AttributedDateTime created = lifetime.getCreated();
-            final AttributedDateTime expires = lifetime.getExpires();
-            synchronized (calendarFormatter){
-                final Date dateCreated = calendarFormatter.parse(created.getValue());
-                final Date dateExpires = calendarFormatter.parse(expires.getValue());
+            if (lifetime != null){
+                final AttributedDateTime created = lifetime.getCreated();
+                final AttributedDateTime expires = lifetime.getExpires();
+                synchronized (calendarFormatter){
+                    final Date dateCreated = calendarFormatter.parse(created.getValue());
+                    final Date dateExpires = calendarFormatter.parse(expires.getValue());
                 
-                // populate the IssuedTokenContext
-                context.setCreationTime(dateCreated);
-                context.setExpirationTime(dateExpires);
+                    // populate the IssuedTokenContext
+                    context.setCreationTime(dateCreated);
+                    context.setExpirationTime(dateExpires);
+                }
             }
         }catch(ParseException ex){
             throw new WSTrustException(ex.getMessage(), ex);
@@ -249,6 +251,14 @@ public class WSTrustClientContractImpl implements WSTrustClientContract {
                 log.log(Level.SEVERE,
                         LogStringsMessages.WST_0019_INVALID_PROOF_TOKEN_TYPE(proofTokenType, appliesTo));
                 throw new WSTrustException( LogStringsMessages.WST_0019_INVALID_PROOF_TOKEN_TYPE(proofTokenType, appliesTo));
+            }
+        }else{
+            Entropy clientEntropy = rst.getEntropy();
+            if (clientEntropy != null){
+                BinarySecret bs = clientEntropy.getBinarySecret();
+                if (bs != null){
+                    key = bs.getRawValue();
+                }
             }
         }
         return key;

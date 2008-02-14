@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityTokenImpl.java,v 1.17 2007-10-24 15:30:45 shyam_rao Exp $
+ * $Id: RequestSecurityTokenImpl.java,v 1.17.2.1 2008-02-14 22:36:01 jdg6688 Exp $
  */
 
 /*
@@ -672,7 +672,11 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
                     setCancelTarget(new CancelTargetImpl(ctType));
                 } else if (local.equalsIgnoreCase("AppliesTo")) {
                     setAppliesTo((AppliesTo)obj.getValue());
+                } else{
+                    getAny().add(list.get(i));
                 }
+            }else{
+                getAny().add(list.get(i));
             }
         }
     }

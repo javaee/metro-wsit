@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityTokenImpl.java,v 1.3 2007-10-24 15:30:52 shyam_rao Exp $
+ * $Id: RequestSecurityTokenImpl.java,v 1.3.2.1 2008-02-14 22:36:00 jdg6688 Exp $
  */
 
 /*
@@ -650,7 +650,11 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
                     setAppliesTo((AppliesTo)obj.getValue());
                 } else if (local.equalsIgnoreCase("SecondaryParameters")){
                     setSecondaryParameters(new SecondaryParametersImpl((SecondaryParametersType)obj.getValue()));
+                } else{
+                    getAny().add(list.get(i));
                 }
+            }else{
+                getAny().add(list.get(i));
             }
         }
     }

@@ -392,7 +392,7 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
         return keyInfo;
     }
     
-    protected Assertion createSAML11Assertion(final String assertionId, final String issuer, final String appliesTo, final KeyInfo keyInfo, final Map<QName, List<String>> claimedAttrs, String keyType) throws WSTrustException{
+   protected Assertion createSAML11Assertion(final String assertionId, final String issuer, final String appliesTo, final KeyInfo keyInfo, final Map<QName, List<String>> claimedAttrs, String keyType) throws WSTrustException{
         Assertion assertion = null;
         try{
                 final SAMLAssertionFactory samlFac = SAMLAssertionFactory.newInstance(SAMLAssertionFactory.SAML1_1);
@@ -420,7 +420,7 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
             }
             
             Element keyInfoEle = null;
-            if (keyInfo != null && !wstVer.getBearerKeyTypeURI().equals(confirMethod)){
+            if (keyInfo != null && !wstVer.getBearerKeyTypeURI().equals(keyType)){
                 keyInfoEle = keyInfo.getElement();
             }
             confirmMethods.add(confirMethod);
@@ -499,12 +499,11 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
 
                 }else{
                     confirMethod = SAML_HOLDER_OF_KEY_2_0;
+                    if (keyInfo != null){
+                        keyInfoConfData = samlFac.createKeyInfoConfirmationData(keyInfo.getElement());
+                    }
                 }
             }
-            if (keyInfo != null && !wstVer.getBearerKeyTypeURI().equals(confirMethod)){
-                keyInfoConfData = samlFac.createKeyInfoConfirmationData(keyInfo.getElement());
-            }
-  
             
             final Conditions conditions = samlFac.createConditions(issueInst, notOnOrAfter, null, arc, null, null);
             
