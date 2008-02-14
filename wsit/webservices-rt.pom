@@ -1,11 +1,18 @@
 <project>
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.sun.xml.ws</groupId>
-  <artifactId>webservice-rt</artifactId>
+  <artifactId>webservices-rt</artifactId>
   <version>@VERSION@</version>
   <name>Metro Implementation</name>
 
-  <url>https://metro.dev.java.net/</url>
+   <dependencies>
+     <dependency>
+        <groupId>javax.xml</groupId>
+        <artifactId>webservices-api</artifactId>
+        <version>${project.version}</version>
+     </dependency>
+   </dependencies>
+    <url>https://metro.dev.java.net/</url>
 
   <organization>
     <name>Sun Microsystems, Inc</name>

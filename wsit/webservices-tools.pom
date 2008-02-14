@@ -1,10 +1,17 @@
 <project>
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.sun.xml.tools</groupId>
-  <artifactId>webservice-tools</artifactId>
+  <groupId>com.sun.tools.ws</groupId>
+  <artifactId>webservices-tools</artifactId>
   <version>@VERSION@</version>
   <name>Metro Implementation</name>
 
+  <dependencies>
+    <dependency>
+       <groupId>com.sun.xml.ws</groupId>
+       <artifactId>webservices-rt</artifactId>
+       <version>${project.version}</version>
+    </dependency>
+  </dependencies>
   <url>https://metro.dev.java.net/</url>
 
   <organization>

@@ -1,7 +1,7 @@
 <project>
   <modelVersion>4.0.0</modelVersion>
   <groupId>javax.xml</groupId>
-  <artifactId>webservice-api</artifactId>
+  <artifactId>webservices-api</artifactId>
   <version>@VERSION@</version>
   <name>Metro Implementation</name>
 
