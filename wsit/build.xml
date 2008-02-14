@@ -349,14 +349,14 @@
                  />
      </target>
 
-    <target name="push-to-maven-prepare" ><!--depends="dist"-->
+    <target name="push-to-maven-prepare" depends="dist">
         <taskdef resource="maven-repository-importer.properties">
             <classpath>
                 <pathelement path="${etc.lib.dir}/maven-repository-importer-1.0.jar" />
             </classpath>
         </taskdef>
         <delete dir="build/maven-repo" /><!-- clean it -->
-        <maven-repository-importer destdir="build/maven-repo" version="1.1.1">
+        <maven-repository-importer destdir="build/maven-repo" version="1.1.2-SNAPSHOT">
             <artifact jar="${dist.image.wsit.lib.dir}/webservices-api.jar"  pom="webservices-api.pom"  />
             <artifact jar="${dist.image.wsit.lib.dir}/webservices-rt.jar"  pom="webservices-rt.pom"  />
             <artifact jar="${dist.image.wsit.lib.dir}/webservices-tools.jar"  pom="webservices-tools.pom"  />
