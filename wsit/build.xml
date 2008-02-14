@@ -373,7 +373,7 @@
                 <argument line="-z9 import -ko -W *.jar -kb -m" />
                 <argument value="deploying new jars to the java.net maven repository" />
 
-                <argument value="YOURJAVANETPROJECTNAME/repo" />
+                <argument value="metro/repo" />
                 <argument line="deployment-to-maven-repository t${DSTAMP}${TSTAMP}" />
             </commandline>
         </cvs>
