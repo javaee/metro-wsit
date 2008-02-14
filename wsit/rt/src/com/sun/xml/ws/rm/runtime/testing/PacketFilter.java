@@ -41,6 +41,7 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import javax.xml.bind.JAXBException;
+import javax.xml.stream.XMLStreamException;
 
 /**
  *
@@ -108,18 +109,6 @@ public abstract class PacketFilter {
                     LOGGER.severe("Unsupported RM version [" + rmVersion.namespaceUri + "]");
                     return null;
             }
-//            AbstractSequence se = readHeaderAsUnderstood(headers, "Sequence");
-//            switch (rmVersion) {
-//                case WSRM10: {
-//                    return (se != null) ? ((com.sun.xml.ws.rm.v200502.SequenceElement) se).getId() : null;
-//                }
-//                case WSRM11: {
-//                    return (se != null) ? ((com.sun.xml.ws.rm.v200702.SequenceElement) se).getId() : null;
-//                }
-//                default:
-//                    LOGGER.severe("Unsupported RM version [" + rmVersion.namespaceUri + "]");
-//                    return null;
-//            }
         } catch (Exception ex) {
             LOGGER.warning("Unexpected exception occured", ex);
             return null;
@@ -154,18 +143,6 @@ public abstract class PacketFilter {
                     LOGGER.severe("Unsupported RM version [" + rmVersion.namespaceUri + "]");
                     return UNSPECIFIED;
             }
-//            AbstractSequence se = readHeaderAsUnderstood(headers, "Sequence");
-//            switch (rmVersion) {
-//                case WSRM10: {
-//                    return (se != null) ? ((com.sun.xml.ws.rm.v200502.SequenceElement) se).getNumber() : UNSPECIFIED;
-//                }
-//                case WSRM11: {
-//                    return (se != null) ? ((com.sun.xml.ws.rm.v200702.SequenceElement) se).getNumber() : UNSPECIFIED;
-//                }
-//                default:
-//                    LOGGER.severe("Unsupported RM version [" + rmVersion.namespaceUri + "]");
-//                    return UNSPECIFIED;
-//            }
         } catch (Exception ex) {
             LOGGER.warning("Unexpected exception occured", ex);
             return UNSPECIFIED;
@@ -182,12 +159,13 @@ public abstract class PacketFilter {
      * 
      * @return RM header with the specified name in the form of JAXB element or {@code null} in case no such header was found
      */
-    private <T> T readHeaderAsUnderstood(HeaderList headers, String name) throws JAXBException {
+    private <T> T readHeaderAsUnderstood(HeaderList headers, String name) throws JAXBException, XMLStreamException {
         Header header = headers.get(rmVersion.namespaceUri, name, false);
         if (header == null) {
             return (T) null;
         }
 
-        return (T) header.readAsJAXB(rmVersion.jaxbUnmarshaller);
+        return (T) rmVersion.jaxbUnmarshaller.unmarshal(header.readHeader());
+//        return (T) header.readAsJAXB(rmVersion.jaxbUnmarshaller);
     }
 }
